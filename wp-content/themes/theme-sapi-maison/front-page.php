@@ -118,6 +118,7 @@ $gallery_images = [
 <section class="newsletter" style="background-image: url('https://test.atelier-sapi.fr/wordpress/wp-content/uploads/2024/12/trame_lampe.png');">
   <div class="newsletter-inner">
     <div class="newsletter-copy">
+      <h2 class="newsletter-heading">Restez informées !</h2>
       <div class="newsletter-title">
         <span class="divider"></span>
         <h2>Et notre prochain coup d'éclat ?</h2>

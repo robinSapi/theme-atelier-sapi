@@ -439,6 +439,14 @@ input[type="submit"]:hover,
   gap: 16px;
 }
 
+.newsletter-heading {
+  font-family: "Square Peg", cursive;
+  font-size: 40px;
+  color: var(--sapi-orange);
+  margin: 0 0 10px;
+  text-align: center;
+}
+
 .newsletter-title .divider {
   flex: 1;
   border-bottom: 2px dotted var(--sapi-text);
