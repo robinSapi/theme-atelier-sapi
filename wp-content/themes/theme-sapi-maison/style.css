@@ -711,3 +711,32 @@ input[type="submit"]:hover,
     font-size: 32px;
   }
 }
+
+/* Category featured */
+.category-featured {
+  padding: 40px 20px;
+  display: grid;
+  gap: 40px;
+}
+
+.category-featured-card {
+  text-align: center;
+}
+
+.category-featured-card h2 {
+  font-size: 24px;
+  text-transform: uppercase;
+  color: var(--sapi-primary);
+}
+
+.category-featured-subtitle {
+  color: var(--sapi-orange);
+  font-style: italic;
+  margin: 10px auto 20px;
+}
+
+.category-featured-media img {
+  width: 100%;
+  max-width: 1000px;
+  height: auto;
+}
