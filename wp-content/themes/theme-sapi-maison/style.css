@@ -727,6 +727,13 @@ input[type="submit"]:hover,
   gap: 40px;
 }
 
+.category-intro {
+  text-align: center;
+  padding: 20px 20px 0;
+  color: var(--sapi-orange);
+  font-weight: 500;
+}
+
 .category-featured-card {
   text-align: center;
 }
@@ -747,4 +754,8 @@ input[type="submit"]:hover,
   width: 100%;
   max-width: 1000px;
   height: auto;
+}
+
+.category-featured-link {
+  display: inline-block;
 }
