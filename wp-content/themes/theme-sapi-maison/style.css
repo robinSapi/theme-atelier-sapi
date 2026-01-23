@@ -1,0 +1,225 @@
+/*
+Theme Name: Theme Sapi Maison
+Theme URI: https://atelier-sapi.fr
+Author: Atelier Sapi
+Description: Theme custom sans Elementor pour Atelier Sapi.
+Version: 0.1.0
+Text Domain: theme-sapi-maison
+*/
+
+:root {
+  --sapi-text: #8A8A8A;
+  --sapi-accent: #323232;
+  --sapi-primary: #585858;
+  --sapi-secondary: #018501;
+  --sapi-ocre: #937D68;
+  --sapi-orange: #E35B24;
+  --sapi-grey-light: #F1F1F1;
+  --sapi-creme: #FEEECD;
+  --sapi-creme-light: #FEFCF5;
+  --sapi-yellow: #F4C43C;
+  --sapi-white: #FFFFFF;
+  --sapi-blue: #00589A;
+  --sapi-blue-hover: #00365F;
+  --sapi-red: #C50000;
+  --sapi-red-hover: #570000;
+  --sapi-green: #00B100;
+  --sapi-green-hover: #026B02;
+
+  --sapi-radius: 5px;
+  --sapi-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Montserrat", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 17px;
+  color: var(--sapi-text);
+  background: var(--sapi-white);
+}
+
+a {
+  color: var(--sapi-blue);
+  text-decoration: none;
+}
+
+a:hover,
+a:focus {
+  color: var(--sapi-blue-hover);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 0.6em;
+  font-family: "Montserrat", Arial, sans-serif;
+  font-weight: 600;
+  color: var(--sapi-primary);
+}
+
+h1, h2 {
+  font-size: 20px;
+}
+
+h3 {
+  font-size: 16px;
+  text-transform: uppercase;
+  color: var(--sapi-orange);
+}
+
+h4, h5 {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+h5 {
+  color: var(--sapi-ocre);
+}
+
+h6 {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--sapi-shadow);
+}
+
+.site-header .header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 10px 20px;
+}
+
+.site-logo {
+  display: flex;
+  align-items: center;
+}
+
+.site-title {
+  font-family: "Square Peg", cursive;
+  font-size: 40px;
+  color: var(--sapi-orange);
+}
+
+.primary-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+}
+
+.primary-nav a {
+  font-size: 14px;
+  font-weight: 500;
+  color: #242424;
+}
+
+.primary-nav a:hover,
+.primary-nav .current-menu-item > a {
+  color: var(--sapi-red-hover);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cart-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  color: var(--sapi-primary);
+}
+
+.cart-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  border-radius: 50%;
+  font-size: 12px;
+  color: var(--sapi-white);
+  background: var(--sapi-orange);
+}
+
+button,
+.button,
+input[type="submit"],
+.woocommerce a.button,
+.woocommerce button.button,
+.woocommerce input.button {
+  font-family: "Montserrat", Arial, sans-serif;
+  font-size: 14px;
+  text-transform: uppercase;
+  padding: 10px 25px;
+  border-radius: var(--sapi-radius);
+  border: none;
+  background: var(--sapi-secondary);
+  color: var(--sapi-white);
+  cursor: pointer;
+}
+
+button:hover,
+.button:hover,
+input[type="submit"]:hover,
+.woocommerce a.button:hover,
+.woocommerce button.button:hover,
+.woocommerce input.button:hover {
+  background: var(--sapi-orange);
+  color: var(--sapi-white);
+}
+
+.site-content {
+  padding: 40px 20px;
+}
+
+.site-footer {
+  padding: 40px 20px;
+  background: var(--sapi-creme-light);
+  color: var(--sapi-primary);
+}
+
+.site-footer .footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: space-between;
+}
+
+@media (max-width: 1024px) {
+  .primary-nav ul {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .site-header .header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .primary-nav ul {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
