@@ -30,6 +30,10 @@ function sapi_maison_enqueue_assets() {
   ];
   wp_enqueue_style('sapi-maison-fonts', add_query_arg($fonts, 'https://fonts.googleapis.com/css'));
   wp_enqueue_style('sapi-maison-style', get_stylesheet_uri(), ['sapi-maison-fonts'], '0.1.0');
+
+  if (is_front_page()) {
+    wp_enqueue_script('sapi-maison-home', get_template_directory_uri() . '/assets/home.js', [], '0.1.0', true);
+  }
 }
 add_action('wp_enqueue_scripts', 'sapi_maison_enqueue_assets');
 
@@ -44,4 +48,3 @@ function sapi_maison_cart_count() {
   }
   return WC()->cart ? WC()->cart->get_cart_contents_count() : 0;
 }
-
