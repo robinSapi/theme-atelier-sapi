@@ -40,19 +40,19 @@ $gallery_images = [
 
 <section class="assurance-strip">
   <div class="assurance-item">
-    <img src="https://test.atelier-sapi.fr/wordpress/wp-content/uploads/2025/03/picto-assembly.svg" alt="Assemblage guidé">
+    <img src="<?php echo esc_url(get_site_url()); ?>/wp-content/uploads/2025/03/picto-assembly.svg" alt="Assemblage guidé">
     <p>Assemblage guidé<br>et ludique</p>
   </div>
   <div class="assurance-item">
-    <img src="https://test.atelier-sapi.fr/wordpress/wp-content/uploads/2025/03/picto-french.svg" alt="Fabrication artisanale">
+    <img src="<?php echo esc_url(get_site_url()); ?>/wp-content/uploads/2025/03/picto-french.svg" alt="Fabrication artisanale">
     <p>Fabrication artisanale<br>dans le Rhône</p>
   </div>
   <div class="assurance-item">
-    <img src="https://test.atelier-sapi.fr/wordpress/wp-content/uploads/2025/03/picto-guarantee.svg" alt="Design unique">
+    <img src="<?php echo esc_url(get_site_url()); ?>/wp-content/uploads/2025/03/picto-guarantee.svg" alt="Design unique">
     <p>Design unique et<br>produits garantis</p>
   </div>
   <div class="assurance-item">
-    <img src="https://test.atelier-sapi.fr/wordpress/wp-content/uploads/2025/03/picto-pantone.svg" alt="Adaptable">
+    <img src="<?php echo esc_url(get_site_url()); ?>/wp-content/uploads/2025/03/picto-pantone.svg" alt="Adaptable">
     <p>Adaptable selon<br>vos envies</p>
   </div>
 </section>
@@ -115,7 +115,7 @@ $gallery_images = [
   </div>
 </section>
 
-<section class="newsletter" style="background-image: url('https://test.atelier-sapi.fr/wordpress/wp-content/uploads/2024/12/trame_lampe.png');">
+<section class="newsletter" style="background-image: url('<?php echo esc_url(get_site_url()); ?>/wp-content/uploads/2024/12/trame_lampe.png');">
   <div class="newsletter-inner">
     <div class="newsletter-copy">
       <h2 class="newsletter-heading">Restez informées !</h2>
