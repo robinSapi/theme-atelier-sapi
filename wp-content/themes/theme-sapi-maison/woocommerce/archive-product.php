@@ -4,7 +4,7 @@ defined('ABSPATH') || exit;
 get_header();
 ?>
 
-<section class="shop-hero" style="background-image: url('<?php echo esc_url(get_site_url()); ?>/wp-content/uploads/2025/01/sapi_illus_creations.jpg');">
+<section class="shop-hero" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/01/sapi_illus_creations.jpg');">
   <div class="shop-hero-inner">
     <div class="shop-hero-title">
       <span class="divider"></span>
