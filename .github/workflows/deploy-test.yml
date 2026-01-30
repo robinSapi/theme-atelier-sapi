@@ -24,8 +24,8 @@ jobs:
           username: ${{ secrets.FTP_USERNAME_TEST }}
           password: ${{ secrets.FTP_PASSWORD_TEST }}
           port: 21
-          server-dir: /
-          local-dir: ./
+          server-dir: /public_html/wp-content/themes/theme-sapi-maison/
+          local-dir: ./wp-content/themes/theme-sapi-maison/
           exclude: |
             **/.git*
             **/.git*/**
