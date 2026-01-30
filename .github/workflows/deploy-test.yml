@@ -20,10 +20,11 @@ jobs:
       - name: Deploy to O2Switch via FTP
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /testLumineux.atelier-sapi.fr/
+          server: ${{ secrets.FTP_SERVER_TEST }}
+          username: ${{ secrets.FTP_USERNAME_TEST }}
+          password: ${{ secrets.FTP_PASSWORD_TEST }}
+          port: 21
+          server-dir: /
           local-dir: ./
           exclude: |
             **/.git*

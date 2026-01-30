@@ -20,21 +20,40 @@ Les informations FTP sensibles sont stockées dans les secrets GitHub pour des r
 
 4. **Ajouter les secrets FTP**
    - Cliquez sur **New repository secret**
-   - Ajoutez les 3 secrets suivants :
+   - Ajoutez les **6 secrets** suivants (3 pour le test + 3 pour la production) :
 
-#### Secret 1 : FTP_SERVER
-- **Name:** `FTP_SERVER`
-- **Secret:** `ftp.atelier-sapi.fr`
+### Secrets pour le Site de TEST (testLumineux)
+
+#### Secret 1 : FTP_SERVER_TEST
+- **Name:** `FTP_SERVER_TEST`
+- **Secret:** `ftp.velu1541.odns.fr`
 - Cliquez sur **Add secret**
 
-#### Secret 2 : FTP_USERNAME
-- **Name:** `FTP_USERNAME`
+#### Secret 2 : FTP_USERNAME_TEST
+- **Name:** `FTP_USERNAME_TEST`
+- **Secret:** `majSiteTest@testlumineux.atelier-sapi.fr`
+- Cliquez sur **Add secret**
+
+#### Secret 3 : FTP_PASSWORD_TEST
+- **Name:** `FTP_PASSWORD_TEST`
+- **Secret:** [Mot de passe du compte majSiteTest - à définir dans cPanel]
+- Cliquez sur **Add secret**
+
+### Secrets pour le Site de PRODUCTION (atelier-sapi.fr)
+
+#### Secret 4 : FTP_SERVER_PROD
+- **Name:** `FTP_SERVER_PROD`
+- **Secret:** `ftp.velu1541.odns.fr`
+- Cliquez sur **Add secret**
+
+#### Secret 5 : FTP_USERNAME_PROD
+- **Name:** `FTP_USERNAME_PROD`
 - **Secret:** `majSite@atelier-sapi.fr`
 - Cliquez sur **Add secret**
 
-#### Secret 3 : FTP_PASSWORD
-- **Name:** `FTP_PASSWORD`
-- **Secret:** [Votre mot de passe FTP O2Switch]
+#### Secret 6 : FTP_PASSWORD_PROD
+- **Name:** `FTP_PASSWORD_PROD`
+- **Secret:** [Mot de passe du compte majSite - à définir dans cPanel]
 - Cliquez sur **Add secret**
 
 > **⚠️ Important :** Les secrets ne seront jamais visibles après leur création (c'est normal et voulu pour la sécurité).
