@@ -8,6 +8,8 @@ get_header();
 <?php while (have_posts()) : ?>
   <?php the_post(); ?>
 
+  <?php sapi_maison_breadcrumbs(); ?>
+
   <section class="product-hero">
     <div class="product-hero-grid">
       <div class="product-gallery">
@@ -82,7 +84,7 @@ get_header();
       ];
       foreach ($images as $image) {
         if ($image && isset($image['url'])) {
-          echo '<img src="' . esc_url($image['url']) . '" alt="" />';
+          echo '<img src="' . esc_url($image['url']) . '" alt="" loading="lazy" />';
         }
       }
     }

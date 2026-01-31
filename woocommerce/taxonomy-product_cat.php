@@ -15,6 +15,8 @@ $category_intro = [
   'lampes-a-poser' => "Lampes de chevet, de bureau ou de salon, c'est ici que ça se passe !",
   'accessoires' => "Ampoules, douilles et pied de lampadaire, retrouvez ici de quoi parfaire votre éclairage !",
 ];
+
+sapi_maison_breadcrumbs();
 ?>
 
 <section class="shop-hero" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/01/sapi_illus_creations.jpg');">
@@ -200,7 +202,7 @@ if (!empty($featured)) :
         <p class="category-featured-subtitle"><?php echo esc_html($item['subtitle']); ?></p>
         <a class="category-featured-link" href="<?php echo esc_url($item['link']); ?>">
           <div class="category-featured-media">
-            <img src="<?php echo esc_url($item['image']); ?>" alt="<?php echo esc_attr($item['title']); ?>">
+            <img src="<?php echo esc_url($item['image']); ?>" alt="<?php echo esc_attr($item['title']); ?>" loading="lazy">
           </div>
         </a>
       </article>

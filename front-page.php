@@ -93,7 +93,7 @@ $gallery_images = [
     <a class="button" href="/nos-creations/olivia-la-gardiena/">Découvrir Olivia</a>
   </div>
   <div class="star-media">
-    <img src="https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg" alt="Olivia La gardiena">
+    <img src="https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg" alt="Olivia La gardiena" loading="lazy">
   </div>
 </section>
 

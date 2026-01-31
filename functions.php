@@ -48,3 +48,172 @@ function sapi_maison_cart_count() {
   }
   return WC()->cart ? WC()->cart->get_cart_contents_count() : 0;
 }
+
+function sapi_maison_structured_data() {
+  if (is_product()) {
+    global $product;
+
+    if (!$product) {
+      return;
+    }
+
+    $schema = [
+      '@context' => 'https://schema.org',
+      '@type' => 'Product',
+      'name' => get_the_title(),
+      'description' => wp_strip_all_tags(get_the_excerpt()),
+      'sku' => $product->get_sku(),
+      'offers' => [
+        '@type' => 'Offer',
+        'url' => get_permalink(),
+        'priceCurrency' => 'EUR',
+        'price' => $product->get_price(),
+        'availability' => $product->is_in_stock() ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+        'seller' => [
+          '@type' => 'Organization',
+          'name' => 'Atelier Sâpi'
+        ]
+      ]
+    ];
+
+    if (has_post_thumbnail()) {
+      $schema['image'] = get_the_post_thumbnail_url(null, 'full');
+    }
+
+    if ($product->get_rating_count() > 0) {
+      $schema['aggregateRating'] = [
+        '@type' => 'AggregateRating',
+        'ratingValue' => $product->get_average_rating(),
+        'reviewCount' => $product->get_rating_count()
+      ];
+    }
+
+    echo '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
+  }
+
+  if (is_front_page()) {
+    $schema = [
+      '@context' => 'https://schema.org',
+      '@type' => 'Organization',
+      'name' => 'Atelier Sâpi',
+      'url' => home_url(),
+      'logo' => get_theme_mod('custom_logo') ? wp_get_attachment_image_url(get_theme_mod('custom_logo'), 'full') : '',
+      'sameAs' => [
+        'https://www.instagram.com/atelier.sapi/',
+        'https://www.facebook.com/ateliersapi'
+      ]
+    ];
+
+    echo '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
+  }
+}
+add_action('wp_head', 'sapi_maison_structured_data');
+
+function sapi_maison_open_graph() {
+  if (is_product()) {
+    global $product;
+
+    if (!$product) {
+      return;
+    }
+
+    echo '<meta property="og:type" content="product">' . "\n";
+    echo '<meta property="og:title" content="' . esc_attr(get_the_title()) . '">' . "\n";
+    echo '<meta property="og:description" content="' . esc_attr(wp_strip_all_tags(get_the_excerpt())) . '">' . "\n";
+    echo '<meta property="og:url" content="' . esc_url(get_permalink()) . '">' . "\n";
+    echo '<meta property="og:site_name" content="Atelier Sâpi">' . "\n";
+
+    if (has_post_thumbnail()) {
+      echo '<meta property="og:image" content="' . esc_url(get_the_post_thumbnail_url(null, 'large')) . '">' . "\n";
+    }
+
+    echo '<meta property="product:price:amount" content="' . esc_attr($product->get_price()) . '">' . "\n";
+    echo '<meta property="product:price:currency" content="EUR">' . "\n";
+  } elseif (is_front_page()) {
+    echo '<meta property="og:type" content="website">' . "\n";
+    echo '<meta property="og:title" content="' . esc_attr(get_bloginfo('name')) . '">' . "\n";
+    echo '<meta property="og:description" content="' . esc_attr(get_bloginfo('description')) . '">' . "\n";
+    echo '<meta property="og:url" content="' . esc_url(home_url()) . '">' . "\n";
+    echo '<meta property="og:site_name" content="Atelier Sâpi">' . "\n";
+  }
+
+  echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
+}
+add_action('wp_head', 'sapi_maison_open_graph');
+
+function sapi_maison_canonical() {
+  if (is_singular()) {
+    echo '<link rel="canonical" href="' . esc_url(get_permalink()) . '">' . "\n";
+  } elseif (is_archive()) {
+    $url = get_term_link(get_queried_object());
+    if (!is_wp_error($url)) {
+      echo '<link rel="canonical" href="' . esc_url($url) . '">' . "\n";
+    }
+  } elseif (is_front_page()) {
+    echo '<link rel="canonical" href="' . esc_url(home_url('/')) . '">' . "\n";
+  }
+}
+add_action('wp_head', 'sapi_maison_canonical');
+
+function sapi_maison_breadcrumbs() {
+  if (is_front_page()) {
+    return;
+  }
+
+  $breadcrumbs = [];
+  $breadcrumbs[] = [
+    'name' => 'Accueil',
+    'url' => home_url('/')
+  ];
+
+  if (is_product()) {
+    $terms = get_the_terms(get_the_ID(), 'product_cat');
+    if ($terms && !is_wp_error($terms)) {
+      $main_term = $terms[0];
+      $breadcrumbs[] = [
+        'name' => $main_term->name,
+        'url' => get_term_link($main_term)
+      ];
+    }
+    $breadcrumbs[] = [
+      'name' => get_the_title(),
+      'url' => ''
+    ];
+  } elseif (is_product_category()) {
+    $term = get_queried_object();
+    $breadcrumbs[] = [
+      'name' => $term->name,
+      'url' => ''
+    ];
+  }
+
+  $schema = [
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => []
+  ];
+
+  echo '<nav class="breadcrumbs" aria-label="Fil d\'Ariane">';
+  foreach ($breadcrumbs as $index => $crumb) {
+    $position = $index + 1;
+
+    $schema['itemListElement'][] = [
+      '@type' => 'ListItem',
+      'position' => $position,
+      'name' => $crumb['name'],
+      'item' => $crumb['url'] ?: null
+    ];
+
+    if ($crumb['url']) {
+      echo '<a href="' . esc_url($crumb['url']) . '">' . esc_html($crumb['name']) . '</a>';
+      if ($position < count($breadcrumbs)) {
+        echo ' <span class="breadcrumb-separator">/</span> ';
+      }
+    } else {
+      echo '<span class="breadcrumb-current">' . esc_html($crumb['name']) . '</span>';
+    }
+  }
+  echo '</nav>';
+
+  echo '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
+}
