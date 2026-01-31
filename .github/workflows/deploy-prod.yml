@@ -31,7 +31,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD_PROD }}
           port: 21
           server-dir: /wp-content/themes/theme-sapi-maison/
-          local-dir: ./wp-content/themes/theme-sapi-maison/
+          local-dir: ./
           exclude: |
             **/.git*
             **/.git*/**
