@@ -23,25 +23,25 @@ get_header();
 
 <section class="shop-categories">
   <div class="shop-category-grid">
-    <a class="shop-category" href="https://atelier-sapi.fr/nos-suspensions/" style="background-image: url('https://www.atelier-sapi.fr/wp-content/uploads/2025/05/IMG_8801-682x1024.jpg');">
+    <a class="shop-category" href="/nos-suspensions/" style="background-image: url('https://www.atelier-sapi.fr/wp-content/uploads/2025/05/IMG_8801-682x1024.jpg');">
       <span>Les suspensions</span>
     </a>
-    <a class="shop-category" href="https://atelier-sapi.fr/nos-lampadaires/" style="background-image: url('https://www.atelier-sapi.fr/wp-content/uploads/2025/07/Face-Allumee.jpg');">
+    <a class="shop-category" href="/nos-lampadaires/" style="background-image: url('https://www.atelier-sapi.fr/wp-content/uploads/2025/07/Face-Allumee.jpg');">
       <span>Les lampadaires</span>
     </a>
-    <a class="shop-category" href="https://atelier-sapi.fr/nos-appliques/" style="background-image: url('https://www.atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg');">
+    <a class="shop-category" href="/nos-appliques/" style="background-image: url('https://www.atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg');">
       <span>Les appliques</span>
     </a>
-    <a class="shop-category" href="https://atelier-sapi.fr/nos-lampes-a-poser/" style="background-image: url('https://www.atelier-sapi.fr/wp-content/uploads/2025/09/IMG_9802.jpg');">
+    <a class="shop-category" href="/nos-lampes-a-poser/" style="background-image: url('https://www.atelier-sapi.fr/wp-content/uploads/2025/09/IMG_9802.jpg');">
       <span>Les lampes à poser</span>
     </a>
-    <a class="shop-category" href="https://atelier-sapi.fr/les-accessoires/">
+    <a class="shop-category" href="/les-accessoires/">
       <span>Les accessoires</span>
     </a>
   </div>
   <div class="shop-cta-row">
-    <a class="button" href="https://atelier-sapi.fr/nos-creations/carte-cadeau/">Carte cadeau 🎁</a>
-    <a class="button button-outline" href="https://atelier-sapi.fr/contact/">Modèle personnalisé</a>
+    <a class="button" href="/nos-creations/carte-cadeau/">Carte cadeau 🎁</a>
+    <a class="button button-outline" href="/contact/">Modèle personnalisé</a>
   </div>
 </section>
 

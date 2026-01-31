@@ -28,7 +28,7 @@ $gallery_images = [
 <section class="hero" data-hero-images='<?php echo wp_json_encode($hero_images); ?>'>
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <a class="hero-card" href="https://atelier-sapi.fr/nos-creations/carte-cadeau/">
+    <a class="hero-card" href="/nos-creations/carte-cadeau/">
       Offrez une carte cadeau ! 🎁
     </a>
     <div class="hero-text">
@@ -60,16 +60,16 @@ $gallery_images = [
 <section class="atelier-selection">
   <h2>La sélection de l'atelier</h2>
   <div class="selection-grid">
-    <a class="selection-card" href="https://atelier-sapi.fr/nos-suspensions/" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/04/A7404579-e1751893880524.jpg');">
+    <a class="selection-card" href="/nos-suspensions/" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/04/A7404579-e1751893880524.jpg');">
       <span>Nos suspensions</span>
     </a>
-    <a class="selection-card" href="https://atelier-sapi.fr/nos-lampadaires/" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/07/Bandeau-Robin.jpg');">
+    <a class="selection-card" href="/nos-lampadaires/" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/07/Bandeau-Robin.jpg');">
       <span>Nos lampadaires</span>
     </a>
-    <a class="selection-card" href="https://atelier-sapi.fr/nos-appliques/" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/04/A7404363.jpg');">
+    <a class="selection-card" href="/nos-appliques/" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/04/A7404363.jpg');">
       <span>Nos appliques</span>
     </a>
-    <a class="selection-card" href="https://atelier-sapi.fr/nos-lampes-a-poser/" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/03/IMG_8749.jpg');">
+    <a class="selection-card" href="/nos-lampes-a-poser/" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/03/IMG_8749.jpg');">
       <span>Nos lampes à poser</span>
     </a>
   </div>
@@ -81,7 +81,7 @@ $gallery_images = [
     <h2>Lumière d'artisan</h2>
     <h3>Découvrez Robin, artisan au cœur de la lumière</h3>
     <p>Chaque luminaire Sâpi est façonné à la main avec passion, alliant techniques traditionnelles et innovation. Du choix des essences de bois à la finition, chaque détail est pensé pour sublimer vos espaces dans une logique de commerce raisonné.</p>
-    <a class="button" href="https://atelier-sapi.fr/lumiere-dartisan/">En savoir +</a>
+    <a class="button" href="/lumiere-dartisan/">En savoir +</a>
   </div>
 </section>
 
@@ -90,7 +90,7 @@ $gallery_images = [
     <h2>Olivia La gardiena</h2>
     <h3>La star de l'atelier</h3>
     <p>Notre suspension monumentale inspirée de la nature. L'équilibre parfait entre l'éclairage et la décoration. Disponible en 4 tailles et 2 essences de bois !</p>
-    <a class="button" href="https://atelier-sapi.fr/nos-creations/olivia-la-gardiena/">Découvrir Olivia</a>
+    <a class="button" href="/nos-creations/olivia-la-gardiena/">Découvrir Olivia</a>
   </div>
   <div class="star-media">
     <img src="https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg" alt="Olivia La gardiena">
@@ -103,14 +103,14 @@ $gallery_images = [
     <h2>Conseils éclairés</h2>
     <h3>Astuces et inspirations</h3>
     <p>L’éclairage transforme un espace : il crée l’ambiance, met en valeur les volumes, et influence même notre bien-être. Que ce soit pour un salon cosy, une cuisine fonctionnelle, ou une chambre apaisante, chaque pièce mérite une lumière adaptée.</p>
-    <a class="button button-outline" href="https://atelier-sapi.fr/conseils-eclaires/">En savoir +</a>
+    <a class="button button-outline" href="/conseils-eclaires/">En savoir +</a>
   </div>
 </section>
 
 <section class="inspiration-gallery">
   <div class="gallery-grid">
     <?php foreach ($gallery_images as $image_url) : ?>
-      <a class="gallery-item" href="https://atelier-sapi.fr/nos-creations/" style="background-image: url('<?php echo esc_url($image_url); ?>');"></a>
+      <a class="gallery-item" href="/nos-creations/" style="background-image: url('<?php echo esc_url($image_url); ?>');"></a>
     <?php endforeach; ?>
   </div>
 </section>
@@ -130,7 +130,7 @@ $gallery_images = [
       <label for="newsletter-email">Renseignez votre email</label>
       <input id="newsletter-email" type="email" name="email" placeholder="E-mail" required>
       <button type="submit">S’inscrire à la newsletter 💡</button>
-      <p class="newsletter-note">Votre adresse e-mail sera utilisée uniquement pour vous envoyer des actualités, vous pouvez vous désinscrire à tout moment. Consultez notre politique de confidentialité <a href="https://atelier-sapi.fr/politique-de-confidentialite/">ici</a>.</p>
+      <p class="newsletter-note">Votre adresse e-mail sera utilisée uniquement pour vous envoyer des actualités, vous pouvez vous désinscrire à tout moment. Consultez notre politique de confidentialité <a href="/politique-de-confidentialite/">ici</a>.</p>
     </form>
   </div>
 </section>
