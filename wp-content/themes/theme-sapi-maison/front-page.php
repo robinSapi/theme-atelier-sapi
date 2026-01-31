@@ -32,7 +32,7 @@ $gallery_images = [
       Offrez une carte cadeau ! 🎁
     </a>
     <div class="hero-text">
-      <p class="hero-kicker">Luminaire en bois - Atelier Sâpi</p>
+      <p class="hero-kicker">Beaux luminaires en bois - Atelier Sâpi</p>
       <h1>Découvrez les luminaires en bois de Robin,<br>fabriqués avec passion à la commande</h1>
     </div>
   </div>
