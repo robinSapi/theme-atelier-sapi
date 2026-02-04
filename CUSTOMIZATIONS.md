@@ -5,6 +5,22 @@
 
 ---
 
+## 🎯 Principes d'Exigence
+
+**Philosophie de développement :**
+- **Qualité** : Code propre, maintenable, sans compromis. CSS-only quand possible, pas de hacks HTML inutiles.
+- **Robustesse** : Solutions pérennes qui ne cassent pas aux mises à jour. Pas de workarounds fragiles.
+- **Conversions** : Chaque élément UX doit servir la conversion. Design au service du business.
+- **Différenciation** : Atelier Sâpi est une marque artisanale unique. Le site doit refléter cette singularité.
+
+**Règles strictes :**
+- Pas de suggestions automatiques de cache (il n'y en a pas sur Local by Flywheel)
+- Pas de solutions "quick fix" qui complexifient le code
+- Toujours comprendre les interdépendances CSS avant de modifier
+- Tester visuellement sur testlumineux avant de valider
+
+---
+
 ## 🚀 Workflow de Déploiement
 
 ```
@@ -290,6 +306,14 @@ add_theme_support('wc-product-gallery-slider');
 ---
 
 ## 📝 Historique des Modifications
+
+**2026-02-05 (chevron dropdown menu):**
+- ✅ **CHEVRON CSS-ONLY** : Indicateur visuel pour "Nos créations" (menu avec sous-menu)
+  - Solution : `::before` avec `position: absolute` + `right: 0`
+  - `padding-right: 18px` sur le lien parent pour l'espace
+  - Rotation 45deg → -135deg au hover
+  - Pas de modification HTML, 100% CSS
+  - **Leçon** : `::after` était déjà utilisé pour l'underline hover, donc `::before` pour le chevron
 
 **2026-02-04 (optimisations UX homepage):**
 - ✅ **HEADER** : Icône panier SVG (remplace emoji), navigation avec underline hover, badge couleur wood (#937D68)
