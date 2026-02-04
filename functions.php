@@ -221,32 +221,30 @@ function sapi_maison_breadcrumbs() {
   echo '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
 }
 
-// DEBUG - Afficher quel template est chargé
-add_action('wp_footer', function() {
-  if (is_tax('product_cat') || is_product_category()) {
-    $queried = get_queried_object();
-    $template_file = get_query_template('taxonomy');
-    echo '<div style="position: fixed; bottom: 0; left: 0; right: 0; background: blue; color: white; padding: 10px; z-index: 99999; font-size: 12px;">';
-    echo 'DEBUG: is_product_category=' . (is_product_category() ? 'TRUE' : 'FALSE');
-    echo ' | is_tax(product_cat)=' . (is_tax('product_cat') ? 'TRUE' : 'FALSE');
-    echo ' | taxonomy=' . (isset($queried->taxonomy) ? $queried->taxonomy : 'none');
-    echo ' | slug=' . (isset($queried->slug) ? $queried->slug : 'none');
-    echo ' | template=' . basename($template_file);
-    echo '</div>';
+// Redirect static category pages to WooCommerce native categories
+add_action('template_redirect', function() {
+  if (!is_page()) {
+    return;
   }
-}, 999);
 
-// DIAGNOSTIC: Test if Elementor is intercepting product archives
-add_action('woocommerce_before_shop_loop', function() {
-  if (is_product_category()) {
-    error_log('HOOK TEST: woocommerce_before_shop_loop fired on category page');
-    echo '<div style="background: orange; color: black; padding: 20px; margin: 20px; border: 5px solid black; font-size: 18px; font-weight: bold;">🔶 HOOK: woocommerce_before_shop_loop fired!</div>';
-  }
-}, 1);
+  $page_slug = get_post_field('post_name', get_queried_object_id());
 
-add_action('woocommerce_after_shop_loop', function() {
-  if (is_product_category()) {
-    error_log('HOOK TEST: woocommerce_after_shop_loop fired on category page');
-    echo '<div style="background: purple; color: white; padding: 20px; margin: 20px; border: 5px solid white; font-size: 18px; font-weight: bold;">🟣 HOOK: woocommerce_after_shop_loop fired!</div>';
+  // Map static page slugs to WooCommerce category slugs
+  $category_redirects = [
+    'nos-lampadaires' => 'lampadaires',
+    'nos-suspensions' => 'suspensions',
+    'nos-appliques' => 'appliques',
+    'nos-lampes-a-poser' => 'lampes-a-poser',
+    'les-accessoires' => 'accessoires',
+  ];
+
+  if (isset($category_redirects[$page_slug])) {
+    $category_slug = $category_redirects[$page_slug];
+    $category_link = get_term_link($category_slug, 'product_cat');
+
+    if (!is_wp_error($category_link)) {
+      wp_redirect($category_link, 301);
+      exit;
+    }
   }
-}, 999);
+});

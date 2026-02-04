@@ -4,9 +4,6 @@ defined('ABSPATH') || exit;
 
 get_header();
 
-// DEBUG - Vérifier si ce fichier est chargé (APRÈS get_header pour que ça s'affiche)
-echo '<div style="position: fixed; top: 0; left: 0; right: 0; background: red; color: white; padding: 20px; z-index: 99999; text-align: center; font-size: 20px; font-weight: bold;">🔴 TAXONOMY-PRODUCT_CAT.PHP EST CHARGÉ</div>';
-
 $term = get_queried_object();
 $term_name = $term && isset($term->name) ? $term->name : '';
 $term_slug = $term && isset($term->slug) ? $term->slug : '';
@@ -213,77 +210,18 @@ if (!empty($featured)) :
   </section>
 <?php endif; ?>
 
-<!-- TEST: Code execution checkpoint -->
-<div style="position: fixed; top: 50%; left: 0; right: 0; background: lime; color: black; padding: 20px; z-index: 99999; text-align: center; font-size: 24px; font-weight: bold; border: 5px solid black;">
-  ✅ CHECKPOINT: Code après featured sections s'exécute!
-</div>
-
-<?php
-// CRITICAL TEST: Output before any WooCommerce functions
-echo '<div style="background: magenta; color: white; padding: 30px; margin: 20px; font-size: 20px; border: 10px solid red;">BEFORE WOOCOMMERCE FUNCTIONS - This should ALWAYS show</div>';
-
-// Query diagnostics
-global $wp_query;
-$query_info = [
-  'is_archive' => is_archive() ? 'YES' : 'NO',
-  'is_tax' => is_tax() ? 'YES' : 'NO',
-  'is_product_category' => is_product_category() ? 'YES' : 'NO',
-  'found_posts' => $wp_query->found_posts,
-  'post_count' => $wp_query->post_count,
-  'max_num_pages' => $wp_query->max_num_pages,
-];
-
-echo '<div style="background: cyan; color: black; padding: 20px; margin: 20px; border: 5px solid blue; font-size: 14px;">';
-echo '<strong>QUERY DIAGNOSTICS:</strong><br>';
-foreach ($query_info as $key => $value) {
-  echo "$key: $value<br>";
-}
-echo '</div>';
-
-// Log execution
-error_log('TAXONOMY-PRODUCT_CAT: Reached products section for term=' . $term_slug . ' | found_posts=' . $wp_query->found_posts . ' | post_count=' . $wp_query->post_count);
-?>
-
 <section class="shop-products">
-  <?php
-  // DEBUG - Check loop conditions with error handling
-  try {
-    $has_loop = woocommerce_product_loop();
-    $total = wc_get_loop_prop('total');
-    $has_posts = have_posts();
-
-    // Log to PHP error log to confirm execution
-    error_log('TAXONOMY-PRODUCT_CAT DEBUG: has_loop=' . ($has_loop ? 'TRUE' : 'FALSE') . ', total=' . $total . ', has_posts=' . ($has_posts ? 'TRUE' : 'FALSE') . ', term=' . $term_slug);
-  } catch (Exception $e) {
-    error_log('TAXONOMY-PRODUCT_CAT ERROR: ' . $e->getMessage());
-    echo '<div style="background: red; color: white; padding: 20px;">ERROR: ' . esc_html($e->getMessage()) . '</div>';
-  }
-  ?>
-  <div style="background: yellow; padding: 10px; border: 2px solid red; margin: 20px;">
-    <strong>DEBUG CATEGORY PAGE:</strong><br>
-    - woocommerce_product_loop(): <?php echo $has_loop ? 'TRUE' : 'FALSE'; ?><br>
-    - wc_get_loop_prop('total'): <?php echo $total; ?><br>
-    - have_posts(): <?php echo $has_posts ? 'TRUE' : 'FALSE'; ?><br>
-    - Category: <?php echo esc_html($term_name); ?> (<?php echo esc_html($term_slug); ?>)
-  </div>
-
   <?php if (woocommerce_product_loop()) : ?>
-    <div style="background: lightgreen; padding: 5px;">ENTERING PRODUCT LOOP</div>
     <?php woocommerce_product_loop_start(); ?>
     <?php if (wc_get_loop_prop('total')) : ?>
-      <div style="background: lightblue; padding: 5px;">FOUND <?php echo wc_get_loop_prop('total'); ?> PRODUCTS</div>
       <?php while (have_posts()) : ?>
         <?php the_post(); ?>
-        <div style="background: orange; padding: 5px;">LOADING PRODUCT TEMPLATE FOR: <?php the_title(); ?></div>
         <?php wc_get_template_part('content', 'product'); ?>
       <?php endwhile; ?>
-    <?php else : ?>
-      <div style="background: red; color: white; padding: 5px;">TOTAL IS ZERO OR FALSE</div>
     <?php endif; ?>
     <?php woocommerce_product_loop_end(); ?>
     <?php woocommerce_pagination(); ?>
   <?php else : ?>
-    <div style="background: red; color: white; padding: 10px;">NO PRODUCT LOOP - woocommerce_product_loop() returned FALSE</div>
     <?php wc_no_products_found(); ?>
   <?php endif; ?>
 </section>
