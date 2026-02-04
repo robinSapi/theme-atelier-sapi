@@ -80,6 +80,12 @@ $collections = [
         <div class="bento-label">Pièce signature</div>
         <h1 class="bento-title">Sculpter<br>la lumière</h1>
         <p class="bento-text">Des créations artisanales qui transforment l'espace</p>
+        <a href="<?php echo home_url('/nos-creations/'); ?>" class="hero-cta">
+          <span>Découvrir nos créations</span>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </a>
       </div>
       <div class="bento-corner-info">
         <span class="corner-label">À partir de</span>
@@ -219,8 +225,10 @@ $collections = [
         <div class="collection-visual" style="background-image: url('<?php echo esc_url($collection['image']); ?>');"></div>
         <div class="collection-details">
           <h3><?php echo esc_html($collection['name']); ?></h3>
-          <span class="collection-count"><?php echo esc_html($collection['count']); ?></span>
-          <span class="collection-btn">Voir →</span>
+          <div class="collection-meta">
+            <span class="collection-count"><?php echo esc_html($collection['count']); ?></span>
+            <span class="collection-btn">→</span>
+          </div>
         </div>
       </a>
     <?php endforeach; ?>
