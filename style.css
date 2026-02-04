@@ -289,21 +289,25 @@ h6 {
 }
 
 /* Menu parent indicator (chevron) */
+.primary-nav > ul > li.menu-item-has-children > a {
+  padding-right: 18px;
+}
+
 .primary-nav > ul > li.menu-item-has-children > a::before {
   content: '';
-  display: inline-block;
+  position: absolute;
+  right: 0;
+  top: 50%;
   width: 6px;
   height: 6px;
   border-right: 1.5px solid currentColor;
   border-bottom: 1.5px solid currentColor;
-  transform: rotate(45deg);
-  margin-left: 6px;
-  margin-bottom: 2px;
+  transform: translateY(-50%) rotate(45deg);
   transition: transform 0.3s ease;
 }
 
 .primary-nav > ul > li.menu-item-has-children:hover > a::before {
-  transform: rotate(-135deg);
+  transform: translateY(-50%) rotate(-135deg);
 }
 
 .header-actions {
