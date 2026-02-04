@@ -1412,13 +1412,13 @@ body.cursor-hover .cursor-dot {
   text-align: right;
   z-index: 2;
   opacity: 0;
-  transform: translateX(20px);
+  transform: translateY(15px);
   transition: all 0.4s var(--ease-expo) 0.2s;
 }
 
 .bento-card:hover .bento-corner-info {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateY(0);
 }
 
 .corner-label {
