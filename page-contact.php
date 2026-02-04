@@ -5,7 +5,7 @@ Template Name: Contact
 get_header();
 ?>
 
-<section class="contact-hero" style="background-image: url('https://www.atelier-sapi.fr/wp-content/uploads/2025/07/Bandeau-Rouge.jpg');">
+<section class="contact-hero" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Bandeau-Rouge.jpg');">
   <div class="contact-hero-overlay"></div>
   <div class="contact-hero-content">
     <h1>Prise de contact</h1>

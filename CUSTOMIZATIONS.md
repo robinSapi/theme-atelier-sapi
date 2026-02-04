@@ -62,27 +62,36 @@ if (!$product || !is_a($product, 'WC_Product')) {
 
 ---
 
-### 2. URLs d'images hardcodées vers production
+### 2. URLs d'images - Environnement de test
 
-**Fichiers concernés:**
-- `woocommerce/taxonomy-product_cat.php` (lignes 45-192)
-- `woocommerce/archive-product.php`
-- `front-page.php`
-- `page-*.php`
+**Statut:** ✅ CORRIGÉ (2026-02-04)
 
-**Problème:** Les images utilisent des URLs absolues vers `https://www.atelier-sapi.fr/` au lieu de chemins relatifs ou `wp_get_attachment_url()`.
+**Fichiers concernés (47 URLs corrigées):**
+- `front-page.php` (9 URLs)
+- `page-conseils-eclaires.php` (5 URLs)
+- `page-lumiere-dartisan.php` (5 URLs)
+- `page-contact.php` (1 URL)
+- `woocommerce/archive-product.php` (5 URLs)
+- `woocommerce/taxonomy-product_cat.php` (22 URLs)
 
-**Exemple:**
+**Problème initial:** Les images utilisaient des URLs absolues vers `https://atelier-sapi.fr/` (production) au lieu de `https://www.testlumineux.atelier-sapi.fr/` (test), ce qui empêchait l'affichage des images sur Chrome.
+
+**Correction appliquée:**
 ```php
-'image' => 'https://www.atelier-sapi.fr/wp-content/uploads/2025/10/Bandeau.jpg',
+// Avant
+'image' => 'https://atelier-sapi.fr/wp-content/uploads/2025/10/Bandeau.jpg',
+
+// Après
+'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/10/Bandeau.jpg',
 ```
 
-**Impact:**
-- ✅ Aucun impact fonctionnel (les images s'affichent)
-- ⚠️ Si les images sont modifiées sur la prod, elles seront automatiquement mises à jour partout
-- ⚠️ Dépendance au domaine de production
+**⚠️ ATTENTION pour le déploiement en production:**
+Avant de déployer sur `atelier-sapi.fr`, il faudra :
+1. Soit remettre les URLs vers `atelier-sapi.fr`
+2. Soit utiliser des URLs relatives (`/wp-content/uploads/...`)
+3. Soit utiliser `wp_get_attachment_url()` avec des IDs d'images WordPress
 
-**Action future:** Si vous voulez des images différentes entre testlumineux et prod, il faudra remplacer ces URLs par des uploads WordPress gérés via la médiathèque.
+**Action future:** Idéalement, refactoriser pour utiliser des images depuis la médiathèque WordPress avec `wp_get_attachment_url()` au lieu d'URLs hardcodées.
 
 ---
 
@@ -154,6 +163,83 @@ add_theme_support('wc-product-gallery-slider');
 
 ---
 
+## 🎨 CSS Design System - État Actuel
+
+**Fichier:** `style.css` (~1940 lignes)
+
+**Statut:** ✅ REFONTE TERMINÉE (2026-02-04)
+
+### Système de variables unifié
+
+```css
+:root {
+  /* Colors - Neutrals */
+  --color-white: #FFFFFF;
+  --color-cream: #FEFDFB;
+  --color-warm: #FBF6EA;
+  --color-gray-light: #F1F1F1;
+  --color-gray-mid: #8A8A8A;
+  --color-gray: #585858;
+  --color-dark: #323232;
+  --color-black: #000000;
+
+  /* Colors - Brand */
+  --color-wood: #937D68;
+  --color-orange: #E35B24;
+  --color-green: #018501;
+  --color-green-hover: #026B02;
+
+  /* Colors - Interactive */
+  --color-link: #00589A;
+  --color-link-hover: #00365F;
+  --color-error: #C50000;
+  --color-error-hover: #570000;
+
+  /* Typography */
+  --font-display: 'Square Peg', cursive;
+  --font-body: 'Montserrat', sans-serif;
+
+  /* Spacing & Layout */
+  --radius: 5px;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  /* Easing */
+  --ease-expo: cubic-bezier(0.87, 0, 0.13, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+```
+
+### Structure du fichier CSS
+
+| Section | Lignes | Description |
+|---------|--------|-------------|
+| Design Tokens | 1-52 | Variables CSS unifiées |
+| Reset & Base | 54-115 | Styles de base et typographie |
+| Layout - Header | 117-230 | Header et navigation |
+| Components - Buttons | 175-210 | Boutons standards et outline |
+| Menu Mobile | 235-420 | Burger menu et overlay |
+| Pages - Shop | 422-645 | Pages boutique et produits |
+| Pages - Content | 690-900 | Artisan, Conseils, Contact, Blog |
+| Components - Breadcrumbs | 902-930 | Fil d'Ariane |
+| CINÉTIQUE - Cursor | 932-970 | Curseur custom |
+| CINÉTIQUE - Header | 972-1085 | Header architectural |
+| CINÉTIQUE - Menu | 1087-1200 | Menu overlay |
+| CINÉTIQUE - Bento | 1204-1593 | Grille Bento homepage |
+| CINÉTIQUE - Collections | 1595-1704 | Section collections |
+| CINÉTIQUE - Newsletter | 1706-1774 | Newsletter |
+| CINÉTIQUE - Footer | 1776-1853 | Footer |
+| CINÉTIQUE - Responsive | 1855-1940 | Media queries |
+
+### Refonte effectuée (2026-02-04)
+
+1. ✅ **Variables unifiées** : suppression de tous les `--sapi-*` → utilisation exclusive de `--color-*`
+2. ✅ **Code mort supprimé** : ~280 lignes de styles legacy home page
+3. ✅ **Sélecteurs dédupliqués** : `.cart-link`, `.cart-count`, media queries
+4. ✅ **Structure réorganisée** : commentaires de section clairs
+5. ✅ **Code debug supprimé** : archive-product.php nettoyé
+
+---
+
 ## 🔧 Points d'Attention pour le Futur
 
 ### Avant une mise à jour WooCommerce majeure:
@@ -204,6 +290,19 @@ add_theme_support('wc-product-gallery-slider');
 ---
 
 ## 📝 Historique des Modifications
+
+**2026-02-04 (refonte CSS):**
+- ✅ **REFONTE CSS COMPLÈTE** : ~2220 lignes → ~1940 lignes
+  - Suppression de ~280 lignes de code mort (ancien home page legacy)
+  - Unification des variables : tous les `--sapi-*` → `--color-*`
+  - Dédupliquer les sélecteurs (`.cart-link`, `.cart-count`, media queries)
+  - Réorganisation avec commentaires de section clairs
+  - Suppression du code debug dans archive-product.php
+
+**2026-02-04 (correction images):**
+- ✅ **CORRECTION IMAGES CHROME** : 47 URLs d'images corrigées de `atelier-sapi.fr` vers `testlumineux.atelier-sapi.fr`
+  - Fichiers modifiés : front-page.php, page-conseils-eclaires.php, page-lumiere-dartisan.php, page-contact.php, archive-product.php, taxonomy-product_cat.php
+  - Cause : les images du domaine de production ne s'affichaient pas sur Chrome en environnement de test
 
 **2026-02-04:**
 - ✅ Ajout section workflow déploiement (Local → GitHub → O2switch)

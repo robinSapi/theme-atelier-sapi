@@ -13,7 +13,7 @@ $featured_products = [
     'name' => 'Timothée l\'Araignée',
     'category' => 'Suspension · Chêne',
     'price' => '389€',
-    'image' => 'https://atelier-sapi.fr/wp-content/uploads/2025/10/Bandeau.jpg',
+    'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/10/Bandeau.jpg',
     'url' => '/nos-creations/timothee-laraignee/',
     'badge' => 'Nouveau',
   ],
@@ -21,7 +21,7 @@ $featured_products = [
     'name' => 'Claudine la Turbine',
     'category' => 'Lampadaire · Design cinétique',
     'price' => '259€',
-    'image' => 'https://atelier-sapi.fr/wp-content/uploads/2025/07/Claudine.jpg',
+    'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Claudine.jpg',
     'url' => '/nos-creations/claudine-la-turbine/',
     'badge' => null,
   ],
@@ -29,7 +29,7 @@ $featured_products = [
     'name' => 'Suze la Méduse',
     'category' => 'Applique · Formes organiques',
     'price' => '129€',
-    'image' => 'https://atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg',
+    'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg',
     'url' => '/nos-creations/suze-la-meduse/',
     'badge' => null,
   ],
@@ -40,25 +40,25 @@ $collections = [
   [
     'name' => 'Suspensions',
     'count' => '12 créations',
-    'image' => 'https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg',
+    'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg',
     'url' => '/categorie-produit/suspension/',
   ],
   [
     'name' => 'Lampadaires',
     'count' => '8 créations',
-    'image' => 'https://atelier-sapi.fr/wp-content/uploads/2025/07/Claudine.jpg',
+    'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Claudine.jpg',
     'url' => '/categorie-produit/lampadaire/',
   ],
   [
     'name' => 'Appliques',
     'count' => '6 créations',
-    'image' => 'https://atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg',
+    'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg',
     'url' => '/categorie-produit/applique/',
   ],
   [
     'name' => 'À poser',
     'count' => '5 créations',
-    'image' => 'https://atelier-sapi.fr/wp-content/uploads/2025/07/Charlie-Bandeau-2.jpg',
+    'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Charlie-Bandeau-2.jpg',
     'url' => '/categorie-produit/lampe-a-poser/',
   ],
 ];
@@ -75,7 +75,7 @@ $collections = [
   <div class="bento-container">
     <!-- Large Hero Card -->
     <div class="bento-card bento-hero">
-      <div class="bento-bg" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg');"></div>
+      <div class="bento-bg" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg');"></div>
       <div class="bento-content">
         <div class="bento-label">Pièce signature</div>
         <h1 class="bento-title">Sculpter<br>la lumière</h1>
@@ -198,7 +198,7 @@ $collections = [
 
     <!-- Atelier Image -->
     <div class="bento-card bento-atelier">
-      <div class="bento-bg" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/01/Robin-scaled.jpg');"></div>
+      <div class="bento-bg" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/01/Robin-scaled.jpg');"></div>
       <div class="atelier-label">
         <span>L'atelier · Lyon</span>
       </div>

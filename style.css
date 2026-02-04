@@ -12,53 +12,48 @@ Text Domain: theme-sapi-maison
    ======================================== */
 
 :root {
-  /* SAPI Brand Colors - Primary */
-  --color-cream: #FEFDFB;
-  --color-gray-light: #F1F1F1;
-  --color-warm: #FBF6EA;
-  --color-dark: #323232;
-  --color-gray: #585858;
-  --color-gray-mid: #8A8A8A;
-  --color-wood: #937D68;
+  /* ========================================
+     SAPI CINÉTIQUE - Design Tokens
+     ======================================== */
 
-  /* SAPI Brand Colors - Punctual (accents only) */
-  --color-orange: #E35B24;
-  --color-green: #018501;
-
-  /* Additional colors */
+  /* Colors - Neutrals */
   --color-white: #FFFFFF;
+  --color-cream: #FEFDFB;
+  --color-warm: #FBF6EA;
+  --color-gray-light: #F1F1F1;
+  --color-gray-mid: #8A8A8A;
+  --color-gray: #585858;
+  --color-dark: #323232;
   --color-black: #000000;
 
-  /* SAPI Brand Typography */
+  /* Colors - Brand */
+  --color-wood: #937D68;
+  --color-orange: #E35B24;
+  --color-green: #018501;
+  --color-green-hover: #026B02;
+
+  /* Colors - Interactive */
+  --color-link: #00589A;
+  --color-link-hover: #00365F;
+  --color-error: #C50000;
+  --color-error-hover: #570000;
+
+  /* Typography */
   --font-display: 'Square Peg', cursive;
   --font-body: 'Montserrat', sans-serif;
 
-  /* Easing curves */
+  /* Spacing & Layout */
+  --radius: 5px;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  /* Easing */
   --ease-expo: cubic-bezier(0.87, 0, 0.13, 1);
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* Legacy variables (for backwards compatibility) */
-  --sapi-text: #8A8A8A;
-  --sapi-accent: #323232;
-  --sapi-primary: #585858;
-  --sapi-secondary: #018501;
-  --sapi-ocre: #937D68;
-  --sapi-orange: #E35B24;
-  --sapi-grey-light: #F1F1F1;
-  --sapi-creme: #FEEECD;
-  --sapi-creme-light: #FEFCF5;
-  --sapi-yellow: #F4C43C;
-  --sapi-white: #FFFFFF;
-  --sapi-blue: #00589A;
-  --sapi-blue-hover: #00365F;
-  --sapi-red: #C50000;
-  --sapi-red-hover: #570000;
-  --sapi-green: #00B100;
-  --sapi-green-hover: #026B02;
-
-  --sapi-radius: 5px;
-  --sapi-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
+/* ========================================
+   RESET & BASE STYLES
+   ======================================== */
 
 * {
   box-sizing: border-box;
@@ -69,18 +64,18 @@ body {
   font-family: "Montserrat", Arial, sans-serif;
   font-size: 14px;
   line-height: 17px;
-  color: var(--sapi-text);
-  background: var(--sapi-white);
+  color: var(--color-gray-mid);
+  background: var(--color-white);
 }
 
 a {
-  color: var(--sapi-blue);
+  color: var(--color-link);
   text-decoration: none;
 }
 
 a:hover,
 a:focus {
-  color: var(--sapi-blue-hover);
+  color: var(--color-link-hover);
 }
 
 img {
@@ -92,7 +87,7 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0 0 0.6em;
   font-family: "Montserrat", Arial, sans-serif;
   font-weight: 600;
-  color: var(--sapi-primary);
+  color: var(--color-gray);
 }
 
 h1, h2 {
@@ -102,7 +97,7 @@ h1, h2 {
 h3 {
   font-size: 16px;
   text-transform: uppercase;
-  color: var(--sapi-orange);
+  color: var(--color-orange);
 }
 
 h4, h5 {
@@ -111,7 +106,7 @@ h4, h5 {
 }
 
 h5 {
-  color: var(--sapi-ocre);
+  color: var(--color-wood);
 }
 
 h6 {
@@ -119,12 +114,16 @@ h6 {
   font-weight: 400;
 }
 
+/* ========================================
+   LAYOUT - Header & Navigation
+   ======================================== */
+
 .site-header {
   position: sticky;
   top: 0;
   z-index: 999;
   background: rgba(255, 255, 255, 0.9);
-  box-shadow: var(--sapi-shadow);
+  box-shadow: var(--shadow);
 }
 
 .site-header .header-inner {
@@ -149,7 +148,7 @@ h6 {
 .site-title {
   font-family: "Square Peg", cursive;
   font-size: 40px;
-  color: var(--sapi-orange);
+  color: var(--color-orange);
 }
 
 .primary-nav ul {
@@ -168,7 +167,7 @@ h6 {
 
 .primary-nav a:hover,
 .primary-nav .current-menu-item > a {
-  color: var(--sapi-red-hover);
+  color: var(--color-error-hover);
 }
 
 .header-actions {
@@ -177,26 +176,9 @@ h6 {
   gap: 12px;
 }
 
-.cart-link {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  font-weight: 600;
-  color: var(--sapi-primary);
-}
-
-.cart-count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  margin-left: 6px;
-  border-radius: 50%;
-  font-size: 12px;
-  color: var(--sapi-white);
-  background: var(--sapi-orange);
-}
+/* ----------------------------------------
+   Components - Buttons
+   ---------------------------------------- */
 
 button,
 .button,
@@ -208,10 +190,10 @@ input[type="submit"],
   font-size: 14px;
   text-transform: uppercase;
   padding: 10px 25px;
-  border-radius: var(--sapi-radius);
+  border-radius: var(--radius);
   border: none;
-  background: var(--sapi-secondary);
-  color: var(--sapi-white);
+  background: var(--color-green);
+  color: var(--color-white);
   cursor: pointer;
 }
 
@@ -221,8 +203,19 @@ input[type="submit"]:hover,
 .woocommerce a.button:hover,
 .woocommerce button.button:hover,
 .woocommerce input.button:hover {
-  background: var(--sapi-orange);
-  color: var(--sapi-white);
+  background: var(--color-orange);
+  color: var(--color-white);
+}
+
+.button-outline {
+  background: transparent;
+  border: 1px solid var(--color-green);
+  color: var(--color-green);
+}
+
+.button-outline:hover {
+  background: var(--color-green);
+  color: var(--color-white);
 }
 
 .site-content {
@@ -231,8 +224,8 @@ input[type="submit"]:hover,
 
 .site-footer {
   padding: 40px 20px;
-  background: var(--sapi-creme-light);
-  color: var(--sapi-primary);
+  background: var(--color-cream);
+  color: var(--color-gray);
 }
 
 .site-footer .footer-inner {
@@ -260,12 +253,12 @@ input[type="submit"]:hover,
   font-family: "Montserrat", Arial, sans-serif;
   font-size: 12px;
   font-weight: 500;
-  color: var(--sapi-primary);
+  color: var(--color-gray);
   transition: color 0.3s ease;
 }
 
 .menu-toggle:hover {
-  color: var(--sapi-orange);
+  color: var(--color-orange);
 }
 
 .menu-burger {
@@ -281,12 +274,12 @@ input[type="submit"]:hover,
   display: block;
   width: 100%;
   height: 2px;
-  background: var(--sapi-primary);
+  background: var(--color-gray);
   transition: all 0.3s ease;
 }
 
 .menu-toggle:hover .burger-line {
-  background: var(--sapi-orange);
+  background: var(--color-orange);
 }
 
 .menu-toggle[aria-expanded="true"] .burger-line:nth-child(1) {
@@ -359,7 +352,7 @@ input[type="submit"]:hover,
 .mobile-nav-menu a {
   font-size: 24px;
   font-weight: 600;
-  color: var(--sapi-primary);
+  color: var(--color-gray);
   text-decoration: none;
   display: block;
   padding: 10px 0;
@@ -368,7 +361,7 @@ input[type="submit"]:hover,
 
 .mobile-nav-menu a:hover,
 .mobile-nav-menu .current-menu-item > a {
-  color: var(--sapi-orange);
+  color: var(--color-orange);
   transform: translateX(10px);
 }
 
@@ -378,20 +371,20 @@ input[type="submit"]:hover,
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  border: 1px solid var(--sapi-grey-light);
-  border-radius: var(--sapi-radius);
+  border: 1px solid var(--color-gray-light);
+  border-radius: var(--radius);
   font-size: 14px;
   font-weight: 500;
-  color: var(--sapi-primary);
+  color: var(--color-gray);
   text-decoration: none;
   transition: all 0.3s ease;
 }
 
 .cart-link:hover {
-  border-color: var(--sapi-orange);
-  color: var(--sapi-orange);
+  border-color: var(--color-orange);
+  color: var(--color-orange);
   transform: translateY(-2px);
-  box-shadow: var(--sapi-shadow);
+  box-shadow: var(--shadow);
 }
 
 .cart-count {
@@ -401,17 +394,11 @@ input[type="submit"]:hover,
   min-width: 20px;
   height: 20px;
   padding: 0 6px;
-  background: var(--sapi-orange);
-  color: var(--sapi-white);
+  background: var(--color-orange);
+  color: var(--color-white);
   border-radius: 10px;
   font-size: 12px;
   font-weight: 600;
-}
-
-@media (max-width: 1024px) {
-  .primary-nav ul {
-    gap: 12px;
-  }
 }
 
 @media (max-width: 768px) {
@@ -437,279 +424,14 @@ input[type="submit"]:hover,
   }
 }
 
-/* Home page */
-.hero {
-  position: relative;
-  min-height: 860px;
-  background-size: cover;
-  background-position: top center;
-  background-repeat: no-repeat;
-  display: flex;
-  align-items: flex-end;
-  padding: 120px 40px 60px;
-  color: var(--sapi-white);
-  transition: opacity 0.4s ease;
-}
+/* ========================================
+   PAGES - Shop & WooCommerce
+   ======================================== */
 
-.hero.is-fading {
-  opacity: 0.6;
-}
-
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.25) 60%, rgba(0, 0, 0, 0) 100%);
-}
-
-.hero-content {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  max-width: 820px;
-}
-
-.hero-card {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--sapi-grey-light);
-  color: var(--sapi-primary);
-  padding: 16px 24px;
-  border-radius: var(--sapi-radius);
-  font-weight: 600;
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
-}
-
-.hero-kicker {
-  text-transform: uppercase;
-  font-weight: 600;
-  letter-spacing: 1px;
-  color: var(--sapi-yellow);
-  margin: 0;
-}
-
-.hero-text h1 {
-  font-family: "Square Peg", cursive;
-  font-size: 64px;
-  color: var(--sapi-creme-light);
-  margin: 0;
-  line-height: 1.1;
-}
-
-.assurance-strip {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 20px;
-  background: var(--sapi-grey-light);
-  padding: 30px 40px;
-  text-align: center;
-}
-
-.assurance-item img {
-  width: 48px;
-  height: 48px;
-}
-
-.assurance-item p {
-  margin: 10px 0 0;
-  font-size: 14px;
-}
-
-.atelier-selection {
-  padding: 60px 40px;
-}
-
-.atelier-selection h2 {
-  text-align: center;
-  margin-bottom: 30px;
-  color: var(--sapi-primary);
-}
-
-.selection-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-}
-
-.selection-card {
-  position: relative;
-  min-height: 240px;
-  border-radius: var(--sapi-radius);
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: flex-end;
-  padding: 20px;
-  color: var(--sapi-white);
-  font-weight: 600;
-  overflow: hidden;
-}
-
-.selection-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.25);
-}
-
-.selection-card span {
-  position: relative;
-  z-index: 1;
-}
-
-.artisan-highlight,
-.star-product {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 30px;
-  padding: 60px 40px;
-  align-items: center;
-}
-
-.artisan-media {
-  min-height: 320px;
-  border-radius: var(--sapi-radius);
-  background-size: cover;
-  background-position: center;
-}
-
-.artisan-copy h3,
-.star-copy h3 {
-  color: var(--sapi-orange);
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
-
-.star-media img {
-  width: 100%;
-  border-radius: var(--sapi-radius);
-  object-fit: cover;
-}
-
-.advice-section {
-  position: relative;
-  padding: 80px 40px;
-  background-size: cover;
-  background-position: center;
-  color: var(--sapi-white);
-}
-
-.advice-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-}
-
-.advice-content {
-  position: relative;
-  max-width: 600px;
-  z-index: 1;
-}
-
-.button-outline {
-  background: transparent;
-  border: 1px solid var(--sapi-white);
-  color: var(--sapi-white);
-}
-
-.inspiration-gallery {
-  padding: 40px;
-}
-
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
-}
-
-.gallery-item {
-  display: block;
-  padding-top: 90%;
-  border-radius: var(--sapi-radius);
-  background-size: cover;
-  background-position: center;
-}
-
-.newsletter {
-  padding: 60px 40px;
-  background-color: var(--sapi-creme-light);
-  background-repeat: no-repeat;
-  background-position: right center;
-}
-
-.newsletter-inner {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 30px;
-  align-items: center;
-}
-
-.newsletter-title {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.newsletter-heading {
-  font-family: "Square Peg", cursive;
-  font-size: 40px;
-  color: var(--sapi-orange);
-  margin: 0 0 10px;
-  text-align: center;
-}
-
-.newsletter-title .divider {
-  flex: 1;
-  border-bottom: 2px dotted var(--sapi-text);
-}
-
-.newsletter-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.newsletter-form input {
-  padding: 10px 12px;
-  border-radius: var(--sapi-radius);
-  border: 1px solid var(--sapi-text);
-}
-
-.newsletter-note {
-  font-size: 12px;
-}
-
-@media (max-width: 768px) {
-  .hero {
-    min-height: 640px;
-    padding: 100px 20px 40px;
-  }
-
-  .hero-text h1 {
-    font-size: 42px;
-  }
-
-  .assurance-strip {
-    padding: 20px;
-  }
-
-  .atelier-selection,
-  .artisan-highlight,
-  .star-product,
-  .advice-section,
-  .inspiration-gallery,
-  .newsletter {
-    padding: 40px 20px;
-  }
-}
-
-/* Shop */
 .shop-hero {
   position: relative;
   min-height: 240px;
-  background-color: var(--sapi-creme-light);
+  background-color: var(--color-cream);
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
@@ -727,13 +449,13 @@ input[type="submit"]:hover,
 
 .shop-hero-title .divider {
   width: 120px;
-  border-bottom: 2px dotted var(--sapi-text);
+  border-bottom: 2px dotted var(--color-gray-mid);
 }
 
 .shop-hero-title h1 {
   font-family: "Square Peg", cursive;
   font-size: 64px;
-  color: var(--sapi-primary);
+  color: var(--color-gray);
 }
 
 .shop-hero-subtitle {
@@ -761,15 +483,15 @@ input[type="submit"]:hover,
 
 .shop-category {
   min-height: 220px;
-  border: 1px solid var(--sapi-text);
-  border-radius: var(--sapi-radius);
+  border: 1px solid var(--color-gray-mid);
+  border-radius: var(--radius);
   background-size: cover;
   background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: var(--sapi-white);
+  color: var(--color-white);
   text-transform: uppercase;
   font-weight: 600;
   position: relative;
@@ -808,8 +530,8 @@ input[type="submit"]:hover,
 
 .product-card {
   list-style: none;
-  border: 1px solid var(--sapi-text);
-  border-radius: var(--sapi-radius);
+  border: 1px solid var(--color-gray-mid);
+  border-radius: var(--radius);
   padding: 16px;
   text-align: center;
 }
@@ -825,10 +547,13 @@ input[type="submit"]:hover,
 .shop-outro-text {
   font-family: "Square Peg", cursive;
   font-size: 40px;
-  color: var(--sapi-orange);
+  color: var(--color-orange);
 }
 
-/* Product */
+/* ----------------------------------------
+   Pages - Single Product
+   ---------------------------------------- */
+
 .product-hero {
   padding: 40px 20px;
 }
@@ -843,17 +568,17 @@ input[type="submit"]:hover,
 .product-summary .product_title {
   font-size: 24px;
   text-transform: uppercase;
-  color: var(--sapi-ocre);
+  color: var(--color-wood);
   margin-bottom: 10px;
 }
 
 .product-summary .price {
-  color: var(--sapi-ocre);
+  color: var(--color-wood);
   font-weight: 600;
 }
 
 .product-hookline {
-  color: var(--sapi-orange);
+  color: var(--color-orange);
   font-weight: 700;
   margin-top: 20px;
 }
@@ -862,7 +587,7 @@ input[type="submit"]:hover,
   margin-top: 20px;
   padding: 20px;
   border-radius: 10px;
-  background: var(--sapi-creme-light);
+  background: var(--color-cream);
 }
 
 .product-details {
@@ -881,7 +606,7 @@ input[type="submit"]:hover,
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 20px;
   padding: 30px 20px;
-  background: var(--sapi-grey-light);
+  background: var(--color-gray-light);
   text-align: center;
 }
 
@@ -894,7 +619,7 @@ input[type="submit"]:hover,
 
 .product-gallery-large img {
   width: 100%;
-  border-radius: var(--sapi-radius);
+  border-radius: var(--radius);
 }
 
 .product-faq {
@@ -908,7 +633,7 @@ input[type="submit"]:hover,
 
 .faq-list summary {
   font-weight: 600;
-  color: var(--sapi-ocre);
+  color: var(--color-wood);
   cursor: pointer;
 }
 
@@ -933,7 +658,10 @@ input[type="submit"]:hover,
   }
 }
 
-/* Category featured */
+/* ----------------------------------------
+   Pages - Category Archives
+   ---------------------------------------- */
+
 .category-featured {
   padding: 40px 20px;
   display: grid;
@@ -943,7 +671,7 @@ input[type="submit"]:hover,
 .category-intro {
   text-align: center;
   padding: 20px 20px 0;
-  color: var(--sapi-orange);
+  color: var(--color-orange);
   font-weight: 500;
 }
 
@@ -954,11 +682,11 @@ input[type="submit"]:hover,
 .category-featured-card h2 {
   font-size: 24px;
   text-transform: uppercase;
-  color: var(--sapi-primary);
+  color: var(--color-gray);
 }
 
 .category-featured-subtitle {
-  color: var(--sapi-orange);
+  color: var(--color-orange);
   font-style: italic;
   margin: 10px auto 20px;
 }
@@ -973,7 +701,11 @@ input[type="submit"]:hover,
   display: inline-block;
 }
 
-/* Artisan page */
+/* ========================================
+   PAGES - Content Pages
+   ======================================== */
+
+/* Artisan (Lumière d'Artisan) */
 .artisan-hero {
   padding: 80px 20px 40px;
   text-align: center;
@@ -982,7 +714,7 @@ input[type="submit"]:hover,
 .artisan-hero h1 {
   font-family: "Square Peg", cursive;
   font-size: 64px;
-  color: var(--sapi-primary);
+  color: var(--color-gray);
 }
 
 .artisan-intro,
@@ -1008,7 +740,7 @@ input[type="submit"]:hover,
 
 .artisan-image {
   min-height: 320px;
-  border-radius: var(--sapi-radius);
+  border-radius: var(--radius);
   background-size: cover;
   background-position: center;
 }
@@ -1018,24 +750,24 @@ input[type="submit"]:hover,
   text-align: center;
   font-family: "Square Peg", cursive;
   font-size: 32px;
-  color: var(--sapi-orange);
+  color: var(--color-orange);
 }
 
 .artisan-quote span {
   display: block;
   font-family: "Montserrat", Arial, sans-serif;
   font-size: 14px;
-  color: var(--sapi-text);
+  color: var(--color-gray-mid);
   margin-top: 10px;
 }
 
-/* Advice page */
+/* Advice (Conseils Éclairés) */
 .advice-hero {
   position: relative;
   padding: 90px 20px;
   background-size: cover;
   background-position: center;
-  color: var(--sapi-white);
+  color: var(--color-white);
 }
 
 .advice-hero-overlay {
@@ -1064,17 +796,17 @@ input[type="submit"]:hover,
 }
 
 .advice-block h2 {
-  color: var(--sapi-primary);
+  color: var(--color-gray);
 }
 
 .advice-block h3 {
-  color: var(--sapi-orange);
+  color: var(--color-orange);
   text-transform: none;
 }
 
 .advice-image {
   min-height: 320px;
-  border-radius: var(--sapi-radius);
+  border-radius: var(--radius);
   background-size: cover;
   background-position: center;
 }
@@ -1084,16 +816,16 @@ input[type="submit"]:hover,
   text-align: center;
   font-family: "Square Peg", cursive;
   font-size: 32px;
-  color: var(--sapi-orange);
+  color: var(--color-orange);
 }
 
-/* Contact page */
+/* Contact */
 .contact-hero {
   position: relative;
   padding: 100px 20px;
   background-size: cover;
   background-position: center;
-  color: var(--sapi-white);
+  color: var(--color-white);
 }
 
 .contact-hero-overlay {
@@ -1135,8 +867,8 @@ input[type="submit"]:hover,
 .contact-form input,
 .contact-form textarea {
   padding: 10px 12px;
-  border-radius: var(--sapi-radius);
-  border: 1px solid var(--sapi-text);
+  border-radius: var(--radius);
+  border: 1px solid var(--color-gray-mid);
 }
 
 /* Blog */
@@ -1161,10 +893,10 @@ input[type="submit"]:hover,
 }
 
 .blog-card {
-  border: 1px solid var(--sapi-text);
-  border-radius: var(--sapi-radius);
+  border: 1px solid var(--color-gray-mid);
+  border-radius: var(--radius);
   overflow: hidden;
-  background: var(--sapi-white);
+  background: var(--color-white);
 }
 
 .blog-card-media img {
@@ -1189,33 +921,36 @@ input[type="submit"]:hover,
   }
 }
 
-/* Breadcrumbs */
+/* ========================================
+   COMPONENTS - Breadcrumbs
+   ======================================== */
+
 .breadcrumbs {
   padding: 16px 20px;
   font-size: 13px;
-  color: var(--sapi-text);
-  background: var(--sapi-grey-light);
+  color: var(--color-gray-mid);
+  background: var(--color-gray-light);
 }
 
 .breadcrumbs a {
-  color: var(--sapi-text);
+  color: var(--color-gray-mid);
   text-decoration: none;
   transition: color 0.2s;
 }
 
 .breadcrumbs a:hover {
-  color: var(--sapi-blue);
+  color: var(--color-link);
   text-decoration: underline;
 }
 
 .breadcrumb-separator {
-  color: var(--sapi-text);
+  color: var(--color-gray-mid);
   opacity: 0.5;
   margin: 0 4px;
 }
 
 .breadcrumb-current {
-  color: var(--sapi-accent);
+  color: var(--color-dark);
   font-weight: 500;
 }
 

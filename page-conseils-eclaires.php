@@ -5,7 +5,7 @@ Template Name: Conseils eclaires
 get_header();
 ?>
 
-<section class="advice-hero" style="background-image: url('https://www.atelier-sapi.fr/wp-content/uploads/2025/03/Sapi-header_idees.jpg');">
+<section class="advice-hero" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/03/Sapi-header_idees.jpg');">
   <div class="advice-hero-overlay"></div>
   <div class="advice-hero-content">
     <h1>Conseils éclairés</h1>
@@ -23,11 +23,11 @@ get_header();
     <h3>Un équilibre entre les deux ?</h3>
     <p>Et si vous êtes du genre à ne pas vouloir choisir entre les deux, nos modèles Suze et Gaston font le grand écart avec style : une ampoule partiellement entourée de bois pour un équilibre parfait entre clarté et ambiance feutrée. Idéal pour ceux qui hésitent entre travailler et chiller… ou faire semblant de bosser en profitant de la bonne lumière.</p>
   </div>
-  <div class="advice-image" style="background-image: url('https://www.atelier-sapi.fr/wp-content/uploads/2025/03/sapi__deco_fonction_1.jpg');"></div>
+  <div class="advice-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/03/sapi__deco_fonction_1.jpg');"></div>
 </section>
 
 <section class="advice-section-block">
-  <div class="advice-image" style="background-image: url('https://www.atelier-sapi.fr/wp-content/uploads/2025/07/IMG_9065.jpeg');"></div>
+  <div class="advice-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/IMG_9065.jpeg');"></div>
   <div class="advice-block">
     <h2>Ampoule, puissance et couleur</h2>
     <h3>Le type d’ampoule</h3>
@@ -51,11 +51,11 @@ get_header();
     <p>Sous un passage : optez pour un luminaire de moins de 30 cm de haut. Trop bas = têtes cognées. Trop collé au plafond = effet sticker raté !</p>
     <p>En revanche, au-dessus d’une table, d’un îlot de cuisine, d’un lit ou d’une table basse, tout est permis ! Vous pouvez opter pour un modèle plus haut, suspendu élégamment, sans risque de bosse sur le front. En résumé : un luminaire bien dimensionné, c’est un intérieur harmonieux et un éclairage au top.</p>
   </div>
-  <div class="advice-image" style="background-image: url('https://www.atelier-sapi.fr/wp-content/uploads/2025/03/sapi__dimension_3.jpg');"></div>
+  <div class="advice-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/03/sapi__dimension_3.jpg');"></div>
 </section>
 
 <section class="advice-section-block">
-  <div class="advice-image" style="background-image: url('https://www.atelier-sapi.fr/wp-content/uploads/2025/07/Claudine.jpg');"></div>
+  <div class="advice-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Claudine.jpg');"></div>
   <div class="advice-block">
     <h2>Suspension, lampadaire, applique ou lampe à poser ?</h2>
     <h3>Le positionnement des luminaires</h3>
