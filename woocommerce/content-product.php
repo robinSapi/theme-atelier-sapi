@@ -18,43 +18,19 @@ if (!is_a($product, WC_Product::class) || !$product->is_visible()) {
 }
 ?>
 <li <?php wc_product_class('product-card', $product); ?>>
+  <a href="<?php echo esc_url($product->get_permalink()); ?>" class="product-card-link woocommerce-LoopProduct-link">
+    <?php if ($product->get_image_id()) : ?>
+      <div class="product-card-image">
+        <?php echo $product->get_image('woocommerce_thumbnail'); ?>
+      </div>
+    <?php endif; ?>
+    <h2 class="woocommerce-loop-product__title"><?php echo esc_html($product->get_name()); ?></h2>
+    <?php if ($price_html = $product->get_price_html()) : ?>
+      <span class="price"><?php echo $price_html; ?></span>
+    <?php endif; ?>
+  </a>
   <?php
-  /**
-   * Hook: woocommerce_before_shop_loop_item.
-   *
-   * @hooked woocommerce_template_loop_product_link_open - 10
-   */
-  do_action('woocommerce_before_shop_loop_item');
-
-  /**
-   * Hook: woocommerce_before_shop_loop_item_title.
-   *
-   * @hooked woocommerce_show_product_loop_sale_flash - 10
-   * @hooked woocommerce_template_loop_product_thumbnail - 10
-   */
-  do_action('woocommerce_before_shop_loop_item_title');
-
-  /**
-   * Hook: woocommerce_shop_loop_item_title.
-   *
-   * @hooked woocommerce_template_loop_product_title - 10
-   */
-  do_action('woocommerce_shop_loop_item_title');
-
-  /**
-   * Hook: woocommerce_after_shop_loop_item_title.
-   *
-   * @hooked woocommerce_template_loop_rating - 5
-   * @hooked woocommerce_template_loop_price - 10
-   */
-  do_action('woocommerce_after_shop_loop_item_title');
-
-  /**
-   * Hook: woocommerce_after_shop_loop_item.
-   *
-   * @hooked woocommerce_template_loop_product_link_close - 5
-   * @hooked woocommerce_template_loop_add_to_cart - 10
-   */
-  do_action('woocommerce_after_shop_loop_item');
+  // Add to cart button
+  woocommerce_template_loop_add_to_cart();
   ?>
 </li>
