@@ -11,6 +11,10 @@
 Local (dossier projet) → GitHub → O2switch (hébergeur)
 ```
 
+**Repository GitHub:** `https://github.com/robinSapi/testLumineux-atelier-sapi`
+
+**Branche de travail:** `test-theme-sapi-maison` (NE PAS push sur main/master)
+
 **Environnements:**
 - **Production:** `https://atelier-sapi.fr` (site live)
 - **Pré-production:** `https://testlumineux.atelier-sapi.fr` (tests)
@@ -18,7 +22,7 @@ Local (dossier projet) → GitHub → O2switch (hébergeur)
 
 **Process:**
 1. Modifications en local
-2. Push sur GitHub
+2. `git push origin test-theme-sapi-maison`
 3. Déploiement automatique sur testlumineux via O2switch
 4. Test sur testlumineux
 5. Si OK → déploiement en production
