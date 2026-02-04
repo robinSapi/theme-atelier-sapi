@@ -8,12 +8,14 @@ get_header();
 <?php while (have_posts()) : ?>
   <?php the_post(); ?>
 
-  <?php global $product; ?>
-
   <?php
-  // Ensure we have a valid product object
-  if (!$product || !is_a($product, 'WC_Product')) {
-    $product = wc_get_product(get_the_ID());
+  // Force WooCommerce to setup product data for current post
+  global $product;
+  $product = wc_get_product(get_the_ID());
+
+  // Safety check
+  if (!$product) {
+    continue;
   }
   ?>
 
