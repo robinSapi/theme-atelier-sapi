@@ -1416,6 +1416,7 @@ body.cursor-hover .cursor-dot {
   grid-template-columns: repeat(12, 1fr);
   gap: 1.5rem;
   grid-auto-rows: 200px;
+  grid-auto-flow: dense;
 }
 
 .bento-card {
@@ -1855,17 +1856,18 @@ transform: translateY(15px);
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   position: relative;
   z-index: 1;
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 1.5rem;
   background: var(--color-warm);
-  transition: all 0.3s var(--ease-smooth);
-  cursor: default;
-}
-
-.process-step:hover {
-  transform: translateY(-3px);
+  transition: all 0.4s var(--ease-expo);
+  cursor: pointer;
+  width: 140px;
+  height: 120px;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .step-num {
@@ -1874,11 +1876,7 @@ transform: translateY(15px);
   font-weight: 900;
   color: var(--color-wood);
   line-height: 1;
-  transition: color 0.3s ease;
-}
-
-.process-step:hover .step-num {
-  color: var(--color-orange);
+  transition: all 0.4s var(--ease-smooth);
 }
 
 .step-text {
@@ -1887,12 +1885,39 @@ transform: translateY(15px);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--color-gray);
+  transition: opacity 0.4s var(--ease-smooth);
+}
+
+/* Process step image reveal on hover */
+.step-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  border-radius: 12px;
+  opacity: 0;
+  transition: all 0.4s var(--ease-expo);
+  z-index: 2;
+}
+
+.process-step:hover .step-image {
+  opacity: 1;
+}
+
+.process-step:hover .step-num,
+.process-step:hover .step-text {
+  opacity: 0;
+}
+
+.process-step:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(147, 125, 104, 0.25);
 }
 
 /* CTA Card */
 .bento-cta {
-  grid-column: span 4;
-  grid-row: span 2;
+  grid-column: span 12;
+  grid-row: span 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -2301,13 +2326,13 @@ transform: translateY(15px);
 
   .bento-statement,
   .bento-product,
-  .bento-stats,
-  .bento-cta {
+  .bento-stats {
     grid-column: span 3;
   }
 
   .bento-process,
-  .bento-atelier {
+  .bento-atelier,
+  .bento-cta {
     grid-column: span 6;
   }
 }

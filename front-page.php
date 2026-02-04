@@ -178,18 +178,22 @@ $collections = [
         <div class="process-step">
           <span class="step-num">01</span>
           <span class="step-text">Dessin</span>
+          <div class="step-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/03/ordi_sapi2.jpg');"></div>
         </div>
         <div class="process-step">
           <span class="step-num">02</span>
           <span class="step-text">Découpe laser</span>
+          <div class="step-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/03/detail_sapi.jpg');"></div>
         </div>
         <div class="process-step">
           <span class="step-num">03</span>
           <span class="step-text">Assemblage</span>
+          <div class="step-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/Robin-Sapi-A.jpg');"></div>
         </div>
         <div class="process-step">
           <span class="step-num">04</span>
           <span class="step-text">Finitions</span>
+          <div class="step-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/03/P_SLM_XL_det5.jpg');"></div>
         </div>
       </div>
     </div>
@@ -211,6 +215,14 @@ $collections = [
       </div>
     </a>
 
+    <!-- Atelier Image -->
+    <div class="bento-card bento-atelier">
+      <div class="bento-bg" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/Robin-Sapi-A.jpg');"></div>
+      <div class="atelier-label">
+        <span>L'atelier · Lyon</span>
+      </div>
+    </div>
+
     <!-- CTA Card -->
     <a href="<?php echo home_url('/nos-creations/'); ?>" class="bento-card bento-cta">
       <h3 class="cta-title">Toutes les créations</h3>
@@ -221,14 +233,6 @@ $collections = [
         </svg>
       </span>
     </a>
-
-    <!-- Atelier Image -->
-    <div class="bento-card bento-atelier">
-      <div class="bento-bg" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/Robin-Sapi-A.jpg');"></div>
-      <div class="atelier-label">
-        <span>L'atelier · Lyon</span>
-      </div>
-    </div>
   </div>
 </section>
 

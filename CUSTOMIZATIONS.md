@@ -307,6 +307,21 @@ add_theme_support('wc-product-gallery-slider');
 
 ## 📝 Historique des Modifications
 
+**2026-02-05 (Process bar hover images):**
+- ✅ **PROCESS BAR HOVER** : Au hover sur chaque étape, le texte disparaît et une photo apparaît
+  - Ajout HTML : `<div class="step-image">` dans chaque `.process-step`
+  - CSS : opacity transition avec `--ease-expo`
+  - `.process-step` : `height: 120px` + `width: 140px` + `overflow: hidden`
+  - `.step-image` : `inset: 0` (pas width/height 100% car ne fonctionne pas avec min-height)
+  - Images utilisées :
+    - 01 Dessin → `ordi_sapi2.jpg` (design sur ordinateur)
+    - 02 Découpe laser → `detail_sapi.jpg` (détail précision)
+    - 03 Assemblage → `Robin-Sapi-A.jpg` (Robin à l'atelier)
+    - 04 Finitions → `P_SLM_XL_det5.jpg` (détail produit fini)
+  - **Leçons** :
+    - `height: 100%` sur enfant absolu ne fonctionne pas si parent a `min-height` (besoin d'un `height` explicite)
+    - Utiliser `inset: 0` au lieu de `top/left + width/height: 100%` pour éviter ce problème
+
 **2026-02-05 (chevron dropdown menu):**
 - ✅ **CHEVRON CSS-ONLY** : Indicateur visuel pour "Nos créations" (menu avec sous-menu)
   - Solution : `::before` avec `position: absolute` + `right: 0`
