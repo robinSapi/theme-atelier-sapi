@@ -1273,7 +1273,7 @@ body.cursor-hover .cursor-dot {
    ======================================== */
 
 .hero-bento {
-  padding: 8rem 3rem 4rem;
+  padding: 2rem 3rem 4rem;
   max-width: 1600px;
   margin: 0 auto;
 }
@@ -1349,10 +1349,11 @@ body.cursor-hover .cursor-dot {
   text-transform: uppercase;
   letter-spacing: 0.2em;
   color: var(--color-white);
-  background: rgba(227, 91, 36, 0.9);
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  background: var(--color-orange);
+  padding: 0.5rem 1.25rem;
+  border-radius: 50px;
   margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(227, 91, 36, 0.3);
 }
 
 .bento-title {
@@ -1369,6 +1370,7 @@ body.cursor-hover .cursor-dot {
   font-weight: 300;
   color: var(--color-cream);
   max-width: 400px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
 .hero-cta {
@@ -1598,9 +1600,10 @@ body.cursor-hover .cursor-dot {
 
 /* Process Card */
 .bento-process {
-  grid-column: span 8;
+  grid-column: span 12;
   grid-row: span 1;
-  padding: 2rem 3rem;
+  padding: 2rem 4rem;
+  background: var(--color-warm);
 }
 
 .process-inner {
@@ -1669,10 +1672,18 @@ body.cursor-hover .cursor-dot {
   transition: all 0.3s var(--ease-expo);
 }
 
+.bento-cta:hover {
+  background: var(--color-wood);
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(227, 91, 36, 0.3);
+}
+
 .bento-cta .cta-button:hover {
   transform: scale(1.05);
   gap: 1.25rem;
-  background: var(--color-cream);
+  background: var(--color-orange);
+  color: var(--color-white);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 /* Atelier Card */
@@ -1742,7 +1753,8 @@ body.cursor-hover .cursor-dot {
 }
 
 .collection-card:hover {
-  transform: translateY(-10px);
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
 }
 
 .collection-visual {
