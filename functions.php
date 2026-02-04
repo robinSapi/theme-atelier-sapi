@@ -29,7 +29,10 @@ function sapi_maison_enqueue_assets() {
     'display' => 'swap',
   ];
   wp_enqueue_style('sapi-maison-fonts', add_query_arg($fonts, 'https://fonts.googleapis.com/css'));
-  wp_enqueue_style('sapi-maison-style', get_stylesheet_uri(), ['sapi-maison-fonts'], '0.1.0');
+  wp_enqueue_style('sapi-maison-style', get_stylesheet_uri(), ['sapi-maison-fonts'], '0.1.1');
+
+  // Menu burger JavaScript - chargé sur toutes les pages
+  wp_enqueue_script('sapi-maison-menu', get_template_directory_uri() . '/assets/menu.js', [], '0.1.0', true);
 
   if (is_front_page()) {
     wp_enqueue_script('sapi-maison-home', get_template_directory_uri() . '/assets/home.js', [], '0.1.0', true);
