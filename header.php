@@ -18,22 +18,21 @@
 
     <!-- Menu Desktop -->
     <nav class="primary-nav" aria-label="Menu principal">
-      <?php
-      wp_nav_menu([
-        'theme_location' => 'primary',
-        'container' => false,
-        'menu_class' => 'nav-menu',
-        'fallback_cb' => function() {
-          echo '<ul class="nav-menu">';
-          echo '<li><a href="' . home_url('/') . '">Accueil</a></li>';
-          echo '<li><a href="' . home_url('/nos-creations/') . '">Nos créations</a></li>';
-          echo '<li><a href="' . home_url('/lumiere-dartisan/') . '">L\'artisan</a></li>';
-          echo '<li><a href="' . home_url('/conseils-eclaires/') . '">Conseils</a></li>';
-          echo '<li><a href="' . home_url('/contact/') . '">Contact</a></li>';
-          echo '</ul>';
-        },
-      ]);
-      ?>
+      <ul class="nav-menu">
+        <li><a href="<?php echo home_url('/'); ?>">Accueil</a></li>
+        <li class="menu-item-has-children">
+          <a href="<?php echo home_url('/nos-creations/'); ?>">Nos créations</a>
+          <ul class="sub-menu">
+            <li><a href="<?php echo home_url('/categorie-produit/suspension/'); ?>">Suspensions</a></li>
+            <li><a href="<?php echo home_url('/categorie-produit/lampadaire/'); ?>">Lampadaires</a></li>
+            <li><a href="<?php echo home_url('/categorie-produit/applique/'); ?>">Appliques</a></li>
+            <li><a href="<?php echo home_url('/categorie-produit/lampe-a-poser/'); ?>">À poser</a></li>
+          </ul>
+        </li>
+        <li><a href="<?php echo home_url('/lumiere-dartisan/'); ?>">L'artisan</a></li>
+        <li><a href="<?php echo home_url('/conseils-eclaires/'); ?>">Conseils</a></li>
+        <li><a href="<?php echo home_url('/contact/'); ?>">Contact</a></li>
+      </ul>
     </nav>
 
     <div class="header-actions">
@@ -66,22 +65,21 @@
   <!-- Mobile Menu Overlay -->
   <div class="mobile-menu-overlay" id="mobile-menu">
     <nav class="mobile-menu-nav" aria-label="Menu mobile">
-      <?php
-      wp_nav_menu([
-        'theme_location' => 'primary',
-        'container' => false,
-        'menu_class' => 'mobile-nav-menu',
-        'fallback_cb' => function() {
-          echo '<ul class="mobile-nav-menu">';
-          echo '<li><a href="' . home_url('/') . '">Accueil</a></li>';
-          echo '<li><a href="' . home_url('/nos-creations/') . '">Nos créations</a></li>';
-          echo '<li><a href="' . home_url('/lumiere-dartisan/') . '">L\'artisan</a></li>';
-          echo '<li><a href="' . home_url('/conseils-eclaires/') . '">Conseils</a></li>';
-          echo '<li><a href="' . home_url('/contact/') . '">Contact</a></li>';
-          echo '</ul>';
-        },
-      ]);
-      ?>
+      <ul class="mobile-nav-menu">
+        <li><a href="<?php echo home_url('/'); ?>">Accueil</a></li>
+        <li class="menu-item-has-children">
+          <a href="<?php echo home_url('/nos-creations/'); ?>">Nos créations</a>
+          <ul class="sub-menu">
+            <li><a href="<?php echo home_url('/categorie-produit/suspension/'); ?>">Suspensions</a></li>
+            <li><a href="<?php echo home_url('/categorie-produit/lampadaire/'); ?>">Lampadaires</a></li>
+            <li><a href="<?php echo home_url('/categorie-produit/applique/'); ?>">Appliques</a></li>
+            <li><a href="<?php echo home_url('/categorie-produit/lampe-a-poser/'); ?>">À poser</a></li>
+          </ul>
+        </li>
+        <li><a href="<?php echo home_url('/lumiere-dartisan/'); ?>">L'artisan</a></li>
+        <li><a href="<?php echo home_url('/conseils-eclaires/'); ?>">Conseils</a></li>
+        <li><a href="<?php echo home_url('/contact/'); ?>">Contact</a></li>
+      </ul>
     </nav>
   </div>
 </header>
