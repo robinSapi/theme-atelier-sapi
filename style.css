@@ -122,8 +122,9 @@ h6 {
   position: sticky;
   top: 0;
   z-index: 999;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: var(--shadow);
+  background: rgba(255, 255, 255, 0.95);
+  -webkit-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .site-header .header-inner {
@@ -139,12 +140,22 @@ h6 {
 .site-logo {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .site-logo img,
 .custom-logo {
+  display: block;
   max-height: 50px;
   width: auto;
+  height: auto;
+}
+
+/* Safari SVG fix */
+.site-logo img[src$=".svg"] {
+  width: 120px;
+  height: 50px;
+  object-fit: contain;
 }
 
 .site-logo a {
