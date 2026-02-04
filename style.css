@@ -1785,22 +1785,24 @@ transform: translateY(15px);
   position: absolute;
   bottom: 100%;
   left: 50%;
+  -webkit-transform: translateX(-50%) translateY(10px);
   transform: translateX(-50%) translateY(10px);
   width: 180px;
   background: var(--color-white);
   border-radius: var(--radius);
+  -webkit-box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   opacity: 0;
-  visibility: hidden;
-  transition: all 0.4s var(--ease-expo);
+  -webkit-transition: opacity 0.4s ease, transform 0.4s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease;
   pointer-events: none;
   z-index: 100;
 }
 
 .stat-block:hover .stat-hover {
   opacity: 1;
-  visibility: visible;
+  -webkit-transform: translateX(-50%) translateY(-8px);
   transform: translateX(-50%) translateY(-8px);
 }
 

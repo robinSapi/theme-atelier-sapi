@@ -262,21 +262,21 @@ document.addEventListener('DOMContentLoaded', () => {
       window.requestAnimationFrame(() => {
         const scrolled = window.pageYOffset;
 
-        // Parallax on hero images
-        const heroImages = document.querySelectorAll('.bento-bg');
-        heroImages.forEach(img => {
-          img.style.transform = `translateY(${scrolled * 0.1}px) scale(1.05)`;
-        });
+        // Parallax on hero image only (not atelier)
+        const heroImage = document.querySelector('.bento-hero .bento-bg');
+        if (heroImage) {
+          heroImage.style.transform = `translateY(${scrolled * 0.1}px) scale(1.05)`;
+        }
 
         // Header background opacity on scroll
         const header = document.querySelector('.site-header');
         if (header) {
           if (scrolled > 100) {
             header.style.background = 'rgba(254, 253, 251, 0.98)';
-            header.style.boxShadow = '0 2px 20px rgba(50, 50, 50, 0.1)';
+            header.style.boxShadow = '0 2px 20px rgba(50, 50, 50, 0.12)';
           } else {
             header.style.background = 'rgba(254, 253, 251, 0.95)';
-            header.style.boxShadow = 'none';
+            header.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)';
           }
         }
 
