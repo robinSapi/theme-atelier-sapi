@@ -211,17 +211,37 @@ if (!empty($featured)) :
 <?php endif; ?>
 
 <section class="shop-products">
+  <?php
+  // DEBUG - Check loop conditions
+  $has_loop = woocommerce_product_loop();
+  $total = wc_get_loop_prop('total');
+  $has_posts = have_posts();
+  ?>
+  <div style="background: yellow; padding: 10px; border: 2px solid red; margin: 20px;">
+    <strong>DEBUG CATEGORY PAGE:</strong><br>
+    - woocommerce_product_loop(): <?php echo $has_loop ? 'TRUE' : 'FALSE'; ?><br>
+    - wc_get_loop_prop('total'): <?php echo $total; ?><br>
+    - have_posts(): <?php echo $has_posts ? 'TRUE' : 'FALSE'; ?><br>
+    - Category: <?php echo esc_html($term_name); ?> (<?php echo esc_html($term_slug); ?>)
+  </div>
+
   <?php if (woocommerce_product_loop()) : ?>
+    <div style="background: lightgreen; padding: 5px;">ENTERING PRODUCT LOOP</div>
     <?php woocommerce_product_loop_start(); ?>
     <?php if (wc_get_loop_prop('total')) : ?>
+      <div style="background: lightblue; padding: 5px;">FOUND <?php echo wc_get_loop_prop('total'); ?> PRODUCTS</div>
       <?php while (have_posts()) : ?>
         <?php the_post(); ?>
+        <div style="background: orange; padding: 5px;">LOADING PRODUCT TEMPLATE FOR: <?php the_title(); ?></div>
         <?php wc_get_template_part('content', 'product'); ?>
       <?php endwhile; ?>
+    <?php else : ?>
+      <div style="background: red; color: white; padding: 5px;">TOTAL IS ZERO OR FALSE</div>
     <?php endif; ?>
     <?php woocommerce_product_loop_end(); ?>
     <?php woocommerce_pagination(); ?>
   <?php else : ?>
+    <div style="background: red; color: white; padding: 10px;">NO PRODUCT LOOP - woocommerce_product_loop() returned FALSE</div>
     <?php wc_no_products_found(); ?>
   <?php endif; ?>
 </section>
