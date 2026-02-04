@@ -218,15 +218,28 @@ if (!empty($featured)) :
   ✅ CHECKPOINT: Code après featured sections s'exécute!
 </div>
 
+<?php
+// CRITICAL TEST: Output before any WooCommerce functions
+echo '<div style="background: magenta; color: white; padding: 30px; margin: 20px; font-size: 20px; border: 10px solid red;">BEFORE WOOCOMMERCE FUNCTIONS - This should ALWAYS show</div>';
+
+// Log execution
+error_log('TAXONOMY-PRODUCT_CAT: Reached products section for term=' . $term_slug);
+?>
+
 <section class="shop-products">
   <?php
-  // DEBUG - Check loop conditions
-  $has_loop = woocommerce_product_loop();
-  $total = wc_get_loop_prop('total');
-  $has_posts = have_posts();
+  // DEBUG - Check loop conditions with error handling
+  try {
+    $has_loop = woocommerce_product_loop();
+    $total = wc_get_loop_prop('total');
+    $has_posts = have_posts();
 
-  // Log to PHP error log to confirm execution
-  error_log('TAXONOMY-PRODUCT_CAT DEBUG: has_loop=' . ($has_loop ? 'TRUE' : 'FALSE') . ', total=' . $total . ', has_posts=' . ($has_posts ? 'TRUE' : 'FALSE') . ', term=' . $term_slug);
+    // Log to PHP error log to confirm execution
+    error_log('TAXONOMY-PRODUCT_CAT DEBUG: has_loop=' . ($has_loop ? 'TRUE' : 'FALSE') . ', total=' . $total . ', has_posts=' . ($has_posts ? 'TRUE' : 'FALSE') . ', term=' . $term_slug);
+  } catch (Exception $e) {
+    error_log('TAXONOMY-PRODUCT_CAT ERROR: ' . $e->getMessage());
+    echo '<div style="background: red; color: white; padding: 20px;">ERROR: ' . esc_html($e->getMessage()) . '</div>';
+  }
   ?>
   <div style="background: yellow; padding: 10px; border: 2px solid red; margin: 20px;">
     <strong>DEBUG CATEGORY PAGE:</strong><br>
