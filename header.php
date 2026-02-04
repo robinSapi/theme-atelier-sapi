@@ -11,7 +11,9 @@
 <header class="site-header">
   <div class="header-inner">
     <div class="site-logo">
-      <a class="site-title" href="<?php echo esc_url(home_url('/')); ?>">Atelier Sâpi</a>
+      <a href="<?php echo esc_url(home_url('/')); ?>">
+        <img src="https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2024/12/logo_sapi.svg" alt="Atelier Sâpi" class="custom-logo">
+      </a>
     </div>
 
     <!-- Menu Desktop -->
