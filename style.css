@@ -1427,10 +1427,10 @@ body.cursor-hover .cursor-dot {
 .corner-label {
   display: block;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--color-orange);
+  color: var(--color-cream);
   margin-bottom: 0.25rem;
 }
 
@@ -1438,7 +1438,7 @@ body.cursor-hover .cursor-dot {
   font-family: var(--font-body);
   font-size: 2.5rem;
   font-weight: 900;
-  color: var(--color-white);
+  color: var(--color-orange);
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
