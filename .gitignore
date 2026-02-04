@@ -15,10 +15,9 @@
 *.log
 *.tmp
 
-# Local exports / backups
-*.zip
-*.sql
-*.tar.gz
+# Local exports
+/atelier-sapi-2026.zip
+/llms.txt
 
 # Caches / backups
 /wp-content/cache/
