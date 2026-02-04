@@ -255,18 +255,21 @@ add_action('template_redirect', function() {
 // Remove default product meta display (SKU, Categories, Tags)
 remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_meta', 40);
 
-// Ensure WooCommerce scripts are loaded
+// Ensure WooCommerce scripts are loaded - CRITICAL for cart functionality
 add_action('wp_enqueue_scripts', function() {
-  if (function_exists('is_woocommerce')) {
-    // Cart fragments for AJAX cart updates (CRITICAL for add-to-cart)
+  // Use class_exists instead of function_exists for reliability
+  if (class_exists('WooCommerce')) {
+    // Cart fragments for AJAX cart updates (CRITICAL for add-to-cart to work)
     wp_enqueue_script('wc-cart-fragments');
-
-    // Variation scripts for variable products
-    if (is_product()) {
-      wp_enqueue_script('wc-add-to-cart-variation');
-    }
   }
-}, 20);
+}, 25);
+
+// Variation scripts for variable products
+add_action('wp_enqueue_scripts', function() {
+  if (class_exists('WooCommerce') && is_product()) {
+    wp_enqueue_script('wc-add-to-cart-variation');
+  }
+}, 30);
 
 // Update cart count fragment after AJAX add-to-cart
 add_filter('woocommerce_add_to_cart_fragments', function($fragments) {
