@@ -80,16 +80,18 @@ $collections = [
         <div class="bento-label">Pièce signature</div>
         <h1 class="bento-title">Sculpter<br>la lumière</h1>
         <p class="bento-text">Des créations artisanales qui transforment l'espace</p>
-        <a href="<?php echo home_url('/nos-creations/'); ?>" class="hero-cta">
-          <span>Découvrir nos créations</span>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
-          </svg>
-        </a>
-      </div>
-      <div class="bento-corner-info">
-        <span class="corner-label">À partir de</span>
-        <strong class="corner-price">219€</strong>
+        <div class="hero-cta-row">
+          <a href="<?php echo home_url('/nos-creations/'); ?>" class="hero-cta">
+            <span>Découvrir nos créations</span>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </a>
+          <div class="bento-corner-info">
+            <span class="corner-label">À partir de</span>
+            <strong class="corner-price">219€</strong>
+          </div>
+        </div>
       </div>
     </div>
 
