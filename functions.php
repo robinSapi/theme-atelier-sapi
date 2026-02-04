@@ -251,3 +251,13 @@ add_action('template_redirect', function() {
     }
   }
 });
+
+// Remove default product meta display (SKU, Categories, Tags)
+remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_meta', 40);
+
+// Ensure variation scripts are loaded
+add_action('wp_enqueue_scripts', function() {
+  if (is_product()) {
+    wp_enqueue_script('wc-add-to-cart-variation');
+  }
+}, 99);
