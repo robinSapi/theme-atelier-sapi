@@ -291,6 +291,13 @@ add_theme_support('wc-product-gallery-slider');
 
 ## 📝 Historique des Modifications
 
+**2026-02-04 (optimisations UX homepage):**
+- ✅ **HEADER** : Icône panier SVG (remplace emoji), navigation avec underline hover, badge couleur wood (#937D68)
+- ✅ **HERO/BENTO** : Label "Pièce signature" avec fond orange + texte blanc, bouton CTA "Découvrir nos créations"
+- ✅ **COLLECTIONS** : Labels toujours visibles (overlay permanent), format "X créations →"
+- ✅ **FOOTER** : Restructuration complète - Logo "Atelier Sâpi" (Square Peg), 3 colonnes (Navigation, Contact, Social), mentions légales
+- ✅ **NUMÉROTATION** : Sections 01/02/03 plus visibles (couleur wood, taille augmentée)
+
 **2026-02-04 (refonte CSS):**
 - ✅ **REFONTE CSS COMPLÈTE** : ~2220 lignes → ~1940 lignes
   - Suppression de ~280 lignes de code mort (ancien home page legacy)
