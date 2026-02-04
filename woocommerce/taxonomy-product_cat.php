@@ -224,6 +224,9 @@ if (!empty($featured)) :
   $has_loop = woocommerce_product_loop();
   $total = wc_get_loop_prop('total');
   $has_posts = have_posts();
+
+  // Log to PHP error log to confirm execution
+  error_log('TAXONOMY-PRODUCT_CAT DEBUG: has_loop=' . ($has_loop ? 'TRUE' : 'FALSE') . ', total=' . $total . ', has_posts=' . ($has_posts ? 'TRUE' : 'FALSE') . ', term=' . $term_slug);
   ?>
   <div style="background: yellow; padding: 10px; border: 2px solid red; margin: 20px;">
     <strong>DEBUG CATEGORY PAGE:</strong><br>
