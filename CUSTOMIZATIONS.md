@@ -185,7 +185,7 @@ add_theme_support('wc-product-gallery-slider');
 
   /* Colors - Brand */
   --color-wood: #937D68;
-  --color-orange: #E35B24;
+  --color-orange: #E67E22;
   --color-green: #018501;
   --color-green-hover: #026B02;
 
