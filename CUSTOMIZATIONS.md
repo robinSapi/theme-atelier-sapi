@@ -180,38 +180,52 @@ add_theme_support('wc-product-gallery-slider');
 
 ## 🚨 Problèmes Non Résolus
 
-### Ajout au panier ne fonctionne pas sur testlumineux
+### Panier affiche le mauvais produit sur testlumineux
 
-**Statut:** ❌ NON RÉSOLU (2025-02-04)
+**Statut:** 🔍 EN INVESTIGATION (2026-02-04)
 
-**Symptômes:**
-- Sur Chrome: compteur panier se met à jour, mais les produits n'apparaissent pas dans le panier
-- Sur Safari: erreur complète lors du clic "Ajouter au panier"
-- Sur PRODUCTION: tout fonctionne correctement ✅
+**Symptômes (mise à jour):**
+- Le compteur panier se met à jour correctement (AJAX fonctionne)
+- Le `dataLayer` Google Analytics montre les BONS produits dans le panier
+- MAIS visuellement la page panier affiche toujours "Olivia" (un produit hardcodé)
+- Cliquer sur "retour" après la page panier montre une page d'erreur avec le nom du dernier produit ajouté
 
-**Ce qui a été tenté:**
-1. ✅ Vérification structure template → correcte
-2. ✅ Ajout global $product et wrapper → a cassé, revert effectué
-3. ✅ Vérification hooks WooCommerce → corrects
-4. ✅ Cart fragments → ajoutés mais pas d'amélioration
-5. ❌ Revert complet à version production → TOUJOURS pas d'amélioration
+**Ce qui fonctionne maintenant:**
+- ✅ `wc-cart-fragments` se charge correctement
+- ✅ `wc-add-to-cart-variation` se charge sur les pages produit
+- ✅ Le filtre `woocommerce_add_to_cart_fragments` est actif
+- ✅ Les produits sont bien ajoutés au panier (visible dans dataLayer)
 
-**Diagnostic:**
-Le problème n'est **PAS dans le thème**. Preuve: le code fonctionne sur production.
+**Diagnostic probable (2026-02-04):**
+Le problème est **une page panier Elementor statique** créée par Jérôme, pas le thème.
 
-**Causes probables:**
-1. **Migration corrompue** - testlumineux a peut-être été créé avec une mauvaise migration
-2. **Base de données** - sessions WooCommerce corrompues ou mauvaise configuration d'URL
-3. **Plugins différents** - testlumineux a peut-être des plugins différents de la prod
-4. **Configuration serveur** - sessions PHP ou cookies mal configurés
+**🔧 Actions à effectuer dans l'admin WordPress de testlumineux:**
 
-**Actions à tenter (hors thème):**
+1. **WooCommerce → Réglages → Avancé → Configuration des pages**
+   - Vérifier quelle page est définie comme "Panier"
+   - Noter son ID
+
+2. **Pages → Toutes les pages → chercher "panier"**
+   - Y a-t-il plusieurs pages avec "panier" ou "cart" ?
+   - Si oui : c'est un doublon Elementor
+
+3. **Éditer la page panier actuelle**
+   - Elle devrait contenir UNIQUEMENT : `[woocommerce_cart]`
+   - Si elle contient du contenu Elementor avec "Olivia" hardcodé → **c'est le bug**
+   - Solution : supprimer le contenu Elementor et remettre juste le shortcode
+
+4. **Vérifier si la page utilise Elementor**
+   - Si "Modifier avec Elementor" apparaît → la page est Elementor
+   - Créer une nouvelle page simple avec juste `[woocommerce_cart]`
+   - Mettre cette nouvelle page dans WooCommerce → Réglages → Avancé
+
+**Anciennes actions (toujours valides si ci-dessus ne fonctionne pas):**
 
 1. **Vérifier URLs en base:**
    ```sql
    SELECT * FROM wp_options WHERE option_name IN ('siteurl', 'home');
    ```
-   Doivent pointer vers `https://www.testlumineux.atelier-sapi.fr`
+   Doivent pointer vers `https://testlumineux.atelier-sapi.fr`
 
 2. **Nettoyer sessions WooCommerce:**
    ```sql
@@ -219,16 +233,9 @@ Le problème n'est **PAS dans le thème**. Preuve: le code fonctionne sur produc
    DELETE FROM wp_options WHERE option_name LIKE '_transient_%';
    ```
 
-3. **Comparer plugins prod vs testlumineux:**
-   - Lister plugins actifs sur production
-   - Lister plugins actifs sur testlumineux
-   - Désactiver les différences et tester
+3. **Comparer plugins prod vs testlumineux**
 
-4. **Refaire migration propre:**
-   - Utiliser Duplicator ou All-in-One WP Migration
-   - Faire une copie FRAÎCHE depuis la production
-
-**Note importante:** Tant que ce problème persiste sur testlumineux mais fonctionne sur prod, **NE PAS déployer vers production**. Tester TOUS les changements en prod avant déploiement.
+**Note importante:** Le thème est maintenant correct. Le problème est dans la configuration BDD/pages WordPress.
 
 ---
 
@@ -237,7 +244,10 @@ Le problème n'est **PAS dans le thème**. Preuve: le code fonctionne sur produc
 **2026-02-04:**
 - ✅ Ajout section workflow déploiement (Local → GitHub → O2switch)
 - ✅ Nouvelle tentative standardisation `single-product.php` : ajout `global $product` + wrapper `wc_product_class()`
-- 🧪 En attente de test sur testlumineux
+- ✅ Ajout chargement `wc-cart-fragments` et `wc-add-to-cart-variation` dans functions.php
+- ✅ Ajout filtre `woocommerce_add_to_cart_fragments` pour mise à jour compteur panier
+- 🔍 Diagnostic panier : les produits sont bien ajoutés (visible dans dataLayer) mais la page panier affiche "Olivia"
+- 🔍 Cause probable identifiée : **page panier Elementor statique** avec contenu hardcodé - à vérifier dans l'admin
 
 **2025-02-04:**
 - Création du thème custom depuis le travail Elementor de Jérôme
