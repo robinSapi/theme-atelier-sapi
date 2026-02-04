@@ -1,4 +1,56 @@
-.DS_Store
-Thumbs.db
+# WordPress core
+/wp-admin/
+/wp-includes/
+/license.txt
+/readme.html
+/wp-*.php
+/xmlrpc.php
+
+# Sensitive configs
+/wp-config.php
+/wp-config*.php
+
+# Logs / temp
+/error_log
 *.log
-node_modules/
+*.tmp
+
+# Local exports
+/atelier-sapi-2026.zip
+/llms.txt
+
+# Caches / backups
+/wp-content/cache/
+/wp-content/upgrade/
+/wp-content/upgrade-temp-backup/
+/wp-content/litespeed/
+/wp-content/wpo-cache/
+/wp-content/ewww/
+/wp-content/jetpack-waf/
+/wp-content/ai1wm-backups/
+/wp-content/updraft/
+/wp-content/temp-write-test-*
+/wp-content/wf-licensing.log
+/wp-content/advanced-cache.php
+/wp-content/advanced-cache-backup.php
+/wp-content/object-cache.php
+/wp-content/themes.zip
+
+# Plugins (keep only custom if needed)
+/wp-content/plugins/
+/wp-content/mu-plugins/
+
+# Themes (keep only custom theme)
+/wp-content/themes/*
+!/wp-content/themes/theme-sapi-maison/
+!/wp-content/themes/theme-sapi-maison/**
+
+# Uploads stay on server
+/wp-content/uploads/
+
+# Other wp-content noise
+/wp-content/index.php
+/wp-content/languages/
+
+# OS
+.DS_Store
