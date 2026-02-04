@@ -8,6 +8,19 @@ get_header();
 <?php while (have_posts()) : ?>
   <?php the_post(); ?>
 
+  <?php global $product; ?>
+
+  <?php
+  // Ensure we have a valid product object
+  if (!$product || !is_a($product, 'WC_Product')) {
+    $product = wc_get_product(get_the_ID());
+  }
+  ?>
+
+  <?php do_action('woocommerce_before_single_product'); ?>
+
+  <div id="product-<?php the_ID(); ?>" <?php wc_product_class('', $product); ?>>
+
   <?php sapi_maison_breadcrumbs(); ?>
 
   <section class="product-hero">
@@ -142,6 +155,10 @@ get_header();
     <h2>Vous aimerez peut-être aussi</h2>
     <?php woocommerce_output_related_products(); ?>
   </section>
+
+  </div><!-- /.product wrapper -->
+
+  <?php do_action('woocommerce_after_single_product'); ?>
 
 <?php endwhile; ?>
 
