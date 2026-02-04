@@ -1593,6 +1593,26 @@ body.cursor-hover .cursor-dot {
   overflow: visible;
 }
 
+/* Underline indicator showing clickable */
+.stat-block::after {
+  content: '';
+  position: absolute;
+  bottom: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 2px;
+  background: var(--color-wood);
+  opacity: 0.4;
+  transition: all 0.3s var(--ease-smooth);
+}
+
+.stat-block:hover::after {
+  width: 60px;
+  opacity: 1;
+  background: var(--color-orange);
+}
+
 .stat-block:hover {
   transform: translateY(-4px);
   background: rgba(147, 125, 104, 0.08);
