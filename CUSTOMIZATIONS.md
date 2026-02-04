@@ -178,64 +178,28 @@ add_theme_support('wc-product-gallery-slider');
 
 ---
 
-## 🚨 Problèmes Non Résolus
+## ✅ Problèmes Résolus
 
-### Panier affiche le mauvais produit sur testlumineux
+### Bug panier "Olivia" sur testlumineux
 
-**Statut:** 🔍 EN INVESTIGATION (2026-02-04)
+**Statut:** ✅ RÉSOLU (2026-02-04)
 
-**Symptômes (mise à jour):**
-- Le compteur panier se met à jour correctement (AJAX fonctionne)
-- Le `dataLayer` Google Analytics montre les BONS produits dans le panier
-- MAIS visuellement la page panier affiche toujours "Olivia" (un produit hardcodé)
-- Cliquer sur "retour" après la page panier montre une page d'erreur avec le nom du dernier produit ajouté
+**Problème:** Le panier affichait toujours "Olivia La gardiena" peu importe le produit ajouté.
 
-**Ce qui fonctionne maintenant:**
-- ✅ `wc-cart-fragments` se charge correctement
-- ✅ `wc-add-to-cart-variation` se charge sur les pages produit
-- ✅ Le filtre `woocommerce_add_to_cart_fragments` est actif
-- ✅ Les produits sont bien ajoutés au panier (visible dans dataLayer)
+**Cause:** La page "Mon Panier" (ID 3554) contenait du contenu statique hardcodé par Jérôme (tableau avec Olivia) au lieu du bloc WooCommerce Cart dynamique.
 
-**Diagnostic probable (2026-02-04):**
-Le problème est **une page panier Elementor statique** créée par Jérôme, pas le thème.
+**Solution appliquée:**
+1. Éditer la page "Mon Panier" dans l'admin WordPress
+2. Supprimer tout le contenu statique (bloc Classique avec tableau Olivia)
+3. Ajouter le bloc **WooCommerce Cart** (pas le shortcode en texte)
+4. Enregistrer
 
-**🔧 Actions à effectuer dans l'admin WordPress de testlumineux:**
+**Leçon apprise:** Les pages WooCommerce (Panier, Commande, Mon compte) doivent utiliser les **blocs WooCommerce natifs** ou le shortcode dans un **bloc Shortcode dédié**, pas du texte brut dans un paragraphe.
 
-1. **WooCommerce → Réglages → Avancé → Configuration des pages**
-   - Vérifier quelle page est définie comme "Panier"
-   - Noter son ID
-
-2. **Pages → Toutes les pages → chercher "panier"**
-   - Y a-t-il plusieurs pages avec "panier" ou "cart" ?
-   - Si oui : c'est un doublon Elementor
-
-3. **Éditer la page panier actuelle**
-   - Elle devrait contenir UNIQUEMENT : `[woocommerce_cart]`
-   - Si elle contient du contenu Elementor avec "Olivia" hardcodé → **c'est le bug**
-   - Solution : supprimer le contenu Elementor et remettre juste le shortcode
-
-4. **Vérifier si la page utilise Elementor**
-   - Si "Modifier avec Elementor" apparaît → la page est Elementor
-   - Créer une nouvelle page simple avec juste `[woocommerce_cart]`
-   - Mettre cette nouvelle page dans WooCommerce → Réglages → Avancé
-
-**Anciennes actions (toujours valides si ci-dessus ne fonctionne pas):**
-
-1. **Vérifier URLs en base:**
-   ```sql
-   SELECT * FROM wp_options WHERE option_name IN ('siteurl', 'home');
-   ```
-   Doivent pointer vers `https://testlumineux.atelier-sapi.fr`
-
-2. **Nettoyer sessions WooCommerce:**
-   ```sql
-   DELETE FROM wp_options WHERE option_name LIKE '_wc_session_%';
-   DELETE FROM wp_options WHERE option_name LIKE '_transient_%';
-   ```
-
-3. **Comparer plugins prod vs testlumineux**
-
-**Note importante:** Le thème est maintenant correct. Le problème est dans la configuration BDD/pages WordPress.
+**Pages WooCommerce à vérifier si problème similaire:**
+- Panier : doit contenir bloc "Cart" ou `[woocommerce_cart]`
+- Validation de commande : bloc "Checkout" ou `[woocommerce_checkout]`
+- Mon compte : bloc "My Account" ou `[woocommerce_my_account]`
 
 ---
 
@@ -246,8 +210,7 @@ Le problème est **une page panier Elementor statique** créée par Jérôme, pa
 - ✅ Nouvelle tentative standardisation `single-product.php` : ajout `global $product` + wrapper `wc_product_class()`
 - ✅ Ajout chargement `wc-cart-fragments` et `wc-add-to-cart-variation` dans functions.php
 - ✅ Ajout filtre `woocommerce_add_to_cart_fragments` pour mise à jour compteur panier
-- 🔍 Diagnostic panier : les produits sont bien ajoutés (visible dans dataLayer) mais la page panier affiche "Olivia"
-- 🔍 Cause probable identifiée : **page panier Elementor statique** avec contenu hardcodé - à vérifier dans l'admin
+- ✅ **BUG PANIER RÉSOLU** : page "Mon Panier" contenait du contenu statique hardcodé → remplacé par bloc WooCommerce Cart
 
 **2025-02-04:**
 - Création du thème custom depuis le travail Elementor de Jérôme
