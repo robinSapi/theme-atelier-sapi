@@ -1579,10 +1579,29 @@ body.cursor-hover .cursor-dot {
   justify-content: space-around;
   align-items: center;
   padding: 2rem;
+  overflow: visible;
+  z-index: 10;
 }
 
 .stat-block {
+  position: relative;
   text-align: center;
+  text-decoration: none;
+  padding: 1.5rem 2rem;
+  border-radius: var(--radius);
+  transition: transform 0.4s var(--ease-smooth), background 0.3s ease;
+  overflow: visible;
+}
+
+.stat-block:hover {
+  transform: translateY(-4px);
+  background: rgba(147, 125, 104, 0.08);
+}
+
+.stat-content {
+  position: relative;
+  z-index: 2;
+  transition: opacity 0.3s ease;
 }
 
 .stat-block strong {
@@ -1592,6 +1611,11 @@ body.cursor-hover .cursor-dot {
   font-weight: 900;
   color: var(--color-wood);
   margin-bottom: 0.25rem;
+  transition: color 0.3s ease;
+}
+
+.stat-block:hover strong {
+  color: var(--color-orange);
 }
 
 .stat-block span {
@@ -1600,6 +1624,49 @@ body.cursor-hover .cursor-dot {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--color-gray);
+}
+
+/* Hover card with image */
+.stat-hover {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  width: 180px;
+  background: var(--color-white);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s var(--ease-expo);
+  pointer-events: none;
+  z-index: 100;
+}
+
+.stat-block:hover .stat-hover {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-8px);
+}
+
+.stat-hover img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+
+.stat-hover-text {
+  display: block;
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-dark);
+  background: var(--color-white);
+  text-align: center;
 }
 
 /* Process Card */
@@ -2064,5 +2131,19 @@ body.cursor-hover .cursor-dot {
     flex-direction: column;
     gap: 1rem;
     text-align: center;
+  }
+
+  /* Stats card mobile */
+  .stat-hover {
+    display: none;
+  }
+
+  .stat-block {
+    padding: 1rem;
+  }
+
+  .bento-stats {
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 }

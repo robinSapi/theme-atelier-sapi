@@ -123,18 +123,36 @@ $collections = [
 
     <!-- Stats Card -->
     <div class="bento-card bento-stats">
-      <div class="stat-block">
-        <strong>100%</strong>
-        <span>Fait main</span>
-      </div>
-      <div class="stat-block">
-        <strong>&lt;5j</strong>
-        <span>Fabrication</span>
-      </div>
-      <div class="stat-block">
-        <strong>Lyon</strong>
-        <span>Atelier</span>
-      </div>
+      <a href="<?php echo home_url('/lumiere-dartisan/'); ?>" class="stat-block">
+        <div class="stat-content">
+          <strong>100%</strong>
+          <span>Fait main</span>
+        </div>
+        <div class="stat-hover">
+          <img src="https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/01/Robin-scaled.jpg" alt="Robin à l'atelier">
+          <span class="stat-hover-text">Découvrir l'artisan →</span>
+        </div>
+      </a>
+      <a href="<?php echo home_url('/lumiere-dartisan/#savoir-faire'); ?>" class="stat-block">
+        <div class="stat-content">
+          <strong>&lt;5j</strong>
+          <span>Fabrication</span>
+        </div>
+        <div class="stat-hover">
+          <img src="https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Charlie-Bandeau-2.jpg" alt="Lampe dans un intérieur">
+          <span class="stat-hover-text">Le processus →</span>
+        </div>
+      </a>
+      <a href="<?php echo home_url('/contact/'); ?>" class="stat-block">
+        <div class="stat-content">
+          <strong>Lyon</strong>
+          <span>Atelier</span>
+        </div>
+        <div class="stat-hover">
+          <img src="https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg" alt="Création dans un appartement">
+          <span class="stat-hover-text">Nous contacter →</span>
+        </div>
+      </a>
     </div>
 
     <!-- Product Card 2 -->
