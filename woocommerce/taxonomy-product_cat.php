@@ -9,11 +9,11 @@ $term_name = $term && isset($term->name) ? $term->name : '';
 $term_slug = $term && isset($term->slug) ? $term->slug : '';
 
 $category_intro = [
-  'suspensions' => "Retrouvez ici tout nos lustres, prêts à faire rayonner votre déco intérieure !",
-  'lampadaires' => "Posés au sol et bien branchés, des lampadaires prêts à illuminer chez vous !",
-  'appliques' => "Nos appliques, un mix idéal entre éclairages et déco pour vos murs !",
-  'lampes-a-poser' => "Lampes de chevet, de bureau ou de salon, c'est ici que ça se passe !",
-  'accessoires' => "Ampoules, douilles et pied de lampadaire, retrouvez ici de quoi parfaire votre éclairage !",
+  'suspension' => "Retrouvez ici tout nos lustres, prêts à faire rayonner votre déco intérieure !",
+  'lampadaire' => "Posés au sol et bien branchés, des lampadaires prêts à illuminer chez vous !",
+  'applique' => "Nos appliques, un mix idéal entre éclairages et déco pour vos murs !",
+  'lampe-a-poser' => "Lampes de chevet, de bureau ou de salon, c'est ici que ça se passe !",
+  'accessoire' => "Ampoules, douilles et pied de lampadaire, retrouvez ici de quoi parfaire votre éclairage !",
 ];
 
 sapi_maison_breadcrumbs();
@@ -36,7 +36,7 @@ sapi_maison_breadcrumbs();
 <?php endif; ?>
 
 <?php
-if ($term_slug === 'suspensions') :
+if ($term_slug === 'suspension') :
   $featured = [
     [
       'id' => 'timothee',
@@ -103,7 +103,7 @@ if ($term_slug === 'suspensions') :
     ],
   ];
 
-elseif ($term_slug === 'lampadaires') :
+elseif ($term_slug === 'lampadaire') :
   $featured = [
     [
       'id' => 'claudine',
@@ -142,7 +142,7 @@ elseif ($term_slug === 'lampadaires') :
     ],
   ];
 
-elseif ($term_slug === 'appliques') :
+elseif ($term_slug === 'applique') :
   $featured = [
     [
       'id' => 'charlie',
@@ -174,7 +174,7 @@ elseif ($term_slug === 'appliques') :
     ],
   ];
 
-elseif ($term_slug === 'lampes-a-poser') :
+elseif ($term_slug === 'lampe-a-poser') :
   $featured = [
     [
       'id' => 'bertrand',

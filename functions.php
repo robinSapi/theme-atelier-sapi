@@ -231,11 +231,11 @@ add_action('template_redirect', function() {
 
   // Map static page slugs to WooCommerce category slugs
   $category_redirects = [
-    'nos-lampadaires' => 'lampadaires',
-    'nos-suspensions' => 'suspensions',
-    'nos-appliques' => 'appliques',
-    'nos-lampes-a-poser' => 'lampes-a-poser',
-    'les-accessoires' => 'accessoires',
+    'nos-lampadaires' => 'lampadaire',
+    'nos-suspensions' => 'suspension',
+    'nos-appliques' => 'applique',
+    'nos-lampes-a-poser' => 'lampe-a-poser',
+    'les-accessoires' => 'accessoire',
   ];
 
   if (isset($category_redirects[$page_slug])) {
