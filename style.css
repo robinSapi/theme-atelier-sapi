@@ -28,7 +28,7 @@ Text Domain: theme-sapi-maison
 
   /* Colors - Brand */
   --color-wood: #937D68;
-  --color-orange: #E35B24;
+  --color-orange: #E67E22;
   --color-green: #018501;
   --color-green-hover: #026B02;
 
@@ -1353,7 +1353,7 @@ body.cursor-hover .cursor-dot {
   padding: 0.5rem 1.25rem;
   border-radius: 50px;
   margin-bottom: 1rem;
-  box-shadow: 0 4px 12px rgba(227, 91, 36, 0.3);
+  box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
 }
 
 .bento-title {
@@ -1675,7 +1675,7 @@ body.cursor-hover .cursor-dot {
 .bento-cta:hover {
   background: var(--color-wood);
   transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(227, 91, 36, 0.3);
+  box-shadow: 0 15px 40px rgba(230, 126, 34, 0.3);
 }
 
 .bento-cta .cta-button:hover {
