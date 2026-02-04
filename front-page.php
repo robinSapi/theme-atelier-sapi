@@ -129,7 +129,7 @@ $collections = [
           <span>Fait main</span>
         </div>
         <div class="stat-hover">
-          <img src="https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/01/Robin-scaled.jpg" alt="Robin à l'atelier">
+          <img src="https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/Robin-Sapi-A.jpg" alt="Robin à l'atelier">
           <span class="stat-hover-text">Découvrir l'artisan →</span>
         </div>
       </a>
@@ -224,7 +224,7 @@ $collections = [
 
     <!-- Atelier Image -->
     <div class="bento-card bento-atelier">
-      <div class="bento-bg" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/01/Robin-scaled.jpg');"></div>
+      <div class="bento-bg" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/Robin-Sapi-A.jpg');"></div>
       <div class="atelier-label">
         <span>L'atelier · Lyon</span>
       </div>
