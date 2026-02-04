@@ -211,6 +211,11 @@ add_theme_support('wc-product-gallery-slider');
 - ✅ Ajout chargement `wc-cart-fragments` et `wc-add-to-cart-variation` dans functions.php
 - ✅ Ajout filtre `woocommerce_add_to_cart_fragments` pour mise à jour compteur panier
 - ✅ **BUG PANIER RÉSOLU** : page "Mon Panier" contenait du contenu statique hardcodé → remplacé par bloc WooCommerce Cart
+- ✅ **NETTOYAGE ELEMENTOR COMPLÉTÉ** sur testlumineux :
+  - Pages statiques supprimées : Les accessoires, Nos lampadaires, Nos suspensions, Nos appliques, Nos lampes à poser
+  - Plugin Elementor supprimé (était déjà désactivé)
+  - BDD nettoyée (0 métadonnées _elementor_* trouvées)
+  - Note : les redirections 301 dans functions.php sont conservées pour le SEO (anciennes URLs → nouvelles catégories)
 
 **2025-02-04:**
 - Création du thème custom depuis le travail Elementor de Jérôme
