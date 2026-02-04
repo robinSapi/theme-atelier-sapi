@@ -2,10 +2,10 @@
 
 defined('ABSPATH') || exit;
 
-// DEBUG - Vérifier si ce fichier est chargé
-echo '<div style="position: fixed; top: 0; left: 0; right: 0; background: red; color: white; padding: 20px; z-index: 99999; text-align: center; font-size: 20px; font-weight: bold;">🔴 TAXONOMY-PRODUCT_CAT.PHP EST CHARGÉ</div>';
-
 get_header();
+
+// DEBUG - Vérifier si ce fichier est chargé (APRÈS get_header pour que ça s'affiche)
+echo '<div style="position: fixed; top: 0; left: 0; right: 0; background: red; color: white; padding: 20px; z-index: 99999; text-align: center; font-size: 20px; font-weight: bold;">🔴 TAXONOMY-PRODUCT_CAT.PHP EST CHARGÉ</div>';
 
 $term = get_queried_object();
 $term_name = $term && isset($term->name) ? $term->name : '';
