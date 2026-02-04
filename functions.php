@@ -235,3 +235,18 @@ add_action('wp_footer', function() {
     echo '</div>';
   }
 }, 999);
+
+// DIAGNOSTIC: Test if Elementor is intercepting product archives
+add_action('woocommerce_before_shop_loop', function() {
+  if (is_product_category()) {
+    error_log('HOOK TEST: woocommerce_before_shop_loop fired on category page');
+    echo '<div style="background: orange; color: black; padding: 20px; margin: 20px; border: 5px solid black; font-size: 18px; font-weight: bold;">🔶 HOOK: woocommerce_before_shop_loop fired!</div>';
+  }
+}, 1);
+
+add_action('woocommerce_after_shop_loop', function() {
+  if (is_product_category()) {
+    error_log('HOOK TEST: woocommerce_after_shop_loop fired on category page');
+    echo '<div style="background: purple; color: white; padding: 20px; margin: 20px; border: 5px solid white; font-size: 18px; font-weight: bold;">🟣 HOOK: woocommerce_after_shop_loop fired!</div>';
+  }
+}, 999);
