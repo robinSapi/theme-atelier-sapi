@@ -213,6 +213,11 @@ if (!empty($featured)) :
   </section>
 <?php endif; ?>
 
+<!-- TEST: Code execution checkpoint -->
+<div style="position: fixed; top: 50%; left: 0; right: 0; background: lime; color: black; padding: 20px; z-index: 99999; text-align: center; font-size: 24px; font-weight: bold; border: 5px solid black;">
+  ✅ CHECKPOINT: Code après featured sections s'exécute!
+</div>
+
 <section class="shop-products">
   <?php
   // DEBUG - Check loop conditions
