@@ -222,8 +222,26 @@ if (!empty($featured)) :
 // CRITICAL TEST: Output before any WooCommerce functions
 echo '<div style="background: magenta; color: white; padding: 30px; margin: 20px; font-size: 20px; border: 10px solid red;">BEFORE WOOCOMMERCE FUNCTIONS - This should ALWAYS show</div>';
 
+// Query diagnostics
+global $wp_query;
+$query_info = [
+  'is_archive' => is_archive() ? 'YES' : 'NO',
+  'is_tax' => is_tax() ? 'YES' : 'NO',
+  'is_product_category' => is_product_category() ? 'YES' : 'NO',
+  'found_posts' => $wp_query->found_posts,
+  'post_count' => $wp_query->post_count,
+  'max_num_pages' => $wp_query->max_num_pages,
+];
+
+echo '<div style="background: cyan; color: black; padding: 20px; margin: 20px; border: 5px solid blue; font-size: 14px;">';
+echo '<strong>QUERY DIAGNOSTICS:</strong><br>';
+foreach ($query_info as $key => $value) {
+  echo "$key: $value<br>";
+}
+echo '</div>';
+
 // Log execution
-error_log('TAXONOMY-PRODUCT_CAT: Reached products section for term=' . $term_slug);
+error_log('TAXONOMY-PRODUCT_CAT: Reached products section for term=' . $term_slug . ' | found_posts=' . $wp_query->found_posts . ' | post_count=' . $wp_query->post_count);
 ?>
 
 <section class="shop-products">
