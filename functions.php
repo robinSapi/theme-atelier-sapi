@@ -255,9 +255,25 @@ add_action('template_redirect', function() {
 // Remove default product meta display (SKU, Categories, Tags)
 remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_meta', 40);
 
-// Ensure variation scripts are loaded
+// Ensure WooCommerce scripts are loaded
 add_action('wp_enqueue_scripts', function() {
-  if (is_product()) {
-    wp_enqueue_script('wc-add-to-cart-variation');
+  if (function_exists('is_woocommerce')) {
+    // Cart fragments for AJAX cart updates (CRITICAL for add-to-cart)
+    wp_enqueue_script('wc-cart-fragments');
+
+    // Variation scripts for variable products
+    if (is_product()) {
+      wp_enqueue_script('wc-add-to-cart-variation');
+    }
   }
-}, 99);
+}, 20);
+
+// Update cart count fragment after AJAX add-to-cart
+add_filter('woocommerce_add_to_cart_fragments', function($fragments) {
+  ob_start();
+  ?>
+  <span class="cart-count"><?php echo esc_html(WC()->cart->get_cart_contents_count()); ?></span>
+  <?php
+  $fragments['.cart-count'] = ob_get_clean();
+  return $fragments;
+});
