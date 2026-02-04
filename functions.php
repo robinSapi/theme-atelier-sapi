@@ -220,3 +220,18 @@ function sapi_maison_breadcrumbs() {
 
   echo '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
 }
+
+// DEBUG - Afficher quel template est chargé
+add_action('wp_footer', function() {
+  if (is_tax('product_cat') || is_product_category()) {
+    $queried = get_queried_object();
+    $template_file = get_query_template('taxonomy');
+    echo '<div style="position: fixed; bottom: 0; left: 0; right: 0; background: blue; color: white; padding: 10px; z-index: 99999; font-size: 12px;">';
+    echo 'DEBUG: is_product_category=' . (is_product_category() ? 'TRUE' : 'FALSE');
+    echo ' | is_tax(product_cat)=' . (is_tax('product_cat') ? 'TRUE' : 'FALSE');
+    echo ' | taxonomy=' . (isset($queried->taxonomy) ? $queried->taxonomy : 'none');
+    echo ' | slug=' . (isset($queried->slug) ? $queried->slug : 'none');
+    echo ' | template=' . basename($template_file);
+    echo '</div>';
+  }
+}, 999);
