@@ -11,9 +11,7 @@
 <header class="site-header">
   <div class="header-inner">
     <div class="site-logo">
-      <?php if (has_custom_logo()) : the_custom_logo(); else : ?>
-        <a class="site-title" href="<?php echo esc_url(home_url('/')); ?>">Atelier Sâpi</a>
-      <?php endif; ?>
+      <a class="site-title" href="<?php echo esc_url(home_url('/')); ?>">Atelier Sâpi</a>
     </div>
 
     <!-- Menu Desktop -->
