@@ -38,7 +38,8 @@ function sapi_maison_enqueue_assets() {
   wp_enqueue_script('sapi-maison-menu', get_template_directory_uri() . '/assets/menu.js', [], '0.1.0', true);
 
   if (is_front_page()) {
-    wp_enqueue_script('sapi-maison-home', get_template_directory_uri() . '/assets/home.js', [], '0.1.0', true);
+    // CINÉTIQUE interactions (bento animations, custom cursor, parallax)
+    wp_enqueue_script('sapi-maison-cinetique', get_template_directory_uri() . '/assets/cinetique.js', [], '0.2.0', true);
   }
 }
 add_action('wp_enqueue_scripts', 'sapi_maison_enqueue_assets');

@@ -1,136 +1,248 @@
 <?php
+/**
+ * Front Page Template - CINÉTIQUE Design
+ *
+ * @package Theme_Sapi_Maison
+ */
+
 get_header();
 
-$hero_images = [
-  'https://atelier-sapi.fr/wp-content/uploads/2025/03/IMG_8778.jpg',
-  'https://atelier-sapi.fr/wp-content/uploads/2025/12/Bandeau-Robin-marche-de-noel-2.jpg',
-  'https://atelier-sapi.fr/wp-content/uploads/2025/12/Vue-generale-optimisee-2-e1765284286687.jpg',
-  'https://atelier-sapi.fr/wp-content/uploads/2025/11/A7404578.jpg',
-  'https://atelier-sapi.fr/wp-content/uploads/2025/10/Large-2.jpg',
-  'https://atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg',
-  'https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg',
-  'https://atelier-sapi.fr/wp-content/uploads/2025/09/IMG_9752.jpg',
+// Featured products for Bento grid
+$featured_products = [
+  [
+    'name' => 'Timothée l\'Araignée',
+    'category' => 'Suspension · Chêne',
+    'price' => '389€',
+    'image' => 'https://atelier-sapi.fr/wp-content/uploads/2025/10/Bandeau.jpg',
+    'url' => '/nos-creations/timothee-laraignee/',
+    'badge' => 'Nouveau',
+  ],
+  [
+    'name' => 'Claudine la Turbine',
+    'category' => 'Lampadaire · Design cinétique',
+    'price' => '259€',
+    'image' => 'https://atelier-sapi.fr/wp-content/uploads/2025/07/Claudine.jpg',
+    'url' => '/nos-creations/claudine-la-turbine/',
+    'badge' => null,
+  ],
+  [
+    'name' => 'Suze la Méduse',
+    'category' => 'Applique · Formes organiques',
+    'price' => '129€',
+    'image' => 'https://atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg',
+    'url' => '/nos-creations/suze-la-meduse/',
+    'badge' => null,
+  ],
 ];
 
-$gallery_images = [
-  'https://www.atelier-sapi.fr/wp-content/uploads/2025/09/IMG_9752.jpg',
-  'https://www.atelier-sapi.fr/wp-content/uploads/2025/04/IMG_5711.jpg',
-  'https://www.atelier-sapi.fr/wp-content/uploads/2025/07/Claudine.jpg',
-  'https://www.atelier-sapi.fr/wp-content/uploads/2025/03/IMG_8441.jpg',
-  'https://www.atelier-sapi.fr/wp-content/uploads/2025/05/IMG_5811.jpg',
-  'https://www.atelier-sapi.fr/wp-content/uploads/2025/03/IMG_8749.jpg',
-  'https://www.atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg',
-  'https://www.atelier-sapi.fr/wp-content/uploads/2025/06/A7404460.jpg',
-  'https://www.atelier-sapi.fr/wp-content/uploads/2025/04/A7404579-e1751893880524.jpg',
+// Collections
+$collections = [
+  [
+    'name' => 'Suspensions',
+    'count' => '12 créations',
+    'image' => 'https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg',
+    'url' => '/categorie-produit/suspension/',
+  ],
+  [
+    'name' => 'Lampadaires',
+    'count' => '8 créations',
+    'image' => 'https://atelier-sapi.fr/wp-content/uploads/2025/07/Claudine.jpg',
+    'url' => '/categorie-produit/lampadaire/',
+  ],
+  [
+    'name' => 'Appliques',
+    'count' => '6 créations',
+    'image' => 'https://atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg',
+    'url' => '/categorie-produit/applique/',
+  ],
+  [
+    'name' => 'À poser',
+    'count' => '5 créations',
+    'image' => 'https://atelier-sapi.fr/wp-content/uploads/2025/07/Charlie-Bandeau-2.jpg',
+    'url' => '/categorie-produit/lampe-a-poser/',
+  ],
 ];
 ?>
 
-<section class="hero" data-hero-images='<?php echo wp_json_encode($hero_images); ?>'>
-  <div class="hero-overlay"></div>
-  <div class="hero-content">
-    <a class="hero-card" href="/nos-creations/carte-cadeau/">
-      Offrez une carte cadeau ! 🎁
+<!-- Custom Cursor (desktop only, hidden on touch devices) -->
+<div class="cursor-custom">
+  <div class="cursor-dot"></div>
+  <div class="cursor-outline"></div>
+</div>
+
+<!-- Hero Bento Grid -->
+<section class="hero-bento">
+  <div class="bento-container">
+    <!-- Large Hero Card -->
+    <div class="bento-card bento-hero">
+      <div class="bento-bg" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg');"></div>
+      <div class="bento-content">
+        <div class="bento-label">Pièce signature</div>
+        <h1 class="bento-title">Sculpter<br>la lumière</h1>
+        <p class="bento-text">Des créations artisanales qui transforment l'espace</p>
+      </div>
+      <div class="bento-corner-info">
+        <span class="corner-label">À partir de</span>
+        <strong class="corner-price">219€</strong>
+      </div>
+    </div>
+
+    <!-- Statement Card -->
+    <div class="bento-card bento-statement">
+      <div class="statement-inner">
+        <span class="statement-number">01</span>
+        <h2 class="statement-text">"Je ne fabrique pas<br>des lampes.<br>Je crée des présences."</h2>
+        <p class="statement-author">— Robin, artisan</p>
+      </div>
+    </div>
+
+    <!-- Product Card 1 -->
+    <a href="<?php echo esc_url($featured_products[0]['url']); ?>" class="bento-card bento-product">
+      <div class="product-image" style="background-image: url('<?php echo esc_url($featured_products[0]['image']); ?>');"></div>
+      <div class="product-overlay">
+        <?php if ($featured_products[0]['badge']) : ?>
+          <div class="product-badge"><?php echo esc_html($featured_products[0]['badge']); ?></div>
+        <?php endif; ?>
+        <div class="product-info-reveal">
+          <h3 class="product-name"><?php echo esc_html($featured_products[0]['name']); ?></h3>
+          <p class="product-cat"><?php echo esc_html($featured_products[0]['category']); ?></p>
+          <div class="product-price-tag">
+            <span><?php echo esc_html($featured_products[0]['price']); ?></span>
+          </div>
+        </div>
+      </div>
     </a>
-    <div class="hero-text">
-      <p class="hero-kicker">Luminaires en bois - Atelier Sâpi</p>
-      <h1>Découvrez les luminaires en bois de Robin,<br>fabriqués avec passion à la commande</h1>
+
+    <!-- Stats Card -->
+    <div class="bento-card bento-stats">
+      <div class="stat-block">
+        <strong>100%</strong>
+        <span>Fait main</span>
+      </div>
+      <div class="stat-block">
+        <strong>&lt;5j</strong>
+        <span>Fabrication</span>
+      </div>
+      <div class="stat-block">
+        <strong>Lyon</strong>
+        <span>Atelier</span>
+      </div>
+    </div>
+
+    <!-- Product Card 2 -->
+    <a href="<?php echo esc_url($featured_products[1]['url']); ?>" class="bento-card bento-product">
+      <div class="product-image" style="background-image: url('<?php echo esc_url($featured_products[1]['image']); ?>');"></div>
+      <div class="product-overlay">
+        <?php if ($featured_products[1]['badge']) : ?>
+          <div class="product-badge"><?php echo esc_html($featured_products[1]['badge']); ?></div>
+        <?php endif; ?>
+        <div class="product-info-reveal">
+          <h3 class="product-name"><?php echo esc_html($featured_products[1]['name']); ?></h3>
+          <p class="product-cat"><?php echo esc_html($featured_products[1]['category']); ?></p>
+          <div class="product-price-tag">
+            <span><?php echo esc_html($featured_products[1]['price']); ?></span>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Process Card -->
+    <div class="bento-card bento-process">
+      <div class="process-inner">
+        <div class="process-step">
+          <span class="step-num">01</span>
+          <span class="step-text">Dessin</span>
+        </div>
+        <div class="process-step">
+          <span class="step-num">02</span>
+          <span class="step-text">Découpe laser</span>
+        </div>
+        <div class="process-step">
+          <span class="step-num">03</span>
+          <span class="step-text">Assemblage</span>
+        </div>
+        <div class="process-step">
+          <span class="step-num">04</span>
+          <span class="step-text">Finitions</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Card 3 -->
+    <a href="<?php echo esc_url($featured_products[2]['url']); ?>" class="bento-card bento-product">
+      <div class="product-image" style="background-image: url('<?php echo esc_url($featured_products[2]['image']); ?>');"></div>
+      <div class="product-overlay">
+        <?php if ($featured_products[2]['badge']) : ?>
+          <div class="product-badge"><?php echo esc_html($featured_products[2]['badge']); ?></div>
+        <?php endif; ?>
+        <div class="product-info-reveal">
+          <h3 class="product-name"><?php echo esc_html($featured_products[2]['name']); ?></h3>
+          <p class="product-cat"><?php echo esc_html($featured_products[2]['category']); ?></p>
+          <div class="product-price-tag">
+            <span><?php echo esc_html($featured_products[2]['price']); ?></span>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- CTA Card -->
+    <a href="<?php echo home_url('/nos-creations/'); ?>" class="bento-card bento-cta">
+      <h3 class="cta-title">Toutes les créations</h3>
+      <span class="cta-button">
+        <span>Explorer</span>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </span>
+    </a>
+
+    <!-- Atelier Image -->
+    <div class="bento-card bento-atelier">
+      <div class="bento-bg" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/01/Robin-scaled.jpg');"></div>
+      <div class="atelier-label">
+        <span>L'atelier · Lyon</span>
+      </div>
     </div>
   </div>
 </section>
 
-<section class="assurance-strip">
-  <div class="assurance-item">
-    <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/icons/picto-assembly.svg'); ?>" alt="Assemblage guidé">
-    <p>Assemblage guidé<br>et ludique</p>
+<!-- Collections Grid -->
+<section class="collections-kinetic">
+  <div class="section-header-kinetic">
+    <span class="section-num">02</span>
+    <h2 class="section-title-kinetic">Collections</h2>
   </div>
-  <div class="assurance-item">
-    <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/icons/picto-french.svg'); ?>" alt="Fabrication artisanale">
-    <p>Fabrication artisanale<br>dans le Rhône</p>
-  </div>
-  <div class="assurance-item">
-    <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/icons/picto-guarantee.svg'); ?>" alt="Design unique">
-    <p>Design unique et<br>produits garantis</p>
-  </div>
-  <div class="assurance-item">
-    <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/icons/picto-pantone.svg'); ?>" alt="Adaptable">
-    <p>Adaptable selon<br>vos envies</p>
-  </div>
-</section>
 
-<section class="atelier-selection">
-  <h2>La sélection de l'atelier</h2>
-  <div class="selection-grid">
-    <a class="selection-card" href="/nos-suspensions/" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/04/A7404579-e1751893880524.jpg');">
-      <span>Nos suspensions</span>
-    </a>
-    <a class="selection-card" href="/nos-lampadaires/" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/07/Bandeau-Robin.jpg');">
-      <span>Nos lampadaires</span>
-    </a>
-    <a class="selection-card" href="/nos-appliques/" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/04/A7404363.jpg');">
-      <span>Nos appliques</span>
-    </a>
-    <a class="selection-card" href="/nos-lampes-a-poser/" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/03/IMG_8749.jpg');">
-      <span>Nos lampes à poser</span>
-    </a>
-  </div>
-</section>
-
-<section class="artisan-highlight">
-  <div class="artisan-media" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/07/Bandeau-Robin.jpg');"></div>
-  <div class="artisan-copy">
-    <h2>Lumière d'artisan</h2>
-    <h3>Découvrez Robin, artisan au cœur de la lumière</h3>
-    <p>Chaque luminaire Sâpi est façonné à la main avec passion, alliant techniques traditionnelles et innovation. Du choix des essences de bois à la finition, chaque détail est pensé pour sublimer vos espaces dans une logique de commerce raisonné.</p>
-    <a class="button" href="/lumiere-dartisan/">En savoir +</a>
-  </div>
-</section>
-
-<section class="star-product">
-  <div class="star-copy">
-    <h2>Olivia La gardiena</h2>
-    <h3>La star de l'atelier</h3>
-    <p>Notre suspension monumentale inspirée de la nature. L'équilibre parfait entre l'éclairage et la décoration. Disponible en 4 tailles et 2 essences de bois !</p>
-    <a class="button" href="/nos-creations/olivia-la-gardiena/">Découvrir Olivia</a>
-  </div>
-  <div class="star-media">
-    <img src="https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg" alt="Olivia La gardiena" loading="lazy">
-  </div>
-</section>
-
-<section class="advice-section" style="background-image: url('https://www.atelier-sapi.fr/wp-content/uploads/2025/03/Sapi-header_idees.jpg');">
-  <div class="advice-overlay"></div>
-  <div class="advice-content">
-    <h2>Conseils éclairés</h2>
-    <h3>Astuces et inspirations</h3>
-    <p>L’éclairage transforme un espace : il crée l’ambiance, met en valeur les volumes, et influence même notre bien-être. Que ce soit pour un salon cosy, une cuisine fonctionnelle, ou une chambre apaisante, chaque pièce mérite une lumière adaptée.</p>
-    <a class="button button-outline" href="/conseils-eclaires/">En savoir +</a>
-  </div>
-</section>
-
-<section class="inspiration-gallery">
-  <div class="gallery-grid">
-    <?php foreach ($gallery_images as $image_url) : ?>
-      <a class="gallery-item" href="/nos-creations/" style="background-image: url('<?php echo esc_url($image_url); ?>');"></a>
+  <div class="collections-grid">
+    <?php foreach ($collections as $collection) : ?>
+      <a href="<?php echo esc_url($collection['url']); ?>" class="collection-card">
+        <div class="collection-visual" style="background-image: url('<?php echo esc_url($collection['image']); ?>');"></div>
+        <div class="collection-details">
+          <h3><?php echo esc_html($collection['name']); ?></h3>
+          <span class="collection-count"><?php echo esc_html($collection['count']); ?></span>
+          <span class="collection-btn">Voir →</span>
+        </div>
+      </a>
     <?php endforeach; ?>
   </div>
 </section>
 
-<section class="newsletter" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2024/12/trame_lampe.png');">
-  <div class="newsletter-inner">
-    <div class="newsletter-copy">
-      <h2 class="newsletter-heading">Restez informées !</h2>
-      <div class="newsletter-title">
-        <span class="divider"></span>
-        <h2>Et notre prochain coup d'éclat ?</h2>
-        <span class="divider"></span>
-      </div>
-      <h3>Découvrez régulièrement nos nouveautés lumineuses !</h3>
+<!-- Newsletter Section -->
+<section class="newsletter-kinetic">
+  <div class="newsletter-content">
+    <div class="newsletter-text">
+      <span class="section-num">03</span>
+      <h2 class="section-title-kinetic">Restez<br>informés</h2>
+      <p>Nouveautés, éditions limitées, coulisses d'atelier.</p>
     </div>
     <form class="newsletter-form" action="#" method="post">
-      <label for="newsletter-email">Renseignez votre email</label>
-      <input id="newsletter-email" type="email" name="email" placeholder="E-mail" required>
-      <button type="submit">S’inscrire à la newsletter 💡</button>
-      <p class="newsletter-note">Votre adresse e-mail sera utilisée uniquement pour vous envoyer des actualités, vous pouvez vous désinscrire à tout moment. Consultez notre politique de confidentialité <a href="/politique-de-confidentialite/">ici</a>.</p>
+      <input type="email" placeholder="votre@email.fr" class="newsletter-input-kinetic" required />
+      <button type="submit" class="newsletter-submit-kinetic">
+        <span>S'inscrire</span>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </button>
     </form>
   </div>
 </section>
