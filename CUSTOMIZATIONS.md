@@ -307,6 +307,50 @@ add_theme_support('wc-product-gallery-slider');
 
 ## 📝 Historique des Modifications
 
+**2026-02-05 (Carrousel produits + filtres client-side):**
+- ✅ **CARROUSEL PRODUITS** : Page `/nos-creations/` avec carrousel horizontal (plus de pagination)
+  - Fichiers : `archive-product.php`, `content-product.php`, `shop.js`, `style.css`
+  - Auto-scroll toutes les 4 secondes avec pause au hover
+  - Navigation : flèches `<` `>` + dots/points indicateurs
+  - Support swipe tactile
+  - Responsive : 4 → 3 → 2 → 1 slides selon largeur écran
+
+- ✅ **FILTRES CLIENT-SIDE** : Boutons filtres par catégorie (Tout, Suspensions, Lampadaires, etc.)
+  - Filtrage JavaScript sans rechargement de page
+  - Attribut `data-categories` sur chaque slide avec slugs des catégories
+  - Classe `.is-filtered-out` pour masquer les produits
+
+- ✅ **CONTEXTE GLOBAL PHP** : Variable `$sapi_carousel_context` pour passer des données entre templates
+  ```php
+  // Dans archive-product.php
+  $sapi_carousel_context = [
+    'is_carousel' => true,
+    'categories' => implode(' ', $cat_slugs), // "suspension lampadaire"
+  ];
+  wc_get_template_part('content', 'product');
+  $sapi_carousel_context = null;
+  ```
+  - `content-product.php` lit cette variable globale pour ajouter les classes/attributs appropriés
+
+- ✅ **FIX SPÉCIFICITÉ CSS** : Règle `.is-filtered-out` devait battre `ul.products li.product { display: block !important }`
+  - Problème : spécificité 0,0,2,2 vs 0,0,2,0
+  - Solution : sélecteurs plus spécifiques `ul.products li.product.is-filtered-out` (0,0,3,2)
+  - **Leçon importante** : En CSS, même avec `!important` des deux côtés, c'est la spécificité qui gagne !
+  ```css
+  /* style.css ligne ~1347 - DOIT battre ul.products li.product */
+  ul.products li.product.is-filtered-out,
+  .products-carousel-track > li.product.is-filtered-out {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    /* ... autres props de masquage agressif */
+  }
+  ```
+
+- ✅ **HOVER IMAGE AMBIANCE** : Au survol d'une vignette produit, la première image de galerie (lifestyle) apparaît
+  - PHP : `$hover_image_url = wp_get_attachment_image_url($gallery_ids[0], 'woocommerce_thumbnail')`
+  - CSS : `.product-media.has-hover-image` avec transition opacity
+
 **2026-02-05 (Process bar hover images):**
 - ✅ **PROCESS BAR HOVER** : Au hover sur chaque étape, le texte disparaît et une photo apparaît
   - Ajout HTML : `<div class="step-image">` dans chaque `.process-step`
