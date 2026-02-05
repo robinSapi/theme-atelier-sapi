@@ -63,10 +63,10 @@ $all_products = new WP_Query([
         <ul class="products-carousel-track products">
           <?php while ($all_products->have_posts()) : $all_products->the_post(); ?>
             <?php
-            global $product;
+            global $product, $sapi_carousel_context;
             $product = wc_get_product(get_the_ID());
 
-            // Get product categories for filtering
+            // Pass carousel context to content-product.php
             $product_cats = get_the_terms(get_the_ID(), 'product_cat');
             $cat_slugs = [];
             if ($product_cats && !is_wp_error($product_cats)) {
@@ -74,10 +74,15 @@ $all_products = new WP_Query([
                 $cat_slugs[] = $cat->slug;
               }
             }
+            $sapi_carousel_context = [
+              'is_carousel' => true,
+              'categories' => implode(' ', $cat_slugs),
+            ];
+
+            wc_get_template_part('content', 'product');
+
+            $sapi_carousel_context = null;
             ?>
-            <li class="products-carousel-slide" data-categories="<?php echo esc_attr(implode(' ', $cat_slugs)); ?>">
-              <?php wc_get_template_part('content', 'product'); ?>
-            </li>
           <?php endwhile; ?>
         </ul>
       </div>

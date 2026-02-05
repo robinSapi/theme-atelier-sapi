@@ -10,12 +10,16 @@
 
 defined('ABSPATH') || exit;
 
-global $product;
+global $product, $sapi_carousel_context;
 
 // Ensure product data is properly set up
 if (!$product || !is_a($product, 'WC_Product')) {
   $product = wc_get_product(get_the_ID());
 }
+
+// Check if we're in a carousel context (passed from archive-product.php or taxonomy-product_cat.php)
+$is_carousel = !empty($sapi_carousel_context['is_carousel']);
+$carousel_categories = $is_carousel ? ($sapi_carousel_context['categories'] ?? '') : '';
 
 // Check if the product is valid
 // Note: Don't use is_visible() here as it fails with custom WP_Query
@@ -69,7 +73,14 @@ if (!empty($gallery_ids)) {
 }
 ?>
 
-<li <?php wc_product_class('product-card-cinetique', $product); ?> data-category="<?php echo esc_attr(sanitize_title($category_name)); ?>">
+<?php
+// Build classes - add carousel slide class if in carousel context
+$card_classes = 'product-card-cinetique';
+if ($is_carousel) {
+  $card_classes .= ' products-carousel-slide';
+}
+?>
+<li <?php wc_product_class($card_classes, $product); ?> data-category="<?php echo esc_attr(sanitize_title($category_name)); ?>"<?php echo $carousel_categories ? ' data-categories="' . esc_attr($carousel_categories) . '"' : ''; ?>>
   <a href="<?php the_permalink(); ?>" class="product-card-link">
     <div class="product-media<?php echo $hover_image_url ? ' has-hover-image' : ''; ?>">
       <?php

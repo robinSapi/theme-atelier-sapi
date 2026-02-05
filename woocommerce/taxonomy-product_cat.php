@@ -261,12 +261,19 @@ if ($products_query->have_posts()) :
       <ul class="products-carousel-track products">
         <?php while ($products_query->have_posts()) : $products_query->the_post(); ?>
           <?php
-          global $product;
+          global $product, $sapi_carousel_context;
           $product = wc_get_product(get_the_ID());
+
+          // Pass carousel context to content-product.php
+          $sapi_carousel_context = [
+            'is_carousel' => true,
+            'categories' => '', // Not needed for category pages (already filtered)
+          ];
+
+          wc_get_template_part('content', 'product');
+
+          $sapi_carousel_context = null;
           ?>
-          <li class="products-carousel-slide">
-            <?php wc_get_template_part('content', 'product'); ?>
-          </li>
         <?php endwhile; ?>
       </ul>
     </div>
