@@ -17,8 +17,9 @@ if (!$product || !is_a($product, 'WC_Product')) {
   $product = wc_get_product(get_the_ID());
 }
 
-// Check if the product is valid and visible
-if (!$product || !$product->is_visible()) {
+// Check if the product is valid
+// Note: Don't use is_visible() here as it fails with custom WP_Query
+if (!$product || $product->get_status() !== 'publish') {
   return;
 }
 
