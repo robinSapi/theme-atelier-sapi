@@ -187,73 +187,96 @@ endif;
 
 if (!empty($featured)) :
 ?>
-  <section class="category-carousel-wrapper">
-    <div class="category-carousel" data-carousel>
-      <div class="carousel-track">
-        <?php foreach ($featured as $index => $item) :
-          // Get product image dynamically from WooCommerce
-          $product_slug = basename(untrailingslashit($item['link']));
-          $product_obj = get_page_by_path($product_slug, OBJECT, 'product');
-          $product_image = '';
+  <section class="category-featured">
+    <?php foreach ($featured as $item) :
+      // Get product image dynamically from WooCommerce
+      $product_slug = basename(untrailingslashit($item['link']));
+      $product_obj = get_page_by_path($product_slug, OBJECT, 'product');
+      $product_image = '';
 
-          if ($product_obj) {
-            $product_image = get_the_post_thumbnail_url($product_obj->ID, 'large');
-          }
+      if ($product_obj) {
+        $product_image = get_the_post_thumbnail_url($product_obj->ID, 'large');
+      }
 
-          // Fallback to hardcoded image if product not found
-          if (!$product_image && !empty($item['image'])) {
-            $product_image = $item['image'];
-          }
+      // Fallback to hardcoded image if product not found
+      if (!$product_image && !empty($item['image'])) {
+        $product_image = $item['image'];
+      }
 
-          // Skip if no image at all
-          if (!$product_image) continue;
-        ?>
-          <article id="<?php echo esc_attr($item['id']); ?>" class="carousel-slide category-featured-card">
-            <a class="category-featured-link" href="<?php echo esc_url($item['link']); ?>">
-              <div class="category-featured-media">
-                <img src="<?php echo esc_url($product_image); ?>" alt="<?php echo esc_attr($item['title']); ?>" loading="lazy">
-              </div>
-              <div class="category-featured-content">
-                <h2><?php echo esc_html($item['title']); ?></h2>
-                <p class="category-featured-subtitle"><?php echo esc_html($item['subtitle']); ?></p>
-                <span class="category-featured-cta"><?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> →</span>
-              </div>
-            </a>
-          </article>
-        <?php endforeach; ?>
-      </div>
+      // Skip if no image at all
+      if (!$product_image) continue;
+    ?>
+      <article id="<?php echo esc_attr($item['id']); ?>" class="category-featured-card">
+        <a class="category-featured-link" href="<?php echo esc_url($item['link']); ?>">
+          <div class="category-featured-media">
+            <img src="<?php echo esc_url($product_image); ?>" alt="<?php echo esc_attr($item['title']); ?>" loading="lazy">
+          </div>
+          <div class="category-featured-content">
+            <h2><?php echo esc_html($item['title']); ?></h2>
+            <p class="category-featured-subtitle"><?php echo esc_html($item['subtitle']); ?></p>
+            <span class="category-featured-cta"><?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> →</span>
+          </div>
+        </a>
+      </article>
+    <?php endforeach; ?>
+  </section>
+<?php endif; ?>
+
+<?php
+// Get ALL products in this category for the carousel (no pagination)
+$term = get_queried_object();
+$products_query = new WP_Query([
+  'post_type' => 'product',
+  'posts_per_page' => -1,
+  'tax_query' => [
+    [
+      'taxonomy' => 'product_cat',
+      'field' => 'term_id',
+      'terms' => $term->term_id,
+    ],
+  ],
+  'orderby' => 'menu_order date',
+  'order' => 'ASC',
+]);
+
+if ($products_query->have_posts()) :
+?>
+<section class="shop-products">
+  <div class="products-carousel-wrapper">
+    <div class="products-carousel" data-products-carousel>
+      <ul class="products-carousel-track products">
+        <?php while ($products_query->have_posts()) : $products_query->the_post(); ?>
+          <?php
+          global $product;
+          $product = wc_get_product(get_the_ID());
+          ?>
+          <li class="products-carousel-slide">
+            <?php wc_get_template_part('content', 'product'); ?>
+          </li>
+        <?php endwhile; ?>
+      </ul>
     </div>
-    <div class="carousel-controls">
-      <button class="carousel-btn carousel-prev" aria-label="<?php esc_attr_e('Précédent', 'theme-sapi-maison'); ?>">
+    <div class="products-carousel-controls">
+      <button class="carousel-btn products-carousel-prev" aria-label="<?php esc_attr_e('Précédent', 'theme-sapi-maison'); ?>">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
       </button>
-      <div class="carousel-dots"></div>
-      <button class="carousel-btn carousel-next" aria-label="<?php esc_attr_e('Suivant', 'theme-sapi-maison'); ?>">
+      <div class="products-carousel-dots"></div>
+      <button class="carousel-btn products-carousel-next" aria-label="<?php esc_attr_e('Suivant', 'theme-sapi-maison'); ?>">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
       </button>
     </div>
-  </section>
-<?php endif; ?>
-
-<section class="shop-products">
-  <?php if (woocommerce_product_loop()) : ?>
-    <ul class="products-grid-cinetique products columns-4">
-      <?php if (wc_get_loop_prop('total')) : ?>
-        <?php while (have_posts()) : ?>
-          <?php the_post(); ?>
-          <?php wc_get_template_part('content', 'product'); ?>
-        <?php endwhile; ?>
-      <?php endif; ?>
-    </ul>
-    <?php woocommerce_pagination(); ?>
-  <?php else : ?>
-    <?php wc_no_products_found(); ?>
-  <?php endif; ?>
+  </div>
 </section>
+<?php
+wp_reset_postdata();
+else :
+  wc_no_products_found();
+endif;
+?>
 
 <?php
 get_footer();

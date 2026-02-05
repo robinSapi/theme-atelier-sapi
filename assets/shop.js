@@ -239,9 +239,9 @@
   };
 
   // =============================================
-  // CATEGORY CAROUSEL
+  // PRODUCTS CAROUSEL (Category pages)
   // =============================================
-  const categoryCarousel = {
+  const productsCarousel = {
     carousel: null,
     track: null,
     slides: [],
@@ -254,14 +254,14 @@
     touchEndX: 0,
 
     init: function() {
-      this.carousel = document.querySelector('[data-carousel]');
+      this.carousel = document.querySelector('[data-products-carousel]');
       if (!this.carousel) return;
 
-      this.track = this.carousel.querySelector('.carousel-track');
-      this.slides = this.carousel.querySelectorAll('.carousel-slide');
-      this.prevBtn = document.querySelector('.carousel-prev');
-      this.nextBtn = document.querySelector('.carousel-next');
-      this.dotsContainer = document.querySelector('.carousel-dots');
+      this.track = this.carousel.querySelector('.products-carousel-track');
+      this.slides = this.carousel.querySelectorAll('.products-carousel-slide');
+      this.prevBtn = document.querySelector('.products-carousel-prev');
+      this.nextBtn = document.querySelector('.products-carousel-next');
+      this.dotsContainer = document.querySelector('.products-carousel-dots');
 
       if (!this.track || this.slides.length === 0) return;
 
@@ -290,7 +290,7 @@
 
       for (let i = 0; i < totalDots; i++) {
         const dot = document.createElement('button');
-        dot.classList.add('carousel-dot');
+        dot.classList.add('products-carousel-dot');
         if (i === 0) dot.classList.add('active');
         dot.setAttribute('aria-label', `Slide ${i + 1}`);
         dot.addEventListener('click', () => this.goToSlide(i * this.slidesPerView));
@@ -323,7 +323,7 @@
         resizeTimeout = setTimeout(() => {
           this.calculateSlidesPerView();
           this.createDots();
-          this.currentIndex = Math.min(this.currentIndex, this.slides.length - this.slidesPerView);
+          this.currentIndex = Math.min(this.currentIndex, Math.max(0, this.slides.length - this.slidesPerView));
           this.updateCarousel();
         }, 200);
       });
@@ -348,7 +348,7 @@
     },
 
     next: function() {
-      const maxIndex = this.slides.length - this.slidesPerView;
+      const maxIndex = Math.max(0, this.slides.length - this.slidesPerView);
       if (this.currentIndex < maxIndex) {
         this.currentIndex++;
         this.updateCarousel();
@@ -356,12 +356,14 @@
     },
 
     goToSlide: function(index) {
-      const maxIndex = this.slides.length - this.slidesPerView;
+      const maxIndex = Math.max(0, this.slides.length - this.slidesPerView);
       this.currentIndex = Math.min(Math.max(0, index), maxIndex);
       this.updateCarousel();
     },
 
     updateCarousel: function() {
+      if (!this.slides.length) return;
+
       // Calculate slide width including gap
       const slideWidth = this.slides[0].offsetWidth;
       const gap = 24; // 1.5rem = 24px
@@ -370,7 +372,7 @@
       this.track.style.transform = `translateX(-${offset}px)`;
 
       // Update buttons state
-      const maxIndex = this.slides.length - this.slidesPerView;
+      const maxIndex = Math.max(0, this.slides.length - this.slidesPerView);
       if (this.prevBtn) {
         this.prevBtn.disabled = this.currentIndex === 0;
       }
@@ -380,7 +382,7 @@
 
       // Update dots
       if (this.dotsContainer) {
-        const dots = this.dotsContainer.querySelectorAll('.carousel-dot');
+        const dots = this.dotsContainer.querySelectorAll('.products-carousel-dot');
         const activeDotIndex = Math.floor(this.currentIndex / this.slidesPerView);
         dots.forEach((dot, i) => {
           dot.classList.toggle('active', i === activeDotIndex);
@@ -428,7 +430,7 @@
     productGallery.init();
     productCards.init();
     quantityButtons.init();
-    categoryCarousel.init();
+    productsCarousel.init();
   }
 
   // Run on DOM ready
