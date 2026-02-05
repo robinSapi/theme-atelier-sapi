@@ -99,7 +99,12 @@
   // PRODUCT FILTERS (Client-side filtering for shop page)
   // =============================================
   const productFilters = {
-    currentFilter: 'all',
+    filters: {
+      category: 'all',
+      price: 'all',
+      wood: 'all',
+      size: 'all'
+    },
 
     init: function() {
       const filterContainer = document.querySelector('.product-filters-js');
@@ -109,7 +114,7 @@
         return;
       }
 
-      // Client-side filtering for shop page
+      // Category filter buttons
       const filterBtns = filterContainer.querySelectorAll('.filter-btn');
       filterBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -121,9 +126,122 @@
           btn.classList.add('active');
 
           // Apply filter
-          this.applyFilter(filter);
+          this.filters.category = filter;
+          this.applyFilters();
         });
       });
+
+      // Advanced dropdown filters
+      this.initAdvancedFilters();
+    },
+
+    initAdvancedFilters: function() {
+      const dropdowns = document.querySelectorAll('.filter-dropdown');
+      const resetBtn = document.querySelector('.filter-reset');
+
+      dropdowns.forEach(dropdown => {
+        const toggle = dropdown.querySelector('.filter-dropdown-toggle');
+        const menu = dropdown.querySelector('.filter-dropdown-menu');
+        const options = dropdown.querySelectorAll('.filter-option');
+        const filterType = dropdown.dataset.filterType;
+
+        // Toggle dropdown
+        toggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // Close other dropdowns
+          dropdowns.forEach(d => {
+            if (d !== dropdown) d.classList.remove('is-open');
+          });
+          dropdown.classList.toggle('is-open');
+        });
+
+        // Handle option selection
+        options.forEach(option => {
+          option.addEventListener('click', () => {
+            // Update active state
+            menu.querySelector('.filter-option.active')?.classList.remove('active');
+            option.classList.add('active');
+
+            // Get filter value
+            const value = option.dataset[filterType];
+            this.filters[filterType] = value;
+
+            // Update label if filter is active
+            const label = toggle.querySelector('.filter-label');
+            if (value !== 'all') {
+              label.textContent = option.textContent;
+              toggle.classList.add('has-filter');
+            } else {
+              label.textContent = this.getDefaultLabel(filterType);
+              toggle.classList.remove('has-filter');
+            }
+
+            // Close dropdown
+            dropdown.classList.remove('is-open');
+
+            // Apply all filters
+            this.applyFilters();
+            this.updateResetButton();
+          });
+        });
+      });
+
+      // Reset button
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          this.resetAllFilters();
+        });
+      }
+
+      // Close dropdowns on outside click
+      document.addEventListener('click', () => {
+        dropdowns.forEach(d => d.classList.remove('is-open'));
+      });
+    },
+
+    getDefaultLabel: function(type) {
+      const labels = {
+        price: 'Prix',
+        wood: 'Essence',
+        size: 'Taille'
+      };
+      return labels[type] || type;
+    },
+
+    updateResetButton: function() {
+      const resetBtn = document.querySelector('.filter-reset');
+      if (!resetBtn) return;
+
+      const hasActiveFilters = this.filters.price !== 'all' ||
+                               this.filters.wood !== 'all' ||
+                               this.filters.size !== 'all';
+
+      resetBtn.style.display = hasActiveFilters ? 'inline-flex' : 'none';
+    },
+
+    resetAllFilters: function() {
+      // Reset filter values
+      this.filters.price = 'all';
+      this.filters.wood = 'all';
+      this.filters.size = 'all';
+
+      // Reset UI
+      document.querySelectorAll('.filter-dropdown').forEach(dropdown => {
+        const toggle = dropdown.querySelector('.filter-dropdown-toggle');
+        const filterType = dropdown.dataset.filterType;
+        const label = toggle.querySelector('.filter-label');
+
+        toggle.classList.remove('has-filter');
+        label.textContent = this.getDefaultLabel(filterType);
+
+        // Reset active option
+        const menu = dropdown.querySelector('.filter-dropdown-menu');
+        menu.querySelector('.filter-option.active')?.classList.remove('active');
+        menu.querySelector('.filter-option[data-' + filterType + '="all"]')?.classList.add('active');
+      });
+
+      this.applyFilters();
+      this.updateResetButton();
     },
 
     initNavigationFilters: function() {
@@ -151,11 +269,22 @@
       });
     },
 
-    applyFilter: function(filter) {
-      this.currentFilter = filter;
+    matchesPrice: function(productPrice, filterValue) {
+      if (filterValue === 'all') return true;
 
+      const price = parseFloat(productPrice);
+      if (isNaN(price)) return true;
+
+      if (filterValue === '0-100') return price < 100;
+      if (filterValue === '100-200') return price >= 100 && price < 200;
+      if (filterValue === '200-300') return price >= 200 && price < 300;
+      if (filterValue === '300+') return price >= 300;
+
+      return true;
+    },
+
+    applyFilters: function() {
       // Find all slides with data-categories attribute
-      // Use the carousel's allSlides if available, otherwise query the DOM
       let slides;
       if (productsCarousel.allSlides && productsCarousel.allSlides.length > 0) {
         slides = productsCarousel.allSlides;
@@ -165,7 +294,17 @@
 
       slides.forEach(slide => {
         const categories = slide.dataset.categories || '';
-        const shouldShow = filter === 'all' || categories.split(' ').includes(filter);
+        const price = slide.dataset.price || '';
+        const wood = slide.dataset.wood || '';
+        const size = slide.dataset.size || '';
+
+        // Check all filter criteria
+        const matchesCategory = this.filters.category === 'all' || categories.split(' ').includes(this.filters.category);
+        const matchesPrice = this.matchesPrice(price, this.filters.price);
+        const matchesWood = this.filters.wood === 'all' || wood === this.filters.wood;
+        const matchesSize = this.filters.size === 'all' || size === this.filters.size;
+
+        const shouldShow = matchesCategory && matchesPrice && matchesWood && matchesSize;
 
         // Use both class AND inline styles to guarantee hiding
         if (shouldShow) {

@@ -707,6 +707,80 @@ input[type="submit"]:hover,
 }
 
 /* ========================================
+   GLOBAL - Sticky Reassurance Bar
+   ======================================== */
+
+.reassurance-bar-sticky {
+  position: sticky;
+  top: 74px; /* Below header */
+  z-index: 998;
+  background: var(--color-warm);
+  border-bottom: 1px solid rgba(147, 125, 104, 0.1);
+}
+
+.reassurance-bar-inner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  padding: 10px 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+.reassurance-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-gray);
+  white-space: nowrap;
+}
+
+.reassurance-item svg {
+  color: var(--color-wood);
+  flex-shrink: 0;
+}
+
+/* Responsive - Tablet */
+@media (max-width: 900px) {
+  .reassurance-bar-inner {
+    gap: 1rem;
+  }
+
+  .reassurance-item {
+    font-size: 12px;
+  }
+
+  .reassurance-item svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Responsive - Mobile: Show only 2 items and scroll */
+@media (max-width: 600px) {
+  .reassurance-bar-sticky {
+    top: 64px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .reassurance-bar-inner {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    gap: 1.5rem;
+    padding: 8px 16px;
+  }
+
+  .reassurance-item {
+    font-size: 11px;
+  }
+}
+
+/* ========================================
    PAGES - Shop & WooCommerce
    ======================================== */
 
@@ -1065,6 +1139,49 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   color: var(--color-orange);
   font-weight: 700;
   margin-top: 20px;
+}
+
+/* Stock Indicator */
+.stock-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 1rem;
+  padding: 8px 14px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.stock-indicator svg {
+  flex-shrink: 0;
+}
+
+.stock-indicator.in-stock {
+  background: rgba(1, 133, 1, 0.1);
+  color: var(--color-green);
+}
+
+.stock-indicator.in-stock svg {
+  stroke: var(--color-green);
+}
+
+.stock-indicator.on-order {
+  background: rgba(230, 126, 34, 0.1);
+  color: var(--color-orange);
+}
+
+.stock-indicator.on-order svg {
+  stroke: var(--color-orange);
+}
+
+.stock-indicator.out-of-stock {
+  background: rgba(197, 0, 0, 0.1);
+  color: var(--color-error);
+}
+
+.stock-indicator.out-of-stock svg {
+  stroke: var(--color-error);
 }
 
 /* Delivery/Returns Info Block */
@@ -2371,7 +2488,362 @@ li.is-filtered-out {
    PAGES - Content Pages
    ======================================== */
 
-/* Artisan (Lumière d'Artisan) */
+/* Artisan (Lumière d'Artisan) - Cinétique Design */
+.artisan-hero-cinetique {
+  padding: 120px 20px 80px;
+  text-align: center;
+  background: var(--color-cream);
+}
+
+.artisan-hero-cinetique .section-number {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--color-wood);
+  margin-bottom: 1rem;
+}
+
+.artisan-hero-cinetique h1 {
+  font-family: "Square Peg", cursive;
+  font-size: clamp(48px, 8vw, 80px);
+  color: var(--color-gray);
+  margin-bottom: 1rem;
+}
+
+.artisan-hero-subtitle {
+  font-size: 1.125rem;
+  color: var(--color-gray-mid);
+  max-width: 500px;
+  margin: 0 auto 2rem;
+}
+
+.artisan-scroll-cta {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-wood);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  -webkit-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+}
+
+.artisan-scroll-cta:hover {
+  color: var(--color-orange);
+}
+
+.artisan-scroll-cta svg {
+  -webkit-animation: bounce 2s infinite;
+  animation: bounce 2s infinite;
+}
+
+@-webkit-keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { -webkit-transform: translateY(0); transform: translateY(0); }
+  40% { -webkit-transform: translateY(8px); transform: translateY(8px); }
+  60% { -webkit-transform: translateY(4px); transform: translateY(4px); }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(8px); }
+  60% { transform: translateY(4px); }
+}
+
+/* Video Section */
+.artisan-video {
+  padding: 60px 20px;
+  background: var(--color-white);
+}
+
+.artisan-video-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.artisan-video-container {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card-hover);
+}
+
+.artisan-video-container video,
+.video-embed-wrapper {
+  width: 100%;
+  aspect-ratio: 16/9;
+}
+
+.video-embed-wrapper iframe {
+  width: 100%;
+  height: 100%;
+}
+
+.video-placeholder {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background-size: cover;
+  background-position: center;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  position: relative;
+}
+
+.video-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.video-placeholder-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: var(--color-white);
+}
+
+.video-play-btn {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  color: var(--color-wood);
+  -webkit-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+}
+
+.video-play-btn svg {
+  margin-left: 4px;
+}
+
+.video-placeholder-content p {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.artisan-video-caption {
+  text-align: center;
+  padding: 2rem 0 0;
+}
+
+.artisan-video-caption h2 {
+  font-size: 1.5rem;
+  color: var(--color-gray);
+  margin-bottom: 0.5rem;
+}
+
+.artisan-video-caption p {
+  color: var(--color-gray-mid);
+}
+
+/* Intro & Steps */
+.artisan-intro-cinetique,
+.artisan-step-cinetique {
+  padding: 80px 20px;
+}
+
+.artisan-intro-cinetique {
+  background: var(--color-white);
+}
+
+.artisan-step-cinetique:nth-child(odd) {
+  background: var(--color-cream);
+}
+
+.artisan-intro-grid,
+.artisan-step-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 40px;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.artisan-step-grid.reverse {
+  direction: rtl;
+}
+
+.artisan-step-grid.reverse > * {
+  direction: ltr;
+}
+
+.artisan-intro-content,
+.artisan-step-content {
+  padding: 1rem;
+}
+
+.artisan-intro-content .section-number,
+.artisan-step-content .section-number {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--color-wood);
+  margin-bottom: 1rem;
+}
+
+.artisan-intro-content h2,
+.artisan-step-content h2 {
+  font-size: 1.75rem;
+  color: var(--color-gray);
+  margin-bottom: 1rem;
+}
+
+.artisan-intro-content p,
+.artisan-step-content p {
+  color: var(--color-gray-mid);
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.artisan-image {
+  min-height: 400px;
+  border-radius: var(--radius-lg);
+  background-size: cover;
+  background-position: center;
+  box-shadow: var(--shadow-card);
+}
+
+/* Values Section */
+.artisan-values-cinetique {
+  padding: 80px 20px;
+  background: var(--color-white);
+}
+
+.artisan-values-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.artisan-values-header .section-number {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--color-wood);
+  margin-bottom: 1rem;
+}
+
+.artisan-values-header h2 {
+  font-size: 2rem;
+  color: var(--color-gray);
+}
+
+.artisan-values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.artisan-value-item {
+  text-align: center;
+  padding: 2rem;
+  background: var(--color-cream);
+  border-radius: var(--radius-lg);
+}
+
+.value-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-white);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  color: var(--color-wood);
+}
+
+.artisan-value-item h3 {
+  font-size: 1.125rem;
+  color: var(--color-gray);
+  margin-bottom: 0.5rem;
+}
+
+.artisan-value-item p {
+  font-size: 0.9rem;
+  color: var(--color-gray-mid);
+  margin: 0;
+}
+
+/* Quote */
+.artisan-quote-cinetique {
+  padding: 80px 20px;
+  text-align: center;
+  background: var(--color-warm);
+}
+
+.artisan-quote-cinetique blockquote {
+  font-family: "Square Peg", cursive;
+  font-size: clamp(28px, 5vw, 40px);
+  color: var(--color-orange);
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.4;
+}
+
+.artisan-quote-cinetique cite {
+  display: block;
+  font-family: "Montserrat", Arial, sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  color: var(--color-gray-mid);
+  margin-top: 1rem;
+}
+
+/* CTA Section */
+.artisan-cta {
+  padding: 80px 20px;
+  text-align: center;
+  background: var(--color-cream);
+}
+
+.artisan-cta-content {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.artisan-cta h2 {
+  font-size: 1.75rem;
+  color: var(--color-gray);
+  margin-bottom: 0.5rem;
+}
+
+.artisan-cta p {
+  color: var(--color-gray-mid);
+  margin-bottom: 1.5rem;
+}
+
+/* Legacy support */
 .artisan-hero {
   padding: 80px 20px 40px;
   text-align: center;
@@ -2386,29 +2858,6 @@ li.is-filtered-out {
 .artisan-intro,
 .artisan-step {
   padding: 40px 20px;
-}
-
-.artisan-intro-grid,
-.artisan-step-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 30px;
-  align-items: center;
-}
-
-.artisan-step-grid.reverse {
-  direction: rtl;
-}
-
-.artisan-step-grid.reverse > * {
-  direction: ltr;
-}
-
-.artisan-image {
-  min-height: 320px;
-  border-radius: var(--radius);
-  background-size: cover;
-  background-position: center;
 }
 
 .artisan-quote {
@@ -4275,6 +4724,167 @@ transform: translateY(15px);
   opacity: 0.9;
 }
 
+/* Product Filters Wrapper */
+.product-filters-wrapper {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Advanced Filters */
+.product-filters-advanced {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 3rem 2rem;
+  flex-wrap: wrap;
+}
+
+.filter-dropdown {
+  position: relative;
+}
+
+.filter-dropdown-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid var(--color-gray-light);
+  border-radius: 8px;
+  background: var(--color-white);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-gray);
+  cursor: pointer;
+  -webkit-transition: all 0.2s ease;
+  transition: all 0.2s ease;
+}
+
+.filter-dropdown-toggle:hover {
+  border-color: var(--color-wood);
+  color: var(--color-wood);
+}
+
+.filter-dropdown-toggle.has-filter {
+  background: var(--color-warm);
+  border-color: var(--color-wood);
+  color: var(--color-wood);
+}
+
+.filter-dropdown-toggle svg {
+  -webkit-transition: transform 0.2s ease;
+  transition: transform 0.2s ease;
+}
+
+.filter-dropdown.is-open .filter-dropdown-toggle svg {
+  -webkit-transform: rotate(180deg);
+  transform: rotate(180deg);
+}
+
+.filter-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 180px;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-light);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  visibility: hidden;
+  -webkit-transform: translateY(-8px);
+  transform: translateY(-8px);
+  -webkit-transition: all 0.2s ease;
+  transition: all 0.2s ease;
+  z-index: 100;
+}
+
+.filter-dropdown.is-open .filter-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
+}
+
+.filter-option {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-gray);
+  text-align: left;
+  cursor: pointer;
+  -webkit-transition: all 0.15s ease;
+  transition: all 0.15s ease;
+}
+
+.filter-option:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.filter-option:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
+.filter-option:hover {
+  background: var(--color-warm);
+  color: var(--color-wood);
+}
+
+.filter-option.active {
+  background: var(--color-wood);
+  color: var(--color-white);
+  font-weight: 500;
+}
+
+.filter-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(197, 0, 0, 0.1);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-error);
+  cursor: pointer;
+  -webkit-transition: all 0.2s ease;
+  transition: all 0.2s ease;
+}
+
+.filter-reset:hover {
+  background: var(--color-error);
+  color: var(--color-white);
+}
+
+/* Responsive - Mobile filters */
+@media (max-width: 768px) {
+  .product-filters-wrapper {
+    padding: 0 1rem;
+  }
+
+  .product-filters-advanced {
+    padding: 0 1rem 1.5rem;
+    gap: 0.5rem;
+  }
+
+  .filter-dropdown-toggle {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .filter-dropdown-menu {
+    min-width: 160px;
+  }
+}
+
 /* ========================================
    WOOCOMMERCE - Enhanced Product Cards
    ======================================== */
@@ -5297,6 +5907,14 @@ transform: translateY(15px);
   object-fit: cover;
 }
 
+/* Wood color gradient swatches */
+.product-summary .attribute-swatch .swatch-item .swatch-color {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
 .product-summary .attribute-swatch .swatch-item .swatch-letter {
   font-size: 0.75rem;
   font-weight: 700;
@@ -5587,10 +6205,131 @@ transform: translateY(15px);
    WOOCOMMERCE - Checkout Page CINÉTIQUE
    ======================================== */
 
-.checkout-page-cinetique {
+.checkout-page-cinetique,
+.cart-page-cinetique {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 3rem 4rem;
+}
+
+/* Checkout Progress Bar */
+.checkout-progress {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 2rem;
+  padding: 1.5rem 0;
+}
+
+.progress-step {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 2;
+}
+
+.progress-step .step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  background: var(--color-gray-light);
+  color: var(--color-gray-mid);
+  -webkit-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+}
+
+.progress-step .step-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-gray-mid);
+  white-space: nowrap;
+}
+
+/* Active step */
+.progress-step.active .step-number {
+  background: var(--color-wood);
+  color: var(--color-white);
+  box-shadow: 0 4px 12px rgba(147, 125, 104, 0.3);
+}
+
+.progress-step.active .step-label {
+  color: var(--color-wood);
+  font-weight: 600;
+}
+
+/* Completed step */
+.progress-step.completed .step-number {
+  background: var(--color-green);
+  color: var(--color-white);
+}
+
+.progress-step.completed .step-label {
+  color: var(--color-green);
+}
+
+/* Progress line between steps */
+.progress-line {
+  width: 60px;
+  height: 3px;
+  background: var(--color-gray-light);
+  position: relative;
+  z-index: 1;
+  margin: 0 8px;
+  margin-bottom: 28px; /* Align with step circles */
+  border-radius: 2px;
+}
+
+.progress-line.completed {
+  background: var(--color-green);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .checkout-progress {
+    gap: 0;
+  }
+
+  .progress-step .step-number {
+    width: 32px;
+    height: 32px;
+    font-size: 0.875rem;
+  }
+
+  .progress-step .step-label {
+    font-size: 0.7rem;
+  }
+
+  .progress-line {
+    width: 30px;
+    margin-bottom: 24px;
+  }
 }
 
 .checkout-hero {

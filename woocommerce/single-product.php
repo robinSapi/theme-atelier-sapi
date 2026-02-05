@@ -47,6 +47,32 @@ get_header();
             <p class="product-hookline"><?php echo esc_html($phrase); ?></p>
           <?php endif; ?>
 
+          <!-- Stock Indicator -->
+          <?php
+          $stock_status = $product->get_stock_status();
+          $stock_class = 'stock-indicator';
+          $stock_icon = '';
+          $stock_text = '';
+
+          if ($stock_status === 'instock') {
+            $stock_class .= ' in-stock';
+            $stock_icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            $stock_text = __('En stock — Expédié sous 48-72h', 'theme-sapi-maison');
+          } elseif ($stock_status === 'onbackorder') {
+            $stock_class .= ' on-order';
+            $stock_icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+            $stock_text = __('Fabriqué à la commande — 5 jours', 'theme-sapi-maison');
+          } else {
+            $stock_class .= ' out-of-stock';
+            $stock_icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+            $stock_text = __('Actuellement indisponible', 'theme-sapi-maison');
+          }
+          ?>
+          <div class="<?php echo esc_attr($stock_class); ?>">
+            <?php echo $stock_icon; ?>
+            <span><?php echo esc_html($stock_text); ?></span>
+          </div>
+
           <!-- Delivery/Returns Info Block -->
           <div class="product-delivery-info">
             <div class="delivery-item">

@@ -418,6 +418,18 @@ add_filter('woocommerce_dropdown_variation_attribute_options_html', function($ht
   // Get attribute taxonomy for swatch images
   $attribute_taxonomy = wc_attribute_taxonomy_name(str_replace('pa_', '', $attribute));
 
+  // Default wood essence colors (CSS gradient fallbacks)
+  $wood_colors = [
+    'chene'   => ['#C4A77D', '#A08660'],
+    'hetre'   => ['#E8D4B8', '#D4BC96'],
+    'noyer'   => ['#5C4033', '#3D2B1F'],
+    'bouleau' => ['#F5E6D3', '#E8D4BC'],
+    'frene'   => ['#D9C8A5', '#C9B58F'],
+    'erable'  => ['#E8D8C8', '#D4C4B0'],
+    'merisier' => ['#B87333', '#8B4513'],
+    'pin'     => ['#DEB887', '#C4A46C'],
+  ];
+
   // Build custom swatch HTML
   $swatch_html = '<div class="attribute-swatch" data-attribute="' . esc_attr($attribute) . '">';
 
@@ -432,14 +444,38 @@ add_filter('woocommerce_dropdown_variation_attribute_options_html', function($ht
       $term_image = get_field('swatch_image', $term);
     }
 
+    // Check for default wood image in theme assets
+    $wood_slug = sanitize_title($option);
+    $default_image_path = get_template_directory() . '/assets/images/wood/' . $wood_slug . '.jpg';
+    $default_image_url = '';
+    if (file_exists($default_image_path)) {
+      $default_image_url = get_template_directory_uri() . '/assets/images/wood/' . $wood_slug . '.jpg';
+    }
+
+    // Get wood color for gradient fallback
+    $wood_gradient = '';
+    if (isset($wood_colors[$wood_slug])) {
+      $colors = $wood_colors[$wood_slug];
+      $wood_gradient = 'linear-gradient(135deg, ' . $colors[0] . ' 0%, ' . $colors[1] . ' 100%)';
+    }
+
     $swatch_html .= '<label class="swatch-item' . $is_selected . '" data-value="' . esc_attr($option) . '">';
     $swatch_html .= '<div class="swatch-preview">';
+
     if ($term_image) {
+      // ACF image
       $swatch_html .= '<img src="' . esc_url($term_image['sizes']['thumbnail']) . '" alt="' . esc_attr($term_name) . '">';
+    } elseif ($default_image_url) {
+      // Default theme image
+      $swatch_html .= '<img src="' . esc_url($default_image_url) . '" alt="' . esc_attr($term_name) . '">';
+    } elseif ($wood_gradient) {
+      // Wood color gradient
+      $swatch_html .= '<span class="swatch-color" style="background: ' . esc_attr($wood_gradient) . ';"></span>';
     } else {
-      // Use a color-based preview or first letter
+      // First letter fallback
       $swatch_html .= '<span class="swatch-letter">' . esc_html(mb_substr($term_name, 0, 1)) . '</span>';
     }
+
     $swatch_html .= '</div>';
     $swatch_html .= '<span class="swatch-name">' . esc_html($term_name) . '</span>';
     $swatch_html .= '</label>';
@@ -477,11 +513,29 @@ add_action('after_setup_theme', function() {
 }, 11);
 
 /**
- * CINÉTIQUE - Custom Cart Page Header
+ * CINÉTIQUE - Custom Cart Page Header with Progress Bar
  */
 add_action('woocommerce_before_cart', function() {
   ?>
   <div class="cart-page-cinetique">
+    <!-- Progress Bar -->
+    <div class="checkout-progress">
+      <div class="progress-step active">
+        <span class="step-number">1</span>
+        <span class="step-label"><?php esc_html_e('Panier', 'theme-sapi-maison'); ?></span>
+      </div>
+      <div class="progress-line"></div>
+      <div class="progress-step">
+        <span class="step-number">2</span>
+        <span class="step-label"><?php esc_html_e('Commande', 'theme-sapi-maison'); ?></span>
+      </div>
+      <div class="progress-line"></div>
+      <div class="progress-step">
+        <span class="step-number">3</span>
+        <span class="step-label"><?php esc_html_e('Confirmation', 'theme-sapi-maison'); ?></span>
+      </div>
+    </div>
+
     <div class="cart-hero">
       <span class="section-number">01</span>
       <h1><?php esc_html_e('Votre Panier', 'theme-sapi-maison'); ?></h1>
@@ -531,11 +585,29 @@ add_action('woocommerce_after_cart', function() {
 });
 
 /**
- * CINÉTIQUE - Custom Checkout Page Header
+ * CINÉTIQUE - Custom Checkout Page Header with Progress Bar
  */
 add_action('woocommerce_before_checkout_form', function() {
   ?>
   <div class="checkout-page-cinetique">
+    <!-- Progress Bar -->
+    <div class="checkout-progress">
+      <div class="progress-step completed">
+        <span class="step-number">1</span>
+        <span class="step-label"><?php esc_html_e('Panier', 'theme-sapi-maison'); ?></span>
+      </div>
+      <div class="progress-line completed"></div>
+      <div class="progress-step active">
+        <span class="step-number">2</span>
+        <span class="step-label"><?php esc_html_e('Commande', 'theme-sapi-maison'); ?></span>
+      </div>
+      <div class="progress-line"></div>
+      <div class="progress-step">
+        <span class="step-number">3</span>
+        <span class="step-label"><?php esc_html_e('Confirmation', 'theme-sapi-maison'); ?></span>
+      </div>
+    </div>
+
     <div class="checkout-hero">
       <span class="section-number">01</span>
       <h1><?php esc_html_e('Finaliser ma commande', 'theme-sapi-maison'); ?></h1>

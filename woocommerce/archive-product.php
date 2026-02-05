@@ -88,20 +88,71 @@ $all_products = new WP_Query([
 </section>
 
 <!-- Product Filters with dynamic counts -->
-<nav class="product-filters product-filters-js" role="navigation" aria-label="<?php esc_attr_e('Filtres produits', 'theme-sapi-maison'); ?>">
-  <button type="button" class="filter-btn active" data-filter="all">
-    <?php esc_html_e('Tout', 'theme-sapi-maison'); ?>
-    <span class="filter-count">(<?php echo esc_html($all_products->found_posts); ?>)</span>
-  </button>
-  <?php if ($product_categories && !is_wp_error($product_categories)) : ?>
-    <?php foreach ($product_categories as $cat) : ?>
-      <button type="button" class="filter-btn" data-filter="<?php echo esc_attr($cat->slug); ?>">
-        <?php echo esc_html($cat->name); ?>
-        <span class="filter-count">(<?php echo esc_html($cat->count); ?>)</span>
+<div class="product-filters-wrapper">
+  <nav class="product-filters product-filters-js" role="navigation" aria-label="<?php esc_attr_e('Filtres produits', 'theme-sapi-maison'); ?>">
+    <button type="button" class="filter-btn active" data-filter="all">
+      <?php esc_html_e('Tout', 'theme-sapi-maison'); ?>
+      <span class="filter-count">(<?php echo esc_html($all_products->found_posts); ?>)</span>
+    </button>
+    <?php if ($product_categories && !is_wp_error($product_categories)) : ?>
+      <?php foreach ($product_categories as $cat) : ?>
+        <button type="button" class="filter-btn" data-filter="<?php echo esc_attr($cat->slug); ?>">
+          <?php echo esc_html($cat->name); ?>
+          <span class="filter-count">(<?php echo esc_html($cat->count); ?>)</span>
+        </button>
+      <?php endforeach; ?>
+    <?php endif; ?>
+  </nav>
+
+  <!-- Advanced Filters -->
+  <div class="product-filters-advanced">
+    <div class="filter-dropdown" data-filter-type="price">
+      <button type="button" class="filter-dropdown-toggle">
+        <span class="filter-label"><?php esc_html_e('Prix', 'theme-sapi-maison'); ?></span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </button>
-    <?php endforeach; ?>
-  <?php endif; ?>
-</nav>
+      <div class="filter-dropdown-menu">
+        <button type="button" class="filter-option active" data-price="all"><?php esc_html_e('Tous les prix', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-price="0-100"><?php esc_html_e('Moins de 100€', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-price="100-200"><?php esc_html_e('100€ - 200€', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-price="200-300"><?php esc_html_e('200€ - 300€', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-price="300+"><?php esc_html_e('Plus de 300€', 'theme-sapi-maison'); ?></button>
+      </div>
+    </div>
+
+    <div class="filter-dropdown" data-filter-type="wood">
+      <button type="button" class="filter-dropdown-toggle">
+        <span class="filter-label"><?php esc_html_e('Essence', 'theme-sapi-maison'); ?></span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="filter-dropdown-menu">
+        <button type="button" class="filter-option active" data-wood="all"><?php esc_html_e('Toutes les essences', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-wood="chene"><?php esc_html_e('Chêne', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-wood="hetre"><?php esc_html_e('Hêtre', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-wood="noyer"><?php esc_html_e('Noyer', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-wood="bouleau"><?php esc_html_e('Bouleau', 'theme-sapi-maison'); ?></button>
+      </div>
+    </div>
+
+    <div class="filter-dropdown" data-filter-type="size">
+      <button type="button" class="filter-dropdown-toggle">
+        <span class="filter-label"><?php esc_html_e('Taille', 'theme-sapi-maison'); ?></span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="filter-dropdown-menu">
+        <button type="button" class="filter-option active" data-size="all"><?php esc_html_e('Toutes les tailles', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-size="petit"><?php esc_html_e('Petit (&lt;30cm)', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-size="moyen"><?php esc_html_e('Moyen (30-60cm)', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-size="grand"><?php esc_html_e('Grand (&gt;60cm)', 'theme-sapi-maison'); ?></button>
+      </div>
+    </div>
+
+    <button type="button" class="filter-reset" style="display: none;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      <?php esc_html_e('Réinitialiser', 'theme-sapi-maison'); ?>
+    </button>
+  </div>
+</div>
 
 <!-- Products Carousel -->
 <section class="shop-products" id="shop-products">

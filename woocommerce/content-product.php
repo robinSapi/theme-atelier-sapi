@@ -65,6 +65,47 @@ $is_on_sale = $product->is_on_sale();
 $price_html = $product->get_price_html();
 $is_variable = $product->is_type('variable');
 
+// Get price for filtering (use min price for variable products)
+$filter_price = $product->get_price();
+if ($is_variable) {
+  $min_price = $product->get_variation_price('min');
+  $filter_price = $min_price ? $min_price : $filter_price;
+}
+
+// Get wood essence from ACF or product attributes
+$wood_essence = '';
+if (function_exists('get_field')) {
+  $wood_essence = get_field('essence_de_bois', $product_id);
+}
+if (!$wood_essence) {
+  // Try product attributes
+  $wood_attr = $product->get_attribute('pa_bois');
+  if ($wood_attr) {
+    $wood_essence = sanitize_title($wood_attr);
+  }
+}
+
+// Get size category from dimensions or ACF
+$size_category = '';
+if (function_exists('get_field')) {
+  $size_category = get_field('taille', $product_id);
+}
+if (!$size_category) {
+  // Calculate from dimensions
+  $height = (float) $product->get_height();
+  $width = (float) $product->get_width();
+  $max_dim = max($height, $width);
+  if ($max_dim > 0) {
+    if ($max_dim < 30) {
+      $size_category = 'petit';
+    } elseif ($max_dim < 60) {
+      $size_category = 'moyen';
+    } else {
+      $size_category = 'grand';
+    }
+  }
+}
+
 // Get gallery image for hover effect (lifestyle/ambiance photo)
 $gallery_ids = $product->get_gallery_image_ids();
 $hover_image_url = '';
@@ -80,7 +121,7 @@ if ($is_carousel) {
   $card_classes .= ' products-carousel-slide';
 }
 ?>
-<li <?php wc_product_class($card_classes, $product); ?> data-category="<?php echo esc_attr(sanitize_title($category_name)); ?>"<?php echo $carousel_categories ? ' data-categories="' . esc_attr($carousel_categories) . '"' : ''; ?>>
+<li <?php wc_product_class($card_classes, $product); ?> data-category="<?php echo esc_attr(sanitize_title($category_name)); ?>"<?php echo $carousel_categories ? ' data-categories="' . esc_attr($carousel_categories) . '"' : ''; ?> data-price="<?php echo esc_attr($filter_price); ?>"<?php echo $wood_essence ? ' data-wood="' . esc_attr(sanitize_title($wood_essence)) . '"' : ''; ?><?php echo $size_category ? ' data-size="' . esc_attr($size_category) . '"' : ''; ?>>
   <a href="<?php the_permalink(); ?>" class="product-card-link">
     <div class="product-media<?php echo $hover_image_url ? ' has-hover-image' : ''; ?>">
       <?php
