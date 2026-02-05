@@ -97,6 +97,20 @@
         <?php sapi_render_mini_cart_contents(); ?>
       <?php endif; ?>
     </div>
+    <?php if (function_exists('WC') && WC()->cart) : ?>
+    <div class="mini-cart-footer">
+      <div class="mini-cart-total">
+        <span><?php esc_html_e('Total', 'theme-sapi-maison'); ?></span>
+        <strong class="total-amount"><?php echo WC()->cart->get_cart_total(); ?></strong>
+      </div>
+      <a href="<?php echo esc_url(wc_get_cart_url()); ?>" class="btn-view-cart">
+        <?php esc_html_e('Voir le panier', 'theme-sapi-maison'); ?>
+      </a>
+      <a href="<?php echo esc_url(wc_get_checkout_url()); ?>" class="btn-checkout">
+        <?php esc_html_e('Commander', 'theme-sapi-maison'); ?> →
+      </a>
+    </div>
+    <?php endif; ?>
   </div>
   <div class="mini-cart-overlay" id="mini-cart-overlay"></div>
 </header>

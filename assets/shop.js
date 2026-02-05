@@ -238,13 +238,20 @@
 
       // Intersection Observer for scroll animations
       if ('IntersectionObserver' in window) {
+        // First, add will-animate class to prepare for animation
+        cards.forEach(card => card.classList.add('will-animate'));
+
         const observer = new IntersectionObserver((entries) => {
-          entries.forEach((entry, index) => {
+          entries.forEach((entry) => {
             if (entry.isIntersecting) {
+              // Get the index from all observed cards for staggering
+              const allCards = Array.from(cards);
+              const index = allCards.indexOf(entry.target);
+
               // Staggered animation
               setTimeout(() => {
                 entry.target.classList.add('is-visible');
-              }, index * 50);
+              }, (index % 4) * 100); // Stagger within each row
               observer.unobserve(entry.target);
             }
           });
@@ -254,10 +261,8 @@
         });
 
         cards.forEach(card => observer.observe(card));
-      } else {
-        // Fallback for older browsers
-        cards.forEach(card => card.classList.add('is-visible'));
       }
+      // No fallback needed - cards are visible by default now
     }
   };
 
