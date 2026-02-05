@@ -1345,9 +1345,26 @@ ul.products.products-carousel-track {
 }
 
 /* Filtered out slides - hidden by client-side filter */
+/* Must be more specific than ul.products li.product rule (specificity 0,0,2,2) */
+ul.products li.product.is-filtered-out,
+.products-carousel-track > li.product.is-filtered-out,
 .products-carousel-slide.is-filtered-out,
-.products-carousel-track > li.is-filtered-out {
+.products-carousel-track > li.is-filtered-out,
+li.is-filtered-out {
   display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  flex: 0 0 0 !important;
+  -webkit-box-flex: 0 !important;
+  -ms-flex: 0 0 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* Smaller product cards in carousel */
