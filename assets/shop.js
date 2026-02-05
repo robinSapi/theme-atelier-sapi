@@ -163,17 +163,17 @@
         slides = document.querySelectorAll('.products-carousel-slide, [data-categories]');
       }
 
-      console.log('Filtering:', filter, 'Found slides:', slides.length);
-
       slides.forEach(slide => {
         const categories = slide.dataset.categories || '';
         const shouldShow = filter === 'all' || categories.split(' ').includes(filter);
 
-        // Use class only - CSS handles display: none !important
+        // Use both class AND inline styles to guarantee hiding
         if (shouldShow) {
           slide.classList.remove('is-filtered-out');
+          slide.style.display = '';
         } else {
           slide.classList.add('is-filtered-out');
+          slide.style.display = 'none';
         }
       });
 
@@ -339,8 +339,6 @@
         // Add the class to found slides for filtering to work
         this.allSlides.forEach(slide => slide.classList.add('products-carousel-slide'));
       }
-
-      console.log('Carousel init - Found slides:', this.allSlides.length);
 
       if (!this.track || this.allSlides.length === 0) return;
 
