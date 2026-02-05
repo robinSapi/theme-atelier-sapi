@@ -60,17 +60,29 @@ $is_on_sale = $product->is_on_sale();
 // Get price display
 $price_html = $product->get_price_html();
 $is_variable = $product->is_type('variable');
+
+// Get gallery image for hover effect (lifestyle/ambiance photo)
+$gallery_ids = $product->get_gallery_image_ids();
+$hover_image_url = '';
+if (!empty($gallery_ids)) {
+  $hover_image_url = wp_get_attachment_image_url($gallery_ids[0], 'woocommerce_thumbnail');
+}
 ?>
 
 <li <?php wc_product_class('product-card-cinetique', $product); ?> data-category="<?php echo esc_attr(sanitize_title($category_name)); ?>">
   <a href="<?php the_permalink(); ?>" class="product-card-link">
-    <div class="product-media">
+    <div class="product-media<?php echo $hover_image_url ? ' has-hover-image' : ''; ?>">
       <?php
-      // Product image
+      // Product image (main)
       if (has_post_thumbnail()) {
-        echo woocommerce_get_product_thumbnail('woocommerce_thumbnail');
+        echo '<span class="product-image-main">' . woocommerce_get_product_thumbnail('woocommerce_thumbnail') . '</span>';
       } else {
-        echo wc_placeholder_img('woocommerce_thumbnail');
+        echo '<span class="product-image-main">' . wc_placeholder_img('woocommerce_thumbnail') . '</span>';
+      }
+
+      // Hover image (lifestyle/ambiance)
+      if ($hover_image_url) {
+        echo '<span class="product-image-hover"><img src="' . esc_url($hover_image_url) . '" alt="' . esc_attr(get_the_title()) . ' - ambiance" loading="lazy"></span>';
       }
       ?>
 

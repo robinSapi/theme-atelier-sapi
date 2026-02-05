@@ -96,16 +96,42 @@
   };
 
   // =============================================
-  // PRODUCT FILTERS (Animated)
+  // PRODUCT FILTERS (Client-side filtering for shop page)
   // =============================================
   const productFilters = {
+    currentFilter: 'all',
+
     init: function() {
+      const filterContainer = document.querySelector('.product-filters-js');
+      if (!filterContainer) {
+        // Fallback: navigation-based filters for category pages
+        this.initNavigationFilters();
+        return;
+      }
+
+      // Client-side filtering for shop page
+      const filterBtns = filterContainer.querySelectorAll('.filter-btn');
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const filter = btn.dataset.filter;
+
+          // Update active state
+          filterContainer.querySelector('.filter-btn.active')?.classList.remove('active');
+          btn.classList.add('active');
+
+          // Apply filter
+          this.applyFilter(filter);
+        });
+      });
+    },
+
+    initNavigationFilters: function() {
       const filterBtns = document.querySelectorAll('.filter-btn');
       if (!filterBtns.length) return;
 
       filterBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
-          // Allow navigation - just add visual feedback before navigating
           const currentActive = document.querySelector('.filter-btn.active');
           if (currentActive) {
             currentActive.classList.remove('active');
@@ -123,6 +149,31 @@
           btn.classList.add('active');
         }
       });
+    },
+
+    applyFilter: function(filter) {
+      this.currentFilter = filter;
+      const slides = document.querySelectorAll('.products-carousel-slide[data-categories]');
+
+      slides.forEach(slide => {
+        const categories = slide.dataset.categories || '';
+        if (filter === 'all' || categories.includes(filter)) {
+          slide.style.display = '';
+          slide.classList.remove('is-filtered-out');
+        } else {
+          slide.style.display = 'none';
+          slide.classList.add('is-filtered-out');
+        }
+      });
+
+      // Reset carousel to beginning and recalculate
+      if (productsCarousel.carousel) {
+        productsCarousel.currentIndex = 0;
+        productsCarousel.recalculateVisibleSlides();
+        productsCarousel.createDots();
+        productsCarousel.updateCarousel();
+        productsCarousel.resetAutoScroll();
+      }
     }
   };
 
@@ -239,13 +290,14 @@
   };
 
   // =============================================
-  // PRODUCTS CAROUSEL (Category pages)
-  // Auto-scrolling with pause on hover
+  // PRODUCTS CAROUSEL (Category pages + Shop page)
+  // Auto-scrolling with pause on hover, supports filtering
   // =============================================
   const productsCarousel = {
     carousel: null,
     track: null,
-    slides: [],
+    allSlides: [],      // All slides (including filtered out)
+    visibleSlides: [],  // Currently visible slides
     prevBtn: null,
     nextBtn: null,
     dotsContainer: null,
@@ -262,18 +314,25 @@
       if (!this.carousel) return;
 
       this.track = this.carousel.querySelector('.products-carousel-track');
-      this.slides = this.carousel.querySelectorAll('.products-carousel-slide');
+      this.allSlides = Array.from(this.carousel.querySelectorAll('.products-carousel-slide'));
       this.prevBtn = document.querySelector('.products-carousel-prev');
       this.nextBtn = document.querySelector('.products-carousel-next');
       this.dotsContainer = document.querySelector('.products-carousel-dots');
 
-      if (!this.track || this.slides.length === 0) return;
+      if (!this.track || this.allSlides.length === 0) return;
 
+      this.recalculateVisibleSlides();
       this.calculateSlidesPerView();
       this.createDots();
       this.bindEvents();
       this.updateCarousel();
       this.startAutoScroll();
+    },
+
+    recalculateVisibleSlides: function() {
+      this.visibleSlides = this.allSlides.filter(slide => {
+        return !slide.classList.contains('is-filtered-out') && slide.style.display !== 'none';
+      });
     },
 
     calculateSlidesPerView: function() {
@@ -293,7 +352,7 @@
       if (!this.dotsContainer) return;
 
       this.dotsContainer.innerHTML = '';
-      const totalDots = Math.ceil(this.slides.length / this.slidesPerView);
+      const totalDots = Math.ceil(this.visibleSlides.length / this.slidesPerView);
 
       for (let i = 0; i < totalDots; i++) {
         const dot = document.createElement('button');
@@ -349,8 +408,9 @@
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
           this.calculateSlidesPerView();
+          this.recalculateVisibleSlides();
           this.createDots();
-          this.currentIndex = Math.min(this.currentIndex, Math.max(0, this.slides.length - this.slidesPerView));
+          this.currentIndex = Math.min(this.currentIndex, Math.max(0, this.visibleSlides.length - this.slidesPerView));
           this.updateCarousel();
         }, 200);
       });
@@ -370,7 +430,7 @@
     },
 
     nextOrLoop: function() {
-      const maxIndex = Math.max(0, this.slides.length - this.slidesPerView);
+      const maxIndex = Math.max(0, this.visibleSlides.length - this.slidesPerView);
       if (this.currentIndex >= maxIndex) {
         // Loop back to start
         this.currentIndex = 0;
@@ -399,7 +459,7 @@
     },
 
     next: function() {
-      const maxIndex = Math.max(0, this.slides.length - this.slidesPerView);
+      const maxIndex = Math.max(0, this.visibleSlides.length - this.slidesPerView);
       if (this.currentIndex < maxIndex) {
         this.currentIndex++;
         this.updateCarousel();
@@ -407,23 +467,26 @@
     },
 
     goToSlide: function(index) {
-      const maxIndex = Math.max(0, this.slides.length - this.slidesPerView);
+      const maxIndex = Math.max(0, this.visibleSlides.length - this.slidesPerView);
       this.currentIndex = Math.min(Math.max(0, index), maxIndex);
       this.updateCarousel();
     },
 
     updateCarousel: function() {
-      if (!this.slides.length) return;
+      if (!this.visibleSlides.length) {
+        this.track.style.transform = 'translateX(0)';
+        return;
+      }
 
-      // Calculate slide width including gap
-      const slideWidth = this.slides[0].offsetWidth;
+      // Calculate slide width including gap from first visible slide
+      const slideWidth = this.visibleSlides[0].offsetWidth;
       const gap = 24; // 1.5rem = 24px
       const offset = this.currentIndex * (slideWidth + gap);
 
       this.track.style.transform = `translateX(-${offset}px)`;
 
       // Update buttons state
-      const maxIndex = Math.max(0, this.slides.length - this.slidesPerView);
+      const maxIndex = Math.max(0, this.visibleSlides.length - this.slidesPerView);
       if (this.prevBtn) {
         this.prevBtn.disabled = this.currentIndex === 0;
       }
