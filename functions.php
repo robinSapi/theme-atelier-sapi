@@ -32,14 +32,14 @@ function sapi_maison_enqueue_assets() {
     'display' => 'swap',
   ];
   wp_enqueue_style('sapi-maison-fonts', add_query_arg($fonts, 'https://fonts.googleapis.com/css'));
-  wp_enqueue_style('sapi-maison-style', get_stylesheet_uri(), ['sapi-maison-fonts'], '0.1.1');
+  wp_enqueue_style('sapi-maison-style', get_stylesheet_uri(), ['sapi-maison-fonts'], filemtime(get_stylesheet_directory() . '/style.css'));
 
   // Menu burger JavaScript - chargé sur toutes les pages
-  wp_enqueue_script('sapi-maison-menu', get_template_directory_uri() . '/assets/menu.js', [], '0.1.0', true);
+  wp_enqueue_script('sapi-maison-menu', get_template_directory_uri() . '/assets/menu.js', [], filemtime(get_template_directory() . '/assets/menu.js'), true);
 
   if (is_front_page()) {
     // CINÉTIQUE interactions (bento animations, custom cursor, parallax)
-    wp_enqueue_script('sapi-maison-cinetique', get_template_directory_uri() . '/assets/cinetique.js', [], '0.2.0', true);
+    wp_enqueue_script('sapi-maison-cinetique', get_template_directory_uri() . '/assets/cinetique.js', [], filemtime(get_template_directory() . '/assets/cinetique.js'), true);
   }
 }
 add_action('wp_enqueue_scripts', 'sapi_maison_enqueue_assets');
