@@ -240,6 +240,7 @@
 
   // =============================================
   // PRODUCTS CAROUSEL (Category pages)
+  // Auto-scrolling with pause on hover
   // =============================================
   const productsCarousel = {
     carousel: null,
@@ -249,9 +250,12 @@
     nextBtn: null,
     dotsContainer: null,
     currentIndex: 0,
-    slidesPerView: 3,
+    slidesPerView: 4,
     touchStartX: 0,
     touchEndX: 0,
+    autoScrollInterval: null,
+    autoScrollDelay: 4000, // 4 seconds between slides
+    isPaused: false,
 
     init: function() {
       this.carousel = document.querySelector('[data-products-carousel]');
@@ -269,16 +273,19 @@
       this.createDots();
       this.bindEvents();
       this.updateCarousel();
+      this.startAutoScroll();
     },
 
     calculateSlidesPerView: function() {
       const width = window.innerWidth;
-      if (width <= 640) {
+      if (width <= 540) {
         this.slidesPerView = 1;
-      } else if (width <= 1024) {
+      } else if (width <= 900) {
         this.slidesPerView = 2;
-      } else {
+      } else if (width <= 1200) {
         this.slidesPerView = 3;
+      } else {
+        this.slidesPerView = 4;
       }
     },
 
@@ -293,27 +300,47 @@
         dot.classList.add('products-carousel-dot');
         if (i === 0) dot.classList.add('active');
         dot.setAttribute('aria-label', `Slide ${i + 1}`);
-        dot.addEventListener('click', () => this.goToSlide(i * this.slidesPerView));
+        dot.addEventListener('click', () => {
+          this.goToSlide(i * this.slidesPerView);
+          this.resetAutoScroll();
+        });
         this.dotsContainer.appendChild(dot);
       }
     },
 
     bindEvents: function() {
       if (this.prevBtn) {
-        this.prevBtn.addEventListener('click', () => this.prev());
+        this.prevBtn.addEventListener('click', () => {
+          this.prev();
+          this.resetAutoScroll();
+        });
       }
       if (this.nextBtn) {
-        this.nextBtn.addEventListener('click', () => this.next());
+        this.nextBtn.addEventListener('click', () => {
+          this.next();
+          this.resetAutoScroll();
+        });
       }
+
+      // Pause auto-scroll on hover
+      this.carousel.addEventListener('mouseenter', () => {
+        this.isPaused = true;
+      });
+      this.carousel.addEventListener('mouseleave', () => {
+        this.isPaused = false;
+      });
 
       // Touch events for mobile swipe
       this.track.addEventListener('touchstart', (e) => {
         this.touchStartX = e.touches[0].clientX;
+        this.isPaused = true;
       }, { passive: true });
 
       this.track.addEventListener('touchend', (e) => {
         this.touchEndX = e.changedTouches[0].clientX;
         this.handleSwipe();
+        this.isPaused = false;
+        this.resetAutoScroll();
       }, { passive: true });
 
       // Recalculate on resize
@@ -327,6 +354,30 @@
           this.updateCarousel();
         }, 200);
       });
+    },
+
+    startAutoScroll: function() {
+      this.autoScrollInterval = setInterval(() => {
+        if (!this.isPaused) {
+          this.nextOrLoop();
+        }
+      }, this.autoScrollDelay);
+    },
+
+    resetAutoScroll: function() {
+      clearInterval(this.autoScrollInterval);
+      this.startAutoScroll();
+    },
+
+    nextOrLoop: function() {
+      const maxIndex = Math.max(0, this.slides.length - this.slidesPerView);
+      if (this.currentIndex >= maxIndex) {
+        // Loop back to start
+        this.currentIndex = 0;
+      } else {
+        this.currentIndex++;
+      }
+      this.updateCarousel();
     },
 
     handleSwipe: function() {

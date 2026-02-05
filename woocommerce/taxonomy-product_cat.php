@@ -1,12 +1,25 @@
 <?php
+/**
+ * Product Category Archive Template
+ *
+ * @package Sapi-Maison
+ */
 
 defined('ABSPATH') || exit;
 
 get_header();
 
 $term = get_queried_object();
-$term_name = $term && isset($term->name) ? $term->name : '';
-$term_slug = $term && isset($term->slug) ? $term->slug : '';
+
+// Ensure $term is valid
+if (!$term || !is_a($term, 'WP_Term')) {
+  get_footer();
+  return;
+}
+
+$term_name = $term->name;
+$term_slug = $term->slug;
+$term_id = $term->term_id;
 
 $category_intro = [
   'suspension' => "Retrouvez ici tous nos lustres, prêts à faire rayonner votre déco intérieure !",
@@ -16,7 +29,9 @@ $category_intro = [
   'accessoire' => "Ampoules, douilles et pied de lampadaire, retrouvez ici de quoi parfaire votre éclairage !",
 ];
 
-sapi_maison_breadcrumbs();
+if (function_exists('sapi_maison_breadcrumbs')) {
+  sapi_maison_breadcrumbs();
+}
 ?>
 
 <section class="shop-hero-cinetique">
@@ -224,7 +239,6 @@ if (!empty($featured)) :
 
 <?php
 // Get ALL products in this category for the carousel (no pagination)
-$term = get_queried_object();
 $products_query = new WP_Query([
   'post_type' => 'product',
   'posts_per_page' => -1,
@@ -232,7 +246,7 @@ $products_query = new WP_Query([
     [
       'taxonomy' => 'product_cat',
       'field' => 'term_id',
-      'terms' => $term->term_id,
+      'terms' => $term_id,
     ],
   ],
   'orderby' => 'menu_order date',
