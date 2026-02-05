@@ -34,11 +34,38 @@ get_header();
         <?php
         $phrase = function_exists('get_field') ? get_field('phrase_daccroche') : '';
         ?>
-        <div class="product-summary-inner">
+        <div class="product-summary-inner" id="product-summary-main">
           <?php do_action('woocommerce_single_product_summary'); ?>
           <?php if ($phrase) : ?>
             <p class="product-hookline"><?php echo esc_html($phrase); ?></p>
           <?php endif; ?>
+
+          <!-- Delivery/Returns Info Block -->
+          <div class="product-delivery-info">
+            <div class="delivery-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              <span><strong>&lt;5j</strong> Fabrication</span>
+            </div>
+            <div class="delivery-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="1" y="3" width="15" height="13"/>
+                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                <circle cx="5.5" cy="18.5" r="2.5"/>
+                <circle cx="18.5" cy="18.5" r="2.5"/>
+              </svg>
+              <span><strong>48-72h</strong> Livraison</span>
+            </div>
+            <div class="delivery-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="1 4 1 10 7 10"/>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+              </svg>
+              <span><strong>30j</strong> Retours</span>
+            </div>
+          </div>
         </div>
         <div class="product-personalisation">
           <p><strong>Vous souhaitez une version colorée ? Une taille différente ? Une gravure personnalisée ?</strong></p>
@@ -181,9 +208,56 @@ get_header();
 
   </div><!-- /.product wrapper -->
 
+  <!-- Sticky Add to Cart Bar -->
+  <div class="sticky-add-to-cart" id="sticky-add-to-cart" aria-hidden="true">
+    <div class="sticky-add-to-cart-inner">
+      <div class="sticky-product-info">
+        <span class="sticky-product-name"><?php the_title(); ?></span>
+        <span class="sticky-product-price"><?php echo $product->get_price_html(); ?></span>
+      </div>
+      <div class="sticky-product-actions">
+        <?php if ($product->is_in_stock() && $product->is_purchasable()) : ?>
+          <a href="<?php echo esc_url($product->add_to_cart_url()); ?>"
+             class="button sticky-add-to-cart-btn"
+             data-product_id="<?php echo esc_attr($product->get_id()); ?>"
+             data-quantity="1"
+             <?php echo $product->is_type('simple') ? 'data-product_sku="' . esc_attr($product->get_sku()) . '"' : ''; ?>>
+            Ajouter au panier
+          </a>
+        <?php else : ?>
+          <span class="button button-disabled">Indisponible</span>
+        <?php endif; ?>
+      </div>
+    </div>
+  </div>
+
   <?php do_action('woocommerce_after_single_product'); ?>
 
 <?php endwhile; ?>
+
+<script>
+// Sticky add-to-cart visibility
+(function() {
+  const stickyBar = document.getElementById('sticky-add-to-cart');
+  const productSummary = document.getElementById('product-summary-main');
+
+  if (!stickyBar || !productSummary) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        stickyBar.classList.remove('is-visible');
+        stickyBar.setAttribute('aria-hidden', 'true');
+      } else {
+        stickyBar.classList.add('is-visible');
+        stickyBar.setAttribute('aria-hidden', 'false');
+      }
+    });
+  }, { threshold: 0, rootMargin: '-100px 0px 0px 0px' });
+
+  observer.observe(productSummary);
+})();
+</script>
 
 <?php
 get_footer();

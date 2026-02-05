@@ -29,7 +29,8 @@ Text Domain: theme-sapi-maison
   /* Colors - Brand */
   --color-wood: #937D68;
   --color-orange: #E67E22;
-  --color-green: #018501;
+  --color-orange-hover: #D35400;
+  --color-green: #018501; /* Keep for success states */
   --color-green-hover: #026B02;
 
   /* Colors - Interactive */
@@ -427,9 +428,10 @@ input[type="submit"],
   padding: 10px 25px;
   border-radius: var(--radius);
   border: none;
-  background: var(--color-green);
+  background: var(--color-orange);
   color: var(--color-white);
   cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 button:hover,
@@ -438,18 +440,19 @@ input[type="submit"]:hover,
 .woocommerce a.button:hover,
 .woocommerce button.button:hover,
 .woocommerce input.button:hover {
-  background: var(--color-orange);
+  background: var(--color-orange-hover);
   color: var(--color-white);
+  transform: translateY(-1px);
 }
 
 .button-outline {
   background: transparent;
-  border: 1px solid var(--color-green);
-  color: var(--color-green);
+  border: 1px solid var(--color-wood);
+  color: var(--color-wood);
 }
 
 .button-outline:hover {
-  background: var(--color-green);
+  background: var(--color-wood);
   color: var(--color-white);
 }
 
@@ -857,11 +860,109 @@ input[type="submit"]:hover,
   margin-top: 20px;
 }
 
+/* Delivery/Returns Info Block */
+.product-delivery-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--color-warm);
+  border-radius: var(--radius);
+  border: 1px solid var(--color-gray-light);
+}
+
+.delivery-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-gray);
+}
+
+.delivery-item svg {
+  color: var(--color-wood);
+  flex-shrink: 0;
+}
+
+.delivery-item strong {
+  color: var(--color-wood);
+}
+
 .product-personalisation {
   margin-top: 20px;
   padding: 20px;
   border-radius: 10px;
   background: var(--color-cream);
+}
+
+/* Sticky Add to Cart Bar */
+.sticky-add-to-cart {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-white);
+  border-top: 1px solid var(--color-gray-light);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 990;
+  transform: translateY(100%);
+  transition: transform 0.3s var(--ease-smooth);
+}
+
+.sticky-add-to-cart.is-visible {
+  transform: translateY(0);
+}
+
+.sticky-add-to-cart-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.75rem 1.5rem;
+}
+
+.sticky-product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sticky-product-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.sticky-product-price {
+  font-weight: 700;
+  color: var(--color-wood);
+}
+
+.sticky-add-to-cart-btn {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .sticky-add-to-cart-inner {
+    padding: 0.75rem 1rem;
+  }
+
+  .sticky-product-name {
+    max-width: 120px;
+    font-size: 0.8rem;
+  }
+
+  .sticky-add-to-cart-btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
 }
 
 .product-details {

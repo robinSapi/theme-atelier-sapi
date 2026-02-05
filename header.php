@@ -21,7 +21,7 @@
       <ul class="nav-menu">
         <li><a href="<?php echo home_url('/'); ?>">Accueil</a></li>
         <li class="menu-item-has-children">
-          <a href="<?php echo home_url('/nos-creations/'); ?>">Nos créations</a>
+          <a href="<?php echo home_url('/boutique/'); ?>">Nos créations</a>
           <ul class="sub-menu">
             <li><a href="<?php echo home_url('/categorie-produit/suspension/'); ?>">Suspensions</a></li>
             <li><a href="<?php echo home_url('/categorie-produit/lampadaire/'); ?>">Lampadaires</a></li>
@@ -66,7 +66,7 @@
       <ul class="mobile-nav-menu">
         <li><a href="<?php echo home_url('/'); ?>">Accueil</a></li>
         <li class="menu-item-has-children">
-          <a href="<?php echo home_url('/nos-creations/'); ?>">Nos créations</a>
+          <a href="<?php echo home_url('/boutique/'); ?>">Nos créations</a>
           <ul class="sub-menu">
             <li><a href="<?php echo home_url('/categorie-produit/suspension/'); ?>">Suspensions</a></li>
             <li><a href="<?php echo home_url('/categorie-produit/lampadaire/'); ?>">Lampadaires</a></li>
