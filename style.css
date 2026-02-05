@@ -1344,6 +1344,12 @@ ul.products.products-carousel-track {
   list-style: none;
 }
 
+/* Filtered out slides - hidden by client-side filter */
+.products-carousel-slide.is-filtered-out,
+.products-carousel-track > li.is-filtered-out {
+  display: none !important;
+}
+
 /* Smaller product cards in carousel */
 .products-carousel-slide .product-card-cinetique {
   font-size: 0.875rem;

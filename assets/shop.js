@@ -169,11 +169,10 @@
         const categories = slide.dataset.categories || '';
         const shouldShow = filter === 'all' || categories.split(' ').includes(filter);
 
+        // Use class only - CSS handles display: none !important
         if (shouldShow) {
-          slide.style.display = '';
           slide.classList.remove('is-filtered-out');
         } else {
-          slide.style.display = 'none';
           slide.classList.add('is-filtered-out');
         }
       });
@@ -355,7 +354,7 @@
 
     recalculateVisibleSlides: function() {
       this.visibleSlides = this.allSlides.filter(slide => {
-        return !slide.classList.contains('is-filtered-out') && slide.style.display !== 'none';
+        return !slide.classList.contains('is-filtered-out');
       });
     },
 
