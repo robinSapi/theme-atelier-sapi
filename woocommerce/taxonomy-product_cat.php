@@ -187,35 +187,55 @@ endif;
 
 if (!empty($featured)) :
 ?>
-  <section class="category-featured">
-    <?php foreach ($featured as $item) :
-      // Get product image dynamically from WooCommerce
-      $product_slug = basename(untrailingslashit($item['link']));
-      $product_obj = get_page_by_path($product_slug, OBJECT, 'product');
-      $product_image = '';
+  <section class="category-carousel-wrapper">
+    <div class="category-carousel" data-carousel>
+      <div class="carousel-track">
+        <?php foreach ($featured as $index => $item) :
+          // Get product image dynamically from WooCommerce
+          $product_slug = basename(untrailingslashit($item['link']));
+          $product_obj = get_page_by_path($product_slug, OBJECT, 'product');
+          $product_image = '';
 
-      if ($product_obj) {
-        $product_image = get_the_post_thumbnail_url($product_obj->ID, 'large');
-      }
+          if ($product_obj) {
+            $product_image = get_the_post_thumbnail_url($product_obj->ID, 'large');
+          }
 
-      // Fallback to hardcoded image if product not found
-      if (!$product_image && !empty($item['image'])) {
-        $product_image = $item['image'];
-      }
+          // Fallback to hardcoded image if product not found
+          if (!$product_image && !empty($item['image'])) {
+            $product_image = $item['image'];
+          }
 
-      // Skip if no image at all
-      if (!$product_image) continue;
-    ?>
-      <article id="<?php echo esc_attr($item['id']); ?>" class="category-featured-card">
-        <h2><?php echo esc_html($item['title']); ?></h2>
-        <p class="category-featured-subtitle"><?php echo esc_html($item['subtitle']); ?></p>
-        <a class="category-featured-link" href="<?php echo esc_url($item['link']); ?>">
-          <div class="category-featured-media">
-            <img src="<?php echo esc_url($product_image); ?>" alt="<?php echo esc_attr($item['title']); ?>" loading="lazy">
-          </div>
-        </a>
-      </article>
-    <?php endforeach; ?>
+          // Skip if no image at all
+          if (!$product_image) continue;
+        ?>
+          <article id="<?php echo esc_attr($item['id']); ?>" class="carousel-slide category-featured-card">
+            <a class="category-featured-link" href="<?php echo esc_url($item['link']); ?>">
+              <div class="category-featured-media">
+                <img src="<?php echo esc_url($product_image); ?>" alt="<?php echo esc_attr($item['title']); ?>" loading="lazy">
+              </div>
+              <div class="category-featured-content">
+                <h2><?php echo esc_html($item['title']); ?></h2>
+                <p class="category-featured-subtitle"><?php echo esc_html($item['subtitle']); ?></p>
+                <span class="category-featured-cta"><?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> →</span>
+              </div>
+            </a>
+          </article>
+        <?php endforeach; ?>
+      </div>
+    </div>
+    <div class="carousel-controls">
+      <button class="carousel-btn carousel-prev" aria-label="<?php esc_attr_e('Précédent', 'theme-sapi-maison'); ?>">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+      <div class="carousel-dots"></div>
+      <button class="carousel-btn carousel-next" aria-label="<?php esc_attr_e('Suivant', 'theme-sapi-maison'); ?>">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </div>
   </section>
 <?php endif; ?>
 

@@ -267,6 +267,157 @@
   };
 
   // =============================================
+  // CATEGORY CAROUSEL
+  // =============================================
+  const categoryCarousel = {
+    carousel: null,
+    track: null,
+    slides: [],
+    prevBtn: null,
+    nextBtn: null,
+    dotsContainer: null,
+    currentIndex: 0,
+    slidesPerView: 3,
+    touchStartX: 0,
+    touchEndX: 0,
+
+    init: function() {
+      this.carousel = document.querySelector('[data-carousel]');
+      if (!this.carousel) return;
+
+      this.track = this.carousel.querySelector('.carousel-track');
+      this.slides = this.carousel.querySelectorAll('.carousel-slide');
+      this.prevBtn = document.querySelector('.carousel-prev');
+      this.nextBtn = document.querySelector('.carousel-next');
+      this.dotsContainer = document.querySelector('.carousel-dots');
+
+      if (!this.track || this.slides.length === 0) return;
+
+      this.calculateSlidesPerView();
+      this.createDots();
+      this.bindEvents();
+      this.updateCarousel();
+    },
+
+    calculateSlidesPerView: function() {
+      const width = window.innerWidth;
+      if (width <= 640) {
+        this.slidesPerView = 1;
+      } else if (width <= 1024) {
+        this.slidesPerView = 2;
+      } else {
+        this.slidesPerView = 3;
+      }
+    },
+
+    createDots: function() {
+      if (!this.dotsContainer) return;
+
+      this.dotsContainer.innerHTML = '';
+      const totalDots = Math.ceil(this.slides.length / this.slidesPerView);
+
+      for (let i = 0; i < totalDots; i++) {
+        const dot = document.createElement('button');
+        dot.classList.add('carousel-dot');
+        if (i === 0) dot.classList.add('active');
+        dot.setAttribute('aria-label', `Slide ${i + 1}`);
+        dot.addEventListener('click', () => this.goToSlide(i * this.slidesPerView));
+        this.dotsContainer.appendChild(dot);
+      }
+    },
+
+    bindEvents: function() {
+      if (this.prevBtn) {
+        this.prevBtn.addEventListener('click', () => this.prev());
+      }
+      if (this.nextBtn) {
+        this.nextBtn.addEventListener('click', () => this.next());
+      }
+
+      // Touch events for mobile swipe
+      this.track.addEventListener('touchstart', (e) => {
+        this.touchStartX = e.touches[0].clientX;
+      }, { passive: true });
+
+      this.track.addEventListener('touchend', (e) => {
+        this.touchEndX = e.changedTouches[0].clientX;
+        this.handleSwipe();
+      }, { passive: true });
+
+      // Recalculate on resize
+      let resizeTimeout;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+          this.calculateSlidesPerView();
+          this.createDots();
+          this.currentIndex = Math.min(this.currentIndex, this.slides.length - this.slidesPerView);
+          this.updateCarousel();
+        }, 200);
+      });
+    },
+
+    handleSwipe: function() {
+      const diff = this.touchStartX - this.touchEndX;
+      const threshold = 50;
+
+      if (diff > threshold) {
+        this.next();
+      } else if (diff < -threshold) {
+        this.prev();
+      }
+    },
+
+    prev: function() {
+      if (this.currentIndex > 0) {
+        this.currentIndex--;
+        this.updateCarousel();
+      }
+    },
+
+    next: function() {
+      const maxIndex = this.slides.length - this.slidesPerView;
+      if (this.currentIndex < maxIndex) {
+        this.currentIndex++;
+        this.updateCarousel();
+      }
+    },
+
+    goToSlide: function(index) {
+      const maxIndex = this.slides.length - this.slidesPerView;
+      this.currentIndex = Math.min(Math.max(0, index), maxIndex);
+      this.updateCarousel();
+    },
+
+    updateCarousel: function() {
+      // Calculate slide width including gap
+      const slideWidth = this.slides[0].offsetWidth;
+      const gap = 24; // 1.5rem = 24px
+      const offset = this.currentIndex * (slideWidth + gap);
+
+      this.track.style.transform = `translateX(-${offset}px)`;
+
+      // Update buttons state
+      const maxIndex = this.slides.length - this.slidesPerView;
+      if (this.prevBtn) {
+        this.prevBtn.disabled = this.currentIndex === 0;
+      }
+      if (this.nextBtn) {
+        this.nextBtn.disabled = this.currentIndex >= maxIndex;
+      }
+
+      // Update dots
+      if (this.dotsContainer) {
+        const dots = this.dotsContainer.querySelectorAll('.carousel-dot');
+        const activeDotIndex = Math.floor(this.currentIndex / this.slidesPerView);
+        dots.forEach((dot, i) => {
+          dot.classList.toggle('active', i === activeDotIndex);
+        });
+      }
+    }
+  };
+
+  // =============================================
   // QUANTITY BUTTONS
   // =============================================
   const quantityButtons = {
@@ -305,6 +456,7 @@
     productGallery.init();
     productCards.init();
     quantityButtons.init();
+    categoryCarousel.init();
   }
 
   // Run on DOM ready
