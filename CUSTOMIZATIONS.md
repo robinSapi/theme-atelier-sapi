@@ -307,6 +307,20 @@ add_theme_support('wc-product-gallery-slider');
 
 ## 📝 Historique des Modifications
 
+**2026-02-05 (Toggle variation selectors):**
+- ✅ **VARIATION SELECTORS** : Design toggle-style pour Matériau et Taille sur pages produit
+  - Fichiers : `style.css` (lignes ~4276+), `shop.js` (variationSwatches module)
+  - Container card avec fond crème (`--color-cream`) et bordure subtile
+  - Toggle buttons horizontaux avec :
+    - Cercle preview (initiale ou image)
+    - Label texte visible
+    - État hover : bordure wood + shadow
+    - État selected : fond warm + bordure wood
+  - JavaScript synchronisé avec WooCommerce :
+    - Click ajoute `.selected` et update le select caché
+    - Reset button réinitialise les sélections
+  - Design cohérent avec le thème Sapi Maison (couleurs, typographie, arrondis)
+
 **2026-02-05 (Carrousel produits + filtres client-side):**
 - ✅ **CARROUSEL PRODUITS** : Page `/nos-creations/` avec carrousel horizontal (plus de pagination)
   - Fichiers : `archive-product.php`, `content-product.php`, `shop.js`, `style.css`
