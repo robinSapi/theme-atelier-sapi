@@ -31,7 +31,7 @@
         </li>
         <li><a href="<?php echo home_url('/lumiere-dartisan/'); ?>">L'artisan</a></li>
         <li><a href="<?php echo home_url('/conseils-eclaires/'); ?>">Conseils</a></li>
-        <li><a href="<?php echo home_url('/contact/'); ?>">Contacts</a></li>
+        <li><a href="<?php echo home_url('/contact/'); ?>">Contact</a></li>
       </ul>
     </nav>
 
@@ -76,7 +76,7 @@
         </li>
         <li><a href="<?php echo home_url('/lumiere-dartisan/'); ?>">L'artisan</a></li>
         <li><a href="<?php echo home_url('/conseils-eclaires/'); ?>">Conseils</a></li>
-        <li><a href="<?php echo home_url('/contact/'); ?>">Contacts</a></li>
+        <li><a href="<?php echo home_url('/contact/'); ?>">Contact</a></li>
       </ul>
     </nav>
   </div>
