@@ -83,60 +83,8 @@ get_header();
     </div>
   </section>
 
-  <section class="product-details product-details-cinetique">
-    <div class="product-details-header">
-      <span class="section-number">02</span>
-      <h2>Détails et conseils</h2>
-    </div>
-    <div class="product-details-grid">
-      <div class="product-details-content">
-        <?php
-        if (function_exists('get_field')) {
-          $descriptif = get_field('descriptif');
-          if ($descriptif) {
-            echo wp_kses_post($descriptif);
-          } else {
-            the_content();
-          }
-        } else {
-          the_content();
-        }
-        ?>
-      </div>
-      <div class="product-details-highlights">
-        <div class="highlight-item">
-          <span class="highlight-icon">✂️</span>
-          <div class="highlight-text">
-            <strong>Découpe laser</strong>
-            <span>Précision au 1/10e de mm</span>
-          </div>
-        </div>
-        <div class="highlight-item">
-          <span class="highlight-icon">🌳</span>
-          <div class="highlight-text">
-            <strong>Bois certifié</strong>
-            <span>Peuplier français PEFC</span>
-          </div>
-        </div>
-        <div class="highlight-item">
-          <span class="highlight-icon">🔧</span>
-          <div class="highlight-text">
-            <strong>Montage facile</strong>
-            <span>Instructions incluses</span>
-          </div>
-        </div>
-        <div class="highlight-item">
-          <span class="highlight-icon">💡</span>
-          <div class="highlight-text">
-            <strong>Ampoule E27</strong>
-            <span>Compatible LED</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="product-assurances product-assurances-cinetique">
+  <!-- Reassurance Bar - Above the fold -->
+  <section class="product-assurances product-assurances-cinetique product-assurances-above-fold">
     <div class="assurance-item">
       <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/icons/picto-assembly.svg'); ?>" alt="Assemblage guidé">
       <p>Assemblage guidé<br>et ludique</p>
@@ -155,6 +103,169 @@ get_header();
     </div>
   </section>
 
+  <!-- Section 02: Pourquoi cette pièce -->
+  <section class="product-why product-why-cinetique">
+    <div class="product-why-header">
+      <span class="section-number">02</span>
+      <h2>Pourquoi cette pièce ?</h2>
+    </div>
+    <div class="product-why-grid">
+      <div class="product-why-content">
+        <?php
+        // Try ACF "pourquoi" field first, fallback to descriptif, then the_content()
+        $why_content = '';
+        if (function_exists('get_field')) {
+          $pourquoi = get_field('pourquoi_cette_piece');
+          $descriptif = get_field('descriptif');
+          if ($pourquoi) {
+            $why_content = $pourquoi;
+          } elseif ($descriptif) {
+            $why_content = $descriptif;
+          }
+        }
+        if ($why_content) {
+          echo wp_kses_post($why_content);
+        } else {
+          the_content();
+        }
+        ?>
+      </div>
+      <div class="product-why-usage">
+        <h3>Idéal pour</h3>
+        <ul class="usage-list">
+          <?php
+          // Try ACF "usages" field, fallback to generic usages
+          $usages = function_exists('get_field') ? get_field('usages') : null;
+          if ($usages && is_array($usages)) {
+            foreach ($usages as $usage) {
+              echo '<li>' . esc_html($usage['usage']) . '</li>';
+            }
+          } else {
+            // Default usages based on category
+            $default_usages = [
+              'Salon & séjour',
+              'Chambre à coucher',
+              'Bureau & espace de travail',
+              'Entrée & couloir'
+            ];
+            foreach ($default_usages as $usage) {
+              echo '<li>' . esc_html($usage) . '</li>';
+            }
+          }
+          ?>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 03: Fiche technique -->
+  <section class="product-specs product-specs-cinetique">
+    <div class="product-specs-header">
+      <span class="section-number">03</span>
+      <h2>Fiche technique</h2>
+    </div>
+    <div class="product-specs-table">
+      <?php
+      // Get product attributes and ACF fields for specs
+      $specs = [];
+
+      // Dimensions (from ACF or attributes)
+      if (function_exists('get_field')) {
+        $dimensions = get_field('dimensions');
+        $hauteur = get_field('hauteur');
+        $largeur = get_field('largeur');
+        $profondeur = get_field('profondeur');
+
+        if ($dimensions) {
+          $specs['Dimensions'] = $dimensions;
+        } elseif ($hauteur || $largeur || $profondeur) {
+          $dim_parts = [];
+          if ($largeur) $dim_parts[] = 'L ' . $largeur;
+          if ($profondeur) $dim_parts[] = 'P ' . $profondeur;
+          if ($hauteur) $dim_parts[] = 'H ' . $hauteur;
+          $specs['Dimensions'] = implode(' × ', $dim_parts);
+        }
+
+        // Other ACF specs
+        $poids = get_field('poids');
+        if ($poids) $specs['Poids'] = $poids;
+      }
+
+      // WooCommerce dimensions fallback
+      if (empty($specs['Dimensions']) && $product) {
+        $wc_dims = wc_format_dimensions($product->get_dimensions(false));
+        if ($wc_dims && $wc_dims !== 'N/A') {
+          $specs['Dimensions'] = $wc_dims;
+        }
+      }
+
+      // Weight fallback
+      if (empty($specs['Poids']) && $product && $product->get_weight()) {
+        $specs['Poids'] = $product->get_weight() . ' kg';
+      }
+
+      // Fixed specs for luminaires
+      $specs['Ampoule'] = 'E27 – LED filament recommandée';
+      $specs['Câble'] = 'Textile noir, 90 cm max, pavillon métal';
+      $specs['Montage'] = 'Instructions incluses, outils fournis';
+      $specs['Matériau'] = 'Peuplier français certifié PEFC';
+      $specs['Finition'] = 'Bois naturel, découpe laser précision';
+
+      foreach ($specs as $label => $value) :
+      ?>
+        <div class="spec-row">
+          <span class="spec-label"><?php echo esc_html($label); ?></span>
+          <span class="spec-value"><?php echo esc_html($value); ?></span>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  </section>
+
+  <!-- Section 04: L'Atelier -->
+  <section class="product-atelier product-atelier-cinetique">
+    <div class="product-atelier-grid">
+      <div class="product-atelier-image">
+        <?php
+        // Try ACF option field, then theme image, then product featured image
+        $atelier_img_url = null;
+        $atelier_img = function_exists('get_field') ? get_field('atelier_photo', 'option') : null;
+
+        if ($atelier_img && isset($atelier_img['url'])) {
+          $atelier_img_url = $atelier_img['url'];
+        } else {
+          $theme_image = get_template_directory() . '/assets/images/atelier-robin.jpg';
+          if (file_exists($theme_image)) {
+            $atelier_img_url = get_template_directory_uri() . '/assets/images/atelier-robin.jpg';
+          }
+        }
+
+        if ($atelier_img_url) :
+        ?>
+          <img src="<?php echo esc_url($atelier_img_url); ?>" alt="Robin dans l'atelier Sapi" loading="lazy">
+        <?php else : ?>
+          <div class="atelier-placeholder">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+            </svg>
+            <span>Photo atelier</span>
+          </div>
+        <?php endif; ?>
+      </div>
+      <div class="product-atelier-content">
+        <span class="section-number">04</span>
+        <h2>Fabriqué avec passion</h2>
+        <p class="atelier-intro">Chaque luminaire est conçu et fabriqué à la main par Robin dans notre atelier lyonnais.</p>
+        <blockquote class="atelier-quote">
+          « Je crée chaque pièce comme si elle allait éclairer ma propre maison. La précision de la découpe laser combinée au savoir-faire artisanal, c'est ce qui rend nos luminaires uniques. »
+        </blockquote>
+        <p class="atelier-signature">— Robin, fondateur d'Atelier Sapi</p>
+        <a href="<?php echo esc_url(home_url('/notre-histoire/')); ?>" class="button button-outline">Découvrir notre histoire</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Product gallery -->
   <section class="product-gallery-large">
     <?php
     $has_acf_images = false;
@@ -198,7 +309,7 @@ get_header();
 
   <section class="product-faq product-faq-cinetique">
     <div class="product-faq-header">
-      <span class="section-number">03</span>
+      <span class="section-number">05</span>
       <h2>Des Questions ?</h2>
     </div>
     <div class="faq-list">

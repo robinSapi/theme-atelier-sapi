@@ -1438,12 +1438,331 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 
 /* CINÉTIQUE Assurances Enhancement */
 .product-assurances.product-assurances-cinetique {
-  padding: 3rem;
+  padding: 2rem 3rem;
   max-width: 1400px;
   margin: 0 auto;
+  background: var(--color-cream);
+  border-radius: var(--radius-lg);
+}
+
+/* Above-fold reassurance bar - compact */
+.product-assurances-above-fold {
+  margin-top: 1rem;
+}
+
+/* ========================================
+   Section 02: Pourquoi cette pièce
+   ======================================== */
+
+.product-why.product-why-cinetique {
+  padding: 4rem 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.product-why-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.product-why-header .section-number {
+  font-size: 0.875rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--color-wood);
+}
+
+.product-why-cinetique h2 {
+  font-family: var(--font-body);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 900;
+  color: var(--color-dark);
+  margin: 0;
+}
+
+.product-why-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+.product-why-content {
+  color: var(--color-gray);
+  line-height: 1.8;
+}
+
+.product-why-content p {
+  margin-bottom: 1.5rem;
+}
+
+.product-why-content p:last-child {
+  margin-bottom: 0;
+}
+
+.product-why-usage {
+  background: var(--color-cream);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+}
+
+.product-why-usage h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1.5rem;
+}
+
+.usage-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.usage-list li {
+  position: relative;
+  padding-left: 1.5rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(147, 125, 104, 0.15);
+  color: var(--color-gray);
+}
+
+.usage-list li:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.usage-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.5rem;
+  width: 8px;
+  height: 8px;
+  background: var(--color-orange);
+  border-radius: 50%;
+}
+
+/* Mobile: Stack the grid */
+@media (max-width: 768px) {
+  .product-why-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .product-why.product-why-cinetique {
+    padding: 3rem 1.5rem;
+  }
+}
+
+/* ========================================
+   Section 03: Fiche technique
+   ======================================== */
+
+.product-specs.product-specs-cinetique {
+  padding: 4rem 3rem;
+  max-width: 900px;
+  margin: 0 auto;
   background: var(--color-white);
-  border-top: 1px solid var(--color-gray-light);
+}
+
+.product-specs-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.product-specs-header .section-number {
+  font-size: 0.875rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--color-wood);
+}
+
+.product-specs-cinetique h2 {
+  font-family: var(--font-body);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 900;
+  color: var(--color-dark);
+  margin: 0;
+}
+
+.product-specs-table {
+  border: 1px solid var(--color-gray-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.spec-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--color-gray-light);
+  -webkit-transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease;
+}
+
+.spec-row:last-child {
+  border-bottom: none;
+}
+
+.spec-row:hover {
+  background: var(--color-cream);
+}
+
+.spec-label {
+  font-weight: 600;
+  color: var(--color-dark);
+  flex-shrink: 0;
+}
+
+.spec-value {
+  color: var(--color-gray);
+  text-align: right;
+}
+
+/* Mobile: Responsive specs */
+@media (max-width: 768px) {
+  .product-specs.product-specs-cinetique {
+    padding: 3rem 1.5rem;
+  }
+
+  .spec-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .spec-value {
+    text-align: left;
+  }
+}
+
+/* ========================================
+   Section 04: L'Atelier / Robin
+   ======================================== */
+
+.product-atelier.product-atelier-cinetique {
+  padding: 4rem 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: var(--color-warm);
+  border-radius: var(--radius-lg);
+}
+
+.product-atelier-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.product-atelier-image {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  aspect-ratio: 4/3;
+}
+
+.product-atelier-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.atelier-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--color-gray-light);
+  color: var(--color-gray-mid);
+  gap: 1rem;
+}
+
+.atelier-placeholder svg {
+  opacity: 0.5;
+}
+
+.atelier-placeholder span {
+  font-size: 0.875rem;
+  opacity: 0.7;
+}
+
+.product-atelier-content {
+  padding: 1rem 0;
+}
+
+.product-atelier-content .section-number {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--color-wood);
+  margin-bottom: 0.75rem;
+}
+
+.product-atelier-content h2 {
+  font-family: var(--font-body);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 900;
+  color: var(--color-dark);
+  margin-bottom: 1.5rem;
+}
+
+.atelier-intro {
+  font-size: 1.125rem;
+  color: var(--color-gray);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.atelier-quote {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 1.125rem;
+  color: var(--color-dark);
+  line-height: 1.8;
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  border-left: 3px solid var(--color-orange);
+}
+
+.atelier-signature {
+  font-weight: 600;
+  color: var(--color-wood);
+  margin-bottom: 2rem;
+}
+
+.product-atelier-content .button {
+  margin-top: 0.5rem;
+}
+
+/* Mobile: Stack the atelier grid */
+@media (max-width: 768px) {
+  .product-atelier.product-atelier-cinetique {
+    padding: 2rem 1.5rem;
+  }
+
+  .product-atelier-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .product-atelier-image {
+    aspect-ratio: 16/9;
+  }
 }
 
 .product-gallery-large {
