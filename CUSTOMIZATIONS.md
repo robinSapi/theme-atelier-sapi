@@ -307,6 +307,37 @@ add_theme_support('wc-product-gallery-slider');
 
 ## 📝 Historique des Modifications
 
+**2026-02-05 (UX Améliorations page Nos Créations):**
+- ✅ **HERO VISUEL** : Refonte hero avec grille texte + collage d'images
+  - Fichiers : `archive-product.php`, `style.css`
+  - Layout grid 2 colonnes : contenu à gauche, collage produits à droite
+  - Collage dynamique : 3 produits "featured" (ou récents en fallback)
+    - `.collage-main` : grande image (span 2 rows)
+    - `.collage-accent-1` et `.collage-accent-2` : petites images
+  - Hover zoom sur les images du collage
+  - Responsive : colonne unique sur mobile, une seule image visible
+
+- ✅ **COMPTEURS FILTRES DYNAMIQUES** : Affichage du nombre de produits par catégorie
+  - Format : `Suspension (9)` - chiffre entre parenthèses
+  - Utilise `$cat->count` pour les catégories
+  - Utilise `$all_products->found_posts` pour "Tout"
+  - Classe `.filter-count` avec opacité réduite
+
+- ✅ **ÉTAT ACTIF FILTRES AMÉLIORÉ** : Design plus visible pour le filtre sélectionné
+  - Fond `--color-wood` avec box-shadow
+  - `transform: scale(1.02)` pour légère mise en avant
+  - Bordure 2px (au lieu de 1px) pour plus de présence
+  - Hover sur actif → fond `--color-dark`
+
+- ✅ **CTAs STRATÉGIQUES** : Ajout de 2 boutons d'appel à l'action
+  - **CTA Hero** : "Découvrir la collection" avec flèche ↓ (ancre vers #shop-products)
+  - **CTA Outro** : "Contactez-nous" avec message personnalisation sur-mesure
+  - Smooth scroll vers la section produits
+
+- ✅ **TEXTE HERO CONDENSÉ** : Reformulation plus concise
+  - Avant : "Chaque pièce est unique, découpée au laser et assemblée à la main dans notre atelier lyonnais."
+  - Après : "Luminaires uniques, découpés au laser et assemblés à la main dans notre atelier lyonnais."
+
 **2026-02-05 (Toggle variation selectors):**
 - ✅ **VARIATION SELECTORS** : Design toggle-style pour Matériau et Taille sur pages produit
   - Fichiers : `style.css` (lignes ~4276+), `shop.js` (variationSwatches module)

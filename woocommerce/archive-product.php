@@ -31,31 +31,80 @@ $all_products = new WP_Query([
 ]);
 ?>
 
-<!-- Hero Section -->
-<section class="shop-hero-cinetique">
-  <span class="section-number">01</span>
-  <h1><?php esc_html_e('Nos Créations', 'theme-sapi-maison'); ?></h1>
-  <p class="shop-subtitle">
-    <?php esc_html_e('Chaque pièce est unique, découpée au laser et assemblée à la main dans notre atelier lyonnais.', 'theme-sapi-maison'); ?>
-  </p>
+<!-- Hero Section with Visual -->
+<section class="shop-hero-cinetique shop-hero-visual">
+  <div class="shop-hero-grid">
+    <div class="shop-hero-content">
+      <span class="section-number">01</span>
+      <h1><?php esc_html_e('Nos Créations', 'theme-sapi-maison'); ?></h1>
+      <p class="shop-subtitle">
+        <?php esc_html_e('Luminaires uniques, découpés au laser et assemblés à la main dans notre atelier lyonnais.', 'theme-sapi-maison'); ?>
+      </p>
+      <a href="#shop-products" class="shop-hero-cta button">
+        <?php esc_html_e('Découvrir la collection', 'theme-sapi-maison'); ?>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <polyline points="19 12 12 19 5 12"></polyline>
+        </svg>
+      </a>
+    </div>
+    <div class="shop-hero-visual-collage">
+      <?php
+      // Get 3 featured products for the collage
+      $featured_products = wc_get_products([
+        'limit' => 3,
+        'status' => 'publish',
+        'featured' => true,
+        'return' => 'objects',
+      ]);
+
+      // Fallback to recent products if no featured
+      if (empty($featured_products)) {
+        $featured_products = wc_get_products([
+          'limit' => 3,
+          'status' => 'publish',
+          'orderby' => 'date',
+          'order' => 'DESC',
+          'return' => 'objects',
+        ]);
+      }
+
+      $collage_classes = ['collage-main', 'collage-accent-1', 'collage-accent-2'];
+      $i = 0;
+      foreach ($featured_products as $fp) :
+        $img_id = $fp->get_image_id();
+        $img_url = $img_id ? wp_get_attachment_image_url($img_id, 'medium_large') : wc_placeholder_img_src('medium_large');
+        $class = isset($collage_classes[$i]) ? $collage_classes[$i] : '';
+      ?>
+        <a href="<?php echo esc_url($fp->get_permalink()); ?>" class="collage-item <?php echo esc_attr($class); ?>">
+          <img src="<?php echo esc_url($img_url); ?>" alt="<?php echo esc_attr($fp->get_name()); ?>" loading="lazy">
+        </a>
+      <?php
+        $i++;
+      endforeach;
+      ?>
+    </div>
+  </div>
 </section>
 
-<!-- Product Filters (client-side filtering) -->
+<!-- Product Filters with dynamic counts -->
 <nav class="product-filters product-filters-js" role="navigation" aria-label="<?php esc_attr_e('Filtres produits', 'theme-sapi-maison'); ?>">
   <button type="button" class="filter-btn active" data-filter="all">
     <?php esc_html_e('Tout', 'theme-sapi-maison'); ?>
+    <span class="filter-count">(<?php echo esc_html($all_products->found_posts); ?>)</span>
   </button>
   <?php if ($product_categories && !is_wp_error($product_categories)) : ?>
     <?php foreach ($product_categories as $cat) : ?>
       <button type="button" class="filter-btn" data-filter="<?php echo esc_attr($cat->slug); ?>">
         <?php echo esc_html($cat->name); ?>
+        <span class="filter-count">(<?php echo esc_html($cat->count); ?>)</span>
       </button>
     <?php endforeach; ?>
   <?php endif; ?>
 </nav>
 
 <!-- Products Carousel -->
-<section class="shop-products">
+<section class="shop-products" id="shop-products">
   <?php if ($all_products->have_posts()) : ?>
 
     <div class="products-carousel-wrapper">
@@ -111,11 +160,19 @@ $all_products = new WP_Query([
   <?php wp_reset_postdata(); ?>
 </section>
 
-<!-- Outro Section -->
+<!-- Outro Section with CTA -->
 <section class="shop-outro">
-  <p class="shop-outro-text">
-    <?php esc_html_e('Laissez-vous guider par la lumière...', 'theme-sapi-maison'); ?>
-  </p>
+  <div class="shop-outro-content">
+    <p class="shop-outro-text">
+      <?php esc_html_e('Vous ne trouvez pas votre bonheur ?', 'theme-sapi-maison'); ?>
+    </p>
+    <p class="shop-outro-subtitle">
+      <?php esc_html_e('Dites-nous ce que vous imaginez et nous créerons ensemble votre luminaire sur-mesure.', 'theme-sapi-maison'); ?>
+    </p>
+    <a href="mailto:contact@atelier-sapi.fr" class="button button-outline shop-outro-cta">
+      <?php esc_html_e('Contactez-nous', 'theme-sapi-maison'); ?>
+    </a>
+  </div>
 </section>
 
 <?php
