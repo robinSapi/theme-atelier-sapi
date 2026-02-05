@@ -61,12 +61,12 @@ get_header();
   <div class="contact-hero-overlay"></div>
   <div class="contact-hero-content">
     <h1>Prise de contact</h1>
-    <p>Personnalisation, questions, service après vente, dites nous ce qui vous traverse l'ampoule !</p>
+    <p>Personnalisation, questions, service après vente, dites-nous ce qui vous traverse l'ampoule !</p>
   </div>
 </section>
 
 <section class="contact-body">
-  <p>Vous n'avez pas trouvé le luminaire de vos rêves ? Vous avez un doute ou n'arrivez pas à faire votre choix ? Vous avez un problème avec votre commande ? Contactez nous, nous répondrons le plus vite possible ! 🚀</p>
+  <p>Vous n'avez pas trouvé le luminaire de vos rêves ? Vous avez un doute ou n'arrivez pas à faire votre choix ? Vous avez un problème avec votre commande ? Contactez-nous, nous répondrons le plus vite possible ! 🚀</p>
   <div class="contact-actions">
     <a class="button" href="mailto:contact@atelier-sapi.fr">ENVOYER UN MAIL ✉️</a>
     <a class="button button-outline" href="tel:0680435585">PASSER UN COUP DE FIL 📞</a>

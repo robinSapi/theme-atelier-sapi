@@ -24,7 +24,7 @@
     <div class="footer-col">
       <h4>Contact</h4>
       <a href="mailto:contact@atelier-sapi.fr">contact@atelier-sapi.fr</a>
-      <a href="tel:+33600000000">06 00 00 00 00</a>
+      <a href="tel:+33680435585">06 80 43 55 85</a>
       <span class="footer-location">Lyon, France</span>
     </div>
 

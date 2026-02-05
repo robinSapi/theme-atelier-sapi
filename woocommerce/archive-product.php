@@ -11,7 +11,7 @@ get_header();
       <h1>Nos luminaires</h1>
       <span class="divider"></span>
     </div>
-    <p class="shop-hero-subtitle">Préparez vous à découvrir nos luminaires en bois uniques</p>
+    <p class="shop-hero-subtitle">Préparez-vous à découvrir nos luminaires en bois uniques</p>
   </div>
 </section>
 

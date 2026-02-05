@@ -9,7 +9,7 @@ $term_name = $term && isset($term->name) ? $term->name : '';
 $term_slug = $term && isset($term->slug) ? $term->slug : '';
 
 $category_intro = [
-  'suspension' => "Retrouvez ici tout nos lustres, prêts à faire rayonner votre déco intérieure !",
+  'suspension' => "Retrouvez ici tous nos lustres, prêts à faire rayonner votre déco intérieure !",
   'lampadaire' => "Posés au sol et bien branchés, des lampadaires prêts à illuminer chez vous !",
   'applique' => "Nos appliques, un mix idéal entre éclairages et déco pour vos murs !",
   'lampe-a-poser' => "Lampes de chevet, de bureau ou de salon, c'est ici que ça se passe !",
