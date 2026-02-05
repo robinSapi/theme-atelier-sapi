@@ -21,11 +21,11 @@ get_header();
 
   <?php do_action('woocommerce_before_single_product'); ?>
 
-  <div id="product-<?php the_ID(); ?>" <?php wc_product_class('', $product); ?>>
+  <div id="product-<?php the_ID(); ?>" <?php wc_product_class('product-page-cinetique', $product); ?>>
 
   <?php sapi_maison_breadcrumbs(); ?>
 
-  <section class="product-hero">
+  <section class="product-hero product-hero-cinetique">
     <div class="product-hero-grid">
       <div class="product-gallery">
         <?php do_action('woocommerce_before_single_product_summary'); ?>
@@ -33,8 +33,15 @@ get_header();
       <div class="product-summary">
         <?php
         $phrase = function_exists('get_field') ? get_field('phrase_daccroche') : '';
+        // Get product category for section context
+        $product_cats = get_the_terms(get_the_ID(), 'product_cat');
+        $cat_name = $product_cats && !is_wp_error($product_cats) ? $product_cats[0]->name : 'Création';
         ?>
         <div class="product-summary-inner" id="product-summary-main">
+          <div class="product-summary-header">
+            <span class="section-number">01</span>
+            <span class="product-category-label"><?php echo esc_html($cat_name); ?></span>
+          </div>
           <?php do_action('woocommerce_single_product_summary'); ?>
           <?php if ($phrase) : ?>
             <p class="product-hookline"><?php echo esc_html($phrase); ?></p>
@@ -76,25 +83,60 @@ get_header();
     </div>
   </section>
 
-  <section class="product-details">
-    <h2>Détails et conseils</h2>
-    <div class="product-details-content">
-      <?php
-      if (function_exists('get_field')) {
-        $descriptif = get_field('descriptif');
-        if ($descriptif) {
-          echo wp_kses_post($descriptif);
+  <section class="product-details product-details-cinetique">
+    <div class="product-details-header">
+      <span class="section-number">02</span>
+      <h2>Détails et conseils</h2>
+    </div>
+    <div class="product-details-grid">
+      <div class="product-details-content">
+        <?php
+        if (function_exists('get_field')) {
+          $descriptif = get_field('descriptif');
+          if ($descriptif) {
+            echo wp_kses_post($descriptif);
+          } else {
+            the_content();
+          }
         } else {
           the_content();
         }
-      } else {
-        the_content();
-      }
-      ?>
+        ?>
+      </div>
+      <div class="product-details-highlights">
+        <div class="highlight-item">
+          <span class="highlight-icon">✂️</span>
+          <div class="highlight-text">
+            <strong>Découpe laser</strong>
+            <span>Précision au 1/10e de mm</span>
+          </div>
+        </div>
+        <div class="highlight-item">
+          <span class="highlight-icon">🌳</span>
+          <div class="highlight-text">
+            <strong>Bois certifié</strong>
+            <span>Peuplier français PEFC</span>
+          </div>
+        </div>
+        <div class="highlight-item">
+          <span class="highlight-icon">🔧</span>
+          <div class="highlight-text">
+            <strong>Montage facile</strong>
+            <span>Instructions incluses</span>
+          </div>
+        </div>
+        <div class="highlight-item">
+          <span class="highlight-icon">💡</span>
+          <div class="highlight-text">
+            <strong>Ampoule E27</strong>
+            <span>Compatible LED</span>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="product-assurances">
+  <section class="product-assurances product-assurances-cinetique">
     <div class="assurance-item">
       <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/icons/picto-assembly.svg'); ?>" alt="Assemblage guidé">
       <p>Assemblage guidé<br>et ludique</p>
@@ -154,15 +196,18 @@ get_header();
     ?>
   </section>
 
-  <section class="product-faq">
-    <h2>Des Questions ?</h2>
+  <section class="product-faq product-faq-cinetique">
+    <div class="product-faq-header">
+      <span class="section-number">03</span>
+      <h2>Des Questions ?</h2>
+    </div>
     <div class="faq-list">
-      <details>
-        <summary>Quelle ampoule choisir ?</summary>
-        <div>
-          <p>Avec chaque modèle, nous vous recommandons une ampoule adaptée. Nous l’avons soigneusement choisie, et elle est disponible à l’achat comme accessoire.</p>
+      <details class="faq-item">
+        <summary><span class="faq-question">Quelle ampoule choisir ?</span><span class="faq-chevron"></span></summary>
+        <div class="faq-answer">
+          <p>Avec chaque modèle, nous vous recommandons une ampoule adaptée. Nous l'avons soigneusement choisie, et elle est disponible à l'achat comme accessoire.</p>
           <ul>
-            <li>Des ampoules E27 : c’est le standard le plus adapté et le plus populaire.</li>
+            <li>Des ampoules E27 : c'est le standard le plus adapté et le plus populaire.</li>
             <li>Filament LED : idéal pour créer les ombres uniques de nos luminaires.</li>
             <li>Taille et forme : elle dépend du modèle. Attention aux ampoules trop grandes.</li>
             <li>Couleur : blanc chaud (2700K), parfait pour mettre en valeur le bois.</li>
@@ -170,32 +215,32 @@ get_header();
           </ul>
         </div>
       </details>
-      <details>
-        <summary>Le montage du luminaire est-il compliqué ?</summary>
-        <div>
-          <p>Pas d’inquiétude, toutes les instructions sont dans le colis ! Montage simple et rapide.</p>
-          <p>Besoin d’aide ? Écrivez-nous à contact@atelier-sapi.fr.</p>
+      <details class="faq-item">
+        <summary><span class="faq-question">Le montage du luminaire est-il compliqué ?</span><span class="faq-chevron"></span></summary>
+        <div class="faq-answer">
+          <p>Pas d'inquiétude, toutes les instructions sont dans le colis ! Montage simple et rapide.</p>
+          <p>Besoin d'aide ? Écrivez-nous à contact@atelier-sapi.fr.</p>
         </div>
       </details>
-      <details>
-        <summary>Dans combien de temps vais-je recevoir mon luminaire ?</summary>
-        <div>
+      <details class="faq-item">
+        <summary><span class="faq-question">Dans combien de temps vais-je recevoir mon luminaire ?</span><span class="faq-chevron"></span></summary>
+        <div class="faq-answer">
           <p>Fabrication : moins de 5 jours.</p>
           <p>Expédition : 48 à 72h pour rejoindre votre nid douillet.</p>
         </div>
       </details>
-      <details>
-        <summary>Puis-je retourner mon luminaire ?</summary>
-        <div>
+      <details class="faq-item">
+        <summary><span class="faq-question">Puis-je retourner mon luminaire ?</span><span class="faq-chevron"></span></summary>
+        <div class="faq-answer">
           <p>Vous avez 30 jours après réception pour le retourner.</p>
           <p>Contactez-nous si besoin, puis renvoyez le produit dans son emballage d'origine.</p>
         </div>
       </details>
-      <details>
-        <summary>Le câble avec la douille est-il fourni ?</summary>
-        <div>
+      <details class="faq-item">
+        <summary><span class="faq-question">Le câble avec la douille est-il fourni ?</span><span class="faq-chevron"></span></summary>
+        <div class="faq-answer">
           <p>Oui ! Câble textile noir, pavillon métal noir, douille E27. Longueur max 90 cm.</p>
-          <p>Besoin d’un câble particulier ? Contactez-nous avant la commande.</p>
+          <p>Besoin d'un câble particulier ? Contactez-nous avant la commande.</p>
         </div>
       </details>
     </div>

@@ -307,6 +307,42 @@ add_theme_support('wc-product-gallery-slider');
 
 ## 📝 Historique des Modifications
 
+**2026-02-05 (Design CINÉTIQUE - Fiche produit + Panier/Checkout):**
+- ✅ **FICHE PRODUIT - Hero style HP** :
+  - Ajout numéro de section "01" + label catégorie
+  - Classes `.product-hero-cinetique`, `.product-summary-header`
+  - Titre plus grand (clamp), cohérent avec la HP
+
+- ✅ **FICHE PRODUIT - Détails 2 colonnes** :
+  - Grille `.product-details-grid` (1.5fr + 1fr)
+  - Colonne gauche : descriptif ACF ou content
+  - Colonne droite : highlights (découpe laser, bois certifié, montage, ampoule)
+  - Section "02" avec numéro
+
+- ✅ **FICHE PRODUIT - FAQ avec chevrons** :
+  - Classes `.product-faq-cinetique`, `.faq-item`
+  - Chevrons CSS-only (::before/::after rotations)
+  - Section "03" avec numéro
+  - Design condensé avec bordures arrondies
+
+- ✅ **FICHE PRODUIT - Sticky bar premium** :
+  - Background gradient cream → white
+  - Bordure top wood 2px
+  - Shadow améliorée
+  - Typographie uppercase + letter-spacing
+
+- ✅ **PANIER - Design CINÉTIQUE** :
+  - Hook `woocommerce_before_cart` → hero avec section "01"
+  - Hook `woocommerce_after_cart` → bloc rassurance (fabrication, livraison, retours)
+  - CSS : `.cart-page-cinetique`, `.cart-hero`, `.cart-reassurance`
+  - Table stylée avec thumbnails arrondies
+
+- ✅ **CHECKOUT - Design CINÉTIQUE** :
+  - Hook `woocommerce_before_checkout_form` → hero avec section "01"
+  - Layout 2 colonnes (billing/shipping côte à côte)
+  - Formulaires avec inputs arrondis, focus wood
+  - Bouton "Commander" premium (uppercase, wood)
+
 **2026-02-05 (Fix sticky add-to-cart produits variables):**
 - ✅ **STICKY BAR VARIABLE PRODUCTS** : Gestion correcte des produits avec variations
   - Fichiers : `single-product.php`, `style.css`

@@ -475,3 +475,77 @@ add_action('after_setup_theme', function() {
   add_image_size('product-card', 400, 400, true);
   add_image_size('product-gallery-thumb', 120, 120, true);
 }, 11);
+
+/**
+ * CINÉTIQUE - Custom Cart Page Header
+ */
+add_action('woocommerce_before_cart', function() {
+  ?>
+  <div class="cart-page-cinetique">
+    <div class="cart-hero">
+      <span class="section-number">01</span>
+      <h1><?php esc_html_e('Votre Panier', 'theme-sapi-maison'); ?></h1>
+      <p class="cart-subtitle"><?php esc_html_e('Plus que quelques clics avant de recevoir votre luminaire !', 'theme-sapi-maison'); ?></p>
+    </div>
+  <?php
+});
+
+add_action('woocommerce_after_cart', function() {
+  ?>
+    <div class="cart-reassurance">
+      <div class="reassurance-item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <div class="reassurance-text">
+          <strong><?php esc_html_e('Fabrication < 5 jours', 'theme-sapi-maison'); ?></strong>
+          <span><?php esc_html_e('Fait main dans notre atelier lyonnais', 'theme-sapi-maison'); ?></span>
+        </div>
+      </div>
+      <div class="reassurance-item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="1" y="3" width="15" height="13"/>
+          <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+          <circle cx="5.5" cy="18.5" r="2.5"/>
+          <circle cx="18.5" cy="18.5" r="2.5"/>
+        </svg>
+        <div class="reassurance-text">
+          <strong><?php esc_html_e('Livraison 48-72h', 'theme-sapi-maison'); ?></strong>
+          <span><?php esc_html_e('Soigneusement emballé', 'theme-sapi-maison'); ?></span>
+        </div>
+      </div>
+      <div class="reassurance-item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="1 4 1 10 7 10"/>
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+        </svg>
+        <div class="reassurance-text">
+          <strong><?php esc_html_e('Retours 30 jours', 'theme-sapi-maison'); ?></strong>
+          <span><?php esc_html_e('Satisfait ou remboursé', 'theme-sapi-maison'); ?></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <?php
+});
+
+/**
+ * CINÉTIQUE - Custom Checkout Page Header
+ */
+add_action('woocommerce_before_checkout_form', function() {
+  ?>
+  <div class="checkout-page-cinetique">
+    <div class="checkout-hero">
+      <span class="section-number">01</span>
+      <h1><?php esc_html_e('Finaliser ma commande', 'theme-sapi-maison'); ?></h1>
+      <p class="checkout-subtitle"><?php esc_html_e('Votre luminaire sera bientôt chez vous !', 'theme-sapi-maison'); ?></p>
+    </div>
+  <?php
+}, 5);
+
+add_action('woocommerce_after_checkout_form', function() {
+  ?>
+  </div><!-- /.checkout-page-cinetique -->
+  <?php
+});

@@ -996,6 +996,13 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   padding: 40px 20px;
 }
 
+/* CINÉTIQUE Product Hero Enhancement */
+.product-hero.product-hero-cinetique {
+  padding: 2rem 3rem 3rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
 .product-hero-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -1003,11 +1010,50 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   align-items: start;
 }
 
+.product-hero-cinetique .product-hero-grid {
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+/* Product Summary Header with Section Number */
+.product-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.product-summary-header .section-number {
+  font-size: 0.875rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--color-wood);
+}
+
+.product-category-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-gray);
+  padding: 0.25rem 0.75rem;
+  background: var(--color-warm);
+  border-radius: 20px;
+}
+
 .product-summary .product_title {
   font-size: 24px;
   text-transform: uppercase;
   color: var(--color-wood);
   margin-bottom: 10px;
+}
+
+/* Enhanced product title for cinetique */
+.product-hero-cinetique .product-summary .product_title {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 900;
+  margin-bottom: 0.75rem;
 }
 
 .product-summary .price {
@@ -1146,20 +1192,24 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 }
 
 /* Sticky Add to Cart Bar */
+/* Premium Sticky Add to Cart Bar */
 .sticky-add-to-cart {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--color-white);
-  border-top: 1px solid var(--color-gray-light);
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(to right, var(--color-cream), var(--color-white));
+  border-top: 2px solid var(--color-wood);
+  box-shadow: 0 -8px 30px rgba(147, 125, 104, 0.15);
   z-index: 990;
+  -webkit-transform: translateY(100%);
   transform: translateY(100%);
+  -webkit-transition: transform 0.3s var(--ease-smooth);
   transition: transform 0.3s var(--ease-smooth);
 }
 
 .sticky-add-to-cart.is-visible {
+  -webkit-transform: translateY(0);
   transform: translateY(0);
 }
 
@@ -1167,10 +1217,10 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1.5rem;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 2rem;
 }
 
 .sticky-product-info {
@@ -1180,22 +1230,30 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 }
 
 .sticky-product-name {
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-weight: 700;
+  font-size: 1rem;
   color: var(--color-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
+  max-width: 280px;
 }
 
 .sticky-product-price {
-  font-weight: 700;
+  font-weight: 800;
+  font-size: 1.1rem;
   color: var(--color-wood);
 }
 
 .sticky-add-to-cart-btn {
   white-space: nowrap;
+  padding: 0.85rem 2rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* Variable product sticky button states */
@@ -1246,6 +1304,129 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   margin-bottom: 20px;
 }
 
+/* CINÉTIQUE Product Details - Two Column Layout */
+.product-details.product-details-cinetique {
+  text-align: left;
+  padding: 4rem 3rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: var(--color-cream);
+}
+
+.product-details-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.product-details-header .section-number {
+  font-size: 0.875rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--color-wood);
+}
+
+.product-details-cinetique h2 {
+  font-family: var(--font-body);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 900;
+  color: var(--color-dark);
+  margin: 0;
+}
+
+.product-details-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.product-details-content {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--color-gray);
+}
+
+.product-details-content p {
+  margin-bottom: 1rem;
+}
+
+.product-details-content ul {
+  padding-left: 1.5rem;
+  margin: 1rem 0;
+}
+
+.product-details-content li {
+  margin-bottom: 0.5rem;
+}
+
+/* Details Highlights Sidebar */
+.product-details-highlights {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.highlight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--color-white);
+  border-radius: 12px;
+  border: 1px solid rgba(147, 125, 104, 0.15);
+}
+
+.highlight-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.highlight-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.highlight-text strong {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+.highlight-text span {
+  font-size: 0.8rem;
+  color: var(--color-gray);
+}
+
+@media (max-width: 900px) {
+  .product-details-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .product-details-highlights {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .highlight-item {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 540px) {
+  .product-details.product-details-cinetique {
+    padding: 2rem 1.5rem;
+  }
+
+  .highlight-item {
+    flex: 1 1 100%;
+  }
+}
+
 .product-assurances {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -1253,6 +1434,16 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   padding: 30px 20px;
   background: var(--color-gray-light);
   text-align: center;
+}
+
+/* CINÉTIQUE Assurances Enhancement */
+.product-assurances.product-assurances-cinetique {
+  padding: 3rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: var(--color-white);
+  border-top: 1px solid var(--color-gray-light);
+  border-bottom: 1px solid var(--color-gray-light);
 }
 
 .product-gallery-large {
@@ -1284,6 +1475,156 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   font-weight: 600;
   color: var(--color-wood);
   cursor: pointer;
+}
+
+/* CINÉTIQUE FAQ Enhancement with Chevrons */
+.product-faq.product-faq-cinetique {
+  padding: 3rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.product-faq-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.product-faq-header .section-number {
+  font-size: 0.875rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--color-wood);
+}
+
+.product-faq-cinetique h2 {
+  font-family: var(--font-body);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 900;
+  color: var(--color-dark);
+  margin: 0;
+}
+
+.product-faq-cinetique .faq-list {
+  border: 1px solid var(--color-gray-light);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.product-faq-cinetique .faq-item {
+  border-top: none;
+  padding: 0;
+  border-bottom: 1px solid var(--color-gray-light);
+}
+
+.product-faq-cinetique .faq-item:last-child {
+  border-bottom: none;
+}
+
+.product-faq-cinetique .faq-item summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  font-weight: 500;
+  color: var(--color-dark);
+  -webkit-transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease;
+  list-style: none;
+}
+
+.product-faq-cinetique .faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.product-faq-cinetique .faq-item summary:hover {
+  background: var(--color-cream);
+}
+
+.product-faq-cinetique .faq-question {
+  flex: 1;
+  padding-right: 1rem;
+}
+
+/* Chevron icon */
+.product-faq-cinetique .faq-chevron {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.product-faq-cinetique .faq-chevron::before,
+.product-faq-cinetique .faq-chevron::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 2px;
+  background: var(--color-wood);
+  top: 50%;
+  -webkit-transition: transform 0.3s var(--ease-smooth);
+  transition: transform 0.3s var(--ease-smooth);
+}
+
+.product-faq-cinetique .faq-chevron::before {
+  left: 2px;
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.product-faq-cinetique .faq-chevron::after {
+  right: 2px;
+  -webkit-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+
+.product-faq-cinetique .faq-item[open] .faq-chevron::before {
+  -webkit-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+
+.product-faq-cinetique .faq-item[open] .faq-chevron::after {
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.product-faq-cinetique .faq-answer {
+  padding: 0 1.5rem 1.25rem;
+  color: var(--color-gray);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.product-faq-cinetique .faq-answer p {
+  margin-bottom: 0.75rem;
+}
+
+.product-faq-cinetique .faq-answer p:last-child {
+  margin-bottom: 0;
+}
+
+.product-faq-cinetique .faq-answer ul {
+  padding-left: 1.25rem;
+  margin: 0.75rem 0;
+}
+
+.product-faq-cinetique .faq-answer li {
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .product-faq.product-faq-cinetique {
+    padding: 2rem 1.5rem;
+  }
+
+  .product-faq-cinetique .faq-item summary {
+    padding: 1rem 1.25rem;
+  }
+
+  .product-faq-cinetique .faq-answer {
+    padding: 0 1.25rem 1rem;
+  }
 }
 
 .product-related {
@@ -3221,6 +3562,25 @@ transform: translateY(15px);
     padding: 3rem 1.5rem;
   }
 
+  /* Product page responsive */
+  .product-hero.product-hero-cinetique {
+    padding: 1.5rem;
+  }
+
+  .product-hero-cinetique .product-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .product-summary-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .product-hero-cinetique .product-summary .product_title {
+    font-size: 1.5rem;
+  }
+
   .bento-container {
     grid-template-columns: 1fr;
     grid-auto-rows: 300px;
@@ -4701,6 +5061,396 @@ transform: translateY(15px);
 
   .product-summary .attribute-swatch .swatch-item .swatch-name {
     font-size: 0.8rem;
+  }
+}
+
+/* ========================================
+   WOOCOMMERCE - Cart Page CINÉTIQUE
+   ======================================== */
+
+.cart-page-cinetique {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 3rem 4rem;
+}
+
+.cart-hero {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.cart-hero .section-number {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--color-wood);
+  margin-bottom: 1rem;
+}
+
+.cart-hero h1 {
+  font-family: var(--font-body);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 900;
+  color: var(--color-dark);
+  margin-bottom: 0.75rem;
+}
+
+.cart-subtitle {
+  font-size: 1.1rem;
+  color: var(--color-gray);
+}
+
+/* Cart Table Enhancements */
+.woocommerce-cart-form {
+  margin-bottom: 2rem;
+}
+
+.woocommerce-cart-form__contents {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.woocommerce-cart-form__contents th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-gray);
+  border-bottom: 2px solid var(--color-gray-light);
+}
+
+.woocommerce-cart-form__contents td {
+  padding: 1.5rem 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--color-gray-light);
+}
+
+.woocommerce-cart-form__contents .product-thumbnail img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.woocommerce-cart-form__contents .product-name a {
+  font-weight: 600;
+  color: var(--color-dark);
+  text-decoration: none;
+}
+
+.woocommerce-cart-form__contents .product-name a:hover {
+  color: var(--color-wood);
+}
+
+.woocommerce-cart-form__contents .product-price {
+  font-weight: 600;
+  color: var(--color-wood);
+}
+
+.woocommerce-cart-form__contents .product-subtotal {
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+/* Cart Reassurance Block */
+.cart-reassurance {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  padding: 2rem;
+  background: var(--color-cream);
+  border-radius: 12px;
+  margin-top: 2rem;
+}
+
+.reassurance-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.reassurance-item svg {
+  color: var(--color-wood);
+  flex-shrink: 0;
+}
+
+.reassurance-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.reassurance-text strong {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+.reassurance-text span {
+  font-size: 0.8rem;
+  color: var(--color-gray);
+}
+
+/* Cart Totals */
+.cart_totals {
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-light);
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.cart_totals h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--color-dark);
+}
+
+.cart_totals table {
+  width: 100%;
+}
+
+.cart_totals th,
+.cart_totals td {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--color-gray-light);
+}
+
+.cart_totals .order-total th,
+.cart_totals .order-total td {
+  padding-top: 1.25rem;
+  border-bottom: none;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.wc-proceed-to-checkout .checkout-button {
+  display: block;
+  width: 100%;
+  padding: 1rem 2rem;
+  background: var(--color-wood);
+  color: var(--color-white);
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  text-decoration: none;
+  -webkit-transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease;
+}
+
+.wc-proceed-to-checkout .checkout-button:hover {
+  background: var(--color-dark);
+}
+
+@media (max-width: 768px) {
+  .cart-page-cinetique {
+    padding: 1.5rem;
+  }
+
+  .cart-reassurance {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .woocommerce-cart-form__contents th.product-thumbnail,
+  .woocommerce-cart-form__contents td.product-thumbnail {
+    display: none;
+  }
+}
+
+/* ========================================
+   WOOCOMMERCE - Checkout Page CINÉTIQUE
+   ======================================== */
+
+.checkout-page-cinetique {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 3rem 4rem;
+}
+
+.checkout-hero {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.checkout-hero .section-number {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--color-wood);
+  margin-bottom: 1rem;
+}
+
+.checkout-hero h1 {
+  font-family: var(--font-body);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 900;
+  color: var(--color-dark);
+  margin-bottom: 0.75rem;
+}
+
+.checkout-subtitle {
+  font-size: 1.1rem;
+  color: var(--color-gray);
+}
+
+/* Checkout Two-Column Layout */
+.woocommerce-checkout .col2-set {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.woocommerce-checkout .col-1,
+.woocommerce-checkout .col-2 {
+  width: 100%;
+}
+
+.woocommerce-checkout h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+  color: var(--color-dark);
+}
+
+/* Form Fields Styling */
+.woocommerce-checkout .form-row {
+  margin-bottom: 1rem;
+}
+
+.woocommerce-checkout .form-row label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--color-dark);
+}
+
+.woocommerce-checkout .form-row input,
+.woocommerce-checkout .form-row select,
+.woocommerce-checkout .form-row textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--color-gray-light);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  -webkit-transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease;
+}
+
+.woocommerce-checkout .form-row input:focus,
+.woocommerce-checkout .form-row select:focus,
+.woocommerce-checkout .form-row textarea:focus {
+  outline: none;
+  border-color: var(--color-wood);
+}
+
+/* Order Review Section */
+#order_review_heading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-gray-light);
+}
+
+.woocommerce-checkout-review-order {
+  background: var(--color-cream);
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.woocommerce-checkout-review-order-table {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.woocommerce-checkout-review-order-table th,
+.woocommerce-checkout-review-order-table td {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(147, 125, 104, 0.2);
+}
+
+.woocommerce-checkout-review-order-table .order-total th,
+.woocommerce-checkout-review-order-table .order-total td {
+  font-weight: 700;
+  font-size: 1.1rem;
+  border-bottom: none;
+  padding-top: 1rem;
+}
+
+/* Payment Methods */
+.woocommerce-checkout-payment {
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-light);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.wc_payment_methods {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+
+.wc_payment_method {
+  padding: 1rem;
+  border: 1px solid var(--color-gray-light);
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  -webkit-transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease;
+}
+
+.wc_payment_method:hover {
+  border-color: var(--color-wood);
+}
+
+.wc_payment_method label {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Place Order Button */
+#place_order {
+  display: block;
+  width: 100%;
+  padding: 1.25rem 2rem;
+  background: var(--color-wood);
+  color: var(--color-white);
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  -webkit-transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease;
+}
+
+#place_order:hover {
+  background: var(--color-dark);
+}
+
+@media (max-width: 768px) {
+  .checkout-page-cinetique {
+    padding: 1.5rem;
+  }
+
+  .woocommerce-checkout .col2-set {
+    grid-template-columns: 1fr;
   }
 }
 
