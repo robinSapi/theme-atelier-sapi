@@ -153,11 +153,23 @@
 
     applyFilter: function(filter) {
       this.currentFilter = filter;
-      const slides = document.querySelectorAll('.products-carousel-slide[data-categories]');
+
+      // Find all slides with data-categories attribute
+      // Use the carousel's allSlides if available, otherwise query the DOM
+      let slides;
+      if (productsCarousel.allSlides && productsCarousel.allSlides.length > 0) {
+        slides = productsCarousel.allSlides;
+      } else {
+        slides = document.querySelectorAll('.products-carousel-slide, [data-categories]');
+      }
+
+      console.log('Filtering:', filter, 'Found slides:', slides.length);
 
       slides.forEach(slide => {
         const categories = slide.dataset.categories || '';
-        if (filter === 'all' || categories.includes(filter)) {
+        const shouldShow = filter === 'all' || categories.split(' ').includes(filter);
+
+        if (shouldShow) {
           slide.style.display = '';
           slide.classList.remove('is-filtered-out');
         } else {
@@ -314,10 +326,22 @@
       if (!this.carousel) return;
 
       this.track = this.carousel.querySelector('.products-carousel-track');
-      this.allSlides = Array.from(this.carousel.querySelectorAll('.products-carousel-slide'));
       this.prevBtn = document.querySelector('.products-carousel-prev');
       this.nextBtn = document.querySelector('.products-carousel-next');
       this.dotsContainer = document.querySelector('.products-carousel-dots');
+
+      // Find slides - they have class products-carousel-slide (added by content-product.php)
+      // The class is added via wc_product_class() which generates: class="product ... products-carousel-slide"
+      this.allSlides = Array.from(this.carousel.querySelectorAll('.products-carousel-slide'));
+
+      // Fallback: if no slides found with that class, try direct children of track
+      if (this.allSlides.length === 0) {
+        this.allSlides = Array.from(this.track.querySelectorAll(':scope > li'));
+        // Add the class to found slides for filtering to work
+        this.allSlides.forEach(slide => slide.classList.add('products-carousel-slide'));
+      }
+
+      console.log('Carousel init - Found slides:', this.allSlides.length);
 
       if (!this.track || this.allSlides.length === 0) return;
 
