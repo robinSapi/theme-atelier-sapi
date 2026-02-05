@@ -307,6 +307,17 @@ add_theme_support('wc-product-gallery-slider');
 
 ## 📝 Historique des Modifications
 
+**2026-02-05 (Fix sticky add-to-cart produits variables):**
+- ✅ **STICKY BAR VARIABLE PRODUCTS** : Gestion correcte des produits avec variations
+  - Fichiers : `single-product.php`, `style.css`
+  - Produits simples : bouton direct "Ajouter au panier" (AJAX)
+  - Produits variables : bouton "Choisir les options" → scroll vers le formulaire
+  - Une fois variation sélectionnée :
+    - Le prix sticky se met à jour avec le prix de la variation
+    - Le bouton devient "Ajouter au panier" et soumet le formulaire principal
+  - Reset automatique si la variation est désélectionnée
+  - CSS : états visuels `.sticky-scroll-to-form` et `.variation-selected`
+
 **2026-02-05 (UX Améliorations page Nos Créations):**
 - ✅ **HERO VISUEL** : Refonte hero avec grille texte + collage d'images
   - Fichiers : `archive-product.php`, `style.css`

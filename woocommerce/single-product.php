@@ -209,21 +209,29 @@ get_header();
   </div><!-- /.product wrapper -->
 
   <!-- Sticky Add to Cart Bar -->
-  <div class="sticky-add-to-cart" id="sticky-add-to-cart" aria-hidden="true">
+  <div class="sticky-add-to-cart" id="sticky-add-to-cart" aria-hidden="true" data-product-type="<?php echo esc_attr($product->get_type()); ?>">
     <div class="sticky-add-to-cart-inner">
       <div class="sticky-product-info">
         <span class="sticky-product-name"><?php the_title(); ?></span>
-        <span class="sticky-product-price"><?php echo $product->get_price_html(); ?></span>
+        <span class="sticky-product-price" id="sticky-price"><?php echo $product->get_price_html(); ?></span>
       </div>
       <div class="sticky-product-actions">
         <?php if ($product->is_in_stock() && $product->is_purchasable()) : ?>
-          <a href="<?php echo esc_url($product->add_to_cart_url()); ?>"
-             class="button sticky-add-to-cart-btn"
-             data-product_id="<?php echo esc_attr($product->get_id()); ?>"
-             data-quantity="1"
-             <?php echo $product->is_type('simple') ? 'data-product_sku="' . esc_attr($product->get_sku()) . '"' : ''; ?>>
-            Ajouter au panier
-          </a>
+          <?php if ($product->is_type('simple')) : ?>
+            <!-- Simple product: direct add to cart -->
+            <a href="<?php echo esc_url($product->add_to_cart_url()); ?>"
+               class="button sticky-add-to-cart-btn ajax_add_to_cart"
+               data-product_id="<?php echo esc_attr($product->get_id()); ?>"
+               data-product_sku="<?php echo esc_attr($product->get_sku()); ?>"
+               data-quantity="1">
+              Ajouter au panier
+            </a>
+          <?php else : ?>
+            <!-- Variable product: scroll to form for selection -->
+            <button type="button" class="button sticky-add-to-cart-btn sticky-scroll-to-form" id="sticky-variable-btn">
+              <span class="sticky-btn-text">Choisir les options</span>
+            </button>
+          <?php endif; ?>
         <?php else : ?>
           <span class="button button-disabled">Indisponible</span>
         <?php endif; ?>
@@ -236,13 +244,17 @@ get_header();
 <?php endwhile; ?>
 
 <script>
-// Sticky add-to-cart visibility
+// Sticky add-to-cart: visibility, price sync, and variable product handling
 (function() {
   const stickyBar = document.getElementById('sticky-add-to-cart');
   const productSummary = document.getElementById('product-summary-main');
+  const stickyPrice = document.getElementById('sticky-price');
+  const stickyVariableBtn = document.getElementById('sticky-variable-btn');
+  const productType = stickyBar ? stickyBar.dataset.productType : 'simple';
 
   if (!stickyBar || !productSummary) return;
 
+  // Visibility observer
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -256,6 +268,77 @@ get_header();
   }, { threshold: 0, rootMargin: '-100px 0px 0px 0px' });
 
   observer.observe(productSummary);
+
+  // Variable products: sync price and button state
+  if (productType === 'variable' && typeof jQuery !== 'undefined') {
+    const $form = jQuery('.variations_form');
+    const btnTextEl = stickyVariableBtn ? stickyVariableBtn.querySelector('.sticky-btn-text') : null;
+
+    // Scroll to form when clicking sticky button
+    if (stickyVariableBtn) {
+      stickyVariableBtn.addEventListener('click', function() {
+        const formSection = document.querySelector('.variations_form') || productSummary;
+        if (formSection) {
+          formSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Focus first swatch/select after scroll
+          setTimeout(() => {
+            const firstInput = formSection.querySelector('.swatch-item, select');
+            if (firstInput) firstInput.focus();
+          }, 500);
+        }
+      });
+    }
+
+    // Listen for variation changes
+    $form.on('found_variation', function(event, variation) {
+      // Update sticky price with variation price
+      if (stickyPrice && variation.price_html) {
+        stickyPrice.innerHTML = variation.price_html;
+      }
+
+      // Update button text to "Ajouter au panier" when valid variation selected
+      if (btnTextEl) {
+        btnTextEl.textContent = 'Ajouter au panier';
+        stickyVariableBtn.classList.add('variation-selected');
+      }
+
+      // Change button behavior to submit the main form
+      if (stickyVariableBtn) {
+        stickyVariableBtn.onclick = function(e) {
+          e.preventDefault();
+          const addBtn = document.querySelector('.single_add_to_cart_button');
+          if (addBtn && !addBtn.disabled) {
+            addBtn.click();
+          }
+        };
+      }
+    });
+
+    // Reset when variation is cleared
+    $form.on('reset_data', function() {
+      // Restore original price
+      const originalPrice = document.querySelector('.summary .price');
+      if (stickyPrice && originalPrice) {
+        stickyPrice.innerHTML = originalPrice.innerHTML;
+      }
+
+      // Reset button
+      if (btnTextEl) {
+        btnTextEl.textContent = 'Choisir les options';
+        stickyVariableBtn.classList.remove('variation-selected');
+      }
+
+      // Reset button behavior
+      if (stickyVariableBtn) {
+        stickyVariableBtn.onclick = function() {
+          const formSection = document.querySelector('.variations_form') || productSummary;
+          if (formSection) {
+            formSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        };
+      }
+    });
+  }
 })();
 </script>
 

@@ -1198,6 +1198,27 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   white-space: nowrap;
 }
 
+/* Variable product sticky button states */
+.sticky-scroll-to-form {
+  background: var(--color-gray);
+  border-color: var(--color-gray);
+}
+
+.sticky-scroll-to-form:hover {
+  background: var(--color-dark);
+  border-color: var(--color-dark);
+}
+
+.sticky-scroll-to-form.variation-selected {
+  background: var(--color-wood);
+  border-color: var(--color-wood);
+}
+
+.sticky-scroll-to-form.variation-selected:hover {
+  background: var(--color-dark);
+  border-color: var(--color-dark);
+}
+
 @media (max-width: 480px) {
   .sticky-add-to-cart-inner {
     padding: 0.75rem 1rem;
