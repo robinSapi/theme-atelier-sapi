@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Atelier Sâpi — Piste Immersive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Navigation lateral dots -->
+  <nav class="nav-dots">
+    <a href="#hero" class="dot active" data-section="hero"></a>
+    <a href="#story" class="dot" data-section="story"></a>
+    <a href="#products" class="dot" data-section="products"></a>
+    <a href="#atelier" class="dot" data-section="atelier"></a>
+    <a href="#contact" class="dot" data-section="contact"></a>
+  </nav>
+
+  <!-- Top minimal menu -->
+  <header class="header-minimal">
+    <div class="header-logo">Atelier Sâpi</div>
+    <button class="menu-burger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Full menu panel -->
+  <div class="menu-panel">
+    <button class="menu-close">&times;</button>
+    <div class="menu-content">
+      <nav class="menu-nav">
+        <a href="#hero" class="menu-link">Accueil</a>
+        <a href="#products" class="menu-link">Créations</a>
+        <a href="#atelier" class="menu-link">L'atelier</a>
+        <a href="#" class="menu-link">Sur-mesure</a>
+        <a href="#contact" class="menu-link">Contact</a>
+      </nav>
+      <div class="menu-info">
+        <div class="menu-info-block">
+          <h4>Atelier</h4>
+          <p>Lyon, France</p>
+          <p><a href="mailto:hello@atelier-sapi.fr">hello@atelier-sapi.fr</a></p>
+        </div>
+        <div class="menu-info-block">
+          <h4>Horaires</h4>
+          <p>Lun - Ven: 9h - 18h</p>
+          <p>Sam: Sur rendez-vous</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 1: Hero Full-screen -->
+  <section id="hero" class="section-fullscreen hero-immersive">
+    <div class="hero-background" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg');"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content-center">
+      <span class="hero-label">Lumières d'atelier · Lyon</span>
+      <h1 class="hero-title-large">Sculpter<br>la lumière</h1>
+      <p class="hero-subtitle">Des pièces uniques nées du geste artisan de Robin</p>
+      <button class="cta-large">Découvrir les créations</button>
+    </div>
+    <div class="scroll-indicator">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- Section 2: Story with reveal -->
+  <section id="story" class="section-fullscreen story-immersive">
+    <div class="story-split">
+      <div class="story-media">
+        <div class="media-stack">
+          <img src="https://atelier-sapi.fr/wp-content/uploads/2025/01/Robin-scaled.jpg" alt="Robin" class="media-layer" />
+          <div class="media-texture"></div>
+        </div>
+      </div>
+      <div class="story-text-block">
+        <span class="section-number">01</span>
+        <h2 class="section-title-large">L'histoire<br>commence ici</h2>
+        <p class="text-large">Dans son atelier lyonnais, Robin dessine, découpe et assemble chaque luminaire à la main. Pas de production industrielle — juste le bois, la lumière, et une obsession pour le détail.</p>
+        <p class="text-large">Chaque pièce raconte son processus : du croquis initial aux derniers ajustements, c'est un dialogue entre matière et intention.</p>
+        <div class="stats-row">
+          <div class="stat">
+            <strong>100%</strong>
+            <span>Fait main</span>
+          </div>
+          <div class="stat">
+            <strong>&lt;5j</strong>
+            <span>Fabrication</span>
+          </div>
+          <div class="stat">
+            <strong>Lyon</strong>
+            <span>Atelier</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: Products carousel -->
+  <section id="products" class="section-fullscreen products-immersive">
+    <div class="products-header-center">
+      <span class="section-number">02</span>
+      <h2 class="section-title-large">Créations<br>disponibles</h2>
+    </div>
+
+    <div class="carousel-container">
+      <div class="carousel-track">
+        <div class="carousel-slide">
+          <div class="product-immersive">
+            <div class="product-visual" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg');">
+              <div class="product-badge-float">Signature</div>
+            </div>
+            <div class="product-details-panel">
+              <h3 class="product-title-large">Olivia<br>la Gardiena</h3>
+              <p class="product-category">Suspension monumentale</p>
+              <p class="product-description">Sculpture en bois massif. Diffusion lumineuse douce et enveloppante. Disponible en 4 tailles.</p>
+              <div class="product-specs">
+                <div class="spec-item">
+                  <span class="spec-label">Matière</span>
+                  <span class="spec-value">Chêne massif</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Dimensions</span>
+                  <span class="spec-value">Ø 40-80cm</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Finitions</span>
+                  <span class="spec-value">Huile naturelle</span>
+                </div>
+              </div>
+              <div class="product-actions">
+                <div class="price-display">
+                  <span class="price-label">À partir de</span>
+                  <strong class="price-large">219€</strong>
+                </div>
+                <button class="btn-add-cart">Ajouter au panier</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="carousel-slide">
+          <div class="product-immersive">
+            <div class="product-visual" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/10/Bandeau.jpg');">
+              <div class="product-badge-float">Nouveau</div>
+            </div>
+            <div class="product-details-panel">
+              <h3 class="product-title-large">Timothée<br>l'Araignée</h3>
+              <p class="product-category">Suspension sculptural</p>
+              <p class="product-description">La seule araignée que vous voudrez voir descendre du plafond. Design aérien avec 8 branches articulées.</p>
+              <div class="product-specs">
+                <div class="spec-item">
+                  <span class="spec-label">Matière</span>
+                  <span class="spec-value">Chêne & métal</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Dimensions</span>
+                  <span class="spec-value">Ø 90cm</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Édition</span>
+                  <span class="spec-value">Limitée</span>
+                </div>
+              </div>
+              <div class="product-actions">
+                <div class="price-display">
+                  <span class="price-label">Pièce unique</span>
+                  <strong class="price-large">389€</strong>
+                </div>
+                <button class="btn-add-cart">Ajouter au panier</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="carousel-slide">
+          <div class="product-immersive">
+            <div class="product-visual" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/07/Claudine.jpg');"></div>
+            <div class="product-details-panel">
+              <h3 class="product-title-large">Claudine<br>la Turbine</h3>
+              <p class="product-category">Lampadaire cinétique</p>
+              <p class="product-description">Design inspiré des turbines. Mouvement perpétuel de lumière qui transforme l'espace.</p>
+              <div class="product-specs">
+                <div class="spec-item">
+                  <span class="spec-label">Matière</span>
+                  <span class="spec-value">Bois tournant</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Hauteur</span>
+                  <span class="spec-value">170cm</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Mobilité</span>
+                  <span class="spec-value">Rotation 360°</span>
+                </div>
+              </div>
+              <div class="product-actions">
+                <div class="price-display">
+                  <span class="price-label">À partir de</span>
+                  <strong class="price-large">259€</strong>
+                </div>
+                <button class="btn-add-cart">Ajouter au panier</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="carousel-controls">
+        <button class="carousel-btn prev">&larr;</button>
+        <div class="carousel-dots">
+          <span class="carousel-dot active"></span>
+          <span class="carousel-dot"></span>
+          <span class="carousel-dot"></span>
+        </div>
+        <button class="carousel-btn next">&rarr;</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: Atelier -->
+  <section id="atelier" class="section-fullscreen atelier-immersive">
+    <div class="atelier-grid">
+      <div class="atelier-image" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/01/sapi_illus_artisan.jpg');"></div>
+      <div class="atelier-content">
+        <span class="section-number">03</span>
+        <h2 class="section-title-large">L'atelier<br>vivant</h2>
+        <p class="text-large">Chaque matin, l'atelier s'éveille avec le bruit de la découpe laser et l'odeur du bois fraîchement poncé. Robin y passe ses journées à affiner, assembler, tester la lumière.</p>
+        <p class="text-large">Ici, pas de ligne de production. Juste des mains expertes, des outils précis, et la volonté de créer des pièces qui durent.</p>
+        <button class="cta-large ghost">Visiter l'atelier</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 5: Contact / Newsletter -->
+  <section id="contact" class="section-fullscreen contact-immersive">
+    <div class="contact-center">
+      <span class="section-number">04</span>
+      <h2 class="section-title-large">Restons<br>en lumière</h2>
+      <p class="text-large">Nouveautés, coulisses d'atelier, et éditions limitées — directement dans votre boîte mail.</p>
+      <form class="form-immersive">
+        <input type="email" placeholder="Votre email" class="input-large" />
+        <button type="submit" class="cta-large">S'inscrire</button>
+      </form>
+      <div class="contact-info">
+        <div class="contact-block">
+          <strong>Email</strong>
+          <a href="mailto:hello@atelier-sapi.fr">hello@atelier-sapi.fr</a>
+        </div>
+        <div class="contact-block">
+          <strong>Instagram</strong>
+          <a href="#">@atelier.sapi</a>
+        </div>
+        <div class="contact-block">
+          <strong>Adresse</strong>
+          <span>Lyon, France</span>
+        </div>
+      </div>
+    </div>
+    <footer class="footer-credit">
+      <p>© 2026 Atelier Sâpi — Lumières artisanales</p>
+    </footer>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>

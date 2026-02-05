@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Atelier Sâpi — Piste Cinétique</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Square+Peg&family=Montserrat:wght@300;400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Custom Cursor -->
+  <div class="cursor-custom">
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+  </div>
+
+  <!-- Navigation Header -->
+  <header class="header-architectural">
+    <div class="header-content">
+      <div class="logo-architectural">
+        <div class="logo-circle">
+          <svg viewBox="0 0 100 100" class="logo-svg">
+            <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="2"/>
+            <line x1="50" y1="30" x2="50" y2="60" stroke="currentColor" stroke-width="2"/>
+            <circle cx="50" cy="65" r="8" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="logo-text">Sâpi</span>
+      </div>
+      <div class="header-right">
+        <div class="cart-indicator">
+          <span class="cart-icon">●</span>
+          <span class="cart-num">0</span>
+        </div>
+        <button class="menu-toggle">
+          <span class="menu-label">Menu</span>
+          <div class="menu-icon">
+            <span></span>
+            <span></span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Menu Overlay -->
+  <div class="menu-overlay">
+    <div class="menu-overlay-inner">
+      <nav class="menu-main">
+        <a href="#" class="menu-item" data-text="Accueil">Accueil</a>
+        <a href="#" class="menu-item" data-text="Créations">Créations</a>
+        <a href="#" class="menu-item" data-text="Atelier">Atelier</a>
+        <a href="#" class="menu-item" data-text="Sur-mesure">Sur-mesure</a>
+        <a href="#" class="menu-item" data-text="Journal">Journal</a>
+        <a href="#" class="menu-item" data-text="Contact">Contact</a>
+      </nav>
+      <div class="menu-details">
+        <div class="menu-block">
+          <h4>Atelier</h4>
+          <p>3 rue de la Lumière<br>69001 Lyon, France</p>
+        </div>
+        <div class="menu-block">
+          <h4>Contact</h4>
+          <p>hello@atelier-sapi.fr<br>+33 6 12 34 56 78</p>
+        </div>
+        <div class="menu-block">
+          <h4>Réseaux</h4>
+          <p><a href="#">Instagram</a> — <a href="#">Pinterest</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero Bento Grid -->
+  <section class="hero-bento">
+    <div class="bento-container">
+      <!-- Large Hero Card -->
+      <div class="bento-card bento-hero" data-hover="Olivia la Gardiena">
+        <div class="bento-bg" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg');"></div>
+        <div class="bento-content">
+          <div class="bento-label">Pièce signature</div>
+          <h1 class="bento-title">Sculpter<br>la lumière</h1>
+          <p class="bento-text">Des créations artisanales qui transforment l'espace</p>
+        </div>
+        <div class="bento-corner-info">
+          <span class="corner-label">À partir de</span>
+          <strong class="corner-price">219€</strong>
+        </div>
+      </div>
+
+      <!-- Statement Card -->
+      <div class="bento-card bento-statement">
+        <div class="statement-inner">
+          <span class="statement-number">01</span>
+          <h2 class="statement-text">"Je ne fabrique pas<br>des lampes.<br>Je crée des présences."</h2>
+          <p class="statement-author">— Robin, artisan</p>
+        </div>
+      </div>
+
+      <!-- Product Card 1 -->
+      <div class="bento-card bento-product" data-product="timothee">
+        <div class="product-image" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/10/Bandeau.jpg');"></div>
+        <div class="product-overlay">
+          <div class="product-badge">Nouveau</div>
+          <div class="product-info-reveal">
+            <h3 class="product-name">Timothée l'Araignée</h3>
+            <p class="product-cat">Suspension · Chêne</p>
+            <div class="product-price-tag">
+              <span>389€</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Card -->
+      <div class="bento-card bento-stats">
+        <div class="stat-block">
+          <strong>100%</strong>
+          <span>Fait main</span>
+        </div>
+        <div class="stat-block">
+          <strong>&lt;5j</strong>
+          <span>Fabrication</span>
+        </div>
+        <div class="stat-block">
+          <strong>Lyon</strong>
+          <span>Atelier</span>
+        </div>
+      </div>
+
+      <!-- Product Card 2 -->
+      <div class="bento-card bento-product" data-product="claudine">
+        <div class="product-image" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/07/Claudine.jpg');"></div>
+        <div class="product-overlay">
+          <div class="product-info-reveal">
+            <h3 class="product-name">Claudine la Turbine</h3>
+            <p class="product-cat">Lampadaire · Design cinétique</p>
+            <div class="product-price-tag">
+              <span>259€</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Process Card -->
+      <div class="bento-card bento-process">
+        <div class="process-inner">
+          <div class="process-step">
+            <span class="step-num">01</span>
+            <span class="step-text">Dessin</span>
+          </div>
+          <div class="process-step">
+            <span class="step-num">02</span>
+            <span class="step-text">Découpe laser</span>
+          </div>
+          <div class="process-step">
+            <span class="step-num">03</span>
+            <span class="step-text">Assemblage</span>
+          </div>
+          <div class="process-step">
+            <span class="step-num">04</span>
+            <span class="step-text">Finitions</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Card 3 -->
+      <div class="bento-card bento-product" data-product="suze">
+        <div class="product-image" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg');"></div>
+        <div class="product-overlay">
+          <div class="product-info-reveal">
+            <h3 class="product-name">Suze la Méduse</h3>
+            <p class="product-cat">Applique · Formes organiques</p>
+            <div class="product-price-tag">
+              <span>129€</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA Card -->
+      <div class="bento-card bento-cta">
+        <h3 class="cta-title">Toutes les créations</h3>
+        <button class="cta-button">
+          <span>Explorer</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Atelier Image -->
+      <div class="bento-card bento-atelier">
+        <div class="bento-bg" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/01/Robin-scaled.jpg');"></div>
+        <div class="atelier-label">
+          <span>L'atelier · Lyon</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Collections Grid -->
+  <section class="collections-kinetic">
+    <div class="section-header-kinetic">
+      <span class="section-num">02</span>
+      <h2 class="section-title-kinetic">Collections</h2>
+    </div>
+
+    <div class="collections-grid">
+      <div class="collection-card" data-collection="suspensions">
+        <div class="collection-visual" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg');"></div>
+        <div class="collection-details">
+          <h3>Suspensions</h3>
+          <span class="collection-count">12 créations</span>
+          <button class="collection-btn">Voir →</button>
+        </div>
+      </div>
+
+      <div class="collection-card" data-collection="lampadaires">
+        <div class="collection-visual" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/07/Claudine.jpg');"></div>
+        <div class="collection-details">
+          <h3>Lampadaires</h3>
+          <span class="collection-count">8 créations</span>
+          <button class="collection-btn">Voir →</button>
+        </div>
+      </div>
+
+      <div class="collection-card" data-collection="appliques">
+        <div class="collection-visual" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg');"></div>
+        <div class="collection-details">
+          <h3>Appliques</h3>
+          <span class="collection-count">6 créations</span>
+          <button class="collection-btn">Voir →</button>
+        </div>
+      </div>
+
+      <div class="collection-card" data-collection="poser">
+        <div class="collection-visual" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/07/Charlie-Bandeau-2.jpg');"></div>
+        <div class="collection-details">
+          <h3>À poser</h3>
+          <span class="collection-count">5 créations</span>
+          <button class="collection-btn">Voir →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter Section -->
+  <section class="newsletter-kinetic">
+    <div class="newsletter-content">
+      <div class="newsletter-text">
+        <span class="section-num">03</span>
+        <h2 class="section-title-kinetic">Restez<br>informés</h2>
+        <p>Nouveautés, éditions limitées, coulisses d'atelier.</p>
+      </div>
+      <form class="newsletter-form">
+        <input type="email" placeholder="votre@email.fr" class="newsletter-input-kinetic" />
+        <button type="submit" class="newsletter-submit-kinetic">
+          <span>S'inscrire</span>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer-kinetic">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo-architectural">
+          <div class="logo-circle">
+            <svg viewBox="0 0 100 100" class="logo-svg">
+              <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="2"/>
+              <line x1="50" y1="30" x2="50" y2="60" stroke="currentColor" stroke-width="2"/>
+              <circle cx="50" cy="65" r="8" fill="currentColor"/>
+            </svg>
+          </div>
+          <span class="logo-text">Sâpi</span>
+        </div>
+        <p>Lumières artisanales<br>Lyon, France</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Atelier</h4>
+          <a href="#">L'histoire</a>
+          <a href="#">Robin</a>
+          <a href="#">Sur-mesure</a>
+        </div>
+        <div class="footer-col">
+          <h4>Boutique</h4>
+          <a href="#">Suspensions</a>
+          <a href="#">Lampadaires</a>
+          <a href="#">Appliques</a>
+        </div>
+        <div class="footer-col">
+          <h4>Suivre</h4>
+          <a href="#">Instagram</a>
+          <a href="#">Pinterest</a>
+          <a href="#">Facebook</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Atelier Sâpi — Lumières sculptées à la main</p>
+      <div class="footer-legal">
+        <a href="#">Mentions légales</a>
+        <a href="#">CGV</a>
+        <a href="#">Confidentialité</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

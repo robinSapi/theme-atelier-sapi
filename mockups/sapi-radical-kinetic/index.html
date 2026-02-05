@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Atelier Sapi — Piste Disruptive B (Cinétique claire)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #15130f;
+      --cream: #f6f0e7;
+      --mist: #f1ebe1;
+      --pearl: #fff9f1;
+      --olive: #7a8062;
+      --copper: #c26b3e;
+      --teal: #4d6f70;
+      --sun: #e8b15c;
+      --radius: 22px;
+      --grid: rgba(21, 19, 15, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--cream);
+      font-family: "Kanit", "Helvetica Neue", sans-serif;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+      mix-blend-mode: multiply;
+    }
+
+    .frame {
+      min-height: 100vh;
+      padding: clamp(20px, 3vw, 38px);
+      display: grid;
+      gap: clamp(26px, 4vw, 56px);
+      background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 80px 80px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.78rem;
+    }
+
+    header .logo {
+      font-family: "DM Serif Display", serif;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      text-transform: none;
+    }
+
+    header .pill {
+      border: 1px solid var(--ink);
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--pearl);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: clamp(20px, 3vw, 38px);
+      align-items: center;
+    }
+
+    .hero h1 {
+      font-family: "DM Serif Display", serif;
+      font-size: clamp(2.6rem, 5vw, 4.8rem);
+      line-height: 0.95;
+      margin: 0 0 16px;
+    }
+
+    .hero p {
+      font-size: clamp(1rem, 1.5vw, 1.3rem);
+      max-width: 36ch;
+    }
+
+    .hero .cta {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid var(--ink);
+      padding: 10px 18px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.78rem;
+      background: var(--pearl);
+    }
+
+    .carousel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .carousel .track {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(220px, 1fr);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 12px;
+      padding-bottom: 8px;
+    }
+
+    .carousel .card {
+      scroll-snap-align: center;
+      border-radius: var(--radius);
+      background: #f7efe6;
+      padding: 12px;
+      min-height: 240px;
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      gap: 8px;
+    }
+
+    .carousel .media {
+      height: 140px;
+      border-radius: 16px;
+      background-image: var(--img);
+      background-size: cover;
+      background-position: center;
+    }
+
+    .carousel .label {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.72rem;
+    }
+
+    .carousel strong { display: block; margin-top: 6px; font-size: 1.1rem; }
+
+    .index {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .index .row {
+      grid-column: span 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px;
+      background: var(--pearl);
+      border-radius: var(--radius);
+      border: 1px solid rgba(21, 19, 15, 0.1);
+    }
+
+    .index .row:nth-child(3),
+    .index .row:nth-child(4) { grid-column: span 4; }
+
+    .index .row h3 {
+      margin: 0;
+      font-size: 1.3rem;
+    }
+
+    .index .row span {
+      font-size: 0.85rem;
+      opacity: 0.6;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .index .num {
+      font-family: "DM Serif Display", serif;
+      font-size: 2.6rem;
+      color: var(--teal);
+    }
+
+    .mosaic {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
+
+    .mosaic .block {
+      border-radius: 18px;
+      min-height: 180px;
+      padding: 16px;
+      background: #f4eee6;
+      border: 1px solid rgba(21, 19, 15, 0.08);
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      gap: 10px;
+    }
+
+    .mosaic .block.large { grid-column: span 5; min-height: 240px; }
+    .mosaic .block.tall { grid-column: span 3; grid-row: span 2; min-height: 320px; }
+    .mosaic .block.wide { grid-column: span 4; }
+
+    .mosaic .block .media {
+      height: 110px;
+      border-radius: 14px;
+      background-image: var(--img);
+      background-size: cover;
+      background-position: center;
+    }
+
+    .process {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+
+    .step {
+      padding: 18px;
+      border-radius: 18px;
+      background: #fff8f0;
+      border: 1px solid rgba(21, 19, 15, 0.08);
+    }
+
+    .step h4 { margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.8rem; }
+    .step p { margin: 0; font-size: 0.95rem; }
+
+    .footer-cta {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 18px;
+      background: var(--mist);
+      border-radius: var(--radius);
+      padding: 20px;
+      border: 1px solid rgba(21, 19, 15, 0.1);
+    }
+
+    .footer-cta input {
+      width: 100%;
+      border: 1px solid rgba(21, 19, 15, 0.2);
+      border-radius: 999px;
+      padding: 10px 12px;
+      background: #fff;
+    }
+
+    .footer-cta button {
+      border: none;
+      border-radius: 999px;
+      background: var(--ink);
+      color: #fff;
+      padding: 10px 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.75rem;
+    }
+
+    .ticker {
+      overflow: hidden;
+      border-top: 1px solid rgba(21, 19, 15, 0.12);
+      border-bottom: 1px solid rgba(21, 19, 15, 0.12);
+      padding: 10px 0;
+      background: #fff8f0;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-size: 0.75rem;
+    }
+
+    .ticker .track {
+      display: flex;
+      gap: 32px;
+      animation: ticker 16s linear infinite;
+    }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    @media (max-width: 980px) {
+      .hero { grid-template-columns: 1fr; }
+      .index { grid-template-columns: 1fr; }
+      .index .row { grid-column: span 1; }
+      .footer-cta { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      header { flex-wrap: wrap; }
+      .mosaic { grid-template-columns: repeat(2, 1fr); }
+      .mosaic .block, .mosaic .block.large, .mosaic .block.tall, .mosaic .block.wide { grid-column: span 2; grid-row: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="frame">
+    <header>
+      <div class="logo">Atelier Sapi</div>
+      <div class="pill">Boutique · Collections · Atelier</div>
+      <div class="pill">Sur-mesure</div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <h1>Lumière architecturale, chaleur artisanale.</h1>
+        <p>Des pièces qui bougent, des ombres qui dansent. L'objet devient présence.</p>
+        <div class="cta">Découvrir la boutique</div>
+      </div>
+      <div class="carousel">
+        <div class="track">
+          <div class="card" style="--img: url('https://source.unsplash.com/800x900/?pendant,light');">
+            <div class="media"></div>
+            <div class="label">Suspension</div>
+            <strong>Orbit 03</strong>
+          </div>
+          <div class="card" style="--img: url('https://source.unsplash.com/800x900/?floor,lamp');">
+            <div class="media"></div>
+            <div class="label">Lampadaire</div>
+            <strong>Colonne 01</strong>
+          </div>
+          <div class="card" style="--img: url('https://source.unsplash.com/800x900/?wall,light');">
+            <div class="media"></div>
+            <div class="label">Applique</div>
+            <strong>Falaise 02</strong>
+          </div>
+          <div class="card" style="--img: url('https://source.unsplash.com/800x900/?table,lamp');">
+            <div class="media"></div>
+            <div class="label">À poser</div>
+            <strong>Galet 04</strong>
+          </div>
+        </div>
+        <small>Glisser pour explorer les séries.</small>
+      </div>
+    </section>
+
+    <section class="ticker">
+      <div class="track">
+        <span>Atelier vivant</span>
+        <span>Éditions courtes</span>
+        <span>Sur-mesure</span>
+        <span>Pièces sculpturales</span>
+        <span>Architectes & hôtels</span>
+        <span>Atelier vivant</span>
+        <span>Éditions courtes</span>
+      </div>
+    </section>
+
+    <section class="index">
+      <div class="row">
+        <div>
+          <h3>Collections en mouvement</h3>
+          <span>Index atelier</span>
+        </div>
+        <div class="num">01</div>
+      </div>
+      <div class="row">
+        <div>
+          <h3>Nouveautés & éditions limitées</h3>
+          <span>Pièces signées</span>
+        </div>
+        <div class="num">02</div>
+      </div>
+      <div class="row">
+        <div>
+          <h3>Rubriques à venir : enfants, mobilier, scénographie</h3>
+          <span>Vision 2026</span>
+        </div>
+        <div class="num">03</div>
+      </div>
+      <div class="row">
+        <div>
+          <h3>Services pro : hôtels, restaurants, architectes</h3>
+          <span>B2B élégant</span>
+        </div>
+        <div class="num">04</div>
+      </div>
+    </section>
+
+    <section class="mosaic">
+      <div class="block large" style="--img: url('https://source.unsplash.com/900x900/?workshop,craft');">
+        <div class="media"></div>
+        <h4>Atelier ouvert</h4>
+        <p>Étapes de fabrication, textures, essais de diffusion.</p>
+      </div>
+      <div class="block tall" style="--img: url('https://source.unsplash.com/900x900/?light,shadow');">
+        <div class="media"></div>
+        <h4>Sur-mesure</h4>
+        <p>Dialogue direct avec Robin, du dessin à la pose.</p>
+      </div>
+      <div class="block" style="--img: url('https://source.unsplash.com/900x900/?texture,material');">
+        <div class="media"></div>
+        <h4>Conseils éclairés</h4>
+        <p>Choisir la bonne température, la bonne hauteur.</p>
+      </div>
+      <div class="block wide" style="--img: url('https://source.unsplash.com/900x900/?design,studio');">
+        <div class="media"></div>
+        <h4>Collections signatures</h4>
+        <p>Des lignes pensées comme des familles.</p>
+      </div>
+      <div class="block" style="--img: url('https://source.unsplash.com/900x900/?interior,lighting');">
+        <div class="media"></div>
+        <h4>Newsletter</h4>
+        <p>Une lettre rare, quand quelque chose compte.</p>
+      </div>
+    </section>
+
+    <section class="process">
+      <div class="step">
+        <h4>1 · Écoute</h4>
+        <p>Comprendre l'espace, les usages, la lumière existante.</p>
+      </div>
+      <div class="step">
+        <h4>2 · Dessin</h4>
+        <p>Esquisse de la pièce et validation des matières.</p>
+      </div>
+      <div class="step">
+        <h4>3 · Fabrication</h4>
+        <p>Assemblage en atelier, tests et finitions.</p>
+      </div>
+      <div class="step">
+        <h4>4 · Pose</h4>
+        <p>Installation et mise en scène lumineuse.</p>
+      </div>
+    </section>
+
+    <section class="footer-cta">
+      <div>
+        <h3>Recevoir les prochaines pièces avant tout le monde.</h3>
+        <p>Éditions limitées, invitations atelier, collections test.</p>
+      </div>
+      <div>
+        <input type="email" placeholder="Email" />
+        <button>Je m'inscris</button>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

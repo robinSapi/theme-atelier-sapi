@@ -1,0 +1,82 @@
+
+:root {
+  --bg: #0f0f10;
+  --panel: #151517;
+  --ink: #f5f1ea;
+  --muted: #c7bfb4;
+  --accent: #e35b24;
+  --line: rgba(255,255,255,0.08);
+  --radius: 16px;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "DM Sans", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+a { color: inherit; text-decoration: none; }
+
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+.site-header {
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(15,15,16,0.9);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(6px);
+}
+
+.header-grid { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; }
+.logo { font-family: "Bodoni Moda", serif; font-size: 20px; }
+.nav { display: flex; gap: 16px; font-size: 14px; }
+.header-cta { display: flex; gap: 10px; }
+
+.btn { background: var(--accent); color: #fff; border: none; padding: 12px 20px; border-radius: 999px; font-weight: 600; cursor: pointer; }
+.btn.ghost { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+
+.hero { position: relative; padding: 90px 0; background: linear-gradient(120deg, rgba(227,91,36,0.12), rgba(0,0,0,0.6)); }
+.hero-overlay { position: absolute; inset: 0; background: url('https://atelier-sapi.fr/wp-content/uploads/2025/07/Bandeau-Robin.jpg') center/cover no-repeat; opacity: 0.3; }
+.hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; align-items: center; }
+.hero h1 { font-family: "Bodoni Moda", serif; font-size: 46px; }
+.eyebrow { text-transform: uppercase; letter-spacing: 0.12em; font-size: 12px; color: var(--muted); }
+.lead { font-size: 18px; line-height: 1.6; }
+.hero-actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+.hero-image { height: 320px; border-radius: var(--radius); background: url('https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg') center/cover no-repeat; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+
+.section { padding: 60px 0; }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; }
+.section h2 { font-family: "Bodoni Moda", serif; }
+
+.collections { background: var(--panel); }
+.collection-bar { display: flex; gap: 16px; border-bottom: 1px solid var(--line); padding: 14px 0; font-size: 14px; }
+
+.feature { background: var(--panel); }
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; align-items: center; }
+.feature-media { height: 300px; border-radius: var(--radius); background: url('https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg') center/cover no-repeat; }
+.signature { font-family: "Square Peg", cursive; font-size: 28px; color: var(--accent); margin: 0 0 6px; }
+
+.product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 24px; }
+.product-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+.product-img { height: 160px; border-radius: 12px; background-size: cover; background-position: center; margin-bottom: 12px; }
+
+.lookbook { background: #111113; }
+.lookbook-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 20px; }
+.lookbook-item { height: 180px; border-radius: 12px; background: url('https://atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg') center/cover no-repeat; }
+.muted { color: var(--muted); }
+
+.split { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 30px; align-items: center; }
+.info-grid { display: grid; gap: 12px; }
+.info-card { border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: var(--panel); }
+
+.cta { background: var(--panel); }
+.cta-box { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+
+.footer { padding: 40px 0; border-top: 1px solid var(--line); }
+.footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+
+@media (max-width: 768px) {
+  .nav { display: none; }
+  .hero h1 { font-size: 34px; }
+}

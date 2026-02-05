@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Atelier Sâpi — Lumière Sculptée</title>
+  <meta name="description" content="Luminaires artisanaux en bois sculptés à la main par Robin. Chaque pièce est une sculpture de lumière unique, créée avec passion à Lyon.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lexend:wght@300;400;500;600;700&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="loading">
+
+  <!-- Loader -->
+  <div class="loader">
+    <div class="loader-inner">
+      <div class="loader-light"></div>
+      <p class="loader-text">Sculptant la lumière<span class="loader-dots">...</span></p>
+    </div>
+  </div>
+
+  <!-- Canvas pour particules lumineuses -->
+  <canvas id="light-canvas"></canvas>
+
+  <!-- Progress bar de scroll -->
+  <div class="scroll-progress"></div>
+
+  <!-- Navigation -->
+  <nav class="nav-lumiere">
+    <div class="nav-container">
+      <a href="#" class="nav-logo">
+        <svg width="40" height="40" viewBox="0 0 40 40" class="logo-icon">
+          <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="1.5" fill="none" />
+          <circle cx="20" cy="20" r="4" fill="currentColor" class="logo-center" />
+        </svg>
+        <span class="logo-text">Sâpi</span>
+      </a>
+
+      <div class="nav-links">
+        <a href="#creations" class="nav-link">Créations</a>
+        <a href="#atelier" class="nav-link">Atelier</a>
+        <a href="#process" class="nav-link">Processus</a>
+        <a href="#contact" class="nav-link">Contact</a>
+      </div>
+
+      <div class="nav-actions">
+        <button class="search-toggle" aria-label="Rechercher">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="8" cy="8" r="6"/>
+            <path d="M13 13l5 5"/>
+          </svg>
+        </button>
+        <button class="cart-toggle" aria-label="Panier">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 1h3l2 13h11l3-10H5"/>
+          </svg>
+          <span class="cart-badge">0</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mini Cart -->
+  <div class="mini-cart">
+    <div class="mini-cart-header">
+      <h3>Panier</h3>
+      <button class="mini-cart-close">&times;</button>
+    </div>
+    <div class="mini-cart-empty">
+      <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M5 5h10l5 35h30l7-25H15"/>
+        <circle cx="25" cy="50" r="3"/>
+        <circle cx="45" cy="50" r="3"/>
+      </svg>
+      <p>Votre panier est vide</p>
+    </div>
+    <div class="mini-cart-items"></div>
+    <div class="mini-cart-footer">
+      <div class="mini-cart-total">
+        <span>Total</span>
+        <strong class="total-amount">0€</strong>
+      </div>
+      <button class="btn-checkout">Commander</button>
+    </div>
+  </div>
+
+  <!-- Search Overlay -->
+  <div class="search-overlay">
+    <button class="search-close">&times;</button>
+    <div class="search-container">
+      <input type="search" placeholder="Rechercher une création..." class="search-input" />
+      <div class="search-results"></div>
+    </div>
+  </div>
+
+  <!-- Hero Section avec particules -->
+  <section class="hero-lumiere" id="hero">
+    <div class="hero-content">
+      <div class="hero-eyebrow" data-scroll>
+        <span class="eyebrow-line"></span>
+        <span class="eyebrow-text">Luminaires artisanaux · Lyon</span>
+        <span class="eyebrow-line"></span>
+      </div>
+
+      <h1 class="hero-title" data-scroll>
+        <span class="title-line">Sculpter</span>
+        <span class="title-line">la lumière</span>
+      </h1>
+
+      <p class="hero-subtitle" data-scroll>
+        Chaque pièce naît d'un dialogue entre le bois et la lumière.<br>
+        Robin crée des luminaires qui ne s'allument pas — ils rayonnent.
+      </p>
+
+      <div class="hero-cta" data-scroll>
+        <button class="btn-primary" data-scroll-to="#creations">
+          <span>Découvrir les créations</span>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M5 10h10M10 5l5 5-5 5" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </button>
+        <button class="btn-secondary" data-scroll-to="#atelier">
+          <span>L'atelier</span>
+        </button>
+      </div>
+
+      <div class="hero-stats" data-scroll>
+        <div class="stat-item">
+          <strong>100%</strong>
+          <span>Fait main</span>
+        </div>
+        <div class="stat-item">
+          <strong>&lt;5j</strong>
+          <span>Fabrication</span>
+        </div>
+        <div class="stat-item">
+          <strong>Lyon</strong>
+          <span>Atelier</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual" data-scroll>
+      <div class="hero-image-stack">
+        <div class="hero-image hero-image-1" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg');"></div>
+        <div class="hero-image hero-image-2" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/10/Bandeau.jpg');"></div>
+        <div class="hero-image hero-image-3" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/07/Claudine.jpg');"></div>
+      </div>
+      <div class="hero-badge">
+        <div class="badge-glow"></div>
+        <span class="badge-label">Pièce signature</span>
+        <strong class="badge-title">Olivia</strong>
+      </div>
+    </div>
+
+    <div class="scroll-indicator" data-scroll>
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- Philosophy Section -->
+  <section class="philosophy" data-scroll-section>
+    <div class="philosophy-inner">
+      <span class="section-number" data-scroll>01</span>
+      <blockquote class="philosophy-quote" data-scroll>
+        <p class="quote-text">"Je ne fabrique pas des lampes.<br>Je crée des présences lumineuses<br>qui habitent l'espace."</p>
+        <footer class="quote-author">
+          <cite>Robin</cite>
+          <span>Artisan lumière</span>
+        </footer>
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- Creations Showcase -->
+  <section class="creations" id="creations" data-scroll-section>
+    <div class="creations-header" data-scroll>
+      <span class="section-number">02</span>
+      <h2 class="section-title">Créations</h2>
+      <p class="section-subtitle">Chaque pièce est unique, sculptée à la main, pensée pour durer.</p>
+    </div>
+
+    <div class="creations-filters" data-scroll>
+      <button class="filter-btn active" data-filter="all">Tout</button>
+      <button class="filter-btn" data-filter="suspensions">Suspensions</button>
+      <button class="filter-btn" data-filter="lampadaires">Lampadaires</button>
+      <button class="filter-btn" data-filter="appliques">Appliques</button>
+      <button class="filter-btn" data-filter="poser">À poser</button>
+    </div>
+
+    <div class="creations-grid">
+      <!-- Product Card 1 - Olivia -->
+      <article class="product-card product-card-featured" data-category="suspensions" data-scroll>
+        <div class="product-media">
+          <div class="product-image" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg');"></div>
+          <div class="product-badge">Signature</div>
+          <button class="product-quick-view" data-product="olivia">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="10" cy="10" r="3"/>
+              <path d="M1 10s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/>
+            </svg>
+            <span>Aperçu rapide</span>
+          </button>
+        </div>
+        <div class="product-info">
+          <h3 class="product-name">Olivia la Gardiena</h3>
+          <p class="product-category">Suspension monumentale</p>
+          <p class="product-description">Sculpture en bois massif. Diffusion lumineuse douce et enveloppante.</p>
+          <div class="product-meta">
+            <span class="product-material">Chêne · 4 tailles</span>
+            <span class="product-time">Fabrication : 3-5 jours</span>
+          </div>
+        </div>
+        <div class="product-actions">
+          <div class="product-price">
+            <span class="price-from">À partir de</span>
+            <strong class="price-value">219€</strong>
+          </div>
+          <button class="btn-add-cart" data-product-id="olivia" data-product-name="Olivia la Gardiena" data-product-price="219">
+            <span>Ajouter</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 1h3l1.5 10h8l2-8H4"/>
+            </svg>
+          </button>
+        </div>
+      </article>
+
+      <!-- Product Card 2 - Timothée -->
+      <article class="product-card" data-category="suspensions" data-scroll>
+        <div class="product-media">
+          <div class="product-image" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/10/Bandeau.jpg');"></div>
+          <div class="product-badge badge-new">Nouveau</div>
+          <button class="product-quick-view" data-product="timothee">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="10" cy="10" r="3"/>
+              <path d="M1 10s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/>
+            </svg>
+            <span>Aperçu rapide</span>
+          </button>
+        </div>
+        <div class="product-info">
+          <h3 class="product-name">Timothée l'Araignée</h3>
+          <p class="product-category">Suspension sculptural</p>
+          <p class="product-description">La seule araignée que vous voudrez voir. Design aérien avec 8 branches.</p>
+          <div class="product-meta">
+            <span class="product-material">Chêne & métal</span>
+            <span class="product-time">Édition limitée</span>
+          </div>
+        </div>
+        <div class="product-actions">
+          <div class="product-price">
+            <span class="price-from">Pièce unique</span>
+            <strong class="price-value">389€</strong>
+          </div>
+          <button class="btn-add-cart" data-product-id="timothee" data-product-name="Timothée l'Araignée" data-product-price="389">
+            <span>Ajouter</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 1h3l1.5 10h8l2-8H4"/>
+            </svg>
+          </button>
+        </div>
+      </article>
+
+      <!-- Product Card 3 - Claudine -->
+      <article class="product-card" data-category="lampadaires" data-scroll>
+        <div class="product-media">
+          <div class="product-image" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/07/Claudine.jpg');"></div>
+          <button class="product-quick-view" data-product="claudine">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="10" cy="10" r="3"/>
+              <path d="M1 10s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/>
+            </svg>
+            <span>Aperçu rapide</span>
+          </button>
+        </div>
+        <div class="product-info">
+          <h3 class="product-name">Claudine la Turbine</h3>
+          <p class="product-category">Lampadaire cinétique</p>
+          <p class="product-description">Mouvement perpétuel de lumière inspiré des turbines.</p>
+          <div class="product-meta">
+            <span class="product-material">Bois tournant</span>
+            <span class="product-time">Rotation 360°</span>
+          </div>
+        </div>
+        <div class="product-actions">
+          <div class="product-price">
+            <span class="price-from">À partir de</span>
+            <strong class="price-value">259€</strong>
+          </div>
+          <button class="btn-add-cart" data-product-id="claudine" data-product-name="Claudine la Turbine" data-product-price="259">
+            <span>Ajouter</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 1h3l1.5 10h8l2-8H4"/>
+            </svg>
+          </button>
+        </div>
+      </article>
+
+      <!-- Product Card 4 - Suze -->
+      <article class="product-card" data-category="appliques" data-scroll>
+        <div class="product-media">
+          <div class="product-image" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg');"></div>
+          <button class="product-quick-view" data-product="suze">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="10" cy="10" r="3"/>
+              <path d="M1 10s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/>
+            </svg>
+            <span>Aperçu rapide</span>
+          </button>
+        </div>
+        <div class="product-info">
+          <h3 class="product-name">Suze la Méduse</h3>
+          <p class="product-category">Applique organique</p>
+          <p class="product-description">Formes aquatiques qui ondulent. Lumière apaisante.</p>
+          <div class="product-meta">
+            <span class="product-material">Lamelles de bois</span>
+            <span class="product-time">Montage facile</span>
+          </div>
+        </div>
+        <div class="product-actions">
+          <div class="product-price">
+            <span class="price-from">À partir de</span>
+            <strong class="price-value">129€</strong>
+          </div>
+          <button class="btn-add-cart" data-product-id="suze" data-product-name="Suze la Méduse" data-product-price="129">
+            <span>Ajouter</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 1h3l1.5 10h8l2-8H4"/>
+            </svg>
+          </button>
+        </div>
+      </article>
+
+      <!-- Product Card 5 - Alban -->
+      <article class="product-card" data-category="suspensions" data-scroll>
+        <div class="product-media">
+          <div class="product-image" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/07/Bandeau-Robin.jpg');"></div>
+          <button class="product-quick-view" data-product="alban">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="10" cy="10" r="3"/>
+              <path d="M1 10s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/>
+            </svg>
+            <span>Aperçu rapide</span>
+          </button>
+        </div>
+        <div class="product-info">
+          <h3 class="product-name">Alban le Virevoltant</h3>
+          <p class="product-category">Suspension dynamique</p>
+          <p class="product-description">Géométrie en mouvement. Ombres dansantes.</p>
+          <div class="product-meta">
+            <span class="product-material">Peuplier</span>
+            <span class="product-time">Finition huile</span>
+          </div>
+        </div>
+        <div class="product-actions">
+          <div class="product-price">
+            <span class="price-from">À partir de</span>
+            <strong class="price-value">189€</strong>
+          </div>
+          <button class="btn-add-cart" data-product-id="alban" data-product-name="Alban le Virevoltant" data-product-price="189">
+            <span>Ajouter</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 1h3l1.5 10h8l2-8H4"/>
+            </svg>
+          </button>
+        </div>
+      </article>
+
+      <!-- Product Card 6 - Charlie -->
+      <article class="product-card" data-category="poser" data-scroll>
+        <div class="product-media">
+          <div class="product-image" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/07/Charlie-Bandeau-2.jpg');"></div>
+          <button class="product-quick-view" data-product="charlie">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="10" cy="10" r="3"/>
+              <path d="M1 10s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/>
+            </svg>
+            <span>Aperçu rapide</span>
+          </button>
+        </div>
+        <div class="product-info">
+          <h3 class="product-name">Charlie le Pissenlit</h3>
+          <p class="product-category">Lampe à poser</p>
+          <p class="product-description">Légèreté poétique. Comme un pissenlit prêt à s'envoler.</p>
+          <div class="product-meta">
+            <span class="product-material">Multi-formats</span>
+            <span class="product-time">Hauteurs variables</span>
+          </div>
+        </div>
+        <div class="product-actions">
+          <div class="product-price">
+            <span class="price-from">À partir de</span>
+            <strong class="price-value">149€</strong>
+          </div>
+          <button class="btn-add-cart" data-product-id="charlie" data-product-name="Charlie le Pissenlit" data-product-price="149">
+            <span>Ajouter</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 1h3l1.5 10h8l2-8H4"/>
+            </svg>
+          </button>
+        </div>
+      </article>
+    </div>
+
+    <div class="creations-cta" data-scroll>
+      <button class="btn-secondary">
+        <span>Voir toutes les créations</span>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M5 10h10M10 5l5 5-5 5" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- Atelier Section Interactive -->
+  <section class="atelier" id="atelier" data-scroll-section>
+    <div class="atelier-header" data-scroll>
+      <span class="section-number">03</span>
+      <h2 class="section-title">L'atelier vivant</h2>
+      <p class="section-subtitle">Dans son atelier lyonnais, Robin dessine, découpe et assemble chaque luminaire.</p>
+    </div>
+
+    <div class="atelier-visual" data-scroll>
+      <div class="atelier-image" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/01/Robin-scaled.jpg');">
+        <!-- Hotspots interactifs -->
+        <button class="hotspot" style="top: 30%; left: 40%;" data-hotspot="1">
+          <span class="hotspot-pulse"></span>
+          <span class="hotspot-dot"></span>
+        </button>
+        <button class="hotspot" style="top: 60%; left: 70%;" data-hotspot="2">
+          <span class="hotspot-pulse"></span>
+          <span class="hotspot-dot"></span>
+        </button>
+        <button class="hotspot" style="top: 50%; left: 20%;" data-hotspot="3">
+          <span class="hotspot-pulse"></span>
+          <span class="hotspot-dot"></span>
+        </button>
+      </div>
+
+      <!-- Hotspot Info Panels -->
+      <div class="hotspot-panel" data-panel="1">
+        <h4>Découpe laser de précision</h4>
+        <p>Chaque pièce est découpée avec une précision au millimètre pour garantir un assemblage parfait.</p>
+      </div>
+      <div class="hotspot-panel" data-panel="2">
+        <h4>Assemblage à la main</h4>
+        <p>Robin assemble chaque luminaire avec patience, testant la diffusion de lumière à chaque étape.</p>
+      </div>
+      <div class="hotspot-panel" data-panel="3">
+        <h4>Finitions artisanales</h4>
+        <p>Ponçage délicat et huile naturelle pour révéler la beauté du bois et protéger la création.</p>
+      </div>
+    </div>
+
+    <div class="atelier-content" data-scroll>
+      <div class="atelier-text">
+        <p class="text-large">Chaque matin, l'atelier s'éveille avec le bruit de la découpe laser et l'odeur du bois fraîchement poncé.</p>
+        <p class="text-large">Robin y passe ses journées à affiner, assembler, tester la lumière. Pas de ligne de production — juste des mains expertes, des outils précis, et la volonté de créer des pièces qui durent.</p>
+      </div>
+      <div class="atelier-stats">
+        <div class="stat-large">
+          <strong>15 ans</strong>
+          <span>D'expérience</span>
+        </div>
+        <div class="stat-large">
+          <strong>500+</strong>
+          <span>Créations uniques</span>
+        </div>
+        <div class="stat-large">
+          <strong>Lyon</strong>
+          <span>Atelier français</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Process Timeline -->
+  <section class="process" id="process" data-scroll-section>
+    <div class="process-header" data-scroll>
+      <span class="section-number">04</span>
+      <h2 class="section-title">Du croquis à la lumière</h2>
+      <p class="section-subtitle">Chaque création suit un processus méticuleux, du dessin initial aux finitions.</p>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-line"></div>
+
+      <div class="timeline-item" data-scroll>
+        <div class="timeline-marker">
+          <span class="marker-number">01</span>
+        </div>
+        <div class="timeline-content">
+          <h3 class="timeline-title">Esquisse & Design</h3>
+          <p class="timeline-text">Robin dessine à la main chaque nouveau projet. Recherche de formes, de proportions, de la diffusion lumineuse idéale.</p>
+          <div class="timeline-image" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/01/sapi_illus_creations.jpg');"></div>
+        </div>
+      </div>
+
+      <div class="timeline-item" data-scroll>
+        <div class="timeline-marker">
+          <span class="marker-number">02</span>
+        </div>
+        <div class="timeline-content">
+          <h3 class="timeline-title">Découpe laser</h3>
+          <p class="timeline-text">Vectorisation du design et découpe de précision. Le bois massif prend forme sous la chaleur du laser.</p>
+          <div class="timeline-image" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/01/sapi_illus_artisan.jpg');"></div>
+        </div>
+      </div>
+
+      <div class="timeline-item" data-scroll>
+        <div class="timeline-marker">
+          <span class="marker-number">03</span>
+        </div>
+        <div class="timeline-content">
+          <h3 class="timeline-title">Assemblage & Test</h3>
+          <p class="timeline-text">Assemblage minutieux des pièces. Test de la lumière, ajustements si besoin. La patience est clé.</p>
+          <div class="timeline-image" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg');"></div>
+        </div>
+      </div>
+
+      <div class="timeline-item" data-scroll>
+        <div class="timeline-marker">
+          <span class="marker-number">04</span>
+        </div>
+        <div class="timeline-content">
+          <h3 class="timeline-title">Finitions & Envoi</h3>
+          <p class="timeline-text">Ponçage délicat, huile naturelle, emballage soigné. Votre création est prête à rayonner chez vous.</p>
+          <div class="timeline-image" style="background-image: url('https://atelier-sapi.fr/wp-content/uploads/2025/10/Bandeau.jpg');"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter CTA -->
+  <section class="newsletter" data-scroll-section>
+    <div class="newsletter-inner" data-scroll>
+      <div class="newsletter-glow"></div>
+      <h2 class="newsletter-title">Restez en lumière</h2>
+      <p class="newsletter-subtitle">Nouveautés, éditions limitées, coulisses d'atelier.</p>
+      <form class="newsletter-form">
+        <div class="form-group">
+          <input type="email" placeholder="votre@email.fr" class="newsletter-input" required />
+          <button type="submit" class="newsletter-submit">
+            <span>S'inscrire</span>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M5 10h10M10 5l5 5-5 5" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer" data-scroll-section>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <a href="#" class="footer-logo">
+          <svg width="40" height="40" viewBox="0 0 40 40">
+            <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="1.5" fill="none" />
+            <circle cx="20" cy="20" r="4" fill="currentColor" />
+          </svg>
+          <span>Atelier Sâpi</span>
+        </a>
+        <p class="footer-tagline">Lumières sculptées à la main<br>Lyon, France</p>
+        <div class="footer-socials">
+          <a href="#" aria-label="Instagram">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <rect x="2" y="2" width="16" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="2"/>
+              <circle cx="10" cy="10" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+              <circle cx="15" cy="5" r="1"/>
+            </svg>
+          </a>
+          <a href="#" aria-label="Pinterest">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 0C4.5 0 0 4.5 0 10c0 4.2 2.6 7.8 6.3 9.3-.1-.8-.2-2 0-2.9.2-.8 1.3-5.4 1.3-5.4s-.3-.6-.3-1.5c0-1.4.8-2.4 1.8-2.4.9 0 1.3.6 1.3 1.4 0 .9-.5 2.1-.8 3.3-.2 1 .5 1.8 1.5 1.8 1.8 0 3.2-1.9 3.2-4.6 0-2.4-1.7-4.1-4.2-4.1-2.9 0-4.6 2.2-4.6 4.4 0 .9.3 1.8.8 2.3.1.1.1.2.1.3-.1.3-.3 1.1-.3 1.3 0 .2-.1.2-.3.1-1.3-.6-2.1-2.5-2.1-4 0-3.3 2.4-6.3 6.9-6.3 3.6 0 6.4 2.6 6.4 6 0 3.6-2.3 6.5-5.4 6.5-1.1 0-2.1-.6-2.4-1.2 0 0-.5 2-.6 2.5-.2.9-.8 2-1.2 2.7.9.3 1.9.4 2.9.4 5.5 0 10-4.5 10-10S15.5 0 10 0z" fill="currentColor"/>
+            </svg>
+          </a>
+          <a href="#" aria-label="Facebook">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M18.9 0H1.1C.5 0 0 .5 0 1.1v17.8c0 .6.5 1.1 1.1 1.1h9.6v-7.7H8.1V9.4h2.6V7.1c0-2.6 1.6-4 3.9-4 1.1 0 2.1.1 2.3.1v2.7h-1.6c-1.3 0-1.5.6-1.5 1.5v2h3l-.4 2.9h-2.6V20h5.1c.6 0 1.1-.5 1.1-1.1V1.1c0-.6-.5-1.1-1.1-1.1z" fill="currentColor"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Atelier</h4>
+          <a href="#">L'histoire</a>
+          <a href="#">Robin</a>
+          <a href="#">Sur-mesure</a>
+          <a href="#">Contact</a>
+        </div>
+        <div class="footer-col">
+          <h4>Collections</h4>
+          <a href="#">Suspensions</a>
+          <a href="#">Lampadaires</a>
+          <a href="#">Appliques</a>
+          <a href="#">À poser</a>
+        </div>
+        <div class="footer-col">
+          <h4>Informations</h4>
+          <a href="#">Livraison</a>
+          <a href="#">Garantie</a>
+          <a href="#">Entretien</a>
+          <a href="#">FAQ</a>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <p>3 rue de la Lumière<br>69001 Lyon, France</p>
+          <p><a href="mailto:hello@atelier-sapi.fr">hello@atelier-sapi.fr</a></p>
+          <p><a href="tel:+33612345678">+33 6 12 34 56 78</a></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 Atelier Sâpi — Lumières sculptées avec passion</p>
+      <div class="footer-legal">
+        <a href="#">Mentions légales</a>
+        <a href="#">CGV</a>
+        <a href="#">Confidentialité</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Lightbox -->
+  <div class="lightbox">
+    <button class="lightbox-close">&times;</button>
+    <div class="lightbox-content">
+      <div class="lightbox-media">
+        <img src="" alt="" class="lightbox-image" />
+      </div>
+      <div class="lightbox-info">
+        <h3 class="lightbox-title"></h3>
+        <p class="lightbox-category"></p>
+        <p class="lightbox-description"></p>
+        <div class="lightbox-specs"></div>
+        <div class="lightbox-actions">
+          <div class="lightbox-price">
+            <span class="price-from">À partir de</span>
+            <strong class="price-value"></strong>
+          </div>
+          <button class="btn-add-cart-lightbox">
+            <span>Ajouter au panier</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 1h3l1.5 10h8l2-8H4"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

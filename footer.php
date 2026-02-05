@@ -38,7 +38,7 @@
   </div>
 
   <div class="footer-bottom">
-    <p>&copy; <?php echo date('Y'); ?> <?php echo esc_html(get_bloginfo('name')); ?> &mdash; Tous droits réservés</p>
+    <p>&copy; <?php echo date('Y'); ?> Atelier Sâpi &mdash; Tous droits réservés</p>
     <div class="footer-legal">
       <a href="<?php echo home_url('/mentions-legales/'); ?>">Mentions légales</a>
       <a href="<?php echo home_url('/cgv/'); ?>">CGV</a>
