@@ -229,40 +229,12 @@
   };
 
   // =============================================
-  // PRODUCT CARDS ANIMATION
+  // PRODUCT CARDS (animation disabled for reliability)
   // =============================================
   const productCards = {
     init: function() {
-      const cards = document.querySelectorAll('.product-card-cinetique');
-      if (!cards.length) return;
-
-      // Intersection Observer for scroll animations
-      if ('IntersectionObserver' in window) {
-        // First, add will-animate class to prepare for animation
-        cards.forEach(card => card.classList.add('will-animate'));
-
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              // Get the index from all observed cards for staggering
-              const allCards = Array.from(cards);
-              const index = allCards.indexOf(entry.target);
-
-              // Staggered animation
-              setTimeout(() => {
-                entry.target.classList.add('is-visible');
-              }, (index % 4) * 100); // Stagger within each row
-              observer.unobserve(entry.target);
-            }
-          });
-        }, {
-          threshold: 0.1,
-          rootMargin: '50px'
-        });
-
-        cards.forEach(card => observer.observe(card));
-      }
-      // No fallback needed - cards are visible by default now
+      // Cards are visible by default via CSS
+      // Animation was causing visibility issues, disabled for now
     }
   };
 

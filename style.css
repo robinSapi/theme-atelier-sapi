@@ -3275,20 +3275,6 @@ transform: translateY(15px);
   transition: all 0.5s var(--ease-expo);
 }
 
-/* Animation: hidden state (set by JS before animating) */
-.product-card-cinetique.will-animate {
-  opacity: 0;
-  -webkit-transform: translateY(30px);
-  transform: translateY(30px);
-}
-
-/* Animation: visible state */
-.product-card-cinetique.is-visible {
-  opacity: 1;
-  -webkit-transform: translateY(0);
-  transform: translateY(0);
-}
-
 .product-card-cinetique:hover {
   border-color: var(--color-wood);
   -webkit-transform: translateY(-8px);
