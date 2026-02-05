@@ -801,8 +801,11 @@ input[type="submit"]:hover,
 
 .shop-products ul.products {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 24px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .product-card {
@@ -877,6 +880,11 @@ input[type="submit"]:hover,
 .product-card .button {
   margin: 0 1rem 1rem;
   width: calc(100% - 2rem);
+  font-size: 0.75rem;
+  padding: 0.8rem 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .shop-outro-text {
