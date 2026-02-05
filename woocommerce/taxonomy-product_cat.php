@@ -19,21 +19,13 @@ $category_intro = [
 sapi_maison_breadcrumbs();
 ?>
 
-<section class="shop-hero" style="background-image: url('/wp-content/uploads/2025/01/sapi_illus_creations.jpg');">
-  <div class="shop-hero-inner">
-    <div class="shop-hero-title">
-      <span class="divider"></span>
-      <h1><?php echo esc_html($term_name ? $term_name : 'Nos créations'); ?></h1>
-      <span class="divider"></span>
-    </div>
-  </div>
+<section class="shop-hero-cinetique">
+  <span class="section-number">01</span>
+  <h1><?php echo esc_html($term_name ? $term_name : 'Nos créations'); ?></h1>
+  <?php if (isset($category_intro[$term_slug])) : ?>
+    <p class="shop-subtitle"><?php echo esc_html($category_intro[$term_slug]); ?></p>
+  <?php endif; ?>
 </section>
-
-<?php if (isset($category_intro[$term_slug])) : ?>
-  <section class="category-intro">
-    <p><?php echo esc_html($category_intro[$term_slug]); ?></p>
-  </section>
-<?php endif; ?>
 
 <?php
 if ($term_slug === 'suspension') :
@@ -229,14 +221,14 @@ if (!empty($featured)) :
 
 <section class="shop-products">
   <?php if (woocommerce_product_loop()) : ?>
-    <?php woocommerce_product_loop_start(); ?>
-    <?php if (wc_get_loop_prop('total')) : ?>
-      <?php while (have_posts()) : ?>
-        <?php the_post(); ?>
-        <?php wc_get_template_part('content', 'product'); ?>
-      <?php endwhile; ?>
-    <?php endif; ?>
-    <?php woocommerce_product_loop_end(); ?>
+    <ul class="products-grid-cinetique products columns-4">
+      <?php if (wc_get_loop_prop('total')) : ?>
+        <?php while (have_posts()) : ?>
+          <?php the_post(); ?>
+          <?php wc_get_template_part('content', 'product'); ?>
+        <?php endwhile; ?>
+      <?php endif; ?>
+    </ul>
     <?php woocommerce_pagination(); ?>
   <?php else : ?>
     <?php wc_no_products_found(); ?>

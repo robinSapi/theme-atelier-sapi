@@ -1,68 +1,84 @@
 <?php
+/**
+ * The Template for displaying product archives
+ *
+ * SAPI CINÉTIQUE - Shop page with animated filters and enhanced grid
+ *
+ * @package Sapi-Maison
+ * @version 9.4.0
+ */
+
 defined('ABSPATH') || exit;
 
 get_header();
+
+// Get all product categories for filters
+$product_categories = get_terms([
+  'taxonomy' => 'product_cat',
+  'hide_empty' => true,
+  'exclude' => [get_option('default_product_cat')], // Exclude "Uncategorized"
+  'orderby' => 'menu_order',
+  'order' => 'ASC',
+]);
 ?>
 
-<section class="shop-hero" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/01/sapi_illus_creations.jpg');">
-  <div class="shop-hero-inner">
-    <div class="shop-hero-title">
-      <span class="divider"></span>
-      <h1>Nos luminaires</h1>
-      <span class="divider"></span>
-    </div>
-    <p class="shop-hero-subtitle">Préparez-vous à découvrir nos luminaires en bois uniques</p>
-  </div>
+<!-- Hero Section -->
+<section class="shop-hero-cinetique">
+  <span class="section-number">01</span>
+  <h1><?php esc_html_e('Nos Créations', 'theme-sapi-maison'); ?></h1>
+  <p class="shop-subtitle">
+    <?php esc_html_e('Chaque pièce est unique, découpée au laser et assemblée à la main dans notre atelier lyonnais.', 'theme-sapi-maison'); ?>
+  </p>
 </section>
 
-<section class="shop-intro">
-  <p><strong>Bienvenue au cœur de l'Atelier Sâpi</strong><br>
-  Chaque luminaire naît d’une idée lumineuse, d’un croquis sur papier, puis prend vie grâce à la précision du laser et la chaleur du bois. Robin, le créateur, sélectionne lui-même les essences comme le peuplier ou l’okoumé, avant de les transformer avec soin dans son atelier lyonnais.</p>
-  <p>Nos suspensions en bois, à la fois légères et expressives, sont conçues pour sublimer vos intérieurs, du salon à la chambre, en passant par l’entrée ou la cuisine. Inspirées par la nature et les formes organiques, nos créations mêlent savoir-faire artisanal, design poétique et fabrication raisonnée.</p>
-</section>
+<!-- Product Filters -->
+<nav class="product-filters" role="navigation" aria-label="<?php esc_attr_e('Filtres produits', 'theme-sapi-maison'); ?>">
+  <a href="<?php echo esc_url(get_permalink(wc_get_page_id('shop'))); ?>" class="filter-btn active" data-filter="all">
+    <?php esc_html_e('Tout', 'theme-sapi-maison'); ?>
+  </a>
+  <?php if ($product_categories && !is_wp_error($product_categories)) : ?>
+    <?php foreach ($product_categories as $cat) : ?>
+      <a href="<?php echo esc_url(get_term_link($cat)); ?>" class="filter-btn" data-filter="<?php echo esc_attr($cat->slug); ?>">
+        <?php echo esc_html($cat->name); ?>
+      </a>
+    <?php endforeach; ?>
+  <?php endif; ?>
+</nav>
 
-<section class="shop-categories">
-  <div class="shop-category-grid">
-    <a class="shop-category" href="<?php echo home_url('/categorie-produit/suspension/'); ?>" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/IMG_8801-682x1024.jpg');">
-      <span>Les suspensions</span>
-    </a>
-    <a class="shop-category" href="<?php echo home_url('/categorie-produit/lampadaire/'); ?>" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Face-Allumee.jpg');">
-      <span>Les lampadaires</span>
-    </a>
-    <a class="shop-category" href="<?php echo home_url('/categorie-produit/applique/'); ?>" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg');">
-      <span>Les appliques</span>
-    </a>
-    <a class="shop-category" href="<?php echo home_url('/categorie-produit/lampe-a-poser/'); ?>" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/09/IMG_9802.jpg');">
-      <span>Les lampes à poser</span>
-    </a>
-    <a class="shop-category" href="<?php echo home_url('/categorie-produit/accessoire/'); ?>">
-      <span>Les accessoires</span>
-    </a>
-  </div>
-  <div class="shop-cta-row">
-    <a class="button" href="<?php echo home_url('/produit/carte-cadeau/'); ?>">Carte cadeau 🎁</a>
-    <a class="button button-outline" href="<?php echo home_url('/contact/'); ?>">Modèle personnalisé</a>
-  </div>
-</section>
-
+<!-- Products Grid -->
 <section class="shop-products">
   <?php if (woocommerce_product_loop()) : ?>
-    <?php woocommerce_product_loop_start(); ?>
-    <?php if (wc_get_loop_prop('total')) : ?>
-      <?php while (have_posts()) : ?>
-        <?php the_post(); ?>
-        <?php wc_get_template_part('content', 'product'); ?>
-      <?php endwhile; ?>
-    <?php endif; ?>
-    <?php woocommerce_product_loop_end(); ?>
+
+    <ul class="products-grid-cinetique products columns-4">
+      <?php
+      if (wc_get_loop_prop('total')) :
+        while (have_posts()) :
+          the_post();
+          wc_get_template_part('content', 'product');
+        endwhile;
+      endif;
+      ?>
+    </ul>
+
     <?php woocommerce_pagination(); ?>
+
   <?php else : ?>
-    <?php wc_no_products_found(); ?>
+
+    <div class="woocommerce-no-products-found">
+      <p><?php esc_html_e('Aucun produit ne correspond à votre recherche.', 'theme-sapi-maison'); ?></p>
+      <a href="<?php echo esc_url(get_permalink(wc_get_page_id('shop'))); ?>" class="button">
+        <?php esc_html_e('Voir toutes les créations', 'theme-sapi-maison'); ?>
+      </a>
+    </div>
+
   <?php endif; ?>
 </section>
 
+<!-- Outro Section -->
 <section class="shop-outro">
-  <p class="shop-outro-text">Laissez-vous guider par la lumière, explorez nos collections pensées pour illuminer chaque pièce… autrement.</p>
+  <p class="shop-outro-text">
+    <?php esc_html_e('Laissez-vous guider par la lumière...', 'theme-sapi-maison'); ?>
+  </p>
 </section>
 
 <?php

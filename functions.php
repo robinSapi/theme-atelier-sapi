@@ -28,18 +28,38 @@ add_action('after_setup_theme', 'sapi_maison_setup');
 
 function sapi_maison_enqueue_assets() {
   $fonts = [
-    'family' => 'Montserrat:wght@400;500;600;700|Square+Peg:wght@400;500',
+    'family' => 'Montserrat:wght@300;400;500;600;700;900|Square+Peg:wght@400',
     'display' => 'swap',
   ];
-  wp_enqueue_style('sapi-maison-fonts', add_query_arg($fonts, 'https://fonts.googleapis.com/css'));
+  wp_enqueue_style('sapi-maison-fonts', add_query_arg($fonts, 'https://fonts.googleapis.com/css2'));
+
+  // CRITICAL: Use filemtime for automatic cache busting
   wp_enqueue_style('sapi-maison-style', get_stylesheet_uri(), ['sapi-maison-fonts'], filemtime(get_stylesheet_directory() . '/style.css'));
 
   // Menu burger JavaScript - chargé sur toutes les pages
-  wp_enqueue_script('sapi-maison-menu', get_template_directory_uri() . '/assets/menu.js', [], filemtime(get_template_directory() . '/assets/menu.js'), true);
+  $menu_js_path = get_template_directory() . '/assets/menu.js';
+  wp_enqueue_script('sapi-maison-menu', get_template_directory_uri() . '/assets/menu.js', [], file_exists($menu_js_path) ? filemtime($menu_js_path) : '1.0.0', true);
 
+  // CINÉTIQUE interactions (bento animations, custom cursor, parallax) - only on homepage
   if (is_front_page()) {
-    // CINÉTIQUE interactions (bento animations, custom cursor, parallax)
-    wp_enqueue_script('sapi-maison-cinetique', get_template_directory_uri() . '/assets/cinetique.js', [], filemtime(get_template_directory() . '/assets/cinetique.js'), true);
+    $cinetique_js_path = get_template_directory() . '/assets/cinetique.js';
+    wp_enqueue_script('sapi-maison-cinetique', get_template_directory_uri() . '/assets/cinetique.js', [], file_exists($cinetique_js_path) ? filemtime($cinetique_js_path) : '1.0.0', true);
+  }
+
+  // WooCommerce shop interactions (filters, animations)
+  if (class_exists('WooCommerce') && (is_shop() || is_product_category() || is_product())) {
+    $shop_js_path = get_template_directory() . '/assets/shop.js';
+    if (file_exists($shop_js_path)) {
+      wp_enqueue_script('sapi-maison-shop', get_template_directory_uri() . '/assets/shop.js', ['jquery'], filemtime($shop_js_path), true);
+
+      // Pass WooCommerce data to JS
+      wp_localize_script('sapi-maison-shop', 'sapiShop', [
+        'ajaxUrl' => admin_url('admin-ajax.php'),
+        'cartUrl' => wc_get_cart_url(),
+        'checkoutUrl' => wc_get_checkout_url(),
+        'currency' => get_woocommerce_currency_symbol(),
+      ]);
+    }
   }
 }
 add_action('wp_enqueue_scripts', 'sapi_maison_enqueue_assets');
@@ -280,5 +300,178 @@ add_filter('woocommerce_add_to_cart_fragments', function($fragments) {
   <span class="cart-count<?php echo $count === 0 ? ' cart-count--empty' : ''; ?>"><?php echo $count > 0 ? esc_html($count) : ''; ?></span>
   <?php
   $fragments['.cart-count'] = ob_get_clean();
+
+  // Mini cart fragment for sliding panel
+  ob_start();
+  sapi_render_mini_cart_contents();
+  $fragments['.mini-cart-body'] = ob_get_clean();
+
+  // Mini cart total
+  ob_start();
+  ?>
+  <div class="mini-cart-total">
+    <span><?php esc_html_e('Total', 'theme-sapi-maison'); ?></span>
+    <strong class="total-amount"><?php echo WC()->cart->get_cart_total(); ?></strong>
+  </div>
+  <?php
+  $fragments['.mini-cart-total'] = ob_get_clean();
+
   return $fragments;
 });
+
+/**
+ * Render mini cart contents for AJAX refresh
+ */
+function sapi_render_mini_cart_contents() {
+  if (!WC()->cart || WC()->cart->is_empty()) {
+    ?>
+    <div class="mini-cart-body">
+      <div class="mini-cart-empty">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="9" cy="21" r="1"/>
+          <circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+        </svg>
+        <p><?php esc_html_e('Votre panier est vide', 'theme-sapi-maison'); ?></p>
+        <a href="<?php echo esc_url(wc_get_page_permalink('shop')); ?>" class="btn-continue">
+          <?php esc_html_e('Voir les créations', 'theme-sapi-maison'); ?>
+        </a>
+      </div>
+    </div>
+    <?php
+    return;
+  }
+  ?>
+  <div class="mini-cart-body">
+    <div class="mini-cart-items">
+      <?php foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) :
+        $product = $cart_item['data'];
+        $product_id = $cart_item['product_id'];
+        $quantity = $cart_item['quantity'];
+        $product_permalink = $product->is_visible() ? $product->get_permalink($cart_item) : '';
+      ?>
+        <div class="mini-cart-item" data-key="<?php echo esc_attr($cart_item_key); ?>">
+          <div class="mini-cart-item-image">
+            <?php echo $product->get_image('thumbnail'); ?>
+          </div>
+          <div class="mini-cart-item-details">
+            <span class="mini-cart-item-name">
+              <?php echo $product_permalink ? '<a href="' . esc_url($product_permalink) . '">' . esc_html($product->get_name()) . '</a>' : esc_html($product->get_name()); ?>
+            </span>
+            <span class="mini-cart-item-meta">
+              <?php echo wc_get_formatted_cart_item_data($cart_item); ?>
+              <?php echo sprintf(__('Qté: %d', 'theme-sapi-maison'), $quantity); ?>
+            </span>
+            <span class="mini-cart-item-price">
+              <?php echo WC()->cart->get_product_price($product); ?>
+            </span>
+          </div>
+          <button class="mini-cart-item-remove" data-cart-item-key="<?php echo esc_attr($cart_item_key); ?>" aria-label="<?php esc_attr_e('Retirer du panier', 'theme-sapi-maison'); ?>">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  </div>
+  <?php
+}
+
+/**
+ * Custom variation attribute display with visible labels
+ * Add classes and data attributes for JS-powered swatches
+ */
+add_filter('woocommerce_dropdown_variation_attribute_options_html', function($html, $args) {
+  $args = wp_parse_args(apply_filters('woocommerce_dropdown_variation_attribute_options_args', $args), [
+    'options'          => false,
+    'attribute'        => false,
+    'product'          => false,
+    'selected'         => false,
+    'name'             => '',
+    'id'               => '',
+    'class'            => '',
+    'show_option_none' => __('Choose an option', 'woocommerce'),
+  ]);
+
+  // Only modify for specific attributes
+  $attribute = $args['attribute'];
+  $product = $args['product'];
+  $options = $args['options'];
+
+  // Check if this is a material/finish attribute (common swatch candidates)
+  $swatch_attributes = ['pa_essence', 'pa_materiau', 'pa_finition', 'pa_couleur', 'essence', 'materiau', 'finition', 'couleur'];
+  $is_swatch_attribute = false;
+
+  foreach ($swatch_attributes as $swatch_attr) {
+    if (stripos($attribute, $swatch_attr) !== false) {
+      $is_swatch_attribute = true;
+      break;
+    }
+  }
+
+  if (!$is_swatch_attribute || empty($options)) {
+    return $html;
+  }
+
+  // Get attribute taxonomy for swatch images
+  $attribute_taxonomy = wc_attribute_taxonomy_name(str_replace('pa_', '', $attribute));
+
+  // Build custom swatch HTML
+  $swatch_html = '<div class="attribute-swatch" data-attribute="' . esc_attr($attribute) . '">';
+
+  foreach ($options as $option) {
+    $term = get_term_by('slug', $option, $attribute_taxonomy);
+    $term_name = $term ? $term->name : $option;
+    $is_selected = $args['selected'] === $option ? ' selected' : '';
+
+    // Try to get a term image (if using ACF or similar)
+    $term_image = '';
+    if ($term && function_exists('get_field')) {
+      $term_image = get_field('swatch_image', $term);
+    }
+
+    $swatch_html .= '<label class="swatch-item' . $is_selected . '" data-value="' . esc_attr($option) . '">';
+    $swatch_html .= '<div class="swatch-preview">';
+    if ($term_image) {
+      $swatch_html .= '<img src="' . esc_url($term_image['sizes']['thumbnail']) . '" alt="' . esc_attr($term_name) . '">';
+    } else {
+      // Use a color-based preview or first letter
+      $swatch_html .= '<span class="swatch-letter">' . esc_html(mb_substr($term_name, 0, 1)) . '</span>';
+    }
+    $swatch_html .= '</div>';
+    $swatch_html .= '<span class="swatch-name">' . esc_html($term_name) . '</span>';
+    $swatch_html .= '</label>';
+  }
+
+  $swatch_html .= '</div>';
+
+  // Keep the original select but add a wrapper class
+  $html = str_replace('<select', '<select class="swatch-select-hidden"', $html);
+
+  return $swatch_html . $html;
+}, 10, 2);
+
+/**
+ * WooCommerce gallery thumbnail size
+ * Ensure thumbnails are at least 100px
+ */
+add_filter('woocommerce_gallery_thumbnail_size', function() {
+  return [100, 100];
+});
+
+/**
+ * Increase gallery image size
+ */
+add_filter('woocommerce_gallery_image_size', function() {
+  return 'woocommerce_single';
+});
+
+/**
+ * Register custom image sizes for better product display
+ */
+add_action('after_setup_theme', function() {
+  add_image_size('product-card', 400, 400, true);
+  add_image_size('product-gallery-thumb', 120, 120, true);
+}, 11);
