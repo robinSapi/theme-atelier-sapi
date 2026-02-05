@@ -274,9 +274,10 @@ add_action('wp_enqueue_scripts', function() {
 
 // Update cart count fragment after AJAX add-to-cart
 add_filter('woocommerce_add_to_cart_fragments', function($fragments) {
+  $count = WC()->cart->get_cart_contents_count();
   ob_start();
   ?>
-  <span class="cart-count"><?php echo esc_html(WC()->cart->get_cart_contents_count()); ?></span>
+  <span class="cart-count<?php echo $count === 0 ? ' cart-count--empty' : ''; ?>"><?php echo $count > 0 ? esc_html($count) : ''; ?></span>
   <?php
   $fragments['.cart-count'] = ob_get_clean();
   return $fragments;

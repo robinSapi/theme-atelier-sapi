@@ -88,8 +88,11 @@ get_header();
 
   <section class="product-gallery-large">
     <?php
+    $has_acf_images = false;
+
+    // Try ACF fields first
     if (function_exists('get_field')) {
-      $images = [
+      $acf_images = [
         get_field('ambiance_1'),
         get_field('detail_1'),
         get_field('detail_2'),
@@ -97,9 +100,27 @@ get_header();
         get_field('ambiance_2_opt'),
         get_field('ambiance_3_opt'),
       ];
-      foreach ($images as $image) {
+      foreach ($acf_images as $image) {
         if ($image && isset($image['url'])) {
-          echo '<img src="' . esc_url($image['url']) . '" alt="" loading="lazy" />';
+          $has_acf_images = true;
+          $alt = isset($image['alt']) ? $image['alt'] : get_the_title();
+          echo '<img src="' . esc_url($image['url']) . '" alt="' . esc_attr($alt) . '" loading="lazy" />';
+        }
+      }
+    }
+
+    // Fallback to WooCommerce gallery if no ACF images
+    if (!$has_acf_images) {
+      global $product;
+      $gallery_ids = $product ? $product->get_gallery_image_ids() : [];
+
+      if (!empty($gallery_ids)) {
+        foreach ($gallery_ids as $gallery_id) {
+          $img_url = wp_get_attachment_image_url($gallery_id, 'large');
+          $img_alt = get_post_meta($gallery_id, '_wp_attachment_image_alt', true) ?: get_the_title();
+          if ($img_url) {
+            echo '<img src="' . esc_url($img_url) . '" alt="' . esc_attr($img_alt) . '" loading="lazy" />';
+          }
         }
       }
     }

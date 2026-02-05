@@ -45,9 +45,7 @@
           </svg>
         </span>
         <?php $cart_count = sapi_maison_cart_count(); ?>
-        <?php if ($cart_count > 0) : ?>
-          <span class="cart-count"><?php echo esc_html($cart_count); ?></span>
-        <?php endif; ?>
+        <span class="cart-count<?php echo $cart_count === 0 ? ' cart-count--empty' : ''; ?>"><?php echo $cart_count > 0 ? esc_html($cart_count) : ''; ?></span>
       </a>
 
       <!-- Menu Burger Toggle -->

@@ -21,7 +21,7 @@ Text Domain: theme-sapi-maison
   --color-cream: #FEFDFB;
   --color-warm: #FBF6EA;
   --color-gray-light: #F1F1F1;
-  --color-gray-mid: #8A8A8A;
+  --color-gray-mid: #717171; /* WCAG AA compliant (4.7:1 contrast) */
   --color-gray: #585858;
   --color-dark: #323232;
   --color-black: #000000;
@@ -62,8 +62,8 @@ Text Domain: theme-sapi-maison
 body {
   margin: 0;
   font-family: "Montserrat", Arial, sans-serif;
-  font-size: 14px;
-  line-height: 17px;
+  font-size: 16px;
+  line-height: 1.5;
   color: var(--color-gray-mid);
   background: var(--color-white);
 }
@@ -88,30 +88,125 @@ h1, h2, h3, h4, h5, h6 {
   font-family: "Montserrat", Arial, sans-serif;
   font-weight: 600;
   color: var(--color-gray);
+  line-height: 1.2;
 }
 
-h1, h2 {
-  font-size: 20px;
+h1 {
+  font-size: clamp(2rem, 4vw, 2.75rem); /* 32-44px */
+}
+
+h2 {
+  font-size: clamp(1.5rem, 3vw, 2rem); /* 24-32px */
 }
 
 h3 {
-  font-size: 16px;
+  font-size: clamp(1.125rem, 2vw, 1.5rem); /* 18-24px */
   text-transform: uppercase;
   color: var(--color-orange);
 }
 
-h4, h5 {
-  font-size: 16px;
+h4 {
+  font-size: 1.125rem; /* 18px */
   font-weight: 500;
 }
 
 h5 {
+  font-size: 1rem; /* 16px */
+  font-weight: 500;
   color: var(--color-wood);
 }
 
 h6 {
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   font-weight: 400;
+}
+
+/* ========================================
+   ACCESSIBILITY - Focus & Keyboard Navigation
+   ======================================== */
+
+/* Focus visible ring for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--color-wood);
+  outline-offset: 2px;
+}
+
+/* Remove default outline for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Links focus */
+a:focus-visible {
+  outline: 2px solid var(--color-wood);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Buttons focus */
+button:focus-visible,
+.button:focus-visible,
+.btn:focus-visible,
+input[type="submit"]:focus-visible,
+.woocommerce a.button:focus-visible,
+.woocommerce button.button:focus-visible {
+  outline: 2px solid var(--color-wood);
+  outline-offset: 2px;
+}
+
+/* Cards focus (for keyboard navigation) */
+.bento-card:focus-visible,
+.product-card:focus-visible,
+.collection-card:focus-visible {
+  outline: 2px solid var(--color-wood);
+  outline-offset: 4px;
+}
+
+/* Form inputs focus */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--color-wood);
+  outline-offset: 0;
+  border-color: var(--color-wood);
+}
+
+/* Nav dropdown keyboard support */
+.primary-nav > ul > li:focus-within > .sub-menu,
+.primary-nav > ul > li:focus-within > ul {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Chevron rotation on focus */
+.primary-nav > ul > li.menu-item-has-children:focus-within > a::before {
+  transform: translateY(-50%) rotate(-135deg);
+}
+
+/* Mobile nav focus */
+.mobile-nav-menu a:focus-visible {
+  color: var(--color-orange);
+  outline: none;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* Skip link for screen readers */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--color-dark);
+  color: var(--color-white);
+  padding: 8px 16px;
+  z-index: 10000;
+  transition: top 0.3s;
+}
+
+.skip-link:focus {
+  top: 0;
 }
 
 /* ========================================
@@ -565,6 +660,13 @@ input[type="submit"]:hover,
   font-size: 11px;
   font-weight: 600;
   transform: translate(25%, -25%);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.cart-count--empty {
+  opacity: 0;
+  transform: translate(25%, -25%) scale(0.5);
+  pointer-events: none;
 }
 
 @media (max-width: 768px) {
@@ -1041,6 +1143,33 @@ input[type="submit"]:hover,
   padding: 10px 12px;
   border-radius: var(--radius);
   border: 1px solid var(--color-gray-mid);
+}
+
+/* Form messages */
+.form-message {
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+}
+
+.form-message--success {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.form-message--error {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.form-message p {
+  margin: 0;
+}
+
+.form-message p + p {
+  margin-top: 0.5rem;
 }
 
 /* Blog */
@@ -2403,5 +2532,44 @@ transform: translateY(15px);
   .bento-stats {
     flex-wrap: wrap;
     gap: 0.5rem;
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY - Reduced Motion
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable parallax effects */
+  .bento-bg {
+    transform: none !important;
+  }
+
+  /* Disable hover transforms */
+  .bento-card:hover {
+    transform: none;
+  }
+
+  .bento-card:hover .bento-bg {
+    transform: none;
+  }
+
+  /* Keep important visual feedback but remove motion */
+  .process-step:hover {
+    transform: none;
+  }
+
+  /* Disable custom cursor animations */
+  .cursor-custom {
+    display: none;
   }
 }
