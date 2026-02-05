@@ -189,10 +189,66 @@
   };
 
   // =============================================
-  // VARIATION SWATCHES
+  // VARIATION SWATCHES (Toggle-style selectors)
+  // Handles both .sapi-swatches and .attribute-swatch containers
   // =============================================
   const variationSwatches = {
     init: function() {
+      // Handle PHP-generated attribute swatches (from functions.php filter)
+      this.initAttributeSwatches();
+      // Handle legacy sapi-swatches if any
+      this.initLegacySwatches();
+    },
+
+    initAttributeSwatches: function() {
+      const swatchContainers = document.querySelectorAll('.attribute-swatch');
+      if (!swatchContainers.length) return;
+
+      swatchContainers.forEach(container => {
+        const items = container.querySelectorAll('.swatch-item');
+        const attribute = container.dataset.attribute;
+
+        // Find the associated hidden select
+        const hiddenSelect = container.nextElementSibling;
+        if (!hiddenSelect || hiddenSelect.tagName !== 'SELECT') return;
+
+        // Set initial selected state based on select value
+        const currentValue = hiddenSelect.value;
+        items.forEach(item => {
+          if (item.dataset.value === currentValue) {
+            item.classList.add('selected');
+          }
+        });
+
+        // Handle click on swatch items
+        items.forEach(item => {
+          item.addEventListener('click', () => {
+            // Remove selected from siblings
+            items.forEach(i => i.classList.remove('selected'));
+            // Add selected to clicked
+            item.classList.add('selected');
+            // Update hidden select
+            hiddenSelect.value = item.dataset.value;
+            // Trigger change event for WooCommerce variations
+            hiddenSelect.dispatchEvent(new Event('change', { bubbles: true }));
+          });
+        });
+      });
+
+      // Listen for WooCommerce variation reset
+      document.querySelectorAll('.reset_variations').forEach(resetBtn => {
+        resetBtn.addEventListener('click', () => {
+          // Small delay to let WooCommerce reset the selects first
+          setTimeout(() => {
+            document.querySelectorAll('.attribute-swatch .swatch-item').forEach(item => {
+              item.classList.remove('selected');
+            });
+          }, 10);
+        });
+      });
+    },
+
+    initLegacySwatches: function() {
       const swatchContainers = document.querySelectorAll('.sapi-swatches');
       if (!swatchContainers.length) return;
 
