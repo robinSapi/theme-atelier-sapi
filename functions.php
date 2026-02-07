@@ -621,3 +621,49 @@ add_action('woocommerce_after_checkout_form', function() {
   </div><!-- /.checkout-page-cinetique -->
   <?php
 });
+
+/**
+ * AJAX Add to Cart - Safari Compatible
+ * Handles AJAX add to cart from sticky bar (simple products)
+ */
+add_action('wp_ajax_sapi_add_to_cart', 'sapi_ajax_add_to_cart');
+add_action('wp_ajax_nopriv_sapi_add_to_cart', 'sapi_ajax_add_to_cart');
+
+function sapi_ajax_add_to_cart() {
+  // Verify nonce
+  if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'sapi-add-to-cart')) {
+    wp_send_json_error(['message' => 'Invalid nonce']);
+    return;
+  }
+
+  $product_id = isset($_POST['product_id']) ? absint($_POST['product_id']) : 0;
+  $quantity = isset($_POST['quantity']) ? absint($_POST['quantity']) : 1;
+
+  if ($product_id <= 0) {
+    wp_send_json_error(['message' => 'Invalid product']);
+    return;
+  }
+
+  // Add to cart
+  $cart_item_key = WC()->cart->add_to_cart($product_id, $quantity);
+
+  if ($cart_item_key) {
+    // Get refreshed fragments
+    ob_start();
+    woocommerce_mini_cart();
+    $mini_cart = ob_get_clean();
+
+    $data = [
+      'fragments' => apply_filters('woocommerce_add_to_cart_fragments', [
+        'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>',
+      ]),
+      'cart_hash' => WC()->cart->get_cart_hash(),
+      'cart_quantity' => WC()->cart->get_cart_contents_count(),
+    ];
+
+    wp_send_json_success($data);
+  } else {
+    wp_send_json_error(['message' => 'Could not add to cart']);
+  }
+}
+
