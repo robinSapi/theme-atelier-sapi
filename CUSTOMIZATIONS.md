@@ -588,6 +588,75 @@ add_theme_support('wc-product-gallery-slider');
 
 - ✅ **COMMIT** : `cb3e87b` - "feat(Phase 2): enrich Design System with premium styles"
 
+**2026-02-07 (Harmonisation site - 3 Vagues Premium):**
+
+Harmonisation complète du site pour que TOUTES les pages atteignent le niveau premium de la Homepage et de la Fiche Produit.
+
+**VAGUE 1 - Storytelling & Trust (commit 2bd9f91):**
+- ✅ **PAGE ARTISAN** (`page-lumiere-dartisan.php` + `style.css`)
+  - Hero premium : gradient overlay warm (bois), clamp(56px, 10vw, 96px), min-height 60vh
+  - Photo Robin circulaire : 280x280px, border 4px wood, box-shadow dorée (comme product page)
+  - Hover effect : scale(1.05) avec shadow augmentée
+  - Steps sections : translateY(-4px) + scale(1.02) au hover, layered shadows
+  - Values cards : gradient cream background, hover lift translateY(-6px)
+  - Quote finale : Square Peg italic clamp(32-48px), gradient background
+  - CTA premium : orange gradient button 180deg (#E35B24→#D14F1C), warm shadows
+  - Fichiers : 242 insertions, 87 deletions
+
+**VAGUE 2 - Lead Generation (commit 9ff6945):**
+- ✅ **PAGE CONSEILS ÉCLAIRÉS** (`page-conseils-eclaires.php` + `style.css`)
+  - Hero : gradient overlay warm, clamp typography, min-height 60vh
+  - Section numbers : 01-04 avec Design System styling (--bois-dore)
+  - Typography : Square Peg pour h2 clamp(36-56px), orange h3 clamp(18-22px)
+  - Images : hover translateY(-4px) + scale(1.02), shadows (0 16px 40px)
+  - Text blocks : alternating gradient backgrounds (cream/white)
+  - Outro : signature style italic, gradient 135deg
+  - 4 section numbers ajoutés manuellement dans HTML
+
+- ✅ **PAGE CONTACT** (`page-contact.php` + `style.css`)
+  - Hero : same gradient overlay treatment
+  - CTA buttons : orange gradient comme HP, padding 18px 36px
+  - Hover states : translateY(-2px) avec warm shadows (rgba(227, 91, 36))
+  - Button outline : 2px border, hover avec background fill
+  - Form fields : focus states avec orange glow (box-shadow 0 0 0 3px)
+  - Input/textarea : border 2px wood, border-radius 8px
+  - Typography : labels uppercase 14px, letter-spacing 0.05em
+  - Success/error messages : gradient backgrounds, 2px colored borders
+  - Fichiers : 337 insertions, 41 deletions
+
+**VAGUE 3 - Content (commit f1803e0):**
+- ✅ **ARCHIVE BLOG** (`archive.php` + `style.css`)
+  - Hero : gradient background clamp(56-96px), centered content
+  - Blog grid : auto-fill minmax(320px, 1fr), gap 40px
+  - Blog cards : 2px border wood, cream background, border-radius 16px
+  - Hover : translateY(-6px), border color change, shadow increase
+  - Card images : aspect-ratio 16/10, scale(1.05) hover avec 0.6s transition
+  - Card meta : date + category display, wood gold color
+  - Navigation : orange border buttons avec hover fill
+  - No template-parts dependency (self-contained)
+
+- ✅ **SINGLE POST** (`single.php` + `style.css`)
+  - Header : gradient background, Square Peg clamp(42-72px)
+  - Meta : date + category badge avec rounded styling
+  - Featured image : elevated -40px overlap, box-shadow 0 16px 48px
+  - Content : 800px max-width, 17px/1.8 line-height
+  - Typography : clamp h2 (28-36px), orange h3 (22-28px)
+  - Tags : hover background fill wood gold, border-radius 6px
+  - Post navigation : gradient cards hover translateY(-4px)
+  - No template-parts dependency (self-contained)
+  - Fichiers : 515 insertions, 26 deletions
+
+**RÉSULTATS HARMONISATION:**
+- ✅ Toutes les pages utilisent les mêmes patterns premium
+- ✅ Gradient backgrounds cohérents (135deg, warm cream tones)
+- ✅ Square Peg pour display typography partout
+- ✅ Clamp() pour responsive sizing uniforme
+- ✅ Orange gradient buttons (#E35B24→#D14F1C) partout
+- ✅ Hover effects (translateY + shadows) cohérents
+- ✅ Design System colors (--bois-dore, --creme-papier, etc.)
+- ✅ -webkit- prefixes pour Safari sur tous les transforms
+- ✅ Total : 1094 insertions, 154 deletions sur 3 commits
+
 **2025-02-04:**
 - Création du thème custom depuis le travail Elementor de Jérôme
 - Nettoyage du code debug
