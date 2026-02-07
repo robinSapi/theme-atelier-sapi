@@ -3697,13 +3697,6 @@ li.is-filtered-out {
    PAGES - WooCommerce Cart & Checkout
    ======================================== */
 
-.woocommerce-cart,
-.woocommerce-checkout {
-  padding: 40px 20px;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
 /* Checkout Order Review */
 .woocommerce-checkout-review-order {
   display: block !important;
@@ -8264,10 +8257,144 @@ transform: translateY(15px);
 }
 
 /* ========================================
+   WOOCOMMERCE - Notifications & Messages
+   ======================================== */
+
+/* Bandeau de confirmation d'ajout au panier */
+.woocommerce-notices-wrapper {
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  z-index: 10000;
+  max-width: 400px;
+  width: calc(100% - 40px);
+}
+
+.woocommerce-message,
+.woocommerce-info,
+.woocommerce-error {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+  background: var(--color-white);
+  border: 2px solid var(--color-wood);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(147, 125, 104, 0.15);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--color-dark);
+  animation: slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Icône personnalisée pour le message de succès */
+.woocommerce-message::before {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  background-color: var(--color-wood);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  mask-size: contain;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  -webkit-mask-size: contain;
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+}
+
+.woocommerce-info::before {
+  background-color: #4A90E2;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='12' y1='16' x2='12' y2='12'%3E%3C/line%3E%3Cline x1='12' y1='8' x2='12.01' y2='8'%3E%3C/line%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='12' y1='16' x2='12' y2='12'%3E%3C/line%3E%3Cline x1='12' y1='8' x2='12.01' y2='8'%3E%3C/line%3E%3C/svg%3E");
+}
+
+.woocommerce-error::before {
+  background-color: var(--color-error);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='15' y1='9' x2='9' y2='15'%3E%3C/line%3E%3Cline x1='9' y1='9' x2='15' y2='15'%3E%3C/line%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='15' y1='9' x2='9' y2='15'%3E%3C/line%3E%3Cline x1='9' y1='9' x2='15' y2='15'%3E%3C/line%3E%3C/svg%3E");
+}
+
+/* Style pour les liens dans les messages */
+.woocommerce-message a,
+.woocommerce-info a,
+.woocommerce-error a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin-left: auto;
+  background: var(--color-orange);
+  color: var(--color-white);
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.3s var(--ease-smooth);
+}
+
+.woocommerce-message a:hover {
+  background: var(--color-orange-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(234, 134, 80, 0.3);
+}
+
+/* Bouton de fermeture */
+.woocommerce-message .woocommerce-Button,
+.woocommerce-info .woocommerce-Button,
+.woocommerce-error .woocommerce-Button {
+  padding: 0.5rem 1rem;
+  margin-left: auto;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .woocommerce-notices-wrapper {
+    top: 80px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+    width: auto;
+  }
+
+  .woocommerce-message,
+  .woocommerce-info,
+  .woocommerce-error {
+    flex-wrap: wrap;
+    padding: 1rem;
+  }
+
+  .woocommerce-message a,
+  .woocommerce-info a,
+  .woocommerce-error a {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ========================================
    WOOCOMMERCE - Cart Page CINÉTIQUE
    ======================================== */
 
-.cart-page-cinetique {
+.cart-page-cinetique,
+.woocommerce-cart,
+.woocommerce-checkout {
   max-width: 1400px;
   margin: 0 auto;
   padding: 2rem 3rem 4rem;
