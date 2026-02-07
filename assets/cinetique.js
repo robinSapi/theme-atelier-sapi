@@ -432,10 +432,314 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ========================================
+  // PREMIUM: Generic Fade-In Animation for ALL Pages
+  // ========================================
+  const fadeInElements = document.querySelectorAll('.editorial-block, .why-sapi-card, .use-cases-list li, .blog-card, .post-nav-item, section[class*="artisan-"], section[class*="advice-"]');
+
+  if (fadeInElements.length > 0) {
+    const fadeInObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+          fadeInObserver.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    });
+
+    fadeInElements.forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+      fadeInObserver.observe(el);
+    });
+  }
+
+  // ========================================
+  // PREMIUM: Scroll Progress Indicator
+  // ========================================
+  const progressBar = document.createElement('div');
+  progressBar.className = 'scroll-progress-bar';
+  progressBar.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-orange, #E35B24) 0%, var(--bois-dore, #937D68) 100%);
+    width: 0%;
+    z-index: 99999;
+    transition: width 0.1s ease-out;
+  `;
+  document.body.appendChild(progressBar);
+
+  window.addEventListener('scroll', () => {
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    progressBar.style.width = scrolled + '%';
+  });
+
+  // ========================================
+  // PREMIUM: Enhanced Product Image Zoom
+  // ========================================
+  const productMainImages = document.querySelectorAll('.product-gallery-main img, .single-post-featured img');
+
+  productMainImages.forEach(img => {
+    img.addEventListener('mouseenter', function() {
+      this.style.cursor = 'zoom-in';
+    });
+
+    img.addEventListener('click', function() {
+      // Create zoom overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'image-zoom-overlay';
+      overlay.style.cssText = `
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: zoom-out;
+        animation: fadeIn 0.3s ease;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      `;
+
+      const zoomedImg = this.cloneNode(true);
+      zoomedImg.style.cssText = `
+        max-width: 95vw;
+        max-height: 95vh;
+        object-fit: contain;
+        animation: scaleIn 0.4s cubic-bezier(0.87, 0, 0.13, 1);
+        box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
+        border-radius: 8px;
+      `;
+
+      overlay.appendChild(zoomedImg);
+      document.body.appendChild(overlay);
+
+      // Close on click
+      overlay.addEventListener('click', () => {
+        overlay.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => overlay.remove(), 300);
+      });
+
+      // Close on ESC key
+      const closeOnEsc = (e) => {
+        if (e.key === 'Escape') {
+          overlay.style.animation = 'fadeOut 0.3s ease';
+          setTimeout(() => overlay.remove(), 300);
+          document.removeEventListener('keydown', closeOnEsc);
+        }
+      };
+      document.addEventListener('keydown', closeOnEsc);
+    });
+  });
+
+  // ========================================
+  // PREMIUM: Form Field Micro-Interactions
+  // ========================================
+  const formInputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], textarea, select');
+
+  formInputs.forEach(input => {
+    // Floating label effect
+    input.addEventListener('focus', function() {
+      this.style.transform = 'translateY(-2px)';
+      this.style.transition = 'transform 0.3s ease';
+
+      const label = this.previousElementSibling;
+      if (label && label.tagName === 'LABEL') {
+        label.style.transform = 'translateY(-2px) scale(0.9)';
+        label.style.color = 'var(--color-orange, #E35B24)';
+      }
+    });
+
+    input.addEventListener('blur', function() {
+      this.style.transform = 'translateY(0)';
+
+      const label = this.previousElementSibling;
+      if (label && label.tagName === 'LABEL' && !this.value) {
+        label.style.transform = 'translateY(0) scale(1)';
+        label.style.color = '';
+      }
+    });
+
+    // Success animation on valid input
+    input.addEventListener('input', function() {
+      if (this.validity.valid && this.value !== '') {
+        this.style.borderColor = 'var(--vert-confiance, #018501)';
+      } else {
+        this.style.borderColor = '';
+      }
+    });
+  });
+
+  // ========================================
+  // PREMIUM: Enhanced Cart Button Feedback
+  // ========================================
+  const addToCartButtons = document.querySelectorAll('.single_add_to_cart_button, .add_to_cart_button');
+
+  addToCartButtons.forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      // Only if not disabled
+      if (!this.disabled) {
+        // Add success animation
+        this.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          this.style.transform = 'scale(1)';
+        }, 150);
+
+        // Create flying icon effect
+        const icon = document.createElement('span');
+        icon.textContent = '🛒';
+        icon.style.cssText = `
+          position: fixed;
+          font-size: 24px;
+          pointer-events: none;
+          z-index: 99999;
+          animation: flyToCart 1s ease-out forwards;
+        `;
+
+        const rect = this.getBoundingClientRect();
+        icon.style.left = rect.left + rect.width / 2 + 'px';
+        icon.style.top = rect.top + rect.height / 2 + 'px';
+
+        document.body.appendChild(icon);
+
+        setTimeout(() => icon.remove(), 1000);
+      }
+    });
+  });
+
+  // Add flying cart animation
+  if (!document.querySelector('#cart-animation-style')) {
+    const style = document.createElement('style');
+    style.id = 'cart-animation-style';
+    style.textContent = `
+      @keyframes flyToCart {
+        0% {
+          transform: translate(0, 0) scale(1);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(calc(100vw - 100px), -80vh) scale(0.3);
+          opacity: 0;
+        }
+      }
+      @keyframes fadeOut {
+        to {
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // ========================================
+  // PREMIUM: Number Input Enhancements
+  // ========================================
+  const quantityInputs = document.querySelectorAll('input[type="number"].qty');
+
+  quantityInputs.forEach(input => {
+    const wrapper = input.parentElement;
+
+    // Add visual feedback on change
+    input.addEventListener('change', function() {
+      this.style.transform = 'scale(1.05)';
+      setTimeout(() => {
+        this.style.transform = 'scale(1)';
+      }, 200);
+    });
+
+    // Smooth transitions
+    input.style.transition = 'all 0.2s ease';
+  });
+
+  // ========================================
+  // PREMIUM: Back to Top Button
+  // ========================================
+  const backToTop = document.createElement('button');
+  backToTop.className = 'back-to-top-btn';
+  backToTop.innerHTML = `
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  `;
+  backToTop.style.cssText = `
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-orange, #E35B24) 0%, #D14F1C 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(227, 91, 36, 0.3);
+    z-index: 9999;
+    transition: all 0.3s ease;
+  `;
+
+  document.body.appendChild(backToTop);
+
+  window.addEventListener('scroll', () => {
+    if (window.pageYOffset > 500) {
+      backToTop.style.display = 'flex';
+      backToTop.style.animation = 'fadeIn 0.3s ease';
+    } else {
+      backToTop.style.display = 'none';
+    }
+  });
+
+  backToTop.addEventListener('click', () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
+
+  backToTop.addEventListener('mouseenter', function() {
+    this.style.transform = 'translateY(-4px) scale(1.1)';
+    this.style.boxShadow = '0 12px 28px rgba(227, 91, 36, 0.4)';
+  });
+
+  backToTop.addEventListener('mouseleave', function() {
+    this.style.transform = 'translateY(0) scale(1)';
+    this.style.boxShadow = '0 8px 20px rgba(227, 91, 36, 0.3)';
+  });
+
+  // ========================================
+  // PREMIUM: Copy to Clipboard for Product URLs
+  // ========================================
+  const shareButtons = document.querySelectorAll('[data-share="copy-url"]');
+
+  shareButtons.forEach(btn => {
+    btn.addEventListener('click', async function(e) {
+      e.preventDefault();
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        showNotification('Lien copié !');
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
+    });
+  });
+
+  // ========================================
   // Console Message
   // ========================================
-  console.log('%cSAPI CINETIQUE', 'font-size: 24px; font-weight: bold; color: #937D68;');
-  console.log('%cDesign architectural - Interactions avancees', 'font-size: 12px; color: #8A8A8A;');
-  console.log('%cShortcuts: C (collections) | Konami Code (surprise)', 'font-size: 10px; color: #585858;');
+  console.log('%cSAPI CINÉTIQUE PREMIUM', 'font-size: 24px; font-weight: bold; color: #937D68; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);');
+  console.log('%cDesign architectural - Interactions avancées 2.0', 'font-size: 12px; color: #8A8A8A;');
+  console.log('%cFeatures: Scroll Progress | Image Zoom | Form Enhancements | Cart Animations | Back to Top', 'font-size: 10px; color: #585858;');
+  console.log('%cShortcuts: C (collections) | ESC (close zoom) | Konami Code (surprise)', 'font-size: 10px; color: #585858;');
 
 });

@@ -95,6 +95,274 @@ Text Domain: theme-sapi-maison
 }
 
 /* ========================================
+   PREMIUM GLOBAL EFFECTS & ANIMATIONS
+   ======================================== */
+
+/* Smooth scroll behavior for modern browsers */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Fade-in animation on scroll (intersection observer target) */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Premium focus states for accessibility */
+*:focus-visible {
+  outline: 3px solid var(--color-orange, #E35B24);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--color-orange, #E35B24);
+  outline-offset: 3px;
+}
+
+/* Micro-interaction: all interactive elements */
+button,
+a,
+input[type="submit"],
+input[type="button"],
+.button,
+.btn {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ripple effect on click (optional - can be toggled) */
+button::after,
+.button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+  pointer-events: none;
+}
+
+button:active::after,
+.button:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Premium hover glow for primary CTAs */
+.button:not(.button-outline):hover,
+button[type="submit"]:hover,
+.single_add_to_cart_button:hover {
+  box-shadow:
+    0 8px 20px rgba(227, 91, 36, 0.3),
+    0 4px 8px rgba(227, 91, 36, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 30px rgba(227, 91, 36, 0.15);
+}
+
+/* Loading state animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Skeleton loading for images */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--creme-papier, #FEFDFB) 0%,
+    var(--creme-chaud, #FAF6F0) 50%,
+    var(--creme-papier, #FEFDFB) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Image lazy load fade-in */
+img[loading="lazy"] {
+  opacity: 0;
+  transition: opacity 0.5s ease-in;
+}
+
+img[loading="lazy"].loaded,
+img[loading="lazy"]:not([data-src]) {
+  opacity: 1;
+}
+
+/* Premium text selection */
+::selection {
+  background: var(--color-orange, #E35B24);
+  color: var(--creme-papier, #FEFDFB);
+}
+
+::-moz-selection {
+  background: var(--color-orange, #E35B24);
+  color: var(--creme-papier, #FEFDFB);
+}
+
+/* Premium scrollbar (WebKit browsers) */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--creme-papier, #FEFDFB);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bois-dore, #937D68);
+  border-radius: 6px;
+  border: 2px solid var(--creme-papier, #FEFDFB);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-orange, #E35B24);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bois-dore, #937D68) var(--creme-papier, #FEFDFB);
+}
+
+/* Subtle parallax effect for hero sections (opt-in with data attribute) */
+[data-parallax] {
+  transition: transform 0.5s ease-out;
+  will-change: transform;
+}
+
+/* Hover lift micro-animation for cards */
+.card,
+.product-card,
+.blog-card,
+.category-featured-card,
+[class*="-card"] {
+  transition:
+    transform 0.4s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1)),
+    box-shadow 0.4s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+  will-change: transform;
+}
+
+/* Stagger animation delay for lists */
+.stagger-item:nth-child(1) { animation-delay: 0.05s; }
+.stagger-item:nth-child(2) { animation-delay: 0.1s; }
+.stagger-item:nth-child(3) { animation-delay: 0.15s; }
+.stagger-item:nth-child(4) { animation-delay: 0.2s; }
+.stagger-item:nth-child(5) { animation-delay: 0.25s; }
+.stagger-item:nth-child(6) { animation-delay: 0.3s; }
+
+/* Backdrop blur support for modals/overlays */
+@supports (backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px)) {
+  .backdrop-blur {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
+/* GPU acceleration hints for frequently animated elements */
+.product-card,
+.category-featured-card,
+.why-sapi-card,
+.editorial-block,
+.blog-card,
+[class*="hover-lift"] {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* ========================================
    RESET & BASE STYLES
    ======================================== */
 
