@@ -793,6 +793,7 @@ select:focus-visible {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
+  overflow: visible; /* Ne pas couper le panier ou autres éléments */
 }
 
 .site-header .header-inner {
@@ -803,6 +804,7 @@ select:focus-visible {
   padding: 12px 40px;
   max-width: 1600px;
   margin: 0 auto;
+  overflow: visible; /* Ne pas couper les éléments débordants */
 }
 
 .site-logo {
@@ -982,6 +984,8 @@ select:focus-visible {
   gap: 12px;
   position: relative;
   z-index: 2; /* Au-dessus du contenu du header */
+  overflow: visible; /* Important: ne pas couper l'icône panier */
+  padding: 4px 0; /* Espace supplémentaire pour éviter la troncature */
 }
 
 /* ----------------------------------------
@@ -1198,7 +1202,7 @@ input[type="submit"]:hover,
   display: flex;
   align-items: center;
   position: relative;
-  padding: 8px;
+  padding: 8px 12px; /* Plus d'espace horizontal pour éviter la troncature */
   color: var(--color-dark);
   text-decoration: none;
   cursor: pointer;
@@ -1211,6 +1215,9 @@ input[type="submit"]:hover,
   -webkit-user-select: none;
   user-select: none;
   z-index: 3; /* Au-dessus de tout dans le header */
+  overflow: visible; /* Ne jamais couper l'icône */
+  min-width: 48px; /* Largeur minimale pour l'accessibilité et éviter la troncature */
+  min-height: 48px; /* Hauteur minimale pour la zone de clic */
 }
 
 .cart-link:hover {
@@ -1223,11 +1230,14 @@ input[type="submit"]:hover,
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: visible; /* Important */
 }
 
 .cart-icon svg {
   width: 24px;
   height: 24px;
+  display: block; /* Évite les problèmes d'espacement inline */
+  overflow: visible; /* Les SVG ne doivent jamais être coupés */
 }
 
 .cart-count {
@@ -8265,9 +8275,10 @@ transform: translateY(15px);
   position: fixed;
   top: 100px;
   right: 20px;
-  z-index: 10000;
-  max-width: 400px;
+  z-index: 10002; /* Au-dessus du header (10001) */
+  max-width: 450px;
   width: calc(100% - 40px);
+  pointer-events: none; /* Les notifications ne bloquent pas les clics sauf sur leurs boutons */
 }
 
 .woocommerce-message,
@@ -8275,18 +8286,22 @@ transform: translateY(15px);
 .woocommerce-error {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Aligner en haut pour mieux gérer le texte long */
   gap: 1rem;
   padding: 1.25rem 1.5rem;
+  padding-right: 3rem; /* Espace pour le bouton de fermeture */
   margin-bottom: 1rem;
   background: var(--color-white);
   border: 2px solid var(--color-wood);
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(147, 125, 104, 0.15);
+  box-shadow: 0 8px 32px rgba(147, 125, 104, 0.2);
   font-size: 0.95rem;
-  line-height: 1.5;
+  line-height: 1.6;
   color: var(--color-dark);
   animation: slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: all; /* La notification elle-même peut recevoir des clics */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 @keyframes slideInFromRight {
