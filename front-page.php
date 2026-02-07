@@ -178,12 +178,12 @@ $collections = [
         <div class="process-step">
           <span class="step-num">01</span>
           <span class="step-text">Dessin</span>
-          <div class="step-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/03/ordi_sapi2.jpg');"></div>
+          <div class="step-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/IMG_1928.png');"></div>
         </div>
         <div class="process-step">
           <span class="step-num">02</span>
           <span class="step-text">Découpe laser</span>
-          <div class="step-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/IMG_1928.png');"></div>
+          <div class="step-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/IMG_7638.jpg');"></div>
         </div>
         <div class="process-step">
           <span class="step-num">03</span>
