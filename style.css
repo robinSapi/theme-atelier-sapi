@@ -5824,9 +5824,10 @@ transform: translateY(15px);
   font-family: var(--font-body);
   font-size: 2rem;
   font-weight: 900;
-  color: var(--color-wood);
+  color: var(--bois-sombre, #4A3F35); /* Contraste amélioré pour mobile */
   margin-bottom: 0.25rem;
   transition: color 0.3s ease;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8); /* Lisibilité sur fonds variés */
 }
 
 .stat-block:hover strong {
@@ -5835,10 +5836,11 @@ transform: translateY(15px);
 
 .stat-block span {
   font-size: 0.75rem;
-  font-weight: 400;
+  font-weight: 600; /* Bold pour meilleure lisibilité mobile */
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--color-gray);
+  color: var(--bois-profond, #6B5A4A); /* Contraste amélioré */
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 /* Hover card with image */
@@ -10175,6 +10177,53 @@ transform: translateY(15px);
   .sticky-btn {
     padding: 0.7rem 1rem;
     font-size: 0.75rem;
+  }
+}
+
+/* ========================================
+   MOBILE OPTIMIZATIONS - Content Pages
+   ======================================== */
+
+@media (max-width: 768px) {
+  /* Réduction hauteur hero sections pour mobile */
+  .advice-hero,
+  .contact-hero,
+  .artisan-hero,
+  .blog-hero {
+    min-height: 45vh !important; /* Réduit de 60vh à 45vh */
+    padding: 100px 20px 60px !important;
+  }
+
+  /* Images sections conseils moins hautes */
+  .advice-image {
+    min-height: 300px !important; /* Réduit de 450px à 300px */
+  }
+
+  /* Padding sections réduit */
+  .advice-section-block,
+  .artisan-step,
+  .contact-section {
+    padding: 60px 20px !important; /* Réduit de 100px à 60px */
+  }
+
+  /* Gallery thumbnails visibles sur mobile */
+  .gallery-thumb {
+    flex: 0 0 80px !important; /* Augmenté de 60px à 80px */
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  /* Barre de réassurance moins intrusive */
+  .reassurance-bar-sticky {
+    position: relative !important; /* Non-sticky sur mobile */
+    top: auto !important;
+  }
+
+  /* Mini-cart footer toujours visible */
+  .mini-cart-footer {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }
 
