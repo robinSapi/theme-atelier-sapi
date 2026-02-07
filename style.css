@@ -3681,7 +3681,7 @@ li.is-filtered-out {
 .woocommerce-cart,
 .woocommerce-checkout {
   padding: 40px 20px;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -8249,7 +8249,7 @@ transform: translateY(15px);
    ======================================== */
 
 .cart-page-cinetique {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 2rem 3rem 4rem;
 }
@@ -8450,7 +8450,7 @@ transform: translateY(15px);
 
 .checkout-page-cinetique,
 .cart-page-cinetique {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 2rem 3rem 4rem;
 }
