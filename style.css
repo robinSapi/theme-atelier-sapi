@@ -2959,32 +2959,44 @@ li.is-filtered-out {
 
 /* Artisan (Lumière d'Artisan) - Cinétique Design */
 .artisan-hero-cinetique {
-  padding: 120px 20px 80px;
+  padding: 140px 20px 100px;
   text-align: center;
-  background: var(--color-cream);
+  /* Premium gradient background like HP */
+  background: linear-gradient(135deg,
+    var(--creme-papier, #FEFDFB) 0%,
+    var(--color-warm, #FBF6EA) 50%,
+    var(--creme-chaud, #FAF6F0) 100%
+  );
+  position: relative;
 }
 
 .artisan-hero-cinetique .section-number {
   display: block;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 2px;
-  color: var(--color-wood);
-  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--bois-dore, #937D68);
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
 }
 
 .artisan-hero-cinetique h1 {
-  font-family: "Square Peg", cursive;
-  font-size: clamp(48px, 8vw, 80px);
-  color: var(--color-gray);
-  margin-bottom: 1rem;
+  font-family: var(--font-display, "Square Peg", cursive);
+  font-size: clamp(56px, 10vw, 96px);
+  font-weight: 400;
+  color: var(--bois-sombre, #4A3F35);
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
 }
 
 .artisan-hero-subtitle {
-  font-size: 1.125rem;
-  color: var(--color-gray-mid);
-  max-width: 500px;
-  margin: 0 auto 2rem;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: var(--bois-profond, #6B5A4A);
+  max-width: 600px;
+  margin: 0 auto 3rem;
+  font-weight: 400;
 }
 
 .artisan-scroll-cta {
@@ -3128,22 +3140,23 @@ li.is-filtered-out {
 /* Intro & Steps */
 .artisan-intro-cinetique,
 .artisan-step-cinetique {
-  padding: 80px 20px;
+  padding: 100px 20px;
 }
 
 .artisan-intro-cinetique {
-  background: var(--color-white);
+  background: var(--creme-papier, #FEFDFB);
+  padding: 100px 20px;
 }
 
 .artisan-step-cinetique:nth-child(odd) {
-  background: var(--color-cream);
+  background: var(--creme-chaud, #FAF6F0);
 }
 
 .artisan-intro-grid,
 .artisan-step-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 40px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 60px;
   align-items: center;
   max-width: 1200px;
   margin: 0 auto;
@@ -3159,103 +3172,174 @@ li.is-filtered-out {
 
 .artisan-intro-content,
 .artisan-step-content {
-  padding: 1rem;
+  padding: 1.5rem;
 }
 
 .artisan-intro-content .section-number,
 .artisan-step-content .section-number {
   display: block;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 2px;
-  color: var(--color-wood);
-  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--bois-dore, #937D68);
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
 }
 
 .artisan-intro-content h2,
 .artisan-step-content h2 {
-  font-size: 1.75rem;
-  color: var(--color-gray);
-  margin-bottom: 1rem;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: var(--bois-sombre, #4A3F35);
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
 }
 
 .artisan-intro-content p,
 .artisan-step-content p {
-  color: var(--color-gray-mid);
-  line-height: 1.7;
-  margin-bottom: 1rem;
+  color: var(--bois-profond, #6B5A4A);
+  line-height: 1.75;
+  font-size: 1.0625rem;
+  margin-bottom: 1.25rem;
 }
 
 .artisan-image {
-  min-height: 400px;
-  border-radius: var(--radius-lg);
+  min-height: 450px;
+  border-radius: 16px;
   background-size: cover;
   background-position: center;
-  box-shadow: var(--shadow-card);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  position: relative;
+  transition: all 0.4s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+  -webkit-transition: all 0.4s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.artisan-image:hover {
+  transform: translateY(-4px) scale(1.02);
+  -webkit-transform: translateY(-4px) scale(1.02);
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.12),
+    0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Photo Robin circulaire premium - Section 02 Intro */
+.artisan-intro-image-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.artisan-intro-robin-photo {
+  width: 280px;
+  height: 280px;
+  object-fit: cover;
+  border-radius: 50%;
+  /* Premium border wood 4px like product page */
+  border: 4px solid var(--bois-dore, #937D68);
+  /* Golden shadow like product page artisan section */
+  box-shadow:
+    0 8px 24px rgba(147, 125, 104, 0.2),
+    0 4px 12px rgba(147, 125, 104, 0.15),
+    0 2px 6px rgba(147, 125, 104, 0.1);
+  transition: all 0.4s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+  -webkit-transition: all 0.4s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.artisan-intro-robin-photo:hover {
+  transform: scale(1.05);
+  -webkit-transform: scale(1.05);
+  box-shadow:
+    0 12px 32px rgba(147, 125, 104, 0.25),
+    0 6px 16px rgba(147, 125, 104, 0.2),
+    0 3px 8px rgba(147, 125, 104, 0.15);
 }
 
 /* Values Section */
 .artisan-values-cinetique {
-  padding: 80px 20px;
-  background: var(--color-white);
+  padding: 100px 20px;
+  background: var(--creme-papier, #FEFDFB);
 }
 
 .artisan-values-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 4rem;
 }
 
 .artisan-values-header .section-number {
   display: block;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 2px;
-  color: var(--color-wood);
-  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--bois-dore, #937D68);
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
 }
 
 .artisan-values-header h2 {
-  font-size: 2rem;
-  color: var(--color-gray);
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: var(--bois-sombre, #4A3F35);
 }
 
 .artisan-values-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  max-width: 1000px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2.5rem;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
 .artisan-value-item {
   text-align: center;
-  padding: 2rem;
-  background: var(--color-cream);
-  border-radius: var(--radius-lg);
+  padding: 3rem 2rem;
+  /* Premium gradient cream background */
+  background: linear-gradient(135deg,
+    var(--creme-chaud, #FAF6F0) 0%,
+    var(--ivoire-doux, #F5EDE4) 100%
+  );
+  border-radius: 20px;
+  border: 1px solid rgba(147, 125, 104, 0.1);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.06),
+    0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+  -webkit-transition: all 0.3s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.artisan-value-item:hover {
+  transform: translateY(-6px);
+  -webkit-transform: translateY(-6px);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.1),
+    0 6px 14px rgba(0, 0, 0, 0.06);
+  border-color: rgba(147, 125, 104, 0.2);
 }
 
 .value-icon {
-  width: 64px;
-  height: 64px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
-  background: var(--color-white);
-  display: -webkit-box;
-  display: -ms-flexbox;
+  background: var(--creme-papier, #FEFDFB);
   display: flex;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  -webkit-box-pack: center;
-  -ms-flex-pack: center;
   justify-content: center;
-  margin: 0 auto 1rem;
-  color: var(--color-wood);
+  margin: 0 auto 1.5rem;
+  color: var(--bois-dore, #937D68);
+  border: 2px solid rgba(147, 125, 104, 0.15);
+  box-shadow: 0 4px 12px rgba(147, 125, 104, 0.1);
 }
 
 .artisan-value-item h3 {
-  font-size: 1.125rem;
-  color: var(--color-gray);
-  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--bois-sombre, #4A3F35);
+  margin-bottom: 0.75rem;
 }
 
 .artisan-value-item p {
@@ -3264,52 +3348,121 @@ li.is-filtered-out {
   margin: 0;
 }
 
-/* Quote */
+/* Quote Finale Premium */
 .artisan-quote-cinetique {
-  padding: 80px 20px;
+  padding: 100px 20px;
   text-align: center;
-  background: var(--color-warm);
+  /* Premium gradient background */
+  background: linear-gradient(135deg,
+    var(--creme-chaud, #FAF6F0) 0%,
+    var(--color-warm, #FBF6EA) 50%,
+    var(--ivoire-doux, #F5EDE4) 100%
+  );
 }
 
 .artisan-quote-cinetique blockquote {
-  font-family: "Square Peg", cursive;
-  font-size: clamp(28px, 5vw, 40px);
-  color: var(--color-orange);
-  max-width: 800px;
+  font-family: var(--font-display, "Square Peg", cursive);
+  font-size: clamp(36px, 6vw, 56px);
+  font-weight: 400;
+  font-style: italic;
+  color: var(--bois-profond, #6B5A4A);
+  max-width: 900px;
   margin: 0 auto;
-  line-height: 1.4;
+  line-height: 1.3;
+  position: relative;
+  padding: 0 3rem;
+}
+
+.artisan-quote-cinetique blockquote::before {
+  content: '"';
+  font-size: 4rem;
+  color: var(--bois-dore, #937D68);
+  opacity: 0.3;
+  position: absolute;
+  top: -1rem;
+  left: 0;
 }
 
 .artisan-quote-cinetique cite {
   display: block;
-  font-family: "Montserrat", Arial, sans-serif;
-  font-size: 14px;
+  font-family: var(--font-display, "Square Peg", cursive);
+  font-size: 28px;
   font-style: normal;
-  color: var(--color-gray-mid);
-  margin-top: 1rem;
+  color: var(--bois-sombre, #4A3F35);
+  margin-top: 2rem;
 }
 
-/* CTA Section */
+/* CTA Section Premium */
 .artisan-cta {
-  padding: 80px 20px;
+  padding: 120px 20px;
   text-align: center;
-  background: var(--color-cream);
+  background: linear-gradient(135deg,
+    var(--creme-papier, #FEFDFB) 0%,
+    var(--creme-chaud, #FAF6F0) 100%
+  );
 }
 
 .artisan-cta-content {
-  max-width: 500px;
+  max-width: 650px;
   margin: 0 auto;
 }
 
 .artisan-cta h2 {
-  font-size: 1.75rem;
-  color: var(--color-gray);
-  margin-bottom: 0.5rem;
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 700;
+  color: var(--bois-sombre, #4A3F35);
+  margin-bottom: 1rem;
+  line-height: 1.2;
 }
 
 .artisan-cta p {
-  color: var(--color-gray-mid);
-  margin-bottom: 1.5rem;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--bois-profond, #6B5A4A);
+  margin-bottom: 2.5rem;
+}
+
+/* Premium CTA Button - HP style */
+.artisan-cta .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 48px;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  color: var(--creme-papier, #FEFDFB);
+  /* Premium gradient orange */
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  border: none;
+  border-radius: 8px;
+  /* Warm shadow (not gray!) */
+  box-shadow:
+    0 4px 12px rgba(227, 91, 36, 0.25),
+    0 2px 4px rgba(227, 91, 36, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.3s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+  -webkit-transition: all 0.3s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.artisan-cta .button:hover {
+  background: linear-gradient(180deg, #D14F1C 0%, #B8441A 100%);
+  transform: translateY(-2px);
+  -webkit-transform: translateY(-2px);
+  box-shadow:
+    0 8px 20px rgba(227, 91, 36, 0.3),
+    0 4px 8px rgba(227, 91, 36, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.artisan-cta .button:active {
+  transform: translateY(0);
+  -webkit-transform: translateY(0);
+  box-shadow:
+    0 2px 6px rgba(227, 91, 36, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Legacy support */
