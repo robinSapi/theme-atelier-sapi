@@ -373,6 +373,65 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ========================================
+  // Product Page - Premium Material Swatches
+  // ========================================
+  const materialSwatches = document.querySelectorAll('.material-option');
+
+  if (materialSwatches.length > 0) {
+    materialSwatches.forEach(swatch => {
+      swatch.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        const attributeContainer = this.closest('.attribute-swatch');
+        if (!attributeContainer) return;
+
+        // Remove selected class from siblings
+        const siblings = attributeContainer.querySelectorAll('.material-option');
+        siblings.forEach(s => {
+          s.classList.remove('selected', 'just-selected');
+        });
+
+        // Add selected class to clicked swatch
+        this.classList.add('selected', 'just-selected');
+
+        // Remove animation class after animation completes
+        setTimeout(() => {
+          this.classList.remove('just-selected');
+        }, 250);
+
+        // Update hidden select for WooCommerce compatibility
+        const selectElement = attributeContainer.nextElementSibling;
+        if (selectElement && selectElement.tagName === 'SELECT') {
+          const value = this.getAttribute('data-value');
+          selectElement.value = value;
+
+          // Trigger change event for WooCommerce variations
+          const event = new Event('change', { bubbles: true });
+          selectElement.dispatchEvent(event);
+
+          // jQuery trigger for older WooCommerce versions
+          if (typeof jQuery !== 'undefined') {
+            jQuery(selectElement).trigger('change');
+          }
+        }
+      });
+    });
+
+    // Sync initial selection from select to swatches (if any)
+    const attributeContainers = document.querySelectorAll('.attribute-swatch');
+    attributeContainers.forEach(container => {
+      const selectElement = container.nextElementSibling;
+      if (selectElement && selectElement.tagName === 'SELECT' && selectElement.value) {
+        const selectedValue = selectElement.value;
+        const correspondingSwatch = container.querySelector(`[data-value="${selectedValue}"]`);
+        if (correspondingSwatch) {
+          correspondingSwatch.classList.add('selected');
+        }
+      }
+    });
+  }
+
+  // ========================================
   // Console Message
   // ========================================
   console.log('%cSAPI CINETIQUE', 'font-size: 24px; font-weight: bold; color: #937D68;');

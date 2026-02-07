@@ -418,16 +418,19 @@ add_filter('woocommerce_dropdown_variation_attribute_options_html', function($ht
   // Get attribute taxonomy for swatch images
   $attribute_taxonomy = wc_attribute_taxonomy_name(str_replace('pa_', '', $attribute));
 
-  // Default wood essence colors (CSS gradient fallbacks)
-  $wood_colors = [
-    'chene'   => ['#C4A77D', '#A08660'],
-    'hetre'   => ['#E8D4B8', '#D4BC96'],
-    'noyer'   => ['#5C4033', '#3D2B1F'],
-    'bouleau' => ['#F5E6D3', '#E8D4BC'],
-    'frene'   => ['#D9C8A5', '#C9B58F'],
-    'erable'  => ['#E8D8C8', '#D4C4B0'],
-    'merisier' => ['#B87333', '#8B4513'],
-    'pin'     => ['#DEB887', '#C4A46C'],
+  // Premium wood gradients from Design System
+  $wood_gradients = [
+    'okoume'   => 'linear-gradient(135deg, #D4B896 0%, #C4A882 50%, #B89B74 100%)',
+    'peuplier' => 'linear-gradient(135deg, #F5EAD6 0%, #E8DCC4 50%, #DDD0B8 100%)',
+    'noyer'    => 'linear-gradient(135deg, #8B6F5C 0%, #7A5F4D 50%, #6B5242 100%)',
+    // Fallbacks pour autres bois
+    'chene'    => 'linear-gradient(135deg, #C4A77D 0%, #B8996D 50%, #A08660 100%)',
+    'hetre'    => 'linear-gradient(135deg, #E8D4B8 0%, #DEC8A7 50%, #D4BC96 100%)',
+    'bouleau'  => 'linear-gradient(135deg, #F5E6D3 0%, #EDDEC7 50%, #E8D4BC 100%)',
+    'frene'    => 'linear-gradient(135deg, #D9C8A5 0%, #CFBE9B 50%, #C9B58F 100%)',
+    'erable'   => 'linear-gradient(135deg, #E8D8C8 0%, #DECCBA 50%, #D4C4B0 100%)',
+    'merisier' => 'linear-gradient(135deg, #B87333 0%, #A46428 50%, #8B4513 100%)',
+    'pin'      => 'linear-gradient(135deg, #DEB887 0%, #D1A876 50%, #C4A46C 100%)',
   ];
 
   // Build custom swatch HTML
@@ -438,6 +441,16 @@ add_filter('woocommerce_dropdown_variation_attribute_options_html', function($ht
     $term_name = $term ? $term->name : $option;
     $is_selected = $args['selected'] === $option ? ' selected' : '';
 
+    // Get wood slug for class mapping
+    $wood_slug = sanitize_title($option);
+
+    // Normalize wood names (handle accents)
+    $wood_class = $wood_slug;
+    $wood_class = str_replace(['okoumé', 'okoume'], 'okoume', $wood_class);
+
+    // Get wood gradient from Design System
+    $wood_gradient = isset($wood_gradients[$wood_slug]) ? $wood_gradients[$wood_slug] : '';
+
     // Try to get a term image (if using ACF or similar)
     $term_image = '';
     if ($term && function_exists('get_field')) {
@@ -445,39 +458,38 @@ add_filter('woocommerce_dropdown_variation_attribute_options_html', function($ht
     }
 
     // Check for default wood image in theme assets
-    $wood_slug = sanitize_title($option);
     $default_image_path = get_template_directory() . '/assets/images/wood/' . $wood_slug . '.jpg';
     $default_image_url = '';
     if (file_exists($default_image_path)) {
       $default_image_url = get_template_directory_uri() . '/assets/images/wood/' . $wood_slug . '.jpg';
     }
 
-    // Get wood color for gradient fallback
-    $wood_gradient = '';
-    if (isset($wood_colors[$wood_slug])) {
-      $colors = $wood_colors[$wood_slug];
-      $wood_gradient = 'linear-gradient(135deg, ' . $colors[0] . ' 0%, ' . $colors[1] . ' 100%)';
-    }
+    // Use premium .material-option structure for wood essences
+    $swatch_html .= '<label class="swatch-item material-option' . $is_selected . '" data-value="' . esc_attr($option) . '" data-wood="' . esc_attr($wood_class) . '">';
 
-    $swatch_html .= '<label class="swatch-item' . $is_selected . '" data-value="' . esc_attr($option) . '">';
-    $swatch_html .= '<div class="swatch-preview">';
+    // Premium circular swatch with gradient
+    $swatch_html .= '<div class="material-swatch ' . esc_attr($wood_class) . '"';
+    if ($wood_gradient && !$term_image && !$default_image_url) {
+      $swatch_html .= ' style="background: ' . esc_attr($wood_gradient) . ';"';
+    }
+    $swatch_html .= '>';
 
     if ($term_image) {
-      // ACF image
-      $swatch_html .= '<img src="' . esc_url($term_image['sizes']['thumbnail']) . '" alt="' . esc_attr($term_name) . '">';
+      // ACF image - render inside the circular swatch
+      $swatch_html .= '<img src="' . esc_url($term_image['sizes']['thumbnail']) . '" alt="' . esc_attr($term_name) . '" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">';
     } elseif ($default_image_url) {
-      // Default theme image
-      $swatch_html .= '<img src="' . esc_url($default_image_url) . '" alt="' . esc_attr($term_name) . '">';
-    } elseif ($wood_gradient) {
-      // Wood color gradient
-      $swatch_html .= '<span class="swatch-color" style="background: ' . esc_attr($wood_gradient) . ';"></span>';
-    } else {
-      // First letter fallback
-      $swatch_html .= '<span class="swatch-letter">' . esc_html(mb_substr($term_name, 0, 1)) . '</span>';
+      // Default theme image - render inside the circular swatch
+      $swatch_html .= '<img src="' . esc_url($default_image_url) . '" alt="' . esc_attr($term_name) . '" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">';
     }
+    // If no image, the CSS gradient will show via inline style or CSS class
 
     $swatch_html .= '</div>';
-    $swatch_html .= '<span class="swatch-name">' . esc_html($term_name) . '</span>';
+
+    // Material info with name
+    $swatch_html .= '<div class="material-info">';
+    $swatch_html .= '<span class="material-name">' . esc_html($term_name) . '</span>';
+    $swatch_html .= '</div>';
+
     $swatch_html .= '</label>';
   }
 

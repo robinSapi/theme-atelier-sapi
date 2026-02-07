@@ -61,6 +61,37 @@ Text Domain: theme-sapi-maison
   --color-text: var(--color-dark);
   --color-text-light: var(--color-gray-mid);
   --color-accent: var(--color-orange);
+
+  /* ========================================
+     DESIGN SYSTEM ENRICHI - Couleurs Premium
+     ======================================== */
+
+  /* Couleurs principales enrichies */
+  --creme-papier: #FEFDFB;
+  --creme-chaud: #FAF6F0;
+  --ivoire-doux: #F5EDE4;
+  --bois-dore: #937D68;
+  --bois-profond: #6B5A4A;
+  --bois-sombre: #4A3F35;
+  --orange-sapi: #E35B24;
+  --orange-hover: #C94D1E;
+  --vert-confiance: #018501;
+  --vert-doux: #2D7D32;
+
+  /* Couleurs d'ambiance */
+  --lumiere-doree: #FFF8E7;
+  --ombre-chaude: rgba(74, 63, 53, 0.08);
+  --voile-bois: rgba(147, 125, 104, 0.05);
+  --noir-doux: #2C2620;
+
+  /* Gradients bois pour swatches */
+  --wood-okoume: linear-gradient(135deg, #D4B896 0%, #C4A882 50%, #B89B74 100%);
+  --wood-peuplier: linear-gradient(135deg, #F5EAD6 0%, #E8DCC4 50%, #DDD0B8 100%);
+  --wood-noyer: linear-gradient(135deg, #8B6F5C 0%, #7A5F4D 50%, #6B5242 100%);
+
+  /* Easings supplémentaires */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-elegant: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 /* ========================================
@@ -7272,6 +7303,158 @@ transform: translateY(15px);
 .product-form-v2 .attribute-swatch .swatch-item.selected {
   border-color: var(--color-accent);
   background: var(--color-warm);
+}
+
+/* ========================================
+   SWATCHES MATÉRIAUX PREMIUM - Design System 4.2
+   ======================================== */
+
+/* Container option matériau avec pastille visuelle */
+.material-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  min-width: 140px;
+
+  background: var(--creme-chaud);
+  border: 2px solid transparent;
+  border-radius: 12px;
+
+  transition: all 0.25s ease;
+  -webkit-transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.material-option:hover {
+  background: var(--ivoire-doux);
+  border-color: var(--bois-dore);
+  transform: translateY(-2px);
+  -webkit-transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(74, 63, 53, 0.1);
+}
+
+.material-option.selected,
+.material-option.active {
+  background: linear-gradient(135deg, var(--ivoire-doux) 0%, var(--creme-chaud) 100%);
+  border-color: var(--bois-dore);
+  box-shadow: 0 4px 12px rgba(147, 125, 104, 0.15);
+}
+
+/* Pastille texture bois avec gradient visuel */
+.material-swatch {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  /* Bordure fine pour définition */
+  border: 2px solid rgba(74, 63, 53, 0.15);
+
+  /* Ombre intérieure pour effet "enfoncé" */
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(255, 255, 255, 0.8);
+
+  transition: transform 0.2s ease;
+  -webkit-transition: transform 0.2s ease;
+}
+
+.material-option:hover .material-swatch {
+  transform: scale(1.05);
+  -webkit-transform: scale(1.05);
+}
+
+/* Gradients bois spécifiques */
+.material-swatch.okoume {
+  background: var(--wood-okoume);
+}
+
+.material-swatch.peuplier {
+  background: var(--wood-peuplier);
+}
+
+.material-swatch.noyer {
+  background: var(--wood-noyer);
+}
+
+/* Support pour les noms d'attributs WooCommerce */
+.material-swatch[data-wood="okoume"],
+.material-swatch[data-value*="okoumé"],
+.material-swatch[data-value*="Okoumé"] {
+  background: var(--wood-okoume);
+}
+
+.material-swatch[data-wood="peuplier"],
+.material-swatch[data-value*="peuplier"],
+.material-swatch[data-value*="Peuplier"] {
+  background: var(--wood-peuplier);
+}
+
+.material-swatch[data-wood="noyer"],
+.material-swatch[data-value*="noyer"],
+.material-swatch[data-value*="Noyer"] {
+  background: var(--wood-noyer);
+}
+
+/* Info texte matériau */
+.material-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.material-name {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--bois-sombre);
+  line-height: 1.3;
+}
+
+.material-option.selected .material-name,
+.material-option.active .material-name {
+  color: var(--orange-sapi);
+}
+
+.material-description {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--bois-profond);
+  opacity: 0.7;
+  line-height: 1.4;
+}
+
+/* Animation sélection */
+@keyframes swatchSelect {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.material-option.just-selected {
+  animation: swatchSelect 0.25s var(--ease-bounce);
+}
+
+/* Compatibilité avec l'ancien système de swatches */
+.product-form-v2 .attribute-swatch .swatch-item.material-option {
+  padding: 16px 20px;
+  background: var(--creme-chaud);
+}
+
+.product-form-v2 .attribute-swatch .swatch-item.material-option:hover {
+  background: var(--ivoire-doux);
+}
+
+.product-form-v2 .attribute-swatch .swatch-item.material-option.selected {
+  background: linear-gradient(135deg, var(--ivoire-doux) 0%, var(--creme-chaud) 100%);
+  border-color: var(--bois-dore);
 }
 
 /* Quantité */
