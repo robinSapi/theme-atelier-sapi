@@ -785,12 +785,14 @@ select:focus-visible {
 .site-header {
   position: sticky;
   top: 0;
-  z-index: 999;
+  z-index: 10001; /* Au-dessus de tous les autres éléments */
   background: #fff;
   background: rgba(255, 255, 255, 0.97);
   -webkit-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   -moz-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .site-header .header-inner {
@@ -978,6 +980,8 @@ select:focus-visible {
   display: flex;
   align-items: center;
   gap: 12px;
+  position: relative;
+  z-index: 2; /* Au-dessus du contenu du header */
 }
 
 /* ----------------------------------------
@@ -1197,11 +1201,22 @@ input[type="submit"]:hover,
   padding: 8px;
   color: var(--color-dark);
   text-decoration: none;
+  cursor: pointer;
+  background: transparent;
+  border: none;
   transition: all 0.3s ease;
+  -webkit-transition: all 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  z-index: 3; /* Au-dessus de tout dans le header */
 }
 
 .cart-link:hover {
   color: var(--color-wood);
+  -webkit-transform: scale(1.05);
+  transform: scale(1.05);
 }
 
 .cart-icon {
@@ -1230,12 +1245,16 @@ input[type="submit"]:hover,
   border-radius: 9px;
   font-size: 11px;
   font-weight: 600;
+  -webkit-transform: translate(25%, -25%);
   transform: translate(25%, -25%);
+  -webkit-transition: opacity 0.2s ease, transform 0.2s ease;
   transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none; /* Le badge ne doit pas bloquer les clics */
 }
 
 .cart-count--empty {
   opacity: 0;
+  -webkit-transform: translate(25%, -25%) scale(0.5);
   transform: translate(25%, -25%) scale(0.5);
   pointer-events: none;
 }
