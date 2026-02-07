@@ -5555,7 +5555,7 @@ body.cursor-hover .cursor-dot {
   font-family: var(--font-body);
   font-size: clamp(3rem, 5vw, 5rem);
   font-weight: 900;
-  line-height: 0.95;
+  line-height: 1.1;
   margin-bottom: 1rem;
   color: var(--color-white);
 }
@@ -5923,11 +5923,11 @@ transform: translateY(15px);
   gap: 0.5rem;
   position: relative;
   z-index: 1;
-  padding: 1rem 1.2rem;
+  padding: 1rem 1rem;
   background: var(--color-warm);
   transition: all 0.4s var(--ease-expo);
   cursor: pointer;
-  width: 160px;
+  width: 180px;
   height: 120px;
   border-radius: 12px;
   overflow: hidden;
@@ -5943,12 +5943,13 @@ transform: translateY(15px);
 }
 
 .step-text {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
   color: var(--color-gray);
   transition: opacity 0.4s var(--ease-smooth);
+  white-space: nowrap;
 }
 
 /* Process step image reveal on hover */
