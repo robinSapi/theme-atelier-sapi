@@ -8193,14 +8193,15 @@ transform: translateY(15px);
 
 /* ---- Swatch Label ---- */
 .product-summary .attribute-swatch .swatch-item .swatch-name {
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: var(--color-dark);
   white-space: nowrap;
+  line-height: 1.2;
 }
 
 .product-summary .attribute-swatch .swatch-item.selected .swatch-name {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-wood);
 }
 
@@ -8252,17 +8253,18 @@ transform: translateY(15px);
   }
 
   .product-summary .attribute-swatch .swatch-item {
-    padding: 0.5rem 0.75rem;
-    min-width: 70px;
+    padding: 0.65rem 0.85rem;
+    min-width: 80px;
   }
 
   .product-summary .attribute-swatch .swatch-item .swatch-preview {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
   }
 
   .product-summary .attribute-swatch .swatch-item .swatch-name {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 600;
   }
 }
 
