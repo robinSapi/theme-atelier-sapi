@@ -46,7 +46,7 @@ $collections = [
   [
     'name' => 'Lampadaires',
     'count' => '8 créations',
-    'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Claudine.jpg',
+    'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Claudine-bandeau-1.jpg',
     'url' => '/categorie-produit/lampadaire/',
   ],
   [
