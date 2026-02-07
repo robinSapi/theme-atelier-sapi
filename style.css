@@ -9134,6 +9134,14 @@ transform: translateY(15px);
   color: var(--color-text-light);
 }
 
+.price-from-label {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--color-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .product-price-v2 .price-amount,
 .product-price-v2 .price-amount .woocommerce-Price-amount {
   font-size: 1.75rem;

@@ -117,12 +117,13 @@ get_header();
         <!-- Titre H1 -->
         <h1 class="product-title-v2"><?php the_title(); ?></h1>
 
-        <!-- Prix (masqué pour variables, affiché par WC dans le formulaire) -->
-        <?php if (!$is_variable) : ?>
+        <!-- Prix (affiché pour tous les produits) -->
         <div class="product-price-v2">
+          <?php if ($is_variable) : ?>
+            <span class="price-from-label"><?php esc_html_e('À partir de', 'theme-sapi-maison'); ?></span>
+          <?php endif; ?>
           <span class="price-amount"><?php echo $price_html; ?></span>
         </div>
-        <?php endif; ?>
 
         <!-- Mini description / Phrase d'accroche -->
         <?php if ($phrase || $mini_description) : ?>
