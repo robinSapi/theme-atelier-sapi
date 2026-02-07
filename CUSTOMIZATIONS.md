@@ -646,7 +646,134 @@ Harmonisation complète du site pour que TOUTES les pages atteignent le niveau p
   - No template-parts dependency (self-contained)
   - Fichiers : 515 insertions, 26 deletions
 
-**RÉSULTATS HARMONISATION:**
+**VAGUE 4 - Collections Enrichment (commits 58744ce + 04703db):**
+- ✅ **RICH EDITORIAL CONTENT** (commit 58744ce - 710 insertions)
+  - **archive-product.php** (shop page)
+    - "Why Atelier Sapi" section (Section 02) avec 4 value cards + 1 highlight card
+    - Storytelling : artisanal, unique, éco-responsable, service client
+    - Icon SVG pour chaque card (layers, smile, check, user)
+    - Highlight card : heart icon + signature style content
+    - Premium hover : translateY(-8px), icon scale(1.1) + rotate(5deg)
+    - Icon gradient on hover : orange 135deg with color transition
+
+  - **taxonomy-product_cat.php** (category pages)
+    - Rich editorial content array pour 5 catégories (500+ words each)
+    - Categories : suspension, lampadaire, applique, lampe-a-poser, accessoire
+    - Each category : tagline, intro, why, promise, 4 use_cases
+    - Section 02 structure : editorial-hero + editorial-grid + use-cases-list
+    - Editorial blocks : hover translateY(-6px) + border color change
+    - Use cases list : SVG check icons, hover translateX(4px) + background
+    - Featured cards upgrade : hover translateY(-12px) + scale(1.02)
+    - Golden overlay on featured cards (opacity 0→1 on hover)
+    - Images scale(1.12) on hover, GPU accelerated
+
+  - **CSS additions** (category-editorial + why-sapi + featured premium)
+    - Gradient backgrounds : 135deg warm cream tones
+    - Typography : Square Peg display font for taglines clamp(32-48px)
+    - Use cases responsive : 2 columns tablet, 1 column mobile
+    - Editorial blocks : 2px border wood, cream background, premium shadows
+    - Fichiers : 710 insertions (583 PHP, 127 CSS)
+
+- ✅ **PREMIUM GLOBAL EFFECTS** (commit 04703db - 575 insertions)
+  - **Generic fade-in animations** (IntersectionObserver)
+    - All editorial-block, why-sapi-card, use-cases-list li
+    - All blog-card, post-nav-item, artisan/advice sections
+    - Opacity 0→1 + translateY(20px→0) on scroll
+    - Threshold 0.1, rootMargin -50px for early trigger
+
+  - **8 Premium Features** (cinetique.js + style.css)
+    1. Scroll Progress Indicator : 3px bar, orange→gold gradient, width 0→100%
+    2. Enhanced Image Zoom : click to fullscreen, backdrop-blur(10px), ESC to close
+    3. Form Field Micro-Interactions : translateY(-2px) on focus, labels scale(0.9)
+    4. Enhanced Cart Button : scale(0.95) on click + flying cart emoji 🛒
+    5. Number Input Enhancements : scale(1.05) visual feedback on change
+    6. Back to Top Button : orange gradient circle, appears at 500px scroll
+    7. Copy to Clipboard : async clipboard API for product URLs
+    8. Generic Animations : fadeInUp, scaleIn, slideInRight keyframes
+
+  - **Global Premium CSS** (280 lines)
+    - Keyframes : fadeInUp, fadeIn, scaleIn, slideInRight, pulse, spin
+    - Focus states : 3px orange outline with 3px offset for accessibility
+    - Ripple effect : button::after expanding circle on click
+    - Premium text selection : orange background, cream text
+    - Custom scrollbar : wood gold thumb, cream track, 12px width
+    - Backdrop blur support : @supports detection for modals
+    - GPU acceleration : translateZ(0) + backface-visibility hidden
+    - Prefers-reduced-motion : auto-disable animations for accessibility
+
+  - **Fichiers** : 575 insertions (250 JS, 280 CSS, 45 template updates)
+
+**RÉSULTATS VAGUE 4 (COLLECTIONS ENRICHMENT):**
+- ✅ Collection pages + shop page have rich editorial content (500+ words/category)
+- ✅ Storytelling before product browsing (emotional connection)
+- ✅ Premium global effects across ALL pages (not just HP/Product)
+- ✅ 8 premium interactions with vanilla JS (no external deps)
+- ✅ IntersectionObserver for performance (no scroll event spam)
+- ✅ Accessibility maintained (reduced motion, focus states, keyboard)
+- ✅ Total : 1285 insertions, 45 deletions sur 2 commits (58744ce + 04703db)
+
+**VAGUE 5 - Premium Interactions v2.0 (commit 4cc440a - 724 insertions):**
+- ✅ **ADVANCED MULTI-SECTION PARALLAX** (vanilla JS with requestAnimationFrame)
+  - Hero images : depth-based parallax with speed 0.1
+  - Shop collage : staggered speeds (0.05 + index * 0.02) for depth illusion
+  - Category hero : speed 0.08 for subtle movement
+  - Featured cards : scroll-triggered parallax (offset * 0.03)
+  - Auto-discovery : data-parallax="0.5" attribute for any element
+  - Performance : single requestAnimationFrame loop, no scroll spam
+  - Templates updated : single.php (data-parallax="0.3" on featured image)
+
+- ✅ **CANVAS WOOD-THEMED PARTICLES** (native Canvas API, no libs)
+  - Organic floating particles with wood-toned colors (#937D68, #C5A880, etc.)
+  - Particle class : random size/speed/opacity, auto-reset out of bounds
+  - Performance : IntersectionObserver auto-pause when out of view
+  - Particle count : adaptive (canvas.width / 20, max 50)
+  - Usage : data-particles="wood" attribute on any section
+  - Templates updated : archive-product.php (why-sapi), taxonomy-product_cat.php (editorial), archive.php (blog-hero)
+
+- ✅ **ENHANCED PRODUCT FILTERS WITH ANIMATED TRANSITIONS**
+  - Category filters : smooth active state with scale(1.05) animation
+  - Advanced dropdowns : slideDown/slideUp animations, backdrop blur
+  - Price filtering : 0-100, 100-200, 200-300, 300+ ranges with smooth transitions
+  - Wood/Size filters : ready for data attributes (data-wood, data-size)
+  - Product reveal : staggered fade-in (50ms delay per item)
+  - Reset button : rotation animation (90deg) on hover, color transition
+  - Real-time count : "X produits trouvés" notification after filtering
+  - Dropdown states : ::before pseudo-element with gradient border on active
+
+- ✅ **INFINITE SCROLL FOR BLOG ARCHIVE** (IntersectionObserver)
+  - Auto-loading : triggers at 200px before reaching bottom
+  - Loading state : animated spinner with rotation SVG
+  - Staggered reveal : new posts fade in with 100ms delay per item
+  - End state : "Vous avez tout vu ✨" message with opacity 0.6
+  - Smart pagination : reads data-max-pages attribute, disconnects observer at end
+  - Template updated : archive.php (blog-archive-grid + load-more-trigger)
+
+- ✅ **CSS ADDITIONS** (258 lines - Premium v2.0 section)
+  - Filter dropdowns : slideDown/slideUp keyframes, 0.3s cubic-bezier
+  - Dropdown menu : elevated positioning, box-shadow 0 10px 30px wood/0.15
+  - Filter options : hover translateX(4px), active orange background
+  - Reset button : border orange, hover fill + scale(1.05)
+  - Loading spinner : flex centered, 24px rotating SVG
+  - Parallax smooth : transition 0.5s cubic-bezier(0.4, 0, 0.2, 1)
+  - Advanced hover : filter-btn::before gradient pseudo-element
+  - Button press : @keyframes buttonPress with scale(0.95)
+
+- ✅ **JS ADDITIONS** (454 lines - cinetique.js)
+  - Advanced parallax system : 60+ lines, multiple element types
+  - Canvas particles engine : 100+ lines, Particle class with reset logic
+  - Enhanced filter system : 150+ lines, category + advanced filters + reset
+  - Infinite scroll logic : 80+ lines, fetch + parse + staggered append
+  - Console message updated : "PREMIUM v2.0", usage instructions for data attributes
+
+**RÉSULTATS VAGUE 5 (PREMIUM v2.0):**
+- ✅ 4 major features implemented (parallax, canvas, filters, infinite scroll)
+- ✅ All vanilla JS/CSS, zero external libraries or dependencies
+- ✅ Performance-optimized : IntersectionObserver + requestAnimationFrame
+- ✅ Auto-discovery patterns : data-parallax, data-particles attributes
+- ✅ Accessibility : keyboard support, focus states, prefers-reduced-motion
+- ✅ Total : 724 insertions, 11 deletions, 6 files (archive.php, cinetique.js, single.php, style.css, archive-product.php, taxonomy-product_cat.php)
+
+**RÉSULTATS HARMONISATION COMPLÈTE (5 VAGUES):**
 - ✅ Toutes les pages utilisent les mêmes patterns premium
 - ✅ Gradient backgrounds cohérents (135deg, warm cream tones)
 - ✅ Square Peg pour display typography partout
@@ -655,7 +782,19 @@ Harmonisation complète du site pour que TOUTES les pages atteignent le niveau p
 - ✅ Hover effects (translateY + shadows) cohérents
 - ✅ Design System colors (--bois-dore, --creme-papier, etc.)
 - ✅ -webkit- prefixes pour Safari sur tous les transforms
-- ✅ Total : 1094 insertions, 154 deletions sur 3 commits
+- ✅ Rich editorial content (500+ words) sur toutes les pages collections
+- ✅ Premium global effects sur TOUTES les pages (fade-in, zoom, forms, cart)
+- ✅ Advanced interactions v2.0 (parallax, canvas particles, animated filters, infinite scroll)
+- ✅ Performance optimisée (IntersectionObserver, requestAnimationFrame, GPU acceleration)
+- ✅ Accessibility complète (keyboard, focus states, prefers-reduced-motion)
+- ✅ **Total 5 vagues : 3,803 insertions, 220 deletions sur 7 commits**
+  - Vague 1 (2bd9f91) : 242 ins, 87 del
+  - Vague 2 (9ff6945) : 337 ins, 41 del
+  - Vague 3 (f1803e0) : 515 ins, 26 del
+  - Vague 4a (58744ce) : 710 ins, 45 del
+  - Vague 4b (04703db) : 575 ins, 10 del
+  - Vague 5 (4cc440a) : 724 ins, 11 del
+  - Git tag : v1.0.0-premium-complete
 
 **2025-02-04:**
 - Création du thème custom depuis le travail Elementor de Jérôme
