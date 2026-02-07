@@ -1893,31 +1893,48 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   text-align: left;
 }
 
-/* Badges certifications */
+/* Badges certifications - Design System Premium */
 .specs-badges {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 1rem;
   padding-top: 1.5rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-top: 1px solid rgba(147, 125, 104, 0.15);
 }
 
 .spec-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.6rem 1rem;
-  background: linear-gradient(135deg, rgba(147, 125, 104, 0.08) 0%, rgba(251, 246, 234, 0.9) 100%);
+  padding: 8px 16px;
+
+  /* Fond premium avec gradient */
+  background: linear-gradient(135deg, var(--creme-chaud, #FAF6F0) 0%, var(--ivoire-doux, #F5EDE4) 100%);
+  border: 1px solid rgba(147, 125, 104, 0.12);
   border-radius: 100px;
-  font-size: 0.8rem;
+
+  /* Typo */
+  font-size: 12px;
   font-weight: 600;
-  color: var(--color-text);
+  color: var(--bois-profond, #6B5A4A);
+
+  /* Ombre subtile */
+  box-shadow: 0 2px 6px rgba(74, 63, 53, 0.06);
+
+  transition: all 0.2s ease;
+}
+
+.spec-badge:hover {
+  transform: translateY(-1px);
+  -webkit-transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(74, 63, 53, 0.1);
 }
 
 .spec-badge svg {
-  color: var(--color-accent);
+  color: var(--bois-dore, #937D68);
   flex-shrink: 0;
+  opacity: 0.9;
 }
 
 /* Responsive specs v2 */
@@ -1955,26 +1972,35 @@ ul.products.products-carousel-track > li.products-carousel-slide {
    Section 04: L'Atelier / Robin
    ======================================== */
 
+/* Section Artisan premium - DS 4.5 */
 .product-atelier.product-atelier-cinetique {
-  padding: 4rem 3rem;
+  padding: var(--space-2xl, 48px);
   max-width: 1200px;
   margin: 0 auto;
-  background: var(--color-warm);
-  border-radius: var(--radius-lg);
+  background: var(--creme-chaud, #FAF6F0);
+  border-radius: 20px;
+
+  /* Bordure subtile */
+  border: 1px solid rgba(147, 125, 104, 0.1);
 }
 
 .product-atelier-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
+  grid-template-columns: 120px 1fr;
+  gap: var(--space-xl, 32px);
   align-items: center;
 }
 
 .product-atelier-image {
-  position: relative;
-  border-radius: var(--radius-lg);
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
   overflow: hidden;
-  aspect-ratio: 4/3;
+  flex-shrink: 0;
+
+  /* Bordure bois - DS 4.5 */
+  border: 4px solid var(--bois-dore, #937D68);
+  box-shadow: 0 4px 16px rgba(147, 125, 104, 0.15);
 }
 
 .product-atelier-image img {
@@ -2005,24 +2031,28 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 }
 
 .product-atelier-content {
-  padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm, 12px);
 }
 
+/* Label "L'ARTISAN" - DS 4.5 */
 .product-atelier-content .section-number {
   display: inline-block;
-  font-size: 0.875rem;
-  font-weight: 900;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
   letter-spacing: 0.15em;
-  color: var(--color-wood);
-  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  color: var(--bois-dore, #937D68);
 }
 
 .product-atelier-content h2 {
   font-family: var(--font-body);
   font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 900;
-  color: var(--color-dark);
-  margin-bottom: 1.5rem;
+  color: var(--bois-sombre, #4A3F35);
+  margin: 0 0 0.5rem;
 }
 
 .atelier-intro {
@@ -2032,40 +2062,46 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   margin-bottom: 2rem;
 }
 
+/* Citation artisan - DS 4.5 */
 .atelier-quote {
   font-family: var(--font-body);
   font-style: italic;
-  font-size: 1.125rem;
-  color: var(--color-dark);
-  line-height: 1.8;
-  margin: 0 0 1rem 0;
-  padding-left: 1.5rem;
-  border-left: 3px solid var(--color-orange);
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--bois-profond, #6B5A4A);
+  margin: 0;
+  padding: 0;
+  border: none;
 }
 
+/* Signature avec typo poétique - DS 4.5 */
 .atelier-signature {
-  font-weight: 600;
-  color: var(--color-wood);
-  margin-bottom: 2rem;
+  font-family: var(--font-display, 'Square Peg', cursive);
+  font-size: 28px;
+  color: var(--bois-sombre, #4A3F35);
+  margin: 8px 0 1rem;
 }
 
 .product-atelier-content .button {
   margin-top: 0.5rem;
 }
 
-/* Mobile: Stack the atelier grid */
+/* Mobile: Stack the atelier grid - DS 4.5 */
 @media (max-width: 768px) {
   .product-atelier.product-atelier-cinetique {
-    padding: 2rem 1.5rem;
+    padding: var(--space-xl, 32px) 1.5rem;
   }
 
   .product-atelier-grid {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1.5rem;
+    text-align: center;
   }
 
   .product-atelier-image {
-    aspect-ratio: 16/9;
+    margin: 0 auto;
+    width: 120px;
+    height: 120px;
   }
 }
 
@@ -6882,6 +6918,20 @@ transform: translateY(15px);
   background: #f5f5f5;
 }
 
+/* Overlay lumière dorée subtile - DS 4.4 */
+.gallery-main::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 248, 231, 0.15) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
 .gallery-main-image {
   width: 100%;
   height: 100%;
@@ -6918,6 +6968,7 @@ transform: translateY(15px);
   transition: all 0.3s ease;
   -webkit-transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 2; /* Au-dessus de l'overlay doré */
 }
 
 .gallery-main:hover .gallery-zoom-icon {
@@ -7482,38 +7533,55 @@ transform: translateY(15px);
   margin: 0;
 }
 
-/* CTA Principal */
+/* CTA Principal - Design System Premium 4.1 */
 .product-form-v2 .single_add_to_cart_button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
   width: 100%;
-  padding: 1.1rem 2rem;
-  font-size: 1rem;
+  padding: 18px 40px;
+
+  /* Gradient premium avec profondeur */
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  color: var(--creme-papier, #FEFDFB);
+  border: none;
+  border-radius: 8px;
+
+  /* Typo */
+  font-size: 15px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  background: var(--color-accent);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
+
+  /* Ombre chaude (pas grise !) - DS 4.1 */
+  box-shadow:
+    0 4px 12px rgba(227, 91, 36, 0.25),
+    0 2px 4px rgba(227, 91, 36, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+
   cursor: pointer;
-  transition: all 0.3s ease;
-  -webkit-transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   margin-top: 0.5rem;
 }
 
 .product-form-v2 .single_add_to_cart_button:hover {
-  background: var(--color-dark);
+  background: linear-gradient(180deg, #D14F1C 0%, #B8441A 100%);
   transform: translateY(-2px);
   -webkit-transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 8px 20px rgba(227, 91, 36, 0.3),
+    0 4px 8px rgba(227, 91, 36, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .product-form-v2 .single_add_to_cart_button:active {
   transform: translateY(0);
   -webkit-transform: translateY(0);
+  box-shadow:
+    0 2px 6px rgba(227, 91, 36, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .product-form-v2 .single_add_to_cart_button.loading {
