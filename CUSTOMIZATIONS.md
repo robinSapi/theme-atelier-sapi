@@ -498,6 +498,96 @@ add_theme_support('wc-product-gallery-slider');
   - BDD nettoyée (0 métadonnées _elementor_* trouvées)
   - Note : les redirections 301 dans functions.php sont conservées pour le SEO (anciennes URLs → nouvelles catégories)
 
+**2026-02-07 (Phase 4 - Proposal B Conversion Features):**
+- ✅ **DOUBLE CTA STRATÉGIQUE** : Deux boutons d'achat pour capturer différents profils clients
+  - Fichiers : `single-product.php`, `functions.php`, `style.css`
+  - **CTA Principal** : "Ajouter au panier" (pour les comparateurs qui veulent continuer leurs recherches)
+  - **CTA Secondaire** : "Acheter maintenant" (pour les décideurs rapides)
+    - Express checkout : skip le panier, redirection directe vers /checkout/
+    - Handler AJAX `sapi_ajax_buy_now()` qui vide le panier et ajoute le produit sélectionné
+    - Style outline avec bordure wood, hover avec fond wood
+    - Support produits simples ET produits variables (vérification variation_id)
+  - Texte explicatif : "Paiement direct, sans passer par le panier"
+  - JavaScript : validation de la sélection pour produits variables avant achat express
+
+- ✅ **LIVRAISON ESTIMÉE PERSONNALISÉE** : Date de livraison dynamique au lieu d'un délai générique
+  - Fichiers : `functions.php`, `single-product.php`, `style.css`
+  - Fonction `sapi_get_estimated_delivery_date()` :
+    - Calcul automatique : 8 jours ouvrés (5 fabrication + 3 livraison)
+    - Exclusion des weekends (samedi/dimanche)
+    - Format français : "12 février" (jour + mois en toutes lettres)
+  - Affichage dans la réassurance : "Chez vous le **12 février**" (au lieu de "Livraison 48-72h")
+  - Design : couleur verte (`--color-green`) pour feedback positif
+  - **Impact conversion** : "Chez vous le 12 février" est 10× plus convaincant qu'un délai générique selon études UX
+
+- ✅ **ACCORDÉON SPECS MOBILE** : Alternative mobile-friendly à la grille 4 colonnes des specs techniques
+  - Fichiers : `single-product.php`, `style.css`
+  - 4 sections repliables (balises `<details>` / `<summary>` natives) :
+    - 01. Dimensions (dimensions, poids, longueur câble)
+    - 02. Éclairage (culot E27, ampoule LED, variateur)
+    - 03. Matériaux (peuplier PEFC, finitions, câble, pavillon)
+    - 04. Installation (montage, difficulté, outils, entretien)
+  - Animations fluides : chevron rotation 180°, slide-in content avec `@keyframes accordionSlide`
+  - Responsive : accordéon visible uniquement sur mobile (< 768px), grille cachée
+  - Desktop : grille 4 colonnes conservée, accordéon caché
+  - Styles premium : fond crème, bordure wood active, box-shadow au hover
+
+- ✅ **COMMIT** : `b91745e` - "feat(Phase 4): implement Proposal B conversion features"
+
+**2026-02-06 (Phase 2 - Design System Premium):**
+- ✅ **ENRICHISSEMENT DESIGN SYSTEM** : Ajout de couleurs et gradients premium dans variables CSS
+  - Fichier : `style.css` (lignes ~59-95)
+  - Nouvelles couleurs étendues :
+    ```css
+    --creme-papier: #FEFDFB;
+    --creme-chaud: #FAF6F0;
+    --ivoire-doux: #F5EDE4;
+    --bois-dore: #937D68;
+    --bois-profond: #6B5A4A;
+    --bois-sombre: #4A3F35;
+    --orange-sapi: #E35B24;
+    --orange-hover: #C94D1E;
+    ```
+  - Gradients bois pour swatches (okoumé, peuplier, noyer, chêne, hêtre, bouleau, frêne, érable, merisier, pin)
+  - Usage : variations de produits, ambiances, textures
+
+- ✅ **CTA PRINCIPAL PREMIUM** : Refonte bouton "Ajouter au panier" selon Design System 4.1
+  - Fichier : `style.css` (lignes ~7485-7590)
+  - Gradient orange avec profondeur : `linear-gradient(180deg, #E35B24 0%, #D14F1C 100%)`
+  - **Ombres chaudes** (pas grises !) : `rgba(227, 91, 36, 0.25)` pour cohérence brand
+  - Hover : gradient plus foncé + `translateY(-2px)` + ombre plus marquée
+  - Active : `translateY(0)` avec inset shadow pour effet "pressed"
+  - Préfixes `-webkit-` pour compatibilité Safari
+
+- ✅ **GALLERY OVERLAY DORÉ** : Lumière dorée subtile sur image produit principale (Design System 4.4)
+  - Fichier : `style.css` (lignes ~6876-6910)
+  - Pseudo-élément `::after` avec gradient diagonal :
+    ```css
+    background: linear-gradient(135deg, rgba(255, 248, 231, 0.15) 0%, transparent 50%);
+    ```
+  - `pointer-events: none` pour ne pas bloquer les interactions
+  - Z-index géré : overlay `z-index: 1`, zoom icon `z-index: 2`
+  - Effet premium subtil qui enrichit la perception produit sans surcharger
+
+- ✅ **SECTION ARTISAN PREMIUM** : Refonte complète section Robin/Atelier (Design System 4.5)
+  - Fichier : `style.css` (lignes ~1958-2070)
+  - Card premium : fond `--creme-chaud`, border-radius 20px, bordure wood subtile
+  - Grid 2 colonnes : photo circulaire 120px + contenu texte
+  - Photo circulaire avec bordure wood 4px + box-shadow dorée
+  - Citation italique 17px, line-height 1.7, couleur `--bois-profond`
+  - Signature : font `Square Peg` (display), 28px, couleur `--bois-sombre`
+  - Bouton outline "Découvrir notre histoire" avec hover wood
+
+- ✅ **BADGES CERTIFICATIONS PREMIUM** : Amélioration visuelle des badges Garantie/CE/Lyon/PEFC
+  - Fichier : `style.css` (lignes ~1897-1922)
+  - Gradient crème : `linear-gradient(135deg, var(--creme-chaud) 0%, var(--ivoire-doux) 100%)`
+  - Bordure wood très subtile : `rgba(147, 125, 104, 0.12)`
+  - Border-radius 100px (pilule)
+  - Hover : `translateY(-1px)` + box-shadow plus marquée
+  - Transition fluide avec `--ease-smooth`
+
+- ✅ **COMMIT** : `cb3e87b` - "feat(Phase 2): enrich Design System with premium styles"
+
 **2025-02-04:**
 - Création du thème custom depuis le travail Elementor de Jérôme
 - Nettoyage du code debug
