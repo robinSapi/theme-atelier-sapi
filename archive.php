@@ -3,7 +3,7 @@ get_header();
 ?>
 
 <!-- Blog Archive Hero Premium -->
-<section class="blog-hero">
+<section class="blog-hero" data-particles="wood">
   <div class="blog-hero-content">
     <h1><?php echo esc_html(get_the_archive_title()); ?></h1>
     <?php if (get_the_archive_description()) : ?>
@@ -15,7 +15,7 @@ get_header();
 <!-- Blog Grid Premium -->
 <section class="blog-list">
   <?php if (have_posts()) : ?>
-    <div class="blog-grid">
+    <div class="blog-archive-grid">
       <?php while (have_posts()) : the_post(); ?>
         <article id="post-<?php the_ID(); ?>" <?php post_class('blog-card'); ?>>
           <?php if (has_post_thumbnail()) : ?>
@@ -47,7 +47,18 @@ get_header();
       <?php endwhile; ?>
     </div>
 
-    <div class="blog-navigation">
+    <!-- Infinite Scroll Trigger -->
+    <?php
+    global $wp_query;
+    $max_pages = $wp_query->max_num_pages;
+    ?>
+    <?php if ($max_pages > 1) : ?>
+      <div class="load-more-trigger" data-max-pages="<?php echo esc_attr($max_pages); ?>">
+        <span>Scroll pour plus d'articles</span>
+      </div>
+    <?php endif; ?>
+
+    <div class="blog-navigation" style="display: none;">
       <?php the_posts_navigation(array(
         'prev_text' => '← Articles précédents',
         'next_text' => 'Articles suivants →',

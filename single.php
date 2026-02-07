@@ -25,7 +25,7 @@ while (have_posts()) : the_post();
   </header>
 
   <?php if (has_post_thumbnail()) : ?>
-    <div class="single-post-featured">
+    <div class="single-post-featured" data-parallax="0.3">
       <?php the_post_thumbnail('full'); ?>
     </div>
   <?php endif; ?>

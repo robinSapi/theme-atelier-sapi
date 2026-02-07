@@ -253,20 +253,62 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ========================================
-  // Parallax Effect on Scroll
+  // PREMIUM: Advanced Parallax Effect on Multiple Sections
   // ========================================
   let ticking = false;
+
+  // Mark elements with data-parallax attribute for auto-discovery
+  const parallaxElements = document.querySelectorAll('[data-parallax]');
+  parallaxElements.forEach(el => {
+    const speed = parseFloat(el.getAttribute('data-parallax')) || 0.5;
+    el.dataset.parallaxSpeed = speed;
+  });
 
   window.addEventListener('scroll', () => {
     if (!ticking) {
       window.requestAnimationFrame(() => {
         const scrolled = window.pageYOffset;
 
-        // Parallax on hero image only (not atelier)
+        // Parallax on hero image (homepage)
         const heroImage = document.querySelector('.bento-hero .bento-bg');
         if (heroImage) {
           heroImage.style.transform = `translateY(${scrolled * 0.1}px) scale(1.05)`;
         }
+
+        // Parallax on shop hero visual collage
+        const shopHeroImages = document.querySelectorAll('.shop-hero-visual-collage .collage-item img');
+        shopHeroImages.forEach((img, index) => {
+          const speed = 0.05 + (index * 0.02); // Different speeds for depth
+          img.style.transform = `translateY(${scrolled * speed}px) scale(1.05)`;
+        });
+
+        // Parallax on category hero images
+        const categoryHeroImage = document.querySelector('.category-hero-visual img');
+        if (categoryHeroImage) {
+          categoryHeroImage.style.transform = `translateY(${scrolled * 0.08}px) scale(1.05)`;
+        }
+
+        // Parallax on featured cards images
+        const featuredCardsImages = document.querySelectorAll('.category-featured-media img, .shop-hero-visual-collage img');
+        featuredCardsImages.forEach((img, index) => {
+          const rect = img.getBoundingClientRect();
+          const isInView = rect.top < window.innerHeight && rect.bottom > 0;
+          if (isInView) {
+            const offset = (window.innerHeight - rect.top) * 0.03;
+            img.style.transform = `translateY(-${offset}px) scale(1.05)`;
+          }
+        });
+
+        // Auto-discovered parallax elements
+        parallaxElements.forEach(el => {
+          const rect = el.getBoundingClientRect();
+          const isInView = rect.top < window.innerHeight && rect.bottom > 0;
+          if (isInView) {
+            const speed = parseFloat(el.dataset.parallaxSpeed);
+            const offset = (window.innerHeight - rect.top) * speed * 0.01;
+            el.style.transform = `translateY(-${offset}px)`;
+          }
+        });
 
         // Header background opacity on scroll
         const header = document.querySelector('.site-header');
@@ -285,6 +327,112 @@ document.addEventListener('DOMContentLoaded', () => {
 
       ticking = true;
     }
+  });
+
+  // ========================================
+  // PREMIUM: Canvas Wood-Themed Particles Background
+  // ========================================
+  const canvasContainers = document.querySelectorAll('[data-particles="wood"]');
+
+  canvasContainers.forEach(container => {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'particles-canvas';
+    canvas.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    `;
+
+    container.style.position = 'relative';
+    container.insertBefore(canvas, container.firstChild);
+
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animationId;
+
+    // Resize canvas
+    function resizeCanvas() {
+      canvas.width = container.offsetWidth;
+      canvas.height = container.offsetHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Particle class
+    class Particle {
+      constructor() {
+        this.reset();
+        this.y = Math.random() * canvas.height;
+      }
+
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = -10;
+        this.size = Math.random() * 3 + 1;
+        this.speedY = Math.random() * 0.5 + 0.2;
+        this.speedX = Math.random() * 0.3 - 0.15;
+        this.opacity = Math.random() * 0.5 + 0.2;
+        // Wood-themed colors: warm browns, golds, creams
+        const colors = ['#937D68', '#C5A880', '#8B7355', '#E8DCC8', '#B89968'];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+      }
+
+      update() {
+        this.y += this.speedY;
+        this.x += this.speedX;
+
+        // Reset if out of bounds
+        if (this.y > canvas.height) {
+          this.reset();
+        }
+        if (this.x < 0 || this.x > canvas.width) {
+          this.x = Math.random() * canvas.width;
+        }
+      }
+
+      draw() {
+        ctx.fillStyle = this.color;
+        ctx.globalAlpha = this.opacity;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Create particles
+    const particleCount = Math.min(50, Math.floor(canvas.width / 20));
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(new Particle());
+    }
+
+    // Animation loop
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach(particle => {
+        particle.update();
+        particle.draw();
+      });
+
+      animationId = requestAnimationFrame(animate);
+    }
+
+    // Start animation only when in view
+    const canvasObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          animate();
+        } else {
+          cancelAnimationFrame(animationId);
+        }
+      });
+    });
+    canvasObserver.observe(container);
   });
 
   // ========================================
@@ -735,11 +883,307 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ========================================
+  // PREMIUM: Enhanced Product Filters with Animated Transitions
+  // ========================================
+  const filterButtons = document.querySelectorAll('.product-filters-js .filter-btn');
+  const advancedFilters = document.querySelectorAll('.filter-dropdown .filter-option');
+  const filterReset = document.querySelector('.filter-reset');
+  const productItems = document.querySelectorAll('.products-carousel-track .product');
+
+  let activeFilters = {
+    category: 'all',
+    price: 'all',
+    wood: 'all',
+    size: 'all'
+  };
+
+  // Category filter (main buttons)
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', function() {
+      // Update active state with smooth transition
+      filterButtons.forEach(b => {
+        b.classList.remove('active');
+        b.style.transform = 'scale(1)';
+      });
+      this.classList.add('active');
+      this.style.transform = 'scale(1.05)';
+      setTimeout(() => {
+        this.style.transform = 'scale(1)';
+      }, 200);
+
+      activeFilters.category = this.getAttribute('data-filter');
+      applyFilters();
+    });
+  });
+
+  // Advanced filters (dropdowns)
+  advancedFilters.forEach(option => {
+    option.addEventListener('click', function() {
+      const filterType = this.closest('[data-filter-type]').getAttribute('data-filter-type');
+      const filterValue = this.getAttribute('data-' + filterType);
+
+      // Update active state in dropdown
+      const siblings = this.closest('.filter-dropdown-menu').querySelectorAll('.filter-option');
+      siblings.forEach(s => s.classList.remove('active'));
+      this.classList.add('active');
+
+      // Update label
+      const label = this.closest('.filter-dropdown').querySelector('.filter-label');
+      if (filterValue !== 'all') {
+        label.textContent = this.textContent;
+      } else {
+        // Reset to default label
+        const defaultLabels = {
+          'price': 'Prix',
+          'wood': 'Essence',
+          'size': 'Taille'
+        };
+        label.textContent = defaultLabels[filterType];
+      }
+
+      activeFilters[filterType] = filterValue;
+      applyFilters();
+
+      // Show reset button if any advanced filter is active
+      const hasActiveFilters = Object.entries(activeFilters).some(([key, value]) => {
+        return key !== 'category' && value !== 'all';
+      });
+      if (filterReset) {
+        filterReset.style.display = hasActiveFilters ? 'flex' : 'none';
+      }
+
+      // Close dropdown with animation
+      const dropdown = this.closest('.filter-dropdown-menu');
+      dropdown.style.animation = 'slideUp 0.3s ease';
+      setTimeout(() => {
+        dropdown.style.animation = '';
+      }, 300);
+    });
+  });
+
+  // Reset filters
+  if (filterReset) {
+    filterReset.addEventListener('click', function() {
+      activeFilters = {
+        category: activeFilters.category, // Keep category filter
+        price: 'all',
+        wood: 'all',
+        size: 'all'
+      };
+
+      // Reset all advanced filters UI
+      advancedFilters.forEach(option => {
+        option.classList.remove('active');
+        const filterType = option.getAttribute('data-price') || option.getAttribute('data-wood') || option.getAttribute('data-size');
+        if (filterType === 'all') {
+          option.classList.add('active');
+        }
+      });
+
+      // Reset labels
+      document.querySelectorAll('.filter-dropdown .filter-label').forEach(label => {
+        const dropdown = label.closest('.filter-dropdown');
+        const type = dropdown.getAttribute('data-filter-type');
+        const defaultLabels = {
+          'price': 'Prix',
+          'wood': 'Essence',
+          'size': 'Taille'
+        };
+        label.textContent = defaultLabels[type];
+      });
+
+      this.style.display = 'none';
+      applyFilters();
+    });
+  }
+
+  // Apply filters with smooth animations
+  function applyFilters() {
+    let visibleCount = 0;
+
+    productItems.forEach((product, index) => {
+      const matchesCategory = activeFilters.category === 'all' ||
+        product.classList.contains('product_cat-' + activeFilters.category);
+
+      // Get product price for filtering
+      const priceElement = product.querySelector('.price .woocommerce-Price-amount');
+      let productPrice = 0;
+      if (priceElement) {
+        const priceText = priceElement.textContent.replace(/[^0-9.,]/g, '').replace(',', '.');
+        productPrice = parseFloat(priceText) || 0;
+      }
+
+      const matchesPrice = activeFilters.price === 'all' || checkPriceRange(productPrice, activeFilters.price);
+
+      // For wood and size, check product attributes (would need data attributes in PHP)
+      const matchesWood = activeFilters.wood === 'all' ||
+        (product.dataset.wood && product.dataset.wood.includes(activeFilters.wood));
+      const matchesSize = activeFilters.size === 'all' ||
+        (product.dataset.size && product.dataset.size === activeFilters.size);
+
+      const shouldShow = matchesCategory && matchesPrice && matchesWood && matchesSize;
+
+      if (shouldShow) {
+        // Staggered fade-in animation
+        setTimeout(() => {
+          product.style.display = '';
+          product.style.opacity = '0';
+          product.style.transform = 'translateY(20px) scale(0.95)';
+
+          requestAnimationFrame(() => {
+            product.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+            product.style.opacity = '1';
+            product.style.transform = 'translateY(0) scale(1)';
+          });
+        }, visibleCount * 50);
+        visibleCount++;
+      } else {
+        // Fade-out animation
+        product.style.transition = 'all 0.3s ease';
+        product.style.opacity = '0';
+        product.style.transform = 'translateY(-20px) scale(0.9)';
+        setTimeout(() => {
+          product.style.display = 'none';
+        }, 300);
+      }
+    });
+
+    // Show notification with count
+    showNotification(`${visibleCount} produit${visibleCount > 1 ? 's' : ''} trouvé${visibleCount > 1 ? 's' : ''}`);
+  }
+
+  function checkPriceRange(price, range) {
+    if (range === '0-100') return price < 100;
+    if (range === '100-200') return price >= 100 && price < 200;
+    if (range === '200-300') return price >= 200 && price < 300;
+    if (range === '300+') return price >= 300;
+    return true;
+  }
+
+  // Dropdown toggle animations
+  document.querySelectorAll('.filter-dropdown-toggle').forEach(toggle => {
+    toggle.addEventListener('click', function() {
+      const dropdown = this.closest('.filter-dropdown');
+      const menu = dropdown.querySelector('.filter-dropdown-menu');
+      const isOpen = dropdown.classList.contains('open');
+
+      // Close all other dropdowns
+      document.querySelectorAll('.filter-dropdown.open').forEach(d => {
+        if (d !== dropdown) {
+          d.classList.remove('open');
+        }
+      });
+
+      dropdown.classList.toggle('open');
+
+      if (!isOpen) {
+        menu.style.animation = 'slideDown 0.3s ease';
+      }
+    });
+  });
+
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.filter-dropdown')) {
+      document.querySelectorAll('.filter-dropdown.open').forEach(d => {
+        d.classList.remove('open');
+      });
+    }
+  });
+
+  // ========================================
+  // PREMIUM: Infinite Scroll for Blog Archive
+  // ========================================
+  const blogArchive = document.querySelector('.blog-archive-grid');
+  const loadMoreTrigger = document.querySelector('.load-more-trigger');
+
+  if (blogArchive && loadMoreTrigger) {
+    let currentPage = 1;
+    let isLoading = false;
+    const maxPages = parseInt(loadMoreTrigger.dataset.maxPages) || 1;
+
+    const loadMoreObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !isLoading && currentPage < maxPages) {
+          loadMorePosts();
+        }
+      });
+    }, {
+      rootMargin: '200px'
+    });
+
+    loadMoreObserver.observe(loadMoreTrigger);
+
+    async function loadMorePosts() {
+      isLoading = true;
+      currentPage++;
+
+      // Show loading state
+      loadMoreTrigger.innerHTML = `
+        <div class="loading-spinner">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" opacity="0.25"/>
+            <path d="M12 2a10 10 0 0 1 10 10" opacity="0.75">
+              <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
+            </path>
+          </svg>
+          <span>Chargement...</span>
+        </div>
+      `;
+
+      try {
+        // Fetch next page
+        const response = await fetch(`?paged=${currentPage}`, {
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+
+        if (response.ok) {
+          const html = await response.text();
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newPosts = doc.querySelectorAll('.blog-card');
+
+          // Add new posts with staggered animation
+          newPosts.forEach((post, index) => {
+            post.style.opacity = '0';
+            post.style.transform = 'translateY(30px)';
+            blogArchive.appendChild(post);
+
+            setTimeout(() => {
+              post.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+              post.style.opacity = '1';
+              post.style.transform = 'translateY(0)';
+            }, index * 100);
+          });
+
+          // Reset loading state
+          if (currentPage < maxPages) {
+            loadMoreTrigger.innerHTML = '<span>Scroll pour plus d\'articles</span>';
+          } else {
+            loadMoreTrigger.innerHTML = '<span>Vous avez tout vu ! ✨</span>';
+            loadMoreTrigger.style.opacity = '0.6';
+            loadMoreObserver.disconnect();
+          }
+        }
+      } catch (error) {
+        console.error('Error loading posts:', error);
+        loadMoreTrigger.innerHTML = '<span>Erreur de chargement</span>';
+      }
+
+      isLoading = false;
+    }
+  }
+
+  // ========================================
   // Console Message
   // ========================================
-  console.log('%cSAPI CINÉTIQUE PREMIUM', 'font-size: 24px; font-weight: bold; color: #937D68; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);');
-  console.log('%cDesign architectural - Interactions avancées 2.0', 'font-size: 12px; color: #8A8A8A;');
-  console.log('%cFeatures: Scroll Progress | Image Zoom | Form Enhancements | Cart Animations | Back to Top', 'font-size: 10px; color: #585858;');
+  console.log('%cSAPI CINÉTIQUE PREMIUM v2.0', 'font-size: 24px; font-weight: bold; color: #937D68; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);');
+  console.log('%cDesign architectural - Interactions avancées Ultra', 'font-size: 12px; color: #8A8A8A;');
+  console.log('%cCore: Scroll Progress | Image Zoom | Form Enhancements | Cart Animations | Back to Top', 'font-size: 10px; color: #585858;');
+  console.log('%cPremium: Advanced Parallax | Canvas Particles | Animated Filters | Infinite Scroll', 'font-size: 10px; color: #937D68; font-weight: bold;');
   console.log('%cShortcuts: C (collections) | ESC (close zoom) | Konami Code (surprise)', 'font-size: 10px; color: #585858;');
+  console.log('%cUsage: Add data-parallax="0.5" for parallax, data-particles="wood" for canvas particles', 'font-size: 9px; color: #B89968;');
 
 });

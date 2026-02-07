@@ -43,7 +43,7 @@ if (function_exists('sapi_maison_breadcrumbs')) {
 </section>
 
 <!-- Rich Editorial Content Section -->
-<section class="category-editorial">
+<section class="category-editorial" data-particles="wood">
   <div class="category-editorial-inner">
     <?php
     // Rich editorial content per category

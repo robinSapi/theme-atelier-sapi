@@ -363,6 +363,264 @@ img[loading="lazy"]:not([data-src]) {
 }
 
 /* ========================================
+   PREMIUM V2.0: ADVANCED ANIMATIONS
+   ======================================== */
+
+/* Dropdown slide animations for filters */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* Filter dropdown enhancements */
+.filter-dropdown {
+  position: relative;
+}
+
+.filter-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 200px;
+  background: var(--creme-papier, #FEFDFB);
+  border: 2px solid var(--bois-dore, #937D68);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow:
+    0 10px 30px rgba(147, 125, 104, 0.15),
+    0 4px 12px rgba(147, 125, 104, 0.1);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+}
+
+.filter-dropdown.open .filter-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.filter-dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 2px solid var(--bois-dore, #937D68);
+  border-radius: 30px;
+  background: var(--creme-papier, #FEFDFB);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-dark, #323232);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filter-dropdown-toggle:hover {
+  background: var(--creme-chaud, #FAF6F0);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(147, 125, 104, 0.15);
+}
+
+.filter-dropdown.open .filter-dropdown-toggle {
+  border-color: var(--color-orange, #E35B24);
+  background: var(--creme-chaud, #FAF6F0);
+}
+
+.filter-dropdown-toggle svg {
+  transition: transform 0.3s ease;
+}
+
+.filter-dropdown.open .filter-dropdown-toggle svg {
+  transform: rotate(180deg);
+}
+
+.filter-option {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  color: var(--color-dark, #323232);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-option:hover {
+  background: var(--creme-chaud, #FAF6F0);
+  transform: translateX(4px);
+}
+
+.filter-option.active {
+  background: var(--color-orange, #E35B24);
+  color: var(--creme-papier, #FEFDFB);
+  font-weight: 600;
+}
+
+.filter-option.active:hover {
+  background: #D14F1C;
+  transform: translateX(4px) scale(1.02);
+}
+
+.filter-reset {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: 2px solid var(--color-orange, #E35B24);
+  border-radius: 30px;
+  background: transparent;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-orange, #E35B24);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filter-reset:hover {
+  background: var(--color-orange, #E35B24);
+  color: var(--creme-papier, #FEFDFB);
+  transform: scale(1.05);
+}
+
+.filter-reset svg {
+  transition: transform 0.3s ease;
+}
+
+.filter-reset:hover svg {
+  transform: rotate(90deg);
+}
+
+/* Loading spinner for infinite scroll */
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 30px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  color: var(--bois-dore, #937D68);
+}
+
+.load-more-trigger {
+  text-align: center;
+  padding: 20px;
+  margin: 40px auto;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  color: var(--bois-dore, #937D68);
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+/* Canvas particles container */
+[data-particles="wood"] {
+  position: relative;
+  overflow: hidden;
+}
+
+[data-particles="wood"] > *:not(.particles-canvas) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Parallax smooth transitions */
+[data-parallax] {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+/* Enhanced product filtering animations */
+.products-carousel-track .product {
+  will-change: opacity, transform;
+}
+
+/* Advanced hover states for premium interactions */
+.filter-btn {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filter-btn::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--color-orange, #E35B24), var(--bois-dore, #937D68));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.filter-btn.active::before {
+  opacity: 1;
+}
+
+.filter-btn.active {
+  color: var(--creme-papier, #FEFDFB);
+  transform: translateY(-2px);
+}
+
+/* Premium micro-interactions */
+@keyframes buttonPress {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+}
+
+.filter-btn:active {
+  animation: buttonPress 0.2s ease;
+}
+
+/* Smooth product reveal animations */
+@keyframes productReveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Enhanced focus states for dropdowns */
+.filter-dropdown-toggle:focus-visible,
+.filter-option:focus-visible,
+.filter-reset:focus-visible {
+  outline: 3px solid var(--color-orange, #E35B24);
+  outline-offset: 2px;
+}
+
+/* ========================================
    RESET & BASE STYLES
    ======================================== */
 

@@ -88,7 +88,7 @@ $all_products = new WP_Query([
 </section>
 
 <!-- Why Atelier Sapi - Brand Promise Section -->
-<section class="why-sapi">
+<section class="why-sapi" data-particles="wood">
   <div class="why-sapi-inner">
     <div class="why-sapi-header">
       <span class="section-number">02</span>
