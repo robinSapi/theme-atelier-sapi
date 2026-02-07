@@ -1893,6 +1893,103 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   text-align: left;
 }
 
+/* Accordion Mobile - Phase 4 Proposal B */
+.product-specs-accordion {
+  display: none; /* Hidden on desktop */
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.specs-accordion-item {
+  background: var(--creme-chaud, #FAF6F0);
+  border: 1px solid rgba(147, 125, 104, 0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  -webkit-transition: all 0.3s ease;
+}
+
+.specs-accordion-item[open] {
+  border-color: var(--bois-dore, #937D68);
+  box-shadow: 0 2px 8px rgba(147, 125, 104, 0.1);
+}
+
+.specs-accordion-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  list-style: none;
+  transition: all 0.2s ease;
+  -webkit-transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.specs-accordion-title::-webkit-details-marker {
+  display: none;
+}
+
+.specs-accordion-title svg:first-child {
+  color: var(--bois-dore, #937D68);
+  flex-shrink: 0;
+}
+
+.specs-accordion-title span {
+  flex: 1;
+}
+
+.accordion-chevron {
+  color: var(--bois-dore, #937D68);
+  flex-shrink: 0;
+  transition: transform 0.3s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+  -webkit-transition: transform 0.3s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.specs-accordion-item[open] .accordion-chevron {
+  transform: rotate(180deg);
+  -webkit-transform: rotate(180deg);
+}
+
+.specs-accordion-item:active .specs-accordion-title {
+  background: rgba(147, 125, 104, 0.05);
+}
+
+.specs-accordion-content {
+  padding: 0 1.25rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  animation: accordionSlide 0.3s ease;
+  -webkit-animation: accordionSlide 0.3s ease;
+}
+
+@keyframes accordionSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@-webkit-keyframes accordionSlide {
+  from {
+    opacity: 0;
+    -webkit-transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+  }
+}
+
 /* Badges certifications - Design System Premium */
 .specs-badges {
   display: flex;
@@ -1949,9 +2046,13 @@ ul.products.products-carousel-track > li.products-carousel-slide {
     padding: 3rem 1.5rem;
   }
 
+  /* Show accordion, hide grid on mobile - Phase 4 Proposal B */
+  .product-specs-accordion {
+    display: flex;
+  }
+
   .product-specs-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    display: none;
   }
 
   .specs-column {
@@ -7589,6 +7690,79 @@ transform: translateY(15px);
   pointer-events: none;
 }
 
+/* Double CTA - Buy Now (Phase 4 - Proposal B) */
+.product-buy-now {
+  width: 100%;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.btn-secondary,
+.btn-buy-now {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 14px 32px;
+
+  /* Design System 4.1 - Secondary Button */
+  background: transparent;
+  color: var(--bois-dore, #937D68);
+  border: 1.5px solid var(--bois-dore, #937D68);
+  border-radius: 8px;
+
+  /* Typo */
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+
+  cursor: pointer;
+  transition: all 0.25s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+  -webkit-transition: all 0.25s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.btn-secondary:hover,
+.btn-buy-now:hover {
+  background: var(--bois-dore, #937D68);
+  color: var(--creme-papier, #FEFDFB);
+  transform: translateY(-1px);
+  -webkit-transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(147, 125, 104, 0.2);
+}
+
+.btn-secondary:active,
+.btn-buy-now:active {
+  transform: translateY(0);
+  -webkit-transform: translateY(0);
+}
+
+.btn-buy-now.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.btn-buy-now svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.25s ease;
+  -webkit-transition: transform 0.25s ease;
+}
+
+.btn-buy-now:hover svg {
+  transform: translateY(2px);
+  -webkit-transform: translateY(2px);
+}
+
+.buy-now-hint {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 13px;
+  color: var(--bois-profond, #6B5A4A);
+  opacity: 0.75;
+  font-style: italic;
+}
+
 /* Wrappers WooCommerce */
 .product-form-v2 .woocommerce-variation-add-to-cart {
   display: flex;
@@ -7680,6 +7854,21 @@ transform: translateY(15px);
   color: var(--color-text);
   font-weight: 700;
   font-size: 0.9rem;
+}
+
+/* Highlight delivery date - Phase 4 Proposal B */
+.reassurance-delivery {
+  position: relative;
+}
+
+.reassurance-delivery svg {
+  color: var(--color-green, #018501) !important;
+}
+
+.reassurance-delivery strong {
+  color: var(--color-green, #018501);
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
 /* Variante horizontale compacte */

@@ -150,6 +150,17 @@ get_header();
           // Only render add to cart form
           woocommerce_template_single_add_to_cart();
           ?>
+
+          <!-- Double CTA Strategy - Proposal B -->
+          <div class="product-buy-now">
+            <button type="button" class="btn-secondary btn-buy-now" data-product-id="<?php echo esc_attr($product_id); ?>">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Acheter maintenant
+            </button>
+            <span class="buy-now-hint">Paiement direct, sans passer par le panier</span>
+          </div>
         </div>
 
         <!-- Paiement rapide (Apple Pay, etc.) - discret -->
@@ -169,11 +180,11 @@ get_header();
             </svg>
             <span>Fabrication <strong>&lt;5 jours</strong></span>
           </div>
-          <div class="reassurance-item-v2">
+          <div class="reassurance-item-v2 reassurance-delivery">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
             </svg>
-            <span>Livraison <strong>48-72h</strong></span>
+            <span>Chez vous le <strong><?php echo sapi_get_estimated_delivery_date(); ?></strong></span>
           </div>
           <div class="reassurance-item-v2">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -279,6 +290,162 @@ get_header();
       <span class="section-number">03</span>
       <h2>Fiche technique</h2>
       <p class="specs-intro">Toutes les informations pour bien choisir votre luminaire</p>
+    </div>
+
+    <!-- Accordion Mobile - Phase 4 Proposal B -->
+    <div class="product-specs-accordion">
+      <?php
+      // Get dimensions and weight (same logic as grid)
+      $dimensions_str = '';
+      $poids = '';
+      if (function_exists('get_field')) {
+        $dimensions = get_field('dimensions');
+        $hauteur = get_field('hauteur');
+        $largeur = get_field('largeur');
+        $profondeur = get_field('profondeur');
+        $poids = get_field('poids');
+
+        if ($dimensions) {
+          $dimensions_str = $dimensions;
+        } elseif ($hauteur || $largeur || $profondeur) {
+          $dim_parts = [];
+          if ($largeur) $dim_parts[] = 'L ' . $largeur;
+          if ($profondeur) $dim_parts[] = 'P ' . $profondeur;
+          if ($hauteur) $dim_parts[] = 'H ' . $hauteur;
+          $dimensions_str = implode(' × ', $dim_parts);
+        }
+      }
+
+      if (!$dimensions_str && $product) {
+        $wc_dims = wc_format_dimensions($product->get_dimensions(false));
+        if ($wc_dims && $wc_dims !== 'N/A') {
+          $dimensions_str = $wc_dims;
+        }
+      }
+
+      if (!isset($poids) || !$poids) {
+        $poids = $product && $product->get_weight() ? $product->get_weight() . ' kg' : null;
+      }
+      ?>
+
+      <details class="specs-accordion-item">
+        <summary class="specs-accordion-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          </svg>
+          <span>Dimensions</span>
+          <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </summary>
+        <div class="specs-accordion-content">
+          <div class="spec-item">
+            <span class="spec-label">Dimensions</span>
+            <span class="spec-value"><?php echo esc_html($dimensions_str ?: 'Voir variations'); ?></span>
+          </div>
+          <?php if ($poids) : ?>
+          <div class="spec-item">
+            <span class="spec-label">Poids</span>
+            <span class="spec-value"><?php echo esc_html($poids); ?></span>
+          </div>
+          <?php endif; ?>
+          <div class="spec-item">
+            <span class="spec-label">Longueur câble</span>
+            <span class="spec-value">90 cm (ajustable)</span>
+          </div>
+        </div>
+      </details>
+
+      <details class="specs-accordion-item">
+        <summary class="specs-accordion-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18h6"/><path d="M10 22h4"/>
+            <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>
+          </svg>
+          <span>Éclairage</span>
+          <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </summary>
+        <div class="specs-accordion-content">
+          <div class="spec-item">
+            <span class="spec-label">Culot</span>
+            <span class="spec-value">E27</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Ampoule recommandée</span>
+            <span class="spec-value">LED filament 4-6W (2700K)</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Compatible variateur</span>
+            <span class="spec-value">Oui, avec ampoule dimmable</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Ampoule incluse</span>
+            <span class="spec-value">Non (disponible en option)</span>
+          </div>
+        </div>
+      </details>
+
+      <details class="specs-accordion-item">
+        <summary class="specs-accordion-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+          <span>Matériaux</span>
+          <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </summary>
+        <div class="specs-accordion-content">
+          <div class="spec-item">
+            <span class="spec-label">Structure</span>
+            <span class="spec-value">Peuplier français PEFC</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Finition</span>
+            <span class="spec-value">Bois naturel non traité</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Câble</span>
+            <span class="spec-value">Textile noir tressé</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Pavillon</span>
+            <span class="spec-value">Métal noir mat</span>
+          </div>
+        </div>
+      </details>
+
+      <details class="specs-accordion-item">
+        <summary class="specs-accordion-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+          </svg>
+          <span>Installation</span>
+          <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </summary>
+        <div class="specs-accordion-content">
+          <div class="spec-item">
+            <span class="spec-label">Montage</span>
+            <span class="spec-value">Notice illustrée incluse</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Difficulté</span>
+            <span class="spec-value">Facile (15-30 min)</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Outils requis</span>
+            <span class="spec-value">Tournevis (fourni)</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Entretien</span>
+            <span class="spec-value">Chiffon sec</span>
+          </div>
+        </div>
+      </details>
     </div>
 
     <div class="product-specs-grid">
@@ -823,6 +990,67 @@ get_header();
       }
     });
   });
+
+  // Buy Now (Express Checkout) - Phase 4 Proposal B
+  const buyNowBtn = document.querySelector('.btn-buy-now');
+  if (buyNowBtn && typeof jQuery !== 'undefined') {
+    buyNowBtn.addEventListener('click', function() {
+      const btn = this;
+      const productId = btn.dataset.productId;
+      const variationForm = document.querySelector('.variations_form');
+
+      // Check if product is variable and variation is selected
+      if (variationForm) {
+        const variationId = variationForm.querySelector('input[name="variation_id"]');
+        if (!variationId || !variationId.value) {
+          alert('Veuillez sélectionner toutes les options avant d\'acheter');
+          return;
+        }
+      }
+
+      btn.classList.add('loading');
+      btn.disabled = true;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Préparation...';
+
+      // Get form data for variable products
+      const formData = variationForm ? jQuery(variationForm).serializeArray() : [];
+      const ajaxData = {
+        action: 'sapi_buy_now',
+        product_id: productId,
+        quantity: 1,
+        nonce: '<?php echo wp_create_nonce('sapi-buy-now'); ?>'
+      };
+
+      // Add variation data if exists
+      formData.forEach(item => {
+        ajaxData[item.name] = item.value;
+      });
+
+      jQuery.ajax({
+        type: 'POST',
+        url: '<?php echo esc_url(admin_url('admin-ajax.php')); ?>',
+        data: ajaxData,
+        success: function(response) {
+          if (response.success) {
+            // Redirect to checkout
+            window.location.href = response.data.checkout_url;
+          } else {
+            btn.classList.remove('loading');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            alert(response.data.message || 'Une erreur est survenue');
+          }
+        },
+        error: function() {
+          btn.classList.remove('loading');
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+          alert('Une erreur est survenue, veuillez réessayer');
+        }
+      });
+    });
+  }
 })();
 </script>
 <?php endif; ?>
