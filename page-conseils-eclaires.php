@@ -15,6 +15,7 @@ get_header();
 
 <section class="advice-section-block">
   <div class="advice-block">
+    <span class="section-number">01</span>
     <h2>Décoration ou fonctionnalité</h2>
     <h3>Éclairage fonctionnel pour travailler &amp; cuisiner</h3>
     <p>Il vous faut un éclairage direct et efficace. Nos modèles comme Dalida ou Arthus sont parfaits pour ça : ils laissent bien passer la lumière sans vous éblouir. Parce qu’après tout, c’est mieux de voir ce qu’on fait plutôt que de deviner où est la lame du couteau ou la touche "Envoyer" d’un e-mail mal inspiré.</p>
@@ -29,6 +30,7 @@ get_header();
 <section class="advice-section-block">
   <div class="advice-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/IMG_9065.jpeg');"></div>
   <div class="advice-block">
+    <span class="section-number">02</span>
     <h2>Ampoule, puissance et couleur</h2>
     <h3>Le type d’ampoule</h3>
     <p>Les ampoules à filament LED sont les reines du bal ! Elles créent ces magnifiques jeux d’ombres envoûtants qui transforment votre salon en scène de film d’auteur. À l’inverse, une LED opaque, c’est un peu comme un jour de pluie : tout devient tristement uniforme.</p>
@@ -43,7 +45,8 @@ get_header();
 
 <section class="advice-section-block">
   <div class="advice-block">
-    <h2>Dimensions du luminaire et volume de l’espace</h2>
+    <span class="section-number">03</span>
+    <h2>Dimensions du luminaire et volume de l'espace</h2>
     <p>Voici nos astuces pour éviter un faux pas lumineux.</p>
     <h3>Le diamètre : l’équilibre entre taille et style</h3>
     <p>Un luminaire doit être proportionnel à la pièce, ni perdu, ni envahissant. Astuce : prenez 20 % de la plus grande longueur de la pièce. Par exemple, pour un salon de 6m de long, un luminaire de 1m20 de diamètre est parfait. Pour un effet wahou, mixez les tailles !</p>
@@ -57,6 +60,7 @@ get_header();
 <section class="advice-section-block">
   <div class="advice-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Claudine.jpg');"></div>
   <div class="advice-block">
+    <span class="section-number">04</span>
     <h2>Suspension, lampadaire, applique ou lampe à poser ?</h2>
     <h3>Le positionnement des luminaires</h3>
     <p>Le positionnement de vos luminaires, c’est un peu comme celui des meubles : si c’est mal pensé, on se cogne dedans et on finit par râler. Alors autant bien réfléchir avant d’installer votre éclairage !</p>
