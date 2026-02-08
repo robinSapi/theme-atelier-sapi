@@ -10275,3 +10275,21 @@ transform: translateY(15px);
 .woocommerce-cart .cart-collaterals {
   max-width: 100%;
 }
+
+/* WooCommerce Wrapper - Base styles for all WooCommerce pages */
+.woocommerce-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 3rem 4rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Override for specific WooCommerce pages to use wrapper width */
+.woocommerce-cart,
+.woocommerce-checkout,
+.woocommerce-account {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
