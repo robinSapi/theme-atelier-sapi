@@ -10266,14 +10266,6 @@ transform: translateY(15px);
   }
 }
 
-/* Cart Layout - Force narrower width */
-.woocommerce-cart .woocommerce-wrapper {
-  max-width: 1100px !important;
-}
-
-.woocommerce-cart .woocommerce-cart-form,
-.woocommerce-cart .cart-collaterals {
-  max-width: 100%;
 }
 
 /* WooCommerce Wrapper - Base styles for all WooCommerce pages */
@@ -10292,4 +10284,14 @@ transform: translateY(15px);
   max-width: 100%;
   margin: 0;
   padding: 0;
+}
+
+/* Cart Layout - Harmonize with site content width (1200px standard) */
+.woocommerce-cart .woocommerce-wrapper {
+  max-width: 1200px !important;
+}
+
+.woocommerce-cart .woocommerce-cart-form,
+.woocommerce-cart .cart-collaterals {
+  max-width: 100%;
 }
