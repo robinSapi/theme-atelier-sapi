@@ -778,3 +778,45 @@ function sapi_ajax_buy_now() {
   }
 }
 
+/**
+ * Force cart page width harmonization with inline CSS
+ * CRITICAL: This ensures cart page matches site content width (1200px)
+ * Multiple selectors for maximum compatibility
+ */
+function sapi_maison_force_cart_width() {
+  if (!is_cart()) {
+    return;
+  }
+  ?>
+  <style id="cart-width-override">
+    /* Force cart page wrapper to 1200px with maximum specificity */
+    body.woocommerce-cart .woocommerce-wrapper,
+    body.woocommerce-cart div.woocommerce-wrapper,
+    .woocommerce-wrapper[data-cart-page="true"],
+    .woocommerce-wrapper--cart,
+    .cart-content-wrapper {
+      max-width: 1200px !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    /* Also target any direct parent of cart form */
+    body.woocommerce-cart .woocommerce-cart-form,
+    body.woocommerce-cart .cart-collaterals {
+      max-width: 100% !important;
+    }
+
+    /* Force on main content wrapper if exists */
+    body.woocommerce-cart main,
+    body.woocommerce-cart .site-content,
+    body.woocommerce-cart #primary {
+      max-width: 1200px !important;
+      margin: 0 auto !important;
+    }
+  </style>
+  <?php
+}
+add_action('wp_head', 'sapi_maison_force_cart_width', 999);
+
