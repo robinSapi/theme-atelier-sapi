@@ -10265,3 +10265,13 @@ transform: translateY(15px);
     display: none;
   }
 }
+
+/* Cart Layout - Force narrower width */
+.woocommerce-cart .woocommerce-wrapper {
+  max-width: 1100px !important;
+}
+
+.woocommerce-cart .woocommerce-cart-form,
+.woocommerce-cart .cart-collaterals {
+  max-width: 100%;
+}
