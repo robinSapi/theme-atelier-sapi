@@ -61,8 +61,8 @@ function sapi_maison_enqueue_assets() {
       ]);
     }
 
-    // Enhanced Editorial Carousel - Category pages only
-    if (is_product_category()) {
+    // Enhanced Editorial Carousel - Shop and Category pages
+    if (is_shop() || is_product_category()) {
       $carousel_js_path = get_template_directory() . '/assets/carousel-editorial.js';
       if (file_exists($carousel_js_path)) {
         wp_enqueue_script('sapi-maison-carousel-editorial', get_template_directory_uri() . '/assets/carousel-editorial.js', [], filemtime($carousel_js_path), true);

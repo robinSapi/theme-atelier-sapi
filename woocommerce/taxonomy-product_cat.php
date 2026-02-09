@@ -327,42 +327,7 @@ elseif ($term_slug === 'lampe-a-poser') :
   ];
 endif;
 
-if (!empty($featured)) :
-?>
-  <section class="category-featured">
-    <?php foreach ($featured as $item) :
-      // Get product image dynamically from WooCommerce
-      $product_slug = basename(untrailingslashit($item['link']));
-      $product_obj = get_page_by_path($product_slug, OBJECT, 'product');
-      $product_image = '';
-
-      if ($product_obj) {
-        $product_image = get_the_post_thumbnail_url($product_obj->ID, 'large');
-      }
-
-      // Fallback to hardcoded image if product not found
-      if (!$product_image && !empty($item['image'])) {
-        $product_image = $item['image'];
-      }
-
-      // Skip if no image at all
-      if (!$product_image) continue;
-    ?>
-      <article id="<?php echo esc_attr($item['id']); ?>" class="category-featured-card">
-        <a class="category-featured-link" href="<?php echo esc_url($item['link']); ?>">
-          <div class="category-featured-media">
-            <img src="<?php echo esc_url($product_image); ?>" alt="<?php echo esc_attr($item['title']); ?>" loading="lazy">
-          </div>
-          <div class="category-featured-content">
-            <h2><?php echo esc_html($item['title']); ?></h2>
-            <p class="category-featured-subtitle"><?php echo esc_html($item['subtitle']); ?></p>
-            <span class="category-featured-cta"><?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> →</span>
-          </div>
-        </a>
-      </article>
-    <?php endforeach; ?>
-  </section>
-<?php endif; ?>
+<!-- Featured products section removed - carousel only below -->
 
 <?php
 // Get ALL products in this category for the carousel (no pagination)
