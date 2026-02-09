@@ -116,11 +116,36 @@ if (!empty($gallery_ids)) {
 <?php
 // Build classes - add carousel slide class if in carousel context
 $card_classes = 'product-card-cinetique';
+$is_editorial_carousel = !empty($sapi_carousel_context['is_editorial']);
+$slide_index = 0;
+$thumbnail_url = '';
+
 if ($is_carousel) {
-  $card_classes .= ' products-carousel-slide';
+  if ($is_editorial_carousel) {
+    $card_classes .= ' carousel-editorial-slide';
+    $slide_index = isset($sapi_carousel_context['slide_index']) ? $sapi_carousel_context['slide_index'] : 0;
+    $thumbnail_url = isset($sapi_carousel_context['thumbnail_url']) ? $sapi_carousel_context['thumbnail_url'] : '';
+  } else {
+    $card_classes .= ' products-carousel-slide';
+  }
+}
+
+// Build data attributes
+$data_attrs = 'data-category="' . esc_attr(sanitize_title($category_name)) . '"';
+$data_attrs .= $carousel_categories ? ' data-categories="' . esc_attr($carousel_categories) . '"' : '';
+$data_attrs .= ' data-price="' . esc_attr($filter_price) . '"';
+$data_attrs .= $wood_essence ? ' data-wood="' . esc_attr(sanitize_title($wood_essence)) . '"' : '';
+$data_attrs .= $size_dimension > 0 ? ' data-size="' . esc_attr($size_dimension) . '"' : '';
+
+// Add editorial carousel specific attributes
+if ($is_editorial_carousel) {
+  $data_attrs .= ' data-slide-index="' . esc_attr($slide_index) . '"';
+  if ($thumbnail_url) {
+    $data_attrs .= ' data-thumbnail="' . esc_url($thumbnail_url) . '"';
+  }
 }
 ?>
-<li <?php wc_product_class($card_classes, $product); ?> data-category="<?php echo esc_attr(sanitize_title($category_name)); ?>"<?php echo $carousel_categories ? ' data-categories="' . esc_attr($carousel_categories) . '"' : ''; ?> data-price="<?php echo esc_attr($filter_price); ?>"<?php echo $wood_essence ? ' data-wood="' . esc_attr(sanitize_title($wood_essence)) . '"' : ''; ?><?php echo $size_dimension > 0 ? ' data-size="' . esc_attr($size_dimension) . '"' : ''; ?>>
+<li <?php wc_product_class($card_classes, $product); ?> <?php echo $data_attrs; ?>>
   <a href="<?php the_permalink(); ?>" class="product-card-link">
     <div class="product-media<?php echo $hover_image_url ? ' has-hover-image' : ''; ?>">
       <?php
@@ -145,13 +170,18 @@ if ($is_carousel) {
         <span class="product-badge badge-signature"><?php esc_html_e('Signature', 'theme-sapi-maison'); ?></span>
       <?php endif; ?>
 
-      <span class="product-quick-view">
+      <button
+        type="button"
+        class="product-quick-view"
+        data-product-id="<?php echo esc_attr($product_id); ?>"
+        data-product-url="<?php echo esc_url(get_permalink($product_id)); ?>"
+        aria-label="<?php echo esc_attr(sprintf(__('Aperçu rapide de %s', 'theme-sapi-maison'), get_the_title())); ?>">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
           <circle cx="12" cy="12" r="3"/>
         </svg>
         <?php esc_html_e('Aperçu', 'theme-sapi-maison'); ?>
-      </span>
+      </button>
     </div>
 
     <div class="product-info">
