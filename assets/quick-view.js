@@ -251,19 +251,36 @@
             console.log('[Quick View Debug] Select name:', sel.getAttribute('name'), 'options:', sel.querySelectorAll('option').length);
           });
 
+          // Try select first
           const woodSelect = doc.querySelector('select[name="attribute_pa_matiere"], select[name="pa_matiere"], select[name="attribute_pa_bois"], select[name="pa_bois"]');
           console.log('[Quick View Debug] Wood/material select found:', !!woodSelect);
 
+          let woods = [];
+
           if (woodSelect) {
             console.log('[Quick View Debug] Wood select name:', woodSelect.getAttribute('name'));
-            const woods = Array.from(woodSelect.querySelectorAll('option'))
+            woods = Array.from(woodSelect.querySelectorAll('option'))
               .map(opt => opt.textContent.trim())
               .filter(w => w && w !== 'Choisir une option' && w !== 'Choisir...' && w !== '')
               .filter((v, i, a) => a.indexOf(v) === i); // Remove duplicates
-            console.log('[Quick View Debug] Woods/materials extracted:', woods);
-            if (woods.length > 0) {
-              productData.woods = woods;
-            }
+            console.log('[Quick View Debug] Woods/materials from select:', woods);
+          }
+
+          // Fallback: extract from variation swatches images (Woo Variation Swatches plugin)
+          if (woods.length === 0) {
+            console.log('[Quick View Debug] Trying variation swatches images...');
+            const swatchImages = doc.querySelectorAll('.variation-swatches img[alt], ul[class*="variation"] img[alt]');
+            console.log('[Quick View Debug] Swatch images found:', swatchImages.length);
+
+            woods = Array.from(swatchImages)
+              .map(img => img.alt.trim())
+              .filter(w => w && w !== 'Choisir une option' && w !== '' && w.length > 1)
+              .filter((v, i, a) => a.indexOf(v) === i); // Remove duplicates
+            console.log('[Quick View Debug] Woods/materials from swatches:', woods);
+          }
+
+          if (woods.length > 0) {
+            productData.woods = woods;
           }
 
           // Add additional images to existing ones
