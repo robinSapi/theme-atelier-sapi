@@ -40,7 +40,7 @@ Text Domain: theme-sapi-maison
   --color-error-hover: #570000;
 
   /* Typography */
-  --font-display: 'Square Peg', cursive;
+  --font-display: 'Dancing Script', cursive;
   --font-body: 'Montserrat', sans-serif;
 
   /* Spacing & Layout */
@@ -6220,16 +6220,7 @@ transform: translateY(15px);
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Safari-specific: Square Peg needs smaller size + better rendering */
-@supports (-webkit-hyphens:none) {
-  .statement-text {
-    font-size: clamp(1.9rem, 3vw, 3rem);
-    letter-spacing: -0.01em;
-    transform: scale(0.95);
-    -webkit-transform: scale(0.95);
-    transform-origin: left center;
-  }
-}
+/* Dancing Script has consistent rendering across browsers - no Safari-specific adjustments needed */
 
 .statement-author {
   font-size: 0.875rem;
