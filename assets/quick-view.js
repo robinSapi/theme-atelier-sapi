@@ -61,14 +61,17 @@
 
       if (!productId) return;
 
+      // Get product card to extract basic data
+      const productCard = btn.closest('.product-card-cinetique') || btn.closest('li');
+
       // Show modal with loading state
       this.modal.setAttribute('aria-hidden', 'false');
       this.loading.style.display = 'flex';
       this.body.style.display = 'none';
       document.body.style.overflow = 'hidden';
 
-      // Fetch product data
-      this.fetchProductData(productId, productUrl);
+      // Fetch product data with card context
+      this.fetchProductData(productId, productUrl, productCard);
     },
 
     closeModal: function() {
@@ -79,31 +82,108 @@
       this.galleryImages = [];
     },
 
-    fetchProductData: function(productId, productUrl) {
-      // Use WordPress REST API to get product data
-      fetch(`${window.location.origin}/wp-json/wc/v3/products/${productId}`)
-        .then(response => {
-          // If REST API fails, fetch from product URL
-          if (!response.ok) {
-            return this.fetchFromPage(productUrl);
+    fetchProductData: function(productId, productUrl, productCard) {
+      // Extract basic data from product card
+      const productData = {
+        name: '',
+        price_html: '',
+        short_description: '',
+        images: [],
+        permalink: productUrl
+      };
+
+      if (productCard) {
+        // Get title
+        const titleEl = productCard.querySelector('.product-name, h2');
+        if (titleEl) {
+          productData.name = titleEl.textContent.trim();
+        }
+
+        // Get price
+        const priceEl = productCard.querySelector('.price-value, .product-price');
+        if (priceEl) {
+          productData.price_html = priceEl.innerHTML;
+        }
+
+        // Get main image
+        const mainImg = productCard.querySelector('.product-image-main img, img');
+        if (mainImg) {
+          productData.images.push({
+            src: mainImg.src,
+            alt: mainImg.alt || productData.name
+          });
+        }
+
+        // Get hover image if available
+        const hoverImg = productCard.querySelector('.product-image-hover img');
+        if (hoverImg) {
+          productData.images.push({
+            src: hoverImg.src,
+            alt: hoverImg.alt || productData.name
+          });
+        }
+      }
+
+      // If we have basic data, render immediately then load more images
+      if (productData.name) {
+        this.renderProduct(productData);
+        // Load additional images in background
+        this.loadAdditionalImages(productUrl, productData);
+      } else {
+        // Fallback: fetch from product page
+        this.fetchFromPage(productUrl);
+      }
+    },
+
+    loadAdditionalImages: function(productUrl, productData) {
+      // Load gallery images from product page in background
+      fetch(productUrl)
+        .then(response => response.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+
+          const additionalImages = [];
+
+          // Get main image (higher resolution)
+          const mainImage = doc.querySelector('.gallery-main-image');
+          if (mainImage && mainImage.src) {
+            // Replace first image with higher res version
+            productData.images[0] = {
+              src: mainImage.src,
+              alt: mainImage.alt || productData.name
+            };
           }
-          return response.json();
-        })
-        .then(product => {
-          if (product) {
-            this.renderProduct(product);
-          } else {
-            this.showError();
+
+          // Get gallery thumbnails
+          const galleryThumbs = doc.querySelectorAll('.gallery-thumb');
+          galleryThumbs.forEach((thumb, index) => {
+            const imgUrl = thumb.dataset.image || thumb.querySelector('img')?.src;
+            if (imgUrl && index > 0) { // Skip first (main image)
+              additionalImages.push({
+                src: imgUrl,
+                alt: `${productData.name} - ${index + 1}`
+              });
+            }
+          });
+
+          // Add additional images to existing ones
+          if (additionalImages.length > 0) {
+            productData.images = productData.images.concat(additionalImages);
+            // Re-render gallery if modal still open
+            if (this.modal.getAttribute('aria-hidden') === 'false') {
+              this.updateGallery(productData);
+            }
           }
         })
         .catch(error => {
-          console.error('Quick view error:', error);
-          // Fallback: fetch from product page
-          this.fetchFromPage(productUrl);
+          console.log('Could not load additional images:', error);
+          // Not critical, we already have basic images
         });
     },
 
     fetchFromPage: function(productUrl) {
+      // Fallback when card data is not available
       return fetch(productUrl)
         .then(response => response.text())
         .then(html => {
@@ -112,15 +192,15 @@
 
           // Extract product data from page
           const productData = {
-            name: doc.querySelector('.product-title-v2')?.textContent || '',
-            price_html: doc.querySelector('.product-price-v2 .price-amount')?.innerHTML || '',
-            short_description: doc.querySelector('.product-tagline')?.textContent || '',
+            name: doc.querySelector('.product-title-v2, h1')?.textContent?.trim() || '',
+            price_html: doc.querySelector('.product-price-v2 .price-amount, .price')?.innerHTML || '',
+            short_description: doc.querySelector('.product-tagline')?.textContent?.trim() || '',
             images: [],
             permalink: productUrl
           };
 
           // Get main image
-          const mainImage = doc.querySelector('.product-gallery-main img');
+          const mainImage = doc.querySelector('.gallery-main-image, .woocommerce-product-gallery__image img');
           if (mainImage) {
             productData.images.push({
               src: mainImage.src,
@@ -129,14 +209,14 @@
           }
 
           // Get gallery images
-          const galleryThumbs = doc.querySelectorAll('.product-gallery-thumbnails button');
+          const galleryThumbs = doc.querySelectorAll('.gallery-thumb');
           galleryThumbs.forEach((thumb, index) => {
             if (index > 0) { // Skip first (already added as main)
-              const img = thumb.querySelector('img');
-              if (img && img.dataset.fullUrl) {
+              const imgUrl = thumb.dataset.image || thumb.querySelector('img')?.src;
+              if (imgUrl) {
                 productData.images.push({
-                  src: img.dataset.fullUrl,
-                  alt: img.alt || productData.name
+                  src: imgUrl,
+                  alt: `${productData.name} - ${index + 1}`
                 });
               }
             }
@@ -292,6 +372,37 @@
         this.goToImage(0);
       } else {
         this.goToImage(newIndex);
+      }
+    },
+
+    updateGallery: function(productData) {
+      // Update gallery with new images
+      this.galleryImages = productData.images;
+
+      const mainImage = this.body.querySelector('.quick-view-gallery-main img');
+      const thumbsContainer = this.body.querySelector('.quick-view-gallery-thumbs');
+      const galleryTotal = this.body.querySelector('.gallery-total');
+
+      // Update total count
+      if (galleryTotal) {
+        galleryTotal.textContent = this.galleryImages.length;
+      }
+
+      // Re-create thumbnails
+      if (thumbsContainer && this.galleryImages.length > 1) {
+        thumbsContainer.innerHTML = this.galleryImages.map((img, index) => `
+          <button type="button" class="gallery-thumb ${index === this.currentGalleryIndex ? 'active' : ''}" data-index="${index}">
+            <img src="${img.src}" alt="${img.alt || productData.name}">
+          </button>
+        `).join('');
+
+        // Re-bind click events
+        thumbsContainer.querySelectorAll('.gallery-thumb').forEach(thumb => {
+          thumb.addEventListener('click', () => {
+            const index = parseInt(thumb.dataset.index);
+            this.goToImage(index);
+          });
+        });
       }
     },
 
