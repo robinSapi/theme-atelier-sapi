@@ -117,11 +117,21 @@ if (!empty($gallery_ids)) {
 <?php
 // Build classes - add carousel slide class if in carousel context
 $card_classes = 'product-card-cinetique';
+$is_editorial_carousel = !empty($sapi_carousel_context['is_editorial']);
+
 if ($is_carousel) {
-  $card_classes .= ' products-carousel-slide';
+  if ($is_editorial_carousel) {
+    $card_classes .= ' carousel-editorial-slide';
+  } else {
+    $card_classes .= ' products-carousel-slide';
+  }
 }
+
+// Get editorial carousel specific data
+$slide_index = $is_editorial_carousel ? ($sapi_carousel_context['slide_index'] ?? 0) : 0;
+$thumbnail_url = $is_editorial_carousel ? ($sapi_carousel_context['thumbnail_url'] ?? '') : '';
 ?>
-<li <?php wc_product_class($card_classes, $product); ?> data-category="<?php echo esc_attr(sanitize_title($category_name)); ?>"<?php echo $carousel_categories ? ' data-categories="' . esc_attr($carousel_categories) . '"' : ''; ?> data-price="<?php echo esc_attr($filter_price); ?>"<?php echo $wood_essence ? ' data-wood="' . esc_attr(sanitize_title($wood_essence)) . '"' : ''; ?><?php echo $size_category ? ' data-size="' . esc_attr($size_category) . '"' : ''; ?>>
+<li <?php wc_product_class($card_classes, $product); ?> data-category="<?php echo esc_attr(sanitize_title($category_name)); ?>"<?php echo $carousel_categories ? ' data-categories="' . esc_attr($carousel_categories) . '"' : ''; ?> data-price="<?php echo esc_attr($filter_price); ?>"<?php echo $wood_essence ? ' data-wood="' . esc_attr(sanitize_title($wood_essence)) . '"' : ''; ?><?php echo $size_category ? ' data-size="' . esc_attr($size_category) . '"' : ''; ?><?php echo $is_editorial_carousel ? ' data-slide-index="' . esc_attr($slide_index) . '" data-product-id="' . esc_attr($product_id) . '" data-thumbnail="' . esc_url($thumbnail_url) . '"' : ''; ?>>
   <a href="<?php the_permalink(); ?>" class="product-card-link">
     <div class="product-media<?php echo $hover_image_url ? ' has-hover-image' : ''; ?>">
       <?php
