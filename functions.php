@@ -844,10 +844,11 @@ function sapi_product_search($request) {
         $score += 100;
       }
 
-      // 2. Search in wood type (essence)
+      // 2. Search in wood type (materiau)
       $wood_essence = get_field('essence_de_bois', $product_id);
       if (!$wood_essence) {
-        $wood_attr = $product->get_attribute('pa_bois');
+        // Try pa_materiau attribute (used in variations)
+        $wood_attr = $product->get_attribute('pa_materiau');
         if ($wood_attr) {
           $wood_essence = strtolower($wood_attr);
         }
@@ -867,14 +868,28 @@ function sapi_product_search($request) {
             $score += 75;
           }
         } else {
-          // Try WooCommerce dimensions
-          $height = floatval($product->get_height());
-          $width = floatval($product->get_width());
-          $length = floatval($product->get_length());
-          $max_dim = max($height, $width, $length);
+          // Try pa_taille attribute (e.g., "50-cm", "100-cm", "130-cm")
+          $taille_attr = $product->get_attribute('pa_taille');
+          if ($taille_attr) {
+            // Extract numeric value from "XXX-cm" format
+            preg_match('/(\d+)/', $taille_attr, $matches);
+            if (!empty($matches[1])) {
+              $dim = floatval($matches[1]);
+              // ±20cm tolerance
+              if ($dim >= ($dimension_search - 20) && $dim <= ($dimension_search + 20)) {
+                $score += 75;
+              }
+            }
+          } else {
+            // Fallback to WooCommerce dimensions
+            $height = floatval($product->get_height());
+            $width = floatval($product->get_width());
+            $length = floatval($product->get_length());
+            $max_dim = max($height, $width, $length);
 
-          if ($max_dim > 0 && $max_dim >= ($dimension_search - 20) && $max_dim <= ($dimension_search + 20)) {
-            $score += 75;
+            if ($max_dim > 0 && $max_dim >= ($dimension_search - 20) && $max_dim <= ($dimension_search + 20)) {
+              $score += 75;
+            }
           }
         }
       }
