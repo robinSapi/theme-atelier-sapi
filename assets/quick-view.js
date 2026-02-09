@@ -34,24 +34,6 @@
     },
 
     bindEvents: function() {
-      // Preload product data on hover for instant modal open
-      document.addEventListener('mouseenter', (e) => {
-        const btn = e.target.closest('.product-quick-view');
-        if (btn) {
-          clearTimeout(this.preloadTimeout);
-          this.preloadTimeout = setTimeout(() => {
-            this.preloadProductData(btn);
-          }, 200); // Small delay to avoid unnecessary preloads
-        }
-      }, true);
-
-      document.addEventListener('mouseleave', (e) => {
-        const btn = e.target.closest('.product-quick-view');
-        if (btn) {
-          clearTimeout(this.preloadTimeout);
-        }
-      }, true);
-
       // Quick view buttons
       document.addEventListener('click', (e) => {
         const btn = e.target.closest('.product-quick-view');
@@ -61,6 +43,9 @@
           this.openModal(btn);
         }
       });
+
+      // Setup IntersectionObserver for automatic preloading when products enter viewport
+      this.setupPreloadObserver();
 
       // Close modal
       if (this.closeBtn) {
@@ -77,6 +62,33 @@
           this.closeModal();
         }
       });
+    },
+
+    setupPreloadObserver: function() {
+      // Observe product cards entering the viewport and preload their data
+      const observerOptions = {
+        root: null,
+        rootMargin: '300px', // Start preloading 300px before card enters viewport
+        threshold: 0.01
+      };
+
+      const preloadObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const card = entry.target;
+            const btn = card.querySelector('.product-quick-view');
+            if (btn) {
+              this.preloadProductData(btn);
+              // Once preloaded, stop observing this card
+              preloadObserver.unobserve(card);
+            }
+          }
+        });
+      }, observerOptions);
+
+      // Observe all product cards
+      const productCards = document.querySelectorAll('.product-card-cinetique');
+      productCards.forEach(card => preloadObserver.observe(card));
     },
 
     preloadProductData: function(btn) {
