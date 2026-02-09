@@ -180,7 +180,14 @@ $all_products = new WP_Query([
     </button>
     <?php if ($product_categories && !is_wp_error($product_categories)) : ?>
       <?php foreach ($product_categories as $cat) : ?>
-        <button type="button" class="filter-btn" data-filter="<?php echo esc_attr($cat->slug); ?>">
+        <?php
+        // Add special class for gift card category
+        $btn_class = 'filter-btn';
+        if ($cat->slug === 'carte-cadeau') {
+          $btn_class .= ' filter-btn--gift';
+        }
+        ?>
+        <button type="button" class="<?php echo esc_attr($btn_class); ?>" data-filter="<?php echo esc_attr($cat->slug); ?>">
           <?php echo esc_html($cat->name); ?>
           <span class="filter-count">(<?php echo esc_html($cat->count); ?>)</span>
         </button>

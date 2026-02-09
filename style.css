@@ -7003,6 +7003,31 @@ transform: translateY(15px);
   opacity: 0.9;
 }
 
+/* Gift Card Filter - Special golden style */
+.filter-btn--gift {
+  border-color: #D4AF37;
+  background: linear-gradient(135deg, #FFF8DC 0%, #F5E6C8 100%);
+  color: #8B6914;
+}
+
+.filter-btn--gift:hover {
+  border-color: #C5A028;
+  background: linear-gradient(135deg, #FFE87C 0%, #F5D780 100%);
+  color: #6B5010;
+}
+
+.filter-btn--gift.active {
+  background: linear-gradient(135deg, #D4AF37 0%, #C5A028 100%);
+  border-color: #C5A028;
+  color: var(--color-white);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+}
+
+.filter-btn--gift.active:hover {
+  background: linear-gradient(135deg, #C5A028 0%, #B8941F 100%);
+  border-color: #B8941F;
+}
+
 /* Product Filters Wrapper */
 .product-filters-wrapper {
   max-width: 1600px;
@@ -7096,27 +7121,29 @@ transform: translateY(15px);
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  border: 1px solid var(--color-gray-light);
+  border: 1px solid #E0E0E0;
   border-radius: 8px;
-  background: var(--color-white);
+  background: #F8F8F8;
   font-family: var(--font-body);
   font-size: 14px;
   font-weight: 500;
-  color: var(--color-gray);
+  color: #757575;
   cursor: pointer;
   -webkit-transition: all 0.2s ease;
   transition: all 0.2s ease;
 }
 
 .filter-dropdown-toggle:hover {
-  border-color: var(--color-wood);
-  color: var(--color-wood);
+  border-color: #BDBDBD;
+  background: #EEEEEE;
+  color: #616161;
 }
 
 .filter-dropdown-toggle.has-filter {
-  background: var(--color-warm);
-  border-color: var(--color-wood);
-  color: var(--color-wood);
+  background: #E0E0E0;
+  border-color: #9E9E9E;
+  color: #424242;
+  font-weight: 600;
 }
 
 .filter-dropdown-toggle svg {
