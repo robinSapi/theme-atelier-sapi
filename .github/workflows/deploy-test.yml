@@ -26,7 +26,6 @@ jobs:
           port: 21
           server-dir: /wp-content/themes/theme-sapi-maison/
           local-dir: ./
-          dangerous-clean-slate: true
           exclude: |
             **/.git*
             **/.git*/**
