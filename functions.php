@@ -60,6 +60,20 @@ function sapi_maison_enqueue_assets() {
         'currency' => get_woocommerce_currency_symbol(),
       ]);
     }
+
+    // Editorial Carousel for shop and category pages
+    if (is_shop() || is_product_category()) {
+      $carousel_js_path = get_template_directory() . '/assets/carousel-editorial.js';
+      if (file_exists($carousel_js_path)) {
+        wp_enqueue_script('sapi-maison-carousel-editorial', get_template_directory_uri() . '/assets/carousel-editorial.js', [], filemtime($carousel_js_path), true);
+      }
+    }
+
+    // Quick View modal for product previews
+    $quick_view_js_path = get_template_directory() . '/assets/quick-view.js';
+    if (file_exists($quick_view_js_path)) {
+      wp_enqueue_script('sapi-maison-quick-view', get_template_directory_uri() . '/assets/quick-view.js', [], filemtime($quick_view_js_path), true);
+    }
   }
 }
 add_action('wp_enqueue_scripts', 'sapi_maison_enqueue_assets');

@@ -169,6 +169,78 @@ if (function_exists('sapi_maison_breadcrumbs')) {
   </div>
 </section>
 
+<!-- Product Filters -->
+<div class="product-filters-wrapper">
+  <!-- Search Bar -->
+  <div class="product-search-bar">
+    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"></circle>
+      <path d="m21 21-4.35-4.35"></path>
+    </svg>
+    <input
+      type="text"
+      id="product-search-input"
+      class="product-search-input"
+      placeholder="<?php esc_attr_e('Rechercher un luminaire...', 'theme-sapi-maison'); ?>"
+      aria-label="<?php esc_attr_e('Rechercher un produit', 'theme-sapi-maison'); ?>"
+    />
+    <button type="button" class="search-clear" style="display: none;" aria-label="<?php esc_attr_e('Effacer la recherche', 'theme-sapi-maison'); ?>">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Advanced Filters -->
+  <div class="product-filters-advanced">
+    <div class="filter-dropdown" data-filter-type="price">
+      <button type="button" class="filter-dropdown-toggle">
+        <span class="filter-label"><?php esc_html_e('Prix', 'theme-sapi-maison'); ?></span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="filter-dropdown-menu">
+        <button type="button" class="filter-option active" data-price="all"><?php esc_html_e('Tous les prix', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-price="0-100"><?php esc_html_e('Moins de 100€', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-price="100-200"><?php esc_html_e('100€ - 200€', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-price="200-300"><?php esc_html_e('200€ - 300€', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-price="300+"><?php esc_html_e('Plus de 300€', 'theme-sapi-maison'); ?></button>
+      </div>
+    </div>
+
+    <div class="filter-dropdown" data-filter-type="wood">
+      <button type="button" class="filter-dropdown-toggle">
+        <span class="filter-label"><?php esc_html_e('Essence', 'theme-sapi-maison'); ?></span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="filter-dropdown-menu">
+        <button type="button" class="filter-option active" data-wood="all"><?php esc_html_e('Toutes les essences', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-wood="peuplier"><?php esc_html_e('Peuplier', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-wood="okoume"><?php esc_html_e('Okoumé', 'theme-sapi-maison'); ?></button>
+      </div>
+    </div>
+
+    <div class="filter-dropdown" data-filter-type="size">
+      <button type="button" class="filter-dropdown-toggle">
+        <span class="filter-label"><?php esc_html_e('Dimensions', 'theme-sapi-maison'); ?></span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="filter-dropdown-menu">
+        <button type="button" class="filter-option active" data-size="all"><?php esc_html_e('Toutes les dimensions', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-size="0-100"><?php esc_html_e('Moins de 100cm', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-size="100-150"><?php esc_html_e('100cm - 150cm', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-size="150-200"><?php esc_html_e('150cm - 200cm', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-size="200+"><?php esc_html_e('Plus de 200cm', 'theme-sapi-maison'); ?></button>
+      </div>
+    </div>
+
+    <button type="button" class="filter-reset" style="display: none;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      <?php esc_html_e('Réinitialiser', 'theme-sapi-maison'); ?>
+    </button>
+  </div>
+</div>
+
 <?php
 // Get ALL products in this category for the carousel (no pagination)
 $products_query = new WP_Query([
