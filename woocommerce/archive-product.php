@@ -213,10 +213,6 @@ $all_products = new WP_Query([
         <button type="button" class="filter-option active" data-wood="all"><?php esc_html_e('Toutes les essences', 'theme-sapi-maison'); ?></button>
         <button type="button" class="filter-option" data-wood="peuplier"><?php esc_html_e('Peuplier', 'theme-sapi-maison'); ?></button>
         <button type="button" class="filter-option" data-wood="okoume"><?php esc_html_e('Okoumé', 'theme-sapi-maison'); ?></button>
-        <button type="button" class="filter-option" data-wood="chene"><?php esc_html_e('Chêne', 'theme-sapi-maison'); ?></button>
-        <button type="button" class="filter-option" data-wood="hetre"><?php esc_html_e('Hêtre', 'theme-sapi-maison'); ?></button>
-        <button type="button" class="filter-option" data-wood="noyer"><?php esc_html_e('Noyer', 'theme-sapi-maison'); ?></button>
-        <button type="button" class="filter-option" data-wood="bouleau"><?php esc_html_e('Bouleau', 'theme-sapi-maison'); ?></button>
       </div>
     </div>
 

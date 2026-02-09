@@ -155,15 +155,6 @@
         </div>
         <ul class="search-results-list" style="display: none;"></ul>
       </div>
-      <div class="global-search-footer">
-        <span class="search-hint">
-          <kbd>Ctrl</kbd> + <kbd>K</kbd> pour ouvrir
-          <span class="divider">•</span>
-          <kbd>Esc</kbd> pour fermer
-          <span class="divider">•</span>
-          <kbd>↑</kbd> <kbd>↓</kbd> pour naviguer
-        </span>
-      </div>
     </div>
   </div>
   <div class="global-search-overlay" id="global-search-overlay"></div>

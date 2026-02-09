@@ -778,3 +778,157 @@ function sapi_ajax_buy_now() {
   }
 }
 
+/**
+ * Custom product search endpoint with metadata support
+ * Searches in: title, content, dimensions, wood type, price
+ */
+function sapi_register_product_search_endpoint() {
+  register_rest_route('sapi/v1', '/products/search', [
+    'methods' => 'GET',
+    'callback' => 'sapi_product_search',
+    'permission_callback' => '__return_true',
+    'args' => [
+      'query' => [
+        'required' => true,
+        'type' => 'string',
+        'sanitize_callback' => 'sanitize_text_field',
+      ],
+    ],
+  ]);
+}
+add_action('rest_api_init', 'sapi_register_product_search_endpoint');
+
+function sapi_product_search($request) {
+  $query_string = $request->get_param('query');
+
+  if (empty($query_string) || strlen($query_string) < 2) {
+    return new WP_REST_Response([], 200);
+  }
+
+  $query_lower = strtolower($query_string);
+
+  // Get all published products
+  $args = [
+    'post_type' => 'product',
+    'post_status' => 'publish',
+    'posts_per_page' => 50,
+    'orderby' => 'relevance',
+  ];
+
+  // First try standard WordPress search
+  $args['s'] = $query_string;
+
+  $products_query = new WP_Query($args);
+  $results = [];
+  $found_ids = [];
+
+  // Process search results
+  if ($products_query->have_posts()) {
+    while ($products_query->have_posts()) {
+      $products_query->the_post();
+      $product_id = get_the_ID();
+      $product = wc_get_product($product_id);
+
+      if (!$product) continue;
+
+      $found_ids[] = $product_id;
+      $results[] = sapi_format_product_for_search($product);
+    }
+    wp_reset_postdata();
+  }
+
+  // Also search in metadata (wood type, dimensions)
+  $meta_query_args = [
+    'post_type' => 'product',
+    'post_status' => 'publish',
+    'posts_per_page' => 50,
+    'post__not_in' => $found_ids, // Exclude already found products
+  ];
+
+  // Check if query is numeric (dimension search)
+  if (is_numeric($query_string)) {
+    $dimension = floatval($query_string);
+    // Search dimensions with tolerance (±20cm)
+    $meta_query_args['meta_query'] = [
+      'relation' => 'OR',
+      [
+        'key' => 'hauteur_cm',
+        'value' => [$dimension - 20, $dimension + 20],
+        'type' => 'NUMERIC',
+        'compare' => 'BETWEEN',
+      ],
+    ];
+  }
+
+  // Search by wood type (essence)
+  $wood_types = ['peuplier', 'okoume', 'chene', 'hetre', 'noyer', 'bouleau'];
+  foreach ($wood_types as $wood) {
+    if (stripos($wood, $query_lower) !== false || stripos($query_lower, $wood) !== false) {
+      $meta_query_args['meta_query'] = [
+        [
+          'key' => 'essence_de_bois',
+          'value' => $wood,
+          'compare' => 'LIKE',
+        ],
+      ];
+      break;
+    }
+  }
+
+  // Execute metadata search if meta_query is set
+  if (isset($meta_query_args['meta_query'])) {
+    $meta_products = new WP_Query($meta_query_args);
+
+    if ($meta_products->have_posts()) {
+      while ($meta_products->have_posts()) {
+        $meta_products->the_post();
+        $product = wc_get_product(get_the_ID());
+
+        if ($product) {
+          $results[] = sapi_format_product_for_search($product);
+        }
+      }
+      wp_reset_postdata();
+    }
+  }
+
+  // Limit to 8 results
+  $results = array_slice($results, 0, 8);
+
+  return new WP_REST_Response($results, 200);
+}
+
+function sapi_format_product_for_search($product) {
+  $product_id = $product->get_id();
+
+  // Get categories
+  $categories = get_the_terms($product_id, 'product_cat');
+  $category_names = [];
+  if ($categories && !is_wp_error($categories)) {
+    foreach ($categories as $cat) {
+      if ($cat->slug !== 'uncategorized') {
+        $category_names[] = $cat->name;
+      }
+    }
+  }
+
+  // Get image
+  $image_id = $product->get_image_id();
+  $image_url = $image_id ? wp_get_attachment_image_url($image_id, 'woocommerce_thumbnail') : '';
+
+  // Get metadata
+  $wood_essence = get_field('essence_de_bois', $product_id);
+  $dimensions = get_field('hauteur_cm', $product_id);
+
+  return [
+    'id' => $product_id,
+    'title' => $product->get_name(),
+    'link' => get_permalink($product_id),
+    'image' => $image_url,
+    'price' => $product->get_price_html(),
+    'categories' => $category_names,
+    'wood' => $wood_essence,
+    'dimensions' => $dimensions,
+  ];
+}
+
