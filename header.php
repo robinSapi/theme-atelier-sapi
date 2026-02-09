@@ -36,6 +36,14 @@
     </nav>
 
     <div class="header-actions">
+      <!-- Global Search Button -->
+      <button class="search-toggle" aria-label="<?php esc_attr_e('Rechercher', 'theme-sapi-maison'); ?>" aria-expanded="false" aria-controls="global-search-modal" title="Rechercher (Ctrl+K)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+      </button>
+
       <button class="cart-link mini-cart-toggle" aria-label="<?php esc_attr_e('Ouvrir le panier', 'theme-sapi-maison'); ?>" aria-expanded="false" aria-controls="mini-cart">
         <span class="cart-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -113,6 +121,43 @@
     <?php endif; ?>
   </div>
   <div class="mini-cart-overlay" id="mini-cart-overlay"></div>
+
+  <!-- Global Search Modal -->
+  <div class="global-search-modal" id="global-search-modal" aria-hidden="true">
+    <div class="global-search-content">
+      <div class="global-search-header">
+        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <input
+          type="text"
+          id="global-search-input"
+          class="global-search-input"
+          placeholder="<?php esc_attr_e('Rechercher un luminaire...', 'theme-sapi-maison'); ?>"
+          autocomplete="off"
+          aria-label="<?php esc_attr_e('Recherche globale', 'theme-sapi-maison'); ?>"
+        />
+        <button class="global-search-close" aria-label="<?php esc_attr_e('Fermer la recherche', 'theme-sapi-maison'); ?>">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="global-search-results">
+        <div class="search-results-empty">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+          <p><?php esc_html_e('Commencez à taper pour rechercher...', 'theme-sapi-maison'); ?></p>
+        </div>
+        <ul class="search-results-list" style="display: none;"></ul>
+      </div>
+    </div>
+  </div>
+  <div class="global-search-overlay" id="global-search-overlay"></div>
 </header>
 
 <!-- Sticky Reassurance Bar -->
