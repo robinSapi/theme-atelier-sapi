@@ -179,19 +179,27 @@
             productData.short_description = tagline.textContent.trim();
           }
 
-          // Extract available sizes from variant buttons or attributes
-          const sizeButtons = doc.querySelectorAll('.variation-button[data-attribute="taille"], .variation-swatch[data-attribute="taille"]');
+          // Extract available sizes from variant buttons or attributes (multiple selectors)
+          let sizeButtons = doc.querySelectorAll('.variation-button[data-attribute="taille"], .variation-swatch[data-attribute="taille"], select[name="attribute_pa_taille"] option, .pa_taille .variation-option');
           if (sizeButtons.length > 0) {
-            const sizes = Array.from(sizeButtons).map(btn => btn.textContent.trim()).filter(s => s);
+            const sizes = Array.from(sizeButtons)
+              .map(btn => btn.textContent || btn.value || '')
+              .map(s => s.trim())
+              .filter(s => s && s !== 'Choisir une option')
+              .filter((v, i, a) => a.indexOf(v) === i); // Remove duplicates
             if (sizes.length > 0) {
               productData.sizes = sizes;
             }
           }
 
-          // Extract wood essences from variant buttons or attributes
-          const woodButtons = doc.querySelectorAll('.variation-button[data-attribute="bois"], .variation-swatch[data-attribute="bois"]');
+          // Extract wood essences from variant buttons or attributes (multiple selectors)
+          let woodButtons = doc.querySelectorAll('.variation-button[data-attribute="bois"], .variation-swatch[data-attribute="bois"], select[name="attribute_pa_bois"] option, .pa_bois .variation-option');
           if (woodButtons.length > 0) {
-            const woods = Array.from(woodButtons).map(btn => btn.textContent.trim()).filter(w => w);
+            const woods = Array.from(woodButtons)
+              .map(btn => btn.textContent || btn.value || '')
+              .map(w => w.trim())
+              .filter(w => w && w !== 'Choisir une option')
+              .filter((v, i, a) => a.indexOf(v) === i); // Remove duplicates
             if (woods.length > 0) {
               productData.woods = woods;
             }
@@ -317,12 +325,8 @@
           </div>
           <div class="quick-view-info">
             <h2 id="quick-view-title" class="quick-view-title">${product.name}</h2>
+            <div class="quick-view-description">${product.short_description || ''}</div>
             <div class="quick-view-price">${product.price_html}</div>
-            ${product.short_description ? `
-              <div class="quick-view-description">
-                ${product.short_description}
-              </div>
-            ` : ''}
             <div class="quick-view-actions">
               <a href="${product.permalink}" class="btn-view-full">
                 Voir la fiche complète →
