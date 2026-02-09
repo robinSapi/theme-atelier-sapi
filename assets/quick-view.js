@@ -14,6 +14,10 @@
     loading: null,
     currentGalleryIndex: 0,
     galleryImages: [],
+    autoAdvanceTimer: null,
+    autoAdvanceInterval: 3000, // 3 seconds per image
+    progressBar: null,
+    progressAnimation: null,
 
     init: function() {
       this.modal = document.getElementById('quick-view-modal');
@@ -75,11 +79,13 @@
     },
 
     closeModal: function() {
+      this.stopAutoAdvance();
       this.modal.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
       this.body.innerHTML = '';
       this.currentGalleryIndex = 0;
       this.galleryImages = [];
+      this.progressBar = null;
     },
 
     fetchProductData: function(productId, productUrl, productCard) {
@@ -136,7 +142,7 @@
     },
 
     loadAdditionalImages: function(productUrl, productData) {
-      // Load gallery images from product page in background
+      // Load gallery images and variant data from product page in background
       fetch(productUrl)
         .then(response => response.text())
         .then(html => {
@@ -167,18 +173,49 @@
             }
           });
 
+          // Extract description/tagline
+          const tagline = doc.querySelector('.product-tagline');
+          if (tagline) {
+            productData.short_description = tagline.textContent.trim();
+          }
+
+          // Extract available sizes from variant buttons or attributes
+          const sizeButtons = doc.querySelectorAll('.variation-button[data-attribute="taille"], .variation-swatch[data-attribute="taille"]');
+          if (sizeButtons.length > 0) {
+            const sizes = Array.from(sizeButtons).map(btn => btn.textContent.trim()).filter(s => s);
+            if (sizes.length > 0) {
+              productData.sizes = sizes;
+            }
+          }
+
+          // Extract wood essences from variant buttons or attributes
+          const woodButtons = doc.querySelectorAll('.variation-button[data-attribute="bois"], .variation-swatch[data-attribute="bois"]');
+          if (woodButtons.length > 0) {
+            const woods = Array.from(woodButtons).map(btn => btn.textContent.trim()).filter(w => w);
+            if (woods.length > 0) {
+              productData.woods = woods;
+            }
+          }
+
           // Add additional images to existing ones
           if (additionalImages.length > 0) {
             productData.images = productData.images.concat(additionalImages);
-            // Re-render gallery if modal still open
-            if (this.modal.getAttribute('aria-hidden') === 'false') {
+          }
+
+          // Re-render if modal still open and we have new data
+          if (this.modal.getAttribute('aria-hidden') === 'false') {
+            if (additionalImages.length > 0) {
               this.updateGallery(productData);
+            }
+            // Update info section with variants if we found any
+            if (productData.short_description || productData.sizes || productData.woods) {
+              this.updateProductInfo(productData);
             }
           }
         })
         .catch(error => {
-          console.log('Could not load additional images:', error);
-          // Not critical, we already have basic images
+          console.log('Could not load additional data:', error);
+          // Not critical, we already have basic info
         });
     },
 
@@ -247,6 +284,11 @@
               ${this.galleryImages.length > 0 ? `
                 <img src="${this.galleryImages[0].src}" alt="${this.galleryImages[0].alt || product.name}" loading="eager">
               ` : `<div class="no-image">Image non disponible</div>`}
+              ${this.galleryImages.length > 1 ? `
+                <div class="quick-view-progress">
+                  <div class="quick-view-progress-bar"></div>
+                </div>
+              ` : ''}
             </div>
             ${this.galleryImages.length > 1 ? `
               <div class="quick-view-gallery-nav">
@@ -294,9 +336,14 @@
       this.loading.style.display = 'none';
       this.body.style.display = 'block';
 
+      // Get progress bar reference
+      this.progressBar = this.body.querySelector('.quick-view-progress-bar');
+
       // Bind gallery navigation
       if (this.galleryImages.length > 1) {
         this.bindGalleryEvents();
+        // Start auto-advance if multiple images
+        this.startAutoAdvance();
       }
     },
 
@@ -304,30 +351,51 @@
       const prevBtn = this.body.querySelector('.gallery-prev');
       const nextBtn = this.body.querySelector('.gallery-next');
       const thumbs = this.body.querySelectorAll('.gallery-thumb');
+      const gallery = this.body.querySelector('.quick-view-gallery');
 
       if (prevBtn) {
-        prevBtn.addEventListener('click', () => this.prevImage());
+        prevBtn.addEventListener('click', () => {
+          this.pauseAutoAdvance();
+          this.prevImage();
+        });
       }
 
       if (nextBtn) {
-        nextBtn.addEventListener('click', () => this.nextImage());
+        nextBtn.addEventListener('click', () => {
+          this.pauseAutoAdvance();
+          this.nextImage();
+        });
       }
 
       thumbs.forEach(thumb => {
         thumb.addEventListener('click', () => {
+          this.pauseAutoAdvance();
           const index = parseInt(thumb.dataset.index);
           this.goToImage(index);
         });
       });
+
+      // Pause on gallery hover, resume on leave
+      if (gallery) {
+        gallery.addEventListener('mouseenter', () => {
+          this.pauseAutoAdvance();
+        });
+
+        gallery.addEventListener('mouseleave', () => {
+          this.resumeAutoAdvance();
+        });
+      }
 
       // Keyboard navigation
       document.addEventListener('keydown', (e) => {
         if (this.modal.getAttribute('aria-hidden') === 'false') {
           if (e.key === 'ArrowLeft') {
             e.preventDefault();
+            this.pauseAutoAdvance();
             this.prevImage();
           } else if (e.key === 'ArrowRight') {
             e.preventDefault();
+            this.pauseAutoAdvance();
             this.nextImage();
           }
         }
@@ -355,6 +423,9 @@
       thumbs.forEach((thumb, i) => {
         thumb.classList.toggle('active', i === index);
       });
+
+      // Restart auto-advance with new progress bar
+      this.startAutoAdvance();
     },
 
     prevImage: function() {
@@ -404,6 +475,101 @@
           });
         });
       }
+    },
+
+    updateProductInfo: function(productData) {
+      // Update description if found
+      const descriptionEl = this.body.querySelector('.quick-view-description');
+      if (descriptionEl && productData.short_description) {
+        descriptionEl.textContent = productData.short_description;
+      }
+
+      // Update or add variants section
+      let variantsEl = this.body.querySelector('.quick-view-variants');
+
+      if (!variantsEl && (productData.sizes || productData.woods)) {
+        // Create variants section if it doesn't exist
+        const priceEl = this.body.querySelector('.quick-view-price');
+        if (priceEl) {
+          variantsEl = document.createElement('div');
+          variantsEl.className = 'quick-view-variants';
+          priceEl.parentNode.insertBefore(variantsEl, priceEl.nextSibling);
+        }
+      }
+
+      if (variantsEl) {
+        let variantsHTML = '';
+
+        if (productData.sizes && productData.sizes.length > 0) {
+          variantsHTML += `
+            <div class="quick-view-variant-group">
+              <div class="quick-view-variant-label">Tailles disponibles</div>
+              <div class="quick-view-variant-values">
+                ${productData.sizes.map(size => `<strong>${size}</strong>`).join(', ')}
+              </div>
+            </div>
+          `;
+        }
+
+        if (productData.woods && productData.woods.length > 0) {
+          variantsHTML += `
+            <div class="quick-view-variant-group">
+              <div class="quick-view-variant-label">Essences disponibles</div>
+              <div class="quick-view-variant-values">
+                ${productData.woods.map(wood => `<strong>${wood}</strong>`).join(', ')}
+              </div>
+            </div>
+          `;
+        }
+
+        variantsEl.innerHTML = variantsHTML;
+      }
+    },
+
+    // =============================================
+    // AUTO-ADVANCE SLIDESHOW
+    // =============================================
+    startAutoAdvance: function() {
+      if (this.galleryImages.length <= 1) return;
+
+      this.stopAutoAdvance(); // Clear any existing timer
+
+      // Start progress bar animation
+      if (this.progressBar) {
+        this.progressBar.style.transition = 'none';
+        this.progressBar.style.width = '0%';
+
+        // Force reflow to restart animation
+        void this.progressBar.offsetWidth;
+
+        this.progressBar.style.transition = `width ${this.autoAdvanceInterval}ms linear`;
+        this.progressBar.style.width = '100%';
+      }
+
+      // Set timer to advance to next image
+      this.autoAdvanceTimer = setTimeout(() => {
+        this.nextImage();
+      }, this.autoAdvanceInterval);
+    },
+
+    stopAutoAdvance: function() {
+      if (this.autoAdvanceTimer) {
+        clearTimeout(this.autoAdvanceTimer);
+        this.autoAdvanceTimer = null;
+      }
+
+      if (this.progressBar) {
+        this.progressBar.style.transition = 'none';
+        this.progressBar.style.width = '0%';
+      }
+    },
+
+    pauseAutoAdvance: function() {
+      this.stopAutoAdvance();
+    },
+
+    resumeAutoAdvance: function() {
+      this.startAutoAdvance();
     },
 
     showError: function() {
