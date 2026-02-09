@@ -806,96 +806,111 @@ function sapi_product_search($request) {
   }
 
   $query_lower = strtolower($query_string);
-
-  // Get all published products
-  $args = [
-    'post_type' => 'product',
-    'post_status' => 'publish',
-    'posts_per_page' => 50,
-    'orderby' => 'relevance',
-  ];
-
-  // First try standard WordPress search
-  $args['s'] = $query_string;
-
-  $products_query = new WP_Query($args);
   $results = [];
   $found_ids = [];
 
-  // Process search results
-  if ($products_query->have_posts()) {
-    while ($products_query->have_posts()) {
-      $products_query->the_post();
+  // Get ALL published products to filter client-side
+  $all_products_args = [
+    'post_type' => 'product',
+    'post_status' => 'publish',
+    'posts_per_page' => -1, // Get all products
+    'tax_query' => [
+      [
+        'taxonomy' => 'product_cat',
+        'field' => 'slug',
+        'terms' => ['accessoire'], // Exclude accessories category
+        'operator' => 'NOT IN',
+      ],
+    ],
+  ];
+
+  $all_products = new WP_Query($all_products_args);
+  $is_numeric_search = is_numeric($query_string);
+  $dimension_search = $is_numeric_search ? floatval($query_string) : 0;
+
+  if ($all_products->have_posts()) {
+    while ($all_products->have_posts()) {
+      $all_products->the_post();
       $product_id = get_the_ID();
       $product = wc_get_product($product_id);
 
       if (!$product) continue;
 
-      $found_ids[] = $product_id;
-      $results[] = sapi_format_product_for_search($product);
+      $title = strtolower($product->get_name());
+      $score = 0;
+
+      // 1. Search in product title (highest priority)
+      if (stripos($title, $query_lower) !== false) {
+        $score += 100;
+      }
+
+      // 2. Search in wood type (essence)
+      $wood_essence = get_field('essence_de_bois', $product_id);
+      if (!$wood_essence) {
+        $wood_attr = $product->get_attribute('pa_bois');
+        if ($wood_attr) {
+          $wood_essence = strtolower($wood_attr);
+        }
+      }
+      if ($wood_essence && stripos(strtolower($wood_essence), $query_lower) !== false) {
+        $score += 50;
+      }
+
+      // 3. Search in dimensions if numeric query
+      if ($is_numeric_search && $dimension_search > 0) {
+        // Try ACF field first
+        $acf_dimension = get_field('hauteur_cm', $product_id);
+        if ($acf_dimension) {
+          $dim = floatval($acf_dimension);
+          // ±20cm tolerance
+          if ($dim >= ($dimension_search - 20) && $dim <= ($dimension_search + 20)) {
+            $score += 75;
+          }
+        } else {
+          // Try WooCommerce dimensions
+          $height = floatval($product->get_height());
+          $width = floatval($product->get_width());
+          $length = floatval($product->get_length());
+          $max_dim = max($height, $width, $length);
+
+          if ($max_dim > 0 && $max_dim >= ($dimension_search - 20) && $max_dim <= ($dimension_search + 20)) {
+            $score += 75;
+          }
+        }
+      }
+
+      // 4. Search in categories
+      $categories = get_the_terms($product_id, 'product_cat');
+      if ($categories && !is_wp_error($categories)) {
+        foreach ($categories as $cat) {
+          if (stripos(strtolower($cat->name), $query_lower) !== false) {
+            $score += 25;
+          }
+        }
+      }
+
+      // Only include products with a score > 0
+      if ($score > 0) {
+        $results[] = [
+          'score' => $score,
+          'data' => sapi_format_product_for_search($product),
+        ];
+      }
     }
     wp_reset_postdata();
   }
 
-  // Also search in metadata (wood type, dimensions)
-  $meta_query_args = [
-    'post_type' => 'product',
-    'post_status' => 'publish',
-    'posts_per_page' => 50,
-    'post__not_in' => $found_ids, // Exclude already found products
-  ];
+  // Sort by score (highest first)
+  usort($results, function($a, $b) {
+    return $b['score'] - $a['score'];
+  });
 
-  // Check if query is numeric (dimension search)
-  if (is_numeric($query_string)) {
-    $dimension = floatval($query_string);
-    // Search dimensions with tolerance (±20cm)
-    $meta_query_args['meta_query'] = [
-      'relation' => 'OR',
-      [
-        'key' => 'hauteur_cm',
-        'value' => [$dimension - 20, $dimension + 20],
-        'type' => 'NUMERIC',
-        'compare' => 'BETWEEN',
-      ],
-    ];
-  }
+  // Extract just the product data and limit to 8 results
+  $final_results = array_slice(array_map(function($item) {
+    return $item['data'];
+  }, $results), 0, 8);
 
-  // Search by wood type (essence)
-  $wood_types = ['peuplier', 'okoume', 'chene', 'hetre', 'noyer', 'bouleau'];
-  foreach ($wood_types as $wood) {
-    if (stripos($wood, $query_lower) !== false || stripos($query_lower, $wood) !== false) {
-      $meta_query_args['meta_query'] = [
-        [
-          'key' => 'essence_de_bois',
-          'value' => $wood,
-          'compare' => 'LIKE',
-        ],
-      ];
-      break;
-    }
-  }
-
-  // Execute metadata search if meta_query is set
-  if (isset($meta_query_args['meta_query'])) {
-    $meta_products = new WP_Query($meta_query_args);
-
-    if ($meta_products->have_posts()) {
-      while ($meta_products->have_posts()) {
-        $meta_products->the_post();
-        $product = wc_get_product(get_the_ID());
-
-        if ($product) {
-          $results[] = sapi_format_product_for_search($product);
-        }
-      }
-      wp_reset_postdata();
-    }
-  }
-
-  // Limit to 8 results
-  $results = array_slice($results, 0, 8);
-
-  return new WP_REST_Response($results, 200);
+  return new WP_REST_Response($final_results, 200);
 }
 
 function sapi_format_product_for_search($product) {
