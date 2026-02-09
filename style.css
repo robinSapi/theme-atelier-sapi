@@ -6226,10 +6226,14 @@ transform: translateY(15px);
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Safari-specific font size adjustment - Square Peg renders larger in Safari */
+/* Safari-specific: Replace Square Peg with Montserrat italic for better rendering */
 @supports (-webkit-hyphens:none) {
   .statement-text {
-    font-size: clamp(2rem, 3.2vw, 3.2rem);
+    font-family: 'Montserrat', sans-serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(2.2rem, 3.8vw, 3.8rem);
+    letter-spacing: -0.02em;
   }
 }
 
