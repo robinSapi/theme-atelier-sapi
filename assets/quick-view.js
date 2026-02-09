@@ -143,9 +143,16 @@
 
     loadAdditionalImages: function(productUrl, productData) {
       // Load gallery images and variant data from product page in background
+      console.log('[Quick View Debug] Fetching product page:', productUrl);
+
       fetch(productUrl)
-        .then(response => response.text())
+        .then(response => {
+          console.log('[Quick View Debug] Fetch response status:', response.status);
+          return response.text();
+        })
         .then(html => {
+          console.log('[Quick View Debug] HTML received, length:', html.length);
+
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
 
@@ -173,33 +180,78 @@
             }
           });
 
-          // Extract description/tagline
+          // Extract description/tagline - try multiple selectors
+          console.log('[Quick View Debug] Looking for description...');
+
           const tagline = doc.querySelector('.product-tagline');
-          if (tagline) {
+          console.log('[Quick View Debug] .product-tagline found:', !!tagline, tagline?.textContent?.trim().substring(0, 50));
+
+          if (tagline && tagline.textContent.trim()) {
             productData.short_description = tagline.textContent.trim();
+            console.log('[Quick View Debug] Description from .product-tagline:', productData.short_description.substring(0, 50));
+          } else {
+            // Fallback to WooCommerce short description
+            const wcDescription = doc.querySelector('.woocommerce-product-details__short-description');
+            console.log('[Quick View Debug] .woocommerce-product-details__short-description found:', !!wcDescription);
+
+            if (wcDescription && wcDescription.textContent.trim()) {
+              productData.short_description = wcDescription.textContent.trim();
+              console.log('[Quick View Debug] Description from WC short description:', productData.short_description.substring(0, 50));
+            } else {
+              // Last resort: find any <p> tag between price and form in product-hero-v2
+              const heroSection = doc.querySelector('.product-hero-v2, .product-info-v2, .product-summary');
+              console.log('[Quick View Debug] Hero section found:', !!heroSection);
+
+              if (heroSection) {
+                const paragraphs = heroSection.querySelectorAll('p');
+                console.log('[Quick View Debug] Paragraphs in hero section:', paragraphs.length);
+
+                for (let p of paragraphs) {
+                  const text = p.textContent.trim();
+                  console.log('[Quick View Debug] Checking paragraph:', text.substring(0, 30), 'length:', text.length);
+
+                  // Find first substantial paragraph (more than 20 chars, not just a label)
+                  if (text.length > 20 && !text.match(/^(À partir de|Prix|Price)/i)) {
+                    productData.short_description = text;
+                    console.log('[Quick View Debug] Description from fallback paragraph:', text.substring(0, 50));
+                    break;
+                  }
+                }
+              }
+            }
           }
 
-          // Extract available sizes from variant buttons or attributes (multiple selectors)
-          let sizeButtons = doc.querySelectorAll('.variation-button[data-attribute="taille"], .variation-swatch[data-attribute="taille"], select[name="attribute_pa_taille"] option, .pa_taille .variation-option');
-          if (sizeButtons.length > 0) {
-            const sizes = Array.from(sizeButtons)
-              .map(btn => btn.textContent || btn.value || '')
-              .map(s => s.trim())
-              .filter(s => s && s !== 'Choisir une option')
+          console.log('[Quick View Debug] Final description:', productData.short_description?.substring(0, 100) || 'EMPTY');
+
+          // Extract available sizes from WooCommerce variation select options
+          console.log('[Quick View Debug] Looking for sizes...');
+          const sizeSelect = doc.querySelector('select[name="attribute_pa_taille"]');
+          console.log('[Quick View Debug] Size select found:', !!sizeSelect);
+
+          if (sizeSelect) {
+            const sizes = Array.from(sizeSelect.querySelectorAll('option'))
+              .map(opt => opt.textContent.trim())
+              .filter(s => s && s !== 'Choisir une option' && s !== 'Choisir...' && s !== '')
               .filter((v, i, a) => a.indexOf(v) === i); // Remove duplicates
+            console.log('[Quick View Debug] Sizes extracted:', sizes);
             if (sizes.length > 0) {
               productData.sizes = sizes;
             }
           }
 
-          // Extract wood essences from variant buttons or attributes (multiple selectors)
-          let woodButtons = doc.querySelectorAll('.variation-button[data-attribute="bois"], .variation-swatch[data-attribute="bois"], select[name="attribute_pa_bois"] option, .pa_bois .variation-option');
-          if (woodButtons.length > 0) {
-            const woods = Array.from(woodButtons)
-              .map(btn => btn.textContent || btn.value || '')
-              .map(w => w.trim())
-              .filter(w => w && w !== 'Choisir une option')
+          // Extract wood/material essences from WooCommerce variation select options
+          // Try both 'matiere' (material) and 'bois' (wood) attribute names
+          console.log('[Quick View Debug] Looking for wood/material...');
+          const woodSelect = doc.querySelector('select[name="attribute_pa_matiere"], select[name="attribute_pa_bois"]');
+          console.log('[Quick View Debug] Wood/material select found:', !!woodSelect);
+
+          if (woodSelect) {
+            console.log('[Quick View Debug] Wood select name:', woodSelect.getAttribute('name'));
+            const woods = Array.from(woodSelect.querySelectorAll('option'))
+              .map(opt => opt.textContent.trim())
+              .filter(w => w && w !== 'Choisir une option' && w !== 'Choisir...' && w !== '')
               .filter((v, i, a) => a.indexOf(v) === i); // Remove duplicates
+            console.log('[Quick View Debug] Woods/materials extracted:', woods);
             if (woods.length > 0) {
               productData.woods = woods;
             }
@@ -211,18 +263,28 @@
           }
 
           // Re-render if modal still open and we have new data
+          console.log('[Quick View Debug] Modal still open:', this.modal.getAttribute('aria-hidden') === 'false');
+          console.log('[Quick View Debug] Data to update - description:', !!productData.short_description, 'sizes:', !!productData.sizes, 'woods:', !!productData.woods);
+
           if (this.modal.getAttribute('aria-hidden') === 'false') {
             if (additionalImages.length > 0) {
               this.updateGallery(productData);
             }
             // Update info section with variants if we found any
             if (productData.short_description || productData.sizes || productData.woods) {
+              console.log('[Quick View Debug] Calling updateProductInfo with:', {
+                description: productData.short_description?.substring(0, 50),
+                sizes: productData.sizes,
+                woods: productData.woods
+              });
               this.updateProductInfo(productData);
+            } else {
+              console.log('[Quick View Debug] No data to update - skipping updateProductInfo');
             }
           }
         })
         .catch(error => {
-          console.log('Could not load additional data:', error);
+          console.error('[Quick View Debug] Fetch error:', error);
           // Not critical, we already have basic info
         });
     },
@@ -236,10 +298,29 @@
           const doc = parser.parseFromString(html, 'text/html');
 
           // Extract product data from page
+          let shortDesc = '';
+          const taglineEl = doc.querySelector('.product-tagline, .woocommerce-product-details__short-description');
+          if (taglineEl) {
+            shortDesc = taglineEl.textContent.trim();
+          } else {
+            // Fallback: find first substantial paragraph in product hero section
+            const heroSection = doc.querySelector('.product-hero-v2, .product-info-v2, .product-summary');
+            if (heroSection) {
+              const paragraphs = heroSection.querySelectorAll('p');
+              for (let p of paragraphs) {
+                const text = p.textContent.trim();
+                if (text.length > 20 && !text.match(/^(À partir de|Prix|Price)/i)) {
+                  shortDesc = text;
+                  break;
+                }
+              }
+            }
+          }
+
           const productData = {
             name: doc.querySelector('.product-title-v2, h1')?.textContent?.trim() || '',
             price_html: doc.querySelector('.product-price-v2 .price-amount, .price')?.innerHTML || '',
-            short_description: doc.querySelector('.product-tagline')?.textContent?.trim() || '',
+            short_description: shortDesc,
             images: [],
             permalink: productUrl
           };
@@ -482,10 +563,18 @@
     },
 
     updateProductInfo: function(productData) {
+      console.log('[Quick View Debug] updateProductInfo called');
+
       // Update description if found
       const descriptionEl = this.body.querySelector('.quick-view-description');
+      console.log('[Quick View Debug] Description element found:', !!descriptionEl);
+      console.log('[Quick View Debug] Description to set:', productData.short_description?.substring(0, 50));
+
       if (descriptionEl && productData.short_description) {
         descriptionEl.textContent = productData.short_description;
+        console.log('[Quick View Debug] Description updated in DOM');
+      } else {
+        console.log('[Quick View Debug] Description NOT updated - element:', !!descriptionEl, 'data:', !!productData.short_description);
       }
 
       // Update or add variants section
