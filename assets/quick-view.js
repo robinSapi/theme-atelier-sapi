@@ -243,6 +243,14 @@
           // Try both 'matiere' (material) and 'bois' (wood) attribute names
           // Try with AND without 'attribute_' prefix
           console.log('[Quick View Debug] Looking for wood/material...');
+
+          // Debug: List ALL selects in the document
+          const allSelects = doc.querySelectorAll('select');
+          console.log('[Quick View Debug] Total selects found:', allSelects.length);
+          allSelects.forEach(sel => {
+            console.log('[Quick View Debug] Select name:', sel.getAttribute('name'), 'options:', sel.querySelectorAll('option').length);
+          });
+
           const woodSelect = doc.querySelector('select[name="attribute_pa_matiere"], select[name="pa_matiere"], select[name="attribute_pa_bois"], select[name="pa_bois"]');
           console.log('[Quick View Debug] Wood/material select found:', !!woodSelect);
 
