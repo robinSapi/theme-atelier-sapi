@@ -225,7 +225,7 @@
 
           // Extract available sizes from WooCommerce variation select options
           console.log('[Quick View Debug] Looking for sizes...');
-          const sizeSelect = doc.querySelector('select[name="attribute_pa_taille"]');
+          const sizeSelect = doc.querySelector('select[name="attribute_pa_taille"], select[name="pa_taille"]');
           console.log('[Quick View Debug] Size select found:', !!sizeSelect);
 
           if (sizeSelect) {
@@ -241,8 +241,9 @@
 
           // Extract wood/material essences from WooCommerce variation select options
           // Try both 'matiere' (material) and 'bois' (wood) attribute names
+          // Try with AND without 'attribute_' prefix
           console.log('[Quick View Debug] Looking for wood/material...');
-          const woodSelect = doc.querySelector('select[name="attribute_pa_matiere"], select[name="attribute_pa_bois"]');
+          const woodSelect = doc.querySelector('select[name="attribute_pa_matiere"], select[name="pa_matiere"], select[name="attribute_pa_bois"], select[name="pa_bois"]');
           console.log('[Quick View Debug] Wood/material select found:', !!woodSelect);
 
           if (woodSelect) {
