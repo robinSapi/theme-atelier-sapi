@@ -180,7 +180,14 @@ $all_products = new WP_Query([
     </button>
     <?php if ($product_categories && !is_wp_error($product_categories)) : ?>
       <?php foreach ($product_categories as $cat) : ?>
-        <button type="button" class="filter-btn" data-filter="<?php echo esc_attr($cat->slug); ?>">
+        <?php
+        // Add special class for gift card category
+        $btn_class = 'filter-btn';
+        if ($cat->slug === 'carte-cadeau') {
+          $btn_class .= ' filter-btn--gift';
+        }
+        ?>
+        <button type="button" class="<?php echo esc_attr($btn_class); ?>" data-filter="<?php echo esc_attr($cat->slug); ?>">
           <?php echo esc_html($cat->name); ?>
           <span class="filter-count">(<?php echo esc_html($cat->count); ?>)</span>
         </button>
@@ -241,16 +248,22 @@ $all_products = new WP_Query([
 <section class="shop-products" id="shop-products">
   <?php if ($all_products->have_posts()) : ?>
 
-    <div class="products-carousel-wrapper">
-      <div class="products-carousel" data-products-carousel data-filterable>
-        <ul class="products-carousel-track products">
-          <?php while ($all_products->have_posts()) : $all_products->the_post(); ?>
-            <?php
+    <div class="products-carousel-editorial-wrapper" data-carousel-editorial>
+      <div class="products-carousel-editorial">
+        <ul class="products-carousel-editorial-track products">
+          <?php
+          $slide_index = 0;
+          while ($all_products->have_posts()) :
+            $all_products->the_post();
             global $product, $sapi_carousel_context;
             $product = wc_get_product(get_the_ID());
 
+            // Get product data for enhanced carousel
+            $product_id = $product->get_id();
+            $thumbnail_url = get_the_post_thumbnail_url($product_id, 'thumbnail');
+
             // Pass carousel context to content-product.php
-            $product_cats = get_the_terms(get_the_ID(), 'product_cat');
+            $product_cats = get_the_terms($product_id, 'product_cat');
             $cat_slugs = [];
             if ($product_cats && !is_wp_error($product_cats)) {
               foreach ($product_cats as $cat) {
@@ -259,28 +272,45 @@ $all_products = new WP_Query([
             }
             $sapi_carousel_context = [
               'is_carousel' => true,
+              'is_editorial' => true,
               'categories' => implode(' ', $cat_slugs),
+              'slide_index' => $slide_index,
+              'thumbnail_url' => $thumbnail_url,
             ];
 
             wc_get_template_part('content', 'product');
 
             $sapi_carousel_context = null;
-            ?>
-          <?php endwhile; ?>
+            $slide_index++;
+          endwhile;
+          ?>
         </ul>
       </div>
-      <div class="products-carousel-controls">
-        <button class="carousel-btn products-carousel-prev" aria-label="<?php esc_attr_e('Précédent', 'theme-sapi-maison'); ?>">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+      <!-- Enhanced Navigation Controls -->
+      <div class="carousel-editorial-nav">
+        <button class="carousel-editorial-btn carousel-editorial-prev"
+                aria-label="<?php esc_attr_e('Produit précédent', 'theme-sapi-maison'); ?>">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
         </button>
-        <div class="products-carousel-dots"></div>
-        <button class="carousel-btn products-carousel-next" aria-label="<?php esc_attr_e('Suivant', 'theme-sapi-maison'); ?>">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="carousel-editorial-btn carousel-editorial-next"
+                aria-label="<?php esc_attr_e('Produit suivant', 'theme-sapi-maison'); ?>">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
         </button>
+      </div>
+
+      <!-- Elegant Counter & Thumbnails -->
+      <div class="carousel-editorial-footer">
+        <div class="carousel-editorial-counter">
+          <span class="counter-current">1</span>
+          <span class="counter-separator">/</span>
+          <span class="counter-total"><?php echo esc_html($slide_index); ?></span>
+        </div>
+        <div class="carousel-editorial-thumbnails"></div>
       </div>
     </div>
 

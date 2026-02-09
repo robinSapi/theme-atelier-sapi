@@ -327,42 +327,7 @@ elseif ($term_slug === 'lampe-a-poser') :
   ];
 endif;
 
-if (!empty($featured)) :
-?>
-  <section class="category-featured">
-    <?php foreach ($featured as $item) :
-      // Get product image dynamically from WooCommerce
-      $product_slug = basename(untrailingslashit($item['link']));
-      $product_obj = get_page_by_path($product_slug, OBJECT, 'product');
-      $product_image = '';
-
-      if ($product_obj) {
-        $product_image = get_the_post_thumbnail_url($product_obj->ID, 'large');
-      }
-
-      // Fallback to hardcoded image if product not found
-      if (!$product_image && !empty($item['image'])) {
-        $product_image = $item['image'];
-      }
-
-      // Skip if no image at all
-      if (!$product_image) continue;
-    ?>
-      <article id="<?php echo esc_attr($item['id']); ?>" class="category-featured-card">
-        <a class="category-featured-link" href="<?php echo esc_url($item['link']); ?>">
-          <div class="category-featured-media">
-            <img src="<?php echo esc_url($product_image); ?>" alt="<?php echo esc_attr($item['title']); ?>" loading="lazy">
-          </div>
-          <div class="category-featured-content">
-            <h2><?php echo esc_html($item['title']); ?></h2>
-            <p class="category-featured-subtitle"><?php echo esc_html($item['subtitle']); ?></p>
-            <span class="category-featured-cta"><?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> →</span>
-          </div>
-        </a>
-      </article>
-    <?php endforeach; ?>
-  </section>
-<?php endif; ?>
+<!-- Featured products section removed - carousel only below -->
 
 <?php
 // Get ALL products in this category for the carousel (no pagination)
@@ -383,39 +348,62 @@ $products_query = new WP_Query([
 if ($products_query->have_posts()) :
 ?>
 <section class="shop-products">
-  <div class="products-carousel-wrapper">
-    <div class="products-carousel" data-products-carousel>
-      <ul class="products-carousel-track products">
-        <?php while ($products_query->have_posts()) : $products_query->the_post(); ?>
-          <?php
+  <div class="products-carousel-editorial-wrapper" data-carousel-editorial>
+    <div class="products-carousel-editorial">
+      <ul class="products-carousel-editorial-track products">
+        <?php
+        $slide_index = 0;
+        while ($products_query->have_posts()) :
+          $products_query->the_post();
           global $product, $sapi_carousel_context;
           $product = wc_get_product(get_the_ID());
 
-          // Pass carousel context to content-product.php
+          // Get product data for enhanced carousel
+          $product_id = $product->get_id();
+          $thumbnail_url = get_the_post_thumbnail_url($product_id, 'thumbnail');
+
+          // Pass carousel context with editorial carousel flag and thumbnail data
           $sapi_carousel_context = [
             'is_carousel' => true,
-            'categories' => '', // Not needed for category pages (already filtered)
+            'is_editorial' => true,
+            'categories' => '',
+            'slide_index' => $slide_index,
+            'thumbnail_url' => $thumbnail_url,
           ];
 
           wc_get_template_part('content', 'product');
 
           $sapi_carousel_context = null;
-          ?>
-        <?php endwhile; ?>
+          $slide_index++;
+        endwhile;
+        ?>
       </ul>
     </div>
-    <div class="products-carousel-controls">
-      <button class="carousel-btn products-carousel-prev" aria-label="<?php esc_attr_e('Précédent', 'theme-sapi-maison'); ?>">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+    <!-- Enhanced Navigation Controls -->
+    <div class="carousel-editorial-nav">
+      <button class="carousel-editorial-btn carousel-editorial-prev"
+              aria-label="<?php esc_attr_e('Produit précédent', 'theme-sapi-maison'); ?>">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
       </button>
-      <div class="products-carousel-dots"></div>
-      <button class="carousel-btn products-carousel-next" aria-label="<?php esc_attr_e('Suivant', 'theme-sapi-maison'); ?>">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <button class="carousel-editorial-btn carousel-editorial-next"
+              aria-label="<?php esc_attr_e('Produit suivant', 'theme-sapi-maison'); ?>">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
       </button>
+    </div>
+
+    <!-- Elegant Counter & Thumbnails -->
+    <div class="carousel-editorial-footer">
+      <div class="carousel-editorial-counter">
+        <span class="counter-current">1</span>
+        <span class="counter-separator">/</span>
+        <span class="counter-total"><?php echo esc_html($slide_index); ?></span>
+      </div>
+      <div class="carousel-editorial-thumbnails"></div>
     </div>
   </div>
 </section>
