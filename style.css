@@ -6219,8 +6219,17 @@ transform: translateY(15px);
   font-weight: 400;
   line-height: 1.2;
   color: var(--color-dark);
-  -webkit-text-size-adjust: 100%; /* Prevent Safari from auto-adjusting text size */
+  -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Safari-specific fix: Square Peg cursive renders ~10% larger */
+@supports (-webkit-hyphens:none) {
+  .statement-text {
+    font-size: clamp(2.2rem, 3.6vw, 3.6rem);
+  }
 }
 
 .statement-author {
@@ -11430,7 +11439,9 @@ body.woocommerce-cart div.woocommerce-wrapper {
   color: var(--color-orange);
   transform: scale(1.15) !important;
   -webkit-transform: scale(1.15) !important;
-  box-shadow: 0 6px 24px rgba(242, 137, 73, 0.2);
+  box-shadow:
+    0 6px 24px rgba(242, 137, 73, 0.2),
+    inset 0 2px 8px rgba(0, 0, 0, 0.1); /* Halo intérieur comme carousel */
 }
 
 .gallery-nav-btn:disabled {
