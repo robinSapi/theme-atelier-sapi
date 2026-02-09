@@ -894,7 +894,8 @@ document.addEventListener('DOMContentLoaded', () => {
     category: 'all',
     price: 'all',
     wood: 'all',
-    size: 'all'
+    size: 'all',
+    searchText: ''
   };
 
   // Category filter (main buttons)
@@ -946,7 +947,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Show reset button if any advanced filter is active
       const hasActiveFilters = Object.entries(activeFilters).some(([key, value]) => {
-        return key !== 'category' && value !== 'all';
+        return key !== 'category' && value !== 'all' && value !== '';
       });
       if (filterReset) {
         filterReset.style.display = hasActiveFilters ? 'flex' : 'none';
@@ -968,8 +969,19 @@ document.addEventListener('DOMContentLoaded', () => {
         category: activeFilters.category, // Keep category filter
         price: 'all',
         wood: 'all',
-        size: 'all'
+        size: 'all',
+        searchText: ''
       };
+
+      // Reset search input
+      const searchInput = document.getElementById('product-search-input');
+      const searchClear = document.querySelector('.search-clear');
+      if (searchInput) {
+        searchInput.value = '';
+      }
+      if (searchClear) {
+        searchClear.style.display = 'none';
+      }
 
       // Reset all advanced filters UI
       advancedFilters.forEach(option => {
@@ -987,7 +999,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const defaultLabels = {
           'price': 'Prix',
           'wood': 'Essence',
-          'size': 'Taille'
+          'size': 'Dimensions'
         };
         label.textContent = defaultLabels[type];
       });
@@ -1019,9 +1031,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const matchesWood = activeFilters.wood === 'all' ||
         (product.dataset.wood && product.dataset.wood.includes(activeFilters.wood));
       const matchesSize = activeFilters.size === 'all' ||
-        (product.dataset.size && product.dataset.size === activeFilters.size);
+        (product.dataset.size && checkSizeRange(parseFloat(product.dataset.size) || 0, activeFilters.size));
 
-      const shouldShow = matchesCategory && matchesPrice && matchesWood && matchesSize;
+      // Text search - check product title
+      const productTitle = product.querySelector('.woocommerce-loop-product__title');
+      const matchesSearch = !activeFilters.searchText ||
+        (productTitle && productTitle.textContent.toLowerCase().includes(activeFilters.searchText.toLowerCase()));
+
+      const shouldShow = matchesCategory && matchesPrice && matchesWood && matchesSize && matchesSearch;
 
       if (shouldShow) {
         // Staggered fade-in animation
@@ -1060,6 +1077,14 @@ document.addEventListener('DOMContentLoaded', () => {
     return true;
   }
 
+  function checkSizeRange(size, range) {
+    if (range === '0-100') return size < 100;
+    if (range === '100-150') return size >= 100 && size < 150;
+    if (range === '150-200') return size >= 150 && size < 200;
+    if (range === '200+') return size >= 200;
+    return true;
+  }
+
   // Dropdown toggle animations
   document.querySelectorAll('.filter-dropdown-toggle').forEach(toggle => {
     toggle.addEventListener('click', function() {
@@ -1090,6 +1115,57 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   });
+
+  // Product search functionality
+  const searchInput = document.getElementById('product-search-input');
+  const searchClear = document.querySelector('.search-clear');
+
+  if (searchInput) {
+    // Real-time search with debounce
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+      const value = this.value.trim();
+
+      // Show/hide clear button
+      if (searchClear) {
+        searchClear.style.display = value ? 'flex' : 'none';
+      }
+
+      // Show reset button if search has text
+      if (filterReset) {
+        const hasFilters = value || Object.entries(activeFilters).some(([key, val]) => {
+          return key !== 'category' && key !== 'searchText' && val !== 'all' && val !== '';
+        });
+        filterReset.style.display = hasFilters ? 'flex' : 'none';
+      }
+
+      // Debounce search to avoid too many filter calls
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        activeFilters.searchText = value;
+        applyFilters();
+      }, 300);
+    });
+
+    // Clear search
+    if (searchClear) {
+      searchClear.addEventListener('click', function() {
+        searchInput.value = '';
+        searchInput.focus();
+        this.style.display = 'none';
+        activeFilters.searchText = '';
+        applyFilters();
+
+        // Hide reset button if no other filters active
+        if (filterReset) {
+          const hasOtherFilters = Object.entries(activeFilters).some(([key, val]) => {
+            return key !== 'category' && key !== 'searchText' && val !== 'all' && val !== '';
+          });
+          filterReset.style.display = hasOtherFilters ? 'flex' : 'none';
+        }
+      });
+    }
+  }
 
   // ========================================
   // PREMIUM: Infinite Scroll for Blog Archive

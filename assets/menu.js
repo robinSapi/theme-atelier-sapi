@@ -300,3 +300,246 @@
   }
 
 })();
+
+/**
+ * Global Search Modal
+ * Recherche globale avec Ctrl+K et autocomplétion
+ */
+
+(function() {
+  'use strict';
+
+  // Elements
+  const searchToggle = document.querySelector('.search-toggle');
+  const searchModal = document.querySelector('.global-search-modal');
+  const searchOverlay = document.querySelector('.global-search-overlay');
+  const searchClose = document.querySelector('.global-search-close');
+  const searchInput = document.getElementById('global-search-input');
+  const searchResultsList = document.querySelector('.search-results-list');
+  const searchResultsEmpty = document.querySelector('.search-results-empty');
+  const body = document.body;
+
+  if (!searchToggle || !searchModal || !searchOverlay || !searchInput) {
+    return;
+  }
+
+  let searchTimeout;
+  let currentResults = [];
+  let selectedIndex = -1;
+
+  /**
+   * Open search modal
+   */
+  function openSearch() {
+    searchModal.setAttribute('aria-hidden', 'false');
+    searchOverlay.classList.add('is-visible');
+    body.style.overflow = 'hidden';
+
+    setTimeout(() => {
+      searchInput.focus();
+    }, 100);
+  }
+
+  /**
+   * Close search modal
+   */
+  function closeSearch() {
+    searchModal.setAttribute('aria-hidden', 'true');
+    searchOverlay.classList.remove('is-visible');
+    body.style.overflow = '';
+    searchInput.value = '';
+    clearResults();
+    selectedIndex = -1;
+  }
+
+  /**
+   * Clear search results
+   */
+  function clearResults() {
+    searchResultsList.innerHTML = '';
+    searchResultsList.style.display = 'none';
+    searchResultsEmpty.style.display = 'flex';
+    currentResults = [];
+  }
+
+  /**
+   * Perform search with AJAX
+   */
+  function performSearch(query) {
+    if (!query || query.length < 2) {
+      clearResults();
+      return;
+    }
+
+    // Show loading state
+    searchResultsEmpty.innerHTML = '<p>Recherche en cours...</p>';
+    searchResultsEmpty.style.display = 'flex';
+    searchResultsList.style.display = 'none';
+
+    // AJAX search request
+    fetch(window.location.origin + '/wp-json/wp/v2/product?search=' + encodeURIComponent(query) + '&per_page=8&_embed')
+      .then(response => response.json())
+      .then(products => {
+        if (products && products.length > 0) {
+          displayResults(products);
+        } else {
+          showNoResults();
+        }
+      })
+      .catch(error => {
+        console.error('Search error:', error);
+        showNoResults();
+      });
+  }
+
+  /**
+   * Display search results
+   */
+  function displayResults(products) {
+    currentResults = products;
+    searchResultsEmpty.style.display = 'none';
+    searchResultsList.style.display = 'block';
+    searchResultsList.innerHTML = '';
+
+    products.forEach((product, index) => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = product.link;
+      a.className = 'search-result-item';
+      a.setAttribute('data-index', index);
+
+      // Get product image
+      let imageUrl = '';
+      if (product._embedded && product._embedded['wp:featuredmedia']) {
+        imageUrl = product._embedded['wp:featuredmedia'][0].source_url;
+      }
+
+      // Get product price (if available)
+      let priceHTML = '';
+      if (product.meta && product.meta.price) {
+        priceHTML = `<span class="search-result-price">${product.meta.price}</span>`;
+      }
+
+      a.innerHTML = `
+        <div class="search-result-image">
+          ${imageUrl ? `<img src="${imageUrl}" alt="${product.title.rendered}" loading="lazy">` : ''}
+        </div>
+        <div class="search-result-info">
+          <h4 class="search-result-title">${product.title.rendered}</h4>
+          <div class="search-result-meta">
+            ${product.categories ? `<span>${product.categories[0]}</span>` : ''}
+          </div>
+        </div>
+        ${priceHTML}
+      `;
+
+      // Mouse events
+      a.addEventListener('mouseenter', function() {
+        selectedIndex = index;
+        updateSelection();
+      });
+
+      a.addEventListener('click', function(e) {
+        // Let the link work naturally
+      });
+
+      li.appendChild(a);
+      searchResultsList.appendChild(li);
+    });
+  }
+
+  /**
+   * Show no results message
+   */
+  function showNoResults() {
+    searchResultsEmpty.innerHTML = `
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.35-4.35"></path>
+      </svg>
+      <p>Aucun résultat trouvé</p>
+    `;
+    searchResultsEmpty.style.display = 'flex';
+    searchResultsList.style.display = 'none';
+    currentResults = [];
+  }
+
+  /**
+   * Update selected item
+   */
+  function updateSelection() {
+    const items = searchResultsList.querySelectorAll('.search-result-item');
+    items.forEach((item, index) => {
+      if (index === selectedIndex) {
+        item.classList.add('active');
+        item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      } else {
+        item.classList.remove('active');
+      }
+    });
+  }
+
+  /**
+   * Event Listeners
+   */
+
+  // Toggle search on button click
+  searchToggle.addEventListener('click', function() {
+    openSearch();
+  });
+
+  // Close search
+  if (searchClose) {
+    searchClose.addEventListener('click', closeSearch);
+  }
+
+  searchOverlay.addEventListener('click', closeSearch);
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', function(e) {
+    // Ctrl+K or Cmd+K to open search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      if (searchModal.getAttribute('aria-hidden') === 'true') {
+        openSearch();
+      } else {
+        closeSearch();
+      }
+    }
+
+    // Escape to close
+    if (e.key === 'Escape' && searchModal.getAttribute('aria-hidden') === 'false') {
+      closeSearch();
+    }
+
+    // Arrow navigation when search is open
+    if (searchModal.getAttribute('aria-hidden') === 'false' && currentResults.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIndex = Math.min(selectedIndex + 1, currentResults.length - 1);
+        updateSelection();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex = Math.max(selectedIndex - 1, -1);
+        updateSelection();
+      } else if (e.key === 'Enter' && selectedIndex >= 0) {
+        e.preventDefault();
+        const selectedItem = searchResultsList.querySelector(`[data-index="${selectedIndex}"]`);
+        if (selectedItem) {
+          window.location.href = selectedItem.href;
+        }
+      }
+    }
+  });
+
+  // Real-time search with debounce
+  searchInput.addEventListener('input', function() {
+    const query = this.value.trim();
+
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      performSearch(query);
+    }, 300);
+  });
+
+})();
