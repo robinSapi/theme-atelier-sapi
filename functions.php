@@ -778,3 +778,135 @@ function sapi_ajax_buy_now() {
   }
 }
 
+/**
+ * Custom REST API endpoint for product search
+ * Searches products by title, wood type (essence), dimensions, and category
+ * Excludes accessories from results
+ */
+add_action('rest_api_init', function() {
+  register_rest_route('sapi/v1', '/products/search', [
+    'methods' => 'GET',
+    'callback' => 'sapi_product_search',
+    'permission_callback' => '__return_true',
+  ]);
+});
+
+function sapi_product_search($request) {
+  $query = $request->get_param('query');
+
+  if (empty($query) || strlen($query) < 2) {
+    return [];
+  }
+
+  $query_lower = strtolower($query);
+
+  // Check if query is a dimension (numeric)
+  $is_dimension_search = is_numeric($query);
+  $dimension_search = $is_dimension_search ? floatval($query) : 0;
+
+  // Get ALL products excluding accessories
+  $all_products_args = [
+    'post_type' => 'product',
+    'posts_per_page' => -1,
+    'post_status' => 'publish',
+    'tax_query' => [
+      [
+        'taxonomy' => 'product_cat',
+        'field' => 'slug',
+        'terms' => ['accessoire'],
+        'operator' => 'NOT IN'
+      ]
+    ]
+  ];
+
+  $all_products = new WP_Query($all_products_args);
+  $scored_products = [];
+
+  if ($all_products->have_posts()) {
+    while ($all_products->have_posts()) {
+      $all_products->the_post();
+      $product = wc_get_product(get_the_ID());
+
+      if (!$product || $product->get_status() !== 'publish') {
+        continue;
+      }
+
+      $score = 0;
+      $title = get_the_title();
+
+      // Title match: 100 points
+      if (stripos($title, $query_lower) !== false) {
+        $score += 100;
+      }
+
+      // Wood type match (essence): 50 points
+      // FIXED: Use pa_materiau (not pa_bois)
+      $wood_attr = $product->get_attribute('pa_materiau');
+      if ($wood_attr && stripos(strtolower($wood_attr), $query_lower) !== false) {
+        $score += 50;
+      }
+
+      // Dimension match: 75 points (±20cm tolerance)
+      // FIXED: Parse pa_taille format "50-cm", "100-cm"
+      if ($is_dimension_search) {
+        $taille_attr = $product->get_attribute('pa_taille');
+        if ($taille_attr) {
+          // Extract numeric value from "XX-cm" format
+          if (preg_match('/(\d+)/', $taille_attr, $matches)) {
+            $dim = floatval($matches[1]);
+            // Check if within ±20cm tolerance
+            if ($dim >= ($dimension_search - 20) && $dim <= ($dimension_search + 20)) {
+              $score += 75;
+            }
+          }
+        }
+      }
+
+      // Category match: 25 points
+      $categories = get_the_terms(get_the_ID(), 'product_cat');
+      if ($categories && !is_wp_error($categories)) {
+        foreach ($categories as $cat) {
+          if ($cat->slug !== 'uncategorized' && stripos($cat->name, $query_lower) !== false) {
+            $score += 25;
+            break;
+          }
+        }
+      }
+
+      // Only include products with a score > 0
+      if ($score > 0) {
+        $image_id = $product->get_image_id();
+        $image_url = $image_id ? wp_get_attachment_image_url($image_id, 'woocommerce_thumbnail') : '';
+
+        $category_names = [];
+        if ($categories && !is_wp_error($categories)) {
+          foreach ($categories as $cat) {
+            if ($cat->slug !== 'uncategorized') {
+              $category_names[] = $cat->name;
+            }
+          }
+        }
+
+        $scored_products[] = [
+          'score' => $score,
+          'id' => get_the_ID(),
+          'title' => $title,
+          'link' => get_permalink(),
+          'image' => $image_url,
+          'price' => $product->get_price_html(),
+          'categories' => $category_names,
+        ];
+      }
+    }
+    wp_reset_postdata();
+  }
+
+  // Sort by score (highest first)
+  usort($scored_products, function($a, $b) {
+    return $b['score'] - $a['score'];
+  });
+
+  // Return top 10 results
+  return array_slice($scored_products, 0, 10);
+}
+

@@ -376,8 +376,8 @@
     searchResultsEmpty.style.display = 'flex';
     searchResultsList.style.display = 'none';
 
-    // AJAX search request
-    fetch(window.location.origin + '/wp-json/wp/v2/product?search=' + encodeURIComponent(query) + '&per_page=8&_embed')
+    // AJAX search request - use custom endpoint with metadata support
+    fetch(window.location.origin + '/wp-json/sapi/v1/products/search?query=' + encodeURIComponent(query))
       .then(response => response.json())
       .then(products => {
         if (products && products.length > 0) {
@@ -408,26 +408,19 @@
       a.className = 'search-result-item';
       a.setAttribute('data-index', index);
 
-      // Get product image
-      let imageUrl = '';
-      if (product._embedded && product._embedded['wp:featuredmedia']) {
-        imageUrl = product._embedded['wp:featuredmedia'][0].source_url;
-      }
-
-      // Get product price (if available)
-      let priceHTML = '';
-      if (product.meta && product.meta.price) {
-        priceHTML = `<span class="search-result-price">${product.meta.price}</span>`;
-      }
+      // Product data from custom endpoint
+      const imageUrl = product.image || '';
+      const priceHTML = product.price ? `<span class="search-result-price">${product.price}</span>` : '';
+      const categoryHTML = product.categories && product.categories.length > 0 ? `<span>${product.categories[0]}</span>` : '';
 
       a.innerHTML = `
         <div class="search-result-image">
-          ${imageUrl ? `<img src="${imageUrl}" alt="${product.title.rendered}" loading="lazy">` : ''}
+          ${imageUrl ? `<img src="${imageUrl}" alt="${product.title}" loading="lazy">` : ''}
         </div>
         <div class="search-result-info">
-          <h4 class="search-result-title">${product.title.rendered}</h4>
+          <h4 class="search-result-title">${product.title}</h4>
           <div class="search-result-meta">
-            ${product.categories ? `<span>${product.categories[0]}</span>` : ''}
+            ${categoryHTML}
           </div>
         </div>
         ${priceHTML}
