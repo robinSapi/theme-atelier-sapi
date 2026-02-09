@@ -152,6 +152,27 @@ $all_products = new WP_Query([
 
 <!-- Product Filters with dynamic counts -->
 <div class="product-filters-wrapper">
+  <!-- Search Bar -->
+  <div class="product-search-bar">
+    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"></circle>
+      <path d="m21 21-4.35-4.35"></path>
+    </svg>
+    <input
+      type="text"
+      id="product-search-input"
+      class="product-search-input"
+      placeholder="<?php esc_attr_e('Rechercher un luminaire...', 'theme-sapi-maison'); ?>"
+      aria-label="<?php esc_attr_e('Rechercher un produit', 'theme-sapi-maison'); ?>"
+    />
+    <button type="button" class="search-clear" style="display: none;" aria-label="<?php esc_attr_e('Effacer la recherche', 'theme-sapi-maison'); ?>">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
   <nav class="product-filters product-filters-js" role="navigation" aria-label="<?php esc_attr_e('Filtres produits', 'theme-sapi-maison'); ?>">
     <button type="button" class="filter-btn active" data-filter="all">
       <?php esc_html_e('Tout', 'theme-sapi-maison'); ?>
@@ -190,6 +211,8 @@ $all_products = new WP_Query([
       </button>
       <div class="filter-dropdown-menu">
         <button type="button" class="filter-option active" data-wood="all"><?php esc_html_e('Toutes les essences', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-wood="peuplier"><?php esc_html_e('Peuplier', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-wood="okoume"><?php esc_html_e('Okoumé', 'theme-sapi-maison'); ?></button>
         <button type="button" class="filter-option" data-wood="chene"><?php esc_html_e('Chêne', 'theme-sapi-maison'); ?></button>
         <button type="button" class="filter-option" data-wood="hetre"><?php esc_html_e('Hêtre', 'theme-sapi-maison'); ?></button>
         <button type="button" class="filter-option" data-wood="noyer"><?php esc_html_e('Noyer', 'theme-sapi-maison'); ?></button>
@@ -199,14 +222,15 @@ $all_products = new WP_Query([
 
     <div class="filter-dropdown" data-filter-type="size">
       <button type="button" class="filter-dropdown-toggle">
-        <span class="filter-label"><?php esc_html_e('Taille', 'theme-sapi-maison'); ?></span>
+        <span class="filter-label"><?php esc_html_e('Dimensions', 'theme-sapi-maison'); ?></span>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </button>
       <div class="filter-dropdown-menu">
-        <button type="button" class="filter-option active" data-size="all"><?php esc_html_e('Toutes les tailles', 'theme-sapi-maison'); ?></button>
-        <button type="button" class="filter-option" data-size="petit"><?php esc_html_e('Petit (&lt;30cm)', 'theme-sapi-maison'); ?></button>
-        <button type="button" class="filter-option" data-size="moyen"><?php esc_html_e('Moyen (30-60cm)', 'theme-sapi-maison'); ?></button>
-        <button type="button" class="filter-option" data-size="grand"><?php esc_html_e('Grand (&gt;60cm)', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option active" data-size="all"><?php esc_html_e('Toutes les dimensions', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-size="0-100"><?php esc_html_e('Moins de 100cm', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-size="100-150"><?php esc_html_e('100cm - 150cm', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-size="150-200"><?php esc_html_e('150cm - 200cm', 'theme-sapi-maison'); ?></button>
+        <button type="button" class="filter-option" data-size="200+"><?php esc_html_e('Plus de 200cm', 'theme-sapi-maison'); ?></button>
       </div>
     </div>
 

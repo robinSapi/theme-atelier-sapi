@@ -85,24 +85,23 @@ if (!$wood_essence) {
   }
 }
 
-// Get size category from dimensions or ACF
-$size_category = '';
+// Get size/dimensions in cm (numeric value for filtering)
+$size_dimension = 0;
 if (function_exists('get_field')) {
-  $size_category = get_field('taille', $product_id);
+  // Try ACF field first (should be numeric in cm)
+  $acf_size = get_field('hauteur_cm', $product_id);
+  if ($acf_size) {
+    $size_dimension = (float) $acf_size;
+  }
 }
-if (!$size_category) {
-  // Calculate from dimensions
+if (!$size_dimension) {
+  // Calculate from WooCommerce dimensions
   $height = (float) $product->get_height();
   $width = (float) $product->get_width();
-  $max_dim = max($height, $width);
+  $length = (float) $product->get_length();
+  $max_dim = max($height, $width, $length);
   if ($max_dim > 0) {
-    if ($max_dim < 30) {
-      $size_category = 'petit';
-    } elseif ($max_dim < 60) {
-      $size_category = 'moyen';
-    } else {
-      $size_category = 'grand';
-    }
+    $size_dimension = $max_dim;
   }
 }
 
@@ -121,7 +120,7 @@ if ($is_carousel) {
   $card_classes .= ' products-carousel-slide';
 }
 ?>
-<li <?php wc_product_class($card_classes, $product); ?> data-category="<?php echo esc_attr(sanitize_title($category_name)); ?>"<?php echo $carousel_categories ? ' data-categories="' . esc_attr($carousel_categories) . '"' : ''; ?> data-price="<?php echo esc_attr($filter_price); ?>"<?php echo $wood_essence ? ' data-wood="' . esc_attr(sanitize_title($wood_essence)) . '"' : ''; ?><?php echo $size_category ? ' data-size="' . esc_attr($size_category) . '"' : ''; ?>>
+<li <?php wc_product_class($card_classes, $product); ?> data-category="<?php echo esc_attr(sanitize_title($category_name)); ?>"<?php echo $carousel_categories ? ' data-categories="' . esc_attr($carousel_categories) . '"' : ''; ?> data-price="<?php echo esc_attr($filter_price); ?>"<?php echo $wood_essence ? ' data-wood="' . esc_attr(sanitize_title($wood_essence)) . '"' : ''; ?><?php echo $size_dimension > 0 ? ' data-size="' . esc_attr($size_dimension) . '"' : ''; ?>>
   <a href="<?php the_permalink(); ?>" class="product-card-link">
     <div class="product-media<?php echo $hover_image_url ? ' has-hover-image' : ''; ?>">
       <?php
