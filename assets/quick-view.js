@@ -252,7 +252,7 @@
           });
 
           // Try select first
-          const woodSelect = doc.querySelector('select[name="attribute_pa_matiere"], select[name="pa_matiere"], select[name="attribute_pa_bois"], select[name="pa_bois"]');
+          const woodSelect = doc.querySelector('select[name="attribute_pa_materiau"], select[name="pa_materiau"], select[name="attribute_pa_matiere"], select[name="pa_matiere"], select[name="attribute_pa_bois"], select[name="pa_bois"]');
           console.log('[Quick View Debug] Wood/material select found:', !!woodSelect);
 
           let woods = [];
