@@ -5,7 +5,7 @@
  * SAPI CINÉTIQUE - Shop page with carousel, client-side filters, and hover effects
  *
  * @package Sapi-Maison
- * @version 9.5.0
+ * @version 9.5.1
  */
 
 defined('ABSPATH') || exit;

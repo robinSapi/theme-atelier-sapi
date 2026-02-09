@@ -3,6 +3,7 @@
  * Product Category Archive Template
  *
  * @package Sapi-Maison
+ * @version 9.5.1
  */
 
 defined('ABSPATH') || exit;
