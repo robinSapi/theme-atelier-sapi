@@ -3676,13 +3676,7 @@ li.carousel-editorial-slide,
   transition: all 300ms cubic-bezier(0.34, 0.61, 0.4, 0.97);
 }
 
-.carousel-editorial-slide .btn-view:hover {
-  background: linear-gradient(135deg, var(--color-orange) 0%, #E67D3F 100%);
-  border-color: var(--color-orange);
-  border-top-color: var(--color-orange);
-  transform: none;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
-}
+/* Carousel button hover styles moved to line 11683 to avoid duplicate selector */
 
 /* Wood border detail - artisanal touch */
 .carousel-editorial-slide .product-card-link::before,
@@ -11679,8 +11673,13 @@ body.woocommerce-cart div.woocommerce-wrapper {
   transform: translateX(-50%) translateY(0) !important;
 }
 
-/* Zoom effect on "Découvrir" button text */
+/* Zoom effect on "Découvrir" button text + orange border + inset shadow */
 .carousel-editorial-slide .btn-view:hover {
+  background: linear-gradient(135deg, var(--color-orange) 0%, #E67D3F 100%);
+  border-color: var(--color-orange);
+  border-top-color: var(--color-orange);
+  transform: none;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
   font-size: 0.9375rem;
   letter-spacing: 0.02em;
 }
