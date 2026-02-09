@@ -1543,6 +1543,9 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   display: block;
   text-decoration: none;
   color: inherit;
+  flex: 1; /* Take available space in flex card */
+  display: flex;
+  flex-direction: column;
 }
 
 .product-card-image {
@@ -6211,10 +6214,13 @@ transform: translateY(15px);
 
 .statement-text {
   font-family: var(--font-display);
+  font-size: 2.5rem; /* Fallback for older browsers */
   font-size: clamp(2.5rem, 4vw, 4rem);
   font-weight: 400;
   line-height: 1.2;
   color: var(--color-dark);
+  -webkit-text-size-adjust: 100%; /* Prevent Safari from auto-adjusting text size */
+  text-size-adjust: 100%;
 }
 
 .statement-author {
@@ -7857,6 +7863,7 @@ transform: translateY(15px);
   max-width: 1600px;
   margin: 0 auto;
   list-style: none;
+  align-items: stretch; /* Ensure all cards stretch to same height */
 }
 
 @media (max-width: 1200px) {
@@ -7887,6 +7894,9 @@ transform: translateY(15px);
   border-radius: var(--radius-lg);
   overflow: hidden;
   list-style: none;
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Take full grid cell height */
   -webkit-transition: all 0.5s var(--ease-expo);
   transition: all 0.5s var(--ease-expo);
 }
@@ -8097,7 +8107,8 @@ transform: translateY(15px);
 
 /* Product Actions */
 .product-card-cinetique .product-actions {
-  padding: 0 1.25rem 1.25rem;
+  padding: 0 1.25rem 1rem; /* Reduced bottom padding to minimize white space */
+  margin-top: auto; /* Push to bottom in flex context */
 }
 
 .product-card-cinetique .btn-view {
@@ -11392,6 +11403,9 @@ body.woocommerce-cart div.woocommerce-wrapper {
   border: 1px solid rgba(147, 125, 104, 0.2);
   border-radius: 68% 32% 32% 68% / 33% 47% 53% 67%; /* Organic left arrow shape */
   cursor: pointer;
+  opacity: 0; /* Hidden by default, like carousel */
+  transform: scale(0.9); /* Subtle scale effect */
+  -webkit-transform: scale(0.9);
   transition: all 400ms cubic-bezier(0.34, 0.61, 0.4, 0.97);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -11403,11 +11417,19 @@ body.woocommerce-cart div.woocommerce-wrapper {
   border-radius: 32% 68% 68% 32% / 47% 33% 67% 53%;
 }
 
+/* Show navigation on gallery hover */
+.quick-view-gallery:hover .gallery-nav-btn:not(:disabled) {
+  opacity: 1;
+  transform: scale(1);
+  -webkit-transform: scale(1);
+}
+
 .gallery-nav-btn:hover:not(:disabled) {
   background: var(--color-white);
   border-color: var(--color-orange);
   color: var(--color-orange);
-  transform: scale(1.15);
+  transform: scale(1.15) !important;
+  -webkit-transform: scale(1.15) !important;
   box-shadow: 0 6px 24px rgba(242, 137, 73, 0.2);
 }
 

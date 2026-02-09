@@ -18,6 +18,8 @@
     autoAdvanceInterval: 3000, // 3 seconds per image
     progressBar: null,
     progressAnimation: null,
+    preloadCache: {}, // Cache for preloaded product data
+    preloadTimeout: null,
 
     init: function() {
       this.modal = document.getElementById('quick-view-modal');
@@ -32,6 +34,24 @@
     },
 
     bindEvents: function() {
+      // Preload product data on hover for instant modal open
+      document.addEventListener('mouseenter', (e) => {
+        const btn = e.target.closest('.product-quick-view');
+        if (btn) {
+          clearTimeout(this.preloadTimeout);
+          this.preloadTimeout = setTimeout(() => {
+            this.preloadProductData(btn);
+          }, 200); // Small delay to avoid unnecessary preloads
+        }
+      }, true);
+
+      document.addEventListener('mouseleave', (e) => {
+        const btn = e.target.closest('.product-quick-view');
+        if (btn) {
+          clearTimeout(this.preloadTimeout);
+        }
+      }, true);
+
       // Quick view buttons
       document.addEventListener('click', (e) => {
         const btn = e.target.closest('.product-quick-view');
@@ -59,6 +79,28 @@
       });
     },
 
+    preloadProductData: function(btn) {
+      const productUrl = btn.dataset.productUrl;
+      if (!productUrl || this.preloadCache[productUrl]) return; // Already preloaded
+
+      console.log('[Quick View Preload] Starting preload for:', productUrl);
+
+      // Mark as loading to avoid duplicate preloads
+      this.preloadCache[productUrl] = { loading: true };
+
+      // Fetch and cache the product page HTML
+      fetch(productUrl)
+        .then(response => response.text())
+        .then(html => {
+          console.log('[Quick View Preload] Cached data for:', productUrl);
+          this.preloadCache[productUrl] = { html, timestamp: Date.now() };
+        })
+        .catch(error => {
+          console.error('[Quick View Preload] Error:', error);
+          delete this.preloadCache[productUrl]; // Clear failed cache
+        });
+    },
+
     openModal: function(btn) {
       const productId = btn.dataset.productId;
       const productUrl = btn.dataset.productUrl;
@@ -74,8 +116,16 @@
       this.body.style.display = 'none';
       document.body.style.overflow = 'hidden';
 
-      // Fetch product data with card context
-      this.fetchProductData(productId, productUrl, productCard);
+      // Check if we have preloaded data
+      const cached = this.preloadCache[productUrl];
+      if (cached && cached.html) {
+        console.log('[Quick View] Using preloaded data');
+        // Use cached data - will be much faster
+        this.fetchProductData(productId, productUrl, productCard, cached.html);
+      } else {
+        // Fetch normally if not preloaded
+        this.fetchProductData(productId, productUrl, productCard);
+      }
     },
 
     closeModal: function() {
@@ -88,7 +138,7 @@
       this.progressBar = null;
     },
 
-    fetchProductData: function(productId, productUrl, productCard) {
+    fetchProductData: function(productId, productUrl, productCard, cachedHtml) {
       // Extract basic data from product card
       const productData = {
         name: '',
@@ -133,24 +183,28 @@
       // If we have basic data, render immediately then load more images
       if (productData.name) {
         this.renderProduct(productData);
-        // Load additional images in background
-        this.loadAdditionalImages(productUrl, productData);
+        // Load additional images in background (use cached HTML if available)
+        this.loadAdditionalImages(productUrl, productData, cachedHtml);
       } else {
         // Fallback: fetch from product page
         this.fetchFromPage(productUrl);
       }
     },
 
-    loadAdditionalImages: function(productUrl, productData) {
+    loadAdditionalImages: function(productUrl, productData, cachedHtml) {
       // Load gallery images and variant data from product page in background
-      console.log('[Quick View Debug] Fetching product page:', productUrl);
+      console.log('[Quick View Debug] Loading additional data for:', productUrl);
 
-      fetch(productUrl)
-        .then(response => {
-          console.log('[Quick View Debug] Fetch response status:', response.status);
-          return response.text();
-        })
-        .then(html => {
+      // Use cached HTML if available, otherwise fetch
+      const htmlPromise = cachedHtml
+        ? Promise.resolve(cachedHtml)
+        : fetch(productUrl)
+            .then(response => {
+              console.log('[Quick View Debug] Fetch response status:', response.status);
+              return response.text();
+            });
+
+      htmlPromise.then(html => {
           console.log('[Quick View Debug] HTML received, length:', html.length);
 
           const parser = new DOMParser();
