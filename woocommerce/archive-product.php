@@ -31,59 +31,58 @@ $all_products = new WP_Query([
 ]);
 ?>
 
-<!-- Hero Section with Visual -->
-<section class="shop-hero-cinetique shop-hero-visual">
-  <div class="shop-hero-grid">
-    <div class="shop-hero-content">
-      <span class="section-number">01</span>
-      <h1><?php esc_html_e('Nos Créations', 'theme-sapi-maison'); ?></h1>
-      <p class="shop-subtitle">
-        <?php esc_html_e('Luminaires uniques, découpés au laser et assemblés à la main dans notre atelier lyonnais.', 'theme-sapi-maison'); ?>
-      </p>
-      <a href="#shop-products" class="shop-hero-cta button">
-        <?php esc_html_e('Découvrir la collection', 'theme-sapi-maison'); ?>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <polyline points="19 12 12 19 5 12"></polyline>
-        </svg>
-      </a>
-    </div>
-    <div class="shop-hero-visual-collage">
-      <?php
-      // Get 3 featured products for the collage
-      $featured_products = wc_get_products([
-        'limit' => 3,
-        'status' => 'publish',
-        'featured' => true,
-        'return' => 'objects',
-      ]);
+<!-- Hero Section - Magazine Style -->
+<?php
+// Get 1 featured product for hero background
+$hero_products = wc_get_products([
+  'limit'    => 1,
+  'status'   => 'publish',
+  'featured' => true,
+  'return'   => 'objects',
+]);
 
-      // Fallback to recent products if no featured
-      if (empty($featured_products)) {
-        $featured_products = wc_get_products([
-          'limit' => 3,
-          'status' => 'publish',
-          'orderby' => 'date',
-          'order' => 'DESC',
-          'return' => 'objects',
-        ]);
-      }
+// Fallback to most recent product if no featured
+if (empty($hero_products)) {
+  $hero_products = wc_get_products([
+    'limit'   => 1,
+    'status'  => 'publish',
+    'orderby' => 'date',
+    'order'   => 'DESC',
+    'return'  => 'objects',
+  ]);
+}
 
-      $collage_classes = ['collage-main', 'collage-accent-1', 'collage-accent-2'];
-      $i = 0;
-      foreach ($featured_products as $fp) :
-        $img_id = $fp->get_image_id();
-        $img_url = $img_id ? wp_get_attachment_image_url($img_id, 'medium_large') : wc_placeholder_img_src('medium_large');
-        $class = isset($collage_classes[$i]) ? $collage_classes[$i] : '';
-      ?>
-        <a href="<?php echo esc_url($fp->get_permalink()); ?>" class="collage-item <?php echo esc_attr($class); ?>">
-          <img src="<?php echo esc_url($img_url); ?>" alt="<?php echo esc_attr($fp->get_name()); ?>" loading="lazy">
-        </a>
-      <?php
-        $i++;
-      endforeach;
-      ?>
-    </div>
+$hero_product = !empty($hero_products) ? $hero_products[0] : null;
+$hero_img_url = '';
+if ($hero_product) {
+  $hero_img_id = $hero_product->get_image_id();
+  $hero_img_url = $hero_img_id
+    ? wp_get_attachment_image_url($hero_img_id, 'full')
+    : wc_placeholder_img_src('full');
+}
+?>
+<section class="shop-hero-cinetique shop-hero-magazine">
+  <?php if ($hero_img_url) : ?>
+    <img
+      class="shop-hero-magazine-bg"
+      src="<?php echo esc_url($hero_img_url); ?>"
+      alt="<?php echo $hero_product ? esc_attr($hero_product->get_name()) : ''; ?>"
+      fetchpriority="high"
+    />
+  <?php endif; ?>
+  <div class="shop-hero-magazine-overlay"></div>
+  <div class="shop-hero-magazine-content">
+    <h1><?php esc_html_e('Nos Créations', 'theme-sapi-maison'); ?></h1>
+    <p class="shop-subtitle">
+      <?php esc_html_e('Luminaires uniques, découpés au laser et assemblés à la main dans notre atelier lyonnais.', 'theme-sapi-maison'); ?>
+    </p>
+    <a href="#shop-products" class="shop-hero-cta button">
+      <?php esc_html_e('Découvrir la collection', 'theme-sapi-maison'); ?>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <polyline points="19 12 12 19 5 12"></polyline>
+      </svg>
+    </a>
   </div>
 </section>
 

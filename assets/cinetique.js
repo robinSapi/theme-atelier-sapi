@@ -275,12 +275,11 @@ document.addEventListener('DOMContentLoaded', () => {
           heroImage.style.transform = `translateY(${scrolled * 0.1}px) scale(1.05)`;
         }
 
-        // Parallax on shop hero visual collage
-        const shopHeroImages = document.querySelectorAll('.shop-hero-visual-collage .collage-item img');
-        shopHeroImages.forEach((img, index) => {
-          const speed = 0.05 + (index * 0.02); // Different speeds for depth
-          img.style.transform = `translateY(${scrolled * speed}px) scale(1.05)`;
-        });
+        // Parallax on shop magazine hero
+        const shopMagazineHero = document.querySelector('.shop-hero-magazine-bg');
+        if (shopMagazineHero) {
+          shopMagazineHero.style.transform = `translateY(${scrolled * 0.1}px) scale(1.05)`;
+        }
 
         // Parallax on category hero images
         const categoryHeroImage = document.querySelector('.category-hero-visual img');
@@ -289,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Parallax on featured cards images
-        const featuredCardsImages = document.querySelectorAll('.category-featured-media img, .shop-hero-visual-collage img');
+        const featuredCardsImages = document.querySelectorAll('.category-featured-media img');
         featuredCardsImages.forEach((img, index) => {
           const rect = img.getBoundingClientRect();
           const isInView = rect.top < window.innerHeight && rect.bottom > 0;
