@@ -149,17 +149,9 @@ function sapi_focal_point_render($post) {
   <?php
 }
 
-// Save focal point via traditional form submit (classic editor fallback)
-function sapi_focal_point_save($post_id) {
-  if (!isset($_POST['sapi_focal_nonce']) || !wp_verify_nonce($_POST['sapi_focal_nonce'], 'sapi_focal_point_save')) return;
-  if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-  if (!current_user_can('edit_post', $post_id)) return;
-
-  if (isset($_POST['sapi_hero_focal_point'])) {
-    update_post_meta($post_id, '_sapi_hero_focal_point', sanitize_text_field($_POST['sapi_hero_focal_point']));
-  }
-}
-add_action('save_post', 'sapi_focal_point_save');
+// Focal point is saved exclusively via AJAX (below).
+// No save_post hook — Gutenberg re-submits meta box forms on "Update",
+// which overwrites the AJAX-saved value with the stale initial value.
 
 // Save focal point via AJAX (instant save, Gutenberg compatible)
 function sapi_focal_point_ajax_save() {
@@ -175,26 +167,6 @@ function sapi_focal_point_ajax_save() {
   wp_send_json_error('Missing data');
 }
 add_action('wp_ajax_sapi_save_focal_point', 'sapi_focal_point_ajax_save');
-
-// DEBUG: Read focal point meta directly (remove after testing)
-function sapi_focal_point_debug_read() {
-  $shop_page_id = wc_get_page_id('shop');
-  $raw = get_post_meta($shop_page_id, '_sapi_hero_focal_point', true);
-  $all_meta = get_post_meta($shop_page_id, '_sapi_hero_focal_point');
-  global $wpdb;
-  $db_row = $wpdb->get_var($wpdb->prepare(
-    "SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
-    $shop_page_id, '_sapi_hero_focal_point'
-  ));
-  wp_send_json_success([
-    'shop_page_id' => $shop_page_id,
-    'get_post_meta_single' => $raw,
-    'get_post_meta_all' => $all_meta,
-    'direct_db_query' => $db_row,
-  ]);
-}
-add_action('wp_ajax_nopriv_sapi_read_focal_point', 'sapi_focal_point_debug_read');
-add_action('wp_ajax_sapi_read_focal_point', 'sapi_focal_point_debug_read');
 
 function sapi_focal_point_admin_assets($hook) {
   if ($hook !== 'post.php' && $hook !== 'post-new.php') return;
