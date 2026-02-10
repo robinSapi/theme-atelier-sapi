@@ -11401,6 +11401,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(147, 125, 104, 0.2);
   border-radius: 68% 32% 32% 68% / 33% 47% 53% 67%; /* Organic left arrow shape */
+  color: var(--color-wood);
   cursor: pointer;
   opacity: 0; /* Hidden by default, like carousel */
   transform: scale(0.9); /* Subtle scale effect */
