@@ -11423,12 +11423,13 @@ body.woocommerce-cart div.woocommerce-wrapper {
   -webkit-transform: scale(1);
 }
 
-/* TEST DIAGNOSTIC - IMPOSSIBLE A RATER */
+/* Quick View buttons - High contrast orange like carousel */
 .gallery-nav-btn:hover:not(:disabled) {
-  background: #00FF00 !important;
-  border: 10px solid #FF0000 !important;
-  transform: scale(1.5) !important;
-  box-shadow: 0 0 50px #FF00FF !important;
+  background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%);
+  border-color: #FF6B35;
+  color: #FFFFFF;
+  transform: none;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(255, 107, 53, 0.3);
 }
 
 .gallery-nav-btn:disabled {
