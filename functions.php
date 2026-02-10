@@ -176,6 +176,26 @@ function sapi_focal_point_ajax_save() {
 }
 add_action('wp_ajax_sapi_save_focal_point', 'sapi_focal_point_ajax_save');
 
+// DEBUG: Read focal point meta directly (remove after testing)
+function sapi_focal_point_debug_read() {
+  $shop_page_id = wc_get_page_id('shop');
+  $raw = get_post_meta($shop_page_id, '_sapi_hero_focal_point', true);
+  $all_meta = get_post_meta($shop_page_id, '_sapi_hero_focal_point');
+  global $wpdb;
+  $db_row = $wpdb->get_var($wpdb->prepare(
+    "SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s",
+    $shop_page_id, '_sapi_hero_focal_point'
+  ));
+  wp_send_json_success([
+    'shop_page_id' => $shop_page_id,
+    'get_post_meta_single' => $raw,
+    'get_post_meta_all' => $all_meta,
+    'direct_db_query' => $db_row,
+  ]);
+}
+add_action('wp_ajax_nopriv_sapi_read_focal_point', 'sapi_focal_point_debug_read');
+add_action('wp_ajax_sapi_read_focal_point', 'sapi_focal_point_debug_read');
+
 function sapi_focal_point_admin_assets($hook) {
   if ($hook !== 'post.php' && $hook !== 'post-new.php') return;
 
