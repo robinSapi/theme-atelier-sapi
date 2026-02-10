@@ -108,6 +108,12 @@
   font-size: 12px;
 }
 
+.focal-picker-status {
+  font-weight: 600;
+  color: #46b450;
+  min-width: 80px;
+}
+
 .focal-picker-hint {
   color: #999;
   font-style: italic;

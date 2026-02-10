@@ -135,7 +135,8 @@ function sapi_focal_point_render($post) {
         <div class="focal-picker-info">
           <span>Point focal :</span>
           <span class="focal-picker-coords"><?php echo esc_html($focal); ?></span>
-          <span class="focal-picker-hint">Le rectangle orange montre la zone visible du hero</span>
+          <span class="focal-picker-status"></span>
+          <span class="focal-picker-hint">Cliquez pour d&eacute;placer &bull; Sauvegarde automatique</span>
         </div>
       </div>
     <?php else : ?>
@@ -148,6 +149,7 @@ function sapi_focal_point_render($post) {
   <?php
 }
 
+// Save focal point via traditional form submit (classic editor fallback)
 function sapi_focal_point_save($post_id) {
   if (!isset($_POST['sapi_focal_nonce']) || !wp_verify_nonce($_POST['sapi_focal_nonce'], 'sapi_focal_point_save')) return;
   if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
@@ -159,6 +161,21 @@ function sapi_focal_point_save($post_id) {
 }
 add_action('save_post', 'sapi_focal_point_save');
 
+// Save focal point via AJAX (instant save, Gutenberg compatible)
+function sapi_focal_point_ajax_save() {
+  check_ajax_referer('sapi_focal_point_save', 'nonce');
+  if (!current_user_can('edit_posts')) wp_send_json_error('Permission denied');
+
+  $post_id = intval($_POST['post_id']);
+  $focal = sanitize_text_field($_POST['focal_point']);
+  if ($post_id && $focal) {
+    update_post_meta($post_id, '_sapi_hero_focal_point', $focal);
+    wp_send_json_success(['saved' => $focal]);
+  }
+  wp_send_json_error('Missing data');
+}
+add_action('wp_ajax_sapi_save_focal_point', 'sapi_focal_point_ajax_save');
+
 function sapi_focal_point_admin_assets($hook) {
   if ($hook !== 'post.php' && $hook !== 'post-new.php') return;
 
@@ -168,6 +185,11 @@ function sapi_focal_point_admin_assets($hook) {
 
   wp_enqueue_style('sapi-focal-point', get_template_directory_uri() . '/assets/admin-focal-point.css', [], filemtime(get_template_directory() . '/assets/admin-focal-point.css'));
   wp_enqueue_script('sapi-focal-point', get_template_directory_uri() . '/assets/admin-focal-point.js', [], filemtime(get_template_directory() . '/assets/admin-focal-point.js'), true);
+  wp_localize_script('sapi-focal-point', 'sapiFocal', [
+    'ajaxUrl' => admin_url('admin-ajax.php'),
+    'nonce'   => wp_create_nonce('sapi_focal_point_save'),
+    'postId'  => $post->ID,
+  ]);
 }
 add_action('admin_enqueue_scripts', 'sapi_focal_point_admin_assets');
 

@@ -1,6 +1,7 @@
 /**
  * Focal Point Picker for Shop Hero Image
  * Shows image with draggable crosshair + live preview rectangle
+ * Saves instantly via AJAX (Gutenberg compatible)
  */
 (function () {
   'use strict';
@@ -16,6 +17,7 @@
     const preview = container.querySelector('.focal-picker-preview');
     const input = document.getElementById('sapi_hero_focal_point');
     const coordsDisplay = container.querySelector('.focal-picker-coords');
+    const statusEl = container.querySelector('.focal-picker-status');
 
     if (!img || !input) return;
 
@@ -28,7 +30,9 @@
       focalY = parseFloat(parts[1]) || 50;
     }
 
-    function updatePicker(x, y) {
+    let saveTimeout = null;
+
+    function updatePicker(x, y, autoSave) {
       focalX = Math.max(0, Math.min(100, x));
       focalY = Math.max(0, Math.min(100, y));
 
@@ -46,6 +50,39 @@
 
       // Update preview rectangle
       updatePreview();
+
+      // Auto-save via AJAX (debounced)
+      if (autoSave && typeof sapiFocal !== 'undefined') {
+        if (saveTimeout) clearTimeout(saveTimeout);
+        if (statusEl) statusEl.textContent = '...';
+        saveTimeout = setTimeout(saveViaAjax, 300);
+      }
+    }
+
+    function saveViaAjax() {
+      if (typeof sapiFocal === 'undefined') return;
+
+      const formData = new FormData();
+      formData.append('action', 'sapi_save_focal_point');
+      formData.append('nonce', sapiFocal.nonce);
+      formData.append('post_id', sapiFocal.postId);
+      formData.append('focal_point', input.value);
+
+      fetch(sapiFocal.ajaxUrl, {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin'
+      })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (statusEl) {
+          statusEl.textContent = data.success ? 'Sauvegardé' : 'Erreur';
+          setTimeout(function () { statusEl.textContent = ''; }, 2000);
+        }
+      })
+      .catch(function () {
+        if (statusEl) statusEl.textContent = 'Erreur réseau';
+      });
     }
 
     function updatePreview() {
@@ -103,7 +140,7 @@
       const imgRect = img.getBoundingClientRect();
       const x = ((e.clientX - imgRect.left) / imgRect.width) * 100;
       const y = ((e.clientY - imgRect.top) / imgRect.height) * 100;
-      updatePicker(x, y);
+      updatePicker(x, y, true);
     }
 
     area.addEventListener('mousedown', function (e) {
@@ -123,23 +160,20 @@
       isDragging = false;
     });
 
-    // Initialize
+    // Initialize (no auto-save on init)
     img.addEventListener('load', function () {
-      updatePicker(focalX, focalY);
+      updatePicker(focalX, focalY, false);
     });
 
-    // If image already loaded
     if (img.complete) {
-      updatePicker(focalX, focalY);
+      updatePicker(focalX, focalY, false);
     }
 
-    // Recalculate on window resize
     window.addEventListener('resize', function () {
       updatePreview();
     });
   }
 
-  // Run on DOM ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
