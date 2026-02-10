@@ -36,17 +36,15 @@ $all_products = new WP_Query([
 // Priority 1: ACF custom hero image (attached to WooCommerce Shop page)
 $hero_img_url = '';
 $hero_alt = 'Nos Créations - Atelier Sâpi';
-$hero_focal_point = 'center';
+$shop_page_id = wc_get_page_id('shop');
+$hero_focal_point = get_post_meta($shop_page_id, '_sapi_hero_focal_point', true);
+if (!$hero_focal_point) $hero_focal_point = '50% 50%';
+
 if (function_exists('get_field')) {
-  $shop_page_id = wc_get_page_id('shop');
   $acf_hero = get_field('shop_hero_image', $shop_page_id);
   if ($acf_hero) {
     $hero_img_url = is_array($acf_hero) ? $acf_hero['url'] : $acf_hero;
     $hero_alt = is_array($acf_hero) && !empty($acf_hero['alt']) ? $acf_hero['alt'] : $hero_alt;
-  }
-  $acf_focal = get_field('shop_hero_focal_point', $shop_page_id);
-  if ($acf_focal) {
-    $hero_focal_point = sanitize_text_field($acf_focal);
   }
 }
 

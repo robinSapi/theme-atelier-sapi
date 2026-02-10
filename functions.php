@@ -87,6 +87,90 @@ add_action('after_setup_theme', 'sapi_maison_content_width', 0);
 // Field: shop_hero_image (Image, return format: Array)
 // Location rule in ACF: Page = Boutique (Shop page)
 
+// Focal Point Picker - Meta box + admin assets for Shop page
+function sapi_focal_point_meta_box() {
+  $shop_page_id = wc_get_page_id('shop');
+  if (!$shop_page_id) return;
+
+  add_meta_box(
+    'sapi_hero_focal_point',
+    'Point focal du hero',
+    'sapi_focal_point_render',
+    'page',
+    'normal',
+    'high'
+  );
+}
+add_action('add_meta_boxes', 'sapi_focal_point_meta_box');
+
+function sapi_focal_point_render($post) {
+  $shop_page_id = wc_get_page_id('shop');
+  if ($post->ID !== $shop_page_id) {
+    echo '<p>Ce champ est uniquement pour la page Boutique.</p>';
+    return;
+  }
+
+  wp_nonce_field('sapi_focal_point_save', 'sapi_focal_nonce');
+  $focal = get_post_meta($post->ID, '_sapi_hero_focal_point', true);
+  if (!$focal) $focal = '50% 50%';
+
+  // Get hero image from ACF
+  $hero_img_url = '';
+  if (function_exists('get_field')) {
+    $acf_hero = get_field('shop_hero_image', $post->ID);
+    if ($acf_hero) {
+      $hero_img_url = is_array($acf_hero) ? $acf_hero['url'] : $acf_hero;
+    }
+  }
+  ?>
+  <div id="sapi-focal-picker">
+    <?php if ($hero_img_url) : ?>
+      <div class="focal-picker-wrap">
+        <label>Cliquez sur l'image pour d&eacute;finir le point focal :</label>
+        <div class="focal-picker-area">
+          <img class="focal-picker-image" src="<?php echo esc_url($hero_img_url); ?>" alt="Hero preview">
+          <div class="focal-picker-crosshair"><div class="focal-picker-dot"></div></div>
+          <div class="focal-picker-preview"></div>
+        </div>
+        <div class="focal-picker-info">
+          <span>Point focal :</span>
+          <span class="focal-picker-coords"><?php echo esc_html($focal); ?></span>
+          <span class="focal-picker-hint">Le rectangle orange montre la zone visible du hero</span>
+        </div>
+      </div>
+    <?php else : ?>
+      <div class="focal-picker-no-image">
+        Uploadez d'abord une image hero via le champ ACF "shop_hero_image" ci-dessus, puis enregistrez la page.
+      </div>
+    <?php endif; ?>
+    <input type="hidden" id="sapi_hero_focal_point" name="sapi_hero_focal_point" value="<?php echo esc_attr($focal); ?>">
+  </div>
+  <?php
+}
+
+function sapi_focal_point_save($post_id) {
+  if (!isset($_POST['sapi_focal_nonce']) || !wp_verify_nonce($_POST['sapi_focal_nonce'], 'sapi_focal_point_save')) return;
+  if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+  if (!current_user_can('edit_post', $post_id)) return;
+
+  if (isset($_POST['sapi_hero_focal_point'])) {
+    update_post_meta($post_id, '_sapi_hero_focal_point', sanitize_text_field($_POST['sapi_hero_focal_point']));
+  }
+}
+add_action('save_post', 'sapi_focal_point_save');
+
+function sapi_focal_point_admin_assets($hook) {
+  if ($hook !== 'post.php' && $hook !== 'post-new.php') return;
+
+  global $post;
+  $shop_page_id = wc_get_page_id('shop');
+  if (!$post || $post->ID !== $shop_page_id) return;
+
+  wp_enqueue_style('sapi-focal-point', get_template_directory_uri() . '/assets/admin-focal-point.css', [], filemtime(get_template_directory() . '/assets/admin-focal-point.css'));
+  wp_enqueue_script('sapi-focal-point', get_template_directory_uri() . '/assets/admin-focal-point.js', [], filemtime(get_template_directory() . '/assets/admin-focal-point.js'), true);
+}
+add_action('admin_enqueue_scripts', 'sapi_focal_point_admin_assets');
+
 function sapi_maison_cart_count() {
   if (!function_exists('WC')) {
     return 0;
