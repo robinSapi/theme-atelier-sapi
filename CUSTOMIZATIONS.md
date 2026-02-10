@@ -937,6 +937,64 @@ Harmonisation complète du site pour que TOUTES les pages atteignent le niveau p
 - `functions.php` : +15 lignes (SEO filter)
 - `style.css` : +320 lignes (mini-carousel section 4028-4310)
 
+**2026-02-11 (Refonte Hero /nos-creations/ + Focal Point Picker):**
+
+**SEO - Hiérarchie des titres (commit 3888cbf):**
+- ✅ **H2 → H3** : Noms de produits dans `content-product.php` passés de `<h2>` à `<h3>`
+  - Raison : respect hiérarchie SEO (H1 page → H2 sections → H3 produits)
+
+**Hero Magazine-Style (commits c9a628c → cb86283):**
+- ✅ **REFONTE COMPLÈTE DU HERO** : Passage de grille 50/50 (texte + collage 3 images) à hero full-width magazine
+  - Fichier : `woocommerce/archive-product.php` (lignes 34-111)
+  - **Avant** : `shop-hero-grid` avec texte à gauche + 3 images cliquables à droite
+  - **Après** : `shop-hero-magazine` avec 1 grande image plein écran + texte superposé
+  - Section number "01" retirée
+
+- ✅ **IMAGE SOURCE** (priorité) :
+  1. Champ ACF `shop_hero_image` sur la page WooCommerce Shop (ACF free, pas Pro)
+  2. Fallback : galerie du 1er produit featured (photo ambiance)
+  3. Fallback : image principale du 1er produit récent
+  - Config ACF requise : Groupe de champs → Règle "Page est égal à Nos créations"
+
+- ✅ **FOCAL POINT PICKER** : Sélecteur visuel dans l'admin
+  - Fichiers : `assets/admin-focal-point.js` (182 lignes), `assets/admin-focal-point.css` (131 lignes)
+  - Meta box WordPress sur l'éditeur de la page Shop
+  - Crosshair orange draggable sur l'image + rectangle de preview (zone visible du hero)
+  - Sauvegarde AJAX instantanée (debounced 300ms), Gutenberg compatible
+  - Post meta : `_sapi_hero_focal_point` (format `"X.X% Y.Y%"`)
+  - Feedback : "✓ Sauvegardé (page XX)" en vert / erreurs en rouge
+  - **IMPORTANT** : Pas de hook `save_post` — Gutenberg re-soumet les meta box forms et écrase la valeur AJAX
+
+- ✅ **CSS HERO MAGAZINE** : ~150 lignes dans `style.css` (section 7623-7763)
+  - Layout : `position: relative; overflow: hidden; height: clamp(300px, 45vh, 500px)`
+  - Image : `position: absolute; object-fit: cover` + `!important` sur width/height/max-width/max-height
+  - **CRITIQUE** : `!important` requis sur les dimensions car `img { height: auto }` global écrasait `height: 100%`
+  - Overlay : `linear-gradient(to top, rgba(50,50,50,0.85) 0%, rgba(50,50,50,0.15) 100%)`
+  - Texte : blanc, text-shadow, CTA orange
+  - Responsive : 3 breakpoints (968px, 600px) avec gradient renforcé sur mobile
+  - Safari : préfixes `-webkit-`, `translateZ(0)` pour GPU
+
+- ✅ **FUNCTIONS.PHP** : Meta box + AJAX endpoint (~45 lignes)
+  - `sapi_focal_point_meta_box()` : enregistre la meta box
+  - `sapi_focal_point_render($post)` : affiche le picker (uniquement page Shop)
+  - `sapi_focal_point_ajax_save()` : endpoint `wp_ajax_sapi_save_focal_point`
+  - `sapi_focal_point_admin_assets($hook)` : CSS/JS admin + `wp_localize_script`
+
+**LEÇONS APPRISES (Hero /nos-creations/):**
+1. **Gutenberg + meta box** : `save_post` hook écrase les valeurs AJAX car Gutenberg re-soumet les formulaires meta box → utiliser AJAX-only
+2. **`img { height: auto }` global** : empêche `object-fit: cover` de fonctionner sur les images positionnées en absolu → toujours forcer `height: 100% !important`
+3. **Données par environnement** : Le focal point est stocké en base, pas dans le code → chaque env (local/test/prod) a sa propre valeur
+4. **`object-position` inline** : Ne pas mettre `object-position` dans le CSS si on veut le contrôler par inline style → le retirer du CSS
+
+**FICHIERS MODIFIÉS (Hero /nos-creations/):**
+- `woocommerce/archive-product.php` : Hero complètement réécrit
+- `woocommerce/content-product.php` : H2 → H3
+- `style.css` : +150 lignes (hero magazine section 7623-7763)
+- `functions.php` : +45 lignes (meta box, AJAX, admin assets)
+- `assets/admin-focal-point.js` : Nouveau fichier (182 lignes)
+- `assets/admin-focal-point.css` : Nouveau fichier (131 lignes)
+- `assets/cinetique.js` : Parallax collage → parallax magazine
+
 **2025-02-04:**
 - Création du thème custom depuis le travail Elementor de Jérôme
 - Nettoyage du code debug
