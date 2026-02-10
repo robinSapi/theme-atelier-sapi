@@ -11425,15 +11425,10 @@ body.woocommerce-cart div.woocommerce-wrapper {
   min-width: 18px !important;
   min-height: 18px !important;
   fill: currentColor !important;
-  opacity: 0.85 !important;
+  opacity: 1 !important;
   visibility: visible !important;
   position: relative !important;
   z-index: 10 !important;
-  transform: scale(0.85) rotate(-5deg) !important;
-}
-
-.gallery-next svg {
-  transform: scale(0.85) rotate(5deg) !important;
 }
 
 /* Show navigation on gallery hover */
