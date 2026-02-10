@@ -5,58 +5,6 @@
 
 ---
 
-## 🚨 ATTENTION : STRUCTURE DOUBLE REPOSITORY (CRITICAL)
-
-**⚠️ INFORMATION ESSENTIELLE POUR LE DÉPLOIEMENT :**
-
-Le projet a une **structure de dépôts Git imbriqués** qui peut causer des problèmes de déploiement si mal comprise :
-
-### Structure réelle :
-```
-/Users/samuel/Local/atelier-sapi/              ← REPO PRINCIPAL (ce qui est déployé)
-├── .git/                                       ← Git repo racine
-├── style.css                                   ← Version 0.2.1 ✅
-├── functions.php                               ← Fichiers du thème ICI
-├── wp-content/
-│   └── themes/
-│       └── theme-sapi-maison/                  ← REPO NESTED (WordPress local)
-│           ├── .git/                           ← Git repo imbriqué
-│           └── style.css                       ← Aussi version 0.2.1
-```
-
-### Problème critique identifié (2026-02-10) :
-
-**GitHub Actions déploie depuis LA RACINE** (`local-dir: ./`), PAS depuis le dossier nested !
-
-- ❌ Si vous committez dans `/wp-content/themes/theme-sapi-maison/`, le déploiement NE VERRA PAS vos changements
-- ✅ Vous DEVEZ synchroniser les fichiers vers la racine PUIS committer
-
-### Workflow correct :
-
-1. **Travailler dans le nested** `/wp-content/themes/theme-sapi-maison/` (pour tester en local avec WordPress)
-2. **Synchroniser vers la racine** :
-   ```bash
-   cd /Users/samuel/Local/atelier-sapi
-   rsync -av --exclude='.git' --exclude='.github' wp-content/themes/theme-sapi-maison/ .
-   ```
-3. **Committer à la RACINE** :
-   ```bash
-   git add style.css functions.php  # etc.
-   git commit -m "votre message"
-   git push
-   ```
-
-### Ce qu'on a appris :
-
-- Les deux repos pointent vers le même remote GitHub : `robinSapi/testLumineux-atelier-sapi.git`
-- Le parent repo (racine) et le nested repo ont des historiques de commits DIFFÉRENTS
-- GitHub Actions lit le repo parent, donc déploie les fichiers de la RACINE
-- Si la racine est obsolète (version 0.2.0) et le nested à jour (0.2.1), le déploiement envoie l'ancienne version
-
-**🔥 NE JAMAIS changer `local-dir` dans `.github/workflows/deploy-test.yml` vers le nested directory - ça cause une page blanche !**
-
----
-
 ## 🎯 Principes d'Exigence
 
 **Philosophie de développement :**
