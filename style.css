@@ -1498,6 +1498,16 @@ ul.products.products-carousel-track {
   gap: 1.5rem;
 }
 
+/* EXCEPTION: Mini carousel also uses flex, not grid */
+ul.products.products-carousel-mini-track {
+  display: flex !important;
+  grid-template-columns: none !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
 /* Override WooCommerce default li.product styles */
 .woocommerce ul.products li.product,
 .shop-products ul.products li.product,
@@ -4244,7 +4254,7 @@ li.carousel-editorial-slide,
   margin: 0;
 }
 
-.category-products-grid .products {
+.category-products-grid ul.products {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 3rem;
@@ -4274,7 +4284,7 @@ li.carousel-editorial-slide,
     width: calc(50% - 0.75rem);
   }
 
-  .category-products-grid .products {
+  .category-products-grid ul.products {
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 1.5rem;
   }
@@ -4299,7 +4309,7 @@ li.carousel-editorial-slide,
     height: 40px;
   }
 
-  .category-products-grid .products {
+  .category-products-grid ul.products {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 1.5rem;
     padding: 0 2rem; /* Match carousel padding */
