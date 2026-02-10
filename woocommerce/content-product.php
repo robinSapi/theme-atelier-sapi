@@ -185,7 +185,7 @@ if ($is_editorial_carousel) {
     </div>
 
     <div class="product-info">
-      <h2 class="product-name"><?php the_title(); ?></h2>
+      <h3 class="product-name"><?php the_title(); ?></h3>
 
       <?php if ($category_name) : ?>
         <p class="product-category"><?php echo esc_html($category_name); ?></p>
