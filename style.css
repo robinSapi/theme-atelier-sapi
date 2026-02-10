@@ -4071,6 +4071,7 @@ li.carousel-editorial-slide,
 .products-carousel-mini-track {
   display: flex !important;
   flex-wrap: nowrap !important; /* Don't wrap to new line */
+  justify-content: center; /* Center the 3 cards */
   height: 100%;
   gap: 1.5rem;
   list-style: none;
@@ -4084,12 +4085,11 @@ li.carousel-editorial-slide,
   display: none;
 }
 
-/* Mini carousel product cards */
+/* Mini carousel product cards - 3 visible */
 .product-mini-card {
   flex: 0 0 auto;
-  width: calc(25% - 1.125rem);
-  min-width: 220px;
-  max-width: 320px;
+  width: calc(33.333% - 1rem);
+  min-width: 240px;
   height: 100%;
   list-style: none;
 }
@@ -4249,7 +4249,7 @@ li.carousel-editorial-slide,
   margin: 0 auto;
   padding: 0 3rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 2rem;
 }
 
@@ -4275,7 +4275,7 @@ li.carousel-editorial-slide,
   }
 
   .category-products-grid .products {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
   }
 }
@@ -4300,7 +4300,7 @@ li.carousel-editorial-slide,
   }
 
   .category-products-grid .products {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
     padding: 0 2rem; /* Match carousel padding */
   }
