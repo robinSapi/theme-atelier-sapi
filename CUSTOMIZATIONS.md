@@ -796,6 +796,147 @@ Harmonisation complète du site pour que TOUTES les pages atteignent le niveau p
   - Vague 5 (4cc440a) : 724 ins, 11 del
   - Git tag : v1.0.0-premium-complete
 
+**2026-02-09 (Quick View Modal - commit 4e8b892):**
+- ✅ **QUICK VIEW MODAL PREMIUM** : Modal d'aperçu produit sans quitter la page
+  - Fichiers : `footer.php`, `assets/quick-view.js` (783 lignes), `style.css` (850+ lignes)
+  - **Déclencheur** : Bouton "Aperçu rapide" sur chaque vignette produit (hover sur desktop, toujours visible mobile)
+  - **Structure modal** : overlay blur + content card centrée
+  - **Galerie avancée** :
+    - Multi-images avec navigation prev/next (icônes œil SVG)
+    - Thumbnails cliquables en bas
+    - Progress bar auto-défilement 8s par image
+    - Swipe tactile supporté (touch-enabled)
+    - Zoom on click → fullscreen lightbox avec backdrop blur
+  - **Product info** :
+    - Prix dynamique (simple products / variable products)
+    - Variation swatches (Matériau + Taille) avec initiales/images
+    - Quantité +/- avec validation stock
+    - Bouton "Ajouter au panier" AJAX → pas de reload
+    - Feedback UX : Loading state → Success ✓ → Auto-close 2s
+  - **Animations** :
+    - Modal fadeIn avec backdrop blur 10px
+    - Gallery slide transitions avec easing
+    - Cart success : scale + checkmark animation
+  - **Performance** :
+    - AJAX fetch product data (pas de full page load)
+    - Lazy-load gallery images
+    - Event delegation pour multiple products
+  - **Accessibility** :
+    - ESC key pour fermer
+    - Focus trap dans modal
+    - ARIA labels (role="dialog", aria-modal="true")
+    - Keyboard navigation gallery (arrow keys)
+
+**2026-02-10 (Refonte Page Catégorie - Phase 1 + Phase 2):**
+
+**PHASE 1 - Quick Fixes (commit af1dd86):**
+- ✅ **SUPPRESSIONS** : Numérotation sections "01" et "02" retirée
+- ✅ **SPACING RÉDUIT** :
+  - Hero : `padding: 8rem → 2rem` top, `4rem → 1.5rem` bottom
+  - Featured section : `margin-bottom: 2rem → 1.5rem`
+- ✅ **BREADCRUMB** : Background `--color-gray-light` → `--color-warm` (plus doux)
+- ✅ **TAGLINES AMÉLIORÉS** : 5 catégories avec storytelling + SEO
+  - suspension : "Des luminaires suspendus en bois qui transforment votre plafond en œuvre d'art..."
+  - lampadaire : "L'éclairage d'ambiance parfait pour structurer votre espace..."
+  - applique : "Libérez vos sols, habillez vos murs..."
+  - lampe-a-poser : "La touche finale qui change tout. Posez-la où vous voulez..."
+  - accessoire : "Les bons accessoires font toute la différence..."
+
+**PHASE 2 - Major Restructure (commits suivants):**
+- ✅ **MINI-CAROUSEL "Coups de cœur"** :
+  - Fichier : `taxonomy-product_cat.php` (lignes 45-116)
+  - Requête : 4 best-sellers (`meta_key: total_sales`, `orderby: meta_value_num DESC`)
+  - Layout : 20vh height (min 280px, max 400px)
+  - Cards custom inline HTML (pas WooCommerce default) :
+    - Structure horizontale : 45% image + 55% info
+    - `product-mini-card` avec `product-mini-link`
+  - **Custom query nécessaire** : `wc_get_template_part()` ne fonctionne pas pour layout custom
+  - Navigation buttons : SVG arrows (cachés jusqu'à implémentation JS)
+
+- ✅ **GRILLE COMPLÈTE** : Tous les produits affichés
+  - Fichier : `taxonomy-product_cat.php` (lignes 119-157)
+  - Query dédiée : `$grid_query` avec `posts_per_page: -1`
+  - **Custom query nécessaire** : La main query était corrompue par le carousel
+  - Header : "Toutes nos {catégorie}s" + compteur produits
+  - Template WooCommerce standard : `wc_get_template_part('content', 'product')`
+
+- ✅ **EDITORIAL CONTENT DÉPLACÉ** : Section riche en bas de page (après produits)
+  - Fichier : `taxonomy-product_cat.php` (lignes 159-242)
+  - Array `$editorial_content` : 5 catégories avec 500+ mots chacune
+  - Structure : tagline + intro + why + promise + 4 use cases
+  - Design : `data-particles="wood"` pour animations canvas
+
+**2026-02-10 (Corrections P0 Critical - commits suivants):**
+- ✅ **GRAMMAIRE** : "Tous nos suspension" → "Toutes nos suspensions" (ligne 121)
+- ✅ **SEO TITLES** : Filter `document_title_parts` dans `functions.php`
+  - suspension → "Suspensions artisanales en bois"
+  - lampadaire → "Lampadaires en bois design"
+  - applique → "Appliques murales artisanales"
+  - lampe-a-poser → "Lampes à poser en bois"
+  - accessoire → "Accessoires pour luminaires"
+
+- ✅ **CAROUSEL ARROWS SVG** : Styling explicite pour icônes
+  ```css
+  .carousel-mini-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--color-orange);
+    stroke-width: 2;
+    fill: none;
+  }
+  ```
+
+- ✅ **OVERFLOW 4ÈME PRODUIT** : Triple approche anti-débordement
+  - `overflow: hidden` sur `.products-carousel-mini-wrapper`
+  - `flex-wrap: nowrap !important` sur `.products-carousel-mini-track`
+  - `.product-mini-card:nth-child(n+4) { display: none; }` (cache 4ème+)
+
+**2026-02-10 (Corrections Spacing & Alignment - commits c5a35d4 + f760bc9):**
+- ✅ **SPACING RÉDUIT** : Espacement vertical entre sections
+  - Hero bottom : `4rem → 1.5rem` (64px → 24px)
+  - Featured section : `3rem 0 → 2rem 0 2.5rem` (48px → 32px top, 40px bottom)
+  - Featured header : `margin-bottom: 2rem → 1.5rem`
+  - Grid section : `4rem 0 → 2.5rem 0 3rem` (64px → 40px top, 48px bottom)
+
+- ✅ **IMAGE CROPPING FIX** : Mini-carousel images
+  - Avant : `object-fit: cover` (coupait les produits)
+  - Après : `object-fit: contain; padding: 0.5rem` (affiche produits entiers)
+
+- ✅ **NAVIGATION BUTTONS CACHÉS** : Boutons carousel non-fonctionnels
+  - `.carousel-mini-nav { display: none; }` (await JS implementation)
+
+- ✅ **ALIGNEMENT PARFAIT** : Padding unifié carousel + grille à tous breakpoints
+  - **Desktop (>1200px)** :
+    - Carousel wrapper : `5rem → 3rem` ✓
+    - Grid : `3rem` (déjà bon)
+    - Featured header : `3rem` (déjà bon)
+    - Grid header : `3rem` (déjà bon)
+
+  - **Tablette (max-width: 1200px)** :
+    - Carousel wrapper : `4rem → 3rem` ✓
+    - Autres : `3rem` inherited
+
+  - **Mobile (max-width: 900px)** :
+    - Tous : `3rem` inherited ✓
+
+  - **Mobile petit (max-width: 600px)** :
+    - Carousel wrapper : `2rem` ✓
+    - Featured header : `3rem → 2rem` ✓ NEW
+    - Grid : `3rem → 2rem` ✓ NEW
+    - Grid header : `3rem → 2rem` ✓ NEW
+
+**LEÇONS APPRISES (Page Catégorie):**
+1. **WooCommerce templates** : `wc_get_template_part('content', 'product')` ne permet pas de layout custom → besoin de HTML inline pour carousel
+2. **Custom queries nécessaires** : Main query corrompue après carousel → besoin de `$grid_query` dédié avec `posts_per_page: -1`
+3. **Triple approche overflow** : Un seul fix CSS ne suffit pas → combiner `overflow`, `flex-wrap`, et `nth-child` display
+4. **Alignement multi-breakpoints** : Vérifier TOUS les breakpoints et TOUS les éléments (wrapper + headers)
+5. **Object-fit contain vs cover** : Cover coupe les produits → contain + padding montre tout
+
+**FICHIERS MODIFIÉS (Page Catégorie):**
+- `taxonomy-product_cat.php` : 245 lignes (structure complète refaite)
+- `functions.php` : +15 lignes (SEO filter)
+- `style.css` : +320 lignes (mini-carousel section 4028-4310)
+
 **2025-02-04:**
 - Création du thème custom depuis le travail Elementor de Jérôme
 - Nettoyage du code debug
