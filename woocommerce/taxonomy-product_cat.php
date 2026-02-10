@@ -118,7 +118,7 @@ endif;
 <!-- PHASE 2: Full product grid (all products) -->
 <section class="category-products-grid">
   <div class="products-grid-header">
-    <h2>Tous nos <?php echo esc_html(strtolower($term_name)); ?></h2>
+    <h2>Toutes nos <?php echo esc_html(strtolower($term_name)); ?>s</h2>
     <p class="products-count"><?php echo esc_html($term->count); ?> produit<?php echo $term->count > 1 ? 's' : ''; ?></p>
   </div>
 

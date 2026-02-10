@@ -531,6 +531,27 @@ add_filter('woocommerce_gallery_image_size', function() {
 });
 
 /**
+ * Custom SEO titles for product category pages
+ */
+add_filter('document_title_parts', function($title) {
+  if (is_product_category()) {
+    $term = get_queried_object();
+    $category_titles = [
+      'suspension' => 'Suspensions artisanales en bois',
+      'lampadaire' => 'Lampadaires en bois design',
+      'applique' => 'Appliques murales artisanales',
+      'lampe-a-poser' => 'Lampes à poser en bois',
+      'accessoire' => 'Accessoires pour luminaires',
+    ];
+
+    if (isset($category_titles[$term->slug])) {
+      $title['title'] = $category_titles[$term->slug];
+    }
+  }
+  return $title;
+});
+
+/**
  * Register custom image sizes for better product display
  */
 add_action('after_setup_theme', function() {

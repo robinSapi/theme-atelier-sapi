@@ -4178,11 +4178,23 @@ li.carousel-editorial-slide,
   box-shadow: 0 4px 12px rgba(147, 125, 104, 0.1);
 }
 
+.carousel-mini-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--color-orange);
+  stroke-width: 2;
+  fill: none;
+}
+
 .carousel-mini-btn:hover {
   background: var(--color-orange);
   color: var(--color-white);
   box-shadow: 0 6px 20px rgba(242, 137, 73, 0.3);
   transform: scale(1.05);
+}
+
+.carousel-mini-btn:hover svg {
+  stroke: var(--color-white);
 }
 
 .carousel-mini-btn[disabled] {
