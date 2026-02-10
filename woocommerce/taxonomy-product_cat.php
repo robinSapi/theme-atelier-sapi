@@ -71,29 +71,28 @@ if ($featured_query->have_posts()) :
     <div class="products-carousel-mini">
       <ul class="products-carousel-mini-track products">
         <?php
-        $mini_index = 0;
         while ($featured_query->have_posts()) :
           $featured_query->the_post();
-          global $product, $sapi_carousel_context;
+          global $product;
           $product = wc_get_product(get_the_ID());
-
           $product_id = $product->get_id();
-          $thumbnail_url = get_the_post_thumbnail_url($product_id, 'thumbnail');
-
-          $sapi_carousel_context = [
-            'is_carousel' => true,
-            'is_mini' => true,
-            'categories' => '',
-            'slide_index' => $mini_index,
-            'thumbnail_url' => $thumbnail_url,
-          ];
-
-          wc_get_template_part('content', 'product');
-
-          $sapi_carousel_context = null;
-          $mini_index++;
-        endwhile;
+          $product_url = get_permalink($product_id);
+          $product_image = get_the_post_thumbnail($product_id, 'medium', ['class' => 'product-image']);
+          $product_name = get_the_title();
+          $product_price = $product->get_price_html();
         ?>
+          <li class="product-mini-card">
+            <a href="<?php echo esc_url($product_url); ?>" class="product-mini-link">
+              <div class="product-mini-image">
+                <?php echo $product_image; ?>
+              </div>
+              <div class="product-mini-info">
+                <h3 class="product-mini-name"><?php echo esc_html($product_name); ?></h3>
+                <div class="product-mini-price"><?php echo $product_price; ?></div>
+              </div>
+            </a>
+          </li>
+        <?php endwhile; ?>
       </ul>
     </div>
 
@@ -124,21 +123,36 @@ endif;
   </div>
 
   <?php
-  // Standard WooCommerce loop
-  if (woocommerce_product_loop()) {
-    woocommerce_product_loop_start();
+  // Query all products in this category for the grid
+  $grid_query = new WP_Query([
+    'post_type' => 'product',
+    'posts_per_page' => -1,
+    'tax_query' => [
+      [
+        'taxonomy' => 'product_cat',
+        'field' => 'term_id',
+        'terms' => $term_id,
+      ],
+    ],
+    'orderby' => 'menu_order date',
+    'order' => 'ASC',
+  ]);
 
-    if (wc_get_loop_prop('total')) {
-      while (have_posts()) {
-        the_post();
+  if ($grid_query->have_posts()) :
+  ?>
+    <ul class="products columns-4">
+      <?php
+      while ($grid_query->have_posts()) :
+        $grid_query->the_post();
         wc_get_template_part('content', 'product');
-      }
-    }
-
-    woocommerce_product_loop_end();
-  } else {
+      endwhile;
+      ?>
+    </ul>
+  <?php
+    wp_reset_postdata();
+  else :
     wc_no_products_found();
-  }
+  endif;
   ?>
 </section>
 
