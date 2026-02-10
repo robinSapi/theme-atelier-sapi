@@ -11423,10 +11423,13 @@ body.woocommerce-cart div.woocommerce-wrapper {
   -webkit-transform: scale(1);
 }
 
-/* Button hover - EXACT format that worked for yellow test, just with orange */
+/* Button hover - EXACT copy of yellow test with ALL 5 properties, just colors changed */
 .gallery-nav-btn:hover:not(:disabled) {
   background: linear-gradient(135deg, #F28949 0%, #E67D3F 100%);
   border-color: #F28949;
+  color: var(--color-white);
+  transform: none;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .gallery-nav-btn:disabled {
