@@ -52,9 +52,19 @@
       updatePreview();
 
       // Auto-save via AJAX (debounced)
-      if (autoSave && typeof sapiFocal !== 'undefined') {
+      if (autoSave) {
+        if (typeof sapiFocal === 'undefined') {
+          if (statusEl) {
+            statusEl.style.color = '#dc3232';
+            statusEl.textContent = 'AJAX non chargé — rechargez la page';
+          }
+          return;
+        }
         if (saveTimeout) clearTimeout(saveTimeout);
-        if (statusEl) statusEl.textContent = '...';
+        if (statusEl) {
+          statusEl.style.color = '#666';
+          statusEl.textContent = '...';
+        }
         saveTimeout = setTimeout(saveViaAjax, 300);
       }
     }
@@ -62,7 +72,7 @@
     function saveViaAjax() {
       if (typeof sapiFocal === 'undefined') return;
 
-      const formData = new FormData();
+      var formData = new FormData();
       formData.append('action', 'sapi_save_focal_point');
       formData.append('nonce', sapiFocal.nonce);
       formData.append('post_id', sapiFocal.postId);
@@ -76,12 +86,21 @@
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (statusEl) {
-          statusEl.textContent = data.success ? 'Sauvegardé' : 'Erreur';
-          setTimeout(function () { statusEl.textContent = ''; }, 2000);
+          if (data.success) {
+            statusEl.style.color = '#46b450';
+            statusEl.textContent = '✓ Sauvegardé (page ' + sapiFocal.postId + ')';
+          } else {
+            statusEl.style.color = '#dc3232';
+            statusEl.textContent = '✗ ' + (data.data || 'Erreur inconnue');
+          }
+          setTimeout(function () { statusEl.textContent = ''; }, 4000);
         }
       })
-      .catch(function () {
-        if (statusEl) statusEl.textContent = 'Erreur réseau';
+      .catch(function (err) {
+        if (statusEl) {
+          statusEl.style.color = '#dc3232';
+          statusEl.textContent = '✗ Réseau: ' + err.message;
+        }
       });
     }
 
