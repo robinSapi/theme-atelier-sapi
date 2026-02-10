@@ -11419,25 +11419,14 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* Show navigation on gallery hover */
 .quick-view-gallery:hover .gallery-nav-btn:not(:disabled) {
   opacity: 1;
-  /* transform removed - handled by button:hover state below to avoid specificity conflicts */
-}
-
-/* Button default state when gallery hovered - scale to normal size */
-.quick-view-gallery:hover .gallery-nav-btn:not(:disabled) {
   transform: scale(1);
   -webkit-transform: scale(1);
 }
 
-/* Button hover - orange style matching carousel, MUST come after gallery:hover rule */
+/* Button hover - EXACT format that worked for yellow test, just with orange */
 .gallery-nav-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--color-orange) 0%, #E67D3F 100%) !important;
-  border-color: var(--color-orange) !important;
-  color: var(--color-white) !important;
-  transform: none !important;
-  -webkit-transform: none !important;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-  font-size: 0.9375rem !important;
-  letter-spacing: 0.02em !important;
+  background: linear-gradient(135deg, #F28949 0%, #E67D3F 100%);
+  border-color: #F28949;
 }
 
 .gallery-nav-btn:disabled {
