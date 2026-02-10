@@ -11423,13 +11423,12 @@ body.woocommerce-cart div.woocommerce-wrapper {
   -webkit-transform: scale(1);
 }
 
-/* Button hover - EXACT copy of yellow test with ALL 5 properties, just colors changed */
+/* TEST DIAGNOSTIC - IMPOSSIBLE A RATER */
 .gallery-nav-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #F28949 0%, #E67D3F 100%);
-  border-color: #F28949;
-  color: var(--color-white);
-  transform: none;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #00FF00 !important;
+  border: 10px solid #FF0000 !important;
+  transform: scale(1.5) !important;
+  box-shadow: 0 0 50px #FF00FF !important;
 }
 
 .gallery-nav-btn:disabled {
