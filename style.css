@@ -11423,13 +11423,35 @@ body.woocommerce-cart div.woocommerce-wrapper {
   -webkit-transform: scale(1);
 }
 
-/* Quick View buttons - High contrast orange like carousel */
+/* Halo orange effect - EXACT copy from carousel */
+.gallery-nav-btn::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(242, 137, 73, 0.15) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 400ms ease;
+  pointer-events: none;
+}
+
+.gallery-nav-btn:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+/* Button hover - EXACT copy from carousel */
 .gallery-nav-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%);
-  border-color: #FF6B35;
-  color: #FFFFFF;
-  transform: none;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(255, 107, 53, 0.3);
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(147, 125, 104, 0.3);
+  color: var(--color-orange);
+  transform: scale(1.1);
+  -webkit-transform: scale(1.1);
+  box-shadow:
+    0 12px 32px rgba(147, 125, 104, 0.2),
+    0 4px 12px rgba(147, 125, 104, 0.12);
 }
 
 .gallery-nav-btn:disabled {
