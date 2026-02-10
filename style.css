@@ -11416,20 +11416,20 @@ body.woocommerce-cart div.woocommerce-wrapper {
   border-radius: 32% 68% 68% 32% / 47% 33% 67% 53%;
 }
 
-/* Show navigation on gallery hover + button hover state */
+/* Show navigation on gallery hover */
 .quick-view-gallery:hover .gallery-nav-btn:not(:disabled) {
   opacity: 1;
   transform: scale(1);
   -webkit-transform: scale(1);
 }
 
-/* Quick View button hover - identical to carousel */
-.gallery-nav-btn:hover:not(:disabled) {
+/* Button hover - MORE SPECIFIC selector to override above */
+.quick-view-gallery .gallery-nav-btn:hover:not(:disabled) {
   background: linear-gradient(135deg, var(--color-orange) 0%, #E67D3F 100%);
   border-color: var(--color-orange);
   color: var(--color-white);
-  transform: none !important;
-  -webkit-transform: none !important;
+  transform: none;
+  -webkit-transform: none;
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
   font-size: 0.9375rem;
   letter-spacing: 0.02em;
