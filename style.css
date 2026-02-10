@@ -11420,13 +11420,12 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* SVG arrow styling - !important needed to override hidden CSS rule */
 .gallery-nav-btn svg {
   display: block !important;
-  width: 28px !important;
-  height: 28px !important;
-  stroke: currentColor !important;
-  stroke-width: 1.5 !important;
-  fill: none !important;
+  width: 20px !important;
+  height: 20px !important;
+  fill: currentColor !important;
   opacity: 1 !important;
   visibility: visible !important;
+  position: relative !important;
 }
 
 /* Show navigation on gallery hover */
