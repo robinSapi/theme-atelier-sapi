@@ -7197,7 +7197,7 @@ transform: translateY(15px);
   font-weight: 300;
   color: var(--color-gray);
   max-width: 600px;
-  margin: 0 0 2rem 0;
+  margin: 0 auto 2rem auto;
 }
 
 .shop-hero-visual .shop-subtitle {
