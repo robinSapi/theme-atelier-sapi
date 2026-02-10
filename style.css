@@ -11423,13 +11423,13 @@ body.woocommerce-cart div.woocommerce-wrapper {
   -webkit-transform: scale(1);
 }
 
-/* Button hover - MORE SPECIFIC selector to override above */
-.quick-view-gallery .gallery-nav-btn:hover:not(:disabled) {
+/* Button hover - Higher specificity with both gallery:hover AND button:hover */
+.quick-view-gallery:hover .gallery-nav-btn:hover:not(:disabled) {
   background: linear-gradient(135deg, var(--color-orange) 0%, #E67D3F 100%);
   border-color: var(--color-orange);
   color: var(--color-white);
-  transform: none;
-  -webkit-transform: none;
+  transform: none !important;
+  -webkit-transform: none !important;
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
   font-size: 0.9375rem;
   letter-spacing: 0.02em;
