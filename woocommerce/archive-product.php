@@ -90,7 +90,7 @@ if (!$hero_img_url) {
       class="shop-hero-magazine-bg"
       src="<?php echo esc_url($hero_img_url); ?>"
       alt="<?php echo esc_attr($hero_alt); ?>"
-      style="object-position: <?php echo esc_attr($hero_focal_point); ?>;"
+      style="object-position: 0% 0% !important; border: 5px solid red;"
       fetchpriority="high"
     />
   <?php endif; ?>
