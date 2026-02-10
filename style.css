@@ -7640,8 +7640,7 @@ transform: translateY(15px);
   height: 100%;
   -o-object-fit: cover;
   object-fit: cover;
-  -o-object-position: center;
-  object-position: center;
+  /* object-position set via inline style from focal point picker */
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
   -webkit-backface-visibility: hidden;
