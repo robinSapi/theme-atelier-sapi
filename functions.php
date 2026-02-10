@@ -28,7 +28,7 @@ add_action('after_setup_theme', 'sapi_maison_setup');
 
 function sapi_maison_enqueue_assets() {
   $fonts = [
-    'family' => 'Montserrat:wght@300;400;500;600;700;900|Pacifico',
+    'family' => 'Montserrat:wght@300;400;500;600;700;900|Square+Peg',
     'display' => 'swap',
   ];
   wp_enqueue_style('sapi-maison-fonts', add_query_arg($fonts, 'https://fonts.googleapis.com/css2'));
