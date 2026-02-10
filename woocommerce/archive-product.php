@@ -33,11 +33,12 @@ $all_products = new WP_Query([
 
 <!-- Hero Section - Magazine Style -->
 <?php
-// Priority 1: ACF custom hero image (Thème Sâpi > Image hero boutique)
+// Priority 1: ACF custom hero image (attached to WooCommerce Shop page)
 $hero_img_url = '';
 $hero_alt = 'Nos Créations - Atelier Sâpi';
 if (function_exists('get_field')) {
-  $acf_hero = get_field('shop_hero_image', 'option');
+  $shop_page_id = wc_get_page_id('shop');
+  $acf_hero = get_field('shop_hero_image', $shop_page_id);
   if ($acf_hero) {
     $hero_img_url = is_array($acf_hero) ? $acf_hero['url'] : $acf_hero;
     $hero_alt = is_array($acf_hero) && !empty($acf_hero['alt']) ? $acf_hero['alt'] : $hero_alt;

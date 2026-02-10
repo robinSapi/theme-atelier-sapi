@@ -83,18 +83,9 @@ function sapi_maison_content_width() {
 }
 add_action('after_setup_theme', 'sapi_maison_content_width', 0);
 
-// ACF Options Page - Réglages du thème (requires ACF Pro)
-if (function_exists('acf_add_options_page')) {
-  acf_add_options_page([
-    'page_title' => 'Réglages Thème Sâpi',
-    'menu_title' => 'Thème Sâpi',
-    'menu_slug'  => 'sapi-theme-options',
-    'capability' => 'edit_posts',
-    'redirect'   => false,
-    'icon_url'   => 'dashicons-admin-customizer',
-    'position'   => 59,
-  ]);
-}
+// ACF hero image is attached to the WooCommerce Shop page
+// Field: shop_hero_image (Image, return format: Array)
+// Location rule in ACF: Page = Boutique (Shop page)
 
 function sapi_maison_cart_count() {
   if (!function_exists('WC')) {
