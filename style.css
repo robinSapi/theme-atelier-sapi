@@ -4263,6 +4263,12 @@ li.carousel-editorial-slide,
   gap: 2rem;
 }
 
+/* Kill WooCommerce clearfix pseudo-elements that steal grid cells */
+.category-products-grid ul.products::before,
+.category-products-grid ul.products::after {
+  display: none !important;
+}
+
 /* Responsive adjustments */
 @media (max-width: 1200px) {
   .products-carousel-mini-wrapper {
