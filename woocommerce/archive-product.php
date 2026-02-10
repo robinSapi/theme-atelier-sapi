@@ -33,32 +33,51 @@ $all_products = new WP_Query([
 
 <!-- Hero Section - Magazine Style -->
 <?php
-// Get 1 featured product for hero background
-$hero_products = wc_get_products([
-  'limit'    => 1,
-  'status'   => 'publish',
-  'featured' => true,
-  'return'   => 'objects',
-]);
-
-// Fallback to most recent product if no featured
-if (empty($hero_products)) {
-  $hero_products = wc_get_products([
-    'limit'   => 1,
-    'status'  => 'publish',
-    'orderby' => 'date',
-    'order'   => 'DESC',
-    'return'  => 'objects',
-  ]);
+// Priority 1: ACF custom hero image (Thème Sâpi > Image hero boutique)
+$hero_img_url = '';
+$hero_alt = 'Nos Créations - Atelier Sâpi';
+if (function_exists('get_field')) {
+  $acf_hero = get_field('shop_hero_image', 'option');
+  if ($acf_hero) {
+    $hero_img_url = is_array($acf_hero) ? $acf_hero['url'] : $acf_hero;
+    $hero_alt = is_array($acf_hero) && !empty($acf_hero['alt']) ? $acf_hero['alt'] : $hero_alt;
+  }
 }
 
-$hero_product = !empty($hero_products) ? $hero_products[0] : null;
-$hero_img_url = '';
-if ($hero_product) {
-  $hero_img_id = $hero_product->get_image_id();
-  $hero_img_url = $hero_img_id
-    ? wp_get_attachment_image_url($hero_img_id, 'full')
-    : wc_placeholder_img_src('full');
+// Priority 2: Fallback to featured product gallery image (ambiance photo)
+if (!$hero_img_url) {
+  $hero_products = wc_get_products([
+    'limit'    => 1,
+    'status'   => 'publish',
+    'featured' => true,
+    'return'   => 'objects',
+  ]);
+
+  if (empty($hero_products)) {
+    $hero_products = wc_get_products([
+      'limit'   => 1,
+      'status'  => 'publish',
+      'orderby' => 'date',
+      'order'   => 'DESC',
+      'return'  => 'objects',
+    ]);
+  }
+
+  if (!empty($hero_products)) {
+    $hero_product = $hero_products[0];
+    // Try gallery first (ambiance photo), then main image
+    $gallery_ids = $hero_product->get_gallery_image_ids();
+    if (!empty($gallery_ids)) {
+      $hero_img_url = wp_get_attachment_image_url($gallery_ids[0], 'full');
+      $hero_alt = $hero_product->get_name() . ' - ambiance';
+    } else {
+      $hero_img_id = $hero_product->get_image_id();
+      $hero_img_url = $hero_img_id
+        ? wp_get_attachment_image_url($hero_img_id, 'full')
+        : wc_placeholder_img_src('full');
+      $hero_alt = $hero_product->get_name();
+    }
+  }
 }
 ?>
 <section class="shop-hero-cinetique shop-hero-magazine">
@@ -66,7 +85,7 @@ if ($hero_product) {
     <img
       class="shop-hero-magazine-bg"
       src="<?php echo esc_url($hero_img_url); ?>"
-      alt="<?php echo $hero_product ? esc_attr($hero_product->get_name()) : ''; ?>"
+      alt="<?php echo esc_attr($hero_alt); ?>"
       fetchpriority="high"
     />
   <?php endif; ?>
