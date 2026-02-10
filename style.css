@@ -11403,8 +11403,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
   border-radius: 68% 32% 32% 68% / 33% 47% 53% 67%; /* Organic left arrow shape */
   color: var(--color-wood);
   cursor: pointer;
-  opacity: 1; /* TEST: Always visible to debug arrows */
-  transform: scale(1); /* TEST: Normal scale */
+  opacity: 0;
+  transform: scale(0.9);
   -webkit-transform: scale(0.9);
   transition: all 400ms cubic-bezier(0.34, 0.61, 0.4, 0.97);
   backdrop-filter: blur(12px);
@@ -11417,11 +11417,16 @@ body.woocommerce-cart div.woocommerce-wrapper {
   border-radius: 32% 68% 68% 32% / 47% 33% 67% 53%;
 }
 
-/* SVG arrow styling */
+/* SVG arrow styling - !important needed to override hidden CSS rule */
 .gallery-nav-btn svg {
-  width: 28px;
-  height: 28px;
-  fill: currentColor; /* TEST: Using filled polygons instead of stroked polylines */
+  display: block !important;
+  width: 28px !important;
+  height: 28px !important;
+  stroke: currentColor !important;
+  stroke-width: 1.5 !important;
+  fill: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 /* Show navigation on gallery hover */
@@ -11453,7 +11458,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* Button hover - EXACT copy from carousel */
 .gallery-nav-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 1);
-  border: 2px solid var(--color-orange);
+  border-color: rgba(147, 125, 104, 0.3);
   color: var(--color-orange);
   transform: scale(1.1);
   -webkit-transform: scale(1.1);
