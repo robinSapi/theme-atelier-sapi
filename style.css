@@ -4248,8 +4248,8 @@ li.carousel-editorial-slide,
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 3rem;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
   gap: 2rem;
 }
 
@@ -4275,7 +4275,7 @@ li.carousel-editorial-slide,
   }
 
   .category-products-grid .products {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr) !important;
     gap: 1.5rem;
   }
 }
@@ -4300,7 +4300,7 @@ li.carousel-editorial-slide,
   }
 
   .category-products-grid .products {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr) !important;
     gap: 1.5rem;
     padding: 0 2rem; /* Match carousel padding */
   }
