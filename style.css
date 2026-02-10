@@ -11421,9 +11421,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .gallery-nav-btn svg {
   width: 28px;
   height: 28px;
-  stroke: currentColor;
-  stroke-width: 3; /* TEST: Thicker stroke to see if arrows appear */
-  fill: none;
+  fill: currentColor; /* TEST: Using filled polygons instead of stroked polylines */
 }
 
 /* Show navigation on gallery hover */
