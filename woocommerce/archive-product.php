@@ -39,8 +39,6 @@ $hero_alt = 'Nos Créations - Atelier Sâpi';
 $shop_page_id = wc_get_page_id('shop');
 $hero_focal_point = get_post_meta($shop_page_id, '_sapi_hero_focal_point', true);
 if (!$hero_focal_point) $hero_focal_point = '50% 50%';
-// DEBUG - remove after testing
-echo '<!-- DEBUG focal: shop_page_id=' . $shop_page_id . ' | focal_raw=' . get_post_meta($shop_page_id, '_sapi_hero_focal_point', true) . ' | focal_used=' . $hero_focal_point . ' -->';
 
 if (function_exists('get_field')) {
   $acf_hero = get_field('shop_hero_image', $shop_page_id);
