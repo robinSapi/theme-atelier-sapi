@@ -474,7 +474,7 @@
             ${this.galleryImages.length > 1 ? `
               <div class="quick-view-gallery-nav">
                 <button type="button" class="gallery-nav-btn gallery-prev" aria-label="Image précédente">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
                     <polyline points="15 18 9 12 15 6"></polyline>
                   </svg>
                 </button>
@@ -482,7 +482,7 @@
                   <span class="gallery-current">1</span> / <span class="gallery-total">${this.galleryImages.length}</span>
                 </div>
                 <button type="button" class="gallery-nav-btn gallery-next" aria-label="Image suivante">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
                     <polyline points="9 18 15 12 9 6"></polyline>
                   </svg>
                 </button>
