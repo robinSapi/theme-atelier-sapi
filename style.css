@@ -4059,6 +4059,7 @@ li.carousel-editorial-slide,
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 5rem;
+  overflow: hidden; /* Hide products that overflow */
 }
 
 .products-carousel-mini {
@@ -4069,12 +4070,18 @@ li.carousel-editorial-slide,
 
 .products-carousel-mini-track {
   display: flex !important;
+  flex-wrap: nowrap !important; /* Don't wrap to new line */
   height: 100%;
   gap: 1.5rem;
   list-style: none;
   margin: 0;
   padding: 0;
   transition: transform 600ms cubic-bezier(0.34, 0.61, 0.4, 0.97);
+}
+
+/* Hide 4th product to prevent overflow (will be shown via carousel JS later) */
+.product-mini-card:nth-child(n+4) {
+  display: none;
 }
 
 /* Mini carousel product cards */
