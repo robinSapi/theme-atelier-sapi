@@ -3772,7 +3772,7 @@ li.carousel-editorial-slide,
 
 .carousel-editorial-btn:hover:not([disabled]) {
   background: rgba(255, 255, 255, 1);
-  border-color: rgba(147, 125, 104, 0.3);
+  border: 2px solid var(--color-orange);
   color: var(--color-orange);
   transform: scale(1.1);
   box-shadow:
@@ -11453,7 +11453,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* Button hover - EXACT copy from carousel */
 .gallery-nav-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 1);
-  border-color: rgba(147, 125, 104, 0.3);
+  border: 2px solid var(--color-orange);
   color: var(--color-orange);
   transform: scale(1.1);
   -webkit-transform: scale(1.1);
