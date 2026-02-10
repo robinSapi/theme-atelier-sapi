@@ -11423,6 +11423,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   -webkit-transform: scale(1);
 }
 
+/* Quick View gallery navigation buttons hover - identical to carousel buttons */
 .gallery-nav-btn:hover:not(:disabled) {
   background: linear-gradient(135deg, var(--color-orange) 0%, #E67D3F 100%);
   border-color: var(--color-orange);
