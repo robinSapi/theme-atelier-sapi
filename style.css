@@ -7623,7 +7623,7 @@ transform: translateY(15px);
 .shop-hero-cinetique.shop-hero-magazine {
   position: relative;
   overflow: hidden;
-  height: clamp(400px, 65vh, 700px);
+  height: clamp(300px, 45vh, 500px);
   padding: 0;
   display: -webkit-flex;
   display: flex;
@@ -7726,7 +7726,7 @@ transform: translateY(15px);
 
 @media (max-width: 968px) {
   .shop-hero-cinetique.shop-hero-magazine {
-    height: clamp(350px, 55vh, 550px);
+    height: clamp(260px, 40vh, 400px);
   }
 
   .shop-hero-magazine-content {
@@ -7736,7 +7736,7 @@ transform: translateY(15px);
 
 @media (max-width: 600px) {
   .shop-hero-cinetique.shop-hero-magazine {
-    height: clamp(300px, 50vh, 450px);
+    height: clamp(220px, 35vh, 350px);
   }
 
   .shop-hero-magazine-content {
