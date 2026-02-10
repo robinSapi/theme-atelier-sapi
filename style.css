@@ -4023,14 +4023,14 @@ li.carousel-editorial-slide,
    ============================================= */
 
 .featured-products-mini {
-  padding: 3rem 0;
+  padding: 2rem 0 2.5rem;
   background: var(--color-white);
   border-top: 1px solid rgba(147, 125, 104, 0.1);
 }
 
 .featured-products-header {
   max-width: 1400px;
-  margin: 0 auto 2rem;
+  margin: 0 auto 1.5rem;
   padding: 0 3rem;
   text-align: center;
 }
@@ -4125,7 +4125,8 @@ li.carousel-editorial-slide,
 .product-mini-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain; /* Show full product instead of cropping */
+  padding: 0.5rem;
 }
 
 .product-mini-info {
@@ -4156,14 +4157,14 @@ li.carousel-editorial-slide,
   font-weight: 700;
 }
 
-/* Mini carousel navigation */
+/* Mini carousel navigation - HIDDEN (no JS carousel yet) */
 .carousel-mini-nav {
+  display: none; /* Hide buttons until carousel JS is added */
   position: absolute;
   top: 50%;
   left: 0;
   right: 0;
   transform: translateY(-50%);
-  display: flex;
   justify-content: space-between;
   pointer-events: none;
   padding: 0 1rem;
@@ -4215,7 +4216,7 @@ li.carousel-editorial-slide,
    ============================================= */
 
 .category-products-grid {
-  padding: 4rem 0;
+  padding: 2.5rem 0 3rem;
   background: var(--color-cream);
 }
 
@@ -7437,7 +7438,7 @@ transform: translateY(15px);
 
 .shop-hero-cinetique {
   position: relative;
-  padding: 2rem 3rem 4rem;
+  padding: 2rem 3rem 1.5rem;
   background: var(--color-cream);
   text-align: center;
 }
