@@ -5703,7 +5703,7 @@ li.carousel-editorial-slide,
   padding: 16px 20px;
   font-size: 13px;
   color: var(--color-gray-mid);
-  background: var(--color-gray-light);
+  background: var(--color-warm);
 }
 
 .breadcrumbs a {
@@ -7149,7 +7149,7 @@ transform: translateY(15px);
 
 .shop-hero-cinetique {
   position: relative;
-  padding: 8rem 3rem 4rem;
+  padding: 2rem 3rem 4rem;
   background: var(--color-cream);
   text-align: center;
 }

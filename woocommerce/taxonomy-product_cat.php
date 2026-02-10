@@ -23,11 +23,11 @@ $term_slug = $term->slug;
 $term_id = $term->term_id;
 
 $category_intro = [
-  'suspension' => "Retrouvez ici tous nos lustres, prêts à faire rayonner votre déco intérieure !",
-  'lampadaire' => "Posés au sol et bien branchés, des lampadaires prêts à illuminer chez vous !",
-  'applique' => "Nos appliques, un mix idéal entre éclairages et déco pour vos murs !",
-  'lampe-a-poser' => "Lampes de chevet, de bureau ou de salon, c'est ici que ça se passe !",
-  'accessoire' => "Ampoules, douilles et pied de lampadaire, retrouvez ici de quoi parfaire votre éclairage !",
+  'suspension' => "Des luminaires suspendus en bois qui transforment votre plafond en œuvre d'art. Du lustre design au modèle artisanal, trouvez la suspension qui raconte votre histoire.",
+  'lampadaire' => "L'éclairage d'ambiance parfait pour structurer votre espace sans percer le plafond. Nos lampadaires en bois allient design sculptural et lumière chaleureuse.",
+  'applique' => "Libérez vos sols, habillez vos murs. Nos appliques murales en bois créent une atmosphère unique tout en dessinant des jeux d'ombres poétiques.",
+  'lampe-a-poser' => "La touche finale qui change tout. Posez-la où vous voulez, déplacez-la au gré de vos envies : nos lampes nomades créent une bulle de lumière intime partout chez vous.",
+  'accessoire' => "Les bons accessoires font toute la différence. Ampoules filament, douilles certifiées, câbles premium : tout pour sublimer vos luminaires en toute sécurité.",
 ];
 
 if (function_exists('sapi_maison_breadcrumbs')) {
@@ -36,7 +36,6 @@ if (function_exists('sapi_maison_breadcrumbs')) {
 ?>
 
 <section class="shop-hero-cinetique">
-  <span class="section-number">01</span>
   <h1><?php echo esc_html($term_name ? $term_name : 'Nos créations'); ?></h1>
   <?php if (isset($category_intro[$term_slug])) : ?>
     <p class="shop-subtitle"><?php echo esc_html($category_intro[$term_slug]); ?></p>
@@ -131,7 +130,6 @@ if (function_exists('sapi_maison_breadcrumbs')) {
     if ($content) :
     ?>
       <div class="editorial-hero">
-        <span class="section-number">02</span>
         <h2 class="editorial-tagline"><?php echo esc_html($content['tagline']); ?></h2>
         <p class="editorial-intro"><?php echo esc_html($content['intro']); ?></p>
       </div>
