@@ -42,7 +42,107 @@ if (function_exists('sapi_maison_breadcrumbs')) {
   <?php endif; ?>
 </section>
 
-<!-- Rich Editorial Content Section -->
+<?php
+// PHASE 2: Mini-carousel "Coups de cœur" (best-sellers, 20vh height)
+$featured_query = new WP_Query([
+  'post_type' => 'product',
+  'posts_per_page' => 4,
+  'tax_query' => [
+    [
+      'taxonomy' => 'product_cat',
+      'field' => 'term_id',
+      'terms' => $term_id,
+    ],
+  ],
+  'meta_key' => 'total_sales',
+  'orderby' => 'meta_value_num',
+  'order' => 'DESC',
+]);
+
+if ($featured_query->have_posts()) :
+?>
+<section class="featured-products-mini">
+  <div class="featured-products-header">
+    <h2>Coups de cœur</h2>
+    <p class="featured-subtitle">Nos créations les plus appréciées</p>
+  </div>
+
+  <div class="products-carousel-mini-wrapper" data-carousel-mini>
+    <div class="products-carousel-mini">
+      <ul class="products-carousel-mini-track products">
+        <?php
+        $mini_index = 0;
+        while ($featured_query->have_posts()) :
+          $featured_query->the_post();
+          global $product, $sapi_carousel_context;
+          $product = wc_get_product(get_the_ID());
+
+          $product_id = $product->get_id();
+          $thumbnail_url = get_the_post_thumbnail_url($product_id, 'thumbnail');
+
+          $sapi_carousel_context = [
+            'is_carousel' => true,
+            'is_mini' => true,
+            'categories' => '',
+            'slide_index' => $mini_index,
+            'thumbnail_url' => $thumbnail_url,
+          ];
+
+          wc_get_template_part('content', 'product');
+
+          $sapi_carousel_context = null;
+          $mini_index++;
+        endwhile;
+        ?>
+      </ul>
+    </div>
+
+    <div class="carousel-mini-nav">
+      <button class="carousel-mini-btn carousel-mini-prev" aria-label="<?php esc_attr_e('Produit précédent', 'theme-sapi-maison'); ?>">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+      <button class="carousel-mini-btn carousel-mini-next" aria-label="<?php esc_attr_e('Produit suivant', 'theme-sapi-maison'); ?>">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </div>
+  </div>
+</section>
+<?php
+wp_reset_postdata();
+endif;
+?>
+
+<!-- PHASE 2: Full product grid (all products) -->
+<section class="category-products-grid">
+  <div class="products-grid-header">
+    <h2>Tous nos <?php echo esc_html(strtolower($term_name)); ?></h2>
+    <p class="products-count"><?php echo esc_html($term->count); ?> produit<?php echo $term->count > 1 ? 's' : ''; ?></p>
+  </div>
+
+  <?php
+  // Standard WooCommerce loop
+  if (woocommerce_product_loop()) {
+    woocommerce_product_loop_start();
+
+    if (wc_get_loop_prop('total')) {
+      while (have_posts()) {
+        the_post();
+        wc_get_template_part('content', 'product');
+      }
+    }
+
+    woocommerce_product_loop_end();
+  } else {
+    wc_no_products_found();
+  }
+  ?>
+</section>
+
+<!-- Rich Editorial Content Section (MOVED TO BOTTOM) -->
 <section class="category-editorial" data-particles="wood">
   <div class="category-editorial-inner">
     <?php
@@ -238,91 +338,6 @@ if (function_exists('sapi_maison_breadcrumbs')) {
     </button>
   </div>
 </div>
-
-<?php
-// Get ALL products in this category for the carousel (no pagination)
-$products_query = new WP_Query([
-  'post_type' => 'product',
-  'posts_per_page' => -1,
-  'tax_query' => [
-    [
-      'taxonomy' => 'product_cat',
-      'field' => 'term_id',
-      'terms' => $term_id,
-    ],
-  ],
-  'orderby' => 'menu_order date',
-  'order' => 'ASC',
-]);
-
-if ($products_query->have_posts()) :
-?>
-<section class="shop-products">
-  <div class="products-carousel-editorial-wrapper" data-carousel-editorial>
-    <div class="products-carousel-editorial">
-      <ul class="products-carousel-editorial-track products">
-        <?php
-        $slide_index = 0;
-        while ($products_query->have_posts()) :
-          $products_query->the_post();
-          global $product, $sapi_carousel_context;
-          $product = wc_get_product(get_the_ID());
-
-          // Get product data for enhanced carousel
-          $product_id = $product->get_id();
-          $thumbnail_url = get_the_post_thumbnail_url($product_id, 'thumbnail');
-
-          // Pass carousel context with editorial carousel flag and thumbnail data
-          $sapi_carousel_context = [
-            'is_carousel' => true,
-            'is_editorial' => true,
-            'categories' => '',
-            'slide_index' => $slide_index,
-            'thumbnail_url' => $thumbnail_url,
-          ];
-
-          wc_get_template_part('content', 'product');
-
-          $sapi_carousel_context = null;
-          $slide_index++;
-        endwhile;
-        ?>
-      </ul>
-    </div>
-
-    <!-- Enhanced Navigation Controls -->
-    <div class="carousel-editorial-nav">
-      <button class="carousel-editorial-btn carousel-editorial-prev"
-              aria-label="<?php esc_attr_e('Produit précédent', 'theme-sapi-maison'); ?>">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
-      </button>
-      <button class="carousel-editorial-btn carousel-editorial-next"
-              aria-label="<?php esc_attr_e('Produit suivant', 'theme-sapi-maison'); ?>">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
-      </button>
-    </div>
-
-    <!-- Elegant Counter & Thumbnails -->
-    <div class="carousel-editorial-footer">
-      <div class="carousel-editorial-counter">
-        <span class="counter-current">1</span>
-        <span class="counter-separator">/</span>
-        <span class="counter-total"><?php echo esc_html($slide_index); ?></span>
-      </div>
-      <div class="carousel-editorial-thumbnails"></div>
-    </div>
-  </div>
-</section>
-<?php
-wp_reset_postdata();
-else :
-  wc_no_products_found();
-endif;
-?>
 
 <?php
 get_footer();
