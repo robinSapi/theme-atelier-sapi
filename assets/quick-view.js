@@ -475,7 +475,7 @@
               <div class="quick-view-gallery-nav">
                 <button type="button" class="gallery-nav-btn gallery-prev" aria-label="Image précédente">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M15 18l-6-6 6-6v12z"></path>
+                    <path d="M15.5 6.5c.3.2.5.5.5.9v9.2c0 .4-.2.7-.5.9-.3.2-.7.2-1 0l-6-4.6c-.3-.2-.5-.6-.5-1s.2-.8.5-1l6-4.6c.3-.2.7-.2 1 .2z"></path>
                   </svg>
                 </button>
                 <div class="gallery-counter">
@@ -483,7 +483,7 @@
                 </div>
                 <button type="button" class="gallery-nav-btn gallery-next" aria-label="Image suivante">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9 18l6-6-6-6v12z"></path>
+                    <path d="M8.5 6.5c-.3.2-.5.5-.5.9v9.2c0 .4.2.7.5.9.3.2.7.2 1 0l6-4.6c.3-.2.5-.6.5-1s-.2-.8-.5-1l-6-4.6c-.3-.2-.7-.2-1 .2z"></path>
                   </svg>
                 </button>
               </div>
