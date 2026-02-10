@@ -11422,10 +11422,13 @@ body.woocommerce-cart div.woocommerce-wrapper {
   display: block !important;
   width: 20px !important;
   height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
   fill: currentColor !important;
   opacity: 1 !important;
   visibility: visible !important;
   position: relative !important;
+  z-index: 10 !important;
 }
 
 /* Show navigation on gallery hover */
@@ -11457,7 +11460,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* Button hover - EXACT copy from carousel */
 .gallery-nav-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 1);
-  border-color: rgba(147, 125, 104, 0.3);
+  border: 2px solid var(--color-orange);
   color: var(--color-orange);
   transform: scale(1.1);
   -webkit-transform: scale(1.1);
