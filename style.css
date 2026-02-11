@@ -4205,8 +4205,15 @@ li.carousel-editorial-slide,
 }
 
 .product-hero-cta:hover {
+  color: white;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(227, 91, 36, 0.4);
+}
+
+.product-hero-cta:active,
+.product-hero-cta:focus {
+  color: white;
+  outline: none;
 }
 
 .product-hero-cta svg {
