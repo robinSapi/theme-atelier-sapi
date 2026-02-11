@@ -79,8 +79,25 @@ if ($featured_query->have_posts()) :
 
           // Utiliser l'image ACF "bandeau" si disponible, sinon image produit
           $bandeau_image = get_field('bandeau', $product_id);
+
           if ($bandeau_image) {
-            $product_image = wp_get_attachment_image($bandeau_image, 'medium', false, ['class' => 'product-image']);
+            // Gérer différents formats de retour ACF
+            if (is_array($bandeau_image)) {
+              // Format tableau : utiliser l'ID
+              $image_id = $bandeau_image['ID'];
+            } elseif (is_numeric($bandeau_image)) {
+              // Format ID
+              $image_id = $bandeau_image;
+            } else {
+              // Format URL : fallback sur image produit
+              $image_id = null;
+            }
+
+            if ($image_id) {
+              $product_image = wp_get_attachment_image($image_id, 'medium', false, ['class' => 'product-image']);
+            } else {
+              $product_image = get_the_post_thumbnail($product_id, 'medium', ['class' => 'product-image']);
+            }
           } else {
             $product_image = get_the_post_thumbnail($product_id, 'medium', ['class' => 'product-image']);
           }
