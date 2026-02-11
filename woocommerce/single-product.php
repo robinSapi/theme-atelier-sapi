@@ -104,7 +104,7 @@ get_header();
       </div>
 
       <!-- COLONNE DROITE: Informations (40%) -->
-      <div class="product-info-v2">
+      <div class="product-info-v2" id="product-summary-main">
 
         <!-- Badge catégorie -->
         <div class="product-badge-category">

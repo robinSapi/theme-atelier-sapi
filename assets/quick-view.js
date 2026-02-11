@@ -341,12 +341,7 @@
             }
             // Update info section with variants if we found any
             if (productData.short_description || productData.sizes || productData.woods) {
-                description: productData.short_description?.substring(0, 50),
-                sizes: productData.sizes,
-                woods: productData.woods
-              });
               this.updateProductInfo(productData);
-            } else {
             }
           }
         })

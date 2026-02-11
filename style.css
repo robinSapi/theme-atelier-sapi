@@ -8472,14 +8472,15 @@ transform: translateY(15px);
   color: var(--color-white);
 }
 
-/* Quick View Button */
+/* Quick View Button — hidden by default, visible on hover */
 .product-card-cinetique .product-quick-view {
   position: absolute;
   bottom: 1rem;
   left: 50%;
-  -webkit-transform: translateX(-50%) translateY(0);
-  transform: translateX(-50%) translateY(0);
-  opacity: 0.7; /* Visible by default for touch devices */
+  -webkit-transform: translateX(-50%) translateY(8px);
+  transform: translateX(-50%) translateY(8px);
+  opacity: 0;
+  pointer-events: none;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -8504,15 +8505,11 @@ transform: translateY(15px);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   text-decoration: none;
   z-index: 10;
-  pointer-events: none;
-}
-
-.product-card-cinetique:hover .product-quick-view {
-  pointer-events: auto;
 }
 
 .product-card-cinetique:hover .product-quick-view {
   opacity: 1;
+  pointer-events: auto;
   -webkit-transform: translateX(-50%) translateY(0);
   transform: translateX(-50%) translateY(0);
 }
