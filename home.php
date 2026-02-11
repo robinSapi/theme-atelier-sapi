@@ -20,8 +20,8 @@ get_header();
         'id' => get_the_ID(),
         'title' => get_the_title(),
         'permalink' => get_permalink(),
-        'excerpt' => get_the_excerpt(),
-        'thumbnail' => get_the_post_thumbnail('large'),
+        'excerpt' => wp_trim_words(get_the_excerpt(), 25, '...'),
+        'thumbnail_id' => get_post_thumbnail_id(),
         'has_thumbnail' => has_post_thumbnail(),
         'date' => get_the_date('d/m/Y'),
         'timestamp' => get_the_time('U'),
@@ -59,10 +59,10 @@ get_header();
         <div class="blog-carousel-track">
           <?php foreach ($all_posts as $index => $post) : ?>
             <article class="<?php echo esc_attr(implode(' ', $post['classes'])); ?>" data-index="<?php echo esc_attr($index); ?>">
-              <?php if ($post['has_thumbnail']) : ?>
+              <?php if ($post['has_thumbnail'] && $post['thumbnail_id']) : ?>
                 <div class="blog-card-media">
                   <a href="<?php echo esc_url($post['permalink']); ?>">
-                    <?php echo wp_kses_post($post['thumbnail']); ?>
+                    <?php echo wp_get_attachment_image($post['thumbnail_id'], 'large'); ?>
                   </a>
                 </div>
               <?php endif; ?>
