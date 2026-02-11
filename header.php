@@ -26,7 +26,7 @@
             <li><a href="<?php echo home_url('/categorie-produit/suspensions/'); ?>">Suspensions</a></li>
             <li><a href="<?php echo home_url('/categorie-produit/lampadaires/'); ?>">Lampadaires</a></li>
             <li><a href="<?php echo home_url('/categorie-produit/appliques/'); ?>">Appliques</a></li>
-            <li><a href="<?php echo home_url('/categorie-produit/lampe-a-poser/'); ?>">À poser</a></li>
+            <li><a href="<?php echo home_url('/categorie-produit/lampeaposer/'); ?>">À poser</a></li>
           </ul>
         </li>
         <li><a href="<?php echo home_url('/lumiere-dartisan/'); ?>">L'artisan</a></li>
@@ -79,7 +79,7 @@
             <li><a href="<?php echo home_url('/categorie-produit/suspensions/'); ?>">Suspensions</a></li>
             <li><a href="<?php echo home_url('/categorie-produit/lampadaires/'); ?>">Lampadaires</a></li>
             <li><a href="<?php echo home_url('/categorie-produit/appliques/'); ?>">Appliques</a></li>
-            <li><a href="<?php echo home_url('/categorie-produit/lampe-a-poser/'); ?>">À poser</a></li>
+            <li><a href="<?php echo home_url('/categorie-produit/lampeaposer/'); ?>">À poser</a></li>
           </ul>
         </li>
         <li><a href="<?php echo home_url('/lumiere-dartisan/'); ?>">L'artisan</a></li>
