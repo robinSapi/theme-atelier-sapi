@@ -76,6 +76,14 @@ function sapi_maison_enqueue_assets() {
       wp_enqueue_script('sapi-maison-quick-view', get_template_directory_uri() . '/assets/quick-view.js', [], filemtime($quick_view_js_path), true);
     }
   }
+
+  // Blog Timeline & Carousel - only on blog home page
+  if (is_home()) {
+    $blog_timeline_js_path = get_template_directory() . '/assets/blog-timeline.js';
+    if (file_exists($blog_timeline_js_path)) {
+      wp_enqueue_script('sapi-maison-blog-timeline', get_template_directory_uri() . '/assets/blog-timeline.js', [], filemtime($blog_timeline_js_path), true);
+    }
+  }
 }
 add_action('wp_enqueue_scripts', 'sapi_maison_enqueue_assets');
 

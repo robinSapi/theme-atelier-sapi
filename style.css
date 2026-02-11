@@ -5807,6 +5807,241 @@ li.carousel-editorial-slide,
   color: var(--bois-profond, #6B5A4A);
 }
 
+/* ========================================
+   BLOG TIMELINE & CAROUSEL
+   ======================================== */
+
+.blog-timeline-section {
+  padding: 60px 20px 100px;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: var(--color-white, #FFFFFF);
+}
+
+/* Timeline */
+.blog-timeline {
+  margin-bottom: 60px;
+  padding: 0 60px;
+}
+
+.timeline-track {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.timeline-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    rgba(147, 125, 104, 0.2) 0%,
+    rgba(147, 125, 104, 0.4) 50%,
+    rgba(147, 125, 104, 0.2) 100%);
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+.timeline-dot {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-cream, #FEFDFB);
+  border: 3px solid var(--color-wood, #937D68);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.timeline-dot:hover {
+  width: 20px;
+  height: 20px;
+  border-color: var(--color-orange, #E67E22);
+  background: var(--color-orange, #E67E22);
+  box-shadow: 0 0 0 4px rgba(230, 126, 34, 0.2);
+}
+
+.timeline-dot.active {
+  width: 24px;
+  height: 24px;
+  background: var(--color-orange, #E67E22);
+  border-color: var(--color-orange, #E67E22);
+  box-shadow: 0 0 0 6px rgba(230, 126, 34, 0.15);
+}
+
+.timeline-date {
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-wood, #937D68);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.timeline-dot:hover .timeline-date,
+.timeline-dot.active .timeline-date {
+  opacity: 1;
+}
+
+/* Carousel Container */
+.blog-carousel-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.carousel-nav {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-cream, #FEFDFB);
+  border: 2px solid var(--color-wood, #937D68);
+  color: var(--color-wood, #937D68);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.carousel-nav:hover:not(:disabled) {
+  background: var(--color-orange, #E67E22);
+  border-color: var(--color-orange, #E67E22);
+  color: white;
+  transform: scale(1.1);
+}
+
+.carousel-nav:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.carousel-nav svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Carousel */
+.blog-carousel {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.blog-carousel-track {
+  display: flex;
+  gap: 30px;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.blog-carousel .blog-card {
+  flex: 0 0 calc((100% - 60px) / 3);
+  min-width: 320px;
+  scroll-snap-align: start;
+}
+
+/* Date in card */
+.blog-card-date {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(147, 125, 104, 0.15);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-wood, #937D68);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .blog-carousel .blog-card {
+    flex: 0 0 calc((100% - 30px) / 2);
+    min-width: 280px;
+  }
+
+  .blog-timeline {
+    padding: 0 40px;
+  }
+
+  .timeline-dot {
+    width: 12px;
+    height: 12px;
+  }
+
+  .timeline-dot:hover {
+    width: 16px;
+    height: 16px;
+  }
+
+  .timeline-dot.active {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .blog-carousel .blog-card {
+    flex: 0 0 100%;
+    min-width: 280px;
+  }
+
+  .blog-timeline {
+    padding: 0 20px;
+    margin-bottom: 40px;
+  }
+
+  .timeline-track {
+    gap: 12px;
+  }
+
+  .timeline-dot {
+    width: 10px;
+    height: 10px;
+    border-width: 2px;
+  }
+
+  .timeline-dot:hover {
+    width: 14px;
+    height: 14px;
+  }
+
+  .timeline-dot.active {
+    width: 16px;
+    height: 16px;
+  }
+
+  .timeline-date {
+    font-size: 10px;
+    top: -30px;
+  }
+
+  .carousel-nav {
+    width: 40px;
+    height: 40px;
+  }
+
+  .blog-carousel-container {
+    gap: 12px;
+  }
+
+  .blog-carousel-track {
+    gap: 20px;
+  }
+}
+
 /* Single Post Premium */
 .single-post {
   background: var(--color-white, #FFFFFF);
