@@ -24,8 +24,8 @@
           <a href="<?php echo home_url('/nos-creations/'); ?>">Nos créations</a>
           <ul class="sub-menu">
             <li><a href="<?php echo home_url('/categorie-produit/suspensions/'); ?>">Suspensions</a></li>
-            <li><a href="<?php echo home_url('/categorie-produit/lampadaire/'); ?>">Lampadaires</a></li>
-            <li><a href="<?php echo home_url('/categorie-produit/applique/'); ?>">Appliques</a></li>
+            <li><a href="<?php echo home_url('/categorie-produit/lampadaires/'); ?>">Lampadaires</a></li>
+            <li><a href="<?php echo home_url('/categorie-produit/appliques/'); ?>">Appliques</a></li>
             <li><a href="<?php echo home_url('/categorie-produit/lampe-a-poser/'); ?>">À poser</a></li>
           </ul>
         </li>
@@ -77,8 +77,8 @@
           <a href="<?php echo home_url('/nos-creations/'); ?>">Nos créations</a>
           <ul class="sub-menu">
             <li><a href="<?php echo home_url('/categorie-produit/suspensions/'); ?>">Suspensions</a></li>
-            <li><a href="<?php echo home_url('/categorie-produit/lampadaire/'); ?>">Lampadaires</a></li>
-            <li><a href="<?php echo home_url('/categorie-produit/applique/'); ?>">Appliques</a></li>
+            <li><a href="<?php echo home_url('/categorie-produit/lampadaires/'); ?>">Lampadaires</a></li>
+            <li><a href="<?php echo home_url('/categorie-produit/appliques/'); ?>">Appliques</a></li>
             <li><a href="<?php echo home_url('/categorie-produit/lampe-a-poser/'); ?>">À poser</a></li>
           </ul>
         </li>
