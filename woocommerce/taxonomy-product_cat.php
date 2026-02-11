@@ -46,7 +46,7 @@ if (function_exists('sapi_maison_breadcrumbs')) {
 // PHASE 2: Mini-carousel "Coups de cœur" (best-sellers, 20vh height)
 $featured_query = new WP_Query([
   'post_type' => 'product',
-  'posts_per_page' => 4,
+  'posts_per_page' => 1,
   'tax_query' => [
     [
       'taxonomy' => 'product_cat',
