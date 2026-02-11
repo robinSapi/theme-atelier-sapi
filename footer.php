@@ -34,6 +34,7 @@
       <a href="https://www.instagram.com/atelier_sapi/" target="_blank" rel="noopener">Instagram</a>
       <a href="https://www.facebook.com/ateliersapi" target="_blank" rel="noopener">Facebook</a>
       <a href="https://www.pinterest.fr/ateliersapi/" target="_blank" rel="noopener">Pinterest</a>
+      <a href="<?php echo esc_url(home_url('/actus/')); ?>">Actus</a>
     </div>
   </div>
 
