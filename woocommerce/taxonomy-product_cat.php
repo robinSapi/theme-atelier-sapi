@@ -77,48 +77,41 @@ if ($featured_query->have_posts()) :
           $product_id = $product->get_id();
           $product_url = get_permalink($product_id);
 
-          // Utiliser l'image ACF "bandeau" si disponible, sinon image produit
-          $product_image = null;
-
+          // Récupérer l'URL de l'image bandeau ACF pour le background
+          $bandeau_url = '';
           if (function_exists('get_field')) {
             $bandeau_image = get_field('bandeau', $product_id);
 
             if ($bandeau_image) {
-              // Gérer différents formats de retour ACF
-              if (is_array($bandeau_image)) {
-                // Format tableau : récupérer l'URL ou l'ID
-                if (isset($bandeau_image['ID'])) {
-                  $image_id = $bandeau_image['ID'];
-                  $product_image = wp_get_attachment_image($image_id, 'medium', false, ['class' => 'product-image']);
-                } elseif (isset($bandeau_image['url'])) {
-                  $product_image = '<img src="' . esc_url($bandeau_image['url']) . '" alt="' . esc_attr($product_name) . '" class="product-image">';
-                }
+              // Gérer différents formats de retour ACF pour obtenir l'URL
+              if (is_array($bandeau_image) && isset($bandeau_image['url'])) {
+                $bandeau_url = $bandeau_image['url'];
+              } elseif (is_array($bandeau_image) && isset($bandeau_image['ID'])) {
+                $bandeau_url = wp_get_attachment_image_url($bandeau_image['ID'], 'full');
               } elseif (is_numeric($bandeau_image)) {
-                // Format ID
-                $product_image = wp_get_attachment_image($bandeau_image, 'medium', false, ['class' => 'product-image']);
+                $bandeau_url = wp_get_attachment_image_url($bandeau_image, 'full');
               } elseif (is_string($bandeau_image) && strpos($bandeau_image, 'http') === 0) {
-                // Format URL
-                $product_image = '<img src="' . esc_url($bandeau_image) . '" alt="' . esc_attr($product_name) . '" class="product-image">';
+                $bandeau_url = $bandeau_image;
               }
             }
           }
 
-          // Fallback sur l'image produit si pas de bandeau
-          if (!$product_image) {
-            $product_image = get_the_post_thumbnail($product_id, 'medium', ['class' => 'product-image']);
-          }
-
+          // Image produit normale pour la carte
+          $product_image = get_the_post_thumbnail($product_id, 'medium', ['class' => 'product-image']);
           $product_name = get_the_title();
           $product_price = $product->get_price_html();
+
+          // Style inline pour le background
+          $card_style = $bandeau_url ? 'style="background-image: url(' . esc_url($bandeau_url) . ');"' : '';
         ?>
-          <li class="product-mini-card">
+          <li class="product-mini-card" <?php echo $card_style; ?>>
             <a href="<?php echo esc_url($product_url); ?>" class="product-mini-link">
               <div class="product-mini-image">
                 <?php echo $product_image; ?>
-                <div class="product-mini-overlay">
-                  <h3 class="product-mini-name"><?php echo esc_html($product_name); ?></h3>
-                  <div class="product-mini-price"><?php echo $product_price; ?></div>
-                </div>
+              </div>
+              <div class="product-mini-info">
+                <h3 class="product-mini-name"><?php echo esc_html($product_name); ?></h3>
+                <div class="product-mini-price"><?php echo $product_price; ?></div>
               </div>
             </a>
           </li>
