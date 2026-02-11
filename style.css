@@ -6072,7 +6072,6 @@ li.carousel-editorial-slide,
   left: 0;
   pointer-events: none;
   z-index: 99999;
-  mix-blend-mode: difference;
 }
 
 .cursor-dot {
