@@ -78,27 +78,33 @@ if ($featured_query->have_posts()) :
           $product_url = get_permalink($product_id);
 
           // Utiliser l'image ACF "bandeau" si disponible, sinon image produit
-          $bandeau_image = get_field('bandeau', $product_id);
+          $product_image = null;
 
-          if ($bandeau_image) {
-            // Gérer différents formats de retour ACF
-            if (is_array($bandeau_image)) {
-              // Format tableau : utiliser l'ID
-              $image_id = $bandeau_image['ID'];
-            } elseif (is_numeric($bandeau_image)) {
-              // Format ID
-              $image_id = $bandeau_image;
-            } else {
-              // Format URL : fallback sur image produit
-              $image_id = null;
-            }
+          if (function_exists('get_field')) {
+            $bandeau_image = get_field('bandeau', $product_id);
 
-            if ($image_id) {
-              $product_image = wp_get_attachment_image($image_id, 'medium', false, ['class' => 'product-image']);
-            } else {
-              $product_image = get_the_post_thumbnail($product_id, 'medium', ['class' => 'product-image']);
+            if ($bandeau_image) {
+              // Gérer différents formats de retour ACF
+              if (is_array($bandeau_image)) {
+                // Format tableau : récupérer l'URL ou l'ID
+                if (isset($bandeau_image['ID'])) {
+                  $image_id = $bandeau_image['ID'];
+                  $product_image = wp_get_attachment_image($image_id, 'medium', false, ['class' => 'product-image']);
+                } elseif (isset($bandeau_image['url'])) {
+                  $product_image = '<img src="' . esc_url($bandeau_image['url']) . '" alt="' . esc_attr($product_name) . '" class="product-image">';
+                }
+              } elseif (is_numeric($bandeau_image)) {
+                // Format ID
+                $product_image = wp_get_attachment_image($bandeau_image, 'medium', false, ['class' => 'product-image']);
+              } elseif (is_string($bandeau_image) && strpos($bandeau_image, 'http') === 0) {
+                // Format URL
+                $product_image = '<img src="' . esc_url($bandeau_image) . '" alt="' . esc_attr($product_name) . '" class="product-image">';
+              }
             }
-          } else {
+          }
+
+          // Fallback sur l'image produit si pas de bandeau
+          if (!$product_image) {
             $product_image = get_the_post_thumbnail($product_id, 'medium', ['class' => 'product-image']);
           }
 
