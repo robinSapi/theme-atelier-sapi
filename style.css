@@ -4178,6 +4178,15 @@ li.carousel-editorial-slide,
   font-weight: 700;
   color: var(--color-orange);
   margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.product-hero-price .price-label {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--color-dark);
 }
 
 .product-hero-price .woocommerce-Price-amount {

@@ -105,7 +105,10 @@ if ($featured_query->have_posts()) :
           <li class="product-mini-card" <?php echo $card_style; ?>>
             <div class="product-hero-content">
               <h3 class="product-hero-name"><?php echo esc_html($product_name); ?></h3>
-              <div class="product-hero-price"><?php echo $product_price; ?></div>
+              <div class="product-hero-price">
+                <span class="price-label">À partir de</span>
+                <?php echo $product_price; ?>
+              </div>
               <a href="<?php echo esc_url($product_url); ?>" class="product-hero-cta">
                 Découvrir
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
