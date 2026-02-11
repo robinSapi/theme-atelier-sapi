@@ -4171,6 +4171,9 @@ li.carousel-editorial-slide,
   margin: 0;
   line-height: 1.2;
   color: var(--color-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .product-hero-price {
