@@ -4131,7 +4131,7 @@ li.carousel-editorial-slide,
   background-repeat: no-repeat;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   padding: 0 4rem;
   border-radius: 12px;
   overflow: hidden;
@@ -4141,7 +4141,7 @@ li.carousel-editorial-slide,
 /* Encart texte compact - caché par défaut */
 .product-hero-content {
   position: absolute;
-  right: 4rem;
+  left: 4rem;
   z-index: 1;
   max-width: 300px;
   background: rgba(255, 255, 255, 0.95);
@@ -4153,7 +4153,7 @@ li.carousel-editorial-slide,
   flex-direction: column;
   gap: 0.75rem;
   opacity: 0;
-  transform: translateX(20px);
+  transform: translateX(-20px);
   transition: opacity 400ms ease, transform 400ms ease;
   pointer-events: none;
 }
@@ -4171,6 +4171,19 @@ li.carousel-editorial-slide,
   margin: 0;
   line-height: 1.2;
   color: var(--color-dark);
+}
+
+.product-hero-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-orange);
+  margin: 0;
+}
+
+.product-hero-price .woocommerce-Price-amount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-orange);
 }
 
 .product-hero-cta {
