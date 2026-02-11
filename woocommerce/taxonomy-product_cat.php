@@ -63,8 +63,8 @@ if ($featured_query->have_posts()) :
 ?>
 <section class="featured-products-mini">
   <div class="featured-products-header">
-    <h2>Coups de cœur</h2>
-    <p class="featured-subtitle">Nos créations les plus appréciées</p>
+    <h2>Le coup de cœur de l'Atelier</h2>
+    <p class="featured-subtitle">Notre création du moment</p>
   </div>
 
   <div class="products-carousel-mini-wrapper" data-carousel-mini>
@@ -77,7 +77,15 @@ if ($featured_query->have_posts()) :
           $product = wc_get_product(get_the_ID());
           $product_id = $product->get_id();
           $product_url = get_permalink($product_id);
-          $product_image = get_the_post_thumbnail($product_id, 'medium', ['class' => 'product-image']);
+
+          // Utiliser l'image ACF "bandeau" si disponible, sinon image produit
+          $bandeau_image = get_field('bandeau', $product_id);
+          if ($bandeau_image) {
+            $product_image = wp_get_attachment_image($bandeau_image, 'medium', false, ['class' => 'product-image']);
+          } else {
+            $product_image = get_the_post_thumbnail($product_id, 'medium', ['class' => 'product-image']);
+          }
+
           $product_name = get_the_title();
           $product_price = $product->get_price_html();
         ?>
