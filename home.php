@@ -9,10 +9,10 @@ get_header();
   </div>
 </section>
 
-<section class="blog-timeline-section">
+<section class="blog-carousel-section">
   <?php if (have_posts()) : ?>
     <?php
-    // Store all posts for timeline and carousel
+    // Store all posts for carousel
     $all_posts = [];
     while (have_posts()) {
       the_post();
@@ -24,30 +24,12 @@ get_header();
         'thumbnail_id' => get_post_thumbnail_id(),
         'has_thumbnail' => has_post_thumbnail(),
         'date' => get_the_date('d/m/Y'),
-        'timestamp' => get_the_time('U'),
         'classes' => get_post_class('blog-card')
       ];
     }
     $total_posts = count($all_posts);
     ?>
 
-    <!-- Timeline -->
-    <div class="blog-timeline">
-      <div class="timeline-track">
-        <?php foreach ($all_posts as $index => $post) : ?>
-          <button
-            class="timeline-dot <?php echo $index === 0 ? 'active' : ''; ?>"
-            data-article-index="<?php echo esc_attr($index); ?>"
-            aria-label="<?php echo esc_attr('Article : ' . $post['title']); ?>"
-            title="<?php echo esc_attr($post['date'] . ' - ' . $post['title']); ?>">
-            <span class="timeline-date"><?php echo esc_html($post['date']); ?></span>
-          </button>
-        <?php endforeach; ?>
-        <div class="timeline-line"></div>
-      </div>
-    </div>
-
-    <!-- Carousel -->
     <div class="blog-carousel-container">
       <button class="carousel-nav carousel-prev" aria-label="Article précédent">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">

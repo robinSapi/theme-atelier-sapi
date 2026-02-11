@@ -1,6 +1,6 @@
 /**
- * Blog Timeline & Carousel
- * Gestion de la timeline interactive et du carousel d'articles
+ * Blog Carousel
+ * Gestion du carousel d'articles
  */
 
 (function() {
@@ -20,7 +20,6 @@
     const track = carousel.querySelector('.blog-carousel-track');
     const prevBtn = document.querySelector('.carousel-prev');
     const nextBtn = document.querySelector('.carousel-next');
-    const timelineDots = document.querySelectorAll('.timeline-dot');
     const cards = document.querySelectorAll('.blog-carousel .blog-card');
 
     if (!track || !prevBtn || !nextBtn || cards.length === 0) return;
@@ -49,20 +48,6 @@
       // Mettre à jour les boutons
       prevBtn.disabled = currentIndex === 0;
       nextBtn.disabled = currentIndex >= totalCards - visibleCards;
-
-      // Mettre à jour la timeline
-      updateTimeline();
-    }
-
-    // Mettre à jour la timeline (point actif)
-    function updateTimeline() {
-      timelineDots.forEach((dot, index) => {
-        if (index === currentIndex) {
-          dot.classList.add('active');
-        } else {
-          dot.classList.remove('active');
-        }
-      });
     }
 
     // Navigation précédent
@@ -80,22 +65,6 @@
         currentIndex++;
         updateCarousel();
       }
-    });
-
-    // Click sur timeline
-    timelineDots.forEach((dot, index) => {
-      dot.addEventListener('click', function() {
-        currentIndex = index;
-
-        // Ajuster si on dépasse la limite
-        const visibleCards = getVisibleCards();
-        const maxIndex = totalCards - visibleCards;
-        if (currentIndex > maxIndex) {
-          currentIndex = maxIndex;
-        }
-
-        updateCarousel();
-      });
     });
 
     // Gestion du responsive
