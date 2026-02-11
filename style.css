@@ -5902,7 +5902,8 @@ li.carousel-editorial-slide,
 /* Carousel */
 .blog-carousel {
   flex: 1;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
   position: relative;
 }
 
