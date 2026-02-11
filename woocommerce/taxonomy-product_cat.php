@@ -96,8 +96,6 @@ if ($featured_query->have_posts()) :
             }
           }
 
-          // Image produit normale pour la carte
-          $product_image = get_the_post_thumbnail($product_id, 'medium', ['class' => 'product-image']);
           $product_name = get_the_title();
           $product_price = $product->get_price_html();
 
@@ -105,15 +103,16 @@ if ($featured_query->have_posts()) :
           $card_style = $bandeau_url ? 'style="background-image: url(' . esc_url($bandeau_url) . ');"' : '';
         ?>
           <li class="product-mini-card" <?php echo $card_style; ?>>
-            <a href="<?php echo esc_url($product_url); ?>" class="product-mini-link">
-              <div class="product-mini-image">
-                <?php echo $product_image; ?>
-              </div>
-              <div class="product-mini-info">
-                <h3 class="product-mini-name"><?php echo esc_html($product_name); ?></h3>
-                <div class="product-mini-price"><?php echo $product_price; ?></div>
-              </div>
-            </a>
+            <div class="product-hero-content">
+              <h3 class="product-hero-name"><?php echo esc_html($product_name); ?></h3>
+              <div class="product-hero-price"><?php echo $product_price; ?></div>
+              <a href="<?php echo esc_url($product_url); ?>" class="product-hero-cta">
+                Découvrir
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8H13M13 8L8 3M13 8L8 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </a>
+            </div>
           </li>
         <?php endwhile; ?>
       </ul>

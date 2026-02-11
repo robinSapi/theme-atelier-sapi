@@ -4083,12 +4083,12 @@ li.carousel-editorial-slide,
   margin: 0;
 }
 
-/* Mini carousel wrapper - Hero avec background bandeau pleine page */
+/* Mini carousel wrapper - Hero bandeau compact */
 .products-carousel-mini-wrapper {
   position: relative;
-  height: 55vh;
-  min-height: 450px;
-  max-height: 700px;
+  height: 40vh;
+  min-height: 350px;
+  max-height: 500px;
   max-width: 100%;
   margin: 0 auto;
   padding: 0;
@@ -4102,7 +4102,7 @@ li.carousel-editorial-slide,
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 0 3rem;
+  padding: 0 4rem;
 }
 
 .products-carousel-mini-track {
@@ -4120,12 +4120,12 @@ li.carousel-editorial-slide,
   width: 100%;
 }
 
-/* Hide 4th product to prevent overflow (will be shown via carousel JS later) */
+/* Hide 4th product to prevent overflow */
 .product-mini-card:nth-child(n+4) {
   display: none;
 }
 
-/* Mini carousel product cards - Background bandeau en pleine page */
+/* Hero bandeau avec encart compact */
 .product-mini-card {
   position: absolute;
   inset: 0;
@@ -4135,82 +4135,81 @@ li.carousel-editorial-slide,
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 3rem 3rem 3rem 4rem;
+  padding: 0 4rem;
 }
 
-/* Overlay sombre pour contraste */
+/* Overlay sombre gradient pour contraste */
 .product-mini-card::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: linear-gradient(to right, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%);
   z-index: 0;
 }
 
-.product-mini-link {
-  display: flex;
-  flex-direction: row;
-  background: var(--color-white);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  transition: transform 300ms ease, box-shadow 300ms ease;
-  text-decoration: none;
-  color: inherit;
+/* Encart texte compact */
+.product-hero-content {
   position: relative;
   z-index: 1;
-  max-width: 550px;
-  width: 100%;
-}
-
-.product-mini-link:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-}
-
-.product-mini-image {
-  flex: 0 0 45%;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-cream);
-}
-
-.product-mini-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 0.5rem;
-}
-
-.product-mini-info {
-  flex: 1;
-  padding: 1.25rem 1.5rem;
+  max-width: 380px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  padding: 2rem 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
-.product-mini-name {
-  font-size: 1.25rem;
+.product-hero-name {
+  font-size: 1.75rem;
   font-weight: 600;
   margin: 0;
-  line-height: 1.3;
+  line-height: 1.2;
   color: var(--color-dark);
 }
 
-.product-mini-price {
-  font-size: 1.1rem;
+.product-hero-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-orange);
+  margin: 0;
+}
+
+.product-hero-price .woocommerce-Price-amount {
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--color-orange);
 }
 
-.product-mini-price .woocommerce-Price-amount {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--color-orange);
+.product-hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+  box-shadow: 0 4px 12px rgba(227, 91, 36, 0.3);
+  align-self: flex-start;
+}
+
+.product-hero-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(227, 91, 36, 0.4);
+}
+
+.product-hero-cta svg {
+  transition: transform 200ms ease;
+}
+
+.product-hero-cta:hover svg {
+  transform: translateX(3px);
 }
 
 /* Mini carousel navigation - HIDDEN (no JS carousel yet) */
@@ -4318,18 +4317,19 @@ li.carousel-editorial-slide,
 /* Responsive adjustments */
 @media (max-width: 1200px) {
   .product-mini-card {
-    padding: 2.5rem 2.5rem 2.5rem 3.5rem;
+    padding: 0 3.5rem;
   }
 
-  .product-mini-link {
-    max-width: 500px;
+  .product-hero-content {
+    max-width: 340px;
+    padding: 1.75rem 2rem;
   }
 }
 
 @media (max-width: 900px) {
   .products-carousel-mini-wrapper {
-    min-height: 400px;
-    height: 50vh;
+    min-height: 320px;
+    height: 35vh;
   }
 
   .products-carousel-mini {
@@ -4337,22 +4337,25 @@ li.carousel-editorial-slide,
   }
 
   .product-mini-card {
-    padding: 2rem;
+    padding: 0 2rem;
   }
 
-  .product-mini-link {
-    flex-direction: column;
-    max-width: 500px;
+  .product-hero-content {
+    max-width: 320px;
+    padding: 1.5rem 1.75rem;
   }
 
-  .product-mini-image {
-    flex: 0 0 auto;
-    width: 100%;
-    height: 200px;
+  .product-hero-name {
+    font-size: 1.5rem;
   }
 
-  .product-mini-name {
-    font-size: 1.1rem;
+  .product-hero-price {
+    font-size: 1.25rem;
+  }
+
+  .product-hero-cta {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
   }
 
   .category-products-grid ul.products {
@@ -4363,8 +4366,8 @@ li.carousel-editorial-slide,
 
 @media (max-width: 600px) {
   .products-carousel-mini-wrapper {
-    min-height: 350px;
-    height: 45vh;
+    min-height: 280px;
+    height: 32vh;
   }
 
   .products-carousel-mini {
@@ -4372,31 +4375,30 @@ li.carousel-editorial-slide,
   }
 
   .featured-products-header {
-    padding: 0 2rem; /* Match carousel padding */
+    padding: 0 2rem;
   }
 
   .product-mini-card {
-    padding: 1.5rem;
+    padding: 0 1.5rem;
   }
 
-  .product-mini-link {
-    max-width: 400px;
+  .product-hero-content {
+    max-width: 280px;
+    padding: 1.25rem 1.5rem;
+    gap: 0.75rem;
   }
 
-  .product-mini-image {
-    height: 180px;
+  .product-hero-name {
+    font-size: 1.25rem;
   }
 
-  .product-mini-name {
-    font-size: 1rem;
+  .product-hero-price {
+    font-size: 1.1rem;
   }
 
-  .product-mini-price {
-    font-size: 1rem;
-  }
-
-  .product-mini-info {
-    padding: 1rem;
+  .product-hero-cta {
+    padding: 0.65rem 1.25rem;
+    font-size: 0.9rem;
   }
 
   .carousel-mini-btn {
