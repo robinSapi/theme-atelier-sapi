@@ -15,15 +15,17 @@ get_header();
       <?php while (have_posts()) : ?>
         <?php the_post(); ?>
         <article <?php post_class('blog-card'); ?>>
-          <a href="<?php the_permalink(); ?>">
-            <?php if (has_post_thumbnail()) : ?>
-              <div class="blog-card-media">
+          <?php if (has_post_thumbnail()) : ?>
+            <div class="blog-card-media">
+              <a href="<?php the_permalink(); ?>">
                 <?php the_post_thumbnail('large'); ?>
-              </div>
-            <?php endif; ?>
-            <h2><?php the_title(); ?></h2>
+              </a>
+            </div>
+          <?php endif; ?>
+          <div class="blog-card-content">
+            <h2><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
             <p><?php echo wp_kses_post(get_the_excerpt()); ?></p>
-          </a>
+          </div>
         </article>
       <?php endwhile; ?>
     </div>
