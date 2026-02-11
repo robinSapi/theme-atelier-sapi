@@ -11,6 +11,29 @@ Text Domain: theme-sapi-maison
    SAPI CINÉTIQUE - Design System
    ======================================== */
 
+/* ----------------------------------------
+   Self-hosted Square Peg (Safari fix)
+   Google Fonts fails to load on some Safari versions,
+   falling back to cursive (Snell Roundhand) which is oversized.
+   ---------------------------------------- */
+@font-face {
+  font-family: 'Square Peg';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/SquarePeg-Regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Square Peg';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/SquarePeg-Regular.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
   /* ========================================
      SAPI CINÉTIQUE - Design Tokens
@@ -40,7 +63,7 @@ Text Domain: theme-sapi-maison
   --color-error-hover: #570000;
 
   /* Typography */
-  --font-display: 'Square Peg', cursive;
+  --font-display: 'Square Peg', 'Brush Script MT', 'Segoe Script', Georgia, serif;
   --font-body: 'Montserrat', sans-serif;
 
   /* Spacing & Layout */
@@ -834,7 +857,7 @@ select:focus-visible {
 }
 
 .site-title {
-  font-family: "Square Peg", cursive;
+  font-family: "Square Peg", "Brush Script MT", "Segoe Script", Georgia, serif;
   font-size: 36px;
   color: var(--color-wood);
   text-decoration: none;
@@ -1401,7 +1424,7 @@ input[type="submit"]:hover,
 }
 
 .shop-hero-title h1 {
-  font-family: "Square Peg", cursive;
+  font-family: "Square Peg", "Brush Script MT", "Segoe Script", Georgia, serif;
   font-size: 64px;
   color: var(--color-gray);
 }
@@ -1616,7 +1639,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 }
 
 .shop-outro-text {
-  font-family: "Square Peg", cursive;
+  font-family: "Square Peg", "Brush Script MT", "Segoe Script", Georgia, serif;
   font-size: 40px;
   color: var(--color-orange);
   margin-bottom: 0.5rem;
@@ -2022,7 +2045,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 }
 
 .product-details h2 {
-  font-family: "Square Peg", cursive;
+  font-family: "Square Peg", "Brush Script MT", "Segoe Script", Georgia, serif;
   font-size: 48px;
   margin-bottom: 20px;
 }
@@ -2745,7 +2768,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 
 /* Signature avec typo poétique - DS 4.5 */
 .atelier-signature {
-  font-family: var(--font-display, 'Square Peg', cursive);
+  font-family: var(--font-display, "Square Peg", Georgia, serif);
   font-size: 28px;
   color: var(--bois-sombre, #4A3F35);
   margin: 8px 0 1rem;
@@ -3155,7 +3178,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 }
 
 .editorial-tagline {
-  font-family: var(--font-display, "Square Peg", cursive);
+  font-family: var(--font-display, "Square Peg", Georgia, serif);
   font-size: clamp(36px, 6vw, 56px);
   font-weight: 400;
   color: var(--bois-sombre, #4A3F35);
@@ -4640,7 +4663,7 @@ li.carousel-editorial-slide,
 }
 
 .artisan-hero-cinetique h1 {
-  font-family: var(--font-display, "Square Peg", cursive);
+  font-family: var(--font-display, "Square Peg", Georgia, serif);
   font-size: clamp(56px, 10vw, 96px);
   font-weight: 400;
   color: var(--bois-sombre, #4A3F35);
@@ -5019,7 +5042,7 @@ li.carousel-editorial-slide,
 }
 
 .artisan-quote-cinetique blockquote {
-  font-family: var(--font-display, "Square Peg", cursive);
+  font-family: var(--font-display, "Square Peg", Georgia, serif);
   font-size: clamp(36px, 6vw, 56px);
   font-weight: 400;
   font-style: italic;
@@ -5043,7 +5066,7 @@ li.carousel-editorial-slide,
 
 .artisan-quote-cinetique cite {
   display: block;
-  font-family: var(--font-display, "Square Peg", cursive);
+  font-family: var(--font-display, "Square Peg", Georgia, serif);
   font-size: 28px;
   font-style: normal;
   color: var(--bois-sombre, #4A3F35);
@@ -5130,7 +5153,7 @@ li.carousel-editorial-slide,
 }
 
 .artisan-hero h1 {
-  font-family: "Square Peg", cursive;
+  font-family: "Square Peg", "Brush Script MT", "Segoe Script", Georgia, serif;
   font-size: 64px;
   color: var(--color-gray);
 }
@@ -5143,7 +5166,7 @@ li.carousel-editorial-slide,
 .artisan-quote {
   padding: 40px 20px 60px;
   text-align: center;
-  font-family: "Square Peg", cursive;
+  font-family: "Square Peg", "Brush Script MT", "Segoe Script", Georgia, serif;
   font-size: 32px;
   color: var(--color-orange);
 }
@@ -5193,7 +5216,7 @@ li.carousel-editorial-slide,
 }
 
 .advice-hero h1 {
-  font-family: var(--font-display, "Square Peg", cursive);
+  font-family: var(--font-display, "Square Peg", Georgia, serif);
   font-size: clamp(56px, 10vw, 96px);
   font-weight: 400;
   line-height: 1.1;
@@ -5249,7 +5272,7 @@ li.carousel-editorial-slide,
 }
 
 .advice-block h2 {
-  font-family: var(--font-display, "Square Peg", cursive);
+  font-family: var(--font-display, "Square Peg", Georgia, serif);
   font-size: clamp(36px, 6vw, 56px);
   font-weight: 400;
   color: var(--bois-sombre, #4A3F35);
@@ -5311,7 +5334,7 @@ li.carousel-editorial-slide,
 }
 
 .advice-outro p {
-  font-family: var(--font-display, "Square Peg", cursive);
+  font-family: var(--font-display, "Square Peg", Georgia, serif);
   font-size: clamp(32px, 5vw, 48px);
   font-weight: 400;
   font-style: italic;
@@ -5360,7 +5383,7 @@ li.carousel-editorial-slide,
 }
 
 .contact-hero h1 {
-  font-family: var(--font-display, "Square Peg", cursive);
+  font-family: var(--font-display, "Square Peg", Georgia, serif);
   font-size: clamp(56px, 10vw, 96px);
   font-weight: 400;
   line-height: 1.1;
@@ -5466,7 +5489,7 @@ li.carousel-editorial-slide,
 }
 
 .contact-form h2 {
-  font-family: var(--font-display, "Square Peg", cursive);
+  font-family: var(--font-display, "Square Peg", Georgia, serif);
   font-size: clamp(36px, 6vw, 56px);
   font-weight: 400;
   color: var(--bois-sombre, #4A3F35);
@@ -5608,7 +5631,7 @@ li.carousel-editorial-slide,
 }
 
 .blog-hero h1 {
-  font-family: var(--font-display, "Square Peg", cursive);
+  font-family: var(--font-display, "Square Peg", Georgia, serif);
   font-size: clamp(56px, 10vw, 96px);
   font-weight: 400;
   color: var(--bois-sombre, #4A3F35);
@@ -5807,7 +5830,7 @@ li.carousel-editorial-slide,
 }
 
 .single-post-header h1 {
-  font-family: var(--font-display, "Square Peg", cursive);
+  font-family: var(--font-display, "Square Peg", Georgia, serif);
   font-size: clamp(42px, 8vw, 72px);
   font-weight: 400;
   color: var(--bois-sombre, #4A3F35);
@@ -6525,6 +6548,8 @@ transform: translateY(15px);
   font-weight: 400;
   line-height: 1.2;
   color: var(--color-dark);
+  overflow-wrap: break-word;
+  word-wrap: break-word;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
@@ -7799,7 +7824,7 @@ transform: translateY(15px);
 }
 
 .why-sapi-header h2 {
-  font-family: var(--font-display, "Square Peg", cursive);
+  font-family: var(--font-display, "Square Peg", Georgia, serif);
   font-size: clamp(42px, 7vw, 64px);
   font-weight: 400;
   color: var(--bois-sombre, #4A3F35);

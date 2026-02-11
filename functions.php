@@ -27,8 +27,9 @@ function sapi_maison_setup() {
 add_action('after_setup_theme', 'sapi_maison_setup');
 
 function sapi_maison_enqueue_assets() {
+  // Montserrat only from Google Fonts — Square Peg is self-hosted (Safari fix)
   $fonts = [
-    'family' => 'Montserrat:wght@300;400;500;600;700;900|Square+Peg',
+    'family' => 'Montserrat:wght@300;400;500;600;700;900',
     'display' => 'swap',
   ];
   wp_enqueue_style('sapi-maison-fonts', add_query_arg($fonts, 'https://fonts.googleapis.com/css2'));
@@ -77,6 +78,14 @@ function sapi_maison_enqueue_assets() {
   }
 }
 add_action('wp_enqueue_scripts', 'sapi_maison_enqueue_assets');
+
+// Preload self-hosted Square Peg font (Safari fix — Google Fonts fails on some Safari versions)
+function sapi_preload_square_peg() {
+  $font_dir = get_template_directory_uri() . '/assets/fonts/';
+  echo '<link rel="preload" href="' . esc_url($font_dir . 'SquarePeg-Regular.woff2') . '" as="font" type="font/woff2" crossorigin>' . "\n";
+  echo '<link rel="preload" href="' . esc_url($font_dir . 'SquarePeg-Regular-latin-ext.woff2') . '" as="font" type="font/woff2" crossorigin>' . "\n";
+}
+add_action('wp_head', 'sapi_preload_square_peg', 1);
 
 function sapi_maison_content_width() {
   $GLOBALS['content_width'] = 1200;
