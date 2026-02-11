@@ -97,7 +97,10 @@ if ($featured_query->have_posts()) :
           }
 
           $product_name = get_the_title();
-          $product_price = $product->get_price_html();
+
+          // Prix simplifié : "À partir de XX€"
+          $price = $product->get_price();
+          $price_formatted = wc_price($price);
 
           // Style inline pour le background
           $card_style = $bandeau_url ? 'style="background-image: url(' . esc_url($bandeau_url) . ');"' : '';
@@ -106,8 +109,7 @@ if ($featured_query->have_posts()) :
             <div class="product-hero-content">
               <h3 class="product-hero-name"><?php echo esc_html($product_name); ?></h3>
               <div class="product-hero-price">
-                <span class="price-label">À partir de</span>
-                <?php echo $product_price; ?>
+                À partir de <?php echo $price_formatted; ?>
               </div>
               <a href="<?php echo esc_url($product_url); ?>" class="product-hero-cta">
                 Découvrir
