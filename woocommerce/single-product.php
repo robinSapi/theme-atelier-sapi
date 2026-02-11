@@ -844,6 +844,7 @@ get_header();
   </section>
   <?php endif; ?>
 
+  <?php do_action('woocommerce_after_single_product'); ?>
   </div><!-- /.product-page-cinetique -->
 
 <?php endwhile; ?>

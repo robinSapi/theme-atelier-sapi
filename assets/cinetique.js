@@ -87,28 +87,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const productCards = document.querySelectorAll('.bento-product');
 
   productCards.forEach(card => {
+    const productImage = card.querySelector('.product-image');
+    if (!productImage) return;
+
+    let moveRAF = null;
+    let rect = null;
+
+    card.addEventListener('mouseenter', () => {
+      rect = card.getBoundingClientRect();
+    });
+
     card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-
-      const rotateX = (y - centerY) / 20;
-      const rotateY = (centerX - x) / 20;
-
-      const productImage = card.querySelector('.product-image');
-      if (productImage) {
+      if (moveRAF || !rect) return;
+      moveRAF = requestAnimationFrame(() => {
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const rotateX = (y - rect.height / 2) / 20;
+        const rotateY = (rect.width / 2 - x) / 20;
         productImage.style.transform = `scale(1.1) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-      }
+        moveRAF = null;
+      });
     });
 
     card.addEventListener('mouseleave', () => {
-      const productImage = card.querySelector('.product-image');
-      if (productImage) {
-        productImage.style.transform = 'scale(1) rotateX(0) rotateY(0)';
-      }
+      if (moveRAF) { cancelAnimationFrame(moveRAF); moveRAF = null; }
+      productImage.style.transform = 'scale(1) rotateX(0) rotateY(0)';
     });
   });
 
@@ -264,35 +267,39 @@ document.addEventListener('DOMContentLoaded', () => {
     el.dataset.parallaxSpeed = speed;
   });
 
+  // Cache DOM selectors for scroll handler (avoid querySelectorAll per frame)
+  const cachedScroll = {
+    heroImage: document.querySelector('.bento-hero .bento-bg'),
+    shopMagazineHero: document.querySelector('.shop-hero-magazine-bg'),
+    categoryHeroImage: document.querySelector('.category-hero-visual img'),
+    featuredCardsImages: document.querySelectorAll('.category-featured-media img'),
+    header: document.querySelector('.site-header'),
+  };
+
   window.addEventListener('scroll', () => {
     if (!ticking) {
       window.requestAnimationFrame(() => {
         const scrolled = window.pageYOffset;
 
         // Parallax on hero image (homepage)
-        const heroImage = document.querySelector('.bento-hero .bento-bg');
-        if (heroImage) {
-          heroImage.style.transform = `translateY(${scrolled * 0.1}px) scale(1.05)`;
+        if (cachedScroll.heroImage) {
+          cachedScroll.heroImage.style.transform = `translateY(${scrolled * 0.1}px) scale(1.05)`;
         }
 
         // Parallax on shop magazine hero
-        const shopMagazineHero = document.querySelector('.shop-hero-magazine-bg');
-        if (shopMagazineHero) {
-          shopMagazineHero.style.transform = `translateY(${scrolled * 0.1}px) scale(1.05)`;
+        if (cachedScroll.shopMagazineHero) {
+          cachedScroll.shopMagazineHero.style.transform = `translateY(${scrolled * 0.1}px) scale(1.05)`;
         }
 
         // Parallax on category hero images
-        const categoryHeroImage = document.querySelector('.category-hero-visual img');
-        if (categoryHeroImage) {
-          categoryHeroImage.style.transform = `translateY(${scrolled * 0.08}px) scale(1.05)`;
+        if (cachedScroll.categoryHeroImage) {
+          cachedScroll.categoryHeroImage.style.transform = `translateY(${scrolled * 0.08}px) scale(1.05)`;
         }
 
         // Parallax on featured cards images
-        const featuredCardsImages = document.querySelectorAll('.category-featured-media img');
-        featuredCardsImages.forEach((img, index) => {
+        cachedScroll.featuredCardsImages.forEach(img => {
           const rect = img.getBoundingClientRect();
-          const isInView = rect.top < window.innerHeight && rect.bottom > 0;
-          if (isInView) {
+          if (rect.top < window.innerHeight && rect.bottom > 0) {
             const offset = (window.innerHeight - rect.top) * 0.03;
             img.style.transform = `translateY(-${offset}px) scale(1.05)`;
           }
@@ -301,8 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Auto-discovered parallax elements
         parallaxElements.forEach(el => {
           const rect = el.getBoundingClientRect();
-          const isInView = rect.top < window.innerHeight && rect.bottom > 0;
-          if (isInView) {
+          if (rect.top < window.innerHeight && rect.bottom > 0) {
             const speed = parseFloat(el.dataset.parallaxSpeed);
             const offset = (window.innerHeight - rect.top) * speed * 0.01;
             el.style.transform = `translateY(-${offset}px)`;
@@ -310,14 +316,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Header background opacity on scroll
-        const header = document.querySelector('.site-header');
-        if (header) {
+        if (cachedScroll.header) {
           if (scrolled > 100) {
-            header.style.background = 'rgba(254, 253, 251, 0.98)';
-            header.style.boxShadow = '0 2px 20px rgba(50, 50, 50, 0.12)';
+            cachedScroll.header.style.background = 'rgba(254, 253, 251, 0.98)';
+            cachedScroll.header.style.boxShadow = '0 2px 20px rgba(50, 50, 50, 0.12)';
           } else {
-            header.style.background = 'rgba(254, 253, 251, 0.95)';
-            header.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)';
+            cachedScroll.header.style.background = 'rgba(254, 253, 251, 0.95)';
+            cachedScroll.header.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)';
           }
         }
 
@@ -326,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       ticking = true;
     }
-  });
+  }, { passive: true });
 
   // ========================================
   // PREMIUM: Canvas Wood-Themed Particles Background

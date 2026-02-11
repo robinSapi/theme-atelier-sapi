@@ -326,17 +326,51 @@
   let searchTimeout;
   let currentResults = [];
   let selectedIndex = -1;
+  let previouslyFocused = null;
+  let focusTrapHandler = null;
+
+  /**
+   * Focus trap — keeps Tab inside the modal (WCAG 2.1)
+   */
+  function setupFocusTrap() {
+    const focusable = searchModal.querySelectorAll(
+      'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    focusTrapHandler = (e) => {
+      if (e.key !== 'Tab') return;
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
+    document.addEventListener('keydown', focusTrapHandler);
+  }
+
+  function removeFocusTrap() {
+    if (focusTrapHandler) {
+      document.removeEventListener('keydown', focusTrapHandler);
+      focusTrapHandler = null;
+    }
+  }
 
   /**
    * Open search modal
    */
   function openSearch() {
+    previouslyFocused = document.activeElement;
     searchModal.setAttribute('aria-hidden', 'false');
     searchOverlay.classList.add('is-visible');
     body.style.overflow = 'hidden';
 
     setTimeout(() => {
       searchInput.focus();
+      setupFocusTrap();
     }, 100);
   }
 
@@ -344,12 +378,17 @@
    * Close search modal
    */
   function closeSearch() {
+    removeFocusTrap();
     searchModal.setAttribute('aria-hidden', 'true');
     searchOverlay.classList.remove('is-visible');
     body.style.overflow = '';
     searchInput.value = '';
     clearResults();
     selectedIndex = -1;
+
+    if (previouslyFocused && previouslyFocused.focus) {
+      previouslyFocused.focus();
+    }
   }
 
   /**

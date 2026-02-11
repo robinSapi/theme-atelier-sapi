@@ -307,6 +307,43 @@ function sapi_maison_canonical() {
 }
 add_action('wp_head', 'sapi_maison_canonical');
 
+// Meta descriptions (SEO)
+function sapi_maison_meta_description() {
+  $description = '';
+
+  if (is_singular('product')) {
+    global $product;
+    if ($product) {
+      $description = wp_strip_all_tags($product->get_short_description());
+      if (empty($description)) {
+        $description = wp_strip_all_tags($product->get_description());
+      }
+    }
+  } elseif (is_product_category()) {
+    $term = get_queried_object();
+    if ($term) {
+      $descs = [
+        'suspension' => 'Découvrez nos suspensions artisanales en bois. Luminaires suspendus design, découpés au laser et assemblés à la main dans notre atelier lyonnais.',
+        'lampadaire' => 'Nos lampadaires en bois sculptés transforment vos espaces. Éclairage d\'ambiance unique, fabriqués en France à Lyon.',
+        'applique' => 'Appliques murales artisanales en bois. Créez des jeux de lumière poétiques sur vos murs. Chaque pièce est unique.',
+        'lampe-a-poser' => 'Lampes à poser portables en bois. Déplacez-les où vous voulez pour créer une bulle de lumière intime.',
+        'accessoire' => 'Accessoires pour luminaires artisanaux. Ampoules, câbles textile et pièces détachées pour vos créations Atelier Sâpi.',
+      ];
+      $description = isset($descs[$term->slug]) ? $descs[$term->slug] : wp_strip_all_tags(term_description($term->term_id, 'product_cat'));
+    }
+  } elseif (is_shop()) {
+    $description = 'Luminaires artisanaux en bois, découpés au laser et assemblés à la main à Lyon. Suspensions, lampadaires, appliques et lampes design.';
+  } elseif (is_front_page()) {
+    $description = get_bloginfo('description') ?: 'Luminaires artisanaux en bois sculptés à la main à Lyon. Suspensions, lampadaires, appliques et lampes design. 100% français.';
+  }
+
+  if (!empty($description)) {
+    $description = mb_substr(trim($description), 0, 160);
+    echo '<meta name="description" content="' . esc_attr($description) . '">' . "\n";
+  }
+}
+add_action('wp_head', 'sapi_maison_meta_description', 6);
+
 function sapi_maison_breadcrumbs() {
   if (is_front_page()) {
     return;
