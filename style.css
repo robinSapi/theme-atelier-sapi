@@ -4141,8 +4141,8 @@ li.carousel-editorial-slide,
 /* Encart texte compact - caché par défaut */
 .product-hero-content {
   position: absolute;
-  left: 4rem;
-  bottom: 4rem;
+  left: 2rem;
+  bottom: 2rem;
   z-index: 1;
   max-width: 450px;
   background: rgba(255, 255, 255, 0.95);
