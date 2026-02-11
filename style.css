@@ -5904,36 +5904,75 @@ li.carousel-editorial-slide,
 }
 
 .carousel-nav {
+  position: relative;
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--color-cream, #FEFDFB);
-  border: 2px solid var(--color-wood, #937D68);
-  color: var(--color-wood, #937D68);
-  cursor: pointer;
+  width: 64px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(147, 125, 104, 0.2);
+  border-radius: 68% 32% 32% 68% / 33% 47% 53% 67%;
+  color: var(--color-wood);
+  cursor: pointer;
+  pointer-events: auto;
+  transform: scale(1);
+  transition: all 400ms cubic-bezier(0.34, 0.61, 0.4, 0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 8px 24px rgba(147, 125, 104, 0.15),
+    0 2px 8px rgba(147, 125, 104, 0.08);
   z-index: 10;
 }
 
+/* Voluptuous arrow shape - next button */
+.carousel-next {
+  border-radius: 32% 68% 68% 32% / 47% 33% 67% 53%;
+}
+
 .carousel-nav:hover:not(:disabled) {
-  background: var(--color-orange, #E67E22);
-  border-color: var(--color-orange, #E67E22);
-  color: white;
+  background: rgba(255, 255, 255, 1);
+  border: 2px solid var(--color-orange);
+  color: var(--color-orange);
   transform: scale(1.1);
+  box-shadow:
+    0 12px 32px rgba(147, 125, 104, 0.2),
+    0 4px 12px rgba(147, 125, 104, 0.12);
+}
+
+.carousel-nav:active:not(:disabled) {
+  transform: scale(1.05);
 }
 
 .carousel-nav:disabled {
-  opacity: 0.3;
+  opacity: 0.2;
   cursor: not-allowed;
 }
 
 .carousel-nav svg {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
+  stroke-width: 1.5;
+}
+
+/* Glow effect on hover */
+.carousel-nav::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(242, 137, 73, 0.15) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+.carousel-nav:hover:not(:disabled)::before {
+  opacity: 1;
 }
 
 /* Carousel */
