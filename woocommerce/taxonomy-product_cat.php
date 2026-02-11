@@ -115,10 +115,10 @@ if ($featured_query->have_posts()) :
             <a href="<?php echo esc_url($product_url); ?>" class="product-mini-link">
               <div class="product-mini-image">
                 <?php echo $product_image; ?>
-              </div>
-              <div class="product-mini-info">
-                <h3 class="product-mini-name"><?php echo esc_html($product_name); ?></h3>
-                <div class="product-mini-price"><?php echo $product_price; ?></div>
+                <div class="product-mini-overlay">
+                  <h3 class="product-mini-name"><?php echo esc_html($product_name); ?></h3>
+                  <div class="product-mini-price"><?php echo $product_price; ?></div>
+                </div>
               </div>
             </a>
           </li>
