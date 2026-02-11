@@ -6078,7 +6078,7 @@ li.carousel-editorial-slide,
 .cursor-dot {
   width: 8px;
   height: 8px;
-  background: var(--color-wood);
+  background: var(--color-orange);
   border-radius: 50%;
   position: absolute;
   transform: translate(-50%, -50%);
@@ -6088,7 +6088,7 @@ li.carousel-editorial-slide,
 .cursor-outline {
   width: 40px;
   height: 40px;
-  border: 1px solid var(--color-wood);
+  border: 1px solid var(--color-orange);
   border-radius: 50%;
   position: absolute;
   transform: translate(-50%, -50%);
