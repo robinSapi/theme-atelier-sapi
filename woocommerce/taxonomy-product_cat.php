@@ -64,7 +64,6 @@ if ($featured_query->have_posts()) :
 <section class="featured-products-mini">
   <div class="featured-products-header">
     <h2>Le coup de cœur de l'Atelier</h2>
-    <p class="featured-subtitle">Notre création du moment</p>
   </div>
 
   <div class="products-carousel-mini-wrapper" data-carousel-mini>
