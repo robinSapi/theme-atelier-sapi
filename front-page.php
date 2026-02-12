@@ -76,13 +76,21 @@ foreach ($categories_order as $cat_slug) {
   wp_reset_postdata();
 }
 
-// Query 2 random products for small bento cards
+// Query 2 random products for small bento cards (only from main categories)
 $random_products = [];
 $random_query = new WP_Query([
   'post_type' => 'product',
   'posts_per_page' => 2,
   'post_status' => 'publish',
   'orderby' => 'rand',
+  'tax_query' => [
+    [
+      'taxonomy' => 'product_cat',
+      'field' => 'slug',
+      'terms' => ['suspensions', 'appliques', 'lampeaposer', 'lampadaires'],
+      'operator' => 'IN',
+    ],
+  ],
 ]);
 
 if ($random_query->have_posts()) {
