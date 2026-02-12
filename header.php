@@ -19,7 +19,6 @@
     <!-- Menu Desktop -->
     <nav class="primary-nav" aria-label="Menu principal">
       <ul class="nav-menu">
-        <li><a href="<?php echo home_url('/'); ?>">Accueil</a></li>
         <li class="menu-item-has-children">
           <a href="<?php echo home_url('/nos-creations/'); ?>">Nos créations</a>
           <ul class="sub-menu">
@@ -29,6 +28,7 @@
             <li><a href="<?php echo home_url('/categorie-produit/lampeaposer/'); ?>">À poser</a></li>
           </ul>
         </li>
+        <li><a href="<?php echo home_url('/sur-mesure/'); ?>">Sur mesure</a></li>
         <li><a href="<?php echo home_url('/lumiere-dartisan/'); ?>">L'artisan</a></li>
         <li><a href="<?php echo home_url('/conseils-eclaires/'); ?>">Conseils</a></li>
         <li><a href="<?php echo home_url('/contact/'); ?>">Contact</a></li>
@@ -82,6 +82,7 @@
             <li><a href="<?php echo home_url('/categorie-produit/lampeaposer/'); ?>">À poser</a></li>
           </ul>
         </li>
+        <li><a href="<?php echo home_url('/sur-mesure/'); ?>">Sur mesure</a></li>
         <li><a href="<?php echo home_url('/lumiere-dartisan/'); ?>">L'artisan</a></li>
         <li><a href="<?php echo home_url('/conseils-eclaires/'); ?>">Conseils</a></li>
         <li><a href="<?php echo home_url('/contact/'); ?>"><?php esc_html_e('Contact', 'theme-sapi-maison'); ?></a></li>
