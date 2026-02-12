@@ -3146,18 +3146,40 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 
 .category-editorial {
   padding: 80px 20px 100px;
-  /* Premium gradient background */
+  position: relative;
+  /* Premium gradient background - fallback */
   background: linear-gradient(
     135deg,
     var(--creme-papier, #FEFDFB) 0%,
     var(--color-warm, #FBF6EA) 50%,
     var(--creme-chaud, #FAF6F0) 100%
   );
+  /* Background image support */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Semi-transparent overlay for readability when background image is present */
+.category-editorial[style*="background-image"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(254, 253, 251, 0.92) 0%,
+    rgba(251, 246, 234, 0.88) 50%,
+    rgba(250, 246, 240, 0.92) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
 }
 
 .category-editorial-inner {
   max-width: 1000px;
   margin: 0 auto;
+  position: relative;
+  z-index: 2;
 }
 
 /* Editorial Hero */

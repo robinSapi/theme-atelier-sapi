@@ -183,7 +183,50 @@ endif;
 </section>
 
 <!-- Rich Editorial Content Section (MOVED TO BOTTOM) -->
-<section class="category-editorial" data-particles="wood">
+<?php
+// Query one product to get Ambiance 1 background
+$bg_query = new WP_Query([
+  'post_type' => 'product',
+  'posts_per_page' => 1,
+  'tax_query' => [
+    [
+      'taxonomy' => 'product_cat',
+      'field' => 'term_id',
+      'terms' => $term_id,
+    ],
+  ],
+  'orderby' => 'menu_order date',
+  'order' => 'ASC',
+]);
+
+$ambiance_bg_url = '';
+if ($bg_query->have_posts()) {
+  $bg_query->the_post();
+  $bg_product_id = get_the_ID();
+
+  if (function_exists('get_field')) {
+    $ambiance_image = get_field('ambiance_1', $bg_product_id);
+
+    if ($ambiance_image) {
+      // Handle different ACF return formats
+      if (is_array($ambiance_image) && isset($ambiance_image['url'])) {
+        $ambiance_bg_url = $ambiance_image['url'];
+      } elseif (is_array($ambiance_image) && isset($ambiance_image['ID'])) {
+        $ambiance_bg_url = wp_get_attachment_image_url($ambiance_image['ID'], 'full');
+      } elseif (is_numeric($ambiance_image)) {
+        $ambiance_bg_url = wp_get_attachment_image_url($ambiance_image, 'full');
+      } elseif (is_string($ambiance_image) && strpos($ambiance_image, 'http') === 0) {
+        $ambiance_bg_url = $ambiance_image;
+      }
+    }
+  }
+
+  wp_reset_postdata();
+}
+
+$editorial_style = $ambiance_bg_url ? 'style="background-image: url(' . esc_url($ambiance_bg_url) . ');"' : '';
+?>
+<section class="category-editorial" data-particles="wood" <?php echo $editorial_style; ?>>
   <div class="category-editorial-inner">
     <?php
     // Rich editorial content per category
