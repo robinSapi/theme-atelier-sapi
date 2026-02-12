@@ -4,7 +4,7 @@
 > **LIRE CE FICHIER AVANT TOUTE MODIFICATION**
 > Il contient l'historique des problèmes et ce qui NE FONCTIONNE PAS.
 
-**Dernière mise à jour :** 2026-02-11
+**Dernière mise à jour :** 2026-02-12
 **Mainteneur :** Robin / Samuel
 
 ---
@@ -14,7 +14,7 @@
 | Fichier | Rôle | Lignes | Dernière modif | Attention |
 |---------|------|--------|----------------|-----------|
 | `functions.php` | Coeur du thème : assets, hooks WooCommerce, AJAX, meta boxes, SEO | ~1147 | 2026-02-11 | Complexe, beaucoup de hooks |
-| `style.css` | Tous les styles (design system, composants, pages, responsive) | ~12197 | 2026-02-11 | Très lourd, variables CSS en haut |
+| `style.css` | Tous les styles (design system, composants, pages, responsive) | ~13086 | 2026-02-12 | Très lourd, variables CSS en haut |
 | `front-page.php` | Homepage bento grid | ~283 | 2026-02-07 | URLs images hardcodées (testlumineux) |
 | `header.php` | Header, nav, panier SVG | ~200 | 2026-02-06 | |
 | `footer.php` | Footer + quick-view modal shell | ~72 | 2026-02-09 | |
@@ -208,6 +208,41 @@ console.log('debug');
 ---
 
 ## 7. HISTORIQUE DES MODIFICATIONS
+
+### [2026-02-12] — Audit & Fix mobile homepage (commit 597c5bc)
+**Fichiers :** `style.css`
+**Problèmes identifiés :**
+- `.collections-grid` `minmax(300px, 1fr)` → overflow sur iPhone SE (320px < 300px)
+- `.process-inner` 5 flex items horizontaux sans wrap → overflow horizontal
+- `.carousel-product-name` à `3rem` fixe sous 768px → trop gros sur petit écran
+- Aucun `overflow-x: hidden` sur `.hero-bento`, `.collections-kinetic`, `.homepage-carousel-fullscreen`
+- `.bento-container` `grid-auto-rows: 420px` fixe → pas flexible pour le contenu
+- Newsletter form pas responsive (flex row sur mobile)
+
+**Corrections :**
+- `overflow-x: hidden` sur `.hero-bento`, `.collections-kinetic`, `.homepage-carousel-fullscreen`
+- Collections grid : `minmax(min(280px, 100%), 1fr)` — empêche l'overflow sur petits écrans
+- Process card : `overflow-x: auto` + `flex-shrink: 0` sur les steps (scroll horizontal natif)
+- Carousel title (≤480px) : `clamp(1.75rem, 10vw, 2.5rem)`
+- Bento grid (≤768px) : `grid-auto-rows: minmax(280px, auto)` au lieu de 420px fixe
+- Newsletter (≤768px) : form en colonne, input 16px (empêche zoom iOS)
+- Breakpoint ≤375px (iPhone SE) : padding réduit, fonts réduites
+- Fix accolade CSS orpheline ligne 12583
+
+**Leçon :** Toujours utiliser `minmax(min(X, 100%), 1fr)` pour les grilles CSS responsive — `minmax(X, 1fr)` force une largeur minimale qui overflow sur petits écrans.
+
+### [2026-02-12] — Modifs PDF (breadcrumb, couleurs, grille, cards)
+**Fichiers :** `style.css`, `front-page.php`, `functions.php`, `archive-product.php`, `cinetique.js`
+**Changements :**
+- Breadcrumb : SVG ampoule en séparateur, niveau intermédiaire "Nos créations", hover bois
+- Couleur orange harmonisée : `#E67E22` → `#E35B24`
+- Carousel buttons : border-radius 50px (pilule)
+- Carousel text-shadow : supprimé l'offset 4px (effet doublé)
+- Grille produits NC : pseudo-éléments WooCommerce supprimés, 4 colonnes, max-width 1400px
+- Cards Suze/Timothée : nouvelle classe `.bento-product-featured` (statique, zoom au hover)
+- `.site-content` padding-top : 40px → 0 (bande blanche supprimée)
+- Stat blocks : padding réduit
+- Collections/Process : spacing réduit
 
 ### [2026-02-11] — Self-host Square Peg font (commit 0d1b3d0)
 **Fichiers :** `style.css`, `functions.php`, `assets/fonts/`
