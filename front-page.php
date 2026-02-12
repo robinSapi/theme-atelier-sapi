@@ -182,7 +182,17 @@ if ($latest_query->have_posts()) {
   wp_reset_postdata();
 }
 
-// Featured products removed (was Suze la Méduse card)
+// Featured products for Bento grid (other products)
+$featured_products = [
+  [
+    'name' => 'Suze la Méduse',
+    'category' => 'Applique · Formes organiques',
+    'price' => '129€',
+    'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg',
+    'url' => '/produit/suze-la-meduse/',
+    'badge' => null,
+  ],
+];
 
 // Collections
 $collections = [
@@ -412,6 +422,23 @@ $collections = [
         </div>
       </div>
     </div>
+
+    <!-- Product Card 3 -->
+    <a href="<?php echo esc_url($featured_products[0]['url']); ?>" class="bento-card bento-product">
+      <div class="product-image" style="background-image: url('<?php echo esc_url($featured_products[0]['image']); ?>');"></div>
+      <div class="product-overlay">
+        <?php if ($featured_products[0]['badge']) : ?>
+          <div class="product-badge"><?php echo esc_html($featured_products[0]['badge']); ?></div>
+        <?php endif; ?>
+        <div class="product-info-reveal">
+          <h3 class="product-name"><?php echo esc_html($featured_products[0]['name']); ?></h3>
+          <p class="product-cat"><?php echo esc_html($featured_products[0]['category']); ?></p>
+          <div class="product-price-tag">
+            <span><?php echo esc_html($featured_products[0]['price']); ?></span>
+          </div>
+        </div>
+      </div>
+    </a>
 
     <!-- Atelier Image -->
     <div class="bento-card bento-atelier">
