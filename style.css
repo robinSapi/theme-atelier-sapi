@@ -7253,6 +7253,21 @@ transform: translateY(15px);
   border-radius: 50px;
 }
 
+.bento-product-featured-badge {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-orange);
+  color: var(--color-white);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 50px;
+  z-index: 2;
+}
+
 /* Small Product Cards (2 squares) */
 .bento-product-small {
   grid-column: span 2;
@@ -7310,40 +7325,7 @@ transform: translateY(15px);
   transform: rotate(-2deg);
 }
 
-/* Latest Product Card - Partial animations */
-/* Image zoom enabled on hover (like other cards) */
-/* But overlay/badge/text remain static */
-
-.bento-product-latest .product-price-tag {
-  transform: none;
-}
-
-.bento-product-latest .product-overlay {
-  opacity: 1;
-  transition: none;
-}
-
-.bento-product-latest:hover .product-overlay {
-  opacity: 1;
-}
-
-.bento-product-latest .product-badge {
-  transform: translateY(0);
-  transition: none;
-}
-
-.bento-product-latest:hover .product-badge {
-  transform: translateY(0);
-}
-
-.bento-product-latest .product-info-reveal {
-  transform: translateY(0);
-  transition: none;
-}
-
-.bento-product-latest:hover .product-info-reveal {
-  transform: translateY(0);
-}
+/* (bento-product-latest removed — now uses bento-product-featured) */
 
 /* Stats Card */
 .bento-stats {

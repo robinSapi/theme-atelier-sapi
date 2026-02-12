@@ -296,20 +296,16 @@ $collections = [
       </div>
     </div>
 
-    <!-- Product Card 1 (Latest Product - Nouveauté) -->
+    <!-- Product Card - Nouveauté (static) -->
     <?php if ($latest_product) : ?>
-    <a href="<?php echo esc_url($latest_product['url']); ?>" class="bento-card bento-product bento-product-latest">
-      <div class="product-image" style="background-image: url('<?php echo esc_url($latest_product['image']); ?>');"></div>
-      <div class="product-overlay">
-        <?php if ($latest_product['badge']) : ?>
-          <div class="product-badge"><?php echo esc_html($latest_product['badge']); ?></div>
-        <?php endif; ?>
-        <div class="product-info-reveal">
-          <h3 class="product-name"><?php echo esc_html($latest_product['name']); ?></h3>
-          <div class="product-price-tag">
-            <span><?php echo wp_kses_post($latest_product['price']); ?></span>
-          </div>
-        </div>
+    <a href="<?php echo esc_url($latest_product['url']); ?>" class="bento-card bento-product-featured">
+      <div class="bento-bg" style="background-image: url('<?php echo esc_url($latest_product['image']); ?>');"></div>
+      <?php if ($latest_product['badge']) : ?>
+        <span class="bento-product-featured-badge"><?php echo esc_html($latest_product['badge']); ?></span>
+      <?php endif; ?>
+      <div class="bento-product-featured-info">
+        <h3><?php echo esc_html($latest_product['name']); ?></h3>
+        <span class="bento-product-featured-price"><?php echo wp_kses_post($latest_product['price']); ?></span>
       </div>
     </a>
     <?php endif; ?>
