@@ -362,7 +362,10 @@ $collections = [
 
     <!-- Process Card -->
     <div class="bento-card bento-process">
-      <h3 class="process-title">"Découvrez mon processus artisanal"</h3>
+      <div class="process-header">
+        <span class="process-number">02</span>
+        <h3 class="process-title">"Découvrez mon processus artisanal"</h3>
+      </div>
       <div class="process-inner">
         <div class="process-step">
           <span class="step-num">01</span>
