@@ -1555,7 +1555,7 @@ input[type="submit"]:hover,
 .woocommerce ul.products,
 .product-related ul.products {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  grid-template-columns: repeat(3, 1fr) !important;
   gap: 24px;
   list-style: none;
   padding: 0;
@@ -1587,6 +1587,22 @@ ul.products.products-carousel-mini-track {
   flex-wrap: nowrap !important;
   justify-content: center;
   gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .shop-products ul.products,
+  .woocommerce ul.products,
+  .product-related ul.products {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .shop-products ul.products,
+  .woocommerce ul.products,
+  .product-related ul.products {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 /* Override WooCommerce default li.product styles */
@@ -6389,8 +6405,7 @@ li.carousel-editorial-slide,
    ======================================== */
 
 .breadcrumbs {
-  margin: 0 -20px;
-  padding: 8px 40px;
+  padding: 8px 20px;
   font-size: 13px;
   color: var(--color-gray-mid);
   background: transparent;
@@ -6437,7 +6452,6 @@ li.carousel-editorial-slide,
 
 @media (max-width: 768px) {
   .breadcrumbs {
-    margin: 0;
     padding: 8px 16px;
   }
 }
