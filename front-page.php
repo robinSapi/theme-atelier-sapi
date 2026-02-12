@@ -359,7 +359,35 @@ $collections = [
         </a>
       <?php endforeach; ?>
     <?php endif; ?>
+  </div>
+</section>
 
+<!-- Collections Grid -->
+<section class="collections-kinetic">
+  <div class="section-header-kinetic">
+    <span class="section-num">02</span>
+    <h2 class="section-title-kinetic">Collections</h2>
+  </div>
+
+  <div class="collections-grid">
+    <?php foreach ($collections as $collection) : ?>
+      <a href="<?php echo esc_url($collection['url']); ?>" class="collection-card">
+        <div class="collection-visual" style="background-image: url('<?php echo esc_url($collection['image']); ?>');"></div>
+        <div class="collection-details">
+          <h3><?php echo esc_html($collection['name']); ?></h3>
+          <div class="collection-meta">
+            <span class="collection-count"><?php echo esc_html($collection['count']); ?></span>
+            <span class="collection-btn">→</span>
+          </div>
+        </div>
+      </a>
+    <?php endforeach; ?>
+  </div>
+</section>
+
+<!-- Hero Bento Grid (continued) -->
+<section class="hero-bento">
+  <div class="bento-container">
     <!-- Process Card -->
     <div class="bento-card bento-process">
       <div class="process-header">
@@ -430,29 +458,6 @@ $collections = [
         </svg>
       </span>
     </a>
-  </div>
-</section>
-
-<!-- Collections Grid -->
-<section class="collections-kinetic">
-  <div class="section-header-kinetic">
-    <span class="section-num">02</span>
-    <h2 class="section-title-kinetic">Collections</h2>
-  </div>
-
-  <div class="collections-grid">
-    <?php foreach ($collections as $collection) : ?>
-      <a href="<?php echo esc_url($collection['url']); ?>" class="collection-card">
-        <div class="collection-visual" style="background-image: url('<?php echo esc_url($collection['image']); ?>');"></div>
-        <div class="collection-details">
-          <h3><?php echo esc_html($collection['name']); ?></h3>
-          <div class="collection-meta">
-            <span class="collection-count"><?php echo esc_html($collection['count']); ?></span>
-            <span class="collection-btn">→</span>
-          </div>
-        </div>
-      </a>
-    <?php endforeach; ?>
   </div>
 </section>
 
