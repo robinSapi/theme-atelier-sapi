@@ -13,9 +13,9 @@
 
 | Fichier | Rôle | Lignes | Dernière modif | Attention |
 |---------|------|--------|----------------|-----------|
-| `functions.php` | Coeur du thème : assets, hooks WooCommerce, AJAX, meta boxes, SEO | ~1147 | 2026-02-11 | Complexe, beaucoup de hooks |
-| `style.css` | Tous les styles (design system, composants, pages, responsive) | ~13086 | 2026-02-12 | Très lourd, variables CSS en haut |
-| `front-page.php` | Homepage bento grid | ~283 | 2026-02-07 | URLs images hardcodées (testlumineux) |
+| `functions.php` | Coeur du thème : assets, hooks WooCommerce, AJAX, meta boxes, SEO | ~1164 | 2026-02-12 | Complexe, beaucoup de hooks |
+| `style.css` | Tous les styles (design system, composants, pages, responsive) | ~13114 | 2026-02-12 | Très lourd, variables CSS en haut |
+| `front-page.php` | Homepage bento grid | ~473 | 2026-02-12 | URLs images hardcodées (testlumineux) |
 | `header.php` | Header, nav, panier SVG | ~200 | 2026-02-06 | |
 | `footer.php` | Footer + quick-view modal shell | ~72 | 2026-02-09 | |
 | `woocommerce/single-product.php` | Fiche produit complète (hero, details, FAQ, sticky bar) | ~1061 | 2026-02-11 | Template custom, pas standard WC |
@@ -209,6 +209,27 @@ console.log('debug');
 
 ## 7. HISTORIQUE DES MODIFICATIONS
 
+### [2026-02-12] — Mobile UX : contraste, espacement, overlays (commit f0ae329)
+**Fichiers :** `style.css`
+**Problèmes identifiés :**
+- `.step-num` et `.process-number` : couleur `#937D68` sur fond `#FBF6EA` → ratio ~2.8:1 (WCAG AA exige ≥4.5:1)
+- `.step-text` : `font-weight: 500` + `color: var(--color-gray)` → quasi invisible
+- `.bento-container` `grid-auto-rows: 280px` → trop haut pour les cards compactes (stats, CTA) sur mobile
+- Sections padding `3rem` sur mobile → espace blanc excessif entre sections
+- Carousel overlay bottom `opacity: 0.35` → texte peu lisible
+- Collection cards gradient `rgba(50,50,50,0.9)` → contraste insuffisant
+
+**Corrections :**
+- `.step-num` et `.process-number` : couleur → `#5A4A3A` (ratio ~7:1 sur fond crème)
+- `.step-text` : `font-weight: 600` + `color: var(--color-dark)` (#323232)
+- `.process-title` : couleur → `#4A3F35`, clamp min réduit à 1.75rem
+- Bento grid mobile : `grid-auto-rows: auto` + `min-height` individuel par type de card (hero 400px, featured 350px, atelier 250px, stats/CTA auto)
+- Sections mobile : padding `3rem` → `1.5rem`
+- Carousel overlay : `opacity: 0.35` → `0.5`
+- Collection cards gradient : `rgba(30,30,30,0.95)` (plus opaque)
+
+**Leçon :** Toujours vérifier les ratios de contraste WCAG AA (4.5:1 minimum) — les couleurs "bois" (#937D68) paraissent OK à l'oeil mais échouent les tests d'accessibilité sur fond clair.
+
 ### [2026-02-12] — Audit & Fix mobile homepage (commit 597c5bc)
 **Fichiers :** `style.css`
 **Problèmes identifiés :**
@@ -313,6 +334,7 @@ console.log('debug');
 |-----|-------------|
 | `v1.0.0-premium-complete` | Fin harmonisation 5 vagues |
 | `v2.1.0-hero-focal-font` | Avant optimisations audit (point de rollback) |
+| `v-avant-modifs-12fev2026` | Avant modifs PDF + audit mobile (12 février 2026) |
 
 ---
 

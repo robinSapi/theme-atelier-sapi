@@ -4,7 +4,7 @@
 > **⚠️ LIRE CE FICHIER + `CUSTOMIZATIONS.md` AVANT TOUTE MODIFICATION**
 > Ce fichier = référence rapide. CUSTOMIZATIONS.md = historique complet.
 
-**Dernière synchro :** 11 février 2026
+**Dernière synchro :** 12 février 2026
 
 ---
 
@@ -100,8 +100,8 @@ src: url('./assets/fonts/SquarePeg-Regular.woff2');
 
 | Fichier | Rôle | ⚠️ Attention |
 |---------|------|--------------|
-| `functions.php` | Cœur du thème (~1147 lignes) | Complexe, bien documenté |
-| `style.css` | Styles (~12197 lignes) | Design System unifié |
+| `functions.php` | Cœur du thème (~1164 lignes) | Complexe, bien documenté |
+| `style.css` | Styles (~13114 lignes) | Design System unifié |
 | `assets/cinetique.js` | Animations + interactions | Premium v2.0 |
 | `assets/quick-view.js` | Modal aperçu rapide | 746 lignes |
 | `assets/menu.js` | Menu burger + recherche | Focus trap WCAG |
@@ -119,7 +119,7 @@ src: url('./assets/fonts/SquarePeg-Regular.woff2');
 --color-cream: #FEFDFB;
 --color-warm: #FBF6EA;
 --color-wood: #937D68;       /* Accent principal */
---color-orange: #E67E22;     /* CTA */
+--color-orange: #E35B24;     /* CTA (harmonisé 12/02/2026) */
 --color-dark: #323232;
 
 /* Typographie */
@@ -190,7 +190,7 @@ Tout le site a été harmonisé en **5 vagues de design premium** :
 
 **Pour l'historique détaillé, les leçons apprises, et le contexte complet :**
 
-➡️ **Lire `CUSTOMIZATIONS.md`** (300 lignes de documentation)
+➡️ **Lire `CUSTOMIZATIONS.md`** (~350 lignes de documentation)
 
 Ce fichier contient :
 - Workflow détaillé Local → GitHub → O2switch
