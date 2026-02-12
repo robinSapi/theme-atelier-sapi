@@ -7209,6 +7209,50 @@ transform: translateY(15px);
   margin-bottom: 1rem;
 }
 
+/* Featured Product Card (static, no hover effects) */
+.bento-product-featured {
+  grid-column: span 4;
+  grid-row: span 2;
+  cursor: pointer;
+}
+
+.bento-product-featured .bento-bg {
+  transition: none;
+}
+
+.bento-product-featured:hover .bento-bg {
+  transform: none;
+}
+
+.bento-product-featured-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem;
+  background: linear-gradient(to top, rgba(50, 50, 50, 0.85) 0%, transparent 100%);
+  z-index: 2;
+}
+
+.bento-product-featured-info h3 {
+  font-family: var(--font-body);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-white);
+  margin: 0 0 0.5rem 0;
+}
+
+.bento-product-featured-price {
+  display: inline-block;
+  padding: 0.5rem 1.25rem;
+  background: var(--color-wood);
+  color: var(--color-white);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 50px;
+}
+
 /* Small Product Cards (2 squares) */
 .bento-product-small {
   grid-column: span 2;

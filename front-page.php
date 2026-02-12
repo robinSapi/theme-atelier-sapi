@@ -423,20 +423,12 @@ $collections = [
       </div>
     </div>
 
-    <!-- Product Card 3 -->
-    <a href="<?php echo esc_url($featured_products[0]['url']); ?>" class="bento-card bento-product">
-      <div class="product-image" style="background-image: url('<?php echo esc_url($featured_products[0]['image']); ?>');"></div>
-      <div class="product-overlay">
-        <?php if ($featured_products[0]['badge']) : ?>
-          <div class="product-badge"><?php echo esc_html($featured_products[0]['badge']); ?></div>
-        <?php endif; ?>
-        <div class="product-info-reveal">
-          <h3 class="product-name"><?php echo esc_html($featured_products[0]['name']); ?></h3>
-          <p class="product-cat"><?php echo esc_html($featured_products[0]['category']); ?></p>
-          <div class="product-price-tag">
-            <span><?php echo esc_html($featured_products[0]['price']); ?></span>
-          </div>
-        </div>
+    <!-- Product Card - Suze la Méduse (static) -->
+    <a href="<?php echo esc_url($featured_products[0]['url']); ?>" class="bento-card bento-product-featured">
+      <div class="bento-bg" style="background-image: url('<?php echo esc_url($featured_products[0]['image']); ?>');"></div>
+      <div class="bento-product-featured-info">
+        <h3><?php echo esc_html($featured_products[0]['name']); ?></h3>
+        <span class="bento-product-featured-price"><?php echo esc_html($featured_products[0]['price']); ?></span>
       </div>
     </a>
 
