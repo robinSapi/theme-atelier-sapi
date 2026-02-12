@@ -7266,14 +7266,9 @@ transform: translateY(15px);
   transform: rotate(-2deg);
 }
 
-/* Latest Product Card - No animations */
-.bento-product-latest .product-image {
-  transition: none;
-}
-
-.bento-product-latest:hover .product-image {
-  transform: none !important;
-}
+/* Latest Product Card - Partial animations */
+/* Image zoom enabled on hover (like other cards) */
+/* But overlay/badge/text remain static */
 
 .bento-product-latest .product-price-tag {
   transform: none;
