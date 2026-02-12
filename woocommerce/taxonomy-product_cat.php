@@ -23,10 +23,10 @@ $term_slug = $term->slug;
 $term_id = $term->term_id;
 
 $category_intro = [
-  'suspension' => "Des luminaires suspendus en bois qui transforment votre plafond en œuvre d'art. Du lustre design au modèle artisanal, trouvez la suspension qui raconte votre histoire.",
-  'lampadaire' => "L'éclairage d'ambiance parfait pour structurer votre espace sans percer le plafond. Nos lampadaires en bois allient design sculptural et lumière chaleureuse.",
-  'applique' => "Libérez vos sols, habillez vos murs. Nos appliques murales en bois créent une atmosphère unique tout en dessinant des jeux d'ombres poétiques.",
-  'lampe-a-poser' => "La touche finale qui change tout. Posez-la où vous voulez, déplacez-la au gré de vos envies : nos lampes nomades créent une bulle de lumière intime partout chez vous.",
+  'suspensions' => "Des luminaires suspendus en bois qui transforment votre plafond en œuvre d'art. Du lustre design au modèle artisanal, trouvez la suspension qui raconte votre histoire.",
+  'lampadaires' => "L'éclairage d'ambiance parfait pour structurer votre espace sans percer le plafond. Nos lampadaires en bois allient design sculptural et lumière chaleureuse.",
+  'appliques' => "Libérez vos sols, habillez vos murs. Nos appliques murales en bois créent une atmosphère unique tout en dessinant des jeux d'ombres poétiques.",
+  'lampeaposer' => "La touche finale qui change tout. Posez-la où vous voulez, déplacez-la au gré de vos envies : nos lampes nomades créent une bulle de lumière intime partout chez vous.",
   'accessoire' => "Les bons accessoires font toute la différence. Ampoules filament, douilles certifiées, câbles premium : tout pour sublimer vos luminaires en toute sécurité.",
 ];
 
@@ -188,7 +188,7 @@ endif;
     <?php
     // Rich editorial content per category
     $editorial_content = [
-      'suspension' => [
+      'suspensions' => [
         'tagline' => 'La lumière qui vous ressemble',
         'intro' => 'Une suspension, ce n\'est pas juste un luminaire accroché au plafond. C\'est le point focal de votre pièce, celle qui attire le regard dès qu\'on franchit la porte. C\'est l\'élément qui transforme un espace ordinaire en un lieu unique, chaleureux, où on a envie de vivre.',
         'why' => 'Pourquoi choisir une suspension en bois ?',
@@ -203,7 +203,7 @@ endif;
           'Au-dessus d\'un îlot central → Design et fonctionnel pour cuisiner avec style'
         ]
       ],
-      'lampadaire' => [
+      'lampadaires' => [
         'tagline' => 'L\'élégance posée',
         'intro' => 'Un lampadaire, c\'est la liberté d\'éclairer sans contrainte. Pas de trou à percer, pas de plafond trop bas. Juste poser, brancher, et profiter. C\'est l\'allié parfait pour structurer un coin lecture, réchauffer un angle froid, ou simplement ajouter une touche de caractère.',
         'why' => 'Pourquoi un lampadaire fait la différence ?',
@@ -218,7 +218,7 @@ endif;
           'Entrée → Premier coup d\'œil chaleureux en rentrant chez soi'
         ]
       ],
-      'applique' => [
+      'appliques' => [
         'tagline' => 'La lumière qui habille vos murs',
         'intro' => 'Une applique murale, c\'est l\'art de libérer de l\'espace au sol tout en créant une atmosphère unique. Elle sculpte vos murs avec sa lumière, dessine des ombres douces, et transforme un pan de mur banal en élément décoratif à part entière.',
         'why' => 'Pourquoi choisir une applique ?',
@@ -233,7 +233,7 @@ endif;
           'Escalier → Sécurité + décoration en un seul geste'
         ]
       ],
-      'lampe-a-poser' => [
+      'lampeaposer' => [
         'tagline' => 'La touche finale qui change tout',
         'intro' => 'Une lampe à poser, c\'est la liberté totale. Sur une table de chevet, un bureau, une étagère... Elle s\'installe partout, se déplace au gré de vos envies, et crée instantanément une bulle de lumière intime et chaleureuse.',
         'why' => 'Pourquoi craquer pour une lampe à poser ?',
