@@ -62,14 +62,18 @@ if ($categories && !is_wp_error($categories)) {
 $is_on_sale = $product->is_on_sale();
 
 // Get price display
-$price_html = $product->get_price_html();
 $is_variable = $product->is_type('variable');
+$price_html = '';
 
-// Get price for filtering (use min price for variable products)
-$filter_price = $product->get_price();
 if ($is_variable) {
+  // Pour les produits variables, afficher uniquement le prix minimum
   $min_price = $product->get_variation_price('min');
-  $filter_price = $min_price ? $min_price : $filter_price;
+  $price_html = wc_price($min_price);
+  $filter_price = $min_price ? $min_price : $product->get_price();
+} else {
+  // Pour les produits simples, utiliser le HTML par défaut
+  $price_html = $product->get_price_html();
+  $filter_price = $product->get_price();
 }
 
 // Get wood essence from ACF or product attributes
