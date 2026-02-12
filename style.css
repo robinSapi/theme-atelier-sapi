@@ -7841,7 +7841,7 @@ transform: translateY(15px);
   position: relative;
   padding: 2rem 3rem 1.5rem;
   background: var(--color-cream);
-  text-align: center;
+  text-align: left;
 }
 
 /* Visual Hero Grid Layout */
@@ -7887,7 +7887,7 @@ transform: translateY(15px);
   font-weight: 300;
   color: var(--color-gray);
   max-width: 600px;
-  margin: 0 auto 2rem auto;
+  margin: 0 0 2rem 0;
 }
 
 .shop-hero-visual .shop-subtitle {
