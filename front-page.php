@@ -142,7 +142,8 @@ $collections = [
 <!-- Full Page Carousel -->
 <?php if (!empty($carousel_products)) : ?>
 <section class="homepage-carousel-fullscreen">
-  <div class="carousel-slides">
+  <div class="carousel-container">
+    <div class="carousel-slides">
     <?php foreach ($carousel_products as $index => $product) : ?>
       <div class="carousel-slide<?php echo $index === 0 ? ' active' : ''; ?>"
            style="background-image: url('<?php echo esc_url($product['image']); ?>');">
@@ -164,13 +165,14 @@ $collections = [
     <?php endforeach; ?>
   </div>
 
-  <!-- Navigation Dots -->
-  <div class="carousel-dots">
-    <?php foreach ($carousel_products as $index => $product) : ?>
-      <button class="carousel-dot<?php echo $index === 0 ? ' active' : ''; ?>"
-              data-slide="<?php echo $index; ?>"
-              aria-label="Aller au produit <?php echo $index + 1; ?>"></button>
-    <?php endforeach; ?>
+    <!-- Navigation Dots -->
+    <div class="carousel-dots">
+      <?php foreach ($carousel_products as $index => $product) : ?>
+        <button class="carousel-dot<?php echo $index === 0 ? ' active' : ''; ?>"
+                data-slide="<?php echo $index; ?>"
+                aria-label="Aller au produit <?php echo $index + 1; ?>"></button>
+      <?php endforeach; ?>
+    </div>
   </div>
 </section>
 <?php endif; ?>
