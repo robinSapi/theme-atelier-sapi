@@ -3403,8 +3403,29 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 }
 
 @media (max-width: 768px) {
+  /* Category pages - reduce margins for more content space */
+  .shop-hero-cinetique {
+    padding: 1.5rem 1rem 1rem;
+  }
+
+  .featured-products-mini {
+    padding: 1.5rem 0;
+  }
+
+  .category-products-grid {
+    padding: 1.5rem 0 2rem;
+  }
+
+  .category-products-grid ul.products {
+    padding: 0 1rem;
+  }
+
   .category-editorial {
-    padding: 60px 20px 80px;
+    padding: 40px 1rem 60px;
+  }
+
+  .category-editorial-inner {
+    padding: 0 1rem;
   }
 
   .editorial-grid {
@@ -3413,7 +3434,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 
   .editorial-block,
   .editorial-use-cases {
-    padding: 2rem;
+    padding: 1.5rem;
   }
 
   .use-cases-list {
