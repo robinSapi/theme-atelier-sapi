@@ -63,7 +63,7 @@ if ($featured_query->have_posts()) :
 ?>
 <section class="featured-products-mini">
   <div class="featured-products-header">
-    <h2>Le coup de cœur de l'Atelier</h2>
+    <h2><span class="section-num">01</span> Le coup de cœur de l'Atelier</h2>
   </div>
 
   <div class="products-carousel-mini-wrapper" data-carousel-mini>
@@ -145,7 +145,7 @@ endif;
 <!-- PHASE 2: Full product grid (all products) -->
 <section class="category-products-grid">
   <div class="products-grid-header">
-    <h2>Toutes nos <?php echo esc_html(strtolower($term_name)); ?>s</h2>
+    <h2><span class="section-num">02</span> Toutes nos <?php echo esc_html(strtolower($term_name)); ?></h2>
     <p class="products-count"><?php echo esc_html($term->count); ?> produit<?php echo $term->count > 1 ? 's' : ''; ?></p>
   </div>
 
@@ -271,7 +271,7 @@ endif;
     if ($content) :
     ?>
       <div class="editorial-hero">
-        <h2 class="editorial-tagline"><?php echo esc_html($content['tagline']); ?></h2>
+        <h2 class="editorial-tagline"><span class="section-num">03</span> <?php echo esc_html($content['tagline']); ?></h2>
         <p class="editorial-intro"><?php echo esc_html($content['intro']); ?></p>
       </div>
 

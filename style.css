@@ -3162,7 +3162,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 
 /* Editorial Hero */
 .editorial-hero {
-  text-align: center;
+  text-align: left;
   margin-bottom: 60px;
 }
 
@@ -3175,6 +3175,17 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   text-transform: uppercase;
   margin-bottom: 1.5rem;
   opacity: 0.9;
+}
+
+/* Section numbers for category headings */
+.section-num {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--bois-dore, #937D68);
+  margin-right: 0.75rem;
+  opacity: 0.8;
 }
 
 .editorial-tagline {
@@ -4065,7 +4076,7 @@ li.carousel-editorial-slide,
   max-width: 1400px;
   margin: 0 auto 1.5rem;
   padding: 0 3rem;
-  text-align: center;
+  text-align: left;
 }
 
 .featured-products-header h2 {
