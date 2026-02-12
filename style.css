@@ -7429,6 +7429,19 @@ transform: translateY(15px);
   grid-row: span 1;
   padding: 2.5rem 4rem;
   background: var(--color-warm);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.process-title {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: var(--color-dark);
+  margin: 0;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .process-inner {
@@ -7460,11 +7473,11 @@ transform: translateY(15px);
   gap: 0.5rem;
   position: relative;
   z-index: 1;
-  padding: 1rem 1rem;
+  padding: 1rem 0.75rem;
   background: var(--color-warm);
   transition: all 0.4s var(--ease-expo);
   cursor: pointer;
-  width: 180px;
+  width: 150px;
   height: 120px;
   border-radius: 12px;
   overflow: hidden;

@@ -362,6 +362,7 @@ $collections = [
 
     <!-- Process Card -->
     <div class="bento-card bento-process">
+      <h3 class="process-title">Le processus artisanal</h3>
       <div class="process-inner">
         <div class="process-step">
           <span class="step-num">01</span>
@@ -380,6 +381,11 @@ $collections = [
         </div>
         <div class="process-step">
           <span class="step-num">04</span>
+          <span class="step-text">Expédition</span>
+          <div class="step-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Claudine-bandeau-1.jpg');"></div>
+        </div>
+        <div class="process-step">
+          <span class="step-num">05</span>
           <span class="step-text">Finitions</span>
           <div class="step-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/03/P_SLM_XL_det5.jpg');"></div>
         </div>
