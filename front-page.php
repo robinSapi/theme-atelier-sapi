@@ -184,7 +184,6 @@ $collections = [
     <div class="bento-card bento-hero">
       <div class="bento-bg" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg');"></div>
       <div class="bento-content">
-        <div class="bento-label">Pièce signature</div>
         <h1 class="bento-title">Sculpter<br>la lumière</h1>
         <p class="bento-text">Des créations artisanales qui transforment l'espace</p>
         <div class="hero-cta-row">
@@ -194,10 +193,6 @@ $collections = [
               <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
             </svg>
           </a>
-          <div class="bento-corner-info">
-            <span class="corner-label">À partir de</span>
-            <strong class="corner-price">219€</strong>
-          </div>
         </div>
       </div>
     </div>

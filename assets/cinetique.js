@@ -281,10 +281,10 @@ document.addEventListener('DOMContentLoaded', () => {
       window.requestAnimationFrame(() => {
         const scrolled = window.pageYOffset;
 
-        // Parallax on hero image (homepage)
-        if (cachedScroll.heroImage) {
-          cachedScroll.heroImage.style.transform = `translateY(${scrolled * 0.1}px) scale(1.05)`;
-        }
+        // Parallax on hero image (homepage) - DISABLED
+        // if (cachedScroll.heroImage) {
+        //   cachedScroll.heroImage.style.transform = `translateY(${scrolled * 0.1}px) scale(1.05)`;
+        // }
 
         // Parallax on shop magazine hero
         if (cachedScroll.shopMagazineHero) {

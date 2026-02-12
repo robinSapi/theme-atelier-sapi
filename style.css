@@ -7025,7 +7025,7 @@ body.cursor-hover .cursor-dot {
   align-items: center;
   gap: 0.75rem;
   padding: 1rem 2rem;
-  background: var(--color-wood);
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
   color: var(--color-white);
   font-family: var(--font-body);
   font-size: 0.875rem;
@@ -7034,11 +7034,13 @@ body.cursor-hover .cursor-dot {
   letter-spacing: 0.1em;
   text-decoration: none;
   border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
   transition: all 0.3s var(--ease-expo);
 }
 
 .hero-cta:hover {
-  background: var(--color-orange);
+  background: linear-gradient(180deg, #D14F1C 0%, #B8431A 100%);
+  box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
   color: var(--color-white);
   transform: translateX(5px);
 }
