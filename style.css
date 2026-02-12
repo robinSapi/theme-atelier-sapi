@@ -1059,6 +1059,13 @@ input[type="submit"]:hover,
   padding: 40px 20px;
 }
 
+@media (max-width: 768px) {
+  .site-content {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
 .site-footer {
   background: var(--color-cream);
   color: var(--color-gray);
