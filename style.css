@@ -6389,10 +6389,19 @@ li.carousel-editorial-slide,
    ======================================== */
 
 .breadcrumbs {
-  padding: 6px 20px;
+  padding: 8px 20px;
   font-size: 13px;
   color: var(--color-gray-mid);
-  background: var(--color-warm);
+  background: transparent;
+}
+
+.breadcrumbs-inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
 }
 
 .breadcrumbs a {
@@ -6402,14 +6411,24 @@ li.carousel-editorial-slide,
 }
 
 .breadcrumbs a:hover {
-  color: var(--color-link);
-  text-decoration: underline;
+  color: var(--color-wood);
 }
 
 .breadcrumb-separator {
-  color: var(--color-gray-mid);
-  opacity: 0.5;
-  margin: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-wood);
+  opacity: 0.45;
+  margin: 0 6px;
+  transition: opacity 0.2s;
+}
+
+.breadcrumbs:hover .breadcrumb-separator {
+  opacity: 0.7;
+}
+
+.breadcrumb-separator svg {
+  display: block;
 }
 
 .breadcrumb-current {

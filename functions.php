@@ -362,6 +362,10 @@ function sapi_maison_breadcrumbs() {
   ];
 
   if (is_product()) {
+    $breadcrumbs[] = [
+      'name' => 'Nos créations',
+      'url' => home_url('/nos-creations/')
+    ];
     $terms = get_the_terms(get_the_ID(), 'product_cat');
     if ($terms && !is_wp_error($terms)) {
       $main_term = $terms[0];
@@ -375,6 +379,10 @@ function sapi_maison_breadcrumbs() {
       'url' => ''
     ];
   } elseif (is_product_category()) {
+    $breadcrumbs[] = [
+      'name' => 'Nos créations',
+      'url' => home_url('/nos-creations/')
+    ];
     $term = get_queried_object();
     $breadcrumbs[] = [
       'name' => $term->name,
@@ -382,13 +390,16 @@ function sapi_maison_breadcrumbs() {
     ];
   }
 
+  // SVG ampoule miniature comme séparateur
+  $bulb = '<span class="breadcrumb-separator"><svg width="10" height="14" viewBox="0 0 10 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 1C3.07 1 1.5 2.57 1.5 4.5c0 1.3.7 2.4 1.75 3V9h3.5V7.5C7.8 6.9 8.5 5.8 8.5 4.5 8.5 2.57 6.93 1 5 1z" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><line x1="3.5" y1="10.5" x2="6.5" y2="10.5" stroke="currentColor" stroke-width="0.8" stroke-linecap="round"/><line x1="3.75" y1="12" x2="6.25" y2="12" stroke="currentColor" stroke-width="0.8" stroke-linecap="round"/></svg></span>';
+
   $schema = [
     '@context' => 'https://schema.org',
     '@type' => 'BreadcrumbList',
     'itemListElement' => []
   ];
 
-  echo '<nav class="breadcrumbs" aria-label="Fil d\'Ariane">';
+  echo '<nav class="breadcrumbs" aria-label="Fil d\'Ariane"><div class="breadcrumbs-inner">';
   foreach ($breadcrumbs as $index => $crumb) {
     $position = $index + 1;
 
@@ -402,13 +413,13 @@ function sapi_maison_breadcrumbs() {
     if ($crumb['url']) {
       echo '<a href="' . esc_url($crumb['url']) . '">' . esc_html($crumb['name']) . '</a>';
       if ($position < count($breadcrumbs)) {
-        echo ' <span class="breadcrumb-separator">/</span> ';
+        echo ' ' . $bulb . ' ';
       }
     } else {
       echo '<span class="breadcrumb-current">' . esc_html($crumb['name']) . '</span>';
     }
   }
-  echo '</nav>';
+  echo '</div></nav>';
 
   echo '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
 }
