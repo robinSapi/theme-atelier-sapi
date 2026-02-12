@@ -306,7 +306,6 @@ $collections = [
         <?php endif; ?>
         <div class="product-info-reveal">
           <h3 class="product-name"><?php echo esc_html($latest_product['name']); ?></h3>
-          <p class="product-cat"><?php echo esc_html($latest_product['category']); ?></p>
           <div class="product-price-tag">
             <span><?php echo wp_kses_post($latest_product['price']); ?></span>
           </div>

@@ -7272,11 +7272,38 @@ transform: translateY(15px);
 }
 
 .bento-product-latest:hover .product-image {
-  transform: none;
+  transform: none !important;
 }
 
 .bento-product-latest .product-price-tag {
   transform: none;
+}
+
+.bento-product-latest .product-overlay {
+  opacity: 1;
+  transition: none;
+}
+
+.bento-product-latest:hover .product-overlay {
+  opacity: 1;
+}
+
+.bento-product-latest .product-badge {
+  transform: translateY(0);
+  transition: none;
+}
+
+.bento-product-latest:hover .product-badge {
+  transform: translateY(0);
+}
+
+.bento-product-latest .product-info-reveal {
+  transform: translateY(0);
+  transition: none;
+}
+
+.bento-product-latest:hover .product-info-reveal {
+  transform: translateY(0);
 }
 
 /* Stats Card */
