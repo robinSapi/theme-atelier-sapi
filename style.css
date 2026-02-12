@@ -4531,7 +4531,7 @@ li.carousel-editorial-slide,
   }
 
   .category-products-grid ul.products {
-    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-columns: 1fr !important;
     gap: 1.5rem;
     padding: 0 2rem; /* Match carousel padding */
   }
