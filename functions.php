@@ -45,6 +45,10 @@ function sapi_maison_enqueue_assets() {
   if (is_front_page()) {
     $cinetique_js_path = get_template_directory() . '/assets/cinetique.js';
     wp_enqueue_script('sapi-maison-cinetique', get_template_directory_uri() . '/assets/cinetique.js', [], file_exists($cinetique_js_path) ? filemtime($cinetique_js_path) : '1.0.0', true);
+
+    // Homepage fullscreen carousel
+    $carousel_js_path = get_template_directory() . '/assets/homepage-carousel.js';
+    wp_enqueue_script('sapi-maison-homepage-carousel', get_template_directory_uri() . '/assets/homepage-carousel.js', [], file_exists($carousel_js_path) ? filemtime($carousel_js_path) : '1.0.0', true);
   }
 
   // WooCommerce shop interactions (filters, animations)

@@ -6692,6 +6692,164 @@ body.cursor-hover .cursor-dot {
 }
 
 /* ========================================
+   HOMEPAGE FULLSCREEN CAROUSEL
+   ======================================== */
+
+.homepage-carousel-fullscreen {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.carousel-slides {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.carousel-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1s var(--ease-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-slide.active {
+  opacity: 1;
+  z-index: 1;
+}
+
+.carousel-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.3) 0%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
+  z-index: 1;
+}
+
+.carousel-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: var(--color-white);
+  max-width: 800px;
+  padding: 2rem;
+}
+
+.carousel-product-name {
+  font-family: var(--font-display);
+  font-size: 5rem;
+  line-height: 1.1;
+  margin: 0 0 1rem 0;
+  color: var(--color-white);
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.carousel-product-price {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0 0 2rem 0;
+  color: var(--color-white);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.carousel-btn-discover {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2.5rem;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  color: var(--color-white);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
+  transition: all 0.3s var(--ease-smooth);
+}
+
+.carousel-btn-discover:hover {
+  background: linear-gradient(180deg, #D14F1C 0%, #B8431A 100%);
+  box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
+  transform: translateY(-2px);
+}
+
+.carousel-btn-discover svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+}
+
+/* Navigation Dots */
+.carousel-dots {
+  position: absolute;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  gap: 1rem;
+}
+
+.carousel-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--color-white);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-smooth);
+  padding: 0;
+}
+
+.carousel-dot:hover {
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(1.2);
+}
+
+.carousel-dot.active {
+  background: var(--color-white);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .carousel-product-name {
+    font-size: 3rem;
+  }
+
+  .carousel-product-price {
+    font-size: 1.5rem;
+  }
+
+  .carousel-btn-discover {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+  }
+
+  .carousel-dots {
+    bottom: 2rem;
+    gap: 0.75rem;
+  }
+
+  .carousel-dot {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* ========================================
    CINÉTIQUE - Bento Grid Layout
    ======================================== */
 
@@ -8959,7 +9117,7 @@ transform: translateY(15px);
   display: block;
   width: 100%;
   padding: 0.875rem;
-  background: var(--color-wood);
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
   border: none;
   border-radius: 8px;
   font-family: var(--font-body);
@@ -8973,14 +9131,15 @@ transform: translateY(15px);
   cursor: pointer;
   -webkit-transition: all 0.3s var(--ease-smooth);
   transition: all 0.3s var(--ease-smooth);
+  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
 }
 
 .product-card-cinetique .btn-view:hover {
-  background: var(--color-orange);
+  background: linear-gradient(180deg, #D14F1C 0%, #B8431A 100%);
   -webkit-transform: translateY(-2px);
   transform: translateY(-2px);
-  -webkit-box-shadow: var(--shadow-orange);
-  box-shadow: var(--shadow-orange);
+  -webkit-box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
+  box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
 }
 
 /* ========================================

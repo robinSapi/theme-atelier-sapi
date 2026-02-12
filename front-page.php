@@ -7,6 +7,53 @@
 
 get_header();
 
+// Query products for full-page carousel - one from each category with ambiance_1 field
+$carousel_products = [];
+$categories_order = ['suspensions', 'appliques', 'lampeaposer', 'lampadaires'];
+
+foreach ($categories_order as $cat_slug) {
+  $args = [
+    'post_type' => 'product',
+    'posts_per_page' => 1,
+    'post_status' => 'publish',
+    'tax_query' => [
+      [
+        'taxonomy' => 'product_cat',
+        'field' => 'slug',
+        'terms' => $cat_slug,
+      ],
+    ],
+    'meta_query' => [
+      [
+        'key' => 'ambiance_1',
+        'compare' => 'EXISTS',
+      ],
+    ],
+    'orderby' => 'rand', // Random product from category
+  ];
+
+  $query = new WP_Query($args);
+
+  if ($query->have_posts()) {
+    while ($query->have_posts()) {
+      $query->the_post();
+      $product = wc_get_product(get_the_ID());
+      $ambiance_1 = get_field('ambiance_1');
+
+      if ($ambiance_1 && $product) {
+        $carousel_products[] = [
+          'id' => get_the_ID(),
+          'name' => get_the_title(),
+          'price' => $product->get_price_html(),
+          'url' => get_permalink(),
+          'image' => is_array($ambiance_1) ? $ambiance_1['url'] : $ambiance_1,
+        ];
+      }
+    }
+  }
+  wp_reset_postdata();
+}
+
 // Featured products for Bento grid
 $featured_products = [
   [
@@ -69,6 +116,39 @@ $collections = [
   <div class="cursor-dot"></div>
   <div class="cursor-outline"></div>
 </div>
+
+<!-- Full Page Carousel -->
+<?php if (!empty($carousel_products)) : ?>
+<section class="homepage-carousel-fullscreen">
+  <div class="carousel-slides">
+    <?php foreach ($carousel_products as $index => $product) : ?>
+      <div class="carousel-slide<?php echo $index === 0 ? ' active' : ''; ?>"
+           style="background-image: url('<?php echo esc_url($product['image']); ?>');">
+        <div class="carousel-overlay"></div>
+        <div class="carousel-content">
+          <h2 class="carousel-product-name"><?php echo esc_html($product['name']); ?></h2>
+          <div class="carousel-product-price"><?php echo $product['price']; ?></div>
+          <a href="<?php echo esc_url($product['url']); ?>" class="carousel-btn-discover">
+            Découvrir
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    <?php endforeach; ?>
+  </div>
+
+  <!-- Navigation Dots -->
+  <div class="carousel-dots">
+    <?php foreach ($carousel_products as $index => $product) : ?>
+      <button class="carousel-dot<?php echo $index === 0 ? ' active' : ''; ?>"
+              data-slide="<?php echo $index; ?>"
+              aria-label="Aller au produit <?php echo $index + 1; ?>"></button>
+    <?php endforeach; ?>
+  </div>
+</section>
+<?php endif; ?>
 
 <!-- Hero Bento Grid -->
 <section class="hero-bento">
