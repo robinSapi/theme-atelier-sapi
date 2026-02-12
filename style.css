@@ -7661,7 +7661,7 @@ transform: translateY(15px);
    ======================================== */
 
 .collections-kinetic {
-  padding: 3rem 3rem;
+  padding: 3.6rem 3rem 3rem 3rem;
   max-width: 1600px;
   margin: 0 auto;
 }
@@ -7670,7 +7670,7 @@ transform: translateY(15px);
   display: flex;
   align-items: baseline;
   gap: 2rem;
-  margin-bottom: 4rem;
+  margin-bottom: 3.2rem;
 }
 
 .section-num {
