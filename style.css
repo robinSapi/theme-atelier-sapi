@@ -1548,18 +1548,30 @@ input[type="submit"]:hover,
 }
 
 .shop-products {
-  padding: 20px;
+  padding: 1.5rem 0 2rem;
+  background: var(--color-cream);
 }
 
 .shop-products ul.products,
 .woocommerce ul.products,
 .product-related ul.products {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 3rem;
   display: grid !important;
   grid-template-columns: repeat(4, 1fr) !important;
-  gap: 24px;
+  gap: 2rem;
   list-style: none;
-  padding: 0;
-  margin: 0;
+}
+
+/* Kill WooCommerce clearfix pseudo-elements that steal grid cells */
+.shop-products ul.products::before,
+.shop-products ul.products::after,
+.woocommerce ul.products::before,
+.woocommerce ul.products::after,
+.product-related ul.products::before,
+.product-related ul.products::after {
+  display: none !important;
 }
 
 /* EXCEPTION: Products carousel uses flex, not grid */
