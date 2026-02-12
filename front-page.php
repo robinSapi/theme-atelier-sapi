@@ -76,6 +76,31 @@ foreach ($categories_order as $cat_slug) {
   wp_reset_postdata();
 }
 
+// Query 2 random products for small bento cards
+$random_products = [];
+$random_query = new WP_Query([
+  'post_type' => 'product',
+  'posts_per_page' => 2,
+  'post_status' => 'publish',
+  'orderby' => 'rand',
+]);
+
+if ($random_query->have_posts()) {
+  while ($random_query->have_posts()) {
+    $random_query->the_post();
+    $product = wc_get_product(get_the_ID());
+
+    if ($product && has_post_thumbnail()) {
+      $random_products[] = [
+        'name' => get_the_title(),
+        'url' => get_permalink(),
+        'image' => get_the_post_thumbnail_url(get_the_ID(), 'woocommerce_thumbnail'),
+      ];
+    }
+  }
+  wp_reset_postdata();
+}
+
 // Featured products for Bento grid
 $featured_products = [
   [
@@ -257,22 +282,17 @@ $collections = [
       </a>
     </div>
 
-    <!-- Product Card 2 -->
-    <a href="<?php echo esc_url($featured_products[1]['url']); ?>" class="bento-card bento-product">
-      <div class="product-image" style="background-image: url('<?php echo esc_url($featured_products[1]['image']); ?>');"></div>
-      <div class="product-overlay">
-        <?php if ($featured_products[1]['badge']) : ?>
-          <div class="product-badge"><?php echo esc_html($featured_products[1]['badge']); ?></div>
-        <?php endif; ?>
-        <div class="product-info-reveal">
-          <h3 class="product-name"><?php echo esc_html($featured_products[1]['name']); ?></h3>
-          <p class="product-cat"><?php echo esc_html($featured_products[1]['category']); ?></p>
-          <div class="product-price-tag">
-            <span><?php echo esc_html($featured_products[1]['price']); ?></span>
+    <!-- Small Product Cards (Random) -->
+    <?php if (!empty($random_products)) : ?>
+      <?php foreach ($random_products as $random_product) : ?>
+        <a href="<?php echo esc_url($random_product['url']); ?>" class="bento-card bento-product-small">
+          <div class="product-image-small" style="background-image: url('<?php echo esc_url($random_product['image']); ?>');"></div>
+          <div class="product-overlay-small">
+            <h4 class="product-name-small"><?php echo esc_html($random_product['name']); ?></h4>
           </div>
-        </div>
-      </div>
-    </a>
+        </a>
+      <?php endforeach; ?>
+    <?php endif; ?>
 
     <!-- Process Card -->
     <div class="bento-card bento-process">
