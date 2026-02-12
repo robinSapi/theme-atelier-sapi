@@ -41,13 +41,35 @@ foreach ($categories_order as $cat_slug) {
       $ambiance_1 = get_field('ambiance_1');
 
       if ($ambiance_1 && $product) {
-        $carousel_products[] = [
-          'id' => get_the_ID(),
-          'name' => get_the_title(),
-          'price' => $product->get_price_html(),
-          'url' => get_permalink(),
-          'image' => is_array($ambiance_1) ? $ambiance_1['url'] : $ambiance_1,
-        ];
+        // Handle different ACF return formats for image
+        $image_url = '';
+        if (is_array($ambiance_1) && isset($ambiance_1['url'])) {
+          $image_url = $ambiance_1['url'];
+        } elseif (is_array($ambiance_1) && isset($ambiance_1['ID'])) {
+          $image_url = wp_get_attachment_image_url($ambiance_1['ID'], 'full');
+        } elseif (is_numeric($ambiance_1)) {
+          $image_url = wp_get_attachment_image_url($ambiance_1, 'full');
+        } elseif (is_string($ambiance_1) && strpos($ambiance_1, 'http') === 0) {
+          $image_url = $ambiance_1;
+        }
+
+        // Get minimum price
+        if ($product->is_type('variable')) {
+          $min_price = $product->get_variation_price('min');
+          $price_display = $min_price ? wc_price($min_price) : $product->get_price_html();
+        } else {
+          $price_display = wc_price($product->get_price());
+        }
+
+        if ($image_url) {
+          $carousel_products[] = [
+            'id' => get_the_ID(),
+            'name' => get_the_title(),
+            'price' => $price_display,
+            'url' => get_permalink(),
+            'image' => $image_url,
+          ];
+        }
       }
     }
   }
@@ -127,7 +149,10 @@ $collections = [
         <div class="carousel-overlay"></div>
         <div class="carousel-content">
           <h2 class="carousel-product-name"><?php echo esc_html($product['name']); ?></h2>
-          <div class="carousel-product-price"><?php echo $product['price']; ?></div>
+          <div class="carousel-product-price">
+            <span class="price-label">À partir de</span>
+            <?php echo $product['price']; ?>
+          </div>
           <a href="<?php echo esc_url($product['url']); ?>" class="carousel-btn-discover">
             Découvrir
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

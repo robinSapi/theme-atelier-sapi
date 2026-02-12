@@ -6719,8 +6719,8 @@ body.cursor-hover .cursor-dot {
   opacity: 0;
   transition: opacity 1s var(--ease-smooth);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-end;
+  justify-content: flex-start;
 }
 
 .carousel-slide.active {
@@ -6733,8 +6733,8 @@ body.cursor-hover .cursor-dot {
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0.3) 0%,
-    rgba(0, 0, 0, 0.5) 100%
+    rgba(0, 0, 0, 0.2) 0%,
+    rgba(0, 0, 0, 0.6) 100%
   );
   z-index: 1;
 }
@@ -6742,10 +6742,10 @@ body.cursor-hover .cursor-dot {
 .carousel-content {
   position: relative;
   z-index: 2;
-  text-align: center;
+  text-align: left;
   color: var(--color-white);
   max-width: 800px;
-  padding: 2rem;
+  padding: 4rem;
 }
 
 .carousel-product-name {
@@ -6758,11 +6758,20 @@ body.cursor-hover .cursor-dot {
 }
 
 .carousel-product-price {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 600;
   margin: 0 0 2rem 0;
   color: var(--color-white);
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.carousel-product-price .price-label {
+  font-size: 1rem;
+  font-weight: 400;
+  opacity: 0.9;
 }
 
 .carousel-btn-discover {
@@ -6796,8 +6805,7 @@ body.cursor-hover .cursor-dot {
 .carousel-dots {
   position: absolute;
   bottom: 3rem;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 4rem;
   z-index: 3;
   display: flex;
   gap: 1rem;
@@ -6825,12 +6833,20 @@ body.cursor-hover .cursor-dot {
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
+  .carousel-content {
+    padding: 2rem;
+  }
+
   .carousel-product-name {
     font-size: 3rem;
   }
 
   .carousel-product-price {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
+  }
+
+  .carousel-product-price .price-label {
+    font-size: 0.875rem;
   }
 
   .carousel-btn-discover {
@@ -6840,6 +6856,7 @@ body.cursor-hover .cursor-dot {
 
   .carousel-dots {
     bottom: 2rem;
+    left: 2rem;
     gap: 0.75rem;
   }
 
