@@ -1075,8 +1075,9 @@ input[type="submit"]:hover,
   display: none;
   align-items: center;
   gap: 8px;
-  background: transparent;
+  background: transparent !important;
   border: none;
+  outline: none;
   padding: 8px;
   cursor: pointer;
   font-family: "Montserrat", Arial, sans-serif;
@@ -1088,6 +1089,13 @@ input[type="submit"]:hover,
 
 .menu-toggle:hover {
   color: var(--color-orange);
+}
+
+.menu-toggle:focus,
+.menu-toggle:active {
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .menu-burger {
@@ -1159,22 +1167,25 @@ input[type="submit"]:hover,
   padding: 10px;
   color: var(--color-dark, #323232);
   opacity: 0;
+  visibility: hidden;
   transform: scale(0.8);
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s 0.3s;
   z-index: 999;
 }
 
 .mobile-menu-overlay.active .mobile-menu-close {
   opacity: 1;
+  visibility: visible;
   transform: scale(1);
-  transition-delay: 0.2s;
+  transition: opacity 0.3s ease 0.2s, transform 0.3s ease 0.2s, visibility 0s 0s;
 }
 
-.mobile-menu-close:hover,
+.mobile-menu-close:hover {
+  transform: scale(1.1);
+}
+
 .mobile-menu-close:focus,
 .mobile-menu-close:active {
-  opacity: 0.7;
-  transform: scale(1.1);
   background: transparent !important;
   border: none !important;
   outline: none !important;
