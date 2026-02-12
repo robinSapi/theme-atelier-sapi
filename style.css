@@ -1555,7 +1555,7 @@ input[type="submit"]:hover,
 .woocommerce ul.products,
 .product-related ul.products {
   display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
+  grid-template-columns: repeat(4, 1fr) !important;
   gap: 24px;
   list-style: none;
   padding: 0;
@@ -1593,11 +1593,19 @@ ul.products.products-carousel-mini-track {
   .shop-products ul.products,
   .woocommerce ul.products,
   .product-related ul.products {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .shop-products ul.products,
+  .woocommerce ul.products,
+  .product-related ul.products {
     grid-template-columns: repeat(2, 1fr) !important;
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 480px) {
   .shop-products ul.products,
   .woocommerce ul.products,
   .product-related ul.products {
