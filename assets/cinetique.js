@@ -82,40 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ========================================
-  // Product Cards - Parallax on Mouse Move
-  // ========================================
-  const productCards = document.querySelectorAll('.bento-product');
-
-  productCards.forEach(card => {
-    const productImage = card.querySelector('.product-image');
-    if (!productImage) return;
-
-    let moveRAF = null;
-    let rect = null;
-
-    card.addEventListener('mouseenter', () => {
-      rect = card.getBoundingClientRect();
-    });
-
-    card.addEventListener('mousemove', (e) => {
-      if (moveRAF || !rect) return;
-      moveRAF = requestAnimationFrame(() => {
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const rotateX = (y - rect.height / 2) / 20;
-        const rotateY = (rect.width / 2 - x) / 20;
-        productImage.style.transform = `scale(1.1) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-        moveRAF = null;
-      });
-    });
-
-    card.addEventListener('mouseleave', () => {
-      if (moveRAF) { cancelAnimationFrame(moveRAF); moveRAF = null; }
-      productImage.style.transform = 'scale(1) rotateX(0) rotateY(0)';
-    });
-  });
-
-  // ========================================
   // Collection Cards Animation
   // ========================================
   const collectionCards = document.querySelectorAll('.collection-card');

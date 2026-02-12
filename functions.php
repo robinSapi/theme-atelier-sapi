@@ -66,13 +66,7 @@ function sapi_maison_enqueue_assets() {
       ]);
     }
 
-    // Editorial Carousel for shop and category pages
-    if (is_shop() || is_product_category()) {
-      $carousel_js_path = get_template_directory() . '/assets/carousel-editorial.js';
-      if (file_exists($carousel_js_path)) {
-        wp_enqueue_script('sapi-maison-carousel-editorial', get_template_directory_uri() . '/assets/carousel-editorial.js', [], filemtime($carousel_js_path), true);
-      }
-    }
+    // Editorial Carousel removed — products now displayed in grid
 
     // Quick View modal for product previews
     $quick_view_js_path = get_template_directory() . '/assets/quick-view.js';

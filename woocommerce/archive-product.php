@@ -114,7 +114,6 @@ if (!$hero_img_url) {
 <section class="why-sapi" data-particles="wood">
   <div class="why-sapi-inner">
     <div class="why-sapi-header">
-      <span class="section-number">02</span>
       <h2>Pourquoi choisir l'Atelier Sâpi ?</h2>
       <p class="why-sapi-intro">Nous ne fabriquons pas juste des luminaires. Nous créons des pièces uniques qui transforment votre intérieur en un lieu où il fait bon vivre.</p>
     </div>
@@ -267,75 +266,37 @@ if (!$hero_img_url) {
   </div>
 </div>
 
-<!-- Products Carousel -->
+<!-- Products Grid -->
 <section class="shop-products" id="shop-products">
   <?php if ($all_products->have_posts()) : ?>
 
-    <div class="products-carousel-editorial-wrapper" data-carousel-editorial>
-      <div class="products-carousel-editorial">
-        <ul class="products-carousel-editorial-track products">
-          <?php
-          $slide_index = 0;
-          while ($all_products->have_posts()) :
-            $all_products->the_post();
-            global $product, $sapi_carousel_context;
-            $product = wc_get_product(get_the_ID());
+    <ul class="products columns-3">
+      <?php
+      while ($all_products->have_posts()) :
+        $all_products->the_post();
+        global $product, $sapi_carousel_context;
+        $product = wc_get_product(get_the_ID());
 
-            // Get product data for enhanced carousel
-            $product_id = $product->get_id();
-            $thumbnail_url = get_the_post_thumbnail_url($product_id, 'thumbnail');
+        // Pass category context for filters
+        $product_id = $product->get_id();
+        $product_cats = get_the_terms($product_id, 'product_cat');
+        $cat_slugs = [];
+        if ($product_cats && !is_wp_error($product_cats)) {
+          foreach ($product_cats as $cat) {
+            $cat_slugs[] = $cat->slug;
+          }
+        }
+        $sapi_carousel_context = [
+          'is_carousel' => false,
+          'categories' => implode(' ', $cat_slugs),
+        ];
 
-            // Pass carousel context to content-product.php
-            $product_cats = get_the_terms($product_id, 'product_cat');
-            $cat_slugs = [];
-            if ($product_cats && !is_wp_error($product_cats)) {
-              foreach ($product_cats as $cat) {
-                $cat_slugs[] = $cat->slug;
-              }
-            }
-            $sapi_carousel_context = [
-              'is_carousel' => true,
-              'is_editorial' => true,
-              'categories' => implode(' ', $cat_slugs),
-              'slide_index' => $slide_index,
-              'thumbnail_url' => $thumbnail_url,
-            ];
+        wc_get_template_part('content', 'product');
 
-            wc_get_template_part('content', 'product');
-
-            $sapi_carousel_context = null;
-            $slide_index++;
-          endwhile;
-          ?>
-        </ul>
-      </div>
-
-      <!-- Enhanced Navigation Controls -->
-      <div class="carousel-editorial-nav">
-        <button class="carousel-editorial-btn carousel-editorial-prev"
-                aria-label="<?php esc_attr_e('Produit précédent', 'theme-sapi-maison'); ?>">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-        </button>
-        <button class="carousel-editorial-btn carousel-editorial-next"
-                aria-label="<?php esc_attr_e('Produit suivant', 'theme-sapi-maison'); ?>">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </button>
-      </div>
-
-      <!-- Elegant Counter & Thumbnails -->
-      <div class="carousel-editorial-footer">
-        <div class="carousel-editorial-counter">
-          <span class="counter-current">1</span>
-          <span class="counter-separator">/</span>
-          <span class="counter-total"><?php echo esc_html($slide_index); ?></span>
-        </div>
-        <div class="carousel-editorial-thumbnails"></div>
-      </div>
-    </div>
+        $sapi_carousel_context = null;
+      endwhile;
+      ?>
+    </ul>
 
   <?php else : ?>
 

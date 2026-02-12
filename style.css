@@ -51,8 +51,8 @@ Text Domain: theme-sapi-maison
 
   /* Colors - Brand */
   --color-wood: #937D68;
-  --color-orange: #E67E22;
-  --color-orange-hover: #D35400;
+  --color-orange: #E35B24;        /* Référence unique orange Sâpi — harmonisée */
+  --color-orange-hover: #C94D1E;
   --color-green: #018501; /* Keep for success states */
   --color-green-hover: #026B02;
 
@@ -6389,7 +6389,7 @@ li.carousel-editorial-slide,
    ======================================== */
 
 .breadcrumbs {
-  padding: 16px 20px;
+  padding: 6px 20px;
   font-size: 13px;
   color: var(--color-gray-mid);
   background: var(--color-warm);
@@ -6765,7 +6765,7 @@ body.cursor-hover .cursor-dot {
   line-height: 1;
   margin: 0 0 0.75rem 0;
   color: var(--color-white);
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
 }
 
 .carousel-product-price {
@@ -6796,7 +6796,7 @@ body.cursor-hover .cursor-dot {
   text-decoration: none;
   font-weight: 600;
   font-size: 1.1rem;
-  border-radius: var(--radius);
+  border-radius: 50px;
   box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
   transition: all 0.3s var(--ease-smooth);
 }
@@ -7317,7 +7317,7 @@ transform: translateY(15px);
   position: relative;
   text-align: center;
   text-decoration: none;
-  padding: 1.5rem 2rem;
+  padding: 1rem 1rem;
   border-radius: var(--radius);
   transition: transform 0.4s var(--ease-smooth), background 0.3s ease;
   overflow: visible;
@@ -7427,11 +7427,11 @@ transform: translateY(15px);
 .bento-process {
   grid-column: span 12;
   grid-row: span 2;
-  padding: 2.5rem 4rem;
+  padding: 1.5rem 3rem;
   background: var(--color-warm);
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.75rem;
 }
 
 .process-header {
@@ -7661,7 +7661,7 @@ transform: translateY(15px);
    ======================================== */
 
 .collections-kinetic {
-  padding: 3.6rem 3rem 3rem 3rem;
+  padding: 1.5rem 3rem 3rem 3rem;
   max-width: 1600px;
   margin: 0 auto;
 }
@@ -7670,7 +7670,7 @@ transform: translateY(15px);
   display: flex;
   align-items: baseline;
   gap: 2rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .section-num {
