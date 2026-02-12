@@ -7844,6 +7844,17 @@ transform: translateY(15px);
   text-align: left;
 }
 
+/* Desktop: center title and subtitle */
+@media (min-width: 769px) {
+  .shop-hero-cinetique {
+    text-align: center;
+  }
+
+  .shop-hero-cinetique .shop-subtitle {
+    margin: 0 auto 2rem auto;
+  }
+}
+
 /* Visual Hero Grid Layout */
 .shop-hero-cinetique.shop-hero-visual {
   text-align: left;
