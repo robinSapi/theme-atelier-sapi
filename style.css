@@ -1146,6 +1146,39 @@ input[type="submit"]:hover,
   visibility: visible;
 }
 
+/* Mobile Menu Close Button */
+.mobile-menu-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  color: var(--color-dark, #323232);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.3s ease;
+  z-index: 999;
+}
+
+.mobile-menu-overlay.active .mobile-menu-close {
+  opacity: 1;
+  transform: scale(1);
+  transition-delay: 0.2s;
+}
+
+.mobile-menu-close:hover {
+  opacity: 0.7;
+  transform: scale(1.1);
+}
+
+.mobile-menu-close svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
 .mobile-menu-nav {
   width: 100%;
   max-width: 400px;

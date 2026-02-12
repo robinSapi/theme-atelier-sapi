@@ -52,6 +52,12 @@
    */
   menuToggle.addEventListener('click', toggleMenu);
 
+  // Close menu with close button
+  const mobileMenuClose = document.querySelector('.mobile-menu-close');
+  if (mobileMenuClose) {
+    mobileMenuClose.addEventListener('click', closeMenu);
+  }
+
   // Close menu when clicking on overlay background
   mobileMenuOverlay.addEventListener('click', function(e) {
     if (e.target === mobileMenuOverlay) {
