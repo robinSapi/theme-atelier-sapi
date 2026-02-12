@@ -7266,6 +7266,19 @@ transform: translateY(15px);
   transform: rotate(-2deg);
 }
 
+/* Latest Product Card - No animations */
+.bento-product-latest .product-image {
+  transition: none;
+}
+
+.bento-product-latest:hover .product-image {
+  transform: none;
+}
+
+.bento-product-latest .product-price-tag {
+  transform: none;
+}
+
 /* Stats Card */
 .bento-stats {
   grid-column: span 4;

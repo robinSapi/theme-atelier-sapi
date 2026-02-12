@@ -109,24 +109,81 @@ if ($random_query->have_posts()) {
   wp_reset_postdata();
 }
 
-// Featured products for Bento grid
+// Query latest product for "Nouveauté" block
+$latest_product = null;
+$latest_query = new WP_Query([
+  'post_type' => 'product',
+  'posts_per_page' => 1,
+  'post_status' => 'publish',
+  'orderby' => 'date',
+  'order' => 'DESC',
+  'tax_query' => [
+    [
+      'taxonomy' => 'product_cat',
+      'field' => 'slug',
+      'terms' => ['suspensions', 'appliques', 'lampeaposer', 'lampadaires'],
+      'operator' => 'IN',
+    ],
+  ],
+]);
+
+if ($latest_query->have_posts()) {
+  while ($latest_query->have_posts()) {
+    $latest_query->the_post();
+    $product = wc_get_product(get_the_ID());
+
+    // Get product category
+    $categories = get_the_terms(get_the_ID(), 'product_cat');
+    $category_name = '';
+    if ($categories && !is_wp_error($categories)) {
+      foreach ($categories as $cat) {
+        if ($cat->slug !== 'uncategorized') {
+          $category_name = $cat->name;
+          break;
+        }
+      }
+    }
+
+    // Get wood essence from ACF or product attributes
+    $wood_essence = '';
+    if (function_exists('get_field')) {
+      $wood_essence = get_field('essence_de_bois', get_the_ID());
+    }
+    if (!$wood_essence) {
+      $wood_attr = $product->get_attribute('pa_bois');
+      if ($wood_attr) {
+        $wood_essence = $wood_attr;
+      }
+    }
+
+    // Build category display
+    $category_display = $category_name;
+    if ($wood_essence) {
+      $category_display .= ' · ' . $wood_essence;
+    }
+
+    // Get price
+    if ($product->is_type('variable')) {
+      $min_price = $product->get_variation_price('min');
+      $price_display = $min_price ? wc_price($min_price) : $product->get_price_html();
+    } else {
+      $price_display = wc_price($product->get_price());
+    }
+
+    $latest_product = [
+      'name' => get_the_title(),
+      'category' => $category_display,
+      'price' => $price_display,
+      'image' => get_the_post_thumbnail_url(get_the_ID(), 'woocommerce_single'),
+      'url' => get_permalink(),
+      'badge' => 'Nouveau',
+    ];
+  }
+  wp_reset_postdata();
+}
+
+// Featured products for Bento grid (other products)
 $featured_products = [
-  [
-    'name' => 'Timothée l\'Araignée',
-    'category' => 'Suspension · Chêne',
-    'price' => '389€',
-    'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/10/Bandeau.jpg',
-    'url' => '/produit/timothee-laraignee/',
-    'badge' => 'Nouveau',
-  ],
-  [
-    'name' => 'Claudine la Turbine',
-    'category' => 'Lampadaire · Design cinétique',
-    'price' => '259€',
-    'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Claudine.jpg',
-    'url' => '/produit/claudine-la-turbine/',
-    'badge' => null,
-  ],
   [
     'name' => 'Suze la Méduse',
     'category' => 'Applique · Formes organiques',
@@ -239,22 +296,24 @@ $collections = [
       </div>
     </div>
 
-    <!-- Product Card 1 -->
-    <a href="<?php echo esc_url($featured_products[0]['url']); ?>" class="bento-card bento-product">
-      <div class="product-image" style="background-image: url('<?php echo esc_url($featured_products[0]['image']); ?>');"></div>
+    <!-- Product Card 1 (Latest Product - Nouveauté) -->
+    <?php if ($latest_product) : ?>
+    <a href="<?php echo esc_url($latest_product['url']); ?>" class="bento-card bento-product bento-product-latest">
+      <div class="product-image" style="background-image: url('<?php echo esc_url($latest_product['image']); ?>');"></div>
       <div class="product-overlay">
-        <?php if ($featured_products[0]['badge']) : ?>
-          <div class="product-badge"><?php echo esc_html($featured_products[0]['badge']); ?></div>
+        <?php if ($latest_product['badge']) : ?>
+          <div class="product-badge"><?php echo esc_html($latest_product['badge']); ?></div>
         <?php endif; ?>
         <div class="product-info-reveal">
-          <h3 class="product-name"><?php echo esc_html($featured_products[0]['name']); ?></h3>
-          <p class="product-cat"><?php echo esc_html($featured_products[0]['category']); ?></p>
+          <h3 class="product-name"><?php echo esc_html($latest_product['name']); ?></h3>
+          <p class="product-cat"><?php echo esc_html($latest_product['category']); ?></p>
           <div class="product-price-tag">
-            <span><?php echo esc_html($featured_products[0]['price']); ?></span>
+            <span><?php echo wp_kses_post($latest_product['price']); ?></span>
           </div>
         </div>
       </div>
     </a>
+    <?php endif; ?>
 
     <!-- Stats Card -->
     <div class="bento-card bento-stats">
@@ -329,17 +388,17 @@ $collections = [
     </div>
 
     <!-- Product Card 3 -->
-    <a href="<?php echo esc_url($featured_products[2]['url']); ?>" class="bento-card bento-product">
-      <div class="product-image" style="background-image: url('<?php echo esc_url($featured_products[2]['image']); ?>');"></div>
+    <a href="<?php echo esc_url($featured_products[0]['url']); ?>" class="bento-card bento-product">
+      <div class="product-image" style="background-image: url('<?php echo esc_url($featured_products[0]['image']); ?>');"></div>
       <div class="product-overlay">
-        <?php if ($featured_products[2]['badge']) : ?>
-          <div class="product-badge"><?php echo esc_html($featured_products[2]['badge']); ?></div>
+        <?php if ($featured_products[0]['badge']) : ?>
+          <div class="product-badge"><?php echo esc_html($featured_products[0]['badge']); ?></div>
         <?php endif; ?>
         <div class="product-info-reveal">
-          <h3 class="product-name"><?php echo esc_html($featured_products[2]['name']); ?></h3>
-          <p class="product-cat"><?php echo esc_html($featured_products[2]['category']); ?></p>
+          <h3 class="product-name"><?php echo esc_html($featured_products[0]['name']); ?></h3>
+          <p class="product-cat"><?php echo esc_html($featured_products[0]['category']); ?></p>
           <div class="product-price-tag">
-            <span><?php echo esc_html($featured_products[2]['price']); ?></span>
+            <span><?php echo esc_html($featured_products[0]['price']); ?></span>
           </div>
         </div>
       </div>
