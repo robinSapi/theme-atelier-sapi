@@ -7890,13 +7890,14 @@ transform: translateY(15px);
   font-size: 1.125rem;
   font-weight: 300;
   color: var(--color-gray);
-  margin: 1rem 0 2rem 0;
+  margin: 1rem 0 2rem 4.5rem;
 }
 
 .newsletter-kinetic .newsletter-form {
   display: flex;
   gap: 1rem;
   max-width: 600px;
+  margin-left: 4.5rem;
 }
 
 .newsletter-input-kinetic {
@@ -8170,9 +8171,14 @@ transform: translateY(15px);
     padding: 2rem 1.5rem;
   }
 
+  .newsletter-kinetic .newsletter-subtitle {
+    margin-left: 0;
+  }
+
   .newsletter-kinetic .newsletter-form {
     flex-direction: column;
     max-width: 100%;
+    margin-left: 0;
   }
 
   .newsletter-input-kinetic {
