@@ -12689,52 +12689,6 @@ body.woocommerce-cart div.woocommerce-wrapper {
   transform: scale(1);
 }
 
-.quick-view-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 100;
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.98);
-  border: 2px solid var(--color-wood);
-  border-radius: 55% 45% 45% 55% / 45% 55% 45% 55%; /* Organic cross shape */
-  cursor: pointer;
-  color: var(--color-wood);
-  transition: all 400ms cubic-bezier(0.34, 0.61, 0.4, 0.97);
-  box-shadow: 0 4px 16px rgba(147, 125, 104, 0.15);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.quick-view-close:hover {
-  background: var(--color-orange);
-  border-color: var(--color-orange);
-  color: var(--color-white);
-  transform: rotate(90deg) scale(1.1);
-  box-shadow: 0 6px 24px rgba(242, 137, 73, 0.3);
-}
-
-.quick-view-close:hover svg {
-  stroke: var(--color-white) !important;
-}
-
-.quick-view-close svg {
-  display: block !important;
-  width: 24px !important;
-  height: 24px !important;
-  stroke: currentColor !important;
-  stroke-width: 2.5 !important;
-  stroke-linecap: round !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  position: relative !important;
-  z-index: 10 !important;
-  pointer-events: none;
-}
 
 .quick-view-loading {
   display: flex;
