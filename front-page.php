@@ -455,18 +455,16 @@ $collections = [
     <span class="section-num">04</span>
     <h2 class="section-title-kinetic">Restez informés</h2>
   </div>
-  <div class="newsletter-content">
-    <p class="newsletter-subtitle">Nouveautés, éditions limitées, coulisses d'atelier.</p>
-    <form class="newsletter-form" action="#" method="post">
-      <input type="email" placeholder="votre@email.fr" class="newsletter-input-kinetic" required />
-      <button type="submit" class="newsletter-submit-kinetic">
-        <span>S'inscrire</span>
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
-        </svg>
-      </button>
-    </form>
-  </div>
+  <p class="newsletter-subtitle">Nouveautés, éditions limitées, coulisses d'atelier.</p>
+  <form class="newsletter-form" action="#" method="post">
+    <input type="email" placeholder="votre@email.fr" class="newsletter-input-kinetic" required />
+    <button type="submit" class="newsletter-submit-kinetic">
+      <span>S'inscrire</span>
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
+      </svg>
+    </button>
+  </form>
 </section>
 
 <?php
