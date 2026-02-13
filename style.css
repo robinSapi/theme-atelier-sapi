@@ -4349,7 +4349,7 @@ li.carousel-editorial-slide,
   color: white;
   font-weight: 600;
   font-size: 0.95rem;
-  border-radius: 6px;
+  border-radius: 50px;
   text-decoration: none;
   transition: transform 200ms ease, box-shadow 200ms ease;
   box-shadow: 0 4px 12px rgba(227, 91, 36, 0.3);
