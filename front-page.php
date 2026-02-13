@@ -453,7 +453,7 @@ $collections = [
 <section class="newsletter-kinetic">
   <div class="newsletter-content">
     <div class="newsletter-text">
-      <span class="section-num">03</span>
+      <span class="section-num">04</span>
       <h2 class="section-title-kinetic">Restez<br>informés</h2>
       <p>Nouveautés, éditions limitées, coulisses d'atelier.</p>
     </div>
