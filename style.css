@@ -12703,6 +12703,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   border: 1px solid rgba(147, 125, 104, 0.2);
   border-radius: 55% 45% 45% 55% / 45% 55% 45% 55%; /* Organic cross shape */
   cursor: pointer;
+  color: var(--color-dark);
   transition: all 400ms cubic-bezier(0.34, 0.61, 0.4, 0.97);
   box-shadow: 0 4px 16px rgba(147, 125, 104, 0.15);
   backdrop-filter: blur(12px);
