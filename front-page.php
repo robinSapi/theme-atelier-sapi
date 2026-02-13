@@ -204,21 +204,40 @@ if ($featured_query->have_posts()) {
     $featured_query->the_post();
     $product = wc_get_product(get_the_ID());
 
-    if ($product && has_post_thumbnail()) {
-      // Get price
-      if ($product->is_type('variable')) {
-        $min_price = $product->get_variation_price('min');
-        $price_display = $min_price ? wc_price($min_price) : $product->get_price_html();
-      } else {
-        $price_display = wc_price($product->get_price());
+    if ($product) {
+      // Get detail_1 ACF field
+      $detail_1 = get_field('detail_1', get_the_ID());
+      $image_url = '';
+
+      if ($detail_1) {
+        // Handle different ACF return formats
+        if (is_array($detail_1) && isset($detail_1['url'])) {
+          $image_url = $detail_1['url'];
+        } elseif (is_array($detail_1) && isset($detail_1['ID'])) {
+          $image_url = wp_get_attachment_image_url($detail_1['ID'], 'full');
+        } elseif (is_numeric($detail_1)) {
+          $image_url = wp_get_attachment_image_url($detail_1, 'full');
+        } elseif (is_string($detail_1) && strpos($detail_1, 'http') === 0) {
+          $image_url = $detail_1;
+        }
       }
 
-      $featured_products[] = [
-        'name' => get_the_title(),
-        'price' => $price_display,
-        'image' => get_the_post_thumbnail_url(get_the_ID(), 'woocommerce_single'),
-        'url' => get_permalink(),
-      ];
+      if ($image_url) {
+        // Get price
+        if ($product->is_type('variable')) {
+          $min_price = $product->get_variation_price('min');
+          $price_display = $min_price ? wc_price($min_price) : $product->get_price_html();
+        } else {
+          $price_display = wc_price($product->get_price());
+        }
+
+        $featured_products[] = [
+          'name' => get_the_title(),
+          'price' => $price_display,
+          'image' => $image_url,
+          'url' => get_permalink(),
+        ];
+      }
     }
   }
   wp_reset_postdata();
