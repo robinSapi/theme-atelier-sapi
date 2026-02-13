@@ -12718,6 +12718,10 @@ body.woocommerce-cart div.woocommerce-wrapper {
   box-shadow: 0 6px 24px rgba(242, 137, 73, 0.3);
 }
 
+.quick-view-close:hover svg {
+  stroke: var(--color-white);
+}
+
 .quick-view-close svg {
   stroke: currentColor;
   stroke-width: 2.5;
