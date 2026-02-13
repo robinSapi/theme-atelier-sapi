@@ -182,17 +182,47 @@ if ($latest_query->have_posts()) {
   wp_reset_postdata();
 }
 
-// Featured products for Bento grid (other products)
-$featured_products = [
-  [
-    'name' => 'Suze la Méduse',
-    'category' => 'Applique · Formes organiques',
-    'price' => '129€',
-    'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg',
-    'url' => '/produit/suze-la-meduse/',
-    'badge' => null,
+// Featured products for Bento grid (random product)
+$featured_products = [];
+$featured_query = new WP_Query([
+  'post_type' => 'product',
+  'posts_per_page' => 1,
+  'post_status' => 'publish',
+  'orderby' => 'rand',
+  'tax_query' => [
+    [
+      'taxonomy' => 'product_cat',
+      'field' => 'slug',
+      'terms' => ['suspensions', 'appliques', 'lampeaposer', 'lampadaires'],
+      'operator' => 'IN',
+    ],
   ],
-];
+]);
+
+if ($featured_query->have_posts()) {
+  while ($featured_query->have_posts()) {
+    $featured_query->the_post();
+    $product = wc_get_product(get_the_ID());
+
+    if ($product && has_post_thumbnail()) {
+      // Get price
+      if ($product->is_type('variable')) {
+        $min_price = $product->get_variation_price('min');
+        $price_display = $min_price ? wc_price($min_price) : $product->get_price_html();
+      } else {
+        $price_display = wc_price($product->get_price());
+      }
+
+      $featured_products[] = [
+        'name' => get_the_title(),
+        'price' => $price_display,
+        'image' => get_the_post_thumbnail_url(get_the_ID(), 'woocommerce_single'),
+        'url' => get_permalink(),
+      ];
+    }
+  }
+  wp_reset_postdata();
+}
 
 // Collections
 $collections = [
@@ -419,14 +449,16 @@ $collections = [
       </div>
     </div>
 
-    <!-- Product Card - Suze la Méduse (static) -->
+    <!-- Product Card - Random Featured Product -->
+    <?php if (!empty($featured_products)) : ?>
     <a href="<?php echo esc_url($featured_products[0]['url']); ?>" class="bento-card bento-product-featured">
       <div class="bento-bg" style="background-image: url('<?php echo esc_url($featured_products[0]['image']); ?>');"></div>
       <div class="bento-product-featured-info">
         <h3><?php echo esc_html($featured_products[0]['name']); ?></h3>
-        <span class="bento-product-featured-price"><?php echo esc_html($featured_products[0]['price']); ?></span>
+        <span class="bento-product-featured-price"><?php echo wp_kses_post($featured_products[0]['price']); ?></span>
       </div>
     </a>
+    <?php endif; ?>
 
     <!-- Atelier Image -->
     <div class="bento-card bento-atelier">
