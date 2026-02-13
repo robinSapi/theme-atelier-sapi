@@ -451,12 +451,12 @@ $collections = [
 
 <!-- Newsletter Section -->
 <section class="newsletter-kinetic">
+  <div class="section-header-kinetic">
+    <span class="section-num">04</span>
+    <h2 class="section-title-kinetic">Restez informés</h2>
+  </div>
   <div class="newsletter-content">
-    <div class="newsletter-text">
-      <span class="section-num">04</span>
-      <h2 class="section-title-kinetic">Restez<br>informés</h2>
-      <p>Nouveautés, éditions limitées, coulisses d'atelier.</p>
-    </div>
+    <p class="newsletter-subtitle">Nouveautés, éditions limitées, coulisses d'atelier.</p>
     <form class="newsletter-form" action="#" method="post">
       <input type="email" placeholder="votre@email.fr" class="newsletter-input-kinetic" required />
       <button type="submit" class="newsletter-submit-kinetic">
