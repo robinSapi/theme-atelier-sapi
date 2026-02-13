@@ -111,8 +111,11 @@ if ($featured_query->have_posts()) :
               <div class="product-hero-price">
                 À partir de <?php echo $price_formatted; ?>
               </div>
-              <a href="<?php echo esc_url($product_url); ?>" class="btn-view">
-                Découvrir →
+              <a href="<?php echo esc_url($product_url); ?>" class="carousel-btn-discover">
+                Découvrir
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
+                </svg>
               </a>
             </div>
           </li>
