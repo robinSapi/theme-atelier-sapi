@@ -111,11 +111,8 @@ if ($featured_query->have_posts()) :
               <div class="product-hero-price">
                 À partir de <?php echo $price_formatted; ?>
               </div>
-              <a href="<?php echo esc_url($product_url); ?>" class="product-hero-cta">
-                Découvrir
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M3 8H13M13 8L8 3M13 8L8 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
+              <a href="<?php echo esc_url($product_url); ?>" class="btn-view">
+                Découvrir →
               </a>
             </div>
           </li>

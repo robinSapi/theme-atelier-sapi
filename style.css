@@ -4340,42 +4340,6 @@ li.carousel-editorial-slide,
   color: var(--color-orange);
 }
 
-.product-hero-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
-  color: white;
-  font-weight: 600;
-  font-size: 0.95rem;
-  border-radius: 50px;
-  text-decoration: none;
-  transition: transform 200ms ease, box-shadow 200ms ease;
-  box-shadow: 0 4px 12px rgba(227, 91, 36, 0.3);
-  align-self: flex-start;
-}
-
-.product-hero-cta:hover {
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(227, 91, 36, 0.4);
-}
-
-.product-hero-cta:active,
-.product-hero-cta:focus {
-  color: white;
-  outline: none;
-}
-
-.product-hero-cta svg {
-  transition: transform 200ms ease;
-}
-
-.product-hero-cta:hover svg {
-  transform: translateX(3px);
-}
-
 /* Mini carousel navigation - HIDDEN (no JS carousel yet) */
 .carousel-mini-nav {
   display: none; /* Hide buttons until carousel JS is added */
@@ -4518,11 +4482,6 @@ li.carousel-editorial-slide,
     font-size: 1.25rem;
   }
 
-  .product-hero-cta {
-    padding: 0.75rem 1.5rem;
-    font-size: 0.95rem;
-  }
-
   .category-products-grid ul.products {
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 1.5rem;
@@ -4559,11 +4518,6 @@ li.carousel-editorial-slide,
 
   .product-hero-price {
     font-size: 1.1rem;
-  }
-
-  .product-hero-cta {
-    padding: 0.65rem 1.25rem;
-    font-size: 0.9rem;
   }
 
   .carousel-mini-btn {
