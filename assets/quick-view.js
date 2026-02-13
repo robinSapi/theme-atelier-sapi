@@ -19,7 +19,7 @@
     modal: null,
     overlay: null,
     body: null,
-    // closeBtn: null, // REMOVED - will be recreated
+    closeBtn: null,
     loading: null,
     currentGalleryIndex: 0,
     galleryImages: [],
@@ -36,7 +36,7 @@
 
       this.overlay = this.modal.querySelector('.quick-view-overlay');
       this.body = this.modal.querySelector('.quick-view-body');
-      // this.closeBtn = this.modal.querySelector('.quick-view-close'); // REMOVED
+      this.closeBtn = this.modal.querySelector('.quick-view-close');
       this.loading = this.modal.querySelector('.quick-view-loading');
 
       this.bindEvents();
@@ -56,10 +56,10 @@
       // Setup IntersectionObserver for automatic preloading when products enter viewport
       this.setupPreloadObserver();
 
-      // Close modal - REMOVED, will be recreated
-      // if (this.closeBtn) {
-      //   this.closeBtn.addEventListener('click', () => this.closeModal());
-      // }
+      // Close modal
+      if (this.closeBtn) {
+        this.closeBtn.addEventListener('click', () => this.closeModal());
+      }
 
       if (this.overlay) {
         this.overlay.addEventListener('click', () => this.closeModal());

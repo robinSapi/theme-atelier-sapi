@@ -12689,6 +12689,39 @@ body.woocommerce-cart div.woocommerce-wrapper {
   transform: scale(1);
 }
 
+/* Quick View Close Button - Simple pattern from mobile-menu-close */
+.quick-view-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid var(--color-wood);
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 10px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-wood);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(147, 125, 104, 0.15);
+  z-index: 100;
+}
+
+.quick-view-close:hover {
+  background: var(--color-orange);
+  border-color: var(--color-orange);
+  color: var(--color-white);
+  transform: scale(1.1);
+}
+
+.quick-view-close svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
 
 .quick-view-loading {
   display: flex;
