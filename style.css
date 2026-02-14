@@ -11466,11 +11466,21 @@ transform: translateY(15px);
 /* Titre H1 */
 .product-title-v2 {
   font-size: clamp(2rem, 4vw, 2.75rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1.15;
-  margin: 0;
+  margin: 0 0 0.75rem 0;
   color: var(--color-text);
   letter-spacing: -0.02em;
+}
+
+/* Catégorie */
+.product-category-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-wood);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 1rem 0;
 }
 
 /* Prix */

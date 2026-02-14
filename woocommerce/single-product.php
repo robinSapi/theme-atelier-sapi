@@ -106,23 +106,12 @@ get_header();
       <!-- COLONNE DROITE: Informations (40%) -->
       <div class="product-info-v2" id="product-summary-main">
 
-        <!-- Badge catégorie -->
-        <div class="product-badge-category">
-          <span class="badge-text"><?php echo esc_html(strtoupper($cat_name)); ?></span>
-          <?php if ($product->is_featured()) : ?>
-            <span class="badge-featured">Édition Atelier</span>
-          <?php endif; ?>
-        </div>
-
-        <!-- Titre H1 -->
+        <!-- Titre H1 (nom du modèle) -->
         <h1 class="product-title-v2"><?php the_title(); ?></h1>
 
-        <!-- Prix (affiché pour tous les produits) -->
-        <div class="product-price-v2">
-          <?php if ($is_variable) : ?>
-            <span class="price-from-label"><?php esc_html_e('À partir de', 'theme-sapi-maison'); ?></span>
-          <?php endif; ?>
-          <span class="price-amount"><?php echo $price_html; ?></span>
+        <!-- Catégorie -->
+        <div class="product-category-label">
+          <?php echo esc_html($cat_name); ?>
         </div>
 
         <!-- Mini description / Phrase d'accroche -->
@@ -135,6 +124,21 @@ get_header();
             <?php echo wp_strip_all_tags($product->get_short_description()); ?>
           </p>
         <?php endif; ?>
+
+        <!-- Prix -->
+        <div class="product-price-v2">
+          <?php
+          // Toujours afficher "À partir de" avec le prix minimum
+          if ($is_variable) {
+            $min_price = $product->get_variation_price('min');
+            echo '<span class="price-from-label">À partir de </span>';
+            echo '<span class="price-amount">' . wc_price($min_price) . '</span>';
+          } else {
+            echo '<span class="price-from-label">À partir de </span>';
+            echo '<span class="price-amount">' . wc_price($product->get_price()) . '</span>';
+          }
+          ?>
+        </div>
 
         <!-- Séparateur visuel -->
         <hr class="product-divider">
