@@ -233,8 +233,7 @@ button:active::after,
 
 /* Premium hover glow for primary CTAs */
 .button:not(.button-outline):hover,
-button[type="submit"]:hover,
-.single_add_to_cart_button:hover {
+button[type="submit"]:hover {
   box-shadow:
     0 8px 20px rgba(227, 91, 36, 0.3),
     0 4px 8px rgba(227, 91, 36, 0.2),
@@ -11939,8 +11938,8 @@ transform: translateY(15px);
   padding: 20px 40px;
 
   /* Gradient vert - charte graphique */
-  background: linear-gradient(180deg, #019501 0%, #018501 100%);
-  color: var(--creme-papier, #FEFDFB);
+  background: linear-gradient(180deg, #019501 0%, #018501 100%) !important;
+  color: var(--creme-papier, #FEFDFB) !important;
   border: none;
   border-radius: 8px;
 
@@ -11963,7 +11962,7 @@ transform: translateY(15px);
 }
 
 .product-form-v2 .single_add_to_cart_button:hover {
-  background: linear-gradient(180deg, #018501 0%, #016701 100%);
+  background: linear-gradient(180deg, #018501 0%, #016701 100%) !important;
   transform: translateY(-2px);
   -webkit-transform: translateY(-2px);
   box-shadow:
