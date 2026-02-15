@@ -47,6 +47,36 @@ get_header();
 
   <div id="product-<?php the_ID(); ?>" <?php wc_product_class('product-page-cinetique product-page-v2', $product); ?>>
 
+  <?php
+  // Get Ambiance 1 image for intro screen
+  $ambiance_intro = '';
+  if (function_exists('get_field')) {
+    $ambiance_1 = get_field('ambiance_1');
+    if ($ambiance_1) {
+      // Handle different ACF return formats
+      if (is_array($ambiance_1) && isset($ambiance_1['url'])) {
+        $ambiance_intro = $ambiance_1['url'];
+      } elseif (is_array($ambiance_1) && isset($ambiance_1['ID'])) {
+        $ambiance_intro = wp_get_attachment_image_url($ambiance_1['ID'], 'full');
+      } elseif (is_numeric($ambiance_1)) {
+        $ambiance_intro = wp_get_attachment_image_url($ambiance_1, 'full');
+      } elseif (is_string($ambiance_1) && strpos($ambiance_1, 'http') === 0) {
+        $ambiance_intro = $ambiance_1;
+      }
+    }
+  }
+
+  if ($ambiance_intro) :
+  ?>
+  <!-- Product Intro Screen with Ambiance Image -->
+  <div class="product-intro-screen" id="product-intro-screen" style="background-image: url('<?php echo esc_url($ambiance_intro); ?>');">
+    <div class="product-intro-content">
+      <h1 class="product-intro-title"><?php the_title(); ?></h1>
+      <span class="product-intro-skip">Cliquez pour découvrir</span>
+    </div>
+  </div>
+  <?php endif; ?>
+
   <?php sapi_maison_breadcrumbs(); ?>
 
   <!-- ═══════════════════════════════════════════════════════════════
@@ -880,6 +910,34 @@ get_header();
 
 <script>
 (function() {
+  // Product Intro Screen Animation
+  const introScreen = document.getElementById('product-intro-screen');
+
+  if (introScreen) {
+    // Auto-fade after 2.5 seconds
+    setTimeout(function() {
+      introScreen.classList.add('fade-out');
+      // Remove from DOM after animation completes
+      setTimeout(function() {
+        introScreen.remove();
+      }, 1000);
+    }, 2500);
+
+    // Click to skip
+    introScreen.addEventListener('click', function() {
+      this.classList.add('fade-out');
+      setTimeout(function() {
+        introScreen.remove();
+      }, 1000);
+    });
+
+    // Prevent scroll while intro is visible
+    document.body.style.overflow = 'hidden';
+    setTimeout(function() {
+      document.body.style.overflow = '';
+    }, 3500);
+  }
+
   const stickyBar = document.getElementById('sticky-add-to-cart');
   const heroSection = document.querySelector('.product-hero-v2');
 
