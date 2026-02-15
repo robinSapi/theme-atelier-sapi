@@ -12513,7 +12513,8 @@ transform: translateY(15px);
   }
 
   .gallery-main {
-    max-height: 500px;
+    /* Keep aspect-ratio 1:1 on all screen sizes */
+    aspect-ratio: 1 / 1;
   }
 
   .product-info-v2 {
