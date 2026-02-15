@@ -11468,9 +11468,10 @@ transform: translateY(15px);
   font-size: clamp(2rem, 4vw, 2.75rem);
   font-weight: 700;
   line-height: 1.15;
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 0.5rem 0;
   color: var(--color-text);
-  letter-spacing: -0.02em;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 /* Catégorie */
@@ -11480,7 +11481,7 @@ transform: translateY(15px);
   color: var(--color-wood);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.5rem 0;
 }
 
 /* Prix */
@@ -11507,7 +11508,7 @@ transform: translateY(15px);
 .product-price-v2 .price-amount,
 .product-price-v2 .price-amount .woocommerce-Price-amount {
   font-size: 1.75rem;
-  font-weight: 500;
+  font-weight: 700;
   color: var(--color-text);
 }
 
@@ -11527,7 +11528,7 @@ transform: translateY(15px);
   font-size: 1rem;
   line-height: 1.6;
   color: var(--color-text-light);
-  margin: 0;
+  margin: 0 0 0.75rem 0;
 }
 
 /* Séparateur */
