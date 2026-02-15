@@ -11503,6 +11503,22 @@ transform: translateY(15px);
   .product-info-v2 .product-price-v2 {
     display: none;
   }
+
+  /* Hide divider line between variations and image on mobile */
+  .product-divider {
+    display: none;
+  }
+
+  /* Variations in 2 columns on mobile */
+  .product-form-v2 .swatch-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .product-form-v2 .swatch-item {
+    width: 100%;
+  }
 }
 
 /* ---- INFO PRODUIT V2 ---- */
