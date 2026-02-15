@@ -6786,7 +6786,7 @@ body.cursor-hover .cursor-dot {
 
 .carousel-product-name {
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 4.5rem;
+  font-size: 3rem;
   font-weight: 800;
   line-height: 1;
   margin: 0 0 0.75rem 0;
@@ -6794,6 +6794,9 @@ body.cursor-hover .cursor-dot {
   text-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .carousel-product-price {
@@ -6904,7 +6907,7 @@ body.cursor-hover .cursor-dot {
   }
 
   .carousel-product-name {
-    font-size: 3rem;
+    font-size: 2.25rem;
   }
 
   .carousel-product-price {
@@ -6935,7 +6938,7 @@ body.cursor-hover .cursor-dot {
 /* Small mobile carousel */
 @media (max-width: 480px) {
   .carousel-product-name {
-    font-size: clamp(1.75rem, 10vw, 2.5rem);
+    font-size: clamp(1.5rem, 8vw, 2rem);
   }
 
   .carousel-content {
