@@ -11498,11 +11498,6 @@ transform: translateY(15px);
   .product-info-v2 .product-tagline {
     display: none;
   }
-
-  /* Hide divider line between variations and image on mobile */
-  .product-divider {
-    display: none;
-  }
 }
 
 /* ---- INFO PRODUIT V2 ---- */
@@ -11599,11 +11594,9 @@ transform: translateY(15px);
   margin: 0 0 0.75rem 0;
 }
 
-/* Séparateur */
+/* Séparateur - Hidden on all screen sizes */
 .product-divider {
-  border: none;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  margin: 0.5rem 0;
+  display: none !important; /* Remove spacing between tagline and variations */
 }
 
 /* ---- FORMULAIRE V2 - Premium Variations ---- */
@@ -11659,9 +11652,9 @@ transform: translateY(15px);
 
 .product-form-v2 .variations .label label::before {
   content: '';
-  width: 4px;
-  height: 4px;
-  background: var(--color-accent);
+  width: 6px;
+  height: 6px;
+  background: var(--color-orange, #E67E22); /* Orange accent for visual coherence */
   border-radius: 50%;
 }
 
