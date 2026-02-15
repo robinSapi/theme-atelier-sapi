@@ -139,11 +139,6 @@ get_header();
         <!-- Titre H1 (nom du modèle) -->
         <h1 class="product-title-v2"><?php the_title(); ?></h1>
 
-        <!-- Catégorie -->
-        <div class="product-category-label">
-          <?php echo esc_html($cat_name); ?>
-        </div>
-
         <!-- Mini description / Phrase d'accroche -->
         <?php if ($phrase || $mini_description) : ?>
           <p class="product-tagline">

@@ -1827,16 +1827,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   color: var(--color-wood);
 }
 
-.product-category-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-gray);
-  padding: 0.25rem 0.75rem;
-  background: var(--color-warm);
-  border-radius: 20px;
-}
+/* Removed: .product-category-label - no longer used */
 
 .product-summary .product_title {
   font-size: 24px;
@@ -11371,6 +11362,7 @@ transform: translateY(15px);
 /* Thumbnails horizontaux */
 .gallery-thumbnails {
   display: flex;
+  justify-content: center;
   gap: 0.75rem;
   overflow-x: auto;
   padding-bottom: 0.5rem;
@@ -11475,15 +11467,6 @@ transform: translateY(15px);
 }
 
 /* Catégorie */
-.product-category-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-wood);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin: 0 0 0.5rem 0;
-}
-
 /* Prix */
 .product-price-v2 {
   display: flex;
