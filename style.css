@@ -11419,45 +11419,9 @@ transform: translateY(15px);
   border-color: var(--color-text-light);
 }
 
-/* Mobile gallery navigation arrows */
-.gallery-nav {
+/* Mobile gallery header (titre + phrase au-dessus de la photo) */
+.product-gallery-mobile-header {
   display: none; /* Hidden on desktop */
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  z-index: 10;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.3s ease;
-  padding: 0;
-  outline: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.gallery-nav svg {
-  stroke: var(--color-wood, #937D68);
-  stroke-width: 3;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.gallery-nav:hover svg,
-.gallery-nav:active svg,
-.gallery-nav:focus svg {
-  opacity: 0.7;
-}
-
-.gallery-nav-prev {
-  left: 1rem;
-}
-
-.gallery-nav-next {
-  right: 1rem;
 }
 
 /* Mobile-specific styles */
@@ -11466,12 +11430,43 @@ transform: translateY(15px);
     display: none; /* Hide thumbnails on mobile */
   }
 
-  .gallery-nav {
-    display: flex; /* Show navigation arrows on mobile */
+  .gallery-main {
+    position: relative;
   }
 
-  .gallery-main {
-    position: relative; /* Ensure arrows are positioned relative to gallery */
+  /* Show mobile header on mobile */
+  .product-gallery-mobile-header {
+    display: block;
+    margin-bottom: 1.5rem;
+  }
+
+  .product-title-mobile {
+    font-family: var(--font-display, 'Square Peg', cursive);
+    font-size: 2rem;
+    line-height: 1.2;
+    color: var(--color-dark, #323232);
+    margin: 0 0 0.5rem 0;
+  }
+
+  .product-tagline-mobile {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--color-text-light, #666);
+    margin: 0;
+  }
+
+  /* Hide desktop title and tagline on mobile */
+  .product-info-v2 .product-title-v2 {
+    display: none;
+  }
+
+  .product-info-v2 .product-tagline {
+    display: none;
+  }
+
+  /* Hide price section on mobile */
+  .product-info-v2 .product-price-v2 {
+    display: none;
   }
 }
 

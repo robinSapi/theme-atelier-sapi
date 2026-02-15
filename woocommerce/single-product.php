@@ -87,6 +87,21 @@ get_header();
 
       <!-- COLONNE GAUCHE: Galerie (60%) -->
       <div class="product-gallery-v2">
+
+        <!-- Mobile-only: Titre et phrase d'accroche au-dessus de la photo -->
+        <div class="product-gallery-mobile-header">
+          <h1 class="product-title-mobile"><?php the_title(); ?></h1>
+          <?php if ($phrase || $mini_description) : ?>
+            <p class="product-tagline-mobile">
+              <?php echo esc_html($phrase ? $phrase : $mini_description); ?>
+            </p>
+          <?php elseif ($product->get_short_description()) : ?>
+            <p class="product-tagline-mobile">
+              <?php echo wp_strip_all_tags($product->get_short_description()); ?>
+            </p>
+          <?php endif; ?>
+        </div>
+
         <?php
         // Main product image
         $main_image_id = $product->get_image_id();
@@ -108,17 +123,6 @@ get_header();
                 </svg>
               </span>
             </a>
-            <!-- Mobile navigation arrows -->
-            <button type="button" class="gallery-nav gallery-nav-prev" aria-label="Image précédente">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
-            </button>
-            <button type="button" class="gallery-nav gallery-nav-next" aria-label="Image suivante">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
-            </button>
           </div>
           <?php
         }
@@ -1116,10 +1120,8 @@ get_header();
     });
   });
 
-  // Mobile gallery navigation with swipe
+  // Mobile gallery swipe navigation (no arrows, swipe only)
   const galleryMain = document.querySelector('.gallery-main');
-  const navPrev = document.querySelector('.gallery-nav-prev');
-  const navNext = document.querySelector('.gallery-nav-next');
   const galleryZoomLink = document.querySelector('.gallery-zoom');
 
   if (galleryMain && thumbnails.length > 1) {
@@ -1145,25 +1147,6 @@ get_header();
       if (galleryZoomLink) {
         galleryZoomLink.href = targetThumb.dataset.image;
       }
-    }
-
-    // Arrow navigation
-    if (navPrev) {
-      navPrev.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const newIndex = currentIndex > 0 ? currentIndex - 1 : thumbnails.length - 1;
-        navigateToImage(newIndex);
-      });
-    }
-
-    if (navNext) {
-      navNext.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const newIndex = currentIndex < thumbnails.length - 1 ? currentIndex + 1 : 0;
-        navigateToImage(newIndex);
-      });
     }
 
     // Touch swipe detection
