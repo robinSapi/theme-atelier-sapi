@@ -11363,6 +11363,7 @@ transform: translateY(15px);
   flex: 0 0 100px;
   width: 100px;
   height: 100px;
+  aspect-ratio: 1 / 1; /* Force square ratio */
   border: 2px solid transparent;
   border-radius: 8px;
   overflow: hidden;
@@ -12519,6 +12520,7 @@ transform: translateY(15px);
     flex: 0 0 60px;
     width: 60px;
     height: 60px;
+    aspect-ratio: 1 / 1; /* Force square ratio on smaller screens */
   }
 
   .product-title-v2 {
@@ -12630,6 +12632,7 @@ transform: translateY(15px);
     flex: 0 0 80px !important; /* Augmenté de 60px à 80px */
     width: 80px !important;
     height: 80px !important;
+    aspect-ratio: 1 / 1 !important; /* Force square ratio on mobile */
   }
 
   /* Barre de réassurance moins intrusive */
@@ -13002,6 +13005,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .gallery-thumb {
   width: 64px;
   height: 64px;
+  aspect-ratio: 1 / 1; /* Force square ratio in quick-view */
   border: 2px solid rgba(147, 125, 104, 0.2);
   border-radius: 8px;
   overflow: hidden;
@@ -13161,6 +13165,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   .gallery-thumb {
     width: 56px;
     height: 56px;
+    aspect-ratio: 1 / 1; /* Force square ratio in quick-view mobile */
   }
 }
 
