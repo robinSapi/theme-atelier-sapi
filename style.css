@@ -155,7 +155,7 @@ html {
   font-family: var(--font-display, 'Square Peg', cursive);
   font-weight: 400;
   text-transform: capitalize; /* Première lettre de chaque mot en majuscule */
-  font-size: 1.3em; /* 130% de la taille du parent */
+  font-size: 1.6em; /* 160% de la taille du parent */
 }
 
 /* Fade-in animation on scroll (intersection observer target) */
