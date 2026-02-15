@@ -11474,14 +11474,16 @@ transform: translateY(15px);
   }
 
   .product-title-mobile {
-    font-family: var(--font-display, 'Square Peg', cursive);
-    font-size: 2rem;
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    font-size: 1.75rem;
+    font-weight: 700;
     line-height: 1.2;
     color: var(--color-dark, #323232);
     margin: 0 0 0.5rem 0;
   }
 
   .product-tagline-mobile {
+    font-family: var(--font-body, 'Montserrat', sans-serif);
     font-size: 0.9rem;
     line-height: 1.5;
     color: var(--color-text-light, #666);
@@ -11541,6 +11543,7 @@ transform: translateY(15px);
 
 /* Titre H1 */
 .product-title-v2 {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
   font-size: clamp(2rem, 4vw, 2.75rem);
   font-weight: 700;
   line-height: 1.15;
@@ -11592,6 +11595,7 @@ transform: translateY(15px);
 
 /* Tagline */
 .product-tagline {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
   font-size: 1rem;
   line-height: 1.6;
   color: var(--color-text-light);
