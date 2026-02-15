@@ -11482,6 +11482,8 @@ transform: translateY(15px);
     line-height: 1.2;
     color: var(--color-dark, #323232);
     margin: 0 0 0.5rem 0;
+    text-transform: uppercase; /* Match desktop style */
+    letter-spacing: 0.02em; /* Match desktop style */
   }
 
   .product-tagline-mobile {
