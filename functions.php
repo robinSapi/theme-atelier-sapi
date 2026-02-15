@@ -41,12 +41,15 @@ function sapi_maison_enqueue_assets() {
   $menu_js_path = get_template_directory() . '/assets/menu.js';
   wp_enqueue_script('sapi-maison-menu', get_template_directory_uri() . '/assets/menu.js', [], file_exists($menu_js_path) ? filemtime($menu_js_path) : '1.0.0', true);
 
-  // CINÉTIQUE interactions (bento animations, custom cursor, parallax) - only on homepage
-  if (is_front_page()) {
+  // CINÉTIQUE interactions (bento animations, custom cursor, parallax, quantity buttons)
+  // Chargé sur homepage ET pages produit
+  if (is_front_page() || (class_exists('WooCommerce') && is_product())) {
     $cinetique_js_path = get_template_directory() . '/assets/cinetique.js';
     wp_enqueue_script('sapi-maison-cinetique', get_template_directory_uri() . '/assets/cinetique.js', [], file_exists($cinetique_js_path) ? filemtime($cinetique_js_path) : '1.0.0', true);
+  }
 
-    // Homepage fullscreen carousel
+  // Homepage fullscreen carousel
+  if (is_front_page()) {
     $carousel_js_path = get_template_directory() . '/assets/homepage-carousel.js';
     wp_enqueue_script('sapi-maison-homepage-carousel', get_template_directory_uri() . '/assets/homepage-carousel.js', [], file_exists($carousel_js_path) ? filemtime($carousel_js_path) : '1.0.0', true);
   }
