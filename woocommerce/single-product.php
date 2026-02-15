@@ -69,10 +69,10 @@ get_header();
   if ($ambiance_intro) :
   ?>
   <!-- Product Intro Screen with Ambiance Image -->
-  <div class="product-intro-screen" id="product-intro-screen" style="background-image: url('<?php echo esc_url($ambiance_intro); ?>');">
+  <div class="product-intro-screen" id="product-intro-screen" style="--intro-bg-image: url('<?php echo esc_url($ambiance_intro); ?>');">
     <div class="product-intro-content">
       <h1 class="product-intro-title"><?php the_title(); ?></h1>
-      <span class="product-intro-skip">Cliquez pour découvrir</span>
+      <span class="product-intro-skip">Scrollez ou cliquez pour découvrir</span>
     </div>
   </div>
   <?php endif; ?>
@@ -910,32 +910,58 @@ get_header();
 
 <script>
 (function() {
-  // Product Intro Screen Animation
+  // Product Intro Screen Animation with Scroll-to-Reveal
   const introScreen = document.getElementById('product-intro-screen');
 
   if (introScreen) {
-    // Auto-fade after 2.5 seconds
+    let introRemoved = false;
+
+    // Fade in the image after initial black fade
     setTimeout(function() {
-      introScreen.classList.add('fade-out');
-      // Remove from DOM after animation completes
-      setTimeout(function() {
-        introScreen.remove();
-      }, 1000);
-    }, 2500);
+      introScreen.classList.add('loaded');
+    }, 300);
+
+    // Scroll-based fade out
+    function handleScroll() {
+      if (introRemoved) return;
+
+      const scrollY = window.scrollY || window.pageYOffset;
+      const fadeDistance = 200; // Distance to scroll for complete fade
+
+      // Calculate opacity based on scroll (1 at top, 0 at fadeDistance)
+      const opacity = Math.max(0, 1 - (scrollY / fadeDistance));
+
+      if (opacity <= 0) {
+        // Completely scrolled, remove intro
+        introScreen.style.opacity = '0';
+        setTimeout(function() {
+          if (!introRemoved) {
+            introScreen.remove();
+            introRemoved = true;
+            window.removeEventListener('scroll', handleScroll);
+          }
+        }, 300);
+      } else {
+        introScreen.style.opacity = opacity;
+      }
+    }
 
     // Click to skip
     introScreen.addEventListener('click', function() {
-      this.classList.add('fade-out');
-      setTimeout(function() {
-        introScreen.remove();
-      }, 1000);
+      if (!introRemoved) {
+        this.classList.add('fade-out');
+        introRemoved = true;
+        window.removeEventListener('scroll', handleScroll);
+        setTimeout(function() {
+          introScreen.remove();
+        }, 600);
+      }
     });
 
-    // Prevent scroll while intro is visible
-    document.body.style.overflow = 'hidden';
+    // Listen to scroll after image loads
     setTimeout(function() {
-      document.body.style.overflow = '';
-    }, 3500);
+      window.addEventListener('scroll', handleScroll);
+    }, 800);
   }
 
   const stickyBar = document.getElementById('sticky-add-to-cart');
