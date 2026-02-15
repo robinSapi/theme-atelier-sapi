@@ -11511,16 +11511,22 @@ transform: translateY(15px);
 
   /* Variations in 2 columns on mobile - Materials left, Sizes right */
   .product-form-v2 .variations {
-    display: grid;
+    display: grid !important;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
     grid-template-rows: auto;
   }
 
+  /* Handle tbody if it exists - makes it transparent to grid layout */
+  .product-form-v2 .variations tbody {
+    display: contents;
+  }
+
   .product-form-v2 .variations tr {
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     gap: 0.5rem;
+    margin-bottom: 0 !important; /* Remove vertical spacing between variations */
   }
 }
 
