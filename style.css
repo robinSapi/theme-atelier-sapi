@@ -4328,7 +4328,7 @@ li.carousel-editorial-slide,
 }
 
 .product-hero-name {
-  font-size: 1.5rem;
+  font-size: 2.5rem;
   font-weight: 600;
   margin: 0;
   line-height: 1.2;
@@ -4484,7 +4484,7 @@ li.carousel-editorial-slide,
   }
 
   .product-hero-name {
-    font-size: 1.5rem;
+    font-size: 2.25rem;
   }
 
   .product-hero-price {
@@ -4522,7 +4522,7 @@ li.carousel-editorial-slide,
   }
 
   .product-hero-name {
-    font-size: 1.25rem;
+    font-size: 2rem;
   }
 
   .product-hero-price {
@@ -9417,7 +9417,7 @@ transform: translateY(15px);
 
 .product-card-cinetique .product-name {
   font-family: var(--font-body);
-  font-size: 1.25rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: var(--color-dark);
   margin: 0 0 0.75rem;
