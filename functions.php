@@ -41,6 +41,10 @@ function sapi_maison_enqueue_assets() {
   $menu_js_path = get_template_directory() . '/assets/menu.js';
   wp_enqueue_script('sapi-maison-menu', get_template_directory_uri() . '/assets/menu.js', [], file_exists($menu_js_path) ? filemtime($menu_js_path) : '1.0.0', true);
 
+  // Product name formatter - chargé sur toutes les pages (prénom en Montserrat, reste en Square Peg)
+  $formatter_js_path = get_template_directory() . '/assets/product-name-formatter.js';
+  wp_enqueue_script('sapi-maison-product-formatter', get_template_directory_uri() . '/assets/product-name-formatter.js', [], file_exists($formatter_js_path) ? filemtime($formatter_js_path) : '1.0.0', true);
+
   // CINÉTIQUE interactions (bento animations, custom cursor, parallax, quantity buttons)
   // Chargé sur homepage ET pages produit
   if (is_front_page() || (class_exists('WooCommerce') && is_product())) {

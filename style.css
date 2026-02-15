@@ -139,6 +139,21 @@ html {
   }
 }
 
+/* ========================================
+   PRODUCT NAME FORMATTING
+   Prénom (premier mot) = Montserrat gras
+   Article + nom = Square Peg
+   ======================================== */
+.product-firstname {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-weight: 800;
+}
+
+.product-restname {
+  font-family: var(--font-display, 'Square Peg', cursive);
+  font-weight: 400;
+}
+
 /* Fade-in animation on scroll (intersection observer target) */
 @keyframes fadeInUp {
   from {
