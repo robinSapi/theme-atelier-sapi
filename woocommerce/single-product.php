@@ -123,6 +123,17 @@ get_header();
                 </svg>
               </span>
             </a>
+            <!-- Mobile navigation arrows (minimal style) -->
+            <button type="button" class="gallery-nav gallery-nav-prev" aria-label="Image précédente">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <button type="button" class="gallery-nav gallery-nav-next" aria-label="Image suivante">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
           </div>
           <?php
         }
@@ -1120,8 +1131,10 @@ get_header();
     });
   });
 
-  // Mobile gallery swipe navigation (no arrows, swipe only)
+  // Mobile gallery navigation with arrows and swipe
   const galleryMain = document.querySelector('.gallery-main');
+  const navPrev = document.querySelector('.gallery-nav-prev');
+  const navNext = document.querySelector('.gallery-nav-next');
   const galleryZoomLink = document.querySelector('.gallery-zoom');
 
   if (galleryMain && thumbnails.length > 1) {
@@ -1147,6 +1160,25 @@ get_header();
       if (galleryZoomLink) {
         galleryZoomLink.href = targetThumb.dataset.image;
       }
+    }
+
+    // Arrow navigation
+    if (navPrev) {
+      navPrev.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const newIndex = currentIndex > 0 ? currentIndex - 1 : thumbnails.length - 1;
+        navigateToImage(newIndex);
+      });
+    }
+
+    if (navNext) {
+      navNext.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const newIndex = currentIndex < thumbnails.length - 1 ? currentIndex + 1 : 0;
+        navigateToImage(newIndex);
+      });
     }
 
     // Touch swipe detection

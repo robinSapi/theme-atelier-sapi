@@ -11424,6 +11424,35 @@ transform: translateY(15px);
   display: none; /* Hidden on desktop */
 }
 
+/* Mobile gallery navigation arrows (minimal style) */
+.gallery-nav {
+  display: none; /* Hidden on desktop */
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 10;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.gallery-nav svg {
+  stroke: var(--color-wood, #937D68);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.gallery-nav-prev {
+  left: 1rem;
+}
+
+.gallery-nav-next {
+  right: 1rem;
+}
+
 /* Mobile-specific styles */
 @media (max-width: 768px) {
   .gallery-thumbnails {
@@ -11432,6 +11461,11 @@ transform: translateY(15px);
 
   .gallery-main {
     position: relative;
+  }
+
+  /* Show navigation arrows on mobile */
+  .gallery-nav {
+    display: block;
   }
 
   /* Show mobile header on mobile */
