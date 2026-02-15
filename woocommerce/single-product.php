@@ -957,10 +957,16 @@ get_header();
       }
     });
 
-    // Update sticky bar when variation is selected
+    // Update sticky bar and main gallery image when variation is selected
     const variationForm = document.querySelector('.variations_form');
+    const mainImage = document.querySelector('.gallery-main-image');
+    const galleryZoomLink = document.querySelector('.gallery-zoom');
+    let originalImageSrc = mainImage ? mainImage.src : '';
+    let originalImageFull = galleryZoomLink ? galleryZoomLink.href : '';
+
     if (variationForm && typeof jQuery !== 'undefined') {
       jQuery(variationForm).on('found_variation', function(event, variation) {
+        // Update sticky bar price
         const priceEl = stickyBar.querySelector('.sticky-product-price');
         if (priceEl && variation.price_html) {
           priceEl.innerHTML = variation.price_html;
@@ -974,11 +980,34 @@ get_header();
             mainForm.querySelector('.single_add_to_cart_button').click();
           }
         }, { once: true });
+
+        // Update main gallery image with variation image
+        if (variation.image && variation.image.src && mainImage) {
+          mainImage.src = variation.image.src;
+          mainImage.srcset = variation.image.srcset || '';
+          mainImage.sizes = variation.image.sizes || '';
+          mainImage.alt = variation.image.alt || '';
+          mainImage.title = variation.image.title || '';
+
+          // Update zoom link if exists
+          if (galleryZoomLink && variation.image.full_src) {
+            galleryZoomLink.href = variation.image.full_src;
+          }
+        }
       });
 
       jQuery(variationForm).on('reset_data', function() {
         scrollBtn.textContent = '<?php esc_html_e('Choisir les options', 'theme-sapi-maison'); ?>';
         scrollBtn.classList.remove('variation-selected');
+
+        // Reset to original image
+        if (mainImage && originalImageSrc) {
+          mainImage.src = originalImageSrc;
+          mainImage.srcset = '';
+          if (galleryZoomLink && originalImageFull) {
+            galleryZoomLink.href = originalImageFull;
+          }
+        }
       });
     }
   }
