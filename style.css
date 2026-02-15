@@ -11439,8 +11439,11 @@ transform: translateY(15px);
   outline: none !important;
   -webkit-tap-highlight-color: transparent;
   box-shadow: none !important;
-  width: auto;
-  height: auto;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .gallery-nav:hover,
