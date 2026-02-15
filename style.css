@@ -7252,7 +7252,7 @@ transform: translateY(15px);
 
 .bento-product .product-name {
   font-family: var(--font-body);
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
   color: var(--color-white);
@@ -9417,7 +9417,7 @@ transform: translateY(15px);
 
 .product-card-cinetique .product-name {
   font-family: var(--font-body);
-  font-size: 1.75rem;
+  font-size: 2.25rem;
   font-weight: 700;
   color: var(--color-dark);
   margin: 0 0 0.75rem;
