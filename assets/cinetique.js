@@ -807,6 +807,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const min = parseInt(input.getAttribute('min')) || 1;
     const max = parseInt(input.getAttribute('max')) || 999;
 
+    // Force step to 1 to ensure increment by 1
+    input.setAttribute('step', '1');
+
     // Create minus button
     const minusBtn = document.createElement('button');
     minusBtn.type = 'button';
@@ -836,6 +839,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Minus button click handler
     minusBtn.addEventListener('click', function(e) {
       e.preventDefault();
+      e.stopPropagation();
       const currentValue = parseInt(input.value) || min;
       if (currentValue > min) {
         input.value = currentValue - 1;
@@ -847,6 +851,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Plus button click handler
     plusBtn.addEventListener('click', function(e) {
       e.preventDefault();
+      e.stopPropagation();
       const currentValue = parseInt(input.value) || min;
       if (!max || currentValue < max) {
         input.value = currentValue + 1;
