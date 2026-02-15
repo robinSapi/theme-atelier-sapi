@@ -11508,26 +11508,6 @@ transform: translateY(15px);
   .product-divider {
     display: none;
   }
-
-  /* Variations in 2 columns on mobile - Materials left, Sizes right */
-  .product-form-v2 .variations {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    grid-template-rows: auto;
-  }
-
-  /* Handle tbody if it exists - makes it transparent to grid layout */
-  .product-form-v2 .variations tbody {
-    display: contents;
-  }
-
-  .product-form-v2 .variations tr {
-    display: flex !important;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-bottom: 0 !important; /* Remove vertical spacing between variations */
-  }
 }
 
 /* ---- INFO PRODUIT V2 ---- */
@@ -11644,16 +11624,26 @@ transform: translateY(15px);
   margin: 0;
 }
 
+/* Variations in 2 columns - Materials left, Sizes right (all screen sizes) */
 .product-form-v2 .variations {
   margin-bottom: 1.5rem;
   border-spacing: 0;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  grid-template-rows: auto;
+}
+
+/* Handle tbody if it exists - makes it transparent to grid layout */
+.product-form-v2 .variations tbody {
+  display: contents;
 }
 
 .product-form-v2 .variations tr {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0; /* No vertical spacing - grid gap handles it */
   padding: 1.25rem;
   background: var(--color-cream);
   border-radius: 12px;
