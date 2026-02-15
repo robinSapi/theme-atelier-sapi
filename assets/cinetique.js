@@ -793,23 +793,74 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ========================================
-  // PREMIUM: Number Input Enhancements
+  // PREMIUM: Quantity Input with +/- Buttons
   // ========================================
   const quantityInputs = document.querySelectorAll('input[type="number"].qty');
 
   quantityInputs.forEach(input => {
-    const wrapper = input.parentElement;
+    // Skip if already enhanced
+    if (input.parentElement.classList.contains('qty-enhanced')) {
+      return;
+    }
 
-    // Add visual feedback on change
-    input.addEventListener('change', function() {
-      this.style.transform = 'scale(1.05)';
-      setTimeout(() => {
-        this.style.transform = 'scale(1)';
-      }, 200);
+    const wrapper = input.parentElement;
+    const min = parseInt(input.getAttribute('min')) || 1;
+    const max = parseInt(input.getAttribute('max')) || 999;
+
+    // Create minus button
+    const minusBtn = document.createElement('button');
+    minusBtn.type = 'button';
+    minusBtn.className = 'qty-btn qty-minus';
+    minusBtn.innerHTML = '−'; // minus sign (U+2212)
+    minusBtn.setAttribute('aria-label', 'Diminuer la quantité');
+
+    // Create plus button
+    const plusBtn = document.createElement('button');
+    plusBtn.type = 'button';
+    plusBtn.className = 'qty-btn qty-plus';
+    plusBtn.innerHTML = '+';
+    plusBtn.setAttribute('aria-label', 'Augmenter la quantité');
+
+    // Insert buttons
+    wrapper.insertBefore(minusBtn, input);
+    wrapper.appendChild(plusBtn);
+    wrapper.classList.add('qty-enhanced');
+
+    // Update button states based on current value
+    function updateButtonStates() {
+      const currentValue = parseInt(input.value) || min;
+      minusBtn.disabled = currentValue <= min;
+      plusBtn.disabled = max && currentValue >= max;
+    }
+
+    // Minus button click handler
+    minusBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const currentValue = parseInt(input.value) || min;
+      if (currentValue > min) {
+        input.value = currentValue - 1;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        updateButtonStates();
+      }
     });
 
-    // Smooth transitions
-    input.style.transition = 'all 0.2s ease';
+    // Plus button click handler
+    plusBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const currentValue = parseInt(input.value) || min;
+      if (!max || currentValue < max) {
+        input.value = currentValue + 1;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        updateButtonStates();
+      }
+    });
+
+    // Update states when input value changes manually
+    input.addEventListener('input', updateButtonStates);
+    input.addEventListener('change', updateButtonStates);
+
+    // Initial state
+    updateButtonStates();
   });
 
   // ========================================

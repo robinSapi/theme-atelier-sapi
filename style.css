@@ -11914,7 +11914,7 @@ transform: translateY(15px);
   border-color: var(--bois-dore);
 }
 
-/* Quantité */
+/* Quantité avec boutons +/- */
 .product-form-v2 .quantity {
   display: inline-flex;
   align-items: center;
@@ -11928,15 +11928,58 @@ transform: translateY(15px);
   width: 60px;
   text-align: center;
   border: none;
+  border-left: 1px solid rgba(0, 0, 0, 0.08);
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
   font-size: 1rem;
   padding: 0.75rem 0.5rem;
   -moz-appearance: textfield;
+  font-weight: 500;
+  color: var(--color-dark, #323232);
 }
 
 .product-form-v2 .quantity input::-webkit-inner-spin-button,
 .product-form-v2 .quantity input::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+/* Boutons +/- */
+.product-form-v2 .qty-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-cream, #FEFDFB);
+  border: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-wood, #937D68);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.product-form-v2 .qty-btn:hover:not(:disabled) {
+  background: var(--color-warm, #FBF6EA);
+  color: var(--color-orange, #E67E22);
+}
+
+.product-form-v2 .qty-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.product-form-v2 .qty-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.product-form-v2 .qty-minus {
+  border-radius: 6px 0 0 6px;
+}
+
+.product-form-v2 .qty-plus {
+  border-radius: 0 6px 6px 0;
 }
 
 /* CTA Principal - Design System Premium 4.1 */
