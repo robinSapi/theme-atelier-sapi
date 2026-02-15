@@ -108,6 +108,17 @@ get_header();
                 </svg>
               </span>
             </a>
+            <!-- Mobile navigation arrows -->
+            <button type="button" class="gallery-nav gallery-nav-prev" aria-label="Image précédente">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <button type="button" class="gallery-nav gallery-nav-next" aria-label="Image suivante">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
           </div>
           <?php
         }
@@ -1104,6 +1115,87 @@ get_header();
       }
     });
   });
+
+  // Mobile gallery navigation with swipe
+  const galleryMain = document.querySelector('.gallery-main');
+  const navPrev = document.querySelector('.gallery-nav-prev');
+  const navNext = document.querySelector('.gallery-nav-next');
+  const galleryZoomLink = document.querySelector('.gallery-zoom');
+
+  if (galleryMain && thumbnails.length > 1) {
+    let currentIndex = 0;
+
+    // Function to navigate to a specific image
+    function navigateToImage(index) {
+      if (index < 0 || index >= thumbnails.length) return;
+
+      currentIndex = index;
+      const targetThumb = thumbnails[index];
+
+      // Update active thumbnail
+      thumbnails.forEach(t => t.classList.remove('active'));
+      targetThumb.classList.add('active');
+
+      // Update main image
+      if (mainImage) {
+        mainImage.src = targetThumb.dataset.image;
+      }
+
+      // Update zoom link if available
+      if (galleryZoomLink) {
+        galleryZoomLink.href = targetThumb.dataset.image;
+      }
+    }
+
+    // Arrow navigation
+    if (navPrev) {
+      navPrev.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const newIndex = currentIndex > 0 ? currentIndex - 1 : thumbnails.length - 1;
+        navigateToImage(newIndex);
+      });
+    }
+
+    if (navNext) {
+      navNext.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const newIndex = currentIndex < thumbnails.length - 1 ? currentIndex + 1 : 0;
+        navigateToImage(newIndex);
+      });
+    }
+
+    // Touch swipe detection
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const minSwipeDistance = 50; // minimum distance for a swipe
+
+    galleryMain.addEventListener('touchstart', function(e) {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    galleryMain.addEventListener('touchend', function(e) {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+      const swipeDistance = touchEndX - touchStartX;
+
+      if (Math.abs(swipeDistance) < minSwipeDistance) return; // Not a swipe
+
+      if (swipeDistance > 0) {
+        // Swipe right - go to previous image
+        const newIndex = currentIndex > 0 ? currentIndex - 1 : thumbnails.length - 1;
+        navigateToImage(newIndex);
+      } else {
+        // Swipe left - go to next image
+        const newIndex = currentIndex < thumbnails.length - 1 ? currentIndex + 1 : 0;
+        navigateToImage(newIndex);
+      }
+    }
+  }
 
   // Buy Now (Express Checkout) - Phase 4 Proposal B
   const buyNowBtn = document.querySelector('.btn-buy-now');

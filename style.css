@@ -11419,6 +11419,64 @@ transform: translateY(15px);
   border-color: var(--color-text-light);
 }
 
+/* Mobile gallery navigation arrows */
+.gallery-nav {
+  display: none; /* Hidden on desktop */
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid var(--color-wood, #937D68);
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  padding: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.gallery-nav svg {
+  stroke: var(--color-wood, #937D68);
+  transition: stroke 0.3s ease;
+}
+
+.gallery-nav:hover {
+  background: var(--color-orange, #E67E22);
+  border-color: var(--color-orange, #E67E22);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.gallery-nav:hover svg {
+  stroke: white;
+}
+
+.gallery-nav-prev {
+  left: 1rem;
+}
+
+.gallery-nav-next {
+  right: 1rem;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .gallery-thumbnails {
+    display: none; /* Hide thumbnails on mobile */
+  }
+
+  .gallery-nav {
+    display: flex; /* Show navigation arrows on mobile */
+  }
+
+  .gallery-main {
+    position: relative; /* Ensure arrows are positioned relative to gallery */
+  }
+}
+
 /* ---- INFO PRODUIT V2 ---- */
 .product-info-v2 {
   display: flex;
