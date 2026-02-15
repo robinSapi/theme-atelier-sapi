@@ -6766,12 +6766,15 @@ body.cursor-hover .cursor-dot {
 }
 
 .carousel-product-name {
-  font-family: var(--font-display);
+  font-family: var(--font-body, 'Montserrat', sans-serif);
   font-size: 4.5rem;
+  font-weight: 800;
   line-height: 1;
   margin: 0 0 0.75rem 0;
   color: var(--color-white);
   text-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .carousel-product-price {
@@ -11478,7 +11481,7 @@ transform: translateY(15px);
   .product-title-mobile {
     font-family: var(--font-body, 'Montserrat', sans-serif);
     font-size: 1.75rem;
-    font-weight: 700;
+    font-weight: 800;
     line-height: 1.2;
     color: var(--color-dark, #323232);
     margin: 0 0 0.5rem 0;
@@ -11544,7 +11547,7 @@ transform: translateY(15px);
 .product-title-v2 {
   font-family: var(--font-body, 'Montserrat', sans-serif);
   font-size: clamp(2rem, 4vw, 2.75rem);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.15;
   margin: 0 0 0.5rem 0;
   color: var(--color-text);
