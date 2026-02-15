@@ -11509,15 +11509,18 @@ transform: translateY(15px);
     display: none;
   }
 
-  /* Variations in 2 columns on mobile */
-  .product-form-v2 .swatch-wrapper {
+  /* Variations in 2 columns on mobile - Materials left, Sizes right */
+  .product-form-v2 .variations {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
+    gap: 1rem;
+    grid-template-rows: auto;
   }
 
-  .product-form-v2 .swatch-item {
-    width: 100%;
+  .product-form-v2 .variations tr {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }
 
