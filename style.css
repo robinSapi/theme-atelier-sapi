@@ -11425,33 +11425,32 @@ transform: translateY(15px);
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
-  background: rgba(255, 255, 255, 0.95);
-  border: 2px solid var(--color-wood, #937D68);
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
   cursor: pointer;
   z-index: 10;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
   padding: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .gallery-nav svg {
-  stroke: var(--color-wood, #937D68);
-  transition: stroke 0.3s ease;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 3;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  transition: all 0.3s ease;
 }
 
 .gallery-nav:hover {
-  background: var(--color-orange, #E67E22);
-  border-color: var(--color-orange, #E67E22);
-  transform: translateY(-50%) scale(1.1);
+  transform: translateY(-50%) scale(1.2);
 }
 
 .gallery-nav:hover svg {
-  stroke: white;
+  stroke: var(--color-orange, #E67E22);
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.6));
 }
 
 .gallery-nav-prev {
