@@ -6373,11 +6373,13 @@ li.carousel-editorial-slide,
   font-size: 13px;
   color: var(--color-gray-mid);
   background: transparent;
+  text-align: center; /* Center breadcrumbs */
 }
 
 .breadcrumbs-inner {
   display: flex;
   align-items: center;
+  justify-content: center; /* Center breadcrumbs horizontally */
   flex-wrap: wrap;
   gap: 2px;
 }
