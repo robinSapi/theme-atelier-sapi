@@ -11609,6 +11609,17 @@ transform: translateY(15px);
   margin: 0;
 }
 
+/* Introduction aux variations */
+.variations-intro {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 1.5rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid var(--color-orange, #E67E22);
+  letter-spacing: 0.02em;
+}
+
 /* Variations in 2 columns - Materials left, Sizes right (all screen sizes) */
 .product-form-v2 .variations {
   margin-bottom: 1.5rem;

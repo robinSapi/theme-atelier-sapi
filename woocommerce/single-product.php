@@ -196,6 +196,9 @@ get_header();
 
         <!-- Formulaire d'achat (variations + quantité + CTA) -->
         <div class="product-form-v2">
+          <!-- Introduction aux variations -->
+          <p class="variations-intro">Composez votre luminaire :</p>
+
           <?php
           // Remove default actions to control order
           remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_title', 5);
