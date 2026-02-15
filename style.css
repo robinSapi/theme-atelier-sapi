@@ -11620,6 +11620,13 @@ transform: translateY(15px);
   letter-spacing: 0.02em;
 }
 
+/* More spacing above variations intro on desktop */
+@media (min-width: 769px) {
+  .variations-intro {
+    margin-top: 2rem;
+  }
+}
+
 /* Variations in 2 columns - Materials left, Sizes right (all screen sizes) */
 .product-form-v2 .variations {
   margin-bottom: 1.5rem;
