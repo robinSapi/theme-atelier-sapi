@@ -11430,19 +11430,39 @@ transform: translateY(15px);
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: none;
-  border: none;
+  background: none !important;
+  border: none !important;
   padding: 0;
+  margin: 0;
   cursor: pointer;
   z-index: 10;
-  outline: none;
+  outline: none !important;
   -webkit-tap-highlight-color: transparent;
+  box-shadow: none !important;
+  width: auto;
+  height: auto;
+}
+
+.gallery-nav:hover,
+.gallery-nav:active,
+.gallery-nav:focus {
+  background: none !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transform: translateY(-50%);
 }
 
 .gallery-nav svg {
   stroke: var(--color-wood, #937D68);
   stroke-width: 2;
   pointer-events: none;
+}
+
+.gallery-nav:hover svg,
+.gallery-nav:active svg,
+.gallery-nav:focus svg {
+  stroke: var(--color-wood, #937D68);
 }
 
 .gallery-nav-prev {
