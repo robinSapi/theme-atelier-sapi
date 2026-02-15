@@ -11433,24 +11433,23 @@ transform: translateY(15px);
   z-index: 10;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease;
   padding: 0;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .gallery-nav svg {
-  stroke: rgba(255, 255, 255, 0.9);
+  stroke: var(--color-wood, #937D68);
   stroke-width: 3;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
-.gallery-nav:hover {
-  transform: translateY(-50%) scale(1.2);
-}
-
-.gallery-nav:hover svg {
-  stroke: var(--color-orange, #E67E22);
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.6));
+.gallery-nav:hover svg,
+.gallery-nav:active svg,
+.gallery-nav:focus svg {
+  opacity: 0.7;
 }
 
 .gallery-nav-prev {
