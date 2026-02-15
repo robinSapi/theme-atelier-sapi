@@ -141,17 +141,19 @@ html {
 
 /* ========================================
    PRODUCT NAME FORMATTING
-   Prénom (premier mot) = Montserrat gras
-   Article + nom = Square Peg
+   Prénom (premier mot) = Montserrat gras uppercase
+   Article + nom = Square Peg capitalize (première lettre seulement)
    ======================================== */
 .product-firstname {
   font-family: var(--font-body, 'Montserrat', sans-serif);
   font-weight: 800;
+  text-transform: uppercase;
 }
 
 .product-restname {
   font-family: var(--font-display, 'Square Peg', cursive);
   font-weight: 400;
+  text-transform: capitalize; /* Première lettre de chaque mot en majuscule */
 }
 
 /* Fade-in animation on scroll (intersection observer target) */
