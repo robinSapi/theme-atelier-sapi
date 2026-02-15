@@ -11499,11 +11499,6 @@ transform: translateY(15px);
     display: none;
   }
 
-  /* Hide price section on mobile */
-  .product-info-v2 .product-price-v2 {
-    display: none;
-  }
-
   /* Hide divider line between variations and image on mobile */
   .product-divider {
     display: none;
@@ -11559,12 +11554,9 @@ transform: translateY(15px);
 }
 
 /* Catégorie */
-/* Prix */
+/* Prix - Hidden on all screen sizes */
 .product-price-v2 {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  margin: 0.25rem 0;
+  display: none !important; /* Hide "À partir de XX€" on both mobile and desktop */
 }
 
 .price-prefix {
