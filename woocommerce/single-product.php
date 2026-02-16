@@ -1062,8 +1062,19 @@ get_header();
     const variationForm = document.querySelector('.variations_form');
     const mainImage = document.querySelector('.gallery-main-image');
     const galleryZoomLink = document.querySelector('.gallery-zoom');
-    const thumbsContainer = document.querySelector('.gallery-thumbnails');
-    let variationThumb = null;
+
+    // Store original first thumbnail data
+    const firstThumb = document.querySelector('.gallery-thumb');
+    let originalFirstThumbSrc = null;
+    let originalFirstThumbData = null;
+
+    if (firstThumb) {
+      const firstThumbImg = firstThumb.querySelector('img');
+      if (firstThumbImg) {
+        originalFirstThumbSrc = firstThumbImg.src;
+      }
+      originalFirstThumbData = firstThumb.dataset.image;
+    }
 
     if (variationForm && typeof jQuery !== 'undefined') {
       jQuery(variationForm).on('found_variation', function(event, variation) {
@@ -1083,55 +1094,30 @@ get_header();
         }, { once: true });
 
         // Update gallery with variation image
-        if (variation.image && variation.image.src && mainImage && thumbsContainer) {
+        if (variation.image && variation.image.src && mainImage) {
           const variationImageSrc = variation.image.src;
           const variationImageFull = variation.image.full_src || variationImageSrc;
+          const variationThumbSrc = variation.image.gallery_thumbnail_src || variationImageSrc;
 
-          // Check if this image already exists in gallery
-          const existingThumb = Array.from(document.querySelectorAll('.gallery-thumb'))
-            .find(thumb => thumb.dataset.image === variationImageSrc);
+          // Update main image
+          mainImage.src = variationImageSrc;
+          mainImage.srcset = variation.image.srcset || '';
+          if (galleryZoomLink) {
+            galleryZoomLink.href = variationImageFull;
+          }
 
-          if (existingThumb) {
-            // Image exists - just activate it
-            document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
-            existingThumb.classList.add('active');
-            mainImage.src = variationImageSrc;
-            mainImage.srcset = variation.image.srcset || '';
-            if (galleryZoomLink) {
-              galleryZoomLink.href = variationImageFull;
+          // Replace first thumbnail with variation image
+          if (firstThumb) {
+            const firstThumbImg = firstThumb.querySelector('img');
+            if (firstThumbImg) {
+              firstThumbImg.src = variationThumbSrc;
             }
-          } else {
-            // Image doesn't exist - create new thumbnail at start
-            variationThumb = document.createElement('button');
-            variationThumb.className = 'gallery-thumb active variation-thumb';
-            variationThumb.dataset.image = variationImageSrc;
-            variationThumb.innerHTML = `<img src="${variationImageSrc}" alt="Variation" />`;
+            firstThumb.dataset.image = variationImageSrc;
+            firstThumb.classList.add('variation-active');
 
-            // Deactivate other thumbs
+            // Make sure it's active
             document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
-
-            // Insert at beginning
-            thumbsContainer.insertBefore(variationThumb, thumbsContainer.firstChild);
-
-            // Add click handler for this thumbnail
-            variationThumb.addEventListener('click', function() {
-              document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
-              this.classList.add('active');
-              if (mainImage) {
-                mainImage.src = variationImageSrc;
-                mainImage.srcset = variation.image.srcset || '';
-              }
-              if (galleryZoomLink) {
-                galleryZoomLink.href = variationImageFull;
-              }
-            });
-
-            // Update main image
-            mainImage.src = variationImageSrc;
-            mainImage.srcset = variation.image.srcset || '';
-            if (galleryZoomLink) {
-              galleryZoomLink.href = variationImageFull;
-            }
+            firstThumb.classList.add('active');
           }
         }
       });
@@ -1140,20 +1126,22 @@ get_header();
         scrollBtn.textContent = '<?php esc_html_e('Choisir les options', 'theme-sapi-maison'); ?>';
         scrollBtn.classList.remove('variation-selected');
 
-        // Remove variation thumbnail if created
-        if (variationThumb && variationThumb.parentNode) {
-          variationThumb.parentNode.removeChild(variationThumb);
-          variationThumb = null;
-        }
+        // Restore original first thumbnail
+        if (firstThumb && originalFirstThumbSrc && originalFirstThumbData) {
+          const firstThumbImg = firstThumb.querySelector('img');
+          if (firstThumbImg) {
+            firstThumbImg.src = originalFirstThumbSrc;
+          }
+          firstThumb.dataset.image = originalFirstThumbData;
+          firstThumb.classList.remove('variation-active');
 
-        // Reset to first original thumbnail
-        const firstThumb = document.querySelector('.gallery-thumb:not(.variation-thumb)');
-        if (firstThumb && mainImage) {
-          document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
-          firstThumb.classList.add('active');
-          mainImage.src = firstThumb.dataset.image;
+          // Update main image to first thumbnail
+          if (mainImage) {
+            mainImage.src = originalFirstThumbData;
+            mainImage.srcset = '';
+          }
           if (galleryZoomLink) {
-            galleryZoomLink.href = firstThumb.dataset.image;
+            galleryZoomLink.href = originalFirstThumbData;
           }
         }
       });
