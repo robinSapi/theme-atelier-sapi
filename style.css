@@ -2037,7 +2037,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 .woocommerce-variation-price .price {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-wood);
+  color: var(--color-orange);
 }
 
 /* Sticky Add to Cart Bar */
@@ -10598,7 +10598,7 @@ transform: translateY(15px);
 .product-summary .woocommerce-variation-price .price {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-wood);
+  color: var(--color-orange);
 }
 
 /* ---- Variation description ---- */
