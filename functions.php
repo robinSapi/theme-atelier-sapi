@@ -888,12 +888,12 @@ function sapi_ajax_add_to_cart() {
 
 /**
  * Calculate estimated delivery date (Phase 4 - Proposal B)
- * Fabrication (5 jours ouvrés) + Livraison (3 jours ouvrés)
+ * Fabrication (3 jours ouvrés) + Livraison (2 jours ouvrés)
  *
  * @return string Formatted date "12 février"
  */
 function sapi_get_estimated_delivery_date() {
-  $business_days_to_add = 8; // 5 jours fabrication + 3 jours livraison
+  $business_days_to_add = 5; // 3 jours fabrication + 2 jours livraison
   $current_date = new DateTime();
   $days_added = 0;
 
