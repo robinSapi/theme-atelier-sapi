@@ -11505,7 +11505,7 @@ transform: translateY(15px);
     font-size: 1.75rem;
     font-weight: 800;
     line-height: 1.2;
-    color: var(--color-dark, #323232);
+    color: var(--color-orange);
     margin: 0 0 0.5rem 0;
     text-transform: uppercase; /* Match desktop style */
     letter-spacing: 0.02em; /* Match desktop style */
@@ -11572,7 +11572,7 @@ transform: translateY(15px);
   font-weight: 800;
   line-height: 1.15;
   margin: 0 0 0.5rem 0;
-  color: var(--color-text);
+  color: var(--color-orange);
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
