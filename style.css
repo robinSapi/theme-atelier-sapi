@@ -9417,7 +9417,7 @@ transform: translateY(15px);
 
 .product-card-cinetique .product-name {
   font-family: var(--font-body);
-  font-size: 1.5rem !important; /* Taille optimale pour équilibre visuel */
+  font-size: 1.35rem !important; /* Taille réduite pour meilleur équilibre */
   font-weight: 700;
   color: var(--color-dark);
   margin: 0 0 0.75rem;
