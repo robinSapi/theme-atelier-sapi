@@ -1158,6 +1158,10 @@ get_header();
       this.classList.add('active');
       if (mainImage) {
         mainImage.src = this.dataset.image;
+        mainImage.srcset = ''; // Clear srcset to prevent variation image from showing
+      }
+      if (galleryZoomLink) {
+        galleryZoomLink.href = this.dataset.image;
       }
     });
   });
@@ -1185,6 +1189,7 @@ get_header();
       // Update main image
       if (mainImage) {
         mainImage.src = targetThumb.dataset.image;
+        mainImage.srcset = ''; // Clear srcset to prevent variation image from showing
       }
 
       // Update zoom link if available
