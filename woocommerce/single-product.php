@@ -1062,7 +1062,7 @@ get_header();
     const variationForm = document.querySelector('.variations_form');
     const mainImage = document.querySelector('.gallery-main-image');
     const galleryZoomLink = document.querySelector('.gallery-zoom');
-    const thumbsContainer = document.querySelector('.gallery-thumbs');
+    const thumbsContainer = document.querySelector('.gallery-thumbnails');
     let variationThumb = null;
 
     if (variationForm && typeof jQuery !== 'undefined') {
