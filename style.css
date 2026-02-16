@@ -12174,7 +12174,7 @@ transform: translateY(15px);
 .product-form-v2 .woocommerce-variation-price .price {
   font-size: 1.75rem;
   font-weight: 500;
-  color: var(--color-text);
+  color: var(--color-orange);
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
