@@ -94,6 +94,17 @@ src: url('./assets/fonts/SquarePeg-Regular.woff2');
 **Ne fonctionne pas.**
 ✅ Utiliser `inset: 0` au lieu de `top/left + width/height: 100%`
 
+### 9. ❌ Changer img.src sans réinitialiser srcset
+**Le navigateur peut ignorer le nouveau src et afficher l'ancienne image du srcset.**
+```javascript
+// INCOMPLET
+mainImage.src = newImage;
+
+// CORRECT
+mainImage.src = newImage;
+mainImage.srcset = ''; // OBLIGATOIRE
+```
+
 ---
 
 ## 📂 STRUCTURE FICHIERS CLÉS
@@ -147,6 +158,12 @@ Tout le site a été harmonisé en **5 vagues de design premium** :
 **Quick View Modal** : Aperçu produit sans quitter la page (galerie, variations, AJAX cart)
 
 **Focal Point Picker** : Sélecteur visuel du point focal pour hero /nos-creations/
+
+**Galerie Variations** : Quand une variation est sélectionnée, son image s'intègre dans la galerie produit
+- Image de variation devient l'image principale
+- Première vignette remplacée par l'image de variation
+- Navigation complète préservée (flèches, clics)
+- Restauration automatique à la désélection
 
 ➡️ **Voir CUSTOMIZATIONS.md pour le détail complet de chaque vague**
 

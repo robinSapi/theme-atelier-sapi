@@ -18,7 +18,7 @@
 | `front-page.php` | Homepage bento grid | ~473 | 2026-02-12 | URLs images hardcodées (testlumineux) |
 | `header.php` | Header, nav, panier SVG | ~200 | 2026-02-06 | |
 | `footer.php` | Footer + quick-view modal shell | ~72 | 2026-02-09 | |
-| `woocommerce/single-product.php` | Fiche produit complète (hero, details, FAQ, sticky bar) | ~1061 | 2026-02-11 | Template custom, pas standard WC |
+| `woocommerce/single-product.php` | Fiche produit complète (hero, details, FAQ, sticky bar, galerie variations) | ~1280 | 2026-02-11 | Template custom, galerie variations intégrée |
 | `woocommerce/archive-product.php` | Page /nos-creations/ (hero magazine + carrousel + filtres) | ~366 | 2026-02-11 | Hero avec ACF image + focal point |
 | `woocommerce/taxonomy-product_cat.php` | Pages catégories (mini-carousel + grille + editorial) | ~357 | 2026-02-10 | Custom queries (main query corrompue) |
 | `woocommerce/content-product.php` | Card produit (vignette dans grilles/carrousels) | ~208 | 2026-02-11 | H3 pour SEO (pas H2) |
@@ -69,6 +69,15 @@ Avant de suggérer de vider le cache, vérifier :
 
 ### "L'audit dit qu'il y a une faille XSS dans cinetique.js"
 **Réalité :** Un audit automatisé a cité cinetique.js:416 mais c'est du code canvas particles, pas du innerHTML. Le vrai innerHTML (inoffensif) est dans menu.js pour le SVG search icon. Vérifier les claims d'audit contre le code réel.
+
+### "Change juste img.src, pas besoin de toucher au srcset"
+**Réalité :** Si `srcset` est défini, le navigateur peut ignorer le nouveau `src` et continuer d'afficher l'ancienne image du `srcset`.
+**Faire :** TOUJOURS réinitialiser `srcset` lors de changements d'image :
+```javascript
+mainImage.src = newImageSrc;
+mainImage.srcset = ''; // OBLIGATOIRE
+```
+**Contexte :** Découvert lors de l'implémentation des variations dans la galerie produit (commit a4a0432).
 
 ---
 
@@ -208,6 +217,24 @@ console.log('debug');
 ---
 
 ## 7. HISTORIQUE DES MODIFICATIONS
+
+### [2026-02-11] — Galerie Variations Produit + Icône Lucide (commits a4a0432, fe94b7b)
+**Fichiers :** `woocommerce/single-product.php`
+**Fonctionnalité majeure :** Intégration des images de variations dans la galerie produit
+**Contexte :** Quand un client sélectionne une variation (couleur, essence de bois), l'image de la variation doit s'afficher dans la galerie tout en conservant la navigation normale.
+**Implémentation :**
+- Event `found_variation` : Image de variation devient l'image principale + première vignette remplacée par image de variation
+- Event `reset_data` : Restauration complète de la galerie à son état original
+- Stockage des données originales de la première vignette au chargement de la page
+- Navigation (clics vignettes + flèches) conserve sa fonctionnalité complète
+**Problème initial :** Image de variation persistait après navigation vers autre vignette
+**Cause :** `srcset` de l'image de variation restait en place même après changement de `src`, le navigateur continuait d'utiliser l'image du `srcset`
+**Solution :** Ajout systématique de `mainImage.srcset = ''` dans :
+  - Navigation par clic sur vignettes (ligne 1154)
+  - Navigation par flèches (ligne 1157)
+  - Reset de variation (ligne 1134)
+**Leçon importante :** Lors de changements d'image `<img>`, TOUJOURS réinitialiser `srcset` sinon le navigateur peut ignorer le nouveau `src` et afficher l'ancienne image du `srcset`.
+**Bonus :** Remplacement icône scie custom par **Lucide person-standing** pour réassurance "Fabrication <5 jours" (lignes 226-232)
 
 ### [2026-02-12] — Mobile UX : contraste, espacement, overlays (commit f0ae329)
 **Fichiers :** `style.css`

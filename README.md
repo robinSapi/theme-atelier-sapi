@@ -222,5 +222,5 @@ Thème propriétaire développé pour Atelier Sapi. Tous droits réservés.
 
 ---
 
-**Version actuelle :** 0.1.0
-**Dernière mise à jour :** Janvier 2026
+**Version actuelle :** 0.2.0
+**Dernière mise à jour :** Février 2026
