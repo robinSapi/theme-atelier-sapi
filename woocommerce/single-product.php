@@ -1058,14 +1058,8 @@ get_header();
       }
     });
 
-    // Update sticky bar and main gallery image when variation is selected
+    // Update sticky bar when variation is selected
     const variationForm = document.querySelector('.variations_form');
-    const mainImage = document.querySelector('.gallery-main-image');
-    const galleryZoomLink = document.querySelector('.gallery-zoom');
-    const thumbsContainer = document.querySelector('.gallery-thumbs');
-    let originalImageSrc = mainImage ? mainImage.src : '';
-    let originalImageFull = galleryZoomLink ? galleryZoomLink.href : '';
-    let variationThumb = null; // Keep reference to variation thumbnail
 
     if (variationForm && typeof jQuery !== 'undefined') {
       jQuery(variationForm).on('found_variation', function(event, variation) {
@@ -1083,97 +1077,11 @@ get_header();
             mainForm.querySelector('.single_add_to_cart_button').click();
           }
         }, { once: true });
-
-        // Update main gallery image with variation image
-        if (variation.image && variation.image.src && mainImage) {
-          const variationImageSrc = variation.image.src;
-          const variationImageFull = variation.image.full_src || variationImageSrc;
-
-          // Check if this variation image already exists in thumbnails
-          const existingThumb = Array.from(document.querySelectorAll('.gallery-thumb'))
-            .find(thumb => thumb.dataset.image === variationImageSrc);
-
-          if (existingThumb) {
-            // Image exists in gallery - just activate it
-            document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
-            existingThumb.classList.add('active');
-            mainImage.src = variationImageSrc;
-            mainImage.srcset = variation.image.srcset || '';
-            mainImage.sizes = variation.image.sizes || '';
-            mainImage.alt = variation.image.alt || '';
-            mainImage.title = variation.image.title || '';
-            if (galleryZoomLink) {
-              galleryZoomLink.href = variationImageFull;
-            }
-          } else if (thumbsContainer) {
-            // Image doesn't exist - create temporary thumbnail
-            variationThumb = document.createElement('button');
-            variationThumb.className = 'gallery-thumb active variation-thumb';
-            variationThumb.dataset.image = variationImageSrc;
-            variationThumb.setAttribute('aria-label', 'Image de la variation');
-            variationThumb.innerHTML = `<img src="${variationImageSrc}" alt="${variation.image.alt || 'Variation'}" />`;
-
-            // Remove active from other thumbs
-            document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
-
-            // Insert at the beginning
-            thumbsContainer.insertBefore(variationThumb, thumbsContainer.firstChild);
-
-            // Add click handler
-            variationThumb.addEventListener('click', function() {
-              document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
-              this.classList.add('active');
-              if (mainImage) {
-                mainImage.src = variationImageSrc;
-                mainImage.srcset = variation.image.srcset || '';
-                mainImage.sizes = variation.image.sizes || '';
-                mainImage.alt = variation.image.alt || '';
-                mainImage.title = variation.image.title || '';
-              }
-              if (galleryZoomLink) {
-                galleryZoomLink.href = variationImageFull;
-              }
-            });
-
-            // Update main image
-            mainImage.src = variationImageSrc;
-            mainImage.srcset = variation.image.srcset || '';
-            mainImage.sizes = variation.image.sizes || '';
-            mainImage.alt = variation.image.alt || '';
-            mainImage.title = variation.image.title || '';
-
-            if (galleryZoomLink) {
-              galleryZoomLink.href = variationImageFull;
-            }
-          }
-        }
       });
 
       jQuery(variationForm).on('reset_data', function() {
         scrollBtn.textContent = '<?php esc_html_e('Choisir les options', 'theme-sapi-maison'); ?>';
         scrollBtn.classList.remove('variation-selected');
-
-        // Remove variation thumbnail if it was created
-        if (variationThumb && variationThumb.parentNode) {
-          variationThumb.parentNode.removeChild(variationThumb);
-          variationThumb = null;
-        }
-
-        // Reset to original image and activate first thumbnail
-        if (mainImage && originalImageSrc) {
-          mainImage.src = originalImageSrc;
-          mainImage.srcset = '';
-          if (galleryZoomLink && originalImageFull) {
-            galleryZoomLink.href = originalImageFull;
-          }
-
-          // Reactivate first thumbnail
-          document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
-          const firstThumb = document.querySelector('.gallery-thumb');
-          if (firstThumb) {
-            firstThumb.classList.add('active');
-          }
-        }
       });
     }
   }
