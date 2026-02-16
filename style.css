@@ -1863,7 +1863,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 }
 
 .product-summary .price {
-  color: var(--color-orange);
+  color: var(--color-orange) !important;
   font-weight: 600;
 }
 
@@ -2037,7 +2037,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 .woocommerce-variation-price .price {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-orange);
+  color: var(--color-orange) !important;
 }
 
 /* Sticky Add to Cart Bar */
@@ -10598,7 +10598,7 @@ transform: translateY(15px);
 .product-summary .woocommerce-variation-price .price {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-orange);
+  color: var(--color-orange) !important;
 }
 
 /* ---- Variation description ---- */
@@ -11600,7 +11600,7 @@ transform: translateY(15px);
 .product-price-v2 .price-amount .woocommerce-Price-amount {
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--color-orange);
+  color: var(--color-orange) !important;
 }
 
 .product-price-v2 .price-amount del {
@@ -12174,7 +12174,7 @@ transform: translateY(15px);
 .product-form-v2 .woocommerce-variation-price .price {
   font-size: 1.75rem;
   font-weight: 500;
-  color: var(--color-orange);
+  color: var(--color-orange) !important;
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
