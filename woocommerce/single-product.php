@@ -209,17 +209,6 @@ get_header();
           // Only render add to cart form
           woocommerce_template_single_add_to_cart();
           ?>
-
-          <!-- Double CTA Strategy - Proposal B -->
-          <div class="product-buy-now">
-            <button type="button" class="btn-secondary btn-buy-now" data-product-id="<?php echo esc_attr($product_id); ?>">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              Acheter maintenant
-            </button>
-            <span class="buy-now-hint">Paiement direct, sans passer par le panier</span>
-          </div>
         </div>
 
         <!-- Paiement rapide (Apple Pay, etc.) - discret -->
