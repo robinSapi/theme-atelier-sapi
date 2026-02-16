@@ -12134,7 +12134,7 @@ transform: translateY(15px);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   -webkit-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-top: 0.5rem;
+  margin-top: 0;
 }
 
 .product-form-v2 .single_add_to_cart_button:hover {
