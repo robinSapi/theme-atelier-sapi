@@ -11676,7 +11676,7 @@ transform: translateY(15px);
   flex-direction: column;
   gap: 0.75rem;
   margin-bottom: 0; /* No vertical spacing - grid gap handles it */
-  padding: 1.25rem;
+  padding: 0.875rem; /* Réduit pour plus de compacité */
   background: var(--color-cream);
   border-radius: 12px;
   border: 1px solid rgba(147, 125, 104, 0.1);
