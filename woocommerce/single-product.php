@@ -224,12 +224,10 @@ get_header();
         <div class="product-reassurance-v2">
           <div class="reassurance-item-v2">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <!-- Poignée -->
-              <rect x="2" y="16" width="5" height="5" rx="1"/>
-              <!-- Lame principale -->
-              <line x1="7" y1="18" x2="22" y2="3"/>
-              <!-- Dents de la scie -->
-              <polyline points="9,16 10,15 11,16 12,15 13,16 14,15 15,16 16,15 17,16 18,15 19,16 20,15 21,16"/>
+              <!-- Poignée de la scie -->
+              <rect x="1" y="15" width="7" height="7" rx="1.5"/>
+              <!-- Lame avec dents en zigzag -->
+              <path d="M8,18 L10,16 L12,18 L14,16 L16,18 L18,16 L20,18 L22,4" fill="none"/>
             </svg>
             <span>Fabrication <strong>&lt;5 jours</strong></span>
           </div>
