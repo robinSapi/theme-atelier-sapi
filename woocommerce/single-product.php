@@ -224,7 +224,13 @@ get_header();
         <div class="product-reassurance-v2">
           <div class="reassurance-item-v2">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+              <path d="M4 20l7-7M11 13l7-7M18 6l2-2"/>
+              <circle cx="20" cy="4" r="2"/>
+              <line x1="4" y1="20" x2="2" y2="22"/>
+              <line x1="7" y1="17" x2="5" y2="19"/>
+              <line x1="10" y1="14" x2="8" y2="16"/>
+              <line x1="13" y1="11" x2="11" y2="13"/>
+              <line x1="16" y1="8" x2="14" y2="10"/>
             </svg>
             <span>Fabrication <strong>&lt;5 jours</strong></span>
           </div>
