@@ -1863,8 +1863,9 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 }
 
 .product-summary .price {
-  color: var(--color-orange) !important;
-  font-weight: 600;
+  color: #018501 !important;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
 }
 
 .product-hookline {
@@ -2036,8 +2037,9 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 /* Reset price display for variations */
 .woocommerce-variation-price .price {
   font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-orange) !important;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  color: #018501 !important;
 }
 
 /* Sticky Add to Cart Bar */
@@ -10597,8 +10599,9 @@ transform: translateY(15px);
 
 .product-summary .woocommerce-variation-price .price {
   font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-orange) !important;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  color: #018501 !important;
 }
 
 /* ---- Variation description ---- */
@@ -11599,8 +11602,9 @@ transform: translateY(15px);
 .product-price-v2 .price-amount,
 .product-price-v2 .price-amount .woocommerce-Price-amount {
   font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--color-orange) !important;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  color: #018501 !important;
 }
 
 .product-price-v2 .price-amount del {
@@ -12173,8 +12177,9 @@ transform: translateY(15px);
 
 .product-form-v2 .woocommerce-variation-price .price {
   font-size: 1.75rem;
-  font-weight: 500;
-  color: var(--color-orange) !important;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  color: #018501 !important;
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
