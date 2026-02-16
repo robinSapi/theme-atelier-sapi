@@ -8287,7 +8287,7 @@ transform: translateY(15px);
 
   .product-summary .single_add_to_cart_button {
     width: 100%;
-    padding: 15px;
+    padding: 12px !important; /* Réduit hauteur bouton mobile */
     font-size: 1rem;
   }
 
@@ -12107,7 +12107,7 @@ transform: translateY(15px);
   justify-content: center;
   gap: 0.75rem;
   width: 100%;
-  padding: 20px 40px;
+  padding: 14px 40px !important; /* Réduit hauteur bouton */
 
   /* Gradient vert - charte graphique */
   background: linear-gradient(180deg, #019501 0%, #018501 100%) !important;
