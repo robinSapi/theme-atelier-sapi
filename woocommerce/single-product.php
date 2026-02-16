@@ -224,11 +224,11 @@ get_header();
         <div class="product-reassurance-v2">
           <div class="reassurance-item-v2">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <!-- Poignée avec grip -->
-              <rect x="1" y="14" width="8" height="8" rx="1.5"/>
-              <line x1="3" y1="18" x2="7" y2="18" stroke-width="1.5"/>
-              <!-- Lame avec grandes dents -->
-              <path d="M9,18 L12,14 L15,18 L18,14 L21,18 L22,5" stroke-width="2.5"/>
+              <!-- Lucide person-standing icon -->
+              <circle cx="12" cy="5" r="1"/>
+              <path d="m9 20 3-6 3 6"/>
+              <path d="m6 8 6 2 6-2"/>
+              <path d="M12 10v4"/>
             </svg>
             <span>Fabrication <strong>&lt;5 jours</strong></span>
           </div>
