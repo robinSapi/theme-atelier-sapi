@@ -516,8 +516,9 @@ $collections = [
   const carousel = document.querySelector('.homepage-carousel-fullscreen');
   if (!reassuranceBar || !carousel) return;
 
-  // Déplacer le bandeau de réassurance juste sous le carousel
+  // Déplacer le bandeau de réassurance juste sous le carousel et le rendre visible
   carousel.parentNode.insertBefore(reassuranceBar, carousel.nextSibling);
+  reassuranceBar.classList.add('home-repositioned-bar');
 })();
 </script>
 
