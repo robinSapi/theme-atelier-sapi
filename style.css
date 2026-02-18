@@ -1077,6 +1077,24 @@ input[type="submit"]:hover,
   padding: 0 20px;
 }
 
+/* Menu transparent par-dessus le carousel sur la homepage */
+.home .site-header {
+  position: absolute;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.5) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Après le carousel : redevient fixe et opaque */
+.home .site-header.is-scrolled {
+  position: fixed;
+  background: rgba(255, 255, 255, 0.97) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+}
+
 .home .site-content {
   padding: 0;
   overflow-x: clip; /* 'clip' ne crée pas de scroll container, contrairement à 'hidden' – préserve position:sticky */

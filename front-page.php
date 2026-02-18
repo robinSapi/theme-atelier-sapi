@@ -519,6 +519,22 @@ $collections = [
   // Déplacer le bandeau de réassurance juste sous le carousel et le rendre visible
   carousel.parentNode.insertBefore(reassuranceBar, carousel.nextSibling);
   reassuranceBar.classList.add('home-repositioned-bar');
+
+  // Menu : transparent par-dessus le carousel, opaque après
+  const header = document.querySelector('.site-header');
+  if (!header) return;
+
+  function updateHeaderState() {
+    const carouselBottom = carousel.offsetTop + carousel.offsetHeight;
+    if (window.scrollY + header.offsetHeight >= carouselBottom) {
+      header.classList.add('is-scrolled');
+    } else {
+      header.classList.remove('is-scrolled');
+    }
+  }
+
+  window.addEventListener('scroll', updateHeaderState, { passive: true });
+  updateHeaderState();
 })();
 </script>
 
