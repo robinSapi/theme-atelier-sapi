@@ -1079,6 +1079,7 @@ input[type="submit"]:hover,
 
 .home .site-content {
   padding: 0;
+  overflow-x: hidden;
 }
 
 @media (max-width: 768px) {
@@ -6786,7 +6787,9 @@ body.cursor-hover .cursor-dot {
 
 .homepage-carousel-fullscreen {
   position: relative;
-  width: 100%;
+  width: 100vw;
+  left: 50%;
+  transform: translateX(-50%);
   overflow-x: hidden;
 }
 
