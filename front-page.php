@@ -289,16 +289,6 @@ $collections = [
         <div class="carousel-overlay"></div>
         <div class="carousel-content">
           <h2 class="carousel-product-name"><?php echo esc_html($product['name']); ?></h2>
-          <div class="carousel-product-price">
-            <span class="price-label">À partir de</span>
-            <?php echo $product['price']; ?>
-          </div>
-          <a href="<?php echo esc_url($product['url']); ?>" class="carousel-btn-discover">
-            Découvrir
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
-            </svg>
-          </a>
         </div>
       </div>
     <?php endforeach; ?>
