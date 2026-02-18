@@ -1079,7 +1079,7 @@ input[type="submit"]:hover,
 
 .home .site-content {
   padding: 0;
-  overflow-x: hidden;
+  overflow-x: clip; /* 'clip' ne crée pas de scroll container, contrairement à 'hidden' – préserve position:sticky */
 }
 
 @media (max-width: 768px) {
