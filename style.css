@@ -6802,12 +6802,12 @@ body.cursor-hover .cursor-dot {
   pointer-events: none; /* L'overlay est décoratif – laisse passer les clics */
 }
 
-/* H1 + H2 hero texte centré sur le carousel */
+/* H1 + H2 hero texte centré en bas du carousel */
 .carousel-hero-text {
   position: absolute;
-  top: 50%;
+  bottom: 3.5rem;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   z-index: 2;
   text-align: center;
   width: 100%;
