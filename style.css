@@ -6723,9 +6723,7 @@ body.cursor-hover .cursor-dot {
 
 .homepage-carousel-fullscreen {
   position: relative;
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 2rem 3rem;
+  width: 100%;
   overflow-x: hidden;
 }
 
@@ -6735,9 +6733,6 @@ body.cursor-hover .cursor-dot {
   height: 70vh;
   min-height: 500px;
   overflow: hidden;
-  border-radius: 16px;
-  border: 1px solid var(--color-gray-light);
-  box-shadow: 0 4px 20px rgba(147, 125, 104, 0.08);
 }
 
 .carousel-slides {
@@ -6883,10 +6878,6 @@ body.cursor-hover .cursor-dot {
 
 /* Tablet Responsive */
 @media (max-width: 900px) {
-  .homepage-carousel-fullscreen {
-    padding: 2rem;
-  }
-
   .carousel-container {
     height: 60vh;
   }
@@ -6894,14 +6885,9 @@ body.cursor-hover .cursor-dot {
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
-  .homepage-carousel-fullscreen {
-    padding: 1rem;
-  }
-
   .carousel-container {
     height: 50vh;
     min-height: 400px;
-    border-radius: 12px;
   }
 
   .carousel-content {
