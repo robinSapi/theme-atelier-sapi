@@ -1406,10 +1406,7 @@ input[type="submit"]:hover,
    GLOBAL - Sticky Reassurance Bar
    ======================================== */
 
-/* Masquer le bandeau de réassurance sur la page d'accueil */
-.home .reassurance-bar-sticky {
-  display: none;
-}
+/* Le bandeau de réassurance est repositionné via JS sous le menu – visible sur la homepage */
 
 /* ========================================
    HOMEPAGE - Menu sous le carousel (sticky)
