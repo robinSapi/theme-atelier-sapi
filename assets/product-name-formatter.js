@@ -46,22 +46,26 @@
       return;
     }
 
-    const fullName = element.textContent.trim();
+    // Si l'élément contient un lien <a>, formater à l'intérieur du lien (préserve le href)
+    const link = element.querySelector('a');
+    const target = link || element;
+
+    const fullName = target.textContent.trim();
     if (!fullName) return;
 
     // Séparer le premier mot (prénom) du reste
     const words = fullName.split(' ');
     if (words.length < 2) {
       // Si un seul mot, tout mettre en Montserrat
-      element.innerHTML = `<span class="product-firstname">${fullName}</span>`;
+      target.innerHTML = `<span class="product-firstname">${fullName}</span>`;
       return;
     }
 
     const firstName = words[0];
     const rest = words.slice(1).join(' ');
 
-    // Créer le HTML formaté
-    element.innerHTML = `<span class="product-firstname">${firstName}</span> <span class="product-restname">${rest}</span>`;
+    // Créer le HTML formaté à l'intérieur de la cible (lien ou élément direct)
+    target.innerHTML = `<span class="product-firstname">${firstName}</span> <span class="product-restname">${rest}</span>`;
   }
 
   // Observer pour les nouveaux éléments ajoutés dynamiquement (AJAX, infinite scroll, etc.)
