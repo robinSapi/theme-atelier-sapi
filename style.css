@@ -1401,6 +1401,11 @@ input[type="submit"]:hover,
    GLOBAL - Sticky Reassurance Bar
    ======================================== */
 
+/* Masquer le bandeau de réassurance sur la page d'accueil */
+.home .reassurance-bar-sticky {
+  display: none;
+}
+
 .reassurance-bar-sticky {
   position: sticky;
   top: 74px; /* Below header */
