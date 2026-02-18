@@ -6747,7 +6747,6 @@ body.cursor-hover .cursor-dot {
   position: relative;
   width: 100%;
   height: 70vh;
-  min-height: 500px;
   overflow: hidden;
 }
 
@@ -6902,17 +6901,12 @@ body.cursor-hover .cursor-dot {
 
 /* Tablet Responsive */
 @media (max-width: 900px) {
-  .carousel-container {
-    height: 60vh;
-  }
+  /* Hauteur carousel inchangée – toujours 70vh */
 }
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
-  .carousel-container {
-    height: 50vh;
-    min-height: 400px;
-  }
+  /* Hauteur carousel inchangée – toujours 70vh */
 
   .carousel-content {
     padding: 2rem;
@@ -6955,15 +6949,6 @@ body.cursor-hover .cursor-dot {
 
   .carousel-content {
     padding: 1.5rem;
-  }
-
-  .carousel-container {
-    min-height: 350px;
-  }
-
-  .carousel-btn-discover {
-    padding: 0.75rem 1.5rem;
-    font-size: 0.875rem;
   }
 }
 
