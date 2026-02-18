@@ -1412,57 +1412,25 @@ input[type="submit"]:hover,
 }
 
 /* ========================================
-   HOMEPAGE - Header transparent sur le carousel
+   HOMEPAGE - Menu sous le carousel (sticky)
    ======================================== */
 
-/* Header en position absolute pour se superposer au carousel */
-.home .site-header {
+/* Avant repositionnement JS : masquer le header et libérer l'espace en haut */
+.home .site-header:not(.home-repositioned) {
+  visibility: hidden;
   position: absolute;
+  top: -999px;
+  left: 0;
   width: 100%;
-  background: transparent !important;
-  box-shadow: none !important;
-  transition: background 0.4s ease, box-shadow 0.4s ease;
 }
 
-/* Gradient sombre derrière le header pour la lisibilité */
-.home .site-header::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35) 0%, transparent 100%);
-  z-index: -1;
-  pointer-events: none;
-}
-
-/* Liens de navigation en blanc */
-.home .site-header:not(.is-scrolled) .primary-nav a {
-  color: white;
-}
-
-.home .site-header:not(.is-scrolled) .primary-nav a::after {
-  background: white;
-}
-
-/* Icônes et texte du header en blanc */
-.home .site-header:not(.is-scrolled) .header-actions svg,
-.home .site-header:not(.is-scrolled) .menu-toggle-text {
-  color: white;
-}
-
-.home .site-header:not(.is-scrolled) .cart-count {
-  background: white;
-  color: var(--color-dark);
-}
-
-/* Quand scrollé hors du carousel : header redevient opaque */
-.home .site-header.is-scrolled {
-  position: fixed;
-  background: rgba(255, 255, 255, 0.97) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
-}
-
-.home .site-header.is-scrolled::after {
-  display: none;
+/* Après repositionnement JS : menu blanc sticky sous le carousel */
+.home .site-header.home-repositioned {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: white !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10) !important;
 }
 
 .reassurance-bar-sticky {

@@ -524,17 +524,9 @@ $collections = [
   const carousel = document.querySelector('.homepage-carousel-fullscreen');
   if (!header || !carousel) return;
 
-  function updateHeader() {
-    const carouselBottom = carousel.offsetTop + carousel.offsetHeight;
-    if (window.scrollY >= carouselBottom - header.offsetHeight) {
-      header.classList.add('is-scrolled');
-    } else {
-      header.classList.remove('is-scrolled');
-    }
-  }
-
-  window.addEventListener('scroll', updateHeader, { passive: true });
-  updateHeader();
+  // Déplacer le header sous le carousel dans le DOM, puis le rendre visible et sticky
+  carousel.parentNode.insertBefore(header, carousel.nextSibling);
+  header.classList.add('home-repositioned');
 })();
 </script>
 
