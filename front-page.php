@@ -512,29 +512,29 @@ $collections = [
 
 <script>
 (function() {
-  const reassuranceBar = document.querySelector('.reassurance-bar-sticky');
   const carousel = document.querySelector('.homepage-carousel-fullscreen');
-  if (!reassuranceBar || !carousel) return;
 
-  // Déplacer le bandeau de réassurance juste sous le carousel et le rendre visible
-  carousel.parentNode.insertBefore(reassuranceBar, carousel.nextSibling);
-  reassuranceBar.classList.add('home-repositioned-bar');
-
-  // Menu : transparent par-dessus le carousel, opaque après
-  const header = document.querySelector('.site-header');
-  if (!header) return;
-
-  function updateHeaderState() {
-    const carouselBottom = carousel.offsetTop + carousel.offsetHeight;
-    if (window.scrollY + header.offsetHeight >= carouselBottom) {
-      header.classList.add('is-scrolled');
-    } else {
-      header.classList.remove('is-scrolled');
-    }
+  // 1. Déplacer le bandeau de réassurance juste sous le carousel
+  const reassuranceBar = document.querySelector('.reassurance-bar-sticky');
+  if (reassuranceBar && carousel) {
+    carousel.parentNode.insertBefore(reassuranceBar, carousel.nextSibling);
+    reassuranceBar.classList.add('home-repositioned-bar');
   }
 
-  window.addEventListener('scroll', updateHeaderState, { passive: true });
-  updateHeaderState();
+  // 2. Menu : transparent sur le carousel, opaque après
+  const header = document.querySelector('.site-header');
+  if (header && carousel) {
+    function updateHeaderState() {
+      const carouselBottom = carousel.offsetTop + carousel.offsetHeight;
+      if (window.scrollY + header.offsetHeight >= carouselBottom) {
+        header.classList.add('is-scrolled');
+      } else {
+        header.classList.remove('is-scrolled');
+      }
+    }
+    window.addEventListener('scroll', updateHeaderState, { passive: true });
+    updateHeaderState();
+  }
 })();
 </script>
 

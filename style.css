@@ -827,10 +827,7 @@ select:focus-visible {
   position: sticky;
   top: 0;
   z-index: 10001; /* Au-dessus de tous les autres éléments */
-  background: #fff;
   background: rgba(255, 255, 255, 0.97);
-  -webkit-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  -moz-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
@@ -1081,20 +1078,20 @@ input[type="submit"]:hover,
 .home .site-header {
   position: fixed;
   width: 100%;
-  background: rgba(255, 255, 255, 0.5) !important;
-  box-shadow: none !important;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: none;
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Après le carousel : redevient opaque */
 .home .site-header.is-scrolled {
-  background: rgba(255, 255, 255, 0.95) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .home .site-content {
   padding: 0;
-  overflow-x: clip; /* 'clip' ne crée pas de scroll container, contrairement à 'hidden' – préserve position:sticky */
+  overflow-x: clip; /* 'clip' évite le débordement horizontal sans créer de scroll container */
 }
 
 @media (max-width: 768px) {
