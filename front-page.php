@@ -288,7 +288,9 @@ $collections = [
            style="background-image: url('<?php echo esc_url($product['image']); ?>');">
         <div class="carousel-overlay"></div>
         <div class="carousel-content">
-          <h2 class="carousel-product-name"><?php echo esc_html($product['name']); ?></h2>
+          <h2 class="carousel-product-name">
+            <a href="<?php echo esc_url($product['url']); ?>"><?php echo esc_html($product['name']); ?></a>
+          </h2>
         </div>
       </div>
     <?php endforeach; ?>

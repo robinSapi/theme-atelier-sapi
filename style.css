@@ -6827,6 +6827,11 @@ body.cursor-hover .cursor-dot {
   text-overflow: ellipsis;
 }
 
+.carousel-product-name a {
+  color: inherit;
+  text-decoration: none;
+}
+
 .carousel-product-price {
   font-size: 1.25rem;
   font-weight: 600;
