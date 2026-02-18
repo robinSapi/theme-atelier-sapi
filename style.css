@@ -1079,19 +1079,16 @@ input[type="submit"]:hover,
 
 /* Menu transparent par-dessus le carousel sur la homepage */
 .home .site-header {
-  position: absolute;
+  position: fixed;
   width: 100%;
   background: rgba(255, 255, 255, 0.5) !important;
   box-shadow: none !important;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Après le carousel : redevient fixe et opaque */
+/* Après le carousel : redevient opaque */
 .home .site-header.is-scrolled {
-  position: fixed;
-  background: rgba(255, 255, 255, 0.97) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
 }
 
