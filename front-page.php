@@ -288,21 +288,16 @@ $collections = [
            style="background-image: url('<?php echo esc_url($product['image']); ?>');">
         <div class="carousel-overlay"></div>
         <div class="carousel-content">
-          <h2 class="carousel-product-name">
-            <a href="<?php echo esc_url($product['url']); ?>"><?php echo esc_html($product['name']); ?></a>
-          </h2>
+          <p class="carousel-product-name"><?php echo esc_html($product['name']); ?></p>
         </div>
       </div>
     <?php endforeach; ?>
   </div>
 
-    <!-- Navigation Dots -->
-    <div class="carousel-dots">
-      <?php foreach ($carousel_products as $index => $product) : ?>
-        <button class="carousel-dot<?php echo $index === 0 ? ' active' : ''; ?>"
-                data-slide="<?php echo $index; ?>"
-                aria-label="Aller au produit <?php echo $index + 1; ?>"></button>
-      <?php endforeach; ?>
+    <!-- Hero Text -->
+    <div class="carousel-hero-text">
+      <h1 class="carousel-hero-title">LUMINAIRE EN BOIS — ATELIER SÂPI</h1>
+      <h2 class="carousel-hero-subtitle">Découvrez les luminaires en bois de Robin,<br>fabriqués avec passion à la commande</h2>
     </div>
   </div>
 </section>
