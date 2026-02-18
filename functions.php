@@ -26,6 +26,13 @@ function sapi_maison_setup() {
 }
 add_action('after_setup_theme', 'sapi_maison_setup');
 
+// Précharger Square Peg avant le premier paint (élimine le FOUT / chargement en deux temps)
+add_action('wp_head', function() {
+  $uri = get_template_directory_uri();
+  echo '<link rel="preload" href="' . esc_url($uri) . '/assets/fonts/SquarePeg-Regular.woff2" as="font" type="font/woff2" crossorigin>' . "\n";
+  echo '<link rel="preload" href="' . esc_url($uri) . '/assets/fonts/SquarePeg-Regular-latin-ext.woff2" as="font" type="font/woff2" crossorigin>' . "\n";
+}, 1);
+
 function sapi_maison_enqueue_assets() {
   // Montserrat only from Google Fonts — Square Peg is self-hosted (Safari fix)
   $fonts = [
