@@ -1409,26 +1409,10 @@ input[type="submit"]:hover,
 /* Le bandeau de réassurance est repositionné via JS sous le menu – visible sur la homepage */
 
 /* ========================================
-   HOMEPAGE - Menu sous le carousel (sticky)
+   HOMEPAGE - Bandeau réassurance sous le carousel (sticky)
    ======================================== */
-
-/* Avant repositionnement JS : masquer le header et libérer l'espace en haut */
-.home .site-header:not(.home-repositioned) {
-  visibility: hidden;
-  position: absolute;
-  top: -999px;
-  left: 0;
-  width: 100%;
-}
-
-/* Après repositionnement JS : menu blanc sticky sous le carousel */
-.home .site-header.home-repositioned {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  background: white !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10) !important;
-}
+/* Le header reste en position normale (sticky en haut).
+   Seul le bandeau réassurance est repositionné via JS sous le carousel. */
 
 .reassurance-bar-sticky {
   position: sticky;

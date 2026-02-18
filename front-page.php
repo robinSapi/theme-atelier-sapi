@@ -512,19 +512,12 @@ $collections = [
 
 <script>
 (function() {
-  const header = document.querySelector('.site-header');
   const reassuranceBar = document.querySelector('.reassurance-bar-sticky');
   const carousel = document.querySelector('.homepage-carousel-fullscreen');
-  if (!header || !carousel) return;
+  if (!reassuranceBar || !carousel) return;
 
-  // Déplacer le header sous le carousel dans le DOM, puis le rendre visible et sticky
-  carousel.parentNode.insertBefore(header, carousel.nextSibling);
-  header.classList.add('home-repositioned');
-
-  // Déplacer le bandeau de réassurance juste sous le menu
-  if (reassuranceBar) {
-    header.parentNode.insertBefore(reassuranceBar, header.nextSibling);
-  }
+  // Déplacer le bandeau de réassurance juste sous le carousel
+  carousel.parentNode.insertBefore(reassuranceBar, carousel.nextSibling);
 })();
 </script>
 
