@@ -2607,11 +2607,28 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   padding: 4rem 3rem;
   max-width: 1200px;
   margin: 0 auto 6rem;
-  background: linear-gradient(135deg, #FAF6F0 0%, #F5EFE6 50%, #FAF6F0 100%);
+  background-image: url('https://atelier-sapi.fr/wp-content/uploads/2026/02/Fond-bois.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   position: relative;
   border: 1px solid rgba(147, 125, 104, 0.15);
+}
+
+.product-specs-v2::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 12px;
+  z-index: 0;
+}
+
+.product-specs-v2 > * {
+  position: relative;
+  z-index: 1;
 }
 
 .product-specs-v2 .product-specs-header {
