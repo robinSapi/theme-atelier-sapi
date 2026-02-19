@@ -310,14 +310,20 @@ get_header();
       }
 
       if ($bandeau_url) :
+        // Random caption
+        $captions = [
+          'Photo envoyée par une cliente',
+          'Photo envoyée récemment par un client'
+        ];
+        $random_caption = $captions[array_rand($captions)];
   ?>
   <section class="product-client-photo">
+    <div class="client-photo-header">
+      <span class="section-number">01</span>
+      <h2><?php echo esc_html($random_caption); ?></h2>
+    </div>
     <div class="client-photo-wrapper">
       <img src="<?php echo esc_url($bandeau_url); ?>" alt="Photo client - <?php echo esc_attr(get_the_title()); ?>" class="client-photo-image">
-      <div class="client-photo-header">
-        <span class="section-number">01</span>
-        <h2>Photo client</h2>
-      </div>
     </div>
   </section>
   <?php

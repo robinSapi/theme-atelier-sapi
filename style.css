@@ -2332,18 +2332,39 @@ ul.products.products-carousel-track > li.products-carousel-slide {
    ======================================== */
 
 .product-client-photo {
-  margin: 3rem 0;
-  padding: 0;
+  padding: 4rem 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.client-photo-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.client-photo-header .section-number {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-accent, #937D68);
+  letter-spacing: 0.05em;
+}
+
+.client-photo-header h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-dark, #323232);
+  margin: 0;
 }
 
 .client-photo-wrapper {
   position: relative;
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
   aspect-ratio: 21 / 9;
   overflow: hidden;
   border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .client-photo-image {
@@ -2354,43 +2375,13 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   display: block;
 }
 
-.client-photo-header {
-  position: absolute;
-  bottom: 2rem;
-  left: 2rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.client-photo-header .section-number {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.7);
-  letter-spacing: 0.05em;
-}
-
-.client-photo-header h2 {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: #fff;
-  margin: 0;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
-}
-
 @media (max-width: 768px) {
   .product-client-photo {
-    margin: 2rem 0;
-  }
-
-  .client-photo-wrapper {
-    aspect-ratio: 16 / 9;
-    border-radius: 0;
+    padding: 2rem 1.5rem;
   }
 
   .client-photo-header {
-    bottom: 1.5rem;
-    left: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
   .client-photo-header .section-number {
@@ -2398,7 +2389,12 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   }
 
   .client-photo-header h2 {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
+  }
+
+  .client-photo-wrapper {
+    aspect-ratio: 16 / 9;
+    border-radius: 8px;
   }
 }
 
@@ -2608,6 +2604,8 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   max-width: 1200px;
   margin: 0 auto;
   background: var(--color-white);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .product-specs-v2 .product-specs-header {
