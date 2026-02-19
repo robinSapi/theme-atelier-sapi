@@ -537,9 +537,13 @@ $collections = [
   if (header && carousel) {
     function updateHeaderState() {
       const carouselBottom = carousel.offsetTop + carousel.offsetHeight;
-      if (window.scrollY + header.offsetHeight >= carouselBottom) {
+      const scrollThreshold = 50; // Marge de 50px pour garder la transparence
+
+      // Si on a scrollé au-delà du carousel (avec marge), menu opaque
+      if (window.scrollY >= carouselBottom - scrollThreshold) {
         header.classList.add('is-scrolled');
       } else {
+        // Sinon, menu transparent (on est sur le carousel)
         header.classList.remove('is-scrolled');
       }
     }
