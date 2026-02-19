@@ -142,30 +142,6 @@ get_header();
         if (!empty($gallery_ids) || $main_image_id) {
           $all_images = $main_image_id ? array_merge([$main_image_id], $gallery_ids) : $gallery_ids;
 
-          // Add ACF images to gallery thumbnails
-          if (function_exists('get_field')) {
-            $acf_image_fields = ['ambiance_1', 'ambiance_2', 'bandeau', 'detail_1', 'detail_2'];
-            foreach ($acf_image_fields as $field_name) {
-              $acf_image = get_field($field_name);
-              if ($acf_image) {
-                // Handle different ACF return formats
-                $image_id = null;
-                if (is_array($acf_image) && isset($acf_image['ID'])) {
-                  $image_id = $acf_image['ID'];
-                } elseif (is_numeric($acf_image)) {
-                  $image_id = $acf_image;
-                } elseif (is_string($acf_image) && strpos($acf_image, 'http') === 0) {
-                  // If it's a URL string, try to get the attachment ID from URL
-                  $image_id = attachment_url_to_postid($acf_image);
-                }
-
-                if ($image_id && is_numeric($image_id)) {
-                  $all_images[] = $image_id;
-                }
-              }
-            }
-          }
-
           if (count($all_images) > 1) {
             ?>
             <div class="gallery-thumbnails">
@@ -314,6 +290,46 @@ get_header();
       </div>
     </div>
   </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION PHOTO CLIENT — BANDEAU
+       ═══════════════════════════════════════════════════════════════ -->
+  <?php
+  if (function_exists('get_field')) {
+    $bandeau = get_field('bandeau');
+    if ($bandeau) {
+      $bandeau_url = '';
+      if (is_array($bandeau) && isset($bandeau['url'])) {
+        $bandeau_url = $bandeau['url'];
+      } elseif (is_array($bandeau) && isset($bandeau['ID'])) {
+        $bandeau_url = wp_get_attachment_image_url($bandeau['ID'], 'full');
+      } elseif (is_numeric($bandeau)) {
+        $bandeau_url = wp_get_attachment_image_url($bandeau, 'full');
+      } elseif (is_string($bandeau) && strpos($bandeau, 'http') === 0) {
+        $bandeau_url = $bandeau;
+      }
+
+      if ($bandeau_url) :
+  ?>
+  <section class="product-client-photo">
+    <div class="client-photo-wrapper">
+      <img src="<?php echo esc_url($bandeau_url); ?>" alt="Photo client - <?php echo esc_attr(get_the_title()); ?>" class="client-photo-image">
+      <div class="client-photo-caption">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        <span>Photo envoyée par un client</span>
+      </div>
+    </div>
+  </section>
+  <?php
+      endif;
+    }
+  }
+  ?>
 
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION 02 — POURQUOI CETTE PIÈCE
