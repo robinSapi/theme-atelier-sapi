@@ -13474,23 +13474,23 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* Mobile adjustments */
 @media (max-width: 768px) {
   .product-intro-title {
-    font-size: clamp(1.5rem, 6vw, 2.5rem);
+    font-size: clamp(2.2rem, 10vw, 3.5rem);
   }
 
   .product-intro-title .product-firstname {
     display: block;
-    font-size: 0.65em;
+    font-size: 0.75em;
     white-space: nowrap;
   }
 
   .product-intro-title .product-restname {
     display: block;
-    font-size: 1.4em;
+    font-size: 1.6em;
     white-space: nowrap;
   }
 
   .product-intro-skip {
-    font-size: 0.75rem;
-    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+    padding: 0.8rem 2.5rem;
   }
 }
