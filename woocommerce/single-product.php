@@ -979,52 +979,79 @@ get_header();
 
   if (introScreen) {
     let introRemoved = false;
+    let scrollProgress = 0;
+    const fadeDistance = 200;
+
+    // Bloquer le scroll de la page derrière l'intro
+    document.body.style.overflow = 'hidden';
 
     // Fade in the image after initial black fade
     setTimeout(function() {
       introScreen.classList.add('loaded');
     }, 300);
 
-    // Scroll-based fade out
-    function handleScroll() {
+    // Disparition progressive via wheel (scroll bloqué, on capte juste la molette)
+    function handleWheel(e) {
       if (introRemoved) return;
+      e.preventDefault();
 
-      const scrollY = window.scrollY || window.pageYOffset;
-      const fadeDistance = 200; // Distance to scroll for complete fade
-
-      // Calculate opacity based on scroll (1 at top, 0 at fadeDistance)
-      const opacity = Math.max(0, 1 - (scrollY / fadeDistance));
+      scrollProgress += Math.abs(e.deltaY);
+      const opacity = Math.max(0, 1 - (scrollProgress / fadeDistance));
+      introScreen.style.opacity = opacity;
 
       if (opacity <= 0) {
-        // Completely scrolled, remove intro
-        introScreen.style.opacity = '0';
-        setTimeout(function() {
-          if (!introRemoved) {
-            introScreen.remove();
-            introRemoved = true;
-            window.removeEventListener('scroll', handleScroll);
-          }
-        }, 300);
-      } else {
-        introScreen.style.opacity = opacity;
+        removeIntro();
       }
+    }
+
+    // Disparition via touch (swipe up)
+    let touchStartY = 0;
+    function handleTouchStart(e) {
+      touchStartY = e.touches[0].clientY;
+    }
+    function handleTouchMove(e) {
+      if (introRemoved) return;
+      e.preventDefault();
+
+      const deltaY = touchStartY - e.touches[0].clientY;
+      if (deltaY > 0) {
+        scrollProgress += deltaY;
+        touchStartY = e.touches[0].clientY;
+        const opacity = Math.max(0, 1 - (scrollProgress / fadeDistance));
+        introScreen.style.opacity = opacity;
+
+        if (opacity <= 0) {
+          removeIntro();
+        }
+      }
+    }
+
+    function removeIntro() {
+      if (introRemoved) return;
+      introRemoved = true;
+      introScreen.style.opacity = '0';
+      document.body.style.overflow = '';
+      window.removeEventListener('wheel', handleWheel, { passive: false });
+      introScreen.removeEventListener('touchstart', handleTouchStart);
+      introScreen.removeEventListener('touchmove', handleTouchMove);
+      setTimeout(function() {
+        introScreen.remove();
+      }, 300);
     }
 
     // Click to skip
     introScreen.addEventListener('click', function() {
       if (!introRemoved) {
         this.classList.add('fade-out');
-        introRemoved = true;
-        window.removeEventListener('scroll', handleScroll);
-        setTimeout(function() {
-          introScreen.remove();
-        }, 600);
+        removeIntro();
       }
     });
 
-    // Listen to scroll after image loads
+    // Écouter après le chargement de l'image
     setTimeout(function() {
-      window.addEventListener('scroll', handleScroll);
+      window.addEventListener('wheel', handleWheel, { passive: false });
+      introScreen.addEventListener('touchstart', handleTouchStart, { passive: true });
+      introScreen.addEventListener('touchmove', handleTouchMove, { passive: false });
     }, 800);
   }
 

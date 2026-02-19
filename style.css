@@ -13388,16 +13388,16 @@ body.woocommerce-cart div.woocommerce-wrapper {
   opacity: 1;
 }
 
-/* Dark overlay on top of image */
+/* Dark overlay on top of image — plus fort en bas pour lisibilité du texte */
 .product-intro-screen::before {
   content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0.3) 0%,
-    rgba(0, 0, 0, 0.1) 50%,
-    rgba(0, 0, 0, 0.5) 100%
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0.05) 40%,
+    rgba(0, 0, 0, 0.55) 100%
   );
   z-index: 1;
   opacity: 0;
@@ -13414,7 +13414,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 .product-intro-content {
-  position: relative;
+  position: absolute;
+  bottom: 3rem;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
   z-index: 2;
   text-align: center;
   color: white;
