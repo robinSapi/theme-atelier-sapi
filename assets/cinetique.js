@@ -610,29 +610,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ========================================
-  // PREMIUM: Scroll Progress Indicator
-  // ========================================
-  const progressBar = document.createElement('div');
-  progressBar.className = 'scroll-progress-bar';
-  progressBar.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--color-orange, #E35B24) 0%, var(--bois-dore, #937D68) 100%);
-    width: 0%;
-    z-index: 99999;
-    transition: width 0.1s ease-out;
-  `;
-  document.body.appendChild(progressBar);
-
-  window.addEventListener('scroll', () => {
-    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    const scrolled = (winScroll / height) * 100;
-    progressBar.style.width = scrolled + '%';
-  });
 
   // ========================================
   // PREMIUM: Enhanced Product Image Zoom
