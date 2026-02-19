@@ -4385,18 +4385,23 @@ li.carousel-editorial-slide,
   border-radius: 12px;
   overflow: hidden;
   aspect-ratio: 21 / 9;
+}
+
+.product-mini-card > a::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: inherit;
   background-size: cover;
   background-position: 50% 10%;
   background-repeat: no-repeat;
-  -webkit-transition: -webkit-transform 0.5s var(--ease-expo), -webkit-box-shadow 0.5s var(--ease-expo);
-  transition: transform 0.5s var(--ease-expo), box-shadow 0.5s var(--ease-expo);
+  -webkit-transition: -webkit-transform 600ms cubic-bezier(0.34, 0.61, 0.4, 0.97);
+  transition: transform 600ms cubic-bezier(0.34, 0.61, 0.4, 0.97);
 }
 
-.product-mini-card > a:hover {
-  -webkit-transform: translateY(-8px);
-  transform: translateY(-8px);
-  -webkit-box-shadow: 0 16px 48px rgba(147, 125, 104, 0.2), 0 4px 16px rgba(147, 125, 104, 0.12);
-  box-shadow: 0 16px 48px rgba(147, 125, 104, 0.2), 0 4px 16px rgba(147, 125, 104, 0.12);
+.product-mini-card > a:hover::before {
+  -webkit-transform: scale(1.08);
+  transform: scale(1.08);
 }
 
 .product-mini-card > a::after {
@@ -4405,13 +4410,14 @@ li.carousel-editorial-slide,
   inset: 0;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, transparent 50%);
   pointer-events: none;
+  z-index: 1;
 }
 
 .product-hero-name {
   position: absolute;
   bottom: 1.5rem;
   left: 1.5rem;
-  z-index: 1;
+  z-index: 2;
   font-size: clamp(1.4rem, 3vw, 2rem);
   margin: 0;
   line-height: 1;
