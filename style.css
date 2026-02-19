@@ -4405,7 +4405,7 @@ li.carousel-editorial-slide,
   z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0;
 }
 
 .product-hero-name {
