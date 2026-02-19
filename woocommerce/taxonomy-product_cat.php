@@ -43,7 +43,7 @@ if (function_exists('sapi_maison_breadcrumbs')) {
 </section>
 
 <?php
-// PHASE 2: Mini-carousel "Coups de cœur" (best-sellers, 20vh height)
+// Section "Le coup de cœur de l'Atelier" — best-seller de la catégorie
 $featured_query = new WP_Query([
   'post_type' => 'product',
   'posts_per_page' => 1,
@@ -60,85 +60,53 @@ $featured_query = new WP_Query([
 ]);
 
 if ($featured_query->have_posts()) :
+  $featured_query->the_post();
+  global $product;
+  $product = wc_get_product(get_the_ID());
+  $product_id = $product->get_id();
+  $product_url = get_permalink($product_id);
+
+  // Récupérer l'URL de l'image bandeau ACF pour le background
+  $bandeau_url = '';
+  if (function_exists('get_field')) {
+    $bandeau_image = get_field('bandeau', $product_id);
+    if ($bandeau_image) {
+      if (is_array($bandeau_image) && isset($bandeau_image['url'])) {
+        $bandeau_url = $bandeau_image['url'];
+      } elseif (is_array($bandeau_image) && isset($bandeau_image['ID'])) {
+        $bandeau_url = wp_get_attachment_image_url($bandeau_image['ID'], 'full');
+      } elseif (is_numeric($bandeau_image)) {
+        $bandeau_url = wp_get_attachment_image_url($bandeau_image, 'full');
+      } elseif (is_string($bandeau_image) && strpos($bandeau_image, 'http') === 0) {
+        $bandeau_url = $bandeau_image;
+      }
+    }
+  }
+
+  $product_name = get_the_title();
+  $price = $product->get_price();
+  $price_formatted = wc_price($price);
+  $card_style = $bandeau_url ? 'style="background-image: url(' . esc_url($bandeau_url) . ');"' : '';
 ?>
 <section class="featured-products-mini">
   <div class="featured-products-header">
     <h2><span class="section-num">01</span> Le coup de cœur de l'Atelier</h2>
   </div>
 
-  <div class="products-carousel-mini-wrapper" data-carousel-mini>
-    <div class="products-carousel-mini">
-      <ul class="products-carousel-mini-track products">
-        <?php
-        while ($featured_query->have_posts()) :
-          $featured_query->the_post();
-          global $product;
-          $product = wc_get_product(get_the_ID());
-          $product_id = $product->get_id();
-          $product_url = get_permalink($product_id);
-
-          // Récupérer l'URL de l'image bandeau ACF pour le background
-          $bandeau_url = '';
-          if (function_exists('get_field')) {
-            $bandeau_image = get_field('bandeau', $product_id);
-
-            if ($bandeau_image) {
-              // Gérer différents formats de retour ACF pour obtenir l'URL
-              if (is_array($bandeau_image) && isset($bandeau_image['url'])) {
-                $bandeau_url = $bandeau_image['url'];
-              } elseif (is_array($bandeau_image) && isset($bandeau_image['ID'])) {
-                $bandeau_url = wp_get_attachment_image_url($bandeau_image['ID'], 'full');
-              } elseif (is_numeric($bandeau_image)) {
-                $bandeau_url = wp_get_attachment_image_url($bandeau_image, 'full');
-              } elseif (is_string($bandeau_image) && strpos($bandeau_image, 'http') === 0) {
-                $bandeau_url = $bandeau_image;
-              }
-            }
-          }
-
-          $product_name = get_the_title();
-
-          // Prix simplifié : "À partir de XX€"
-          $price = $product->get_price();
-          $price_formatted = wc_price($price);
-
-          // Style inline pour le background
-          $card_style = $bandeau_url ? 'style="background-image: url(' . esc_url($bandeau_url) . ');"' : '';
-        ?>
-          <li class="product-mini-card" <?php echo $card_style; ?>>
-            <div class="product-hero-content">
-              <h3 class="product-hero-name"><?php echo esc_html($product_name); ?></h3>
-              <div class="product-hero-price">
-                À partir de <?php echo $price_formatted; ?>
-              </div>
-              <a href="<?php echo esc_url($product_url); ?>" class="carousel-btn-discover">
-                Découvrir
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
-                </svg>
-              </a>
-            </div>
-          </li>
-        <?php endwhile; ?>
-      </ul>
-    </div>
-
-    <div class="carousel-mini-nav">
-      <button class="carousel-mini-btn carousel-mini-prev" aria-label="<?php esc_attr_e('Produit précédent', 'theme-sapi-maison'); ?>">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
-      </button>
-      <button class="carousel-mini-btn carousel-mini-next" aria-label="<?php esc_attr_e('Produit suivant', 'theme-sapi-maison'); ?>">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
-      </button>
+  <div class="product-mini-card" <?php echo $card_style; ?>>
+    <div class="product-hero-content">
+      <h3 class="product-hero-name"><?php echo esc_html($product_name); ?></h3>
+      <div class="product-hero-price">
+        À partir de <?php echo $price_formatted; ?>
+      </div>
+      <a href="<?php echo esc_url($product_url); ?>" class="btn-view">
+        Découvrir →
+      </a>
     </div>
   </div>
 </section>
 <?php
-wp_reset_postdata();
+  wp_reset_postdata();
 endif;
 ?>
 
