@@ -142,9 +142,9 @@ get_header();
         if (!empty($gallery_ids) || $main_image_id) {
           $all_images = $main_image_id ? array_merge([$main_image_id], $gallery_ids) : $gallery_ids;
 
-          // Add ACF images (ambiance_1, ambiance_2) to gallery thumbnails
+          // Add ACF images to gallery thumbnails
           if (function_exists('get_field')) {
-            $acf_image_fields = ['ambiance_1', 'ambiance_2'];
+            $acf_image_fields = ['ambiance_1', 'ambiance_2', 'bandeau', 'detail_1', 'detail_2'];
             foreach ($acf_image_fields as $field_name) {
               $acf_image = get_field($field_name);
               if ($acf_image) {
