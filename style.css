@@ -4400,8 +4400,8 @@ li.carousel-editorial-slide,
 }
 
 .product-mini-card > a:hover::before {
-  -webkit-transform: scale(1.08);
-  transform: scale(1.08);
+  -webkit-transform: scale(1.03);
+  transform: scale(1.03);
 }
 
 .product-mini-card > a::after {
