@@ -851,8 +851,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const backToTop = document.createElement('button');
   backToTop.className = 'back-to-top-btn';
   backToTop.innerHTML = `
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-      <polyline points="18 15 12 9 6 15"></polyline>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <!-- Lucide chevron-up icon -->
+      <path d="m18 15-6-6-6 6"/>
     </svg>
   `;
   backToTop.style.cssText = `
