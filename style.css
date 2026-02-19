@@ -4388,6 +4388,15 @@ li.carousel-editorial-slide,
   background-size: cover;
   background-position: 50% 10%;
   background-repeat: no-repeat;
+  -webkit-transition: -webkit-transform 0.5s var(--ease-expo), -webkit-box-shadow 0.5s var(--ease-expo);
+  transition: transform 0.5s var(--ease-expo), box-shadow 0.5s var(--ease-expo);
+}
+
+.product-mini-card > a:hover {
+  -webkit-transform: translateY(-8px);
+  transform: translateY(-8px);
+  -webkit-box-shadow: 0 16px 48px rgba(147, 125, 104, 0.2), 0 4px 16px rgba(147, 125, 104, 0.12);
+  box-shadow: 0 16px 48px rgba(147, 125, 104, 0.2), 0 4px 16px rgba(147, 125, 104, 0.12);
 }
 
 .product-mini-card > a::after {
