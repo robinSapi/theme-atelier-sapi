@@ -2338,10 +2338,12 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 }
 
 .client-photo-header {
-  display: flex;
+  display: flex !important;
   align-items: center;
   gap: 1rem;
   margin-bottom: 2rem;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .client-photo-header .section-number {
@@ -2349,6 +2351,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   font-weight: 600;
   color: var(--color-accent, #937D68);
   letter-spacing: 0.05em;
+  display: inline-block;
 }
 
 .client-photo-header h2 {
@@ -2356,6 +2359,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   font-weight: 600;
   color: var(--color-dark, #323232);
   margin: 0;
+  display: block;
 }
 
 .client-photo-wrapper {
@@ -2602,10 +2606,12 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 .product-specs-v2 {
   padding: 4rem 3rem;
   max-width: 1200px;
-  margin: 0 auto;
-  background: var(--color-white);
+  margin: 0 auto 6rem;
+  background: linear-gradient(135deg, #FAF6F0 0%, #F5EFE6 50%, #FAF6F0 100%);
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  position: relative;
+  border: 1px solid rgba(147, 125, 104, 0.15);
 }
 
 .product-specs-v2 .product-specs-header {
