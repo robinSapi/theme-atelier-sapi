@@ -846,64 +846,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ========================================
-  // PREMIUM: Back to Top Button
-  // ========================================
-  const backToTop = document.createElement('button');
-  backToTop.className = 'back-to-top-btn';
-  backToTop.innerHTML = `
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-      <!-- Lucide chevron-up icon -->
-      <path d="m18 15-6-6-6 6"/>
-    </svg>
-  `;
-  backToTop.style.cssText = `
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--color-orange, #E35B24) 0%, #D14F1C 100%);
-    color: white;
-    border: none;
-    cursor: pointer;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 20px rgba(227, 91, 36, 0.3);
-    z-index: 9999;
-    transition: all 0.3s ease;
-  `;
-
-  document.body.appendChild(backToTop);
-
-  window.addEventListener('scroll', () => {
-    if (window.pageYOffset > 500) {
-      backToTop.style.display = 'flex';
-      backToTop.style.animation = 'fadeIn 0.3s ease';
-    } else {
-      backToTop.style.display = 'none';
-    }
-  });
-
-  backToTop.addEventListener('click', () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  });
-
-  backToTop.addEventListener('mouseenter', function() {
-    this.style.transform = 'translateY(-4px) scale(1.1)';
-    this.style.boxShadow = '0 12px 28px rgba(227, 91, 36, 0.4)';
-  });
-
-  backToTop.addEventListener('mouseleave', function() {
-    this.style.transform = 'translateY(0) scale(1)';
-    this.style.boxShadow = '0 8px 20px rgba(227, 91, 36, 0.3)';
-  });
-
-  // ========================================
   // PREMIUM: Copy to Clipboard for Product URLs
   // ========================================
   const shareButtons = document.querySelectorAll('[data-share="copy-url"]');
@@ -1295,7 +1237,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========================================
   console.log('%cSAPI CINÉTIQUE PREMIUM v2.0', 'font-size: 24px; font-weight: bold; color: #937D68; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);');
   console.log('%cDesign architectural - Interactions avancées Ultra', 'font-size: 12px; color: #8A8A8A;');
-  console.log('%cCore: Scroll Progress | Image Zoom | Form Enhancements | Cart Animations | Back to Top', 'font-size: 10px; color: #585858;');
+  console.log('%cCore: Image Zoom | Form Enhancements | Cart Animations', 'font-size: 10px; color: #585858;');
   console.log('%cPremium: Advanced Parallax | Canvas Particles | Animated Filters | Infinite Scroll', 'font-size: 10px; color: #937D68; font-weight: bold;');
   console.log('%cShortcuts: C (collections) | ESC (close zoom) | Konami Code (surprise)', 'font-size: 10px; color: #585858;');
   console.log('%cUsage: Add data-parallax="0.5" for parallax, data-particles="wood" for canvas particles', 'font-size: 9px; color: #B89968;');
