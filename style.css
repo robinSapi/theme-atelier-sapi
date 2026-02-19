@@ -13492,5 +13492,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   .product-intro-skip {
     font-size: 0.85rem;
     padding: 0.8rem 2.5rem;
+    width: 70vw;
+    text-align: center;
   }
 }
