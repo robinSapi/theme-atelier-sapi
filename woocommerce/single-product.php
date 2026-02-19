@@ -927,6 +927,7 @@ get_header();
   ?>
   <section class="product-related">
     <div class="product-related-header">
+      <span class="section-number">07</span>
       <h2>Vous aimerez aussi</h2>
     </div>
     <div class="products-grid products-grid-cinetique">
