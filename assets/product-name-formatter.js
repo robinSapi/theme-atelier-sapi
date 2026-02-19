@@ -22,6 +22,7 @@
       '.carousel-product-name',          // Carousel homepage
       '.product-name',                   // Grille produits
       '.product-hero-name',              // Mini-carousel catégories
+      '.product-intro-title',            // Intro screen produit
       '.bento-product-featured h3',      // Bento grid homepage
       '.product-name-small',             // Petites cartes bento
       '.quick-view-title'                // Quick view modal
@@ -80,6 +81,7 @@
             '.carousel-product-name',
             '.product-name',
             '.product-hero-name',
+            '.product-intro-title',
             '.bento-product-featured h3',
             '.product-name-small',
             '.quick-view-title'

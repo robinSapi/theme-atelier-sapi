@@ -13425,13 +13425,17 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 .product-intro-title {
-  font-family: var(--font-display, 'Square Peg', cursive);
   font-size: clamp(3rem, 8vw, 6rem);
-  font-weight: 400;
   line-height: 1.2;
   margin: 0 0 1rem 0;
+  color: #fff;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+}
+
+.product-intro-title .product-firstname,
+.product-intro-title .product-restname {
+  color: #fff;
 }
 
 .product-intro-skip {
