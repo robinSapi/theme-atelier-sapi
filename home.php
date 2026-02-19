@@ -106,7 +106,7 @@ get_header();
             <?php if (has_post_thumbnail()) : ?>
               <div class="blog-grid-media">
                 <a href="<?php the_permalink(); ?>">
-                  <?php the_post_thumbnail('medium_large'); ?>
+                  <?php echo wp_get_attachment_image(get_post_thumbnail_id(), 'large'); ?>
                 </a>
               </div>
             <?php endif; ?>
