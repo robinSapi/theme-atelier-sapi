@@ -9,14 +9,22 @@ get_header();
   </div>
 </section>
 
+<!-- Carousel: 5 derniers articles -->
 <section class="blog-carousel-section">
-  <?php if (have_posts()) : ?>
-    <?php
-    // Store all posts for carousel
-    $all_posts = [];
-    while (have_posts()) {
-      the_post();
-      $all_posts[] = [
+  <?php
+  // Query pour les 5 derniers articles (carousel)
+  $carousel_query = new WP_Query([
+    'posts_per_page' => 5,
+    'post_status' => 'publish',
+    'orderby' => 'date',
+    'order' => 'DESC'
+  ]);
+
+  if ($carousel_query->have_posts()) :
+    $carousel_posts = [];
+    while ($carousel_query->have_posts()) {
+      $carousel_query->the_post();
+      $carousel_posts[] = [
         'id' => get_the_ID(),
         'title' => get_the_title(),
         'permalink' => get_permalink(),
@@ -27,8 +35,9 @@ get_header();
         'classes' => get_post_class('blog-card')
       ];
     }
-    $total_posts = count($all_posts);
-    ?>
+    $total_carousel = count($carousel_posts);
+    wp_reset_postdata();
+  ?>
 
     <div class="blog-carousel-container">
       <button class="carousel-nav carousel-prev" aria-label="Article précédent">
@@ -37,9 +46,9 @@ get_header();
         </svg>
       </button>
 
-      <div class="blog-carousel" data-total="<?php echo esc_attr($total_posts); ?>">
+      <div class="blog-carousel" data-total="<?php echo esc_attr($total_carousel); ?>">
         <div class="blog-carousel-track">
-          <?php foreach ($all_posts as $index => $post) : ?>
+          <?php foreach ($carousel_posts as $index => $post) : ?>
             <article class="<?php echo esc_attr(implode(' ', $post['classes'])); ?>" data-index="<?php echo esc_attr($index); ?>">
               <?php if ($post['has_thumbnail'] && $post['thumbnail_id']) : ?>
                 <div class="blog-card-media">
@@ -65,9 +74,73 @@ get_header();
       </button>
     </div>
 
-  <?php else : ?>
-    <p class="no-posts">Aucun article pour le moment.</p>
   <?php endif; ?>
+</section>
+
+<!-- Grille: Tous les autres articles -->
+<section class="blog-grid-section">
+  <div class="blog-grid-container">
+    <?php
+    // Récupérer les IDs des articles du carousel pour les exclure
+    $carousel_ids = array_column($carousel_posts, 'id');
+
+    // Pagination
+    $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
+
+    // Query pour tous les autres articles (grille)
+    $grid_query = new WP_Query([
+      'posts_per_page' => 9,
+      'post_status' => 'publish',
+      'orderby' => 'date',
+      'order' => 'DESC',
+      'post__not_in' => $carousel_ids,
+      'paged' => $paged
+    ]);
+
+    if ($grid_query->have_posts()) :
+    ?>
+      <div class="blog-grid">
+        <?php while ($grid_query->have_posts()) : $grid_query->the_post(); ?>
+          <article <?php post_class('blog-grid-card'); ?>>
+            <?php if (has_post_thumbnail()) : ?>
+              <div class="blog-grid-media">
+                <a href="<?php the_permalink(); ?>">
+                  <?php the_post_thumbnail('medium_large'); ?>
+                </a>
+              </div>
+            <?php endif; ?>
+            <div class="blog-grid-content">
+              <h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+              <p><?php echo wp_trim_words(get_the_excerpt(), 20, '...'); ?></p>
+              <div class="blog-grid-meta">
+                <span class="blog-grid-date"><?php echo get_the_date('d/m/Y'); ?></span>
+                <a href="<?php the_permalink(); ?>" class="blog-grid-link">Lire →</a>
+              </div>
+            </div>
+          </article>
+        <?php endwhile; ?>
+      </div>
+
+      <!-- Pagination -->
+      <?php if ($grid_query->max_num_pages > 1) : ?>
+        <nav class="blog-pagination" role="navigation">
+          <?php
+          echo paginate_links([
+            'total' => $grid_query->max_num_pages,
+            'current' => $paged,
+            'prev_text' => '← Précédent',
+            'next_text' => 'Suivant →',
+            'mid_size' => 2
+          ]);
+          ?>
+        </nav>
+      <?php endif; ?>
+
+    <?php
+    wp_reset_postdata();
+    endif;
+    ?>
+  </div>
 </section>
 
 <?php
