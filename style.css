@@ -6835,7 +6835,7 @@ body.cursor-hover .cursor-dot {
   color: rgba(255, 255, 255, 0.95);
   text-shadow: 0 2px 15px rgba(0, 0, 0, 0.6);
   margin: 0;
-  line-height: 1.05;
+  line-height: 0.5;
 }
 
 /* Nom du produit : petit, bas-droite, non cliquable */
