@@ -1078,15 +1078,15 @@ input[type="submit"]:hover,
 .home .site-header {
   position: fixed;
   width: 100%;
-  background: rgba(255, 255, 255, 0.3);
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: none !important;
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Après le carousel : redevient opaque */
 .home .site-header.is-scrolled {
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
 }
 
 .home .site-content {
