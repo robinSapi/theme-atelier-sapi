@@ -2348,16 +2348,17 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 
 .client-photo-header .section-number {
   font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-accent, #937D68);
-  letter-spacing: 0.05em;
+  font-weight: 900;
+  color: var(--color-wood);
+  letter-spacing: 0.15em;
   display: inline-block;
 }
 
 .client-photo-header h2 {
-  font-size: 2rem;
-  font-weight: 600;
-  color: var(--color-dark, #323232);
+  font-family: var(--font-body);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 900;
+  color: var(--color-dark);
   margin: 0;
   display: block;
 }
@@ -2633,16 +2634,25 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 }
 
 .product-specs-v2 .product-specs-header {
-  text-align: center;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.product-specs-v2 .product-specs-header .section-number {
+  font-size: 0.875rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--color-wood);
 }
 
 .product-specs-v2 .product-specs-header h2 {
-  font-size: clamp(1.75rem, 3vw, 2.25rem);
-  font-weight: 700;
-  margin: 0.5rem 0 0;
+  font-family: var(--font-body);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 900;
+  color: var(--color-dark);
+  margin: 0;
 }
 
 .product-specs-v2 .specs-intro {
@@ -2960,18 +2970,17 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 .product-atelier-content .section-number {
   display: inline-block;
   font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 0.875rem;
+  font-weight: 900;
   letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--bois-dore, #937D68);
+  color: var(--color-wood);
 }
 
 .product-atelier-content h2 {
   font-family: var(--font-body);
   font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 900;
-  color: var(--bois-sombre, #4A3F35);
+  color: var(--color-dark);
   margin: 0 0 0.5rem;
 }
 
