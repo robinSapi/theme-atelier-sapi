@@ -84,8 +84,6 @@ if ($featured_query->have_posts()) :
   }
 
   $product_name = get_the_title();
-  $price = $product->get_price();
-  $price_formatted = wc_price($price);
   $card_style = $bandeau_url ? 'style="background-image: url(' . esc_url($bandeau_url) . ');"' : '';
 ?>
 <section class="featured-products-mini">
@@ -95,12 +93,7 @@ if ($featured_query->have_posts()) :
 
   <div class="product-mini-card">
     <a href="<?php echo esc_url($product_url); ?>" <?php echo $card_style; ?>>
-      <div class="product-hero-content">
-        <h3 class="product-hero-name"><?php echo esc_html($product_name); ?></h3>
-        <div class="product-hero-price">
-          À partir de <?php echo $price_formatted; ?>
-        </div>
-      </div>
+      <span class="product-hero-name"><?php echo esc_html($product_name); ?></span>
     </a>
   </div>
 </section>

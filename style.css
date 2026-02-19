@@ -4398,32 +4398,16 @@ li.carousel-editorial-slide,
   pointer-events: none;
 }
 
-.product-hero-content {
+.product-hero-name {
   position: absolute;
   bottom: 1.5rem;
   left: 1.5rem;
   z-index: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.product-hero-name {
   font-size: clamp(1.4rem, 3vw, 2rem);
   margin: 0;
   line-height: 1;
   color: #fff;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-}
-
-.product-hero-price,
-.product-hero-price *,
-.product-hero-price .woocommerce-Price-amount,
-.product-hero-price .woocommerce-Price-currencySymbol {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #E35B24 !important;
-  margin: 0;
 }
 
 /* =============================================
@@ -4495,7 +4479,7 @@ li.carousel-editorial-slide,
     aspect-ratio: 16 / 9;
   }
 
-  .product-hero-content {
+  .product-hero-name {
     bottom: 1rem;
     left: 1rem;
   }
