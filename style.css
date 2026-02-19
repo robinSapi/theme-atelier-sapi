@@ -6817,7 +6817,7 @@ body.cursor-hover .cursor-dot {
 
 .carousel-hero-title {
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: clamp(1rem, 1.8vw, 1.5rem);
+  font-size: clamp(1rem, 1.8vw, 1.7rem);
   font-weight: 600;
   color: var(--color-white);
   text-transform: uppercase;
@@ -6829,7 +6829,7 @@ body.cursor-hover .cursor-dot {
 
 .carousel-hero-subtitle {
   font-family: var(--font-display, 'Square Peg', cursive);
-  font-size: clamp(2.5rem, 4.5vw, 4.8rem);
+  font-size: clamp(2.5rem, 4.5vw, 5.2rem);
   font-weight: 400;
   font-style: normal;
   color: #FBF6EA;
@@ -6838,16 +6838,16 @@ body.cursor-hover .cursor-dot {
   line-height: 0.8;
 }
 
-/* Mobile : réduire H2 et ajuster H1 pour tenir sur une ligne */
+/* Mobile : ajuster H1 (une ligne) et H2 (deux lignes max) */
 @media (max-width: 768px) {
   .carousel-hero-title {
-    font-size: clamp(0.85rem, 1.8vw, 1.5rem);
+    font-size: clamp(0.95rem, 2vw, 1.7rem);
     letter-spacing: 0.05em;
     white-space: nowrap;
   }
 
   .carousel-hero-subtitle {
-    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
   }
 }
 
