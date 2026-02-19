@@ -4419,12 +4419,12 @@ li.carousel-editorial-slide,
 .product-hero-price {
   font-size: 1.1rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: #E35B24;
   margin: 0;
 }
 
 .product-hero-price .woocommerce-Price-amount {
-  color: rgba(255, 255, 255, 0.9);
+  color: #E35B24;
 }
 
 /* =============================================
