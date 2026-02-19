@@ -93,16 +93,15 @@ if ($featured_query->have_posts()) :
     <h2><span class="section-num">01</span> Le coup de cœur de l'Atelier</h2>
   </div>
 
-  <div class="product-mini-card" <?php echo $card_style; ?>>
-    <div class="product-hero-content">
-      <h3 class="product-hero-name"><?php echo esc_html($product_name); ?></h3>
-      <div class="product-hero-price">
-        À partir de <?php echo $price_formatted; ?>
+  <div class="product-mini-card">
+    <a href="<?php echo esc_url($product_url); ?>" <?php echo $card_style; ?>>
+      <div class="product-hero-content">
+        <h3 class="product-hero-name"><?php echo esc_html($product_name); ?></h3>
+        <div class="product-hero-price">
+          À partir de <?php echo $price_formatted; ?>
+        </div>
       </div>
-      <a href="<?php echo esc_url($product_url); ?>" class="btn-view">
-        Découvrir →
-      </a>
-    </div>
+    </a>
   </div>
 </section>
 <?php
