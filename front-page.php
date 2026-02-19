@@ -260,32 +260,58 @@ if ($featured_query->have_posts()) {
 }
 
 // Collections
-$collections = [
-  [
-    'name' => 'Suspensions',
-    'count' => '12 créations',
-    'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg',
-    'url' => '/categorie-produit/suspension/',
-  ],
-  [
-    'name' => 'Lampadaires',
-    'count' => '8 créations',
-    'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Claudine-bandeau-1.jpg',
-    'url' => '/categorie-produit/lampadaire/',
-  ],
-  [
-    'name' => 'Appliques',
-    'count' => '6 créations',
-    'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Face-allumee-1.jpg',
-    'url' => '/categorie-produit/applique/',
-  ],
-  [
-    'name' => 'À poser',
-    'count' => '5 créations',
-    'image' => 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Charlie-Bandeau-2.jpg',
-    'url' => '/categorie-produit/lampe-a-poser/',
-  ],
+// Collections dynamiques — URLs et images récupérées depuis WooCommerce/ACF
+$collection_slugs = [
+  ['slug' => 'suspensions', 'name' => 'Suspensions'],
+  ['slug' => 'lampadaires', 'name' => 'Lampadaires'],
+  ['slug' => 'appliques',   'name' => 'Appliques'],
+  ['slug' => 'lampeaposer', 'name' => 'À poser'],
 ];
+
+$collections = [];
+foreach ($collection_slugs as $col) {
+  $cat_term = get_term_by('slug', $col['slug'], 'product_cat');
+  if (!$cat_term) continue;
+
+  $cat_url = get_term_link($cat_term);
+  $cat_count = $cat_term->count;
+
+  // Récupérer l'image bandeau ACF du premier produit de la catégorie
+  $col_image = '';
+  $col_query = new WP_Query([
+    'post_type' => 'product',
+    'posts_per_page' => 1,
+    'post_status' => 'publish',
+    'tax_query' => [['taxonomy' => 'product_cat', 'field' => 'slug', 'terms' => $col['slug']]],
+    'orderby' => 'menu_order date',
+    'order' => 'ASC',
+  ]);
+  if ($col_query->have_posts()) {
+    $col_query->the_post();
+    if (function_exists('get_field')) {
+      $bandeau = get_field('bandeau', get_the_ID());
+      if ($bandeau) {
+        if (is_array($bandeau) && isset($bandeau['url'])) {
+          $col_image = $bandeau['url'];
+        } elseif (is_array($bandeau) && isset($bandeau['ID'])) {
+          $col_image = wp_get_attachment_image_url($bandeau['ID'], 'large');
+        } elseif (is_numeric($bandeau)) {
+          $col_image = wp_get_attachment_image_url($bandeau, 'large');
+        } elseif (is_string($bandeau) && strpos($bandeau, 'http') === 0) {
+          $col_image = $bandeau;
+        }
+      }
+    }
+    wp_reset_postdata();
+  }
+
+  $collections[] = [
+    'name' => $col['name'],
+    'count' => $cat_count . ' ' . ($cat_count > 1 ? 'créations' : 'création'),
+    'image' => $col_image,
+    'url' => $cat_url,
+  ];
+}
 ?>
 
 <!-- Custom Cursor (desktop only, hidden on touch devices) -->
