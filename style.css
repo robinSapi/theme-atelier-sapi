@@ -6832,7 +6832,7 @@ body.cursor-hover .cursor-dot {
   font-size: clamp(2.5rem, 4.5vw, 4.8rem);
   font-weight: 400;
   font-style: normal;
-  color: rgba(255, 255, 255, 0.95);
+  color: #FBF6EA;
   text-shadow: 0 2px 15px rgba(0, 0, 0, 0.6);
   margin: 0;
   line-height: 0.8;
@@ -6848,7 +6848,7 @@ body.cursor-hover .cursor-dot {
 }
 
 .carousel-product-name {
-  font-size: 0.75rem; /* Base pour .product-firstname (0.75em) et .product-restname (1.6em) */
+  font-size: 0.9rem; /* Base pour .product-firstname (0.75em) et .product-restname (1.6em) */
   margin: 0;
   color: rgba(255, 255, 255, 0.65);
   /* Pas de font-family ni text-transform : les spans .product-firstname/.product-restname les définissent */
