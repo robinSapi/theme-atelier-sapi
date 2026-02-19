@@ -4411,20 +4411,19 @@ li.carousel-editorial-slide,
 .product-hero-name {
   font-size: clamp(1.4rem, 3vw, 2rem);
   margin: 0;
-  line-height: 1.2;
+  line-height: 1;
   color: #fff;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
-.product-hero-price {
+.product-hero-price,
+.product-hero-price *,
+.product-hero-price .woocommerce-Price-amount,
+.product-hero-price .woocommerce-Price-currencySymbol {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #E35B24;
+  color: #E35B24 !important;
   margin: 0;
-}
-
-.product-hero-price .woocommerce-Price-amount {
-  color: #E35B24;
 }
 
 /* =============================================
