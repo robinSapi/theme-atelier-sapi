@@ -7,14 +7,17 @@
 
 get_header();
 
-// Query products for full-page carousel - one from each category with ambiance_1 field
+// Query products for full-page carousel - two from each category with ambiance_1 field
+// Order: suspension, applique, lampe à poser, lampadaire (x2)
 $carousel_products = [];
 $categories_order = ['suspensions', 'appliques', 'lampeaposer', 'lampadaires'];
 
+// Get 2 products from each category
+$products_by_category = [];
 foreach ($categories_order as $cat_slug) {
   $args = [
     'post_type' => 'product',
-    'posts_per_page' => 1,
+    'posts_per_page' => 2, // Get 2 products instead of 1
     'post_status' => 'publish',
     'tax_query' => [
       [
@@ -29,10 +32,11 @@ foreach ($categories_order as $cat_slug) {
         'compare' => 'EXISTS',
       ],
     ],
-    'orderby' => 'rand', // Random product from category
+    'orderby' => 'rand',
   ];
 
   $query = new WP_Query($args);
+  $products_by_category[$cat_slug] = [];
 
   if ($query->have_posts()) {
     while ($query->have_posts()) {
@@ -62,7 +66,7 @@ foreach ($categories_order as $cat_slug) {
         }
 
         if ($image_url) {
-          $carousel_products[] = [
+          $products_by_category[$cat_slug][] = [
             'id' => get_the_ID(),
             'name' => get_the_title(),
             'price' => $price_display,
@@ -74,6 +78,18 @@ foreach ($categories_order as $cat_slug) {
     }
   }
   wp_reset_postdata();
+}
+
+// Interleave products: suspension, applique, lampe, lampadaire, suspension, applique, lampe, lampadaire
+foreach ($categories_order as $cat_slug) {
+  if (isset($products_by_category[$cat_slug][0])) {
+    $carousel_products[] = $products_by_category[$cat_slug][0];
+  }
+}
+foreach ($categories_order as $cat_slug) {
+  if (isset($products_by_category[$cat_slug][1])) {
+    $carousel_products[] = $products_by_category[$cat_slug][1];
+  }
 }
 
 // Query 2 random products for small bento cards (only from main categories)

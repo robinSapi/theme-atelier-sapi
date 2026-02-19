@@ -1,6 +1,6 @@
 /**
  * Homepage Fullscreen Carousel
- * Auto-rotation toutes les 3 secondes
+ * Auto-rotation toutes les 5 secondes
  */
 
 (function() {
@@ -55,7 +55,7 @@
      */
     function startAutoRotate() {
       stopAutoRotate(); // Clear any existing interval
-      autoRotateInterval = setInterval(nextSlide, 3000); // 3 seconds
+      autoRotateInterval = setInterval(nextSlide, 5000); // 5 seconds
     }
 
     /**
