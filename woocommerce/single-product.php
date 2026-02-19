@@ -141,6 +141,28 @@ get_header();
         // Thumbnails (horizontal)
         if (!empty($gallery_ids) || $main_image_id) {
           $all_images = $main_image_id ? array_merge([$main_image_id], $gallery_ids) : $gallery_ids;
+
+          // Add ACF images (ambiance_1, ambiance_2) to gallery thumbnails
+          if (function_exists('get_field')) {
+            $acf_image_fields = ['ambiance_1', 'ambiance_2'];
+            foreach ($acf_image_fields as $field_name) {
+              $acf_image = get_field($field_name);
+              if ($acf_image) {
+                // Handle different ACF return formats
+                $image_id = null;
+                if (is_array($acf_image) && isset($acf_image['ID'])) {
+                  $image_id = $acf_image['ID'];
+                } elseif (is_numeric($acf_image)) {
+                  $image_id = $acf_image;
+                }
+
+                if ($image_id) {
+                  $all_images[] = $image_id;
+                }
+              }
+            }
+          }
+
           if (count($all_images) > 1) {
             ?>
             <div class="gallery-thumbnails">
