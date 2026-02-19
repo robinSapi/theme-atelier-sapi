@@ -77,15 +77,7 @@
       });
     });
 
-    // Pause on hover (better UX)
-    carousel.addEventListener('mouseenter', stopAutoRotate);
-    carousel.addEventListener('mouseleave', startAutoRotate);
-
-    // Pause on touch/focus (mobile accessibility)
-    carousel.addEventListener('touchstart', stopAutoRotate);
-    carousel.addEventListener('touchend', startAutoRotate);
-
-    // Start auto-rotation
+    // Start auto-rotation (continue même au survol)
     startAutoRotate();
 
     // Cleanup on page unload
