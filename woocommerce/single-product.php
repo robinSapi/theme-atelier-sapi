@@ -835,7 +835,7 @@ get_header();
     </div>
 
     <div class="testimonials-cta">
-      <p>Vous avez ce produit ? <a href="#review_form_wrapper">Partagez votre avis</a></p>
+      <p>Vous avez ce produit ? <a href="https://g.page/r/CQ0YW1uBzOimEAE/review" target="_blank" rel="noopener noreferrer">Partagez votre avis</a></p>
     </div>
     <?php endif; ?>
   </section>
