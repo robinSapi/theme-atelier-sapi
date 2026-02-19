@@ -6847,7 +6847,12 @@ body.cursor-hover .cursor-dot {
   }
 
   .carousel-hero-subtitle {
-    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-size: clamp(1.9rem, 4.5vw, 3.2rem);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 100%;
   }
 }
 
