@@ -536,14 +536,16 @@ $collections = [
   const header = document.querySelector('.site-header');
   if (header && carousel) {
     function updateHeaderState() {
-      const carouselBottom = carousel.offsetTop + carousel.offsetHeight;
+      // getBoundingClientRect() donne la position actuelle par rapport au viewport
+      const carouselRect = carousel.getBoundingClientRect();
+      const carouselBottom = carouselRect.bottom;
       const scrollThreshold = 50; // Marge de 50px pour garder la transparence
 
-      // Si on a scrollé au-delà du carousel (avec marge), menu opaque
-      if (window.scrollY >= carouselBottom - scrollThreshold) {
+      // Si le bas du carousel est au-dessus du seuil, menu opaque
+      // Sinon (carousel encore visible dans le viewport), menu transparent
+      if (carouselBottom < scrollThreshold) {
         header.classList.add('is-scrolled');
       } else {
-        // Sinon, menu transparent (on est sur le carousel)
         header.classList.remove('is-scrolled');
       }
     }
