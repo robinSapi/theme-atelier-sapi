@@ -990,21 +990,21 @@ get_header();
       introScreen.classList.add('loaded');
     }, 300);
 
-    // Disparition progressive via wheel (scroll bloqué, on capte juste la molette)
+    // Glissement vers le haut via wheel
     function handleWheel(e) {
       if (introRemoved) return;
       e.preventDefault();
 
       scrollProgress += Math.abs(e.deltaY);
-      const opacity = Math.max(0, 1 - (scrollProgress / fadeDistance));
-      introScreen.style.opacity = opacity;
+      var progress = Math.min(1, scrollProgress / fadeDistance);
+      introScreen.style.transform = 'translateY(-' + (progress * 100) + 'vh)';
 
-      if (opacity <= 0) {
+      if (progress >= 1) {
         removeIntro();
       }
     }
 
-    // Disparition via touch (swipe up)
+    // Glissement via touch (swipe up)
     let touchStartY = 0;
     function handleTouchStart(e) {
       touchStartY = e.touches[0].clientY;
@@ -1017,10 +1017,10 @@ get_header();
       if (deltaY > 0) {
         scrollProgress += deltaY;
         touchStartY = e.touches[0].clientY;
-        const opacity = Math.max(0, 1 - (scrollProgress / fadeDistance));
-        introScreen.style.opacity = opacity;
+        var progress = Math.min(1, scrollProgress / fadeDistance);
+        introScreen.style.transform = 'translateY(-' + (progress * 100) + 'vh)';
 
-        if (opacity <= 0) {
+        if (progress >= 1) {
           removeIntro();
         }
       }
@@ -1029,20 +1029,20 @@ get_header();
     function removeIntro() {
       if (introRemoved) return;
       introRemoved = true;
-      introScreen.style.opacity = '0';
+      introScreen.style.transform = 'translateY(-100vh)';
       document.body.style.overflow = '';
       window.removeEventListener('wheel', handleWheel, { passive: false });
       introScreen.removeEventListener('touchstart', handleTouchStart);
       introScreen.removeEventListener('touchmove', handleTouchMove);
       setTimeout(function() {
         introScreen.remove();
-      }, 300);
+      }, 400);
     }
 
-    // Click to skip
+    // Click to skip — glisse vers le haut
     introScreen.addEventListener('click', function() {
       if (!introRemoved) {
-        this.classList.add('fade-out');
+        introScreen.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
         removeIntro();
       }
     });
