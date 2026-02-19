@@ -6838,8 +6838,14 @@ body.cursor-hover .cursor-dot {
   line-height: 0.8;
 }
 
-/* Mobile : réduire H2 */
+/* Mobile : réduire H2 et ajuster H1 pour tenir sur une ligne */
 @media (max-width: 768px) {
+  .carousel-hero-title {
+    font-size: clamp(0.85rem, 1.8vw, 1.5rem);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
   .carousel-hero-subtitle {
     font-size: clamp(1.8rem, 4vw, 3rem);
   }
