@@ -1078,14 +1078,14 @@ input[type="submit"]:hover,
 .home .site-header {
   position: fixed;
   width: 100%;
-  background: rgba(255, 255, 255, 0.4) !important;
+  background: rgba(255, 255, 255, 0.35) !important;
   box-shadow: none !important;
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Après le carousel : redevient opaque */
 .home .site-header.is-scrolled {
-  background: rgba(255, 255, 255, 0.9) !important;
+  background: rgba(255, 255, 255, 1) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
 }
 
@@ -6836,6 +6836,13 @@ body.cursor-hover .cursor-dot {
   text-shadow: 0 2px 15px rgba(0, 0, 0, 0.6);
   margin: 0;
   line-height: 0.8;
+}
+
+/* Mobile : réduire H2 */
+@media (max-width: 768px) {
+  .carousel-hero-subtitle {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+  }
 }
 
 /* Nom du produit : petit, bas-droite, non cliquable */
