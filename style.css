@@ -13477,6 +13477,14 @@ body.woocommerce-cart div.woocommerce-wrapper {
     font-size: clamp(2rem, 10vw, 3.5rem);
   }
 
+  .product-intro-title .product-firstname {
+    display: block;
+  }
+
+  .product-intro-title .product-restname {
+    display: block;
+  }
+
   .product-intro-skip {
     font-size: 0.75rem;
     padding: 0.6rem 1.2rem;
