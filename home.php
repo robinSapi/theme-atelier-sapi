@@ -20,8 +20,9 @@ get_header();
     'order' => 'DESC'
   ]);
 
+  $carousel_posts = []; // Initialiser AVANT le if pour éviter les erreurs
+
   if ($carousel_query->have_posts()) :
-    $carousel_posts = [];
     while ($carousel_query->have_posts()) {
       $carousel_query->the_post();
       $carousel_posts[] = [
