@@ -6344,7 +6344,7 @@ li.carousel-editorial-slide,
 .blog-grid-media {
   position: relative;
   width: 100%;
-  padding-bottom: 66.67%; /* 3:2 aspect ratio */
+  aspect-ratio: 3 / 2;
   overflow: hidden;
   background: var(--creme-chaud, #FAF6F0);
 }
@@ -6353,8 +6353,9 @@ li.carousel-editorial-slide,
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
   object-fit: cover;
   transition: transform 0.5s ease;
 }
