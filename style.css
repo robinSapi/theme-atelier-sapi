@@ -6575,11 +6575,14 @@ li.carousel-editorial-slide,
 
 .single-post-featured img {
   width: 100%;
+  max-width: 800px;
   height: auto;
   border-radius: 16px;
   box-shadow:
     0 16px 48px rgba(0, 0, 0, 0.12),
     0 8px 24px rgba(0, 0, 0, 0.08);
+  display: block;
+  margin: 0 auto;
 }
 
 .single-post-content {
@@ -6610,10 +6613,12 @@ li.carousel-editorial-slide,
 }
 
 .single-post-content img {
-  max-width: 100%;
+  max-width: 600px;
+  width: 100%;
   height: auto;
   border-radius: 12px;
-  margin: 2rem 0;
+  margin: 2rem auto;
+  display: block;
 }
 
 .single-post-content a {
