@@ -154,9 +154,12 @@ get_header();
                   $image_id = $acf_image['ID'];
                 } elseif (is_numeric($acf_image)) {
                   $image_id = $acf_image;
+                } elseif (is_string($acf_image) && strpos($acf_image, 'http') === 0) {
+                  // If it's a URL string, try to get the attachment ID from URL
+                  $image_id = attachment_url_to_postid($acf_image);
                 }
 
-                if ($image_id) {
+                if ($image_id && is_numeric($image_id)) {
                   $all_images[] = $image_id;
                 }
               }
@@ -168,7 +171,12 @@ get_header();
             <div class="gallery-thumbnails">
               <?php foreach ($all_images as $index => $image_id) :
                 $thumb_url = wp_get_attachment_image_url($image_id, 'woocommerce_gallery_thumbnail');
-                $full_url = wp_get_attachment_image_url($image_id, 'woocommerce_single');
+                // Use 'full' size for main display to ensure ACF images display properly
+                $full_url = wp_get_attachment_image_url($image_id, 'full');
+                // Fallback to woocommerce_single if full is not available
+                if (!$full_url) {
+                  $full_url = wp_get_attachment_image_url($image_id, 'woocommerce_single');
+                }
                 ?>
                 <button class="gallery-thumb<?php echo $index === 0 ? ' active' : ''; ?>" data-image="<?php echo esc_url($full_url); ?>">
                   <img src="<?php echo esc_url($thumb_url); ?>" alt="">
