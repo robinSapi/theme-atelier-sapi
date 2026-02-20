@@ -287,9 +287,42 @@
     }
   });
 
+  // ========================================
+  // PREMIUM: Cart Illuminate Effect
+  // Warm light wave spreading from the button on add to cart
+  // ========================================
+  let lastAddToCartButton = null;
+
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.single_add_to_cart_button, .add_to_cart_button, .ajax_add_to_cart');
+    if (btn) lastAddToCartButton = btn;
+  }, true);
+
+  function illuminateSite(originElement) {
+    const overlay = document.createElement('div');
+    overlay.className = 'cart-illuminate-overlay';
+
+    if (originElement) {
+      const rect = originElement.getBoundingClientRect();
+      overlay.style.left = (rect.left + rect.width / 2) + 'px';
+      overlay.style.top = (rect.top + rect.height / 2) + 'px';
+    } else {
+      overlay.style.left = '50%';
+      overlay.style.top = '50%';
+    }
+
+    document.body.appendChild(overlay);
+    overlay.addEventListener('animationend', function() {
+      overlay.remove();
+    });
+  }
+
   // Update mini cart on AJAX add to cart
   if (typeof jQuery !== 'undefined') {
     jQuery(document.body).on('added_to_cart', function() {
+      // Illuminate the site with warm light
+      illuminateSite(lastAddToCartButton);
+      lastAddToCartButton = null;
       // Auto-open cart when item added
       openMiniCart();
     });

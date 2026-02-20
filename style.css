@@ -653,6 +653,39 @@ img[loading="lazy"]:not([data-src]) {
   }
 }
 
+/* ========================================
+   PREMIUM: Cart Illuminate Effect
+   "Illumine ton intérieur" — warm light wave on add to cart
+   ======================================== */
+@keyframes illuminateSpread {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.7;
+  }
+  40% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+
+.cart-illuminate-overlay {
+  position: fixed;
+  z-index: 99999;
+  pointer-events: none;
+  width: 200vmax;
+  height: 200vmax;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(227, 91, 36, 0.22) 0%,
+    rgba(237, 168, 72, 0.10) 30%,
+    rgba(254, 253, 251, 0.04) 55%,
+    transparent 75%);
+  animation: illuminateSpread 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
 /* Enhanced focus states for dropdowns */
 .filter-dropdown-toggle:focus-visible,
 .filter-option:focus-visible,
