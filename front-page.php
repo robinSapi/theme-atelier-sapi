@@ -276,31 +276,49 @@ foreach ($collection_slugs as $col) {
   $cat_url = get_term_link($cat_term);
   $cat_count = $cat_term->count;
 
-  // Récupérer l'image bandeau ACF du premier produit de la catégorie
+  // Récupérer l'image d'un produit de la catégorie (bandeau ACF → image à la une)
   $col_image = '';
   $col_query = new WP_Query([
     'post_type' => 'product',
-    'posts_per_page' => 1,
+    'posts_per_page' => 12,
     'post_status' => 'publish',
     'tax_query' => [['taxonomy' => 'product_cat', 'field' => 'slug', 'terms' => $col['slug']]],
     'orderby' => 'menu_order date',
     'order' => 'ASC',
   ]);
   if ($col_query->have_posts()) {
-    $col_query->the_post();
-    if (function_exists('get_field')) {
-      $bandeau = get_field('bandeau', get_the_ID());
-      if ($bandeau) {
-        if (is_array($bandeau) && isset($bandeau['url'])) {
-          $col_image = $bandeau['url'];
-        } elseif (is_array($bandeau) && isset($bandeau['ID'])) {
-          $col_image = wp_get_attachment_image_url($bandeau['ID'], 'large');
-        } elseif (is_numeric($bandeau)) {
-          $col_image = wp_get_attachment_image_url($bandeau, 'large');
-        } elseif (is_string($bandeau) && strpos($bandeau, 'http') === 0) {
-          $col_image = $bandeau;
+    $fallback_id = null;
+    while ($col_query->have_posts()) {
+      $col_query->the_post();
+      $pid = get_the_ID();
+      if (!$fallback_id) $fallback_id = $pid;
+
+      // Priorité au produit "Vincent" pour les suspensions
+      if ($col['slug'] === 'suspensions' && stripos(get_the_title(), 'vincent') !== false) {
+        $fallback_id = $pid;
+      }
+
+      // Essayer le bandeau ACF
+      if (function_exists('get_field')) {
+        $bandeau = get_field('bandeau', $pid);
+        if ($bandeau) {
+          if (is_array($bandeau) && isset($bandeau['url'])) {
+            $col_image = $bandeau['url'];
+          } elseif (is_array($bandeau) && isset($bandeau['ID'])) {
+            $col_image = wp_get_attachment_image_url($bandeau['ID'], 'large');
+          } elseif (is_numeric($bandeau)) {
+            $col_image = wp_get_attachment_image_url($bandeau, 'large');
+          } elseif (is_string($bandeau) && strpos($bandeau, 'http') === 0) {
+            $col_image = $bandeau;
+          }
+          if ($col_image) break;
         }
       }
+    }
+
+    // Fallback : image à la une du produit prioritaire
+    if (empty($col_image) && $fallback_id) {
+      $col_image = get_the_post_thumbnail_url($fallback_id, 'large');
     }
     wp_reset_postdata();
   }
