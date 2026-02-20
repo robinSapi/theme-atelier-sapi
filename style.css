@@ -11300,6 +11300,7 @@ body.woocommerce-cart {
 }
 
 /* Titre section paiement express — doit rester léger comme "Ou continuez ci-dessous" */
+body.woocommerce-checkout .sapi-checkout-outer .wp-block-woocommerce-checkout-express-payment-block .wc-block-components-checkout-step__title,
 body.woocommerce-checkout .sapi-checkout-outer .wp-block-woocommerce-checkout-express-payment-block .wc-block-components-express-payment__title,
 body.woocommerce-checkout .sapi-checkout-outer .wp-block-woocommerce-checkout-express-payment-block .wc-block-components-title {
   font-weight: 400 !important;
