@@ -11107,7 +11107,8 @@ body.woocommerce-order-received {
 }
 
 /* Colonne droite (totaux) — card + sticky
- * WC Blocks fixe width:35% — idem, on soustrait 1rem */
+ * WC Blocks fixe width:35% — idem, on soustrait 1rem
+ * top: 90px = hauteur header simplifié (logo 50px + padding 2×16px) + 8px marge */
 .sapi-cart-outer .wc-block-components-sidebar {
   width: calc(35% - 1rem) !important;
   background: var(--color-white, #fff) !important;
@@ -11116,7 +11117,7 @@ body.woocommerce-order-received {
   padding: 2rem !important;
   box-sizing: border-box !important;
   position: sticky !important;
-  top: 2rem !important;
+  top: 90px !important;
   align-self: flex-start !important;
 }
 
@@ -11275,7 +11276,8 @@ body.woocommerce-cart {
   box-sizing: border-box !important;
 }
 
-/* Colonne droite (récap commande) — sticky */
+/* Colonne droite (récap commande) — sticky
+ * top: 90px = hauteur header simplifié (logo 50px + padding 2×16px) + 8px marge */
 .sapi-checkout-outer .wc-block-components-sidebar {
   width: calc(35% - 1rem) !important;
   background: var(--color-white, #fff) !important;
@@ -11284,7 +11286,7 @@ body.woocommerce-cart {
   padding: 2rem !important;
   box-sizing: border-box !important;
   position: sticky !important;
-  top: 2rem !important;
+  top: 90px !important;
   align-self: flex-start !important;
 }
 
