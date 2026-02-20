@@ -118,15 +118,22 @@ add_action('wp_footer', function () {
   ?>
   <script>
   (function () {
-    function replaceRemoveText() {
+    function replaceCartTexts() {
+      // "Supprimer l'élément" → "Supprimer"
       document.querySelectorAll('.wc-block-cart-item__remove-link').forEach(function (el) {
         if (el.textContent.trim() === "Supprimer l\u2019\u00e9l\u00e9ment") {
           el.textContent = 'Supprimer';
         }
       });
+      // Titre cross-sell → texte personnalisé
+      document.querySelectorAll('.wp-block-heading').forEach(function (el) {
+        if (el.textContent.trim().indexOf('peut vous int') !== -1) {
+          el.textContent = 'Avez-vous d\u00e9j\u00e0 la bonne ampoule\u00a0?';
+        }
+      });
     }
-    replaceRemoveText();
-    new MutationObserver(replaceRemoveText).observe(document.body, { childList: true, subtree: true });
+    replaceCartTexts();
+    new MutationObserver(replaceCartTexts).observe(document.body, { childList: true, subtree: true });
   })();
   </script>
   <?php
@@ -138,13 +145,6 @@ add_filter('woocommerce_short_description', function ($description) {
 });
 add_filter('wc_blocks_product_short_description_character_limit', '__return_false');
 
-// Surcharge de traduction — remplace le texte cross-sell à la source
-add_filter('gettext', function ($translated, $original, $domain) {
-  if ($original === 'You may also like&hellip;' || $original === 'You may also like…') {
-    return 'Avez-vous déjà la bonne ampoule ?';
-  }
-  return $translated;
-}, 10, 3);
 
 add_filter('render_block', function ($content, $block) {
   if ($block['blockName'] === 'woocommerce/cart') {
