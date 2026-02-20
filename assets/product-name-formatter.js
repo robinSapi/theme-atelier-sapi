@@ -25,7 +25,8 @@
       '.product-intro-title',            // Intro screen produit
       '.bento-product-featured h3',      // Bento grid homepage
       '.product-name-small',             // Petites cartes bento
-      '.quick-view-title'                // Quick view modal
+      '.quick-view-title',               // Quick view modal
+      '.wc-block-components-product-name' // Panier + récap commande (WooCommerce Blocks)
     ];
 
     // Pour chaque sélecteur, formater les noms
@@ -84,7 +85,8 @@
             '.product-intro-title',
             '.bento-product-featured h3',
             '.product-name-small',
-            '.quick-view-title'
+            '.quick-view-title',
+            '.wc-block-components-product-name'
           ];
 
           selectors.forEach(selector => {
