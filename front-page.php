@@ -454,26 +454,38 @@ foreach ($collection_slugs as $col) {
   </div>
 </section>
 
-<!-- Collections Grid -->
+<!-- Collections Carousel / Grid -->
 <section class="collections-kinetic">
   <div class="section-header-kinetic">
     <span class="section-num">02</span>
     <h2 class="section-title-kinetic">Collections</h2>
   </div>
 
-  <div class="collections-grid">
-    <?php foreach ($collections as $collection) : ?>
-      <a href="<?php echo esc_url($collection['url']); ?>" class="collection-card">
-        <div class="collection-visual" style="background-image: url('<?php echo esc_url($collection['image']); ?>');"></div>
-        <div class="collection-details">
-          <h3><?php echo esc_html($collection['name']); ?></h3>
-          <div class="collection-meta">
-            <span class="collection-count"><?php echo esc_html($collection['count']); ?></span>
-            <span class="collection-btn">→</span>
+  <div class="collections-carousel-wrapper">
+    <div class="collections-grid">
+      <?php foreach ($collections as $collection) : ?>
+        <a href="<?php echo esc_url($collection['url']); ?>" class="collection-card">
+          <div class="collection-visual" style="background-image: url('<?php echo esc_url($collection['image']); ?>');"></div>
+          <div class="collection-details">
+            <h3><?php echo esc_html($collection['name']); ?></h3>
+            <div class="collection-meta">
+              <span class="collection-count"><?php echo esc_html($collection['count']); ?></span>
+              <span class="collection-btn">→</span>
+            </div>
           </div>
-        </div>
-      </a>
-    <?php endforeach; ?>
+        </a>
+      <?php endforeach; ?>
+    </div>
+
+    <!-- Carousel navigation (visible only when scrollable) -->
+    <div class="collections-carousel-nav" aria-label="Navigation collections">
+      <button class="collections-carousel-btn collections-carousel-prev" aria-label="Collection précédente" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="collections-carousel-btn collections-carousel-next" aria-label="Collection suivante">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
   </div>
 </section>
 

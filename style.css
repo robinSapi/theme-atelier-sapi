@@ -8144,6 +8144,108 @@ transform: translateY(15px);
   transform: translateX(5px);
 }
 
+/* Collections Carousel Wrapper */
+.collections-carousel-wrapper {
+  position: relative;
+}
+
+/* Navigation arrows — hidden on desktop (grid mode) */
+.collections-carousel-nav {
+  display: none;
+}
+
+/* ========================================
+   Collections Carousel — below 1024px
+   ======================================== */
+@media (max-width: 1024px) {
+  .collections-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    gap: 1rem;
+    padding-bottom: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .collections-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .collection-card {
+    flex: 0 0 72%;
+    scroll-snap-align: start;
+    aspect-ratio: 3/4;
+  }
+
+  /* Show carousel nav */
+  .collections-carousel-nav {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.25rem;
+  }
+
+  .collections-carousel-btn {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(147, 125, 104, 0.2);
+    color: var(--color-wood);
+    cursor: pointer;
+    transition: all 400ms cubic-bezier(0.34, 0.61, 0.4, 0.97);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow:
+      0 4px 16px rgba(147, 125, 104, 0.12),
+      0 2px 6px rgba(147, 125, 104, 0.06);
+  }
+
+  /* Organic voluptuous shape — like editorial carousel */
+  .collections-carousel-prev {
+    border-radius: 68% 32% 32% 68% / 33% 47% 53% 67%;
+  }
+
+  .collections-carousel-next {
+    border-radius: 32% 68% 68% 32% / 47% 33% 67% 53%;
+  }
+
+  .collections-carousel-btn:hover:not([disabled]) {
+    background: rgba(255, 255, 255, 1);
+    border: 2px solid var(--color-orange);
+    color: var(--color-orange);
+    transform: scale(1.1);
+    box-shadow:
+      0 8px 24px rgba(147, 125, 104, 0.18),
+      0 4px 10px rgba(147, 125, 104, 0.1);
+  }
+
+  .collections-carousel-btn:active:not([disabled]) {
+    transform: scale(1.05);
+  }
+
+  .collections-carousel-btn[disabled] {
+    opacity: 0.25;
+    cursor: not-allowed;
+  }
+
+  .collections-carousel-btn svg {
+    width: 22px;
+    height: 22px;
+    stroke-width: 2;
+  }
+}
+
+@media (max-width: 600px) {
+  .collection-card {
+    flex: 0 0 82%;
+  }
+}
+
 /* ========================================
    CINÉTIQUE - Newsletter Section
    ======================================== */
