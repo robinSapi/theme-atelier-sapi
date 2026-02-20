@@ -1096,6 +1096,10 @@ get_header();
     const origDimensionsValue = getOrigSpecValue('Dimensions');
     const origPoidsValue      = getOrigSpecValue('Poids');
 
+    // État initial : Dimensions et Poids dépendent du choix de variation
+    updateSpecLabel('Dimensions', 'Faites votre choix');
+    updateSpecLabel('Poids',      'Faites votre choix');
+
     if (variationForm && typeof jQuery !== 'undefined') {
       jQuery(variationForm).on('found_variation', function(event, variation) {
         // Update sticky bar price
@@ -1177,9 +1181,9 @@ get_header();
         }
 
         // Restaurer les valeurs originales
-        if (origBoisValue)       updateSpecLabel('Bois',       origBoisValue);
-        if (origDimensionsValue) updateSpecLabel('Dimensions', origDimensionsValue);
-        updateSpecLabel('Poids', 'N/A');
+        if (origBoisValue) updateSpecLabel('Bois', origBoisValue);
+        updateSpecLabel('Dimensions', 'Faites votre choix');
+        updateSpecLabel('Poids',      'Faites votre choix');
       });
     }
   }
