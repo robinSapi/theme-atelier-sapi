@@ -384,7 +384,7 @@ get_header();
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════
-       SECTION 03 — FICHE TECHNIQUE (Style bōlum)
+       SECTION 03 — FICHE TECHNIQUE (Dynamique via ACF)
        ═══════════════════════════════════════════════════════════════ -->
   <section class="product-specs product-specs-v2">
     <div class="product-specs-header">
@@ -393,304 +393,190 @@ get_header();
       <p class="specs-intro">Toutes les informations pour bien choisir votre luminaire</p>
     </div>
 
-    <!-- Accordion Mobile - Phase 4 Proposal B -->
+    <?php
+    // ── Déterminer la catégorie produit ──
+    $product_cat_slugs = [];
+    if ($product_cats && !is_wp_error($product_cats)) {
+      foreach ($product_cats as $cat) {
+        $product_cat_slugs[] = $cat->slug;
+      }
+    }
+    $is_suspension = in_array('suspensions', $product_cat_slugs);
+    $is_lampadaire = in_array('lampadaires', $product_cat_slugs);
+    $is_lampe_poser = in_array('lampeaposer', $product_cat_slugs) || in_array('lampes-a-poser', $product_cat_slugs);
+    $is_applique = in_array('appliques', $product_cat_slugs) || in_array('appliques-murales', $product_cat_slugs);
+
+    $acf = function_exists('get_field');
+
+    // ── Dimensions (champs existants + WooCommerce) ──
+    $dimensions_str = '';
+    $poids = '';
+    if ($acf) {
+      $dimensions = get_field('dimensions');
+      $hauteur = get_field('hauteur');
+      $largeur = get_field('largeur');
+      $profondeur = get_field('profondeur');
+      $poids = get_field('poids');
+
+      if ($dimensions) {
+        $dimensions_str = $dimensions;
+      } elseif ($hauteur || $largeur || $profondeur) {
+        $dim_parts = [];
+        if ($largeur) $dim_parts[] = 'L ' . $largeur;
+        if ($profondeur) $dim_parts[] = 'P ' . $profondeur;
+        if ($hauteur) $dim_parts[] = 'H ' . $hauteur;
+        $dimensions_str = implode(' × ', $dim_parts);
+      }
+    }
+    if (!$dimensions_str && $product) {
+      $wc_dims = wc_format_dimensions($product->get_dimensions(false));
+      if ($wc_dims && $wc_dims !== 'N/A') {
+        $dimensions_str = $wc_dims;
+      }
+    }
+    if (!$poids) {
+      $poids = $product && $product->get_weight() ? $product->get_weight() . ' kg' : '';
+    }
+
+    // ── Champs ACF communs (avec fallbacks) ──
+    $culot             = ($acf ? get_field('culot') : '')             ?: 'E27';
+    $ampoule_reco      = ($acf ? get_field('ampoule_recommandee') : '') ?: 'LED filament 4-6W (2700K)';
+    $ampoule_incluse   = ($acf ? get_field('ampoule_incluse') : '')  ?: 'Non (disponible en option)';
+    $materiau_structure = ($acf ? get_field('materiau_structure') : '') ?: '100% bois';
+    $finition          = ($acf ? get_field('finition') : '')         ?: 'Contreplaqué poncé';
+    $assemblage        = ($acf ? get_field('assemblage') : '')       ?: 'Notice et tuto vidéo';
+    $difficulte        = ($acf ? get_field('installation_difficulte') : '') ?: 'Facile (15-30 min)';
+    $outils_requis     = ($acf ? get_field('assemblage_outils') : '') ?: 'Aucun';
+    $entretien         = ($acf ? get_field('entretien') : '')        ?: 'Chiffon sec ou plumeau';
+
+    // ── Champs ACF par catégorie (pas de fallback, affichés seulement si remplis) ──
+    $longueur_cable       = $acf ? get_field('longueur_cable') : '';
+    $materiau_cable       = $acf ? get_field('materiau_cable') : '';
+    $compatible_dcl       = $acf ? get_field('compatible_dcl') : '';
+    $compatible_variateur = $acf ? get_field('compatible_variateur') : '';
+    $rosace               = $acf ? get_field('rosace') : '';
+    $hauteur_totale       = $acf ? get_field('hauteur_totale') : '';
+    $hauteur_ampoule_ft   = $acf ? get_field('hauteur_ampoule') : '';
+    $interrupteur         = $acf ? get_field('interrupteur') : '';
+    $fixation_murale      = $acf ? get_field('fixation_murale') : '';
+    $type_connexion       = $acf ? get_field('type_connexion') : '';
+
+    // ── Construire les 4 sections de specs ──
+
+    // Section 1 : Dimensions & Produit
+    $specs_dimensions = [];
+    $specs_dimensions[] = ['label' => 'Dimensions', 'value' => $dimensions_str ?: 'Voir variations'];
+    if ($poids) {
+      $specs_dimensions[] = ['label' => 'Poids', 'value' => $poids];
+    }
+    if ($is_lampadaire && $hauteur_totale) {
+      $specs_dimensions[] = ['label' => 'Hauteur totale', 'value' => $hauteur_totale];
+    }
+    if ($is_lampadaire && $hauteur_ampoule_ft) {
+      $specs_dimensions[] = ['label' => 'Hauteur ampoule', 'value' => $hauteur_ampoule_ft];
+    }
+    if ($longueur_cable) {
+      $specs_dimensions[] = ['label' => 'Longueur câble', 'value' => $longueur_cable];
+    }
+    if ($is_suspension && $rosace) {
+      $specs_dimensions[] = ['label' => 'Rosace', 'value' => $rosace];
+    }
+    if ($is_applique && $fixation_murale) {
+      $specs_dimensions[] = ['label' => 'Fixation murale', 'value' => $fixation_murale];
+    }
+    if ($is_applique && $type_connexion) {
+      $specs_dimensions[] = ['label' => 'Connexion électrique', 'value' => $type_connexion];
+    }
+
+    // Section 2 : Éclairage
+    $specs_eclairage = [];
+    $specs_eclairage[] = ['label' => 'Culot', 'value' => $culot];
+    $specs_eclairage[] = ['label' => 'Ampoule recommandée', 'value' => $ampoule_reco];
+    $specs_eclairage[] = ['label' => 'Ampoule incluse', 'value' => $ampoule_incluse];
+    if ($compatible_variateur) {
+      $specs_eclairage[] = ['label' => 'Compatible variateur', 'value' => $compatible_variateur];
+    }
+    if ($compatible_dcl) {
+      $specs_eclairage[] = ['label' => 'Compatible DCL', 'value' => $compatible_dcl];
+    }
+
+    // Section 3 : Matériaux
+    $specs_materiaux = [];
+    $specs_materiaux[] = ['label' => 'Structure', 'value' => $materiau_structure];
+    $specs_materiaux[] = ['label' => 'Finition', 'value' => $finition];
+    if ($materiau_cable) {
+      $specs_materiaux[] = ['label' => 'Câble', 'value' => $materiau_cable];
+    }
+
+    // Section 4 : Installation
+    $specs_installation = [];
+    $specs_installation[] = ['label' => 'Assemblage', 'value' => $assemblage];
+    $specs_installation[] = ['label' => 'Difficulté', 'value' => $difficulte];
+    $specs_installation[] = ['label' => 'Outils requis', 'value' => $outils_requis];
+    $specs_installation[] = ['label' => 'Entretien', 'value' => $entretien];
+    if ($interrupteur) {
+      $specs_installation[] = ['label' => 'Interrupteur', 'value' => $interrupteur];
+    }
+
+    // SVG icons
+    $icon_dimensions   = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>';
+    $icon_eclairage    = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>';
+    $icon_materiaux    = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>';
+    $icon_installation = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>';
+
+    $spec_sections = [
+      ['title' => 'Dimensions',   'icon' => $icon_dimensions,   'items' => $specs_dimensions],
+      ['title' => 'Éclairage',    'icon' => $icon_eclairage,    'items' => $specs_eclairage],
+      ['title' => 'Matériaux',    'icon' => $icon_materiaux,    'items' => $specs_materiaux],
+      ['title' => 'Installation', 'icon' => $icon_installation, 'items' => $specs_installation],
+    ];
+    ?>
+
+    <!-- Accordion Mobile -->
     <div class="product-specs-accordion">
-      <?php
-      // Get dimensions and weight (same logic as grid)
-      $dimensions_str = '';
-      $poids = '';
-      if (function_exists('get_field')) {
-        $dimensions = get_field('dimensions');
-        $hauteur = get_field('hauteur');
-        $largeur = get_field('largeur');
-        $profondeur = get_field('profondeur');
-        $poids = get_field('poids');
-
-        if ($dimensions) {
-          $dimensions_str = $dimensions;
-        } elseif ($hauteur || $largeur || $profondeur) {
-          $dim_parts = [];
-          if ($largeur) $dim_parts[] = 'L ' . $largeur;
-          if ($profondeur) $dim_parts[] = 'P ' . $profondeur;
-          if ($hauteur) $dim_parts[] = 'H ' . $hauteur;
-          $dimensions_str = implode(' × ', $dim_parts);
-        }
-      }
-
-      if (!$dimensions_str && $product) {
-        $wc_dims = wc_format_dimensions($product->get_dimensions(false));
-        if ($wc_dims && $wc_dims !== 'N/A') {
-          $dimensions_str = $wc_dims;
-        }
-      }
-
-      if (!isset($poids) || !$poids) {
-        $poids = $product && $product->get_weight() ? $product->get_weight() . ' kg' : null;
-      }
-      ?>
-
-      <details class="specs-accordion-item">
-        <summary class="specs-accordion-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-          </svg>
-          <span>Dimensions</span>
-          <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </summary>
-        <div class="specs-accordion-content">
-          <div class="spec-item">
-            <span class="spec-label">Dimensions</span>
-            <span class="spec-value"><?php echo esc_html($dimensions_str ?: 'Voir variations'); ?></span>
+      <?php foreach ($spec_sections as $section) : ?>
+        <?php if (!empty($section['items'])) : ?>
+        <details class="specs-accordion-item">
+          <summary class="specs-accordion-title">
+            <?php echo $section['icon']; ?>
+            <span><?php echo esc_html($section['title']); ?></span>
+            <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </summary>
+          <div class="specs-accordion-content">
+            <?php foreach ($section['items'] as $item) : ?>
+            <div class="spec-item">
+              <span class="spec-label"><?php echo esc_html($item['label']); ?></span>
+              <span class="spec-value"><?php echo esc_html($item['value']); ?></span>
+            </div>
+            <?php endforeach; ?>
           </div>
-          <?php if ($poids) : ?>
-          <div class="spec-item">
-            <span class="spec-label">Poids</span>
-            <span class="spec-value"><?php echo esc_html($poids); ?></span>
-          </div>
-          <?php endif; ?>
-          <div class="spec-item">
-            <span class="spec-label">Longueur câble</span>
-            <span class="spec-value">90 cm (ajustable)</span>
-          </div>
-        </div>
-      </details>
-
-      <details class="specs-accordion-item">
-        <summary class="specs-accordion-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 18h6"/><path d="M10 22h4"/>
-            <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>
-          </svg>
-          <span>Éclairage</span>
-          <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </summary>
-        <div class="specs-accordion-content">
-          <div class="spec-item">
-            <span class="spec-label">Culot</span>
-            <span class="spec-value">E27</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Ampoule recommandée</span>
-            <span class="spec-value">LED filament 4-6W (2700K)</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Compatible variateur</span>
-            <span class="spec-value">Oui, avec ampoule dimmable</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Ampoule incluse</span>
-            <span class="spec-value">Non (disponible en option)</span>
-          </div>
-        </div>
-      </details>
-
-      <details class="specs-accordion-item">
-        <summary class="specs-accordion-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-          </svg>
-          <span>Matériaux</span>
-          <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </summary>
-        <div class="specs-accordion-content">
-          <div class="spec-item">
-            <span class="spec-label">Structure</span>
-            <span class="spec-value">Peuplier français PEFC</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Finition</span>
-            <span class="spec-value">Bois naturel non traité</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Câble</span>
-            <span class="spec-value">Textile noir tressé</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Pavillon</span>
-            <span class="spec-value">Métal noir mat</span>
-          </div>
-        </div>
-      </details>
-
-      <details class="specs-accordion-item">
-        <summary class="specs-accordion-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-          </svg>
-          <span>Installation</span>
-          <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </summary>
-        <div class="specs-accordion-content">
-          <div class="spec-item">
-            <span class="spec-label">Montage</span>
-            <span class="spec-value">Notice illustrée incluse</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Difficulté</span>
-            <span class="spec-value">Facile (15-30 min)</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Outils requis</span>
-            <span class="spec-value">Tournevis (fourni)</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Entretien</span>
-            <span class="spec-value">Chiffon sec</span>
-          </div>
-        </div>
-      </details>
+        </details>
+        <?php endif; ?>
+      <?php endforeach; ?>
     </div>
 
+    <!-- Grid Desktop -->
     <div class="product-specs-grid">
-      <!-- Colonne 1: Dimensions & Poids -->
-      <div class="specs-column">
-        <h3 class="specs-column-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-          </svg>
-          Dimensions
-        </h3>
-        <div class="specs-list">
-          <?php
-          $dimensions_str = '';
-          if (function_exists('get_field')) {
-            $dimensions = get_field('dimensions');
-            $hauteur = get_field('hauteur');
-            $largeur = get_field('largeur');
-            $profondeur = get_field('profondeur');
-            $poids = get_field('poids');
-
-            if ($dimensions) {
-              $dimensions_str = $dimensions;
-            } elseif ($hauteur || $largeur || $profondeur) {
-              $dim_parts = [];
-              if ($largeur) $dim_parts[] = 'L ' . $largeur;
-              if ($profondeur) $dim_parts[] = 'P ' . $profondeur;
-              if ($hauteur) $dim_parts[] = 'H ' . $hauteur;
-              $dimensions_str = implode(' × ', $dim_parts);
-            }
-          }
-
-          if (!$dimensions_str && $product) {
-            $wc_dims = wc_format_dimensions($product->get_dimensions(false));
-            if ($wc_dims && $wc_dims !== 'N/A') {
-              $dimensions_str = $wc_dims;
-            }
-          }
-
-          if (!isset($poids) || !$poids) {
-            $poids = $product && $product->get_weight() ? $product->get_weight() . ' kg' : null;
-          }
-          ?>
-          <div class="spec-item">
-            <span class="spec-label">Dimensions</span>
-            <span class="spec-value"><?php echo esc_html($dimensions_str ?: 'Voir variations'); ?></span>
-          </div>
-          <?php if ($poids) : ?>
-          <div class="spec-item">
-            <span class="spec-label">Poids</span>
-            <span class="spec-value"><?php echo esc_html($poids); ?></span>
-          </div>
-          <?php endif; ?>
-          <div class="spec-item">
-            <span class="spec-label">Longueur câble</span>
-            <span class="spec-value">90 cm (ajustable)</span>
+      <?php foreach ($spec_sections as $section) : ?>
+        <?php if (!empty($section['items'])) : ?>
+        <div class="specs-column">
+          <h3 class="specs-column-title">
+            <?php echo $section['icon']; ?>
+            <?php echo esc_html($section['title']); ?>
+          </h3>
+          <div class="specs-list">
+            <?php foreach ($section['items'] as $item) : ?>
+            <div class="spec-item">
+              <span class="spec-label"><?php echo esc_html($item['label']); ?></span>
+              <span class="spec-value"><?php echo esc_html($item['value']); ?></span>
+            </div>
+            <?php endforeach; ?>
           </div>
         </div>
-      </div>
-
-      <!-- Colonne 2: Éclairage -->
-      <div class="specs-column">
-        <h3 class="specs-column-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 18h6"/><path d="M10 22h4"/>
-            <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>
-          </svg>
-          Éclairage
-        </h3>
-        <div class="specs-list">
-          <div class="spec-item">
-            <span class="spec-label">Culot</span>
-            <span class="spec-value">E27</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Ampoule recommandée</span>
-            <span class="spec-value">LED filament 4-6W (2700K)</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Compatible variateur</span>
-            <span class="spec-value">Oui, avec ampoule dimmable</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Ampoule incluse</span>
-            <span class="spec-value">Non (disponible en option)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Colonne 3: Matériaux -->
-      <div class="specs-column">
-        <h3 class="specs-column-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-          </svg>
-          Matériaux
-        </h3>
-        <div class="specs-list">
-          <div class="spec-item">
-            <span class="spec-label">Structure</span>
-            <span class="spec-value">Peuplier français PEFC</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Finition</span>
-            <span class="spec-value">Bois naturel non traité</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Câble</span>
-            <span class="spec-value">Textile noir tressé</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Pavillon</span>
-            <span class="spec-value">Métal noir mat</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Colonne 4: Installation -->
-      <div class="specs-column">
-        <h3 class="specs-column-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-          </svg>
-          Installation
-        </h3>
-        <div class="specs-list">
-          <div class="spec-item">
-            <span class="spec-label">Montage</span>
-            <span class="spec-value">Notice illustrée incluse</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Difficulté</span>
-            <span class="spec-value">Facile (15-30 min)</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Outils requis</span>
-            <span class="spec-value">Tournevis (fourni)</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Entretien</span>
-            <span class="spec-value">Chiffon sec</span>
-          </div>
-        </div>
-      </div>
+        <?php endif; ?>
+      <?php endforeach; ?>
     </div>
 
     <!-- Badges certifications -->

@@ -1,0 +1,26 @@
+Groupe;Règle de localisation;Champ;Clé ACF;Type;Valeur par défaut
+Fiche Technique - Commun;Tous les produits;Culot;culot;Texte;E27
+Fiche Technique - Commun;Tous les produits;Ampoule recommandée;ampoule_recommandee;Texte;LED filament 4-6W (2700K)
+Fiche Technique - Commun;Tous les produits;Ampoule incluse;ampoule_incluse;Texte;Non (disponible en option)
+Fiche Technique - Commun;Tous les produits;Structure;materiau_structure;Texte;100% bois
+Fiche Technique - Commun;Tous les produits;Finition;finition;Texte;Contreplaqué poncé
+Fiche Technique - Commun;Tous les produits;Assemblage;assemblage;Texte;Notice et tuto vidéo
+Fiche Technique - Commun;Tous les produits;Difficulté;installation_difficulte;Texte;Facile (15-30 min)
+Fiche Technique - Commun;Tous les produits;Outils requis pour l’assemblage;assemblage_outils;Texte;Aucun
+Fiche Technique - Commun;Tous les produits;Entretien;entretien;Texte;Chiffon sec ou plumeau
+Fiche Technique - Suspensions;Catégorie = suspensions;Longueur câble;longueur_cable;Texte;90 cm (maximum - ajustable)
+Fiche Technique - Suspensions;Catégorie = suspensions;Câble;materiau_cable;Texte;Textile noir tressé
+Fiche Technique - Suspensions;Catégorie = suspensions;Compatible DCL;compatible_dcl;Texte;Oui
+Fiche Technique - Suspensions;Catégorie = suspensions;Compatible variateur;compatible_variateur;Texte;Oui avec ampoule dimmable
+Fiche Technique - Suspensions;Catégorie = suspensions;Rosace;rosace;Texte;Ronde Ø 10 cm
+Fiche Technique - Lampadaires;Catégorie = lampadaires;Hauteur totale;hauteur_totale;Texte;180 cm
+Fiche Technique - Lampadaires;Catégorie = lampadaires;Hauteur ampoule;hauteur_ampoule;Texte;150 cm
+Fiche Technique - Lampadaires;Catégorie = lampadaires;Longueur câble;longueur_cable;Texte;180 cm
+Fiche Technique - Lampadaires;Catégorie = lampadaires;Interrupteur;interrupteur;Texte;Interrupteur pédale
+Fiche Technique - Lampes à poser;Catégorie = lampeaposer;Longueur câble;longueur_cable;Texte;180 cm
+Fiche Technique - Lampes à poser;Catégorie = lampeaposer;Câble;materiau_cable;Texte;Textile noir tressé
+Fiche Technique - Lampes à poser;Catégorie = lampeaposer;Interrupteur;interrupteur;Texte;Oui, sur le câble
+Fiche Technique - Appliques;Catégorie = appliques;Fixation murale;fixation_murale;Texte;Vis + cheville (fournis)
+Fiche Technique - Appliques;Catégorie = appliques;Connexion électrique;type_connexion;Texte;Directe sur domino
+Fiche Technique - Appliques;Catégorie = appliques;Compatible DCL;compatible_dcl;Texte;Oui
+Fiche Technique - Appliques;Catégorie = appliques;Compatible variateur;compatible_variateur;Texte;Oui avec ampoule dimmable
