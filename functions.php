@@ -117,6 +117,9 @@ add_filter('render_block', function ($content, $block) {
     $content = str_replace('Ça peut vous intéresser…', 'Avez vous déjà la bonne ampoule ?', $content);
     return '<div class="sapi-cart-outer">' . $content . '</div>';
   }
+  if ($block['blockName'] === 'woocommerce/checkout') {
+    return '<div class="sapi-checkout-outer">' . $content . '</div>';
+  }
   return $content;
 }, 10, 2);
 
