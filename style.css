@@ -11153,7 +11153,7 @@ body.woocommerce-checkout .sapi-checkout-outer h2,
 body.woocommerce-checkout .sapi-checkout-outer .wp-block-heading,
 body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-checkout-step__title,
 body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
-  font-weight: 300 !important;
+  font-weight: 400 !important;
 }
 
 /* Images produits arrondies */
@@ -11297,7 +11297,7 @@ body.woocommerce-cart {
 .sapi-checkout-outer .wp-block-woocommerce-checkout-express-payment-block .wc-block-components-express-payment__title {
   font-family: var(--font-body) !important;
   font-size: 1rem !important;
-  font-weight: 300 !important;
+  font-weight: 400 !important;
   color: var(--color-dark) !important;
 }
 
