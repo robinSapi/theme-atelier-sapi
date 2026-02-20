@@ -8070,7 +8070,7 @@ transform: translateY(15px);
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   gap: 1.5rem;
-  padding: 1rem 3rem 3.5rem 3rem;
+  padding: 1rem 0 3.5rem 0;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
@@ -8089,6 +8089,14 @@ transform: translateY(15px);
   cursor: pointer;
   scroll-snap-align: start;
   transition: transform 0.5s var(--ease-expo);
+}
+
+.collection-card:first-child {
+  margin-left: 3rem;
+}
+
+.collection-card:last-child {
+  margin-right: 3rem;
 }
 
 .collection-card:hover {
@@ -8233,6 +8241,14 @@ transform: translateY(15px);
 @media (max-width: 1024px) {
   .collection-card {
     flex: 0 0 72%;
+  }
+
+  .collection-card:first-child {
+    margin-left: 1rem;
+  }
+
+  .collection-card:last-child {
+    margin-right: 1rem;
   }
 }
 
