@@ -10974,6 +10974,73 @@ transform: translateY(15px);
 }
 
 /* ========================================
+   WOOCOMMERCE BLOCKS - Cart Page Sâpi
+   .sapi-cart-outer = wrapper PHP injecté via render_block
+   Résiste au remplacement DOM de React car il est AUTOUR du bloc WC.
+   ======================================== */
+
+/*
+ * LAYOUT DEUX COLONNES + SIDEBAR STICKY
+ * .wc-block-components-sidebar-layout = flex container créé par React
+ * Nécessite align-items: flex-start sinon la sidebar étire sa hauteur
+ * et position:sticky n'a aucun effet (élément déjà plein-hauteur).
+ */
+.sapi-cart-outer .wc-block-components-sidebar-layout {
+  align-items: flex-start !important;
+}
+
+.sapi-cart-outer .wc-block-components-sidebar {
+  position: sticky !important;
+  top: 2rem !important;
+  align-self: flex-start !important;
+}
+
+/* Mobile : désactive sticky, passe en colonne */
+@media (max-width: 768px) {
+  .sapi-cart-outer .wc-block-components-sidebar {
+    position: static !important;
+  }
+}
+
+/* Bouton "Passer commande" — orange CTA */
+.sapi-cart-outer .wc-block-cart__submit-button {
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%) !important;
+  color: #fff !important;
+  border-radius: 12px !important;
+  font-family: var(--font-body) !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25) !important;
+  border: none !important;
+}
+
+/* Images produits arrondies */
+.sapi-cart-outer .wc-block-cart-item__image img,
+.sapi-cart-outer .wc-block-components-product-image img {
+  border-radius: 12px !important;
+  object-fit: cover !important;
+}
+
+/* Noms produits */
+.sapi-cart-outer .wc-block-components-product-name {
+  font-family: var(--font-body) !important;
+  font-weight: 700 !important;
+  color: var(--color-dark) !important;
+}
+
+/* Prix */
+.sapi-cart-outer .wc-block-components-product-price {
+  font-weight: 700 !important;
+  color: var(--color-wood) !important;
+}
+
+/* Fond page */
+body.woocommerce-cart {
+  background-color: var(--color-cream);
+}
+
+/* ========================================
    WOOCOMMERCE - Cart Page CINÉTIQUE
    ======================================== */
 

@@ -89,6 +89,14 @@ function sapi_maison_enqueue_assets() {
     }
   }
 
+  // Cart page JS — enqueued when is_cart() returns true
+  if (class_exists('WooCommerce') && is_cart()) {
+    $cart_js_path = get_template_directory() . '/assets/cart-page.js';
+    if (file_exists($cart_js_path)) {
+      wp_enqueue_script('sapi-maison-cart-page', get_template_directory_uri() . '/assets/cart-page.js', [], filemtime($cart_js_path), true);
+    }
+  }
+
   // Blog Timeline & Carousel - only on blog home page
   if (is_home()) {
     $blog_timeline_js_path = get_template_directory() . '/assets/blog-timeline.js';
@@ -98,6 +106,18 @@ function sapi_maison_enqueue_assets() {
   }
 }
 add_action('wp_enqueue_scripts', 'sapi_maison_enqueue_assets');
+
+/**
+ * render_block — Enveloppe le bloc panier WooCommerce dans .sapi-cart-outer
+ * Ce wrapper est injecté côté PHP AVANT React et ne sera jamais touché par React.
+ * Il permet de scoper notre CSS avec une spécificité garantie.
+ */
+add_filter('render_block', function ($content, $block) {
+  if ($block['blockName'] === 'woocommerce/cart') {
+    return '<div class="sapi-cart-outer">' . $content . '</div>';
+  }
+  return $content;
+}, 10, 2);
 
 // Preload self-hosted Square Peg font (Safari fix — Google Fonts fails on some Safari versions)
 function sapi_preload_square_peg() {
