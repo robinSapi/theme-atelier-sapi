@@ -11168,6 +11168,8 @@ body.woocommerce-checkout .sapi-checkout-outer [id*="express"] h2 {
 .sapi-cart-outer .wc-block-components-product-image img {
   border-radius: 12px !important;
   object-fit: cover !important;
+  width: 120px !important;
+  height: 120px !important;
 }
 
 /* Noms produits */
