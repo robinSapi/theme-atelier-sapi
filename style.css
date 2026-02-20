@@ -11146,6 +11146,12 @@ body.woocommerce-order-received {
   border: none !important;
 }
 
+/* H2 allégés sur panier et checkout */
+.sapi-cart-outer h2,
+.sapi-checkout-outer h2 {
+  font-weight: 400 !important;
+}
+
 /* Images produits arrondies */
 .sapi-cart-outer .wc-block-cart-item__image img,
 .sapi-cart-outer .wc-block-components-product-image img {
