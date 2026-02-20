@@ -11093,6 +11093,61 @@ transform: translateY(15px);
   color: var(--color-wood) !important;
 }
 
+/* ---- Cross-sells "Ça peut vous intéresser…" ---- */
+.sapi-cart-outer .wc-block-cart__cross-sells {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 2px solid var(--color-gray-light, #e8e2d9);
+}
+
+.sapi-cart-outer .wc-block-cart__cross-sells h2,
+.sapi-cart-outer .wc-block-cart__cross-sells-title {
+  font-family: var(--font-body) !important;
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem) !important;
+  font-weight: 900 !important;
+  color: var(--color-dark) !important;
+  margin-bottom: 1.5rem !important;
+}
+
+/* Noms produits cross-sell */
+.sapi-cart-outer .wc-block-cart__cross-sells .wc-block-grid__product-title,
+.sapi-cart-outer .wc-block-cart__cross-sells .wc-block-components-product-name {
+  font-family: var(--font-body) !important;
+  font-weight: 700 !important;
+  color: var(--color-dark) !important;
+}
+
+/* Prix cross-sell */
+.sapi-cart-outer .wc-block-cart__cross-sells .wc-block-grid__product-price .price,
+.sapi-cart-outer .wc-block-cart__cross-sells .wc-block-components-product-price {
+  font-weight: 700 !important;
+  color: var(--color-wood) !important;
+}
+
+/* Bouton "Ajouter au panier" cross-sell — orange CTA */
+.sapi-cart-outer .wc-block-cart__cross-sells .wp-block-button__link,
+.sapi-cart-outer .wc-block-cart__cross-sells .add_to_cart_button,
+.sapi-cart-outer .wc-block-cart__cross-sells .wc-block-components-product-add-to-cart button {
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%) !important;
+  color: #fff !important;
+  border-radius: 12px !important;
+  font-family: var(--font-body) !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25) !important;
+  border: none !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.sapi-cart-outer .wc-block-cart__cross-sells .wp-block-button__link:hover,
+.sapi-cart-outer .wc-block-cart__cross-sells .add_to_cart_button:hover,
+.sapi-cart-outer .wc-block-cart__cross-sells .wc-block-components-product-add-to-cart button:hover {
+  background: linear-gradient(180deg, #D14F1C 0%, #B8431A 100%) !important;
+  box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
 /* Fond page */
 body.woocommerce-cart {
   background-color: var(--color-cream);
