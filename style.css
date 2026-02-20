@@ -10979,6 +10979,28 @@ transform: translateY(15px);
    Résiste au remplacement DOM de React car il est AUTOUR du bloc WC.
    ======================================== */
 
+/* Titre de la page panier — identique aux pages catégorie (.shop-hero-cinetique h1) */
+.woocommerce-cart article.page > header {
+  padding: 2rem 3rem 1.5rem;
+  background: var(--color-cream);
+  text-align: center;
+}
+
+.woocommerce-cart article.page > header h1 {
+  font-family: var(--font-body);
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 900;
+  color: var(--color-dark);
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .woocommerce-cart article.page > header {
+    padding: 1.5rem 1rem 1rem;
+    text-align: left;
+  }
+}
+
 /*
  * LAYOUT DEUX COLONNES + SIDEBAR STICKY
  * .wc-block-components-sidebar-layout = flex container créé par React
