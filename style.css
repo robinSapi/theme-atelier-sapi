@@ -11197,11 +11197,11 @@ body.woocommerce-checkout .sapi-checkout-outer [id*="express"] h2 {
    Tout est dans .wc-block-cart__main, pas de wrapper dédié.
    Classes confirmées via inspection DOM live. */
 
-/* Titre */
+/* Titre cross-sell — même style que les H2 du checkout */
 .sapi-cart-outer .wc-block-cart__main .wp-block-heading {
   font-family: var(--font-body) !important;
-  font-size: 1.1rem !important;
-  font-weight: 300 !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
   color: var(--color-dark) !important;
 }
 
