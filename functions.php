@@ -1287,11 +1287,13 @@ add_action('woocommerce_init', function () {
 // ACF — Groupes de champs par catégorie de produit
 // ============================================================
 
-add_action('acf/init', function () {
+// Utilise 'init' avec priorité haute — plus fiable que 'acf/init' selon la version ACF
+add_action('init', function () {
   if (!function_exists('acf_add_local_field_group')) return;
 
   // ----------------------------------------------------------
   // Lampadaires — champs spécifiques
+  // (location : tous les produits pour diagnostic, à affiner ensuite)
   // ----------------------------------------------------------
   acf_add_local_field_group([
     'key'    => 'group_lampadaires_specs',
@@ -1313,18 +1315,13 @@ add_action('acf/init', function () {
           'operator' => '==',
           'value'    => 'product',
         ],
-        [
-          'param'    => 'product_cat',
-          'operator' => '==',
-          'value'    => 'lampadaires',
-        ],
       ],
     ],
     'position'        => 'normal',
     'style'           => 'default',
     'label_placement' => 'top',
   ]);
-});
+}, 20);
 
 // Save the opt-out choice as order meta
 add_action('woocommerce_set_additional_field_value', function ($key, $value, $group, $wc_object) {
