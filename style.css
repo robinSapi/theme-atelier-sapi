@@ -13143,6 +13143,322 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 /* =========================================
+   PAGE CONFIRMATION — Sâpi
+   Miroir du panier : 2 colonnes 65/35, mêmes cards
+   ========================================= */
+
+.sapi-thankyou-outer {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 3rem 4rem;
+  box-sizing: border-box;
+}
+
+/* Hero succès */
+.thankyou-hero {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.thankyou-success-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  background: rgba(1, 133, 1, 0.08);
+  border-radius: 50%;
+  color: var(--color-green, #018501);
+  margin-bottom: 1.5rem;
+}
+
+.thankyou-hero .section-number {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--color-wood);
+  margin-bottom: 0.75rem;
+}
+
+.thankyou-hero h1 {
+  font-family: var(--font-body);
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 900;
+  color: var(--color-dark);
+  margin-bottom: 1rem;
+}
+
+.thankyou-subtitle {
+  font-size: 1rem;
+  color: var(--color-gray);
+  line-height: 1.7;
+}
+
+/* Layout 2 colonnes — identique au panier */
+.thankyou-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  margin-bottom: 2.5rem;
+}
+
+.thankyou-main {
+  width: calc(65% - 1rem);
+}
+
+.thankyou-sidebar {
+  width: calc(35% - 1rem);
+  position: sticky;
+  top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Cards — même style que les colonnes du panier */
+.thankyou-card {
+  background: var(--color-white, #fff);
+  border: 1px solid var(--color-gray-light, #e8e2d9);
+  border-radius: var(--radius-lg, 16px);
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.thankyou-card h2 {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-wood);
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--color-gray-light, #e8e2d9);
+}
+
+/* Récapitulatif commande (sidebar) */
+.thankyou-overview {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.thankyou-overview li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--color-gray-light, #e8e2d9);
+  font-size: 0.9rem;
+  gap: 1rem;
+}
+
+.thankyou-overview li:last-child {
+  border-bottom: none;
+}
+
+.thankyou-overview li span {
+  color: var(--color-gray);
+  flex-shrink: 0;
+}
+
+.thankyou-overview li strong {
+  color: var(--color-dark);
+  font-weight: 600;
+  text-align: right;
+  word-break: break-word;
+}
+
+.thankyou-overview__total {
+  margin-top: 0.5rem;
+  padding-top: 1rem !important;
+  border-top: 2px solid var(--color-gray-light, #e8e2d9);
+}
+
+.thankyou-overview__total span {
+  font-weight: 700;
+  color: var(--color-dark) !important;
+  font-size: 1rem !important;
+}
+
+.thankyou-overview__total strong {
+  font-size: 1.1rem;
+  color: var(--color-wood) !important;
+}
+
+/* Tableau des articles commandés */
+.sapi-thankyou-outer .woocommerce-table--order-details {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+.sapi-thankyou-outer .woocommerce-table--order-details th {
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-gray);
+  padding: 0 0 0.75rem;
+  border-bottom: 2px solid var(--color-gray-light, #e8e2d9);
+}
+
+.sapi-thankyou-outer .woocommerce-table--order-details td {
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--color-gray-light, #e8e2d9);
+  vertical-align: middle;
+}
+
+.sapi-thankyou-outer .woocommerce-table--order-details .product-name {
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+.sapi-thankyou-outer .woocommerce-table--order-details .product-name a {
+  color: var(--color-dark);
+  text-decoration: none;
+}
+
+.sapi-thankyou-outer .woocommerce-table--order-details .product-total {
+  text-align: right;
+  font-weight: 700;
+  color: var(--color-wood);
+}
+
+.sapi-thankyou-outer .woocommerce-table--order-details tfoot tr td,
+.sapi-thankyou-outer .woocommerce-table--order-details tfoot tr th {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--color-gray-light, #e8e2d9);
+  font-size: 0.9rem;
+}
+
+.sapi-thankyou-outer .woocommerce-table--order-details tfoot .order-total td,
+.sapi-thankyou-outer .woocommerce-table--order-details tfoot .order-total th {
+  font-weight: 900;
+  font-size: 1.1rem;
+  color: var(--color-dark);
+  border-bottom: none;
+  padding-top: 1rem;
+}
+
+/* Détails client (adresses) */
+.sapi-thankyou-outer .woocommerce-customer-details {
+  margin: 0;
+}
+
+.sapi-thankyou-outer .woocommerce-customer-details h2,
+.sapi-thankyou-outer .woocommerce-columns--addresses h2 {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-wood);
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--color-gray-light, #e8e2d9);
+}
+
+.sapi-thankyou-outer .woocommerce-columns--addresses {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.sapi-thankyou-outer .woocommerce-column h3 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-gray);
+  margin-bottom: 0.75rem;
+}
+
+.sapi-thankyou-outer address {
+  font-style: normal;
+  font-size: 0.9rem;
+  color: var(--color-dark);
+  line-height: 1.7;
+}
+
+/* CTA retour boutique */
+.thankyou-cta {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.thankyou-cta-btn {
+  display: inline-block;
+  padding: 0.9rem 2rem;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  color: #fff;
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.thankyou-cta-btn:hover {
+  background: linear-gradient(180deg, #D14F1C 0%, #B8431A 100%);
+  box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Commande échouée */
+.thankyou-hero--failed .thankyou-success-icon {
+  background: rgba(220, 53, 69, 0.08);
+  color: #dc3545;
+}
+
+.thankyou-btn-retry {
+  display: inline-block;
+  margin-top: 1.5rem;
+  padding: 0.9rem 2rem;
+  background: var(--color-wood);
+  color: #fff;
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.thankyou-btn-retry:hover {
+  background: var(--color-dark);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sapi-thankyou-outer {
+    padding: 1.5rem;
+  }
+
+  .thankyou-layout {
+    flex-direction: column;
+  }
+
+  .thankyou-main,
+  .thankyou-sidebar {
+    width: 100%;
+    position: static;
+  }
+
+  .sapi-thankyou-outer .woocommerce-columns--addresses {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================
    QUICK VIEW MODAL - Patricia Urquiola inspired
    ========================================= */
 
