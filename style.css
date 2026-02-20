@@ -8162,12 +8162,18 @@ transform: translateY(15px);
   position: relative;
 }
 
-/* Collections Carousel Navigation */
+/* Collections Carousel Navigation — overlaid on cards */
 .collections-carousel-nav {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
   display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1.25rem;
+  justify-content: space-between;
+  padding: 0 1rem;
+  pointer-events: none;
+  z-index: 10;
 }
 
 .collections-carousel-btn {
@@ -8180,6 +8186,7 @@ transform: translateY(15px);
   border: 1px solid rgba(147, 125, 104, 0.2);
   color: var(--color-wood);
   cursor: pointer;
+  pointer-events: auto;
   transition: all 400ms cubic-bezier(0.34, 0.61, 0.4, 0.97);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
