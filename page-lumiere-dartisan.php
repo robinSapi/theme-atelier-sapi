@@ -28,7 +28,7 @@ get_header();
       // Try to get video from ACF, otherwise use placeholder
       $video_url = function_exists('get_field') ? get_field('video_atelier') : '';
       $video_poster = function_exists('get_field') ? get_field('video_poster') : '';
-      $poster_url = $video_poster ? $video_poster['url'] : 'https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/Robin-Sapi-A.jpg';
+      $poster_url = $video_poster ? $video_poster['url'] : home_url('/wp-content/uploads/2025/05/Robin-Sapi-A.jpg');
 
       if ($video_url) :
         // Check if it's a YouTube/Vimeo URL or a local video
@@ -85,14 +85,14 @@ get_header();
       <p>Alors l'Atelier Sâpi, c'est mon coin de paradis. Ici, j'imagine, je conçois, je fabrique et j'expédie moi-même tous les luminaires que j'ai le plaisir de vous faire découvrir. Je me déplace aussi régulièrement pour tester les prototypes, réaliser des photos et des vidéos, afin de vous montrer mes créations dans des lieux réels, vivants.</p>
     </div>
     <div class="artisan-intro-image-wrapper">
-      <img src="https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/Robin-Sapi-A.jpg" alt="Robin dans l'atelier Sapi" class="artisan-intro-robin-photo" loading="lazy">
+      <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Robin-Sapi-A.jpg" alt="Robin dans l'atelier Sapi" class="artisan-intro-robin-photo" loading="lazy">
     </div>
   </div>
 </section>
 
 <section class="artisan-step artisan-step-cinetique">
   <div class="artisan-step-grid">
-    <div class="artisan-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/IMG_1928.png');"></div>
+    <div class="artisan-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.png');"></div>
     <div class="artisan-step-content">
       <span class="section-number">03</span>
       <h2>Tout commence par une idée</h2>
@@ -110,13 +110,13 @@ get_header();
       <p>Quand une idée tient la route et que je veux lui donner vie, je passe à l'étape suivante, sur ordinateur. Je dessine un modèle en 3D et j'affine chaque pièce, chaque détail, chaque assemblage. C'est aussi à cette étape que j'imagine les variations possibles : différentes tailles, formes, finitions …</p>
       <p>L'essentiel est d'imaginer le réel et de garder en vue que le luminaire sera suspendu dans un vrai intérieur. Comment va-t-il épouser l'espace, quelles ombres va-t-il projeter, à quoi ressemblera l'ambiance qu'il créera ? Lorsque ma conception est prête, j'exporte chaque pièce en format 2D pour la production. Et comme je suis un peu maniaque, je classe bien tous les documents : bien archiver le passé, c'est bien construire le futur ! Ensuite, place à la découpe ...</p>
     </div>
-    <div class="artisan-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/Retouchee1.jpg');"></div>
+    <div class="artisan-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Retouchee1.jpg');"></div>
   </div>
 </section>
 
 <section class="artisan-step artisan-step-cinetique">
   <div class="artisan-step-grid">
-    <div class="artisan-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/IMG_7638.jpg');"></div>
+    <div class="artisan-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_7638.jpg');"></div>
     <div class="artisan-step-content">
       <span class="section-number">05</span>
       <h2>J'adore l'étape de fabrication</h2>
@@ -134,7 +134,7 @@ get_header();
       <p>Chaque pièce est ensuite contrôlée à la main : je ponce, j'affine, je vérifie la qualité avant de passer à l'assemblage puis à l'emballage. En effet, certains modèles vous arrivent pré-assemblés, et il ne vous reste que quelques étapes faciles et guidées !</p>
       <p>Je prépare chaque colis avec soin : pièces, accessoires commandés, notice d'installation… et bien sûr, un bon emballage pour garantir une livraison impeccable !</p>
     </div>
-    <div class="artisan-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/P1130073-scaled.jpg');"></div>
+    <div class="artisan-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/P1130073-scaled.jpg');"></div>
   </div>
 </section>
 

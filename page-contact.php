@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sapi_contact_nonce'])
 get_header();
 ?>
 
-<section class="contact-hero" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Bandeau-Rouge.jpg');">
+<section class="contact-hero" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/Bandeau-Rouge.jpg');">
   <div class="contact-hero-overlay"></div>
   <div class="contact-hero-content">
     <h1>Prise de contact</h1>

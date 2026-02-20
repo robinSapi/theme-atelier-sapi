@@ -1189,14 +1189,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ========================================
-  // Console Message
-  // ========================================
-  console.log('%cSAPI CINÉTIQUE PREMIUM v2.0', 'font-size: 24px; font-weight: bold; color: #937D68; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);');
-  console.log('%cDesign architectural - Interactions avancées Ultra', 'font-size: 12px; color: #8A8A8A;');
-  console.log('%cCore: Image Zoom | Form Enhancements | Cart Animations', 'font-size: 10px; color: #585858;');
-  console.log('%cPremium: Advanced Parallax | Canvas Particles | Animated Filters | Infinite Scroll', 'font-size: 10px; color: #937D68; font-weight: bold;');
-  console.log('%cShortcuts: C (collections) | ESC (close zoom) | Konami Code (surprise)', 'font-size: 10px; color: #585858;');
-  console.log('%cUsage: Add data-parallax="0.5" for parallax, data-particles="wood" for canvas particles', 'font-size: 9px; color: #B89968;');
 
 });

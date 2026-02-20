@@ -9,8 +9,8 @@
   // Fetch with timeout (5s) to avoid hanging requests
   function fetchWithTimeout(url, timeout) {
     if (timeout === undefined) timeout = 5000;
-    var controller = new AbortController();
-    var timeoutId = setTimeout(function() { controller.abort(); }, timeout);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(function() { controller.abort(); }, timeout);
     return fetch(url, { signal: controller.signal })
       .finally(function() { clearTimeout(timeoutId); });
   }
@@ -296,11 +296,6 @@
           // Extract wood/material essences from WooCommerce variation select options
           // Try both 'matiere' (material) and 'bois' (wood) attribute names
           // Try with AND without 'attribute_' prefix
-
-          // Debug: List ALL selects in the document
-          const allSelects = doc.querySelectorAll('select');
-          allSelects.forEach(sel => {
-          });
 
           // Try select first
           const woodSelect = doc.querySelector('select[name="attribute_pa_materiau"], select[name="pa_materiau"], select[name="attribute_pa_matiere"], select[name="pa_matiere"], select[name="attribute_pa_bois"], select[name="pa_bois"]');
@@ -629,7 +624,6 @@
 
       if (descriptionEl && productData.short_description) {
         descriptionEl.textContent = productData.short_description;
-      } else {
       }
 
       // Update or add variants section

@@ -350,7 +350,7 @@ foreach ($collection_slugs as $col) {
   <div class="bento-container">
     <!-- Large Hero Card -->
     <div class="bento-card bento-hero">
-      <div class="bento-bg" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg');"></div>
+      <div class="bento-bg" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/12/Olivia-La-gardiena.jpg');"></div>
       <div class="bento-content">
         <h1 class="bento-title">Sculpter<br>la lumière</h1>
         <p class="bento-text">Des créations artisanales qui transforment l'espace</p>
@@ -396,7 +396,7 @@ foreach ($collection_slugs as $col) {
           <span>Fait main</span>
         </div>
         <div class="stat-hover">
-          <img src="https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/Robin-Sapi-A.jpg" alt="Robin à l'atelier">
+          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Robin-Sapi-A.jpg" alt="Robin à l'atelier">
           <span class="stat-hover-text">Découvrir l'artisan →</span>
         </div>
       </a>
@@ -406,7 +406,7 @@ foreach ($collection_slugs as $col) {
           <span>Fabrication</span>
         </div>
         <div class="stat-hover">
-          <img src="https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Charlie-Bandeau-2.jpg" alt="Lampe dans un intérieur">
+          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/Charlie-Bandeau-2.jpg" alt="Lampe dans un intérieur">
           <span class="stat-hover-text">Le processus →</span>
         </div>
       </a>
@@ -416,7 +416,7 @@ foreach ($collection_slugs as $col) {
           <span>Atelier</span>
         </div>
         <div class="stat-hover">
-          <img src="https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/12/Olivia-La-gardiena.jpg" alt="Création dans un appartement">
+          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/12/Olivia-La-gardiena.jpg" alt="Création dans un appartement">
           <span class="stat-hover-text">Nous contacter →</span>
         </div>
       </a>
@@ -472,27 +472,27 @@ foreach ($collection_slugs as $col) {
         <div class="process-step">
           <span class="step-num">01</span>
           <span class="step-text">Dessin</span>
-          <div class="step-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/IMG_1928.png');"></div>
+          <div class="step-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.png');"></div>
         </div>
         <div class="process-step">
           <span class="step-num">02</span>
           <span class="step-text">Découpe laser</span>
-          <div class="step-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/IMG_7638.jpg');"></div>
+          <div class="step-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_7638.jpg');"></div>
         </div>
         <div class="process-step">
           <span class="step-num">03</span>
           <span class="step-text">Finitions</span>
-          <div class="step-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/03/P_SLM_XL_det5.jpg');"></div>
+          <div class="step-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/03/P_SLM_XL_det5.jpg');"></div>
         </div>
         <div class="process-step">
           <span class="step-num">04</span>
           <span class="step-text">Assemblage</span>
-          <div class="step-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/Robin-Sapi-A.jpg');"></div>
+          <div class="step-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Robin-Sapi-A.jpg');"></div>
         </div>
         <div class="process-step">
           <span class="step-num">05</span>
           <span class="step-text">Expédition</span>
-          <div class="step-image" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/07/Claudine-bandeau-1.jpg');"></div>
+          <div class="step-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/Claudine-bandeau-1.jpg');"></div>
         </div>
       </div>
     </div>
@@ -510,7 +510,7 @@ foreach ($collection_slugs as $col) {
 
     <!-- Atelier Image -->
     <div class="bento-card bento-atelier">
-      <div class="bento-bg" style="background-image: url('https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2025/05/Robin-Sapi-A.jpg');"></div>
+      <div class="bento-bg" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Robin-Sapi-A.jpg');"></div>
       <div class="atelier-label">
         <span>L'atelier · Lyon</span>
       </div>
