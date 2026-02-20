@@ -536,9 +536,56 @@ get_header();
     } catch (\Throwable $e) {
       // Log pour débogage serveur
       error_log('[Sapi] Fiche technique error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
-      // Commentaire HTML visible dans le source pour identifier l'erreur exacte
-      echo "\n<!-- [SAPI-DEBUG] " . esc_html($e->getMessage()) . ' (' . esc_html(basename($e->getFile())) . ':' . (int)$e->getLine() . ") -->\n";
       // $spec_sections garde les valeurs par défaut définies avant le try
+    }
+    ?>
+
+    <?php
+    // ── Specs ACF par variation (pour mise à jour JS de la fiche technique) ──
+    if ($is_variable && $has_acf) {
+      $var_specs_map = [];
+      try {
+        foreach ($product->get_children() as $var_id) {
+          $vs = [];
+
+          // Dimensions (même logique que product-level)
+          $vd = get_field('dimensions',  $var_id);
+          $vh = get_field('hauteur',     $var_id);
+          $vl = get_field('largeur',     $var_id);
+          $vp = get_field('profondeur',  $var_id);
+          if ($vd) {
+            $vs['dimensions'] = (string) $vd;
+          } elseif ($vh || $vl || $vp) {
+            $vparts = [];
+            if ($vl) $vparts[] = 'L ' . $vl;
+            if ($vp) $vparts[] = 'P ' . $vp;
+            if ($vh) $vparts[] = 'H ' . $vh;
+            $vs['dimensions'] = implode(' × ', $vparts);
+          }
+
+          // Champs simples susceptibles de varier
+          $var_acf_fields = [
+            'poids', 'materiau_structure', 'finition',
+            'longueur_cable', 'materiau_cable',
+            'hauteur_totale', 'hauteur_ampoule',
+            'rosace', 'compatible_variateur', 'interrupteur',
+          ];
+          foreach ($var_acf_fields as $f) {
+            $val = get_field($f, $var_id);
+            if ($val) $vs[$f] = (string) $val;
+          }
+
+          if (!empty($vs)) {
+            $var_specs_map[$var_id] = $vs;
+          }
+        }
+      } catch (\Throwable $e) {
+        error_log('[Sapi] Variation specs error: ' . $e->getMessage());
+      }
+
+      if (!empty($var_specs_map)) {
+        echo '<script>var sapiVarSpecs=' . wp_json_encode($var_specs_map) . ';</script>' . "\n";
+      }
     }
     ?>
 
@@ -1058,6 +1105,45 @@ get_header();
       originalFirstThumbData = firstThumb.dataset.image;
     }
 
+    // Sauvegarde des valeurs originales de la fiche technique pour restauration
+    const origSpecValues = {};
+    document.querySelectorAll('.spec-item').forEach(item => {
+      const lbl = item.querySelector('.spec-label');
+      const val = item.querySelector('.spec-value');
+      if (lbl && val) origSpecValues[lbl.textContent.trim()] = val.textContent;
+    });
+
+    // Correspondance clé ACF → libellé affiché dans la fiche technique
+    const specLabelMap = {
+      dimensions:           'Dimensions',
+      poids:                'Poids',
+      materiau_structure:   'Structure',
+      finition:             'Finition',
+      longueur_cable:       'Longueur câble',
+      materiau_cable:       'Câble',
+      hauteur_totale:       'Hauteur totale',
+      hauteur_ampoule:      'Hauteur ampoule',
+      rosace:               'Rosace',
+      compatible_variateur: 'Compatible variateur',
+      interrupteur:         'Interrupteur',
+    };
+
+    function updateSpecValue(label, value) {
+      document.querySelectorAll('.spec-item').forEach(item => {
+        const lbl = item.querySelector('.spec-label');
+        if (lbl && lbl.textContent.trim() === label) {
+          const val = item.querySelector('.spec-value');
+          if (val) val.textContent = value;
+        }
+      });
+    }
+
+    function restoreSpecValues() {
+      Object.keys(origSpecValues).forEach(label => {
+        updateSpecValue(label, origSpecValues[label]);
+      });
+    }
+
     if (variationForm && typeof jQuery !== 'undefined') {
       jQuery(variationForm).on('found_variation', function(event, variation) {
         // Update sticky bar price
@@ -1102,6 +1188,15 @@ get_header();
             firstThumb.classList.add('active');
           }
         }
+
+        // Mise à jour de la fiche technique avec les specs de la variation sélectionnée
+        if (typeof sapiVarSpecs !== 'undefined' && sapiVarSpecs[variation.variation_id]) {
+          const vSpecs = sapiVarSpecs[variation.variation_id];
+          Object.keys(vSpecs).forEach(key => {
+            const label = specLabelMap[key];
+            if (label) updateSpecValue(label, vSpecs[key]);
+          });
+        }
       });
 
       jQuery(variationForm).on('reset_data', function() {
@@ -1126,6 +1221,9 @@ get_header();
             galleryZoomLink.href = originalFirstThumbData;
           }
         }
+
+        // Restaurer les valeurs originales de la fiche technique
+        restoreSpecValues();
       });
     }
   }
