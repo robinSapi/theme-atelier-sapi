@@ -1150,7 +1150,7 @@ get_header();
         if (tailleLabel) updateSpecLabel('Dimensions', tailleLabel);
 
         // Mettre à jour "Poids" depuis les données WooCommerce de la variation
-        if (variation.weight) updateSpecLabel('Poids', variation.weight);
+        updateSpecLabel('Poids', variation.weight ? variation.weight + ' kg' : 'N/A');
       });
 
       jQuery(variationForm).on('reset_data', function() {
@@ -1179,7 +1179,7 @@ get_header();
         // Restaurer les valeurs originales
         if (origBoisValue)       updateSpecLabel('Bois',       origBoisValue);
         if (origDimensionsValue) updateSpecLabel('Dimensions', origDimensionsValue);
-        if (origPoidsValue)      updateSpecLabel('Poids',      origPoidsValue);
+        updateSpecLabel('Poids', 'N/A');
       });
     }
   }
