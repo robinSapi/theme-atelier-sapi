@@ -11178,9 +11178,17 @@ body.woocommerce-checkout .sapi-checkout-outer [id*="express"] h2 {
   color: var(--color-dark) !important;
 }
 
-/* Prix unitaire sous le nom — masqué (le total est déjà affiché à droite) */
-.sapi-cart-outer .wc-block-components-product-price {
+/* Prix unitaire sous le nom — masqué uniquement dans la colonne produit */
+.sapi-cart-outer .wc-block-cart-item__product .wc-block-components-product-price,
+.sapi-cart-outer .wc-block-cart-item__description .wc-block-components-product-price {
   display: none !important;
+}
+
+/* Prix total à droite — conservé et stylisé */
+.sapi-cart-outer .wc-block-cart-item__total .wc-block-components-product-price {
+  display: block !important;
+  font-weight: 700 !important;
+  color: var(--color-wood) !important;
 }
 
 /* ---- Cross-sells "Ça peut vous intéresser…" ----
