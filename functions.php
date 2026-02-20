@@ -132,6 +132,12 @@ add_action('wp_footer', function () {
   <?php
 });
 
+// Supprime la limite de caractères sur la description courte dans le panier WooCommerce Blocks
+add_filter('woocommerce_short_description', function ($description) {
+  return $description;
+});
+add_filter('wc_blocks_product_short_description_character_limit', '__return_false');
+
 add_filter('render_block', function ($content, $block) {
   if ($block['blockName'] === 'woocommerce/cart') {
     $content = str_replace('Ça peut vous intéresser…', 'Avez vous déjà la bonne ampoule ?', $content);
