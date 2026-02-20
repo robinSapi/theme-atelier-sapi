@@ -121,18 +121,29 @@ add_filter('render_block', function ($content, $block) {
 }, 10, 2);
 
 /**
- * Retire le template Elementor Canvas sur la page checkout/order-received.
- * Force page.php du thème → get_header() et get_footer() sont appelés
- * → header/footer simplifiés s'appliquent automatiquement.
+ * Migration unique — supprime Elementor de la page checkout (ID 13).
+ * S'exécute une fois au premier chargement admin, puis ne fait plus rien.
  */
-add_filter('template_include', function ($template) {
-  if (!function_exists('is_checkout')) return $template;
-  if (is_checkout()) {
-    $theme_page = get_stylesheet_directory() . '/page.php';
-    if (file_exists($theme_page)) return $theme_page;
+add_action('admin_init', function () {
+  $page_id = wc_get_page_id('checkout');
+  if (!$page_id || $page_id < 1) return;
+  if (get_post_meta($page_id, '_wp_page_template', true) !== 'elementor_header_footer') return;
+
+  // 1. Template → défaut du thème
+  update_post_meta($page_id, '_wp_page_template', 'default');
+
+  // 2. Supprime toutes les metas Elementor
+  foreach (['_elementor_data', '_elementor_template_type', '_elementor_edit_mode',
+            '_elementor_version', '_elementor_css', '_elementor_controls_usage'] as $meta) {
+    delete_post_meta($page_id, $meta);
   }
-  return $template;
-}, 99999);
+
+  // 3. Injecte le bloc WooCommerce Checkout dans post_content
+  wp_update_post([
+    'ID'           => $page_id,
+    'post_content' => '<!-- wp:woocommerce/checkout --><div class="wp-block-woocommerce-checkout alignwide wc-block-checkout is-loading"></div><!-- /wp:woocommerce/checkout -->',
+  ]);
+});
 
 // Preload self-hosted Square Peg font (Safari fix — Google Fonts fails on some Safari versions)
 function sapi_preload_square_peg() {
