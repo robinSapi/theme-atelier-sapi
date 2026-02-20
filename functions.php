@@ -1288,12 +1288,16 @@ add_action('woocommerce_init', function () {
 // ============================================================
 
 // Utilise 'init' avec priorité haute — plus fiable que 'acf/init' selon la version ACF
+// ACF compare les catégories par term_id (pas par slug) dans les règles de localisation
 add_action('init', function () {
   if (!function_exists('acf_add_local_field_group')) return;
 
+  // Récupérer les IDs des catégories par slug (ACF utilise les IDs, pas les slugs)
+  $term_lampadaires = get_term_by('slug', 'lampadaires', 'product_cat');
+  if (!$term_lampadaires) return; // Catégorie inexistante sur ce site
+
   // ----------------------------------------------------------
   // Lampadaires — champs spécifiques
-  // (location : tous les produits pour diagnostic, à affiner ensuite)
   // ----------------------------------------------------------
   acf_add_local_field_group([
     'key'    => 'group_lampadaires_specs',
@@ -1318,7 +1322,7 @@ add_action('init', function () {
         [
           'param'    => 'product_cat',
           'operator' => '==',
-          'value'    => 'lampadaires',
+          'value'    => $term_lampadaires->term_id,
         ],
       ],
     ],
