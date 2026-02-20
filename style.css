@@ -8070,7 +8070,8 @@ transform: translateY(15px);
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   gap: 1.5rem;
-  padding: 1rem 0 3.5rem 0;
+  padding: 1rem 0 3.5rem 3rem;
+  scroll-padding-left: 3rem;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
@@ -8091,7 +8092,6 @@ transform: translateY(15px);
   transition: transform 0.5s var(--ease-expo);
 }
 
-.collections-grid::before,
 .collections-grid::after {
   content: '';
   flex: 0 0 1.5rem;
