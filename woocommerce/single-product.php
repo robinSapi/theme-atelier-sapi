@@ -1333,49 +1333,70 @@ get_header();
   }
 
   // ========================================
-  // AJAX Add to Cart — remplace le POST classique pour éviter le rechargement
+  // AJAX Add to Cart — listener click (évite les conflits avec WC variation JS)
+  // Fonctionne pour produits simples ET variables
   // ========================================
-  const cartForm = document.querySelector('form.cart');
-  if (cartForm && typeof jQuery !== 'undefined') {
-    cartForm.addEventListener('submit', function(e) {
-      const btn = cartForm.querySelector('.single_add_to_cart_button');
+  const mainAddBtn = document.querySelector('.single_add_to_cart_button');
+  if (mainAddBtn && typeof jQuery !== 'undefined') {
+    mainAddBtn.addEventListener('click', function(e) {
       // Laisser passer si le bouton est désactivé (variation non sélectionnée)
-      if (!btn || btn.classList.contains('disabled') || btn.disabled) return;
+      if (this.classList.contains('disabled') || this.disabled) return;
       e.preventDefault();
 
+      const btn = this;
       const originalText = btn.textContent;
       btn.disabled = true;
       btn.textContent = 'Ajout en cours…';
 
-      const formData = new FormData(cartForm);
-      formData.set('add-to-cart', '<?php echo $product->get_id(); ?>');
+      // Récupérer les données du formulaire
+      const variationForm = document.querySelector('.variations_form');
+      const productIdInput = variationForm
+        ? variationForm.querySelector('input[name="product_id"]')
+        : null;
+      const variationIdInput = variationForm
+        ? variationForm.querySelector('input[name="variation_id"], input.variation_id')
+        : null;
+      const qtyInput = document.querySelector('input.qty');
 
-      fetch('/?wc-ajax=add_to_cart', {
-        method: 'POST',
-        body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      })
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        btn.disabled = false;
-        if (data.error) {
+      const ajaxData = {
+        action: 'sapi_add_to_cart',
+        product_id: productIdInput ? productIdInput.value : '<?php echo $product->get_id(); ?>',
+        variation_id: variationIdInput ? variationIdInput.value : 0,
+        quantity: qtyInput ? qtyInput.value : 1,
+        nonce: '<?php echo wp_create_nonce('sapi-add-to-cart'); ?>'
+      };
+
+      // Ajouter les attributs de variation (attribute_pa_*)
+      if (variationForm) {
+        variationForm.querySelectorAll('select[name^="attribute_"]').forEach(function(sel) {
+          ajaxData[sel.name] = sel.value;
+        });
+      }
+
+      jQuery.ajax({
+        type: 'POST',
+        url: '<?php echo esc_url(admin_url('admin-ajax.php')); ?>',
+        data: ajaxData,
+        success: function(response) {
+          btn.disabled = false;
+          if (response.success) {
+            btn.textContent = 'Ajouté !';
+            setTimeout(function() { btn.textContent = originalText; }, 2500);
+            // Ouvre le mini-cart et met à jour les fragments
+            jQuery(document.body).trigger('added_to_cart', [response.data.fragments, response.data.cart_hash]);
+            if (response.data.fragments) {
+              jQuery.each(response.data.fragments, function(key, value) {
+                jQuery(key).replaceWith(value);
+              });
+            }
+          } else {
+            btn.textContent = originalText;
+          }
+        },
+        error: function() {
+          btn.disabled = false;
           btn.textContent = originalText;
-          return;
         }
-        // Succès
-        btn.textContent = 'Ajouté !';
-        setTimeout(function() { btn.textContent = originalText; }, 2500);
-        // Déclenche la mise à jour du mini-cart et l'ouverture du volet
-        jQuery(document.body).trigger('added_to_cart', [data.fragments, data.cart_hash]);
-        if (data.fragments) {
-          jQuery.each(data.fragments, function(key, value) {
-            jQuery(key).replaceWith(value);
-          });
-        }
-      })
-      .catch(function() {
-        btn.disabled = false;
-        btn.textContent = originalText;
       });
     });
   }

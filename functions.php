@@ -944,16 +944,25 @@ function sapi_ajax_add_to_cart() {
     return;
   }
 
-  $product_id = isset($_POST['product_id']) ? absint($_POST['product_id']) : 0;
-  $quantity = isset($_POST['quantity']) ? absint($_POST['quantity']) : 1;
+  $product_id   = isset($_POST['product_id'])   ? absint($_POST['product_id'])   : 0;
+  $quantity     = isset($_POST['quantity'])      ? absint($_POST['quantity'])      : 1;
+  $variation_id = isset($_POST['variation_id']) ? absint($_POST['variation_id']) : 0;
+
+  // Collect variation attributes (attribute_pa_*)
+  $variation = [];
+  foreach ($_POST as $key => $value) {
+    if (strpos($key, 'attribute_') === 0) {
+      $variation[sanitize_title(wp_unslash($key))] = sanitize_text_field(wp_unslash($value));
+    }
+  }
 
   if ($product_id <= 0) {
     wp_send_json_error(['message' => 'Invalid product']);
     return;
   }
 
-  // Add to cart
-  $cart_item_key = WC()->cart->add_to_cart($product_id, $quantity);
+  // Add to cart (works for simple and variable products)
+  $cart_item_key = WC()->cart->add_to_cart($product_id, $quantity, $variation_id, $variation);
 
   if ($cart_item_key) {
     // Get refreshed fragments
