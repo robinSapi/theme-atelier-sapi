@@ -8091,13 +8091,12 @@ transform: translateY(15px);
   transition: transform 0.5s var(--ease-expo);
 }
 
-.collection-card:first-child {
-  margin-left: 3rem;
+.collections-grid::before,
+.collections-grid::after {
+  content: '';
+  flex: 0 0 1.5rem;
 }
 
-.collection-card:last-child {
-  margin-right: 3rem;
-}
 
 .collection-card:hover {
   transform: translateY(-10px) scale(1.02);
@@ -8241,14 +8240,6 @@ transform: translateY(15px);
 @media (max-width: 1024px) {
   .collection-card {
     flex: 0 0 72%;
-  }
-
-  .collection-card:first-child {
-    margin-left: 1rem;
-  }
-
-  .collection-card:last-child {
-    margin-right: 1rem;
   }
 }
 
