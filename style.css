@@ -10985,11 +10985,36 @@ transform: translateY(15px);
  * Nécessite align-items: flex-start sinon la sidebar étire sa hauteur
  * et position:sticky n'a aucun effet (élément déjà plein-hauteur).
  */
-.sapi-cart-outer .wc-block-components-sidebar-layout {
-  align-items: flex-start !important;
+/* Centrage + largeur max de l'ensemble */
+.sapi-cart-outer {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2rem 3rem 4rem;
+  box-sizing: border-box;
 }
 
+.sapi-cart-outer .wc-block-components-sidebar-layout {
+  align-items: flex-start !important;
+  gap: 2rem !important;
+}
+
+/* Colonne gauche (articles) — card */
+.sapi-cart-outer .wc-block-components-main {
+  background: var(--color-white, #fff) !important;
+  border: 1px solid var(--color-gray-light, #e8e2d9) !important;
+  border-radius: var(--radius-lg, 16px) !important;
+  padding: 2rem !important;
+  box-sizing: border-box !important;
+}
+
+/* Colonne droite (totaux) — card + sticky */
 .sapi-cart-outer .wc-block-components-sidebar {
+  background: var(--color-white, #fff) !important;
+  border: 1px solid var(--color-gray-light, #e8e2d9) !important;
+  border-radius: var(--radius-lg, 16px) !important;
+  padding: 2rem !important;
+  box-sizing: border-box !important;
   position: sticky !important;
   top: 2rem !important;
   align-self: flex-start !important;
@@ -10997,6 +11022,10 @@ transform: translateY(15px);
 
 /* Mobile : désactive sticky, passe en colonne */
 @media (max-width: 768px) {
+  .sapi-cart-outer {
+    padding: 1.5rem;
+  }
+
   .sapi-cart-outer .wc-block-components-sidebar {
     position: static !important;
   }
