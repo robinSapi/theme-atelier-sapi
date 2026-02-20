@@ -2487,6 +2487,11 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   margin-bottom: 2.5rem;
 }
 
+.product-why-left {
+  display: flex;
+  flex-direction: column;
+}
+
 .product-why-header .section-number {
   font-size: 0.875rem;
   font-weight: 900;

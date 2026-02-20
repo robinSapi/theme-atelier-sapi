@@ -336,12 +336,13 @@ get_header();
        SECTION 02 — POURQUOI CETTE PIÈCE
        ═══════════════════════════════════════════════════════════════ -->
   <section class="product-why product-why-cinetique">
-    <div class="product-why-header">
-      <span class="section-number">02</span>
-      <h2>Pourquoi cette pièce ?</h2>
-    </div>
     <div class="product-why-grid">
-      <div class="product-why-content">
+      <div class="product-why-left">
+        <div class="product-why-header">
+          <span class="section-number">02</span>
+          <h2>Pourquoi cette pièce ?</h2>
+        </div>
+        <div class="product-why-content">
         <?php
         $why_content = '';
         if (function_exists('get_field')) {
@@ -359,7 +360,8 @@ get_header();
           the_content();
         }
         ?>
-      </div>
+        </div><!-- .product-why-content -->
+      </div><!-- .product-why-left -->
       <div class="product-why-usage">
         <h3>Idéal pour</h3>
         <ul class="usage-list">
