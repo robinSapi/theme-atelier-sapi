@@ -11156,10 +11156,10 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   font-weight: 600 !important;
 }
 
-/* "Validation de commande express" reçoit la classe .sapi-express-title via render_block
-   — on la remet à un poids léger, hors du scope des H2 bold */
-body.woocommerce-checkout .sapi-checkout-outer h2.sapi-express-title,
-body.woocommerce-checkout .sapi-checkout-outer .sapi-express-title {
+/* "Validation de commande express" — rendu par React, non accessible via PHP.
+   Wildcard sur tout parent contenant "express" dans sa classe ou son id. */
+body.woocommerce-checkout .sapi-checkout-outer [class*="express"] h2,
+body.woocommerce-checkout .sapi-checkout-outer [id*="express"] h2 {
   font-weight: 400 !important;
 }
 
