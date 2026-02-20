@@ -1060,6 +1060,28 @@ get_header();
       originalFirstThumbData = firstThumb.dataset.image;
     }
 
+    // Valeur originale du champ "Bois" dans la fiche technique (pour restauration)
+    const origBoisValue = (() => {
+      for (const item of document.querySelectorAll('.spec-item')) {
+        const lbl = item.querySelector('.spec-label');
+        if (lbl && lbl.textContent.trim() === 'Bois') {
+          const val = item.querySelector('.spec-value');
+          return val ? val.textContent : '';
+        }
+      }
+      return '';
+    })();
+
+    function updateBoisSpec(value) {
+      document.querySelectorAll('.spec-item').forEach(item => {
+        const lbl = item.querySelector('.spec-label');
+        if (lbl && lbl.textContent.trim() === 'Bois') {
+          const val = item.querySelector('.spec-value');
+          if (val) val.textContent = value;
+        }
+      });
+    }
+
     if (variationForm && typeof jQuery !== 'undefined') {
       jQuery(variationForm).on('found_variation', function(event, variation) {
         // Update sticky bar price
@@ -1104,6 +1126,12 @@ get_header();
             firstThumb.classList.add('active');
           }
         }
+
+        // Mettre à jour "Bois" avec le libellé sélectionné dans l'attribut Matériau
+        const materiauSelect = variationForm.querySelector('select[name*="mati"]');
+        if (materiauSelect && materiauSelect.selectedIndex > 0) {
+          updateBoisSpec(materiauSelect.options[materiauSelect.selectedIndex].text);
+        }
       });
 
       jQuery(variationForm).on('reset_data', function() {
@@ -1128,6 +1156,9 @@ get_header();
             galleryZoomLink.href = originalFirstThumbData;
           }
         }
+
+        // Restaurer la valeur originale du champ Bois
+        if (origBoisValue) updateBoisSpec(origBoisValue);
       });
     }
   }
