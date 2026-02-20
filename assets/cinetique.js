@@ -722,52 +722,9 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
           this.style.transform = 'scale(1)';
         }, 150);
-
-        // Create flying icon effect
-        const icon = document.createElement('span');
-        icon.textContent = '🛒';
-        icon.style.cssText = `
-          position: fixed;
-          font-size: 24px;
-          pointer-events: none;
-          z-index: 99999;
-          animation: flyToCart 1s ease-out forwards;
-        `;
-
-        const rect = this.getBoundingClientRect();
-        icon.style.left = rect.left + rect.width / 2 + 'px';
-        icon.style.top = rect.top + rect.height / 2 + 'px';
-
-        document.body.appendChild(icon);
-
-        setTimeout(() => icon.remove(), 1000);
       }
     });
   });
-
-  // Add flying cart animation
-  if (!document.querySelector('#cart-animation-style')) {
-    const style = document.createElement('style');
-    style.id = 'cart-animation-style';
-    style.textContent = `
-      @keyframes flyToCart {
-        0% {
-          transform: translate(0, 0) scale(1);
-          opacity: 1;
-        }
-        100% {
-          transform: translate(calc(100vw - 100px), -80vh) scale(0.3);
-          opacity: 0;
-        }
-      }
-      @keyframes fadeOut {
-        to {
-          opacity: 0;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-  }
 
   // ========================================
   // PREMIUM: Quantity Input with +/- Buttons
