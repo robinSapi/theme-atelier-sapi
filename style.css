@@ -8070,7 +8070,7 @@ transform: translateY(15px);
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   gap: 1.5rem;
-  padding-bottom: 0.5rem;
+  padding: 0 3rem 0.5rem 3rem;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
@@ -8451,6 +8451,11 @@ transform: translateY(15px);
     padding: 0 1rem;
   }
 
+  .collections-grid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
   .newsletter-kinetic {
     padding: 2rem 1.5rem;
   }
@@ -8600,6 +8605,11 @@ transform: translateY(15px);
     padding: 0 1rem;
   }
 
+  .collections-grid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
   /* Stats card mobile */
   .stat-hover {
     display: none;
@@ -8721,6 +8731,11 @@ transform: translateY(15px);
 
   .section-header-kinetic {
     padding: 0 0.75rem;
+  }
+
+  .collections-grid {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
 
   .bento-container {
