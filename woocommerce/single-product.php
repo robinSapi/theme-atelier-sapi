@@ -473,6 +473,7 @@ get_header();
       $ampoule_reco       = ($has_acf ? (string) get_field('ampoule_recommandee') : '')      ?: 'LED filament 4-6W (2700K)';
       $ampoule_incluse    = ($has_acf ? (string) get_field('ampoule_incluse') : '')          ?: 'Non (disponible en option)';
       $materiau_structure = ($has_acf ? (string) get_field('materiau_structure') : '')       ?: '100% bois';
+      $bois               = ($has_acf ? (string) get_field('bois') : '')                     ?: 'Peuplier ou Okoumé - Au choix';
       $finition           = ($has_acf ? (string) get_field('finition') : '')                 ?: 'Contreplaqué poncé';
       $assemblage         = ($has_acf ? (string) get_field('assemblage') : '')               ?: 'Notice et tuto vidéo';
       $difficulte         = ($has_acf ? (string) get_field('installation_difficulte') : '')  ?: 'Facile (15-30 min)';
@@ -515,6 +516,7 @@ get_header();
       // Section 3 : Matériaux
       $specs_materiaux   = [];
       $specs_materiaux[] = ['label' => 'Structure', 'value' => $materiau_structure];
+      $specs_materiaux[] = ['label' => 'Bois',      'value' => $bois];
       $specs_materiaux[] = ['label' => 'Finition',  'value' => $finition];
       if ($materiau_cable) $specs_materiaux[] = ['label' => 'Câble', 'value' => $materiau_cable];
 
