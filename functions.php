@@ -118,6 +118,12 @@ add_filter('render_block', function ($content, $block) {
     return '<div class="sapi-cart-outer">' . $content . '</div>';
   }
   if ($block['blockName'] === 'woocommerce/checkout') {
+    // Remplace le H2 "Validation de commande express" par un <p> pour éviter les conflits CSS
+    $content = preg_replace(
+      '/<h2([^>]*class="[^"]*wc-block-components-checkout-step__title[^"]*"[^>]*)>Validation de commande express<\/h2>/',
+      '<p$1>Validation de commande express</p>',
+      $content
+    );
     return '<div class="sapi-checkout-outer">' . $content . '</div>';
   }
   return $content;
