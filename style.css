@@ -11174,6 +11174,7 @@ body.woocommerce-checkout .sapi-checkout-outer [id*="express"] h2 {
 .sapi-cart-outer .wc-block-components-product-name {
   font-family: var(--font-body) !important;
   font-weight: 700 !important;
+  font-size: 1.25rem !important;
   color: var(--color-dark) !important;
 }
 
