@@ -116,32 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ========================================
-  // Collection Cards Animation
-  // ========================================
-  const collectionCards = document.querySelectorAll('.collection-card');
-
-  if (collectionCards.length > 0) {
-    const collectionObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry, index) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-          }, index * 150);
-        }
-      });
-    }, {
-      threshold: 0.2
-    });
-
-    collectionCards.forEach(card => {
-      card.style.opacity = '0';
-      card.style.transform = 'translateY(50px)';
-      card.style.transition = 'all 0.8s cubic-bezier(0.87, 0, 0.13, 1)';
-      collectionObserver.observe(card);
-    });
-  }
-
   // ========================================
   // Newsletter Form
   // ========================================
