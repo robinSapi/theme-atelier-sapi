@@ -120,6 +120,20 @@ add_filter('render_block', function ($content, $block) {
   return $content;
 }, 10, 2);
 
+/**
+ * Retire le template Elementor Canvas sur la page checkout/order-received.
+ * Force page.php du thème → get_header() et get_footer() sont appelés
+ * → header/footer simplifiés s'appliquent automatiquement.
+ */
+add_filter('template_include', function ($template) {
+  if (!function_exists('is_checkout')) return $template;
+  if (is_checkout()) {
+    $theme_page = get_stylesheet_directory() . '/page.php';
+    if (file_exists($theme_page)) return $theme_page;
+  }
+  return $template;
+}, 99999);
+
 // Preload self-hosted Square Peg font (Safari fix — Google Fonts fails on some Safari versions)
 function sapi_preload_square_peg() {
   $font_dir = get_template_directory_uri() . '/assets/fonts/';

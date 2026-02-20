@@ -11041,6 +11041,18 @@ transform: translateY(15px);
    ======================================== */
 
 /* Titre de la page panier — identique aux pages catégorie (.shop-hero-cinetique h1) */
+/* Checkout et order-received : le H1 natif de content-page.php est caché,
+   WooCommerce injecte ses propres titres via les hooks */
+.woocommerce-checkout article.page > header,
+.woocommerce-order-received article.page > header {
+  display: none;
+}
+
+body.woocommerce-checkout,
+body.woocommerce-order-received {
+  background-color: var(--color-cream);
+}
+
 .woocommerce-cart article.page > header {
   padding: 2rem 3rem 1.5rem;
   background: var(--color-cream);
