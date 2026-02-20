@@ -437,17 +437,13 @@
             ${this.galleryImages.length > 1 ? `
               <div class="quick-view-gallery-nav">
                 <button type="button" class="gallery-nav-btn gallery-prev" aria-label="Image précédente">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M5.2 13.1C6.1 8.2 10.8 4.9 15.4 5.5C17.7 5.8 19.6 7 20.8 8.7C21.4 9.6 21.8 10.6 22 11.3L22.6 12L22 12.7C21.5 14.4 20.1 16 18 17.2C15.6 18.6 12.4 19.5 9.4 18.8C7.6 18.4 6.2 17.4 5.5 16C4.9 14.9 4.8 14 5.2 13.1ZM7.7 13.2C8.4 9.8 11.6 7 14.8 7.2C16.4 7.3 17.8 8.1 18.8 9.2C19.3 9.7 19.6 10.3 19.8 10.8L20.2 12L19.8 13.1C19.3 14.4 18 15.5 16.3 16.3C14.5 17.1 12.2 17.5 10.2 17C9.1 16.7 8.3 16.1 7.9 15.3C7.5 14.7 7.4 14.1 7.7 13.2Z"></path>
-                  </svg>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
                 </button>
                 <div class="gallery-counter">
                   <span class="gallery-current">1</span> / <span class="gallery-total">${this.galleryImages.length}</span>
                 </div>
                 <button type="button" class="gallery-nav-btn gallery-next" aria-label="Image suivante">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path fill-rule="evenodd" clip-rule="evenodd" transform="translate(24 0) scale(-1 1)" d="M5.2 13.1C6.1 8.2 10.8 4.9 15.4 5.5C17.7 5.8 19.6 7 20.8 8.7C21.4 9.6 21.8 10.6 22 11.3L22.6 12L22 12.7C21.5 14.4 20.1 16 18 17.2C15.6 18.6 12.4 19.5 9.4 18.8C7.6 18.4 6.2 17.4 5.5 16C4.9 14.9 4.8 14 5.2 13.1ZM7.7 13.2C8.4 9.8 11.6 7 14.8 7.2C16.4 7.3 17.8 8.1 18.8 9.2C19.3 9.7 19.6 10.3 19.8 10.8L20.2 12L19.8 13.1C19.3 14.4 18 15.5 16.3 16.3C14.5 17.1 12.2 17.5 10.2 17C9.1 16.7 8.3 16.1 7.9 15.3C7.5 14.7 7.4 14.1 7.7 13.2Z"></path>
-                  </svg>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </button>
               </div>
               <div class="quick-view-gallery-thumbs">
