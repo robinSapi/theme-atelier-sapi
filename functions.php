@@ -112,6 +112,26 @@ add_action('wp_enqueue_scripts', 'sapi_maison_enqueue_assets');
  * Ce wrapper est injecté côté PHP AVANT React et ne sera jamais touché par React.
  * Il permet de scoper notre CSS avec une spécificité garantie.
  */
+// Remplace "Supprimer l'élément" par "Supprimer" dans le panier (rendu React)
+add_action('wp_footer', function () {
+  if (!function_exists('is_cart') || !is_cart()) return;
+  ?>
+  <script>
+  (function () {
+    function replaceRemoveText() {
+      document.querySelectorAll('.wc-block-cart-item__remove-link').forEach(function (el) {
+        if (el.textContent.trim() === "Supprimer l\u2019\u00e9l\u00e9ment") {
+          el.textContent = 'Supprimer';
+        }
+      });
+    }
+    replaceRemoveText();
+    new MutationObserver(replaceRemoveText).observe(document.body, { childList: true, subtree: true });
+  })();
+  </script>
+  <?php
+});
+
 add_filter('render_block', function ($content, $block) {
   if ($block['blockName'] === 'woocommerce/cart') {
     $content = str_replace('Ça peut vous intéresser…', 'Avez vous déjà la bonne ampoule ?', $content);
