@@ -1128,10 +1128,20 @@ get_header();
         }
 
         // Mettre à jour "Bois" avec le libellé sélectionné dans l'attribut Matériau
-        const materiauSelect = variationForm.querySelector('select[name*="materiau"]');
-        if (materiauSelect && materiauSelect.selectedIndex > 0) {
-          updateBoisSpec(materiauSelect.options[materiauSelect.selectedIndex].text);
+        let materiauLabel = '';
+        // 1. Woo Variation Swatches : swatch sélectionné avec data-title
+        const materiauSwatch = variationForm.querySelector('.variable-items-wrapper[data-attribute_name*="materiau"] .variable-item.selected');
+        if (materiauSwatch) {
+          materiauLabel = materiauSwatch.dataset.title || materiauSwatch.getAttribute('title') || '';
         }
+        // 2. Fallback : select natif (attribut local ou swatches non activés)
+        if (!materiauLabel) {
+          const materiauSelect = variationForm.querySelector('select[name*="materiau"]');
+          if (materiauSelect && materiauSelect.value) {
+            materiauLabel = materiauSelect.options[materiauSelect.selectedIndex]?.text || '';
+          }
+        }
+        if (materiauLabel) updateBoisSpec(materiauLabel);
       });
 
       jQuery(variationForm).on('reset_data', function() {
