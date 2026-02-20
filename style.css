@@ -11291,11 +11291,11 @@ body.woocommerce-cart {
   color: var(--color-dark) !important;
 }
 
-/* Labels des champs */
+/* Labels des champs — labels flottants WooCommerce Blocks */
 .sapi-checkout-outer label {
   font-family: var(--font-body) !important;
   font-size: 0.875rem !important;
-  font-weight: 600 !important;
+  font-weight: 400 !important;
   color: var(--color-dark) !important;
 }
 
@@ -11307,7 +11307,8 @@ body.woocommerce-cart {
   border-radius: 8px !important;
   font-family: var(--font-body) !important;
   font-size: 0.95rem !important;
-  padding: 0.75rem 1rem !important;
+  /* padding-top élevé pour laisser de la place au label flottant */
+  padding: 1.5rem 1rem 0.4rem !important;
   background: var(--color-cream) !important;
   transition: border-color 0.2s ease !important;
 }
