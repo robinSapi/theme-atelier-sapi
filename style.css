@@ -10999,8 +10999,11 @@ transform: translateY(15px);
   gap: 2rem !important;
 }
 
-/* Colonne gauche (articles) — card */
+/* Colonne gauche (articles) — card
+ * WC Blocks fixe width:65% — on soustrait la moitié du gap (1rem)
+ * pour que 65%-1rem + 2rem gap + 35%-1rem = 100% exactement */
 .sapi-cart-outer .wc-block-components-main {
+  width: calc(65% - 1rem) !important;
   background: var(--color-white, #fff) !important;
   border: 1px solid var(--color-gray-light, #e8e2d9) !important;
   border-radius: var(--radius-lg, 16px) !important;
@@ -11008,8 +11011,10 @@ transform: translateY(15px);
   box-sizing: border-box !important;
 }
 
-/* Colonne droite (totaux) — card + sticky */
+/* Colonne droite (totaux) — card + sticky
+ * WC Blocks fixe width:35% — idem, on soustrait 1rem */
 .sapi-cart-outer .wc-block-components-sidebar {
+  width: calc(35% - 1rem) !important;
   background: var(--color-white, #fff) !important;
   border: 1px solid var(--color-gray-light, #e8e2d9) !important;
   border-radius: var(--radius-lg, 16px) !important;
@@ -11020,13 +11025,15 @@ transform: translateY(15px);
   align-self: flex-start !important;
 }
 
-/* Mobile : désactive sticky, passe en colonne */
+/* Mobile : désactive sticky, passe en colonne pleine largeur */
 @media (max-width: 768px) {
   .sapi-cart-outer {
     padding: 1.5rem;
   }
 
+  .sapi-cart-outer .wc-block-components-main,
   .sapi-cart-outer .wc-block-components-sidebar {
+    width: 100% !important;
     position: static !important;
   }
 }
