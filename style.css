@@ -8120,6 +8120,8 @@ transform: translateY(15px);
 /* Collections Carousel Wrapper */
 .collections-carousel-wrapper {
   position: relative;
+  margin: 0;
+  padding: 0;
 }
 
 /* Collections Carousel Navigation — overlaid on cards */
