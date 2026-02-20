@@ -1100,6 +1100,67 @@ input[type="submit"]:hover,
   }
 }
 
+/* ========================================
+   HEADER SIMPLIFIÉ — Panier & Confirmation
+   ======================================== */
+.site-header--simplified {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--color-white, #fff);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--color-gray-light, #e8e2d9);
+}
+
+.site-header--simplified .header-inner--centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem 2rem;
+}
+
+/* ========================================
+   FOOTER SIMPLIFIÉ — Panier & Confirmation
+   ======================================== */
+.site-footer--simplified {
+  background: var(--color-cream);
+  border-top: 1px solid var(--color-gray-light, #e8e2d9);
+  padding: 1.25rem 2rem;
+}
+
+.site-footer--simplified .footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-size: 0.8rem;
+  color: var(--color-gray);
+}
+
+.site-footer--simplified .footer-legal {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.site-footer--simplified .footer-legal a {
+  color: var(--color-gray);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.site-footer--simplified .footer-legal a:hover {
+  color: var(--color-dark);
+}
+
+@media (max-width: 600px) {
+  .site-footer--simplified .footer-bottom {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+  }
+}
+
 .site-footer {
   background: var(--color-cream);
   color: var(--color-gray);

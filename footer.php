@@ -1,6 +1,23 @@
 <?php
+$is_simplified = function_exists('is_cart') && (is_cart() || is_checkout());
 ?>
 </main>
+
+<?php if ($is_simplified) : ?>
+
+<footer class="site-footer site-footer--simplified">
+  <div class="footer-bottom">
+    <p>&copy; <?php echo date('Y'); ?> Atelier Sâpi &mdash; Tous droits réservés</p>
+    <div class="footer-legal">
+      <a href="<?php echo esc_url(home_url('/mentions-legales/')); ?>">Mentions légales</a>
+      <a href="<?php echo esc_url(home_url('/cgv/')); ?>">CGV</a>
+      <a href="<?php echo esc_url(home_url('/politique-de-confidentialite/')); ?>">Confidentialité</a>
+    </div>
+  </div>
+</footer>
+
+<?php else : ?>
+
 <footer class="site-footer footer-kinetic">
   <div class="footer-grid">
     <!-- Brand Column -->
@@ -47,6 +64,8 @@
     </div>
   </div>
 </footer>
+
+<?php endif; ?>
 
 <!-- Quick View Modal -->
 <div class="quick-view-modal" id="quick-view-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="quick-view-title">

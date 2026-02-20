@@ -1,4 +1,5 @@
 <?php
+$is_simplified = function_exists('is_cart') && (is_cart() || is_checkout());
 ?><!doctype html>
 <html <?php language_attributes(); ?>>
 <head>
@@ -8,6 +9,21 @@
 </head>
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
+
+<?php if ($is_simplified) : ?>
+
+<header class="site-header site-header--simplified">
+  <div class="header-inner header-inner--centered">
+    <div class="site-logo">
+      <a href="<?php echo esc_url(home_url('/')); ?>">
+        <img src="https://www.testlumineux.atelier-sapi.fr/wp-content/uploads/2024/12/logo_sapi.svg" alt="Atelier Sâpi" class="custom-logo">
+      </a>
+    </div>
+  </div>
+</header>
+
+<?php else : ?>
+
 <header class="site-header">
   <div class="header-inner">
     <div class="site-logo">
@@ -203,5 +219,7 @@
     </div>
   </div>
 </div>
+
+<?php endif; ?>
 
 <main class="site-content">
