@@ -1283,45 +1283,6 @@ add_action('woocommerce_init', function () {
   ]);
 });
 
-// ============================================================
-// ACF — Groupes de champs par catégorie de produit
-// ============================================================
-
-// Approche fiable : on enregistre le groupe ACF uniquement quand WordPress
-// confirme qu'on édite un produit de la bonne catégorie (hook add_meta_boxes).
-// Pas de dépendance aux location rules ACF pour les taxonomies custom.
-add_action('add_meta_boxes', function () {
-  if (!function_exists('acf_add_local_field_group')) return;
-
-  global $post;
-  if (!$post || $post->post_type !== 'product') return;
-
-  // ----------------------------------------------------------
-  // Lampadaires — champs spécifiques
-  // ----------------------------------------------------------
-  if (has_term('lampadaires', 'product_cat', $post)) {
-    acf_add_local_field_group([
-      'key'    => 'group_lampadaires_specs',
-      'title'  => 'Fiche technique — Lampadaires',
-      'fields' => [
-        [
-          'key'          => 'field_hauteur_totale',
-          'label'        => 'Hauteur totale',
-          'name'         => 'hauteur_totale',
-          'type'         => 'text',
-          'placeholder'  => 'ex : 165 cm',
-          'instructions' => 'Hauteur totale du lampadaire (pied + abat-jour inclus)',
-        ],
-      ],
-      'location' => [
-        [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'product' ] ],
-      ],
-      'position'        => 'normal',
-      'style'           => 'default',
-      'label_placement' => 'top',
-    ]);
-  }
-});
 
 // Save the opt-out choice as order meta
 add_action('woocommerce_set_additional_field_value', function ($key, $value, $group, $wc_object) {
