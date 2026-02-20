@@ -11100,7 +11100,7 @@ transform: translateY(15px);
 /* Titre */
 .sapi-cart-outer .wc-block-cart__main .wp-block-heading {
   font-family: var(--font-body) !important;
-  font-size: clamp(1.25rem, 2.5vw, 1.75rem) !important;
+  font-size: 1.1rem !important;
   font-weight: 900 !important;
   color: var(--color-dark) !important;
 }

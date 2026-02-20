@@ -114,6 +114,7 @@ add_action('wp_enqueue_scripts', 'sapi_maison_enqueue_assets');
  */
 add_filter('render_block', function ($content, $block) {
   if ($block['blockName'] === 'woocommerce/cart') {
+    $content = str_replace('Ça peut vous intéresser…', 'Avez vous déjà la bonne ampoule ?', $content);
     return '<div class="sapi-cart-outer">' . $content . '</div>';
   }
   return $content;
