@@ -11156,6 +11156,13 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   font-weight: 600 !important;
 }
 
+/* "Validation de commande express" reçoit la classe .sapi-express-title via render_block
+   — on la remet à un poids léger, hors du scope des H2 bold */
+body.woocommerce-checkout .sapi-checkout-outer h2.sapi-express-title,
+body.woocommerce-checkout .sapi-checkout-outer .sapi-express-title {
+  font-weight: 400 !important;
+}
+
 /* Images produits arrondies */
 .sapi-cart-outer .wc-block-cart-item__image img,
 .sapi-cart-outer .wc-block-components-product-image img {
