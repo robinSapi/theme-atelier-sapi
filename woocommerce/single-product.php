@@ -979,6 +979,14 @@ get_header();
   const introScreen = document.getElementById('product-intro-screen');
 
   if (introScreen) {
+    // N'afficher l'intro qu'une seule fois par session par produit.
+    // Après un ajout au panier (rechargement), l'intro ne réapparaît pas.
+    const introKey = 'sapi_intro_<?php echo $product->get_id(); ?>';
+    if (sessionStorage.getItem(introKey)) {
+      introScreen.remove();
+    } else {
+      sessionStorage.setItem(introKey, '1');
+
     let introRemoved = false;
     let scrollProgress = 0;
     const fadeDistance = 200;
@@ -1054,6 +1062,7 @@ get_header();
       introScreen.addEventListener('touchstart', handleTouchStart, { passive: true });
       introScreen.addEventListener('touchmove', handleTouchMove, { passive: false });
     }, 800);
+    } // end else (intro non encore vue)
   }
 
   const stickyBar = document.getElementById('sticky-add-to-cart');
@@ -1321,6 +1330,54 @@ get_header();
         navigateToImage(newIndex);
       }
     }
+  }
+
+  // ========================================
+  // AJAX Add to Cart — remplace le POST classique pour éviter le rechargement
+  // ========================================
+  const cartForm = document.querySelector('form.cart');
+  if (cartForm && typeof jQuery !== 'undefined') {
+    cartForm.addEventListener('submit', function(e) {
+      const btn = cartForm.querySelector('.single_add_to_cart_button');
+      // Laisser passer si le bouton est désactivé (variation non sélectionnée)
+      if (!btn || btn.classList.contains('disabled') || btn.disabled) return;
+      e.preventDefault();
+
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Ajout en cours…';
+
+      const formData = new FormData(cartForm);
+      formData.set('add-to-cart', '<?php echo $product->get_id(); ?>');
+
+      fetch('/?wc-ajax=add_to_cart', {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        btn.disabled = false;
+        if (data.error) {
+          btn.textContent = originalText;
+          return;
+        }
+        // Succès
+        btn.textContent = 'Ajouté !';
+        setTimeout(function() { btn.textContent = originalText; }, 2500);
+        // Déclenche la mise à jour du mini-cart et l'ouverture du volet
+        jQuery(document.body).trigger('added_to_cart', [data.fragments, data.cart_hash]);
+        if (data.fragments) {
+          jQuery.each(data.fragments, function(key, value) {
+            jQuery(key).replaceWith(value);
+          });
+        }
+      })
+      .catch(function() {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      });
+    });
   }
 
   // Buy Now (Express Checkout) - Phase 4 Proposal B
