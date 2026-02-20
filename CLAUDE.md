@@ -105,6 +105,17 @@ mainImage.src = newImage;
 mainImage.srcset = ''; // OBLIGATOIRE
 ```
 
+### 10. ❌ Utiliser `$acf` comme nom de variable dans un template WordPress
+**ACF stocke son singleton global dans `$acf`. Les templates WordPress s'exécutent dans le scope global, donc écrire `$acf = true` écrase le singleton !**
+```php
+// INTERDIT – écrase le singleton global d'ACF → "Call to a member function init() on true"
+$acf = function_exists('get_field');
+
+// CORRECT
+$has_acf = function_exists('get_field');
+```
+**Variables globales réservées à éviter** : `$acf`, `$wpdb`, `$wp`, `$wp_query`, `$post`
+
 ---
 
 ## 📂 STRUCTURE FICHIERS CLÉS
