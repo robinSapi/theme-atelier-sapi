@@ -660,10 +660,10 @@ img[loading="lazy"]:not([data-src]) {
 @keyframes illuminateSpread {
   0% {
     transform: translate(-50%, -50%) scale(0);
-    opacity: 0.7;
+    opacity: 1;
   }
-  40% {
-    opacity: 0.35;
+  30% {
+    opacity: 0.8;
   }
   100% {
     transform: translate(-50%, -50%) scale(1);
@@ -679,9 +679,9 @@ img[loading="lazy"]:not([data-src]) {
   height: 200vmax;
   border-radius: 50%;
   background: radial-gradient(circle,
-    rgba(227, 91, 36, 0.22) 0%,
-    rgba(237, 168, 72, 0.10) 30%,
-    rgba(254, 253, 251, 0.04) 55%,
+    rgba(227, 91, 36, 0.45) 0%,
+    rgba(237, 168, 72, 0.20) 30%,
+    rgba(254, 253, 251, 0.08) 55%,
     transparent 75%);
   animation: illuminateSpread 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }

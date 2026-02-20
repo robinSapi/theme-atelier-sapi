@@ -294,16 +294,16 @@
   let lastAddToCartButton = null;
 
   document.addEventListener('click', function(e) {
-    const btn = e.target.closest('.single_add_to_cart_button, .add_to_cart_button, .ajax_add_to_cart');
+    const btn = e.target.closest('.single_add_to_cart_button, .add_to_cart_button, .ajax_add_to_cart, .sticky-add-btn');
     if (btn) lastAddToCartButton = btn;
   }, true);
 
   function illuminateSite(originElement) {
-    const overlay = document.createElement('div');
+    var overlay = document.createElement('div');
     overlay.className = 'cart-illuminate-overlay';
 
     if (originElement) {
-      const rect = originElement.getBoundingClientRect();
+      var rect = originElement.getBoundingClientRect();
       overlay.style.left = (rect.left + rect.width / 2) + 'px';
       overlay.style.top = (rect.top + rect.height / 2) + 'px';
     } else {
@@ -323,8 +323,10 @@
       // Illuminate the site with warm light
       illuminateSite(lastAddToCartButton);
       lastAddToCartButton = null;
-      // Auto-open cart when item added
-      openMiniCart();
+      // Delay mini cart opening so the light effect is visible first
+      setTimeout(function() {
+        openMiniCart();
+      }, 400);
     });
 
     // Update cart count badge
