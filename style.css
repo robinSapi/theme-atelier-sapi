@@ -11293,12 +11293,16 @@ body.woocommerce-cart {
 }
 
 /* Titres de sections du formulaire */
-.sapi-checkout-outer .wc-block-components-checkout-step__title,
-.sapi-checkout-outer .wp-block-woocommerce-checkout-express-payment-block .wc-block-components-express-payment__title {
+.sapi-checkout-outer .wc-block-components-checkout-step__title {
   font-family: var(--font-body) !important;
   font-size: 1rem !important;
   font-weight: 600 !important;
   color: var(--color-dark) !important;
+}
+
+/* Titre section paiement express — doit rester léger comme "Ou continuez ci-dessous" */
+.sapi-checkout-outer .wc-block-components-express-payment__title {
+  font-weight: 400 !important;
 }
 
 /* Labels des champs — labels flottants WooCommerce Blocks */
