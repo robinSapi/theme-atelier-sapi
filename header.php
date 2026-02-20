@@ -1,7 +1,7 @@
 <?php
 $is_simplified = function_exists('is_cart') && (is_cart() || is_checkout());
 $logo_id  = get_theme_mod('custom_logo');
-$logo_url = $logo_id ? wp_get_attachment_image_url($logo_id, 'full') : get_template_directory_uri() . '/assets/logo_sapi.svg';
+$logo_url = $logo_id ? wp_get_attachment_image_url($logo_id, 'full') : home_url('/wp-content/uploads/2024/12/logo_sapi.svg');
 $logo_alt = get_bloginfo('name');
 ?><!doctype html>
 <html <?php language_attributes(); ?>>

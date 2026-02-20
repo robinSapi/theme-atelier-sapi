@@ -394,142 +394,151 @@ get_header();
     </div>
 
     <?php
-    // ── Déterminer la catégorie produit ──
-    $product_cat_slugs = [];
-    if ($product_cats && !is_wp_error($product_cats)) {
-      foreach ($product_cats as $cat) {
-        $product_cat_slugs[] = $cat->slug;
-      }
-    }
-    $is_suspension = in_array('suspensions', $product_cat_slugs);
-    $is_lampadaire = in_array('lampadaires', $product_cat_slugs);
-    $is_lampe_poser = in_array('lampeaposer', $product_cat_slugs) || in_array('lampes-a-poser', $product_cat_slugs);
-    $is_applique = in_array('appliques', $product_cat_slugs) || in_array('appliques-murales', $product_cat_slugs);
-
-    $acf = function_exists('get_field');
-
-    // ── Dimensions (champs existants + WooCommerce) ──
-    $dimensions_str = '';
-    $poids = '';
-    if ($acf) {
-      $dimensions = get_field('dimensions');
-      $hauteur = get_field('hauteur');
-      $largeur = get_field('largeur');
-      $profondeur = get_field('profondeur');
-      $poids = get_field('poids');
-
-      if ($dimensions) {
-        $dimensions_str = $dimensions;
-      } elseif ($hauteur || $largeur || $profondeur) {
-        $dim_parts = [];
-        if ($largeur) $dim_parts[] = 'L ' . $largeur;
-        if ($profondeur) $dim_parts[] = 'P ' . $profondeur;
-        if ($hauteur) $dim_parts[] = 'H ' . $hauteur;
-        $dimensions_str = implode(' × ', $dim_parts);
-      }
-    }
-    if (!$dimensions_str && $product) {
-      $wc_dims = wc_format_dimensions($product->get_dimensions(false));
-      if ($wc_dims && $wc_dims !== 'N/A') {
-        $dimensions_str = $wc_dims;
-      }
-    }
-    if (!$poids) {
-      $poids = $product && $product->get_weight() ? $product->get_weight() . ' kg' : '';
-    }
-
-    // ── Champs ACF communs (avec fallbacks) ──
-    $culot             = ($acf ? get_field('culot') : '')             ?: 'E27';
-    $ampoule_reco      = ($acf ? get_field('ampoule_recommandee') : '') ?: 'LED filament 4-6W (2700K)';
-    $ampoule_incluse   = ($acf ? get_field('ampoule_incluse') : '')  ?: 'Non (disponible en option)';
-    $materiau_structure = ($acf ? get_field('materiau_structure') : '') ?: '100% bois';
-    $finition          = ($acf ? get_field('finition') : '')         ?: 'Contreplaqué poncé';
-    $assemblage        = ($acf ? get_field('assemblage') : '')       ?: 'Notice et tuto vidéo';
-    $difficulte        = ($acf ? get_field('installation_difficulte') : '') ?: 'Facile (15-30 min)';
-    $outils_requis     = ($acf ? get_field('assemblage_outils') : '') ?: 'Aucun';
-    $entretien         = ($acf ? get_field('entretien') : '')        ?: 'Chiffon sec ou plumeau';
-
-    // ── Champs ACF par catégorie (pas de fallback, affichés seulement si remplis) ──
-    $longueur_cable       = $acf ? get_field('longueur_cable') : '';
-    $materiau_cable       = $acf ? get_field('materiau_cable') : '';
-    $compatible_dcl       = $acf ? get_field('compatible_dcl') : '';
-    $compatible_variateur = $acf ? get_field('compatible_variateur') : '';
-    $rosace               = $acf ? get_field('rosace') : '';
-    $hauteur_totale       = $acf ? get_field('hauteur_totale') : '';
-    $hauteur_ampoule_ft   = $acf ? get_field('hauteur_ampoule') : '';
-    $interrupteur         = $acf ? get_field('interrupteur') : '';
-    $fixation_murale      = $acf ? get_field('fixation_murale') : '';
-    $type_connexion       = $acf ? get_field('type_connexion') : '';
-
-    // ── Construire les 4 sections de specs ──
-
-    // Section 1 : Dimensions & Produit
-    $specs_dimensions = [];
-    $specs_dimensions[] = ['label' => 'Dimensions', 'value' => $dimensions_str ?: 'Voir variations'];
-    if ($poids) {
-      $specs_dimensions[] = ['label' => 'Poids', 'value' => $poids];
-    }
-    if ($is_lampadaire && $hauteur_totale) {
-      $specs_dimensions[] = ['label' => 'Hauteur totale', 'value' => $hauteur_totale];
-    }
-    if ($is_lampadaire && $hauteur_ampoule_ft) {
-      $specs_dimensions[] = ['label' => 'Hauteur ampoule', 'value' => $hauteur_ampoule_ft];
-    }
-    if ($longueur_cable) {
-      $specs_dimensions[] = ['label' => 'Longueur câble', 'value' => $longueur_cable];
-    }
-    if ($is_suspension && $rosace) {
-      $specs_dimensions[] = ['label' => 'Rosace', 'value' => $rosace];
-    }
-    if ($is_applique && $fixation_murale) {
-      $specs_dimensions[] = ['label' => 'Fixation murale', 'value' => $fixation_murale];
-    }
-    if ($is_applique && $type_connexion) {
-      $specs_dimensions[] = ['label' => 'Connexion électrique', 'value' => $type_connexion];
-    }
-
-    // Section 2 : Éclairage
-    $specs_eclairage = [];
-    $specs_eclairage[] = ['label' => 'Culot', 'value' => $culot];
-    $specs_eclairage[] = ['label' => 'Ampoule recommandée', 'value' => $ampoule_reco];
-    $specs_eclairage[] = ['label' => 'Ampoule incluse', 'value' => $ampoule_incluse];
-    if ($compatible_variateur) {
-      $specs_eclairage[] = ['label' => 'Compatible variateur', 'value' => $compatible_variateur];
-    }
-    if ($compatible_dcl) {
-      $specs_eclairage[] = ['label' => 'Compatible DCL', 'value' => $compatible_dcl];
-    }
-
-    // Section 3 : Matériaux
-    $specs_materiaux = [];
-    $specs_materiaux[] = ['label' => 'Structure', 'value' => $materiau_structure];
-    $specs_materiaux[] = ['label' => 'Finition', 'value' => $finition];
-    if ($materiau_cable) {
-      $specs_materiaux[] = ['label' => 'Câble', 'value' => $materiau_cable];
-    }
-
-    // Section 4 : Installation
-    $specs_installation = [];
-    $specs_installation[] = ['label' => 'Assemblage', 'value' => $assemblage];
-    $specs_installation[] = ['label' => 'Difficulté', 'value' => $difficulte];
-    $specs_installation[] = ['label' => 'Outils requis', 'value' => $outils_requis];
-    $specs_installation[] = ['label' => 'Entretien', 'value' => $entretien];
-    if ($interrupteur) {
-      $specs_installation[] = ['label' => 'Interrupteur', 'value' => $interrupteur];
-    }
-
-    // SVG icons
+    // SVG icons (définis avant le try pour être disponibles dans le catch aussi)
     $icon_dimensions   = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>';
     $icon_eclairage    = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>';
     $icon_materiaux    = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>';
     $icon_installation = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>';
 
+    // Valeurs par défaut (fallback statique si le try échoue)
     $spec_sections = [
-      ['title' => 'Dimensions',   'icon' => $icon_dimensions,   'items' => $specs_dimensions],
-      ['title' => 'Éclairage',    'icon' => $icon_eclairage,    'items' => $specs_eclairage],
-      ['title' => 'Matériaux',    'icon' => $icon_materiaux,    'items' => $specs_materiaux],
-      ['title' => 'Installation', 'icon' => $icon_installation, 'items' => $specs_installation],
+      ['title' => 'Dimensions',   'icon' => $icon_dimensions,   'items' => [
+        ['label' => 'Dimensions', 'value' => 'Voir variations'],
+      ]],
+      ['title' => 'Éclairage',    'icon' => $icon_eclairage,    'items' => [
+        ['label' => 'Culot',              'value' => 'E27'],
+        ['label' => 'Ampoule recommandée','value' => 'LED filament 4-6W (2700K)'],
+        ['label' => 'Ampoule incluse',    'value' => 'Non (disponible en option)'],
+      ]],
+      ['title' => 'Matériaux',    'icon' => $icon_materiaux,    'items' => [
+        ['label' => 'Structure', 'value' => '100% bois'],
+        ['label' => 'Finition',  'value' => 'Contreplaqué poncé'],
+      ]],
+      ['title' => 'Installation', 'icon' => $icon_installation, 'items' => [
+        ['label' => 'Assemblage',   'value' => 'Notice et tuto vidéo'],
+        ['label' => 'Difficulté',   'value' => 'Facile (15-30 min)'],
+        ['label' => 'Entretien',    'value' => 'Chiffon sec ou plumeau'],
+      ]],
     ];
+
+    try {
+      // ── Déterminer la catégorie produit ──
+      $product_cat_slugs = [];
+      if ($product_cats && !is_wp_error($product_cats)) {
+        foreach ($product_cats as $cat) {
+          $product_cat_slugs[] = $cat->slug;
+        }
+      }
+      $is_suspension  = in_array('suspensions', $product_cat_slugs);
+      $is_lampadaire  = in_array('lampadaires', $product_cat_slugs);
+      $is_lampe_poser = in_array('lampeaposer', $product_cat_slugs) || in_array('lampes-a-poser', $product_cat_slugs);
+      $is_applique    = in_array('appliques', $product_cat_slugs) || in_array('appliques-murales', $product_cat_slugs);
+
+      $acf = function_exists('get_field');
+
+      // ── Dimensions (champs ACF + WooCommerce en fallback) ──
+      $dimensions_str = '';
+      $poids = '';
+      if ($acf) {
+        $dimensions = get_field('dimensions');
+        $hauteur    = get_field('hauteur');
+        $largeur    = get_field('largeur');
+        $profondeur = get_field('profondeur');
+        $poids      = (string) get_field('poids');
+
+        if ($dimensions) {
+          $dimensions_str = (string) $dimensions;
+        } elseif ($hauteur || $largeur || $profondeur) {
+          $dim_parts = [];
+          if ($largeur)    $dim_parts[] = 'L ' . $largeur;
+          if ($profondeur) $dim_parts[] = 'P ' . $profondeur;
+          if ($hauteur)    $dim_parts[] = 'H ' . $hauteur;
+          $dimensions_str = implode(' × ', $dim_parts);
+        }
+      }
+      if (!$dimensions_str && $product && function_exists('wc_format_dimensions')) {
+        $wc_dims = wc_format_dimensions($product->get_dimensions(false));
+        if ($wc_dims && $wc_dims !== 'N/A') {
+          $dimensions_str = $wc_dims;
+        }
+      }
+      if (!$poids) {
+        $weight = $product ? $product->get_weight() : '';
+        $poids  = $weight ? $weight . ' kg' : '';
+      }
+
+      // ── Champs ACF communs (avec fallbacks) ──
+      $culot              = ($acf ? (string) get_field('culot') : '')                    ?: 'E27';
+      $ampoule_reco       = ($acf ? (string) get_field('ampoule_recommandee') : '')      ?: 'LED filament 4-6W (2700K)';
+      $ampoule_incluse    = ($acf ? (string) get_field('ampoule_incluse') : '')          ?: 'Non (disponible en option)';
+      $materiau_structure = ($acf ? (string) get_field('materiau_structure') : '')       ?: '100% bois';
+      $finition           = ($acf ? (string) get_field('finition') : '')                 ?: 'Contreplaqué poncé';
+      $assemblage         = ($acf ? (string) get_field('assemblage') : '')               ?: 'Notice et tuto vidéo';
+      $difficulte         = ($acf ? (string) get_field('installation_difficulte') : '')  ?: 'Facile (15-30 min)';
+      $outils_requis      = ($acf ? (string) get_field('assemblage_outils') : '')        ?: 'Aucun';
+      $entretien          = ($acf ? (string) get_field('entretien') : '')                ?: 'Chiffon sec ou plumeau';
+
+      // ── Champs ACF par catégorie (pas de fallback) ──
+      $longueur_cable       = $acf ? (string) get_field('longueur_cable')       : '';
+      $materiau_cable       = $acf ? (string) get_field('materiau_cable')       : '';
+      $compatible_dcl       = $acf ? (string) get_field('compatible_dcl')       : '';
+      $compatible_variateur = $acf ? (string) get_field('compatible_variateur') : '';
+      $rosace               = $acf ? (string) get_field('rosace')               : '';
+      $hauteur_totale       = $acf ? (string) get_field('hauteur_totale')       : '';
+      $hauteur_ampoule_ft   = $acf ? (string) get_field('hauteur_ampoule')      : '';
+      $interrupteur         = $acf ? (string) get_field('interrupteur')         : '';
+      $fixation_murale      = $acf ? (string) get_field('fixation_murale')      : '';
+      $type_connexion       = $acf ? (string) get_field('type_connexion')       : '';
+
+      // ── Construire les 4 sections de specs ──
+
+      // Section 1 : Dimensions & Produit
+      $specs_dimensions   = [];
+      $specs_dimensions[] = ['label' => 'Dimensions', 'value' => $dimensions_str ?: 'Voir variations'];
+      if ($poids)                             $specs_dimensions[] = ['label' => 'Poids',              'value' => $poids];
+      if ($is_lampadaire && $hauteur_totale)  $specs_dimensions[] = ['label' => 'Hauteur totale',     'value' => $hauteur_totale];
+      if ($is_lampadaire && $hauteur_ampoule_ft) $specs_dimensions[] = ['label' => 'Hauteur ampoule', 'value' => $hauteur_ampoule_ft];
+      if ($longueur_cable)                    $specs_dimensions[] = ['label' => 'Longueur câble',     'value' => $longueur_cable];
+      if ($is_suspension && $rosace)          $specs_dimensions[] = ['label' => 'Rosace',             'value' => $rosace];
+      if ($is_applique && $fixation_murale)   $specs_dimensions[] = ['label' => 'Fixation murale',    'value' => $fixation_murale];
+      if ($is_applique && $type_connexion)    $specs_dimensions[] = ['label' => 'Connexion électrique','value' => $type_connexion];
+
+      // Section 2 : Éclairage
+      $specs_eclairage   = [];
+      $specs_eclairage[] = ['label' => 'Culot',               'value' => $culot];
+      $specs_eclairage[] = ['label' => 'Ampoule recommandée', 'value' => $ampoule_reco];
+      $specs_eclairage[] = ['label' => 'Ampoule incluse',     'value' => $ampoule_incluse];
+      if ($compatible_variateur) $specs_eclairage[] = ['label' => 'Compatible variateur', 'value' => $compatible_variateur];
+      if ($compatible_dcl)       $specs_eclairage[] = ['label' => 'Compatible DCL',       'value' => $compatible_dcl];
+
+      // Section 3 : Matériaux
+      $specs_materiaux   = [];
+      $specs_materiaux[] = ['label' => 'Structure', 'value' => $materiau_structure];
+      $specs_materiaux[] = ['label' => 'Finition',  'value' => $finition];
+      if ($materiau_cable) $specs_materiaux[] = ['label' => 'Câble', 'value' => $materiau_cable];
+
+      // Section 4 : Installation
+      $specs_installation   = [];
+      $specs_installation[] = ['label' => 'Assemblage',  'value' => $assemblage];
+      $specs_installation[] = ['label' => 'Difficulté',  'value' => $difficulte];
+      $specs_installation[] = ['label' => 'Outils requis','value' => $outils_requis];
+      $specs_installation[] = ['label' => 'Entretien',   'value' => $entretien];
+      if ($interrupteur) $specs_installation[] = ['label' => 'Interrupteur', 'value' => $interrupteur];
+
+      $spec_sections = [
+        ['title' => 'Dimensions',   'icon' => $icon_dimensions,   'items' => $specs_dimensions],
+        ['title' => 'Éclairage',    'icon' => $icon_eclairage,    'items' => $specs_eclairage],
+        ['title' => 'Matériaux',    'icon' => $icon_materiaux,    'items' => $specs_materiaux],
+        ['title' => 'Installation', 'icon' => $icon_installation, 'items' => $specs_installation],
+      ];
+
+    } catch (\Throwable $e) {
+      // Log pour débogage serveur
+      error_log('[Sapi] Fiche technique error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+      // Commentaire HTML visible dans le source pour identifier l'erreur exacte
+      echo "\n<!-- [SAPI-DEBUG] " . esc_html($e->getMessage()) . ' (' . esc_html(basename($e->getFile())) . ':' . (int)$e->getLine() . ") -->\n";
+      // $spec_sections garde les valeurs par défaut définies avant le try
+    }
     ?>
 
     <!-- Accordion Mobile -->
