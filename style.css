@@ -11111,10 +11111,9 @@ transform: translateY(15px);
   margin-bottom: 1.5rem !important;
 }
 
-/* Noms produits — Product Collection block (WC Blocks moderne)
-   Les titres sont des <a> dans .wc-block-components-product-title */
-.sapi-cart-outer .wc-block-cart__cross-sells .wc-block-components-product-title,
-.sapi-cart-outer .wc-block-cart__cross-sells .wc-block-components-product-title a {
+/* Noms produits — Product Collection utilise wp-block-post-title (bloc Gutenberg) */
+.sapi-cart-outer .wc-block-cart__cross-sells .wp-block-post-title,
+.sapi-cart-outer .wc-block-cart__cross-sells .wp-block-post-title a {
   font-family: var(--font-body) !important;
   font-weight: 700 !important;
   color: var(--color-dark) !important;
