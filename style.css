@@ -11180,7 +11180,7 @@ body.woocommerce-order-received {
 .sapi-cart-outer .wc-block-cart__main .wp-block-heading {
   font-family: var(--font-body) !important;
   font-size: 1.1rem !important;
-  font-weight: 900 !important;
+  font-weight: 300 !important;
   color: var(--color-dark) !important;
 }
 
