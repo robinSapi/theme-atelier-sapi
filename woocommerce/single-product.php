@@ -1128,7 +1128,7 @@ get_header();
         }
 
         // Mettre à jour "Bois" avec le libellé sélectionné dans l'attribut Matériau
-        const materiauSelect = variationForm.querySelector('select[name*="mati"]');
+        const materiauSelect = variationForm.querySelector('select[name*="materiau"]');
         if (materiauSelect && materiauSelect.selectedIndex > 0) {
           updateBoisSpec(materiauSelect.options[materiauSelect.selectedIndex].text);
         }
