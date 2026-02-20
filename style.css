@@ -9845,22 +9845,33 @@ transform: translateY(15px);
 }
 
 .mini-cart-close {
-  width: 40px;
-  height: 40px;
-  border: none;
-  background: var(--color-gray-light);
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid var(--color-wood);
   border-radius: 50%;
-  font-size: 1.5rem;
-  line-height: 1;
-  color: var(--color-dark);
   cursor: pointer;
-  -webkit-transition: all 0.3s var(--ease-smooth);
-  transition: all 0.3s var(--ease-smooth);
+  padding: 10px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-wood);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(147, 125, 104, 0.15);
+  flex-shrink: 0;
+}
+
+.mini-cart-close svg {
+  display: block;
+  width: 24px;
+  height: 24px;
 }
 
 .mini-cart-close:hover {
-  background: var(--color-wood);
+  background: var(--color-orange);
+  border-color: var(--color-orange);
   color: var(--color-white);
+  transform: scale(1.1);
 }
 
 .mini-cart-body {
