@@ -434,12 +434,13 @@ get_header();
       $is_lampe_poser = in_array('lampeaposer', $product_cat_slugs) || in_array('lampes-a-poser', $product_cat_slugs);
       $is_applique    = in_array('appliques', $product_cat_slugs) || in_array('appliques-murales', $product_cat_slugs);
 
-      $acf = function_exists('get_field');
+      // IMPORTANT : ne pas nommer cette variable $acf — c'est le nom du singleton global ACF !
+      $has_acf = function_exists('get_field');
 
       // ── Dimensions (champs ACF + WooCommerce en fallback) ──
       $dimensions_str = '';
       $poids = '';
-      if ($acf) {
+      if ($has_acf) {
         $dimensions = get_field('dimensions');
         $hauteur    = get_field('hauteur');
         $largeur    = get_field('largeur');
@@ -468,27 +469,27 @@ get_header();
       }
 
       // ── Champs ACF communs (avec fallbacks) ──
-      $culot              = ($acf ? (string) get_field('culot') : '')                    ?: 'E27';
-      $ampoule_reco       = ($acf ? (string) get_field('ampoule_recommandee') : '')      ?: 'LED filament 4-6W (2700K)';
-      $ampoule_incluse    = ($acf ? (string) get_field('ampoule_incluse') : '')          ?: 'Non (disponible en option)';
-      $materiau_structure = ($acf ? (string) get_field('materiau_structure') : '')       ?: '100% bois';
-      $finition           = ($acf ? (string) get_field('finition') : '')                 ?: 'Contreplaqué poncé';
-      $assemblage         = ($acf ? (string) get_field('assemblage') : '')               ?: 'Notice et tuto vidéo';
-      $difficulte         = ($acf ? (string) get_field('installation_difficulte') : '')  ?: 'Facile (15-30 min)';
-      $outils_requis      = ($acf ? (string) get_field('assemblage_outils') : '')        ?: 'Aucun';
-      $entretien          = ($acf ? (string) get_field('entretien') : '')                ?: 'Chiffon sec ou plumeau';
+      $culot              = ($has_acf ? (string) get_field('culot') : '')                    ?: 'E27';
+      $ampoule_reco       = ($has_acf ? (string) get_field('ampoule_recommandee') : '')      ?: 'LED filament 4-6W (2700K)';
+      $ampoule_incluse    = ($has_acf ? (string) get_field('ampoule_incluse') : '')          ?: 'Non (disponible en option)';
+      $materiau_structure = ($has_acf ? (string) get_field('materiau_structure') : '')       ?: '100% bois';
+      $finition           = ($has_acf ? (string) get_field('finition') : '')                 ?: 'Contreplaqué poncé';
+      $assemblage         = ($has_acf ? (string) get_field('assemblage') : '')               ?: 'Notice et tuto vidéo';
+      $difficulte         = ($has_acf ? (string) get_field('installation_difficulte') : '')  ?: 'Facile (15-30 min)';
+      $outils_requis      = ($has_acf ? (string) get_field('assemblage_outils') : '')        ?: 'Aucun';
+      $entretien          = ($has_acf ? (string) get_field('entretien') : '')                ?: 'Chiffon sec ou plumeau';
 
       // ── Champs ACF par catégorie (pas de fallback) ──
-      $longueur_cable       = $acf ? (string) get_field('longueur_cable')       : '';
-      $materiau_cable       = $acf ? (string) get_field('materiau_cable')       : '';
-      $compatible_dcl       = $acf ? (string) get_field('compatible_dcl')       : '';
-      $compatible_variateur = $acf ? (string) get_field('compatible_variateur') : '';
-      $rosace               = $acf ? (string) get_field('rosace')               : '';
-      $hauteur_totale       = $acf ? (string) get_field('hauteur_totale')       : '';
-      $hauteur_ampoule_ft   = $acf ? (string) get_field('hauteur_ampoule')      : '';
-      $interrupteur         = $acf ? (string) get_field('interrupteur')         : '';
-      $fixation_murale      = $acf ? (string) get_field('fixation_murale')      : '';
-      $type_connexion       = $acf ? (string) get_field('type_connexion')       : '';
+      $longueur_cable       = $has_acf ? (string) get_field('longueur_cable')       : '';
+      $materiau_cable       = $has_acf ? (string) get_field('materiau_cable')       : '';
+      $compatible_dcl       = $has_acf ? (string) get_field('compatible_dcl')       : '';
+      $compatible_variateur = $has_acf ? (string) get_field('compatible_variateur') : '';
+      $rosace               = $has_acf ? (string) get_field('rosace')               : '';
+      $hauteur_totale       = $has_acf ? (string) get_field('hauteur_totale')       : '';
+      $hauteur_ampoule_ft   = $has_acf ? (string) get_field('hauteur_ampoule')      : '';
+      $interrupteur         = $has_acf ? (string) get_field('interrupteur')         : '';
+      $fixation_murale      = $has_acf ? (string) get_field('fixation_murale')      : '';
+      $type_connexion       = $has_acf ? (string) get_field('type_connexion')       : '';
 
       // ── Construire les 4 sections de specs ──
 
