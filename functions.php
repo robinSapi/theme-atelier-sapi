@@ -1225,3 +1225,26 @@ function sapi_format_product_for_search($product) {
   ];
 }
 
+/**
+ * Newsletter opt-out checkbox on checkout
+ * Adds a checkbox below "Ajouter une note de commande" (location: order)
+ */
+add_action('woocommerce_init', function () {
+  if (!function_exists('woocommerce_register_additional_checkout_field')) return;
+
+  woocommerce_register_additional_checkout_field([
+    'id'       => 'sapi-maison/newsletter-optout',
+    'label'    => 'Je ne souhaite pas recevoir les actualités de l\'Atelier Sâpi',
+    'location' => 'order',
+    'type'     => 'checkbox',
+    'default'  => false,
+  ]);
+});
+
+// Save the opt-out choice as order meta
+add_action('woocommerce_set_additional_field_value', function ($key, $value, $group, $wc_object) {
+  if ($key !== 'sapi-maison/newsletter-optout') return;
+  if (!($wc_object instanceof WC_Order)) return;
+  $wc_object->update_meta_data('_sapi_newsletter_optout', wc_bool_to_string($value));
+}, 10, 4);
+
