@@ -1315,6 +1315,11 @@ add_action('init', function () {
           'operator' => '==',
           'value'    => 'product',
         ],
+        [
+          'param'    => 'product_cat',
+          'operator' => '==',
+          'value'    => 'lampadaires',
+        ],
       ],
     ],
     'position'        => 'normal',
