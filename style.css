@@ -11093,27 +11093,21 @@ transform: translateY(15px);
   color: var(--color-wood) !important;
 }
 
-/* ---- Cross-sells "Ça peut vous intéresser…" ---- */
-.sapi-cart-outer .wc-block-cart__cross-sells {
-  margin-top: 3rem;
-  padding-top: 2rem;
-  border-top: 2px solid var(--color-gray-light, #e8e2d9);
-}
+/* ---- Cross-sells "Ça peut vous intéresser…" ----
+   Tout est dans .wc-block-cart__main, pas de wrapper dédié.
+   Classes confirmées via inspection DOM live. */
 
-/* Titre — cible h2 et la classe explicite de WC Blocks */
-.sapi-cart-outer .wc-block-cart__cross-sells h2,
-.sapi-cart-outer .wc-block-cart__cross-sells > h2,
-.sapi-cart-outer .wc-block-cart__cross-sells-title {
+/* Titre */
+.sapi-cart-outer .wc-block-cart__main .wp-block-heading {
   font-family: var(--font-body) !important;
   font-size: clamp(1.25rem, 2.5vw, 1.75rem) !important;
   font-weight: 900 !important;
   color: var(--color-dark) !important;
-  margin-bottom: 1.5rem !important;
 }
 
-/* Noms produits — Product Collection utilise wp-block-post-title (bloc Gutenberg) */
-.sapi-cart-outer .wc-block-cart__cross-sells .wp-block-post-title,
-.sapi-cart-outer .wc-block-cart__cross-sells .wp-block-post-title a {
+/* Noms produits (wp-block-post-title + son lien <a>) */
+.sapi-cart-outer .wc-block-cart__main .wp-block-post-title,
+.sapi-cart-outer .wc-block-cart__main .wp-block-post-title a {
   font-family: var(--font-body) !important;
   font-weight: 700 !important;
   color: var(--color-dark) !important;
@@ -11121,18 +11115,15 @@ transform: translateY(15px);
 }
 
 /* Prix */
-.sapi-cart-outer .wc-block-cart__cross-sells .wc-block-components-product-price,
-.sapi-cart-outer .wc-block-cart__cross-sells .wc-block-components-product-price .woocommerce-Price-amount {
+.sapi-cart-outer .wc-block-cart__main .wc-block-components-product-price,
+.sapi-cart-outer .wc-block-cart__main .wc-block-components-product-price .woocommerce-Price-amount {
   font-weight: 700 !important;
   color: var(--color-wood) !important;
 }
 
 /* Bouton "Ajouter au panier" — orange CTA
-   Product Collection block utilise .wc-block-components-product-add-to-cart */
-.sapi-cart-outer .wc-block-cart__cross-sells .wc-block-components-product-add-to-cart a,
-.sapi-cart-outer .wc-block-cart__cross-sells .wc-block-components-product-add-to-cart button,
-.sapi-cart-outer .wc-block-cart__cross-sells .wp-block-button__link,
-.sapi-cart-outer .wc-block-cart__cross-sells .add_to_cart_button {
+   Classe confirmée : .wc-block-components-product-button__button */
+.sapi-cart-outer .wc-block-cart__main .wc-block-components-product-button__button {
   background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%) !important;
   color: #fff !important;
   border-radius: 12px !important;
@@ -11145,10 +11136,7 @@ transform: translateY(15px);
   transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
 
-.sapi-cart-outer .wc-block-cart__cross-sells .wc-block-components-product-add-to-cart a:hover,
-.sapi-cart-outer .wc-block-cart__cross-sells .wc-block-components-product-add-to-cart button:hover,
-.sapi-cart-outer .wc-block-cart__cross-sells .wp-block-button__link:hover,
-.sapi-cart-outer .wc-block-cart__cross-sells .add_to_cart_button:hover {
+.sapi-cart-outer .wc-block-cart__main .wc-block-components-product-button__button:hover {
   background: linear-gradient(180deg, #D14F1C 0%, #B8431A 100%) !important;
   box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35) !important;
   transform: translateY(-1px) !important;
