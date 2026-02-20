@@ -138,9 +138,16 @@ add_filter('woocommerce_short_description', function ($description) {
 });
 add_filter('wc_blocks_product_short_description_character_limit', '__return_false');
 
+// Surcharge de traduction — remplace le texte cross-sell à la source
+add_filter('gettext', function ($translated, $original, $domain) {
+  if ($original === 'You may also like&hellip;' || $original === 'You may also like…') {
+    return 'Avez-vous déjà la bonne ampoule ?';
+  }
+  return $translated;
+}, 10, 3);
+
 add_filter('render_block', function ($content, $block) {
   if ($block['blockName'] === 'woocommerce/cart') {
-    $content = str_replace('Ça peut vous intéresser…', 'Avez vous déjà la bonne ampoule ?', $content);
     return '<div class="sapi-cart-outer">' . $content . '</div>';
   }
   if ($block['blockName'] === 'woocommerce/checkout') {
