@@ -11328,6 +11328,11 @@ body.woocommerce-cart {
   color: var(--color-dark) !important;
 }
 
+/* Masquer le prix individuel en doublon (le total de ligne est déjà affiché à droite) */
+.sapi-checkout-outer .wc-block-components-order-summary-item__individual-prices {
+  display: none !important;
+}
+
 .sapi-checkout-outer .wc-block-components-product-price {
   font-weight: 700 !important;
   color: var(--color-wood) !important;
