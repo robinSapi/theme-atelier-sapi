@@ -11292,12 +11292,10 @@ body.woocommerce-cart {
   box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35) !important;
 }
 
-/* Titres de sections du formulaire */
-.sapi-checkout-outer .wc-block-components-checkout-step__title,
-.sapi-checkout-outer .wp-block-woocommerce-checkout-express-payment-block .wc-block-components-express-payment__title {
+/* Titres de sections du formulaire — sans font-weight pour ne pas écraser "Validation de commande express" */
+.sapi-checkout-outer .wc-block-components-checkout-step__title {
   font-family: var(--font-body) !important;
   font-size: 1rem !important;
-  font-weight: 600 !important;
   color: var(--color-dark) !important;
 }
 
