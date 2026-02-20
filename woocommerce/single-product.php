@@ -1094,6 +1094,7 @@ get_header();
 
     const origBoisValue       = getOrigSpecValue('Bois');
     const origDimensionsValue = getOrigSpecValue('Dimensions');
+    const origPoidsValue      = getOrigSpecValue('Poids');
 
     if (variationForm && typeof jQuery !== 'undefined') {
       jQuery(variationForm).on('found_variation', function(event, variation) {
@@ -1147,6 +1148,9 @@ get_header();
         // Mettre à jour "Dimensions" avec le libellé sélectionné dans l'attribut Taille
         const tailleLabel = getVariationAttributeLabel('taille');
         if (tailleLabel) updateSpecLabel('Dimensions', tailleLabel);
+
+        // Mettre à jour "Poids" depuis les données WooCommerce de la variation
+        if (variation.weight) updateSpecLabel('Poids', variation.weight);
       });
 
       jQuery(variationForm).on('reset_data', function() {
@@ -1175,6 +1179,7 @@ get_header();
         // Restaurer les valeurs originales
         if (origBoisValue)       updateSpecLabel('Bois',       origBoisValue);
         if (origDimensionsValue) updateSpecLabel('Dimensions', origDimensionsValue);
+        if (origPoidsValue)      updateSpecLabel('Poids',      origPoidsValue);
       });
     }
   }
