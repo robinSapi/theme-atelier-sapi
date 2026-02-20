@@ -1283,6 +1283,49 @@ add_action('woocommerce_init', function () {
   ]);
 });
 
+// ============================================================
+// ACF — Groupes de champs par catégorie de produit
+// ============================================================
+
+add_action('acf/init', function () {
+  if (!function_exists('acf_add_local_field_group')) return;
+
+  // ----------------------------------------------------------
+  // Lampadaires — champs spécifiques
+  // ----------------------------------------------------------
+  acf_add_local_field_group([
+    'key'    => 'group_lampadaires_specs',
+    'title'  => 'Fiche technique — Lampadaires',
+    'fields' => [
+      [
+        'key'          => 'field_hauteur_totale',
+        'label'        => 'Hauteur totale',
+        'name'         => 'hauteur_totale',
+        'type'         => 'text',
+        'placeholder'  => 'ex : 165 cm',
+        'instructions' => 'Hauteur totale du lampadaire (pied + abat-jour inclus)',
+      ],
+    ],
+    'location' => [
+      [
+        [
+          'param'    => 'post_type',
+          'operator' => '==',
+          'value'    => 'product',
+        ],
+        [
+          'param'    => 'product_cat',
+          'operator' => '==',
+          'value'    => 'lampadaires',
+        ],
+      ],
+    ],
+    'position'        => 'normal',
+    'style'           => 'default',
+    'label_placement' => 'top',
+  ]);
+});
+
 // Save the opt-out choice as order meta
 add_action('woocommerce_set_additional_field_value', function ($key, $value, $group, $wc_object) {
   if ($key !== 'sapi-maison/newsletter-optout') return;
