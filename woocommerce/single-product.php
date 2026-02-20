@@ -1060,27 +1060,40 @@ get_header();
       originalFirstThumbData = firstThumb.dataset.image;
     }
 
-    // Valeur originale du champ "Bois" dans la fiche technique (pour restauration)
-    const origBoisValue = (() => {
+    // Lecture de la valeur originale d'un champ de la fiche technique
+    function getOrigSpecValue(label) {
       for (const item of document.querySelectorAll('.spec-item')) {
         const lbl = item.querySelector('.spec-label');
-        if (lbl && lbl.textContent.trim() === 'Bois') {
+        if (lbl && lbl.textContent.trim() === label) {
           const val = item.querySelector('.spec-value');
           return val ? val.textContent : '';
         }
       }
       return '';
-    })();
+    }
 
-    function updateBoisSpec(value) {
+    // Mise à jour d'un champ de la fiche technique par son libellé
+    function updateSpecLabel(label, value) {
       document.querySelectorAll('.spec-item').forEach(item => {
         const lbl = item.querySelector('.spec-label');
-        if (lbl && lbl.textContent.trim() === 'Bois') {
+        if (lbl && lbl.textContent.trim() === label) {
           const val = item.querySelector('.spec-value');
           if (val) val.textContent = value;
         }
       });
     }
+
+    // Lecture du libellé sélectionné dans un attribut de variation (swatches ou select natif)
+    function getVariationAttributeLabel(attrName) {
+      const swatch = variationForm.querySelector('.variable-items-wrapper[data-attribute_name*="' + attrName + '"] .variable-item.selected');
+      if (swatch) return swatch.dataset.title || swatch.getAttribute('title') || '';
+      const select = variationForm.querySelector('select[name*="' + attrName + '"]');
+      if (select && select.value) return select.options[select.selectedIndex]?.text || '';
+      return '';
+    }
+
+    const origBoisValue       = getOrigSpecValue('Bois');
+    const origDimensionsValue = getOrigSpecValue('Dimensions');
 
     if (variationForm && typeof jQuery !== 'undefined') {
       jQuery(variationForm).on('found_variation', function(event, variation) {
@@ -1128,20 +1141,12 @@ get_header();
         }
 
         // Mettre à jour "Bois" avec le libellé sélectionné dans l'attribut Matériau
-        let materiauLabel = '';
-        // 1. Woo Variation Swatches : swatch sélectionné avec data-title
-        const materiauSwatch = variationForm.querySelector('.variable-items-wrapper[data-attribute_name*="materiau"] .variable-item.selected');
-        if (materiauSwatch) {
-          materiauLabel = materiauSwatch.dataset.title || materiauSwatch.getAttribute('title') || '';
-        }
-        // 2. Fallback : select natif (attribut local ou swatches non activés)
-        if (!materiauLabel) {
-          const materiauSelect = variationForm.querySelector('select[name*="materiau"]');
-          if (materiauSelect && materiauSelect.value) {
-            materiauLabel = materiauSelect.options[materiauSelect.selectedIndex]?.text || '';
-          }
-        }
-        if (materiauLabel) updateBoisSpec(materiauLabel);
+        const materiauLabel = getVariationAttributeLabel('materiau');
+        if (materiauLabel) updateSpecLabel('Bois', materiauLabel);
+
+        // Mettre à jour "Dimensions" avec le libellé sélectionné dans l'attribut Taille
+        const tailleLabel = getVariationAttributeLabel('taille');
+        if (tailleLabel) updateSpecLabel('Dimensions', tailleLabel);
       });
 
       jQuery(variationForm).on('reset_data', function() {
@@ -1167,8 +1172,9 @@ get_header();
           }
         }
 
-        // Restaurer la valeur originale du champ Bois
-        if (origBoisValue) updateBoisSpec(origBoisValue);
+        // Restaurer les valeurs originales
+        if (origBoisValue)       updateSpecLabel('Bois',       origBoisValue);
+        if (origDimensionsValue) updateSpecLabel('Dimensions', origDimensionsValue);
       });
     }
   }
