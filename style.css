@@ -7990,8 +7990,6 @@ transform: translateY(15px);
 
 .collections-kinetic {
   padding: 1.5rem 0 3rem 0;
-  max-width: 1600px;
-  margin: 0 auto;
   overflow-x: hidden;
 }
 
