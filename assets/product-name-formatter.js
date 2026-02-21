@@ -34,13 +34,16 @@
 
     // Sélecteurs spéciaux mini-cart (nom + variation séparés)
     const miniCartSelectors = [
-      '.mini-cart-item-name'
+      '.mini-cart-item-name',
+      '.sapi-thankyou-outer .product-name' // Page confirmation commande
     ];
 
     // Pour chaque sélecteur, formater les noms
     selectors.forEach(selector => {
       const elements = document.querySelectorAll(selector);
       elements.forEach(element => {
+        // Exclure les éléments de la page thankyou (traités par miniCartSelectors)
+        if (element.closest('.sapi-thankyou-outer')) return;
         if (isInAllowedCategory(element)) {
           formatProductName(element);
         }
