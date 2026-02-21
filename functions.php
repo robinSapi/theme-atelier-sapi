@@ -635,14 +635,18 @@ function sapi_render_mini_cart_contents() {
               $full_name = $product->get_name();
               $base_name = $full_name;
               $variation_label = '';
-              if ($product->is_type('variation')) {
-                $parent_product = wc_get_product($product->get_parent_id());
-                if ($parent_product) {
-                  $base_name = $parent_product->get_name();
-                  $variation_attrs = $product->get_attributes();
+              if (!empty($cart_item['variation_id']) && $cart_item['variation_id'] > 0) {
+                $parent = wc_get_product($cart_item['product_id']);
+                if ($parent) {
+                  $base_name = $parent->get_name();
                   $variation_parts = [];
-                  foreach ($variation_attrs as $attr_key => $attr_value) {
-                    $variation_parts[] = ucfirst($attr_value);
+                  if (!empty($cart_item['variation'])) {
+                    foreach ($cart_item['variation'] as $attr_key => $attr_value) {
+                      if (!$attr_value) continue;
+                      $taxonomy = str_replace('attribute_', '', $attr_key);
+                      $term = get_term_by('slug', $attr_value, $taxonomy);
+                      $variation_parts[] = $term ? $term->name : ucfirst(str_replace('-', ' ', $attr_value));
+                    }
                   }
                   $variation_label = implode(', ', $variation_parts);
                 }
