@@ -13515,6 +13515,15 @@ body.woocommerce-cart div.woocommerce-wrapper {
   box-sizing: border-box;
 }
 
+/* Grand merci en Square Peg */
+.thankyou-merci {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 8vw, 6rem);
+  color: var(--color-wood);
+  margin-bottom: 0.5rem;
+}
+
 /* Hero succès */
 .thankyou-hero {
   text-align: center;

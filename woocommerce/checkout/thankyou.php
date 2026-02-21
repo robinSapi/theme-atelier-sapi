@@ -40,6 +40,9 @@ defined('ABSPATH') || exit;
     </div>
   </div>
 
+  <!-- Grand merci -->
+  <div class="thankyou-merci">Merci !</div>
+
   <!-- Hero succès -->
   <div class="thankyou-hero">
     <h1>Votre luminaire va bientôt voir le jour</h1>
