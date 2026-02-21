@@ -600,7 +600,7 @@ get_header();
               <div class="spec-item spec-item-ampoule">
                 <button type="button" class="add-ampoule-btn" data-product-id="<?php echo esc_attr($item['product_id']); ?>">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                  Ajouter l'ampoule — <?php echo esc_html(wc_price($item['price'])); ?>
+                  Ajouter l'ampoule — <?php echo wp_kses_post(wc_price($item['price'])); ?>
                 </button>
               </div>
               <?php else : ?>
@@ -631,7 +631,7 @@ get_header();
               <div class="spec-item spec-item-ampoule">
                 <button type="button" class="add-ampoule-btn" data-product-id="<?php echo esc_attr($item['product_id']); ?>">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                  Ajouter l'ampoule — <?php echo esc_html(wc_price($item['price'])); ?>
+                  Ajouter l'ampoule — <?php echo wp_kses_post(wc_price($item['price'])); ?>
                 </button>
               </div>
               <?php else : ?>
