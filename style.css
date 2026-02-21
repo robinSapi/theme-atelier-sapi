@@ -13515,13 +13515,86 @@ body.woocommerce-cart div.woocommerce-wrapper {
   box-sizing: border-box;
 }
 
-/* Grand merci en Square Peg */
+/* ===== ANIMATION SÉQUENTIELLE THANKYOU ===== */
+
+/* État initial : tout est invisible */
+.sapi-thankyou-outer .checkout-progress .progress-step,
+.sapi-thankyou-outer .checkout-progress .progress-line {
+  opacity: 0;
+  transform: scale(0.5);
+  animation: thankyouPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Phase 1 : les 3 étapes apparaissent une par une */
+.sapi-thankyou-outer .checkout-progress .progress-step:nth-child(1) { animation-delay: 0.3s; }
+.sapi-thankyou-outer .checkout-progress .progress-line:nth-child(2) { animation-delay: 0.6s; }
+.sapi-thankyou-outer .checkout-progress .progress-step:nth-child(3) { animation-delay: 0.9s; }
+.sapi-thankyou-outer .checkout-progress .progress-line:nth-child(4) { animation-delay: 1.2s; }
+.sapi-thankyou-outer .checkout-progress .progress-step:nth-child(5) { animation-delay: 1.5s; }
+
+@keyframes thankyouPopIn {
+  0% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Phase 2 : "Merci !" — effet écriture manuscrite */
 .thankyou-merci {
   text-align: center;
   font-family: var(--font-display);
   font-size: clamp(5rem, 14vw, 10rem);
   color: var(--color-wood);
   margin-bottom: 0.5rem;
+  opacity: 0;
+  display: inline-block;
+  width: 100%;
+  overflow: hidden;
+  animation: thankyouMerciReveal 1s ease forwards;
+  animation-delay: 2s;
+}
+
+@keyframes thankyouMerciReveal {
+  0% { opacity: 0; clip-path: inset(0 100% 0 0); }
+  20% { opacity: 1; }
+  100% { opacity: 1; clip-path: inset(0 0% 0 0); }
+}
+
+/* Phase 3 : le reste de la page apparaît progressivement */
+.sapi-thankyou-outer .thankyou-hero,
+.sapi-thankyou-outer .thankyou-reassurance,
+.sapi-thankyou-outer .thankyou-layout,
+.sapi-thankyou-outer .thankyou-social,
+.sapi-thankyou-outer .thankyou-cta {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: thankyouFadeUp 0.6s ease forwards;
+}
+
+.sapi-thankyou-outer .thankyou-hero { animation-delay: 3.2s; }
+.sapi-thankyou-outer .thankyou-reassurance { animation-delay: 3.5s; }
+.sapi-thankyou-outer .thankyou-layout { animation-delay: 3.8s; }
+.sapi-thankyou-outer .thankyou-social { animation-delay: 4.1s; }
+.sapi-thankyou-outer .thankyou-cta { animation-delay: 4.4s; }
+
+@keyframes thankyouFadeUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Désactiver les animations si l'utilisateur préfère le mouvement réduit */
+@media (prefers-reduced-motion: reduce) {
+  .sapi-thankyou-outer .checkout-progress .progress-step,
+  .sapi-thankyou-outer .checkout-progress .progress-line,
+  .thankyou-merci,
+  .sapi-thankyou-outer .thankyou-hero,
+  .sapi-thankyou-outer .thankyou-reassurance,
+  .sapi-thankyou-outer .thankyou-layout,
+  .sapi-thankyou-outer .thankyou-social,
+  .sapi-thankyou-outer .thankyou-cta {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    clip-path: none !important;
+  }
 }
 
 /* Hero succès */
