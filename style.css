@@ -13785,6 +13785,82 @@ body.woocommerce-cart div.woocommerce-wrapper {
   line-height: 1.7;
 }
 
+/* Réassurance post-achat */
+.thankyou-reassurance {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin-bottom: 3rem;
+  padding: 0 2rem;
+}
+
+.thankyou-reassurance-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex: 1;
+  max-width: 320px;
+}
+
+.thankyou-reassurance-item svg {
+  flex-shrink: 0;
+  color: var(--color-wood);
+  margin-top: 2px;
+}
+
+.thankyou-reassurance-item strong {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-dark);
+  margin-bottom: 0.2rem;
+}
+
+.thankyou-reassurance-item span {
+  font-size: 0.8rem;
+  color: var(--color-gray);
+  line-height: 1.5;
+}
+
+/* Réseaux sociaux */
+.thankyou-social {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.thankyou-social p {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-gray);
+  margin-bottom: 0.75rem;
+}
+
+.thankyou-social-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.thankyou-social-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--color-gray-light, #e8e2d9);
+  color: var(--color-wood);
+  transition: all 0.2s ease;
+}
+
+.thankyou-social-links a:hover {
+  background: var(--color-wood);
+  color: #fff;
+  border-color: var(--color-wood);
+}
+
 /* CTA retour boutique */
 .thankyou-cta {
   text-align: center;
@@ -13854,6 +13930,16 @@ body.woocommerce-cart div.woocommerce-wrapper {
 
   .sapi-thankyou-outer .woocommerce-columns--addresses {
     grid-template-columns: 1fr;
+  }
+
+  .thankyou-reassurance {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .thankyou-reassurance-item {
+    max-width: 100%;
   }
 }
 
