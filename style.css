@@ -8475,7 +8475,7 @@ transform: translateY(15px);
 
   /* Cards that need minimum height for their background images */
   .bento-hero {
-    min-height: 400px;
+    min-height: 300px;
   }
 
   .bento-product-featured {
