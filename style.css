@@ -13667,17 +13667,12 @@ body.woocommerce-cart div.woocommerce-wrapper {
   letter-spacing: 0.1em;
   color: var(--color-gray);
   padding: 0.75rem 1rem;
-  border-bottom: 2px solid var(--color-gray-light, #e8e2d9);
-  border-top: none;
-  border-left: none;
-  border-right: none;
+  border: none;
 }
 
 .sapi-thankyou-outer .woocommerce-table--order-details td {
   padding: 1.25rem 1rem;
-  border-bottom: 1px solid var(--color-gray-light, #e8e2d9);
-  border-left: none;
-  border-right: none;
+  border: none;
   vertical-align: middle;
 }
 
@@ -13700,9 +13695,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .sapi-thankyou-outer .woocommerce-table--order-details tfoot tr td,
 .sapi-thankyou-outer .woocommerce-table--order-details tfoot tr th {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--color-gray-light, #e8e2d9);
-  border-left: none;
-  border-right: none;
+  border: none;
   font-size: 0.9rem;
   text-transform: none;
   letter-spacing: normal;
@@ -13710,17 +13703,12 @@ body.woocommerce-cart div.woocommerce-wrapper {
   color: var(--color-gray);
 }
 
-/* Supprimer toute bordure extérieure du tableau WooCommerce */
+/* Supprimer toute bordure du tableau WooCommerce */
 .sapi-thankyou-outer .woocommerce-table--order-details,
 .sapi-thankyou-outer .woocommerce-table--order-details tr,
 .sapi-thankyou-outer .woocommerce-table--order-details th,
 .sapi-thankyou-outer .woocommerce-table--order-details td {
-  border-left: none !important;
-  border-right: none !important;
-}
-
-.sapi-thankyou-outer .woocommerce-table--order-details tr:last-child td {
-  border-bottom: none;
+  border: none !important;
 }
 
 .sapi-thankyou-outer .woocommerce-table--order-details tfoot .order-total td,
