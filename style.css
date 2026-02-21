@@ -12410,7 +12410,12 @@ body.woocommerce-cart {
 
 /* Produits simples (pas de variations) : espacement quantité / bouton */
 .product-form-v2 form.cart:not(.variations_form) .quantity {
-  margin-bottom: 1rem;
+  display: inline-flex;
+  margin-bottom: 1rem !important;
+}
+
+.product-form-v2 form.cart:not(.variations_form) .single_add_to_cart_button {
+  margin-top: 0.5rem;
 }
 
 /* Introduction aux variations */
