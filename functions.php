@@ -429,7 +429,7 @@ function sapi_maison_meta_description() {
         'lampadaire' => 'Nos lampadaires en bois sculptés transforment vos espaces. Éclairage d\'ambiance unique, fabriqués en France à Lyon.',
         'applique' => 'Appliques murales artisanales en bois. Créez des jeux de lumière poétiques sur vos murs. Chaque pièce est unique.',
         'lampe-a-poser' => 'Lampes à poser portables en bois. Déplacez-les où vous voulez pour créer une bulle de lumière intime.',
-        'accessoire' => 'Accessoires pour luminaires artisanaux. Ampoules, câbles textile et pièces détachées pour vos créations Atelier Sâpi.',
+        'accessoires' => 'Accessoires pour luminaires artisanaux. Ampoules, câbles textile et pièces détachées pour vos créations Atelier Sâpi.',
       ];
       $description = isset($descs[$term->slug]) ? $descs[$term->slug] : wp_strip_all_tags(term_description($term->term_id, 'product_cat'));
     }
@@ -534,7 +534,7 @@ add_action('template_redirect', function() {
     'nos-suspensions' => 'suspension',
     'nos-appliques' => 'applique',
     'nos-lampes-a-poser' => 'lampe-a-poser',
-    'les-accessoires' => 'accessoire',
+    'les-accessoires' => 'accessoires',
   ];
 
   if (isset($category_redirects[$page_slug])) {
@@ -802,7 +802,7 @@ add_filter('document_title_parts', function($title) {
       'lampadaire' => 'Lampadaires en bois design',
       'applique' => 'Appliques murales artisanales',
       'lampe-a-poser' => 'Lampes à poser en bois',
-      'accessoire' => 'Accessoires pour luminaires',
+      'accessoires' => 'Accessoires pour luminaires',
     ];
 
     if (isset($category_titles[$term->slug])) {
@@ -1123,7 +1123,7 @@ function sapi_product_search($request) {
       [
         'taxonomy' => 'product_cat',
         'field' => 'slug',
-        'terms' => ['accessoire'], // Exclude accessories category
+        'terms' => ['accessoires'], // Exclude accessories category
         'operator' => 'NOT IN',
       ],
     ],

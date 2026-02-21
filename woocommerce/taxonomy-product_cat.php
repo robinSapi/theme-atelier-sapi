@@ -27,7 +27,7 @@ $category_intro = [
   'lampadaires' => "L'éclairage d'ambiance parfait pour structurer votre espace sans percer le plafond. Nos lampadaires en bois allient design sculptural et lumière chaleureuse.",
   'appliques' => "Libérez vos sols, habillez vos murs. Nos appliques murales en bois créent une atmosphère unique tout en dessinant des jeux d'ombres poétiques.",
   'lampeaposer' => "La touche finale qui change tout. Posez-la où vous voulez, déplacez-la au gré de vos envies : nos lampes nomades créent une bulle de lumière intime partout chez vous.",
-  'accessoire' => "Les bons accessoires font toute la différence. Ampoules filament, douilles certifiées, câbles premium : tout pour sublimer vos luminaires en toute sécurité.",
+  'accessoires' => "Les bons accessoires font toute la différence. Ampoules filament, douilles certifiées, câbles premium : tout pour sublimer vos luminaires en toute sécurité.",
 ];
 
 if (function_exists('sapi_maison_breadcrumbs')) {
@@ -42,7 +42,7 @@ if (function_exists('sapi_maison_breadcrumbs')) {
   <?php endif; ?>
 </section>
 
-<?php if ($term_slug !== 'accessoire') : ?>
+<?php if ($term_slug !== 'accessoires') : ?>
 <?php
 // Section "Le coup de cœur de l'Atelier" — best-seller de la catégorie
 $featured_query = new WP_Query([
@@ -107,7 +107,7 @@ endif;
 <!-- PHASE 2: Full product grid (all products) -->
 <section class="category-products-grid">
   <div class="products-grid-header">
-    <?php $masculin = in_array($term_slug, ['accessoire', 'lampadaires']); ?>
+    <?php $masculin = in_array($term_slug, ['accessoires', 'lampadaires']); ?>
     <h2><span class="section-num">02</span> <?php echo $masculin ? 'Tous nos' : 'Toutes nos'; ?> <?php echo esc_html(strtolower($term_name)); ?></h2>
   </div>
 
@@ -254,7 +254,7 @@ $editorial_style = $ambiance_bg_url ? 'style="background-image: url(' . esc_url(
           'Commode → Petit point lumineux pour guider la nuit'
         ]
       ],
-      'accessoire' => [
+      'accessoires' => [
         'tagline' => 'Les détails qui font toute la différence',
         'intro' => 'Un beau luminaire mérite les bons accessoires. Ampoules à filament pour les jeux d\'ombres, douilles de qualité pour la sécurité, pieds adaptés pour les lampadaires... C\'est ici que vous trouvez tout pour parfaire votre installation.',
         'why' => 'Pourquoi ces accessoires comptent ?',
