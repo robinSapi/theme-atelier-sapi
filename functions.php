@@ -632,24 +632,14 @@ function sapi_render_mini_cart_contents() {
           <div class="mini-cart-item-details">
             <?php
               // Séparer le nom du produit des attributs de variation
+              // Le nom WooCommerce est au format "Nom Produit - Attr1, Attr2"
               $full_name = $product->get_name();
               $base_name = $full_name;
               $variation_label = '';
-              if (!empty($cart_item['variation_id']) && $cart_item['variation_id'] > 0) {
-                $parent = wc_get_product($cart_item['product_id']);
-                if ($parent) {
-                  $base_name = $parent->get_name();
-                  $variation_parts = [];
-                  if (!empty($cart_item['variation'])) {
-                    foreach ($cart_item['variation'] as $attr_key => $attr_value) {
-                      if (!$attr_value) continue;
-                      $taxonomy = str_replace('attribute_', '', $attr_key);
-                      $term = get_term_by('slug', $attr_value, $taxonomy);
-                      $variation_parts[] = $term ? $term->name : ucfirst(str_replace('-', ' ', $attr_value));
-                    }
-                  }
-                  $variation_label = implode(', ', $variation_parts);
-                }
+              if (strpos($full_name, ' - ') !== false) {
+                $parts = explode(' - ', $full_name, 2);
+                $base_name = trim($parts[0]);
+                $variation_label = trim($parts[1]);
               }
             ?>
             <span class="mini-cart-item-name">
