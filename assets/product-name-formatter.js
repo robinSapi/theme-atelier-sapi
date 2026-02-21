@@ -32,6 +32,11 @@
       '.wc-block-components-product-name' // Panier + récap commande (WooCommerce Blocks)
     ];
 
+    // Sélecteurs spéciaux mini-cart (nom + variation séparés)
+    const miniCartSelectors = [
+      '.mini-cart-item-name'
+    ];
+
     // Pour chaque sélecteur, formater les noms
     selectors.forEach(selector => {
       const elements = document.querySelectorAll(selector);
@@ -39,6 +44,14 @@
         if (isInAllowedCategory(element)) {
           formatProductName(element);
         }
+      });
+    });
+
+    // Pour le mini-cart, formatage spécial (sépare variation)
+    miniCartSelectors.forEach(selector => {
+      const elements = document.querySelectorAll(selector);
+      elements.forEach(element => {
+        formatMiniCartName(element);
       });
     });
   }
@@ -102,6 +115,50 @@
     target.innerHTML = `<span class="product-firstname">${firstName}</span> <span class="product-restname">${rest}</span>`;
   }
 
+  /**
+   * Formate un nom de produit dans le mini-cart
+   * Sépare "Vincent L'incandescent - Peuplier, 18 cm x 33cm" en :
+   *   - Nom formaté (prénom + restname)
+   *   - Variation sur une ligne séparée
+   */
+  function formatMiniCartName(element) {
+    if (element.querySelector('.product-firstname')) return;
+
+    const link = element.querySelector('a');
+    const target = link || element;
+    const fullText = target.textContent.trim();
+    if (!fullText) return;
+
+    // Séparer nom produit et attributs de variation sur " - "
+    var productName = fullText;
+    var variationText = '';
+    var dashIndex = fullText.indexOf(' - ');
+    if (dashIndex !== -1) {
+      productName = fullText.substring(0, dashIndex).trim();
+      variationText = fullText.substring(dashIndex + 3).trim();
+    }
+
+    // Formater le nom (prénom + restname)
+    var words = productName.split(' ');
+    var nameHTML = '';
+    if (words.length < 2) {
+      nameHTML = '<span class="product-firstname">' + productName + '</span>';
+    } else {
+      nameHTML = '<span class="product-firstname">' + words[0] + '</span> <span class="product-restname">' + words.slice(1).join(' ') + '</span>';
+    }
+
+    // Injecter dans le lien ou l'élément
+    target.innerHTML = nameHTML;
+
+    // Ajouter la variation après le lien (dans l'élément parent, pas dans le <a>)
+    if (variationText) {
+      var variationSpan = document.createElement('span');
+      variationSpan.className = 'mini-cart-item-variation';
+      variationSpan.textContent = variationText;
+      element.appendChild(variationSpan);
+    }
+  }
+
   // Observer pour les nouveaux éléments ajoutés dynamiquement (AJAX, infinite scroll, etc.)
   const observer = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
@@ -128,6 +185,17 @@
             const children = node.querySelectorAll ? node.querySelectorAll(selector) : [];
             children.forEach(child => {
               if (isInAllowedCategory(child)) formatProductName(child);
+            });
+          });
+
+          // Mini-cart : formatage spécial
+          ['.mini-cart-item-name'].forEach(selector => {
+            if (node.matches && node.matches(selector)) {
+              formatMiniCartName(node);
+            }
+            const children = node.querySelectorAll ? node.querySelectorAll(selector) : [];
+            children.forEach(child => {
+              formatMiniCartName(child);
             });
           });
         }
