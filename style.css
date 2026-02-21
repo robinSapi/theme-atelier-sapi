@@ -13519,7 +13519,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .thankyou-merci {
   text-align: center;
   font-family: var(--font-display);
-  font-size: clamp(3.5rem, 8vw, 6rem);
+  font-size: clamp(5rem, 14vw, 10rem);
   color: var(--color-wood);
   margin-bottom: 0.5rem;
 }
