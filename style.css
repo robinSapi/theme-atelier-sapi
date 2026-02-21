@@ -10129,6 +10129,15 @@ transform: translateY(15px);
   font-size: 0.9rem;
 }
 
+.mini-cart-item-name a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.mini-cart-item-name a:hover {
+  color: var(--color-wood);
+}
+
 .mini-cart-item-meta {
   font-size: 0.8rem;
   color: var(--color-gray);
