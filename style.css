@@ -14657,7 +14657,13 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* Mobile adjustments */
 @media (max-width: 768px) {
   .product-intro-screen {
-    height: 100dvh;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: auto;
+    inset: 0;
     z-index: 10002;
   }
 
