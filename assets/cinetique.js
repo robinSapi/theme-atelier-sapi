@@ -458,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.querySelectorAll('.product-image, .collection-visual').forEach(img => {
     img.style.opacity = '0';
-    img.style.transition = 'opacity 0.6s ease';
+    img.style.transition = 'opacity 0.6s ease, transform 0.8s var(--ease-expo)';
     imageObserver.observe(img);
   });
 
