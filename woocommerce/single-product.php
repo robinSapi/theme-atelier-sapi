@@ -758,43 +758,6 @@ get_header();
   <?php endif; // fin exclusion avis accessoires ?>
 
   <!-- ═══════════════════════════════════════════════════════════════
-       SECTION 06 — GALERIE AMBIANCE
-       ═══════════════════════════════════════════════════════════════ -->
-  <section class="product-gallery-large">
-    <?php
-    $has_acf_images = false;
-
-    if (function_exists('get_field')) {
-      $acf_images = [
-        get_field('ambiance_1'),
-        get_field('ambiance_2'),
-      ];
-
-      $acf_images = array_filter($acf_images);
-
-      if (!empty($acf_images)) {
-        $has_acf_images = true;
-        foreach ($acf_images as $img) {
-          if (isset($img['url'])) {
-            echo '<div class="gallery-large-item"><img src="' . esc_url($img['url']) . '" alt="' . esc_attr(get_the_title()) . ' - ambiance" loading="lazy"></div>';
-          }
-        }
-      }
-    }
-
-    if (!$has_acf_images && !empty($gallery_ids)) {
-      $lifestyle_images = array_slice($gallery_ids, 0, 2);
-      foreach ($lifestyle_images as $img_id) {
-        $img_url = wp_get_attachment_image_url($img_id, 'large');
-        if ($img_url) {
-          echo '<div class="gallery-large-item"><img src="' . esc_url($img_url) . '" alt="' . esc_attr(get_the_title()) . ' - ambiance" loading="lazy"></div>';
-        }
-      }
-    }
-    ?>
-  </section>
-
-  <!-- ═══════════════════════════════════════════════════════════════
        SECTION 07 — FAQ
        ═══════════════════════════════════════════════════════════════ -->
   <section class="product-faq product-faq-cinetique">
