@@ -157,6 +157,13 @@ add_filter('render_block', function ($content, $block) {
 }, 10, 2);
 
 /**
+ * Page confirmation (thankyou) : on rend manuellement les détails commande
+ * et les adresses client dans notre template custom (2 colonnes).
+ * Empêcher WooCommerce de les re-afficher via do_action('woocommerce_thankyou').
+ */
+remove_action('woocommerce_thankyou', 'woocommerce_order_details_table', 10);
+
+/**
  * Migration unique — supprime Elementor de la page checkout (ID 13).
  * S'exécute une fois au premier chargement admin, puis ne fait plus rien.
  */

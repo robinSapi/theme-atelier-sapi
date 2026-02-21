@@ -13707,7 +13707,12 @@ body.woocommerce-cart div.woocommerce-wrapper {
   padding-top: 1rem;
 }
 
-/* Détails client (adresses) */
+/* Masquer les adresses dans la colonne principale (déjà affichées en sidebar) */
+.thankyou-main .woocommerce-customer-details {
+  display: none;
+}
+
+/* Détails client (adresses) — dans la sidebar */
 .sapi-thankyou-outer .woocommerce-customer-details {
   margin: 0;
 }
