@@ -294,7 +294,16 @@
   // Update mini cart on AJAX add to cart
   if (typeof jQuery !== 'undefined') {
     jQuery(document.body).on('added_to_cart', function() {
-      openMiniCart();
+      var productImg = document.querySelector('.gallery-main-image');
+      if (productImg) {
+        productImg.classList.add('glow-added');
+        productImg.addEventListener('animationend', function() {
+          productImg.classList.remove('glow-added');
+          openMiniCart();
+        }, { once: true });
+      } else {
+        openMiniCart();
+      }
     });
 
     // Update cart count badge
