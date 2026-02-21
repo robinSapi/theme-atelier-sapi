@@ -13710,8 +13710,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
   color: var(--color-gray);
 }
 
-/* Supprimer toute bordure extérieure du tableau WooCommerce */
+/* Supprimer toute bordure latérale du tableau WooCommerce */
 .sapi-thankyou-outer .woocommerce-table--order-details,
+.sapi-thankyou-outer .woocommerce-table--order-details thead,
+.sapi-thankyou-outer .woocommerce-table--order-details tbody,
+.sapi-thankyou-outer .woocommerce-table--order-details tfoot,
 .sapi-thankyou-outer .woocommerce-table--order-details tr,
 .sapi-thankyou-outer .woocommerce-table--order-details th,
 .sapi-thankyou-outer .woocommerce-table--order-details td {
