@@ -209,7 +209,7 @@ get_header();
         <!-- Formulaire d'achat (variations + quantité + CTA) -->
         <div class="product-form-v2">
           <!-- Introduction aux variations -->
-          <?php if (!$is_accessoire && $product->is_type('variable')) : ?>
+          <?php if ($product->is_type('variable')) : ?>
           <p class="variations-intro">Composez votre luminaire :</p>
           <?php endif; ?>
 
