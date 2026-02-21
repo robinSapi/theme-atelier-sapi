@@ -7091,10 +7091,6 @@ body.cursor-hover .cursor-dot {
 
 /* Mobile : ajuster H1 (une ligne) et H2 (deux lignes max) */
 @media (max-width: 768px) {
-  .carousel-container {
-    height: 70vh;
-  }
-
   .carousel-hero-title {
     font-size: clamp(0.95rem, 2vw, 1.7rem);
     letter-spacing: 0.05em;
