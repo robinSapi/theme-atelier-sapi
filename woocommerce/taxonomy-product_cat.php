@@ -42,6 +42,7 @@ if (function_exists('sapi_maison_breadcrumbs')) {
   <?php endif; ?>
 </section>
 
+<?php if ($term_slug !== 'accessoire') : ?>
 <?php
 // Section "Le coup de cœur de l'Atelier" — best-seller de la catégorie
 $featured_query = new WP_Query([
@@ -101,6 +102,7 @@ if ($featured_query->have_posts()) :
   wp_reset_postdata();
 endif;
 ?>
+<?php endif; // fin exclusion accessoire ?>
 
 <!-- PHASE 2: Full product grid (all products) -->
 <section class="category-products-grid">
