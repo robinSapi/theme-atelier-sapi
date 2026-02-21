@@ -12408,6 +12408,15 @@ body.woocommerce-cart {
   margin: 0;
 }
 
+/* Produits simples (pas de variations) : espacement interne du formulaire */
+.product-form-v2 form.cart:not(.variations_form) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
 /* Introduction aux variations */
 .variations-intro {
   font-size: 1.1rem;
