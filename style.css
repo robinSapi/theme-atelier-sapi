@@ -12810,6 +12810,7 @@ body.woocommerce-cart {
   border-radius: 6px;
   overflow: hidden;
   margin-right: 1rem;
+  margin-bottom: 1rem;
 }
 
 .product-form-v2 .quantity input {
