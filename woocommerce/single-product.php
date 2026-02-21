@@ -31,6 +31,12 @@ get_header();
   // Category
   $product_cats = get_the_terms($product_id, 'product_cat');
   $cat_name = $product_cats && !is_wp_error($product_cats) ? $product_cats[0]->name : 'Création';
+  $is_accessoire = false;
+  if ($product_cats && !is_wp_error($product_cats)) {
+    foreach ($product_cats as $pcat) {
+      if ($pcat->slug === 'accessoires') { $is_accessoire = true; break; }
+    }
+  }
 
   // ACF fields
   $phrase = function_exists('get_field') ? get_field('phrase_daccroche') : '';
@@ -203,7 +209,9 @@ get_header();
         <!-- Formulaire d'achat (variations + quantité + CTA) -->
         <div class="product-form-v2">
           <!-- Introduction aux variations -->
+          <?php if (!$is_accessoire) : ?>
           <p class="variations-intro">Composez votre luminaire :</p>
+          <?php endif; ?>
 
           <?php
           // Remove default actions to control order
@@ -228,6 +236,7 @@ get_header();
 
         <!-- Réassurance inline (au-dessus du fold) -->
         <div class="product-reassurance-v2">
+          <?php if (!$is_accessoire) : ?>
           <div class="reassurance-item-v2">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <!-- Lucide person-standing icon -->
@@ -238,6 +247,7 @@ get_header();
             </svg>
             <span>Fabrication <strong>&lt;5 jours</strong></span>
           </div>
+          <?php endif; ?>
           <div class="reassurance-item-v2 reassurance-delivery">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
@@ -282,10 +292,12 @@ get_header();
           </a>
         </div>
 
+        <?php if (!$is_accessoire) : ?>
         <!-- Micro-copy artisan -->
         <p class="product-artisan-note">
           <em>Chaque pièce est découpée au laser puis assemblée à la main dans notre atelier lyonnais.</em>
         </p>
+        <?php endif; ?>
 
       </div>
     </div>
@@ -620,6 +632,7 @@ get_header();
     </div>
   </section>
 
+  <?php if (!$is_accessoire) : ?>
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION 04 — L'ATELIER
        ═══════════════════════════════════════════════════════════════ -->
@@ -664,7 +677,9 @@ get_header();
       </div>
     </div>
   </section>
+  <?php endif; // fin exclusion atelier accessoires ?>
 
+  <?php if (!$is_accessoire) : ?>
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION 05 — TÉMOIGNAGES (Preuve Sociale)
        ═══════════════════════════════════════════════════════════════ -->
@@ -739,6 +754,7 @@ get_header();
     </div>
     <?php endif; ?>
   </section>
+  <?php endif; // fin exclusion avis accessoires ?>
 
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION 06 — GALERIE AMBIANCE
