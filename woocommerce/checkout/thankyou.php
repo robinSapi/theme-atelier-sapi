@@ -40,8 +40,12 @@ defined('ABSPATH') || exit;
     </div>
   </div>
 
-  <!-- Grand merci -->
-  <div class="thankyou-merci">Merci !</div>
+  <!-- Grand merci — animation manuscrite SVG -->
+  <div class="thankyou-merci">
+    <svg viewBox="0 0 500 160" class="thankyou-merci-svg" aria-label="Merci !">
+      <text x="250" y="120" text-anchor="middle">Merci !</text>
+    </svg>
+  </div>
 
   <!-- Hero succès -->
   <div class="thankyou-hero">
