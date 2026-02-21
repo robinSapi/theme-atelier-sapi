@@ -58,7 +58,6 @@ defined('ABSPATH') || exit;
     <!-- Colonne gauche (65%) — Détail de la commande -->
     <div class="thankyou-main">
       <div class="thankyou-card">
-        <h2><?php esc_html_e('Détail de la commande', 'woocommerce'); ?></h2>
         <?php wc_get_template('order/order-details.php', array('order_id' => $order->get_id())); ?>
       </div>
     </div>
