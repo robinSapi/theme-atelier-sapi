@@ -12806,25 +12806,23 @@ body.woocommerce-cart {
 .product-form-v2 .quantity {
   display: inline-flex;
   align-items: center;
-  border: 1.5px solid var(--color-gray-light, #e8e2d9);
-  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
   overflow: hidden;
   margin-right: 1rem;
-  background: var(--color-white, #fff);
 }
 
 .product-form-v2 .quantity input {
   width: 60px;
   text-align: center;
   border: none;
-  border-left: 1px solid var(--color-gray-light, #e8e2d9);
-  border-right: 1px solid var(--color-gray-light, #e8e2d9);
+  border-left: 1px solid rgba(0, 0, 0, 0.08);
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
   font-size: 1rem;
   padding: 0.75rem 0.5rem;
   -moz-appearance: textfield;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--color-dark, #323232);
-  background: transparent;
 }
 
 .product-form-v2 .quantity input::-webkit-inner-spin-button,
@@ -12870,13 +12868,6 @@ body.woocommerce-cart {
 
 .product-form-v2 .qty-plus {
   border-radius: 0 6px 6px 0;
-}
-
-/* Produits simples : quantité centrée et plus large */
-.product-form-v2 form.cart:not(.variations_form) .quantity {
-  display: flex;
-  margin: 0 auto 1rem;
-  margin-right: auto;
 }
 
 /* CTA Principal - Design System Premium 4.1 */
