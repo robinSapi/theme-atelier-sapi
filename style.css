@@ -8112,11 +8112,12 @@ transform: translateY(15px);
   height: 100%;
   background-size: cover;
   background-position: center;
-  transition: transform 0.6s var(--ease-expo);
+  transition: transform 0.8s var(--ease-expo);
+  will-change: transform;
 }
 
 .collection-card:hover .collection-visual {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .collection-card .collection-details {
