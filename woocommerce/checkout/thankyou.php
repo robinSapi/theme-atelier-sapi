@@ -42,7 +42,7 @@ defined('ABSPATH') || exit;
 
   <!-- Hero succès -->
   <div class="thankyou-hero">
-    <h1>Votre luminaire prendra vie dans notre atelier</h1>
+    <h1>Votre luminaire va bientôt voir le jour</h1>
     <p class="thankyou-subtitle">
       Merci <?php echo esc_html($order->get_billing_first_name()); ?>, votre commande <strong>#<?php echo esc_html($order->get_order_number()); ?></strong> est confirmée.<br>
       Un email de confirmation a été envoyé à <strong><?php echo esc_html($order->get_billing_email()); ?></strong>.
