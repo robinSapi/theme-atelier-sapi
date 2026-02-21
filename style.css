@@ -10138,6 +10138,15 @@ transform: translateY(15px);
   color: var(--color-wood);
 }
 
+.mini-cart-item-variation {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--color-wood);
+  margin-bottom: 0.25rem;
+}
+
 .mini-cart-item-meta {
   font-size: 0.8rem;
   color: var(--color-gray);
