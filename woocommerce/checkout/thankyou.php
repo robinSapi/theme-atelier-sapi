@@ -30,21 +30,18 @@ defined('ABSPATH') || exit;
       <span class="step-label">Commande</span>
     </div>
     <div class="progress-line completed"></div>
-    <div class="progress-step active">
-      <div class="step-number">3</div>
+    <div class="progress-step completed">
+      <div class="step-number">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
       <span class="step-label">Confirmation</span>
     </div>
   </div>
 
   <!-- Hero succès -->
   <div class="thankyou-hero">
-    <div class="thankyou-success-icon">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-      </svg>
-    </div>
-    <span class="section-number">03 — Confirmation</span>
     <h1>Votre luminaire prend vie dans notre atelier</h1>
     <p class="thankyou-subtitle">
       Merci <?php echo esc_html($order->get_billing_first_name()); ?>, votre commande <strong>#<?php echo esc_html($order->get_order_number()); ?></strong> est confirmée.<br>
