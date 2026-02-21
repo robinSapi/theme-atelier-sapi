@@ -29,8 +29,7 @@
       '.bento-product-featured h3',      // Bento grid homepage
       '.product-name-small',             // Petites cartes bento
       '.quick-view-title',               // Quick view modal
-      '.wc-block-components-product-name', // Panier + récap commande (WooCommerce Blocks)
-      '.mini-cart-item-name'             // Volet panier latéral
+      '.wc-block-components-product-name' // Panier + récap commande (WooCommerce Blocks)
     ];
 
     // Pour chaque sélecteur, formater les noms
@@ -119,8 +118,7 @@
             '.bento-product-featured h3',
             '.product-name-small',
             '.quick-view-title',
-            '.wc-block-components-product-name',
-            '.mini-cart-item-name'
+            '.wc-block-components-product-name'
           ];
 
           selectors.forEach(selector => {

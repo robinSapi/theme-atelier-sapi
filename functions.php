@@ -630,24 +630,9 @@ function sapi_render_mini_cart_contents() {
             <?php echo $product->get_image('thumbnail'); ?>
           </div>
           <div class="mini-cart-item-details">
-            <?php
-              // Séparer le nom du produit des attributs de variation
-              // Le nom WooCommerce est au format "Nom Produit - Attr1, Attr2"
-              $full_name = $product->get_name();
-              $base_name = $full_name;
-              $variation_label = '';
-              if (strpos($full_name, ' - ') !== false) {
-                $parts = explode(' - ', $full_name, 2);
-                $base_name = trim($parts[0]);
-                $variation_label = trim($parts[1]);
-              }
-            ?>
             <span class="mini-cart-item-name">
-              <?php echo $product_permalink ? '<a href="' . esc_url($product_permalink) . '">' . esc_html($base_name) . '</a>' : esc_html($base_name); ?>
+              <?php echo $product_permalink ? '<a href="' . esc_url($product_permalink) . '">' . esc_html($product->get_name()) . '</a>' : esc_html($product->get_name()); ?>
             </span>
-            <?php if ($variation_label) : ?>
-              <span class="mini-cart-item-variation"><?php echo esc_html($variation_label); ?></span>
-            <?php endif; ?>
             <span class="mini-cart-item-meta">
               <?php echo wc_get_formatted_cart_item_data($cart_item); ?>
               <?php echo sprintf(__('Qté: %d', 'theme-sapi-maison'), $quantity); ?>
