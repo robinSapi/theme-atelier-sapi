@@ -321,6 +321,7 @@ get_header();
         $bandeau_url = $bandeau;
       }
 
+      $section_num = 0; // Compteur dynamique pour numérotation des sections
       if ($bandeau_url) :
         // Random caption
         $captions = [
@@ -331,7 +332,7 @@ get_header();
   ?>
   <section class="product-client-photo">
     <div class="client-photo-header">
-      <span class="section-number">01</span>
+      <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
       <h2><?php echo esc_html($random_caption); ?></h2>
     </div>
     <div class="client-photo-wrapper">
@@ -351,7 +352,7 @@ get_header();
     <div class="product-why-grid">
       <div class="product-why-left">
         <div class="product-why-header">
-          <span class="section-number">02</span>
+          <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
           <h2>Pourquoi cette pièce ?</h2>
         </div>
         <div class="product-why-content">
@@ -400,7 +401,7 @@ get_header();
        ═══════════════════════════════════════════════════════════════ -->
   <section class="product-specs product-specs-v2">
     <div class="product-specs-header">
-      <span class="section-number">03</span>
+      <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
       <h2>Fiche technique</h2>
       <p class="specs-intro">Toutes les informations pour bien choisir votre luminaire</p>
     </div>
@@ -666,7 +667,7 @@ get_header();
         <?php endif; ?>
       </div>
       <div class="product-atelier-content">
-        <span class="section-number">04</span>
+        <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
         <h2>Fabriqué avec passion</h2>
         <p class="atelier-intro">Chaque luminaire est conçu et fabriqué à la main par Robin dans notre atelier lyonnais.</p>
         <blockquote class="atelier-quote">
@@ -685,7 +686,7 @@ get_header();
        ═══════════════════════════════════════════════════════════════ -->
   <section class="product-testimonials">
     <div class="testimonials-header">
-      <span class="section-number">05</span>
+      <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
       <h2>Ce qu'en pensent nos clients</h2>
     </div>
 
@@ -798,7 +799,7 @@ get_header();
        ═══════════════════════════════════════════════════════════════ -->
   <section class="product-faq product-faq-cinetique">
     <div class="product-faq-header">
-      <span class="section-number">06</span>
+      <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
       <h2>Des Questions ?</h2>
     </div>
     <div class="faq-list">
@@ -843,7 +844,7 @@ get_header();
   ?>
   <section class="product-related">
     <div class="product-related-header">
-      <span class="section-number">07</span>
+      <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
       <h2>Vous aimerez aussi</h2>
     </div>
     <div class="products-grid products-grid-cinetique">
