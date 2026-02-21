@@ -2823,6 +2823,57 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   text-align: left;
 }
 
+/* Bouton "Ajouter l'ampoule au panier" */
+.spec-item-ampoule {
+  padding-top: 0.5rem;
+  border-top: none;
+}
+
+.add-ampoule-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--color-wood);
+  background: var(--color-warm);
+  border: 1.5px solid var(--color-wood);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  line-height: 1.4;
+  min-width: auto;
+  min-height: auto;
+  overflow: visible;
+  text-transform: none;
+}
+
+.add-ampoule-btn:hover {
+  background: var(--color-wood);
+  color: #fff;
+}
+
+.add-ampoule-btn.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.add-ampoule-btn.added {
+  background: var(--color-wood);
+  color: #fff;
+  border-color: var(--color-wood);
+}
+
+.add-ampoule-btn svg {
+  flex-shrink: 0;
+  display: inline-block !important;
+  width: 14px !important;
+  height: 14px !important;
+}
+
 /* Accordion Mobile - Phase 4 Proposal B */
 .product-specs-accordion {
   display: none; /* Hidden on desktop */

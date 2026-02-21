@@ -526,6 +526,31 @@ get_header();
       if ($compatible_variateur) $specs_eclairage[] = ['label' => 'Compatible variateur', 'value' => $compatible_variateur];
       if ($compatible_dcl)       $specs_eclairage[] = ['label' => 'Compatible DCL',       'value' => $compatible_dcl];
 
+      // Ampoule associée via cross-sells (hors accessoires)
+      $ampoule_product = null;
+      if (!$is_accessoire) {
+        $cross_sell_ids = $product->get_cross_sell_ids();
+        foreach ($cross_sell_ids as $cs_id) {
+          $cs_cats = get_the_terms($cs_id, 'product_cat');
+          if ($cs_cats && !is_wp_error($cs_cats)) {
+            foreach ($cs_cats as $cs_cat) {
+              if ($cs_cat->slug === 'accessoires') {
+                $ampoule_product = wc_get_product($cs_id);
+                break 2;
+              }
+            }
+          }
+        }
+        if ($ampoule_product && $ampoule_product->is_purchasable() && $ampoule_product->is_in_stock()) {
+          $specs_eclairage[] = [
+            'type'       => 'ampoule_button',
+            'product_id' => $ampoule_product->get_id(),
+            'name'       => $ampoule_product->get_name(),
+            'price'      => $ampoule_product->get_price(),
+          ];
+        }
+      }
+
       // Section 3 : Matériaux
       $specs_materiaux   = [];
       $specs_materiaux[] = ['label' => 'Structure', 'value' => $materiau_structure];
@@ -571,10 +596,19 @@ get_header();
           </summary>
           <div class="specs-accordion-content">
             <?php foreach ($section['items'] as $item) : ?>
-            <div class="spec-item">
-              <span class="spec-label"><?php echo esc_html($item['label']); ?></span>
-              <span class="spec-value"><?php echo esc_html($item['value']); ?></span>
-            </div>
+              <?php if (!empty($item['type']) && $item['type'] === 'ampoule_button') : ?>
+              <div class="spec-item spec-item-ampoule">
+                <button type="button" class="add-ampoule-btn" data-product-id="<?php echo esc_attr($item['product_id']); ?>">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                  Ajouter l'ampoule — <?php echo esc_html(wc_price($item['price'])); ?>
+                </button>
+              </div>
+              <?php else : ?>
+              <div class="spec-item">
+                <span class="spec-label"><?php echo esc_html($item['label']); ?></span>
+                <span class="spec-value"><?php echo esc_html($item['value']); ?></span>
+              </div>
+              <?php endif; ?>
             <?php endforeach; ?>
           </div>
         </details>
@@ -593,10 +627,19 @@ get_header();
           </h3>
           <div class="specs-list">
             <?php foreach ($section['items'] as $item) : ?>
-            <div class="spec-item">
-              <span class="spec-label"><?php echo esc_html($item['label']); ?></span>
-              <span class="spec-value"><?php echo esc_html($item['value']); ?></span>
-            </div>
+              <?php if (!empty($item['type']) && $item['type'] === 'ampoule_button') : ?>
+              <div class="spec-item spec-item-ampoule">
+                <button type="button" class="add-ampoule-btn" data-product-id="<?php echo esc_attr($item['product_id']); ?>">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                  Ajouter l'ampoule — <?php echo esc_html(wc_price($item['price'])); ?>
+                </button>
+              </div>
+              <?php else : ?>
+              <div class="spec-item">
+                <span class="spec-label"><?php echo esc_html($item['label']); ?></span>
+                <span class="spec-value"><?php echo esc_html($item['value']); ?></span>
+              </div>
+              <?php endif; ?>
             <?php endforeach; ?>
           </div>
         </div>
@@ -1397,6 +1440,50 @@ get_header();
       });
     });
   }
+
+  // ── Bouton "Ajouter l'ampoule au panier" ──
+  document.querySelectorAll('.add-ampoule-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var button = this;
+      var productId = button.dataset.productId;
+      if (!productId || button.classList.contains('loading')) return;
+
+      button.classList.add('loading');
+      var originalText = button.innerHTML;
+      button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Ajout en cours…';
+
+      jQuery.ajax({
+        url: '<?php echo admin_url('admin-ajax.php'); ?>',
+        type: 'POST',
+        data: {
+          action: 'sapi_add_to_cart',
+          product_id: productId,
+          quantity: 1,
+          nonce: '<?php echo wp_create_nonce('sapi-add-to-cart'); ?>'
+        },
+        success: function(response) {
+          if (response.success) {
+            button.classList.remove('loading');
+            button.classList.add('added');
+            button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Ajouté !';
+            jQuery(document.body).trigger('added_to_cart', [response.data.fragments, response.data.cart_hash]);
+            setTimeout(function() {
+              button.classList.remove('added');
+              button.innerHTML = originalText;
+            }, 3000);
+          } else {
+            button.classList.remove('loading');
+            button.innerHTML = originalText;
+          }
+        },
+        error: function() {
+          button.classList.remove('loading');
+          button.innerHTML = originalText;
+        }
+      });
+    });
+  });
 })();
 </script>
 <?php endif; ?>
