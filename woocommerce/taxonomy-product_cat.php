@@ -107,7 +107,8 @@ endif;
 <!-- PHASE 2: Full product grid (all products) -->
 <section class="category-products-grid">
   <div class="products-grid-header">
-    <h2><span class="section-num">02</span> Toutes nos <?php echo esc_html(strtolower($term_name)); ?></h2>
+    <?php $masculin = in_array($term_slug, ['accessoire', 'lampadaires']); ?>
+    <h2><span class="section-num">02</span> <?php echo $masculin ? 'Tous nos' : 'Toutes nos'; ?> <?php echo esc_html(strtolower($term_name)); ?></h2>
   </div>
 
   <?php
