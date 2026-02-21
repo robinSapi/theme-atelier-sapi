@@ -96,32 +96,6 @@ defined('ABSPATH') || exit;
     <!-- Colonne droite (35%) — Récapitulatif + Adresse -->
     <div class="thankyou-sidebar">
 
-      <div class="thankyou-card">
-        <h2><?php esc_html_e('Votre commande', 'woocommerce'); ?></h2>
-        <ul class="thankyou-overview">
-          <li>
-            <span><?php esc_html_e('Commande', 'woocommerce'); ?></span>
-            <strong>#<?php echo esc_html($order->get_order_number()); ?></strong>
-          </li>
-          <li>
-            <span><?php esc_html_e('Date', 'woocommerce'); ?></span>
-            <strong><?php echo esc_html(wc_format_datetime($order->get_date_created())); ?></strong>
-          </li>
-          <li>
-            <span><?php esc_html_e('Email', 'woocommerce'); ?></span>
-            <strong><?php echo esc_html($order->get_billing_email()); ?></strong>
-          </li>
-          <li class="thankyou-overview__total">
-            <span><?php esc_html_e('Total', 'woocommerce'); ?></span>
-            <strong><?php echo wp_kses_post($order->get_formatted_order_total()); ?></strong>
-          </li>
-          <li>
-            <span><?php esc_html_e('Paiement', 'woocommerce'); ?></span>
-            <strong><?php echo esc_html($order->get_payment_method_title()); ?></strong>
-          </li>
-        </ul>
-      </div>
-
       <?php if ($order->get_formatted_shipping_address() || $order->get_formatted_billing_address()) : ?>
       <div class="thankyou-card">
         <?php wc_get_template('order/order-details-customer.php', array('order' => $order)); ?>
