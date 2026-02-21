@@ -42,7 +42,7 @@ defined('ABSPATH') || exit;
 
   <!-- Hero succès -->
   <div class="thankyou-hero">
-    <h1>Votre luminaire prend vie dans notre atelier</h1>
+    <h1>Votre luminaire prendra vie dans notre atelier</h1>
     <p class="thankyou-subtitle">
       Merci <?php echo esc_html($order->get_billing_first_name()); ?>, votre commande <strong>#<?php echo esc_html($order->get_order_number()); ?></strong> est confirmée.<br>
       Un email de confirmation a été envoyé à <strong><?php echo esc_html($order->get_billing_email()); ?></strong>.
@@ -57,7 +57,7 @@ defined('ABSPATH') || exit;
       </svg>
       <div>
         <strong>On fabrique dès que possible</strong>
-        <span>Votre pièce est préparée avec soin dans notre atelier lyonnais</span>
+        <span>Votre pièce sera préparée avec soin dans notre atelier lyonnais</span>
       </div>
     </div>
     <div class="thankyou-reassurance-item">
