@@ -8462,6 +8462,11 @@ transform: translateY(15px);
     gap: 1rem;
   }
 
+  .bento-card {
+    border: none;
+    box-shadow: 0 2px 12px rgba(147, 125, 104, 0.08);
+  }
+
   .bento-hero,
   .bento-statement,
   .bento-product,
