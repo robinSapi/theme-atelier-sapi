@@ -14657,14 +14657,18 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* Mobile adjustments */
 @media (max-width: 768px) {
   .product-intro-screen {
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     width: auto;
     height: auto;
-    inset: 0;
     z-index: 10002;
+    /* Image directement sur l'élément pour couvrir la zone Dynamic Island/safe-area
+       Le ::after avec position:absolute ne s'étend pas dans la safe-area sur iOS Safari */
+    background-image: var(--intro-bg-image);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    /* will-change: transform crée un containing block qui peut bloquer le rendu safe-area */
+    will-change: auto;
   }
 
   .product-intro-title {
