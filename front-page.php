@@ -266,6 +266,7 @@ $collection_slugs = [
   ['slug' => 'lampadaires', 'name' => 'Lampadaires'],
   ['slug' => 'appliques',   'name' => 'Appliques'],
   ['slug' => 'lampeaposer', 'name' => 'À poser'],
+  ['slug' => 'accessoire',  'name' => 'Accessoires', 'prefer' => 'ampoule'],
 ];
 
 $collections = [];
@@ -293,7 +294,10 @@ foreach ($collection_slugs as $col) {
       $pid = get_the_ID();
       if (!$fallback_id) $fallback_id = $pid;
 
-      // Priorité au produit "Vincent" pour les suspensions
+      // Priorité à un produit spécifique si défini (ex: "vincent" pour suspensions, "ampoule" pour accessoires)
+      if (!empty($col['prefer']) && stripos(get_the_title(), $col['prefer']) !== false) {
+        $fallback_id = $pid;
+      }
       if ($col['slug'] === 'suspensions' && stripos(get_the_title(), 'vincent') !== false) {
         $fallback_id = $pid;
       }
