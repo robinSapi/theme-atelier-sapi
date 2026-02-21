@@ -156,6 +156,7 @@ html {
   font-weight: 400;
   text-transform: capitalize; /* Première lettre de chaque mot en majuscule */
   font-size: 1.6em; /* 160% de la taille du parent */
+  white-space: nowrap; /* Jamais de coupure à l'intérieur — retour à la ligne uniquement avant */
 }
 
 /* Fade-in animation on scroll (intersection observer target) */
