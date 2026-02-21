@@ -834,6 +834,9 @@ select:focus-visible {
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   overflow: visible; /* Ne pas couper le panier ou autres éléments */
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 .site-header .header-inner {
@@ -14653,6 +14656,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
+  .product-intro-screen {
+    height: 100dvh;
+    z-index: 10002;
+  }
+
   .product-intro-title {
     font-size: clamp(2.2rem, 10vw, 3.5rem);
   }
