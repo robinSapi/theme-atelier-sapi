@@ -163,6 +163,14 @@ add_filter('render_block', function ($content, $block) {
  */
 remove_action('woocommerce_thankyou', 'woocommerce_order_details_table', 10);
 
+// Masquer "Informations complémentaires" (champs additionnels checkout) sur la confirmation
+add_action('woocommerce_order_details_after_customer_details', function() {
+  // Vide : empêche les hooks suivants de s'exécuter en retirant tout
+  remove_all_actions('woocommerce_order_details_after_customer_details', 20);
+  remove_all_actions('woocommerce_order_details_after_customer_details', 30);
+  remove_all_actions('woocommerce_order_details_after_customer_details', 40);
+}, 1);
+
 /**
  * Migration unique — supprime Elementor de la page checkout (ID 13).
  * S'exécute une fois au premier chargement admin, puis ne fait plus rien.

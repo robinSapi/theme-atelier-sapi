@@ -13718,7 +13718,10 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 /* Masquer "Informations complémentaires" (opt-out newsletter) — inutile sur la confirmation */
-.sapi-thankyou-outer .woocommerce-additional-fields {
+.sapi-thankyou-outer .woocommerce-additional-fields,
+.sapi-thankyou-outer .wc-block-order-confirmation-additional-fields-wrapper,
+.sapi-thankyou-outer .wc-block-order-confirmation-additional-fields,
+.sapi-thankyou-outer .wc-block-components-order-confirmation-additional-fields {
   display: none;
 }
 
