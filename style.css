@@ -7091,6 +7091,10 @@ body.cursor-hover .cursor-dot {
 
 /* Mobile : ajuster H1 (une ligne) et H2 (deux lignes max) */
 @media (max-width: 768px) {
+  .carousel-container {
+    height: 70vh;
+  }
+
   .carousel-hero-title {
     font-size: clamp(0.95rem, 2vw, 1.7rem);
     letter-spacing: 0.05em;
@@ -8538,6 +8542,7 @@ transform: translateY(15px);
   .newsletter-submit-kinetic {
     justify-content: center;
     padding: 1rem 2rem;
+    width: 100%;
   }
 
   .footer-kinetic .footer-grid {
@@ -8566,6 +8571,19 @@ transform: translateY(15px);
     min-width: 70px;
     flex-shrink: 0;
     padding: 0.5rem;
+    width: auto;
+    height: auto;
+  }
+
+  .step-text {
+    white-space: normal;
+    font-size: 0.6rem;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .step-num {
+    font-size: 1.25rem;
   }
 
   /* Bento auto-rows: auto for process to fit content */
@@ -8580,6 +8598,16 @@ transform: translateY(15px);
 
   .section-header-kinetic {
     padding: 0 1rem;
+  }
+
+  .collections-grid {
+    padding: 1.5rem 0 1.5rem 1rem;
+    scroll-padding-left: 1rem;
+    gap: 1rem;
+  }
+
+  .collections-grid::after {
+    flex: 0 0 1rem;
   }
 
   /* Stats card mobile */
