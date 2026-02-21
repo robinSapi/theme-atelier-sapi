@@ -13658,7 +13658,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   margin-bottom: 1.5rem;
 }
 
-.sapi-thankyou-outer .woocommerce-table--order-details th {
+.sapi-thankyou-outer .woocommerce-table--order-details thead th {
   text-align: left;
   font-size: 0.75rem;
   font-weight: 900;
@@ -13696,6 +13696,10 @@ body.woocommerce-cart div.woocommerce-wrapper {
   padding: 0.6rem 0;
   border-bottom: 1px solid var(--color-gray-light, #e8e2d9);
   font-size: 0.9rem;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 500;
+  color: var(--color-gray);
 }
 
 .sapi-thankyou-outer .woocommerce-table--order-details tfoot .order-total td,
