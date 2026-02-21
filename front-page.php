@@ -334,6 +334,29 @@ foreach ($collection_slugs as $col) {
     'url' => $cat_url,
   ];
 }
+
+// Ajouter la carte cadeau comme dernière card
+$gc_term = get_term_by('slug', 'carte-cadeau', 'product_cat');
+if ($gc_term && !is_wp_error($gc_term)) {
+  $gc_image = '';
+  $gc_query = new WP_Query([
+    'post_type' => 'product',
+    'posts_per_page' => 1,
+    'post_status' => 'publish',
+    'tax_query' => [['taxonomy' => 'product_cat', 'field' => 'slug', 'terms' => 'carte-cadeau']],
+  ]);
+  if ($gc_query->have_posts()) {
+    $gc_query->the_post();
+    $gc_image = get_the_post_thumbnail_url(get_the_ID(), 'large');
+    wp_reset_postdata();
+  }
+  $collections[] = [
+    'name' => 'Carte Cadeau',
+    'count' => 'Offrez du bonheur',
+    'image' => $gc_image,
+    'url' => get_term_link($gc_term),
+  ];
+}
 ?>
 
 <!-- Custom Cursor (desktop only, hidden on touch devices) -->
