@@ -7,6 +7,9 @@
 (function() {
   'use strict';
 
+  // Catégories dont les noms de produits doivent être formatés (prénom + nom)
+  var allowedCats = ['suspensions', 'appliques', 'lampadaires', 'lampeaposer'];
+
   // Attendre que le DOM soit chargé
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
@@ -33,9 +36,38 @@
     selectors.forEach(selector => {
       const elements = document.querySelectorAll(selector);
       elements.forEach(element => {
-        formatProductName(element);
+        if (isInAllowedCategory(element)) {
+          formatProductName(element);
+        }
       });
     });
+  }
+
+  /**
+   * Vérifie si un élément appartient à une catégorie autorisée
+   */
+  function isInAllowedCategory(element) {
+    // Vérifier le <li class="product product_cat-xxx"> parent
+    var productEl = element.closest('li.product, .product');
+    if (productEl) {
+      var classes = productEl.className.split(/\s+/);
+      var catClasses = classes.filter(function(c) { return c.indexOf('product_cat-') === 0; });
+      if (catClasses.length > 0) {
+        return catClasses.some(function(c) { return allowedCats.indexOf(c.replace('product_cat-', '')) !== -1; });
+      }
+    }
+
+    // Sur une page catégorie, vérifier les classes du body (term-xxx)
+    if (document.body.classList.contains('tax-product_cat')) {
+      var bodyClasses = document.body.className.split(/\s+/);
+      var termClasses = bodyClasses.filter(function(c) { return c.indexOf('term-') === 0; });
+      if (termClasses.length > 0) {
+        return termClasses.some(function(c) { return allowedCats.indexOf(c.replace('term-', '')) !== -1; });
+      }
+    }
+
+    // Par défaut (homepage, panier, etc.) : formater
+    return true;
   }
 
   /**
@@ -91,10 +123,12 @@
 
           selectors.forEach(selector => {
             if (node.matches && node.matches(selector)) {
-              formatProductName(node);
+              if (isInAllowedCategory(node)) formatProductName(node);
             }
             const children = node.querySelectorAll ? node.querySelectorAll(selector) : [];
-            children.forEach(child => formatProductName(child));
+            children.forEach(child => {
+              if (isInAllowedCategory(child)) formatProductName(child);
+            });
           });
         }
       });
