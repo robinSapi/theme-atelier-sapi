@@ -7252,8 +7252,13 @@ body.cursor-hover .cursor-dot {
 
 .bento-card:hover {
   border-color: var(--color-wood);
-  transform: translateY(-5px);
   box-shadow: 0 20px 60px rgba(147, 125, 104, 0.15);
+}
+
+@media (hover: hover) {
+  .bento-card:hover {
+    transform: translateY(-5px);
+  }
 }
 
 /* Hero Card - Large */
