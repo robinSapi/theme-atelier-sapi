@@ -92,11 +92,11 @@ foreach ($categories_order as $cat_slug) {
   }
 }
 
-// Query 2 random products for small bento cards (only from main categories)
+// Query 1 random product for first small bento card (only from main categories)
 $random_products = [];
 $random_query = new WP_Query([
   'post_type' => 'product',
-  'posts_per_page' => 2,
+  'posts_per_page' => 1,
   'post_status' => 'publish',
   'orderby' => 'rand',
   'tax_query' => [
@@ -121,6 +121,25 @@ if ($random_query->have_posts()) {
         'image' => get_the_post_thumbnail_url(get_the_ID(), 'woocommerce_thumbnail'),
       ];
     }
+  }
+  wp_reset_postdata();
+}
+
+// Deuxième small card = toujours la Carte Cadeau
+$gc_query = new WP_Query([
+  'post_type' => 'product',
+  'posts_per_page' => 1,
+  'post_status' => 'publish',
+  'tax_query' => [['taxonomy' => 'product_cat', 'field' => 'slug', 'terms' => 'carte-cadeau']],
+]);
+if ($gc_query->have_posts()) {
+  $gc_query->the_post();
+  if (has_post_thumbnail()) {
+    $random_products[] = [
+      'name' => get_the_title(),
+      'url' => get_permalink(),
+      'image' => get_the_post_thumbnail_url(get_the_ID(), 'woocommerce_thumbnail'),
+    ];
   }
   wp_reset_postdata();
 }
