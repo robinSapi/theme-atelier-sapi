@@ -8048,7 +8048,7 @@ transform: translateY(15px);
   display: flex;
   align-items: baseline;
   gap: 2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
   padding: 0 3rem;
 }
 
