@@ -12410,10 +12410,6 @@ body.woocommerce-cart {
 
 /* Produits simples (pas de variations) : espacement interne du formulaire */
 .product-form-v2 form.cart:not(.variations_form) {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem;
   margin-top: 1.5rem;
 }
 
