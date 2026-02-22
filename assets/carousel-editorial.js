@@ -164,7 +164,7 @@
       document.addEventListener('mouseup', (e) => this.handleDragEnd(e));
 
       // Touch drag with momentum
-      this.track.addEventListener('touchstart', (e) => this.handleDragStart(e), { passive: false });
+      this.track.addEventListener('touchstart', (e) => this.handleDragStart(e), { passive: true });
       document.addEventListener('touchmove', (e) => this.handleDragMove(e), { passive: false });
       document.addEventListener('touchend', (e) => this.handleDragEnd(e));
 
@@ -218,7 +218,10 @@
     // =============================================
     handleDragStart: function(e) {
       this.isDragging = true;
+      this.dragLocked = false; // Direction pas encore décidée
+      this.dragAxis = null;    // 'x' (carousel) ou 'y' (scroll natif)
       this.startX = this.getPositionX(e);
+      this.startY = e.type.includes('mouse') ? e.pageY : e.touches[0].pageY;
       this.currentX = this.startX;
       this.dragOffset = 0;
       this.velocity = 0;
@@ -236,6 +239,22 @@
 
     handleDragMove: function(e) {
       if (!this.isDragging) return;
+
+      // Détecter la direction au premier mouvement significatif
+      if (!this.dragLocked) {
+        var dx = Math.abs(this.getPositionX(e) - this.startX);
+        var dy = Math.abs((e.type.includes('mouse') ? e.pageY : e.touches[0].pageY) - this.startY);
+        if (dx < 5 && dy < 5) return; // Pas assez de mouvement pour décider
+        this.dragLocked = true;
+        this.dragAxis = dx >= dy ? 'x' : 'y';
+      }
+
+      // Si scroll vertical → laisser le navigateur gérer (ne pas preventDefault)
+      if (this.dragAxis === 'y') {
+        this.isDragging = false;
+        this.track.style.cursor = 'grab';
+        return;
+      }
 
       e.preventDefault();
 
