@@ -14664,24 +14664,7 @@ html.sapi-intro-active body {
 /* Mobile adjustments */
 @media (max-width: 768px) {
   .product-intro-screen {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100dvh;
     z-index: 10002;
-    /* Safari ne rend PAS les background-image dans la zone safe-area (Dynamic Island, barre URL).
-       Il teinte ces zones avec le background-color de l'élément fixed.
-       → Le JS sample la couleur dominante des bords de l'image et l'applique en background-color
-       pour que la teinte Safari se fonde avec l'image. */
-    background-image: var(--intro-bg-image);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
-
-  /* Masquer le ::after sur mobile — bg image directement sur l'élément */
-  .product-intro-screen::after {
-    display: none;
   }
 
   .product-intro-title {

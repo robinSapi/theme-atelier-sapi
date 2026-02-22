@@ -26,68 +26,6 @@ function sapi_maison_setup() {
 }
 add_action('after_setup_theme', 'sapi_maison_setup');
 
-/**
- * Extraire la couleur moyenne d'un bord (haut ou bas) d'une image.
- * Safari teinte la zone Dynamic Island et la barre URL avec le background-color
- * de l'élément fixed — on sample la couleur du bord correspondant de l'image
- * pour que la teinte se fonde visuellement.
- * Résultat mis en cache dans post_meta pour éviter le recalcul.
- */
-function sapi_get_image_edge_color($attachment_id, $edge = 'top') {
-  if (!$attachment_id) return '#000000';
-
-  $post_id = get_the_ID();
-  $cache_key = '_sapi_intro_' . $edge . '_color';
-
-  // Vérifier le cache
-  if ($post_id) {
-    $cached = get_post_meta($post_id, $cache_key, true);
-    if ($cached) return $cached;
-  }
-
-  $path = get_attached_file($attachment_id);
-  if (!$path || !file_exists($path)) return '#000000';
-
-  $info = @getimagesize($path);
-  if (!$info) return '#000000';
-
-  $img = null;
-  switch ($info[2]) {
-    case IMAGETYPE_JPEG: $img = @imagecreatefromjpeg($path); break;
-    case IMAGETYPE_PNG:  $img = @imagecreatefrompng($path); break;
-    case IMAGETYPE_WEBP: $img = @imagecreatefromwebp($path); break;
-  }
-  if (!$img) return '#000000';
-
-  $w = imagesx($img);
-  $h = imagesy($img);
-  $sample_h = max(1, (int)round($h * 0.03));
-  $start_y = ($edge === 'top') ? 0 : $h - $sample_h;
-  $step_x = max(1, (int)round($w / 100)); // ~100 pixels par ligne
-
-  $r = $g = $b = $count = 0;
-  for ($y = $start_y; $y < $start_y + $sample_h; $y++) {
-    for ($x = 0; $x < $w; $x += $step_x) {
-      $rgb = imagecolorat($img, $x, $y);
-      $r += ($rgb >> 16) & 0xFF;
-      $g += ($rgb >> 8) & 0xFF;
-      $b += $rgb & 0xFF;
-      $count++;
-    }
-  }
-  imagedestroy($img);
-
-  if ($count === 0) return '#000000';
-  $color = sprintf('#%02x%02x%02x', (int)round($r/$count), (int)round($g/$count), (int)round($b/$count));
-
-  // Mettre en cache
-  if ($post_id) {
-    update_post_meta($post_id, $cache_key, $color);
-  }
-
-  return $color;
-}
-
 // Précharger Square Peg avant le premier paint (élimine le FOUT / chargement en deux temps)
 add_action('wp_head', function() {
   $uri = get_template_directory_uri();

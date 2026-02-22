@@ -56,41 +56,26 @@ get_header();
   <?php
   // Get Ambiance 1 image for intro screen
   $ambiance_intro = '';
-  $ambiance_1_id = null;
   if (function_exists('get_field')) {
     $ambiance_1 = get_field('ambiance_1');
     if ($ambiance_1) {
-      // Handle different ACF return formats + extraire l'ID
+      // Handle different ACF return formats
       if (is_array($ambiance_1) && isset($ambiance_1['url'])) {
         $ambiance_intro = $ambiance_1['url'];
-        $ambiance_1_id = isset($ambiance_1['ID']) ? $ambiance_1['ID'] : (isset($ambiance_1['id']) ? $ambiance_1['id'] : null);
       } elseif (is_array($ambiance_1) && isset($ambiance_1['ID'])) {
         $ambiance_intro = wp_get_attachment_image_url($ambiance_1['ID'], 'full');
-        $ambiance_1_id = $ambiance_1['ID'];
       } elseif (is_numeric($ambiance_1)) {
         $ambiance_intro = wp_get_attachment_image_url($ambiance_1, 'full');
-        $ambiance_1_id = intval($ambiance_1);
       } elseif (is_string($ambiance_1) && strpos($ambiance_1, 'http') === 0) {
         $ambiance_intro = $ambiance_1;
       }
     }
   }
 
-  // Sampler les couleurs des bords de l'image pour la teinte Safari (Dynamic Island + barre URL)
-  $intro_top_color = '#000000';
-  $intro_bottom_color = '#000000';
-  if ($ambiance_1_id && function_exists('sapi_get_image_edge_color')) {
-    $intro_top_color = sapi_get_image_edge_color($ambiance_1_id, 'top');
-    $intro_bottom_color = sapi_get_image_edge_color($ambiance_1_id, 'bottom');
-  }
-
   if ($ambiance_intro) :
   ?>
   <!-- Product Intro Screen with Ambiance Image -->
-  <div class="product-intro-screen" id="product-intro-screen"
-    style="--intro-bg-image: url('<?php echo esc_url($ambiance_intro); ?>'); background-color: <?php echo esc_attr($intro_top_color); ?>;"
-    data-top-color="<?php echo esc_attr($intro_top_color); ?>"
-    data-bottom-color="<?php echo esc_attr($intro_bottom_color); ?>">
+  <div class="product-intro-screen" id="product-intro-screen" style="--intro-bg-image: url('<?php echo esc_url($ambiance_intro); ?>');">
     <div class="product-intro-content">
       <h1 class="product-intro-title"><?php the_title(); ?></h1>
       <span class="product-intro-skip">Scrollez ou cliquez pour découvrir</span>
@@ -932,17 +917,6 @@ get_header();
     // Bloquer le scroll de la page derrière l'intro
     document.documentElement.classList.add('sapi-intro-active');
 
-    // Safari teinte la zone Dynamic Island (haut) et barre URL (bas) avec le
-    // background-color de l'élément fixed. Les couleurs sont calculées côté serveur
-    // (PHP GD) et injectées dans le HTML via inline style + data attributes.
-    var topColor = introScreen.dataset.topColor;
-    var bottomColor = introScreen.dataset.bottomColor;
-    if (topColor) {
-      // Mettre à jour theme-color pour Safari
-      var themeMeta = document.querySelector('meta[name="theme-color"]');
-      if (themeMeta) themeMeta.setAttribute('content', topColor);
-    }
-
     // Fade in the image after initial black fade
     setTimeout(function() {
       introScreen.classList.add('loaded');
@@ -989,9 +963,6 @@ get_header();
       introRemoved = true;
       introScreen.style.transform = 'translateY(-100vh)';
       document.documentElement.classList.remove('sapi-intro-active');
-      // Restaurer le theme-color par défaut du site
-      var themeMeta = document.querySelector('meta[name="theme-color"]');
-      if (themeMeta) themeMeta.setAttribute('content', '#FEFDFB');
       window.removeEventListener('wheel', handleWheel, { passive: false });
       introScreen.removeEventListener('touchstart', handleTouchStart);
       introScreen.removeEventListener('touchmove', handleTouchMove);
