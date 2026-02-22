@@ -915,10 +915,61 @@ get_header();
     const fadeDistance = 200;
 
     // Bloquer le scroll de la page derrière l'intro
-    // Note: on utilise une classe CSS sur <html> au lieu de body.style.overflow
-    // car overflow:hidden directement sur body empêche les éléments fixed de
-    // s'étendre dans la safe-area (Dynamic Island) sur iOS Safari
     document.documentElement.classList.add('sapi-intro-active');
+
+    // Safari teinte la zone Dynamic Island (haut) et barre URL (bas) avec le
+    // background-color de l'élément fixed, PAS le background-image.
+    // → On sample la couleur dominante des bords haut/bas de l'image
+    //   et on l'applique comme background-color pour fondre la teinte Safari.
+    (function() {
+      var bgVar = introScreen.style.getPropertyValue('--intro-bg-image');
+      var match = bgVar && bgVar.match(/url\(['"]?(.+?)['"]?\)/);
+      if (!match) return;
+
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function() {
+        try {
+          var w = img.naturalWidth;
+          var h = img.naturalHeight;
+          var sampleH = Math.max(1, Math.round(h * 0.03)); // 3% haut/bas
+          var canvas = document.createElement('canvas');
+          var ctx = canvas.getContext('2d');
+
+          // --- Couleur du bord HAUT ---
+          canvas.width = w;
+          canvas.height = sampleH;
+          ctx.drawImage(img, 0, 0, w, sampleH, 0, 0, w, sampleH);
+          var topData = ctx.getImageData(0, 0, w, sampleH).data;
+          var tr = 0, tg = 0, tb = 0, tc = 0;
+          for (var i = 0; i < topData.length; i += 4) {
+            tr += topData[i]; tg += topData[i+1]; tb += topData[i+2]; tc++;
+          }
+          var topColor = 'rgb(' + Math.round(tr/tc) + ',' + Math.round(tg/tc) + ',' + Math.round(tb/tc) + ')';
+
+          // --- Couleur du bord BAS ---
+          ctx.clearRect(0, 0, w, sampleH);
+          ctx.drawImage(img, 0, h - sampleH, w, sampleH, 0, 0, w, sampleH);
+          var botData = ctx.getImageData(0, 0, w, sampleH).data;
+          var br = 0, bg = 0, bb = 0, bc = 0;
+          for (var j = 0; j < botData.length; j += 4) {
+            br += botData[j]; bg += botData[j+1]; bb += botData[j+2]; bc++;
+          }
+          var bottomColor = 'rgb(' + Math.round(br/bc) + ',' + Math.round(bg/bc) + ',' + Math.round(bb/bc) + ')';
+
+          // Appliquer : gradient haut→bas pour que Safari teinte correctement les 2 zones
+          introScreen.style.backgroundImage = 'linear-gradient(to bottom, ' + topColor + ', ' + topColor + ' 5%, transparent 15%, transparent 85%, ' + bottomColor + ' 95%, ' + bottomColor + '), var(--intro-bg-image)';
+          introScreen.style.backgroundColor = topColor;
+
+          // Mettre à jour theme-color pour Safari
+          var themeMeta = document.querySelector('meta[name="theme-color"]');
+          if (themeMeta) themeMeta.setAttribute('content', topColor);
+        } catch(e) {
+          // CORS ou canvas error — on garde le #000 par défaut
+        }
+      };
+      img.src = match[1];
+    })();
 
     // Fade in the image after initial black fade
     setTimeout(function() {
@@ -966,6 +1017,9 @@ get_header();
       introRemoved = true;
       introScreen.style.transform = 'translateY(-100vh)';
       document.documentElement.classList.remove('sapi-intro-active');
+      // Restaurer le theme-color par défaut du site
+      var themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) themeMeta.setAttribute('content', '#FEFDFB');
       window.removeEventListener('wheel', handleWheel, { passive: false });
       introScreen.removeEventListener('touchstart', handleTouchStart);
       introScreen.removeEventListener('touchmove', handleTouchMove);
