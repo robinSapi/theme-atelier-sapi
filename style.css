@@ -5517,19 +5517,22 @@ li.carousel-editorial-slide,
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 40px;
   padding: 2.5rem 3rem;
-  align-items: center;
+  align-items: stretch;
   max-width: 1200px;
+  max-height: 100vh;
   margin: 40px auto;
   background: rgba(255, 255, 255, 0.85);
   border-radius: 16px;
   box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.06),
     0 2px 6px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
 }
 
 /* Content Block Premium */
 .advice-block {
   padding: 1rem 0;
+  overflow-y: auto;
 }
 
 .advice-block .section-number {
@@ -5575,8 +5578,8 @@ li.carousel-editorial-slide,
 
 /* Image Premium with Hover */
 .advice-image {
-  min-height: 900px;
-  border-radius: 16px;
+  min-height: 400px;
+  border-radius: 12px;
   background-size: cover;
   background-position: center;
   box-shadow:
