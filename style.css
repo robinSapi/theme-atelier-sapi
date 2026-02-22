@@ -5680,6 +5680,13 @@ li.carousel-editorial-slide,
   height: 100%;
 }
 
+.advice-panel-quote {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+}
+
 .advice-quote-text {
   font-family: var(--font-display, 'Square Peg', cursive);
   font-size: clamp(2.5rem, 4vw, 4rem);
