@@ -5534,9 +5534,14 @@ li.carousel-editorial-slide,
   background: var(--color-white, #FFFFFF);
 }
 
-/* Content Block Premium */
+/* Content Block Premium – Card Style */
 .advice-block {
-  padding: 2rem;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 16px;
+  padding: 2.5rem 3rem;
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 .advice-block .section-number {
@@ -5576,40 +5581,8 @@ li.carousel-editorial-slide,
   margin-bottom: 1.5rem;
 }
 
-/* Advice Cards */
-.advice-card {
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 12px;
-  padding: 1.5rem 2rem;
-  margin-bottom: 1rem;
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    0 1px 3px rgba(0, 0, 0, 0.03);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-.advice-card:hover {
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.08),
-    0 2px 6px rgba(0, 0, 0, 0.05);
-  transform: translateY(-2px);
-}
-
-.advice-card:last-child {
+.advice-block p:last-child {
   margin-bottom: 0;
-}
-
-.advice-card h3 {
-  margin-top: 0;
-}
-
-.advice-card p:last-child {
-  margin-bottom: 0;
-}
-
-.advice-intro {
-  font-style: italic;
-  opacity: 0.85;
 }
 
 /* Image Premium with Hover */
