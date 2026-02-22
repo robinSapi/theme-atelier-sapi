@@ -915,7 +915,10 @@ get_header();
     const fadeDistance = 200;
 
     // Bloquer le scroll de la page derrière l'intro
-    document.body.style.overflow = 'hidden';
+    // Note: on utilise une classe CSS sur <html> au lieu de body.style.overflow
+    // car overflow:hidden directement sur body empêche les éléments fixed de
+    // s'étendre dans la safe-area (Dynamic Island) sur iOS Safari
+    document.documentElement.classList.add('sapi-intro-active');
 
     // Fade in the image after initial black fade
     setTimeout(function() {
@@ -962,7 +965,7 @@ get_header();
       if (introRemoved) return;
       introRemoved = true;
       introScreen.style.transform = 'translateY(-100vh)';
-      document.body.style.overflow = '';
+      document.documentElement.classList.remove('sapi-intro-active');
       window.removeEventListener('wheel', handleWheel, { passive: false });
       introScreen.removeEventListener('touchstart', handleTouchStart);
       introScreen.removeEventListener('touchmove', handleTouchMove);

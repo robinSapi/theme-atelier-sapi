@@ -14543,13 +14543,20 @@ body.woocommerce-cart div.woocommerce-wrapper {
   left: 0;
   width: 100%;
   height: 100vh;
+  height: 100dvh; /* Dynamic viewport height — couvre Dynamic Island + barre URL sur iOS */
   background-color: #000;
   z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  will-change: transform;
+}
+
+/* Scroll lock pour l'intro — appliqué via JS sur <html> */
+html.sapi-intro-active,
+html.sapi-intro-active body {
+  overflow: hidden;
+  height: 100%;
 }
 
 /* Background image layer - starts invisible */
@@ -14657,18 +14664,17 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* Mobile adjustments */
 @media (max-width: 768px) {
   .product-intro-screen {
+    position: fixed; /* Ré-déclaré explicitement pour iOS Safari */
     inset: 0;
-    width: auto;
-    height: auto;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
     z-index: 10002;
-    /* Image directement sur l'élément pour couvrir la zone Dynamic Island/safe-area
-       Le ::after avec position:absolute ne s'étend pas dans la safe-area sur iOS Safari */
+    /* Image directement sur l'élément pour couvrir la zone Dynamic Island/safe-area */
     background-image: var(--intro-bg-image);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    /* will-change: transform crée un containing block qui peut bloquer le rendu safe-area */
-    will-change: auto;
   }
 
   .product-intro-title {
