@@ -5511,29 +5511,32 @@ li.carousel-editorial-slide,
   margin: 0 auto;
 }
 
-/* Section Blocks Premium – Card Style */
+/* Section Blocks Premium */
 .advice-section-block {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 40px;
-  padding: 2.5rem 3rem;
-  align-items: stretch;
-  max-width: 1400px;
-  max-height: calc(100vh - 100px);
-  margin: 40px auto;
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 16px;
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.06),
-    0 2px 6px rgba(0, 0, 0, 0.04);
-  overflow: hidden;
+  gap: 60px;
+  padding: 100px 20px;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.advice-section-block:nth-child(even) {
+  background: linear-gradient(
+    135deg,
+    var(--creme-papier, #FEFDFB) 0%,
+    var(--creme-chaud, #FAF6F0) 100%
+  );
+}
+
+.advice-section-block:nth-child(odd) {
+  background: var(--color-white, #FFFFFF);
 }
 
 /* Content Block Premium */
 .advice-block {
-  padding: 1rem 1rem 1rem 0;
-  overflow-y: auto;
-  max-height: calc(100vh - 100px - 5rem);
+  padding: 2rem;
 }
 
 .advice-block .section-number {
@@ -5573,14 +5576,10 @@ li.carousel-editorial-slide,
   margin-bottom: 1.5rem;
 }
 
-.advice-block p:last-child {
-  margin-bottom: 0;
-}
-
 /* Image Premium with Hover */
 .advice-image {
-  min-height: 300px;
-  border-radius: 12px;
+  min-height: 450px;
+  border-radius: 16px;
   background-size: cover;
   background-position: center;
   box-shadow:
