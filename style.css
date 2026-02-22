@@ -5637,8 +5637,11 @@ li.carousel-editorial-slide,
 /* Bouton croix orange (hidden by default) */
 .advice-tip-close {
   display: none;
-  width: 36px;
-  height: 36px;
+  min-width: 36px;
+  max-width: 36px;
+  min-height: 36px;
+  max-height: 36px;
+  padding: 0;
   border-radius: 50%;
   border: 2px solid var(--color-orange, #E35B24);
   background: transparent;
@@ -5648,6 +5651,7 @@ li.carousel-editorial-slide,
   cursor: pointer;
   transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .advice-tip-close:hover {
