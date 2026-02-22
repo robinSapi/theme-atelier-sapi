@@ -6092,6 +6092,30 @@ li.carousel-editorial-slide,
   padding: 0 2rem;
 }
 
+.advice-outro p::before {
+  content: "\201C";
+  font-family: Georgia, serif;
+  font-size: clamp(5rem, 10vw, 8rem);
+  font-style: normal;
+  color: var(--color-orange, #E35B24);
+  opacity: 0.3;
+  position: absolute;
+  top: -0.5em;
+  left: -0.1em;
+  line-height: 1;
+}
+
+.advice-outro-signature {
+  display: block;
+  text-align: right;
+  max-width: 900px;
+  margin: 1.5rem auto 0;
+  padding-right: 2rem;
+  font-family: var(--font-display, "Square Peg", Georgia, serif);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  color: var(--color-wood, #937D68);
+}
+
 /* ========================================
    PAGE TEMPLATE - Contact (PREMIUM)
    ======================================== */
