@@ -5523,6 +5523,22 @@ li.carousel-editorial-slide,
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
+  transition: grid-template-columns 0.4s ease;
+}
+
+/* Grille en mode expanded : 1 col card + 3 cols panneau */
+.advice-tips-grid.is-expanded {
+  grid-template-columns: 1fr 3fr;
+}
+
+/* Masquer les cards non-actives en mode expanded */
+.advice-tips-grid.is-expanded .advice-tip:not(.is-active) {
+  display: none;
+}
+
+/* Card active : occupe 1 colonne */
+.advice-tips-grid.is-expanded .advice-tip.is-active {
+  grid-column: 1;
 }
 
 /* Tip Card */
@@ -5561,17 +5577,6 @@ li.carousel-editorial-slide,
     rgba(0, 0, 0, 0.25) 50%,
     rgba(0, 0, 0, 0.05) 100%
   );
-  transition: background 0.4s ease;
-}
-
-/* Quand la citation est visible, overlay plus sombre */
-.advice-tip[data-state="quote"] .advice-tip-overlay {
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.85) 0%,
-    rgba(0, 0, 0, 0.5) 60%,
-    rgba(0, 0, 0, 0.3) 100%
-  );
 }
 
 /* Tip Content (over image) */
@@ -5604,69 +5609,7 @@ li.carousel-editorial-slide,
   line-height: 1.25;
 }
 
-/* Citation Square Peg (hidden by default) */
-.advice-tip-quote {
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  transition: max-height 0.5s ease, opacity 0.4s ease;
-}
-
-.advice-tip[data-state="quote"] .advice-tip-quote {
-  max-height: 300px;
-  opacity: 1;
-}
-
-.advice-tip-quote p {
-  font-family: var(--font-display, 'Square Peg', cursive);
-  font-size: clamp(1.8rem, 2.5vw, 2.4rem);
-  font-weight: 400;
-  color: #fff;
-  line-height: 1.3;
-  margin: 0 0 1.25rem 0;
-  font-style: italic;
-}
-
-/* Conteneur boutons */
-.advice-tip-buttons {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-/* Bouton croix orange (hidden by default) */
-.advice-tip-close {
-  display: none;
-  min-width: 36px;
-  max-width: 36px;
-  min-height: 36px;
-  max-height: 36px;
-  padding: 0;
-  border-radius: 50%;
-  border: 2px solid var(--color-orange, #E35B24);
-  background: transparent;
-  color: var(--color-orange, #E35B24);
-  font-size: 1.4rem;
-  line-height: 1;
-  cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
-  flex-shrink: 0;
-  box-sizing: border-box;
-}
-
-.advice-tip-close:hover {
-  background: var(--color-orange, #E35B24);
-  color: #fff;
-  transform: scale(1.1);
-}
-
-.advice-tip[data-state="quote"] .advice-tip-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Bouton principal (même design dans les 2 états) */
+/* Bouton "Voir le conseil" */
 .advice-tip-btn {
   display: inline-block;
   padding: 0.55rem 1.3rem;
@@ -5685,6 +5628,96 @@ li.carousel-editorial-slide,
 
 .advice-tip-btn:hover {
   background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.03);
+}
+
+/* Panneau citation (hidden by default) */
+.advice-quote-panel {
+  display: none;
+  border-radius: 16px;
+  background: var(--color-warm, #FBF6EA);
+  overflow: hidden;
+}
+
+.advice-tips-grid.is-expanded .advice-quote-panel {
+  display: flex;
+  grid-column: 2;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.advice-quote-panel-inner {
+  padding: 3rem;
+  text-align: center;
+  max-width: 700px;
+}
+
+.advice-quote-text {
+  font-family: var(--font-display, 'Square Peg', cursive);
+  font-size: clamp(2.5rem, 4vw, 4rem);
+  font-weight: 400;
+  color: var(--bois-sombre, #4A3F35);
+  line-height: 1.2;
+  margin: 0 0 2.5rem 0;
+}
+
+/* Boutons du panneau citation */
+.advice-quote-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.advice-quote-close {
+  min-width: 36px;
+  max-width: 36px;
+  min-height: 36px;
+  max-height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--color-orange, #E35B24);
+  background: transparent;
+  color: var(--color-orange, #E35B24);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.advice-quote-close:hover {
+  background: var(--color-orange, #E35B24);
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.advice-quote-more {
+  display: inline-block;
+  padding: 0.6rem 1.5rem;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--bois-dore, #937D68);
+  border-radius: 50px;
+  color: var(--bois-sombre, #4A3F35);
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.advice-quote-more:hover {
+  background: rgba(0, 0, 0, 0.1);
   transform: scale(1.03);
 }
 
@@ -5772,8 +5805,17 @@ li.carousel-editorial-slide,
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
+  .advice-tips-grid.is-expanded {
+    grid-template-columns: 1fr 1fr;
+  }
   .advice-tip-image {
     min-height: 380px;
+  }
+  .advice-quote-panel-inner {
+    padding: 2rem;
+  }
+  .advice-quote-text {
+    font-size: clamp(2rem, 3.5vw, 3rem);
   }
 }
 
@@ -5786,14 +5828,23 @@ li.carousel-editorial-slide,
     grid-template-columns: 1fr;
     gap: 20px;
   }
+  .advice-tips-grid.is-expanded {
+    grid-template-columns: 1fr;
+  }
+  .advice-tips-grid.is-expanded .advice-quote-panel {
+    grid-column: 1;
+  }
   .advice-tip-image {
     min-height: 350px;
   }
   .advice-tip-content {
     padding: 1.5rem;
   }
-  .advice-tip-quote p {
-    font-size: 1.6rem;
+  .advice-quote-panel-inner {
+    padding: 1.5rem;
+  }
+  .advice-quote-text {
+    font-size: 1.8rem;
   }
   .advice-detail-inner {
     padding: 1.5rem;

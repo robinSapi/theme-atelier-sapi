@@ -80,23 +80,28 @@ $tips = [
 <section class="advice-tips-section">
   <div class="advice-tips-grid">
     <?php foreach ($tips as $i => $tip) : ?>
-    <div class="advice-tip" data-tip="<?php echo esc_attr($i); ?>" data-state="initial">
+    <div class="advice-tip" data-tip="<?php echo esc_attr($i); ?>">
       <div class="advice-tip-image" style="background-image: url('<?php echo esc_url($tip['image']); ?>');">
         <div class="advice-tip-overlay"></div>
         <div class="advice-tip-content">
           <span class="advice-tip-number"><?php echo esc_html($tip['number']); ?></span>
           <h2><?php echo esc_html($tip['title']); ?></h2>
-          <div class="advice-tip-quote" aria-hidden="true">
-            <p><?php echo esc_html($tip['summary']); ?></p>
-          </div>
-          <div class="advice-tip-buttons">
-            <button class="advice-tip-close" aria-label="Fermer le conseil">&times;</button>
-            <button class="advice-tip-btn">Voir le conseil</button>
-          </div>
+          <button class="advice-tip-btn">Voir le conseil</button>
         </div>
       </div>
     </div>
     <?php endforeach; ?>
+
+    <!-- Panneau citation (3 colonnes, hidden par défaut) -->
+    <div class="advice-quote-panel" aria-hidden="true">
+      <div class="advice-quote-panel-inner">
+        <p class="advice-quote-text"></p>
+        <div class="advice-quote-buttons">
+          <button class="advice-quote-close" aria-label="Fermer">&times;</button>
+          <button class="advice-quote-more">En savoir plus</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <?php foreach ($tips as $i => $tip) : ?>
@@ -123,65 +128,82 @@ $tips = [
 (function() {
   'use strict';
 
+  var grid = document.querySelector('.advice-tips-grid');
+  var panel = document.querySelector('.advice-quote-panel');
+  var quoteText = panel.querySelector('.advice-quote-text');
+  var activeTipIndex = null;
+
+  /* Données des citations */
+  var summaries = <?php echo json_encode(array_map(function($t) { return $t['summary']; }, $tips)); ?>;
+
+  /* Clic "Voir le conseil" → slide card en pos 1, afficher panneau citation */
   document.querySelectorAll('.advice-tip-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var tip = this.closest('.advice-tip');
-      var state = tip.getAttribute('data-state');
-      var quote = tip.querySelector('.advice-tip-quote');
+      var tipIndex = tip.getAttribute('data-tip');
 
-      if (state === 'initial') {
-        /* État 1 → 2 : Montrer la citation */
-        tip.setAttribute('data-state', 'quote');
-        quote.setAttribute('aria-hidden', 'false');
-        this.textContent = 'En savoir plus';
+      /* Reset toutes les cards */
+      document.querySelectorAll('.advice-tip').forEach(function(t) {
+        t.classList.remove('is-active');
+      });
 
-      } else if (state === 'quote') {
-        /* État 2 → 3 : Ouvrir l'accordéon détail */
-        var tipIndex = tip.getAttribute('data-tip');
-        var detail = document.querySelector('.advice-detail[data-tip="' + tipIndex + '"]');
+      /* Activer la card cliquée */
+      tip.classList.add('is-active');
+      activeTipIndex = tipIndex;
 
-        /* Fermer les autres détails ouverts */
-        document.querySelectorAll('.advice-detail').forEach(function(d) {
-          if (d !== detail) {
-            d.classList.remove('is-open');
-            d.setAttribute('aria-hidden', 'true');
-          }
-        });
+      /* Remplir le panneau citation */
+      quoteText.textContent = summaries[tipIndex];
 
-        detail.classList.add('is-open');
-        detail.setAttribute('aria-hidden', 'false');
+      /* Afficher le panneau et passer la grille en mode expanded */
+      grid.classList.add('is-expanded');
+      panel.setAttribute('aria-hidden', 'false');
+    });
+  });
 
-        setTimeout(function() {
-          detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 50);
+  /* Bouton croix dans le panneau → tout refermer */
+  panel.querySelector('.advice-quote-close').addEventListener('click', function() {
+    grid.classList.remove('is-expanded');
+    panel.setAttribute('aria-hidden', 'true');
+
+    document.querySelectorAll('.advice-tip').forEach(function(t) {
+      t.classList.remove('is-active');
+    });
+
+    activeTipIndex = null;
+  });
+
+  /* Bouton "En savoir plus" → ouvrir l'accordéon détail */
+  panel.querySelector('.advice-quote-more').addEventListener('click', function() {
+    if (activeTipIndex === null) return;
+
+    var detail = document.querySelector('.advice-detail[data-tip="' + activeTipIndex + '"]');
+
+    /* Fermer les autres */
+    document.querySelectorAll('.advice-detail').forEach(function(d) {
+      if (d !== detail) {
+        d.classList.remove('is-open');
+        d.setAttribute('aria-hidden', 'true');
       }
     });
+
+    detail.classList.add('is-open');
+    detail.setAttribute('aria-hidden', 'false');
+
+    setTimeout(function() {
+      detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
   });
 
-  /* Bouton croix : refermer la citation (état 2 → 1) */
-  document.querySelectorAll('.advice-tip-close').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var tip = this.closest('.advice-tip');
-      var quote = tip.querySelector('.advice-tip-quote');
-      var mainBtn = tip.querySelector('.advice-tip-btn');
-
-      tip.setAttribute('data-state', 'initial');
-      quote.setAttribute('aria-hidden', 'true');
-      mainBtn.textContent = 'Voir le conseil';
-    });
-  });
-
+  /* Bouton "Fermer" dans l'accordéon détail */
   document.querySelectorAll('.advice-btn-close').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var detail = this.closest('.advice-detail');
-      var tipIndex = detail.getAttribute('data-tip');
-      var tip = document.querySelector('.advice-tip[data-tip="' + tipIndex + '"]');
 
       detail.classList.remove('is-open');
       detail.setAttribute('aria-hidden', 'true');
 
       setTimeout(function() {
-        tip.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        grid.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 50);
     });
   });
