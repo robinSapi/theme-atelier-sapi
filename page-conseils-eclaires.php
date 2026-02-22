@@ -165,7 +165,7 @@ $tips = [
 
   /* ========== DESKTOP : slide + panneau ========== */
   function showQuoteView() {
-    panelQuote.style.display = 'block';
+    panelQuote.style.display = 'flex';
     panelQuote.setAttribute('aria-hidden', 'false');
     panelDetail.style.display = 'none';
     panelDetail.setAttribute('aria-hidden', 'true');
