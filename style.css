@@ -6097,8 +6097,8 @@ li.carousel-editorial-slide,
   font-family: Georgia, serif;
   font-size: clamp(8rem, 15vw, 14rem);
   font-style: normal;
-  color: var(--color-wood, #937D68);
-  opacity: 0.15;
+  color: var(--color-orange, #E35B24);
+  opacity: 0.2;
   position: absolute;
   top: -0.4em;
   left: -0.1em;
