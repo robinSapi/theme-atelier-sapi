@@ -14664,17 +14664,32 @@ html.sapi-intro-active body {
 /* Mobile adjustments */
 @media (max-width: 768px) {
   .product-intro-screen {
-    position: fixed; /* Ré-déclaré explicitement pour iOS Safari */
-    inset: 0;
+    position: fixed;
+    /* Safari ne rend PAS les background-image dans la safe-area pour les éléments fixed.
+       On pousse l'élément physiquement derrière la Dynamic Island avec un top négatif. */
+    top: calc(0px - env(safe-area-inset-top, 0px));
+    left: 0;
+    right: 0;
+    bottom: calc(0px - env(safe-area-inset-bottom, 0px));
     width: 100vw;
-    height: 100vh;
-    height: 100dvh;
+    height: calc(100dvh + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px));
     z-index: 10002;
-    /* Image directement sur l'élément pour couvrir la zone Dynamic Island/safe-area */
+    /* Image directement sur l'élément (pas ::after) pour couvrir la zone safe-area */
     background-image: var(--intro-bg-image);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    background-color: rgba(0, 0, 0, 0.99); /* Fix Safari 26 compositing bug */
+  }
+
+  /* Masquer le ::after sur mobile — bg image directement sur l'élément */
+  .product-intro-screen::after {
+    display: none;
+  }
+
+  /* Garder le contenu dans la zone safe (pas derrière Dynamic Island) */
+  .product-intro-content {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   .product-intro-title {
