@@ -5531,8 +5531,9 @@ li.carousel-editorial-slide,
 
 /* Content Block Premium */
 .advice-block {
-  padding: 1rem 0;
+  padding: 1rem 1rem 1rem 0;
   overflow-y: auto;
+  max-height: calc(100vh - 100px - 5rem);
 }
 
 .advice-block .section-number {
