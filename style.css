@@ -6095,12 +6095,12 @@ li.carousel-editorial-slide,
 .advice-outro p::before {
   content: "\201C";
   font-family: Georgia, serif;
-  font-size: clamp(5rem, 10vw, 8rem);
+  font-size: clamp(8rem, 15vw, 14rem);
   font-style: normal;
-  color: var(--color-orange, #E35B24);
-  opacity: 0.3;
+  color: var(--color-wood, #937D68);
+  opacity: 0.15;
   position: absolute;
-  top: -0.5em;
+  top: -0.4em;
   left: -0.1em;
   line-height: 1;
 }
@@ -6111,8 +6111,11 @@ li.carousel-editorial-slide,
   max-width: 900px;
   margin: 1.5rem auto 0;
   padding-right: 2rem;
-  font-family: var(--font-display, "Square Peg", Georgia, serif);
-  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: clamp(0.85rem, 1.5vw, 1rem);
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.05em;
   color: var(--color-wood, #937D68);
 }
 
