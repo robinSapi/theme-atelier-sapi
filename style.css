@@ -5980,7 +5980,7 @@ li.carousel-editorial-slide,
 .advice-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 10002;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
