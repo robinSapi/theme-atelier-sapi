@@ -5518,8 +5518,8 @@ li.carousel-editorial-slide,
   gap: 40px;
   padding: 2.5rem 3rem;
   align-items: stretch;
-  max-width: 1200px;
-  max-height: 100vh;
+  max-width: 1400px;
+  max-height: calc(100vh - 100px);
   margin: 40px auto;
   background: rgba(255, 255, 255, 0.85);
   border-radius: 16px;
@@ -5578,7 +5578,7 @@ li.carousel-editorial-slide,
 
 /* Image Premium with Hover */
 .advice-image {
-  min-height: 400px;
+  min-height: 300px;
   border-radius: 12px;
   background-size: cover;
   background-position: center;
