@@ -396,7 +396,7 @@ foreach ($collection_slugs as $col) {
         <h1 class="bento-title">Sculpter<br>la lumière</h1>
         <p class="bento-text">Des créations artisanales qui transforment l'espace</p>
         <div class="hero-cta-row">
-          <a href="<?php echo home_url('/boutique/'); ?>" class="hero-cta">
+          <a href="<?php echo home_url('/nos-creations/'); ?>" class="hero-cta">
             <span>Découvrir nos créations</span>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
@@ -570,7 +570,7 @@ foreach ($collection_slugs as $col) {
     </div>
 
     <!-- CTA Card -->
-    <a href="<?php echo home_url('/boutique/'); ?>" class="bento-card bento-cta">
+    <a href="<?php echo home_url('/nos-creations/'); ?>" class="bento-card bento-cta">
       <h3 class="cta-title">Toutes les créations</h3>
       <span class="cta-button">
         <span>Explorer</span>
