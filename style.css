@@ -5511,55 +5511,191 @@ li.carousel-editorial-slide,
   margin: 0 auto;
 }
 
-/* Section Blocks Premium */
-.advice-section-block {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 60px;
-  padding: 100px 20px;
-  align-items: center;
+/* Tips Section */
+.advice-tips-section {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 60px 20px 40px;
 }
 
-.advice-section-block:nth-child(even) {
+/* Tips Grid – 2x2 desktop */
+.advice-tips-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+}
+
+/* Tip Card */
+.advice-tip {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.advice-tip:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Tip Image Background */
+.advice-tip-image {
+  position: relative;
+  min-height: 380px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+}
+
+.advice-tip-overlay {
+  position: absolute;
+  inset: 0;
   background: linear-gradient(
-    135deg,
-    var(--creme-papier, #FEFDFB) 0%,
-    var(--creme-chaud, #FAF6F0) 100%
+    to top,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0.2) 50%,
+    rgba(0, 0, 0, 0.05) 100%
   );
 }
 
-.advice-section-block:nth-child(odd) {
-  background: var(--color-white, #FFFFFF);
-}
-
-/* Content Block Premium */
-.advice-block {
+/* Tip Content (over image) */
+.advice-tip-content {
+  position: relative;
+  z-index: 1;
   padding: 2rem;
+  width: 100%;
 }
 
-.advice-block .section-number {
+.advice-tip-number {
   display: block;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 3px;
-  color: var(--bois-dore, #937D68);
+  color: rgba(255, 255, 255, 0.7);
   text-transform: uppercase;
-  margin-bottom: 1.5rem;
-  opacity: 0.9;
+  margin-bottom: 0.75rem;
 }
 
-.advice-block h2 {
-  font-family: var(--font-display, "Square Peg", Georgia, serif);
-  font-size: clamp(36px, 6vw, 56px);
-  font-weight: 400;
-  color: var(--bois-sombre, #4A3F35);
-  margin-bottom: 2rem;
+.advice-tip-content h2 {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: clamp(1.25rem, 2.5vw, 1.6rem);
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 1.25rem 0;
   line-height: 1.2;
 }
 
-.advice-block h3 {
+/* Bouton "Voir le conseil" */
+.advice-btn-reveal {
+  display: inline-block;
+  padding: 0.6rem 1.5rem;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50px;
+  color: #fff;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.advice-btn-reveal:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.03);
+}
+
+/* Summary (hidden by default) */
+.advice-tip-summary {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+  margin-top: 0;
+}
+
+.advice-tip-summary.is-visible {
+  max-height: 200px;
+  opacity: 1;
+  margin-top: 1.25rem;
+}
+
+.advice-tip-summary p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0 0 1rem 0;
+}
+
+/* Bouton "En savoir plus" */
+.advice-btn-more {
+  display: inline-block;
+  padding: 0.5rem 1.25rem;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  border: none;
+  border-radius: 50px;
+  color: #fff;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(227, 91, 36, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.advice-btn-more:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(227, 91, 36, 0.4);
+}
+
+/* Detail Accordion (hidden by default) */
+.advice-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease;
+}
+
+.advice-detail.is-open {
+  max-height: 2000px;
+}
+
+.advice-detail-inner {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2.5rem 3rem;
+  margin-top: 30px;
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.advice-detail-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--color-warm, #FBF6EA);
+}
+
+.advice-detail-header .advice-tip-number {
+  color: var(--bois-dore, #937D68);
+}
+
+.advice-detail-header h2 {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  color: var(--bois-sombre, #4A3F35);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.advice-detail-body h3 {
   font-size: clamp(18px, 3vw, 22px);
   font-weight: 600;
   color: var(--color-orange, #E35B24);
@@ -5569,34 +5705,63 @@ li.carousel-editorial-slide,
   letter-spacing: -0.01em;
 }
 
-.advice-block p {
+.advice-detail-body p {
   font-size: clamp(15px, 2.5vw, 17px);
   line-height: 1.7;
   color: var(--bois-profond, #6B5A4A);
   margin-bottom: 1.5rem;
 }
 
-/* Image Premium with Hover */
-.advice-image {
-  min-height: 450px;
-  border-radius: 16px;
-  background-size: cover;
-  background-position: center;
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.08),
-    0 4px 12px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-  position: relative;
-  transition: all 0.4s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
-  -webkit-transition: all 0.4s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+/* Bouton "Fermer" */
+.advice-btn-close {
+  display: inline-block;
+  margin-top: 1.5rem;
+  padding: 0.5rem 1.25rem;
+  background: transparent;
+  border: 2px solid var(--bois-dore, #937D68);
+  border-radius: 50px;
+  color: var(--bois-dore, #937D68);
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-.advice-image:hover {
-  transform: translateY(-4px) scale(1.02);
-  -webkit-transform: translateY(-4px) scale(1.02);
-  box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.12),
-    0 8px 20px rgba(0, 0, 0, 0.08);
+.advice-btn-close:hover {
+  background: var(--bois-dore, #937D68);
+  color: #fff;
+}
+
+/* Responsive – Tablet */
+@media (max-width: 900px) {
+  .advice-tips-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .advice-tip-image {
+    min-height: 320px;
+  }
+}
+
+/* Responsive – Mobile */
+@media (max-width: 600px) {
+  .advice-tips-section {
+    padding: 40px 15px 30px;
+  }
+  .advice-tips-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .advice-tip-image {
+    min-height: 300px;
+  }
+  .advice-tip-content {
+    padding: 1.5rem;
+  }
+  .advice-detail-inner {
+    padding: 1.5rem;
+  }
 }
 
 /* Outro Premium - Signature Style */
