@@ -5545,7 +5545,7 @@ li.carousel-editorial-slide,
 /* Tip Image Background */
 .advice-tip-image {
   position: relative;
-  min-height: 420px;
+  min-height: 550px;
   background-size: cover;
   background-position: center;
   display: flex;
