@@ -108,7 +108,6 @@ $tips = [
           <div class="advice-panel-detail-body"></div>
           <div class="advice-panel-detail-buttons">
             <button class="advice-quote-close" aria-label="Fermer">&times;</button>
-            <button class="advice-panel-back">Retour</button>
           </div>
         </div>
       </div>
@@ -193,10 +192,6 @@ $tips = [
     showDetailView();
   });
 
-  /* Bouton "Retour" → revenir à la citation */
-  panel.querySelector('.advice-panel-back').addEventListener('click', function() {
-    showQuoteView();
-  });
 })();
 </script>
 
