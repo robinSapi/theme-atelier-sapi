@@ -92,32 +92,28 @@ $tips = [
     </div>
     <?php endforeach; ?>
 
-    <!-- Panneau citation (3 colonnes, hidden par défaut) -->
+    <!-- Panneau citation / détail (3 colonnes, hidden par défaut) -->
     <div class="advice-quote-panel" aria-hidden="true">
       <div class="advice-quote-panel-inner">
-        <p class="advice-quote-text"></p>
-        <div class="advice-quote-buttons">
-          <button class="advice-quote-close" aria-label="Fermer">&times;</button>
-          <button class="advice-quote-more">En savoir plus</button>
+        <!-- Vue citation -->
+        <div class="advice-panel-quote">
+          <p class="advice-quote-text"></p>
+          <div class="advice-quote-buttons">
+            <button class="advice-quote-close" aria-label="Fermer">&times;</button>
+            <button class="advice-quote-more">En savoir plus</button>
+          </div>
+        </div>
+        <!-- Vue détail (remplace la citation) -->
+        <div class="advice-panel-detail" aria-hidden="true">
+          <div class="advice-panel-detail-body"></div>
+          <div class="advice-panel-detail-buttons">
+            <button class="advice-quote-close" aria-label="Fermer">&times;</button>
+            <button class="advice-panel-back">Retour</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
-
-  <?php foreach ($tips as $i => $tip) : ?>
-  <div class="advice-detail" data-tip="<?php echo esc_attr($i); ?>" aria-hidden="true">
-    <div class="advice-detail-inner">
-      <div class="advice-detail-header">
-        <span class="advice-tip-number"><?php echo esc_html($tip['number']); ?></span>
-        <h2><?php echo esc_html($tip['title']); ?></h2>
-      </div>
-      <div class="advice-detail-body">
-        <?php echo $tip['content']; ?>
-      </div>
-      <button class="advice-btn-close">Fermer</button>
-    </div>
-  </div>
-  <?php endforeach; ?>
 </section>
 
 <section class="advice-outro">
@@ -131,81 +127,75 @@ $tips = [
   var grid = document.querySelector('.advice-tips-grid');
   var panel = document.querySelector('.advice-quote-panel');
   var quoteText = panel.querySelector('.advice-quote-text');
+  var panelQuote = panel.querySelector('.advice-panel-quote');
+  var panelDetail = panel.querySelector('.advice-panel-detail');
+  var panelDetailBody = panel.querySelector('.advice-panel-detail-body');
   var activeTipIndex = null;
 
-  /* Données des citations */
+  /* Données des citations et contenu */
   var summaries = <?php echo json_encode(array_map(function($t) { return $t['summary']; }, $tips)); ?>;
+  var contents = <?php echo json_encode(array_map(function($t) { return $t['content']; }, $tips)); ?>;
 
-  /* Clic "Voir le conseil" → slide card en pos 1, afficher panneau citation */
+  function showQuoteView() {
+    panelQuote.style.display = '';
+    panelQuote.setAttribute('aria-hidden', 'false');
+    panelDetail.style.display = 'none';
+    panelDetail.setAttribute('aria-hidden', 'true');
+  }
+
+  function showDetailView() {
+    panelQuote.style.display = 'none';
+    panelQuote.setAttribute('aria-hidden', 'true');
+    panelDetail.style.display = '';
+    panelDetail.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeAll() {
+    grid.classList.remove('is-expanded');
+    panel.setAttribute('aria-hidden', 'true');
+    document.querySelectorAll('.advice-tip').forEach(function(t) {
+      t.classList.remove('is-active');
+    });
+    showQuoteView();
+    activeTipIndex = null;
+  }
+
+  /* Clic "Voir le conseil" → slide card en pos 1, afficher citation */
   document.querySelectorAll('.advice-tip-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var tip = this.closest('.advice-tip');
       var tipIndex = tip.getAttribute('data-tip');
 
-      /* Reset toutes les cards */
       document.querySelectorAll('.advice-tip').forEach(function(t) {
         t.classList.remove('is-active');
       });
 
-      /* Activer la card cliquée */
       tip.classList.add('is-active');
       activeTipIndex = tipIndex;
 
-      /* Remplir le panneau citation */
       quoteText.textContent = summaries[tipIndex];
+      showQuoteView();
 
-      /* Afficher le panneau et passer la grille en mode expanded */
       grid.classList.add('is-expanded');
       panel.setAttribute('aria-hidden', 'false');
     });
   });
 
-  /* Bouton croix dans le panneau → tout refermer */
-  panel.querySelector('.advice-quote-close').addEventListener('click', function() {
-    grid.classList.remove('is-expanded');
-    panel.setAttribute('aria-hidden', 'true');
-
-    document.querySelectorAll('.advice-tip').forEach(function(t) {
-      t.classList.remove('is-active');
-    });
-
-    activeTipIndex = null;
+  /* Boutons croix → tout refermer */
+  panel.querySelectorAll('.advice-quote-close').forEach(function(btn) {
+    btn.addEventListener('click', closeAll);
   });
 
-  /* Bouton "En savoir plus" → ouvrir l'accordéon détail */
+  /* Bouton "En savoir plus" → afficher le contenu dans le panneau */
   panel.querySelector('.advice-quote-more').addEventListener('click', function() {
     if (activeTipIndex === null) return;
-
-    var detail = document.querySelector('.advice-detail[data-tip="' + activeTipIndex + '"]');
-
-    /* Fermer les autres */
-    document.querySelectorAll('.advice-detail').forEach(function(d) {
-      if (d !== detail) {
-        d.classList.remove('is-open');
-        d.setAttribute('aria-hidden', 'true');
-      }
-    });
-
-    detail.classList.add('is-open');
-    detail.setAttribute('aria-hidden', 'false');
-
-    setTimeout(function() {
-      detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 50);
+    panelDetailBody.innerHTML = contents[activeTipIndex];
+    showDetailView();
   });
 
-  /* Bouton "Fermer" dans l'accordéon détail */
-  document.querySelectorAll('.advice-btn-close').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var detail = this.closest('.advice-detail');
-
-      detail.classList.remove('is-open');
-      detail.setAttribute('aria-hidden', 'true');
-
-      setTimeout(function() {
-        grid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 50);
-    });
+  /* Bouton "Retour" → revenir à la citation */
+  panel.querySelector('.advice-panel-back').addEventListener('click', function() {
+    showQuoteView();
   });
 })();
 </script>
