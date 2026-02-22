@@ -913,6 +913,7 @@ get_header();
     let introRemoved = false;
     let scrollProgress = 0;
     const fadeDistance = 200;
+    const snapThreshold = 0.3; // 30% → au-delà on ferme, en-deçà on ramène
 
     // Bloquer le scroll de la page derrière l'intro
     document.documentElement.classList.add('sapi-intro-active');
@@ -922,7 +923,25 @@ get_header();
       introScreen.classList.add('loaded');
     }, 300);
 
+    // Snap : fermer ou ramener selon la progression
+    function snapIntro() {
+      var progress = Math.min(1, scrollProgress / fadeDistance);
+      if (progress > 0 && progress < 1) {
+        introScreen.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        if (progress >= snapThreshold) {
+          removeIntro();
+        } else {
+          // Ramener à la position initiale
+          scrollProgress = 0;
+          introScreen.style.transform = 'translateY(0)';
+          // Retirer la transition après l'animation
+          setTimeout(function() { introScreen.style.transition = ''; }, 400);
+        }
+      }
+    }
+
     // Glissement vers le haut via wheel
+    var wheelTimer = null;
     function handleWheel(e) {
       if (introRemoved) return;
       e.preventDefault();
@@ -933,6 +952,10 @@ get_header();
 
       if (progress >= 1) {
         removeIntro();
+      } else {
+        // Snap après un court délai sans scroll (l'utilisateur a arrêté)
+        clearTimeout(wheelTimer);
+        wheelTimer = setTimeout(snapIntro, 150);
       }
     }
 
@@ -957,15 +980,20 @@ get_header();
         }
       }
     }
+    function handleTouchEnd() {
+      if (!introRemoved) snapIntro();
+    }
 
     function removeIntro() {
       if (introRemoved) return;
       introRemoved = true;
+      clearTimeout(wheelTimer);
       introScreen.style.transform = 'translateY(-100vh)';
       document.documentElement.classList.remove('sapi-intro-active');
       window.removeEventListener('wheel', handleWheel, { passive: false });
       introScreen.removeEventListener('touchstart', handleTouchStart);
       introScreen.removeEventListener('touchmove', handleTouchMove);
+      introScreen.removeEventListener('touchend', handleTouchEnd);
       setTimeout(function() {
         introScreen.remove();
       }, 400);
@@ -984,6 +1012,7 @@ get_header();
       window.addEventListener('wheel', handleWheel, { passive: false });
       introScreen.addEventListener('touchstart', handleTouchStart, { passive: true });
       introScreen.addEventListener('touchmove', handleTouchMove, { passive: false });
+      introScreen.addEventListener('touchend', handleTouchEnd, { passive: true });
     }, 800);
     } // end else (intro non encore vue)
   }
