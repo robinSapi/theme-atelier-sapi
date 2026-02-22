@@ -96,18 +96,10 @@ $tips = [
         <!-- Face arrière (mobile flip) -->
         <div class="advice-tip-back">
           <div class="advice-tip-back-inner">
-            <div class="advice-tip-back-quote">
-              <p class="advice-tip-back-text"><?php echo esc_html($tip['summary']); ?></p>
-              <div class="advice-tip-back-buttons">
-                <button class="advice-tip-back-close" aria-label="Fermer">&times;</button>
-                <button class="advice-tip-back-more">En savoir plus</button>
-              </div>
-            </div>
-            <div class="advice-tip-back-detail" aria-hidden="true">
-              <div class="advice-tip-back-detail-body"><?php echo $tip['content']; ?></div>
-              <div class="advice-tip-back-detail-buttons">
-                <button class="advice-tip-back-close" aria-label="Fermer">&times;</button>
-              </div>
+            <p class="advice-tip-back-text"><?php echo esc_html($tip['summary']); ?></p>
+            <div class="advice-tip-back-buttons">
+              <button class="advice-tip-back-close" aria-label="Fermer">&times;</button>
+              <button class="advice-tip-back-more" data-tip="<?php echo esc_attr($i); ?>">En savoir plus</button>
             </div>
           </div>
         </div>
@@ -137,6 +129,14 @@ $tips = [
     </div>
   </div>
 </section>
+
+<!-- Overlay plein écran mobile -->
+<div class="advice-overlay" aria-hidden="true">
+  <div class="advice-overlay-inner">
+    <button class="advice-overlay-close" aria-label="Fermer">&times;</button>
+    <div class="advice-overlay-body"></div>
+  </div>
+</div>
 
 <section class="advice-outro">
   <p>Éclairer une pièce, c'est un peu comme choisir la bonne sauce pour ses pâtes : tout est une question de préférence et de dosage !</p>
@@ -187,20 +187,26 @@ $tips = [
     activeTipIndex = null;
   }
 
-  /* ========== MOBILE : flip card ========== */
-  function resetFlipBack(tip) {
-    var quoteEl = tip.querySelector('.advice-tip-back-quote');
-    var detailEl = tip.querySelector('.advice-tip-back-detail');
-    if (quoteEl) quoteEl.style.display = 'block';
-    if (detailEl) {
-      detailEl.style.display = 'none';
-      detailEl.setAttribute('aria-hidden', 'true');
-    }
-  }
+  /* ========== MOBILE : flip card + overlay ========== */
+  var overlay = document.querySelector('.advice-overlay');
+  var overlayBody = document.querySelector('.advice-overlay-body');
+  var overlayClose = document.querySelector('.advice-overlay-close');
 
   function closeFlip(tip) {
     tip.classList.remove('is-flipped');
-    resetFlipBack(tip);
+  }
+
+  function openOverlay(tipIndex) {
+    overlayBody.innerHTML = contents[tipIndex];
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeOverlay() {
+    overlay.classList.remove('is-open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
   }
 
   /* ========== EVENT LISTENERS ========== */
@@ -253,17 +259,25 @@ $tips = [
     });
   });
 
-  /* Mobile : bouton "En savoir plus" (face arrière) */
+  /* Mobile : bouton "En savoir plus" → ouvre overlay plein écran */
   document.querySelectorAll('.advice-tip-back-more').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      var tip = this.closest('.advice-tip');
-      var quoteEl = tip.querySelector('.advice-tip-back-quote');
-      var detailEl = tip.querySelector('.advice-tip-back-detail');
-      quoteEl.style.display = 'none';
-      detailEl.style.display = 'block';
-      detailEl.setAttribute('aria-hidden', 'false');
+      var tipIndex = this.getAttribute('data-tip');
+      openOverlay(tipIndex);
     });
   });
+
+  /* Overlay : bouton fermer */
+  if (overlayClose) {
+    overlayClose.addEventListener('click', closeOverlay);
+  }
+
+  /* Overlay : fermer en cliquant sur le fond */
+  if (overlay) {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) closeOverlay();
+    });
+  }
 
 })();
 </script>
