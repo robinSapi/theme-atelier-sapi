@@ -137,7 +137,7 @@ $tips = [
   var contents = <?php echo json_encode(array_map(function($t) { return $t['content']; }, $tips)); ?>;
 
   function showQuoteView() {
-    panelQuote.style.display = '';
+    panelQuote.style.display = 'block';
     panelQuote.setAttribute('aria-hidden', 'false');
     panelDetail.style.display = 'none';
     panelDetail.setAttribute('aria-hidden', 'true');
@@ -146,7 +146,7 @@ $tips = [
   function showDetailView() {
     panelQuote.style.display = 'none';
     panelQuote.setAttribute('aria-hidden', 'true');
-    panelDetail.style.display = '';
+    panelDetail.style.display = 'block';
     panelDetail.setAttribute('aria-hidden', 'false');
   }
 
