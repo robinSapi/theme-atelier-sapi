@@ -5627,7 +5627,42 @@ li.carousel-editorial-slide,
   font-style: italic;
 }
 
-/* Bouton unique (change de texte selon l'état) */
+/* Conteneur boutons */
+.advice-tip-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Bouton croix orange (hidden by default) */
+.advice-tip-close {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--color-orange, #E35B24);
+  background: transparent;
+  color: var(--color-orange, #E35B24);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.advice-tip-close:hover {
+  background: var(--color-orange, #E35B24);
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.advice-tip[data-state="quote"] .advice-tip-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Bouton principal (même design dans les 2 états) */
 .advice-tip-btn {
   display: inline-block;
   padding: 0.55rem 1.3rem;
@@ -5647,18 +5682,6 @@ li.carousel-editorial-slide,
 .advice-tip-btn:hover {
   background: rgba(255, 255, 255, 0.25);
   transform: scale(1.03);
-}
-
-/* État "quote" : bouton CTA orange */
-.advice-tip[data-state="quote"] .advice-tip-btn {
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
-  border: none;
-  box-shadow: 0 2px 8px rgba(227, 91, 36, 0.3);
-}
-
-.advice-tip[data-state="quote"] .advice-tip-btn:hover {
-  box-shadow: 0 4px 16px rgba(227, 91, 36, 0.4);
-  transform: scale(1.05);
 }
 
 /* Detail Accordion (hidden by default) */

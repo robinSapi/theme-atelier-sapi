@@ -89,7 +89,10 @@ $tips = [
           <div class="advice-tip-quote" aria-hidden="true">
             <p><?php echo esc_html($tip['summary']); ?></p>
           </div>
-          <button class="advice-tip-btn">Voir le conseil</button>
+          <div class="advice-tip-buttons">
+            <button class="advice-tip-close" aria-label="Fermer le conseil">&times;</button>
+            <button class="advice-tip-btn">Voir le conseil</button>
+          </div>
         </div>
       </div>
     </div>
@@ -152,6 +155,19 @@ $tips = [
           detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 50);
       }
+    });
+  });
+
+  /* Bouton croix : refermer la citation (état 2 → 1) */
+  document.querySelectorAll('.advice-tip-close').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var tip = this.closest('.advice-tip');
+      var quote = tip.querySelector('.advice-tip-quote');
+      var mainBtn = tip.querySelector('.advice-tip-btn');
+
+      tip.setAttribute('data-state', 'initial');
+      quote.setAttribute('aria-hidden', 'true');
+      mainBtn.textContent = 'Voir le conseil';
     });
   });
 
