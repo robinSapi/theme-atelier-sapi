@@ -80,17 +80,16 @@ $tips = [
 <section class="advice-tips-section">
   <div class="advice-tips-grid">
     <?php foreach ($tips as $i => $tip) : ?>
-    <div class="advice-tip" data-tip="<?php echo esc_attr($i); ?>">
+    <div class="advice-tip" data-tip="<?php echo esc_attr($i); ?>" data-state="initial">
       <div class="advice-tip-image" style="background-image: url('<?php echo esc_url($tip['image']); ?>');">
         <div class="advice-tip-overlay"></div>
         <div class="advice-tip-content">
           <span class="advice-tip-number"><?php echo esc_html($tip['number']); ?></span>
           <h2><?php echo esc_html($tip['title']); ?></h2>
-          <button class="advice-btn-reveal" aria-expanded="false">Voir le conseil</button>
-          <div class="advice-tip-summary" aria-hidden="true">
+          <div class="advice-tip-quote" aria-hidden="true">
             <p><?php echo esc_html($tip['summary']); ?></p>
-            <button class="advice-btn-more">En savoir plus</button>
           </div>
+          <button class="advice-tip-btn">Voir le conseil</button>
         </div>
       </div>
     </div>
@@ -121,44 +120,38 @@ $tips = [
 (function() {
   'use strict';
 
-  document.querySelectorAll('.advice-btn-reveal').forEach(function(btn) {
+  document.querySelectorAll('.advice-tip-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var tip = this.closest('.advice-tip');
-      var summary = tip.querySelector('.advice-tip-summary');
-      var isOpen = this.getAttribute('aria-expanded') === 'true';
+      var state = tip.getAttribute('data-state');
+      var quote = tip.querySelector('.advice-tip-quote');
 
-      if (isOpen) {
-        this.setAttribute('aria-expanded', 'false');
-        summary.setAttribute('aria-hidden', 'true');
-        summary.classList.remove('is-visible');
-        this.textContent = 'Voir le conseil';
-      } else {
-        this.setAttribute('aria-expanded', 'true');
-        summary.setAttribute('aria-hidden', 'false');
-        summary.classList.add('is-visible');
-        this.textContent = 'Masquer';
+      if (state === 'initial') {
+        /* État 1 → 2 : Montrer la citation */
+        tip.setAttribute('data-state', 'quote');
+        quote.setAttribute('aria-hidden', 'false');
+        this.textContent = 'En savoir plus';
+
+      } else if (state === 'quote') {
+        /* État 2 → 3 : Ouvrir l'accordéon détail */
+        var tipIndex = tip.getAttribute('data-tip');
+        var detail = document.querySelector('.advice-detail[data-tip="' + tipIndex + '"]');
+
+        /* Fermer les autres détails ouverts */
+        document.querySelectorAll('.advice-detail').forEach(function(d) {
+          if (d !== detail) {
+            d.classList.remove('is-open');
+            d.setAttribute('aria-hidden', 'true');
+          }
+        });
+
+        detail.classList.add('is-open');
+        detail.setAttribute('aria-hidden', 'false');
+
+        setTimeout(function() {
+          detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
       }
-    });
-  });
-
-  document.querySelectorAll('.advice-btn-more').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var tipIndex = this.closest('.advice-tip').getAttribute('data-tip');
-      var detail = document.querySelector('.advice-detail[data-tip="' + tipIndex + '"]');
-
-      document.querySelectorAll('.advice-detail').forEach(function(d) {
-        if (d !== detail) {
-          d.classList.remove('is-open');
-          d.setAttribute('aria-hidden', 'true');
-        }
-      });
-
-      detail.classList.add('is-open');
-      detail.setAttribute('aria-hidden', 'false');
-
-      setTimeout(function() {
-        detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 50);
     });
   });
 
