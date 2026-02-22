@@ -5593,6 +5593,7 @@ li.carousel-editorial-slide,
   color: rgba(255, 255, 255, 0.6);
   text-transform: uppercase;
   margin-bottom: 0.5rem;
+  transition: opacity 0.3s ease, max-height 0.3s ease;
 }
 
 .advice-tip-content h2 {
@@ -5602,6 +5603,16 @@ li.carousel-editorial-slide,
   color: #fff;
   margin: 0 0 1rem 0;
   line-height: 1.25;
+  transition: opacity 0.3s ease, max-height 0.3s ease;
+}
+
+/* Masquer numéro et titre en état citation */
+.advice-tip[data-state="quote"] .advice-tip-number,
+.advice-tip[data-state="quote"] .advice-tip-content h2 {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  margin: 0;
 }
 
 /* Citation Square Peg (hidden by default) */
