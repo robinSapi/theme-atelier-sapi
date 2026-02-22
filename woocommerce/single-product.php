@@ -56,26 +56,41 @@ get_header();
   <?php
   // Get Ambiance 1 image for intro screen
   $ambiance_intro = '';
+  $ambiance_1_id = null;
   if (function_exists('get_field')) {
     $ambiance_1 = get_field('ambiance_1');
     if ($ambiance_1) {
-      // Handle different ACF return formats
+      // Handle different ACF return formats + extraire l'ID
       if (is_array($ambiance_1) && isset($ambiance_1['url'])) {
         $ambiance_intro = $ambiance_1['url'];
+        $ambiance_1_id = isset($ambiance_1['ID']) ? $ambiance_1['ID'] : (isset($ambiance_1['id']) ? $ambiance_1['id'] : null);
       } elseif (is_array($ambiance_1) && isset($ambiance_1['ID'])) {
         $ambiance_intro = wp_get_attachment_image_url($ambiance_1['ID'], 'full');
+        $ambiance_1_id = $ambiance_1['ID'];
       } elseif (is_numeric($ambiance_1)) {
         $ambiance_intro = wp_get_attachment_image_url($ambiance_1, 'full');
+        $ambiance_1_id = intval($ambiance_1);
       } elseif (is_string($ambiance_1) && strpos($ambiance_1, 'http') === 0) {
         $ambiance_intro = $ambiance_1;
       }
     }
   }
 
+  // Sampler les couleurs des bords de l'image pour la teinte Safari (Dynamic Island + barre URL)
+  $intro_top_color = '#000000';
+  $intro_bottom_color = '#000000';
+  if ($ambiance_1_id && function_exists('sapi_get_image_edge_color')) {
+    $intro_top_color = sapi_get_image_edge_color($ambiance_1_id, 'top');
+    $intro_bottom_color = sapi_get_image_edge_color($ambiance_1_id, 'bottom');
+  }
+
   if ($ambiance_intro) :
   ?>
   <!-- Product Intro Screen with Ambiance Image -->
-  <div class="product-intro-screen" id="product-intro-screen" style="--intro-bg-image: url('<?php echo esc_url($ambiance_intro); ?>');">
+  <div class="product-intro-screen" id="product-intro-screen"
+    style="--intro-bg-image: url('<?php echo esc_url($ambiance_intro); ?>'); background-color: <?php echo esc_attr($intro_top_color); ?>;"
+    data-top-color="<?php echo esc_attr($intro_top_color); ?>"
+    data-bottom-color="<?php echo esc_attr($intro_bottom_color); ?>">
     <div class="product-intro-content">
       <h1 class="product-intro-title"><?php the_title(); ?></h1>
       <span class="product-intro-skip">Scrollez ou cliquez pour découvrir</span>
@@ -918,58 +933,15 @@ get_header();
     document.documentElement.classList.add('sapi-intro-active');
 
     // Safari teinte la zone Dynamic Island (haut) et barre URL (bas) avec le
-    // background-color de l'élément fixed, PAS le background-image.
-    // → On sample la couleur dominante des bords haut/bas de l'image
-    //   et on l'applique comme background-color pour fondre la teinte Safari.
-    (function() {
-      var bgVar = introScreen.style.getPropertyValue('--intro-bg-image');
-      var match = bgVar && bgVar.match(/url\(['"]?(.+?)['"]?\)/);
-      if (!match) return;
-
-      var img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = function() {
-        try {
-          var w = img.naturalWidth;
-          var h = img.naturalHeight;
-          var sampleH = Math.max(1, Math.round(h * 0.03)); // 3% haut/bas
-          var canvas = document.createElement('canvas');
-          var ctx = canvas.getContext('2d');
-
-          // --- Couleur du bord HAUT ---
-          canvas.width = w;
-          canvas.height = sampleH;
-          ctx.drawImage(img, 0, 0, w, sampleH, 0, 0, w, sampleH);
-          var topData = ctx.getImageData(0, 0, w, sampleH).data;
-          var tr = 0, tg = 0, tb = 0, tc = 0;
-          for (var i = 0; i < topData.length; i += 4) {
-            tr += topData[i]; tg += topData[i+1]; tb += topData[i+2]; tc++;
-          }
-          var topColor = 'rgb(' + Math.round(tr/tc) + ',' + Math.round(tg/tc) + ',' + Math.round(tb/tc) + ')';
-
-          // --- Couleur du bord BAS ---
-          ctx.clearRect(0, 0, w, sampleH);
-          ctx.drawImage(img, 0, h - sampleH, w, sampleH, 0, 0, w, sampleH);
-          var botData = ctx.getImageData(0, 0, w, sampleH).data;
-          var br = 0, bg = 0, bb = 0, bc = 0;
-          for (var j = 0; j < botData.length; j += 4) {
-            br += botData[j]; bg += botData[j+1]; bb += botData[j+2]; bc++;
-          }
-          var bottomColor = 'rgb(' + Math.round(br/bc) + ',' + Math.round(bg/bc) + ',' + Math.round(bb/bc) + ')';
-
-          // Appliquer : gradient haut→bas pour que Safari teinte correctement les 2 zones
-          introScreen.style.backgroundImage = 'linear-gradient(to bottom, ' + topColor + ', ' + topColor + ' 5%, transparent 15%, transparent 85%, ' + bottomColor + ' 95%, ' + bottomColor + '), var(--intro-bg-image)';
-          introScreen.style.backgroundColor = topColor;
-
-          // Mettre à jour theme-color pour Safari
-          var themeMeta = document.querySelector('meta[name="theme-color"]');
-          if (themeMeta) themeMeta.setAttribute('content', topColor);
-        } catch(e) {
-          // CORS ou canvas error — on garde le #000 par défaut
-        }
-      };
-      img.src = match[1];
-    })();
+    // background-color de l'élément fixed. Les couleurs sont calculées côté serveur
+    // (PHP GD) et injectées dans le HTML via inline style + data attributes.
+    var topColor = introScreen.dataset.topColor;
+    var bottomColor = introScreen.dataset.bottomColor;
+    if (topColor) {
+      // Mettre à jour theme-color pour Safari
+      var themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) themeMeta.setAttribute('content', topColor);
+    }
 
     // Fade in the image after initial black fade
     setTimeout(function() {
