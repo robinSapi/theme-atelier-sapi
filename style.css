@@ -7107,6 +7107,7 @@ body.cursor-hover .cursor-dot {
     -webkit-box-orient: vertical;
     overflow: hidden;
     max-width: 100%;
+    margin-bottom: 1rem;
   }
 }
 
