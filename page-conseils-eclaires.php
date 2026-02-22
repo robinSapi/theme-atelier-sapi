@@ -223,7 +223,12 @@ $tips = [
         document.querySelectorAll('.advice-tip').forEach(function(t) {
           if (t !== tip) closeFlip(t);
         });
+        var backFace = tip.querySelector('.advice-tip-back');
+        backFace.classList.add('no-touch');
         tip.classList.add('is-flipped');
+        setTimeout(function() {
+          backFace.classList.remove('no-touch');
+        }, 700);
       } else {
         /* Desktop : slide + panneau */
         document.querySelectorAll('.advice-tip').forEach(function(t) {
