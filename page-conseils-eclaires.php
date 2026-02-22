@@ -222,7 +222,6 @@ $tips = [
         document.querySelectorAll('.advice-tip').forEach(function(t) {
           if (t !== tip) closeFlip(t);
         });
-        resetFlipBack(tip);
         tip.classList.add('is-flipped');
       } else {
         /* Desktop : slide + panneau */
