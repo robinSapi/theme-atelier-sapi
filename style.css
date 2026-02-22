@@ -5843,6 +5843,7 @@ li.carousel-editorial-slide,
 
   /* Flip Card 3D */
   .advice-tip {
+    -webkit-perspective: 1000px;
     perspective: 1000px;
     overflow: visible;
     background: transparent;
@@ -5857,17 +5858,23 @@ li.carousel-editorial-slide,
     position: relative;
     width: 100%;
     min-height: 400px;
+    -webkit-transition: -webkit-transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-transform-style: preserve-3d;
     transform-style: preserve-3d;
   }
   .advice-tip.is-flipped .advice-tip-flipper {
+    -webkit-transform: rotateY(180deg);
     transform: rotateY(180deg);
   }
 
   .advice-tip-front,
   .advice-tip-back {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     border-radius: 16px;
@@ -5883,6 +5890,7 @@ li.carousel-editorial-slide,
 
   .advice-tip-back {
     display: flex;
+    -webkit-transform: rotateY(180deg);
     transform: rotateY(180deg);
     background: var(--color-warm, #FBF6EA);
     z-index: 1;
