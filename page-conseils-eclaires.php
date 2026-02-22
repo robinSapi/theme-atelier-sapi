@@ -174,7 +174,7 @@ $tips = [
   function showDetailView() {
     panelQuote.style.display = 'none';
     panelQuote.setAttribute('aria-hidden', 'true');
-    panelDetail.style.display = 'block';
+    panelDetail.style.display = 'flex';
     panelDetail.setAttribute('aria-hidden', 'false');
   }
 
