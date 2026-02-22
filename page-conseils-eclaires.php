@@ -81,12 +81,35 @@ $tips = [
   <div class="advice-tips-grid">
     <?php foreach ($tips as $i => $tip) : ?>
     <div class="advice-tip" data-tip="<?php echo esc_attr($i); ?>">
-      <div class="advice-tip-image" style="background-image: url('<?php echo esc_url($tip['image']); ?>');">
-        <div class="advice-tip-overlay"></div>
-        <div class="advice-tip-content">
-          <span class="advice-tip-number"><?php echo esc_html($tip['number']); ?></span>
-          <h2><?php echo esc_html($tip['title']); ?></h2>
-          <button class="advice-tip-btn">Voir le conseil</button>
+      <div class="advice-tip-flipper">
+        <!-- Face avant -->
+        <div class="advice-tip-front">
+          <div class="advice-tip-image" style="background-image: url('<?php echo esc_url($tip['image']); ?>');">
+            <div class="advice-tip-overlay"></div>
+            <div class="advice-tip-content">
+              <span class="advice-tip-number"><?php echo esc_html($tip['number']); ?></span>
+              <h2><?php echo esc_html($tip['title']); ?></h2>
+              <button class="advice-tip-btn">Voir le conseil</button>
+            </div>
+          </div>
+        </div>
+        <!-- Face arrière (mobile flip) -->
+        <div class="advice-tip-back">
+          <div class="advice-tip-back-inner">
+            <div class="advice-tip-back-quote">
+              <p class="advice-tip-back-text"><?php echo esc_html($tip['summary']); ?></p>
+              <div class="advice-tip-back-buttons">
+                <button class="advice-tip-back-close" aria-label="Fermer">&times;</button>
+                <button class="advice-tip-back-more">En savoir plus</button>
+              </div>
+            </div>
+            <div class="advice-tip-back-detail" aria-hidden="true">
+              <div class="advice-tip-back-detail-body"><?php echo $tip['content']; ?></div>
+              <div class="advice-tip-back-detail-buttons">
+                <button class="advice-tip-back-close" aria-label="Fermer">&times;</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -135,6 +158,11 @@ $tips = [
   var summaries = <?php echo json_encode(array_map(function($t) { return $t['summary']; }, $tips)); ?>;
   var contents = <?php echo json_encode(array_map(function($t) { return $t['content']; }, $tips)); ?>;
 
+  function isMobile() {
+    return window.innerWidth <= 768;
+  }
+
+  /* ========== DESKTOP : slide + panneau ========== */
   function showQuoteView() {
     panelQuote.style.display = 'block';
     panelQuote.setAttribute('aria-hidden', 'false');
@@ -149,7 +177,7 @@ $tips = [
     panelDetail.setAttribute('aria-hidden', 'false');
   }
 
-  function closeAll() {
+  function closeAllDesktop() {
     grid.classList.remove('is-expanded');
     panel.setAttribute('aria-hidden', 'true');
     document.querySelectorAll('.advice-tip').forEach(function(t) {
@@ -159,37 +187,82 @@ $tips = [
     activeTipIndex = null;
   }
 
-  /* Clic "Voir le conseil" → slide card en pos 1, afficher citation */
+  /* ========== MOBILE : flip card ========== */
+  function resetFlipBack(tip) {
+    var quoteEl = tip.querySelector('.advice-tip-back-quote');
+    var detailEl = tip.querySelector('.advice-tip-back-detail');
+    if (quoteEl) quoteEl.style.display = 'block';
+    if (detailEl) {
+      detailEl.style.display = 'none';
+      detailEl.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  function closeFlip(tip) {
+    tip.classList.remove('is-flipped');
+    resetFlipBack(tip);
+  }
+
+  /* ========== EVENT LISTENERS ========== */
+
+  /* Clic "Voir le conseil" */
   document.querySelectorAll('.advice-tip-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var tip = this.closest('.advice-tip');
       var tipIndex = tip.getAttribute('data-tip');
 
-      document.querySelectorAll('.advice-tip').forEach(function(t) {
-        t.classList.remove('is-active');
-      });
-
-      tip.classList.add('is-active');
-      activeTipIndex = tipIndex;
-
-      quoteText.textContent = summaries[tipIndex];
-      showQuoteView();
-
-      grid.classList.add('is-expanded');
-      panel.setAttribute('aria-hidden', 'false');
+      if (isMobile()) {
+        /* Mobile : flip la card */
+        document.querySelectorAll('.advice-tip').forEach(function(t) {
+          if (t !== tip) closeFlip(t);
+        });
+        resetFlipBack(tip);
+        tip.classList.add('is-flipped');
+      } else {
+        /* Desktop : slide + panneau */
+        document.querySelectorAll('.advice-tip').forEach(function(t) {
+          t.classList.remove('is-active');
+        });
+        tip.classList.add('is-active');
+        activeTipIndex = tipIndex;
+        quoteText.textContent = summaries[tipIndex];
+        showQuoteView();
+        grid.classList.add('is-expanded');
+        panel.setAttribute('aria-hidden', 'false');
+      }
     });
   });
 
-  /* Boutons croix → tout refermer */
+  /* Boutons croix desktop (panneau) */
   panel.querySelectorAll('.advice-quote-close').forEach(function(btn) {
-    btn.addEventListener('click', closeAll);
+    btn.addEventListener('click', closeAllDesktop);
   });
 
-  /* Bouton "En savoir plus" → afficher le contenu dans le panneau */
+  /* Bouton "En savoir plus" desktop (panneau) */
   panel.querySelector('.advice-quote-more').addEventListener('click', function() {
     if (activeTipIndex === null) return;
     panelDetailBody.innerHTML = contents[activeTipIndex];
     showDetailView();
+  });
+
+  /* Mobile : boutons croix (face arrière) */
+  document.querySelectorAll('.advice-tip-back-close').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var tip = this.closest('.advice-tip');
+      closeFlip(tip);
+    });
+  });
+
+  /* Mobile : bouton "En savoir plus" (face arrière) */
+  document.querySelectorAll('.advice-tip-back-more').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var tip = this.closest('.advice-tip');
+      var quoteEl = tip.querySelector('.advice-tip-back-quote');
+      var detailEl = tip.querySelector('.advice-tip-back-detail');
+      quoteEl.style.display = 'none';
+      detailEl.style.display = 'block';
+      detailEl.setAttribute('aria-hidden', 'false');
+    });
   });
 
 })();
