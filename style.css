@@ -10225,7 +10225,7 @@ transform: translateY(15px);
   margin-top: 2rem;
 }
 
-.related-cta .button-cta-orange {
+.related-cta-btn {
   display: inline-block;
   padding: 0.75rem 2rem;
   background: linear-gradient(180deg, #937D68 0%, #7A6855 100%);
@@ -10243,7 +10243,7 @@ transform: translateY(15px);
   cursor: pointer;
 }
 
-.related-cta .button-cta-orange:hover {
+.related-cta-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(147, 125, 104, 0.4);
 }

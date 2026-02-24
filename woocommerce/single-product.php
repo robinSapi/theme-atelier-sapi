@@ -879,7 +879,7 @@ get_header();
         $cta_text .= strtolower($main_cat->name);
         ?>
         <div class="related-cta">
-          <a href="<?php echo esc_url(get_term_link($main_cat)); ?>" class="button button-cta-orange">
+          <a href="<?php echo esc_url(get_term_link($main_cat)); ?>" class="related-cta-btn">
             <?php echo esc_html($cta_text); ?>
           </a>
         </div>
