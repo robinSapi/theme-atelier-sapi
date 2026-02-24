@@ -9889,7 +9889,7 @@ transform: translateY(15px);
 .product-filters-wrapper {
   max-width: 1600px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 3rem 2rem 0;
 }
 
 /* Product Search Bar */
