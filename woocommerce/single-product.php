@@ -852,7 +852,7 @@ get_header();
       <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
       <h2>Vous aimerez aussi</h2>
     </div>
-    <div class="products-grid products-grid-cinetique">
+    <div class="products-grid products-grid-cinetique" id="related-carousel">
       <?php
       foreach ($related_products as $related_id) {
         $post_object = get_post($related_id);
@@ -861,6 +861,14 @@ get_header();
       }
       wp_reset_postdata();
       ?>
+    </div>
+    <div class="related-carousel-nav">
+      <button type="button" class="related-nav-prev" aria-label="<?php esc_attr_e('Produit précédent', 'theme-sapi-maison'); ?>">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button type="button" class="related-nav-next" aria-label="<?php esc_attr_e('Produit suivant', 'theme-sapi-maison'); ?>">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
     </div>
   </section>
   <?php endif; ?>
@@ -1550,6 +1558,29 @@ get_header();
 })();
 </script>
 <?php endif; ?>
+
+<script>
+// Related products carousel navigation (mobile)
+(function() {
+  var carousel = document.getElementById('related-carousel');
+  var prevBtn = document.querySelector('.related-nav-prev');
+  var nextBtn = document.querySelector('.related-nav-next');
+  if (!carousel || !prevBtn || !nextBtn) return;
+
+  var getCardWidth = function() {
+    var card = carousel.querySelector('.product-card-cinetique');
+    if (!card) return 0;
+    return card.offsetWidth + parseInt(getComputedStyle(carousel).gap || '16');
+  };
+
+  prevBtn.addEventListener('click', function() {
+    carousel.scrollBy({ left: -getCardWidth(), behavior: 'smooth' });
+  });
+  nextBtn.addEventListener('click', function() {
+    carousel.scrollBy({ left: getCardWidth(), behavior: 'smooth' });
+  });
+})();
+</script>
 
 <?php
 get_footer();
