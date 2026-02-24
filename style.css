@@ -10227,24 +10227,25 @@ transform: translateY(15px);
 
 .related-cta .button-cta-orange {
   display: inline-block;
-  padding: 0.875rem 2rem;
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  padding: 0.75rem 2rem;
+  background: linear-gradient(180deg, #937D68 0%, #7A6855 100%);
   color: #fff;
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   text-decoration: none;
   border: none;
   border-radius: 50px;
-  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
+  box-shadow: 0 4px 15px rgba(147, 125, 104, 0.3);
   transition: all 0.3s ease;
   cursor: pointer;
 }
 
 .related-cta .button-cta-orange:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
+  box-shadow: 0 6px 20px rgba(147, 125, 104, 0.4);
 }
 
 .product-card-cinetique {
