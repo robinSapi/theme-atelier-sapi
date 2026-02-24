@@ -3004,6 +3004,8 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 @media (max-width: 768px) {
   .product-specs-v2 {
     padding: 3rem 1.5rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
   }
 
   /* Show accordion, hide grid on mobile - Phase 4 Proposal B */
