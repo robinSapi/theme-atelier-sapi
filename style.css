@@ -2715,8 +2715,9 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 
 .product-specs-v2 .product-specs-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem 1rem;
   margin-bottom: 2.5rem;
 }
 
@@ -2736,6 +2737,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 }
 
 .product-specs-v2 .specs-intro {
+  width: 100%;
   font-size: 1rem;
   color: var(--color-text-light);
   margin: 0;
