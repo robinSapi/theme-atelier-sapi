@@ -675,53 +675,6 @@ get_header();
     </div>
   </section>
 
-  <?php if (!$is_accessoire) : ?>
-  <!-- ═══════════════════════════════════════════════════════════════
-       SECTION 04 — L'ATELIER
-       ═══════════════════════════════════════════════════════════════ -->
-  <section class="product-atelier product-atelier-cinetique">
-    <div class="product-atelier-grid">
-      <div class="product-atelier-image">
-        <?php
-        $atelier_img_url = null;
-        $atelier_img = function_exists('get_field') ? get_field('atelier_photo', 'option') : null;
-
-        if ($atelier_img && isset($atelier_img['url'])) {
-          $atelier_img_url = $atelier_img['url'];
-        } else {
-          $theme_image = get_template_directory() . '/assets/images/atelier-robin.jpg';
-          if (file_exists($theme_image)) {
-            $atelier_img_url = get_template_directory_uri() . '/assets/images/atelier-robin.jpg';
-          }
-        }
-
-        if ($atelier_img_url) :
-        ?>
-          <img src="<?php echo esc_url($atelier_img_url); ?>" alt="Robin dans l'atelier Sapi" loading="lazy">
-        <?php else : ?>
-          <div class="atelier-placeholder">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-            </svg>
-            <span>Photo atelier</span>
-          </div>
-        <?php endif; ?>
-      </div>
-      <div class="product-atelier-content">
-        <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
-        <h2>Fabriqué avec passion</h2>
-        <p class="atelier-intro">Chaque luminaire est conçu et fabriqué à la main par Robin dans notre atelier lyonnais.</p>
-        <blockquote class="atelier-quote">
-          « Je crée chaque pièce comme si elle allait éclairer ma propre maison. La précision de la découpe laser combinée au savoir-faire artisanal, c'est ce qui rend nos luminaires uniques. »
-        </blockquote>
-        <p class="atelier-signature">— Robin, fondateur d'Atelier Sapi</p>
-        <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="button button-outline">Découvrir notre histoire</a>
-      </div>
-    </div>
-  </section>
-  <?php endif; // fin exclusion atelier accessoires ?>
-
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION — FAQ
        ═══════════════════════════════════════════════════════════════ -->
@@ -839,6 +792,53 @@ get_header();
     <?php endif; ?>
   </section>
   <?php endif; // fin exclusion avis accessoires ?>
+
+  <?php if (!$is_accessoire) : ?>
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION — L'ATELIER (Fabriqué avec passion)
+       ═══════════════════════════════════════════════════════════════ -->
+  <section class="product-atelier product-atelier-cinetique">
+    <div class="product-atelier-grid">
+      <div class="product-atelier-image">
+        <?php
+        $atelier_img_url = null;
+        $atelier_img = function_exists('get_field') ? get_field('atelier_photo', 'option') : null;
+
+        if ($atelier_img && isset($atelier_img['url'])) {
+          $atelier_img_url = $atelier_img['url'];
+        } else {
+          $theme_image = get_template_directory() . '/assets/images/atelier-robin.jpg';
+          if (file_exists($theme_image)) {
+            $atelier_img_url = get_template_directory_uri() . '/assets/images/atelier-robin.jpg';
+          }
+        }
+
+        if ($atelier_img_url) :
+        ?>
+          <img src="<?php echo esc_url($atelier_img_url); ?>" alt="Robin dans l'atelier Sapi" loading="lazy">
+        <?php else : ?>
+          <div class="atelier-placeholder">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+            </svg>
+            <span>Photo atelier</span>
+          </div>
+        <?php endif; ?>
+      </div>
+      <div class="product-atelier-content">
+        <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
+        <h2>Fabriqué avec passion</h2>
+        <p class="atelier-intro">Chaque luminaire est conçu et fabriqué à la main par Robin dans notre atelier lyonnais.</p>
+        <blockquote class="atelier-quote">
+          « Je crée chaque pièce comme si elle allait éclairer ma propre maison. La précision de la découpe laser combinée au savoir-faire artisanal, c'est ce qui rend nos luminaires uniques. »
+        </blockquote>
+        <p class="atelier-signature">— Robin, fondateur d'Atelier Sapi</p>
+        <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="button button-outline">Découvrir notre histoire</a>
+      </div>
+    </div>
+  </section>
+  <?php endif; // fin exclusion atelier accessoires ?>
 
   <!-- ═══════════════════════════════════════════════════════════════
        PRODUITS SIMILAIRES
