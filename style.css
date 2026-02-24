@@ -10243,6 +10243,14 @@ transform: translateY(15px);
   cursor: pointer;
 }
 
+.related-cta-btn:active,
+.related-cta-btn:focus,
+.related-cta-btn:visited {
+  color: #fff;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .related-cta-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(147, 125, 104, 0.4);
