@@ -1200,12 +1200,20 @@ get_header();
         const materiauLabel = getVariationAttributeLabel('materiau');
         if (materiauLabel) updateSpecLabel('Bois', materiauLabel);
 
-        // Mettre à jour "Dimensions" avec le libellé sélectionné dans l'attribut Taille
-        const tailleLabel = getVariationAttributeLabel('taille');
-        if (tailleLabel) updateSpecLabel('Dimensions', tailleLabel);
+        // Mettre à jour "Dimensions" — priorité aux données WooCommerce, sinon label attribut
+        if (variation.dimensions_html && variation.dimensions_html.trim()) {
+          updateSpecLabel('Dimensions', variation.dimensions_html.replace(/<[^>]*>/g, '').trim());
+        } else {
+          const tailleLabel = getVariationAttributeLabel('taille');
+          if (tailleLabel) updateSpecLabel('Dimensions', tailleLabel);
+        }
 
-        // Mettre à jour "Poids" depuis les données WooCommerce de la variation
-        updateSpecLabel('Poids', variation.weight ? variation.weight + ' kg' : 'N/A');
+        // Mettre à jour "Poids" — priorité aux données WooCommerce formatées
+        if (variation.weight_html && variation.weight_html.trim()) {
+          updateSpecLabel('Poids', variation.weight_html.replace(/<[^>]*>/g, '').trim());
+        } else if (variation.weight) {
+          updateSpecLabel('Poids', variation.weight + ' kg');
+        }
       });
 
       jQuery(variationForm).on('reset_data', function() {
