@@ -10219,38 +10219,6 @@ transform: translateY(15px);
   }
 }
 
-/* Boutons navigation carousel produits similaires */
-.related-carousel-nav {
-  display: none;
-}
-
-@media (max-width: 540px) {
-  .related-carousel-nav {
-    display: flex;
-    justify-content: center;
-    gap: 0.75rem;
-    margin-top: 1rem;
-  }
-
-  .related-carousel-nav button {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 1px solid var(--color-wood);
-    background: transparent;
-    color: var(--color-wood);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-  }
-
-  .related-carousel-nav button:hover {
-    background: var(--color-wood);
-    color: #fff;
-  }
-}
 
 .product-card-cinetique {
   position: relative;
