@@ -200,21 +200,28 @@ if (!$hero_img_url) {
       <?php esc_html_e('Tout', 'theme-sapi-maison'); ?>
       <span class="filter-count">(<?php echo esc_html($all_products->found_posts); ?>)</span>
     </button>
-    <?php if ($product_categories && !is_wp_error($product_categories)) : ?>
-      <?php foreach ($product_categories as $cat) : ?>
-        <?php
-        // Add special class for gift card category
-        $btn_class = 'filter-btn';
-        if ($cat->slug === 'carte-cadeau') {
-          $btn_class .= ' filter-btn--gift';
-        }
-        ?>
-        <button type="button" class="<?php echo esc_attr($btn_class); ?>" data-filter="<?php echo esc_attr($cat->slug); ?>">
-          <?php echo esc_html($cat->name); ?>
-          <span class="filter-count">(<?php echo esc_html($cat->count); ?>)</span>
-        </button>
-      <?php endforeach; ?>
-    <?php endif; ?>
+    <?php
+    // Ordre personnalisé des catégories
+    $cat_order = ['suspensions', 'appliques', 'lampes-a-poser', 'lampadaires', 'accessoires', 'carte-cadeau'];
+    $cats_by_slug = [];
+    if ($product_categories && !is_wp_error($product_categories)) {
+      foreach ($product_categories as $cat) {
+        $cats_by_slug[$cat->slug] = $cat;
+      }
+    }
+    foreach ($cat_order as $slug) :
+      if (!isset($cats_by_slug[$slug])) continue;
+      $cat = $cats_by_slug[$slug];
+      $btn_class = 'filter-btn';
+      if ($cat->slug === 'carte-cadeau') {
+        $btn_class .= ' filter-btn--gift';
+      }
+    ?>
+      <button type="button" class="<?php echo esc_attr($btn_class); ?>" data-filter="<?php echo esc_attr($cat->slug); ?>">
+        <?php echo esc_html($cat->name); ?>
+        <span class="filter-count">(<?php echo esc_html($cat->count); ?>)</span>
+      </button>
+    <?php endforeach; ?>
   </nav>
 
 </div>
