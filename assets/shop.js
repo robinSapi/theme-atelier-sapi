@@ -106,6 +106,8 @@
       size: 'all'
     },
 
+    searchQuery: '',
+
     init: function() {
       const filterContainer = document.querySelector('.product-filters-js');
       if (!filterContainer) {
@@ -131,8 +133,32 @@
         });
       });
 
+      // Search bar
+      this.initSearch();
+
       // Advanced dropdown filters
       this.initAdvancedFilters();
+    },
+
+    initSearch: function() {
+      const searchInput = document.getElementById('product-search-input');
+      const clearBtn = document.querySelector('.search-clear');
+      if (!searchInput) return;
+
+      searchInput.addEventListener('input', () => {
+        this.searchQuery = searchInput.value.trim().toLowerCase();
+        clearBtn.style.display = this.searchQuery ? 'flex' : 'none';
+        this.applyFilters();
+      });
+
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          searchInput.value = '';
+          this.searchQuery = '';
+          clearBtn.style.display = 'none';
+          this.applyFilters();
+        });
+      }
     },
 
     initAdvancedFilters: function() {
@@ -283,38 +309,70 @@
       return true;
     },
 
+    matchesSize: function(productSize, filterValue) {
+      if (filterValue === 'all') return true;
+
+      const size = parseFloat(productSize);
+      if (isNaN(size)) return true;
+
+      if (filterValue === '0-100') return size < 100;
+      if (filterValue === '100-150') return size >= 100 && size < 150;
+      if (filterValue === '150-200') return size >= 150 && size < 200;
+      if (filterValue === '200+') return size >= 200;
+
+      return true;
+    },
+
     applyFilters: function() {
-      // Find all slides with data-categories attribute
+      // Find all product cards — carousel slides or grid items
       let slides;
       if (productsCarousel.allSlides && productsCarousel.allSlides.length > 0) {
         slides = productsCarousel.allSlides;
       } else {
-        slides = document.querySelectorAll('.products-carousel-slide, [data-categories]');
+        slides = document.querySelectorAll('.product-card-cinetique');
       }
+
+      let visibleCount = 0;
 
       slides.forEach(slide => {
         const categories = slide.dataset.categories || '';
         const price = slide.dataset.price || '';
         const wood = slide.dataset.wood || '';
         const size = slide.dataset.size || '';
+        const name = slide.dataset.name || '';
 
         // Check all filter criteria
         const matchesCategory = this.filters.category === 'all' || categories.split(' ').includes(this.filters.category);
         const matchesPrice = this.matchesPrice(price, this.filters.price);
         const matchesWood = this.filters.wood === 'all' || wood === this.filters.wood;
-        const matchesSize = this.filters.size === 'all' || size === this.filters.size;
+        const matchesSize = this.filters.size === 'all' || this.matchesSize(size, this.filters.size);
+        const matchesSearch = !this.searchQuery || name.includes(this.searchQuery);
 
-        const shouldShow = matchesCategory && matchesPrice && matchesWood && matchesSize;
+        const shouldShow = matchesCategory && matchesPrice && matchesWood && matchesSize && matchesSearch;
 
         // Use both class AND inline styles to guarantee hiding
         if (shouldShow) {
           slide.classList.remove('is-filtered-out');
           slide.style.display = '';
+          visibleCount++;
         } else {
           slide.classList.add('is-filtered-out');
           slide.style.display = 'none';
         }
       });
+
+      // Show/hide "no results" message
+      const noResults = document.querySelector('.woocommerce-no-products-found');
+      const productsList = document.querySelector('.products.columns-3');
+      if (noResults && productsList) {
+        if (visibleCount === 0 && slides.length > 0) {
+          noResults.style.display = 'block';
+          productsList.style.display = 'none';
+        } else {
+          noResults.style.display = 'none';
+          productsList.style.display = '';
+        }
+      }
 
       // Reset carousel to beginning and recalculate
       if (productsCarousel.carousel) {

@@ -298,6 +298,11 @@ if (!$hero_img_url) {
       ?>
     </ul>
 
+    <!-- Message "aucun résultat" pour le filtrage JS côté client -->
+    <div class="woocommerce-no-products-found" style="display: none;">
+      <p><?php esc_html_e('Aucun produit ne correspond à votre recherche.', 'theme-sapi-maison'); ?></p>
+    </div>
+
   <?php else : ?>
 
     <div class="woocommerce-no-products-found">

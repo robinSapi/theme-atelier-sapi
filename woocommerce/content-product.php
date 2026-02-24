@@ -19,7 +19,7 @@ if (!$product || !is_a($product, 'WC_Product')) {
 
 // Check if we're in a carousel context (passed from archive-product.php or taxonomy-product_cat.php)
 $is_carousel = !empty($sapi_carousel_context['is_carousel']);
-$carousel_categories = $is_carousel ? ($sapi_carousel_context['categories'] ?? '') : '';
+$carousel_categories = !empty($sapi_carousel_context['categories']) ? $sapi_carousel_context['categories'] : '';
 
 // Check if the product is valid
 // Note: Don't use is_visible() here as it fails with custom WP_Query
@@ -134,9 +134,18 @@ if ($is_carousel) {
   }
 }
 
-// Build data attributes
+// Build data attributes - always include data-categories for filtering
 $data_attrs = 'data-category="' . esc_attr(sanitize_title($category_name)) . '"';
-$data_attrs .= $carousel_categories ? ' data-categories="' . esc_attr($carousel_categories) . '"' : '';
+$filter_categories = $carousel_categories;
+if (!$filter_categories && $categories && !is_wp_error($categories)) {
+  $cat_slug_list = [];
+  foreach ($categories as $c) {
+    $cat_slug_list[] = $c->slug;
+  }
+  $filter_categories = implode(' ', $cat_slug_list);
+}
+$data_attrs .= $filter_categories ? ' data-categories="' . esc_attr($filter_categories) . '"' : '';
+$data_attrs .= ' data-name="' . esc_attr(strtolower(get_the_title())) . '"';
 $data_attrs .= ' data-price="' . esc_attr($filter_price) . '"';
 $data_attrs .= $wood_essence ? ' data-wood="' . esc_attr(sanitize_title($wood_essence)) . '"' : '';
 $data_attrs .= $size_dimension > 0 ? ' data-size="' . esc_attr($size_dimension) . '"' : '';
