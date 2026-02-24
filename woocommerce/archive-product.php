@@ -202,7 +202,7 @@ if (!$hero_img_url) {
     </button>
     <?php
     // Ordre personnalisé des catégories
-    $cat_order = ['suspensions', 'appliques', 'lampes-a-poser', 'lampadaires', 'accessoires', 'carte-cadeau'];
+    $cat_order = ['suspensions', 'appliques', 'lampeaposer', 'lampadaires', 'accessoires', 'carte-cadeau'];
     $cats_by_slug = [];
     if ($product_categories && !is_wp_error($product_categories)) {
       foreach ($product_categories as $cat) {
