@@ -353,7 +353,7 @@ get_header();
       <div class="product-why-left">
         <div class="product-why-header">
           <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
-          <h2>Pourquoi cette pièce ?</h2>
+          <h2>L'histoire de <?php echo esc_html($product->get_name()); ?></h2>
         </div>
         <div class="product-why-content">
         <?php
