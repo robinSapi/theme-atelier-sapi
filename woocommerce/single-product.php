@@ -1135,14 +1135,34 @@ get_header();
     });
   }
 
-  // Lecture du libellé sélectionné dans un attribut de variation (swatches ou select natif)
-  function getVariationAttributeLabel(attrName) {
-    if (!variationForm) return '';
-    const swatch = variationForm.querySelector('.variable-items-wrapper[data-attribute_name*="' + attrName + '"] .variable-item.selected');
-    if (swatch) return swatch.dataset.title || swatch.getAttribute('title') || '';
-    const select = variationForm.querySelector('select[name*="' + attrName + '"]');
-    if (select && select.value) return select.options[select.selectedIndex]?.text || '';
-    return '';
+  // Lecture du libellé d'un attribut de variation depuis les données WooCommerce
+  function getVariationAttributeLabel(variation, attrName) {
+    if (!variationForm || !variation || !variation.attributes) return '';
+    // Chercher la clé d'attribut correspondante dans variation.attributes
+    var attrKey = '';
+    var attrSlug = '';
+    for (var key in variation.attributes) {
+      if (key.toLowerCase().indexOf(attrName.toLowerCase()) !== -1) {
+        attrKey = key;
+        attrSlug = variation.attributes[key];
+        break;
+      }
+    }
+    if (!attrKey || !attrSlug) return '';
+    // Chercher le label dans le select natif WooCommerce
+    var select = variationForm.querySelector('select[name="' + attrKey + '"]');
+    if (select) {
+      var option = select.querySelector('option[value="' + attrSlug + '"]');
+      if (option) return option.textContent.trim();
+    }
+    // Chercher dans les swatches (data-value correspond au slug)
+    var wrapper = variationForm.querySelector('.variable-items-wrapper[data-attribute_name="' + attrKey + '"]');
+    if (wrapper) {
+      var swatch = wrapper.querySelector('.variable-item[data-value="' + attrSlug + '"]');
+      if (swatch) return swatch.dataset.title || swatch.getAttribute('title') || '';
+    }
+    // Fallback : capitaliser le slug
+    return attrSlug.charAt(0).toUpperCase() + attrSlug.slice(1).replace(/-/g, ' ');
   }
 
   const origBoisValue       = getOrigSpecValue('Bois');
@@ -1205,14 +1225,14 @@ get_header();
       }
 
       // Mettre à jour "Bois" avec le libellé sélectionné dans l'attribut Matériau
-      const materiauLabel = getVariationAttributeLabel('materiau');
+      var materiauLabel = getVariationAttributeLabel(variation, 'materiau');
       if (materiauLabel) updateSpecLabel('Bois', materiauLabel);
 
       // Mettre à jour "Dimensions" — priorité aux données WooCommerce, sinon label attribut
       if (variation.dimensions_html && variation.dimensions_html.trim()) {
         updateSpecLabel('Dimensions', variation.dimensions_html.replace(/<[^>]*>/g, '').trim());
       } else {
-        const tailleLabel = getVariationAttributeLabel('taille');
+        var tailleLabel = getVariationAttributeLabel(variation, 'taille');
         if (tailleLabel) updateSpecLabel('Dimensions', tailleLabel);
       }
 
