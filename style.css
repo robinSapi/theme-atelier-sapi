@@ -10378,7 +10378,6 @@ transform: translateY(15px);
   font-weight: 300;
   color: var(--color-gray);
   margin-bottom: 1.25rem;
-  flex-grow: 1;
 }
 
 .product-card-cinetique .product-price {
