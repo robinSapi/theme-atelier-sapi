@@ -1019,19 +1019,19 @@ get_header();
   const stickyBar = document.getElementById('sticky-add-to-cart');
   const heroSection = document.querySelector('.product-hero-v2');
 
-  if (!stickyBar || !heroSection) return;
-
   // Show/hide sticky bar based on scroll position
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      stickyBar.classList.toggle('is-visible', !entry.isIntersecting);
-    });
-  }, { threshold: 0, rootMargin: '-100px 0px 0px 0px' });
+  if (stickyBar && heroSection) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        stickyBar.classList.toggle('is-visible', !entry.isIntersecting);
+      });
+    }, { threshold: 0, rootMargin: '-100px 0px 0px 0px' });
 
-  observer.observe(heroSection);
+    observer.observe(heroSection);
+  }
 
   // Handle simple product add to cart (Safari compatible)
-  const addBtn = stickyBar.querySelector('.sticky-add-btn');
+  const addBtn = stickyBar ? stickyBar.querySelector('.sticky-add-btn') : null;
   if (addBtn) {
     addBtn.addEventListener('click', function() {
       const btn = this;
@@ -1083,7 +1083,7 @@ get_header();
   }
 
   // Handle variable product scroll to form
-  const scrollBtn = stickyBar.querySelector('.sticky-scroll-to-form');
+  const scrollBtn = stickyBar ? stickyBar.querySelector('.sticky-scroll-to-form') : null;
   if (scrollBtn) {
     scrollBtn.addEventListener('click', function(e) {
       e.preventDefault();
@@ -1092,72 +1092,79 @@ get_header();
         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     });
+  }
 
-    // Update sticky bar and gallery when variation is selected
-    const variationForm = document.querySelector('.variations_form');
-    const mainImage = document.querySelector('.gallery-main-image');
-    const galleryZoomLink = document.querySelector('.gallery-zoom');
+  // Update sticky bar, gallery and specs when variation is selected
+  const variationForm = document.querySelector('.variations_form');
+  const mainImage = document.querySelector('.gallery-main-image');
+  const galleryZoomLink = document.querySelector('.gallery-zoom');
 
-    // Store original first thumbnail data
-    const firstThumb = document.querySelector('.gallery-thumb');
-    let originalFirstThumbSrc = null;
-    let originalFirstThumbData = null;
+  // Store original first thumbnail data
+  const firstThumb = document.querySelector('.gallery-thumb');
+  let originalFirstThumbSrc = null;
+  let originalFirstThumbData = null;
 
-    if (firstThumb) {
-      const firstThumbImg = firstThumb.querySelector('img');
-      if (firstThumbImg) {
-        originalFirstThumbSrc = firstThumbImg.src;
+  if (firstThumb) {
+    const firstThumbImg = firstThumb.querySelector('img');
+    if (firstThumbImg) {
+      originalFirstThumbSrc = firstThumbImg.src;
+    }
+    originalFirstThumbData = firstThumb.dataset.image;
+  }
+
+  // Lecture de la valeur originale d'un champ de la fiche technique
+  function getOrigSpecValue(label) {
+    for (const item of document.querySelectorAll('.spec-item')) {
+      const lbl = item.querySelector('.spec-label');
+      if (lbl && lbl.textContent.trim() === label) {
+        const val = item.querySelector('.spec-value');
+        return val ? val.textContent : '';
       }
-      originalFirstThumbData = firstThumb.dataset.image;
     }
+    return '';
+  }
 
-    // Lecture de la valeur originale d'un champ de la fiche technique
-    function getOrigSpecValue(label) {
-      for (const item of document.querySelectorAll('.spec-item')) {
-        const lbl = item.querySelector('.spec-label');
-        if (lbl && lbl.textContent.trim() === label) {
-          const val = item.querySelector('.spec-value');
-          return val ? val.textContent : '';
-        }
+  // Mise à jour d'un champ de la fiche technique par son libellé
+  function updateSpecLabel(label, value) {
+    document.querySelectorAll('.spec-item').forEach(item => {
+      const lbl = item.querySelector('.spec-label');
+      if (lbl && lbl.textContent.trim() === label) {
+        const val = item.querySelector('.spec-value');
+        if (val) val.textContent = value;
       }
-      return '';
-    }
+    });
+  }
 
-    // Mise à jour d'un champ de la fiche technique par son libellé
-    function updateSpecLabel(label, value) {
-      document.querySelectorAll('.spec-item').forEach(item => {
-        const lbl = item.querySelector('.spec-label');
-        if (lbl && lbl.textContent.trim() === label) {
-          const val = item.querySelector('.spec-value');
-          if (val) val.textContent = value;
-        }
-      });
-    }
+  // Lecture du libellé sélectionné dans un attribut de variation (swatches ou select natif)
+  function getVariationAttributeLabel(attrName) {
+    if (!variationForm) return '';
+    const swatch = variationForm.querySelector('.variable-items-wrapper[data-attribute_name*="' + attrName + '"] .variable-item.selected');
+    if (swatch) return swatch.dataset.title || swatch.getAttribute('title') || '';
+    const select = variationForm.querySelector('select[name*="' + attrName + '"]');
+    if (select && select.value) return select.options[select.selectedIndex]?.text || '';
+    return '';
+  }
 
-    // Lecture du libellé sélectionné dans un attribut de variation (swatches ou select natif)
-    function getVariationAttributeLabel(attrName) {
-      const swatch = variationForm.querySelector('.variable-items-wrapper[data-attribute_name*="' + attrName + '"] .variable-item.selected');
-      if (swatch) return swatch.dataset.title || swatch.getAttribute('title') || '';
-      const select = variationForm.querySelector('select[name*="' + attrName + '"]');
-      if (select && select.value) return select.options[select.selectedIndex]?.text || '';
-      return '';
-    }
+  const origBoisValue       = getOrigSpecValue('Bois');
+  const origDimensionsValue = getOrigSpecValue('Dimensions');
+  const origPoidsValue      = getOrigSpecValue('Poids');
 
-    const origBoisValue       = getOrigSpecValue('Bois');
-    const origDimensionsValue = getOrigSpecValue('Dimensions');
-    const origPoidsValue      = getOrigSpecValue('Poids');
-
-    // État initial : Dimensions et Poids dépendent du choix de variation
+  // État initial : Dimensions et Poids dépendent du choix de variation
+  if (variationForm) {
     updateSpecLabel('Dimensions', 'Faites votre choix');
     updateSpecLabel('Poids',      'Faites votre choix');
+  }
 
-    if (variationForm && typeof jQuery !== 'undefined') {
-      jQuery(variationForm).on('found_variation', function(event, variation) {
-        // Update sticky bar price
+  if (variationForm && typeof jQuery !== 'undefined') {
+    jQuery(variationForm).on('found_variation', function(event, variation) {
+      // Update sticky bar price
+      if (stickyBar) {
         const priceEl = stickyBar.querySelector('.sticky-product-price');
         if (priceEl && variation.price_html) {
           priceEl.innerHTML = variation.price_html;
         }
+      }
+      if (scrollBtn) {
         scrollBtn.textContent = '<?php esc_html_e('Ajouter au panier', 'theme-sapi-maison'); ?>';
         scrollBtn.classList.add('variation-selected');
         scrollBtn.addEventListener('click', function submitForm(e) {
@@ -1167,89 +1174,90 @@ get_header();
             mainForm.querySelector('.single_add_to_cart_button').click();
           }
         }, { once: true });
+      }
 
-        // Update gallery with variation image
-        if (variation.image && variation.image.src && mainImage) {
-          const variationImageSrc = variation.image.src;
-          const variationImageFull = variation.image.full_src || variationImageSrc;
-          const variationThumbSrc = variation.image.gallery_thumbnail_src || variationImageSrc;
+      // Update gallery with variation image
+      if (variation.image && variation.image.src && mainImage) {
+        const variationImageSrc = variation.image.src;
+        const variationImageFull = variation.image.full_src || variationImageSrc;
+        const variationThumbSrc = variation.image.gallery_thumbnail_src || variationImageSrc;
 
-          // Update main image
-          mainImage.src = variationImageSrc;
-          mainImage.srcset = variation.image.srcset || '';
-          if (galleryZoomLink) {
-            galleryZoomLink.href = variationImageFull;
-          }
-
-          // Replace first thumbnail with variation image
-          if (firstThumb) {
-            const firstThumbImg = firstThumb.querySelector('img');
-            if (firstThumbImg) {
-              firstThumbImg.src = variationThumbSrc;
-            }
-            firstThumb.dataset.image = variationImageSrc;
-            firstThumb.classList.add('variation-active');
-
-            // Make sure it's active
-            document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
-            firstThumb.classList.add('active');
-          }
+        // Update main image
+        mainImage.src = variationImageSrc;
+        mainImage.srcset = variation.image.srcset || '';
+        if (galleryZoomLink) {
+          galleryZoomLink.href = variationImageFull;
         }
 
-        // Mettre à jour "Bois" avec le libellé sélectionné dans l'attribut Matériau
-        const materiauLabel = getVariationAttributeLabel('materiau');
-        if (materiauLabel) updateSpecLabel('Bois', materiauLabel);
-
-        // Mettre à jour "Dimensions" — priorité aux données WooCommerce, sinon label attribut
-        if (variation.dimensions_html && variation.dimensions_html.trim()) {
-          updateSpecLabel('Dimensions', variation.dimensions_html.replace(/<[^>]*>/g, '').trim());
-        } else {
-          const tailleLabel = getVariationAttributeLabel('taille');
-          if (tailleLabel) updateSpecLabel('Dimensions', tailleLabel);
-        }
-
-        // Mettre à jour "Poids" — priorité aux données WooCommerce formatées
-        if (variation.weight_html && variation.weight_html.trim()) {
-          updateSpecLabel('Poids', variation.weight_html.replace(/<[^>]*>/g, '').trim());
-        } else if (variation.weight) {
-          updateSpecLabel('Poids', variation.weight + ' kg');
-        }
-      });
-
-      jQuery(variationForm).on('reset_data', function() {
-        scrollBtn.textContent = '<?php esc_html_e('Choisir les options', 'theme-sapi-maison'); ?>';
-        scrollBtn.classList.remove('variation-selected');
-
-        // Restore original first thumbnail
-        if (firstThumb && originalFirstThumbSrc && originalFirstThumbData) {
+        // Replace first thumbnail with variation image
+        if (firstThumb) {
           const firstThumbImg = firstThumb.querySelector('img');
           if (firstThumbImg) {
-            firstThumbImg.src = originalFirstThumbSrc;
+            firstThumbImg.src = variationThumbSrc;
           }
-          firstThumb.dataset.image = originalFirstThumbData;
-          firstThumb.classList.remove('variation-active');
+          firstThumb.dataset.image = variationImageSrc;
+          firstThumb.classList.add('variation-active');
 
-          // Update main image to first thumbnail
-          if (mainImage) {
-            mainImage.src = originalFirstThumbData;
-            mainImage.srcset = '';
-          }
-          if (galleryZoomLink) {
-            galleryZoomLink.href = originalFirstThumbData;
-          }
+          // Make sure it's active
+          document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
+          firstThumb.classList.add('active');
         }
+      }
 
-        // Restaurer les valeurs originales
-        if (origBoisValue) updateSpecLabel('Bois', origBoisValue);
-        updateSpecLabel('Dimensions', 'Faites votre choix');
-        updateSpecLabel('Poids',      'Faites votre choix');
-      });
-    }
+      // Mettre à jour "Bois" avec le libellé sélectionné dans l'attribut Matériau
+      const materiauLabel = getVariationAttributeLabel('materiau');
+      if (materiauLabel) updateSpecLabel('Bois', materiauLabel);
+
+      // Mettre à jour "Dimensions" — priorité aux données WooCommerce, sinon label attribut
+      if (variation.dimensions_html && variation.dimensions_html.trim()) {
+        updateSpecLabel('Dimensions', variation.dimensions_html.replace(/<[^>]*>/g, '').trim());
+      } else {
+        const tailleLabel = getVariationAttributeLabel('taille');
+        if (tailleLabel) updateSpecLabel('Dimensions', tailleLabel);
+      }
+
+      // Mettre à jour "Poids" — priorité aux données WooCommerce formatées
+      if (variation.weight_html && variation.weight_html.trim()) {
+        updateSpecLabel('Poids', variation.weight_html.replace(/<[^>]*>/g, '').trim());
+      } else if (variation.weight) {
+        updateSpecLabel('Poids', variation.weight + ' kg');
+      }
+    });
+
+    jQuery(variationForm).on('reset_data', function() {
+      if (scrollBtn) {
+        scrollBtn.textContent = '<?php esc_html_e('Choisir les options', 'theme-sapi-maison'); ?>';
+        scrollBtn.classList.remove('variation-selected');
+      }
+
+      // Restore original first thumbnail
+      if (firstThumb && originalFirstThumbSrc && originalFirstThumbData) {
+        const firstThumbImg = firstThumb.querySelector('img');
+        if (firstThumbImg) {
+          firstThumbImg.src = originalFirstThumbSrc;
+        }
+        firstThumb.dataset.image = originalFirstThumbData;
+        firstThumb.classList.remove('variation-active');
+
+        // Update main image to first thumbnail
+        if (mainImage) {
+          mainImage.src = originalFirstThumbData;
+          mainImage.srcset = '';
+        }
+        if (galleryZoomLink) {
+          galleryZoomLink.href = originalFirstThumbData;
+        }
+      }
+
+      // Restaurer les valeurs originales
+      if (origBoisValue) updateSpecLabel('Bois', origBoisValue);
+      updateSpecLabel('Dimensions', 'Faites votre choix');
+      updateSpecLabel('Poids',      'Faites votre choix');
+    });
   }
 
   // Gallery thumbnail switching
   const thumbnails = document.querySelectorAll('.gallery-thumb');
-  const mainImage = document.querySelector('.gallery-main-image');
 
   thumbnails.forEach(thumb => {
     thumb.addEventListener('click', function() {
@@ -1269,7 +1277,6 @@ get_header();
   const galleryMain = document.querySelector('.gallery-main');
   const navPrev = document.querySelector('.gallery-nav-prev');
   const navNext = document.querySelector('.gallery-nav-next');
-  const galleryZoomLink = document.querySelector('.gallery-zoom');
 
   if (galleryMain && thumbnails.length > 1) {
     let currentIndex = 0;
