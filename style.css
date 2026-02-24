@@ -609,23 +609,7 @@ img[loading="lazy"]:not([data-src]) {
 }
 
 .filter-btn::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: inherit;
-  background: linear-gradient(135deg, var(--color-orange, #E35B24), var(--bois-dore, #937D68));
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: -1;
-}
-
-.filter-btn.active::before {
-  opacity: 1;
-}
-
-.filter-btn.active {
-  color: var(--creme-papier, #FEFDFB);
-  transform: translateY(-2px);
+  display: none;
 }
 
 /* Premium micro-interactions */
@@ -9833,20 +9817,20 @@ transform: translateY(15px);
   color: var(--color-wood);
 }
 
-/* Active filter state - more visible with wood background */
+/* Active filter state - orange CTA style */
 .filter-btn.active {
-  background: var(--color-wood);
-  border-color: var(--color-wood);
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  border-color: #E35B24;
   color: var(--color-white);
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(139, 90, 43, 0.3);
+  box-shadow: 0 4px 12px rgba(227, 91, 36, 0.3);
   -webkit-transform: scale(1.02);
   transform: scale(1.02);
 }
 
 .filter-btn.active:hover {
-  background: var(--color-dark);
-  border-color: var(--color-dark);
+  background: linear-gradient(180deg, #D14F1C 0%, #C04518 100%);
+  border-color: #D14F1C;
 }
 
 /* Filter count badge */
