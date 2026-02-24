@@ -3154,6 +3154,8 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 @media (max-width: 768px) {
   .product-atelier.product-atelier-cinetique {
     padding: var(--space-xl, 32px) 1.5rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
   }
 
   .product-atelier-grid {
