@@ -862,6 +862,29 @@ get_header();
       wp_reset_postdata();
       ?>
     </div>
+    <?php
+    // CTA vers la page catégorie du produit
+    $product_cats = get_the_terms($product_id, 'product_cat');
+    if ($product_cats && !is_wp_error($product_cats)) {
+      $main_cat = null;
+      foreach ($product_cats as $cat) {
+        if ($cat->slug !== 'non-classe' && $cat->slug !== 'uncategorized') {
+          $main_cat = $cat;
+          break;
+        }
+      }
+      if ($main_cat) {
+        $masculin = in_array($main_cat->slug, ['accessoires', 'lampadaires']);
+        $cta_text = $masculin ? 'Voir tous les ' : 'Voir toutes les ';
+        $cta_text .= strtolower($main_cat->name);
+        ?>
+        <div class="related-cta">
+          <a href="<?php echo esc_url(get_term_link($main_cat)); ?>" class="button button-cta-orange">
+            <?php echo esc_html($cta_text); ?>
+          </a>
+        </div>
+      <?php } ?>
+    <?php } ?>
   </section>
   <?php endif; ?>
 

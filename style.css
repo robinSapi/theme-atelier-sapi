@@ -10219,6 +10219,33 @@ transform: translateY(15px);
   }
 }
 
+/* CTA vers page catégorie sous produits similaires */
+.related-cta {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.related-cta .button-cta-orange {
+  display: inline-block;
+  padding: 0.875rem 2rem;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  border: none;
+  border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.related-cta .button-cta-orange:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
+}
 
 .product-card-cinetique {
   position: relative;
