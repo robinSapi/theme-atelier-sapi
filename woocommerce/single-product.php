@@ -403,7 +403,6 @@ get_header();
     <div class="product-specs-header">
       <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
       <h2>Fiche technique</h2>
-      <p class="specs-intro">Toutes les informations pour bien choisir votre luminaire</p>
     </div>
 
     <?php
