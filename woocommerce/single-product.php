@@ -1646,7 +1646,6 @@ get_header();
       </button>
       <div class="ambiance-lightbox-thumbs-wrapper">
         <div class="ambiance-lightbox-thumbs"></div>
-        <span class="ambiance-lightbox-counter"></span>
       </div>
       <button class="ambiance-lightbox-next" aria-label="<?php esc_attr_e('Image suivante', 'theme-sapi-maison'); ?>" type="button">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -1665,7 +1664,6 @@ get_header();
 
   var current = 0;
   var img = lightbox.querySelector('.ambiance-lightbox-image');
-  var counter = lightbox.querySelector('.ambiance-lightbox-counter');
   var thumbsContainer = lightbox.querySelector('.ambiance-lightbox-thumbs');
   var productName = <?php echo wp_json_encode(get_the_title()); ?>;
 
@@ -1684,7 +1682,6 @@ get_header();
     img.src = photos[current].url;
     img.srcset = '';
     img.alt = productName + ' - ' + photos[current].label;
-    counter.textContent = (current + 1) + ' / ' + photos.length;
     var thumbs = thumbsContainer.querySelectorAll('.ambiance-thumb');
     thumbs.forEach(function(t, i) { t.classList.toggle('active', i === current); });
   }

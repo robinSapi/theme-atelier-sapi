@@ -14854,14 +14854,6 @@ body.woocommerce-cart div.woocommerce-wrapper {
   gap: 0.4rem;
 }
 
-.ambiance-lightbox-counter {
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--color-wood, #937D68);
-  letter-spacing: 0.1em;
-}
-
 /* Thumbnails strip */
 .ambiance-lightbox-thumbs {
   display: flex;
