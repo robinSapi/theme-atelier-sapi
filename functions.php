@@ -170,6 +170,7 @@ add_action('wp_footer', function () {
   if (!WC()->cart || !WC()->cart->is_empty()) return;
 
   $products_data = [];
+  $has_viewed = false;
 
   // 1. Essayer les produits récemment vus (cookie WooCommerce)
   if (!empty($_COOKIE['woocommerce_recently_viewed'])) {
@@ -186,6 +187,9 @@ add_action('wp_footer', function () {
         'price' => $vp->get_price_html(),
         'img'   => get_the_post_thumbnail_url($vid, 'medium') ?: '',
       ];
+    }
+    if (count($products_data) > 0) {
+      $has_viewed = true;
     }
   }
 
@@ -234,6 +238,7 @@ add_action('wp_footer', function () {
   (function() {
     var popularProducts = <?php echo wp_json_encode(array_values($products_data)); ?>;
     var shopUrl = <?php echo wp_json_encode($shop_url); ?>;
+    var sectionTitle = <?php echo wp_json_encode($has_viewed ? 'Consultés récemment' : 'La sélection de l\'artisan'); ?>;
     var done = false;
 
     function replaceEmptyCart() {
@@ -263,7 +268,7 @@ add_action('wp_footer', function () {
 
       var productsHTML = '';
       if (popularProducts.length > 0) {
-        productsHTML = '<div class="empty-cart-viewed"><h2 class="empty-cart-viewed-title">La s\u00e9lection de l\u2019artisan</h2><div class="empty-cart-viewed-grid">';
+        productsHTML = '<div class="empty-cart-viewed"><h2 class="empty-cart-viewed-title">' + sectionTitle + '</h2><div class="empty-cart-viewed-grid">';
         for (var j = 0; j < popularProducts.length; j++) {
           var pr = popularProducts[j];
           productsHTML += '<a href="' + pr.url + '" class="empty-cart-viewed-card">';
