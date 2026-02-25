@@ -90,6 +90,8 @@ get_header();
     if ($lb_url) $acf_photos[] = ['url' => $lb_url, 'label' => 'Galerie'];
   }
 
+  $first_acf_index = count($acf_photos); // index where ACF photos start
+
   // 2. ACF ambiance/detail/tailles
   if (function_exists('get_field')) {
     $acf_field_labels = [
@@ -1626,7 +1628,7 @@ get_header();
 
 <?php if (!empty($acf_photos)) : ?>
 <!-- Lightbox Ambiance/Détail -->
-<div class="ambiance-lightbox" id="ambiance-lightbox" aria-hidden="true" role="dialog" aria-modal="true" data-photos='<?php echo wp_json_encode($acf_photos, JSON_HEX_APOS | JSON_HEX_QUOT); ?>'>
+<div class="ambiance-lightbox" id="ambiance-lightbox" aria-hidden="true" role="dialog" aria-modal="true" data-photos='<?php echo wp_json_encode($acf_photos, JSON_HEX_APOS | JSON_HEX_QUOT); ?>' data-first-acf="<?php echo esc_attr($first_acf_index); ?>">
   <div class="ambiance-lightbox-overlay"></div>
   <div class="ambiance-lightbox-content">
     <button class="ambiance-lightbox-close" aria-label="<?php esc_attr_e('Fermer', 'theme-sapi-maison'); ?>" type="button">
@@ -1672,8 +1674,7 @@ get_header();
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'ambiance-thumb' + (i === 0 ? ' active' : '');
-    btn.innerHTML = '<img src="' + photo.url + '" alt="' + productName + ' - ' + photo.label + '">' +
-                    '<span class="ambiance-thumb-label">' + photo.label + '</span>';
+    btn.innerHTML = '<img src="' + photo.url + '" alt="' + productName + ' - ' + photo.label + '">';
     btn.addEventListener('click', function() { goTo(i); });
     thumbsContainer.appendChild(btn);
   });
@@ -1688,8 +1689,10 @@ get_header();
     thumbs.forEach(function(t, i) { t.classList.toggle('active', i === current); });
   }
 
+  var firstAcf = parseInt(lightbox.dataset.firstAcf, 10) || 0;
+
   function open() {
-    goTo(0);
+    goTo(firstAcf);
     lightbox.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
     lightbox.querySelector('.ambiance-lightbox-close').focus();

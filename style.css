@@ -14905,18 +14905,6 @@ body.woocommerce-cart div.woocommerce-wrapper {
   border-radius: 6px;
 }
 
-.ambiance-thumb-label {
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.6rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-wood, #937D68);
-}
-
-.ambiance-thumb.active .ambiance-thumb-label {
-  color: var(--color-orange, #E35B24);
-}
 
 /* Responsive */
 @media (max-width: 768px) {
