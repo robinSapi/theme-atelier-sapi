@@ -562,12 +562,12 @@ foreach ($collection_slugs as $col) {
     <?php endif; ?>
 
     <!-- Atelier Image -->
-    <div class="bento-card bento-atelier">
+    <a href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer" class="bento-card bento-atelier">
       <div class="bento-bg" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Robin-Sapi-A.jpg');"></div>
       <div class="atelier-label">
         <span>L'atelier · Lyon</span>
       </div>
-    </div>
+    </a>
 
     <!-- CTA Card -->
     <a href="<?php echo home_url('/nos-creations/'); ?>" class="bento-card bento-cta">
