@@ -1707,12 +1707,12 @@ get_header();
     if (firstThumb) {
       allThumbs.forEach(function(t) { t.classList.remove('active'); });
       firstThumb.classList.add('active');
-      var mainImg = document.querySelector('.product-main-image');
+      var mainImg = document.querySelector('.gallery-main-image');
       if (mainImg && firstThumb.dataset.image) {
         mainImg.src = firstThumb.dataset.image;
         mainImg.srcset = '';
       }
-      var zoomLink = document.querySelector('.woocommerce-product-gallery__image a');
+      var zoomLink = document.querySelector('.gallery-zoom');
       if (zoomLink && firstThumb.dataset.image) {
         zoomLink.href = firstThumb.dataset.image;
       }
