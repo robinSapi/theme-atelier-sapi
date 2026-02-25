@@ -14790,7 +14790,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   transform: scale(1.1);
 }
 
-/* Main image area — bordure fine */
+/* Main image area — bordure fine, écart uniforme haut/gauche/droite */
 .ambiance-lightbox-main {
   position: relative;
   display: flex;
@@ -14798,7 +14798,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   justify-content: center;
   flex: 1;
   min-height: 0;
-  padding: 0.5rem 0.5rem 0;
+  padding: 0.75rem 0.75rem 0;
 }
 
 .ambiance-lightbox-image {
