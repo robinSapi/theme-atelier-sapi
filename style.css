@@ -14768,8 +14768,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* Close — par-dessus la photo */
 .ambiance-lightbox-close {
   position: absolute;
-  top: 1.75rem;
-  right: 1.75rem;
+  top: 0.6rem;
+  right: 0.6rem;
   background: rgba(0, 0, 0, 0.45);
   border: none;
   border-radius: 50%;
@@ -14798,7 +14798,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   justify-content: center;
   flex: 1;
   min-height: 0;
-  padding: 1.5rem 1.5rem 0;
+  padding: 0.35rem 0.35rem 0;
 }
 
 .ambiance-lightbox-image {
