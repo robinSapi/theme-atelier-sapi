@@ -489,13 +489,6 @@ add_action('admin_init', function () {
   ]);
 });
 
-// Preload self-hosted Square Peg font (Safari fix — Google Fonts fails on some Safari versions)
-function sapi_preload_square_peg() {
-  $font_dir = get_template_directory_uri() . '/assets/fonts/';
-  echo '<link rel="preload" href="' . esc_url($font_dir . 'SquarePeg-Regular.woff2') . '" as="font" type="font/woff2" crossorigin>' . "\n";
-  echo '<link rel="preload" href="' . esc_url($font_dir . 'SquarePeg-Regular-latin-ext.woff2') . '" as="font" type="font/woff2" crossorigin>' . "\n";
-}
-add_action('wp_head', 'sapi_preload_square_peg', 1);
 
 function sapi_maison_content_width() {
   $GLOBALS['content_width'] = 1200;

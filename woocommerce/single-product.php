@@ -161,7 +161,7 @@ get_header();
                 }
                 ?>
                 <button class="gallery-thumb<?php echo $index === 0 ? ' active' : ''; ?>" data-image="<?php echo esc_url($full_url); ?>">
-                  <img src="<?php echo esc_url($thumb_url); ?>" alt="">
+                  <img src="<?php echo esc_url($thumb_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>">
                 </button>
               <?php endforeach; ?>
             </div>

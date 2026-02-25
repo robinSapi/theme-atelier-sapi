@@ -13,6 +13,8 @@ $logo_alt = get_bloginfo('name');
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 
+<a class="skip-to-content" href="#main-content"><?php esc_html_e('Aller au contenu', 'theme-sapi-maison'); ?></a>
+
 <?php if ($is_simplified) : ?>
 
 <header class="site-header site-header--simplified">
@@ -66,7 +68,7 @@ $logo_alt = get_bloginfo('name');
           </svg>
         </span>
         <?php $cart_count = sapi_maison_cart_count(); ?>
-        <span class="cart-count<?php echo $cart_count === 0 ? ' cart-count--empty' : ''; ?>"><?php echo $cart_count > 0 ? esc_html($cart_count) : ''; ?></span>
+        <span class="cart-count<?php echo $cart_count === 0 ? ' cart-count--empty' : ''; ?>" aria-live="polite" aria-atomic="true"><?php echo $cart_count > 0 ? esc_html($cart_count) : ''; ?></span>
       </button>
 
       <!-- Menu Burger Toggle -->
@@ -212,4 +214,4 @@ $logo_alt = get_bloginfo('name');
 
 <?php endif; ?>
 
-<main class="site-content">
+<main class="site-content" id="main-content">

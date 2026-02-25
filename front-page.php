@@ -393,7 +393,7 @@ foreach ($collection_slugs as $col) {
     <div class="bento-card bento-hero">
       <div class="bento-bg" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/12/Olivia-La-gardiena.jpg');"></div>
       <div class="bento-content">
-        <h1 class="bento-title">Sculpter<br>la lumière</h1>
+        <h2 class="bento-title">Sculpter<br>la lumière</h2>
         <p class="bento-text">Des créations artisanales qui transforment l'espace</p>
         <div class="hero-cta-row">
           <a href="<?php echo home_url('/nos-creations/'); ?>" class="hero-cta">
