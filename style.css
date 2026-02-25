@@ -11835,7 +11835,7 @@ body.woocommerce-order-received {
 @media (max-width: 768px) {
   .woocommerce-cart article.page > header {
     padding: 1.5rem 1rem 1rem;
-    text-align: left;
+    text-align: center;
   }
 }
 
