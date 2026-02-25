@@ -1701,6 +1701,22 @@ get_header();
   function close() {
     lightbox.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    // Restore gallery: reactivate first thumbnail and its image
+    var allThumbs = document.querySelectorAll('.gallery-thumb');
+    var firstThumb = document.querySelector('.gallery-thumb:not(.gallery-thumb-more)');
+    if (firstThumb) {
+      allThumbs.forEach(function(t) { t.classList.remove('active'); });
+      firstThumb.classList.add('active');
+      var mainImg = document.querySelector('.product-main-image');
+      if (mainImg && firstThumb.dataset.image) {
+        mainImg.src = firstThumb.dataset.image;
+        mainImg.srcset = '';
+      }
+      var zoomLink = document.querySelector('.woocommerce-product-gallery__image a');
+      if (zoomLink && firstThumb.dataset.image) {
+        zoomLink.href = firstThumb.dataset.image;
+      }
+    }
     var btn = document.getElementById('btn-ambiance-lightbox');
     if (btn) btn.focus();
   }
