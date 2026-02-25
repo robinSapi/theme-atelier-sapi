@@ -167,21 +167,19 @@ add_action('wp_footer', function () {
       var emptyBlock = document.querySelector('.wc-block-cart--is-loading');
       if (emptyBlock) return; // Still loading
 
-      var emptyMsg = document.querySelector('.wc-block-cart__empty-cart__title, .wp-block-woocommerce-empty-cart-block');
-      if (!emptyMsg) {
-        // Chercher le texte "panier est actuellement vide"
-        var allP = document.querySelectorAll('.wc-block-cart p, .sapi-cart-outer p, .wp-block-woocommerce-cart p');
-        for (var i = 0; i < allP.length; i++) {
-          if (allP[i].textContent.indexOf('vide') !== -1) {
-            emptyMsg = allP[i];
-            break;
-          }
+      // Chercher le texte "vide" dans h1, h2, p
+      var emptyMsg = null;
+      var candidates = document.querySelectorAll('.sapi-cart-outer h1, .sapi-cart-outer h2, .sapi-cart-outer p, .wc-block-cart h1, .wc-block-cart h2, .wc-block-cart p, .wp-block-woocommerce-cart h1, .wp-block-woocommerce-cart h2, .wp-block-woocommerce-cart p, .entry-content h1, .entry-content h2, .entry-content p');
+      for (var i = 0; i < candidates.length; i++) {
+        if (candidates[i].textContent.indexOf('vide') !== -1) {
+          emptyMsg = candidates[i];
+          break;
         }
       }
       if (!emptyMsg) return;
 
       // Trouver le conteneur parent à remplacer
-      var container = emptyMsg.closest('.wp-block-woocommerce-empty-cart-block') || emptyMsg.closest('.wc-block-cart') || emptyMsg.parentElement;
+      var container = emptyMsg.closest('.wp-block-woocommerce-empty-cart-block') || emptyMsg.closest('.wc-block-cart') || emptyMsg.closest('.sapi-cart-outer') || emptyMsg.closest('.entry-content') || emptyMsg.parentElement;
       if (!container || container.dataset.sapiReplaced) return;
       container.dataset.sapiReplaced = 'true';
 
