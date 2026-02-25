@@ -139,50 +139,75 @@ add_action('wp_footer', function () {
   <?php
 });
 
-// Panier vide : injecter les 3 produits les plus populaires + remplacement JS
+// Panier vide : 3 derniers produits vus (fallback produits populaires) + remplacement JS
 add_action('wp_footer', function () {
   if (!function_exists('is_cart') || !is_cart()) return;
   if (!WC()->cart || !WC()->cart->is_empty()) return;
 
-  // 3 produits les plus vendus
-  $popular_query = new WP_Query([
-    'post_type'      => 'product',
-    'posts_per_page' => 3,
-    'post_status'    => 'publish',
-    'meta_key'       => 'total_sales',
-    'orderby'        => 'meta_value_num',
-    'order'          => 'DESC',
-    'tax_query'      => [[
-      'taxonomy' => 'product_visibility',
-      'field'    => 'name',
-      'terms'    => 'exclude-from-catalog',
-      'operator' => 'NOT IN',
-    ]],
-  ]);
-
   $products_data = [];
-  if ($popular_query->have_posts()) {
-    while ($popular_query->have_posts()) {
-      $popular_query->the_post();
-      $p = wc_get_product(get_the_ID());
-      if (!$p) continue;
-      $name_parts = explode(' ', $p->get_name(), 2);
+
+  // 1. Essayer les produits récemment vus (cookie WooCommerce)
+  if (!empty($_COOKIE['woocommerce_recently_viewed'])) {
+    $viewed_ids = array_filter(array_map('absint', explode('|', wp_unslash($_COOKIE['woocommerce_recently_viewed']))));
+    $viewed_ids = array_slice($viewed_ids, 0, 3);
+    foreach ($viewed_ids as $vid) {
+      $vp = wc_get_product($vid);
+      if (!$vp || !$vp->is_visible()) continue;
+      $name_parts = explode(' ', $vp->get_name(), 2);
       $products_data[] = [
-        'url'   => get_permalink(),
+        'url'   => $vp->get_permalink(),
         'name'  => $name_parts[0],
         'desc'  => isset($name_parts[1]) ? $name_parts[1] : '',
-        'price' => $p->get_price_html(),
-        'img'   => get_the_post_thumbnail_url(get_the_ID(), 'medium') ?: '',
+        'price' => $vp->get_price_html(),
+        'img'   => get_the_post_thumbnail_url($vid, 'medium') ?: '',
       ];
     }
-    wp_reset_postdata();
+  }
+
+  // 2. Fallback : 3 produits les plus vendus
+  if (count($products_data) < 3) {
+    $exclude = array_map(function($p) { return 0; }, $products_data);
+    // Récupérer les IDs déjà présents pour ne pas les dupliquer
+    $existing_urls = array_column($products_data, 'url');
+    $popular_query = new WP_Query([
+      'post_type'      => 'product',
+      'posts_per_page' => 3 - count($products_data),
+      'post_status'    => 'publish',
+      'meta_key'       => 'total_sales',
+      'orderby'        => 'meta_value_num',
+      'order'          => 'DESC',
+      'tax_query'      => [[
+        'taxonomy' => 'product_visibility',
+        'field'    => 'name',
+        'terms'    => 'exclude-from-catalog',
+        'operator' => 'NOT IN',
+      ]],
+    ]);
+    if ($popular_query->have_posts()) {
+      while ($popular_query->have_posts()) {
+        $popular_query->the_post();
+        $p = wc_get_product(get_the_ID());
+        if (!$p) continue;
+        if (in_array($p->get_permalink(), $existing_urls)) continue;
+        $name_parts = explode(' ', $p->get_name(), 2);
+        $products_data[] = [
+          'url'   => get_permalink(),
+          'name'  => $name_parts[0],
+          'desc'  => isset($name_parts[1]) ? $name_parts[1] : '',
+          'price' => $p->get_price_html(),
+          'img'   => get_the_post_thumbnail_url(get_the_ID(), 'medium') ?: '',
+        ];
+        if (count($products_data) >= 3) break;
+      }
+      wp_reset_postdata();
+    }
   }
 
   $shop_url = esc_url(wc_get_page_permalink('shop'));
   ?>
   <script>
   (function() {
-    var popularProducts = <?php echo wp_json_encode($products_data); ?>;
+    var popularProducts = <?php echo wp_json_encode(array_values($products_data)); ?>;
     var shopUrl = <?php echo wp_json_encode($shop_url); ?>;
     var done = false;
 
