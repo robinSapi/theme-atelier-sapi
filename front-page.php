@@ -411,7 +411,7 @@ foreach ($collection_slugs as $col) {
       <div class="statement-inner">
         <span class="statement-number">01</span>
         <h2 class="statement-text">"Je ne fabrique pas<br>des lampes.<br>Je crée des présences."</h2>
-        <p class="statement-author">— Robin, artiste à l'Atelier Sâpi</p>
+        <p class="statement-author">— Robin, créateur à l'Atelier Sâpi</p>
       </div>
     </div>
 

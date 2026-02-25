@@ -187,7 +187,7 @@ get_header();
 <section class="artisan-quote artisan-quote-cinetique" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/2025/04/Vue-detail-1.jpg")); ?>');">
   <blockquote>
     « Je vous souhaite autant de plaisir à monter et à profiter de votre luminaire Sâpi que j'en ai eu lors de sa conception et de sa fabrication ! »
-    <cite>Robin, artiste à l'Atelier Sâpi</cite>
+    <cite>Robin, créateur à l'Atelier Sâpi</cite>
   </blockquote>
 </section>
 

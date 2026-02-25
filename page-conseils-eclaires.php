@@ -140,7 +140,7 @@ $tips = [
 
 <section class="advice-outro">
   <p>Éclairer une pièce, c'est un peu comme choisir la bonne sauce pour ses pâtes : tout est une question de préférence et de dosage !</p>
-  <span class="advice-outro-signature">Robin, artiste à l'Atelier Sâpi</span>
+  <span class="advice-outro-signature">Robin, créateur à l'Atelier Sâpi</span>
 </section>
 
 <script>
