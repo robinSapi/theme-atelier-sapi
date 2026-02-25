@@ -136,69 +136,97 @@ add_action('wp_footer', function () {
     new MutationObserver(replaceCartTexts).observe(document.body, { childList: true, subtree: true });
   })();
   </script>
-
   <?php
-  // Récupérer les 3 derniers produits vus pour le panier vide
-  $viewed_ids = !empty($_COOKIE['woocommerce_recently_viewed'])
-    ? array_slice(array_filter(array_map('absint', explode('|', wp_unslash($_COOKIE['woocommerce_recently_viewed'])))), 0, 3)
-    : [];
-  $viewed_data = [];
-  foreach ($viewed_ids as $vid) {
-    $vp = wc_get_product($vid);
-    if (!$vp || !$vp->is_visible()) continue;
-    $name_parts = explode(' ', $vp->get_name(), 2);
-    $img = wp_get_attachment_image_url($vp->get_image_id(), 'medium');
-    $viewed_data[] = [
-      'url'   => $vp->get_permalink(),
-      'name'  => $name_parts[0],
-      'desc'  => isset($name_parts[1]) ? $name_parts[1] : '',
-      'price' => $vp->get_price_html(),
-      'img'   => $img ?: '',
-    ];
+});
+
+// Panier vide : injecter les 3 produits les plus populaires + remplacement JS
+add_action('wp_footer', function () {
+  if (!function_exists('is_cart') || !is_cart()) return;
+  if (!WC()->cart || !WC()->cart->is_empty()) return;
+
+  // 3 produits les plus vendus
+  $popular_query = new WP_Query([
+    'post_type'      => 'product',
+    'posts_per_page' => 3,
+    'post_status'    => 'publish',
+    'meta_key'       => 'total_sales',
+    'orderby'        => 'meta_value_num',
+    'order'          => 'DESC',
+    'tax_query'      => [[
+      'taxonomy' => 'product_visibility',
+      'field'    => 'name',
+      'terms'    => 'exclude-from-catalog',
+      'operator' => 'NOT IN',
+    ]],
+  ]);
+
+  $products_data = [];
+  if ($popular_query->have_posts()) {
+    while ($popular_query->have_posts()) {
+      $popular_query->the_post();
+      $p = wc_get_product(get_the_ID());
+      if (!$p) continue;
+      $name_parts = explode(' ', $p->get_name(), 2);
+      $products_data[] = [
+        'url'   => get_permalink(),
+        'name'  => $name_parts[0],
+        'desc'  => isset($name_parts[1]) ? $name_parts[1] : '',
+        'price' => $p->get_price_html(),
+        'img'   => get_the_post_thumbnail_url(get_the_ID(), 'medium') ?: '',
+      ];
+    }
+    wp_reset_postdata();
   }
+
   $shop_url = esc_url(wc_get_page_permalink('shop'));
   ?>
   <script>
   (function() {
-    var viewedProducts = <?php echo wp_json_encode($viewed_data); ?>;
+    var popularProducts = <?php echo wp_json_encode($products_data); ?>;
     var shopUrl = <?php echo wp_json_encode($shop_url); ?>;
+    var done = false;
 
     function replaceEmptyCart() {
-      var emptyBlock = document.querySelector('.wc-block-cart--is-loading');
-      if (emptyBlock) return; // Still loading
+      if (done) return;
 
-      // Chercher le texte "vide" dans h1, h2, p
+      // Chercher le texte "vide" partout dans la page
+      var allEls = document.querySelectorAll('h1, h2, h3, p');
       var emptyMsg = null;
-      var candidates = document.querySelectorAll('.sapi-cart-outer h1, .sapi-cart-outer h2, .sapi-cart-outer p, .wc-block-cart h1, .wc-block-cart h2, .wc-block-cart p, .wp-block-woocommerce-cart h1, .wp-block-woocommerce-cart h2, .wp-block-woocommerce-cart p, .entry-content h1, .entry-content h2, .entry-content p');
-      for (var i = 0; i < candidates.length; i++) {
-        if (candidates[i].textContent.indexOf('vide') !== -1) {
-          emptyMsg = candidates[i];
+      for (var i = 0; i < allEls.length; i++) {
+        if (allEls[i].textContent.indexOf('vide') !== -1) {
+          emptyMsg = allEls[i];
           break;
         }
       }
       if (!emptyMsg) return;
 
-      // Trouver le conteneur parent à remplacer
-      var container = emptyMsg.closest('.wp-block-woocommerce-empty-cart-block') || emptyMsg.closest('.wc-block-cart') || emptyMsg.closest('.sapi-cart-outer') || emptyMsg.closest('.entry-content') || emptyMsg.parentElement;
-      if (!container || container.dataset.sapiReplaced) return;
-      container.dataset.sapiReplaced = 'true';
+      done = true;
 
-      var viewedHTML = '';
-      if (viewedProducts.length > 0) {
-        viewedHTML = '<div class="empty-cart-viewed"><h2 class="empty-cart-viewed-title">Vos derni\u00e8res d\u00e9couvertes</h2><div class="empty-cart-viewed-grid">';
-        for (var j = 0; j < viewedProducts.length; j++) {
-          var p = viewedProducts[j];
-          viewedHTML += '<a href="' + p.url + '" class="empty-cart-viewed-card">';
-          if (p.img) {
-            viewedHTML += '<div class="empty-cart-viewed-image"><img src="' + p.img + '" alt="' + p.name + '" loading="lazy" /></div>';
+      // Remonter au conteneur le plus logique
+      var container = emptyMsg.closest('.wp-block-woocommerce-empty-cart-block')
+        || emptyMsg.closest('.wp-block-woocommerce-cart')
+        || emptyMsg.closest('.wc-block-cart')
+        || emptyMsg.closest('.sapi-cart-outer')
+        || emptyMsg.closest('.page-content')
+        || emptyMsg.closest('main')
+        || emptyMsg.parentElement;
+
+      var productsHTML = '';
+      if (popularProducts.length > 0) {
+        productsHTML = '<div class="empty-cart-viewed"><h2 class="empty-cart-viewed-title">Nos cr\u00e9ations les plus aim\u00e9es</h2><div class="empty-cart-viewed-grid">';
+        for (var j = 0; j < popularProducts.length; j++) {
+          var pr = popularProducts[j];
+          productsHTML += '<a href="' + pr.url + '" class="empty-cart-viewed-card">';
+          if (pr.img) {
+            productsHTML += '<div class="empty-cart-viewed-image"><img src="' + pr.img + '" alt="' + pr.name + '" loading="lazy" /></div>';
           }
-          viewedHTML += '<div class="empty-cart-viewed-info">';
-          viewedHTML += '<h3>' + p.name + '</h3>';
-          if (p.desc) viewedHTML += '<span class="empty-cart-viewed-desc">' + p.desc + '</span>';
-          viewedHTML += '<span class="empty-cart-viewed-price">' + p.price + '</span>';
-          viewedHTML += '</div></a>';
+          productsHTML += '<div class="empty-cart-viewed-info">';
+          productsHTML += '<h3>' + pr.name + '</h3>';
+          if (pr.desc) productsHTML += '<span class="empty-cart-viewed-desc">' + pr.desc + '</span>';
+          productsHTML += '<span class="empty-cart-viewed-price">' + pr.price + '</span>';
+          productsHTML += '</div></a>';
         }
-        viewedHTML += '</div></div>';
+        productsHTML += '</div></div>';
       }
 
       container.innerHTML =
@@ -208,14 +236,17 @@ add_action('wp_footer', function () {
             '<h1 class="empty-cart-title">Votre panier est vide... pour l\u2019instant\u00a0!</h1>' +
             '<p class="empty-cart-text">Nos luminaires n\u2019attendent que vous. Laissez-vous inspirer par nos cr\u00e9ations artisanales.</p>' +
           '</div>' +
-          viewedHTML +
+          productsHTML +
           '<div class="empty-cart-cta"><a href="' + shopUrl + '" class="empty-cart-btn">D\u00e9couvrir nos cr\u00e9ations</a></div>' +
         '</section>';
     }
 
-    // Lancer après le rendu React
-    setTimeout(replaceEmptyCart, 500);
-    new MutationObserver(replaceEmptyCart).observe(document.body, { childList: true, subtree: true });
+    // Tenter plusieurs fois après le rendu React
+    setTimeout(replaceEmptyCart, 300);
+    setTimeout(replaceEmptyCart, 800);
+    setTimeout(replaceEmptyCart, 1500);
+    var obs = new MutationObserver(function() { if (!done) replaceEmptyCart(); });
+    obs.observe(document.body, { childList: true, subtree: true });
   })();
   </script>
   <?php
