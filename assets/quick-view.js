@@ -323,15 +323,9 @@
             productData.woods = woods;
           }
 
-          // Add additional images to existing ones (deduplicate by URL)
+          // Add additional images to existing ones
           if (additionalImages.length > 0) {
-            var existingSrcs = productData.images.map(function(img) { return img.src; });
-            additionalImages.forEach(function(img) {
-              if (existingSrcs.indexOf(img.src) === -1) {
-                productData.images.push(img);
-                existingSrcs.push(img.src);
-              }
-            });
+            productData.images = productData.images.concat(additionalImages);
           }
 
           // Re-render if modal still open and we have new data
