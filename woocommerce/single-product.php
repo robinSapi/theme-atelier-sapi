@@ -161,7 +161,11 @@ get_header();
                 }
                 ?>
                 <button class="gallery-thumb<?php echo $index === 0 ? ' active' : ''; ?>" data-image="<?php echo esc_url($full_url); ?>">
-                  <img src="<?php echo esc_url($thumb_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>">
+                  <?php
+                    $cat_names = wp_list_pluck(wc_get_product_terms($product->get_id(), 'product_cat'), 'name');
+                    $cat_label = !empty($cat_names) ? $cat_names[0] : 'luminaire';
+                  ?>
+                  <img src="<?php echo esc_url($thumb_url); ?>" alt="<?php echo esc_attr(get_the_title() . ' - ' . $cat_label . ' photo ' . ($index + 1)); ?>">
                 </button>
               <?php endforeach; ?>
             </div>
