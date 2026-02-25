@@ -5347,14 +5347,19 @@ li.carousel-editorial-slide,
 
 /* Quote Finale Premium */
 .artisan-quote-cinetique {
-  padding: 100px 20px;
+  padding: 120px 20px;
   text-align: center;
-  /* Premium gradient background */
-  background: linear-gradient(135deg,
-    var(--creme-chaud, #FAF6F0) 0%,
-    var(--color-warm, #FBF6EA) 50%,
-    var(--ivoire-doux, #F5EDE4) 100%
-  );
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.artisan-quote-cinetique::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(254, 253, 251, 0.88);
 }
 
 .artisan-quote-cinetique blockquote {
@@ -5387,6 +5392,7 @@ li.carousel-editorial-slide,
   font-style: normal;
   color: var(--bois-sombre, #4A3F35);
   margin-top: 2rem;
+  position: relative;
 }
 
 /* CTA Section Premium */
