@@ -14692,32 +14692,30 @@ body.woocommerce-cart div.woocommerce-wrapper {
    AMBIANCE LIGHTBOX - Photos ACF
    ========================================= */
 
-/* Bouton "Voir en situation" */
-.btn-ambiance-lightbox {
+/* Vignette "+N" pour ouvrir la lightbox ambiance */
+.gallery-thumb-more {
+  background: var(--color-warm, #FBF6EA);
+  border: 1.5px dashed var(--color-wood, #937D68);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-  padding: 0.5rem 1rem;
-  background: transparent;
-  border: 1.5px solid var(--color-wood, #937D68);
-  border-radius: 8px;
-  color: var(--color-wood, #937D68);
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.8rem;
-  font-weight: 500;
-  letter-spacing: 0.03em;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  justify-content: center;
 }
 
-.btn-ambiance-lightbox:hover {
+.gallery-thumb-more:hover {
   border-color: var(--color-orange, #E35B24);
-  color: var(--color-orange, #E35B24);
+  background: rgba(227, 91, 36, 0.06);
 }
 
-.btn-ambiance-lightbox svg {
-  flex-shrink: 0;
+.gallery-thumb-more-icon {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-wood, #937D68);
+  transition: color 0.2s;
+}
+
+.gallery-thumb-more:hover .gallery-thumb-more-icon {
+  color: var(--color-orange, #E35B24);
 }
 
 /* Lightbox overlay */
