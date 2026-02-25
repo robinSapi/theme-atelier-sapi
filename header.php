@@ -36,23 +36,17 @@ $logo_alt = get_bloginfo('name');
     </div>
 
     <!-- Menu Desktop -->
-    <nav class="primary-nav" aria-label="Menu principal">
-      <ul class="nav-menu">
-        <li class="menu-item-has-children">
-          <a href="<?php echo home_url('/nos-creations/'); ?>">Nos créations</a>
-          <ul class="sub-menu">
-            <li><a href="<?php echo home_url('/categorie-produit/suspensions/'); ?>">Suspensions</a></li>
-            <li><a href="<?php echo home_url('/categorie-produit/lampadaires/'); ?>">Lampadaires</a></li>
-            <li><a href="<?php echo home_url('/categorie-produit/appliques/'); ?>">Appliques</a></li>
-            <li><a href="<?php echo home_url('/categorie-produit/lampeaposer/'); ?>">À poser</a></li>
-          </ul>
-        </li>
-        <li><a href="<?php echo home_url('/sur-mesure/'); ?>">Sur mesure</a></li>
-        <li><a href="<?php echo home_url('/lumiere-dartisan/'); ?>">L'artisan</a></li>
-        <li><a href="<?php echo home_url('/conseils-eclaires/'); ?>">Conseils</a></li>
-        <li><a href="<?php echo home_url('/contact/'); ?>">Contact</a></li>
-      </ul>
-    </nav>
+    <?php
+    wp_nav_menu([
+      'theme_location' => 'primary',
+      'container'      => 'nav',
+      'container_class' => 'primary-nav',
+      'container_aria_label' => __('Menu principal', 'theme-sapi-maison'),
+      'menu_class'     => 'nav-menu',
+      'menu_id'        => '',
+      'fallback_cb'    => 'sapi_fallback_primary_menu',
+    ]);
+    ?>
 
     <div class="header-actions">
       <!-- Global Search Button -->
@@ -95,24 +89,17 @@ $logo_alt = get_bloginfo('name');
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
     </button>
-    <nav class="mobile-menu-nav" aria-label="Menu mobile">
-      <ul class="mobile-nav-menu">
-        <li><a href="<?php echo home_url('/'); ?>">Accueil</a></li>
-        <li class="menu-item-has-children">
-          <a href="<?php echo home_url('/nos-creations/'); ?>">Nos créations</a>
-          <ul class="sub-menu">
-            <li><a href="<?php echo home_url('/categorie-produit/suspensions/'); ?>">Suspensions</a></li>
-            <li><a href="<?php echo home_url('/categorie-produit/lampadaires/'); ?>">Lampadaires</a></li>
-            <li><a href="<?php echo home_url('/categorie-produit/appliques/'); ?>">Appliques</a></li>
-            <li><a href="<?php echo home_url('/categorie-produit/lampeaposer/'); ?>">À poser</a></li>
-          </ul>
-        </li>
-        <li><a href="<?php echo home_url('/sur-mesure/'); ?>">Sur mesure</a></li>
-        <li><a href="<?php echo home_url('/lumiere-dartisan/'); ?>">L'artisan</a></li>
-        <li><a href="<?php echo home_url('/conseils-eclaires/'); ?>">Conseils</a></li>
-        <li><a href="<?php echo home_url('/contact/'); ?>"><?php esc_html_e('Contact', 'theme-sapi-maison'); ?></a></li>
-      </ul>
-    </nav>
+    <?php
+    wp_nav_menu([
+      'theme_location' => 'primary',
+      'container'      => 'nav',
+      'container_class' => 'mobile-menu-nav',
+      'container_aria_label' => __('Menu mobile', 'theme-sapi-maison'),
+      'menu_class'     => 'mobile-nav-menu',
+      'menu_id'        => 'mobile-nav-menu',
+      'fallback_cb'    => 'sapi_fallback_mobile_menu',
+    ]);
+    ?>
   </div>
 
   <!-- Mini Cart Sliding Panel -->

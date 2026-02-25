@@ -20,11 +20,122 @@ function sapi_maison_setup() {
   add_theme_support('wc-product-gallery-slider');
 
   register_nav_menus([
-    'primary' => __('Menu principal', 'theme-sapi-maison'),
-    'footer' => __('Menu pied de page', 'theme-sapi-maison'),
+    'primary'       => __('Menu principal', 'theme-sapi-maison'),
+    'footer'        => __('Menu pied de page', 'theme-sapi-maison'),
+    'footer_social' => __('Footer – Réseaux sociaux', 'theme-sapi-maison'),
+    'footer_legal'  => __('Footer – Mentions légales', 'theme-sapi-maison'),
   ]);
 }
 add_action('after_setup_theme', 'sapi_maison_setup');
+
+/**
+ * Walker pour les menus footer : rend des <a> simples (pas de <ul><li>).
+ */
+class Sapi_Footer_Walker extends Walker_Nav_Menu {
+  public function start_lvl(&$output, $depth = 0, $args = null) {}
+  public function end_lvl(&$output, $depth = 0, $args = null) {}
+
+  public function start_el(&$output, $item, $depth = 0, $args = null, $id = 0) {
+    $atts = [];
+    $atts['href']  = !empty($item->url) ? $item->url : '';
+    $atts['title'] = !empty($item->attr_title) ? $item->attr_title : '';
+
+    if ('_blank' === $item->target) {
+      $atts['target'] = '_blank';
+      $atts['rel']    = 'noopener';
+    }
+
+    $attributes = '';
+    foreach ($atts as $attr => $value) {
+      if (!empty($value)) {
+        $attributes .= ' ' . $attr . '="' . esc_attr($value) . '"';
+      }
+    }
+
+    $output .= '<a' . $attributes . '>' . esc_html($item->title) . '</a>';
+  }
+
+  public function end_el(&$output, $item, $depth = 0, $args = null) {}
+}
+
+/**
+ * Ajouter "Accueil" en premier élément du menu mobile uniquement.
+ */
+add_filter('wp_nav_menu_items', function ($items, $args) {
+  if (isset($args->menu_id) && 'mobile-nav-menu' === $args->menu_id) {
+    $home = '<li class="menu-item menu-item-home"><a href="' . esc_url(home_url('/')) . '">' . esc_html__('Accueil', 'theme-sapi-maison') . '</a></li>';
+    $items = $home . $items;
+  }
+  return $items;
+}, 10, 2);
+
+/**
+ * Fallbacks : affichent les liens hardcodés si les menus WordPress ne sont pas encore créés.
+ */
+function sapi_fallback_primary_menu() {
+  ?>
+  <nav class="primary-nav" aria-label="<?php esc_attr_e('Menu principal', 'theme-sapi-maison'); ?>">
+    <ul class="nav-menu">
+      <li class="menu-item menu-item-has-children">
+        <a href="<?php echo esc_url(home_url('/nos-creations/')); ?>">Nos créations</a>
+        <ul class="sub-menu">
+          <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/suspensions/')); ?>">Suspensions</a></li>
+          <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampadaires/')); ?>">Lampadaires</a></li>
+          <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/appliques/')); ?>">Appliques</a></li>
+          <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampeaposer/')); ?>">À poser</a></li>
+        </ul>
+      </li>
+      <li class="menu-item"><a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>">Sur mesure</a></li>
+      <li class="menu-item"><a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>">L'artisan</a></li>
+      <li class="menu-item"><a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>">Conseils</a></li>
+      <li class="menu-item"><a href="<?php echo esc_url(home_url('/contact/')); ?>">Contact</a></li>
+    </ul>
+  </nav>
+  <?php
+}
+
+function sapi_fallback_mobile_menu() {
+  ?>
+  <nav class="mobile-menu-nav" aria-label="<?php esc_attr_e('Menu mobile', 'theme-sapi-maison'); ?>">
+    <ul class="mobile-nav-menu" id="mobile-nav-menu">
+      <li class="menu-item menu-item-home"><a href="<?php echo esc_url(home_url('/')); ?>">Accueil</a></li>
+      <li class="menu-item menu-item-has-children">
+        <a href="<?php echo esc_url(home_url('/nos-creations/')); ?>">Nos créations</a>
+        <ul class="sub-menu">
+          <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/suspensions/')); ?>">Suspensions</a></li>
+          <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampadaires/')); ?>">Lampadaires</a></li>
+          <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/appliques/')); ?>">Appliques</a></li>
+          <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampeaposer/')); ?>">À poser</a></li>
+        </ul>
+      </li>
+      <li class="menu-item"><a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>">Sur mesure</a></li>
+      <li class="menu-item"><a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>">L'artisan</a></li>
+      <li class="menu-item"><a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>">Conseils</a></li>
+      <li class="menu-item"><a href="<?php echo esc_url(home_url('/contact/')); ?>">Contact</a></li>
+    </ul>
+  </nav>
+  <?php
+}
+
+function sapi_fallback_footer_nav() {
+  echo '<a href="' . esc_url(home_url('/nos-creations/')) . '">Nos créations</a>';
+  echo '<a href="' . esc_url(home_url('/lumiere-dartisan/')) . '">L\'artisan</a>';
+  echo '<a href="' . esc_url(home_url('/conseils-eclaires/')) . '">Conseils</a>';
+  echo '<a href="' . esc_url(home_url('/contact/')) . '">Contact</a>';
+}
+
+function sapi_fallback_social_menu() {
+  echo '<a href="https://www.instagram.com/atelier_sapi/" target="_blank" rel="noopener">Instagram</a>';
+  echo '<a href="https://www.facebook.com/ateliersapi" target="_blank" rel="noopener">Facebook</a>';
+  echo '<a href="https://www.pinterest.fr/ateliersapi/" target="_blank" rel="noopener">Pinterest</a>';
+  echo '<a href="' . esc_url(home_url('/actus/')) . '">Actus</a>';
+}
+
+function sapi_fallback_legal_menu() {
+  echo '<a href="' . esc_url(home_url('/mentions-legales/')) . '">Mentions légales</a>';
+  echo '<a href="' . esc_url(home_url('/cgv/')) . '">CGV</a>';
+  echo '<a href="' . esc_url(home_url('/politique-de-confidentialite/')) . '">Confidentialité</a>';
+}
 
 // Précharger Square Peg avant le premier paint (élimine le FOUT / chargement en deux temps)
 add_action('wp_head', function() {

@@ -9,9 +9,16 @@ $is_simplified = function_exists('is_cart') && (is_cart() || is_checkout());
   <div class="footer-bottom">
     <p>&copy; <?php echo date('Y'); ?> Atelier Sâpi &mdash; Tous droits réservés</p>
     <div class="footer-legal">
-      <a href="<?php echo esc_url(home_url('/mentions-legales/')); ?>">Mentions légales</a>
-      <a href="<?php echo esc_url(home_url('/cgv/')); ?>">CGV</a>
-      <a href="<?php echo esc_url(home_url('/politique-de-confidentialite/')); ?>">Confidentialité</a>
+      <?php
+      wp_nav_menu([
+        'theme_location' => 'footer_legal',
+        'container'      => false,
+        'items_wrap'     => '%3$s',
+        'walker'         => new Sapi_Footer_Walker(),
+        'fallback_cb'    => 'sapi_fallback_legal_menu',
+        'depth'          => 1,
+      ]);
+      ?>
     </div>
   </div>
 </footer>
@@ -30,10 +37,16 @@ $is_simplified = function_exists('is_cart') && (is_cart() || is_checkout());
     <div class="footer-col">
       <h4>Navigation</h4>
       <nav class="footer-nav" aria-label="Menu pied de page">
-        <a href="<?php echo home_url('/nos-creations/'); ?>">Nos créations</a>
-        <a href="<?php echo home_url('/lumiere-dartisan/'); ?>">L'artisan</a>
-        <a href="<?php echo home_url('/conseils-eclaires/'); ?>">Conseils</a>
-        <a href="<?php echo home_url('/contact/'); ?>">Contact</a>
+        <?php
+        wp_nav_menu([
+          'theme_location' => 'footer',
+          'container'      => false,
+          'items_wrap'     => '%3$s',
+          'walker'         => new Sapi_Footer_Walker(),
+          'fallback_cb'    => 'sapi_fallback_footer_nav',
+          'depth'          => 1,
+        ]);
+        ?>
       </nav>
     </div>
 
@@ -48,19 +61,32 @@ $is_simplified = function_exists('is_cart') && (is_cart() || is_checkout());
     <!-- Social Column -->
     <div class="footer-col">
       <h4>Suivez-nous</h4>
-      <a href="https://www.instagram.com/atelier_sapi/" target="_blank" rel="noopener">Instagram</a>
-      <a href="https://www.facebook.com/ateliersapi" target="_blank" rel="noopener">Facebook</a>
-      <a href="https://www.pinterest.fr/ateliersapi/" target="_blank" rel="noopener">Pinterest</a>
-      <a href="<?php echo esc_url(home_url('/actus/')); ?>">Actus</a>
+      <?php
+      wp_nav_menu([
+        'theme_location' => 'footer_social',
+        'container'      => false,
+        'items_wrap'     => '%3$s',
+        'walker'         => new Sapi_Footer_Walker(),
+        'fallback_cb'    => 'sapi_fallback_social_menu',
+        'depth'          => 1,
+      ]);
+      ?>
     </div>
   </div>
 
   <div class="footer-bottom">
     <p>&copy; <?php echo date('Y'); ?> Atelier Sâpi &mdash; Tous droits réservés</p>
     <div class="footer-legal">
-      <a href="<?php echo home_url('/mentions-legales/'); ?>">Mentions légales</a>
-      <a href="<?php echo home_url('/cgv/'); ?>">CGV</a>
-      <a href="<?php echo home_url('/politique-de-confidentialite/'); ?>">Confidentialité</a>
+      <?php
+      wp_nav_menu([
+        'theme_location' => 'footer_legal',
+        'container'      => false,
+        'items_wrap'     => '%3$s',
+        'walker'         => new Sapi_Footer_Walker(),
+        'fallback_cb'    => 'sapi_fallback_legal_menu',
+        'depth'          => 1,
+      ]);
+      ?>
     </div>
   </div>
 </footer>
