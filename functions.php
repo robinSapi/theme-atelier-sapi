@@ -180,11 +180,18 @@ add_action('wp_footer', function () {
       $vp = wc_get_product($vid);
       if (!$vp || !$vp->is_visible()) continue;
       $name_parts = explode(' ', $vp->get_name(), 2);
+      $vp_cats = get_the_terms($vid, 'product_cat');
+      $vp_cat_name = '';
+      if ($vp_cats && !is_wp_error($vp_cats)) {
+        foreach ($vp_cats as $vc) {
+          if ($vc->slug !== 'non-classe' && $vc->slug !== 'uncategorized') { $vp_cat_name = $vc->name; break; }
+        }
+      }
       $products_data[] = [
         'url'   => $vp->get_permalink(),
         'name'  => $name_parts[0],
         'desc'  => isset($name_parts[1]) ? $name_parts[1] : '',
-        'price' => $vp->get_price_html(),
+        'cat'   => $vp_cat_name,
         'img'   => get_the_post_thumbnail_url($vid, 'medium') ?: '',
       ];
     }
@@ -219,11 +226,18 @@ add_action('wp_footer', function () {
         if (!$p) continue;
         if (in_array($p->get_permalink(), $existing_urls)) continue;
         $name_parts = explode(' ', $p->get_name(), 2);
+        $p_cats = get_the_terms(get_the_ID(), 'product_cat');
+        $p_cat_name = '';
+        if ($p_cats && !is_wp_error($p_cats)) {
+          foreach ($p_cats as $pc) {
+            if ($pc->slug !== 'non-classe' && $pc->slug !== 'uncategorized') { $p_cat_name = $pc->name; break; }
+          }
+        }
         $products_data[] = [
           'url'   => get_permalink(),
           'name'  => $name_parts[0],
           'desc'  => isset($name_parts[1]) ? $name_parts[1] : '',
-          'price' => $p->get_price_html(),
+          'cat'   => $p_cat_name,
           'img'   => get_the_post_thumbnail_url(get_the_ID(), 'medium') ?: '',
         ];
         if (count($products_data) >= 3) break;
@@ -278,7 +292,7 @@ add_action('wp_footer', function () {
           productsHTML += '<div class="empty-cart-viewed-info">';
           productsHTML += '<h3>' + pr.name + '</h3>';
           if (pr.desc) productsHTML += '<span class="empty-cart-viewed-desc">' + pr.desc + '</span>';
-          productsHTML += '<span class="empty-cart-viewed-price">' + pr.price + '</span>';
+          if (pr.cat) productsHTML += '<span class="empty-cart-viewed-cat">' + pr.cat + '</span>';
           productsHTML += '</div></a>';
         }
         productsHTML += '</div></div>';
