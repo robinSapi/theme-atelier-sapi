@@ -5175,13 +5175,13 @@ li.carousel-editorial-slide,
 .artisan-intro-content .section-number,
 .artisan-step-content .section-number {
   display: block;
-  font-size: 0.875rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 900;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: var(--bois-dore, #937D68);
+  color: var(--color-orange, #E35B24);
   margin-bottom: 1.5rem;
-  opacity: 0.9;
+  opacity: 0.85;
 }
 
 .artisan-intro-content h2,
@@ -5269,13 +5269,13 @@ li.carousel-editorial-slide,
 
 .artisan-values-header .section-number {
   display: block;
-  font-size: 0.875rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 900;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: var(--bois-dore, #937D68);
+  color: var(--color-orange, #E35B24);
   margin-bottom: 1.5rem;
-  opacity: 0.9;
+  opacity: 0.85;
 }
 
 .artisan-values-header h2 {
