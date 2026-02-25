@@ -14718,7 +14718,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   color: var(--color-orange, #E35B24);
 }
 
-/* Lightbox overlay */
+/* Lightbox — même style que Quick View */
 .ambiance-lightbox {
   position: fixed;
   inset: 0;
@@ -14728,7 +14728,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   justify-content: center;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition: opacity 0.4s cubic-bezier(0.34, 0.61, 0.4, 0.97), visibility 0.4s;
 }
 
 .ambiance-lightbox[aria-hidden="false"] {
@@ -14739,36 +14739,58 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .ambiance-lightbox-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-/* Content container */
+/* Content — carte blanche arrondie */
 .ambiance-lightbox-content {
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  width: 90vw;
-  max-width: 1100px;
+  width: 90%;
+  max-width: 900px;
   max-height: 90vh;
+  background: var(--color-cream, #FEFDFB);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
   z-index: 1;
+  transform: scale(0.95);
+  transition: transform 0.4s cubic-bezier(0.34, 0.61, 0.4, 0.97);
 }
 
-/* Close button */
+.ambiance-lightbox[aria-hidden="false"] .ambiance-lightbox-content {
+  transform: scale(1);
+}
+
+/* Close — rond identique Quick View */
 .ambiance-lightbox-close {
   position: absolute;
-  top: -2.5rem;
-  right: 0;
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.7);
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid var(--color-wood, #937D68);
+  border-radius: 50%;
   cursor: pointer;
-  padding: 0.5rem;
-  transition: color 0.2s;
+  padding: 10px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-wood, #937D68);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(147, 125, 104, 0.15);
+  z-index: 100;
 }
 
 .ambiance-lightbox-close:hover {
+  background: var(--color-orange, #E35B24);
+  border-color: var(--color-orange, #E35B24);
   color: #fff;
+  transform: scale(1.1);
 }
 
 /* Main image area */
@@ -14778,44 +14800,48 @@ body.woocommerce-cart div.woocommerce-wrapper {
   align-items: center;
   justify-content: center;
   width: 100%;
+  padding: 2rem 2rem 0;
   flex: 1;
   min-height: 0;
 }
 
 .ambiance-lightbox-image {
   max-width: 100%;
-  max-height: 70vh;
+  max-height: 60vh;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 16px;
   user-select: none;
 }
 
-/* Navigation arrows */
+/* Navigation arrows — même style Quick View */
 .ambiance-lightbox-prev,
 .ambiance-lightbox-next {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.4);
-  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--color-wood, #937D68);
   border-radius: 50%;
   width: 44px;
   height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--color-wood, #937D68);
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(147, 125, 104, 0.15);
 }
 
 .ambiance-lightbox-prev:hover,
 .ambiance-lightbox-next:hover {
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--color-orange, #E35B24);
+  border-color: var(--color-orange, #E35B24);
+  color: #fff;
 }
 
-.ambiance-lightbox-prev { left: 0.5rem; }
-.ambiance-lightbox-next { right: 0.5rem; }
+.ambiance-lightbox-prev { left: 1rem; }
+.ambiance-lightbox-next { right: 1rem; }
 
 /* Footer: counter + thumbnails */
 .ambiance-lightbox-footer {
@@ -14823,15 +14849,14 @@ body.woocommerce-cart div.woocommerce-wrapper {
   flex-direction: column;
   align-items: center;
   gap: 0.75rem;
-  margin-top: 1rem;
-  width: 100%;
+  padding: 1.25rem 2rem 1.5rem;
 }
 
 .ambiance-lightbox-counter {
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-wood, #937D68);
   letter-spacing: 0.1em;
 }
 
@@ -14850,8 +14875,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
   gap: 0.3rem;
   background: none;
   border: 2px solid transparent;
-  border-radius: 6px;
-  padding: 2px;
+  border-radius: 8px;
+  padding: 3px;
   cursor: pointer;
   transition: border-color 0.2s;
 }
@@ -14861,23 +14886,23 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 .ambiance-thumb:hover:not(.active) {
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: var(--color-wood, #937D68);
 }
 
 .ambiance-thumb img {
-  width: 60px;
-  height: 60px;
+  width: 56px;
+  height: 56px;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 .ambiance-thumb-label {
   font-family: var(--font-body, 'Montserrat', sans-serif);
   font-size: 0.6rem;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.06em;
+  color: var(--color-wood, #937D68);
 }
 
 .ambiance-thumb.active .ambiance-thumb-label {
@@ -14887,29 +14912,43 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* Responsive */
 @media (max-width: 768px) {
   .ambiance-lightbox-content {
-    width: 100vw;
-    max-height: 100vh;
-    padding: 1rem;
+    width: 96%;
+    max-height: 95vh;
+    border-radius: 16px;
+  }
+
+  .ambiance-lightbox-main {
+    padding: 1rem 1rem 0;
   }
 
   .ambiance-lightbox-image {
-    max-height: 55vh;
+    max-height: 50vh;
+    border-radius: 12px;
   }
 
-  .ambiance-lightbox-close {
-    top: -2rem;
-    right: 0.5rem;
+  .ambiance-lightbox-prev,
+  .ambiance-lightbox-next {
+    width: 36px;
+    height: 36px;
   }
+
+  .ambiance-lightbox-prev { left: 0.5rem; }
+  .ambiance-lightbox-next { right: 0.5rem; }
 
   .ambiance-thumb img {
     width: 44px;
     height: 44px;
   }
+
+  .ambiance-lightbox-footer {
+    padding: 1rem;
+  }
 }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .ambiance-lightbox {
+  .ambiance-lightbox,
+  .ambiance-lightbox-content {
     transition: none;
   }
 }
