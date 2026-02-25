@@ -9497,7 +9497,7 @@ transform: translateY(15px);
   max-height: none !important;
   -o-object-fit: cover;
   object-fit: cover;
-  /* object-position set via inline style from focal point picker */
+  object-position: center;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
   -webkit-backface-visibility: hidden;

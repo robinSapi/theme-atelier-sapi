@@ -37,8 +37,6 @@ $all_products = new WP_Query([
 $hero_img_url = '';
 $hero_alt = 'Nos Créations - Atelier Sâpi';
 $shop_page_id = wc_get_page_id('shop');
-$hero_focal_point = get_post_meta($shop_page_id, '_sapi_hero_focal_point', true);
-if (!$hero_focal_point) $hero_focal_point = '50% 50%';
 
 if (function_exists('get_field')) {
   $acf_hero = get_field('shop_hero_image', $shop_page_id);
@@ -90,7 +88,7 @@ if (!$hero_img_url) {
       class="shop-hero-magazine-bg"
       src="<?php echo esc_url($hero_img_url); ?>"
       alt="<?php echo esc_attr($hero_alt); ?>"
-      style="object-position: <?php echo esc_attr($hero_focal_point); ?>;"
+      style="object-position: center;"
       fetchpriority="high"
     />
   <?php endif; ?>
