@@ -54,20 +54,42 @@ get_header();
   <div id="product-<?php the_ID(); ?>" <?php wc_product_class('product-page-cinetique product-page-v2', $product); ?>>
 
   <?php
+  // Helper: extract URL from ACF image field (handles all return formats)
+  function sapi_get_acf_image_url($field_value) {
+    if (!$field_value) return '';
+    if (is_array($field_value) && isset($field_value['url'])) {
+      return $field_value['url'];
+    } elseif (is_array($field_value) && isset($field_value['ID'])) {
+      return wp_get_attachment_image_url($field_value['ID'], 'full');
+    } elseif (is_numeric($field_value)) {
+      return wp_get_attachment_image_url($field_value, 'full');
+    } elseif (is_string($field_value) && strpos($field_value, 'http') === 0) {
+      return $field_value;
+    }
+    return '';
+  }
+
   // Get Ambiance 1 image for intro screen
   $ambiance_intro = '';
   if (function_exists('get_field')) {
-    $ambiance_1 = get_field('ambiance_1');
-    if ($ambiance_1) {
-      // Handle different ACF return formats
-      if (is_array($ambiance_1) && isset($ambiance_1['url'])) {
-        $ambiance_intro = $ambiance_1['url'];
-      } elseif (is_array($ambiance_1) && isset($ambiance_1['ID'])) {
-        $ambiance_intro = wp_get_attachment_image_url($ambiance_1['ID'], 'full');
-      } elseif (is_numeric($ambiance_1)) {
-        $ambiance_intro = wp_get_attachment_image_url($ambiance_1, 'full');
-      } elseif (is_string($ambiance_1) && strpos($ambiance_1, 'http') === 0) {
-        $ambiance_intro = $ambiance_1;
+    $ambiance_intro = sapi_get_acf_image_url(get_field('ambiance_1'));
+  }
+
+  // Collect all ACF ambiance/detail photos for lightbox
+  $acf_photos = [];
+  if (function_exists('get_field')) {
+    $acf_field_labels = [
+      'ambiance_1' => 'Ambiance',
+      'ambiance_2' => 'Ambiance',
+      'ambiance_3' => 'Ambiance',
+      'detail_1'   => 'Détail',
+      'detail_2'   => 'Détail',
+      'tailles'    => 'Tailles',
+    ];
+    foreach ($acf_field_labels as $field_name => $label) {
+      $url = sapi_get_acf_image_url(get_field($field_name));
+      if ($url) {
+        $acf_photos[] = ['url' => $url, 'label' => $label];
       }
     }
   }
@@ -173,6 +195,16 @@ get_header();
           }
         }
         ?>
+        <?php if (!empty($acf_photos)) : ?>
+          <button class="btn-ambiance-lightbox" id="btn-ambiance-lightbox" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            Voir en situation (<?php echo count($acf_photos); ?>)
+          </button>
+        <?php endif; ?>
       </div>
 
       <!-- COLONNE DROITE: Informations (40%) -->
@@ -1582,6 +1614,109 @@ get_header();
 </script>
 <?php endif; ?>
 
+
+<?php if (!empty($acf_photos)) : ?>
+<!-- Lightbox Ambiance/Détail -->
+<div class="ambiance-lightbox" id="ambiance-lightbox" aria-hidden="true" role="dialog" aria-modal="true" data-photos='<?php echo wp_json_encode($acf_photos, JSON_HEX_APOS | JSON_HEX_QUOT); ?>'>
+  <div class="ambiance-lightbox-overlay"></div>
+  <div class="ambiance-lightbox-content">
+    <button class="ambiance-lightbox-close" aria-label="<?php esc_attr_e('Fermer', 'theme-sapi-maison'); ?>" type="button">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+    <div class="ambiance-lightbox-main">
+      <button class="ambiance-lightbox-prev" aria-label="<?php esc_attr_e('Image précédente', 'theme-sapi-maison'); ?>" type="button">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <img src="" alt="" class="ambiance-lightbox-image">
+      <button class="ambiance-lightbox-next" aria-label="<?php esc_attr_e('Image suivante', 'theme-sapi-maison'); ?>" type="button">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
+    <div class="ambiance-lightbox-footer">
+      <span class="ambiance-lightbox-counter"></span>
+      <div class="ambiance-lightbox-thumbs"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var lightbox = document.getElementById('ambiance-lightbox');
+  if (!lightbox) return;
+
+  var photos = JSON.parse(lightbox.dataset.photos || '[]');
+  if (!photos.length) return;
+
+  var current = 0;
+  var img = lightbox.querySelector('.ambiance-lightbox-image');
+  var counter = lightbox.querySelector('.ambiance-lightbox-counter');
+  var thumbsContainer = lightbox.querySelector('.ambiance-lightbox-thumbs');
+  var productName = <?php echo wp_json_encode(get_the_title()); ?>;
+
+  // Build thumbnails
+  photos.forEach(function(photo, i) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'ambiance-thumb' + (i === 0 ? ' active' : '');
+    btn.innerHTML = '<img src="' + photo.url + '" alt="' + productName + ' - ' + photo.label + '">' +
+                    '<span class="ambiance-thumb-label">' + photo.label + '</span>';
+    btn.addEventListener('click', function() { goTo(i); });
+    thumbsContainer.appendChild(btn);
+  });
+
+  function goTo(index) {
+    current = index;
+    img.src = photos[current].url;
+    img.srcset = '';
+    img.alt = productName + ' - ' + photos[current].label;
+    counter.textContent = (current + 1) + ' / ' + photos.length;
+    var thumbs = thumbsContainer.querySelectorAll('.ambiance-thumb');
+    thumbs.forEach(function(t, i) { t.classList.toggle('active', i === current); });
+  }
+
+  function open() {
+    goTo(0);
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    lightbox.querySelector('.ambiance-lightbox-close').focus();
+  }
+
+  function close() {
+    lightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    var btn = document.getElementById('btn-ambiance-lightbox');
+    if (btn) btn.focus();
+  }
+
+  // Open
+  var openBtn = document.getElementById('btn-ambiance-lightbox');
+  if (openBtn) openBtn.addEventListener('click', open);
+
+  // Close
+  lightbox.querySelector('.ambiance-lightbox-close').addEventListener('click', close);
+  lightbox.querySelector('.ambiance-lightbox-overlay').addEventListener('click', close);
+
+  // Navigation
+  lightbox.querySelector('.ambiance-lightbox-prev').addEventListener('click', function() {
+    goTo(current > 0 ? current - 1 : photos.length - 1);
+  });
+  lightbox.querySelector('.ambiance-lightbox-next').addEventListener('click', function() {
+    goTo(current < photos.length - 1 ? current + 1 : 0);
+  });
+
+  // Keyboard
+  lightbox.addEventListener('keydown', function(e) {
+    if (lightbox.getAttribute('aria-hidden') === 'true') return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowLeft') goTo(current > 0 ? current - 1 : photos.length - 1);
+    if (e.key === 'ArrowRight') goTo(current < photos.length - 1 ? current + 1 : 0);
+  });
+})();
+</script>
+<?php endif; ?>
 
 <?php
 get_footer();

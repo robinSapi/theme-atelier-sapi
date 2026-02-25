@@ -14689,6 +14689,234 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 /* =========================================
+   AMBIANCE LIGHTBOX - Photos ACF
+   ========================================= */
+
+/* Bouton "Voir en situation" */
+.btn-ambiance-lightbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1.5px solid var(--color-wood, #937D68);
+  border-radius: 8px;
+  color: var(--color-wood, #937D68);
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-ambiance-lightbox:hover {
+  border-color: var(--color-orange, #E35B24);
+  color: var(--color-orange, #E35B24);
+}
+
+.btn-ambiance-lightbox svg {
+  flex-shrink: 0;
+}
+
+/* Lightbox overlay */
+.ambiance-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.ambiance-lightbox[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.ambiance-lightbox-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+}
+
+/* Content container */
+.ambiance-lightbox-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90vw;
+  max-width: 1100px;
+  max-height: 90vh;
+  z-index: 1;
+}
+
+/* Close button */
+.ambiance-lightbox-close {
+  position: absolute;
+  top: -2.5rem;
+  right: 0;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.2s;
+}
+
+.ambiance-lightbox-close:hover {
+  color: #fff;
+}
+
+/* Main image area */
+.ambiance-lightbox-main {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+.ambiance-lightbox-image {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 8px;
+  user-select: none;
+}
+
+/* Navigation arrows */
+.ambiance-lightbox-prev,
+.ambiance-lightbox-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.4);
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ambiance-lightbox-prev:hover,
+.ambiance-lightbox-next:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.ambiance-lightbox-prev { left: 0.5rem; }
+.ambiance-lightbox-next { right: 0.5rem; }
+
+/* Footer: counter + thumbnails */
+.ambiance-lightbox-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.ambiance-lightbox-counter {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.1em;
+}
+
+/* Thumbnails strip */
+.ambiance-lightbox-thumbs {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ambiance-thumb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  padding: 2px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.ambiance-thumb.active {
+  border-color: var(--color-orange, #E35B24);
+}
+
+.ambiance-thumb:hover:not(.active) {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.ambiance-thumb img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.ambiance-thumb-label {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.6rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.ambiance-thumb.active .ambiance-thumb-label {
+  color: var(--color-orange, #E35B24);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ambiance-lightbox-content {
+    width: 100vw;
+    max-height: 100vh;
+    padding: 1rem;
+  }
+
+  .ambiance-lightbox-image {
+    max-height: 55vh;
+  }
+
+  .ambiance-lightbox-close {
+    top: -2rem;
+    right: 0.5rem;
+  }
+
+  .ambiance-thumb img {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .ambiance-lightbox {
+    transition: none;
+  }
+}
+
+/* =========================================
    QUICK VIEW MODAL - Patricia Urquiola inspired
    ========================================= */
 
