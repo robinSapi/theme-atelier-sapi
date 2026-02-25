@@ -136,6 +136,90 @@ add_action('wp_footer', function () {
     new MutationObserver(replaceCartTexts).observe(document.body, { childList: true, subtree: true });
   })();
   </script>
+
+  <?php
+  // Récupérer les 3 derniers produits vus pour le panier vide
+  $viewed_ids = !empty($_COOKIE['woocommerce_recently_viewed'])
+    ? array_slice(array_filter(array_map('absint', explode('|', wp_unslash($_COOKIE['woocommerce_recently_viewed'])))), 0, 3)
+    : [];
+  $viewed_data = [];
+  foreach ($viewed_ids as $vid) {
+    $vp = wc_get_product($vid);
+    if (!$vp || !$vp->is_visible()) continue;
+    $name_parts = explode(' ', $vp->get_name(), 2);
+    $img = wp_get_attachment_image_url($vp->get_image_id(), 'medium');
+    $viewed_data[] = [
+      'url'   => $vp->get_permalink(),
+      'name'  => $name_parts[0],
+      'desc'  => isset($name_parts[1]) ? $name_parts[1] : '',
+      'price' => $vp->get_price_html(),
+      'img'   => $img ?: '',
+    ];
+  }
+  $shop_url = esc_url(wc_get_page_permalink('shop'));
+  ?>
+  <script>
+  (function() {
+    var viewedProducts = <?php echo wp_json_encode($viewed_data); ?>;
+    var shopUrl = <?php echo wp_json_encode($shop_url); ?>;
+
+    function replaceEmptyCart() {
+      var emptyBlock = document.querySelector('.wc-block-cart--is-loading');
+      if (emptyBlock) return; // Still loading
+
+      var emptyMsg = document.querySelector('.wc-block-cart__empty-cart__title, .wp-block-woocommerce-empty-cart-block');
+      if (!emptyMsg) {
+        // Chercher le texte "panier est actuellement vide"
+        var allP = document.querySelectorAll('.wc-block-cart p, .sapi-cart-outer p, .wp-block-woocommerce-cart p');
+        for (var i = 0; i < allP.length; i++) {
+          if (allP[i].textContent.indexOf('vide') !== -1) {
+            emptyMsg = allP[i];
+            break;
+          }
+        }
+      }
+      if (!emptyMsg) return;
+
+      // Trouver le conteneur parent à remplacer
+      var container = emptyMsg.closest('.wp-block-woocommerce-empty-cart-block') || emptyMsg.closest('.wc-block-cart') || emptyMsg.parentElement;
+      if (!container || container.dataset.sapiReplaced) return;
+      container.dataset.sapiReplaced = 'true';
+
+      var viewedHTML = '';
+      if (viewedProducts.length > 0) {
+        viewedHTML = '<div class="empty-cart-viewed"><h2 class="empty-cart-viewed-title">Vos derni\u00e8res d\u00e9couvertes</h2><div class="empty-cart-viewed-grid">';
+        for (var j = 0; j < viewedProducts.length; j++) {
+          var p = viewedProducts[j];
+          viewedHTML += '<a href="' + p.url + '" class="empty-cart-viewed-card">';
+          if (p.img) {
+            viewedHTML += '<div class="empty-cart-viewed-image"><img src="' + p.img + '" alt="' + p.name + '" loading="lazy" /></div>';
+          }
+          viewedHTML += '<div class="empty-cart-viewed-info">';
+          viewedHTML += '<h3>' + p.name + '</h3>';
+          if (p.desc) viewedHTML += '<span class="empty-cart-viewed-desc">' + p.desc + '</span>';
+          viewedHTML += '<span class="empty-cart-viewed-price">' + p.price + '</span>';
+          viewedHTML += '</div></a>';
+        }
+        viewedHTML += '</div></div>';
+      }
+
+      container.innerHTML =
+        '<section class="empty-cart-page">' +
+          '<div class="empty-cart-content">' +
+            '<div class="empty-cart-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div>' +
+            '<h1 class="empty-cart-title">Votre panier est vide... pour l\u2019instant\u00a0!</h1>' +
+            '<p class="empty-cart-text">Nos luminaires n\u2019attendent que vous. Laissez-vous inspirer par nos cr\u00e9ations artisanales.</p>' +
+          '</div>' +
+          viewedHTML +
+          '<div class="empty-cart-cta"><a href="' + shopUrl + '" class="empty-cart-btn">D\u00e9couvrir nos cr\u00e9ations</a></div>' +
+        '</section>';
+    }
+
+    // Lancer après le rendu React
+    setTimeout(replaceEmptyCart, 500);
+    new MutationObserver(replaceEmptyCart).observe(document.body, { childList: true, subtree: true });
+  })();
+  </script>
   <?php
 });
 
