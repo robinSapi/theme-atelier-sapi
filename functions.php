@@ -820,19 +820,8 @@ function sapi_render_mini_cart_contents() {
               <?php echo wc_get_formatted_cart_item_data($cart_item); ?>
               <?php echo sprintf(__('Qté: %d', 'theme-sapi-maison'), $quantity); ?>
             </span>
-            <span class="mini-cart-item-category">
-              <?php
-              $product_cats = get_the_terms($product_id, 'product_cat');
-              if ($product_cats && !is_wp_error($product_cats)) {
-                $cat_names = [];
-                foreach ($product_cats as $cat) {
-                  if ($cat->slug !== 'non-classe' && $cat->slug !== 'uncategorized') {
-                    $cat_names[] = $cat->name;
-                  }
-                }
-                echo esc_html(implode(', ', $cat_names));
-              }
-              ?>
+            <span class="mini-cart-item-price">
+              <?php echo WC()->cart->get_product_price($product); ?>
             </span>
           </div>
           <button class="mini-cart-item-remove" data-cart-item-key="<?php echo esc_attr($cart_item_key); ?>" aria-label="<?php esc_attr_e('Retirer du panier', 'theme-sapi-maison'); ?>">
