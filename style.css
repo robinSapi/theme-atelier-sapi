@@ -15622,8 +15622,9 @@ html.sapi-intro-active body {
   margin: 0;
 }
 
-/* Produits récemment vus */
+/* Sélection de l'artisan */
 .empty-cart-viewed {
+  margin-top: 3rem;
   margin-bottom: 2.5rem;
 }
 

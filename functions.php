@@ -213,7 +213,7 @@ add_action('wp_footer', function () {
 
       var productsHTML = '';
       if (popularProducts.length > 0) {
-        productsHTML = '<div class="empty-cart-viewed"><h2 class="empty-cart-viewed-title">Nos cr\u00e9ations les plus aim\u00e9es</h2><div class="empty-cart-viewed-grid">';
+        productsHTML = '<div class="empty-cart-viewed"><h2 class="empty-cart-viewed-title">La s\u00e9lection de l\u2019artisan</h2><div class="empty-cart-viewed-grid">';
         for (var j = 0; j < popularProducts.length; j++) {
           var pr = popularProducts[j];
           productsHTML += '<a href="' + pr.url + '" class="empty-cart-viewed-card">';
