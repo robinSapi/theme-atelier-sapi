@@ -186,6 +186,14 @@
           });
         }
 
+        // Get hover image if available
+        const hoverImg = productCard.querySelector('.product-image-hover img');
+        if (hoverImg) {
+          productData.images.push({
+            src: hoverImg.src,
+            alt: hoverImg.alt || productData.name
+          });
+        }
       }
 
       // If we have basic data, render immediately then load more images
