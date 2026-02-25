@@ -154,154 +154,174 @@
       this.progressBar = null;
     },
 
+    extractCardData: function(productCard, productUrl) {
+      const data = {
+        name: '',
+        price_html: '',
+        short_description: '',
+        images: [],
+        permalink: productUrl
+      };
+      if (!productCard) return data;
+
+      const titleEl = productCard.querySelector('.product-name, h2');
+      if (titleEl) data.name = titleEl.textContent.trim();
+
+      const priceEl = productCard.querySelector('.price-value, .product-price');
+      if (priceEl) data.price_html = priceEl.innerHTML;
+
+      const mainImg = productCard.querySelector('.product-image-main img, img');
+      if (mainImg) {
+        data.images.push({ src: mainImg.src, alt: mainImg.alt || data.name });
+      }
+
+      return data;
+    },
+
+    extractPageData: function(html, productUrl, productCard) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      const productData = {
+        name: '',
+        price_html: '',
+        short_description: '',
+        images: [],
+        permalink: productUrl
+      };
+
+      // Get product name
+      const titleEl = doc.querySelector('.product-title-v2, h1');
+      if (titleEl) {
+        productData.name = titleEl.textContent.trim();
+      } else if (productCard) {
+        const cardTitle = productCard.querySelector('.product-name, h2');
+        if (cardTitle) productData.name = cardTitle.textContent.trim();
+      }
+
+      // Get price
+      const priceEl = doc.querySelector('.product-price-v2 .price-amount, .price');
+      if (priceEl) {
+        productData.price_html = priceEl.innerHTML;
+      } else if (productCard) {
+        const cardPrice = productCard.querySelector('.price-value, .product-price');
+        if (cardPrice) productData.price_html = cardPrice.innerHTML;
+      }
+
+      // Get main image
+      const mainImage = doc.querySelector('.gallery-main-image');
+      if (mainImage && mainImage.src) {
+        productData.images.push({
+          src: mainImage.src,
+          alt: mainImage.alt || productData.name
+        });
+      }
+
+      // Get gallery thumbnails (skip first = main image)
+      const galleryThumbs = doc.querySelectorAll('.gallery-thumb');
+      galleryThumbs.forEach((thumb, index) => {
+        const imgUrl = thumb.dataset.image || thumb.querySelector('img')?.src;
+        if (imgUrl && index > 0) {
+          productData.images.push({
+            src: imgUrl,
+            alt: `${productData.name} - ${index + 1}`
+          });
+        }
+      });
+
+      // Fallback: if no images from page, use card image
+      if (productData.images.length === 0 && productCard) {
+        const mainImg = productCard.querySelector('.product-image-main img, img');
+        if (mainImg) {
+          productData.images.push({
+            src: mainImg.src,
+            alt: mainImg.alt || productData.name
+          });
+        }
+      }
+
+      // Extract description/tagline
+      const tagline = doc.querySelector('.product-tagline');
+      if (tagline && tagline.textContent.trim()) {
+        productData.short_description = tagline.textContent.trim();
+      } else {
+        const wcDescription = doc.querySelector('.woocommerce-product-details__short-description');
+        if (wcDescription && wcDescription.textContent.trim()) {
+          productData.short_description = wcDescription.textContent.trim();
+        } else {
+          const heroSection = doc.querySelector('.product-hero-v2, .product-info-v2, .product-summary');
+          if (heroSection) {
+            const paragraphs = heroSection.querySelectorAll('p');
+            for (let p of paragraphs) {
+              const text = p.textContent.trim();
+              if (text.length > 20 && !text.match(/^(À partir de|Prix|Price)/i)) {
+                productData.short_description = text;
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      // Extract available sizes
+      const sizeSelect = doc.querySelector('select[name="attribute_pa_taille"], select[name="pa_taille"]');
+      if (sizeSelect) {
+        const sizes = Array.from(sizeSelect.querySelectorAll('option'))
+          .map(opt => opt.textContent.trim())
+          .filter(s => s && s !== 'Choisir une option' && s !== 'Choisir...' && s !== '')
+          .filter((v, i, a) => a.indexOf(v) === i);
+        if (sizes.length > 0) {
+          productData.sizes = sizes;
+        }
+      }
+
+      // Extract wood/material essences
+      const woodSelect = doc.querySelector('select[name="attribute_pa_materiau"], select[name="pa_materiau"], select[name="attribute_pa_matiere"], select[name="pa_matiere"], select[name="attribute_pa_bois"], select[name="pa_bois"]');
+      let woods = [];
+      if (woodSelect) {
+        woods = Array.from(woodSelect.querySelectorAll('option'))
+          .map(opt => opt.textContent.trim())
+          .filter(w => w && w !== 'Choisir une option' && w !== 'Choisir...' && w !== '')
+          .filter((v, i, a) => a.indexOf(v) === i);
+      }
+      if (woods.length === 0) {
+        const swatchImages = doc.querySelectorAll('.variation-swatches img[alt], ul[class*="variation"] img[alt]');
+        woods = Array.from(swatchImages)
+          .map(img => img.alt.trim())
+          .filter(w => w && w !== 'Choisir une option' && w !== '' && w.length > 1)
+          .filter((v, i, a) => a.indexOf(v) === i);
+      }
+      if (woods.length > 0) {
+        productData.woods = woods;
+      }
+
+      return productData;
+    },
+
     fetchProductData: function(productId, productUrl, productCard, cachedHtml) {
-      // Use cached HTML if available, otherwise fetch
+      // Phase 1: Render immediately with card data
+      const cardData = this.extractCardData(productCard, productUrl);
+      if (cardData.name) {
+        this.renderProduct(cardData);
+      }
+
+      // Phase 2: Fetch full page data then re-render completely
       const htmlPromise = cachedHtml
         ? Promise.resolve(cachedHtml)
         : fetchWithTimeout(productUrl).then(response => response.text());
 
       htmlPromise.then(html => {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
+          const fullData = this.extractPageData(html, productUrl, productCard);
 
-          const productData = {
-            name: '',
-            price_html: '',
-            short_description: '',
-            images: [],
-            permalink: productUrl
-          };
-
-          // Get product name
-          const titleEl = doc.querySelector('.product-title-v2, h1');
-          if (titleEl) {
-            productData.name = titleEl.textContent.trim();
-          } else if (productCard) {
-            const cardTitle = productCard.querySelector('.product-name, h2');
-            if (cardTitle) productData.name = cardTitle.textContent.trim();
-          }
-
-          // Get price
-          const priceEl = doc.querySelector('.product-price-v2 .price-amount, .price');
-          if (priceEl) {
-            productData.price_html = priceEl.innerHTML;
-          } else if (productCard) {
-            const cardPrice = productCard.querySelector('.price-value, .product-price');
-            if (cardPrice) productData.price_html = cardPrice.innerHTML;
-          }
-
-          // Get main image
-          const mainImage = doc.querySelector('.gallery-main-image');
-          if (mainImage && mainImage.src) {
-            productData.images.push({
-              src: mainImage.src,
-              alt: mainImage.alt || productData.name
-            });
-          }
-
-          // Get gallery thumbnails (skip first = main image)
-          const galleryThumbs = doc.querySelectorAll('.gallery-thumb');
-          galleryThumbs.forEach((thumb, index) => {
-            const imgUrl = thumb.dataset.image || thumb.querySelector('img')?.src;
-            if (imgUrl && index > 0) {
-              productData.images.push({
-                src: imgUrl,
-                alt: `${productData.name} - ${index + 1}`
-              });
-            }
-          });
-
-          // Fallback: if no images from page, use card image
-          if (productData.images.length === 0 && productCard) {
-            const mainImg = productCard.querySelector('.product-image-main img, img');
-            if (mainImg) {
-              productData.images.push({
-                src: mainImg.src,
-                alt: mainImg.alt || productData.name
-              });
-            }
-          }
-
-          // Extract description/tagline
-          const tagline = doc.querySelector('.product-tagline');
-          if (tagline && tagline.textContent.trim()) {
-            productData.short_description = tagline.textContent.trim();
-          } else {
-            const wcDescription = doc.querySelector('.woocommerce-product-details__short-description');
-            if (wcDescription && wcDescription.textContent.trim()) {
-              productData.short_description = wcDescription.textContent.trim();
-            } else {
-              const heroSection = doc.querySelector('.product-hero-v2, .product-info-v2, .product-summary');
-              if (heroSection) {
-                const paragraphs = heroSection.querySelectorAll('p');
-                for (let p of paragraphs) {
-                  const text = p.textContent.trim();
-                  if (text.length > 20 && !text.match(/^(À partir de|Prix|Price)/i)) {
-                    productData.short_description = text;
-                    break;
-                  }
-                }
-              }
-            }
-          }
-
-          // Extract available sizes
-          const sizeSelect = doc.querySelector('select[name="attribute_pa_taille"], select[name="pa_taille"]');
-          if (sizeSelect) {
-            const sizes = Array.from(sizeSelect.querySelectorAll('option'))
-              .map(opt => opt.textContent.trim())
-              .filter(s => s && s !== 'Choisir une option' && s !== 'Choisir...' && s !== '')
-              .filter((v, i, a) => a.indexOf(v) === i);
-            if (sizes.length > 0) {
-              productData.sizes = sizes;
-            }
-          }
-
-          // Extract wood/material essences
-          const woodSelect = doc.querySelector('select[name="attribute_pa_materiau"], select[name="pa_materiau"], select[name="attribute_pa_matiere"], select[name="pa_matiere"], select[name="attribute_pa_bois"], select[name="pa_bois"]');
-          let woods = [];
-          if (woodSelect) {
-            woods = Array.from(woodSelect.querySelectorAll('option'))
-              .map(opt => opt.textContent.trim())
-              .filter(w => w && w !== 'Choisir une option' && w !== 'Choisir...' && w !== '')
-              .filter((v, i, a) => a.indexOf(v) === i);
-          }
-          if (woods.length === 0) {
-            const swatchImages = doc.querySelectorAll('.variation-swatches img[alt], ul[class*="variation"] img[alt]');
-            woods = Array.from(swatchImages)
-              .map(img => img.alt.trim())
-              .filter(w => w && w !== 'Choisir une option' && w !== '' && w.length > 1)
-              .filter((v, i, a) => a.indexOf(v) === i);
-          }
-          if (woods.length > 0) {
-            productData.woods = woods;
-          }
-
-          // Render with all data at once
+          // Re-render with complete data (full gallery, description, variants)
           if (this.modal.getAttribute('aria-hidden') === 'false') {
-            this.renderProduct(productData);
+            this.renderProduct(fullData);
           }
         })
         .catch(error => {
-          // Fallback: try to render with card data only
-          if (productCard && this.modal.getAttribute('aria-hidden') === 'false') {
-            const fallbackData = {
-              name: '',
-              price_html: '',
-              short_description: '',
-              images: [],
-              permalink: productUrl
-            };
-            const titleEl = productCard.querySelector('.product-name, h2');
-            if (titleEl) fallbackData.name = titleEl.textContent.trim();
-            const priceEl = productCard.querySelector('.price-value, .product-price');
-            if (priceEl) fallbackData.price_html = priceEl.innerHTML;
-            const mainImg = productCard.querySelector('.product-image-main img, img');
-            if (mainImg) {
-              fallbackData.images.push({ src: mainImg.src, alt: mainImg.alt || fallbackData.name });
-            }
-            this.renderProduct(fallbackData);
-          } else {
+          // Phase 1 already rendered card data, nothing more to do
+          // If phase 1 had no data either, show error
+          if (!cardData.name && this.modal.getAttribute('aria-hidden') === 'false') {
             this.showError();
           }
         });
