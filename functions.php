@@ -108,6 +108,31 @@ function sapi_maison_enqueue_assets() {
 add_action('wp_enqueue_scripts', 'sapi_maison_enqueue_assets');
 
 /**
+ * Tracking des produits récemment consultés (cookie woocommerce_recently_viewed)
+ * WooCommerce ne remplit ce cookie que si le widget "Recently Viewed" est actif.
+ * On le gère manuellement ici pour toujours avoir les données.
+ */
+add_action('template_redirect', function () {
+  if (!is_singular('product')) return;
+
+  $product_id = get_queried_object_id();
+  if (!$product_id) return;
+
+  $viewed = !empty($_COOKIE['woocommerce_recently_viewed'])
+    ? array_filter(array_map('absint', explode('|', wp_unslash($_COOKIE['woocommerce_recently_viewed']))))
+    : [];
+
+  // Retirer l'ID s'il existe déjà pour le mettre en premier
+  $viewed = array_diff($viewed, [$product_id]);
+  array_unshift($viewed, $product_id);
+
+  // Limiter à 15 produits
+  $viewed = array_slice($viewed, 0, 15);
+
+  wc_setcookie('woocommerce_recently_viewed', implode('|', $viewed));
+});
+
+/**
  * render_block — Enveloppe le bloc panier WooCommerce dans .sapi-cart-outer
  * Ce wrapper est injecté côté PHP AVANT React et ne sera jamais touché par React.
  * Il permet de scoper notre CSS avec une spécificité garantie.
