@@ -14825,12 +14825,17 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .ambiance-lightbox-prev,
 .ambiance-lightbox-next {
   flex-shrink: 0;
+  flex-grow: 0;
   background: rgba(255, 255, 255, 0.9);
   border: 2px solid var(--color-wood, #937D68);
   border-radius: 50%;
   width: 48px;
   height: 48px;
-  aspect-ratio: 1;
+  min-width: 48px;
+  min-height: 48px;
+  max-width: 48px;
+  max-height: 48px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14935,6 +14940,10 @@ body.woocommerce-cart div.woocommerce-wrapper {
   .ambiance-lightbox-next {
     width: 36px;
     height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    max-width: 36px;
+    max-height: 36px;
   }
 
   .ambiance-lightbox-prev svg,

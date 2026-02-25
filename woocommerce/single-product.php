@@ -75,8 +75,22 @@ get_header();
     $ambiance_intro = sapi_get_acf_image_url(get_field('ambiance_1'));
   }
 
-  // Collect all ACF ambiance/detail photos for lightbox
+  // Collect ALL photos for lightbox: product images + ACF ambiance/detail
   $acf_photos = [];
+
+  // 1. Product main image + gallery
+  $lb_main_id = wc_get_product(get_the_ID()) ? wc_get_product(get_the_ID())->get_image_id() : 0;
+  $lb_gallery_ids = wc_get_product(get_the_ID()) ? wc_get_product(get_the_ID())->get_gallery_image_ids() : [];
+  if ($lb_main_id) {
+    $lb_url = wp_get_attachment_image_url($lb_main_id, 'full');
+    if ($lb_url) $acf_photos[] = ['url' => $lb_url, 'label' => 'Produit'];
+  }
+  foreach ($lb_gallery_ids as $lb_gid) {
+    $lb_url = wp_get_attachment_image_url($lb_gid, 'full');
+    if ($lb_url) $acf_photos[] = ['url' => $lb_url, 'label' => 'Galerie'];
+  }
+
+  // 2. ACF ambiance/detail/tailles
   if (function_exists('get_field')) {
     $acf_field_labels = [
       'ambiance_1' => 'Ambiance',
