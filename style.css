@@ -3160,10 +3160,13 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   border: none;
 }
 
-/* Signature avec typo poétique - DS 4.5 */
+/* Signature artisan harmonisée - DS 4.5 */
 .atelier-signature {
-  font-family: var(--font-display, "Square Peg", Georgia, serif);
-  font-size: 28px;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.03em;
   color: var(--bois-sombre, #4A3F35);
   margin: 8px 0 1rem;
 }
@@ -5387,9 +5390,11 @@ li.carousel-editorial-slide,
 
 .artisan-quote-cinetique cite {
   display: block;
-  font-family: var(--font-display, "Square Peg", Georgia, serif);
-  font-size: 28px;
-  font-style: normal;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.03em;
   color: var(--bois-sombre, #4A3F35);
   margin-top: 2rem;
   position: relative;
@@ -6173,11 +6178,11 @@ li.carousel-editorial-slide,
   margin: 1.5rem auto 0;
   padding-right: 2rem;
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: clamp(0.85rem, 1.5vw, 1rem);
+  font-size: 0.95rem;
   font-weight: 500;
   font-style: italic;
-  letter-spacing: 0.05em;
-  color: var(--color-wood, #937D68);
+  letter-spacing: 0.03em;
+  color: var(--bois-sombre, #4A3F35);
 }
 
 /* ========================================
@@ -8004,9 +8009,12 @@ transform: translateY(15px);
 /* Dancing Script has consistent rendering across browsers - no Safari-specific adjustments needed */
 
 .statement-author {
-  font-size: 0.875rem;
-  font-weight: 400;
-  color: var(--color-gray);
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.03em;
+  color: var(--bois-sombre, #4A3F35);
 }
 
 /* Product Cards */
