@@ -1005,6 +1005,13 @@ select:focus-visible {
   color: var(--color-wood);
 }
 
+/* Séparateur dans sous-menu */
+.primary-nav .sub-menu .menu-separator-before {
+  border-top: 1px solid rgba(147, 125, 104, 0.2);
+  margin-top: 4px;
+  padding-top: 4px;
+}
+
 /* Menu parent indicator (chevron) */
 .primary-nav > ul > li.menu-item-has-children > a {
   padding-right: 18px;
@@ -1386,6 +1393,12 @@ input[type="submit"]:hover,
 
 .mobile-nav-menu .sub-menu a:hover {
   color: var(--color-wood);
+}
+
+.mobile-nav-menu .sub-menu .menu-separator-before {
+  border-top: 1px solid rgba(147, 125, 104, 0.2);
+  margin-top: 4px;
+  padding-top: 4px;
 }
 
 /* Cart Link Improvements */

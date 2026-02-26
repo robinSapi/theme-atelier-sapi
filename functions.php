@@ -70,6 +70,19 @@ add_filter('wp_nav_menu_items', function ($items, $args) {
 }, 10, 2);
 
 /**
+ * Ajouter une classe CSS "menu-separator-before" sur l'item "Accessoires"
+ * pour afficher un séparateur visuel dans le sous-menu "Nos créations".
+ */
+add_filter('wp_nav_menu_objects', function ($items) {
+  foreach ($items as $item) {
+    if (strtolower(trim($item->title)) === 'accessoires' && $item->menu_item_parent != 0) {
+      $item->classes[] = 'menu-separator-before';
+    }
+  }
+  return $items;
+});
+
+/**
  * Fallbacks : affichent les liens hardcodés si les menus WordPress ne sont pas encore créés.
  */
 function sapi_fallback_primary_menu() {
