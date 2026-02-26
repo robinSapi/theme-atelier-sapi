@@ -110,6 +110,8 @@ get_header();
     }
   }
 
+  $acf_only_count = count($acf_photos) - $first_acf_index;
+
   if ($ambiance_intro) :
   ?>
   <!-- Product Intro Screen with Ambiance Image -->
@@ -207,8 +209,8 @@ get_header();
                 </button>
               <?php endforeach; ?>
               <?php if (!empty($acf_photos)) : ?>
-                <button class="gallery-thumb gallery-thumb-more" id="btn-ambiance-lightbox" type="button" aria-label="Voir <?php echo count($acf_photos); ?> photos en situation">
-                  <span class="gallery-thumb-more-icon">+<?php echo count($acf_photos); ?></span>
+                <button class="gallery-thumb gallery-thumb-more" id="btn-ambiance-lightbox" type="button" aria-label="Voir <?php echo esc_attr($acf_only_count); ?> photos en situation">
+                  <span class="gallery-thumb-more-icon">+<?php echo esc_html($acf_only_count); ?></span>
                 </button>
               <?php endif; ?>
             </div>
