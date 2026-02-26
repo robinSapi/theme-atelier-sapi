@@ -13863,8 +13863,8 @@ body.woocommerce-cart {
   align-items: center;
   justify-content: center;
   padding: 0.85rem 2rem;
-  background: var(--color-accent);
-  color: #fff;
+  background: linear-gradient(180deg, #019501 0%, #018501 100%);
+  color: var(--color-cream, #FEFDFB);
   font-size: 0.9rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -13873,16 +13873,19 @@ body.woocommerce-cart {
   border-radius: 6px;
   cursor: pointer;
   text-decoration: none;
-  transition: all 0.2s ease;
-  -webkit-transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(1, 133, 1, 0.25), 0 2px 4px rgba(1, 133, 1, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sticky-btn:hover {
-  background: var(--color-dark);
+  background: linear-gradient(180deg, #018501 0%, #016701 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(1, 133, 1, 0.3), 0 3px 6px rgba(1, 133, 1, 0.2);
 }
 
 .sticky-btn.variation-selected {
-  background: var(--color-accent);
+  background: linear-gradient(180deg, #019501 0%, #018501 100%);
 }
 
 /* ---- RESPONSIVE HERO V2 ---- */
