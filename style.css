@@ -3224,7 +3224,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 .testimonials-header h2 {
   font-family: var(--font-body);
   font-size: clamp(1.5rem, 3vw, 2rem);
-  font-weight: 700;
+  font-weight: 900;
   color: var(--color-dark);
   margin: 0;
 }
