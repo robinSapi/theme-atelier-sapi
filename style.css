@@ -11849,6 +11849,175 @@ transform: translateY(15px);
 }
 
 /* ========================================
+   PAGES PAR DÉFAUT (Mentions légales, CGV, Confidentialité…)
+   Template : page.php → content-page.php
+   ======================================== */
+
+.page-default {
+  background: var(--color-cream, #FEFDFB);
+}
+
+.page-default-header {
+  background: var(--color-warm, #FBF6EA);
+  padding: 3rem 2rem 2.5rem;
+  text-align: center;
+}
+
+.page-default-header h1 {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 900;
+  color: var(--color-dark, #323232);
+  margin: 0;
+}
+
+.page-default .entry-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 3rem 2rem 4rem;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--color-dark, #323232);
+}
+
+/* Titres dans le contenu */
+.page-default .entry-content h2 {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--color-dark, #323232);
+  margin: 2.5rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba(147, 125, 104, 0.2);
+}
+
+.page-default .entry-content h3 {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-wood, #937D68);
+  margin: 2rem 0 0.75rem;
+}
+
+.page-default .entry-content h4 {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-dark, #323232);
+  margin: 1.5rem 0 0.5rem;
+}
+
+/* Paragraphes */
+.page-default .entry-content p {
+  margin-bottom: 1.25rem;
+}
+
+/* Listes */
+.page-default .entry-content ul,
+.page-default .entry-content ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.page-default .entry-content li {
+  margin-bottom: 0.5rem;
+  padding-left: 0.25rem;
+}
+
+.page-default .entry-content ul li::marker {
+  color: var(--color-wood, #937D68);
+}
+
+.page-default .entry-content ol li::marker {
+  color: var(--color-wood, #937D68);
+  font-weight: 600;
+}
+
+/* Liens */
+.page-default .entry-content a {
+  color: var(--color-wood, #937D68);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.page-default .entry-content a:hover {
+  color: var(--color-orange, #E35B24);
+  border-bottom-color: var(--color-orange, #E35B24);
+}
+
+/* Strong et em */
+.page-default .entry-content strong {
+  font-weight: 700;
+  color: var(--color-dark, #323232);
+}
+
+/* Tables (CGV) */
+.page-default .entry-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+
+.page-default .entry-content th,
+.page-default .entry-content td {
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(147, 125, 104, 0.2);
+  text-align: left;
+}
+
+.page-default .entry-content th {
+  background: var(--color-warm, #FBF6EA);
+  font-weight: 700;
+  color: var(--color-dark, #323232);
+}
+
+.page-default .entry-content tr:nth-child(even) td {
+  background: rgba(251, 246, 234, 0.4);
+}
+
+/* Blockquotes */
+.page-default .entry-content blockquote {
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  border-left: 3px solid var(--color-wood, #937D68);
+  background: var(--color-warm, #FBF6EA);
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-default-header {
+    padding: 2rem 1rem 1.5rem;
+  }
+
+  .page-default .entry-content {
+    padding: 2rem 1rem 3rem;
+    font-size: 1rem;
+  }
+
+  .page-default .entry-content h2 {
+    font-size: 1.25rem;
+  }
+
+  .page-default .entry-content h3 {
+    font-size: 1.1rem;
+  }
+
+  .page-default .entry-content table {
+    font-size: 0.85rem;
+  }
+
+  .page-default .entry-content th,
+  .page-default .entry-content td {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* ========================================
    WOOCOMMERCE BLOCKS - Cart Page Sâpi
    .sapi-cart-outer = wrapper PHP injecté via render_block
    Résiste au remplacement DOM de React car il est AUTOUR du bloc WC.
