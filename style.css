@@ -4996,7 +4996,7 @@ li.carousel-editorial-slide,
 
 .artisan-hero-cinetique h1 {
   font-family: var(--font-display, "Square Peg", Georgia, serif);
-  font-size: clamp(56px, 10vw, 96px);
+  font-size: clamp(64px, 12vw, 120px);
   font-weight: 400;
   color: var(--bois-sombre, #4A3F35);
   margin-bottom: 1.5rem;
@@ -5007,7 +5007,7 @@ li.carousel-editorial-slide,
   font-size: 1.25rem;
   line-height: 1.6;
   color: var(--bois-profond, #6B5A4A);
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto 3rem;
   font-weight: 400;
 }
