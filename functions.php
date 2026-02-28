@@ -228,6 +228,19 @@ function sapi_maison_enqueue_assets() {
       wp_enqueue_script('sapi-maison-blog-timeline', get_template_directory_uri() . '/assets/blog-timeline.js', [], filemtime($blog_timeline_js_path), true);
     }
   }
+
+  // Guide Luminaire questionnaire
+  if (is_page_template('page-guide-luminaire.php')) {
+    $guide_js_path = get_template_directory() . '/assets/guide-luminaire.js';
+    if (file_exists($guide_js_path)) {
+      wp_enqueue_script('sapi-guide-luminaire', get_template_directory_uri() . '/assets/guide-luminaire.js', [], filemtime($guide_js_path), true);
+    }
+    // Quick View for product results
+    $quick_view_js_path = get_template_directory() . '/assets/quick-view.js';
+    if (file_exists($quick_view_js_path)) {
+      wp_enqueue_script('sapi-maison-quick-view', get_template_directory_uri() . '/assets/quick-view.js', [], filemtime($quick_view_js_path), true);
+    }
+  }
 }
 add_action('wp_enqueue_scripts', 'sapi_maison_enqueue_assets');
 
@@ -1298,6 +1311,123 @@ function sapi_ajax_buy_now() {
   } else {
     wp_send_json_error(['message' => 'Impossible d\'ajouter au panier']);
   }
+}
+
+/**
+ * AJAX Guide Luminaire — Product Results
+ * Finds matching products based on quiz answers (WooCommerce attribute tax_query).
+ * Falls back through 4 tiers if no exact match found.
+ */
+add_action('wp_ajax_sapi_guide_results', 'sapi_ajax_guide_results');
+add_action('wp_ajax_nopriv_sapi_guide_results', 'sapi_ajax_guide_results');
+
+function sapi_ajax_guide_results() {
+  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
+    wp_send_json_error(['message' => 'Nonce invalide']);
+    return;
+  }
+
+  $raw_answers = isset($_POST['answers']) ? sanitize_text_field(wp_unslash($_POST['answers'])) : '{}';
+  $answers = json_decode($raw_answers, true);
+
+  if (!is_array($answers) || empty($answers)) {
+    wp_send_json_error(['message' => 'Données invalides']);
+    return;
+  }
+
+  $sanitized = [];
+  foreach ($answers as $attribute => $slug) {
+    $sanitized[sanitize_title($attribute)] = sanitize_title($slug);
+  }
+
+  // Tier fallback: all 6 → 4 (drop hauteur+taille) → 2 (style+usage) → bestsellers
+  $tier_sets = [
+    1 => array_keys($sanitized),
+    2 => array_filter(array_keys($sanitized), function($k) {
+      return !in_array($k, ['pa_hauteur', 'pa_taille-piece'], true);
+    }),
+    3 => array_filter(array_keys($sanitized), function($k) {
+      return in_array($k, ['pa_style', 'pa_eclairage'], true);
+    }),
+    4 => [],
+  ];
+
+  $tier = 1;
+  $products = null;
+
+  foreach ($tier_sets as $tier_num => $active_attrs) {
+    $query = new WP_Query(sapi_guide_build_query($sanitized, $active_attrs));
+    if ($query->have_posts()) {
+      $products = $query;
+      $tier = $tier_num;
+      break;
+    }
+    wp_reset_postdata();
+  }
+
+  if (!$products || !$products->have_posts()) {
+    wp_send_json_error(['message' => 'Aucun produit trouvé']);
+    return;
+  }
+
+  ob_start();
+  while ($products->have_posts()) {
+    $products->the_post();
+    $product = wc_get_product(get_the_ID());
+    if (!$product || $product->get_status() !== 'publish') {
+      continue;
+    }
+    wc_get_template_part('content', 'product');
+  }
+  $html = ob_get_clean();
+  wp_reset_postdata();
+
+  wp_send_json_success([
+    'html'  => $html,
+    'count' => $products->found_posts,
+    'tier'  => $tier,
+  ]);
+}
+
+function sapi_guide_build_query(array $answers, array $active_attrs) {
+  $args = [
+    'post_type'      => 'product',
+    'post_status'    => 'publish',
+    'posts_per_page' => 12,
+    'orderby'        => 'menu_order date',
+    'order'          => 'ASC',
+  ];
+
+  if (empty($active_attrs)) {
+    $args['posts_per_page'] = 8;
+    $args['meta_key']       = 'total_sales';
+    $args['orderby']        = 'meta_value_num';
+    $args['order']          = 'DESC';
+    return $args;
+  }
+
+  $tax_queries = ['relation' => 'AND'];
+  foreach ($active_attrs as $attribute) {
+    if (!isset($answers[$attribute])) {
+      continue;
+    }
+    $term = get_term_by('slug', $answers[$attribute], $attribute);
+    if (!$term || is_wp_error($term)) {
+      continue;
+    }
+    $tax_queries[] = [
+      'taxonomy' => $attribute,
+      'field'    => 'slug',
+      'terms'    => [$answers[$attribute]],
+      'operator' => 'IN',
+    ];
+  }
+
+  if (count($tax_queries) > 1) {
+    $args['tax_query'] = $tax_queries;
+  }
+
+  return $args;
 }
 
 /**
