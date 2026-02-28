@@ -5486,18 +5486,6 @@ li.carousel-editorial-slide,
     inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Legacy support */
-.artisan-hero {
-  padding: 80px 20px 40px;
-  text-align: center;
-}
-
-.artisan-hero h1 {
-  font-family: "Square Peg", "Brush Script MT", "Segoe Script", Georgia, serif;
-  font-size: 64px;
-  color: var(--color-gray);
-}
-
 .artisan-intro,
 .artisan-step {
   padding: 40px 20px;
@@ -7224,7 +7212,6 @@ li.carousel-editorial-slide,
 }
 
 @media (max-width: 768px) {
-  .artisan-hero h1,
   .advice-hero h1,
   .blog-hero h1 {
     font-size: 42px;
