@@ -1,0 +1,17 @@
+Libellé,Slug,Type,Options
+Titre Conseil 1,tip_1_title,Texte,
+Citation Conseil 1,tip_1_summary,Zone de texte,Lignes : 2
+Contenu Conseil 1,tip_1_content,Éditeur WYSIWYG,
+Image Conseil 1,tip_1_picture,Image,
+Titre Conseil 2,tip_2_title,Texte,
+Citation Conseil 2,tip_2_summary,Zone de texte,Lignes : 2
+Contenu Conseil 2,tip_2_content,Éditeur WYSIWYG,
+Image Conseil 2,tip_2_picture,Image,
+Titre Conseil 3,tip_3_title,Texte,
+Citation Conseil 3,tip_3_summary,Zone de texte,Lignes : 2
+Contenu Conseil 3,tip_3_content,Éditeur WYSIWYG,
+Image Conseil 3,tip_3_picture,Image,
+Titre Conseil 4,tip_4_title,Texte,
+Citation Conseil 4,tip_4_summary,Zone de texte,Lignes : 2
+Contenu Conseil 4,tip_4_content,Éditeur WYSIWYG,
+Image Conseil 4,tip_4_picture,Image,
