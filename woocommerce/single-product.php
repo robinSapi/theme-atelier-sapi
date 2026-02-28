@@ -432,16 +432,13 @@ get_header();
         <h3>Idéal pour</h3>
         <ul class="usage-list">
           <?php
-          $usages = function_exists('get_field') ? get_field('usages') : null;
-          if ($usages && is_array($usages)) {
-            foreach ($usages as $usage) {
-              echo '<li>' . esc_html($usage['usage']) . '</li>';
+          $pieces = get_the_terms($product->get_id(), 'pa_piece');
+          if ($pieces && !is_wp_error($pieces)) {
+            foreach ($pieces as $piece) {
+              echo '<li>' . esc_html($piece->name) . '</li>';
             }
           } else {
-            $default_usages = ['Salon & séjour', 'Chambre à coucher', 'Bureau & espace de travail', 'Entrée & couloir'];
-            foreach ($default_usages as $usage) {
-              echo '<li>' . esc_html($usage) . '</li>';
-            }
+            echo '<li>Toutes pièces</li>';
           }
           ?>
         </ul>
