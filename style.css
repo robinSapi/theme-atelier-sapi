@@ -7885,8 +7885,18 @@ body.cursor-hover .cursor-dot {
   font-size: clamp(3rem, 5vw, 5rem);
   font-weight: 900;
   line-height: 1.1;
-  margin-bottom: 1rem;
+  margin-bottom: 0.25rem;
   color: var(--color-white);
+}
+
+.bento-category {
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-cream);
+  opacity: 0.85;
+  margin: 0;
 }
 
 .bento-text {

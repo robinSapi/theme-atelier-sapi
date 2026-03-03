@@ -381,19 +381,10 @@ foreach ($collection_slugs as $col) {
       <div class="bento-bg" style="background-image: url('<?php echo esc_url($olivia_product['image']); ?>');"></div>
       <span class="bento-bestseller-badge">Bestseller</span>
       <div class="bento-content">
-        <?php if ($olivia_product['category']) : ?>
-          <p class="bento-text"><?php echo esc_html($olivia_product['category']); ?></p>
-        <?php endif; ?>
         <h2 class="bento-title"><?php echo esc_html($olivia_product['name']); ?></h2>
-        <div class="hero-cta-row">
-          <span class="bento-product-featured-price"><?php echo wp_kses_post($olivia_product['price']); ?></span>
-          <span class="hero-cta">
-            <span>Découvrir</span>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
-            </svg>
-          </span>
-        </div>
+        <?php if ($olivia_product['category']) : ?>
+          <p class="bento-category"><?php echo esc_html($olivia_product['category']); ?></p>
+        <?php endif; ?>
       </div>
     </a>
     <?php endif; ?>
