@@ -92,82 +92,27 @@ foreach ($categories_order as $cat_slug) {
   }
 }
 
-// Query 1 random product for first small bento card (only from main categories)
-$random_products = [];
-$random_query = new WP_Query([
-  'post_type' => 'product',
+// Query Olivia La Gardiéna — Bestseller
+$olivia_product = null;
+$olivia_query = new WP_Query([
+  'post_type'      => 'product',
   'posts_per_page' => 1,
-  'post_status' => 'publish',
-  'orderby' => 'rand',
-  'tax_query' => [
-    [
-      'taxonomy' => 'product_cat',
-      'field' => 'slug',
-      'terms' => ['suspensions', 'appliques', 'lampeaposer', 'lampadaires'],
-      'operator' => 'IN',
-    ],
-  ],
+  'post_status'    => 'publish',
+  'name'           => 'olivia-la-gardiena',
 ]);
 
-if ($random_query->have_posts()) {
-  while ($random_query->have_posts()) {
-    $random_query->the_post();
-    $product = wc_get_product(get_the_ID());
+if ($olivia_query->have_posts()) {
+  $olivia_query->the_post();
+  $product = wc_get_product(get_the_ID());
 
-    if ($product && has_post_thumbnail()) {
-      $random_products[] = [
-        'name' => get_the_title(),
-        'url' => get_permalink(),
-        'image' => get_the_post_thumbnail_url(get_the_ID(), 'woocommerce_thumbnail'),
-      ];
+  if ($product) {
+    if ($product->is_type('variable')) {
+      $min_price = $product->get_variation_price('min');
+      $price_display = $min_price ? wc_price($min_price) : $product->get_price_html();
+    } else {
+      $price_display = wc_price($product->get_price());
     }
-  }
-  wp_reset_postdata();
-}
 
-// Deuxième small card = toujours la Carte Cadeau
-$gc_query = new WP_Query([
-  'post_type' => 'product',
-  'posts_per_page' => 1,
-  'post_status' => 'publish',
-  'tax_query' => [['taxonomy' => 'product_cat', 'field' => 'slug', 'terms' => 'carte-cadeau']],
-]);
-if ($gc_query->have_posts()) {
-  $gc_query->the_post();
-  if (has_post_thumbnail()) {
-    $random_products[] = [
-      'name' => get_the_title(),
-      'url' => get_permalink(),
-      'image' => get_the_post_thumbnail_url(get_the_ID(), 'woocommerce_thumbnail'),
-    ];
-  }
-  wp_reset_postdata();
-}
-
-// Query latest product for "Nouveauté" block
-$latest_product = null;
-$latest_query = new WP_Query([
-  'post_type' => 'product',
-  'posts_per_page' => 1,
-  'post_status' => 'publish',
-  'orderby' => 'date',
-  'order' => 'DESC',
-  'tax_query' => [
-    [
-      'taxonomy' => 'product_cat',
-      'field' => 'slug',
-      'terms' => ['suspensions', 'appliques', 'lampeaposer', 'lampadaires'],
-      'operator' => 'IN',
-    ],
-  ],
-]);
-
-if ($latest_query->have_posts()) {
-  while ($latest_query->have_posts()) {
-    $latest_query->the_post();
-    $product = wc_get_product(get_the_ID());
-
-    // Get product category
     $categories = get_the_terms(get_the_ID(), 'product_cat');
     $category_name = '';
     if ($categories && !is_wp_error($categories)) {
@@ -179,25 +124,50 @@ if ($latest_query->have_posts()) {
       }
     }
 
-    // Get wood essence from ACF or product attributes
-    $wood_essence = '';
+    $image_url = '';
     if (function_exists('get_field')) {
-      $wood_essence = get_field('essence_de_bois', get_the_ID());
-    }
-    if (!$wood_essence) {
-      $wood_attr = $product->get_attribute('pa_bois');
-      if ($wood_attr) {
-        $wood_essence = $wood_attr;
+      $ambiance = get_field('ambiance_1', get_the_ID());
+      if ($ambiance) {
+        if (is_array($ambiance) && isset($ambiance['url'])) {
+          $image_url = $ambiance['url'];
+        } elseif (is_array($ambiance) && isset($ambiance['ID'])) {
+          $image_url = wp_get_attachment_image_url($ambiance['ID'], 'full');
+        } elseif (is_numeric($ambiance)) {
+          $image_url = wp_get_attachment_image_url($ambiance, 'full');
+        } elseif (is_string($ambiance) && strpos($ambiance, 'http') === 0) {
+          $image_url = $ambiance;
+        }
       }
     }
-
-    // Build category display
-    $category_display = $category_name;
-    if ($wood_essence) {
-      $category_display .= ' · ' . $wood_essence;
+    if (!$image_url) {
+      $image_url = get_the_post_thumbnail_url(get_the_ID(), 'woocommerce_single');
     }
 
-    // Get price
+    $olivia_product = [
+      'name'     => get_the_title(),
+      'category' => $category_name,
+      'price'    => $price_display,
+      'image'    => $image_url,
+      'url'      => get_permalink(),
+    ];
+  }
+  wp_reset_postdata();
+}
+
+// Query Carte Cadeau
+$gift_card = null;
+$gc_query = new WP_Query([
+  'post_type'      => 'product',
+  'posts_per_page' => 1,
+  'post_status'    => 'publish',
+  'tax_query'      => [['taxonomy' => 'product_cat', 'field' => 'slug', 'terms' => 'carte-cadeau']],
+]);
+
+if ($gc_query->have_posts()) {
+  $gc_query->the_post();
+  $product = wc_get_product(get_the_ID());
+
+  if ($product) {
     if ($product->is_type('variable')) {
       $min_price = $product->get_variation_price('min');
       $price_display = $min_price ? wc_price($min_price) : $product->get_price_html();
@@ -205,17 +175,32 @@ if ($latest_query->have_posts()) {
       $price_display = wc_price($product->get_price());
     }
 
-    $latest_product = [
-      'name' => get_the_title(),
-      'category' => $category_display,
+    $gift_card = [
+      'name'  => get_the_title(),
       'price' => $price_display,
       'image' => get_the_post_thumbnail_url(get_the_ID(), 'woocommerce_single'),
-      'url' => get_permalink(),
-      'badge' => 'Nouveau',
+      'url'   => get_permalink(),
     ];
   }
   wp_reset_postdata();
 }
+
+// Room choices for mini-questionnaire "Pour quelle pièce ?"
+$room_choices = [
+  ['label' => 'Salon',   'slug' => 'salon-sejour',           'icon' => 'sofa'],
+  ['label' => 'Cuisine', 'slug' => 'cuisine-salle-a-manger', 'icon' => 'dining'],
+  ['label' => 'Chambre', 'slug' => 'chambre',                'icon' => 'bed'],
+  ['label' => 'Bureau',  'slug' => 'bureau-atelier',         'icon' => 'monitor'],
+  ['label' => 'Entrée',  'slug' => 'entree-couloir',         'icon' => 'door'],
+];
+
+$room_icons = [
+  'sofa'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3"/><rect x="2" y="11" width="20" height="7" rx="2"/><path d="M5 18v2m14-2v2"/></svg>',
+  'dining'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="2" rx="1"/><path d="M7 12v6m10-6v6"/><path d="M9 10V6m6 4V6"/><path d="M4 18h16"/></svg>',
+  'bed'     => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M2 14h20"/><path d="M2 10V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/></svg>',
+  'monitor' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>',
+  'door'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="15" cy="12" r="1"/></svg>',
+];
 
 // Featured products for Bento grid (random product)
 $featured_products = [];
@@ -389,91 +374,75 @@ foreach ($collection_slugs as $col) {
 <!-- Hero Bento Grid -->
 <section class="hero-bento">
   <div class="bento-container">
-    <!-- Large Hero Card -->
-    <div class="bento-card bento-hero">
-      <div class="bento-bg" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/12/Olivia-La-gardiena.jpg');"></div>
+
+    <!-- Olivia Bestseller -->
+    <?php if ($olivia_product) : ?>
+    <a href="<?php echo esc_url($olivia_product['url']); ?>" class="bento-card bento-hero">
+      <div class="bento-bg" style="background-image: url('<?php echo esc_url($olivia_product['image']); ?>');"></div>
+      <span class="bento-bestseller-badge">Bestseller</span>
       <div class="bento-content">
-        <h2 class="bento-title">Sculpter<br>la lumière</h2>
-        <p class="bento-text">Des créations artisanales qui transforment l'espace</p>
+        <?php if ($olivia_product['category']) : ?>
+          <p class="bento-text"><?php echo esc_html($olivia_product['category']); ?></p>
+        <?php endif; ?>
+        <h2 class="bento-title"><?php echo esc_html($olivia_product['name']); ?></h2>
         <div class="hero-cta-row">
-          <a href="<?php echo home_url('/nos-creations/'); ?>" class="hero-cta">
-            <span>Découvrir nos créations</span>
+          <span class="bento-product-featured-price"><?php echo wp_kses_post($olivia_product['price']); ?></span>
+          <span class="hero-cta">
+            <span>Découvrir</span>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
             </svg>
-          </a>
+          </span>
         </div>
-      </div>
-    </div>
-
-    <!-- Statement Card -->
-    <div class="bento-card bento-statement">
-      <div class="statement-inner">
-        <span class="statement-number">01</span>
-        <h2 class="statement-text">"Je ne fabrique pas<br>des lampes.<br>Je crée des présences."</h2>
-        <p class="statement-author">— Robin, créateur à l'Atelier Sâpi</p>
-      </div>
-    </div>
-
-    <!-- Product Card - Nouveauté (static) -->
-    <?php if ($latest_product) : ?>
-    <a href="<?php echo esc_url($latest_product['url']); ?>" class="bento-card bento-product-featured">
-      <div class="bento-bg" style="background-image: url('<?php echo esc_url($latest_product['image']); ?>');"></div>
-      <?php if ($latest_product['badge']) : ?>
-        <span class="bento-product-featured-badge"><?php echo esc_html($latest_product['badge']); ?></span>
-      <?php endif; ?>
-      <div class="bento-product-featured-info">
-        <h3><?php echo esc_html($latest_product['name']); ?></h3>
-        <span class="bento-product-featured-price"><?php echo wp_kses_post($latest_product['price']); ?></span>
       </div>
     </a>
     <?php endif; ?>
 
-    <!-- Stats Card -->
-    <div class="bento-card bento-stats">
-      <a href="<?php echo home_url('/lumiere-dartisan/'); ?>" class="stat-block">
-        <div class="stat-content">
-          <strong>100%</strong>
-          <span>Fait main</span>
-        </div>
-        <div class="stat-hover">
-          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Robin-Sapi-A.jpg" alt="Robin à l'atelier">
-          <span class="stat-hover-text">Découvrir l'artisan →</span>
-        </div>
-      </a>
-      <a href="<?php echo home_url('/lumiere-dartisan/#savoir-faire'); ?>" class="stat-block">
-        <div class="stat-content">
-          <strong>&lt;5j</strong>
-          <span>Fabrication</span>
-        </div>
-        <div class="stat-hover">
-          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/Charlie-Bandeau-2.jpg" alt="Lampe dans un intérieur">
-          <span class="stat-hover-text">Le processus →</span>
-        </div>
-      </a>
-      <a href="<?php echo home_url('/contact/'); ?>" class="stat-block">
-        <div class="stat-content">
-          <strong>Lyon</strong>
-          <span>Atelier</span>
-        </div>
-        <div class="stat-hover">
-          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/12/Olivia-La-gardiena.jpg" alt="Création dans un appartement">
-          <span class="stat-hover-text">Nous contacter →</span>
-        </div>
-      </a>
+    <!-- Storytelling Artisanat -->
+    <div class="bento-card bento-storytelling">
+      <div class="storytelling-inner">
+        <span class="storytelling-label">L'atelier</span>
+        <h2 class="storytelling-title">Sculptées à la main</h2>
+        <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
+        <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="storytelling-link">
+          <span>Découvrir l'artisan</span>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </a>
+      </div>
     </div>
 
-    <!-- Small Product Cards (Random) -->
-    <?php if (!empty($random_products)) : ?>
-      <?php foreach ($random_products as $random_product) : ?>
-        <a href="<?php echo esc_url($random_product['url']); ?>" class="bento-card bento-product-small">
-          <div class="product-image-small" style="background-image: url('<?php echo esc_url($random_product['image']); ?>');"></div>
-          <div class="product-overlay-small">
-            <h4 class="product-name-small"><?php echo esc_html($random_product['name']); ?></h4>
-          </div>
-        </a>
-      <?php endforeach; ?>
+    <!-- Carte Cadeau -->
+    <?php if ($gift_card) : ?>
+    <a href="<?php echo esc_url($gift_card['url']); ?>" class="bento-card bento-giftcard">
+      <div class="bento-bg" style="background-image: url('<?php echo esc_url($gift_card['image']); ?>');"></div>
+      <span class="giftcard-badge">Idée cadeau</span>
+      <div class="giftcard-info">
+        <h3>Offrez la lumière</h3>
+        <span class="giftcard-price"><?php echo wp_kses_post($gift_card['price']); ?></span>
+      </div>
+    </a>
     <?php endif; ?>
+
+    <!-- Pour quelle pièce ? -->
+    <div class="bento-card bento-room-picker">
+      <div class="room-picker-inner">
+        <h3 class="room-picker-title">Pour quelle pièce cherchez-vous un luminaire ?</h3>
+        <div class="room-picker-cards">
+          <?php foreach ($room_choices as $room) : ?>
+            <a href="<?php echo esc_url(home_url('/guide-luminaire/?piece=' . $room['slug'])); ?>" class="room-card">
+              <span class="room-card-icon"><?php echo $room_icons[$room['icon']]; ?></span>
+              <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
+            </a>
+          <?php endforeach; ?>
+        </div>
+        <p class="room-picker-sub">
+          <a href="<?php echo esc_url(home_url('/guide-luminaire/')); ?>">Voir le guide complet →</a>
+        </p>
+      </div>
+    </div>
+
   </div>
 </section>
 

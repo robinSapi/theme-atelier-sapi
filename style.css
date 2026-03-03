@@ -8337,6 +8337,248 @@ transform: translateY(15px);
   text-align: center;
 }
 
+/* Bestseller Badge */
+.bento-bestseller-badge {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  padding: 0.5rem 1.25rem;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  color: var(--color-white);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  border-radius: 50px;
+  z-index: 3;
+  box-shadow: 0 4px 12px rgba(227, 91, 36, 0.3);
+}
+
+/* Storytelling Artisanat Card */
+.bento-storytelling {
+  grid-column: span 4;
+  grid-row: span 2;
+  background: var(--color-warm);
+}
+
+.storytelling-inner {
+  padding: 2.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.storytelling-label {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-wood);
+}
+
+.storytelling-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.5vw, 3.5rem);
+  font-weight: 400;
+  line-height: 1.1;
+  color: var(--color-dark);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.storytelling-text {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--bois-sombre, #4A3F35);
+}
+
+.storytelling-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-orange);
+  text-decoration: none;
+  margin-top: 0.5rem;
+  transition: gap 0.3s var(--ease-expo);
+}
+
+.storytelling-link:hover {
+  gap: 0.85rem;
+  color: var(--color-orange);
+}
+
+/* Gift Card */
+.bento-giftcard {
+  grid-column: span 4;
+  grid-row: span 1;
+  cursor: pointer;
+}
+
+.bento-giftcard .bento-bg {
+  transition: transform 0.6s var(--ease-expo);
+}
+
+.bento-giftcard:hover .bento-bg {
+  transform: scale(1.05);
+}
+
+.giftcard-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  padding: 0.4rem 1rem;
+  background: linear-gradient(135deg, #D4AF37 0%, #C5A028 100%);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 50px;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+.giftcard-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.25rem;
+  background: linear-gradient(to top, rgba(50, 50, 50, 0.9) 0%, transparent 100%);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.giftcard-info h3 {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-white);
+  margin: 0;
+}
+
+.giftcard-price {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #D4AF37 0%, #C5A028 100%);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 800;
+  border-radius: 50px;
+  white-space: nowrap;
+}
+
+/* Room Picker — "Pour quelle pièce ?" */
+.bento-room-picker {
+  grid-column: span 12;
+  grid-row: span 2;
+  background: var(--color-white);
+}
+
+.room-picker-inner {
+  padding: 2rem 2.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.room-picker-title {
+  font-family: var(--font-body);
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 700;
+  color: var(--color-dark);
+  text-align: center;
+  margin: 0;
+}
+
+.room-picker-cards {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.room-card {
+  flex: 1;
+  max-width: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem 1rem;
+  background: var(--color-warm);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.3s var(--ease-expo);
+}
+
+.room-card:hover {
+  border-color: var(--color-orange);
+  background: #fff;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(227, 91, 36, 0.12);
+}
+
+.room-card-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-wood);
+  transition: color 0.3s ease;
+}
+
+.room-card-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.room-card:hover .room-card-icon {
+  color: var(--color-orange);
+}
+
+.room-card-label {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+.room-picker-sub {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+}
+
+.room-picker-sub a {
+  color: var(--color-wood);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.room-picker-sub a:hover {
+  color: var(--color-orange);
+}
+
 /* Process Card */
 .bento-process {
   grid-column: span 12;
@@ -8966,13 +9208,16 @@ transform: translateY(15px);
 
   .bento-statement,
   .bento-product,
-  .bento-stats {
+  .bento-stats,
+  .bento-storytelling,
+  .bento-giftcard {
     grid-column: span 3;
   }
 
   .bento-process,
   .bento-atelier,
-  .bento-cta {
+  .bento-cta,
+  .bento-room-picker {
     grid-column: span 6;
   }
 }
@@ -9034,7 +9279,10 @@ transform: translateY(15px);
   .bento-stats,
   .bento-process,
   .bento-cta,
-  .bento-atelier {
+  .bento-atelier,
+  .bento-storytelling,
+  .bento-giftcard,
+  .bento-room-picker {
     grid-column: span 1;
     grid-row: span 1;
   }
@@ -9055,6 +9303,25 @@ transform: translateY(15px);
 
   .bento-product-small {
     min-height: 200px;
+  }
+
+  .bento-giftcard {
+    min-height: 200px;
+  }
+
+  .room-picker-cards {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .room-card {
+    flex: 0 0 calc(33.33% - 0.5rem);
+    min-width: 0;
+    padding: 1rem 0.75rem;
+  }
+
+  .room-picker-inner {
+    padding: 1.5rem 1rem;
   }
 
   /* Stats card: compact on mobile, no forced height */
