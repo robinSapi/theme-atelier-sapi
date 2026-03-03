@@ -195,19 +195,18 @@ $total_steps = count($guide_steps);
           Voir ce luminaire
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
+        <div class="guide-next-proposal" id="guide-next-proposal">
+          <button class="guide-next-btn" id="guide-next-btn" type="button">
+            Recommandation suivante
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <p class="guide-proposal-counter" id="guide-proposal-counter"></p>
+        </div>
       </div>
 
       <!-- Colonne droite : explications -->
       <div class="guide-result-explanations" id="guide-result-explanations">
         <div class="guide-explanations-list" id="guide-explanations-list"></div>
-
-        <div class="guide-next-proposal" id="guide-next-proposal">
-          <button class="guide-next-btn" id="guide-next-btn" type="button">
-            Proposition suivante
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </button>
-          <p class="guide-proposal-counter" id="guide-proposal-counter"></p>
-        </div>
       </div>
 
     </div>
