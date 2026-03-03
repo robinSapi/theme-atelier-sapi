@@ -1694,7 +1694,7 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
   $prompt .= "3. Explique POURQUOI ce produit convient en liant à chaque réponse du client.\n";
   $prompt .= "4. Si un format a été exclu (vertical en plafond bas sans table), mentionne-le naturellement.\n";
   $prompt .= "5. Ton : chaleureux, passionné, artisan. Pas commercial ni vendeur. Vouvoie le client.\n";
-  $prompt .= "6. Maximum 150 mots pour la recommandation.\n";
+  $prompt .= "6. Maximum 80 mots pour la recommandation. Sois concis et impactant.\n";
   $prompt .= "7. Propose 4 boutons de relance pertinents pour continuer la discussion.\n";
   $prompt .= "8. N'utilise AUCUN formatage markdown dans le texte de recommandation (pas de **, pas de #, pas de _). Écris en texte brut uniquement. Mentionne les noms de produits naturellement dans le texte.\n\n";
 
