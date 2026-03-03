@@ -30,8 +30,8 @@
     dom.progressBar      = null;
     dom.progressSegments = [];
     dom.backBtn          = document.getElementById('guide-back');
-    dom.stepCounter      = document.querySelector('.guide-step-counter');
-    dom.currentStepEl    = document.getElementById('guide-current-step');
+    dom.stepCounter      = null;
+    dom.currentStepEl    = null;
     dom.results          = document.getElementById('guide-results');
     dom.resultsGrid      = document.getElementById('guide-results-grid');
     dom.resultsTags      = document.getElementById('guide-results-tags');

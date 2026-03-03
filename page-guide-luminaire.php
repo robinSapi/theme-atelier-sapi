@@ -158,10 +158,6 @@ $total_steps = count($guide_steps);
       Retour
     </button>
 
-    <!-- Step counter -->
-    <div class="guide-step-counter" aria-live="polite">
-      <span id="guide-current-step">1</span> / <?php echo esc_html($total_steps); ?>
-    </div>
   </section>
 
   <!-- ─── Results Section ─── -->
