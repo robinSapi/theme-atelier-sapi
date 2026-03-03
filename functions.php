@@ -1370,6 +1370,15 @@ function sapi_ajax_guide_results() {
     return;
   }
 
+  // Map style answer to preferred wood essence
+  $style_to_essence = [
+    'epure'      => 'peuplier',
+    'chaleureux' => 'okoume',
+    // 'imposant' => no preference, use default
+  ];
+  $style_slug = isset($sanitized['pa_style']) ? $sanitized['pa_style'] : '';
+  $preferred_essence = isset($style_to_essence[$style_slug]) ? $style_to_essence[$style_slug] : '';
+
   $product_list = [];
   while ($products->have_posts()) {
     $products->the_post();
@@ -1377,14 +1386,43 @@ function sapi_ajax_guide_results() {
     if (!$product || $product->get_status() !== 'publish') {
       continue;
     }
-    $image_id = $product->get_image_id();
+
+    $image_id  = $product->get_image_id();
+    $price     = $product->get_price_html();
+    $permalink = get_permalink($product->get_id());
+    $variation_label = '';
+
+    // For variable products, try to find matching essence variation
+    if ($preferred_essence && $product->is_type('variable')) {
+      $variations = $product->get_available_variations();
+      foreach ($variations as $var) {
+        $essence_attr = isset($var['attributes']['attribute_pa_essence'])
+          ? $var['attributes']['attribute_pa_essence']
+          : '';
+        if ($essence_attr === $preferred_essence) {
+          // Use variation image and price
+          if (!empty($var['image']['url'])) {
+            $image_id = $var['image_id'];
+          }
+          $var_product = wc_get_product($var['variation_id']);
+          if ($var_product) {
+            $price = $var_product->get_price_html();
+          }
+          $term = get_term_by('slug', $preferred_essence, 'pa_essence');
+          $variation_label = $term ? $term->name : ucfirst($preferred_essence);
+          break;
+        }
+      }
+    }
+
     $product_list[] = [
-      'id'        => $product->get_id(),
-      'title'     => $product->get_name(),
-      'price'     => $product->get_price_html(),
-      'image'     => $image_id ? wp_get_attachment_url($image_id) : '',
-      'image_alt' => $image_id ? get_post_meta($image_id, '_wp_attachment_image_alt', true) : '',
-      'permalink' => get_permalink($product->get_id()),
+      'id'              => $product->get_id(),
+      'title'           => $product->get_name(),
+      'price'           => $price,
+      'image'           => $image_id ? wp_get_attachment_url($image_id) : '',
+      'image_alt'       => $image_id ? get_post_meta($image_id, '_wp_attachment_image_alt', true) : '',
+      'permalink'       => $permalink,
+      'variation_label' => $variation_label,
     ];
   }
   wp_reset_postdata();

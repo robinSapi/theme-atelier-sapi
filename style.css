@@ -17253,7 +17253,19 @@ html.sapi-intro-active body {
   font-size: 1.15rem;
   font-weight: 600;
   color: var(--color-wood, #937D68);
+  margin: 0 0 0.5rem;
+}
+
+.guide-result-variation {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-wood, #937D68);
   margin: 0 0 1.25rem;
+  padding: 0.35rem 0.875rem;
+  background: var(--color-warm, #FBF6EA);
+  border-radius: 100px;
+  display: inline-block;
 }
 
 .guide-result-cta {

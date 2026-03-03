@@ -188,6 +188,7 @@ $total_steps = count($guide_steps);
         </div>
         <h3 class="guide-result-name" id="guide-result-name"></h3>
         <p class="guide-result-price" id="guide-result-price"></p>
+        <p class="guide-result-variation" id="guide-result-variation" style="display:none;"></p>
         <a class="guide-result-cta" id="guide-result-cta" href="#">
           Voir ce luminaire
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>

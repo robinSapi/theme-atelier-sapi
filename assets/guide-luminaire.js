@@ -42,6 +42,7 @@
     dom.resultName       = document.getElementById('guide-result-name');
     dom.resultPrice      = document.getElementById('guide-result-price');
     dom.resultCta        = document.getElementById('guide-result-cta');
+    dom.resultVariation  = document.getElementById('guide-result-variation');
     dom.resultError      = document.getElementById('guide-result-error');
     dom.explanationsList = document.getElementById('guide-explanations-list');
     dom.nextBtn          = document.getElementById('guide-next-btn');
@@ -320,8 +321,8 @@
       'les-deux':     "Sa polyvalence vous permet de basculer entre éclairage pratique et ambiance chaleureuse selon vos envies.",
     },
     'pa_style': {
-      'epure':       "Ses lignes épurées et minimalistes s'intègrent avec discrétion dans votre intérieur, laissant le bois parler de lui-même.",
-      'chaleureux':  "Ses courbes organiques et la chaleur naturelle du bois créent une atmosphère accueillante et réconfortante.",
+      'epure':       "Ses lignes épurées et minimalistes s'intègrent avec discrétion dans votre intérieur. Nous recommandons le Peuplier, un bois clair et délicat qui sublime ce style.",
+      'chaleureux':  "Ses courbes organiques et la chaleur naturelle du bois créent une atmosphère accueillante. Nous recommandons l'Okoumé, un bois aux teintes chaudes et enveloppantes.",
       'imposant':    "Sa présence affirmée en fait une pièce maîtresse qui capte le regard et donne du caractère à votre espace.",
     },
     'pa_taille-piece': {
@@ -624,6 +625,15 @@
     }
     if (dom.resultPrice) {
       dom.resultPrice.innerHTML = product.price;
+    }
+    // Show variation label if available
+    if (dom.resultVariation) {
+      if (product.variation_label) {
+        dom.resultVariation.textContent = 'Essence recommandée : ' + product.variation_label;
+        dom.resultVariation.style.display = '';
+      } else {
+        dom.resultVariation.style.display = 'none';
+      }
     }
     if (dom.resultCta) {
       dom.resultCta.href = product.permalink;
