@@ -174,7 +174,6 @@ $total_steps = count($guide_steps);
     <div class="guide-results-header">
       <div class="guide-results-tags" id="guide-results-tags"></div>
       <h2 class="guide-results-title">Notre recommandation pour vous</h2>
-      <p class="guide-results-subtitle" id="guide-results-subtitle"></p>
     </div>
 
     <div class="guide-results-loading" id="guide-results-loading" aria-hidden="true">

@@ -36,7 +36,6 @@
     dom.currentStepEl    = null;
     dom.results          = document.getElementById('guide-results');
     dom.resultsTags      = document.getElementById('guide-results-tags');
-    dom.resultsSubtitle  = document.getElementById('guide-results-subtitle');
     dom.resultsLoading   = document.getElementById('guide-results-loading');
     dom.resultLayout     = document.getElementById('guide-result-layout');
     dom.resultImage      = document.getElementById('guide-result-image');
@@ -599,7 +598,6 @@
         state.resultProducts = data.data.products;
         state.resultIndex = 0;
         renderCurrentProduct();
-        updateSubtitle(data.data.tier);
         if (dom.resultLayout) dom.resultLayout.style.display = '';
       } else {
         renderResultsError();
@@ -647,17 +645,7 @@
     }
   }
 
-  function updateSubtitle(tier) {
-    var subtitleMessages = {
-      1: 'Sélection parfaite pour votre espace.',
-      2: 'Voici nos créations qui correspondent le mieux à votre espace.',
-      3: 'Explorez nos luminaires qui correspondent à votre style.',
-      4: 'Notre collection complète — un luminaire trouvera sa place chez vous.',
-    };
-    if (dom.resultsSubtitle) {
-      dom.resultsSubtitle.textContent = subtitleMessages[tier] || subtitleMessages[1];
-    }
-  }
+
 
   function bindNextButton() {
     if (dom.nextBtn) {
