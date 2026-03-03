@@ -620,8 +620,13 @@
       dom.resultImage.alt = product.image_alt || product.title;
     }
     if (dom.resultName) {
-      dom.resultName.textContent = product.title;
-      // Trigger product name formatter (MutationObserver will pick it up)
+      // Replace element to trigger MutationObserver in product-name-formatter
+      var newName = document.createElement('h3');
+      newName.className = 'guide-result-name';
+      newName.id = 'guide-result-name';
+      newName.textContent = product.title;
+      dom.resultName.parentNode.replaceChild(newName, dom.resultName);
+      dom.resultName = newName;
     }
     if (dom.resultPrice) {
       dom.resultPrice.innerHTML = product.price;
