@@ -16899,7 +16899,7 @@ html.sapi-intro-active body {
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1), transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1), transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateX(60px);
 }
 
