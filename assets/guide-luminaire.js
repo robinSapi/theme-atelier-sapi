@@ -628,7 +628,9 @@
   // ================================================================
   function renderAiText(text) {
     if (!dom.aiTextContent || !dom.aiText) return;
-    dom.aiTextContent.textContent = text;
+    // Strip any leftover markdown bold markers
+    var clean = text.replace(/\*\*(.*?)\*\*/g, '$1');
+    dom.aiTextContent.textContent = clean;
     dom.aiText.style.display = '';
   }
 
