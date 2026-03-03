@@ -84,6 +84,30 @@ for ($i = 1; $i <= 4; $i++) {
         </div>
       </div>
     </div>
+
+    <?php
+    // URL du Guide Luminaire (recherche dynamique)
+    $guide_url = home_url('/guide-luminaire/');
+    $guide_pages = get_pages(['meta_key' => '_wp_page_template', 'meta_value' => 'page-guide-luminaire.php', 'number' => 1]);
+    if (!empty($guide_pages)) {
+      $guide_url = get_permalink($guide_pages[0]->ID);
+    }
+    ?>
+
+    <!-- Card CTA – Guide Luminaire -->
+    <div class="advice-guide-cta">
+      <div class="advice-guide-cta-inner">
+        <div class="advice-guide-cta-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7z"/><path d="M9 21h6"/><path d="M10 17v-2.5"/><path d="M14 17v-2.5"/></svg>
+        </div>
+        <h2 class="advice-guide-cta-title">Trouvez le luminaire fait pour vous</h2>
+        <p class="advice-guide-cta-text">Répondez à 6 questions simples et découvrez nos créations adaptées à votre intérieur, votre style et vos envies.</p>
+        <a href="<?php echo esc_url($guide_url); ?>" class="advice-guide-cta-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6m-3-3h6"/></svg>
+          Démarrer le questionnaire
+        </a>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -94,29 +118,6 @@ for ($i = 1; $i <= 4; $i++) {
     <div class="advice-overlay-body"></div>
   </div>
 </div>
-
-<?php
-// URL du Guide Luminaire (recherche dynamique)
-$guide_url = home_url('/guide-luminaire/');
-$guide_pages = get_pages(['meta_key' => '_wp_page_template', 'meta_value' => 'page-guide-luminaire.php', 'number' => 1]);
-if (!empty($guide_pages)) {
-  $guide_url = get_permalink($guide_pages[0]->ID);
-}
-?>
-
-<section class="advice-guide-cta">
-  <div class="advice-guide-cta-inner">
-    <div class="advice-guide-cta-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7z"/><path d="M9 21h6"/><path d="M10 17v-2.5"/><path d="M14 17v-2.5"/></svg>
-    </div>
-    <h2 class="advice-guide-cta-title">Trouvez le luminaire fait pour vous</h2>
-    <p class="advice-guide-cta-text">Répondez à 6 questions simples et découvrez nos créations adaptées à votre intérieur, votre style et vos envies.</p>
-    <a href="<?php echo esc_url($guide_url); ?>" class="advice-guide-cta-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6m-3-3h6"/></svg>
-      Démarrer le questionnaire
-    </a>
-  </div>
-</section>
 
 <section class="advice-outro">
   <p>Éclairer une pièce, c'est un peu comme choisir la bonne sauce pour ses pâtes : tout est une question de préférence et de dosage !</p>
