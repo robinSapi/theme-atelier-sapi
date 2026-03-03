@@ -16906,26 +16906,18 @@ html.sapi-intro-active body {
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  transform: translateY(50px);
+  transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .guide-step.is-active {
   opacity: 1;
   pointer-events: all;
-  transform: translateY(0);
   position: relative;
   inset: auto;
 }
 
-.guide-step.is-exiting-up {
+.guide-step.is-exiting {
   opacity: 0;
-  transform: translateY(-50px);
-}
-
-.guide-step.is-exiting-down {
-  opacity: 0;
-  transform: translateY(50px);
 }
 
 .guide-step-inner {

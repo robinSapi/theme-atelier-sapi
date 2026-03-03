@@ -156,26 +156,23 @@
     if (!nextStep) return;
 
     if (currentActive && currentActive !== nextStep && direction !== 'none') {
-      var exitClass = direction === 'backward' ? 'is-exiting-down' : 'is-exiting-up';
-      currentActive.classList.add(exitClass);
+      currentActive.classList.add('is-exiting');
       currentActive.classList.remove('is-active');
 
       // Clean up after transition
       currentActive.addEventListener('transitionend', function handler() {
-        currentActive.classList.remove(exitClass);
+        currentActive.classList.remove('is-exiting');
         currentActive.removeEventListener('transitionend', handler);
       });
     } else if (currentActive && currentActive !== nextStep) {
       currentActive.classList.remove('is-active');
     }
 
-    // For non-none directions, set up entrance
+    // For non-none directions, set up entrance with crossfade
     if (direction !== 'none') {
-      // Temporarily position at start
       nextStep.style.transition = 'none';
-      nextStep.classList.remove('is-active', 'is-exiting-up', 'is-exiting-down');
+      nextStep.classList.remove('is-active', 'is-exiting');
       nextStep.style.opacity = '0';
-      nextStep.style.transform = direction === 'backward' ? 'translateY(50px)' : 'translateY(50px)';
 
       // Force reflow
       nextStep.getBoundingClientRect();
@@ -183,7 +180,6 @@
       // Restore transition and activate
       nextStep.style.transition = '';
       nextStep.style.opacity = '';
-      nextStep.style.transform = '';
       nextStep.classList.add('is-active');
     } else {
       nextStep.classList.add('is-active');
