@@ -1396,29 +1396,19 @@ function sapi_ajax_guide_results() {
     if ($preferred_essence && $product->is_type('variable')) {
       $variations = $product->get_available_variations();
       foreach ($variations as $var) {
-        // Search for essence attribute with any key format
-        $essence_value = '';
-        foreach ($var['attributes'] as $attr_key => $attr_val) {
-          if (stripos($attr_key, 'essence') !== false) {
-            $essence_value = $attr_val;
-            break;
-          }
-        }
-        if ($essence_value === $preferred_essence) {
-          // Use variation image
+        // Check pa_materiau attribute for wood type
+        $materiau_value = isset($var['attributes']['attribute_pa_materiau'])
+          ? $var['attributes']['attribute_pa_materiau']
+          : '';
+        if ($materiau_value === $preferred_essence) {
           if (!empty($var['image_id'])) {
             $image_id = $var['image_id'];
           }
-          // Use variation price
           $var_product = wc_get_product($var['variation_id']);
           if ($var_product) {
             $price = $var_product->get_price_html();
           }
-          // Get term label
-          $term = get_term_by('slug', $preferred_essence, 'pa_essence');
-          if (!$term) {
-            $term = get_term_by('slug', $preferred_essence, 'essence');
-          }
+          $term = get_term_by('slug', $preferred_essence, 'pa_materiau');
           $variation_label = $term ? $term->name : ucfirst($preferred_essence);
           break;
         }
@@ -1437,24 +1427,10 @@ function sapi_ajax_guide_results() {
   }
   wp_reset_postdata();
 
-  // Debug: include first product's variation attributes to diagnose matching
-  $debug_variations = [];
-  if (!empty($product_list) && $preferred_essence) {
-    $first_product = wc_get_product($product_list[0]['id']);
-    if ($first_product && $first_product->is_type('variable')) {
-      $vars = $first_product->get_available_variations();
-      foreach ($vars as $v) {
-        $debug_variations[] = $v['attributes'];
-      }
-    }
-  }
-
   wp_send_json_success([
-    'products'         => $product_list,
-    'count'            => count($product_list),
-    'tier'             => $tier,
-    'debug_essence'    => $preferred_essence,
-    'debug_variations' => $debug_variations,
+    'products' => $product_list,
+    'count'    => count($product_list),
+    'tier'     => $tier,
   ]);
 }
 
