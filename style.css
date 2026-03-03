@@ -16708,6 +16708,8 @@ html.sapi-intro-active body {
 }
 
 .guide-choice-card:hover {
+  background: #fff;
+  color: var(--color-dark, #323232);
   border-color: var(--color-wood, #937D68);
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(74, 63, 53, 0.1);
@@ -16718,9 +16720,11 @@ html.sapi-intro-active body {
   outline-offset: 3px;
 }
 
-.guide-choice-card.is-selected {
-  border-color: var(--color-orange, #E35B24);
+.guide-choice-card.is-selected,
+.guide-choice-card.is-selected:hover {
   background: linear-gradient(180deg, #FFF8F5 0%, #FFF3EE 100%);
+  color: var(--color-dark, #323232);
+  border-color: var(--color-orange, #E35B24);
   box-shadow: 0 0 0 4px rgba(227, 91, 36, 0.12);
   transform: scale(0.97);
 }
