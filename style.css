@@ -16738,7 +16738,11 @@ html.sapi-intro-active body {
   transition: background 0.25s ease, color 0.25s ease;
 }
 
-.guide-choice-card:hover .guide-choice-icon,
+.guide-choice-card:hover .guide-choice-icon {
+  background: rgba(147, 125, 104, 0.15);
+  color: var(--color-wood, #937D68);
+}
+
 .guide-choice-card.is-selected .guide-choice-icon {
   background: rgba(227, 91, 36, 0.1);
   color: var(--color-orange, #E35B24);
