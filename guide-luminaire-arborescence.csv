@@ -1,22 +1,26 @@
-Étape,Question,Choix,Attribut WooCommerce,Slug attribut
-1,Pour quelle pièce cherchez-vous un luminaire ?,Salon / Séjour / Salle à manger,Pièce,pa_piece
-1,Pour quelle pièce cherchez-vous un luminaire ?,Cuisine,Pièce,pa_piece
-1,Pour quelle pièce cherchez-vous un luminaire ?,Chambre,Pièce,pa_piece
-1,Pour quelle pièce cherchez-vous un luminaire ?,Bureau / Atelier,Pièce,pa_piece
-1,Pour quelle pièce cherchez-vous un luminaire ?,Entrée / Hall,Pièce,pa_piece
-1,Pour quelle pièce cherchez-vous un luminaire ?,Couloir / Montée d'escalier,Pièce,pa_piece
-2,Quel usage principal ?,Éclairage fonctionnel (travailler cuisiner lire),Éclairage,pa_eclairage
-2,Quel usage principal ?,Ambiance & décoration (détente cosy),Éclairage,pa_eclairage
-2,Quel usage principal ?,Les deux à la fois,Éclairage,pa_eclairage
-3,Quelle taille de pièce ?,Petite (< 10 m²),Taille pièce,pa_taille-piece
-3,Quelle taille de pièce ?,Moyenne (10 – 20 m²),Taille pièce,pa_taille-piece
-3,Quelle taille de pièce ?,Grande (> 20 m²),Taille pièce,pa_taille-piece
-4,Où sera placé le luminaire ?,Au-dessus d'une table / îlot / bureau,Type luminaire,pa_type-luminaire
-4,Où sera placé le luminaire ?,Zone de passage (centre de pièce couloir),Type luminaire,pa_type-luminaire
-4,Où sera placé le luminaire ?,Coin / mur (lecture chevet déco),Type luminaire,pa_type-luminaire
-5,Hauteur sous plafond ?,Standard (< 2.50 m),Hauteur,pa_hauteur
-5,Hauteur sous plafond ?,Confortable (2.50 – 3 m),Hauteur,pa_hauteur
-5,Hauteur sous plafond ?,Haute (> 3 m),Hauteur,pa_hauteur
-6,Quel style recherché ?,Épuré / Minimaliste,Style,pa_style
-6,Quel style recherché ?,Chaleureux / Organique,Style,pa_style
-6,Quel style recherché ?,Imposant / Statement,Style,pa_style
+Étape,Question,Choix,Slug terme,Attribut WooCommerce,Slug attribut
+1,Pour quelle pièce cherchez-vous un luminaire ?,Salon,salon,Pièce,pa_piece
+1,Pour quelle pièce cherchez-vous un luminaire ?,Cuisine,cuisine,Pièce,pa_piece
+1,Pour quelle pièce cherchez-vous un luminaire ?,Chambre,chambre,Pièce,pa_piece
+1,Pour quelle pièce cherchez-vous un luminaire ?,Bureau,bureau,Pièce,pa_piece
+1,Pour quelle pièce cherchez-vous un luminaire ?,Hall,couloir,Pièce,pa_piece
+1,Pour quelle pièce cherchez-vous un luminaire ?,Couloir,couloir-2,Pièce,pa_piece
+2,Quel sera l'usage principal ?,Éclairage fonctionnel,fonctionnel,Éclairage,pa_eclairage
+2,Quel sera l'usage principal ?,Ambiance & décoration,ambiance,Éclairage,pa_eclairage
+2,Quel sera l'usage principal ?,Les deux à la fois,les-deux,Éclairage,pa_eclairage
+3,Quel est le style recherché ?,Épuré / Minimaliste,epure,Style,pa_style
+3,Quel est le style recherché ?,Chaleureux / Organique,chaleureux,Style,pa_style
+3,Quel est le style recherché ?,Imposant / Statement,imposant,Style,pa_style
+3,Quel est le style recherché ?,Bohème / Nature,boheme,Style,pa_style
+3,Quel est le style recherché ?,Scandinave / Nordique,scandinave,Style,pa_style
+3,Quel est le style recherché ?,Poétique / Romantique,poetique,Style,pa_style
+4,Quelle est la taille de la pièce ?,Petite (< 10 m²),petite,Taille pièce,pa_taille-piece
+4,Quelle est la taille de la pièce ?,Moyenne (10 – 20 m²),moyenne,Taille pièce,pa_taille-piece
+4,Quelle est la taille de la pièce ?,Grande (> 20 m²),grande,Taille pièce,pa_taille-piece
+5,Quelle est la hauteur sous-plafond ?,Standard (< 2.50 m),standard,Hauteur,pa_hauteur
+5,Quelle est la hauteur sous-plafond ?,Confortable (2.50 – 3 m),confortable,Hauteur,pa_hauteur
+5,Quelle est la hauteur sous-plafond ?,Haute (> 3 m),haute,Hauteur,pa_hauteur
+6,Où sera placé le luminaire ?,Au-dessus d'un meuble,au-dessus-meuble,Type luminaire,pa_type-luminaire
+6,Où sera placé le luminaire ?,Zone de passage,zone-passage,Type luminaire,pa_type-luminaire
+6,Où sera placé le luminaire ?,Dans un coin,dans-un-coin,Type luminaire,pa_type-luminaire
+6,Où sera placé le luminaire ?,Sur un mur,sur-un-mur,Type luminaire,pa_type-luminaire
