@@ -194,11 +194,11 @@ if (!empty($guide_pages)) {
 
 // Room choices for mini-questionnaire "Pour quelle pièce ?"
 $room_choices = [
-  ['label' => 'Salon',   'slug' => 'salon-sejour',           'icon' => 'sofa'],
-  ['label' => 'Cuisine', 'slug' => 'cuisine-salle-a-manger', 'icon' => 'dining'],
-  ['label' => 'Chambre', 'slug' => 'chambre',                'icon' => 'bed'],
-  ['label' => 'Bureau',  'slug' => 'bureau-atelier',         'icon' => 'monitor'],
-  ['label' => 'Entrée',  'slug' => 'entree-couloir',         'icon' => 'door'],
+  ['label' => 'Salon',   'slug' => 'salon',   'icon' => 'sofa'],
+  ['label' => 'Cuisine', 'slug' => 'cuisine', 'icon' => 'dining'],
+  ['label' => 'Chambre', 'slug' => 'chambre', 'icon' => 'bed'],
+  ['label' => 'Bureau',  'slug' => 'bureau',  'icon' => 'monitor'],
+  ['label' => 'Entrée',  'slug' => 'couloir', 'icon' => 'door'],
 ];
 
 $room_icons = [

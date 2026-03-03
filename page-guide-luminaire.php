@@ -14,11 +14,12 @@ $guide_steps = [
     'attribute' => 'pa_piece',
     'question'  => 'Pour quelle pièce cherchez-vous un luminaire ?',
     'choices'   => [
-      ['label' => 'Salon / Séjour',           'slug' => 'salon-sejour',           'icon' => 'sofa'],
-      ['label' => 'Cuisine / Salle à manger', 'slug' => 'cuisine-salle-a-manger', 'icon' => 'dining'],
-      ['label' => 'Chambre',                  'slug' => 'chambre',                'icon' => 'bed'],
-      ['label' => 'Bureau / Atelier',         'slug' => 'bureau-atelier',         'icon' => 'monitor'],
-      ['label' => 'Entrée / Couloir',         'slug' => 'entree-couloir',         'icon' => 'door'],
+      ['label' => 'Salon / Séjour / Salle à manger', 'slug' => 'salon',     'icon' => 'sofa'],
+      ['label' => 'Cuisine',                         'slug' => 'cuisine',   'icon' => 'dining'],
+      ['label' => 'Chambre',                         'slug' => 'chambre',   'icon' => 'bed'],
+      ['label' => 'Bureau / Atelier',                'slug' => 'bureau',    'icon' => 'monitor'],
+      ['label' => 'Entrée / Hall',                   'slug' => 'couloir',   'icon' => 'door'],
+      ['label' => 'Couloir / Montée d\'escalier',   'slug' => 'couloir-2', 'icon' => 'stairs'],
     ],
   ],
   [
@@ -95,6 +96,7 @@ $icons = [
   'minimal'     => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><line x1="12" y1="8" x2="12" y2="16"/></svg>',
   'organic'     => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-3 0-6 2-7 5s0 7 2 9 6 3 9 2 5-4 5-7-1-6-3-8-3-1-6-1z"/><circle cx="12" cy="13" r="2.5"/></svg>',
   'statement'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 22 12 12 22 2 12z"/></svg>',
+  'stairs'      => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4v-4h4v-4h4V8h4"/><path d="M4 20V8"/><path d="M20 20V8"/></svg>',
 ];
 
 $total_steps = count($guide_steps);
