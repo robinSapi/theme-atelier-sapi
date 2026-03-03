@@ -17292,14 +17292,6 @@ html.sapi-intro-active body {
   padding-top: 0.5rem;
 }
 
-.guide-explanations-title {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: var(--color-dark, #323232);
-  margin: 0 0 1.5rem;
-}
-
 .guide-explanation-item {
   padding: 1rem 0;
   border-bottom: 1px solid rgba(147, 125, 104, 0.15);

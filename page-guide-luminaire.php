@@ -199,7 +199,6 @@ $total_steps = count($guide_steps);
 
       <!-- Colonne droite : explications -->
       <div class="guide-result-explanations" id="guide-result-explanations">
-        <h3 class="guide-explanations-title">Pourquoi ce luminaire ?</h3>
         <div class="guide-explanations-list" id="guide-explanations-list"></div>
 
         <div class="guide-next-proposal" id="guide-next-proposal">
