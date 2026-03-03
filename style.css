@@ -8496,7 +8496,7 @@ transform: translateY(15px);
   grid-column: span 12;
   grid-row: span 2;
   background: var(--color-white);
-  border: 1.5px solid rgba(147, 125, 104, 0.25);
+  border: 2px solid rgba(147, 125, 104, 0.5);
 }
 
 .room-picker-inner {
