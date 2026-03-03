@@ -17210,19 +17210,53 @@ html.sapi-intro-active body {
   margin: 0;
 }
 
-/* ---- Result Layout (2 columns) ---- */
-.guide-result-layout {
-  display: grid;
-  grid-template-columns: 2fr 3fr;
-  gap: 3rem;
-  max-width: 1100px;
+/* ---- AI Recommendation Text ---- */
+.guide-ai-recommendation {
+  max-width: 800px;
   margin: 0 auto 3rem;
-  align-items: start;
+  padding: 2rem 2.5rem;
+  background: linear-gradient(135deg, #FBF6EA 0%, #FEFDFB 100%);
+  border-radius: 16px;
+  border-left: 4px solid var(--color-orange, #E35B24);
 }
 
-/* ---- Product Column (left) ---- */
+.guide-ai-text-content {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--color-dark, #323232);
+}
+
+/* ---- Products Row (main + optional complement) ---- */
+.guide-result-products-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  max-width: 900px;
+  margin: 0 auto 3rem;
+}
+
+.guide-result-products-row.has-complement {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ---- Product Card ---- */
 .guide-result-product {
   text-align: center;
+}
+
+.guide-result-badge {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-orange, #E35B24);
+  margin-bottom: 1rem;
+}
+
+.guide-complement-badge {
+  color: var(--color-wood, #937D68);
 }
 
 .guide-result-image-wrap {
@@ -17299,53 +17333,71 @@ html.sapi-intro-active body {
   animation: guideProductFade 0.35s ease both;
 }
 
-/* ---- Explanations Column (right) ---- */
-.guide-result-explanations {
-  padding-top: 0.5rem;
+/* ---- Secondary CTA (complement) ---- */
+.guide-result-cta-secondary {
+  background: transparent;
+  border: 2px solid var(--color-wood, #937D68);
+  color: var(--color-wood, #937D68);
+  box-shadow: none;
 }
 
-.guide-explanation-item {
-  padding: 1rem 0;
-  border-bottom: 1px solid rgba(147, 125, 104, 0.15);
+.guide-result-cta-secondary:hover {
+  background: var(--color-wood, #937D68);
+  color: #fff;
+  box-shadow: none;
+  transform: translateY(-2px);
 }
 
-.guide-explanation-item:last-child {
-  border-bottom: none;
-}
-
-.guide-explanation-header {
+/* ---- Follow-up Buttons ---- */
+.guide-followup-buttons {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  max-width: 800px;
+  margin: 0 auto 2rem;
+}
+
+.guide-followup-btn {
+  padding: 0.6rem 1.25rem;
+  background: var(--color-warm, #FBF6EA);
+  border: 1.5px solid var(--color-wood, #937D68);
+  border-radius: 100px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-wood, #937D68);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.guide-followup-btn:hover {
+  background: var(--color-wood, #937D68);
+  color: #fff;
+}
+
+/* ---- Loading Steps ---- */
+.guide-loading-steps {
+  display: flex;
+  flex-direction: column;
   gap: 0.5rem;
-  margin-bottom: 0.4rem;
+  align-items: center;
 }
 
-.guide-explanation-check {
-  color: var(--color-orange, #E35B24);
-  flex-shrink: 0;
-}
-
-.guide-explanation-question {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #6B5A4A;
-}
-
-.guide-explanation-answer {
+.guide-loading-step {
   font-family: 'Montserrat', sans-serif;
   font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--color-dark, #323232);
+  color: var(--color-wood, #937D68);
+  opacity: 0.3;
+  transition: opacity 0.4s ease;
 }
 
-.guide-explanation-text {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: #6B5A4A;
-  margin: 0;
-  padding-left: 2rem;
+.guide-loading-step.is-active {
+  opacity: 1;
+}
+
+.guide-loading-step.is-done {
+  opacity: 0.5;
 }
 
 /* ---- Next Proposal ---- */
@@ -17510,14 +17562,27 @@ html.sapi-intro-active body {
     padding: 4rem 1rem 3rem;
   }
 
-  .guide-result-layout {
+  .guide-result-products-row.has-complement {
     grid-template-columns: 1fr;
-    gap: 2rem;
+  }
+
+  .guide-ai-recommendation {
+    padding: 1.5rem;
+    margin: 0 auto 2rem;
   }
 
   .guide-result-image-wrap {
     max-width: 320px;
     margin: 0 auto 1rem;
+  }
+
+  .guide-followup-buttons {
+    gap: 0.5rem;
+  }
+
+  .guide-followup-btn {
+    font-size: 0.75rem;
+    padding: 0.5rem 1rem;
   }
 
   .guide-restart-wrap {

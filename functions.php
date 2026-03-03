@@ -1314,19 +1314,23 @@ function sapi_ajax_buy_now() {
 }
 
 /**
- * AJAX Guide Luminaire — Product Results
- * Finds matching products based on quiz answers (WooCommerce attribute tax_query).
- * Falls back through 4 tiers if no exact match found.
+ * ═══════════════════════════════════════════════════════════════════
+ * GUIDE LUMINAIRE V2 — AJAX + Claude AI Integration
+ * Filters products by category/format/ampoule, then generates
+ * a personalised AI recommendation via the Claude API.
+ * ═══════════════════════════════════════════════════════════════════
  */
 add_action('wp_ajax_sapi_guide_results', 'sapi_ajax_guide_results');
 add_action('wp_ajax_nopriv_sapi_guide_results', 'sapi_ajax_guide_results');
 
 function sapi_ajax_guide_results() {
+  // 1. Nonce check
   if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
     wp_send_json_error(['message' => 'Nonce invalide']);
     return;
   }
 
+  // 2. Parse & sanitize answers
   $raw_answers = isset($_POST['answers']) ? sanitize_text_field(wp_unslash($_POST['answers'])) : '{}';
   $answers = json_decode($raw_answers, true);
 
@@ -1335,53 +1339,232 @@ function sapi_ajax_guide_results() {
     return;
   }
 
-  $sanitized = [];
-  foreach ($answers as $attribute => $slug) {
-    $sanitized[sanitize_title($attribute)] = sanitize_title($slug);
+  $clean = [];
+  foreach ($answers as $key => $val) {
+    $clean[sanitize_key($key)] = sanitize_text_field($val);
   }
 
-  // Tier fallback: all 6 → 4 (drop hauteur+taille) → 2 (style+usage) → bestsellers
-  $tier_sets = [
-    1 => array_keys($sanitized),
-    2 => array_filter(array_keys($sanitized), function($k) {
-      return !in_array($k, ['pa_hauteur', 'pa_taille-piece'], true);
-    }),
-    3 => array_filter(array_keys($sanitized), function($k) {
-      return in_array($k, ['pa_style', 'pa_eclairage'], true);
-    }),
-    4 => [],
-  ];
+  // 3. Determine product categories from step 1
+  $categories = sapi_guide_get_categories($clean);
 
-  $tier = 1;
-  $products = null;
+  // 4. Query main products
+  $products_data = sapi_guide_query_products($clean, $categories);
 
-  foreach ($tier_sets as $tier_num => $active_attrs) {
-    $query = new WP_Query(sapi_guide_build_query($sanitized, $active_attrs));
-    if ($query->have_posts()) {
-      $products = $query;
-      $tier = $tier_num;
-      break;
+  // 5. Query complements if grande pièce
+  $complement_data = [];
+  if (isset($clean['taille']) && $clean['taille'] === 'grande') {
+    $complement_data = sapi_guide_query_complements($clean, $categories);
+  }
+
+  // 6. Call Claude API for AI recommendation
+  $ai_response = null;
+  if (!empty($products_data)) {
+    $system_prompt = sapi_guide_build_system_prompt($products_data, $clean, $complement_data);
+    $ai_response = sapi_guide_call_claude($system_prompt);
+  }
+
+  // 7. Build response
+  $main_product = null;
+  $complement = null;
+  $followup_buttons = [];
+  $ai_text = null;
+
+  if ($ai_response && isset($ai_response['recommendation'])) {
+    $ai_text = $ai_response['recommendation'];
+    $followup_buttons = isset($ai_response['followup_buttons']) ? $ai_response['followup_buttons'] : [];
+
+    // Find the AI-recommended main product
+    if (isset($ai_response['main_product_id'])) {
+      $main_product = sapi_guide_find_product_by_id($products_data, $ai_response['main_product_id']);
     }
-    wp_reset_postdata();
+    // Find the AI-recommended complement
+    if (isset($ai_response['complement_product_id']) && $ai_response['complement_product_id']) {
+      $complement = sapi_guide_find_product_by_id(
+        array_merge($products_data, $complement_data),
+        $ai_response['complement_product_id']
+      );
+    }
   }
 
-  if (!$products || !$products->have_posts()) {
+  // Fallback: use first product if AI didn't pick one
+  if (!$main_product && !empty($products_data)) {
+    $main_product = $products_data[0];
+  }
+  // Fallback: use first complement if AI didn't pick one but grande pièce
+  if (!$complement && !empty($complement_data)) {
+    $complement = $complement_data[0];
+  }
+
+  if (empty($products_data)) {
     wp_send_json_error(['message' => 'Aucun produit trouvé']);
     return;
   }
 
-  // Map style answer to preferred wood essence
-  $style_to_essence = [
-    'epure'      => 'peuplier',
-    'chaleureux' => 'okoume',
-    // 'imposant' => no preference, use default
-  ];
-  $style_slug = isset($sanitized['pa_style']) ? $sanitized['pa_style'] : '';
-  $preferred_essence = isset($style_to_essence[$style_slug]) ? $style_to_essence[$style_slug] : '';
+  wp_send_json_success([
+    'ai_text'          => $ai_text,
+    'main_product'     => $main_product,
+    'complement'       => $complement,
+    'products'         => $products_data,
+    'followup_buttons' => $followup_buttons,
+  ]);
+}
 
-  $product_list = [];
-  while ($products->have_posts()) {
-    $products->the_post();
+/**
+ * Step 1 → WooCommerce product categories
+ */
+function sapi_guide_get_categories(array $answers) {
+  $sortie = isset($answers['sortie']) ? $answers['sortie'] : '';
+
+  switch ($sortie) {
+    case 'plafond':
+      return ['suspensions'];
+    case 'mur':
+      return ['appliques'];
+    case 'pas-de-sortie':
+      return ['lampadaires', 'lampeaposer', 'appliques'];
+    default:
+      return ['suspensions', 'appliques', 'lampadaires', 'lampeaposer'];
+  }
+}
+
+/**
+ * Get ampoule type filter based on room
+ */
+function sapi_guide_get_ampoule_filter($piece) {
+  switch ($piece) {
+    case 'cuisine':
+    case 'bureau':
+      return ['ampoule_degagee', 'semi_degagee'];
+    case 'salon':
+    case 'chambre':
+      return ['ampoule_entouree', 'semi_degagee'];
+    default:
+      return null; // entrée/couloir: all types OK
+  }
+}
+
+/**
+ * Query main products based on guide answers
+ */
+function sapi_guide_query_products(array $answers, array $categories) {
+  $tax_query = ['relation' => 'AND'];
+
+  // Category filter
+  $tax_query[] = [
+    'taxonomy' => 'product_cat',
+    'field'    => 'slug',
+    'terms'    => $categories,
+    'operator' => 'IN',
+  ];
+
+  // Format exclusion: plafond + standard + not above table → exclude vertical
+  $exclude_vertical = (
+    (isset($answers['sortie']) && $answers['sortie'] === 'plafond') &&
+    (isset($answers['hauteur']) && $answers['hauteur'] === 'standard') &&
+    (isset($answers['table']) && $answers['table'] === 'non')
+  );
+
+  if ($exclude_vertical) {
+    $tax_query[] = [
+      'taxonomy' => 'pa_format',
+      'field'    => 'slug',
+      'terms'    => ['vertical'],
+      'operator' => 'NOT IN',
+    ];
+  }
+
+  // Ampoule filter based on room
+  $piece = isset($answers['piece']) ? $answers['piece'] : '';
+  $ampoule_filter = sapi_guide_get_ampoule_filter($piece);
+  $has_ampoule_filter = false;
+
+  if ($ampoule_filter) {
+    $tax_query[] = [
+      'taxonomy' => 'pa_type-ampoule',
+      'field'    => 'slug',
+      'terms'    => $ampoule_filter,
+      'operator' => 'IN',
+    ];
+    $has_ampoule_filter = true;
+  }
+
+  $args = [
+    'post_type'      => 'product',
+    'post_status'    => 'publish',
+    'posts_per_page' => 20,
+    'tax_query'      => $tax_query,
+    'orderby'        => 'menu_order date',
+    'order'          => 'ASC',
+  ];
+
+  $query = new WP_Query($args);
+
+  // Fallback: if no results with ampoule filter, retry without it
+  if (!$query->have_posts() && $has_ampoule_filter) {
+    wp_reset_postdata();
+    array_pop($tax_query); // Remove ampoule filter
+    $args['tax_query'] = $tax_query;
+    $query = new WP_Query($args);
+  }
+
+  // Second fallback: if still no results, drop format exclusion too
+  if (!$query->have_posts() && $exclude_vertical) {
+    wp_reset_postdata();
+    $args['tax_query'] = [
+      ['taxonomy' => 'product_cat', 'field' => 'slug', 'terms' => $categories, 'operator' => 'IN'],
+    ];
+    $query = new WP_Query($args);
+  }
+
+  $results = sapi_guide_collect_results($query, $answers);
+  wp_reset_postdata();
+  return $results;
+}
+
+/**
+ * Query complementary products for grande pièce
+ */
+function sapi_guide_query_complements(array $answers, array $main_categories) {
+  $all_cats = ['suspensions', 'lampadaires', 'appliques', 'lampeaposer'];
+  $complement_cats = array_values(array_diff($all_cats, $main_categories));
+
+  if (empty($complement_cats)) {
+    $complement_cats = ['lampadaires', 'lampeaposer'];
+  }
+
+  $args = [
+    'post_type'      => 'product',
+    'post_status'    => 'publish',
+    'posts_per_page' => 6,
+    'tax_query'      => [
+      ['taxonomy' => 'product_cat', 'field' => 'slug', 'terms' => $complement_cats, 'operator' => 'IN'],
+    ],
+    'orderby'        => 'menu_order',
+    'order'          => 'ASC',
+  ];
+
+  $query = new WP_Query($args);
+  $results = sapi_guide_collect_results($query, $answers);
+  wp_reset_postdata();
+  return $results;
+}
+
+/**
+ * Process query results into product data arrays
+ */
+function sapi_guide_collect_results($query, array $answers) {
+  // Determine preferred essence from style answer
+  $style = isset($answers['style']) ? $answers['style'] : '';
+  $preferred_essence = '';
+  if ($style === 'moderne') {
+    $preferred_essence = 'peuplier';
+  } elseif ($style === 'ancien') {
+    $preferred_essence = 'okoume';
+  }
+
+  $products = [];
+  while ($query->have_posts()) {
+    $query->the_post();
     $product = wc_get_product(get_the_ID());
     if (!$product || $product->get_status() !== 'publish') {
       continue;
@@ -1389,14 +1572,29 @@ function sapi_ajax_guide_results() {
 
     $image_id  = $product->get_image_id();
     $price     = $product->get_price_html();
-    $permalink = get_permalink($product->get_id());
     $variation_label = '';
 
-    // For variable products, try to find matching essence variation
+    // Get category slugs
+    $cats = get_the_terms($product->get_id(), 'product_cat');
+    $cat_slugs = [];
+    if ($cats && !is_wp_error($cats)) {
+      foreach ($cats as $c) {
+        $cat_slugs[] = $c->slug;
+      }
+    }
+
+    // Get format attribute
+    $format_terms = get_the_terms($product->get_id(), 'pa_format');
+    $format = ($format_terms && !is_wp_error($format_terms)) ? $format_terms[0]->name : '';
+
+    // Get ampoule attribute
+    $ampoule_terms = get_the_terms($product->get_id(), 'pa_type-ampoule');
+    $ampoule = ($ampoule_terms && !is_wp_error($ampoule_terms)) ? $ampoule_terms[0]->name : '';
+
+    // Match preferred essence variation
     if ($preferred_essence && $product->is_type('variable')) {
       $variations = $product->get_available_variations();
       foreach ($variations as $var) {
-        // Check pa_materiau attribute for wood type
         $materiau_value = isset($var['attributes']['attribute_pa_materiau'])
           ? $var['attributes']['attribute_pa_materiau']
           : '';
@@ -1415,64 +1613,169 @@ function sapi_ajax_guide_results() {
       }
     }
 
-    $product_list[] = [
+    $products[] = [
       'id'              => $product->get_id(),
       'title'           => $product->get_name(),
       'price'           => $price,
       'image'           => $image_id ? wp_get_attachment_url($image_id) : '',
       'image_alt'       => $image_id ? get_post_meta($image_id, '_wp_attachment_image_alt', true) : '',
-      'permalink'       => $permalink,
+      'permalink'       => get_permalink($product->get_id()),
       'variation_label' => $variation_label,
+      'categories'      => $cat_slugs,
+      'format'          => $format,
+      'type_ampoule'    => $ampoule,
     ];
   }
-  wp_reset_postdata();
 
-  wp_send_json_success([
-    'products' => $product_list,
-    'count'    => count($product_list),
-    'tier'     => $tier,
-  ]);
+  return $products;
 }
 
-function sapi_guide_build_query(array $answers, array $active_attrs) {
-  $args = [
-    'post_type'      => 'product',
-    'post_status'    => 'publish',
-    'posts_per_page' => 12,
-    'orderby'        => 'menu_order date',
-    'order'          => 'ASC',
-  ];
+/**
+ * Find a product in the data array by ID
+ */
+function sapi_guide_find_product_by_id(array $products, $id) {
+  foreach ($products as $p) {
+    if ((int) $p['id'] === (int) $id) {
+      return $p;
+    }
+  }
+  return null;
+}
 
-  if (empty($active_attrs)) {
-    $args['posts_per_page'] = 8;
-    $args['meta_key']       = 'total_sales';
-    $args['orderby']        = 'meta_value_num';
-    $args['order']          = 'DESC';
-    return $args;
+/**
+ * Build the system prompt for Claude with filtered products and client answers
+ */
+function sapi_guide_build_system_prompt(array $products_data, array $answers, array $complement_data = []) {
+  $prompt = "Tu es le conseiller luminaire de l'Atelier Sâpi, un atelier artisanal à Lyon qui crée des luminaires en bois découpés au laser et assemblés à la main par Robin.\n\n";
+
+  $prompt .= "RÈGLE ABSOLUE : Tu ne recommandes QUE les produits listés ci-dessous. Ne jamais inventer de produit, de prix ou de caractéristique.\n\n";
+
+  // Catalogue filtré
+  $prompt .= "CATALOGUE FILTRÉ (correspond aux besoins du client) :\n";
+  foreach ($products_data as $p) {
+    $prompt .= "- " . $p['title'] . " | Prix : " . wp_strip_all_tags($p['price']) . " | Catégorie : " . implode(', ', $p['categories']) . " | Format : " . $p['format'] . " | Ampoule : " . $p['type_ampoule'];
+    if ($p['variation_label']) {
+      $prompt .= " | Essence recommandée : " . $p['variation_label'];
+    }
+    $prompt .= " | ID : " . $p['id'] . "\n";
   }
 
-  $tax_queries = ['relation' => 'AND'];
-  foreach ($active_attrs as $attribute) {
-    if (!isset($answers[$attribute])) {
-      continue;
+  // Compléments si grande pièce
+  if (!empty($complement_data)) {
+    $prompt .= "\nPRODUITS COMPLÉMENTAIRES (pour compléter l'éclairage d'une grande pièce) :\n";
+    foreach ($complement_data as $p) {
+      $prompt .= "- " . $p['title'] . " | Prix : " . wp_strip_all_tags($p['price']) . " | Catégorie : " . implode(', ', $p['categories']) . " | ID : " . $p['id'] . "\n";
     }
-    $term = get_term_by('slug', $answers[$attribute], $attribute);
-    if (!$term || is_wp_error($term)) {
-      continue;
-    }
-    $tax_queries[] = [
-      'taxonomy' => $attribute,
-      'field'    => 'slug',
-      'terms'    => [$answers[$attribute]],
-      'operator' => 'IN',
+  }
+
+  // Réponses du client
+  $prompt .= "\nRÉPONSES DU CLIENT :\n";
+  $labels = [
+    'sortie'  => 'Sortie électrique',
+    'hauteur' => 'Hauteur sous-plafond',
+    'table'   => 'Au-dessus d\'une table',
+    'taille'  => 'Taille de la pièce',
+    'piece'   => 'Pièce',
+    'style'   => 'Style intérieur',
+  ];
+  foreach ($labels as $key => $label) {
+    $val = isset($answers[$key]) ? $answers[$key] : 'Non demandé';
+    $prompt .= "- " . $label . " : " . $val . "\n";
+  }
+
+  // Instructions de réponse
+  $prompt .= "\nINSTRUCTIONS :\n";
+  $prompt .= "1. Recommande UN produit principal parmi le catalogue filtré.\n";
+  if (!empty($complement_data)) {
+    $prompt .= "2. Recommande aussi UN produit complémentaire parmi les produits complémentaires, en expliquant pourquoi plusieurs sources lumineuses sont importantes dans une grande pièce.\n";
+  } else {
+    $prompt .= "2. Pas de produit complémentaire nécessaire.\n";
+  }
+  $prompt .= "3. Explique POURQUOI ce produit convient en liant à chaque réponse du client.\n";
+  $prompt .= "4. Si un format a été exclu (vertical en plafond bas sans table), mentionne-le naturellement.\n";
+  $prompt .= "5. Ton : chaleureux, passionné, artisan. Pas commercial ni vendeur. Vouvoie le client.\n";
+  $prompt .= "6. Maximum 150 mots pour la recommandation.\n";
+  $prompt .= "7. Propose 4 boutons de relance pertinents pour continuer la discussion.\n\n";
+
+  $prompt .= "FORMAT DE RÉPONSE (JSON strict, sans commentaires) :\n";
+  $prompt .= "{\n";
+  $prompt .= "  \"recommendation\": \"Texte de recommandation personnalisé...\",\n";
+  $prompt .= "  \"main_product_id\": 123,\n";
+  $prompt .= "  \"complement_product_id\": 456,\n";
+  $prompt .= "  \"followup_buttons\": [\n";
+  $prompt .= "    {\"label\": \"Texte du bouton\", \"type\": \"question\"},\n";
+  $prompt .= "    {\"label\": \"Texte du bouton\", \"type\": \"question\"},\n";
+  $prompt .= "    {\"label\": \"Texte du bouton\", \"type\": \"question\"},\n";
+  $prompt .= "    {\"label\": \"Texte du bouton\", \"type\": \"contact\"}\n";
+  $prompt .= "  ]\n";
+  $prompt .= "}\n";
+  $prompt .= "Si pas de complément, mettre complement_product_id à null.\n";
+
+  return $prompt;
+}
+
+/**
+ * Call Claude API and return parsed response
+ */
+function sapi_guide_call_claude($system_prompt) {
+  $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
+  if (empty($api_key)) {
+    return null;
+  }
+
+  $body = [
+    'model'      => 'claude-sonnet-4-20250514',
+    'max_tokens' => 1024,
+    'system'     => $system_prompt,
+    'messages'   => [
+      ['role' => 'user', 'content' => 'Voici mes réponses au questionnaire. Recommande-moi un luminaire adapté à ma situation.'],
+    ],
+  ];
+
+  $response = wp_remote_post('https://api.anthropic.com/v1/messages', [
+    'timeout' => 30,
+    'headers' => [
+      'Content-Type'     => 'application/json',
+      'x-api-key'        => $api_key,
+      'anthropic-version' => '2023-06-01',
+    ],
+    'body' => wp_json_encode($body),
+  ]);
+
+  if (is_wp_error($response)) {
+    error_log('Sapi Guide Claude API error: ' . $response->get_error_message());
+    return null;
+  }
+
+  $status = wp_remote_retrieve_response_code($response);
+  if ($status !== 200) {
+    error_log('Sapi Guide Claude API HTTP ' . $status . ': ' . wp_remote_retrieve_body($response));
+    return null;
+  }
+
+  $data = json_decode(wp_remote_retrieve_body($response), true);
+  if (!isset($data['content'][0]['text'])) {
+    return null;
+  }
+
+  $text = $data['content'][0]['text'];
+
+  // Clean markdown code fences if present
+  $text = preg_replace('/^```json\s*/i', '', trim($text));
+  $text = preg_replace('/\s*```$/i', '', $text);
+
+  $parsed = json_decode(trim($text), true);
+  if (!$parsed || !isset($parsed['recommendation'])) {
+    // If Claude didn't return valid JSON, use the raw text as recommendation
+    return [
+      'recommendation'       => $text,
+      'main_product_id'      => null,
+      'complement_product_id' => null,
+      'followup_buttons'     => [],
     ];
   }
 
-  if (count($tax_queries) > 1) {
-    $args['tax_query'] = $tax_queries;
-  }
-
-  return $args;
+  return $parsed;
 }
 
 /**

@@ -5,17 +5,18 @@
   // STATE
   // ================================================================
   var state = {
-    currentStep: 1,
-    totalSteps: 6,
-    answers: {},   // { pa_piece: 'salon-sejour', ... }
-    labels: {},    // { pa_piece: 'Salon / Séjour', ... }
+    currentStepId: null,
+    answers: {},          // { sortie: 'plafond', hauteur: 'standard', ... }
+    labels: {},           // { sortie: 'Au plafond', ... }
     isShowingResults: false,
     isQuizStarted: false,
-    resultProducts: [],  // Array of product objects from AJAX
-    resultIndex: 0,      // Current product index
+    resultProducts: [],
+    resultIndex: 0,
+    aiText: '',
+    loadingInterval: null,
   };
 
-  var SESSION_KEY = 'sapiGuide';
+  var SESSION_KEY = 'sapiGuideV2';
 
   // ================================================================
   // DOM REFS
@@ -23,33 +24,107 @@
   var dom = {};
 
   // ================================================================
+  // STEP VISIBILITY LOGIC
+  // ================================================================
+
+  /**
+   * Compute which steps are currently visible based on answers.
+   * Returns an array of step IDs in order.
+   */
+  function getVisibleSteps() {
+    var steps = sapiGuide.steps;
+    var visible = [];
+
+    for (var i = 0; i < steps.length; i++) {
+      var step = steps[i];
+      var vis = step.visibility;
+
+      if (vis === 'always') {
+        visible.push(step.id);
+        continue;
+      }
+
+      if (typeof vis === 'object' && vis !== null) {
+        var show = true;
+        for (var condStep in vis) {
+          if (!vis.hasOwnProperty(condStep)) continue;
+          var allowed = vis[condStep];
+          var answer = state.answers[condStep];
+          if (!answer || allowed.indexOf(answer) === -1) {
+            show = false;
+            break;
+          }
+        }
+        if (show) visible.push(step.id);
+      }
+    }
+
+    return visible;
+  }
+
+  /**
+   * Get the step data object by ID.
+   */
+  function getStepById(stepId) {
+    var steps = sapiGuide.steps;
+    for (var i = 0; i < steps.length; i++) {
+      if (steps[i].id === stepId) return steps[i];
+    }
+    return null;
+  }
+
+  /**
+   * Get the next visible step after the given one, or null if it's the last.
+   */
+  function getNextVisibleStep(currentId) {
+    var visible = getVisibleSteps();
+    var idx = visible.indexOf(currentId);
+    if (idx === -1 || idx >= visible.length - 1) return null;
+    return visible[idx + 1];
+  }
+
+  /**
+   * Get the previous visible step before the given one, or null if it's the first.
+   */
+  function getPrevVisibleStep(currentId) {
+    var visible = getVisibleSteps();
+    var idx = visible.indexOf(currentId);
+    if (idx <= 0) return null;
+    return visible[idx - 1];
+  }
+
+  // ================================================================
   // INIT
   // ================================================================
   function init() {
-    dom.intro            = document.getElementById('guide-intro');
-    dom.quiz             = document.getElementById('guide-quiz');
-    dom.steps            = document.querySelectorAll('.guide-step');
-    dom.progressBar      = null;
-    dom.progressSegments = [];
-    dom.backBtn          = document.getElementById('guide-back');
-    dom.stepCounter      = null;
-    dom.currentStepEl    = null;
-    dom.results          = document.getElementById('guide-results');
-    dom.resultsTags      = document.getElementById('guide-results-tags');
-    dom.resultsLoading   = document.getElementById('guide-results-loading');
-    dom.resultLayout     = document.getElementById('guide-result-layout');
-    dom.resultImage      = document.getElementById('guide-result-image');
-    dom.resultName       = document.getElementById('guide-result-name');
-    dom.resultPrice      = document.getElementById('guide-result-price');
-    dom.resultCta        = document.getElementById('guide-result-cta');
-    dom.resultVariation  = document.getElementById('guide-result-variation');
-    dom.resultError      = document.getElementById('guide-result-error');
-    dom.explanationsList = document.getElementById('guide-explanations-list');
-    dom.nextBtn          = document.getElementById('guide-next-btn');
-    dom.proposalCounter  = document.getElementById('guide-proposal-counter');
-    dom.restartBtn       = document.getElementById('guide-restart');
-    dom.startBtn         = document.getElementById('guide-start-btn');
-    dom.restartWrap      = document.getElementById('guide-restart-wrap');
+    dom.intro           = document.getElementById('guide-intro');
+    dom.quiz            = document.getElementById('guide-quiz');
+    dom.steps           = document.querySelectorAll('.guide-step');
+    dom.backBtn         = document.getElementById('guide-back');
+    dom.results         = document.getElementById('guide-results');
+    dom.resultsTags     = document.getElementById('guide-results-tags');
+    dom.resultsLoading  = document.getElementById('guide-results-loading');
+    dom.productsRow     = document.getElementById('guide-result-products-row');
+    dom.resultImage     = document.getElementById('guide-result-image');
+    dom.resultName      = document.getElementById('guide-result-name');
+    dom.resultPrice     = document.getElementById('guide-result-price');
+    dom.resultCta       = document.getElementById('guide-result-cta');
+    dom.resultVariation = document.getElementById('guide-result-variation');
+    dom.complementWrap  = document.getElementById('guide-result-product-complement');
+    dom.complementImage = document.getElementById('guide-complement-image');
+    dom.complementName  = document.getElementById('guide-complement-name');
+    dom.complementPrice = document.getElementById('guide-complement-price');
+    dom.complementCta   = document.getElementById('guide-complement-cta');
+    dom.aiText          = document.getElementById('guide-ai-text');
+    dom.aiTextContent   = document.getElementById('guide-ai-text-content');
+    dom.followupBtns    = document.getElementById('guide-followup-buttons');
+    dom.resultError     = document.getElementById('guide-result-error');
+    dom.nextBtn         = document.getElementById('guide-next-btn');
+    dom.nextProposal    = document.getElementById('guide-next-proposal');
+    dom.proposalCounter = document.getElementById('guide-proposal-counter');
+    dom.restartBtn      = document.getElementById('guide-restart');
+    dom.startBtn        = document.getElementById('guide-start-btn');
+    dom.restartWrap     = document.getElementById('guide-restart-wrap');
 
     if (!dom.steps.length) return;
 
@@ -67,40 +142,13 @@
     bindNextButton();
     bindKeyboard();
 
-    // Check for ?piece= URL parameter (from homepage room picker)
-    var urlParams = new URLSearchParams(window.location.search);
-    var pieceParam = urlParams.get('piece');
-
-    if (pieceParam) {
-      // Find the matching choice card for step 1 (pa_piece)
-      var step1 = document.querySelector('.guide-step[data-step="1"]');
-      if (step1) {
-        var matchingCard = step1.querySelector('.guide-choice-card[data-slug="' + pieceParam + '"]');
-        if (matchingCard) {
-          var attr = matchingCard.getAttribute('data-attribute');
-          var label = matchingCard.getAttribute('data-label');
-          state.answers[attr] = pieceParam;
-          state.labels[attr] = label;
-          state.currentStep = 2;
-          startQuiz();
-          matchingCard.classList.add('is-selected');
-          renderStep(2, 'none');
-          saveSession();
-          // Clean URL without reloading
-          window.history.replaceState({}, '', window.location.pathname);
-          return;
-        }
-      }
-    }
-
-    // If we have a saved session, restore
-    if (saved && saved.step > 0 && Object.keys(saved.answers).length > 0) {
-      state.currentStep = saved.step;
+    // Restore session if valid V2 format
+    if (saved && saved.currentStepId && typeof saved.currentStepId === 'string' && Object.keys(saved.answers).length > 0) {
+      state.currentStepId = saved.currentStepId;
       state.answers = saved.answers;
       state.labels = saved.labels || {};
       startQuiz();
-      renderStep(state.currentStep, 'none');
-      // Mark previously selected cards
+      renderStep(state.currentStepId, 'none');
       markPreviousAnswers();
     }
   }
@@ -111,7 +159,7 @@
   function saveSession() {
     try {
       sessionStorage.setItem(SESSION_KEY, JSON.stringify({
-        step: state.currentStep,
+        currentStepId: state.currentStepId,
         answers: state.answers,
         labels: state.labels,
       }));
@@ -129,7 +177,11 @@
   }
 
   function clearSession() {
-    try { sessionStorage.removeItem(SESSION_KEY); } catch (e) { /* */ }
+    try {
+      sessionStorage.removeItem(SESSION_KEY);
+      // Also clear old V1 session if present
+      sessionStorage.removeItem('sapiGuide');
+    } catch (e) { /* */ }
   }
 
   // ================================================================
@@ -149,20 +201,21 @@
       dom.quiz.setAttribute('aria-hidden', 'false');
     }
 
-    // Show progress bar
-    if (dom.progressBar) {
-      dom.progressBar.classList.add('is-visible');
+    // Set first step if not set
+    if (!state.currentStepId) {
+      var visible = getVisibleSteps();
+      state.currentStepId = visible[0] || sapiGuide.steps[0].id;
     }
 
-    renderStep(state.currentStep, 'none');
+    renderStep(state.currentStepId, 'none');
   }
 
   // ================================================================
   // NAVIGATION
   // ================================================================
-  function renderStep(stepNum, direction) {
+  function renderStep(stepId, direction) {
     var currentActive = document.querySelector('.guide-step.is-active');
-    var nextStep = document.querySelector('.guide-step[data-step="' + stepNum + '"]');
+    var nextStep = document.querySelector('.guide-step[data-step="' + stepId + '"]');
 
     if (!nextStep) return;
 
@@ -192,7 +245,6 @@
       currentActive.classList.add('is-exiting');
       currentActive.classList.remove('is-active');
 
-      // Wait for exit to finish, then enter
       currentActive.addEventListener('transitionend', function handler() {
         currentActive.classList.remove('is-exiting');
         currentActive.removeEventListener('transitionend', handler);
@@ -207,37 +259,52 @@
       nextStep.classList.add('is-active');
     }
 
-    updateProgress(stepNum);
-    updateBackButton(stepNum);
-    updateStepCounter(stepNum);
+    updateBackButton(stepId);
+    updateStepCounter(stepId);
   }
 
-  function advanceToStep(stepNum) {
-    state.currentStep = stepNum;
+  function advanceToStep(stepId) {
+    state.currentStepId = stepId;
     saveSession();
-    renderStep(stepNum, 'forward');
+    renderStep(stepId, 'forward');
   }
 
   function goBack() {
-    if (state.currentStep <= 1) return;
+    var prevStep = getPrevVisibleStep(state.currentStepId);
+    if (!prevStep) return;
 
-    // Clear the answer for the current step before going back
-    var currentAttr = getAttributeForStep(state.currentStep);
-    if (currentAttr) {
-      delete state.answers[currentAttr];
-      delete state.labels[currentAttr];
-    }
+    // Clear the answer for the current step
+    delete state.answers[state.currentStepId];
+    delete state.labels[state.currentStepId];
 
-    state.currentStep--;
+    // Also clear answers for steps that become invisible after going back
+    cleanInvisibleAnswers();
+
+    state.currentStepId = prevStep;
     saveSession();
-    renderStep(state.currentStep, 'backward');
+    renderStep(prevStep, 'backward');
   }
 
-  function getAttributeForStep(stepNum) {
-    var stepEl = document.querySelector('.guide-step[data-step="' + stepNum + '"]');
-    if (!stepEl) return null;
-    var firstCard = stepEl.querySelector('.guide-choice-card');
-    return firstCard ? firstCard.getAttribute('data-attribute') : null;
+  /**
+   * Remove answers for steps that are no longer visible.
+   */
+  function cleanInvisibleAnswers() {
+    var visible = getVisibleSteps();
+    var allStepIds = sapiGuide.steps.map(function (s) { return s.id; });
+
+    allStepIds.forEach(function (id) {
+      if (visible.indexOf(id) === -1 && state.answers[id]) {
+        delete state.answers[id];
+        delete state.labels[id];
+        // Deselect cards for that step
+        var stepEl = document.querySelector('.guide-step[data-step="' + id + '"]');
+        if (stepEl) {
+          stepEl.querySelectorAll('.guide-choice-card.is-selected').forEach(function (c) {
+            c.classList.remove('is-selected');
+          });
+        }
+      }
+    });
   }
 
   // ================================================================
@@ -248,25 +315,28 @@
       var card = e.target.closest('.guide-choice-card');
       if (!card) return;
 
-      var attribute = card.getAttribute('data-attribute');
+      var stepId = card.getAttribute('data-step');
       var slug = card.getAttribute('data-slug');
       var label = card.getAttribute('data-label');
 
       // Save answer
-      state.answers[attribute] = slug;
-      state.labels[attribute] = label;
+      state.answers[stepId] = slug;
+      state.labels[stepId] = label;
 
       // Visual: deselect siblings, select this one
       var siblings = card.parentElement.querySelectorAll('.guide-choice-card');
       siblings.forEach(function (s) { s.classList.remove('is-selected'); });
       card.classList.add('is-selected');
 
-      var nextStep = state.currentStep + 1;
+      // Clean invisible answers (a new choice might change which steps are visible)
+      cleanInvisibleAnswers();
 
-      if (nextStep > state.totalSteps) {
-        // All done - show results
+      // Determine next step
+      var nextStepId = getNextVisibleStep(stepId);
+
+      if (!nextStepId) {
+        // Last visible step — show results
         saveSession();
-        // Small visual delay so user sees their selection
         requestAnimationFrame(function () {
           requestAnimationFrame(function () {
             showResults();
@@ -276,7 +346,7 @@
         // Advance
         requestAnimationFrame(function () {
           requestAnimationFrame(function () {
-            advanceToStep(nextStep);
+            advanceToStep(nextStepId);
           });
         });
       }
@@ -284,102 +354,14 @@
   }
 
   function markPreviousAnswers() {
-    // For each saved answer, mark the card as selected
-    Object.keys(state.answers).forEach(function (attr) {
-      var slug = state.answers[attr];
-      var card = document.querySelector('.guide-choice-card[data-attribute="' + attr + '"][data-slug="' + slug + '"]');
+    Object.keys(state.answers).forEach(function (stepId) {
+      var slug = state.answers[stepId];
+      var card = document.querySelector('.guide-choice-card[data-step="' + stepId + '"][data-slug="' + slug + '"]');
       if (card) {
         card.classList.add('is-selected');
       }
     });
   }
-
-  // ================================================================
-  // EXPLANATIONS DATA
-  // ================================================================
-  var stepQuestions = {
-    'pa_piece':           'Votre pièce',
-    'pa_eclairage':       'Usage principal',
-    'pa_style':           'Style recherché',
-    'pa_taille-piece':    'Taille de la pièce',
-    'pa_hauteur':         'Hauteur sous plafond',
-    'pa_type-luminaire':  'Placement',
-  };
-
-  var explanations = {
-    'pa_piece': {
-      'salon':     "Pensé pour être le point focal de votre pièce de vie, ce luminaire apporte une présence chaleureuse qui accompagne vos moments de détente.",
-      'cuisine':   "Sa lumière généreuse illumine votre espace culinaire tout en ajoutant une touche artisanale à votre cuisine.",
-      'chambre':   "Sa lumière douce crée l'atmosphère apaisante dont votre chambre a besoin pour des moments de calme et de repos.",
-      'bureau':    "Un éclairage pensé pour la concentration, qui habille votre espace de travail avec élégance et caractère.",
-      'couloir':   "Parfait pour accueillir vos invités, ce luminaire transforme votre entrée en une première impression mémorable.",
-      'couloir-2': "Sa forme épurée s'intègre harmonieusement dans les espaces de passage tout en leur apportant de la personnalité.",
-    },
-    'pa_eclairage': {
-      'fonctionnel':  "Son éclairage fonctionnel offre une lumière claire et bien répartie, idéale pour les activités du quotidien.",
-      'ambiance':     "Conçu pour créer une ambiance enveloppante, il diffuse une lumière tamisée qui invite à la détente.",
-      'les-deux':     "Sa polyvalence vous permet de basculer entre éclairage pratique et ambiance chaleureuse selon vos envies.",
-    },
-    'pa_style': {
-      'epure':       "Ses lignes épurées et minimalistes s'intègrent avec discrétion dans votre intérieur. Nous recommandons le Peuplier, un bois clair et délicat qui sublime ce style.",
-      'chaleureux':  "Ses courbes organiques et la chaleur naturelle du bois créent une atmosphère accueillante. Nous recommandons l'Okoumé, un bois aux teintes chaudes et enveloppantes.",
-      'imposant':    "Sa présence affirmée en fait une pièce maîtresse qui capte le regard et donne du caractère à votre espace.",
-    },
-    'pa_taille-piece': {
-      'petite':  "Ses proportions sont adaptées aux espaces intimistes, sans les encombrer tout en restant visuellement présent.",
-      'moyenne': "Ses dimensions équilibrées s'harmonisent parfaitement avec votre pièce de taille moyenne.",
-      'grande':  "Sa envergure lui permet de remplir l'espace sans se perdre dans les grands volumes.",
-    },
-    'pa_hauteur': {
-      'standard':     "Sa conception tient compte d'une hauteur sous plafond standard pour un rendu optimal.",
-      'confortable':  "Il tire parti de votre belle hauteur sous plafond pour un effet suspendu élégant.",
-      'haute':        "Pensé pour les volumes généreux, il occupe magnifiquement l'espace vertical de votre pièce.",
-    },
-    'pa_type-luminaire': {
-      'au-dessus-meuble':  "Positionné au-dessus de votre mobilier, il crée un jeu de lumière qui met en valeur votre agencement.",
-      'zone-passage':      "Son design s'adapte aux zones de circulation, offrant un éclairage pratique avec une touche décorative.",
-      'dans-un-coin':      "Parfait pour habiller un coin de la pièce, il transforme un espace souvent oublié en point d'intérêt.",
-      'sur-un-mur':        "Fixé au mur, il libère l'espace au sol tout en projetant une lumière sculpturale sur la surface.",
-    },
-  };
-
-  // Choices data for dropdown editing
-  var stepChoices = {
-    'pa_piece': [
-      { slug: 'salon',     label: 'Salon' },
-      { slug: 'cuisine',   label: 'Cuisine' },
-      { slug: 'chambre',   label: 'Chambre' },
-      { slug: 'bureau',    label: 'Bureau' },
-      { slug: 'couloir',   label: 'Hall' },
-      { slug: 'couloir-2', label: 'Couloir' },
-    ],
-    'pa_eclairage': [
-      { slug: 'fonctionnel', label: 'Éclairage fonctionnel' },
-      { slug: 'ambiance',    label: 'Ambiance & décoration' },
-      { slug: 'les-deux',    label: 'Les deux à la fois' },
-    ],
-    'pa_style': [
-      { slug: 'epure',      label: 'Épuré / Minimaliste' },
-      { slug: 'chaleureux', label: 'Chaleureux / Organique' },
-      { slug: 'imposant',   label: 'Imposant / Statement' },
-    ],
-    'pa_taille-piece': [
-      { slug: 'petite',  label: 'Petite (< 10 m²)' },
-      { slug: 'moyenne', label: 'Moyenne (10–20 m²)' },
-      { slug: 'grande',  label: 'Grande (> 20 m²)' },
-    ],
-    'pa_hauteur': [
-      { slug: 'standard',    label: 'Standard (< 2,50 m)' },
-      { slug: 'confortable', label: 'Confortable (2,50–3 m)' },
-      { slug: 'haute',       label: 'Haute (> 3 m)' },
-    ],
-    'pa_type-luminaire': [
-      { slug: 'au-dessus-meuble', label: 'Au-dessus d\'un meuble' },
-      { slug: 'zone-passage',     label: 'Zone de passage' },
-      { slug: 'dans-un-coin',     label: 'Dans un coin' },
-      { slug: 'sur-un-mur',       label: 'Sur un mur' },
-    ],
-  };
 
   // ================================================================
   // RESULTS
@@ -392,9 +374,8 @@
       dom.quiz.setAttribute('aria-hidden', 'true');
     }
 
-    // Hide step counter and back button
+    // Hide back button
     if (dom.backBtn) dom.backBtn.hidden = true;
-    if (dom.stepCounter) dom.stepCounter.style.display = 'none';
 
     // Show results
     if (dom.results) {
@@ -402,17 +383,10 @@
       dom.results.classList.add('is-visible');
     }
 
-    // Progress: all done
-    dom.progressSegments.forEach(function (seg) {
-      seg.classList.add('is-done');
-      seg.classList.remove('is-active');
-    });
-
-    // Render tags and explanations
+    // Render tags
     renderAnswerTags();
-    renderExplanations();
 
-    // Fetch products
+    // Fetch products + AI recommendation
     fetchResults();
 
     // Scroll to top
@@ -422,51 +396,70 @@
   function renderAnswerTags() {
     if (!dom.resultsTags) return;
 
+    var visible = getVisibleSteps();
     var html = '';
-    for (var i = 1; i <= state.totalSteps; i++) {
-      var attr = getAttributeForStep(i);
-      var label = attr ? state.labels[attr] : null;
-      if (label) {
-        html += '<div class="guide-tag-wrap" data-attribute="' + escapeHtml(attr) + '">'
-              + '<button class="guide-answer-tag" data-step="' + i + '" data-attribute="' + escapeHtml(attr) + '" type="button" '
-              + 'aria-label="Modifier : ' + escapeHtml(label) + '">'
-              + '<span class="guide-tag-label">' + escapeHtml(label) + '</span>'
-              + '<svg class="guide-tag-edit" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
-              + '<path d="m6 9 6 6 6-6"/>'
-              + '</svg></button>'
-              + '</div>';
-      }
-    }
+
+    visible.forEach(function (stepId) {
+      var label = state.labels[stepId];
+      if (!label) return;
+
+      var step = getStepById(stepId);
+      var questionShort = step ? getShortQuestionLabel(step.id) : stepId;
+
+      html += '<div class="guide-tag-wrap" data-step-id="' + escapeHtml(stepId) + '">'
+            + '<button class="guide-answer-tag" data-step-id="' + escapeHtml(stepId) + '" type="button" '
+            + 'aria-label="Modifier : ' + escapeHtml(label) + '">'
+            + '<span class="guide-tag-label">' + escapeHtml(label) + '</span>'
+            + '<svg class="guide-tag-edit" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
+            + '<path d="m6 9 6 6 6-6"/>'
+            + '</svg></button>'
+            + '</div>';
+    });
+
     dom.resultsTags.innerHTML = html;
 
-    // Bind tag clicks to open dropdown
+    // Bind tag clicks
     dom.resultsTags.querySelectorAll('.guide-answer-tag').forEach(function (tag) {
       tag.addEventListener('click', function (e) {
         e.stopPropagation();
-        var attr = this.getAttribute('data-attribute');
-        toggleTagDropdown(this, attr);
+        var stepId = this.getAttribute('data-step-id');
+        toggleTagDropdown(this, stepId);
       });
     });
   }
 
-  function toggleTagDropdown(tagBtn, attribute) {
+  /**
+   * Short label for answer tags header.
+   */
+  function getShortQuestionLabel(stepId) {
+    var labels = {
+      'sortie':  'Sortie',
+      'hauteur': 'Hauteur',
+      'table':   'Table',
+      'taille':  'Taille pièce',
+      'piece':   'Pièce',
+      'style':   'Style',
+    };
+    return labels[stepId] || stepId;
+  }
+
+  function toggleTagDropdown(tagBtn, stepId) {
     var wrap = tagBtn.closest('.guide-tag-wrap');
     var existingDropdown = wrap.querySelector('.guide-tag-dropdown');
 
-    // Close all other dropdowns first
     closeAllDropdowns();
 
-    if (existingDropdown) return; // Was open, now closed by closeAllDropdowns
+    if (existingDropdown) return;
 
-    // Build dropdown
-    var choices = stepChoices[attribute];
-    if (!choices) return;
+    // Get choices for this step from sapiGuide.steps
+    var step = getStepById(stepId);
+    if (!step || !step.choices) return;
 
-    var currentSlug = state.answers[attribute];
+    var currentSlug = state.answers[stepId];
     var dropdown = document.createElement('div');
     dropdown.className = 'guide-tag-dropdown';
 
-    choices.forEach(function (choice) {
+    step.choices.forEach(function (choice) {
       var option = document.createElement('button');
       option.className = 'guide-tag-option';
       option.type = 'button';
@@ -474,20 +467,20 @@
       option.textContent = choice.label;
       option.addEventListener('click', function (e) {
         e.stopPropagation();
-        // Update answer
-        state.answers[attribute] = choice.slug;
-        state.labels[attribute] = choice.label;
+        state.answers[stepId] = choice.slug;
+        state.labels[stepId] = choice.label;
+
+        // Clean answers for steps that may no longer be visible
+        cleanInvisibleAnswers();
         saveSession();
 
-        // Update tag label
         var labelEl = tagBtn.querySelector('.guide-tag-label');
         if (labelEl) labelEl.textContent = choice.label;
 
-        // Close dropdown
         closeAllDropdowns();
 
-        // Re-render explanations and fetch new product
-        renderExplanations();
+        // Re-render tags (visibility may have changed) and fetch
+        renderAnswerTags();
         fetchResults();
       });
       dropdown.appendChild(option);
@@ -496,7 +489,6 @@
     wrap.appendChild(dropdown);
     tagBtn.classList.add('is-open');
 
-    // Close on outside click
     setTimeout(function () {
       document.addEventListener('click', closeAllDropdowns, { once: true });
     }, 0);
@@ -507,72 +499,25 @@
     document.querySelectorAll('.guide-answer-tag.is-open').forEach(function (t) { t.classList.remove('is-open'); });
   }
 
-  function renderExplanations() {
-    if (!dom.explanationsList) return;
-
-    var html = '';
-    for (var i = 1; i <= state.totalSteps; i++) {
-      var attr = getAttributeForStep(i);
-      if (!attr || !state.answers[attr]) continue;
-
-      var slug = state.answers[attr];
-      var questionLabel = stepQuestions[attr] || '';
-      var answerLabel = state.labels[attr] || '';
-      var text = (explanations[attr] && explanations[attr][slug]) || '';
-
-      html += '<div class="guide-explanation-item">'
-            + '<div class="guide-explanation-header">'
-            + '<svg class="guide-explanation-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
-            + '<span class="guide-explanation-question">' + escapeHtml(questionLabel) + ' :</span> '
-            + '<strong class="guide-explanation-answer">' + escapeHtml(answerLabel) + '</strong>'
-            + '</div>'
-            + '<p class="guide-explanation-text">' + escapeHtml(text) + '</p>'
-            + '</div>';
-    }
-
-    dom.explanationsList.innerHTML = html;
-  }
-
-  function goBackToStep(stepNum) {
-    state.isShowingResults = false;
-    state.currentStep = stepNum;
-
-    // Clear answers from this step onwards
-    for (var i = stepNum; i <= state.totalSteps; i++) {
-      var attr = getAttributeForStep(i);
-      if (attr) {
-        delete state.answers[attr];
-        delete state.labels[attr];
-        var stepEl = document.querySelector('.guide-step[data-step="' + i + '"]');
-        if (stepEl) {
-          stepEl.querySelectorAll('.guide-choice-card.is-selected').forEach(function (c) {
-            c.classList.remove('is-selected');
-          });
-        }
-      }
-    }
-
-    // Hide results, show quiz
-    if (dom.results) {
-      dom.results.setAttribute('aria-hidden', 'true');
-      dom.results.classList.remove('is-visible');
-    }
-    if (dom.quiz) {
-      dom.quiz.setAttribute('aria-hidden', 'false');
-    }
-    if (dom.stepCounter) {
-      dom.stepCounter.style.display = '';
-    }
-
-    saveSession();
-    renderStep(stepNum, 'none');
-  }
-
+  // ================================================================
+  // FETCH RESULTS + AI
+  // ================================================================
   function fetchResults() {
+    // Show loading
     if (dom.resultsLoading) dom.resultsLoading.setAttribute('aria-hidden', 'false');
-    if (dom.resultLayout) dom.resultLayout.style.display = 'none';
+    if (dom.productsRow) dom.productsRow.style.display = 'none';
+    if (dom.aiText) dom.aiText.style.display = 'none';
+    if (dom.followupBtns) dom.followupBtns.style.display = 'none';
+    if (dom.nextProposal) dom.nextProposal.style.display = 'none';
     if (dom.resultError) dom.resultError.style.display = 'none';
     if (dom.restartWrap) dom.restartWrap.style.display = 'none';
+    if (dom.complementWrap) dom.complementWrap.style.display = 'none';
+
+    // Reset complement class
+    if (dom.productsRow) dom.productsRow.classList.remove('has-complement');
+
+    // Start loading animation
+    startLoadingAnimation();
 
     var formData = new FormData();
     formData.append('action', 'sapi_guide_results');
@@ -586,75 +531,205 @@
     })
     .then(function (response) { return response.json(); })
     .then(function (data) {
+      stopLoadingAnimation();
       if (dom.resultsLoading) dom.resultsLoading.setAttribute('aria-hidden', 'true');
       if (dom.restartWrap) dom.restartWrap.style.display = '';
 
-      if (data.success && data.data && data.data.products && data.data.products.length) {
-        state.resultProducts = data.data.products;
+      if (data.success && data.data) {
+        var d = data.data;
+
+        // Store all products for carousel
+        state.resultProducts = d.products || [];
         state.resultIndex = 0;
-        renderCurrentProduct();
-        if (dom.resultLayout) dom.resultLayout.style.display = '';
+
+        // Display AI recommendation text
+        if (d.ai_text) {
+          state.aiText = d.ai_text;
+          renderAiText(d.ai_text);
+        }
+
+        // Display main product
+        if (d.main_product) {
+          renderProduct(d.main_product, 'main');
+        } else if (state.resultProducts.length > 0) {
+          renderProduct(state.resultProducts[0], 'main');
+        }
+
+        // Display complement if grande pièce
+        if (d.complement) {
+          renderProduct(d.complement, 'complement');
+          if (dom.productsRow) dom.productsRow.classList.add('has-complement');
+          if (dom.complementWrap) dom.complementWrap.style.display = '';
+        }
+
+        // Display follow-up buttons
+        if (d.followup_buttons && d.followup_buttons.length > 0) {
+          renderFollowupButtons(d.followup_buttons);
+        }
+
+        // Show products row
+        if (dom.productsRow && state.resultProducts.length > 0) {
+          dom.productsRow.style.display = '';
+        }
+
+        // Show next proposal if multiple products
+        updateProposalCounter();
+
       } else {
         renderResultsError();
       }
     })
     .catch(function () {
+      stopLoadingAnimation();
       if (dom.resultsLoading) dom.resultsLoading.setAttribute('aria-hidden', 'true');
       if (dom.restartWrap) dom.restartWrap.style.display = '';
       renderResultsError();
     });
   }
 
+  // ================================================================
+  // LOADING ANIMATION
+  // ================================================================
+  function startLoadingAnimation() {
+    var steps = document.querySelectorAll('.guide-loading-step');
+    var stepIndex = 0;
+
+    // Reset all
+    steps.forEach(function (s) {
+      s.classList.remove('is-active', 'is-done');
+    });
+    if (steps.length > 0) steps[0].classList.add('is-active');
+
+    state.loadingInterval = setInterval(function () {
+      if (stepIndex > 0 && stepIndex <= steps.length) {
+        steps[stepIndex - 1].classList.remove('is-active');
+        steps[stepIndex - 1].classList.add('is-done');
+      }
+      if (stepIndex < steps.length) {
+        steps[stepIndex].classList.add('is-active');
+      }
+      stepIndex++;
+      if (stepIndex > steps.length) {
+        clearInterval(state.loadingInterval);
+        state.loadingInterval = null;
+      }
+    }, 1200);
+  }
+
+  function stopLoadingAnimation() {
+    if (state.loadingInterval) {
+      clearInterval(state.loadingInterval);
+      state.loadingInterval = null;
+    }
+  }
+
+  // ================================================================
+  // RENDER AI TEXT
+  // ================================================================
+  function renderAiText(text) {
+    if (!dom.aiTextContent || !dom.aiText) return;
+    dom.aiTextContent.textContent = text;
+    dom.aiText.style.display = '';
+  }
+
+  // ================================================================
+  // RENDER PRODUCTS
+  // ================================================================
+  function renderProduct(product, type) {
+    if (type === 'complement') {
+      // Complement product
+      if (dom.complementImage) {
+        dom.complementImage.src = product.image;
+        dom.complementImage.srcset = '';
+        dom.complementImage.alt = product.image_alt || product.title;
+      }
+      if (dom.complementName) {
+        var newName = document.createElement('h3');
+        newName.className = 'guide-result-name';
+        newName.id = 'guide-complement-name';
+        newName.textContent = product.title;
+        dom.complementName.parentNode.replaceChild(newName, dom.complementName);
+        dom.complementName = newName;
+      }
+      if (dom.complementPrice) {
+        dom.complementPrice.innerHTML = product.price;
+      }
+      if (dom.complementCta) {
+        dom.complementCta.href = product.permalink;
+      }
+    } else {
+      // Main product
+      if (dom.resultImage) {
+        dom.resultImage.src = product.image;
+        dom.resultImage.srcset = '';
+        dom.resultImage.alt = product.image_alt || product.title;
+      }
+      if (dom.resultName) {
+        var newMainName = document.createElement('h3');
+        newMainName.className = 'guide-result-name';
+        newMainName.id = 'guide-result-name';
+        newMainName.textContent = product.title;
+        dom.resultName.parentNode.replaceChild(newMainName, dom.resultName);
+        dom.resultName = newMainName;
+      }
+      if (dom.resultPrice) {
+        dom.resultPrice.innerHTML = product.price;
+      }
+      if (dom.resultVariation) {
+        if (product.variation_label) {
+          dom.resultVariation.textContent = 'Essence recommandée : ' + product.variation_label;
+          dom.resultVariation.style.display = '';
+        } else {
+          dom.resultVariation.style.display = 'none';
+        }
+      }
+      if (dom.resultCta) {
+        dom.resultCta.href = product.permalink;
+      }
+    }
+  }
+
   function renderCurrentProduct() {
     var product = state.resultProducts[state.resultIndex];
     if (!product) return;
-
-    if (dom.resultImage) {
-      dom.resultImage.src = product.image;
-      dom.resultImage.srcset = '';
-      dom.resultImage.alt = product.image_alt || product.title;
-    }
-    if (dom.resultName) {
-      // Replace element to trigger MutationObserver in product-name-formatter
-      var newName = document.createElement('h3');
-      newName.className = 'guide-result-name';
-      newName.id = 'guide-result-name';
-      newName.textContent = product.title;
-      dom.resultName.parentNode.replaceChild(newName, dom.resultName);
-      dom.resultName = newName;
-    }
-    if (dom.resultPrice) {
-      dom.resultPrice.innerHTML = product.price;
-    }
-    // Show variation label if available
-    if (dom.resultVariation) {
-      if (product.variation_label) {
-        dom.resultVariation.textContent = 'Essence recommandée : ' + product.variation_label;
-        dom.resultVariation.style.display = '';
-      } else {
-        dom.resultVariation.style.display = 'none';
-      }
-    }
-    if (dom.resultCta) {
-      dom.resultCta.href = product.permalink;
-    }
-
-    // Update proposal counter
+    renderProduct(product, 'main');
     updateProposalCounter();
   }
 
+  // ================================================================
+  // FOLLOW-UP BUTTONS
+  // ================================================================
+  function renderFollowupButtons(buttons) {
+    if (!dom.followupBtns) return;
+
+    dom.followupBtns.innerHTML = '';
+
+    buttons.forEach(function (btn) {
+      var el = document.createElement('button');
+      el.className = 'guide-followup-btn';
+      el.type = 'button';
+      el.textContent = btn.label;
+      el.setAttribute('data-followup-type', btn.type || 'question');
+      // Phase B will make these interactive (chat)
+      dom.followupBtns.appendChild(el);
+    });
+
+    dom.followupBtns.style.display = '';
+  }
+
+  // ================================================================
+  // NEXT PROPOSAL (CAROUSEL)
+  // ================================================================
   function updateProposalCounter() {
     var total = state.resultProducts.length;
     if (dom.proposalCounter) {
       dom.proposalCounter.textContent = (state.resultIndex + 1) + ' / ' + total + ' proposition' + (total > 1 ? 's' : '');
     }
-    // Hide next button if only 1 product
-    if (dom.nextBtn) {
-      dom.nextBtn.style.display = total <= 1 ? 'none' : '';
+    // Show/hide next button and counter
+    if (dom.nextProposal) {
+      dom.nextProposal.style.display = total > 1 ? '' : 'none';
     }
   }
-
-
 
   function bindNextButton() {
     if (dom.nextBtn) {
@@ -663,13 +738,11 @@
         state.resultIndex = (state.resultIndex + 1) % state.resultProducts.length;
 
         // Animate product change
-        if (dom.resultLayout) {
-          var productCol = dom.resultLayout.querySelector('.guide-result-product');
-          if (productCol) {
-            productCol.classList.remove('guide-product-fade');
-            productCol.getBoundingClientRect(); // force reflow
-            productCol.classList.add('guide-product-fade');
-          }
+        var mainProduct = document.getElementById('guide-result-product-main');
+        if (mainProduct) {
+          mainProduct.classList.remove('guide-product-fade');
+          mainProduct.getBoundingClientRect();
+          mainProduct.classList.add('guide-product-fade');
         }
 
         renderCurrentProduct();
@@ -678,39 +751,43 @@
   }
 
   function renderResultsError() {
-    if (dom.resultLayout) dom.resultLayout.style.display = 'none';
+    if (dom.productsRow) dom.productsRow.style.display = 'none';
+    if (dom.aiText) dom.aiText.style.display = 'none';
     if (dom.resultError) dom.resultError.style.display = '';
   }
 
   // ================================================================
   // UI HELPERS
   // ================================================================
-  function updateProgress(stepNum) {
-    dom.progressSegments.forEach(function (seg, i) {
-      var segStep = i + 1;
-      seg.classList.remove('is-done', 'is-active');
-      if (segStep < stepNum) seg.classList.add('is-done');
-      else if (segStep === stepNum) seg.classList.add('is-active');
-    });
+  function updateBackButton(stepId) {
+    if (!dom.backBtn) return;
+    var visible = getVisibleSteps();
+    dom.backBtn.hidden = visible.indexOf(stepId) <= 0;
   }
 
-  function updateBackButton(stepNum) {
-    if (dom.backBtn) {
-      dom.backBtn.hidden = stepNum <= 1;
+  function updateStepCounter(stepId) {
+    var visible = getVisibleSteps();
+    var idx = visible.indexOf(stepId);
+    var counterEl = document.querySelector('.guide-step.is-active [data-step-counter]');
+    if (!counterEl) {
+      // The step may not be active yet, try with the target step
+      var stepEl = document.querySelector('.guide-step[data-step="' + stepId + '"]');
+      if (stepEl) counterEl = stepEl.querySelector('[data-step-counter]');
+    }
+    if (counterEl && idx !== -1) {
+      counterEl.textContent = pad(idx + 1) + ' / ' + pad(visible.length);
     }
   }
 
-  function updateStepCounter(stepNum) {
-    if (dom.currentStepEl) {
-      dom.currentStepEl.textContent = stepNum;
-    }
+  function pad(n) {
+    return n < 10 ? '0' + n : '' + n;
   }
 
   function bindBackButton() {
     if (dom.backBtn) {
       dom.backBtn.addEventListener('click', function () {
         if (state.isShowingResults) {
-          goBackToStep(state.totalSteps);
+          goBackFromResults();
         } else {
           goBack();
         }
@@ -718,13 +795,47 @@
     }
   }
 
+  function goBackFromResults() {
+    state.isShowingResults = false;
+
+    // Find last visible step
+    var visible = getVisibleSteps();
+    var lastStep = visible[visible.length - 1];
+    state.currentStepId = lastStep;
+
+    // Clear the last step's answer
+    delete state.answers[lastStep];
+    delete state.labels[lastStep];
+    var stepEl = document.querySelector('.guide-step[data-step="' + lastStep + '"]');
+    if (stepEl) {
+      stepEl.querySelectorAll('.guide-choice-card.is-selected').forEach(function (c) {
+        c.classList.remove('is-selected');
+      });
+    }
+
+    // Hide results, show quiz
+    if (dom.results) {
+      dom.results.setAttribute('aria-hidden', 'true');
+      dom.results.classList.remove('is-visible');
+    }
+    if (dom.quiz) {
+      dom.quiz.setAttribute('aria-hidden', 'false');
+    }
+
+    saveSession();
+    renderStep(lastStep, 'none');
+  }
+
   function bindRestartButton() {
     if (dom.restartBtn) {
       dom.restartBtn.addEventListener('click', function () {
-        state.currentStep = 1;
+        state.currentStepId = null;
         state.answers = {};
         state.labels = {};
         state.isShowingResults = false;
+        state.resultProducts = [];
+        state.resultIndex = 0;
+        state.aiText = '';
         clearSession();
 
         // Deselect all cards
@@ -740,11 +851,11 @@
         if (dom.quiz) {
           dom.quiz.setAttribute('aria-hidden', 'false');
         }
-        if (dom.stepCounter) {
-          dom.stepCounter.style.display = '';
-        }
 
-        renderStep(1, 'none');
+        // Reset to first step
+        var visible = getVisibleSteps();
+        state.currentStepId = visible[0];
+        renderStep(state.currentStepId, 'none');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     }
@@ -754,8 +865,8 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && state.isQuizStarted) {
         if (state.isShowingResults) {
-          goBackToStep(state.totalSteps);
-        } else if (state.currentStep > 1) {
+          goBackFromResults();
+        } else {
           goBack();
         }
       }
