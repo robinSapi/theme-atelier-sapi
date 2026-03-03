@@ -173,16 +173,53 @@ $total_steps = count($guide_steps);
   <section class="guide-results-section" id="guide-results" aria-hidden="true">
     <div class="guide-results-header">
       <div class="guide-results-tags" id="guide-results-tags"></div>
-      <h2 class="guide-results-title">Vos luminaires idéaux</h2>
+      <h2 class="guide-results-title">Notre recommandation pour vous</h2>
       <p class="guide-results-subtitle" id="guide-results-subtitle"></p>
     </div>
 
     <div class="guide-results-loading" id="guide-results-loading" aria-hidden="true">
       <svg class="guide-spinner" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/></svg>
-      <p>Nous cherchons vos luminaires...</p>
+      <p>Nous cherchons votre luminaire idéal...</p>
     </div>
 
-    <ul class="products guide-results-grid" id="guide-results-grid"></ul>
+    <!-- Layout 2 colonnes : produit + explications -->
+    <div class="guide-result-layout" id="guide-result-layout">
+
+      <!-- Colonne gauche : produit -->
+      <div class="guide-result-product" id="guide-result-product">
+        <div class="guide-result-image-wrap">
+          <img class="guide-result-image" id="guide-result-image" src="" alt="" />
+        </div>
+        <h3 class="guide-result-name" id="guide-result-name"></h3>
+        <p class="guide-result-price" id="guide-result-price"></p>
+        <a class="guide-result-cta" id="guide-result-cta" href="#">
+          Voir ce luminaire
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <!-- Colonne droite : explications -->
+      <div class="guide-result-explanations" id="guide-result-explanations">
+        <h3 class="guide-explanations-title">Pourquoi ce luminaire ?</h3>
+        <div class="guide-explanations-list" id="guide-explanations-list"></div>
+
+        <div class="guide-next-proposal" id="guide-next-proposal">
+          <button class="guide-next-btn" id="guide-next-btn" type="button">
+            Proposition suivante
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <p class="guide-proposal-counter" id="guide-proposal-counter"></p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Erreur -->
+    <div class="guide-result-error" id="guide-result-error" style="display:none;">
+      <p>Impossible de charger les résultats.
+        <a href="<?php echo esc_url($shop_url); ?>">Voir toute la collection</a>.
+      </p>
+    </div>
 
     <div class="guide-restart-wrap" id="guide-restart-wrap">
       <button class="guide-restart-btn" id="guide-restart" type="button">

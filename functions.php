@@ -1370,22 +1370,29 @@ function sapi_ajax_guide_results() {
     return;
   }
 
-  ob_start();
+  $product_list = [];
   while ($products->have_posts()) {
     $products->the_post();
     $product = wc_get_product(get_the_ID());
     if (!$product || $product->get_status() !== 'publish') {
       continue;
     }
-    wc_get_template_part('content', 'product');
+    $image_id = $product->get_image_id();
+    $product_list[] = [
+      'id'        => $product->get_id(),
+      'title'     => $product->get_name(),
+      'price'     => $product->get_price_html(),
+      'image'     => $image_id ? wp_get_attachment_url($image_id) : '',
+      'image_alt' => $image_id ? get_post_meta($image_id, '_wp_attachment_image_alt', true) : '',
+      'permalink' => get_permalink($product->get_id()),
+    ];
   }
-  $html = ob_get_clean();
   wp_reset_postdata();
 
   wp_send_json_success([
-    'html'  => $html,
-    'count' => $products->found_posts,
-    'tier'  => $tier,
+    'products' => $product_list,
+    'count'    => count($product_list),
+    'tier'     => $tier,
   ]);
 }
 

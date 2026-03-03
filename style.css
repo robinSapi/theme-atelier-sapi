@@ -17106,13 +17106,17 @@ html.sapi-intro-active body {
   text-align: center;
 }
 
-/* ---- Answer Tags ---- */
+/* ---- Answer Tags (editable dropdowns) ---- */
 .guide-results-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   justify-content: center;
   margin-bottom: 2rem;
+}
+
+.guide-tag-wrap {
+  position: relative;
 }
 
 .guide-answer-tag {
@@ -17131,7 +17135,8 @@ html.sapi-intro-active body {
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-.guide-answer-tag:hover {
+.guide-answer-tag:hover,
+.guide-answer-tag.is-open {
   background: var(--color-wood, #937D68);
   color: #fff;
 }
@@ -17139,10 +17144,62 @@ html.sapi-intro-active body {
 .guide-tag-edit {
   opacity: 0.6;
   flex-shrink: 0;
+  transition: transform 0.2s ease;
 }
 
-.guide-answer-tag:hover .guide-tag-edit {
+.guide-answer-tag:hover .guide-tag-edit,
+.guide-answer-tag.is-open .guide-tag-edit {
   opacity: 1;
+}
+
+.guide-answer-tag.is-open .guide-tag-edit {
+  transform: rotate(180deg);
+}
+
+.guide-tag-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border: 1.5px solid var(--color-wood, #937D68);
+  border-radius: 12px;
+  padding: 0.4rem;
+  min-width: 180px;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  animation: guideDropdownIn 0.15s ease;
+}
+
+@keyframes guideDropdownIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-4px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.guide-tag-option {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.875rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--color-dark, #323232);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.guide-tag-option:hover {
+  background: var(--color-warm, #FBF6EA);
+}
+
+.guide-tag-option.is-current {
+  font-weight: 700;
+  color: var(--color-wood, #937D68);
+  background: var(--color-warm, #FBF6EA);
 }
 
 .guide-results-title {
@@ -17160,30 +17217,189 @@ html.sapi-intro-active body {
   margin: 0;
 }
 
-/* ---- Results Grid ---- */
-.guide-results-grid {
+/* ---- Result Layout (2 columns) ---- */
+.guide-result-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
   max-width: 1100px;
   margin: 0 auto 3rem;
-  padding: 0;
-  list-style: none;
+  align-items: start;
 }
 
-@keyframes guideCardReveal {
-  from {
-    opacity: 0;
-    transform: translateY(24px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+/* ---- Product Column (left) ---- */
+.guide-result-product {
+  text-align: center;
 }
 
-.guide-result-reveal {
-  animation: guideCardReveal 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+.guide-result-image-wrap {
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--color-warm, #FBF6EA);
+  margin-bottom: 1.5rem;
+}
+
+.guide-result-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.guide-result-name {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--color-dark, #323232);
+  margin: 0 0 0.5rem;
+}
+
+.guide-result-price {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-wood, #937D68);
+  margin: 0 0 1.25rem;
+}
+
+.guide-result-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2rem;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  color: #fff;
+  border-radius: 100px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.guide-result-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
+  color: #fff;
+}
+
+@keyframes guideProductFade {
+  0% { opacity: 0.4; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.guide-product-fade {
+  animation: guideProductFade 0.35s ease both;
+}
+
+/* ---- Explanations Column (right) ---- */
+.guide-result-explanations {
+  padding-top: 0.5rem;
+}
+
+.guide-explanations-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--color-dark, #323232);
+  margin: 0 0 1.5rem;
+}
+
+.guide-explanation-item {
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(147, 125, 104, 0.15);
+}
+
+.guide-explanation-item:last-child {
+  border-bottom: none;
+}
+
+.guide-explanation-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.guide-explanation-check {
+  color: var(--color-orange, #E35B24);
+  flex-shrink: 0;
+}
+
+.guide-explanation-question {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #6B5A4A;
+}
+
+.guide-explanation-answer {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-dark, #323232);
+}
+
+.guide-explanation-text {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #6B5A4A;
+  margin: 0;
+  padding-left: 2rem;
+}
+
+/* ---- Next Proposal ---- */
+.guide-next-proposal {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(147, 125, 104, 0.15);
+  text-align: center;
+}
+
+.guide-next-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  background: transparent;
+  border: 2px solid var(--color-wood, #937D68);
+  border-radius: 100px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-wood, #937D68);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.guide-next-btn:hover {
+  background: var(--color-wood, #937D68);
+  color: #fff;
+}
+
+.guide-proposal-counter {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.78rem;
+  color: #6B5A4A;
+  margin: 0.75rem 0 0;
+}
+
+/* ---- Result Error ---- */
+.guide-result-error {
+  text-align: center;
+  padding: 3rem;
+  color: #6B5A4A;
+  font-family: 'Montserrat', sans-serif;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.guide-result-error a {
+  color: var(--color-orange, #E35B24);
+  font-weight: 600;
 }
 
 /* ---- Loading Spinner ---- */
@@ -17259,21 +17475,6 @@ html.sapi-intro-active body {
   opacity: 0.8;
 }
 
-/* ---- Results Error ---- */
-.guide-results-error {
-  list-style: none;
-  text-align: center;
-  padding: 3rem;
-  color: #6B5A4A;
-  grid-column: 1 / -1;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.guide-results-error a {
-  color: var(--color-orange, #E35B24);
-  font-weight: 600;
-}
-
 /* ---- RESPONSIVE ---- */
 @media (max-width: 768px) {
   .guide-quiz-section {
@@ -17312,9 +17513,14 @@ html.sapi-intro-active body {
     padding: 4rem 1rem 3rem;
   }
 
-  .guide-results-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+  .guide-result-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .guide-result-image-wrap {
+    max-width: 320px;
+    margin: 0 auto 1rem;
   }
 
   .guide-restart-wrap {
@@ -17330,10 +17536,6 @@ html.sapi-intro-active body {
 @media (max-width: 480px) {
   .guide-choices-grid,
   .guide-choices-grid[data-count="5"] {
-    grid-template-columns: 1fr;
-  }
-
-  .guide-results-grid {
     grid-template-columns: 1fr;
   }
 }

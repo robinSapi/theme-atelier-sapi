@@ -11,6 +11,8 @@
     labels: {},    // { pa_piece: 'Salon / Séjour', ... }
     isShowingResults: false,
     isQuizStarted: false,
+    resultProducts: [],  // Array of product objects from AJAX
+    resultIndex: 0,      // Current product index
   };
 
   var SESSION_KEY = 'sapiGuide';
@@ -33,10 +35,18 @@
     dom.stepCounter      = null;
     dom.currentStepEl    = null;
     dom.results          = document.getElementById('guide-results');
-    dom.resultsGrid      = document.getElementById('guide-results-grid');
     dom.resultsTags      = document.getElementById('guide-results-tags');
     dom.resultsSubtitle  = document.getElementById('guide-results-subtitle');
     dom.resultsLoading   = document.getElementById('guide-results-loading');
+    dom.resultLayout     = document.getElementById('guide-result-layout');
+    dom.resultImage      = document.getElementById('guide-result-image');
+    dom.resultName       = document.getElementById('guide-result-name');
+    dom.resultPrice      = document.getElementById('guide-result-price');
+    dom.resultCta        = document.getElementById('guide-result-cta');
+    dom.resultError      = document.getElementById('guide-result-error');
+    dom.explanationsList = document.getElementById('guide-explanations-list');
+    dom.nextBtn          = document.getElementById('guide-next-btn');
+    dom.proposalCounter  = document.getElementById('guide-proposal-counter');
     dom.restartBtn       = document.getElementById('guide-restart');
     dom.startBtn         = document.getElementById('guide-start-btn');
     dom.restartWrap      = document.getElementById('guide-restart-wrap');
@@ -54,6 +64,7 @@
     bindChoiceClicks();
     bindBackButton();
     bindRestartButton();
+    bindNextButton();
     bindKeyboard();
 
     // Check for ?piece= URL parameter (from homepage room picker)
@@ -284,6 +295,99 @@
   }
 
   // ================================================================
+  // EXPLANATIONS DATA
+  // ================================================================
+  var stepQuestions = {
+    'pa_piece':           'Votre pièce',
+    'pa_eclairage':       'Usage principal',
+    'pa_style':           'Style recherché',
+    'pa_taille-piece':    'Taille de la pièce',
+    'pa_hauteur':         'Hauteur sous plafond',
+    'pa_type-luminaire':  'Placement',
+  };
+
+  var explanations = {
+    'pa_piece': {
+      'salon':     "Pensé pour être le point focal de votre pièce de vie, ce luminaire apporte une présence chaleureuse qui accompagne vos moments de détente.",
+      'cuisine':   "Sa lumière généreuse illumine votre espace culinaire tout en ajoutant une touche artisanale à votre cuisine.",
+      'chambre':   "Sa lumière douce crée l'atmosphère apaisante dont votre chambre a besoin pour des moments de calme et de repos.",
+      'bureau':    "Un éclairage pensé pour la concentration, qui habille votre espace de travail avec élégance et caractère.",
+      'couloir':   "Parfait pour accueillir vos invités, ce luminaire transforme votre entrée en une première impression mémorable.",
+      'couloir-2': "Sa forme épurée s'intègre harmonieusement dans les espaces de passage tout en leur apportant de la personnalité.",
+    },
+    'pa_eclairage': {
+      'fonctionnel':  "Son éclairage fonctionnel offre une lumière claire et bien répartie, idéale pour les activités du quotidien.",
+      'ambiance':     "Conçu pour créer une ambiance enveloppante, il diffuse une lumière tamisée qui invite à la détente.",
+      'les-deux':     "Sa polyvalence vous permet de basculer entre éclairage pratique et ambiance chaleureuse selon vos envies.",
+    },
+    'pa_style': {
+      'epure':       "Ses lignes épurées et minimalistes s'intègrent avec discrétion dans votre intérieur, laissant le bois parler de lui-même.",
+      'chaleureux':  "Ses courbes organiques et la chaleur naturelle du bois créent une atmosphère accueillante et réconfortante.",
+      'imposant':    "Sa présence affirmée en fait une pièce maîtresse qui capte le regard et donne du caractère à votre espace.",
+      'boheme':      "Son esprit bohème apporte une touche naturelle et décontractée, évoquant un intérieur libre et authentique.",
+      'scandinave':  "Son design nordique épuré mise sur la fonctionnalité et la beauté simple des matériaux naturels.",
+      'poetique':    "Sa silhouette délicate et romantique apporte une touche de poésie et de douceur à votre décoration.",
+    },
+    'pa_taille-piece': {
+      'petite':  "Ses proportions sont adaptées aux espaces intimistes, sans les encombrer tout en restant visuellement présent.",
+      'moyenne': "Ses dimensions équilibrées s'harmonisent parfaitement avec votre pièce de taille moyenne.",
+      'grande':  "Sa envergure lui permet de remplir l'espace sans se perdre dans les grands volumes.",
+    },
+    'pa_hauteur': {
+      'standard':     "Sa conception tient compte d'une hauteur sous plafond standard pour un rendu optimal.",
+      'confortable':  "Il tire parti de votre belle hauteur sous plafond pour un effet suspendu élégant.",
+      'haute':        "Pensé pour les volumes généreux, il occupe magnifiquement l'espace vertical de votre pièce.",
+    },
+    'pa_type-luminaire': {
+      'au-dessus-meuble':  "Positionné au-dessus de votre mobilier, il crée un jeu de lumière qui met en valeur votre agencement.",
+      'zone-passage':      "Son design s'adapte aux zones de circulation, offrant un éclairage pratique avec une touche décorative.",
+      'dans-un-coin':      "Parfait pour habiller un coin de la pièce, il transforme un espace souvent oublié en point d'intérêt.",
+      'sur-un-mur':        "Fixé au mur, il libère l'espace au sol tout en projetant une lumière sculpturale sur la surface.",
+    },
+  };
+
+  // Choices data for dropdown editing
+  var stepChoices = {
+    'pa_piece': [
+      { slug: 'salon',     label: 'Salon' },
+      { slug: 'cuisine',   label: 'Cuisine' },
+      { slug: 'chambre',   label: 'Chambre' },
+      { slug: 'bureau',    label: 'Bureau' },
+      { slug: 'couloir',   label: 'Hall' },
+      { slug: 'couloir-2', label: 'Couloir' },
+    ],
+    'pa_eclairage': [
+      { slug: 'fonctionnel', label: 'Éclairage fonctionnel' },
+      { slug: 'ambiance',    label: 'Ambiance & décoration' },
+      { slug: 'les-deux',    label: 'Les deux à la fois' },
+    ],
+    'pa_style': [
+      { slug: 'epure',      label: 'Épuré / Minimaliste' },
+      { slug: 'chaleureux', label: 'Chaleureux / Organique' },
+      { slug: 'imposant',   label: 'Imposant / Statement' },
+      { slug: 'boheme',     label: 'Bohème / Nature' },
+      { slug: 'scandinave', label: 'Scandinave / Nordique' },
+      { slug: 'poetique',   label: 'Poétique / Romantique' },
+    ],
+    'pa_taille-piece': [
+      { slug: 'petite',  label: 'Petite (< 10 m²)' },
+      { slug: 'moyenne', label: 'Moyenne (10–20 m²)' },
+      { slug: 'grande',  label: 'Grande (> 20 m²)' },
+    ],
+    'pa_hauteur': [
+      { slug: 'standard',    label: 'Standard (< 2,50 m)' },
+      { slug: 'confortable', label: 'Confortable (2,50–3 m)' },
+      { slug: 'haute',       label: 'Haute (> 3 m)' },
+    ],
+    'pa_type-luminaire': [
+      { slug: 'au-dessus-meuble', label: 'Au-dessus d\'un meuble' },
+      { slug: 'zone-passage',     label: 'Zone de passage' },
+      { slug: 'dans-un-coin',     label: 'Dans un coin' },
+      { slug: 'sur-un-mur',       label: 'Sur un mur' },
+    ],
+  };
+
+  // ================================================================
   // RESULTS
   // ================================================================
   function showResults() {
@@ -310,8 +414,9 @@
       seg.classList.remove('is-active');
     });
 
-    // Render tags
+    // Render tags and explanations
     renderAnswerTags();
+    renderExplanations();
 
     // Fetch products
     fetchResults();
@@ -324,29 +429,114 @@
     if (!dom.resultsTags) return;
 
     var html = '';
-    // Iterate in step order
     for (var i = 1; i <= state.totalSteps; i++) {
       var attr = getAttributeForStep(i);
       var label = attr ? state.labels[attr] : null;
       if (label) {
-        html += '<button class="guide-answer-tag" data-step="' + i + '" type="button" '
+        html += '<div class="guide-tag-wrap" data-attribute="' + escapeHtml(attr) + '">'
+              + '<button class="guide-answer-tag" data-step="' + i + '" data-attribute="' + escapeHtml(attr) + '" type="button" '
               + 'aria-label="Modifier : ' + escapeHtml(label) + '">'
               + '<span class="guide-tag-label">' + escapeHtml(label) + '</span>'
               + '<svg class="guide-tag-edit" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
-              + '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>'
-              + '<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>'
-              + '</svg></button>';
+              + '<path d="m6 9 6 6 6-6"/>'
+              + '</svg></button>'
+              + '</div>';
       }
     }
     dom.resultsTags.innerHTML = html;
 
-    // Bind tag clicks
+    // Bind tag clicks to open dropdown
     dom.resultsTags.querySelectorAll('.guide-answer-tag').forEach(function (tag) {
-      tag.addEventListener('click', function () {
-        var stepNum = parseInt(this.getAttribute('data-step'), 10);
-        goBackToStep(stepNum);
+      tag.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var attr = this.getAttribute('data-attribute');
+        toggleTagDropdown(this, attr);
       });
     });
+  }
+
+  function toggleTagDropdown(tagBtn, attribute) {
+    var wrap = tagBtn.closest('.guide-tag-wrap');
+    var existingDropdown = wrap.querySelector('.guide-tag-dropdown');
+
+    // Close all other dropdowns first
+    closeAllDropdowns();
+
+    if (existingDropdown) return; // Was open, now closed by closeAllDropdowns
+
+    // Build dropdown
+    var choices = stepChoices[attribute];
+    if (!choices) return;
+
+    var currentSlug = state.answers[attribute];
+    var dropdown = document.createElement('div');
+    dropdown.className = 'guide-tag-dropdown';
+
+    choices.forEach(function (choice) {
+      var option = document.createElement('button');
+      option.className = 'guide-tag-option';
+      option.type = 'button';
+      if (choice.slug === currentSlug) option.classList.add('is-current');
+      option.textContent = choice.label;
+      option.addEventListener('click', function (e) {
+        e.stopPropagation();
+        // Update answer
+        state.answers[attribute] = choice.slug;
+        state.labels[attribute] = choice.label;
+        saveSession();
+
+        // Update tag label
+        var labelEl = tagBtn.querySelector('.guide-tag-label');
+        if (labelEl) labelEl.textContent = choice.label;
+
+        // Close dropdown
+        closeAllDropdowns();
+
+        // Re-render explanations and fetch new product
+        renderExplanations();
+        fetchResults();
+      });
+      dropdown.appendChild(option);
+    });
+
+    wrap.appendChild(dropdown);
+    tagBtn.classList.add('is-open');
+
+    // Close on outside click
+    setTimeout(function () {
+      document.addEventListener('click', closeAllDropdowns, { once: true });
+    }, 0);
+  }
+
+  function closeAllDropdowns() {
+    document.querySelectorAll('.guide-tag-dropdown').forEach(function (d) { d.remove(); });
+    document.querySelectorAll('.guide-answer-tag.is-open').forEach(function (t) { t.classList.remove('is-open'); });
+  }
+
+  function renderExplanations() {
+    if (!dom.explanationsList) return;
+
+    var html = '';
+    for (var i = 1; i <= state.totalSteps; i++) {
+      var attr = getAttributeForStep(i);
+      if (!attr || !state.answers[attr]) continue;
+
+      var slug = state.answers[attr];
+      var questionLabel = stepQuestions[attr] || '';
+      var answerLabel = state.labels[attr] || '';
+      var text = (explanations[attr] && explanations[attr][slug]) || '';
+
+      html += '<div class="guide-explanation-item">'
+            + '<div class="guide-explanation-header">'
+            + '<svg class="guide-explanation-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+            + '<span class="guide-explanation-question">' + escapeHtml(questionLabel) + ' :</span> '
+            + '<strong class="guide-explanation-answer">' + escapeHtml(answerLabel) + '</strong>'
+            + '</div>'
+            + '<p class="guide-explanation-text">' + escapeHtml(text) + '</p>'
+            + '</div>';
+    }
+
+    dom.explanationsList.innerHTML = html;
   }
 
   function goBackToStep(stepNum) {
@@ -359,7 +549,6 @@
       if (attr) {
         delete state.answers[attr];
         delete state.labels[attr];
-        // Deselect cards for this step
         var stepEl = document.querySelector('.guide-step[data-step="' + i + '"]');
         if (stepEl) {
           stepEl.querySelectorAll('.guide-choice-card.is-selected').forEach(function (c) {
@@ -387,7 +576,8 @@
 
   function fetchResults() {
     if (dom.resultsLoading) dom.resultsLoading.setAttribute('aria-hidden', 'false');
-    if (dom.resultsGrid) dom.resultsGrid.innerHTML = '';
+    if (dom.resultLayout) dom.resultLayout.style.display = 'none';
+    if (dom.resultError) dom.resultError.style.display = 'none';
     if (dom.restartWrap) dom.restartWrap.style.display = 'none';
 
     var formData = new FormData();
@@ -405,8 +595,12 @@
       if (dom.resultsLoading) dom.resultsLoading.setAttribute('aria-hidden', 'true');
       if (dom.restartWrap) dom.restartWrap.style.display = '';
 
-      if (data.success && data.data) {
-        renderResultProducts(data.data);
+      if (data.success && data.data && data.data.products && data.data.products.length) {
+        state.resultProducts = data.data.products;
+        state.resultIndex = 0;
+        renderCurrentProduct();
+        updateSubtitle(data.data.tier);
+        if (dom.resultLayout) dom.resultLayout.style.display = '';
       } else {
         renderResultsError();
       }
@@ -418,37 +612,77 @@
     });
   }
 
-  function renderResultProducts(data) {
+  function renderCurrentProduct() {
+    var product = state.resultProducts[state.resultIndex];
+    if (!product) return;
+
+    if (dom.resultImage) {
+      dom.resultImage.src = product.image;
+      dom.resultImage.srcset = '';
+      dom.resultImage.alt = product.image_alt || product.title;
+    }
+    if (dom.resultName) {
+      dom.resultName.textContent = product.title;
+      // Trigger product name formatter (MutationObserver will pick it up)
+    }
+    if (dom.resultPrice) {
+      dom.resultPrice.innerHTML = product.price;
+    }
+    if (dom.resultCta) {
+      dom.resultCta.href = product.permalink;
+    }
+
+    // Update proposal counter
+    updateProposalCounter();
+  }
+
+  function updateProposalCounter() {
+    var total = state.resultProducts.length;
+    if (dom.proposalCounter) {
+      dom.proposalCounter.textContent = (state.resultIndex + 1) + ' / ' + total + ' proposition' + (total > 1 ? 's' : '');
+    }
+    // Hide next button if only 1 product
+    if (dom.nextBtn) {
+      dom.nextBtn.style.display = total <= 1 ? 'none' : '';
+    }
+  }
+
+  function updateSubtitle(tier) {
     var subtitleMessages = {
       1: 'Sélection parfaite pour votre espace.',
       2: 'Voici nos créations qui correspondent le mieux à votre espace.',
       3: 'Explorez nos luminaires qui correspondent à votre style.',
       4: 'Notre collection complète — un luminaire trouvera sa place chez vous.',
     };
-
     if (dom.resultsSubtitle) {
-      dom.resultsSubtitle.textContent = subtitleMessages[data.tier] || subtitleMessages[1];
+      dom.resultsSubtitle.textContent = subtitleMessages[tier] || subtitleMessages[1];
     }
+  }
 
-    if (dom.resultsGrid) {
-      dom.resultsGrid.innerHTML = data.html;
+  function bindNextButton() {
+    if (dom.nextBtn) {
+      dom.nextBtn.addEventListener('click', function () {
+        if (state.resultProducts.length <= 1) return;
+        state.resultIndex = (state.resultIndex + 1) % state.resultProducts.length;
 
-      // Stagger animation for product cards
-      var cards = dom.resultsGrid.querySelectorAll('li.product');
-      cards.forEach(function (card, i) {
-        card.style.animationDelay = (i * 0.08) + 's';
-        card.classList.add('guide-result-reveal');
+        // Animate product change
+        if (dom.resultLayout) {
+          var productCol = dom.resultLayout.querySelector('.guide-result-product');
+          if (productCol) {
+            productCol.classList.remove('guide-product-fade');
+            productCol.getBoundingClientRect(); // force reflow
+            productCol.classList.add('guide-product-fade');
+          }
+        }
+
+        renderCurrentProduct();
       });
     }
   }
 
   function renderResultsError() {
-    if (dom.resultsGrid) {
-      dom.resultsGrid.innerHTML = '<li class="guide-results-error">'
-        + '<p>Impossible de charger les résultats. '
-        + '<a href="' + escapeHtml(sapiGuide.shopUrl) + '">Voir toute la collection</a>.</p>'
-        + '</li>';
-    }
+    if (dom.resultLayout) dom.resultLayout.style.display = 'none';
+    if (dom.resultError) dom.resultError.style.display = '';
   }
 
   // ================================================================
