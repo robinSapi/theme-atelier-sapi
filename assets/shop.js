@@ -361,6 +361,23 @@
         }
       });
 
+      // Show/hide individual text cards + recap card based on filters
+      var textCards = document.querySelectorAll('.product-text-card');
+      var recapCard = document.querySelector('.why-sapi-recap');
+      var isFiltered = this.filters.category !== 'all' || this.searchQuery;
+      textCards.forEach(function(card) {
+        if (isFiltered) {
+          card.classList.add('is-filtered-out');
+          card.style.display = 'none';
+        } else {
+          card.classList.remove('is-filtered-out');
+          card.style.display = '';
+        }
+      });
+      if (recapCard) {
+        recapCard.style.display = isFiltered ? '' : 'none';
+      }
+
       // Show/hide "no results" message
       const noResults = document.querySelector('.woocommerce-no-products-found');
       const productsList = document.querySelector('.products.columns-3');

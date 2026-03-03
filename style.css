@@ -1836,6 +1836,114 @@ ul.products li.product {
   color: var(--color-orange, #E35B24);
 }
 
+/* Recap card — visible only when filters are active */
+.why-sapi-recap {
+  max-width: 1400px;
+  margin: 2rem auto 0;
+  padding: 0 3rem;
+}
+
+.why-sapi-recap-inner {
+  background: var(--color-warm, #FBF6EA);
+  border-radius: var(--radius-lg, 16px);
+  border: 2px solid rgba(147, 125, 104, 0.12);
+  padding: 3rem;
+  text-align: center;
+}
+
+.why-sapi-recap-inner > h2 {
+  font-family: var(--font-display, 'Square Peg', cursive);
+  font-size: 2.5rem;
+  color: var(--color-wood, #937D68);
+  margin: 0 0 2rem;
+  font-weight: 400;
+}
+
+.why-sapi-recap-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.why-sapi-recap-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.why-sapi-recap-item h3 {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-dark, #323232);
+  margin: 0;
+}
+
+.why-sapi-recap-item p {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: rgba(50, 50, 50, 0.65);
+  margin: 0;
+}
+
+.why-sapi-recap-highlight {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, rgba(227, 91, 36, 0.04) 0%, rgba(227, 91, 36, 0.08) 100%);
+  border-radius: 12px;
+  text-align: left;
+}
+
+.why-sapi-recap-highlight .product-text-card-icon {
+  background: rgba(227, 91, 36, 0.1);
+  color: var(--color-orange, #E35B24);
+  flex-shrink: 0;
+}
+
+.why-sapi-recap-highlight h3 {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-dark, #323232);
+  margin: 0 0 0.25rem;
+}
+
+.why-sapi-recap-highlight p {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: rgba(50, 50, 50, 0.65);
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .why-sapi-recap-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .why-sapi-recap {
+    padding: 0 1.5rem;
+  }
+  .why-sapi-recap-inner {
+    padding: 2rem 1.5rem;
+  }
+  .why-sapi-recap-grid {
+    grid-template-columns: 1fr;
+  }
+  .why-sapi-recap-highlight {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
 /* EXCEPTION: Carousel slides have fixed width */
 .products-carousel-track > li.products-carousel-slide,
 ul.products.products-carousel-track > li.products-carousel-slide {
