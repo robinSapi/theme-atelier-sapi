@@ -231,22 +231,10 @@ $total_steps = count($guide_steps);
 </div><!-- .guide-luminaire-page -->
 
 <script>
-<?php
-  $rules_file = get_stylesheet_directory() . '/guide-regles.json';
-  $skip_rules = [];
-  if ( file_exists( $rules_file ) ) {
-    $json    = file_get_contents( $rules_file );
-    $decoded = json_decode( $json, true );
-    if ( isset( $decoded['skip_rules'] ) ) {
-      $skip_rules = $decoded['skip_rules'];
-    }
-  }
-?>
 var sapiGuide = <?php echo wp_json_encode([
-  'ajaxUrl'   => admin_url('admin-ajax.php'),
-  'nonce'     => $ajax_nonce,
-  'shopUrl'   => $shop_url,
-  'skipRules' => $skip_rules,
+  'ajaxUrl' => admin_url('admin-ajax.php'),
+  'nonce'   => $ajax_nonce,
+  'shopUrl' => $shop_url,
 ]); ?>;
 </script>
 

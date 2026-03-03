@@ -229,19 +229,6 @@
     }
 
     state.currentStep--;
-
-    // Sauter en arrière par-dessus les étapes auto-remplies
-    while (state.currentStep > 1) {
-      var skipped = getSkippedAnswer(state.currentStep);
-      if (!skipped) break;
-      var skipAttr = getAttributeForStep(state.currentStep);
-      if (skipAttr) {
-        delete state.answers[skipAttr];
-        delete state.labels[skipAttr];
-      }
-      state.currentStep--;
-    }
-
     saveSession();
     renderStep(state.currentStep, 'backward');
   }
@@ -251,41 +238,6 @@
     if (!stepEl) return null;
     var firstCard = stepEl.querySelector('.guide-choice-card');
     return firstCard ? firstCard.getAttribute('data-attribute') : null;
-  }
-
-  /**
-   * Vérifie si une règle de saut s'applique pour l'étape donnée.
-   * Retourne { attribute, slug, label } si oui, null sinon.
-   */
-  function getSkippedAnswer(stepNum) {
-    var rules = (typeof sapiGuide !== 'undefined' && sapiGuide.skipRules) ? sapiGuide.skipRules : [];
-    var stepAttr = getAttributeForStep(stepNum);
-    if (!stepAttr) return null;
-
-    for (var i = 0; i < rules.length; i++) {
-      var rule = rules[i];
-      if (!rule.alors || !rule.alors[stepAttr]) continue;
-
-      var allMatch = true;
-      for (var condAttr in rule.si) {
-        if (!rule.si.hasOwnProperty(condAttr)) continue;
-        var condValues = rule.si[condAttr];
-        if (!Array.isArray(condValues)) condValues = [condValues];
-        if (condValues.indexOf(state.answers[condAttr]) === -1) {
-          allMatch = false;
-          break;
-        }
-      }
-
-      if (allMatch) {
-        return {
-          attribute: stepAttr,
-          slug: rule.alors[stepAttr],
-          label: rule.label
-        };
-      }
-    }
-    return null;
   }
 
   // ================================================================
@@ -310,15 +262,6 @@
       card.classList.add('is-selected');
 
       var nextStep = state.currentStep + 1;
-
-      // Sauter les étapes dont la réponse est déterminée par les règles
-      while (nextStep <= state.totalSteps) {
-        var skipped = getSkippedAnswer(nextStep);
-        if (!skipped) break;
-        state.answers[skipped.attribute] = skipped.slug;
-        state.labels[skipped.attribute] = skipped.label;
-        nextStep++;
-      }
 
       if (nextStep > state.totalSteps) {
         // All done - show results
