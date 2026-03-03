@@ -8369,7 +8369,8 @@ transform: translateY(15px);
 .bento-storytelling {
   grid-column: span 4;
   grid-row: span 2;
-  background: var(--color-warm);
+  background: var(--color-white);
+  border: 3px solid var(--color-wood);
 }
 
 .storytelling-inner {
