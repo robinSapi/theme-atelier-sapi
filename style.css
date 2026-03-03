@@ -6369,6 +6369,104 @@ li.carousel-editorial-slide,
   color: var(--bois-sombre, #4A3F35);
 }
 
+/* Bandeau CTA – Guide Luminaire */
+.advice-guide-cta {
+  position: relative;
+  padding: 80px 20px;
+  background: linear-gradient(
+    135deg,
+    var(--color-wood, #937D68) 0%,
+    #7A6554 40%,
+    #6B5A4A 100%
+  );
+  text-align: center;
+  overflow: hidden;
+}
+
+.advice-guide-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 30% 50%,
+    rgba(227, 91, 36, 0.12) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+.advice-guide-cta-inner {
+  position: relative;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.advice-guide-cta-title {
+  font-family: var(--font-display, "Square Peg", Georgia, serif);
+  font-size: clamp(36px, 6vw, 56px);
+  font-weight: 400;
+  color: var(--creme-papier, #FEFDFB);
+  margin: 0 0 1rem;
+  line-height: 1.2;
+}
+
+.advice-guide-cta-text {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+  color: rgba(254, 253, 251, 0.85);
+  line-height: 1.7;
+  margin: 0 0 2.5rem;
+  max-width: 550px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.advice-guide-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 36px;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  color: #fff;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(227, 91, 36, 0.35);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.advice-guide-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(227, 91, 36, 0.45);
+  color: #fff;
+  text-decoration: none;
+}
+
+.advice-guide-cta-btn:active {
+  transform: translateY(0);
+}
+
+.advice-guide-cta-btn svg {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .advice-guide-cta {
+    padding: 60px 20px;
+  }
+
+  .advice-guide-cta-btn {
+    padding: 14px 28px;
+    font-size: 0.9rem;
+  }
+}
+
 /* ========================================
    PAGE TEMPLATE - Contact (PREMIUM)
    ======================================== */

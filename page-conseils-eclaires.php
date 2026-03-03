@@ -95,6 +95,26 @@ for ($i = 1; $i <= 4; $i++) {
   </div>
 </div>
 
+<?php
+// URL du Guide Luminaire (recherche dynamique)
+$guide_url = home_url('/guide-luminaire/');
+$guide_pages = get_pages(['meta_key' => '_wp_page_template', 'meta_value' => 'page-guide-luminaire.php', 'number' => 1]);
+if (!empty($guide_pages)) {
+  $guide_url = get_permalink($guide_pages[0]->ID);
+}
+?>
+
+<section class="advice-guide-cta">
+  <div class="advice-guide-cta-inner">
+    <h2 class="advice-guide-cta-title">Trouvez le luminaire fait pour vous</h2>
+    <p class="advice-guide-cta-text">Répondez à 6 questions simples et découvrez nos créations adaptées à votre intérieur, votre style et vos envies.</p>
+    <a href="<?php echo esc_url($guide_url); ?>" class="advice-guide-cta-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6m-3-3h6"/></svg>
+      Démarrer le questionnaire
+    </a>
+  </div>
+</section>
+
 <section class="advice-outro">
   <p>Éclairer une pièce, c'est un peu comme choisir la bonne sauce pour ses pâtes : tout est une question de préférence et de dosage !</p>
   <span class="advice-outro-signature">Robin, créateur à l'Atelier Sâpi</span>
