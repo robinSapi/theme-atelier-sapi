@@ -70,6 +70,14 @@ Avant de suggérer de vider le cache, vérifier :
 ### "L'audit dit qu'il y a une faille XSS dans cinetique.js"
 **Réalité :** Un audit automatisé a cité cinetique.js:416 mais c'est du code canvas particles, pas du innerHTML. Le vrai innerHTML (inoffensif) est dans menu.js pour le SVG search icon. Vérifier les claims d'audit contre le code réel.
 
+### "Affiche le titre produit directement avec the_title() / esc_html()"
+**Réalité :** Les noms de produits ont un formatage en deux parties géré par `product-name-formatter.js`.
+**Faire :** S'assurer que l'élément HTML contenant le titre a un sélecteur CSS ciblé par le formatter. Le JS sépare automatiquement :
+- **Prénom** (1er mot) → `<span class="product-firstname">` = Montserrat 800, uppercase, 0.75em
+- **Article + nom** (reste) → `<span class="product-restname">` = Square Peg 400, capitalize, 1.6em
+**Sélecteurs actuels** : `.product-title-mobile`, `.product-title-v2`, `.carousel-product-name`, `.product-name`, `.product-hero-name`, `.product-intro-title`, `.bento-product-featured h3`, `.bento-hero .bento-title`, `.product-name-small`, `.quick-view-title`, `.wc-block-components-product-name`
+**Pour un nouveau contexte :** Ajouter le sélecteur dans les DEUX tableaux `selectors` de `assets/product-name-formatter.js` (init + MutationObserver).
+
 ### "Change juste img.src, pas besoin de toucher au srcset"
 **Réalité :** Si `srcset` est défini, le navigateur peut ignorer le nouveau `src` et continuer d'afficher l'ancienne image du `srcset`.
 **Faire :** TOUJOURS réinitialiser `srcset` lors de changements d'image :

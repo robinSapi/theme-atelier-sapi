@@ -116,6 +116,21 @@ $has_acf = function_exists('get_field');
 ```
 **Variables globales réservées à éviter** : `$acf`, `$wpdb`, `$wp`, `$wp_query`, `$post`
 
+### 11. ❌ Afficher un titre produit sans le formatter
+**Tous les titres de produits DOIVENT passer par `product-name-formatter.js`.**
+Le formatter sépare automatiquement le prénom (1er mot) du reste du nom :
+- **Prénom** → `<span class="product-firstname">` = Montserrat gras, uppercase, 0.75em
+- **Article + nom** → `<span class="product-restname">` = Square Peg cursive, capitalize, 1.6em
+
+```html
+<!-- INTERDIT — titre brut sans formatage -->
+<h3><?php the_title(); ?></h3>
+
+<!-- CORRECT — utiliser un sélecteur ciblé par le formatter -->
+<!-- Le JS formate automatiquement si le sélecteur est dans la liste -->
+```
+**Pour ajouter un nouveau contexte :** ajouter le sélecteur CSS dans les deux tableaux `selectors` de `assets/product-name-formatter.js` (init + MutationObserver).
+
 ---
 
 ## 📂 STRUCTURE FICHIERS CLÉS
