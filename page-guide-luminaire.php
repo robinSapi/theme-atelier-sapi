@@ -175,7 +175,10 @@ $icons = [
 
     <!-- AI Recommendation Text -->
     <div class="guide-ai-recommendation" id="guide-ai-text" style="display:none;">
+      <span class="guide-ai-quote guide-ai-quote-open">&laquo;</span>
       <div class="guide-ai-text-content" id="guide-ai-text-content"></div>
+      <span class="guide-ai-quote guide-ai-quote-close">&raquo;</span>
+      <div class="guide-ai-signature">&mdash; Robin</div>
     </div>
 
     <!-- Products row: main + optional complement -->
