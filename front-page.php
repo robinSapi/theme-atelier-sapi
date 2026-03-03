@@ -200,7 +200,6 @@ $room_choices = [
   ['label' => 'Bureau',  'slug' => 'bureau',    'icon' => 'monitor'],
   ['label' => 'Hall',    'slug' => 'couloir',   'icon' => 'door'],
   ['label' => 'Couloir', 'slug' => 'couloir-2', 'icon' => 'stairs'],
-  ['label' => 'Autre',   'slug' => 'autre',     'icon' => 'autre'],
 ];
 
 $room_icons = [
