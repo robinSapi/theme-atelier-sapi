@@ -40,9 +40,6 @@ $guide_steps = [
       ['label' => 'Épuré / Minimaliste',      'slug' => 'epure',       'icon' => 'minimal'],
       ['label' => 'Chaleureux / Organique',    'slug' => 'chaleureux',  'icon' => 'organic'],
       ['label' => 'Imposant / Statement',      'slug' => 'imposant',    'icon' => 'statement'],
-      ['label' => 'Bohème / Nature',           'slug' => 'boheme',      'icon' => 'boheme'],
-      ['label' => 'Scandinave / Nordique',     'slug' => 'scandinave',  'icon' => 'scandinave'],
-      ['label' => 'Poétique / Romantique',     'slug' => 'poetique',    'icon' => 'poetique'],
     ],
   ],
   [

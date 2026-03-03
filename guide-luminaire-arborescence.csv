@@ -11,9 +11,6 @@
 3,Quel est le style recherché ?,Épuré / Minimaliste,epure,Style,pa_style
 3,Quel est le style recherché ?,Chaleureux / Organique,chaleureux,Style,pa_style
 3,Quel est le style recherché ?,Imposant / Statement,imposant,Style,pa_style
-3,Quel est le style recherché ?,Bohème / Nature,boheme,Style,pa_style
-3,Quel est le style recherché ?,Scandinave / Nordique,scandinave,Style,pa_style
-3,Quel est le style recherché ?,Poétique / Romantique,poetique,Style,pa_style
 4,Quelle est la taille de la pièce ?,Petite (< 10 m²),petite,Taille pièce,pa_taille-piece
 4,Quelle est la taille de la pièce ?,Moyenne (10 – 20 m²),moyenne,Taille pièce,pa_taille-piece
 4,Quelle est la taille de la pièce ?,Grande (> 20 m²),grande,Taille pièce,pa_taille-piece

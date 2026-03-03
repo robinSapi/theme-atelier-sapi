@@ -323,9 +323,6 @@
       'epure':       "Ses lignes épurées et minimalistes s'intègrent avec discrétion dans votre intérieur, laissant le bois parler de lui-même.",
       'chaleureux':  "Ses courbes organiques et la chaleur naturelle du bois créent une atmosphère accueillante et réconfortante.",
       'imposant':    "Sa présence affirmée en fait une pièce maîtresse qui capte le regard et donne du caractère à votre espace.",
-      'boheme':      "Son esprit bohème apporte une touche naturelle et décontractée, évoquant un intérieur libre et authentique.",
-      'scandinave':  "Son design nordique épuré mise sur la fonctionnalité et la beauté simple des matériaux naturels.",
-      'poetique':    "Sa silhouette délicate et romantique apporte une touche de poésie et de douceur à votre décoration.",
     },
     'pa_taille-piece': {
       'petite':  "Ses proportions sont adaptées aux espaces intimistes, sans les encombrer tout en restant visuellement présent.",
@@ -364,9 +361,6 @@
       { slug: 'epure',      label: 'Épuré / Minimaliste' },
       { slug: 'chaleureux', label: 'Chaleureux / Organique' },
       { slug: 'imposant',   label: 'Imposant / Statement' },
-      { slug: 'boheme',     label: 'Bohème / Nature' },
-      { slug: 'scandinave', label: 'Scandinave / Nordique' },
-      { slug: 'poetique',   label: 'Poétique / Romantique' },
     ],
     'pa_taille-piece': [
       { slug: 'petite',  label: 'Petite (< 10 m²)' },
