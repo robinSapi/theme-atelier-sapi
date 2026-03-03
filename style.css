@@ -16971,6 +16971,8 @@ html.sapi-intro-active body {
 .guide-back-btn:hover {
   border-color: var(--color-wood, #937D68);
   color: #4A3F35;
+  background: #fff;
+  transform: translateX(-50%) translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
