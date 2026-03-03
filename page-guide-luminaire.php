@@ -14,18 +14,19 @@ $guide_steps = [
     'attribute' => 'pa_piece',
     'question'  => 'Pour quelle pièce cherchez-vous un luminaire ?',
     'choices'   => [
-      ['label' => 'Salon / Séjour / Salle à manger', 'slug' => 'salon',     'icon' => 'sofa'],
-      ['label' => 'Cuisine',                         'slug' => 'cuisine',   'icon' => 'dining'],
-      ['label' => 'Chambre',                         'slug' => 'chambre',   'icon' => 'bed'],
-      ['label' => 'Bureau / Atelier',                'slug' => 'bureau',    'icon' => 'monitor'],
-      ['label' => 'Entrée / Hall',                   'slug' => 'couloir',   'icon' => 'door'],
-      ['label' => 'Couloir / Montée d\'escalier',   'slug' => 'couloir-2', 'icon' => 'stairs'],
+      ['label' => 'Salon',   'slug' => 'salon',     'icon' => 'sofa'],
+      ['label' => 'Cuisine', 'slug' => 'cuisine',   'icon' => 'dining'],
+      ['label' => 'Chambre', 'slug' => 'chambre',   'icon' => 'bed'],
+      ['label' => 'Bureau',  'slug' => 'bureau',    'icon' => 'monitor'],
+      ['label' => 'Hall',    'slug' => 'couloir',   'icon' => 'door'],
+      ['label' => 'Couloir', 'slug' => 'couloir-2', 'icon' => 'stairs'],
+      ['label' => 'Autre',   'slug' => 'autre',     'icon' => 'autre'],
     ],
   ],
   [
     'id'        => 2,
     'attribute' => 'pa_eclairage',
-    'question'  => 'Quel usage principal ?',
+    'question'  => 'Quel sera l\'usage principal ?',
     'choices'   => [
       ['label' => 'Éclairage fonctionnel',  'slug' => 'fonctionnel',  'icon' => 'zap'],
       ['label' => 'Ambiance & décoration',  'slug' => 'ambiance',     'icon' => 'moon'],
@@ -34,8 +35,21 @@ $guide_steps = [
   ],
   [
     'id'        => 3,
+    'attribute' => 'pa_style',
+    'question'  => 'Quel est le style recherché ?',
+    'choices'   => [
+      ['label' => 'Épuré / Minimaliste',      'slug' => 'epure',       'icon' => 'minimal'],
+      ['label' => 'Chaleureux / Organique',    'slug' => 'chaleureux',  'icon' => 'organic'],
+      ['label' => 'Imposant / Statement',      'slug' => 'imposant',    'icon' => 'statement'],
+      ['label' => 'Bohème / Nature',           'slug' => 'boheme',      'icon' => 'boheme'],
+      ['label' => 'Scandinave / Nordique',     'slug' => 'scandinave',  'icon' => 'scandinave'],
+      ['label' => 'Poétique / Romantique',     'slug' => 'poetique',    'icon' => 'poetique'],
+    ],
+  ],
+  [
+    'id'        => 4,
     'attribute' => 'pa_taille-piece',
-    'question'  => 'Quelle taille de pièce ?',
+    'question'  => 'Quelle est la taille de la pièce ?',
     'choices'   => [
       ['label' => 'Petite (< 10 m²)',    'slug' => 'petite',  'icon' => 'square-sm'],
       ['label' => 'Moyenne (10–20 m²)',   'slug' => 'moyenne', 'icon' => 'square-md'],
@@ -43,19 +57,9 @@ $guide_steps = [
     ],
   ],
   [
-    'id'        => 4,
-    'attribute' => 'pa_type-luminaire',
-    'question'  => 'Où sera placé le luminaire ?',
-    'choices'   => [
-      ['label' => 'Au-dessus d\'une table / îlot',  'slug' => 'au-dessus-table',  'icon' => 'pendant'],
-      ['label' => 'Zone de passage',                 'slug' => 'zone-passage',     'icon' => 'compass'],
-      ['label' => 'Coin / mur',                      'slug' => 'coin-mur',         'icon' => 'wall'],
-    ],
-  ],
-  [
     'id'        => 5,
     'attribute' => 'pa_hauteur',
-    'question'  => 'Hauteur sous plafond ?',
+    'question'  => 'Quelle est la hauteur sous-plafond ?',
     'choices'   => [
       ['label' => 'Standard (< 2,50 m)',     'slug' => 'standard',     'icon' => 'ceiling-low'],
       ['label' => 'Confortable (2,50–3 m)',  'slug' => 'confortable',  'icon' => 'ceiling-mid'],
@@ -64,12 +68,13 @@ $guide_steps = [
   ],
   [
     'id'        => 6,
-    'attribute' => 'pa_style',
-    'question'  => 'Quel style recherché ?',
+    'attribute' => 'pa_type-luminaire',
+    'question'  => 'Où sera placé le luminaire ?',
     'choices'   => [
-      ['label' => 'Épuré / Minimaliste',    'slug' => 'epure',      'icon' => 'minimal'],
-      ['label' => 'Chaleureux / Organique',  'slug' => 'chaleureux', 'icon' => 'organic'],
-      ['label' => 'Imposant / Statement',    'slug' => 'imposant',   'icon' => 'statement'],
+      ['label' => 'Au-dessus d\'un meuble',  'slug' => 'au-dessus-meuble',  'icon' => 'pendant'],
+      ['label' => 'Zone de passage',          'slug' => 'zone-passage',      'icon' => 'compass'],
+      ['label' => 'Dans un coin',             'slug' => 'dans-un-coin',      'icon' => 'coin'],
+      ['label' => 'Sur un mur',               'slug' => 'sur-un-mur',        'icon' => 'wall'],
     ],
   ],
 ];
@@ -96,6 +101,11 @@ $icons = [
   'minimal'     => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><line x1="12" y1="8" x2="12" y2="16"/></svg>',
   'organic'     => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-3 0-6 2-7 5s0 7 2 9 6 3 9 2 5-4 5-7-1-6-3-8-3-1-6-1z"/><circle cx="12" cy="13" r="2.5"/></svg>',
   'statement'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 22 12 12 22 2 12z"/></svg>',
+  'boheme'      => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 17 3.5s1 5.5-1 10.5c-1 2.5-3.5 4-5 6z"/><path d="M11 20v-10"/></svg>',
+  'scandinave'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/><path d="m20 16-4-4 4-4"/><path d="m4 8 4 4-4 4"/><path d="m16 4-4 4-4-4"/><path d="m8 20 4-4 4 4"/></svg>',
+  'poetique'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg>',
+  'autre'       => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  'coin'        => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><circle cx="10" cy="12" r="3"/><path d="M10 9V5"/><path d="M7 12H4"/></svg>',
   'stairs'      => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4v-4h4v-4h4V8h4"/><path d="M4 20V8"/><path d="M20 20V8"/></svg>',
 ];
 

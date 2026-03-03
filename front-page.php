@@ -200,6 +200,7 @@ $room_choices = [
   ['label' => 'Bureau',  'slug' => 'bureau',    'icon' => 'monitor'],
   ['label' => 'Hall',    'slug' => 'couloir',   'icon' => 'door'],
   ['label' => 'Couloir', 'slug' => 'couloir-2', 'icon' => 'stairs'],
+  ['label' => 'Autre',   'slug' => 'autre',     'icon' => 'autre'],
 ];
 
 $room_icons = [
@@ -209,6 +210,7 @@ $room_icons = [
   'monitor' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>',
   'door'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="15" cy="12" r="1"/></svg>',
   'stairs'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4v-4h4v-4h4V8h4"/><path d="M4 20V8"/><path d="M20 20V8"/></svg>',
+  'autre'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
 ];
 
 // Featured products for Bento grid (random product)
