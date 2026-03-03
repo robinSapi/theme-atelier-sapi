@@ -194,11 +194,12 @@ if (!empty($guide_pages)) {
 
 // Room choices for mini-questionnaire "Pour quelle pièce ?"
 $room_choices = [
-  ['label' => 'Salon',   'slug' => 'salon',   'icon' => 'sofa'],
-  ['label' => 'Cuisine', 'slug' => 'cuisine', 'icon' => 'dining'],
-  ['label' => 'Chambre', 'slug' => 'chambre', 'icon' => 'bed'],
-  ['label' => 'Bureau',  'slug' => 'bureau',  'icon' => 'monitor'],
-  ['label' => 'Entrée',  'slug' => 'couloir', 'icon' => 'door'],
+  ['label' => 'Salon',   'slug' => 'salon',     'icon' => 'sofa'],
+  ['label' => 'Cuisine', 'slug' => 'cuisine',   'icon' => 'dining'],
+  ['label' => 'Chambre', 'slug' => 'chambre',   'icon' => 'bed'],
+  ['label' => 'Bureau',  'slug' => 'bureau',    'icon' => 'monitor'],
+  ['label' => 'Entrée',  'slug' => 'couloir',   'icon' => 'door'],
+  ['label' => 'Couloir', 'slug' => 'couloir-2', 'icon' => 'stairs'],
 ];
 
 $room_icons = [
@@ -207,6 +208,7 @@ $room_icons = [
   'bed'     => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M2 14h20"/><path d="M2 10V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/></svg>',
   'monitor' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>',
   'door'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="15" cy="12" r="1"/></svg>',
+  'stairs'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4v-4h4v-4h4V8h4"/><path d="M4 20V8"/><path d="M20 20V8"/></svg>',
 ];
 
 // Featured products for Bento grid (random product)
