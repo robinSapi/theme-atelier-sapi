@@ -16606,7 +16606,7 @@ html.sapi-intro-active body {
 .guide-steps-wrapper {
   position: relative;
   width: 100%;
-  max-width: 780px;
+  max-width: 1000px;
 }
 
 /* ---- Individual Step ---- */
@@ -16647,20 +16647,20 @@ html.sapi-intro-active body {
 
 .guide-step-number {
   font-family: 'Montserrat', sans-serif;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--color-wood, #937D68);
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
 .guide-step-question {
   font-family: 'Montserrat', sans-serif;
-  font-size: clamp(1.4rem, 3.5vw, 2.15rem);
+  font-size: clamp(1.8rem, 4vw, 2.75rem);
   font-weight: 800;
   color: var(--color-dark, #323232);
-  margin-bottom: 2.5rem;
+  margin-bottom: 3rem;
   line-height: 1.25;
 }
 
@@ -16668,14 +16668,15 @@ html.sapi-intro-active body {
 .guide-choices-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  max-width: 580px;
+  gap: 1.25rem;
+  max-width: 750px;
   margin: 0 auto;
 }
 
-.guide-choices-grid[data-count="5"] {
+.guide-choices-grid[data-count="5"],
+.guide-choices-grid[data-count="6"] {
   grid-template-columns: repeat(3, 1fr);
-  max-width: 680px;
+  max-width: 850px;
 }
 
 .guide-choices-grid[data-count="5"] .guide-choice-card:nth-child(4),
@@ -16688,8 +16689,8 @@ html.sapi-intro-active body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.875rem;
-  padding: 1.75rem 1rem;
+  gap: 1rem;
+  padding: 2.25rem 1.25rem;
   background: #fff;
   border: 2px solid rgba(147, 125, 104, 0.15);
   border-radius: 16px;
@@ -16700,7 +16701,7 @@ html.sapi-intro-active body {
     box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
     background 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: 'Montserrat', sans-serif;
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--color-dark, #323232);
   text-align: center;
@@ -16734,8 +16735,8 @@ html.sapi-intro-active body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
+  width: 64px;
+  height: 64px;
   background: var(--color-warm, #FBF6EA);
   border-radius: 50%;
   color: var(--color-wood, #937D68);
@@ -16753,8 +16754,8 @@ html.sapi-intro-active body {
 }
 
 .guide-choice-icon svg {
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
 }
 
 .guide-choice-label {
