@@ -1768,7 +1768,7 @@ ul.products li.product {
 }
 
 .product-text-card-inner {
-  padding: 2rem 1.5rem;
+  padding: 3rem 2rem;
   background: var(--color-warm, #FBF6EA);
   border-radius: var(--radius-lg, 16px);
   border: 2px solid rgba(147, 125, 104, 0.12);
@@ -1778,6 +1778,7 @@ ul.products li.product {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   -webkit-transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1790,32 +1791,38 @@ ul.products li.product {
 }
 
 .product-text-card-icon {
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(147, 125, 104, 0.08);
   border-radius: 50%;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
   color: var(--color-wood, #937D68);
+}
+
+.product-text-card-icon svg {
+  width: 40px;
+  height: 40px;
 }
 
 .product-text-card-inner h3 {
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 1.05rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--color-dark, #323232);
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.5rem;
   letter-spacing: -0.01em;
 }
 
 .product-text-card-inner p {
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.85rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.7;
   color: rgba(50, 50, 50, 0.7);
   margin: 0;
+  max-width: 280px;
 }
 
 /* Highlight variant (Fabriqué avec amour) */
