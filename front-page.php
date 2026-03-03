@@ -185,6 +185,13 @@ if ($gc_query->have_posts()) {
   wp_reset_postdata();
 }
 
+// URL du Guide Luminaire (recherche dynamique de la page par template)
+$guide_url = home_url('/guide-luminaire/'); // fallback
+$guide_pages = get_pages(['meta_key' => '_wp_page_template', 'meta_value' => 'page-guide-luminaire.php', 'number' => 1]);
+if (!empty($guide_pages)) {
+  $guide_url = get_permalink($guide_pages[0]->ID);
+}
+
 // Room choices for mini-questionnaire "Pour quelle pièce ?"
 $room_choices = [
   ['label' => 'Salon',   'slug' => 'salon-sejour',           'icon' => 'sofa'],
@@ -422,14 +429,14 @@ foreach ($collection_slugs as $col) {
         <h3 class="room-picker-title">Pour quelle pièce cherchez-vous un luminaire ?</h3>
         <div class="room-picker-cards">
           <?php foreach ($room_choices as $room) : ?>
-            <a href="<?php echo esc_url(home_url('/guide-luminaire/?piece=' . $room['slug'])); ?>" class="room-card">
+            <a href="<?php echo esc_url(add_query_arg('piece', $room['slug'], $guide_url)); ?>" class="room-card">
               <span class="room-card-icon"><?php echo $room_icons[$room['icon']]; ?></span>
               <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
             </a>
           <?php endforeach; ?>
         </div>
         <p class="room-picker-sub">
-          <a href="<?php echo esc_url(home_url('/guide-luminaire/')); ?>">Trouvez le luminaire idéal en 6 questions →</a>
+          <a href="<?php echo esc_url($guide_url); ?>">Trouvez le luminaire idéal en 6 questions →</a>
         </p>
       </div>
     </div>
