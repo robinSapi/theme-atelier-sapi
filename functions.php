@@ -1646,9 +1646,13 @@ function sapi_guide_find_product_by_id(array $products, $id) {
  * Build the system prompt for Claude with filtered products and client answers
  */
 function sapi_guide_build_system_prompt(array $products_data, array $answers, array $complement_data = []) {
-  $prompt = "Tu es le conseiller luminaire de l'Atelier Sâpi, un atelier artisanal à Lyon qui crée des luminaires en bois découpés au laser et assemblés à la main par Robin.\n\n";
+  $theme_dir = get_stylesheet_directory();
 
-  $prompt .= "RÈGLE ABSOLUE : Tu ne recommandes QUE les produits listés ci-dessous. Ne jamais inventer de produit, de prix ou de caractéristique.\n\n";
+  // Load rules and tone from text files
+  $regles = file_get_contents($theme_dir . '/assets/guide-prompt-regles.txt');
+  $ton    = file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt');
+
+  $prompt = $regles . "\n\n" . $ton . "\n\n";
 
   // Catalogue filtré
   $prompt .= "CATALOGUE FILTRÉ (correspond aux besoins du client) :\n";
@@ -1683,22 +1687,8 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
     $prompt .= "- " . $label . " : " . $val . "\n";
   }
 
-  // Instructions de réponse
-  $prompt .= "\nINSTRUCTIONS :\n";
-  $prompt .= "1. Recommande UN produit principal parmi le catalogue filtré.\n";
-  if (!empty($complement_data)) {
-    $prompt .= "2. Recommande aussi UN produit complémentaire parmi les produits complémentaires, en expliquant pourquoi plusieurs sources lumineuses sont importantes dans une grande pièce.\n";
-  } else {
-    $prompt .= "2. Pas de produit complémentaire nécessaire.\n";
-  }
-  $prompt .= "3. Explique POURQUOI ce produit convient en liant à chaque réponse du client.\n";
-  $prompt .= "4. Si un format a été exclu (vertical en plafond bas sans table), mentionne-le naturellement.\n";
-  $prompt .= "5. Ton : chaleureux, passionné, artisan. Pas commercial ni vendeur. Vouvoie le client.\n";
-  $prompt .= "6. Maximum 80 mots pour la recommandation. Sois concis et impactant.\n";
-  $prompt .= "7. Propose 4 boutons de relance pertinents pour continuer la discussion.\n";
-  $prompt .= "8. N'utilise AUCUN formatage markdown dans le texte de recommandation (pas de **, pas de #, pas de _). Écris en texte brut uniquement. Mentionne les noms de produits naturellement dans le texte.\n\n";
-
-  $prompt .= "FORMAT DE RÉPONSE (JSON strict, sans commentaires) :\n";
+  // Format de réponse JSON
+  $prompt .= "\nFORMAT DE RÉPONSE (JSON strict, sans commentaires) :\n";
   $prompt .= "{\n";
   $prompt .= "  \"recommendation\": \"Texte de recommandation personnalisé...\",\n";
   $prompt .= "  \"main_product_id\": 123,\n";
@@ -1710,7 +1700,6 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
   $prompt .= "    {\"label\": \"Texte du bouton\", \"type\": \"contact\"}\n";
   $prompt .= "  ]\n";
   $prompt .= "}\n";
-  $prompt .= "Si pas de complément, mettre complement_product_id à null.\n";
 
   return $prompt;
 }
