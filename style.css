@@ -16991,9 +16991,9 @@ html.sapi-intro-active body {
 .guide-choice-card:hover {
   background: #fff;
   color: var(--color-dark, #323232);
-  border-color: var(--color-wood, #937D68);
+  border-color: var(--color-orange, #E35B24);
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(74, 63, 53, 0.1);
+  box-shadow: 0 8px 24px rgba(227, 91, 36, 0.08);
 }
 
 .guide-choice-card:focus-visible {
