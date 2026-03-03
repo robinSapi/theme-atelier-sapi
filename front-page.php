@@ -411,7 +411,7 @@ foreach ($collection_slugs as $col) {
       <span class="giftcard-badge">Idée cadeau</span>
       <div class="giftcard-info">
         <h3>Offrez la lumière</h3>
-        <span class="giftcard-price"><?php echo wp_kses_post($gift_card['price']); ?></span>
+        <span class="giftcard-price">À partir de <?php echo wp_kses_post($gift_card['price']); ?></span>
       </div>
     </a>
     <?php endif; ?>

@@ -8446,7 +8446,7 @@ transform: translateY(15px);
   top: 1rem;
   left: 1rem;
   padding: 0.4rem 1rem;
-  background: linear-gradient(135deg, #D4AF37 0%, #C5A028 100%);
+  background: var(--color-wood);
   color: #fff;
   font-family: var(--font-body);
   font-size: 0.7rem;
@@ -8455,7 +8455,7 @@ transform: translateY(15px);
   letter-spacing: 0.1em;
   border-radius: 50px;
   z-index: 2;
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 2px 8px rgba(147, 125, 104, 0.3);
 }
 
 .giftcard-info {
@@ -8482,11 +8482,11 @@ transform: translateY(15px);
 .giftcard-price {
   display: inline-block;
   padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #D4AF37 0%, #C5A028 100%);
+  background: var(--color-wood);
   color: #fff;
   font-family: var(--font-body);
-  font-size: 1rem;
-  font-weight: 800;
+  font-size: 0.85rem;
+  font-weight: 600;
   border-radius: 50px;
   white-space: nowrap;
 }
