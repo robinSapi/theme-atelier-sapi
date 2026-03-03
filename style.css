@@ -16499,38 +16499,6 @@ html.sapi-intro-active body {
    GUIDE LUMINAIRE — QUESTIONNAIRE
    ======================================== */
 
-/* ---- Progress Bar ---- */
-.guide-progress-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 5px;
-  display: none;
-  gap: 3px;
-  z-index: 1001;
-  padding: 0 2px;
-}
-
-.guide-progress-bar.is-visible {
-  display: flex;
-}
-
-.guide-progress-segment {
-  flex: 1;
-  background: rgba(147, 125, 104, 0.15);
-  border-radius: 3px;
-  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.guide-progress-segment.is-done {
-  background: linear-gradient(90deg, #E35B24 0%, #D14F1C 100%);
-}
-
-.guide-progress-segment.is-active {
-  background: rgba(227, 91, 36, 0.4);
-}
-
 /* ---- Page Layout ---- */
 .guide-luminaire-page {
   min-height: 100vh;

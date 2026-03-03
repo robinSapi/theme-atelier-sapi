@@ -27,8 +27,8 @@
     dom.intro            = document.getElementById('guide-intro');
     dom.quiz             = document.getElementById('guide-quiz');
     dom.steps            = document.querySelectorAll('.guide-step');
-    dom.progressBar      = document.querySelector('.guide-progress-bar');
-    dom.progressSegments = document.querySelectorAll('.guide-progress-segment');
+    dom.progressBar      = null;
+    dom.progressSegments = [];
     dom.backBtn          = document.getElementById('guide-back');
     dom.stepCounter      = document.querySelector('.guide-step-counter');
     dom.currentStepEl    = document.getElementById('guide-current-step');

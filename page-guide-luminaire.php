@@ -102,13 +102,6 @@ $icons = [
 $total_steps = count($guide_steps);
 ?>
 
-<!-- Progress bar -->
-<div class="guide-progress-bar" aria-hidden="true">
-  <?php for ($i = 1; $i <= $total_steps; $i++) : ?>
-    <div class="guide-progress-segment" data-segment="<?php echo esc_attr($i); ?>"></div>
-  <?php endfor; ?>
-</div>
-
 <div class="guide-luminaire-page">
 
   <!-- ─── Intro Screen ─── -->
