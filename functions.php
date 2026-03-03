@@ -1624,6 +1624,7 @@ function sapi_guide_collect_results($query, array $answers) {
       'categories'      => $cat_slugs,
       'format'          => $format,
       'type_ampoule'    => $ampoule,
+      'total_sales'     => (int) $product->get_total_sales(),
     ];
   }
 
@@ -1661,7 +1662,7 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
     if ($p['variation_label']) {
       $prompt .= " | Essence recommandée : " . $p['variation_label'];
     }
-    $prompt .= " | ID : " . $p['id'] . "\n";
+    $prompt .= " | Ventes : " . $p['total_sales'] . " | ID : " . $p['id'] . "\n";
   }
 
   // Compléments si grande pièce

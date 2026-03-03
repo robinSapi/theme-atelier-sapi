@@ -11,4 +11,5 @@ INSTRUCTIONS :
 6. Maximum 80 mots pour la recommandation. Sois concis et impactant.
 7. N'utilise AUCUN formatage markdown (pas de **, pas de #, pas de _). Texte brut uniquement.
 8. Mentionne les noms de produits naturellement dans le texte.
-9. Si pas de complément, mettre complement_product_id à null dans le JSON.
+9. En cas de doute entre plusieurs produits, privilégie le plus populaire (nombre de ventes le plus élevé).
+10. Si pas de complément, mettre complement_product_id à null dans le JSON.
