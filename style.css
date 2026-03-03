@@ -8369,8 +8369,7 @@ transform: translateY(15px);
 .bento-storytelling {
   grid-column: span 4;
   grid-row: span 2;
-  background: var(--color-white);
-  border: 3px solid var(--color-wood);
+  background: var(--color-warm);
 }
 
 .storytelling-inner {
@@ -8496,8 +8495,8 @@ transform: translateY(15px);
 .bento-room-picker {
   grid-column: span 12;
   grid-row: span 2;
-  background: var(--color-warm);
-  border-color: rgba(147, 125, 104, 0.15);
+  background: var(--color-white);
+  border: 3px solid var(--color-wood);
 }
 
 .room-picker-inner {
