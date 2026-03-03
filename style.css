@@ -1761,6 +1761,74 @@ ul.products li.product {
   list-style: none !important;
 }
 
+/* Text cards in product grid ("Pourquoi choisir l'Atelier Sâpi") */
+.product-text-card {
+  list-style: none;
+  display: block;
+}
+
+.product-text-card-inner {
+  padding: 2rem 1.5rem;
+  background: var(--color-warm, #FBF6EA);
+  border-radius: var(--radius-lg, 16px);
+  border: 2px solid rgba(147, 125, 104, 0.12);
+  text-align: center;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-text-card-inner:hover {
+  transform: translateY(-4px);
+  -webkit-transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(147, 125, 104, 0.12);
+  border-color: rgba(147, 125, 104, 0.25);
+}
+
+.product-text-card-icon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(147, 125, 104, 0.08);
+  border-radius: 50%;
+  margin-bottom: 1.25rem;
+  color: var(--color-wood, #937D68);
+}
+
+.product-text-card-inner h3 {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-dark, #323232);
+  margin: 0 0 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+.product-text-card-inner p {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: rgba(50, 50, 50, 0.7);
+  margin: 0;
+}
+
+/* Highlight variant (Fabriqué avec amour) */
+.product-text-card--highlight .product-text-card-inner {
+  background: linear-gradient(135deg, var(--color-warm, #FBF6EA) 0%, rgba(227, 91, 36, 0.06) 100%);
+  border-color: rgba(227, 91, 36, 0.15);
+}
+
+.product-text-card--highlight .product-text-card-icon {
+  background: rgba(227, 91, 36, 0.1);
+  color: var(--color-orange, #E35B24);
+}
+
 /* EXCEPTION: Carousel slides have fixed width */
 .products-carousel-track > li.products-carousel-slide,
 ul.products.products-carousel-track > li.products-carousel-slide {
