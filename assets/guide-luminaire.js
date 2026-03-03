@@ -156,7 +156,7 @@
     if (!nextStep) return;
 
     if (currentActive && currentActive !== nextStep && direction !== 'none') {
-      var exitClass = direction === 'backward' ? 'is-exiting-right' : 'is-exiting-left';
+      var exitClass = direction === 'backward' ? 'is-exiting-down' : 'is-exiting-up';
       currentActive.classList.add(exitClass);
       currentActive.classList.remove('is-active');
 
@@ -171,12 +171,11 @@
 
     // For non-none directions, set up entrance
     if (direction !== 'none') {
-      var enterFromClass = direction === 'backward' ? 'is-exiting-left' : 'is-exiting-right';
       // Temporarily position at start
       nextStep.style.transition = 'none';
-      nextStep.classList.remove('is-active', 'is-exiting-left', 'is-exiting-right');
+      nextStep.classList.remove('is-active', 'is-exiting-up', 'is-exiting-down');
       nextStep.style.opacity = '0';
-      nextStep.style.transform = direction === 'backward' ? 'translateX(-60px)' : 'translateX(60px)';
+      nextStep.style.transform = direction === 'backward' ? 'translateY(50px)' : 'translateY(50px)';
 
       // Force reflow
       nextStep.getBoundingClientRect();

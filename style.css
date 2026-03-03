@@ -16917,26 +16917,26 @@ html.sapi-intro-active body {
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1), transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
-  transform: translateX(60px);
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(50px);
 }
 
 .guide-step.is-active {
   opacity: 1;
   pointer-events: all;
-  transform: translateX(0);
+  transform: translateY(0);
   position: relative;
   inset: auto;
 }
 
-.guide-step.is-exiting-left {
+.guide-step.is-exiting-up {
   opacity: 0;
-  transform: translateX(-60px);
+  transform: translateY(-50px);
 }
 
-.guide-step.is-exiting-right {
+.guide-step.is-exiting-down {
   opacity: 0;
-  transform: translateX(60px);
+  transform: translateY(50px);
 }
 
 .guide-step-inner {
