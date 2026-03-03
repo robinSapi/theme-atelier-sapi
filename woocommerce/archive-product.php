@@ -167,34 +167,44 @@ if (!$hero_img_url) {
   <?php if ($all_products->have_posts()) : ?>
     <?php
     // "Pourquoi choisir l'Atelier Sâpi" — cards inserted in the product grid
-    $sapi_text_cards = [
-      4 => [
+    // Positions aléatoires dans des zones pour varier la colonne à chaque chargement
+    $sapi_card_contents = [
+      [
         'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
         'title' => '100% artisanal français',
         'text' => 'Chaque luminaire est conçu, découpé et assemblé à la main dans notre atelier lyonnais. Pas de production de masse, juste du savoir-faire et de la passion.',
       ],
-      8 => [
+      [
         'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>',
         'title' => 'Pièces uniques & originales',
         'text' => 'Chaque modèle est une création originale signée Robin. Vous ne trouverez jamais nos luminaires ailleurs. Votre intérieur sera unique, comme vous.',
       ],
-      12 => [
+      [
         'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
         'title' => 'Bois PEFC & éco-responsable',
         'text' => 'Nos bois proviennent de forêts gérées durablement. Production locale, emballages recyclables, zéro gaspillage. Beauté et responsabilité vont de pair.',
       ],
-      16 => [
+      [
         'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
         'title' => 'Service client réactif',
         'text' => 'Une question ? Un doute ? Besoin de conseils ? Robin est là pour vous accompagner personnellement, du choix à l\'installation. Réponse rapide garantie.',
       ],
-      20 => [
+      [
         'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
         'title' => 'Fabriqué avec amour à Lyon',
         'text' => 'Robin conçoit, découpe, assemble et expédie personnellement chaque luminaire. Vous recevez bien plus qu\'un objet : vous recevez une histoire, un bout de son atelier, une pièce qui porte son attention aux détails.',
         'highlight' => true,
       ],
     ];
+    // Zones d'insertion : chaque card apparaît dans une plage aléatoire
+    $sapi_card_zones = [[3, 6], [8, 11], [13, 16], [18, 21], [23, 26]];
+    $sapi_text_cards = [];
+    foreach ($sapi_card_zones as $i => $zone) {
+      if (isset($sapi_card_contents[$i])) {
+        $pos = wp_rand($zone[0], $zone[1]);
+        $sapi_text_cards[$pos] = $sapi_card_contents[$i];
+      }
+    }
     $sapi_product_counter = 0;
     ?>
 
