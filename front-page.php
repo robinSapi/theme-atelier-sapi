@@ -198,7 +198,7 @@ $room_choices = [
   ['label' => 'Cuisine', 'slug' => 'cuisine',   'icon' => 'dining'],
   ['label' => 'Chambre', 'slug' => 'chambre',   'icon' => 'bed'],
   ['label' => 'Bureau',  'slug' => 'bureau',    'icon' => 'monitor'],
-  ['label' => 'Entrée',  'slug' => 'couloir',   'icon' => 'door'],
+  ['label' => 'Hall',    'slug' => 'couloir',   'icon' => 'door'],
   ['label' => 'Couloir', 'slug' => 'couloir-2', 'icon' => 'stairs'],
 ];
 
