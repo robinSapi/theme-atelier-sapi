@@ -1724,7 +1724,7 @@ function sapi_guide_call_claude($system_prompt) {
   }
 
   $body = [
-    'model'      => 'claude-sonnet-4-20250514',
+    'model'      => 'claude-sonnet-4-6',
     'max_tokens' => 1024,
     'system'     => $system_prompt,
     'messages'   => [
