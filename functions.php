@@ -1720,8 +1720,12 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
 function sapi_guide_call_claude($system_prompt) {
   $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
   if (empty($api_key)) {
+    error_log('Sapi Guide: ANTHROPIC_API_KEY not defined or empty');
     return null;
   }
+
+  error_log('Sapi Guide: API key found (length=' . strlen($api_key) . ', starts=' . substr($api_key, 0, 10) . '...)');
+  error_log('Sapi Guide: System prompt length = ' . strlen($system_prompt));
 
   $body = [
     'model'      => 'claude-sonnet-4-6',
@@ -1743,22 +1747,27 @@ function sapi_guide_call_claude($system_prompt) {
   ]);
 
   if (is_wp_error($response)) {
-    error_log('Sapi Guide Claude API error: ' . $response->get_error_message());
+    error_log('Sapi Guide: wp_remote_post WP_Error: ' . $response->get_error_message());
     return null;
   }
 
   $status = wp_remote_retrieve_response_code($response);
+  $raw_body = wp_remote_retrieve_body($response);
+  error_log('Sapi Guide: HTTP status = ' . $status);
+  error_log('Sapi Guide: Response body (first 500 chars) = ' . substr($raw_body, 0, 500));
+
   if ($status !== 200) {
-    error_log('Sapi Guide Claude API HTTP ' . $status . ': ' . wp_remote_retrieve_body($response));
     return null;
   }
 
-  $data = json_decode(wp_remote_retrieve_body($response), true);
+  $data = json_decode($raw_body, true);
   if (!isset($data['content'][0]['text'])) {
+    error_log('Sapi Guide: No content[0][text] in response. Keys: ' . implode(', ', array_keys($data ?: [])));
     return null;
   }
 
   $text = $data['content'][0]['text'];
+  error_log('Sapi Guide: Claude raw text (first 300 chars) = ' . substr($text, 0, 300));
 
   // Clean markdown code fences if present
   $text = preg_replace('/^```json\s*/i', '', trim($text));
@@ -1766,6 +1775,7 @@ function sapi_guide_call_claude($system_prompt) {
 
   $parsed = json_decode(trim($text), true);
   if (!$parsed || !isset($parsed['recommendation'])) {
+    error_log('Sapi Guide: JSON parse failed or no "recommendation" key. Using raw text.');
     // If Claude didn't return valid JSON, use the raw text as recommendation
     return [
       'recommendation'       => $text,
@@ -1775,6 +1785,7 @@ function sapi_guide_call_claude($system_prompt) {
     ];
   }
 
+  error_log('Sapi Guide: Success! AI recommendation received.');
   return $parsed;
 }
 
