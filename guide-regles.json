@@ -1,0 +1,14 @@
+{
+  "skip_rules": [
+    {
+      "si": { "pa_piece": ["chambre", "bureau"] },
+      "alors": { "pa_eclairage": "fonctionnel" },
+      "label": "Éclairage fonctionnel"
+    },
+    {
+      "si": { "pa_piece": ["couloir", "couloir-2"] },
+      "alors": { "pa_eclairage": "fonctionnel" },
+      "label": "Éclairage fonctionnel"
+    }
+  ]
+}
