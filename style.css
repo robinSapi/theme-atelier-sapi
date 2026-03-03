@@ -8494,25 +8494,25 @@ transform: translateY(15px);
 /* Room Picker — "Pour quelle pièce ?" */
 .bento-room-picker {
   grid-column: span 12;
-  grid-row: span 2;
+  grid-row: span 3;
   background: var(--color-warm);
   border-color: rgba(147, 125, 104, 0.15);
 }
 
 .room-picker-inner {
-  padding: 2.5rem 3rem;
+  padding: 3rem 4rem;
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 1.75rem;
+  gap: 2.5rem;
 }
 
 .room-picker-title {
   font-family: var(--font-body);
-  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
-  font-weight: 700;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 800;
   color: var(--color-dark);
   text-align: center;
   margin: 0;
@@ -8521,18 +8521,18 @@ transform: translateY(15px);
 .room-picker-cards {
   display: flex;
   justify-content: center;
-  gap: 1.25rem;
+  gap: 1.5rem;
   width: 100%;
 }
 
 .room-card {
   flex: 1;
-  max-width: 200px;
+  max-width: 220px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 2rem 1.25rem;
+  gap: 1.25rem;
+  padding: 2.5rem 1.5rem;
   background: var(--color-white);
   border: 2px solid rgba(147, 125, 104, 0.12);
   border-radius: 16px;
@@ -8549,20 +8549,20 @@ transform: translateY(15px);
 }
 
 .room-card-icon {
-  width: 52px;
-  height: 52px;
+  width: 64px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--color-wood);
   background: var(--color-warm);
-  border-radius: 12px;
+  border-radius: 14px;
   transition: all 0.3s ease;
 }
 
 .room-card-icon svg {
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
 }
 
 .room-card:hover .room-card-icon {
@@ -8572,15 +8572,15 @@ transform: translateY(15px);
 
 .room-card-label {
   font-family: var(--font-body);
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--color-dark);
 }
 
 .room-picker-sub {
   margin: 0;
   font-family: var(--font-body);
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .room-picker-sub a {
