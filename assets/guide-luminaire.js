@@ -56,6 +56,32 @@
     bindRestartButton();
     bindKeyboard();
 
+    // Check for ?piece= URL parameter (from homepage room picker)
+    var urlParams = new URLSearchParams(window.location.search);
+    var pieceParam = urlParams.get('piece');
+
+    if (pieceParam) {
+      // Find the matching choice card for step 1 (pa_piece)
+      var step1 = document.querySelector('.guide-step[data-step="1"]');
+      if (step1) {
+        var matchingCard = step1.querySelector('.guide-choice-card[data-slug="' + pieceParam + '"]');
+        if (matchingCard) {
+          var attr = matchingCard.getAttribute('data-attribute');
+          var label = matchingCard.getAttribute('data-label');
+          state.answers[attr] = pieceParam;
+          state.labels[attr] = label;
+          state.currentStep = 2;
+          startQuiz();
+          matchingCard.classList.add('is-selected');
+          renderStep(2, 'none');
+          saveSession();
+          // Clean URL without reloading
+          window.history.replaceState({}, '', window.location.pathname);
+          return;
+        }
+      }
+    }
+
     // If we have a saved session, restore
     if (saved && saved.step > 0 && Object.keys(saved.answers).length > 0) {
       state.currentStep = saved.step;

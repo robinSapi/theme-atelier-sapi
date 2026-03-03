@@ -429,7 +429,7 @@ foreach ($collection_slugs as $col) {
           <?php endforeach; ?>
         </div>
         <p class="room-picker-sub">
-          <a href="<?php echo esc_url(home_url('/guide-luminaire/')); ?>">Voir le guide complet →</a>
+          <a href="<?php echo esc_url(home_url('/guide-luminaire/')); ?>">Trouvez le luminaire idéal en 6 questions →</a>
         </p>
       </div>
     </div>
