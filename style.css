@@ -5742,7 +5742,7 @@ li.carousel-editorial-slide,
 .advice-tips-section {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 60px 20px 40px;
+  padding: 100px 20px 80px;
 }
 
 /* Tips Grid – 4x1 desktop */
@@ -6068,7 +6068,7 @@ li.carousel-editorial-slide,
 /* Responsive – Mobile + Flip Card */
 @media (max-width: 768px) {
   .advice-tips-section {
-    padding: 40px 15px 30px;
+    padding: 60px 15px 50px;
   }
   .advice-tips-grid {
     grid-template-columns: 1fr;
