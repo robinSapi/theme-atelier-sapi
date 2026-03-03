@@ -155,21 +155,8 @@
 
     if (!nextStep) return;
 
-    if (currentActive && currentActive !== nextStep && direction !== 'none') {
-      currentActive.classList.add('is-exiting');
-      currentActive.classList.remove('is-active');
-
-      // Clean up after transition
-      currentActive.addEventListener('transitionend', function handler() {
-        currentActive.classList.remove('is-exiting');
-        currentActive.removeEventListener('transitionend', handler);
-      });
-    } else if (currentActive && currentActive !== nextStep) {
-      currentActive.classList.remove('is-active');
-    }
-
-    // For non-none directions, set up entrance with crossfade
-    if (direction !== 'none') {
+    // Helper: activate next step with fade in
+    function activateNext() {
       nextStep.style.transition = 'none';
       nextStep.classList.remove('is-active', 'is-exiting');
       nextStep.style.opacity = '0';
@@ -181,6 +168,30 @@
       nextStep.style.transition = '';
       nextStep.style.opacity = '';
       nextStep.classList.add('is-active');
+
+      // Focus question heading for accessibility
+      var heading = nextStep.querySelector('.guide-step-question');
+      if (heading) {
+        heading.setAttribute('tabindex', '-1');
+        heading.focus({ preventScroll: true });
+      }
+    }
+
+    if (currentActive && currentActive !== nextStep && direction !== 'none') {
+      currentActive.classList.add('is-exiting');
+      currentActive.classList.remove('is-active');
+
+      // Wait for exit to finish, then enter
+      currentActive.addEventListener('transitionend', function handler() {
+        currentActive.classList.remove('is-exiting');
+        currentActive.removeEventListener('transitionend', handler);
+        activateNext();
+      });
+    } else if (currentActive && currentActive !== nextStep) {
+      currentActive.classList.remove('is-active');
+      nextStep.classList.add('is-active');
+    } else if (direction !== 'none') {
+      activateNext();
     } else {
       nextStep.classList.add('is-active');
     }
@@ -188,13 +199,6 @@
     updateProgress(stepNum);
     updateBackButton(stepNum);
     updateStepCounter(stepNum);
-
-    // Focus question heading for accessibility
-    var heading = nextStep.querySelector('.guide-step-question');
-    if (heading && direction !== 'none') {
-      heading.setAttribute('tabindex', '-1');
-      heading.focus({ preventScroll: true });
-    }
   }
 
   function advanceToStep(stepNum) {
