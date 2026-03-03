@@ -106,6 +106,9 @@ if (!empty($guide_pages)) {
 
 <section class="advice-guide-cta">
   <div class="advice-guide-cta-inner">
+    <div class="advice-guide-cta-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7z"/><path d="M9 21h6"/><path d="M10 17v-2.5"/><path d="M14 17v-2.5"/></svg>
+    </div>
     <h2 class="advice-guide-cta-title">Trouvez le luminaire fait pour vous</h2>
     <p class="advice-guide-cta-text">Répondez à 6 questions simples et découvrez nos créations adaptées à votre intérieur, votre style et vos envies.</p>
     <a href="<?php echo esc_url($guide_url); ?>" class="advice-guide-cta-btn">
