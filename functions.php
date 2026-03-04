@@ -1402,11 +1402,11 @@ function sapi_ajax_guide_results() {
 
   // 8. Send email notification to Robin
   $labels = [
+    'piece'   => 'Pièce',
+    'taille'  => 'Taille de la pièce',
     'sortie'  => 'Sortie électrique',
     'hauteur' => 'Hauteur sous-plafond',
     'table'   => 'Au-dessus d\'une table',
-    'taille'  => 'Taille de la pièce',
-    'piece'   => 'Pièce',
     'style'   => 'Style intérieur',
   ];
   $email_body = "Nouvelle recommandation Guide Luminaire\n";
@@ -1710,11 +1710,11 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
   // Réponses du client
   $prompt .= "\nRÉPONSES DU CLIENT :\n";
   $labels = [
+    'piece'   => 'Pièce',
+    'taille'  => 'Taille de la pièce',
     'sortie'  => 'Sortie électrique',
     'hauteur' => 'Hauteur sous-plafond',
     'table'   => 'Au-dessus d\'une table',
-    'taille'  => 'Taille de la pièce',
-    'piece'   => 'Pièce',
     'style'   => 'Style intérieur',
   ];
   foreach ($labels as $key => $label) {
