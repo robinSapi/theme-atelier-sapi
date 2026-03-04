@@ -25,7 +25,7 @@ $guide_steps = [
   [
     'id'         => 'taille',
     'question'   => 'Quelle est la taille de votre pièce ?',
-    'visibility' => 'always',
+    'visibility' => ['piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'entree']],
     'choices'    => [
       ['label' => 'Petite (< 10 m²)',   'slug' => 'petite',  'icon' => 'square-sm'],
       ['label' => 'Moyenne (10–20 m²)',  'slug' => 'moyenne', 'icon' => 'square-md'],
@@ -56,7 +56,15 @@ $guide_steps = [
   [
     'id'         => 'table',
     'question'   => 'Sera-t-il au-dessus d\'une table ou d\'un îlot ?',
-    'visibility' => ['hauteur' => ['standard']],
+    'visibility' => ['hauteur' => ['standard'], 'piece' => ['cuisine', 'bureau', 'salon', 'chambre']],
+    'dynamic_question' => [
+      'piece' => [
+        'cuisine' => 'Sera-t-il au-dessus d\'une table ou d\'un îlot ?',
+        'bureau'  => 'Sera-t-il au-dessus du bureau ?',
+        'salon'   => 'Sera-t-il au-dessus d\'une table ?',
+        'chambre' => 'Sera-t-il au-dessus du lit ?',
+      ],
+    ],
     'choices'    => [
       ['label' => 'Oui', 'slug' => 'oui', 'icon' => 'table-yes'],
       ['label' => 'Non', 'slug' => 'non', 'icon' => 'table-no'],

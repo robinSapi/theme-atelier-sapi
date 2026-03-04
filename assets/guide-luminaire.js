@@ -233,8 +233,21 @@
       nextStep.style.opacity = '';
       nextStep.classList.add('is-active');
 
-      // Focus question heading for accessibility
+      // Update dynamic question text if applicable
+      var stepData = getStepById(stepId);
       var heading = nextStep.querySelector('.guide-step-question');
+      if (heading && stepData && stepData.dynamic_question) {
+        for (var depStep in stepData.dynamic_question) {
+          if (!stepData.dynamic_question.hasOwnProperty(depStep)) continue;
+          var answer = state.answers[depStep];
+          if (answer && stepData.dynamic_question[depStep][answer]) {
+            heading.textContent = stepData.dynamic_question[depStep][answer];
+            break;
+          }
+        }
+      }
+
+      // Focus question heading for accessibility
       if (heading) {
         heading.setAttribute('tabindex', '-1');
         heading.focus({ preventScroll: true });
