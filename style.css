@@ -17176,14 +17176,9 @@ html.sapi-intro-active body {
   margin-bottom: 2rem;
 }
 
-.guide-tag-wrap {
-  position: relative;
-}
-
 .guide-answer-tag {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
   padding: 0.4rem 0.875rem;
   background: var(--color-warm, #FBF6EA);
   border: 1.5px solid var(--color-wood, #937D68);
@@ -17192,75 +17187,6 @@ html.sapi-intro-active body {
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--color-wood, #937D68);
-  cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-}
-
-.guide-answer-tag:hover,
-.guide-answer-tag.is-open {
-  background: var(--color-wood, #937D68);
-  color: #fff;
-}
-
-.guide-tag-edit {
-  opacity: 0.6;
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
-}
-
-.guide-answer-tag:hover .guide-tag-edit,
-.guide-answer-tag.is-open .guide-tag-edit {
-  opacity: 1;
-}
-
-.guide-answer-tag.is-open .guide-tag-edit {
-  transform: rotate(180deg);
-}
-
-.guide-tag-dropdown {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: #fff;
-  border: 1.5px solid var(--color-wood, #937D68);
-  border-radius: 12px;
-  padding: 0.4rem;
-  min-width: 180px;
-  z-index: 100;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  animation: guideDropdownIn 0.15s ease;
-}
-
-@keyframes guideDropdownIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(-4px); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
-
-.guide-tag-option {
-  display: block;
-  width: 100%;
-  padding: 0.5rem 0.875rem;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: var(--color-dark, #323232);
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.guide-tag-option:hover {
-  background: var(--color-warm, #FBF6EA);
-}
-
-.guide-tag-option.is-current {
-  font-weight: 700;
-  color: var(--color-wood, #937D68);
-  background: var(--color-warm, #FBF6EA);
 }
 
 .guide-results-title {
