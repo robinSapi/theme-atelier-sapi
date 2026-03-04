@@ -1458,17 +1458,28 @@ function sapi_ajax_guide_results() {
  */
 function sapi_guide_get_categories(array $answers) {
   $sortie = isset($answers['sortie']) ? $answers['sortie'] : '';
+  $piece  = isset($answers['piece'])  ? $answers['piece']  : '';
 
   switch ($sortie) {
     case 'plafond':
-      return ['suspensions'];
+      $cats = ['suspensions'];
+      break;
     case 'mur':
-      return ['appliques'];
+      $cats = ['appliques'];
+      break;
     case 'pas-de-sortie':
-      return ['lampadaires', 'lampeaposer', 'appliques'];
+      $cats = ['lampadaires', 'lampeaposer', 'appliques'];
+      break;
     default:
-      return ['suspensions', 'appliques', 'lampadaires', 'lampeaposer'];
+      $cats = ['suspensions', 'appliques', 'lampadaires', 'lampeaposer'];
   }
+
+  // Règle A : jamais de lampe à poser en cuisine
+  if ($piece === 'cuisine') {
+    $cats = array_values(array_diff($cats, ['lampeaposer']));
+  }
+
+  return $cats;
 }
 
 /**
@@ -1513,6 +1524,17 @@ function sapi_guide_query_products(array $answers, array $categories) {
       'taxonomy' => 'pa_format',
       'field'    => 'slug',
       'terms'    => ['vertical'],
+      'operator' => 'NOT IN',
+    ];
+  }
+
+  // Règle B : escalier → exclure format plat (préférer boule ou vertical)
+  $piece = isset($answers['piece']) ? $answers['piece'] : '';
+  if ($piece === 'escalier' && in_array('suspensions', $categories)) {
+    $tax_query[] = [
+      'taxonomy' => 'pa_format',
+      'field'    => 'slug',
+      'terms'    => ['plat'],
       'operator' => 'NOT IN',
     ];
   }
