@@ -12730,21 +12730,27 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   font-weight: 600 !important;
 }
 
-/* Exception : titre "Validation de commande express" plus léger */
-.sapi-checkout-outer .wc-block-components-express-payment h2 {
-  font-weight: 400 !important;
+/* Section express payment — titre + boutons */
+.sapi-checkout-outer .wc-block-components-express-payment {
+  position: relative;
 }
 
-/* Boutons express payment (Apple Pay, Link, Google Pay) */
+.sapi-checkout-outer .wc-block-components-express-payment h2 {
+  font-weight: 400 !important;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 0.75rem;
+}
+
 .sapi-checkout-outer .wc-block-components-express-payment__event-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.75rem !important;
 }
 
 .sapi-checkout-outer .wc-block-components-express-payment__event-buttons > * {
-  flex: 1 1 auto;
-  min-width: 150px;
+  flex: 1 1 calc(50% - 0.375rem) !important;
+  min-width: 0 !important;
 }
 
 /* Images produits arrondies */
