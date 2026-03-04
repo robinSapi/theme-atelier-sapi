@@ -430,6 +430,9 @@ foreach ($collection_slugs as $col) {
     <div class="bento-card bento-room-picker">
       <div class="room-picker-inner">
         <h3 class="room-picker-title">Pour quelle pièce cherchez-vous un luminaire ?</h3>
+        <p class="room-picker-sub">
+          <a href="<?php echo esc_url($guide_url); ?>">Quelques questions et Robin vous guide vers le luminaire idéal →</a>
+        </p>
         <div class="room-picker-cards">
           <?php foreach ($room_choices as $room) : ?>
             <a href="<?php echo esc_url(add_query_arg('piece', $room['slug'], $guide_url)); ?>" class="room-card">
@@ -438,9 +441,6 @@ foreach ($collection_slugs as $col) {
             </a>
           <?php endforeach; ?>
         </div>
-        <p class="room-picker-sub">
-          <a href="<?php echo esc_url($guide_url); ?>">Trouvez le luminaire idéal en 6 questions →</a>
-        </p>
       </div>
     </div>
 
