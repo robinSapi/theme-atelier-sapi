@@ -6,94 +6,7 @@
 (function() {
   'use strict';
 
-  // =============================================
-  // MINI CART
-  // =============================================
-  const miniCart = {
-    panel: null,
-    overlay: null,
-    toggle: null,
-    closeBtn: null,
-    isOpen: false,
-
-    init: function() {
-      this.panel = document.getElementById('mini-cart');
-      this.overlay = document.getElementById('mini-cart-overlay');
-      this.toggle = document.querySelector('.mini-cart-toggle');
-      this.closeBtn = document.querySelector('.mini-cart-close');
-
-      if (!this.panel || !this.toggle) return;
-
-      this.toggle.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.open();
-      });
-
-      if (this.closeBtn) {
-        this.closeBtn.addEventListener('click', () => this.close());
-      }
-
-      if (this.overlay) {
-        this.overlay.addEventListener('click', () => this.close());
-      }
-
-      // Close on escape key
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && this.isOpen) {
-          this.close();
-        }
-      });
-
-      // Listen for WooCommerce cart updates
-      document.body.addEventListener('added_to_cart', () => this.refresh());
-      document.body.addEventListener('removed_from_cart', () => this.refresh());
-      document.body.addEventListener('updated_cart_totals', () => this.refresh());
-    },
-
-    open: function() {
-      if (!this.panel) return;
-
-      this.isOpen = true;
-      this.panel.classList.add('is-open');
-      this.panel.setAttribute('aria-hidden', 'false');
-
-      if (this.overlay) {
-        this.overlay.classList.add('is-visible');
-      }
-
-      if (this.toggle) {
-        this.toggle.setAttribute('aria-expanded', 'true');
-      }
-
-      document.body.style.overflow = 'hidden';
-    },
-
-    close: function() {
-      if (!this.panel) return;
-
-      this.isOpen = false;
-      this.panel.classList.remove('is-open');
-      this.panel.setAttribute('aria-hidden', 'true');
-
-      if (this.overlay) {
-        this.overlay.classList.remove('is-visible');
-      }
-
-      if (this.toggle) {
-        this.toggle.setAttribute('aria-expanded', 'false');
-      }
-
-      document.body.style.overflow = '';
-    },
-
-    refresh: function() {
-      // WooCommerce handles fragment updates via AJAX
-      // This refreshes the cart count badge
-      if (typeof wc_cart_fragments_params !== 'undefined') {
-        jQuery(document.body).trigger('wc_fragment_refresh');
-      }
-    }
-  };
+  // Mini cart is handled by menu.js (loaded on all pages)
 
   // =============================================
   // PRODUCT FILTERS (Client-side filtering for shop page)
@@ -796,45 +709,17 @@
     }
   };
 
-  // =============================================
-  // QUANTITY BUTTONS
-  // =============================================
-  const quantityButtons = {
-    init: function() {
-      document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('qty-btn')) {
-          const btn = e.target;
-          const input = btn.parentElement.querySelector('.qty');
-          if (!input) return;
-
-          let value = parseInt(input.value) || 1;
-          const min = parseInt(input.getAttribute('min')) || 1;
-          const max = parseInt(input.getAttribute('max')) || 999;
-
-          if (btn.classList.contains('qty-minus')) {
-            value = Math.max(min, value - 1);
-          } else if (btn.classList.contains('qty-plus')) {
-            value = Math.min(max, value + 1);
-          }
-
-          input.value = value;
-          input.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-      });
-    }
-  };
+  // Quantity buttons are created and handled by cinetique.js
 
   // =============================================
   // INIT
   // =============================================
   function init() {
-    miniCart.init();
     productFilters.init();
     variationSwatches.init();
     dynamicPrice.init();
     productGallery.init();
     productCards.init();
-    quantityButtons.init();
     productsCarousel.init();
   }
 

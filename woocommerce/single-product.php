@@ -1590,7 +1590,7 @@ get_header();
       button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Ajout en cours…';
 
       jQuery.ajax({
-        url: '<?php echo admin_url('admin-ajax.php'); ?>',
+        url: '<?php echo esc_url(admin_url('admin-ajax.php')); ?>',
         type: 'POST',
         data: {
           action: 'sapi_add_to_cart',

@@ -590,16 +590,11 @@ foreach ($collection_slugs as $col) {
       const carouselBottom = carouselRect.bottom;
       const scrollThreshold = 50; // Marge de 50px pour garder la transparence
 
-      // Debug logs (temporaires)
-      console.log('Carousel bottom:', carouselBottom, 'Threshold:', scrollThreshold);
-
       // Si le bas du carousel est au-dessus du seuil, menu opaque
       // Sinon (carousel encore visible dans le viewport), menu transparent
       if (carouselBottom < scrollThreshold) {
-        console.log('Adding is-scrolled');
         header.classList.add('is-scrolled');
       } else {
-        console.log('Removing is-scrolled');
         header.classList.remove('is-scrolled');
       }
     }
