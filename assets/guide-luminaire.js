@@ -734,21 +734,10 @@
   // FOLLOW-UP BUTTONS
   // ================================================================
   function renderFollowupButtons(buttons) {
+    // Phase B (chat interactif) pas encore implémentée — boutons masqués
+    // Réactiver cette fonction quand Phase B sera prête
     if (!dom.followupBtns) return;
-
-    dom.followupBtns.innerHTML = '';
-
-    buttons.forEach(function (btn) {
-      var el = document.createElement('button');
-      el.className = 'guide-followup-btn';
-      el.type = 'button';
-      el.textContent = btn.label;
-      el.setAttribute('data-followup-type', btn.type || 'question');
-      // Phase B will make these interactive (chat)
-      dom.followupBtns.appendChild(el);
-    });
-
-    dom.followupBtns.style.display = '';
+    dom.followupBtns.style.display = 'none';
   }
 
   // ================================================================

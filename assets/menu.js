@@ -315,7 +315,8 @@
       body: new URLSearchParams({
         action: 'sapi_update_mini_cart_qty',
         cart_item_key: cartItemKey,
-        quantity: qty
+        quantity: qty,
+        nonce: (typeof sapiMenu !== 'undefined') ? sapiMenu.miniCartNonce : ''
       })
     })
     .then(function(r) { return r.json(); })

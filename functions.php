@@ -171,6 +171,9 @@ function sapi_maison_enqueue_assets() {
   // Menu burger JavaScript - chargé sur toutes les pages
   $menu_js_path = get_template_directory() . '/assets/menu.js';
   wp_enqueue_script('sapi-maison-menu', get_template_directory_uri() . '/assets/menu.js', [], file_exists($menu_js_path) ? filemtime($menu_js_path) : '1.0.0', true);
+  wp_localize_script('sapi-maison-menu', 'sapiMenu', [
+    'miniCartNonce' => wp_create_nonce('sapi-update-mini-cart-qty'),
+  ]);
 
   // Product name formatter - chargé sur toutes les pages (prénom en Montserrat, reste en Square Peg)
   $formatter_js_path = get_template_directory() . '/assets/product-name-formatter.js';
@@ -905,6 +908,12 @@ function sapi_render_mini_cart_contents() {
  * AJAX handler: update mini-cart item quantity
  */
 function sapi_update_mini_cart_qty() {
+  // Verify nonce
+  if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'sapi-update-mini-cart-qty')) {
+    wp_send_json_error(['message' => 'Invalid nonce']);
+    return;
+  }
+
   $cart_item_key = sanitize_text_field($_POST['cart_item_key'] ?? '');
   $quantity = absint($_POST['quantity'] ?? 0);
 
