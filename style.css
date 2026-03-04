@@ -310,17 +310,6 @@ button[type="submit"]:hover {
   }
 }
 
-/* Image lazy load fade-in */
-img[loading="lazy"] {
-  opacity: 0;
-  transition: opacity 0.5s ease-in;
-}
-
-img[loading="lazy"].loaded,
-img[loading="lazy"]:not([data-src]) {
-  opacity: 1;
-}
-
 /* Premium text selection */
 ::selection {
   background: var(--color-orange, #E35B24);
@@ -7092,6 +7081,11 @@ li.carousel-editorial-slide,
   aspect-ratio: 3 / 2;
   overflow: hidden;
   background: var(--creme-chaud, #FAF6F0);
+}
+
+.blog-grid-media a {
+  display: block;
+  height: 100%;
 }
 
 .blog-grid-media img {
