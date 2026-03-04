@@ -12711,6 +12711,18 @@ body.woocommerce-checkout .sapi-checkout-outer [id*="express"] h2 {
   font-weight: 400 !important;
 }
 
+/* Boutons express payment (Apple Pay, Link, Google Pay) */
+.sapi-checkout-outer .wc-block-components-express-payment__event-buttons {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.75rem !important;
+}
+
+.sapi-checkout-outer .wc-block-components-express-payment__event-buttons > * {
+  flex: 1 1 auto !important;
+  min-width: 150px !important;
+}
+
 /* Images produits arrondies */
 .sapi-cart-outer .wc-block-cart-item__image img,
 .sapi-cart-outer .wc-block-components-product-image img {
