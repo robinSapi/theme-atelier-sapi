@@ -12731,6 +12731,22 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
 }
 
 
+/* Supprimer le quadrillage du tableau produits */
+.sapi-cart-outer .wc-block-cart-items,
+.sapi-cart-outer .wc-block-cart-items th,
+.sapi-cart-outer .wc-block-cart-items td,
+.sapi-cart-outer .wc-block-cart-items tr,
+.sapi-cart-outer .wc-block-cart-items thead,
+.sapi-cart-outer .wc-block-cart-items tbody {
+  border: none !important;
+  border-collapse: collapse !important;
+}
+
+/* Masquer l'en-tête PRODUIT / TOTAL */
+.sapi-cart-outer .wc-block-cart-items thead {
+  display: none !important;
+}
+
 /* Images produits arrondies */
 .sapi-cart-outer .wc-block-cart-item__image img,
 .sapi-cart-outer .wc-block-components-product-image img {
@@ -12789,25 +12805,26 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   color: var(--color-wood) !important;
 }
 
-/* Bouton "Ajouter au panier" — orange CTA
-   Classe confirmée : .wc-block-components-product-button__button */
+/* Bouton cross-sell "Ajouter au panier" — style outline discret */
 .sapi-cart-outer .wc-block-cart__main .wc-block-components-product-button__button {
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%) !important;
-  color: #fff !important;
+  background: transparent !important;
+  color: var(--color-orange, #E35B24) !important;
+  border: 1.5px solid var(--color-orange, #E35B24) !important;
   border-radius: 12px !important;
   font-family: var(--font-body) !important;
-  font-weight: 800 !important;
+  font-weight: 600 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.08em !important;
-  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25) !important;
-  border: none !important;
-  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  font-size: 0.75rem !important;
+  box-shadow: none !important;
+  transition: background 0.2s ease, color 0.2s ease !important;
 }
 
 .sapi-cart-outer .wc-block-cart__main .wc-block-components-product-button__button:hover {
-  background: linear-gradient(180deg, #D14F1C 0%, #B8431A 100%) !important;
-  box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35) !important;
-  transform: translateY(-1px) !important;
+  background: var(--color-orange, #E35B24) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 /* Fond page */
