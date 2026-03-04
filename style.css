@@ -11338,6 +11338,25 @@ transform: translateY(15px);
   color: var(--color-gray);
 }
 
+.mini-cart-item-meta dl {
+  margin: 0;
+}
+
+.mini-cart-item-meta dt,
+.mini-cart-item-meta dd {
+  display: inline;
+  margin: 0;
+}
+
+.mini-cart-item-meta dt::after {
+  content: ' ';
+}
+
+.mini-cart-item-meta dd::after {
+  content: '\A';
+  white-space: pre;
+}
+
 .mini-cart-item-price {
   font-weight: 700;
   color: var(--color-wood);
