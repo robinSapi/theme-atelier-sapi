@@ -151,6 +151,25 @@
       renderStep(state.currentStepId, 'none');
       markPreviousAnswers();
     }
+
+    // Pre-select room from ?piece= URL parameter (homepage cards)
+    var urlParams = new URLSearchParams(window.location.search);
+    var preselectedPiece = urlParams.get('piece');
+    if (preselectedPiece && !state.isQuizStarted) {
+      var pieceCard = document.querySelector('.guide-choice-card[data-step="piece"][data-slug="' + preselectedPiece + '"]');
+      if (pieceCard) {
+        state.answers['piece'] = preselectedPiece;
+        state.labels['piece'] = pieceCard.getAttribute('data-label') || preselectedPiece;
+        pieceCard.classList.add('is-selected');
+        startQuiz();
+        var nextStep = getNextVisibleStep('piece');
+        if (nextStep) {
+          state.currentStepId = nextStep;
+          renderStep(nextStep, 'none');
+        }
+        saveSession();
+      }
+    }
   }
 
   // ================================================================
