@@ -7126,16 +7126,14 @@ li.carousel-editorial-slide,
 }
 
 .blog-grid-media {
-  position: relative;
   overflow: hidden;
   aspect-ratio: 3 / 2;
   background: var(--creme-chaud, #FAF6F0);
 }
 
 .blog-grid-media a {
-  position: absolute;
-  inset: 0;
   display: block;
+  height: 100%;
 }
 
 .blog-grid-media img {
