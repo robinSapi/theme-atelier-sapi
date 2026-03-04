@@ -12742,6 +12742,15 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   border-collapse: collapse !important;
 }
 
+/* Bordure discrète autour de chaque produit */
+.sapi-cart-outer .wc-block-cart-items tr {
+  border: 1px solid rgba(147, 125, 104, 0.15) !important;
+  border-radius: 8px !important;
+  display: block !important;
+  padding: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
 /* Masquer l'en-tête PRODUIT / TOTAL */
 .sapi-cart-outer .wc-block-cart-items thead {
   display: none !important;
