@@ -11,7 +11,7 @@ $ajax_nonce = wp_create_nonce('sapi-guide-results');
 $guide_steps = [
   [
     'id'         => 'piece',
-    'question'   => 'Dans quelle pièce sera-t-il installé ?',
+    'question'   => 'Pour quelle pièce cherchez-vous un luminaire ?',
     'visibility' => 'always',
     'choices'    => [
       ['label' => 'Cuisine',              'slug' => 'cuisine',  'icon' => 'dining'],
