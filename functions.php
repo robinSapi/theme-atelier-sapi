@@ -863,10 +863,10 @@ function sapi_render_mini_cart_contents() {
             <span class="mini-cart-item-name">
               <?php echo $product_permalink ? '<a href="' . esc_url($product_permalink) . '">' . esc_html($product->get_name()) . '</a>' : esc_html($product->get_name()); ?>
             </span>
-            <span class="mini-cart-item-meta">
+            <div class="mini-cart-item-meta">
               <?php echo wc_get_formatted_cart_item_data($cart_item); ?>
               <?php echo sprintf(__('Qté: %d', 'theme-sapi-maison'), $quantity); ?>
-            </span>
+            </div>
             <span class="mini-cart-item-price">
               <?php echo WC()->cart->get_product_price($product); ?>
             </span>
