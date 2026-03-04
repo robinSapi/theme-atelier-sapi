@@ -11340,12 +11340,21 @@ transform: translateY(15px);
 
 .mini-cart-item-meta dl {
   margin: 0;
+  line-height: 1.4;
 }
 
-.mini-cart-item-meta dt,
+.mini-cart-item-meta dt {
+  display: inline;
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-dark, #323232);
+}
+
 .mini-cart-item-meta dd {
   display: inline;
   margin: 0;
+  font-weight: 400;
+  color: var(--color-gray);
 }
 
 .mini-cart-item-meta dt::after {
