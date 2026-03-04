@@ -14,9 +14,10 @@ $guide_steps = [
     'question'   => 'Où se trouve votre sortie électrique ?',
     'visibility' => 'always',
     'choices'    => [
-      ['label' => 'Au plafond',         'slug' => 'plafond',       'icon' => 'ceiling-plug'],
-      ['label' => 'Au mur',             'slug' => 'mur',           'icon' => 'wall-plug'],
-      ['label' => 'Pas de sortie fixe', 'slug' => 'pas-de-sortie', 'icon' => 'no-plug'],
+      ['label' => 'Au plafond',               'slug' => 'plafond',       'icon' => 'ceiling-plug'],
+      ['label' => 'Au mur',                   'slug' => 'mur',           'icon' => 'wall-plug'],
+      ['label' => 'Sur prise classique 230V', 'slug' => 'pas-de-sortie', 'icon' => 'no-plug'],
+      ['label' => 'Je ne sais pas',           'slug' => 'ne-sais-pas',   'icon' => 'question-mark'],
     ],
   ],
   [
@@ -76,7 +77,8 @@ $icons = [
   // Sortie électrique (new)
   'ceiling-plug' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18"/><path d="M12 3v4"/><circle cx="12" cy="10" r="3"/><path d="M10 13v2m4-2v2"/></svg>',
   'wall-plug'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v18"/><rect x="8" y="8" width="8" height="8" rx="2"/><path d="M11 11v2m2-2v2"/></svg>',
-  'no-plug'      => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M10 10v4m4-4v4"/><path d="M4 4l16 16"/></svg>',
+  'no-plug'       => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M10 10v4m4-4v4"/></svg>',
+  'question-mark' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>',
   'table-yes'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M6 12v6m12-6v6"/><path d="M12 3v4"/><path d="M9 7h6l-1 5H10L9 7z"/></svg>',
   'table-no'     => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M9 9h6l-1 4h-4l-1-4z"/><path d="M3 21h18"/><path d="M7 21v-4m10 4v-4"/></svg>',
   // Hauteur plafond (existing)
