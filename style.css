@@ -12770,6 +12770,11 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   display: none !important;
 }
 
+/* Masquer la description (dimensions/poids) dans le panier */
+.sapi-cart-outer .wc-block-components-product-metadata__description {
+  display: none !important;
+}
+
 /* Prix total à droite — conservé et stylisé */
 .sapi-cart-outer .wc-block-cart-item__total .wc-block-components-product-price {
   display: block !important;
