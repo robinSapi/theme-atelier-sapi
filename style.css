@@ -15967,8 +15967,10 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 .quick-view-gallery-thumbs .gallery-thumb {
+  flex: 0 0 auto;
   width: 64px;
   aspect-ratio: 1 / 1;
+  padding: 0;
   border: 2px solid rgba(147, 125, 104, 0.2);
   border-radius: 8px;
   overflow: hidden;
