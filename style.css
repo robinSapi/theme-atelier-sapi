@@ -11278,6 +11278,7 @@ transform: translateY(15px);
   gap: 0.5rem;
   padding: 1rem;
   background: var(--color-cream);
+  border: 1px solid rgba(147, 125, 104, 0.15);
   border-radius: 8px;
   margin-bottom: 1rem;
 }
