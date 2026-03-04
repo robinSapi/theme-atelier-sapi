@@ -12742,15 +12742,19 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   margin-bottom: 0.75rem;
 }
 
-.sapi-checkout-outer .wc-block-components-express-payment__event-buttons {
+.sapi-checkout-outer ul.wc-block-components-express-payment__event-buttons {
   display: flex !important;
+  flex-direction: row !important;
   flex-wrap: wrap !important;
   gap: 0.75rem !important;
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
-.sapi-checkout-outer .wc-block-components-express-payment__event-buttons > * {
+.sapi-checkout-outer ul.wc-block-components-express-payment__event-buttons > li {
   flex: 1 1 calc(50% - 0.375rem) !important;
-  min-width: 0 !important;
+  max-width: calc(50% - 0.375rem) !important;
 }
 
 /* Images produits arrondies */
