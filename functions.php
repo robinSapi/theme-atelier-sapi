@@ -859,6 +859,7 @@ function sapi_render_mini_cart_contents() {
         <div class="mini-cart-item" data-key="<?php echo esc_attr($cart_item_key); ?>">
           <div class="mini-cart-item-image">
             <?php echo $product->get_image('thumbnail'); ?>
+            <span class="mini-cart-qty-badge"><?php echo esc_html($quantity); ?></span>
           </div>
           <div class="mini-cart-item-details">
             <span class="mini-cart-item-name">
@@ -876,7 +877,6 @@ function sapi_render_mini_cart_contents() {
                   </div>
                 <?php endforeach; ?>
               <?php endif; ?>
-              <div class="mini-cart-var-line"><?php echo sprintf(esc_html__('Qté : %d', 'theme-sapi-maison'), $quantity); ?></div>
             </div>
             <span class="mini-cart-item-price">
               <?php echo WC()->cart->get_product_price($product); ?>

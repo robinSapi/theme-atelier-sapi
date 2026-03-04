@@ -11289,8 +11289,27 @@ transform: translateY(15px);
   width: 120px;
   height: 120px;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
   margin: 0 auto;
+  position: relative;
+}
+
+.mini-cart-qty-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-dark, #323232);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  border: 2px solid #fff;
 }
 
 .mini-cart-item-image img {
