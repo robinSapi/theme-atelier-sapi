@@ -11273,8 +11273,9 @@ transform: translateY(15px);
 }
 
 .mini-cart-item {
+  position: relative;
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr;
   gap: 0.5rem;
   padding: 1rem;
   background: var(--color-cream);
@@ -11371,14 +11372,14 @@ transform: translateY(15px);
 }
 
 .mini-cart-item-remove {
-  -ms-flex-item-align: start;
-  align-self: flex-start;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
   background: none;
   border: none;
   color: var(--color-gray);
   cursor: pointer;
   padding: 0.25rem;
-  -webkit-transition: color 0.3s var(--ease-smooth);
   transition: color 0.3s var(--ease-smooth);
 }
 
