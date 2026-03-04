@@ -12916,6 +12916,11 @@ body.woocommerce-cart {
   background: var(--color-white, #fff) !important;
 }
 
+/* Masquer le message "Vous validez votre commande en tant qu'invité" */
+.wc-block-checkout__guest-checkout-notice {
+  display: none !important;
+}
+
 /* Produits dans le récap (sidebar) — layout vertical comme le mini-cart */
 .sapi-checkout-outer .wc-block-components-order-summary-item {
   display: flex !important;
