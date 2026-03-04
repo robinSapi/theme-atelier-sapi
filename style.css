@@ -12930,17 +12930,10 @@ body.woocommerce-cart {
 .sapi-checkout-outer .wc-block-components-order-summary-item__image {
   order: -1 !important;
   align-self: center !important;
-  width: 120px !important;
-  height: 120px !important;
-  overflow: hidden !important;
-  border-radius: 8px !important;
-  flex-shrink: 0 !important;
 }
 
 .sapi-checkout-outer .wc-block-components-order-summary-item__image img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
+  border-radius: 8px !important;
 }
 
 .sapi-checkout-outer .wc-block-components-product-name {
