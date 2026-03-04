@@ -9,92 +9,53 @@ get_header();
   </div>
 </section>
 
-<!-- Carousel: 5 derniers articles -->
-<section class="blog-carousel-section">
-  <?php
-  // Query pour les 5 derniers articles (carousel)
-  $carousel_query = new WP_Query([
-    'posts_per_page' => 5,
-    'post_status' => 'publish',
-    'orderby' => 'date',
-    'order' => 'DESC'
-  ]);
+<!-- Article vedette : dernier article publié -->
+<?php
+$featured_id = 0;
+$featured_query = new WP_Query([
+  'posts_per_page' => 1,
+  'post_status' => 'publish',
+  'orderby' => 'date',
+  'order' => 'DESC'
+]);
 
-  $carousel_posts = []; // Initialiser AVANT le if pour éviter les erreurs
-
-  if ($carousel_query->have_posts()) :
-    while ($carousel_query->have_posts()) {
-      $carousel_query->the_post();
-      $carousel_posts[] = [
-        'id' => get_the_ID(),
-        'title' => get_the_title(),
-        'permalink' => get_permalink(),
-        'excerpt' => wp_trim_words(get_the_excerpt(), 25, '...'),
-        'thumbnail_id' => get_post_thumbnail_id(),
-        'has_thumbnail' => has_post_thumbnail(),
-        'date' => get_the_date('d/m/Y'),
-        'classes' => get_post_class('blog-card')
-      ];
-    }
-    $total_carousel = count($carousel_posts);
-    wp_reset_postdata();
-  ?>
-
-    <div class="blog-carousel-container">
-      <button class="carousel-nav carousel-prev" aria-label="Article précédent">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
-      </button>
-
-      <div class="blog-carousel" data-total="<?php echo esc_attr($total_carousel); ?>">
-        <div class="blog-carousel-track">
-          <?php foreach ($carousel_posts as $index => $post) : ?>
-            <article class="<?php echo esc_attr(implode(' ', $post['classes'])); ?>" data-index="<?php echo esc_attr($index); ?>">
-              <?php if ($post['has_thumbnail'] && $post['thumbnail_id']) : ?>
-                <div class="blog-card-media">
-                  <a href="<?php echo esc_url($post['permalink']); ?>">
-                    <?php echo wp_get_attachment_image($post['thumbnail_id'], 'large'); ?>
-                  </a>
-                </div>
-              <?php endif; ?>
-              <div class="blog-card-content">
-                <h2><a href="<?php echo esc_url($post['permalink']); ?>"><?php echo esc_html($post['title']); ?></a></h2>
-                <p><?php echo wp_kses_post($post['excerpt']); ?></p>
-                <div class="blog-card-date"><?php echo esc_html($post['date']); ?></div>
-              </div>
-            </article>
-          <?php endforeach; ?>
-        </div>
-      </div>
-
-      <button class="carousel-nav carousel-next" aria-label="Article suivant">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
-      </button>
+if ($featured_query->have_posts()) :
+  $featured_query->the_post();
+  $featured_id = get_the_ID();
+?>
+<section class="blog-featured-hero">
+  <a href="<?php the_permalink(); ?>" class="blog-featured-link">
+    <?php if (has_post_thumbnail()) : ?>
+      <?php echo wp_get_attachment_image(get_post_thumbnail_id(), 'full', false, [
+        'class' => 'blog-featured-bg'
+      ]); ?>
+    <?php endif; ?>
+    <div class="blog-featured-overlay"></div>
+    <div class="blog-featured-content">
+      <span class="blog-featured-date"><?php echo esc_html(get_the_date('d/m/Y')); ?></span>
+      <h2><?php echo esc_html(get_the_title()); ?></h2>
+      <p><?php echo esc_html(wp_trim_words(get_the_excerpt(), 30, '...')); ?></p>
+      <span class="blog-featured-cta">Lire l'article →</span>
     </div>
-
-  <?php endif; ?>
+  </a>
 </section>
+<?php
+  wp_reset_postdata();
+endif;
+?>
 
 <!-- Grille: Tous les autres articles -->
 <section class="blog-grid-section">
   <div class="blog-grid-container">
     <?php
-    // Récupérer les IDs des articles du carousel pour les exclure
-    $carousel_ids = array_column($carousel_posts, 'id');
-
-    // Pagination
     $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
 
-    // Query pour tous les autres articles (grille)
     $grid_query = new WP_Query([
       'posts_per_page' => 9,
       'post_status' => 'publish',
       'orderby' => 'date',
       'order' => 'DESC',
-      'post__not_in' => $carousel_ids,
+      'post__not_in' => $featured_id ? [$featured_id] : [],
       'paged' => $paged
     ]);
 

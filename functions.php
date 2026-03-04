@@ -224,14 +224,6 @@ function sapi_maison_enqueue_assets() {
     }
   }
 
-  // Blog Timeline & Carousel - only on blog home page
-  if (is_home()) {
-    $blog_timeline_js_path = get_template_directory() . '/assets/blog-timeline.js';
-    if (file_exists($blog_timeline_js_path)) {
-      wp_enqueue_script('sapi-maison-blog-timeline', get_template_directory_uri() . '/assets/blog-timeline.js', [], filemtime($blog_timeline_js_path), true);
-    }
-  }
-
   // Guide Luminaire questionnaire
   if (is_page_template('page-guide-luminaire.php')) {
     $guide_js_path = get_template_directory() . '/assets/guide-luminaire.js';
