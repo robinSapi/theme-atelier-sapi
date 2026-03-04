@@ -854,6 +854,7 @@ function sapi_render_mini_cart_contents() {
         $product_id = $cart_item['product_id'];
         $quantity = $cart_item['quantity'];
         $product_permalink = $product->is_visible() ? $product->get_permalink($cart_item) : '';
+        $display_name = $product->is_type('variation') ? wc_get_product($product_id)->get_name() : $product->get_name();
       ?>
         <div class="mini-cart-item" data-key="<?php echo esc_attr($cart_item_key); ?>">
           <div class="mini-cart-item-image">
@@ -861,7 +862,7 @@ function sapi_render_mini_cart_contents() {
           </div>
           <div class="mini-cart-item-details">
             <span class="mini-cart-item-name">
-              <?php echo $product_permalink ? '<a href="' . esc_url($product_permalink) . '">' . esc_html($product->get_name()) . '</a>' : esc_html($product->get_name()); ?>
+              <?php echo $product_permalink ? '<a href="' . esc_url($product_permalink) . '">' . esc_html($display_name) . '</a>' : esc_html($display_name); ?>
             </span>
             <div class="mini-cart-item-meta">
               <?php if (!empty($cart_item['variation'])) : ?>
