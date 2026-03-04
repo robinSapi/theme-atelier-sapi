@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maillage Interne — Atelier Sâpi — Audit SEO</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #1a1a2e;
+    color: #eee;
+    overflow: hidden;
+  }
+  #app { display: flex; height: 100vh; }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: 340px;
+    min-width: 340px;
+    background: #16213e;
+    border-right: 1px solid #0f3460;
+    overflow-y: auto;
+    padding: 20px;
+    z-index: 10;
+  }
+  #sidebar h1 { font-size: 18px; color: #E35B24; margin-bottom: 4px; }
+  #sidebar .subtitle { font-size: 12px; color: #888; margin-bottom: 20px; }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: #1a1a2e;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+  .stat-card .value { font-size: 24px; font-weight: 700; color: #E35B24; }
+  .stat-card .label { font-size: 11px; color: #888; margin-top: 2px; }
+
+  .legend { margin-bottom: 20px; }
+  .legend h3 {
+    font-size: 13px;
+    color: #aaa;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: background 0.2s;
+  }
+  .legend-item:hover { background: rgba(255,255,255,0.05); }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .link-legend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+  .link-line {
+    width: 30px;
+    height: 3px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── Detail Panel ── */
+  #detail-panel {
+    margin-top: 16px;
+    background: #1a1a2e;
+    border-radius: 8px;
+    padding: 14px;
+    display: none;
+  }
+  #detail-panel h3 { font-size: 14px; color: #E35B24; margin-bottom: 8px; }
+  #detail-panel .detail-url {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 10px;
+    word-break: break-all;
+  }
+  #detail-panel .detail-section { margin-bottom: 8px; }
+  #detail-panel .detail-section h4 { font-size: 12px; color: #aaa; margin-bottom: 4px; }
+  #detail-panel .detail-section ul { list-style: none; padding: 0; }
+  #detail-panel .detail-section li {
+    font-size: 12px;
+    color: #ccc;
+    padding: 2px 0;
+    padding-left: 14px;
+    position: relative;
+  }
+  #detail-panel .detail-section li::before {
+    content: '\2192';
+    position: absolute;
+    left: 0;
+    color: #E35B24;
+  }
+  #detail-panel .detail-section li.incoming::before {
+    content: '\2190';
+    color: #53c28b;
+  }
+
+  /* ── Alerts ── */
+  .alert-section {
+    margin-top: 16px;
+    background: rgba(227, 91, 36, 0.1);
+    border: 1px solid rgba(227, 91, 36, 0.3);
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .alert-section h3 { font-size: 13px; color: #E35B24; margin-bottom: 8px; }
+  .alert-section li {
+    font-size: 12px;
+    color: #ccc;
+    margin-bottom: 6px;
+    list-style: none;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.4;
+  }
+  .alert-section li::before {
+    content: '\26A0';
+    position: absolute;
+    left: 0;
+  }
+
+  /* ── Canvas ── */
+  #canvas-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  canvas { display: block; cursor: grab; }
+  canvas:active { cursor: grabbing; }
+
+  /* ── Tooltip ── */
+  #tooltip {
+    position: absolute;
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    pointer-events: none;
+    display: none;
+    z-index: 100;
+    max-width: 220px;
+  }
+  #tooltip .tt-name { font-weight: 700; color: #E35B24; }
+  #tooltip .tt-url { color: #666; font-size: 11px; }
+  #tooltip .tt-stats { margin-top: 4px; color: #aaa; }
+
+  /* ── Controls ── */
+  #controls {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 6px;
+    z-index: 10;
+  }
+  #controls button {
+    background: #16213e;
+    border: 1px solid #0f3460;
+    color: #ccc;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+  #controls button:hover { background: #0f3460; color: #fff; }
+  #controls button.active { background: #E35B24; border-color: #E35B24; color: #fff; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="sidebar">
+    <h1>Maillage Interne</h1>
+    <p class="subtitle">Atelier Sâpi — Audit SEO — Mars 2026</p>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="value" id="stat-pages">0</div><div class="label">Pages</div></div>
+      <div class="stat-card"><div class="value" id="stat-links">0</div><div class="label">Liens contenu</div></div>
+      <div class="stat-card"><div class="value" id="stat-avg">0</div><div class="label">Sortants moy.</div></div>
+      <div class="stat-card"><div class="value" id="stat-orphan">0</div><div class="label">Pages faibles</div></div>
+    </div>
+
+    <div class="legend">
+      <h3>Types de pages</h3>
+      <div id="node-legend"></div>
+    </div>
+
+    <div class="legend">
+      <h3>Types de liens</h3>
+      <div class="link-legend"><div class="link-line" style="background:#E35B24"></div> Lien de contenu (CTA)</div>
+      <div class="link-legend"><div class="link-line" style="background:rgba(83,194,139,0.5)"></div> Navigation (header)</div>
+      <div class="link-legend"><div class="link-line" style="background:rgba(100,100,180,0.4)"></div> Navigation (footer)</div>
+    </div>
+
+    <div class="alert-section" id="alerts">
+      <h3>Points d'attention SEO</h3>
+      <ul id="alert-list"></ul>
+    </div>
+
+    <div id="detail-panel">
+      <h3 id="detail-name"></h3>
+      <div class="detail-url" id="detail-url"></div>
+      <div class="detail-section">
+        <h4>Liens sortants (<span id="detail-out-count">0</span>)</h4>
+        <ul id="detail-out"></ul>
+      </div>
+      <div class="detail-section">
+        <h4>Liens entrants (<span id="detail-in-count">0</span>)</h4>
+        <ul id="detail-in"></ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="canvas-wrap">
+    <canvas id="graph"></canvas>
+    <div id="tooltip">
+      <div class="tt-name"></div>
+      <div class="tt-url"></div>
+      <div class="tt-stats"></div>
+    </div>
+    <div id="controls">
+      <button onclick="resetView()">Recentrer</button>
+      <button id="btn-nav" class="active" onclick="toggleLayer('nav')">Header</button>
+      <button id="btn-footer" class="active" onclick="toggleLayer('footer')">Footer</button>
+      <button id="btn-content" class="active" onclick="toggleLayer('content')">Contenu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA — Maillage interne Atelier Sâpi
+// ============================================================
+var CATEGORIES = {
+  hub:     { color: '#E35B24', label: 'Hub principal' },
+  shop:    { color: '#d4a853', label: 'Boutique / Cat\u00e9gories' },
+  content: { color: '#53c28b', label: 'Pages de contenu' },
+  tool:    { color: '#5b8def', label: 'Outils / Guide' },
+  blog:    { color: '#b07dd6', label: 'Blog / Actus' },
+  woo:     { color: '#e87da0', label: 'Panier / Commande' },
+  legal:   { color: '#777',    label: 'Pages l\u00e9gales' }
+};
+
+var nodes = [
+  { id: 'accueil',        name: 'Accueil',           url: '/',                               cat: 'hub',     r: 30 },
+  { id: 'nos-creations',  name: 'Nos cr\u00e9ations',url: '/nos-creations/',                 cat: 'shop',    r: 26 },
+  { id: 'suspensions',    name: 'Suspensions',       url: '/categorie-produit/suspensions/',  cat: 'shop',    r: 17 },
+  { id: 'lampadaires',    name: 'Lampadaires',       url: '/categorie-produit/lampadaires/',  cat: 'shop',    r: 17 },
+  { id: 'appliques',      name: 'Appliques',         url: '/categorie-produit/appliques/',    cat: 'shop',    r: 17 },
+  { id: 'a-poser',        name: '\u00c0 poser',      url: '/categorie-produit/lampeaposer/',  cat: 'shop',    r: 17 },
+  { id: 'guide',          name: 'Guide Luminaire',   url: '/guide-luminaire/',                cat: 'tool',    r: 23 },
+  { id: 'artisan',        name: "L'Artisan",         url: '/lumiere-dartisan/',               cat: 'content', r: 20 },
+  { id: 'conseils',       name: 'Conseils',          url: '/conseils-eclaires/',              cat: 'content', r: 17 },
+  { id: 'contact',        name: 'Contact',           url: '/contact/',                        cat: 'content', r: 17 },
+  { id: 'sur-mesure',     name: 'Sur mesure',        url: '/sur-mesure/',                     cat: 'content', r: 17 },
+  { id: 'actus',          name: 'Actus',             url: '/actus/',                          cat: 'blog',    r: 17 },
+  { id: 'article',        name: 'Articles blog',     url: '/article/*',                       cat: 'blog',    r: 14 },
+  { id: 'produit',        name: 'Fiches produits',   url: '/produit/*',                       cat: 'shop',    r: 22 },
+  { id: 'panier',         name: 'Panier',            url: '/panier/',                         cat: 'woo',     r: 17 },
+  { id: 'commande',       name: 'Commande',          url: '/commande/',                       cat: 'woo',     r: 17 },
+  { id: 'mentions',       name: 'Mentions l\u00e9gales', url: '/mentions-legales/',           cat: 'legal',   r: 13 },
+  { id: 'cgv',            name: 'CGV',               url: '/cgv/',                            cat: 'legal',   r: 13 },
+  { id: 'confidentialite',name: 'Confidentialit\u00e9',  url: '/politique-de-confidentialite/', cat: 'legal', r: 13 },
+  { id: 'recherche',      name: 'Recherche',         url: '/search/',                         cat: 'tool',    r: 13 },
+  { id: '404',            name: '404',               url: '/404',                             cat: 'tool',    r: 13 }
+];
+
+// type: 'content' (CTA/inline), 'nav' (header menu), 'footer' (footer menu)
+var edges = [
+  // ── Header navigation (menu principal, toutes pages) ──
+  { from: 'accueil', to: 'nos-creations',  type: 'nav', label: 'Menu principal' },
+  { from: 'accueil', to: 'suspensions',    type: 'nav', label: 'Sous-menu' },
+  { from: 'accueil', to: 'lampadaires',    type: 'nav', label: 'Sous-menu' },
+  { from: 'accueil', to: 'appliques',      type: 'nav', label: 'Sous-menu' },
+  { from: 'accueil', to: 'a-poser',        type: 'nav', label: 'Sous-menu' },
+  { from: 'accueil', to: 'sur-mesure',     type: 'nav', label: 'Menu principal' },
+  { from: 'accueil', to: 'artisan',        type: 'nav', label: 'Menu principal' },
+  { from: 'accueil', to: 'conseils',       type: 'nav', label: 'Menu principal' },
+  { from: 'accueil', to: 'contact',        type: 'nav', label: 'Menu principal' },
+  { from: 'accueil', to: 'panier',         type: 'nav', label: 'Mini-cart' },
+  { from: 'accueil', to: 'commande',       type: 'nav', label: 'Mini-cart' },
+
+  // ── Footer (toutes pages) ──
+  { from: 'accueil', to: 'nos-creations',  type: 'footer', label: 'Footer nav' },
+  { from: 'accueil', to: 'artisan',        type: 'footer', label: 'Footer nav' },
+  { from: 'accueil', to: 'conseils',       type: 'footer', label: 'Footer nav' },
+  { from: 'accueil', to: 'contact',        type: 'footer', label: 'Footer nav' },
+  { from: 'accueil', to: 'actus',          type: 'footer', label: 'Footer social' },
+  { from: 'accueil', to: 'mentions',       type: 'footer', label: 'Footer l\u00e9gal' },
+  { from: 'accueil', to: 'cgv',            type: 'footer', label: 'Footer l\u00e9gal' },
+  { from: 'accueil', to: 'confidentialite',type: 'footer', label: 'Footer l\u00e9gal' },
+
+  // ── Homepage (contenu) ──
+  { from: 'accueil', to: 'artisan',        type: 'content', label: "D\u00e9couvrir l'artisan" },
+  { from: 'accueil', to: 'guide',          type: 'content', label: 'CTA Guide Luminaire' },
+  { from: 'accueil', to: 'nos-creations',  type: 'content', label: 'Bento CTA' },
+  { from: 'accueil', to: 'produit',        type: 'content', label: 'Carousel + Featured + Bestseller + Gift' },
+  { from: 'accueil', to: 'suspensions',    type: 'content', label: 'Collection cards' },
+  { from: 'accueil', to: 'lampadaires',    type: 'content', label: 'Collection cards' },
+  { from: 'accueil', to: 'appliques',      type: 'content', label: 'Collection cards' },
+  { from: 'accueil', to: 'a-poser',        type: 'content', label: 'Collection cards' },
+
+  // ── Guide Luminaire ──
+  { from: 'guide',   to: 'nos-creations',  type: 'content', label: 'Voir toute la collection' },
+  { from: 'guide',   to: 'produit',        type: 'content', label: 'Recommandation IA' },
+
+  // ── Fiche produit ──
+  { from: 'produit', to: 'artisan',        type: 'content', label: "D\u00e9couvrir l'artisan" },
+  { from: 'produit', to: 'nos-creations',  type: 'content', label: 'Cat\u00e9gorie associ\u00e9e' },
+
+  // ── L'Artisan ──
+  { from: 'artisan', to: 'nos-creations',  type: 'content', label: 'D\u00e9couvrir la collection' },
+
+  // ── Conseils ──
+  { from: 'conseils', to: 'guide',         type: 'content', label: 'CTA Guide Luminaire' },
+
+  // ── Checkout (merci) ──
+  { from: 'commande', to: 'nos-creations', type: 'content', label: 'Continuer shopping' },
+
+  // ── Panier vide ──
+  { from: 'panier',  to: 'nos-creations',  type: 'content', label: 'Panier vide CTA' },
+  { from: 'panier',  to: 'produit',        type: 'content', label: 'Produits vus r\u00e9cemment' },
+
+  // ── Blog ──
+  { from: 'actus',   to: 'article',        type: 'content', label: 'Carousel articles' },
+  { from: 'article', to: 'article',        type: 'content', label: 'Prev/Next article' },
+
+  // ── Boutique + Cat\u00e9gories ──
+  { from: 'nos-creations', to: 'produit',  type: 'content', label: 'Cards produits' },
+  { from: 'suspensions',   to: 'produit',  type: 'content', label: 'Cards produits' },
+  { from: 'lampadaires',   to: 'produit',  type: 'content', label: 'Cards produits' },
+  { from: 'appliques',     to: 'produit',  type: 'content', label: 'Cards produits' },
+  { from: 'a-poser',       to: 'produit',  type: 'content', label: 'Cards produits' },
+
+  // ── Recherche ──
+  { from: 'recherche', to: 'nos-creations', type: 'content', label: 'Fallback parcourir' },
+  { from: 'recherche', to: 'produit',       type: 'content', label: 'R\u00e9sultats recherche' },
+
+  // ── 404 ──
+  { from: '404', to: 'accueil',             type: 'content', label: 'Retour accueil' }
+];
+
+// Give each node simulation state
+nodes.forEach(function(n) { n.x = 0; n.y = 0; n.vx = 0; n.vy = 0; });
+
+// ============================================================
+// CANVAS
+// ============================================================
+var canvas = document.getElementById('graph');
+var ctx = canvas.getContext('2d');
+var tooltip = document.getElementById('tooltip');
+
+var W, H, dpr;
+var offsetX = 0, offsetY = 0, scale = 1;
+var dragging = false, dragNode = null, panStartX, panStartY;
+var hoveredNode = null, selectedNode = null;
+var layers = { nav: true, footer: true, content: true };
+var simRunning = true;
+
+function resize() {
+  var wrap = document.getElementById('canvas-wrap');
+  dpr = window.devicePixelRatio || 1;
+  W = wrap.clientWidth;
+  H = wrap.clientHeight;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+// ============================================================
+// LAYOUT — radial initial placement
+// ============================================================
+function initPositions() {
+  var cx = W / 2, cy = H / 2;
+
+  // Accueil at center
+  var hub = nodes.find(function(n){ return n.id === 'accueil'; });
+  hub.x = cx; hub.y = cy; hub.vx = 0; hub.vy = 0;
+
+  // Group others by category
+  var catOrder = ['shop', 'tool', 'content', 'blog', 'woo', 'legal'];
+  var groups = {};
+  nodes.forEach(function(n) {
+    if (n.id === 'accueil') return;
+    if (!groups[n.cat]) groups[n.cat] = [];
+    groups[n.cat].push(n);
+  });
+
+  var angleStep = (2 * Math.PI) / catOrder.length;
+  var startAngle = -Math.PI / 2;
+
+  catOrder.forEach(function(cat, ci) {
+    var group = groups[cat] || [];
+    var baseAngle = startAngle + ci * angleStep;
+    var baseR = 220;
+    group.forEach(function(n, ni) {
+      var spread = group.length > 1 ? (ni - (group.length - 1) / 2) * 0.35 : 0;
+      var angle = baseAngle + spread;
+      var r = baseR + (ni % 2) * 70;
+      n.x = cx + Math.cos(angle) * r;
+      n.y = cy + Math.sin(angle) * r;
+      n.vx = 0;
+      n.vy = 0;
+    });
+  });
+}
+
+// ============================================================
+// FORCE SIMULATION
+// ============================================================
+function simulate() {
+  if (!simRunning) return;
+
+  var repulsion = 9000;
+  var attraction = 0.004;
+  var damping = 0.65;
+  var centerForce = 0.008;
+  var cx = W / 2, cy = H / 2;
+
+  // Repulsion between all pairs
+  for (var i = 0; i < nodes.length; i++) {
+    for (var j = i + 1; j < nodes.length; j++) {
+      var a = nodes[i], b = nodes[j];
+      var dx = b.x - a.x, dy = b.y - a.y;
+      var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      var minDist = a.r + b.r + 50;
+      if (dist < minDist) dist = minDist;
+      var force = repulsion / (dist * dist);
+      var fx = (dx / dist) * force;
+      var fy = (dy / dist) * force;
+      a.vx -= fx; a.vy -= fy;
+      b.vx += fx; b.vy += fy;
+    }
+  }
+
+  // Attraction along visible edges
+  var visEdges = edges.filter(function(e){ return layers[e.type]; });
+  visEdges.forEach(function(e) {
+    var a = nodes.find(function(n){ return n.id === e.from; });
+    var b = nodes.find(function(n){ return n.id === e.to; });
+    if (!a || !b) return;
+    var dx = b.x - a.x, dy = b.y - a.y;
+    var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    var target = e.type === 'content' ? 180 : 260;
+    var f = (dist - target) * attraction;
+    var fx = (dx / dist) * f;
+    var fy = (dy / dist) * f;
+    a.vx += fx; a.vy += fy;
+    b.vx -= fx; b.vy -= fy;
+  });
+
+  // Center gravity
+  nodes.forEach(function(n) {
+    n.vx += (cx - n.x) * centerForce;
+    n.vy += (cy - n.y) * centerForce;
+  });
+
+  // Apply + damp
+  var totalV = 0;
+  nodes.forEach(function(n) {
+    if (n === dragNode) return;
+    n.vx *= damping;
+    n.vy *= damping;
+    n.x += n.vx * 0.3;
+    n.y += n.vy * 0.3;
+    n.x = Math.max(n.r + 20, Math.min(W - n.r - 20, n.x));
+    n.y = Math.max(n.r + 20, Math.min(H - n.r - 20, n.y));
+    totalV += Math.abs(n.vx) + Math.abs(n.vy);
+  });
+
+  // Stop when settled
+  if (totalV < 0.5) simRunning = false;
+}
+
+// ============================================================
+// DRAWING
+// ============================================================
+function drawArrow(x1, y1, x2, y2, r2, color, width) {
+  var dx = x2 - x1, dy = y2 - y1;
+  var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+  var nx = dx / dist, ny = dy / dist;
+  var ex = x2 - nx * (r2 + 5);
+  var ey = y2 - ny * (r2 + 5);
+
+  ctx.beginPath();
+  ctx.moveTo(x1 + nx * (nodes.find(function(n){ return Math.abs(n.x - x1) < 1 && Math.abs(n.y - y1) < 1; })?.r || 10), y1 + ny * (nodes.find(function(n){ return Math.abs(n.x - x1) < 1 && Math.abs(n.y - y1) < 1; })?.r || 10));
+  ctx.lineTo(ex, ey);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.stroke();
+
+  // arrowhead
+  var headLen = 7 + width;
+  var angle = Math.atan2(ey - y1, ex - x1);
+  ctx.beginPath();
+  ctx.moveTo(ex, ey);
+  ctx.lineTo(ex - headLen * Math.cos(angle - 0.35), ey - headLen * Math.sin(angle - 0.35));
+  ctx.lineTo(ex - headLen * Math.cos(angle + 0.35), ey - headLen * Math.sin(angle + 0.35));
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.save();
+  ctx.translate(offsetX, offsetY);
+  ctx.scale(scale, scale);
+
+  var visEdges = edges.filter(function(e){ return layers[e.type]; });
+  var activeId = selectedNode ? selectedNode.id : (hoveredNode ? hoveredNode.id : null);
+
+  // ── Edges ──
+  visEdges.forEach(function(e) {
+    var a = nodes.find(function(n){ return n.id === e.from; });
+    var b = nodes.find(function(n){ return n.id === e.to; });
+    if (!a || !b) return;
+
+    var color, w;
+    if (e.type === 'content')     { color = 'rgba(227,91,36,0.35)';   w = 2; }
+    else if (e.type === 'nav')    { color = 'rgba(83,194,139,0.18)';  w = 1.2; }
+    else                          { color = 'rgba(100,100,180,0.12)'; w = 1; }
+
+    if (activeId) {
+      if (e.from === activeId || e.to === activeId) {
+        if (e.type === 'content')     { color = '#E35B24'; w = 3; }
+        else if (e.type === 'nav')    { color = '#53c28b'; w = 2.5; }
+        else                          { color = 'rgba(100,100,180,0.6)'; w = 2; }
+      } else {
+        color = 'rgba(255,255,255,0.02)';
+        w = 0.5;
+      }
+    }
+
+    drawArrow(a.x, a.y, b.x, b.y, b.r, color, w);
+  });
+
+  // ── Nodes ──
+  nodes.forEach(function(n) {
+    var catColor = CATEGORIES[n.cat].color;
+    var alpha = 1;
+
+    if (activeId) {
+      var connected = visEdges.some(function(e) {
+        return (e.from === activeId && e.to === n.id) ||
+               (e.to === activeId && e.from === n.id) ||
+               n.id === activeId;
+      });
+      alpha = connected ? 1 : 0.15;
+    }
+
+    // Glow for hovered/selected
+    if (n === selectedNode || n === hoveredNode) {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r + 10, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(227,91,36,0.12)';
+      ctx.fill();
+    }
+
+    // Circle
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+    ctx.fillStyle = catColor;
+    ctx.fill();
+
+    if (n === selectedNode || n === hoveredNode) {
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    // Label
+    ctx.fillStyle = '#fff';
+    var fontSize = Math.max(9, n.r * 0.42);
+    ctx.font = (n.r > 18 ? 'bold ' : '') + fontSize + 'px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    var words = n.name.split(' ');
+    if (words.length > 1 && n.r >= 16) {
+      var mid = Math.ceil(words.length / 2);
+      ctx.fillText(words.slice(0, mid).join(' '), n.x, n.y - fontSize * 0.55);
+      ctx.fillText(words.slice(mid).join(' '), n.x, n.y + fontSize * 0.55);
+    } else {
+      ctx.fillText(n.name, n.x, n.y);
+    }
+
+    // Badge incoming count
+    var inCount = visEdges.filter(function(e){ return e.to === n.id; }).length;
+    if (inCount > 0 && n.r >= 14) {
+      var bx = n.x + n.r * 0.7, by = n.y - n.r * 0.7;
+      ctx.beginPath();
+      ctx.arc(bx, by, 9, 0, Math.PI * 2);
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(bx, by, 8, 0, Math.PI * 2);
+      ctx.fillStyle = alpha < 0.5 ? 'rgba(60,60,60,0.5)' : '#333';
+      ctx.fill();
+      ctx.fillStyle = alpha < 0.5 ? 'rgba(255,255,255,0.3)' : '#fff';
+      ctx.font = 'bold 9px system-ui';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(inCount, bx, by + 0.5);
+    }
+
+    ctx.globalAlpha = 1;
+  });
+
+  ctx.restore();
+  requestAnimationFrame(draw);
+}
+
+// ============================================================
+// INTERACTION
+// ============================================================
+function screenToWorld(sx, sy) {
+  return { x: (sx - offsetX) / scale, y: (sy - offsetY) / scale };
+}
+
+function findNode(sx, sy) {
+  var p = screenToWorld(sx, sy);
+  for (var i = nodes.length - 1; i >= 0; i--) {
+    var n = nodes[i];
+    var dx = n.x - p.x, dy = n.y - p.y;
+    if (dx * dx + dy * dy < n.r * n.r) return n;
+  }
+  return null;
+}
+
+canvas.addEventListener('mousedown', function(e) {
+  var rect = canvas.getBoundingClientRect();
+  var sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+  var node = findNode(sx, sy);
+  if (node) {
+    dragNode = node;
+    panStartX = sx; panStartY = sy;
+  } else {
+    dragging = true;
+    panStartX = sx - offsetX;
+    panStartY = sy - offsetY;
+  }
+});
+
+canvas.addEventListener('mousemove', function(e) {
+  var rect = canvas.getBoundingClientRect();
+  var sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+
+  if (dragNode) {
+    var p = screenToWorld(sx, sy);
+    dragNode.x = p.x; dragNode.y = p.y;
+    dragNode.vx = 0; dragNode.vy = 0;
+    simRunning = true;
+    return;
+  }
+  if (dragging) {
+    offsetX = sx - panStartX;
+    offsetY = sy - panStartY;
+    return;
+  }
+
+  var node = findNode(sx, sy);
+  hoveredNode = node;
+  canvas.style.cursor = node ? 'pointer' : 'grab';
+
+  if (node) {
+    var visEdges = edges.filter(function(e2){ return layers[e2.type]; });
+    var outC = visEdges.filter(function(e2){ return e2.from === node.id; }).length;
+    var inC  = visEdges.filter(function(e2){ return e2.to === node.id;   }).length;
+    tooltip.style.display = 'block';
+    var sidebarW = document.getElementById('sidebar').offsetWidth;
+    tooltip.style.left = (e.clientX - sidebarW + 14) + 'px';
+    tooltip.style.top  = (e.clientY + 14) + 'px';
+    tooltip.querySelector('.tt-name').textContent = node.name;
+    tooltip.querySelector('.tt-url').textContent  = node.url;
+    tooltip.querySelector('.tt-stats').textContent = outC + ' sortants \u00b7 ' + inC + ' entrants';
+  } else {
+    tooltip.style.display = 'none';
+  }
+});
+
+canvas.addEventListener('mouseup', function(e) {
+  if (dragNode) {
+    var rect = canvas.getBoundingClientRect();
+    var sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+    var dist = Math.sqrt((sx - panStartX) * (sx - panStartX) + (sy - panStartY) * (sy - panStartY));
+    if (dist < 5) {
+      selectedNode = selectedNode === dragNode ? null : dragNode;
+      showDetail(selectedNode);
+    }
+  }
+  dragNode = null;
+  dragging = false;
+});
+
+canvas.addEventListener('wheel', function(e) {
+  e.preventDefault();
+  var rect = canvas.getBoundingClientRect();
+  var sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+  var delta = e.deltaY > 0 ? 0.9 : 1.1;
+  var newScale = Math.max(0.3, Math.min(3, scale * delta));
+  offsetX = sx - (sx - offsetX) * (newScale / scale);
+  offsetY = sy - (sy - offsetY) * (newScale / scale);
+  scale = newScale;
+}, { passive: false });
+
+// ============================================================
+// DETAIL PANEL
+// ============================================================
+function showDetail(node) {
+  var panel = document.getElementById('detail-panel');
+  if (!node) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  document.getElementById('detail-name').textContent = node.name;
+  document.getElementById('detail-url').textContent  = node.url;
+
+  var vis = edges.filter(function(e){ return layers[e.type]; });
+  var outE = vis.filter(function(e){ return e.from === node.id; });
+  var inE  = vis.filter(function(e){ return e.to === node.id;   });
+
+  document.getElementById('detail-out-count').textContent = outE.length;
+  document.getElementById('detail-in-count').textContent  = inE.length;
+
+  document.getElementById('detail-out').innerHTML = outE.map(function(e) {
+    var t = nodes.find(function(n){ return n.id === e.to; });
+    return '<li>' + t.name + ' <span style="color:#666;font-size:10px">(' + e.label + ')</span></li>';
+  }).join('');
+
+  document.getElementById('detail-in').innerHTML = inE.map(function(e) {
+    var s = nodes.find(function(n){ return n.id === e.from; });
+    return '<li class="incoming">' + s.name + ' <span style="color:#666;font-size:10px">(' + e.label + ')</span></li>';
+  }).join('');
+}
+
+// ============================================================
+// CONTROLS
+// ============================================================
+function toggleLayer(layer) {
+  layers[layer] = !layers[layer];
+  document.getElementById('btn-' + layer).classList.toggle('active');
+  simRunning = true;
+}
+
+function resetView() {
+  offsetX = 0; offsetY = 0; scale = 1;
+  selectedNode = null; hoveredNode = null;
+  showDetail(null);
+  initPositions();
+  simRunning = true;
+}
+
+// ============================================================
+// STATS + ALERTS
+// ============================================================
+function computeStats() {
+  var contentE = edges.filter(function(e){ return e.type === 'content'; });
+
+  document.getElementById('stat-pages').textContent = nodes.length;
+  document.getElementById('stat-links').textContent = contentE.length;
+  document.getElementById('stat-avg').textContent   = (contentE.length / nodes.length).toFixed(1);
+
+  // Weak pages: few incoming content links (excl. legal + accueil)
+  var weakPages = nodes.filter(function(n) {
+    var inc = contentE.filter(function(e){ return e.to === n.id; }).length;
+    return inc <= 1 && n.cat !== 'legal' && n.id !== 'accueil';
+  });
+  document.getElementById('stat-orphan').textContent = weakPages.length;
+
+  // Alerts
+  var alerts = [];
+
+  weakPages.forEach(function(n) {
+    var inc = contentE.filter(function(e){ return e.to === n.id; }).length;
+    alerts.push('<b>' + n.name + '</b> : ' + (inc === 0 ? 'aucun' : 'seulement ' + inc) + ' lien entrant de contenu');
+  });
+
+  // Cul-de-sac pages (no outgoing content)
+  nodes.forEach(function(n) {
+    var out = contentE.filter(function(e){ return e.from === n.id; }).length;
+    if (out === 0 && n.cat !== 'legal' && n.id !== 'accueil') {
+      alerts.push('<b>' + n.name + '</b> : aucun lien sortant de contenu (cul-de-sac)');
+    }
+  });
+
+  document.getElementById('alert-list').innerHTML = alerts.map(function(a){ return '<li>' + a + '</li>'; }).join('');
+
+  // Node legend
+  var legendEl = document.getElementById('node-legend');
+  legendEl.innerHTML = Object.keys(CATEGORIES).map(function(key) {
+    var val = CATEGORIES[key];
+    var count = nodes.filter(function(n){ return n.cat === key; }).length;
+    return '<div class="legend-item"><div class="legend-dot" style="background:' + val.color + '"></div>' + val.label + ' (' + count + ')</div>';
+  }).join('');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  resize();
+  initPositions();
+  computeStats();
+
+  // Warm up simulation
+  for (var i = 0; i < 250; i++) simulate();
+  simRunning = true;
+
+  // Ongoing simulation
+  setInterval(function() { simulate(); }, 50);
+  requestAnimationFrame(draw);
+}
+
+window.addEventListener('resize', function() { resize(); simRunning = true; });
+init();
+</script>
+</body>
+</html>
