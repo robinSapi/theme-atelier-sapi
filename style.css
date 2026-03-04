@@ -7097,7 +7097,7 @@ li.carousel-editorial-slide,
 /* Blog Grid Section */
 .blog-grid-section {
   background: var(--color-white, #FFFFFF);
-  padding: 80px 20px;
+  padding: 80px 40px;
 }
 
 .blog-grid-container {
@@ -7264,7 +7264,7 @@ li.carousel-editorial-slide,
   }
 
   .blog-grid-section {
-    padding: 60px 20px;
+    padding: 60px 30px;
   }
 }
 
