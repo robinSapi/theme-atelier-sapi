@@ -12730,25 +12730,15 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   font-weight: 600 !important;
 }
 
-/* Section express payment — titre + boutons */
-.sapi-checkout-outer .wc-block-components-express-payment {
-  display: flex !important;
-  flex-direction: column !important;
-}
-
+/* Section express payment — boutons Apple Pay / Google Pay côte à côte */
 .sapi-checkout-outer .wc-block-components-express-payment h2 {
-  font-weight: 400 !important;
-  margin-bottom: 0.75rem !important;
-}
-
-.sapi-checkout-outer .wc-block-components-express-payment__content {
-  position: relative !important;
+  display: none !important;
 }
 
 .sapi-checkout-outer ul.wc-block-components-express-payment__event-buttons {
   display: flex !important;
   flex-direction: row !important;
-  flex-wrap: wrap !important;
+  flex-wrap: nowrap !important;
   gap: 0.75rem !important;
   list-style: none !important;
   padding: 0 !important;
@@ -12756,8 +12746,8 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
 }
 
 .sapi-checkout-outer ul.wc-block-components-express-payment__event-buttons > li {
-  flex: 1 1 calc(50% - 0.375rem) !important;
-  max-width: calc(50% - 0.375rem) !important;
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
 }
 
 /* Images produits arrondies */
