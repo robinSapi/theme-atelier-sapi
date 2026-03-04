@@ -342,7 +342,6 @@ add_action('wp_footer', function () {
 
   // 2. Fallback : 3 produits les plus vendus
   if (count($products_data) < 3) {
-    $exclude = array_map(function($p) { return 0; }, $products_data);
     // Récupérer les IDs déjà présents pour ne pas les dupliquer
     $existing_urls = array_column($products_data, 'url');
     $popular_query = new WP_Query([
@@ -462,18 +461,107 @@ add_action('wp_footer', function () {
 });
 
 // Supprime la limite de caractères sur la description courte dans le panier WooCommerce Blocks
-add_filter('woocommerce_short_description', function ($description) {
-  return $description;
-});
 add_filter('wc_blocks_product_short_description_character_limit', '__return_false');
 
 
 add_filter('render_block', function ($content, $block) {
   if ($block['blockName'] === 'woocommerce/cart') {
-    return '<div class="sapi-cart-outer">' . $content . '</div>';
+    ob_start();
+    ?>
+    <div class="sapi-cart-outer">
+      <div class="cart-page-cinetique">
+        <div class="checkout-progress">
+          <div class="progress-step active">
+            <span class="step-number">1</span>
+            <span class="step-label"><?php esc_html_e('Panier', 'theme-sapi-maison'); ?></span>
+          </div>
+          <div class="progress-line"></div>
+          <div class="progress-step">
+            <span class="step-number">2</span>
+            <span class="step-label"><?php esc_html_e('Commande', 'theme-sapi-maison'); ?></span>
+          </div>
+          <div class="progress-line"></div>
+          <div class="progress-step">
+            <span class="step-number">3</span>
+            <span class="step-label"><?php esc_html_e('Confirmation', 'theme-sapi-maison'); ?></span>
+          </div>
+        </div>
+        <div class="cart-hero">
+          <span class="section-number">01</span>
+          <h1><?php esc_html_e('Votre Panier', 'theme-sapi-maison'); ?></h1>
+          <p class="cart-subtitle"><?php esc_html_e('Plus que quelques clics avant de recevoir votre luminaire !', 'theme-sapi-maison'); ?></p>
+        </div>
+      <?php echo $content; ?>
+        <div class="cart-reassurance">
+          <div class="reassurance-item">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <div class="reassurance-text">
+              <strong><?php esc_html_e('Fabrication < 5 jours', 'theme-sapi-maison'); ?></strong>
+              <span><?php esc_html_e('Fait main dans notre atelier lyonnais', 'theme-sapi-maison'); ?></span>
+            </div>
+          </div>
+          <div class="reassurance-item">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="1" y="3" width="15" height="13"/>
+              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+              <circle cx="5.5" cy="18.5" r="2.5"/>
+              <circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+            <div class="reassurance-text">
+              <strong><?php esc_html_e('Livraison 48-72h', 'theme-sapi-maison'); ?></strong>
+              <span><?php esc_html_e('Soigneusement emballé', 'theme-sapi-maison'); ?></span>
+            </div>
+          </div>
+          <div class="reassurance-item">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="1 4 1 10 7 10"/>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+            </svg>
+            <div class="reassurance-text">
+              <strong><?php esc_html_e('Retours 30 jours', 'theme-sapi-maison'); ?></strong>
+              <span><?php esc_html_e('Satisfait ou remboursé', 'theme-sapi-maison'); ?></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <?php
+    return ob_get_clean();
   }
   if ($block['blockName'] === 'woocommerce/checkout') {
-    return '<div class="sapi-checkout-outer">' . $content . '</div>';
+    ob_start();
+    ?>
+    <div class="sapi-checkout-outer">
+      <div class="checkout-page-cinetique">
+        <div class="checkout-progress">
+          <div class="progress-step completed">
+            <span class="step-number">1</span>
+            <span class="step-label"><?php esc_html_e('Panier', 'theme-sapi-maison'); ?></span>
+          </div>
+          <div class="progress-line completed"></div>
+          <div class="progress-step active">
+            <span class="step-number">2</span>
+            <span class="step-label"><?php esc_html_e('Commande', 'theme-sapi-maison'); ?></span>
+          </div>
+          <div class="progress-line"></div>
+          <div class="progress-step">
+            <span class="step-number">3</span>
+            <span class="step-label"><?php esc_html_e('Confirmation', 'theme-sapi-maison'); ?></span>
+          </div>
+        </div>
+        <div class="checkout-hero">
+          <span class="section-number">01</span>
+          <h1><?php esc_html_e('Finaliser ma commande', 'theme-sapi-maison'); ?></h1>
+          <p class="checkout-subtitle"><?php esc_html_e('Votre luminaire sera bientôt chez vous !', 'theme-sapi-maison'); ?></p>
+        </div>
+      <?php echo $content; ?>
+      </div>
+    </div>
+    <?php
+    return ob_get_clean();
   }
   return $content;
 }, 10, 2);
@@ -1102,115 +1190,7 @@ add_action('after_setup_theme', function() {
   add_image_size('product-gallery-thumb', 120, 120, true);
 }, 11);
 
-/**
- * CINÉTIQUE - Custom Cart Page Header with Progress Bar
- */
-add_action('woocommerce_before_cart', function() {
-  ?>
-  <div class="cart-page-cinetique">
-    <!-- Progress Bar -->
-    <div class="checkout-progress">
-      <div class="progress-step active">
-        <span class="step-number">1</span>
-        <span class="step-label"><?php esc_html_e('Panier', 'theme-sapi-maison'); ?></span>
-      </div>
-      <div class="progress-line"></div>
-      <div class="progress-step">
-        <span class="step-number">2</span>
-        <span class="step-label"><?php esc_html_e('Commande', 'theme-sapi-maison'); ?></span>
-      </div>
-      <div class="progress-line"></div>
-      <div class="progress-step">
-        <span class="step-number">3</span>
-        <span class="step-label"><?php esc_html_e('Confirmation', 'theme-sapi-maison'); ?></span>
-      </div>
-    </div>
-
-    <div class="cart-hero">
-      <span class="section-number">01</span>
-      <h1><?php esc_html_e('Votre Panier', 'theme-sapi-maison'); ?></h1>
-      <p class="cart-subtitle"><?php esc_html_e('Plus que quelques clics avant de recevoir votre luminaire !', 'theme-sapi-maison'); ?></p>
-    </div>
-  <?php
-});
-
-add_action('woocommerce_after_cart', function() {
-  ?>
-    <div class="cart-reassurance">
-      <div class="reassurance-item">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <polyline points="12 6 12 12 16 14"/>
-        </svg>
-        <div class="reassurance-text">
-          <strong><?php esc_html_e('Fabrication < 5 jours', 'theme-sapi-maison'); ?></strong>
-          <span><?php esc_html_e('Fait main dans notre atelier lyonnais', 'theme-sapi-maison'); ?></span>
-        </div>
-      </div>
-      <div class="reassurance-item">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="1" y="3" width="15" height="13"/>
-          <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
-          <circle cx="5.5" cy="18.5" r="2.5"/>
-          <circle cx="18.5" cy="18.5" r="2.5"/>
-        </svg>
-        <div class="reassurance-text">
-          <strong><?php esc_html_e('Livraison 48-72h', 'theme-sapi-maison'); ?></strong>
-          <span><?php esc_html_e('Soigneusement emballé', 'theme-sapi-maison'); ?></span>
-        </div>
-      </div>
-      <div class="reassurance-item">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="1 4 1 10 7 10"/>
-          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
-        </svg>
-        <div class="reassurance-text">
-          <strong><?php esc_html_e('Retours 30 jours', 'theme-sapi-maison'); ?></strong>
-          <span><?php esc_html_e('Satisfait ou remboursé', 'theme-sapi-maison'); ?></span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <?php
-});
-
-/**
- * CINÉTIQUE - Custom Checkout Page Header with Progress Bar
- */
-add_action('woocommerce_before_checkout_form', function() {
-  ?>
-  <div class="checkout-page-cinetique">
-    <!-- Progress Bar -->
-    <div class="checkout-progress">
-      <div class="progress-step completed">
-        <span class="step-number">1</span>
-        <span class="step-label"><?php esc_html_e('Panier', 'theme-sapi-maison'); ?></span>
-      </div>
-      <div class="progress-line completed"></div>
-      <div class="progress-step active">
-        <span class="step-number">2</span>
-        <span class="step-label"><?php esc_html_e('Commande', 'theme-sapi-maison'); ?></span>
-      </div>
-      <div class="progress-line"></div>
-      <div class="progress-step">
-        <span class="step-number">3</span>
-        <span class="step-label"><?php esc_html_e('Confirmation', 'theme-sapi-maison'); ?></span>
-      </div>
-    </div>
-
-    <div class="checkout-hero">
-      <span class="section-number">01</span>
-      <h1><?php esc_html_e('Finaliser ma commande', 'theme-sapi-maison'); ?></h1>
-      <p class="checkout-subtitle"><?php esc_html_e('Votre luminaire sera bientôt chez vous !', 'theme-sapi-maison'); ?></p>
-    </div>
-  <?php
-}, 5);
-
-add_action('woocommerce_after_checkout_form', function() {
-  ?>
-  </div><!-- /.checkout-page-cinetique -->
-  <?php
-});
+// Progress bar panier/checkout migrée dans le filtre render_block (compatible WooCommerce Blocks)
 
 /**
  * AJAX Add to Cart - Safari Compatible
@@ -1583,8 +1563,7 @@ function sapi_guide_query_products(array $answers, array $categories) {
     ];
   }
 
-  // Ampoule filter based on room
-  $piece = isset($answers['piece']) ? $answers['piece'] : '';
+  // Ampoule filter based on room (reuses $piece from above)
   $ampoule_filter = sapi_guide_get_ampoule_filter($piece);
   $has_ampoule_filter = false;
 
@@ -1920,7 +1899,6 @@ function sapi_product_search($request) {
 
   $query_lower = strtolower($query_string);
   $results = [];
-  $found_ids = [];
 
   // Get ALL published products to filter client-side
   $all_products_args = [
