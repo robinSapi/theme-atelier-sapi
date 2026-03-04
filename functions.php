@@ -1525,8 +1525,9 @@ function sapi_guide_query_products(array $answers, array $categories) {
  * Query complementary products for grande pièce
  */
 function sapi_guide_query_complements(array $answers, array $main_categories) {
-  $all_cats = ['suspensions', 'lampadaires', 'appliques', 'lampeaposer'];
-  $complement_cats = array_values(array_diff($all_cats, $main_categories));
+  // Complements: jamais de suspension (nécessite sortie plafond dédiée)
+  $complement_pool = ['lampadaires', 'lampeaposer', 'appliques'];
+  $complement_cats = array_values(array_diff($complement_pool, $main_categories));
 
   if (empty($complement_cats)) {
     $complement_cats = ['lampadaires', 'lampeaposer'];
