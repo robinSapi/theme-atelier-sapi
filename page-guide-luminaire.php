@@ -10,6 +10,28 @@ $ajax_nonce = wp_create_nonce('sapi-guide-results');
 // ─── Steps data (V2 — dynamic flow) ───
 $guide_steps = [
   [
+    'id'         => 'piece',
+    'question'   => 'Dans quelle pièce sera-t-il installé ?',
+    'visibility' => 'always',
+    'choices'    => [
+      ['label' => 'Cuisine',          'slug' => 'cuisine', 'icon' => 'dining'],
+      ['label' => 'Bureau / Atelier', 'slug' => 'bureau',  'icon' => 'monitor'],
+      ['label' => 'Salon',            'slug' => 'salon',   'icon' => 'sofa'],
+      ['label' => 'Chambre',          'slug' => 'chambre', 'icon' => 'bed'],
+      ['label' => 'Entrée / Couloir', 'slug' => 'entree',  'icon' => 'door'],
+    ],
+  ],
+  [
+    'id'         => 'taille',
+    'question'   => 'Quelle est la taille de votre pièce ?',
+    'visibility' => 'always',
+    'choices'    => [
+      ['label' => 'Petite (< 10 m²)',   'slug' => 'petite',  'icon' => 'square-sm'],
+      ['label' => 'Moyenne (10–20 m²)',  'slug' => 'moyenne', 'icon' => 'square-md'],
+      ['label' => 'Grande (> 20 m²)',    'slug' => 'grande',  'icon' => 'square-lg'],
+    ],
+  ],
+  [
     'id'         => 'sortie',
     'question'   => 'Où se trouve votre sortie électrique ?',
     'visibility' => 'always',
@@ -37,28 +59,6 @@ $guide_steps = [
     'choices'    => [
       ['label' => 'Oui', 'slug' => 'oui', 'icon' => 'table-yes'],
       ['label' => 'Non', 'slug' => 'non', 'icon' => 'table-no'],
-    ],
-  ],
-  [
-    'id'         => 'taille',
-    'question'   => 'Quelle est la taille de votre pièce ?',
-    'visibility' => 'always',
-    'choices'    => [
-      ['label' => 'Petite (< 10 m²)',   'slug' => 'petite',  'icon' => 'square-sm'],
-      ['label' => 'Moyenne (10–20 m²)',  'slug' => 'moyenne', 'icon' => 'square-md'],
-      ['label' => 'Grande (> 20 m²)',    'slug' => 'grande',  'icon' => 'square-lg'],
-    ],
-  ],
-  [
-    'id'         => 'piece',
-    'question'   => 'Dans quelle pièce sera-t-il installé ?',
-    'visibility' => 'always',
-    'choices'    => [
-      ['label' => 'Cuisine',          'slug' => 'cuisine', 'icon' => 'dining'],
-      ['label' => 'Bureau / Atelier', 'slug' => 'bureau',  'icon' => 'monitor'],
-      ['label' => 'Salon',            'slug' => 'salon',   'icon' => 'sofa'],
-      ['label' => 'Chambre',          'slug' => 'chambre', 'icon' => 'bed'],
-      ['label' => 'Entrée / Couloir', 'slug' => 'entree',  'icon' => 'door'],
     ],
   ],
   [
