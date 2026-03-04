@@ -6903,7 +6903,7 @@ li.carousel-editorial-slide,
   overflow: hidden;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 40px 40px 60px;
 }
 
 .blog-featured-link {
