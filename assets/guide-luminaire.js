@@ -435,100 +435,12 @@
       var label = state.labels[stepId];
       if (!label) return;
 
-      var step = getStepById(stepId);
-      var questionShort = step ? getShortQuestionLabel(step.id) : stepId;
-
-      html += '<div class="guide-tag-wrap" data-step-id="' + escapeHtml(stepId) + '">'
-            + '<button class="guide-answer-tag" data-step-id="' + escapeHtml(stepId) + '" type="button" '
-            + 'aria-label="Modifier : ' + escapeHtml(label) + '">'
+      html += '<span class="guide-answer-tag">'
             + '<span class="guide-tag-label">' + escapeHtml(label) + '</span>'
-            + '<svg class="guide-tag-edit" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
-            + '<path d="m6 9 6 6 6-6"/>'
-            + '</svg></button>'
-            + '</div>';
+            + '</span>';
     });
 
     dom.resultsTags.innerHTML = html;
-
-    // Bind tag clicks
-    dom.resultsTags.querySelectorAll('.guide-answer-tag').forEach(function (tag) {
-      tag.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var stepId = this.getAttribute('data-step-id');
-        toggleTagDropdown(this, stepId);
-      });
-    });
-  }
-
-  /**
-   * Short label for answer tags header.
-   */
-  function getShortQuestionLabel(stepId) {
-    var labels = {
-      'sortie':  'Sortie',
-      'hauteur': 'Hauteur',
-      'table':   'Table',
-      'taille':  'Taille pièce',
-      'piece':   'Pièce',
-      'style':   'Style',
-    };
-    return labels[stepId] || stepId;
-  }
-
-  function toggleTagDropdown(tagBtn, stepId) {
-    var wrap = tagBtn.closest('.guide-tag-wrap');
-    var existingDropdown = wrap.querySelector('.guide-tag-dropdown');
-
-    closeAllDropdowns();
-
-    if (existingDropdown) return;
-
-    // Get choices for this step from sapiGuide.steps
-    var step = getStepById(stepId);
-    if (!step || !step.choices) return;
-
-    var currentSlug = state.answers[stepId];
-    var dropdown = document.createElement('div');
-    dropdown.className = 'guide-tag-dropdown';
-
-    step.choices.forEach(function (choice) {
-      var option = document.createElement('button');
-      option.className = 'guide-tag-option';
-      option.type = 'button';
-      if (choice.slug === currentSlug) option.classList.add('is-current');
-      option.textContent = choice.label;
-      option.addEventListener('click', function (e) {
-        e.stopPropagation();
-        state.answers[stepId] = choice.slug;
-        state.labels[stepId] = choice.label;
-
-        // Clean answers for steps that may no longer be visible
-        cleanInvisibleAnswers();
-        saveSession();
-
-        var labelEl = tagBtn.querySelector('.guide-tag-label');
-        if (labelEl) labelEl.textContent = choice.label;
-
-        closeAllDropdowns();
-
-        // Re-render tags (visibility may have changed) and fetch
-        renderAnswerTags();
-        fetchResults();
-      });
-      dropdown.appendChild(option);
-    });
-
-    wrap.appendChild(dropdown);
-    tagBtn.classList.add('is-open');
-
-    setTimeout(function () {
-      document.addEventListener('click', closeAllDropdowns, { once: true });
-    }, 0);
-  }
-
-  function closeAllDropdowns() {
-    document.querySelectorAll('.guide-tag-dropdown').forEach(function (d) { d.remove(); });
-    document.querySelectorAll('.guide-answer-tag.is-open').forEach(function (t) { t.classList.remove('is-open'); });
   }
 
   // ================================================================
