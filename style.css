@@ -12731,11 +12731,14 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
 }
 
 /* Section express payment — boutons Apple Pay / Google Pay côte à côte */
-.sapi-checkout-outer .wc-block-components-express-payment--checkout {
+.sapi-checkout-outer .wc-block-components-express-payment--checkout,
+.sapi-checkout-outer .wc-block-components-express-payment__content {
   border: none !important;
   background: none !important;
   padding: 0 !important;
+  margin: 0 !important;
   box-shadow: none !important;
+  outline: none !important;
 }
 
 .sapi-checkout-outer .wc-block-components-express-payment__title-container {
