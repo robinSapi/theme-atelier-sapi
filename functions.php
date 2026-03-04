@@ -864,8 +864,18 @@ function sapi_render_mini_cart_contents() {
               <?php echo $product_permalink ? '<a href="' . esc_url($product_permalink) . '">' . esc_html($product->get_name()) . '</a>' : esc_html($product->get_name()); ?>
             </span>
             <div class="mini-cart-item-meta">
-              <?php echo wc_get_formatted_cart_item_data($cart_item); ?>
-              <?php echo sprintf(__('Qté: %d', 'theme-sapi-maison'), $quantity); ?>
+              <?php if (!empty($cart_item['variation'])) : ?>
+                <?php foreach ($cart_item['variation'] as $attr_key => $attr_value) :
+                  if (empty($attr_value)) continue;
+                  $attr_name = wc_attribute_label(str_replace('attribute_', '', $attr_key), $product);
+                ?>
+                  <div class="mini-cart-var-line">
+                    <span class="mini-cart-var-label"><?php echo esc_html($attr_name); ?> :</span>
+                    <span class="mini-cart-var-value"><?php echo esc_html($attr_value); ?></span>
+                  </div>
+                <?php endforeach; ?>
+              <?php endif; ?>
+              <div class="mini-cart-var-line"><?php echo sprintf(esc_html__('Qté : %d', 'theme-sapi-maison'), $quantity); ?></div>
             </div>
             <span class="mini-cart-item-price">
               <?php echo WC()->cart->get_product_price($product); ?>
