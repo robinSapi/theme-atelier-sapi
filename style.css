@@ -12439,6 +12439,12 @@ transform: translateY(15px);
   color: var(--color-dark, #323232);
 }
 
+/* Exception : pages Panier & Checkout — largeur complète pour le layout 2 colonnes */
+body.woocommerce-cart .page-default .entry-content,
+body.woocommerce-checkout .page-default .entry-content {
+  max-width: 1400px;
+}
+
 /* Titres dans le contenu */
 .page-default .entry-content h2 {
   font-family: var(--font-body, 'Montserrat', sans-serif);
