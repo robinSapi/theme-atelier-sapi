@@ -77,6 +77,7 @@ $guide_steps = [
     'choices'    => [
       ['label' => 'Moderne, neuf, tons clairs',        'slug' => 'moderne', 'icon' => 'minimal'],
       ['label' => 'Ancien, pierre, bois, tons chauds', 'slug' => 'ancien',  'icon' => 'organic'],
+      ['label' => 'Pas de préférence',                 'slug' => 'neutre',  'icon' => 'question-mark'],
     ],
   ],
 ];

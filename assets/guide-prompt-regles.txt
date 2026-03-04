@@ -14,6 +14,7 @@ INSTRUCTIONS :
 7. Mentionne les noms de produits naturellement dans le texte.
 8. En cas de doute entre plusieurs produits, privilégie le plus populaire (nombre de ventes le plus élevé).
 9. Si pas de complément, mettre complement_product_id à null dans le JSON.
+10. Si aucune essence recommandée n'est indiquée pour un produit, mentionne que le luminaire existe en plusieurs teintes de bois (Peuplier pour un rendu clair et moderne, Okoumé pour un rendu chaud et naturel) et invite le client à choisir selon ses goûts.
 
 INFO - LIVRAISON ET ASSEMBLAGE :
 - Les luminaires sont expédiés en kit (parfois partiellement assemblés selon le modèle). Le client assemble lui-même grâce à une notice et un tuto-vidéo fournis.
