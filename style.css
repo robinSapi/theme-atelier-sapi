@@ -12916,26 +12916,62 @@ body.woocommerce-cart {
   background: var(--color-white, #fff) !important;
 }
 
-/* Produits dans le récap (sidebar) */
-.sapi-checkout-outer .wc-block-components-product-name {
-  font-family: var(--font-body) !important;
-  font-weight: 700 !important;
-  color: var(--color-dark) !important;
+/* Produits dans le récap (sidebar) — layout vertical comme le mini-cart */
+.sapi-checkout-outer .wc-block-components-order-summary-item {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+  padding: 1rem !important;
+  background: var(--color-cream) !important;
+  border: 1px solid rgba(147, 125, 104, 0.15) !important;
+  border-radius: 8px !important;
 }
 
-/* Masquer le prix individuel en doublon (le total de ligne est déjà affiché à droite) */
-.sapi-checkout-outer .wc-block-components-order-summary-item__individual-prices {
-  display: none !important;
-}
-
-.sapi-checkout-outer .wc-block-components-product-price {
-  font-weight: 700 !important;
-  color: var(--color-wood) !important;
+.sapi-checkout-outer .wc-block-components-order-summary-item__image {
+  order: -1 !important;
+  align-self: center !important;
 }
 
 .sapi-checkout-outer .wc-block-components-order-summary-item__image img {
-  border-radius: 12px !important;
+  width: 120px !important;
+  height: 120px !important;
+  border-radius: 8px !important;
   object-fit: cover !important;
+}
+
+.sapi-checkout-outer .wc-block-components-product-name {
+  font-size: 1.2rem !important;
+  color: var(--color-dark) !important;
+}
+
+/* Masquer prix individuel (doublon) + description longue (dimensions/poids) */
+.sapi-checkout-outer .wc-block-components-order-summary-item__individual-prices,
+.sapi-checkout-outer .wc-block-components-product-metadata__description {
+  display: none !important;
+}
+
+/* Variations compactes */
+.sapi-checkout-outer .wc-block-components-product-details {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0.25rem 0 0 !important;
+  font-size: 0.8rem !important;
+}
+
+.sapi-checkout-outer .wc-block-components-product-details__name {
+  font-weight: 600 !important;
+  color: var(--color-dark) !important;
+}
+
+.sapi-checkout-outer .wc-block-components-product-details__value {
+  font-weight: 400 !important;
+  color: var(--color-gray) !important;
+}
+
+/* Prix total */
+.sapi-checkout-outer .wc-block-components-order-summary-item__total-price {
+  font-weight: 700 !important;
+  color: var(--color-wood) !important;
 }
 
 /* Mobile */
