@@ -12721,33 +12721,30 @@ body.woocommerce-order-received {
   border: none !important;
 }
 
-/* H2 allégés sur panier et checkout — spécificité maximale */
+/* H2 allégés sur panier et checkout */
 body.woocommerce-cart .sapi-cart-outer h2,
 body.woocommerce-cart .sapi-cart-outer .wp-block-heading,
 body.woocommerce-checkout .sapi-checkout-outer h2,
 body.woocommerce-checkout .sapi-checkout-outer .wp-block-heading,
-body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-checkout-step__title,
 body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   font-weight: 600 !important;
 }
 
-/* "Validation de commande express" — rendu par React, non accessible via PHP.
-   Wildcard sur tout parent contenant "express" dans sa classe ou son id. */
-body.woocommerce-checkout .sapi-checkout-outer [class*="express"] h2,
-body.woocommerce-checkout .sapi-checkout-outer [id*="express"] h2 {
+/* Exception : titre "Validation de commande express" plus léger */
+.sapi-checkout-outer .wc-block-components-express-payment h2 {
   font-weight: 400 !important;
 }
 
 /* Boutons express payment (Apple Pay, Link, Google Pay) */
 .sapi-checkout-outer .wc-block-components-express-payment__event-buttons {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 0.75rem !important;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .sapi-checkout-outer .wc-block-components-express-payment__event-buttons > * {
-  flex: 1 1 auto !important;
-  min-width: 150px !important;
+  flex: 1 1 auto;
+  min-width: 150px;
 }
 
 /* Images produits arrondies */
@@ -12897,9 +12894,10 @@ body.woocommerce-cart {
   box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35) !important;
 }
 
-/* Titres de sections du formulaire — sans font-weight pour ne pas écraser "Validation de commande express" */
+/* Titres de sections du formulaire */
 .sapi-checkout-outer .wc-block-components-checkout-step__title {
   font-family: var(--font-body) !important;
+  font-weight: 600 !important;
   font-size: 1rem !important;
   color: var(--color-dark) !important;
 }
