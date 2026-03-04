@@ -859,7 +859,6 @@ function sapi_render_mini_cart_contents() {
         <div class="mini-cart-item" data-key="<?php echo esc_attr($cart_item_key); ?>">
           <div class="mini-cart-item-image">
             <?php echo $product->get_image('thumbnail'); ?>
-            <span class="mini-cart-qty-badge"><?php echo esc_html($quantity); ?></span>
           </div>
           <div class="mini-cart-item-details">
             <span class="mini-cart-item-name">
@@ -878,9 +877,16 @@ function sapi_render_mini_cart_contents() {
                 <?php endforeach; ?>
               <?php endif; ?>
             </div>
-            <span class="mini-cart-item-price">
-              <?php echo WC()->cart->get_product_price($product); ?>
-            </span>
+            <div class="mini-cart-item-bottom">
+              <span class="mini-cart-item-price">
+                <?php echo WC()->cart->get_product_price($product); ?>
+              </span>
+              <div class="mini-cart-qty-selector" data-cart-item-key="<?php echo esc_attr($cart_item_key); ?>">
+                <button class="mini-cart-qty-btn mini-cart-qty-minus" aria-label="<?php esc_attr_e('Diminuer la quantité', 'theme-sapi-maison'); ?>">−</button>
+                <span class="mini-cart-qty-value"><?php echo esc_html($quantity); ?></span>
+                <button class="mini-cart-qty-btn mini-cart-qty-plus" aria-label="<?php esc_attr_e('Augmenter la quantité', 'theme-sapi-maison'); ?>">+</button>
+              </div>
+            </div>
           </div>
           <button class="mini-cart-item-remove" data-cart-item-key="<?php echo esc_attr($cart_item_key); ?>" aria-label="<?php esc_attr_e('Retirer du panier', 'theme-sapi-maison'); ?>">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -894,6 +900,32 @@ function sapi_render_mini_cart_contents() {
   </div>
   <?php
 }
+
+/**
+ * AJAX handler: update mini-cart item quantity
+ */
+function sapi_update_mini_cart_qty() {
+  $cart_item_key = sanitize_text_field($_POST['cart_item_key'] ?? '');
+  $quantity = absint($_POST['quantity'] ?? 0);
+
+  if (!$cart_item_key || !WC()->cart) {
+    wp_send_json_error();
+  }
+
+  if ($quantity === 0) {
+    WC()->cart->remove_cart_item($cart_item_key);
+  } else {
+    WC()->cart->set_quantity($cart_item_key, $quantity);
+  }
+
+  WC()->cart->calculate_totals();
+
+  // Return updated fragments
+  $fragments = apply_filters('woocommerce_add_to_cart_fragments', array());
+  wp_send_json_success(array('fragments' => $fragments));
+}
+add_action('wp_ajax_sapi_update_mini_cart_qty', 'sapi_update_mini_cart_qty');
+add_action('wp_ajax_nopriv_sapi_update_mini_cart_qty', 'sapi_update_mini_cart_qty');
 
 /**
  * Custom variation attribute display with visible labels

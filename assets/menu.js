@@ -287,10 +287,57 @@
     }
   });
 
-  // ========================================
-  // PREMIUM: Cart Illuminate Effect
-  // Warm light wave spreading from the button on add to cart
-  // ========================================
+  // Update quantity from mini cart
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.mini-cart-qty-minus, .mini-cart-qty-plus');
+    if (!btn) return;
+    e.preventDefault();
+
+    var selector = btn.closest('.mini-cart-qty-selector');
+    if (!selector) return;
+
+    var cartItemKey = selector.getAttribute('data-cart-item-key');
+    var valueEl = selector.querySelector('.mini-cart-qty-value');
+    var qty = parseInt(valueEl.textContent, 10) || 1;
+
+    if (btn.classList.contains('mini-cart-qty-minus')) {
+      qty = Math.max(0, qty - 1);
+    } else {
+      qty = qty + 1;
+    }
+
+    // Disable buttons during request
+    selector.classList.add('is-loading');
+
+    fetch(wc_add_to_cart_params.ajax_url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        action: 'sapi_update_mini_cart_qty',
+        cart_item_key: cartItemKey,
+        quantity: qty
+      })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success && data.data.fragments) {
+        if (typeof jQuery !== 'undefined') {
+          jQuery.each(data.data.fragments, function(key, value) {
+            jQuery(key).replaceWith(value);
+          });
+          jQuery(document.body).trigger('wc_fragments_refreshed');
+        }
+      } else {
+        if (typeof jQuery !== 'undefined') {
+          jQuery(document.body).trigger('wc_fragment_refresh');
+        }
+      }
+    })
+    .catch(function() {
+      selector.classList.remove('is-loading');
+    });
+  });
+
   // Update mini cart on AJAX add to cart
   if (typeof jQuery !== 'undefined') {
     jQuery(document.body).on('added_to_cart', function() {
