@@ -12778,6 +12778,7 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
 /* Supprimer le padding gauche des variations */
 .sapi-cart-outer .wc-block-components-product-details {
   padding-left: 0 !important;
+  margin-bottom: 0.75rem !important;
 }
 
 /* Prix total à droite — conservé et stylisé */
