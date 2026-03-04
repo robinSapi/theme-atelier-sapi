@@ -1391,18 +1391,21 @@ function sapi_ajax_guide_results() {
   $categories = sapi_guide_get_categories($clean);
 
   // 4. Query main products
-  $products_data = sapi_guide_query_products($clean, $categories);
+  $query_result = sapi_guide_query_products($clean, $categories);
+  $products_data  = $query_result['products'];
+  $fallback_notes = $query_result['fallback_notes'];
 
   // 5. Query complements if grande pièce
   $complement_data = [];
   if (isset($clean['taille']) && $clean['taille'] === 'grande') {
-    $complement_data = sapi_guide_query_complements($clean, $categories);
+    $complement_result = sapi_guide_query_complements($clean, $categories);
+    $complement_data = $complement_result;
   }
 
   // 6. Call Claude API for AI recommendation
   $ai_response = null;
   if (!empty($products_data)) {
-    $system_prompt = sapi_guide_build_system_prompt($products_data, $clean, $complement_data);
+    $system_prompt = sapi_guide_build_system_prompt($products_data, $clean, $complement_data, $fallback_notes);
     $ai_response = sapi_guide_call_claude($system_prompt);
   }
 
@@ -1596,6 +1599,7 @@ function sapi_guide_query_products(array $answers, array $categories) {
   ];
 
   $query = new WP_Query($args);
+  $fallback_notes = [];
 
   // Fallback: if no results with ampoule filter, retry without it
   if (!$query->have_posts() && $has_ampoule_filter) {
@@ -1603,6 +1607,8 @@ function sapi_guide_query_products(array $answers, array $categories) {
     array_pop($tax_query); // Remove ampoule filter
     $args['tax_query'] = $tax_query;
     $query = new WP_Query($args);
+    $ideal_types = implode(' ou ', $ampoule_filter);
+    $fallback_notes[] = "ATTENTION : aucun produit avec ampoule $ideal_types n'était disponible dans cette catégorie. Les produits ci-dessous peuvent avoir un type d'ampoule différent de l'idéal pour cette pièce. Signale-le honnêtement au client comme un compromis, ne dis pas que c'est le choix idéal.";
   }
 
   // Second fallback: if still no results, drop format exclusion too
@@ -1612,11 +1618,12 @@ function sapi_guide_query_products(array $answers, array $categories) {
       ['taxonomy' => 'product_cat', 'field' => 'slug', 'terms' => $categories, 'operator' => 'IN'],
     ];
     $query = new WP_Query($args);
+    $fallback_notes[] = "ATTENTION : le filtre de format a aussi été relâché. Des formats normalement exclus peuvent apparaître.";
   }
 
   $results = sapi_guide_collect_results($query, $answers);
   wp_reset_postdata();
-  return $results;
+  return ['products' => $results, 'fallback_notes' => $fallback_notes];
 }
 
 /**
@@ -1745,7 +1752,7 @@ function sapi_guide_find_product_by_id(array $products, $id) {
 /**
  * Build the system prompt for Claude with filtered products and client answers
  */
-function sapi_guide_build_system_prompt(array $products_data, array $answers, array $complement_data = []) {
+function sapi_guide_build_system_prompt(array $products_data, array $answers, array $complement_data = [], array $fallback_notes = []) {
   $theme_dir = get_stylesheet_directory();
 
   // Load rules and tone from text files
@@ -1753,6 +1760,11 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
   $ton    = file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt');
 
   $prompt = $regles . "\n\n" . $ton . "\n\n";
+
+  // Inject fallback warnings if filters were relaxed
+  if (!empty($fallback_notes)) {
+    $prompt .= implode("\n", $fallback_notes) . "\n\n";
+  }
 
   // Catalogue filtré
   $prompt .= "CATALOGUE FILTRÉ (correspond aux besoins du client) :\n";
