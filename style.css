@@ -12732,14 +12732,17 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
 
 /* Section express payment — titre + boutons */
 .sapi-checkout-outer .wc-block-components-express-payment {
-  position: relative;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .sapi-checkout-outer .wc-block-components-express-payment h2 {
   font-weight: 400 !important;
-  position: relative;
-  z-index: 1;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.75rem !important;
+}
+
+.sapi-checkout-outer .wc-block-components-express-payment__content {
+  position: relative !important;
 }
 
 .sapi-checkout-outer ul.wc-block-components-express-payment__event-buttons {
