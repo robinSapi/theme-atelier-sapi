@@ -9130,6 +9130,9 @@ transform: translateY(15px);
   gap: 2rem;
   margin-bottom: 0;
   padding: 0 3rem;
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .section-num {
