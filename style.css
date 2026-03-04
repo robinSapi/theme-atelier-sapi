@@ -11314,16 +11314,25 @@ transform: translateY(15px);
   font-weight: 700;
   color: var(--color-dark);
   margin-bottom: 0.4rem;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
 }
 
 .mini-cart-item-name a {
   color: inherit;
   text-decoration: none;
+  font-size: inherit;
 }
 
 .mini-cart-item-name a:hover {
   color: var(--color-wood);
+}
+
+.mini-cart-item-name .product-firstname {
+  font-size: 0.85em;
+}
+
+.mini-cart-item-name .product-restname {
+  font-size: 1.8em;
 }
 
 .mini-cart-item-variation {
