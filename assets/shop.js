@@ -321,10 +321,7 @@
   // =============================================
   const variationSwatches = {
     init: function() {
-      // Handle PHP-generated attribute swatches (from functions.php filter)
       this.initAttributeSwatches();
-      // Handle legacy sapi-swatches if any
-      this.initLegacySwatches();
     },
 
     initAttributeSwatches: function() {
@@ -332,8 +329,10 @@
       if (!swatchContainers.length) return;
 
       swatchContainers.forEach(container => {
+        // Skip if cinetique.js handles these swatches (product pages)
+        if (container.querySelector('.material-option')) return;
+
         const items = container.querySelectorAll('.swatch-item');
-        const attribute = container.dataset.attribute;
 
         // Find the associated hidden select
         const hiddenSelect = container.nextElementSibling;
@@ -350,13 +349,9 @@
         // Handle click on swatch items
         items.forEach(item => {
           item.addEventListener('click', () => {
-            // Remove selected from siblings
             items.forEach(i => i.classList.remove('selected'));
-            // Add selected to clicked
             item.classList.add('selected');
-            // Update hidden select
             hiddenSelect.value = item.dataset.value;
-            // Trigger change event for WooCommerce variations
             hiddenSelect.dispatchEvent(new Event('change', { bubbles: true }));
           });
         });
@@ -365,37 +360,11 @@
       // Listen for WooCommerce variation reset
       document.querySelectorAll('.reset_variations').forEach(resetBtn => {
         resetBtn.addEventListener('click', () => {
-          // Small delay to let WooCommerce reset the selects first
           setTimeout(() => {
             document.querySelectorAll('.attribute-swatch .swatch-item').forEach(item => {
               item.classList.remove('selected');
             });
           }, 10);
-        });
-      });
-    },
-
-    initLegacySwatches: function() {
-      const swatchContainers = document.querySelectorAll('.sapi-swatches');
-      if (!swatchContainers.length) return;
-
-      swatchContainers.forEach(container => {
-        const buttons = container.querySelectorAll('.sapi-swatch-btn');
-        const hiddenSelect = container.previousElementSibling;
-
-        if (!hiddenSelect || hiddenSelect.tagName !== 'SELECT') return;
-
-        buttons.forEach(btn => {
-          btn.addEventListener('click', () => {
-            // Remove active from siblings
-            buttons.forEach(b => b.classList.remove('is-selected'));
-            // Add active to clicked
-            btn.classList.add('is-selected');
-            // Update hidden select
-            hiddenSelect.value = btn.dataset.value;
-            // Trigger change event for WooCommerce
-            hiddenSelect.dispatchEvent(new Event('change', { bubbles: true }));
-          });
         });
       });
     }

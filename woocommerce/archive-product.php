@@ -41,7 +41,7 @@ $shop_page_id = wc_get_page_id('shop');
 if (function_exists('get_field')) {
   $acf_hero = get_field('shop_hero_image', $shop_page_id);
   if ($acf_hero) {
-    $hero_img_url = is_array($acf_hero) ? $acf_hero['url'] : $acf_hero;
+    $hero_img_url = sapi_get_acf_image_url($acf_hero);
     $hero_alt = is_array($acf_hero) && !empty($acf_hero['alt']) ? $acf_hero['alt'] : $hero_alt;
   }
 }

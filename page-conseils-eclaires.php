@@ -9,12 +9,7 @@ $has_acf = function_exists('get_field');
 $tips = [];
 for ($i = 1; $i <= 4; $i++) {
     $image_field = $has_acf ? get_field("tip_{$i}_picture") : false;
-    $image_url   = '';
-    if (is_array($image_field) && !empty($image_field['url'])) {
-        $image_url = $image_field['url'];
-    } elseif (is_string($image_field) && !empty($image_field)) {
-        $image_url = $image_field;
-    }
+    $image_url = sapi_get_acf_image_url($image_field);
 
     $tips[] = [
         'number'  => str_pad($i, 2, '0', STR_PAD_LEFT),

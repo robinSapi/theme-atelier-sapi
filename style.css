@@ -96,16 +96,9 @@ Text Domain: theme-sapi-maison
   --bois-dore: #937D68;
   --bois-profond: #6B5A4A;
   --bois-sombre: #4A3F35;
-  --orange-sapi: #E35B24;
-  --orange-hover: #C94D1E;
-  --vert-confiance: #018501;
-  --vert-doux: #2D7D32;
-
   /* Couleurs d'ambiance */
-  --lumiere-doree: #FFF8E7;
   --ombre-chaude: rgba(74, 63, 53, 0.08);
   --voile-bois: rgba(147, 125, 104, 0.05);
-  --noir-doux: #2C2620;
 
   /* Gradients bois pour swatches */
   --wood-okoume: linear-gradient(135deg, #D4B896 0%, #C4A882 50%, #B89B74 100%);
@@ -224,21 +217,7 @@ html {
   outline-offset: 2px;
 }
 
-/* Premium focus states for accessibility */
-*:focus-visible {
-  outline: 3px solid var(--color-orange, #E35B24);
-  outline-offset: 3px;
-  border-radius: 4px;
-}
-
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible {
-  outline: 3px solid var(--color-orange, #E35B24);
-  outline-offset: 3px;
-}
+/* Focus-visible: styles détaillés dans la section ACCESSIBILITY plus bas */
 
 /* Micro-interaction: all interactive elements */
 button,
@@ -6776,11 +6755,7 @@ li.carousel-editorial-slide,
   background: var(--color-white, #FFFFFF);
 }
 
-.blog-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 40px;
-}
+/* blog-grid layout défini dans la section Blog Grid plus bas (repeat 3 colonnes) */
 
 /* Blog Card Premium */
 .blog-card {
@@ -7154,7 +7129,7 @@ li.carousel-editorial-slide,
 }
 
 .blog-grid-content h3 a:hover {
-  color: var(--color-orange, #E67E22);
+  color: var(--color-orange, #E35B24);
 }
 
 .blog-grid-content > p {
@@ -7181,7 +7156,7 @@ li.carousel-editorial-slide,
 .blog-grid-link {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--color-orange, #E67E22);
+  color: var(--color-orange, #E35B24);
   text-decoration: none;
   transition: transform 0.2s ease;
   display: inline-block;
@@ -7218,17 +7193,17 @@ li.carousel-editorial-slide,
 }
 
 .blog-pagination a:hover {
-  background: var(--color-orange, #E67E22);
+  background: var(--color-orange, #E35B24);
   color: white;
-  border-color: var(--color-orange, #E67E22);
+  border-color: var(--color-orange, #E35B24);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(230, 126, 34, 0.25);
 }
 
 .blog-pagination .current {
-  background: var(--color-orange, #E67E22);
+  background: var(--color-orange, #E35B24);
   color: white;
-  border: 1px solid var(--color-orange, #E67E22);
+  border: 1px solid var(--color-orange, #E35B24);
   box-shadow: 0 4px 12px rgba(230, 126, 34, 0.25);
 }
 
@@ -10589,130 +10564,7 @@ transform: translateY(15px);
   flex-wrap: wrap;
 }
 
-.filter-dropdown {
-  position: relative;
-}
-
-.filter-dropdown-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border: 1px solid #E0E0E0;
-  border-radius: 8px;
-  background: #F8F8F8;
-  font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 500;
-  color: #757575;
-  cursor: pointer;
-  -webkit-transition: all 0.2s ease;
-  transition: all 0.2s ease;
-}
-
-.filter-dropdown-toggle:hover {
-  border-color: #BDBDBD;
-  background: #EEEEEE;
-  color: #616161;
-}
-
-.filter-dropdown-toggle.has-filter {
-  background: #E0E0E0;
-  border-color: #9E9E9E;
-  color: #424242;
-  font-weight: 600;
-}
-
-.filter-dropdown-toggle svg {
-  -webkit-transition: transform 0.2s ease;
-  transition: transform 0.2s ease;
-}
-
-.filter-dropdown.is-open .filter-dropdown-toggle svg {
-  -webkit-transform: rotate(180deg);
-  transform: rotate(180deg);
-}
-
-.filter-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  min-width: 180px;
-  background: var(--color-white);
-  border: 1px solid var(--color-gray-light);
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  opacity: 0;
-  visibility: hidden;
-  -webkit-transform: translateY(-8px);
-  transform: translateY(-8px);
-  -webkit-transition: all 0.2s ease;
-  transition: all 0.2s ease;
-  z-index: 100;
-}
-
-.filter-dropdown.is-open .filter-dropdown-menu {
-  opacity: 1;
-  visibility: visible;
-  -webkit-transform: translateY(0);
-  transform: translateY(0);
-}
-
-.filter-option {
-  display: block;
-  width: 100%;
-  padding: 10px 16px;
-  border: none;
-  background: none;
-  font-family: var(--font-body);
-  font-size: 14px;
-  color: var(--color-gray);
-  text-align: left;
-  cursor: pointer;
-  -webkit-transition: all 0.15s ease;
-  transition: all 0.15s ease;
-}
-
-.filter-option:first-child {
-  border-radius: 8px 8px 0 0;
-}
-
-.filter-option:last-child {
-  border-radius: 0 0 8px 8px;
-}
-
-.filter-option:hover {
-  background: var(--color-warm);
-  color: var(--color-wood);
-}
-
-.filter-option.active {
-  background: var(--color-wood);
-  color: var(--color-white);
-  font-weight: 500;
-}
-
-.filter-reset {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 8px;
-  background: rgba(197, 0, 0, 0.1);
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-error);
-  cursor: pointer;
-  -webkit-transition: all 0.2s ease;
-  transition: all 0.2s ease;
-}
-
-.filter-reset:hover {
-  background: var(--color-error);
-  color: var(--color-white);
-}
+/* Ancien bloc filtres gris/minimal supprimé — styles premium dans la section filters plus haut */
 
 /* Responsive - Mobile filters */
 @media (max-width: 768px) {
@@ -13705,10 +13557,10 @@ body.woocommerce-cart {
   border-radius: 2px;
 }
 
-.gallery-thumb {
+.gallery-thumbnails .gallery-thumb {
   flex: 0 0 auto;
   width: 100px;
-  aspect-ratio: 1 / 1; /* Force square ratio - height auto-calculated */
+  aspect-ratio: 1 / 1;
   border: 2px solid transparent;
   border-radius: 8px;
   overflow: hidden;
@@ -13719,7 +13571,7 @@ body.woocommerce-cart {
   -webkit-transition: all 0.2s ease;
 }
 
-.gallery-thumb img {
+.gallery-thumbnails .gallery-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -13728,16 +13580,16 @@ body.woocommerce-cart {
   -webkit-transition: opacity 0.2s ease;
 }
 
-.gallery-thumb:hover img,
-.gallery-thumb.active img {
+.gallery-thumbnails .gallery-thumb:hover img,
+.gallery-thumbnails .gallery-thumb.active img {
   opacity: 1;
 }
 
-.gallery-thumb.active {
+.gallery-thumbnails .gallery-thumb.active {
   border-color: var(--color-accent);
 }
 
-.gallery-thumb:hover {
+.gallery-thumbnails .gallery-thumb:hover {
   border-color: var(--color-text-light);
 }
 
@@ -13975,7 +13827,7 @@ body.woocommerce-cart {
   color: var(--color-text);
   margin: 0 0 1.5rem 0;
   padding-left: 1rem;
-  border-left: 3px solid var(--color-orange, #E67E22);
+  border-left: 3px solid var(--color-orange, #E35B24);
   letter-spacing: 0.02em;
 }
 
@@ -14031,7 +13883,7 @@ body.woocommerce-cart {
   content: '';
   width: 6px;
   height: 6px;
-  background: var(--color-orange, #E67E22); /* Orange accent for visual coherence */
+  background: var(--color-orange, #E35B24); /* Orange accent for visual coherence */
   border-radius: 50%;
 }
 
@@ -14319,7 +14171,7 @@ body.woocommerce-cart {
 
 .material-option.selected .material-name,
 .material-option.active .material-name {
-  color: var(--orange-sapi);
+  color: var(--color-orange);
 }
 
 .material-description {
@@ -14410,7 +14262,7 @@ body.woocommerce-cart {
 
 .product-form-v2 .qty-btn:hover:not(:disabled) {
   background: var(--color-warm, #FBF6EA);
-  color: var(--color-orange, #E67E22);
+  color: var(--color-orange, #E35B24);
 }
 
 .product-form-v2 .qty-btn:active:not(:disabled) {
@@ -16114,9 +15966,9 @@ body.woocommerce-cart div.woocommerce-wrapper {
   flex-wrap: wrap;
 }
 
-.gallery-thumb {
+.quick-view-gallery-thumbs .gallery-thumb {
   width: 64px;
-  aspect-ratio: 1 / 1; /* Force square ratio in quick-view */
+  aspect-ratio: 1 / 1;
   border: 2px solid rgba(147, 125, 104, 0.2);
   border-radius: 8px;
   overflow: hidden;
@@ -16125,18 +15977,18 @@ body.woocommerce-cart div.woocommerce-wrapper {
   background: var(--color-cream);
 }
 
-.gallery-thumb img {
+.quick-view-gallery-thumbs .gallery-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.gallery-thumb:hover {
+.quick-view-gallery-thumbs .gallery-thumb:hover {
   border-color: var(--color-orange);
   transform: scale(1.05);
 }
 
-.gallery-thumb.active {
+.quick-view-gallery-thumbs .gallery-thumb.active {
   border-color: var(--color-orange);
   border-width: 3px;
   box-shadow: 0 0 0 4px rgba(242, 137, 73, 0.1);

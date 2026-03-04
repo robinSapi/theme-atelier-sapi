@@ -54,20 +54,7 @@ get_header();
   <div id="product-<?php the_ID(); ?>" <?php wc_product_class('product-page-cinetique product-page-v2', $product); ?>>
 
   <?php
-  // Helper: extract URL from ACF image field (handles all return formats)
-  function sapi_get_acf_image_url($field_value) {
-    if (!$field_value) return '';
-    if (is_array($field_value) && isset($field_value['url'])) {
-      return $field_value['url'];
-    } elseif (is_array($field_value) && isset($field_value['ID'])) {
-      return wp_get_attachment_image_url($field_value['ID'], 'full');
-    } elseif (is_numeric($field_value)) {
-      return wp_get_attachment_image_url($field_value, 'full');
-    } elseif (is_string($field_value) && strpos($field_value, 'http') === 0) {
-      return $field_value;
-    }
-    return '';
-  }
+  // sapi_get_acf_image_url() is defined in functions.php
 
   // Get Ambiance 1 image for intro screen
   $ambiance_intro = '';
@@ -359,16 +346,7 @@ get_header();
   if (function_exists('get_field')) {
     $bandeau = get_field('bandeau');
     if ($bandeau) {
-      $bandeau_url = '';
-      if (is_array($bandeau) && isset($bandeau['url'])) {
-        $bandeau_url = $bandeau['url'];
-      } elseif (is_array($bandeau) && isset($bandeau['ID'])) {
-        $bandeau_url = wp_get_attachment_image_url($bandeau['ID'], 'full');
-      } elseif (is_numeric($bandeau)) {
-        $bandeau_url = wp_get_attachment_image_url($bandeau, 'full');
-      } elseif (is_string($bandeau) && strpos($bandeau, 'http') === 0) {
-        $bandeau_url = $bandeau;
-      }
+      $bandeau_url = sapi_get_acf_image_url($bandeau);
 
       $section_num = 0; // Compteur dynamique pour numérotation des sections
       if ($bandeau_url) :

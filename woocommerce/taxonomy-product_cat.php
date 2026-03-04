@@ -71,17 +71,7 @@ if ($featured_query->have_posts()) :
   $bandeau_url = '';
   if (function_exists('get_field')) {
     $bandeau_image = get_field('bandeau', $product_id);
-    if ($bandeau_image) {
-      if (is_array($bandeau_image) && isset($bandeau_image['url'])) {
-        $bandeau_url = $bandeau_image['url'];
-      } elseif (is_array($bandeau_image) && isset($bandeau_image['ID'])) {
-        $bandeau_url = wp_get_attachment_image_url($bandeau_image['ID'], 'full');
-      } elseif (is_numeric($bandeau_image)) {
-        $bandeau_url = wp_get_attachment_image_url($bandeau_image, 'full');
-      } elseif (is_string($bandeau_image) && strpos($bandeau_image, 'http') === 0) {
-        $bandeau_url = $bandeau_image;
-      }
-    }
+    $bandeau_url = sapi_get_acf_image_url($bandeau_image);
   }
 
   $product_name = get_the_title();
@@ -170,18 +160,7 @@ if ($bg_query->have_posts()) {
   if (function_exists('get_field')) {
     $ambiance_image = get_field('ambiance_1', $bg_product_id);
 
-    if ($ambiance_image) {
-      // Handle different ACF return formats
-      if (is_array($ambiance_image) && isset($ambiance_image['url'])) {
-        $ambiance_bg_url = $ambiance_image['url'];
-      } elseif (is_array($ambiance_image) && isset($ambiance_image['ID'])) {
-        $ambiance_bg_url = wp_get_attachment_image_url($ambiance_image['ID'], 'full');
-      } elseif (is_numeric($ambiance_image)) {
-        $ambiance_bg_url = wp_get_attachment_image_url($ambiance_image, 'full');
-      } elseif (is_string($ambiance_image) && strpos($ambiance_image, 'http') === 0) {
-        $ambiance_bg_url = $ambiance_image;
-      }
-    }
+    $ambiance_bg_url = sapi_get_acf_image_url($ambiance_image);
   }
 
   wp_reset_postdata();

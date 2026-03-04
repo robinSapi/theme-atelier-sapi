@@ -45,17 +45,7 @@ foreach ($categories_order as $cat_slug) {
       $ambiance_1 = get_field('ambiance_1');
 
       if ($ambiance_1 && $product) {
-        // Handle different ACF return formats for image
-        $image_url = '';
-        if (is_array($ambiance_1) && isset($ambiance_1['url'])) {
-          $image_url = $ambiance_1['url'];
-        } elseif (is_array($ambiance_1) && isset($ambiance_1['ID'])) {
-          $image_url = wp_get_attachment_image_url($ambiance_1['ID'], 'full');
-        } elseif (is_numeric($ambiance_1)) {
-          $image_url = wp_get_attachment_image_url($ambiance_1, 'full');
-        } elseif (is_string($ambiance_1) && strpos($ambiance_1, 'http') === 0) {
-          $image_url = $ambiance_1;
-        }
+        $image_url = sapi_get_acf_image_url($ambiance_1);
 
         // Get minimum price
         if ($product->is_type('variable')) {
@@ -128,15 +118,7 @@ if ($olivia_query->have_posts()) {
     if (function_exists('get_field')) {
       $ambiance = get_field('ambiance_1', get_the_ID());
       if ($ambiance) {
-        if (is_array($ambiance) && isset($ambiance['url'])) {
-          $image_url = $ambiance['url'];
-        } elseif (is_array($ambiance) && isset($ambiance['ID'])) {
-          $image_url = wp_get_attachment_image_url($ambiance['ID'], 'full');
-        } elseif (is_numeric($ambiance)) {
-          $image_url = wp_get_attachment_image_url($ambiance, 'full');
-        } elseif (is_string($ambiance) && strpos($ambiance, 'http') === 0) {
-          $image_url = $ambiance;
-        }
+        $image_url = sapi_get_acf_image_url($ambiance);
       }
     }
     if (!$image_url) {
@@ -240,16 +222,7 @@ if ($featured_query->have_posts()) {
       $image_url = '';
 
       if ($detail_1) {
-        // Handle different ACF return formats
-        if (is_array($detail_1) && isset($detail_1['url'])) {
-          $image_url = $detail_1['url'];
-        } elseif (is_array($detail_1) && isset($detail_1['ID'])) {
-          $image_url = wp_get_attachment_image_url($detail_1['ID'], 'full');
-        } elseif (is_numeric($detail_1)) {
-          $image_url = wp_get_attachment_image_url($detail_1, 'full');
-        } elseif (is_string($detail_1) && strpos($detail_1, 'http') === 0) {
-          $image_url = $detail_1;
-        }
+        $image_url = sapi_get_acf_image_url($detail_1);
       }
 
       if ($image_url) {
@@ -320,15 +293,7 @@ foreach ($collection_slugs as $col) {
       if (function_exists('get_field')) {
         $bandeau = get_field('bandeau', $pid);
         if ($bandeau) {
-          if (is_array($bandeau) && isset($bandeau['url'])) {
-            $col_image = $bandeau['url'];
-          } elseif (is_array($bandeau) && isset($bandeau['ID'])) {
-            $col_image = wp_get_attachment_image_url($bandeau['ID'], 'large');
-          } elseif (is_numeric($bandeau)) {
-            $col_image = wp_get_attachment_image_url($bandeau, 'large');
-          } elseif (is_string($bandeau) && strpos($bandeau, 'http') === 0) {
-            $col_image = $bandeau;
-          }
+          $col_image = sapi_get_acf_image_url($bandeau, 'large');
           if ($col_image) break;
         }
       }

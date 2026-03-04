@@ -567,6 +567,24 @@ add_filter('render_block', function ($content, $block) {
 }, 10, 2);
 
 /**
+ * Helper: extract URL from ACF image field (handles all return formats)
+ * Centralized here to avoid duplication across templates.
+ */
+function sapi_get_acf_image_url($field_value, $size = 'full') {
+  if (!$field_value) return '';
+  if (is_array($field_value) && isset($field_value['url'])) {
+    return $field_value['url'];
+  } elseif (is_array($field_value) && isset($field_value['ID'])) {
+    return wp_get_attachment_image_url($field_value['ID'], $size);
+  } elseif (is_numeric($field_value)) {
+    return wp_get_attachment_image_url($field_value, $size);
+  } elseif (is_string($field_value) && strpos($field_value, 'http') === 0) {
+    return $field_value;
+  }
+  return '';
+}
+
+/**
  * Page confirmation (thankyou) : on rend manuellement les détails commande
  * et les adresses client dans notre template custom (2 colonnes).
  * Empêcher WooCommerce de les re-afficher via do_action('woocommerce_thankyou').
