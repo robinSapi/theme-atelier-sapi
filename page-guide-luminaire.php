@@ -14,11 +14,12 @@ $guide_steps = [
     'question'   => 'Dans quelle pièce sera-t-il installé ?',
     'visibility' => 'always',
     'choices'    => [
-      ['label' => 'Cuisine',          'slug' => 'cuisine', 'icon' => 'dining'],
-      ['label' => 'Bureau / Atelier', 'slug' => 'bureau',  'icon' => 'monitor'],
-      ['label' => 'Salon',            'slug' => 'salon',   'icon' => 'sofa'],
-      ['label' => 'Chambre',          'slug' => 'chambre', 'icon' => 'bed'],
-      ['label' => 'Entrée / Couloir', 'slug' => 'entree',  'icon' => 'door'],
+      ['label' => 'Cuisine',              'slug' => 'cuisine',  'icon' => 'dining'],
+      ['label' => 'Bureau / Atelier',    'slug' => 'bureau',   'icon' => 'monitor'],
+      ['label' => 'Salon / Salle à manger', 'slug' => 'salon', 'icon' => 'sofa'],
+      ['label' => 'Chambre',             'slug' => 'chambre',  'icon' => 'bed'],
+      ['label' => 'Entrée / Couloir',    'slug' => 'entree',   'icon' => 'door'],
+      ['label' => 'Cage d\'escalier',    'slug' => 'escalier', 'icon' => 'stairs'],
     ],
   ],
   [
@@ -95,6 +96,7 @@ $icons = [
   'bed'          => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M2 14h20"/><path d="M2 10V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/></svg>',
   'monitor'      => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>',
   'door'         => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="15" cy="12" r="1"/></svg>',
+  'stairs'       => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21h4v-4h4v-4h4v-4h4V5"/></svg>',
   // Style (existing)
   'minimal'      => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><line x1="12" y1="8" x2="12" y2="16"/></svg>',
   'organic'      => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-3 0-6 2-7 5s0 7 2 9 6 3 9 2 5-4 5-7-1-6-3-8-3-1-6-1z"/><circle cx="12" cy="13" r="2.5"/></svg>',
