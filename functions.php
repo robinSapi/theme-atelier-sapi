@@ -1400,6 +1400,39 @@ function sapi_ajax_guide_results() {
     return;
   }
 
+  // 8. Send email notification to Robin
+  $labels = [
+    'sortie'  => 'Sortie électrique',
+    'hauteur' => 'Hauteur sous-plafond',
+    'table'   => 'Au-dessus d\'une table',
+    'taille'  => 'Taille de la pièce',
+    'piece'   => 'Pièce',
+    'style'   => 'Style intérieur',
+  ];
+  $email_body = "Nouvelle recommandation Guide Luminaire\n";
+  $email_body .= "========================================\n\n";
+  $email_body .= "RÉPONSES DU CLIENT :\n";
+  foreach ($labels as $key => $label) {
+    if (isset($clean[$key])) {
+      $email_body .= "- " . $label . " : " . $clean[$key] . "\n";
+    }
+  }
+  $email_body .= "\nPRODUIT RECOMMANDÉ :\n";
+  $email_body .= $main_product ? "- " . $main_product['title'] . " (" . wp_strip_all_tags($main_product['price']) . ")\n" : "- Aucun\n";
+  if ($complement) {
+    $email_body .= "\nCOMPLÉMENT :\n";
+    $email_body .= "- " . $complement['title'] . " (" . wp_strip_all_tags($complement['price']) . ")\n";
+  }
+  $email_body .= "\nRECOMMANDATION IA :\n";
+  $email_body .= $ai_text ? $ai_text : "(pas de texte IA)";
+  $email_body .= "\n\n---\nDate : " . wp_date('d/m/Y H:i');
+
+  wp_mail(
+    get_option('admin_email'),
+    'Guide Luminaire — Nouvelle recommandation',
+    $email_body
+  );
+
   wp_send_json_success([
     'ai_text'          => $ai_text,
     'main_product'     => $main_product,
