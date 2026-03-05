@@ -1441,30 +1441,13 @@ get_header();
       btn.disabled = true;
       btn.textContent = 'Ajout en cours…';
 
-      // Récupérer les données du formulaire
-      const variationForm = document.querySelector('.variations_form');
-      const productIdInput = variationForm
-        ? variationForm.querySelector('input[name="product_id"]')
-        : null;
-      const variationIdInput = variationForm
-        ? variationForm.querySelector('input[name="variation_id"], input.variation_id')
-        : null;
-      const qtyInput = document.querySelector('input.qty');
-
-      const ajaxData = {
-        action: 'sapi_add_to_cart',
-        product_id: productIdInput ? productIdInput.value : '<?php echo $product->get_id(); ?>',
-        variation_id: variationIdInput ? variationIdInput.value : 0,
-        quantity: qtyInput ? qtyInput.value : 1,
-        nonce: '<?php echo wp_create_nonce('sapi-add-to-cart'); ?>'
-      };
-
-      // Ajouter les attributs de variation (attribute_pa_*)
-      if (variationForm) {
-        variationForm.querySelectorAll('select[name^="attribute_"]').forEach(function(sel) {
-          ajaxData[sel.name] = sel.value;
-        });
-      }
+      // Sérialiser TOUT le formulaire (variations + add-ons + futurs plugins)
+      const cartForm = document.querySelector('form.cart');
+      const formSerialized = cartForm ? jQuery(cartForm).serialize() : '';
+      const ajaxData = formSerialized
+        + '&action=sapi_add_to_cart'
+        + '&nonce=<?php echo wp_create_nonce('sapi-add-to-cart'); ?>'
+        + '&product_id=<?php echo $product->get_id(); ?>';
 
       jQuery.ajax({
         type: 'POST',
@@ -1516,19 +1499,14 @@ get_header();
       const originalText = btn.innerHTML;
       btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Préparation...';
 
-      // Get form data for variable products
-      const formData = variationForm ? jQuery(variationForm).serializeArray() : [];
-      const ajaxData = {
-        action: 'sapi_buy_now',
-        product_id: productId,
-        quantity: 1,
-        nonce: '<?php echo wp_create_nonce('sapi-buy-now'); ?>'
-      };
-
-      // Add variation data if exists
-      formData.forEach(item => {
-        ajaxData[item.name] = item.value;
-      });
+      // Sérialiser TOUT le formulaire (variations + add-ons + futurs plugins)
+      const cartForm = document.querySelector('form.cart');
+      const formSerialized = cartForm ? jQuery(cartForm).serialize() : '';
+      const ajaxData = formSerialized
+        + '&action=sapi_buy_now'
+        + '&product_id=' + productId
+        + '&quantity=1'
+        + '&nonce=<?php echo wp_create_nonce('sapi-buy-now'); ?>';
 
       jQuery.ajax({
         type: 'POST',
