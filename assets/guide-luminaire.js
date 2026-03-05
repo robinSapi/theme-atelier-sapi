@@ -497,7 +497,7 @@
 
         // Display products grid (up to 4, or 3 + sur mesure card)
         if (d.products && d.products.length > 0) {
-          renderProductsGrid(d.products, d.show_sur_mesure || false);
+          renderProductsGrid(d.products, d.show_sur_mesure || false, d.sur_mesure_reason || '');
         }
 
         // Display follow-up buttons
@@ -567,7 +567,7 @@
   // ================================================================
   // RENDER PRODUCTS GRID
   // ================================================================
-  function renderProductsGrid(products, showSurMesure) {
+  function renderProductsGrid(products, showSurMesure, surMesureReason) {
     if (!dom.productsGrid) return;
 
     var html = '';
@@ -601,8 +601,16 @@
         + '</article>';
     }
 
-    // Sur mesure card (4th slot) — shown for grappe, grande pièce, or haute hauteur
+    // Sur mesure card (4th slot) — content adapts to reason
     if (showSurMesure) {
+      var smTitle = 'Cr\u00e9ation sur mesure';
+      var smDesc = 'Un luminaire unique, con\u00e7u sp\u00e9cialement pour votre espace par Robin.';
+
+      if (surMesureReason === 'grappe') {
+        smTitle = 'Cr\u00e9ation multi-ampoules';
+        smDesc = 'Grappe de suspensions \u00e0 diff\u00e9rentes hauteurs, ou grand luminaire \u00e0 plusieurs sources lumineuses \u2014 Robin cr\u00e9e votre projet sur mesure.';
+      }
+
       html += '<article class="guide-result-card guide-result-card--surmesure">'
         + '<div class="guide-surmesure-card">'
         + '<div class="guide-surmesure-icon">'
@@ -612,8 +620,8 @@
         + '<path d="M2 12l10 5 10-5"/>'
         + '</svg>'
         + '</div>'
-        + '<h3 class="guide-result-name">Cr\u00e9ation sur mesure</h3>'
-        + '<p class="guide-surmesure-desc">Un luminaire unique, con\u00e7u sp\u00e9cialement pour votre espace par Robin.</p>'
+        + '<h3 class="guide-result-name">' + smTitle + '</h3>'
+        + '<p class="guide-surmesure-desc">' + smDesc + '</p>'
         + '<a href="/contact/" class="guide-result-cta guide-surmesure-cta">'
         + 'Contacter Robin'
         + ' <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>'

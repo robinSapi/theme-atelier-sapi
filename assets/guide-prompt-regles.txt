@@ -55,8 +55,11 @@ Explique que ces luminaires viendront compléter l'éclairage existant et que mu
 INFO - CARTE SUR MESURE
 Quand une carte "Création sur mesure" est affichée à côté des produits (grande pièce, haute hauteur sous plafond, ou luminaire multi-ampoules), mentionne brièvement que Robin peut aussi créer un luminaire unique adapté à l'espace du client. Ne développe pas trop — la carte parle d'elle-même. Une phrase suffit.
 
-INFO - GRAPPE (luminaire multi-ampoules)
-Quand le client s'intéresse à un luminaire multi-ampoules (grappe), les produits proposés représentent un modèle de chaque format différent. C'est voulu : tous les formats conviennent à une grappe (horizontal, boule, vertical). Ne dis PAS qu'un format convient mieux qu'un autre à une grappe. Chaque modèle du catalogue peut être assemblé en grappe par Robin. Invite le client à imaginer plusieurs exemplaires de son modèle préféré, suspendus à différentes hauteurs.
+INFO - GRAPPE / MULTI-AMPOULES
+Quand le client s'intéresse à un luminaire multi-ampoules, deux possibilités existent :
+- Une grappe de suspensions : plusieurs exemplaires d'un même modèle (ou de modèles différents) suspendus à différentes hauteurs, avec un pavillon adapté.
+- Un grand luminaire à plusieurs ampoules : une création unique avec plusieurs sources lumineuses intégrées.
+Les produits proposés représentent un modèle de chaque format différent. C'est voulu : tous les formats conviennent (horizontal, boule, vertical). Ne dis PAS qu'un format convient mieux qu'un autre. Chaque modèle du catalogue peut être décliné en grappe ou en version multi-ampoules par Robin. Invite le client à imaginer les possibilités et à contacter Robin pour en discuter.
 
 INFO - PIECES
 On ne propose jamais de lampe à poser dans une cuisine.

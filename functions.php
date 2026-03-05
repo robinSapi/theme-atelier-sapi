@@ -1400,10 +1400,16 @@ function sapi_ajax_guide_results() {
   $taille_answer    = isset($clean['taille'])    ? $clean['taille']    : '';
   $hauteur_answer   = isset($clean['hauteur'])   ? $clean['hauteur']   : '';
 
-  if ($eclairage_answer === 'grappe'
-      || $taille_answer === 'grande'
-      || in_array($hauteur_answer, ['haute', 'confortable'], true)) {
+  $sur_mesure_reason = '';
+  if ($eclairage_answer === 'grappe') {
     $show_sur_mesure = true;
+    $sur_mesure_reason = 'grappe';
+  } elseif ($taille_answer === 'grande') {
+    $show_sur_mesure = true;
+    $sur_mesure_reason = 'grande';
+  } elseif (in_array($hauteur_answer, ['haute', 'confortable'], true)) {
+    $show_sur_mesure = true;
+    $sur_mesure_reason = 'hauteur';
   }
 
   // 6. Pick products: 3 if sur mesure card shown (4th slot = carte sur mesure), else 4
@@ -1451,7 +1457,7 @@ function sapi_ajax_guide_results() {
     }
   }
   if ($show_sur_mesure) {
-    $email_body .= "\nCARTE SUR MESURE : Oui\n";
+    $email_body .= "\nCARTE SUR MESURE : Oui (" . $sur_mesure_reason . ")\n";
   }
   $email_body .= "\nPRODUITS PROPOSÉS :\n";
   foreach ($display_products as $dp) {
@@ -1472,6 +1478,7 @@ function sapi_ajax_guide_results() {
     'products'         => $display_products,
     'followup_buttons' => $followup_buttons,
     'show_sur_mesure'  => $show_sur_mesure,
+    'sur_mesure_reason' => $sur_mesure_reason,
   ]);
 }
 

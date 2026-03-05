@@ -39,7 +39,7 @@ $guide_steps = [
     'choices'    => [
       ['label' => 'Je cherche d\'abord mon éclairage principal', 'slug' => 'principal',  'icon' => 'sun'],
       ['label' => 'Je veux compléter mon éclairage existant',   'slug' => 'secondaire', 'icon' => 'lamp-desk'],
-      ['label' => 'Un luminaire multi-ampoules m\'intéresse !', 'slug' => 'grappe',     'icon' => 'cluster'],
+      ['label' => 'Un luminaire multi-ampoules ou en grappe m\'intéresse !', 'slug' => 'grappe', 'icon' => 'cluster'],
       ['label' => 'Je verrai plus tard',                        'slug' => 'plustard',   'icon' => 'clock'],
     ],
   ],
