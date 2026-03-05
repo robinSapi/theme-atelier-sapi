@@ -18509,6 +18509,11 @@ html.sapi-intro-active body {
    WooCommerce Product Add-Ons – Styles
    ========================================================================== */
 
+/* Espacement au-dessus du bloc add-ons */
+.wc-pao-addons-container {
+  margin-top: 1.5rem;
+}
+
 /* Masque le prix variation partiel quand add-on présent */
 .variations_form:has(.wc-pao-addons-container) .woocommerce-variation-price {
   display: none;
