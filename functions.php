@@ -479,11 +479,7 @@ add_filter('render_block', function ($content, $block) {
             <span class="step-label"><?php esc_html_e('Confirmation', 'theme-sapi-maison'); ?></span>
           </div>
         </div>
-        <div class="cart-hero">
-          <span class="section-number">01</span>
-          <h1><?php esc_html_e('Votre Panier', 'theme-sapi-maison'); ?></h1>
-          <p class="cart-subtitle"><?php esc_html_e('Plus que quelques clics avant de recevoir votre luminaire !', 'theme-sapi-maison'); ?></p>
-        </div>
+        <p class="cart-subtitle"><?php esc_html_e('Plus que quelques clics avant de recevoir votre luminaire !', 'theme-sapi-maison'); ?></p>
       <?php echo $content; ?>
         <div class="cart-reassurance">
           <div class="reassurance-item">
