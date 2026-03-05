@@ -590,7 +590,7 @@
       var variationHtml = '';
       if (p.variation_label) {
         variationHtml += '<p class="guide-result-variation">'
-          + 'Essence recommand\u00e9e : ' + escapeHtml(p.variation_label)
+          + 'Mat\u00e9riau conseill\u00e9 : ' + escapeHtml(p.variation_label)
           + '</p>';
       }
       if (p.size_label) {
