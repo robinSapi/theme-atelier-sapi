@@ -1505,7 +1505,7 @@ function sapi_guide_get_categories(array $answers) {
 
   // Éclairage secondaire → pool limité, affiné par sortie
   if ($eclairage === 'secondaire') {
-    $pool = ['lampadaires', 'lampeaposer', 'appliques'];
+    $pool = ['lampadaires', 'lampeaposer']; // default (NSP) : pas d'appliques
     if ($sortie === 'plafond') {
       $pool = ['suspensions'];
     } elseif ($sortie === 'mur') {
@@ -1529,8 +1529,8 @@ function sapi_guide_get_categories(array $answers) {
     case 'pas-de-sortie':
       $cats = ['lampadaires', 'lampeaposer', 'appliques'];
       break;
-    default:
-      $cats = ['suspensions', 'appliques', 'lampadaires', 'lampeaposer'];
+    default: // "ne-sais-pas" → pas d'appliques (nécessite sortie mur)
+      $cats = ['suspensions', 'lampadaires', 'lampeaposer'];
   }
 
   // Règle A : jamais de lampe à poser en cuisine
