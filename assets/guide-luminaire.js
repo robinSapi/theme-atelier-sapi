@@ -43,17 +43,39 @@
       }
 
       if (typeof vis === 'object' && vis !== null) {
-        var show = true;
-        for (var condStep in vis) {
-          if (!vis.hasOwnProperty(condStep)) continue;
-          var allowed = vis[condStep];
-          var answer = state.answers[condStep];
-          if (!answer || allowed.indexOf(answer) === -1) {
-            show = false;
-            break;
+        // OR logic: { _or: [ {condA: [vals]}, {condB: [vals]} ] }
+        if (vis._or) {
+          var orGroups = vis._or;
+          var orMatch = false;
+          for (var g = 0; g < orGroups.length; g++) {
+            var group = orGroups[g];
+            var groupOk = true;
+            for (var condStep in group) {
+              if (!group.hasOwnProperty(condStep)) continue;
+              var allowed = group[condStep];
+              var answer = state.answers[condStep];
+              if (!answer || allowed.indexOf(answer) === -1) {
+                groupOk = false;
+                break;
+              }
+            }
+            if (groupOk) { orMatch = true; break; }
           }
+          if (orMatch) visible.push(step.id);
+        } else {
+          // AND logic (existing behavior)
+          var show = true;
+          for (var condStep in vis) {
+            if (!vis.hasOwnProperty(condStep)) continue;
+            var allowed = vis[condStep];
+            var answer = state.answers[condStep];
+            if (!answer || allowed.indexOf(answer) === -1) {
+              show = false;
+              break;
+            }
+          }
+          if (show) visible.push(step.id);
         }
-        if (show) visible.push(step.id);
       }
     }
 
@@ -106,6 +128,9 @@
     dom.aiText          = document.getElementById('guide-ai-text');
     dom.aiTextContent   = document.getElementById('guide-ai-text-content');
     dom.followupBtns    = document.getElementById('guide-followup-buttons');
+    dom.surMesure       = document.getElementById('guide-sur-mesure');
+    dom.surMesureText   = document.getElementById('guide-sur-mesure-text');
+    dom.resultsTitle    = document.getElementById('guide-results-title');
     dom.resultError     = document.getElementById('guide-result-error');
     dom.restartBtn      = document.getElementById('guide-restart');
     dom.startBtn        = document.getElementById('guide-start-btn');
@@ -436,6 +461,7 @@
     if (dom.productsGrid) dom.productsGrid.style.display = 'none';
     if (dom.aiText) dom.aiText.style.display = 'none';
     if (dom.followupBtns) dom.followupBtns.style.display = 'none';
+    if (dom.surMesure) dom.surMesure.style.display = 'none';
     if (dom.resultError) dom.resultError.style.display = 'none';
     if (dom.restartWrap) dom.restartWrap.style.display = 'none';
 
@@ -460,6 +486,20 @@
 
       if (data.success && data.data) {
         var d = data.data;
+
+        // Sur mesure (grappe) — special result without products
+        if (d.sur_mesure) {
+          if (dom.resultsTitle) dom.resultsTitle.textContent = 'Notre proposition sur mesure';
+          if (d.ai_text && dom.surMesureText) {
+            var clean = d.ai_text.replace(/\*\*(.*?)\*\*/g, '$1');
+            dom.surMesureText.textContent = clean;
+          }
+          if (dom.surMesure) dom.surMesure.style.display = '';
+          return;
+        }
+
+        // Reset title for normal results
+        if (dom.resultsTitle) dom.resultsTitle.textContent = 'Notre s\u00e9lection pour vous';
 
         // Display AI recommendation text
         if (d.ai_text) {

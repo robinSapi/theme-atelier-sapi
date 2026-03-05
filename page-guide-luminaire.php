@@ -33,9 +33,24 @@ $guide_steps = [
     ],
   ],
   [
+    'id'         => 'eclairage',
+    'question'   => 'Pour un grand espace, Robin recommande de multiplier les sources. Que recherchez-vous ?',
+    'visibility' => ['taille' => ['grande']],
+    'choices'    => [
+      ['label' => 'Mon éclairage principal',     'slug' => 'principal',  'icon' => 'sun'],
+      ['label' => 'Un éclairage secondaire',     'slug' => 'secondaire', 'icon' => 'lamp-desk'],
+      ['label' => 'Un luminaire multi-ampoules', 'slug' => 'grappe',     'icon' => 'cluster'],
+      ['label' => 'Je verrai plus tard',         'slug' => 'plustard',   'icon' => 'clock'],
+    ],
+  ],
+  [
     'id'         => 'sortie',
     'question'   => 'Où se trouve votre sortie électrique ?',
-    'visibility' => 'always',
+    'visibility' => ['_or' => [
+      ['taille' => ['petite', 'moyenne']],
+      ['eclairage' => ['principal', 'plustard']],
+      ['piece' => ['escalier']],
+    ]],
     'choices'    => [
       ['label' => 'Au plafond',               'slug' => 'plafond',       'icon' => 'ceiling-plug'],
       ['label' => 'Au mur',                   'slug' => 'mur',           'icon' => 'wall-plug'],
@@ -106,6 +121,11 @@ $icons = [
   'monitor'      => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>',
   'door'         => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="15" cy="12" r="1"/></svg>',
   'stairs'       => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21h4v-4h4v-4h4v-4h4V5"/></svg>',
+  // Éclairage grande pièce
+  'sun'          => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>',
+  'lamp-desk'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 21v-4"/><path d="M6 17l2-12h8l2 12"/><path d="M5 17h14"/></svg>',
+  'cluster'      => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4m-5-2v6m10-6v6"/><circle cx="12" cy="10" r="3"/><circle cx="7" cy="14" r="2.5"/><circle cx="17" cy="14" r="2.5"/></svg>',
+  'clock'        => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
   // Style (existing)
   'minimal'      => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><line x1="12" y1="8" x2="12" y2="16"/></svg>',
   'organic'      => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-3 0-6 2-7 5s0 7 2 9 6 3 9 2 5-4 5-7-1-6-3-8-3-1-6-1z"/><circle cx="12" cy="13" r="2.5"/></svg>',
@@ -173,7 +193,7 @@ $icons = [
   <section class="guide-results-section" id="guide-results" aria-hidden="true">
     <div class="guide-results-header">
       <div class="guide-results-tags" id="guide-results-tags"></div>
-      <h2 class="guide-results-title">Notre sélection pour vous</h2>
+      <h2 class="guide-results-title" id="guide-results-title">Notre sélection pour vous</h2>
     </div>
 
     <!-- Loading with progressive steps -->
@@ -196,6 +216,21 @@ $icons = [
 
     <!-- Products grid (up to 4 products) -->
     <div class="guide-result-products-grid" id="guide-result-products-grid" style="display:none;"></div>
+
+    <!-- Sur mesure block (grappe) -->
+    <div class="guide-sur-mesure" id="guide-sur-mesure" style="display:none;">
+      <div class="guide-sur-mesure-inner">
+        <div class="guide-sur-mesure-icon" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4m-5-2v6m10-6v6"/><circle cx="12" cy="10" r="3"/><circle cx="7" cy="14" r="2.5"/><circle cx="17" cy="14" r="2.5"/></svg>
+        </div>
+        <h3 class="guide-sur-mesure-title">Création sur mesure</h3>
+        <div class="guide-sur-mesure-text" id="guide-sur-mesure-text"></div>
+        <a href="/contact/" class="guide-sur-mesure-cta">
+          Contacter Robin
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
 
     <!-- Follow-up buttons (AI-generated, display only in Phase A) -->
     <div class="guide-followup-buttons" id="guide-followup-buttons" style="display:none;"></div>

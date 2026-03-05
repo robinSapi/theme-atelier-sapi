@@ -1386,7 +1386,45 @@ function sapi_ajax_guide_results() {
     $clean[sanitize_key($key)] = sanitize_text_field($val);
   }
 
-  // 3. Determine product categories from step 1
+  // 3. Court-circuit grappe → sur mesure (pas de produits)
+  if (isset($clean['eclairage']) && $clean['eclairage'] === 'grappe') {
+    $sur_mesure_text = sapi_guide_sur_mesure_response($clean);
+
+    // Email notification
+    $labels = [
+      'piece'     => 'Pièce',
+      'taille'    => 'Taille de la pièce',
+      'eclairage' => 'Type d\'éclairage',
+      'style'     => 'Style intérieur',
+    ];
+    $email_body = "Nouvelle demande SUR MESURE — Guide Luminaire\n";
+    $email_body .= "================================================\n\n";
+    $email_body .= "Le client souhaite un luminaire multi-ampoules (en grappe).\n\n";
+    $email_body .= "RÉPONSES DU CLIENT :\n";
+    foreach ($labels as $key => $label) {
+      if (isset($clean[$key])) {
+        $email_body .= "- " . $label . " : " . $clean[$key] . "\n";
+      }
+    }
+    $email_body .= "\nTEXTE AFFICHÉ AU CLIENT :\n";
+    $email_body .= $sur_mesure_text ?: "(pas de texte IA)";
+    $email_body .= "\n\n---\nDate : " . wp_date('d/m/Y H:i');
+
+    wp_mail(
+      get_option('admin_email'),
+      'Guide Luminaire — Demande sur mesure (grappe)',
+      $email_body
+    );
+
+    wp_send_json_success([
+      'sur_mesure' => true,
+      'ai_text'    => $sur_mesure_text,
+      'products'   => [],
+    ]);
+    return;
+  }
+
+  // 4. Determine product categories
   $categories = sapi_guide_get_categories($clean);
 
   // 4. Query main products
@@ -1420,12 +1458,13 @@ function sapi_ajax_guide_results() {
 
   // 8. Send email notification to Robin
   $labels = [
-    'piece'   => 'Pièce',
-    'taille'  => 'Taille de la pièce',
-    'sortie'  => 'Sortie électrique',
-    'hauteur' => 'Hauteur sous-plafond',
-    'table'   => 'Au-dessus d\'une table',
-    'style'   => 'Style intérieur',
+    'piece'     => 'Pièce',
+    'taille'    => 'Taille de la pièce',
+    'eclairage' => 'Type d\'éclairage',
+    'sortie'    => 'Sortie électrique',
+    'hauteur'   => 'Hauteur sous-plafond',
+    'table'     => 'Au-dessus d\'une table',
+    'style'     => 'Style intérieur',
   ];
   $email_body = "Nouvelle recommandation Guide Luminaire\n";
   $email_body .= "========================================\n\n";
@@ -1460,8 +1499,18 @@ function sapi_ajax_guide_results() {
  * Step 1 → WooCommerce product categories
  */
 function sapi_guide_get_categories(array $answers) {
-  $sortie = isset($answers['sortie']) ? $answers['sortie'] : '';
-  $piece  = isset($answers['piece'])  ? $answers['piece']  : '';
+  $sortie    = isset($answers['sortie'])    ? $answers['sortie']    : '';
+  $piece     = isset($answers['piece'])     ? $answers['piece']     : '';
+  $eclairage = isset($answers['eclairage']) ? $answers['eclairage'] : '';
+
+  // Éclairage secondaire → seulement lampadaires, lampes à poser, appliques
+  if ($eclairage === 'secondaire') {
+    $cats = ['lampadaires', 'lampeaposer', 'appliques'];
+    if ($piece === 'cuisine') {
+      $cats = array_values(array_diff($cats, ['lampeaposer']));
+    }
+    return $cats;
+  }
 
   switch ($sortie) {
     case 'plafond':
@@ -1838,12 +1887,13 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
   // Réponses du client
   $prompt .= "\nRÉPONSES DU CLIENT :\n";
   $labels = [
-    'piece'   => 'Pièce',
-    'taille'  => 'Taille de la pièce',
-    'sortie'  => 'Sortie électrique',
-    'hauteur' => 'Hauteur sous-plafond',
-    'table'   => 'Au-dessus d\'une table',
-    'style'   => 'Style intérieur',
+    'piece'     => 'Pièce',
+    'taille'    => 'Taille de la pièce',
+    'eclairage' => 'Type d\'éclairage',
+    'sortie'    => 'Sortie électrique',
+    'hauteur'   => 'Hauteur sous-plafond',
+    'table'     => 'Au-dessus d\'une table',
+    'style'     => 'Style intérieur',
   ];
   foreach ($labels as $key => $label) {
     $val = isset($answers[$key]) ? $answers[$key] : 'Non demandé';
@@ -1927,6 +1977,66 @@ function sapi_guide_call_claude($system_prompt) {
   }
 
   return $parsed;
+}
+
+/**
+ * Generate AI text for sur mesure (grappe) result
+ */
+function sapi_guide_sur_mesure_response(array $answers) {
+  $theme_dir = get_stylesheet_directory();
+  $ton = file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt');
+
+  $piece = isset($answers['piece']) ? $answers['piece'] : '';
+  $style = isset($answers['style']) ? $answers['style'] : '';
+
+  $prompt  = "Tu es le conseiller luminaire de l'Atelier Sâpi, un atelier artisanal à Lyon qui crée des luminaires en bois découpés au laser par Robin.\n\n";
+  $prompt .= $ton . "\n\n";
+  $prompt .= "Le client recherche un luminaire multi-ampoules (en grappe) pour une grande pièce.\n";
+  $prompt .= "Pièce : " . ($piece ?: 'non précisée') . "\n";
+  $prompt .= "Style : " . ($style ?: 'non précisé') . "\n\n";
+  $prompt .= "INSTRUCTIONS :\n";
+  $prompt .= "1. Explique le concept de luminaire en grappe : plusieurs suspensions installées ensemble, à différentes hauteurs, créant un effet spectaculaire.\n";
+  $prompt .= "2. Mentionne que c'est une création sur mesure réalisée par Robin, avec un pavillon adapté pour suspendre plusieurs luminaires.\n";
+  $prompt .= "3. Donne des exemples d'effet visuel selon la pièce du client (au-dessus d'une grande table, au milieu du salon, dans un hall, en cage d'escalier...).\n";
+  $prompt .= "4. Invite le client à contacter Robin pour discuter du projet.\n";
+  $prompt .= "5. Maximum 100 mots. Sois chaleureux et inspirant.\n";
+  $prompt .= "6. N'utilise AUCUN formatage markdown (pas de **, pas de #, pas de _). Texte brut uniquement.\n";
+  $prompt .= "7. Réponds uniquement avec le texte, pas de JSON.\n";
+
+  $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
+  if (empty($api_key)) {
+    return 'Un luminaire en grappe, c\'est plusieurs suspensions réunies pour créer un effet spectaculaire. Robin crée ces compositions sur mesure, adaptées à votre espace. Contactez-le pour en discuter.';
+  }
+
+  $body = [
+    'model'      => 'claude-sonnet-4-6',
+    'max_tokens' => 512,
+    'system'     => $prompt,
+    'messages'   => [
+      ['role' => 'user', 'content' => 'Je voudrais un luminaire multi-ampoules pour ma grande pièce. Explique-moi ce concept.'],
+    ],
+  ];
+
+  $response = wp_remote_post('https://api.anthropic.com/v1/messages', [
+    'timeout' => 30,
+    'headers' => [
+      'Content-Type'      => 'application/json',
+      'x-api-key'         => $api_key,
+      'anthropic-version'  => '2023-06-01',
+    ],
+    'body' => wp_json_encode($body),
+  ]);
+
+  if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+    return 'Un luminaire en grappe, c\'est plusieurs suspensions réunies pour créer un effet spectaculaire. Robin crée ces compositions sur mesure, adaptées à votre espace. Contactez-le pour en discuter.';
+  }
+
+  $data = json_decode(wp_remote_retrieve_body($response), true);
+  if (isset($data['content'][0]['text'])) {
+    return $data['content'][0]['text'];
+  }
+
+  return 'Un luminaire en grappe, c\'est plusieurs suspensions réunies pour créer un effet spectaculaire. Robin crée ces compositions sur mesure, adaptées à votre espace. Contactez-le pour en discuter.';
 }
 
 /**
