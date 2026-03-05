@@ -525,7 +525,7 @@
           <strong>Filtrage taille luminaire :</strong>
           <ul>
             <li>Petite → plus petite taille disponible</li>
-            <li>Moyenne → 2e taille</li>
+            <li>Moyenne → 2e taille (fallback sur 1ère si une seule taille)</li>
             <li>Grande → 3e taille (exclut produits ≤ 2 tailles, fallback si vide)</li>
           </ul>
         </div>
@@ -991,7 +991,7 @@
 
       <tr class="rules-group"><td colspan="2">Taille du luminaire</td></tr>
       <tr><td>Petite pièce</td><td>Plus petite taille disponible du produit</td></tr>
-      <tr><td>Moyenne pièce</td><td>2e taille du produit</td></tr>
+      <tr><td>Moyenne pièce</td><td>2e taille du produit (fallback sur 1ère si une seule taille)</td></tr>
       <tr><td>Grande pièce</td><td>3e taille (exclut produits ≤ 2 tailles, fallback si vide)</td></tr>
 
       <tr class="rules-group"><td colspan="2">Essence (style)</td></tr>
