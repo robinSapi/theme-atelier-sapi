@@ -18504,3 +18504,17 @@ html.sapi-intro-active body {
     height: 36px;
   }
 }
+
+/* ==========================================================================
+   WooCommerce Product Add-Ons – Masquage éléments redondants
+   ========================================================================== */
+
+/* Masque le prix variation uniquement quand un add-on est présent */
+.variations_form:has(.wc-pao-addons-container) .woocommerce-variation-price {
+  display: none;
+}
+
+/* Récap add-ons (n'existe que si le plugin est actif sur le produit) */
+#product-addons-total {
+  display: none;
+}
