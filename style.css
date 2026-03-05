@@ -18521,22 +18521,28 @@ html.sapi-intro-active body {
 
 /* Style du subtotal identique au prix produit */
 .wc-pao-subtotal-line {
+  list-style: none;
+}
+
+.wc-pao-subtotal-line p.price {
   color: #018501 !important;
   font-family: 'Montserrat', sans-serif;
   font-weight: 900;
   font-size: 1.1rem;
-  list-style: none;
-  justify-content: flex-start;
+  text-align: left;
+  margin: 0;
+  font-size: 0;
 }
 
-/* Masque le label "Subtotal", garde uniquement le prix */
-.wc-pao-subtotal-line .wc-pao-col1 {
-  display: none;
+/* Masque "Subtotal", affiche uniquement le montant */
+.wc-pao-subtotal-line p.price .amount {
+  font-size: 1.1rem;
 }
 
 /* Retire les bordures/séparateurs du bloc totals */
 .product-addon-totals,
-.product-addon-totals ul {
+.product-addon-totals ul,
+.product-addon-totals li {
   border: none !important;
   padding: 0 !important;
   margin: 0 !important;
