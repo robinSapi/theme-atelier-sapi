@@ -501,7 +501,7 @@
         var d = data.data;
 
         // Reset title for normal results
-        if (dom.resultsTitle) dom.resultsTitle.textContent = 'Les luminaires les plus adapt\u00e9s \u00e0 votre espace';
+        if (dom.resultsTitle) dom.resultsTitle.textContent = 'Ce que Robin vous propose';
 
         // Display AI recommendation text
         if (d.ai_text) {

@@ -199,7 +199,7 @@ $icons = [
   <section class="guide-results-section" id="guide-results" aria-hidden="true">
     <div class="guide-results-header">
       <div class="guide-results-tags" id="guide-results-tags"></div>
-      <h2 class="guide-results-title" id="guide-results-title">Les luminaires les plus adaptés à votre espace</h2>
+      <h2 class="guide-results-title" id="guide-results-title">Ce que Robin vous propose</h2>
     </div>
 
     <!-- Loading with progressive steps -->
@@ -217,7 +217,6 @@ $icons = [
       <span class="guide-ai-quote guide-ai-quote-open">&laquo;</span>
       <div class="guide-ai-text-content" id="guide-ai-text-content"></div>
       <span class="guide-ai-quote guide-ai-quote-close">&raquo;</span>
-      <div class="guide-ai-signature">&mdash; Robin</div>
     </div>
 
     <!-- Products grid (up to 4 products) -->
