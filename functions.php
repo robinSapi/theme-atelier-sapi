@@ -173,6 +173,7 @@ function sapi_maison_enqueue_assets() {
   wp_enqueue_script('sapi-maison-menu', get_template_directory_uri() . '/assets/menu.js', [], file_exists($menu_js_path) ? filemtime($menu_js_path) : '1.0.0', true);
   wp_localize_script('sapi-maison-menu', 'sapiMenu', [
     'miniCartNonce' => wp_create_nonce('sapi-update-mini-cart-qty'),
+    'wcAjaxUrl'     => home_url('/?wc-ajax='),
   ]);
 
   // Product name formatter - chargé sur toutes les pages (prénom en Montserrat, reste en Square Peg)
@@ -1040,6 +1041,7 @@ function sapi_update_mini_cart_qty() {
 }
 add_action('wp_ajax_sapi_update_mini_cart_qty', 'sapi_update_mini_cart_qty');
 add_action('wp_ajax_nopriv_sapi_update_mini_cart_qty', 'sapi_update_mini_cart_qty');
+add_action('wc_ajax_sapi_update_mini_cart_qty', 'sapi_update_mini_cart_qty');
 
 /**
  * Custom variation attribute display with visible labels

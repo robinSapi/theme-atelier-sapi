@@ -309,7 +309,7 @@
     // Disable buttons during request
     selector.classList.add('is-loading');
 
-    fetch(wc_add_to_cart_params.ajax_url, {
+    fetch((typeof sapiMenu !== 'undefined' && sapiMenu.wcAjaxUrl) ? sapiMenu.wcAjaxUrl + 'sapi_update_mini_cart_qty' : wc_add_to_cart_params.ajax_url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
