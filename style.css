@@ -18514,42 +18514,7 @@ html.sapi-intro-active body {
   margin-top: 1.5rem;
 }
 
-/* Masque le prix variation partiel quand add-on présent */
-.variations_form:has(.wc-pao-addons-container) .woocommerce-variation-price {
+/* Masque le récap add-ons (produit + options + subtotal) */
+#product-addons-total {
   display: none;
-}
-
-/* Masque les lignes de détail, garde le subtotal */
-.product-addon-totals > ul > li:not(.wc-pao-subtotal-line) {
-  display: none;
-}
-
-/* Style du subtotal identique au prix produit */
-.wc-pao-subtotal-line {
-  list-style: none;
-  justify-content: flex-start !important;
-}
-
-.wc-pao-subtotal-line p.price {
-  color: #018501 !important;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 900;
-  font-size: 1.1rem;
-  text-align: left;
-  margin: 0;
-  font-size: 0;
-}
-
-/* Masque "Subtotal", affiche uniquement le montant */
-.wc-pao-subtotal-line p.price .amount {
-  font-size: 1.1rem;
-}
-
-/* Retire les bordures/séparateurs du bloc totals */
-.product-addon-totals,
-.product-addon-totals ul,
-.product-addon-totals li {
-  border: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
 }
