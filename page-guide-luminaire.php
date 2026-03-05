@@ -250,6 +250,7 @@ $icons = [
 <!-- Full-width ambiance photo (populated by JS from first product) -->
 <div class="guide-ambiance-banner" id="guide-ambiance-banner" style="display:none;">
   <img class="guide-ambiance-img" id="guide-ambiance-img" src="" alt="" />
+  <h2 class="guide-ambiance-title" id="guide-ambiance-title"></h2>
 </div>
 
 <script>

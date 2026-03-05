@@ -136,6 +136,7 @@
     dom.restartWrap     = document.getElementById('guide-restart-wrap');
     dom.ambianceBanner  = document.getElementById('guide-ambiance-banner');
     dom.ambianceImg     = document.getElementById('guide-ambiance-img');
+    dom.ambianceTitle   = document.getElementById('guide-ambiance-title');
 
     if (!dom.steps.length) return;
 
@@ -503,6 +504,9 @@
           if (firstProduct && firstProduct.ambiance && dom.ambianceBanner && dom.ambianceImg) {
             dom.ambianceImg.src = firstProduct.ambiance;
             dom.ambianceImg.alt = firstProduct.title + ' \u2014 ambiance';
+            if (dom.ambianceTitle) {
+              dom.ambianceTitle.textContent = firstProduct.title;
+            }
             dom.ambianceBanner.style.display = '';
           }
         }
