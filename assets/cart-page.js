@@ -35,14 +35,17 @@
    * Typographie française : espace insécable avant « : » dans les labels produit
    * WooCommerce Blocks rend "Matériau:" sans espace — on corrige après hydratation.
    */
+  var colonTimer = null;
   function fixFrenchColons() {
     var labels = document.querySelectorAll(
       '.wc-block-components-product-details__name'
     );
     labels.forEach(function (el) {
       var text = el.textContent;
+      // Déjà corrigé (contient espace insécable avant :) → on skip
+      if (!text || /\u00a0:$/.test(text)) return;
       // Remplace ":" ou " :" en fin de texte par "\u00a0:" (espace insécable + :)
-      if (text && /:$/.test(text.trim())) {
+      if (/:$/.test(text.trim())) {
         el.textContent = text.replace(/\s*:\s*$/, '\u00a0:');
       }
     });
@@ -61,8 +64,10 @@
     }).observe(cartBlock, { attributes: true, attributeFilter: ['class'] });
 
     // Observer continu pour les mises à jour dynamiques (quantité, etc.)
+    // Debounce pour éviter la boucle infinie (notre modif DOM re-déclenche l'observer)
     new MutationObserver(function () {
-      fixFrenchColons();
+      clearTimeout(colonTimer);
+      colonTimer = setTimeout(fixFrenchColons, 200);
     }).observe(cartBlock, { childList: true, subtree: true });
   }
 
