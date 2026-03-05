@@ -11323,6 +11323,31 @@ transform: translateY(15px);
   color: var(--color-gray);
 }
 
+/* Add-ons dans le mini-cart — harmonisé avec les lignes de variation */
+.mini-cart-addons dl {
+  margin: 0;
+  padding: 0;
+}
+
+.mini-cart-addons dt {
+  font-weight: 600;
+  color: var(--color-dark, #323232);
+  display: inline;
+}
+
+.mini-cart-addons dd {
+  font-weight: 400;
+  color: var(--color-gray);
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
+.mini-cart-addons dd p {
+  display: inline;
+  margin: 0;
+}
+
 .mini-cart-item-price {
   font-weight: 700;
   color: var(--color-wood);
