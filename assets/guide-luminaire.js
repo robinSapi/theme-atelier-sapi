@@ -505,7 +505,11 @@
             dom.ambianceImg.src = firstProduct.ambiance;
             dom.ambianceImg.alt = firstProduct.title + ' \u2014 ambiance';
             if (dom.ambianceTitle) {
-              dom.ambianceTitle.textContent = firstProduct.title;
+              var words = firstProduct.title.split(' ');
+              var fn = words[0] || '';
+              var rest = words.slice(1).join(' ');
+              dom.ambianceTitle.innerHTML = '<span class="product-firstname">' + escapeHtml(fn) + '</span>'
+                + (rest ? ' <span class="product-restname">' + escapeHtml(rest) + '</span>' : '');
             }
             dom.ambianceBanner.style.display = '';
           }

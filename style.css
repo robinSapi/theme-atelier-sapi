@@ -17595,15 +17595,13 @@ html.sapi-intro-active body {
 
 .guide-ambiance-title {
   position: absolute;
-  bottom: 3rem;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 2.5rem;
+  left: 3rem;
   margin: 0;
   color: #fff;
   text-shadow: 0 2px 20px rgba(0, 0, 0, 0.45), 0 1px 6px rgba(0, 0, 0, 0.3);
-  text-align: center;
+  text-align: left;
   line-height: 1.2;
-  white-space: nowrap;
 }
 
 .guide-ambiance-title .product-firstname {
@@ -17630,7 +17628,8 @@ html.sapi-intro-active body {
     height: 420px;
   }
   .guide-ambiance-title {
-    bottom: 2rem;
+    top: 1.5rem;
+    left: 1.5rem;
   }
   .guide-ambiance-title .product-firstname {
     font-size: 1.2rem;
