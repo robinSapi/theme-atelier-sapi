@@ -1442,8 +1442,11 @@ get_header();
       btn.textContent = 'Ajout en cours…';
 
       // Sérialiser TOUT le formulaire (variations + add-ons + futurs plugins)
+      // On retire add-to-cart pour éviter que WC_Form_Handler l'intercepte (double ajout)
       const cartForm = document.querySelector('form.cart');
-      const formSerialized = cartForm ? jQuery(cartForm).serialize() : '';
+      const formSerialized = cartForm
+        ? jQuery(cartForm).serialize().replace(/(?:^|&)add-to-cart=[^&]*/g, '')
+        : '';
       const ajaxData = formSerialized
         + '&action=sapi_add_to_cart'
         + '&nonce=<?php echo wp_create_nonce('sapi-add-to-cart'); ?>'
@@ -1500,8 +1503,11 @@ get_header();
       btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Préparation...';
 
       // Sérialiser TOUT le formulaire (variations + add-ons + futurs plugins)
+      // On retire add-to-cart pour éviter que WC_Form_Handler l'intercepte (double ajout)
       const cartForm = document.querySelector('form.cart');
-      const formSerialized = cartForm ? jQuery(cartForm).serialize() : '';
+      const formSerialized = cartForm
+        ? jQuery(cartForm).serialize().replace(/(?:^|&)add-to-cart=[^&]*/g, '')
+        : '';
       const ajaxData = formSerialized
         + '&action=sapi_buy_now'
         + '&product_id=' + productId
