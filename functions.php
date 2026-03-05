@@ -984,7 +984,7 @@ function sapi_render_mini_cart_contents() {
                 foreach ($cart_item['addons'] as $addon) :
               ?>
                   <div class="mini-cart-var-line">
-                    <span class="mini-cart-var-label"><?php echo esc_html($addon['name']); ?> :</span>
+                    <span class="mini-cart-var-label"><?php echo esc_html(rtrim($addon['name'], ': ')); ?> :</span>
                     <span class="mini-cart-var-value"><?php echo esc_html($addon['value']); ?></span>
                   </div>
               <?php endforeach; endif; ?>
