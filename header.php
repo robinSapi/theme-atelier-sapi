@@ -115,11 +115,9 @@ $logo_alt = get_bloginfo('name');
         </svg>
       </button>
     </div>
-    <div class="mini-cart-content">
-      <?php if (function_exists('sapi_render_mini_cart_contents')) : ?>
-        <?php sapi_render_mini_cart_contents(); ?>
-      <?php endif; ?>
-    </div>
+    <?php if (function_exists('sapi_render_mini_cart_contents')) : ?>
+      <?php sapi_render_mini_cart_contents(); ?>
+    <?php endif; ?>
     <?php if (function_exists('WC') && WC()->cart) : ?>
     <div class="mini-cart-footer">
       <div class="mini-cart-total">
