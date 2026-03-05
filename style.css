@@ -18270,11 +18270,54 @@ html.sapi-intro-active body {
 }
 
 .surmesure-modal-content {
-  padding: 40px 32px;
+  padding: 60px 32px 40px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+/* --- Flèches navigation galerie modale --- */
+.surmesure-modal-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid var(--color-wood, #937D68);
+  border-radius: 50%;
+  color: var(--color-wood, #937D68);
+  cursor: pointer;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.surmesure-modal-nav:hover {
+  background: var(--color-orange, #E35B24);
+  border-color: var(--color-orange, #E35B24);
+  color: #fff;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.surmesure-modal-nav svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+.surmesure-modal-nav-prev {
+  left: 12px;
+}
+
+.surmesure-modal-nav-next {
+  right: 12px;
 }
 
 .surmesure-modal-title {
@@ -18340,6 +18383,26 @@ html.sapi-intro-active body {
 
   .surmesure-modal-content {
     padding: 24px 20px 32px;
+  }
+
+  .surmesure-modal-nav {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .surmesure-modal-nav svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .surmesure-modal-nav-prev {
+    left: 8px;
+  }
+
+  .surmesure-modal-nav-next {
+    right: 8px;
   }
 
   .surmesure-modal-close {

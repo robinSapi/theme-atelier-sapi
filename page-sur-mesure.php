@@ -194,10 +194,16 @@ get_header();
           </svg>
         </button>
         <div class="surmesure-modal-body">
-          <div class="surmesure-modal-gallery">
+          <div class="surmesure-modal-gallery" style="position:relative;">
             <div class="surmesure-modal-image">
               <img src="" alt="">
             </div>
+            <button class="surmesure-modal-nav surmesure-modal-nav-prev" aria-label="Photo précédente" style="display:none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <button class="surmesure-modal-nav surmesure-modal-nav-next" aria-label="Photo suivante" style="display:none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
+            </button>
             <div class="surmesure-modal-thumbs"></div>
           </div>
           <div class="surmesure-modal-content">
@@ -226,6 +232,8 @@ get_header();
       var closeBtn  = modal.querySelector('.surmesure-modal-close');
       var imgEl     = modal.querySelector('.surmesure-modal-image img');
       var thumbsEl  = modal.querySelector('.surmesure-modal-thumbs');
+      var prevBtn   = modal.querySelector('.surmesure-modal-nav-prev');
+      var nextBtn   = modal.querySelector('.surmesure-modal-nav-next');
       var titleEl   = modal.querySelector('.surmesure-modal-title');
       var detailsEl = modal.querySelector('.surmesure-modal-details');
       var descEl    = modal.querySelector('.surmesure-modal-desc');
@@ -234,6 +242,8 @@ get_header();
       var citeEl    = quoteEl.querySelector('cite');
       var ctaLink   = modal.querySelector('.surmesure-modal-cta');
       var previousFocus = null;
+      var currentGallery = [];
+      var currentIndex = 0;
 
       function buildDetail(svg, text) {
         return '<span class="surmesure-detail">' + svg + ' ' + text + '</span>';
@@ -246,6 +256,14 @@ get_header();
         });
       }
 
+      function goToPhoto(index) {
+        if (index < 0 || index >= currentGallery.length) return;
+        currentIndex = index;
+        imgEl.src = currentGallery[index];
+        imgEl.srcset = '';
+        setActiveThumb(index);
+      }
+
       function openModal(card) {
         var data = card.dataset;
         previousFocus = document.activeElement;
@@ -255,27 +273,31 @@ get_header();
         imgEl.srcset = '';
         imgEl.alt = data.modalTitle || '';
 
-        // Gallery thumbnails
-        var gallery = [];
-        try { gallery = JSON.parse(data.modalGallery || '[]'); } catch(e) {}
+        // Gallery
+        currentGallery = [];
+        currentIndex = 0;
+        try { currentGallery = JSON.parse(data.modalGallery || '[]'); } catch(e) {}
+
+        // Thumbnails
         thumbsEl.innerHTML = '';
-        if (gallery.length > 1) {
-          gallery.forEach(function(url, i) {
+        var hasGallery = currentGallery.length > 1;
+        if (hasGallery) {
+          currentGallery.forEach(function(url, i) {
             var thumb = document.createElement('button');
             thumb.className = 'surmesure-modal-thumb' + (i === 0 ? ' is-active' : '');
             thumb.setAttribute('aria-label', 'Photo ' + (i + 1));
             thumb.innerHTML = '<img src="' + url + '" alt="">';
-            thumb.addEventListener('click', function() {
-              imgEl.src = url;
-              imgEl.srcset = '';
-              setActiveThumb(i);
-            });
+            thumb.addEventListener('click', function() { goToPhoto(i); });
             thumbsEl.appendChild(thumb);
           });
           thumbsEl.style.display = '';
         } else {
           thumbsEl.style.display = 'none';
         }
+
+        // Arrows
+        prevBtn.style.display = hasGallery ? '' : 'none';
+        nextBtn.style.display = hasGallery ? '' : 'none';
 
         // Details
         var html = '';
@@ -327,11 +349,32 @@ get_header();
         });
       });
 
+      // Arrow navigation
+      prevBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var idx = currentIndex > 0 ? currentIndex - 1 : currentGallery.length - 1;
+        goToPhoto(idx);
+      });
+      nextBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var idx = currentIndex < currentGallery.length - 1 ? currentIndex + 1 : 0;
+        goToPhoto(idx);
+      });
+
       // Close
       closeBtn.addEventListener('click', closeModal);
       overlay.addEventListener('click', closeModal);
       document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+        if (!modal.classList.contains('is-open')) return;
+        if (e.key === 'Escape') closeModal();
+        if (e.key === 'ArrowLeft' && currentGallery.length > 1) {
+          var idx = currentIndex > 0 ? currentIndex - 1 : currentGallery.length - 1;
+          goToPhoto(idx);
+        }
+        if (e.key === 'ArrowRight' && currentGallery.length > 1) {
+          var idx = currentIndex < currentGallery.length - 1 ? currentIndex + 1 : 0;
+          goToPhoto(idx);
+        }
       });
 
       // Close modal when CTA link is clicked
