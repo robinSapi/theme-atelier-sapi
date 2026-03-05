@@ -12941,6 +12941,11 @@ body.woocommerce-cart {
   color: var(--color-dark) !important;
 }
 
+.sapi-checkout-outer .wc-block-components-order-summary-item__description {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 /* Masquer prix individuel (doublon) + description longue (dimensions/poids) */
 .sapi-checkout-outer .wc-block-components-order-summary-item__individual-prices,
 .sapi-checkout-outer .wc-block-components-product-metadata__description {
