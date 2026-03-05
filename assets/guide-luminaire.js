@@ -498,10 +498,10 @@
         if (d.products && d.products.length > 0) {
           renderProductsGrid(d.products, d.show_sur_mesure || false, d.sur_mesure_reason || '');
 
-          // Show ambiance_2 photo of first product as full-width banner
+          // Show ambiance photo of first product as full-width banner
           var firstProduct = d.products[0];
-          if (firstProduct && firstProduct.ambiance_2 && dom.ambianceBanner && dom.ambianceImg) {
-            dom.ambianceImg.src = firstProduct.ambiance_2;
+          if (firstProduct && firstProduct.ambiance && dom.ambianceBanner && dom.ambianceImg) {
+            dom.ambianceImg.src = firstProduct.ambiance;
             dom.ambianceImg.alt = firstProduct.title + ' \u2014 ambiance';
             dom.ambianceBanner.style.display = '';
           }

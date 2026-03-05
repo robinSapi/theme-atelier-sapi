@@ -1791,11 +1791,15 @@ function sapi_guide_collect_results($query, array $answers) {
       }
     }
 
-    // Ambiance photo for full-width banner
-    $ambiance_2_url = '';
-    $ambiance_2_raw = get_field('ambiance_2', $product->get_id());
-    if ($ambiance_2_raw) {
-      $ambiance_2_url = sapi_get_acf_image_url($ambiance_2_raw, 'full');
+    // Ambiance photo for full-width banner (fallback: ambiance_2 → ambiance_1)
+    $ambiance_url = '';
+    $pid = $product->get_id();
+    $ambiance_raw = get_field('ambiance_2', $pid);
+    if (!$ambiance_raw) {
+      $ambiance_raw = get_field('ambiance_1', $pid);
+    }
+    if ($ambiance_raw) {
+      $ambiance_url = sapi_get_acf_image_url($ambiance_raw, 'full');
     }
 
     $products[] = [
@@ -1811,7 +1815,7 @@ function sapi_guide_collect_results($query, array $answers) {
       'format'          => $format,
       'type_ampoule'    => $ampoule,
       'total_sales'     => (int) $product->get_total_sales(),
-      'ambiance_2'      => $ambiance_2_url,
+      'ambiance'        => $ambiance_url,
     ];
   }
 
