@@ -1394,10 +1394,13 @@ function sapi_ajax_guide_results() {
   $products_data  = $query_result['products'];
   $fallback_notes = $query_result['fallback_notes'];
 
-  // 5. Call Claude API for AI recommendation
+  // 5. Limit to 4 products for display AND for AI prompt
+  $display_products = array_slice($products_data, 0, 4);
+
+  // 6. Call Claude API for AI recommendation (only sees the 4 displayed products)
   $ai_response = null;
-  if (!empty($products_data)) {
-    $system_prompt = sapi_guide_build_system_prompt($products_data, $clean, $fallback_notes);
+  if (!empty($display_products)) {
+    $system_prompt = sapi_guide_build_system_prompt($display_products, $clean, $fallback_notes);
     $ai_response = sapi_guide_call_claude($system_prompt);
   }
 
@@ -1410,13 +1413,10 @@ function sapi_ajax_guide_results() {
     $followup_buttons = isset($ai_response['followup_buttons']) ? $ai_response['followup_buttons'] : [];
   }
 
-  if (empty($products_data)) {
+  if (empty($display_products)) {
     wp_send_json_error(['message' => 'Aucun produit trouvé']);
     return;
   }
-
-  // Limit to 4 products for display
-  $display_products = array_slice($products_data, 0, 4);
 
   // 8. Send email notification to Robin
   $labels = [
