@@ -1509,7 +1509,7 @@ function sapi_guide_get_categories(array $answers) {
     if ($sortie === 'mur') {
       $pool = ['appliques'];
     } elseif ($sortie === 'pas-de-sortie') {
-      $pool = ['lampadaires', 'lampeaposer'];
+      $pool = ['lampadaires', 'lampeaposer', 'appliques'];
     }
     if ($piece === 'cuisine') {
       $pool = array_values(array_diff($pool, ['lampeaposer']));
