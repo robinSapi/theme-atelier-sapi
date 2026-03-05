@@ -31,23 +31,46 @@
     return true;
   }
 
+  /**
+   * Typographie française : espace insécable avant « : » dans les labels produit
+   * WooCommerce Blocks rend "Matériau:" sans espace — on corrige après hydratation.
+   */
+  function fixFrenchColons() {
+    var labels = document.querySelectorAll(
+      '.wc-block-components-product-details__name'
+    );
+    labels.forEach(function (el) {
+      var text = el.textContent;
+      // Remplace ":" ou " :" en fin de texte par "\u00a0:" (espace insécable + :)
+      if (text && /:$/.test(text.trim())) {
+        el.textContent = text.replace(/\s*:\s*$/, '\u00a0:');
+      }
+    });
+  }
+
   // Observe la suppression de is-loading = fin de l'hydratation React
   var cartBlock = document.querySelector('.wp-block-woocommerce-cart');
   if (cartBlock) {
     new MutationObserver(function (mutations, obs) {
       if (!cartBlock.classList.contains('is-loading')) {
         obs.disconnect();
-        setTimeout(apply, 100);
-        setTimeout(apply, 600);
-        setTimeout(apply, 1500);
+        setTimeout(function () { apply(); fixFrenchColons(); }, 100);
+        setTimeout(function () { apply(); fixFrenchColons(); }, 600);
+        setTimeout(function () { apply(); fixFrenchColons(); }, 1500);
       }
     }).observe(cartBlock, { attributes: true, attributeFilter: ['class'] });
+
+    // Observer continu pour les mises à jour dynamiques (quantité, etc.)
+    new MutationObserver(function () {
+      fixFrenchColons();
+    }).observe(cartBlock, { childList: true, subtree: true });
   }
 
   // Fallback window.load
   window.addEventListener('load', function () {
     apply();
-    setTimeout(apply, 800);
+    fixFrenchColons();
+    setTimeout(function () { apply(); fixFrenchColons(); }, 800);
   });
 
   // Resize
