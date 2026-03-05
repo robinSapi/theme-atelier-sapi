@@ -1204,10 +1204,11 @@ add_action('after_setup_theme', function() {
 
 /**
  * AJAX Add to Cart - Safari Compatible
- * Handles AJAX add to cart from sticky bar (simple products)
+ * Utilise wc-ajax pour que les plugins (Product Add-Ons) chargent leurs hooks frontend
  */
 add_action('wp_ajax_sapi_add_to_cart', 'sapi_ajax_add_to_cart');
 add_action('wp_ajax_nopriv_sapi_add_to_cart', 'sapi_ajax_add_to_cart');
+add_action('wc_ajax_sapi_add_to_cart', 'sapi_ajax_add_to_cart');
 
 function sapi_ajax_add_to_cart() {
   // Verify nonce
@@ -1296,6 +1297,7 @@ function sapi_get_estimated_delivery_date() {
  */
 add_action('wp_ajax_sapi_buy_now', 'sapi_ajax_buy_now');
 add_action('wp_ajax_nopriv_sapi_buy_now', 'sapi_ajax_buy_now');
+add_action('wc_ajax_sapi_buy_now', 'sapi_ajax_buy_now');
 
 function sapi_ajax_buy_now() {
   // Verify nonce

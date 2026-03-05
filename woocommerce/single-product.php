@@ -1095,7 +1095,7 @@ get_header();
       if (typeof jQuery !== 'undefined') {
         jQuery.ajax({
           type: 'POST',
-          url: '<?php echo esc_url(admin_url('admin-ajax.php')); ?>',
+          url: '<?php echo esc_url(home_url('/?wc-ajax=sapi_add_to_cart')); ?>',
           data: {
             action: 'sapi_add_to_cart',
             product_id: productId,
@@ -1451,7 +1451,7 @@ get_header();
 
       jQuery.ajax({
         type: 'POST',
-        url: '<?php echo esc_url(admin_url('admin-ajax.php')); ?>',
+        url: '<?php echo esc_url(home_url('/?wc-ajax=sapi_add_to_cart')); ?>',
         data: ajaxData,
         success: function(response) {
           btn.disabled = false;
@@ -1510,7 +1510,7 @@ get_header();
 
       jQuery.ajax({
         type: 'POST',
-        url: '<?php echo esc_url(admin_url('admin-ajax.php')); ?>',
+        url: '<?php echo esc_url(home_url('/?wc-ajax=sapi_buy_now')); ?>',
         data: ajaxData,
         success: function(response) {
           if (response.success) {
