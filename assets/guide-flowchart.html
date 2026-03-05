@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Guide Luminaire — Flowchart V2</title>
+<title>Guide Luminaire — Flowchart V3</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
 
@@ -14,314 +14,403 @@
     background: #FEFDFB;
     color: #323232;
     padding: 40px 20px 80px;
-    min-height: 100vh;
   }
 
-  h1 {
-    text-align: center;
-    font-size: 1.6rem;
+  h1 { text-align: center; font-size: 1.45rem; font-weight: 700; }
+  .subtitle { text-align: center; font-size: 0.8rem; color: #937D68; margin: 6px 0 10px; }
+  .date { text-align: center; font-size: 0.7rem; color: #B0A0A0; margin-bottom: 36px; }
+
+  .section-title {
+    font-size: 1.05rem;
     font-weight: 700;
-    color: #323232;
+    margin: 50px auto 20px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #E8DFD5;
+    max-width: 820px;
+  }
+
+  /* ═══════════════════════════════════
+     SECTION 1 : FLUX PRINCIPAL
+     ═══════════════════════════════════ */
+
+  .flow-layout {
+    display: flex;
+    gap: 24px;
+    max-width: 820px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .flow-main {
+    flex: 1;
+    max-width: 540px;
+  }
+
+  .flow-bypasses {
+    width: 200px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  /* ── Step card ── */
+  .step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .step-num {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    z-index: 2;
+    position: relative;
+  }
+
+  .step-num.conditional { background: linear-gradient(180deg, #9B59B6 0%, #7D3C98 100%); }
+  .step-num.result { background: linear-gradient(180deg, #937D68 0%, #7A6555 100%); }
+
+  .step-card {
+    flex: 1;
+    background: #fff;
+    border: 2px solid #E8DFD5;
+    border-radius: 14px;
+    padding: 14px 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .step-card:hover {
+    border-color: #E35B24;
+    box-shadow: 0 3px 16px rgba(227, 91, 36, 0.1);
+  }
+
+  .step-card.conditional {
+    border-color: #9B59B6;
+    background: linear-gradient(135deg, #FAF5FF 0%, #FFF 100%);
+  }
+  .step-card.conditional:hover { border-color: #7D3C98; }
+
+  .step-card.result-card {
+    background: linear-gradient(135deg, #FBF6EA 0%, #FFF8F0 100%);
+    border-color: #E35B24;
+  }
+
+  .step-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
     margin-bottom: 6px;
   }
 
-  .subtitle {
-    text-align: center;
-    font-size: 0.85rem;
-    color: #937D68;
-    margin-bottom: 40px;
-    font-weight: 400;
-  }
-
-  /* ── Canvas ── */
-  .canvas {
-    position: relative;
-    width: 1100px;
-    margin: 0 auto;
-    min-height: 2600px;
-  }
-
-  .canvas svg.connections {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* ── Question node ── */
-  .node {
-    position: absolute;
-    background: #fff;
-    border: 2px solid #E8DFD5;
-    border-radius: 16px;
-    padding: 18px 22px 14px;
-    text-align: center;
-    width: 280px;
-    box-shadow: 0 2px 12px rgba(147, 125, 104, 0.08);
-    z-index: 2;
-    transition: all 0.25s ease;
-  }
-
-  .node:hover {
-    border-color: #E35B24;
-    box-shadow: 0 4px 24px rgba(227, 91, 36, 0.15);
-    transform: translateY(-2px);
-    z-index: 10;
-  }
-
-  .node-number {
-    position: absolute;
-    top: -11px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
-    color: #fff;
-    font-size: 0.65rem;
+  .step-name {
+    font-size: 0.82rem;
     font-weight: 700;
-    padding: 2px 12px;
-    border-radius: 20px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-
-  .node-question {
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-top: 4px;
-    margin-bottom: 10px;
-    line-height: 1.35;
-  }
-
-  /* ── Choices ── */
-  .choices {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  .choice {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: #FBF6EA;
-    border: 1.5px solid #E8DFD5;
-    border-radius: 8px;
-    padding: 6px 10px;
-    font-size: 0.73rem;
-    font-weight: 500;
-    color: #323232;
-    cursor: default;
-    transition: all 0.2s ease;
-    position: relative;
-  }
-
-  .choice:hover {
-    background: #fff;
-    border-color: #E35B24;
     color: #E35B24;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
   }
 
-  .choice .dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
+  .step-card.conditional .step-name { color: #9B59B6; }
+  .step-card.result-card .step-name { color: #937D68; }
 
-  .dot.orange { background: #E35B24; }
-  .dot.green  { background: #4CAF50; }
-  .dot.gray   { background: #B0A0A0; }
-  .dot.blue   { background: #5B9BD5; }
-  .dot.wood   { background: #937D68; }
-  .dot.purple { background: #9B59B6; }
-
-  .choice .target-label {
-    margin-left: auto;
-    font-size: 0.6rem;
+  .step-cond {
+    font-size: 0.65rem;
     color: #937D68;
-    font-weight: 400;
-    opacity: 0.8;
-    white-space: nowrap;
-  }
-
-  /* ── Result node ── */
-  .node-result {
-    background: linear-gradient(135deg, #FBF6EA 0%, #FFF8F0 100%);
-    border: 2px solid #E35B24;
-  }
-
-  .node-result .node-number {
-    background: linear-gradient(180deg, #937D68 0%, #7A6555 100%);
-  }
-
-  .node-result .node-question {
-    font-size: 0.95rem;
-    color: #D14F1C;
-  }
-
-  .result-details {
-    font-size: 0.7rem;
-    color: #937D68;
-    line-height: 1.6;
-    text-align: left;
-    margin-top: 4px;
-  }
-
-  .result-details span { display: block; }
-
-  /* ── New question node (conditional) ── */
-  .node-new {
-    border: 2px solid #9B59B6;
-    background: linear-gradient(135deg, #F8F0FF 0%, #FFF 100%);
-  }
-
-  .node-new .node-number {
-    background: linear-gradient(180deg, #9B59B6 0%, #7D3C98 100%);
-  }
-
-  /* ── Dynamic note ── */
-  .dynamic-note {
-    background: linear-gradient(135deg, #F0F7FF 0%, #E8F0FE 100%);
-    border: 1.5px solid #5B9BD5;
+    font-style: italic;
+    background: #FBF6EA;
+    padding: 2px 8px;
     border-radius: 10px;
-    padding: 10px 14px;
-    font-size: 0.68rem;
-    color: #2C5F8A;
-    text-align: left;
-    margin-top: 8px;
-    line-height: 1.45;
   }
 
-  .dynamic-note strong { color: #1A4570; font-size: 0.7rem; }
-  .dynamic-note ul { list-style: none; margin-top: 4px; }
-  .dynamic-note ul li { padding: 1px 0; }
-  .dynamic-note ul li::before { content: "→ "; color: #5B9BD5; font-weight: 700; }
-
-  .filter-note {
-    background: linear-gradient(135deg, #FFF5EC 0%, #FFF0E5 100%);
-    border: 1.5px solid #E35B24;
-    border-radius: 10px;
-    padding: 10px 14px;
-    font-size: 0.68rem;
-    color: #8B4513;
-    text-align: left;
-    margin-top: 8px;
-    line-height: 1.45;
+  .step-q {
+    font-size: 0.8rem;
+    font-weight: 500;
+    line-height: 1.35;
+    margin-bottom: 10px;
   }
 
-  .filter-note strong { color: #D14F1C; font-size: 0.7rem; }
-  .filter-note ul { list-style: none; margin-top: 4px; }
-  .filter-note ul li { padding: 1px 0; }
-  .filter-note ul li::before { content: "⚙ "; }
+  /* ── Routes within card ── */
+  .routes { display: flex; flex-direction: column; gap: 6px; }
 
-  /* ── Legend ── */
-  .legend {
-    position: absolute;
-    top: 10px;
-    right: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 14px 18px;
-    background: #fff;
-    border-radius: 12px;
-    border: 1.5px solid #E8DFD5;
-    z-index: 5;
+  .route {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border-left: 3px solid;
   }
 
-  .legend-title {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: #937D68;
-    margin-bottom: 2px;
+  .route.cont {
+    background: #F0FAF0;
+    border-color: #4CAF50;
   }
 
-  .legend-item {
+  .route.skip {
+    background: #FFF5EC;
+    border-color: #E35B24;
+  }
+
+  .route.special {
+    background: #FAF0FF;
+    border-color: #9B59B6;
+  }
+
+  .route-head {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.7rem;
-    color: #323232;
-  }
-
-  .legend-line {
-    width: 28px;
-    height: 3px;
-    border-radius: 2px;
-    flex-shrink: 0;
-  }
-
-  /* ── Parcours ── */
-  .parcours {
-    max-width: 750px;
-    margin: 40px auto 0;
-    background: #fff;
-    border-radius: 12px;
-    border: 1.5px solid #E8DFD5;
-    padding: 24px;
-  }
-
-  .parcours h2 {
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 16px;
-  }
-
-  .parcours-item { margin-bottom: 14px; }
-  .parcours-item:last-child { margin-bottom: 0; }
-
-  .parcours-label {
-    font-size: 0.8rem;
-    font-weight: 600;
+    gap: 6px;
     margin-bottom: 4px;
   }
 
-  .parcours-label.main { color: #E35B24; }
-  .parcours-label.alt { color: #937D68; }
-  .parcours-label.new { color: #9B59B6; }
+  .route-arrow {
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
 
-  .parcours-flow {
-    font-size: 0.78rem;
-    background: #FBF6EA;
-    padding: 8px 14px;
+  .route.cont .route-arrow { color: #4CAF50; }
+  .route.skip .route-arrow { color: #E35B24; }
+  .route.special .route-arrow { color: #9B59B6; }
+
+  .route-target {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #323232;
+  }
+
+  .route-note {
+    font-size: 0.62rem;
+    color: #937D68;
+    font-style: italic;
+    margin-left: auto;
+  }
+
+  .route-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .chip {
+    display: inline-block;
+    padding: 2px 8px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid #E8DFD5;
+    border-radius: 12px;
+    font-size: 0.65rem;
+    font-weight: 500;
+  }
+
+  /* ── Filter note ── */
+  .filter-note {
+    margin-top: 8px;
+    padding: 7px 10px;
+    background: #FFF8F2;
+    border: 1px solid rgba(227, 91, 36, 0.15);
     border-radius: 8px;
-    line-height: 1.6;
+    font-size: 0.65rem;
+    color: #8B4513;
+    line-height: 1.45;
   }
 
-  .skipped {
-    color: #B0A0A0;
-    text-decoration: line-through;
+  .filter-note strong { color: #D14F1C; font-size: 0.67rem; }
+  .filter-note ul { list-style: none; margin-top: 3px; }
+  .filter-note ul li { padding: 1px 0; }
+  .filter-note ul li::before { content: "⚙ "; }
+
+  /* ── Connector between steps ── */
+  .connector {
+    display: flex;
+    padding: 0 0 0 16px;
+    min-height: 28px;
   }
 
-  .new-step {
-    color: #9B59B6;
+  .connector-line {
+    width: 2px;
+    background: #E8DFD5;
+    min-height: 28px;
+  }
+
+  /* ═══════════════════════════════════
+     BYPASS BARS (right side)
+     ═══════════════════════════════════ */
+
+  .bypass-bar {
+    position: absolute;
+    width: 3px;
+    border-radius: 3px;
+    opacity: 0.45;
+    transition: opacity 0.2s;
+  }
+
+  .bypass-bar:hover { opacity: 0.85; }
+
+  .bypass-dot {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    opacity: 0.6;
+  }
+
+  .bypass-arrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    opacity: 0.6;
+  }
+
+  .bypass-label {
+    position: absolute;
+    font-size: 0.58rem;
+    font-weight: 600;
+    white-space: nowrap;
+    background: #FEFDFB;
+    padding: 0 3px;
+    z-index: 2;
+    transform-origin: center center;
+  }
+
+  /* ═══════════════════════════════════
+     SECTION 2 : PARCOURS TYPES
+     ═══════════════════════════════════ */
+
+  .paths-container {
+    max-width: 820px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .path-card {
+    background: #fff;
+    border: 1.5px solid #E8DFD5;
+    border-radius: 12px;
+    padding: 16px 18px;
+    transition: border-color 0.2s;
+  }
+
+  .path-card:hover { border-color: #937D68; }
+
+  .path-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .path-name {
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .path-name.main { color: #E35B24; }
+  .path-name.alt { color: #937D68; }
+  .path-name.special { color: #9B59B6; }
+
+  .path-count {
+    font-size: 0.62rem;
+    background: #FBF6EA;
+    padding: 2px 8px;
+    border-radius: 10px;
+    color: #937D68;
     font-weight: 600;
   }
 
-  /* ── Règles ── */
-  .rules-section {
-    max-width: 750px;
-    margin: 30px auto 0;
-    background: #fff;
-    border-radius: 12px;
-    border: 1.5px solid #E8DFD5;
-    padding: 24px;
+  .path-result {
+    font-size: 0.65rem;
+    color: #937D68;
+    margin-left: auto;
+    font-style: italic;
   }
 
-  .rules-section h2 {
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 16px;
+  /* Horizontal timeline */
+  .timeline {
+    display: flex;
+    align-items: flex-start;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .tl-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 72px;
+    flex-shrink: 0;
+  }
+
+  .tl-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2.5px solid #E35B24;
+    background: #E35B24;
+    flex-shrink: 0;
+  }
+
+  .tl-step.skipped .tl-dot {
+    background: transparent;
+    border-color: #D0C8C0;
+  }
+
+  .tl-step.special .tl-dot {
+    border-color: #9B59B6;
+    background: #9B59B6;
+  }
+
+  .tl-label {
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: #937D68;
+    margin-top: 4px;
+    text-align: center;
+  }
+
+  .tl-step.skipped .tl-label { color: #C8C0B8; text-decoration: line-through; }
+
+  .tl-value {
+    font-size: 0.62rem;
+    font-weight: 500;
+    color: #323232;
+    text-align: center;
+    margin-top: 1px;
+  }
+
+  .tl-step.skipped .tl-value { display: none; }
+
+  .tl-line {
+    flex: 1;
+    height: 2px;
+    background: #E8DFD5;
+    margin-top: 6px;
+    min-width: 14px;
+  }
+
+  .tl-line.active { background: #E35B24; }
+
+  /* ═══════════════════════════════════
+     SECTION 3 : RÈGLES DE FILTRAGE
+     ═══════════════════════════════════ */
+
+  .rules-container {
+    max-width: 820px;
+    margin: 0 auto;
   }
 
   .rules-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
   }
 
   .rules-table th {
@@ -331,7 +420,7 @@
     border: 1px solid #E8DFD5;
     font-weight: 600;
     color: #937D68;
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
@@ -342,424 +431,651 @@
     line-height: 1.4;
   }
 
-  .rules-table tr:hover td {
-    background: #FEFDFB;
-  }
+  .rules-table tr:hover td { background: #FEFDFB; }
+
+  .rules-group td { background: #FBF6EA; font-weight: 600; color: #937D68; }
 </style>
 </head>
 <body>
 
-<h1>Guide Luminaire — Arbre des questions V2</h1>
-<p class="subtitle">Questionnaire dynamique — Atelier Sapi — incluant question "Éclairage" (grande pièce) et règles de filtrage mises à jour</p>
+<h1>Guide Luminaire — Arbre décisionnel V3</h1>
+<p class="subtitle">Questionnaire dynamique avec question Éclairage, sortie pour secondaire, filtrage complet</p>
+<p class="date">Mis à jour le 5 mars 2026</p>
 
-<div class="canvas" id="canvas">
+<!-- ═══════════════════════════════════════════
+     SECTION 1 : FLUX PRINCIPAL
+     ═══════════════════════════════════════════ -->
 
-  <!-- SVG layer for arrows -->
-  <svg class="connections" id="svg"></svg>
+<h2 class="section-title">Flux principal</h2>
 
-  <!-- Legend -->
-  <div class="legend">
-    <div class="legend-title">Flèches</div>
-    <div class="legend-item"><div class="legend-line" style="background: #E35B24;"></div> Chemin direct</div>
-    <div class="legend-item"><div class="legend-line" style="background: #4CAF50;"></div> Chemin principal</div>
-    <div class="legend-item"><div class="legend-line" style="background: #9B59B6;"></div> Nouvelle question</div>
-    <div class="legend-item"><div class="legend-line" style="background: #B0A0A0; background-image: repeating-linear-gradient(90deg, #B0A0A0, #B0A0A0 4px, transparent 4px, transparent 8px);"></div> Skip (saute des étapes)</div>
+<div class="flow-layout">
+  <div class="flow-main">
+
+    <!-- ── 1. PIÈCE ── -->
+    <div class="step" id="s-piece">
+      <div class="step-num">1</div>
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-name">Pièce</span>
+          <span class="step-cond">Toujours</span>
+        </div>
+        <p class="step-q">Pour quelle pièce cherchez-vous un luminaire ?</p>
+        <div class="routes">
+          <div class="route cont">
+            <div class="route-head">
+              <span class="route-arrow">↓</span>
+              <span class="route-target">Taille</span>
+            </div>
+            <div class="route-chips">
+              <span class="chip">Cuisine</span>
+              <span class="chip">Bureau / Atelier</span>
+              <span class="chip">Salon / SAM</span>
+              <span class="chip">Chambre</span>
+              <span class="chip">Entrée / Couloir</span>
+            </div>
+          </div>
+          <div class="route skip">
+            <div class="route-head">
+              <span class="route-arrow">↗</span>
+              <span class="route-target">Sortie</span>
+              <span class="route-note">saute Taille + Éclairage</span>
+            </div>
+            <div class="route-chips">
+              <span class="chip">Cage d'escalier</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="connector-line"></div></div>
+
+    <!-- ── 2. TAILLE ── -->
+    <div class="step" id="s-taille">
+      <div class="step-num">2</div>
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-name">Taille</span>
+          <span class="step-cond">Sauf escalier</span>
+        </div>
+        <p class="step-q">Quelle est la taille de votre pièce ?</p>
+        <div class="routes">
+          <div class="route skip">
+            <div class="route-head">
+              <span class="route-arrow">↗</span>
+              <span class="route-target">Sortie</span>
+              <span class="route-note">saute Éclairage</span>
+            </div>
+            <div class="route-chips">
+              <span class="chip">Petite (&lt; 10 m²)</span>
+              <span class="chip">Moyenne (10–20 m²)</span>
+            </div>
+          </div>
+          <div class="route cont">
+            <div class="route-head">
+              <span class="route-arrow">↓</span>
+              <span class="route-target">Éclairage</span>
+            </div>
+            <div class="route-chips">
+              <span class="chip">Grande (&gt; 20 m²)</span>
+            </div>
+          </div>
+        </div>
+        <div class="filter-note">
+          <strong>Filtrage taille luminaire :</strong>
+          <ul>
+            <li>Petite → plus petite taille disponible</li>
+            <li>Moyenne → 2e taille</li>
+            <li>Grande → 3e taille (exclut produits ≤ 2 tailles, fallback si vide)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="connector-line"></div></div>
+
+    <!-- ── 2b. ÉCLAIRAGE ── -->
+    <div class="step" id="s-eclairage">
+      <div class="step-num conditional">2b</div>
+      <div class="step-card conditional">
+        <div class="step-header">
+          <span class="step-name">Éclairage</span>
+          <span class="step-cond">Si grande pièce</span>
+        </div>
+        <p class="step-q">Pour un grand espace, Robin recommande toujours de multiplier les sources lumineuses. Que pensez-vous ?</p>
+        <div class="routes">
+          <div class="route cont">
+            <div class="route-head">
+              <span class="route-arrow">↓</span>
+              <span class="route-target">Sortie</span>
+            </div>
+            <div class="route-chips">
+              <span class="chip">Éclairage principal</span>
+              <span class="chip">Compléter existant (secondaire)</span>
+              <span class="chip">Je verrai plus tard</span>
+            </div>
+          </div>
+          <div class="route special">
+            <div class="route-head">
+              <span class="route-arrow">↗</span>
+              <span class="route-target">Style</span>
+              <span class="route-note">sur mesure — saute Sortie/Hauteur/Table</span>
+            </div>
+            <div class="route-chips">
+              <span class="chip">Multi-ampoules (grappe)</span>
+            </div>
+          </div>
+        </div>
+        <div class="filter-note">
+          <strong>Impact éclairage :</strong>
+          <ul>
+            <li>Principal / Plus tard → filtrage normal</li>
+            <li>Secondaire → pool limité (lampadaires + lampes + appliques), affiné par sortie</li>
+            <li>Grappe → résultat sur mesure "en grappe" + CTA contacter Robin</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="connector-line"></div></div>
+
+    <!-- ── 3. SORTIE ── -->
+    <div class="step" id="s-sortie">
+      <div class="step-num">3</div>
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-name">Sortie électrique</span>
+          <span class="step-cond">Condition OR</span>
+        </div>
+        <p class="step-q">Où se trouve votre sortie électrique ?</p>
+        <div class="filter-note" style="margin-top:0; margin-bottom:8px;">
+          <strong>Visible quand :</strong>
+          <ul>
+            <li>Petite ou Moyenne (skip éclairage)</li>
+            <li>Principal, Secondaire ou Plus tard (après éclairage)</li>
+            <li>Escalier (skip taille + éclairage)</li>
+          </ul>
+        </div>
+        <div class="routes">
+          <div class="route cont">
+            <div class="route-head">
+              <span class="route-arrow">↓</span>
+              <span class="route-target">Hauteur</span>
+            </div>
+            <div class="route-chips">
+              <span class="chip">Au plafond</span>
+            </div>
+          </div>
+          <div class="route skip">
+            <div class="route-head">
+              <span class="route-arrow">↗</span>
+              <span class="route-target">Style</span>
+              <span class="route-note">saute Hauteur + Table</span>
+            </div>
+            <div class="route-chips">
+              <span class="chip">Au mur</span>
+              <span class="chip">Prise 230V</span>
+              <span class="chip">Je ne sais pas</span>
+            </div>
+          </div>
+        </div>
+        <div class="filter-note">
+          <strong>Filtrage catégories :</strong>
+          <ul>
+            <li>Plafond → suspensions</li>
+            <li>Mur → appliques</li>
+            <li>Prise 230V → lampadaires + lampes à poser + appliques</li>
+            <li>NSP → tout (suspensions + appliques + lampadaires + lampes)</li>
+            <li>Secondaire + Plafond → suspensions (IA mentionne les autres en complément)</li>
+            <li>Secondaire + Mur → appliques seules</li>
+            <li>Secondaire + Prise 230V → lampadaires + lampes + appliques</li>
+            <li>Secondaire + NSP → lampadaires + lampes + appliques</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="connector-line"></div></div>
+
+    <!-- ── 4. HAUTEUR ── -->
+    <div class="step" id="s-hauteur">
+      <div class="step-num">4</div>
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-name">Hauteur</span>
+          <span class="step-cond">Si sortie = plafond</span>
+        </div>
+        <p class="step-q">Quelle est votre hauteur sous-plafond ?</p>
+        <div class="routes">
+          <div class="route cont">
+            <div class="route-head">
+              <span class="route-arrow">↓</span>
+              <span class="route-target">Table</span>
+              <span class="route-note">sauf escalier &amp; entrée</span>
+            </div>
+            <div class="route-chips">
+              <span class="chip">Standard (&lt; 2,50 m)</span>
+            </div>
+          </div>
+          <div class="route skip">
+            <div class="route-head">
+              <span class="route-arrow">↗</span>
+              <span class="route-target">Style</span>
+              <span class="route-note">saute Table</span>
+            </div>
+            <div class="route-chips">
+              <span class="chip">Confortable (2,50–3 m)</span>
+              <span class="chip">Haute (&gt; 3 m)</span>
+            </div>
+          </div>
+        </div>
+        <div class="filter-note">
+          <strong>Format vertical (suspensions) :</strong>
+          <ul>
+            <li>Exclu par défaut</li>
+            <li>Autorisé si escalier (toute hauteur)</li>
+            <li>Autorisé si entrée/couloir + confortable ou haute</li>
+            <li>Autorisé si petite pièce + confortable ou haute</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="connector-line"></div></div>
+
+    <!-- ── 5. TABLE ── -->
+    <div class="step" id="s-table">
+      <div class="step-num">5</div>
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-name">Table</span>
+          <span class="step-cond">Standard + pièce ≠ escalier/entrée</span>
+        </div>
+        <p class="step-q">Sera-t-il au-dessus d'une table ou d'un îlot ?</p>
+        <div class="routes">
+          <div class="route cont">
+            <div class="route-head">
+              <span class="route-arrow">↓</span>
+              <span class="route-target">Style</span>
+            </div>
+            <div class="route-chips">
+              <span class="chip">Oui</span>
+              <span class="chip">Non</span>
+            </div>
+          </div>
+        </div>
+        <div class="filter-note">
+          <strong>Question dynamique selon pièce :</strong>
+          <ul>
+            <li>Cuisine → "Au-dessus d'une table ou d'un îlot ?"</li>
+            <li>Bureau → "Au-dessus du bureau ?"</li>
+            <li>Salon → "Au-dessus d'une table ?"</li>
+            <li>Chambre → "Au-dessus du lit ?"</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="connector-line"></div></div>
+
+    <!-- ── 6. STYLE ── -->
+    <div class="step" id="s-style">
+      <div class="step-num">6</div>
+      <div class="step-card">
+        <div class="step-header">
+          <span class="step-name">Style</span>
+          <span class="step-cond">Toujours</span>
+        </div>
+        <p class="step-q">Quel est le style de votre intérieur ?</p>
+        <div class="routes">
+          <div class="route cont">
+            <div class="route-head">
+              <span class="route-arrow">↓</span>
+              <span class="route-target">Résultat</span>
+            </div>
+            <div class="route-chips">
+              <span class="chip">Moderne, neuf, tons clairs</span>
+              <span class="chip">Ancien, pierre, bois, tons chauds</span>
+              <span class="chip">Pas de préférence</span>
+            </div>
+          </div>
+        </div>
+        <div class="filter-note">
+          <strong>Filtrage essence :</strong>
+          <ul>
+            <li>Moderne → variation Peuplier (clair)</li>
+            <li>Ancien → variation Okoumé (chaud)</li>
+            <li>Neutre → pas de filtre essence</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="connector-line"></div></div>
+
+    <!-- ── ★ RÉSULTAT ── -->
+    <div class="step" id="s-result">
+      <div class="step-num result">★</div>
+      <div class="step-card result-card">
+        <div class="step-header">
+          <span class="step-name">Résultat</span>
+        </div>
+        <p class="step-q">Sélection personnalisée</p>
+        <div class="filter-note" style="margin-top:0;">
+          <strong>Contenu du résultat :</strong>
+          <ul>
+            <li>Texte IA signé "— Robin" (max 80 mots, pas de markdown)</li>
+            <li>Grille de 4 produits filtrés (image, nom, prix, essence + taille reco.)</li>
+            <li>Sélection : 1) best seller, 2) dernier ajouté, 3) 2e best seller, 4) aléatoire</li>
+            <li>OU résultat sur mesure "en grappe" + CTA contacter Robin (si grappe)</li>
+          </ul>
+        </div>
+        <div class="filter-note">
+          <strong>Règles spéciales :</strong>
+          <ul>
+            <li>Cuisine → jamais de lampe à poser</li>
+            <li>Escalier → exclut format plat</li>
+            <li>Fallback : si 0 résultats → relâche filtre ampoule, puis format, puis taille</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /flow-main -->
+
+  <div class="flow-bypasses" id="flow-bypasses"></div>
+</div><!-- /flow-layout -->
+
+
+<!-- ═══════════════════════════════════════════
+     SECTION 2 : PARCOURS TYPES
+     ═══════════════════════════════════════════ -->
+
+<h2 class="section-title">Parcours types</h2>
+
+<div class="paths-container">
+
+  <!-- Parcours 1 -->
+  <div class="path-card">
+    <div class="path-header">
+      <span class="path-name main">Salon complet</span>
+      <span class="path-count">8 étapes</span>
+      <span class="path-result">→ 4 suspensions</span>
+    </div>
+    <div class="timeline">
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Pièce</div><div class="tl-value">Salon</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Taille</div><div class="tl-value">Grande</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step special"><div class="tl-dot"></div><div class="tl-label">Éclairage</div><div class="tl-value">Principal</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Sortie</div><div class="tl-value">Plafond</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Hauteur</div><div class="tl-value">Standard</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Table</div><div class="tl-value">Oui</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Style</div><div class="tl-value">Moderne</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Résultat</div><div class="tl-value">4 prod.</div></div>
+    </div>
   </div>
 
-  <!-- ═══ PIÈCE ═══ -->
-  <div class="node" id="node-piece" style="left: 380px; top: 0;">
-    <span class="node-number">1 — Pièce</span>
-    <div class="node-question">Dans quelle pièce sera-t-il installé ?</div>
-    <div class="choices">
-      <div class="choice" data-from="piece-cuisine" data-to="node-taille"><span class="dot green"></span>Cuisine<span class="target-label">→ Taille</span></div>
-      <div class="choice" data-from="piece-bureau" data-to="node-taille"><span class="dot green"></span>Bureau / Atelier<span class="target-label">→ Taille</span></div>
-      <div class="choice" data-from="piece-salon" data-to="node-taille"><span class="dot green"></span>Salon / Salle à manger<span class="target-label">→ Taille</span></div>
-      <div class="choice" data-from="piece-chambre" data-to="node-taille"><span class="dot green"></span>Chambre<span class="target-label">→ Taille</span></div>
-      <div class="choice" data-from="piece-entree" data-to="node-taille"><span class="dot green"></span>Entrée / Couloir<span class="target-label">→ Taille</span></div>
-      <div class="choice" data-from="piece-escalier" data-to="node-sortie"><span class="dot gray"></span>Cage d'escalier<span class="target-label">→ Sortie (skip taille)</span></div>
+  <!-- Parcours 2 -->
+  <div class="path-card">
+    <div class="path-header">
+      <span class="path-name special">Grande + secondaire</span>
+      <span class="path-count">6 étapes</span>
+      <span class="path-result">→ lampadaires / lampes / appliques</span>
+    </div>
+    <div class="timeline">
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Pièce</div><div class="tl-value">Salon</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Taille</div><div class="tl-value">Grande</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step special"><div class="tl-dot"></div><div class="tl-label">Éclairage</div><div class="tl-value">Secondaire</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Sortie</div><div class="tl-value">Prise 230V</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-step skipped"><div class="tl-dot"></div><div class="tl-label">Hauteur</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-step skipped"><div class="tl-dot"></div><div class="tl-label">Table</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Style</div><div class="tl-value">Ancien</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Résultat</div><div class="tl-value">4 prod.</div></div>
     </div>
   </div>
 
-  <!-- ═══ TAILLE ═══ -->
-  <div class="node" id="node-taille" style="left: 380px; top: 310px;">
-    <span class="node-number">2 — Taille</span>
-    <div class="node-question">Quelle est la taille de votre pièce ?</div>
-    <div class="choices">
-      <div class="choice" data-from="taille-petite" data-to="node-sortie"><span class="dot orange"></span>Petite (&lt; 10 m²)<span class="target-label">→ Sortie</span></div>
-      <div class="choice" data-from="taille-moyenne" data-to="node-sortie"><span class="dot orange"></span>Moyenne (10–20 m²)<span class="target-label">→ Sortie</span></div>
-      <div class="choice" data-from="taille-grande" data-to="node-eclairage"><span class="dot purple"></span>Grande (&gt; 20 m²)<span class="target-label">→ Éclairage (NEW)</span></div>
+  <!-- Parcours 3 -->
+  <div class="path-card">
+    <div class="path-header">
+      <span class="path-name special">Grande + grappe (sur mesure)</span>
+      <span class="path-count">4 étapes</span>
+      <span class="path-result">→ résultat sur mesure</span>
     </div>
-    <div class="filter-note">
-      <strong>Filtrage taille du luminaire :</strong>
-      <ul>
-        <li>Petite → plus petite taille disponible</li>
-        <li>Moyenne → 2e taille</li>
-        <li>Grande → 3e taille (exclut produits avec ≤ 2 tailles)</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- ═══ ÉCLAIRAGE (NEW — grande pièce seulement) ═══ -->
-  <div class="node node-new" id="node-eclairage" style="left: 730px; top: 490px; width: 310px;">
-    <span class="node-number">2b — Éclairage (si grande)</span>
-    <div class="node-question">Pour un grand espace, plusieurs sources lumineuses font toute la différence.</div>
-    <div class="choices">
-      <div class="choice" data-from="eclairage-principal" data-to="node-sortie"><span class="dot purple"></span>Je cherche mon éclairage principal<span class="target-label">→ Sortie</span></div>
-      <div class="choice" data-from="eclairage-secondaire" data-to="node-sortie"><span class="dot purple"></span>Je cherche un éclairage secondaire<span class="target-label">→ Sortie</span></div>
-      <div class="choice" data-from="eclairage-grappe" data-to="node-style"><span class="dot purple"></span>Je voudrais plusieurs ampoules<span class="target-label">→ Style (sur mesure)</span></div>
-      <div class="choice" data-from="eclairage-plustard" data-to="node-sortie"><span class="dot purple"></span>Je verrai plus tard<span class="target-label">→ Sortie</span></div>
-    </div>
-    <div class="dynamic-note">
-      <strong>Impact sur le filtrage :</strong>
-      <ul>
-        <li><strong>Principal</strong> — filtre normal (suspensions, etc.)</li>
-        <li><strong>Secondaire</strong> — lampadaires, lampes à poser, appliques</li>
-        <li><strong>Plusieurs ampoules</strong> — sur mesure "en grappe", pas de filtrage produit</li>
-        <li><strong>Plus tard</strong> — filtre normal, comme "principal"</li>
-      </ul>
+    <div class="timeline">
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Pièce</div><div class="tl-value">Chambre</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Taille</div><div class="tl-value">Grande</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step special"><div class="tl-dot"></div><div class="tl-label">Éclairage</div><div class="tl-value">Grappe</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-step skipped"><div class="tl-dot"></div><div class="tl-label">Sortie</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-step skipped"><div class="tl-dot"></div><div class="tl-label">Hauteur</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-step skipped"><div class="tl-dot"></div><div class="tl-label">Table</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Style</div><div class="tl-value">Moderne</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Résultat</div><div class="tl-value">Sur mesure</div></div>
     </div>
   </div>
 
-  <!-- ═══ SORTIE ═══ -->
-  <div class="node" id="node-sortie" style="left: 380px; top: 730px;">
-    <span class="node-number">3 — Sortie électrique</span>
-    <div class="node-question">Où se trouve votre sortie électrique ?</div>
-    <div class="choices">
-      <div class="choice" data-from="sortie-plafond" data-to="node-hauteur"><span class="dot green"></span>Au plafond<span class="target-label">→ Hauteur</span></div>
-      <div class="choice" data-from="sortie-mur" data-to="node-style"><span class="dot gray"></span>Au mur<span class="target-label">→ Style (skip 4-5)</span></div>
-      <div class="choice" data-from="sortie-prise" data-to="node-style"><span class="dot gray"></span>Sur prise classique 230V<span class="target-label">→ Style (skip 4-5)</span></div>
-      <div class="choice" data-from="sortie-nsp" data-to="node-style"><span class="dot gray"></span>Je ne sais pas<span class="target-label">→ Style (skip 4-5)</span></div>
+  <!-- Parcours 4 -->
+  <div class="path-card">
+    <div class="path-header">
+      <span class="path-name alt">Escalier — plafond haut</span>
+      <span class="path-count">4 étapes</span>
+      <span class="path-result">→ suspensions (vertical autorisé)</span>
     </div>
-    <div class="dynamic-note">
-      <strong>Impact "Éclairage secondaire" :</strong>
-      <ul>
-        <li>Si secondaire → propose lampadaires, lampes à poser, appliques (pas suspensions)</li>
-        <li>La question "Sortie" est alors sautée (pas pertinent)</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- ═══ HAUTEUR ═══ -->
-  <div class="node" id="node-hauteur" style="left: 60px; top: 1020px;">
-    <span class="node-number">4 — Hauteur (si plafond)</span>
-    <div class="node-question">Quelle est votre hauteur sous-plafond ?</div>
-    <div class="choices">
-      <div class="choice" data-from="hauteur-standard" data-to="node-table"><span class="dot green"></span>Standard (&lt; 2,50 m)<span class="target-label">→ Table*</span></div>
-      <div class="choice" data-from="hauteur-confortable" data-to="node-style"><span class="dot gray"></span>Confortable (2,50–3 m)<span class="target-label">→ Style (skip 5)</span></div>
-      <div class="choice" data-from="hauteur-haute" data-to="node-style"><span class="dot gray"></span>Haute (&gt; 3 m)<span class="target-label">→ Style (skip 5)</span></div>
-    </div>
-    <div class="filter-note">
-      <strong>Filtrage format vertical :</strong>
-      <ul>
-        <li>Vertical EXCLU par défaut pour suspensions</li>
-        <li>SAUF : escalier (toute hauteur)</li>
-        <li>SAUF : couloir + hauteur grande ou confortable</li>
-        <li>SAUF : petite pièce + hauteur grande ou confortable</li>
-      </ul>
+    <div class="timeline">
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Pièce</div><div class="tl-value">Escalier</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-step skipped"><div class="tl-dot"></div><div class="tl-label">Taille</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-step skipped"><div class="tl-dot"></div><div class="tl-label">Éclairage</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Sortie</div><div class="tl-value">Plafond</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Hauteur</div><div class="tl-value">Haute</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-step skipped"><div class="tl-dot"></div><div class="tl-label">Table</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Style</div><div class="tl-value">Ancien</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Résultat</div><div class="tl-value">4 prod.</div></div>
     </div>
   </div>
 
-  <!-- ═══ TABLE ═══ -->
-  <div class="node" id="node-table" style="left: 60px; top: 1380px;">
-    <span class="node-number">5 — Table (si standard)</span>
-    <div class="node-question">Au-dessus d'une table / du lit / du bureau ?</div>
-    <div class="choices">
-      <div class="choice" data-from="table-oui" data-to="node-style"><span class="dot orange"></span>Oui<span class="target-label">→ Style</span></div>
-      <div class="choice" data-from="table-non" data-to="node-style"><span class="dot orange"></span>Non<span class="target-label">→ Style</span></div>
+  <!-- Parcours 5 -->
+  <div class="path-card">
+    <div class="path-header">
+      <span class="path-name alt">Cuisine — prise 230V</span>
+      <span class="path-count">4 étapes</span>
+      <span class="path-result">→ lampadaires + appliques (pas lampe à poser)</span>
     </div>
-    <div class="dynamic-note">
-      <strong>Question adaptée selon la pièce :</strong>
-      <ul>
-        <li><strong>Cuisine</strong> — "Au-dessus d'une table ou d'un îlot ?"</li>
-        <li><strong>Bureau</strong> — "Au-dessus du bureau ?"</li>
-        <li><strong>Salon</strong> — "Au-dessus d'une table ?"</li>
-        <li><strong>Chambre</strong> — "Au-dessus du lit ?"</li>
-      </ul>
-      <div style="margin-top: 6px; color: #7A6A6A; font-style: italic;">* Entrée, couloir et escalier : question sautée</div>
-    </div>
-  </div>
-
-  <!-- ═══ STYLE ═══ -->
-  <div class="node" id="node-style" style="left: 380px; top: 1700px;">
-    <span class="node-number">6 — Style</span>
-    <div class="node-question">Quel est le style de votre intérieur ?</div>
-    <div class="choices">
-      <div class="choice" data-from="style-moderne" data-to="node-result"><span class="dot orange"></span>Moderne, neuf, tons clairs<span class="target-label">→ Résultat</span></div>
-      <div class="choice" data-from="style-ancien" data-to="node-result"><span class="dot orange"></span>Ancien, pierre, bois, tons chauds<span class="target-label">→ Résultat</span></div>
-    </div>
-    <div class="filter-note">
-      <strong>Filtrage essence :</strong>
-      <ul>
-        <li>Moderne → variation Peuplier (clair)</li>
-        <li>Ancien → variation Okoumé (chaud)</li>
-      </ul>
+    <div class="timeline">
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Pièce</div><div class="tl-value">Cuisine</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Taille</div><div class="tl-value">Moyenne</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-step skipped"><div class="tl-dot"></div><div class="tl-label">Éclairage</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Sortie</div><div class="tl-value">Prise 230V</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-step skipped"><div class="tl-dot"></div><div class="tl-label">Hauteur</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-step skipped"><div class="tl-dot"></div><div class="tl-label">Table</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Style</div><div class="tl-value">Moderne</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Résultat</div><div class="tl-value">4 prod.</div></div>
     </div>
   </div>
 
-  <!-- ═══ RÉSULTAT ═══ -->
-  <div class="node node-result" id="node-result" style="left: 380px; top: 1960px; width: 320px;">
-    <span class="node-number">Résultat</span>
-    <div class="node-question">Sélection personnalisée</div>
-    <div class="result-details">
-      <span>Texte IA signé "— Robin" (max 80 mots)</span>
-      <span>Explique pourquoi cette sélection correspond</span>
-      <span>Grille de 4 produits filtrés (1 ligne desktop)</span>
-      <span>Chaque carte : image, nom, prix, essence + taille recommandées, CTA</span>
+  <!-- Parcours 6 -->
+  <div class="path-card">
+    <div class="path-header">
+      <span class="path-name alt">Bureau — parcours complet (petit)</span>
+      <span class="path-count">7 étapes</span>
+      <span class="path-result">→ suspensions (ampoule dégagée)</span>
     </div>
-    <div class="filter-note" style="margin-top: 10px;">
-      <strong>Sélection des 4 produits (si &gt; 4 filtrés) :</strong>
-      <ul>
-        <li>1) Le plus vendu</li>
-        <li>2) Le dernier ajouté au catalogue</li>
-        <li>3) Le 2e plus vendu</li>
-        <li>4) Aléatoire parmi les restants</li>
-      </ul>
+    <div class="timeline">
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Pièce</div><div class="tl-value">Bureau</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Taille</div><div class="tl-value">Petite</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-step skipped"><div class="tl-dot"></div><div class="tl-label">Éclairage</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Sortie</div><div class="tl-value">Plafond</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Hauteur</div><div class="tl-value">Standard</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Table</div><div class="tl-value">Oui</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Style</div><div class="tl-value">Moderne</div></div>
+      <div class="tl-line active"></div>
+      <div class="tl-step"><div class="tl-dot"></div><div class="tl-label">Résultat</div><div class="tl-value">4 prod.</div></div>
     </div>
   </div>
 
 </div>
 
-<!-- ═══ PARCOURS TYPES ═══ -->
-<div class="parcours" style="margin-top: 60px;">
-  <h2>Parcours types</h2>
 
-  <div class="parcours-item">
-    <div class="parcours-label main">Parcours complet — salon standard (7 étapes)</div>
-    <div class="parcours-flow">
-      Salon → Grande → <span class="new-step">Éclairage principal</span> → Plafond → Standard → "Au-dessus d'une table ?" Oui → Moderne → Résultat (4 produits)
-    </div>
-  </div>
+<!-- ═══════════════════════════════════════════
+     SECTION 3 : RÈGLES DE FILTRAGE
+     ═══════════════════════════════════════════ -->
 
-  <div class="parcours-item">
-    <div class="parcours-label new">Parcours grande pièce — éclairage secondaire (5 étapes)</div>
-    <div class="parcours-flow">
-      Salon → Grande → <span class="new-step">Éclairage secondaire</span> → <span class="skipped">sortie</span> → <span class="skipped">hauteur</span> → <span class="skipped">table</span> → Moderne → Résultat (lampadaires, lampes, appliques)
-    </div>
-  </div>
+<h2 class="section-title">Règles de filtrage complètes</h2>
 
-  <div class="parcours-item">
-    <div class="parcours-label new">Parcours grande pièce — multi-ampoules (4 étapes)</div>
-    <div class="parcours-flow">
-      Chambre → Grande → <span class="new-step">Plusieurs ampoules</span> → <span class="skipped">sortie</span> → <span class="skipped">hauteur</span> → <span class="skipped">table</span> → Ancien → Résultat (sur mesure "en grappe")
-    </div>
-  </div>
-
-  <div class="parcours-item">
-    <div class="parcours-label alt">Parcours court — cage d'escalier (3 étapes)</div>
-    <div class="parcours-flow">
-      Cage d'escalier → <span class="skipped">taille</span> → Mur → <span class="skipped">hauteur</span> → <span class="skipped">table</span> → Ancien → Résultat
-    </div>
-  </div>
-
-  <div class="parcours-item">
-    <div class="parcours-label alt">Parcours moyen — plafond haut (5 étapes)</div>
-    <div class="parcours-flow">
-      Chambre → Petite → Plafond → Haute → <span class="skipped">table</span> → Moderne → Résultat
-    </div>
-  </div>
-
-  <div class="parcours-item">
-    <div class="parcours-label alt">Parcours moyen — prise classique (4 étapes)</div>
-    <div class="parcours-flow">
-      Cuisine → Moyenne → Sur prise 230V → <span class="skipped">hauteur</span> → <span class="skipped">table</span> → Ancien → Résultat
-    </div>
-  </div>
-</div>
-
-<!-- ═══ RÈGLES DE FILTRAGE ═══ -->
-<div class="rules-section">
-  <h2>Règles de filtrage complètes</h2>
+<div class="rules-container">
   <table class="rules-table">
     <thead>
-      <tr>
-        <th>Réponse</th>
-        <th>Filtre appliqué</th>
-      </tr>
+      <tr><th style="width:35%">Réponse / Condition</th><th>Filtre appliqué</th></tr>
     </thead>
     <tbody>
-      <tr><td>Sortie plafond</td><td>→ Suspensions</td></tr>
-      <tr><td>Sortie mur</td><td>→ Appliques</td></tr>
-      <tr><td>Sortie prise 230V</td><td>→ Lampadaires + Lampes à poser + Appliques</td></tr>
-      <tr><td>Sortie "je ne sais pas"</td><td>→ Tout</td></tr>
-      <tr><td>Éclairage secondaire (NEW)</td><td>→ Lampadaires + Lampes à poser + Appliques (pas suspensions)</td></tr>
-      <tr><td>Multi-ampoules (NEW)</td><td>→ Résultat sur mesure "en grappe" (pas de filtrage catalogue)</td></tr>
-      <tr><td>Cuisine</td><td>→ Ampoule dégagée ou semi-dégagée. Jamais de lampe à poser.</td></tr>
-      <tr><td>Bureau / Atelier</td><td>→ Ampoule dégagée ou semi-dégagée</td></tr>
-      <tr><td>Salon / Chambre</td><td>→ Ampoule entourée ou semi-dégagée</td></tr>
-      <tr><td>Entrée / Couloir</td><td>→ Pas de filtre ampoule</td></tr>
-      <tr><td>Escalier</td><td>→ Exclut format plat. Vertical autorisé.</td></tr>
-      <tr><td>Vertical (par défaut)</td><td>→ Exclu pour suspensions</td></tr>
-      <tr><td>Vertical (escalier)</td><td>→ Autorisé (toute hauteur)</td></tr>
-      <tr><td>Vertical (couloir)</td><td>→ Autorisé si hauteur grande ou confortable</td></tr>
-      <tr><td>Vertical (petite pièce)</td><td>→ Autorisé si hauteur grande ou confortable</td></tr>
-      <tr><td>Style moderne</td><td>→ Variation Peuplier (clair)</td></tr>
-      <tr><td>Style ancien</td><td>→ Variation Okoumé (chaud)</td></tr>
-      <tr><td>Petite pièce</td><td>→ Plus petite taille du produit</td></tr>
-      <tr><td>Moyenne pièce</td><td>→ 2e taille du produit</td></tr>
-      <tr><td>Grande pièce</td><td>→ 3e taille (exclut produits avec ≤ 2 tailles)</td></tr>
+      <tr class="rules-group"><td colspan="2">Catégories (sortie électrique)</td></tr>
+      <tr><td>Plafond</td><td>Suspensions</td></tr>
+      <tr><td>Mur</td><td>Appliques</td></tr>
+      <tr><td>Prise 230V</td><td>Lampadaires + Lampes à poser + Appliques</td></tr>
+      <tr><td>Je ne sais pas</td><td>Tout (suspensions + appliques + lampadaires + lampes)</td></tr>
+
+      <tr class="rules-group"><td colspan="2">Éclairage secondaire (override catégories)</td></tr>
+      <tr><td>Secondaire + Plafond</td><td>Suspensions (+ IA mentionne appliques/lampadaires/lampes en complément)</td></tr>
+      <tr><td>Secondaire + Mur</td><td>Appliques uniquement</td></tr>
+      <tr><td>Secondaire + Prise 230V</td><td>Lampadaires + Lampes à poser + Appliques</td></tr>
+      <tr><td>Secondaire + NSP</td><td>Lampadaires + Lampes à poser + Appliques</td></tr>
+
+      <tr class="rules-group"><td colspan="2">Type d'ampoule (pièce)</td></tr>
+      <tr><td>Cuisine / Bureau</td><td>Ampoule dégagée ou semi-dégagée</td></tr>
+      <tr><td>Salon / Chambre</td><td>Ampoule entourée ou semi-dégagée</td></tr>
+      <tr><td>Entrée / Escalier</td><td>Pas de filtre ampoule</td></tr>
+
+      <tr class="rules-group"><td colspan="2">Format vertical (suspensions uniquement)</td></tr>
+      <tr><td>Par défaut</td><td>Vertical exclu</td></tr>
+      <tr><td>Escalier</td><td>Vertical autorisé (toute hauteur) + plat exclu</td></tr>
+      <tr><td>Entrée + confortable ou haute</td><td>Vertical autorisé</td></tr>
+      <tr><td>Petite pièce + confortable ou haute</td><td>Vertical autorisé</td></tr>
+
+      <tr class="rules-group"><td colspan="2">Taille du luminaire</td></tr>
+      <tr><td>Petite pièce</td><td>Plus petite taille disponible du produit</td></tr>
+      <tr><td>Moyenne pièce</td><td>2e taille du produit</td></tr>
+      <tr><td>Grande pièce</td><td>3e taille (exclut produits ≤ 2 tailles, fallback si vide)</td></tr>
+
+      <tr class="rules-group"><td colspan="2">Essence (style)</td></tr>
+      <tr><td>Moderne</td><td>Variation Peuplier (clair)</td></tr>
+      <tr><td>Ancien</td><td>Variation Okoumé (chaud)</td></tr>
+      <tr><td>Pas de préférence</td><td>Pas de filtre essence</td></tr>
+
+      <tr class="rules-group"><td colspan="2">Règles spéciales</td></tr>
+      <tr><td>Cuisine</td><td>Jamais de lampe à poser</td></tr>
+      <tr><td>Grappe</td><td>Court-circuit : résultat sur mesure (pas de filtrage produit)</td></tr>
+      <tr><td>Fallback vide</td><td>1) Relâche ampoule → 2) Relâche format → 3) Relâche taille</td></tr>
     </tbody>
   </table>
 </div>
 
 <script>
 (function () {
-  var svg = document.getElementById('svg');
-  var canvas = document.getElementById('canvas');
+  // ── Draw bypass bars on right side ──
+  var bypasses = [
+    { from: 's-piece',     to: 's-sortie', label: 'Escalier',            color: '#B0A0A0', lane: 0 },
+    { from: 's-taille',    to: 's-sortie', label: 'Petite / Moyenne',    color: '#E35B24', lane: 1 },
+    { from: 's-eclairage', to: 's-style',  label: 'Grappe (sur mesure)', color: '#9B59B6', lane: 2 },
+    { from: 's-sortie',    to: 's-style',  label: 'Mur / Prise / NSP',  color: '#937D68', lane: 3 },
+    { from: 's-hauteur',   to: 's-style',  label: 'Confort. / Haute',    color: '#5B9BD5', lane: 4 },
+  ];
 
-  var COLORS = {
-    direct:  '#E35B24',
-    main:    '#4CAF50',
-    skip:    '#B0A0A0',
-    purple:  '#9B59B6',
-  };
+  function draw() {
+    var container = document.getElementById('flow-bypasses');
+    if (!container) return;
+    container.innerHTML = '';
 
-  function getColor(fromId, toId) {
-    // Purple for new éclairage question
-    if (fromId.startsWith('taille-grande')) return COLORS.purple;
-    if (fromId.startsWith('eclairage-')) return COLORS.purple;
+    var containerRect = container.getBoundingClientRect();
+    var laneWidth = 36;
 
-    // Skip arrows
-    if (fromId.startsWith('piece-escalier')) return COLORS.skip;
-    if (fromId.startsWith('sortie-mur') || fromId.startsWith('sortie-prise') || fromId.startsWith('sortie-nsp')) return COLORS.skip;
-    if (fromId.startsWith('hauteur-confortable') || fromId.startsWith('hauteur-haute')) return COLORS.skip;
+    bypasses.forEach(function (bp) {
+      var fromEl = document.getElementById(bp.from);
+      var toEl   = document.getElementById(bp.to);
+      if (!fromEl || !toEl) return;
 
-    // Green for main path
-    if (fromId.startsWith('piece-') && toId === 'node-taille') return COLORS.main;
-    if (fromId.startsWith('sortie-plafond')) return COLORS.main;
-    if (fromId.startsWith('hauteur-standard')) return COLORS.main;
+      var fromRect = fromEl.getBoundingClientRect();
+      var toRect   = toEl.getBoundingClientRect();
 
-    return COLORS.direct;
-  }
+      var top    = fromRect.bottom - containerRect.top + 4;
+      var bottom = toRect.top - containerRect.top - 4;
+      var left   = bp.lane * laneWidth + 14;
+      var height = bottom - top;
 
-  function isDashed(fromId) {
-    if (fromId.startsWith('piece-escalier')) return true;
-    if (fromId.startsWith('sortie-mur') || fromId.startsWith('sortie-prise') || fromId.startsWith('sortie-nsp')) return true;
-    if (fromId.startsWith('hauteur-confortable') || fromId.startsWith('hauteur-haute')) return true;
-    if (fromId === 'eclairage-grappe') return true;
-    return false;
-  }
+      if (height < 20) return;
 
-  function getArrowType(fromId, toId) {
-    if (fromId.startsWith('taille-grande') || fromId.startsWith('eclairage-')) return 'purple';
-    if (isDashed(fromId)) return 'skip';
-    var color = getColor(fromId, toId);
-    if (color === COLORS.main) return 'main';
-    return 'direct';
-  }
+      // Vertical bar
+      var bar = document.createElement('div');
+      bar.className = 'bypass-bar';
+      bar.style.cssText = 'left:' + left + 'px;top:' + top + 'px;height:' + height + 'px;background:' + bp.color + ';';
+      container.appendChild(bar);
 
-  function drawArrows() {
-    svg.innerHTML = '';
+      // Start dot
+      var dot = document.createElement('div');
+      dot.className = 'bypass-dot';
+      dot.style.cssText = 'left:' + (left - 3) + 'px;top:' + (top - 4) + 'px;background:' + bp.color + ';';
+      container.appendChild(dot);
 
-    svg.setAttribute('width', canvas.scrollWidth);
-    svg.setAttribute('height', canvas.scrollHeight);
+      // End arrow
+      var arrow = document.createElement('div');
+      arrow.className = 'bypass-arrow';
+      arrow.style.cssText = 'left:' + (left - 4) + 'px;top:' + (bottom - 2) + 'px;border-top:8px solid ' + bp.color + ';';
+      container.appendChild(arrow);
 
-    var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    ['direct', 'main', 'skip', 'purple'].forEach(function (type) {
-      var marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
-      marker.setAttribute('id', 'arrow-' + type);
-      marker.setAttribute('viewBox', '0 0 10 10');
-      marker.setAttribute('refX', '9');
-      marker.setAttribute('refY', '5');
-      marker.setAttribute('markerWidth', '6');
-      marker.setAttribute('markerHeight', '6');
-      marker.setAttribute('orient', 'auto-start-reverse');
-      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', 'M 0 1 L 9 5 L 0 9 z');
-      path.setAttribute('fill', COLORS[type]);
-      marker.appendChild(path);
-      defs.appendChild(marker);
-    });
-    svg.appendChild(defs);
+      // Label (rotated)
+      var label = document.createElement('div');
+      label.className = 'bypass-label';
+      label.textContent = bp.label;
+      label.style.cssText = 'color:' + bp.color + ';left:' + (left + 6) + 'px;top:' + (top + height / 2) + 'px;transform:translateY(-50%);';
 
-    var choices = document.querySelectorAll('.choice[data-from]');
-
-    choices.forEach(function (choice) {
-      var fromId = choice.getAttribute('data-from');
-      var toId = choice.getAttribute('data-to');
-      var targetNode = document.getElementById(toId);
-      if (!targetNode) return;
-
-      var canvasOffset = canvas.getBoundingClientRect();
-
-      var fromRect = choice.getBoundingClientRect();
-      var sx = fromRect.right - canvasOffset.left + 4;
-      var sy = fromRect.top + fromRect.height / 2 - canvasOffset.top;
-
-      var toRect = targetNode.getBoundingClientRect();
-      var tx = toRect.left + toRect.width / 2 - canvasOffset.left;
-      var ty = toRect.top - canvasOffset.top - 2;
-
-      var color = getColor(fromId, toId);
-      var dashed = isDashed(fromId);
-      var arrowType = getArrowType(fromId, toId);
-
-      var dx = tx - sx;
-      var dy = ty - sy;
-
-      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-
-      var cx1, cy1, cx2, cy2;
-
-      if (Math.abs(dx) < 50) {
-        cx1 = sx + 40;
-        cy1 = sy + dy * 0.3;
-        cx2 = tx - 40;
-        cy2 = sy + dy * 0.7;
-      } else if (dx > 0) {
-        cx1 = sx + Math.min(80, Math.abs(dx) * 0.4);
-        cy1 = sy;
-        cx2 = tx;
-        cy2 = ty - Math.min(60, Math.abs(dy) * 0.3);
-      } else {
-        cx1 = sx + Math.min(80, Math.abs(dx) * 0.3);
-        cy1 = sy;
-        cx2 = tx;
-        cy2 = ty - Math.min(60, Math.abs(dy) * 0.3);
+      // If bar is tall enough, rotate label vertically
+      if (height > 80) {
+        label.style.cssText = 'color:' + bp.color + ';left:' + (left - 6) + 'px;top:' + (top + height / 2) + 'px;transform:translateY(-50%) rotate(-90deg);';
       }
 
-      var d = 'M ' + sx + ' ' + sy + ' C ' + cx1 + ' ' + cy1 + ', ' + cx2 + ' ' + cy2 + ', ' + tx + ' ' + ty;
-
-      path.setAttribute('d', d);
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke', color);
-      path.setAttribute('stroke-width', dashed ? '1.5' : '2');
-      path.setAttribute('marker-end', 'url(#arrow-' + arrowType + ')');
-      if (dashed) {
-        path.setAttribute('stroke-dasharray', '6,4');
-      }
-      path.setAttribute('opacity', '0.7');
-
-      svg.appendChild(path);
+      container.appendChild(label);
     });
   }
 
-  window.addEventListener('load', drawArrows);
-  window.addEventListener('resize', drawArrows);
-
-  document.addEventListener('mouseover', function (e) {
-    var choice = e.target.closest('.choice[data-from]');
-    if (!choice) return;
-    var paths = svg.querySelectorAll('path[d]');
-    var idx = Array.from(document.querySelectorAll('.choice[data-from]')).indexOf(choice);
-    paths.forEach(function (p, i) {
-      if (!p.hasAttribute('d') || p.closest('defs')) return;
-      p.setAttribute('opacity', i === idx ? '1' : '0.15');
-      if (i === idx) p.setAttribute('stroke-width', '3');
-    });
-  });
-
-  document.addEventListener('mouseout', function (e) {
-    var choice = e.target.closest('.choice[data-from]');
-    if (!choice) return;
-    var paths = svg.querySelectorAll('path:not(defs path)');
-    paths.forEach(function (p) {
-      if (p.closest('defs')) return;
-      var dashed = p.getAttribute('stroke-dasharray');
-      p.setAttribute('opacity', '0.7');
-      p.setAttribute('stroke-width', dashed ? '1.5' : '2');
-    });
-  });
-
+  window.addEventListener('load', draw);
+  window.addEventListener('resize', draw);
 })();
 </script>
 

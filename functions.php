@@ -1506,7 +1506,9 @@ function sapi_guide_get_categories(array $answers) {
   // Éclairage secondaire → pool limité, affiné par sortie
   if ($eclairage === 'secondaire') {
     $pool = ['lampadaires', 'lampeaposer', 'appliques'];
-    if ($sortie === 'mur') {
+    if ($sortie === 'plafond') {
+      $pool = ['suspensions'];
+    } elseif ($sortie === 'mur') {
       $pool = ['appliques'];
     } elseif ($sortie === 'pas-de-sortie') {
       $pool = ['lampadaires', 'lampeaposer', 'appliques'];
