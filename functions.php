@@ -979,13 +979,17 @@ function sapi_render_mini_cart_contents() {
                 <?php endforeach; ?>
               <?php endif; ?>
               <?php
-              // Afficher les add-ons avec le même markup que les variations
-              if (!empty($cart_item['addons'])) :
-                foreach ($cart_item['addons'] as $addon) :
+              // Afficher les métadonnées supplémentaires (add-ons, etc.)
+              $extra_data = apply_filters('woocommerce_get_item_data', array(), $cart_item);
+              if (!empty($extra_data)) :
+                foreach ($extra_data as $data) :
+                  $label = isset($data['key']) ? $data['key'] : (isset($data['name']) ? $data['name'] : '');
+                  $value = isset($data['display']) ? wp_strip_all_tags($data['display']) : (isset($data['value']) ? $data['value'] : '');
+                  if (empty($label) || empty($value)) continue;
               ?>
                   <div class="mini-cart-var-line">
-                    <span class="mini-cart-var-label"><?php echo esc_html(rtrim($addon['name'], ': ')); ?> :</span>
-                    <span class="mini-cart-var-value"><?php echo esc_html($addon['value']); ?></span>
+                    <span class="mini-cart-var-label"><?php echo esc_html(rtrim($label, ': ')); ?> :</span>
+                    <span class="mini-cart-var-value"><?php echo esc_html($value); ?></span>
                   </div>
               <?php endforeach; endif; ?>
             </div>
