@@ -1394,56 +1394,29 @@ function sapi_ajax_guide_results() {
   $products_data  = $query_result['products'];
   $fallback_notes = $query_result['fallback_notes'];
 
-  // 5. Query complements if grande pièce
-  $complement_data = [];
-  if (isset($clean['taille']) && $clean['taille'] === 'grande') {
-    $complement_result = sapi_guide_query_complements($clean, $categories);
-    $complement_data = $complement_result;
-  }
-
-  // 6. Call Claude API for AI recommendation
+  // 5. Call Claude API for AI recommendation
   $ai_response = null;
   if (!empty($products_data)) {
-    $system_prompt = sapi_guide_build_system_prompt($products_data, $clean, $complement_data, $fallback_notes);
+    $system_prompt = sapi_guide_build_system_prompt($products_data, $clean, $fallback_notes);
     $ai_response = sapi_guide_call_claude($system_prompt);
   }
 
-  // 7. Build response
-  $main_product = null;
-  $complement = null;
+  // 6. Build response
   $followup_buttons = [];
   $ai_text = null;
 
   if ($ai_response && isset($ai_response['recommendation'])) {
     $ai_text = $ai_response['recommendation'];
     $followup_buttons = isset($ai_response['followup_buttons']) ? $ai_response['followup_buttons'] : [];
-
-    // Find the AI-recommended main product
-    if (isset($ai_response['main_product_id'])) {
-      $main_product = sapi_guide_find_product_by_id($products_data, $ai_response['main_product_id']);
-    }
-    // Find the AI-recommended complement
-    if (isset($ai_response['complement_product_id']) && $ai_response['complement_product_id']) {
-      $complement = sapi_guide_find_product_by_id(
-        array_merge($products_data, $complement_data),
-        $ai_response['complement_product_id']
-      );
-    }
-  }
-
-  // Fallback: use first product if AI didn't pick one
-  if (!$main_product && !empty($products_data)) {
-    $main_product = $products_data[0];
-  }
-  // Fallback: use first complement if AI didn't pick one but grande pièce
-  if (!$complement && !empty($complement_data)) {
-    $complement = $complement_data[0];
   }
 
   if (empty($products_data)) {
     wp_send_json_error(['message' => 'Aucun produit trouvé']);
     return;
   }
+
+  // Limit to 4 products for display
+  $display_products = array_slice($products_data, 0, 4);
 
   // 8. Send email notification to Robin
   $labels = [
@@ -1462,11 +1435,9 @@ function sapi_ajax_guide_results() {
       $email_body .= "- " . $label . " : " . $clean[$key] . "\n";
     }
   }
-  $email_body .= "\nPRODUIT RECOMMANDÉ :\n";
-  $email_body .= $main_product ? "- " . $main_product['title'] . " (" . wp_strip_all_tags($main_product['price']) . ")\n" : "- Aucun\n";
-  if ($complement) {
-    $email_body .= "\nCOMPLÉMENT :\n";
-    $email_body .= "- " . $complement['title'] . " (" . wp_strip_all_tags($complement['price']) . ")\n";
+  $email_body .= "\nPRODUITS PROPOSÉS :\n";
+  foreach ($display_products as $dp) {
+    $email_body .= "- " . $dp['title'] . " (" . wp_strip_all_tags($dp['price']) . ")\n";
   }
   $email_body .= "\nRECOMMANDATION IA :\n";
   $email_body .= $ai_text ? $ai_text : "(pas de texte IA)";
@@ -1480,9 +1451,7 @@ function sapi_ajax_guide_results() {
 
   wp_send_json_success([
     'ai_text'          => $ai_text,
-    'main_product'     => $main_product,
-    'complement'       => $complement,
-    'products'         => $products_data,
+    'products'         => $display_products,
     'followup_buttons' => $followup_buttons,
   ]);
 }
@@ -1750,7 +1719,7 @@ function sapi_guide_find_product_by_id(array $products, $id) {
 /**
  * Build the system prompt for Claude with filtered products and client answers
  */
-function sapi_guide_build_system_prompt(array $products_data, array $answers, array $complement_data = [], array $fallback_notes = []) {
+function sapi_guide_build_system_prompt(array $products_data, array $answers, array $fallback_notes = []) {
   $theme_dir = get_stylesheet_directory();
 
   // Load rules and tone from text files
@@ -1774,14 +1743,6 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
     $prompt .= " | Ventes : " . $p['total_sales'] . " | ID : " . $p['id'] . "\n";
   }
 
-  // Compléments si grande pièce
-  if (!empty($complement_data)) {
-    $prompt .= "\nPRODUITS COMPLÉMENTAIRES (pour compléter l'éclairage d'une grande pièce) :\n";
-    foreach ($complement_data as $p) {
-      $prompt .= "- " . $p['title'] . " | Prix : " . wp_strip_all_tags($p['price']) . " | Catégorie : " . implode(', ', $p['categories']) . " | ID : " . $p['id'] . "\n";
-    }
-  }
-
   // Réponses du client
   $prompt .= "\nRÉPONSES DU CLIENT :\n";
   $labels = [
@@ -1800,9 +1761,7 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
   // Format de réponse JSON
   $prompt .= "\nFORMAT DE RÉPONSE (JSON strict, sans commentaires) :\n";
   $prompt .= "{\n";
-  $prompt .= "  \"recommendation\": \"Texte de recommandation personnalisé...\",\n";
-  $prompt .= "  \"main_product_id\": 123,\n";
-  $prompt .= "  \"complement_product_id\": 456,\n";
+  $prompt .= "  \"recommendation\": \"Texte expliquant pourquoi cette sélection correspond aux critères du client...\",\n";
   $prompt .= "  \"followup_buttons\": [\n";
   $prompt .= "    {\"label\": \"Texte du bouton\", \"type\": \"question\"},\n";
   $prompt .= "    {\"label\": \"Texte du bouton\", \"type\": \"question\"},\n";
@@ -1828,7 +1787,7 @@ function sapi_guide_call_claude($system_prompt) {
     'max_tokens' => 1024,
     'system'     => $system_prompt,
     'messages'   => [
-      ['role' => 'user', 'content' => 'Voici mes réponses au questionnaire. Recommande-moi un luminaire adapté à ma situation.'],
+      ['role' => 'user', 'content' => 'Voici mes réponses au questionnaire. Explique-moi pourquoi cette sélection de luminaires correspond à mes critères.'],
     ],
   ];
 
@@ -1870,10 +1829,8 @@ function sapi_guide_call_claude($system_prompt) {
   if (!$parsed || !isset($parsed['recommendation'])) {
     // If Claude didn't return valid JSON, use the raw text as recommendation
     return [
-      'recommendation'       => $text,
-      'main_product_id'      => null,
-      'complement_product_id' => null,
-      'followup_buttons'     => [],
+      'recommendation'   => $text,
+      'followup_buttons' => [],
     ];
   }
 

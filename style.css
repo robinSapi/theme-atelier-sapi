@@ -17244,43 +17244,44 @@ html.sapi-intro-active body {
   padding-right: 0.5rem;
 }
 
-/* ---- Products Row (main + optional complement) ---- */
-.guide-result-products-row {
+/* ---- Products Grid (up to 4 products) ---- */
+.guide-result-products-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
   max-width: 900px;
   margin: 0 auto 3rem;
 }
 
-.guide-result-products-row.has-complement {
-  grid-template-columns: 1fr 1fr;
-}
-
 /* ---- Product Card ---- */
-.guide-result-product {
+.guide-result-card {
   text-align: center;
 }
 
-.guide-result-badge {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--color-orange, #E35B24);
-  margin-bottom: 1rem;
+.guide-result-card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: 1.5rem;
+  border-radius: var(--radius-lg, 16px);
+  border: 2px solid rgba(147, 125, 104, 0.12);
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(147, 125, 104, 0.06);
+  transition: transform 0.3s var(--ease-smooth, ease), box-shadow 0.3s var(--ease-smooth, ease), border-color 0.3s var(--ease-smooth, ease);
+  -webkit-transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-.guide-complement-badge {
-  color: var(--color-wood, #937D68);
+.guide-result-card-link:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 28px rgba(147, 125, 104, 0.14);
+  border-color: rgba(147, 125, 104, 0.25);
 }
 
 .guide-result-image-wrap {
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
   background: var(--color-warm, #FBF6EA);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .guide-result-image {
@@ -17293,27 +17294,27 @@ html.sapi-intro-active body {
 
 .guide-result-name {
   font-family: 'Montserrat', sans-serif;
-  font-size: 1.3rem;
+  font-size: 1.15rem;
   font-weight: 800;
   color: var(--color-dark, #323232);
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.4rem;
 }
 
 .guide-result-price {
   font-family: 'Montserrat', sans-serif;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: var(--color-wood, #937D68);
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.4rem;
 }
 
 .guide-result-variation {
   font-family: 'Montserrat', sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--color-wood, #937D68);
-  margin: 0 0 1.25rem;
-  padding: 0.35rem 0.875rem;
+  margin: 0 0 1rem;
+  padding: 0.3rem 0.75rem;
   background: var(--color-warm, #FBF6EA);
   border-radius: 100px;
   display: inline-block;
@@ -17322,47 +17323,22 @@ html.sapi-intro-active body {
 .guide-result-cta {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.875rem 2rem;
+  gap: 0.4rem;
+  padding: 0.7rem 1.5rem;
   background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
   color: #fff;
   border-radius: 100px;
   font-family: 'Montserrat', sans-serif;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 700;
   text-decoration: none;
   box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.guide-result-cta:hover {
+.guide-result-card-link:hover .guide-result-cta {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
-  color: #fff;
-}
-
-@keyframes guideProductFade {
-  0% { opacity: 0.4; transform: translateY(8px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-.guide-product-fade {
-  animation: guideProductFade 0.35s ease both;
-}
-
-/* ---- Secondary CTA (complement) ---- */
-.guide-result-cta-secondary {
-  background: transparent;
-  border: 2px solid var(--color-wood, #937D68);
-  color: var(--color-wood, #937D68);
-  box-shadow: none;
-}
-
-.guide-result-cta-secondary:hover {
-  background: var(--color-wood, #937D68);
-  color: #fff;
-  box-shadow: none;
-  transform: translateY(-2px);
 }
 
 /* ---- Follow-up Buttons ---- */
@@ -17417,41 +17393,6 @@ html.sapi-intro-active body {
   opacity: 0.5;
 }
 
-/* ---- Next Proposal ---- */
-.guide-next-proposal {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(147, 125, 104, 0.15);
-  text-align: center;
-}
-
-.guide-next-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.75rem;
-  background: transparent;
-  border: 2px solid var(--color-wood, #937D68);
-  border-radius: 100px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--color-wood, #937D68);
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-
-.guide-next-btn:hover {
-  background: var(--color-wood, #937D68);
-  color: #fff;
-}
-
-.guide-proposal-counter {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.78rem;
-  color: #6B5A4A;
-  margin: 0.75rem 0 0;
-}
 
 /* ---- Result Error ---- */
 .guide-result-error {
@@ -17579,8 +17520,13 @@ html.sapi-intro-active body {
     padding: 4rem 1rem 3rem;
   }
 
-  .guide-result-products-row.has-complement {
-    grid-template-columns: 1fr;
+  .guide-result-products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .guide-result-card-link {
+    padding: 1rem;
   }
 
   .guide-ai-recommendation {
@@ -17590,11 +17536,6 @@ html.sapi-intro-active body {
 
   .guide-ai-quote {
     font-size: 3rem;
-  }
-
-  .guide-result-image-wrap {
-    max-width: 320px;
-    margin: 0 auto 1rem;
   }
 
   .guide-followup-buttons {
@@ -17620,6 +17561,11 @@ html.sapi-intro-active body {
   .guide-choices-grid,
   .guide-choices-grid[data-count="5"] {
     grid-template-columns: 1fr;
+  }
+
+  .guide-result-products-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 }
 

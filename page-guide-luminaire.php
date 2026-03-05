@@ -173,7 +173,7 @@ $icons = [
   <section class="guide-results-section" id="guide-results" aria-hidden="true">
     <div class="guide-results-header">
       <div class="guide-results-tags" id="guide-results-tags"></div>
-      <h2 class="guide-results-title">Notre recommandation pour vous</h2>
+      <h2 class="guide-results-title">Notre sélection pour vous</h2>
     </div>
 
     <!-- Loading with progressive steps -->
@@ -194,51 +194,11 @@ $icons = [
       <div class="guide-ai-signature">&mdash; Robin</div>
     </div>
 
-    <!-- Products row: main + optional complement -->
-    <div class="guide-result-products-row" id="guide-result-products-row" style="display:none;">
-
-      <!-- Main product -->
-      <div class="guide-result-product" id="guide-result-product-main">
-        <div class="guide-result-badge">Notre recommandation</div>
-        <div class="guide-result-image-wrap">
-          <img class="guide-result-image" id="guide-result-image" src="" alt="" />
-        </div>
-        <h3 class="guide-result-name" id="guide-result-name"></h3>
-        <p class="guide-result-price" id="guide-result-price"></p>
-        <p class="guide-result-variation" id="guide-result-variation" style="display:none;"></p>
-        <a class="guide-result-cta" id="guide-result-cta" href="#">
-          Voir ce luminaire
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-      </div>
-
-      <!-- Complement product (grande pièce only) -->
-      <div class="guide-result-product guide-complement" id="guide-result-product-complement" style="display:none;">
-        <div class="guide-result-badge guide-complement-badge">Pour compléter</div>
-        <div class="guide-result-image-wrap">
-          <img class="guide-result-image" id="guide-complement-image" src="" alt="" />
-        </div>
-        <h3 class="guide-result-name" id="guide-complement-name"></h3>
-        <p class="guide-result-price" id="guide-complement-price"></p>
-        <a class="guide-result-cta guide-result-cta-secondary" id="guide-complement-cta" href="#">
-          Voir ce luminaire
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-      </div>
-
-    </div>
+    <!-- Products grid (up to 4 products) -->
+    <div class="guide-result-products-grid" id="guide-result-products-grid" style="display:none;"></div>
 
     <!-- Follow-up buttons (AI-generated, display only in Phase A) -->
     <div class="guide-followup-buttons" id="guide-followup-buttons" style="display:none;"></div>
-
-    <!-- Next proposal + counter -->
-    <div class="guide-next-proposal" id="guide-next-proposal" style="display:none;">
-      <button class="guide-next-btn" id="guide-next-btn" type="button">
-        Autre recommandation
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </button>
-      <p class="guide-proposal-counter" id="guide-proposal-counter"></p>
-    </div>
 
     <!-- Error -->
     <div class="guide-result-error" id="guide-result-error" style="display:none;">

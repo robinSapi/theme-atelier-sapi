@@ -10,8 +10,6 @@
     labels: {},           // { sortie: 'Au plafond', ... }
     isShowingResults: false,
     isQuizStarted: false,
-    resultProducts: [],
-    resultIndex: 0,
     aiText: '',
     loadingInterval: null,
   };
@@ -104,24 +102,11 @@
     dom.results         = document.getElementById('guide-results');
     dom.resultsTags     = document.getElementById('guide-results-tags');
     dom.resultsLoading  = document.getElementById('guide-results-loading');
-    dom.productsRow     = document.getElementById('guide-result-products-row');
-    dom.resultImage     = document.getElementById('guide-result-image');
-    dom.resultName      = document.getElementById('guide-result-name');
-    dom.resultPrice     = document.getElementById('guide-result-price');
-    dom.resultCta       = document.getElementById('guide-result-cta');
-    dom.resultVariation = document.getElementById('guide-result-variation');
-    dom.complementWrap  = document.getElementById('guide-result-product-complement');
-    dom.complementImage = document.getElementById('guide-complement-image');
-    dom.complementName  = document.getElementById('guide-complement-name');
-    dom.complementPrice = document.getElementById('guide-complement-price');
-    dom.complementCta   = document.getElementById('guide-complement-cta');
+    dom.productsGrid    = document.getElementById('guide-result-products-grid');
     dom.aiText          = document.getElementById('guide-ai-text');
     dom.aiTextContent   = document.getElementById('guide-ai-text-content');
     dom.followupBtns    = document.getElementById('guide-followup-buttons');
     dom.resultError     = document.getElementById('guide-result-error');
-    dom.nextBtn         = document.getElementById('guide-next-btn');
-    dom.nextProposal    = document.getElementById('guide-next-proposal');
-    dom.proposalCounter = document.getElementById('guide-proposal-counter');
     dom.restartBtn      = document.getElementById('guide-restart');
     dom.startBtn        = document.getElementById('guide-start-btn');
     dom.restartWrap     = document.getElementById('guide-restart-wrap');
@@ -139,7 +124,6 @@
     bindChoiceClicks();
     bindBackButton();
     bindRestartButton();
-    bindNextButton();
     bindKeyboard();
 
     // Restore session if valid V2 format
@@ -449,16 +433,11 @@
   function fetchResults() {
     // Show loading
     if (dom.resultsLoading) dom.resultsLoading.setAttribute('aria-hidden', 'false');
-    if (dom.productsRow) dom.productsRow.style.display = 'none';
+    if (dom.productsGrid) dom.productsGrid.style.display = 'none';
     if (dom.aiText) dom.aiText.style.display = 'none';
     if (dom.followupBtns) dom.followupBtns.style.display = 'none';
-    if (dom.nextProposal) dom.nextProposal.style.display = 'none';
     if (dom.resultError) dom.resultError.style.display = 'none';
     if (dom.restartWrap) dom.restartWrap.style.display = 'none';
-    if (dom.complementWrap) dom.complementWrap.style.display = 'none';
-
-    // Reset complement class
-    if (dom.productsRow) dom.productsRow.classList.remove('has-complement');
 
     // Start loading animation
     startLoadingAnimation();
@@ -482,42 +461,21 @@
       if (data.success && data.data) {
         var d = data.data;
 
-        // Store all products for carousel
-        state.resultProducts = d.products || [];
-        state.resultIndex = 0;
-
         // Display AI recommendation text
         if (d.ai_text) {
           state.aiText = d.ai_text;
           renderAiText(d.ai_text);
         }
 
-        // Display main product
-        if (d.main_product) {
-          renderProduct(d.main_product, 'main');
-        } else if (state.resultProducts.length > 0) {
-          renderProduct(state.resultProducts[0], 'main');
-        }
-
-        // Display complement if grande pièce
-        if (d.complement) {
-          renderProduct(d.complement, 'complement');
-          if (dom.productsRow) dom.productsRow.classList.add('has-complement');
-          if (dom.complementWrap) dom.complementWrap.style.display = '';
+        // Display products grid (up to 4)
+        if (d.products && d.products.length > 0) {
+          renderProductsGrid(d.products);
         }
 
         // Display follow-up buttons
         if (d.followup_buttons && d.followup_buttons.length > 0) {
           renderFollowupButtons(d.followup_buttons);
         }
-
-        // Show products row
-        if (dom.productsRow && state.resultProducts.length > 0) {
-          dom.productsRow.style.display = '';
-        }
-
-        // Show next proposal if multiple products
-        updateProposalCounter();
 
       } else {
         renderResultsError();
@@ -579,67 +537,39 @@
   }
 
   // ================================================================
-  // RENDER PRODUCTS
+  // RENDER PRODUCTS GRID
   // ================================================================
-  function renderProduct(product, type) {
-    if (type === 'complement') {
-      // Complement product
-      if (dom.complementImage) {
-        dom.complementImage.src = product.image;
-        dom.complementImage.srcset = '';
-        dom.complementImage.alt = product.image_alt || product.title;
-      }
-      if (dom.complementName) {
-        var newName = document.createElement('h3');
-        newName.className = 'guide-result-name';
-        newName.id = 'guide-complement-name';
-        newName.textContent = product.title;
-        dom.complementName.parentNode.replaceChild(newName, dom.complementName);
-        dom.complementName = newName;
-      }
-      if (dom.complementPrice) {
-        dom.complementPrice.innerHTML = product.price;
-      }
-      if (dom.complementCta) {
-        dom.complementCta.href = product.permalink;
-      }
-    } else {
-      // Main product
-      if (dom.resultImage) {
-        dom.resultImage.src = product.image;
-        dom.resultImage.srcset = '';
-        dom.resultImage.alt = product.image_alt || product.title;
-      }
-      if (dom.resultName) {
-        var newMainName = document.createElement('h3');
-        newMainName.className = 'guide-result-name';
-        newMainName.id = 'guide-result-name';
-        newMainName.textContent = product.title;
-        dom.resultName.parentNode.replaceChild(newMainName, dom.resultName);
-        dom.resultName = newMainName;
-      }
-      if (dom.resultPrice) {
-        dom.resultPrice.innerHTML = product.price;
-      }
-      if (dom.resultVariation) {
-        if (product.variation_label) {
-          dom.resultVariation.textContent = 'Essence recommandée : ' + product.variation_label;
-          dom.resultVariation.style.display = '';
-        } else {
-          dom.resultVariation.style.display = 'none';
-        }
-      }
-      if (dom.resultCta) {
-        dom.resultCta.href = product.permalink;
-      }
-    }
-  }
+  function renderProductsGrid(products) {
+    if (!dom.productsGrid) return;
 
-  function renderCurrentProduct() {
-    var product = state.resultProducts[state.resultIndex];
-    if (!product) return;
-    renderProduct(product, 'main');
-    updateProposalCounter();
+    var html = '';
+    for (var i = 0; i < products.length; i++) {
+      var p = products[i];
+      var variationHtml = '';
+      if (p.variation_label) {
+        variationHtml = '<p class="guide-result-variation">'
+          + 'Essence recommandée : ' + escapeHtml(p.variation_label)
+          + '</p>';
+      }
+
+      html += '<article class="guide-result-card">'
+        + '<a href="' + escapeHtml(p.permalink) + '" class="guide-result-card-link">'
+        + '<div class="guide-result-image-wrap">'
+        + '<img class="guide-result-image" src="' + escapeHtml(p.image) + '" srcset="" alt="' + escapeHtml(p.image_alt || p.title) + '" />'
+        + '</div>'
+        + '<h3 class="guide-result-name">' + escapeHtml(p.title) + '</h3>'
+        + '<p class="guide-result-price">' + p.price + '</p>'
+        + variationHtml
+        + '<span class="guide-result-cta">'
+        + 'Voir ce luminaire'
+        + ' <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>'
+        + '</span>'
+        + '</a>'
+        + '</article>';
+    }
+
+    dom.productsGrid.innerHTML = html;
+    dom.productsGrid.style.display = '';
   }
 
   // ================================================================
@@ -652,41 +582,8 @@
     dom.followupBtns.style.display = 'none';
   }
 
-  // ================================================================
-  // NEXT PROPOSAL (CAROUSEL)
-  // ================================================================
-  function updateProposalCounter() {
-    var total = state.resultProducts.length;
-    if (dom.proposalCounter) {
-      dom.proposalCounter.textContent = (state.resultIndex + 1) + ' / ' + total + ' proposition' + (total > 1 ? 's' : '');
-    }
-    // Show/hide next button and counter
-    if (dom.nextProposal) {
-      dom.nextProposal.style.display = total > 1 ? '' : 'none';
-    }
-  }
-
-  function bindNextButton() {
-    if (dom.nextBtn) {
-      dom.nextBtn.addEventListener('click', function () {
-        if (state.resultProducts.length <= 1) return;
-        state.resultIndex = (state.resultIndex + 1) % state.resultProducts.length;
-
-        // Animate product change
-        var mainProduct = document.getElementById('guide-result-product-main');
-        if (mainProduct) {
-          mainProduct.classList.remove('guide-product-fade');
-          mainProduct.getBoundingClientRect();
-          mainProduct.classList.add('guide-product-fade');
-        }
-
-        renderCurrentProduct();
-      });
-    }
-  }
-
   function renderResultsError() {
-    if (dom.productsRow) dom.productsRow.style.display = 'none';
+    if (dom.productsGrid) dom.productsGrid.style.display = 'none';
     if (dom.aiText) dom.aiText.style.display = 'none';
     if (dom.resultError) dom.resultError.style.display = '';
   }
