@@ -122,7 +122,6 @@
     dom.steps           = document.querySelectorAll('.guide-step');
     dom.backBtn         = document.getElementById('guide-back');
     dom.results         = document.getElementById('guide-results');
-    dom.resultsTags     = document.getElementById('guide-results-tags');
     dom.resultsLoading  = document.getElementById('guide-results-loading');
     dom.productsGrid    = document.getElementById('guide-result-products-grid');
     dom.aiText          = document.getElementById('guide-ai-text');
@@ -426,9 +425,6 @@
       dom.results.classList.add('is-visible');
     }
 
-    // Render tags
-    renderAnswerTags();
-
     // Fetch products + AI recommendation
     fetchResults();
 
@@ -436,23 +432,6 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function renderAnswerTags() {
-    if (!dom.resultsTags) return;
-
-    var visible = getVisibleSteps();
-    var html = '';
-
-    visible.forEach(function (stepId) {
-      var label = state.labels[stepId];
-      if (!label) return;
-
-      html += '<span class="guide-answer-tag">'
-            + '<span class="guide-tag-label">' + escapeHtml(label) + '</span>'
-            + '</span>';
-    });
-
-    dom.resultsTags.innerHTML = html;
-  }
 
   // ================================================================
   // FETCH RESULTS + AI

@@ -198,7 +198,6 @@ $icons = [
   <!-- ─── Results Section ─── -->
   <section class="guide-results-section" id="guide-results" aria-hidden="true">
     <div class="guide-results-header">
-      <div class="guide-results-tags" id="guide-results-tags"></div>
       <h2 class="guide-results-title" id="guide-results-title">Ce que Robin vous propose</h2>
     </div>
 
