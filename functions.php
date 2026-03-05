@@ -977,6 +977,13 @@ function sapi_render_mini_cart_contents() {
                   </div>
                 <?php endforeach; ?>
               <?php endif; ?>
+              <?php
+              // Afficher les données add-ons (Product Add-Ons, etc.)
+              $item_data = wc_get_formatted_cart_item_data($cart_item, true);
+              if ($item_data) :
+              ?>
+                <div class="mini-cart-addons"><?php echo $item_data; ?></div>
+              <?php endif; ?>
             </div>
             <div class="mini-cart-item-bottom">
               <span class="mini-cart-item-price">
