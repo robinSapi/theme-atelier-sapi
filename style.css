@@ -13026,6 +13026,7 @@ body.woocommerce-cart {
 .cart-subtitle {
   font-size: 1.1rem;
   color: var(--color-gray);
+  text-align: center;
 }
 
 /* Cart Table Enhancements */
