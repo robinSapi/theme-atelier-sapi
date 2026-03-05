@@ -1394,8 +1394,8 @@ function sapi_ajax_guide_results() {
   $products_data  = $query_result['products'];
   $fallback_notes = $query_result['fallback_notes'];
 
-  // 5. Limit to 4 products for display AND for AI prompt
-  $display_products = array_slice($products_data, 0, 4);
+  // 5. Pick 4 products: 1) best seller, 2) newest, 3) 2nd best seller, 4) random
+  $display_products = sapi_guide_pick_four($products_data);
 
   // 6. Call Claude API for AI recommendation (only sees the 4 displayed products)
   $ai_response = null;
@@ -1714,6 +1714,45 @@ function sapi_guide_find_product_by_id(array $products, $id) {
     }
   }
   return null;
+}
+
+/**
+ * Pick up to 4 products from the filtered list:
+ * 1) Best seller (most total_sales)
+ * 2) Newest (most recent post date)
+ * 3) 2nd best seller
+ * 4) Random among remaining
+ */
+function sapi_guide_pick_four(array $products) {
+  if (count($products) <= 4) {
+    return $products;
+  }
+
+  $picked = [];
+  $remaining = $products;
+
+  // 1) Best seller
+  usort($remaining, function ($a, $b) {
+    return $b['total_sales'] - $a['total_sales'];
+  });
+  $picked[] = array_shift($remaining);
+
+  // 2) Newest (highest ID = most recently created)
+  usort($remaining, function ($a, $b) {
+    return $b['id'] - $a['id'];
+  });
+  $picked[] = array_shift($remaining);
+
+  // 3) 2nd best seller (best seller among remaining)
+  usort($remaining, function ($a, $b) {
+    return $b['total_sales'] - $a['total_sales'];
+  });
+  $picked[] = array_shift($remaining);
+
+  // 4) Random among remaining
+  $picked[] = $remaining[array_rand($remaining)];
+
+  return $picked;
 }
 
 /**
