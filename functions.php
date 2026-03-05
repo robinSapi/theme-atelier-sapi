@@ -1515,14 +1515,17 @@ function sapi_guide_query_products(array $answers, array $categories) {
     'operator' => 'IN',
   ];
 
-  // Format exclusion: plafond + standard + not above table → exclude vertical
-  $exclude_vertical = (
-    (isset($answers['sortie']) && $answers['sortie'] === 'plafond') &&
-    (isset($answers['hauteur']) && $answers['hauteur'] === 'standard') &&
-    (isset($answers['table']) && $answers['table'] === 'non')
+  // Format vertical : exclu par défaut pour suspensions, SAUF escalier ou (petite + haute)
+  $piece   = isset($answers['piece'])   ? $answers['piece']   : '';
+  $taille  = isset($answers['taille'])  ? $answers['taille']  : '';
+  $hauteur = isset($answers['hauteur']) ? $answers['hauteur'] : '';
+
+  $allow_vertical = (
+    $piece === 'escalier' ||
+    ($taille === 'petite' && in_array($hauteur, ['grande', 'confortable'], true))
   );
 
-  if ($exclude_vertical) {
+  if (in_array('suspensions', $categories) && !$allow_vertical) {
     $tax_query[] = [
       'taxonomy' => 'pa_format',
       'field'    => 'slug',
@@ -1532,7 +1535,6 @@ function sapi_guide_query_products(array $answers, array $categories) {
   }
 
   // Règle B : escalier → exclure format plat (préférer boule ou vertical)
-  $piece = isset($answers['piece']) ? $answers['piece'] : '';
   if ($piece === 'escalier' && in_array('suspensions', $categories)) {
     $tax_query[] = [
       'taxonomy' => 'pa_format',
