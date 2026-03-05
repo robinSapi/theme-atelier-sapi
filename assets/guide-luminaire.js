@@ -622,7 +622,7 @@
 
       if (surMesureReason === 'grappe') {
         smTitle = 'Cr\u00e9ation multi-ampoules';
-        smDesc = 'Votre situation m\u00e9rite un luminaire d\u2019exception, comme un luminaire avec plusieurs ampoules\u00a0! Robin adore cr\u00e9er et serait ravi d\u2019en discuter avec vous.';
+        smDesc = 'Votre situation m\u00e9rite un luminaire d\u2019exception, comme un luminaire avec plusieurs ampoules\u00a0! \u00c7a tombe bien, moi (Robin), j\u2019adore cr\u00e9er et je serais ravi d\u2019en discuter avec vous.';
       }
 
       html += '<article class="guide-result-card guide-result-card--surmesure">'
