@@ -18514,18 +18514,18 @@ html.sapi-intro-active body {
   margin-top: 1.5rem;
 }
 
-/* Masque les lignes de détail, garde uniquement le subtotal */
-.product-addon-totals > ul > li:not(.wc-pao-subtotal-line) {
+/* Masque les lignes de détail sur la FICHE PRODUIT uniquement */
+.single-product .product-addon-totals > ul > li:not(.wc-pao-subtotal-line) {
   display: none;
 }
 
-/* Style du subtotal */
-.wc-pao-subtotal-line {
+/* Style du subtotal — fiche produit uniquement */
+.single-product .wc-pao-subtotal-line {
   list-style: none;
   justify-content: flex-start !important;
 }
 
-.wc-pao-subtotal-line p.price {
+.single-product .wc-pao-subtotal-line p.price {
   color: #018501 !important;
   font-family: 'Montserrat', sans-serif;
   font-weight: 900;
@@ -18533,14 +18533,14 @@ html.sapi-intro-active body {
   font-size: 0;
 }
 
-.wc-pao-subtotal-line p.price .amount {
+.single-product .wc-pao-subtotal-line p.price .amount {
   font-size: 1.1rem;
 }
 
-/* Retire bordures du bloc totals */
-.product-addon-totals,
-.product-addon-totals ul,
-.product-addon-totals li {
+/* Retire bordures du bloc totals — fiche produit uniquement */
+.single-product .product-addon-totals,
+.single-product .product-addon-totals ul,
+.single-product .product-addon-totals li {
   border: none !important;
   padding: 0 !important;
   margin: 0 !important;
