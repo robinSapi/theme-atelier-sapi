@@ -1503,13 +1503,18 @@ function sapi_guide_get_categories(array $answers) {
   $piece     = isset($answers['piece'])     ? $answers['piece']     : '';
   $eclairage = isset($answers['eclairage']) ? $answers['eclairage'] : '';
 
-  // Éclairage secondaire → seulement lampadaires, lampes à poser, appliques
+  // Éclairage secondaire → pool limité, affiné par sortie
   if ($eclairage === 'secondaire') {
-    $cats = ['lampadaires', 'lampeaposer', 'appliques'];
-    if ($piece === 'cuisine') {
-      $cats = array_values(array_diff($cats, ['lampeaposer']));
+    $pool = ['lampadaires', 'lampeaposer', 'appliques'];
+    if ($sortie === 'mur') {
+      $pool = ['appliques'];
+    } elseif ($sortie === 'pas-de-sortie') {
+      $pool = ['lampadaires', 'lampeaposer'];
     }
-    return $cats;
+    if ($piece === 'cuisine') {
+      $pool = array_values(array_diff($pool, ['lampeaposer']));
+    }
+    return $pool;
   }
 
   switch ($sortie) {

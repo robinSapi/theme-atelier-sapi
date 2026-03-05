@@ -48,7 +48,7 @@ $guide_steps = [
     'question'   => 'Où se trouve votre sortie électrique ?',
     'visibility' => ['_or' => [
       ['taille' => ['petite', 'moyenne']],
-      ['eclairage' => ['principal', 'plustard']],
+      ['eclairage' => ['principal', 'secondaire', 'plustard']],
       ['piece' => ['escalier']],
     ]],
     'choices'    => [
