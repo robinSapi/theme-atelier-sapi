@@ -979,17 +979,10 @@ function sapi_render_mini_cart_contents() {
                 <?php endforeach; ?>
               <?php endif; ?>
               <?php
-              // DEBUG: voir les clés disponibles dans $cart_item
-              $debug_keys = array_keys($cart_item);
-              echo '<!-- CART KEYS: ' . esc_html(implode(', ', $debug_keys)) . ' -->';
-              if (!empty($cart_item['addons'])) {
-                echo '<!-- ADDONS DATA: ' . esc_html(print_r($cart_item['addons'], true)) . ' -->';
-              }
-              $extra_data = apply_filters('woocommerce_get_item_data', array(), $cart_item);
-              echo '<!-- ITEM DATA COUNT: ' . count($extra_data) . ' -->';
-
-              // Méthode 1: $cart_item['addons']
+              // Afficher les add-ons — double approche pour fiabilité
               $addon_rendered = false;
+
+              // Méthode 1: données directes du plugin Product Add-Ons
               if (!empty($cart_item['addons']) && is_array($cart_item['addons'])) :
                 foreach ($cart_item['addons'] as $addon) :
                   $name = isset($addon['name']) ? $addon['name'] : '';
@@ -1003,7 +996,7 @@ function sapi_render_mini_cart_contents() {
                   </div>
               <?php endforeach; endif;
 
-              // Méthode 2 (fallback): wc_get_formatted_cart_item_data
+              // Méthode 2 (fallback): parsing du texte WooCommerce
               if (!$addon_rendered) :
                 $flat_data = wc_get_formatted_cart_item_data($cart_item, true);
                 if (!empty($flat_data)) :
