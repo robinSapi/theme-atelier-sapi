@@ -114,10 +114,20 @@ get_header();
         $nom_client = $has_acf ? get_field('nom_client') : '';
         $full_desc  = get_the_content();
         $thumb_url  = get_the_post_thumbnail_url(get_the_ID(), 'large');
+
+        // Photos supplémentaires
+        $gallery_urls = [];
+        if ($thumb_url) $gallery_urls[] = $thumb_url;
+        for ($i = 2; $i <= 4; $i++) {
+          $photo = $has_acf ? get_field('photo_' . $i) : '';
+          $url = sapi_get_acf_image_url($photo, 'large');
+          if ($url) $gallery_urls[] = $url;
+        }
       ?>
         <article class="surmesure-card" role="button" tabindex="0"
           data-modal-title="<?php echo esc_attr(get_the_title()); ?>"
           data-modal-image="<?php echo esc_attr($thumb_url ?: ''); ?>"
+          data-modal-gallery="<?php echo esc_attr(wp_json_encode($gallery_urls)); ?>"
           data-modal-desc="<?php echo esc_attr($full_desc); ?>"
           data-modal-essence="<?php echo esc_attr($essence); ?>"
           data-modal-piece="<?php echo esc_attr($piece); ?>"
@@ -184,8 +194,11 @@ get_header();
           </svg>
         </button>
         <div class="surmesure-modal-body">
-          <div class="surmesure-modal-image">
-            <img src="" alt="">
+          <div class="surmesure-modal-gallery">
+            <div class="surmesure-modal-image">
+              <img src="" alt="">
+            </div>
+            <div class="surmesure-modal-thumbs"></div>
           </div>
           <div class="surmesure-modal-content">
             <h3 class="surmesure-modal-title"></h3>
@@ -212,6 +225,7 @@ get_header();
       var overlay   = modal.querySelector('.surmesure-modal-overlay');
       var closeBtn  = modal.querySelector('.surmesure-modal-close');
       var imgEl     = modal.querySelector('.surmesure-modal-image img');
+      var thumbsEl  = modal.querySelector('.surmesure-modal-thumbs');
       var titleEl   = modal.querySelector('.surmesure-modal-title');
       var detailsEl = modal.querySelector('.surmesure-modal-details');
       var descEl    = modal.querySelector('.surmesure-modal-desc');
@@ -225,13 +239,43 @@ get_header();
         return '<span class="surmesure-detail">' + svg + ' ' + text + '</span>';
       }
 
+      function setActiveThumb(index) {
+        var thumbs = thumbsEl.querySelectorAll('.surmesure-modal-thumb');
+        thumbs.forEach(function(t, i) {
+          t.classList.toggle('is-active', i === index);
+        });
+      }
+
       function openModal(card) {
         var data = card.dataset;
         previousFocus = document.activeElement;
 
         titleEl.textContent = data.modalTitle || '';
         imgEl.src = data.modalImage || '';
+        imgEl.srcset = '';
         imgEl.alt = data.modalTitle || '';
+
+        // Gallery thumbnails
+        var gallery = [];
+        try { gallery = JSON.parse(data.modalGallery || '[]'); } catch(e) {}
+        thumbsEl.innerHTML = '';
+        if (gallery.length > 1) {
+          gallery.forEach(function(url, i) {
+            var thumb = document.createElement('button');
+            thumb.className = 'surmesure-modal-thumb' + (i === 0 ? ' is-active' : '');
+            thumb.setAttribute('aria-label', 'Photo ' + (i + 1));
+            thumb.innerHTML = '<img src="' + url + '" alt="">';
+            thumb.addEventListener('click', function() {
+              imgEl.src = url;
+              imgEl.srcset = '';
+              setActiveThumb(i);
+            });
+            thumbsEl.appendChild(thumb);
+          });
+          thumbsEl.style.display = '';
+        } else {
+          thumbsEl.style.display = 'none';
+        }
 
         // Details
         var html = '';

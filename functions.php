@@ -2122,6 +2122,33 @@ function sapi_register_acf_projet_sur_mesure() {
         'placeholder' => 'Ex: Marie, Restaurant Le Comptoir...',
         'instructions' => 'Prénom ou nom affiché sous le témoignage (optionnel)',
       ],
+      [
+        'key'          => 'field_psm_photo_2',
+        'label'        => 'Photo 2',
+        'name'         => 'photo_2',
+        'type'         => 'image',
+        'return_format' => 'array',
+        'preview_size'  => 'medium',
+        'instructions'  => 'Photo supplémentaire (optionnel)',
+      ],
+      [
+        'key'          => 'field_psm_photo_3',
+        'label'        => 'Photo 3',
+        'name'         => 'photo_3',
+        'type'         => 'image',
+        'return_format' => 'array',
+        'preview_size'  => 'medium',
+        'instructions'  => 'Photo supplémentaire (optionnel)',
+      ],
+      [
+        'key'          => 'field_psm_photo_4',
+        'label'        => 'Photo 4',
+        'name'         => 'photo_4',
+        'type'         => 'image',
+        'return_format' => 'array',
+        'preview_size'  => 'medium',
+        'instructions'  => 'Photo supplémentaire (optionnel)',
+      ],
     ],
     'location' => [
       [
