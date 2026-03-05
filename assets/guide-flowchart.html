@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guide Luminaire — Flowchart V2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: #FEFDFB;
+    color: #323232;
+    padding: 40px 20px 80px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #323232;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #937D68;
+    margin-bottom: 40px;
+    font-weight: 400;
+  }
+
+  /* ── Canvas ── */
+  .canvas {
+    position: relative;
+    width: 1100px;
+    margin: 0 auto;
+    min-height: 2600px;
+  }
+
+  .canvas svg.connections {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Question node ── */
+  .node {
+    position: absolute;
+    background: #fff;
+    border: 2px solid #E8DFD5;
+    border-radius: 16px;
+    padding: 18px 22px 14px;
+    text-align: center;
+    width: 280px;
+    box-shadow: 0 2px 12px rgba(147, 125, 104, 0.08);
+    z-index: 2;
+    transition: all 0.25s ease;
+  }
+
+  .node:hover {
+    border-color: #E35B24;
+    box-shadow: 0 4px 24px rgba(227, 91, 36, 0.15);
+    transform: translateY(-2px);
+    z-index: 10;
+  }
+
+  .node-number {
+    position: absolute;
+    top: -11px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .node-question {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 4px;
+    margin-bottom: 10px;
+    line-height: 1.35;
+  }
+
+  /* ── Choices ── */
+  .choices {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .choice {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #FBF6EA;
+    border: 1.5px solid #E8DFD5;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.73rem;
+    font-weight: 500;
+    color: #323232;
+    cursor: default;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  .choice:hover {
+    background: #fff;
+    border-color: #E35B24;
+    color: #E35B24;
+  }
+
+  .choice .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot.orange { background: #E35B24; }
+  .dot.green  { background: #4CAF50; }
+  .dot.gray   { background: #B0A0A0; }
+  .dot.blue   { background: #5B9BD5; }
+  .dot.wood   { background: #937D68; }
+  .dot.purple { background: #9B59B6; }
+
+  .choice .target-label {
+    margin-left: auto;
+    font-size: 0.6rem;
+    color: #937D68;
+    font-weight: 400;
+    opacity: 0.8;
+    white-space: nowrap;
+  }
+
+  /* ── Result node ── */
+  .node-result {
+    background: linear-gradient(135deg, #FBF6EA 0%, #FFF8F0 100%);
+    border: 2px solid #E35B24;
+  }
+
+  .node-result .node-number {
+    background: linear-gradient(180deg, #937D68 0%, #7A6555 100%);
+  }
+
+  .node-result .node-question {
+    font-size: 0.95rem;
+    color: #D14F1C;
+  }
+
+  .result-details {
+    font-size: 0.7rem;
+    color: #937D68;
+    line-height: 1.6;
+    text-align: left;
+    margin-top: 4px;
+  }
+
+  .result-details span { display: block; }
+
+  /* ── New question node (conditional) ── */
+  .node-new {
+    border: 2px solid #9B59B6;
+    background: linear-gradient(135deg, #F8F0FF 0%, #FFF 100%);
+  }
+
+  .node-new .node-number {
+    background: linear-gradient(180deg, #9B59B6 0%, #7D3C98 100%);
+  }
+
+  /* ── Dynamic note ── */
+  .dynamic-note {
+    background: linear-gradient(135deg, #F0F7FF 0%, #E8F0FE 100%);
+    border: 1.5px solid #5B9BD5;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.68rem;
+    color: #2C5F8A;
+    text-align: left;
+    margin-top: 8px;
+    line-height: 1.45;
+  }
+
+  .dynamic-note strong { color: #1A4570; font-size: 0.7rem; }
+  .dynamic-note ul { list-style: none; margin-top: 4px; }
+  .dynamic-note ul li { padding: 1px 0; }
+  .dynamic-note ul li::before { content: "→ "; color: #5B9BD5; font-weight: 700; }
+
+  .filter-note {
+    background: linear-gradient(135deg, #FFF5EC 0%, #FFF0E5 100%);
+    border: 1.5px solid #E35B24;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.68rem;
+    color: #8B4513;
+    text-align: left;
+    margin-top: 8px;
+    line-height: 1.45;
+  }
+
+  .filter-note strong { color: #D14F1C; font-size: 0.7rem; }
+  .filter-note ul { list-style: none; margin-top: 4px; }
+  .filter-note ul li { padding: 1px 0; }
+  .filter-note ul li::before { content: "⚙ "; }
+
+  /* ── Legend ── */
+  .legend {
+    position: absolute;
+    top: 10px;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 18px;
+    background: #fff;
+    border-radius: 12px;
+    border: 1.5px solid #E8DFD5;
+    z-index: 5;
+  }
+
+  .legend-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #937D68;
+    margin-bottom: 2px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.7rem;
+    color: #323232;
+  }
+
+  .legend-line {
+    width: 28px;
+    height: 3px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── Parcours ── */
+  .parcours {
+    max-width: 750px;
+    margin: 40px auto 0;
+    background: #fff;
+    border-radius: 12px;
+    border: 1.5px solid #E8DFD5;
+    padding: 24px;
+  }
+
+  .parcours h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  .parcours-item { margin-bottom: 14px; }
+  .parcours-item:last-child { margin-bottom: 0; }
+
+  .parcours-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .parcours-label.main { color: #E35B24; }
+  .parcours-label.alt { color: #937D68; }
+  .parcours-label.new { color: #9B59B6; }
+
+  .parcours-flow {
+    font-size: 0.78rem;
+    background: #FBF6EA;
+    padding: 8px 14px;
+    border-radius: 8px;
+    line-height: 1.6;
+  }
+
+  .skipped {
+    color: #B0A0A0;
+    text-decoration: line-through;
+  }
+
+  .new-step {
+    color: #9B59B6;
+    font-weight: 600;
+  }
+
+  /* ── Règles ── */
+  .rules-section {
+    max-width: 750px;
+    margin: 30px auto 0;
+    background: #fff;
+    border-radius: 12px;
+    border: 1.5px solid #E8DFD5;
+    padding: 24px;
+  }
+
+  .rules-section h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  .rules-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+  }
+
+  .rules-table th {
+    text-align: left;
+    padding: 8px 10px;
+    background: #FBF6EA;
+    border: 1px solid #E8DFD5;
+    font-weight: 600;
+    color: #937D68;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .rules-table td {
+    padding: 6px 10px;
+    border: 1px solid #E8DFD5;
+    line-height: 1.4;
+  }
+
+  .rules-table tr:hover td {
+    background: #FEFDFB;
+  }
+</style>
+</head>
+<body>
+
+<h1>Guide Luminaire — Arbre des questions V2</h1>
+<p class="subtitle">Questionnaire dynamique — Atelier Sapi — incluant question "Éclairage" (grande pièce) et règles de filtrage mises à jour</p>
+
+<div class="canvas" id="canvas">
+
+  <!-- SVG layer for arrows -->
+  <svg class="connections" id="svg"></svg>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-title">Flèches</div>
+    <div class="legend-item"><div class="legend-line" style="background: #E35B24;"></div> Chemin direct</div>
+    <div class="legend-item"><div class="legend-line" style="background: #4CAF50;"></div> Chemin principal</div>
+    <div class="legend-item"><div class="legend-line" style="background: #9B59B6;"></div> Nouvelle question</div>
+    <div class="legend-item"><div class="legend-line" style="background: #B0A0A0; background-image: repeating-linear-gradient(90deg, #B0A0A0, #B0A0A0 4px, transparent 4px, transparent 8px);"></div> Skip (saute des étapes)</div>
+  </div>
+
+  <!-- ═══ PIÈCE ═══ -->
+  <div class="node" id="node-piece" style="left: 380px; top: 0;">
+    <span class="node-number">1 — Pièce</span>
+    <div class="node-question">Dans quelle pièce sera-t-il installé ?</div>
+    <div class="choices">
+      <div class="choice" data-from="piece-cuisine" data-to="node-taille"><span class="dot green"></span>Cuisine<span class="target-label">→ Taille</span></div>
+      <div class="choice" data-from="piece-bureau" data-to="node-taille"><span class="dot green"></span>Bureau / Atelier<span class="target-label">→ Taille</span></div>
+      <div class="choice" data-from="piece-salon" data-to="node-taille"><span class="dot green"></span>Salon / Salle à manger<span class="target-label">→ Taille</span></div>
+      <div class="choice" data-from="piece-chambre" data-to="node-taille"><span class="dot green"></span>Chambre<span class="target-label">→ Taille</span></div>
+      <div class="choice" data-from="piece-entree" data-to="node-taille"><span class="dot green"></span>Entrée / Couloir<span class="target-label">→ Taille</span></div>
+      <div class="choice" data-from="piece-escalier" data-to="node-sortie"><span class="dot gray"></span>Cage d'escalier<span class="target-label">→ Sortie (skip taille)</span></div>
+    </div>
+  </div>
+
+  <!-- ═══ TAILLE ═══ -->
+  <div class="node" id="node-taille" style="left: 380px; top: 310px;">
+    <span class="node-number">2 — Taille</span>
+    <div class="node-question">Quelle est la taille de votre pièce ?</div>
+    <div class="choices">
+      <div class="choice" data-from="taille-petite" data-to="node-sortie"><span class="dot orange"></span>Petite (&lt; 10 m²)<span class="target-label">→ Sortie</span></div>
+      <div class="choice" data-from="taille-moyenne" data-to="node-sortie"><span class="dot orange"></span>Moyenne (10–20 m²)<span class="target-label">→ Sortie</span></div>
+      <div class="choice" data-from="taille-grande" data-to="node-eclairage"><span class="dot purple"></span>Grande (&gt; 20 m²)<span class="target-label">→ Éclairage (NEW)</span></div>
+    </div>
+    <div class="filter-note">
+      <strong>Filtrage taille du luminaire :</strong>
+      <ul>
+        <li>Petite → plus petite taille disponible</li>
+        <li>Moyenne → 2e taille</li>
+        <li>Grande → 3e taille (exclut produits avec ≤ 2 tailles)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══ ÉCLAIRAGE (NEW — grande pièce seulement) ═══ -->
+  <div class="node node-new" id="node-eclairage" style="left: 730px; top: 490px; width: 310px;">
+    <span class="node-number">2b — Éclairage (si grande)</span>
+    <div class="node-question">Pour un grand espace, plusieurs sources lumineuses font toute la différence.</div>
+    <div class="choices">
+      <div class="choice" data-from="eclairage-principal" data-to="node-sortie"><span class="dot purple"></span>Je cherche mon éclairage principal<span class="target-label">→ Sortie</span></div>
+      <div class="choice" data-from="eclairage-secondaire" data-to="node-sortie"><span class="dot purple"></span>Je cherche un éclairage secondaire<span class="target-label">→ Sortie</span></div>
+      <div class="choice" data-from="eclairage-grappe" data-to="node-style"><span class="dot purple"></span>Je voudrais plusieurs ampoules<span class="target-label">→ Style (sur mesure)</span></div>
+      <div class="choice" data-from="eclairage-plustard" data-to="node-sortie"><span class="dot purple"></span>Je verrai plus tard<span class="target-label">→ Sortie</span></div>
+    </div>
+    <div class="dynamic-note">
+      <strong>Impact sur le filtrage :</strong>
+      <ul>
+        <li><strong>Principal</strong> — filtre normal (suspensions, etc.)</li>
+        <li><strong>Secondaire</strong> — lampadaires, lampes à poser, appliques</li>
+        <li><strong>Plusieurs ampoules</strong> — sur mesure "en grappe", pas de filtrage produit</li>
+        <li><strong>Plus tard</strong> — filtre normal, comme "principal"</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══ SORTIE ═══ -->
+  <div class="node" id="node-sortie" style="left: 380px; top: 730px;">
+    <span class="node-number">3 — Sortie électrique</span>
+    <div class="node-question">Où se trouve votre sortie électrique ?</div>
+    <div class="choices">
+      <div class="choice" data-from="sortie-plafond" data-to="node-hauteur"><span class="dot green"></span>Au plafond<span class="target-label">→ Hauteur</span></div>
+      <div class="choice" data-from="sortie-mur" data-to="node-style"><span class="dot gray"></span>Au mur<span class="target-label">→ Style (skip 4-5)</span></div>
+      <div class="choice" data-from="sortie-prise" data-to="node-style"><span class="dot gray"></span>Sur prise classique 230V<span class="target-label">→ Style (skip 4-5)</span></div>
+      <div class="choice" data-from="sortie-nsp" data-to="node-style"><span class="dot gray"></span>Je ne sais pas<span class="target-label">→ Style (skip 4-5)</span></div>
+    </div>
+    <div class="dynamic-note">
+      <strong>Impact "Éclairage secondaire" :</strong>
+      <ul>
+        <li>Si secondaire → propose lampadaires, lampes à poser, appliques (pas suspensions)</li>
+        <li>La question "Sortie" est alors sautée (pas pertinent)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══ HAUTEUR ═══ -->
+  <div class="node" id="node-hauteur" style="left: 60px; top: 1020px;">
+    <span class="node-number">4 — Hauteur (si plafond)</span>
+    <div class="node-question">Quelle est votre hauteur sous-plafond ?</div>
+    <div class="choices">
+      <div class="choice" data-from="hauteur-standard" data-to="node-table"><span class="dot green"></span>Standard (&lt; 2,50 m)<span class="target-label">→ Table*</span></div>
+      <div class="choice" data-from="hauteur-confortable" data-to="node-style"><span class="dot gray"></span>Confortable (2,50–3 m)<span class="target-label">→ Style (skip 5)</span></div>
+      <div class="choice" data-from="hauteur-haute" data-to="node-style"><span class="dot gray"></span>Haute (&gt; 3 m)<span class="target-label">→ Style (skip 5)</span></div>
+    </div>
+    <div class="filter-note">
+      <strong>Filtrage format vertical :</strong>
+      <ul>
+        <li>Vertical EXCLU par défaut pour suspensions</li>
+        <li>SAUF : escalier (toute hauteur)</li>
+        <li>SAUF : couloir + hauteur grande ou confortable</li>
+        <li>SAUF : petite pièce + hauteur grande ou confortable</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══ TABLE ═══ -->
+  <div class="node" id="node-table" style="left: 60px; top: 1380px;">
+    <span class="node-number">5 — Table (si standard)</span>
+    <div class="node-question">Au-dessus d'une table / du lit / du bureau ?</div>
+    <div class="choices">
+      <div class="choice" data-from="table-oui" data-to="node-style"><span class="dot orange"></span>Oui<span class="target-label">→ Style</span></div>
+      <div class="choice" data-from="table-non" data-to="node-style"><span class="dot orange"></span>Non<span class="target-label">→ Style</span></div>
+    </div>
+    <div class="dynamic-note">
+      <strong>Question adaptée selon la pièce :</strong>
+      <ul>
+        <li><strong>Cuisine</strong> — "Au-dessus d'une table ou d'un îlot ?"</li>
+        <li><strong>Bureau</strong> — "Au-dessus du bureau ?"</li>
+        <li><strong>Salon</strong> — "Au-dessus d'une table ?"</li>
+        <li><strong>Chambre</strong> — "Au-dessus du lit ?"</li>
+      </ul>
+      <div style="margin-top: 6px; color: #7A6A6A; font-style: italic;">* Entrée, couloir et escalier : question sautée</div>
+    </div>
+  </div>
+
+  <!-- ═══ STYLE ═══ -->
+  <div class="node" id="node-style" style="left: 380px; top: 1700px;">
+    <span class="node-number">6 — Style</span>
+    <div class="node-question">Quel est le style de votre intérieur ?</div>
+    <div class="choices">
+      <div class="choice" data-from="style-moderne" data-to="node-result"><span class="dot orange"></span>Moderne, neuf, tons clairs<span class="target-label">→ Résultat</span></div>
+      <div class="choice" data-from="style-ancien" data-to="node-result"><span class="dot orange"></span>Ancien, pierre, bois, tons chauds<span class="target-label">→ Résultat</span></div>
+    </div>
+    <div class="filter-note">
+      <strong>Filtrage essence :</strong>
+      <ul>
+        <li>Moderne → variation Peuplier (clair)</li>
+        <li>Ancien → variation Okoumé (chaud)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══ RÉSULTAT ═══ -->
+  <div class="node node-result" id="node-result" style="left: 380px; top: 1960px; width: 320px;">
+    <span class="node-number">Résultat</span>
+    <div class="node-question">Sélection personnalisée</div>
+    <div class="result-details">
+      <span>Texte IA signé "— Robin" (max 80 mots)</span>
+      <span>Explique pourquoi cette sélection correspond</span>
+      <span>Grille de 4 produits filtrés (1 ligne desktop)</span>
+      <span>Chaque carte : image, nom, prix, essence + taille recommandées, CTA</span>
+    </div>
+    <div class="filter-note" style="margin-top: 10px;">
+      <strong>Sélection des 4 produits (si &gt; 4 filtrés) :</strong>
+      <ul>
+        <li>1) Le plus vendu</li>
+        <li>2) Le dernier ajouté au catalogue</li>
+        <li>3) Le 2e plus vendu</li>
+        <li>4) Aléatoire parmi les restants</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ PARCOURS TYPES ═══ -->
+<div class="parcours" style="margin-top: 60px;">
+  <h2>Parcours types</h2>
+
+  <div class="parcours-item">
+    <div class="parcours-label main">Parcours complet — salon standard (7 étapes)</div>
+    <div class="parcours-flow">
+      Salon → Grande → <span class="new-step">Éclairage principal</span> → Plafond → Standard → "Au-dessus d'une table ?" Oui → Moderne → Résultat (4 produits)
+    </div>
+  </div>
+
+  <div class="parcours-item">
+    <div class="parcours-label new">Parcours grande pièce — éclairage secondaire (5 étapes)</div>
+    <div class="parcours-flow">
+      Salon → Grande → <span class="new-step">Éclairage secondaire</span> → <span class="skipped">sortie</span> → <span class="skipped">hauteur</span> → <span class="skipped">table</span> → Moderne → Résultat (lampadaires, lampes, appliques)
+    </div>
+  </div>
+
+  <div class="parcours-item">
+    <div class="parcours-label new">Parcours grande pièce — multi-ampoules (4 étapes)</div>
+    <div class="parcours-flow">
+      Chambre → Grande → <span class="new-step">Plusieurs ampoules</span> → <span class="skipped">sortie</span> → <span class="skipped">hauteur</span> → <span class="skipped">table</span> → Ancien → Résultat (sur mesure "en grappe")
+    </div>
+  </div>
+
+  <div class="parcours-item">
+    <div class="parcours-label alt">Parcours court — cage d'escalier (3 étapes)</div>
+    <div class="parcours-flow">
+      Cage d'escalier → <span class="skipped">taille</span> → Mur → <span class="skipped">hauteur</span> → <span class="skipped">table</span> → Ancien → Résultat
+    </div>
+  </div>
+
+  <div class="parcours-item">
+    <div class="parcours-label alt">Parcours moyen — plafond haut (5 étapes)</div>
+    <div class="parcours-flow">
+      Chambre → Petite → Plafond → Haute → <span class="skipped">table</span> → Moderne → Résultat
+    </div>
+  </div>
+
+  <div class="parcours-item">
+    <div class="parcours-label alt">Parcours moyen — prise classique (4 étapes)</div>
+    <div class="parcours-flow">
+      Cuisine → Moyenne → Sur prise 230V → <span class="skipped">hauteur</span> → <span class="skipped">table</span> → Ancien → Résultat
+    </div>
+  </div>
+</div>
+
+<!-- ═══ RÈGLES DE FILTRAGE ═══ -->
+<div class="rules-section">
+  <h2>Règles de filtrage complètes</h2>
+  <table class="rules-table">
+    <thead>
+      <tr>
+        <th>Réponse</th>
+        <th>Filtre appliqué</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Sortie plafond</td><td>→ Suspensions</td></tr>
+      <tr><td>Sortie mur</td><td>→ Appliques</td></tr>
+      <tr><td>Sortie prise 230V</td><td>→ Lampadaires + Lampes à poser + Appliques</td></tr>
+      <tr><td>Sortie "je ne sais pas"</td><td>→ Tout</td></tr>
+      <tr><td>Éclairage secondaire (NEW)</td><td>→ Lampadaires + Lampes à poser + Appliques (pas suspensions)</td></tr>
+      <tr><td>Multi-ampoules (NEW)</td><td>→ Résultat sur mesure "en grappe" (pas de filtrage catalogue)</td></tr>
+      <tr><td>Cuisine</td><td>→ Ampoule dégagée ou semi-dégagée. Jamais de lampe à poser.</td></tr>
+      <tr><td>Bureau / Atelier</td><td>→ Ampoule dégagée ou semi-dégagée</td></tr>
+      <tr><td>Salon / Chambre</td><td>→ Ampoule entourée ou semi-dégagée</td></tr>
+      <tr><td>Entrée / Couloir</td><td>→ Pas de filtre ampoule</td></tr>
+      <tr><td>Escalier</td><td>→ Exclut format plat. Vertical autorisé.</td></tr>
+      <tr><td>Vertical (par défaut)</td><td>→ Exclu pour suspensions</td></tr>
+      <tr><td>Vertical (escalier)</td><td>→ Autorisé (toute hauteur)</td></tr>
+      <tr><td>Vertical (couloir)</td><td>→ Autorisé si hauteur grande ou confortable</td></tr>
+      <tr><td>Vertical (petite pièce)</td><td>→ Autorisé si hauteur grande ou confortable</td></tr>
+      <tr><td>Style moderne</td><td>→ Variation Peuplier (clair)</td></tr>
+      <tr><td>Style ancien</td><td>→ Variation Okoumé (chaud)</td></tr>
+      <tr><td>Petite pièce</td><td>→ Plus petite taille du produit</td></tr>
+      <tr><td>Moyenne pièce</td><td>→ 2e taille du produit</td></tr>
+      <tr><td>Grande pièce</td><td>→ 3e taille (exclut produits avec ≤ 2 tailles)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+(function () {
+  var svg = document.getElementById('svg');
+  var canvas = document.getElementById('canvas');
+
+  var COLORS = {
+    direct:  '#E35B24',
+    main:    '#4CAF50',
+    skip:    '#B0A0A0',
+    purple:  '#9B59B6',
+  };
+
+  function getColor(fromId, toId) {
+    // Purple for new éclairage question
+    if (fromId.startsWith('taille-grande')) return COLORS.purple;
+    if (fromId.startsWith('eclairage-')) return COLORS.purple;
+
+    // Skip arrows
+    if (fromId.startsWith('piece-escalier')) return COLORS.skip;
+    if (fromId.startsWith('sortie-mur') || fromId.startsWith('sortie-prise') || fromId.startsWith('sortie-nsp')) return COLORS.skip;
+    if (fromId.startsWith('hauteur-confortable') || fromId.startsWith('hauteur-haute')) return COLORS.skip;
+
+    // Green for main path
+    if (fromId.startsWith('piece-') && toId === 'node-taille') return COLORS.main;
+    if (fromId.startsWith('sortie-plafond')) return COLORS.main;
+    if (fromId.startsWith('hauteur-standard')) return COLORS.main;
+
+    return COLORS.direct;
+  }
+
+  function isDashed(fromId) {
+    if (fromId.startsWith('piece-escalier')) return true;
+    if (fromId.startsWith('sortie-mur') || fromId.startsWith('sortie-prise') || fromId.startsWith('sortie-nsp')) return true;
+    if (fromId.startsWith('hauteur-confortable') || fromId.startsWith('hauteur-haute')) return true;
+    if (fromId === 'eclairage-grappe') return true;
+    return false;
+  }
+
+  function getArrowType(fromId, toId) {
+    if (fromId.startsWith('taille-grande') || fromId.startsWith('eclairage-')) return 'purple';
+    if (isDashed(fromId)) return 'skip';
+    var color = getColor(fromId, toId);
+    if (color === COLORS.main) return 'main';
+    return 'direct';
+  }
+
+  function drawArrows() {
+    svg.innerHTML = '';
+
+    svg.setAttribute('width', canvas.scrollWidth);
+    svg.setAttribute('height', canvas.scrollHeight);
+
+    var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    ['direct', 'main', 'skip', 'purple'].forEach(function (type) {
+      var marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+      marker.setAttribute('id', 'arrow-' + type);
+      marker.setAttribute('viewBox', '0 0 10 10');
+      marker.setAttribute('refX', '9');
+      marker.setAttribute('refY', '5');
+      marker.setAttribute('markerWidth', '6');
+      marker.setAttribute('markerHeight', '6');
+      marker.setAttribute('orient', 'auto-start-reverse');
+      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', 'M 0 1 L 9 5 L 0 9 z');
+      path.setAttribute('fill', COLORS[type]);
+      marker.appendChild(path);
+      defs.appendChild(marker);
+    });
+    svg.appendChild(defs);
+
+    var choices = document.querySelectorAll('.choice[data-from]');
+
+    choices.forEach(function (choice) {
+      var fromId = choice.getAttribute('data-from');
+      var toId = choice.getAttribute('data-to');
+      var targetNode = document.getElementById(toId);
+      if (!targetNode) return;
+
+      var canvasOffset = canvas.getBoundingClientRect();
+
+      var fromRect = choice.getBoundingClientRect();
+      var sx = fromRect.right - canvasOffset.left + 4;
+      var sy = fromRect.top + fromRect.height / 2 - canvasOffset.top;
+
+      var toRect = targetNode.getBoundingClientRect();
+      var tx = toRect.left + toRect.width / 2 - canvasOffset.left;
+      var ty = toRect.top - canvasOffset.top - 2;
+
+      var color = getColor(fromId, toId);
+      var dashed = isDashed(fromId);
+      var arrowType = getArrowType(fromId, toId);
+
+      var dx = tx - sx;
+      var dy = ty - sy;
+
+      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+      var cx1, cy1, cx2, cy2;
+
+      if (Math.abs(dx) < 50) {
+        cx1 = sx + 40;
+        cy1 = sy + dy * 0.3;
+        cx2 = tx - 40;
+        cy2 = sy + dy * 0.7;
+      } else if (dx > 0) {
+        cx1 = sx + Math.min(80, Math.abs(dx) * 0.4);
+        cy1 = sy;
+        cx2 = tx;
+        cy2 = ty - Math.min(60, Math.abs(dy) * 0.3);
+      } else {
+        cx1 = sx + Math.min(80, Math.abs(dx) * 0.3);
+        cy1 = sy;
+        cx2 = tx;
+        cy2 = ty - Math.min(60, Math.abs(dy) * 0.3);
+      }
+
+      var d = 'M ' + sx + ' ' + sy + ' C ' + cx1 + ' ' + cy1 + ', ' + cx2 + ' ' + cy2 + ', ' + tx + ' ' + ty;
+
+      path.setAttribute('d', d);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke', color);
+      path.setAttribute('stroke-width', dashed ? '1.5' : '2');
+      path.setAttribute('marker-end', 'url(#arrow-' + arrowType + ')');
+      if (dashed) {
+        path.setAttribute('stroke-dasharray', '6,4');
+      }
+      path.setAttribute('opacity', '0.7');
+
+      svg.appendChild(path);
+    });
+  }
+
+  window.addEventListener('load', drawArrows);
+  window.addEventListener('resize', drawArrows);
+
+  document.addEventListener('mouseover', function (e) {
+    var choice = e.target.closest('.choice[data-from]');
+    if (!choice) return;
+    var paths = svg.querySelectorAll('path[d]');
+    var idx = Array.from(document.querySelectorAll('.choice[data-from]')).indexOf(choice);
+    paths.forEach(function (p, i) {
+      if (!p.hasAttribute('d') || p.closest('defs')) return;
+      p.setAttribute('opacity', i === idx ? '1' : '0.15');
+      if (i === idx) p.setAttribute('stroke-width', '3');
+    });
+  });
+
+  document.addEventListener('mouseout', function (e) {
+    var choice = e.target.closest('.choice[data-from]');
+    if (!choice) return;
+    var paths = svg.querySelectorAll('path:not(defs path)');
+    paths.forEach(function (p) {
+      if (p.closest('defs')) return;
+      var dashed = p.getAttribute('stroke-dasharray');
+      p.setAttribute('opacity', '0.7');
+      p.setAttribute('stroke-width', dashed ? '1.5' : '2');
+    });
+  });
+
+})();
+</script>
+
+</body>
+</html>
