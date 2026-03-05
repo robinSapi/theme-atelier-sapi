@@ -979,12 +979,15 @@ function sapi_render_mini_cart_contents() {
                 <?php endforeach; ?>
               <?php endif; ?>
               <?php
-              // Afficher les données add-ons (Product Add-Ons, etc.)
-              $item_data = wc_get_formatted_cart_item_data($cart_item);
-              if ($item_data) :
+              // Afficher les add-ons avec le même markup que les variations
+              if (!empty($cart_item['addons'])) :
+                foreach ($cart_item['addons'] as $addon) :
               ?>
-                <div class="mini-cart-addons"><?php echo $item_data; ?></div>
-              <?php endif; ?>
+                  <div class="mini-cart-var-line">
+                    <span class="mini-cart-var-label"><?php echo esc_html($addon['name']); ?> :</span>
+                    <span class="mini-cart-var-value"><?php echo esc_html($addon['value']); ?></span>
+                  </div>
+              <?php endforeach; endif; ?>
             </div>
             <div class="mini-cart-item-bottom">
               <span class="mini-cart-item-price">
