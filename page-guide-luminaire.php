@@ -45,7 +45,7 @@ $guide_steps = [
   ],
   [
     'id'         => 'sortie',
-    'question'   => 'Où se trouve votre sortie électrique ?',
+    'question'   => 'Où installerez-vous votre luminaire ?',
     'visibility' => ['_or' => [
       ['taille' => ['petite', 'moyenne']],
       ['eclairage' => ['principal', 'secondaire', 'plustard']],
