@@ -2127,7 +2127,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 .product-summary .product_title {
   font-size: 24px;
   text-transform: uppercase;
-  color: var(--color-orange);
+  color: var(--color-wood);
   margin-bottom: 10px;
 }
 
@@ -18506,15 +18506,9 @@ html.sapi-intro-active body {
 }
 
 /* ==========================================================================
-   WooCommerce Product Add-Ons – Masquage éléments redondants
+   WooCommerce Product Add-Ons – Masquage récap redondant
    ========================================================================== */
 
-/* Masque le prix variation uniquement quand un add-on est présent */
-.variations_form:has(.wc-pao-addons-container) .woocommerce-variation-price {
-  display: none;
-}
-
-/* Récap add-ons (n'existe que si le plugin est actif sur le produit) */
 #product-addons-total {
   display: none;
 }
