@@ -18509,4 +18509,21 @@ html.sapi-intro-active body {
    WooCommerce Product Add-Ons – Styles
    ========================================================================== */
 
-/* Temporaire : tout visible pour inspection */
+/* Masque le prix variation partiel quand add-on présent */
+.variations_form:has(.wc-pao-addons-container) .woocommerce-variation-price {
+  display: none;
+}
+
+/* Masque les lignes de détail, garde le subtotal */
+.product-addon-totals > ul > li:not(.wc-pao-subtotal-line) {
+  display: none;
+}
+
+/* Style du subtotal identique au prix produit */
+.wc-pao-subtotal-line {
+  color: #018501;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  font-size: 1.1rem;
+  list-style: none;
+}
