@@ -323,7 +323,7 @@ get_header();
         <!-- CTA Sur-mesure -->
         <div class="product-custom-cta">
           <p class="custom-cta-text">Besoin d'une version sur-mesure ?</p>
-          <a href="mailto:contact@atelier-sapi.fr" class="custom-cta-link">
+          <a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>" class="custom-cta-link">
             Parlons de votre projet →
           </a>
         </div>

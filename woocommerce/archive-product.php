@@ -315,8 +315,8 @@ if (!$hero_img_url) {
     <p class="shop-outro-subtitle">
       <?php esc_html_e('Dites-nous ce que vous imaginez et nous créerons ensemble votre luminaire sur-mesure.', 'theme-sapi-maison'); ?>
     </p>
-    <a href="mailto:contact@atelier-sapi.fr" class="button button-outline shop-outro-cta">
-      <?php esc_html_e('Contactez-nous', 'theme-sapi-maison'); ?>
+    <a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>" class="button button-outline shop-outro-cta">
+      <?php esc_html_e('Découvrir le sur mesure', 'theme-sapi-maison'); ?>
     </a>
   </div>
 </section>

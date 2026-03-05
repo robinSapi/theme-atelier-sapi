@@ -2044,3 +2044,145 @@ add_action('woocommerce_set_additional_field_value', function ($key, $value, $gr
   $wc_object->update_meta_data('_sapi_newsletter_optout', wc_bool_to_string($value));
 }, 10, 4);
 
+/**
+ * ============================================================
+ * CUSTOM POST TYPE : Projets Sur Mesure
+ * ============================================================
+ */
+function sapi_register_cpt_projet_sur_mesure() {
+  register_post_type('projet_sur_mesure', [
+    'labels' => [
+      'name'               => 'Projets Sur Mesure',
+      'singular_name'      => 'Projet Sur Mesure',
+      'add_new'            => 'Ajouter un projet',
+      'add_new_item'       => 'Ajouter un projet sur mesure',
+      'edit_item'          => 'Modifier le projet',
+      'new_item'           => 'Nouveau projet',
+      'view_item'          => 'Voir le projet',
+      'search_items'       => 'Rechercher un projet',
+      'not_found'          => 'Aucun projet trouvé',
+      'not_found_in_trash' => 'Aucun projet dans la corbeille',
+    ],
+    'public'        => false,
+    'show_ui'       => true,
+    'show_in_menu'  => true,
+    'menu_position' => 25,
+    'menu_icon'     => 'dashicons-lightbulb',
+    'supports'      => ['title', 'editor', 'thumbnail', 'revisions'],
+    'has_archive'   => false,
+    'rewrite'       => false,
+  ]);
+}
+add_action('init', 'sapi_register_cpt_projet_sur_mesure');
+
+/**
+ * ACF fields for Projets Sur Mesure
+ */
+function sapi_register_acf_projet_sur_mesure() {
+  if (!function_exists('acf_add_local_field_group')) return;
+
+  acf_add_local_field_group([
+    'key'      => 'group_projet_sur_mesure',
+    'title'    => 'Détails du projet',
+    'fields'   => [
+      [
+        'key'   => 'field_psm_essence',
+        'label' => 'Essence de bois',
+        'name'  => 'essence_bois',
+        'type'  => 'text',
+        'placeholder' => 'Ex: Peuplier, Okoumé, Chêne...',
+      ],
+      [
+        'key'   => 'field_psm_dimensions',
+        'label' => 'Dimensions',
+        'name'  => 'dimensions_projet',
+        'type'  => 'text',
+        'placeholder' => 'Ex: 60 x 40 cm',
+      ],
+      [
+        'key'   => 'field_psm_piece',
+        'label' => 'Pièce de destination',
+        'name'  => 'piece_destination',
+        'type'  => 'text',
+        'placeholder' => 'Ex: Salon, Chambre, Restaurant...',
+      ],
+      [
+        'key'   => 'field_psm_temoignage',
+        'label' => 'Témoignage client',
+        'name'  => 'temoignage_client',
+        'type'  => 'textarea',
+        'rows'  => 3,
+        'instructions' => 'Citation du client (optionnel)',
+      ],
+      [
+        'key'   => 'field_psm_nom_client',
+        'label' => 'Nom du client',
+        'name'  => 'nom_client',
+        'type'  => 'text',
+        'placeholder' => 'Ex: Marie, Restaurant Le Comptoir...',
+        'instructions' => 'Prénom ou nom affiché sous le témoignage (optionnel)',
+      ],
+    ],
+    'location' => [
+      [
+        [
+          'param'    => 'post_type',
+          'operator' => '==',
+          'value'    => 'projet_sur_mesure',
+        ],
+      ],
+    ],
+    'position' => 'normal',
+    'style'    => 'default',
+  ]);
+}
+add_action('acf/init', 'sapi_register_acf_projet_sur_mesure');
+
+/**
+ * Handle "Sur Mesure" contact form submission
+ */
+function sapi_handle_surmesure_form() {
+  if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['sapi_surmesure_nonce'])) {
+    return ['submitted' => false, 'success' => false, 'error' => ''];
+  }
+
+  if (!wp_verify_nonce($_POST['sapi_surmesure_nonce'], 'sapi_surmesure_form')) {
+    return ['submitted' => true, 'success' => false, 'error' => 'Erreur de sécurité. Veuillez réessayer.'];
+  }
+
+  // Honeypot
+  if (!empty($_POST['website'])) {
+    return ['submitted' => true, 'success' => false, 'error' => 'Spam détecté.'];
+  }
+
+  $name    = sanitize_text_field($_POST['name'] ?? '');
+  $email   = sanitize_email($_POST['email'] ?? '');
+  $message = sanitize_textarea_field($_POST['message'] ?? '');
+
+  if (empty($name) || empty($email) || empty($message)) {
+    return ['submitted' => true, 'success' => false, 'error' => 'Veuillez remplir tous les champs.'];
+  }
+
+  if (!is_email($email)) {
+    return ['submitted' => true, 'success' => false, 'error' => 'Adresse email invalide.'];
+  }
+
+  $to      = 'contact@atelier-sapi.fr';
+  $subject = '[Sur Mesure] Nouveau projet de ' . $name;
+  $body    = "Nom: $name\n";
+  $body   .= "Email: $email\n\n";
+  $body   .= "Projet sur mesure:\n$message";
+
+  $headers = [
+    'Content-Type: text/plain; charset=UTF-8',
+    'From: ' . get_bloginfo('name') . ' <noreply@' . wp_parse_url(home_url(), PHP_URL_HOST) . '>',
+    'Reply-To: ' . $name . ' <' . $email . '>',
+  ];
+
+  if (wp_mail($to, $subject, $body, $headers)) {
+    return ['submitted' => true, 'success' => true, 'error' => ''];
+  }
+
+  return ['submitted' => true, 'success' => false, 'error' => "Erreur lors de l'envoi. Veuillez réessayer ou nous contacter directement par email."];
+}
+
