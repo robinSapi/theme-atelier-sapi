@@ -181,11 +181,17 @@ $icons = [
       <?php endforeach; ?>
     </div>
 
-    <!-- Back button -->
-    <button class="guide-back-btn" id="guide-back" type="button" aria-label="Retour à l'étape précédente" hidden>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-      Retour
-    </button>
+    <!-- Navigation buttons -->
+    <div class="guide-nav-buttons">
+      <button class="guide-back-btn" id="guide-back" type="button" aria-label="Retour à l'étape précédente" hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Retour
+      </button>
+      <button class="guide-reset-btn" id="guide-reset" type="button" aria-label="Recommencer le questionnaire" hidden>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        Recommencer
+      </button>
+    </div>
 
   </section>
 

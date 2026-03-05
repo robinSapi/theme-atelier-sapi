@@ -133,6 +133,7 @@
     dom.resultsTitle    = document.getElementById('guide-results-title');
     dom.resultError     = document.getElementById('guide-result-error');
     dom.restartBtn      = document.getElementById('guide-restart');
+    dom.resetBtn        = document.getElementById('guide-reset');
     dom.startBtn        = document.getElementById('guide-start-btn');
     dom.restartWrap     = document.getElementById('guide-restart-wrap');
 
@@ -149,6 +150,7 @@
     bindChoiceClicks();
     bindBackButton();
     bindRestartButton();
+    bindResetButton();
     bindKeyboard();
 
     // Restore session if valid V2 format
@@ -637,9 +639,10 @@
   // UI HELPERS
   // ================================================================
   function updateBackButton(stepId) {
-    if (!dom.backBtn) return;
     var visible = getVisibleSteps();
-    dom.backBtn.hidden = visible.indexOf(stepId) <= 0;
+    var isFirst = visible.indexOf(stepId) <= 0;
+    if (dom.backBtn) dom.backBtn.hidden = isFirst;
+    if (dom.resetBtn) dom.resetBtn.hidden = isFirst;
   }
 
   function updateStepCounter(stepId) {
@@ -706,36 +709,46 @@
   function bindRestartButton() {
     if (dom.restartBtn) {
       dom.restartBtn.addEventListener('click', function () {
-        state.currentStepId = null;
-        state.answers = {};
-        state.labels = {};
-        state.isShowingResults = false;
-        state.resultProducts = [];
-        state.resultIndex = 0;
-        state.aiText = '';
-        clearSession();
-
-        // Deselect all cards
-        document.querySelectorAll('.guide-choice-card.is-selected').forEach(function (c) {
-          c.classList.remove('is-selected');
-        });
-
-        // Hide results, show quiz
-        if (dom.results) {
-          dom.results.setAttribute('aria-hidden', 'true');
-          dom.results.classList.remove('is-visible');
-        }
-        if (dom.quiz) {
-          dom.quiz.setAttribute('aria-hidden', 'false');
-        }
-
-        // Reset to first step
-        var visible = getVisibleSteps();
-        state.currentStepId = visible[0];
-        renderStep(state.currentStepId, 'none');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        resetQuiz();
       });
     }
+  }
+
+  function bindResetButton() {
+    if (dom.resetBtn) {
+      dom.resetBtn.addEventListener('click', function () {
+        resetQuiz();
+      });
+    }
+  }
+
+  function resetQuiz() {
+    state.currentStepId = null;
+    state.answers = {};
+    state.labels = {};
+    state.isShowingResults = false;
+    state.aiText = '';
+    clearSession();
+
+    // Deselect all cards
+    document.querySelectorAll('.guide-choice-card.is-selected').forEach(function (c) {
+      c.classList.remove('is-selected');
+    });
+
+    // Hide results if visible, show quiz
+    if (dom.results) {
+      dom.results.setAttribute('aria-hidden', 'true');
+      dom.results.classList.remove('is-visible');
+    }
+    if (dom.quiz) {
+      dom.quiz.setAttribute('aria-hidden', 'false');
+    }
+
+    // Reset to first step
+    var visible = getVisibleSteps();
+    state.currentStepId = visible[0];
+    renderStep(state.currentStepId, 'none');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function bindKeyboard() {
