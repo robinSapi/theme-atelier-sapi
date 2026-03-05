@@ -621,7 +621,7 @@
       var smDesc = 'Un luminaire unique, con\u00e7u sp\u00e9cialement pour votre espace par Robin.';
 
       if (surMesureReason === 'grappe') {
-        smTitle = 'Luminaire multi-ampoules';
+        smTitle = 'Cr\u00e9ation multi-ampoules';
         smDesc = 'Un luminaire \u00e0 plusieurs sources lumineuses, con\u00e7u sur mesure par Robin pour votre espace.';
       }
 
