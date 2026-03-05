@@ -1407,7 +1407,9 @@ function sapi_ajax_guide_results() {
   }
 
   // 6. Pick products: 3 if sur mesure card shown (4th slot = carte sur mesure), else 4
-  $display_products = sapi_guide_pick_four($products_data, $show_sur_mesure ? 3 : 4);
+  // Grappe: diversify by format (one of each)
+  $diversify_format = ($eclairage_answer === 'grappe');
+  $display_products = sapi_guide_pick_four($products_data, $show_sur_mesure ? 3 : 4, $diversify_format);
 
   // 6. Call Claude API for AI recommendation (only sees the 4 displayed products)
   $ai_response = null;
@@ -1554,7 +1556,10 @@ function sapi_guide_query_products(array $answers, array $categories) {
   $taille  = isset($answers['taille'])  ? $answers['taille']  : '';
   $hauteur = isset($answers['hauteur']) ? $answers['hauteur'] : '';
 
+  $eclairage = isset($answers['eclairage']) ? $answers['eclairage'] : '';
+
   $allow_vertical = (
+    $eclairage === 'grappe' ||
     $piece === 'escalier' ||
     ($piece === 'entree' && in_array($hauteur, ['grande', 'confortable'], true)) ||
     ($taille === 'petite' && in_array($hauteur, ['grande', 'confortable'], true))
@@ -1811,17 +1816,64 @@ function sapi_guide_find_product_by_id(array $products, $id) {
 }
 
 /**
- * Pick up to $count products from the filtered list:
- * 1) Best seller (most total_sales)
- * 2) Newest (most recent post date)
- * 3) 2nd best seller
- * 4) Random among remaining (only if $count >= 4)
+ * Pick up to $count products from the filtered list.
+ * Normal mode: best seller, newest, 2nd best seller, random.
+ * Diversify mode (grappe): one product per format (horizontal, boule, vertical…),
+ * prioritized by total_sales within each format.
  */
-function sapi_guide_pick_four(array $products, $count = 4) {
+function sapi_guide_pick_four(array $products, $count = 4, $diversify_format = false) {
   if (count($products) <= $count) {
     return $products;
   }
 
+  // Grappe: pick one product per format, best seller within each
+  if ($diversify_format) {
+    $by_format = [];
+    foreach ($products as $p) {
+      $fmt = !empty($p['format']) ? strtolower($p['format']) : 'autre';
+      if (!isset($by_format[$fmt])) {
+        $by_format[$fmt] = [];
+      }
+      $by_format[$fmt][] = $p;
+    }
+    // Sort each format group by sales desc
+    foreach ($by_format as &$group) {
+      usort($group, function ($a, $b) {
+        return $b['total_sales'] - $a['total_sales'];
+      });
+    }
+    unset($group);
+
+    // Pick best seller from each format
+    $picked = [];
+    foreach ($by_format as $group) {
+      $picked[] = $group[0];
+      if (count($picked) >= $count) {
+        break;
+      }
+    }
+
+    // If not enough formats, fill from remaining best sellers
+    if (count($picked) < $count) {
+      $picked_ids = array_map(function ($p) { return $p['id']; }, $picked);
+      $remaining = array_filter($products, function ($p) use ($picked_ids) {
+        return !in_array($p['id'], $picked_ids);
+      });
+      usort($remaining, function ($a, $b) {
+        return $b['total_sales'] - $a['total_sales'];
+      });
+      foreach ($remaining as $p) {
+        $picked[] = $p;
+        if (count($picked) >= $count) {
+          break;
+        }
+      }
+    }
+
+    return $picked;
+  }
+
+  // Normal mode
   $picked = [];
   $remaining = $products;
 
