@@ -122,6 +122,7 @@
     dom.steps           = document.querySelectorAll('.guide-step');
     dom.backBtn         = document.getElementById('guide-back');
     dom.results         = document.getElementById('guide-results');
+    dom.resultsTags     = document.getElementById('guide-results-tags');
     dom.resultsLoading  = document.getElementById('guide-results-loading');
     dom.productsGrid    = document.getElementById('guide-result-products-grid');
     dom.aiText          = document.getElementById('guide-ai-text');
@@ -432,6 +433,23 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  function renderAnswerTags() {
+    if (!dom.resultsTags) return;
+
+    var visible = getVisibleSteps();
+    var html = '';
+
+    visible.forEach(function (stepId) {
+      var label = state.labels[stepId];
+      if (!label) return;
+      html += '<span class="guide-answer-tag">'
+            + '<span class="guide-tag-label">' + escapeHtml(label) + '</span>'
+            + '</span>';
+    });
+
+    dom.resultsTags.innerHTML = html;
+    dom.resultsTags.style.display = html ? '' : 'none';
+  }
 
   // ================================================================
   // FETCH RESULTS + AI
@@ -493,6 +511,9 @@
         if (d.followup_buttons && d.followup_buttons.length > 0) {
           renderFollowupButtons(d.followup_buttons);
         }
+
+        // Display answer tags below grid
+        renderAnswerTags();
 
       } else {
         renderResultsError();
