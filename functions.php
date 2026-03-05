@@ -1682,6 +1682,12 @@ function sapi_guide_collect_results($query, array $answers) {
       $preferred_taille_slug = '';
       if ($taille_answer) {
         $taille_terms = wc_get_product_terms($product->get_id(), 'pa_taille', ['orderby' => 'menu_order']);
+
+        // Grande pièce : exclure les produits avec 2 tailles ou moins
+        if ($taille_answer === 'grande' && !empty($taille_terms) && count($taille_terms) <= 2) {
+          continue;
+        }
+
         if (!empty($taille_terms)) {
           $idx = min($size_index, count($taille_terms) - 1);
           $preferred_taille_slug = $taille_terms[$idx]->slug;
