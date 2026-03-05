@@ -12586,7 +12586,7 @@ body.woocommerce-order-received {
 }
 
 .woocommerce-cart article.page > header {
-  padding: 2rem 3rem 1.5rem;
+  padding: 2rem 3rem 0;
   background: var(--color-cream);
   text-align: center;
 }
@@ -13215,8 +13215,8 @@ body.woocommerce-cart {
   -ms-flex-pack: center;
   justify-content: center;
   gap: 0;
-  margin-bottom: 2rem;
-  padding: 1.5rem 0;
+  margin-bottom: 1rem;
+  padding: 0.75rem 0;
 }
 
 .progress-step {
