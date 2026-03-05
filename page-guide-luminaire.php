@@ -156,7 +156,7 @@ $icons = [
       ?>
         <div class="guide-step" data-step="<?php echo esc_attr($step['id']); ?>" role="group" aria-labelledby="guide-q-<?php echo esc_attr($step['id']); ?>">
           <div class="guide-step-inner">
-            <p class="guide-step-number" aria-hidden="true" data-step-counter></p>
+            <div class="guide-progress" aria-hidden="true"><div class="guide-progress-bar" data-step-counter></div></div>
             <h2 class="guide-step-question" id="guide-q-<?php echo esc_attr($step['id']); ?>"><?php echo esc_html($step['question']); ?></h2>
             <div class="guide-choices-grid" data-count="<?php echo esc_attr($choice_count); ?>" role="list">
               <?php foreach ($step['choices'] as $choice) :

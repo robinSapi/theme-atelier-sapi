@@ -16986,14 +16986,21 @@ html.sapi-intro-active body {
   text-align: center;
 }
 
-.guide-step-number {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--color-wood, #937D68);
-  margin-bottom: 1.5rem;
+.guide-progress {
+  width: 120px;
+  height: 4px;
+  background: #E8DFD5;
+  border-radius: 2px;
+  margin: 0 auto 1.5rem;
+  overflow: hidden;
+}
+
+.guide-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #E35B24 0%, #D14F1C 100%);
+  border-radius: 2px;
+  transition: width 0.4s ease;
 }
 
 .guide-step-question {

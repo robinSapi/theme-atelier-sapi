@@ -650,17 +650,13 @@
     var idx = visible.indexOf(stepId);
     var counterEl = document.querySelector('.guide-step.is-active [data-step-counter]');
     if (!counterEl) {
-      // The step may not be active yet, try with the target step
       var stepEl = document.querySelector('.guide-step[data-step="' + stepId + '"]');
       if (stepEl) counterEl = stepEl.querySelector('[data-step-counter]');
     }
     if (counterEl && idx !== -1) {
-      counterEl.textContent = pad(idx + 1) + ' / ' + pad(visible.length);
+      var pct = ((idx + 1) / visible.length) * 100;
+      counterEl.style.width = pct + '%';
     }
-  }
-
-  function pad(n) {
-    return n < 10 ? '0' + n : '' + n;
   }
 
   function bindBackButton() {
