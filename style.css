@@ -17247,9 +17247,9 @@ html.sapi-intro-active body {
 /* ---- Products Grid (up to 4 products) ---- */
 .guide-result-products-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 24px;
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto 3rem;
 }
 
