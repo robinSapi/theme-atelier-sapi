@@ -18514,7 +18514,34 @@ html.sapi-intro-active body {
   margin-top: 1.5rem;
 }
 
-/* Masque le récap add-ons (produit + options + subtotal) */
-#product-addons-total {
+/* Masque les lignes de détail, garde uniquement le subtotal */
+.product-addon-totals > ul > li:not(.wc-pao-subtotal-line) {
   display: none;
+}
+
+/* Style du subtotal */
+.wc-pao-subtotal-line {
+  list-style: none;
+  justify-content: flex-start !important;
+}
+
+.wc-pao-subtotal-line p.price {
+  color: #018501 !important;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  margin: 0;
+  font-size: 0;
+}
+
+.wc-pao-subtotal-line p.price .amount {
+  font-size: 1.1rem;
+}
+
+/* Retire bordures du bloc totals */
+.product-addon-totals,
+.product-addon-totals ul,
+.product-addon-totals li {
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
