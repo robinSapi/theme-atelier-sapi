@@ -199,7 +199,7 @@ $icons = [
   <section class="guide-results-section" id="guide-results" aria-hidden="true">
     <div class="guide-results-header">
       <div class="guide-results-tags" id="guide-results-tags"></div>
-      <h2 class="guide-results-title" id="guide-results-title">Notre sélection pour vous</h2>
+      <h2 class="guide-results-title" id="guide-results-title">Les luminaires les plus adaptés à votre espace</h2>
     </div>
 
     <!-- Loading with progressive steps -->
