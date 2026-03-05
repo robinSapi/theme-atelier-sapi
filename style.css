@@ -17021,6 +17021,11 @@ html.sapi-intro-active body {
   margin: 0 auto;
 }
 
+.guide-choices-grid[data-count="4"] {
+  grid-template-columns: repeat(4, 1fr);
+  max-width: 900px;
+}
+
 .guide-choices-grid[data-count="5"],
 .guide-choices-grid[data-count="6"] {
   grid-template-columns: repeat(3, 1fr);
@@ -17575,6 +17580,7 @@ html.sapi-intro-active body {
   }
 
   .guide-choices-grid,
+  .guide-choices-grid[data-count="4"],
   .guide-choices-grid[data-count="5"] {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
