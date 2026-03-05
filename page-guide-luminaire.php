@@ -34,13 +34,13 @@ $guide_steps = [
   ],
   [
     'id'         => 'eclairage',
-    'question'   => 'Pour un grand espace, Robin recommande de multiplier les sources. Que recherchez-vous ?',
+    'question'   => 'Pour un grand espace, Robin recommande toujours de multiplier les sources lumineuses. Que pensez-vous ?',
     'visibility' => ['taille' => ['grande']],
     'choices'    => [
-      ['label' => 'Mon éclairage principal',     'slug' => 'principal',  'icon' => 'sun'],
-      ['label' => 'Un éclairage secondaire',     'slug' => 'secondaire', 'icon' => 'lamp-desk'],
-      ['label' => 'Un luminaire multi-ampoules', 'slug' => 'grappe',     'icon' => 'cluster'],
-      ['label' => 'Je verrai plus tard',         'slug' => 'plustard',   'icon' => 'clock'],
+      ['label' => 'Je cherche d\'abord mon éclairage principal', 'slug' => 'principal',  'icon' => 'sun'],
+      ['label' => 'Je veux compléter mon éclairage existant',   'slug' => 'secondaire', 'icon' => 'lamp-desk'],
+      ['label' => 'Un luminaire multi-ampoules m\'intéresse !', 'slug' => 'grappe',     'icon' => 'cluster'],
+      ['label' => 'Je verrai plus tard',                        'slug' => 'plustard',   'icon' => 'clock'],
     ],
   ],
   [
