@@ -1571,7 +1571,7 @@ function sapi_guide_query_products(array $answers, array $categories) {
 
   $allow_vertical = (
     $piece === 'escalier' ||
-    ($piece === 'couloir' && in_array($hauteur, ['grande', 'confortable'], true)) ||
+    ($piece === 'entree' && in_array($hauteur, ['grande', 'confortable'], true)) ||
     ($taille === 'petite' && in_array($hauteur, ['grande', 'confortable'], true))
   );
 
@@ -1631,7 +1631,7 @@ function sapi_guide_query_products(array $answers, array $categories) {
   }
 
   // Second fallback: if still no results, drop format exclusion too
-  if (!$query->have_posts() && $exclude_vertical) {
+  if (!$query->have_posts() && !$allow_vertical) {
     wp_reset_postdata();
     $args['tax_query'] = [
       ['taxonomy' => 'product_cat', 'field' => 'slug', 'terms' => $categories, 'operator' => 'IN'],
@@ -1641,6 +1641,16 @@ function sapi_guide_query_products(array $answers, array $categories) {
   }
 
   $results = sapi_guide_collect_results($query, $answers);
+
+  // Fallback: if grande pièce excluded all products via ≤2 tailles, retry without size filter
+  if (empty($results) && $taille === 'grande' && $query->have_posts()) {
+    $query->rewind_posts();
+    $answers_no_taille = $answers;
+    unset($answers_no_taille['taille']);
+    $results = sapi_guide_collect_results($query, $answers_no_taille);
+    $fallback_notes[] = "ATTENTION : les produits proposés n'ont pas tous 3 tailles ou plus. La recommandation de taille peut ne pas correspondre parfaitement à une grande pièce.";
+  }
+
   wp_reset_postdata();
   return ['products' => $results, 'fallback_notes' => $fallback_notes];
 }
