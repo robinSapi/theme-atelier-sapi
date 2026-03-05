@@ -225,17 +225,16 @@ $icons = [
 
     <!-- Sur mesure block (grappe) -->
     <div class="guide-sur-mesure" id="guide-sur-mesure" style="display:none;">
-      <div class="guide-sur-mesure-inner">
-        <div class="guide-sur-mesure-icon" aria-hidden="true">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4m-5-2v6m10-6v6"/><circle cx="12" cy="10" r="3"/><circle cx="7" cy="14" r="2.5"/><circle cx="17" cy="14" r="2.5"/></svg>
-        </div>
-        <h3 class="guide-sur-mesure-title">Création sur mesure</h3>
-        <div class="guide-sur-mesure-text" id="guide-sur-mesure-text"></div>
-        <a href="/contact/" class="guide-sur-mesure-cta">
-          Contacter Robin
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
+      <div class="guide-ai-recommendation">
+        <span class="guide-ai-quote guide-ai-quote-open">&laquo;</span>
+        <div class="guide-ai-text-content" id="guide-sur-mesure-text"></div>
+        <span class="guide-ai-quote guide-ai-quote-close">&raquo;</span>
+        <div class="guide-ai-signature">&mdash; Robin</div>
       </div>
+      <a href="/contact/" class="guide-sur-mesure-cta">
+        Contacter Robin pour en discuter
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
     </div>
 
     <!-- Follow-up buttons (AI-generated, display only in Phase A) -->

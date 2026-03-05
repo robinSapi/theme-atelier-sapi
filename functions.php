@@ -2008,21 +2008,24 @@ function sapi_guide_sur_mesure_response(array $answers) {
 
   $prompt  = "Tu es le conseiller luminaire de l'Atelier Sâpi, un atelier artisanal à Lyon qui crée des luminaires en bois découpés au laser par Robin.\n\n";
   $prompt .= $ton . "\n\n";
-  $prompt .= "Le client recherche un luminaire multi-ampoules (en grappe) pour une grande pièce.\n";
+  $prompt .= "Le client s'intéresse à un luminaire multi-ampoules pour une grande pièce.\n";
   $prompt .= "Pièce : " . ($piece ?: 'non précisée') . "\n";
   $prompt .= "Style : " . ($style ?: 'non précisé') . "\n\n";
   $prompt .= "INSTRUCTIONS :\n";
-  $prompt .= "1. Explique le concept de luminaire en grappe : plusieurs suspensions installées ensemble, à différentes hauteurs, créant un effet spectaculaire.\n";
-  $prompt .= "2. Mentionne que c'est une création sur mesure réalisée par Robin, avec un pavillon adapté pour suspendre plusieurs luminaires.\n";
-  $prompt .= "3. Donne des exemples d'effet visuel selon la pièce du client (au-dessus d'une grande table, au milieu du salon, dans un hall, en cage d'escalier...).\n";
-  $prompt .= "4. Invite le client à contacter Robin pour discuter du projet.\n";
+  $prompt .= "1. Présente les différentes possibilités multi-ampoules que Robin peut créer sur mesure :\n";
+  $prompt .= "   - Une grappe de suspensions : plusieurs luminaires du catalogue suspendus ensemble à différentes hauteurs, avec un pavillon adapté. Effet spectaculaire.\n";
+  $prompt .= "   - Un grand luminaire à plusieurs ampoules : une création unique avec plusieurs sources lumineuses intégrées.\n";
+  $prompt .= "   - D'autres solutions créatives sont possibles : Robin adore les défis et peut imaginer des concepts originaux.\n";
+  $prompt .= "2. Donne des exemples concrets selon la pièce du client (au-dessus d'une grande table, au milieu du salon, dans un hall, en cage d'escalier...).\n";
+  $prompt .= "3. Mentionne que tout est fabriqué artisanalement en bois découpé au laser dans son atelier à Lyon.\n";
+  $prompt .= "4. Invite le client à contacter Robin pour discuter de son projet — c'est sans engagement.\n";
   $prompt .= "5. Maximum 100 mots. Sois chaleureux et inspirant.\n";
   $prompt .= "6. N'utilise AUCUN formatage markdown (pas de **, pas de #, pas de _). Texte brut uniquement.\n";
   $prompt .= "7. Réponds uniquement avec le texte, pas de JSON.\n";
 
   $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
   if (empty($api_key)) {
-    return 'Un luminaire en grappe, c\'est plusieurs suspensions réunies pour créer un effet spectaculaire. Robin crée ces compositions sur mesure, adaptées à votre espace. Contactez-le pour en discuter.';
+    return 'Plusieurs possibilités s\'offrent à vous : une grappe de suspensions à différentes hauteurs, un grand luminaire multi-ampoules, ou une création originale imaginée par Robin. Tout est fabriqué artisanalement en bois dans son atelier à Lyon. Contactez Robin pour discuter de votre projet, c\'est sans engagement.';
   }
 
   $body = [
@@ -2045,7 +2048,7 @@ function sapi_guide_sur_mesure_response(array $answers) {
   ]);
 
   if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
-    return 'Un luminaire en grappe, c\'est plusieurs suspensions réunies pour créer un effet spectaculaire. Robin crée ces compositions sur mesure, adaptées à votre espace. Contactez-le pour en discuter.';
+    return 'Plusieurs possibilités s\'offrent à vous : une grappe de suspensions à différentes hauteurs, un grand luminaire multi-ampoules, ou une création originale imaginée par Robin. Tout est fabriqué artisanalement en bois dans son atelier à Lyon. Contactez Robin pour discuter de votre projet, c\'est sans engagement.';
   }
 
   $data = json_decode(wp_remote_retrieve_body($response), true);
@@ -2053,7 +2056,7 @@ function sapi_guide_sur_mesure_response(array $answers) {
     return $data['content'][0]['text'];
   }
 
-  return 'Un luminaire en grappe, c\'est plusieurs suspensions réunies pour créer un effet spectaculaire. Robin crée ces compositions sur mesure, adaptées à votre espace. Contactez-le pour en discuter.';
+  return 'Plusieurs possibilités s\'offrent à vous : une grappe de suspensions à différentes hauteurs, un grand luminaire multi-ampoules, ou une création originale imaginée par Robin. Tout est fabriqué artisanalement en bois dans son atelier à Lyon. Contactez Robin pour discuter de votre projet, c\'est sans engagement.';
 }
 
 /**
