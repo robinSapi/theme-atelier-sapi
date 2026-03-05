@@ -547,8 +547,13 @@
       var p = products[i];
       var variationHtml = '';
       if (p.variation_label) {
-        variationHtml = '<p class="guide-result-variation">'
+        variationHtml += '<p class="guide-result-variation">'
           + 'Essence recommandée : ' + escapeHtml(p.variation_label)
+          + '</p>';
+      }
+      if (p.size_label) {
+        variationHtml += '<p class="guide-result-variation">'
+          + 'Taille recommandée : ' + escapeHtml(p.size_label)
           + '</p>';
       }
 

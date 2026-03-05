@@ -1638,6 +1638,12 @@ function sapi_guide_collect_results($query, array $answers) {
     $preferred_essence = 'okoume';
   }
 
+  // Determine preferred size index from room size
+  $taille_answer = isset($answers['taille']) ? $answers['taille'] : '';
+  $size_index = 0; // petite = smallest
+  if ($taille_answer === 'moyenne') $size_index = 1;
+  if ($taille_answer === 'grande') $size_index = 2;
+
   $products = [];
   while ($query->have_posts()) {
     $query->the_post();
@@ -1649,6 +1655,7 @@ function sapi_guide_collect_results($query, array $answers) {
     $image_id  = $product->get_image_id();
     $price     = $product->get_price_html();
     $variation_label = '';
+    $size_label = '';
 
     // Get category slugs
     $cats = get_the_terms($product->get_id(), 'product_cat');
@@ -1667,24 +1674,57 @@ function sapi_guide_collect_results($query, array $answers) {
     $ampoule_terms = get_the_terms($product->get_id(), 'pa_type-ampoule');
     $ampoule = ($ampoule_terms && !is_wp_error($ampoule_terms)) ? $ampoule_terms[0]->name : '';
 
-    // Match preferred essence variation
-    if ($preferred_essence && $product->is_type('variable')) {
+    // Match preferred essence + size variation
+    if ($product->is_type('variable')) {
       $variations = $product->get_available_variations();
+
+      // Determine preferred taille slug for this product
+      $preferred_taille_slug = '';
+      if ($taille_answer) {
+        $taille_terms = wc_get_product_terms($product->get_id(), 'pa_taille', ['orderby' => 'menu_order']);
+        if (!empty($taille_terms)) {
+          $idx = min($size_index, count($taille_terms) - 1);
+          $preferred_taille_slug = $taille_terms[$idx]->slug;
+          $size_label = $taille_terms[$idx]->name;
+        }
+      }
+
+      // Find best variation matching both essence + taille
+      $best_var = null;
+      $fallback_essence = null;
+      $fallback_taille = null;
+
       foreach ($variations as $var) {
-        $materiau_value = isset($var['attributes']['attribute_pa_materiau'])
-          ? $var['attributes']['attribute_pa_materiau']
-          : '';
-        if ($materiau_value === $preferred_essence) {
-          if (!empty($var['image_id'])) {
-            $image_id = $var['image_id'];
-          }
-          $var_product = wc_get_product($var['variation_id']);
-          if ($var_product) {
-            $price = $var_product->get_price_html();
-          }
+        $mat = isset($var['attributes']['attribute_pa_materiau']) ? $var['attributes']['attribute_pa_materiau'] : '';
+        $tai = isset($var['attributes']['attribute_pa_taille']) ? $var['attributes']['attribute_pa_taille'] : '';
+
+        // Empty attribute = "any" in WooCommerce
+        $essence_ok = (!$preferred_essence || $mat === $preferred_essence || $mat === '');
+        $taille_ok  = (!$preferred_taille_slug || $tai === $preferred_taille_slug || $tai === '');
+
+        if ($essence_ok && $taille_ok) {
+          $best_var = $var;
+          break;
+        }
+        if ($essence_ok && !$fallback_essence) $fallback_essence = $var;
+        if ($taille_ok && !$fallback_taille) $fallback_taille = $var;
+      }
+
+      if (!$best_var) {
+        $best_var = $fallback_essence ?: $fallback_taille;
+      }
+
+      if ($best_var) {
+        if (!empty($best_var['image_id'])) {
+          $image_id = $best_var['image_id'];
+        }
+        $var_product = wc_get_product($best_var['variation_id']);
+        if ($var_product) {
+          $price = $var_product->get_price_html();
+        }
+        if ($preferred_essence) {
           $term = get_term_by('slug', $preferred_essence, 'pa_materiau');
           $variation_label = $term ? $term->name : ucfirst($preferred_essence);
-          break;
         }
       }
     }
@@ -1697,6 +1737,7 @@ function sapi_guide_collect_results($query, array $answers) {
       'image_alt'       => $image_id ? get_post_meta($image_id, '_wp_attachment_image_alt', true) : '',
       'permalink'       => get_permalink($product->get_id()),
       'variation_label' => $variation_label,
+      'size_label'      => $size_label,
       'categories'      => $cat_slugs,
       'format'          => $format,
       'type_ampoule'    => $ampoule,
@@ -1781,6 +1822,9 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
     $prompt .= "- " . $p['title'] . " | Prix : " . wp_strip_all_tags($p['price']) . " | Catégorie : " . implode(', ', $p['categories']) . " | Format : " . $p['format'] . " | Ampoule : " . $p['type_ampoule'];
     if ($p['variation_label']) {
       $prompt .= " | Essence recommandée : " . $p['variation_label'];
+    }
+    if (!empty($p['size_label'])) {
+      $prompt .= " | Taille recommandée : " . $p['size_label'];
     }
     $prompt .= " | Ventes : " . $p['total_sales'] . " | ID : " . $p['id'] . "\n";
   }
