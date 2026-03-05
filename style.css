@@ -18527,6 +18527,7 @@ html.sapi-intro-active body {
 /* Style du subtotal identique au prix produit */
 .wc-pao-subtotal-line {
   list-style: none;
+  justify-content: flex-start !important;
 }
 
 .wc-pao-subtotal-line p.price {
