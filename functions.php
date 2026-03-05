@@ -979,19 +979,44 @@ function sapi_render_mini_cart_contents() {
                 <?php endforeach; ?>
               <?php endif; ?>
               <?php
-              // Afficher les métadonnées supplémentaires (add-ons, etc.)
+              // DEBUG: voir les clés disponibles dans $cart_item
+              $debug_keys = array_keys($cart_item);
+              echo '<!-- CART KEYS: ' . esc_html(implode(', ', $debug_keys)) . ' -->';
+              if (!empty($cart_item['addons'])) {
+                echo '<!-- ADDONS DATA: ' . esc_html(print_r($cart_item['addons'], true)) . ' -->';
+              }
               $extra_data = apply_filters('woocommerce_get_item_data', array(), $cart_item);
-              if (!empty($extra_data)) :
-                foreach ($extra_data as $data) :
-                  $label = isset($data['key']) ? $data['key'] : (isset($data['name']) ? $data['name'] : '');
-                  $value = isset($data['display']) ? wp_strip_all_tags($data['display']) : (isset($data['value']) ? $data['value'] : '');
-                  if (empty($label) || empty($value)) continue;
+              echo '<!-- ITEM DATA COUNT: ' . count($extra_data) . ' -->';
+
+              // Méthode 1: $cart_item['addons']
+              $addon_rendered = false;
+              if (!empty($cart_item['addons']) && is_array($cart_item['addons'])) :
+                foreach ($cart_item['addons'] as $addon) :
+                  $name = isset($addon['name']) ? $addon['name'] : '';
+                  $value = isset($addon['value']) ? $addon['value'] : '';
+                  if (empty($name) || empty($value)) continue;
+                  $addon_rendered = true;
               ?>
                   <div class="mini-cart-var-line">
-                    <span class="mini-cart-var-label"><?php echo esc_html(rtrim($label, ': ')); ?> :</span>
+                    <span class="mini-cart-var-label"><?php echo esc_html(rtrim($name, ': ')); ?> :</span>
                     <span class="mini-cart-var-value"><?php echo esc_html($value); ?></span>
                   </div>
-              <?php endforeach; endif; ?>
+              <?php endforeach; endif;
+
+              // Méthode 2 (fallback): wc_get_formatted_cart_item_data
+              if (!$addon_rendered) :
+                $flat_data = wc_get_formatted_cart_item_data($cart_item, true);
+                if (!empty($flat_data)) :
+                  $lines = array_filter(explode("\n", trim($flat_data)));
+                  foreach ($lines as $line) :
+                    $parts = explode(': ', $line, 2);
+                    if (count($parts) === 2) :
+              ?>
+                  <div class="mini-cart-var-line">
+                    <span class="mini-cart-var-label"><?php echo esc_html(rtrim($parts[0], ': ')); ?> :</span>
+                    <span class="mini-cart-var-value"><?php echo esc_html($parts[1]); ?></span>
+                  </div>
+              <?php endif; endforeach; endif; endif; ?>
             </div>
             <div class="mini-cart-item-bottom">
               <span class="mini-cart-item-price">
