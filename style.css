@@ -18506,9 +18506,7 @@ html.sapi-intro-active body {
 }
 
 /* ==========================================================================
-   WooCommerce Product Add-Ons – Masquage récap redondant
+   WooCommerce Product Add-Ons – Styles
    ========================================================================== */
 
-#product-addons-total {
-  display: none;
-}
+/* Temporaire : tout visible pour inspection */
