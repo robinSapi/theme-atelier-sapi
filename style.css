@@ -18163,8 +18163,8 @@ html.sapi-intro-active body {
 
 .surmesure-modal-container {
   position: relative;
-  width: 90vw;
-  max-width: 900px;
+  width: 92vw;
+  max-width: 1100px;
   max-height: 85vh;
   background: #fff;
   border-radius: 16px;
@@ -18180,26 +18180,34 @@ html.sapi-intro-active body {
 
 .surmesure-modal-close {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 1rem;
+  right: 1rem;
   z-index: 2;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid var(--color-wood, #937D68);
   border-radius: 50%;
   cursor: pointer;
-  color: var(--color-dark, #323232);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
+  padding: 10px;
+  color: var(--color-wood, #937D68);
+  transition: all 0.3s ease;
 }
 
 .surmesure-modal-close:hover {
-  background: #fff;
+  background: var(--color-orange, #E35B24);
+  border-color: var(--color-orange, #E35B24);
+  color: #fff;
   transform: scale(1.1);
+}
+
+.surmesure-modal-close svg {
+  display: block;
+  width: 24px;
+  height: 24px;
 }
 
 .surmesure-modal-body {
@@ -18335,7 +18343,9 @@ html.sapi-intro-active body {
   }
 
   .surmesure-modal-close {
-    top: 12px;
-    right: 12px;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 36px;
+    height: 36px;
   }
 }
