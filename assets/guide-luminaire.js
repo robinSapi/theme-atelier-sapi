@@ -134,6 +134,8 @@
     dom.resetBtn        = document.getElementById('guide-reset');
     dom.startBtn        = document.getElementById('guide-start-btn');
     dom.restartWrap     = document.getElementById('guide-restart-wrap');
+    dom.ambianceBanner  = document.getElementById('guide-ambiance-banner');
+    dom.ambianceImg     = document.getElementById('guide-ambiance-img');
 
     if (!dom.steps.length) return;
 
@@ -512,6 +514,14 @@
         // Display products grid (up to 4, or 3 + sur mesure card)
         if (d.products && d.products.length > 0) {
           renderProductsGrid(d.products, d.show_sur_mesure || false, d.sur_mesure_reason || '');
+
+          // Show ambiance_2 photo of first product as full-width banner
+          var firstProduct = d.products[0];
+          if (firstProduct && firstProduct.ambiance_2 && dom.ambianceBanner && dom.ambianceImg) {
+            dom.ambianceImg.src = firstProduct.ambiance_2;
+            dom.ambianceImg.alt = firstProduct.title + ' \u2014 ambiance';
+            dom.ambianceBanner.style.display = '';
+          }
         }
 
         // Display follow-up buttons
@@ -765,6 +775,7 @@
       dom.results.setAttribute('aria-hidden', 'true');
       dom.results.classList.remove('is-visible');
     }
+    if (dom.ambianceBanner) dom.ambianceBanner.style.display = 'none';
     if (dom.quiz) {
       dom.quiz.setAttribute('aria-hidden', 'false');
     }

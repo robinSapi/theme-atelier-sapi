@@ -1791,6 +1791,13 @@ function sapi_guide_collect_results($query, array $answers) {
       }
     }
 
+    // Ambiance photo for full-width banner
+    $ambiance_2_url = '';
+    $ambiance_2_raw = get_field('ambiance_2', $product->get_id());
+    if ($ambiance_2_raw) {
+      $ambiance_2_url = sapi_get_acf_image_url($ambiance_2_raw, 'full');
+    }
+
     $products[] = [
       'id'              => $product->get_id(),
       'title'           => $product->get_name(),
@@ -1804,6 +1811,7 @@ function sapi_guide_collect_results($query, array $answers) {
       'format'          => $format,
       'type_ampoule'    => $ampoule,
       'total_sales'     => (int) $product->get_total_sales(),
+      'ambiance_2'      => $ambiance_2_url,
     ];
   }
 

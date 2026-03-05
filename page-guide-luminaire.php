@@ -246,6 +246,11 @@ $icons = [
 
 </div><!-- .guide-luminaire-page -->
 
+<!-- Full-width ambiance photo (populated by JS from first product) -->
+<div class="guide-ambiance-banner" id="guide-ambiance-banner" style="display:none;">
+  <img class="guide-ambiance-img" id="guide-ambiance-img" src="" alt="" />
+</div>
+
 <script>
 var sapiGuide = <?php echo wp_json_encode([
   'ajaxUrl' => admin_url('admin-ajax.php'),
