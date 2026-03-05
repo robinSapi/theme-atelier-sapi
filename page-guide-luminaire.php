@@ -48,7 +48,7 @@ $guide_steps = [
     'question'   => 'Où installerez-vous votre luminaire ?',
     'visibility' => ['_or' => [
       ['taille' => ['petite', 'moyenne']],
-      ['eclairage' => ['principal', 'secondaire', 'plustard']],
+      ['eclairage' => ['principal', 'secondaire', 'grappe', 'plustard']],
       ['piece' => ['escalier']],
     ]],
     'choices'    => [
@@ -222,20 +222,6 @@ $icons = [
 
     <!-- Products grid (up to 4 products) -->
     <div class="guide-result-products-grid" id="guide-result-products-grid" style="display:none;"></div>
-
-    <!-- Sur mesure block (grappe) -->
-    <div class="guide-sur-mesure" id="guide-sur-mesure" style="display:none;">
-      <div class="guide-ai-recommendation">
-        <span class="guide-ai-quote guide-ai-quote-open">&laquo;</span>
-        <div class="guide-ai-text-content" id="guide-sur-mesure-text"></div>
-        <span class="guide-ai-quote guide-ai-quote-close">&raquo;</span>
-        <div class="guide-ai-signature">&mdash; Robin</div>
-      </div>
-      <a href="/contact/" class="guide-sur-mesure-cta">
-        Contacter Robin pour en discuter
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </a>
-    </div>
 
     <!-- Follow-up buttons (AI-generated, display only in Phase A) -->
     <div class="guide-followup-buttons" id="guide-followup-buttons" style="display:none;"></div>

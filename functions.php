@@ -1386,45 +1386,7 @@ function sapi_ajax_guide_results() {
     $clean[sanitize_key($key)] = sanitize_text_field($val);
   }
 
-  // 3. Court-circuit grappe → sur mesure (pas de produits)
-  if (isset($clean['eclairage']) && $clean['eclairage'] === 'grappe') {
-    $sur_mesure_text = sapi_guide_sur_mesure_response($clean);
-
-    // Email notification
-    $labels = [
-      'piece'     => 'Pièce',
-      'taille'    => 'Taille de la pièce',
-      'eclairage' => 'Type d\'éclairage',
-      'style'     => 'Style intérieur',
-    ];
-    $email_body = "Nouvelle demande SUR MESURE — Guide Luminaire\n";
-    $email_body .= "================================================\n\n";
-    $email_body .= "Le client souhaite un luminaire multi-ampoules (en grappe).\n\n";
-    $email_body .= "RÉPONSES DU CLIENT :\n";
-    foreach ($labels as $key => $label) {
-      if (isset($clean[$key])) {
-        $email_body .= "- " . $label . " : " . $clean[$key] . "\n";
-      }
-    }
-    $email_body .= "\nTEXTE AFFICHÉ AU CLIENT :\n";
-    $email_body .= $sur_mesure_text ?: "(pas de texte IA)";
-    $email_body .= "\n\n---\nDate : " . wp_date('d/m/Y H:i');
-
-    wp_mail(
-      get_option('admin_email'),
-      'Guide Luminaire — Demande sur mesure (grappe)',
-      $email_body
-    );
-
-    wp_send_json_success([
-      'sur_mesure' => true,
-      'ai_text'    => $sur_mesure_text,
-      'products'   => [],
-    ]);
-    return;
-  }
-
-  // 4. Determine product categories
+  // 3. Determine product categories
   $categories = sapi_guide_get_categories($clean);
 
   // 4. Query main products
@@ -1432,13 +1394,25 @@ function sapi_ajax_guide_results() {
   $products_data  = $query_result['products'];
   $fallback_notes = $query_result['fallback_notes'];
 
-  // 5. Pick 4 products: 1) best seller, 2) newest, 3) 2nd best seller, 4) random
-  $display_products = sapi_guide_pick_four($products_data);
+  // 5. Show sur mesure card? (grappe, grande pièce, haute hauteur)
+  $show_sur_mesure = false;
+  $eclairage_answer = isset($clean['eclairage']) ? $clean['eclairage'] : '';
+  $taille_answer    = isset($clean['taille'])    ? $clean['taille']    : '';
+  $hauteur_answer   = isset($clean['hauteur'])   ? $clean['hauteur']   : '';
+
+  if ($eclairage_answer === 'grappe'
+      || $taille_answer === 'grande'
+      || in_array($hauteur_answer, ['haute', 'confortable'], true)) {
+    $show_sur_mesure = true;
+  }
+
+  // 6. Pick products: 3 if sur mesure card shown (4th slot = carte sur mesure), else 4
+  $display_products = sapi_guide_pick_four($products_data, $show_sur_mesure ? 3 : 4);
 
   // 6. Call Claude API for AI recommendation (only sees the 4 displayed products)
   $ai_response = null;
   if (!empty($display_products)) {
-    $system_prompt = sapi_guide_build_system_prompt($display_products, $clean, $fallback_notes);
+    $system_prompt = sapi_guide_build_system_prompt($display_products, $clean, $fallback_notes, $show_sur_mesure);
     $ai_response = sapi_guide_call_claude($system_prompt);
   }
 
@@ -1474,6 +1448,9 @@ function sapi_ajax_guide_results() {
       $email_body .= "- " . $label . " : " . $clean[$key] . "\n";
     }
   }
+  if ($show_sur_mesure) {
+    $email_body .= "\nCARTE SUR MESURE : Oui\n";
+  }
   $email_body .= "\nPRODUITS PROPOSÉS :\n";
   foreach ($display_products as $dp) {
     $email_body .= "- " . $dp['title'] . " (" . wp_strip_all_tags($dp['price']) . ")\n";
@@ -1492,6 +1469,7 @@ function sapi_ajax_guide_results() {
     'ai_text'          => $ai_text,
     'products'         => $display_products,
     'followup_buttons' => $followup_buttons,
+    'show_sur_mesure'  => $show_sur_mesure,
   ]);
 }
 
@@ -1833,14 +1811,14 @@ function sapi_guide_find_product_by_id(array $products, $id) {
 }
 
 /**
- * Pick up to 4 products from the filtered list:
+ * Pick up to $count products from the filtered list:
  * 1) Best seller (most total_sales)
  * 2) Newest (most recent post date)
  * 3) 2nd best seller
- * 4) Random among remaining
+ * 4) Random among remaining (only if $count >= 4)
  */
-function sapi_guide_pick_four(array $products) {
-  if (count($products) <= 4) {
+function sapi_guide_pick_four(array $products, $count = 4) {
+  if (count($products) <= $count) {
     return $products;
   }
 
@@ -1865,8 +1843,10 @@ function sapi_guide_pick_four(array $products) {
   });
   $picked[] = array_shift($remaining);
 
-  // 4) Random among remaining
-  $picked[] = $remaining[array_rand($remaining)];
+  // 4) Random among remaining (only when picking 4)
+  if ($count >= 4 && !empty($remaining)) {
+    $picked[] = $remaining[array_rand($remaining)];
+  }
 
   return $picked;
 }
@@ -1874,7 +1854,7 @@ function sapi_guide_pick_four(array $products) {
 /**
  * Build the system prompt for Claude with filtered products and client answers
  */
-function sapi_guide_build_system_prompt(array $products_data, array $answers, array $fallback_notes = []) {
+function sapi_guide_build_system_prompt(array $products_data, array $answers, array $fallback_notes = [], $show_sur_mesure = false) {
   $theme_dir = get_stylesheet_directory();
 
   // Load rules and tone from text files
@@ -1915,6 +1895,10 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
   foreach ($labels as $key => $label) {
     $val = isset($answers[$key]) ? $answers[$key] : 'Non demandé';
     $prompt .= "- " . $label . " : " . $val . "\n";
+  }
+
+  if ($show_sur_mesure) {
+    $prompt .= "\nINFO CONTEXTE : Une carte \"Création sur mesure\" est affichée à côté des produits. Mentionne-la brièvement (une phrase).\n";
   }
 
   // Format de réponse JSON
@@ -1994,69 +1978,6 @@ function sapi_guide_call_claude($system_prompt) {
   }
 
   return $parsed;
-}
-
-/**
- * Generate AI text for sur mesure (grappe) result
- */
-function sapi_guide_sur_mesure_response(array $answers) {
-  $theme_dir = get_stylesheet_directory();
-  $ton = file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt');
-
-  $piece = isset($answers['piece']) ? $answers['piece'] : '';
-  $style = isset($answers['style']) ? $answers['style'] : '';
-
-  $prompt  = "Tu es le conseiller luminaire de l'Atelier Sâpi, un atelier artisanal à Lyon qui crée des luminaires en bois découpés au laser par Robin.\n\n";
-  $prompt .= $ton . "\n\n";
-  $prompt .= "Le client s'intéresse à un luminaire multi-ampoules pour une grande pièce.\n";
-  $prompt .= "Pièce : " . ($piece ?: 'non précisée') . "\n";
-  $prompt .= "Style : " . ($style ?: 'non précisé') . "\n\n";
-  $prompt .= "INSTRUCTIONS :\n";
-  $prompt .= "1. Présente les différentes possibilités multi-ampoules que Robin peut créer sur mesure :\n";
-  $prompt .= "   - Une grappe de suspensions : plusieurs luminaires du catalogue suspendus ensemble à différentes hauteurs, avec un pavillon adapté. Effet spectaculaire.\n";
-  $prompt .= "   - Un grand luminaire à plusieurs ampoules : une création unique avec plusieurs sources lumineuses intégrées.\n";
-  $prompt .= "   - D'autres solutions créatives sont possibles : Robin adore les défis et peut imaginer des concepts originaux.\n";
-  $prompt .= "2. Donne des exemples concrets selon la pièce du client (au-dessus d'une grande table, au milieu du salon, dans un hall, en cage d'escalier...).\n";
-  $prompt .= "3. Mentionne que tout est fabriqué artisanalement en bois découpé au laser dans son atelier à Lyon.\n";
-  $prompt .= "4. Invite le client à contacter Robin pour discuter de son projet — c'est sans engagement.\n";
-  $prompt .= "5. Maximum 100 mots. Sois chaleureux et inspirant.\n";
-  $prompt .= "6. N'utilise AUCUN formatage markdown (pas de **, pas de #, pas de _). Texte brut uniquement.\n";
-  $prompt .= "7. Réponds uniquement avec le texte, pas de JSON.\n";
-
-  $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
-  if (empty($api_key)) {
-    return 'Plusieurs possibilités s\'offrent à vous : une grappe de suspensions à différentes hauteurs, un grand luminaire multi-ampoules, ou une création originale imaginée par Robin. Tout est fabriqué artisanalement en bois dans son atelier à Lyon. Contactez Robin pour discuter de votre projet, c\'est sans engagement.';
-  }
-
-  $body = [
-    'model'      => 'claude-sonnet-4-6',
-    'max_tokens' => 512,
-    'system'     => $prompt,
-    'messages'   => [
-      ['role' => 'user', 'content' => 'Je voudrais un luminaire multi-ampoules pour ma grande pièce. Explique-moi ce concept.'],
-    ],
-  ];
-
-  $response = wp_remote_post('https://api.anthropic.com/v1/messages', [
-    'timeout' => 30,
-    'headers' => [
-      'Content-Type'      => 'application/json',
-      'x-api-key'         => $api_key,
-      'anthropic-version'  => '2023-06-01',
-    ],
-    'body' => wp_json_encode($body),
-  ]);
-
-  if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
-    return 'Plusieurs possibilités s\'offrent à vous : une grappe de suspensions à différentes hauteurs, un grand luminaire multi-ampoules, ou une création originale imaginée par Robin. Tout est fabriqué artisanalement en bois dans son atelier à Lyon. Contactez Robin pour discuter de votre projet, c\'est sans engagement.';
-  }
-
-  $data = json_decode(wp_remote_retrieve_body($response), true);
-  if (isset($data['content'][0]['text'])) {
-    return $data['content'][0]['text'];
-  }
-
-  return 'Plusieurs possibilités s\'offrent à vous : une grappe de suspensions à différentes hauteurs, un grand luminaire multi-ampoules, ou une création originale imaginée par Robin. Tout est fabriqué artisanalement en bois dans son atelier à Lyon. Contactez Robin pour discuter de votre projet, c\'est sans engagement.';
 }
 
 /**

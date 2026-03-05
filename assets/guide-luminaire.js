@@ -128,8 +128,6 @@
     dom.aiText          = document.getElementById('guide-ai-text');
     dom.aiTextContent   = document.getElementById('guide-ai-text-content');
     dom.followupBtns    = document.getElementById('guide-followup-buttons');
-    dom.surMesure       = document.getElementById('guide-sur-mesure');
-    dom.surMesureText   = document.getElementById('guide-sur-mesure-text');
     dom.resultsTitle    = document.getElementById('guide-results-title');
     dom.resultError     = document.getElementById('guide-result-error');
     dom.restartBtn      = document.getElementById('guide-restart');
@@ -463,7 +461,6 @@
     if (dom.productsGrid) dom.productsGrid.style.display = 'none';
     if (dom.aiText) dom.aiText.style.display = 'none';
     if (dom.followupBtns) dom.followupBtns.style.display = 'none';
-    if (dom.surMesure) dom.surMesure.style.display = 'none';
     if (dom.resultError) dom.resultError.style.display = 'none';
     if (dom.restartWrap) dom.restartWrap.style.display = 'none';
 
@@ -489,17 +486,6 @@
       if (data.success && data.data) {
         var d = data.data;
 
-        // Sur mesure (grappe) — special result without products
-        if (d.sur_mesure) {
-          if (dom.resultsTitle) dom.resultsTitle.textContent = 'Notre proposition sur mesure';
-          if (d.ai_text && dom.surMesureText) {
-            var clean = d.ai_text.replace(/\*\*(.*?)\*\*/g, '$1');
-            dom.surMesureText.textContent = clean;
-          }
-          if (dom.surMesure) dom.surMesure.style.display = '';
-          return;
-        }
-
         // Reset title for normal results
         if (dom.resultsTitle) dom.resultsTitle.textContent = 'Notre s\u00e9lection pour vous';
 
@@ -509,9 +495,9 @@
           renderAiText(d.ai_text);
         }
 
-        // Display products grid (up to 4)
+        // Display products grid (up to 4, or 3 + sur mesure card)
         if (d.products && d.products.length > 0) {
-          renderProductsGrid(d.products);
+          renderProductsGrid(d.products, d.show_sur_mesure || false);
         }
 
         // Display follow-up buttons
@@ -581,7 +567,7 @@
   // ================================================================
   // RENDER PRODUCTS GRID
   // ================================================================
-  function renderProductsGrid(products) {
+  function renderProductsGrid(products, showSurMesure) {
     if (!dom.productsGrid) return;
 
     var html = '';
@@ -590,12 +576,12 @@
       var variationHtml = '';
       if (p.variation_label) {
         variationHtml += '<p class="guide-result-variation">'
-          + 'Essence recommandée : ' + escapeHtml(p.variation_label)
+          + 'Essence recommand\u00e9e : ' + escapeHtml(p.variation_label)
           + '</p>';
       }
       if (p.size_label) {
         variationHtml += '<p class="guide-result-variation">'
-          + 'Taille recommandée : ' + escapeHtml(p.size_label)
+          + 'Taille recommand\u00e9e : ' + escapeHtml(p.size_label)
           + '</p>';
       }
 
@@ -612,6 +598,27 @@
         + ' <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>'
         + '</span>'
         + '</a>'
+        + '</article>';
+    }
+
+    // Sur mesure card (4th slot) — shown for grappe, grande pièce, or haute hauteur
+    if (showSurMesure) {
+      html += '<article class="guide-result-card guide-result-card--surmesure">'
+        + '<div class="guide-surmesure-card">'
+        + '<div class="guide-surmesure-icon">'
+        + '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'
+        + '<path d="M12 2L2 7l10 5 10-5-10-5z"/>'
+        + '<path d="M2 17l10 5 10-5"/>'
+        + '<path d="M2 12l10 5 10-5"/>'
+        + '</svg>'
+        + '</div>'
+        + '<h3 class="guide-result-name">Cr\u00e9ation sur mesure</h3>'
+        + '<p class="guide-surmesure-desc">Un luminaire unique, con\u00e7u sp\u00e9cialement pour votre espace par Robin.</p>'
+        + '<a href="/contact/" class="guide-result-cta guide-surmesure-cta">'
+        + 'Contacter Robin'
+        + ' <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>'
+        + '</a>'
+        + '</div>'
         + '</article>';
     }
 

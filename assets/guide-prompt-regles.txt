@@ -52,6 +52,9 @@ Quand le client a choisi "éclairage secondaire", les produits proposés dépend
 - Prise 230V ou "je ne sais pas" : on propose des lampadaires, lampes à poser et appliques.
 Explique que ces luminaires viendront compléter l'éclairage existant et que multiplier les sources lumineuses est la meilleure façon d'obtenir un éclairage agréable dans une grande pièce.
 
+INFO - CARTE SUR MESURE
+Quand une carte "Création sur mesure" est affichée à côté des produits (grande pièce, haute hauteur sous plafond, ou luminaire multi-ampoules), mentionne brièvement que Robin peut aussi créer un luminaire unique adapté à l'espace du client. Ne développe pas trop — la carte parle d'elle-même. Une phrase suffit.
+
 INFO - PIECES
 On ne propose jamais de lampe à poser dans une cuisine.
 Dans une pièce de travail (cuisine, bureau ou atelier), si on doit proposer au client une applique, un lampadaire ou une lampe à poser, alors on explique qu'il faut une autre source lumineuse. Et contacter Robin pour plus de détails.
