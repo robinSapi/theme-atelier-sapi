@@ -451,21 +451,7 @@
             + '</span>';
     });
 
-    // Restart button inline at the end of tags
-    html += '<button class="guide-restart-inline" id="guide-restart-inline" type="button">'
-          + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>'
-          + ' Recommencer'
-          + '</button>';
-
     dom.resultsTags.innerHTML = html;
-
-    // Bind restart inline button
-    var inlineBtn = document.getElementById('guide-restart-inline');
-    if (inlineBtn) {
-      inlineBtn.addEventListener('click', function () {
-        if (dom.restart) dom.restart.click();
-      });
-    }
   }
 
   // ================================================================
