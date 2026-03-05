@@ -17357,7 +17357,7 @@ html.sapi-intro-active body {
 }
 
 .guide-surmesure-cta {
-  margin-top: auto;
+  margin-top: 0.5rem;
 }
 
 /* ---- Products Grid (up to 4 products) ---- */
