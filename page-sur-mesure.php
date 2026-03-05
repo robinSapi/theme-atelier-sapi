@@ -106,8 +106,25 @@ get_header();
 
   if ($projets->have_posts()) : ?>
     <div class="surmesure-grid">
-      <?php while ($projets->have_posts()) : $projets->the_post(); ?>
-        <article class="surmesure-card">
+      <?php while ($projets->have_posts()) : $projets->the_post();
+        $essence    = $has_acf ? get_field('essence_bois') : '';
+        $piece      = $has_acf ? get_field('piece_destination') : '';
+        $dims       = $has_acf ? get_field('dimensions_projet') : '';
+        $temoignage = $has_acf ? get_field('temoignage_client') : '';
+        $nom_client = $has_acf ? get_field('nom_client') : '';
+        $full_desc  = get_the_content();
+        $thumb_url  = get_the_post_thumbnail_url(get_the_ID(), 'large');
+      ?>
+        <article class="surmesure-card" role="button" tabindex="0"
+          data-modal-title="<?php echo esc_attr(get_the_title()); ?>"
+          data-modal-image="<?php echo esc_attr($thumb_url ?: ''); ?>"
+          data-modal-desc="<?php echo esc_attr($full_desc); ?>"
+          data-modal-essence="<?php echo esc_attr($essence); ?>"
+          data-modal-piece="<?php echo esc_attr($piece); ?>"
+          data-modal-dims="<?php echo esc_attr($dims); ?>"
+          data-modal-temoignage="<?php echo esc_attr($temoignage); ?>"
+          data-modal-client="<?php echo esc_attr($nom_client); ?>"
+        >
           <?php if (has_post_thumbnail()) : ?>
             <div class="surmesure-card-image">
               <?php the_post_thumbnail('large', ['loading' => 'lazy']); ?>
@@ -115,11 +132,6 @@ get_header();
           <?php endif; ?>
           <div class="surmesure-card-content">
             <h3><?php the_title(); ?></h3>
-            <?php
-            $essence = $has_acf ? get_field('essence_bois') : '';
-            $piece   = $has_acf ? get_field('piece_destination') : '';
-            $dims    = $has_acf ? get_field('dimensions_projet') : '';
-            ?>
             <?php if ($essence || $piece || $dims) : ?>
               <div class="surmesure-card-details">
                 <?php if ($essence) : ?>
@@ -143,14 +155,10 @@ get_header();
               </div>
             <?php endif; ?>
 
-            <?php if (get_the_content()) : ?>
-              <p class="surmesure-card-desc"><?php echo esc_html(wp_trim_words(get_the_content(), 25)); ?></p>
+            <?php if ($full_desc) : ?>
+              <p class="surmesure-card-desc"><?php echo esc_html(wp_trim_words($full_desc, 25)); ?></p>
             <?php endif; ?>
 
-            <?php
-            $temoignage  = $has_acf ? get_field('temoignage_client') : '';
-            $nom_client  = $has_acf ? get_field('nom_client') : '';
-            ?>
             <?php if ($temoignage) : ?>
               <blockquote class="surmesure-card-quote">
                 <p><?php echo esc_html($temoignage); ?></p>
@@ -164,6 +172,130 @@ get_header();
       <?php endwhile; ?>
     </div>
     <?php wp_reset_postdata(); ?>
+
+    <!-- Modale projet -->
+    <div class="surmesure-modal" id="surmesure-modal" aria-hidden="true">
+      <div class="surmesure-modal-overlay"></div>
+      <div class="surmesure-modal-container" role="dialog" aria-modal="true" aria-label="Détail du projet">
+        <button class="surmesure-modal-close" aria-label="Fermer">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="surmesure-modal-body">
+          <div class="surmesure-modal-image">
+            <img src="" alt="">
+          </div>
+          <div class="surmesure-modal-content">
+            <h3 class="surmesure-modal-title"></h3>
+            <div class="surmesure-modal-details surmesure-card-details"></div>
+            <div class="surmesure-modal-desc"></div>
+            <blockquote class="surmesure-modal-quote surmesure-card-quote" style="display:none;">
+              <p></p>
+              <cite></cite>
+            </blockquote>
+            <a href="#surmesure-form" class="surmesure-modal-cta">
+              Vous aussi, lancez votre projet sur mesure →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    (function() {
+      'use strict';
+      var modal = document.getElementById('surmesure-modal');
+      if (!modal) return;
+
+      var overlay   = modal.querySelector('.surmesure-modal-overlay');
+      var closeBtn  = modal.querySelector('.surmesure-modal-close');
+      var imgEl     = modal.querySelector('.surmesure-modal-image img');
+      var titleEl   = modal.querySelector('.surmesure-modal-title');
+      var detailsEl = modal.querySelector('.surmesure-modal-details');
+      var descEl    = modal.querySelector('.surmesure-modal-desc');
+      var quoteEl   = modal.querySelector('.surmesure-modal-quote');
+      var quotePEl  = quoteEl.querySelector('p');
+      var citeEl    = quoteEl.querySelector('cite');
+      var ctaLink   = modal.querySelector('.surmesure-modal-cta');
+      var previousFocus = null;
+
+      function buildDetail(svg, text) {
+        return '<span class="surmesure-detail">' + svg + ' ' + text + '</span>';
+      }
+
+      function openModal(card) {
+        var data = card.dataset;
+        previousFocus = document.activeElement;
+
+        titleEl.textContent = data.modalTitle || '';
+        imgEl.src = data.modalImage || '';
+        imgEl.alt = data.modalTitle || '';
+
+        // Details
+        var html = '';
+        if (data.modalEssence) html += buildDetail('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>', data.modalEssence);
+        if (data.modalPiece) html += buildDetail('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>', data.modalPiece);
+        if (data.modalDims) html += buildDetail('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 8 21"></polyline><line x1="16" y1="3" x2="3" y2="16"></line></svg>', data.modalDims);
+        detailsEl.innerHTML = html;
+        detailsEl.style.display = html ? '' : 'none';
+
+        // Description
+        descEl.textContent = data.modalDesc || '';
+        descEl.style.display = data.modalDesc ? '' : 'none';
+
+        // Testimonial
+        if (data.modalTemoignage) {
+          quotePEl.textContent = data.modalTemoignage;
+          citeEl.textContent = data.modalClient ? '— ' + data.modalClient : '';
+          citeEl.style.display = data.modalClient ? '' : 'none';
+          quoteEl.style.display = '';
+        } else {
+          quoteEl.style.display = 'none';
+        }
+
+        modal.setAttribute('aria-hidden', 'false');
+        modal.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+        closeBtn.focus();
+      }
+
+      function closeModal() {
+        modal.setAttribute('aria-hidden', 'true');
+        modal.classList.remove('is-open');
+        document.body.style.overflow = '';
+        if (previousFocus) previousFocus.focus();
+      }
+
+      // Open on card click
+      document.querySelectorAll('.surmesure-card').forEach(function(card) {
+        card.addEventListener('click', function(e) {
+          // Don't intercept CTA link in modal
+          if (e.target.closest('.surmesure-modal')) return;
+          openModal(card);
+        });
+        card.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openModal(card);
+          }
+        });
+      });
+
+      // Close
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', closeModal);
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+      });
+
+      // Close modal when CTA link is clicked
+      ctaLink.addEventListener('click', function() {
+        closeModal();
+      });
+    })();
+    </script>
 
   <?php else : ?>
     <div class="surmesure-empty">
