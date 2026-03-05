@@ -1802,16 +1802,29 @@ function sapi_guide_collect_results($query, array $answers) {
       $ambiance_url = sapi_get_acf_image_url($ambiance_raw, 'full');
     }
 
+    // Hover image (first gallery image for card hover effect)
+    $hover_image_url = '';
+    $gallery_ids = $product->get_gallery_image_ids();
+    if (!empty($gallery_ids)) {
+      $hover_image_url = wp_get_attachment_image_url($gallery_ids[0], 'woocommerce_thumbnail');
+    }
+
+    // Category label for card
+    $cat_names = wp_get_post_terms($product->get_id(), 'product_cat', ['fields' => 'names']);
+    $cat_label = !empty($cat_names) ? $cat_names[0] : '';
+
     $products[] = [
       'id'              => $product->get_id(),
       'title'           => $product->get_name(),
       'price'           => $price,
       'image'           => $image_id ? wp_get_attachment_url($image_id) : '',
       'image_alt'       => $image_id ? get_post_meta($image_id, '_wp_attachment_image_alt', true) : '',
+      'hover_image'     => $hover_image_url,
       'permalink'       => get_permalink($product->get_id()),
       'variation_label' => $variation_label,
       'size_label'      => $size_label,
       'categories'      => $cat_slugs,
+      'category_label'  => $cat_label,
       'format'          => $format,
       'type_ampoule'    => $ampoule,
       'total_sales'     => (int) $product->get_total_sales(),

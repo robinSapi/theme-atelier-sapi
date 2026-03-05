@@ -591,6 +591,14 @@
     var html = '';
     for (var i = 0; i < products.length; i++) {
       var p = products[i];
+
+      // Hover image markup
+      var hoverClass = p.hover_image ? ' has-hover-image' : '';
+      var hoverHtml = p.hover_image
+        ? '<span class="product-image-hover"><img src="' + escapeHtml(p.hover_image) + '" alt="' + escapeHtml(p.title) + ' - ambiance" /></span>'
+        : '';
+
+      // Variation pills
       var variationHtml = '';
       if (p.variation_label) {
         variationHtml += '<p class="guide-result-variation">'
@@ -603,19 +611,27 @@
           + '</p>';
       }
 
-      html += '<article class="guide-result-card">'
-        + '<a href="' + escapeHtml(p.permalink) + '" class="guide-result-card-link">'
-        + '<div class="guide-result-image-wrap">'
-        + '<img class="guide-result-image" src="' + escapeHtml(p.image) + '" srcset="" alt="' + escapeHtml(p.image_alt || p.title) + '" />'
+      html += '<article class="product-card-cinetique guide-result-card">'
+        + '<a href="' + escapeHtml(p.permalink) + '" class="product-card-link">'
+        + '<div class="product-media' + hoverClass + '">'
+        + '<span class="product-image-main"><img src="' + escapeHtml(p.image) + '" srcset="" alt="' + escapeHtml(p.image_alt || p.title) + '" /></span>'
+        + hoverHtml
         + '</div>'
-        + '<h3 class="guide-result-name">' + escapeHtml(p.title) + '</h3>'
-        + '<p class="guide-result-price">' + p.price + '</p>'
+        + '<div class="product-info">'
+        + '<h3 class="product-name guide-result-name">' + escapeHtml(p.title) + '</h3>'
+        + (p.category_label ? '<p class="product-category">' + escapeHtml(p.category_label) + '</p>' : '')
+        + '<div class="product-price">'
+        + '<span class="price-value">' + p.price + '</span>'
+        + '</div>'
         + variationHtml
-        + '<span class="guide-result-cta">'
-        + 'Voir ce luminaire'
-        + ' <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>'
-        + '</span>'
+        + '</div>'
         + '</a>'
+        + '<div class="product-actions">'
+        + '<a href="' + escapeHtml(p.permalink) + '" class="btn-view">'
+        + 'D\u00e9couvrir'
+        + ' <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>'
+        + '</a>'
+        + '</div>'
         + '</article>';
     }
 
