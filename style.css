@@ -13201,13 +13201,26 @@ body.woocommerce-cart {
 /* Mobile */
 @media (max-width: 768px) {
   .sapi-checkout-outer {
-    padding: 0.25rem;
+    padding: 0;
+    margin: 0;
+  }
+
+  .sapi-checkout-outer .wc-block-components-sidebar-layout {
+    padding: 0 !important;
+    margin: 0 !important;
+    gap: 0 !important;
+  }
+
+  .sapi-checkout-outer .wp-block-woocommerce-checkout {
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   .sapi-checkout-outer .wc-block-components-main {
     width: 100% !important;
     position: static !important;
     padding: 0.5rem !important;
+    margin: 0.25rem !important;
     box-sizing: border-box !important;
     border-radius: 8px !important;
   }
