@@ -17208,8 +17208,8 @@ html.sapi-intro-active body {
 .guide-ai-recommendation {
   position: relative;
   max-width: 960px;
-  margin: 0 auto 2.5rem;
-  padding: 2rem 3rem 1.5rem;
+  margin: 0 auto 1rem;
+  padding: 1.25rem 3rem 1rem;
   background: linear-gradient(135deg, rgba(251, 246, 234, 0.4) 0%, rgba(254, 253, 251, 0.6) 100%);
   border-radius: 16px;
 }
@@ -17737,8 +17737,8 @@ html.sapi-intro-active body {
   }
 
   .guide-ai-recommendation {
-    padding: 2rem 1.5rem 1.5rem;
-    margin: 0 auto 2rem;
+    padding: 1.25rem 1.5rem 1rem;
+    margin: 0 auto 0.75rem;
   }
 
   .guide-ai-quote {

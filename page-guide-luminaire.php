@@ -227,7 +227,7 @@ $icons = [
 
       <!-- Étape 1 : Message -->
       <div class="guide-contact-step" id="guide-contact-step1">
-        <p class="guide-contact-prompt">Une question, un avis ? Dites-le à Robin !</p>
+        <p class="guide-contact-prompt">Que pensez-vous de cette proposition ?</p>
         <div class="guide-contact-field-wrap">
           <textarea id="guide-contact-message" class="guide-contact-textarea"
             placeholder="J'aimerais plutôt une applique… / C'est parfait mais en plus petit…"
