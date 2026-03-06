@@ -16,6 +16,8 @@
     return;
   }
 
+  let lastCloseTime = 0;
+
   /**
    * Toggle mobile menu
    */
@@ -25,6 +27,8 @@
     if (isExpanded) {
       closeMenu();
     } else {
+      // Prevent ghost click: ignore if menu was just closed
+      if (Date.now() - lastCloseTime < 400) return;
       openMenu();
     }
   }
@@ -42,9 +46,18 @@
    * Close mobile menu
    */
   function closeMenu() {
+    lastCloseTime = Date.now();
     menuToggle.setAttribute('aria-expanded', 'false');
     mobileMenuOverlay.classList.remove('active');
     body.style.overflow = '';
+
+    // Prevent ghost clicks: temporary full-screen blocker (touch devices only)
+    if ('ontouchstart' in window) {
+      var blocker = document.createElement('div');
+      blocker.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;';
+      document.body.appendChild(blocker);
+      setTimeout(function() { blocker.remove(); }, 400);
+    }
   }
 
   /**
@@ -215,6 +228,14 @@
     miniCart.setAttribute('aria-hidden', 'true');
     miniCartOverlay.classList.remove('is-visible');
     body.style.overflow = '';
+
+    // Prevent ghost clicks on touch devices
+    if ('ontouchstart' in window) {
+      var blocker = document.createElement('div');
+      blocker.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;';
+      document.body.appendChild(blocker);
+      setTimeout(function() { blocker.remove(); }, 400);
+    }
   }
 
   /**
@@ -442,6 +463,14 @@
     searchInput.value = '';
     clearResults();
     selectedIndex = -1;
+
+    // Prevent ghost clicks on touch devices
+    if ('ontouchstart' in window) {
+      var blocker = document.createElement('div');
+      blocker.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;';
+      document.body.appendChild(blocker);
+      setTimeout(function() { blocker.remove(); }, 400);
+    }
 
     if (previouslyFocused && previouslyFocused.focus) {
       previouslyFocused.focus();
