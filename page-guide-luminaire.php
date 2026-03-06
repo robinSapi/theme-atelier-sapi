@@ -199,7 +199,7 @@ $icons = [
   <section class="guide-results-section" id="guide-results" aria-hidden="true">
     <div class="guide-results-header">
       <h2 class="guide-results-title" id="guide-results-title">Le conseil de Robin</h2>
-      <p class="guide-results-subtitle">Enfin, ce qu'il nous a dit d'afficher dans votre cas</p>
+      <p class="guide-results-subtitle">Enfin, ce que je vous aurais dit à l'atelier</p>
     </div>
 
     <!-- Loading with progressive steps -->
