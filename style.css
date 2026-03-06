@@ -13201,7 +13201,7 @@ body.woocommerce-cart {
 /* Mobile */
 @media (max-width: 768px) {
   .sapi-checkout-outer {
-    padding: 0;
+    padding: 0.25rem;
   }
 
   .sapi-checkout-outer .wc-block-components-main {
@@ -13209,8 +13209,7 @@ body.woocommerce-cart {
     position: static !important;
     padding: 0.5rem !important;
     box-sizing: border-box !important;
-    border: none !important;
-    border-radius: 0 !important;
+    border-radius: 8px !important;
   }
 
   .sapi-checkout-outer .wc-block-components-checkout-step {
