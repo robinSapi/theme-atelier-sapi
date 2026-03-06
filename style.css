@@ -17384,6 +17384,7 @@ html.sapi-intro-active body {
 
 .guide-result-products-grid .guide-result-cta {
   margin-top: auto;
+  padding-top: 1rem;
   align-self: flex-start;
 }
 
