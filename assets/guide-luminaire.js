@@ -479,8 +479,7 @@
       if (data.success && data.data) {
         var d = data.data;
 
-        // Reset title for normal results
-        if (dom.resultsTitle) dom.resultsTitle.textContent = 'Voici ma proposition';
+
 
         // Display AI recommendation text
         if (d.ai_text) {
