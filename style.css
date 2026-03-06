@@ -13528,17 +13528,17 @@ body.woocommerce-cart {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 .gallery-main {
   position: relative;
   width: 100%;
-  max-width: 500px;
   aspect-ratio: 1 / 1;
   overflow: hidden;
   border-radius: 12px;
   background: #f5f5f5;
-  margin: 0 auto;
 }
 
 /* Overlay lumière dorée subtile - DS 4.4 */
