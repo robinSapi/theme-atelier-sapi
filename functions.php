@@ -2278,7 +2278,7 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
 
   if ($show_sur_mesure) {
     $prompt .= "\nINFO CONTEXTE : Une carte \"Création sur mesure\" est affichée à côté des produits. NE mentionne PAS le sur mesure dans le champ \"recommendation\" — utilise le champ \"sur_mesure_text\" à la place.\n";
-    $prompt .= "Dans \"sur_mesure_text\", écris un texte court (30 mots max) qui explique pourquoi une création sur mesure est pertinente pour la situation précise de CE client. Sois concret, pas générique. Parle du projet, pas du service.\n";
+    $prompt .= "Dans \"sur_mesure_text\", écris un texte court (30 mots max) qui suggère que pour la situation du client, Robin pourrait imaginer quelque chose de plus ambitieux et adapté qu'un luminaire catalogue. Reste vague sur la solution (\"par exemple\", \"pourquoi pas\"). Ne décide pas à la place du client. L'idée : ouvrir une porte, donner envie de discuter avec Robin.\n";
   }
 
   // Format de réponse JSON
