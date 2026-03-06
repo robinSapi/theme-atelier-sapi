@@ -90,9 +90,11 @@ get_header();
       'tailles'    => 'Tailles',
     ];
     foreach ($acf_field_labels as $field_name => $label) {
-      $url = sapi_get_acf_image_url(get_field($field_name));
+      $raw_field = get_field($field_name);
+      $url = sapi_get_acf_image_url($raw_field);
       if ($url) {
-        $acf_photos[] = ['url' => $url, 'label' => $label];
+        $thumb = sapi_get_acf_image_url($raw_field, 'woocommerce_gallery_thumbnail');
+        $acf_photos[] = ['url' => $url, 'thumb' => $thumb ?: $url, 'label' => $label];
       }
     }
   }
@@ -165,7 +167,7 @@ get_header();
         if (!empty($gallery_ids) || $main_image_id) {
           $all_images = $main_image_id ? array_merge([$main_image_id], $gallery_ids) : $gallery_ids;
 
-          if (count($all_images) > 1) {
+          if (count($all_images) + $acf_only_count > 1) {
             ?>
             <div class="gallery-thumbnails">
               <?php foreach ($all_images as $index => $image_id) :
@@ -185,7 +187,16 @@ get_header();
                   <img src="<?php echo esc_url($thumb_url); ?>" alt="<?php echo esc_attr(get_the_title() . ' - ' . $cat_label . ' photo ' . ($index + 1)); ?>">
                 </button>
               <?php endforeach; ?>
-              <?php // Bouton "+N" supprimé — la lightbox s'ouvre au clic sur l'image principale ?>
+              <?php
+              // ACF ambiance/detail photos as additional gallery thumbnails
+              for ($i = $first_acf_index; $i < count($acf_photos); $i++) :
+                $acf_photo = $acf_photos[$i];
+                $acf_thumb_url = isset($acf_photo['thumb']) ? $acf_photo['thumb'] : $acf_photo['url'];
+              ?>
+                <button class="gallery-thumb" data-image="<?php echo esc_url($acf_photo['url']); ?>">
+                  <img src="<?php echo esc_url($acf_thumb_url); ?>" alt="<?php echo esc_attr(get_the_title() . ' - ' . $acf_photo['label']); ?>">
+                </button>
+              <?php endfor; ?>
             </div>
             <?php
           }
@@ -1336,7 +1347,14 @@ get_header();
     galleryMainEl.addEventListener('click', function(e) {
       if (e.target.closest('.gallery-nav')) return; // Ignore arrow clicks
       var lb = document.getElementById('ambiance-lightbox');
-      if (lb && lb.openLightbox) lb.openLightbox();
+      if (lb && lb.openLightbox) {
+        // Open lightbox at the currently displayed image
+        var activeThumb = document.querySelector('.gallery-thumb.active');
+        var allThumbs = document.querySelectorAll('.gallery-thumb');
+        var idx = 0;
+        allThumbs.forEach(function(t, i) { if (t === activeThumb) idx = i; });
+        lb.openLightbox(idx);
+      }
     });
   }
 
@@ -1660,8 +1678,8 @@ get_header();
 
   var firstAcf = parseInt(lightbox.dataset.firstAcf, 10) || 0;
 
-  function open() {
-    goTo(firstAcf);
+  function open(startIndex) {
+    goTo(typeof startIndex === 'number' ? startIndex : 0);
     lightbox.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
     lightbox.querySelector('.ambiance-lightbox-close').focus();
