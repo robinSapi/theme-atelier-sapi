@@ -19,8 +19,6 @@
       size: 'all'
     },
 
-    excludeAccessoires: true, // Masquer accessoires par défaut
-
     searchQuery: '',
 
     init: function() {
@@ -37,11 +35,6 @@
         btn.addEventListener('click', (e) => {
           e.preventDefault();
           const filter = btn.dataset.filter;
-
-          // Clic sur "Tout" → affiche tout y compris accessoires
-          if (filter === 'all') {
-            this.excludeAccessoires = false;
-          }
 
           // Update active state
           filterContainer.querySelector('.filter-btn.active')?.classList.remove('active');
@@ -266,8 +259,9 @@
 
         // Check all filter criteria
         const catList = categories.split(' ');
+        const extraCategories = ['accessoires', 'carte-cadeau'];
         const matchesCategory = this.filters.category === 'all'
-          ? (!this.excludeAccessoires || !catList.includes('accessoires'))
+          ? !catList.some(function(c) { return extraCategories.indexOf(c) !== -1; })
           : catList.includes(this.filters.category);
         const matchesPrice = this.matchesPrice(price, this.filters.price);
         const matchesWood = this.filters.wood === 'all' || wood === this.filters.wood;

@@ -125,32 +125,63 @@ if (!$hero_img_url) {
   </div>
 
   <nav class="product-filters product-filters-js" role="navigation" aria-label="<?php esc_attr_e('Filtres produits', 'theme-sapi-maison'); ?>">
-    <button type="button" class="filter-btn active" data-filter="all">
-      <?php esc_html_e('Tout', 'theme-sapi-maison'); ?>
-      <span class="filter-count">(<?php echo esc_html($all_products->found_posts); ?>)</span>
-    </button>
     <?php
-    // Ordre personnalisé des catégories
-    $cat_order = ['suspensions', 'appliques', 'lampeaposer', 'lampadaires', 'accessoires', 'carte-cadeau'];
+    // Build category lookup
     $cats_by_slug = [];
     if ($product_categories && !is_wp_error($product_categories)) {
       foreach ($product_categories as $cat) {
         $cats_by_slug[$cat->slug] = $cat;
       }
     }
-    foreach ($cat_order as $slug) :
-      if (!isset($cats_by_slug[$slug])) continue;
-      $cat = $cats_by_slug[$slug];
-      $btn_class = 'filter-btn';
-      if ($cat->slug === 'carte-cadeau') {
-        $btn_class .= ' filter-btn--gift';
+
+    // Count for "Toutes nos créations" = total minus extras
+    $extras_slugs = ['accessoires', 'carte-cadeau'];
+    $creations_count = $all_products->found_posts;
+    foreach ($extras_slugs as $es) {
+      if (isset($cats_by_slug[$es])) {
+        $creations_count -= $cats_by_slug[$es]->count;
       }
+    }
     ?>
-      <button type="button" class="<?php echo esc_attr($btn_class); ?>" data-filter="<?php echo esc_attr($cat->slug); ?>">
-        <?php echo esc_html($cat->name); ?>
-        <span class="filter-count">(<?php echo esc_html($cat->count); ?>)</span>
+
+    <!-- Groupe 1 : Créations -->
+    <div class="filter-group filter-group--creations">
+      <button type="button" class="filter-btn active" data-filter="all">
+        <?php esc_html_e('Toutes nos créations', 'theme-sapi-maison'); ?>
+        <span class="filter-count">(<?php echo esc_html($creations_count); ?>)</span>
       </button>
-    <?php endforeach; ?>
+      <?php
+      $creations_order = ['suspensions', 'appliques', 'lampadaires', 'lampeaposer'];
+      foreach ($creations_order as $slug) :
+        if (!isset($cats_by_slug[$slug])) continue;
+        $cat = $cats_by_slug[$slug];
+      ?>
+        <button type="button" class="filter-btn" data-filter="<?php echo esc_attr($cat->slug); ?>">
+          <?php echo esc_html($cat->name); ?>
+          <span class="filter-count">(<?php echo esc_html($cat->count); ?>)</span>
+        </button>
+      <?php endforeach; ?>
+    </div>
+
+    <div class="filter-separator" aria-hidden="true"></div>
+
+    <!-- Groupe 2 : Extras -->
+    <div class="filter-group filter-group--extras">
+      <?php
+      foreach ($extras_slugs as $slug) :
+        if (!isset($cats_by_slug[$slug])) continue;
+        $cat = $cats_by_slug[$slug];
+        $btn_class = 'filter-btn';
+        if ($slug === 'carte-cadeau') {
+          $btn_class .= ' filter-btn--gift';
+        }
+      ?>
+        <button type="button" class="<?php echo esc_attr($btn_class); ?>" data-filter="<?php echo esc_attr($cat->slug); ?>">
+          <?php echo esc_html($cat->name); ?>
+          <span class="filter-count">(<?php echo esc_html($cat->count); ?>)</span>
+        </button>
+      <?php endforeach; ?>
+    </div>
   </nav>
 
 </div>
