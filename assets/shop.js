@@ -19,6 +19,8 @@
       size: 'all'
     },
 
+    excludeAccessoires: true, // Masquer accessoires par défaut
+
     searchQuery: '',
 
     init: function() {
@@ -36,6 +38,11 @@
           e.preventDefault();
           const filter = btn.dataset.filter;
 
+          // Clic sur "Tout" → affiche tout y compris accessoires
+          if (filter === 'all') {
+            this.excludeAccessoires = false;
+          }
+
           // Update active state
           filterContainer.querySelector('.filter-btn.active')?.classList.remove('active');
           btn.classList.add('active');
@@ -51,6 +58,9 @@
 
       // Advanced dropdown filters
       this.initAdvancedFilters();
+
+      // Appliquer le filtre initial (masque accessoires par défaut)
+      this.applyFilters();
     },
 
     initSearch: function() {
@@ -255,7 +265,10 @@
         const name = slide.dataset.name || '';
 
         // Check all filter criteria
-        const matchesCategory = this.filters.category === 'all' || categories.split(' ').includes(this.filters.category);
+        const catList = categories.split(' ');
+        const matchesCategory = this.filters.category === 'all'
+          ? (!this.excludeAccessoires || !catList.includes('accessoires'))
+          : catList.includes(this.filters.category);
         const matchesPrice = this.matchesPrice(price, this.filters.price);
         const matchesWood = this.filters.wood === 'all' || wood === this.filters.wood;
         const matchesSize = this.filters.size === 'all' || this.matchesSize(size, this.filters.size);
