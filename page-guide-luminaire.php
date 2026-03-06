@@ -222,14 +222,61 @@ $icons = [
       <span class="guide-ai-quote guide-ai-quote-close">&raquo;</span>
     </div>
 
+    <!-- Phase C : Card flottante sticky — se pose entre AI text et restart -->
+    <div class="guide-contact-wrap" id="guide-contact-wrap" style="display:none;">
+
+      <!-- Étape 1 : Message -->
+      <div class="guide-contact-step" id="guide-contact-step1">
+        <p class="guide-contact-prompt">Que pensez-vous de cette proposition ?</p>
+        <div class="guide-contact-field-wrap">
+          <textarea id="guide-contact-message" class="guide-contact-textarea"
+            placeholder="J'aimerais plutôt une applique… / C'est parfait mais en plus petit…"
+            rows="1"></textarea>
+          <button type="button" id="guide-contact-next" class="guide-contact-submit" disabled>
+            Envoyer
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Étape 2 : Coordonnées -->
+      <div class="guide-contact-step" id="guide-contact-step2" style="display:none;">
+        <p class="guide-contact-prompt">Robin va vous répondre personnellement !</p>
+        <form id="guide-contact-form" novalidate>
+          <input type="hidden" name="message" id="guide-contact-msg-hidden" />
+          <div class="guide-contact-fields">
+            <input type="text" id="guide-contact-name" name="name"
+              placeholder="Votre prénom" required />
+            <input type="email" id="guide-contact-email" name="email"
+              placeholder="Email" />
+            <input type="tel" id="guide-contact-phone" name="phone"
+              placeholder="Téléphone" />
+          </div>
+          <p class="guide-contact-hint">Email ou téléphone — au moins un des deux</p>
+          <!-- Honeypot anti-spam -->
+          <input type="text" name="website" style="display:none;" tabindex="-1" autocomplete="off" />
+          <button type="submit" class="guide-contact-submit" id="guide-contact-send">
+            Envoyer à Robin
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- Étape 3 : Confirmation -->
+      <div class="guide-contact-step" id="guide-contact-step3" style="display:none;">
+        <div class="guide-contact-success">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#018501" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+          <p class="guide-contact-thanks">Merci <span id="guide-contact-thanks-name"></span>, Robin vous répondra très vite !</p>
+        </div>
+      </div>
+    </div>
+
     <!-- Error -->
     <div class="guide-result-error" id="guide-result-error" style="display:none;">
       <p>Impossible de charger les résultats.
         <a href="<?php echo esc_url($shop_url); ?>">Voir toute la collection</a>.
       </p>
     </div>
-
-
 
     <div class="guide-restart-wrap" id="guide-restart-wrap">
       <button class="guide-restart-btn" id="guide-restart" type="button">
@@ -244,55 +291,6 @@ $icons = [
   </section>
 
 </div><!-- .guide-luminaire-page -->
-
-<!-- Phase C : Formulaire contact + raffinement (outside results-section to avoid transform breaking position:fixed) -->
-<div class="guide-contact-wrap" id="guide-contact-wrap" style="display:none;">
-
-  <!-- Étape 1 : Message -->
-  <div class="guide-contact-step" id="guide-contact-step1">
-    <p class="guide-contact-prompt">Que pensez-vous de cette proposition ?</p>
-    <div class="guide-contact-field-wrap">
-      <textarea id="guide-contact-message" class="guide-contact-textarea"
-        placeholder="J'aimerais plutôt une applique… / C'est parfait mais en plus petit…"
-        rows="1"></textarea>
-      <button type="button" id="guide-contact-next" class="guide-contact-submit" disabled>
-        Envoyer
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </button>
-    </div>
-  </div>
-
-  <!-- Étape 2 : Coordonnées -->
-  <div class="guide-contact-step" id="guide-contact-step2" style="display:none;">
-    <p class="guide-contact-prompt">Robin va vous répondre personnellement !</p>
-    <form id="guide-contact-form" novalidate>
-      <input type="hidden" name="message" id="guide-contact-msg-hidden" />
-      <div class="guide-contact-fields">
-        <input type="text" id="guide-contact-name" name="name"
-          placeholder="Votre prénom" required />
-        <input type="email" id="guide-contact-email" name="email"
-          placeholder="Email" />
-        <input type="tel" id="guide-contact-phone" name="phone"
-          placeholder="Téléphone" />
-      </div>
-      <p class="guide-contact-hint">Email ou téléphone — au moins un des deux</p>
-      <!-- Honeypot anti-spam -->
-      <input type="text" name="website" style="display:none;" tabindex="-1" autocomplete="off" />
-      <button type="submit" class="guide-contact-submit" id="guide-contact-send">
-        Envoyer à Robin
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </button>
-    </form>
-  </div>
-
-  <!-- Étape 3 : Confirmation -->
-  <div class="guide-contact-step" id="guide-contact-step3" style="display:none;">
-    <div class="guide-contact-success">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#018501" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
-      <p class="guide-contact-thanks">Merci <span id="guide-contact-thanks-name"></span>, Robin vous répondra très vite !</p>
-    </div>
-  </div>
-</div>
 
 <!-- Full-width ambiance photo (populated by JS from first product) -->
 <div class="guide-ambiance-banner" id="guide-ambiance-banner" style="display:none;">
