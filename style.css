@@ -13272,7 +13272,7 @@ body.woocommerce-cart {
 .progress-step.active .step-number {
   background: var(--color-wood);
   color: var(--color-white);
-  box-shadow: 0 4px 12px rgba(147, 125, 104, 0.3);
+  box-shadow: 0 0 0 4px rgba(147, 125, 104, 0.2), 0 4px 12px rgba(147, 125, 104, 0.3);
 }
 
 .progress-step.active .step-label {
