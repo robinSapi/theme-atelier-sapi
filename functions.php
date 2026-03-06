@@ -1458,41 +1458,6 @@ function sapi_ajax_guide_results() {
     return;
   }
 
-  // 8. Send email notification to Robin
-  $labels = [
-    'piece'     => 'Pièce',
-    'taille'    => 'Taille de la pièce',
-    'eclairage' => 'Type d\'éclairage',
-    'sortie'    => 'Sortie électrique',
-    'hauteur'   => 'Hauteur sous-plafond',
-    'table'     => 'Au-dessus d\'une table',
-    'style'     => 'Style intérieur',
-  ];
-  $email_body = "Nouvelle recommandation Guide Luminaire\n";
-  $email_body .= "========================================\n\n";
-  $email_body .= "RÉPONSES DU CLIENT :\n";
-  foreach ($labels as $key => $label) {
-    if (isset($clean[$key])) {
-      $email_body .= "- " . $label . " : " . $clean[$key] . "\n";
-    }
-  }
-  if ($show_sur_mesure) {
-    $email_body .= "\nCARTE SUR MESURE : Oui (" . $sur_mesure_reason . ")\n";
-  }
-  $email_body .= "\nPRODUITS PROPOSÉS :\n";
-  foreach ($display_products as $dp) {
-    $email_body .= "- " . $dp['title'] . " (" . wp_strip_all_tags($dp['price']) . ")\n";
-  }
-  $email_body .= "\nRECOMMANDATION IA :\n";
-  $email_body .= $ai_text ? $ai_text : "(pas de texte IA)";
-  $email_body .= "\n\n---\nDate : " . wp_date('d/m/Y H:i');
-
-  wp_mail(
-    get_option('admin_email'),
-    'Guide Luminaire — Nouvelle recommandation',
-    $email_body
-  );
-
   wp_send_json_success([
     'ai_text'           => $ai_text,
     'products'          => $display_products,
@@ -1719,37 +1684,7 @@ function sapi_ajax_guide_refine() {
     ]
   );
 
-  // 9. Email notification to Robin
-  $email_body  = "Raffinement Guide Luminaire\n";
-  $email_body .= "===========================\n\n";
-  $email_body .= "MESSAGE CLIENT : " . esc_html($user_message) . "\n";
-  $email_body .= "ACTION IA : " . esc_html($action) . "\n";
-  $email_body .= "RECOMMANDATION : " . esc_html($recommendation) . "\n";
-  if (!empty($new_products)) {
-    $email_body .= "\nNOUVEAUX PRODUITS PROPOSÉS :\n";
-    foreach ($new_products as $p) {
-      $email_body .= '- ' . esc_html($p['title']) . ' (' . wp_strip_all_tags($p['price']) . ")\n";
-    }
-  }
-  $email_body .= "\nRÉPONSES QUESTIONNAIRE :\n";
-  $labels_map = [
-    'piece' => 'Pièce', 'taille' => 'Taille', 'eclairage' => 'Éclairage',
-    'sortie' => 'Sortie', 'hauteur' => 'Hauteur', 'table' => 'Table', 'style' => 'Style',
-  ];
-  foreach ($labels_map as $key => $label) {
-    if (isset($clean[$key])) {
-      $email_body .= '- ' . $label . ' : ' . esc_html($clean[$key]) . "\n";
-    }
-  }
-  $email_body .= "\n---\nDate : " . wp_date('d/m/Y H:i') . "\n";
-
-  wp_mail(
-    get_option('admin_email'),
-    '[Guide Luminaire] Raffinement — ' . esc_html($action),
-    $email_body
-  );
-
-  // 10. Send response
+  // 9. Send response
   wp_send_json_success([
     'action'       => $action,
     'ai_text'      => $recommendation,
