@@ -1327,8 +1327,8 @@ get_header();
     });
   }
 
-  // Gallery thumbnail switching
-  const thumbnails = document.querySelectorAll('.gallery-thumb');
+  // Gallery thumbnail switching (exclude "+N" button from navigation)
+  const thumbnails = document.querySelectorAll('.gallery-thumb:not(.gallery-thumb-more)');
 
   thumbnails.forEach(thumb => {
     thumb.addEventListener('click', function() {
@@ -1343,6 +1343,14 @@ get_header();
       }
     });
   });
+
+  // Mobile: tap on main image opens the ambiance lightbox
+  if ('ontouchstart' in window && mainImage) {
+    mainImage.addEventListener('click', function() {
+      var openBtn = document.getElementById('btn-ambiance-lightbox');
+      if (openBtn) openBtn.click();
+    });
+  }
 
   // Mobile gallery navigation with arrows and swipe
   const galleryMain = document.querySelector('.gallery-main');

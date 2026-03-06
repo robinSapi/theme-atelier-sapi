@@ -13909,6 +13909,11 @@ body.woocommerce-cart {
     transform: scale(1.2);
   }
 
+  /* Hide "+N" button on mobile — lightbox opens via tap on main image */
+  .gallery-thumbnails .gallery-thumb-more {
+    display: none !important;
+  }
+
   .gallery-main {
     position: relative;
   }
