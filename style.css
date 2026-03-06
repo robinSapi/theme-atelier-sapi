@@ -17356,27 +17356,19 @@ html.sapi-intro-active body {
 .guide-result-products-grid > * {
   width: calc(25% - 18px);
   min-width: 0;
-  height: auto;
 }
 
 /* ---- Guide cards: equal height + align CTA buttons at bottom ---- */
-.guide-result-products-grid .guide-result-card {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
 .guide-result-products-grid .product-card-link {
   display: flex;
   flex-direction: column;
   flex: 1;
-  text-decoration: none;
-  color: inherit;
 }
 
 .guide-result-products-grid .product-info {
   display: flex;
   flex-direction: column;
+  flex: 1;
   flex: 1;
 }
 
