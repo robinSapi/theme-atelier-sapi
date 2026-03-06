@@ -13178,11 +13178,15 @@ body.woocommerce-cart {
     padding: 0.5rem;
   }
 
-  .sapi-checkout-outer .wc-block-components-main,
-  .sapi-checkout-outer .wc-block-components-sidebar {
+  .sapi-checkout-outer .wc-block-components-main {
     width: 100% !important;
     position: static !important;
     padding: 0.75rem !important;
+  }
+
+  /* Masquer la sidebar (résumé commande) sur mobile — déjà affiché en haut par WC Blocks */
+  .sapi-checkout-outer .wc-block-components-sidebar {
+    display: none !important;
   }
 }
 
