@@ -17330,32 +17330,117 @@ html.sapi-intro-active body {
   display: inline-block;
 }
 
-/* ---- Follow-up Buttons ---- */
-.guide-followup-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  justify-content: center;
-  max-width: 800px;
-  margin: 0 auto 2rem;
+/* ---- Contact Form (Phase B) ---- */
+.guide-contact-wrap {
+  max-width: 700px;
+  margin: 2rem auto 0;
+  text-align: center;
 }
 
-.guide-followup-btn {
-  padding: 0.6rem 1.25rem;
-  background: var(--color-warm, #FBF6EA);
-  border: 1.5px solid var(--color-wood, #937D68);
+.guide-contact-prompt {
+  font-family: 'Square Peg', cursive;
+  font-size: 2rem;
+  color: var(--color-wood, #937D68);
+  margin: 0 0 1rem;
+}
+
+.guide-contact-field-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.guide-contact-textarea {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border: 2px solid rgba(147, 125, 104, 0.2);
+  border-radius: var(--radius-lg, 16px);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.guide-contact-textarea:focus {
+  border-color: var(--color-wood, #937D68);
+  outline: none;
+}
+
+.guide-contact-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem 2rem;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  border: none;
   border-radius: 100px;
   font-family: 'Montserrat', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--color-wood, #937D68);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
+  transition: all 0.3s ease;
 }
 
-.guide-followup-btn:hover {
-  background: var(--color-wood, #937D68);
-  color: #fff;
+.guide-contact-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
+}
+
+.guide-contact-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.guide-contact-fields {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.guide-contact-fields input {
+  flex: 1;
+  padding: 0.875rem 1.25rem;
+  border: 2px solid rgba(147, 125, 104, 0.2);
+  border-radius: var(--radius-lg, 16px);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.guide-contact-fields input:focus {
+  border-color: var(--color-wood, #937D68);
+  outline: none;
+}
+
+.guide-contact-hint {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.78rem;
+  color: var(--color-wood, #937D68);
+  opacity: 0.7;
+  margin: 0.25rem 0 0;
+}
+
+.guide-contact-success {
+  padding: 2rem;
+}
+
+.guide-contact-success svg {
+  margin-bottom: 1rem;
+}
+
+.guide-contact-thanks {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.1rem;
+  color: var(--color-dark, #323232);
+}
+
+.guide-contact-thanks span {
+  font-weight: 700;
 }
 
 /* ---- Loading Steps ---- */
@@ -17597,13 +17682,12 @@ html.sapi-intro-active body {
     font-size: 3rem;
   }
 
-  .guide-followup-buttons {
-    gap: 0.5rem;
+  .guide-contact-fields {
+    flex-direction: column;
   }
 
-  .guide-followup-btn {
-    font-size: 0.75rem;
-    padding: 0.5rem 1rem;
+  .guide-contact-prompt {
+    font-size: 1.6rem;
   }
 
   .guide-restart-wrap {

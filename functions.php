@@ -1502,6 +1502,94 @@ function sapi_ajax_guide_results() {
 }
 
 /**
+ * ── Phase B : Contact form from guide results ──
+ * Receives the client's message + contact info + full guide context.
+ * Sends a lead email to Robin.
+ */
+add_action('wp_ajax_sapi_guide_contact', 'sapi_ajax_guide_contact');
+add_action('wp_ajax_nopriv_sapi_guide_contact', 'sapi_ajax_guide_contact');
+
+function sapi_ajax_guide_contact() {
+  // 1. Nonce
+  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-contact')) {
+    wp_send_json_error(['message' => 'Nonce invalide']);
+    return;
+  }
+
+  // 2. Honeypot
+  if (!empty($_POST['website'])) {
+    wp_send_json_error(['message' => 'Spam']);
+    return;
+  }
+
+  // 3. Sanitize
+  $name    = sanitize_text_field(wp_unslash($_POST['name'] ?? ''));
+  $email   = sanitize_email(wp_unslash($_POST['email'] ?? ''));
+  $phone   = sanitize_text_field(wp_unslash($_POST['phone'] ?? ''));
+  $message = sanitize_textarea_field(wp_unslash($_POST['message'] ?? ''));
+  $ai_text = sanitize_textarea_field(wp_unslash($_POST['ai_text'] ?? ''));
+
+  // 4. Validate
+  if (empty($name)) {
+    wp_send_json_error(['message' => 'Prénom requis']);
+    return;
+  }
+  if (empty($email) && empty($phone)) {
+    wp_send_json_error(['message' => 'Email ou téléphone requis']);
+    return;
+  }
+  if (!empty($email) && !is_email($email)) {
+    wp_send_json_error(['message' => 'Email invalide']);
+    return;
+  }
+
+  // 5. Parse guide answers
+  $labels_raw = json_decode(wp_unslash($_POST['labels'] ?? '{}'), true);
+  if (!is_array($labels_raw)) {
+    $labels_raw = [];
+  }
+
+  // 6. Build email body
+  $body  = "Nouveau message depuis le Guide Luminaire\n";
+  $body .= "==========================================\n\n";
+  $body .= "CLIENT :\n";
+  $body .= "- Prénom : " . esc_html($name) . "\n";
+  if ($email) {
+    $body .= "- Email : " . esc_html($email) . "\n";
+  }
+  if ($phone) {
+    $body .= "- Téléphone : " . esc_html($phone) . "\n";
+  }
+  $body .= "\nMESSAGE :\n" . esc_html($message) . "\n";
+  $body .= "\nRÉPONSES AU QUESTIONNAIRE :\n";
+  foreach ($labels_raw as $step => $label) {
+    $body .= "- " . ucfirst(sanitize_text_field($step)) . " : " . sanitize_text_field($label) . "\n";
+  }
+  $body .= "\nRECOMMANDATION IA :\n" . ($ai_text ? esc_html($ai_text) : '(pas de texte IA)') . "\n";
+  $body .= "\n---\nDate : " . wp_date('d/m/Y H:i') . "\n";
+
+  // 7. Headers
+  $headers = ['Content-Type: text/plain; charset=UTF-8'];
+  if ($email) {
+    $headers[] = 'Reply-To: ' . $name . ' <' . $email . '>';
+  }
+
+  // 8. Send
+  $sent = wp_mail(
+    'contact@atelier-sapi.fr',
+    '[Guide Luminaire] Message de ' . $name,
+    $body,
+    $headers
+  );
+
+  if ($sent) {
+    wp_send_json_success(['message' => 'Envoyé']);
+  } else {
+    wp_send_json_error(['message' => 'Erreur envoi']);
+  }
+}
+
+/**
  * Step 1 → WooCommerce product categories
  */
 function sapi_guide_get_categories(array $answers) {

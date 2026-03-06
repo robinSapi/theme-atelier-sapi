@@ -127,8 +127,15 @@
     dom.productsGrid    = document.getElementById('guide-result-products-grid');
     dom.aiText          = document.getElementById('guide-ai-text');
     dom.aiTextContent   = document.getElementById('guide-ai-text-content');
-    dom.followupBtns    = document.getElementById('guide-followup-buttons');
     dom.resultsTitle    = document.getElementById('guide-results-title');
+    dom.contactWrap     = document.getElementById('guide-contact-wrap');
+    dom.contactStep1    = document.getElementById('guide-contact-step1');
+    dom.contactStep2    = document.getElementById('guide-contact-step2');
+    dom.contactStep3    = document.getElementById('guide-contact-step3');
+    dom.contactMsg      = document.getElementById('guide-contact-message');
+    dom.contactNext     = document.getElementById('guide-contact-next');
+    dom.contactForm     = document.getElementById('guide-contact-form');
+    dom.contactSend     = document.getElementById('guide-contact-send');
     dom.resultError     = document.getElementById('guide-result-error');
     dom.restartBtn      = document.getElementById('guide-restart');
     dom.resetBtn        = document.getElementById('guide-reset');
@@ -153,6 +160,7 @@
     bindRestartButton();
     bindResetButton();
     bindKeyboard();
+    bindContactForm();
 
     // Restore session if valid V2 format
     if (saved && saved.currentStepId && typeof saved.currentStepId === 'string' && Object.keys(saved.answers).length > 0) {
@@ -460,7 +468,7 @@
     if (dom.resultsLoading) dom.resultsLoading.setAttribute('aria-hidden', 'false');
     if (dom.productsGrid) dom.productsGrid.style.display = 'none';
     if (dom.aiText) dom.aiText.style.display = 'none';
-    if (dom.followupBtns) dom.followupBtns.style.display = 'none';
+    if (dom.contactWrap) dom.contactWrap.style.display = 'none';
     if (dom.resultError) dom.resultError.style.display = 'none';
     if (dom.restartWrap) dom.restartWrap.style.display = 'none';
 
@@ -515,10 +523,8 @@
           }
         }
 
-        // Display follow-up buttons
-        if (d.followup_buttons && d.followup_buttons.length > 0) {
-          renderFollowupButtons(d.followup_buttons);
-        }
+        // Show contact form (Phase B)
+        if (dom.contactWrap) dom.contactWrap.style.display = '';
 
         // Display answer tags below grid
         renderAnswerTags();
@@ -669,13 +675,116 @@
   }
 
   // ================================================================
-  // FOLLOW-UP BUTTONS
+  // CONTACT FORM (Phase B)
   // ================================================================
-  function renderFollowupButtons(buttons) {
-    // Phase B (chat interactif) pas encore implémentée — boutons masqués
-    // Réactiver cette fonction quand Phase B sera prête
-    if (!dom.followupBtns) return;
-    dom.followupBtns.style.display = 'none';
+  function bindContactForm() {
+    // Enable "Envoyer" only when textarea has content
+    if (dom.contactMsg && dom.contactNext) {
+      dom.contactMsg.addEventListener('input', function () {
+        dom.contactNext.disabled = !this.value.trim();
+      });
+    }
+
+    // Step 1 → Step 2 : save message, show contact fields
+    if (dom.contactNext) {
+      dom.contactNext.addEventListener('click', function () {
+        var msg = dom.contactMsg ? dom.contactMsg.value.trim() : '';
+        if (!msg) return;
+        var hidden = document.getElementById('guide-contact-msg-hidden');
+        if (hidden) hidden.value = msg;
+        if (dom.contactStep1) dom.contactStep1.style.display = 'none';
+        if (dom.contactStep2) dom.contactStep2.style.display = '';
+      });
+    }
+
+    // Step 2 : form submit via AJAX
+    if (dom.contactForm) {
+      dom.contactForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        var nameEl  = document.getElementById('guide-contact-name');
+        var emailEl = document.getElementById('guide-contact-email');
+        var phoneEl = document.getElementById('guide-contact-phone');
+        var name  = nameEl ? nameEl.value.trim() : '';
+        var email = emailEl ? emailEl.value.trim() : '';
+        var phone = phoneEl ? phoneEl.value.trim() : '';
+
+        // Validation
+        if (!name) {
+          nameEl.style.borderColor = '#E35B24';
+          nameEl.focus();
+          return;
+        }
+        if (!email && !phone) {
+          var hint = document.querySelector('.guide-contact-hint');
+          if (hint) hint.style.color = '#E35B24';
+          if (emailEl) emailEl.style.borderColor = '#E35B24';
+          if (phoneEl) phoneEl.style.borderColor = '#E35B24';
+          return;
+        }
+
+        if (dom.contactSend) {
+          dom.contactSend.disabled = true;
+          dom.contactSend.innerHTML = 'Envoi\u2026';
+        }
+
+        var formData = new FormData();
+        formData.append('action', 'sapi_guide_contact');
+        formData.append('nonce', sapiGuide.contactNonce);
+        formData.append('name', name);
+        formData.append('email', email);
+        formData.append('phone', phone);
+        formData.append('message', document.getElementById('guide-contact-msg-hidden').value);
+        formData.append('answers', JSON.stringify(state.answers));
+        formData.append('labels', JSON.stringify(state.labels));
+        formData.append('ai_text', state.aiText);
+
+        fetch(sapiGuide.ajaxUrl, {
+          method: 'POST',
+          credentials: 'same-origin',
+          body: formData,
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (data.success) {
+            if (dom.contactStep2) dom.contactStep2.style.display = 'none';
+            if (dom.contactStep3) dom.contactStep3.style.display = '';
+            var thanksName = document.getElementById('guide-contact-thanks-name');
+            if (thanksName) thanksName.textContent = name;
+          } else {
+            resetContactSendBtn();
+          }
+        })
+        .catch(function () {
+          resetContactSendBtn();
+        });
+      });
+    }
+  }
+
+  function resetContactSendBtn() {
+    if (dom.contactSend) {
+      dom.contactSend.disabled = false;
+      dom.contactSend.innerHTML = 'Envoyer \u00e0 Robin <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+    }
+  }
+
+  function resetContactForm() {
+    if (dom.contactWrap) dom.contactWrap.style.display = 'none';
+    if (dom.contactStep1) dom.contactStep1.style.display = '';
+    if (dom.contactStep2) dom.contactStep2.style.display = 'none';
+    if (dom.contactStep3) dom.contactStep3.style.display = 'none';
+    if (dom.contactMsg) { dom.contactMsg.value = ''; }
+    if (dom.contactNext) dom.contactNext.disabled = true;
+    var hidden = document.getElementById('guide-contact-msg-hidden');
+    if (hidden) hidden.value = '';
+    var nameEl = document.getElementById('guide-contact-name');
+    var emailEl = document.getElementById('guide-contact-email');
+    var phoneEl = document.getElementById('guide-contact-phone');
+    if (nameEl) nameEl.value = '';
+    if (emailEl) emailEl.value = '';
+    if (phoneEl) phoneEl.value = '';
+    resetContactSendBtn();
   }
 
   function renderResultsError() {
@@ -786,6 +895,7 @@
       dom.results.classList.remove('is-visible');
     }
     if (dom.ambianceBanner) dom.ambianceBanner.style.display = 'none';
+    resetContactForm();
     if (dom.quiz) {
       dom.quiz.setAttribute('aria-hidden', 'false');
     }
