@@ -18722,23 +18722,33 @@ html.sapi-intro-active body {
   }
 
   .surmesure-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 16px;
+    padding: 0 20px 16px;
+    margin: 0 -20px;
   }
 
-  .surmesure-form-section {
-    padding: 60px 20px;
+  .surmesure-grid::-webkit-scrollbar {
+    display: none;
   }
-}
 
-@media (max-width: 640px) {
-  .surmesure-grid {
-    grid-template-columns: 1fr;
-    gap: 24px;
+  .surmesure-grid .surmesure-card {
+    flex: 0 0 80%;
+    max-width: 320px;
+    scroll-snap-align: center;
   }
 
   .surmesure-card-content {
     padding: 20px;
+  }
+
+  .surmesure-form-section {
+    padding: 60px 20px;
   }
 }
 
