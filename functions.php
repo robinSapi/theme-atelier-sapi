@@ -1444,12 +1444,10 @@ function sapi_ajax_guide_results() {
   }
 
   // 6. Build response
-  $followup_buttons = [];
   $ai_text = null;
 
   if ($ai_response && isset($ai_response['recommendation'])) {
     $ai_text = $ai_response['recommendation'];
-    $followup_buttons = isset($ai_response['followup_buttons']) ? $ai_response['followup_buttons'] : [];
   }
 
   if (empty($display_products)) {
@@ -1493,10 +1491,9 @@ function sapi_ajax_guide_results() {
   );
 
   wp_send_json_success([
-    'ai_text'          => $ai_text,
-    'products'         => $display_products,
-    'followup_buttons' => $followup_buttons,
-    'show_sur_mesure'  => $show_sur_mesure,
+    'ai_text'           => $ai_text,
+    'products'          => $display_products,
+    'show_sur_mesure'   => $show_sur_mesure,
     'sur_mesure_reason' => $sur_mesure_reason,
   ]);
 }
@@ -2095,13 +2092,7 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
   // Format de réponse JSON
   $prompt .= "\nFORMAT DE RÉPONSE (JSON strict, sans commentaires) :\n";
   $prompt .= "{\n";
-  $prompt .= "  \"recommendation\": \"Texte expliquant pourquoi cette sélection correspond aux critères du client...\",\n";
-  $prompt .= "  \"followup_buttons\": [\n";
-  $prompt .= "    {\"label\": \"Texte du bouton\", \"type\": \"question\"},\n";
-  $prompt .= "    {\"label\": \"Texte du bouton\", \"type\": \"question\"},\n";
-  $prompt .= "    {\"label\": \"Texte du bouton\", \"type\": \"question\"},\n";
-  $prompt .= "    {\"label\": \"Texte du bouton\", \"type\": \"contact\"}\n";
-  $prompt .= "  ]\n";
+  $prompt .= "  \"recommendation\": \"Texte expliquant pourquoi cette sélection correspond aux critères du client...\"\n";
   $prompt .= "}\n";
 
   return $prompt;
@@ -2163,8 +2154,7 @@ function sapi_guide_call_claude($system_prompt) {
   if (!$parsed || !isset($parsed['recommendation'])) {
     // If Claude didn't return valid JSON, use the raw text as recommendation
     return [
-      'recommendation'   => $text,
-      'followup_buttons' => [],
+      'recommendation' => $text,
     ];
   }
 
