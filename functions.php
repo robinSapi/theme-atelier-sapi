@@ -519,7 +519,7 @@ add_filter('render_block', function ($content, $block) {
         if (shipping && !shipping.querySelector('.cart-shipping-note')) {
           var note = document.createElement('p');
           note.className = 'cart-shipping-note';
-          note.innerHTML = '<strong>Tarifs de livraison estimés</strong><br>Vous pourrez modifier à la prochaine étape';
+          note.textContent = 'Choisissez votre mode de livraison \u00e0 la prochaine \u00e9tape';
           shipping.appendChild(note);
         }
       }
