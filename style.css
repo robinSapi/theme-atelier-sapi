@@ -14115,6 +14115,12 @@ body.woocommerce-cart {
   }
 }
 
+@media (max-width: 768px) {
+  .variations-intro {
+    display: none;
+  }
+}
+
 /* Variations in 2 columns - Materials left, Sizes right (all screen sizes) */
 .product-form-v2 .variations {
   margin-bottom: 1.5rem;
