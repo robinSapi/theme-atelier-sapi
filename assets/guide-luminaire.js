@@ -477,7 +477,7 @@
         var d = data.data;
 
         // Reset title for normal results
-        if (dom.resultsTitle) dom.resultsTitle.textContent = 'Ce que Robin vous propose';
+        if (dom.resultsTitle) dom.resultsTitle.textContent = 'Le conseil de Robin';
 
         // Display AI recommendation text
         if (d.ai_text) {
