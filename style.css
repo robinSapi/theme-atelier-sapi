@@ -13237,6 +13237,7 @@ body.woocommerce-cart {
   gap: 8px;
   position: relative;
   z-index: 2;
+  width: 100px;
 }
 
 .progress-step .step-number {
