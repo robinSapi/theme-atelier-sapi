@@ -27,16 +27,7 @@ defined('ABSPATH') || exit;
           <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
       </div>
-      <span class="step-label">Commande</span>
-    </div>
-    <div class="progress-line completed"></div>
-    <div class="progress-step completed">
-      <div class="step-number">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-      </div>
-      <span class="step-label">Confirmation</span>
+      <span class="step-label">Paiement</span>
     </div>
   </div>
 

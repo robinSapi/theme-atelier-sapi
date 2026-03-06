@@ -471,12 +471,7 @@ add_filter('render_block', function ($content, $block) {
           <div class="progress-line"></div>
           <div class="progress-step">
             <span class="step-number">2</span>
-            <span class="step-label"><?php esc_html_e('Commande', 'theme-sapi-maison'); ?></span>
-          </div>
-          <div class="progress-line"></div>
-          <div class="progress-step">
-            <span class="step-number">3</span>
-            <span class="step-label"><?php esc_html_e('Confirmation', 'theme-sapi-maison'); ?></span>
+            <span class="step-label"><?php esc_html_e('Paiement', 'theme-sapi-maison'); ?></span>
           </div>
         </div>
         <p class="cart-subtitle"><?php esc_html_e('Plus que quelques clics avant de recevoir votre luminaire !', 'theme-sapi-maison'); ?></p>
@@ -533,12 +528,7 @@ add_filter('render_block', function ($content, $block) {
           <div class="progress-line completed"></div>
           <div class="progress-step active">
             <span class="step-number">2</span>
-            <span class="step-label"><?php esc_html_e('Commande', 'theme-sapi-maison'); ?></span>
-          </div>
-          <div class="progress-line"></div>
-          <div class="progress-step">
-            <span class="step-number">3</span>
-            <span class="step-label"><?php esc_html_e('Confirmation', 'theme-sapi-maison'); ?></span>
+            <span class="step-label"><?php esc_html_e('Paiement', 'theme-sapi-maison'); ?></span>
           </div>
         </div>
         <h1 class="checkout-title"><?php esc_html_e('Finaliser ma commande', 'theme-sapi-maison'); ?></h1>
