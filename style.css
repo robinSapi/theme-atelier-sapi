@@ -12666,17 +12666,22 @@ body.woocommerce-order-received {
   }
 }
 
-/* Bouton "Passer commande" — orange CTA */
+/* Bouton "Passer commande" — vert validation */
 .sapi-cart-outer .wc-block-cart__submit-button {
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%) !important;
+  background: linear-gradient(180deg, #018501 0%, #026B02 100%) !important;
   color: #fff !important;
   border-radius: 12px !important;
   font-family: var(--font-body) !important;
   font-weight: 800 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.08em !important;
-  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25) !important;
+  box-shadow: 0 4px 15px rgba(1, 133, 1, 0.25) !important;
   border: none !important;
+}
+
+.sapi-cart-outer .wc-block-cart__submit-button:hover {
+  background: linear-gradient(180deg, #026B02 0%, #015A01 100%) !important;
+  box-shadow: 0 6px 20px rgba(1, 133, 1, 0.35) !important;
 }
 
 /* H2 allégés sur panier et checkout */
@@ -12852,25 +12857,25 @@ body.woocommerce-cart {
   align-self: flex-start !important;
 }
 
-/* Bouton "Passer commande" — orange CTA */
+/* Bouton "Passer commande" — vert validation */
 .sapi-checkout-outer .wc-block-components-checkout-place-order-button button,
 .sapi-checkout-outer .wc-block-components-checkout-place-order-button {
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%) !important;
+  background: linear-gradient(180deg, #018501 0%, #026B02 100%) !important;
   color: #fff !important;
   border-radius: 12px !important;
   font-family: var(--font-body) !important;
   font-weight: 800 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.08em !important;
-  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25) !important;
+  box-shadow: 0 4px 15px rgba(1, 133, 1, 0.25) !important;
   border: none !important;
   width: 100% !important;
 }
 
 .sapi-checkout-outer .wc-block-components-checkout-place-order-button button:hover,
 .sapi-checkout-outer .wc-block-components-checkout-place-order-button:hover {
-  background: linear-gradient(180deg, #D14F1C 0%, #B8431A 100%) !important;
-  box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35) !important;
+  background: linear-gradient(180deg, #026B02 0%, #015A01 100%) !important;
+  box-shadow: 0 6px 20px rgba(1, 133, 1, 0.35) !important;
 }
 
 /* Titres de sections du formulaire */
