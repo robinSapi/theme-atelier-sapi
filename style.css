@@ -12625,7 +12625,7 @@ body.woocommerce-order-received .page-default .entry-content {
   body.woocommerce-cart .page-default .entry-content,
   body.woocommerce-checkout .page-default .entry-content,
   body.woocommerce-order-received .page-default .entry-content {
-    padding: 0.5rem 0.25rem;
+    padding: 0.25rem 0;
   }
 }
 
@@ -13219,8 +13219,8 @@ body.woocommerce-cart {
   .sapi-checkout-outer .wc-block-components-main {
     width: 100% !important;
     position: static !important;
-    padding: 0.5rem !important;
-    margin: 0.25rem !important;
+    padding: 0.25rem !important;
+    margin: 2px !important;
     box-sizing: border-box !important;
     border-radius: 8px !important;
   }
