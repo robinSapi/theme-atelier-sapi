@@ -512,6 +512,24 @@ add_filter('render_block', function ($content, $block) {
         </div>
       </div>
     </div>
+    <script>
+    (function() {
+      function addShippingNote() {
+        var shipping = document.querySelector('.sapi-cart-outer .wc-block-components-totals-shipping');
+        if (shipping && !shipping.querySelector('.cart-shipping-note')) {
+          var note = document.createElement('p');
+          note.className = 'cart-shipping-note';
+          note.innerHTML = '<strong>Tarifs de livraison estimés</strong><br>Vous pourrez modifier à la prochaine étape';
+          shipping.appendChild(note);
+        }
+      }
+      // WC Blocks renders via React — observe DOM changes
+      var observer = new MutationObserver(addShippingNote);
+      var target = document.querySelector('.sapi-cart-outer');
+      if (target) observer.observe(target, { childList: true, subtree: true });
+      addShippingNote();
+    })();
+    </script>
     <?php
     return ob_get_clean();
   }

@@ -12857,6 +12857,23 @@ body.woocommerce-order-received {
   }
 }
 
+/* Note sous les frais de livraison */
+.cart-shipping-note {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--color-gray, #999);
+  line-height: 1.4;
+  margin: 0.5rem 0 0;
+  font-style: italic;
+}
+
+.cart-shipping-note strong {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--color-dark, #323232);
+  font-size: 0.75rem;
+}
+
 /* Bouton "Passer commande" — vert validation */
 .sapi-cart-outer .wc-block-cart__submit-button {
   background: linear-gradient(180deg, #018501 0%, #026B02 100%) !important;
