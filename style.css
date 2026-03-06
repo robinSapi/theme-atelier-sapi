@@ -13909,10 +13909,6 @@ body.woocommerce-cart {
     transform: scale(1.2);
   }
 
-  /* Hide "+N" button on mobile — lightbox opens via tap on main image */
-  .gallery-thumbnails .gallery-thumb-more {
-    display: none !important;
-  }
 
   .gallery-main {
     position: relative;
@@ -15749,31 +15745,6 @@ body.woocommerce-cart div.woocommerce-wrapper {
    AMBIANCE LIGHTBOX - Photos ACF
    ========================================= */
 
-/* Vignette "+N" pour ouvrir la lightbox ambiance */
-.gallery-thumb-more {
-  background: var(--color-warm, #FBF6EA);
-  border: 1.5px dashed var(--color-wood, #937D68);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.gallery-thumb-more:hover {
-  border-color: var(--color-orange, #E35B24);
-  background: rgba(227, 91, 36, 0.06);
-}
-
-.gallery-thumb-more-icon {
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--color-wood, #937D68);
-  transition: color 0.2s;
-}
-
-.gallery-thumb-more:hover .gallery-thumb-more-icon {
-  color: var(--color-orange, #E35B24);
-}
 
 /* Lightbox — même style que Quick View */
 .ambiance-lightbox {

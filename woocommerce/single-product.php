@@ -185,11 +185,7 @@ get_header();
                   <img src="<?php echo esc_url($thumb_url); ?>" alt="<?php echo esc_attr(get_the_title() . ' - ' . $cat_label . ' photo ' . ($index + 1)); ?>">
                 </button>
               <?php endforeach; ?>
-              <?php if (!empty($acf_photos)) : ?>
-                <button class="gallery-thumb gallery-thumb-more" id="btn-ambiance-lightbox" type="button" aria-label="Voir <?php echo esc_attr($acf_only_count); ?> photos en situation">
-                  <span class="gallery-thumb-more-icon">+<?php echo esc_html($acf_only_count); ?></span>
-                </button>
-              <?php endif; ?>
+              <?php // Bouton "+N" supprimé — la lightbox s'ouvre au clic sur l'image principale ?>
             </div>
             <?php
           }
@@ -1317,8 +1313,8 @@ get_header();
     });
   }
 
-  // Gallery thumbnail switching (exclude "+N" button from navigation)
-  const thumbnails = document.querySelectorAll('.gallery-thumb:not(.gallery-thumb-more)');
+  // Gallery thumbnail switching
+  const thumbnails = document.querySelectorAll('.gallery-thumb');
 
   thumbnails.forEach(thumb => {
     thumb.addEventListener('click', function() {
@@ -1339,8 +1335,8 @@ get_header();
   if (galleryMainEl) {
     galleryMainEl.addEventListener('click', function(e) {
       if (e.target.closest('.gallery-nav')) return; // Ignore arrow clicks
-      var openBtn = document.getElementById('btn-ambiance-lightbox');
-      if (openBtn) openBtn.click();
+      var lb = document.getElementById('ambiance-lightbox');
+      if (lb && lb.openLightbox) lb.openLightbox();
     });
   }
 
@@ -1676,7 +1672,7 @@ get_header();
     document.body.style.overflow = '';
     // Restore gallery: reactivate first thumbnail and its image
     var allThumbs = document.querySelectorAll('.gallery-thumb');
-    var firstThumb = document.querySelector('.gallery-thumb:not(.gallery-thumb-more)');
+    var firstThumb = document.querySelector('.gallery-thumb');
     if (firstThumb) {
       allThumbs.forEach(function(t) { t.classList.remove('active'); });
       firstThumb.classList.add('active');
@@ -1690,13 +1686,12 @@ get_header();
         zoomLink.href = firstThumb.dataset.image;
       }
     }
-    var btn = document.getElementById('btn-ambiance-lightbox');
-    if (btn) btn.focus();
+    var galleryMainFocus = document.querySelector('.gallery-main');
+    if (galleryMainFocus) galleryMainFocus.focus();
   }
 
-  // Open
-  var openBtn = document.getElementById('btn-ambiance-lightbox');
-  if (openBtn) openBtn.addEventListener('click', open);
+  // Expose open function so gallery click handler can call it
+  lightbox.openLightbox = open;
 
   // Close
   lightbox.querySelector('.ambiance-lightbox-close').addEventListener('click', close);
