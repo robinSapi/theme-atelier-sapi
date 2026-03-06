@@ -17359,6 +17359,10 @@ html.sapi-intro-active body {
 }
 
 /* ---- Guide cards: equal height + align CTA buttons at bottom ---- */
+.guide-result-products-grid .guide-result-card--surmesure {
+  display: flex;
+}
+
 .guide-result-products-grid .product-card-link {
   display: flex;
   flex-direction: column;
