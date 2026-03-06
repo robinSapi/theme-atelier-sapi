@@ -17339,11 +17339,17 @@ html.sapi-intro-active body {
 
 /* ---- Products Grid (up to 4 products) ---- */
 .guide-result-products-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 24px;
   max-width: 1200px;
   margin: 0 auto 3rem;
+}
+
+.guide-result-products-grid > * {
+  width: calc(25% - 18px);
+  min-width: 0;
 }
 
 /* ---- Guide cards inherit .product-card-cinetique styles ---- */
@@ -17615,8 +17621,10 @@ html.sapi-intro-active body {
   }
 
   .guide-result-products-grid {
-    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
+  }
+  .guide-result-products-grid > * {
+    width: calc(50% - 8px);
   }
 
   .guide-ai-recommendation {
@@ -17653,9 +17661,8 @@ html.sapi-intro-active body {
     grid-template-columns: 1fr;
   }
 
-  .guide-result-products-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+  .guide-result-products-grid > * {
+    width: 100%;
   }
 }
 
