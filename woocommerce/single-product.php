@@ -90,11 +90,9 @@ get_header();
       'tailles'    => 'Tailles',
     ];
     foreach ($acf_field_labels as $field_name => $label) {
-      $raw_field = get_field($field_name);
-      $url = sapi_get_acf_image_url($raw_field);
+      $url = sapi_get_acf_image_url(get_field($field_name));
       if ($url) {
-        $thumb = sapi_get_acf_image_url($raw_field, 'woocommerce_gallery_thumbnail');
-        $acf_photos[] = ['url' => $url, 'thumb' => $thumb ?: $url, 'label' => $label];
+        $acf_photos[] = ['url' => $url, 'label' => $label];
       }
     }
   }
@@ -191,10 +189,9 @@ get_header();
               // ACF ambiance/detail photos as additional gallery thumbnails
               for ($i = $first_acf_index; $i < count($acf_photos); $i++) :
                 $acf_photo = $acf_photos[$i];
-                $acf_thumb_url = isset($acf_photo['thumb']) ? $acf_photo['thumb'] : $acf_photo['url'];
               ?>
                 <button class="gallery-thumb" data-image="<?php echo esc_url($acf_photo['url']); ?>">
-                  <img src="<?php echo esc_url($acf_thumb_url); ?>" alt="<?php echo esc_attr(get_the_title() . ' - ' . $acf_photo['label']); ?>">
+                  <img src="<?php echo esc_url($acf_photo['url']); ?>" alt="<?php echo esc_attr(get_the_title() . ' - ' . $acf_photo['label']); ?>">
                 </button>
               <?php endfor; ?>
             </div>
