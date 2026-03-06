@@ -1175,10 +1175,8 @@ input[type="submit"]:hover,
   transition: color 0.3s ease;
 }
 
-@media (hover: hover) {
-  .menu-toggle:hover {
-    color: var(--color-orange);
-  }
+.menu-toggle:hover {
+  color: var(--color-orange);
 }
 
 .menu-toggle:focus,
@@ -1205,10 +1203,8 @@ input[type="submit"]:hover,
   transition: all 0.3s ease;
 }
 
-@media (hover: hover) {
-  .menu-toggle:hover .burger-line {
-    background: var(--color-orange);
-  }
+.menu-toggle:hover .burger-line {
+  background: var(--color-orange);
 }
 
 .menu-toggle[aria-expanded="true"] .burger-line:nth-child(1) {
@@ -1275,10 +1271,8 @@ input[type="submit"]:hover,
   transition: opacity 0.3s ease 0.2s, transform 0.3s ease 0.2s, visibility 0s 0s;
 }
 
-@media (hover: hover) {
-  .mobile-menu-close:hover {
-    transform: scale(1.1);
-  }
+.mobile-menu-close:hover {
+  transform: scale(1.1);
 }
 
 .mobile-menu-close:focus,
@@ -1398,12 +1392,10 @@ input[type="submit"]:hover,
   min-height: 48px; /* Hauteur minimale pour la zone de clic */
 }
 
-@media (hover: hover) {
-  .cart-link:hover {
-    color: var(--color-wood);
-    -webkit-transform: scale(1.05);
-    transform: scale(1.05);
-  }
+.cart-link:hover {
+  color: var(--color-wood);
+  -webkit-transform: scale(1.05);
+  transform: scale(1.05);
 }
 
 .cart-icon {
@@ -11303,13 +11295,12 @@ transform: translateY(15px);
   height: 24px;
 }
 
-@media (hover: hover) {
-  .mini-cart-close:hover {
-    background: var(--color-orange);
-    border-color: var(--color-orange);
-    color: var(--color-white);
-    transform: scale(1.1);
-  }
+.mini-cart-close:hover {
+  background: var(--color-orange);
+  border-color: var(--color-orange);
+  color: var(--color-white);
+  transform: scale(1.1);
+}
 }
 
 .mini-cart-body {
@@ -11629,10 +11620,8 @@ transform: translateY(15px);
   justify-content: center;
 }
 
-@media (hover: hover) {
-  .search-toggle:hover {
-    color: var(--color-orange);
-  }
+.search-toggle:hover {
+  color: var(--color-orange);
 }
 
 .global-search-overlay {
@@ -11734,11 +11723,10 @@ transform: translateY(15px);
   transition: all 0.2s ease;
 }
 
-@media (hover: hover) {
-  .global-search-close:hover {
-    background: var(--color-gray-light);
-    color: var(--color-dark);
-  }
+.global-search-close:hover {
+  background: var(--color-gray-light);
+  color: var(--color-dark);
+}
 }
 
 .global-search-results {
