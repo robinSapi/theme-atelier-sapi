@@ -205,9 +205,9 @@ $icons = [
     <div class="guide-results-loading" id="guide-results-loading" aria-hidden="true">
       <svg class="guide-spinner" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/></svg>
       <div class="guide-loading-steps">
-        <p class="guide-loading-step is-active" data-load-step="1">Analyse de vos préférences...</p>
-        <p class="guide-loading-step" data-load-step="2">Sélection dans notre catalogue...</p>
-        <p class="guide-loading-step" data-load-step="3">Rédaction de votre conseil personnalisé...</p>
+        <p class="guide-loading-step is-active" data-load-step="1">On fouille dans les notes de Robin...</p>
+        <p class="guide-loading-step" data-load-step="2">On fait du tri dans ses conseils...</p>
+        <p class="guide-loading-step" data-load-step="3">On prépare une sélection sur mesure...</p>
       </div>
     </div>
 
