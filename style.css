@@ -14029,13 +14029,7 @@ body.woocommerce-cart {
   display: none !important; /* Hide "À partir de XX€" on desktop — variations show the price */
 }
 
-/* Show starting price on mobile for quick scanning */
-@media (max-width: 768px) {
-  .product-price-v2 {
-    display: block !important;
-    margin-bottom: 1rem;
-  }
-}
+/* Prix masqué partout — les variations/add-ons affichent le prix */
 
 .price-prefix {
   font-size: 0.85rem;
