@@ -1454,6 +1454,14 @@ input[type="submit"]:hover,
 
   .menu-toggle {
     display: flex;
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  .search-toggle {
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .cart-link {
@@ -5658,6 +5666,91 @@ li.carousel-editorial-slide,
   margin-top: 10px;
 }
 
+/* ---- RESPONSIVE ARTISAN PAGE ---- */
+@media (max-width: 768px) {
+  .artisan-hero-cinetique {
+    padding: 100px 1rem 60px;
+  }
+
+  .artisan-hero-cinetique h1 {
+    font-size: clamp(40px, 10vw, 72px);
+  }
+
+  .artisan-hero-subtitle {
+    font-size: 1.05rem;
+    margin-bottom: 2rem;
+  }
+
+  .artisan-intro-cinetique,
+  .artisan-step-cinetique {
+    padding: 60px 1rem;
+  }
+
+  .artisan-intro-grid,
+  .artisan-step-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .artisan-step-grid.reverse {
+    direction: ltr;
+  }
+
+  .artisan-image {
+    min-height: 280px;
+  }
+
+  .artisan-intro-robin-photo {
+    width: 180px;
+    height: 180px;
+  }
+
+  .artisan-intro-image-wrapper {
+    padding: 1rem;
+  }
+
+  .artisan-values-cinetique {
+    padding: 60px 1rem;
+  }
+
+  .artisan-values-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .artisan-values-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .artisan-value-item {
+    padding: 2rem 1.5rem;
+  }
+
+  .value-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .artisan-quote-cinetique {
+    padding: 60px 1rem;
+  }
+
+  .artisan-quote-cinetique blockquote {
+    padding: 0 1.5rem;
+  }
+
+  .artisan-cta {
+    padding: 60px 1rem;
+  }
+
+  .artisan-cta .button {
+    padding: 14px 32px;
+    font-size: 14px;
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
 /* ========================================
    PAGE TEMPLATE - Conseils Éclairés (PREMIUM)
    ======================================== */
@@ -9445,7 +9538,8 @@ transform: translateY(15px);
   font-weight: 300;
   color: var(--color-dark);
   text-decoration: none;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0;
+  padding: 0.5rem 0;
   transition: color 0.3s var(--ease-smooth);
 }
 
@@ -9662,15 +9756,16 @@ transform: translateY(15px);
   }
 
   .footer-kinetic .footer-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
   }
 
-  .footer-kinetic .footer-bottom {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
+  .footer-kinetic .footer-col h4 {
+    font-size: 0.8rem;
   }
+}
 
+@media (max-width: 768px) {
   /* Process card: horizontal scroll instead of overflow */
   .bento-process {
     padding: 1.5rem 1rem;
@@ -9832,6 +9927,19 @@ transform: translateY(15px);
 
   .sticky-add-to-cart-btn {
     width: 100%;
+  }
+}
+
+/* Footer stacking on small screens */
+@media (max-width: 540px) {
+  .footer-kinetic .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-kinetic .footer-bottom {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
   }
 }
 
@@ -10615,9 +10723,10 @@ transform: translateY(15px);
   }
 
   .filter-btn {
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1rem;
     font-size: 0.8rem;
     flex-shrink: 0;
+    min-height: 44px;
   }
 
   .filter-count {
@@ -11000,6 +11109,55 @@ transform: translateY(15px);
   box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
 }
 
+/* ---- RESPONSIVE PRODUCT CARDS ---- */
+@media (max-width: 768px) {
+  .product-card-cinetique .product-info {
+    padding: 1.25rem;
+  }
+
+  .product-card-cinetique .product-name {
+    font-size: 1.1rem !important;
+  }
+
+  .product-card-cinetique .product-category {
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .product-card-cinetique .price-value {
+    font-size: 1.2rem;
+  }
+
+  .product-card-cinetique .product-actions {
+    padding: 0 1rem 0.75rem;
+  }
+
+  .product-card-cinetique .btn-view {
+    padding: 0.7rem 1.25rem;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-card-cinetique .product-info {
+    padding: 1rem;
+  }
+
+  .product-card-cinetique .product-name {
+    font-size: 1rem !important;
+    margin-bottom: 0.5rem;
+  }
+
+  .product-card-cinetique .product-category {
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .product-card-cinetique .price-value {
+    font-size: 1.1rem;
+  }
+}
+
 /* ========================================
    WOOCOMMERCE - Mini Cart Sliding Panel
    ======================================== */
@@ -11030,6 +11188,7 @@ transform: translateY(15px);
   width: 400px;
   max-width: 90vw;
   height: 100vh;
+  height: 100dvh;
   background: var(--color-white);
   z-index: 9999;
   -webkit-transform: translateX(100%);
@@ -14790,6 +14949,12 @@ body.woocommerce-cart {
   .sticky-btn {
     padding: 0.7rem 1rem;
     font-size: 0.75rem;
+    min-height: 44px;
+  }
+
+  /* Variations en 1 colonne sur mobile */
+  .product-form-v2 .variations {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -16153,8 +16318,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
   }
 
   .quick-view-close {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
   }
 
   .quick-view-gallery-thumbs .gallery-thumb {
