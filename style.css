@@ -17382,6 +17382,7 @@ html.sapi-intro-active body {
   display: flex;
   flex-direction: column;
   flex: 1;
+  gap: 0.75rem;
 }
 
 /* Sur mesure card: flex to fill stretched parent */
