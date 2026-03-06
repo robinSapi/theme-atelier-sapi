@@ -17320,6 +17320,27 @@ html.sapi-intro-active body {
   margin-top: 0.5rem;
 }
 
+.guide-result-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-orange, #E35B24);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.guide-result-cta svg {
+  transition: transform 0.2s ease;
+}
+
+.guide-result-card:hover .guide-result-cta svg {
+  transform: translateX(3px);
+}
+
 /* ---- Products Grid (up to 4 products) ---- */
 .guide-result-products-grid {
   display: flex;
