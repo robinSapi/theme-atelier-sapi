@@ -17216,7 +17216,7 @@ html.sapi-intro-active body {
 
 .guide-ai-quote {
   font-family: 'Square Peg', cursive;
-  font-size: 2.5rem;
+  font-size: 4rem;
   line-height: 1;
   color: var(--color-orange, #E35B24);
   opacity: 0.6;
@@ -17225,19 +17225,19 @@ html.sapi-intro-active body {
 }
 
 .guide-ai-quote-open {
-  margin-bottom: -0.5rem;
+  margin-bottom: -1rem;
 }
 
 .guide-ai-quote-close {
   text-align: right;
-  margin-top: -0.25rem;
+  margin-top: -0.5rem;
 }
 
 .guide-ai-text-content {
   font-family: 'Montserrat', sans-serif;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-style: italic;
-  line-height: 1.6;
+  line-height: 1.9;
   color: var(--color-dark, #323232);
   padding: 0 0.5rem;
 }
@@ -17320,7 +17320,7 @@ html.sapi-intro-active body {
   justify-content: center;
   gap: 24px;
   max-width: 1200px;
-  margin: 0 auto 1.5rem;
+  margin: 0 auto 3rem;
 }
 
 .guide-result-products-grid > * {
@@ -17348,7 +17348,7 @@ html.sapi-intro-active body {
 /* ---- Contact Form (Phase B) ---- */
 .guide-contact-wrap {
   max-width: 700px;
-  margin: 0.75rem auto 0;
+  margin: 2rem auto 0;
   text-align: center;
 }
 
@@ -17742,7 +17742,7 @@ html.sapi-intro-active body {
   }
 
   .guide-ai-quote {
-    font-size: 2rem;
+    font-size: 3rem;
   }
 
   .guide-contact-fields {
