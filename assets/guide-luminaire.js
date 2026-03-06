@@ -666,6 +666,32 @@
   // ================================================================
   var ARROW_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
 
+  /**
+   * Show loading animation during refinement (replaces textarea temporarily)
+   */
+  function showRefineLoading() {
+    if (dom.contactStep1) dom.contactStep1.style.display = 'none';
+    // Create or show the refine loading element
+    var loader = document.getElementById('guide-refine-loading');
+    if (!loader) {
+      loader = document.createElement('div');
+      loader.id = 'guide-refine-loading';
+      loader.className = 'guide-refine-loading';
+      loader.innerHTML = '<div class="guide-refine-loading-inner">'
+        + '<div class="guide-refine-dots"><span></span><span></span><span></span></div>'
+        + '<p class="guide-refine-loading-text">Robin r\u00e9fl\u00e9chit\u2026</p>'
+        + '</div>';
+      dom.contactWrap.insertBefore(loader, dom.contactStep1);
+    }
+    loader.style.display = '';
+  }
+
+  function hideRefineLoading() {
+    var loader = document.getElementById('guide-refine-loading');
+    if (loader) loader.style.display = 'none';
+    if (dom.contactStep1) dom.contactStep1.style.display = '';
+  }
+
   function bindContactForm() {
     // Enable "Envoyer" only when textarea has content
     if (dom.contactMsg && dom.contactNext) {
@@ -680,9 +706,9 @@
         var msg = dom.contactMsg ? dom.contactMsg.value.trim() : '';
         if (!msg) return;
 
-        // Loading state
+        // Loading state: hide textarea, show loading animation
         dom.contactNext.disabled = true;
-        dom.contactNext.innerHTML = 'Robin r\u00e9fl\u00e9chit\u2026';
+        showRefineLoading();
 
         var formData = new FormData();
         formData.append('action', 'sapi_guide_refine');
@@ -700,6 +726,7 @@
         })
         .then(function (r) { return r.json(); })
         .then(function (data) {
+          hideRefineLoading();
           resetContactNextBtn();
 
           if (data.success && data.data) {
@@ -709,6 +736,16 @@
             // Update conversation history from server
             if (d.conversation) {
               state.conversationHistory = d.conversation;
+            }
+
+            // Always display AI recommendation text if available
+            if (d.ai_text) {
+              state.aiText = d.ai_text;
+              renderAiText(d.ai_text);
+              // Scroll to updated AI text
+              if (dom.aiText) {
+                dom.aiText.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
             }
 
             if (action === 'refine') {
@@ -725,6 +762,7 @@
           }
         })
         .catch(function () {
+          hideRefineLoading();
           resetContactNextBtn();
           // Fallback: go to contact form (graceful degradation)
           handleContact(msg);
@@ -799,15 +837,10 @@
   }
 
   /**
-   * Handle "refine" action: update products + AI text, keep textarea visible
+   * Handle "refine" action: update products, keep textarea visible
+   * (AI text is already rendered by the main handler)
    */
   function handleRefine(d) {
-    // Update AI text
-    if (d.ai_text) {
-      state.aiText = d.ai_text;
-      renderAiText(d.ai_text);
-    }
-
     // Update products grid
     if (d.products && d.products.length > 0) {
       renderProductsGrid(d.products, false, '');
@@ -832,11 +865,6 @@
     // Clear textarea, keep it visible for next round
     if (dom.contactMsg) dom.contactMsg.value = '';
     if (dom.contactNext) dom.contactNext.disabled = true;
-
-    // Scroll to AI text so the user sees the updated recommendation
-    if (dom.aiText) {
-      dom.aiText.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
   }
 
   /**

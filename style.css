@@ -17458,6 +17458,54 @@ html.sapi-intro-active body {
   font-weight: 700;
 }
 
+/* ---- Refine Loading (Phase C) ---- */
+.guide-refine-loading {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.guide-refine-loading-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.guide-refine-loading-text {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  color: var(--color-wood, #937D68);
+  margin: 0;
+}
+
+.guide-refine-dots {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.guide-refine-dots span {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-wood, #937D68);
+  opacity: 0.3;
+  animation: guideRefinePulse 1.2s ease-in-out infinite;
+}
+
+.guide-refine-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.guide-refine-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes guideRefinePulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
 /* ---- Loading Steps ---- */
 .guide-loading-steps {
   display: flex;
