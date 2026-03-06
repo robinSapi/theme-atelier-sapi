@@ -1413,6 +1413,9 @@ function sapi_ajax_guide_results() {
   $products_data  = $query_result['products'];
   $fallback_notes = $query_result['fallback_notes'];
 
+  // 4b. Build filter context for refinement calls
+  $filter_context = sapi_guide_build_filter_context($clean, $categories, $fallback_notes);
+
   // 5. Show sur mesure card? (grappe, grande pièce, haute hauteur)
   $show_sur_mesure = false;
   $eclairage_answer = isset($clean['eclairage']) ? $clean['eclairage'] : '';
@@ -1495,6 +1498,7 @@ function sapi_ajax_guide_results() {
     'products'          => $display_products,
     'show_sur_mesure'   => $show_sur_mesure,
     'sur_mesure_reason' => $sur_mesure_reason,
+    'filter_context'    => $filter_context,
   ]);
 }
 
@@ -1540,10 +1544,14 @@ function sapi_ajax_guide_contact() {
     return;
   }
 
-  // 5. Parse guide answers
+  // 5. Parse guide answers + conversation history
   $labels_raw = json_decode(wp_unslash($_POST['labels'] ?? '{}'), true);
   if (!is_array($labels_raw)) {
     $labels_raw = [];
+  }
+  $conversation_raw = json_decode(wp_unslash($_POST['conversation'] ?? '[]'), true);
+  if (!is_array($conversation_raw)) {
+    $conversation_raw = [];
   }
 
   // 6. Build email body
@@ -1562,7 +1570,17 @@ function sapi_ajax_guide_contact() {
   foreach ($labels_raw as $step => $label) {
     $body .= "- " . ucfirst(sanitize_text_field($step)) . " : " . sanitize_text_field($label) . "\n";
   }
-  $body .= "\nRECOMMANDATION IA :\n" . ($ai_text ? esc_html($ai_text) : '(pas de texte IA)') . "\n";
+  // Include conversation history if the client had a back-and-forth with the AI
+  if (!empty($conversation_raw)) {
+    $body .= "\nHISTORIQUE DE CONVERSATION :\n";
+    foreach ($conversation_raw as $msg) {
+      if (!isset($msg['role']) || !isset($msg['content'])) continue;
+      $role_label = ($msg['role'] === 'user') ? 'Client' : 'IA (Robin)';
+      $body .= $role_label . " : " . sanitize_textarea_field($msg['content']) . "\n\n";
+    }
+  } else {
+    $body .= "\nRECOMMANDATION IA :\n" . ($ai_text ? esc_html($ai_text) : '(pas de texte IA)') . "\n";
+  }
   $body .= "\n---\nDate : " . wp_date('d/m/Y H:i') . "\n";
 
   // 7. Headers
@@ -1584,6 +1602,160 @@ function sapi_ajax_guide_contact() {
   } else {
     wp_send_json_error(['message' => 'Erreur envoi']);
   }
+}
+
+/**
+ * ── Phase C : Smart refinement — AI routes client message ──
+ * Client sends a follow-up message after seeing initial results.
+ * Claude decides: refine products, show contact form, or both.
+ */
+add_action('wp_ajax_sapi_guide_refine', 'sapi_ajax_guide_refine');
+add_action('wp_ajax_nopriv_sapi_guide_refine', 'sapi_ajax_guide_refine');
+
+function sapi_ajax_guide_refine() {
+  // 1. Nonce check (reuses the guide results nonce)
+  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
+    wp_send_json_error(['message' => 'Nonce invalide']);
+    return;
+  }
+
+  // 2. Parse inputs
+  $user_message      = sanitize_textarea_field(wp_unslash($_POST['user_message'] ?? ''));
+  $raw_answers       = isset($_POST['answers']) ? sanitize_text_field(wp_unslash($_POST['answers'])) : '{}';
+  $answers           = json_decode($raw_answers, true);
+  $conversation_raw  = isset($_POST['conversation']) ? wp_unslash($_POST['conversation']) : '[]';
+  $conversation      = json_decode($conversation_raw, true);
+  $current_ids_raw   = isset($_POST['current_products']) ? wp_unslash($_POST['current_products']) : '[]';
+  $current_product_ids = json_decode($current_ids_raw, true);
+  $filter_context    = sanitize_textarea_field(wp_unslash($_POST['filter_context'] ?? ''));
+
+  if (empty($user_message)) {
+    wp_send_json_error(['message' => 'Message vide']);
+    return;
+  }
+
+  if (!is_array($answers)) $answers = [];
+  if (!is_array($conversation)) $conversation = [];
+  if (!is_array($current_product_ids)) $current_product_ids = [];
+
+  // Sanitize answers
+  $clean = [];
+  foreach ($answers as $key => $val) {
+    $clean[sanitize_key($key)] = sanitize_text_field($val);
+  }
+
+  // Sanitize current product IDs
+  $current_product_ids = array_map('intval', $current_product_ids);
+
+  // 3. Get FULL product catalog
+  $all_products = sapi_guide_query_all_products();
+
+  // 4. Build refinement system prompt
+  $system_prompt = sapi_guide_build_refine_prompt(
+    $all_products,
+    $clean,
+    $filter_context,
+    $current_product_ids
+  );
+
+  // 5. Build messages array with conversation history
+  $messages = [];
+  if (is_array($conversation)) {
+    foreach ($conversation as $msg) {
+      if (!isset($msg['role']) || !isset($msg['content'])) continue;
+      $role = ($msg['role'] === 'assistant') ? 'assistant' : 'user';
+      $messages[] = ['role' => $role, 'content' => sanitize_textarea_field($msg['content'])];
+    }
+  }
+  $messages[] = ['role' => 'user', 'content' => $user_message];
+
+  // 6. Call Claude API
+  $ai_response = sapi_guide_call_claude_refine($system_prompt, $messages);
+
+  if (!$ai_response) {
+    // Fallback: route to contact form
+    wp_send_json_success([
+      'action'       => 'contact',
+      'ai_text'      => '',
+      'products'     => [],
+      'conversation' => array_merge(
+        $conversation,
+        [['role' => 'user', 'content' => $user_message]]
+      ),
+    ]);
+    return;
+  }
+
+  $action         = isset($ai_response['action']) ? $ai_response['action'] : 'contact';
+  $recommendation = isset($ai_response['recommendation']) ? $ai_response['recommendation'] : '';
+  $product_ids    = isset($ai_response['product_ids']) ? $ai_response['product_ids'] : [];
+
+  // Validate action
+  if (!in_array($action, ['refine', 'contact', 'both'], true)) {
+    $action = 'contact';
+  }
+
+  // 7. If refine or both, resolve product IDs to full product data
+  $new_products = [];
+  if (in_array($action, ['refine', 'both'], true) && !empty($product_ids)) {
+    foreach ($product_ids as $pid) {
+      $found = sapi_guide_find_product_by_id($all_products, (int) $pid);
+      if ($found) {
+        $new_products[] = $found;
+      }
+    }
+    // If Claude returned IDs but none resolved, fallback to contact
+    if (empty($new_products)) {
+      $action = 'contact';
+    }
+  }
+
+  // 8. Build updated conversation
+  $updated_conversation = array_merge(
+    $conversation,
+    [
+      ['role' => 'user', 'content' => $user_message],
+      ['role' => 'assistant', 'content' => $recommendation],
+    ]
+  );
+
+  // 9. Email notification to Robin
+  $email_body  = "Raffinement Guide Luminaire\n";
+  $email_body .= "===========================\n\n";
+  $email_body .= "MESSAGE CLIENT : " . esc_html($user_message) . "\n";
+  $email_body .= "ACTION IA : " . esc_html($action) . "\n";
+  $email_body .= "RECOMMANDATION : " . esc_html($recommendation) . "\n";
+  if (!empty($new_products)) {
+    $email_body .= "\nNOUVEAUX PRODUITS PROPOSÉS :\n";
+    foreach ($new_products as $p) {
+      $email_body .= '- ' . esc_html($p['title']) . ' (' . wp_strip_all_tags($p['price']) . ")\n";
+    }
+  }
+  $email_body .= "\nRÉPONSES QUESTIONNAIRE :\n";
+  $labels_map = [
+    'piece' => 'Pièce', 'taille' => 'Taille', 'eclairage' => 'Éclairage',
+    'sortie' => 'Sortie', 'hauteur' => 'Hauteur', 'table' => 'Table', 'style' => 'Style',
+  ];
+  foreach ($labels_map as $key => $label) {
+    if (isset($clean[$key])) {
+      $email_body .= '- ' . $label . ' : ' . esc_html($clean[$key]) . "\n";
+    }
+  }
+  $email_body .= "\n---\nDate : " . wp_date('d/m/Y H:i') . "\n";
+
+  wp_mail(
+    get_option('admin_email'),
+    '[Guide Luminaire] Raffinement — ' . esc_html($action),
+    $email_body
+  );
+
+  // 10. Send response
+  wp_send_json_success([
+    'action'       => $action,
+    'ai_text'      => $recommendation,
+    'products'     => $new_products,
+    'conversation' => $updated_conversation,
+  ]);
 }
 
 /**
@@ -1783,6 +1955,84 @@ function sapi_guide_query_complements(array $answers, array $main_categories) {
   $results = sapi_guide_collect_results($query, $answers);
   wp_reset_postdata();
   return $results;
+}
+
+/**
+ * Query ALL published products (full catalog, no filters).
+ * Used for refinement calls so Claude can pick from any product.
+ */
+function sapi_guide_query_all_products() {
+  $args = [
+    'post_type'      => 'product',
+    'post_status'    => 'publish',
+    'posts_per_page' => 50,
+    'orderby'        => 'menu_order date',
+    'order'          => 'ASC',
+  ];
+  $query = new WP_Query($args);
+  $results = sapi_guide_collect_results($query, []);
+  wp_reset_postdata();
+  return $results;
+}
+
+/**
+ * Build a human-readable description of the filters applied during the first recommendation.
+ * Sent to Claude during refinement so it understands what was filtered and why.
+ */
+function sapi_guide_build_filter_context(array $answers, array $categories, array $fallback_notes = []) {
+  $parts = [];
+  $sortie    = isset($answers['sortie'])    ? $answers['sortie']    : '';
+  $piece     = isset($answers['piece'])     ? $answers['piece']     : '';
+  $taille    = isset($answers['taille'])    ? $answers['taille']    : '';
+  $hauteur   = isset($answers['hauteur'])   ? $answers['hauteur']   : '';
+  $style     = isset($answers['style'])     ? $answers['style']     : '';
+  $eclairage = isset($answers['eclairage']) ? $answers['eclairage'] : '';
+  $table     = isset($answers['table'])     ? $answers['table']     : '';
+
+  $parts[] = 'Catégories filtrées : ' . implode(', ', $categories);
+
+  if ($eclairage === 'secondaire') {
+    $parts[] = 'Éclairage secondaire demandé (complémentaire).';
+  }
+
+  if ($sortie === 'plafond') {
+    $parts[] = 'Filtré sur suspensions car sortie plafond.';
+  } elseif ($sortie === 'mur') {
+    $parts[] = 'Filtré sur appliques car sortie mur.';
+  } elseif ($sortie === 'pas-de-sortie') {
+    $parts[] = 'Filtré sur lampadaires, lampes à poser et appliques car prise 230V (pas de sortie électrique dédiée).';
+  } elseif ($sortie === 'ne-sais-pas') {
+    $parts[] = 'Sortie inconnue : suspensions, lampadaires et lampes à poser proposés.';
+  }
+
+  $ampoule_filter = sapi_guide_get_ampoule_filter($piece);
+  if ($ampoule_filter) {
+    $parts[] = 'Filtre ampoule : ' . implode(' ou ', $ampoule_filter) . ' (pièce : ' . $piece . ').';
+  }
+
+  if ($sortie === 'plafond' && $hauteur === 'standard' && $table === 'non') {
+    $parts[] = 'Format vertical exclu (plafond standard sans table en dessous).';
+  }
+
+  if ($style === 'moderne') {
+    $parts[] = 'Essence conseillée : Peuplier (style moderne).';
+  } elseif ($style === 'ancien') {
+    $parts[] = 'Essence conseillée : Okoumé (style ancien/chaleureux).';
+  }
+
+  if ($piece === 'cuisine') {
+    $parts[] = 'Lampe à poser exclue (cuisine).';
+  }
+
+  if ($taille === 'grande') {
+    $parts[] = 'Grande pièce : produits avec peu de tailles disponibles exclus.';
+  }
+
+  if (!empty($fallback_notes)) {
+    $parts[] = 'Notes de fallback (filtres relâchés) : ' . implode(' ', $fallback_notes);
+  }
+
+  return implode("\n", $parts);
 }
 
 /**
@@ -2155,6 +2405,130 @@ function sapi_guide_call_claude($system_prompt) {
     // If Claude didn't return valid JSON, use the raw text as recommendation
     return [
       'recommendation' => $text,
+    ];
+  }
+
+  return $parsed;
+}
+
+/**
+ * ── Refinement: Build system prompt with full catalog ──
+ * Used when the client sends a follow-up message after seeing initial results.
+ */
+function sapi_guide_build_refine_prompt(array $all_products, array $answers, $filter_context, array $current_product_ids) {
+  $theme_dir = get_stylesheet_directory();
+  $refine_rules = file_get_contents($theme_dir . '/assets/guide-prompt-refine.txt');
+  $ton          = file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt');
+
+  $prompt = $refine_rules . "\n\n" . $ton . "\n\n";
+
+  // Full catalog
+  $prompt .= "CATALOGUE COMPLET (tous les luminaires disponibles) :\n";
+  foreach ($all_products as $p) {
+    $is_current = in_array((int) $p['id'], $current_product_ids, true) ? ' [ACTUELLEMENT AFFICHÉ]' : '';
+    $prompt .= '- ' . $p['title']
+      . ' | ID : ' . $p['id']
+      . ' | Prix : ' . wp_strip_all_tags($p['price'])
+      . ' | Catégorie : ' . implode(', ', $p['categories'])
+      . ' | Format : ' . $p['format']
+      . ' | Ampoule : ' . $p['type_ampoule']
+      . ' | Ventes : ' . $p['total_sales']
+      . $is_current . "\n";
+  }
+
+  // Quiz answers
+  $prompt .= "\nRÉPONSES INITIALES DU CLIENT AU QUESTIONNAIRE :\n";
+  $labels = [
+    'piece'     => 'Pièce',
+    'taille'    => 'Taille de la pièce',
+    'eclairage' => 'Type d\'éclairage',
+    'sortie'    => 'Sortie électrique',
+    'hauteur'   => 'Hauteur sous-plafond',
+    'table'     => 'Au-dessus d\'une table',
+    'style'     => 'Style intérieur',
+  ];
+  foreach ($labels as $key => $label) {
+    $val = isset($answers[$key]) ? $answers[$key] : 'Non demandé';
+    $prompt .= '- ' . $label . ' : ' . $val . "\n";
+  }
+
+  // Filter context from first round
+  $prompt .= "\nFILTRES APPLIQUÉS LORS DE LA PREMIÈRE RECOMMANDATION :\n";
+  $prompt .= $filter_context . "\n";
+
+  // Currently displayed products
+  $prompt .= "\nPRODUITS ACTUELLEMENT AFFICHÉS AU CLIENT (IDs) : " . implode(', ', $current_product_ids) . "\n";
+
+  // Response format
+  $prompt .= "\nFORMAT DE RÉPONSE (JSON strict, sans commentaires) :\n";
+  $prompt .= "{\n";
+  $prompt .= '  "action": "refine" | "contact" | "both",' . "\n";
+  $prompt .= '  "recommendation": "Texte de réponse pour le client (max 80 mots)...",' . "\n";
+  $prompt .= '  "product_ids": [123, 456, 789]' . "\n";
+  $prompt .= "}\n";
+  $prompt .= "Note : product_ids est obligatoire si action = \"refine\" ou \"both\". Vide [] si action = \"contact\".\n";
+
+  return $prompt;
+}
+
+/**
+ * ── Refinement: Call Claude API with conversation history ──
+ * Similar to sapi_guide_call_claude() but supports multi-turn messages.
+ */
+function sapi_guide_call_claude_refine($system_prompt, array $messages) {
+  $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
+  if (empty($api_key)) {
+    return null;
+  }
+
+  $body = [
+    'model'      => 'claude-sonnet-4-6',
+    'max_tokens' => 1024,
+    'system'     => $system_prompt,
+    'messages'   => $messages,
+  ];
+
+  $response = wp_remote_post('https://api.anthropic.com/v1/messages', [
+    'timeout' => 30,
+    'headers' => [
+      'Content-Type'      => 'application/json',
+      'x-api-key'         => $api_key,
+      'anthropic-version' => '2023-06-01',
+    ],
+    'body' => wp_json_encode($body),
+  ]);
+
+  if (is_wp_error($response)) {
+    error_log('Sapi Guide Refine API error: ' . $response->get_error_message());
+    return null;
+  }
+
+  $status   = wp_remote_retrieve_response_code($response);
+  $raw_body = wp_remote_retrieve_body($response);
+
+  if ($status !== 200) {
+    error_log('Sapi Guide Refine API HTTP ' . $status . ': ' . $raw_body);
+    return null;
+  }
+
+  $data = json_decode($raw_body, true);
+  if (!isset($data['content'][0]['text'])) {
+    return null;
+  }
+
+  $text = $data['content'][0]['text'];
+
+  // Clean markdown code fences if present
+  $text = preg_replace('/^```json\s*/i', '', trim($text));
+  $text = preg_replace('/\s*```$/i', '', $text);
+
+  $parsed = json_decode(trim($text), true);
+  if (!$parsed || !isset($parsed['action'])) {
+    // Fallback: treat as contact intent with raw text
+    return [
+      'action'         => 'contact',
+      'recommendation' => $text,
+      'product_ids'    => [],
     ];
   }
 

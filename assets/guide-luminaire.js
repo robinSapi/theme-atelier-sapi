@@ -12,6 +12,9 @@
     isQuizStarted: false,
     aiText: '',
     loadingInterval: null,
+    conversationHistory: [],  // [{ role: 'user'|'assistant', content: '...' }]
+    currentProducts: [],      // IDs of products currently displayed
+    filterContext: '',        // filter context string from initial results
   };
 
   var SESSION_KEY = 'sapiGuideV2';
@@ -505,10 +508,13 @@
           }
         }
 
+        // Save filter context + product IDs for refinement calls
+        state.filterContext = d.filter_context || '';
+        state.currentProducts = d.products ? d.products.map(function(p) { return p.id; }) : [];
+        state.conversationHistory = d.ai_text ? [{ role: 'assistant', content: d.ai_text }] : [];
+
         // Show contact form (Phase B)
         if (dom.contactWrap) dom.contactWrap.style.display = '';
-
-        // Display answer tags below grid
 
       } else {
         renderResultsError();
@@ -656,8 +662,10 @@
   }
 
   // ================================================================
-  // CONTACT FORM (Phase B)
+  // CONTACT FORM + SMART REFINEMENT (Phase C)
   // ================================================================
+  var ARROW_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+
   function bindContactForm() {
     // Enable "Envoyer" only when textarea has content
     if (dom.contactMsg && dom.contactNext) {
@@ -666,19 +674,65 @@
       });
     }
 
-    // Step 1 → Step 2 : save message, show contact fields
+    // Step 1 : Send message to AI for routing (refine / contact / both)
     if (dom.contactNext) {
       dom.contactNext.addEventListener('click', function () {
         var msg = dom.contactMsg ? dom.contactMsg.value.trim() : '';
         if (!msg) return;
-        var hidden = document.getElementById('guide-contact-msg-hidden');
-        if (hidden) hidden.value = msg;
-        if (dom.contactStep1) dom.contactStep1.style.display = 'none';
-        if (dom.contactStep2) dom.contactStep2.style.display = '';
+
+        // Loading state
+        dom.contactNext.disabled = true;
+        dom.contactNext.innerHTML = 'Robin r\u00e9fl\u00e9chit\u2026';
+
+        var formData = new FormData();
+        formData.append('action', 'sapi_guide_refine');
+        formData.append('nonce', sapiGuide.nonce);
+        formData.append('user_message', msg);
+        formData.append('answers', JSON.stringify(state.answers));
+        formData.append('conversation', JSON.stringify(state.conversationHistory));
+        formData.append('current_products', JSON.stringify(state.currentProducts));
+        formData.append('filter_context', state.filterContext);
+
+        fetch(sapiGuide.ajaxUrl, {
+          method: 'POST',
+          credentials: 'same-origin',
+          body: formData,
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          resetContactNextBtn();
+
+          if (data.success && data.data) {
+            var d = data.data;
+            var action = d.action || 'contact';
+
+            // Update conversation history from server
+            if (d.conversation) {
+              state.conversationHistory = d.conversation;
+            }
+
+            if (action === 'refine') {
+              handleRefine(d);
+            } else if (action === 'contact') {
+              handleContact(msg);
+            } else if (action === 'both') {
+              handleRefine(d);
+              handleContact(msg);
+            }
+          } else {
+            // Fallback: go to contact form
+            handleContact(msg);
+          }
+        })
+        .catch(function () {
+          resetContactNextBtn();
+          // Fallback: go to contact form (graceful degradation)
+          handleContact(msg);
+        });
       });
     }
 
-    // Step 2 : form submit via AJAX
+    // Step 2 : Contact form submit via AJAX
     if (dom.contactForm) {
       dom.contactForm.addEventListener('submit', function (e) {
         e.preventDefault();
@@ -719,6 +773,7 @@
         formData.append('answers', JSON.stringify(state.answers));
         formData.append('labels', JSON.stringify(state.labels));
         formData.append('ai_text', state.aiText);
+        formData.append('conversation', JSON.stringify(state.conversationHistory));
 
         fetch(sapiGuide.ajaxUrl, {
           method: 'POST',
@@ -743,10 +798,68 @@
     }
   }
 
+  /**
+   * Handle "refine" action: update products + AI text, keep textarea visible
+   */
+  function handleRefine(d) {
+    // Update AI text
+    if (d.ai_text) {
+      state.aiText = d.ai_text;
+      renderAiText(d.ai_text);
+    }
+
+    // Update products grid
+    if (d.products && d.products.length > 0) {
+      renderProductsGrid(d.products, false, '');
+      state.currentProducts = d.products.map(function(p) { return p.id; });
+
+      // Update ambiance banner with first new product
+      var firstProduct = d.products[0];
+      if (firstProduct && firstProduct.ambiance && dom.ambianceBanner && dom.ambianceImg) {
+        dom.ambianceImg.src = firstProduct.ambiance;
+        dom.ambianceImg.alt = firstProduct.title + ' \u2014 ambiance';
+        if (dom.ambianceTitle) {
+          var words = firstProduct.title.split(' ');
+          var fn = words[0] || '';
+          var rest = words.slice(1).join(' ');
+          dom.ambianceTitle.innerHTML = '<span class="product-firstname">' + escapeHtml(fn) + '</span>'
+            + (rest ? ' <span class="product-restname">' + escapeHtml(rest) + '</span>' : '');
+        }
+        dom.ambianceBanner.style.display = '';
+      }
+    }
+
+    // Clear textarea, keep it visible for next round
+    if (dom.contactMsg) dom.contactMsg.value = '';
+    if (dom.contactNext) dom.contactNext.disabled = true;
+
+    // Scroll to AI text so the user sees the updated recommendation
+    if (dom.aiText) {
+      dom.aiText.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  /**
+   * Handle "contact" action: save message, show contact form (step 2)
+   */
+  function handleContact(msg) {
+    var hidden = document.getElementById('guide-contact-msg-hidden');
+    if (hidden) hidden.value = msg;
+    if (dom.contactStep1) dom.contactStep1.style.display = 'none';
+    if (dom.contactStep2) dom.contactStep2.style.display = '';
+  }
+
+  function resetContactNextBtn() {
+    if (dom.contactNext) {
+      dom.contactNext.disabled = false;
+      dom.contactNext.innerHTML = 'Envoyer ' + ARROW_SVG;
+    }
+  }
+
   function resetContactSendBtn() {
     if (dom.contactSend) {
       dom.contactSend.disabled = false;
-      dom.contactSend.innerHTML = 'Envoyer \u00e0 Robin <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+      dom.contactSend.innerHTML = 'Envoyer \u00e0 Robin ' + ARROW_SVG;
     }
   }
 
@@ -863,6 +976,9 @@
     state.labels = {};
     state.isShowingResults = false;
     state.aiText = '';
+    state.conversationHistory = [];
+    state.currentProducts = [];
+    state.filterContext = '';
     clearSession();
 
     // Deselect all cards

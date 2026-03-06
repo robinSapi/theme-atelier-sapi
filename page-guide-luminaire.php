@@ -227,10 +227,10 @@ $icons = [
 
       <!-- Étape 1 : Message -->
       <div class="guide-contact-step" id="guide-contact-step1">
-        <p class="guide-contact-prompt">Que pensez-vous de ces propositions ?</p>
+        <p class="guide-contact-prompt">Une question, un avis ? Dites-le à Robin !</p>
         <div class="guide-contact-field-wrap">
           <textarea id="guide-contact-message" class="guide-contact-textarea"
-            placeholder="J'aime bien mais je cherche quelque chose de plus petit…"
+            placeholder="J'aimerais plutôt une applique… / C'est parfait mais en plus petit…"
             rows="3"></textarea>
           <button type="button" id="guide-contact-next" class="guide-contact-submit" disabled>
             Envoyer
