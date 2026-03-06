@@ -12857,11 +12857,6 @@ body.woocommerce-order-received {
   }
 }
 
-/* Masquer la ligne frais de livraison sur le panier (adresse pas encore saisie) */
-.sapi-cart-outer .wc-block-components-totals-shipping {
-  display: none !important;
-}
-
 /* Bouton "Passer commande" — vert validation */
 .sapi-cart-outer .wc-block-cart__submit-button {
   background: linear-gradient(180deg, #018501 0%, #026B02 100%) !important;
