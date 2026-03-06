@@ -1453,6 +1453,11 @@ function sapi_ajax_guide_results() {
     $ai_text = $ai_response['recommendation'];
   }
 
+  $sur_mesure_text = null;
+  if ($ai_response && isset($ai_response['sur_mesure_text'])) {
+    $sur_mesure_text = $ai_response['sur_mesure_text'];
+  }
+
   if (empty($display_products)) {
     wp_send_json_error(['message' => 'Aucun produit trouvé']);
     return;
@@ -1463,6 +1468,7 @@ function sapi_ajax_guide_results() {
     'products'          => $display_products,
     'show_sur_mesure'   => $show_sur_mesure,
     'sur_mesure_reason' => $sur_mesure_reason,
+    'sur_mesure_text'   => $sur_mesure_text,
     'filter_context'    => $filter_context,
   ]);
 }
@@ -2271,14 +2277,18 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
   }
 
   if ($show_sur_mesure) {
-    $prompt .= "\nINFO CONTEXTE : Une carte \"Création sur mesure\" est affichée à côté des produits. Mentionne-la brièvement (une phrase).\n";
+    $prompt .= "\nINFO CONTEXTE : Une carte \"Création sur mesure\" est affichée à côté des produits. NE mentionne PAS le sur mesure dans le champ \"recommendation\" — utilise le champ \"sur_mesure_text\" à la place.\n";
+    $prompt .= "Dans \"sur_mesure_text\", écris un texte court (30 mots max) qui explique pourquoi une création sur mesure est pertinente pour la situation précise de CE client. Sois concret, pas générique. Parle du projet, pas du service.\n";
   }
 
   // Format de réponse JSON
   $prompt .= "\nFORMAT DE RÉPONSE (JSON strict, sans commentaires) :\n";
   $prompt .= "{\n";
-  $prompt .= "  \"recommendation\": \"Texte expliquant pourquoi cette sélection correspond aux critères du client...\"\n";
-  $prompt .= "}\n";
+  $prompt .= "  \"recommendation\": \"Texte expliquant pourquoi cette sélection correspond aux critères du client...\"";
+  if ($show_sur_mesure) {
+    $prompt .= ",\n  \"sur_mesure_text\": \"Texte court expliquant pourquoi le sur mesure est adapté à CE client...\"";
+  }
+  $prompt .= "\n}\n";
 
   return $prompt;
 }
