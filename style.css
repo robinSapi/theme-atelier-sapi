@@ -17197,11 +17197,9 @@ html.sapi-intro-active body {
 
 .guide-results-signature {
   font-family: 'Montserrat', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-orange, #E35B24);
-  text-align: right;
-  margin: 0.25rem 0 0;
 }
 
 .guide-results-subtitle {
