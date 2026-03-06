@@ -12857,9 +12857,9 @@ body.woocommerce-order-received {
   }
 }
 
-/* Masquer les lignes de totaux dans la sidebar panier (sous-total, frais, total)
-   On garde uniquement le bouton + paiement express */
-.sapi-cart-outer .wc-block-components-totals-wrapper {
+/* Masquer totaux + titre dans la sidebar panier — ne garde que bouton + paiement express */
+.sapi-cart-outer .wc-block-components-totals-wrapper,
+.sapi-cart-outer .wc-block-cart__totals-title {
   display: none !important;
 }
 
