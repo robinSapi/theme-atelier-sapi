@@ -277,7 +277,7 @@ $icons = [
       </p>
     </div>
 
-    <div class="guide-results-tags" id="guide-results-tags" style="display:none;"></div>
+
 
     <div class="guide-restart-wrap" id="guide-restart-wrap">
       <button class="guide-restart-btn" id="guide-restart" type="button">
