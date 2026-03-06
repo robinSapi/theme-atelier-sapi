@@ -13755,7 +13755,7 @@ body.woocommerce-cart {
 
 @media (max-width: 768px) {
   .checkout-page-cinetique {
-    padding: 1.5rem;
+    padding: 0;
   }
 
   .woocommerce-checkout .col2-set {
