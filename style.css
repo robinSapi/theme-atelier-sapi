@@ -17195,6 +17195,13 @@ html.sapi-intro-active body {
   line-height: 1.1;
 }
 
+.guide-results-signature {
+  font-family: 'Square Peg', cursive;
+  font-size: 1.6rem;
+  color: var(--color-orange, #E35B24);
+  margin: 0.25rem 0 0;
+}
+
 .guide-results-subtitle {
   font-family: 'Montserrat', sans-serif;
   font-size: 0.9rem;
