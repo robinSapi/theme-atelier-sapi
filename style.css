@@ -17356,11 +17356,13 @@ html.sapi-intro-active body {
 .guide-result-products-grid > * {
   width: calc(25% - 18px);
   min-width: 0;
+  height: auto; /* Override product-card-cinetique height:100% so align-items:stretch works */
 }
 
-/* ---- Guide cards: equal height + align CTA buttons at bottom ---- */
-.guide-result-products-grid .guide-result-card--surmesure {
+/* Product cards: flex column filling stretched parent */
+.guide-result-products-grid .product-card-cinetique {
   display: flex;
+  flex-direction: column;
 }
 
 .guide-result-products-grid .product-card-link {
@@ -17373,7 +17375,11 @@ html.sapi-intro-active body {
   display: flex;
   flex-direction: column;
   flex: 1;
-  flex: 1;
+}
+
+/* Sur mesure card: flex to fill stretched parent */
+.guide-result-products-grid .guide-result-card--surmesure {
+  display: flex;
 }
 
 .guide-result-products-grid .guide-result-cta {
