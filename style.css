@@ -17347,6 +17347,7 @@ html.sapi-intro-active body {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: stretch;
   gap: 24px;
   max-width: 1200px;
   margin: 0 auto 3rem;
@@ -17355,12 +17356,14 @@ html.sapi-intro-active body {
 .guide-result-products-grid > * {
   width: calc(25% - 18px);
   min-width: 0;
+  height: auto;
 }
 
-/* ---- Guide cards: align CTA buttons at bottom ---- */
+/* ---- Guide cards: equal height + align CTA buttons at bottom ---- */
 .guide-result-products-grid .guide-result-card {
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .guide-result-products-grid .product-card-link {
