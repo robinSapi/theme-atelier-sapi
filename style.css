@@ -13533,11 +13533,12 @@ body.woocommerce-cart {
 .gallery-main {
   position: relative;
   width: 100%;
+  max-width: 500px;
   aspect-ratio: 1 / 1;
-  max-height: 550px;
   overflow: hidden;
   border-radius: 12px;
   background: #f5f5f5;
+  margin: 0 auto;
 }
 
 /* Overlay lumière dorée subtile - DS 4.4 */
