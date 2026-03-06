@@ -144,18 +144,8 @@ get_header();
           $main_image_url = wp_get_attachment_image_url($main_image_id, 'woocommerce_single');
           $main_image_full = wp_get_attachment_image_url($main_image_id, 'full');
           ?>
-          <div class="gallery-main">
-            <a href="<?php echo esc_url($main_image_full); ?>" class="gallery-zoom" data-fancybox="product-gallery">
+          <div class="gallery-main" style="cursor: pointer;">
               <img src="<?php echo esc_url($main_image_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="gallery-main-image">
-              <span class="gallery-zoom-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                  <line x1="11" y1="8" x2="11" y2="14"></line>
-                  <line x1="8" y1="11" x2="14" y2="11"></line>
-                </svg>
-              </span>
-            </a>
             <!-- Mobile navigation arrows (minimal style) -->
             <button type="button" class="gallery-nav gallery-nav-prev" aria-label="Image précédente">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -1148,7 +1138,7 @@ get_header();
   // Update sticky bar, gallery and specs when variation is selected
   const variationForm = document.querySelector('.variations_form');
   const mainImage = document.querySelector('.gallery-main-image');
-  const galleryZoomLink = document.querySelector('.gallery-zoom');
+  const galleryZoomLink = null; // Removed: lightbox replaces zoom link
 
   // Store original first thumbnail data
   const firstThumb = document.querySelector('.gallery-thumb');
@@ -1344,18 +1334,14 @@ get_header();
     });
   });
 
-  // Mobile: tap on main image opens the ambiance lightbox
-  if ('ontouchstart' in window) {
-    var galleryMainEl = document.querySelector('.gallery-main');
-    if (galleryMainEl) {
-      galleryMainEl.addEventListener('click', function(e) {
-        // Ignore clicks on navigation arrows
-        if (e.target.closest('.gallery-nav')) return;
-        e.preventDefault();
-        var openBtn = document.getElementById('btn-ambiance-lightbox');
-        if (openBtn) openBtn.click();
-      });
-    }
+  // Click on main gallery image opens the lightbox (mobile + desktop)
+  var galleryMainEl = document.querySelector('.gallery-main');
+  if (galleryMainEl) {
+    galleryMainEl.addEventListener('click', function(e) {
+      if (e.target.closest('.gallery-nav')) return; // Ignore arrow clicks
+      var openBtn = document.getElementById('btn-ambiance-lightbox');
+      if (openBtn) openBtn.click();
+    });
   }
 
   // Mobile gallery navigation with arrows and swipe
