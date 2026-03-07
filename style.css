@@ -6475,13 +6475,11 @@ li.carousel-editorial-slide,
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-@media (hover: hover) {
-  .advice-guide-cta-inner:hover {
-    transform: translateY(-3px);
-    box-shadow:
-      0 12px 40px rgba(147, 125, 104, 0.18),
-      0 4px 12px rgba(147, 125, 104, 0.08);
-  }
+.advice-guide-cta-inner:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 12px 40px rgba(147, 125, 104, 0.18),
+    0 4px 12px rgba(147, 125, 104, 0.08);
 }
 
 .advice-guide-cta-title {
@@ -17223,11 +17221,9 @@ html.sapi-intro-active body {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-@media (hover: hover) {
-  .guide-intro-cta:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(227, 91, 36, 0.35);
-  }
+.guide-intro-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(227, 91, 36, 0.35);
 }
 
 .guide-intro-duration {
@@ -17365,14 +17361,12 @@ html.sapi-intro-active body {
   line-height: 1.3;
 }
 
-@media (hover: hover) {
-  .guide-choice-card:hover {
-    background: #fff;
-    color: var(--color-dark, #323232);
-    border-color: var(--color-orange, #E35B24);
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(227, 91, 36, 0.08);
-  }
+.guide-choice-card:hover {
+  background: #fff;
+  color: var(--color-dark, #323232);
+  border-color: var(--color-orange, #E35B24);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(227, 91, 36, 0.08);
 }
 
 .guide-choice-card:focus-visible {
@@ -17402,11 +17396,9 @@ html.sapi-intro-active body {
   transition: background 0.25s ease, color 0.25s ease;
 }
 
-@media (hover: hover) {
-  .guide-choice-card:hover .guide-choice-icon {
-    background: rgba(147, 125, 104, 0.15);
-    color: var(--color-wood, #937D68);
-  }
+.guide-choice-card:hover .guide-choice-icon {
+  background: rgba(147, 125, 104, 0.15);
+  color: var(--color-wood, #937D68);
 }
 
 .guide-choice-card.is-selected .guide-choice-icon {
@@ -17453,15 +17445,13 @@ html.sapi-intro-active body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-@media (hover: hover) {
-  .guide-back-btn:hover,
-  .guide-reset-btn:hover {
-    border-color: var(--color-wood, #937D68);
-    color: #4A3F35;
-    background: #fff;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
+.guide-back-btn:hover,
+.guide-reset-btn:hover {
+  border-color: var(--color-wood, #937D68);
+  color: #4A3F35;
+  background: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .guide-reset-btn {
@@ -17470,10 +17460,8 @@ html.sapi-intro-active body {
   opacity: 0.7;
 }
 
-@media (hover: hover) {
-  .guide-reset-btn:hover {
-    opacity: 1;
-  }
+.guide-reset-btn:hover {
+  opacity: 1;
 }
 
 .guide-back-btn[hidden],
@@ -17602,13 +17590,11 @@ html.sapi-intro-active body {
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-@media (hover: hover) {
-  .guide-surmesure-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 8px 28px rgba(227, 91, 36, 0.12);
-    border-color: rgba(227, 91, 36, 0.5);
-    border-style: solid;
-  }
+.guide-surmesure-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 28px rgba(227, 91, 36, 0.12);
+  border-color: rgba(227, 91, 36, 0.5);
+  border-style: solid;
 }
 
 .guide-surmesure-content {
@@ -17672,11 +17658,9 @@ html.sapi-intro-active body {
   transition: all 0.3s ease;
 }
 
-@media (hover: hover) {
-  .guide-result-card:hover .guide-result-cta {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
-  }
+.guide-result-card:hover .guide-result-cta {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
 }
 
 /* ---- Products Grid (up to 4 products) ---- */
@@ -17805,11 +17789,9 @@ html.sapi-intro-active body {
   flex-shrink: 0;
 }
 
-@media (hover: hover) {
-  .guide-contact-submit:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
-  }
+.guide-contact-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
 }
 
 .guide-contact-submit:disabled {
@@ -18012,11 +17994,9 @@ html.sapi-intro-active body {
   transition: background 0.2s ease, color 0.2s ease;
 }
 
-@media (hover: hover) {
-  .guide-restart-btn:hover {
-    background: var(--color-wood, #937D68);
-    color: #fff;
-  }
+.guide-restart-btn:hover {
+  background: var(--color-wood, #937D68);
+  color: #fff;
 }
 
 .guide-shop-link {
@@ -18031,10 +18011,8 @@ html.sapi-intro-active body {
   transition: opacity 0.2s ease;
 }
 
-@media (hover: hover) {
-  .guide-shop-link:hover {
-    opacity: 0.8;
-  }
+.guide-shop-link:hover {
+  opacity: 0.8;
 }
 
 /* ---- Ambiance Banner (full-width photo above footer) ---- */
