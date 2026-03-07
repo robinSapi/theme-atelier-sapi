@@ -3,7 +3,7 @@ Theme Name: Theme Sapi Maison
 Theme URI: https://atelier-sapi.fr
 Author: Atelier Sapi
 Description: Theme custom CINÉTIQUE pour Atelier Sapi.
-Version: 0.2.2
+Version: 0.2.3
 Text Domain: theme-sapi-maison
 */
 
@@ -1969,10 +1969,12 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   transition: all 0.3s var(--ease-smooth);
 }
 
-.product-card:hover {
-  border-color: var(--color-wood);
-  box-shadow: 0 10px 30px rgba(147, 125, 104, 0.15);
-  transform: translateY(-5px);
+@media (hover: hover) {
+  .product-card:hover {
+    border-color: var(--color-wood);
+    box-shadow: 0 10px 30px rgba(147, 125, 104, 0.15);
+    transform: translateY(-5px);
+  }
 }
 
 .product-card-link {
@@ -1999,8 +2001,10 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   transition: transform 0.4s var(--ease-smooth);
 }
 
-.product-card:hover .product-card-image img {
-  transform: scale(1.05);
+@media (hover: hover) {
+  .product-card:hover .product-card-image img {
+    transform: scale(1.05);
+  }
 }
 
 .product-card .woocommerce-loop-product__title {
@@ -4311,14 +4315,16 @@ li.carousel-editorial-slide,
   transition: box-shadow 400ms ease, transform 400ms cubic-bezier(0.34, 0.61, 0.4, 0.97);
 }
 
-.carousel-editorial-slide .product-card-cinetique:hover,
-.carousel-editorial-slide > a:hover,
-.carousel-editorial-slide .product-card-link:hover {
-  box-shadow:
-    0 16px 48px rgba(147, 125, 104, 0.18),
-    0 4px 16px rgba(147, 125, 104, 0.12),
-    inset 0 0 0 1px rgba(147, 125, 104, 0.15);
-  transform: none;
+@media (hover: hover) {
+  .carousel-editorial-slide .product-card-cinetique:hover,
+  .carousel-editorial-slide > a:hover,
+  .carousel-editorial-slide .product-card-link:hover {
+    box-shadow:
+      0 16px 48px rgba(147, 125, 104, 0.18),
+      0 4px 16px rgba(147, 125, 104, 0.12),
+      inset 0 0 0 1px rgba(147, 125, 104, 0.15);
+    transform: none;
+  }
 }
 
 /* Zoom sur l'image au hover uniquement */
@@ -4406,9 +4412,11 @@ li.carousel-editorial-slide,
   transition: border-color 400ms ease;
 }
 
-.carousel-editorial-slide .product-card-link:hover::before,
-.carousel-editorial-slide > a:hover::before {
-  border-color: rgba(147, 125, 104, 0.25);
+@media (hover: hover) {
+  .carousel-editorial-slide .product-card-link:hover::before,
+  .carousel-editorial-slide > a:hover::before {
+    border-color: rgba(147, 125, 104, 0.25);
+  }
 }
 
 /* Warm shadow detail */
@@ -10912,12 +10920,14 @@ transform: translateY(15px);
   transition: all 0.5s var(--ease-expo);
 }
 
-.product-card-cinetique:hover {
-  border-color: var(--color-wood);
-  -webkit-transform: translateY(-8px);
-  transform: translateY(-8px);
-  -webkit-box-shadow: var(--shadow-card-hover);
-  box-shadow: var(--shadow-card-hover);
+@media (hover: hover) {
+  .product-card-cinetique:hover {
+    border-color: var(--color-wood);
+    -webkit-transform: translateY(-8px);
+    transform: translateY(-8px);
+    -webkit-box-shadow: var(--shadow-card-hover);
+    box-shadow: var(--shadow-card-hover);
+  }
 }
 
 /* Product Card Media */
@@ -10937,9 +10947,11 @@ transform: translateY(15px);
   transition: transform 0.6s var(--ease-expo), opacity 0.4s ease;
 }
 
-.product-card-cinetique:hover .product-media img {
-  -webkit-transform: scale(1.08);
-  transform: scale(1.08);
+@media (hover: hover) {
+  .product-card-cinetique:hover .product-media img {
+    -webkit-transform: scale(1.08);
+    transform: scale(1.08);
+  }
 }
 
 /* Hover Image Effect (lifestyle/ambiance photo) */
@@ -10964,12 +10976,14 @@ transform: translateY(15px);
   transition: opacity 0.4s ease;
 }
 
-.product-card-cinetique .product-media.has-hover-image:hover .product-image-main {
-  opacity: 0;
-}
+@media (hover: hover) {
+  .product-card-cinetique .product-media.has-hover-image:hover .product-image-main {
+    opacity: 0;
+  }
 
-.product-card-cinetique .product-media.has-hover-image:hover .product-image-hover {
-  opacity: 1;
+  .product-card-cinetique .product-media.has-hover-image:hover .product-image-hover {
+    opacity: 1;
+  }
 }
 
 /* Product Badge */
@@ -11036,16 +11050,18 @@ transform: translateY(15px);
   z-index: 10;
 }
 
-.product-card-cinetique:hover .product-quick-view {
-  opacity: 1;
-  pointer-events: auto;
-  -webkit-transform: translateX(-50%) translateY(0);
-  transform: translateX(-50%) translateY(0);
-}
+@media (hover: hover) {
+  .product-card-cinetique:hover .product-quick-view {
+    opacity: 1;
+    pointer-events: auto;
+    -webkit-transform: translateX(-50%) translateY(0);
+    transform: translateX(-50%) translateY(0);
+  }
 
-.product-card-cinetique .product-quick-view:hover {
-  background: var(--color-wood);
-  color: var(--color-white);
+  .product-card-cinetique .product-quick-view:hover {
+    background: var(--color-wood);
+    color: var(--color-white);
+  }
 }
 
 /* Product Info */
@@ -11065,8 +11081,10 @@ transform: translateY(15px);
   letter-spacing: 0.02em;
 }
 
-.product-card-cinetique:hover .product-name {
-  color: var(--color-wood);
+@media (hover: hover) {
+  .product-card-cinetique:hover .product-name {
+    color: var(--color-wood);
+  }
 }
 
 .product-card-cinetique .product-category {
@@ -11140,12 +11158,14 @@ transform: translateY(15px);
   box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
 }
 
-.product-card-cinetique .btn-view:hover {
-  background: linear-gradient(180deg, #D14F1C 0%, #B8431A 100%);
-  -webkit-transform: translateY(-2px);
-  transform: translateY(-2px);
-  -webkit-box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
-  box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
+@media (hover: hover) {
+  .product-card-cinetique .btn-view:hover {
+    background: linear-gradient(180deg, #D14F1C 0%, #B8431A 100%);
+    -webkit-transform: translateY(-2px);
+    transform: translateY(-2px);
+    -webkit-box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
+    box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
+  }
 }
 
 /* ---- RESPONSIVE PRODUCT CARDS ---- */
