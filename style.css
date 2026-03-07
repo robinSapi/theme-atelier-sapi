@@ -15563,8 +15563,8 @@ body.woocommerce-cart {
 
   /* Barre de réassurance moins intrusive */
   .reassurance-bar-sticky {
-    position: relative !important; /* Non-sticky sur mobile */
-    top: auto !important;
+    position: sticky;
+    top: calc(64px + env(safe-area-inset-top, 0px));
   }
 
   /* Mini-cart footer toujours visible */
