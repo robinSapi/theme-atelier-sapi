@@ -1566,13 +1566,9 @@ button:hover,
   white-space: nowrap;
 }
 
-.reassurance-item svg {
+.reassurance-bar-sticky .reassurance-item svg {
   width: 11px !important;
   height: 11px !important;
-  flex-shrink: 0;
-}
-
-.reassurance-item svg {
   color: var(--color-wood);
   flex-shrink: 0;
 }
@@ -1583,13 +1579,13 @@ button:hover,
     gap: 1rem;
   }
 
-  .reassurance-item {
+  .reassurance-bar-sticky .reassurance-item {
     font-size: 12px;
   }
 
-  .reassurance-item svg {
-    width: 16px;
-    height: 16px;
+  .reassurance-bar-sticky .reassurance-item svg {
+    width: 12px;
+    height: 12px;
   }
 }
 
@@ -1608,7 +1604,7 @@ button:hover,
     padding: 8px 16px;
   }
 
-  .reassurance-item {
+  .reassurance-bar-sticky .reassurance-item {
     font-size: 11px;
   }
 }
@@ -13708,7 +13704,7 @@ body.woocommerce-cart {
   overflow: hidden;
 }
 
-.reassurance-item {
+.cart-reassurance .reassurance-item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -13718,7 +13714,7 @@ body.woocommerce-cart {
   position: relative;
 }
 
-.reassurance-item:not(:last-child)::after {
+.cart-reassurance .reassurance-item:not(:last-child)::after {
   content: '';
   position: absolute;
   right: 0;
@@ -13728,7 +13724,7 @@ body.woocommerce-cart {
   background: var(--color-gray-light, #e8e2d9);
 }
 
-.reassurance-item svg {
+.cart-reassurance .reassurance-item svg {
   color: var(--color-wood);
   flex-shrink: 0;
   width: 28px;
