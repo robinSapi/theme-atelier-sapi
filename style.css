@@ -1539,7 +1539,7 @@ button:hover,
 
 .reassurance-bar-sticky {
   position: sticky;
-  top: 74px; /* Below header */
+  top: 80px; /* Below header */
   z-index: 998;
   background: var(--color-warm);
   border-bottom: 1px solid rgba(147, 125, 104, 0.1);
