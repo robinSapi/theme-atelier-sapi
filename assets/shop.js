@@ -725,8 +725,8 @@
       if (grid) {
         var cards = grid.querySelectorAll('.product-card-cinetique');
         cards.forEach(function(card) {
-          var wood = card.getAttribute('data-wood');
-          if (wood && wood.toLowerCase() === prefs.essence.toLowerCase()) {
+          var wood = (card.getAttribute('data-wood') || '').toLowerCase();
+          if (wood && wood.indexOf(prefs.essence.toLowerCase()) !== -1) {
             // Add badge
             var media = card.querySelector('.product-media');
             if (media) {

@@ -82,9 +82,13 @@ if (function_exists('get_field')) {
   $wood_essence = get_field('essence_de_bois', $product_id);
 }
 if (!$wood_essence) {
-  // Try product attributes
+  // Try product attributes (pa_bois then pa_materiau)
   $wood_attr = $product->get_attribute('pa_bois');
+  if (!$wood_attr) {
+    $wood_attr = $product->get_attribute('pa_materiau');
+  }
   if ($wood_attr) {
+    // For variable products, may return "Peuplier, Okoumé" — keep all, sanitized
     $wood_essence = sanitize_title($wood_attr);
   }
 }
