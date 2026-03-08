@@ -555,6 +555,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     });
+
+    // Auto-select variations from guide luminaire quiz preferences (localStorage)
+    try {
+      const prefs = JSON.parse(localStorage.getItem('sapiGuidePrefs'));
+      if (prefs) {
+        // Wait for WooCommerce variation form to initialize
+        setTimeout(() => {
+          // Pre-select essence (materiau)
+          if (prefs.essence) {
+            const essenceSwatch = document.querySelector('.material-option[data-value="' + prefs.essence + '"]');
+            if (essenceSwatch && !essenceSwatch.classList.contains('selected')) {
+              essenceSwatch.click();
+            }
+          }
+          // Pre-select taille by index (petite=0, moyenne=1, grande=2)
+          if (prefs.tailleIndex !== null && prefs.tailleIndex !== undefined) {
+            const tailleContainer = document.querySelector('.attribute-swatch[data-attribute="attribute_pa_taille"]');
+            if (tailleContainer) {
+              const tailleSwatches = tailleContainer.querySelectorAll('.swatch-item');
+              if (tailleSwatches.length) {
+                const idx = Math.min(prefs.tailleIndex, tailleSwatches.length - 1);
+                if (!tailleSwatches[idx].classList.contains('selected')) {
+                  tailleSwatches[idx].click();
+                }
+              }
+            }
+          }
+        }, 400);
+      }
+    } catch (e) { /* localStorage disabled or invalid JSON */ }
   }
 
   // ========================================

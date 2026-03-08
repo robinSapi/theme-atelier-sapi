@@ -215,6 +215,24 @@
     } catch (e) { /* */ }
   }
 
+  /**
+   * Save quiz preferences to localStorage for variation pre-selection on product pages.
+   * Maps style → essence (peuplier/okoume) and taille → index (0/1/2).
+   */
+  function saveGuidePrefs() {
+    try {
+      var essenceMap = { moderne: 'peuplier', ancien: 'okoume' };
+      var tailleMap  = { petite: 0, moyenne: 1, grande: 2 };
+      var style  = state.answers.style || null;
+      var taille = state.answers.taille || null;
+
+      localStorage.setItem('sapiGuidePrefs', JSON.stringify({
+        essence: essenceMap[style] || null,
+        tailleIndex: taille in tailleMap ? tailleMap[taille] : null
+      }));
+    } catch (e) { /* localStorage might be disabled */ }
+  }
+
   // ================================================================
   // START QUIZ
   // ================================================================
@@ -501,6 +519,9 @@
         state.filterContext = d.filter_context || '';
         state.currentProducts = d.products ? d.products.map(function(p) { return p.id; }) : [];
         state.conversationHistory = d.ai_text ? [{ role: 'assistant', content: d.ai_text }] : [];
+
+        // Save quiz preferences to localStorage for variation pre-selection on product pages
+        saveGuidePrefs();
 
         // Show contact form (Phase B)
         if (dom.contactWrap) dom.contactWrap.style.display = '';
@@ -988,6 +1009,7 @@
     state.currentProducts = [];
     state.filterContext = '';
     clearSession();
+    try { localStorage.removeItem('sapiGuidePrefs'); } catch (e) { /* */ }
 
     // Deselect all cards
     document.querySelectorAll('.guide-choice-card.is-selected').forEach(function (c) {
