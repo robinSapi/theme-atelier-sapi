@@ -1598,7 +1598,7 @@ button:hover,
   }
 
   .reassurance-bar-inner {
-    justify-content: flex-start;
+    justify-content: center;
     flex-wrap: nowrap;
     gap: 1.5rem;
     padding: 8px 16px;
