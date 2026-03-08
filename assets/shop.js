@@ -714,4 +714,33 @@
     });
   }
 
+  // =============================================
+  // GUIDE QUIZ: Badge "Pour vous" + tri sur pages catégorie
+  // =============================================
+  try {
+    var prefs = JSON.parse(localStorage.getItem('sapiGuidePrefs'));
+    if (prefs && prefs.essence) {
+      // Only act on category/shop grids (not carousels)
+      var grid = document.querySelector('ul.products.columns-4');
+      if (grid) {
+        var cards = grid.querySelectorAll('.product-card-cinetique');
+        cards.forEach(function(card) {
+          var wood = card.getAttribute('data-wood');
+          if (wood && wood.toLowerCase() === prefs.essence.toLowerCase()) {
+            // Add badge
+            var media = card.querySelector('.product-media');
+            if (media) {
+              var badge = document.createElement('span');
+              badge.className = 'product-badge badge-recommended';
+              badge.textContent = 'Pour vous';
+              media.appendChild(badge);
+            }
+            // Move to top of grid
+            card.style.order = '-1';
+          }
+        });
+      }
+    }
+  } catch (e) { /* localStorage disabled */ }
+
 })();

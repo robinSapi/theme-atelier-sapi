@@ -11313,6 +11313,13 @@ transform: translateY(15px);
   color: var(--color-white);
 }
 
+.product-card-cinetique .badge-recommended {
+  left: auto;
+  right: 1rem;
+  background: var(--color-wood, #937D68);
+  color: var(--color-white, #fff);
+}
+
 /* Quick View Button — hidden by default, visible on hover */
 .product-card-cinetique .product-quick-view {
   position: absolute;
