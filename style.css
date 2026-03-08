@@ -15566,7 +15566,7 @@ body.woocommerce-cart {
   /* Barre de réassurance moins intrusive */
   .reassurance-bar-sticky {
     position: sticky;
-    top: calc(64px + env(safe-area-inset-top, 0px));
+    top: calc(72px + env(safe-area-inset-top, 0px));
   }
 
   /* Mini-cart footer toujours visible */
