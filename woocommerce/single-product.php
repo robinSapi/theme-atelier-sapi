@@ -876,7 +876,7 @@ get_header();
   <?php
   $gift_query = new WP_Query([
     'post_type'      => 'product',
-    'posts_per_page' => 8,
+    'posts_per_page' => 4,
     'post_status'    => 'publish',
     'tax_query'      => [[
       'taxonomy' => 'product_cat',
