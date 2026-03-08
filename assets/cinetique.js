@@ -562,22 +562,25 @@ document.addEventListener('DOMContentLoaded', () => {
       if (prefs) {
         // Wait for WooCommerce variation form to initialize
         setTimeout(() => {
-          // Pre-select essence (materiau)
+          // Pre-select essence (materiau) — rendered as custom swatches (.material-option)
           if (prefs.essence) {
             const essenceSwatch = document.querySelector('.material-option[data-value="' + prefs.essence + '"]');
             if (essenceSwatch && !essenceSwatch.classList.contains('selected')) {
               essenceSwatch.click();
             }
           }
-          // Pre-select taille by index (petite=0, moyenne=1, grande=2)
+          // Pre-select taille by index — rendered as standard <select> dropdown
           if (prefs.tailleIndex !== null && prefs.tailleIndex !== undefined) {
-            const tailleContainer = document.querySelector('.attribute-swatch[data-attribute="attribute_pa_taille"]');
-            if (tailleContainer) {
-              const tailleSwatches = tailleContainer.querySelectorAll('.swatch-item');
-              if (tailleSwatches.length) {
-                const idx = Math.min(prefs.tailleIndex, tailleSwatches.length - 1);
-                if (!tailleSwatches[idx].classList.contains('selected')) {
-                  tailleSwatches[idx].click();
+            const tailleSelect = document.querySelector('select[name="attribute_pa_taille"]');
+            if (tailleSelect) {
+              // Get real options (skip first empty "Choisir une option")
+              const options = Array.from(tailleSelect.options).filter(o => o.value);
+              if (options.length) {
+                const idx = Math.min(prefs.tailleIndex, options.length - 1);
+                tailleSelect.value = options[idx].value;
+                tailleSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                if (typeof jQuery !== 'undefined') {
+                  jQuery(tailleSelect).trigger('change');
                 }
               }
             }
