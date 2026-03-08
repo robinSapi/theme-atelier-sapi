@@ -228,7 +228,8 @@
 
       localStorage.setItem('sapiGuidePrefs', JSON.stringify({
         essence: essenceMap[style] || null,
-        tailleIndex: taille in tailleMap ? tailleMap[taille] : null
+        tailleIndex: taille in tailleMap ? tailleMap[taille] : null,
+        recommendedIds: state.currentProducts || []
       }));
     } catch (e) { /* localStorage might be disabled */ }
   }

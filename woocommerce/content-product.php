@@ -139,7 +139,8 @@ if ($is_carousel) {
 }
 
 // Build data attributes - always include data-categories for filtering
-$data_attrs = 'data-category="' . esc_attr(sanitize_title($category_name)) . '"';
+$data_attrs = 'data-id="' . esc_attr($product_id) . '"';
+$data_attrs .= ' data-category="' . esc_attr(sanitize_title($category_name)) . '"';
 $filter_categories = $carousel_categories;
 if (!$filter_categories && $categories && !is_wp_error($categories)) {
   $cat_slug_list = [];
