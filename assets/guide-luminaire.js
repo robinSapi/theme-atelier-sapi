@@ -149,8 +149,8 @@
 
     if (!dom.steps.length) return;
 
-    // Check for saved session
-    var saved = restoreSession();
+    // Fresh start: clear any previous session
+    clearSession();
 
     // Bind events
     if (dom.startBtn) {
@@ -163,16 +163,6 @@
     bindResetButton();
     bindKeyboard();
     bindContactForm();
-
-    // Restore session if valid V2 format
-    if (saved && saved.currentStepId && typeof saved.currentStepId === 'string' && Object.keys(saved.answers).length > 0) {
-      state.currentStepId = saved.currentStepId;
-      state.answers = saved.answers;
-      state.labels = saved.labels || {};
-      startQuiz();
-      renderStep(state.currentStepId, 'none');
-      markPreviousAnswers();
-    }
 
     // Pre-select room from ?piece= URL parameter (homepage cards)
     var urlParams = new URLSearchParams(window.location.search);
