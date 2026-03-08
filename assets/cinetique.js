@@ -556,39 +556,63 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Auto-select variations from guide luminaire quiz preferences (localStorage)
-    try {
-      const prefs = JSON.parse(localStorage.getItem('sapiGuidePrefs'));
-      if (prefs) {
-        // Wait for WooCommerce variation form to initialize
-        setTimeout(() => {
-          // Pre-select essence (materiau) — rendered as custom swatches (.material-option)
-          if (prefs.essence) {
-            const essenceSwatch = document.querySelector('.material-option[data-value="' + prefs.essence + '"]');
-            if (essenceSwatch && !essenceSwatch.classList.contains('selected')) {
-              essenceSwatch.click();
-            }
-          }
-          // Pre-select taille by index — rendered as standard <select> dropdown
-          if (prefs.tailleIndex !== null && prefs.tailleIndex !== undefined) {
-            const tailleSelect = document.querySelector('select[name="attribute_pa_taille"]');
-            if (tailleSelect) {
-              // Get real options (skip first empty "Choisir une option")
-              const options = Array.from(tailleSelect.options).filter(o => o.value);
-              if (options.length) {
-                const idx = Math.min(prefs.tailleIndex, options.length - 1);
-                tailleSelect.value = options[idx].value;
-                tailleSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                if (typeof jQuery !== 'undefined') {
-                  jQuery(tailleSelect).trigger('change');
-                }
+  }
+
+  // ========================================
+  // Auto-select variations from guide luminaire quiz preferences
+  // ========================================
+  // Runs independently — works even if product has no material swatches
+  try {
+    const guidePrefs = JSON.parse(localStorage.getItem('sapiGuidePrefs'));
+    if (guidePrefs && document.querySelector('.variations_form')) {
+      // Wait for WooCommerce variation form to fully initialize
+      const initVariations = () => {
+        // Step 1: Pre-select essence (materiau) — custom swatches
+        if (guidePrefs.essence) {
+          const essenceSwatch = document.querySelector('.material-option[data-value="' + guidePrefs.essence + '"]');
+          if (essenceSwatch && !essenceSwatch.classList.contains('selected')) {
+            essenceSwatch.click();
+          } else {
+            // Fallback: try hidden select directly
+            const matSelect = document.querySelector('select[name="attribute_pa_materiau"]');
+            if (matSelect && !matSelect.value) {
+              const matOption = matSelect.querySelector('option[value="' + guidePrefs.essence + '"]');
+              if (matOption) {
+                matSelect.value = guidePrefs.essence;
+                matSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                if (typeof jQuery !== 'undefined') jQuery(matSelect).trigger('change');
               }
             }
           }
-        }, 400);
+        }
+
+        // Step 2: Pre-select taille — standard <select> dropdown (after short delay for WC to process step 1)
+        setTimeout(() => {
+          if (guidePrefs.tailleIndex !== null && guidePrefs.tailleIndex !== undefined) {
+            const tailleSelect = document.querySelector('select[name="attribute_pa_taille"]');
+            if (tailleSelect && !tailleSelect.value) {
+              const options = Array.from(tailleSelect.options).filter(o => o.value);
+              if (options.length) {
+                const idx = Math.min(guidePrefs.tailleIndex, options.length - 1);
+                tailleSelect.value = options[idx].value;
+                tailleSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                if (typeof jQuery !== 'undefined') jQuery(tailleSelect).trigger('change');
+              }
+            }
+          }
+        }, 300);
+      };
+
+      // Use jQuery wc_variation_form event if available, otherwise fallback to timeout
+      if (typeof jQuery !== 'undefined') {
+        jQuery('.variations_form').on('wc_variation_form', initVariations);
+        // Fallback if event already fired
+        setTimeout(initVariations, 1000);
+      } else {
+        setTimeout(initVariations, 1000);
       }
-    } catch (e) { /* localStorage disabled or invalid JSON */ }
-  }
+    }
+  } catch (e) { /* localStorage disabled or invalid JSON */ }
 
   // ========================================
   // PREMIUM: Generic Fade-In Animation for ALL Pages
