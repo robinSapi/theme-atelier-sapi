@@ -212,15 +212,15 @@ $icons = [
       </div>
     </div>
 
-    <!-- Products grid (up to 4 products) -->
-    <div class="guide-result-products-grid" id="guide-result-products-grid" style="display:none;"></div>
-
-    <!-- AI Recommendation Text (below cards, near textarea) -->
+    <!-- AI Recommendation Text (above cards) -->
     <div class="guide-ai-recommendation" id="guide-ai-text" style="display:none;">
       <span class="guide-ai-quote guide-ai-quote-open">&laquo;</span>
       <div class="guide-ai-text-content" id="guide-ai-text-content"></div>
       <span class="guide-ai-quote guide-ai-quote-close">&raquo;</span>
     </div>
+
+    <!-- Products grid (up to 4 products) -->
+    <div class="guide-result-products-grid" id="guide-result-products-grid" style="display:none;"></div>
 
     <!-- Phase C : Card flottante sticky — se pose entre AI text et restart -->
     <div class="guide-contact-wrap" id="guide-contact-wrap" style="display:none;">
