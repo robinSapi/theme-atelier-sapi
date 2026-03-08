@@ -221,6 +221,8 @@ $logo_alt = get_bloginfo('name');
 })();
 </script>
 
+<div class="guide-profile-chip" id="guide-profile-chip" style="display:none;"></div>
+
 <?php endif; ?>
 
 <main class="site-content" id="main-content">

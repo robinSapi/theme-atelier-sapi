@@ -223,13 +223,21 @@
     try {
       var essenceMap = { moderne: 'peuplier', ancien: 'okoume' };
       var tailleMap  = { petite: 0, moyenne: 1, grande: 2 };
+      var pieceLabels = { cuisine: 'Cuisine', bureau: 'Bureau', salon: 'Salon', chambre: 'Chambre', entree: 'Entrée', escalier: 'Escalier' };
+      var styleLabels = { moderne: 'Moderne', ancien: 'Ancien', neutre: 'Neutre' };
+      var tailleLabels = { petite: 'Petit', moyenne: 'Moyen', grande: 'Grand' };
+
       var style  = state.answers.style || null;
       var taille = state.answers.taille || null;
+      var piece  = state.answers.piece || null;
 
       localStorage.setItem('sapiGuidePrefs', JSON.stringify({
         essence: essenceMap[style] || null,
         tailleIndex: taille in tailleMap ? tailleMap[taille] : null,
-        recommendedIds: state.currentProducts || []
+        recommendedIds: state.currentProducts || [],
+        pieceLabel: pieceLabels[piece] || null,
+        styleLabel: styleLabels[style] || null,
+        tailleLabel: tailleLabels[taille] || null
       }));
     } catch (e) { /* localStorage might be disabled */ }
   }
