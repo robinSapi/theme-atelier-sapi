@@ -209,6 +209,17 @@ $logo_alt = get_bloginfo('name');
     </div>
   </div>
 </div>
+<script>
+(function(){
+  if(window.innerWidth>600)return;
+  var items=document.querySelectorAll('.reassurance-bar-sticky .reassurance-item');
+  if(items.length<3)return;
+  var indices=[0,1,2,3];
+  for(var i=indices.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=indices[i];indices[i]=indices[j];indices[j]=t;}
+  items[indices[0]].style.display='none';
+  items[indices[1]].style.display='none';
+})();
+</script>
 
 <?php endif; ?>
 
