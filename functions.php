@@ -390,11 +390,11 @@ add_action('wp_footer', function () {
     function replaceEmptyCart() {
       if (done) return;
 
-      // Chercher le texte "vide" partout dans la page
-      var allEls = document.querySelectorAll('h1, h2, h3, p');
+      // Chercher le texte "vide" partout dans la page (tous types d'éléments)
+      var allEls = document.querySelectorAll('h1, h2, h3, h4, p, strong, span, div');
       var emptyMsg = null;
       for (var i = 0; i < allEls.length; i++) {
-        if (allEls[i].textContent.indexOf('vide') !== -1) {
+        if (allEls[i].textContent.indexOf('vide') !== -1 && allEls[i].children.length < 3) {
           emptyMsg = allEls[i];
           break;
         }
@@ -442,12 +442,14 @@ add_action('wp_footer', function () {
         '</section>';
     }
 
-    // Tenter plusieurs fois après le rendu React
+    // Tenter plusieurs fois après le rendu React (mobile peut être plus lent)
     setTimeout(replaceEmptyCart, 300);
     setTimeout(replaceEmptyCart, 800);
     setTimeout(replaceEmptyCart, 1500);
+    setTimeout(replaceEmptyCart, 3000);
+    setTimeout(replaceEmptyCart, 5000);
     var obs = new MutationObserver(function() { if (!done) replaceEmptyCart(); });
-    obs.observe(document.body, { childList: true, subtree: true });
+    obs.observe(document.body, { childList: true, subtree: true, characterData: true });
   })();
   </script>
   <?php
