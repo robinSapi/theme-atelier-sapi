@@ -881,7 +881,7 @@ get_header();
     'tax_query'      => [[
       'taxonomy' => 'product_cat',
       'field'    => 'slug',
-      'terms'    => 'carte-cadeau',
+      'terms'    => ['carte-cadeau', 'accessoires'],
       'operator' => 'NOT IN',
     ]],
     'orderby' => 'rand',
