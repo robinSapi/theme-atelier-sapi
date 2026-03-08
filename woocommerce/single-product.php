@@ -32,9 +32,11 @@ get_header();
   $product_cats = get_the_terms($product_id, 'product_cat');
   $cat_name = $product_cats && !is_wp_error($product_cats) ? $product_cats[0]->name : 'Création';
   $is_accessoire = false;
+  $is_carte_cadeau = false;
   if ($product_cats && !is_wp_error($product_cats)) {
     foreach ($product_cats as $pcat) {
-      if ($pcat->slug === 'accessoires') { $is_accessoire = true; break; }
+      if ($pcat->slug === 'accessoires') { $is_accessoire = true; }
+      if ($pcat->slug === 'carte-cadeau') { $is_carte_cadeau = true; }
     }
   }
 
@@ -265,6 +267,7 @@ get_header();
         </div>
 
         <!-- Réassurance inline (au-dessus du fold) -->
+        <?php if (!$is_carte_cadeau) : ?>
         <div class="product-reassurance-v2">
           <?php if (!$is_accessoire) : ?>
           <div class="reassurance-item-v2">
@@ -321,6 +324,7 @@ get_header();
             Parlons de votre projet →
           </a>
         </div>
+        <?php endif; // fin !$is_carte_cadeau ?>
 
         <?php if (!$is_accessoire) : ?>
         <!-- Micro-copy artisan -->
@@ -333,6 +337,7 @@ get_header();
     </div>
   </section>
 
+  <?php if (!$is_carte_cadeau) : // Masquer tout le contenu détaillé pour la carte cadeau ?>
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION PHOTO CLIENT — BANDEAU
        ═══════════════════════════════════════════════════════════════ -->
@@ -861,10 +866,51 @@ get_header();
     </div>
   </section>
   <?php endif; // fin exclusion atelier accessoires ?>
+  <?php endif; // fin !$is_carte_cadeau ?>
 
   <!-- ═══════════════════════════════════════════════════════════════
-       PRODUITS SIMILAIRES
+       PRODUITS SIMILAIRES / CARTE CADEAU
        ═══════════════════════════════════════════════════════════════ -->
+  <?php if ($is_carte_cadeau) : ?>
+  <!-- Grille produits pour carte cadeau -->
+  <?php
+  $gift_query = new WP_Query([
+    'post_type'      => 'product',
+    'posts_per_page' => 8,
+    'post_status'    => 'publish',
+    'tax_query'      => [[
+      'taxonomy' => 'product_cat',
+      'field'    => 'slug',
+      'terms'    => 'carte-cadeau',
+      'operator' => 'NOT IN',
+    ]],
+    'orderby' => 'rand',
+  ]);
+  if ($gift_query->have_posts()) :
+  ?>
+  <section class="product-related product-related-giftcard">
+    <div class="product-related-header">
+      <h2>Vos proches pourront par exemple s'offrir</h2>
+    </div>
+    <div class="products-grid products-grid-cinetique" id="related-carousel">
+      <?php
+      while ($gift_query->have_posts()) {
+        $gift_query->the_post();
+        wc_get_template_part('content', 'product');
+      }
+      wp_reset_postdata();
+      ?>
+    </div>
+    <div class="related-cta">
+      <a href="<?php echo esc_url(get_permalink(wc_get_page_id('shop'))); ?>" class="related-cta-btn">
+        Voir toutes nos cr&eacute;ations
+      </a>
+    </div>
+  </section>
+  <?php endif; ?>
+
+  <?php else : ?>
+  <!-- Produits similaires (standard) -->
   <?php
   $related_products = wc_get_related_products($product_id, 4);
   if (!empty($related_products)) :
@@ -909,6 +955,7 @@ get_header();
     <?php } ?>
   </section>
   <?php endif; ?>
+  <?php endif; // fin carte cadeau vs standard ?>
 
   <?php do_action('woocommerce_after_single_product'); ?>
   </div><!-- /.product-page-cinetique -->
