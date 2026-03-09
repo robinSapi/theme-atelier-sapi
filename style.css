@@ -6009,7 +6009,7 @@ li.carousel-editorial-slide,
     transform: translateY(-10px) scale(1.02);
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
   }
-  .advice-tip:hover .advice-tip-image {
+  .advice-tip:hover .advice-tip-image::before {
     transform: scale(1.05);
   }
 }
@@ -6152,8 +6152,18 @@ li.carousel-editorial-slide,
   background-position: center;
   display: flex;
   align-items: flex-end;
+  overflow: hidden;
+}
+
+/* Pseudo-élément pour zoomer uniquement le fond (pas le texte) */
+.advice-tip-image::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: inherit;
   transition: transform 0.8s var(--ease-expo);
   will-change: transform;
+  z-index: 0;
 }
 
 .advice-tip-overlay {
