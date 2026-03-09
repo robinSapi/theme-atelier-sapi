@@ -19675,11 +19675,17 @@ html.sapi-intro-active body {
     scrollbar-width: none;
     gap: 1rem;
     padding: 0 1rem 1rem;
+    align-items: stretch;
   }
   .advice-tips-grid::-webkit-scrollbar { display: none; }
   .advice-tips-grid > .advice-tip {
     flex: 0 0 85%;
     scroll-snap-align: center;
+  }
+  /* Masquer le panneau citation et le CTA guide dans le slider */
+  .advice-tips-grid > .advice-quote-panel,
+  .advice-tips-grid > .advice-guide-cta {
+    display: none !important;
   }
 
   /* --- Témoignages --- */
