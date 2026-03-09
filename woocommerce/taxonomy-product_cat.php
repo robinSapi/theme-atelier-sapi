@@ -259,35 +259,57 @@ $editorial_style = $ambiance_bg_url ? 'style="background-image: url(' . esc_url(
         <p class="editorial-intro"><?php echo esc_html($content['intro']); ?></p>
       </div>
 
-      <div class="editorial-grid">
-        <div class="editorial-block">
-          <h3><?php echo esc_html($content['why']); ?></h3>
-          <p><?php echo esc_html($content['why_content']); ?></p>
+      <button class="editorial-read-more" aria-expanded="false">
+        <span>En savoir plus</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+
+      <div class="editorial-collapsible">
+        <div class="editorial-grid">
+          <div class="editorial-block">
+            <h3><?php echo esc_html($content['why']); ?></h3>
+            <p><?php echo esc_html($content['why_content']); ?></p>
+          </div>
+
+          <div class="editorial-block editorial-block-highlight">
+            <svg class="editorial-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <h3><?php echo esc_html($content['promise']); ?></h3>
+            <p><?php echo esc_html($content['promise_content']); ?></p>
+          </div>
         </div>
 
-        <div class="editorial-block editorial-block-highlight">
-          <svg class="editorial-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
-          </svg>
-          <h3><?php echo esc_html($content['promise']); ?></h3>
-          <p><?php echo esc_html($content['promise_content']); ?></p>
+        <div class="editorial-use-cases">
+          <h3><?php echo esc_html($content['use_cases']); ?></h3>
+          <ul class="use-cases-list">
+            <?php foreach ($content['use_cases_items'] as $use_case) : ?>
+              <li>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <?php echo esc_html($use_case); ?>
+              </li>
+            <?php endforeach; ?>
+          </ul>
         </div>
       </div>
 
-      <div class="editorial-use-cases">
-        <h3><?php echo esc_html($content['use_cases']); ?></h3>
-        <ul class="use-cases-list">
-          <?php foreach ($content['use_cases_items'] as $use_case) : ?>
-            <li>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-              <?php echo esc_html($use_case); ?>
-            </li>
-          <?php endforeach; ?>
-        </ul>
-      </div>
+      <script>
+      (function() {
+        var btn = document.querySelector('.editorial-read-more');
+        if (!btn) return;
+        btn.addEventListener('click', function() {
+          var section = btn.closest('.category-editorial');
+          var expanded = section.classList.toggle('is-expanded');
+          btn.setAttribute('aria-expanded', expanded);
+          btn.querySelector('span').textContent = expanded ? 'Réduire' : 'En savoir plus';
+        });
+      })();
+      </script>
     <?php endif; ?>
   </div>
 </section>
