@@ -59,27 +59,6 @@ for ($i = 1; $i <= 4; $i++) {
     </div>
     <?php endforeach; ?>
 
-    <!-- Panneau citation / détail (3 colonnes, hidden par défaut) -->
-    <div class="advice-quote-panel" aria-hidden="true">
-      <div class="advice-quote-panel-inner">
-        <!-- Vue citation -->
-        <div class="advice-panel-quote">
-          <p class="advice-quote-text"></p>
-          <div class="advice-quote-buttons">
-            <button class="advice-quote-close" aria-label="Fermer">&times;</button>
-            <button class="advice-quote-more">En savoir plus</button>
-          </div>
-        </div>
-        <!-- Vue détail (remplace la citation) -->
-        <div class="advice-panel-detail" aria-hidden="true">
-          <div class="advice-panel-detail-body"></div>
-          <div class="advice-panel-detail-buttons">
-            <button class="advice-quote-close" aria-label="Fermer">&times;</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <?php
     // URL du Guide Luminaire (recherche dynamique)
     $guide_url = home_url('/guide-luminaire/');
@@ -117,7 +96,7 @@ for ($i = 1; $i <= 4; $i++) {
   </div>
 </section>
 
-<!-- Overlay plein écran mobile -->
+<!-- Overlay plein écran -->
 <div class="advice-overlay" aria-hidden="true">
   <div class="advice-overlay-inner">
     <button class="advice-overlay-close" aria-label="Fermer">&times;</button>
@@ -134,48 +113,8 @@ for ($i = 1; $i <= 4; $i++) {
 (function() {
   'use strict';
 
-  var grid = document.querySelector('.advice-tips-grid');
-  var panel = document.querySelector('.advice-quote-panel');
-  var quoteText = panel.querySelector('.advice-quote-text');
-  var panelQuote = panel.querySelector('.advice-panel-quote');
-  var panelDetail = panel.querySelector('.advice-panel-detail');
-  var panelDetailBody = panel.querySelector('.advice-panel-detail-body');
-  var activeTipIndex = null;
-
-  /* Données des citations et contenu */
-  var summaries = <?php echo json_encode(array_map(function($t) { return $t['summary']; }, $tips)); ?>;
   var contents = <?php echo json_encode(array_map(function($t) { return $t['content']; }, $tips)); ?>;
 
-  function isMobile() {
-    return window.innerWidth <= 768;
-  }
-
-  /* ========== DESKTOP : slide + panneau ========== */
-  function showQuoteView() {
-    panelQuote.style.display = 'flex';
-    panelQuote.setAttribute('aria-hidden', 'false');
-    panelDetail.style.display = 'none';
-    panelDetail.setAttribute('aria-hidden', 'true');
-  }
-
-  function showDetailView() {
-    panelQuote.style.display = 'none';
-    panelQuote.setAttribute('aria-hidden', 'true');
-    panelDetail.style.display = 'flex';
-    panelDetail.setAttribute('aria-hidden', 'false');
-  }
-
-  function closeAllDesktop() {
-    grid.classList.remove('is-expanded');
-    panel.setAttribute('aria-hidden', 'true');
-    document.querySelectorAll('.advice-tip').forEach(function(t) {
-      t.classList.remove('is-active');
-    });
-    showQuoteView();
-    activeTipIndex = null;
-  }
-
-  /* ========== MOBILE : flip card + overlay ========== */
   var overlay = document.querySelector('.advice-overlay');
   var overlayBody = document.querySelector('.advice-overlay-body');
   var overlayClose = document.querySelector('.advice-overlay-close');
@@ -197,74 +136,40 @@ for ($i = 1; $i <= 4; $i++) {
     document.body.style.overflow = '';
   }
 
-  /* ========== EVENT LISTENERS ========== */
-
-  /* Clic "Voir le conseil" */
+  /* Clic "Voir le conseil" → flip la card */
   document.querySelectorAll('.advice-tip-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var tip = this.closest('.advice-tip');
-      var tipIndex = tip.getAttribute('data-tip');
-
-      if (isMobile()) {
-        /* Mobile : flip la card */
-        document.querySelectorAll('.advice-tip').forEach(function(t) {
-          if (t !== tip) closeFlip(t);
-        });
-        var backFace = tip.querySelector('.advice-tip-back');
-        backFace.classList.add('no-touch');
-        tip.classList.add('is-flipped');
-        setTimeout(function() {
-          backFace.classList.remove('no-touch');
-        }, 700);
-      } else {
-        /* Desktop : slide + panneau */
-        document.querySelectorAll('.advice-tip').forEach(function(t) {
-          t.classList.remove('is-active');
-        });
-        tip.classList.add('is-active');
-        activeTipIndex = tipIndex;
-        quoteText.textContent = summaries[tipIndex];
-        showQuoteView();
-        grid.classList.add('is-expanded');
-        panel.setAttribute('aria-hidden', 'false');
-      }
+      document.querySelectorAll('.advice-tip').forEach(function(t) {
+        if (t !== tip) closeFlip(t);
+      });
+      var backFace = tip.querySelector('.advice-tip-back');
+      backFace.classList.add('no-touch');
+      tip.classList.add('is-flipped');
+      setTimeout(function() {
+        backFace.classList.remove('no-touch');
+      }, 700);
     });
   });
 
-  /* Boutons croix desktop (panneau) */
-  panel.querySelectorAll('.advice-quote-close').forEach(function(btn) {
-    btn.addEventListener('click', closeAllDesktop);
-  });
-
-  /* Bouton "En savoir plus" desktop (panneau) */
-  panel.querySelector('.advice-quote-more').addEventListener('click', function() {
-    if (activeTipIndex === null) return;
-    panelDetailBody.innerHTML = contents[activeTipIndex];
-    showDetailView();
-  });
-
-  /* Mobile : boutons croix (face arrière) */
+  /* Bouton croix (face arrière) → retourne la card */
   document.querySelectorAll('.advice-tip-back-close').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      var tip = this.closest('.advice-tip');
-      closeFlip(tip);
+      closeFlip(this.closest('.advice-tip'));
     });
   });
 
-  /* Mobile : bouton "En savoir plus" → ouvre overlay plein écran */
+  /* Bouton "En savoir plus" → ouvre overlay plein écran */
   document.querySelectorAll('.advice-tip-back-more').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      var tipIndex = this.getAttribute('data-tip');
-      openOverlay(tipIndex);
+      openOverlay(this.getAttribute('data-tip'));
     });
   });
 
-  /* Overlay : bouton fermer */
+  /* Overlay : fermer */
   if (overlayClose) {
     overlayClose.addEventListener('click', closeOverlay);
   }
-
-  /* Overlay : fermer en cliquant sur le fond */
   if (overlay) {
     overlay.addEventListener('click', function(e) {
       if (e.target === overlay) closeOverlay();
