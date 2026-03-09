@@ -19677,6 +19677,16 @@ html.sapi-intro-active body {
     margin-bottom: 0.75rem;
   }
 
+  /* --- Spacer droit (padding-right ignoré sur overflow-x) --- */
+  .collections-grid::after,
+  .advice-tips-grid::after,
+  .testimonials-grid::after,
+  .artisan-values-grid::after,
+  .process-inner::after {
+    content: '';
+    flex: 0 0 5%;
+  }
+
   /* --- Dots --- */
   .scroll-dots {
     display: flex;
