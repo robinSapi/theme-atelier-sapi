@@ -1649,12 +1649,12 @@ button:hover,
 .guide-chip-dismiss {
   background: none;
   border: none;
-  color: var(--color-wood, #937D68);
+  color: var(--color-orange, #E35B24);
   font-size: 1.1rem;
   line-height: 1;
   cursor: pointer;
   padding: 0 0.25rem;
-  opacity: 0.5;
+  opacity: 0.7;
   transition: opacity 0.2s;
 }
 
