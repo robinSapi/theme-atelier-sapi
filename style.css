@@ -6025,8 +6025,8 @@ li.carousel-editorial-slide,
 }
 
 .advice-tip.is-flipped .advice-tip-flipper {
-  -webkit-transform: rotateY(180deg) scale(0.95);
-  transform: rotateY(180deg) scale(0.95);
+  -webkit-transform: rotateY(180deg);
+  transform: rotateY(180deg);
 }
 
 .advice-tip-front,
@@ -19381,7 +19381,7 @@ html.sapi-intro-active body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 1rem;
-    padding: 0 5%;
+    padding: 10px 5%;
     align-items: stretch;
   }
   .advice-tips-grid::-webkit-scrollbar { display: none; }
