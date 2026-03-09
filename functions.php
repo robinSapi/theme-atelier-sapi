@@ -1430,6 +1430,17 @@ function sapi_ajax_guide_results() {
 
   // 1c. Honeypot check
   if (!empty($_POST['guide_website'])) {
+    $bot_ip  = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : 'inconnue';
+    $bot_val = sanitize_text_field(wp_unslash($_POST['guide_website']));
+    wp_mail(
+      'contact@atelier-sapi.fr',
+      '[Sécurité] Bot détecté sur le quiz luminaire',
+      "Un robot a rempli le champ honeypot du questionnaire guide luminaire.\n\n" .
+      "IP : " . $bot_ip . "\n" .
+      "Valeur du champ : " . $bot_val . "\n" .
+      "Date : " . current_time('d/m/Y H:i:s') . "\n\n" .
+      "Le bot a été bloqué automatiquement."
+    );
     wp_send_json_error(['message' => 'Erreur de validation']);
     return;
   }
