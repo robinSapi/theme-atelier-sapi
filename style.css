@@ -18934,7 +18934,8 @@ html.sapi-intro-active body {
   .surmesure-card-content {
     padding: 20px;
   }
-  .surmesure-card-details .surmesure-detail:first-child {
+  .surmesure-card-details .surmesure-detail:first-child,
+  .surmesure-card-details .surmesure-detail:last-child {
     display: none;
   }
   .surmesure-card-desc {
