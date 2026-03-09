@@ -272,6 +272,70 @@ add_action('template_redirect', function () {
 });
 
 /**
+ * Shortcode classique [woocommerce_cart] — Enveloppe dans .sapi-cart-outer
+ * Injecte la progress bar + réassurances (même rendu que le bloc WC Blocks)
+ */
+add_action('woocommerce_before_cart', function () {
+  ?>
+  <div class="sapi-cart-outer">
+    <div class="cart-page-cinetique">
+      <div class="checkout-progress">
+        <div class="progress-step active">
+          <span class="step-number">1</span>
+          <span class="step-label"><?php esc_html_e('Panier', 'theme-sapi-maison'); ?></span>
+        </div>
+        <div class="progress-line"></div>
+        <div class="progress-step">
+          <span class="step-number">2</span>
+          <span class="step-label"><?php esc_html_e('Paiement', 'theme-sapi-maison'); ?></span>
+        </div>
+      </div>
+      <p class="cart-subtitle"><?php esc_html_e('Plus que quelques clics avant de recevoir votre luminaire !', 'theme-sapi-maison'); ?></p>
+  <?php
+});
+
+add_action('woocommerce_after_cart', function () {
+  ?>
+      <div class="cart-reassurance">
+        <div class="reassurance-item">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <div class="reassurance-text">
+            <strong><?php esc_html_e('Fabrication < 5 jours', 'theme-sapi-maison'); ?></strong>
+            <span><?php esc_html_e('Fait main dans notre atelier lyonnais', 'theme-sapi-maison'); ?></span>
+          </div>
+        </div>
+        <div class="reassurance-item">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="1" y="3" width="15" height="13"/>
+            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+            <circle cx="5.5" cy="18.5" r="2.5"/>
+            <circle cx="18.5" cy="18.5" r="2.5"/>
+          </svg>
+          <div class="reassurance-text">
+            <strong><?php esc_html_e('Livraison 48-72h', 'theme-sapi-maison'); ?></strong>
+            <span><?php esc_html_e('Soigneusement emballé', 'theme-sapi-maison'); ?></span>
+          </div>
+        </div>
+        <div class="reassurance-item">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="1 4 1 10 7 10"/>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+          </svg>
+          <div class="reassurance-text">
+            <strong><?php esc_html_e('Retours 30 jours', 'theme-sapi-maison'); ?></strong>
+            <span><?php esc_html_e('Satisfait ou remboursé', 'theme-sapi-maison'); ?></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <?php
+});
+
+/**
  * render_block — Enveloppe le bloc panier WooCommerce dans .sapi-cart-outer
  * Ce wrapper est injecté côté PHP AVANT React et ne sera jamais touché par React.
  * Il permet de scoper notre CSS avec une spécificité garantie.
