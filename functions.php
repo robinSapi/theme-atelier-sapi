@@ -296,8 +296,35 @@ add_action('wp_footer', function () {
         }
       });
     }
+    // Cross-sell: boutons "Ajouter au panier" → redirigent vers la fiche produit
+    // Résout le problème de l'AJAX silencieux qui échoue (produits variables / add-ons)
+    function fixCrossSellButtons() {
+      document.querySelectorAll('.wc-block-cart__main .wc-block-components-product-button__button').forEach(function (btn) {
+        if (btn.dataset.fixedRedirect) return;
+        btn.dataset.fixedRedirect = 'true';
+
+        // Cherche le lien produit le plus proche (nom ou image)
+        var li = btn.closest('li') || btn.closest('.wc-block-grid__product');
+        if (!li) return;
+        var productLink = li.querySelector('a[href]');
+        if (!productLink) return;
+        var url = productLink.getAttribute('href');
+
+        btn.textContent = 'Voir le produit';
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          window.location.href = url;
+        }, true);
+      });
+    }
+
     replaceCartTexts();
-    new MutationObserver(replaceCartTexts).observe(document.body, { childList: true, subtree: true });
+    fixCrossSellButtons();
+    new MutationObserver(function () {
+      replaceCartTexts();
+      fixCrossSellButtons();
+    }).observe(document.body, { childList: true, subtree: true });
   })();
   </script>
   <?php

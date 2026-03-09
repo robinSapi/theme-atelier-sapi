@@ -13195,7 +13195,7 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   color: var(--color-wood) !important;
 }
 
-/* Bouton cross-sell "Ajouter au panier" — style outline discret */
+/* Bouton cross-sell "Voir le produit" — style outline discret */
 .sapi-cart-outer .wc-block-cart__main .wc-block-components-product-button__button {
   background: transparent !important;
   color: var(--color-orange, #E35B24) !important;
@@ -13208,6 +13208,7 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   font-size: 0.75rem !important;
   box-shadow: none !important;
   transition: background 0.2s ease, color 0.2s ease !important;
+  min-height: 44px !important; /* Touch target iOS */
 }
 
 @media (hover: hover) {
