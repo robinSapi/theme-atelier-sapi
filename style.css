@@ -18926,7 +18926,7 @@ html.sapi-intro-active body {
   }
 
   .surmesure-grid .surmesure-card {
-    flex: 0 0 90%;
+    flex: 0 0 95%;
     max-width: none;
     scroll-snap-align: center;
   }
