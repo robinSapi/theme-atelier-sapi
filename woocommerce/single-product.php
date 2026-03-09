@@ -46,9 +46,6 @@ get_header();
 
   // Price display
   $price_html = $product->get_price_html();
-
-  // Stock status
-  $stock_status = $product->get_stock_status();
   ?>
 
   <?php do_action('woocommerce_before_single_product'); ?>
@@ -295,27 +292,6 @@ get_header();
           </div>
         </div>
 
-        <!-- Stock indicator -->
-        <?php
-        $stock_class = 'stock-badge-v2';
-        if ($stock_status === 'instock') {
-          $stock_class .= ' in-stock';
-          $stock_icon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-          $stock_text = __('En stock', 'theme-sapi-maison');
-        } elseif ($stock_status === 'onbackorder') {
-          $stock_class .= ' on-order';
-          $stock_icon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
-          $stock_text = __('Fabriqué à la commande', 'theme-sapi-maison');
-        } else {
-          $stock_class .= ' out-of-stock';
-          $stock_icon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/></svg>';
-          $stock_text = __('Indisponible', 'theme-sapi-maison');
-        }
-        ?>
-        <div class="<?php echo esc_attr($stock_class); ?>">
-          <?php echo $stock_icon; ?>
-          <span><?php echo esc_html($stock_text); ?></span>
-        </div>
 
         <!-- CTA Sur-mesure -->
         <div class="product-custom-cta">
