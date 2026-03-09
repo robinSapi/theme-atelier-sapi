@@ -18912,12 +18912,10 @@ html.sapi-intro-active body {
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    gap: 16px;
-    padding: 0 20px 16px;
-    margin: 0 -20px;
+    gap: 1rem;
+    padding: 15px 5%;
   }
 
   .surmesure-grid::-webkit-scrollbar {
@@ -18925,8 +18923,8 @@ html.sapi-intro-active body {
   }
 
   .surmesure-grid .surmesure-card {
-    flex: 0 0 80%;
-    max-width: 320px;
+    flex: 0 0 90%;
+    max-width: none;
     scroll-snap-align: center;
   }
 
