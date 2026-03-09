@@ -70,7 +70,6 @@ get_header();
 
     <!-- Colonne gauche — Infos -->
     <div class="contact-info">
-      <span class="section-num">01</span>
       <h2 class="contact-info-title">Un projet, une question ?</h2>
       <p class="contact-info-text">Chaque luminaire a son histoire, et j'aime les entendre. Que ce soit pour une création sur mesure, un conseil personnalisé ou simplement pour discuter de votre projet d'éclairage, n'hésitez pas.</p>
 
@@ -117,7 +116,6 @@ get_header();
 
     <!-- Colonne droite — Formulaire -->
     <div class="contact-form-wrapper">
-      <span class="section-num">02</span>
       <h2 class="contact-form-title">Votre message</h2>
 
       <div class="contact-form-card">
