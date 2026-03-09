@@ -19577,6 +19577,8 @@ html.sapi-intro-active body {
     scrollbar-width: none;
     gap: 1rem;
     padding: 0 5%;
+    scroll-padding-left: 0;
+    scroll-behavior: auto;
   }
   .collections-grid::-webkit-scrollbar { display: none; }
   .collections-grid > .collection-card {
@@ -19675,16 +19677,6 @@ html.sapi-intro-active body {
   .bento-process .process-header {
     padding: 0 1rem;
     margin-bottom: 0.75rem;
-  }
-
-  /* --- Spacer droit (padding-right ignoré sur overflow-x) --- */
-  .collections-grid::after,
-  .advice-tips-grid::after,
-  .testimonials-grid::after,
-  .artisan-values-grid::after,
-  .process-inner::after {
-    content: '';
-    flex: 0 0 5%;
   }
 
   /* --- Dots --- */
