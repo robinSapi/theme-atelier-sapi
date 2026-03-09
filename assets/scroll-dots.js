@@ -7,7 +7,6 @@
   'use strict';
 
   var sections = [
-    { container: '.products-grid-cinetique', child: '.product-card-cinetique', snap: 'center' },
     { container: '.advice-tips-grid', child: '.advice-tip', snap: 'center' },
     { container: '.testimonials-grid', child: '.testimonial-card', snap: 'center' },
     { container: '.artisan-values-grid', child: '.artisan-value-item', snap: 'center' }
