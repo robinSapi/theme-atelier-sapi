@@ -195,7 +195,7 @@
 <div id="app">
   <div id="sidebar">
     <h1>Maillage Interne</h1>
-    <p class="subtitle">Atelier Sâpi — Audit SEO — Mars 2026</p>
+    <p class="subtitle">Atelier Sâpi — Audit SEO — 9 mars 2026</p>
 
     <div class="stat-grid">
       <div class="stat-card"><div class="value" id="stat-pages">0</div><div class="label">Pages</div></div>
@@ -316,7 +316,7 @@ var edges = [
 
   // ── Homepage (contenu) ──
   { from: 'accueil', to: 'artisan',        type: 'content', label: "D\u00e9couvrir l'artisan" },
-  { from: 'accueil', to: 'guide',          type: 'content', label: 'CTA Guide Luminaire' },
+  { from: 'accueil', to: 'guide',          type: 'content', label: 'Room picker \u00d76 + CTA texte' },
   { from: 'accueil', to: 'nos-creations',  type: 'content', label: 'Bento CTA' },
   { from: 'accueil', to: 'produit',        type: 'content', label: 'Carousel + Featured + Bestseller + Gift' },
   { from: 'accueil', to: 'suspensions',    type: 'content', label: 'Collection cards' },
@@ -331,12 +331,13 @@ var edges = [
   // ── Fiche produit ──
   { from: 'produit', to: 'artisan',        type: 'content', label: "D\u00e9couvrir l'artisan" },
   { from: 'produit', to: 'nos-creations',  type: 'content', label: 'Cat\u00e9gorie associ\u00e9e' },
+  { from: 'produit', to: 'sur-mesure',     type: 'content', label: 'Version sur-mesure' },
 
   // ── L'Artisan ──
   { from: 'artisan', to: 'nos-creations',  type: 'content', label: 'D\u00e9couvrir la collection' },
 
   // ── Conseils ──
-  { from: 'conseils', to: 'guide',         type: 'content', label: 'CTA Guide Luminaire' },
+  { from: 'conseils', to: 'guide',         type: 'content', label: 'Room picker \u00d76' },
 
   // ── Checkout (merci) ──
   { from: 'commande', to: 'nos-creations', type: 'content', label: 'Continuer shopping' },
@@ -351,6 +352,7 @@ var edges = [
 
   // ── Boutique + Cat\u00e9gories ──
   { from: 'nos-creations', to: 'produit',  type: 'content', label: 'Cards produits' },
+  { from: 'nos-creations', to: 'sur-mesure', type: 'content', label: 'Outro sur-mesure' },
   { from: 'suspensions',   to: 'produit',  type: 'content', label: 'Cards produits' },
   { from: 'lampadaires',   to: 'produit',  type: 'content', label: 'Cards produits' },
   { from: 'appliques',     to: 'produit',  type: 'content', label: 'Cards produits' },
