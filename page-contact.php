@@ -57,60 +57,108 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sapi_contact_nonce'])
 get_header();
 ?>
 
-<section class="contact-hero" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/Bandeau-Rouge.jpg');">
+<section class="contact-hero" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/Charlie-Bandeau-2.jpg');">
   <div class="contact-hero-overlay"></div>
   <div class="contact-hero-content">
-    <h1>Prise de contact</h1>
-    <p>Personnalisation, questions, service après vente, dites-nous ce qui vous traverse l'ampoule !</p>
+    <h1>Parlons de votre projet</h1>
+    <p>Une question, une envie, un projet sur mesure — Robin vous répond personnellement.</p>
   </div>
 </section>
 
-<section class="contact-body">
-  <p>Vous n'avez pas trouvé le luminaire de vos rêves ? Vous avez un doute ou n'arrivez pas à faire votre choix ? Vous avez un problème avec votre commande ? Contactez-nous, nous répondrons le plus vite possible ! 🚀</p>
-  <div class="contact-actions">
-    <a class="button" href="mailto:contact@atelier-sapi.fr">ENVOYER UN MAIL ✉️</a>
-    <a class="button button-outline" href="tel:0680435585">PASSER UN COUP DE FIL 📞</a>
-    <a class="button" href="#formulaire">COMPLETER LE FORMULAIRE 📋</a>
-  </div>
-</section>
+<section class="contact-main">
+  <div class="contact-main-grid">
 
-<section id="formulaire" class="contact-form">
-  <h2>Contactez-nous</h2>
+    <!-- Colonne gauche — Infos -->
+    <div class="contact-info">
+      <span class="section-num">01</span>
+      <h2 class="contact-info-title">Un projet, une question ?</h2>
+      <p class="contact-info-text">Chaque luminaire a son histoire, et j'aime les entendre. Que ce soit pour une création sur mesure, un conseil personnalisé ou simplement pour discuter de votre projet d'éclairage, n'hésitez pas.</p>
 
-  <?php if ($form_success) : ?>
-    <div class="form-message form-message--success">
-      <p><strong>Message envoyé !</strong></p>
-      <p>Merci pour votre message. Nous vous répondrons dans les plus brefs délais.</p>
+      <div class="contact-cards">
+        <a href="mailto:contact@atelier-sapi.fr" class="contact-card">
+          <span class="contact-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="M22 4L12 13L2 4"/>
+            </svg>
+          </span>
+          <span class="contact-card-content">
+            <span class="contact-card-label">Email</span>
+            <span class="contact-card-value">contact@atelier-sapi.fr</span>
+          </span>
+        </a>
+
+        <a href="tel:+33680435585" class="contact-card">
+          <span class="contact-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </span>
+          <span class="contact-card-content">
+            <span class="contact-card-label">Téléphone</span>
+            <span class="contact-card-value">06 80 43 55 85</span>
+          </span>
+        </a>
+
+        <a href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer" class="contact-card">
+          <span class="contact-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </span>
+          <span class="contact-card-content">
+            <span class="contact-card-label">L'atelier</span>
+            <span class="contact-card-value">Lyon, France</span>
+          </span>
+        </a>
+      </div>
     </div>
-  <?php else : ?>
 
-    <?php if ($form_error) : ?>
-      <div class="form-message form-message--error">
-        <p><?php echo esc_html($form_error); ?></p>
+    <!-- Colonne droite — Formulaire -->
+    <div class="contact-form-wrapper">
+      <span class="section-num">02</span>
+      <h2 class="contact-form-title">Votre message</h2>
+
+      <div class="contact-form-card">
+        <?php if ($form_success) : ?>
+          <div class="form-message form-message--success">
+            <p><strong>Message envoyé !</strong></p>
+            <p>Merci pour votre message. Je vous répondrai dans les plus brefs délais.</p>
+          </div>
+        <?php else : ?>
+
+          <?php if ($form_error) : ?>
+            <div class="form-message form-message--error">
+              <p><?php echo esc_html($form_error); ?></p>
+            </div>
+          <?php endif; ?>
+
+          <form action="<?php echo esc_url(get_permalink()); ?>" method="post">
+            <?php wp_nonce_field('sapi_contact_form', 'sapi_contact_nonce'); ?>
+
+            <!-- Honeypot anti-spam (hidden field) -->
+            <div style="display: none;" aria-hidden="true">
+              <label for="website">Ne pas remplir</label>
+              <input type="text" name="website" id="website" tabindex="-1" autocomplete="off">
+            </div>
+
+            <label for="contact-name">Nom</label>
+            <input id="contact-name" type="text" name="name" required placeholder="Votre nom" value="<?php echo esc_attr($_POST['name'] ?? ''); ?>">
+
+            <label for="contact-email">Email</label>
+            <input id="contact-email" type="email" name="email" required placeholder="votre@email.fr" value="<?php echo esc_attr($_POST['email'] ?? ''); ?>">
+
+            <label for="contact-message">Message</label>
+            <textarea id="contact-message" name="message" rows="6" required placeholder="Décrivez votre projet, posez votre question..."><?php echo esc_textarea($_POST['message'] ?? ''); ?></textarea>
+
+            <button type="submit">Envoyer le message</button>
+          </form>
+        <?php endif; ?>
       </div>
-    <?php endif; ?>
+    </div>
 
-    <form action="<?php echo esc_url(get_permalink()); ?>#formulaire" method="post">
-      <?php wp_nonce_field('sapi_contact_form', 'sapi_contact_nonce'); ?>
-
-      <!-- Honeypot anti-spam (hidden field) -->
-      <div style="display: none;" aria-hidden="true">
-        <label for="website">Ne pas remplir</label>
-        <input type="text" name="website" id="website" tabindex="-1" autocomplete="off">
-      </div>
-
-      <label for="contact-name">Nom</label>
-      <input id="contact-name" type="text" name="name" required value="<?php echo esc_attr($_POST['name'] ?? ''); ?>">
-
-      <label for="contact-email">Email</label>
-      <input id="contact-email" type="email" name="email" required value="<?php echo esc_attr($_POST['email'] ?? ''); ?>">
-
-      <label for="contact-message">Message</label>
-      <textarea id="contact-message" name="message" rows="6" required><?php echo esc_textarea($_POST['message'] ?? ''); ?></textarea>
-
-      <button type="submit">Envoyer</button>
-    </form>
-  <?php endif; ?>
+  </div>
 </section>
 
 <?php
