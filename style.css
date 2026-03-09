@@ -3622,6 +3622,10 @@ ul.products.products-carousel-track > li.products-carousel-slide {
     padding: 3rem 0;
   }
 
+  .product-testimonials .testimonials-header {
+    padding: 0 1.5rem;
+  }
+
   .testimonials-grid {
     grid-template-columns: 1fr;
   }
@@ -5891,6 +5895,7 @@ li.carousel-editorial-slide,
 
   .artisan-values-header {
     margin-bottom: 2.5rem;
+    padding: 0 1.5rem;
   }
 
   .artisan-values-grid {
@@ -10209,6 +10214,9 @@ transform: translateY(15px);
   }
   .product-related {
     padding: 30px 0;
+  }
+  .product-related-header {
+    padding: 0 1.5rem;
   }
 
   .product-details h2 {
