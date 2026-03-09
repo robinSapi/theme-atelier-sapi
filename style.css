@@ -19661,7 +19661,7 @@ html.sapi-intro-active body {
   }
   .products-grid-cinetique::-webkit-scrollbar { display: none; }
   .products-grid-cinetique > .product-card-cinetique {
-    flex: 0 0 85%;
+    flex: 0 0 90%;
     scroll-snap-align: center;
   }
 
@@ -19679,7 +19679,7 @@ html.sapi-intro-active body {
   }
   .advice-tips-grid::-webkit-scrollbar { display: none; }
   .advice-tips-grid > .advice-tip {
-    flex: 0 0 85%;
+    flex: 0 0 90%;
     scroll-snap-align: center;
   }
   /* Masquer le panneau citation et le CTA guide dans le slider */
@@ -19701,7 +19701,7 @@ html.sapi-intro-active body {
   }
   .testimonials-grid::-webkit-scrollbar { display: none; }
   .testimonials-grid > .testimonial-card {
-    flex: 0 0 85%;
+    flex: 0 0 90%;
     scroll-snap-align: center;
   }
 
@@ -19718,7 +19718,7 @@ html.sapi-intro-active body {
   }
   .artisan-values-grid::-webkit-scrollbar { display: none; }
   .artisan-values-grid > .artisan-value-item {
-    flex: 0 0 85%;
+    flex: 0 0 90%;
     scroll-snap-align: center;
   }
 
