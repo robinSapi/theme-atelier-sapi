@@ -151,7 +151,7 @@ if (!$hero_img_url) {
         <span class="filter-count">(<?php echo esc_html($creations_count); ?>)</span>
       </button>
       <?php
-      $creations_order = ['suspensions', 'appliques', 'lampadaires', 'lampeaposer'];
+      $creations_order = ['suspensions', 'appliques', 'lampadaires', 'lampesaposer'];
       foreach ($creations_order as $slug) :
         if (!isset($cats_by_slug[$slug])) continue;
         $cat = $cats_by_slug[$slug];

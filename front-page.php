@@ -10,7 +10,7 @@ get_header();
 // Query products for full-page carousel - two from each category with ambiance_1 field
 // Order: suspension, applique, lampe à poser, lampadaire (x2)
 $carousel_products = [];
-$categories_order = ['suspensions', 'appliques', 'lampeaposer', 'lampadaires'];
+$categories_order = ['suspensions', 'appliques', 'lampesaposer', 'lampadaires'];
 
 // Get 2 products from each category
 $products_by_category = [];
@@ -205,7 +205,7 @@ $featured_query = new WP_Query([
     [
       'taxonomy' => 'product_cat',
       'field' => 'slug',
-      'terms' => ['suspensions', 'appliques', 'lampeaposer', 'lampadaires'],
+      'terms' => ['suspensions', 'appliques', 'lampesaposer', 'lampadaires'],
       'operator' => 'IN',
     ],
   ],
@@ -252,7 +252,7 @@ $collection_slugs = [
   ['slug' => 'suspensions', 'name' => 'Suspensions'],
   ['slug' => 'lampadaires', 'name' => 'Lampadaires'],
   ['slug' => 'appliques',   'name' => 'Appliques'],
-  ['slug' => 'lampeaposer', 'name' => 'À poser'],
+  ['slug' => 'lampesaposer', 'name' => 'À poser'],
   ['slug' => 'accessoires', 'name' => 'Accessoires', 'prefer' => 'ampoule'],
 ];
 

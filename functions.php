@@ -95,7 +95,7 @@ function sapi_fallback_primary_menu() {
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/suspensions/')); ?>">Suspensions</a></li>
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampadaires/')); ?>">Lampadaires</a></li>
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/appliques/')); ?>">Appliques</a></li>
-          <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampeaposer/')); ?>">À poser</a></li>
+          <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampesaposer/')); ?>">À poser</a></li>
         </ul>
       </li>
       <li class="menu-item"><a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>">Sur mesure</a></li>
@@ -118,7 +118,7 @@ function sapi_fallback_mobile_menu() {
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/suspensions/')); ?>">Suspensions</a></li>
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampadaires/')); ?>">Lampadaires</a></li>
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/appliques/')); ?>">Appliques</a></li>
-          <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampeaposer/')); ?>">À poser</a></li>
+          <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampesaposer/')); ?>">À poser</a></li>
         </ul>
       </li>
       <li class="menu-item"><a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>">Sur mesure</a></li>
@@ -1914,16 +1914,16 @@ function sapi_guide_get_categories(array $answers) {
 
   // Éclairage secondaire → pool limité, affiné par sortie
   if ($eclairage === 'secondaire') {
-    $pool = ['lampadaires', 'lampeaposer']; // default (NSP) : pas d'appliques
+    $pool = ['lampadaires', 'lampesaposer']; // default (NSP) : pas d'appliques
     if ($sortie === 'plafond') {
       $pool = ['suspensions'];
     } elseif ($sortie === 'mur') {
       $pool = ['appliques'];
     } elseif ($sortie === 'pas-de-sortie') {
-      $pool = ['lampadaires', 'lampeaposer', 'appliques'];
+      $pool = ['lampadaires', 'lampesaposer', 'appliques'];
     }
     if ($piece === 'cuisine') {
-      $pool = array_values(array_diff($pool, ['lampeaposer']));
+      $pool = array_values(array_diff($pool, ['lampesaposer']));
     }
     return $pool;
   }
@@ -1936,15 +1936,15 @@ function sapi_guide_get_categories(array $answers) {
       $cats = ['appliques'];
       break;
     case 'pas-de-sortie':
-      $cats = ['lampadaires', 'lampeaposer', 'appliques'];
+      $cats = ['lampadaires', 'lampesaposer', 'appliques'];
       break;
     default: // "ne-sais-pas" → pas d'appliques (nécessite sortie mur)
-      $cats = ['suspensions', 'lampadaires', 'lampeaposer'];
+      $cats = ['suspensions', 'lampadaires', 'lampesaposer'];
   }
 
   // Règle A : jamais de lampe à poser en cuisine
   if ($piece === 'cuisine') {
-    $cats = array_values(array_diff($cats, ['lampeaposer']));
+    $cats = array_values(array_diff($cats, ['lampesaposer']));
   }
 
   return $cats;
@@ -2079,11 +2079,11 @@ function sapi_guide_query_products(array $answers, array $categories) {
  */
 function sapi_guide_query_complements(array $answers, array $main_categories) {
   // Complements: jamais de suspension (nécessite sortie plafond dédiée)
-  $complement_pool = ['lampadaires', 'lampeaposer', 'appliques'];
+  $complement_pool = ['lampadaires', 'lampesaposer', 'appliques'];
   $complement_cats = array_values(array_diff($complement_pool, $main_categories));
 
   if (empty($complement_cats)) {
-    $complement_cats = ['lampadaires', 'lampeaposer'];
+    $complement_cats = ['lampadaires', 'lampesaposer'];
   }
 
   $args = [

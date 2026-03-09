@@ -26,7 +26,7 @@ $category_intro = [
   'suspensions' => "Des luminaires suspendus en bois qui transforment votre plafond en œuvre d'art. Du lustre design au modèle artisanal, trouvez la suspension qui raconte votre histoire.",
   'lampadaires' => "L'éclairage d'ambiance parfait pour structurer votre espace sans percer le plafond. Nos lampadaires en bois allient design sculptural et lumière chaleureuse.",
   'appliques' => "Libérez vos sols, habillez vos murs. Nos appliques murales en bois créent une atmosphère unique tout en dessinant des jeux d'ombres poétiques.",
-  'lampeaposer' => "La touche finale qui change tout. Posez-la où vous voulez, déplacez-la au gré de vos envies : nos lampes nomades créent une bulle de lumière intime partout chez vous.",
+  'lampesaposer' => "La touche finale qui change tout. Posez-la où vous voulez, déplacez-la au gré de vos envies : nos lampes nomades créent une bulle de lumière intime partout chez vous.",
   'accessoires' => "Les bons accessoires font toute la différence. Ampoules filament, douilles certifiées, câbles premium : tout pour sublimer vos luminaires en toute sécurité.",
 ];
 
@@ -218,7 +218,7 @@ $editorial_style = $ambiance_bg_url ? 'style="background-image: url(' . esc_url(
           'Escalier → Sécurité + décoration en un seul geste'
         ]
       ],
-      'lampeaposer' => [
+      'lampesaposer' => [
         'tagline' => 'La touche finale qui change tout',
         'intro' => 'Une lampe à poser, c\'est la liberté totale. Sur une table de chevet, un bureau, une étagère... Elle s\'installe partout, se déplace au gré de vos envies, et crée instantanément une bulle de lumière intime et chaleureuse.',
         'why' => 'Pourquoi craquer pour une lampe à poser ?',

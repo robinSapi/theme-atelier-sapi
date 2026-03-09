@@ -8,7 +8,7 @@
   'use strict';
 
   // Catégories dont les noms de produits doivent être formatés (prénom + nom)
-  var allowedCats = ['suspensions', 'appliques', 'lampadaires', 'lampeaposer'];
+  var allowedCats = ['suspensions', 'appliques', 'lampadaires', 'lampesaposer'];
 
   // Attendre que le DOM soit chargé
   if (document.readyState === 'loading') {

@@ -446,7 +446,7 @@ get_header();
       }
       $is_suspension  = in_array('suspensions', $product_cat_slugs);
       $is_lampadaire  = in_array('lampadaires', $product_cat_slugs);
-      $is_lampe_poser = in_array('lampeaposer', $product_cat_slugs) || in_array('lampes-a-poser', $product_cat_slugs);
+      $is_lampe_poser = in_array('lampesaposer', $product_cat_slugs) || in_array('lampes-a-poser', $product_cat_slugs);
       $is_applique    = in_array('appliques', $product_cat_slugs) || in_array('appliques-murales', $product_cat_slugs);
 
       // IMPORTANT : ne pas nommer cette variable $acf — c'est le nom du singleton global ACF !
