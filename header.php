@@ -175,6 +175,7 @@ $logo_alt = get_bloginfo('name');
 
 <!-- Sticky Reassurance Bar -->
 <div class="reassurance-bar reassurance-bar-sticky">
+  <div class="guide-profile-chip" id="guide-profile-chip" style="display:none;"></div>
   <div class="reassurance-bar-inner">
     <div class="reassurance-item">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -220,8 +221,6 @@ $logo_alt = get_bloginfo('name');
   items[indices[1]].style.display='none';
 })();
 </script>
-
-<div class="guide-profile-chip" id="guide-profile-chip" style="display:none;"></div>
 
 <?php endif; ?>
 
