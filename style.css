@@ -8195,7 +8195,7 @@ body.cursor-hover .cursor-dot {
   padding: 3rem 3rem 2rem;
   max-width: 1600px;
   margin: 0 auto;
-  overflow-x: hidden;
+  overflow: clip; /* 'clip' évite le débordement sans créer de scroll container (évite overflow-y: auto implicite) */
 }
 
 .bento-container {
