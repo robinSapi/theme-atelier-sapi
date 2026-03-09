@@ -9,7 +9,7 @@ Les informations FTP sensibles sont stockées dans les secrets GitHub pour des r
 ### Étapes de configuration
 
 1. **Aller sur GitHub**
-   - Accédez à votre repo : [github.com/robinSapi/testLumineux-atelier-sapi](https://github.com/robinSapi/testLumineux-atelier-sapi)
+   - Accédez à votre repo : [github.com/robinSapi/theme-atelier-sapi](https://github.com/robinSapi/theme-atelier-sapi)
 
 2. **Ouvrir les Settings**
    - Cliquez sur l'onglet **Settings** (en haut à droite)
@@ -226,7 +226,7 @@ GitHub Repository (testLumineux-atelier-sapi)
 
 ## 🔗 Liens Utiles
 
-- **GitHub Repository :** [github.com/robinSapi/testLumineux-atelier-sapi](https://github.com/robinSapi/testLumineux-atelier-sapi)
+- **GitHub Repository :** [github.com/robinSapi/theme-atelier-sapi](https://github.com/robinSapi/theme-atelier-sapi)
 - **Site de test :** [testLumineux.atelier-sapi.fr](https://testLumineux.atelier-sapi.fr)
 - **Site de production :** [atelier-sapi.fr](https://atelier-sapi.fr)
 - **Panel O2Switch :** [atelier-sapi.fr:2222](https://atelier-sapi.fr:2222) (cPanel)

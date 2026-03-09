@@ -15,7 +15,7 @@
 | **Projet** | Atelier Sâpi – Luminaires artisanaux bois |
 | **Site test** | `testlumineux.atelier-sapi.fr` |
 | **Site prod** | `atelier-sapi.fr` |
-| **Repo GitHub** | `github.com/robinSapi/testLumineux-atelier-sapi` |
+| **Repo GitHub** | `github.com/robinSapi/theme-atelier-sapi` |
 | **Branche** | `test-theme-sapi-maison` ⚠️ JAMAIS push sur main/master |
 | **Hébergeur** | O2switch |
 | **Local** | `/Users/sapi/testLumineux-atelier-sapi` |

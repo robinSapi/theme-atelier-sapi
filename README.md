@@ -54,7 +54,7 @@ Ce thème a été développé from scratch pour remplacer l'ancien thème basé 
 1. Cloner le repo dans votre installation WordPress locale :
    ```bash
    cd /path/to/wordpress/
-   git clone https://github.com/robinSapi/testLumineux-atelier-sapi.git .
+   git clone https://github.com/robinSapi/theme-atelier-sapi.git .
    ```
 
 2. Installer WordPress et WooCommerce (si ce n'est pas déjà fait)
@@ -214,7 +214,7 @@ Les menus sont configurables dans l'admin WordPress :
 - Client : Robin (Atelier Sapi)
 - Développeur : Samuel
 - Hébergeur : O2Switch
-- Repo GitHub : [robinSapi/testLumineux-atelier-sapi](https://github.com/robinSapi/testLumineux-atelier-sapi)
+- Repo GitHub : [robinSapi/theme-atelier-sapi](https://github.com/robinSapi/theme-atelier-sapi)
 
 ## 📝 Licence
 
