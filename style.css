@@ -4147,19 +4147,55 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   .category-editorial.is-expanded .editorial-collapsible {
     max-height: 2000px;
     opacity: 1;
+    overflow: visible;
   }
 
   .editorial-grid {
     gap: 24px;
   }
 
-  .editorial-block,
-  .editorial-use-cases {
+  .editorial-block {
     padding: 1.5rem;
   }
 
+  .editorial-use-cases {
+    padding: 1.5rem 0;
+  }
+
+  .editorial-use-cases h3 {
+    padding: 0 1.5rem;
+  }
+
+  /* Use-cases — slider horizontal */
   .use-cases-list {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
     gap: 1rem;
+    padding: 15px 5%;
+  }
+
+  .use-cases-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .use-cases-list li {
+    flex: 0 0 85%;
+    scroll-snap-align: center;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+    padding: 1.5rem 1.25rem;
+  }
+
+  .use-cases-list li svg {
+    margin-top: 0;
+    width: 28px;
+    height: 28px;
   }
 }
 
