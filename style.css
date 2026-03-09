@@ -6001,14 +6001,16 @@ li.carousel-editorial-slide,
   border-radius: 16px;
   overflow: visible;
   background: transparent;
+  transition: transform 0.5s var(--ease-expo), box-shadow 0.5s var(--ease-expo);
 }
 
 @media (hover: hover) {
   .advice-tip:hover {
-    transform: translateY(-4px);
-    box-shadow:
-      0 8px 24px rgba(0, 0, 0, 0.12),
-      0 4px 12px rgba(0, 0, 0, 0.06);
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  }
+  .advice-tip:hover .advice-tip-image {
+    transform: scale(1.05);
   }
 }
 
@@ -6150,6 +6152,8 @@ li.carousel-editorial-slide,
   background-position: center;
   display: flex;
   align-items: flex-end;
+  transition: transform 0.8s var(--ease-expo);
+  will-change: transform;
 }
 
 .advice-tip-overlay {
