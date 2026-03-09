@@ -19381,7 +19381,7 @@ html.sapi-intro-active body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 1rem;
-    padding: 10px 5%;
+    padding: 25px 5%;
     align-items: stretch;
   }
   .advice-tips-grid::-webkit-scrollbar { display: none; }
