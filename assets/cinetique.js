@@ -1221,35 +1221,4 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-  // ========================================
-  // Collections Carousel (responsive)
-  // ========================================
-  const collectionsGrid = document.querySelector('.collections-grid');
-  const prevBtn = document.querySelector('.collections-carousel-prev');
-  const nextBtn = document.querySelector('.collections-carousel-next');
-
-  if (collectionsGrid && prevBtn && nextBtn) {
-    function updateCarouselButtons() {
-      var scrollLeft = collectionsGrid.scrollLeft;
-      var maxScroll = collectionsGrid.scrollWidth - collectionsGrid.clientWidth;
-      prevBtn.disabled = scrollLeft <= 2;
-      nextBtn.disabled = scrollLeft >= maxScroll - 2;
-    }
-
-    function scrollByCard(direction) {
-      var card = collectionsGrid.querySelector('.collection-card');
-      if (!card) return;
-      var gap = parseInt(getComputedStyle(collectionsGrid).gap) || 16;
-      var scrollAmount = (card.offsetWidth + gap) * direction;
-      collectionsGrid.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-
-    prevBtn.addEventListener('click', function() { scrollByCard(-1); });
-    nextBtn.addEventListener('click', function() { scrollByCard(1); });
-    collectionsGrid.addEventListener('scroll', updateCarouselButtons, { passive: true });
-
-    updateCarouselButtons();
-    window.addEventListener('resize', updateCarouselButtons);
-  }
-
 });

@@ -7,6 +7,7 @@
   'use strict';
 
   var sections = [
+    { container: '.collections-grid', child: '.collection-card', snap: 'center' },
     { container: '.advice-tips-grid', child: '.advice-tip', snap: 'center' },
     { container: '.testimonials-grid', child: '.testimonial-card', snap: 'center' },
     { container: '.artisan-values-grid', child: '.artisan-value-item', snap: 'center' },

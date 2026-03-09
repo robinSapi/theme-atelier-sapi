@@ -419,31 +419,19 @@ foreach ($collection_slugs as $col) {
     <h2 class="section-title-kinetic">Collections</h2>
   </div>
 
-  <div class="collections-carousel-wrapper">
-    <div class="collections-grid">
-      <?php foreach ($collections as $collection) : ?>
-        <a href="<?php echo esc_url($collection['url']); ?>" class="collection-card">
-          <div class="collection-visual" style="background-image: url('<?php echo esc_url($collection['image']); ?>');"></div>
-          <div class="collection-details">
-            <h3><?php echo esc_html($collection['name']); ?></h3>
-            <div class="collection-meta">
-              <span class="collection-count"><?php echo esc_html($collection['count']); ?></span>
-              <span class="collection-btn">→</span>
-            </div>
+  <div class="collections-grid">
+    <?php foreach ($collections as $collection) : ?>
+      <a href="<?php echo esc_url($collection['url']); ?>" class="collection-card">
+        <div class="collection-visual" style="background-image: url('<?php echo esc_url($collection['image']); ?>');"></div>
+        <div class="collection-details">
+          <h3><?php echo esc_html($collection['name']); ?></h3>
+          <div class="collection-meta">
+            <span class="collection-count"><?php echo esc_html($collection['count']); ?></span>
+            <span class="collection-btn">→</span>
           </div>
-        </a>
-      <?php endforeach; ?>
-    </div>
-
-    <!-- Carousel navigation (visible only when scrollable) -->
-    <div class="collections-carousel-nav" aria-label="Navigation collections">
-      <button class="collections-carousel-btn collections-carousel-prev" aria-label="Collection précédente" disabled>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-      </button>
-      <button class="collections-carousel-btn collections-carousel-next" aria-label="Collection suivante">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-      </button>
-    </div>
+        </div>
+      </a>
+    <?php endforeach; ?>
   </div>
 </section>
 
