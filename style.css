@@ -19657,7 +19657,7 @@ html.sapi-intro-active body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 1rem;
-    padding: 0 1rem 1rem;
+    padding: 0 5%;
   }
   .products-grid-cinetique::-webkit-scrollbar { display: none; }
   .products-grid-cinetique > .product-card-cinetique {
@@ -19674,7 +19674,7 @@ html.sapi-intro-active body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 1rem;
-    padding: 0;
+    padding: 0 5%;
     align-items: stretch;
   }
   .advice-tips-grid::-webkit-scrollbar { display: none; }
@@ -19697,7 +19697,7 @@ html.sapi-intro-active body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 1rem;
-    padding: 0 1rem 1rem;
+    padding: 0 5%;
   }
   .testimonials-grid::-webkit-scrollbar { display: none; }
   .testimonials-grid > .testimonial-card {
@@ -19714,7 +19714,7 @@ html.sapi-intro-active body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 1rem;
-    padding: 0 1rem 1rem;
+    padding: 0 5%;
   }
   .artisan-values-grid::-webkit-scrollbar { display: none; }
   .artisan-values-grid > .artisan-value-item {
