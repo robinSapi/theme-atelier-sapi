@@ -6352,7 +6352,7 @@ li.carousel-editorial-slide,
   .advice-tip-flipper {
     position: relative;
     width: 100%;
-    min-height: 280px;
+    min-height: 400px;
     -webkit-transition: -webkit-transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     -webkit-transform-style: preserve-3d;
@@ -6392,7 +6392,7 @@ li.carousel-editorial-slide,
   }
 
   .advice-tip-image {
-    min-height: 280px;
+    min-height: 400px;
   }
   .advice-tip-content {
     padding: 1.5rem;
