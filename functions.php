@@ -279,8 +279,19 @@ add_action('template_redirect', function () {
 // Remplace "Supprimer l'élément" par "Supprimer" dans le panier (rendu React)
 add_action('wp_footer', function () {
   if (!function_exists('is_cart') || !is_cart()) return;
+
+  // Mapping slug → product_id pour les cross-sells (utilisé par le JS ci-dessous)
+  $cross_sell_ids = WC()->cart->get_cross_sells();
+  $slug_map = [];
+  foreach ($cross_sell_ids as $pid) {
+    $p = wc_get_product($pid);
+    if ($p) {
+      $slug_map[$p->get_slug()] = $pid;
+    }
+  }
   ?>
   <script>
+  var sapiCrossSellMap = <?php echo wp_json_encode($slug_map); ?>;
   (function () {
     function replaceCartTexts() {
       // "Supprimer l'élément" → "Supprimer"
@@ -296,25 +307,62 @@ add_action('wp_footer', function () {
         }
       });
     }
-    // Cross-sell: boutons "Ajouter au panier" → redirigent vers la fiche produit
-    // Résout le problème de l'AJAX silencieux qui échoue (produits variables / add-ons)
+    // Cross-sell: ajout direct au panier en AJAX (un clic = produit ajouté)
     function fixCrossSellButtons() {
       document.querySelectorAll('.wc-block-cart__main .wc-block-components-product-button__button').forEach(function (btn) {
-        if (btn.dataset.fixedRedirect) return;
-        btn.dataset.fixedRedirect = 'true';
+        if (btn.dataset.fixedAjax) return;
+        btn.dataset.fixedAjax = 'true';
 
-        // Cherche le lien produit le plus proche (nom ou image)
         var li = btn.closest('li') || btn.closest('.wc-block-grid__product');
         if (!li) return;
         var productLink = li.querySelector('a[href]');
         if (!productLink) return;
         var url = productLink.getAttribute('href');
 
-        btn.textContent = 'Voir le produit';
+        // Extraire le slug depuis l'URL du produit
+        var slug = url.replace(/\/$/, '').split('/').pop();
+        var productId = (window.sapiCrossSellMap || {})[slug];
+        if (!productId) return;
+
+        var originalText = btn.textContent;
+
         btn.addEventListener('click', function (e) {
           e.preventDefault();
           e.stopPropagation();
-          window.location.href = url;
+          e.stopImmediatePropagation();
+
+          if (btn.disabled) return;
+          btn.disabled = true;
+          btn.textContent = 'Ajout\u2026';
+
+          var formData = new FormData();
+          formData.append('product_id', productId);
+          formData.append('quantity', 1);
+
+          fetch('/?wc-ajax=add_to_cart', {
+            method: 'POST',
+            body: formData
+          })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data.error) {
+              btn.textContent = 'Erreur';
+              setTimeout(function () {
+                btn.textContent = originalText;
+                btn.disabled = false;
+              }, 2000);
+            } else {
+              btn.textContent = 'Ajout\u00e9 \u2713';
+              setTimeout(function () { location.reload(); }, 800);
+            }
+          })
+          .catch(function () {
+            btn.textContent = 'Erreur';
+            setTimeout(function () {
+              btn.textContent = originalText;
+              btn.disabled = false;
+            }, 2000);
+          });
         }, true);
       });
     }
