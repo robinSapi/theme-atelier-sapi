@@ -6047,6 +6047,7 @@ li.carousel-editorial-slide,
 
 .advice-tip-front {
   z-index: 2;
+  cursor: pointer;
 }
 
 .advice-tip-back {

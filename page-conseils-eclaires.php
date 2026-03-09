@@ -136,9 +136,9 @@ for ($i = 1; $i <= 4; $i++) {
     document.body.style.overflow = '';
   }
 
-  /* Clic "Voir le conseil" → flip la card */
-  document.querySelectorAll('.advice-tip-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
+  /* Clic n'importe où sur la face avant → flip la card */
+  document.querySelectorAll('.advice-tip-front').forEach(function(front) {
+    front.addEventListener('click', function() {
       var tip = this.closest('.advice-tip');
       document.querySelectorAll('.advice-tip').forEach(function(t) {
         if (t !== tip) closeFlip(t);
