@@ -6315,7 +6315,7 @@ li.carousel-editorial-slide,
 /* Responsive – Mobile + Flip Card */
 @media (max-width: 768px) {
   .advice-tips-section {
-    padding: 60px 15px 50px;
+    padding: 60px 0 50px;
   }
   .advice-tips-grid {
     grid-template-columns: 1fr;
@@ -19674,7 +19674,7 @@ html.sapi-intro-active body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 1rem;
-    padding: 0 1rem 1rem;
+    padding: 0;
     align-items: stretch;
   }
   .advice-tips-grid::-webkit-scrollbar { display: none; }
