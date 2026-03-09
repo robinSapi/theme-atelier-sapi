@@ -643,7 +643,7 @@
       chip.innerHTML =
         '<span class="guide-chip-text">' +
         '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> ' +
-        'Votre profil\u00a0: ' + parts.join(' \u00b7 ') +
+        'Votre pi\u00e8ce\u00a0: ' + parts.join(' \u00b7 ') +
         '</span>' +
         '<a href="/guide-luminaire/" class="guide-chip-link">Modifier</a>' +
         '<button type="button" class="guide-chip-dismiss" aria-label="Annuler mes choix">\u00d7</button>';
