@@ -19361,7 +19361,7 @@ html.sapi-intro-active body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 1rem;
-    padding: 0 5%;
+    padding: 15px 5%;
     scroll-padding-left: 0;
     scroll-behavior: auto;
   }
@@ -19404,7 +19404,7 @@ html.sapi-intro-active body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 1rem;
-    padding: 0 5%;
+    padding: 15px 5%;
   }
   .testimonials-grid::-webkit-scrollbar { display: none; }
   .testimonials-grid > .testimonial-card {
@@ -19421,7 +19421,7 @@ html.sapi-intro-active body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 1rem;
-    padding: 0 5%;
+    padding: 15px 5%;
   }
   .artisan-values-grid::-webkit-scrollbar { display: none; }
   .artisan-values-grid > .artisan-value-item {
@@ -19438,7 +19438,7 @@ html.sapi-intro-active body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 1rem;
-    padding: 0 5%;
+    padding: 15px 5%;
     justify-content: flex-start;
   }
   .process-inner::-webkit-scrollbar { display: none; }
