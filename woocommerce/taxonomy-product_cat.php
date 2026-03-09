@@ -44,10 +44,10 @@ if (function_exists('sapi_maison_breadcrumbs')) {
 
 <?php if ($term_slug !== 'accessoires') : ?>
 <?php
-// Section "Le coup de cœur de l'Atelier" — best-seller de la catégorie
+// Section "Le coup de cœur de l'Atelier" — best-seller avec image ACF
 $featured_query = new WP_Query([
   'post_type' => 'product',
-  'posts_per_page' => 1,
+  'posts_per_page' => 10,
   'tax_query' => [
     [
       'taxonomy' => 'product_cat',
@@ -60,22 +60,34 @@ $featured_query = new WP_Query([
   'order' => 'DESC',
 ]);
 
-if ($featured_query->have_posts()) :
-  $featured_query->the_post();
-  global $product;
-  $product = wc_get_product(get_the_ID());
-  $product_id = $product->get_id();
-  $product_url = get_permalink($product_id);
+$featured_image_url = '';
+$featured_product_name = '';
+$featured_product_url = '';
 
-  // Récupérer l'URL de l'image bandeau ACF pour le background
-  $bandeau_url = '';
+while ($featured_query->have_posts()) :
+  $featured_query->the_post();
+  $pid = get_the_ID();
+
+  // Chercher une image ACF : bandeau → ambiance_1 → ambiance_2 → ambiance_3
   if (function_exists('get_field')) {
-    $bandeau_image = get_field('bandeau', $product_id);
-    $bandeau_url = sapi_get_acf_image_url($bandeau_image);
+    foreach (['bandeau', 'ambiance_1', 'ambiance_2', 'ambiance_3'] as $acf_field) {
+      $acf_image = get_field($acf_field, $pid);
+      if ($acf_image) {
+        $featured_image_url = sapi_get_acf_image_url($acf_image);
+        if ($featured_image_url) break;
+      }
+    }
   }
 
-  $product_name = get_the_title();
-  $card_style = $bandeau_url ? 'style="background-image: url(' . esc_url($bandeau_url) . ');"' : '';
+  if ($featured_image_url) {
+    $featured_product_name = get_the_title();
+    $featured_product_url = get_permalink($pid);
+    break;
+  }
+endwhile;
+wp_reset_postdata();
+
+if ($featured_image_url) :
 ?>
 <section class="featured-products-mini">
   <div class="featured-products-header">
@@ -83,13 +95,12 @@ if ($featured_query->have_posts()) :
   </div>
 
   <div class="product-mini-card">
-    <a href="<?php echo esc_url($product_url); ?>" <?php echo $card_style; ?>>
-      <span class="product-hero-name"><?php echo esc_html($product_name); ?></span>
+    <a href="<?php echo esc_url($featured_product_url); ?>" style="background-image: url(<?php echo esc_url($featured_image_url); ?>);">
+      <span class="product-hero-name"><?php echo esc_html($featured_product_name); ?></span>
     </a>
   </div>
 </section>
 <?php
-  wp_reset_postdata();
 endif;
 ?>
 <?php endif; // fin exclusion accessoire ?>
