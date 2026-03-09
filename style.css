@@ -18934,6 +18934,15 @@ html.sapi-intro-active body {
   .surmesure-card-content {
     padding: 20px;
   }
+  .surmesure-card-details .surmesure-detail:first-child {
+    display: none;
+  }
+  .surmesure-card-desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 
   .surmesure-form-section {
     padding: 60px 20px;
