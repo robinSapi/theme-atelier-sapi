@@ -19710,3 +19710,107 @@ html.sapi-intro-active body {
   padding: 0 !important;
   margin: 0 !important;
 }
+
+/* ========================================
+   SCROLL DOTS — Grilles verticales → Sliders horizontaux sur mobile
+   ======================================== */
+
+.scroll-dots {
+  display: none;
+}
+
+@media (max-width: 768px) {
+
+  /* --- Grille produits (catégories + shop) --- */
+  .products-grid-cinetique {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 1rem;
+    padding: 0 1rem 1rem;
+  }
+  .products-grid-cinetique::-webkit-scrollbar { display: none; }
+  .products-grid-cinetique > .product-card-cinetique {
+    flex: 0 0 85%;
+    scroll-snap-align: center;
+  }
+
+  /* --- Conseils tips --- */
+  .advice-tips-grid {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 1rem;
+    padding: 0 1rem 1rem;
+  }
+  .advice-tips-grid::-webkit-scrollbar { display: none; }
+  .advice-tips-grid > .advice-tip {
+    flex: 0 0 85%;
+    scroll-snap-align: center;
+  }
+
+  /* --- Témoignages --- */
+  .testimonials-grid {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 1rem;
+    padding: 0 1rem 1rem;
+  }
+  .testimonials-grid::-webkit-scrollbar { display: none; }
+  .testimonials-grid > .testimonial-card {
+    flex: 0 0 85%;
+    scroll-snap-align: center;
+  }
+
+  /* --- Valeurs artisan --- */
+  .artisan-values-grid {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 1rem;
+    padding: 0 1rem 1rem;
+  }
+  .artisan-values-grid::-webkit-scrollbar { display: none; }
+  .artisan-values-grid > .artisan-value-item {
+    flex: 0 0 85%;
+    scroll-snap-align: center;
+  }
+
+  /* --- Dots --- */
+  .scroll-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 0 0;
+  }
+
+  .scroll-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-gray-light, #e8e2d9);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .scroll-dot.active {
+    background: var(--color-wood);
+    transform: scale(1.3);
+  }
+}
