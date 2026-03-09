@@ -481,6 +481,8 @@
     formData.append('action', 'sapi_guide_results');
     formData.append('nonce', sapiGuide.nonce);
     formData.append('answers', JSON.stringify(state.answers));
+    var honeypot = document.getElementById('guide_website');
+    if (honeypot) { formData.append('guide_website', honeypot.value); }
 
     fetch(sapiGuide.ajaxUrl, {
       method: 'POST',

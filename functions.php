@@ -1404,10 +1404,33 @@ function sapi_ajax_buy_now() {
 add_action('wp_ajax_sapi_guide_results', 'sapi_ajax_guide_results');
 add_action('wp_ajax_nopriv_sapi_guide_results', 'sapi_ajax_guide_results');
 
+function sapi_guide_check_rate_limit() {
+  $ip  = md5(isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : 'unknown');
+  $key = 'sapi_guide_rl_' . $ip;
+  $hits = (int) get_transient($key);
+  if ($hits >= 10) {
+    return false;
+  }
+  set_transient($key, $hits + 1, HOUR_IN_SECONDS);
+  return true;
+}
+
 function sapi_ajax_guide_results() {
   // 1. Nonce check
   if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
     wp_send_json_error(['message' => 'Nonce invalide']);
+    return;
+  }
+
+  // 1b. Rate limiting (10 appels/heure par IP)
+  if (!sapi_guide_check_rate_limit()) {
+    wp_send_json_error(['message' => 'Trop de requêtes, veuillez réessayer dans une heure.'], 429);
+    return;
+  }
+
+  // 1c. Honeypot check
+  if (!empty($_POST['guide_website'])) {
+    wp_send_json_error(['message' => 'Erreur de validation']);
     return;
   }
 
@@ -1607,6 +1630,12 @@ function sapi_ajax_guide_refine() {
   // 1. Nonce check (reuses the guide results nonce)
   if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
     wp_send_json_error(['message' => 'Nonce invalide']);
+    return;
+  }
+
+  // 1b. Rate limiting (partagé avec guide_results, 10 appels/heure par IP)
+  if (!sapi_guide_check_rate_limit()) {
+    wp_send_json_error(['message' => 'Trop de requêtes, veuillez réessayer dans une heure.'], 429);
     return;
   }
 

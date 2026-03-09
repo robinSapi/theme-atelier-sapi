@@ -148,6 +148,9 @@ $icons = [
     </div>
   </section>
 
+  <!-- Honeypot anti-bot (doit rester vide) -->
+  <input type="text" name="guide_website" id="guide_website" value="" autocomplete="off" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
+
   <!-- ─── Quiz Section ─── -->
   <section class="guide-quiz-section" id="guide-quiz" aria-hidden="true">
     <div class="guide-steps-wrapper">
