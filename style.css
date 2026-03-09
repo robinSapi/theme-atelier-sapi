@@ -2305,49 +2305,6 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   margin-top: 20px;
 }
 
-/* Stock Indicator */
-.stock-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 1rem;
-  padding: 8px 14px;
-  border-radius: 50px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.stock-indicator svg {
-  flex-shrink: 0;
-}
-
-.stock-indicator.in-stock {
-  background: rgba(1, 133, 1, 0.1);
-  color: var(--color-green);
-}
-
-.stock-indicator.in-stock svg {
-  stroke: var(--color-green);
-}
-
-.stock-indicator.on-order {
-  background: rgba(230, 126, 34, 0.1);
-  color: var(--color-orange);
-}
-
-.stock-indicator.on-order svg {
-  stroke: var(--color-orange);
-}
-
-.stock-indicator.out-of-stock {
-  background: rgba(197, 0, 0, 0.1);
-  color: var(--color-error);
-}
-
-.stock-indicator.out-of-stock svg {
-  stroke: var(--color-error);
-}
-
 /* Delivery/Returns Info Block */
 .product-delivery-info {
   display: flex;
@@ -6435,7 +6392,7 @@ li.carousel-editorial-slide,
   }
 
   .advice-tip-image {
-    min-height: 400px;
+    min-height: 280px;
   }
   .advice-tip-content {
     padding: 1.5rem;
@@ -15300,36 +15257,6 @@ body.woocommerce-cart {
 }
 
 /* ---- STOCK BADGE V2 ---- */
-.stock-badge-v2 {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.4rem 0.75rem;
-  border-radius: 100px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.stock-badge-v2.in-stock {
-  background: rgba(34, 139, 34, 0.1);
-  color: #228B22;
-}
-
-.stock-badge-v2.on-order {
-  background: rgba(255, 165, 0, 0.1);
-  color: #cc8400;
-}
-
-.stock-badge-v2.out-of-stock {
-  background: rgba(220, 53, 69, 0.1);
-  color: #dc3545;
-}
-
-.stock-badge-v2 svg {
-  width: 14px;
-  height: 14px;
-}
-
 /* ---- CTA SUR-MESURE ---- */
 .product-custom-cta {
   padding: 1rem 1.25rem;
