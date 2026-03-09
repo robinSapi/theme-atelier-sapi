@@ -19715,6 +19715,41 @@ html.sapi-intro-active body {
     scroll-snap-align: center;
   }
 
+  /* --- Processus artisanal --- */
+  .process-inner {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 1rem;
+    padding: 0 5%;
+    justify-content: flex-start;
+  }
+  .process-inner::-webkit-scrollbar { display: none; }
+  .process-inner::before {
+    display: none !important;
+  }
+  .process-inner > .process-step {
+    flex: 0 0 90%;
+    scroll-snap-align: center;
+    min-width: unset;
+    width: auto;
+    height: 140px;
+    border-radius: 16px;
+  }
+  .process-inner > .process-step .step-image {
+    opacity: 0.15;
+  }
+  .bento-process {
+    padding: 1.5rem 0 !important;
+  }
+  .bento-process .process-header {
+    padding: 0 1rem;
+    margin-bottom: 0.75rem;
+  }
+
   /* --- Dots --- */
   .scroll-dots {
     display: flex;

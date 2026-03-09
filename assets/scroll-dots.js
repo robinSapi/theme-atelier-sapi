@@ -9,7 +9,8 @@
   var sections = [
     { container: '.advice-tips-grid', child: '.advice-tip', snap: 'center' },
     { container: '.testimonials-grid', child: '.testimonial-card', snap: 'center' },
-    { container: '.artisan-values-grid', child: '.artisan-value-item', snap: 'center' }
+    { container: '.artisan-values-grid', child: '.artisan-value-item', snap: 'center' },
+    { container: '.process-inner', child: '.process-step', snap: 'center' }
   ];
 
   var instances = [];
