@@ -9558,6 +9558,11 @@ transform: translateY(15px);
   scrollbar-width: none;
 }
 
+.collections-grid::after {
+  content: '';
+  flex: 0 0 5rem;
+}
+
 .collections-grid::-webkit-scrollbar {
   display: none;
 }
