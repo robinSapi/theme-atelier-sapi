@@ -2007,12 +2007,12 @@ function sapi_guide_query_products(array $answers, array $categories) {
     ];
   }
 
-  // Règle B : escalier → exclure format plat (préférer boule ou vertical)
+  // Règle B : escalier → exclure format horizontal (préférer boule ou vertical)
   if ($piece === 'escalier' && in_array('suspensions', $categories)) {
     $tax_query[] = [
       'taxonomy' => 'pa_format',
       'field'    => 'slug',
-      'terms'    => ['plat'],
+      'terms'    => ['horizontal'],
       'operator' => 'NOT IN',
     ];
   }
