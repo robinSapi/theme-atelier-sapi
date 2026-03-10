@@ -1664,10 +1664,16 @@ button:hover,
 
 @media (max-width: 600px) {
   .guide-profile-chip {
-    flex-direction: column;
-    gap: 0.25rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.25rem 0.75rem;
     padding: 0.35rem 0.75rem;
     font-size: 0.7rem;
+  }
+
+  .guide-chip-text {
+    width: 100%;
+    justify-content: center;
   }
 }
 
