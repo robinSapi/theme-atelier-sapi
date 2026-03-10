@@ -1828,7 +1828,7 @@ function sapi_ajax_guide_refine() {
   $current_product_ids = array_map('intval', $current_product_ids);
 
   // 3. Get FULL product catalog
-  $all_products = sapi_guide_query_all_products();
+  $all_products = sapi_guide_query_all_products($clean);
 
   // 4. Build refinement system prompt
   $system_prompt = sapi_guide_build_refine_prompt(
@@ -1868,19 +1868,54 @@ function sapi_ajax_guide_refine() {
 
   $action         = isset($ai_response['action']) ? $ai_response['action'] : 'contact';
   $recommendation = isset($ai_response['recommendation']) ? $ai_response['recommendation'] : '';
-  $product_ids    = isset($ai_response['product_ids']) ? $ai_response['product_ids'] : [];
+  $raw_product_ids = isset($ai_response['product_ids']) ? $ai_response['product_ids'] : [];
 
   // Validate action
   if (!in_array($action, ['refine', 'contact', 'both'], true)) {
     $action = 'contact';
   }
 
+  // Normalize product_ids: support both old [123, 456] and new [{"product_id":123,"variation_id":456}] formats
+  $product_requests = [];
+  foreach ($raw_product_ids as $item) {
+    if (is_array($item) && isset($item['product_id'])) {
+      $product_requests[] = [
+        'product_id'   => (int) $item['product_id'],
+        'variation_id' => isset($item['variation_id']) ? (int) $item['variation_id'] : 0,
+      ];
+    } elseif (is_numeric($item)) {
+      $product_requests[] = [
+        'product_id'   => (int) $item,
+        'variation_id' => 0,
+      ];
+    }
+  }
+
   // 7. If refine or both, resolve product IDs to full product data
   $new_products = [];
-  if (in_array($action, ['refine', 'both'], true) && !empty($product_ids)) {
-    foreach ($product_ids as $pid) {
-      $found = sapi_guide_find_product_by_id($all_products, (int) $pid);
+  if (in_array($action, ['refine', 'both'], true) && !empty($product_requests)) {
+    foreach ($product_requests as $req) {
+      $found = sapi_guide_find_product_by_id($all_products, $req['product_id']);
       if ($found) {
+        // If Claude specified a variation_id, override image/price/labels with that variation
+        if ($req['variation_id'] && !empty($found['variations'])) {
+          foreach ($found['variations'] as $v) {
+            if ($v['variation_id'] === $req['variation_id']) {
+              if ($v['image_url']) {
+                $found['image'] = $v['image_url'];
+                $found['image_alt'] = $found['title'] . ' - ' . trim($v['essence'] . ' ' . $v['taille']);
+              }
+              if ($v['price']) {
+                $found['price'] = $v['price'];
+              }
+              $found['variation_label'] = $v['essence'];
+              $found['size_label'] = $v['taille'];
+              break;
+            }
+          }
+        }
+        // Strip variations data before sending to frontend
+        unset($found['variations'], $found['best_variation_id']);
         $new_products[] = $found;
       }
     }
@@ -2111,7 +2146,7 @@ function sapi_guide_query_complements(array $answers, array $main_categories) {
  * Query ALL published products (full catalog, no filters).
  * Used for refinement calls so Claude can pick from any product.
  */
-function sapi_guide_query_all_products() {
+function sapi_guide_query_all_products($answers = []) {
   $args = [
     'post_type'      => 'product',
     'post_status'    => 'publish',
@@ -2120,7 +2155,7 @@ function sapi_guide_query_all_products() {
     'order'          => 'ASC',
   ];
   $query = new WP_Query($args);
-  $results = sapi_guide_collect_results($query, []);
+  $results = sapi_guide_collect_results($query, $answers, true);
   wp_reset_postdata();
   return $results;
 }
@@ -2188,7 +2223,7 @@ function sapi_guide_build_filter_context(array $answers, array $categories, arra
 /**
  * Process query results into product data arrays
  */
-function sapi_guide_collect_results($query, array $answers) {
+function sapi_guide_collect_results($query, array $answers, $skip_exclusions = false) {
   // Determine preferred essence from style answer
   $style = isset($answers['style']) ? $answers['style'] : '';
   $preferred_essence = '';
@@ -2243,8 +2278,8 @@ function sapi_guide_collect_results($query, array $answers) {
       if ($taille_answer) {
         $taille_terms = wc_get_product_terms($product->get_id(), 'pa_taille', ['orderby' => 'menu_order']);
 
-        // Grande pièce : exclure les produits avec 2 tailles ou moins
-        if ($taille_answer === 'grande' && !empty($taille_terms) && count($taille_terms) <= 2) {
+        // Grande pièce : exclure les produits avec 2 tailles ou moins (sauf en refine)
+        if (!$skip_exclusions && $taille_answer === 'grande' && !empty($taille_terms) && count($taille_terms) <= 2) {
           continue;
         }
 
@@ -2293,6 +2328,32 @@ function sapi_guide_collect_results($query, array $answers) {
           $variation_label = $term ? $term->name : ucfirst($preferred_essence);
         }
       }
+
+      // Collect ALL variations for refine context
+      $all_vars = [];
+      foreach ($variations as $var) {
+        $mat_slug = isset($var['attributes']['attribute_pa_materiau']) ? $var['attributes']['attribute_pa_materiau'] : '';
+        $tai_slug = isset($var['attributes']['attribute_pa_taille']) ? $var['attributes']['attribute_pa_taille'] : '';
+        $mat_name = '';
+        if ($mat_slug) {
+          $mat_term = get_term_by('slug', $mat_slug, 'pa_materiau');
+          $mat_name = $mat_term ? $mat_term->name : ucfirst($mat_slug);
+        }
+        $tai_name = '';
+        if ($tai_slug) {
+          $tai_term = get_term_by('slug', $tai_slug, 'pa_taille');
+          $tai_name = $tai_term ? $tai_term->name : ucfirst($tai_slug);
+        }
+        $var_img_id = !empty($var['image_id']) ? (int) $var['image_id'] : 0;
+        $var_product_obj = wc_get_product($var['variation_id']);
+        $all_vars[] = [
+          'variation_id' => (int) $var['variation_id'],
+          'essence'      => $mat_name,
+          'taille'       => $tai_name,
+          'image_url'    => $var_img_id ? wp_get_attachment_url($var_img_id) : '',
+          'price'        => $var_product_obj ? $var_product_obj->get_price_html() : '',
+        ];
+      }
     }
 
     // Ambiance photo for full-width banner (fallback: ambiance_2 → ambiance_1)
@@ -2333,6 +2394,8 @@ function sapi_guide_collect_results($query, array $answers) {
       'type_ampoule'    => $ampoule,
       'total_sales'     => (int) $product->get_total_sales(),
       'ambiance'        => $ambiance_url,
+      'variations'        => isset($all_vars) ? $all_vars : [],
+      'best_variation_id' => isset($best_var) ? (int) $best_var['variation_id'] : 0,
     ];
   }
 
@@ -2459,7 +2522,7 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
   // Catalogue filtré
   $prompt .= "CATALOGUE FILTRÉ (correspond aux besoins du client) :\n";
   foreach ($products_data as $p) {
-    $prompt .= "- " . $p['title'] . " | Prix : " . wp_strip_all_tags($p['price']) . " | Catégorie : " . implode(', ', $p['categories']) . " | Format : " . $p['format'] . " | Ampoule : " . $p['type_ampoule'];
+    $prompt .= "- " . $p['title'] . " | Catégorie : " . implode(', ', $p['categories']) . " | Format : " . $p['format'] . " | Ampoule : " . $p['type_ampoule'];
     if ($p['variation_label']) {
       $prompt .= " | Essence recommandée : " . $p['variation_label'];
     }
@@ -2582,12 +2645,31 @@ function sapi_guide_build_refine_prompt(array $all_products, array $answers, $fi
     $is_current = in_array((int) $p['id'], $current_product_ids, true) ? ' [ACTUELLEMENT AFFICHÉ]' : '';
     $prompt .= '- ' . $p['title']
       . ' | ID : ' . $p['id']
-      . ' | Prix : ' . wp_strip_all_tags($p['price'])
       . ' | Catégorie : ' . implode(', ', $p['categories'])
       . ' | Format : ' . $p['format']
       . ' | Ampoule : ' . $p['type_ampoule']
       . ' | Ventes : ' . $p['total_sales']
       . $is_current . "\n";
+
+    // List all variations
+    if (!empty($p['variations'])) {
+      $var_parts = [];
+      foreach ($p['variations'] as $v) {
+        $label = trim($v['essence'] . ' ' . $v['taille']);
+        $var_parts[] = $label . ' (var:' . $v['variation_id'] . ')';
+      }
+      $prompt .= '  Variations : ' . implode(', ', $var_parts) . "\n";
+      if (!empty($p['best_variation_id'])) {
+        $best_label = '';
+        foreach ($p['variations'] as $v) {
+          if ($v['variation_id'] === $p['best_variation_id']) {
+            $best_label = trim($v['essence'] . ' ' . $v['taille']);
+            break;
+          }
+        }
+        $prompt .= '  [RECOMMANDÉ : var:' . $p['best_variation_id'] . ($best_label ? ' ' . $best_label : '') . "]\n";
+      }
+    }
   }
 
   // Quiz answers
@@ -2618,9 +2700,10 @@ function sapi_guide_build_refine_prompt(array $all_products, array $answers, $fi
   $prompt .= "{\n";
   $prompt .= '  "action": "refine" | "contact" | "both",' . "\n";
   $prompt .= '  "recommendation": "Texte de réponse pour le client (max 80 mots)...",' . "\n";
-  $prompt .= '  "product_ids": [123, 456, 789]' . "\n";
+  $prompt .= '  "product_ids": [{"product_id": 123, "variation_id": 456}, {"product_id": 789}]' . "\n";
   $prompt .= "}\n";
   $prompt .= "Note : product_ids est obligatoire si action = \"refine\" ou \"both\". Vide [] si action = \"contact\".\n";
+  $prompt .= "Chaque entrée de product_ids DOIT contenir un product_id. Le variation_id est optionnel : utilise-le pour recommander une essence/taille spécifique. Si omis, la variation recommandée initialement sera utilisée.\n";
 
   return $prompt;
 }
