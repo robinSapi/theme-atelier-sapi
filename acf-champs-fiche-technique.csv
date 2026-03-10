@@ -1,26 +1,26 @@
-Groupe;Règle de localisation;Champ;Clé ACF;Type;Valeur par défaut
-Fiche Technique - Commun;Tous les produits;Culot;culot;Texte;E27
-Fiche Technique - Commun;Tous les produits;Ampoule recommandée;ampoule_recommandee;Texte;LED filament 4-6W (2700K)
-Fiche Technique - Commun;Tous les produits;Ampoule incluse;ampoule_incluse;Texte;Non (disponible en option)
-Fiche Technique - Commun;Tous les produits;Structure;materiau_structure;Texte;100% bois
-Fiche Technique - Commun;Tous les produits;Finition;finition;Texte;Contreplaqué poncé
-Fiche Technique - Commun;Tous les produits;Assemblage;assemblage;Texte;Notice et tuto vidéo
-Fiche Technique - Commun;Tous les produits;Difficulté;installation_difficulte;Texte;Facile (15-30 min)
-Fiche Technique - Commun;Tous les produits;Outils requis pour l’assemblage;assemblage_outils;Texte;Aucun
-Fiche Technique - Commun;Tous les produits;Entretien;entretien;Texte;Chiffon sec ou plumeau
-Fiche Technique - Suspensions;Catégorie = suspensions;Longueur câble;longueur_cable;Texte;90 cm (maximum - ajustable)
-Fiche Technique - Suspensions;Catégorie = suspensions;Câble;materiau_cable;Texte;Textile noir tressé
-Fiche Technique - Suspensions;Catégorie = suspensions;Compatible DCL;compatible_dcl;Texte;Oui
-Fiche Technique - Suspensions;Catégorie = suspensions;Compatible variateur;compatible_variateur;Texte;Oui avec ampoule dimmable
-Fiche Technique - Suspensions;Catégorie = suspensions;Rosace;rosace;Texte;Ronde Ø 10 cm
-Fiche Technique - Lampadaires;Catégorie = lampadaires;Hauteur totale;hauteur_totale;Texte;180 cm
-Fiche Technique - Lampadaires;Catégorie = lampadaires;Hauteur ampoule;hauteur_ampoule;Texte;150 cm
-Fiche Technique - Lampadaires;Catégorie = lampadaires;Longueur câble;longueur_cable;Texte;180 cm
-Fiche Technique - Lampadaires;Catégorie = lampadaires;Interrupteur;interrupteur;Texte;Interrupteur pédale
-Fiche Technique - Lampes à poser;Catégorie = lampesaposer;Longueur câble;longueur_cable;Texte;180 cm
-Fiche Technique - Lampes à poser;Catégorie = lampesaposer;Câble;materiau_cable;Texte;Textile noir tressé
-Fiche Technique - Lampes à poser;Catégorie = lampesaposer;Interrupteur;interrupteur;Texte;Oui, sur le câble
-Fiche Technique - Appliques;Catégorie = appliques;Fixation murale;fixation_murale;Texte;Vis + cheville (fournis)
-Fiche Technique - Appliques;Catégorie = appliques;Connexion électrique;type_connexion;Texte;Directe sur domino
-Fiche Technique - Appliques;Catégorie = appliques;Compatible DCL;compatible_dcl;Texte;Oui
-Fiche Technique - Appliques;Catégorie = appliques;Compatible variateur;compatible_variateur;Texte;Oui avec ampoule dimmable
+Section;Champ;Clé ACF;Type;Catégories;Valeur par défaut
+Dimensions;Dimensions;dimensions;Texte;Tous;Voir variations
+Dimensions;Hauteur;hauteur;Texte;Tous;(composant dimension)
+Dimensions;Largeur;largeur;Texte;Tous;(composant dimension)
+Dimensions;Profondeur;profondeur;Texte;Tous;(composant dimension)
+Dimensions;Poids;poids;Texte;Tous;(fallback WooCommerce)
+Dimensions;Hauteur totale;hauteur_totale;Texte;Lampadaires;
+Dimensions;Hauteur ampoule;hauteur_ampoule;Texte;Lampadaires;
+Dimensions;Longueur câble;longueur_cable;Texte;Suspensions / Lampadaires / Lampes à poser;90 cm (suspensions)
+Dimensions;Rosace;rosace;Texte;Suspensions;Ronde Ø 10 cm
+Dimensions;Fixation murale;fixation_murale;Texte;Appliques;Vis + cheville (fournis)
+Dimensions;Connexion électrique;type_connexion;Texte;Appliques;Directe sur domino
+Éclairage;Culot;culot;Texte;Tous;E27
+Éclairage;Ampoule recommandée;ampoule_recommandee;Texte;Tous;LED filament 4-6W (2700K)
+Éclairage;Ampoule incluse;ampoule_incluse;Texte;Tous;Non (disponible en option)
+Éclairage;Compatible variateur;compatible_variateur;Texte;Suspensions / Appliques;Oui avec ampoule dimmable
+Éclairage;Compatible DCL;compatible_dcl;Texte;Suspensions / Appliques;Oui
+Matériaux;Structure;materiau_structure;Texte;Tous;100% bois
+Matériaux;Bois;bois;Texte;Tous;Peuplier ou Okoumé - Au choix
+Matériaux;Finition;finition;Texte;Tous;Contreplaqué poncé
+Matériaux;Câble;materiau_cable;Texte;Tous (affiché si rempli);Textile noir tressé
+Installation;Assemblage;assemblage;Texte;Tous;Notice et tuto vidéo
+Installation;Difficulté;installation_difficulte;Texte;Tous;Facile (15-30 min)
+Installation;Outils requis;assemblage_outils;Texte;Tous;Aucun
+Installation;Entretien;entretien;Texte;Tous;Chiffon sec ou plumeau
+Installation;Interrupteur;interrupteur;Texte;Lampadaires / Lampes à poser;(varie selon produit)
