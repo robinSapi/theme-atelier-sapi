@@ -1828,7 +1828,7 @@ function sapi_ajax_guide_refine() {
   $current_product_ids = array_map('intval', $current_product_ids);
 
   // 3. Get FULL product catalog
-  $all_products = sapi_guide_query_all_products();
+  $all_products = sapi_guide_query_all_products($clean);
 
   // 4. Build refinement system prompt
   $system_prompt = sapi_guide_build_refine_prompt(
@@ -2111,7 +2111,7 @@ function sapi_guide_query_complements(array $answers, array $main_categories) {
  * Query ALL published products (full catalog, no filters).
  * Used for refinement calls so Claude can pick from any product.
  */
-function sapi_guide_query_all_products() {
+function sapi_guide_query_all_products($answers = []) {
   $args = [
     'post_type'      => 'product',
     'post_status'    => 'publish',
@@ -2120,7 +2120,7 @@ function sapi_guide_query_all_products() {
     'order'          => 'ASC',
   ];
   $query = new WP_Query($args);
-  $results = sapi_guide_collect_results($query, []);
+  $results = sapi_guide_collect_results($query, $answers, true);
   wp_reset_postdata();
   return $results;
 }
@@ -2188,7 +2188,7 @@ function sapi_guide_build_filter_context(array $answers, array $categories, arra
 /**
  * Process query results into product data arrays
  */
-function sapi_guide_collect_results($query, array $answers) {
+function sapi_guide_collect_results($query, array $answers, $skip_exclusions = false) {
   // Determine preferred essence from style answer
   $style = isset($answers['style']) ? $answers['style'] : '';
   $preferred_essence = '';
@@ -2243,8 +2243,8 @@ function sapi_guide_collect_results($query, array $answers) {
       if ($taille_answer) {
         $taille_terms = wc_get_product_terms($product->get_id(), 'pa_taille', ['orderby' => 'menu_order']);
 
-        // Grande pièce : exclure les produits avec 2 tailles ou moins
-        if ($taille_answer === 'grande' && !empty($taille_terms) && count($taille_terms) <= 2) {
+        // Grande pièce : exclure les produits avec 2 tailles ou moins (sauf en refine)
+        if (!$skip_exclusions && $taille_answer === 'grande' && !empty($taille_terms) && count($taille_terms) <= 2) {
           continue;
         }
 
