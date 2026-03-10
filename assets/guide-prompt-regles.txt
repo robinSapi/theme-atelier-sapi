@@ -31,7 +31,7 @@ INFO - PRODUITS COMPLEMENTAIRES et SUR MESURE
 - De manière générale, pour un meilleur éclairage il est plus utile de multiplier les sources lumineuses que d'augmenter la puissance de l'ampoule. En effet, avec plusieurs sources lumineuses on supprime les ombres car tous les côtés des objets sont éclairés.
 - C'est notamment vrai et important dans une grande pièce.
 - Pour multiplier les sources de lumière, il y a plusieurs possibilités :
-	- Plusieurs suspensions : projet sur mesure : pavillons spécifiques pour suspendre plusieurs luminaires en grappe.
+	- Plusieurs suspensions : projet sur mesure avec pavillons spécifiques pour suspendre plusieurs luminaires ensemble.
 	- Ajouter un lampadaire, une lampe à poser ou une applique.
 
 INFO - Ampoule dégagée ou entourée ?
@@ -43,7 +43,7 @@ INFO - Sur mesure
 - Il est possible de conseiller au client de se faire faire un modèle sur mesure. Plusieurs pistes :
 - Faire graver un message ou une texture sur un luminaire catalogue.
 - Adapter la forme, la taille ou la couleur d'un luminaire existant. Simple, rapide, pas beaucoup plus cher.
-- Faire un luminaire en grappe : modifier le pavillon pour suspendre plusieurs suspensions. Idéal pour au dessus d'une grande table, au milieu d'un salon, dans un grand hall, au milieu une cage d'escalier sur toute la hauteur ...
+- Modifier le pavillon pour suspendre plusieurs luminaires ensemble. Idéal au-dessus d'une grande table, au milieu d'un salon, dans un grand hall, ou dans une cage d'escalier sur toute la hauteur.
 - Créer un nouveau modèle à partir de zéro, sur cahier des charges. 
 
 INFO - ÉCLAIRAGE SECONDAIRE (grande pièce)
@@ -75,5 +75,5 @@ INFO - APPLIQUES
 INFO - PIECES
 On ne propose jamais de lampe à poser dans une cuisine.
 Dans une pièce de travail (cuisine, bureau ou atelier), si on doit proposer au client une applique, un lampadaire ou une lampe à poser, alors on explique qu'il faut une autre source lumineuse. Et contacter Robin pour plus de détails.
-En cas de suspension dans un escalier, évitons les modèles plats. Plutôt un luminaire en volume ou de forme allongée.
-Si un modèle vertical est proposé dans un escalier, mentionne la possibilité d'une création sur mesure "en grappe" : plusieurs suspensions verticales installées à différentes hauteurs dans la cage d'escalier, pour un effet spectaculaire.
+En cas de suspension dans un escalier, évitons les modèles horizontaux. Plutôt un luminaire en volume ou de forme allongée.
+Si un modèle vertical est proposé dans un escalier, mentionne la possibilité d'une création sur mesure : plusieurs suspensions installées à différentes hauteurs dans la cage d'escalier, pour un effet spectaculaire.
