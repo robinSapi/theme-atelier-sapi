@@ -25,22 +25,36 @@
 
 ## 🔀 WORKFLOW DÉPLOIEMENT
 
-### Test (automatique)
+### Flux normal (test → prod)
 ```
 Code → commit + push sur test-theme-sapi-maison → auto-deploy → testlumineux.atelier-sapi.fr
+                                                                        ↓
+                                                                  Robin teste
+                                                                        ↓
+                                                                  "Go prod"
+                                                                        ↓
+                                              Claude merge test-theme-sapi-maison → master + push
+                                                                        ↓
+                                                    Robin lance le workflow GitHub Actions
+                                                                        ↓
+                                                                  atelier-sapi.fr
 ```
-Claude fait le commit et push automatiquement après chaque modification.
 
-### Production (validation Robin obligatoire)
+### Hotfix urgent (fix isolé sans embarquer le travail en cours)
 ```
-Robin dit "go prod" → Claude merge test-theme-sapi-maison dans master + push
-                    → Robin lance le workflow GitHub Actions manuellement
+Claude crée une branche hotfix/xxx depuis master
+      → fait le fix → commit + push hotfix/xxx
+      → Robin valide sur testlumineux (deploy manuel ou switch branche)
+      → Claude merge hotfix/xxx dans master + push
+      → Robin lance le workflow → prod
+      → Claude rebase test-theme-sapi-maison sur master (récupère le fix)
 ```
 
 **RÈGLES :**
 - Commit/push sur `test-theme-sapi-maison` : automatique, sans demander
 - Merge dans `master` : **UNIQUEMENT** après validation explicite de Robin ("go prod", "go en production", etc.)
 - **JAMAIS** push directement sur master sans passer par le merge
+- **Hotfix** : quand Robin veut passer un fix en prod sans embarquer le travail en cours, Claude crée une branche `hotfix/xxx` depuis master, fait le fix, et merge uniquement cette branche dans master
 
 ---
 

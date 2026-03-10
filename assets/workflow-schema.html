@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workflow Déploiement — Atelier Sâpi</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #FEFDFB;
+    color: #323232;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 1.5rem;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #323232;
+  }
+
+  .subtitle {
+    color: #937D68;
+    font-size: 0.95rem;
+    margin-bottom: 3rem;
+  }
+
+  /* ═══════════════════════════════════ */
+  /* SCHÉMA INFRASTRUCTURE              */
+  /* ═══════════════════════════════════ */
+  .diagram {
+    max-width: 820px;
+    width: 100%;
+    position: relative;
+  }
+
+  .diagram-canvas {
+    position: relative;
+    min-height: 680px;
+  }
+
+  /* ── Boîtes ── */
+  .box {
+    position: absolute;
+    border-radius: 16px;
+    padding: 1.2rem 1.4rem;
+    z-index: 2;
+  }
+  .box-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .box-url {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.72rem;
+    opacity: 0.55;
+    display: block;
+    margin-top: 0.15rem;
+  }
+  .box-tag {
+    display: inline-block;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    margin-left: auto;
+  }
+  .box-files {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(0,0,0,0.06);
+  }
+  .box-file {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.68rem;
+    padding: 0.2rem 0.45rem;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.5);
+  }
+
+  /* ── Status dot ── */
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .dot--online { background: #43a047; box-shadow: 0 0 5px rgba(67,160,71,0.4); }
+  .dot--local { background: #937D68; }
+
+  /* ── Thèmes boîtes ── */
+  .box--local {
+    background: linear-gradient(135deg, #f8f4ef, #f0ebe4);
+    border: 2px solid #d4c9ba;
+    width: 260px;
+    left: 0; bottom: 0;
+  }
+  .box--local .box-tag { background: rgba(147,125,104,0.12); color: #937D68; }
+
+  .box--test {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border: 2px solid #90caf9;
+    width: 260px;
+    left: 0; top: 230px;
+  }
+  .box--test .box-tag { background: rgba(30,136,229,0.12); color: #1565c0; }
+  .box--test .box-files { border-top-color: rgba(30,136,229,0.12); }
+
+  .box--prod {
+    background: linear-gradient(135deg, #323232, #4a4a4a);
+    color: white;
+    border: 2px solid #555;
+    width: 260px;
+    left: 0; top: 0;
+  }
+  .box--prod .box-tag { background: rgba(255,255,255,0.12); color: #ccc; }
+  .box--prod .box-url { color: rgba(255,255,255,0.45); }
+  .box--prod .box-files { border-top-color: rgba(255,255,255,0.08); }
+  .box--prod .box-file { background: rgba(255,255,255,0.07); color: #ccc; }
+
+  .box--github {
+    background: #24292e;
+    color: white;
+    border: 2px solid #555;
+    width: 300px;
+    right: 0; top: 80px;
+  }
+  .box--github .box-files { border-top-color: rgba(255,255,255,0.08); }
+
+  .github-branches {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+  }
+  .gb {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.7rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 5px;
+    font-weight: 600;
+  }
+  .gb--test { background: rgba(30,136,229,0.2); color: #90caf9; }
+  .gb--master { background: rgba(67,160,71,0.2); color: #a5d6a7; }
+
+  .github-wf {
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.45rem;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.06);
+  }
+  .github-wf-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  .github-wf-trigger { margin-left: auto; font-size: 0.58rem; opacity: 0.4; }
+
+  /* ═══════════════════════════════════ */
+  /* FLÈCHES SVG                        */
+  /* ═══════════════════════════════════ */
+  .arrows {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ── Labels sur flèches ── */
+  .arrow-label {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .arrow-label-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .arrow-label-inner small {
+    font-weight: 400;
+    opacity: 0.6;
+    font-size: 0.62rem;
+  }
+  .arrow-label-num {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.65rem;
+    color: white; flex-shrink: 0;
+  }
+
+  .al--claude .arrow-label-inner { background: #f0ebe4; border: 1px solid #d4c9ba; }
+  .al--claude .arrow-label-num { background: #937D68; }
+  .al--auto .arrow-label-inner { background: #e8f5e9; border: 1px solid #c5e1a5; }
+  .al--auto .arrow-label-num { background: #43a047; }
+  .al--robin .arrow-label-inner { background: #fff3e0; border: 1px solid #ffcc80; }
+  .al--robin .arrow-label-num { background: #E35B24; }
+  .al--test .arrow-label-inner { background: #e3f2fd; border: 1px solid #90caf9; }
+  .al--test .arrow-label-num { background: #1e88e5; }
+
+  /* ── Séparateur "Go prod" ── */
+  .go-prod-label {
+    position: absolute;
+    z-index: 4;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .go-prod-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 1.2rem;
+    border-radius: 20px;
+    background: white;
+    border: 2px dashed #E35B24;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #E35B24;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── Légende ── */
+  .legend {
+    margin-top: 2.5rem;
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: #666;
+  }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Infrastructure & Workflow</h1>
+<p class="subtitle">Atelier Sâpi — Qui fait quoi, et comment les fichiers circulent</p>
+
+<div class="diagram">
+  <div class="diagram-canvas">
+
+    <!-- ═══ LES 4 BOÎTES ═══ -->
+
+    <!-- PRODUCTION (haut gauche) -->
+    <div class="box box--prod">
+      <div class="box-title">
+        <span class="dot dot--online"></span>
+        Production
+        <span class="box-tag">O2switch</span>
+      </div>
+      <span class="box-url">atelier-sapi.fr</span>
+      <div class="box-files">
+        <div class="box-file">Thème complet (branche master)</div>
+        <div class="box-file">WordPress + WooCommerce + DB</div>
+        <div class="box-file">Medias (uploads/)</div>
+      </div>
+    </div>
+
+    <!-- TEST (milieu gauche) -->
+    <div class="box box--test">
+      <div class="box-title">
+        <span class="dot dot--online"></span>
+        Test
+        <span class="box-tag">O2switch</span>
+      </div>
+      <span class="box-url">testlumineux.atelier-sapi.fr</span>
+      <div class="box-files">
+        <div class="box-file">Thème complet (branche test-*)</div>
+        <div class="box-file">WordPress + WooCommerce + DB</div>
+        <div class="box-file">Medias (uploads/)</div>
+      </div>
+    </div>
+
+    <!-- LOCAL (bas gauche) -->
+    <div class="box box--local">
+      <div class="box-title">
+        <span class="dot dot--local"></span>
+        Local
+        <span class="box-tag">Ordi Robin</span>
+      </div>
+      <span class="box-url">/Users/sapi/testLumineux-atelier-sapi</span>
+      <div class="box-files">
+        <div class="box-file">Thème (code source) — git repo</div>
+        <div class="box-file">PHP + JS + CSS + docs</div>
+      </div>
+    </div>
+
+    <!-- GITHUB (droite, centré) -->
+    <div class="box box--github">
+      <div class="box-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5 1 .1-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.3-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.24 3.22c0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.82.58A12 12 0 0 0 24 12C24 5.37 18.63 0 12 0z"/></svg>
+        GitHub
+      </div>
+      <span class="box-url">robinSapi/theme-atelier-sapi</span>
+
+      <!-- Visuel des branches avec commits -->
+      <div style="margin-top: 0.8rem; padding: 0.7rem; background: rgba(0,0,0,0.25); border-radius: 10px;">
+
+        <!-- Branche master -->
+        <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.7rem;">
+          <span class="gb gb--master" style="font-size: 0.62rem; padding: 0.15rem 0.45rem;">master</span>
+          <svg width="120" height="14" viewBox="0 0 120 14">
+            <line x1="0" y1="7" x2="110" y2="7" stroke="#a5d6a7" stroke-width="2"/>
+            <circle cx="20" cy="7" r="4" fill="#4caf50" stroke="#24292e" stroke-width="1.5"/>
+            <circle cx="110" cy="7" r="4" fill="#4caf50" stroke="#24292e" stroke-width="1.5"/>
+          </svg>
+          <span style="font-size: 0.55rem; opacity: 0.4;">stable</span>
+        </div>
+
+        <!-- Branche test avec commits qui s'accumulent -->
+        <div style="display: flex; align-items: center; gap: 0.4rem;">
+          <span class="gb gb--test" style="font-size: 0.62rem; padding: 0.15rem 0.45rem;">test-*</span>
+          <svg width="120" height="14" viewBox="0 0 120 14">
+            <line x1="0" y1="7" x2="110" y2="7" stroke="#90caf9" stroke-width="2"/>
+            <circle cx="15" cy="7" r="4" fill="#42a5f5" stroke="#24292e" stroke-width="1.5"/>
+            <circle cx="35" cy="7" r="4" fill="#42a5f5" stroke="#24292e" stroke-width="1.5"/>
+            <circle cx="55" cy="7" r="4" fill="#42a5f5" stroke="#24292e" stroke-width="1.5"/>
+            <circle cx="75" cy="7" r="4" fill="#42a5f5" stroke="#24292e" stroke-width="1.5"/>
+            <circle cx="95" cy="7" r="4" fill="#42a5f5" stroke="#24292e" stroke-width="1.5"/>
+          </svg>
+          <span style="font-size: 0.55rem; opacity: 0.4;">commits</span>
+        </div>
+
+        <!-- Flèche merge -->
+        <div style="display: flex; align-items: center; gap: 0.3rem; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed rgba(255,255,255,0.1);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a5d6a7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle>
+            <path d="M6 21V9a9 9 0 0 0 9 9"></path>
+          </svg>
+          <span style="font-size: 0.65rem; color: #a5d6a7; font-weight: 600;">Merge</span>
+          <span style="font-size: 0.58rem; opacity: 0.4; margin-left: 0.2rem;">Claude fusionne test → master (apres « Go prod »)</span>
+        </div>
+      </div>
+
+      <!-- Hotfix : branche temporaire -->
+      <div style="margin-top: 0.6rem; padding: 0.6rem; background: rgba(227,91,36,0.1); border: 1px dashed rgba(227,91,36,0.3); border-radius: 8px;">
+        <div style="display: flex; align-items: center; gap: 0.3rem; margin-bottom: 0.35rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E35B24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span style="font-size: 0.65rem; color: #E35B24; font-weight: 700;">Hotfix urgent</span>
+        </div>
+        <div style="font-size: 0.58rem; opacity: 0.55; line-height: 1.4;">
+          Si un fix doit partir en prod sans embarquer le travail en cours :<br>
+          Claude cree <span style="color: #E35B24; opacity: 1;">hotfix/xxx</span> depuis master → fix → merge dans master uniquement.<br>
+          Le chantier en cours sur test-* reste intact.
+        </div>
+      </div>
+
+      <!-- Workflows -->
+      <div class="box-files" style="margin-top: 0.6rem;">
+        <div class="github-wf">
+          <span class="github-wf-dot" style="background:#43a047"></span>
+          deploy-test.yml
+          <span class="github-wf-trigger">auto, chaque push</span>
+        </div>
+        <div class="github-wf">
+          <span class="github-wf-dot" style="background:#E35B24"></span>
+          deploy-prod.yml
+          <span class="github-wf-trigger">Robin lance</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SVG FLÈCHES ═══ -->
+    <svg class="arrows" viewBox="0 0 820 680" fill="none">
+      <defs>
+        <marker id="ah-wood" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#937D68"/>
+        </marker>
+        <marker id="ah-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#43a047"/>
+        </marker>
+        <marker id="ah-orange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#E35B24"/>
+        </marker>
+        <marker id="ah-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#1e88e5"/>
+        </marker>
+      </defs>
+
+      <!-- FLÈCHE 1 : Local → GitHub (commit+push, Claude) -->
+      <path d="M 260 570 C 370 560, 430 440, 510 400"
+            stroke="#937D68" stroke-width="2.5" stroke-dasharray="6,4" marker-end="url(#ah-wood)"/>
+
+      <!-- FLÈCHE 2 : GitHub → Test (auto-deploy) -->
+      <path d="M 510 310 C 430 310, 370 310, 260 310"
+            stroke="#43a047" stroke-width="2.5" marker-end="url(#ah-green)"/>
+
+      <!-- FLÈCHE 3 : Test → Robin teste (petite flèche bleue descendante) -->
+      <path d="M 130 420 L 130 450"
+            stroke="#1e88e5" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#ah-blue)"/>
+
+      <!-- FLÈCHE 4 : GitHub → Prod (deploy prod) -->
+      <path d="M 510 140 C 420 120, 370 90, 260 80"
+            stroke="#E35B24" stroke-width="2.5" marker-end="url(#ah-orange)"/>
+    </svg>
+
+    <!-- ═══ LABELS SUR FLÈCHES ═══ -->
+
+    <!-- Label 1 : Commit + Push -->
+    <div class="arrow-label al--claude" style="left: 305px; top: 478px;">
+      <div class="arrow-label-inner">
+        <span class="arrow-label-num">1</span>
+        <div>Commit + Push<br><small>Claude, auto</small></div>
+      </div>
+    </div>
+
+    <!-- Label 2 : Auto-deploy test -->
+    <div class="arrow-label al--auto" style="left: 310px; top: 280px;">
+      <div class="arrow-label-inner">
+        <span class="arrow-label-num">2</span>
+        <div>Auto-deploy test<br><small>GitHub Actions</small></div>
+      </div>
+    </div>
+
+    <!-- Label 3 : Robin teste -->
+    <div class="arrow-label al--test" style="left: 40px; top: 450px;">
+      <div class="arrow-label-inner">
+        <span class="arrow-label-num">3</span>
+        <div>Robin teste<br><small>sur testlumineux</small></div>
+      </div>
+    </div>
+
+    <!-- Go prod separator -->
+    <div class="go-prod-label" style="top: 210px; left: 25%; transform: none;">
+      <div class="go-prod-inner">Robin dit « Go prod »</div>
+    </div>
+
+    <!-- Label 4 : Merge (intégré dans le bloc GitHub maintenant) -->
+
+    <!-- Label 5 : Robin lance workflow -->
+    <div class="arrow-label al--robin" style="right: 10px; top: 48px;">
+      <div class="arrow-label-inner">
+        <span class="arrow-label-num">4</span>
+        <div>Run workflow<br><small>Robin, manuel</small></div>
+      </div>
+    </div>
+
+    <!-- Label 6 : Deploy prod -->
+    <div class="arrow-label al--auto" style="left: 310px; top: 100px;">
+      <div class="arrow-label-inner">
+        <span class="arrow-label-num">5</span>
+        <div>Deploy prod<br><small>GitHub Actions → O2switch</small></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Légende -->
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-dot" style="background: #937D68;"></div>
+    Claude (automatique)
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background: #43a047;"></div>
+    GitHub Actions
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background: #E35B24;"></div>
+    Robin (manuel)
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background: #1e88e5;"></div>
+    Vérification
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SCHÉMA 2 : CARTE DES FICHIERS                         -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<div style="margin-top: 5rem; width: 100%; max-width: 960px;">
+  <h1 style="text-align: center;">Carte des fichiers</h1>
+  <p class="subtitle" style="text-align: center;">Quels fichiers sont où, et lesquels sont modifiés le plus souvent</p>
+</div>
+
+<style>
+  /* ── Carte fichiers ── */
+  .filemap {
+    max-width: 960px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .filemap-group {
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid #e0d8ce;
+  }
+  .filemap-group-header {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .filemap-group-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .filemap-group-icon svg { width: 18px; height: 18px; }
+  .filemap-group-title {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .filemap-group-desc {
+    font-size: 0.8rem;
+    color: #937D68;
+    margin-left: auto;
+  }
+
+  .filemap-files {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .filemap-file {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.6);
+    font-size: 0.82rem;
+    border: 1px solid transparent;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .filemap-file:hover {
+    border-color: #d4c9ba;
+    background: white;
+  }
+
+  .filemap-file code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #323232;
+  }
+  .filemap-file .file-role {
+    font-size: 0.72rem;
+    color: #888;
+    margin-left: auto;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* Fréquence badges */
+  .freq {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .freq--high { background: #E35B24; }
+  .freq--med  { background: #E8A838; }
+  .freq--low  { background: #c5e1a5; }
+  .freq--never { background: #e0e0e0; }
+
+  /* Couleurs groupes */
+  .filemap-group--core { background: linear-gradient(135deg, #f8f4ef 0%, #f0ebe4 100%); }
+  .filemap-group--core .filemap-group-icon { background: #937D68; color: white; }
+
+  .filemap-group--templates { background: linear-gradient(135deg, #eef6ff 0%, #e3f0fd 100%); border-color: #c5dcf0; }
+  .filemap-group--templates .filemap-group-icon { background: #1e88e5; color: white; }
+
+  .filemap-group--woo { background: linear-gradient(135deg, #f3e8ff 0%, #ede0fb 100%); border-color: #d4b8f0; }
+  .filemap-group--woo .filemap-group-icon { background: #7b1fa2; color: white; }
+
+  .filemap-group--assets { background: linear-gradient(135deg, #e8f5e9 0%, #dcedc8 100%); border-color: #c5e1a5; }
+  .filemap-group--assets .filemap-group-icon { background: #43a047; color: white; }
+
+  .filemap-group--config { background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%); border-color: #ffe082; }
+  .filemap-group--config .filemap-group-icon { background: #f9a825; color: white; }
+
+  .filemap-group--deploy { background: linear-gradient(135deg, #323232 0%, #444 100%); border-color: #555; color: white; }
+  .filemap-group--deploy .filemap-group-icon { background: rgba(255,255,255,0.15); color: white; }
+  .filemap-group--deploy .filemap-group-desc { color: #bbb; }
+  .filemap-group--deploy .filemap-file { background: rgba(255,255,255,0.08); }
+  .filemap-group--deploy .filemap-file:hover { background: rgba(255,255,255,0.14); border-color: #666; }
+  .filemap-group--deploy .filemap-file code { color: white; }
+  .filemap-group--deploy .filemap-file .file-role { color: #aaa; }
+  .filemap-group--deploy .filemap-group-header { border-bottom-color: rgba(255,255,255,0.1); }
+
+  /* Légende fréquence */
+  .freq-legend {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1.8rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .freq-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: #666;
+  }
+</style>
+
+<div class="filemap">
+
+  <!-- Coeur du thème -->
+  <div class="filemap-group filemap-group--core">
+    <div class="filemap-group-header">
+      <div class="filemap-group-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path>
+        </svg>
+      </div>
+      <span class="filemap-group-title">Coeur du thème</span>
+      <span class="filemap-group-desc">Racine /</span>
+    </div>
+    <div class="filemap-files">
+      <div class="filemap-file"><span class="freq freq--high"></span><code>functions.php</code><span class="file-role">~1164 lignes — hooks, AJAX, filtres</span></div>
+      <div class="filemap-file"><span class="freq freq--high"></span><code>style.css</code><span class="file-role">~13000+ lignes — tout le CSS</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>header.php</code><span class="file-role">En-tête + nav</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>footer.php</code><span class="file-role">Pied de page + liens</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>front-page.php</code><span class="file-role">Page d'accueil</span></div>
+      <div class="filemap-file"><span class="freq freq--never"></span><code>index.php</code><span class="file-role">Fallback WP</span></div>
+    </div>
+  </div>
+
+  <!-- Templates de pages -->
+  <div class="filemap-group filemap-group--templates">
+    <div class="filemap-group-header">
+      <div class="filemap-group-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+      </div>
+      <span class="filemap-group-title">Templates de pages</span>
+      <span class="filemap-group-desc">Racine / — page-*.php</span>
+    </div>
+    <div class="filemap-files">
+      <div class="filemap-file"><span class="freq freq--med"></span><code>page-guide-luminaire.php</code><span class="file-role">Guide IA luminaire</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>page-lumiere-dartisan.php</code><span class="file-role">Page Artisan</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>page-conseils-eclaires.php</code><span class="file-role">Conseils éclairage</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>page-contact.php</code><span class="file-role">Formulaire contact</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>page-sur-mesure.php</code><span class="file-role">Sur mesure / brief</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>home.php</code><span class="file-role">Blog / Actus carousel</span></div>
+      <div class="filemap-file"><span class="freq freq--never"></span><code>single.php</code><span class="file-role">Article blog</span></div>
+      <div class="filemap-file"><span class="freq freq--never"></span><code>archive.php</code><span class="file-role">Archive articles</span></div>
+      <div class="filemap-file"><span class="freq freq--never"></span><code>search.php</code><span class="file-role">Résultats recherche</span></div>
+      <div class="filemap-file"><span class="freq freq--never"></span><code>404.php</code><span class="file-role">Page erreur</span></div>
+    </div>
+  </div>
+
+  <!-- WooCommerce -->
+  <div class="filemap-group filemap-group--woo">
+    <div class="filemap-group-header">
+      <div class="filemap-group-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+      </div>
+      <span class="filemap-group-title">WooCommerce (templates custom)</span>
+      <span class="filemap-group-desc">woocommerce/</span>
+    </div>
+    <div class="filemap-files">
+      <div class="filemap-file"><span class="freq freq--high"></span><code>single-product.php</code><span class="file-role">Fiche produit — galerie, variations</span></div>
+      <div class="filemap-file"><span class="freq freq--med"></span><code>archive-product.php</code><span class="file-role">/nos-creations/ — hero + carrousel</span></div>
+      <div class="filemap-file"><span class="freq freq--med"></span><code>taxonomy-product_cat.php</code><span class="file-role">Pages catégorie</span></div>
+      <div class="filemap-file"><span class="freq freq--med"></span><code>content-product.php</code><span class="file-role">Card produit (grille)</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>checkout/thankyou.php</code><span class="file-role">Page merci post-achat</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>cart/cart-empty.php</code><span class="file-role">Panier vide</span></div>
+    </div>
+  </div>
+
+  <!-- Assets JS -->
+  <div class="filemap-group filemap-group--assets">
+    <div class="filemap-group-header">
+      <div class="filemap-group-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline>
+        </svg>
+      </div>
+      <span class="filemap-group-title">Assets (JavaScript + fonts)</span>
+      <span class="filemap-group-desc">assets/</span>
+    </div>
+    <div class="filemap-files">
+      <div class="filemap-file"><span class="freq freq--med"></span><code>cinetique.js</code><span class="file-role">Animations + parallax + particles</span></div>
+      <div class="filemap-file"><span class="freq freq--med"></span><code>quick-view.js</code><span class="file-role">Modal aperçu rapide produit</span></div>
+      <div class="filemap-file"><span class="freq freq--med"></span><code>shop.js</code><span class="file-role">Filtres + variations boutique</span></div>
+      <div class="filemap-file"><span class="freq freq--med"></span><code>guide-luminaire.js</code><span class="file-role">Navigation guide IA</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>menu.js</code><span class="file-role">Burger + recherche + focus trap</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>product-name-formatter.js</code><span class="file-role">Formatage titres produits</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>homepage-carousel.js</code><span class="file-role">Carousel page d'accueil</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>cart-page.js</code><span class="file-role">Interactions panier</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>scroll-dots.js</code><span class="file-role">Navigation scroll dots</span></div>
+      <div class="filemap-file"><span class="freq freq--never"></span><code>fonts/SquarePeg-Regular.woff2</code><span class="file-role">Police cursive locale</span></div>
+    </div>
+  </div>
+
+  <!-- Config & docs -->
+  <div class="filemap-group filemap-group--config">
+    <div class="filemap-group-header">
+      <div class="filemap-group-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </div>
+      <span class="filemap-group-title">Configuration & documentation</span>
+      <span class="filemap-group-desc">Racine /</span>
+    </div>
+    <div class="filemap-files">
+      <div class="filemap-file"><span class="freq freq--med"></span><code>CLAUDE.md</code><span class="file-role">Instructions IA — référence rapide</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>CUSTOMIZATIONS.md</code><span class="file-role">Historique complet modifications</span></div>
+      <div class="filemap-file"><span class="freq freq--never"></span><code>.gitignore</code><span class="file-role">Fichiers exclus du repo</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>guide-prompt-regles.txt</code><span class="file-role">Règles logiques prompt IA</span></div>
+      <div class="filemap-file"><span class="freq freq--low"></span><code>guide-prompt-ton.txt</code><span class="file-role">Personnalité prompt IA</span></div>
+    </div>
+  </div>
+
+  <!-- Déploiement -->
+  <div class="filemap-group filemap-group--deploy">
+    <div class="filemap-group-header">
+      <div class="filemap-group-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22.65 14.39L12 22.13 1.35 14.39a.84.84 0 0 1-.3-.94l1.22-3.78 2.44-7.51A.42.42 0 0 1 4.82 2a.43.43 0 0 1 .58 0 .42.42 0 0 1 .11.18l2.44 7.49h8.1l2.44-7.51A.42.42 0 0 1 18.6 2a.43.43 0 0 1 .58 0 .42.42 0 0 1 .11.18l2.44 7.51L23 13.45a.84.84 0 0 1-.35.94z"></path>
+        </svg>
+      </div>
+      <span class="filemap-group-title">Déploiement (GitHub Actions)</span>
+      <span class="filemap-group-desc">.github/workflows/</span>
+    </div>
+    <div class="filemap-files">
+      <div class="filemap-file"><span class="freq freq--never"></span><code>deploy-test.yml</code><span class="file-role">Auto-deploy → testlumineux (sur push)</span></div>
+      <div class="filemap-file"><span class="freq freq--never"></span><code>deploy-prod.yml</code><span class="file-role">Deploy prod → Robin lance manuellement</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Légende fréquence -->
+<div class="freq-legend">
+  <div class="freq-legend-item"><span class="freq freq--high"></span> Modifié très souvent</div>
+  <div class="freq-legend-item"><span class="freq freq--med"></span> Modifié régulièrement</div>
+  <div class="freq-legend-item"><span class="freq freq--low"></span> Modifié occasionnellement</div>
+  <div class="freq-legend-item"><span class="freq freq--never"></span> Rarement / jamais modifié</div>
+</div>
+
+</body>
+</html>
