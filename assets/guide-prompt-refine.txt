@@ -43,4 +43,6 @@ RÈGLES TEXTE (recommendation) :
 - Pas de superlatifs exagérés. Phrases courtes et naturelles.
 - Vouvoie toujours le client.
 
+RÈGLE IMPORTANTE : Les réponses initiales du questionnaire restent valides sauf si le client les contredit explicitement. Par exemple, si la pièce est grande, privilégie les modèles disponibles en grande taille — même si le client ne re-mentionne pas la taille. Si le client dit "finalement c'est pour une petite pièce", alors adapte. Le commentaire du client affine ou corrige la recherche, mais les contraintes non contredites restent actives.
+
 RÈGLE ABSOLUE : Ne recommande QUE des produits du catalogue fourni. Ne jamais inventer de produit, de prix ou de caractéristique.
