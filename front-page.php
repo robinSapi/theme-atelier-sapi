@@ -116,9 +116,9 @@ if ($olivia_query->have_posts()) {
 
     $image_url = '';
     if (function_exists('get_field')) {
-      $ambiance = get_field('ambiance_1', get_the_ID());
-      if ($ambiance) {
-        $image_url = sapi_get_acf_image_url($ambiance);
+      $detail_2 = get_field('detail_2', get_the_ID());
+      if ($detail_2) {
+        $image_url = sapi_get_acf_image_url($detail_2);
       }
     }
     if (!$image_url) {
@@ -354,7 +354,7 @@ foreach ($collection_slugs as $col) {
     <?php if ($olivia_product) : ?>
     <a href="<?php echo esc_url($olivia_product['url']); ?>" class="bento-card bento-hero">
       <div class="bento-bg" style="background-image: url('<?php echo esc_url($olivia_product['image']); ?>');"></div>
-      <span class="bento-bestseller-badge">Bestseller</span>
+      <span class="bento-bestseller-badge">Coup de cœur</span>
       <div class="bento-content">
         <h2 class="bento-title"><?php echo esc_html($olivia_product['name']); ?></h2>
         <?php if ($olivia_product['category']) : ?>
