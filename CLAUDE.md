@@ -4,7 +4,7 @@
 > **⚠️ LIRE CE FICHIER + `CUSTOMIZATIONS.md` AVANT TOUTE MODIFICATION**
 > Ce fichier = référence rapide. CUSTOMIZATIONS.md = historique complet.
 
-**Dernière synchro :** 12 février 2026
+**Dernière synchro :** 10 mars 2026
 
 ---
 
@@ -16,7 +16,8 @@
 | **Site test** | `testlumineux.atelier-sapi.fr` |
 | **Site prod** | `atelier-sapi.fr` |
 | **Repo GitHub** | `github.com/robinSapi/theme-atelier-sapi` |
-| **Branche** | `test-theme-sapi-maison` ⚠️ JAMAIS push sur main/master |
+| **Branche test** | `test-theme-sapi-maison` |
+| **Branche prod** | `master` (merge uniquement après validation Robin) |
 | **Hébergeur** | O2switch |
 | **Local** | `/Users/sapi/testLumineux-atelier-sapi` |
 
@@ -24,15 +25,22 @@
 
 ## 🔀 WORKFLOW DÉPLOIEMENT
 
+### Test (automatique)
 ```
-Local → GitHub (push) → O2switch (auto-deploy) → testlumineux
-                                                      ↓
-                                                 Test OK ?
-                                                      ↓
-                                                 Production
+Code → commit + push sur test-theme-sapi-maison → auto-deploy → testlumineux.atelier-sapi.fr
+```
+Claude fait le commit et push automatiquement après chaque modification.
+
+### Production (validation Robin obligatoire)
+```
+Robin dit "go prod" → Claude merge test-theme-sapi-maison dans master + push
+                    → Robin lance le workflow GitHub Actions manuellement
 ```
 
-**IMPORTANT :** Toujours pousser sur la branche `test-theme-sapi-maison`, jamais sur main/master.
+**RÈGLES :**
+- Commit/push sur `test-theme-sapi-maison` : automatique, sans demander
+- Merge dans `master` : **UNIQUEMENT** après validation explicite de Robin ("go prod", "go en production", etc.)
+- **JAMAIS** push directement sur master sans passer par le merge
 
 ---
 
