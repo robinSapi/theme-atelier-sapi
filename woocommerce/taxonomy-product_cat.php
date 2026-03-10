@@ -68,14 +68,11 @@ while ($featured_query->have_posts()) :
   $featured_query->the_post();
   $pid = get_the_ID();
 
-  // Chercher une image ACF : bandeau → ambiance_1 → ambiance_2 → ambiance_3
+  // Chercher l'image ACF bandeau uniquement
   if (function_exists('get_field')) {
-    foreach (['bandeau', 'ambiance_1', 'ambiance_2', 'ambiance_3'] as $acf_field) {
-      $acf_image = get_field($acf_field, $pid);
-      if ($acf_image) {
-        $featured_image_url = sapi_get_acf_image_url($acf_image);
-        if ($featured_image_url) break;
-      }
+    $bandeau = get_field('bandeau', $pid);
+    if ($bandeau) {
+      $featured_image_url = sapi_get_acf_image_url($bandeau);
     }
   }
 
