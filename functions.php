@@ -217,6 +217,14 @@ function sapi_maison_enqueue_assets() {
     }
   }
 
+  // Guide personalization — swap product card images based on guide preferences
+  if (is_front_page() || (class_exists('WooCommerce') && (is_shop() || is_product_category()))) {
+    $gp_path = get_template_directory() . '/assets/guide-personalize.js';
+    if (file_exists($gp_path)) {
+      wp_enqueue_script('sapi-guide-personalize', get_template_directory_uri() . '/assets/guide-personalize.js', [], filemtime($gp_path), true);
+    }
+  }
+
   // Cart page JS — enqueued when is_cart() returns true
   if (class_exists('WooCommerce') && is_cart()) {
     $cart_js_path = get_template_directory() . '/assets/cart-page.js';
