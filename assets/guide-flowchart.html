@@ -440,7 +440,7 @@
 
 <h1>Guide Luminaire — Arbre décisionnel V3</h1>
 <p class="subtitle">Questionnaire dynamique avec question Éclairage, sortie pour secondaire, filtrage complet</p>
-<p class="date">Mis à jour le 5 mars 2026</p>
+<p class="date">Mis à jour le 10 mars 2026</p>
 
 <!-- ═══════════════════════════════════════════
      SECTION 1 : FLUX PRINCIPAL
@@ -774,7 +774,7 @@
           <strong>Règles spéciales :</strong>
           <ul>
             <li>Cuisine → jamais de lampe à poser</li>
-            <li>Escalier → exclut format plat</li>
+            <li>Escalier → exclut format horizontal</li>
             <li>Fallback : si 0 résultats → relâche filtre ampoule, puis format, puis taille</li>
           </ul>
         </div>
@@ -985,7 +985,7 @@
 
       <tr class="rules-group"><td colspan="2">Format vertical (suspensions uniquement)</td></tr>
       <tr><td>Par défaut</td><td>Vertical exclu</td></tr>
-      <tr><td>Escalier</td><td>Vertical autorisé (toute hauteur) + plat exclu</td></tr>
+      <tr><td>Escalier</td><td>Vertical autorisé (toute hauteur) + horizontal exclu</td></tr>
       <tr><td>Entrée + confortable ou haute</td><td>Vertical autorisé</td></tr>
       <tr><td>Petite pièce + confortable ou haute</td><td>Vertical autorisé</td></tr>
 
@@ -1005,6 +1005,146 @@
       <tr><td>Fallback vide</td><td>1) Relâche ampoule → 2) Relâche format → 3) Relâche taille</td></tr>
     </tbody>
   </table>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 4 : DONNÉES ENVOYÉES À CLAUDE
+     ═══════════════════════════════════════════ -->
+
+<h2 class="section-title">Données envoyées à Claude</h2>
+
+<div class="data-flow-container" style="max-width:820px; margin:0 auto; display:flex; gap:24px; flex-wrap:wrap;">
+
+  <!-- COLONNE 1 : PREMIER QUESTIONNAIRE -->
+  <div style="flex:1; min-width:360px;">
+    <div class="step-card result-card" style="border-color:#937D68;">
+      <div class="step-header">
+        <span class="step-name" style="color:#937D68;">1. Recommandation initiale</span>
+      </div>
+      <p style="font-size:0.72rem; color:#937D68; font-style:italic; margin-bottom:10px;">
+        Après le questionnaire → appel Claude API (claude-sonnet-4-6)
+      </p>
+
+      <div class="filter-note" style="margin-top:0;">
+        <strong>Prompt system :</strong>
+        <ul>
+          <li>guide-prompt-regles.txt (règles logiques)</li>
+          <li>guide-prompt-ton.txt (personnalité Robin)</li>
+          <li>Avertissements fallback (si filtres relâchés)</li>
+        </ul>
+      </div>
+
+      <div class="filter-note">
+        <strong>Catalogue filtré (~4-15 produits) :</strong>
+        <ul>
+          <li>Nom du produit</li>
+          <li>ID produit</li>
+          <li>Catégorie (suspensions, appliques…)</li>
+          <li>Format (Horizontal, Boule, Vertical)</li>
+          <li>Type d'ampoule (dégagée, entourée…)</li>
+          <li>Essence recommandée (Peuplier / Okoumé)</li>
+          <li>Taille recommandée (S / M / L…)</li>
+          <li>Ventes totales (popularité)</li>
+        </ul>
+      </div>
+
+      <div class="filter-note">
+        <strong>Réponses du client :</strong>
+        <ul>
+          <li>Pièce, Taille, Éclairage, Sortie, Hauteur, Table, Style</li>
+        </ul>
+      </div>
+
+      <div class="filter-note" style="background:#F0FAF0; border-color:rgba(76,175,80,0.2);">
+        <strong style="color:#2E7D32;">Claude retourne :</strong>
+        <ul>
+          <li style="color:#2E7D32;">recommendation (texte max 80 mots)</li>
+          <li style="color:#2E7D32;">sur_mesure_text (si carte sur mesure affichée)</li>
+        </ul>
+      </div>
+
+      <div class="filter-note" style="background:#FFF0F0; border-color:rgba(200,50,50,0.15);">
+        <strong style="color:#C62828;">Non envoyé :</strong>
+        <ul>
+          <li style="color:#C62828;">Prix (le client les voit sur les cartes)</li>
+          <li style="color:#C62828;">Variations individuelles (une seule pré-sélectionnée)</li>
+          <li style="color:#C62828;">Images / URLs</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLÈCHE CENTRALE -->
+  <div style="display:flex; align-items:center; font-size:1.5rem; color:#E35B24; padding:0 4px;">→</div>
+
+  <!-- COLONNE 2 : REFINE -->
+  <div style="flex:1; min-width:360px;">
+    <div class="step-card" style="border-color:#E35B24; background:linear-gradient(135deg, #FFF8F0 0%, #FFF 100%);">
+      <div class="step-header">
+        <span class="step-name">2. Refine (conversation)</span>
+      </div>
+      <p style="font-size:0.72rem; color:#937D68; font-style:italic; margin-bottom:10px;">
+        Le client envoie un message → appel Claude API avec historique
+      </p>
+
+      <div class="filter-note" style="margin-top:0;">
+        <strong>Prompt system :</strong>
+        <ul>
+          <li>guide-prompt-refine.txt (règles refine + variations)</li>
+          <li>guide-prompt-ton.txt (personnalité Robin)</li>
+        </ul>
+      </div>
+
+      <div class="filter-note">
+        <strong>Catalogue COMPLET (~40-50 produits) :</strong>
+        <ul>
+          <li>Nom, ID, Catégorie, Format, Ampoule, Ventes</li>
+          <li style="color:#E35B24; font-weight:600;">⚙ TOUTES les variations par produit (essence + taille + variation_id)</li>
+          <li style="color:#E35B24; font-weight:600;">⚙ [RECOMMANDÉ : var:XXX] = variation initiale</li>
+          <li>[ACTUELLEMENT AFFICHÉ] sur les produits visibles</li>
+        </ul>
+      </div>
+
+      <div class="filter-note">
+        <strong>Contexte client :</strong>
+        <ul>
+          <li>Réponses initiales du questionnaire</li>
+          <li>Filtres appliqués lors de la 1ère reco</li>
+          <li>IDs des produits actuellement affichés</li>
+          <li>Historique de conversation (messages précédents)</li>
+        </ul>
+      </div>
+
+      <div class="filter-note" style="background:#F0FAF0; border-color:rgba(76,175,80,0.2);">
+        <strong style="color:#2E7D32;">Claude retourne :</strong>
+        <ul>
+          <li style="color:#2E7D32;">action ("refine" / "contact" / "both")</li>
+          <li style="color:#2E7D32;">recommendation (texte max 80 mots)</li>
+          <li style="color:#2E7D32;">product_ids [{product_id, variation_id}]</li>
+        </ul>
+      </div>
+
+      <div class="filter-note" style="background:#FFF0F0; border-color:rgba(200,50,50,0.15);">
+        <strong style="color:#C62828;">Non envoyé :</strong>
+        <ul>
+          <li style="color:#C62828;">Prix (ni produit ni variation)</li>
+          <li style="color:#C62828;">Images / URLs</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="max-width:820px; margin:20px auto 0;">
+  <div class="filter-note" style="background:#FAF0FF; border-color:rgba(155,89,182,0.2);">
+    <strong style="color:#7D3C98;">Différence clé Initial → Refine :</strong>
+    <ul>
+      <li style="color:#7D3C98;">Initial : catalogue PRÉ-FILTRÉ (seuls les produits pertinents) + 1 variation pré-sélectionnée par produit</li>
+      <li style="color:#7D3C98;">Refine : catalogue COMPLET (tous les produits) + TOUTES les variations listées → Claude peut choisir un autre produit ET/OU une autre variation</li>
+      <li style="color:#7D3C98;">Les réponses du questionnaire restent actives sauf si le client les contredit</li>
+    </ul>
+  </div>
 </div>
 
 <script>
