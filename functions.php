@@ -681,6 +681,10 @@ add_filter('render_block', function ($content, $block) {
     return ob_get_clean();
   }
   if ($block['blockName'] === 'woocommerce/checkout') {
+    // Sur la page thank you, le template thankyou.php gère déjà sa propre progress bar
+    if (function_exists('is_wc_endpoint_url') && is_wc_endpoint_url('order-received')) {
+      return $content;
+    }
     ob_start();
     ?>
     <div class="sapi-checkout-outer">
