@@ -18790,7 +18790,7 @@ html.sapi-intro-active body {
   }
 
   .guide-result-products-grid > * {
-    flex: 0 0 85%;
+    flex: 0 0 90%;
     scroll-snap-align: start;
   }
 
