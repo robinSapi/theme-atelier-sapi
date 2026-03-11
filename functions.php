@@ -3261,13 +3261,30 @@ function sapi_guide_log_initial($session_id, $answers, $product_ids, $ai_text) {
     : (isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '');
   $referrer = isset($_SERVER['HTTP_REFERER']) ? esc_url_raw(wp_unslash($_SERVER['HTTP_REFERER'])) : '';
 
-  // Detect device type from user-agent
+  // Detect device type + browser from user-agent
   $device_type = 'Desktop';
   $ua_lower = strtolower($user_agent);
   if (preg_match('/mobile|android.*mobile|iphone|ipod|windows phone/i', $ua_lower)) {
     $device_type = 'Mobile';
   } elseif (preg_match('/tablet|ipad|android(?!.*mobile)/i', $ua_lower)) {
     $device_type = 'Tablette';
+  }
+
+  // Detect browser
+  $browser = '';
+  if (preg_match('/Edg\//i', $user_agent)) {
+    $browser = 'Edge';
+  } elseif (preg_match('/OPR\//i', $user_agent)) {
+    $browser = 'Opera';
+  } elseif (preg_match('/Chrome\//i', $user_agent) && !preg_match('/Edg\//i', $user_agent)) {
+    $browser = 'Chrome';
+  } elseif (preg_match('/Safari\//i', $user_agent) && !preg_match('/Chrome\//i', $user_agent)) {
+    $browser = 'Safari';
+  } elseif (preg_match('/Firefox\//i', $user_agent)) {
+    $browser = 'Firefox';
+  }
+  if ($browser) {
+    $device_type .= ' · ' . $browser;
   }
 
   $wpdb->insert($table, [
@@ -3430,6 +3447,7 @@ function sapi_guide_admin_page() {
           <th>Date</th>
           <th>Appareil</th>
           <th>IP</th>
+          <th>Provenance</th>
           <th>Pièce</th>
           <th>Taille</th>
           <th>Sortie</th>
@@ -3442,16 +3460,28 @@ function sapi_guide_admin_page() {
       </thead>
       <tbody>
         <?php if (empty($rows)) : ?>
-          <tr><td colspan="11" style="text-align:center; color:#999;">Aucune session enregistrée pour le moment.</td></tr>
+          <tr><td colspan="12" style="text-align:center; color:#999;">Aucune session enregistrée pour le moment.</td></tr>
         <?php else : ?>
           <?php foreach ($rows as $r) : ?>
             <tr>
               <td style="white-space:nowrap;"><?php echo esc_html(wp_date('d/m/Y H:i', strtotime($r->created_at))); ?></td>
-              <td><?php echo esc_html($r->device_type ?: '—'); ?></td>
-              <td title="<?php echo esc_attr($r->referrer ?: ''); ?>" style="cursor:<?php echo $r->referrer ? 'help' : 'default'; ?>;">
-                <?php echo esc_html($r->ip_address ?: '—'); ?>
+              <td style="white-space:nowrap;"><?php echo esc_html($r->device_type ?: '—'); ?></td>
+              <td style="white-space:nowrap;">
+                <?php if ($r->ip_address) : ?>
+                  <a href="https://whatismyipaddress.com/ip/<?php echo esc_attr($r->ip_address); ?>" target="_blank" rel="noopener" title="Voir la localisation" style="text-decoration:none;">
+                    <?php echo esc_html($r->ip_address); ?> &#x1F50D;
+                  </a>
+                <?php else : ?>
+                  —
+                <?php endif; ?>
+              </td>
+              <td>
                 <?php if ($r->referrer) : ?>
-                  <br><small style="color:#999;"><?php echo esc_html(wp_parse_url($r->referrer, PHP_URL_HOST) ?: $r->referrer); ?></small>
+                  <a href="<?php echo esc_url($r->referrer); ?>" target="_blank" rel="noopener" title="<?php echo esc_attr($r->referrer); ?>" style="text-decoration:none;">
+                    <?php echo esc_html(wp_parse_url($r->referrer, PHP_URL_HOST) ?: $r->referrer); ?>
+                  </a>
+                <?php else : ?>
+                  —
                 <?php endif; ?>
               </td>
               <td><?php echo esc_html($r->piece); ?></td>
