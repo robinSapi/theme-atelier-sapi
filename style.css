@@ -18784,8 +18784,8 @@ html.sapi-intro-active body {
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    gap: 0.75rem;
-    padding: 0 7.5%;
+    gap: 1rem;
+    padding: 15px 5%;
     margin: 0 -1rem 1rem;
     width: calc(100% + 2rem);
     max-width: none;
@@ -18796,7 +18796,7 @@ html.sapi-intro-active body {
   }
 
   .guide-result-products-grid > * {
-    flex: 0 0 85%;
+    flex: 0 0 90%;
     scroll-snap-align: center;
   }
 
