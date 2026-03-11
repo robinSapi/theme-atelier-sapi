@@ -1609,6 +1609,11 @@ button:hover,
   }
 }
 
+/* Hide chip on guide luminaire page (redundant with quiz) */
+.page-template-page-guide-luminaire .guide-profile-chip {
+  display: none !important;
+}
+
 /* Guide Profile Chip */
 .guide-profile-chip {
   display: flex;
