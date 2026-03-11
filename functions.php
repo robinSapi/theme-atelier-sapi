@@ -3216,6 +3216,7 @@ function sapi_guide_create_logs_table() {
     ip_address varchar(45) DEFAULT '',
     device_type varchar(20) DEFAULT '',
     referrer varchar(500) DEFAULT '',
+    location varchar(200) DEFAULT '',
     PRIMARY KEY (id),
     KEY session_id (session_id)
   ) $charset;";
@@ -3243,6 +3244,9 @@ function sapi_guide_maybe_create_table() {
     }
     if (!in_array('referrer', $columns, true)) {
       $wpdb->query("ALTER TABLE $table ADD COLUMN referrer varchar(500) DEFAULT '' AFTER device_type");
+    }
+    if (!in_array('location', $columns, true)) {
+      $wpdb->query("ALTER TABLE $table ADD COLUMN location varchar(200) DEFAULT '' AFTER referrer");
     }
   }
 }
@@ -3287,6 +3291,25 @@ function sapi_guide_log_initial($session_id, $answers, $product_ids, $ai_text) {
     $device_type .= ' · ' . $browser;
   }
 
+  // Geolocation via ip-api.com (free, no key, 45 req/min)
+  $location = '';
+  if ($ip_address && !in_array($ip_address, ['127.0.0.1', '::1'], true)) {
+    $geo_response = wp_remote_get('http://ip-api.com/json/' . rawurlencode($ip_address) . '?fields=city,regionName,country&lang=fr', [
+      'timeout' => 3,
+    ]);
+    if (!is_wp_error($geo_response)) {
+      $geo_data = json_decode(wp_remote_retrieve_body($geo_response), true);
+      if ($geo_data) {
+        $parts = array_filter([
+          $geo_data['city'] ?? '',
+          $geo_data['regionName'] ?? '',
+          $geo_data['country'] ?? '',
+        ]);
+        $location = implode(', ', $parts);
+      }
+    }
+  }
+
   $wpdb->insert($table, [
     'session_id'     => $session_id,
     'created_at'     => current_time('mysql'),
@@ -3306,6 +3329,7 @@ function sapi_guide_log_initial($session_id, $answers, $product_ids, $ai_text) {
     'ip_address'     => $ip_address,
     'device_type'    => $device_type,
     'referrer'       => mb_substr($referrer, 0, 500),
+    'location'       => mb_substr($location, 0, 200),
   ]);
 }
 
@@ -3380,12 +3404,13 @@ function sapi_guide_export_csv() {
   $out = fopen('php://output', 'w');
   fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM for Excel
 
-  fputcsv($out, ['Date', 'IP', 'Appareil', 'Provenance', 'Pièce', 'Taille', 'Éclairage', 'Sortie', 'Hauteur', 'Table', 'Style', 'Produits affichés', 'Texte IA', 'Nb refines', 'Messages refine', 'Contact envoyé', 'Nom contact', 'Email contact'], ';');
+  fputcsv($out, ['Date', 'IP', 'Localisation', 'Appareil', 'Provenance', 'Pièce', 'Taille', 'Éclairage', 'Sortie', 'Hauteur', 'Table', 'Style', 'Produits affichés', 'Texte IA', 'Nb refines', 'Messages refine', 'Contact envoyé', 'Nom contact', 'Email contact'], ';');
 
   foreach ($rows as $r) {
     fputcsv($out, [
       $r['created_at'],
       $r['ip_address'] ?? '',
+      $r['location'] ?? '',
       $r['device_type'] ?? '',
       $r['referrer'] ?? '',
       $r['piece'],
@@ -3447,6 +3472,7 @@ function sapi_guide_admin_page() {
           <th>Date</th>
           <th>Appareil</th>
           <th>IP</th>
+          <th>Localisation</th>
           <th>Provenance</th>
           <th>Pièce</th>
           <th>Taille</th>
@@ -3460,7 +3486,7 @@ function sapi_guide_admin_page() {
       </thead>
       <tbody>
         <?php if (empty($rows)) : ?>
-          <tr><td colspan="12" style="text-align:center; color:#999;">Aucune session enregistrée pour le moment.</td></tr>
+          <tr><td colspan="13" style="text-align:center; color:#999;">Aucune session enregistrée pour le moment.</td></tr>
         <?php else : ?>
           <?php foreach ($rows as $r) : ?>
             <tr>
@@ -3475,6 +3501,7 @@ function sapi_guide_admin_page() {
                   —
                 <?php endif; ?>
               </td>
+              <td><?php echo esc_html($r->location ?: '—'); ?></td>
               <td>
                 <?php if ($r->referrer) :
                   $ref_path = trim(wp_parse_url($r->referrer, PHP_URL_PATH) ?: '', '/');
