@@ -6168,7 +6168,7 @@ li.carousel-editorial-slide,
 
 .advice-tip-back-text {
   font-family: var(--font-display, 'Square Peg', cursive);
-  font-size: clamp(2.2rem, 4vw, 3.5rem);
+  font-size: clamp(1.6rem, 3vw, 2.5rem);
   font-weight: 400;
   color: var(--bois-sombre, #4A3F35);
   line-height: 1.2;
@@ -6380,7 +6380,7 @@ li.carousel-editorial-slide,
 .advice-overlay-inner {
   position: relative;
   width: 92%;
-  max-width: 600px;
+  max-width: 800px;
   max-height: 85vh;
   background: var(--color-warm, #FBF6EA);
   border-radius: 20px;
