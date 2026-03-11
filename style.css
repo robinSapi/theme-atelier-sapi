@@ -17952,6 +17952,11 @@ html.sapi-intro-active body {
   margin: 0 auto;
 }
 
+.guide-choices-grid[data-count="2"] {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 500px;
+}
+
 .guide-choices-grid[data-count="4"] {
   grid-template-columns: repeat(4, 1fr);
   max-width: 900px;
