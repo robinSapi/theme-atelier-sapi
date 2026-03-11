@@ -18774,13 +18774,15 @@ html.sapi-intro-active body {
   .guide-result-products-grid {
     display: flex !important;
     flex-wrap: nowrap !important;
+    justify-content: flex-start;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 1rem;
-    padding: 0 5%;
-    margin: 0 auto 1rem;
+    padding: 0 1rem;
+    margin: 0 0 1rem;
+    max-width: 100%;
   }
 
   .guide-result-products-grid::-webkit-scrollbar {
@@ -18788,8 +18790,8 @@ html.sapi-intro-active body {
   }
 
   .guide-result-products-grid > * {
-    flex: 0 0 80%;
-    scroll-snap-align: center;
+    flex: 0 0 85%;
+    scroll-snap-align: start;
   }
 
   .guide-ai-recommendation {
