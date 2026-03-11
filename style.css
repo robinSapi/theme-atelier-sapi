@@ -18341,11 +18341,23 @@ html.sapi-intro-active body {
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: 0.25rem;
+  gap: 0;
+}
+
+.guide-result-products-grid .product-name {
+  margin-bottom: 0.15rem;
+}
+
+.guide-result-products-grid .product-category {
+  margin-bottom: 0.25rem;
+}
+
+.guide-result-products-grid .product-price {
+  margin-bottom: 0.3rem;
 }
 
 .guide-result-products-grid .guide-result-variations {
-  margin-top: 0.4rem;
+  margin-top: 0.15rem;
 }
 
 /* Sur mesure card: flex to fill stretched parent */
