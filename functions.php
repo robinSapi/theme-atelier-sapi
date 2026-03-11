@@ -3297,13 +3297,14 @@ function sapi_guide_log_contact($session_id, $name, $email) {
  * ── Admin page : Guide Luminaire Logs ──
  */
 function sapi_guide_admin_menu() {
-  add_submenu_page(
-    'woocommerce',
+  add_menu_page(
     'Guide Luminaire — Sessions',
     'Guide Luminaire',
     'manage_woocommerce',
     'sapi-guide-logs',
-    'sapi_guide_admin_page'
+    'sapi_guide_admin_page',
+    'dashicons-lightbulb',
+    58
   );
 }
 add_action('admin_menu', 'sapi_guide_admin_menu');
