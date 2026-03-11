@@ -372,7 +372,7 @@
           <div class="quick-view-info">
             <h2 id="quick-view-title" class="quick-view-title">${product.name}</h2>
             <div class="quick-view-description">${product.short_description || ''}</div>
-            <div class="quick-view-price">${product.price_html}</div>
+            <div class="quick-view-price">${product.sizes || product.woods ? '<span class="price-from">\u00c0 PARTIR DE</span>' : ''}${product.price_html}</div>
             ${product.sizes || product.woods ? `
               <div class="quick-view-variants">
                 ${product.sizes && product.sizes.length > 0 ? `
