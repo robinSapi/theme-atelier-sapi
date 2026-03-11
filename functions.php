@@ -3297,13 +3297,14 @@ function sapi_guide_log_contact($session_id, $name, $email) {
  * ── Admin page : Guide Luminaire Logs ──
  */
 function sapi_guide_admin_menu() {
-  add_submenu_page(
-    'woocommerce',
+  add_menu_page(
     'Guide Luminaire — Sessions',
     'Guide Luminaire',
     'manage_woocommerce',
     'sapi-guide-logs',
-    'sapi_guide_admin_page'
+    'sapi_guide_admin_page',
+    'dashicons-welcome-learn-more',
+    26
   );
 }
 add_action('admin_menu', 'sapi_guide_admin_menu');
@@ -3359,6 +3360,15 @@ function sapi_guide_admin_page() {
   global $wpdb;
   $table = $wpdb->prefix . 'sapi_guide_logs';
 
+  // Handle delete action
+  if (isset($_GET['sapi_guide_delete']) && isset($_GET['_wpnonce'])) {
+    $delete_id = (int) $_GET['sapi_guide_delete'];
+    if (wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'sapi_guide_delete_' . $delete_id)) {
+      $wpdb->delete($table, ['id' => $delete_id], ['%d']);
+      echo '<div class="notice notice-success is-dismissible"><p>Session supprimée.</p></div>';
+    }
+  }
+
   $per_page = 30;
   $paged = isset($_GET['paged']) ? max(1, (int) $_GET['paged']) : 1;
   $offset = ($paged - 1) * $per_page;
@@ -3386,11 +3396,12 @@ function sapi_guide_admin_page() {
           <th>Produits</th>
           <th>Refines</th>
           <th>Contact</th>
+          <th style="width:50px;"></th>
         </tr>
       </thead>
       <tbody>
         <?php if (empty($rows)) : ?>
-          <tr><td colspan="8" style="text-align:center; color:#999;">Aucune session enregistrée pour le moment.</td></tr>
+          <tr><td colspan="9" style="text-align:center; color:#999;">Aucune session enregistrée pour le moment.</td></tr>
         <?php else : ?>
           <?php foreach ($rows as $r) : ?>
             <tr>
@@ -3415,6 +3426,17 @@ function sapi_guide_admin_page() {
                 <?php else : ?>
                   —
                 <?php endif; ?>
+              </td>
+              <td style="text-align:center;">
+                <?php
+                $delete_url = wp_nonce_url(
+                  admin_url('admin.php?page=sapi-guide-logs&sapi_guide_delete=' . (int) $r->id),
+                  'sapi_guide_delete_' . (int) $r->id
+                );
+                ?>
+                <a href="<?php echo esc_url($delete_url); ?>"
+                   onclick="return confirm('Supprimer cette session ?');"
+                   style="color:#a00; text-decoration:none;" title="Supprimer">&#10005;</a>
               </td>
             </tr>
           <?php endforeach; ?>
