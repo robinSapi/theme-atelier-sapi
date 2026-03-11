@@ -3476,10 +3476,22 @@ function sapi_guide_admin_page() {
                 <?php endif; ?>
               </td>
               <td>
-                <?php if ($r->referrer) : ?>
-                  <a href="<?php echo esc_url($r->referrer); ?>" target="_blank" rel="noopener" title="<?php echo esc_attr($r->referrer); ?>" style="text-decoration:none;">
-                    <?php echo esc_html(wp_parse_url($r->referrer, PHP_URL_HOST) ?: $r->referrer); ?>
-                  </a>
+                <?php if ($r->referrer) :
+                  $ref_path = trim(wp_parse_url($r->referrer, PHP_URL_PATH) ?: '', '/');
+                  $ref_page_id = url_to_postid($r->referrer);
+                  if ($ref_page_id) {
+                    $ref_label = get_the_title($ref_page_id);
+                  } elseif ($ref_path === '' || $ref_path === 'accueil') {
+                    $ref_label = 'Accueil';
+                  } elseif (strpos($ref_path, 'nos-creations') !== false) {
+                    $ref_label = 'Nos créations';
+                  } else {
+                    $ref_label = ucfirst(str_replace(['-', '/'], [' ', ' › '], $ref_path));
+                  }
+                ?>
+                  <span title="<?php echo esc_attr($r->referrer); ?>" style="cursor:help;">
+                    <?php echo esc_html($ref_label); ?>
+                  </span>
                 <?php else : ?>
                   —
                 <?php endif; ?>
