@@ -3303,8 +3303,8 @@ function sapi_guide_admin_menu() {
     'manage_woocommerce',
     'sapi-guide-logs',
     'sapi_guide_admin_page',
-    'dashicons-lightbulb',
-    58
+    'dashicons-welcome-learn-more',
+    26
   );
 }
 add_action('admin_menu', 'sapi_guide_admin_menu');
