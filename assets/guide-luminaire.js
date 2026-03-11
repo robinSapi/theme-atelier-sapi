@@ -4,6 +4,14 @@
   // ================================================================
   // STATE
   // ================================================================
+  // Generate a unique session ID for logging
+  function generateSessionId() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+
   var state = {
     currentStepId: null,
     answers: {},          // { sortie: 'plafond', hauteur: 'standard', ... }
@@ -15,6 +23,7 @@
     conversationHistory: [],  // [{ role: 'user'|'assistant', content: '...' }]
     currentProducts: [],      // IDs of products currently displayed
     filterContext: '',        // filter context string from initial results
+    sessionId: generateSessionId(),
   };
 
   var SESSION_KEY = 'sapiGuideV2';
@@ -481,6 +490,7 @@
     formData.append('action', 'sapi_guide_results');
     formData.append('nonce', sapiGuide.nonce);
     formData.append('answers', JSON.stringify(state.answers));
+    formData.append('session_id', state.sessionId);
     var honeypot = document.getElementById('guide_website');
     if (honeypot) { formData.append('guide_website', honeypot.value); }
 
@@ -729,6 +739,7 @@
         formData.append('answers', JSON.stringify(state.answers));
         formData.append('conversation', JSON.stringify(state.conversationHistory));
         formData.append('current_products', JSON.stringify(state.currentProducts));
+        formData.append('session_id', state.sessionId);
         formData.append('filter_context', state.filterContext);
 
         fetch(sapiGuide.ajaxUrl, {
@@ -824,6 +835,7 @@
         formData.append('labels', JSON.stringify(state.labels));
         formData.append('ai_text', state.aiText);
         formData.append('conversation', JSON.stringify(state.conversationHistory));
+        formData.append('session_id', state.sessionId);
 
         fetch(sapiGuide.ajaxUrl, {
           method: 'POST',

@@ -1674,6 +1674,11 @@ function sapi_ajax_guide_results() {
     return;
   }
 
+  // Log session
+  $session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : wp_generate_uuid4();
+  $product_ids_for_log = array_map(function($p) { return $p['id']; }, $display_products);
+  sapi_guide_log_initial($session_id, $clean, $product_ids_for_log, $ai_text ?: '');
+
   wp_send_json_success([
     'ai_text'           => $ai_text,
     'products'          => $display_products,
@@ -1681,6 +1686,7 @@ function sapi_ajax_guide_results() {
     'sur_mesure_reason' => $sur_mesure_reason,
     'sur_mesure_text'   => $sur_mesure_text,
     'filter_context'    => $filter_context,
+    'session_id'        => $session_id,
   ]);
 }
 
@@ -1778,6 +1784,12 @@ function sapi_ajax_guide_contact() {
     $body,
     $headers
   );
+
+  // Log contact
+  $contact_session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : '';
+  if ($contact_session_id) {
+    sapi_guide_log_contact($contact_session_id, $name, $email);
+  }
 
   if ($sent) {
     wp_send_json_success(['message' => 'Envoyé']);
@@ -1942,7 +1954,14 @@ function sapi_ajax_guide_refine() {
     ]
   );
 
-  // 9. Send response
+  // 9. Log refine
+  $refine_session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : '';
+  if ($refine_session_id) {
+    $refine_pids = array_map(function($p) { return $p['id']; }, $new_products);
+    sapi_guide_log_refine($refine_session_id, $user_message, $recommendation, $refine_pids);
+  }
+
+  // 10. Send response
   wp_send_json_success([
     'action'       => $action,
     'ai_text'      => $recommendation,
@@ -3154,5 +3173,269 @@ function sapi_handle_surmesure_form() {
   }
 
   return ['submitted' => true, 'success' => false, 'error' => "Erreur lors de l'envoi. Veuillez réessayer ou nous contacter directement par email."];
+}
+
+/*
+ * ═══════════════════════════════════════════════════════════════════
+ * GUIDE LUMINAIRE — LOGGING & ADMIN
+ * Enregistre chaque session du guide luminaire en base de données.
+ * ═══════════════════════════════════════════════════════════════════
+ */
+
+/**
+ * Create the guide logs table on theme switch (activation)
+ */
+function sapi_guide_create_logs_table() {
+  global $wpdb;
+  $table = $wpdb->prefix . 'sapi_guide_logs';
+  $charset = $wpdb->get_charset_collate();
+
+  $sql = "CREATE TABLE IF NOT EXISTS $table (
+    id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    session_id varchar(36) NOT NULL,
+    created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    piece varchar(50) DEFAULT '',
+    taille varchar(50) DEFAULT '',
+    eclairage varchar(50) DEFAULT '',
+    sortie varchar(50) DEFAULT '',
+    hauteur varchar(50) DEFAULT '',
+    table_reponse varchar(50) DEFAULT '',
+    style varchar(50) DEFAULT '',
+    products_shown text DEFAULT '',
+    ai_text text DEFAULT '',
+    refine_count int(11) DEFAULT 0,
+    refine_messages text DEFAULT '',
+    contact_sent tinyint(1) DEFAULT 0,
+    contact_name varchar(100) DEFAULT '',
+    contact_email varchar(100) DEFAULT '',
+    user_agent varchar(500) DEFAULT '',
+    PRIMARY KEY (id),
+    KEY session_id (session_id)
+  ) $charset;";
+
+  require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+  dbDelta($sql);
+}
+add_action('after_switch_theme', 'sapi_guide_create_logs_table');
+
+// Also create on init if table doesn't exist yet (for existing installs)
+function sapi_guide_maybe_create_table() {
+  global $wpdb;
+  $table = $wpdb->prefix . 'sapi_guide_logs';
+  if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table)) !== $table) {
+    sapi_guide_create_logs_table();
+  }
+}
+add_action('admin_init', 'sapi_guide_maybe_create_table');
+
+/**
+ * Log the initial quiz results
+ */
+function sapi_guide_log_initial($session_id, $answers, $product_ids, $ai_text) {
+  global $wpdb;
+  $table = $wpdb->prefix . 'sapi_guide_logs';
+
+  $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])) : '';
+
+  $wpdb->insert($table, [
+    'session_id'     => $session_id,
+    'created_at'     => current_time('mysql'),
+    'piece'          => isset($answers['piece'])     ? $answers['piece']     : '',
+    'taille'         => isset($answers['taille'])    ? $answers['taille']    : '',
+    'eclairage'      => isset($answers['eclairage']) ? $answers['eclairage'] : '',
+    'sortie'         => isset($answers['sortie'])    ? $answers['sortie']    : '',
+    'hauteur'        => isset($answers['hauteur'])   ? $answers['hauteur']   : '',
+    'table_reponse'  => isset($answers['table'])     ? $answers['table']     : '',
+    'style'          => isset($answers['style'])     ? $answers['style']     : '',
+    'products_shown' => implode(', ', $product_ids),
+    'ai_text'        => $ai_text ?: '',
+    'refine_count'   => 0,
+    'refine_messages'=> '',
+    'contact_sent'   => 0,
+    'user_agent'     => mb_substr($user_agent, 0, 500),
+  ]);
+}
+
+/**
+ * Log a refine interaction (update existing session row)
+ */
+function sapi_guide_log_refine($session_id, $user_message, $ai_text, $product_ids) {
+  global $wpdb;
+  $table = $wpdb->prefix . 'sapi_guide_logs';
+
+  $row = $wpdb->get_row($wpdb->prepare("SELECT id, refine_count, refine_messages FROM $table WHERE session_id = %s", $session_id));
+  if (!$row) return;
+
+  $existing = $row->refine_messages ? $row->refine_messages : '';
+  $new_entry = 'Client: ' . $user_message . "\nRobin: " . $ai_text;
+  if (!empty($product_ids)) {
+    $new_entry .= ' [produits: ' . implode(', ', $product_ids) . ']';
+  }
+  $updated = $existing ? $existing . "\n---\n" . $new_entry : $new_entry;
+
+  $wpdb->update($table, [
+    'refine_count'    => (int) $row->refine_count + 1,
+    'refine_messages' => $updated,
+  ], ['id' => $row->id]);
+}
+
+/**
+ * Log contact form submission (update existing session row)
+ */
+function sapi_guide_log_contact($session_id, $name, $email) {
+  global $wpdb;
+  $table = $wpdb->prefix . 'sapi_guide_logs';
+
+  $wpdb->update($table, [
+    'contact_sent'  => 1,
+    'contact_name'  => $name,
+    'contact_email' => $email,
+  ], ['session_id' => $session_id]);
+}
+
+/**
+ * ── Admin page : Guide Luminaire Logs ──
+ */
+function sapi_guide_admin_menu() {
+  add_submenu_page(
+    'woocommerce',
+    'Guide Luminaire — Sessions',
+    'Guide Luminaire',
+    'manage_woocommerce',
+    'sapi-guide-logs',
+    'sapi_guide_admin_page'
+  );
+}
+add_action('admin_menu', 'sapi_guide_admin_menu');
+
+/**
+ * CSV Export handler
+ */
+function sapi_guide_export_csv() {
+  if (!isset($_GET['sapi_guide_export']) || $_GET['sapi_guide_export'] !== '1') return;
+  if (!current_user_can('manage_woocommerce')) return;
+  if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'sapi_guide_export')) return;
+
+  global $wpdb;
+  $table = $wpdb->prefix . 'sapi_guide_logs';
+  $rows = $wpdb->get_results("SELECT * FROM $table ORDER BY created_at DESC", ARRAY_A);
+
+  header('Content-Type: text/csv; charset=utf-8');
+  header('Content-Disposition: attachment; filename=guide-luminaire-sessions-' . wp_date('Y-m-d') . '.csv');
+
+  $out = fopen('php://output', 'w');
+  fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM for Excel
+
+  fputcsv($out, ['Date', 'Pièce', 'Taille', 'Éclairage', 'Sortie', 'Hauteur', 'Table', 'Style', 'Produits affichés', 'Texte IA', 'Nb refines', 'Messages refine', 'Contact envoyé', 'Nom contact', 'Email contact'], ';');
+
+  foreach ($rows as $r) {
+    fputcsv($out, [
+      $r['created_at'],
+      $r['piece'],
+      $r['taille'],
+      $r['eclairage'],
+      $r['sortie'],
+      $r['hauteur'],
+      $r['table_reponse'],
+      $r['style'],
+      $r['products_shown'],
+      $r['ai_text'],
+      $r['refine_count'],
+      $r['refine_messages'],
+      $r['contact_sent'] ? 'Oui' : 'Non',
+      $r['contact_name'],
+      $r['contact_email'],
+    ], ';');
+  }
+  fclose($out);
+  exit;
+}
+add_action('admin_init', 'sapi_guide_export_csv');
+
+/**
+ * Admin page renderer
+ */
+function sapi_guide_admin_page() {
+  global $wpdb;
+  $table = $wpdb->prefix . 'sapi_guide_logs';
+
+  $per_page = 30;
+  $paged = isset($_GET['paged']) ? max(1, (int) $_GET['paged']) : 1;
+  $offset = ($paged - 1) * $per_page;
+
+  $total = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table");
+  $rows = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table ORDER BY created_at DESC LIMIT %d OFFSET %d", $per_page, $offset));
+  $total_pages = ceil($total / $per_page);
+
+  $export_url = wp_nonce_url(admin_url('admin.php?page=sapi-guide-logs&sapi_guide_export=1'), 'sapi_guide_export');
+
+  ?>
+  <div class="wrap">
+    <h1>Guide Luminaire — Sessions <span style="font-size:0.6em; color:#999;">(<?php echo esc_html($total); ?> sessions)</span></h1>
+    <p>
+      <a href="<?php echo esc_url($export_url); ?>" class="button button-secondary">Exporter CSV</a>
+    </p>
+    <table class="widefat striped" style="margin-top:10px;">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Pièce</th>
+          <th>Taille</th>
+          <th>Sortie</th>
+          <th>Style</th>
+          <th>Produits</th>
+          <th>Refines</th>
+          <th>Contact</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php if (empty($rows)) : ?>
+          <tr><td colspan="8" style="text-align:center; color:#999;">Aucune session enregistrée pour le moment.</td></tr>
+        <?php else : ?>
+          <?php foreach ($rows as $r) : ?>
+            <tr>
+              <td style="white-space:nowrap;"><?php echo esc_html(wp_date('d/m/Y H:i', strtotime($r->created_at))); ?></td>
+              <td><?php echo esc_html($r->piece); ?></td>
+              <td><?php echo esc_html($r->taille); ?></td>
+              <td><?php echo esc_html($r->sortie); ?></td>
+              <td><?php echo esc_html($r->style); ?></td>
+              <td><?php echo esc_html($r->products_shown); ?></td>
+              <td style="text-align:center;">
+                <?php if ($r->refine_count > 0) : ?>
+                  <span title="<?php echo esc_attr($r->refine_messages); ?>" style="cursor:help; text-decoration:underline dotted;">
+                    <?php echo esc_html($r->refine_count); ?>
+                  </span>
+                <?php else : ?>
+                  —
+                <?php endif; ?>
+              </td>
+              <td style="text-align:center;">
+                <?php if ($r->contact_sent) : ?>
+                  <span title="<?php echo esc_attr($r->contact_name . ' — ' . $r->contact_email); ?>" style="cursor:help; color:#2E7D32;">&#10003;</span>
+                <?php else : ?>
+                  —
+                <?php endif; ?>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </tbody>
+    </table>
+    <?php if ($total_pages > 1) : ?>
+      <div class="tablenav">
+        <div class="tablenav-pages">
+          <?php
+          echo wp_kses_post(paginate_links([
+            'base'    => add_query_arg('paged', '%#%'),
+            'format'  => '',
+            'current' => $paged,
+            'total'   => $total_pages,
+          ]));
+          ?>
+        </div>
+      </div>
+    <?php endif; ?>
+  </div>
+  <?php
 }
 
