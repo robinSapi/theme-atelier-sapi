@@ -11212,7 +11212,7 @@ transform: translateY(15px);
 
 .product-card-cinetique .product-name {
   font-family: var(--font-body);
-  font-size: 1.35rem !important; /* Taille réduite pour meilleur équilibre */
+  font-size: 1.6rem !important;
   font-weight: 700;
   color: var(--color-dark);
   margin: 0 0 0.75rem;
@@ -18342,10 +18342,6 @@ html.sapi-intro-active body {
   flex-direction: column;
   flex: 1;
   gap: 0.25rem;
-}
-
-.guide-result-products-grid .product-name {
-  font-size: 1.6rem !important;
 }
 
 .guide-result-products-grid .guide-result-variations {
