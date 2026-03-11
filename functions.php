@@ -3291,25 +3291,6 @@ function sapi_guide_log_initial($session_id, $answers, $product_ids, $ai_text) {
     $device_type .= ' · ' . $browser;
   }
 
-  // Geolocation via ip-api.com (free, no key, 45 req/min)
-  $location = '';
-  if ($ip_address && !in_array($ip_address, ['127.0.0.1', '::1'], true)) {
-    $geo_response = wp_remote_get('http://ip-api.com/json/' . rawurlencode($ip_address) . '?fields=city,regionName,country&lang=fr', [
-      'timeout' => 3,
-    ]);
-    if (!is_wp_error($geo_response)) {
-      $geo_data = json_decode(wp_remote_retrieve_body($geo_response), true);
-      if ($geo_data) {
-        $parts = array_filter([
-          $geo_data['city'] ?? '',
-          $geo_data['regionName'] ?? '',
-          $geo_data['country'] ?? '',
-        ]);
-        $location = implode(', ', $parts);
-      }
-    }
-  }
-
   $wpdb->insert($table, [
     'session_id'     => $session_id,
     'created_at'     => current_time('mysql'),
@@ -3329,8 +3310,42 @@ function sapi_guide_log_initial($session_id, $answers, $product_ids, $ai_text) {
     'ip_address'     => $ip_address,
     'device_type'    => $device_type,
     'referrer'       => mb_substr($referrer, 0, 500),
-    'location'       => mb_substr($location, 0, 200),
+    'location'       => '',
   ]);
+
+  // Resolve geolocation AFTER response is sent (shutdown hook)
+  $insert_id = $wpdb->insert_id;
+  if ($insert_id && $ip_address && !in_array($ip_address, ['127.0.0.1', '::1'], true)) {
+    add_action('shutdown', function() use ($insert_id, $ip_address) {
+      sapi_guide_resolve_geolocation($insert_id, $ip_address);
+    });
+  }
+}
+
+/**
+ * Resolve IP geolocation via ip-api.com and update the log row.
+ * Called on shutdown hook so it never blocks the response to the visitor.
+ */
+function sapi_guide_resolve_geolocation($row_id, $ip_address) {
+  $geo_response = wp_remote_get('http://ip-api.com/json/' . rawurlencode($ip_address) . '?fields=city,regionName,country&lang=fr', [
+    'timeout' => 5,
+  ]);
+  if (is_wp_error($geo_response)) return;
+
+  $geo_data = json_decode(wp_remote_retrieve_body($geo_response), true);
+  if (!$geo_data) return;
+
+  $parts = array_filter([
+    $geo_data['city'] ?? '',
+    $geo_data['regionName'] ?? '',
+    $geo_data['country'] ?? '',
+  ]);
+  $location = implode(', ', $parts);
+  if (!$location) return;
+
+  global $wpdb;
+  $table = $wpdb->prefix . 'sapi_guide_logs';
+  $wpdb->update($table, ['location' => mb_substr($location, 0, 200)], ['id' => $row_id], ['%s'], ['%d']);
 }
 
 /**
