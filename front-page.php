@@ -512,7 +512,7 @@ foreach ($collection_slugs as $col) {
     <h2 class="section-title-kinetic">Restez informés</h2>
   </div>
   <p class="newsletter-subtitle">Nouveautés, éditions limitées, coulisses d'atelier.</p>
-  <form class="newsletter-form" action="#" method="post">
+  <form class="newsletter-form" action="#" method="post" id="newsletter-form">
     <input type="email" placeholder="votre@email.fr" class="newsletter-input-kinetic" required />
     <button type="submit" class="newsletter-submit-kinetic">
       <span>S'inscrire</span>
@@ -520,7 +520,57 @@ foreach ($collection_slugs as $col) {
         <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
       </svg>
     </button>
+    <p class="newsletter-feedback" style="display:none; margin-top:0.8rem; font-size:0.95rem;"></p>
   </form>
+  <script>
+  (function(){
+    var form = document.getElementById('newsletter-form');
+    if (!form) return;
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var input = form.querySelector('input[type="email"]');
+      var btn = form.querySelector('button');
+      var feedback = form.querySelector('.newsletter-feedback');
+      var email = input.value.trim();
+      if (!email) return;
+
+      btn.disabled = true;
+      btn.querySelector('span').textContent = 'Envoi…';
+      feedback.style.display = 'none';
+
+      var data = new FormData();
+      data.append('action', 'sapi_newsletter_subscribe');
+      data.append('email', email);
+      data.append('nonce', '<?php echo esc_js(wp_create_nonce("sapi_newsletter_nonce")); ?>');
+
+      fetch('<?php echo esc_url(admin_url("admin-ajax.php")); ?>', {
+        method: 'POST',
+        body: data
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        feedback.style.display = 'block';
+        if (res.success) {
+          feedback.style.color = '#018501';
+          feedback.textContent = res.data.message;
+          input.value = '';
+        } else {
+          feedback.style.color = '#E35B24';
+          feedback.textContent = res.data.message;
+        }
+        btn.disabled = false;
+        btn.querySelector('span').textContent = "S'inscrire";
+      })
+      .catch(function() {
+        feedback.style.display = 'block';
+        feedback.style.color = '#E35B24';
+        feedback.textContent = 'Erreur réseau. Réessayez.';
+        btn.disabled = false;
+        btn.querySelector('span').textContent = "S'inscrire";
+      });
+    });
+  })();
+  </script>
 </section>
 
 <script>

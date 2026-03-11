@@ -3012,6 +3012,60 @@ add_action('woocommerce_set_additional_field_value', function ($key, $value, $gr
 
 /**
  * ============================================================
+ * NEWSLETTER BREVO — AJAX subscription
+ * ============================================================
+ */
+add_action('wp_ajax_sapi_newsletter_subscribe', 'sapi_newsletter_subscribe');
+add_action('wp_ajax_nopriv_sapi_newsletter_subscribe', 'sapi_newsletter_subscribe');
+
+function sapi_newsletter_subscribe() {
+    check_ajax_referer('sapi_newsletter_nonce', 'nonce');
+
+    $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
+    if (!is_email($email)) {
+        wp_send_json_error(['message' => 'Adresse email invalide.']);
+    }
+
+    $api_key = defined('BREVO_API_KEY') ? BREVO_API_KEY : '';
+    if (!$api_key) {
+        wp_send_json_error(['message' => 'Configuration newsletter manquante.']);
+    }
+
+    $response = wp_remote_post('https://api.brevo.com/v3/contacts', [
+        'headers' => [
+            'api-key'      => $api_key,
+            'Content-Type' => 'application/json',
+            'Accept'       => 'application/json',
+        ],
+        'body' => wp_json_encode([
+            'email'            => $email,
+            'listIds'          => [6],
+            'updateEnabled'    => true,
+        ]),
+        'timeout' => 15,
+    ]);
+
+    if (is_wp_error($response)) {
+        wp_send_json_error(['message' => 'Erreur de connexion. Réessayez plus tard.']);
+    }
+
+    $code = wp_remote_retrieve_response_code($response);
+
+    if ($code === 201 || $code === 204) {
+        wp_send_json_success(['message' => 'Bienvenue dans la famille Sâpi !']);
+    }
+
+    $body = json_decode(wp_remote_retrieve_body($response), true);
+
+    if ($code === 400 && isset($body['message']) && strpos($body['message'], 'already exist') !== false) {
+        wp_send_json_success(['message' => 'Vous êtes déjà inscrit(e) !']);
+    }
+
+    wp_send_json_error(['message' => 'Une erreur est survenue. Réessayez plus tard.']);
+}
+
+/**
+ * ============================================================
  * CUSTOM POST TYPE : Projets Sur Mesure
  * ============================================================
  */
