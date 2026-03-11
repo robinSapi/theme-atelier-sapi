@@ -171,9 +171,12 @@ function sapi_maison_enqueue_assets() {
   // Menu burger JavaScript - chargé sur toutes les pages
   $menu_js_path = get_template_directory() . '/assets/menu.js';
   wp_enqueue_script('sapi-maison-menu', get_template_directory_uri() . '/assets/menu.js', [], file_exists($menu_js_path) ? filemtime($menu_js_path) : '1.0.0', true);
+  $guide_pages = get_pages(['meta_key' => '_wp_page_template', 'meta_value' => 'page-guide-luminaire.php', 'number' => 1]);
+  $guide_url = !empty($guide_pages) ? get_permalink($guide_pages[0]) : home_url('/guide-luminaire/');
   wp_localize_script('sapi-maison-menu', 'sapiMenu', [
     'miniCartNonce' => wp_create_nonce('sapi-update-mini-cart-qty'),
     'wcAjaxUrl'     => home_url('/?wc-ajax='),
+    'guideUrl'      => $guide_url,
   ]);
 
   // Product name formatter - chargé sur toutes les pages (prénom en Montserrat, reste en Square Peg)
