@@ -6168,7 +6168,7 @@ li.carousel-editorial-slide,
 
 .advice-tip-back-text {
   font-family: var(--font-display, 'Square Peg', cursive);
-  font-size: clamp(2.2rem, 4vw, 3.5rem);
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
   font-weight: 400;
   color: var(--bois-sombre, #4A3F35);
   line-height: 1.2;
@@ -6380,7 +6380,7 @@ li.carousel-editorial-slide,
 .advice-overlay-inner {
   position: relative;
   width: 92%;
-  max-width: 600px;
+  max-width: 800px;
   max-height: 85vh;
   background: var(--color-warm, #FBF6EA);
   border-radius: 20px;
@@ -17952,6 +17952,11 @@ html.sapi-intro-active body {
   margin: 0 auto;
 }
 
+.guide-choices-grid[data-count="2"] {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 500px;
+}
+
 .guide-choices-grid[data-count="4"] {
   grid-template-columns: repeat(4, 1fr);
   max-width: 900px;
@@ -18050,6 +18055,14 @@ html.sapi-intro-active body {
 
 .guide-choice-label {
   display: block;
+}
+
+.guide-choice-dim {
+  display: block;
+  color: var(--color-wood);
+  font-size: 0.85em;
+  font-weight: 500;
+  margin-top: 0.15rem;
 }
 
 /* ---- Navigation Buttons (back + reset) ---- */

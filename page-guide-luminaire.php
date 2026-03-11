@@ -27,9 +27,9 @@ $guide_steps = [
     'question'   => 'Quelle est la taille de votre pièce ?',
     'visibility' => ['piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'entree']],
     'choices'    => [
-      ['label' => 'Petite (< 10 m²)',   'slug' => 'petite',  'icon' => 'square-sm'],
-      ['label' => 'Moyenne (10–20 m²)',  'slug' => 'moyenne', 'icon' => 'square-md'],
-      ['label' => 'Grande (> 20 m²)',    'slug' => 'grande',  'icon' => 'square-lg'],
+      ['label' => 'Petite',   'dim' => '< 10 m²',   'slug' => 'petite',  'icon' => 'square-sm'],
+      ['label' => 'Moyenne',  'dim' => '10–20 m²',  'slug' => 'moyenne', 'icon' => 'square-md'],
+      ['label' => 'Grande',   'dim' => '> 20 m²',   'slug' => 'grande',  'icon' => 'square-lg'],
     ],
   ],
   [
@@ -63,9 +63,9 @@ $guide_steps = [
     'question'   => 'Quelle est votre hauteur sous-plafond ?',
     'visibility' => ['sortie' => ['plafond']],
     'choices'    => [
-      ['label' => 'Standard (< 2,50 m)',    'slug' => 'standard',    'icon' => 'ceiling-low'],
-      ['label' => 'Confortable (2,50–3 m)', 'slug' => 'confortable', 'icon' => 'ceiling-mid'],
-      ['label' => 'Haute (> 3 m)',          'slug' => 'haute',       'icon' => 'ceiling-high'],
+      ['label' => 'Standard',    'dim' => '< 2,50 m',  'slug' => 'standard',    'icon' => 'ceiling-low'],
+      ['label' => 'Confortable', 'dim' => '2,50–3 m', 'slug' => 'confortable', 'icon' => 'ceiling-mid'],
+      ['label' => 'Haute',       'dim' => '> 3 m',    'slug' => 'haute',       'icon' => 'ceiling-high'],
     ],
   ],
   [
@@ -175,7 +175,12 @@ $icons = [
                   <span class="guide-choice-icon" aria-hidden="true">
                     <?php echo $icon_svg; // SVGs are hardcoded above, safe ?>
                   </span>
-                  <span class="guide-choice-label"><?php echo esc_html($choice['label']); ?></span>
+                  <span class="guide-choice-label">
+                    <?php echo esc_html($choice['label']); ?>
+                    <?php if (!empty($choice['dim'])) : ?>
+                      <span class="guide-choice-dim"><?php echo esc_html($choice['dim']); ?></span>
+                    <?php endif; ?>
+                  </span>
                 </button>
               <?php endforeach; ?>
             </div>
