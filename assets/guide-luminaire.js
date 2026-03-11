@@ -152,9 +152,6 @@
     dom.resetBtn        = document.getElementById('guide-reset');
     dom.startBtn        = document.getElementById('guide-start-btn');
     dom.restartWrap     = document.getElementById('guide-restart-wrap');
-    dom.ambianceBanner  = document.getElementById('guide-ambiance-banner');
-    dom.ambianceImg     = document.getElementById('guide-ambiance-img');
-    dom.ambianceTitle   = document.getElementById('guide-ambiance-title');
 
     if (!dom.steps.length) return;
 
@@ -520,20 +517,6 @@
         if (d.products && d.products.length > 0) {
           renderProductsGrid(d.products, d.show_sur_mesure || false, d.sur_mesure_reason || '', d.sur_mesure_text || '');
 
-          // Show ambiance photo of first product as full-width banner
-          var firstProduct = d.products[0];
-          if (firstProduct && firstProduct.ambiance && dom.ambianceBanner && dom.ambianceImg) {
-            dom.ambianceImg.src = firstProduct.ambiance;
-            dom.ambianceImg.alt = firstProduct.title + ' \u2014 ambiance';
-            if (dom.ambianceTitle) {
-              var words = firstProduct.title.split(' ');
-              var fn = words[0] || '';
-              var rest = words.slice(1).join(' ');
-              dom.ambianceTitle.innerHTML = '<span class="product-firstname">' + escapeHtml(fn) + '</span>'
-                + (rest ? ' <span class="product-restname">' + escapeHtml(rest) + '</span>' : '');
-            }
-            dom.ambianceBanner.style.display = '';
-          }
         }
 
         // Save filter context + product IDs for refinement calls
@@ -622,18 +605,21 @@
         ? '<span class="product-image-hover"><img src="' + escapeHtml(p.hover_image) + '" alt="' + escapeHtml(p.title) + ' - ambiance" /></span>'
         : '';
 
-      // Variation pills
-      var variationHtml = '';
+      // Variation pills (wrapped together to avoid double gap)
+      var variationPills = '';
       if (p.variation_label) {
-        variationHtml += '<p class="guide-result-variation">'
+        variationPills += '<span class="guide-result-variation">'
           + 'Mat\u00e9riau conseill\u00e9 : ' + escapeHtml(p.variation_label)
-          + '</p>';
+          + '</span>';
       }
       if (p.size_label) {
-        variationHtml += '<p class="guide-result-variation">'
+        variationPills += '<span class="guide-result-variation">'
           + 'Taille recommand\u00e9e : ' + escapeHtml(p.size_label)
-          + '</p>';
+          + '</span>';
       }
+      var variationHtml = variationPills
+        ? '<div class="guide-result-variations">' + variationPills + '</div>'
+        : '';
 
       html += '<article class="product-card-cinetique guide-result-card">'
         + '<a href="' + escapeHtml(p.permalink) + '" class="product-card-link">'
@@ -681,6 +667,11 @@
 
     dom.productsGrid.innerHTML = html;
     dom.productsGrid.style.display = '';
+
+    // Refresh scroll dots for mobile slider
+    if (typeof window.scrollDotsRefresh === 'function') {
+      window.scrollDotsRefresh();
+    }
   }
 
   // ================================================================
@@ -869,21 +860,6 @@
     if (d.products && d.products.length > 0) {
       renderProductsGrid(d.products, false, '');
       state.currentProducts = d.products.map(function(p) { return p.id; });
-
-      // Update ambiance banner with first new product
-      var firstProduct = d.products[0];
-      if (firstProduct && firstProduct.ambiance && dom.ambianceBanner && dom.ambianceImg) {
-        dom.ambianceImg.src = firstProduct.ambiance;
-        dom.ambianceImg.alt = firstProduct.title + ' \u2014 ambiance';
-        if (dom.ambianceTitle) {
-          var words = firstProduct.title.split(' ');
-          var fn = words[0] || '';
-          var rest = words.slice(1).join(' ');
-          dom.ambianceTitle.innerHTML = '<span class="product-firstname">' + escapeHtml(fn) + '</span>'
-            + (rest ? ' <span class="product-restname">' + escapeHtml(rest) + '</span>' : '');
-        }
-        dom.ambianceBanner.style.display = '';
-      }
     }
 
     // Clear textarea, keep it visible for next round
@@ -1044,7 +1020,6 @@
       dom.results.setAttribute('aria-hidden', 'true');
       dom.results.classList.remove('is-visible');
     }
-    if (dom.ambianceBanner) dom.ambianceBanner.style.display = 'none';
     resetContactForm();
     if (dom.quiz) {
       dom.quiz.setAttribute('aria-hidden', 'false');

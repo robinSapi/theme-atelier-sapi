@@ -14,7 +14,8 @@
     { container: '.process-inner', child: '.process-step', snap: 'center' },
     { container: '.surmesure-grid', child: '.surmesure-card', snap: 'center' },
     { container: '.surmesure-steps', child: '.surmesure-step', snap: 'center' },
-    { container: '.use-cases-list', child: 'li', snap: 'center' }
+    { container: '.use-cases-list', child: 'li', snap: 'center' },
+    { container: '.guide-result-products-grid', child: '.guide-result-card', snap: 'center' }
   ];
 
   var instances = [];
@@ -114,6 +115,12 @@
     if (mql.matches) activateAll();
     mql.addEventListener('change', handleChange);
   }
+
+  // Public API: allow dynamic content to trigger dot creation
+  window.scrollDotsRefresh = function() {
+    destroyAll();
+    if (mql.matches) activateAll();
+  };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

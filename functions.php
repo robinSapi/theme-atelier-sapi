@@ -171,9 +171,12 @@ function sapi_maison_enqueue_assets() {
   // Menu burger JavaScript - chargé sur toutes les pages
   $menu_js_path = get_template_directory() . '/assets/menu.js';
   wp_enqueue_script('sapi-maison-menu', get_template_directory_uri() . '/assets/menu.js', [], file_exists($menu_js_path) ? filemtime($menu_js_path) : '1.0.0', true);
+  $guide_pages = get_pages(['meta_key' => '_wp_page_template', 'meta_value' => 'page-guide-luminaire.php', 'number' => 1]);
+  $guide_url = !empty($guide_pages) ? get_permalink($guide_pages[0]) : home_url('/guide-luminaire/');
   wp_localize_script('sapi-maison-menu', 'sapiMenu', [
     'miniCartNonce' => wp_create_nonce('sapi-update-mini-cart-qty'),
     'wcAjaxUrl'     => home_url('/?wc-ajax='),
+    'guideUrl'      => $guide_url,
   ]);
 
   // Product name formatter - chargé sur toutes les pages (prénom en Montserrat, reste en Square Peg)
@@ -1579,11 +1582,8 @@ function sapi_ajax_guide_results() {
     return;
   }
 
-  // 1b. Rate limiting (10 appels/heure par IP)
-  if (!sapi_guide_check_rate_limit()) {
-    wp_send_json_error(['message' => 'Trop de requêtes, veuillez réessayer dans une heure.'], 429);
-    return;
-  }
+  // 1b. Rate limiting (10 appels IA/heure par IP) — checked later, products still returned
+  $ai_allowed = sapi_guide_check_rate_limit();
 
   // 1c. Honeypot check
   if (!empty($_POST['guide_website'])) {
@@ -1650,9 +1650,9 @@ function sapi_ajax_guide_results() {
   $diversify_format = ($eclairage_answer === 'grappe');
   $display_products = sapi_guide_pick_four($products_data, $show_sur_mesure ? 3 : 4, $diversify_format);
 
-  // 6. Call Claude API for AI recommendation (only sees the 4 displayed products)
+  // 6. Call Claude API for AI recommendation (skip if rate limited)
   $ai_response = null;
-  if (!empty($display_products)) {
+  if (!empty($display_products) && $ai_allowed) {
     $system_prompt = sapi_guide_build_system_prompt($display_products, $clean, $fallback_notes, $show_sur_mesure);
     $ai_response = sapi_guide_call_claude($system_prompt);
   }
@@ -1813,9 +1813,13 @@ function sapi_ajax_guide_refine() {
     return;
   }
 
-  // 1b. Rate limiting (partagé avec guide_results, 10 appels/heure par IP)
+  // 1b. Rate limiting — if exceeded, fallback to contact form
   if (!sapi_guide_check_rate_limit()) {
-    wp_send_json_error(['message' => 'Trop de requêtes, veuillez réessayer dans une heure.'], 429);
+    wp_send_json_success([
+      'action'         => 'contact',
+      'ai_text'        => 'Je ne peux plus affiner ma recherche pour le moment. Laissez vos coordonnées et Robin vous répondra personnellement.',
+      'conversation'   => [],
+    ]);
     return;
   }
 

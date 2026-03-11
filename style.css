@@ -1609,6 +1609,11 @@ button:hover,
   }
 }
 
+/* Hide chip on guide luminaire page (redundant with quiz) */
+.page-template-page-guide-luminaire .guide-profile-chip {
+  display: none !important;
+}
+
 /* Guide Profile Chip */
 .guide-profile-chip {
   display: flex;
@@ -11207,7 +11212,7 @@ transform: translateY(15px);
 
 .product-card-cinetique .product-name {
   font-family: var(--font-body);
-  font-size: 1.35rem !important; /* Taille réduite pour meilleur équilibre */
+  font-size: 1.4rem !important;
   font-weight: 700;
   color: var(--color-dark);
   margin: 0 0 0.75rem;
@@ -11339,7 +11344,7 @@ transform: translateY(15px);
   }
 
   .product-card-cinetique .product-name {
-    font-size: 1rem !important;
+    font-size: 1.6rem !important;
     margin-bottom: 0.5rem;
   }
 
@@ -18336,7 +18341,24 @@ html.sapi-intro-active body {
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: 0.75rem;
+  gap: 0;
+}
+
+.guide-result-products-grid .product-name {
+  margin-bottom: 0.15rem;
+}
+
+.guide-result-products-grid .product-category {
+  margin-bottom: 0.25rem;
+}
+
+.guide-result-products-grid .product-price {
+  margin-bottom: 0.3rem;
+}
+
+.guide-result-products-grid .guide-result-variations {
+  margin-top: 0.15rem;
+  margin-bottom: 0.5rem;
 }
 
 /* Sur mesure card: flex to fill stretched parent */
@@ -18349,27 +18371,30 @@ html.sapi-intro-active body {
   align-self: flex-start;
 }
 
+.guide-result-variations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
 .guide-result-variation {
   font-family: 'Montserrat', sans-serif;
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--color-wood, #937D68);
-  margin: 0.5rem 0 0;
   padding: 0.3rem 0.75rem;
   background: var(--color-warm, #FBF6EA);
   border-radius: 100px;
   display: inline-block;
 }
 
-/* ---- Contact Form — sticky card ---- */
+/* ---- Contact Form card ---- */
 .guide-contact-wrap {
-  position: sticky;
-  bottom: 1rem;
-  z-index: 900;
+  position: relative;
   background: var(--color-cream, #FEFDFB);
-  border: 1px solid rgba(147, 125, 104, 0.15);
+  border: 1.5px solid rgba(147, 125, 104, 0.25);
   border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.12);
   padding: 1rem 1.5rem 1.25rem;
   text-align: center;
   max-width: 960px;
@@ -18378,7 +18403,7 @@ html.sapi-intro-active body {
 
 .guide-contact-prompt {
   font-family: 'Square Peg', cursive;
-  font-size: 1.5rem;
+  font-size: 2rem;
   color: var(--color-wood, #937D68);
   margin: 0 0 0.5rem;
 }
@@ -18623,103 +18648,46 @@ html.sapi-intro-active body {
 .guide-restart-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.875rem 2rem;
-  background: transparent;
-  border: 2px solid var(--color-wood, #937D68);
-  border-radius: 100px;
+  gap: 0.4rem;
+  padding: 0.5rem 0;
+  background: none;
+  border: none;
   font-family: 'Montserrat', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 500;
   color: var(--color-wood, #937D68);
+  opacity: 0.6;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 @media (hover: hover) {
   .guide-restart-btn:hover {
-    background: var(--color-wood, #937D68);
-    color: #fff;
+    opacity: 1;
   }
 }
 
 .guide-shop-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2rem;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  border-radius: 100px;
   font-family: 'Montserrat', sans-serif;
   font-size: 0.9rem;
   font-weight: 700;
-  color: var(--color-orange, #E35B24);
+  color: #fff;
   text-decoration: none;
-  transition: opacity 0.2s ease;
+  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 @media (hover: hover) {
   .guide-shop-link:hover {
-    opacity: 0.8;
-  }
-}
-
-/* ---- Ambiance Banner (full-width photo above footer) ---- */
-.guide-ambiance-banner {
-  position: relative;
-  width: 100%;
-  max-height: 720px;
-  overflow: hidden;
-  line-height: 0;
-}
-
-.guide-ambiance-img {
-  width: 100%;
-  height: 720px;
-  object-fit: cover;
-  object-position: center;
-}
-
-.guide-ambiance-title {
-  position: absolute;
-  top: 2.5rem;
-  left: 3rem;
-  margin: 0;
-  color: #fff;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.45), 0 1px 6px rgba(0, 0, 0, 0.3);
-  text-align: left;
-  line-height: 1.2;
-}
-
-.guide-ambiance-title .product-firstname {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 700;
-  text-transform: uppercase;
-  font-size: 1.8rem;
-  letter-spacing: 0.08em;
-  color: #fff;
-}
-
-.guide-ambiance-title .product-restname {
-  font-family: 'Square Peg', cursive;
-  font-size: 4rem;
-  text-transform: capitalize;
-  color: #fff;
-}
-
-@media (max-width: 768px) {
-  .guide-ambiance-banner {
-    max-height: 420px;
-  }
-  .guide-ambiance-img {
-    height: 420px;
-  }
-  .guide-ambiance-title {
-    top: 1.5rem;
-    left: 1.5rem;
-  }
-  .guide-ambiance-title .product-firstname {
-    font-size: 1.2rem;
-  }
-  .guide-ambiance-title .product-restname {
-    font-size: 2.8rem;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
   }
 }
 
@@ -18772,10 +18740,27 @@ html.sapi-intro-active body {
   }
 
   .guide-result-products-grid {
-    gap: 16px;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 1rem;
+    padding: 15px 5%;
+    margin: 0 -1rem 1rem;
+    width: calc(100% + 2rem);
+    max-width: none;
   }
+
+  .guide-result-products-grid::-webkit-scrollbar {
+    display: none;
+  }
+
   .guide-result-products-grid > * {
-    width: calc(50% - 8px);
+    flex: 0 0 90%;
+    scroll-snap-align: center;
   }
 
   .guide-ai-recommendation {
@@ -18804,7 +18789,7 @@ html.sapi-intro-active body {
   }
 
   .guide-contact-prompt {
-    font-size: 1.3rem;
+    font-size: 1.75rem;
     margin-bottom: 0.35rem;
   }
 
@@ -18822,10 +18807,6 @@ html.sapi-intro-active body {
   .guide-choices-grid,
   .guide-choices-grid[data-count="5"] {
     grid-template-columns: 1fr;
-  }
-
-  .guide-result-products-grid > * {
-    width: 100%;
   }
 }
 
