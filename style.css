@@ -18671,68 +18671,6 @@ html.sapi-intro-active body {
   }
 }
 
-/* ---- Ambiance Banner (full-width photo above footer) ---- */
-.guide-ambiance-banner {
-  position: relative;
-  width: 100%;
-  max-height: 720px;
-  overflow: hidden;
-  line-height: 0;
-}
-
-.guide-ambiance-img {
-  width: 100%;
-  height: 720px;
-  object-fit: cover;
-  object-position: center;
-}
-
-.guide-ambiance-title {
-  position: absolute;
-  top: 2.5rem;
-  left: 3rem;
-  margin: 0;
-  color: #fff;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.45), 0 1px 6px rgba(0, 0, 0, 0.3);
-  text-align: left;
-  line-height: 1.2;
-}
-
-.guide-ambiance-title .product-firstname {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 700;
-  text-transform: uppercase;
-  font-size: 1.8rem;
-  letter-spacing: 0.08em;
-  color: #fff;
-}
-
-.guide-ambiance-title .product-restname {
-  font-family: 'Square Peg', cursive;
-  font-size: 4rem;
-  text-transform: capitalize;
-  color: #fff;
-}
-
-@media (max-width: 768px) {
-  .guide-ambiance-banner {
-    max-height: 420px;
-  }
-  .guide-ambiance-img {
-    height: 420px;
-  }
-  .guide-ambiance-title {
-    top: 1.5rem;
-    left: 1.5rem;
-  }
-  .guide-ambiance-title .product-firstname {
-    font-size: 1.2rem;
-  }
-  .guide-ambiance-title .product-restname {
-    font-size: 2.8rem;
-  }
-}
-
 /* ---- RESPONSIVE ---- */
 @media (max-width: 768px) {
   .guide-quiz-section {
