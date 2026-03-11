@@ -3486,7 +3486,6 @@ function sapi_guide_admin_page() {
         <tr>
           <th>Date</th>
           <th>Appareil</th>
-          <th>IP</th>
           <th>Localisation</th>
           <th>Provenance</th>
           <th>Pièce</th>
@@ -3501,21 +3500,12 @@ function sapi_guide_admin_page() {
       </thead>
       <tbody>
         <?php if (empty($rows)) : ?>
-          <tr><td colspan="13" style="text-align:center; color:#999;">Aucune session enregistrée pour le moment.</td></tr>
+          <tr><td colspan="12" style="text-align:center; color:#999;">Aucune session enregistrée pour le moment.</td></tr>
         <?php else : ?>
           <?php foreach ($rows as $r) : ?>
             <tr>
               <td style="white-space:nowrap;"><?php echo esc_html(wp_date('d/m/Y H:i', strtotime($r->created_at))); ?></td>
               <td style="white-space:nowrap;"><?php echo esc_html($r->device_type ?: '—'); ?></td>
-              <td style="white-space:nowrap;">
-                <?php if ($r->ip_address) : ?>
-                  <a href="https://whatismyipaddress.com/ip/<?php echo esc_attr($r->ip_address); ?>" target="_blank" rel="noopener" title="Voir la localisation" style="text-decoration:none;">
-                    <?php echo esc_html($r->ip_address); ?> &#x1F50D;
-                  </a>
-                <?php else : ?>
-                  —
-                <?php endif; ?>
-              </td>
               <td><?php echo esc_html($r->location ?: '—'); ?></td>
               <td>
                 <?php if ($r->referrer) :
