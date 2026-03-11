@@ -3213,6 +3213,9 @@ function sapi_guide_create_logs_table() {
     contact_name varchar(100) DEFAULT '',
     contact_email varchar(100) DEFAULT '',
     user_agent varchar(500) DEFAULT '',
+    ip_address varchar(45) DEFAULT '',
+    device_type varchar(20) DEFAULT '',
+    referrer varchar(500) DEFAULT '',
     PRIMARY KEY (id),
     KEY session_id (session_id)
   ) $charset;";
@@ -3223,11 +3226,24 @@ function sapi_guide_create_logs_table() {
 add_action('after_switch_theme', 'sapi_guide_create_logs_table');
 
 // Also create on init if table doesn't exist yet (for existing installs)
+// And add missing columns for existing tables
 function sapi_guide_maybe_create_table() {
   global $wpdb;
   $table = $wpdb->prefix . 'sapi_guide_logs';
   if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table)) !== $table) {
     sapi_guide_create_logs_table();
+  } else {
+    // Add columns if they don't exist yet (migration)
+    $columns = $wpdb->get_col("DESCRIBE $table", 0);
+    if (!in_array('ip_address', $columns, true)) {
+      $wpdb->query("ALTER TABLE $table ADD COLUMN ip_address varchar(45) DEFAULT '' AFTER user_agent");
+    }
+    if (!in_array('device_type', $columns, true)) {
+      $wpdb->query("ALTER TABLE $table ADD COLUMN device_type varchar(20) DEFAULT '' AFTER ip_address");
+    }
+    if (!in_array('referrer', $columns, true)) {
+      $wpdb->query("ALTER TABLE $table ADD COLUMN referrer varchar(500) DEFAULT '' AFTER device_type");
+    }
   }
 }
 add_action('admin_init', 'sapi_guide_maybe_create_table');
@@ -3240,6 +3256,19 @@ function sapi_guide_log_initial($session_id, $answers, $product_ids, $ai_text) {
   $table = $wpdb->prefix . 'sapi_guide_logs';
 
   $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])) : '';
+  $ip_address = isset($_SERVER['HTTP_X_FORWARDED_FOR'])
+    ? sanitize_text_field(wp_unslash(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0]))
+    : (isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '');
+  $referrer = isset($_SERVER['HTTP_REFERER']) ? esc_url_raw(wp_unslash($_SERVER['HTTP_REFERER'])) : '';
+
+  // Detect device type from user-agent
+  $device_type = 'Desktop';
+  $ua_lower = strtolower($user_agent);
+  if (preg_match('/mobile|android.*mobile|iphone|ipod|windows phone/i', $ua_lower)) {
+    $device_type = 'Mobile';
+  } elseif (preg_match('/tablet|ipad|android(?!.*mobile)/i', $ua_lower)) {
+    $device_type = 'Tablette';
+  }
 
   $wpdb->insert($table, [
     'session_id'     => $session_id,
@@ -3257,6 +3286,9 @@ function sapi_guide_log_initial($session_id, $answers, $product_ids, $ai_text) {
     'refine_messages'=> '',
     'contact_sent'   => 0,
     'user_agent'     => mb_substr($user_agent, 0, 500),
+    'ip_address'     => $ip_address,
+    'device_type'    => $device_type,
+    'referrer'       => mb_substr($referrer, 0, 500),
   ]);
 }
 
@@ -3331,11 +3363,14 @@ function sapi_guide_export_csv() {
   $out = fopen('php://output', 'w');
   fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM for Excel
 
-  fputcsv($out, ['Date', 'Pièce', 'Taille', 'Éclairage', 'Sortie', 'Hauteur', 'Table', 'Style', 'Produits affichés', 'Texte IA', 'Nb refines', 'Messages refine', 'Contact envoyé', 'Nom contact', 'Email contact'], ';');
+  fputcsv($out, ['Date', 'IP', 'Appareil', 'Provenance', 'Pièce', 'Taille', 'Éclairage', 'Sortie', 'Hauteur', 'Table', 'Style', 'Produits affichés', 'Texte IA', 'Nb refines', 'Messages refine', 'Contact envoyé', 'Nom contact', 'Email contact'], ';');
 
   foreach ($rows as $r) {
     fputcsv($out, [
       $r['created_at'],
+      $r['ip_address'] ?? '',
+      $r['device_type'] ?? '',
+      $r['referrer'] ?? '',
       $r['piece'],
       $r['taille'],
       $r['eclairage'],
@@ -3393,6 +3428,8 @@ function sapi_guide_admin_page() {
       <thead>
         <tr>
           <th>Date</th>
+          <th>Appareil</th>
+          <th>IP</th>
           <th>Pièce</th>
           <th>Taille</th>
           <th>Sortie</th>
@@ -3405,11 +3442,18 @@ function sapi_guide_admin_page() {
       </thead>
       <tbody>
         <?php if (empty($rows)) : ?>
-          <tr><td colspan="9" style="text-align:center; color:#999;">Aucune session enregistrée pour le moment.</td></tr>
+          <tr><td colspan="11" style="text-align:center; color:#999;">Aucune session enregistrée pour le moment.</td></tr>
         <?php else : ?>
           <?php foreach ($rows as $r) : ?>
             <tr>
               <td style="white-space:nowrap;"><?php echo esc_html(wp_date('d/m/Y H:i', strtotime($r->created_at))); ?></td>
+              <td><?php echo esc_html($r->device_type ?: '—'); ?></td>
+              <td title="<?php echo esc_attr($r->referrer ?: ''); ?>" style="cursor:<?php echo $r->referrer ? 'help' : 'default'; ?>;">
+                <?php echo esc_html($r->ip_address ?: '—'); ?>
+                <?php if ($r->referrer) : ?>
+                  <br><small style="color:#999;"><?php echo esc_html(wp_parse_url($r->referrer, PHP_URL_HOST) ?: $r->referrer); ?></small>
+                <?php endif; ?>
+              </td>
               <td><?php echo esc_html($r->piece); ?></td>
               <td><?php echo esc_html($r->taille); ?></td>
               <td><?php echo esc_html($r->sortie); ?></td>
