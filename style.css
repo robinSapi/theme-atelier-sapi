@@ -18344,6 +18344,10 @@ html.sapi-intro-active body {
   gap: 0.25rem;
 }
 
+.guide-result-products-grid .product-name {
+  font-size: 1.6rem !important;
+}
+
 .guide-result-products-grid .guide-result-variations {
   margin-top: 0.4rem;
 }
