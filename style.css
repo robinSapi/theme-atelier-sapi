@@ -18785,7 +18785,7 @@ html.sapi-intro-active body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 0.75rem;
-    padding: 0;
+    padding: 0 7.5%;
     margin: 0 -1rem 1rem;
     width: calc(100% + 2rem);
     max-width: none;
