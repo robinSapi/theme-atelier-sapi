@@ -18052,6 +18052,14 @@ html.sapi-intro-active body {
   display: block;
 }
 
+.guide-choice-dim {
+  display: block;
+  color: var(--color-wood);
+  font-size: 0.85em;
+  font-weight: 500;
+  margin-top: 0.15rem;
+}
+
 /* ---- Navigation Buttons (back + reset) ---- */
 .guide-nav-buttons {
   position: fixed;
