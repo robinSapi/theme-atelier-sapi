@@ -18375,9 +18375,9 @@ html.sapi-intro-active body {
 .guide-contact-wrap {
   position: relative;
   background: var(--color-cream, #FEFDFB);
-  border: 1px solid rgba(147, 125, 104, 0.15);
+  border: 1.5px solid rgba(147, 125, 104, 0.25);
   border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.12);
   padding: 1rem 1.5rem 1.25rem;
   text-align: center;
   max-width: 960px;
@@ -18631,41 +18631,46 @@ html.sapi-intro-active body {
 .guide-restart-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.875rem 2rem;
-  background: transparent;
-  border: 2px solid var(--color-wood, #937D68);
-  border-radius: 100px;
+  gap: 0.4rem;
+  padding: 0.5rem 0;
+  background: none;
+  border: none;
   font-family: 'Montserrat', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 500;
   color: var(--color-wood, #937D68);
+  opacity: 0.6;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 @media (hover: hover) {
   .guide-restart-btn:hover {
-    background: var(--color-wood, #937D68);
-    color: #fff;
+    opacity: 1;
   }
 }
 
 .guide-shop-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2rem;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  border-radius: 100px;
   font-family: 'Montserrat', sans-serif;
   font-size: 0.9rem;
   font-weight: 700;
-  color: var(--color-orange, #E35B24);
+  color: #fff;
   text-decoration: none;
-  transition: opacity 0.2s ease;
+  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 @media (hover: hover) {
   .guide-shop-link:hover {
-    opacity: 0.8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
   }
 }
 
