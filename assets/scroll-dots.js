@@ -15,7 +15,7 @@
     { container: '.surmesure-grid', child: '.surmesure-card', snap: 'center' },
     { container: '.surmesure-steps', child: '.surmesure-step', snap: 'center' },
     { container: '.use-cases-list', child: 'li', snap: 'center' },
-    { container: '.guide-result-products-grid', child: '.guide-result-card', snap: 'start' }
+    { container: '.guide-result-products-grid', child: '.guide-result-card', snap: 'center' }
   ];
 
   var instances = [];
