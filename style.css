@@ -18772,10 +18772,24 @@ html.sapi-intro-active body {
   }
 
   .guide-result-products-grid {
-    gap: 16px;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 1rem;
+    padding: 0 5%;
+    margin: 0 auto 1rem;
   }
+
+  .guide-result-products-grid::-webkit-scrollbar {
+    display: none;
+  }
+
   .guide-result-products-grid > * {
-    width: calc(50% - 8px);
+    flex: 0 0 80%;
+    scroll-snap-align: center;
   }
 
   .guide-ai-recommendation {
@@ -18822,10 +18836,6 @@ html.sapi-intro-active body {
   .guide-choices-grid,
   .guide-choices-grid[data-count="5"] {
     grid-template-columns: 1fr;
-  }
-
-  .guide-result-products-grid > * {
-    width: 100%;
   }
 }
 

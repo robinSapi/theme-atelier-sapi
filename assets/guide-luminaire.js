@@ -681,6 +681,11 @@
 
     dom.productsGrid.innerHTML = html;
     dom.productsGrid.style.display = '';
+
+    // Refresh scroll dots for mobile slider
+    if (typeof window.scrollDotsRefresh === 'function') {
+      window.scrollDotsRefresh();
+    }
   }
 
   // ================================================================
