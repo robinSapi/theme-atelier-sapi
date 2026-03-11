@@ -18386,7 +18386,7 @@ html.sapi-intro-active body {
 
 .guide-contact-prompt {
   font-family: 'Square Peg', cursive;
-  font-size: 1.5rem;
+  font-size: 2rem;
   color: var(--color-wood, #937D68);
   margin: 0 0 0.5rem;
 }
@@ -18772,7 +18772,7 @@ html.sapi-intro-active body {
   }
 
   .guide-contact-prompt {
-    font-size: 1.3rem;
+    font-size: 1.75rem;
     margin-bottom: 0.35rem;
   }
 
