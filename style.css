@@ -18371,11 +18371,9 @@ html.sapi-intro-active body {
   display: inline-block;
 }
 
-/* ---- Contact Form — sticky card ---- */
+/* ---- Contact Form card ---- */
 .guide-contact-wrap {
-  position: sticky;
-  bottom: 1rem;
-  z-index: 900;
+  position: relative;
   background: var(--color-cream, #FEFDFB);
   border: 1px solid rgba(147, 125, 104, 0.15);
   border-radius: 16px;
