@@ -622,18 +622,21 @@
         ? '<span class="product-image-hover"><img src="' + escapeHtml(p.hover_image) + '" alt="' + escapeHtml(p.title) + ' - ambiance" /></span>'
         : '';
 
-      // Variation pills
-      var variationHtml = '';
+      // Variation pills (wrapped together to avoid double gap)
+      var variationPills = '';
       if (p.variation_label) {
-        variationHtml += '<p class="guide-result-variation">'
+        variationPills += '<span class="guide-result-variation">'
           + 'Mat\u00e9riau conseill\u00e9 : ' + escapeHtml(p.variation_label)
-          + '</p>';
+          + '</span>';
       }
       if (p.size_label) {
-        variationHtml += '<p class="guide-result-variation">'
+        variationPills += '<span class="guide-result-variation">'
           + 'Taille recommand\u00e9e : ' + escapeHtml(p.size_label)
-          + '</p>';
+          + '</span>';
       }
+      var variationHtml = variationPills
+        ? '<div class="guide-result-variations">' + variationPills + '</div>'
+        : '';
 
       html += '<article class="product-card-cinetique guide-result-card">'
         + '<a href="' + escapeHtml(p.permalink) + '" class="product-card-link">'

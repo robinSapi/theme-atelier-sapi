@@ -18349,12 +18349,17 @@ html.sapi-intro-active body {
   align-self: flex-start;
 }
 
+.guide-result-variations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
 .guide-result-variation {
   font-family: 'Montserrat', sans-serif;
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--color-wood, #937D68);
-  margin: 0.5rem 0 0;
   padding: 0.3rem 0.75rem;
   background: var(--color-warm, #FBF6EA);
   border-radius: 100px;
