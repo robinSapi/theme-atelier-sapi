@@ -155,6 +155,31 @@ $data_attrs .= ' data-price="' . esc_attr($filter_price) . '"';
 $data_attrs .= $wood_essence ? ' data-wood="' . esc_attr(sanitize_title($wood_essence)) . '"' : '';
 $data_attrs .= $size_dimension > 0 ? ' data-size="' . esc_attr($size_dimension) . '"' : '';
 
+// Variation images for guide personalization (one image per essence)
+if ($is_variable) {
+  $variation_imgs = [];
+  $main_img_id = $product->get_image_id();
+  $children = $product->get_children();
+  foreach ($children as $var_id) {
+    $var_obj = wc_get_product($var_id);
+    if (!$var_obj || !$var_obj->is_purchasable()) continue;
+    $ess = $var_obj->get_attribute('pa_materiau');
+    if (!$ess) continue;
+    $ess_slug = sanitize_title($ess);
+    if (isset($variation_imgs[$ess_slug])) continue;
+    $img_id = $var_obj->get_image_id();
+    if ($img_id && (int) $img_id !== (int) $main_img_id) {
+      $img_url = wp_get_attachment_image_url($img_id, 'woocommerce_thumbnail');
+      if ($img_url) {
+        $variation_imgs[$ess_slug] = $img_url;
+      }
+    }
+  }
+  if (!empty($variation_imgs)) {
+    $data_attrs .= ' data-variation-imgs="' . esc_attr(wp_json_encode($variation_imgs)) . '"';
+  }
+}
+
 // Add editorial carousel specific attributes
 if ($is_editorial_carousel) {
   $data_attrs .= ' data-slide-index="' . esc_attr($slide_index) . '"';
