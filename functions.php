@@ -3213,6 +3213,10 @@ function sapi_guide_create_logs_table() {
     contact_name varchar(100) DEFAULT '',
     contact_email varchar(100) DEFAULT '',
     user_agent varchar(500) DEFAULT '',
+    ip_address varchar(45) DEFAULT '',
+    device_type varchar(20) DEFAULT '',
+    referrer varchar(500) DEFAULT '',
+    location varchar(200) DEFAULT '',
     PRIMARY KEY (id),
     KEY session_id (session_id)
   ) $charset;";
@@ -3223,11 +3227,27 @@ function sapi_guide_create_logs_table() {
 add_action('after_switch_theme', 'sapi_guide_create_logs_table');
 
 // Also create on init if table doesn't exist yet (for existing installs)
+// And add missing columns for existing tables
 function sapi_guide_maybe_create_table() {
   global $wpdb;
   $table = $wpdb->prefix . 'sapi_guide_logs';
   if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table)) !== $table) {
     sapi_guide_create_logs_table();
+  } else {
+    // Add columns if they don't exist yet (migration)
+    $columns = $wpdb->get_col("DESCRIBE $table", 0);
+    if (!in_array('ip_address', $columns, true)) {
+      $wpdb->query("ALTER TABLE $table ADD COLUMN ip_address varchar(45) DEFAULT '' AFTER user_agent");
+    }
+    if (!in_array('device_type', $columns, true)) {
+      $wpdb->query("ALTER TABLE $table ADD COLUMN device_type varchar(20) DEFAULT '' AFTER ip_address");
+    }
+    if (!in_array('referrer', $columns, true)) {
+      $wpdb->query("ALTER TABLE $table ADD COLUMN referrer varchar(500) DEFAULT '' AFTER device_type");
+    }
+    if (!in_array('location', $columns, true)) {
+      $wpdb->query("ALTER TABLE $table ADD COLUMN location varchar(200) DEFAULT '' AFTER referrer");
+    }
   }
 }
 add_action('admin_init', 'sapi_guide_maybe_create_table');
@@ -3240,6 +3260,36 @@ function sapi_guide_log_initial($session_id, $answers, $product_ids, $ai_text) {
   $table = $wpdb->prefix . 'sapi_guide_logs';
 
   $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])) : '';
+  $ip_address = isset($_SERVER['HTTP_X_FORWARDED_FOR'])
+    ? sanitize_text_field(wp_unslash(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0]))
+    : (isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '');
+  $referrer = isset($_SERVER['HTTP_REFERER']) ? esc_url_raw(wp_unslash($_SERVER['HTTP_REFERER'])) : '';
+
+  // Detect device type + browser from user-agent
+  $device_type = 'Desktop';
+  $ua_lower = strtolower($user_agent);
+  if (preg_match('/mobile|android.*mobile|iphone|ipod|windows phone/i', $ua_lower)) {
+    $device_type = 'Mobile';
+  } elseif (preg_match('/tablet|ipad|android(?!.*mobile)/i', $ua_lower)) {
+    $device_type = 'Tablette';
+  }
+
+  // Detect browser
+  $browser = '';
+  if (preg_match('/Edg\//i', $user_agent)) {
+    $browser = 'Edge';
+  } elseif (preg_match('/OPR\//i', $user_agent)) {
+    $browser = 'Opera';
+  } elseif (preg_match('/Chrome\//i', $user_agent) && !preg_match('/Edg\//i', $user_agent)) {
+    $browser = 'Chrome';
+  } elseif (preg_match('/Safari\//i', $user_agent) && !preg_match('/Chrome\//i', $user_agent)) {
+    $browser = 'Safari';
+  } elseif (preg_match('/Firefox\//i', $user_agent)) {
+    $browser = 'Firefox';
+  }
+  if ($browser) {
+    $device_type .= ' · ' . $browser;
+  }
 
   $wpdb->insert($table, [
     'session_id'     => $session_id,
@@ -3257,7 +3307,45 @@ function sapi_guide_log_initial($session_id, $answers, $product_ids, $ai_text) {
     'refine_messages'=> '',
     'contact_sent'   => 0,
     'user_agent'     => mb_substr($user_agent, 0, 500),
+    'ip_address'     => $ip_address,
+    'device_type'    => $device_type,
+    'referrer'       => mb_substr($referrer, 0, 500),
+    'location'       => '',
   ]);
+
+  // Resolve geolocation AFTER response is sent (shutdown hook)
+  $insert_id = $wpdb->insert_id;
+  if ($insert_id && $ip_address && !in_array($ip_address, ['127.0.0.1', '::1'], true)) {
+    add_action('shutdown', function() use ($insert_id, $ip_address) {
+      sapi_guide_resolve_geolocation($insert_id, $ip_address);
+    });
+  }
+}
+
+/**
+ * Resolve IP geolocation via ip-api.com and update the log row.
+ * Called on shutdown hook so it never blocks the response to the visitor.
+ */
+function sapi_guide_resolve_geolocation($row_id, $ip_address) {
+  $geo_response = wp_remote_get('http://ip-api.com/json/' . rawurlencode($ip_address) . '?fields=city,regionName,country&lang=fr', [
+    'timeout' => 5,
+  ]);
+  if (is_wp_error($geo_response)) return;
+
+  $geo_data = json_decode(wp_remote_retrieve_body($geo_response), true);
+  if (!$geo_data) return;
+
+  $parts = array_filter([
+    $geo_data['city'] ?? '',
+    $geo_data['regionName'] ?? '',
+    $geo_data['country'] ?? '',
+  ]);
+  $location = implode(', ', $parts);
+  if (!$location) return;
+
+  global $wpdb;
+  $table = $wpdb->prefix . 'sapi_guide_logs';
+  $wpdb->update($table, ['location' => mb_substr($location, 0, 200)], ['id' => $row_id], ['%s'], ['%d']);
 }
 
 /**
@@ -3331,11 +3419,15 @@ function sapi_guide_export_csv() {
   $out = fopen('php://output', 'w');
   fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM for Excel
 
-  fputcsv($out, ['Date', 'Pièce', 'Taille', 'Éclairage', 'Sortie', 'Hauteur', 'Table', 'Style', 'Produits affichés', 'Texte IA', 'Nb refines', 'Messages refine', 'Contact envoyé', 'Nom contact', 'Email contact'], ';');
+  fputcsv($out, ['Date', 'IP', 'Localisation', 'Appareil', 'Provenance', 'Pièce', 'Taille', 'Éclairage', 'Sortie', 'Hauteur', 'Table', 'Style', 'Produits affichés', 'Texte IA', 'Nb refines', 'Messages refine', 'Contact envoyé', 'Nom contact', 'Email contact'], ';');
 
   foreach ($rows as $r) {
     fputcsv($out, [
       $r['created_at'],
+      $r['ip_address'] ?? '',
+      $r['location'] ?? '',
+      $r['device_type'] ?? '',
+      $r['referrer'] ?? '',
       $r['piece'],
       $r['taille'],
       $r['eclairage'],
@@ -3393,6 +3485,9 @@ function sapi_guide_admin_page() {
       <thead>
         <tr>
           <th>Date</th>
+          <th>Appareil</th>
+          <th>Localisation</th>
+          <th>Provenance</th>
           <th>Pièce</th>
           <th>Taille</th>
           <th>Sortie</th>
@@ -3405,11 +3500,34 @@ function sapi_guide_admin_page() {
       </thead>
       <tbody>
         <?php if (empty($rows)) : ?>
-          <tr><td colspan="9" style="text-align:center; color:#999;">Aucune session enregistrée pour le moment.</td></tr>
+          <tr><td colspan="12" style="text-align:center; color:#999;">Aucune session enregistrée pour le moment.</td></tr>
         <?php else : ?>
           <?php foreach ($rows as $r) : ?>
             <tr>
               <td style="white-space:nowrap;"><?php echo esc_html(wp_date('d/m/Y H:i', strtotime($r->created_at))); ?></td>
+              <td style="white-space:nowrap;"><?php echo esc_html($r->device_type ?: '—'); ?></td>
+              <td><?php echo esc_html($r->location ?: '—'); ?></td>
+              <td>
+                <?php if ($r->referrer) :
+                  $ref_path = trim(wp_parse_url($r->referrer, PHP_URL_PATH) ?: '', '/');
+                  $ref_page_id = url_to_postid($r->referrer);
+                  if ($ref_page_id) {
+                    $ref_label = get_the_title($ref_page_id);
+                  } elseif ($ref_path === '' || $ref_path === 'accueil') {
+                    $ref_label = 'Accueil';
+                  } elseif (strpos($ref_path, 'nos-creations') !== false) {
+                    $ref_label = 'Nos créations';
+                  } else {
+                    $ref_label = ucfirst(str_replace(['-', '/'], [' ', ' › '], $ref_path));
+                  }
+                ?>
+                  <span title="<?php echo esc_attr($r->referrer); ?>" style="cursor:help;">
+                    <?php echo esc_html($ref_label); ?>
+                  </span>
+                <?php else : ?>
+                  —
+                <?php endif; ?>
+              </td>
               <td><?php echo esc_html($r->piece); ?></td>
               <td><?php echo esc_html($r->taille); ?></td>
               <td><?php echo esc_html($r->sortie); ?></td>
