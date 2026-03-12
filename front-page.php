@@ -381,7 +381,12 @@ foreach ($collection_slugs as $col) {
         <span class="storytelling-label">L'atelier</span>
         <h2 class="storytelling-title">Sculptées à la main</h2>
         <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
-        <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="storytelling-discover">Découvrir ⇾</a>
+        <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="storytelling-link">
+          <span>Découvrir l'artisan</span>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </a>
       </div>
     </div>
 
