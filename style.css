@@ -11234,7 +11234,7 @@ transform: translateY(15px);
   font-weight: 300;
   color: var(--color-gray);
   margin-top: 0;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.75rem;
 }
 
 .product-card-cinetique .product-price {
@@ -11261,7 +11261,7 @@ transform: translateY(15px);
 
 .product-card-cinetique .price-value {
   font-family: var(--font-body);
-  font-size: 1.5rem;
+  font-size: 1.15rem;
   font-weight: 900;
   color: var(--color-dark);
 }
