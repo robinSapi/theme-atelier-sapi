@@ -11226,6 +11226,7 @@ transform: translateY(15px);
   font-weight: 700;
   color: var(--color-dark);
   margin: 0;
+  padding: 0 !important;
   line-height: 1;
   -webkit-transition: color 0.3s var(--ease-smooth);
   transition: color 0.3s var(--ease-smooth);
