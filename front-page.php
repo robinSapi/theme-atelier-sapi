@@ -108,7 +108,11 @@ if ($olivia_query->have_posts()) {
     if ($categories && !is_wp_error($categories)) {
       foreach ($categories as $cat) {
         if ($cat->slug !== 'uncategorized') {
-          $category_name = $cat->name;
+          $category_name = str_replace(
+            ['Suspensions', 'Appliques', 'Lampadaires', 'Lampes à poser'],
+            ['Suspension',  'Applique',  'Lampadaire',  'Lampe à poser'],
+            $cat->name
+          );
           break;
         }
       }
