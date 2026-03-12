@@ -241,11 +241,11 @@ if ($is_editorial_carousel) {
         <span class="price-value"><?php echo $price_html; ?></span>
       </div>
     </div>
-  </a>
 
-  <div class="product-actions">
-    <a href="<?php the_permalink(); ?>" class="btn-view">
-      <?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> ⇾
-    </a>
-  </div>
+    <div class="product-actions">
+      <span class="btn-view">
+        <?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> ⇾
+      </span>
+    </div>
+  </a>
 </li>
