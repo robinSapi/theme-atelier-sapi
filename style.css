@@ -11215,7 +11215,7 @@ transform: translateY(15px);
   font-size: 1.4rem !important;
   font-weight: 700;
   color: var(--color-dark);
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.25rem;
   -webkit-transition: color 0.3s var(--ease-smooth);
   transition: color 0.3s var(--ease-smooth);
   text-transform: uppercase;
@@ -11232,17 +11232,21 @@ transform: translateY(15px);
   font-size: 1rem;
   font-weight: 300;
   color: var(--color-gray);
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.5rem;
 }
 
 .product-card-cinetique .product-price {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
+  -webkit-box-orient: horizontal;
   -webkit-box-direction: normal;
-  -ms-flex-direction: column;
-  flex-direction: column;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-align: baseline;
+  -ms-flex-align: baseline;
+  align-items: baseline;
+  gap: 0.4rem;
 }
 
 .product-card-cinetique .price-from {
