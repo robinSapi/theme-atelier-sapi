@@ -8924,11 +8924,6 @@ transform: translateY(15px);
   background: var(--color-warm);
 }
 
-.bento-card.bento-storytelling:hover {
-  transform: none;
-  border-color: transparent;
-  box-shadow: none;
-}
 
 .storytelling-inner {
   padding: 2.5rem;
