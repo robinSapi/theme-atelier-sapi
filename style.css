@@ -11232,6 +11232,7 @@ transform: translateY(15px);
   font-size: 1rem;
   font-weight: 300;
   color: var(--color-gray);
+  margin-top: 0;
   margin-bottom: 0.25rem;
 }
 
