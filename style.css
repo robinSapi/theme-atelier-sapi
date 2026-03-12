@@ -11310,6 +11310,7 @@ transform: translateY(15px);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   cursor: pointer;
+  opacity: 0.6;
   -webkit-transition: all 0.3s var(--ease-smooth);
   transition: all 0.3s var(--ease-smooth);
   box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
@@ -11317,6 +11318,7 @@ transform: translateY(15px);
 
 @media (hover: hover) {
   .product-card-cinetique .btn-view:hover {
+    opacity: 1;
     background: linear-gradient(180deg, #D14F1C 0%, #B8431A 100%);
     -webkit-transform: translateY(-2px);
     transform: translateY(-2px);
