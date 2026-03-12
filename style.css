@@ -1852,7 +1852,8 @@ ul.products.products-carousel-track {
 .shop-products ul.products li.product,
 .product-related ul.products li.product,
 ul.products li.product {
-  display: block !important;
+  display: flex !important;
+  flex-direction: column !important;
   width: 100% !important;
   float: none !important;
   margin: 0 !important;
