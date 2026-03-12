@@ -396,7 +396,7 @@ foreach ($collection_slugs as $col) {
       <div class="bento-bg" style="background-image: url('<?php echo esc_url($gift_card['image']); ?>'); background-position: bottom right;"></div>
       <span class="giftcard-badge">Idée cadeau</span>
       <div class="giftcard-info">
-        <h3>Offrez la lumière</h3>
+        <h3>Offrez la lumière avec carte cadeau</h3>
       </div>
     </a>
     <?php endif; ?>
