@@ -108,7 +108,11 @@ if ($olivia_query->have_posts()) {
     if ($categories && !is_wp_error($categories)) {
       foreach ($categories as $cat) {
         if ($cat->slug !== 'uncategorized') {
-          $category_name = $cat->name;
+          $category_name = str_replace(
+            ['Suspensions', 'Appliques', 'Lampadaires', 'Lampes à poser'],
+            ['Suspension',  'Applique',  'Lampadaire',  'Lampe à poser'],
+            $cat->name
+          );
           break;
         }
       }
@@ -157,10 +161,21 @@ if ($gc_query->have_posts()) {
       $price_display = wc_price($product->get_price());
     }
 
+    // Image custom : Bandeau-Noel.jpg depuis la médiathèque
+    $bandeau_noel = get_posts([
+      'post_type'      => 'attachment',
+      'posts_per_page' => 1,
+      'post_status'    => 'inherit',
+      'meta_query'     => [['key' => '_wp_attached_file', 'value' => 'Bandeau-Noel', 'compare' => 'LIKE']],
+    ]);
+    $gc_image = $bandeau_noel
+      ? wp_get_attachment_image_url($bandeau_noel[0]->ID, 'large')
+      : get_the_post_thumbnail_url(get_the_ID(), 'woocommerce_single');
+
     $gift_card = [
       'name'  => get_the_title(),
       'price' => $price_display,
-      'image' => get_the_post_thumbnail_url(get_the_ID(), 'woocommerce_single'),
+      'image' => $gc_image,
       'url'   => get_permalink(),
     ];
   }
@@ -382,11 +397,10 @@ foreach ($collection_slugs as $col) {
     <!-- Carte Cadeau -->
     <?php if ($gift_card) : ?>
     <a href="<?php echo esc_url($gift_card['url']); ?>" class="bento-card bento-giftcard">
-      <div class="bento-bg" style="background-image: url('<?php echo esc_url($gift_card['image']); ?>');"></div>
+      <div class="bento-bg" style="background-image: url('<?php echo esc_url($gift_card['image']); ?>'); background-position: bottom right;"></div>
       <span class="giftcard-badge">Idée cadeau</span>
       <div class="giftcard-info">
-        <h3>Offrez la lumière</h3>
-        <span class="giftcard-price">À partir de <?php echo wp_kses_post($gift_card['price']); ?></span>
+        <h3>Offrez la lumière avec une carte cadeau</h3>
       </div>
     </a>
     <?php endif; ?>

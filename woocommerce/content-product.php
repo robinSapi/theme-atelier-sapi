@@ -52,7 +52,11 @@ if ($categories && !is_wp_error($categories)) {
   // Get the first non-uncategorized category
   foreach ($categories as $cat) {
     if ($cat->slug !== 'uncategorized') {
-      $category_name = $cat->name;
+      $category_name = str_replace(
+        ['Suspensions', 'Appliques', 'Lampadaires', 'Lampes à poser'],
+        ['Suspension',  'Applique',  'Lampadaire',  'Lampe à poser'],
+        $cat->name
+      );
       break;
     }
   }
@@ -240,12 +244,12 @@ if ($is_editorial_carousel) {
         <?php endif; ?>
         <span class="price-value"><?php echo $price_html; ?></span>
       </div>
+
+      <div class="product-actions">
+        <span class="btn-view">
+          <?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> ⇾
+        </span>
+      </div>
     </div>
   </a>
-
-  <div class="product-actions">
-    <a href="<?php the_permalink(); ?>" class="btn-view">
-      <?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> →
-    </a>
-  </div>
 </li>
