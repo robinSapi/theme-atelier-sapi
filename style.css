@@ -11298,13 +11298,13 @@ transform: translateY(15px);
 .product-card-cinetique .btn-view {
   display: inline-block;
   padding: 0.65rem 1.5rem;
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  background: transparent;
   border: none;
   border-radius: 50px;
   font-family: var(--font-body);
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--color-white);
+  color: var(--color-orange);
   text-align: center;
   text-decoration: none;
   text-transform: uppercase;
@@ -11312,12 +11312,13 @@ transform: translateY(15px);
   cursor: pointer;
   -webkit-transition: all 0.3s var(--ease-smooth);
   transition: all 0.3s var(--ease-smooth);
-  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
+  box-shadow: none;
 }
 
 @media (hover: hover) {
   .product-card-cinetique .btn-view:hover {
-    background: linear-gradient(180deg, #D14F1C 0%, #B8431A 100%);
+    background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+    color: var(--color-white);
     -webkit-transform: translateY(-2px);
     transform: translateY(-2px);
     -webkit-box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);

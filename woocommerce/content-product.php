@@ -245,7 +245,7 @@ if ($is_editorial_carousel) {
 
   <div class="product-actions">
     <a href="<?php the_permalink(); ?>" class="btn-view">
-      <?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> →
+      <?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> ⇾
     </a>
   </div>
 </li>
