@@ -11050,9 +11050,7 @@ transform: translateY(15px);
   border-radius: var(--radius-lg);
   overflow: hidden;
   list-style: none;
-  display: flex !important;
-  flex-direction: column !important;
-  height: 100%; /* Take full grid cell height */
+  height: 100%; /* Take full grid cell height — flex via ul.products li.product */
   -webkit-box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   -webkit-transition: all 0.5s var(--ease-expo);
@@ -11351,7 +11349,7 @@ transform: translateY(15px);
   }
 
   .product-card-cinetique .product-actions {
-    padding: 0 1rem 0.75rem;
+    padding: 0;
   }
 
   .product-card-cinetique .btn-view {
@@ -18360,17 +18358,7 @@ html.sapi-intro-active body {
   height: auto; /* Override product-card-cinetique height:100% so align-items:stretch works */
 }
 
-/* Product cards: flex column filling stretched parent */
-.guide-result-products-grid .product-card-cinetique {
-  display: flex;
-  flex-direction: column;
-}
-
-.guide-result-products-grid .product-card-link {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
+/* Product cards: flex already handled by base rules (ul.products li.product + .product-card-link) */
 
 .guide-result-products-grid .product-info {
   display: flex;
