@@ -8922,6 +8922,19 @@ transform: translateY(15px);
   grid-column: span 4;
   grid-row: span 2;
   background: var(--color-warm);
+  pointer-events: none;
+}
+
+.bento-storytelling .storytelling-discover {
+  pointer-events: auto;
+}
+
+@media (hover: hover) {
+  .bento-storytelling.bento-card:hover {
+    transform: none;
+    border-color: var(--color-gray-light);
+    box-shadow: none;
+  }
 }
 
 
@@ -8961,22 +8974,19 @@ transform: translateY(15px);
   color: var(--bois-sombre, #4A3F35);
 }
 
-.storytelling-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+.storytelling-discover {
   font-family: var(--font-body);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--color-orange);
+  color: var(--color-wood);
   text-decoration: none;
   margin-top: 0.5rem;
-  transition: gap 0.3s var(--ease-expo);
+  letter-spacing: 0.03em;
+  transition: color 0.3s var(--ease-smooth);
 }
 
 @media (hover: hover) {
-  .storytelling-link:hover {
-    gap: 0.85rem;
+  .storytelling-discover:hover {
     color: var(--color-orange);
   }
 }
