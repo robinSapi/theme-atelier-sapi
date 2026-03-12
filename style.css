@@ -11291,12 +11291,12 @@ transform: translateY(15px);
   display: inline-block;
   padding: 0.65rem 1.5rem;
   background: transparent;
-  border: 1.5px solid var(--color-wood);
+  border: 1.5px solid var(--color-orange);
   border-radius: 50px;
   font-family: var(--font-body);
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--color-wood);
+  color: var(--color-orange);
   text-align: center;
   text-decoration: none;
   text-transform: uppercase;
@@ -11309,12 +11309,12 @@ transform: translateY(15px);
 
 @media (hover: hover) {
   .product-card-cinetique .btn-view:hover {
-    background: var(--color-wood);
+    background: var(--color-orange);
     color: var(--color-white);
     -webkit-transform: translateY(-2px);
     transform: translateY(-2px);
-    -webkit-box-shadow: 0 4px 15px rgba(147, 125, 104, 0.3);
-    box-shadow: 0 4px 15px rgba(147, 125, 104, 0.3);
+    -webkit-box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
+    box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
   }
 }
 
