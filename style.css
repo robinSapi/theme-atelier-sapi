@@ -2109,12 +2109,11 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 }
 
 .product-card-link {
-  display: block;
   text-decoration: none;
   color: inherit;
-  flex: 1; /* Take available space in flex card */
-  display: flex;
-  flex-direction: column;
+  flex: 1;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .product-card-image {
@@ -11218,8 +11217,8 @@ transform: translateY(15px);
 /* Product Info */
 .product-card-cinetique .product-info {
   padding: 2rem;
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
   flex: 1;
 }
 
