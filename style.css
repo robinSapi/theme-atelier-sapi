@@ -11218,6 +11218,9 @@ transform: translateY(15px);
 /* Product Info */
 .product-card-cinetique .product-info {
   padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .product-card-cinetique .product-name {
@@ -11260,6 +11263,7 @@ transform: translateY(15px);
   -ms-flex-align: baseline;
   align-items: baseline;
   gap: 0.4rem;
+  margin-top: auto;
 }
 
 .product-card-cinetique .price-from {
@@ -11292,7 +11296,6 @@ transform: translateY(15px);
 /* Product Actions */
 .product-card-cinetique .product-actions {
   padding: 0 1.25rem 1rem;
-  margin-top: auto;
   text-align: center;
 }
 
