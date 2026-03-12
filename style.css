@@ -1907,12 +1907,20 @@ ul.products li.product {
   }
 }
 
+.product-text-card-discover {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-wood);
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  margin-top: 0.5rem;
+  transition: color 0.3s ease;
+}
+
 @media (hover: hover) {
-  .product-text-card-inner:hover {
-    transform: translateY(-4px);
-    -webkit-transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(147, 125, 104, 0.12);
-    border-color: rgba(147, 125, 104, 0.25);
+  .product-text-card-discover:hover {
+    color: var(--color-orange);
   }
 }
 
