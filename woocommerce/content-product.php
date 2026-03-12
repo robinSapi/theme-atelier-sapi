@@ -240,12 +240,12 @@ if ($is_editorial_carousel) {
         <?php endif; ?>
         <span class="price-value"><?php echo $price_html; ?></span>
       </div>
-    </div>
 
-    <div class="product-actions">
-      <span class="btn-view">
-        <?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> ⇾
-      </span>
+      <div class="product-actions">
+        <span class="btn-view">
+          <?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> ⇾
+        </span>
+      </div>
     </div>
   </a>
 </li>

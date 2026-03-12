@@ -11295,7 +11295,7 @@ transform: translateY(15px);
 
 /* Product Actions */
 .product-card-cinetique .product-actions {
-  padding: 0 1.25rem 1rem;
+  padding: 0;
   text-align: center;
 }
 
