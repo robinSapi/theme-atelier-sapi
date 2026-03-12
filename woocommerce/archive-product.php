@@ -268,7 +268,7 @@ if (!$hero_img_url) {
             <div class="product-text-card-icon"><?php echo $card['icon']; ?></div>
             <h3><?php echo esc_html($card['title']); ?></h3>
             <p><?php echo esc_html($card['text']); ?></p>
-            <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="product-text-card-discover">Découvrir ⇾</a>
+            <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="product-text-card-discover">En savoir plus</a>
           </div>
         </li>
         <?php endif;
