@@ -11245,7 +11245,7 @@ transform: translateY(15px);
   font-weight: 300;
   color: var(--color-gray);
   margin-top: 0;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
 }
 
 .product-card-cinetique .product-price {
@@ -11291,7 +11291,7 @@ transform: translateY(15px);
 
 /* Product Actions */
 .product-card-cinetique .product-actions {
-  padding: 0 1.25rem 1rem;
+  padding: 0 1.25rem;
   margin-top: auto;
   text-align: center;
 }
