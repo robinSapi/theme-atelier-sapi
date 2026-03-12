@@ -11050,8 +11050,8 @@ transform: translateY(15px);
   border-radius: var(--radius-lg);
   overflow: hidden;
   list-style: none;
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
   height: 100%; /* Take full grid cell height */
   -webkit-box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
