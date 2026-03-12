@@ -11217,12 +11217,12 @@ transform: translateY(15px);
 
 /* Product Info */
 .product-card-cinetique .product-info {
-  padding: 1.25rem 1.5rem;
+  padding: 2rem;
 }
 
 .product-card-cinetique .product-name {
   font-family: var(--font-body);
-  font-size: 1.6rem !important;
+  font-size: 1.4rem !important;
   font-weight: 700;
   color: var(--color-dark);
   margin: 0;
@@ -11245,7 +11245,7 @@ transform: translateY(15px);
   font-weight: 300;
   color: var(--color-gray);
   margin-top: 0;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .product-card-cinetique .product-price {
@@ -11291,7 +11291,7 @@ transform: translateY(15px);
 
 /* Product Actions */
 .product-card-cinetique .product-actions {
-  padding: 0 1.25rem;
+  padding: 0 1.25rem 1rem;
   margin-top: auto;
   text-align: center;
 }
