@@ -591,11 +591,11 @@ foreach ($collection_slugs as $col) {
 (function() {
   const carousel = document.querySelector('.homepage-carousel-fullscreen');
 
-  // 1. Déplacer le bandeau de réassurance juste sous le carousel
-  const reassuranceBar = document.querySelector('.reassurance-bar-sticky');
-  if (reassuranceBar && carousel) {
-    carousel.parentNode.insertBefore(reassuranceBar, carousel.nextSibling);
-    reassuranceBar.classList.add('home-repositioned-bar');
+  // 1. Déplacer le bandeau "Mon projet" juste sous le carousel
+  const monProjetBar = document.querySelector('.mon-projet-bar');
+  if (monProjetBar && carousel) {
+    carousel.parentNode.insertBefore(monProjetBar, carousel.nextSibling);
+    monProjetBar.classList.add('home-repositioned-bar');
   }
 
   // 2. Menu : transparent sur le carousel, opaque après

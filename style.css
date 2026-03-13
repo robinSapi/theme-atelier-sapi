@@ -1533,152 +1533,355 @@ button:hover,
    ======================================== */
 /* Masqué en position originale (entre header et main) pour ne pas créer de gap.
    Rendu visible par JS après repositionnement sous le carousel. */
-.home .reassurance-bar-sticky:not(.home-repositioned-bar) {
+/* ========================================
+   Bandeau "Mon projet" — Questionnaire permanent
+   ======================================== */
+
+/* Sur la homepage, le bandeau est déplacé par JS sous le carousel.
+   Tant qu'il n'est pas déplacé, le cacher pour éviter un doublon visuel. */
+.home .mon-projet-bar:not(.home-repositioned-bar) {
   display: none;
 }
 
-.reassurance-bar-sticky {
+.mon-projet-bar {
   position: sticky;
-  top: 80px; /* Below header */
+  top: 80px;
   z-index: 998;
-  background: var(--color-warm);
-  border-bottom: 1px solid rgba(147, 125, 104, 0.1);
+  background: linear-gradient(135deg, rgba(251, 246, 234, 0.95) 0%, rgba(254, 253, 251, 0.98) 100%);
+  border-bottom: 1px solid rgba(147, 125, 104, 0.12);
+  font-family: 'Montserrat', sans-serif;
 }
 
-.reassurance-bar-inner {
+/* --- État replié --- */
+.mon-projet-collapsed {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 1.5rem;
-  padding: 8px 20px;
+  gap: 1rem;
+  padding: 0.5rem 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
-  flex-wrap: wrap;
 }
 
-.reassurance-item {
+.mon-projet-left {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--color-gray);
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.mon-projet-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-wood, #937D68);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.mon-projet-label svg {
+  color: var(--color-orange, #E35B24);
+  flex-shrink: 0;
+}
+
+.mon-projet-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.mon-projet-placeholder {
+  font-size: 0.7rem;
+  color: var(--color-wood, #937D68);
+  opacity: 0.6;
+  font-style: italic;
+}
+
+.mon-projet-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  background: rgba(147, 125, 104, 0.1);
+  border-radius: 100px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--color-wood, #937D68);
   white-space: nowrap;
 }
 
-.reassurance-bar-sticky .reassurance-item svg {
-  width: 11px !important;
-  height: 11px !important;
-  color: var(--color-wood);
+.mon-projet-chip-sep {
+  color: rgba(147, 125, 104, 0.3);
+  font-size: 0.5rem;
+}
+
+/* --- Boutons d'action --- */
+.mon-projet-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   flex-shrink: 0;
 }
 
-/* Responsive - Tablet */
-@media (max-width: 900px) {
-  .reassurance-bar-inner {
-    gap: 1rem;
-  }
-
-  .reassurance-bar-sticky .reassurance-item {
-    font-size: 12px;
-  }
-
-  .reassurance-bar-sticky .reassurance-item svg {
-    width: 12px;
-    height: 12px;
-  }
-}
-
-/* Responsive - Mobile: Show only 2 items and scroll */
-@media (max-width: 600px) {
-  .reassurance-bar-sticky {
-    top: calc(76px + env(safe-area-inset-top, 0px));
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .reassurance-bar-inner {
-    justify-content: center;
-    flex-wrap: nowrap;
-    gap: 1.5rem;
-    padding: 8px 16px;
-  }
-
-  .reassurance-bar-sticky .reassurance-item {
-    font-size: 11px;
-  }
-}
-
-/* Hide chip on guide luminaire page (redundant with quiz) */
-.page-template-page-guide-luminaire .guide-profile-chip {
-  display: none !important;
-}
-
-/* Guide Profile Chip */
-.guide-profile-chip {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.4rem 1rem;
-  background: linear-gradient(135deg, rgba(251, 246, 234, 0.9) 0%, rgba(254, 253, 251, 0.95) 100%);
-  border-bottom: 1px solid rgba(147, 125, 104, 0.1);
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.75rem;
-}
-
-.guide-chip-text {
+.mon-projet-btn-conseils {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  color: var(--color-wood, #937D68);
-  font-weight: 500;
+  padding: 0.35rem 0.85rem;
+  border: 1.5px solid var(--color-orange, #E35B24);
+  border-radius: 100px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--color-orange, #E35B24);
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
 }
 
-.guide-chip-text svg {
-  color: var(--color-orange, #E35B24);
+.mon-projet-btn-conseils:hover {
+  background: var(--color-orange, #E35B24);
+  color: #fff;
+}
+
+.mon-projet-btn-selection {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.85rem;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  border: none;
+  border-radius: 100px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(227, 91, 36, 0.25);
+  transition: transform 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+
+.mon-projet-btn-selection:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(227, 91, 36, 0.35);
+  color: #fff;
+}
+
+/* --- Bouton toggle --- */
+.mon-projet-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: 1.5px solid rgba(147, 125, 104, 0.2);
+  border-radius: 50%;
+  color: var(--color-wood, #937D68);
+  cursor: pointer;
+  transition: transform 0.3s ease, border-color 0.2s;
   flex-shrink: 0;
 }
 
-.guide-chip-link {
-  color: var(--color-orange, #E35B24);
+.mon-projet-toggle:hover {
+  border-color: var(--color-wood, #937D68);
+}
+
+.mon-projet-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+/* --- État déplié --- */
+.mon-projet-expanded {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mon-projet-expanded[aria-hidden="false"] {
+  max-height: 600px;
+}
+
+.mon-projet-expanded > .mon-projet-question:first-child {
+  border-top: 1px solid rgba(147, 125, 104, 0.1);
+}
+
+/* --- Question row --- */
+.mon-projet-question {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  border-bottom: 1px solid rgba(147, 125, 104, 0.06);
+}
+
+.mon-projet-question[data-visible="false"] {
+  display: none;
+}
+
+.mon-projet-question-label {
+  font-size: 0.7rem;
   font-weight: 600;
-  text-decoration: none;
-  transition: opacity 0.2s;
+  color: var(--color-dark, #323232);
+  min-width: 220px;
+  flex-shrink: 0;
 }
 
-.guide-chip-link:hover {
+/* --- Choix --- */
+.mon-projet-choices {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.mon-projet-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.65rem;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1.5px solid rgba(147, 125, 104, 0.15);
+  border-radius: 100px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--color-wood, #937D68);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.mon-projet-choice:hover {
+  border-color: var(--color-wood, #937D68);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.mon-projet-choice.is-selected {
+  background: rgba(227, 91, 36, 0.08);
+  border-color: var(--color-orange, #E35B24);
+  color: var(--color-orange, #E35B24);
+}
+
+.mon-projet-choice-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mon-projet-choice-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.mon-projet-choice-dim {
+  font-weight: 400;
   opacity: 0.7;
+  font-size: 0.55rem;
 }
 
-.guide-chip-dismiss {
+/* --- Bouton Reset --- */
+.mon-projet-reset-row {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.4rem 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.mon-projet-reset {
   background: none;
   border: none;
-  color: var(--color-orange, #E35B24);
-  font-size: 1.1rem;
-  line-height: 1;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--color-wood, #937D68);
+  opacity: 0.5;
   cursor: pointer;
-  padding: 0 0.25rem;
-  opacity: 0.7;
+  text-decoration: underline;
+  text-underline-offset: 2px;
   transition: opacity 0.2s;
 }
 
-.guide-chip-dismiss:hover {
+.mon-projet-reset:hover {
   opacity: 1;
 }
 
-@media (max-width: 600px) {
-  .guide-profile-chip {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.25rem 0.75rem;
-    padding: 0.35rem 0.75rem;
-    font-size: 0.7rem;
+/* --- Responsive Tablet --- */
+@media (max-width: 900px) {
+  .mon-projet-collapsed {
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
   }
 
-  .guide-chip-text {
+  .mon-projet-question-label {
+    min-width: 160px;
+    font-size: 0.65rem;
+  }
+
+  .mon-projet-question {
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* --- Responsive Mobile --- */
+@media (max-width: 600px) {
+  .mon-projet-bar {
+    top: calc(76px + env(safe-area-inset-top, 0px));
+  }
+
+  .mon-projet-collapsed {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.4rem 0.75rem;
+  }
+
+  .mon-projet-left {
     width: 100%;
     justify-content: center;
+  }
+
+  .mon-projet-chips {
+    display: none;
+  }
+
+  .mon-projet-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .mon-projet-toggle {
+    position: absolute;
+    right: 0.75rem;
+    top: 0.35rem;
+    width: 24px;
+    height: 24px;
+  }
+
+  .mon-projet-question {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .mon-projet-question-label {
+    min-width: 0;
+  }
+
+  .mon-projet-choice {
+    font-size: 0.55rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .mon-projet-choice-icon svg {
+    width: 12px;
+    height: 12px;
   }
 }
 
