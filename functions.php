@@ -254,6 +254,18 @@ function sapi_maison_enqueue_assets() {
   if (file_exists($scroll_dots_path)) {
     wp_enqueue_script('sapi-maison-scroll-dots', get_template_directory_uri() . '/assets/scroll-dots.js', [], filemtime($scroll_dots_path), true);
   }
+
+  // Mon Projet — bandeau questionnaire permanent (toutes les pages)
+  require_once get_template_directory() . '/inc/guide-data.php';
+  $mon_projet_path = get_template_directory() . '/assets/mon-projet.js';
+  if (file_exists($mon_projet_path)) {
+    wp_enqueue_script('sapi-mon-projet', get_template_directory_uri() . '/assets/mon-projet.js', [], filemtime($mon_projet_path), true);
+    wp_localize_script('sapi-mon-projet', 'sapiMonProjet', [
+      'steps'   => sapi_guide_get_steps(),
+      'ajaxUrl' => admin_url('admin-ajax.php'),
+      'nonce'   => wp_create_nonce('sapi-guide-results'),
+    ]);
+  }
 }
 add_action('wp_enqueue_scripts', 'sapi_maison_enqueue_assets');
 
