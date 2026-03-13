@@ -1647,28 +1647,6 @@ button:hover,
   color: #fff;
 }
 
-.mon-projet-btn-selection {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.35rem 0.85rem;
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
-  border: none;
-  border-radius: 100px;
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: #fff;
-  text-decoration: none;
-  box-shadow: 0 2px 8px rgba(227, 91, 36, 0.25);
-  transition: transform 0.2s, box-shadow 0.2s;
-  white-space: nowrap;
-}
-
-.mon-projet-btn-selection:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(227, 91, 36, 0.35);
-  color: #fff;
-}
-
 /* --- Bouton toggle --- */
 .mon-projet-toggle {
   display: flex;
@@ -1815,33 +1793,6 @@ button:hover,
 
 .mon-projet-reset:hover {
   opacity: 1;
-}
-
-.mon-projet-validate {
-  padding: 8px 24px;
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
-  color: #fff;
-  border: none;
-  border-radius: 50px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  box-shadow: 0 3px 10px rgba(227, 91, 36, 0.25);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s;
-}
-
-@media (hover: hover) {
-  .mon-projet-validate:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 5px 15px rgba(227, 91, 36, 0.35);
-  }
-}
-
-.mon-projet-validate:disabled {
-  opacity: 0.6;
-  cursor: wait;
 }
 
 /* --- Responsive Tablet --- */
@@ -6339,6 +6290,83 @@ li.carousel-editorial-slide,
   line-height: 1.6;
   color: var(--color-dark);
   margin: 0;
+}
+
+/* Conseils — Produits recommandés */
+.conseils-products-section {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 20px 1rem;
+}
+
+.conseils-products-header h2 {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-dark);
+  margin: 0 0 1.5rem;
+}
+
+.conseils-products-header .section-num {
+  color: var(--color-wood);
+  margin-right: 0.5rem;
+}
+
+.conseils-products-grid .products {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .conseils-products-grid .products {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .conseils-products-grid .products {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Conseils — Bouton refresh */
+.conseils-refresh {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem 20px;
+  text-align: center;
+}
+
+.conseils-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 12px 32px;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(227, 91, 36, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+@media (hover: hover) {
+  .conseils-refresh-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(227, 91, 36, 0.35);
+  }
 }
 
 /* Tips Section */

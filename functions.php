@@ -3774,3 +3774,43 @@ function sapi_ajax_mon_projet_texts() {
   ]);
 }
 
+// ─── AJAX: Render product cards for Conseils page ───
+add_action('wp_ajax_sapi_conseils_products', 'sapi_ajax_conseils_products');
+add_action('wp_ajax_nopriv_sapi_conseils_products', 'sapi_ajax_conseils_products');
+
+function sapi_ajax_conseils_products() {
+  check_ajax_referer('sapi_guide_nonce', 'nonce');
+
+  $ids_raw = isset($_POST['ids']) ? sanitize_text_field(wp_unslash($_POST['ids'])) : '[]';
+  $ids = json_decode($ids_raw, true);
+
+  if (!is_array($ids) || empty($ids)) {
+    wp_send_json_error('No product IDs');
+    return;
+  }
+
+  // Limit to 12 products max
+  $ids = array_slice(array_map('absint', $ids), 0, 12);
+
+  $query = new WP_Query([
+    'post_type'      => 'product',
+    'post__in'       => $ids,
+    'orderby'        => 'post__in',
+    'posts_per_page' => 12,
+  ]);
+
+  ob_start();
+  if ($query->have_posts()) {
+    echo '<ul class="products columns-4">';
+    while ($query->have_posts()) {
+      $query->the_post();
+      wc_get_template_part('content', 'product');
+    }
+    echo '</ul>';
+    wp_reset_postdata();
+  }
+  $html = ob_get_clean();
+
+  wp_send_json_success($html);
+}
+

@@ -68,6 +68,15 @@
 
       // Appliquer le filtre initial (masque accessoires par défaut)
       this.applyFilters();
+
+      // Écouter les mises à jour du bandeau Mon Projet (rafraîchir le filtre en live)
+      var self = this;
+      document.addEventListener('monProjetUpdated', function() {
+        self.initMaSelection(filterContainer);
+        if (self.filters.category === 'ma-selection') {
+          self.applyFilters();
+        }
+      });
     },
 
     initSearch: function() {

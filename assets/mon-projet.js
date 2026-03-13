@@ -2,6 +2,7 @@
  * Mon Projet — Bandeau questionnaire permanent
  * Gère : expand/collapse, visibilité conditionnelle, sélection,
  * reset en cascade, chips résumé, sauvegarde localStorage.
+ * AJAX déclenché à la fermeture du bandeau si pièce + taille répondues.
  *
  * @package Theme_Sapi_Maison
  */
@@ -16,8 +17,6 @@
   var expanded  = document.getElementById('mon-projet-expanded');
   var chipsEl   = document.getElementById('mon-projet-chips');
   var resetBtn  = document.getElementById('mon-projet-reset');
-  var selBtn    = document.getElementById('mon-projet-btn-selection');
-  var validateBtn = document.getElementById('mon-projet-validate');
 
   // Steps data passed from PHP via wp_localize_script
   var steps     = (typeof sapiMonProjet !== 'undefined' && sapiMonProjet.steps) ? sapiMonProjet.steps : [];
@@ -32,6 +31,7 @@
   var STORAGE_KEY = 'sapiGuidePrefs';
   var hoverTimer  = null;
   var isTouch     = !window.matchMedia('(hover: hover)').matches;
+  var answersHashAtOpen = null; // Hash des réponses à l'ouverture du bandeau
 
   // ─── Storage ───
   function loadState() {
@@ -43,8 +43,6 @@
           state.answers = data.answers;
           state.labels  = data.labels || {};
         } else if (data) {
-          // Migration ancien format (pieceLabel, styleLabel, tailleLabel)
-          // On ne peut pas reconstruire les answers, mais on préserve les prefs
           state.answers = {};
           state.labels  = {};
         }
@@ -71,7 +69,6 @@
       existing.styleLabel = state.labels.style || null;
       existing.tailleLabel = state.labels.taille || null;
 
-      // Reset recommendedIds only if not already set
       if (!existing.recommendedIds) {
         existing.recommendedIds = [];
       }
@@ -183,19 +180,6 @@
       }
       chipsEl.innerHTML = html;
     }
-
-    // Bouton "Ma sélection" visible dès pièce + taille répondus
-    if (selBtn) {
-      selBtn.style.display = hasMinimumAnswers() ? '' : 'none';
-    }
-  }
-
-  function isQuizComplete() {
-    var visible = getVisibleSteps();
-    for (var i = 0; i < visible.length; i++) {
-      if (!state.answers[visible[i]]) return false;
-    }
-    return visible.length > 0;
   }
 
   function escapeHtml(str) {
@@ -225,6 +209,7 @@
   function openBanner() {
     if (state.isOpen) return;
     state.isOpen = true;
+    answersHashAtOpen = simpleHash(JSON.stringify(state.answers));
     expanded.setAttribute('aria-hidden', 'false');
     toggle.setAttribute('aria-expanded', 'true');
   }
@@ -234,11 +219,50 @@
     state.isOpen = false;
     expanded.setAttribute('aria-hidden', 'true');
     toggle.setAttribute('aria-expanded', 'false');
+
+    // Si les réponses ont changé et que pièce + taille sont répondues → AJAX
+    if (hasMinimumAnswers()) {
+      var currentHash = simpleHash(JSON.stringify(state.answers));
+      if (currentHash !== answersHashAtOpen) {
+        // Invalider les anciens résultats car les réponses ont changé
+        invalidateResults();
+        // Lancer les nouvelles requêtes
+        fetchResults(function() {
+          applyPageUpdates();
+        });
+      }
+    }
   }
 
   function toggleBanner() {
     if (state.isOpen) closeBanner();
     else openBanner();
+  }
+
+  // ─── Invalidation des résultats quand les réponses changent ───
+  function invalidateResults() {
+    try {
+      var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      delete prefs.recommendedIds;
+      delete prefs.aiTexts;
+      delete prefs.aiTextsHash;
+      delete prefs.aiText;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+    } catch (e) { /* */ }
+
+    // Sur la page Conseils : masquer la partie perso et montrer le bouton
+    var conseilsIntro = document.getElementById('conseils-perso-intro');
+    if (conseilsIntro) {
+      conseilsIntro.style.display = 'none';
+    }
+    var conseilsProducts = document.getElementById('conseils-products-section');
+    if (conseilsProducts) {
+      conseilsProducts.style.display = 'none';
+    }
+    var conseilsRefresh = document.getElementById('conseils-refresh-btn');
+    if (conseilsRefresh) {
+      conseilsRefresh.style.display = '';
+    }
   }
 
   // ─── Event handlers ───
@@ -265,29 +289,10 @@
     // Tout mettre à jour
     updateAll();
     saveState();
-
-    // Montrer/cacher le bouton "Valider mon projet"
-    updateValidateButton();
   }
 
   function hasMinimumAnswers() {
-    // Valider dès que pièce + taille sont répondus
     return !!state.answers.piece && !!state.answers.taille;
-  }
-
-  function updateValidateButton() {
-    if (!validateBtn) return;
-    validateBtn.style.display = hasMinimumAnswers() ? '' : 'none';
-  }
-
-  function onValidate() {
-    if (!hasMinimumAnswers()) return;
-    validateBtn.textContent = 'Chargement\u2026';
-    validateBtn.disabled = true;
-    fetchResults(function() {
-      // Recharger la page pour appliquer les textes IA
-      window.location.reload();
-    });
   }
 
   function onReset() {
@@ -295,7 +300,9 @@
     state.labels  = {};
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* */ }
     updateAll();
-    updateValidateButton();
+
+    // Masquer les éléments perso sur la page active
+    invalidateResults();
   }
 
   function updateAll() {
@@ -305,14 +312,14 @@
     updateDynamicQuestions();
   }
 
-  // ─── AJAX : Fetch results when quiz is complete ───
+  // ─── AJAX : Fetch results ───
   function fetchResults(onDone) {
     if (typeof sapiMonProjet === 'undefined' || !sapiMonProjet.ajaxUrl) {
       if (onDone) onDone();
       return;
     }
 
-    var pending = 2; // 2 AJAX calls in parallel
+    var pending = 2;
     function checkDone() {
       pending--;
       if (pending <= 0 && onDone) onDone();
@@ -336,8 +343,6 @@
               prefs.aiText = resp.data.ai_text;
             }
             localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-
-            if (selBtn) selBtn.style.display = '';
           }
         } catch (e) { /* */ }
       }
@@ -351,7 +356,7 @@
 
     xhr.send(params);
 
-    // 2. Fetch personalized AI texts (separate call, cached by answers hash)
+    // 2. Fetch personalized AI texts
     fetchAiTexts(checkDone);
   }
 
@@ -362,7 +367,6 @@
       return;
     }
 
-    // Build a simple hash of current answers to detect changes
     var answersStr = JSON.stringify(state.answers);
     var hash = simpleHash(answersStr);
 
@@ -411,73 +415,20 @@
     return hash.toString(36);
   }
 
-  // ─── Init ───
-  loadState();
-  updateAll();
-
-  // Toggle button
-  toggle.addEventListener('click', function(e) {
-    e.stopPropagation();
-    toggleBanner();
-  });
-
-  // Collapsed area click → open
-  bar.querySelector('.mon-projet-collapsed').addEventListener('click', function(e) {
-    // Ne pas ouvrir si on clique sur un lien ou bouton
-    if (e.target.closest('a') || e.target.closest('.mon-projet-toggle')) return;
-    if (!state.isOpen) openBanner();
-  });
-
-  // Desktop hover
-  if (!isTouch) {
-    bar.addEventListener('mouseenter', function() {
-      clearTimeout(hoverTimer);
-      hoverTimer = setTimeout(openBanner, 200);
-    });
-    bar.addEventListener('mouseleave', function() {
-      clearTimeout(hoverTimer);
-      hoverTimer = setTimeout(closeBanner, 300);
-    });
+  // ─── Page updates after AJAX ───
+  function applyPageUpdates() {
+    applyAiTexts();
+    applyShopFilter();
   }
 
-  // Choice clicks (event delegation)
-  expanded.addEventListener('click', onChoiceClick);
-
-  // Reset
-  if (resetBtn) {
-    resetBtn.addEventListener('click', onReset);
-  }
-
-  // Validate button
-  if (validateBtn) {
-    validateBtn.addEventListener('click', onValidate);
-  }
-
-  // Show validate button if quiz already complete on load
-  updateValidateButton();
-
-  // "Ma sélection" : valider d'abord si pas encore de recommandations
-  if (selBtn) {
-    selBtn.addEventListener('click', function(e) {
-      try {
-        var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-        if (prefs.recommendedIds && prefs.recommendedIds.length > 0) return; // laisser le lien naviguer
-      } catch (err) { /* */ }
-
-      // Pas encore de recommandations → valider d'abord
-      if (hasMinimumAnswers()) {
-        e.preventDefault();
-        selBtn.textContent = 'Chargement\u2026';
-        fetchResults(function() {
-          window.location.href = selBtn.href;
-        });
-      }
-    });
+  // ─── Page Nos Créations : rafraîchir le filtre en live ───
+  function applyShopFilter() {
+    // Déclencher un événement custom pour que shop.js rafraîchisse le filtre
+    var evt = new CustomEvent('monProjetUpdated');
+    document.dispatchEvent(evt);
   }
 
   // ─── Page-specific AI text injection ───
-  applyAiTexts();
-
   function applyAiTexts() {
     try {
       var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
@@ -491,6 +442,25 @@
         conseilsIntro.style.display = '';
       }
 
+      // Page Conseils : afficher les produits recommandés
+      var conseilsProducts = document.getElementById('conseils-products-section');
+      if (conseilsProducts && prefs.recommendedIds && prefs.recommendedIds.length > 0) {
+        conseilsProducts.style.display = '';
+        renderConseilsProducts(conseilsProducts, prefs.recommendedIds);
+      }
+
+      // Page Conseils : cacher le bouton refresh (les données sont fraîches)
+      var conseilsRefresh = document.getElementById('conseils-refresh-btn');
+      if (conseilsRefresh) {
+        conseilsRefresh.style.display = 'none';
+      }
+
+      // Page Conseils : cacher le CTA "Commencez votre projet"
+      var conseilsCta = document.querySelector('.advice-guide-cta');
+      if (conseilsCta && prefs.recommendedIds && prefs.recommendedIds.length > 0) {
+        conseilsCta.style.display = 'none';
+      }
+
       // Page Sur-mesure — AI intro
       var surMesureIntro = document.getElementById('sur-mesure-perso-intro');
       var surMesureText = document.getElementById('sur-mesure-perso-text');
@@ -502,6 +472,42 @@
       // Page Sur-mesure — pre-fill form
       prefillSurMesureForm(prefs);
     } catch (e) { /* */ }
+  }
+
+  // ─── Page Conseils : render product cards ───
+  function renderConseilsProducts(container, ids) {
+    // Chercher les cards produits déjà en localStorage (sauvées par l'AJAX produits)
+    var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    if (!prefs.recommendedIds || prefs.recommendedIds.length === 0) return;
+
+    // Les cards sont générées côté serveur, on utilise un AJAX léger pour les récupérer
+    if (container.dataset.loaded === 'true') return;
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', sapiMonProjet.ajaxUrl, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState !== 4) return;
+      if (xhr.status === 200) {
+        try {
+          var resp = JSON.parse(xhr.responseText);
+          if (resp.success && resp.data) {
+            var grid = container.querySelector('.conseils-products-grid');
+            if (grid) {
+              grid.innerHTML = resp.data;
+              container.dataset.loaded = 'true';
+            }
+          }
+        } catch (e) { /* */ }
+      }
+    };
+
+    var params = 'action=sapi_conseils_products'
+      + '&nonce=' + encodeURIComponent(sapiMonProjet.nonce)
+      + '&ids=' + encodeURIComponent(JSON.stringify(ids));
+
+    xhr.send(params);
   }
 
   function prefillSurMesureForm(prefs) {
@@ -529,5 +535,83 @@
       }
     }
   }
+
+  // ─── Bouton "Les conseils de Robin" : valider si pas encore fait ───
+  var conseilsBtn = bar.querySelector('.mon-projet-btn-conseils');
+  if (conseilsBtn) {
+    conseilsBtn.addEventListener('click', function(e) {
+      // Si déjà des recommandations → laisser naviguer normalement
+      try {
+        var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        if (prefs.recommendedIds && prefs.recommendedIds.length > 0) return;
+      } catch (err) { /* */ }
+
+      // Pas encore de recommandations mais pièce + taille répondues → AJAX puis rediriger
+      if (hasMinimumAnswers()) {
+        e.preventDefault();
+        conseilsBtn.textContent = 'Chargement\u2026';
+        fetchResults(function() {
+          window.location.href = conseilsBtn.href;
+        });
+      }
+    });
+  }
+
+  // ─── Page Conseils : bouton "Obtenir les conseils de Robin" ───
+  var refreshBtn = document.getElementById('conseils-refresh-btn');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', function() {
+      if (!hasMinimumAnswers()) {
+        // Ouvrir le bandeau
+        openBanner();
+        bar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      refreshBtn.textContent = 'Chargement\u2026';
+      refreshBtn.disabled = true;
+      fetchResults(function() {
+        window.location.reload();
+      });
+    });
+  }
+
+  // ─── Init ───
+  loadState();
+  updateAll();
+
+  // Toggle button
+  toggle.addEventListener('click', function(e) {
+    e.stopPropagation();
+    toggleBanner();
+  });
+
+  // Collapsed area click → open
+  bar.querySelector('.mon-projet-collapsed').addEventListener('click', function(e) {
+    if (e.target.closest('a') || e.target.closest('.mon-projet-toggle')) return;
+    if (!state.isOpen) openBanner();
+  });
+
+  // Desktop hover
+  if (!isTouch) {
+    bar.addEventListener('mouseenter', function() {
+      clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(openBanner, 200);
+    });
+    bar.addEventListener('mouseleave', function() {
+      clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(closeBanner, 300);
+    });
+  }
+
+  // Choice clicks (event delegation)
+  expanded.addEventListener('click', onChoiceClick);
+
+  // Reset
+  if (resetBtn) {
+    resetBtn.addEventListener('click', onReset);
+  }
+
+  // Apply AI texts on page load
+  applyPageUpdates();
 
 })();

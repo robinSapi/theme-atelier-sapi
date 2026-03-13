@@ -36,6 +36,21 @@ for ($i = 1; $i <= 4; $i++) {
   </div>
 </div>
 
+<!-- Produits recommandés (shown by mon-projet.js if recommendedIds exist) -->
+<section class="conseils-products-section" id="conseils-products-section" style="display:none">
+  <div class="conseils-products-header">
+    <h2><span class="section-num">00</span> La sélection de Robin pour votre projet</h2>
+  </div>
+  <div class="conseils-products-grid" id="conseils-products-grid">
+    <!-- Cards injectées par AJAX via mon-projet.js -->
+  </div>
+</section>
+
+<!-- Bouton refresh après modification des réponses (caché par défaut) -->
+<div class="conseils-refresh" id="conseils-refresh-btn" style="display:none">
+  <button type="button" class="conseils-refresh-btn">Obtenir les conseils de Robin</button>
+</div>
+
 <section class="advice-tips-section">
   <div class="advice-tips-grid">
     <?php foreach ($tips as $i => $tip) : ?>
@@ -66,7 +81,7 @@ for ($i = 1; $i <= 4; $i++) {
     </div>
     <?php endforeach; ?>
 
-    <!-- Card CTA – Ouvre le bandeau Mon Projet -->
+    <!-- Card CTA – Ouvre le bandeau Mon Projet (visible uniquement sans projet) -->
     <div class="advice-guide-cta">
       <div class="advice-guide-cta-inner">
         <h2 class="advice-guide-cta-title">Définissez votre projet d'éclairage</h2>

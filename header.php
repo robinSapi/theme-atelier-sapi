@@ -179,7 +179,6 @@ require_once get_template_directory() . '/inc/guide-data.php';
 $mon_projet_steps = sapi_guide_get_steps();
 $mon_projet_icons = sapi_guide_get_icons();
 $conseils_url = get_permalink(get_page_by_path('conseils-eclaires'));
-$shop_url = class_exists('WooCommerce') ? esc_url(wc_get_page_permalink('shop')) : '/nos-creations/';
 ?>
 <div class="mon-projet-bar" id="mon-projet-bar">
   <!-- État replié -->
@@ -195,7 +194,6 @@ $shop_url = class_exists('WooCommerce') ? esc_url(wc_get_page_permalink('shop'))
     </div>
     <div class="mon-projet-actions">
       <a href="<?php echo esc_url($conseils_url); ?>" class="mon-projet-btn-conseils">Les conseils de Robin</a>
-      <a href="<?php echo esc_url($shop_url); ?>?filtre=ma-selection" class="mon-projet-btn-selection" id="mon-projet-btn-selection" style="display:none;">La s&eacute;lection de Robin</a>
     </div>
     <button class="mon-projet-toggle" id="mon-projet-toggle" type="button" aria-expanded="false" aria-controls="mon-projet-expanded">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
@@ -233,7 +231,6 @@ $shop_url = class_exists('WooCommerce') ? esc_url(wc_get_page_permalink('shop'))
     <?php endforeach; ?>
     <div class="mon-projet-actions-row">
       <button class="mon-projet-reset" id="mon-projet-reset" type="button">R&eacute;initialiser</button>
-      <button class="mon-projet-validate" id="mon-projet-validate" type="button" style="display:none;">Valider mon projet</button>
     </div>
   </div>
 </div>
