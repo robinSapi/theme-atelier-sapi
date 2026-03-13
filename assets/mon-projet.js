@@ -285,6 +285,7 @@
   function fetchResults() {
     if (typeof sapiMonProjet === 'undefined' || !sapiMonProjet.ajaxUrl) return;
 
+    // 1. Fetch product recommendations
     var xhr = new XMLHttpRequest();
     xhr.open('POST', sapiMonProjet.ajaxUrl, true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -294,7 +295,6 @@
       try {
         var resp = JSON.parse(xhr.responseText);
         if (resp.success && resp.data) {
-          // Store recommended product IDs
           var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
           prefs.recommendedIds = resp.data.product_ids || [];
           if (resp.data.ai_text) {
@@ -302,7 +302,6 @@
           }
           localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
 
-          // Show "Ma sélection" button
           if (selBtn) selBtn.style.display = '';
         }
       } catch (e) { /* */ }
@@ -314,6 +313,56 @@
       + '&guide_website=';
 
     xhr.send(params);
+
+    // 2. Fetch personalized AI texts (separate call, cached by answers hash)
+    fetchAiTexts();
+  }
+
+  // ─── AJAX : Fetch personalized AI texts ───
+  function fetchAiTexts() {
+    if (typeof sapiMonProjet === 'undefined' || !sapiMonProjet.ajaxUrl) return;
+
+    // Build a simple hash of current answers to detect changes
+    var answersStr = JSON.stringify(state.answers);
+    var hash = simpleHash(answersStr);
+
+    // Check if we already have cached texts for these exact answers
+    var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    if (prefs.aiTextsHash === hash && prefs.aiTexts) return;
+
+    var xhr2 = new XMLHttpRequest();
+    xhr2.open('POST', sapiMonProjet.ajaxUrl, true);
+    xhr2.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+    xhr2.onreadystatechange = function() {
+      if (xhr2.readyState !== 4 || xhr2.status !== 200) return;
+      try {
+        var resp = JSON.parse(xhr2.responseText);
+        if (resp.success && resp.data) {
+          var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+          prefs.aiTexts = resp.data;
+          prefs.aiTextsHash = hash;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+        }
+      } catch (e) { /* */ }
+    };
+
+    var params2 = 'action=sapi_mon_projet_texts'
+      + '&nonce=' + encodeURIComponent(sapiMonProjet.nonce)
+      + '&answers=' + encodeURIComponent(answersStr)
+      + '&guide_website=';
+
+    xhr2.send(params2);
+  }
+
+  function simpleHash(str) {
+    var hash = 0;
+    for (var i = 0; i < str.length; i++) {
+      var chr = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + chr;
+      hash |= 0;
+    }
+    return hash.toString(36);
   }
 
   // ─── Init ───
@@ -351,6 +400,112 @@
   // Reset
   if (resetBtn) {
     resetBtn.addEventListener('click', onReset);
+  }
+
+  // ─── Page-specific AI text injection ───
+  applyAiTexts();
+
+  function applyAiTexts() {
+    try {
+      var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      if (!prefs.aiTexts) return;
+
+      // Page Conseils
+      var conseilsIntro = document.getElementById('conseils-perso-intro');
+      var conseilsText = document.getElementById('conseils-perso-text');
+      if (conseilsIntro && conseilsText && prefs.aiTexts.conseils_intro) {
+        conseilsText.textContent = prefs.aiTexts.conseils_intro;
+        conseilsIntro.style.display = '';
+      }
+
+      // Pages catégorie — AI subtitle
+      var catSubtitle = document.getElementById('category-perso-subtitle');
+      var catText = document.getElementById('category-perso-text');
+      if (catSubtitle && catText && prefs.aiTexts.category_texts) {
+        var catSlug = catSubtitle.getAttribute('data-category-slug');
+        if (catSlug && prefs.aiTexts.category_texts[catSlug]) {
+          catText.textContent = prefs.aiTexts.category_texts[catSlug];
+          catSubtitle.style.display = '';
+        }
+      }
+
+      // Pages catégorie — reorder products (recommended first)
+      if (prefs.recommendedIds && prefs.recommendedIds.length > 0) {
+        reorderProducts(prefs.recommendedIds);
+      }
+
+      // Page Sur-mesure — AI intro
+      var surMesureIntro = document.getElementById('sur-mesure-perso-intro');
+      var surMesureText = document.getElementById('sur-mesure-perso-text');
+      if (surMesureIntro && surMesureText && prefs.aiTexts.sur_mesure_intro) {
+        surMesureText.textContent = prefs.aiTexts.sur_mesure_intro;
+        surMesureIntro.style.display = '';
+      }
+
+      // Page Sur-mesure — pre-fill form
+      prefillSurMesureForm(prefs);
+    } catch (e) { /* */ }
+  }
+
+  function reorderProducts(recommendedIds) {
+    var grid = document.querySelector('.products.columns-3');
+    if (!grid) return;
+
+    var cards = grid.querySelectorAll('.product-card-cinetique');
+    if (!cards.length) return;
+
+    var idsStr = recommendedIds.map(function(id) { return String(id); });
+    var recommended = [];
+    var others = [];
+
+    for (var i = 0; i < cards.length; i++) {
+      var cardId = cards[i].getAttribute('data-id');
+      if (cardId && idsStr.indexOf(cardId) !== -1) {
+        recommended.push(cards[i]);
+      } else {
+        others.push(cards[i]);
+      }
+    }
+
+    if (recommended.length === 0) return;
+
+    // Hide grid, reorder, fade in
+    grid.style.opacity = '0';
+    grid.style.transition = 'opacity 0.3s ease';
+
+    for (var j = 0; j < recommended.length; j++) {
+      grid.insertBefore(recommended[j], grid.firstChild);
+    }
+
+    requestAnimationFrame(function() {
+      grid.style.opacity = '1';
+    });
+  }
+
+  function prefillSurMesureForm(prefs) {
+    if (!prefs.answers) return;
+    var form = document.querySelector('.sur-mesure-form, .wpcf7-form, #sur-mesure-form');
+    if (!form) return;
+
+    var fieldMap = {
+      piece: ['piece', 'destination', 'pièce'],
+      taille: ['taille', 'dimensions', 'surface'],
+      style: ['style', 'ambiance'],
+      sortie: ['sortie', 'type-luminaire', 'installation'],
+    };
+
+    for (var answerKey in fieldMap) {
+      if (!prefs.answers[answerKey]) continue;
+      var names = fieldMap[answerKey];
+      for (var n = 0; n < names.length; n++) {
+        var input = form.querySelector('[name*="' + names[n] + '"]');
+        if (input && !input.value) {
+          var label = prefs.labels && prefs.labels[answerKey] ? prefs.labels[answerKey] : prefs.answers[answerKey];
+          input.value = label;
+          break;
+        }
+      }
+    }
   }
 
 })();

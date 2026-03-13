@@ -182,8 +182,24 @@ if (!$hero_img_url) {
         </button>
       <?php endforeach; ?>
     </div>
+
+    <div class="filter-separator filter-separator--selection" aria-hidden="true" style="display:none"></div>
+
+    <!-- Groupe 3 : Ma sélection (visible uniquement si quiz complété) -->
+    <div class="filter-group filter-group--selection" style="display:none">
+      <button type="button" class="filter-btn filter-btn--selection" data-filter="ma-selection">
+        Ma sélection
+      </button>
+    </div>
   </nav>
 
+</div>
+
+<!-- AI selection intro (hidden by default, shown by JS) -->
+<div class="selection-ai-intro" id="selection-ai-intro" style="display:none">
+  <div class="selection-ai-intro__inner">
+    <p class="selection-ai-intro__text" id="selection-ai-text"></p>
+  </div>
 </div>
 
 <!-- Products Grid -->

@@ -25,6 +25,13 @@ get_header();
   </div>
 </section>
 
+<!-- AI personalized intro (shown by mon-projet.js if available) -->
+<div class="sur-mesure-perso-intro" id="sur-mesure-perso-intro" style="display:none">
+  <div class="sur-mesure-perso-intro__inner">
+    <p class="sur-mesure-perso-intro__text" id="sur-mesure-perso-text"></p>
+  </div>
+</div>
+
 <!-- INTRODUCTION -->
 <section class="surmesure-intro">
   <div class="surmesure-intro-grid">

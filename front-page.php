@@ -182,12 +182,8 @@ if ($gc_query->have_posts()) {
   wp_reset_postdata();
 }
 
-// URL du Guide Luminaire (recherche dynamique de la page par template)
-$guide_url = home_url('/guide-luminaire/'); // fallback
-$guide_pages = get_pages(['meta_key' => '_wp_page_template', 'meta_value' => 'page-guide-luminaire.php', 'number' => 1]);
-if (!empty($guide_pages)) {
-  $guide_url = get_permalink($guide_pages[0]->ID);
-}
+// Room picker now opens Mon Projet banner instead of guide-luminaire page
+$creations_url = home_url('/nos-creations/');
 
 // Room choices for mini-questionnaire "Pour quelle pièce ?"
 $room_choices = [
@@ -410,14 +406,14 @@ foreach ($collection_slugs as $col) {
       <div class="room-picker-inner">
         <h3 class="room-picker-title">Pour quelle pièce cherchez-vous un luminaire ?</h3>
         <p class="room-picker-sub">
-          <a href="<?php echo esc_url($guide_url); ?>">Quelques questions et Robin vous guide vers le luminaire idéal →</a>
+          Quelques questions et Robin vous guide vers le luminaire idéal
         </p>
         <div class="room-picker-cards">
           <?php foreach ($room_choices as $room) : ?>
-            <a href="<?php echo esc_url(add_query_arg('piece', $room['slug'], $guide_url)); ?>" class="room-card">
+            <button type="button" class="room-card" data-piece="<?php echo esc_attr($room['slug']); ?>" onclick="var bar=document.getElementById('mon-projet-bar');if(bar){bar.scrollIntoView({behavior:'smooth',block:'start'});var t=document.getElementById('mon-projet-toggle');if(t&&t.getAttribute('aria-expanded')==='false')t.click();}">
               <span class="room-card-icon"><?php echo $room_icons[$room['icon']]; ?></span>
               <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
-            </a>
+            </button>
           <?php endforeach; ?>
         </div>
       </div>

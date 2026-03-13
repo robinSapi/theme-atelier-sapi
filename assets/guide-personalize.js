@@ -1,7 +1,7 @@
 /**
  * Guide Personalize — Swap product card images based on guide preferences
  *
- * Reads sapiGuidePrefs from localStorage (set by guide-luminaire.js)
+ * Reads sapiGuidePrefs from localStorage (set by mon-projet.js)
  * and replaces default product thumbnails with the preferred essence image.
  */
 (function () {

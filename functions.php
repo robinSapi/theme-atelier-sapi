@@ -171,12 +171,9 @@ function sapi_maison_enqueue_assets() {
   // Menu burger JavaScript - chargé sur toutes les pages
   $menu_js_path = get_template_directory() . '/assets/menu.js';
   wp_enqueue_script('sapi-maison-menu', get_template_directory_uri() . '/assets/menu.js', [], file_exists($menu_js_path) ? filemtime($menu_js_path) : '1.0.0', true);
-  $guide_pages = get_pages(['meta_key' => '_wp_page_template', 'meta_value' => 'page-guide-luminaire.php', 'number' => 1]);
-  $guide_url = !empty($guide_pages) ? get_permalink($guide_pages[0]) : home_url('/guide-luminaire/');
   wp_localize_script('sapi-maison-menu', 'sapiMenu', [
     'miniCartNonce' => wp_create_nonce('sapi-update-mini-cart-qty'),
     'wcAjaxUrl'     => home_url('/?wc-ajax='),
-    'guideUrl'      => $guide_url,
   ]);
 
   // Product name formatter - chargé sur toutes les pages (prénom en Montserrat, reste en Square Peg)
@@ -236,18 +233,6 @@ function sapi_maison_enqueue_assets() {
     }
   }
 
-  // Guide Luminaire questionnaire
-  if (is_page_template('page-guide-luminaire.php')) {
-    $guide_js_path = get_template_directory() . '/assets/guide-luminaire.js';
-    if (file_exists($guide_js_path)) {
-      wp_enqueue_script('sapi-guide-luminaire', get_template_directory_uri() . '/assets/guide-luminaire.js', [], filemtime($guide_js_path), true);
-    }
-    // Quick View for product results
-    $quick_view_js_path = get_template_directory() . '/assets/quick-view.js';
-    if (file_exists($quick_view_js_path)) {
-      wp_enqueue_script('sapi-maison-quick-view', get_template_directory_uri() . '/assets/quick-view.js', [], filemtime($quick_view_js_path), true);
-    }
-  }
 
   // Scroll Dots — mobile slide indicators (grilles verticales → sliders horizontaux)
   $scroll_dots_path = get_template_directory() . '/assets/scroll-dots.js';
@@ -3647,5 +3632,148 @@ function sapi_guide_admin_page() {
     <?php endif; ?>
   </div>
   <?php
+}
+
+/**
+ * ═══════════════════════════════════════════════════════════════════
+ * MON PROJET — AJAX endpoint for personalized AI texts
+ * Generates all page-specific texts in a single Claude call.
+ * ═══════════════════════════════════════════════════════════════════
+ */
+add_action('wp_ajax_sapi_mon_projet_texts', 'sapi_ajax_mon_projet_texts');
+add_action('wp_ajax_nopriv_sapi_mon_projet_texts', 'sapi_ajax_mon_projet_texts');
+
+function sapi_ajax_mon_projet_texts() {
+  // 1. Nonce check
+  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
+    wp_send_json_error(['message' => 'Nonce invalide']);
+    return;
+  }
+
+  // 2. Rate limiting (shared with guide results)
+  if (!sapi_guide_check_rate_limit()) {
+    wp_send_json_error(['message' => 'Trop de requêtes, réessayez plus tard']);
+    return;
+  }
+
+  // 3. Honeypot
+  if (!empty($_POST['guide_website'])) {
+    wp_send_json_error(['message' => 'Erreur de validation']);
+    return;
+  }
+
+  // 4. Parse & sanitize answers
+  $raw_answers = isset($_POST['answers']) ? sanitize_text_field(wp_unslash($_POST['answers'])) : '{}';
+  $answers = json_decode($raw_answers, true);
+
+  if (!is_array($answers) || empty($answers)) {
+    wp_send_json_error(['message' => 'Données invalides']);
+    return;
+  }
+
+  $clean = [];
+  foreach ($answers as $key => $val) {
+    $clean[sanitize_key($key)] = sanitize_text_field($val);
+  }
+
+  // 5. Build system prompt
+  $theme_dir = get_stylesheet_directory();
+  $prompt_template = file_get_contents($theme_dir . '/assets/guide-prompt-mon-projet.txt');
+
+  if (!$prompt_template) {
+    wp_send_json_error(['message' => 'Prompt introuvable']);
+    return;
+  }
+
+  // Build human-readable answers string
+  $labels_map = [
+    'piece'     => 'Pièce',
+    'taille'    => 'Taille de la pièce',
+    'eclairage' => 'Type d\'éclairage',
+    'sortie'    => 'Sortie électrique',
+    'hauteur'   => 'Hauteur sous-plafond',
+    'table'     => 'Au-dessus d\'une table',
+    'style'     => 'Style intérieur',
+  ];
+
+  $answers_text = '';
+  foreach ($labels_map as $key => $label) {
+    if (isset($clean[$key])) {
+      $answers_text .= '- ' . $label . ' : ' . $clean[$key] . "\n";
+    }
+  }
+
+  $system_prompt = str_replace('{answers}', $answers_text, $prompt_template);
+
+  // 6. Call Claude API
+  $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
+  if (empty($api_key)) {
+    wp_send_json_error(['message' => 'API non configurée']);
+    return;
+  }
+
+  $body = [
+    'model'      => 'claude-sonnet-4-6',
+    'max_tokens' => 1024,
+    'system'     => $system_prompt,
+    'messages'   => [
+      ['role' => 'user', 'content' => 'Génère les textes personnalisés pour mon projet.'],
+    ],
+  ];
+
+  $response = wp_remote_post('https://api.anthropic.com/v1/messages', [
+    'timeout' => 30,
+    'headers' => [
+      'Content-Type'      => 'application/json',
+      'x-api-key'         => $api_key,
+      'anthropic-version' => '2023-06-01',
+    ],
+    'body' => wp_json_encode($body),
+  ]);
+
+  if (is_wp_error($response)) {
+    error_log('Sapi Mon Projet Claude API error: ' . $response->get_error_message());
+    wp_send_json_error(['message' => 'Erreur API']);
+    return;
+  }
+
+  $status   = wp_remote_retrieve_response_code($response);
+  $raw_body = wp_remote_retrieve_body($response);
+
+  if ($status !== 200) {
+    error_log('Sapi Mon Projet Claude API HTTP ' . $status . ': ' . $raw_body);
+    wp_send_json_error(['message' => 'Erreur API']);
+    return;
+  }
+
+  $data = json_decode($raw_body, true);
+  if (!isset($data['content'][0]['text'])) {
+    wp_send_json_error(['message' => 'Réponse API invalide']);
+    return;
+  }
+
+  $text = $data['content'][0]['text'];
+
+  // Clean markdown code fences if present
+  $text = preg_replace('/^```json\s*/i', '', trim($text));
+  $text = preg_replace('/\s*```$/i', '', $text);
+
+  $parsed = json_decode(trim($text), true);
+
+  if (!$parsed) {
+    error_log('Sapi Mon Projet: Claude response not valid JSON: ' . $text);
+    wp_send_json_error(['message' => 'Réponse IA invalide']);
+    return;
+  }
+
+  // 7. Return texts
+  wp_send_json_success([
+    'conseils_intro'  => isset($parsed['conseils_intro']) ? sanitize_text_field($parsed['conseils_intro']) : '',
+    'selection_intro' => isset($parsed['selection_intro']) ? sanitize_text_field($parsed['selection_intro']) : '',
+    'category_texts'  => isset($parsed['category_texts']) && is_array($parsed['category_texts'])
+      ? array_map('sanitize_text_field', $parsed['category_texts'])
+      : [],
+    'sur_mesure_intro' => isset($parsed['sur_mesure_intro']) ? sanitize_text_field($parsed['sur_mesure_intro']) : '',
+  ]);
 }
 

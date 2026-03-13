@@ -29,6 +29,13 @@ for ($i = 1; $i <= 4; $i++) {
   </div>
 </section>
 
+<!-- AI personalized intro (shown by mon-projet.js if available) -->
+<div class="conseils-perso-intro" id="conseils-perso-intro" style="display:none">
+  <div class="conseils-perso-intro__inner">
+    <p class="conseils-perso-intro__text" id="conseils-perso-text"></p>
+  </div>
+</div>
+
 <section class="advice-tips-section">
   <div class="advice-tips-grid">
     <?php foreach ($tips as $i => $tip) : ?>
@@ -59,38 +66,14 @@ for ($i = 1; $i <= 4; $i++) {
     </div>
     <?php endforeach; ?>
 
-    <?php
-    // URL du Guide Luminaire (recherche dynamique)
-    $guide_url = home_url('/guide-luminaire/');
-    $guide_pages = get_pages(['meta_key' => '_wp_page_template', 'meta_value' => 'page-guide-luminaire.php', 'number' => 1]);
-    if (!empty($guide_pages)) {
-      $guide_url = get_permalink($guide_pages[0]->ID);
-    }
-    ?>
-
-    <!-- Card CTA – Guide Luminaire avec choix de pièce -->
-    <?php
-    $room_choices = [
-      ['label' => 'Salon',   'slug' => 'salon',    'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3"/><rect x="2" y="11" width="20" height="7" rx="2"/><path d="M5 18v2m14-2v2"/></svg>'],
-      ['label' => 'Cuisine', 'slug' => 'cuisine',  'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V20H6Z"/><line x1="6" y1="17" x2="18" y2="17"/></svg>'],
-      ['label' => 'Chambre', 'slug' => 'chambre',  'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M2 14h20"/><path d="M2 10V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/></svg>'],
-      ['label' => 'Bureau',  'slug' => 'bureau',   'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>'],
-      ['label' => 'Entrée',  'slug' => 'entree',   'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="15" cy="12" r="1"/></svg>'],
-      ['label' => 'Escalier','slug' => 'escalier', 'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4v-4h4v-4h4V8h4"/><path d="M4 20V8"/><path d="M20 20V8"/></svg>'],
-    ];
-    ?>
+    <!-- Card CTA – Ouvre le bandeau Mon Projet -->
     <div class="advice-guide-cta">
       <div class="advice-guide-cta-inner">
-        <h2 class="advice-guide-cta-title">Pour quelle pièce cherchez-vous un luminaire ?</h2>
-        <p class="advice-guide-cta-text">Sélectionnez votre pièce et Robin vous guide vers le luminaire idéal.</p>
-        <div class="advice-room-picker">
-          <?php foreach ($room_choices as $room) : ?>
-            <a href="<?php echo esc_url(add_query_arg('piece', $room['slug'], $guide_url)); ?>" class="room-card">
-              <span class="room-card-icon"><?php echo $room['icon']; ?></span>
-              <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
-            </a>
-          <?php endforeach; ?>
-        </div>
+        <h2 class="advice-guide-cta-title">Définissez votre projet d'éclairage</h2>
+        <p class="advice-guide-cta-text">Répondez à quelques questions et Robin vous recommande les luminaires idéaux pour votre pièce.</p>
+        <button type="button" class="advice-guide-cta-btn" onclick="var bar=document.getElementById('mon-projet-bar');if(bar){bar.scrollIntoView({behavior:'smooth',block:'start'});var t=document.getElementById('mon-projet-toggle');if(t&&t.getAttribute('aria-expanded')==='false')t.click();}">
+          Commencer mon projet
+        </button>
       </div>
     </div>
   </div>

@@ -40,6 +40,10 @@ if (function_exists('sapi_maison_breadcrumbs')) {
   <?php if (isset($category_intro[$term_slug])) : ?>
     <p class="shop-subtitle"><?php echo esc_html($category_intro[$term_slug]); ?></p>
   <?php endif; ?>
+  <!-- AI personalized subtitle (shown by mon-projet.js if available) -->
+  <div class="category-perso-subtitle" id="category-perso-subtitle" data-category-slug="<?php echo esc_attr($term_slug); ?>" style="display:none">
+    <p class="category-perso-text" id="category-perso-text"></p>
+  </div>
 </section>
 
 <?php if ($term_slug !== 'accessoires') : ?>

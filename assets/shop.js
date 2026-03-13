@@ -52,6 +52,20 @@
       // Advanced dropdown filters
       this.initAdvancedFilters();
 
+      // Show "Ma sélection" button if quiz completed
+      this.initMaSelection(filterContainer);
+
+      // Check URL param ?filtre=ma-selection
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('filtre') === 'ma-selection') {
+        const selBtn = filterContainer.querySelector('[data-filter="ma-selection"]');
+        if (selBtn && selBtn.offsetParent !== null) {
+          filterContainer.querySelector('.filter-btn.active')?.classList.remove('active');
+          selBtn.classList.add('active');
+          this.filters.category = 'ma-selection';
+        }
+      }
+
       // Appliquer le filtre initial (masque accessoires par défaut)
       this.applyFilters();
     },
@@ -239,6 +253,18 @@
       return true;
     },
 
+    initMaSelection: function(filterContainer) {
+      try {
+        var prefs = JSON.parse(localStorage.getItem('sapiGuidePrefs') || '{}');
+        if (prefs.recommendedIds && prefs.recommendedIds.length > 0) {
+          var selGroup = filterContainer.querySelector('.filter-group--selection');
+          var selSep = filterContainer.querySelector('.filter-separator--selection');
+          if (selGroup) selGroup.style.display = '';
+          if (selSep) selSep.style.display = '';
+        }
+      } catch (e) { /* */ }
+    },
+
     applyFilters: function() {
       // Find all product cards — carousel slides or grid items
       let slides;
@@ -250,19 +276,57 @@
 
       let visibleCount = 0;
 
+      // "Ma sélection" — get recommended IDs from localStorage
+      let recommendedIds = [];
+      const isMaSelection = this.filters.category === 'ma-selection';
+      if (isMaSelection) {
+        try {
+          const prefs = JSON.parse(localStorage.getItem('sapiGuidePrefs') || '{}');
+          recommendedIds = (prefs.recommendedIds || []).map(function(id) { return String(id); });
+        } catch (e) { /* */ }
+      }
+
+      // Show/hide AI selection intro
+      const selIntro = document.getElementById('selection-ai-intro');
+      const selText = document.getElementById('selection-ai-text');
+      if (selIntro) {
+        if (isMaSelection) {
+          try {
+            const prefs = JSON.parse(localStorage.getItem('sapiGuidePrefs') || '{}');
+            if (prefs.aiTexts && prefs.aiTexts.selection_intro) {
+              selText.textContent = prefs.aiTexts.selection_intro;
+              selIntro.style.display = '';
+            } else if (prefs.aiText) {
+              selText.textContent = prefs.aiText;
+              selIntro.style.display = '';
+            } else {
+              selIntro.style.display = 'none';
+            }
+          } catch (e) { selIntro.style.display = 'none'; }
+        } else {
+          selIntro.style.display = 'none';
+        }
+      }
+
       slides.forEach(slide => {
         const categories = slide.dataset.categories || '';
         const price = slide.dataset.price || '';
         const wood = slide.dataset.wood || '';
         const size = slide.dataset.size || '';
         const name = slide.dataset.name || '';
+        const productId = slide.dataset.id || '';
 
         // Check all filter criteria
         const catList = categories.split(' ');
         const extraCategories = ['accessoires', 'carte-cadeau'];
-        const matchesCategory = this.filters.category === 'all'
-          ? !catList.some(function(c) { return extraCategories.indexOf(c) !== -1; })
-          : catList.includes(this.filters.category);
+        let matchesCategory;
+        if (isMaSelection) {
+          matchesCategory = recommendedIds.indexOf(productId) !== -1;
+        } else if (this.filters.category === 'all') {
+          matchesCategory = !catList.some(function(c) { return extraCategories.indexOf(c) !== -1; });
+        } else {
+          matchesCategory = catList.includes(this.filters.category);
+        }
         const matchesPrice = this.matchesPrice(price, this.filters.price);
         const matchesWood = this.filters.wood === 'all' || wood === this.filters.wood;
         const matchesSize = this.filters.size === 'all' || this.matchesSize(size, this.filters.size);
