@@ -184,10 +184,12 @@
       chipsEl.innerHTML = html;
     }
 
-    // Bouton "Ma sélection" visible si quiz complet
-    var allAnswered = isQuizComplete();
+    // Bouton "Ma sélection" visible si des produits recommandés existent
     if (selBtn) {
-      selBtn.style.display = allAnswered ? '' : 'none';
+      try {
+        var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        selBtn.style.display = (prefs.recommendedIds && prefs.recommendedIds.length > 0) ? '' : 'none';
+      } catch (e) { selBtn.style.display = 'none'; }
     }
   }
 
