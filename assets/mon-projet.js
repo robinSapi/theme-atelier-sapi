@@ -296,7 +296,9 @@
         var resp = JSON.parse(xhr.responseText);
         if (resp.success && resp.data) {
           var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-          prefs.recommendedIds = resp.data.product_ids || [];
+          // Extract IDs from products array
+          var products = resp.data.products || [];
+          prefs.recommendedIds = products.map(function(p) { return p.id; });
           if (resp.data.ai_text) {
             prefs.aiText = resp.data.ai_text;
           }
