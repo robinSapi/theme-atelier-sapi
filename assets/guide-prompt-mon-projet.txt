@@ -20,7 +20,7 @@ TEXTES À GÉNÉRER :
 
 2. "selection_intro" (~40-50 mots) : Introduction pour la page "Ma sélection" de luminaires recommandés. Explique brièvement pourquoi ces luminaires correspondent au projet. Mentionne un critère technique lié aux réponses.
 
-3. "category_texts" : Un objet avec une phrase (~25-30 mots) pour chaque catégorie pertinente parmi : "suspensions", "appliques", "lampes-a-poser", "sur-mesure". Chaque phrase explique pourquoi cette catégorie est intéressante pour le projet du visiteur. Ne génère que les catégories pertinentes.
+3. "category_texts" : Un objet avec une phrase (~25-30 mots) pour chaque catégorie pertinente parmi : "suspensions", "appliques", "lampadaires", "lampesaposer", "accessoires". Chaque phrase explique pourquoi cette catégorie est intéressante pour le projet du visiteur. Ne génère que les catégories pertinentes.
 
 4. "sur_mesure_intro" (~40-50 mots) : Introduction pour la page Sur-mesure. Explique comment le sur-mesure peut répondre au projet spécifique du visiteur. Mentionne un aspect concret (dimensions, essence du bois, nombre de points lumineux...).
 
@@ -31,8 +31,9 @@ FORMAT DE RÉPONSE (JSON strict, sans commentaires, sans markdown) :
   "category_texts": {
     "suspensions": "...",
     "appliques": "...",
-    "lampes-a-poser": "...",
-    "sur-mesure": "..."
+    "lampadaires": "...",
+    "lampesaposer": "...",
+    "accessoires": "..."
   },
   "sur_mesure_intro": "..."
 }
