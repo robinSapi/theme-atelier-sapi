@@ -58,19 +58,24 @@
 
       var style  = state.answers.style || null;
       var taille = state.answers.taille || null;
-      var piece  = state.answers.piece || null;
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        answers: state.answers,
-        labels: state.labels,
-        // Champs dérivés pour guide-personalize.js + shop badges
-        essence: essenceMap[style] || null,
-        tailleIndex: taille in tailleMap ? tailleMap[taille] : null,
-        recommendedIds: [],
-        pieceLabel: state.labels.piece || null,
-        styleLabel: state.labels.style || null,
-        tailleLabel: state.labels.taille || null
-      }));
+      // Merge with existing data to preserve AJAX results (recommendedIds, aiTexts)
+      var existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+      existing.answers = state.answers;
+      existing.labels = state.labels;
+      existing.essence = essenceMap[style] || null;
+      existing.tailleIndex = taille in tailleMap ? tailleMap[taille] : null;
+      existing.pieceLabel = state.labels.piece || null;
+      existing.styleLabel = state.labels.style || null;
+      existing.tailleLabel = state.labels.taille || null;
+
+      // Reset recommendedIds only if not already set
+      if (!existing.recommendedIds) {
+        existing.recommendedIds = [];
+      }
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
     } catch (e) { /* */ }
   }
 
