@@ -185,10 +185,10 @@ if (!$hero_img_url) {
 
     <div class="filter-separator filter-separator--selection" aria-hidden="true" style="display:none"></div>
 
-    <!-- Groupe 3 : Ma sélection (visible uniquement si quiz complété) -->
+    <!-- Groupe 3 : La sélection de Robin (visible uniquement si quiz validé) -->
     <div class="filter-group filter-group--selection" style="display:none">
       <button type="button" class="filter-btn filter-btn--selection" data-filter="ma-selection">
-        Ma sélection
+        La sélection de Robin
       </button>
     </div>
   </nav>

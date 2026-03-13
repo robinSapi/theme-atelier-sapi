@@ -195,7 +195,7 @@ $shop_url = class_exists('WooCommerce') ? esc_url(wc_get_page_permalink('shop'))
     </div>
     <div class="mon-projet-actions">
       <a href="<?php echo esc_url($conseils_url); ?>" class="mon-projet-btn-conseils">Les conseils de Robin</a>
-      <a href="<?php echo esc_url($shop_url); ?>?filtre=ma-selection" class="mon-projet-btn-selection" id="mon-projet-btn-selection" style="display:none;">Ma s&eacute;lection</a>
+      <a href="<?php echo esc_url($shop_url); ?>?filtre=ma-selection" class="mon-projet-btn-selection" id="mon-projet-btn-selection" style="display:none;">La s&eacute;lection de Robin</a>
     </div>
     <button class="mon-projet-toggle" id="mon-projet-toggle" type="button" aria-expanded="false" aria-controls="mon-projet-expanded">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
