@@ -1675,7 +1675,9 @@ button:hover,
   align-items: center;
   justify-content: center;
   width: 28px;
+  min-width: 28px;
   height: 28px;
+  aspect-ratio: 1;
   background: none;
   border: 1.5px solid rgba(147, 125, 104, 0.2);
   border-radius: 50%;
@@ -1683,6 +1685,7 @@ button:hover,
   cursor: pointer;
   transition: transform 0.3s ease, border-color 0.2s;
   flex-shrink: 0;
+  padding: 0;
 }
 
 .mon-projet-toggle:hover {
