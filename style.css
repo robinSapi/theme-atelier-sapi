@@ -11464,19 +11464,19 @@ transform: translateY(15px);
   z-index: 1;
 }
 
-.product-card-cinetique .has-hover-image .product-image-main {
+.product-card-cinetique .product-image-hover {
   z-index: 2;
   opacity: 0;
   -webkit-transition: opacity 0.4s ease;
   transition: opacity 0.4s ease;
 }
 
-.product-card-cinetique .product-image-hover {
-  z-index: 1;
-}
-
 @media (hover: hover) {
   .product-card-cinetique .product-media.has-hover-image:hover .product-image-main {
+    opacity: 0;
+  }
+
+  .product-card-cinetique .product-media.has-hover-image:hover .product-image-hover {
     opacity: 1;
   }
 }
