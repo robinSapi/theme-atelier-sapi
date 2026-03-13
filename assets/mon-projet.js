@@ -272,8 +272,8 @@
   }
 
   function hasMinimumAnswers() {
-    // Valider dès que pièce + style sont répondus
-    return !!state.answers.piece && !!state.answers.style;
+    // Valider dès que pièce + taille sont répondus
+    return !!state.answers.piece && !!state.answers.taille;
   }
 
   function updateValidateButton() {
