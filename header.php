@@ -231,8 +231,9 @@ $shop_url = class_exists('WooCommerce') ? esc_url(wc_get_page_permalink('shop'))
       </div>
     </div>
     <?php endforeach; ?>
-    <div class="mon-projet-reset-row">
+    <div class="mon-projet-actions-row">
       <button class="mon-projet-reset" id="mon-projet-reset" type="button">R&eacute;initialiser</button>
+      <button class="mon-projet-validate" id="mon-projet-validate" type="button" style="display:none;">Valider mon projet</button>
     </div>
   </div>
 </div>

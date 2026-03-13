@@ -17,6 +17,7 @@
   var chipsEl   = document.getElementById('mon-projet-chips');
   var resetBtn  = document.getElementById('mon-projet-reset');
   var selBtn    = document.getElementById('mon-projet-btn-selection');
+  var validateBtn = document.getElementById('mon-projet-validate');
 
   // Steps data passed from PHP via wp_localize_script
   var steps     = (typeof sapiMonProjet !== 'undefined' && sapiMonProjet.steps) ? sapiMonProjet.steps : [];
@@ -266,10 +267,31 @@
     updateAll();
     saveState();
 
-    // AJAX si quiz complet
+    // Montrer/cacher le bouton "Valider mon projet"
+    updateValidateButton();
+  }
+
+  function updateValidateButton() {
+    if (!validateBtn) return;
     if (isQuizComplete()) {
-      fetchResults();
+      validateBtn.style.display = '';
+    } else {
+      validateBtn.style.display = 'none';
     }
+  }
+
+  function onValidate() {
+    if (!isQuizComplete()) return;
+    validateBtn.style.display = 'none';
+    validateBtn.textContent = 'Chargement…';
+    validateBtn.style.display = '';
+    validateBtn.disabled = true;
+    fetchResults(function() {
+      validateBtn.textContent = 'Valider mon projet';
+      validateBtn.disabled = false;
+      validateBtn.style.display = 'none';
+      closeBanner();
+    });
   }
 
   function onReset() {
@@ -277,6 +299,7 @@
     state.labels  = {};
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* */ }
     updateAll();
+    updateValidateButton();
   }
 
   function updateAll() {
@@ -287,8 +310,17 @@
   }
 
   // ─── AJAX : Fetch results when quiz is complete ───
-  function fetchResults() {
-    if (typeof sapiMonProjet === 'undefined' || !sapiMonProjet.ajaxUrl) return;
+  function fetchResults(onDone) {
+    if (typeof sapiMonProjet === 'undefined' || !sapiMonProjet.ajaxUrl) {
+      if (onDone) onDone();
+      return;
+    }
+
+    var pending = 2; // 2 AJAX calls in parallel
+    function checkDone() {
+      pending--;
+      if (pending <= 0 && onDone) onDone();
+    }
 
     // 1. Fetch product recommendations
     var xhr = new XMLHttpRequest();
@@ -296,22 +328,24 @@
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
     xhr.onreadystatechange = function() {
-      if (xhr.readyState !== 4 || xhr.status !== 200) return;
-      try {
-        var resp = JSON.parse(xhr.responseText);
-        if (resp.success && resp.data) {
-          var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-          // Extract IDs from products array
-          var products = resp.data.products || [];
-          prefs.recommendedIds = products.map(function(p) { return p.id; });
-          if (resp.data.ai_text) {
-            prefs.aiText = resp.data.ai_text;
-          }
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+      if (xhr.readyState !== 4) return;
+      if (xhr.status === 200) {
+        try {
+          var resp = JSON.parse(xhr.responseText);
+          if (resp.success && resp.data) {
+            var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+            var products = resp.data.products || [];
+            prefs.recommendedIds = products.map(function(p) { return p.id; });
+            if (resp.data.ai_text) {
+              prefs.aiText = resp.data.ai_text;
+            }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
 
-          if (selBtn) selBtn.style.display = '';
-        }
-      } catch (e) { /* */ }
+            if (selBtn) selBtn.style.display = '';
+          }
+        } catch (e) { /* */ }
+      }
+      checkDone();
     };
 
     var params = 'action=sapi_guide_results'
@@ -322,12 +356,15 @@
     xhr.send(params);
 
     // 2. Fetch personalized AI texts (separate call, cached by answers hash)
-    fetchAiTexts();
+    fetchAiTexts(checkDone);
   }
 
   // ─── AJAX : Fetch personalized AI texts ───
-  function fetchAiTexts() {
-    if (typeof sapiMonProjet === 'undefined' || !sapiMonProjet.ajaxUrl) return;
+  function fetchAiTexts(onDone) {
+    if (typeof sapiMonProjet === 'undefined' || !sapiMonProjet.ajaxUrl) {
+      if (onDone) onDone();
+      return;
+    }
 
     // Build a simple hash of current answers to detect changes
     var answersStr = JSON.stringify(state.answers);
@@ -335,23 +372,29 @@
 
     // Check if we already have cached texts for these exact answers
     var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-    if (prefs.aiTextsHash === hash && prefs.aiTexts) return;
+    if (prefs.aiTextsHash === hash && prefs.aiTexts) {
+      if (onDone) onDone();
+      return;
+    }
 
     var xhr2 = new XMLHttpRequest();
     xhr2.open('POST', sapiMonProjet.ajaxUrl, true);
     xhr2.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
     xhr2.onreadystatechange = function() {
-      if (xhr2.readyState !== 4 || xhr2.status !== 200) return;
-      try {
-        var resp = JSON.parse(xhr2.responseText);
-        if (resp.success && resp.data) {
-          var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-          prefs.aiTexts = resp.data;
-          prefs.aiTextsHash = hash;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-        }
-      } catch (e) { /* */ }
+      if (xhr2.readyState !== 4) return;
+      if (xhr2.status === 200) {
+        try {
+          var resp = JSON.parse(xhr2.responseText);
+          if (resp.success && resp.data) {
+            var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+            prefs.aiTexts = resp.data;
+            prefs.aiTextsHash = hash;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+          }
+        } catch (e) { /* */ }
+      }
+      if (onDone) onDone();
     };
 
     var params2 = 'action=sapi_mon_projet_texts'
@@ -408,6 +451,14 @@
   if (resetBtn) {
     resetBtn.addEventListener('click', onReset);
   }
+
+  // Validate button
+  if (validateBtn) {
+    validateBtn.addEventListener('click', onValidate);
+  }
+
+  // Show validate button if quiz already complete on load
+  updateValidateButton();
 
   // ─── Page-specific AI text injection ───
   applyAiTexts();

@@ -1789,10 +1789,12 @@ button:hover,
 }
 
 /* --- Bouton Reset --- */
-.mon-projet-reset-row {
+.mon-projet-actions-row {
   display: flex;
-  justify-content: flex-end;
-  padding: 0.4rem 1.5rem;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.6rem 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -1813,6 +1815,33 @@ button:hover,
 
 .mon-projet-reset:hover {
   opacity: 1;
+}
+
+.mon-projet-validate {
+  padding: 8px 24px;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(227, 91, 36, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s;
+}
+
+@media (hover: hover) {
+  .mon-projet-validate:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(227, 91, 36, 0.35);
+  }
+}
+
+.mon-projet-validate:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 /* --- Responsive Tablet --- */
