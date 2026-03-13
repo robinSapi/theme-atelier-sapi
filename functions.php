@@ -3770,9 +3770,6 @@ function sapi_ajax_mon_projet_texts() {
   wp_send_json_success([
     'conseils_intro'  => isset($parsed['conseils_intro']) ? sanitize_text_field($parsed['conseils_intro']) : '',
     'selection_intro' => isset($parsed['selection_intro']) ? sanitize_text_field($parsed['selection_intro']) : '',
-    'category_texts'  => isset($parsed['category_texts']) && is_array($parsed['category_texts'])
-      ? array_map('sanitize_text_field', $parsed['category_texts'])
-      : [],
     'sur_mesure_intro' => isset($parsed['sur_mesure_intro']) ? sanitize_text_field($parsed['sur_mesure_intro']) : '',
   ]);
 }

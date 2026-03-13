@@ -10510,27 +10510,6 @@ transform: translateY(15px);
   }
 }
 
-/* Category AI personalized subtitle */
-.category-perso-subtitle {
-  margin-top: 0.5rem;
-}
-
-.category-perso-text {
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  font-style: italic;
-  line-height: 1.6;
-  color: var(--color-wood);
-  max-width: 600px;
-  margin: 0;
-}
-
-@media (min-width: 769px) {
-  .category-perso-text {
-    margin: 0 auto;
-  }
-}
-
 /* Hero CTA */
 .shop-hero-cta {
   display: inline-flex;

@@ -491,22 +491,6 @@
         conseilsIntro.style.display = '';
       }
 
-      // Pages catégorie — AI subtitle
-      var catSubtitle = document.getElementById('category-perso-subtitle');
-      var catText = document.getElementById('category-perso-text');
-      if (catSubtitle && catText && prefs.aiTexts.category_texts) {
-        var catSlug = catSubtitle.getAttribute('data-category-slug');
-        if (catSlug && prefs.aiTexts.category_texts[catSlug]) {
-          catText.textContent = prefs.aiTexts.category_texts[catSlug];
-          catSubtitle.style.display = '';
-        }
-      }
-
-      // Pages catégorie — reorder products (recommended first)
-      if (prefs.recommendedIds && prefs.recommendedIds.length > 0) {
-        reorderProducts(prefs.recommendedIds);
-      }
-
       // Page Sur-mesure — AI intro
       var surMesureIntro = document.getElementById('sur-mesure-perso-intro');
       var surMesureText = document.getElementById('sur-mesure-perso-text');
@@ -518,41 +502,6 @@
       // Page Sur-mesure — pre-fill form
       prefillSurMesureForm(prefs);
     } catch (e) { /* */ }
-  }
-
-  function reorderProducts(recommendedIds) {
-    var grid = document.querySelector('.products.columns-3');
-    if (!grid) return;
-
-    var cards = grid.querySelectorAll('.product-card-cinetique');
-    if (!cards.length) return;
-
-    var idsStr = recommendedIds.map(function(id) { return String(id); });
-    var recommended = [];
-    var others = [];
-
-    for (var i = 0; i < cards.length; i++) {
-      var cardId = cards[i].getAttribute('data-id');
-      if (cardId && idsStr.indexOf(cardId) !== -1) {
-        recommended.push(cards[i]);
-      } else {
-        others.push(cards[i]);
-      }
-    }
-
-    if (recommended.length === 0) return;
-
-    // Hide grid, reorder, fade in
-    grid.style.opacity = '0';
-    grid.style.transition = 'opacity 0.3s ease';
-
-    for (var j = 0; j < recommended.length; j++) {
-      grid.insertBefore(recommended[j], grid.firstChild);
-    }
-
-    requestAnimationFrame(function() {
-      grid.style.opacity = '1';
-    });
   }
 
   function prefillSurMesureForm(prefs) {
