@@ -1565,7 +1565,7 @@ function sapi_guide_check_rate_limit() {
   $ip  = md5(isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : 'unknown');
   $key = 'sapi_guide_rl_' . $ip;
   $hits = (int) get_transient($key);
-  if ($hits >= 10) {
+  if ($hits >= 30) {
     return false;
   }
   set_transient($key, $hits + 1, HOUR_IN_SECONDS);
