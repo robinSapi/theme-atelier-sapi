@@ -271,26 +271,23 @@
     updateValidateButton();
   }
 
+  function hasMinimumAnswers() {
+    // Valider dès que pièce + style sont répondus
+    return !!state.answers.piece && !!state.answers.style;
+  }
+
   function updateValidateButton() {
     if (!validateBtn) return;
-    if (isQuizComplete()) {
-      validateBtn.style.display = '';
-    } else {
-      validateBtn.style.display = 'none';
-    }
+    validateBtn.style.display = hasMinimumAnswers() ? '' : 'none';
   }
 
   function onValidate() {
-    if (!isQuizComplete()) return;
-    validateBtn.style.display = 'none';
-    validateBtn.textContent = 'Chargement…';
-    validateBtn.style.display = '';
+    if (!hasMinimumAnswers()) return;
+    validateBtn.textContent = 'Chargement\u2026';
     validateBtn.disabled = true;
     fetchResults(function() {
-      validateBtn.textContent = 'Valider mon projet';
-      validateBtn.disabled = false;
-      validateBtn.style.display = 'none';
-      closeBanner();
+      // Recharger la page pour appliquer les textes IA
+      window.location.reload();
     });
   }
 
