@@ -184,12 +184,9 @@
       chipsEl.innerHTML = html;
     }
 
-    // Bouton "Ma sélection" visible si des produits recommandés existent
+    // Bouton "Ma sélection" visible dès pièce + taille répondus
     if (selBtn) {
-      try {
-        var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-        selBtn.style.display = (prefs.recommendedIds && prefs.recommendedIds.length > 0) ? '' : 'none';
-      } catch (e) { selBtn.style.display = 'none'; }
+      selBtn.style.display = hasMinimumAnswers() ? '' : 'none';
     }
   }
 
@@ -458,6 +455,25 @@
 
   // Show validate button if quiz already complete on load
   updateValidateButton();
+
+  // "Ma sélection" : valider d'abord si pas encore de recommandations
+  if (selBtn) {
+    selBtn.addEventListener('click', function(e) {
+      try {
+        var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        if (prefs.recommendedIds && prefs.recommendedIds.length > 0) return; // laisser le lien naviguer
+      } catch (err) { /* */ }
+
+      // Pas encore de recommandations → valider d'abord
+      if (hasMinimumAnswers()) {
+        e.preventDefault();
+        selBtn.textContent = 'Chargement\u2026';
+        fetchResults(function() {
+          window.location.href = selBtn.href;
+        });
+      }
+    });
+  }
 
   // ─── Page-specific AI text injection ───
   applyAiTexts();
