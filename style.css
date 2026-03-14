@@ -6272,46 +6272,107 @@ li.carousel-editorial-slide,
 
 /* Conseil personnalisé de Robin */
 .robin-conseil {
-  max-width: 900px;
+  max-width: 960px;
   margin: 0 auto;
-  padding: 3rem 2rem 2rem;
-  text-align: center;
+  padding: 2.5rem 2rem 2rem;
+  background: var(--color-warm, #FBF6EA);
+  border-radius: 12px;
   position: relative;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Header : badge + chips */
+.robin-conseil__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.robin-conseil__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.75rem;
+  background: var(--color-wood, #937D68);
+  color: #fff;
+  border-radius: 50px;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.robin-conseil__badge svg {
+  flex-shrink: 0;
+}
+
+.robin-conseil__chips {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.robin-conseil__chip {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  background: rgba(147, 125, 104, 0.12);
+  border-radius: 50px;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--color-wood, #937D68);
+  letter-spacing: 0.02em;
+}
+
+/* Body : guillemet + texte + signature */
+.robin-conseil__body {
+  position: relative;
+  padding-left: 2.5rem;
 }
 
 .robin-conseil__quote {
+  position: absolute;
+  left: 0;
+  top: -0.3rem;
   font-family: Georgia, serif;
-  font-size: clamp(5rem, 10vw, 8rem);
+  font-size: 4rem;
   color: var(--color-orange, #E35B24);
-  opacity: 0.15;
-  line-height: 0.5;
-  margin-bottom: -0.5rem;
+  opacity: 0.25;
+  line-height: 1;
   user-select: none;
 }
 
 .robin-conseil__text {
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.7;
   color: var(--color-dark, #323232);
-  margin: 0 0 1.2rem;
-  text-align: left;
+  margin: 0 0 1rem;
 }
 
 .robin-conseil__signature {
   display: block;
   text-align: right;
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
   font-style: italic;
   letter-spacing: 0.03em;
   color: var(--color-wood, #937D68);
-  margin-bottom: 1.5rem;
 }
 
+/* Actions */
 .robin-conseil__actions {
   text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(147, 125, 104, 0.15);
 }
 
 .robin-conseil__reply {

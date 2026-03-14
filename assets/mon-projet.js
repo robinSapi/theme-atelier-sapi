@@ -371,12 +371,26 @@
     try {
       var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
 
-      // Page Conseils — texte IA
+      // Page Conseils — texte IA + chips projet
       var conseilsIntro = document.getElementById('conseils-perso-intro');
       var conseilsText = document.getElementById('conseils-perso-text');
       if (conseilsIntro && conseilsText && prefs.conseilsText) {
         conseilsText.textContent = prefs.conseilsText;
         conseilsIntro.style.display = '';
+
+        // Injecter les chips du projet dans le bloc Robin
+        var chipsContainer = document.getElementById('robin-conseil-chips');
+        if (chipsContainer && prefs.labels) {
+          var html = '';
+          var visible = getVisibleSteps();
+          for (var i = 0; i < visible.length; i++) {
+            var lbl = prefs.labels[visible[i]];
+            if (lbl) {
+              html += '<span class="robin-conseil__chip">' + escapeHtml(lbl) + '</span>';
+            }
+          }
+          chipsContainer.innerHTML = html;
+        }
       }
 
       // Page Conseils — produits recommandés
