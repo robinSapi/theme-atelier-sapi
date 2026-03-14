@@ -6500,6 +6500,8 @@ li.carousel-editorial-slide,
 
 .robin-conseil__contact-input:focus {
   border-color: rgba(var(--color-wood-rgb), 0.45);
+  outline: none;
+  box-shadow: none;
 }
 
 .robin-conseil__contact-input::placeholder {
