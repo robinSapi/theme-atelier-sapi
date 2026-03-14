@@ -6270,26 +6270,71 @@ li.carousel-editorial-slide,
   margin: 0 auto;
 }
 
-/* Conseils personalized intro */
-.conseils-perso-intro {
-  max-width: 1400px;
+/* Conseil personnalisé de Robin */
+.robin-conseil {
+  max-width: 900px;
   margin: 0 auto;
-  padding: 2rem 20px 0;
+  padding: 3rem 2rem 2rem;
+  text-align: center;
+  position: relative;
 }
 
-.conseils-perso-intro__inner {
-  background: var(--color-warm);
-  border-left: 3px solid var(--color-wood);
-  border-radius: 0 8px 8px 0;
-  padding: 1.2rem 1.5rem;
+.robin-conseil__quote {
+  font-family: Georgia, serif;
+  font-size: clamp(5rem, 10vw, 8rem);
+  color: var(--color-orange, #E35B24);
+  opacity: 0.15;
+  line-height: 0.5;
+  margin-bottom: -0.5rem;
+  user-select: none;
 }
 
-.conseils-perso-intro__text {
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: var(--color-dark);
-  margin: 0;
+.robin-conseil__text {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--color-dark, #323232);
+  margin: 0 0 1.2rem;
+  text-align: left;
+}
+
+.robin-conseil__signature {
+  display: block;
+  text-align: right;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.03em;
+  color: var(--color-wood, #937D68);
+  margin-bottom: 1.5rem;
+}
+
+.robin-conseil__actions {
+  text-align: center;
+}
+
+.robin-conseil__reply {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 8px 20px;
+  background: transparent;
+  border: 1.5px solid var(--color-wood, #937D68);
+  border-radius: 50px;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-wood, #937D68);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+@media (hover: hover) {
+  .robin-conseil__reply:hover {
+    background: var(--color-wood, #937D68);
+    color: #fff;
+  }
 }
 
 /* Conseils — Produits recommandés */

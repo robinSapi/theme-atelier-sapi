@@ -29,10 +29,13 @@ for ($i = 1; $i <= 4; $i++) {
   </div>
 </section>
 
-<!-- AI personalized intro (shown by mon-projet.js if available) -->
-<div class="conseils-perso-intro" id="conseils-perso-intro" style="display:none">
-  <div class="conseils-perso-intro__inner">
-    <p class="conseils-perso-intro__text" id="conseils-perso-text"></p>
+<!-- Conseil personnalisé de Robin (shown by mon-projet.js if available) -->
+<div class="robin-conseil" id="conseils-perso-intro" style="display:none">
+  <div class="robin-conseil__quote">&ldquo;</div>
+  <p class="robin-conseil__text" id="conseils-perso-text"></p>
+  <span class="robin-conseil__signature">&mdash; Robin, votre artisan</span>
+  <div class="robin-conseil__actions">
+    <button type="button" class="robin-conseil__reply" id="conseils-reply-btn">Répondre à Robin</button>
   </div>
 </div>
 
