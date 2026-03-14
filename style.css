@@ -6544,7 +6544,7 @@ li.carousel-editorial-slide,
   color: var(--color-orange, #E35B24);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 1.2rem;
+  margin-bottom: 16px;
   transition: all 0.3s var(--ease-smooth, ease);
   box-shadow: none;
 }
