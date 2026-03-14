@@ -6476,6 +6476,16 @@ li.carousel-editorial-slide,
   gap: 0.6rem;
 }
 
+.robin-conseil__contact-row {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.robin-conseil__contact-row .robin-conseil__contact-input {
+  flex: 1;
+  min-width: 0;
+}
+
 .robin-conseil__contact-input {
   padding: 0.55rem 1rem;
   border: 1.5px solid rgba(var(--color-wood-rgb), 0.25);
@@ -6573,6 +6583,9 @@ li.carousel-editorial-slide,
     grid-template-columns: 1fr;
   }
 
+  .robin-conseil__contact-row {
+    flex-direction: column;
+  }
 }
 
 /* Conseils — Bouton refresh */

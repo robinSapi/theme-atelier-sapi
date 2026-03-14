@@ -30,13 +30,18 @@ function sapi_robin_conseil_card( $prefix = 'conseils' ) {
     <div class="robin-conseil__contact-form" id="<?php echo $prefix; ?>-contact-form" style="display:none">
       <p class="robin-conseil__contact-intro">Laissez vos coordonn&eacute;es, Robin vous recontacte personnellement&nbsp;:</p>
       <div class="robin-conseil__contact-fields">
-        <input type="text" class="robin-conseil__contact-input" id="<?php echo $prefix; ?>-contact-coord"
-               placeholder="Votre t&eacute;l&eacute;phone ou e-mail"
-               aria-label="<?php esc_attr_e('Téléphone ou e-mail', 'theme-sapi-maison'); ?>" required>
+        <div class="robin-conseil__contact-row">
+          <input type="email" class="robin-conseil__contact-input" id="<?php echo $prefix; ?>-contact-email"
+                 placeholder="E-mail *"
+                 aria-label="<?php esc_attr_e('E-mail', 'theme-sapi-maison'); ?>" required>
+          <input type="tel" class="robin-conseil__contact-input" id="<?php echo $prefix; ?>-contact-phone"
+                 placeholder="T&eacute;l&eacute;phone"
+                 aria-label="<?php esc_attr_e('Téléphone', 'theme-sapi-maison'); ?>">
+        </div>
         <textarea class="robin-conseil__contact-input robin-conseil__contact-textarea" id="<?php echo $prefix; ?>-contact-msg"
                   placeholder="Message (facultatif)"
-                  aria-label="<?php esc_attr_e('Message facultatif', 'theme-sapi-maison'); ?>" rows="3"></textarea>
-        <button type="button" class="robin-conseil__contact-send" id="<?php echo $prefix; ?>-contact-send">Envoyer</button>
+                  aria-label="<?php esc_attr_e('Message facultatif', 'theme-sapi-maison'); ?>" rows="2"></textarea>
+        <button type="button" class="robin-conseil__contact-send" id="<?php echo $prefix; ?>-contact-send" disabled>Envoyer</button>
       </div>
       <p class="robin-conseil__contact-success" id="<?php echo $prefix; ?>-contact-success" style="display:none">
         Merci&nbsp;! Robin vous recontactera tr&egrave;s bient&ocirc;t.

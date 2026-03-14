@@ -553,25 +553,37 @@
 
   // ─── Formulaire contact inline "Contacter Robin" ───
   function initContactForm(prefix) {
-    var contactBtn  = document.getElementById(prefix + '-contact-btn');
-    var formEl      = document.getElementById(prefix + '-contact-form');
-    var coordInput  = document.getElementById(prefix + '-contact-coord');
-    var msgInput    = document.getElementById(prefix + '-contact-msg');
-    var sendBtn     = document.getElementById(prefix + '-contact-send');
-    var successEl   = document.getElementById(prefix + '-contact-success');
+    var contactBtn = document.getElementById(prefix + '-contact-btn');
+    var formEl     = document.getElementById(prefix + '-contact-form');
+    var emailInput = document.getElementById(prefix + '-contact-email');
+    var phoneInput = document.getElementById(prefix + '-contact-phone');
+    var msgInput   = document.getElementById(prefix + '-contact-msg');
+    var sendBtn    = document.getElementById(prefix + '-contact-send');
+    var successEl  = document.getElementById(prefix + '-contact-success');
     if (!contactBtn || !formEl) return;
 
     contactBtn.addEventListener('click', function() {
       formEl.style.display = '';
       contactBtn.style.display = 'none';
-      if (coordInput) coordInput.focus();
+      if (emailInput) emailInput.focus();
     });
+
+    // Activer le bouton dès qu'un email valide est saisi
+    function checkEmail() {
+      if (!sendBtn || !emailInput) return;
+      var v = emailInput.value.trim();
+      sendBtn.disabled = !v || v.indexOf('@') === -1 || v.indexOf('.') === -1;
+    }
+    if (emailInput) {
+      emailInput.addEventListener('input', checkEmail);
+      emailInput.addEventListener('change', checkEmail);
+    }
 
     if (!sendBtn) return;
     sendBtn.addEventListener('click', function() {
-      if (!coordInput) return;
-      var coord = coordInput.value.trim();
-      if (!coord) { coordInput.focus(); return; }
+      if (!emailInput) return;
+      var email = emailInput.value.trim();
+      if (!email) { emailInput.focus(); return; }
 
       sendBtn.disabled = true;
       sendBtn.textContent = 'Envoi\u2026';
@@ -602,7 +614,6 @@
         sendBtn.textContent = 'Envoyer';
 
         if (xhr.status === 200) {
-          // Masquer les champs, afficher le succès
           formEl.querySelector('.robin-conseil__contact-fields').style.display = 'none';
           formEl.querySelector('.robin-conseil__contact-intro').style.display = 'none';
           if (successEl) successEl.style.display = '';
@@ -611,7 +622,8 @@
 
       var params = 'action=sapi_robin_contact'
         + '&nonce=' + encodeURIComponent(sapiMonProjet.nonce)
-        + '&coord=' + encodeURIComponent(coord)
+        + '&email=' + encodeURIComponent(email)
+        + '&phone=' + encodeURIComponent(phoneInput ? phoneInput.value.trim() : '')
         + '&message=' + encodeURIComponent(msgInput ? msgInput.value.trim() : '')
         + '&project=' + encodeURIComponent(projectSummary)
         + '&page=' + encodeURIComponent(window.location.pathname);
