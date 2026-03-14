@@ -366,17 +366,19 @@
 
   // ─── Linkifier les noms de produits dans un texte ───
   function linkifyProducts(text, productLinks) {
-    if (!productLinks || !productLinks.length) return escapeHtml(text);
-    var html = escapeHtml(text);
+    if (!productLinks || !productLinks.length) return escapeHtml(text).replace(/\n\n/g, '<br><br>');
+    // Convertir les sauts de ligne en marqueurs, puis escape
+    var html = escapeHtml(text).replace(/\n\n/g, '<br><br>');
+    var linked = {};
     for (var i = 0; i < productLinks.length; i++) {
       var p = productLinks[i];
       if (!p.name || !p.url) continue;
-      // Extraire le prénom du produit (premier mot) pour matcher plus facilement
       var firstName = p.name.split(' ')[0];
-      if (firstName.length < 3) continue;
-      // Échapper le nom pour l'utiliser dans une regex
-      var escaped = escapeHtml(firstName).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      var re = new RegExp('\\b(' + escaped + ')\\b', 'gi');
+      if (firstName.length < 3 || linked[firstName.toLowerCase()]) continue;
+      linked[firstName.toLowerCase()] = true;
+      // Regex insensible à la casse, mot entier — remplace uniquement la 1ère occurrence
+      var escaped = firstName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      var re = new RegExp('\\b(' + escaped + ')\\b', 'i');
       html = html.replace(re, '<a href="' + escapeHtml(p.url) + '" class="robin-conseil__product-link">$1</a>');
     }
     return html;
