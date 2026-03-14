@@ -6449,6 +6449,119 @@ li.carousel-editorial-slide,
   margin: 0;
 }
 
+/* Chat inline — Répondre à Robin */
+.robin-conseil__chat {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(var(--color-wood-rgb), 0.15);
+}
+
+.robin-conseil__messages {
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+  padding-right: 0.5rem;
+}
+
+.robin-conseil__msg {
+  max-width: 80%;
+  padding: 0.6rem 1rem;
+  border-radius: 16px;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.robin-conseil__msg--user {
+  align-self: flex-end;
+  background: var(--color-wood, #937D68);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.robin-conseil__msg--robin {
+  align-self: flex-start;
+  background: rgba(var(--color-wood-rgb), 0.1);
+  color: var(--color-dark, #323232);
+  border-bottom-left-radius: 4px;
+}
+
+.robin-conseil__msg-author {
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-wood, #937D68);
+  margin-right: 0.3rem;
+}
+
+.robin-conseil__msg--contact {
+  align-self: center;
+  text-align: center;
+}
+
+.robin-conseil__msg--contact a {
+  color: var(--color-orange, #E35B24);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.robin-conseil__msg--contact a:hover {
+  text-decoration: underline;
+}
+
+.robin-conseil__input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.robin-conseil__input {
+  flex: 1;
+  padding: 0.55rem 1rem;
+  border: 1.5px solid rgba(var(--color-wood-rgb), 0.25);
+  border-radius: 50px;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  color: var(--color-dark, #323232);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.robin-conseil__input:focus {
+  border-color: var(--color-wood, #937D68);
+}
+
+.robin-conseil__input::placeholder {
+  color: rgba(var(--color-wood-rgb), 0.4);
+}
+
+.robin-conseil__send {
+  padding: 0.55rem 1.2rem;
+  background: var(--color-wood, #937D68);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.robin-conseil__send:hover {
+  opacity: 0.85;
+}
+
+.robin-conseil__send:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 @media (max-width: 900px) {
   .robin-conseil {
     padding: 2rem 1.5rem 1.5rem;
@@ -6487,6 +6600,14 @@ li.carousel-editorial-slide,
 
   .robin-conseil__products .products {
     grid-template-columns: 1fr;
+  }
+
+  .robin-conseil__msg {
+    max-width: 90%;
+  }
+
+  .robin-conseil__messages {
+    max-height: 250px;
   }
 }
 

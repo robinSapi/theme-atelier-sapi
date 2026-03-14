@@ -2,7 +2,7 @@
 /**
  * Template partial — Card "Conseil personnalisé de Robin"
  *
- * @param string $prefix  ID prefix: 'conseils' ou 'selection'
+ * @param string $prefix  ID prefix: 'conseils', 'selection' ou 'surmesure'
  */
 function sapi_robin_conseil_card( $prefix = 'conseils' ) {
   $prefix = esc_attr( $prefix );
@@ -26,6 +26,15 @@ function sapi_robin_conseil_card( $prefix = 'conseils' ) {
     </div>
     <div class="robin-conseil__actions">
       <button type="button" class="robin-conseil__reply" id="<?php echo $prefix; ?>-reply-btn">R&eacute;pondre &agrave; Robin</button>
+    </div>
+    <div class="robin-conseil__chat" id="<?php echo $prefix; ?>-chat" style="display:none">
+      <div class="robin-conseil__messages" id="<?php echo $prefix; ?>-messages"></div>
+      <div class="robin-conseil__input-row">
+        <input type="text" class="robin-conseil__input" id="<?php echo $prefix; ?>-input"
+               placeholder="Votre message &agrave; Robin&hellip;"
+               aria-label="<?php esc_attr_e('Votre message', 'theme-sapi-maison'); ?>">
+        <button type="button" class="robin-conseil__send" id="<?php echo $prefix; ?>-send">Envoyer</button>
+      </div>
     </div>
   </div>
   <?php
