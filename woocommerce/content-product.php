@@ -185,18 +185,13 @@ if ($is_variable) {
     if (!$img_url) continue;
 
     // Composite key essence:tailleIndex (primary lookup)
-    $taille = $var_obj->get_attribute('pa_taille');
-    // DEBUG — temporary HTML comment for Alban
-    if (stripos(get_the_title(), 'alban') !== false) {
-      echo '<!-- DEBUG var#' . esc_html($var_id) . ' ess=' . esc_html($ess) . ' taille=[' . esc_html($taille) . '] taille_terms=' . esc_html(wp_json_encode(array_keys($taille_to_idx))) . ' -->';
-    }
-    if ($taille) {
-      $t_slug = sanitize_title($taille);
-      if (isset($taille_to_idx[$t_slug])) {
-        $key = $ess_slug . ':' . $taille_to_idx[$t_slug];
-        if (!isset($variation_imgs[$key])) {
-          $variation_imgs[$key] = $img_url;
-        }
+    // Use variation attributes (raw slugs) to match taxonomy terms exactly
+    $var_attrs = $var_obj->get_variation_attributes();
+    $t_slug = isset($var_attrs['attribute_pa_taille']) ? $var_attrs['attribute_pa_taille'] : '';
+    if ($t_slug && isset($taille_to_idx[$t_slug])) {
+      $key = $ess_slug . ':' . $taille_to_idx[$t_slug];
+      if (!isset($variation_imgs[$key])) {
+        $variation_imgs[$key] = $img_url;
       }
     }
 
