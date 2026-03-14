@@ -6412,29 +6412,6 @@ li.carousel-editorial-slide,
   border-top: 1px solid rgba(var(--color-wood-rgb), 0.15);
 }
 
-.robin-conseil__reply {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 8px 20px;
-  background: transparent;
-  border: 1.5px solid var(--color-wood, #937D68);
-  border-radius: 50px;
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--color-wood, #937D68);
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-}
-
-@media (hover: hover) {
-  .robin-conseil__reply:hover {
-    background: var(--color-wood, #937D68);
-    color: #fff;
-  }
-}
-
 /* Produits recommandés dans la card Robin */
 .robin-conseil__products {
   margin-top: 1.5rem;
@@ -6461,80 +6438,48 @@ li.carousel-editorial-slide,
   margin: 0;
 }
 
-/* Chat inline — Répondre à Robin */
-.robin-conseil__chat {
+/* Formulaire contact inline — Contacter Robin */
+.robin-conseil__contact-btn {
+  background: none;
+  border: 1.5px solid var(--color-wood, #937D68);
+  color: var(--color-wood, #937D68);
+  padding: 0.5rem 1.4rem;
+  border-radius: 50px;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.robin-conseil__contact-btn:hover {
+  background: var(--color-wood, #937D68);
+  color: #fff;
+}
+
+.robin-conseil__contact-form {
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid rgba(var(--color-wood-rgb), 0.15);
 }
 
-.robin-conseil__messages {
-  max-height: 300px;
-  overflow-y: auto;
+.robin-conseil__contact-intro {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  color: var(--color-dark, #323232);
+  margin: 0 0 0.8rem;
+}
+
+.robin-conseil__contact-fields {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  margin-bottom: 0.8rem;
-  padding-right: 0.5rem;
 }
 
-.robin-conseil__msg {
-  max-width: 80%;
-  padding: 0.6rem 1rem;
-  border-radius: 16px;
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
-
-.robin-conseil__msg--user {
-  align-self: flex-end;
-  background: var(--color-wood, #937D68);
-  color: #fff;
-  border-bottom-right-radius: 4px;
-}
-
-.robin-conseil__msg--robin {
-  align-self: flex-start;
-  background: rgba(var(--color-wood-rgb), 0.1);
-  color: var(--color-dark, #323232);
-  border-bottom-left-radius: 4px;
-}
-
-.robin-conseil__msg-author {
-  font-weight: 700;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--color-wood, #937D68);
-  margin-right: 0.3rem;
-}
-
-.robin-conseil__msg--contact {
-  align-self: center;
-  text-align: center;
-}
-
-.robin-conseil__msg--contact a {
-  color: var(--color-orange, #E35B24);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.robin-conseil__msg--contact a:hover {
-  text-decoration: underline;
-}
-
-.robin-conseil__input-row {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.robin-conseil__input {
-  flex: 1;
+.robin-conseil__contact-input {
   padding: 0.55rem 1rem;
   border: 1.5px solid rgba(var(--color-wood-rgb), 0.25);
-  border-radius: 50px;
+  border-radius: 12px;
   font-family: var(--font-body, 'Montserrat', sans-serif);
   font-size: 0.85rem;
   color: var(--color-dark, #323232);
@@ -6543,16 +6488,22 @@ li.carousel-editorial-slide,
   transition: border-color 0.2s;
 }
 
-.robin-conseil__input:focus {
+.robin-conseil__contact-input:focus {
   border-color: var(--color-wood, #937D68);
 }
 
-.robin-conseil__input::placeholder {
+.robin-conseil__contact-input::placeholder {
   color: rgba(var(--color-wood-rgb), 0.4);
 }
 
-.robin-conseil__send {
-  padding: 0.55rem 1.2rem;
+.robin-conseil__contact-textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.robin-conseil__contact-send {
+  align-self: flex-start;
+  padding: 0.55rem 1.4rem;
   background: var(--color-wood, #937D68);
   color: #fff;
   border: none;
@@ -6562,16 +6513,24 @@ li.carousel-editorial-slide,
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.2s;
-  white-space: nowrap;
 }
 
-.robin-conseil__send:hover {
+.robin-conseil__contact-send:hover {
   opacity: 0.85;
 }
 
-.robin-conseil__send:disabled {
+.robin-conseil__contact-send:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+.robin-conseil__contact-success {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.9rem;
+  color: var(--color-wood, #937D68);
+  font-weight: 600;
+  text-align: center;
+  margin: 0.5rem 0 0;
 }
 
 @media (max-width: 900px) {
@@ -6614,13 +6573,6 @@ li.carousel-editorial-slide,
     grid-template-columns: 1fr;
   }
 
-  .robin-conseil__msg {
-    max-width: 90%;
-  }
-
-  .robin-conseil__messages {
-    max-height: 250px;
-  }
 }
 
 /* Conseils — Bouton refresh */

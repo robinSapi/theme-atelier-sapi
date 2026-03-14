@@ -1802,6 +1802,61 @@ function sapi_ajax_guide_contact() {
 }
 
 /**
+ * ── Contact inline depuis la card Robin-Conseil ──
+ * Formulaire simplifié : coordonnées + message facultatif + contexte projet.
+ */
+add_action('wp_ajax_sapi_robin_contact', 'sapi_ajax_robin_contact');
+add_action('wp_ajax_nopriv_sapi_robin_contact', 'sapi_ajax_robin_contact');
+
+function sapi_ajax_robin_contact() {
+  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
+    wp_send_json_error(['message' => 'Nonce invalide']);
+    return;
+  }
+
+  $coord   = sanitize_text_field(wp_unslash($_POST['coord'] ?? ''));
+  $message = sanitize_textarea_field(wp_unslash($_POST['message'] ?? ''));
+  $project = sanitize_text_field(wp_unslash($_POST['project'] ?? ''));
+  $page    = sanitize_text_field(wp_unslash($_POST['page'] ?? ''));
+
+  if (empty($coord)) {
+    wp_send_json_error(['message' => 'Coordonnées requises']);
+    return;
+  }
+
+  $body  = "Demande de contact depuis « Contacter Robin »\n";
+  $body .= "=============================================\n\n";
+  $body .= "COORDONNÉES : " . esc_html($coord) . "\n";
+  if ($message) {
+    $body .= "MESSAGE : " . esc_html($message) . "\n";
+  }
+  if ($project) {
+    $body .= "\nPROJET : " . esc_html($project) . "\n";
+  }
+  $body .= "\nPAGE : " . esc_html($page) . "\n";
+  $body .= "DATE : " . wp_date('d/m/Y H:i') . "\n";
+
+  $headers = ['Content-Type: text/plain; charset=UTF-8'];
+  // Si c'est un email, ajouter Reply-To
+  if (is_email($coord)) {
+    $headers[] = 'Reply-To: ' . $coord;
+  }
+
+  $sent = wp_mail(
+    'contact@atelier-sapi.fr',
+    '[Mon Projet] Demande de contact',
+    $body,
+    $headers
+  );
+
+  if ($sent) {
+    wp_send_json_success(['message' => 'Envoyé']);
+  } else {
+    wp_send_json_error(['message' => 'Erreur envoi']);
+  }
+}
+
+/**
  * ── Phase C : Smart refinement — AI routes client message ──
  * Client sends a follow-up message after seeing initial results.
  * Claude decides: refine products, show contact form, or both.

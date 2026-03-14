@@ -551,154 +551,78 @@
     });
   }
 
-  // ─── Chat "Répondre à Robin" ───
-  var chatConversation = [];
-  var chatPendingXhr = null;
+  // ─── Formulaire contact inline "Contacter Robin" ───
+  function initContactForm(prefix) {
+    var contactBtn  = document.getElementById(prefix + '-contact-btn');
+    var formEl      = document.getElementById(prefix + '-contact-form');
+    var coordInput  = document.getElementById(prefix + '-contact-coord');
+    var msgInput    = document.getElementById(prefix + '-contact-msg');
+    var sendBtn     = document.getElementById(prefix + '-contact-send');
+    var successEl   = document.getElementById(prefix + '-contact-success');
+    if (!contactBtn || !formEl) return;
 
-  function buildFilterContext() {
-    var prefs = safeLoad();
-    if (!prefs.labels) return '';
-    var parts = [];
-    var labelMap = {
-      piece: 'Pi\u00e8ce', taille: 'Taille', style: 'Style',
-      sortie: 'Sortie', hauteur: 'Hauteur', eclairage: '\u00c9clairage', ambiance: 'Ambiance'
-    };
-    for (var key in labelMap) {
-      if (prefs.labels[key]) parts.push(labelMap[key] + ' : ' + prefs.labels[key]);
-    }
-    return parts.join(', ');
-  }
-
-  function initChat(prefix) {
-    var replyBtn = document.getElementById(prefix + '-reply-btn');
-    var chatEl   = document.getElementById(prefix + '-chat');
-    var inputEl  = document.getElementById(prefix + '-input');
-    var sendBtn  = document.getElementById(prefix + '-send');
-    var msgsEl   = document.getElementById(prefix + '-messages');
-    var gridEl   = document.getElementById(prefix + '-products-grid');
-    if (!replyBtn || !chatEl) return;
-
-    replyBtn.addEventListener('click', function() {
-      chatEl.style.display = '';
-      replyBtn.style.display = 'none';
-      if (inputEl) inputEl.focus();
+    contactBtn.addEventListener('click', function() {
+      formEl.style.display = '';
+      contactBtn.style.display = 'none';
+      if (coordInput) coordInput.focus();
     });
 
-    function sendMessage() {
-      if (!inputEl || !sendBtn || !msgsEl) return;
-      var msg = inputEl.value.trim();
-      if (!msg) return;
+    if (!sendBtn) return;
+    sendBtn.addEventListener('click', function() {
+      if (!coordInput) return;
+      var coord = coordInput.value.trim();
+      if (!coord) { coordInput.focus(); return; }
 
-      // Afficher le message utilisateur
-      appendMessage(msgsEl, 'user', msg);
-      inputEl.value = '';
       sendBtn.disabled = true;
-      sendBtn.textContent = '\u2026';
+      sendBtn.textContent = 'Envoi\u2026';
 
-      // Construire les paramètres
       var prefs = safeLoad();
-      chatConversation.push({ role: 'user', content: msg });
+      var projectSummary = '';
+      if (prefs.labels) {
+        var parts = [];
+        var labelMap = {
+          piece: 'Pi\u00e8ce', taille: 'Taille', style: 'Style',
+          sortie: 'Sortie', hauteur: 'Hauteur', eclairage: '\u00c9clairage', ambiance: 'Ambiance'
+        };
+        for (var key in labelMap) {
+          if (prefs.labels[key]) parts.push(labelMap[key] + ' : ' + prefs.labels[key]);
+        }
+        projectSummary = parts.join(', ');
+      }
 
       if (typeof sapiMonProjet === 'undefined' || !sapiMonProjet.ajaxUrl) return;
 
-      if (chatPendingXhr) { try { chatPendingXhr.abort(); } catch (e) { /* */ } }
       var xhr = new XMLHttpRequest();
-      chatPendingXhr = xhr;
       xhr.open('POST', sapiMonProjet.ajaxUrl, true);
       xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
       xhr.onreadystatechange = function() {
         if (xhr.readyState !== 4) return;
-        if (xhr !== chatPendingXhr) return;
-        chatPendingXhr = null;
         sendBtn.disabled = false;
         sendBtn.textContent = 'Envoyer';
 
         if (xhr.status === 200) {
-          try {
-            var resp = JSON.parse(xhr.responseText);
-            if (resp.success && resp.data) {
-              // Texte IA
-              if (resp.data.ai_text) {
-                appendMessage(msgsEl, 'robin', resp.data.ai_text);
-                chatConversation.push({ role: 'assistant', content: resp.data.ai_text });
-              }
-
-              // Mettre à jour les produits
-              if (resp.data.action === 'refine' || resp.data.action === 'both') {
-                var products = resp.data.products || [];
-                if (products.length > 0 && gridEl) {
-                  var ids = products.map(function(p) { return p.id; });
-                  prefs.recommendedIds = ids;
-                  safeSave(prefs);
-                  gridEl.dataset.loaded = '';
-                  renderProductCards(gridEl, ids);
-                }
-              }
-
-              // Action contact
-              if (resp.data.action === 'contact' || resp.data.action === 'both') {
-                appendContactLink(msgsEl);
-              }
-
-              // Historique serveur
-              if (resp.data.conversation) {
-                chatConversation = resp.data.conversation;
-              }
-            }
-          } catch (e) {
-            appendMessage(msgsEl, 'robin', 'D\u00e9sol\u00e9, une erreur est survenue. R\u00e9essayez dans un instant.');
-          }
-        } else {
-          appendMessage(msgsEl, 'robin', 'D\u00e9sol\u00e9, une erreur est survenue. R\u00e9essayez dans un instant.');
+          // Masquer les champs, afficher le succès
+          formEl.querySelector('.robin-conseil__contact-fields').style.display = 'none';
+          formEl.querySelector('.robin-conseil__contact-intro').style.display = 'none';
+          if (successEl) successEl.style.display = '';
         }
       };
 
-      var params = 'action=sapi_guide_refine'
+      var params = 'action=sapi_robin_contact'
         + '&nonce=' + encodeURIComponent(sapiMonProjet.nonce)
-        + '&user_message=' + encodeURIComponent(msg)
-        + '&answers=' + encodeURIComponent(JSON.stringify(state.answers))
-        + '&conversation=' + encodeURIComponent(JSON.stringify(chatConversation.slice(0, -1)))
-        + '&current_products=' + encodeURIComponent(JSON.stringify(prefs.recommendedIds || []))
-        + '&filter_context=' + encodeURIComponent(buildFilterContext());
+        + '&coord=' + encodeURIComponent(coord)
+        + '&message=' + encodeURIComponent(msgInput ? msgInput.value.trim() : '')
+        + '&project=' + encodeURIComponent(projectSummary)
+        + '&page=' + encodeURIComponent(window.location.pathname);
 
       xhr.send(params);
-    }
-
-    if (sendBtn) {
-      sendBtn.addEventListener('click', sendMessage);
-    }
-    if (inputEl) {
-      inputEl.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
-      });
-    }
+    });
   }
 
-  function appendMessage(container, role, text) {
-    var div = document.createElement('div');
-    div.className = 'robin-conseil__msg robin-conseil__msg--' + role;
-    if (role === 'robin') {
-      div.innerHTML = '<span class="robin-conseil__msg-author">Robin</span> ' + escapeHtml(text);
-    } else {
-      div.textContent = text;
-    }
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-  }
-
-  function appendContactLink(container) {
-    var div = document.createElement('div');
-    div.className = 'robin-conseil__msg robin-conseil__msg--contact';
-    div.innerHTML = '<a href="/contact/">Contacter Robin directement \u2192</a>';
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-  }
-
-  // Init chat sur chaque page où la card est présente
-  initChat('conseils');
-  initChat('selection');
-  initChat('surmesure');
+  initContactForm('conseils');
+  initContactForm('selection');
+  initContactForm('surmesure');
 
   // ─── Init ───
   loadState();

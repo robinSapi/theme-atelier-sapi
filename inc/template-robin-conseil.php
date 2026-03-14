@@ -25,16 +25,22 @@ function sapi_robin_conseil_card( $prefix = 'conseils' ) {
       <h3 class="robin-conseil__products-title">La proposition de Robin pour votre projet</h3>
     </div>
     <div class="robin-conseil__actions">
-      <button type="button" class="robin-conseil__reply" id="<?php echo $prefix; ?>-reply-btn">R&eacute;pondre &agrave; Robin</button>
+      <button type="button" class="robin-conseil__contact-btn" id="<?php echo $prefix; ?>-contact-btn">Contacter Robin</button>
     </div>
-    <div class="robin-conseil__chat" id="<?php echo $prefix; ?>-chat" style="display:none">
-      <div class="robin-conseil__messages" id="<?php echo $prefix; ?>-messages"></div>
-      <div class="robin-conseil__input-row">
-        <input type="text" class="robin-conseil__input" id="<?php echo $prefix; ?>-input"
-               placeholder="Votre message &agrave; Robin&hellip;"
-               aria-label="<?php esc_attr_e('Votre message', 'theme-sapi-maison'); ?>">
-        <button type="button" class="robin-conseil__send" id="<?php echo $prefix; ?>-send">Envoyer</button>
+    <div class="robin-conseil__contact-form" id="<?php echo $prefix; ?>-contact-form" style="display:none">
+      <p class="robin-conseil__contact-intro">Laissez vos coordonn&eacute;es, Robin vous recontacte personnellement&nbsp;:</p>
+      <div class="robin-conseil__contact-fields">
+        <input type="text" class="robin-conseil__contact-input" id="<?php echo $prefix; ?>-contact-coord"
+               placeholder="Votre t&eacute;l&eacute;phone ou e-mail"
+               aria-label="<?php esc_attr_e('Téléphone ou e-mail', 'theme-sapi-maison'); ?>" required>
+        <textarea class="robin-conseil__contact-input robin-conseil__contact-textarea" id="<?php echo $prefix; ?>-contact-msg"
+                  placeholder="Message (facultatif)"
+                  aria-label="<?php esc_attr_e('Message facultatif', 'theme-sapi-maison'); ?>" rows="3"></textarea>
+        <button type="button" class="robin-conseil__contact-send" id="<?php echo $prefix; ?>-contact-send">Envoyer</button>
       </div>
+      <p class="robin-conseil__contact-success" id="<?php echo $prefix; ?>-contact-success" style="display:none">
+        Merci&nbsp;! Robin vous recontactera tr&egrave;s bient&ocirc;t.
+      </p>
     </div>
   </div>
   <?php
