@@ -2670,10 +2670,7 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
 
   // Format de réponse JSON
   $prompt .= "\nTEXTES À GÉNÉRER :\n";
-  $prompt .= "1. \"conseils_text\" (~150-200 mots, DEUX paragraphes séparés par \\n\\n) :\n";
-  $prompt .= "   PARAGRAPHE 1 : Conseils CONCRETS, TECHNIQUES et FACTUELS adaptés au projet du client. Type d'éclairage selon la pièce, hauteur de suspension idéale, nombre de points lumineux, puissance recommandée, température de couleur, etc. PAS de noms de modèles dans ce paragraphe.\n";
-  $prompt .= "   PARAGRAPHE 2 : Propose 2-3 modèles du catalogue en les nommant EXACTEMENT par leur prénom (premier mot du nom). Exemples : \"Olivia\", \"Éléonore\", \"Ondine\". Utilise EXACTEMENT le prénom tel qu'il apparaît dans le catalogue ci-dessus. Cite-les naturellement dans le texte (ex: \"un modèle comme Olivia\" ou \"la suspension Éléonore, avec son format grappe\"). NE mets PAS les noms entre crochets ou guillemets spéciaux.\n";
-  $prompt .= "   IMPORTANT : Les deux paragraphes DOIVENT être séparés par \\n\\n dans la chaîne JSON. Le client ne verra PAS de photos de produits ici, uniquement ton texte.\n";
+  $prompt .= "1. \"conseils_text\" (~150-200 mots) : Conseils CONCRETS, TECHNIQUES et FACTUELS adaptés au projet du client. Type d'éclairage selon la pièce, hauteur de suspension idéale, nombre de points lumineux, puissance recommandée, température de couleur, type d'ampoule, etc. NE mentionne AUCUN nom de modèle — le client verra sa sélection personnalisée sur une autre page. Reste purement sur le conseil technique et l'expertise artisanale.\n";
   $prompt .= "2. \"selection_text\" (~60-80 mots) : Texte pour la page Nos Créations. Justifie le choix de ces modèles précis pour le projet du client. Explique pourquoi chaque type de luminaire recommandé correspond à sa situation (pièce, hauteur, style…). Plus technique et factuel que le texte conseils.\n";
   if ($show_sur_mesure) {
     $prompt .= "3. \"sur_mesure_text\" (30 mots max) : DOIT commencer par \"Par exemple\" ou \"Et pourquoi pas\". Propose une IDÉE ouverte de création sur mesure, pas une solution. Reste rêveur et suggestif.\n";

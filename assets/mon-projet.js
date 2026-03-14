@@ -390,12 +390,7 @@
     var textEl = document.getElementById(prefix + '-perso-text');
     if (!intro || !textEl || !prefs[textKey]) return;
 
-    // Utiliser innerHTML avec liens produits sur la page Conseils, textContent ailleurs
-    if (prefix === 'conseils' && prefs.productLinks) {
-      textEl.innerHTML = linkifyProducts(prefs[textKey], prefs.productLinks);
-    } else {
-      textEl.textContent = prefs[textKey];
-    }
+    textEl.textContent = prefs[textKey];
     intro.style.display = '';
 
     // Chips projet
@@ -408,6 +403,12 @@
         }
       }
       chips.innerHTML = html;
+    }
+
+    // Bouton "Voir ma sélection"
+    var selBtn = document.getElementById(prefix + '-selection-btn');
+    if (selBtn && prefs.recommendedIds && prefs.recommendedIds.length > 0) {
+      selBtn.style.display = '';
     }
 
     // Produits recommandés

@@ -6406,10 +6406,36 @@ li.carousel-editorial-slide,
 
 /* Actions */
 .robin-conseil__actions {
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
   margin-top: 1.5rem;
   padding-top: 1rem;
   border-top: 1px solid rgba(var(--color-wood-rgb), 0.15);
+}
+
+.robin-conseil__selection-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1.4rem;
+  background: var(--gradient-cta);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 3px 10px rgba(227, 91, 36, 0.2);
+}
+
+.robin-conseil__selection-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(227, 91, 36, 0.3);
+  color: #fff;
 }
 
 /* Produits recommandés dans la card Robin */
