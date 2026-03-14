@@ -1842,7 +1842,7 @@ function sapi_ajax_robin_contact() {
       ],
       'body' => wp_json_encode([
         'email'         => $email,
-        'listIds'       => [7],
+        'listIds'       => [6],
         'attributes'    => $attributes,
         'updateEnabled' => true,
       ]),
