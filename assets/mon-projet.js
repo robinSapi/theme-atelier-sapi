@@ -252,11 +252,14 @@
     delete prefs.recommendedIds;
     delete prefs.conseilsText;
     delete prefs.selectionText;
+    delete prefs.surMesureText;
+    delete prefs.showSurMesure;
     safeSave(prefs);
 
     // Masquer les cards Robin sur toutes les pages
     hideRobinCard('conseils');
     hideRobinCard('selection');
+    hideRobinCard('surmesure');
 
     // Page Conseils : montrer le bouton refresh
     var conseilsRefresh = document.getElementById('conseils-refresh-btn');
@@ -334,6 +337,8 @@
             prefs.recommendedIds = products.map(function(p) { return p.id; });
             if (resp.data.conseils_text) prefs.conseilsText = resp.data.conseils_text;
             if (resp.data.selection_text) prefs.selectionText = resp.data.selection_text;
+            if (resp.data.sur_mesure_text) prefs.surMesureText = resp.data.sur_mesure_text;
+            prefs.showSurMesure = !!resp.data.show_sur_mesure;
             safeSave(prefs);
           }
         } catch (e) { /* */ }
@@ -400,7 +405,10 @@
     // Page Nos Créations
     applyRobinCard('selection', 'selectionText', prefs);
 
-    // Page Sur-mesure
+    // Page Sur-mesure — card robin-conseil + pré-remplissage formulaire
+    if (prefs.showSurMesure && prefs.surMesureText) {
+      applyRobinCard('surmesure', 'surMesureText', prefs);
+    }
     prefillSurMesureForm(prefs);
   }
 
@@ -436,28 +444,32 @@
   }
 
   function prefillSurMesureForm(prefs) {
-    if (!prefs.answers) return;
-    var form = document.querySelector('.sur-mesure-form, .wpcf7-form, #sur-mesure-form');
+    if (!prefs.labels) return;
+    var form = document.getElementById('sur-mesure-form');
     if (!form) return;
 
-    var fieldMap = {
-      piece: ['piece', 'destination', 'pièce'],
-      taille: ['taille', 'dimensions', 'surface'],
-      style: ['style', 'ambiance'],
-      sortie: ['sortie', 'type-luminaire', 'installation'],
+    var textarea = form.querySelector('textarea[name="message"]');
+    if (!textarea || textarea.value) return; // Ne pas écraser une saisie existante
+
+    var labelMap = {
+      piece: 'Pièce',
+      taille: 'Taille',
+      style: 'Style',
+      sortie: 'Sortie électrique',
+      hauteur: 'Hauteur',
+      eclairage: 'Type d\u2019éclairage',
+      ambiance: 'Ambiance',
     };
 
-    for (var answerKey in fieldMap) {
-      if (!prefs.answers[answerKey]) continue;
-      var names = fieldMap[answerKey];
-      for (var n = 0; n < names.length; n++) {
-        var input = form.querySelector('[name*="' + names[n] + '"]');
-        if (input && !input.value) {
-          var label = prefs.labels && prefs.labels[answerKey] ? prefs.labels[answerKey] : prefs.answers[answerKey];
-          input.value = label;
-          break;
-        }
+    var lines = [];
+    for (var key in labelMap) {
+      if (prefs.labels[key]) {
+        lines.push(labelMap[key] + ' : ' + prefs.labels[key]);
       }
+    }
+
+    if (lines.length > 0) {
+      textarea.value = 'Mon projet :\n' + lines.join('\n') + '\n\n';
     }
   }
 

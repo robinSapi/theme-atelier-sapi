@@ -25,12 +25,11 @@ get_header();
   </div>
 </section>
 
-<!-- AI personalized intro (shown by mon-projet.js if available) -->
-<div class="sur-mesure-perso-intro" id="sur-mesure-perso-intro" style="display:none">
-  <div class="sur-mesure-perso-intro__inner">
-    <p class="sur-mesure-perso-intro__text" id="sur-mesure-perso-text"></p>
-  </div>
-</div>
+<!-- Conseil personnalisé de Robin pour le sur-mesure (shown by mon-projet.js if available) -->
+<?php
+require_once get_template_directory() . '/inc/template-robin-conseil.php';
+sapi_robin_conseil_card( 'surmesure' );
+?>
 
 <!-- INTRODUCTION -->
 <section class="surmesure-intro">
@@ -418,7 +417,7 @@ get_header();
         </div>
       <?php endif; ?>
 
-      <form action="<?php echo esc_url(get_permalink()); ?>#surmesure-form" method="post">
+      <form id="sur-mesure-form" action="<?php echo esc_url(get_permalink()); ?>#surmesure-form" method="post">
         <?php wp_nonce_field('sapi_surmesure_form', 'sapi_surmesure_nonce'); ?>
 
         <!-- Honeypot -->

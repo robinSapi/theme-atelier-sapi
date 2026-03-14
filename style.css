@@ -18334,28 +18334,6 @@ html.sapi-intro-active body {
 }
 
 /* --- Introduction --- */
-/* Sur-mesure AI personalized intro */
-.sur-mesure-perso-intro {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 20px 0;
-}
-
-.sur-mesure-perso-intro__inner {
-  background: var(--color-warm);
-  border-left: 3px solid var(--color-wood);
-  border-radius: 0 8px 8px 0;
-  padding: 1.2rem 1.5rem;
-}
-
-.sur-mesure-perso-intro__text {
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: var(--color-dark);
-  margin: 0;
-}
-
 .surmesure-intro {
   padding: 100px 20px;
   background: var(--creme-papier, #FEFDFB);
