@@ -180,7 +180,7 @@ if ($is_variable) {
     $ess_slug = sanitize_title($ess);
 
     $img_id = $var_obj->get_image_id();
-    if (!$img_id || (int) $img_id === (int) $main_img_id) continue;
+    if (!$img_id) continue;
     $img_url = wp_get_attachment_image_url($img_id, 'woocommerce_thumbnail');
     if (!$img_url) continue;
 
