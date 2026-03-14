@@ -6480,14 +6480,18 @@ li.carousel-editorial-slide,
   border-radius: 20px;
   text-decoration: none;
   color: var(--color-dark, #323232);
-  transition: border-color 0.3s, background 0.3s;
+  transition: transform 0.5s var(--ease-expo, ease), box-shadow 0.5s var(--ease-expo, ease), border-color 0.3s, background 0.3s;
   height: 100%;
   width: 100%;
 }
 
-.sur-mesure-card__link:hover {
-  border-color: var(--color-orange, #E35B24);
-  background: rgba(var(--color-wood-rgb), 0.1);
+@media (hover: hover) {
+  .sur-mesure-card__link:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    border-color: var(--color-orange, #E35B24);
+    background: rgba(var(--color-wood-rgb), 0.1);
+  }
 }
 
 .sur-mesure-card__content {
@@ -6530,6 +6534,9 @@ li.carousel-editorial-slide,
 .sur-mesure-card__cta {
   display: inline-block;
   padding: 0.65rem 1.5rem;
+  background: transparent;
+  border: none;
+  border-radius: 50px;
   font-family: var(--font-body, 'Montserrat', sans-serif);
   font-size: 0.8rem;
   font-weight: 600;
@@ -6537,15 +6544,17 @@ li.carousel-editorial-slide,
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 1.2rem;
-  transition: all 0.3s;
+  transition: all 0.3s var(--ease-smooth, ease);
+  box-shadow: none;
 }
 
-.sur-mesure-card__link:hover .sur-mesure-card__cta {
-  background: var(--gradient-cta);
-  color: #fff;
-  border-radius: 50px;
-  box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .sur-mesure-card__cta:hover {
+    background: var(--gradient-cta);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
+  }
 }
 
 /* Formulaire contact inline — Contacter Robin */
