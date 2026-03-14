@@ -183,22 +183,32 @@ if (!$hero_img_url) {
       <?php endforeach; ?>
     </div>
 
-    <div class="filter-separator filter-separator--selection" aria-hidden="true" style="display:none"></div>
-
-    <!-- Groupe 3 : La sélection de Robin (visible uniquement si quiz validé) -->
-    <div class="filter-group filter-group--selection" style="display:none">
-      <button type="button" class="filter-btn filter-btn--selection" data-filter="ma-selection">
-        La sélection de Robin
-      </button>
-    </div>
   </nav>
 
 </div>
 
-<!-- AI selection intro (hidden by default, shown by JS) -->
-<div class="selection-ai-intro" id="selection-ai-intro" style="display:none">
-  <div class="selection-ai-intro__inner">
-    <p class="selection-ai-intro__text" id="selection-ai-text"></p>
+<!-- Conseil personnalisé de Robin pour Nos Créations (shown by mon-projet.js if available) -->
+<div class="robin-conseil" id="selection-perso-intro" style="display:none">
+  <div class="robin-conseil__header">
+    <span class="robin-conseil__badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      Conseil personnalis&eacute;
+    </span>
+    <div class="robin-conseil__chips" id="selection-conseil-chips">
+      <!-- Chips injectées par mon-projet.js -->
+    </div>
+  </div>
+  <div class="robin-conseil__body">
+    <div class="robin-conseil__quote">&ldquo;</div>
+    <p class="robin-conseil__text" id="selection-perso-text"></p>
+    <span class="robin-conseil__signature">&mdash; Robin, votre artisan</span>
+  </div>
+  <div class="robin-conseil__products" id="selection-products-grid">
+    <h3 class="robin-conseil__products-title">La proposition de Robin pour votre projet</h3>
+    <!-- Cards injectées par AJAX via mon-projet.js -->
+  </div>
+  <div class="robin-conseil__actions">
+    <button type="button" class="robin-conseil__reply" id="selection-reply-btn">R&eacute;pondre &agrave; Robin</button>
   </div>
 </div>
 

@@ -261,6 +261,16 @@
     if (conseilsRefresh) {
       conseilsRefresh.style.display = '';
     }
+
+    // Sur la page Nos Créations : masquer la card Robin
+    var selectionIntro = document.getElementById('selection-perso-intro');
+    if (selectionIntro) {
+      selectionIntro.style.display = 'none';
+    }
+    var selectionGrid = document.getElementById('selection-products-grid');
+    if (selectionGrid) {
+      selectionGrid.dataset.loaded = '';
+    }
   }
 
   // ─── Event handlers ───
@@ -361,8 +371,6 @@
   // ─── Page updates after AJAX ───
   function applyPageUpdates() {
     applyAiTexts();
-    // Déclencher un événement custom pour que shop.js rafraîchisse le filtre
-    document.dispatchEvent(new CustomEvent('monProjetUpdated'));
   }
 
   // ─── Page-specific AI text injection ───
@@ -408,6 +416,34 @@
       var conseilsCta = document.querySelector('.advice-guide-cta');
       if (conseilsCta && prefs.recommendedIds && prefs.recommendedIds.length > 0) {
         conseilsCta.style.display = 'none';
+      }
+
+      // Page Nos Créations — texte IA + chips projet
+      var selectionIntro = document.getElementById('selection-perso-intro');
+      var selectionText = document.getElementById('selection-perso-text');
+      if (selectionIntro && selectionText && prefs.selectionText) {
+        selectionText.textContent = prefs.selectionText;
+        selectionIntro.style.display = '';
+
+        // Injecter les chips du projet
+        var selChips = document.getElementById('selection-conseil-chips');
+        if (selChips && prefs.labels) {
+          var selHtml = '';
+          var selVisible = getVisibleSteps();
+          for (var s = 0; s < selVisible.length; s++) {
+            var selLbl = prefs.labels[selVisible[s]];
+            if (selLbl) {
+              selHtml += '<span class="robin-conseil__chip">' + escapeHtml(selLbl) + '</span>';
+            }
+          }
+          selChips.innerHTML = selHtml;
+        }
+      }
+
+      // Page Nos Créations — produits recommandés (dans la card robin-conseil)
+      var selProductsGrid = document.getElementById('selection-products-grid');
+      if (selProductsGrid && prefs.recommendedIds && prefs.recommendedIds.length > 0) {
+        renderConseilsProducts(selProductsGrid, prefs.recommendedIds);
       }
 
       // Page Sur-mesure — pre-fill form

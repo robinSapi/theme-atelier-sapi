@@ -11199,58 +11199,6 @@ transform: translateY(15px);
   }
 }
 
-/* Ma sélection filter button */
-.filter-btn--selection {
-  border-color: var(--color-orange);
-  background: linear-gradient(135deg, #FFF0E8 0%, #FFE0D0 100%);
-  color: var(--color-orange);
-}
-
-@media (hover: hover) {
-  .filter-btn--selection:hover {
-    border-color: #D14F1C;
-    background: linear-gradient(135deg, #FFE0D0 0%, #FFD0B8 100%);
-    color: #D14F1C;
-  }
-}
-
-.filter-btn--selection.active {
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
-  border-color: #D14F1C;
-  color: var(--color-white);
-  box-shadow: 0 4px 12px rgba(227, 91, 36, 0.4);
-}
-
-@media (hover: hover) {
-  .filter-btn--selection.active:hover {
-    background: linear-gradient(180deg, #D14F1C 0%, #C04518 100%);
-    border-color: #C04518;
-  }
-}
-
-/* AI selection intro */
-.selection-ai-intro {
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-.selection-ai-intro__inner {
-  background: var(--color-warm);
-  border-left: 3px solid var(--color-orange);
-  border-radius: 0 8px 8px 0;
-  padding: 1rem 1.5rem;
-  margin-top: 1rem;
-}
-
-.selection-ai-intro__text {
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: var(--color-dark);
-  margin: 0;
-}
-
 /* Product Filters Wrapper */
 .product-filters-wrapper {
   max-width: 1600px;
