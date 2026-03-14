@@ -6464,6 +6464,69 @@ li.carousel-editorial-slide,
   margin: 0;
 }
 
+/* Card "Création sur mesure" dans la grille produits */
+.sur-mesure-card {
+  display: flex !important;
+}
+
+.sur-mesure-card__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  background: rgba(var(--color-wood-rgb), 0.06);
+  border: 2px dashed rgba(var(--color-wood-rgb), 0.25);
+  border-radius: 20px;
+  text-decoration: none;
+  color: var(--color-dark, #323232);
+  transition: border-color 0.3s, background 0.3s;
+  height: 100%;
+  width: 100%;
+}
+
+.sur-mesure-card__link:hover {
+  border-color: var(--color-orange, #E35B24);
+  background: rgba(var(--color-wood-rgb), 0.1);
+}
+
+.sur-mesure-card__icon {
+  color: var(--color-wood, #937D68);
+  margin-bottom: 1rem;
+}
+
+.sur-mesure-card__link:hover .sur-mesure-card__icon {
+  color: var(--color-orange, #E35B24);
+}
+
+.sur-mesure-card__title {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-wood, #937D68);
+  margin: 0 0 0.8rem;
+}
+
+.sur-mesure-card__text {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--color-dark, #323232);
+  margin: 0 0 1rem;
+  font-style: italic;
+}
+
+.sur-mesure-card__cta {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-orange, #E35B24);
+  margin-top: auto;
+}
+
 /* Formulaire contact inline — Contacter Robin */
 .robin-conseil__contact-btn {
   background: none;

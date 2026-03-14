@@ -463,6 +463,25 @@
             var titleHtml = title ? title.outerHTML : '';
             grid.innerHTML = titleHtml + resp.data;
             grid.dataset.loaded = 'true';
+
+            // Card "Projet sur mesure" en dernière position
+            var prefs = safeLoad();
+            if (prefs.showSurMesure && prefs.surMesureText) {
+              var ul = grid.querySelector('ul.products');
+              if (ul) {
+                var li = document.createElement('li');
+                li.className = 'product sur-mesure-card';
+                li.innerHTML = '<a href="/sur-mesure/" class="sur-mesure-card__link">'
+                  + '<div class="sur-mesure-card__icon">'
+                  + '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>'
+                  + '</div>'
+                  + '<h3 class="sur-mesure-card__title">Cr\u00e9ation sur mesure</h3>'
+                  + '<p class="sur-mesure-card__text">' + escapeHtml(prefs.surMesureText) + '</p>'
+                  + '<span class="sur-mesure-card__cta">D\u00e9couvrir \u2192</span>'
+                  + '</a>';
+                ul.appendChild(li);
+              }
+            }
           }
         } catch (e) { /* */ }
       }
