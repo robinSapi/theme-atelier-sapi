@@ -99,6 +99,10 @@ Text Domain: theme-sapi-maison
   /* Couleurs d'ambiance */
   --ombre-chaude: rgba(74, 63, 53, 0.08);
   --voile-bois: rgba(147, 125, 104, 0.05);
+  --color-wood-rgb: 147, 125, 104;
+
+  /* Gradient CTA orange */
+  --gradient-cta: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
 
   /* Gradients bois pour swatches */
   --wood-okoume: linear-gradient(135deg, #D4B896 0%, #C4A882 50%, #B89B74 100%);
@@ -6104,7 +6108,7 @@ li.carousel-editorial-slide,
   text-decoration: none;
   color: var(--creme-papier, #FEFDFB);
   /* Premium gradient orange */
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  background: var(--gradient-cta);
   border: none;
   border-radius: 8px;
   /* Warm shadow (not gray!) */
@@ -6342,7 +6346,7 @@ li.carousel-editorial-slide,
 .robin-conseil__chip {
   display: inline-block;
   padding: 0.2rem 0.6rem;
-  background: rgba(147, 125, 104, 0.12);
+  background: rgba(var(--color-wood-rgb), 0.12);
   border-radius: 50px;
   font-family: var(--font-body, 'Montserrat', sans-serif);
   font-size: 0.7rem;
@@ -6393,7 +6397,7 @@ li.carousel-editorial-slide,
   text-align: center;
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid rgba(147, 125, 104, 0.15);
+  border-top: 1px solid rgba(var(--color-wood-rgb), 0.15);
 }
 
 .robin-conseil__reply {
@@ -6423,7 +6427,7 @@ li.carousel-editorial-slide,
 .robin-conseil__products {
   margin-top: 1.5rem;
   padding-top: 1.5rem;
-  border-top: 1px solid rgba(147, 125, 104, 0.15);
+  border-top: 1px solid rgba(var(--color-wood-rgb), 0.15);
 }
 
 .robin-conseil__products-title {
@@ -6499,11 +6503,11 @@ li.carousel-editorial-slide,
   align-items: center;
   gap: 0.5rem;
   padding: 12px 32px;
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  background: var(--gradient-cta);
   color: #fff;
   border: none;
   border-radius: 50px;
-  font-family: var(--font-body);
+  font-family: var(--font-body, 'Montserrat', sans-serif);
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -6991,11 +6995,11 @@ li.carousel-editorial-slide,
 .advice-guide-cta-btn {
   display: inline-block;
   padding: 14px 32px;
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  background: var(--gradient-cta);
   color: #fff;
   border: none;
   border-radius: 50px;
-  font-family: var(--font-body);
+  font-family: var(--font-body, 'Montserrat', sans-serif);
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -7247,7 +7251,7 @@ li.carousel-editorial-slide,
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--creme-papier, #FEFDFB);
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  background: var(--gradient-cta);
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -7663,7 +7667,7 @@ li.carousel-editorial-slide,
   letter-spacing: 0.1em;
   color: var(--color-white, #FFFFFF);
   padding: 1rem 2rem;
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  background: var(--gradient-cta);
   border: none;
   border-radius: 50px;
   box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
@@ -8686,7 +8690,7 @@ body.cursor-hover .cursor-dot {
   align-self: flex-start;
   gap: 0.5rem;
   padding: 0.65rem 1.5rem;
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  background: var(--gradient-cta);
   color: var(--color-white);
   text-decoration: none;
   font-weight: 600;
@@ -8910,7 +8914,7 @@ body.cursor-hover .cursor-dot {
   align-items: center;
   gap: 0.75rem;
   padding: 1rem 2rem;
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  background: var(--gradient-cta);
   color: var(--color-white);
   font-family: var(--font-body);
   font-size: 0.875rem;
@@ -9371,7 +9375,7 @@ transform: translateY(15px);
   top: 1.25rem;
   left: 1.25rem;
   padding: 0.5rem 1.25rem;
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  background: var(--gradient-cta);
   color: var(--color-white);
   font-family: var(--font-body);
   font-size: 0.75rem;
@@ -11192,7 +11196,7 @@ transform: translateY(15px);
 
 /* Active filter state - orange CTA style */
 .filter-btn.active {
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  background: var(--gradient-cta);
   border: none;
   color: var(--color-white);
   font-weight: 600;
@@ -11778,7 +11782,7 @@ transform: translateY(15px);
 
 @media (hover: hover) {
   .product-card-cinetique .btn-view:hover {
-    background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+    background: var(--gradient-cta);
     color: var(--color-white);
     -webkit-transform: translateY(-2px);
     transform: translateY(-2px);
@@ -16805,7 +16809,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .thankyou-cta-btn {
   display: inline-block;
   padding: 0.9rem 2rem;
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  background: var(--gradient-cta);
   color: #fff;
   border-radius: 12px;
   font-family: var(--font-body);
@@ -17499,7 +17503,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   align-items: center;
   gap: 0.5rem;
   padding: 1rem 2rem;
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  background: var(--gradient-cta);
   color: var(--color-white);
   font-family: var(--font-body);
   font-size: 1rem;
@@ -18734,7 +18738,7 @@ html.sapi-intro-active body {
   display: inline-block;
   width: 100%;
   padding: 18px 48px;
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  background: var(--gradient-cta);
   color: var(--creme-papier, #FEFDFB);
   font-family: 'Montserrat', sans-serif;
   font-size: 0.95rem;
@@ -19547,7 +19551,7 @@ html.sapi-intro-active body {
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--color-cream, #FEFDFB);
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  background: var(--gradient-cta);
   padding: 0.6rem 1.25rem;
   border-radius: 50px;
   text-decoration: none;
@@ -20023,7 +20027,7 @@ html.sapi-intro-active body {
   gap: 0.5rem;
   margin-top: 1rem;
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  background: var(--gradient-cta);
   color: #fff;
   font-family: var(--font-body, 'Montserrat', sans-serif);
   font-size: 0.9rem;

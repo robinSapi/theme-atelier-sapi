@@ -1845,6 +1845,9 @@ function sapi_ajax_guide_refine() {
   if (!is_array($conversation)) $conversation = [];
   if (!is_array($current_product_ids)) $current_product_ids = [];
 
+  // Limiter l'historique de conversation pour éviter de dépasser les limites de tokens
+  $conversation = array_slice($conversation, -20);
+
   // Sanitize answers
   $clean = [];
   foreach ($answers as $key => $val) {
