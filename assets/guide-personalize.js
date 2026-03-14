@@ -13,6 +13,7 @@
   if (!prefs || !prefs.essence) return;
 
   var essence = prefs.essence; // 'peuplier' or 'okoume'
+  var tailleIndex = prefs.tailleIndex; // 0, 1 or 2
 
   function swapCard(card) {
     var data = card.getAttribute('data-variation-imgs');
@@ -20,12 +21,16 @@
 
     try {
       var imgs = JSON.parse(data);
-      if (!imgs[essence]) return;
+      // Try composite key essence:tailleIndex, fallback to essence-only
+      var url = (tailleIndex !== null && tailleIndex !== undefined)
+        ? (imgs[essence + ':' + tailleIndex] || imgs[essence])
+        : imgs[essence];
+      if (!url) return;
 
       var mainImg = card.querySelector('.product-image-main img');
       if (!mainImg) return;
 
-      mainImg.src = imgs[essence];
+      mainImg.src = url;
       mainImg.srcset = ''; // OBLIGATOIRE — évite que le navigateur garde l'ancien srcset
     } catch (e) { /* silently skip */ }
   }

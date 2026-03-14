@@ -159,24 +159,46 @@ $data_attrs .= ' data-price="' . esc_attr($filter_price) . '"';
 $data_attrs .= $wood_essence ? ' data-wood="' . esc_attr(sanitize_title($wood_essence)) . '"' : '';
 $data_attrs .= $size_dimension > 0 ? ' data-size="' . esc_attr($size_dimension) . '"' : '';
 
-// Variation images for guide personalization (one image per essence)
+// Variation images for guide personalization (essence + taille)
 if ($is_variable) {
   $variation_imgs = [];
   $main_img_id = $product->get_image_id();
   $children = $product->get_children();
+
+  // Map taille slugs to indices (0, 1, 2…)
+  $taille_terms = wc_get_product_terms($product->get_id(), 'pa_taille', ['orderby' => 'menu_order']);
+  $taille_to_idx = [];
+  foreach ($taille_terms as $idx => $t) {
+    $taille_to_idx[$t->slug] = $idx;
+  }
+
   foreach ($children as $var_id) {
     $var_obj = wc_get_product($var_id);
     if (!$var_obj || !$var_obj->is_purchasable()) continue;
     $ess = $var_obj->get_attribute('pa_materiau');
     if (!$ess) continue;
     $ess_slug = sanitize_title($ess);
-    if (isset($variation_imgs[$ess_slug])) continue;
+
     $img_id = $var_obj->get_image_id();
-    if ($img_id && (int) $img_id !== (int) $main_img_id) {
-      $img_url = wp_get_attachment_image_url($img_id, 'woocommerce_thumbnail');
-      if ($img_url) {
-        $variation_imgs[$ess_slug] = $img_url;
+    if (!$img_id || (int) $img_id === (int) $main_img_id) continue;
+    $img_url = wp_get_attachment_image_url($img_id, 'woocommerce_thumbnail');
+    if (!$img_url) continue;
+
+    // Composite key essence:tailleIndex (primary lookup)
+    $taille = $var_obj->get_attribute('pa_taille');
+    if ($taille) {
+      $t_slug = sanitize_title($taille);
+      if (isset($taille_to_idx[$t_slug])) {
+        $key = $ess_slug . ':' . $taille_to_idx[$t_slug];
+        if (!isset($variation_imgs[$key])) {
+          $variation_imgs[$key] = $img_url;
+        }
       }
+    }
+
+    // Fallback key essence-only (first match)
+    if (!isset($variation_imgs[$ess_slug])) {
+      $variation_imgs[$ess_slug] = $img_url;
     }
   }
   if (!empty($variation_imgs)) {
