@@ -248,15 +248,14 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
     } catch (e) { /* */ }
 
-    // Sur la page Conseils : masquer la partie perso et montrer le bouton
+    // Sur la page Conseils : masquer la card Robin et montrer le bouton refresh
     var conseilsIntro = document.getElementById('conseils-perso-intro');
     if (conseilsIntro) {
       conseilsIntro.style.display = 'none';
     }
-    var conseilsProducts = document.getElementById('conseils-products-section');
-    if (conseilsProducts) {
-      conseilsProducts.style.display = 'none';
-      conseilsProducts.dataset.loaded = '';
+    var conseilsGrid = document.getElementById('conseils-products-grid');
+    if (conseilsGrid) {
+      conseilsGrid.dataset.loaded = '';
     }
     var conseilsRefresh = document.getElementById('conseils-refresh-btn');
     if (conseilsRefresh) {
@@ -393,11 +392,10 @@
         }
       }
 
-      // Page Conseils — produits recommandés
-      var conseilsProducts = document.getElementById('conseils-products-section');
-      if (conseilsProducts && prefs.recommendedIds && prefs.recommendedIds.length > 0) {
-        conseilsProducts.style.display = '';
-        renderConseilsProducts(conseilsProducts, prefs.recommendedIds);
+      // Page Conseils — produits recommandés (dans la card robin-conseil)
+      var conseilsProductsGrid = document.getElementById('conseils-products-grid');
+      if (conseilsProductsGrid && prefs.recommendedIds && prefs.recommendedIds.length > 0) {
+        renderConseilsProducts(conseilsProductsGrid, prefs.recommendedIds);
       }
 
       // Page Conseils — cacher le bouton refresh (données fraîches)
@@ -418,8 +416,8 @@
   }
 
   // ─── Page Conseils : render product cards ───
-  function renderConseilsProducts(container, ids) {
-    if (container.dataset.loaded === 'true') return;
+  function renderConseilsProducts(grid, ids) {
+    if (grid.dataset.loaded === 'true') return;
 
     var xhr = new XMLHttpRequest();
     xhr.open('POST', sapiMonProjet.ajaxUrl, true);
@@ -431,11 +429,11 @@
         try {
           var resp = JSON.parse(xhr.responseText);
           if (resp.success && resp.data) {
-            var grid = container.querySelector('.conseils-products-grid');
-            if (grid) {
-              grid.innerHTML = resp.data;
-              container.dataset.loaded = 'true';
-            }
+            // Conserver le titre H3 et ajouter le HTML après
+            var title = grid.querySelector('.robin-conseil__products-title');
+            var titleHtml = title ? title.outerHTML : '';
+            grid.innerHTML = titleHtml + resp.data;
+            grid.dataset.loaded = 'true';
           }
         } catch (e) { /* */ }
       }

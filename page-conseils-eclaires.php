@@ -45,20 +45,14 @@ for ($i = 1; $i <= 4; $i++) {
     <p class="robin-conseil__text" id="conseils-perso-text"></p>
     <span class="robin-conseil__signature">&mdash; Robin, votre artisan</span>
   </div>
+  <div class="robin-conseil__products" id="conseils-products-grid">
+    <h3 class="robin-conseil__products-title">La proposition de Robin pour votre projet</h3>
+    <!-- Cards injectées par AJAX via mon-projet.js -->
+  </div>
   <div class="robin-conseil__actions">
     <button type="button" class="robin-conseil__reply" id="conseils-reply-btn">R&eacute;pondre &agrave; Robin</button>
   </div>
 </div>
-
-<!-- Produits recommandés (shown by mon-projet.js if recommendedIds exist) -->
-<section class="conseils-products-section" id="conseils-products-section" style="display:none">
-  <div class="conseils-products-header">
-    <h2>La proposition de Robin pour votre projet</h2>
-  </div>
-  <div class="conseils-products-grid" id="conseils-products-grid">
-    <!-- Cards injectées par AJAX via mon-projet.js -->
-  </div>
-</section>
 
 <!-- Bouton refresh après modification des réponses (caché par défaut) -->
 <div class="conseils-refresh" id="conseils-refresh-btn" style="display:none">

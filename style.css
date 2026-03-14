@@ -6398,46 +6398,41 @@ li.carousel-editorial-slide,
   }
 }
 
-/* Conseils — Produits recommandés */
-.conseils-products-section {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem 20px 1rem;
+/* Produits recommandés dans la card Robin */
+.robin-conseil__products {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(147, 125, 104, 0.15);
 }
 
-.conseils-products-header h2 {
-  font-family: var(--font-body);
-  font-size: 1.1rem;
+.robin-conseil__products-title {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--color-dark);
-  margin: 0 0 1.5rem;
+  color: var(--color-wood, #937D68);
+  margin: 0 0 1.2rem;
 }
 
-.conseils-products-header .section-num {
-  color: var(--color-wood);
-  margin-right: 0.5rem;
-}
-
-.conseils-products-grid .products {
+.robin-conseil__products .products {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
+  gap: 1.2rem;
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
 @media (max-width: 900px) {
-  .conseils-products-grid .products {
+  .robin-conseil__products .products {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
   }
 }
 
 @media (max-width: 480px) {
-  .conseils-products-grid .products {
+  .robin-conseil__products .products {
     grid-template-columns: 1fr;
   }
 }
