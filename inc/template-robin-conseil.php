@@ -28,7 +28,7 @@ function sapi_robin_conseil_card( $prefix = 'conseils' ) {
       <button type="button" class="robin-conseil__contact-btn" id="<?php echo $prefix; ?>-contact-btn">Contacter Robin</button>
     </div>
     <div class="robin-conseil__contact-form" id="<?php echo $prefix; ?>-contact-form" style="display:none">
-      <p class="robin-conseil__contact-intro">Laissez vos coordonn&eacute;es, Robin vous recontacte personnellement&nbsp;:</p>
+      <p class="robin-conseil__contact-intro">Robin vous recontactera rapidement&nbsp;:</p>
       <div class="robin-conseil__contact-fields">
         <div class="robin-conseil__contact-row">
           <input type="email" class="robin-conseil__contact-input" id="<?php echo $prefix; ?>-contact-email"
