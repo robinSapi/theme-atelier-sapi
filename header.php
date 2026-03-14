@@ -178,7 +178,9 @@ $logo_alt = get_bloginfo('name');
 require_once get_template_directory() . '/inc/guide-data.php';
 $mon_projet_steps = sapi_guide_get_steps();
 $mon_projet_icons = sapi_guide_get_icons();
-$conseils_url = get_permalink(get_page_by_path('conseils-eclaires'));
+$conseils_url  = get_permalink(get_page_by_path('conseils-eclaires'));
+$creations_url = get_permalink(wc_get_page_id('shop'));
+$contact_url   = get_permalink(get_page_by_path('contact'));
 ?>
 <div class="mon-projet-bar" id="mon-projet-bar">
   <!-- État replié -->
@@ -191,9 +193,6 @@ $conseils_url = get_permalink(get_page_by_path('conseils-eclaires'));
       <div class="mon-projet-chips" id="mon-projet-chips">
         <span class="mon-projet-placeholder">Cliquez pour d&eacute;finir votre projet</span>
       </div>
-    </div>
-    <div class="mon-projet-actions">
-      <a href="<?php echo esc_url($conseils_url); ?>" class="mon-projet-btn-conseils">Les conseils de Robin</a>
     </div>
     <button class="mon-projet-toggle" id="mon-projet-toggle" type="button" aria-expanded="false" aria-controls="mon-projet-expanded">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
@@ -230,6 +229,11 @@ $conseils_url = get_permalink(get_page_by_path('conseils-eclaires'));
     </div>
     <?php endforeach; ?>
     <div class="mon-projet-actions-row">
+      <a href="<?php echo esc_url($conseils_url); ?>" class="mon-projet-btn mon-projet-btn-conseils" id="mon-projet-btn-conseils">Les conseils de Robin</a>
+      <a href="<?php echo esc_url($creations_url); ?>" class="mon-projet-btn mon-projet-btn-selection" id="mon-projet-btn-selection">La s&eacute;lection de Robin</a>
+      <a href="<?php echo esc_url($contact_url); ?>" class="mon-projet-btn mon-projet-btn-contact">Contacter Robin</a>
+    </div>
+    <div class="mon-projet-reset-row">
       <button class="mon-projet-reset" id="mon-projet-reset" type="button">R&eacute;initialiser</button>
     </div>
   </div>

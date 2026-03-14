@@ -1620,31 +1620,58 @@ button:hover,
   font-size: 0.5rem;
 }
 
-/* --- Boutons d'action --- */
-.mon-projet-actions {
+/* --- Boutons d'action (dans le bandeau déplié) --- */
+.mon-projet-actions-row {
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
+  gap: 1rem;
+  padding: 0.8rem 1.5rem 0;
+  max-width: 1400px;
+  margin: 0 auto;
+  flex-wrap: wrap;
 }
 
-.mon-projet-btn-conseils {
+.mon-projet-btn {
   display: inline-flex;
   align-items: center;
-  padding: 0.35rem 0.85rem;
+  padding: 0.45rem 1.1rem;
   border: 1.5px solid var(--color-orange, #E35B24);
   border-radius: 100px;
-  font-size: 0.65rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.7rem;
   font-weight: 700;
   color: var(--color-orange, #E35B24);
   text-decoration: none;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s, opacity 0.2s;
   white-space: nowrap;
+  cursor: pointer;
 }
 
-.mon-projet-btn-conseils:hover {
+.mon-projet-btn:hover {
   background: var(--color-orange, #E35B24);
   color: #fff;
+}
+
+.mon-projet-btn-contact {
+  border-color: var(--color-wood, #937D68);
+  color: var(--color-wood, #937D68);
+}
+
+.mon-projet-btn-contact:hover {
+  background: var(--color-wood, #937D68);
+  color: #fff;
+}
+
+.mon-projet-btn.is-disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.mon-projet-reset-row {
+  display: flex;
+  justify-content: center;
+  padding: 0.4rem 1.5rem 0.2rem;
 }
 
 /* --- Bouton toggle --- */
@@ -1766,17 +1793,6 @@ button:hover,
   font-size: 0.55rem;
 }
 
-/* --- Bouton Reset --- */
-.mon-projet-actions-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 0.6rem 1.5rem;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
 .mon-projet-reset {
   background: none;
   border: none;
@@ -1833,9 +1849,14 @@ button:hover,
     display: none;
   }
 
-  .mon-projet-actions {
-    width: 100%;
-    justify-content: center;
+  .mon-projet-actions-row {
+    gap: 0.6rem;
+    padding: 0.6rem 0.75rem 0;
+  }
+
+  .mon-projet-btn {
+    font-size: 0.6rem;
+    padding: 0.4rem 0.8rem;
   }
 
   .mon-projet-toggle {

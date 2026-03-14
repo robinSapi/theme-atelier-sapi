@@ -312,6 +312,7 @@
     updateChoicesUI();
     updateChips();
     updateDynamicQuestions();
+    updateActionButtons();
   }
 
   // ─── AJAX : Un seul appel (produits + textes IA) ───
@@ -508,23 +509,37 @@
     }
   }
 
-  // ─── Bouton "Les conseils de Robin" : valider si pas encore fait ───
-  var conseilsBtn = bar.querySelector('.mon-projet-btn-conseils');
-  if (conseilsBtn) {
-    conseilsBtn.addEventListener('click', function(e) {
-      try {
-        var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-        if (prefs.recommendedIds && prefs.recommendedIds.length > 0) return;
-      } catch (err) { /* */ }
+  // ─── Boutons d'action dans le bandeau déplié ───
+  var btnConseils  = document.getElementById('mon-projet-btn-conseils');
+  var btnSelection = document.getElementById('mon-projet-btn-selection');
 
-      if (hasMinimumAnswers()) {
-        e.preventDefault();
-        conseilsBtn.textContent = 'Chargement\u2026';
-        fetchResults(function() {
-          window.location.href = conseilsBtn.href;
-        });
-      }
-    });
+  function updateActionButtons() {
+    var disabled = !hasMinimumAnswers();
+    if (btnConseils)  btnConseils.classList.toggle('is-disabled', disabled);
+    if (btnSelection) btnSelection.classList.toggle('is-disabled', disabled);
+  }
+
+  // Lancer AJAX avant navigation si résultats pas encore dispo
+  function handleActionClick(btn, e) {
+    try {
+      var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      if (prefs.recommendedIds && prefs.recommendedIds.length > 0) return;
+    } catch (err) { /* */ }
+
+    if (hasMinimumAnswers()) {
+      e.preventDefault();
+      btn.textContent = 'Chargement\u2026';
+      fetchResults(function() {
+        window.location.href = btn.href;
+      });
+    }
+  }
+
+  if (btnConseils) {
+    btnConseils.addEventListener('click', function(e) { handleActionClick(btnConseils, e); });
+  }
+  if (btnSelection) {
+    btnSelection.addEventListener('click', function(e) { handleActionClick(btnSelection, e); });
   }
 
   // ─── Page Conseils : bouton "Obtenir les conseils de Robin" ───
