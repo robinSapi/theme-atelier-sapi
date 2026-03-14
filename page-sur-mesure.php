@@ -25,12 +25,6 @@ get_header();
   </div>
 </section>
 
-<!-- Conseil personnalisé de Robin pour le sur-mesure (shown by mon-projet.js if available) -->
-<?php
-require_once get_template_directory() . '/inc/template-robin-conseil.php';
-sapi_robin_conseil_card( 'surmesure' );
-?>
-
 <!-- INTRODUCTION -->
 <section class="surmesure-intro">
   <div class="surmesure-intro-grid">

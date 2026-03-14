@@ -435,13 +435,12 @@
       conseilsCta.style.display = 'none';
     }
 
-    // Page Nos Créations
+    // Page Nos Créations — masquer le bouton sélection (déjà sur la page)
     applyRobinCard('selection', 'selectionText', prefs);
+    var selBtnCreations = document.getElementById('selection-selection-btn');
+    if (selBtnCreations) selBtnCreations.style.display = 'none';
 
-    // Page Sur-mesure — card robin-conseil + pré-remplissage formulaire
-    if (prefs.showSurMesure && prefs.surMesureText) {
-      applyRobinCard('surmesure', 'surMesureText', prefs);
-    }
+    // Page Sur-mesure — pré-remplissage formulaire uniquement
     prefillSurMesureForm(prefs);
   }
 
@@ -637,7 +636,6 @@
 
   initContactForm('conseils');
   initContactForm('selection');
-  initContactForm('surmesure');
 
   // ─── Init ───
   loadState();
