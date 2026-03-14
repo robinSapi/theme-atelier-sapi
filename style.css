@@ -6401,7 +6401,7 @@ li.carousel-editorial-slide,
   font-weight: 500;
   font-style: italic;
   letter-spacing: 0.03em;
-  color: var(--color-wood, #937D68);
+  color: var(--color-orange, #E35B24);
 }
 
 /* Actions */
@@ -6499,7 +6499,7 @@ li.carousel-editorial-slide,
 }
 
 .robin-conseil__contact-input:focus {
-  border-color: var(--color-wood, #937D68);
+  border-color: rgba(var(--color-wood-rgb), 0.45);
 }
 
 .robin-conseil__contact-input::placeholder {
