@@ -3652,7 +3652,10 @@ add_action('wp_ajax_sapi_conseils_products', 'sapi_ajax_conseils_products');
 add_action('wp_ajax_nopriv_sapi_conseils_products', 'sapi_ajax_conseils_products');
 
 function sapi_ajax_conseils_products() {
-  check_ajax_referer('sapi_guide_nonce', 'nonce');
+  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
+    wp_send_json_error(['message' => 'Nonce invalide']);
+    return;
+  }
 
   $ids_raw = isset($_POST['ids']) ? sanitize_text_field(wp_unslash($_POST['ids'])) : '[]';
   $ids = json_decode($ids_raw, true);
