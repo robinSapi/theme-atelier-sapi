@@ -53,7 +53,7 @@ for ($i = 1; $i <= 4; $i++) {
 <!-- Produits recommandés (shown by mon-projet.js if recommendedIds exist) -->
 <section class="conseils-products-section" id="conseils-products-section" style="display:none">
   <div class="conseils-products-header">
-    <h2><span class="section-num">00</span> La sélection de Robin pour votre projet</h2>
+    <h2>La proposition de Robin pour votre projet</h2>
   </div>
   <div class="conseils-products-grid" id="conseils-products-grid">
     <!-- Cards injectées par AJAX via mon-projet.js -->
