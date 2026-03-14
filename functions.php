@@ -2659,10 +2659,10 @@ function sapi_guide_call_claude($system_prompt) {
   $text = preg_replace('/\s*```$/i', '', $text);
 
   $parsed = json_decode(trim($text), true);
-  if (!$parsed || !isset($parsed['recommendation'])) {
-    // If Claude didn't return valid JSON, use the raw text as recommendation
+  if (!$parsed || (!isset($parsed['conseils_text']) && !isset($parsed['recommendation']))) {
+    // If Claude didn't return valid JSON, use the raw text as conseils_text
     return [
-      'recommendation' => $text,
+      'conseils_text' => $text,
     ];
   }
 
