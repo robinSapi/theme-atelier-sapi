@@ -250,6 +250,7 @@
   function invalidateResults() {
     var prefs = safeLoad();
     delete prefs.recommendedIds;
+    delete prefs.productLinks;
     delete prefs.conseilsText;
     delete prefs.selectionText;
     delete prefs.surMesureText;
@@ -335,6 +336,10 @@
             var prefs = safeLoad();
             var products = resp.data.products || [];
             prefs.recommendedIds = products.map(function(p) { return p.id; });
+            // Stocker les infos produits pour les liens dans le texte
+            prefs.productLinks = products.map(function(p) {
+              return { name: p.title, url: p.product_url };
+            });
             if (resp.data.conseils_text) prefs.conseilsText = resp.data.conseils_text;
             if (resp.data.selection_text) prefs.selectionText = resp.data.selection_text;
             if (resp.data.sur_mesure_text) prefs.surMesureText = resp.data.sur_mesure_text;
@@ -359,13 +364,36 @@
     applyAiTexts();
   }
 
+  // ─── Linkifier les noms de produits dans un texte ───
+  function linkifyProducts(text, productLinks) {
+    if (!productLinks || !productLinks.length) return escapeHtml(text);
+    var html = escapeHtml(text);
+    for (var i = 0; i < productLinks.length; i++) {
+      var p = productLinks[i];
+      if (!p.name || !p.url) continue;
+      // Extraire le prénom du produit (premier mot) pour matcher plus facilement
+      var firstName = p.name.split(' ')[0];
+      if (firstName.length < 3) continue;
+      // Échapper le nom pour l'utiliser dans une regex
+      var escaped = escapeHtml(firstName).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      var re = new RegExp('\\b(' + escaped + ')\\b', 'gi');
+      html = html.replace(re, '<a href="' + escapeHtml(p.url) + '" class="robin-conseil__product-link">$1</a>');
+    }
+    return html;
+  }
+
   // ─── Robin-conseil card : affichage mutualisé ───
   function applyRobinCard(prefix, textKey, prefs) {
     var intro = document.getElementById(prefix + '-perso-intro');
     var textEl = document.getElementById(prefix + '-perso-text');
     if (!intro || !textEl || !prefs[textKey]) return;
 
-    textEl.textContent = prefs[textKey];
+    // Utiliser innerHTML avec liens produits sur la page Conseils, textContent ailleurs
+    if (prefix === 'conseils' && prefs.productLinks) {
+      textEl.innerHTML = linkifyProducts(prefs[textKey], prefs.productLinks);
+    } else {
+      textEl.textContent = prefs[textKey];
+    }
     intro.style.display = '';
 
     // Chips projet
@@ -391,8 +419,10 @@
   function applyAiTexts() {
     var prefs = safeLoad();
 
-    // Page Conseils
+    // Page Conseils — texte conseil uniquement, pas de produits
     applyRobinCard('conseils', 'conseilsText', prefs);
+    var conseilsGrid = document.getElementById('conseils-products-grid');
+    if (conseilsGrid) conseilsGrid.style.display = 'none';
 
     var conseilsRefresh = document.getElementById('conseils-refresh-btn');
     if (conseilsRefresh && prefs.conseilsText) conseilsRefresh.style.display = 'none';

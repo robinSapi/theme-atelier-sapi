@@ -6381,6 +6381,18 @@ li.carousel-editorial-slide,
   margin: 0 0 1rem;
 }
 
+.robin-conseil__product-link {
+  color: var(--color-orange, #E35B24);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.robin-conseil__product-link:hover {
+  border-bottom-color: var(--color-orange, #E35B24);
+}
+
 .robin-conseil__signature {
   display: block;
   text-align: right;
