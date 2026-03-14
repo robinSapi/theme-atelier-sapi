@@ -3,6 +3,7 @@
  * Gère : expand/collapse, visibilité conditionnelle, sélection,
  * reset en cascade, chips résumé, sauvegarde localStorage.
  * AJAX déclenché à la fermeture du bandeau si pièce + taille répondues.
+ * Un seul appel AJAX (sapi_guide_results) retourne produits + textes IA.
  *
  * @package Theme_Sapi_Maison
  */
@@ -31,7 +32,7 @@
   var STORAGE_KEY = 'sapiGuidePrefs';
   var hoverTimer  = null;
   var isTouch     = !window.matchMedia('(hover: hover)').matches;
-  var answersHashAtOpen = null; // Hash des réponses à l'ouverture du bandeau
+  var answersHashAtOpen = null;
 
   // ─── Storage ───
   function loadState() {
@@ -58,7 +59,7 @@
       var style  = state.answers.style || null;
       var taille = state.answers.taille || null;
 
-      // Merge with existing data to preserve AJAX results (recommendedIds, aiTexts)
+      // Merge with existing data to preserve AJAX results
       var existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
 
       existing.answers = state.answers;
@@ -224,9 +225,7 @@
     if (hasMinimumAnswers()) {
       var currentHash = simpleHash(JSON.stringify(state.answers));
       if (currentHash !== answersHashAtOpen) {
-        // Invalider les anciens résultats car les réponses ont changé
         invalidateResults();
-        // Lancer les nouvelles requêtes
         fetchResults(function() {
           applyPageUpdates();
         });
@@ -244,9 +243,8 @@
     try {
       var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
       delete prefs.recommendedIds;
-      delete prefs.aiTexts;
-      delete prefs.aiTextsHash;
-      delete prefs.aiText;
+      delete prefs.conseilsText;
+      delete prefs.selectionText;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
     } catch (e) { /* */ }
 
@@ -258,6 +256,7 @@
     var conseilsProducts = document.getElementById('conseils-products-section');
     if (conseilsProducts) {
       conseilsProducts.style.display = 'none';
+      conseilsProducts.dataset.loaded = '';
     }
     var conseilsRefresh = document.getElementById('conseils-refresh-btn');
     if (conseilsRefresh) {
@@ -274,7 +273,6 @@
     var slug   = btn.getAttribute('data-slug');
     var label  = btn.getAttribute('data-label');
 
-    // Si on clique sur le même choix → désélectionner
     if (state.answers[stepId] === slug) {
       delete state.answers[stepId];
       delete state.labels[stepId];
@@ -283,10 +281,7 @@
       state.labels[stepId]  = label;
     }
 
-    // Reset en cascade
     cleanInvisibleAnswers();
-
-    // Tout mettre à jour
     updateAll();
     saveState();
   }
@@ -300,8 +295,6 @@
     state.labels  = {};
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* */ }
     updateAll();
-
-    // Masquer les éléments perso sur la page active
     invalidateResults();
   }
 
@@ -312,20 +305,13 @@
     updateDynamicQuestions();
   }
 
-  // ─── AJAX : Fetch results ───
+  // ─── AJAX : Un seul appel (produits + textes IA) ───
   function fetchResults(onDone) {
     if (typeof sapiMonProjet === 'undefined' || !sapiMonProjet.ajaxUrl) {
       if (onDone) onDone();
       return;
     }
 
-    var pending = 2;
-    function checkDone() {
-      pending--;
-      if (pending <= 0 && onDone) onDone();
-    }
-
-    // 1. Fetch product recommendations
     var xhr = new XMLHttpRequest();
     xhr.open('POST', sapiMonProjet.ajaxUrl, true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -339,14 +325,20 @@
             var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
             var products = resp.data.products || [];
             prefs.recommendedIds = products.map(function(p) { return p.id; });
-            if (resp.data.ai_text) {
-              prefs.aiText = resp.data.ai_text;
+
+            // Textes IA retournés par le même endpoint
+            if (resp.data.conseils_text) {
+              prefs.conseilsText = resp.data.conseils_text;
             }
+            if (resp.data.selection_text) {
+              prefs.selectionText = resp.data.selection_text;
+            }
+
             localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
           }
         } catch (e) { /* */ }
       }
-      checkDone();
+      if (onDone) onDone();
     };
 
     var params = 'action=sapi_guide_results'
@@ -355,54 +347,6 @@
       + '&guide_website=';
 
     xhr.send(params);
-
-    // 2. Fetch personalized AI texts
-    fetchAiTexts(checkDone);
-  }
-
-  // ─── AJAX : Fetch personalized AI texts ───
-  function fetchAiTexts(onDone) {
-    if (typeof sapiMonProjet === 'undefined' || !sapiMonProjet.ajaxUrl) {
-      if (onDone) onDone();
-      return;
-    }
-
-    var answersStr = JSON.stringify(state.answers);
-    var hash = simpleHash(answersStr);
-
-    // Check if we already have cached texts for these exact answers
-    var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-    if (prefs.aiTextsHash === hash && prefs.aiTexts) {
-      if (onDone) onDone();
-      return;
-    }
-
-    var xhr2 = new XMLHttpRequest();
-    xhr2.open('POST', sapiMonProjet.ajaxUrl, true);
-    xhr2.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-    xhr2.onreadystatechange = function() {
-      if (xhr2.readyState !== 4) return;
-      if (xhr2.status === 200) {
-        try {
-          var resp = JSON.parse(xhr2.responseText);
-          if (resp.success && resp.data) {
-            var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-            prefs.aiTexts = resp.data;
-            prefs.aiTextsHash = hash;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-          }
-        } catch (e) { /* */ }
-      }
-      if (onDone) onDone();
-    };
-
-    var params2 = 'action=sapi_mon_projet_texts'
-      + '&nonce=' + encodeURIComponent(sapiMonProjet.nonce)
-      + '&answers=' + encodeURIComponent(answersStr)
-      + '&guide_website=';
-
-    xhr2.send(params2);
   }
 
   function simpleHash(str) {
@@ -418,55 +362,40 @@
   // ─── Page updates after AJAX ───
   function applyPageUpdates() {
     applyAiTexts();
-    applyShopFilter();
-  }
-
-  // ─── Page Nos Créations : rafraîchir le filtre en live ───
-  function applyShopFilter() {
     // Déclencher un événement custom pour que shop.js rafraîchisse le filtre
-    var evt = new CustomEvent('monProjetUpdated');
-    document.dispatchEvent(evt);
+    document.dispatchEvent(new CustomEvent('monProjetUpdated'));
   }
 
   // ─── Page-specific AI text injection ───
   function applyAiTexts() {
     try {
       var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-      if (!prefs.aiTexts) return;
 
-      // Page Conseils
+      // Page Conseils — texte IA
       var conseilsIntro = document.getElementById('conseils-perso-intro');
       var conseilsText = document.getElementById('conseils-perso-text');
-      if (conseilsIntro && conseilsText && prefs.aiTexts.conseils_intro) {
-        conseilsText.textContent = prefs.aiTexts.conseils_intro;
+      if (conseilsIntro && conseilsText && prefs.conseilsText) {
+        conseilsText.textContent = prefs.conseilsText;
         conseilsIntro.style.display = '';
       }
 
-      // Page Conseils : afficher les produits recommandés
+      // Page Conseils — produits recommandés
       var conseilsProducts = document.getElementById('conseils-products-section');
       if (conseilsProducts && prefs.recommendedIds && prefs.recommendedIds.length > 0) {
         conseilsProducts.style.display = '';
         renderConseilsProducts(conseilsProducts, prefs.recommendedIds);
       }
 
-      // Page Conseils : cacher le bouton refresh (les données sont fraîches)
+      // Page Conseils — cacher le bouton refresh (données fraîches)
       var conseilsRefresh = document.getElementById('conseils-refresh-btn');
-      if (conseilsRefresh) {
+      if (conseilsRefresh && prefs.conseilsText) {
         conseilsRefresh.style.display = 'none';
       }
 
-      // Page Conseils : cacher le CTA "Commencez votre projet"
+      // Page Conseils — cacher le CTA "Commencez votre projet"
       var conseilsCta = document.querySelector('.advice-guide-cta');
       if (conseilsCta && prefs.recommendedIds && prefs.recommendedIds.length > 0) {
         conseilsCta.style.display = 'none';
-      }
-
-      // Page Sur-mesure — AI intro
-      var surMesureIntro = document.getElementById('sur-mesure-perso-intro');
-      var surMesureText = document.getElementById('sur-mesure-perso-text');
-      if (surMesureIntro && surMesureText && prefs.aiTexts.sur_mesure_intro) {
-        surMesureText.textContent = prefs.aiTexts.sur_mesure_intro;
-        surMesureIntro.style.display = '';
       }
 
       // Page Sur-mesure — pre-fill form
@@ -476,11 +405,6 @@
 
   // ─── Page Conseils : render product cards ───
   function renderConseilsProducts(container, ids) {
-    // Chercher les cards produits déjà en localStorage (sauvées par l'AJAX produits)
-    var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-    if (!prefs.recommendedIds || prefs.recommendedIds.length === 0) return;
-
-    // Les cards sont générées côté serveur, on utilise un AJAX léger pour les récupérer
     if (container.dataset.loaded === 'true') return;
 
     var xhr = new XMLHttpRequest();
@@ -540,13 +464,11 @@
   var conseilsBtn = bar.querySelector('.mon-projet-btn-conseils');
   if (conseilsBtn) {
     conseilsBtn.addEventListener('click', function(e) {
-      // Si déjà des recommandations → laisser naviguer normalement
       try {
         var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
         if (prefs.recommendedIds && prefs.recommendedIds.length > 0) return;
       } catch (err) { /* */ }
 
-      // Pas encore de recommandations mais pièce + taille répondues → AJAX puis rediriger
       if (hasMinimumAnswers()) {
         e.preventDefault();
         conseilsBtn.textContent = 'Chargement\u2026';
@@ -562,7 +484,6 @@
   if (refreshBtn) {
     refreshBtn.addEventListener('click', function() {
       if (!hasMinimumAnswers()) {
-        // Ouvrir le bandeau
         openBanner();
         bar.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
@@ -611,7 +532,7 @@
     resetBtn.addEventListener('click', onReset);
   }
 
-  // Apply AI texts on page load
+  // Apply on page load
   applyPageUpdates();
 
 })();

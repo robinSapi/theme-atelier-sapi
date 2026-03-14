@@ -302,11 +302,8 @@
         if (isMaSelection) {
           try {
             const prefs = JSON.parse(localStorage.getItem('sapiGuidePrefs') || '{}');
-            if (prefs.aiTexts && prefs.aiTexts.selection_intro) {
-              selText.textContent = prefs.aiTexts.selection_intro;
-              selIntro.style.display = '';
-            } else if (prefs.aiText) {
-              selText.textContent = prefs.aiText;
+            if (prefs.selectionText) {
+              selText.textContent = prefs.selectionText;
               selIntro.style.display = '';
             } else {
               selIntro.style.display = 'none';

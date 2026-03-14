@@ -1655,15 +1655,20 @@ function sapi_ajax_guide_results() {
   }
 
   // 6. Build response
-  $ai_text = null;
-
-  if ($ai_response && isset($ai_response['recommendation'])) {
-    $ai_text = $ai_response['recommendation'];
-  }
-
+  $conseils_text = null;
+  $selection_text = null;
   $sur_mesure_text = null;
-  if ($ai_response && isset($ai_response['sur_mesure_text'])) {
-    $sur_mesure_text = $ai_response['sur_mesure_text'];
+
+  if ($ai_response) {
+    if (isset($ai_response['conseils_text'])) {
+      $conseils_text = $ai_response['conseils_text'];
+    }
+    if (isset($ai_response['selection_text'])) {
+      $selection_text = $ai_response['selection_text'];
+    }
+    if (isset($ai_response['sur_mesure_text'])) {
+      $sur_mesure_text = $ai_response['sur_mesure_text'];
+    }
   }
 
   if (empty($display_products)) {
@@ -1674,10 +1679,11 @@ function sapi_ajax_guide_results() {
   // Log session
   $session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : wp_generate_uuid4();
   $product_ids_for_log = array_map(function($p) { return $p['id']; }, $display_products);
-  sapi_guide_log_initial($session_id, $clean, $product_ids_for_log, $ai_text ?: '');
+  sapi_guide_log_initial($session_id, $clean, $product_ids_for_log, $conseils_text ?: '');
 
   wp_send_json_success([
-    'ai_text'           => $ai_text,
+    'conseils_text'     => $conseils_text,
+    'selection_text'    => $selection_text,
     'products'          => $display_products,
     'show_sur_mesure'   => $show_sur_mesure,
     'sur_mesure_reason' => $sur_mesure_reason,
@@ -2582,11 +2588,18 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
   }
 
   // Format de réponse JSON
-  $prompt .= "\nFORMAT DE RÉPONSE (JSON strict, sans commentaires) :\n";
-  $prompt .= "{\n";
-  $prompt .= "  \"recommendation\": \"Texte expliquant pourquoi cette sélection correspond aux critères du client...\"";
+  $prompt .= "\nTEXTES À GÉNÉRER :\n";
+  $prompt .= "1. \"conseils_text\" (~80-100 mots) : Texte pour la page Conseils. Oriente le client dans son choix de luminaire en s'appuyant sur ses réponses (pièce, taille, style...). Donne des conseils concrets et pertinents, puis glisse naturellement vers la sélection de produits recommandés. Le client verra les 4 modèles juste en dessous de ce texte.\n";
+  $prompt .= "2. \"selection_text\" (~60-80 mots) : Texte pour la page Nos Créations. Justifie le choix de ces modèles précis pour le projet du client. Explique pourquoi chaque type de luminaire recommandé correspond à sa situation (pièce, hauteur, style…). Plus technique et factuel que le texte conseils.\n";
   if ($show_sur_mesure) {
-    $prompt .= ",\n  \"sur_mesure_text\": \"Par exemple, Robin pourrait imaginer… (idée ouverte, 30 mots max)\"";
+    $prompt .= "3. \"sur_mesure_text\" (30 mots max) : DOIT commencer par \"Par exemple\" ou \"Et pourquoi pas\". Propose une IDÉE ouverte de création sur mesure, pas une solution. Reste rêveur et suggestif.\n";
+  }
+  $prompt .= "\nFORMAT DE RÉPONSE (JSON strict, sans commentaires, sans markdown) :\n";
+  $prompt .= "{\n";
+  $prompt .= "  \"conseils_text\": \"...\",\n";
+  $prompt .= "  \"selection_text\": \"...\"";
+  if ($show_sur_mesure) {
+    $prompt .= ",\n  \"sur_mesure_text\": \"...\"";
   }
   $prompt .= "\n}\n";
 
@@ -3632,146 +3645,6 @@ function sapi_guide_admin_page() {
     <?php endif; ?>
   </div>
   <?php
-}
-
-/**
- * ═══════════════════════════════════════════════════════════════════
- * MON PROJET — AJAX endpoint for personalized AI texts
- * Generates all page-specific texts in a single Claude call.
- * ═══════════════════════════════════════════════════════════════════
- */
-add_action('wp_ajax_sapi_mon_projet_texts', 'sapi_ajax_mon_projet_texts');
-add_action('wp_ajax_nopriv_sapi_mon_projet_texts', 'sapi_ajax_mon_projet_texts');
-
-function sapi_ajax_mon_projet_texts() {
-  // 1. Nonce check
-  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
-    wp_send_json_error(['message' => 'Nonce invalide']);
-    return;
-  }
-
-  // 2. Rate limiting (shared with guide results)
-  if (!sapi_guide_check_rate_limit()) {
-    wp_send_json_error(['message' => 'Trop de requêtes, réessayez plus tard']);
-    return;
-  }
-
-  // 3. Honeypot
-  if (!empty($_POST['guide_website'])) {
-    wp_send_json_error(['message' => 'Erreur de validation']);
-    return;
-  }
-
-  // 4. Parse & sanitize answers
-  $raw_answers = isset($_POST['answers']) ? sanitize_text_field(wp_unslash($_POST['answers'])) : '{}';
-  $answers = json_decode($raw_answers, true);
-
-  if (!is_array($answers) || empty($answers)) {
-    wp_send_json_error(['message' => 'Données invalides']);
-    return;
-  }
-
-  $clean = [];
-  foreach ($answers as $key => $val) {
-    $clean[sanitize_key($key)] = sanitize_text_field($val);
-  }
-
-  // 5. Build system prompt
-  $theme_dir = get_stylesheet_directory();
-  $prompt_template = file_get_contents($theme_dir . '/assets/guide-prompt-mon-projet.txt');
-
-  if (!$prompt_template) {
-    wp_send_json_error(['message' => 'Prompt introuvable']);
-    return;
-  }
-
-  // Build human-readable answers string
-  $labels_map = [
-    'piece'     => 'Pièce',
-    'taille'    => 'Taille de la pièce',
-    'eclairage' => 'Type d\'éclairage',
-    'sortie'    => 'Sortie électrique',
-    'hauteur'   => 'Hauteur sous-plafond',
-    'table'     => 'Au-dessus d\'une table',
-    'style'     => 'Style intérieur',
-  ];
-
-  $answers_text = '';
-  foreach ($labels_map as $key => $label) {
-    if (isset($clean[$key])) {
-      $answers_text .= '- ' . $label . ' : ' . $clean[$key] . "\n";
-    }
-  }
-
-  $system_prompt = str_replace('{answers}', $answers_text, $prompt_template);
-
-  // 6. Call Claude API
-  $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
-  if (empty($api_key)) {
-    wp_send_json_error(['message' => 'API non configurée']);
-    return;
-  }
-
-  $body = [
-    'model'      => 'claude-sonnet-4-6',
-    'max_tokens' => 1024,
-    'system'     => $system_prompt,
-    'messages'   => [
-      ['role' => 'user', 'content' => 'Génère les textes personnalisés pour mon projet.'],
-    ],
-  ];
-
-  $response = wp_remote_post('https://api.anthropic.com/v1/messages', [
-    'timeout' => 30,
-    'headers' => [
-      'Content-Type'      => 'application/json',
-      'x-api-key'         => $api_key,
-      'anthropic-version' => '2023-06-01',
-    ],
-    'body' => wp_json_encode($body),
-  ]);
-
-  if (is_wp_error($response)) {
-    error_log('Sapi Mon Projet Claude API error: ' . $response->get_error_message());
-    wp_send_json_error(['message' => 'Erreur API']);
-    return;
-  }
-
-  $status   = wp_remote_retrieve_response_code($response);
-  $raw_body = wp_remote_retrieve_body($response);
-
-  if ($status !== 200) {
-    error_log('Sapi Mon Projet Claude API HTTP ' . $status . ': ' . $raw_body);
-    wp_send_json_error(['message' => 'Erreur API']);
-    return;
-  }
-
-  $data = json_decode($raw_body, true);
-  if (!isset($data['content'][0]['text'])) {
-    wp_send_json_error(['message' => 'Réponse API invalide']);
-    return;
-  }
-
-  $text = $data['content'][0]['text'];
-
-  // Clean markdown code fences if present
-  $text = preg_replace('/^```json\s*/i', '', trim($text));
-  $text = preg_replace('/\s*```$/i', '', $text);
-
-  $parsed = json_decode(trim($text), true);
-
-  if (!$parsed) {
-    error_log('Sapi Mon Projet: Claude response not valid JSON: ' . $text);
-    wp_send_json_error(['message' => 'Réponse IA invalide']);
-    return;
-  }
-
-  // 7. Return texts
-  wp_send_json_success([
-    'conseils_intro'  => isset($parsed['conseils_intro']) ? sanitize_text_field($parsed['conseils_intro']) : '',
-    'selection_intro' => isset($parsed['selection_intro']) ? sanitize_text_field($parsed['selection_intro']) : '',
-    'sur_mesure_intro' => isset($parsed['sur_mesure_intro']) ? sanitize_text_field($parsed['sur_mesure_intro']) : '',
-  ]);
 }
 
 // ─── AJAX: Render product cards for Conseils page ───
