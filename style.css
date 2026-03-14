@@ -6446,13 +6446,41 @@ li.carousel-editorial-slide,
 }
 
 @media (max-width: 900px) {
+  .robin-conseil {
+    padding: 2rem 1.5rem 1.5rem;
+  }
+
+  .robin-conseil__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
   .robin-conseil__products .products {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
+  .robin-conseil {
+    padding: 1.5rem 1rem 1rem;
+    margin-top: 1rem;
+    border-radius: 16px;
+  }
+
+  .robin-conseil__body {
+    padding-left: 1.5rem;
+  }
+
+  .robin-conseil__quote {
+    font-size: 2.5rem;
+  }
+
+  .robin-conseil__text {
+    font-size: 0.85rem;
+  }
+
   .robin-conseil__products .products {
     grid-template-columns: 1fr;
   }

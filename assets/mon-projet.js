@@ -32,50 +32,54 @@
   var STORAGE_KEY = 'sapiGuidePrefs';
   var hoverTimer  = null;
   var isTouch     = !window.matchMedia('(hover: hover)').matches;
-  var answersHashAtOpen = null;
+  var answersSnapshotAtOpen = null;
+  var pendingXhr  = null;
+
+  // ─── Helpers localStorage ───
+  function safeLoad() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+    catch (e) { return {}; }
+  }
+
+  function safeSave(data) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+    catch (e) { /* quota exceeded */ }
+  }
 
   // ─── Storage ───
   function loadState() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        var data = JSON.parse(raw);
-        if (data && data.answers) {
-          state.answers = data.answers;
-          state.labels  = data.labels || {};
-        } else if (data) {
-          state.answers = {};
-          state.labels  = {};
-        }
-      }
-    } catch (e) { /* */ }
+    var data = safeLoad();
+    if (data && data.answers) {
+      state.answers = data.answers;
+      state.labels  = data.labels || {};
+    } else {
+      state.answers = {};
+      state.labels  = {};
+    }
   }
 
   function saveState() {
-    try {
-      var essenceMap = { moderne: 'peuplier', ancien: 'okoume' };
-      var tailleMap  = { petite: 0, moyenne: 1, grande: 2 };
+    var essenceMap = { moderne: 'peuplier', ancien: 'okoume' };
+    var tailleMap  = { petite: 0, moyenne: 1, grande: 2 };
 
-      var style  = state.answers.style || null;
-      var taille = state.answers.taille || null;
+    var style  = state.answers.style || null;
+    var taille = state.answers.taille || null;
 
-      // Merge with existing data to preserve AJAX results
-      var existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    var existing = safeLoad();
 
-      existing.answers = state.answers;
-      existing.labels = state.labels;
-      existing.essence = essenceMap[style] || null;
-      existing.tailleIndex = taille in tailleMap ? tailleMap[taille] : null;
-      existing.pieceLabel = state.labels.piece || null;
-      existing.styleLabel = state.labels.style || null;
-      existing.tailleLabel = state.labels.taille || null;
+    existing.answers = state.answers;
+    existing.labels = state.labels;
+    existing.essence = essenceMap[style] || null;
+    existing.tailleIndex = taille in tailleMap ? tailleMap[taille] : null;
+    existing.pieceLabel = state.labels.piece || null;
+    existing.styleLabel = state.labels.style || null;
+    existing.tailleLabel = state.labels.taille || null;
 
-      if (!existing.recommendedIds) {
-        existing.recommendedIds = [];
-      }
+    if (!existing.recommendedIds) {
+      existing.recommendedIds = [];
+    }
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
-    } catch (e) { /* */ }
+    safeSave(existing);
   }
 
   // ─── Visibilité conditionnelle ───
@@ -210,7 +214,7 @@
   function openBanner() {
     if (state.isOpen) return;
     state.isOpen = true;
-    answersHashAtOpen = simpleHash(JSON.stringify(state.answers));
+    answersSnapshotAtOpen = JSON.stringify(state.answers);
     expanded.setAttribute('aria-hidden', 'false');
     toggle.setAttribute('aria-expanded', 'true');
   }
@@ -222,14 +226,11 @@
     toggle.setAttribute('aria-expanded', 'false');
 
     // Si les réponses ont changé et que pièce + taille sont répondues → AJAX
-    if (hasMinimumAnswers()) {
-      var currentHash = simpleHash(JSON.stringify(state.answers));
-      if (currentHash !== answersHashAtOpen) {
-        invalidateResults();
-        fetchResults(function() {
-          applyPageUpdates();
-        });
-      }
+    if (hasMinimumAnswers() && JSON.stringify(state.answers) !== answersSnapshotAtOpen) {
+      invalidateResults();
+      fetchResults(function() {
+        applyPageUpdates();
+      });
     }
   }
 
@@ -239,38 +240,27 @@
   }
 
   // ─── Invalidation des résultats quand les réponses changent ───
+  function hideRobinCard(prefix) {
+    var intro = document.getElementById(prefix + '-perso-intro');
+    if (intro) intro.style.display = 'none';
+    var grid = document.getElementById(prefix + '-products-grid');
+    if (grid) grid.dataset.loaded = '';
+  }
+
   function invalidateResults() {
-    try {
-      var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-      delete prefs.recommendedIds;
-      delete prefs.conseilsText;
-      delete prefs.selectionText;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-    } catch (e) { /* */ }
+    var prefs = safeLoad();
+    delete prefs.recommendedIds;
+    delete prefs.conseilsText;
+    delete prefs.selectionText;
+    safeSave(prefs);
 
-    // Sur la page Conseils : masquer la card Robin et montrer le bouton refresh
-    var conseilsIntro = document.getElementById('conseils-perso-intro');
-    if (conseilsIntro) {
-      conseilsIntro.style.display = 'none';
-    }
-    var conseilsGrid = document.getElementById('conseils-products-grid');
-    if (conseilsGrid) {
-      conseilsGrid.dataset.loaded = '';
-    }
+    // Masquer les cards Robin sur toutes les pages
+    hideRobinCard('conseils');
+    hideRobinCard('selection');
+
+    // Page Conseils : montrer le bouton refresh
     var conseilsRefresh = document.getElementById('conseils-refresh-btn');
-    if (conseilsRefresh) {
-      conseilsRefresh.style.display = '';
-    }
-
-    // Sur la page Nos Créations : masquer la card Robin
-    var selectionIntro = document.getElementById('selection-perso-intro');
-    if (selectionIntro) {
-      selectionIntro.style.display = 'none';
-    }
-    var selectionGrid = document.getElementById('selection-products-grid');
-    if (selectionGrid) {
-      selectionGrid.dataset.loaded = '';
-    }
+    if (conseilsRefresh) conseilsRefresh.style.display = '';
   }
 
   // ─── Event handlers ───
@@ -322,29 +312,29 @@
       return;
     }
 
+    // Annuler l'appel précédent s'il est encore en cours
+    if (pendingXhr) { try { pendingXhr.abort(); } catch (e) { /* */ } }
+
     var xhr = new XMLHttpRequest();
+    pendingXhr = xhr;
     xhr.open('POST', sapiMonProjet.ajaxUrl, true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
     xhr.onreadystatechange = function() {
       if (xhr.readyState !== 4) return;
+      if (xhr !== pendingXhr) return; // Ignoré si un appel plus récent a pris le relais
+      pendingXhr = null;
+
       if (xhr.status === 200) {
         try {
           var resp = JSON.parse(xhr.responseText);
           if (resp.success && resp.data) {
-            var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+            var prefs = safeLoad();
             var products = resp.data.products || [];
             prefs.recommendedIds = products.map(function(p) { return p.id; });
-
-            // Textes IA retournés par le même endpoint
-            if (resp.data.conseils_text) {
-              prefs.conseilsText = resp.data.conseils_text;
-            }
-            if (resp.data.selection_text) {
-              prefs.selectionText = resp.data.selection_text;
-            }
-
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+            if (resp.data.conseils_text) prefs.conseilsText = resp.data.conseils_text;
+            if (resp.data.selection_text) prefs.selectionText = resp.data.selection_text;
+            safeSave(prefs);
           }
         } catch (e) { /* */ }
       }
@@ -359,102 +349,65 @@
     xhr.send(params);
   }
 
-  function simpleHash(str) {
-    var hash = 0;
-    for (var i = 0; i < str.length; i++) {
-      var chr = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + chr;
-      hash |= 0;
-    }
-    return hash.toString(36);
-  }
-
   // ─── Page updates after AJAX ───
   function applyPageUpdates() {
     applyAiTexts();
   }
 
-  // ─── Page-specific AI text injection ───
-  function applyAiTexts() {
-    try {
-      var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  // ─── Robin-conseil card : affichage mutualisé ───
+  function applyRobinCard(prefix, textKey, prefs) {
+    var intro = document.getElementById(prefix + '-perso-intro');
+    var textEl = document.getElementById(prefix + '-perso-text');
+    if (!intro || !textEl || !prefs[textKey]) return;
 
-      // Page Conseils — texte IA + chips projet
-      var conseilsIntro = document.getElementById('conseils-perso-intro');
-      var conseilsText = document.getElementById('conseils-perso-text');
-      if (conseilsIntro && conseilsText && prefs.conseilsText) {
-        conseilsText.textContent = prefs.conseilsText;
-        conseilsIntro.style.display = '';
+    textEl.textContent = prefs[textKey];
+    intro.style.display = '';
 
-        // Injecter les chips du projet dans le bloc Robin
-        var chipsContainer = document.getElementById('robin-conseil-chips');
-        if (chipsContainer && prefs.labels) {
-          var html = '';
-          var visible = getVisibleSteps();
-          for (var i = 0; i < visible.length; i++) {
-            var lbl = prefs.labels[visible[i]];
-            if (lbl) {
-              html += '<span class="robin-conseil__chip">' + escapeHtml(lbl) + '</span>';
-            }
-          }
-          chipsContainer.innerHTML = html;
+    // Chips projet
+    var chips = document.getElementById(prefix + '-conseil-chips');
+    if (chips && prefs.labels) {
+      var html = '';
+      for (var key in prefs.labels) {
+        if (prefs.labels[key]) {
+          html += '<span class="robin-conseil__chip">' + escapeHtml(prefs.labels[key]) + '</span>';
         }
       }
+      chips.innerHTML = html;
+    }
 
-      // Page Conseils — produits recommandés (dans la card robin-conseil)
-      var conseilsProductsGrid = document.getElementById('conseils-products-grid');
-      if (conseilsProductsGrid && prefs.recommendedIds && prefs.recommendedIds.length > 0) {
-        renderConseilsProducts(conseilsProductsGrid, prefs.recommendedIds);
-      }
-
-      // Page Conseils — cacher le bouton refresh (données fraîches)
-      var conseilsRefresh = document.getElementById('conseils-refresh-btn');
-      if (conseilsRefresh && prefs.conseilsText) {
-        conseilsRefresh.style.display = 'none';
-      }
-
-      // Page Conseils — cacher le CTA "Commencez votre projet"
-      var conseilsCta = document.querySelector('.advice-guide-cta');
-      if (conseilsCta && prefs.recommendedIds && prefs.recommendedIds.length > 0) {
-        conseilsCta.style.display = 'none';
-      }
-
-      // Page Nos Créations — texte IA + chips projet
-      var selectionIntro = document.getElementById('selection-perso-intro');
-      var selectionText = document.getElementById('selection-perso-text');
-      if (selectionIntro && selectionText && prefs.selectionText) {
-        selectionText.textContent = prefs.selectionText;
-        selectionIntro.style.display = '';
-
-        // Injecter les chips du projet
-        var selChips = document.getElementById('selection-conseil-chips');
-        if (selChips && prefs.labels) {
-          var selHtml = '';
-          var selVisible = getVisibleSteps();
-          for (var s = 0; s < selVisible.length; s++) {
-            var selLbl = prefs.labels[selVisible[s]];
-            if (selLbl) {
-              selHtml += '<span class="robin-conseil__chip">' + escapeHtml(selLbl) + '</span>';
-            }
-          }
-          selChips.innerHTML = selHtml;
-        }
-      }
-
-      // Page Nos Créations — produits recommandés (dans la card robin-conseil)
-      var selProductsGrid = document.getElementById('selection-products-grid');
-      if (selProductsGrid && prefs.recommendedIds && prefs.recommendedIds.length > 0) {
-        renderConseilsProducts(selProductsGrid, prefs.recommendedIds);
-      }
-
-      // Page Sur-mesure — pre-fill form
-      prefillSurMesureForm(prefs);
-    } catch (e) { /* */ }
+    // Produits recommandés
+    var grid = document.getElementById(prefix + '-products-grid');
+    if (grid && prefs.recommendedIds && prefs.recommendedIds.length > 0) {
+      renderProductCards(grid, prefs.recommendedIds);
+    }
   }
 
-  // ─── Page Conseils : render product cards ───
-  function renderConseilsProducts(grid, ids) {
+  // ─── Page-specific AI text injection ───
+  function applyAiTexts() {
+    var prefs = safeLoad();
+
+    // Page Conseils
+    applyRobinCard('conseils', 'conseilsText', prefs);
+
+    var conseilsRefresh = document.getElementById('conseils-refresh-btn');
+    if (conseilsRefresh && prefs.conseilsText) conseilsRefresh.style.display = 'none';
+
+    var conseilsCta = document.querySelector('.advice-guide-cta');
+    if (conseilsCta && prefs.recommendedIds && prefs.recommendedIds.length > 0) {
+      conseilsCta.style.display = 'none';
+    }
+
+    // Page Nos Créations
+    applyRobinCard('selection', 'selectionText', prefs);
+
+    // Page Sur-mesure
+    prefillSurMesureForm(prefs);
+  }
+
+  // ─── Render product cards via AJAX ───
+  function renderProductCards(grid, ids) {
     if (grid.dataset.loaded === 'true') return;
+    if (typeof sapiMonProjet === 'undefined' || !sapiMonProjet.ajaxUrl) return;
 
     var xhr = new XMLHttpRequest();
     xhr.open('POST', sapiMonProjet.ajaxUrl, true);
@@ -466,7 +419,6 @@
         try {
           var resp = JSON.parse(xhr.responseText);
           if (resp.success && resp.data) {
-            // Conserver le titre H3 et ajouter le HTML après
             var title = grid.querySelector('.robin-conseil__products-title');
             var titleHtml = title ? title.outerHTML : '';
             grid.innerHTML = titleHtml + resp.data;
@@ -521,10 +473,8 @@
 
   // Lancer AJAX avant navigation si résultats pas encore dispo
   function handleActionClick(btn, e) {
-    try {
-      var prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-      if (prefs.recommendedIds && prefs.recommendedIds.length > 0) return;
-    } catch (err) { /* */ }
+    var prefs = safeLoad();
+    if (prefs.recommendedIds && prefs.recommendedIds.length > 0) return;
 
     if (hasMinimumAnswers()) {
       e.preventDefault();
