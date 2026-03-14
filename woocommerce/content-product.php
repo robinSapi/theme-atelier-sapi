@@ -186,6 +186,10 @@ if ($is_variable) {
 
     // Composite key essence:tailleIndex (primary lookup)
     $taille = $var_obj->get_attribute('pa_taille');
+    // DEBUG — temporary log for Alban
+    if (stripos(get_the_title(), 'alban') !== false) {
+      error_log('ALBAN var#' . $var_id . ' ess=' . $ess . ' taille=[' . $taille . '] img=' . $img_id . ' taille_terms=' . wp_json_encode(array_keys($taille_to_idx)));
+    }
     if ($taille) {
       $t_slug = sanitize_title($taille);
       if (isset($taille_to_idx[$t_slug])) {
