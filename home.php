@@ -25,12 +25,13 @@ if ($featured_query->have_posts()) :
 ?>
 <section class="blog-featured-hero">
   <a href="<?php the_permalink(); ?>" class="blog-featured-link">
-    <?php if (has_post_thumbnail()) : ?>
-      <?php echo wp_get_attachment_image(get_post_thumbnail_id(), 'full', false, [
-        'class' => 'blog-featured-bg'
-      ]); ?>
-    <?php endif; ?>
-    <div class="blog-featured-overlay"></div>
+    <div class="blog-featured-media">
+      <?php if (has_post_thumbnail()) : ?>
+        <?php echo wp_get_attachment_image(get_post_thumbnail_id(), 'large', false, [
+          'class' => 'blog-featured-bg'
+        ]); ?>
+      <?php endif; ?>
+    </div>
     <div class="blog-featured-content">
       <span class="blog-featured-date"><?php echo esc_html(get_the_date('d/m/Y')); ?></span>
       <h2><?php echo esc_html(get_the_title()); ?></h2>
