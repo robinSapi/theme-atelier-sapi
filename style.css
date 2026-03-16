@@ -9647,7 +9647,7 @@ transform: translateY(15px);
   display: grid;
   grid-template-columns: 1.5fr 1fr 1fr 1fr;
   gap: 3rem;
-  margin-bottom: 3rem;
+  margin-bottom: 1rem;
 }
 
 .footer-logo {
