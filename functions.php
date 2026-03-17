@@ -1614,8 +1614,9 @@ function sapi_ajax_guide_results() {
   }
 
   // Normalise taille_escalier → taille pour le filtrage produits
+  // standard → petite (suspensions compactes), ouvert → grande (grandes suspensions verticales)
   if (!empty($clean['taille_escalier']) && empty($clean['taille'])) {
-    $clean['taille'] = $clean['taille_escalier'];
+    $clean['taille'] = ($clean['taille_escalier'] === 'ouvert') ? 'grande' : 'petite';
   }
 
   // 3. Determine product categories
