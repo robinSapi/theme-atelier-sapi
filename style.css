@@ -6369,34 +6369,51 @@ li.carousel-editorial-slide,
   margin: 0 0 1rem;
 }
 
-.robin-conseil__loading {
+/* ─── Robin Conseil : Loading state ─── */
+.robin-conseil__loader {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
+  padding: 1.5rem 0;
+}
+
+.robin-conseil__spinner {
+  flex-shrink: 0;
+  animation: robinSpin 1s linear infinite;
+  color: var(--color-orange, #E35B24);
+}
+
+@keyframes robinSpin {
+  to { transform: rotate(360deg); }
+}
+
+.robin-conseil__loader-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.robin-conseil__loader-step {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.9rem;
   color: var(--color-wood, #937D68);
-  font-style: italic;
-  font-size: 0.95rem;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 0.4s ease, transform 0.4s ease, color 0.3s ease;
 }
 
-.robin-conseil__loading-dots {
-  display: inline-flex;
-  gap: 3px;
+.robin-conseil__loader-step.is-active {
+  opacity: 1;
+  transform: translateY(0);
+  color: var(--color-dark, #323232);
+  font-weight: 500;
 }
 
-.robin-conseil__loading-dots span {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-wood, #937D68);
-  animation: robinDotPulse 1.2s ease-in-out infinite;
-}
-
-.robin-conseil__loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-.robin-conseil__loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes robinDotPulse {
-  0%, 100% { opacity: 0.3; transform: scale(0.8); }
-  50% { opacity: 1; transform: scale(1); }
+.robin-conseil__loader-step.is-done {
+  opacity: 0.4;
+  transform: translateY(0);
+  color: var(--color-wood, #937D68);
+  font-weight: 400;
 }
 
 .robin-conseil__product-link {

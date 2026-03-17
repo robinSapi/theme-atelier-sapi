@@ -421,7 +421,7 @@
       showLoadingState();
       fetchResults(function() {
         hideLoadingState();
-        applyAiTexts();
+        applyAiTextsAnimated();
       });
       return;
     }
@@ -429,26 +429,144 @@
     applyAiTexts();
   }
 
-  // ─── Loading state pour cards Robin ───
+  // ─── Loading : spinner + messages progressifs ───
+  var loadingStepTimer = null;
+
   function showLoadingState() {
     var cards = document.querySelectorAll('.robin-conseil');
     for (var i = 0; i < cards.length; i++) {
       var card = cards[i];
       card.style.display = '';
-      var textEl = card.querySelector('.robin-conseil__text');
-      if (textEl) {
-        textEl.innerHTML = '<span class="robin-conseil__loading">'
-          + '<span class="robin-conseil__loading-dots"><span></span><span></span><span></span></span>'
-          + ' Robin r\u00e9fl\u00e9chit\u2026'
-          + '</span>';
-      }
+      // Masquer body + products + actions pendant le chargement
+      var body = card.querySelector('.robin-conseil__body');
+      if (body) body.style.display = 'none';
+      var prods = card.querySelector('.robin-conseil__products');
+      if (prods) prods.style.display = 'none';
+      var actions = card.querySelector('.robin-conseil__actions');
+      if (actions) actions.style.display = 'none';
+
+      var header = card.querySelector('.robin-conseil__header');
+      if (!header) continue;
+
+      // Insérer le loader après le header
+      var loader = document.createElement('div');
+      loader.className = 'robin-conseil__loader';
+      loader.innerHTML = '<svg class="robin-conseil__spinner" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/></svg>'
+        + '<div class="robin-conseil__loader-steps">'
+        + '<p class="robin-conseil__loader-step is-active" data-step="1">On fouille dans les notes de Robin\u2026</p>'
+        + '<p class="robin-conseil__loader-step" data-step="2">On trie ses conseils\u2026</p>'
+        + '<p class="robin-conseil__loader-step" data-step="3">On ajuste la proposition personnalis\u00e9e\u2026</p>'
+        + '</div>';
+      header.after(loader);
     }
+
+    // Progression des messages
+    var stepIndex = 1;
+    loadingStepTimer = setInterval(function() {
+      stepIndex++;
+      var allSteps = document.querySelectorAll('.robin-conseil__loader-step');
+      allSteps.forEach(function(s) {
+        var n = parseInt(s.getAttribute('data-step'));
+        if (n < stepIndex) { s.classList.remove('is-active'); s.classList.add('is-done'); }
+        else if (n === stepIndex) s.classList.add('is-active');
+      });
+      if (stepIndex >= 3) clearInterval(loadingStepTimer);
+    }, 1500);
   }
 
   function hideLoadingState() {
-    var loaders = document.querySelectorAll('.robin-conseil__loading');
-    for (var i = 0; i < loaders.length; i++) {
-      loaders[i].remove();
+    if (loadingStepTimer) { clearInterval(loadingStepTimer); loadingStepTimer = null; }
+    var loaders = document.querySelectorAll('.robin-conseil__loader');
+    for (var i = 0; i < loaders.length; i++) loaders[i].remove();
+  }
+
+  // ─── Apparition animée : typewriter + fondu séquentielle ───
+  function applyAiTextsAnimated() {
+    var prefs = safeLoad();
+    var cards = document.querySelectorAll('.robin-conseil');
+
+    cards.forEach(function(card) {
+      var prefix = card.id.replace('-perso-intro', '');
+      var textKey = prefix === 'conseils' ? 'conseilsText' : (prefix === 'selection' ? 'selectionText' : 'surMesureText');
+      if (!prefs[textKey]) return;
+
+      // Masquer les chips
+      var chips = card.querySelector('.robin-conseil__chips');
+      if (chips) chips.style.display = 'none';
+
+      // Préparer le body
+      var body = card.querySelector('.robin-conseil__body');
+      var textEl = card.querySelector('.robin-conseil__text');
+      if (!body || !textEl) return;
+
+      body.style.display = '';
+      body.style.opacity = '0';
+      textEl.textContent = '';
+
+      // Fade in body
+      requestAnimationFrame(function() {
+        body.style.transition = 'opacity 0.5s ease';
+        body.style.opacity = '1';
+      });
+
+      // Typewriter mot par mot
+      var words = prefs[textKey].split(' ');
+      var wordIndex = 0;
+      var typeTimer = setInterval(function() {
+        if (wordIndex < words.length) {
+          textEl.textContent += (wordIndex > 0 ? ' ' : '') + words[wordIndex];
+          wordIndex++;
+        } else {
+          clearInterval(typeTimer);
+          // Après le texte → afficher les produits
+          showProductsAnimated(card, prefix, prefs);
+        }
+      }, 35);
+    });
+  }
+
+  function showProductsAnimated(card, prefix, prefs) {
+    var grid = card.querySelector('.robin-conseil__products');
+    if (grid && prefs.productsData && prefs.productsData.length > 0) {
+      renderProductCardsFromCache(grid, prefs);
+      grid.style.display = '';
+      grid.style.opacity = '0';
+      grid.style.transition = 'opacity 0.4s ease';
+      requestAnimationFrame(function() { grid.style.opacity = '1'; });
+
+      // Fade in chaque card produit séquentiellement
+      var items = grid.querySelectorAll('.product-card-cinetique');
+      items.forEach(function(item, idx) {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(15px)';
+        item.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        setTimeout(function() {
+          item.style.opacity = '1';
+          item.style.transform = 'translateY(0)';
+        }, 200 + idx * 200);
+      });
+
+      // Sur-mesure card aussi
+      var smCard = grid.querySelector('.sur-mesure-card');
+      if (smCard) {
+        smCard.style.opacity = '0';
+        smCard.style.transform = 'translateY(15px)';
+        smCard.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        setTimeout(function() {
+          smCard.style.opacity = '1';
+          smCard.style.transform = 'translateY(0)';
+        }, 200 + items.length * 200);
+      }
+    }
+
+    // Bouton "Contacter Robin" en dernier
+    var actions = card.querySelector('.robin-conseil__actions');
+    if (actions) {
+      var totalDelay = 400 + ((prefs.productsData || []).length + 1) * 200;
+      actions.style.display = '';
+      actions.style.opacity = '0';
+      actions.style.transition = 'opacity 0.4s ease';
+      setTimeout(function() { actions.style.opacity = '1'; }, totalDelay);
     }
   }
 
