@@ -1613,6 +1613,11 @@ function sapi_ajax_guide_results() {
     $clean[sanitize_key($key)] = sanitize_text_field($val);
   }
 
+  // Normalise taille_escalier → taille pour le filtrage produits
+  if (!empty($clean['taille_escalier']) && empty($clean['taille'])) {
+    $clean['taille'] = $clean['taille_escalier'];
+  }
+
   // 3. Determine product categories
   $categories = sapi_guide_get_categories($clean);
 
@@ -3443,7 +3448,7 @@ function sapi_guide_log_initial($session_id, $answers, $product_ids, $ai_text) {
     'session_id'     => $session_id,
     'created_at'     => current_time('mysql'),
     'piece'          => isset($answers['piece'])     ? $answers['piece']     : '',
-    'taille'         => isset($answers['taille'])    ? $answers['taille']    : '',
+    'taille'         => !empty($answers['taille']) ? $answers['taille'] : (!empty($answers['taille_escalier']) ? $answers['taille_escalier'] : ''),
     'eclairage'      => isset($answers['eclairage']) ? $answers['eclairage'] : '',
     'sortie'         => isset($answers['sortie'])    ? $answers['sortie']    : '',
     'hauteur'        => isset($answers['hauteur'])   ? $answers['hauteur']   : '',

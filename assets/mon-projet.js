@@ -290,7 +290,8 @@
   }
 
   function hasMinimumAnswers() {
-    return !!state.answers.piece && !!state.answers.taille;
+    if (!state.answers.piece) return false;
+    return !!state.answers.taille || !!state.answers.taille_escalier;
   }
 
   function onReset() {

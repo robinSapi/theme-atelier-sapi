@@ -35,6 +35,15 @@ function sapi_guide_get_steps() {
       ],
     ],
     [
+      'id'         => 'taille_escalier',
+      'question'   => 'Quel type d\'escalier ?',
+      'visibility' => ['piece' => ['escalier']],
+      'choices'    => [
+        ['label' => 'Escalier standard',       'slug' => 'standard', 'icon' => 'stairs'],
+        ['label' => 'Grand escalier ouvert',   'slug' => 'ouvert',   'icon' => 'square-lg'],
+      ],
+    ],
+    [
       'id'         => 'eclairage',
       'question'   => 'Pour un grand espace, Robin recommande toujours de multiplier les sources lumineuses.',
       'visibility' => ['taille' => ['grande']],
