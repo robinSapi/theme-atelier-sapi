@@ -232,12 +232,16 @@ if ($featured_query->have_posts()) {
     $product = wc_get_product(get_the_ID());
 
     if ($product) {
-      // Get detail_1 ACF field
+      // Get detail_1 ACF field, fallback to product thumbnail
       $detail_1 = get_field('detail_1', get_the_ID());
       $image_url = '';
 
       if ($detail_1) {
         $image_url = sapi_get_acf_image_url($detail_1);
+      }
+
+      if (!$image_url) {
+        $image_url = get_the_post_thumbnail_url(get_the_ID(), 'large');
       }
 
       if ($image_url) {
