@@ -585,18 +585,33 @@
     if (btnSelection) btnSelection.classList.toggle('is-disabled', disabled);
   }
 
-  // Lancer AJAX avant navigation si résultats pas encore dispo
+  // Lancer AJAX avant navigation si résultats pas encore dispo ou réponses modifiées
   function handleActionClick(btn, e) {
-    var prefs = safeLoad();
-    if (prefs.recommendedIds && prefs.recommendedIds.length > 0) return;
+    if (!hasMinimumAnswers()) return;
 
-    if (hasMinimumAnswers()) {
+    var answersChanged = answersSnapshotAtOpen !== null && JSON.stringify(state.answers) !== answersSnapshotAtOpen;
+
+    if (answersChanged) {
+      // Réponses modifiées → invalider et re-fetcher
       e.preventDefault();
+      saveState();
+      invalidateResults();
       btn.textContent = 'Chargement\u2026';
       fetchResults(function() {
         window.location.href = btn.href;
       });
+      return;
     }
+
+    var prefs = safeLoad();
+    if (prefs.recommendedIds && prefs.recommendedIds.length > 0) return;
+
+    // Pas de résultats en cache → fetcher avant navigation
+    e.preventDefault();
+    btn.textContent = 'Chargement\u2026';
+    fetchResults(function() {
+      window.location.href = btn.href;
+    });
   }
 
   if (btnConseils) {
