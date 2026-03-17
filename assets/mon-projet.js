@@ -543,12 +543,25 @@
     var html = '<ul class="products columns-4">';
     for (var i = 0; i < products.length; i++) {
       var p = products[i];
-      html += '<li class="product">'
-        + '<a href="' + escapeHtml(p.permalink) + '" class="robin-conseil__product-card">'
-        + '<img src="' + escapeHtml(p.image) + '" srcset="" alt="' + escapeHtml(p.image_alt || p.title) + '" />'
-        + '<h3>' + escapeHtml(p.title) + '</h3>'
-        + (p.category_label ? '<span class="robin-conseil__product-cat">' + escapeHtml(p.category_label) + '</span>' : '')
-        + '<span class="robin-conseil__product-price">' + p.price + '</span>'
+      var hoverClass = p.hover_image ? ' has-hover-image' : '';
+      var hoverHtml = p.hover_image
+        ? '<span class="product-image-hover"><img src="' + escapeHtml(p.hover_image) + '" alt="' + escapeHtml(p.title) + ' - ambiance" loading="lazy"></span>'
+        : '';
+
+      html += '<li class="product product-card-cinetique" data-id="' + p.id + '">'
+        + '<a href="' + escapeHtml(p.permalink) + '" class="product-card-link">'
+        + '<div class="product-media' + hoverClass + '">'
+        + '<span class="product-image-main"><img src="' + escapeHtml(p.image) + '" srcset="" alt="' + escapeHtml(p.image_alt || p.title) + '" /></span>'
+        + hoverHtml
+        + '</div>'
+        + '<div class="product-info">'
+        + '<h3 class="product-name">' + escapeHtml(p.title) + '</h3>'
+        + (p.category_label ? '<p class="product-category">' + escapeHtml(p.category_label) + '</p>' : '')
+        + '<div class="product-price">'
+        + '<span class="price-value">' + p.price + '</span>'
+        + '</div>'
+        + '</div>'
+        + '<div class="product-actions"><span class="btn-view">D\u00e9couvrir \u21fe</span></div>'
         + '</a></li>';
     }
 
@@ -570,6 +583,7 @@
     html += '</ul>';
     grid.innerHTML = titleHtml + html;
     grid.dataset.loaded = 'true';
+    // Le MutationObserver de product-name-formatter.js formate automatiquement les .product-name
   }
 
   function prefillSurMesureForm(prefs) {
