@@ -225,13 +225,61 @@
     expanded.setAttribute('aria-hidden', 'true');
     toggle.setAttribute('aria-expanded', 'false');
 
-    // Si les réponses ont changé et que pièce + taille sont répondues → AJAX
-    if (hasMinimumAnswers() && JSON.stringify(state.answers) !== answersSnapshotAtOpen) {
+    var answersChanged = JSON.stringify(state.answers) !== answersSnapshotAtOpen;
+
+    // Actualisation immédiate de la page (images, badges) sans attendre l'IA
+    if (answersChanged) {
+      refreshPageVisuals();
+    }
+
+    // Si les réponses ont changé et que pièce + taille sont répondues → AJAX IA
+    if (hasMinimumAnswers() && answersChanged) {
       invalidateResults();
       fetchResults(function() {
         applyPageUpdates();
       });
     }
+  }
+
+  // ─── Refresh visuel immédiat (sans AJAX) ───
+  function refreshPageVisuals() {
+    // 1. Swap images produits (essence + taille)
+    if (typeof window.sapiPersonalizeRefresh === 'function') {
+      window.sapiPersonalizeRefresh();
+    }
+
+    // 2. Badges "Pour vous" + tri (pages shop/catégorie)
+    refreshRecommendedBadges();
+  }
+
+  function refreshRecommendedBadges() {
+    var grid = document.querySelector('ul.products.columns-4');
+    if (!grid) return;
+
+    var prefs = safeLoad();
+    var recIds = (prefs.recommendedIds || []).map(function(id) { return String(id); });
+
+    var cards = grid.querySelectorAll('.product-card-cinetique');
+    cards.forEach(function(card) {
+      var cardId = card.getAttribute('data-id');
+      var badge = card.querySelector('.badge-recommended');
+
+      if (cardId && recIds.indexOf(cardId) !== -1) {
+        if (!badge) {
+          var media = card.querySelector('.product-media');
+          if (media) {
+            badge = document.createElement('span');
+            badge.className = 'product-badge badge-recommended';
+            badge.textContent = 'Pour vous';
+            media.appendChild(badge);
+          }
+        }
+        card.style.order = '-1';
+      } else {
+        if (badge) badge.remove();
+        card.style.order = '';
+      }
+    });
   }
 
   function toggleBanner() {
