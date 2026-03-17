@@ -2402,8 +2402,8 @@ function sapi_guide_collect_results($query, array $answers, $skip_exclusions = f
       if ($taille_answer) {
         $taille_terms = wc_get_product_terms($product->get_id(), 'pa_taille', ['orderby' => 'menu_order']);
 
-        // Grande pièce : exclure les produits avec 2 tailles ou moins (sauf en refine)
-        if (!$skip_exclusions && $taille_answer === 'grande' && !empty($taille_terms) && count($taille_terms) <= 2) {
+        // Grande pièce + suspension : exclure les produits avec 2 tailles ou moins (sauf en refine)
+        if (!$skip_exclusions && $taille_answer === 'grande' && !empty($taille_terms) && count($taille_terms) <= 2 && array_intersect($cat_slugs, ['suspensions'])) {
           continue;
         }
 
