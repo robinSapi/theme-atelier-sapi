@@ -2107,10 +2107,13 @@ function sapi_guide_get_categories(array $answers) {
 /**
  * Get ampoule type filter based on room
  */
-function sapi_guide_get_ampoule_filter($piece) {
+function sapi_guide_get_ampoule_filter($piece, $taille = '') {
   switch ($piece) {
     case 'cuisine':
     case 'bureau':
+      if ($taille === 'grande') {
+        return null; // grande pièce : tous les types OK
+      }
       return ['ampoule_degagee', 'semi_degagee'];
     case 'salon':
     case 'chambre':
@@ -2168,7 +2171,7 @@ function sapi_guide_query_products(array $answers, array $categories) {
   }
 
   // Ampoule filter based on room (reuses $piece from above)
-  $ampoule_filter = sapi_guide_get_ampoule_filter($piece);
+  $ampoule_filter = sapi_guide_get_ampoule_filter($piece, $taille);
   $has_ampoule_filter = false;
 
   if ($ampoule_filter) {
@@ -2305,7 +2308,7 @@ function sapi_guide_build_filter_context(array $answers, array $categories, arra
     $parts[] = 'Sortie inconnue : suspensions, lampadaires et lampes à poser proposés.';
   }
 
-  $ampoule_filter = sapi_guide_get_ampoule_filter($piece);
+  $ampoule_filter = sapi_guide_get_ampoule_filter($piece, $taille);
   if ($ampoule_filter) {
     $parts[] = 'Filtre ampoule : ' . implode(' ou ', $ampoule_filter) . ' (pièce : ' . $piece . ').';
   }
