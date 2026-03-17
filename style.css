@@ -9849,7 +9849,7 @@ transform: translateY(15px);
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   gap: 1.5rem;
-  padding: 3.5rem 0 3.5rem 5rem;
+  padding: 3.5rem 0 4rem 5rem;
   scroll-padding-left: 5rem;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
