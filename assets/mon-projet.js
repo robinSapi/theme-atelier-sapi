@@ -299,6 +299,7 @@
     var prefs = safeLoad();
     delete prefs.recommendedIds;
     delete prefs.productLinks;
+    delete prefs.productsData;
     delete prefs.conseilsText;
     delete prefs.selectionText;
     delete prefs.surMesureText;
@@ -385,10 +386,11 @@
             var prefs = safeLoad();
             var products = resp.data.products || [];
             prefs.recommendedIds = products.map(function(p) { return p.id; });
-            // Stocker les infos produits pour les liens dans le texte
+            // Stocker les infos produits complètes (pour rendu JS + liens texte)
             prefs.productLinks = products.map(function(p) {
               return { name: p.title, url: p.product_url };
             });
+            prefs.productsData = products;
             if (resp.data.conseils_text) prefs.conseilsText = resp.data.conseils_text;
             if (resp.data.selection_text) prefs.selectionText = resp.data.selection_text;
             if (resp.data.sur_mesure_text) prefs.surMesureText = resp.data.sur_mesure_text;
@@ -410,7 +412,44 @@
 
   // ─── Page updates after AJAX ───
   function applyPageUpdates() {
+    var prefs = safeLoad();
+
+    // Si des réponses existent mais pas de résultats → fetch lazy
+    if (prefs.answers && Object.keys(prefs.answers).length > 0
+        && hasMinimumAnswers()
+        && (!prefs.recommendedIds || prefs.recommendedIds.length === 0)) {
+      showLoadingState();
+      fetchResults(function() {
+        hideLoadingState();
+        applyAiTexts();
+      });
+      return;
+    }
+
     applyAiTexts();
+  }
+
+  // ─── Loading state pour cards Robin ───
+  function showLoadingState() {
+    var cards = document.querySelectorAll('.robin-conseil');
+    for (var i = 0; i < cards.length; i++) {
+      var card = cards[i];
+      card.style.display = '';
+      var textEl = card.querySelector('.robin-conseil__text');
+      if (textEl) {
+        textEl.innerHTML = '<span class="robin-conseil__loading">'
+          + '<span class="robin-conseil__loading-dots"><span></span><span></span><span></span></span>'
+          + ' Robin r\u00e9fl\u00e9chit\u2026'
+          + '</span>';
+      }
+    }
+  }
+
+  function hideLoadingState() {
+    var loaders = document.querySelectorAll('.robin-conseil__loading');
+    for (var i = 0; i < loaders.length; i++) {
+      loaders[i].remove();
+    }
   }
 
   // ─── Linkifier les noms de produits dans un texte ───
@@ -460,10 +499,10 @@
       selBtn.style.display = '';
     }
 
-    // Produits recommandés
+    // Produits recommandés (rendu JS depuis données en cache)
     var grid = document.getElementById(prefix + '-products-grid');
-    if (grid && prefs.recommendedIds && prefs.recommendedIds.length > 0) {
-      renderProductCards(grid, prefs.recommendedIds);
+    if (grid && prefs.productsData && prefs.productsData.length > 0) {
+      renderProductCardsFromCache(grid, prefs);
     }
   }
 
@@ -493,56 +532,44 @@
     prefillSurMesureForm(prefs);
   }
 
-  // ─── Render product cards via AJAX ───
-  function renderProductCards(grid, ids) {
+  // ─── Render product cards from cached data (no AJAX) ───
+  function renderProductCardsFromCache(grid, prefs) {
     if (grid.dataset.loaded === 'true') return;
-    if (typeof sapiMonProjet === 'undefined' || !sapiMonProjet.ajaxUrl) return;
 
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', sapiMonProjet.ajaxUrl, true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    var products = prefs.productsData;
+    var title = grid.querySelector('.robin-conseil__products-title');
+    var titleHtml = title ? title.outerHTML : '';
 
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState !== 4) return;
-      if (xhr.status === 200) {
-        try {
-          var resp = JSON.parse(xhr.responseText);
-          if (resp.success && resp.data) {
-            var title = grid.querySelector('.robin-conseil__products-title');
-            var titleHtml = title ? title.outerHTML : '';
-            grid.innerHTML = titleHtml + resp.data;
-            grid.dataset.loaded = 'true';
+    var html = '<ul class="products columns-4">';
+    for (var i = 0; i < products.length; i++) {
+      var p = products[i];
+      html += '<li class="product">'
+        + '<a href="' + escapeHtml(p.permalink) + '" class="robin-conseil__product-card">'
+        + '<img src="' + escapeHtml(p.image) + '" srcset="" alt="' + escapeHtml(p.image_alt || p.title) + '" />'
+        + '<h3>' + escapeHtml(p.title) + '</h3>'
+        + (p.category_label ? '<span class="robin-conseil__product-cat">' + escapeHtml(p.category_label) + '</span>' : '')
+        + '<span class="robin-conseil__product-price">' + p.price + '</span>'
+        + '</a></li>';
+    }
 
-            // Card "Projet sur mesure" en dernière position
-            var prefs = safeLoad();
-            if (prefs.showSurMesure && prefs.surMesureText) {
-              var ul = grid.querySelector('ul.products');
-              if (ul) {
-                var li = document.createElement('li');
-                li.className = 'product sur-mesure-card';
-                li.innerHTML = '<a href="/sur-mesure/" class="sur-mesure-card__link">'
-                  + '<div class="sur-mesure-card__content">'
-                  + '<div class="sur-mesure-card__icon">'
-                  + '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>'
-                  + '</div>'
-                  + '<h3 class="sur-mesure-card__title">Cr\u00e9ation sur mesure</h3>'
-                  + '<p class="sur-mesure-card__text">' + escapeHtml(prefs.surMesureText) + '</p>'
-                  + '</div>'
-                  + '<span class="sur-mesure-card__cta">D\u00e9couvrir \u2192</span>'
-                  + '</a>';
-                ul.appendChild(li);
-              }
-            }
-          }
-        } catch (e) { /* */ }
-      }
-    };
+    // Card "Projet sur mesure" en dernière position
+    if (prefs.showSurMesure && prefs.surMesureText) {
+      html += '<li class="product sur-mesure-card">'
+        + '<a href="/sur-mesure/" class="sur-mesure-card__link">'
+        + '<div class="sur-mesure-card__content">'
+        + '<div class="sur-mesure-card__icon">'
+        + '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>'
+        + '</div>'
+        + '<h3 class="sur-mesure-card__title">Cr\u00e9ation sur mesure</h3>'
+        + '<p class="sur-mesure-card__text">' + escapeHtml(prefs.surMesureText) + '</p>'
+        + '</div>'
+        + '<span class="sur-mesure-card__cta">D\u00e9couvrir \u2192</span>'
+        + '</a></li>';
+    }
 
-    var params = 'action=sapi_conseils_products'
-      + '&nonce=' + encodeURIComponent(sapiMonProjet.nonce)
-      + '&ids=' + encodeURIComponent(JSON.stringify(ids));
-
-    xhr.send(params);
+    html += '</ul>';
+    grid.innerHTML = titleHtml + html;
+    grid.dataset.loaded = 'true';
   }
 
   function prefillSurMesureForm(prefs) {
@@ -585,33 +612,18 @@
     if (btnSelection) btnSelection.classList.toggle('is-disabled', disabled);
   }
 
-  // Lancer AJAX avant navigation si résultats pas encore dispo ou réponses modifiées
+  // Navigation immédiate — la page de destination lancera l'AJAX si nécessaire
   function handleActionClick(btn, e) {
     if (!hasMinimumAnswers()) return;
 
     var answersChanged = answersSnapshotAtOpen !== null && JSON.stringify(state.answers) !== answersSnapshotAtOpen;
 
     if (answersChanged) {
-      // Réponses modifiées → invalider et re-fetcher
-      e.preventDefault();
       saveState();
       invalidateResults();
-      btn.textContent = 'Chargement\u2026';
-      fetchResults(function() {
-        window.location.href = btn.href;
-      });
-      return;
     }
 
-    var prefs = safeLoad();
-    if (prefs.recommendedIds && prefs.recommendedIds.length > 0) return;
-
-    // Pas de résultats en cache → fetcher avant navigation
-    e.preventDefault();
-    btn.textContent = 'Chargement\u2026';
-    fetchResults(function() {
-      window.location.href = btn.href;
-    });
+    // Navigation immédiate (le lien <a> fait son travail normalement)
   }
 
   if (btnConseils) {
