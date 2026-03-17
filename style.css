@@ -9338,6 +9338,14 @@ transform: translateY(15px);
   gap: 1rem;
 }
 
+.storytelling-num {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--color-orange, #E35B24);
+  letter-spacing: 0.05em;
+}
+
 .storytelling-label {
   font-family: var(--font-body);
   font-size: 0.75rem;

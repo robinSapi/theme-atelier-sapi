@@ -393,7 +393,7 @@ foreach ($collection_slugs as $col) {
     <!-- Storytelling Artisanat -->
     <div class="bento-card bento-storytelling">
       <div class="storytelling-inner">
-        <span class="storytelling-label">L'atelier</span>
+        <span class="storytelling-label"><span class="storytelling-num">01</span> L'atelier</span>
         <h2 class="storytelling-title">Sculptées à la main</h2>
         <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
         <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="storytelling-link">
