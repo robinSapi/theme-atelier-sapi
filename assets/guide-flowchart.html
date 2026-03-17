@@ -440,7 +440,7 @@
 
 <h1>Guide Luminaire — Arbre décisionnel V3</h1>
 <p class="subtitle">Questionnaire dynamique avec question Éclairage, sortie pour secondaire, filtrage complet</p>
-<p class="date">Mis à jour le 10 mars 2026</p>
+<p class="date">Mis à jour le 17 mars 2026</p>
 
 <!-- ═══════════════════════════════════════════
      SECTION 1 : FLUX PRINCIPAL
@@ -477,8 +477,8 @@
           <div class="route skip">
             <div class="route-head">
               <span class="route-arrow">↗</span>
-              <span class="route-target">Sortie</span>
-              <span class="route-note">saute Taille + Éclairage</span>
+              <span class="route-target">Taille escalier</span>
+              <span class="route-note">saute Taille classique + Éclairage</span>
             </div>
             <div class="route-chips">
               <span class="chip">Cage d'escalier</span>
@@ -496,7 +496,7 @@
       <div class="step-card">
         <div class="step-header">
           <span class="step-name">Taille</span>
-          <span class="step-cond">Sauf escalier</span>
+          <span class="step-cond">Sauf escalier (→ taille escalier)</span>
         </div>
         <p class="step-q">Quelle est la taille de votre pièce ?</p>
         <div class="routes">
@@ -527,6 +527,40 @@
             <li>Petite → plus petite taille disponible</li>
             <li>Moyenne → 2e taille (fallback sur 1ère si une seule taille)</li>
             <li>Grande → 3e taille (exclut produits ≤ 2 tailles, fallback si vide)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="connector-line"></div></div>
+
+    <!-- ── 2bis. TAILLE ESCALIER ── -->
+    <div class="step" id="s-taille-escalier">
+      <div class="step-num conditional">2b</div>
+      <div class="step-card conditional">
+        <div class="step-header">
+          <span class="step-name">Taille escalier</span>
+          <span class="step-cond">Uniquement escalier</span>
+        </div>
+        <p class="step-q">Quel type d'escalier ?</p>
+        <div class="routes">
+          <div class="route skip">
+            <div class="route-head">
+              <span class="route-arrow">↗</span>
+              <span class="route-target">Sortie</span>
+              <span class="route-note">saute Éclairage</span>
+            </div>
+            <div class="route-chips">
+              <span class="chip">Escalier standard</span>
+              <span class="chip">Grand escalier ouvert</span>
+            </div>
+          </div>
+        </div>
+        <div class="filter-note">
+          <strong>Mapping vers filtrage taille :</strong>
+          <ul>
+            <li>Escalier standard → petite (suspensions compactes)</li>
+            <li>Grand escalier ouvert → grande (grandes suspensions verticales)</li>
           </ul>
         </div>
       </div>
@@ -593,7 +627,7 @@
           <ul>
             <li>Petite ou Moyenne (skip éclairage)</li>
             <li>Principal, Secondaire ou Plus tard (après éclairage)</li>
-            <li>Escalier (skip taille + éclairage)</li>
+            <li>Escalier (après taille escalier, skip éclairage)</li>
           </ul>
         </div>
         <div class="routes">
@@ -993,6 +1027,8 @@
       <tr><td>Petite pièce</td><td>Plus petite taille disponible du produit</td></tr>
       <tr><td>Moyenne pièce</td><td>2e taille du produit (fallback sur 1ère si une seule taille)</td></tr>
       <tr><td>Grande pièce</td><td>3e taille (exclut produits ≤ 2 tailles, fallback si vide)</td></tr>
+      <tr><td>Escalier standard</td><td>→ mappé sur Petite (suspensions compactes)</td></tr>
+      <tr><td>Grand escalier ouvert</td><td>→ mappé sur Grande (grandes suspensions verticales)</td></tr>
 
       <tr class="rules-group"><td colspan="2">Essence (style)</td></tr>
       <tr><td>Moderne</td><td>Variation Peuplier (clair)</td></tr>
@@ -1151,7 +1187,8 @@
 (function () {
   // ── Draw bypass bars on right side ──
   var bypasses = [
-    { from: 's-piece',     to: 's-sortie', label: 'Escalier',            color: '#B0A0A0', lane: 0 },
+    { from: 's-piece',     to: 's-taille-escalier', label: 'Escalier',   color: '#B0A0A0', lane: 0 },
+    { from: 's-taille-escalier', to: 's-sortie', label: '→ Sortie',  color: '#B0A0A0', lane: 0 },
     { from: 's-taille',    to: 's-sortie', label: 'Petite / Moyenne',    color: '#E35B24', lane: 1 },
     { from: 's-eclairage', to: 's-style',  label: 'Grappe (sur mesure)', color: '#9B59B6', lane: 2 },
     { from: 's-sortie',    to: 's-style',  label: 'Mur / Prise / NSP',  color: '#937D68', lane: 3 },
