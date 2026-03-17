@@ -481,16 +481,10 @@
     textEl.textContent = prefs[textKey];
     intro.style.display = '';
 
-    // Chips projet
+    // Chips projet — masqués (déjà visibles dans le bandeau Mon Projet)
     var chips = document.getElementById(prefix + '-conseil-chips');
-    if (chips && prefs.labels) {
-      var html = '';
-      for (var key in prefs.labels) {
-        if (prefs.labels[key]) {
-          html += '<span class="robin-conseil__chip">' + escapeHtml(prefs.labels[key]) + '</span>';
-        }
-      }
-      chips.innerHTML = html;
+    if (chips) {
+      chips.style.display = 'none';
     }
 
     // Bouton "Voir ma sélection"
