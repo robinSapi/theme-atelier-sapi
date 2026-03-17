@@ -199,6 +199,8 @@ $uploads = esc_url(home_url('/wp-content/uploads/'));
         array('file' => '2025/09/Vue-detail-1b-150x150.jpg', 'full' => '2025/09/Vue-detail-1b.jpg', 'alt' => 'Vue détail'),
         array('file' => '2025/09/Face-allumee-1-150x150.jpg', 'full' => '2025/09/Face-allumee-1.jpg', 'alt' => 'Face allumée'),
         array('file' => '2025/05/Retouchee1-150x150.jpg', 'full' => '2025/05/Retouchee1.jpg', 'alt' => 'Modélisation 3D'),
+        array('file' => '2026/03/Robin-au-poncage-150x150.jpg', 'full' => '2026/03/Robin-au-poncage.jpg', 'alt' => 'Robin au ponçage'),
+        array('file' => '2026/03/Robin-a-lassemblage-150x150.jpg', 'full' => '2026/03/Robin-a-lassemblage.jpg', 'alt' => 'Robin à l\'assemblage'),
       );
       foreach ($gallery_images as $img) : ?>
         <a href="<?php echo $uploads . esc_attr($img['full']); ?>" class="presse-gallery-item" target="_blank" rel="noopener noreferrer">
