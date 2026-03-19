@@ -2138,11 +2138,11 @@ a.robin-fiche__choice--link {
   padding: 1rem 1.5rem;
 }
 
-/* Modale agrandie */
+/* Modale agrandie — transition cinématique */
 .robin-modal__container--expanded {
   max-width: 900px;
   height: 90vh;
-  transition: max-width 0.6s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s ease;
+  transition: max-width 3s cubic-bezier(0.25, 0.1, 0.25, 1), height 3s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 @media (max-width: 600px) {
   .robin-modal__container--expanded {
@@ -2151,6 +2151,24 @@ a.robin-fiche__choice--link {
     max-width: 100%;
     border-radius: 12px;
   }
+}
+
+/* Overlay sombre en mode reco */
+.robin-modal--reco .robin-modal__overlay {
+  background: rgba(0, 0, 0, 0.8);
+  transition: background 2s ease;
+}
+
+/* Header simplifié en mode reco */
+.robin-modal--reco .robin-modal__back,
+.robin-modal--reco .robin-modal__project {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+.robin-modal--reco .robin-modal__header {
+  grid-template-columns: 0fr auto 0fr;
+  transition: grid-template-columns 1s ease;
 }
 
 /* Container recommandation — flex colonne, remplit toute la modale */
@@ -2205,6 +2223,15 @@ a.robin-fiche__choice--link {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+/* Éléments cachés au départ — dévoilement progressif */
+.robin-reco__reveal {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.robin-reco__reveal-word {
+  display: inline;
 }
 
 /* Photo — ~65% de la slide */

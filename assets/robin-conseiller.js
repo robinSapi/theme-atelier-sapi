@@ -379,10 +379,11 @@
     document.body.style.overflow = '';
     state.isOpen = false;
 
-    // Retirer le mode étendu
+    // Retirer le mode étendu + cinématique
     var container = document.querySelector('.robin-modal__container');
     if (container) container.classList.remove('robin-modal__container--expanded');
     body.classList.remove('robin-modal__body--reco');
+    modal.classList.remove('robin-modal--reco');
 
     // Annuler tout AJAX en cours
     if (state.pendingXhr) {
@@ -655,12 +656,15 @@
   }
 
   function onRecoConseilClick() {
-    // Agrandir la modale + mode reco sur le body
+    // 1. Mode cinématique — overlay sombre + header simplifié
+    modal.classList.add('robin-modal--reco');
+
+    // 2. Agrandir la modale lentement (3s)
     var container = document.querySelector('.robin-modal__container');
     if (container) container.classList.add('robin-modal__container--expanded');
     body.classList.add('robin-modal__body--reco');
 
-    // Afficher le loader
+    // 3. Afficher le loader (apparaît pendant l'agrandissement)
     body.innerHTML = '<div class="robin-reco">' +
       '<div class="robin-reco__loader">' + renderConseilLoader() + '</div>' +
       '</div>';
@@ -722,24 +726,30 @@
         var p = products[i];
         html += '<div class="robin-reco__slide" data-index="' + i + '">';
 
-        // Photo grande
-        html += '<div class="robin-reco__photo">';
+        // Photo grande — apparaît en premier
+        html += '<div class="robin-reco__photo robin-reco__reveal" data-reveal="1">';
         html += '<img src="' + escAttr(p.ambiance || p.image) + '" alt="' + escAttr(p.title) + '">';
         html += '</div>';
 
-        // Infos sous la photo
+        // Infos sous la photo — apparaît en séquence
         html += '<div class="robin-reco__info">';
-        html += '<div class="robin-reco__info-top">';
+        html += '<div class="robin-reco__info-top robin-reco__reveal" data-reveal="2">';
         html += '<h3 class="robin-reco__name">' + escHtml(p.title) + '</h3>';
         html += '<span class="robin-reco__price">' + (p.price || '') + '</span>';
         html += '</div>';
         if (p.variation_label) {
-          html += '<span class="robin-reco__essence">' + escHtml(p.variation_label) + '</span>';
+          html += '<span class="robin-reco__essence robin-reco__reveal" data-reveal="2">' + escHtml(p.variation_label) + '</span>';
         }
         if (p.reason) {
-          html += '<p class="robin-reco__reason">' + escHtml(p.reason) + '</p>';
+          // Texte B — mot par mot
+          var reasonWords = p.reason.split(' ');
+          html += '<p class="robin-reco__reason">';
+          for (var w = 0; w < reasonWords.length; w++) {
+            html += '<span class="robin-reco__reveal-word" style="opacity:0;">' + escHtml(reasonWords[w]) + '</span> ';
+          }
+          html += '</p>';
         }
-        html += '<a href="' + escAttr(p.permalink) + '" class="robin-reco__cta">Voir ce mod\u00e8le &rarr;</a>';
+        html += '<a href="' + escAttr(p.permalink) + '" class="robin-reco__cta robin-reco__reveal" data-reveal="4">Voir ce mod\u00e8le &rarr;</a>';
         html += '</div>';
 
         html += '</div>';
@@ -750,7 +760,7 @@
 
       // Navigation
       if (totalSlides > 1) {
-        html += '<div class="robin-reco__nav">';
+        html += '<div class="robin-reco__nav robin-reco__reveal" data-reveal="5">';
         html += '<button class="robin-reco__arrow robin-reco__arrow--prev" id="robin-reco-prev" disabled>&lsaquo;</button>';
         html += '<span class="robin-reco__counter"><span id="robin-reco-current">1</span> / ' + totalSlides + '</span>';
         html += '<button class="robin-reco__arrow robin-reco__arrow--next" id="robin-reco-next">&rsaquo;</button>';
@@ -761,7 +771,7 @@
     }
 
     // Boutons finaux
-    html += '<div class="robin-reco__actions">';
+    html += '<div class="robin-reco__actions robin-reco__reveal" data-reveal="6">';
     html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/nos-creations/?robin_selection=1">Voir toutes nos cr\u00e9ations</a>';
     html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/contact/">Contacter Robin</a>';
     html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/sur-mesure/">Projet sur mesure</a>';
@@ -771,15 +781,8 @@
 
     body.innerHTML = html;
 
-    // Showcase apparaît en fondu
-    var showcase = document.getElementById('robin-reco-showcase');
-    if (showcase) {
-      showcase.style.opacity = '0';
-      setTimeout(function() {
-        showcase.style.transition = 'opacity 0.6s';
-        showcase.style.opacity = '1';
-      }, 300);
-    }
+    // Dévoilement progressif séquentiel
+    animateRecoReveal();
 
     // Init slider navigation
     if (totalSlides > 1) {
@@ -823,6 +826,49 @@
       if (Math.abs(diff) > 50) {
         goTo(diff > 0 ? current + 1 : current - 1);
       }
+    });
+  }
+
+  function animateRecoReveal() {
+    // Séquence : photo (0.5s) → nom/prix (1s) → texte B mot par mot (1.5s) → CTA (2.5s) → nav (3s) → boutons (3.5s)
+    var revealTimings = { 1: 500, 2: 1000, 3: 1500, 4: 2500, 5: 3000, 6: 3500 };
+
+    // Éléments avec data-reveal du premier slide uniquement
+    var firstSlide = document.querySelector('.robin-reco__slide[data-index="0"]');
+    if (!firstSlide) return;
+
+    var reveals = firstSlide.querySelectorAll('.robin-reco__reveal');
+    reveals.forEach(function(el) {
+      var step = parseInt(el.dataset.reveal, 10);
+      var delay = revealTimings[step] || 1000;
+      setTimeout(function() {
+        el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      }, delay);
+    });
+
+    // Texte B mot par mot (step 3 timing)
+    var words = firstSlide.querySelectorAll('.robin-reco__reveal-word');
+    var wordStart = revealTimings[3] || 1500;
+    for (var i = 0; i < words.length; i++) {
+      (function(el, d) {
+        setTimeout(function() {
+          el.style.transition = 'opacity 0.3s';
+          el.style.opacity = '1';
+        }, d);
+      })(words[i], wordStart + i * 50);
+    }
+
+    // Nav et actions (hors du slide, dans le showcase)
+    var globalReveals = document.querySelectorAll('.robin-reco__showcase > .robin-reco__reveal');
+    globalReveals.forEach(function(el) {
+      var step = parseInt(el.dataset.reveal, 10);
+      var delay = revealTimings[step] || 3000;
+      setTimeout(function() {
+        el.style.transition = 'opacity 0.6s ease';
+        el.style.opacity = '1';
+      }, delay);
     });
   }
 
