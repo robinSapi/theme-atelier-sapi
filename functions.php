@@ -2373,6 +2373,7 @@ function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $con
   $prompt .= "- Le link_url doit pointer vers une page existante du site (catégorie, page nos-créations, etc.) ou null.\n";
   $prompt .= "- Pas de markdown. Texte brut uniquement.\n";
   $prompt .= "- Pas de guillemets « » dans le texte (ils sont ajoutés côté front).\n";
+  $prompt .= "- Les labels des boutons : première lettre majuscule, reste en minuscule. Exemple : \"Voir les suspensions\", \"Contacter Robin\".\n";
 
   return $prompt;
 }
