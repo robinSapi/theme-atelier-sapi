@@ -195,7 +195,7 @@
   /* ═══════════════════════════════════════════
      DOM refs
   ═══════════════════════════════════════════ */
-  var modal, overlay, body, backBtn, closeBtn, stepTitle, badgeEl;
+  var modal, overlay, body, backBtn, closeBtn, badgeEl;
 
   function initDomRefs() {
     modal      = document.getElementById('robin-modal');
@@ -203,7 +203,6 @@
     body       = document.getElementById('robin-modal-body');
     backBtn    = document.getElementById('robin-modal-back');
     closeBtn   = document.getElementById('robin-modal-close');
-    stepTitle  = document.getElementById('robin-modal-step-title');
     badgeEl    = document.getElementById('robin-modal-badge');
   }
 
@@ -461,19 +460,9 @@
   function updateHeader(stepId) {
     var isFirst = state.history.length === 0;
 
-    // Bouton retour
-    backBtn.style.display    = isFirst ? 'none' : '';
-    badgeEl.style.display = isFirst ? '' : 'none';
-
-    // Titre d'étape
-    var step = getStepById(stepId);
-    if (step && !isFirst) {
-      stepTitle.textContent = step.question.length > 40
-        ? step.question.substring(0, 37) + '...'
-        : step.question;
-    } else {
-      stepTitle.textContent = '';
-    }
+    // Bouton retour (gauche) — visible sauf sur la première fiche
+    backBtn.style.display = isFirst ? 'none' : '';
+    // Badge toujours visible (centré)
   }
 
   /* ═══════════════════════════════════════════
