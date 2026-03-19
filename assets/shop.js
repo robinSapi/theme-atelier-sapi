@@ -386,7 +386,7 @@
       // Show/hide individual text cards + recap card based on filters
       var textCards = document.querySelectorAll('.product-text-card');
       var recapCard = document.querySelector('.why-sapi-recap');
-      var isFiltered = this.filters.category !== 'all' || this.searchQuery;
+      var isFiltered = this.filters.category !== 'all' || this.searchQuery || this._robinProductIds;
       textCards.forEach(function(card) {
         if (isFiltered) {
           card.classList.add('is-filtered-out');
