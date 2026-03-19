@@ -1989,15 +1989,13 @@ button:hover,
 /* ─── Responsive mobile ─── */
 @media (max-width: 600px) {
   .robin-modal {
-    padding: 0;
-    align-items: stretch;
+    padding: 1rem;
   }
   .robin-modal__container {
-    max-width: 100%;
-    height: 100vh;
-    height: 100dvh;
-    border-radius: 0;
-    border: none;
+    width: 90%;
+    height: 90vh;
+    height: 90dvh;
+    border-radius: 16px;
   }
   /* Header compact */
   .robin-modal__header {
