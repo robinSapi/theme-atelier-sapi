@@ -1621,7 +1621,7 @@ button:hover,
 .robin-modal__overlay {
   position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(254, 253, 251, 0.9);
 }
 .robin-modal__container {
   position: relative;
