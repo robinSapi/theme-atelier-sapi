@@ -1696,6 +1696,7 @@ button:hover,
 .robin-modal__close {
   width: 32px;
   height: 32px;
+  aspect-ratio: 1;
   border-radius: 50%;
   border: none;
   background: rgba(var(--color-wood-rgb, 147, 125, 104), 0.08);
@@ -1881,6 +1882,7 @@ button:hover,
 .robin-fiche__send {
   width: 34px;
   height: 34px;
+  aspect-ratio: 1;
   border-radius: 50%;
   background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
   color: #fff;
