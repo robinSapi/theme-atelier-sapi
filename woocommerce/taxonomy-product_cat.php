@@ -109,6 +109,12 @@ endif;
     <h2><span class="section-num">02</span> <?php echo $masculin ? 'Tous nos' : 'Toutes nos'; ?> <?php echo esc_html(strtolower($term_name)); ?></h2>
   </div>
 
+  <?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) : ?>
+    <button type="button" class="robin-pill" data-robin-context="category" data-robin-data='<?php echo esc_attr(wp_json_encode(['category_slug' => $term_slug])); ?>'>
+      &#x1F4A1; Besoin d'un conseil pour choisir ?
+    </button>
+  <?php endif; ?>
+
   <?php
   // Query all products in this category for the grid
   $grid_query = new WP_Query([

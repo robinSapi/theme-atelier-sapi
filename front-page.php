@@ -421,7 +421,7 @@ foreach ($collection_slugs as $col) {
         </p>
         <div class="room-picker-cards">
           <?php foreach ($room_choices as $room) : ?>
-            <button type="button" class="room-card" data-piece="<?php echo esc_attr($room['slug']); ?>" onclick="var bar=document.getElementById('mon-projet-bar');if(bar){bar.scrollIntoView({behavior:'smooth',block:'start'});var t=document.getElementById('mon-projet-toggle');if(t&&t.getAttribute('aria-expanded')==='false')t.click();}">
+            <button type="button" class="room-card" data-piece="<?php echo esc_attr($room['slug']); ?>" onclick="<?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) : ?>if(window.sapiRobinOpen)window.sapiRobinOpen('homepage',{piece:this.dataset.piece});<?php else : ?>var bar=document.getElementById('mon-projet-bar');if(bar){bar.scrollIntoView({behavior:'smooth',block:'start'});var t=document.getElementById('mon-projet-toggle');if(t&&t.getAttribute('aria-expanded')==='false')t.click();}<?php endif; ?>">
               <span class="room-card-icon"><?php echo $room_icons[$room['icon']]; ?></span>
               <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
             </button>
