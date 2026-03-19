@@ -253,11 +253,14 @@ function sapi_maison_enqueue_assets() {
     $robin_js_path = get_template_directory() . '/assets/robin-conseiller.js';
     if (file_exists($robin_js_path)) {
       wp_enqueue_script('sapi-robin-conseiller', get_template_directory_uri() . '/assets/robin-conseiller.js', [], filemtime($robin_js_path), true);
+      $conseils_path = get_template_directory() . '/assets/guide-conseils.json';
+      $conseils_data = file_exists($conseils_path) ? json_decode(file_get_contents($conseils_path), true) : [];
       wp_localize_script('sapi-robin-conseiller', 'sapiRobinConseiller', [
-        'steps'   => sapi_guide_get_steps(),
-        'icons'   => sapi_guide_get_icons(),
-        'ajaxUrl' => admin_url('admin-ajax.php'),
-        'nonce'   => wp_create_nonce('sapi-guide-results'),
+        'steps'    => sapi_guide_get_steps(),
+        'icons'    => sapi_guide_get_icons(),
+        'conseils' => $conseils_data,
+        'ajaxUrl'  => admin_url('admin-ajax.php'),
+        'nonce'    => wp_create_nonce('sapi-guide-results'),
       ]);
     }
   } else {

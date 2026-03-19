@@ -13,8 +13,9 @@
      Config & refs (injectés par PHP)
   ═══════════════════════════════════════════ */
   var config = window.sapiRobinConseiller || {};
-  var steps  = config.steps || [];
-  var icons  = config.icons || {};
+  var steps    = config.steps || [];
+  var icons    = config.icons || {};
+  var conseils = config.conseils || {};
   var AJAX_URL    = config.ajaxUrl || '/wp-admin/admin-ajax.php';
   var NONCE       = config.nonce || '';
   var STORAGE_KEY = 'sapiGuidePrefs';
@@ -193,6 +194,65 @@
   }
 
   /* ═══════════════════════════════════════════
+     Lookup conseil pré-généré
+  ═══════════════════════════════════════════ */
+  function getConseil(stepId, slug) {
+    // Construire la clé selon les règles de croisement par étape
+    var piece = state.answers.piece || '';
+    var taille = state.answers.taille || '';
+    var taille_esc = state.answers.taille_escalier || '';
+    var key = '';
+
+    switch (stepId) {
+      case 'piece':
+        key = 'piece:' + slug;
+        break;
+
+      case 'taille':
+        key = 'taille:' + slug + '|piece:' + piece;
+        break;
+
+      case 'taille_escalier':
+        key = 'taille_escalier:' + slug;
+        break;
+
+      case 'eclairage':
+        key = 'eclairage:' + slug + '|piece:' + piece;
+        break;
+
+      case 'sortie':
+        if (slug === 'ne-sais-pas') {
+          key = 'sortie:ne-sais-pas';
+        } else if (slug === 'mur') {
+          key = 'sortie:mur|piece:' + piece;
+        } else {
+          // plafond et pas-de-sortie : croisement piece × taille
+          var t = piece === 'escalier' ? '|taille_escalier:' + taille_esc : '|taille:' + taille;
+          key = 'sortie:' + slug + '|piece:' + piece + t;
+        }
+        break;
+
+      case 'hauteur':
+        var t = piece === 'escalier' ? '|taille_escalier:' + taille_esc : '|taille:' + taille;
+        key = 'hauteur:' + slug + '|piece:' + piece + t;
+        break;
+
+      case 'table':
+        key = 'table:' + slug + '|piece:' + piece;
+        break;
+
+      case 'style':
+        key = 'style:' + slug;
+        break;
+
+      default:
+        key = stepId + ':' + slug;
+    }
+
+    return conseils[key] || null;
+  }
+
+  /* ═══════════════════════════════════════════
      DOM refs
   ═══════════════════════════════════════════ */
   var modal, overlay, body, backBtn, closeBtn, badgeEl;
@@ -329,21 +389,28 @@
 
     var html = '';
 
-    // Zone citation (conseil IA) — hardcodé, loader ou cache
+    // Zone citation (conseil pré-généré)
     html += '<div class="robin-fiche__conseil" id="robin-fiche-conseil">';
     if (isFirstFiche) {
       html += renderConseil({ conseil_text: 'Chaque luminaire que je cr\u00e9e est une pi\u00e8ce unique, fa\u00e7onn\u00e9e \u00e0 la main dans mon atelier. Pour vous orienter au mieux, dites-moi dans quelle pi\u00e8ce vous imaginez votre futur luminaire.' });
-    } else if (state.aiCache[stepId]) {
-      html += renderConseil(state.aiCache[stepId]);
     } else {
-      html += renderConseilLoader();
+      // Le conseil correspond au dernier step répondu (pas au step courant)
+      var lastStep = state.history.length > 0 ? state.history[state.history.length - 1] : null;
+      var lastSlug = lastStep ? state.answers[lastStep] : null;
+      var conseilData = lastStep && lastSlug ? getConseil(lastStep, lastSlug) : null;
+      if (conseilData) {
+        html += renderConseil(conseilData);
+      }
     }
     html += '</div>';
 
-    // Lien sortant (si en cache)
-    if (state.aiCache[stepId] && state.aiCache[stepId].link_url) {
-      html += '<div class="robin-fiche__link"><a href="' + escHtml(state.aiCache[stepId].link_url) + '">';
-      html += escHtml(state.aiCache[stepId].link_label || 'Voir') + ' &rarr;</a></div>';
+    // Lien sortant
+    var lastStepForLink = state.history.length > 0 ? state.history[state.history.length - 1] : null;
+    var lastSlugForLink = lastStepForLink ? state.answers[lastStepForLink] : null;
+    var linkData = lastStepForLink && lastSlugForLink ? getConseil(lastStepForLink, lastSlugForLink) : null;
+    if (linkData && linkData.link_url) {
+      html += '<div class="robin-fiche__link"><a href="' + escHtml(linkData.link_url) + '">';
+      html += escHtml(linkData.link_label || 'Voir') + ' &rarr;</a></div>';
     }
 
     // Question
@@ -366,11 +433,6 @@
     html += renderTextInput();
 
     body.innerHTML = html;
-
-    // Lancer le fetch IA en lazy si pas en cache (sauf première fiche = hardcodé)
-    if (!isFirstFiche && !state.aiCache[stepId]) {
-      fetchConseil(stepId);
-    }
   }
 
   /* ═══════════════════════════════════════════

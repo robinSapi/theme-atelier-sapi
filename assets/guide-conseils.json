@@ -1,0 +1,554 @@
+{
+  "_meta": {
+    "description": "146 textes conseil pré-générés pour Robin Conseiller V2",
+    "format": "clé = step:réponse|dépendance:valeur → { conseil_text, link_url?, link_label? }",
+    "generated": "2026-03-19"
+  },
+
+  "piece:cuisine": {
+    "conseil_text": "La cuisine, c'est un espace où la lumière de travail compte énormément. Une ampoule bien dégagée éclaire efficacement le plan de travail ou l'îlot, sans zone d'ombre.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir les luminaires pour la cuisine"
+  },
+  "piece:bureau": {
+    "conseil_text": "Le bureau a besoin d'un éclairage fonctionnel mais pas froid. Une ampoule dégagée pour bien voir, mais avec la chaleur du bois.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir les luminaires pour le bureau"
+  },
+  "piece:salon": {
+    "conseil_text": "Le salon, c'est l'espace où l'on veut une lumière enveloppante, chaleureuse. Je recommande une ampoule entourée ou semi-dégagée, qui diffuse sans éblouir.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir les luminaires pour le salon"
+  },
+  "piece:chambre": {
+    "conseil_text": "La chambre demande une lumière douce, tamisée. Une ampoule entourée par le bois crée cette ambiance cocon.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir les luminaires pour la chambre"
+  },
+  "piece:entree": {
+    "conseil_text": "L'entrée c'est la première impression. Un luminaire qui attire l'œil sans encombrer l'espace.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir les luminaires pour l'entrée"
+  },
+  "piece:escalier": {
+    "conseil_text": "L'escalier est un espace technique — il faut éclairer les marches sans gêner le passage.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir les luminaires"
+  },
+
+  "taille:petite|piece:cuisine": {
+    "conseil_text": "Dans une petite cuisine, il ne faut pas voir trop grand. Un luminaire compact au-dessus du plan de travail ou de la table fera toute la différence sans écraser l'espace."
+  },
+  "taille:petite|piece:bureau": {
+    "conseil_text": "Un petit bureau demande un luminaire qui ne gêne pas l'espace de travail. Un format compact avec ampoule dégagée, positionné juste au-dessus de la zone d'activité."
+  },
+  "taille:petite|piece:salon": {
+    "conseil_text": "Dans un petit salon, le luminaire structure la pièce. Un format boule ou compact crée un point focal chaleureux sans encombrer."
+  },
+  "taille:petite|piece:chambre": {
+    "conseil_text": "Une petite chambre gagne à avoir un luminaire discret mais présent. Un format compact qui diffuse une lumière douce, c'est l'idéal pour créer un cocon."
+  },
+  "taille:petite|piece:entree": {
+    "conseil_text": "Dans une petite entrée, chaque centimètre compte. Un luminaire compact qui marque l'accueil sans encombrer le passage."
+  },
+  "taille:moyenne|piece:cuisine": {
+    "conseil_text": "Une cuisine de taille moyenne laisse pas mal de liberté. La plupart de mes suspensions s'y intègrent bien — c'est surtout le positionnement au-dessus de l'îlot ou de la table qui fera la différence."
+  },
+  "taille:moyenne|piece:bureau": {
+    "conseil_text": "Un bureau de taille moyenne, c'est confortable. Vous avez le choix entre un éclairage ciblé au-dessus du poste de travail ou un luminaire plus central."
+  },
+  "taille:moyenne|piece:salon": {
+    "conseil_text": "Un salon de taille moyenne, c'est l'espace idéal pour un beau luminaire. Pas besoin de surdimensionner — une suspension bien choisie suffit à structurer la pièce."
+  },
+  "taille:moyenne|piece:chambre": {
+    "conseil_text": "Une chambre de taille moyenne offre de belles possibilités. Un luminaire central crée l'ambiance, et vous pouvez jouer avec la hauteur pour un effet plus ou moins intime."
+  },
+  "taille:moyenne|piece:entree": {
+    "conseil_text": "Une entrée de taille moyenne, c'est parfait pour un luminaire qui fait impression dès le pas de la porte. Pas besoin de voir trop petit."
+  },
+  "taille:grande|piece:cuisine": {
+    "conseil_text": "Une grande cuisine, c'est l'occasion de marquer un point focal fort au-dessus de l'îlot. Mais souvent un seul luminaire ne suffit pas — je recommande de combiner avec un complément pour éviter les zones d'ombre. Une grappe de suspensions est aussi une idée à considérer !"
+  },
+  "taille:grande|piece:bureau": {
+    "conseil_text": "Un grand bureau ou atelier, c'est un espace où multiplier les sources lumineuses fait sens. Un luminaire principal au-dessus de la zone de travail, complété par un lampadaire ou une applique ailleurs."
+  },
+  "taille:grande|piece:salon": {
+    "conseil_text": "Un grand salon, c'est l'occasion de voir grand ! Un luminaire généreux en point focal, complété par un lampadaire ou des appliques pour supprimer les zones d'ombre. Une grappe de suspensions est aussi une option superbe."
+  },
+  "taille:grande|piece:chambre": {
+    "conseil_text": "Une grande chambre peut accueillir un luminaire généreux qui devient une vraie pièce de décoration. Pensez aussi à un complément près du lit — lampe à poser ou applique — pour le côté fonctionnel."
+  },
+  "taille:grande|piece:entree": {
+    "conseil_text": "Un grand hall d'entrée, c'est une opportunité rare. Un luminaire imposant qui donne le ton de tout l'intérieur. On peut se permettre des formats verticaux ou une grappe spectaculaire."
+  },
+
+  "taille_escalier:standard": {
+    "conseil_text": "Il faut positionner un luminaire en partie haute pour éclairer toute la descente. Attention à la hauteur de passage. On est plutôt sur un éclairage déco mais avec un luminaire de taille raisonnable et au format boule ou vertical."
+  },
+  "taille_escalier:ouvert": {
+    "conseil_text": "Un escalier ouvert avec mezzanine ou palier, c'est un vrai espace à part entière. On peut se permettre un luminaire généreux qui occupe l'espace disponible ! Une œuvre d'art suspendue (ou pas) est bienvenue dans ce volume."
+  },
+
+  "eclairage:principal|piece:cuisine": {
+    "conseil_text": "Dans une grande cuisine, l'éclairage principal doit être efficace. Je vous orienterai vers des suspensions avec ampoule dégagée qui éclairent vraiment le plan de travail et l'îlot."
+  },
+  "eclairage:principal|piece:bureau": {
+    "conseil_text": "Pour un grand bureau, l'éclairage principal doit couvrir la zone de travail sans éblouir. Un luminaire avec ampoule dégagée, bien positionné, c'est la clé."
+  },
+  "eclairage:principal|piece:salon": {
+    "conseil_text": "Dans un grand salon, l'éclairage principal crée l'ambiance générale. Un luminaire central avec ampoule dégagée ou semi-dégagée selon l'atmosphère que vous voulez."
+  },
+  "eclairage:principal|piece:chambre": {
+    "conseil_text": "Dans une grande chambre, l'éclairage principal peut être plus doux que dans les pièces de vie. Un luminaire central avec ampoule entourée pour une atmosphère cocon."
+  },
+  "eclairage:principal|piece:entree": {
+    "conseil_text": "Un grand hall d'entrée mérite un éclairage principal qui impressionne. Un luminaire généreux avec ampoule dégagée pour illuminer tout l'espace dès le pas de la porte."
+  },
+  "eclairage:secondaire|piece:cuisine": {
+    "conseil_text": "Si vous avez déjà un éclairage principal dans votre cuisine, le nouveau luminaire peut être plus décoratif. Ça ouvre la porte à des formats plus créatifs — ampoule entourée, jeux d'ombres sur les murs."
+  },
+  "eclairage:secondaire|piece:bureau": {
+    "conseil_text": "Compléter l'éclairage d'un grand bureau, c'est malin. Le nouveau luminaire peut créer une ambiance différente — plus chaleureuse, plus déco — à côté de l'éclairage fonctionnel existant."
+  },
+  "eclairage:secondaire|piece:salon": {
+    "conseil_text": "Compléter un éclairage existant dans le salon, c'est parfait. Le nouveau luminaire peut jouer un rôle plus décoratif — des jeux d'ombres, une ambiance tamisée dans un coin de la pièce."
+  },
+  "eclairage:secondaire|piece:chambre": {
+    "conseil_text": "Ajouter un luminaire dans une grande chambre déjà éclairée, c'est créer des zones d'ambiance. Un luminaire décoratif qui apporte de la chaleur sans forcément éclairer toute la pièce."
+  },
+  "eclairage:secondaire|piece:entree": {
+    "conseil_text": "Compléter l'éclairage de votre entrée, c'est ajouter du caractère. Un luminaire en bois artisanal crée un accueil chaleureux à côté de l'éclairage fonctionnel."
+  },
+  "eclairage:grappe|piece:cuisine": {
+    "conseil_text": "Excellent choix pour une grande cuisine ! Une grappe de suspensions au-dessus de l'îlot couvre une grande zone tout en créant un effet visuel saisissant. Il va falloir contacter Robin car ces modèles ne sont pas disponibles en ligne."
+  },
+  "eclairage:grappe|piece:bureau": {
+    "conseil_text": "Une grappe dans un grand bureau, c'est spectaculaire et fonctionnel. Plusieurs suspensions couvrent toute la surface de travail. Contactez Robin pour un projet sur mesure — ces modèles ne sont pas disponibles en ligne."
+  },
+  "eclairage:grappe|piece:salon": {
+    "conseil_text": "Une grappe de suspensions dans un grand salon, c'est le statement ultime ! Plusieurs luminaires qui descendent à des hauteurs différentes, c'est une vraie sculpture lumineuse. Contactez Robin, c'est du sur mesure."
+  },
+  "eclairage:grappe|piece:chambre": {
+    "conseil_text": "Une grappe dans une grande chambre, c'est audacieux et magnifique. Plusieurs petites suspensions créent un ciel étoilé en bois. Contactez Robin pour concevoir ce projet sur mesure."
+  },
+  "eclairage:grappe|piece:entree": {
+    "conseil_text": "Une grappe de suspensions dans un grand hall, c'est l'entrée en matière parfaite. L'effet est spectaculaire dès le premier pas. Contactez Robin pour ce type de projet sur mesure."
+  },
+  "eclairage:plustard|piece:cuisine": {
+    "conseil_text": "Pas de souci, on avance et on pourra y revenir. Continuons à définir votre projet pour votre cuisine."
+  },
+  "eclairage:plustard|piece:bureau": {
+    "conseil_text": "Pas de souci, on avance et on pourra y revenir. Continuons à définir votre projet pour votre bureau."
+  },
+  "eclairage:plustard|piece:salon": {
+    "conseil_text": "Pas de souci, on avance et on pourra y revenir. Continuons à définir votre projet pour votre salon."
+  },
+  "eclairage:plustard|piece:chambre": {
+    "conseil_text": "Pas de souci, on avance et on pourra y revenir. Continuons à définir votre projet pour votre chambre."
+  },
+  "eclairage:plustard|piece:entree": {
+    "conseil_text": "Pas de souci, on avance et on pourra y revenir. Continuons à définir votre projet pour votre entrée."
+  },
+
+  "sortie:plafond|piece:cuisine|taille:petite": {
+    "conseil_text": "Avec une sortie au plafond dans votre petite cuisine, vous avez accès à mes suspensions compactes. L'idéal pour éclairer efficacement un espace réduit avec une ampoule bien dégagée.",
+    "link_url": "/categorie-produit/suspensions/",
+    "link_label": "Voir les suspensions"
+  },
+  "sortie:plafond|piece:cuisine|taille:moyenne": {
+    "conseil_text": "Sortie au plafond dans une cuisine de taille moyenne, c'est la configuration idéale. Vous avez accès à toute ma gamme de suspensions — le choix se fera surtout sur le positionnement au-dessus de la table ou de l'îlot.",
+    "link_url": "/categorie-produit/suspensions/",
+    "link_label": "Voir les suspensions"
+  },
+  "sortie:plafond|piece:cuisine|taille:grande": {
+    "conseil_text": "Sortie plafond dans une grande cuisine, c'est parfait. Vous pouvez voir grand sur la suspension principale, et on pourra réfléchir à un complément pour les zones annexes.",
+    "link_url": "/categorie-produit/suspensions/",
+    "link_label": "Voir les suspensions"
+  },
+  "sortie:plafond|piece:bureau|taille:petite": {
+    "conseil_text": "Sortie plafond dans un petit bureau — une suspension compacte juste au-dessus de la zone de travail, c'est simple et efficace.",
+    "link_url": "/categorie-produit/suspensions/",
+    "link_label": "Voir les suspensions"
+  },
+  "sortie:plafond|piece:bureau|taille:moyenne": {
+    "conseil_text": "Sortie au plafond dans un bureau de taille moyenne, vous avez le choix. Une suspension bien positionnée au-dessus du poste de travail éclaire sans encombrer.",
+    "link_url": "/categorie-produit/suspensions/",
+    "link_label": "Voir les suspensions"
+  },
+  "sortie:plafond|piece:bureau|taille:grande": {
+    "conseil_text": "Sortie plafond dans un grand bureau, c'est idéal pour une belle suspension qui structure l'espace. On pourra compléter avec un lampadaire dans un coin lecture.",
+    "link_url": "/categorie-produit/suspensions/",
+    "link_label": "Voir les suspensions"
+  },
+  "sortie:plafond|piece:salon|taille:petite": {
+    "conseil_text": "Sortie plafond dans un petit salon — une suspension crée un point focal chaleureux. Optez pour un format compact avec ampoule entourée pour une lumière douce.",
+    "link_url": "/categorie-produit/suspensions/",
+    "link_label": "Voir les suspensions"
+  },
+  "sortie:plafond|piece:salon|taille:moyenne": {
+    "conseil_text": "Sortie au plafond dans un salon de taille moyenne, c'est la configuration rêvée. Une suspension en bois au centre de la pièce transforme complètement l'ambiance.",
+    "link_url": "/categorie-produit/suspensions/",
+    "link_label": "Voir les suspensions"
+  },
+  "sortie:plafond|piece:salon|taille:grande": {
+    "conseil_text": "Sortie plafond dans un grand salon — vous pouvez vous faire plaisir avec un luminaire généreux. La suspension sera le cœur visuel de la pièce.",
+    "link_url": "/categorie-produit/suspensions/",
+    "link_label": "Voir les suspensions"
+  },
+  "sortie:plafond|piece:chambre|taille:petite": {
+    "conseil_text": "Sortie plafond dans une petite chambre — un luminaire compact avec ampoule entourée crée l'ambiance cocon parfaite.",
+    "link_url": "/categorie-produit/suspensions/",
+    "link_label": "Voir les suspensions"
+  },
+  "sortie:plafond|piece:chambre|taille:moyenne": {
+    "conseil_text": "Sortie au plafond dans une chambre de taille moyenne, c'est parfait. Une suspension en bois diffuse une lumière douce qui invite au repos.",
+    "link_url": "/categorie-produit/suspensions/",
+    "link_label": "Voir les suspensions"
+  },
+  "sortie:plafond|piece:chambre|taille:grande": {
+    "conseil_text": "Sortie plafond dans une grande chambre — le luminaire peut devenir une vraie pièce maîtresse. Un format généreux avec ampoule entourée pour une ambiance enveloppante.",
+    "link_url": "/categorie-produit/suspensions/",
+    "link_label": "Voir les suspensions"
+  },
+  "sortie:plafond|piece:entree|taille:petite": {
+    "conseil_text": "Sortie plafond dans une petite entrée — un luminaire compact mais remarquable, c'est la signature de votre intérieur dès le pas de la porte.",
+    "link_url": "/categorie-produit/suspensions/",
+    "link_label": "Voir les suspensions"
+  },
+  "sortie:plafond|piece:entree|taille:moyenne": {
+    "conseil_text": "Sortie au plafond dans une entrée de taille moyenne, vous avez de quoi faire. Un luminaire qui donne le ton, sans gêner le passage.",
+    "link_url": "/categorie-produit/suspensions/",
+    "link_label": "Voir les suspensions"
+  },
+  "sortie:plafond|piece:entree|taille:grande": {
+    "conseil_text": "Sortie plafond dans un grand hall — c'est l'occasion d'un luminaire spectaculaire qui impressionne dès l'entrée. Formats verticaux ou suspensions imposantes, tout est possible.",
+    "link_url": "/categorie-produit/suspensions/",
+    "link_label": "Voir les suspensions"
+  },
+  "sortie:plafond|piece:escalier|taille_escalier:standard": {
+    "conseil_text": "Sortie au plafond dans un escalier standard — une suspension compacte en partie haute éclaire toute la descente. Attention à garder une hauteur de passage confortable.",
+    "link_url": "/categorie-produit/suspensions/",
+    "link_label": "Voir les suspensions"
+  },
+  "sortie:plafond|piece:escalier|taille_escalier:ouvert": {
+    "conseil_text": "Sortie plafond dans un grand escalier ouvert — c'est le cas idéal pour un luminaire vertical qui occupe le volume. Un vrai élément sculptural suspendu dans le vide.",
+    "link_url": "/categorie-produit/suspensions/",
+    "link_label": "Voir les suspensions"
+  },
+
+  "sortie:mur|piece:cuisine": {
+    "conseil_text": "Une applique en bois dans la cuisine, c'est un éclairage d'appoint élégant. Au-dessus du plan de travail ou près de la table, elle complète parfaitement l'éclairage principal.",
+    "link_url": "/categorie-produit/appliques/",
+    "link_label": "Voir les appliques"
+  },
+  "sortie:mur|piece:bureau": {
+    "conseil_text": "Une applique au mur dans le bureau crée un éclairage indirect très agréable. Idéal comme source secondaire à côté de l'éclairage principal.",
+    "link_url": "/categorie-produit/appliques/",
+    "link_label": "Voir les appliques"
+  },
+  "sortie:mur|piece:salon": {
+    "conseil_text": "Au mur du salon, c'est le territoire des appliques. Elles créent un éclairage d'ambiance magnifique et mettent en valeur le bois sous un autre angle.",
+    "link_url": "/categorie-produit/appliques/",
+    "link_label": "Voir les appliques"
+  },
+  "sortie:mur|piece:chambre": {
+    "conseil_text": "Une applique dans la chambre, c'est parfait pour une lumière de chevet ou d'ambiance. Le bois diffuse une lumière chaude et tamisée contre le mur.",
+    "link_url": "/categorie-produit/appliques/",
+    "link_label": "Voir les appliques"
+  },
+  "sortie:mur|piece:entree": {
+    "conseil_text": "Une applique dans l'entrée, c'est discret et accueillant. Elle éclaire le passage tout en ajoutant du caractère au mur.",
+    "link_url": "/categorie-produit/appliques/",
+    "link_label": "Voir les appliques"
+  },
+  "sortie:mur|piece:escalier": {
+    "conseil_text": "Une applique dans l'escalier, c'est pratique et esthétique. Positionnée à mi-hauteur, elle éclaire les marches et crée un bel effet sur le mur.",
+    "link_url": "/categorie-produit/appliques/",
+    "link_label": "Voir les appliques"
+  },
+
+  "sortie:pas-de-sortie|piece:cuisine|taille:petite": {
+    "conseil_text": "Pas de sortie au plafond dans votre petite cuisine ? Pas de problème. Une lampe à poser sur le plan de travail ou un lampadaire dans un coin apportent la lumière qu'il faut. Et les appliques avec option câble apparent ont beaucoup de charme.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir lampadaires et lampes à poser"
+  },
+  "sortie:pas-de-sortie|piece:cuisine|taille:moyenne": {
+    "conseil_text": "Pas de sortie plafond dans votre cuisine de taille moyenne, pas de souci. Un lampadaire ou une lampe à poser fonctionnent sur prise classique. Les appliques avec câble apparent sont aussi une option pleine de charme.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir lampadaires et lampes à poser"
+  },
+  "sortie:pas-de-sortie|piece:cuisine|taille:grande": {
+    "conseil_text": "Pas de sortie plafond dans une grande cuisine — un lampadaire généreux peut devenir le point focal. Complétez avec une lampe à poser ou une applique sur câble pour multiplier les sources.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir lampadaires et lampes à poser"
+  },
+  "sortie:pas-de-sortie|piece:bureau|taille:petite": {
+    "conseil_text": "Pas de sortie plafond dans un petit bureau — une lampe à poser directement sur le bureau, c'est fonctionnel et chaleureux avec le bois.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir les lampes à poser"
+  },
+  "sortie:pas-de-sortie|piece:bureau|taille:moyenne": {
+    "conseil_text": "Pas de sortie plafond dans votre bureau de taille moyenne — un lampadaire à côté du poste de travail ou une lampe à poser sur le bureau. Les appliques avec câble apparent marchent aussi très bien.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir lampadaires et lampes à poser"
+  },
+  "sortie:pas-de-sortie|piece:bureau|taille:grande": {
+    "conseil_text": "Pas de sortie plafond dans un grand bureau — un beau lampadaire en bois structure l'espace. Vous pouvez le compléter avec une lampe à poser ou une applique sur câble.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir les lampadaires"
+  },
+  "sortie:pas-de-sortie|piece:salon|taille:petite": {
+    "conseil_text": "Pas de sortie plafond dans un petit salon — un lampadaire dans le coin canapé crée exactement l'ambiance qu'il faut. Chaleureux et fonctionnel.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir les lampadaires"
+  },
+  "sortie:pas-de-sortie|piece:salon|taille:moyenne": {
+    "conseil_text": "Pas de sortie plafond dans votre salon — les lampadaires et lampes à poser en bois fonctionnent sur prise classique et créent une ambiance magnifique. Les appliques avec câble apparent aussi.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir lampadaires et lampes à poser"
+  },
+  "sortie:pas-de-sortie|piece:salon|taille:grande": {
+    "conseil_text": "Pas de sortie plafond dans un grand salon — c'est l'occasion de multiplier les sources sur prise : un lampadaire imposant plus des appliques ou lampes à poser. Le bois réchauffe l'ensemble.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir lampadaires et lampes à poser"
+  },
+  "sortie:pas-de-sortie|piece:chambre|taille:petite": {
+    "conseil_text": "Pas de sortie plafond dans une petite chambre — une lampe à poser sur la table de chevet, c'est l'éclairage parfait. Doux, intime, en bois.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir les lampes à poser"
+  },
+  "sortie:pas-de-sortie|piece:chambre|taille:moyenne": {
+    "conseil_text": "Pas de sortie plafond dans votre chambre — une lampe à poser ou un lampadaire créent l'ambiance sans travaux. L'applique sur câble est aussi une option superbe comme liseuse.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir lampadaires et lampes à poser"
+  },
+  "sortie:pas-de-sortie|piece:chambre|taille:grande": {
+    "conseil_text": "Pas de sortie plafond dans une grande chambre — un lampadaire généreux comme point focal, complété par des lampes à poser de chaque côté du lit. L'applique sur câble fonctionne aussi très bien.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir lampadaires et lampes à poser"
+  },
+  "sortie:pas-de-sortie|piece:entree|taille:petite": {
+    "conseil_text": "Pas de sortie plafond dans une petite entrée — une applique sur câble apparent est la solution idéale. Discrète, chaleureuse, sans travaux.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir les appliques"
+  },
+  "sortie:pas-de-sortie|piece:entree|taille:moyenne": {
+    "conseil_text": "Pas de sortie plafond dans votre entrée — un lampadaire ou une applique sur câble apparent accueillent vos invités avec chaleur.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir lampadaires et appliques"
+  },
+  "sortie:pas-de-sortie|piece:entree|taille:grande": {
+    "conseil_text": "Pas de sortie plafond dans un grand hall — un lampadaire imposant en bois fait forte impression. Complétez avec des appliques sur câble pour un éclairage homogène.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir les lampadaires"
+  },
+  "sortie:pas-de-sortie|piece:escalier|taille_escalier:standard": {
+    "conseil_text": "Pas de sortie plafond dans l'escalier — une applique murale avec option câble est parfaite pour éclairer les marches. Positionnée à mi-hauteur, elle guide la descente.",
+    "link_url": "/categorie-produit/appliques/",
+    "link_label": "Voir les appliques"
+  },
+  "sortie:pas-de-sortie|piece:escalier|taille_escalier:ouvert": {
+    "conseil_text": "Pas de sortie plafond dans un grand escalier ouvert — des appliques murales étagées le long de la descente créent un bel effet. L'option câble apparent ajoute du caractère.",
+    "link_url": "/categorie-produit/appliques/",
+    "link_label": "Voir les appliques"
+  },
+
+  "sortie:ne-sais-pas": {
+    "conseil_text": "Pas de souci, on peut regarder ensemble. En général : si vous avez un crochet ou une rosace au plafond, c'est une sortie plafond. Sinon, une prise électrique habituelle fonctionne très bien avec les lampadaires, les appliques murales (avec l'option prise) et les lampes à poser."
+  },
+
+  "hauteur:standard|piece:cuisine|taille:petite": {
+    "conseil_text": "Plafond standard dans une petite cuisine — il faut faire attention à la hauteur. Je conseille le bas du luminaire à minimum 2m10 du sol en zone de passage, et 70-80 cm au-dessus d'une table ou d'un îlot."
+  },
+  "hauteur:standard|piece:cuisine|taille:moyenne": {
+    "conseil_text": "Plafond standard dans votre cuisine — le positionnement est clé. Le bas du luminaire à 70-80 cm au-dessus de la table ou de l'îlot, et au moins 2m10 du sol dans les zones de passage."
+  },
+  "hauteur:standard|piece:cuisine|taille:grande": {
+    "conseil_text": "Plafond standard dans une grande cuisine — avec cette hauteur, privilégiez les formats horizontaux qui éclairent une grande surface sans descendre trop bas."
+  },
+  "hauteur:standard|piece:bureau|taille:petite": {
+    "conseil_text": "Plafond standard dans un petit bureau — le luminaire doit rester haut pour ne pas gêner. Un format compact qui se fait oublier tout en éclairant bien le plan de travail."
+  },
+  "hauteur:standard|piece:bureau|taille:moyenne": {
+    "conseil_text": "Plafond standard dans votre bureau — positionnez le luminaire au-dessus de la zone de travail, à environ 70-80 cm du plateau si c'est au-dessus du bureau."
+  },
+  "hauteur:standard|piece:bureau|taille:grande": {
+    "conseil_text": "Plafond standard dans un grand bureau — un format horizontal est idéal pour couvrir une grande surface de travail sans descendre trop bas."
+  },
+  "hauteur:standard|piece:salon|taille:petite": {
+    "conseil_text": "Plafond standard dans un petit salon — gardez le luminaire assez haut pour ne pas encombrer visuellement. Un format boule ou compact fonctionne bien."
+  },
+  "hauteur:standard|piece:salon|taille:moyenne": {
+    "conseil_text": "Plafond standard dans votre salon — si le luminaire est au-dessus de la table basse ou d'une table à manger, 70-80 cm de hauteur libre sous le luminaire. En zone de passage, minimum 2m10."
+  },
+  "hauteur:standard|piece:salon|taille:grande": {
+    "conseil_text": "Plafond standard dans un grand salon — avec cette hauteur, évitez les formats verticaux trop longs. Les formats horizontaux ou boule sont plus adaptés."
+  },
+  "hauteur:standard|piece:chambre|taille:petite": {
+    "conseil_text": "Plafond standard dans une petite chambre — un luminaire compact et pas trop bas pour garder la sensation d'espace. Au-dessus du lit, c'est parfait."
+  },
+  "hauteur:standard|piece:chambre|taille:moyenne": {
+    "conseil_text": "Plafond standard dans votre chambre — le luminaire peut être centré dans la pièce. Pas besoin qu'il soit très bas — la lumière douce se diffuse naturellement."
+  },
+  "hauteur:standard|piece:chambre|taille:grande": {
+    "conseil_text": "Plafond standard dans une grande chambre — un luminaire central avec format horizontal couvre bien l'espace. Évitez les formats verticaux qui descendraient trop."
+  },
+  "hauteur:standard|piece:entree|taille:petite": {
+    "conseil_text": "Plafond standard dans une petite entrée — la hauteur de passage est la priorité. Le luminaire doit rester au-dessus de 2m10 du sol."
+  },
+  "hauteur:standard|piece:entree|taille:moyenne": {
+    "conseil_text": "Plafond standard dans votre entrée — un luminaire compact qui laisse la hauteur de passage libre, tout en créant un bel accueil."
+  },
+  "hauteur:standard|piece:entree|taille:grande": {
+    "conseil_text": "Plafond standard dans un grand hall — même avec de l'espace au sol, la hauteur limite les formats. Un luminaire horizontal ou boule sera plus adapté."
+  },
+  "hauteur:standard|piece:escalier|taille_escalier:standard": {
+    "conseil_text": "Plafond standard dans un escalier classique — le luminaire doit être positionné au point le plus haut, loin des zones de passage. Un format compact et boule est le plus sûr."
+  },
+  "hauteur:standard|piece:escalier|taille_escalier:ouvert": {
+    "conseil_text": "Plafond standard dans un escalier ouvert — même avec un bel espace, la hauteur limite un peu. Un luminaire compact mais bien visible depuis le palier et le bas."
+  },
+  "hauteur:confortable|piece:cuisine|taille:petite": {
+    "conseil_text": "Plafond confortable dans votre petite cuisine — c'est la hauteur idéale, vous avez la liberté de choisir le format qui vous plaît sans contrainte de passage."
+  },
+  "hauteur:confortable|piece:cuisine|taille:moyenne": {
+    "conseil_text": "Plafond confortable dans votre cuisine — parfait, assez d'espace pour une belle suspension sans contrainte. Tous les formats sont possibles."
+  },
+  "hauteur:confortable|piece:cuisine|taille:grande": {
+    "conseil_text": "Plafond confortable dans une grande cuisine — vous avez la liberté totale. Formats horizontaux, verticaux, boule — tout fonctionne ici."
+  },
+  "hauteur:confortable|piece:bureau|taille:petite": {
+    "conseil_text": "Plafond confortable dans un petit bureau — la hauteur est idéale, vous pouvez choisir le format qui vous plaît."
+  },
+  "hauteur:confortable|piece:bureau|taille:moyenne": {
+    "conseil_text": "Plafond confortable dans votre bureau — la hauteur parfaite pour un luminaire bien positionné au-dessus du plan de travail. Tous les formats sont envisageables."
+  },
+  "hauteur:confortable|piece:bureau|taille:grande": {
+    "conseil_text": "Plafond confortable dans un grand bureau — une belle hauteur qui permet un luminaire généreux sans aucune contrainte de passage."
+  },
+  "hauteur:confortable|piece:salon|taille:petite": {
+    "conseil_text": "Plafond confortable dans un petit salon — la hauteur vous donne de la liberté même dans un espace réduit. Un beau luminaire peut descendre un peu sans gêner."
+  },
+  "hauteur:confortable|piece:salon|taille:moyenne": {
+    "conseil_text": "Plafond confortable dans votre salon — c'est la configuration idéale. La suspension peut prendre sa place naturellement, sans contrainte."
+  },
+  "hauteur:confortable|piece:salon|taille:grande": {
+    "conseil_text": "Plafond confortable dans un grand salon — parfait, tous les formats sont possibles. Vous avez la place de voir grand."
+  },
+  "hauteur:confortable|piece:chambre|taille:petite": {
+    "conseil_text": "Plafond confortable dans une petite chambre — la hauteur est idéale pour un luminaire qui crée l'ambiance sans encombrer."
+  },
+  "hauteur:confortable|piece:chambre|taille:moyenne": {
+    "conseil_text": "Plafond confortable dans votre chambre — parfait, le luminaire peut être positionné idéalement au-dessus du lit. Tous les formats fonctionnent."
+  },
+  "hauteur:confortable|piece:chambre|taille:grande": {
+    "conseil_text": "Plafond confortable dans une grande chambre — la hauteur et l'espace permettent un luminaire généreux qui devient le point focal de la pièce."
+  },
+  "hauteur:confortable|piece:entree|taille:petite": {
+    "conseil_text": "Plafond confortable dans une petite entrée — la hauteur compense l'espace réduit. Un luminaire peut descendre un peu pour créer un bel effet."
+  },
+  "hauteur:confortable|piece:entree|taille:moyenne": {
+    "conseil_text": "Plafond confortable dans votre entrée — une belle hauteur pour un luminaire remarquable qui accueille vos invités."
+  },
+  "hauteur:confortable|piece:entree|taille:grande": {
+    "conseil_text": "Plafond confortable dans un grand hall — très belle configuration, le luminaire peut prendre de l'ampleur."
+  },
+  "hauteur:confortable|piece:escalier|taille_escalier:standard": {
+    "conseil_text": "Plafond confortable dans l'escalier — assez de hauteur pour un luminaire qui se voit bien sans gêner le passage. Un format vertical ou boule sera parfait."
+  },
+  "hauteur:confortable|piece:escalier|taille_escalier:ouvert": {
+    "conseil_text": "Plafond confortable dans un grand escalier ouvert — la hauteur est bonne pour un luminaire qui s'admire depuis le rez-de-chaussée et les étages."
+  },
+  "hauteur:haute|piece:cuisine|taille:petite": {
+    "conseil_text": "Plafond haut dans une petite cuisine — le luminaire peut prendre de la dimension verticale, c'est un atout rare dans un petit espace. Un format vertical crée un bel effet."
+  },
+  "hauteur:haute|piece:cuisine|taille:moyenne": {
+    "conseil_text": "Plafond haut dans votre cuisine — c'est idéal, le luminaire peut prendre toute sa dimension. Les formats verticaux plus imposants sont une option superbe."
+  },
+  "hauteur:haute|piece:cuisine|taille:grande": {
+    "conseil_text": "Plafond haut dans une grande cuisine — la configuration rêvée. Tous les formats sont possibles, y compris un luminaire sur mesure comme une grappe qui occupe le volume."
+  },
+  "hauteur:haute|piece:bureau|taille:petite": {
+    "conseil_text": "Plafond haut dans un petit bureau — la hauteur compense la surface. Un luminaire vertical qui descend crée un effet spectaculaire."
+  },
+  "hauteur:haute|piece:bureau|taille:moyenne": {
+    "conseil_text": "Plafond haut dans votre bureau — la liberté totale pour un luminaire qui prend de la dimension. Les formats verticaux sont particulièrement adaptés."
+  },
+  "hauteur:haute|piece:bureau|taille:grande": {
+    "conseil_text": "Plafond haut dans un grand bureau — un volume impressionnant qui appelle un luminaire à la hauteur. Un projet sur mesure comme une grappe est une idée à étudier !"
+  },
+  "hauteur:haute|piece:salon|taille:petite": {
+    "conseil_text": "Plafond haut dans un petit salon — la verticalité est votre atout. Un luminaire qui descend crée de la profondeur dans un espace réduit."
+  },
+  "hauteur:haute|piece:salon|taille:moyenne": {
+    "conseil_text": "Plafond haut dans votre salon — c'est le cas idéal. Le luminaire peut prendre toute sa dimension sans gêner. Tous les formats sont envisageables."
+  },
+  "hauteur:haute|piece:salon|taille:grande": {
+    "conseil_text": "Plafond haut dans un grand salon — c'est le Saint-Graal ! Un luminaire imposant, un format vertical généreux ou une grappe sur mesure. Tout est permis."
+  },
+  "hauteur:haute|piece:chambre|taille:petite": {
+    "conseil_text": "Plafond haut dans une petite chambre — un luminaire vertical qui descend crée un effet cocon malgré l'espace réduit. Très beau avec le bois."
+  },
+  "hauteur:haute|piece:chambre|taille:moyenne": {
+    "conseil_text": "Plafond haut dans votre chambre — le luminaire peut descendre pour créer une atmosphère intime. Un format vertical ou boule généreux, c'est magnifique."
+  },
+  "hauteur:haute|piece:chambre|taille:grande": {
+    "conseil_text": "Plafond haut dans une grande chambre — un volume exceptionnel qui mérite un luminaire à la mesure. On peut vraiment se faire plaisir ici."
+  },
+  "hauteur:haute|piece:entree|taille:petite": {
+    "conseil_text": "Plafond haut dans une petite entrée — la hauteur donne une impression de grandeur. Un luminaire vertical qui descend crée un accueil spectaculaire."
+  },
+  "hauteur:haute|piece:entree|taille:moyenne": {
+    "conseil_text": "Plafond haut dans votre entrée — c'est l'occasion d'un luminaire qui impressionne. Un format vertical généreux qui se voit dès le pas de la porte."
+  },
+  "hauteur:haute|piece:entree|taille:grande": {
+    "conseil_text": "Plafond haut dans un grand hall — la configuration la plus spectaculaire possible. Un luminaire monumental ou une grappe sur mesure, c'est ici que ça prend tout son sens."
+  },
+  "hauteur:haute|piece:escalier|taille_escalier:standard": {
+    "conseil_text": "Plafond haut dans l'escalier — parfait pour un luminaire vertical qui accompagne la descente. Il sera visible depuis plusieurs niveaux."
+  },
+  "hauteur:haute|piece:escalier|taille_escalier:ouvert": {
+    "conseil_text": "Plafond haut dans un grand escalier ouvert — c'est le cas de figure rêvé. Un luminaire vertical imposant qui occupe tout le volume, visible de tous les étages. Une vraie pièce maîtresse."
+  },
+
+  "table:oui|piece:cuisine": {
+    "conseil_text": "Au-dessus de l'îlot ou de la table de cuisine, le luminaire crée un cercle de lumière intime. Je recommande 70-80 cm entre le bas du luminaire et le plateau. Le luminaire peut prendre un peu plus de place !"
+  },
+  "table:oui|piece:bureau": {
+    "conseil_text": "Au-dessus du bureau, le luminaire éclaire directement la zone de travail. 70-80 cm entre le bas du luminaire et le plateau, c'est la bonne distance. On peut se permettre un format un peu plus généreux."
+  },
+  "table:oui|piece:salon": {
+    "conseil_text": "Au-dessus de la table, la suspension crée un cercle de lumière convivial — parfait pour les repas et les soirées. 70-80 cm au-dessus du plateau, c'est l'idéal."
+  },
+  "table:oui|piece:chambre": {
+    "conseil_text": "Au-dessus du lit, le luminaire crée une ambiance enveloppante. Il peut descendre un peu plus bas que dans une zone de passage — c'est même plus joli."
+  },
+  "table:non|piece:cuisine": {
+    "conseil_text": "En zone de passage dans la cuisine, l'essentiel c'est la hauteur : minimum 2m10 de libre sous le luminaire. Il nous faudra opter pour un format qui ne soit pas trop haut !"
+  },
+  "table:non|piece:bureau": {
+    "conseil_text": "Pas au-dessus du bureau — en zone de passage, le luminaire doit rester à minimum 2m10 du sol. Un format compact est plus adapté."
+  },
+  "table:non|piece:salon": {
+    "conseil_text": "En zone de passage dans le salon, il faut garder 2m10 minimum sous le luminaire. Un format boule ou compact fonctionne très bien."
+  },
+  "table:non|piece:chambre": {
+    "conseil_text": "Pas au-dessus du lit — en zone de passage, le luminaire doit rester haut. Minimum 2m10 de libre dessous. Un format compact sera plus adapté."
+  },
+
+  "style:moderne": {
+    "conseil_text": "Le Peuplier, c'est un bois clair, lumineux, avec un grain très fin. Il apporte une touche contemporaine, épurée. C'est le choix le plus populaire pour les intérieurs modernes, et c'est celui que je recommande.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir les créations en Peuplier"
+  },
+  "style:ancien": {
+    "conseil_text": "L'Okoumé a un ton chaud, ambré, avec plus de caractère. Il s'intègre naturellement dans des intérieurs plus traditionnels ou qui misent sur la chaleur des matériaux.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir les créations en Okoumé"
+  },
+  "style:neutre": {
+    "conseil_text": "Pas de préférence marquée ? Les deux essences sont belles. Je vous montrerai les deux et vous verrez sur les photos ce qui vous parle le plus.",
+    "link_url": "/nos-creations/",
+    "link_label": "Voir toutes les créations"
+  }
+}
