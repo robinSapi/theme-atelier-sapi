@@ -390,16 +390,19 @@
     var html = '';
 
     // Zone citation (conseil pré-généré)
+    var shouldAnimate = !isFirstFiche;
     html += '<div class="robin-fiche__conseil" id="robin-fiche-conseil">';
     if (isFirstFiche) {
-      html += renderConseil({ conseil_text: 'Chaque luminaire que je cr\u00e9e est une pi\u00e8ce unique, fa\u00e7onn\u00e9e \u00e0 la main dans mon atelier. Pour vous orienter au mieux, dites-moi dans quelle pi\u00e8ce vous imaginez votre futur luminaire.' });
+      html += renderConseil({ conseil_text: 'Chaque luminaire que je cr\u00e9e est une pi\u00e8ce unique, fa\u00e7onn\u00e9e \u00e0 la main dans mon atelier. Pour vous orienter au mieux, dites-moi dans quelle pi\u00e8ce vous imaginez votre futur luminaire.' }, false);
     } else {
       // Le conseil correspond au dernier step répondu (pas au step courant)
       var lastStep = state.history.length > 0 ? state.history[state.history.length - 1] : null;
       var lastSlug = lastStep ? state.answers[lastStep] : null;
       var conseilData = lastStep && lastSlug ? getConseil(lastStep, lastSlug) : null;
       if (conseilData) {
-        html += renderConseil(conseilData);
+        html += renderConseil(conseilData, true);
+      } else {
+        shouldAnimate = false;
       }
     }
     html += '</div>';
@@ -433,18 +436,56 @@
     html += renderTextInput();
 
     body.innerHTML = html;
+
+    if (shouldAnimate) {
+      animateConseil();
+    }
   }
 
   /* ═══════════════════════════════════════════
      Rendu partiel : conseil, loader, input
   ═══════════════════════════════════════════ */
-  function renderConseil(data) {
+  function renderConseil(data, animate) {
     if (!data || !data.conseil_text) return '';
     var html = '<div class="robin-fiche__citation">';
-    html += '<p class="robin-fiche__citation-text">' + escHtml(data.conseil_text) + '</p>';
-    html += '<span class="robin-fiche__signature">&mdash; Robin</span>';
+    if (animate) {
+      // Mots avec opacity 0, animés ensuite par animateConseil()
+      var words = data.conseil_text.split(' ');
+      html += '<p class="robin-fiche__citation-text">';
+      for (var i = 0; i < words.length; i++) {
+        html += '<span class="robin-word" style="opacity:0;">' + escHtml(words[i]) + '</span> ';
+      }
+      html += '</p>';
+      html += '<span class="robin-fiche__signature" style="opacity:0;">&mdash; Robin</span>';
+    } else {
+      html += '<p class="robin-fiche__citation-text">' + escHtml(data.conseil_text) + '</p>';
+      html += '<span class="robin-fiche__signature">&mdash; Robin</span>';
+    }
     html += '</div>';
     return html;
+  }
+
+  function animateConseil() {
+    var words = body.querySelectorAll('.robin-word');
+    var signature = body.querySelector('.robin-fiche__signature');
+    var delay = 30; // ms entre chaque mot
+
+    for (var i = 0; i < words.length; i++) {
+      (function(el, d) {
+        setTimeout(function() {
+          el.style.transition = 'opacity 0.25s';
+          el.style.opacity = '1';
+        }, d);
+      })(words[i], i * delay);
+    }
+
+    // Signature apparaît après le dernier mot
+    if (signature) {
+      setTimeout(function() {
+        signature.style.transition = 'opacity 0.4s';
+        signature.style.opacity = '1';
+      }, words.length * delay + 100);
+    }
   }
 
   function renderConseilLoader() {

@@ -1631,7 +1631,7 @@ button:hover,
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
   width: 100%;
   max-width: 520px;
-  max-height: 85vh;
+  height: 85vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -1733,6 +1733,9 @@ button:hover,
   content: '\00A0\00BB';
   color: var(--color-orange, #E35B24);
   opacity: 0.4;
+}
+.robin-word {
+  display: inline;
 }
 .robin-fiche__signature {
   display: block;
