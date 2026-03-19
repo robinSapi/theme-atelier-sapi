@@ -1746,19 +1746,24 @@ button:hover,
   overflow: hidden;
 }
 
-/* Zone haute : conseil centré, lien en bas */
+/* Zone haute : conseil centré au-dessus du lien */
 .robin-fiche__top {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   padding: 1.5rem 1.5rem 1rem;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
+.robin-fiche__top .robin-fiche__conseil {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 .robin-fiche__top .robin-fiche__link {
-  margin-top: auto;
+  flex-shrink: 0;
   padding-top: 0.75rem;
 }
 
