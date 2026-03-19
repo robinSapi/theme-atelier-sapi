@@ -1813,23 +1813,40 @@ button:hover,
   color: var(--color-orange, #E35B24);
 }
 
-/* Loader conseil (skeleton) */
+/* Loader conseil (ampoule + messages) */
 .robin-fiche__loader {
-  padding: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
 }
-.robin-fiche__loader-line {
-  height: 12px;
-  border-radius: 6px;
-  background: rgba(var(--color-wood-rgb, 147, 125, 104), 0.08);
-  margin-bottom: 0.5rem;
-  animation: robinPulse 1.5s ease-in-out infinite;
+.robin-fiche__loader-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--color-orange, #E35B24);
+  animation: robinPulse 2s ease-in-out infinite;
 }
-.robin-fiche__loader-line--short {
-  width: 60%;
+.robin-fiche__loader-icon svg {
+  width: 100%;
+  height: 100%;
+}
+.robin-fiche__loader-text {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--color-wood, #937D68);
+  margin: 0;
+  text-align: center;
+  transition: opacity 0.5s, transform 0.5s;
+}
+.robin-fiche__loader-text--hidden {
+  opacity: 0;
+  transform: translateY(5px);
 }
 @keyframes robinPulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
 }
 
 /* Lien sortant */

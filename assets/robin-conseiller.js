@@ -546,9 +546,21 @@
 
   function renderConseilLoader() {
     return '<div class="robin-fiche__loader">' +
-      '<div class="robin-fiche__loader-line"></div>' +
-      '<div class="robin-fiche__loader-line robin-fiche__loader-line--short"></div>' +
-      '</div>';
+      '<div class="robin-fiche__loader-icon">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18h6M12 2v1M18 12a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/></svg>' +
+      '</div>' +
+      '<p class="robin-fiche__loader-text" id="robin-loader-text-1">Analyse du catalogue de Robin...</p>' +
+      '<p class="robin-fiche__loader-text robin-fiche__loader-text--hidden" id="robin-loader-text-2">Et de ses conseils aussi !</p>' +
+    '</div>';
+  }
+
+  function animateLoader() {
+    var text2 = document.getElementById('robin-loader-text-2');
+    if (text2) {
+      setTimeout(function() {
+        text2.classList.remove('robin-fiche__loader-text--hidden');
+      }, 2000);
+    }
   }
 
   function renderTextInput() {
@@ -683,6 +695,7 @@
     var bottomEl = document.getElementById('robin-fiche-bottom');
     if (topEl) {
       topEl.innerHTML = '<div class="robin-fiche__conseil">' + renderConseilLoader() + '</div>';
+      animateLoader();
     }
     if (bottomEl) {
       bottomEl.style.opacity = '0';
