@@ -408,12 +408,12 @@
     }
     html += '</div>';
 
-    // Lien sortant (dans la zone haute aussi)
+    // Lien sortant (dans la zone haute, caché si animé)
     var lastStepForLink = state.history.length > 0 ? state.history[state.history.length - 1] : null;
     var lastSlugForLink = lastStepForLink ? state.answers[lastStepForLink] : null;
     var linkData = lastStepForLink && lastSlugForLink ? getConseil(lastStepForLink, lastSlugForLink) : null;
     if (linkData && linkData.link_url) {
-      html += '<div class="robin-fiche__link"><a href="' + escHtml(linkData.link_url) + '">';
+      html += '<div class="robin-fiche__link" id="robin-fiche-link"' + (shouldAnimate ? ' style="opacity:0;"' : '') + '><a href="' + escHtml(linkData.link_url) + '">';
       html += escHtml(linkData.link_label || 'Voir') + ' &rarr;</a></div>';
     }
     html += '</div>';
@@ -498,12 +498,21 @@
       }, endTime + 200);
     }
 
-    // Zone basse apparaît après la signature
+    // Lien sortant apparaît après la signature
+    var link = document.getElementById('robin-fiche-link');
+    if (link) {
+      setTimeout(function() {
+        link.style.transition = 'opacity 0.4s';
+        link.style.opacity = '1';
+      }, endTime + 500);
+    }
+
+    // Zone basse apparaît après le lien
     if (bottom) {
       setTimeout(function() {
         bottom.style.transition = 'opacity 0.4s';
         bottom.style.opacity = '1';
-      }, endTime + 500);
+      }, endTime + 800);
     }
   }
 
