@@ -4,6 +4,11 @@ if (!defined('ABSPATH')) {
   exit;
 }
 
+/* ─── Feature flag Robin Conseiller V2 ─── */
+if (!defined('SAPI_ROBIN_V2')) {
+  define('SAPI_ROBIN_V2', true);
+}
+
 function sapi_maison_setup() {
   add_theme_support('title-tag');
   add_theme_support('post-thumbnails');
@@ -240,16 +245,32 @@ function sapi_maison_enqueue_assets() {
     wp_enqueue_script('sapi-maison-scroll-dots', get_template_directory_uri() . '/assets/scroll-dots.js', [], filemtime($scroll_dots_path), true);
   }
 
-  // Mon Projet — bandeau questionnaire permanent (toutes les pages)
+  // Guide luminaire — bandeau + questionnaire (toutes les pages)
   require_once get_template_directory() . '/inc/guide-data.php';
-  $mon_projet_path = get_template_directory() . '/assets/mon-projet.js';
-  if (file_exists($mon_projet_path)) {
-    wp_enqueue_script('sapi-mon-projet', get_template_directory_uri() . '/assets/mon-projet.js', [], filemtime($mon_projet_path), true);
-    wp_localize_script('sapi-mon-projet', 'sapiMonProjet', [
-      'steps'   => sapi_guide_get_steps(),
-      'ajaxUrl' => admin_url('admin-ajax.php'),
-      'nonce'   => wp_create_nonce('sapi-guide-results'),
-    ]);
+
+  if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) {
+    // V2 — Robin Conseiller : modale diaporama
+    $robin_js_path = get_template_directory() . '/assets/robin-conseiller.js';
+    if (file_exists($robin_js_path)) {
+      wp_enqueue_script('sapi-robin-conseiller', get_template_directory_uri() . '/assets/robin-conseiller.js', [], filemtime($robin_js_path), true);
+      wp_localize_script('sapi-robin-conseiller', 'sapiRobinConseiller', [
+        'steps'   => sapi_guide_get_steps(),
+        'icons'   => sapi_guide_get_icons(),
+        'ajaxUrl' => admin_url('admin-ajax.php'),
+        'nonce'   => wp_create_nonce('sapi-guide-results'),
+      ]);
+    }
+  } else {
+    // V1 — Mon Projet : bandeau dépliable (legacy)
+    $mon_projet_path = get_template_directory() . '/assets/mon-projet.js';
+    if (file_exists($mon_projet_path)) {
+      wp_enqueue_script('sapi-mon-projet', get_template_directory_uri() . '/assets/mon-projet.js', [], filemtime($mon_projet_path), true);
+      wp_localize_script('sapi-mon-projet', 'sapiMonProjet', [
+        'steps'   => sapi_guide_get_steps(),
+        'ajaxUrl' => admin_url('admin-ajax.php'),
+        'nonce'   => wp_create_nonce('sapi-guide-results'),
+      ]);
+    }
   }
 }
 add_action('wp_enqueue_scripts', 'sapi_maison_enqueue_assets');

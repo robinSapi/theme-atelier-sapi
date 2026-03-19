@@ -173,7 +173,14 @@ $logo_alt = get_bloginfo('name');
   <div class="global-search-overlay" id="global-search-overlay"></div>
 </header>
 
-<!-- Bandeau "Mon projet" — questionnaire permanent -->
+<?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) : ?>
+<!-- Robin Conseiller V2 — Bandeau simplifié -->
+<?php
+require_once get_template_directory() . '/inc/template-robin-bandeau-v2.php';
+sapi_robin_bandeau_v2();
+?>
+<?php else : ?>
+<!-- V1 — Bandeau "Mon projet" dépliable -->
 <?php
 require_once get_template_directory() . '/inc/guide-data.php';
 $mon_projet_steps = sapi_guide_get_steps();
@@ -183,7 +190,6 @@ $creations_url = get_permalink(wc_get_page_id('shop'));
 $contact_url   = get_permalink(get_page_by_path('contact'));
 ?>
 <div class="mon-projet-bar" id="mon-projet-bar">
-  <!-- État replié -->
   <div class="mon-projet-collapsed">
     <div class="mon-projet-left">
       <span class="mon-projet-label">
@@ -198,8 +204,6 @@ $contact_url   = get_permalink(get_page_by_path('contact'));
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
     </button>
   </div>
-
-  <!-- État déplié — questionnaire inline -->
   <div class="mon-projet-expanded" id="mon-projet-expanded" aria-hidden="true">
     <?php foreach ($mon_projet_steps as $step) :
       $step_id = esc_attr($step['id']);
@@ -238,6 +242,7 @@ $contact_url   = get_permalink(get_page_by_path('contact'));
     </div>
   </div>
 </div>
+<?php endif; ?>
 
 <?php endif; ?>
 

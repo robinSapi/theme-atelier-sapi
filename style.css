@@ -1541,6 +1541,411 @@ button:hover,
    Bandeau "Mon projet" — Questionnaire permanent
    ======================================== */
 
+/* ═══════════════════════════════════════════════════════════
+   ROBIN CONSEILLER V2 — Bandeau + Modale + Fiches
+═══════════════════════════════════════════════════════════ */
+
+/* ─── Bandeau V2 ─── */
+.robin-bandeau {
+  background: var(--color-warm, #FBF6EA);
+  padding: 0.65rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+  z-index: 998;
+}
+.robin-bandeau:hover { background: #f5edda; }
+.robin-bandeau__left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.robin-bandeau__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  background: var(--color-wood, #937D68);
+  color: #fff;
+  border-radius: 50px;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.robin-bandeau__badge svg {
+  flex-shrink: 0;
+}
+.robin-bandeau__chips {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  color: var(--color-dark, #323232);
+}
+.robin-bandeau__arrow {
+  color: var(--color-wood, #937D68);
+  font-size: 1.2rem;
+}
+
+/* ─── Modale ─── */
+.robin-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10020;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  transition: opacity 0.25s, visibility 0.25s;
+}
+.robin-modal[aria-hidden="true"] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.robin-modal[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+}
+.robin-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+.robin-modal__container {
+  position: relative;
+  background: var(--color-cream, #FEFDFB);
+  border-radius: 20px;
+  border: 2px dashed rgba(var(--color-wood-rgb, 147, 125, 104), 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header modale */
+.robin-modal__header {
+  padding: 1rem 1.5rem;
+  background: var(--color-warm, #FBF6EA);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  min-height: 56px;
+}
+.robin-modal__header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.robin-modal__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: none;
+  border: none;
+  color: var(--color-wood, #937D68);
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.3rem 0;
+  transition: color 0.2s;
+}
+.robin-modal__back:hover { color: var(--color-dark, #323232); }
+.robin-modal__avatar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.robin-modal__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-wood, #937D68);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.robin-modal__name {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-dark, #323232);
+}
+.robin-modal__role {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.7rem;
+  color: var(--color-wood, #937D68);
+}
+.robin-modal__step-title {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-dark, #323232);
+}
+.robin-modal__close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(var(--color-wood-rgb, 147, 125, 104), 0.08);
+  color: var(--color-dark, #323232);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.robin-modal__close:hover {
+  background: rgba(var(--color-wood-rgb, 147, 125, 104), 0.15);
+}
+
+/* Corps modale */
+.robin-modal__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.75rem 1.5rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Fiches conseil ─── */
+
+/* Citation Robin */
+.robin-fiche__conseil {
+  margin-bottom: 1.25rem;
+}
+.robin-fiche__citation-text {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.93rem;
+  line-height: 1.75;
+  color: var(--color-dark, #323232);
+  font-style: italic;
+  padding: 0 0.5rem;
+  margin: 0 0 0.5rem;
+}
+.robin-fiche__citation-text::before {
+  content: '\00AB\00A0';
+  color: var(--color-orange, #E35B24);
+  opacity: 0.4;
+}
+.robin-fiche__citation-text::after {
+  content: '\00A0\00BB';
+  color: var(--color-orange, #E35B24);
+  opacity: 0.4;
+}
+.robin-fiche__signature {
+  display: block;
+  text-align: right;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--color-orange, #E35B24);
+}
+
+/* Loader conseil (skeleton) */
+.robin-fiche__loader {
+  padding: 0.5rem 0;
+}
+.robin-fiche__loader-line {
+  height: 12px;
+  border-radius: 6px;
+  background: rgba(var(--color-wood-rgb, 147, 125, 104), 0.08);
+  margin-bottom: 0.5rem;
+  animation: robinPulse 1.5s ease-in-out infinite;
+}
+.robin-fiche__loader-line--short {
+  width: 60%;
+}
+@keyframes robinPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* Lien sortant */
+.robin-fiche__link {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+.robin-fiche__link a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.3rem;
+  border: 1.5px solid var(--color-orange, #E35B24);
+  border-radius: 50px;
+  color: var(--color-orange, #E35B24);
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.robin-fiche__link a:hover {
+  background: rgba(227, 91, 36, 0.06);
+}
+
+/* Question */
+.robin-fiche__question {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-wood, #937D68);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.6rem;
+}
+
+/* Boutons choix */
+.robin-fiche__choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.robin-fiche__choice {
+  padding: 0.55rem 1.15rem;
+  border: 1.5px solid rgba(227, 91, 36, 0.3);
+  border-radius: 50px;
+  background: transparent;
+  color: var(--color-dark, #323232);
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.robin-fiche__choice:hover {
+  background: rgba(227, 91, 36, 0.06);
+  border-color: var(--color-orange, #E35B24);
+}
+.robin-fiche__choice.is-selected {
+  background: var(--color-orange, #E35B24);
+  color: #fff;
+  border-color: var(--color-orange, #E35B24);
+}
+.robin-fiche__choice-icon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+}
+.robin-fiche__choice-icon svg {
+  width: 100%;
+  height: 100%;
+}
+.robin-fiche__choice-dim {
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+/* Champ texte libre */
+.robin-fiche__input-wrap {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
+}
+.robin-fiche__input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(var(--color-wood-rgb, 147, 125, 104), 0.06);
+  border-radius: 50px;
+  padding: 0.6rem 0.75rem 0.6rem 1.25rem;
+}
+.robin-fiche__input input {
+  flex: 1;
+  border: none;
+  background: none;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  color: var(--color-dark, #323232);
+  outline: none;
+}
+.robin-fiche__input input::placeholder {
+  color: rgba(var(--color-wood-rgb, 147, 125, 104), 0.5);
+}
+.robin-fiche__send {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.robin-fiche__send:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(227, 91, 36, 0.3);
+}
+
+/* ─── Pills contextuelles ─── */
+.robin-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-warm, #FBF6EA);
+  border: 2px dashed rgba(var(--color-wood-rgb, 147, 125, 104), 0.3);
+  border-radius: 50px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, color 0.2s;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.82rem;
+  color: var(--color-wood, #937D68);
+}
+.robin-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
+  border-color: var(--color-wood, #937D68);
+  color: var(--color-dark, #323232);
+}
+
+/* ─── Responsive mobile ─── */
+@media (max-width: 600px) {
+  .robin-modal__container {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    border: none;
+  }
+  .robin-modal {
+    padding: 0;
+  }
+  .robin-bandeau {
+    padding: 0.55rem 1rem;
+  }
+  .robin-bandeau__chips {
+    font-size: 0.78rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FIN ROBIN CONSEILLER V2
+═══════════════════════════════════════════════════════════ */
+
 /* Sur la homepage, le bandeau est déplacé par JS sous le carousel.
    Tant qu'il n'est pas déplacé, le cacher pour éviter un doublon visuel. */
 .home .mon-projet-bar:not(.home-repositioned-bar) {
