@@ -2132,6 +2132,12 @@ a.robin-fiche__choice--link {
 
 /* ─── Recommandation finale ─── */
 
+/* Body modale en mode reco — pas de scroll, tout proportionnel */
+.robin-modal__body--reco {
+  overflow: hidden;
+  padding: 1rem 1.5rem;
+}
+
 /* Modale agrandie */
 .robin-modal__container--expanded {
   max-width: 900px;
@@ -2147,17 +2153,22 @@ a.robin-fiche__choice--link {
   }
 }
 
-/* Container recommandation */
+/* Container recommandation — flex colonne, remplit toute la modale */
 .robin-reco {
-  padding: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
 }
 .robin-reco__loader {
   display: flex;
   justify-content: center;
-  padding: 3rem 0;
+  align-items: center;
+  flex: 1;
 }
 .robin-reco__conseil {
-  margin-bottom: 2rem;
+  flex: 0 0 auto;
+  padding: 0 0 0.75rem;
 }
 
 /* Bouton primaire "Voir le conseil de Robin" */
@@ -2174,31 +2185,38 @@ a.robin-fiche__choice--link {
   box-shadow: 0 4px 15px rgba(227, 91, 36, 0.3);
 }
 
-/* Showcase slider — 1 produit par slide */
+/* Showcase — proportions de l'espace disponible */
 .robin-reco__showcase {
-  margin: 1.5rem 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
+
+/* Viewport + track slider */
 .robin-reco__viewport {
+  flex: 1;
   overflow: hidden;
-  border-radius: 16px;
+  min-height: 0;
 }
 .robin-reco__track {
   display: flex;
+  height: 100%;
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .robin-reco__slide {
   min-width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
 
-/* Photo grande */
+/* Photo — ~55% de la slide */
 .robin-reco__photo {
-  width: 100%;
-  aspect-ratio: 4 / 3;
+  flex: 0 0 55%;
   overflow: hidden;
   background: var(--color-warm, #FBF6EA);
-  border-radius: 16px;
+  border-radius: 12px;
 }
 .robin-reco__photo img {
   width: 100%;
@@ -2206,27 +2224,31 @@ a.robin-fiche__choice--link {
   object-fit: cover;
 }
 
-/* Infos sous la photo */
+/* Infos — ~35% de la slide */
 .robin-reco__info {
-  padding: 1.25rem 0.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.75rem 0.25rem 0;
 }
 .robin-reco__info-top {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.25rem;
+  gap: 0.75rem;
+  margin-bottom: 0.15rem;
 }
 .robin-reco__name {
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 700;
   margin: 0;
   color: var(--color-dark, #323232);
 }
 .robin-reco__price {
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--color-orange, #E35B24);
   font-weight: 600;
   white-space: nowrap;
@@ -2234,30 +2256,31 @@ a.robin-fiche__choice--link {
 .robin-reco__essence {
   display: inline-block;
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: var(--color-wood, #937D68);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.4rem;
 }
 .robin-reco__reason {
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-style: italic;
-  line-height: 1.55;
+  line-height: 1.5;
   color: var(--color-dark, #323232);
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.5rem;
 }
 .robin-reco__cta {
   display: inline-flex;
   align-items: center;
+  align-self: flex-start;
   gap: 0.3rem;
-  padding: 0.5rem 1.2rem;
+  padding: 0.4rem 1rem;
   border: 1.5px solid var(--color-orange, #E35B24);
   border-radius: 50px;
   color: var(--color-orange, #E35B24);
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
   text-decoration: none;
   transition: all 0.2s;
@@ -2266,24 +2289,25 @@ a.robin-fiche__choice--link {
   background: rgba(227, 91, 36, 0.06);
 }
 
-/* Navigation slider */
+/* Navigation slider — ~10% */
 .robin-reco__nav {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.5rem;
-  padding: 0.75rem 0 0;
+  gap: 1.25rem;
+  padding: 0.5rem 0;
 }
 .robin-reco__arrow {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
   padding: 0;
   border-radius: 50%;
   border: 1.5px solid rgba(var(--color-wood-rgb, 147, 125, 104), 0.3);
   background: var(--color-cream, #FEFDFB);
   color: var(--color-wood, #937D68);
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -2300,44 +2324,49 @@ a.robin-fiche__choice--link {
 }
 .robin-reco__counter {
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--color-wood, #937D68);
 }
 
 /* Boutons finaux */
 .robin-reco__actions {
+  flex: 0 0 auto;
   display: flex;
   justify-content: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
-  padding: 1.5rem 0 0.5rem;
+  padding: 0.6rem 0 0.25rem;
   border-top: 1px solid rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
-  margin-top: 1rem;
 }
 
 /* Responsive mobile */
 @media (max-width: 600px) {
   .robin-reco__photo {
-    aspect-ratio: 1;
-    border-radius: 12px;
+    flex: 0 0 45%;
+    border-radius: 10px;
   }
   .robin-reco__name {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
   .robin-reco__price {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
   .robin-reco__reason {
-    font-size: 0.78rem;
+    font-size: 0.75rem;
   }
-  .robin-reco__actions {
-    gap: 0.4rem;
+  .robin-reco__cta {
+    font-size: 0.72rem;
+    padding: 0.35rem 0.85rem;
   }
   .robin-reco__arrow {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+  }
+  .robin-reco__actions .robin-fiche__choice {
+    font-size: 0.72rem;
+    padding: 0.35rem 0.75rem;
   }
 }
 

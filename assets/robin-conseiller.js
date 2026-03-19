@@ -382,6 +382,7 @@
     // Retirer le mode étendu
     var container = document.querySelector('.robin-modal__container');
     if (container) container.classList.remove('robin-modal__container--expanded');
+    body.classList.remove('robin-modal__body--reco');
 
     // Annuler tout AJAX en cours
     if (state.pendingXhr) {
@@ -654,9 +655,10 @@
   }
 
   function onRecoConseilClick() {
-    // Agrandir la modale
+    // Agrandir la modale + mode reco sur le body
     var container = document.querySelector('.robin-modal__container');
     if (container) container.classList.add('robin-modal__container--expanded');
+    body.classList.add('robin-modal__body--reco');
 
     // Afficher le loader
     body.innerHTML = '<div class="robin-reco">' +
