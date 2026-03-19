@@ -2137,12 +2137,17 @@ function sapi_ajax_robin_conseil_step() {
     wp_send_json_error(['message' => 'step_id manquant']);
   }
 
-  // 5. Si pas d'IA (rate limit), renvoyer une réponse vide
+  // 5. Si pas d'IA (rate limit), renvoyer un fallback
   if (!$ai_allowed) {
     wp_send_json_success([
-      'conseil_text' => null,
+      'conseil_text' => 'Robin est très sollicité en ce moment. Pour une réponse rapide, contactez-le directement.',
       'link_url'     => null,
       'link_label'   => null,
+      'suggested_buttons' => [
+        ['label' => 'Contacter Robin', 'slug' => 'contact', 'step_id' => 'hors_parcours'],
+      ],
+      'next_step_id' => 'hors_parcours',
+      'answered_steps' => new \stdClass(),
     ]);
   }
 
@@ -2168,11 +2173,17 @@ function sapi_ajax_robin_conseil_step() {
 
   $result = sapi_robin_call_claude_step($system_prompt, $user_prompt);
 
-  if (!$result) {
+  if (!$result || empty($result['conseil_text'])) {
     wp_send_json_success([
-      'conseil_text' => null,
+      'conseil_text' => 'Je ne suis pas en mesure de répondre à cette question. Le mieux est d\'en parler directement avec Robin.',
       'link_url'     => null,
       'link_label'   => null,
+      'suggested_buttons' => [
+        ['label' => 'Contacter Robin', 'slug' => 'contact', 'step_id' => 'hors_parcours'],
+        ['label' => 'Reprendre le questionnaire', 'slug' => 'restart', 'step_id' => 'piece'],
+      ],
+      'next_step_id' => 'hors_parcours',
+      'answered_steps' => new \stdClass(),
     ]);
   }
 
