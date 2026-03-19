@@ -751,11 +751,17 @@
         html += '<span class="robin-reco__price">' + (p.price || '') + '</span>';
         html += '</div>';
         html += '</div>';
-        if (p.variation_label) {
-          html += '<span class="robin-reco__essence robin-reco__reveal" data-reveal="2">' + escHtml(p.variation_label) + '</span>';
-        }
-        if (p.category_label) {
-          html += '<span class="robin-reco__category robin-reco__reveal" data-reveal="2">' + escHtml(p.category_label) + '</span>';
+        // Chips conseils (essence + taille)
+        var hasChips = p.variation_label || p.size_label;
+        if (hasChips) {
+          html += '<div class="robin-reco__chips robin-reco__reveal" data-reveal="2">';
+          if (p.variation_label) {
+            html += '<span class="robin-reco__chip">Essence recommand\u00e9e : ' + escHtml(p.variation_label) + '</span>';
+          }
+          if (p.size_label) {
+            html += '<span class="robin-reco__chip">Taille : ' + escHtml(p.size_label) + '</span>';
+          }
+          html += '</div>';
         }
         if (p.reason) {
           // Texte B — mot par mot

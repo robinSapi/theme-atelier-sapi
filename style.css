@@ -2248,9 +2248,9 @@ a.robin-fiche__choice--link {
   display: inline;
 }
 
-/* Photo — plein bord, ~70% de la slide */
+/* Photo — plein bord, ~75% de la slide */
 .robin-reco__photo {
-  flex: 0 0 70%;
+  flex: 0 0 75%;
   overflow: hidden;
   background: var(--color-warm, #FBF6EA);
 }
@@ -2309,21 +2309,21 @@ a.robin-fiche__choice--link {
   font-weight: 900;
   color: var(--color-dark, #323232);
 }
-.robin-reco__essence {
-  display: block;
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 1rem;
-  font-weight: 300;
-  color: var(--color-wood, #937D68);
-  margin-bottom: 0.25rem;
+.robin-reco__chips {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin: 0.3rem 0;
 }
-.robin-reco__category {
-  display: block;
+.robin-reco__chip {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  background: rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
+  border-radius: 50px;
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.8rem;
-  font-weight: 300;
-  color: rgba(var(--color-wood-rgb, 147, 125, 104), 0.6);
-  margin-bottom: 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--color-wood, #937D68);
 }
 .robin-reco__reason {
   font-family: var(--font-body, 'Montserrat', sans-serif);
@@ -2422,8 +2422,9 @@ a.robin-fiche__choice--link {
   .robin-reco__price {
     font-size: 1rem;
   }
-  .robin-reco__essence {
-    font-size: 0.85rem;
+  .robin-reco__chip {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.5rem;
   }
   .robin-reco__reason {
     font-size: 0.78rem;
