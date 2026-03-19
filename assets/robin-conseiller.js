@@ -460,9 +460,8 @@
   function updateHeader(stepId) {
     var isFirst = state.history.length === 0;
 
-    // Bouton retour (gauche) — visible sauf sur la première fiche
-    backBtn.style.display = isFirst ? 'none' : '';
-    // Badge toujours visible (centré)
+    // Bouton retour (gauche) — invisible mais occupe l'espace sur la première fiche
+    backBtn.style.visibility = isFirst ? 'hidden' : 'visible';
   }
 
   /* ═══════════════════════════════════════════

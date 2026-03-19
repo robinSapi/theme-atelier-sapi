@@ -16,7 +16,7 @@ function sapi_robin_modal() {
 
     <!-- Header : retour | badge centré | fermer -->
     <div class="robin-modal__header" id="robin-modal-header">
-      <button class="robin-modal__back" id="robin-modal-back" type="button" aria-label="Retour" style="display:none;">
+      <button class="robin-modal__back" id="robin-modal-back" type="button" aria-label="Retour" style="visibility:hidden;">
         &larr; Retour
       </button>
       <span class="robin-modal__badge" id="robin-modal-badge">
