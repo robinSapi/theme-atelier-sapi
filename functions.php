@@ -2226,6 +2226,9 @@ function sapi_robin_validate_response($result) {
         if (isset($valid_slugs[$btn['step_id']]) && in_array($btn['slug'], $valid_slugs[$btn['step_id']], true)) {
           $clean_buttons[] = $btn;
         }
+      } elseif (!empty($btn['label'])) {
+        // Bouton conversation — juste un label, renvoie comme texte libre
+        $clean_buttons[] = ['label' => sanitize_text_field($btn['label'])];
       }
     }
     $result['suggested_buttons'] = $clean_buttons;
@@ -2350,9 +2353,10 @@ function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $con
     }
 
     $prompt .= "- next_step_id : la prochaine étape logique du questionnaire, ou 'hors_parcours' si le message sort du cadre.\n";
-    $prompt .= "- suggested_buttons : deux types possibles :\n";
+    $prompt .= "- suggested_buttons : trois types possibles :\n";
     $prompt .= "  - Bouton lien (ouvre une page) : { \"label\": \"...\", \"url\": \"/chemin/\" }\n";
-    $prompt .= "  - Bouton questionnaire (navigue vers une étape) : { \"label\": \"...\", \"slug\": \"...\", \"step_id\": \"...\" }\n";
+    $prompt .= "  - Bouton questionnaire (valide une étape) : { \"label\": \"...\", \"slug\": \"...\", \"step_id\": \"...\" }\n";
+    $prompt .= "  - Bouton conversation (continue la discussion) : { \"label\": \"...\" } — le label est renvoyé comme message\n";
     $prompt .= "  URLs valides : /contact/, /nos-creations/, /categorie-produit/suspensions/, /categorie-produit/appliques/, /categorie-produit/lampadaires/, /categorie-produit/lampes-a-poser/, /sur-mesure/\n";
     $prompt .= "- Si le message est une question hors questionnaire (livraison, prix, sur mesure...), réponds et mets next_step_id à 'hors_parcours'.\n";
   } else {

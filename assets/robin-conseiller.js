@@ -783,9 +783,14 @@
           html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="' + escAttr(btn.url) + '">';
           html += escHtml(btn.label);
           html += '</a>';
-        } else {
+        } else if (btn.step_id && btn.slug) {
           // Bouton questionnaire → navigue vers une étape
-          html += '<button class="robin-fiche__choice" data-step="' + escAttr(btn.step_id || '') + '" data-slug="' + escAttr(btn.slug || '') + '" data-label="' + escAttr(btn.label || '') + '">';
+          html += '<button class="robin-fiche__choice" data-step="' + escAttr(btn.step_id) + '" data-slug="' + escAttr(btn.slug) + '" data-label="' + escAttr(btn.label || '') + '">';
+          html += escHtml(btn.label);
+          html += '</button>';
+        } else {
+          // Bouton conversation → renvoie le label comme texte libre
+          html += '<button class="robin-fiche__choice robin-fiche__choice--conv" data-message="' + escAttr(btn.label) + '">';
           html += escHtml(btn.label);
           html += '</button>';
         }
@@ -1013,9 +1018,17 @@
     if (body) {
       body.addEventListener('click', function (e) {
         var btn = e.target.closest('.robin-fiche__choice');
-        if (btn && btn.dataset.step && btn.dataset.slug) {
-          onChoiceClick(btn.dataset.step, btn.dataset.slug, btn.dataset.label || '');
-          return;
+        if (btn) {
+          // Bouton questionnaire
+          if (btn.dataset.step && btn.dataset.slug) {
+            onChoiceClick(btn.dataset.step, btn.dataset.slug, btn.dataset.label || '');
+            return;
+          }
+          // Bouton conversation → renvoie comme texte libre
+          if (btn.dataset.message) {
+            onFreeText(btn.dataset.message);
+            return;
+          }
         }
 
         // Confirmation catégorie
