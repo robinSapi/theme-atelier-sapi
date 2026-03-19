@@ -737,19 +737,25 @@
         var p = products[i];
         html += '<div class="robin-reco__slide" data-index="' + i + '">';
 
-        // Photo grande — apparaît en premier
+        // Photo plein bord — apparaît en premier
         html += '<div class="robin-reco__photo robin-reco__reveal" data-reveal="1">';
         html += '<img src="' + escAttr(p.ambiance || p.image) + '" alt="' + escAttr(p.title) + '">';
         html += '</div>';
 
-        // Infos sous la photo — apparaît en séquence
+        // Infos sous la photo — styles identiques aux cards produit du site
         html += '<div class="robin-reco__info">';
         html += '<div class="robin-reco__info-top robin-reco__reveal" data-reveal="2">';
-        html += '<h3 class="robin-reco__name">' + escHtml(p.title) + '</h3>';
+        html += '<h3 class="product-name robin-reco__name">' + escHtml(p.title) + '</h3>';
+        html += '<div class="robin-reco__price-wrap">';
+        html += '<span class="robin-reco__price-from">À partir de</span>';
         html += '<span class="robin-reco__price">' + (p.price || '') + '</span>';
+        html += '</div>';
         html += '</div>';
         if (p.variation_label) {
           html += '<span class="robin-reco__essence robin-reco__reveal" data-reveal="2">' + escHtml(p.variation_label) + '</span>';
+        }
+        if (p.category_label) {
+          html += '<span class="robin-reco__category robin-reco__reveal" data-reveal="2">' + escHtml(p.category_label) + '</span>';
         }
         if (p.reason) {
           // Texte B — mot par mot
@@ -791,6 +797,11 @@
     html += '</div>';
 
     body.innerHTML = html;
+
+    // Déclencher le formatter de noms produit
+    if (typeof window.sapiFormatProductNames === 'function') {
+      window.sapiFormatProductNames();
+    }
 
     // Dévoilement progressif séquentiel
     animateRecoReveal();

@@ -2249,12 +2249,12 @@ a.robin-fiche__choice--link {
   display: inline;
 }
 
-/* Photo — ~65% de la slide */
+/* Photo — plein bord, ~60% de la slide */
 .robin-reco__photo {
-  flex: 0 0 65%;
+  flex: 0 0 60%;
   overflow: hidden;
   background: var(--color-warm, #FBF6EA);
-  border-radius: 12px;
+  margin: 0 -1.5rem;
 }
 .robin-reco__photo img {
   width: 100%;
@@ -2262,34 +2262,42 @@ a.robin-fiche__choice--link {
   object-fit: cover;
 }
 
-/* Infos — ~35% de la slide */
+/* Infos — style cohérent avec les cards produit du site */
 .robin-reco__info {
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0.75rem 0.25rem 0;
+  padding: 0.75rem 0 0;
 }
 .robin-reco__info-top {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
   margin-bottom: 0.15rem;
 }
+/* Le nom utilise .product-name → formaté par product-name-formatter.js */
 .robin-reco__name {
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1.4rem;
   margin: 0;
-  color: var(--color-dark, #323232);
+}
+.robin-reco__price-wrap {
+  text-align: right;
+  flex-shrink: 0;
+}
+.robin-reco__price-from {
+  display: block;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.65rem;
+  color: var(--color-wood, #937D68);
+  font-weight: 400;
 }
 .robin-reco__price {
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   color: var(--color-orange, #E35B24);
-  font-weight: 600;
-  white-space: nowrap;
+  font-weight: 700;
 }
 .robin-reco__essence {
   display: inline-block;
@@ -2298,33 +2306,44 @@ a.robin-fiche__choice--link {
   color: var(--color-wood, #937D68);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.2rem;
+}
+.robin-reco__category {
+  display: inline-block;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.65rem;
+  color: rgba(var(--color-wood-rgb, 147, 125, 104), 0.6);
+  margin-left: 0.5rem;
 }
 .robin-reco__reason {
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-style: italic;
   line-height: 1.5;
   color: var(--color-dark, #323232);
-  margin: 0 0 0.5rem;
+  margin: 0.3rem 0 0.5rem;
 }
 .robin-reco__cta {
   display: inline-flex;
   align-items: center;
   align-self: flex-start;
   gap: 0.3rem;
-  padding: 0.4rem 1rem;
-  border: 1.5px solid var(--color-orange, #E35B24);
+  padding: 0.5rem 1.2rem;
+  background: var(--gradient-cta, linear-gradient(180deg, #E35B24 0%, #D14F1C 100%));
+  border: none;
   border-radius: 50px;
-  color: var(--color-orange, #E35B24);
+  color: #fff;
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
   text-decoration: none;
   transition: all 0.2s;
+  box-shadow: 0 3px 10px rgba(227, 91, 36, 0.2);
 }
 .robin-reco__cta:hover {
-  background: rgba(227, 91, 36, 0.06);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(227, 91, 36, 0.3);
+  color: #fff;
 }
 
 /* Navigation slider — ~10% */
@@ -2381,8 +2400,8 @@ a.robin-fiche__choice--link {
 /* Responsive mobile */
 @media (max-width: 600px) {
   .robin-reco__photo {
-    flex: 0 0 45%;
-    border-radius: 10px;
+    flex: 0 0 50%;
+    margin: 0 -1.25rem;
   }
   .robin-reco__name {
     font-size: 0.95rem;
