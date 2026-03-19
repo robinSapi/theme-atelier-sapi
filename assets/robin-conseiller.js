@@ -325,11 +325,16 @@
     var step = getStepById(stepId);
     if (!step) return;
 
+    // Première fiche (piece) sans réponse = texte d'accueil hardcodé, pas d'appel IA
+    var isFirstFiche = (stepId === steps[0].id && state.history.length === 0);
+
     var html = '';
 
-    // Zone citation (conseil IA) — loader ou cache
+    // Zone citation (conseil IA) — hardcodé, loader ou cache
     html += '<div class="robin-fiche__conseil" id="robin-fiche-conseil">';
-    if (state.aiCache[stepId]) {
+    if (isFirstFiche) {
+      html += renderConseil({ conseil_text: 'Chaque luminaire que je cr\u00e9e est une pi\u00e8ce unique, fa\u00e7onn\u00e9e \u00e0 la main dans mon atelier. Pour vous orienter au mieux, dites-moi dans quelle pi\u00e8ce vous imaginez votre futur luminaire.' });
+    } else if (state.aiCache[stepId]) {
       html += renderConseil(state.aiCache[stepId]);
     } else {
       html += renderConseilLoader();
@@ -363,8 +368,8 @@
 
     body.innerHTML = html;
 
-    // Lancer le fetch IA en lazy si pas en cache
-    if (!state.aiCache[stepId]) {
+    // Lancer le fetch IA en lazy si pas en cache (sauf première fiche = hardcodé)
+    if (!isFirstFiche && !state.aiCache[stepId]) {
       fetchConseil(stepId);
     }
   }
