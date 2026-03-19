@@ -52,29 +52,99 @@
       // Advanced dropdown filters
       this.initAdvancedFilters();
 
-      // Lire les filtres depuis l'URL (liens Robin Conseiller)
-      this.applyUrlFilters();
+      // "Ma sélection" — bouton Robin si projet en cours
+      this.initRobinSelection(filterContainer);
 
       // Appliquer le filtre initial (masque accessoires par défaut)
       this.applyFilters();
     },
 
-    applyUrlFilters: function() {
+    initRobinSelection: function(filterContainer) {
+      if (!filterContainer) return;
+
+      // Vérifier si le visiteur a un projet en cours
+      var prefs = {};
+      try { prefs = JSON.parse(localStorage.getItem('sapiGuidePrefs') || '{}'); } catch(e) {}
+      if (!prefs.answers || !Object.keys(prefs.answers).length) return;
+
+      // Injecter le bouton "Ma sélection" avant le premier bouton filtre
+      var firstBtn = filterContainer.querySelector('.filter-btn');
+      if (!firstBtn) return;
+
+      var robinBtn = document.createElement('button');
+      robinBtn.type = 'button';
+      robinBtn.className = 'filter-btn filter-btn--robin';
+      robinBtn.dataset.filter = '_robin_selection';
+      robinBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg> Ma s\u00e9lection';
+      firstBtn.parentNode.insertBefore(robinBtn, firstBtn);
+
+      // State
+      var self = this;
+      this._robinProductIds = null;
+
+      // Click handler
+      robinBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var isActive = robinBtn.classList.contains('active');
+
+        // Désactiver tous les filtres
+        filterContainer.querySelectorAll('.filter-btn.active').forEach(function(b) {
+          b.classList.remove('active');
+        });
+
+        if (isActive) {
+          // Désactiver Ma sélection → revenir à "tout"
+          var allBtn = filterContainer.querySelector('.filter-btn[data-filter="all"]');
+          if (allBtn) allBtn.classList.add('active');
+          self.filters.category = 'all';
+          self._robinProductIds = null;
+          self.applyFilters();
+        } else {
+          // Activer Ma sélection
+          robinBtn.classList.add('active');
+          self.fetchRobinSelection(prefs.answers);
+        }
+      });
+
+      // Auto-activer si URL contient robin_selection=1
       var params = new URLSearchParams(window.location.search);
-      var cat = params.get('robin_cat');
-
-      if (cat) {
-        this.filters.category = cat;
-
-        // Mettre à jour le bouton catégorie actif
-        var activeBtn = document.querySelector('.filter-btn.active');
-        if (activeBtn) activeBtn.classList.remove('active');
-        var targetBtn = document.querySelector('.filter-btn[data-filter="' + cat + '"]');
-        if (targetBtn) targetBtn.classList.add('active');
-
-        // Nettoyer l'URL
+      if (params.get('robin_selection') === '1') {
         window.history.replaceState({}, '', window.location.pathname);
+        // Simuler le clic
+        robinBtn.click();
       }
+    },
+
+    fetchRobinSelection: function(answers) {
+      var self = this;
+      var nonce = '';
+      if (window.sapiRobinConseiller) nonce = window.sapiRobinConseiller.nonce;
+      else if (window.sapiMonProjet) nonce = window.sapiMonProjet.nonce;
+
+      var fd = new FormData();
+      fd.append('action', 'sapi_robin_filter_products');
+      fd.append('nonce', nonce);
+      fd.append('answers', JSON.stringify(answers));
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', (window.sapiRobinConseiller || window.sapiMonProjet || {}).ajaxUrl || '/wp-admin/admin-ajax.php', true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState !== 4) return;
+        if (xhr.status === 200) {
+          try {
+            var resp = JSON.parse(xhr.responseText);
+            if (resp.success && resp.data && resp.data.product_ids) {
+              self._robinProductIds = resp.data.product_ids.map(String);
+              self.applyFilters();
+              return;
+            }
+          } catch(e) {}
+        }
+        // Erreur — désactiver le filtre
+        self._robinProductIds = null;
+        self.applyFilters();
+      };
+      xhr.send(fd);
     },
 
     initSearch: function() {
@@ -292,7 +362,13 @@
         const matchesSize = this.filters.size === 'all' || this.matchesSize(size, this.filters.size);
         const matchesSearch = !this.searchQuery || name.includes(this.searchQuery);
 
-        const shouldShow = matchesCategory && matchesPrice && matchesWood && matchesSize && matchesSearch;
+        let shouldShow;
+        if (this._robinProductIds) {
+          // Filtre "Ma sélection" actif → seuls les IDs filtrés par Robin
+          shouldShow = this._robinProductIds.includes(slide.dataset.id);
+        } else {
+          shouldShow = matchesCategory && matchesPrice && matchesWood && matchesSize && matchesSearch;
+        }
 
         // Use both class AND inline styles to guarantee hiding
         if (shouldShow) {

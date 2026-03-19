@@ -633,6 +633,32 @@ button:active::after,
 .filter-btn:active {
   animation: buttonPress 0.2s ease;
 }
+.filter-btn--robin {
+  background: var(--color-warm, #FBF6EA);
+  border: 2px dashed rgba(var(--color-wood-rgb, 147, 125, 104), 0.3);
+  color: var(--color-wood, #937D68);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.filter-btn--robin svg {
+  flex-shrink: 0;
+}
+.filter-btn--robin:hover {
+  border-color: var(--color-wood, #937D68);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
+}
+.filter-btn--robin.active {
+  background: var(--color-wood, #937D68);
+  border-color: var(--color-wood, #937D68);
+  border-style: solid;
+  color: #fff;
+}
+.filter-btn--robin.active svg {
+  stroke: #fff;
+}
 
 /* Smooth product reveal animations */
 @keyframes productReveal {

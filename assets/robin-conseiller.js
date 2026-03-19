@@ -222,33 +222,10 @@
      Lien sortant dynamique vers /nos-creations/
   ═══════════════════════════════════════════ */
   function buildShopLink() {
-    var params = [];
-    var labelParts = [];
-
-    // Catégorie selon la sortie
-    var sortie = state.answers.sortie;
-    if (sortie === 'plafond') {
-      params.push('robin_cat=suspensions');
-      labelParts.push('suspensions');
-    } else if (sortie === 'mur') {
-      params.push('robin_cat=appliques');
-      labelParts.push('appliques');
-    } else if (sortie === 'pas-de-sortie') {
-      // Pas de filtre catégorie unique — on montre tout sauf suspensions
-      labelParts.push('lampadaires, appliques et lampes');
-    }
-
-    var url = '/nos-creations/';
-    if (params.length > 0) {
-      url += '?' + params.join('&');
-    }
-
-    var label = 'Voir les créations';
-    if (labelParts.length > 0) {
-      label = 'Voir les ' + labelParts.join(', ');
-    }
-
-    return { url: url, label: label };
+    return {
+      url: '/nos-creations/?robin_selection=1',
+      label: 'Voir ma sélection'
+    };
   }
 
   /* ═══════════════════════════════════════════

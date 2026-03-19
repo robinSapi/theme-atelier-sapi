@@ -2089,6 +2089,53 @@ function sapi_ajax_guide_refine() {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   ROBIN CONSEILLER V2 — Filtrage produits pour "Ma sélection"
+═══════════════════════════════════════════════════════════ */
+add_action('wp_ajax_sapi_robin_filter_products', 'sapi_ajax_robin_filter_products');
+add_action('wp_ajax_nopriv_sapi_robin_filter_products', 'sapi_ajax_robin_filter_products');
+
+function sapi_ajax_robin_filter_products() {
+  // 1. Nonce
+  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
+    wp_send_json_error(['message' => 'Nonce invalide']);
+  }
+
+  // 2. Parse answers
+  $answers = [];
+  if (!empty($_POST['answers'])) {
+    $raw = json_decode(sanitize_text_field(wp_unslash($_POST['answers'])), true);
+    if (is_array($raw)) {
+      foreach ($raw as $k => $v) {
+        $answers[sanitize_key($k)] = sanitize_text_field($v);
+      }
+    }
+  }
+
+  if (empty($answers)) {
+    wp_send_json_error(['message' => 'Pas de réponses']);
+  }
+
+  // 3. Normaliser taille_escalier → taille
+  if (!empty($answers['taille_escalier'])) {
+    $answers['taille'] = $answers['taille_escalier'] === 'ouvert' ? 'grande' : 'petite';
+  }
+
+  // 4. Filtrage via le pipeline existant
+  require_once get_template_directory() . '/inc/guide-data.php';
+  $categories = sapi_guide_get_categories($answers);
+  $result = sapi_guide_query_products($answers, $categories);
+  $products = isset($result['products']) ? $result['products'] : [];
+
+  // 5. Extraire les IDs
+  $ids = array_map(function($p) { return $p['id']; }, $products);
+
+  wp_send_json_success([
+    'product_ids' => $ids,
+    'count'       => count($ids),
+  ]);
+}
+
+/* ═══════════════════════════════════════════════════════════
    ROBIN CONSEILLER V2 — Endpoint per-step AI conseil
 ═══════════════════════════════════════════════════════════ */
 add_action('wp_ajax_sapi_robin_conseil_step', 'sapi_ajax_robin_conseil_step');
