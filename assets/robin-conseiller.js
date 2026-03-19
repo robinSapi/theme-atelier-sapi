@@ -379,6 +379,10 @@
     document.body.style.overflow = '';
     state.isOpen = false;
 
+    // Retirer le mode étendu
+    var container = document.querySelector('.robin-modal__container');
+    if (container) container.classList.remove('robin-modal__container--expanded');
+
     // Annuler tout AJAX en cours
     if (state.pendingXhr) {
       state.pendingXhr.abort();
@@ -631,12 +635,143 @@
   }
 
   function renderRecommendation() {
-    // TODO Phase E : appel pipeline complet
-    var html = '<div class="robin-fiche__conseil">';
-    html += renderConseilLoader();
+    // Fiche "merci" — 2 boutons
+    var html = '<div class="robin-fiche__top">';
+    html += '<div class="robin-fiche__conseil">';
+    html += renderConseil({ conseil_text: 'Merci ! Avec toutes ces infos, nous allons pouvoir vous proposer les meilleurs mod\u00e8les et vous aider \u00e0 choisir.' }, true);
     html += '</div>';
-    html += renderTextInput();
+    html += '</div>';
+
+    html += '<div class="robin-fiche__bottom" id="robin-fiche-bottom" style="opacity:0;">';
+    html += '<div class="robin-fiche__choices robin-fiche__choices--reco">';
+    html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/nos-creations/?robin_selection=1">Voir nos cr\u00e9ations</a>';
+    html += '<button class="robin-fiche__choice robin-fiche__choice--primary" id="robin-reco-conseil">Voir le conseil de Robin</button>';
+    html += '</div>';
+    html += '</div>';
+
     body.innerHTML = html;
+    animateConseil();
+  }
+
+  function onRecoConseilClick() {
+    // Agrandir la modale
+    var container = document.querySelector('.robin-modal__container');
+    if (container) container.classList.add('robin-modal__container--expanded');
+
+    // Afficher le loader
+    body.innerHTML = '<div class="robin-reco">' +
+      '<div class="robin-reco__loader">' + renderConseilLoader() + '</div>' +
+      '</div>';
+    animateLoader();
+
+    // Appel AJAX recommendation
+    var fd = new FormData();
+    fd.append('action', 'sapi_robin_conseil_step');
+    fd.append('nonce', NONCE);
+    fd.append('guide_website', '');
+    fd.append('step_id', 'recommendation');
+    fd.append('answers', JSON.stringify(state.answers));
+    fd.append('opening_context', state.openingContext);
+    fd.append('context_data', JSON.stringify(state.contextData));
+    fd.append('user_message', '');
+    fd.append('conversation', JSON.stringify(state.conversation));
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', AJAX_URL, true);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) return;
+      if (xhr.status === 200) {
+        try {
+          var resp = JSON.parse(xhr.responseText);
+          if (resp.success && resp.data) {
+            renderRecoResult(resp.data);
+            return;
+          }
+        } catch (e) {}
+      }
+      // Fallback erreur
+      body.innerHTML = '<div class="robin-reco">' +
+        '<div class="robin-fiche__conseil">' +
+        renderConseil({ conseil_text: 'D\u00e9sol\u00e9, je n\'ai pas pu analyser votre projet. Rendez-vous sur nos cr\u00e9ations pour explorer le catalogue.' }, false) +
+        '</div>' +
+        '<div class="robin-fiche__link"><a href="/nos-creations/?robin_selection=1">Voir nos cr\u00e9ations &rarr;</a></div>' +
+        '</div>';
+    };
+    xhr.send(fd);
+  }
+
+  function renderRecoResult(data) {
+    var html = '<div class="robin-reco">';
+
+    // Texte A — conseils techniques (animation mot par mot)
+    html += '<div class="robin-reco__conseil">';
+    html += renderConseil({ conseil_text: data.conseil_text || '' }, true);
+    html += '</div>';
+
+    // Slider de produits
+    if (data.products && data.products.length > 0) {
+      html += '<div class="robin-reco__slider-wrap">';
+      html += '<div class="robin-reco__slider" id="robin-reco-slider">';
+
+      for (var i = 0; i < data.products.length; i++) {
+        var p = data.products[i];
+        html += '<a href="' + escAttr(p.permalink) + '" class="robin-reco__card" style="opacity:0;">';
+
+        // Photos
+        html += '<div class="robin-reco__card-photos">';
+        html += '<img src="' + escAttr(p.image) + '" alt="' + escAttr(p.title) + '" class="robin-reco__card-img">';
+        if (p.hover_image) {
+          html += '<img src="' + escAttr(p.hover_image) + '" alt="" class="robin-reco__card-img robin-reco__card-img--hover">';
+        }
+        html += '</div>';
+
+        // Infos
+        html += '<div class="robin-reco__card-info">';
+        html += '<h4 class="robin-reco__card-title">' + escHtml(p.title) + '</h4>';
+        html += '<div class="robin-reco__card-price">' + (p.price || '') + '</div>';
+        if (p.variation_label) {
+          html += '<div class="robin-reco__card-variant">' + escHtml(p.variation_label) + '</div>';
+        }
+        // Texte B — pourquoi ce produit
+        if (p.reason) {
+          html += '<p class="robin-reco__card-reason">' + escHtml(p.reason) + '</p>';
+        }
+        html += '</div>';
+
+        html += '</a>';
+      }
+
+      html += '</div>';
+      html += '</div>';
+    }
+
+    // Boutons finaux
+    html += '<div class="robin-reco__actions">';
+    html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/nos-creations/?robin_selection=1">Voir toutes nos cr\u00e9ations</a>';
+    html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/contact/">Contacter Robin</a>';
+    html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/sur-mesure/">Projet sur mesure</a>';
+    html += '</div>';
+
+    html += '</div>';
+
+    body.innerHTML = html;
+
+    // Animer le texte A
+    animateConseil();
+
+    // Animer les cards produit avec un délai séquentiel
+    setTimeout(function() {
+      var cards = document.querySelectorAll('.robin-reco__card');
+      for (var i = 0; i < cards.length; i++) {
+        (function(card, delay) {
+          setTimeout(function() {
+            card.style.transition = 'opacity 0.5s, transform 0.5s';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+          }, delay);
+        })(cards[i], i * 300 + 500);
+      }
+    }, (data.conseil_text || '').split(' ').length * 50 + 1000);
   }
 
   function renderHorsParcours() {
@@ -1079,6 +1214,12 @@
         }
         if (e.target.id === 'robin-category-no') {
           onCategoryConfirm(false);
+          return;
+        }
+
+        // Voir le conseil de Robin (recommandation)
+        if (e.target.id === 'robin-reco-conseil') {
+          onRecoConseilClick();
           return;
         }
 

@@ -2198,7 +2198,13 @@ function sapi_ajax_robin_conseil_step() {
     ]);
   }
 
-  // 6. Construire le prompt et appeler Claude
+  // 6. Recommendation finale — pipeline complet
+  if ($step_id === 'recommendation') {
+    sapi_robin_handle_recommendation($answers, $ai_allowed);
+    return; // sapi_robin_handle_recommendation fait son propre wp_send_json
+  }
+
+  // 7. Étapes normales — construire le prompt et appeler Claude
   $system_prompt = sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $context_data, $user_message);
 
   // Message user contextuel
@@ -2298,6 +2304,145 @@ function sapi_robin_validate_response($result) {
 /**
  * Robin V2 — Build system prompt for a single step.
  */
+/**
+ * Robin V2 — Recommandation finale : filtrage + Claude + produits.
+ */
+function sapi_robin_handle_recommendation($answers, $ai_allowed) {
+  require_once get_template_directory() . '/inc/guide-data.php';
+
+  // Normaliser taille_escalier → taille
+  if (!empty($answers['taille_escalier'])) {
+    $answers['taille'] = $answers['taille_escalier'] === 'ouvert' ? 'grande' : 'petite';
+  }
+
+  // Pipeline de filtrage
+  $categories = sapi_guide_get_categories($answers);
+  $result = sapi_guide_query_products($answers, $categories);
+  $products = isset($result['products']) ? $result['products'] : [];
+
+  // Sélectionner 3-4 produits
+  $show_sur_mesure = !empty($answers['eclairage']) && $answers['eclairage'] === 'grappe';
+  $pick_count = $show_sur_mesure ? 3 : 4;
+  $picked = sapi_guide_pick_four($products, $pick_count);
+
+  if (empty($picked)) {
+    wp_send_json_success([
+      'conseil_text' => 'Je n\'ai pas trouvé de luminaire qui corresponde exactement à vos critères. Le mieux est d\'explorer notre catalogue ou de contacter Robin directement.',
+      'products' => [],
+    ]);
+    return;
+  }
+
+  // Préparer les données produit pour le front
+  $front_products = [];
+  foreach ($picked as $p) {
+    $front_products[] = [
+      'id'              => $p['id'],
+      'title'           => $p['title'],
+      'price'           => $p['price'],
+      'image'           => $p['image'],
+      'hover_image'     => isset($p['hover_image']) ? $p['hover_image'] : '',
+      'ambiance'        => isset($p['ambiance']) ? $p['ambiance'] : '',
+      'permalink'       => $p['permalink'],
+      'variation_label' => isset($p['variation_label']) ? $p['variation_label'] : '',
+      'size_label'      => isset($p['size_label']) ? $p['size_label'] : '',
+      'category_label'  => isset($p['category_label']) ? $p['category_label'] : '',
+      'reason'          => '', // Sera rempli par Claude
+    ];
+  }
+
+  // Appeler Claude pour le texte A + texte B par produit
+  if ($ai_allowed) {
+    $ai_result = sapi_robin_call_recommendation($picked, $answers);
+    if ($ai_result) {
+      // Texte A
+      $conseil_text = isset($ai_result['conseil_text']) ? $ai_result['conseil_text'] : '';
+
+      // Textes B par produit
+      if (!empty($ai_result['products'])) {
+        foreach ($ai_result['products'] as $ai_prod) {
+          $pid = isset($ai_prod['id']) ? (int) $ai_prod['id'] : 0;
+          $reason = isset($ai_prod['reason']) ? $ai_prod['reason'] : '';
+          for ($i = 0; $i < count($front_products); $i++) {
+            if ($front_products[$i]['id'] === $pid) {
+              $front_products[$i]['reason'] = $reason;
+              break;
+            }
+          }
+        }
+      }
+
+      wp_send_json_success([
+        'conseil_text' => $conseil_text,
+        'products'     => $front_products,
+      ]);
+      return;
+    }
+  }
+
+  // Fallback sans IA
+  wp_send_json_success([
+    'conseil_text' => 'Voici les luminaires qui correspondent le mieux à votre projet. Explorez-les et n\'hésitez pas à contacter Robin pour en discuter.',
+    'products'     => $front_products,
+  ]);
+}
+
+/**
+ * Robin V2 — Appel Claude pour la recommandation finale.
+ */
+function sapi_robin_call_recommendation($products, $answers) {
+  $theme_dir = get_template_directory();
+  $ton    = @file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt') ?: '';
+  $savoir = @file_get_contents($theme_dir . '/assets/guide-prompt-savoir.txt') ?: '';
+  $regles = @file_get_contents($theme_dir . '/assets/guide-prompt-regles.txt') ?: '';
+
+  // Construire la liste des produits pour le prompt
+  $product_lines = [];
+  foreach ($products as $p) {
+    $line = '- ' . $p['title'] . ' (ID: ' . $p['id'] . ')';
+    $line .= ' | Catégorie: ' . ($p['category_label'] ?? '');
+    $line .= ' | Format: ' . ($p['format'] ?? '');
+    $line .= ' | Ampoule: ' . ($p['type_ampoule'] ?? '');
+    if (!empty($p['variation_label'])) $line .= ' | Essence: ' . $p['variation_label'];
+    $line .= ' | Ventes: ' . ($p['total_sales'] ?? 0);
+    $product_lines[] = $line;
+  }
+
+  // Résumé des réponses
+  $label_map = [
+    'piece' => 'Pièce', 'taille' => 'Taille', 'taille_escalier' => 'Type escalier',
+    'eclairage' => 'Éclairage', 'sortie' => 'Installation', 'hauteur' => 'Hauteur plafond',
+    'table' => 'Au-dessus table/îlot', 'style' => 'Style',
+  ];
+  $answers_text = '';
+  foreach ($answers as $k => $v) {
+    $label = isset($label_map[$k]) ? $label_map[$k] : $k;
+    $answers_text .= '- ' . $label . ' : ' . $v . "\n";
+  }
+
+  $prompt = $ton . "\n\n" . $savoir . "\n\n" . $regles . "\n\n";
+  $prompt .= "PRODUITS SÉLECTIONNÉS POUR CE CLIENT :\n" . implode("\n", $product_lines) . "\n\n";
+  $prompt .= "RÉPONSES DU CLIENT :\n" . $answers_text . "\n";
+  $prompt .= "MISSION : Rédige une recommandation finale personnalisée.\n\n";
+  $prompt .= "FORMAT DE RÉPONSE (JSON strict, pas de markdown) :\n";
+  $prompt .= "{\n";
+  $prompt .= '  "conseil_text": "Texte A : conseil technique et pratique global (3-5 phrases). Synthétise les réponses du client et explique pourquoi ces luminaires sont adaptés. Ne cite pas les noms des produits ici.",' . "\n";
+  $prompt .= '  "products": [' . "\n";
+  $prompt .= '    { "id": 123, "reason": "Texte B : 1-2 phrases expliquant pourquoi ce produit précis est adapté au projet du client." }' . "\n";
+  $prompt .= '  ]' . "\n";
+  $prompt .= "}\n\n";
+  $prompt .= "RÈGLES :\n";
+  $prompt .= "- Le conseil_text ne mentionne PAS les noms de produits (ils sont affichés à côté).\n";
+  $prompt .= "- Chaque reason est personnalisée (pas générique).\n";
+  $prompt .= "- Pas de guillemets « » (ajoutés côté front).\n";
+  $prompt .= "- Pas de markdown.\n";
+  $prompt .= "- Les IDs dans products doivent correspondre exactement aux IDs des produits fournis.\n";
+
+  $result = sapi_robin_call_claude_step($prompt, 'Voici mon projet complet. Recommande-moi des luminaires.');
+
+  return $result;
+}
+
 function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $context_data, $user_message) {
   $theme_dir = get_template_directory();
 

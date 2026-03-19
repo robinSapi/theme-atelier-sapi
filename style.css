@@ -2130,6 +2130,176 @@ a.robin-fiche__choice--link {
   }
 }
 
+/* ─── Recommandation finale ─── */
+
+/* Modale agrandie */
+.robin-modal__container--expanded {
+  max-width: 900px;
+  height: 90vh;
+  transition: max-width 0.6s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s ease;
+}
+@media (max-width: 600px) {
+  .robin-modal__container--expanded {
+    width: 100%;
+    height: 95dvh;
+    max-width: 100%;
+    border-radius: 12px;
+  }
+}
+
+/* Container recommandation */
+.robin-reco {
+  padding: 0.5rem 0;
+}
+.robin-reco__loader {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+}
+.robin-reco__conseil {
+  margin-bottom: 2rem;
+}
+
+/* Bouton primaire "Voir le conseil de Robin" */
+.robin-fiche__choice--primary {
+  background: var(--gradient-cta, linear-gradient(180deg, #E35B24 0%, #D14F1C 100%));
+  color: #fff;
+  border-color: var(--color-orange, #E35B24);
+  font-weight: 600;
+}
+.robin-fiche__choice--primary:hover {
+  background: var(--color-orange-hover, #C94D1E);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.3);
+}
+
+/* Slider produits */
+.robin-reco__slider-wrap {
+  margin: 1.5rem 0 2rem;
+  overflow: hidden;
+}
+.robin-reco__slider {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.5rem 0.25rem 1rem;
+  scrollbar-width: none;
+}
+.robin-reco__slider::-webkit-scrollbar {
+  display: none;
+}
+
+/* Card produit */
+.robin-reco__card {
+  flex: 0 0 280px;
+  scroll-snap-align: start;
+  background: var(--color-cream, #FEFDFB);
+  border: 2px dashed rgba(var(--color-wood-rgb, 147, 125, 104), 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--color-dark, #323232);
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s, opacity 0.5s;
+  transform: translateY(20px);
+  opacity: 0;
+}
+.robin-reco__card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 30px rgba(var(--color-wood-rgb, 147, 125, 104), 0.15);
+  border-color: var(--color-wood, #937D68);
+}
+
+/* Photos produit */
+.robin-reco__card-photos {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--color-warm, #FBF6EA);
+}
+.robin-reco__card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.4s;
+}
+.robin-reco__card-img--hover {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+.robin-reco__card:hover .robin-reco__card-img--hover {
+  opacity: 1;
+}
+
+/* Infos produit */
+.robin-reco__card-info {
+  padding: 1.25rem;
+}
+.robin-reco__card-title {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+  color: var(--color-dark, #323232);
+}
+.robin-reco__card-price {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.9rem;
+  color: var(--color-orange, #E35B24);
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+.robin-reco__card-variant {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.75rem;
+  color: var(--color-wood, #937D68);
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.robin-reco__card-reason {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.82rem;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--color-dark, #323232);
+  margin: 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
+}
+
+/* Boutons finaux */
+.robin-reco__actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding: 1rem 0;
+}
+
+/* Responsive mobile — cards plus petites */
+@media (max-width: 600px) {
+  .robin-reco__card {
+    flex: 0 0 240px;
+  }
+  .robin-reco__card-info {
+    padding: 1rem;
+  }
+  .robin-reco__card-title {
+    font-size: 0.9rem;
+  }
+  .robin-reco__card-reason {
+    font-size: 0.78rem;
+  }
+  .robin-reco__actions {
+    gap: 0.4rem;
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════
    FIN ROBIN CONSEILLER V2
 ═══════════════════════════════════════════════════════════ */
