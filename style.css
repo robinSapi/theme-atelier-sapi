@@ -1701,6 +1701,43 @@ button:hover,
   background: rgba(var(--color-wood-rgb, 147, 125, 104), 0.15);
 }
 
+/* Résumé projet sous le header */
+.robin-modal__project {
+  padding: 0.5rem 1.5rem 0.6rem;
+  background: var(--color-warm, #FBF6EA);
+  border-bottom: 1px solid rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.robin-modal__chip {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  background: rgba(var(--color-wood-rgb, 147, 125, 104), 0.12);
+  border-radius: 50px;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--color-wood, #937D68);
+}
+.robin-modal__reset {
+  margin-left: auto;
+  background: none;
+  border: none;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.68rem;
+  color: var(--color-orange, #E35B24);
+  cursor: pointer;
+  padding: 0.15rem 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.robin-modal__reset:hover {
+  color: var(--color-orange-hover, #C94D1E);
+}
+
 /* Corps modale — deux zones */
 .robin-modal__body {
   flex: 1;

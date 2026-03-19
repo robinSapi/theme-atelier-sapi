@@ -26,6 +26,9 @@ function sapi_robin_modal() {
       <button class="robin-modal__close" id="robin-modal-close" type="button" aria-label="Fermer">&times;</button>
     </div>
 
+    <!-- Résumé projet : chips + recommencer (rempli par JS) -->
+    <div class="robin-modal__project" id="robin-modal-project" style="display:none;"></div>
+
     <!-- Corps : JS rend les fiches ici -->
     <div class="robin-modal__body" id="robin-modal-body"></div>
 

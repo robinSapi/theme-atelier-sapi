@@ -333,6 +333,7 @@
     document.body.style.overflow = 'hidden';
     state.isOpen = true;
 
+    updateModalProject();
     showFiche(startStep);
   }
 
@@ -607,8 +608,9 @@
     // Afficher la fiche suivante (instantané)
     showFiche(next);
 
-    // Mettre à jour le bandeau
+    // Mettre à jour le bandeau + résumé modale
     updateBandeauChips();
+    updateModalProject();
   }
 
   /* ═══════════════════════════════════════════
@@ -706,6 +708,48 @@
   }
 
   /* ═══════════════════════════════════════════
+     Résumé projet dans la modale (chips + recommencer)
+  ═══════════════════════════════════════════ */
+  function updateModalProject() {
+    var projectEl = document.getElementById('robin-modal-project');
+    if (!projectEl) return;
+
+    var parts = [];
+    var visible = getVisibleSteps();
+    for (var i = 0; i < visible.length; i++) {
+      var lbl = state.labels[visible[i]];
+      if (lbl) parts.push(lbl);
+    }
+
+    if (parts.length === 0) {
+      projectEl.style.display = 'none';
+      return;
+    }
+
+    var html = '';
+    for (var j = 0; j < parts.length; j++) {
+      html += '<span class="robin-modal__chip">' + escHtml(parts[j]) + '</span>';
+    }
+    html += '<button class="robin-modal__reset" id="robin-modal-reset" type="button">Recommencer</button>';
+
+    projectEl.innerHTML = html;
+    projectEl.style.display = '';
+  }
+
+  function resetProject() {
+    state.answers = {};
+    state.labels  = {};
+    state.history = [];
+    state.aiCache = {};
+    state.conversation = [];
+    localStorage.removeItem(STORAGE_KEY);
+    saveState();
+    updateBandeauChips();
+    updateModalProject();
+    showFiche(steps[0].id);
+  }
+
+  /* ═══════════════════════════════════════════
      Refresh page visuals (consommateurs localStorage)
   ═══════════════════════════════════════════ */
   function refreshPageVisuals() {
@@ -738,6 +782,16 @@
 
     // Retour
     if (backBtn) backBtn.addEventListener('click', goBack);
+
+    // Reset projet (délégation car le bouton est dynamique)
+    var projectEl = document.getElementById('robin-modal-project');
+    if (projectEl) {
+      projectEl.addEventListener('click', function (e) {
+        if (e.target.id === 'robin-modal-reset' || e.target.closest('#robin-modal-reset')) {
+          resetProject();
+        }
+      });
+    }
 
     // Échap
     document.addEventListener('keydown', function (e) {
