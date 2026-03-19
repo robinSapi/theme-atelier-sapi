@@ -53,7 +53,7 @@
       this.initAdvancedFilters();
 
       // "Ma sélection" — bouton Robin si projet en cours
-      this.initRobinSelection(filterContainer);
+      try { this.initRobinSelection(filterContainer); } catch(e) { /* ne jamais casser les filtres */ }
 
       // Appliquer le filtre initial (masque accessoires par défaut)
       this.applyFilters();
@@ -100,18 +100,20 @@
           self._robinProductIds = null;
           self.applyFilters();
         } else {
-          // Activer Ma sélection
+          // Activer Ma sélection — désactiver les autres boutons
+          filterContainer.querySelectorAll('.filter-btn.active').forEach(function(b) {
+            b.classList.remove('active');
+          });
           robinBtn.classList.add('active');
           self.fetchRobinSelection(prefs.answers);
         }
       });
 
-      // Auto-activer si URL contient robin_selection=1
+      // Auto-activer si URL contient robin_selection=1 (différé après init)
       var params = new URLSearchParams(window.location.search);
       if (params.get('robin_selection') === '1') {
         window.history.replaceState({}, '', window.location.pathname);
-        // Simuler le clic
-        robinBtn.click();
+        setTimeout(function() { robinBtn.click(); }, 50);
       }
     },
 
