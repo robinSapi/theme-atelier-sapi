@@ -1746,7 +1746,7 @@ button:hover,
   overflow: hidden;
 }
 
-/* Zone haute : conseil centré */
+/* Zone haute : conseil centré, lien en bas */
 .robin-fiche__top {
   flex: 1;
   display: flex;
@@ -1756,6 +1756,10 @@ button:hover,
   padding: 1.5rem 1.5rem 1rem;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+.robin-fiche__top .robin-fiche__link {
+  margin-top: auto;
+  padding-top: 0.75rem;
 }
 
 /* Zone basse : question + boutons + input */
@@ -1968,6 +1972,13 @@ button:hover,
   box-shadow: 0 6px 20px rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
   border-color: var(--color-wood, #937D68);
   color: var(--color-dark, #323232);
+}
+
+/* ─── Desktop ─── */
+@media (min-width: 601px) {
+  .robin-fiche__citation-text {
+    font-size: 1.1rem;
+  }
 }
 
 /* ─── Responsive mobile ─── */
