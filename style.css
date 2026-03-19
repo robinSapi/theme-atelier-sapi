@@ -2346,6 +2346,7 @@ a.robin-fiche__choice--link {
 }
 .robin-reco__cta {
   display: inline-block;
+  align-self: flex-start;
   padding: 0.65rem 1.5rem;
   background: transparent;
   border: none;
