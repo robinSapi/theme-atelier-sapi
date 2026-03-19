@@ -1897,6 +1897,10 @@ button:hover,
   color: #fff;
   border-color: var(--color-orange, #E35B24);
 }
+a.robin-fiche__choice--link {
+  text-decoration: none;
+  color: var(--color-dark, #323232);
+}
 .robin-fiche__choice-icon {
   display: inline-flex;
   width: 18px;

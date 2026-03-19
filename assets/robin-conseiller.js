@@ -734,9 +734,17 @@
       html += '<div class="robin-fiche__choices">';
       for (var i = 0; i < data.suggested_buttons.length; i++) {
         var btn = data.suggested_buttons[i];
-        html += '<button class="robin-fiche__choice" data-step="' + escAttr(btn.step_id || '') + '" data-slug="' + escAttr(btn.slug || '') + '" data-label="' + escAttr(btn.label || '') + '">';
-        html += escHtml(btn.label);
-        html += '</button>';
+        if (btn.url) {
+          // Bouton lien → ouvre une page
+          html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="' + escAttr(btn.url) + '">';
+          html += escHtml(btn.label);
+          html += '</a>';
+        } else {
+          // Bouton questionnaire → navigue vers une étape
+          html += '<button class="robin-fiche__choice" data-step="' + escAttr(btn.step_id || '') + '" data-slug="' + escAttr(btn.slug || '') + '" data-label="' + escAttr(btn.label || '') + '">';
+          html += escHtml(btn.label);
+          html += '</button>';
+        }
       }
       html += '</div>';
     } else if (nextStep !== 'hors_parcours' && nextStep !== 'recommendation') {

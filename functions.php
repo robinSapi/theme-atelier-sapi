@@ -2144,7 +2144,7 @@ function sapi_ajax_robin_conseil_step() {
       'link_url'     => null,
       'link_label'   => null,
       'suggested_buttons' => [
-        ['label' => 'Contacter Robin', 'slug' => 'contact', 'step_id' => 'hors_parcours'],
+        ['label' => 'Contacter Robin', 'url' => '/contact/'],
       ],
       'next_step_id' => 'hors_parcours',
       'answered_steps' => new \stdClass(),
@@ -2179,7 +2179,7 @@ function sapi_ajax_robin_conseil_step() {
       'link_url'     => null,
       'link_label'   => null,
       'suggested_buttons' => [
-        ['label' => 'Contacter Robin', 'slug' => 'contact', 'step_id' => 'hors_parcours'],
+        ['label' => 'Contacter Robin', 'url' => '/contact/'],
         ['label' => 'Reprendre le questionnaire', 'slug' => 'restart', 'step_id' => 'piece'],
       ],
       'next_step_id' => 'hors_parcours',
@@ -2274,6 +2274,8 @@ function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $con
     $prompt .= '  "link_label": "Voir les suspensions" ou null,' . "\n";
     $prompt .= '  "answered_steps": { "piece": "cuisine", "taille": "petite" } ou {} si rien déduit,' . "\n";
     $prompt .= '  "suggested_buttons": [' . "\n";
+    $prompt .= '    { "label": "Voir les suspensions", "url": "/categorie-produit/suspensions/" },' . "\n";
+    $prompt .= '    { "label": "Contacter Robin", "url": "/contact/" },' . "\n";
     $prompt .= '    { "label": "Sortie plafond", "slug": "plafond", "step_id": "sortie" }' . "\n";
     $prompt .= '  ] ou [] si pas pertinent,' . "\n";
     $prompt .= '  "next_step_id": "sortie" ou "hors_parcours" ou null' . "\n";
@@ -2293,7 +2295,10 @@ function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $con
     }
 
     $prompt .= "- next_step_id : la prochaine étape logique du questionnaire, ou 'hors_parcours' si le message sort du cadre.\n";
-    $prompt .= "- suggested_buttons : boutons à proposer au client pour continuer. Chaque bouton a un label, un slug et un step_id.\n";
+    $prompt .= "- suggested_buttons : deux types possibles :\n";
+    $prompt .= "  - Bouton lien (ouvre une page) : { \"label\": \"...\", \"url\": \"/chemin/\" }\n";
+    $prompt .= "  - Bouton questionnaire (navigue vers une étape) : { \"label\": \"...\", \"slug\": \"...\", \"step_id\": \"...\" }\n";
+    $prompt .= "  URLs valides : /contact/, /nos-creations/, /categorie-produit/suspensions/, /categorie-produit/appliques/, /categorie-produit/lampadaires/, /categorie-produit/lampes-a-poser/, /sur-mesure/\n";
     $prompt .= "- Si le message est une question hors questionnaire (livraison, prix, sur mesure...), réponds et mets next_step_id à 'hors_parcours'.\n";
   } else {
     $prompt .= "{\n";
