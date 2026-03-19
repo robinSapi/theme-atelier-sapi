@@ -598,8 +598,8 @@ foreach ($collection_slugs as $col) {
 (function() {
   const carousel = document.querySelector('.homepage-carousel-fullscreen');
 
-  // 1. Déplacer le bandeau "Mon projet" juste sous le carousel
-  const monProjetBar = document.querySelector('.mon-projet-bar');
+  // 1. Déplacer le bandeau juste sous le carousel (V1 ou V2)
+  const monProjetBar = document.querySelector('.mon-projet-bar') || document.querySelector('.robin-bandeau');
   if (monProjetBar && carousel) {
     carousel.parentNode.insertBefore(monProjetBar, carousel.nextSibling);
     monProjetBar.classList.add('home-repositioned-bar');
