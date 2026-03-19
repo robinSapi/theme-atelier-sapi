@@ -52,8 +52,54 @@
       // Advanced dropdown filters
       this.initAdvancedFilters();
 
+      // Lire les filtres depuis l'URL (liens Robin Conseiller)
+      this.applyUrlFilters();
+
       // Appliquer le filtre initial (masque accessoires par défaut)
       this.applyFilters();
+    },
+
+    applyUrlFilters: function() {
+      var params = new URLSearchParams(window.location.search);
+      var mapping = { robin_cat: 'category', robin_wood: 'wood', robin_size: 'size' };
+
+      for (var param in mapping) {
+        var value = params.get(param);
+        if (value) {
+          var filterType = mapping[param];
+          this.filters[filterType] = value;
+
+          // Mettre à jour l'UI des dropdowns
+          var dropdown = document.querySelector('.filter-dropdown[data-filter-type="' + filterType + '"]');
+          if (dropdown) {
+            var option = dropdown.querySelector('.filter-option[data-' + filterType + '="' + value + '"]');
+            var toggle = dropdown.querySelector('.filter-dropdown-toggle');
+            if (option && toggle) {
+              dropdown.querySelector('.filter-option.active')?.classList.remove('active');
+              option.classList.add('active');
+              var label = toggle.querySelector('.filter-label');
+              if (label) {
+                label.textContent = option.textContent;
+                toggle.classList.add('has-filter');
+              }
+            }
+          }
+
+          // Mettre à jour les boutons catégorie
+          if (filterType === 'category') {
+            var activeBtn = document.querySelector('.filter-btn.active');
+            if (activeBtn) activeBtn.classList.remove('active');
+            var targetBtn = document.querySelector('.filter-btn[data-filter="' + value + '"]');
+            if (targetBtn) targetBtn.classList.add('active');
+          }
+        }
+      }
+
+      // Nettoyer l'URL
+      if (params.has('robin_cat') || params.has('robin_wood') || params.has('robin_size')) {
+        var url = window.location.pathname;
+        window.history.replaceState({}, '', url);
+      }
     },
 
     initSearch: function() {

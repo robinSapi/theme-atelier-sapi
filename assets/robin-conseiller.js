@@ -219,6 +219,47 @@
   }
 
   /* ═══════════════════════════════════════════
+     Lien sortant dynamique vers /nos-creations/
+  ═══════════════════════════════════════════ */
+  function buildShopLink() {
+    var params = [];
+    var labelParts = [];
+
+    // Catégorie selon la sortie
+    var sortie = state.answers.sortie;
+    if (sortie === 'plafond') {
+      params.push('robin_cat=suspensions');
+      labelParts.push('suspensions');
+    } else if (sortie === 'mur') {
+      params.push('robin_cat=appliques');
+      labelParts.push('appliques');
+    } else if (sortie === 'pas-de-sortie') {
+      params.push('robin_cat=lampadaires');
+      labelParts.push('lampadaires et lampes');
+    }
+
+    // Essence selon le style
+    var style = state.answers.style;
+    if (style === 'moderne') {
+      params.push('robin_wood=peuplier');
+    } else if (style === 'ancien') {
+      params.push('robin_wood=okoume');
+    }
+
+    var url = '/nos-creations/';
+    if (params.length > 0) {
+      url += '?' + params.join('&');
+    }
+
+    var label = 'Voir les créations';
+    if (labelParts.length > 0) {
+      label = 'Voir les ' + labelParts.join(', ');
+    }
+
+    return { url: url, label: label };
+  }
+
+  /* ═══════════════════════════════════════════
      Lookup conseil pré-généré
   ═══════════════════════════════════════════ */
   function getConseil(stepId, slug) {
@@ -436,13 +477,26 @@
     }
     html += '</div>';
 
-    // Lien sortant (dans la zone haute, caché si animé)
-    var lastStepForLink = state.history.length > 0 ? state.history[state.history.length - 1] : null;
-    var lastSlugForLink = lastStepForLink ? state.answers[lastStepForLink] : null;
-    var linkData = lastStepForLink && lastSlugForLink ? getConseil(lastStepForLink, lastSlugForLink) : null;
-    if (linkData && linkData.link_url) {
-      html += '<div class="robin-fiche__link" id="robin-fiche-link"' + (shouldAnimate ? ' style="opacity:0;"' : '') + '><a href="' + escHtml(linkData.link_url) + '">';
-      html += escHtml(linkData.link_label || 'Voir') + ' &rarr;</a></div>';
+    // Lien sortant — override JSON si existant, sinon lien dynamique
+    if (!isFirstFiche) {
+      var lastStepForLink = state.history.length > 0 ? state.history[state.history.length - 1] : null;
+      var lastSlugForLink = lastStepForLink ? state.answers[lastStepForLink] : null;
+      var conseilForLink = lastStepForLink && lastSlugForLink ? getConseil(lastStepForLink, lastSlugForLink) : null;
+      var linkUrl, linkLabel;
+
+      if (conseilForLink && conseilForLink.link_url) {
+        // Override depuis le JSON (ex: /contact/ pour grappe)
+        linkUrl = conseilForLink.link_url;
+        linkLabel = conseilForLink.link_label || 'Voir';
+      } else {
+        // Lien dynamique vers /nos-creations/ avec filtres
+        var shopLink = buildShopLink();
+        linkUrl = shopLink.url;
+        linkLabel = shopLink.label;
+      }
+
+      html += '<div class="robin-fiche__link" id="robin-fiche-link"' + (shouldAnimate ? ' style="opacity:0;"' : '') + '><a href="' + escHtml(linkUrl) + '">';
+      html += escHtml(linkLabel) + ' &rarr;</a></div>';
     }
     html += '</div>';
 
