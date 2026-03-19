@@ -2166,10 +2166,6 @@ a.robin-fiche__choice--link {
   align-items: center;
   flex: 1;
 }
-.robin-reco__conseil {
-  flex: 0 0 auto;
-  padding: 0 0 0.75rem;
-}
 
 /* Bouton primaire "Voir le conseil de Robin" */
 .robin-fiche__choice--primary {
@@ -2211,9 +2207,9 @@ a.robin-fiche__choice--link {
   flex-direction: column;
 }
 
-/* Photo — ~55% de la slide */
+/* Photo — ~65% de la slide */
 .robin-reco__photo {
-  flex: 0 0 55%;
+  flex: 0 0 65%;
   overflow: hidden;
   background: var(--color-warm, #FBF6EA);
   border-radius: 12px;

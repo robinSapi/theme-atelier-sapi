@@ -708,10 +708,7 @@
 
     var html = '<div class="robin-reco">';
 
-    // Texte A — court, animation mot par mot
-    html += '<div class="robin-reco__conseil">';
-    html += renderConseil({ conseil_text: data.conseil_text || '' }, true);
-    html += '</div>';
+    // Texte A supprimé — la photo prend tout l'espace
 
     // Slider showcase — 1 produit par slide
     if (totalSlides > 0) {
@@ -774,18 +771,14 @@
 
     body.innerHTML = html;
 
-    // Animer texte A
-    animateConseil();
-
-    // Afficher le showcase après le texte A
+    // Showcase apparaît en fondu
     var showcase = document.getElementById('robin-reco-showcase');
     if (showcase) {
       showcase.style.opacity = '0';
-      var textDelay = (data.conseil_text || '').split(' ').length * 50 + 1200;
       setTimeout(function() {
         showcase.style.transition = 'opacity 0.6s';
         showcase.style.opacity = '1';
-      }, textDelay);
+      }, 300);
     }
 
     // Init slider navigation
