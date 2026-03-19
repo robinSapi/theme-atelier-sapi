@@ -1988,15 +1988,94 @@ button:hover,
 
 /* ─── Responsive mobile ─── */
 @media (max-width: 600px) {
+  .robin-modal {
+    padding: 0;
+    align-items: stretch;
+  }
   .robin-modal__container {
     max-width: 100%;
-    max-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
     border-radius: 0;
     border: none;
   }
-  .robin-modal {
-    padding: 0;
+  /* Header compact */
+  .robin-modal__header {
+    padding: 0.6rem 1rem;
+    min-height: 44px;
   }
+  .robin-modal__badge {
+    font-size: 0.6rem;
+    padding: 0.2rem 0.6rem;
+  }
+  .robin-modal__back {
+    font-size: 0.75rem;
+  }
+  /* Zone haute */
+  .robin-fiche__top {
+    padding: 1rem 1.25rem 0.75rem;
+  }
+  .robin-fiche__citation-text {
+    font-size: 0.88rem;
+    line-height: 1.65;
+  }
+  .robin-fiche__signature {
+    font-size: 0.78rem;
+  }
+  /* Zone basse compacte */
+  .robin-fiche__bottom {
+    padding: 0.75rem 1.25rem 1rem;
+  }
+  .robin-fiche__question {
+    font-size: 0.72rem;
+    margin-bottom: 0.4rem;
+  }
+  .robin-fiche__choices {
+    gap: 0.35rem;
+    margin-bottom: 0.6rem;
+  }
+  .robin-fiche__choice {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.78rem;
+  }
+  .robin-fiche__choice-icon {
+    width: 15px;
+    height: 15px;
+  }
+  .robin-fiche__choice-dim {
+    font-size: 0.68rem;
+  }
+  .robin-fiche__input-wrap {
+    margin-top: 0.6rem;
+  }
+  .robin-fiche__input {
+    padding: 0.45rem 0.6rem 0.45rem 1rem;
+  }
+  .robin-fiche__input input {
+    font-size: 0.8rem;
+  }
+  .robin-fiche__send {
+    width: 30px;
+    min-width: 30px;
+    height: 30px;
+  }
+  /* Résumé projet compact */
+  .robin-modal__project {
+    padding: 0.35rem 1rem 0.4rem;
+  }
+  .robin-modal__chip {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.45rem;
+  }
+  .robin-modal__reset {
+    font-size: 0.6rem;
+  }
+  /* Lien CTA compact */
+  .robin-fiche__link a {
+    font-size: 0.78rem;
+    padding: 0.45rem 1rem;
+  }
+  /* Bandeau */
   .robin-bandeau {
     padding: 0.55rem 1rem;
     top: calc(76px + env(safe-area-inset-top, 0px));
