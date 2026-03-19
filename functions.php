@@ -2616,6 +2616,8 @@ function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $con
   $prompt .= "- Pas de markdown. Texte brut uniquement.\n";
   $prompt .= "- Pas de guillemets « » dans le texte (ils sont ajoutés côté front).\n";
   $prompt .= "- Les labels des boutons : première lettre majuscule, reste en minuscule. Exemple : \"Voir les suspensions\", \"Contacter Robin\".\n";
+  $prompt .= "- CRITIQUE : ta réponse doit être UNIQUEMENT du JSON valide. Pas de texte avant, pas de texte après, pas de commentaire, pas d'analyse. Juste le JSON.\n";
+  $prompt .= "- Tu es Robin qui parle AU CLIENT, pas une IA qui analyse. Ne dis jamais 'le client', 'mon analyse', 'voici ma réflexion'. Tu PARLES directement au visiteur.\n";
 
   return $prompt;
 }
@@ -2667,15 +2669,38 @@ function sapi_robin_call_claude_step($system_prompt, $user_message) {
   }
 
   $text = $data['content'][0]['text'];
+
+  // Nettoyer les code fences
   $text = preg_replace('/^```json\s*/i', '', trim($text));
   $text = preg_replace('/\s*```$/i', '', $text);
 
+  // Essai 1 : parser directement
   $parsed = json_decode(trim($text), true);
-  if (!$parsed || !isset($parsed['conseil_text'])) {
-    return ['conseil_text' => $text, 'link_url' => null, 'link_label' => null];
+  if ($parsed && isset($parsed['conseil_text'])) {
+    return $parsed;
   }
 
-  return $parsed;
+  // Essai 2 : extraire le JSON du texte (si Claude a mis du texte autour)
+  if (preg_match('/\{[\s\S]*"conseil_text"[\s\S]*\}/s', $text, $match)) {
+    $parsed = json_decode($match[0], true);
+    if ($parsed && isset($parsed['conseil_text'])) {
+      return $parsed;
+    }
+  }
+
+  // Essai 3 : extraire juste le conseil_text par regex
+  if (preg_match('/"conseil_text"\s*:\s*"((?:[^"\\\\]|\\\\.)*)"/s', $text, $m)) {
+    return ['conseil_text' => stripslashes($m[1]), 'link_url' => null, 'link_label' => null];
+  }
+
+  // Fallback : texte brut nettoyé
+  $clean = preg_replace('/\{[\s\S]*\}/', '', $text);
+  $clean = trim($clean);
+  if (!empty($clean)) {
+    return ['conseil_text' => $clean, 'link_url' => null, 'link_label' => null];
+  }
+
+  return ['conseil_text' => $text, 'link_url' => null, 'link_label' => null];
 }
 
 /**
