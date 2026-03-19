@@ -234,16 +234,8 @@
       params.push('robin_cat=appliques');
       labelParts.push('appliques');
     } else if (sortie === 'pas-de-sortie') {
-      params.push('robin_cat=lampadaires');
-      labelParts.push('lampadaires et lampes');
-    }
-
-    // Essence selon le style
-    var style = state.answers.style;
-    if (style === 'moderne') {
-      params.push('robin_wood=peuplier');
-    } else if (style === 'ancien') {
-      params.push('robin_wood=okoume');
+      // Pas de filtre catégorie unique — on montre tout sauf suspensions
+      labelParts.push('lampadaires, appliques et lampes');
     }
 
     var url = '/nos-creations/';
