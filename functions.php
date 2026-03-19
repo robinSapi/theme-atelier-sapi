@@ -2187,7 +2187,62 @@ function sapi_ajax_robin_conseil_step() {
     ]);
   }
 
+  // Filtrer les boutons et réponses invalides avant d'envoyer
+  $result = sapi_robin_validate_response($result);
+
   wp_send_json_success($result);
+}
+
+/**
+ * Robin V2 — Valide et nettoie la réponse IA.
+ * Supprime les boutons avec des slugs invalides et les answered_steps incorrects.
+ */
+function sapi_robin_validate_response($result) {
+  require_once get_template_directory() . '/inc/guide-data.php';
+  $all_steps = sapi_guide_get_steps();
+
+  // Construire la map des slugs valides par step_id
+  $valid_slugs = [];
+  foreach ($all_steps as $s) {
+    $valid_slugs[$s['id']] = array_map(function($c) { return $c['slug']; }, $s['choices']);
+  }
+
+  // URLs valides pour les boutons liens
+  $valid_urls = ['/contact/', '/nos-creations/', '/sur-mesure/',
+    '/categorie-produit/suspensions/', '/categorie-produit/appliques/',
+    '/categorie-produit/lampadaires/', '/categorie-produit/lampes-a-poser/'];
+
+  // Filtrer suggested_buttons
+  if (!empty($result['suggested_buttons']) && is_array($result['suggested_buttons'])) {
+    $clean_buttons = [];
+    foreach ($result['suggested_buttons'] as $btn) {
+      if (!empty($btn['url'])) {
+        // Bouton lien — vérifier que l'URL est dans la liste
+        if (in_array($btn['url'], $valid_urls, true)) {
+          $clean_buttons[] = $btn;
+        }
+      } elseif (!empty($btn['step_id']) && !empty($btn['slug'])) {
+        // Bouton questionnaire — vérifier que le slug est valide pour cette étape
+        if (isset($valid_slugs[$btn['step_id']]) && in_array($btn['slug'], $valid_slugs[$btn['step_id']], true)) {
+          $clean_buttons[] = $btn;
+        }
+      }
+    }
+    $result['suggested_buttons'] = $clean_buttons;
+  }
+
+  // Filtrer answered_steps
+  if (!empty($result['answered_steps']) && is_array($result['answered_steps'])) {
+    $clean_answers = [];
+    foreach ($result['answered_steps'] as $step_id => $slug) {
+      if (isset($valid_slugs[$step_id]) && in_array($slug, $valid_slugs[$step_id], true)) {
+        $clean_answers[$step_id] = $slug;
+      }
+    }
+    $result['answered_steps'] = $clean_answers;
+  }
+
+  return $result;
 }
 
 /**
