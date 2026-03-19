@@ -460,7 +460,7 @@
       var iconHtml = icons[c.icon] ? '<span class="robin-fiche__choice-icon">' + icons[c.icon] + '</span>' : '';
       var dimHtml  = c.dim ? ' <span class="robin-fiche__choice-dim">' + escHtml(c.dim) + '</span>' : '';
       html += '<button class="robin-fiche__choice' + selected + '" data-step="' + escAttr(stepId) + '" data-slug="' + escAttr(c.slug) + '" data-label="' + escAttr(c.label) + '">';
-      html += iconHtml + escHtml(c.label) + dimHtml;
+      html += iconHtml + escHtml(ucfirst(c.label)) + dimHtml;
       html += '</button>';
     }
     html += '</div>';
@@ -781,17 +781,17 @@
         if (btn.url) {
           // Bouton lien → ouvre une page
           html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="' + escAttr(btn.url) + '">';
-          html += escHtml(btn.label);
+          html += escHtml(ucfirst(btn.label));
           html += '</a>';
         } else if (btn.step_id && btn.slug) {
           // Bouton questionnaire → navigue vers une étape
           html += '<button class="robin-fiche__choice" data-step="' + escAttr(btn.step_id) + '" data-slug="' + escAttr(btn.slug) + '" data-label="' + escAttr(btn.label || '') + '">';
-          html += escHtml(btn.label);
+          html += escHtml(ucfirst(btn.label));
           html += '</button>';
         } else {
           // Bouton conversation → renvoie le label comme texte libre
           html += '<button class="robin-fiche__choice robin-fiche__choice--conv" data-message="' + escAttr(btn.label) + '">';
-          html += escHtml(btn.label);
+          html += escHtml(ucfirst(btn.label));
           html += '</button>';
         }
       }
@@ -807,7 +807,7 @@
           var iconHtml = icons[c.icon] ? '<span class="robin-fiche__choice-icon">' + icons[c.icon] + '</span>' : '';
           var dimHtml = c.dim ? ' <span class="robin-fiche__choice-dim">' + escHtml(c.dim) + '</span>' : '';
           html += '<button class="robin-fiche__choice" data-step="' + escAttr(nextStep) + '" data-slug="' + escAttr(c.slug) + '" data-label="' + escAttr(c.label) + '">';
-          html += iconHtml + escHtml(c.label) + dimHtml;
+          html += iconHtml + escHtml(ucfirst(c.label)) + dimHtml;
           html += '</button>';
         }
         html += '</div>';
@@ -986,6 +986,11 @@
 
   function escAttr(str) {
     return escHtml(str).replace(/"/g, '&quot;');
+  }
+
+  function ucfirst(str) {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   }
 
   /* ═══════════════════════════════════════════

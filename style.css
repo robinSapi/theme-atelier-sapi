@@ -1887,7 +1887,6 @@ button:hover,
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  text-transform: capitalize;
 }
 .robin-fiche__choice:hover {
   background: rgba(227, 91, 36, 0.06);
