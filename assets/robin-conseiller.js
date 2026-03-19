@@ -388,14 +388,14 @@
     var isFirstFiche = (stepId === steps[0].id && state.history.length === 0);
 
     var html = '';
-
-    // Zone citation (conseil pré-généré)
     var shouldAnimate = !isFirstFiche;
+
+    // ─── Zone haute : conseil centré ───
+    html += '<div class="robin-fiche__top">';
     html += '<div class="robin-fiche__conseil" id="robin-fiche-conseil">';
     if (isFirstFiche) {
       html += renderConseil({ conseil_text: 'Chaque luminaire que je cr\u00e9e est une pi\u00e8ce unique, fa\u00e7onn\u00e9e \u00e0 la main dans mon atelier. Pour vous orienter au mieux, dites-moi dans quelle pi\u00e8ce vous imaginez votre futur luminaire.' }, false);
     } else {
-      // Le conseil correspond au dernier step répondu (pas au step courant)
       var lastStep = state.history.length > 0 ? state.history[state.history.length - 1] : null;
       var lastSlug = lastStep ? state.answers[lastStep] : null;
       var conseilData = lastStep && lastSlug ? getConseil(lastStep, lastSlug) : null;
@@ -407,7 +407,7 @@
     }
     html += '</div>';
 
-    // Lien sortant
+    // Lien sortant (dans la zone haute aussi)
     var lastStepForLink = state.history.length > 0 ? state.history[state.history.length - 1] : null;
     var lastSlugForLink = lastStepForLink ? state.answers[lastStepForLink] : null;
     var linkData = lastStepForLink && lastSlugForLink ? getConseil(lastStepForLink, lastSlugForLink) : null;
@@ -415,6 +415,10 @@
       html += '<div class="robin-fiche__link"><a href="' + escHtml(linkData.link_url) + '">';
       html += escHtml(linkData.link_label || 'Voir') + ' &rarr;</a></div>';
     }
+    html += '</div>';
+
+    // ─── Zone basse : question + boutons + input ───
+    html += '<div class="robin-fiche__bottom">';
 
     // Question
     html += '<div class="robin-fiche__question">' + escHtml(getQuestionText(step)) + '</div>';
@@ -434,6 +438,8 @@
 
     // Champ texte libre
     html += renderTextInput();
+
+    html += '</div>';
 
     body.innerHTML = html;
 

@@ -1631,7 +1631,7 @@ button:hover,
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
   width: 100%;
   max-width: 520px;
-  height: 85vh;
+  height: 70vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -1701,19 +1701,39 @@ button:hover,
   background: rgba(var(--color-wood-rgb, 147, 125, 104), 0.15);
 }
 
-/* Corps modale */
+/* Corps modale — deux zones */
 .robin-modal__body {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Zone haute : conseil centré */
+.robin-fiche__top {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem 1.5rem 1rem;
   overflow-y: auto;
-  padding: 1.75rem 1.5rem;
   -webkit-overflow-scrolling: touch;
+}
+
+/* Zone basse : question + boutons + input */
+.robin-fiche__bottom {
+  flex-shrink: 0;
+  padding: 1rem 1.5rem 1.5rem;
+  border-top: 1px solid rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
 }
 
 /* ─── Fiches conseil ─── */
 
 /* Citation Robin */
 .robin-fiche__conseil {
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
+  width: 100%;
 }
 .robin-fiche__citation-text {
   font-family: var(--font-body, 'Montserrat', sans-serif);
@@ -1847,9 +1867,7 @@ button:hover,
 
 /* Champ texte libre */
 .robin-fiche__input-wrap {
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
+  margin-top: 1rem;
 }
 .robin-fiche__input {
   display: flex;
