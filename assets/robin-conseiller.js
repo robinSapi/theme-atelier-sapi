@@ -389,13 +389,13 @@
     var isFirstFiche = (stepId === steps[0].id && state.history.length === 0);
 
     var html = '';
-    var shouldAnimate = !isFirstFiche;
+    var shouldAnimate = true;
 
     // ─── Zone haute : conseil centré ───
     html += '<div class="robin-fiche__top">';
     html += '<div class="robin-fiche__conseil" id="robin-fiche-conseil">';
     if (isFirstFiche) {
-      html += renderConseil({ conseil_text: 'Chaque luminaire que je cr\u00e9e est une pi\u00e8ce unique, fa\u00e7onn\u00e9e \u00e0 la main dans mon atelier. Pour vous orienter au mieux, dites-moi dans quelle pi\u00e8ce vous imaginez votre futur luminaire.' }, false);
+      html += renderConseil({ conseil_text: 'Chaque luminaire que je cr\u00e9e est une pi\u00e8ce unique, fa\u00e7onn\u00e9e \u00e0 la main dans mon atelier. Pour vous orienter au mieux, dites-moi dans quelle pi\u00e8ce vous imaginez votre futur luminaire.' }, true);
     } else {
       var lastStep = state.history.length > 0 ? state.history[state.history.length - 1] : null;
       var lastSlug = lastStep ? state.answers[lastStep] : null;
