@@ -547,7 +547,7 @@
   function renderConseilLoader() {
     return '<div class="robin-fiche__loader">' +
       '<div class="robin-fiche__loader-icon">' +
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18h6M12 2v1M18 12a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/></svg>' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M9 18h6"/><path d="M10 18V15.4a5 5 0 1 1 4 0V18"/></svg>' +
       '</div>' +
       '<p class="robin-fiche__loader-text" id="robin-loader-text-1">Analyse du catalogue de Robin...</p>' +
       '<p class="robin-fiche__loader-text robin-fiche__loader-text--hidden" id="robin-loader-text-2">Et de ses conseils aussi !</p>' +
