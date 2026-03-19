@@ -417,8 +417,8 @@
     }
     html += '</div>';
 
-    // ─── Zone basse : question + boutons + input ───
-    html += '<div class="robin-fiche__bottom">';
+    // ─── Zone basse : question + boutons + input (cachée si animée) ───
+    html += '<div class="robin-fiche__bottom" id="robin-fiche-bottom"' + (shouldAnimate ? ' style="opacity:0;"' : '') + '>';
 
     // Question
     html += '<div class="robin-fiche__question">' + escHtml(getQuestionText(step)) + '</div>';
@@ -474,7 +474,9 @@
   function animateConseil() {
     var words = body.querySelectorAll('.robin-word');
     var signature = body.querySelector('.robin-fiche__signature');
-    var delay = 30; // ms entre chaque mot
+    var bottom = document.getElementById('robin-fiche-bottom');
+    var startDelay = 1000; // 1s avant de commencer
+    var wordDelay = 50;    // 50ms entre chaque mot
 
     for (var i = 0; i < words.length; i++) {
       (function(el, d) {
@@ -482,15 +484,25 @@
           el.style.transition = 'opacity 0.25s';
           el.style.opacity = '1';
         }, d);
-      })(words[i], i * delay);
+      })(words[i], startDelay + i * wordDelay);
     }
+
+    var endTime = startDelay + words.length * wordDelay;
 
     // Signature apparaît après le dernier mot
     if (signature) {
       setTimeout(function() {
         signature.style.transition = 'opacity 0.4s';
         signature.style.opacity = '1';
-      }, words.length * delay + 100);
+      }, endTime + 200);
+    }
+
+    // Zone basse apparaît après la signature
+    if (bottom) {
+      setTimeout(function() {
+        bottom.style.transition = 'opacity 0.4s';
+        bottom.style.opacity = '1';
+      }, endTime + 500);
     }
   }
 
