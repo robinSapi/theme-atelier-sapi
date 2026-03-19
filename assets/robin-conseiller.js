@@ -627,6 +627,22 @@
      Interaction : clic bouton choix
   ═══════════════════════════════════════════ */
   function onChoiceClick(stepId, slug, label) {
+    // Valider que c'est une étape et un slug valides du questionnaire
+    var step = getStepById(stepId);
+    if (!step) {
+      // Pas une étape du questionnaire — traiter comme un lien ou ignorer
+      return;
+    }
+    var validSlug = false;
+    for (var i = 0; i < step.choices.length; i++) {
+      if (step.choices[i].slug === slug) {
+        validSlug = true;
+        label = step.choices[i].label; // Utiliser le label officiel, pas celui de l'IA
+        break;
+      }
+    }
+    if (!validSlug) return;
+
     // Mettre à jour state
     state.answers[stepId] = slug;
     state.labels[stepId]  = label;
@@ -920,8 +936,25 @@
     state.history = [];
     state.aiCache = {};
     state.conversation = [];
+    // Vider complètement le localStorage
     localStorage.removeItem(STORAGE_KEY);
-    saveState();
+    // Réécrire un state vide propre
+    safeSave({
+      answers: {},
+      labels: {},
+      essence: null,
+      tailleIndex: null,
+      pieceLabel: null,
+      styleLabel: null,
+      tailleLabel: null,
+      recommendedIds: [],
+      productsData: [],
+      conseilsText: null,
+      selectionText: null,
+      surMesureText: null,
+      showSurMesure: false,
+      productLinks: []
+    });
     updateBandeauChips();
     updateModalProject();
     showFiche(steps[0].id);
