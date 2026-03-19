@@ -194,6 +194,31 @@
   }
 
   /* ═══════════════════════════════════════════
+     Résumé du projet (quand on rouvre la modale)
+  ═══════════════════════════════════════════ */
+  function buildProjectSummary() {
+    var parts = [];
+    var visible = getVisibleSteps();
+    for (var i = 0; i < visible.length; i++) {
+      var lbl = state.labels[visible[i]];
+      if (lbl) parts.push(lbl.toLowerCase());
+    }
+    if (parts.length === 0) return 'Continuons à définir votre projet.';
+
+    var piece = state.labels.piece || '';
+    var summary = 'Vous cherchez un luminaire';
+    if (piece) summary += ' pour votre ' + piece.toLowerCase();
+    summary += '. ';
+
+    if (parts.length > 1) {
+      summary += 'Continuons à affiner votre projet.';
+    } else {
+      summary += 'Dites-m\'en plus pour que je vous conseille au mieux.';
+    }
+    return summary;
+  }
+
+  /* ═══════════════════════════════════════════
      Lookup conseil pré-généré
   ═══════════════════════════════════════════ */
   function getConseil(stepId, slug) {
@@ -402,6 +427,9 @@
       var conseilData = lastStep && lastSlug ? getConseil(lastStep, lastSlug) : null;
       if (conseilData) {
         html += renderConseil(conseilData, true);
+      } else if (hasAnyAnswer()) {
+        // Résumé du projet quand on rouvre la modale avec des réponses existantes
+        html += renderConseil({ conseil_text: buildProjectSummary() }, true);
       } else {
         shouldAnimate = false;
       }
