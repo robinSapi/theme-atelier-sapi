@@ -2248,9 +2248,9 @@ a.robin-fiche__choice--link {
   display: inline;
 }
 
-/* Photo — plein bord, ~60% de la slide */
+/* Photo — plein bord, ~70% de la slide */
 .robin-reco__photo {
-  flex: 0 0 60%;
+  flex: 0 0 70%;
   overflow: hidden;
   background: var(--color-warm, #FBF6EA);
 }
@@ -2270,7 +2270,7 @@ a.robin-fiche__choice--link {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 1.25rem 2rem 0;
+  padding: 0.75rem 2rem 0;
 }
 .robin-reco__info-top {
   display: flex;
@@ -2327,11 +2327,11 @@ a.robin-fiche__choice--link {
 }
 .robin-reco__reason {
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-style: italic;
-  line-height: 1.5;
+  line-height: 1.45;
   color: var(--color-dark, #323232);
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.4rem;
 }
 .robin-reco__cta {
   display: inline-block;
