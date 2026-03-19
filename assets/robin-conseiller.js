@@ -222,7 +222,13 @@
 
     switch (state.openingContext) {
       case 'bandeau':
-        startStep = hasAnyAnswer() ? getFirstUnansweredStep() : steps[0].id;
+        if (hasAnyAnswer()) {
+          var next = getFirstUnansweredStep();
+          // Si tout est répondu, revenir à la première étape pour naviguer/modifier
+          startStep = (next === 'recommendation') ? steps[0].id : next;
+        } else {
+          startStep = steps[0].id;
+        }
         break;
 
       case 'category':
