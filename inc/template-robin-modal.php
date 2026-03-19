@@ -20,7 +20,7 @@ function sapi_robin_modal() {
         &larr; Retour
       </button>
       <span class="robin-modal__badge" id="robin-modal-badge">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18h6M12 2v1M18 12a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
         Conseil de Robin
       </span>
       <button class="robin-modal__close" id="robin-modal-close" type="button" aria-label="Fermer">&times;</button>
