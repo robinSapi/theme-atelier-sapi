@@ -628,8 +628,141 @@
   function onFreeText(message) {
     if (!message || !message.trim()) return;
 
-    // TODO Phase C : loader complet + appel IA avec user_message
-    // Pour l'instant on ne fait rien
+    // Empiler le step courant dans l'historique
+    if (state.currentStep) {
+      state.history.push(state.currentStep);
+    }
+
+    // Afficher un loader plein écran dans la modale
+    state.currentStep = '_free_text_loading';
+    var topEl = body.querySelector('.robin-fiche__top');
+    var bottomEl = document.getElementById('robin-fiche-bottom');
+    if (topEl) {
+      topEl.innerHTML = '<div class="robin-fiche__conseil">' + renderConseilLoader() + '</div>';
+    }
+    if (bottomEl) {
+      bottomEl.style.opacity = '0';
+      bottomEl.style.pointerEvents = 'none';
+    }
+
+    // Appel AJAX
+    var fd = new FormData();
+    fd.append('action', 'sapi_robin_conseil_step');
+    fd.append('nonce', NONCE);
+    fd.append('guide_website', '');
+    fd.append('step_id', state.history[state.history.length - 1] || 'piece');
+    fd.append('answers', JSON.stringify(state.answers));
+    fd.append('opening_context', state.openingContext);
+    fd.append('context_data', JSON.stringify(state.contextData));
+    fd.append('user_message', message);
+    fd.append('conversation', JSON.stringify(state.conversation));
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', AJAX_URL, true);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) return;
+
+      if (xhr.status === 200) {
+        try {
+          var resp = JSON.parse(xhr.responseText);
+          if (resp.success && resp.data) {
+            handleFreeTextResponse(resp.data, message);
+            return;
+          }
+        } catch (e) {}
+      }
+
+      // Erreur — revenir à la fiche précédente
+      if (state.history.length > 0) {
+        var prev = state.history.pop();
+        showFiche(prev);
+      }
+    };
+    xhr.send(fd);
+  }
+
+  function handleFreeTextResponse(data, originalMessage) {
+    // 1. Auto-remplir les réponses déduites
+    if (data.answered_steps && typeof data.answered_steps === 'object') {
+      for (var stepId in data.answered_steps) {
+        if (data.answered_steps.hasOwnProperty(stepId)) {
+          state.answers[stepId] = data.answered_steps[stepId];
+          // Trouver le label correspondant
+          var step = getStepById(stepId);
+          if (step) {
+            for (var i = 0; i < step.choices.length; i++) {
+              if (step.choices[i].slug === data.answered_steps[stepId]) {
+                state.labels[stepId] = step.choices[i].label;
+                break;
+              }
+            }
+          }
+        }
+      }
+      cleanInvisibleAnswers();
+      saveState();
+      updateBandeauChips();
+      updateModalProject();
+    }
+
+    // 2. Sauvegarder dans la conversation
+    state.conversation.push({ role: 'user', content: originalMessage });
+    state.conversation.push({ role: 'assistant', content: data.conseil_text || '' });
+
+    // 3. Afficher la réponse IA
+    var nextStep = data.next_step_id || getFirstUnansweredStep();
+    state.currentStep = nextStep;
+
+    // Rendre la fiche avec le conseil IA et les boutons suggérés
+    var html = '';
+
+    // Zone haute : conseil IA
+    html += '<div class="robin-fiche__top">';
+    html += '<div class="robin-fiche__conseil">';
+    html += renderConseil({ conseil_text: data.conseil_text }, true);
+    html += '</div>';
+    if (data.link_url) {
+      html += '<div class="robin-fiche__link" id="robin-fiche-link" style="opacity:0;"><a href="' + escHtml(data.link_url) + '">';
+      html += escHtml(data.link_label || 'Voir') + ' &rarr;</a></div>';
+    }
+    html += '</div>';
+
+    // Zone basse : boutons suggérés par l'IA OU la prochaine question du questionnaire
+    html += '<div class="robin-fiche__bottom" id="robin-fiche-bottom" style="opacity:0;">';
+
+    if (data.suggested_buttons && data.suggested_buttons.length > 0) {
+      html += '<div class="robin-fiche__choices">';
+      for (var i = 0; i < data.suggested_buttons.length; i++) {
+        var btn = data.suggested_buttons[i];
+        html += '<button class="robin-fiche__choice" data-step="' + escAttr(btn.step_id || '') + '" data-slug="' + escAttr(btn.slug || '') + '" data-label="' + escAttr(btn.label || '') + '">';
+        html += escHtml(btn.label);
+        html += '</button>';
+      }
+      html += '</div>';
+    } else if (nextStep !== 'hors_parcours' && nextStep !== 'recommendation') {
+      // Afficher la prochaine question du questionnaire
+      var nextStepData = getStepById(nextStep);
+      if (nextStepData) {
+        html += '<div class="robin-fiche__question">' + escHtml(getQuestionText(nextStepData)) + '</div>';
+        html += '<div class="robin-fiche__choices">';
+        for (var j = 0; j < nextStepData.choices.length; j++) {
+          var c = nextStepData.choices[j];
+          var iconHtml = icons[c.icon] ? '<span class="robin-fiche__choice-icon">' + icons[c.icon] + '</span>' : '';
+          var dimHtml = c.dim ? ' <span class="robin-fiche__choice-dim">' + escHtml(c.dim) + '</span>' : '';
+          html += '<button class="robin-fiche__choice" data-step="' + escAttr(nextStep) + '" data-slug="' + escAttr(c.slug) + '" data-label="' + escAttr(c.label) + '">';
+          html += iconHtml + escHtml(c.label) + dimHtml;
+          html += '</button>';
+        }
+        html += '</div>';
+      }
+    }
+
+    html += renderTextInput();
+    html += '</div>';
+
+    body.innerHTML = html;
+    updateHeader(nextStep);
+    animateConseil();
   }
 
   /* ═══════════════════════════════════════════

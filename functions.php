@@ -2249,16 +2249,50 @@ function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $con
   }
   $prompt .= "ÉTAPE ACTUELLE : " . $step_id . "\n\n";
 
-  // Output format instructions
+  // Output format — différent selon texte libre ou pas
+  $is_free_text = !empty($user_message);
+
   $prompt .= "FORMAT DE RÉPONSE (JSON strict, pas de markdown, pas de code fences) :\n";
-  $prompt .= "{\n";
-  $prompt .= '  "conseil_text": "Ton conseil personnalisé pour cette étape (2-4 phrases, style citation Robin)",' . "\n";
-  $prompt .= '  "link_url": "/nos-creations/suspensions/" ou null si pas pertinent,' . "\n";
-  $prompt .= '  "link_label": "Voir les suspensions" ou null' . "\n";
-  $prompt .= "}\n\n";
+
+  if ($is_free_text) {
+    $prompt .= "Le client a écrit un message libre. Analyse ce qu'il dit et réponds.\n";
+    $prompt .= "{\n";
+    $prompt .= '  "conseil_text": "Ta réponse personnalisée (2-5 phrases, style Robin)",' . "\n";
+    $prompt .= '  "link_url": "/nos-creations/suspensions/" ou null,' . "\n";
+    $prompt .= '  "link_label": "Voir les suspensions" ou null,' . "\n";
+    $prompt .= '  "answered_steps": { "piece": "cuisine", "taille": "petite" } ou {} si rien déduit,' . "\n";
+    $prompt .= '  "suggested_buttons": [' . "\n";
+    $prompt .= '    { "label": "Sortie plafond", "slug": "plafond", "step_id": "sortie" }' . "\n";
+    $prompt .= '  ] ou [] si pas pertinent,' . "\n";
+    $prompt .= '  "next_step_id": "sortie" ou "hors_parcours" ou null' . "\n";
+    $prompt .= "}\n\n";
+
+    $prompt .= "RÈGLES TEXTE LIBRE :\n";
+    $prompt .= "- Analyse le message du client et déduis les réponses aux questions du questionnaire.\n";
+    $prompt .= "- answered_steps : les step_id → slug que tu as pu déduire du message. Utilise UNIQUEMENT les slugs valides des étapes du questionnaire.\n";
+
+    // Liste des slugs valides par étape
+    $prompt .= "- Slugs valides :\n";
+    require_once get_template_directory() . '/inc/guide-data.php';
+    $all_steps = sapi_guide_get_steps();
+    foreach ($all_steps as $s) {
+      $slugs = array_map(function($c) { return $c['slug']; }, $s['choices']);
+      $prompt .= '  - ' . $s['id'] . ' : ' . implode(', ', $slugs) . "\n";
+    }
+
+    $prompt .= "- next_step_id : la prochaine étape logique du questionnaire, ou 'hors_parcours' si le message sort du cadre.\n";
+    $prompt .= "- suggested_buttons : boutons à proposer au client pour continuer. Chaque bouton a un label, un slug et un step_id.\n";
+    $prompt .= "- Si le message est une question hors questionnaire (livraison, prix, sur mesure...), réponds et mets next_step_id à 'hors_parcours'.\n";
+  } else {
+    $prompt .= "{\n";
+    $prompt .= '  "conseil_text": "Ton conseil personnalisé pour cette étape (2-4 phrases, style citation Robin)",' . "\n";
+    $prompt .= '  "link_url": "/nos-creations/suspensions/" ou null si pas pertinent,' . "\n";
+    $prompt .= '  "link_label": "Voir les suspensions" ou null' . "\n";
+    $prompt .= "}\n\n";
+  }
 
   $prompt .= "RÈGLES IMPORTANTES :\n";
-  $prompt .= "- Le conseil_text doit être personnel et adapté aux réponses du client.\n";
+  $prompt .= "- Le conseil_text doit être personnel et adapté.\n";
   $prompt .= "- Ne répète pas la question, donne directement le conseil.\n";
   $prompt .= "- Le link_url doit pointer vers une page existante du site (catégorie, page nos-créations, etc.) ou null.\n";
   $prompt .= "- Pas de markdown. Texte brut uniquement.\n";
