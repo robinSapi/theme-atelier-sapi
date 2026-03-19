@@ -2438,9 +2438,59 @@ function sapi_robin_call_recommendation($products, $answers) {
   $prompt .= "- Pas de markdown.\n";
   $prompt .= "- Les IDs dans products doivent correspondre exactement aux IDs des produits fournis.\n";
 
-  $result = sapi_robin_call_claude_step($prompt, 'Voici mon projet complet. Recommande-moi des luminaires.');
+  // Appel avec plus de tokens (la recommandation est plus longue)
+  $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
+  if (empty($api_key)) return null;
 
-  return $result;
+  $body = [
+    'model'      => 'claude-sonnet-4-6',
+    'max_tokens' => 2048,
+    'system'     => $prompt,
+    'messages'   => [
+      ['role' => 'user', 'content' => 'Voici mon projet complet. Recommande-moi des luminaires.'],
+    ],
+  ];
+
+  $response = wp_remote_post('https://api.anthropic.com/v1/messages', [
+    'timeout' => 45,
+    'headers' => [
+      'Content-Type'      => 'application/json',
+      'x-api-key'         => $api_key,
+      'anthropic-version'  => '2023-06-01',
+    ],
+    'body' => wp_json_encode($body),
+  ]);
+
+  if (is_wp_error($response)) {
+    error_log('Robin V2 Reco API error: ' . $response->get_error_message());
+    return null;
+  }
+
+  $status   = wp_remote_retrieve_response_code($response);
+  $raw_body = wp_remote_retrieve_body($response);
+
+  if ($status !== 200) {
+    error_log('Robin V2 Reco API HTTP ' . $status . ': ' . $raw_body);
+    return null;
+  }
+
+  $data = json_decode($raw_body, true);
+  if (!isset($data['content'][0]['text'])) return null;
+
+  $text = $data['content'][0]['text'];
+  $text = preg_replace('/^```json\s*/i', '', trim($text));
+  $text = preg_replace('/\s*```$/i', '', $text);
+
+  $parsed = json_decode(trim($text), true);
+  if (!$parsed || !isset($parsed['conseil_text'])) {
+    // Fallback : essayer d'extraire conseil_text par regex
+    if (preg_match('/"conseil_text"\s*:\s*"((?:[^"\\\\]|\\\\.)*)"/s', $text, $m)) {
+      return ['conseil_text' => stripslashes($m[1]), 'products' => []];
+    }
+    return ['conseil_text' => 'Robin vous recommande d\'explorer les luminaires sélectionnés ci-dessous.', 'products' => []];
+  }
+
+  return $parsed;
 }
 
 function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $context_data, $user_message) {
