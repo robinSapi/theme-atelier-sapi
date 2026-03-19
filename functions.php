@@ -2187,6 +2187,7 @@ function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $con
 
   // Load prompt files
   $ton      = @file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt') ?: '';
+  $savoir   = @file_get_contents($theme_dir . '/assets/guide-prompt-savoir.txt') ?: '';
   $regles   = @file_get_contents($theme_dir . '/assets/guide-prompt-regles.txt') ?: '';
   $exemples = @file_get_contents($theme_dir . '/assets/guide-prompt-exemples.txt') ?: '';
 
@@ -2231,7 +2232,7 @@ function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $con
   }
 
   // Compose system prompt
-  $prompt = $ton . "\n\n" . $regles . "\n\n";
+  $prompt = $ton . "\n\n" . $savoir . "\n\n" . $regles . "\n\n";
 
   $prompt .= "EXEMPLES DE CONSEILS PAR ÉTAPE (pour le ton et la direction) :\n";
   $prompt .= $exemples . "\n\n";
