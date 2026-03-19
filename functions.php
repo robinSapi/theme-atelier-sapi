@@ -2426,9 +2426,9 @@ function sapi_robin_call_recommendation($products, $answers) {
   $prompt .= "MISSION : Rédige une recommandation finale personnalisée.\n\n";
   $prompt .= "FORMAT DE RÉPONSE (JSON strict, pas de markdown) :\n";
   $prompt .= "{\n";
-  $prompt .= '  "conseil_text": "Texte A : conseil technique et pratique global (3-5 phrases). Synthétise les réponses du client et explique pourquoi ces luminaires sont adaptés. Ne cite pas les noms des produits ici.",' . "\n";
+  $prompt .= '  "conseil_text": "Texte A : 2 phrases MAXIMUM. Synthèse technique courte. Ne cite pas les noms des produits.",' . "\n";
   $prompt .= '  "products": [' . "\n";
-  $prompt .= '    { "id": 123, "reason": "Texte B : 1-2 phrases expliquant pourquoi ce produit précis est adapté au projet du client." }' . "\n";
+  $prompt .= '    { "id": 123, "reason": "Texte B : 1 seule phrase. Pourquoi ce modèle précis convient." }' . "\n";
   $prompt .= '  ]' . "\n";
   $prompt .= "}\n\n";
   $prompt .= "RÈGLES :\n";

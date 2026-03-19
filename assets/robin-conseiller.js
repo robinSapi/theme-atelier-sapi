@@ -701,47 +701,63 @@
   }
 
   function renderRecoResult(data) {
+    var products = data.products || [];
+    var totalSlides = products.length;
+
     var html = '<div class="robin-reco">';
 
-    // Texte A — conseils techniques (animation mot par mot)
+    // Texte A — court, animation mot par mot
     html += '<div class="robin-reco__conseil">';
     html += renderConseil({ conseil_text: data.conseil_text || '' }, true);
     html += '</div>';
 
-    // Slider de produits
-    if (data.products && data.products.length > 0) {
-      html += '<div class="robin-reco__slider-wrap">';
-      html += '<div class="robin-reco__slider" id="robin-reco-slider">';
+    // Slider showcase — 1 produit par slide
+    if (totalSlides > 0) {
+      html += '<div class="robin-reco__showcase" id="robin-reco-showcase">';
 
-      for (var i = 0; i < data.products.length; i++) {
-        var p = data.products[i];
-        html += '<a href="' + escAttr(p.permalink) + '" class="robin-reco__card" style="opacity:0;">';
+      // Viewport
+      html += '<div class="robin-reco__viewport">';
+      html += '<div class="robin-reco__track" id="robin-reco-track">';
 
-        // Photos
-        html += '<div class="robin-reco__card-photos">';
-        html += '<img src="' + escAttr(p.image) + '" alt="' + escAttr(p.title) + '" class="robin-reco__card-img">';
-        if (p.hover_image) {
-          html += '<img src="' + escAttr(p.hover_image) + '" alt="" class="robin-reco__card-img robin-reco__card-img--hover">';
-        }
+      for (var i = 0; i < totalSlides; i++) {
+        var p = products[i];
+        html += '<div class="robin-reco__slide" data-index="' + i + '">';
+
+        // Photo grande
+        html += '<div class="robin-reco__photo">';
+        html += '<img src="' + escAttr(p.ambiance || p.image) + '" alt="' + escAttr(p.title) + '">';
         html += '</div>';
 
-        // Infos
-        html += '<div class="robin-reco__card-info">';
-        html += '<h4 class="robin-reco__card-title">' + escHtml(p.title) + '</h4>';
-        html += '<div class="robin-reco__card-price">' + (p.price || '') + '</div>';
+        // Infos sous la photo
+        html += '<div class="robin-reco__info">';
+        html += '<div class="robin-reco__info-top">';
+        html += '<h3 class="robin-reco__name">' + escHtml(p.title) + '</h3>';
+        html += '<span class="robin-reco__price">' + (p.price || '') + '</span>';
+        html += '</div>';
         if (p.variation_label) {
-          html += '<div class="robin-reco__card-variant">' + escHtml(p.variation_label) + '</div>';
+          html += '<span class="robin-reco__essence">' + escHtml(p.variation_label) + '</span>';
         }
-        // Texte B — pourquoi ce produit
         if (p.reason) {
-          html += '<p class="robin-reco__card-reason">' + escHtml(p.reason) + '</p>';
+          html += '<p class="robin-reco__reason">' + escHtml(p.reason) + '</p>';
         }
+        html += '<a href="' + escAttr(p.permalink) + '" class="robin-reco__cta">Voir ce mod\u00e8le &rarr;</a>';
         html += '</div>';
 
-        html += '</a>';
+        html += '</div>';
       }
 
       html += '</div>';
+      html += '</div>';
+
+      // Navigation
+      if (totalSlides > 1) {
+        html += '<div class="robin-reco__nav">';
+        html += '<button class="robin-reco__arrow robin-reco__arrow--prev" id="robin-reco-prev" disabled>&lsaquo;</button>';
+        html += '<span class="robin-reco__counter"><span id="robin-reco-current">1</span> / ' + totalSlides + '</span>';
+        html += '<button class="robin-reco__arrow robin-reco__arrow--next" id="robin-reco-next">&rsaquo;</button>';
+        html += '</div>';
+      }
+
       html += '</div>';
     }
 
@@ -756,22 +772,63 @@
 
     body.innerHTML = html;
 
-    // Animer le texte A
+    // Animer texte A
     animateConseil();
 
-    // Animer les cards produit avec un délai séquentiel
-    setTimeout(function() {
-      var cards = document.querySelectorAll('.robin-reco__card');
-      for (var i = 0; i < cards.length; i++) {
-        (function(card, delay) {
-          setTimeout(function() {
-            card.style.transition = 'opacity 0.5s, transform 0.5s';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-          }, delay);
-        })(cards[i], i * 300 + 500);
+    // Afficher le showcase après le texte A
+    var showcase = document.getElementById('robin-reco-showcase');
+    if (showcase) {
+      showcase.style.opacity = '0';
+      var textDelay = (data.conseil_text || '').split(' ').length * 50 + 1200;
+      setTimeout(function() {
+        showcase.style.transition = 'opacity 0.6s';
+        showcase.style.opacity = '1';
+      }, textDelay);
+    }
+
+    // Init slider navigation
+    if (totalSlides > 1) {
+      initRecoSlider(totalSlides);
+    }
+  }
+
+  function initRecoSlider(total) {
+    var current = 0;
+    var track = document.getElementById('robin-reco-track');
+    var prevBtn = document.getElementById('robin-reco-prev');
+    var nextBtn = document.getElementById('robin-reco-next');
+    var counter = document.getElementById('robin-reco-current');
+
+    function goTo(index) {
+      if (index < 0 || index >= total) return;
+      current = index;
+      track.style.transform = 'translateX(-' + (current * 100) + '%)';
+      counter.textContent = current + 1;
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === total - 1;
+    }
+
+    prevBtn.addEventListener('click', function() { goTo(current - 1); });
+    nextBtn.addEventListener('click', function() { goTo(current + 1); });
+
+    // Swipe mobile
+    var startX = 0;
+    var isDragging = false;
+    var viewport = track.parentElement;
+
+    viewport.addEventListener('touchstart', function(e) {
+      startX = e.touches[0].clientX;
+      isDragging = true;
+    }, { passive: true });
+
+    viewport.addEventListener('touchend', function(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      var diff = startX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 50) {
+        goTo(diff > 0 ? current + 1 : current - 1);
       }
-    }, (data.conseil_text || '').split(' ').length * 50 + 1000);
+    });
   }
 
   function renderHorsParcours() {

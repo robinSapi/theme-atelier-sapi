@@ -2174,102 +2174,135 @@ a.robin-fiche__choice--link {
   box-shadow: 0 4px 15px rgba(227, 91, 36, 0.3);
 }
 
-/* Slider produits */
-.robin-reco__slider-wrap {
-  margin: 1.5rem 0 2rem;
+/* Showcase slider — 1 produit par slide */
+.robin-reco__showcase {
+  margin: 1.5rem 0;
+}
+.robin-reco__viewport {
   overflow: hidden;
-}
-.robin-reco__slider {
-  display: flex;
-  gap: 1.25rem;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  padding: 0.5rem 0.25rem 1rem;
-  scrollbar-width: none;
-}
-.robin-reco__slider::-webkit-scrollbar {
-  display: none;
-}
-
-/* Card produit */
-.robin-reco__card {
-  flex: 0 0 280px;
-  scroll-snap-align: start;
-  background: var(--color-cream, #FEFDFB);
-  border: 2px dashed rgba(var(--color-wood-rgb, 147, 125, 104), 0.2);
   border-radius: 16px;
-  overflow: hidden;
-  text-decoration: none;
-  color: var(--color-dark, #323232);
-  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s, opacity 0.5s;
-  transform: translateY(20px);
-  opacity: 0;
 }
-.robin-reco__card:hover {
-  transform: translateY(-4px) !important;
-  box-shadow: 0 12px 30px rgba(var(--color-wood-rgb, 147, 125, 104), 0.15);
-  border-color: var(--color-wood, #937D68);
+.robin-reco__track {
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.robin-reco__slide {
+  min-width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Photos produit */
-.robin-reco__card-photos {
-  position: relative;
+/* Photo grande */
+.robin-reco__photo {
   width: 100%;
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   background: var(--color-warm, #FBF6EA);
+  border-radius: 16px;
 }
-.robin-reco__card-img {
+.robin-reco__photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: opacity 0.4s;
-}
-.robin-reco__card-img--hover {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-}
-.robin-reco__card:hover .robin-reco__card-img--hover {
-  opacity: 1;
 }
 
-/* Infos produit */
-.robin-reco__card-info {
-  padding: 1.25rem;
+/* Infos sous la photo */
+.robin-reco__info {
+  padding: 1.25rem 0.5rem;
 }
-.robin-reco__card-title {
+.robin-reco__info-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+.robin-reco__name {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-dark, #323232);
+}
+.robin-reco__price {
   font-family: var(--font-body, 'Montserrat', sans-serif);
   font-size: 1rem;
-  font-weight: 700;
-  margin: 0 0 0.35rem;
-  color: var(--color-dark, #323232);
-}
-.robin-reco__card-price {
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.9rem;
   color: var(--color-orange, #E35B24);
   font-weight: 600;
-  margin-bottom: 0.35rem;
+  white-space: nowrap;
 }
-.robin-reco__card-variant {
+.robin-reco__essence {
+  display: inline-block;
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--color-wood, #937D68);
-  margin-bottom: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.6rem;
 }
-.robin-reco__card-reason {
+.robin-reco__reason {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--color-dark, #323232);
+  margin: 0 0 0.75rem;
+}
+.robin-reco__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.5rem 1.2rem;
+  border: 1.5px solid var(--color-orange, #E35B24);
+  border-radius: 50px;
+  color: var(--color-orange, #E35B24);
   font-family: var(--font-body, 'Montserrat', sans-serif);
   font-size: 0.82rem;
-  font-style: italic;
-  line-height: 1.5;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.robin-reco__cta:hover {
+  background: rgba(227, 91, 36, 0.06);
+}
+
+/* Navigation slider */
+.robin-reco__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0.75rem 0 0;
+}
+.robin-reco__arrow {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(var(--color-wood-rgb, 147, 125, 104), 0.3);
+  background: var(--color-cream, #FEFDFB);
+  color: var(--color-wood, #937D68);
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.robin-reco__arrow:hover:not(:disabled) {
+  border-color: var(--color-wood, #937D68);
   color: var(--color-dark, #323232);
-  margin: 0;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
+}
+.robin-reco__arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.robin-reco__counter {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-wood, #937D68);
 }
 
 /* Boutons finaux */
@@ -2278,25 +2311,33 @@ a.robin-fiche__choice--link {
   justify-content: center;
   gap: 0.6rem;
   flex-wrap: wrap;
-  padding: 1rem 0;
+  padding: 1.5rem 0 0.5rem;
+  border-top: 1px solid rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
+  margin-top: 1rem;
 }
 
-/* Responsive mobile — cards plus petites */
+/* Responsive mobile */
 @media (max-width: 600px) {
-  .robin-reco__card {
-    flex: 0 0 240px;
+  .robin-reco__photo {
+    aspect-ratio: 1;
+    border-radius: 12px;
   }
-  .robin-reco__card-info {
-    padding: 1rem;
+  .robin-reco__name {
+    font-size: 1rem;
   }
-  .robin-reco__card-title {
+  .robin-reco__price {
     font-size: 0.9rem;
   }
-  .robin-reco__card-reason {
+  .robin-reco__reason {
     font-size: 0.78rem;
   }
   .robin-reco__actions {
     gap: 0.4rem;
+  }
+  .robin-reco__arrow {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
   }
 }
 
