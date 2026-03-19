@@ -120,19 +120,29 @@
     "conseil_text": "Compléter l'éclairage de votre entrée, c'est ajouter du caractère. Un luminaire en bois artisanal crée un accueil chaleureux à côté de l'éclairage fonctionnel."
   },
   "eclairage:grappe|piece:cuisine": {
-    "conseil_text": "Excellent choix pour une grande cuisine ! Une grappe de suspensions au-dessus de l'îlot couvre une grande zone tout en créant un effet visuel saisissant. Il va falloir contacter Robin car ces modèles ne sont pas disponibles en ligne."
+    "conseil_text": "Excellent choix pour une grande cuisine ! Une grappe de suspensions au-dessus de l'îlot couvre une grande zone tout en créant un effet visuel saisissant. Il va falloir contacter Robin car ces modèles ne sont pas disponibles en ligne.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin pour ce projet"
   },
   "eclairage:grappe|piece:bureau": {
-    "conseil_text": "Une grappe dans un grand bureau, c'est spectaculaire et fonctionnel. Plusieurs suspensions couvrent toute la surface de travail. Contactez Robin pour un projet sur mesure — ces modèles ne sont pas disponibles en ligne."
+    "conseil_text": "Une grappe dans un grand bureau, c'est spectaculaire et fonctionnel. Plusieurs suspensions couvrent toute la surface de travail. Contactez Robin pour un projet sur mesure — ces modèles ne sont pas disponibles en ligne.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin pour ce projet"
   },
   "eclairage:grappe|piece:salon": {
-    "conseil_text": "Une grappe de suspensions dans un grand salon, c'est le statement ultime ! Plusieurs luminaires qui descendent à des hauteurs différentes, c'est une vraie sculpture lumineuse. Contactez Robin, c'est du sur mesure."
+    "conseil_text": "Une grappe de suspensions dans un grand salon, c'est le statement ultime ! Plusieurs luminaires qui descendent à des hauteurs différentes, c'est une vraie sculpture lumineuse. Contactez Robin, c'est du sur mesure.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin pour ce projet"
   },
   "eclairage:grappe|piece:chambre": {
-    "conseil_text": "Une grappe dans une grande chambre, c'est audacieux et magnifique. Plusieurs petites suspensions créent un ciel étoilé en bois. Contactez Robin pour concevoir ce projet sur mesure."
+    "conseil_text": "Une grappe dans une grande chambre, c'est audacieux et magnifique. Plusieurs petites suspensions créent un ciel étoilé en bois. Contactez Robin pour concevoir ce projet sur mesure.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin pour ce projet"
   },
   "eclairage:grappe|piece:entree": {
-    "conseil_text": "Une grappe de suspensions dans un grand hall, c'est l'entrée en matière parfaite. L'effet est spectaculaire dès le premier pas. Contactez Robin pour ce type de projet sur mesure."
+    "conseil_text": "Une grappe de suspensions dans un grand hall, c'est l'entrée en matière parfaite. L'effet est spectaculaire dès le premier pas. Contactez Robin pour ce type de projet sur mesure.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin pour ce projet"
   },
   "eclairage:plustard|piece:cuisine": {
     "conseil_text": "Pas de souci, on avance et on pourra y revenir. Continuons à définir votre projet pour votre cuisine."
