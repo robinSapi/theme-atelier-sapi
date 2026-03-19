@@ -29,6 +29,14 @@ for ($i = 1; $i <= 4; $i++) {
   </div>
 </section>
 
+<?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) : ?>
+  <div style="text-align:center; margin: 1.5rem 0;">
+    <button type="button" class="robin-pill" data-robin-context="bandeau">
+      &#x1F4A1; Vous avez un projet ? Robin vous conseille
+    </button>
+  </div>
+<?php endif; ?>
+
 <!-- Conseil personnalisé de Robin (shown by mon-projet.js if available) -->
 <?php
 require_once get_template_directory() . '/inc/template-robin-conseil.php';
@@ -75,7 +83,7 @@ sapi_robin_conseil_card( 'conseils' );
       <div class="advice-guide-cta-inner">
         <h2 class="advice-guide-cta-title">Définissez votre projet d'éclairage</h2>
         <p class="advice-guide-cta-text">Répondez à quelques questions et Robin vous recommande les luminaires idéaux pour votre pièce.</p>
-        <button type="button" class="advice-guide-cta-btn" onclick="var bar=document.getElementById('mon-projet-bar');if(bar){bar.scrollIntoView({behavior:'smooth',block:'start'});var t=document.getElementById('mon-projet-toggle');if(t&&t.getAttribute('aria-expanded')==='false')t.click();}">
+        <button type="button" class="advice-guide-cta-btn" onclick="<?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) : ?>if(window.sapiRobinOpen)window.sapiRobinOpen('bandeau');<?php else : ?>var bar=document.getElementById('mon-projet-bar');if(bar){bar.scrollIntoView({behavior:'smooth',block:'start'});var t=document.getElementById('mon-projet-toggle');if(t&&t.getAttribute('aria-expanded')==='false')t.click();}<?php endif; ?>">
           Commencer mon projet
         </button>
       </div>
