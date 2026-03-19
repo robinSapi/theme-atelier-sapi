@@ -2085,6 +2085,243 @@ function sapi_ajax_guide_refine() {
   ]);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   ROBIN CONSEILLER V2 — Endpoint per-step AI conseil
+═══════════════════════════════════════════════════════════ */
+add_action('wp_ajax_sapi_robin_conseil_step', 'sapi_ajax_robin_conseil_step');
+add_action('wp_ajax_nopriv_sapi_robin_conseil_step', 'sapi_ajax_robin_conseil_step');
+
+function sapi_ajax_robin_conseil_step() {
+  // 1. Nonce
+  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
+    wp_send_json_error(['message' => 'Nonce invalide']);
+  }
+
+  // 2. Honeypot
+  if (!empty($_POST['guide_website'])) {
+    wp_send_json_error(['message' => 'Erreur']);
+  }
+
+  // 3. Rate limit
+  $ai_allowed = sapi_guide_check_rate_limit();
+
+  // 4. Parse inputs
+  $step_id = isset($_POST['step_id']) ? sanitize_key($_POST['step_id']) : '';
+  $answers = [];
+  if (!empty($_POST['answers'])) {
+    $raw = json_decode(sanitize_text_field(wp_unslash($_POST['answers'])), true);
+    if (is_array($raw)) {
+      foreach ($raw as $k => $v) {
+        $answers[sanitize_key($k)] = sanitize_text_field($v);
+      }
+    }
+  }
+
+  $opening_context = isset($_POST['opening_context']) ? sanitize_key($_POST['opening_context']) : 'bandeau';
+  $context_data = [];
+  if (!empty($_POST['context_data'])) {
+    $cd = json_decode(sanitize_text_field(wp_unslash($_POST['context_data'])), true);
+    if (is_array($cd)) {
+      foreach ($cd as $k => $v) {
+        $context_data[sanitize_key($k)] = sanitize_text_field($v);
+      }
+    }
+  }
+
+  $user_message = isset($_POST['user_message']) ? sanitize_textarea_field(wp_unslash($_POST['user_message'])) : '';
+
+  if (empty($step_id)) {
+    wp_send_json_error(['message' => 'step_id manquant']);
+  }
+
+  // 5. Si pas d'IA (rate limit), renvoyer une réponse vide
+  if (!$ai_allowed) {
+    wp_send_json_success([
+      'conseil_text' => null,
+      'link_url'     => null,
+      'link_label'   => null,
+    ]);
+  }
+
+  // 6. Construire le prompt et appeler Claude
+  $system_prompt = sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $context_data, $user_message);
+
+  // Message user contextuel
+  $user_prompt = '';
+  if (!empty($user_message)) {
+    $user_prompt = $user_message;
+  } elseif ($step_id === 'recommendation') {
+    $user_prompt = 'Voici mes réponses complètes. Recommande-moi des luminaires précis.';
+  } elseif ($step_id === 'product_page') {
+    $product_name = isset($context_data['product_name']) ? $context_data['product_name'] : 'ce luminaire';
+    $user_prompt = 'Je regarde ' . $product_name . '. Qu\'en penses-tu par rapport à mon projet ?';
+  } else {
+    // Step normal — le dernier choix fait
+    $last_answer = isset($answers[$step_id]) ? $answers[$step_id] : '';
+    $user_prompt = $last_answer
+      ? 'J\'ai répondu "' . $last_answer . '" à la question sur ' . $step_id . '. Donne-moi ton conseil.'
+      : 'Donne-moi ton conseil pour cette étape.';
+  }
+
+  $result = sapi_robin_call_claude_step($system_prompt, $user_prompt);
+
+  if (!$result) {
+    wp_send_json_success([
+      'conseil_text' => null,
+      'link_url'     => null,
+      'link_label'   => null,
+    ]);
+  }
+
+  wp_send_json_success($result);
+}
+
+/**
+ * Robin V2 — Build system prompt for a single step.
+ */
+function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $context_data, $user_message) {
+  $theme_dir = get_template_directory();
+
+  // Load prompt files
+  $ton      = @file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt') ?: '';
+  $regles   = @file_get_contents($theme_dir . '/assets/guide-prompt-regles.txt') ?: '';
+  $exemples = @file_get_contents($theme_dir . '/assets/guide-prompt-exemples.txt') ?: '';
+
+  // Load full catalog
+  require_once $theme_dir . '/inc/guide-data.php';
+  $all_products = sapi_guide_query_all_products($answers);
+
+  $catalog_lines = [];
+  foreach ($all_products as $p) {
+    $line = '- ' . $p['title'];
+    $line .= ' | Catégorie: ' . ($p['category_label'] ?? '');
+    $line .= ' | Format: ' . ($p['format'] ?? '');
+    $line .= ' | Ampoule: ' . ($p['type_ampoule'] ?? '');
+    if (!empty($p['variation_label'])) {
+      $line .= ' | Essence recommandée: ' . $p['variation_label'];
+    }
+    $line .= ' | Ventes: ' . ($p['total_sales'] ?? 0);
+    $line .= ' | ID: ' . $p['id'];
+    $line .= ' | URL: ' . ($p['permalink'] ?? '');
+
+    if (!empty($p['variations'])) {
+      $vars = [];
+      foreach ($p['variations'] as $v) {
+        $vars[] = $v['essence'] . ' ' . ($v['taille'] ?? '') . ' (var:' . $v['variation_id'] . ')';
+      }
+      $line .= ' | Variations: ' . implode(', ', $vars);
+    }
+
+    $catalog_lines[] = $line;
+  }
+
+  // Build answers summary
+  $answers_text = '';
+  $label_map = [
+    'piece' => 'Pièce', 'taille' => 'Taille', 'taille_escalier' => 'Type escalier',
+    'eclairage' => 'Éclairage', 'sortie' => 'Installation', 'hauteur' => 'Hauteur plafond',
+    'table' => 'Au-dessus table/îlot', 'style' => 'Style',
+  ];
+  foreach ($answers as $k => $v) {
+    $label = isset($label_map[$k]) ? $label_map[$k] : $k;
+    $answers_text .= '- ' . $label . ' : ' . $v . "\n";
+  }
+
+  // Compose system prompt
+  $prompt = $ton . "\n\n" . $regles . "\n\n";
+
+  $prompt .= "EXEMPLES DE CONSEILS PAR ÉTAPE (pour le ton et la direction) :\n";
+  $prompt .= $exemples . "\n\n";
+
+  $prompt .= "CATALOGUE COMPLET DES LUMINAIRES :\n";
+  $prompt .= implode("\n", $catalog_lines) . "\n\n";
+
+  if (!empty($answers_text)) {
+    $prompt .= "RÉPONSES DU CLIENT JUSQU'À PRÉSENT :\n" . $answers_text . "\n";
+  }
+
+  $prompt .= "CONTEXTE D'OUVERTURE : " . $opening_context . "\n";
+  if (!empty($context_data)) {
+    $prompt .= "DONNÉES CONTEXTUELLES : " . wp_json_encode($context_data) . "\n";
+  }
+  $prompt .= "ÉTAPE ACTUELLE : " . $step_id . "\n\n";
+
+  // Output format instructions
+  $prompt .= "FORMAT DE RÉPONSE (JSON strict, pas de markdown, pas de code fences) :\n";
+  $prompt .= "{\n";
+  $prompt .= '  "conseil_text": "Ton conseil personnalisé pour cette étape (2-4 phrases, style citation Robin)",' . "\n";
+  $prompt .= '  "link_url": "/nos-creations/suspensions/" ou null si pas pertinent,' . "\n";
+  $prompt .= '  "link_label": "Voir les suspensions" ou null' . "\n";
+  $prompt .= "}\n\n";
+
+  $prompt .= "RÈGLES IMPORTANTES :\n";
+  $prompt .= "- Le conseil_text doit être personnel et adapté aux réponses du client.\n";
+  $prompt .= "- Ne répète pas la question, donne directement le conseil.\n";
+  $prompt .= "- Le link_url doit pointer vers une page existante du site (catégorie, page nos-créations, etc.) ou null.\n";
+  $prompt .= "- Pas de markdown. Texte brut uniquement.\n";
+  $prompt .= "- Pas de guillemets « » dans le texte (ils sont ajoutés côté front).\n";
+
+  return $prompt;
+}
+
+/**
+ * Robin V2 — Call Claude API with custom user message.
+ */
+function sapi_robin_call_claude_step($system_prompt, $user_message) {
+  $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
+  if (empty($api_key)) {
+    return null;
+  }
+
+  $body = [
+    'model'      => 'claude-sonnet-4-6',
+    'max_tokens' => 512,
+    'system'     => $system_prompt,
+    'messages'   => [
+      ['role' => 'user', 'content' => $user_message],
+    ],
+  ];
+
+  $response = wp_remote_post('https://api.anthropic.com/v1/messages', [
+    'timeout' => 30,
+    'headers' => [
+      'Content-Type'      => 'application/json',
+      'x-api-key'         => $api_key,
+      'anthropic-version'  => '2023-06-01',
+    ],
+    'body' => wp_json_encode($body),
+  ]);
+
+  if (is_wp_error($response)) {
+    error_log('Robin V2 Claude API error: ' . $response->get_error_message());
+    return null;
+  }
+
+  $status   = wp_remote_retrieve_response_code($response);
+  $raw_body = wp_remote_retrieve_body($response);
+
+  if ($status !== 200) {
+    error_log('Robin V2 Claude API HTTP ' . $status . ': ' . $raw_body);
+    return null;
+  }
+
+  $data = json_decode($raw_body, true);
+  if (!isset($data['content'][0]['text'])) {
+    return null;
+  }
+
+  $text = $data['content'][0]['text'];
+  $text = preg_replace('/^```json\s*/i', '', trim($text));
+  $text = preg_replace('/\s*```$/i', '', $text);
+
+  $parsed = json_decode(trim($text), true);
+  if (!$parsed || !isset($parsed['conseil_text'])) {
+    return ['conseil_text' => $text, 'link_url' => null, 'link_label' => null];
+  }
+
+  return $parsed;
+}
+
 /**
  * Step 1 → WooCommerce product categories
  */
