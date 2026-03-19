@@ -195,7 +195,7 @@
   /* ═══════════════════════════════════════════
      DOM refs
   ═══════════════════════════════════════════ */
-  var modal, overlay, body, backBtn, closeBtn, stepTitle, avatarWrap;
+  var modal, overlay, body, backBtn, closeBtn, stepTitle, badgeEl;
 
   function initDomRefs() {
     modal      = document.getElementById('robin-modal');
@@ -204,7 +204,7 @@
     backBtn    = document.getElementById('robin-modal-back');
     closeBtn   = document.getElementById('robin-modal-close');
     stepTitle  = document.getElementById('robin-modal-step-title');
-    avatarWrap = document.getElementById('robin-modal-avatar-wrap');
+    badgeEl    = document.getElementById('robin-modal-badge');
   }
 
   /* ═══════════════════════════════════════════
@@ -452,7 +452,7 @@
 
     // Bouton retour
     backBtn.style.display    = isFirst ? 'none' : '';
-    avatarWrap.style.display = isFirst ? '' : 'none';
+    badgeEl.style.display = isFirst ? '' : 'none';
 
     // Titre d'étape
     var step = getStepById(stepId);

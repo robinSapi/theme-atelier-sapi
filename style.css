@@ -1667,34 +1667,23 @@ button:hover,
   transition: color 0.2s;
 }
 .robin-modal__back:hover { color: var(--color-dark, #323232); }
-.robin-modal__avatar-wrap {
-  display: flex;
+.robin-modal__badge {
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-}
-.robin-modal__avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  gap: 0.35rem;
+  padding: 0.3rem 0.75rem;
   background: var(--color-wood, #937D68);
   color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-weight: 700;
-  font-size: 0.8rem;
-}
-.robin-modal__name {
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--color-dark, #323232);
-}
-.robin-modal__role {
+  border-radius: 50px;
   font-family: var(--font-body, 'Montserrat', sans-serif);
   font-size: 0.7rem;
-  color: var(--color-wood, #937D68);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.robin-modal__badge svg {
+  flex-shrink: 0;
 }
 .robin-modal__step-title {
   font-family: var(--font-body, 'Montserrat', sans-serif);
