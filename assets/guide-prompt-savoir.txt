@@ -19,6 +19,7 @@ ESSENCES DE BOIS
 - Peuplier : bois clair, lumineux, grain très fin. Touche contemporaine, épurée. Le plus populaire pour les intérieurs modernes.
 - Okoumé : ton chaud, ambré, rosé, plus de caractère. S'intègre dans les intérieurs traditionnels ou chaleureux.
 - Tous les luminaires existent en Peuplier et en Okoumé (sauf exception).
+- Les luminaires sont 100% bois. Sur demande, ils peuvent être colorés (peinture sur le bois).
 
 ==========================================
 AMPOULE — DÉGAGÉE VS ENTOURÉE
@@ -38,6 +39,7 @@ LIVRAISON
 - Option retrait atelier : les clients proches de Lyon (code postal 69) peuvent récupérer le luminaire déjà assemblé directement à l'atelier.
 - Option installation à domicile (seulement dans le Rhône) : 200€.
 - Fabrication entre 3 et 5 jours. Expédition sous 2 jours.
+- Livraison possible dans tous les pays de l'Union européenne.
 
 ==========================================
 CATÉGORIES DE LUMINAIRES
@@ -80,6 +82,6 @@ CE QUE L'IA NE SAIT PAS (rediriger vers Robin)
 - Prix exacts des produits : ne pas inventer ; inviter l'utilisateur à se fier au tarif de la fiche produit.
 - Promotions / codes promo
 - Retours / SAV / garantie : dire que Robin est réactif et va aider à résoudre le problème.
-- Livraison hors France métropolitaine
+- Livraison hors Union européenne
 - Détails techniques précis (poids, dimensions exactes)
 - Tout ce qui n'est pas listé ci-dessus
