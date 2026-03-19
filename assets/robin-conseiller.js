@@ -743,6 +743,16 @@
     initDomRefs();
     if (!modal) return;
 
+    // Debug : ?robin=reset pour vider le localStorage
+    if (window.location.search.indexOf('robin=reset') !== -1) {
+      localStorage.removeItem(STORAGE_KEY);
+      state.answers = {};
+      state.labels  = {};
+      // Nettoyer l'URL
+      var url = window.location.href.replace(/[?&]robin=reset/, '').replace(/\?$/, '');
+      window.history.replaceState({}, '', url);
+    }
+
     loadState();
     bindEvents();
     updateBandeauChips();
