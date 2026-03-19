@@ -2792,8 +2792,8 @@ function sapi_guide_query_products(array $answers, array $categories) {
   $allow_vertical = (
     $eclairage === 'grappe' ||
     $piece === 'escalier' ||
-    ($piece === 'entree' && in_array($hauteur, ['grande', 'confortable'], true)) ||
-    ($taille === 'petite' && in_array($hauteur, ['grande', 'confortable'], true))
+    ($piece === 'entree' && in_array($hauteur, ['haute', 'confortable'], true)) ||
+    ($taille === 'petite' && in_array($hauteur, ['haute', 'confortable'], true))
   );
 
   if (in_array('suspensions', $categories) && !$allow_vertical) {
