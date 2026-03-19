@@ -476,7 +476,7 @@
     var words = body.querySelectorAll('.robin-word');
     var signature = body.querySelector('.robin-fiche__signature');
     var bottom = document.getElementById('robin-fiche-bottom');
-    var startDelay = 1000; // 1s avant de commencer
+    var startDelay = 500; // 0.5s avant de commencer
     var wordDelay = 50;    // 50ms entre chaque mot
 
     for (var i = 0; i < words.length; i++) {
