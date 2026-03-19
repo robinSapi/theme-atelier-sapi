@@ -2142,7 +2142,7 @@ a.robin-fiche__choice--link {
 .robin-modal__container--expanded {
   max-width: 900px;
   height: 90vh;
-  transition: max-width 3s cubic-bezier(0.25, 0.1, 0.25, 1), height 3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition: max-width 5s cubic-bezier(0.25, 0.1, 0.25, 1), height 5s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 @media (max-width: 600px) {
   .robin-modal__container--expanded {
@@ -2159,16 +2159,31 @@ a.robin-fiche__choice--link {
   transition: background 2s ease;
 }
 
-/* Header simplifié en mode reco */
-.robin-modal--reco .robin-modal__back,
+/* Header simplifié en mode reco — éléments disparaissent individuellement */
+.robin-modal--reco .robin-modal__back {
+  transition: opacity 0.5s ease;
+}
 .robin-modal--reco .robin-modal__project {
+  transition: opacity 0.8s ease, max-height 0.8s ease;
+  overflow: hidden;
+}
+.robin-modal--reco .robin-modal__project.is-hidden {
+  opacity: 0;
+  max-height: 0;
+  padding: 0;
+  pointer-events: none;
+}
+.robin-modal--reco .robin-modal__back.is-hidden {
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.6s ease;
 }
-.robin-modal--reco .robin-modal__header {
-  grid-template-columns: 0fr auto 0fr;
-  transition: grid-template-columns 1s ease;
+.robin-modal__chip.is-fading {
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+.robin-modal__reset.is-fading {
+  transition: opacity 0.3s ease;
+  opacity: 0;
 }
 
 /* Container recommandation — flex colonne, remplit toute la modale */
