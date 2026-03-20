@@ -1656,8 +1656,8 @@ button:hover,
   border: 1px solid rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
   width: 100%;
-  max-width: 520px;
-  height: 70vh;
+  max-width: 580px;
+  height: 80vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
