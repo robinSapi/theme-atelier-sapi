@@ -6,6 +6,18 @@ get_header();
 
 $has_acf = function_exists('get_field');
 
+// Room picker data (même que homepage)
+require_once get_template_directory() . '/inc/guide-data.php';
+$room_choices = [
+  ['label' => 'Salon',   'slug' => 'salon',    'icon' => 'sofa'],
+  ['label' => 'Cuisine', 'slug' => 'cuisine',  'icon' => 'dining'],
+  ['label' => 'Chambre', 'slug' => 'chambre',  'icon' => 'bed'],
+  ['label' => 'Bureau',  'slug' => 'bureau',   'icon' => 'monitor'],
+  ['label' => 'Entrée',  'slug' => 'entree',   'icon' => 'door'],
+  ['label' => 'Escalier','slug' => 'escalier', 'icon' => 'stairs'],
+];
+$room_icons = sapi_guide_get_icons();
+
 $tips = [];
 for ($i = 1; $i <= 4; $i++) {
     $image_field = $has_acf ? get_field("tip_{$i}_picture") : false;
@@ -28,14 +40,6 @@ for ($i = 1; $i <= 4; $i++) {
     <p>Suspensions ou lampadaire ? Quelle ampoule choisir ? Retrouvez ici les infos idéales pour une décoration réussie !</p>
   </div>
 </section>
-
-<?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) : ?>
-  <div style="text-align:center; margin: 1.5rem 0;">
-    <button type="button" class="robin-pill" data-robin-context="bandeau">
-      &#x1F4A1; Vous avez un projet ? Robin vous conseille
-    </button>
-  </div>
-<?php endif; ?>
 
 <!-- Conseil personnalisé de Robin (shown by mon-projet.js if available) -->
 <?php
@@ -78,14 +82,25 @@ sapi_robin_conseil_card( 'conseils' );
     </div>
     <?php endforeach; ?>
 
-    <!-- Card CTA – Ouvre le bandeau Mon Projet (visible uniquement sans projet) -->
-    <div class="advice-guide-cta">
-      <div class="advice-guide-cta-inner">
-        <h2 class="advice-guide-cta-title">Définissez votre projet d'éclairage</h2>
-        <p class="advice-guide-cta-text">Répondez à quelques questions et Robin vous recommande les luminaires idéaux pour votre pièce.</p>
-        <button type="button" class="advice-guide-cta-btn" onclick="<?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) : ?>if(window.sapiRobinOpen)window.sapiRobinOpen('bandeau');<?php else : ?>var bar=document.getElementById('mon-projet-bar');if(bar){bar.scrollIntoView({behavior:'smooth',block:'start'});var t=document.getElementById('mon-projet-toggle');if(t&&t.getAttribute('aria-expanded')==='false')t.click();}<?php endif; ?>">
-          Commencer mon projet
-        </button>
+    <!-- Card "Pour quelle pièce" — ouvre la modale Robin -->
+    <div class="advice-room-picker">
+      <div class="room-picker-inner">
+        <span class="robin-modal__badge" style="margin-bottom: 0.5rem;">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+          Conseil de Robin
+        </span>
+        <h3 class="room-picker-title">Pour quelle pièce cherchez-vous un luminaire ?</h3>
+        <p class="room-picker-sub">Quelques questions et Robin vous guide vers le luminaire idéal</p>
+        <div class="room-picker-cards">
+          <?php foreach ($room_choices as $room) :
+            $icon_svg = isset($room_icons[$room['icon']]) ? $room_icons[$room['icon']] : '';
+          ?>
+            <button type="button" class="room-card" data-piece="<?php echo esc_attr($room['slug']); ?>" onclick="if(window.sapiRobinOpen)window.sapiRobinOpen('homepage',{piece:this.dataset.piece});">
+              <span class="room-card-icon"><?php echo $icon_svg; ?></span>
+              <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
+            </button>
+          <?php endforeach; ?>
+        </div>
       </div>
     </div>
   </div>
