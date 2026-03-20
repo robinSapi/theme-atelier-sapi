@@ -53,19 +53,19 @@
     "conseil_text": "Une entrée de taille moyenne, c'est parfait pour un luminaire qui fait impression dès le pas de la porte. Pas besoin de voir trop petit."
   },
   "taille:grande|piece:cuisine": {
-    "conseil_text": "Une grande cuisine, c'est l'occasion de marquer un point focal fort au-dessus de l'îlot. Mais souvent un seul luminaire ne suffit pas — je recommande de combiner avec un complément pour éviter les zones d'ombre. Une grappe de suspensions est aussi une idée à considérer !"
+    "conseil_text": "Une grande cuisine, c'est l'occasion de marquer un point focal fort au-dessus de l'îlot. Mais souvent un seul luminaire ne suffit pas — je recommande de combiner avec un complément pour éviter les zones d'ombre. Pour un rendu spectaculaire, Robin peut aussi concevoir un luminaire multi-ampoules sur mesure."
   },
   "taille:grande|piece:bureau": {
     "conseil_text": "Un grand bureau ou atelier, c'est un espace où multiplier les sources lumineuses fait sens. Un luminaire principal au-dessus de la zone de travail, complété par un lampadaire ou une applique ailleurs."
   },
   "taille:grande|piece:salon": {
-    "conseil_text": "Un grand salon, c'est l'occasion de voir grand ! Un luminaire généreux en point focal, complété par un lampadaire ou des appliques pour supprimer les zones d'ombre. Une grappe de suspensions est aussi une option superbe."
+    "conseil_text": "Un grand salon, c'est l'occasion de voir grand ! Un luminaire généreux en point focal, complété par un lampadaire ou des appliques pour supprimer les zones d'ombre. Pour un effet unique, Robin peut concevoir un luminaire multi-ampoules sur mesure."
   },
   "taille:grande|piece:chambre": {
     "conseil_text": "Une grande chambre peut accueillir un luminaire généreux qui devient une vraie pièce de décoration. Pensez aussi à un complément près du lit — lampe à poser ou applique — pour le côté fonctionnel."
   },
   "taille:grande|piece:entree": {
-    "conseil_text": "Un grand hall d'entrée, c'est une opportunité rare. Un luminaire imposant qui donne le ton de tout l'intérieur. On peut se permettre des formats verticaux ou une grappe spectaculaire."
+    "conseil_text": "Un grand hall d'entrée, c'est une opportunité rare. Un luminaire imposant qui donne le ton de tout l'intérieur. On peut se permettre des formats verticaux ou un ensemble de luminaires conçu sur mesure par Robin."
   },
   "taille_escalier:standard": {
     "conseil_text": "Il faut positionner un luminaire en partie haute pour éclairer toute la descente. Attention à la hauteur de passage. On est plutôt sur un éclairage déco mais avec un luminaire de taille raisonnable et au format boule ou vertical."
@@ -102,46 +102,6 @@
   },
   "eclairage:secondaire|piece:entree": {
     "conseil_text": "Compléter l'éclairage de votre entrée, c'est ajouter du caractère. Un luminaire en bois artisanal crée un accueil chaleureux à côté de l'éclairage fonctionnel."
-  },
-  "eclairage:grappe|piece:cuisine": {
-    "conseil_text": "Excellent choix pour une grande cuisine ! Une grappe de suspensions au-dessus de l'îlot couvre une grande zone tout en créant un effet visuel saisissant. Il va falloir contacter Robin car ces modèles ne sont pas disponibles en ligne.",
-    "link_url": "/contact/",
-    "link_label": "Contacter Robin pour ce projet"
-  },
-  "eclairage:grappe|piece:bureau": {
-    "conseil_text": "Une grappe dans un grand bureau, c'est spectaculaire et fonctionnel. Plusieurs suspensions couvrent toute la surface de travail. Contactez Robin pour un projet sur mesure — ces modèles ne sont pas disponibles en ligne.",
-    "link_url": "/contact/",
-    "link_label": "Contacter Robin pour ce projet"
-  },
-  "eclairage:grappe|piece:salon": {
-    "conseil_text": "Une grappe de suspensions dans un grand salon, c'est le statement ultime ! Plusieurs luminaires qui descendent à des hauteurs différentes, c'est une vraie sculpture lumineuse. Contactez Robin, c'est du sur mesure.",
-    "link_url": "/contact/",
-    "link_label": "Contacter Robin pour ce projet"
-  },
-  "eclairage:grappe|piece:chambre": {
-    "conseil_text": "Une grappe dans une grande chambre, c'est audacieux et magnifique. Plusieurs petites suspensions créent un ciel étoilé en bois. Contactez Robin pour concevoir ce projet sur mesure.",
-    "link_url": "/contact/",
-    "link_label": "Contacter Robin pour ce projet"
-  },
-  "eclairage:grappe|piece:entree": {
-    "conseil_text": "Une grappe de suspensions dans un grand hall, c'est l'entrée en matière parfaite. L'effet est spectaculaire dès le premier pas. Contactez Robin pour ce type de projet sur mesure.",
-    "link_url": "/contact/",
-    "link_label": "Contacter Robin pour ce projet"
-  },
-  "eclairage:plustard|piece:cuisine": {
-    "conseil_text": "Pas de souci, on avance et on pourra y revenir. Continuons à définir votre projet pour votre cuisine."
-  },
-  "eclairage:plustard|piece:bureau": {
-    "conseil_text": "Pas de souci, on avance et on pourra y revenir. Continuons à définir votre projet pour votre bureau."
-  },
-  "eclairage:plustard|piece:salon": {
-    "conseil_text": "Pas de souci, on avance et on pourra y revenir. Continuons à définir votre projet pour votre salon."
-  },
-  "eclairage:plustard|piece:chambre": {
-    "conseil_text": "Pas de souci, on avance et on pourra y revenir. Continuons à définir votre projet pour votre chambre."
-  },
-  "eclairage:plustard|piece:entree": {
-    "conseil_text": "Pas de souci, on avance et on pourra y revenir. Continuons à définir votre projet pour votre entrée."
   },
   "sortie:plafond|piece:cuisine|taille:petite": {
     "conseil_text": "Avec une sortie au plafond dans votre petite cuisine, vous avez accès à mes suspensions compactes. L'idéal pour éclairer efficacement un espace réduit avec une ampoule bien dégagée."

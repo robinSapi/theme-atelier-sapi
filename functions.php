@@ -2321,7 +2321,7 @@ function sapi_robin_handle_recommendation($answers, $ai_allowed) {
   $products = isset($result['products']) ? $result['products'] : [];
 
   // Sélectionner 3-4 produits
-  $show_sur_mesure = !empty($answers['eclairage']) && $answers['eclairage'] === 'grappe';
+  $show_sur_mesure = false; // Grappe supprimée du questionnaire — sur mesure suggéré dans les textes
   $pick_count = $show_sur_mesure ? 3 : 4;
   $picked = sapi_guide_pick_four($products, $pick_count);
 
@@ -2790,7 +2790,6 @@ function sapi_guide_query_products(array $answers, array $categories) {
   $eclairage = isset($answers['eclairage']) ? $answers['eclairage'] : '';
 
   $allow_vertical = (
-    $eclairage === 'grappe' ||
     $piece === 'escalier' ||
     ($piece === 'entree' && in_array($hauteur, ['haute', 'confortable'], true)) ||
     ($taille === 'petite' && in_array($hauteur, ['haute', 'confortable'], true))

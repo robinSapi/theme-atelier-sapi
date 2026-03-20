@@ -503,6 +503,13 @@
     }
     html += '</div>';
 
+    // Bouton sur-mesure pour grandes pièces
+    if (state.answers.taille === 'grande') {
+      html += '<div class="robin-fiche__cta-links" style="margin-top: 0.5rem;">';
+      html += '<a class="robin-fiche__cta-link" href="/contact/">Et si Robin cr\u00e9ait un mod\u00e8le unique pour vous ? &rarr;</a>';
+      html += '</div>';
+    }
+
     // Champ texte libre
     html += renderTextInput();
 

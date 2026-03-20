@@ -45,13 +45,11 @@ function sapi_guide_get_steps() {
     ],
     [
       'id'         => 'eclairage',
-      'question'   => 'Pour un grand espace, Robin recommande toujours de multiplier les sources lumineuses.',
+      'question'   => 'Ce luminaire sera-t-il votre principale source de lumière ?',
       'visibility' => ['taille' => ['grande']],
       'choices'    => [
-        ['label' => 'Je cherche mon éclairage principal',        'slug' => 'principal',  'icon' => 'sun'],
-        ['label' => 'Je veux compléter un éclairage existant',   'slug' => 'secondaire', 'icon' => 'lamp-desk'],
-        ['label' => 'Un luminaire multi-ampoules m\'intéresse',  'slug' => 'grappe',     'icon' => 'cluster'],
-        ['label' => 'Je verrai plus tard',                       'slug' => 'plustard',   'icon' => 'clock'],
+        ['label' => 'Ce sera la principale source d\'éclairage', 'slug' => 'principal',  'icon' => 'sun'],
+        ['label' => 'J\'ai d\'autres sources lumineuses',       'slug' => 'secondaire', 'icon' => 'lamp-desk'],
       ],
     ],
     [
@@ -59,7 +57,7 @@ function sapi_guide_get_steps() {
       'question'   => 'Où installerez-vous votre luminaire ?',
       'visibility' => ['_or' => [
         ['taille' => ['petite', 'moyenne']],
-        ['eclairage' => ['principal', 'secondaire', 'grappe', 'plustard']],
+        ['eclairage' => ['principal', 'secondaire']],
         ['piece' => ['escalier']],
       ]],
       'choices'    => [
