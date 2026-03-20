@@ -980,7 +980,7 @@
   }
 
   function animateRecoReveal() {
-    var revealTimings = { 1: 500, 2: 1200, 3: 1800, 4: 3000, 5: 3500, 6: 4000 };
+    var revealTimings = { 2: 500, 3: 1000, 4: 2000, 5: 2500, 6: 3000 };
 
     // Tous les éléments reveal dans le DOM (premier slide + globaux)
     var allReveals = document.querySelectorAll('.robin-reco .robin-reco__reveal');
@@ -1008,6 +1008,13 @@
         })(words[i], wordStart + i * 60);
       }
     }
+
+    // Activer le hover après toutes les animations
+    var maxDelay = revealTimings[6] || 3000;
+    setTimeout(function() {
+      var reco = document.querySelector('.robin-reco');
+      if (reco) reco.classList.add('robin-reco--ready');
+    }, maxDelay + 500);
   }
 
   function renderHorsParcours() {

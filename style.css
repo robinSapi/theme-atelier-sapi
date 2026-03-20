@@ -2218,24 +2218,28 @@ button:hover,
   height: 60px;
   color: var(--color-orange, #E35B24);
   opacity: 0;
-  transition: opacity 0.8s ease;
 }
 .robin-modal__curtain-bulb--visible {
-  opacity: 1;
-  animation: robinCurtainPulse 2.5s ease-in-out infinite;
+  animation: robinCurtainBulbIn 0.8s ease forwards, robinCurtainPulse 2.5s ease-in-out 0.8s infinite;
 }
 .robin-modal__curtain-bulb--fading {
-  opacity: 0 !important;
-  animation: none;
-  transition: opacity 0.8s ease;
+  animation: robinCurtainBulbOut 0.8s ease forwards;
 }
 .robin-modal__curtain-bulb svg {
   width: 100%;
   height: 100%;
 }
+@keyframes robinCurtainBulbIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes robinCurtainBulbOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
 @keyframes robinCurtainPulse {
-  0%, 100% { opacity: 0.3; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.15); }
+  0%, 100% { transform: scale(1); filter: brightness(0.7); }
+  50% { transform: scale(1.15); filter: brightness(1); }
 }
 
 /* ─── Recommandation finale ─── */
@@ -2381,7 +2385,7 @@ button:hover,
   object-fit: cover;
   transition: transform 0.6s var(--ease-expo, cubic-bezier(0.16, 1, 0.3, 1));
 }
-.robin-reco__slide:hover .robin-reco__photo img {
+.robin-reco--ready .robin-reco__slide:hover .robin-reco__photo img {
   transform: scale(1.04);
 }
 
