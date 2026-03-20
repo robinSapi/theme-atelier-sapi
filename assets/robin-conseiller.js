@@ -669,17 +669,24 @@
     };
     var label = labelMap[slug] || 'ce type de luminaire';
 
-    var html = '<div class="robin-fiche__conseil">';
-    html += '<div class="robin-fiche__citation">';
-    html += '<p class="robin-fiche__citation-text">C\'est bien ' + escHtml(label) + ' que vous cherchez ?</p>';
-    html += '</div></div>';
+    var html = '';
 
+    // Zone haute : question centrée
+    html += '<div class="robin-fiche__top">';
+    html += '<div class="robin-fiche__conseil">';
+    html += renderConseil({ conseil_text: 'C\'est bien ' + label + ' que vous cherchez ?' }, false);
+    html += '</div>';
+    html += '</div>';
+
+    // Zone basse : boutons + texte libre
+    html += '<div class="robin-fiche__bottom">';
     html += '<div class="robin-fiche__choices">';
     html += '<button class="robin-fiche__choice" id="robin-category-yes">Oui</button>';
     html += '<button class="robin-fiche__choice" id="robin-category-no">Non, autre chose</button>';
     html += '</div>';
-
     html += renderTextInput();
+    html += '</div>';
+
     body.innerHTML = html;
   }
 
