@@ -2197,7 +2197,7 @@ button:hover,
   left: 0;
   right: 0;
   height: 0;
-  background: var(--color-warm, #FBF6EA);
+  background: var(--color-wood, #937D68);
   z-index: 20;
   overflow: hidden;
   display: flex;
