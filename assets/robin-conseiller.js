@@ -1589,10 +1589,14 @@
         return;
       }
 
-      // Pills contextuelles
-      var pill = e.target.closest('.robin-pill');
-      if (pill) {
-        var context = pill.dataset.robinContext || 'bandeau';
+      // Pills contextuelles + cards Robin
+      var pill = e.target.closest('.robin-pill') || e.target.closest('.robin-category-card__inner');
+      if (pill && pill.dataset.robinContext) {
+        var context = pill.dataset.robinContext;
+        if (context === '_product_reselect') {
+          reselectVariation();
+          return;
+        }
         var data = {};
         try { data = JSON.parse(pill.dataset.robinData || '{}'); } catch (err) {}
         openModal(context, data);

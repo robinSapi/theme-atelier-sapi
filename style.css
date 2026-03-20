@@ -2577,6 +2577,51 @@ button:hover,
   }
 }
 
+/* ─── Card Robin dans grille catégorie ─── */
+.robin-category-card {
+  list-style: none;
+}
+.robin-category-card__inner {
+  background: var(--color-warm, #FBF6EA);
+  border: 2px dashed rgba(var(--color-wood-rgb, 147, 125, 104), 0.3);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.robin-category-card__inner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
+  border-color: var(--color-wood, #937D68);
+}
+.robin-category-card__text {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-dark, #323232);
+  margin: 0;
+}
+.robin-category-card__cta {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-orange, #E35B24);
+  transition: gap 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.robin-category-card__inner:hover .robin-category-card__cta {
+  gap: 0.5rem;
+}
+
 /* ═══════════════════════════════════════════════════════════
    FIN ROBIN CONSEILLER V2
 ═══════════════════════════════════════════════════════════ */

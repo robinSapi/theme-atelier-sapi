@@ -109,12 +109,6 @@ endif;
     <h2><span class="section-num">02</span> <?php echo $masculin ? 'Tous nos' : 'Toutes nos'; ?> <?php echo esc_html(strtolower($term_name)); ?></h2>
   </div>
 
-  <?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) : ?>
-    <button type="button" class="robin-pill" data-robin-context="category" data-robin-data='<?php echo esc_attr(wp_json_encode(['category_slug' => $term_slug])); ?>'>
-      &#x1F4A1; Besoin d'un conseil pour choisir ?
-    </button>
-  <?php endif; ?>
-
   <?php
   // Query all products in this category for the grid
   $grid_query = new WP_Query([
@@ -132,12 +126,31 @@ endif;
   ]);
 
   if ($grid_query->have_posts()) :
+    $product_count = 0;
   ?>
     <ul class="products columns-4">
       <?php
       while ($grid_query->have_posts()) :
         $grid_query->the_post();
         wc_get_template_part('content', 'product');
+        $product_count++;
+
+        // Card Robin après le 4ème produit
+        if ($product_count === 4 && defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) :
+        ?>
+          <li class="robin-category-card" id="robin-category-card">
+            <div class="robin-category-card__inner" data-robin-context="category" data-robin-data='<?php echo esc_attr(wp_json_encode(['category_slug' => $term_slug])); ?>'>
+              <span class="robin-modal__badge">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+                Conseil de Robin
+              </span>
+              <p class="robin-category-card__text">Quel mod&egrave;le est fait pour vous ? R&eacute;pondez &agrave; quelques questions, Robin vous guide.</p>
+              <span class="robin-category-card__cta">D&eacute;couvrir &rarr;</span>
+            </div>
+          </li>
+        <?php
+        endif;
+
       endwhile;
       ?>
     </ul>
