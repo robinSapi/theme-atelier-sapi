@@ -70,7 +70,7 @@ function sapi_guide_get_steps() {
     [
       'id'         => 'hauteur',
       'question'   => 'Quelle est votre hauteur sous-plafond ?',
-      'visibility' => ['sortie' => ['plafond']],
+      'visibility' => ['sortie' => ['plafond'], 'piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'entree']],
       'choices'    => [
         ['label' => 'Standard',    'dim' => '< 2,50 m',  'slug' => 'standard',    'icon' => 'ceiling-low'],
         ['label' => 'Confortable', 'dim' => '2,50–3 m',  'slug' => 'confortable', 'icon' => 'ceiling-mid'],
