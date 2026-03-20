@@ -2218,14 +2218,16 @@ button:hover,
   height: 60px;
   color: var(--color-orange, #E35B24);
   opacity: 0;
-  transition: opacity 0.6s;
+  transition: opacity 0.8s ease;
 }
 .robin-modal__curtain-bulb--visible {
   opacity: 1;
   animation: robinCurtainPulse 2.5s ease-in-out infinite;
 }
 .robin-modal__curtain-bulb--fading {
-  opacity: 0;
+  opacity: 0 !important;
+  animation: none;
+  transition: opacity 0.8s ease;
 }
 .robin-modal__curtain-bulb svg {
   width: 100%;

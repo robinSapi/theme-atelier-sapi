@@ -748,16 +748,16 @@
     }, 200);
 
     function openCurtain() {
-      // Masquer complètement le header (pour que la photo commence en haut)
+      // Masquer complètement le header
       var headerEl = document.getElementById('robin-modal-header');
       var projectEl2 = document.getElementById('robin-modal-project');
       if (headerEl) headerEl.classList.add('is-collapsed');
       if (projectEl2) projectEl2.classList.add('is-collapsed');
 
-      // Préparer le contenu derrière le rideau
+      // Préparer le contenu DERRIÈRE le rideau (déjà en place)
       body.classList.add('robin-modal__body--reco');
       if (recoData) {
-        renderRecoResult(recoData, true); // true = ne pas animer encore
+        renderRecoResult(recoData, true);
       } else {
         body.innerHTML = '<div class="robin-reco">' +
           '<div class="robin-fiche__conseil">' +
@@ -767,20 +767,19 @@
           '</div>';
       }
 
-      // 6. Ampoule disparaît en fondu
-      if (bulb) {
-        bulb.classList.remove('robin-modal__curtain-bulb--visible');
-        bulb.classList.add('robin-modal__curtain-bulb--fading');
-      }
+      // 6. Ampoule disparaît en fondu doux
+      if (bulb) bulb.classList.add('robin-modal__curtain-bulb--fading');
 
-      // 7. Rideau s'ouvre (remonte et disparaît)
+      // 7. Attendre que l'ampoule soit partie, puis ouvrir le rideau
       setTimeout(function() {
+        if (bulb) bulb.classList.remove('robin-modal__curtain-bulb--visible');
+
         if (curtain) {
           curtain.classList.remove('robin-modal__curtain--closing');
           curtain.classList.add('robin-modal__curtain--opening');
         }
 
-        // 8. Après ouverture, animer les éléments
+        // 8. Après ouverture du rideau, animer les infos (pas la photo, elle est déjà visible)
         setTimeout(function() {
           animateRecoReveal();
           if (curtain) {
@@ -788,7 +787,7 @@
             bulb.classList.remove('robin-modal__curtain-bulb--fading');
           }
         }, 1300);
-      }, 600);
+      }, 800);
     }
   }
 
@@ -812,14 +811,14 @@
         var p = products[i];
         html += '<div class="robin-reco__slide" data-index="' + i + '">';
 
-        // Photo plein bord cliquable — apparaît en premier
-        html += '<a href="' + escAttr(p.permalink) + '" class="robin-reco__photo robin-reco__reveal" data-reveal="1">';
+        // Photo plein bord cliquable — visible derrière le rideau (pas animée)
+        html += '<a href="' + escAttr(p.permalink) + '" class="robin-reco__photo">';
         html += '<img src="' + escAttr(p.ambiance || p.image) + '" alt="' + escAttr(p.title) + '">';
         html += '</a>';
 
-        // Infos sous la photo — styles identiques aux cards produit du site
+        // Nom + prix — visible derrière le rideau (pas animé)
         html += '<div class="robin-reco__info">';
-        html += '<div class="robin-reco__info-top robin-reco__reveal" data-reveal="2">';
+        html += '<div class="robin-reco__info-top">';
         html += '<h3 class="product-name robin-reco__name">' + escHtml(p.title) + '</h3>';
         html += '<div class="robin-reco__price-wrap">';
         html += '<span class="robin-reco__price-from">À partir de</span>';
