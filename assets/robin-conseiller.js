@@ -401,6 +401,10 @@
     if (badgeRestore) { badgeRestore.style.opacity = ''; badgeRestore.style.transition = ''; }
     var closeRestore = document.getElementById('robin-modal-close');
     if (closeRestore) { closeRestore.style.opacity = ''; closeRestore.style.transition = ''; }
+    var headerRestore = document.getElementById('robin-modal-header');
+    if (headerRestore) headerRestore.classList.remove('is-collapsed');
+    var projectRestore = document.getElementById('robin-modal-project');
+    if (projectRestore) projectRestore.classList.remove('is-collapsed');
 
     // Restaurer le rideau
     var curtain = document.getElementById('robin-modal-curtain');
@@ -687,22 +691,19 @@
     var recoData = null;
     var recoReady = false;
 
-    // 1. Overlay sombre + modale s'agrandit
+    // 1. Overlay sombre
     modal.classList.add('robin-modal--reco');
-    if (container) container.classList.add('robin-modal__container--expanded');
 
-    // 2. Chips disparaissent une par une (y compris badge + croix)
+    // 2. Chips disparaissent + rideau descend EN MÊME TEMPS
     animateHeaderSimplify();
+    if (curtain) curtain.classList.add('robin-modal__curtain--closing');
 
-    // 3. Après disparition header (~1.5s), le rideau descend
-    setTimeout(function() {
-      if (curtain) curtain.classList.add('robin-modal__curtain--closing');
-    }, 1500);
-
-    // 4. Après fermeture rideau (~3s), ampoule apparaît
+    // 3. Après fermeture rideau (~2s), ampoule apparaît
     setTimeout(function() {
       if (bulb) bulb.classList.add('robin-modal__curtain-bulb--visible');
-    }, 3000);
+      // 4. Modale commence à s'agrandir APRÈS fermeture rideau
+      if (container) container.classList.add('robin-modal__container--expanded');
+    }, 2000);
 
     // 5. Appel AJAX en parallèle
     var fd = new FormData();
@@ -747,6 +748,12 @@
     }, 200);
 
     function openCurtain() {
+      // Masquer complètement le header (pour que la photo commence en haut)
+      var headerEl = document.getElementById('robin-modal-header');
+      var projectEl2 = document.getElementById('robin-modal-project');
+      if (headerEl) headerEl.classList.add('is-collapsed');
+      if (projectEl2) projectEl2.classList.add('is-collapsed');
+
       // Préparer le contenu derrière le rideau
       body.classList.add('robin-modal__body--reco');
       if (recoData) {

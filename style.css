@@ -2292,6 +2292,18 @@ button:hover,
   opacity: 0;
 }
 
+/* Header complètement masqué après ouverture rideau */
+.robin-modal--reco .robin-modal__header.is-collapsed {
+  height: 0;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  transition: height 0.5s ease, padding 0.5s ease, min-height 0.5s ease;
+}
+.robin-modal--reco .robin-modal__project.is-collapsed {
+  display: none;
+}
+
 /* Container recommandation — flex colonne, remplit toute la modale */
 .robin-reco {
   display: flex;
