@@ -158,8 +158,9 @@
   ┌────────────┬──────────────────────────┬──────────────────────────┐
   │ Format     │ Description              │ Contrainte               │
   ├────────────┼──────────────────────────┼──────────────────────────┤
-  │ Horizontal │ Large, peu de hauteur    │ Aucune — OK partout      │
-  │            │                          │                          │
+  │ Horizontal │ Large, peu de hauteur    │ EXCLU si petite pièce    │
+  │            │                          │ + plafond haut           │
+  │            │                          │ EXCLU si escalier        │
   │ Boule      │ Forme ronde / sphérique  │ Aucune — OK partout      │
   │            │                          │                          │
   │ Vertical   │ En hauteur, allongé      │ EXCLU si plafond bas     │
