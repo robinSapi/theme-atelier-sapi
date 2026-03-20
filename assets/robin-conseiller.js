@@ -808,7 +808,9 @@
 
       // Préparer le contenu DERRIÈRE le rideau (déjà en place)
       body.classList.add('robin-modal__body--reco');
-      if (recoData) {
+      if (recoData && recoData.recommend_type === 'sur_mesure') {
+        renderSurMesureResult(recoData, true);
+      } else if (recoData) {
         renderRecoResult(recoData, true);
       } else {
         body.innerHTML = '<div class="robin-reco">' +
@@ -840,6 +842,45 @@
           }
         }, 1300);
       }, 800);
+    }
+  }
+
+  function renderSurMesureResult(data, skipAnimate) {
+    var words = (data.conseil_text || '').split(' ');
+
+    var html = '<div class="robin-reco robin-reco--sur-mesure">';
+
+    // Icône atelier
+    html += '<div class="robin-sur-mesure__icon robin-reco__reveal" data-reveal="2">';
+    html += '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>';
+    html += '</div>';
+
+    // Titre
+    html += '<h3 class="robin-sur-mesure__title robin-reco__reveal" data-reveal="2">Ce projet m\u00e9rite du sur mesure</h3>';
+
+    // Texte Claude — mot par mot
+    html += '<p class="robin-sur-mesure__text">';
+    for (var i = 0; i < words.length; i++) {
+      html += '<span class="robin-reco__reveal-word" style="opacity:0;">' + escHtml(words[i]) + '</span> ';
+    }
+    html += '</p>';
+
+    // CTA principal
+    html += '<div class="robin-sur-mesure__actions robin-reco__reveal" data-reveal="4">';
+    html += '<a class="robin-sur-mesure__cta-main" href="/sur-mesure/">Parler de mon projet avec Robin &rarr;</a>';
+    html += '</div>';
+
+    // CTA secondaire
+    html += '<div class="robin-sur-mesure__secondary robin-reco__reveal" data-reveal="5">';
+    html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/nos-creations/?robin_selection=1">Voir les mod\u00e8les existants quand m\u00eame</a>';
+    html += '</div>';
+
+    html += '</div>';
+
+    body.innerHTML = html;
+
+    if (!skipAnimate) {
+      animateRecoReveal();
     }
   }
 

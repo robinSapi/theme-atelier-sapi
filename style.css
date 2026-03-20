@@ -2552,6 +2552,86 @@ button:hover,
   }
 }
 
+/* ─── Fiche Sur Mesure (recommandation finale) ─── */
+.robin-reco--sur-mesure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 2rem 2rem;
+  min-height: 100%;
+}
+.robin-sur-mesure__icon {
+  color: var(--color-orange, #E35B24);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  transform: translateY(10px);
+}
+.robin-sur-mesure__title {
+  font-family: var(--font-display, 'Square Peg', cursive);
+  font-size: 2rem;
+  color: var(--color-dark, #323232);
+  margin: 0 0 1.5rem;
+  opacity: 0;
+  transform: translateY(10px);
+}
+.robin-sur-mesure__text {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--color-dark, #323232);
+  max-width: 480px;
+  margin: 0 auto 2rem;
+}
+.robin-sur-mesure__actions {
+  margin-bottom: 1rem;
+  opacity: 0;
+  transform: translateY(10px);
+}
+.robin-sur-mesure__cta-main {
+  display: inline-block;
+  padding: 0.85rem 2rem;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  color: #fff;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.robin-sur-mesure__cta-main:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
+}
+.robin-sur-mesure__secondary {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.robin-sur-mesure__secondary .robin-fiche__choice--link {
+  font-size: 0.8rem;
+  color: var(--color-wood, #937D68);
+}
+
+@media (max-width: 600px) {
+  .robin-reco--sur-mesure {
+    padding: 2rem 1.25rem 1.5rem;
+  }
+  .robin-sur-mesure__title {
+    font-size: 1.6rem;
+  }
+  .robin-sur-mesure__text {
+    font-size: 0.88rem;
+  }
+  .robin-sur-mesure__cta-main {
+    font-size: 0.85rem;
+    padding: 0.75rem 1.5rem;
+  }
+}
+
 /* ─── Card Robin dans grille catégorie ─── */
 .robin-category-card {
   list-style: none;

@@ -2316,15 +2316,25 @@ function sapi_robin_handle_recommendation($answers, $ai_allowed) {
     $answers['taille'] = $answers['taille_escalier'] === 'ouvert' ? 'grande' : 'petite';
   }
 
-  // Pipeline de filtrage
+  // Détecter si le projet relève du sur mesure
+  $piece   = isset($answers['piece']) ? $answers['piece'] : '';
+  $taille  = isset($answers['taille']) ? $answers['taille'] : '';
+  $hauteur = isset($answers['hauteur']) ? $answers['hauteur'] : '';
+  $is_sur_mesure = ($piece === 'escalier')
+    || ($taille === 'grande' && in_array($hauteur, ['haute', 'confortable'], true))
+    || ($taille === 'grande' && $piece === 'escalier');
+
+  if ($is_sur_mesure) {
+    sapi_robin_handle_sur_mesure($answers, $ai_allowed);
+    return;
+  }
+
+  // Pipeline de filtrage (parcours standard)
   $categories = sapi_guide_get_categories($answers);
   $result = sapi_guide_query_products($answers, $categories);
   $products = isset($result['products']) ? $result['products'] : [];
 
-  // Sélectionner 3-4 produits
-  $show_sur_mesure = false; // Grappe supprimée du questionnaire — sur mesure suggéré dans les textes
-  $pick_count = $show_sur_mesure ? 3 : 4;
-  $picked = sapi_guide_pick_four($products, $pick_count);
+  $picked = sapi_guide_pick_four($products, 4);
 
   if (empty($picked)) {
     wp_send_json_success([
@@ -2386,6 +2396,87 @@ function sapi_robin_handle_recommendation($answers, $ai_allowed) {
     'conseil_text' => 'Voici les luminaires qui correspondent le mieux à votre projet. Contactez Robin si vous souhaitez en discuter.',
     'products'     => $front_products,
   ]);
+}
+
+/**
+ * Robin V2 — Gestion du parcours "sur mesure" (escalier, grande pièce + plafond haut).
+ */
+function sapi_robin_handle_sur_mesure($answers, $ai_allowed) {
+  $label_map = [
+    'piece' => 'Pièce', 'taille' => 'Taille', 'taille_escalier' => 'Type escalier',
+    'eclairage' => 'Éclairage', 'sortie' => 'Installation', 'hauteur' => 'Hauteur plafond',
+    'table' => 'Au-dessus table/îlot', 'style' => 'Style',
+  ];
+  $answers_text = '';
+  foreach ($answers as $k => $v) {
+    $label = isset($label_map[$k]) ? $label_map[$k] : $k;
+    $answers_text .= '- ' . $label . ' : ' . $v . "\n";
+  }
+
+  $conseil_text = '';
+  if ($ai_allowed) {
+    $conseil_text = sapi_robin_call_sur_mesure($answers_text);
+  }
+  if (empty($conseil_text)) {
+    // Fallback sans IA
+    $conseil_text = 'Ce type de projet mérite une attention particulière. Robin a déjà réalisé des luminaires pour des situations similaires. Le mieux est d\'en discuter directement avec lui.';
+  }
+
+  wp_send_json_success([
+    'recommend_type' => 'sur_mesure',
+    'conseil_text'   => $conseil_text,
+    'products'       => [],
+  ]);
+}
+
+/**
+ * Robin V2 — Appel Claude pour le texte sur mesure.
+ */
+function sapi_robin_call_sur_mesure($answers_text) {
+  $theme_dir = get_template_directory();
+  $ton = @file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt') ?: '';
+
+  $prompt  = $ton . "\n\n";
+  $prompt .= "CONTEXTE : Le client a un projet qui relève du sur mesure. Robin crée des luminaires sur mesure pour ce genre de situations.\n\n";
+  $prompt .= "RÉPONSES DU CLIENT :\n" . $answers_text . "\n";
+  $prompt .= "MISSION : Rédige un court texte (3-4 phrases MAX) qui :\n";
+  $prompt .= "1. Valide que le sur mesure est la bonne option pour ce projet\n";
+  $prompt .= "2. Rassure le client en mentionnant que Robin a déjà créé des luminaires pour des situations similaires\n";
+  $prompt .= "3. Donne envie de contacter Robin pour en discuter\n\n";
+  $prompt .= "RÈGLES ABSOLUES :\n";
+  $prompt .= "- Tu ne proposes PAS de luminaire, tu ne décris PAS ce que Robin pourrait créer. C'est la mission de Robin, pas la tienne.\n";
+  $prompt .= "- Tu parles du projet du client (sa pièce, ses contraintes) et tu expliques pourquoi le sur mesure est adapté.\n";
+  $prompt .= "- Pas de guillemets « ». Pas de markdown. Texte brut uniquement.\n";
+  $prompt .= "- Réponds UNIQUEMENT avec le texte, rien d'autre (pas de JSON, pas de commentaire).\n";
+
+  $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
+  if (empty($api_key)) return '';
+
+  $body = [
+    'model'      => 'claude-sonnet-4-6',
+    'max_tokens' => 256,
+    'system'     => $prompt,
+    'messages'   => [
+      ['role' => 'user', 'content' => 'Voici mon projet. Est-ce que le sur mesure est adapté ?'],
+    ],
+  ];
+
+  $response = wp_remote_post('https://api.anthropic.com/v1/messages', [
+    'timeout' => 20,
+    'headers' => [
+      'Content-Type'      => 'application/json',
+      'x-api-key'         => $api_key,
+      'anthropic-version'  => '2023-06-01',
+    ],
+    'body' => wp_json_encode($body),
+  ]);
+
+  if (is_wp_error($response)) return '';
+
+  $resp_body = json_decode(wp_remote_retrieve_body($response), true);
+  if (!$resp_body || empty($resp_body['content'][0]['text'])) return '';
+
+  return trim($resp_body['content'][0]['text']);
 }
 
 /**
