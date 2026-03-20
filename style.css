@@ -8308,7 +8308,25 @@ li.carousel-editorial-slide,
   }
 }
 
+.advice-room-picker-section {
+  max-width: 1400px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+}
 .advice-room-picker {
+  background: var(--color-warm, #FBF6EA);
+  border: 2px dashed rgba(var(--color-wood-rgb, 147, 125, 104), 0.3);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.advice-room-picker:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
+  border-color: var(--color-wood, #937D68);
+}
+.advice-room-picker .room-picker-cards {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
@@ -8321,7 +8339,7 @@ li.carousel-editorial-slide,
     padding: 36px 20px;
   }
 
-  .advice-room-picker {
+  .advice-room-picker .room-picker-cards {
     gap: 0.75rem;
   }
 
@@ -8329,6 +8347,14 @@ li.carousel-editorial-slide,
     flex: 0 0 calc(50% - 0.5rem);
     max-width: none;
     padding: 1rem 0.75rem;
+  }
+
+  .advice-room-picker-section {
+    padding: 0 1rem;
+  }
+
+  .advice-room-picker {
+    padding: 1.5rem 1.25rem;
   }
 }
 
