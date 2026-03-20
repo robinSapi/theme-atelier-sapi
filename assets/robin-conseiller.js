@@ -396,7 +396,17 @@
       projectEl.classList.remove('is-hidden');
       projectEl.querySelectorAll('.is-fading').forEach(function(el) { el.classList.remove('is-fading'); });
     }
-    if (backBtn) backBtn.classList.remove('is-hidden');
+    if (backBtn) { backBtn.classList.remove('is-hidden'); backBtn.style.opacity = ''; backBtn.style.transition = ''; }
+    var badgeRestore = document.getElementById('robin-modal-badge');
+    if (badgeRestore) { badgeRestore.style.opacity = ''; badgeRestore.style.transition = ''; }
+    var closeRestore = document.getElementById('robin-modal-close');
+    if (closeRestore) { closeRestore.style.opacity = ''; closeRestore.style.transition = ''; }
+
+    // Restaurer le rideau
+    var curtain = document.getElementById('robin-modal-curtain');
+    var bulb = document.getElementById('robin-modal-curtain-bulb');
+    if (curtain) { curtain.classList.remove('robin-modal__curtain--closing', 'robin-modal__curtain--opening'); }
+    if (bulb) { bulb.classList.remove('robin-modal__curtain-bulb--visible', 'robin-modal__curtain-bulb--fading'); }
 
     // Annuler tout AJAX en cours
     if (state.pendingXhr) {
@@ -671,24 +681,30 @@
   }
 
   function onRecoConseilClick() {
-    // 1. Mode cinématique — overlay sombre
-    modal.classList.add('robin-modal--reco');
+    var curtain = document.getElementById('robin-modal-curtain');
+    var bulb = document.getElementById('robin-modal-curtain-bulb');
+    var container = document.querySelector('.robin-modal__container');
+    var recoData = null;
+    var recoReady = false;
 
-    // 2. Header — disparition élément par élément
+    // 1. Overlay sombre + modale s'agrandit
+    modal.classList.add('robin-modal--reco');
+    if (container) container.classList.add('robin-modal__container--expanded');
+
+    // 2. Chips disparaissent une par une (y compris badge + croix)
     animateHeaderSimplify();
 
-    // 3. Agrandir la modale lentement (5s)
-    var container = document.querySelector('.robin-modal__container');
-    if (container) container.classList.add('robin-modal__container--expanded');
-    body.classList.add('robin-modal__body--reco');
+    // 3. Après disparition header (~1.5s), le rideau descend
+    setTimeout(function() {
+      if (curtain) curtain.classList.add('robin-modal__curtain--closing');
+    }, 1500);
 
-    // 4. Afficher le loader (apparaît pendant l'agrandissement)
-    body.innerHTML = '<div class="robin-reco">' +
-      '<div class="robin-reco__loader">' + renderConseilLoader() + '</div>' +
-      '</div>';
-    animateLoader();
+    // 4. Après fermeture rideau (~3s), ampoule apparaît
+    setTimeout(function() {
+      if (bulb) bulb.classList.add('robin-modal__curtain-bulb--visible');
+    }, 3000);
 
-    // Appel AJAX recommendation
+    // 5. Appel AJAX en parallèle
     var fd = new FormData();
     fd.append('action', 'sapi_robin_conseil_step');
     fd.append('nonce', NONCE);
@@ -708,23 +724,68 @@
         try {
           var resp = JSON.parse(xhr.responseText);
           if (resp.success && resp.data) {
-            renderRecoResult(resp.data);
-            return;
+            recoData = resp.data;
           }
         } catch (e) {}
       }
-      // Fallback erreur
-      body.innerHTML = '<div class="robin-reco">' +
-        '<div class="robin-fiche__conseil">' +
-        renderConseil({ conseil_text: 'D\u00e9sol\u00e9, je n\'ai pas pu analyser votre projet. Rendez-vous sur nos cr\u00e9ations pour explorer le catalogue.' }, false) +
-        '</div>' +
-        '<div class="robin-fiche__link"><a href="/nos-creations/?robin_selection=1">Voir nos cr\u00e9ations &rarr;</a></div>' +
-        '</div>';
+      recoReady = true;
+      // Si l'ampoule est déjà visible, ouvrir le rideau
+      if (bulb && bulb.classList.contains('robin-modal__curtain-bulb--visible')) {
+        openCurtain();
+      }
     };
     xhr.send(fd);
+
+    // Quand l'ampoule est visible ET la réponse est prête → ouvrir
+    // Si la réponse arrive avant l'ampoule, on attend l'ampoule
+    var ampouleCheckInterval = setInterval(function() {
+      if (recoReady && bulb && bulb.classList.contains('robin-modal__curtain-bulb--visible')) {
+        clearInterval(ampouleCheckInterval);
+        // Laisser l'ampoule pulser au moins 1.5s
+        setTimeout(openCurtain, 1500);
+      }
+    }, 200);
+
+    function openCurtain() {
+      // Préparer le contenu derrière le rideau
+      body.classList.add('robin-modal__body--reco');
+      if (recoData) {
+        renderRecoResult(recoData, true); // true = ne pas animer encore
+      } else {
+        body.innerHTML = '<div class="robin-reco">' +
+          '<div class="robin-fiche__conseil">' +
+          renderConseil({ conseil_text: 'D\u00e9sol\u00e9, je n\'ai pas pu analyser votre projet. Rendez-vous sur nos cr\u00e9ations pour explorer le catalogue.' }, false) +
+          '</div>' +
+          '<div class="robin-fiche__cta-links"><a class="robin-fiche__cta-link" href="/nos-creations/?robin_selection=1">Voir nos cr\u00e9ations &rarr;</a></div>' +
+          '</div>';
+      }
+
+      // 6. Ampoule disparaît en fondu
+      if (bulb) {
+        bulb.classList.remove('robin-modal__curtain-bulb--visible');
+        bulb.classList.add('robin-modal__curtain-bulb--fading');
+      }
+
+      // 7. Rideau s'ouvre (remonte et disparaît)
+      setTimeout(function() {
+        if (curtain) {
+          curtain.classList.remove('robin-modal__curtain--closing');
+          curtain.classList.add('robin-modal__curtain--opening');
+        }
+
+        // 8. Après ouverture, animer les éléments
+        setTimeout(function() {
+          animateRecoReveal();
+          if (curtain) {
+            curtain.classList.remove('robin-modal__curtain--opening');
+            bulb.classList.remove('robin-modal__curtain-bulb--fading');
+          }
+        }, 1300);
+      }, 600);
+    }
   }
 
-  function renderRecoResult(data) {
+  function renderRecoResult(data, skipAnimate) {
     var products = data.products || [];
     var totalSlides = products.length;
 
@@ -816,12 +877,14 @@
       window.sapiFormatProductNames();
     }
 
-    // Dévoilement progressif séquentiel
-    animateRecoReveal();
-
     // Init slider navigation
     if (totalSlides > 1) {
       initRecoSlider(totalSlides);
+    }
+
+    // Animer seulement si pas derrière le rideau
+    if (!skipAnimate) {
+      animateRecoReveal();
     }
   }
 
@@ -867,6 +930,9 @@
   function animateHeaderSimplify() {
     var projectEl = document.getElementById('robin-modal-project');
     var backBtnEl = document.getElementById('robin-modal-back');
+    var badgeEl2 = document.getElementById('robin-modal-badge');
+    var closeEl = document.getElementById('robin-modal-close');
+    var delay = 0;
 
     // 1. Chips disparaissent une par une
     if (projectEl) {
@@ -874,26 +940,36 @@
       var resetBtn = projectEl.querySelector('.robin-modal__reset');
 
       for (var i = 0; i < chips.length; i++) {
-        (function(chip, delay) {
-          setTimeout(function() { chip.classList.add('is-fading'); }, delay);
-        })(chips[i], i * 200);
+        (function(chip, d) {
+          setTimeout(function() { chip.classList.add('is-fading'); }, d);
+        })(chips[i], delay);
+        delay += 150;
       }
 
       // 2. Recommencer disparaît
-      var resetDelay = chips.length * 200 + 200;
       if (resetBtn) {
-        setTimeout(function() { resetBtn.classList.add('is-fading'); }, resetDelay);
+        setTimeout(function() { resetBtn.classList.add('is-fading'); }, delay);
+        delay += 200;
       }
 
-      // 3. Toute la barre projet se réduit
-      setTimeout(function() {
-        projectEl.classList.add('is-hidden');
-      }, resetDelay + 400);
+      // 3. Barre projet se réduit
+      setTimeout(function() { projectEl.classList.add('is-hidden'); }, delay);
+      delay += 200;
     }
 
     // 4. Bouton retour disparaît
     if (backBtnEl) {
-      setTimeout(function() { backBtnEl.classList.add('is-hidden'); }, 800);
+      setTimeout(function() { backBtnEl.style.transition = 'opacity 0.3s'; backBtnEl.style.opacity = '0'; }, delay);
+    }
+
+    // 5. Badge "Mon projet" disparaît
+    if (badgeEl2) {
+      setTimeout(function() { badgeEl2.style.transition = 'opacity 0.3s'; badgeEl2.style.opacity = '0'; }, delay + 150);
+    }
+
+    // 6. Croix disparaît
+    if (closeEl) {
+      setTimeout(function() { closeEl.style.transition = 'opacity 0.3s'; closeEl.style.opacity = '0'; }, delay + 300);
     }
   }
 
