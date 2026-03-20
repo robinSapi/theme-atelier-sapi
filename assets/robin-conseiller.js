@@ -1179,14 +1179,26 @@
     html += '<div class="robin-fiche__conseil">';
     html += renderConseil({ conseil_text: data.conseil_text }, true);
     html += '</div>';
-    // 2 liens CTA standards
-    var showSurMesureFT = state.answers.taille === 'grande' || state.answers.hauteur === 'haute';
+    // Liens CTA — de l'IA ou fallback standards
+    var linkBtns = [];
+    if (data.suggested_buttons) {
+      for (var lb = 0; lb < data.suggested_buttons.length; lb++) {
+        if (data.suggested_buttons[lb].url) linkBtns.push(data.suggested_buttons[lb]);
+      }
+    }
+    // Fallback si l'IA n'a pas retourné de liens
+    if (linkBtns.length === 0) {
+      var showSurMesureFT = state.answers.taille === 'grande' || state.answers.hauteur === 'haute';
+      linkBtns.push({ label: 'Voir les mod\u00e8les filtr\u00e9s pour votre projet', url: '/nos-creations/?robin_selection=1' });
+      if (showSurMesureFT) {
+        linkBtns.push({ label: 'Imaginer un mod\u00e8le sur mesure', url: '/sur-mesure/' });
+      } else {
+        linkBtns.push({ label: 'Contacter Robin', url: '/contact/' });
+      }
+    }
     html += '<div class="robin-fiche__cta-links" id="robin-fiche-link" style="opacity:0;">';
-    html += '<a class="robin-fiche__cta-link" href="/nos-creations/?robin_selection=1">Voir les mod\u00e8les filtr\u00e9s pour votre projet &rarr;</a>';
-    if (showSurMesureFT) {
-      html += '<a class="robin-fiche__cta-link" href="/sur-mesure/">Imaginer un mod\u00e8le sur mesure &rarr;</a>';
-    } else {
-      html += '<a class="robin-fiche__cta-link" href="/contact/">Contacter Robin &rarr;</a>';
+    for (var lbi = 0; lbi < linkBtns.length; lbi++) {
+      html += '<a class="robin-fiche__cta-link" href="' + escAttr(linkBtns[lbi].url) + '">' + escHtml(linkBtns[lbi].label) + ' &rarr;</a>';
     }
     html += '</div>';
     html += '</div>';
@@ -1195,13 +1207,13 @@
     html += '<div class="robin-fiche__bottom" id="robin-fiche-bottom" style="opacity:0;">';
 
     if (data.suggested_buttons && data.suggested_buttons.length > 0) {
-      // Séparer les 3 types de boutons
-      var convBtns = [], stepBtns = [], linkBtns = [];
+      // Séparer conversation et questionnaire (liens déjà en zone haute)
+      var convBtns = [], stepBtns = [];
       for (var i = 0; i < data.suggested_buttons.length; i++) {
         var btn = data.suggested_buttons[i];
-        if (btn.url) linkBtns.push(btn);
+        if (btn.url) continue; // liens déjà affichés en zone haute
         else if (btn.step_id && btn.slug) stepBtns.push(btn);
-        else convBtns.push(btn);
+        else if (btn.label) convBtns.push(btn);
       }
 
       // Boutons conversation (suggestions IA) — en premier
@@ -1215,24 +1227,13 @@
         html += '</div>';
       }
 
-      // Boutons questionnaire — au milieu
+      // Boutons questionnaire
       if (stepBtns.length > 0) {
         html += '<div class="robin-fiche__choices">';
         for (var si = 0; si < stepBtns.length; si++) {
           html += '<button class="robin-fiche__choice" data-step="' + escAttr(stepBtns[si].step_id) + '" data-slug="' + escAttr(stepBtns[si].slug) + '" data-label="' + escAttr(stepBtns[si].label || '') + '">';
           html += escHtml(stepBtns[si].label);
           html += '</button>';
-        }
-        html += '</div>';
-      }
-
-      // Liens CTA — en dernier
-      if (linkBtns.length > 0) {
-        html += '<div class="robin-fiche__cta-links">';
-        for (var li = 0; li < linkBtns.length; li++) {
-          html += '<a class="robin-fiche__cta-link" href="' + escAttr(linkBtns[li].url) + '">';
-          html += escHtml(linkBtns[li].label) + ' &rarr;';
-          html += '</a>';
         }
         html += '</div>';
       }

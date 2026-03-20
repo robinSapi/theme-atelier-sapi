@@ -2599,7 +2599,21 @@ function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $con
     $prompt .= "  - Bouton lien (ouvre une page) : { \"label\": \"...\", \"url\": \"/chemin/\" }\n";
     $prompt .= "  - Bouton questionnaire (valide une étape) : { \"label\": \"...\", \"slug\": \"...\", \"step_id\": \"...\" }\n";
     $prompt .= "  - Bouton conversation (continue la discussion) : { \"label\": \"...\" } — le label est renvoyé comme message\n";
-    $prompt .= "  URLs valides : /contact/, /nos-creations/, /categorie-produit/suspensions/, /categorie-produit/appliques/, /categorie-produit/lampadaires/, /categorie-produit/lampes-a-poser/, /sur-mesure/\n";
+    $prompt .= "  URLs valides : /contact/, /nos-creations/?robin_selection=1, /sur-mesure/\n";
+    $prompt .= "- BOUTONS PAR DÉFAUT : si tu n'as pas de meilleure idée, utilise ces boutons liens :\n";
+
+    // Injecter les boutons par défaut selon le contexte
+    $taille = isset($answers['taille']) ? $answers['taille'] : '';
+    $hauteur = isset($answers['hauteur']) ? $answers['hauteur'] : '';
+    $show_sur_mesure_prompt = ($taille === 'grande' || $hauteur === 'haute');
+
+    $prompt .= '  { "label": "Voir les modèles filtrés pour votre projet", "url": "/nos-creations/?robin_selection=1" }' . "\n";
+    if ($show_sur_mesure_prompt) {
+      $prompt .= '  { "label": "Imaginer un modèle sur mesure", "url": "/sur-mesure/" }' . "\n";
+    } else {
+      $prompt .= '  { "label": "Contacter Robin", "url": "/contact/" }' . "\n";
+    }
+    $prompt .= "  Tu peux garder ces boutons, les remplacer, ou en ajouter selon ta réponse. Retourne la liste complète dans suggested_buttons.\n";
     $prompt .= "- Si le message est une question hors questionnaire (livraison, prix, sur mesure...), réponds et mets next_step_id à 'hors_parcours'.\n";
   } else {
     $prompt .= "{\n";
