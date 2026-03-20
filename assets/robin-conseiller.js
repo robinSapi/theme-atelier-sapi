@@ -661,8 +661,8 @@
 
     html += '<div class="robin-fiche__bottom" id="robin-fiche-bottom" style="opacity:0;">';
     html += '<div class="robin-fiche__choices robin-fiche__choices--reco">';
-    html += '<button class="robin-fiche__choice robin-fiche__choice--primary" id="robin-reco-conseil">Voir la s\u00e9lection de Robin</button>';
-    html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/nos-creations/?robin_selection=1">Voir les mod\u00e8les adapt\u00e9s \u00e0 mon projet</a>';
+    html += '<button class="robin-fiche__choice robin-fiche__choice--primary" id="robin-reco-conseil">Voir le mod\u00e8le que Robin me conseille</button>';
+    html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/nos-creations/?robin_selection=1">Voir tous les mod\u00e8les adapt\u00e9s \u00e0 mon projet</a>';
     html += '</div>';
     html += '</div>';
 
