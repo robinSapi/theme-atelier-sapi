@@ -99,14 +99,12 @@
         iconSvg +
         '<span class="robin-selection-label">Ma s\u00e9lection</span>' +
         '<div class="robin-selection-chips">' + chipsHtml + '</div>' +
-        '<button type="button" class="robin-selection-btn" id="robin-selection-btn">Voir</button>' +
-        '<button type="button" class="robin-selection-reset" id="robin-selection-reset" title="R\u00e9initialiser" aria-label="R\u00e9initialiser ma s\u00e9lection">&times;</button>';
+        '<button type="button" class="robin-selection-btn" id="robin-selection-btn">Voir</button>';
 
       robinRow.style.display = 'flex';
 
       // Références
       var viewBtn = document.getElementById('robin-selection-btn');
-      var resetBtn = document.getElementById('robin-selection-reset');
       var self = this;
 
       // Clic sur "Voir" — active/désactive le filtre
@@ -134,26 +132,9 @@
         }
       });
 
-      // Clic sur reset — efface le projet et masque la ligne
-      resetBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        // Désactiver le filtre si actif
-        if (viewBtn.classList.contains('active')) {
-          self._robinProductIds = null;
-          self.filters.category = 'all';
-          var allBtn = filterContainer.querySelector('.filter-btn[data-filter="all"]');
-          if (allBtn) {
-            filterContainer.querySelectorAll('.filter-btn.active').forEach(function(b) { b.classList.remove('active'); });
-            allBtn.classList.add('active');
-          }
-          self.applyFilters();
-        }
-        robinRow.style.display = 'none';
-      });
-
       // Clic sur le bandeau Robin pour ouvrir la modale (modifier son projet)
       robinRow.addEventListener('click', function(e) {
-        if (e.target === viewBtn || e.target === resetBtn || viewBtn.contains(e.target) || resetBtn.contains(e.target)) return;
+        if (e.target === viewBtn || viewBtn.contains(e.target)) return;
         // Ouvrir la modale Robin si disponible
         if (window.sapiRobinConseiller && typeof window.openRobinModal === 'function') {
           window.openRobinModal('bandeau');
