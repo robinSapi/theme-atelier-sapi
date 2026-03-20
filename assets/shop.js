@@ -97,7 +97,7 @@
 
       robinRow.innerHTML =
         iconSvg +
-        '<span class="robin-selection-label">Ma s\u00e9lection</span>' +
+        '<span class="robin-selection-label">La s\u00e9lection pour mon projet</span>' +
         '<div class="robin-selection-chips">' + chipsHtml + '</div>' +
         '<button type="button" class="robin-selection-btn" id="robin-selection-btn">Modifier le projet</button>';
 
