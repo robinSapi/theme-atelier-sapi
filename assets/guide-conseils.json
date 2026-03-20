@@ -320,10 +320,10 @@
     "conseil_text": "Sortie plafond dans une grande cuisine — comme éclairage principal, il faut que la suspension soit efficace. Une ampoule bien dégagée est essentielle pour éclairer toute la zone, et je recommande de compléter avec une autre source dans les coins."
   },
   "sortie:plafond|piece:bureau|taille:grande|eclairage:principal": {
-    "conseil_text": "Sortie plafond dans une grande bureau — comme éclairage principal, il faut que la suspension soit efficace. Une ampoule bien dégagée est essentielle pour éclairer toute la zone, et je recommande de compléter avec une autre source dans les coins."
+    "conseil_text": "Sortie plafond dans un grand bureau — comme éclairage principal, il faut que la suspension soit efficace. Une ampoule bien dégagée est essentielle pour éclairer toute la zone, et je recommande de compléter avec une autre source dans les coins."
   },
   "sortie:plafond|piece:salon|taille:grande|eclairage:principal": {
-    "conseil_text": "Sortie plafond dans une grande salon — comme éclairage principal, il faut que la suspension soit efficace. Une ampoule bien dégagée est essentielle pour éclairer toute la zone, et je recommande de compléter avec une autre source dans les coins."
+    "conseil_text": "Sortie plafond dans un grand salon — comme éclairage principal, il faut que la suspension soit efficace. Une ampoule bien dégagée est essentielle pour éclairer toute la zone, et je recommande de compléter avec une autre source dans les coins."
   },
   "sortie:plafond|piece:chambre|taille:grande|eclairage:principal": {
     "conseil_text": "Sortie plafond dans une grande chambre — comme éclairage principal, il faut que la suspension soit efficace. Une ampoule bien dégagée est essentielle pour éclairer toute la zone, et je recommande de compléter avec une autre source dans les coins."
@@ -335,10 +335,10 @@
     "conseil_text": "Sortie plafond dans votre grande cuisine — puisque vous avez d'autres sources lumineuses, la suspension peut être plus décorative. Tous les formats sont possibles, y compris avec ampoule entourée pour jouer avec les ombres."
   },
   "sortie:plafond|piece:bureau|taille:grande|eclairage:secondaire": {
-    "conseil_text": "Sortie plafond dans votre grande bureau — puisque vous avez d'autres sources lumineuses, la suspension peut être plus décorative. Tous les formats sont possibles, y compris avec ampoule entourée pour jouer avec les ombres."
+    "conseil_text": "Sortie plafond dans votre grand bureau — puisque vous avez d'autres sources lumineuses, la suspension peut être plus décorative. Tous les formats sont possibles, y compris avec ampoule entourée pour jouer avec les ombres."
   },
   "sortie:plafond|piece:salon|taille:grande|eclairage:secondaire": {
-    "conseil_text": "Sortie plafond dans votre grande salon — puisque vous avez d'autres sources lumineuses, la suspension peut être plus décorative. Tous les formats sont possibles, y compris avec ampoule entourée pour jouer avec les ombres."
+    "conseil_text": "Sortie plafond dans votre grand salon — puisque vous avez d'autres sources lumineuses, la suspension peut être plus décorative. Tous les formats sont possibles, y compris avec ampoule entourée pour jouer avec les ombres."
   },
   "sortie:plafond|piece:chambre|taille:grande|eclairage:secondaire": {
     "conseil_text": "Sortie plafond dans votre grande chambre — puisque vous avez d'autres sources lumineuses, la suspension peut être plus décorative. Tous les formats sont possibles, y compris avec ampoule entourée pour jouer avec les ombres."
@@ -476,10 +476,10 @@
     "conseil_text": "Pas de souci ! Pour un éclairage principal dans une grande cuisine, une sortie plafond serait idéale pour une belle suspension. Vérifiez si vous avez un crochet ou une rosace. Sinon, un lampadaire généreux sur prise peut aussi faire le travail."
   },
   "sortie:ne-sais-pas|piece:bureau|taille:grande|eclairage:principal": {
-    "conseil_text": "Pas de souci ! Pour un éclairage principal dans une grande bureau, une sortie plafond serait idéale pour une belle suspension. Vérifiez si vous avez un crochet ou une rosace. Sinon, un lampadaire généreux sur prise peut aussi faire le travail."
+    "conseil_text": "Pas de souci ! Pour un éclairage principal dans un grand bureau, une sortie plafond serait idéale pour une belle suspension. Vérifiez si vous avez un crochet ou une rosace. Sinon, un lampadaire généreux sur prise peut aussi faire le travail."
   },
   "sortie:ne-sais-pas|piece:salon|taille:grande|eclairage:principal": {
-    "conseil_text": "Pas de souci ! Pour un éclairage principal dans une grande salon, une sortie plafond serait idéale pour une belle suspension. Vérifiez si vous avez un crochet ou une rosace. Sinon, un lampadaire généreux sur prise peut aussi faire le travail."
+    "conseil_text": "Pas de souci ! Pour un éclairage principal dans un grand salon, une sortie plafond serait idéale pour une belle suspension. Vérifiez si vous avez un crochet ou une rosace. Sinon, un lampadaire généreux sur prise peut aussi faire le travail."
   },
   "sortie:ne-sais-pas|piece:chambre|taille:grande|eclairage:principal": {
     "conseil_text": "Pas de souci ! Pour un éclairage principal dans une grande chambre, une sortie plafond serait idéale pour une belle suspension. Vérifiez si vous avez un crochet ou une rosace. Sinon, un lampadaire généreux sur prise peut aussi faire le travail."
@@ -491,10 +491,10 @@
     "conseil_text": "Pas de souci ! Pour compléter l'éclairage de votre grande cuisine, toutes les options sont possibles : suspension si vous avez une sortie plafond, lampadaire ou applique sur câble sinon. Regardez au plafond si vous voyez un crochet."
   },
   "sortie:ne-sais-pas|piece:bureau|taille:grande|eclairage:secondaire": {
-    "conseil_text": "Pas de souci ! Pour compléter l'éclairage de votre grande bureau, toutes les options sont possibles : suspension si vous avez une sortie plafond, lampadaire ou applique sur câble sinon. Regardez au plafond si vous voyez un crochet."
+    "conseil_text": "Pas de souci ! Pour compléter l'éclairage de votre grand bureau, toutes les options sont possibles : suspension si vous avez une sortie plafond, lampadaire ou applique sur câble sinon. Regardez au plafond si vous voyez un crochet."
   },
   "sortie:ne-sais-pas|piece:salon|taille:grande|eclairage:secondaire": {
-    "conseil_text": "Pas de souci ! Pour compléter l'éclairage de votre grande salon, toutes les options sont possibles : suspension si vous avez une sortie plafond, lampadaire ou applique sur câble sinon. Regardez au plafond si vous voyez un crochet."
+    "conseil_text": "Pas de souci ! Pour compléter l'éclairage de votre grand salon, toutes les options sont possibles : suspension si vous avez une sortie plafond, lampadaire ou applique sur câble sinon. Regardez au plafond si vous voyez un crochet."
   },
   "sortie:ne-sais-pas|piece:chambre|taille:grande|eclairage:secondaire": {
     "conseil_text": "Pas de souci ! Pour compléter l'éclairage de votre grande chambre, toutes les options sont possibles : suspension si vous avez une sortie plafond, lampadaire ou applique sur câble sinon. Regardez au plafond si vous voyez un crochet."
@@ -515,16 +515,16 @@
     "conseil_text": "Plafond standard dans votre grande cuisine en complément — avec cette hauteur, un format compact ou horizontal fonctionne bien. L'ampoule peut être entourée puisque ce n'est pas la source principale."
   },
   "hauteur:standard|piece:bureau|taille:grande|eclairage:principal": {
-    "conseil_text": "Plafond standard dans une grande bureau en éclairage principal — privilégiez les formats horizontaux qui éclairent une grande surface sans descendre trop bas. L'ampoule doit être bien dégagée pour être efficace."
+    "conseil_text": "Plafond standard dans un grand bureau en éclairage principal — privilégiez les formats horizontaux qui éclairent une grande surface sans descendre trop bas. L'ampoule doit être bien dégagée pour être efficace."
   },
   "hauteur:standard|piece:bureau|taille:grande|eclairage:secondaire": {
-    "conseil_text": "Plafond standard dans votre grande bureau en complément — avec cette hauteur, un format compact ou horizontal fonctionne bien. L'ampoule peut être entourée puisque ce n'est pas la source principale."
+    "conseil_text": "Plafond standard dans votre grand bureau en complément — avec cette hauteur, un format compact ou horizontal fonctionne bien. L'ampoule peut être entourée puisque ce n'est pas la source principale."
   },
   "hauteur:standard|piece:salon|taille:grande|eclairage:principal": {
-    "conseil_text": "Plafond standard dans une grande salon en éclairage principal — privilégiez les formats horizontaux qui éclairent une grande surface sans descendre trop bas. L'ampoule doit être bien dégagée pour être efficace."
+    "conseil_text": "Plafond standard dans un grand salon en éclairage principal — privilégiez les formats horizontaux qui éclairent une grande surface sans descendre trop bas. L'ampoule doit être bien dégagée pour être efficace."
   },
   "hauteur:standard|piece:salon|taille:grande|eclairage:secondaire": {
-    "conseil_text": "Plafond standard dans votre grande salon en complément — avec cette hauteur, un format compact ou horizontal fonctionne bien. L'ampoule peut être entourée puisque ce n'est pas la source principale."
+    "conseil_text": "Plafond standard dans votre grand salon en complément — avec cette hauteur, un format compact ou horizontal fonctionne bien. L'ampoule peut être entourée puisque ce n'est pas la source principale."
   },
   "hauteur:standard|piece:chambre|taille:grande|eclairage:principal": {
     "conseil_text": "Plafond standard dans une grande chambre en éclairage principal — privilégiez les formats horizontaux qui éclairent une grande surface sans descendre trop bas. L'ampoule doit être bien dégagée pour être efficace."
@@ -545,16 +545,16 @@
     "conseil_text": "Plafond confortable dans votre grande cuisine en complément — la hauteur idéale, tous les formats et types d'ampoules sont possibles. Laissez-vous guider par vos goûts."
   },
   "hauteur:confortable|piece:bureau|taille:grande|eclairage:principal": {
-    "conseil_text": "Plafond confortable dans une grande bureau — parfait pour un éclairage principal efficace. Tous les formats fonctionnent, avec une ampoule bien dégagée pour couvrir l'espace."
+    "conseil_text": "Plafond confortable dans un grand bureau — parfait pour un éclairage principal efficace. Tous les formats fonctionnent, avec une ampoule bien dégagée pour couvrir l'espace."
   },
   "hauteur:confortable|piece:bureau|taille:grande|eclairage:secondaire": {
-    "conseil_text": "Plafond confortable dans votre grande bureau en complément — la hauteur idéale, tous les formats et types d'ampoules sont possibles. Laissez-vous guider par vos goûts."
+    "conseil_text": "Plafond confortable dans votre grand bureau en complément — la hauteur idéale, tous les formats et types d'ampoules sont possibles. Laissez-vous guider par vos goûts."
   },
   "hauteur:confortable|piece:salon|taille:grande|eclairage:principal": {
-    "conseil_text": "Plafond confortable dans une grande salon — parfait pour un éclairage principal efficace. Tous les formats fonctionnent, avec une ampoule bien dégagée pour couvrir l'espace."
+    "conseil_text": "Plafond confortable dans un grand salon — parfait pour un éclairage principal efficace. Tous les formats fonctionnent, avec une ampoule bien dégagée pour couvrir l'espace."
   },
   "hauteur:confortable|piece:salon|taille:grande|eclairage:secondaire": {
-    "conseil_text": "Plafond confortable dans votre grande salon en complément — la hauteur idéale, tous les formats et types d'ampoules sont possibles. Laissez-vous guider par vos goûts."
+    "conseil_text": "Plafond confortable dans votre grand salon en complément — la hauteur idéale, tous les formats et types d'ampoules sont possibles. Laissez-vous guider par vos goûts."
   },
   "hauteur:confortable|piece:chambre|taille:grande|eclairage:principal": {
     "conseil_text": "Plafond confortable dans une grande chambre — parfait pour un éclairage principal efficace. Tous les formats fonctionnent, avec une ampoule bien dégagée pour couvrir l'espace."
@@ -575,16 +575,16 @@
     "conseil_text": "Plafond haut dans votre grande cuisine en complément — avec tout cet espace, le luminaire peut être purement décoratif. Un format vertical imposant ou un luminaire en volume, c'est magnifique."
   },
   "hauteur:haute|piece:bureau|taille:grande|eclairage:principal": {
-    "conseil_text": "Plafond haut dans une grande bureau — la configuration rêvée pour un éclairage principal spectaculaire. Tous les formats sont possibles, y compris un luminaire sur mesure."
+    "conseil_text": "Plafond haut dans un grand bureau — la configuration rêvée pour un éclairage principal spectaculaire. Tous les formats sont possibles, y compris un luminaire sur mesure."
   },
   "hauteur:haute|piece:bureau|taille:grande|eclairage:secondaire": {
-    "conseil_text": "Plafond haut dans votre grande bureau en complément — avec tout cet espace, le luminaire peut être purement décoratif. Un format vertical imposant ou un luminaire en volume, c'est magnifique."
+    "conseil_text": "Plafond haut dans votre grand bureau en complément — avec tout cet espace, le luminaire peut être purement décoratif. Un format vertical imposant ou un luminaire en volume, c'est magnifique."
   },
   "hauteur:haute|piece:salon|taille:grande|eclairage:principal": {
-    "conseil_text": "Plafond haut dans une grande salon — la configuration rêvée pour un éclairage principal spectaculaire. Tous les formats sont possibles, y compris un luminaire sur mesure."
+    "conseil_text": "Plafond haut dans un grand salon — la configuration rêvée pour un éclairage principal spectaculaire. Tous les formats sont possibles, y compris un luminaire sur mesure."
   },
   "hauteur:haute|piece:salon|taille:grande|eclairage:secondaire": {
-    "conseil_text": "Plafond haut dans votre grande salon en complément — avec tout cet espace, le luminaire peut être purement décoratif. Un format vertical imposant ou un luminaire en volume, c'est magnifique."
+    "conseil_text": "Plafond haut dans votre grand salon en complément — avec tout cet espace, le luminaire peut être purement décoratif. Un format vertical imposant ou un luminaire en volume, c'est magnifique."
   },
   "hauteur:haute|piece:chambre|taille:grande|eclairage:principal": {
     "conseil_text": "Plafond haut dans une grande chambre — la configuration rêvée pour un éclairage principal spectaculaire. Tous les formats sont possibles, y compris un luminaire sur mesure."
