@@ -33,7 +33,9 @@
     conversation: [],
     aiCache: {},
     pendingXhr: null,
-    isOpen: false
+    isOpen: false,
+    lastWasFreeText: false,
+    aiCallCount: 0
   };
 
   /* ═══════════════════════════════════════════
@@ -427,6 +429,7 @@
   ═══════════════════════════════════════════ */
   function showFiche(stepId) {
     state.currentStep = stepId;
+    state.lastWasFreeText = false;
 
     // Navigation : retour + titre
     updateHeader(stepId);
@@ -1071,8 +1074,14 @@
     // Empiler l'historique
     state.history.push(stepId);
 
-    // Afficher la fiche suivante (instantané)
-    showFiche(next);
+    // Si on était en mode IA, continuer avec un appel IA pour la fiche suivante
+    if (state.lastWasFreeText && next !== 'recommendation') {
+      state.lastWasFreeText = true; // garder le flag
+      onFreeText('J\'ai choisi "' + label + '" pour ' + stepId + '. Continue.');
+    } else {
+      // Afficher la fiche suivante (instantané, texte pré-généré)
+      showFiche(next);
+    }
 
     // Mettre à jour le bandeau + résumé modale
     updateBandeauChips();
@@ -1114,6 +1123,7 @@
     fd.append('context_data', JSON.stringify(state.contextData));
     fd.append('user_message', message);
     fd.append('conversation', JSON.stringify(state.conversation));
+    fd.append('ai_call_count', String(state.aiCallCount));
 
     var xhr = new XMLHttpRequest();
     xhr.open('POST', AJAX_URL, true);
@@ -1140,6 +1150,10 @@
   }
 
   function handleFreeTextResponse(data, originalMessage) {
+    // Marquer qu'on est en mode IA
+    state.lastWasFreeText = true;
+    state.aiCallCount++;
+
     // 1. Auto-remplir les réponses déduites
     if (data.answered_steps && typeof data.answered_steps === 'object') {
       for (var stepId in data.answered_steps) {
@@ -1382,6 +1396,8 @@
     state.history = [];
     state.aiCache = {};
     state.conversation = [];
+    state.lastWasFreeText = false;
+    state.aiCallCount = 0;
     // Vider complètement le localStorage
     localStorage.removeItem(STORAGE_KEY);
     // Réécrire un state vide propre

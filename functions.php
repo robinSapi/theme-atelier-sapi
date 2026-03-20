@@ -2179,6 +2179,7 @@ function sapi_ajax_robin_conseil_step() {
   }
 
   $user_message = isset($_POST['user_message']) ? sanitize_textarea_field(wp_unslash($_POST['user_message'])) : '';
+  $ai_call_count = isset($_POST['ai_call_count']) ? (int) $_POST['ai_call_count'] : 0;
 
   if (empty($step_id)) {
     wp_send_json_error(['message' => 'step_id manquant']);
@@ -2205,7 +2206,7 @@ function sapi_ajax_robin_conseil_step() {
   }
 
   // 7. Étapes normales — construire le prompt et appeler Claude
-  $system_prompt = sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $context_data, $user_message);
+  $system_prompt = sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $context_data, $user_message, $ai_call_count);
 
   // Message user contextuel
   $user_prompt = '';
@@ -2493,7 +2494,7 @@ function sapi_robin_call_recommendation($products, $answers) {
   return $parsed;
 }
 
-function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $context_data, $user_message) {
+function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $context_data, $user_message, $ai_call_count = 0) {
   $theme_dir = get_template_directory();
 
   // Load prompt files
@@ -2568,6 +2569,18 @@ function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $con
 
   if ($is_free_text) {
     $prompt .= "Le client a écrit un message libre. Analyse ce qu'il dit et réponds.\n";
+
+    // Compteur d'échanges IA — limite à 3
+    $exchange_num = $ai_call_count + 1;
+    $prompt .= "\nÉCHANGE IA N°" . $exchange_num . " sur 3 maximum.\n";
+    if ($exchange_num >= 3) {
+      $prompt .= "C'est ton DERNIER échange. Tu DOIS conclure maintenant :\n";
+      $prompt .= "- Plus de boutons conversation. Uniquement des boutons liens (catalogue, contact, sur-mesure) ou questionnaire.\n";
+      $prompt .= "- Oriente le client vers une action concrète : voir les modèles, contacter Robin, ou imaginer un sur-mesure.\n";
+    } elseif ($exchange_num === 2) {
+      $prompt .= "C'est ton avant-dernier échange. Commence à orienter le client vers une action.\n";
+    }
+    $prompt .= "\n";
     $prompt .= "{\n";
     $prompt .= '  "conseil_text": "Ta réponse personnalisée (2-5 phrases, style Robin)",' . "\n";
     $prompt .= '  "link_url": "/nos-creations/suspensions/" ou null,' . "\n";
