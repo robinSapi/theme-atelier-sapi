@@ -465,8 +465,9 @@
     }
     html += '</div>';
 
-    // 2 liens CTA — toujours présents (sauf première fiche)
-    if (!isFirstFiche) {
+    // 2 liens CTA — présents quand pièce + taille sont renseignées
+    var hasMinAnswers = state.answers.piece && (state.answers.taille || state.answers.taille_escalier);
+    if (!isFirstFiche && hasMinAnswers) {
       var shopLink = buildShopLink();
 
       // Lien 2 : Contacter Robin OU Sur mesure selon contexte
