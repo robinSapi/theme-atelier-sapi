@@ -413,7 +413,7 @@ foreach ($collection_slugs as $col) {
     <?php endif; ?>
 
     <!-- Pour quelle pièce ? -->
-    <div class="bento-card bento-room-picker">
+    <div class="bento-card bento-room-picker" id="robin-home-room-picker">
       <div class="room-picker-inner">
         <?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) : ?>
           <span class="robin-modal__badge" style="margin-bottom: 0.5rem;">
