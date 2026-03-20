@@ -597,5 +597,44 @@
   },
   "hauteur:haute|piece:entree|taille:grande|eclairage:secondaire": {
     "conseil_text": "Plafond haut dans votre grande entrée en complément — avec tout cet espace, le luminaire peut être purement décoratif. Un format vertical imposant ou un luminaire en volume, c'est magnifique."
+  },
+  "pg_intro": {
+    "conseil_text": "Quelques questions pour vous aider à choisir la bonne taille et la bonne finition de ce modèle."
+  },
+  "pg_piece:cuisine": {
+    "conseil_text": "Bien noté, c'est pour votre cuisine."
+  },
+  "pg_piece:bureau": {
+    "conseil_text": "Bien noté, c'est pour votre bureau."
+  },
+  "pg_piece:salon": {
+    "conseil_text": "Bien noté, c'est pour votre salon."
+  },
+  "pg_piece:chambre": {
+    "conseil_text": "Bien noté, c'est pour votre chambre."
+  },
+  "pg_piece:entree": {
+    "conseil_text": "Bien noté, c'est pour votre entrée."
+  },
+  "pg_piece:escalier": {
+    "conseil_text": "Bien noté, c'est pour votre escalier."
+  },
+  "pg_taille:petite": {
+    "conseil_text": "Un espace réduit, il faudra rester sur les plus petites tailles pour ne pas écraser la pièce."
+  },
+  "pg_taille:moyenne": {
+    "conseil_text": "Un espace de taille moyenne, la plupart des tailles fonctionnent bien. C'est surtout une question de goût."
+  },
+  "pg_taille:grande": {
+    "conseil_text": "Un grand espace, vous pouvez vous permettre les grandes tailles — ça remplira le volume et marquera la pièce."
+  },
+  "pg_style:moderne": {
+    "conseil_text": "Le Peuplier, clair et lumineux, s'accordera parfaitement avec votre intérieur moderne."
+  },
+  "pg_style:ancien": {
+    "conseil_text": "L'Okoumé, chaud et ambré, s'intègrera naturellement dans votre intérieur aux tons chauds."
+  },
+  "pg_style:neutre": {
+    "conseil_text": "Les deux essences sont belles — vous pourrez voir les photos de chaque finition sur la fiche."
   }
 }

@@ -479,12 +479,22 @@
     // ─── Zone haute : conseil centré ───
     html += '<div class="robin-fiche__top">';
     html += '<div class="robin-fiche__conseil" id="robin-fiche-conseil">';
-    if (isFirstFiche) {
+    if (isFirstFiche && state.openingContext === 'product_guide') {
+      // Intro mini-questionnaire produit
+      var pgIntro = conseils['pg_intro'];
+      html += renderConseil(pgIntro || { conseil_text: 'Quelques questions pour vous aider à choisir.' }, true);
+    } else if (isFirstFiche) {
       html += renderConseil({ conseil_text: 'Chaque luminaire que je cr\u00e9e est une pi\u00e8ce unique, fa\u00e7onn\u00e9e \u00e0 la main dans mon atelier. Pour vous orienter au mieux, dites-moi dans quelle pi\u00e8ce vous imaginez votre futur luminaire.' }, true);
     } else {
       var lastStep = state.history.length > 0 ? state.history[state.history.length - 1] : null;
       var lastSlug = lastStep ? state.answers[lastStep] : null;
-      var conseilData = lastStep && lastSlug ? getConseil(lastStep, lastSlug) : null;
+      var conseilData;
+      // En mode product_guide, chercher les textes pg_ en priorité
+      if (state.openingContext === 'product_guide' && lastStep && lastSlug) {
+        conseilData = conseils['pg_' + lastStep + ':' + lastSlug] || getConseil(lastStep, lastSlug);
+      } else {
+        conseilData = lastStep && lastSlug ? getConseil(lastStep, lastSlug) : null;
+      }
       if (conseilData) {
         html += renderConseil(conseilData, true);
       } else if (hasAnyAnswer()) {
@@ -496,9 +506,9 @@
     }
     html += '</div>';
 
-    // 2 liens CTA — présents quand pièce + taille sont renseignées
+    // 2 liens CTA — présents quand pièce + taille sont renseignées (pas en mode product_guide)
     var hasMinAnswers = state.answers.piece && (state.answers.taille || state.answers.taille_escalier);
-    if (!isFirstFiche && hasMinAnswers) {
+    if (!isFirstFiche && hasMinAnswers && state.openingContext !== 'product_guide') {
       var shopLink = buildShopLink();
 
       // Lien 2 : Contacter Robin OU Sur mesure selon contexte
