@@ -224,7 +224,7 @@
   function buildShopLink() {
     return {
       url: '/nos-creations/?robin_selection=1',
-      label: 'Voir ma sélection'
+      label: 'Voir les mod\u00e8les filtr\u00e9s pour votre projet'
     };
   }
 
@@ -318,8 +318,8 @@
       case 'bandeau':
         if (hasAnyAnswer()) {
           var next = getFirstUnansweredStep();
-          // Si tout est répondu, revenir à la première étape pour naviguer/modifier
-          startStep = (next === 'recommendation') ? steps[0].id : next;
+          // Si tout est répondu, afficher la fiche merci (recommandation)
+          startStep = next;
         } else {
           startStep = steps[0].id;
         }
@@ -478,8 +478,9 @@
         linkLabel = shopLink.label;
       }
 
-      html += '<div class="robin-fiche__link" id="robin-fiche-link"' + (shouldAnimate ? ' style="opacity:0;"' : '') + '><a href="' + escHtml(linkUrl) + '">';
-      html += escHtml(linkLabel) + ' &rarr;</a></div>';
+      html += '<div class="robin-fiche__cta-links" id="robin-fiche-link"' + (shouldAnimate ? ' style="opacity:0;"' : '') + '>';
+      html += '<a class="robin-fiche__cta-link" href="' + escHtml(linkUrl) + '">' + escHtml(linkLabel) + ' &rarr;</a>';
+      html += '</div>';
     }
     html += '</div>';
 
@@ -1093,27 +1094,47 @@
     html += '<div class="robin-fiche__bottom" id="robin-fiche-bottom" style="opacity:0;">';
 
     if (data.suggested_buttons && data.suggested_buttons.length > 0) {
-      html += '<div class="robin-fiche__choices">';
+      // Séparer les 3 types de boutons
+      var convBtns = [], stepBtns = [], linkBtns = [];
       for (var i = 0; i < data.suggested_buttons.length; i++) {
         var btn = data.suggested_buttons[i];
-        if (btn.url) {
-          // Bouton lien → ouvre une page
-          html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="' + escAttr(btn.url) + '">';
-          html += escHtml(btn.label);
-          html += '</a>';
-        } else if (btn.step_id && btn.slug) {
-          // Bouton questionnaire → navigue vers une étape
-          html += '<button class="robin-fiche__choice" data-step="' + escAttr(btn.step_id) + '" data-slug="' + escAttr(btn.slug) + '" data-label="' + escAttr(btn.label || '') + '">';
-          html += escHtml(btn.label);
-          html += '</button>';
-        } else {
-          // Bouton conversation → renvoie le label comme texte libre
-          html += '<button class="robin-fiche__choice robin-fiche__choice--conv" data-message="' + escAttr(btn.label) + '">';
-          html += escHtml(btn.label);
+        if (btn.url) linkBtns.push(btn);
+        else if (btn.step_id && btn.slug) stepBtns.push(btn);
+        else convBtns.push(btn);
+      }
+
+      // Boutons conversation (suggestions IA) — en premier
+      if (convBtns.length > 0) {
+        html += '<div class="robin-fiche__conv-buttons">';
+        for (var ci = 0; ci < convBtns.length; ci++) {
+          html += '<button class="robin-fiche__choice robin-fiche__choice--conv" data-message="' + escAttr(convBtns[ci].label) + '">';
+          html += escHtml(convBtns[ci].label);
           html += '</button>';
         }
+        html += '</div>';
       }
-      html += '</div>';
+
+      // Boutons questionnaire — au milieu
+      if (stepBtns.length > 0) {
+        html += '<div class="robin-fiche__choices">';
+        for (var si = 0; si < stepBtns.length; si++) {
+          html += '<button class="robin-fiche__choice" data-step="' + escAttr(stepBtns[si].step_id) + '" data-slug="' + escAttr(stepBtns[si].slug) + '" data-label="' + escAttr(stepBtns[si].label || '') + '">';
+          html += escHtml(stepBtns[si].label);
+          html += '</button>';
+        }
+        html += '</div>';
+      }
+
+      // Liens CTA — en dernier
+      if (linkBtns.length > 0) {
+        html += '<div class="robin-fiche__cta-links">';
+        for (var li = 0; li < linkBtns.length; li++) {
+          html += '<a class="robin-fiche__cta-link" href="' + escAttr(linkBtns[li].url) + '">';
+          html += escHtml(linkBtns[li].label) + ' &rarr;';
+          html += '</a>';
+        }
+        html += '</div>';
+      }
     } else if (nextStep !== 'hors_parcours' && nextStep !== 'recommendation') {
       // Afficher la prochaine question du questionnaire
       var nextStepData = getStepById(nextStep);
@@ -1231,21 +1252,21 @@
     var projectEl = document.getElementById('robin-modal-project');
     if (!projectEl) return;
 
-    var parts = [];
     var visible = getVisibleSteps();
+    var answered = [];
     for (var i = 0; i < visible.length; i++) {
       var lbl = state.labels[visible[i]];
-      if (lbl) parts.push(lbl);
+      if (lbl) answered.push({ stepId: visible[i], label: lbl });
     }
 
-    if (parts.length === 0) {
+    if (answered.length === 0) {
       projectEl.style.display = 'none';
       return;
     }
 
     var html = '';
-    for (var j = 0; j < parts.length; j++) {
-      html += '<span class="robin-modal__chip">' + escHtml(parts[j]) + '</span>';
+    for (var j = 0; j < answered.length; j++) {
+      html += '<span class="robin-modal__chip" data-step="' + escAttr(answered[j].stepId) + '" style="cursor:pointer;">' + escHtml(answered[j].label) + '</span>';
     }
     html += '<button class="robin-modal__reset" id="robin-modal-reset" type="button">Recommencer</button>';
 
@@ -1328,6 +1349,13 @@
       projectEl.addEventListener('click', function (e) {
         if (e.target.id === 'robin-modal-reset' || e.target.closest('#robin-modal-reset')) {
           resetProject();
+          return;
+        }
+        // Chip cliquable → revenir à la question
+        var chip = e.target.closest('.robin-modal__chip');
+        if (chip && chip.dataset.step) {
+          state.history = [];
+          showFiche(chip.dataset.step);
         }
       });
     }

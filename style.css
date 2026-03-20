@@ -1950,9 +1950,46 @@ button:hover,
   color: #fff;
   border-color: var(--color-orange, #E35B24);
 }
-a.robin-fiche__choice--link {
-  text-decoration: none;
+/* Boutons conversation — style discret wood */
+.robin-fiche__conv-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+.robin-fiche__choice--conv {
+  border-color: rgba(var(--color-wood-rgb, 147, 125, 104), 0.25);
+  color: var(--color-wood, #937D68);
+  font-size: 0.8rem;
+}
+.robin-fiche__choice--conv:hover {
+  border-color: var(--color-wood, #937D68);
+  background: rgba(var(--color-wood-rgb, 147, 125, 104), 0.06);
   color: var(--color-dark, #323232);
+}
+
+/* Liens CTA — texte orange + flèche */
+.robin-fiche__cta-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.robin-fiche__cta-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-orange, #E35B24);
+  text-decoration: none;
+  padding: 0.3rem 0;
+  transition: all 0.2s;
+}
+.robin-fiche__cta-link:hover {
+  color: var(--color-orange-hover, #C94D1E);
+  gap: 0.5rem;
 }
 .robin-fiche__choice-icon {
   display: inline-flex;
