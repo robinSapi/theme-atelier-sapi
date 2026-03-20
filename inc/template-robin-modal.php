@@ -21,7 +21,7 @@ function sapi_robin_modal() {
       </button>
       <span class="robin-modal__badge" id="robin-modal-badge">
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
-        Conseil de Robin
+        Mon projet
       </span>
       <button class="robin-modal__close" id="robin-modal-close" type="button" aria-label="Fermer">&times;</button>
     </div>
