@@ -40,8 +40,8 @@
 
           // Désactiver le filtre Robin si actif
           this._robinProductIds = null;
-          var robinViewBtn = document.getElementById('robin-selection-btn');
-          if (robinViewBtn) { robinViewBtn.classList.remove('active'); robinViewBtn.textContent = 'Voir'; }
+          var robinRow = document.getElementById('filter-row-robin');
+          if (robinRow) robinRow.classList.remove('is-active');
 
           // Update active state
           filterContainer.querySelector('.filter-btn.active')?.classList.remove('active');
@@ -99,23 +99,24 @@
         iconSvg +
         '<span class="robin-selection-label">Ma s\u00e9lection</span>' +
         '<div class="robin-selection-chips">' + chipsHtml + '</div>' +
-        '<button type="button" class="robin-selection-btn" id="robin-selection-btn">Voir</button>';
+        '<button type="button" class="robin-selection-btn" id="robin-selection-btn">Modifier le projet</button>';
 
       robinRow.style.display = 'flex';
 
       // Références
-      var viewBtn = document.getElementById('robin-selection-btn');
+      var editBtn = document.getElementById('robin-selection-btn');
       var self = this;
 
-      // Clic sur "Voir" — active/désactive le filtre
-      viewBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        var isActive = viewBtn.classList.contains('active');
+      // Clic sur le bandeau — active/désactive le filtre
+      robinRow.addEventListener('click', function(e) {
+        // Ne pas filtrer si clic sur le bouton "Modifier le projet"
+        if (e.target === editBtn || editBtn.contains(e.target)) return;
+
+        var isActive = robinRow.classList.contains('is-active');
 
         if (isActive) {
           // Désactiver → revenir à "tout"
-          viewBtn.classList.remove('active');
-          viewBtn.textContent = 'Voir';
+          robinRow.classList.remove('is-active');
           var allBtn = filterContainer.querySelector('.filter-btn[data-filter="all"]');
           if (allBtn) {
             filterContainer.querySelectorAll('.filter-btn.active').forEach(function(b) { b.classList.remove('active'); });
@@ -127,15 +128,15 @@
         } else {
           // Activer Ma sélection
           filterContainer.querySelectorAll('.filter-btn.active').forEach(function(b) { b.classList.remove('active'); });
-          viewBtn.classList.add('active');
+          robinRow.classList.add('is-active');
           self.fetchRobinSelection(prefs.answers);
         }
       });
 
-      // Clic sur le bandeau Robin pour ouvrir la modale (modifier son projet)
-      robinRow.addEventListener('click', function(e) {
-        if (e.target === viewBtn || viewBtn.contains(e.target)) return;
-        // Ouvrir la modale Robin si disponible
+      // Clic sur "Modifier le projet" — ouvrir la modale Robin
+      editBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
         if (window.sapiRobinConseiller && typeof window.openRobinModal === 'function') {
           window.openRobinModal('bandeau');
         } else {
@@ -143,13 +144,12 @@
           if (bandeau) bandeau.click();
         }
       });
-      robinRow.style.cursor = 'pointer';
 
       // Auto-activer si URL contient robin_selection=1 (différé après init)
       var params = new URLSearchParams(window.location.search);
       if (params.get('robin_selection') === '1') {
         window.history.replaceState({}, '', window.location.pathname);
-        setTimeout(function() { viewBtn.click(); }, 50);
+        setTimeout(function() { robinRow.click(); }, 50);
       }
     },
 
@@ -174,9 +174,6 @@
             if (resp.success && resp.data && resp.data.product_ids) {
               self._robinProductIds = resp.data.product_ids.map(String);
               self.applyFilters();
-              // Mettre à jour le texte du bouton avec le count
-              var viewBtn = document.getElementById('robin-selection-btn');
-              if (viewBtn) viewBtn.textContent = 'Voir (' + resp.data.product_ids.length + ')';
               return;
             }
           } catch(e) {}
