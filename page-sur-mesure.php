@@ -427,6 +427,11 @@ get_header();
         <input id="surmesure-email" type="email" name="email" required value="<?php echo esc_attr($_POST['email'] ?? ''); ?>" placeholder="votre@email.fr">
 
         <label for="surmesure-message">Votre projet</label>
+
+        <!-- Bandeau projet Robin (rempli par JS si projet existant) -->
+        <div id="robin-contact-project" style="display:none;"></div>
+        <input type="hidden" name="robin_project" id="robin-contact-project-data" value="">
+
         <textarea id="surmesure-message" name="message" rows="6" required placeholder="Décrivez votre idée : le type de luminaire, la pièce, les dimensions souhaitées, le style, le bois..."><?php echo esc_textarea($_POST['message'] ?? ''); ?></textarea>
 
         <button type="submit">Envoyer ma demande</button>

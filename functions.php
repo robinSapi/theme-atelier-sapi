@@ -3987,6 +3987,12 @@ function sapi_handle_surmesure_form() {
   $subject = '[Sur Mesure] Nouveau projet de ' . $name;
   $body    = "Nom: $name\n";
   $body   .= "Email: $email\n\n";
+  // Projet Robin (si existant)
+  $robin_project = sanitize_textarea_field($_POST['robin_project'] ?? '');
+  if (!empty($robin_project)) {
+    $body .= "Projet du client (questionnaire):\n$robin_project\n\n";
+  }
+
   $body   .= "Projet sur mesure:\n$message";
 
   $headers = [
