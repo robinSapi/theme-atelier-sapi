@@ -1714,21 +1714,44 @@
     var essence = prefs.essence;
     var tailleIndex = prefs.tailleIndex;
 
+    if (!document.querySelector('.variations_form')) return;
+
+    // Step 1 : Essence — swatch custom ou fallback select
     if (essence) {
       var essenceSwatch = document.querySelector('.material-option[data-value="' + essence + '"]');
-      if (essenceSwatch && !essenceSwatch.classList.contains('selected')) {
+      if (essenceSwatch) {
         essenceSwatch.click();
+      } else {
+        var matSelect = document.querySelector('select[name="attribute_pa_materiau"]');
+        if (matSelect) {
+          var matOption = matSelect.querySelector('option[value="' + essence + '"]');
+          if (matOption) {
+            matSelect.value = essence;
+            matSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            if (typeof jQuery !== 'undefined') jQuery(matSelect).trigger('change');
+          }
+        }
       }
     }
 
-    // Taille — sélectionner dans le dropdown si disponible
-    if (tailleIndex !== null && tailleIndex !== undefined) {
-      var sizeSelect = document.querySelector('select[name="attribute_pa_taille"]');
-      if (sizeSelect && sizeSelect.options.length > tailleIndex + 1) {
-        sizeSelect.selectedIndex = tailleIndex + 1; // +1 pour sauter l'option vide
-        sizeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    // Step 2 : Taille — après un délai pour que WC traite l'essence
+    setTimeout(function() {
+      if (tailleIndex !== null && tailleIndex !== undefined) {
+        var tailleSelect = document.querySelector('select[name="attribute_pa_taille"]');
+        if (tailleSelect) {
+          var options = [];
+          for (var i = 0; i < tailleSelect.options.length; i++) {
+            if (tailleSelect.options[i].value) options.push(tailleSelect.options[i]);
+          }
+          if (options.length) {
+            var idx = Math.min(tailleIndex, options.length - 1);
+            tailleSelect.value = options[idx].value;
+            tailleSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            if (typeof jQuery !== 'undefined') jQuery(tailleSelect).trigger('change');
+          }
+        }
       }
-    }
+    }, 400);
   }
 
   // Lancement
