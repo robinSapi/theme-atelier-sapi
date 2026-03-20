@@ -342,6 +342,16 @@
         startStep = '_product_compare';
         break;
 
+      case 'product_guide':
+        // Mini-questionnaire produit : pièce → taille → style → sélection variation
+        startStep = steps[0].id; // piece
+        break;
+
+      case '_product_reselect':
+        // Avec projet → resélectionner la variation
+        reselectVariation();
+        return; // ne pas ouvrir la modale
+
       case 'homepage':
         // La pièce est déjà sélectionnée via contextData.piece
         if (state.contextData.piece) {
@@ -437,6 +447,10 @@
     // Fiches spéciales (contextes d'ouverture)
     if (stepId === '_category_confirm') {
       renderCategoryConfirm();
+      return;
+    }
+    if (stepId === '_product_guide_done') {
+      finishProductGuide();
       return;
     }
     if (stepId === '_product_compare') {
@@ -1068,8 +1082,27 @@
     saveState();
 
     // Déterminer la fiche suivante
-    var next = getNextStep(stepId);
-    if (!next) next = 'recommendation';
+    var next;
+    if (state.openingContext === 'product_guide') {
+      // Parcours raccourci : piece → taille → style → conclusion produit
+      var productGuideOrder = ['piece', 'taille', 'taille_escalier', 'style'];
+      var currentIdx = productGuideOrder.indexOf(stepId);
+      if (currentIdx >= 0) {
+        // Chercher le prochain step visible dans le parcours raccourci
+        next = null;
+        for (var pg = currentIdx + 1; pg < productGuideOrder.length; pg++) {
+          var visible = getVisibleSteps();
+          if (visible.indexOf(productGuideOrder[pg]) !== -1 && !state.answers[productGuideOrder[pg]]) {
+            next = productGuideOrder[pg];
+            break;
+          }
+        }
+      }
+      if (!next) next = '_product_guide_done';
+    } else {
+      next = getNextStep(stepId);
+      if (!next) next = 'recommendation';
+    }
 
     // Empiler l'historique
     state.history.push(stepId);
@@ -1623,6 +1656,69 @@
     loadState();
     bindEvents();
     updateBandeauChips();
+    adaptProductPill();
+  }
+
+  /* ═══════════════════════════════════════════
+     Pill produit adaptative
+  ═══════════════════════════════════════════ */
+  function finishProductGuide() {
+    // Sauvegarder les réponses
+    saveState();
+
+    // Fermer la modale
+    closeModal();
+
+    // Sélectionner la variation adaptée
+    reselectVariation();
+
+    // Mettre à jour la pill
+    var pill = document.getElementById('robin-product-pill');
+    if (pill) {
+      pill.textContent = 'Ce mod\u00e8le correspond \u00e0 votre projet \u2713';
+      pill.dataset.robinContext = '_product_reselect';
+    }
+
+    // Mettre à jour bandeau
+    updateBandeauChips();
+  }
+
+  function adaptProductPill() {
+    var pill = document.getElementById('robin-product-pill');
+    if (!pill) return;
+
+    if (hasAnyAnswer()) {
+      // Projet existant → sélectionner la variation adaptée
+      pill.textContent = 'Ce mod\u00e8le correspond \u00e0 votre projet \u2713';
+      pill.dataset.robinContext = '_product_reselect';
+
+      // Sélectionner la variation au chargement (cinetique.js le fait déjà,
+      // mais on s'assure que c'est fait)
+      reselectVariation();
+    }
+    // Sans projet → texte par défaut "Comment choisir le bon modèle ?"
+  }
+
+  function reselectVariation() {
+    var prefs = safeLoad();
+    var essence = prefs.essence;
+    var tailleIndex = prefs.tailleIndex;
+
+    if (essence) {
+      var essenceSwatch = document.querySelector('.material-option[data-value="' + essence + '"]');
+      if (essenceSwatch && !essenceSwatch.classList.contains('selected')) {
+        essenceSwatch.click();
+      }
+    }
+
+    // Taille — sélectionner dans le dropdown si disponible
+    if (tailleIndex !== null && tailleIndex !== undefined) {
+      var sizeSelect = document.querySelector('select[name="attribute_pa_taille"]');
+      if (sizeSelect && sizeSelect.options.length > tailleIndex + 1) {
+        sizeSelect.selectedIndex = tailleIndex + 1; // +1 pour sauter l'option vide
+        sizeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
   }
 
   // Lancement

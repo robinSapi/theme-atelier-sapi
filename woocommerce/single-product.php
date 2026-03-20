@@ -233,8 +233,10 @@ get_header();
         </div>
 
         <?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) : ?>
-          <button type="button" class="robin-pill" data-robin-context="product" data-robin-data='<?php echo esc_attr(wp_json_encode(['product_id' => $product_id, 'product_name' => get_the_title()])); ?>'>
-            &#x2728; Une question sur cette pièce ?
+          <button type="button" class="robin-pill" id="robin-product-pill"
+            data-robin-context="product_guide"
+            data-robin-data='<?php echo esc_attr(wp_json_encode(['product_id' => $product_id, 'product_name' => get_the_title()])); ?>'>
+            Comment choisir le bon mod&egrave;le ?
           </button>
         <?php endif; ?>
 
