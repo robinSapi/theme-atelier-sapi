@@ -2262,7 +2262,7 @@ function sapi_robin_validate_response($result) {
   }
 
   // URLs valides pour les boutons liens
-  $valid_urls = ['/contact/', '/nos-creations/', '/sur-mesure/',
+  $valid_urls = ['/contact/', '/nos-creations/', '/nos-creations/?robin_selection=1', '/sur-mesure/',
     '/categorie-produit/suspensions/', '/categorie-produit/appliques/',
     '/categorie-produit/lampadaires/', '/categorie-produit/lampes-a-poser/'];
 

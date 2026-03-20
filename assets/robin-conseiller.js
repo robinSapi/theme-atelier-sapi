@@ -430,6 +430,12 @@
       state.pendingXhr = null;
     }
 
+    // Annuler l'interval de l'animation recommandation
+    if (state._recoInterval) {
+      clearInterval(state._recoInterval);
+      state._recoInterval = null;
+    }
+
     saveState();
     refreshPageVisuals();
   }
@@ -779,10 +785,21 @@
     var ampouleCheckInterval = setInterval(function() {
       if (recoReady && bulb && bulb.classList.contains('robin-modal__curtain-bulb--visible')) {
         clearInterval(ampouleCheckInterval);
+        state._recoInterval = null;
         // Laisser l'ampoule pulser au moins 1.5s
         setTimeout(openCurtain, 1500);
       }
     }, 200);
+    state._recoInterval = ampouleCheckInterval;
+
+    // Garde-fou : timeout 30s si AJAX ou animation bloqués
+    setTimeout(function() {
+      if (state._recoInterval) {
+        clearInterval(state._recoInterval);
+        state._recoInterval = null;
+        openCurtain();
+      }
+    }, 30000);
 
     function openCurtain() {
       // Masquer complètement le header
