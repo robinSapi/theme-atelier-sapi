@@ -465,28 +465,23 @@
     }
     html += '</div>';
 
-    // Lien sortant — override JSON si existant, sinon lien dynamique
+    // 2 liens CTA — toujours présents (sauf première fiche)
     if (!isFirstFiche) {
+      var shopLink = buildShopLink();
+
+      // Lien 2 : Contacter Robin OU Sur mesure selon contexte
       var lastStepForLink = state.history.length > 0 ? state.history[state.history.length - 1] : null;
       var lastSlugForLink = lastStepForLink ? state.answers[lastStepForLink] : null;
       var conseilForLink = lastStepForLink && lastSlugForLink ? getConseil(lastStepForLink, lastSlugForLink) : null;
-      var linkUrl, linkLabel;
-
-      if (conseilForLink && conseilForLink.link_url) {
-        // Override depuis le JSON (ex: /contact/ pour grappe)
-        linkUrl = conseilForLink.link_url;
-        linkLabel = conseilForLink.link_label || 'Voir';
-      } else {
-        // Lien dynamique vers /nos-creations/ avec filtres
-        var shopLink = buildShopLink();
-        linkUrl = shopLink.url;
-        linkLabel = shopLink.label;
-      }
+      var isConstrained = conseilForLink && conseilForLink.link_url === '/contact/';
+      var showSurMesure = isConstrained || state.answers.taille === 'grande' || state.answers.hauteur === 'haute';
 
       html += '<div class="robin-fiche__cta-links" id="robin-fiche-link"' + (shouldAnimate ? ' style="opacity:0;"' : '') + '>';
-      html += '<a class="robin-fiche__cta-link" href="' + escHtml(linkUrl) + '">' + escHtml(linkLabel) + ' &rarr;</a>';
-      if (state.answers.taille === 'grande') {
-        html += '<a class="robin-fiche__cta-link" href="/contact/">Et si Robin cr\u00e9ait un mod\u00e8le unique pour vous ? &rarr;</a>';
+      html += '<a class="robin-fiche__cta-link" href="' + escHtml(shopLink.url) + '">' + escHtml(shopLink.label) + ' &rarr;</a>';
+      if (showSurMesure) {
+        html += '<a class="robin-fiche__cta-link" href="/sur-mesure/">Imaginer un mod\u00e8le sur mesure &rarr;</a>';
+      } else {
+        html += '<a class="robin-fiche__cta-link" href="/contact/">Contacter Robin &rarr;</a>';
       }
       html += '</div>';
     }
@@ -1094,10 +1089,16 @@
     html += '<div class="robin-fiche__conseil">';
     html += renderConseil({ conseil_text: data.conseil_text }, true);
     html += '</div>';
-    if (data.link_url) {
-      html += '<div class="robin-fiche__link" id="robin-fiche-link" style="opacity:0;"><a href="' + escHtml(data.link_url) + '">';
-      html += escHtml(data.link_label || 'Voir') + ' &rarr;</a></div>';
+    // 2 liens CTA standards
+    var showSurMesureFT = state.answers.taille === 'grande' || state.answers.hauteur === 'haute';
+    html += '<div class="robin-fiche__cta-links" id="robin-fiche-link" style="opacity:0;">';
+    html += '<a class="robin-fiche__cta-link" href="/nos-creations/?robin_selection=1">Voir les mod\u00e8les filtr\u00e9s pour votre projet &rarr;</a>';
+    if (showSurMesureFT) {
+      html += '<a class="robin-fiche__cta-link" href="/sur-mesure/">Imaginer un mod\u00e8le sur mesure &rarr;</a>';
+    } else {
+      html += '<a class="robin-fiche__cta-link" href="/contact/">Contacter Robin &rarr;</a>';
     }
+    html += '</div>';
     html += '</div>';
 
     // Zone basse : boutons suggérés par l'IA OU la prochaine question du questionnaire
