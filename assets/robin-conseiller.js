@@ -256,20 +256,25 @@
         break;
 
       case 'sortie':
-        if (slug === 'ne-sais-pas') {
-          key = 'sortie:ne-sais-pas';
-        } else if (slug === 'mur') {
-          key = 'sortie:mur|piece:' + piece;
+        var eclairage = state.answers.eclairage || '';
+        if (piece === 'escalier') {
+          key = 'sortie:' + slug + '|piece:escalier|taille_escalier:' + taille_esc;
+        } else if (taille === 'grande' && eclairage) {
+          key = 'sortie:' + slug + '|piece:' + piece + '|taille:grande|eclairage:' + eclairage;
         } else {
-          // plafond et pas-de-sortie : croisement piece × taille
-          var t = piece === 'escalier' ? '|taille_escalier:' + taille_esc : '|taille:' + taille;
-          key = 'sortie:' + slug + '|piece:' + piece + t;
+          key = 'sortie:' + slug + '|piece:' + piece + '|taille:' + taille;
         }
         break;
 
       case 'hauteur':
-        var t = piece === 'escalier' ? '|taille_escalier:' + taille_esc : '|taille:' + taille;
-        key = 'hauteur:' + slug + '|piece:' + piece + t;
+        var eclairageH = state.answers.eclairage || '';
+        if (piece === 'escalier') {
+          key = 'hauteur:' + slug + '|piece:escalier|taille_escalier:' + taille_esc;
+        } else if (taille === 'grande' && eclairageH) {
+          key = 'hauteur:' + slug + '|piece:' + piece + '|taille:grande|eclairage:' + eclairageH;
+        } else {
+          key = 'hauteur:' + slug + '|piece:' + piece + '|taille:' + taille;
+        }
         break;
 
       case 'table':
