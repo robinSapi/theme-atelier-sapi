@@ -1692,7 +1692,6 @@
     updateBandeauChips();
     adaptProductPill();
     adaptCategoryCard();
-    adaptHomeRoomPicker();
   }
 
   /* ═══════════════════════════════════════════
@@ -1717,38 +1716,6 @@
 
     // Mettre à jour bandeau
     updateBandeauChips();
-  }
-
-  function adaptHomeRoomPicker() {
-    var card = document.getElementById('robin-home-room-picker');
-    if (!card) return;
-    if (!hasAnyAnswer()) return;
-
-    var inner = card.querySelector('.room-picker-inner');
-    if (!inner) return;
-
-    // Construire le résumé du projet en chips
-    var visible = getVisibleSteps();
-    var chips = '';
-    for (var i = 0; i < visible.length; i++) {
-      var lbl = state.labels[visible[i]];
-      if (lbl) {
-        chips += '<span class="robin-modal__chip">' + escHtml(lbl) + '</span> ';
-      }
-    }
-
-    var html = '';
-    html += '<span class="robin-modal__badge" style="margin-bottom: 0.5rem;">';
-    html += '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>';
-    html += ' Mon projet</span>';
-    html += '<h3 class="room-picker-title">Votre projet d\'\u00e9clairage</h3>';
-    html += '<div class="robin-category-card__chips" style="margin-bottom: 1rem;">' + chips + '</div>';
-    html += '<div class="robin-category-card__actions">';
-    html += '<a class="robin-fiche__cta-link" href="/nos-creations/?robin_selection=1">Voir la s\u00e9lection de Robin &rarr;</a>';
-    html += '<span class="robin-fiche__cta-link" style="cursor:pointer;" onclick="if(window.sapiRobinOpen)window.sapiRobinOpen(\'bandeau\');">Modifier mon projet &rarr;</span>';
-    html += '</div>';
-
-    inner.innerHTML = html;
   }
 
   function adaptCategoryCard() {
