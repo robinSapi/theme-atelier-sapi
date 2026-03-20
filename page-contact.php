@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sapi_contact_nonce'])
     $form_submitted = true;
 
     // Sanitize inputs
-    $name = sanitize_text_field($_POST['name'] ?? '');
+    $name = sanitize_text_field($_POST['fullname'] ?? '');
     $email = sanitize_email($_POST['email'] ?? '');
     $message = sanitize_textarea_field($_POST['message'] ?? '');
 
@@ -149,7 +149,7 @@ get_header();
             </div>
 
             <label for="contact-name">Nom</label>
-            <input id="contact-name" type="text" name="name" required placeholder="Votre nom" value="<?php echo esc_attr($_POST['name'] ?? ''); ?>">
+            <input id="contact-name" type="text" name="fullname" required placeholder="Votre nom" value="<?php echo esc_attr($_POST['fullname'] ?? ''); ?>">
 
             <label for="contact-email">Email</label>
             <input id="contact-email" type="email" name="email" required placeholder="votre@email.fr" value="<?php echo esc_attr($_POST['email'] ?? ''); ?>">

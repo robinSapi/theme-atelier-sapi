@@ -3971,7 +3971,7 @@ function sapi_handle_surmesure_form() {
     return ['submitted' => true, 'success' => false, 'error' => 'Spam détecté.'];
   }
 
-  $name    = sanitize_text_field($_POST['name'] ?? '');
+  $name    = sanitize_text_field($_POST['fullname'] ?? '');
   $email   = sanitize_email($_POST['email'] ?? '');
   $message = sanitize_textarea_field($_POST['message'] ?? '');
 

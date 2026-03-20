@@ -421,7 +421,7 @@ get_header();
         </div>
 
         <label for="surmesure-name">Nom</label>
-        <input id="surmesure-name" type="text" name="name" required value="<?php echo esc_attr($_POST['name'] ?? ''); ?>" placeholder="Votre nom">
+        <input id="surmesure-name" type="text" name="fullname" required value="<?php echo esc_attr($_POST['fullname'] ?? ''); ?>" placeholder="Votre nom">
 
         <label for="surmesure-email">Email</label>
         <input id="surmesure-email" type="email" name="email" required value="<?php echo esc_attr($_POST['email'] ?? ''); ?>" placeholder="votre@email.fr">
