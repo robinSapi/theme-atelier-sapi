@@ -158,10 +158,12 @@
     "conseil_text": "Pas de sortie plafond dans votre salon — les lampadaires et lampes à poser en bois fonctionnent sur prise classique et créent une ambiance magnifique. Les appliques avec câble apparent aussi."
   },
   "sortie:pas-de-sortie|piece:chambre|taille:petite": {
-    "conseil_text": "Pas de sortie plafond dans une petite chambre — une lampe à poser sur la table de chevet, c'est l'éclairage parfait. Doux, intime, en bois."
+    "conseil_text": "Pas de sortie plafond dans une petite chambre — une lampe à poser sur la table de chevet en bois, c'est doux et intime. Si c'est votre seule source, ça fonctionne dans un petit espace. Sinon, Robin peut vous proposer des solutions simples."
   },
   "sortie:pas-de-sortie|piece:chambre|taille:moyenne": {
-    "conseil_text": "Pas de sortie plafond dans votre chambre — une lampe à poser ou un lampadaire créent l'ambiance sans travaux. L'applique sur câble est aussi une option superbe comme liseuse."
+    "conseil_text": "Pas de sortie plafond dans votre chambre — une lampe à poser ou un lampadaire créent l'ambiance sans travaux. Si c'est votre seule lumière, pensez à combiner les deux. Robin peut vous aider à trouver la bonne association.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:pas-de-sortie|piece:entree|taille:petite": {
     "conseil_text": "Pas de sortie plafond dans une petite entrée — une applique sur câble apparent est la solution idéale. Discrète, chaleureuse, sans travaux."
@@ -170,10 +172,14 @@
     "conseil_text": "Pas de sortie plafond dans votre entrée — un lampadaire ou une applique sur câble apparent accueillent vos invités avec chaleur."
   },
   "sortie:pas-de-sortie|piece:escalier|taille_escalier:standard": {
-    "conseil_text": "Pas de sortie plafond dans l'escalier — une applique murale avec option câble est parfaite pour éclairer les marches. Positionnée à mi-hauteur, elle guide la descente."
+    "conseil_text": "Pas de sortie plafond dans l'escalier — une applique murale avec option câble est parfaite pour éclairer les marches. Positionnée à mi-hauteur, elle guide la descente.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:pas-de-sortie|piece:escalier|taille_escalier:ouvert": {
-    "conseil_text": "Pas de sortie plafond dans un grand escalier ouvert — des appliques murales étagées le long de la descente créent un bel effet. L'option câble apparent ajoute du caractère."
+    "conseil_text": "Pas de sortie plafond dans un grand escalier ouvert — des appliques murales étagées le long de la descente créent un bel effet. L'option câble apparent ajoute du caractère.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "hauteur:standard|piece:cuisine|taille:petite": {
     "conseil_text": "Plafond standard dans une petite cuisine — il faut faire attention à la hauteur. Je conseille le bas du luminaire à minimum 2m10 du sol en zone de passage, et 70-80 cm au-dessus d'une table ou d'un îlot."
@@ -347,49 +353,71 @@
     "conseil_text": "Sortie plafond dans votre grande entrée — puisque vous avez d'autres sources lumineuses, la suspension peut être plus décorative. Tous les formats sont possibles, y compris avec ampoule entourée pour jouer avec les ombres."
   },
   "sortie:mur|piece:cuisine|taille:petite": {
-    "conseil_text": "Une applique dans une petite cuisine apporte un éclairage d'appoint chaleureux. Au-dessus du plan de travail ou près de la table, c'est un beau complément."
+    "conseil_text": "Une applique dans une petite cuisine apporte une belle lumière d'ambiance, mais pour un vrai éclairage de travail, elle ne suffira probablement pas seule. Robin peut vous proposer des solutions simples pour combiner les sources et avoir la bonne lumière.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:mur|piece:bureau|taille:petite": {
-    "conseil_text": "Une applique dans un petit bureau crée un éclairage indirect très agréable, sans encombrer l'espace de travail."
+    "conseil_text": "Une applique dans un petit bureau crée un éclairage indirect agréable, mais pour travailler confortablement, une seule source murale peut être limite. Robin peut vous proposer des solutions créatives et simples à mettre en place.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:mur|piece:salon|taille:petite": {
     "conseil_text": "Une applique dans un petit salon, c'est discret et chaleureux. Elle habille le mur et diffuse une lumière douce."
   },
   "sortie:mur|piece:chambre|taille:petite": {
-    "conseil_text": "Une applique dans une petite chambre, c'est parfait comme liseuse ou éclairage d'ambiance. Le bois contre le mur, c'est très cocon."
+    "conseil_text": "Une applique dans une petite chambre, c'est parfait comme liseuse ou éclairage d'ambiance. Si c'est votre seule source de lumière, ça peut suffire dans un petit espace — le bois contre le mur crée un vrai cocon. Sinon, Robin peut vous proposer une combinaison simple.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:mur|piece:entree|taille:petite": {
     "conseil_text": "Une applique dans une petite entrée, c'est la solution idéale. Elle éclaire le passage sans encombrer."
   },
   "sortie:mur|piece:cuisine|taille:moyenne": {
-    "conseil_text": "Une applique au mur dans votre cuisine complète parfaitement l'éclairage. Positionnée près de la table ou du plan de travail, elle crée une zone de lumière chaleureuse."
+    "conseil_text": "Une applique au mur dans votre cuisine crée une zone de lumière chaleureuse, mais en cuisine on a besoin d'un éclairage efficace sur le plan de travail. Robin peut vous aider à trouver la bonne combinaison, même avec une sortie murale.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:mur|piece:bureau|taille:moyenne": {
-    "conseil_text": "Une applique au mur dans votre bureau crée un éclairage indirect agréable. Idéal à côté du poste de travail pour une lumière sans éblouissement."
+    "conseil_text": "Une applique au mur dans votre bureau apporte une lumière indirecte agréable, mais pour un vrai éclairage de travail, il faudra sans doute compléter. Robin peut vous proposer des solutions simples pour avoir la bonne lumière, même sans sortie plafond.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:mur|piece:salon|taille:moyenne": {
     "conseil_text": "Au mur du salon, les appliques créent un éclairage d'ambiance magnifique. Elles mettent en valeur le bois sous un autre angle."
   },
   "sortie:mur|piece:chambre|taille:moyenne": {
-    "conseil_text": "Une applique dans la chambre, c'est parfait pour une lumière de chevet ou d'ambiance. Le bois diffuse une lumière chaude et tamisée contre le mur."
+    "conseil_text": "Une applique dans la chambre diffuse une lumière chaude et tamisée — parfait pour l'ambiance. Si c'est votre unique source lumineuse, pensez à compléter avec une lampe de chevet. Robin peut vous aider à trouver la bonne combinaison.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:mur|piece:entree|taille:moyenne": {
     "conseil_text": "Une applique dans l'entrée, c'est discret et accueillant. Elle éclaire le passage tout en ajoutant du caractère au mur."
   },
   "sortie:mur|piece:cuisine|taille:grande|eclairage:principal": {
-    "conseil_text": "Une applique seule ne suffira pas comme éclairage principal dans une grande cuisine. Elle crée une belle ambiance, mais il faudra absolument la compléter avec d'autres sources — un lampadaire ou des lampes à poser."
+    "conseil_text": "Une applique seule ne suffira pas comme éclairage principal dans une grande cuisine. Elle crée une belle ambiance, mais il faudra absolument la compléter avec d'autres sources — un lampadaire ou des lampes à poser. Robin peut vous proposer des solutions créatives et simples à mettre en œuvre.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:mur|piece:bureau|taille:grande|eclairage:principal": {
-    "conseil_text": "Dans un grand bureau, une applique seule ne couvrira pas tout l'espace comme éclairage principal. C'est un bel appoint, mais prévoyez d'autres sources lumineuses pour les zones de travail."
+    "conseil_text": "Dans un grand bureau, une applique seule ne couvrira pas tout l'espace comme éclairage principal. C'est un bel appoint, mais prévoyez d'autres sources lumineuses pour les zones de travail. Robin peut vous proposer des solutions créatives et simples à mettre en œuvre.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:mur|piece:salon|taille:grande|eclairage:principal": {
-    "conseil_text": "Une applique murale ne sera pas suffisante comme éclairage principal dans un grand salon. Elle apporte de l'ambiance, mais il faudra la combiner avec un lampadaire ou des lampes à poser pour un vrai éclairage."
+    "conseil_text": "Une applique murale ne sera pas suffisante comme éclairage principal dans un grand salon. Elle apporte de l'ambiance, mais il faudra la combiner avec un lampadaire ou des lampes à poser pour un vrai éclairage. Robin peut vous proposer des solutions créatives et simples à mettre en œuvre.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:mur|piece:chambre|taille:grande|eclairage:principal": {
-    "conseil_text": "Dans une grande chambre, une applique seule ne suffira pas comme éclairage principal. Elle est parfaite comme liseuse ou ambiance, mais complétez avec un lampadaire ou une lampe à poser."
+    "conseil_text": "Dans une grande chambre, une applique seule ne suffira pas comme éclairage principal. Elle est parfaite comme liseuse ou ambiance, mais complétez avec un lampadaire ou une lampe à poser. Robin peut vous proposer des solutions créatives et simples à mettre en œuvre.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:mur|piece:entree|taille:grande|eclairage:principal": {
-    "conseil_text": "Une applique dans un grand hall crée un accueil chaleureux, mais ne suffira pas seule comme éclairage principal. Pensez à multiplier les appliques ou à compléter avec un lampadaire."
+    "conseil_text": "Une applique dans un grand hall crée un accueil chaleureux, mais ne suffira pas seule comme éclairage principal. Pensez à multiplier les appliques ou à compléter avec un lampadaire. Robin peut vous proposer des solutions créatives et simples à mettre en œuvre.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:mur|piece:cuisine|taille:grande|eclairage:secondaire": {
     "conseil_text": "Une applique en complément dans votre grande cuisine, c'est une excellente idée. Elle crée une zone de lumière chaleureuse qui s'ajoute à votre éclairage existant."
@@ -413,19 +441,29 @@
     "conseil_text": "Des appliques dans un grand escalier ouvert, étagées le long de la descente, créent un bel effet. L'option câble apparent ajoute du caractère."
   },
   "sortie:pas-de-sortie|piece:cuisine|taille:grande|eclairage:principal": {
-    "conseil_text": "Pas de sortie plafond dans une grande cuisine et c'est votre éclairage principal — un lampadaire généreux sera le point focal, mais il faudra impérativement compléter avec d'autres sources pour couvrir l'espace."
+    "conseil_text": "Pas de sortie plafond dans une grande cuisine et c'est votre éclairage principal — un lampadaire généreux sera le point focal, mais il faudra impérativement compléter avec d'autres sources pour couvrir l'espace.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin pour trouver la bonne combinaison"
   },
   "sortie:pas-de-sortie|piece:bureau|taille:grande|eclairage:principal": {
-    "conseil_text": "Pas de sortie plafond dans un grand bureau en éclairage principal — un beau lampadaire près du poste de travail, complété par une lampe à poser ou une applique sur câble ailleurs."
+    "conseil_text": "Pas de sortie plafond dans un grand bureau en éclairage principal — un beau lampadaire près du poste de travail, complété par une lampe à poser ou une applique sur câble ailleurs.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin pour trouver la bonne combinaison"
   },
   "sortie:pas-de-sortie|piece:salon|taille:grande|eclairage:principal": {
-    "conseil_text": "Pas de sortie plafond dans un grand salon en éclairage principal — multipliez les sources sur prise : un lampadaire imposant comme point focal, plus des lampes à poser et des appliques sur câble."
+    "conseil_text": "Pas de sortie plafond dans un grand salon en éclairage principal — multipliez les sources sur prise : un lampadaire imposant comme point focal, plus des lampes à poser et des appliques sur câble.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin pour trouver la bonne combinaison"
   },
   "sortie:pas-de-sortie|piece:chambre|taille:grande|eclairage:principal": {
-    "conseil_text": "Pas de sortie plafond dans une grande chambre en éclairage principal — un lampadaire généreux complété par des lampes de chevet. L'applique sur câble est aussi une option superbe."
+    "conseil_text": "Pas de sortie plafond dans une grande chambre en éclairage principal — un lampadaire généreux complété par des lampes de chevet. L'applique sur câble est aussi une option superbe.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin pour trouver la bonne combinaison"
   },
   "sortie:pas-de-sortie|piece:entree|taille:grande|eclairage:principal": {
-    "conseil_text": "Pas de sortie plafond dans un grand hall en éclairage principal — un lampadaire imposant en bois fait forte impression. Complétez avec des appliques sur câble pour un éclairage homogène."
+    "conseil_text": "Pas de sortie plafond dans un grand hall en éclairage principal — un lampadaire imposant en bois fait forte impression. Complétez avec des appliques sur câble pour un éclairage homogène.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin pour trouver la bonne combinaison"
   },
   "sortie:pas-de-sortie|piece:cuisine|taille:grande|eclairage:secondaire": {
     "conseil_text": "Pas de sortie plafond dans votre grande cuisine en complément — une lampe à poser ou une applique sur câble ajoute une touche chaleureuse à votre éclairage existant."
@@ -473,19 +511,29 @@
     "conseil_text": "Pas de souci ! Regardez au plafond de votre entrée : un crochet ou une rosace signifie que vous pouvez installer une suspension. Sinon, les lampadaires et appliques sur câble fonctionnent sur prise classique."
   },
   "sortie:ne-sais-pas|piece:cuisine|taille:grande|eclairage:principal": {
-    "conseil_text": "Pas de souci ! Pour un éclairage principal dans une grande cuisine, une sortie plafond serait idéale pour une belle suspension. Vérifiez si vous avez un crochet ou une rosace. Sinon, un lampadaire généreux sur prise peut aussi faire le travail."
+    "conseil_text": "Pas de souci ! Pour éclairer efficacement une grande cuisine, l'idéal serait une sortie plafond — vérifiez si vous avez un crochet ou une rosace. Si ce n'est pas le cas, Robin peut vous proposer des solutions créatives pour avoir un vrai éclairage de travail.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:ne-sais-pas|piece:bureau|taille:grande|eclairage:principal": {
-    "conseil_text": "Pas de souci ! Pour un éclairage principal dans un grand bureau, une sortie plafond serait idéale pour une belle suspension. Vérifiez si vous avez un crochet ou une rosace. Sinon, un lampadaire généreux sur prise peut aussi faire le travail."
+    "conseil_text": "Pas de souci ! Pour un éclairage de travail efficace dans un grand bureau, une sortie plafond serait idéale. Regardez au plafond s'il y a un crochet. Sinon, Robin connaît des solutions simples pour bien éclairer un bureau sans sortie plafond.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:ne-sais-pas|piece:salon|taille:grande|eclairage:principal": {
-    "conseil_text": "Pas de souci ! Pour un éclairage principal dans un grand salon, une sortie plafond serait idéale pour une belle suspension. Vérifiez si vous avez un crochet ou une rosace. Sinon, un lampadaire généreux sur prise peut aussi faire le travail."
+    "conseil_text": "Pas de souci ! Pour éclairer un grand salon, une sortie plafond permet d'installer une belle suspension centrale. Vérifiez si vous avez un crochet. Si non, Robin peut vous guider vers la meilleure combinaison de luminaires sur prise.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:ne-sais-pas|piece:chambre|taille:grande|eclairage:principal": {
-    "conseil_text": "Pas de souci ! Pour un éclairage principal dans une grande chambre, une sortie plafond serait idéale pour une belle suspension. Vérifiez si vous avez un crochet ou une rosace. Sinon, un lampadaire généreux sur prise peut aussi faire le travail."
+    "conseil_text": "Pas de souci ! Dans une grande chambre, une suspension crée une belle ambiance. Vérifiez si vous avez une sortie plafond. Sinon, un lampadaire et des lampes de chevet en bois font des merveilles — Robin peut vous conseiller.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:ne-sais-pas|piece:entree|taille:grande|eclairage:principal": {
-    "conseil_text": "Pas de souci ! Pour un éclairage principal dans une grande entrée, une sortie plafond serait idéale pour une belle suspension. Vérifiez si vous avez un crochet ou une rosace. Sinon, un lampadaire généreux sur prise peut aussi faire le travail."
+    "conseil_text": "Pas de souci ! Dans un grand hall, une suspension fait forte impression. Regardez au plafond s'il y a un crochet ou une rosace. Si non, Robin peut vous proposer des alternatives sur prise tout aussi spectaculaires.",
+    "link_url": "/contact/",
+    "link_label": "Contacter Robin"
   },
   "sortie:ne-sais-pas|piece:cuisine|taille:grande|eclairage:secondaire": {
     "conseil_text": "Pas de souci ! Pour compléter l'éclairage de votre grande cuisine, toutes les options sont possibles : suspension si vous avez une sortie plafond, lampadaire ou applique sur câble sinon. Regardez au plafond si vous voyez un crochet."
