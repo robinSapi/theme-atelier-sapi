@@ -10822,7 +10822,7 @@ transform: translateY(15px);
 }
 
 .room-picker-inner {
-  padding: 1.75rem 3rem;
+  padding: 0 3rem 1.75rem;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -11627,7 +11627,7 @@ transform: translateY(15px);
   }
 
   .room-picker-inner {
-    padding: 1.5rem 1rem;
+    padding: 0 1rem 1.5rem;
   }
 
   /* Stats card: compact on mobile, no forced height */
