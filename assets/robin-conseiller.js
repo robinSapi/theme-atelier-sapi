@@ -752,15 +752,16 @@
         html += '<span class="robin-reco__price">' + (p.price || '') + '</span>';
         html += '</div>';
         html += '</div>';
-        // Chips conseils (essence + taille)
+        // Label + Chips conseils (essence + taille)
         var hasChips = p.variation_label || p.size_label;
         if (hasChips) {
           html += '<div class="robin-reco__chips robin-reco__reveal" data-reveal="2">';
-          if (p.variation_label) {
-            html += '<span class="robin-reco__chip">Essence recommand\u00e9e : ' + escHtml(p.variation_label) + '</span>';
-          }
+          html += '<span class="robin-reco__chip robin-reco__chip--label">Ma recommandation</span>';
           if (p.size_label) {
             html += '<span class="robin-reco__chip">Taille : ' + escHtml(p.size_label) + '</span>';
+          }
+          if (p.variation_label) {
+            html += '<span class="robin-reco__chip">Essence : ' + escHtml(p.variation_label) + '</span>';
           }
           html += '</div>';
         }
@@ -796,9 +797,8 @@
 
     // Boutons finaux
     html += '<div class="robin-reco__actions robin-reco__reveal" data-reveal="6">';
-    html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/nos-creations/?robin_selection=1">Voir toutes nos cr\u00e9ations</a>';
+    html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/nos-creations/?robin_selection=1">Voir les autres mod\u00e8les adapt\u00e9s</a>';
     html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/contact/">Contacter Robin</a>';
-    html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/sur-mesure/">Projet sur mesure</a>';
     html += '</div>';
 
     html += '</div>';
