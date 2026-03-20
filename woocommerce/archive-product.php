@@ -35,7 +35,7 @@ $all_products = new WP_Query([
 <?php
 // Priority 1: ACF custom hero image (attached to WooCommerce Shop page)
 $hero_img_url = '';
-$hero_alt = 'Nos Créations - Atelier Sâpi';
+$hero_alt = 'Mes Créations - Atelier Sâpi';
 $shop_page_id = wc_get_page_id('shop');
 
 if (function_exists('get_field')) {
@@ -94,14 +94,14 @@ if (!$hero_img_url) {
   <?php endif; ?>
   <div class="shop-hero-magazine-overlay"></div>
   <div class="shop-hero-magazine-content">
-    <h1><?php esc_html_e('Nos Créations', 'theme-sapi-maison'); ?></h1>
+    <h1><?php esc_html_e('Mes Créations', 'theme-sapi-maison'); ?></h1>
     <p class="shop-subtitle">
       <?php esc_html_e('Luminaires uniques, découpés au laser et assemblés à la main dans l\'atelier lyonnais de Robin.', 'theme-sapi-maison'); ?>
     </p>
   </div>
 </section>
 
-<!-- Conseil personnalisé de Robin pour Nos Créations (shown by mon-projet.js if available) -->
+<!-- Conseil personnalisé de Robin pour Mes Créations (shown by mon-projet.js if available) -->
 <?php
 require_once get_template_directory() . '/inc/template-robin-conseil.php';
 sapi_robin_conseil_card( 'selection' );
@@ -153,7 +153,7 @@ sapi_robin_conseil_card( 'selection' );
     <!-- Ligne 1 : Filtres catégorie (luminaires) -->
     <div class="filter-row filter-row--categories">
       <button type="button" class="filter-btn active" data-filter="all">
-        <?php esc_html_e('Toutes nos créations', 'theme-sapi-maison'); ?>
+        <?php esc_html_e('Toutes mes créations', 'theme-sapi-maison'); ?>
         <span class="filter-count">(<?php echo esc_html($creations_count); ?>)</span>
       </button>
       <?php

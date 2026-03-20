@@ -36,7 +36,7 @@ if (function_exists('sapi_maison_breadcrumbs')) {
 ?>
 
 <section class="shop-hero-cinetique">
-  <h1><?php echo esc_html($term_name ? $term_name : 'Nos créations'); ?></h1>
+  <h1><?php echo esc_html($term_name ? $term_name : 'Mes créations'); ?></h1>
   <?php if (isset($category_intro[$term_slug])) : ?>
     <p class="shop-subtitle"><?php echo esc_html($category_intro[$term_slug]); ?></p>
   <?php endif; ?>

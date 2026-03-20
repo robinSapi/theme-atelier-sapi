@@ -635,7 +635,7 @@
       conseilsCta.style.display = 'none';
     }
 
-    // Page Nos Créations — masquer le bouton sélection (déjà sur la page)
+    // Page Mes Créations — masquer le bouton sélection (déjà sur la page)
     applyRobinCard('selection', 'selectionText', prefs);
     var selBtnCreations = document.getElementById('selection-selection-btn');
     if (selBtnCreations) selBtnCreations.style.display = 'none';

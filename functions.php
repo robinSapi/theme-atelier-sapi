@@ -95,7 +95,7 @@ function sapi_fallback_primary_menu() {
   <nav class="primary-nav" aria-label="<?php esc_attr_e('Menu principal', 'theme-sapi-maison'); ?>">
     <ul class="nav-menu">
       <li class="menu-item menu-item-has-children">
-        <a href="<?php echo esc_url(home_url('/nos-creations/')); ?>">Nos créations</a>
+        <a href="<?php echo esc_url(home_url('/nos-creations/')); ?>">Mes créations</a>
         <ul class="sub-menu">
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/suspensions/')); ?>">Suspensions</a></li>
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampadaires/')); ?>">Lampadaires</a></li>
@@ -118,7 +118,7 @@ function sapi_fallback_mobile_menu() {
     <ul class="mobile-nav-menu" id="mobile-nav-menu">
       <li class="menu-item menu-item-home"><a href="<?php echo esc_url(home_url('/')); ?>">Accueil</a></li>
       <li class="menu-item menu-item-has-children">
-        <a href="<?php echo esc_url(home_url('/nos-creations/')); ?>">Nos créations</a>
+        <a href="<?php echo esc_url(home_url('/nos-creations/')); ?>">Mes créations</a>
         <ul class="sub-menu">
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/suspensions/')); ?>">Suspensions</a></li>
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampadaires/')); ?>">Lampadaires</a></li>
@@ -136,7 +136,7 @@ function sapi_fallback_mobile_menu() {
 }
 
 function sapi_fallback_footer_nav() {
-  echo '<a href="' . esc_url(home_url('/nos-creations/')) . '">Nos créations</a>';
+  echo '<a href="' . esc_url(home_url('/nos-creations/')) . '">Mes créations</a>';
   echo '<a href="' . esc_url(home_url('/lumiere-dartisan/')) . '">L\'artisan</a>';
   echo '<a href="' . esc_url(home_url('/conseils-eclaires/')) . '">Conseils</a>';
   echo '<a href="' . esc_url(home_url('/contact/')) . '">Contact</a>';
@@ -975,7 +975,7 @@ function sapi_maison_breadcrumbs() {
 
   if (is_product()) {
     $breadcrumbs[] = [
-      'name' => 'Nos créations',
+      'name' => 'Mes créations',
       'url' => home_url('/nos-creations/')
     ];
     $terms = get_the_terms(get_the_ID(), 'product_cat');
@@ -992,7 +992,7 @@ function sapi_maison_breadcrumbs() {
     ];
   } elseif (is_product_category()) {
     $breadcrumbs[] = [
-      'name' => 'Nos créations',
+      'name' => 'Mes créations',
       'url' => home_url('/nos-creations/')
     ];
     $term = get_queried_object();
@@ -4436,7 +4436,7 @@ function sapi_guide_admin_page() {
                   } elseif ($ref_path === '' || $ref_path === 'accueil') {
                     $ref_label = 'Accueil';
                   } elseif (strpos($ref_path, 'nos-creations') !== false) {
-                    $ref_label = 'Nos créations';
+                    $ref_label = 'Mes créations';
                   } else {
                     $ref_label = ucfirst(str_replace(['-', '/'], [' ', ' › '], $ref_path));
                   }
