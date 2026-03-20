@@ -411,7 +411,7 @@ get_header();
         </div>
       <?php endif; ?>
 
-      <form id="sur-mesure-form" action="<?php echo esc_url(get_permalink()); ?>#surmesure-form" method="post">
+      <form id="sur-mesure-form" action="#surmesure-form" method="post">
         <?php wp_nonce_field('sapi_surmesure_form', 'sapi_surmesure_nonce'); ?>
 
         <!-- Honeypot -->

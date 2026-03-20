@@ -139,7 +139,7 @@ get_header();
             </div>
           <?php endif; ?>
 
-          <form action="<?php echo esc_url(get_permalink()); ?>" method="post">
+          <form action="" method="post">
             <?php wp_nonce_field('sapi_contact_form', 'sapi_contact_nonce'); ?>
 
             <!-- Honeypot anti-spam (hidden field) -->
