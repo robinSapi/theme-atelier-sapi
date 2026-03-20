@@ -336,7 +336,7 @@ add_action('woocommerce_after_cart', function () {
           </svg>
           <div class="reassurance-text">
             <strong><?php esc_html_e('Fabrication < 5 jours', 'theme-sapi-maison'); ?></strong>
-            <span><?php esc_html_e('Fait main dans l'atelier lyonnais de Robin', 'theme-sapi-maison'); ?></span>
+            <span><?php esc_html_e('Fait main dans l\'atelier lyonnais de Robin', 'theme-sapi-maison'); ?></span>
           </div>
         </div>
         <div class="reassurance-item">
@@ -663,7 +663,7 @@ add_filter('render_block', function ($content, $block) {
             </svg>
             <div class="reassurance-text">
               <strong><?php esc_html_e('Fabrication < 5 jours', 'theme-sapi-maison'); ?></strong>
-              <span><?php esc_html_e('Fait main dans l'atelier lyonnais de Robin', 'theme-sapi-maison'); ?></span>
+              <span><?php esc_html_e('Fait main dans l\'atelier lyonnais de Robin', 'theme-sapi-maison'); ?></span>
             </div>
           </div>
           <div class="reassurance-item">
