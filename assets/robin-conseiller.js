@@ -1745,7 +1745,7 @@
     html += ' Mon projet</span>';
     html += '<div class="robin-contact-project__chips">' + chips + '</div>';
     html += '<p class="robin-contact-project__note">Robin recevra ces informations avec votre message.</p>';
-    html += '<span class="robin-fiche__cta-link" style="cursor:pointer;font-size:0.75rem;" onclick="if(window.sapiRobinOpen)window.sapiRobinOpen(\'bandeau\');">Modifier &rarr;</span>';
+    html += '<span class="robin-contact-project__remove" id="robin-contact-remove" style="cursor:pointer;">Supprimer</span>';
     html += '</div>';
 
     bannerEl.innerHTML = html;
@@ -1753,6 +1753,15 @@
 
     // Remplir le champ hidden
     hiddenEl.value = projectText.trim();
+
+    // Bouton supprimer
+    var removeBtn = document.getElementById('robin-contact-remove');
+    if (removeBtn) {
+      removeBtn.addEventListener('click', function() {
+        bannerEl.style.display = 'none';
+        hiddenEl.value = '';
+      });
+    }
   }
 
   function adaptCategoryCard() {
