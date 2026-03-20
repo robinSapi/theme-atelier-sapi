@@ -36,6 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sapi_contact_nonce'])
       $subject = '[Atelier Sapi] Nouveau message de ' . $name;
       $body = "Nom: $name\n";
       $body .= "Email: $email\n\n";
+
+      // Projet Robin (si existant)
+      $robin_project = sanitize_textarea_field($_POST['robin_project'] ?? '');
+      if (!empty($robin_project)) {
+        $body .= "Projet du client:\n$robin_project\n\n";
+      }
+
       $body .= "Message:\n$message";
 
       $headers = array(
@@ -148,6 +155,11 @@ get_header();
             <input id="contact-email" type="email" name="email" required placeholder="votre@email.fr" value="<?php echo esc_attr($_POST['email'] ?? ''); ?>">
 
             <label for="contact-message">Message</label>
+
+            <!-- Bandeau projet Robin (rempli par JS si projet existant) -->
+            <div id="robin-contact-project" style="display:none;"></div>
+            <input type="hidden" name="robin_project" id="robin-contact-project-data" value="">
+
             <textarea id="contact-message" name="message" rows="6" required placeholder="Décrivez votre projet, posez votre question..."><?php echo esc_textarea($_POST['message'] ?? ''); ?></textarea>
 
             <button type="submit">Envoyer le message</button>

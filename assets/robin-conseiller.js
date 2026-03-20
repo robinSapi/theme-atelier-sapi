@@ -1692,6 +1692,7 @@
     updateBandeauChips();
     adaptProductPill();
     adaptCategoryCard();
+    adaptContactForm();
   }
 
   /* ═══════════════════════════════════════════
@@ -1716,6 +1717,42 @@
 
     // Mettre à jour bandeau
     updateBandeauChips();
+  }
+
+  function adaptContactForm() {
+    var bannerEl = document.getElementById('robin-contact-project');
+    var hiddenEl = document.getElementById('robin-contact-project-data');
+    if (!bannerEl || !hiddenEl) return;
+    if (!hasAnyAnswer()) return;
+
+    // Construire les chips
+    var visible = getVisibleSteps();
+    var chips = '';
+    var projectText = '';
+    for (var i = 0; i < visible.length; i++) {
+      var lbl = state.labels[visible[i]];
+      if (lbl) {
+        chips += '<span class="robin-modal__chip">' + escHtml(lbl) + '</span> ';
+        projectText += visible[i] + ': ' + lbl + '\n';
+      }
+    }
+
+    // Remplir le bandeau
+    var html = '';
+    html += '<div class="robin-contact-project__inner">';
+    html += '<span class="robin-modal__badge">';
+    html += '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>';
+    html += ' Mon projet</span>';
+    html += '<div class="robin-contact-project__chips">' + chips + '</div>';
+    html += '<p class="robin-contact-project__note">Robin recevra ces informations avec votre message.</p>';
+    html += '<span class="robin-fiche__cta-link" style="cursor:pointer;font-size:0.75rem;" onclick="if(window.sapiRobinOpen)window.sapiRobinOpen(\'bandeau\');">Modifier &rarr;</span>';
+    html += '</div>';
+
+    bannerEl.innerHTML = html;
+    bannerEl.style.display = '';
+
+    // Remplir le champ hidden
+    hiddenEl.value = projectText.trim();
   }
 
   function adaptCategoryCard() {

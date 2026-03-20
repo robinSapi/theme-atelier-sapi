@@ -2622,6 +2622,31 @@ button:hover,
   gap: 0.5rem;
 }
 
+/* ─── Bandeau projet dans formulaire contact ─── */
+.robin-contact-project__inner {
+  background: var(--color-warm, #FBF6EA);
+  border: 2px dashed rgba(var(--color-wood-rgb, 147, 125, 104), 0.3);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.robin-contact-project__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.robin-contact-project__note {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.75rem;
+  color: var(--color-wood, #937D68);
+  font-style: italic;
+  margin: 0;
+}
+
 .robin-category-card__chips {
   display: flex;
   flex-wrap: wrap;
