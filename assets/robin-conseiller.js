@@ -490,7 +490,10 @@
       var lastSlug = lastStep ? state.answers[lastStep] : null;
       var conseilData;
       // En mode product_guide, chercher les textes pg_ en priorité
-      if (state.openingContext === 'product_guide' && lastStep && lastSlug) {
+      if (lastStep && state.aiCache[lastStep]) {
+        // Conseil en cache (texte libre IA, confirmation catégorie, etc.)
+        conseilData = state.aiCache[lastStep];
+      } else if (state.openingContext === 'product_guide' && lastStep && lastSlug) {
         conseilData = conseils['pg_' + lastStep + ':' + lastSlug] || getConseil(lastStep, lastSlug);
       } else {
         conseilData = lastStep && lastSlug ? getConseil(lastStep, lastSlug) : null;
@@ -1635,6 +1638,12 @@
         'lampadaires': 'pas-de-sortie',
         'lampesaposer': 'pas-de-sortie'
       };
+      var catLabels = {
+        'suspensions': 'les suspensions',
+        'appliques': 'les appliques',
+        'lampadaires': 'les lampadaires',
+        'lampesaposer': 'les lampes à poser'
+      };
       var slug = state.contextData.category_slug;
       if (slug && catToSortie[slug]) {
         state.answers.sortie = catToSortie[slug];
@@ -1646,13 +1655,17 @@
       }
       cleanInvisibleAnswers();
       saveState();
+      // Mettre un conseil en cache pour la fiche suivante
+      var catLabel = catLabels[slug] || 'cette catégorie';
+      state.aiCache['_from_category'] = { conseil_text: 'Parfait, vous cherchez parmi ' + catLabel + '. Quelques questions pour affiner.' };
       // Aller à la prochaine question pertinente
       var next = getFirstUnansweredStep();
-      state.history.push('_category_confirm');
+      state.history.push('_from_category');
       showFiche(next);
     } else {
-      // Pas la bonne catégorie → fiche 1
-      state.history.push('_category_confirm');
+      // Pas la bonne catégorie → fiche 1 avec texte adapté
+      state.aiCache['_from_category_no'] = { conseil_text: 'Pas de souci, reprenons depuis le d\u00e9but.' };
+      state.history.push('_from_category_no');
       showFiche(steps[0].id);
     }
   }
