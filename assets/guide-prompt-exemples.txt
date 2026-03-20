@@ -110,7 +110,7 @@ Dans un petit espace, il ne faut pas voir trop grand, sinon on se sent écrasé 
 Une piece de taille moyenne laisse pas mal de liberte. La plupart de mes creations s'y integrent bien, c'est surtout une question de gout et de positionnement.
 
 > Grande (> 20 m²) :
-Une grande piece, c'est l'occasion de marquer un point focal fort avec une belle suspension. Mais souvent un seul luminaire ne suffit pas — je recommande de combiner : une suspension principale et un complement (lampadaire ou applique) pour eviter les zones d'ombre. Un luminaire constitué de plusieurs suspensions en grappe est aussi une idée à considérer !
+Une grande piece, c'est l'occasion de marquer un point focal fort avec une belle suspension. Mais souvent un seul luminaire ne suffit pas — je recommande de combiner : une suspension principale et un complement (lampadaire ou applique) pour eviter les zones d'ombre. Pour un rendu spectaculaire, Robin peut aussi concevoir un luminaire multi-ampoules sur mesure.
 
 Lien : "Voir les luminaires adaptes →"
 
@@ -129,20 +129,14 @@ Un escalier ouvert avec mezzanine ou palier, c'est un vrai espace a part entiere
 
 FICHE 3 — ECLAIRAGE (si taille = grande uniquement)
 ====================================================
-Question : "Pour un grand espace, Robin recommande toujours de multiplier les sources lumineuses."
-Boutons : Je cherche mon eclairage principal / Je veux completer un eclairage existant / Un luminaire multi-ampoules m'interesse / Je verrai plus tard
+Question : "Ce luminaire sera-t-il votre principale source de lumiere ?"
+Boutons : Ce sera la principale source d'eclairage / J'ai d'autres sources lumineuses
 
-> Eclairage principal :
+> Principale source d'eclairage :
 Si c'est le luminaire principal, il faut qu'il eclaire efficacement. Je vous orienterai vers des modeles avec ampoule degagee.
 
-> Completer un eclairage existant :
+> J'ai d'autres sources lumineuses :
 Parfait, si vous avez deja des points lumineux, le nouveau luminaire peut etre plus un element de decoration qu'une source d'eclairage principale. Ca ouvre plus de possibilites sur les formats.
-
-> Multi-ampoules / grappe :
-Excellent choix pour un grand espace ! Une grappe de suspensions permet de couvrir une grande zone tout en creant un effet visuel saisissant. Il va falloir contacter Robin car ces modèles ne sont pas disponible en ligne.
-
-> Je verrai plus tard :
-Pas de souci, on avance et on pourra y revenir.
 
 
 FICHE 4 — SORTIE ELECTRIQUE (apres taille ou eclairage)
@@ -179,7 +173,7 @@ Avec un plafond standard, il faut faire attention a la hauteur du luminaire. Je 
 C'est la hauteur ideale — assez d'espace pour une belle suspension sans contrainte. Vous avez le choix entre tous les formats.
 
 > Haute (> 3 m) :
-Avec de la hauteur, c'est ideal — le luminaire peut prendre toute sa dimension sans gener. Vous pouvez opter pour des formats verticaux plus imposants. Un luminaire sur mesure, comme une grappe de luminaire est une idée à étudier !
+Avec de la hauteur, c'est ideal — le luminaire peut prendre toute sa dimension sans gener. Vous pouvez opter pour des formats verticaux plus imposants. Robin peut aussi concevoir un luminaire multi-ampoules sur mesure.
 
 
 FICHE 6 — TABLE / ILOT (si hauteur = standard ET piece = cuisine, bureau, salon ou chambre)
