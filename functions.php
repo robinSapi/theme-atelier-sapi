@@ -2805,8 +2805,12 @@ function sapi_guide_query_products(array $answers, array $categories) {
     ];
   }
 
-  // Règle B : escalier → exclure format horizontal (préférer boule ou vertical)
-  if ($piece === 'escalier' && in_array('suspensions', $categories)) {
+  // Règle B : exclure format horizontal dans les espaces étroits + hauts
+  $exclude_horizontal = (
+    ($piece === 'escalier') ||
+    ($taille === 'petite' && $hauteur === 'haute')
+  );
+  if ($exclude_horizontal && in_array('suspensions', $categories)) {
     $tax_query[] = [
       'taxonomy' => 'pa_format',
       'field'    => 'slug',
