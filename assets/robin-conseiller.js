@@ -1691,6 +1691,7 @@
     bindEvents();
     updateBandeauChips();
     adaptProductPill();
+    adaptCategoryCard();
   }
 
   /* ═══════════════════════════════════════════
@@ -1715,6 +1716,49 @@
 
     // Mettre à jour bandeau
     updateBandeauChips();
+  }
+
+  function adaptCategoryCard() {
+    var card = document.getElementById('robin-category-card');
+    if (!card) return;
+    if (!hasAnyAnswer()) return; // pas de projet → garder le défaut
+
+    var inner = card.querySelector('.robin-category-card__inner');
+    if (!inner) return;
+
+    // Construire le résumé du projet en chips
+    var visible = getVisibleSteps();
+    var chips = '';
+    for (var i = 0; i < visible.length; i++) {
+      var lbl = state.labels[visible[i]];
+      if (lbl) {
+        chips += '<span class="robin-modal__chip">' + escHtml(lbl) + '</span> ';
+      }
+    }
+
+    var html = '';
+    html += '<span class="robin-modal__badge">';
+    html += '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>';
+    html += ' Mon projet</span>';
+    html += '<div class="robin-category-card__chips">' + chips + '</div>';
+    html += '<div class="robin-category-card__actions">';
+    html += '<a class="robin-fiche__cta-link" href="/nos-creations/?robin_selection=1" onclick="event.stopPropagation();">Voir la s\u00e9lection de Robin &rarr;</a>';
+    html += '<span class="robin-fiche__cta-link" data-robin-context="bandeau" style="cursor:pointer;">Modifier mon projet &rarr;</span>';
+    html += '</div>';
+
+    inner.innerHTML = html;
+    inner.removeAttribute('data-robin-context');
+    inner.removeAttribute('data-robin-data');
+    inner.style.cursor = 'default';
+
+    // Clic sur "Modifier mon projet"
+    var modifyBtn = inner.querySelector('[data-robin-context="bandeau"]');
+    if (modifyBtn) {
+      modifyBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        openModal('bandeau');
+      });
+    }
   }
 
   function adaptProductPill() {

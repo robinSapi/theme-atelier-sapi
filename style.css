@@ -2622,6 +2622,19 @@ button:hover,
   gap: 0.5rem;
 }
 
+.robin-category-card__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: center;
+}
+.robin-category-card__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 /* ═══════════════════════════════════════════════════════════
    FIN ROBIN CONSEILLER V2
 ═══════════════════════════════════════════════════════════ */
