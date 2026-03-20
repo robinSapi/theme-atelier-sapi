@@ -1740,12 +1740,14 @@
     // Remplir le bandeau
     var html = '';
     html += '<div class="robin-contact-project__inner">';
+    html += '<div class="robin-contact-project__header">';
     html += '<span class="robin-modal__badge">';
     html += '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>';
     html += ' Mon projet</span>';
+    html += '<span class="robin-contact-project__close" id="robin-contact-remove" style="cursor:pointer;">&times;</span>';
+    html += '</div>';
     html += '<div class="robin-contact-project__chips">' + chips + '</div>';
     html += '<p class="robin-contact-project__note">Robin recevra ces informations avec votre message.</p>';
-    html += '<span class="robin-contact-project__remove" id="robin-contact-remove" style="cursor:pointer;">Supprimer</span>';
     html += '</div>';
 
     bannerEl.innerHTML = html;

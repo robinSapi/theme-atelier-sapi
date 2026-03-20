@@ -2639,15 +2639,19 @@ button:hover,
   flex-wrap: wrap;
   gap: 0.35rem;
 }
-.robin-contact-project__remove {
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.7rem;
-  color: rgba(var(--color-wood-rgb, 147, 125, 104), 0.5);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  transition: color 0.2s;
+.robin-contact-project__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
-.robin-contact-project__remove:hover {
+.robin-contact-project__close {
+  font-size: 1.2rem;
+  color: rgba(var(--color-wood-rgb, 147, 125, 104), 0.4);
+  transition: color 0.2s;
+  line-height: 1;
+}
+.robin-contact-project__close:hover {
   color: var(--color-dark, #323232);
 }
 .robin-contact-project__note {
