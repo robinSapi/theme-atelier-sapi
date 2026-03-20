@@ -2320,10 +2320,11 @@ function sapi_robin_handle_recommendation($answers, $ai_allowed) {
   $result = sapi_guide_query_products($answers, $categories);
   $products = isset($result['products']) ? $result['products'] : [];
 
-  // Sélectionner 3-4 produits
+  // Sélectionner 3-4 produits avec priorisation format selon contexte
   $show_sur_mesure = !empty($answers['eclairage']) && $answers['eclairage'] === 'grappe';
   $pick_count = $show_sur_mesure ? 3 : 4;
-  $picked = sapi_guide_pick_four($products, $pick_count);
+  $format_priority = sapi_guide_get_format_priority($answers);
+  $picked = sapi_guide_pick_four($products, $pick_count, $show_sur_mesure, $format_priority);
 
   if (empty($picked)) {
     wp_send_json_success([
@@ -3183,9 +3184,45 @@ function sapi_guide_find_product_by_id(array $products, $id) {
  * Diversify mode (grappe): one product per format (horizontal, boule, vertical…),
  * prioritized by total_sales within each format.
  */
-function sapi_guide_pick_four(array $products, $count = 4, $diversify_format = false) {
+/**
+ * Détermine l'ordre de priorité des formats selon le contexte.
+ * Petit espace haut / entrée / escalier → vertical d'abord, puis boule.
+ */
+function sapi_guide_get_format_priority(array $answers) {
+  $piece   = isset($answers['piece'])   ? $answers['piece']   : '';
+  $taille  = isset($answers['taille'])  ? $answers['taille']  : '';
+  $hauteur = isset($answers['hauteur']) ? $answers['hauteur'] : '';
+
+  $is_narrow = in_array($piece, ['entree', 'escalier'], true) || $taille === 'petite';
+  $is_high   = in_array($hauteur, ['haute', 'confortable'], true);
+
+  if ($is_narrow && $is_high) {
+    return ['vertical', 'boule', 'horizontal'];
+  }
+
+  return []; // pas de priorité particulière
+}
+
+function sapi_guide_pick_four(array $products, $count = 4, $diversify_format = false, $format_priority = []) {
   if (count($products) <= $count) {
     return $products;
+  }
+
+  // Si une priorité de format est définie, trier les produits en amont
+  if (!empty($format_priority)) {
+    usort($products, function ($a, $b) use ($format_priority) {
+      $fa = !empty($a['format']) ? strtolower($a['format']) : '';
+      $fb = !empty($b['format']) ? strtolower($b['format']) : '';
+      $ia = array_search($fa, $format_priority);
+      $ib = array_search($fb, $format_priority);
+      if ($ia === false) $ia = 999;
+      if ($ib === false) $ib = 999;
+      if ($ia !== $ib) return $ia - $ib;
+      // À priorité égale, trier par ventes
+      return ($b['total_sales'] ?? 0) - ($a['total_sales'] ?? 0);
+    });
+    // Prendre les $count premiers (déjà triés par format prioritaire + ventes)
+    return array_slice($products, 0, $count);
   }
 
   // Grappe: pick one product per format, best seller within each
