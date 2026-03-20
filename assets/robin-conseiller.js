@@ -221,11 +221,11 @@
   }
 
   /* ═══════════════════════════════════════════
-     Lien sortant dynamique vers /nos-creations/
+     Lien sortant dynamique vers /mes-creations/
   ═══════════════════════════════════════════ */
   function buildShopLink() {
     return {
-      url: '/nos-creations/?robin_selection=1',
+      url: '/mes-creations/?robin_selection=1',
       label: 'Voir les mod\u00e8les filtr\u00e9s pour votre projet'
     };
   }
@@ -717,7 +717,7 @@
     html += '<div class="robin-fiche__bottom" id="robin-fiche-bottom" style="opacity:0;">';
     html += '<div class="robin-fiche__choices robin-fiche__choices--reco">';
     html += '<button class="robin-fiche__choice robin-fiche__choice--primary" id="robin-reco-conseil">Voir le mod\u00e8le que Robin me conseille</button>';
-    html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/nos-creations/?robin_selection=1">Voir tous les mod\u00e8les adapt\u00e9s \u00e0 mon projet</a>';
+    html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/mes-creations/?robin_selection=1">Voir tous les mod\u00e8les adapt\u00e9s \u00e0 mon projet</a>';
     html += '</div>';
     html += '</div>';
 
@@ -817,7 +817,7 @@
           '<div class="robin-fiche__conseil">' +
           renderConseil({ conseil_text: 'D\u00e9sol\u00e9, je n\'ai pas pu analyser votre projet. Rendez-vous sur les cr\u00e9ations de Robin pour explorer le catalogue.' }, false) +
           '</div>' +
-          '<div class="robin-fiche__cta-links"><a class="robin-fiche__cta-link" href="/nos-creations/?robin_selection=1">Voir les cr\u00e9ations &rarr;</a></div>' +
+          '<div class="robin-fiche__cta-links"><a class="robin-fiche__cta-link" href="/mes-creations/?robin_selection=1">Voir les cr\u00e9ations &rarr;</a></div>' +
           '</div>';
       }
 
@@ -872,7 +872,7 @@
 
     // CTA secondaire
     html += '<div class="robin-sur-mesure__secondary robin-reco__reveal" data-reveal="5">';
-    html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/nos-creations/?robin_selection=1">Voir les mod\u00e8les existants quand m\u00eame</a>';
+    html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/mes-creations/?robin_selection=1">Voir les mod\u00e8les existants quand m\u00eame</a>';
     html += '</div>';
 
     html += '</div>';
@@ -963,7 +963,7 @@
 
     // Boutons finaux
     html += '<div class="robin-reco__actions robin-reco__reveal" data-reveal="6">';
-    html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/nos-creations/?robin_selection=1">Voir les autres mod\u00e8les adapt\u00e9s</a>';
+    html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/mes-creations/?robin_selection=1">Voir les autres mod\u00e8les adapt\u00e9s</a>';
     html += '<a class="robin-fiche__choice robin-fiche__choice--link" href="/contact/">Contacter Robin</a>';
     html += '</div>';
 
@@ -1312,7 +1312,7 @@
     // Fallback si l'IA n'a pas retourné de liens
     if (linkBtns.length === 0) {
       var showSurMesureFT = state.answers.taille === 'grande' || state.answers.hauteur === 'haute';
-      linkBtns.push({ label: 'Voir les mod\u00e8les filtr\u00e9s pour votre projet', url: '/nos-creations/?robin_selection=1' });
+      linkBtns.push({ label: 'Voir les mod\u00e8les filtr\u00e9s pour votre projet', url: '/mes-creations/?robin_selection=1' });
       if (showSurMesureFT) {
         linkBtns.push({ label: 'Imaginer un mod\u00e8le sur mesure', url: '/sur-mesure/' });
       } else {
@@ -1846,7 +1846,7 @@
     html += ' Mon projet</span>';
     html += '<div class="robin-category-card__chips">' + chips + '</div>';
     html += '<div class="robin-category-card__actions">';
-    html += '<a class="robin-fiche__cta-link" href="/nos-creations/?robin_selection=1" onclick="event.stopPropagation();">Voir la s\u00e9lection de Robin &rarr;</a>';
+    html += '<a class="robin-fiche__cta-link" href="/mes-creations/?robin_selection=1" onclick="event.stopPropagation();">Voir la s\u00e9lection de Robin &rarr;</a>';
     html += '<span class="robin-fiche__cta-link" data-robin-context="bandeau" style="cursor:pointer;">Modifier mon projet &rarr;</span>';
     html += '</div>';
 

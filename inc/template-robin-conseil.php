@@ -25,7 +25,7 @@ function sapi_robin_conseil_card( $prefix = 'conseils' ) {
       <h3 class="robin-conseil__products-title">S&eacute;lection pour votre projet</h3>
     </div>
     <div class="robin-conseil__actions">
-      <a href="/nos-creations/?filtre=ma-selection" class="robin-conseil__selection-btn" id="<?php echo $prefix; ?>-selection-btn" style="display:none">Voir la s&eacute;lection personnalis&eacute;e</a>
+      <a href="/mes-creations/?filtre=ma-selection" class="robin-conseil__selection-btn" id="<?php echo $prefix; ?>-selection-btn" style="display:none">Voir la s&eacute;lection personnalis&eacute;e</a>
       <button type="button" class="robin-conseil__contact-btn" id="<?php echo $prefix; ?>-contact-btn">Contacter Robin</button>
     </div>
     <div class="robin-conseil__contact-form" id="<?php echo $prefix; ?>-contact-form" style="display:none">

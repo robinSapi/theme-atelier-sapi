@@ -130,7 +130,7 @@ defined('ABSPATH') || exit;
 
   <!-- CTA retour boutique -->
   <div class="thankyou-cta">
-    <a href="<?php echo esc_url(home_url('/nos-creations/')); ?>" class="thankyou-cta-btn">
+    <a href="<?php echo esc_url(home_url('/mes-creations/')); ?>" class="thankyou-cta-btn">
       Continuer à explorer les créations
     </a>
   </div>

@@ -95,7 +95,7 @@ function sapi_fallback_primary_menu() {
   <nav class="primary-nav" aria-label="<?php esc_attr_e('Menu principal', 'theme-sapi-maison'); ?>">
     <ul class="nav-menu">
       <li class="menu-item menu-item-has-children">
-        <a href="<?php echo esc_url(home_url('/nos-creations/')); ?>">Mes créations</a>
+        <a href="<?php echo esc_url(home_url('/mes-creations/')); ?>">Mes créations</a>
         <ul class="sub-menu">
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/suspensions/')); ?>">Suspensions</a></li>
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampadaires/')); ?>">Lampadaires</a></li>
@@ -118,7 +118,7 @@ function sapi_fallback_mobile_menu() {
     <ul class="mobile-nav-menu" id="mobile-nav-menu">
       <li class="menu-item menu-item-home"><a href="<?php echo esc_url(home_url('/')); ?>">Accueil</a></li>
       <li class="menu-item menu-item-has-children">
-        <a href="<?php echo esc_url(home_url('/nos-creations/')); ?>">Mes créations</a>
+        <a href="<?php echo esc_url(home_url('/mes-creations/')); ?>">Mes créations</a>
         <ul class="sub-menu">
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/suspensions/')); ?>">Suspensions</a></li>
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampadaires/')); ?>">Lampadaires</a></li>
@@ -136,7 +136,7 @@ function sapi_fallback_mobile_menu() {
 }
 
 function sapi_fallback_footer_nav() {
-  echo '<a href="' . esc_url(home_url('/nos-creations/')) . '">Mes créations</a>';
+  echo '<a href="' . esc_url(home_url('/mes-creations/')) . '">Mes créations</a>';
   echo '<a href="' . esc_url(home_url('/lumiere-dartisan/')) . '">L\'artisan</a>';
   echo '<a href="' . esc_url(home_url('/conseils-eclaires/')) . '">Conseils</a>';
   echo '<a href="' . esc_url(home_url('/contact/')) . '">Contact</a>';
@@ -976,7 +976,7 @@ function sapi_maison_breadcrumbs() {
   if (is_product()) {
     $breadcrumbs[] = [
       'name' => 'Mes créations',
-      'url' => home_url('/nos-creations/')
+      'url' => home_url('/mes-creations/')
     ];
     $terms = get_the_terms(get_the_ID(), 'product_cat');
     if ($terms && !is_wp_error($terms)) {
@@ -993,7 +993,7 @@ function sapi_maison_breadcrumbs() {
   } elseif (is_product_category()) {
     $breadcrumbs[] = [
       'name' => 'Mes créations',
-      'url' => home_url('/nos-creations/')
+      'url' => home_url('/mes-creations/')
     ];
     $term = get_queried_object();
     $breadcrumbs[] = [
@@ -2262,7 +2262,7 @@ function sapi_robin_validate_response($result) {
   }
 
   // URLs valides pour les boutons liens
-  $valid_urls = ['/contact/', '/nos-creations/', '/nos-creations/?robin_selection=1', '/sur-mesure/',
+  $valid_urls = ['/contact/', '/mes-creations/', '/mes-creations/?robin_selection=1', '/sur-mesure/',
     '/categorie-produit/suspensions/', '/categorie-produit/appliques/',
     '/categorie-produit/lampadaires/', '/categorie-produit/lampes-a-poser/'];
 
@@ -2674,7 +2674,7 @@ function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $con
     $prompt .= "\n";
     $prompt .= "{\n";
     $prompt .= '  "conseil_text": "Ta réponse personnalisée (2-5 phrases, style Robin)",' . "\n";
-    $prompt .= '  "link_url": "/nos-creations/suspensions/" ou null,' . "\n";
+    $prompt .= '  "link_url": "/mes-creations/suspensions/" ou null,' . "\n";
     $prompt .= '  "link_label": "Voir les suspensions" ou null,' . "\n";
     $prompt .= '  "answered_steps": { "piece": "cuisine", "taille": "petite" } ou {} si rien déduit,' . "\n";
     $prompt .= '  "suggested_buttons": [' . "\n";
@@ -2703,7 +2703,7 @@ function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $con
     $prompt .= "  - Bouton lien (ouvre une page) : { \"label\": \"...\", \"url\": \"/chemin/\" }\n";
     $prompt .= "  - Bouton questionnaire (valide une étape) : { \"label\": \"...\", \"slug\": \"...\", \"step_id\": \"...\" }\n";
     $prompt .= "  - Bouton conversation (continue la discussion) : { \"label\": \"...\" } — le label est renvoyé comme message\n";
-    $prompt .= "  URLs valides : /contact/, /nos-creations/?robin_selection=1, /sur-mesure/\n";
+    $prompt .= "  URLs valides : /contact/, /mes-creations/?robin_selection=1, /sur-mesure/\n";
     $prompt .= "- BOUTONS PAR DÉFAUT : si tu n'as pas de meilleure idée, utilise ces boutons liens :\n";
 
     // Injecter les boutons par défaut selon le contexte
@@ -2711,7 +2711,7 @@ function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $con
     $hauteur = isset($answers['hauteur']) ? $answers['hauteur'] : '';
     $show_sur_mesure_prompt = ($taille === 'grande' || $hauteur === 'haute');
 
-    $prompt .= '  { "label": "Voir les modèles filtrés pour votre projet", "url": "/nos-creations/?robin_selection=1" }' . "\n";
+    $prompt .= '  { "label": "Voir les modèles filtrés pour votre projet", "url": "/mes-creations/?robin_selection=1" }' . "\n";
     if ($show_sur_mesure_prompt) {
       $prompt .= '  { "label": "Imaginer un modèle sur mesure", "url": "/sur-mesure/" }' . "\n";
     } else {
@@ -2722,7 +2722,7 @@ function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $con
   } else {
     $prompt .= "{\n";
     $prompt .= '  "conseil_text": "Ton conseil personnalisé pour cette étape (2-4 phrases, style citation Robin)",' . "\n";
-    $prompt .= '  "link_url": "/nos-creations/suspensions/" ou null si pas pertinent,' . "\n";
+    $prompt .= '  "link_url": "/mes-creations/suspensions/" ou null si pas pertinent,' . "\n";
     $prompt .= '  "link_label": "Voir les suspensions" ou null' . "\n";
     $prompt .= "}\n\n";
   }

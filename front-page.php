@@ -183,7 +183,7 @@ if ($gc_query->have_posts()) {
 }
 
 // Room picker now opens Mon Projet banner instead of guide-luminaire page
-$creations_url = home_url('/nos-creations/');
+$creations_url = home_url('/mes-creations/');
 
 // Room choices for mini-questionnaire "Pour quelle pièce ?"
 $room_choices = [
@@ -520,7 +520,7 @@ foreach ($collection_slugs as $col) {
     </a>
 
     <!-- CTA Card -->
-    <a href="<?php echo home_url('/nos-creations/'); ?>" class="bento-card bento-cta">
+    <a href="<?php echo home_url('/mes-creations/'); ?>" class="bento-card bento-cta">
       <h3 class="cta-title">Toutes les créations</h3>
       <span class="cta-button">
         <span>Explorer</span>
