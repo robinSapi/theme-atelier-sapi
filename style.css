@@ -2374,12 +2374,11 @@ button:hover,
   color: var(--color-wood, #937D68);
 }
 .robin-reco__chip--label {
-  background: var(--color-wood, #937D68);
-  color: #fff;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-size: 0.6rem;
+  background: none;
+  padding: 0;
+  color: var(--color-wood, #937D68);
+  font-weight: 600;
+  font-size: 0.7rem;
 }
 .robin-reco__reason {
   font-family: var(--font-body, 'Montserrat', sans-serif);

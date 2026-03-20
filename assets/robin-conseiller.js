@@ -738,10 +738,10 @@
         var p = products[i];
         html += '<div class="robin-reco__slide" data-index="' + i + '">';
 
-        // Photo plein bord — apparaît en premier
-        html += '<div class="robin-reco__photo robin-reco__reveal" data-reveal="1">';
+        // Photo plein bord cliquable — apparaît en premier
+        html += '<a href="' + escAttr(p.permalink) + '" class="robin-reco__photo robin-reco__reveal" data-reveal="1">';
         html += '<img src="' + escAttr(p.ambiance || p.image) + '" alt="' + escAttr(p.title) + '">';
-        html += '</div>';
+        html += '</a>';
 
         // Infos sous la photo — styles identiques aux cards produit du site
         html += '<div class="robin-reco__info">';
@@ -756,7 +756,7 @@
         var hasChips = p.variation_label || p.size_label;
         if (hasChips) {
           html += '<div class="robin-reco__chips robin-reco__reveal" data-reveal="2">';
-          html += '<span class="robin-reco__chip robin-reco__chip--label">Ma recommandation</span>';
+          html += '<span class="robin-reco__chip robin-reco__chip--label">Ma recommandation :</span>';
           if (p.size_label) {
             html += '<span class="robin-reco__chip">Taille : ' + escHtml(p.size_label) + '</span>';
           }
