@@ -336,7 +336,7 @@ add_action('woocommerce_after_cart', function () {
           </svg>
           <div class="reassurance-text">
             <strong><?php esc_html_e('Fabrication < 5 jours', 'theme-sapi-maison'); ?></strong>
-            <span><?php esc_html_e('Fait main dans notre atelier lyonnais', 'theme-sapi-maison'); ?></span>
+            <span><?php esc_html_e('Fait main dans l'atelier lyonnais de Robin', 'theme-sapi-maison'); ?></span>
           </div>
         </div>
         <div class="reassurance-item">
@@ -612,9 +612,9 @@ add_action('wp_footer', function () {
           '<div class="empty-cart-content">' +
             '<div class="empty-cart-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div>' +
             '<h1 class="empty-cart-title">Votre panier est vide... pour l\u2019instant\u00a0!</h1>' +
-            '<p class="empty-cart-text">Nos luminaires n\u2019attendent que vous. Laissez-vous inspirer par nos cr\u00e9ations artisanales.</p>' +
+            '<p class="empty-cart-text">Les luminaires de Robin n\u2019attendent que vous. Laissez-vous inspirer par ses cr\u00e9ations artisanales.</p>' +
           '</div>' +
-          '<div class="empty-cart-cta"><a href="' + shopUrl + '" class="empty-cart-btn">D\u00e9couvrir nos cr\u00e9ations</a></div>' +
+          '<div class="empty-cart-cta"><a href="' + shopUrl + '" class="empty-cart-btn">D\u00e9couvrir les cr\u00e9ations</a></div>' +
           productsHTML +
         '</section>';
     }
@@ -663,7 +663,7 @@ add_filter('render_block', function ($content, $block) {
             </svg>
             <div class="reassurance-text">
               <strong><?php esc_html_e('Fabrication < 5 jours', 'theme-sapi-maison'); ?></strong>
-              <span><?php esc_html_e('Fait main dans notre atelier lyonnais', 'theme-sapi-maison'); ?></span>
+              <span><?php esc_html_e('Fait main dans l'atelier lyonnais de Robin', 'theme-sapi-maison'); ?></span>
             </div>
           </div>
           <div class="reassurance-item">
@@ -941,8 +941,8 @@ function sapi_maison_meta_description() {
     $term = get_queried_object();
     if ($term) {
       $descs = [
-        'suspension' => 'Découvrez nos suspensions artisanales en bois. Luminaires suspendus design, découpés au laser et assemblés à la main dans notre atelier lyonnais.',
-        'lampadaire' => 'Nos lampadaires en bois sculptés transforment vos espaces. Éclairage d\'ambiance unique, fabriqués en France à Lyon.',
+        'suspension' => 'Découvrez les suspensions artisanales en bois de l\'Atelier Sâpi. Luminaires suspendus design, découpés au laser et assemblés à la main à Lyon.',
+        'lampadaire' => 'Les lampadaires en bois sculptés de Robin transforment vos espaces. Éclairage d\'ambiance unique, fabriqués en France à Lyon.',
         'applique' => 'Appliques murales artisanales en bois. Créez des jeux de lumière poétiques sur vos murs. Chaque pièce est unique.',
         'lampe-a-poser' => 'Lampes à poser portables en bois. Déplacez-les où vous voulez pour créer une bulle de lumière intime.',
         'accessoires' => 'Accessoires pour luminaires artisanaux. Ampoules, câbles textile et pièces détachées pour vos créations Atelier Sâpi.',
@@ -1928,7 +1928,7 @@ function sapi_ajax_guide_refine() {
   if (!sapi_guide_check_rate_limit()) {
     wp_send_json_success([
       'action'         => 'contact',
-      'ai_text'        => 'Je ne peux plus affiner ma recherche pour le moment. Laissez vos coordonnées et Robin vous répondra personnellement.',
+      'ai_text'        => 'Je ne peux pas affiner davantage pour le moment. Laissez vos coordonnées et Robin vous répondra personnellement.',
       'conversation'   => [],
     ]);
     return;
@@ -2188,7 +2188,7 @@ function sapi_ajax_robin_conseil_step() {
   // 5. Si pas d'IA (rate limit), renvoyer un fallback
   if (!$ai_allowed) {
     wp_send_json_success([
-      'conseil_text' => 'Robin est très sollicité en ce moment. Pour une réponse rapide, contactez-le directement.',
+      'conseil_text' => 'Le service est temporairement indisponible. Pour une réponse rapide, contactez Robin directement.',
       'link_url'     => null,
       'link_label'   => null,
       'suggested_buttons' => [
@@ -2229,7 +2229,7 @@ function sapi_ajax_robin_conseil_step() {
 
   if (!$result || empty($result['conseil_text'])) {
     wp_send_json_success([
-      'conseil_text' => 'Je ne suis pas en mesure de répondre à cette question. Le mieux est d\'en parler directement avec Robin.',
+      'conseil_text' => 'Je ne peux pas répondre à cette question. Le mieux est d\'en parler directement avec Robin.',
       'link_url'     => null,
       'link_label'   => null,
       'suggested_buttons' => [
@@ -2328,7 +2328,7 @@ function sapi_robin_handle_recommendation($answers, $ai_allowed) {
 
   if (empty($picked)) {
     wp_send_json_success([
-      'conseil_text' => 'Je n\'ai pas trouvé de luminaire qui corresponde exactement à vos critères. Le mieux est d\'explorer notre catalogue ou de contacter Robin directement.',
+      'conseil_text' => 'Je n\'ai pas trouvé de luminaire qui corresponde exactement à vos critères. Explorez le catalogue ou contactez Robin directement.',
       'products' => [],
     ]);
     return;
@@ -2383,7 +2383,7 @@ function sapi_robin_handle_recommendation($answers, $ai_allowed) {
 
   // Fallback sans IA
   wp_send_json_success([
-    'conseil_text' => 'Voici les luminaires qui correspondent le mieux à votre projet. Explorez-les et n\'hésitez pas à contacter Robin pour en discuter.',
+    'conseil_text' => 'Voici les luminaires qui correspondent le mieux à votre projet. Contactez Robin si vous souhaitez en discuter.',
     'products'     => $front_products,
   ]);
 }
@@ -2488,7 +2488,7 @@ function sapi_robin_call_recommendation($products, $answers) {
     if (preg_match('/"conseil_text"\s*:\s*"((?:[^"\\\\]|\\\\.)*)"/s', $text, $m)) {
       return ['conseil_text' => stripslashes($m[1]), 'products' => []];
     }
-    return ['conseil_text' => 'Robin vous recommande d\'explorer les luminaires sélectionnés ci-dessous.', 'products' => []];
+    return ['conseil_text' => 'Explorez les luminaires sélectionnés ci-dessous, ou contactez Robin pour un conseil personnalisé.', 'products' => []];
   }
 
   return $parsed;
@@ -2644,7 +2644,7 @@ function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $con
   $prompt .= "- Pas de guillemets « » dans le texte (ils sont ajoutés côté front).\n";
   $prompt .= "- Les labels des boutons : première lettre majuscule, reste en minuscule. Exemple : \"Voir les suspensions\", \"Contacter Robin\".\n";
   $prompt .= "- CRITIQUE : ta réponse doit être UNIQUEMENT du JSON valide. Pas de texte avant, pas de texte après, pas de commentaire, pas d'analyse. Juste le JSON.\n";
-  $prompt .= "- Tu es Robin qui parle AU CLIENT, pas une IA qui analyse. Ne dis jamais 'le client', 'mon analyse', 'voici ma réflexion'. Tu PARLES directement au visiteur.\n";
+  $prompt .= "- Tu es l'assistant de Robin, l'artisan de l'Atelier Sâpi. Tu parles directement au visiteur, naturellement, sans prétendre être Robin. Tu connais bien ses créations et tu guides le client. Ne dis jamais 'le client', 'mon analyse', 'voici ma réflexion'. Quand tu parles de Robin ou de son travail, utilise la 3e personne (\"Robin\", \"son atelier\"). Pour tes recommandations, utilise le \"je\" naturellement (\"je vous recommande\").\n";
 
   return $prompt;
 }
@@ -4005,7 +4005,7 @@ function sapi_handle_surmesure_form() {
     return ['submitted' => true, 'success' => true, 'error' => ''];
   }
 
-  return ['submitted' => true, 'success' => false, 'error' => "Erreur lors de l'envoi. Veuillez réessayer ou nous contacter directement par email."];
+  return ['submitted' => true, 'success' => false, 'error' => "Erreur lors de l'envoi. Veuillez réessayer ou contacter Robin directement par email."];
 }
 
 /*

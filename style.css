@@ -7566,15 +7566,17 @@ li.carousel-editorial-slide,
   border-bottom-color: var(--color-orange, #E35B24);
 }
 
-.robin-conseil__signature {
+.robin-conseil__transparency {
   display: block;
   text-align: right;
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.75rem;
+  font-weight: 400;
   font-style: italic;
-  letter-spacing: 0.03em;
-  color: var(--color-orange, #E35B24);
+  letter-spacing: 0.02em;
+  color: var(--color-wood, #937D68);
+  opacity: 0.7;
+  margin-top: 0.5rem;
 }
 
 /* Actions */

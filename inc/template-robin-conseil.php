@@ -19,13 +19,13 @@ function sapi_robin_conseil_card( $prefix = 'conseils' ) {
     <div class="robin-conseil__body">
       <div class="robin-conseil__quote">&ldquo;</div>
       <p class="robin-conseil__text" id="<?php echo $prefix; ?>-perso-text"></p>
-      <span class="robin-conseil__signature">&mdash; Robin, votre artisan</span>
+      <span class="robin-conseil__transparency">Con&ccedil;u par Robin pour vous accompagner dans vos choix.</span>
     </div>
     <div class="robin-conseil__products" id="<?php echo $prefix; ?>-products-grid">
-      <h3 class="robin-conseil__products-title">Ma s&eacute;lection pour votre projet</h3>
+      <h3 class="robin-conseil__products-title">S&eacute;lection pour votre projet</h3>
     </div>
     <div class="robin-conseil__actions">
-      <a href="/nos-creations/?filtre=ma-selection" class="robin-conseil__selection-btn" id="<?php echo $prefix; ?>-selection-btn" style="display:none">Voir ma s&eacute;lection personnalis&eacute;e</a>
+      <a href="/nos-creations/?filtre=ma-selection" class="robin-conseil__selection-btn" id="<?php echo $prefix; ?>-selection-btn" style="display:none">Voir la s&eacute;lection personnalis&eacute;e</a>
       <button type="button" class="robin-conseil__contact-btn" id="<?php echo $prefix; ?>-contact-btn">Contacter Robin</button>
     </div>
     <div class="robin-conseil__contact-form" id="<?php echo $prefix; ?>-contact-form" style="display:none">

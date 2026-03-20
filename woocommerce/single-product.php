@@ -313,7 +313,7 @@ get_header();
         <?php if (!$is_accessoire) : ?>
         <!-- Micro-copy artisan -->
         <p class="product-artisan-note">
-          <em>Chaque pièce est découpée au laser puis assemblée à la main dans notre atelier lyonnais.</em>
+          <em>Chaque pièce est découpée au laser puis assemblée à la main à l'Atelier Sâpi, à Lyon.</em>
         </p>
         <?php endif; ?>
 
@@ -698,7 +698,7 @@ get_header();
       <details class="faq-item">
         <summary><span class="faq-question">Quelle ampoule choisir ?</span><span class="faq-chevron"></span></summary>
         <div class="faq-answer">
-          <p>Avec chaque modèle, nous vous recommandons une ampoule adaptée. Nous l'avons soigneusement choisie, et elle est disponible à l'achat comme accessoire.</p>
+          <p>Avec chaque modèle, Robin recommande une ampoule adaptée, soigneusement choisie et disponible à l'achat comme accessoire.</p>
           <ul>
             <li>Puissance : 4-6W (équivalent 40-60W)</li>
             <li>Température : blanc chaud (2700K)</li>
@@ -709,13 +709,13 @@ get_header();
       <details class="faq-item">
         <summary><span class="faq-question">Comment se passe le montage ?</span><span class="faq-chevron"></span></summary>
         <div class="faq-answer">
-          <p>Nos luminaires sont livrés pré-assemblés ou avec un guide d'assemblage clair et illustré. Le montage se fait en quelques minutes, sans outil spécial.</p>
+          <p>Les luminaires sont livrés pré-assemblés ou avec un guide d'assemblage clair et illustré. Le montage se fait en quelques minutes, sans outil spécial.</p>
         </div>
       </details>
       <details class="faq-item">
         <summary><span class="faq-question">Puis-je personnaliser mon luminaire ?</span><span class="faq-chevron"></span></summary>
         <div class="faq-answer">
-          <p>Absolument ! Contactez-nous pour discuter de vos envies : dimensions sur-mesure, gravures personnalisées, finitions spéciales... Nous étudions chaque demande avec plaisir.</p>
+          <p>Absolument ! Contactez Robin pour discuter de vos envies : dimensions sur-mesure, gravures personnalisées, finitions spéciales... Chaque demande est étudiée avec plaisir.</p>
         </div>
       </details>
       <details class="faq-item">
@@ -734,7 +734,7 @@ get_header();
   <section class="product-testimonials">
     <div class="testimonials-header">
       <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
-      <h2>Ce qu'en pensent nos clients</h2>
+      <h2>Ce qu'en pensent les clients</h2>
     </div>
 
     <?php
@@ -840,12 +840,12 @@ get_header();
       <div class="product-atelier-content">
         <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
         <h2>Fabriqué avec passion</h2>
-        <p class="atelier-intro">Chaque luminaire est conçu et fabriqué à la main par Robin dans notre atelier lyonnais.</p>
+        <p class="atelier-intro">Chaque luminaire est conçu et fabriqué à la main par Robin dans son atelier lyonnais.</p>
         <blockquote class="atelier-quote">
-          « Je crée chaque pièce comme si elle allait éclairer ma propre maison. La précision de la découpe laser combinée au savoir-faire artisanal, c'est ce qui rend nos luminaires uniques. »
+          « Je crée chaque pièce comme si elle allait éclairer ma propre maison. La précision de la découpe laser combinée au savoir-faire artisanal, c'est ce qui rend chaque luminaire unique. »
         </blockquote>
         <p class="atelier-signature">Robin, créateur à l'Atelier Sâpi</p>
-        <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="button button-outline">Découvrir notre histoire</a>
+        <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="button button-outline">Découvrir l'histoire de Robin</a>
       </div>
     </div>
   </section>
@@ -887,7 +887,7 @@ get_header();
     </div>
     <div class="related-cta">
       <a href="<?php echo esc_url(get_permalink(wc_get_page_id('shop'))); ?>" class="related-cta-btn">
-        Voir toutes nos cr&eacute;ations
+        Voir toutes les cr&eacute;ations
       </a>
     </div>
   </section>

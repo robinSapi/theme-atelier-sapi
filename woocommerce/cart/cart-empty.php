@@ -24,7 +24,7 @@ $viewed_products = array_slice($viewed_products, 0, 3);
       </svg>
     </div>
     <h1 class="empty-cart-title">Votre panier est vide... pour l'instant&nbsp;!</h1>
-    <p class="empty-cart-text">Nos luminaires n'attendent que vous. Laissez-vous inspirer par nos créations artisanales.</p>
+    <p class="empty-cart-text">Les luminaires de Robin n'attendent que vous. Laissez-vous inspirer par ses créations artisanales.</p>
   </div>
 
   <?php if (!empty($viewed_products)) : ?>
@@ -56,6 +56,6 @@ $viewed_products = array_slice($viewed_products, 0, 3);
   <?php endif; ?>
 
   <div class="empty-cart-cta">
-    <a href="<?php echo esc_url(wc_get_page_permalink('shop')); ?>" class="empty-cart-btn">Découvrir nos créations</a>
+    <a href="<?php echo esc_url(wc_get_page_permalink('shop')); ?>" class="empty-cart-btn">Découvrir les créations</a>
   </div>
 </section>

@@ -32,7 +32,7 @@ get_header();
       <span class="section-number">01</span>
       <h2>Votre luminaire, votre histoire</h2>
       <p>Chaque intérieur est unique. Parfois, aucun luminaire existant ne correspond exactement à ce que vous imaginez : une dimension particulière, une essence de bois précise, une forme qui épouse votre espace.</p>
-      <p>C'est pour cela que je propose la création sur mesure. Ensemble, nous partons de votre vision pour aboutir à un luminaire artisanal qui vous ressemble, fabriqué à la main dans mon atelier lyonnais.</p>
+      <p>C'est pour cela que je propose la création sur mesure. On part de votre vision pour aboutir à un luminaire artisanal qui vous ressemble, fabriqué à la main dans mon atelier lyonnais.</p>
     </div>
     <div class="surmesure-intro-image">
       <img src="<?php echo esc_url(home_url('/wp-content/uploads/')); ?>2025/05/Robin-Sapi-A.jpg" alt="Robin dans l'atelier Sâpi" loading="lazy">
@@ -90,7 +90,7 @@ get_header();
 <section class="surmesure-realisations">
   <div class="surmesure-realisations-header">
     <span class="section-number">02</span>
-    <h2>Nos réalisations sur mesure</h2>
+    <h2>Réalisations sur mesure</h2>
     <p>Chaque projet est unique, voici quelques exemples de créations personnalisées.</p>
   </div>
 
@@ -386,7 +386,7 @@ get_header();
 
   <?php else : ?>
     <div class="surmesure-empty">
-      <p>Nos premières réalisations sur mesure arrivent bientôt !</p>
+      <p>Les premières réalisations sur mesure arrivent bientôt !</p>
       <p>En attendant, n'hésitez pas à nous décrire votre projet ci-dessous.</p>
     </div>
   <?php endif; ?>

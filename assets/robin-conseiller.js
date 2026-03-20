@@ -490,7 +490,7 @@
       var pgIntro = conseils['pg_intro'];
       html += renderConseil(pgIntro || { conseil_text: 'Quelques questions pour vous aider à choisir.' }, true);
     } else if (isFirstFiche) {
-      html += renderConseil({ conseil_text: 'Chaque luminaire que je cr\u00e9e est une pi\u00e8ce unique, fa\u00e7onn\u00e9e \u00e0 la main dans mon atelier. Pour vous orienter au mieux, dites-moi dans quelle pi\u00e8ce vous imaginez votre futur luminaire.' }, true);
+      html += renderConseil({ conseil_text: 'Chaque luminaire est une pi\u00e8ce unique, fa\u00e7onn\u00e9e \u00e0 la main par Robin dans son atelier. Pour vous orienter au mieux, dites-moi dans quelle pi\u00e8ce vous imaginez votre futur luminaire.' }, true);
     } else {
       var lastStep = state.history.length > 0 ? state.history[state.history.length - 1] : null;
       var lastSlug = lastStep ? state.answers[lastStep] : null;
@@ -585,10 +585,8 @@
       }
       html += '<span class="robin-word robin-word--quote" style="opacity:0;">\u00A0\u00BB</span>';
       html += '</p>';
-      html += '<span class="robin-fiche__signature" style="opacity:0;">&mdash; Robin</span>';
     } else {
       html += '<p class="robin-fiche__citation-text">' + escHtml(data.conseil_text) + '</p>';
-      html += '<span class="robin-fiche__signature">&mdash; Robin</span>';
     }
     html += '</div>';
     return html;
@@ -712,7 +710,7 @@
     // Fiche "merci" — 2 boutons
     var html = '<div class="robin-fiche__top">';
     html += '<div class="robin-fiche__conseil">';
-    html += renderConseil({ conseil_text: 'C\'est not\u00e9 ! Avec toutes ces infos, nous allons pouvoir vous proposer les meilleurs mod\u00e8les et vous aider \u00e0 choisir.' }, true);
+    html += renderConseil({ conseil_text: 'C\'est not\u00e9 ! Avec toutes ces infos, je vais pouvoir vous proposer les meilleurs mod\u00e8les et vous aider \u00e0 choisir.' }, true);
     html += '</div>';
     html += '</div>';
 
@@ -815,9 +813,9 @@
       } else {
         body.innerHTML = '<div class="robin-reco">' +
           '<div class="robin-fiche__conseil">' +
-          renderConseil({ conseil_text: 'D\u00e9sol\u00e9, je n\'ai pas pu analyser votre projet. Rendez-vous sur nos cr\u00e9ations pour explorer le catalogue.' }, false) +
+          renderConseil({ conseil_text: 'D\u00e9sol\u00e9, je n\'ai pas pu analyser votre projet. Rendez-vous sur les cr\u00e9ations de Robin pour explorer le catalogue.' }, false) +
           '</div>' +
-          '<div class="robin-fiche__cta-links"><a class="robin-fiche__cta-link" href="/nos-creations/?robin_selection=1">Voir nos cr\u00e9ations &rarr;</a></div>' +
+          '<div class="robin-fiche__cta-links"><a class="robin-fiche__cta-link" href="/nos-creations/?robin_selection=1">Voir les cr\u00e9ations &rarr;</a></div>' +
           '</div>';
       }
 
