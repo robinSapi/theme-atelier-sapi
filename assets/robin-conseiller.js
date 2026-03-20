@@ -536,10 +536,12 @@
     if (animate) {
       // Mots avec opacity 0, animés ensuite par animateConseil()
       var words = data.conseil_text.split(' ');
-      html += '<p class="robin-fiche__citation-text">';
+      html += '<p class="robin-fiche__citation-text robin-fiche__citation-text--animated">';
+      html += '<span class="robin-word robin-word--quote" style="opacity:0;">\u00AB\u00A0</span>';
       for (var i = 0; i < words.length; i++) {
         html += '<span class="robin-word" style="opacity:0;">' + escHtml(words[i]) + '</span> ';
       }
+      html += '<span class="robin-word robin-word--quote" style="opacity:0;">\u00A0\u00BB</span>';
       html += '</p>';
       html += '<span class="robin-fiche__signature" style="opacity:0;">&mdash; Robin</span>';
     } else {

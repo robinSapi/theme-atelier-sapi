@@ -1831,6 +1831,15 @@ button:hover,
   color: var(--color-orange, #E35B24);
   opacity: 0.4;
 }
+.robin-fiche__citation-text--animated::before,
+.robin-fiche__citation-text--animated::after {
+  content: none;
+}
+.robin-word--quote {
+  color: var(--color-orange, #E35B24);
+  opacity: 0;
+  font-style: normal;
+}
 .robin-fiche__citation-text::after {
   content: '\00A0\00BB';
   color: var(--color-orange, #E35B24);
