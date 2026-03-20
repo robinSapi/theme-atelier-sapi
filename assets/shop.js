@@ -40,7 +40,8 @@
 
           // Désactiver le filtre Robin si actif
           this._robinProductIds = null;
-          filterContainer.querySelector('.filter-btn--robin.active')?.classList.remove('active');
+          var robinViewBtn = document.getElementById('robin-selection-btn');
+          if (robinViewBtn) { robinViewBtn.classList.remove('active'); robinViewBtn.textContent = 'Voir'; }
 
           // Update active state
           filterContainer.querySelector('.filter-btn.active')?.classList.remove('active');
@@ -73,47 +74,101 @@
       try { prefs = JSON.parse(localStorage.getItem('sapiGuidePrefs') || '{}'); } catch(e) {}
       if (!prefs.answers || !Object.keys(prefs.answers).length) return;
 
-      // Injecter le bouton "Ma sélection" avant le premier bouton filtre
-      var firstBtn = filterContainer.querySelector('.filter-btn');
-      if (!firstBtn) return;
+      // Conteneur ligne 3 — bandeau personnalisé
+      var robinRow = document.getElementById('filter-row-robin');
+      if (!robinRow) return;
 
-      var robinBtn = document.createElement('button');
-      robinBtn.type = 'button';
-      robinBtn.className = 'filter-btn filter-btn--robin';
-      robinBtn.dataset.filter = '_robin_selection';
-      robinBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg> Ma s\u00e9lection';
-      firstBtn.parentNode.insertBefore(robinBtn, firstBtn);
+      // Construire les chips à partir des réponses
+      var labels = prefs.labels || {};
+      var chipLabels = [];
+      var labelOrder = ['piece', 'taille', 'taille_escalier', 'sortie', 'hauteur', 'table', 'style'];
+      labelOrder.forEach(function(key) {
+        if (labels[key]) chipLabels.push(labels[key]);
+      });
 
-      // Click handler
+      var chipsHtml = '';
+      chipLabels.forEach(function(label, i) {
+        if (i > 0) chipsHtml += '<span class="robin-selection-chip-sep" aria-hidden="true">\u00b7</span>';
+        chipsHtml += '<span class="robin-selection-chip">' + label + '</span>';
+      });
+
+      // Icône crayon
+      var iconSvg = '<svg class="robin-selection-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>';
+
+      robinRow.innerHTML =
+        iconSvg +
+        '<span class="robin-selection-label">Ma s\u00e9lection</span>' +
+        '<div class="robin-selection-chips">' + chipsHtml + '</div>' +
+        '<button type="button" class="robin-selection-btn" id="robin-selection-btn">Voir</button>' +
+        '<button type="button" class="robin-selection-reset" id="robin-selection-reset" title="R\u00e9initialiser" aria-label="R\u00e9initialiser ma s\u00e9lection">&times;</button>';
+
+      robinRow.style.display = 'flex';
+
+      // Références
+      var viewBtn = document.getElementById('robin-selection-btn');
+      var resetBtn = document.getElementById('robin-selection-reset');
       var self = this;
-      robinBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        var isActive = robinBtn.classList.contains('active');
 
-        // Désactiver tous les boutons
-        filterContainer.querySelectorAll('.filter-btn.active').forEach(function(b) {
-          b.classList.remove('active');
-        });
+      // Clic sur "Voir" — active/désactive le filtre
+      viewBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var isActive = viewBtn.classList.contains('active');
 
         if (isActive) {
-          // Désactiver Ma sélection → revenir à "tout"
+          // Désactiver → revenir à "tout"
+          viewBtn.classList.remove('active');
+          viewBtn.textContent = 'Voir';
           var allBtn = filterContainer.querySelector('.filter-btn[data-filter="all"]');
-          if (allBtn) allBtn.classList.add('active');
+          if (allBtn) {
+            filterContainer.querySelectorAll('.filter-btn.active').forEach(function(b) { b.classList.remove('active'); });
+            allBtn.classList.add('active');
+          }
           self.filters.category = 'all';
           self._robinProductIds = null;
           self.applyFilters();
         } else {
           // Activer Ma sélection
-          robinBtn.classList.add('active');
+          filterContainer.querySelectorAll('.filter-btn.active').forEach(function(b) { b.classList.remove('active'); });
+          viewBtn.classList.add('active');
           self.fetchRobinSelection(prefs.answers);
         }
       });
+
+      // Clic sur reset — efface le projet et masque la ligne
+      resetBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        // Désactiver le filtre si actif
+        if (viewBtn.classList.contains('active')) {
+          self._robinProductIds = null;
+          self.filters.category = 'all';
+          var allBtn = filterContainer.querySelector('.filter-btn[data-filter="all"]');
+          if (allBtn) {
+            filterContainer.querySelectorAll('.filter-btn.active').forEach(function(b) { b.classList.remove('active'); });
+            allBtn.classList.add('active');
+          }
+          self.applyFilters();
+        }
+        robinRow.style.display = 'none';
+      });
+
+      // Clic sur le bandeau Robin pour ouvrir la modale (modifier son projet)
+      robinRow.addEventListener('click', function(e) {
+        if (e.target === viewBtn || e.target === resetBtn || viewBtn.contains(e.target) || resetBtn.contains(e.target)) return;
+        // Ouvrir la modale Robin si disponible
+        if (window.sapiRobinConseiller && typeof window.openRobinModal === 'function') {
+          window.openRobinModal('bandeau');
+        } else {
+          var bandeau = document.getElementById('robin-bandeau');
+          if (bandeau) bandeau.click();
+        }
+      });
+      robinRow.style.cursor = 'pointer';
 
       // Auto-activer si URL contient robin_selection=1 (différé après init)
       var params = new URLSearchParams(window.location.search);
       if (params.get('robin_selection') === '1') {
         window.history.replaceState({}, '', window.location.pathname);
-        setTimeout(function() { robinBtn.click(); }, 50);
+        setTimeout(function() { viewBtn.click(); }, 50);
       }
     },
 
@@ -138,6 +193,9 @@
             if (resp.success && resp.data && resp.data.product_ids) {
               self._robinProductIds = resp.data.product_ids.map(String);
               self.applyFilters();
+              // Mettre à jour le texte du bouton avec le count
+              var viewBtn = document.getElementById('robin-selection-btn');
+              if (viewBtn) viewBtn.textContent = 'Voir (' + resp.data.product_ids.length + ')';
               return;
             }
           } catch(e) {}

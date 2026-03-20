@@ -150,8 +150,8 @@ sapi_robin_conseil_card( 'selection' );
     }
     ?>
 
-    <!-- Groupe 1 : Créations -->
-    <div class="filter-group filter-group--creations">
+    <!-- Ligne 1 : Filtres catégorie (luminaires) -->
+    <div class="filter-row filter-row--categories">
       <button type="button" class="filter-btn active" data-filter="all">
         <?php esc_html_e('Toutes nos créations', 'theme-sapi-maison'); ?>
         <span class="filter-count">(<?php echo esc_html($creations_count); ?>)</span>
@@ -169,15 +169,13 @@ sapi_robin_conseil_card( 'selection' );
       <?php endforeach; ?>
     </div>
 
-    <div class="filter-separator" aria-hidden="true"></div>
-
-    <!-- Groupe 2 : Extras -->
-    <div class="filter-group filter-group--extras">
+    <!-- Ligne 2 : Extras (accessoires, carte cadeau) -->
+    <div class="filter-row filter-row--extras">
       <?php
       foreach ($extras_slugs as $slug) :
         if (!isset($cats_by_slug[$slug])) continue;
         $cat = $cats_by_slug[$slug];
-        $btn_class = 'filter-btn';
+        $btn_class = 'filter-btn filter-btn--extra';
         if ($slug === 'carte-cadeau') {
           $btn_class .= ' filter-btn--gift';
         }
@@ -188,6 +186,9 @@ sapi_robin_conseil_card( 'selection' );
         </button>
       <?php endforeach; ?>
     </div>
+
+    <!-- Ligne 3 : Ma sélection personnalisée (injecté par shop.js si projet en cours) -->
+    <div class="filter-row filter-row--robin" id="filter-row-robin" style="display: none;"></div>
 
   </nav>
 
