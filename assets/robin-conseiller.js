@@ -649,7 +649,7 @@
     // Fiche "merci" — 2 boutons
     var html = '<div class="robin-fiche__top">';
     html += '<div class="robin-fiche__conseil">';
-    html += renderConseil({ conseil_text: 'Merci ! Avec toutes ces infos, nous allons pouvoir vous proposer les meilleurs mod\u00e8les et vous aider \u00e0 choisir.' }, true);
+    html += renderConseil({ conseil_text: 'C\'est not\u00e9 ! Avec toutes ces infos, nous allons pouvoir vous proposer les meilleurs mod\u00e8les et vous aider \u00e0 choisir.' }, true);
     html += '</div>';
     html += '</div>';
 
