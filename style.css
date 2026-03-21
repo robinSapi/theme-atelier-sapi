@@ -1798,6 +1798,7 @@ button:hover,
   line-height: 1.75;
   color: var(--color-dark, #323232);
   font-style: italic;
+  text-align: center;
   padding: 0 0.5rem;
   margin: 0 0 0.5rem;
 }
@@ -1901,6 +1902,7 @@ button:hover,
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin-bottom: 0.6rem;
+  text-align: center;
 }
 
 /* Boutons choix */
@@ -1960,6 +1962,7 @@ button:hover,
 .robin-fiche__cta-links {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.4rem;
   margin-top: 0.75rem;
 }
