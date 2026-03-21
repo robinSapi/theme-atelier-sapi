@@ -1959,8 +1959,8 @@ button:hover,
 /* Liens CTA — texte orange + flèche */
 .robin-fiche__cta-links {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.4rem;
   margin-top: 0.75rem;
 }
 .robin-fiche__cta-link {

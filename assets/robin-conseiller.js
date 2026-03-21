@@ -528,11 +528,11 @@
       var showSurMesure = isConstrained || state.answers.taille === 'grande' || state.answers.hauteur === 'haute';
 
       html += '<div class="robin-fiche__cta-links" id="robin-fiche-link"' + (shouldAnimate ? ' style="opacity:0;"' : '') + '>';
-      html += '<a class="robin-fiche__cta-link" href="' + escHtml(shopLink.url) + '">' + escHtml(shopLink.label) + ' &rarr;</a>';
+      html += '<a class="robin-fiche__cta-link" href="' + escHtml(shopLink.url) + '">&rarr; ' + escHtml(shopLink.label) + '</a>';
       if (showSurMesure) {
-        html += '<a class="robin-fiche__cta-link" href="/sur-mesure/">Imaginer un mod\u00e8le sur mesure &rarr;</a>';
+        html += '<a class="robin-fiche__cta-link" href="/sur-mesure/">&rarr; Imaginer un mod\u00e8le sur mesure</a>';
       } else {
-        html += '<a class="robin-fiche__cta-link" href="/contact/">Contacter Robin &rarr;</a>';
+        html += '<a class="robin-fiche__cta-link" href="/contact/">&rarr; Contacter Robin</a>';
       }
       html += '</div>';
     }
