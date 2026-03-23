@@ -173,54 +173,76 @@ $logo_alt = get_bloginfo('name');
   <div class="global-search-overlay" id="global-search-overlay"></div>
 </header>
 
-<!-- Sticky Reassurance Bar -->
-<div class="reassurance-bar reassurance-bar-sticky">
-  <div class="guide-profile-chip" id="guide-profile-chip" style="display:none;"></div>
-  <div class="reassurance-bar-inner">
-    <div class="reassurance-item">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="1" y="3" width="15" height="13"></rect>
-        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-        <circle cx="5.5" cy="18.5" r="2.5"></circle>
-        <circle cx="18.5" cy="18.5" r="2.5"></circle>
-      </svg>
-      <span>Livraison 48-72h</span>
+<?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) : ?>
+<!-- Robin Conseiller V2 — Bandeau simplifié -->
+<?php
+require_once get_template_directory() . '/inc/template-robin-bandeau-v2.php';
+sapi_robin_bandeau_v2();
+?>
+<?php else : ?>
+<!-- V1 — Bandeau "Mon projet" dépliable -->
+<?php
+require_once get_template_directory() . '/inc/guide-data.php';
+$mon_projet_steps = sapi_guide_get_steps();
+$mon_projet_icons = sapi_guide_get_icons();
+$conseils_url  = get_permalink(get_page_by_path('conseils-eclaires'));
+$creations_url = get_permalink(wc_get_page_id('shop'));
+$contact_url   = get_permalink(get_page_by_path('contact'));
+?>
+<div class="mon-projet-bar" id="mon-projet-bar">
+  <div class="mon-projet-collapsed">
+    <div class="mon-projet-left">
+      <span class="mon-projet-label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Mon projet
+      </span>
+      <div class="mon-projet-chips" id="mon-projet-chips">
+        <span class="mon-projet-placeholder">Cliquez pour d&eacute;finir votre projet</span>
+      </div>
     </div>
-    <div class="reassurance-item">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="3"></circle>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-      </svg>
-      <span>Fabrication &lt;5 jours</span>
+    <button class="mon-projet-toggle" id="mon-projet-toggle" type="button" aria-expanded="false" aria-controls="mon-projet-expanded">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+  </div>
+  <div class="mon-projet-expanded" id="mon-projet-expanded" aria-hidden="true">
+    <?php foreach ($mon_projet_steps as $step) :
+      $step_id = esc_attr($step['id']);
+      $icon_map = $mon_projet_icons;
+    ?>
+    <div class="mon-projet-question" data-step="<?php echo $step_id; ?>">
+      <span class="mon-projet-question-label"><?php echo esc_html($step['question']); ?></span>
+      <div class="mon-projet-choices" data-step="<?php echo $step_id; ?>">
+        <?php foreach ($step['choices'] as $choice) :
+          $icon_key = isset($choice['icon']) ? $choice['icon'] : '';
+          $icon_svg = isset($icon_map[$icon_key]) ? $icon_map[$icon_key] : '';
+        ?>
+        <button class="mon-projet-choice" type="button"
+                data-step="<?php echo $step_id; ?>"
+                data-slug="<?php echo esc_attr($choice['slug']); ?>"
+                data-label="<?php echo esc_attr($choice['label']); ?>">
+          <?php if ($icon_svg) : ?>
+            <span class="mon-projet-choice-icon"><?php echo $icon_svg; ?></span>
+          <?php endif; ?>
+          <span class="mon-projet-choice-text"><?php echo esc_html($choice['label']); ?></span>
+          <?php if (!empty($choice['dim'])) : ?>
+            <span class="mon-projet-choice-dim"><?php echo esc_html($choice['dim']); ?></span>
+          <?php endif; ?>
+        </button>
+        <?php endforeach; ?>
+      </div>
     </div>
-    <div class="reassurance-item">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="23 4 23 10 17 10"></polyline>
-        <polyline points="1 20 1 14 7 14"></polyline>
-        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-      </svg>
-      <span>Retours 30 jours</span>
+    <?php endforeach; ?>
+    <div class="mon-projet-actions-row">
+      <a href="<?php echo esc_url($conseils_url); ?>" class="mon-projet-btn mon-projet-btn-conseils" id="mon-projet-btn-conseils">Les conseils de Robin</a>
+      <a href="<?php echo esc_url($creations_url); ?>" class="mon-projet-btn mon-projet-btn-selection" id="mon-projet-btn-selection">La s&eacute;lection de Robin</a>
+      <a href="<?php echo esc_url($contact_url); ?>" class="mon-projet-btn mon-projet-btn-contact">Contacter Robin</a>
     </div>
-    <div class="reassurance-item">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-      </svg>
-      <span>Paiement sécurisé</span>
+    <div class="mon-projet-reset-row">
+      <button class="mon-projet-reset" id="mon-projet-reset" type="button">R&eacute;initialiser</button>
     </div>
   </div>
 </div>
-<script>
-(function(){
-  if(window.innerWidth>600)return;
-  var items=document.querySelectorAll('.reassurance-bar-sticky .reassurance-item');
-  if(items.length<3)return;
-  var indices=[0,1,2,3];
-  for(var i=indices.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=indices[i];indices[i]=indices[j];indices[j]=t;}
-  items[indices[0]].style.display='none';
-  items[indices[1]].style.display='none';
-})();
-</script>
+<?php endif; ?>
 
 <?php endif; ?>
 

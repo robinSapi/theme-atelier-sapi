@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sapi_contact_nonce'])
     $form_submitted = true;
 
     // Sanitize inputs
-    $name = sanitize_text_field($_POST['name'] ?? '');
+    $name = sanitize_text_field($_POST['fullname'] ?? '');
     $email = sanitize_email($_POST['email'] ?? '');
     $message = sanitize_textarea_field($_POST['message'] ?? '');
 
@@ -36,6 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sapi_contact_nonce'])
       $subject = '[Atelier Sapi] Nouveau message de ' . $name;
       $body = "Nom: $name\n";
       $body .= "Email: $email\n\n";
+
+      // Projet Robin (si existant)
+      $robin_project = sanitize_textarea_field($_POST['robin_project'] ?? '');
+      if (!empty($robin_project)) {
+        $body .= "Projet du client:\n$robin_project\n\n";
+      }
+
       $body .= "Message:\n$message";
 
       $headers = array(
@@ -132,7 +139,7 @@ get_header();
             </div>
           <?php endif; ?>
 
-          <form action="<?php echo esc_url(get_permalink()); ?>" method="post">
+          <form action="" method="post">
             <?php wp_nonce_field('sapi_contact_form', 'sapi_contact_nonce'); ?>
 
             <!-- Honeypot anti-spam (hidden field) -->
@@ -142,12 +149,17 @@ get_header();
             </div>
 
             <label for="contact-name">Nom</label>
-            <input id="contact-name" type="text" name="name" required placeholder="Votre nom" value="<?php echo esc_attr($_POST['name'] ?? ''); ?>">
+            <input id="contact-name" type="text" name="fullname" required placeholder="Votre nom" value="<?php echo esc_attr($_POST['fullname'] ?? ''); ?>">
 
             <label for="contact-email">Email</label>
             <input id="contact-email" type="email" name="email" required placeholder="votre@email.fr" value="<?php echo esc_attr($_POST['email'] ?? ''); ?>">
 
             <label for="contact-message">Message</label>
+
+            <!-- Bandeau projet Robin (rempli par JS si projet existant) -->
+            <div id="robin-contact-project" style="display:none;"></div>
+            <input type="hidden" name="robin_project" id="robin-contact-project-data" value="">
+
             <textarea id="contact-message" name="message" rows="6" required placeholder="Décrivez votre projet, posez votre question..."><?php echo esc_textarea($_POST['message'] ?? ''); ?></textarea>
 
             <button type="submit">Envoyer le message</button>

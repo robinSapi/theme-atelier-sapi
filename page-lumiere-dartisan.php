@@ -196,7 +196,7 @@ get_header();
   <div class="artisan-cta-content">
     <h2>Envie de découvrir mes créations ?</h2>
     <p>Chaque luminaire est une pièce unique, pensée pour sublimer votre intérieur.</p>
-    <a href="<?php echo home_url('/nos-creations/'); ?>" class="button">Voir la collection</a>
+    <a href="<?php echo home_url('/mes-creations/'); ?>" class="button">Voir la collection</a>
   </div>
 </section>
 

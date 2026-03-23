@@ -6,6 +6,18 @@ get_header();
 
 $has_acf = function_exists('get_field');
 
+// Room picker data (même que homepage)
+require_once get_template_directory() . '/inc/guide-data.php';
+$room_choices = [
+  ['label' => 'Salon',   'slug' => 'salon',    'icon' => 'sofa'],
+  ['label' => 'Cuisine', 'slug' => 'cuisine',  'icon' => 'dining'],
+  ['label' => 'Chambre', 'slug' => 'chambre',  'icon' => 'bed'],
+  ['label' => 'Bureau',  'slug' => 'bureau',   'icon' => 'monitor'],
+  ['label' => 'Entrée',  'slug' => 'entree',   'icon' => 'door'],
+  ['label' => 'Escalier','slug' => 'escalier', 'icon' => 'stairs'],
+];
+$room_icons = sapi_guide_get_icons();
+
 $tips = [];
 for ($i = 1; $i <= 4; $i++) {
     $image_field = $has_acf ? get_field("tip_{$i}_picture") : false;
@@ -28,6 +40,17 @@ for ($i = 1; $i <= 4; $i++) {
     <p>Suspensions ou lampadaire ? Quelle ampoule choisir ? Retrouvez ici les infos idéales pour une décoration réussie !</p>
   </div>
 </section>
+
+<!-- Conseil personnalisé de Robin (shown by mon-projet.js if available) -->
+<?php
+require_once get_template_directory() . '/inc/template-robin-conseil.php';
+sapi_robin_conseil_card( 'conseils' );
+?>
+
+<!-- Bouton refresh après modification des réponses (caché par défaut) -->
+<div class="conseils-refresh" id="conseils-refresh-btn" style="display:none">
+  <button type="button" class="conseils-refresh-btn">Obtenir les conseils de Robin</button>
+</div>
 
 <section class="advice-tips-section">
   <div class="advice-tips-grid">
@@ -58,39 +81,28 @@ for ($i = 1; $i <= 4; $i++) {
       </div>
     </div>
     <?php endforeach; ?>
+  </div>
+</section>
 
-    <?php
-    // URL du Guide Luminaire (recherche dynamique)
-    $guide_url = home_url('/guide-luminaire/');
-    $guide_pages = get_pages(['meta_key' => '_wp_page_template', 'meta_value' => 'page-guide-luminaire.php', 'number' => 1]);
-    if (!empty($guide_pages)) {
-      $guide_url = get_permalink($guide_pages[0]->ID);
-    }
-    ?>
-
-    <!-- Card CTA – Guide Luminaire avec choix de pièce -->
-    <?php
-    $room_choices = [
-      ['label' => 'Salon',   'slug' => 'salon',    'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3"/><rect x="2" y="11" width="20" height="7" rx="2"/><path d="M5 18v2m14-2v2"/></svg>'],
-      ['label' => 'Cuisine', 'slug' => 'cuisine',  'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V20H6Z"/><line x1="6" y1="17" x2="18" y2="17"/></svg>'],
-      ['label' => 'Chambre', 'slug' => 'chambre',  'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M2 14h20"/><path d="M2 10V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/></svg>'],
-      ['label' => 'Bureau',  'slug' => 'bureau',   'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>'],
-      ['label' => 'Entrée',  'slug' => 'entree',   'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="15" cy="12" r="1"/></svg>'],
-      ['label' => 'Escalier','slug' => 'escalier', 'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4v-4h4v-4h4V8h4"/><path d="M4 20V8"/><path d="M20 20V8"/></svg>'],
-    ];
-    ?>
-    <div class="advice-guide-cta">
-      <div class="advice-guide-cta-inner">
-        <h2 class="advice-guide-cta-title">Pour quelle pièce cherchez-vous un luminaire ?</h2>
-        <p class="advice-guide-cta-text">Sélectionnez votre pièce et Robin vous guide vers le luminaire idéal.</p>
-        <div class="advice-room-picker">
-          <?php foreach ($room_choices as $room) : ?>
-            <a href="<?php echo esc_url(add_query_arg('piece', $room['slug'], $guide_url)); ?>" class="room-card">
-              <span class="room-card-icon"><?php echo $room['icon']; ?></span>
-              <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
-            </a>
-          <?php endforeach; ?>
-        </div>
+<!-- Card "Pour quelle pièce" — ouvre la modale Robin -->
+<section class="advice-room-picker-section">
+  <div class="advice-room-picker">
+    <div class="room-picker-inner">
+      <span class="robin-modal__badge" style="margin-bottom: 0.5rem;">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+        Conseil de Robin
+      </span>
+      <h3 class="room-picker-title">Pour quelle pièce cherchez-vous un luminaire ?</h3>
+      <p class="room-picker-sub">Quelques questions et Robin vous guide vers le luminaire idéal</p>
+      <div class="room-picker-cards">
+        <?php foreach ($room_choices as $room) :
+          $icon_svg = isset($room_icons[$room['icon']]) ? $room_icons[$room['icon']] : '';
+        ?>
+          <button type="button" class="room-card" data-piece="<?php echo esc_attr($room['slug']); ?>" onclick="if(window.sapiRobinOpen)window.sapiRobinOpen('homepage',{piece:this.dataset.piece});">
+            <span class="room-card-icon"><?php echo $icon_svg; ?></span>
+            <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
+          </button>
+        <?php endforeach; ?>
       </div>
     </div>
   </div>

@@ -1,0 +1,256 @@
+ROBIN CONSEILLER V2 — Exemples de conseils par fiche
+=====================================================
+Ces textes serviront d'exemples dans le prompt IA pour donner le ton et la direction.
+Corrige, enrichis, reformule librement.
+
+
+========================================================
+CONTEXTES D'OUVERTURE DE LA MODALE
+========================================================
+La premiere fiche affichee depend de l'endroit d'ou le visiteur ouvre la modale.
+
+
+CONTEXTE 1 — BANDEAU SANS PROJET (hardcode)
+============================================
+→ Fiche 1 classique (accueil avec choix de piece)
+
+
+CONTEXTE 2 — BANDEAU AVEC PROJET EN COURS (hardcode)
+=====================================================
+→ Reprend a la derniere fiche non repondue du questionnaire
+
+
+CONTEXTE 3 — PAGE CATEGORIE (hardcode, pas d'appel IA)
+=======================================================
+Le visiteur arrive depuis une page categorie (suspensions, appliques, etc.).
+On demande confirmation avant de pre-remplir.
+
+> Depuis "Suspensions" :
+"C'est bien une suspension que vous cherchez ?"
+Boutons : Oui / Non, autre chose
+
+> Depuis "Appliques" :
+"C'est bien une applique murale que vous cherchez ?"
+Boutons : Oui / Non, autre chose
+
+> Depuis "Lampadaires" :
+"C'est bien un lampadaire que vous cherchez ?"
+Boutons : Oui / Non, autre chose
+
+Si Oui → pre-remplit la sortie electrique et passe a la fiche suivante pertinente.
+Si Non → fiche 1 classique.
+
+
+CONTEXTE 4 — FICHE PRODUIT (appel IA)
+======================================
+L'IA compare le produit consulte au projet du client.
+3 cas possibles :
+
+> Projet existe + produit coherent :
+L'IA confirme et explique pourquoi c'est un bon choix par rapport au projet.
+Boutons : Voir les autres modeles adaptes / Contacter Robin / Continuer le questionnaire
+
+> Projet existe + produit incoherent :
+L'IA signale le decalage et demande si le projet a change.
+Exemple : "Ce modele est adapté pour un grand espace avec plafond haut. Dans le cadre du projet que vous m'avez indiqué, j'ai peur qu'il soit [trop grand - a adapter]. Votre projet a evolue, ou vous souhaitez un avis sur ce modele ?"
+Boutons : Mon projet a change / Je veux un avis quand meme / Contacter Robin
+
+> Pas de projet en cours :
+L'IA invite a demarrer le questionnaire a partir du produit.
+Exemple : "Vous regardez [nom du produit]. Vous voulez que je vous aide a savoir s'il correspond a votre situation ?"
+Boutons : Oui, me conseiller / Non merci
+
+
+CONTEXTE 5 — CARD ACCUEIL / PAGE CONSEILS (hardcode)
+=====================================================
+Le visiteur a deja clique sur un bouton piece (Cuisine, Salon...) depuis la card.
+→ La piece est enregistree, la modale s'ouvre directement sur la fiche 2.
+
+
+========================================================
+FICHES DU QUESTIONNAIRE
+========================================================
+
+
+FICHE 1 — PIECE (toujours visible)
+===================================
+Question : "Pour quelle piece cherchez-vous un luminaire ?"
+Boutons : Cuisine / Bureau · Atelier / Salon · Salle a manger / Chambre / Entree · Couloir / Cage d'escalier
+
+> Cuisine :
+La cuisine, c'est un espace ou la lumiere de travail compte enormement. Une ampoule bien degagee eclaire efficacement le plan de travail ou l'ilot, sans zone d'ombre.
+
+> Bureau / Atelier :
+Le bureau a besoin d'un eclairage fonctionnel mais pas froid. Une ampoule degagee pour bien voir, mais avec la chaleur du bois.
+
+> Salon / Salle a manger :
+Le salon, c'est l'espace ou l'on veut une lumiere enveloppante, chaleureuse. Je recommande une ampoule entouree ou semi-degagee, qui diffuse sans eblouir.
+
+> Chambre :
+La chambre demande une lumiere douce, tamisee. Une ampoule entouree par le bois cree cette ambiance cocon.
+
+> Entree / Couloir :
+L'entree c'est la premiere impression. Un luminaire qui attire l'oeil sans encombrer l'espace.
+
+> Cage d'escalier :
+L'escalier est un espace technique — il faut eclairer les marches sans gener le passage.
+
+Lien : "Voir les luminaires pour la [piece] →"
+
+
+FICHE 2 — TAILLE DE LA PIECE (si piece ≠ escalier)
+====================================================
+Question : "Quelle est la taille de votre piece ?"
+Boutons : Petite (< 10 m²) / Moyenne (10–20 m²) / Grande (> 20 m²)
+
+> Petite (< 10 m²) :
+Dans un petit espace, il ne faut pas voir trop grand, sinon on se sent écrasé par le luminaire. Il faudra rester raisonnable lors du choix de la taille !
+
+> Moyenne (10–20 m²) :
+Une piece de taille moyenne laisse pas mal de liberte. La plupart de mes creations s'y integrent bien, c'est surtout une question de gout et de positionnement.
+
+> Grande (> 20 m²) :
+Une grande piece, c'est l'occasion de marquer un point focal fort avec une belle suspension. Mais souvent un seul luminaire ne suffit pas — je recommande de combiner : une suspension principale et un complement (lampadaire ou applique) pour eviter les zones d'ombre. Pour un rendu spectaculaire, Robin peut aussi concevoir un luminaire multi-ampoules sur mesure.
+
+Lien : "Voir les luminaires adaptes →"
+
+
+FICHE 2bis — TAILLE ESCALIER (si piece = cage d'escalier)
+==========================================================
+Question : "Quel type d'escalier ?"
+Boutons : Escalier standard / Grand escalier ouvert
+
+> Escalier standard :
+Il faut positionner un luminaire en partie haute pour eclairer toute la descente. Attention a la hauteur de passage. On est plutôt sur un éclairage déco mais avec un luminaire de taille raisonnable et au format boule ou vertical.
+
+> Grand escalier ouvert :
+Un escalier ouvert avec mezzanine ou palier, c'est un vrai espace a part entiere. On peut se permettre un luminaire genereux qui occupe l'espace disponible ! Une oeuvre d'art suspendue (ou pas) est bienvenue dans ce volume.
+
+
+FICHE 3 — ECLAIRAGE (si taille = grande uniquement)
+====================================================
+Question : "Ce luminaire sera-t-il votre principale source de lumiere ?"
+Boutons : Ce sera la principale source d'eclairage / J'ai d'autres sources lumineuses
+
+> Principale source d'eclairage :
+Si c'est le luminaire principal, il faut qu'il eclaire efficacement. Je vous orienterai vers des modeles avec ampoule degagee.
+
+> J'ai d'autres sources lumineuses :
+Parfait, si vous avez deja des points lumineux, le nouveau luminaire peut etre plus un element de decoration qu'une source d'eclairage principale. Ca ouvre plus de possibilites sur les formats.
+
+
+FICHE 4 — SORTIE ELECTRIQUE (apres taille ou eclairage)
+========================================================
+Question : "Ou installerez-vous votre luminaire ?"
+Boutons : Au plafond / Au mur / Sur prise classique 230V / Je ne sais pas
+
+> Au plafond :
+Avec une sortie au plafond, vous avez acces a toute ma gamme de suspensions. C'est la configuration ideale pour un luminaire artisanal en bois.
+
+> Au mur :
+Au mur, c'est le territoire des appliques. Elles creent un eclairage d'ambiance magnifique et mettent en valeur le bois sous un autre angle.
+
+> Sur prise classique 230V :
+Pas de sortie au plafond, pas de probleme. Mes lampadaires et lampes a poser fonctionnent sur prise classique. Et les appliques aussi, avec l'option cable apparent qui a beaucoup de charme.
+
+> Je ne sais pas :
+Pas de souci, on peut regarder ensemble. En general : si vous avez un crochet ou une rosace au plafond, c'est une sortie plafond. Sinon, une prise electrique habituelle fonctionne tres bien avec les lampadaires, les appliques murales (avec l'option prise) et les lampes a poser.
+
+Lien (plafond) : "Voir les suspensions →"
+Lien (mur) : "Voir les appliques →"
+Lien (prise) : "Voir lampadaires et lampes a poser →"
+
+
+FICHE 5 — HAUTEUR SOUS PLAFOND (si sortie = plafond)
+=====================================================
+Question : "Quelle est votre hauteur sous-plafond ?"
+Boutons : Standard (< 2,50 m) / Confortable (2,50–3 m) / Haute (> 3 m)
+
+> Standard (< 2,50 m) :
+Avec un plafond standard, il faut faire attention a la hauteur du luminaire. Je conseille que le bas soit a minimum 2m10 du sol dans une zone de passage, et environ 70-80 cm au-dessus d'une table ou d'un ilot.
+
+> Confortable (2,50–3 m) :
+C'est la hauteur ideale — assez d'espace pour une belle suspension sans contrainte. Vous avez le choix entre tous les formats.
+
+> Haute (> 3 m) :
+Avec de la hauteur, c'est ideal — le luminaire peut prendre toute sa dimension sans gener. Vous pouvez opter pour des formats verticaux plus imposants. Robin peut aussi concevoir un luminaire multi-ampoules sur mesure.
+
+
+FICHE 6 — TABLE / ILOT (si hauteur = standard ET piece = cuisine, bureau, salon ou chambre)
+============================================================================================
+Question dynamique selon la piece :
+  - Cuisine : "Sera-t-il au-dessus d'une table ou d'un ilot ?"
+  - Bureau : "Sera-t-il au-dessus du bureau ?"
+  - Salon : "Sera-t-il au-dessus d'une table ?"
+  - Chambre : "Sera-t-il au-dessus du lit ?"
+Boutons : Oui / Non
+
+> Oui :
+Au-dessus d'une surface, le luminaire cree un cercle de lumiere intime. Je recommande 70-80 cm entre le bas du luminaire et le plateau. Le luminaire peut prendre un peu plus de place !
+
+> Non :
+En zone de passage, l'essentiel c'est la hauteur : minimum 2m10 de libre sous le luminaire. Il nous faudra opter vers qui ne soit pas trop haut !
+
+
+FICHE 7 — STYLE (toujours visible)
+===================================
+Question : "Quel est le style de votre interieur ?"
+Boutons : Moderne, neuf, tons clairs / Ancien, pierre, bois, tons chauds / Pas de preference
+
+> Moderne, neuf, tons clairs :
+Le Peuplier, c'est un bois clair, lumineux, avec un grain tres fin. Il apporte une touche contemporaine, epuree. C'est le choix le plus populaire pour les interieurs modernes, et c'est celui que je recommande.
+
+> Ancien, pierre, bois, tons chauds :
+L'Okoume a un ton chaud, ambre, avec plus de caractere. Il s'integre naturellement dans des interieurs plus traditionnels ou qui misent sur la chaleur des materiaux.
+
+> Pas de preference :
+Pas de preference marquee ? Les deux essences sont belles. Je vous montrerai les deux et vous verrez sur les photos ce qui vous parle le plus.
+
+Lien : "Voir les creations en [essence] →"
+
+
+FICHE 8 — RECOMMANDATION FINALE
+================================
+Pas de question. Contenu genere par l'IA qui :
+- Nomme 2-3 produits precis avec explications personnalisees
+- Explique pourquoi ils correspondent au profil
+- Propose les essences adaptees
+
+Lien : "Voir ma selection personnalisee →"
+
+Boutons finaux :
+- Contacter Robin
+- Projet sur mesure
+- Recommencer
+
+
+FICHE 9 — HORS PARCOURS (texte libre hors questionnaire)
+=========================================================
+Declenchee quand l'IA detecte que le message du visiteur ne correspond
+a aucune etape du questionnaire : question technique, tarif, livraison,
+demande hors catalogue, etc.
+
+L'IA repond du mieux possible avec le savoir de Robin, puis propose
+des boutons contextuels adaptes a la situation.
+
+Exemples :
+
+> "Est-ce que vous faites des lustres en cristal ?"
+Non, je travaille exclusivement le bois ! Chaque piece est faconnee a la main dans mon atelier. Si vous cherchez un luminaire en bois avec un certain eclat, je peux vous orienter vers mes creations qui jouent avec la lumiere.
+
+Boutons : Voir les creations / Reprendre le questionnaire / Contacter Robin
+
+> "Combien coute la livraison ?"
+La livraison est offerte en France metropolitaine. Chaque luminaire est emballe avec soin dans l'atelier et expedie sous forme de kit a assembler — c'est simple et rapide.
+
+Boutons : Reprendre le questionnaire / Voir les conditions de livraison / Contacter Robin
+
+> "Je cherche un cadeau pour ma femme"
+Belle idee ! Un luminaire artisanal en bois, c'est un cadeau original et durable. Si vous me dites pour quelle piece il serait destine, je peux vous orienter vers le modele ideal.
+
+Boutons : Cuisine / Salon / Chambre / Contacter Robin
+
+> "Vous faites du sur mesure ?"
+Oui, c'est meme une de mes specialites ! Dimensions, essence de bois, nombre d'ampoules — on peut adapter beaucoup de choses. Le mieux c'est d'en discuter directement avec moi.
+
+Boutons : Contacter Robin pour un projet sur mesure / Voir les creations existantes

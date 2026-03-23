@@ -19,6 +19,8 @@
       size: 'all'
     },
 
+    _robinProductIds: null,
+
     searchQuery: '',
 
     init: function() {
@@ -30,11 +32,16 @@
       }
 
       // Category filter buttons
-      const filterBtns = filterContainer.querySelectorAll('.filter-btn');
+      const filterBtns = filterContainer.querySelectorAll('.filter-btn:not(.filter-btn--robin)');
       filterBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.preventDefault();
           const filter = btn.dataset.filter;
+
+          // Désactiver le filtre Robin si actif
+          this._robinProductIds = null;
+          var robinRow = document.getElementById('filter-row-robin');
+          if (robinRow) robinRow.classList.remove('is-active');
 
           // Update active state
           filterContainer.querySelector('.filter-btn.active')?.classList.remove('active');
@@ -52,8 +59,130 @@
       // Advanced dropdown filters
       this.initAdvancedFilters();
 
+      // "Ma sélection" — bouton Robin si projet en cours
+      try { this.initRobinSelection(filterContainer); } catch(e) { /* ne jamais casser les filtres */ }
+
       // Appliquer le filtre initial (masque accessoires par défaut)
       this.applyFilters();
+    },
+
+    initRobinSelection: function(filterContainer) {
+      if (!filterContainer) return;
+
+      // Vérifier si le visiteur a un projet en cours
+      var prefs = {};
+      try { prefs = JSON.parse(localStorage.getItem('sapiGuidePrefs') || '{}'); } catch(e) {}
+      if (!prefs.answers || !Object.keys(prefs.answers).length) return;
+
+      // Conteneur ligne 3 — bandeau personnalisé
+      var robinRow = document.getElementById('filter-row-robin');
+      if (!robinRow) return;
+
+      // Construire les chips à partir des réponses
+      var labels = prefs.labels || {};
+      var chipLabels = [];
+      var labelOrder = ['piece', 'taille', 'taille_escalier', 'sortie', 'hauteur', 'table', 'style'];
+      labelOrder.forEach(function(key) {
+        if (labels[key]) chipLabels.push(labels[key]);
+      });
+
+      var chipsHtml = '';
+      chipLabels.forEach(function(label, i) {
+        if (i > 0) chipsHtml += '<span class="robin-selection-chip-sep" aria-hidden="true">\u00b7</span>';
+        chipsHtml += '<span class="robin-selection-chip">' + label + '</span>';
+      });
+
+      // Icône crayon
+      var iconSvg = '<svg class="robin-selection-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>';
+
+      robinRow.innerHTML =
+        iconSvg +
+        '<span class="robin-selection-label">La s\u00e9lection pour mon projet</span>' +
+        '<div class="robin-selection-chips">' + chipsHtml + '</div>' +
+        '<button type="button" class="robin-selection-btn" id="robin-selection-btn">Modifier le projet</button>';
+
+      robinRow.style.display = 'flex';
+
+      // Références
+      var editBtn = document.getElementById('robin-selection-btn');
+      var self = this;
+
+      // Clic sur le bandeau — active/désactive le filtre
+      robinRow.addEventListener('click', function(e) {
+        // Ne pas filtrer si clic sur le bouton "Modifier le projet"
+        if (e.target === editBtn || editBtn.contains(e.target)) return;
+
+        var isActive = robinRow.classList.contains('is-active');
+
+        if (isActive) {
+          // Désactiver → revenir à "tout"
+          robinRow.classList.remove('is-active');
+          var allBtn = filterContainer.querySelector('.filter-btn[data-filter="all"]');
+          if (allBtn) {
+            filterContainer.querySelectorAll('.filter-btn.active').forEach(function(b) { b.classList.remove('active'); });
+            allBtn.classList.add('active');
+          }
+          self.filters.category = 'all';
+          self._robinProductIds = null;
+          self.applyFilters();
+        } else {
+          // Activer Ma sélection
+          filterContainer.querySelectorAll('.filter-btn.active').forEach(function(b) { b.classList.remove('active'); });
+          robinRow.classList.add('is-active');
+          self.fetchRobinSelection(prefs.answers);
+        }
+      });
+
+      // Clic sur "Modifier le projet" — ouvrir la modale Robin
+      editBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.sapiRobinConseiller && typeof window.openRobinModal === 'function') {
+          window.openRobinModal('bandeau');
+        } else {
+          var bandeau = document.getElementById('robin-bandeau');
+          if (bandeau) bandeau.click();
+        }
+      });
+
+      // Auto-activer si URL contient robin_selection=1 (différé après init)
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('robin_selection') === '1') {
+        window.history.replaceState({}, '', window.location.pathname);
+        setTimeout(function() { robinRow.click(); }, 50);
+      }
+    },
+
+    fetchRobinSelection: function(answers) {
+      var self = this;
+      var nonce = '';
+      if (window.sapiRobinConseiller) nonce = window.sapiRobinConseiller.nonce;
+      else if (window.sapiMonProjet) nonce = window.sapiMonProjet.nonce;
+
+      var fd = new FormData();
+      fd.append('action', 'sapi_robin_filter_products');
+      fd.append('nonce', nonce);
+      fd.append('answers', JSON.stringify(answers));
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', (window.sapiRobinConseiller || window.sapiMonProjet || {}).ajaxUrl || '/wp-admin/admin-ajax.php', true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState !== 4) return;
+        if (xhr.status === 200) {
+          try {
+            var resp = JSON.parse(xhr.responseText);
+            if (resp.success && resp.data && resp.data.product_ids) {
+              self._robinProductIds = resp.data.product_ids.map(String);
+              self.applyFilters();
+              return;
+            }
+          } catch(e) {}
+        }
+        // Erreur — désactiver le filtre
+        self._robinProductIds = null;
+        self.applyFilters();
+      };
+      xhr.send(fd);
     },
 
     initSearch: function() {
@@ -260,15 +389,24 @@
         // Check all filter criteria
         const catList = categories.split(' ');
         const extraCategories = ['accessoires', 'carte-cadeau'];
-        const matchesCategory = this.filters.category === 'all'
-          ? !catList.some(function(c) { return extraCategories.indexOf(c) !== -1; })
-          : catList.includes(this.filters.category);
+        let matchesCategory;
+        if (this.filters.category === 'all') {
+          matchesCategory = !catList.some(function(c) { return extraCategories.indexOf(c) !== -1; });
+        } else {
+          matchesCategory = catList.includes(this.filters.category);
+        }
         const matchesPrice = this.matchesPrice(price, this.filters.price);
         const matchesWood = this.filters.wood === 'all' || wood === this.filters.wood;
         const matchesSize = this.filters.size === 'all' || this.matchesSize(size, this.filters.size);
         const matchesSearch = !this.searchQuery || name.includes(this.searchQuery);
 
-        const shouldShow = matchesCategory && matchesPrice && matchesWood && matchesSize && matchesSearch;
+        let shouldShow;
+        if (this._robinProductIds) {
+          // Filtre "Ma sélection" actif → seuls les IDs filtrés par Robin
+          shouldShow = this._robinProductIds.includes(slide.dataset.id);
+        } else {
+          shouldShow = matchesCategory && matchesPrice && matchesWood && matchesSize && matchesSearch;
+        }
 
         // Use both class AND inline styles to guarantee hiding
         if (shouldShow) {
@@ -284,7 +422,7 @@
       // Show/hide individual text cards + recap card based on filters
       var textCards = document.querySelectorAll('.product-text-card');
       var recapCard = document.querySelector('.why-sapi-recap');
-      var isFiltered = this.filters.category !== 'all' || this.searchQuery;
+      var isFiltered = this.filters.category !== 'all' || this.searchQuery || this._robinProductIds;
       textCards.forEach(function(card) {
         if (isFiltered) {
           card.classList.add('is-filtered-out');

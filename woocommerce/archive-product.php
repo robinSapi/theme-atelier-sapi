@@ -35,7 +35,7 @@ $all_products = new WP_Query([
 <?php
 // Priority 1: ACF custom hero image (attached to WooCommerce Shop page)
 $hero_img_url = '';
-$hero_alt = 'Nos Créations - Atelier Sâpi';
+$hero_alt = 'Mes Créations - Atelier Sâpi';
 $shop_page_id = wc_get_page_id('shop');
 
 if (function_exists('get_field')) {
@@ -94,12 +94,18 @@ if (!$hero_img_url) {
   <?php endif; ?>
   <div class="shop-hero-magazine-overlay"></div>
   <div class="shop-hero-magazine-content">
-    <h1><?php esc_html_e('Nos Créations', 'theme-sapi-maison'); ?></h1>
+    <h1><?php esc_html_e('Mes Créations', 'theme-sapi-maison'); ?></h1>
     <p class="shop-subtitle">
-      <?php esc_html_e('Luminaires uniques, découpés au laser et assemblés à la main dans notre atelier lyonnais.', 'theme-sapi-maison'); ?>
+      <?php esc_html_e('Luminaires uniques, découpés au laser et assemblés à la main dans l\'atelier lyonnais de Robin.', 'theme-sapi-maison'); ?>
     </p>
   </div>
 </section>
+
+<!-- Conseil personnalisé de Robin pour Mes Créations (shown by mon-projet.js if available) -->
+<?php
+require_once get_template_directory() . '/inc/template-robin-conseil.php';
+sapi_robin_conseil_card( 'selection' );
+?>
 
 <!-- Product Filters with dynamic counts -->
 <div class="product-filters-wrapper">
@@ -144,10 +150,10 @@ if (!$hero_img_url) {
     }
     ?>
 
-    <!-- Groupe 1 : Créations -->
-    <div class="filter-group filter-group--creations">
+    <!-- Ligne 1 : Filtres catégorie (luminaires) -->
+    <div class="filter-row filter-row--categories">
       <button type="button" class="filter-btn active" data-filter="all">
-        <?php esc_html_e('Toutes nos créations', 'theme-sapi-maison'); ?>
+        <?php esc_html_e('Toutes mes créations', 'theme-sapi-maison'); ?>
         <span class="filter-count">(<?php echo esc_html($creations_count); ?>)</span>
       </button>
       <?php
@@ -163,15 +169,13 @@ if (!$hero_img_url) {
       <?php endforeach; ?>
     </div>
 
-    <div class="filter-separator" aria-hidden="true"></div>
-
-    <!-- Groupe 2 : Extras -->
-    <div class="filter-group filter-group--extras">
+    <!-- Ligne 2 : Extras (accessoires, carte cadeau) -->
+    <div class="filter-row filter-row--extras">
       <?php
       foreach ($extras_slugs as $slug) :
         if (!isset($cats_by_slug[$slug])) continue;
         $cat = $cats_by_slug[$slug];
-        $btn_class = 'filter-btn';
+        $btn_class = 'filter-btn filter-btn--extra';
         if ($slug === 'carte-cadeau') {
           $btn_class .= ' filter-btn--gift';
         }
@@ -182,6 +186,10 @@ if (!$hero_img_url) {
         </button>
       <?php endforeach; ?>
     </div>
+
+    <!-- Ligne 3 : Ma sélection personnalisée (injecté par shop.js si projet en cours) -->
+    <div class="filter-row filter-row--robin" id="filter-row-robin" style="display: none;"></div>
+
   </nav>
 
 </div>
@@ -196,17 +204,17 @@ if (!$hero_img_url) {
       [
         'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
         'title' => '100% artisanal français',
-        'text' => 'Chaque luminaire est conçu, découpé et assemblé à la main dans notre atelier lyonnais. Pas de production de masse, juste du savoir-faire et de la passion.',
+        'text' => 'Chaque luminaire est conçu, découpé et assemblé à la main dans l\'atelier lyonnais de Robin. Pas de production de masse, juste du savoir-faire et de la passion.',
       ],
       [
         'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>',
         'title' => 'Pièces uniques & originales',
-        'text' => 'Chaque modèle est une création originale signée Robin. Vous ne trouverez jamais nos luminaires ailleurs. Votre intérieur sera unique, comme vous.',
+        'text' => 'Chaque modèle est une création originale signée Robin. Vous ne trouverez ces luminaires nulle part ailleurs. Votre intérieur sera unique, comme vous.',
       ],
       [
         'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
         'title' => 'Bois PEFC & éco-responsable',
-        'text' => 'Nos bois proviennent de forêts gérées durablement. Production locale, emballages recyclables, zéro gaspillage. Beauté et responsabilité vont de pair.',
+        'text' => 'Les bois proviennent de forêts gérées durablement (PEFC). Production locale, emballages recyclables, zéro gaspillage. Beauté et responsabilité vont de pair.',
       ],
       [
         'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
@@ -301,7 +309,7 @@ if (!$hero_img_url) {
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
           </div>
           <h3>100% artisanal français</h3>
-          <p>Chaque luminaire est conçu, découpé et assemblé à la main dans notre atelier lyonnais.</p>
+          <p>Chaque luminaire est conçu, découpé et assemblé à la main dans l'atelier lyonnais de Robin.</p>
         </div>
         <div class="why-sapi-recap-item">
           <div class="product-text-card-icon">
@@ -315,7 +323,7 @@ if (!$hero_img_url) {
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           </div>
           <h3>Bois PEFC & éco-responsable</h3>
-          <p>Nos bois proviennent de forêts gérées durablement. Beauté et responsabilité vont de pair.</p>
+          <p>Les bois proviennent de forêts gérées durablement (PEFC). Beauté et responsabilité vont de pair.</p>
         </div>
         <div class="why-sapi-recap-item">
           <div class="product-text-card-icon">
@@ -331,7 +339,7 @@ if (!$hero_img_url) {
         </div>
         <div>
           <h3>Fabriqué avec amour à Lyon</h3>
-          <p>Vous recevez bien plus qu'un objet : vous recevez une histoire, un bout de notre atelier, une pièce qui porte notre attention aux détails.</p>
+          <p>Vous recevez bien plus qu'un objet : vous recevez une histoire, un bout de l'atelier de Robin, une pièce qui porte son attention aux détails.</p>
         </div>
       </div>
     </div>
@@ -345,7 +353,7 @@ if (!$hero_img_url) {
       <?php esc_html_e('Vous ne trouvez pas votre bonheur ?', 'theme-sapi-maison'); ?>
     </p>
     <p class="shop-outro-subtitle">
-      <?php esc_html_e('Dites-nous ce que vous imaginez et nous créerons ensemble votre luminaire sur-mesure.', 'theme-sapi-maison'); ?>
+      <?php esc_html_e('Dites à Robin ce que vous imaginez et créez ensemble votre luminaire sur-mesure.', 'theme-sapi-maison'); ?>
     </p>
     <a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>" class="button button-outline shop-outro-cta">
       <?php esc_html_e('Découvrir le sur mesure', 'theme-sapi-maison'); ?>

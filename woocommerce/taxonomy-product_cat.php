@@ -24,9 +24,9 @@ $term_id = $term->term_id;
 
 $category_intro = [
   'suspensions' => "Des luminaires suspendus en bois qui transforment votre plafond en œuvre d'art. Du lustre design au modèle artisanal, trouvez la suspension qui raconte votre histoire.",
-  'lampadaires' => "L'éclairage d'ambiance parfait pour structurer votre espace sans percer le plafond. Nos lampadaires en bois allient design sculptural et lumière chaleureuse.",
-  'appliques' => "Libérez vos sols, habillez vos murs. Nos appliques murales en bois créent une atmosphère unique tout en dessinant des jeux d'ombres poétiques.",
-  'lampesaposer' => "La touche finale qui change tout. Posez-la où vous voulez, déplacez-la au gré de vos envies : nos lampes nomades créent une bulle de lumière intime partout chez vous.",
+  'lampadaires' => "L'éclairage d'ambiance parfait pour structurer votre espace sans percer le plafond. Les lampadaires en bois de l'Atelier Sâpi allient design sculptural et lumière chaleureuse.",
+  'appliques' => "Libérez vos sols, habillez vos murs. Les appliques murales en bois créent une atmosphère unique tout en dessinant des jeux d'ombres poétiques.",
+  'lampesaposer' => "La touche finale qui change tout. Posez-la où vous voulez, déplacez-la au gré de vos envies : les lampes nomades créent une bulle de lumière intime partout chez vous.",
   'accessoires' => "Les bons accessoires font toute la différence. Ampoules filament, douilles certifiées, câbles premium : tout pour sublimer vos luminaires en toute sécurité.",
 ];
 
@@ -36,7 +36,7 @@ if (function_exists('sapi_maison_breadcrumbs')) {
 ?>
 
 <section class="shop-hero-cinetique">
-  <h1><?php echo esc_html($term_name ? $term_name : 'Nos créations'); ?></h1>
+  <h1><?php echo esc_html($term_name ? $term_name : 'Mes créations'); ?></h1>
   <?php if (isset($category_intro[$term_slug])) : ?>
     <p class="shop-subtitle"><?php echo esc_html($category_intro[$term_slug]); ?></p>
   <?php endif; ?>
@@ -126,12 +126,31 @@ endif;
   ]);
 
   if ($grid_query->have_posts()) :
+    $product_count = 0;
   ?>
     <ul class="products columns-4">
       <?php
       while ($grid_query->have_posts()) :
         $grid_query->the_post();
         wc_get_template_part('content', 'product');
+        $product_count++;
+
+        // Card Robin après le 4ème produit
+        if ($product_count === 4 && defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) :
+        ?>
+          <li class="robin-category-card" id="robin-category-card">
+            <div class="robin-category-card__inner" data-robin-context="category" data-robin-data='<?php echo esc_attr(wp_json_encode(['category_slug' => $term_slug])); ?>'>
+              <span class="robin-modal__badge">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+                Conseil de Robin
+              </span>
+              <p class="robin-category-card__text">Quel mod&egrave;le est fait pour vous ? R&eacute;pondez &agrave; quelques questions, Robin vous guide.</p>
+              <span class="robin-category-card__cta">D&eacute;couvrir &rarr;</span>
+            </div>
+          </li>
+        <?php
+        endif;
+
       endwhile;
       ?>
     </ul>
@@ -185,9 +204,9 @@ $editorial_style = $ambiance_bg_url ? 'style="background-image: url(' . esc_url(
         'tagline' => 'La lumière qui vous ressemble',
         'intro' => 'Une suspension, ce n\'est pas juste un luminaire accroché au plafond. C\'est le point focal de votre pièce, celle qui attire le regard dès qu\'on franchit la porte. C\'est l\'élément qui transforme un espace ordinaire en un lieu unique, chaleureux, où on a envie de vivre.',
         'why' => 'Pourquoi choisir une suspension en bois ?',
-        'why_content' => 'Le bois apporte une chaleur incomparable. Il filtre la lumière avec douceur, créant des jeux d\'ombres poétiques sur vos murs. Nos suspensions ne sont pas de simples objets décoratifs : elles racontent une histoire, celle de l\'artisanat français, du savoir-faire et de la passion.',
-        'promise' => 'Notre promesse',
-        'promise_content' => 'Chaque suspension est unique. Découpée au laser dans notre atelier lyonnais, assemblée à la main, testée avec soin. Vous recevez bien plus qu\'un luminaire : vous recevez une pièce d\'art fonctionnelle, pensée pour durer, conçue pour sublimer votre quotidien.',
+        'why_content' => 'Le bois apporte une chaleur incomparable. Il filtre la lumière avec douceur, créant des jeux d\'ombres poétiques sur vos murs. Ces suspensions ne sont pas de simples objets décoratifs : elles racontent une histoire, celle de l\'artisanat français, du savoir-faire et de la passion.',
+        'promise' => 'La promesse de Robin',
+        'promise_content' => 'Chaque suspension est unique. Découpée au laser dans l\'atelier lyonnais de Robin, assemblée à la main, testée avec soin. Vous recevez bien plus qu\'un luminaire : vous recevez une pièce d\'art fonctionnelle, pensée pour durer, conçue pour sublimer votre quotidien.',
         'use_cases' => 'Où installer votre suspension ?',
         'use_cases_items' => [
           'Au-dessus de la table à manger → Pour créer une ambiance conviviale lors des repas',
@@ -200,9 +219,9 @@ $editorial_style = $ambiance_bg_url ? 'style="background-image: url(' . esc_url(
         'tagline' => 'L\'élégance posée',
         'intro' => 'Un lampadaire, c\'est la liberté d\'éclairer sans contrainte. Pas de trou à percer, pas de plafond trop bas. Juste poser, brancher, et profiter. C\'est l\'allié parfait pour structurer un coin lecture, réchauffer un angle froid, ou simplement ajouter une touche de caractère.',
         'why' => 'Pourquoi un lampadaire fait la différence ?',
-        'why_content' => 'Contrairement à un plafonnier, le lampadaire crée une lumière d\'ambiance, plus douce, plus humaine. Il se fond dans votre décoration tout en affirmant son caractère. Nos modèles en bois sculptent l\'espace avec poésie, entre ombre et lumière.',
-        'promise' => 'Notre engagement',
-        'promise_content' => 'Stabilité, robustesse, élégance. Nos lampadaires sont conçus pour être beaux ET pratiques. Base lestée pour éviter tout basculement, bois PEFC pour une démarche responsable, assemblage précis pour une finition irréprochable.',
+        'why_content' => 'Contrairement à un plafonnier, le lampadaire crée une lumière d\'ambiance, plus douce, plus humaine. Il se fond dans votre décoration tout en affirmant son caractère. Les modèles en bois de Robin sculptent l\'espace avec poésie, entre ombre et lumière.',
+        'promise' => 'L\'engagement de Robin',
+        'promise_content' => 'Stabilité, robustesse, élégance. Les lampadaires sont conçus pour être beaux ET pratiques. Base lestée pour éviter tout basculement, bois PEFC pour une démarche responsable, assemblage précis pour une finition irréprochable.',
         'use_cases' => 'Dans quelles pièces l\'utiliser ?',
         'use_cases_items' => [
           'Salon → À côté du canapé pour lire confortablement',
@@ -215,8 +234,8 @@ $editorial_style = $ambiance_bg_url ? 'style="background-image: url(' . esc_url(
         'tagline' => 'La lumière qui habille vos murs',
         'intro' => 'Une applique murale, c\'est l\'art de libérer de l\'espace au sol tout en créant une atmosphère unique. Elle sculpte vos murs avec sa lumière, dessine des ombres douces, et transforme un pan de mur banal en élément décoratif à part entière.',
         'why' => 'Pourquoi choisir une applique ?',
-        'why_content' => 'Pratiques et élégantes, les appliques sont parfaites pour les petits espaces ou pour créer un éclairage d\'appoint. Nos modèles en bois diffusent une lumière chaleureuse et tamisée, idéale pour les moments de détente.',
-        'promise' => 'Ce qui fait notre différence',
+        'why_content' => 'Pratiques et élégantes, les appliques sont parfaites pour les petits espaces ou pour créer un éclairage d\'appoint. Les modèles en bois diffusent une lumière chaleureuse et tamisée, idéale pour les moments de détente.',
+        'promise' => 'Ce qui fait la différence',
         'promise_content' => 'Installation simplifiée, câblage textile de qualité, fixations fournies. Chaque applique est testée et emballée avec soin. Vous recevez un luminaire prêt à poser, avec notice illustrée claire et assistance disponible si besoin.',
         'use_cases' => 'Où installer vos appliques ?',
         'use_cases_items' => [
@@ -230,8 +249,8 @@ $editorial_style = $ambiance_bg_url ? 'style="background-image: url(' . esc_url(
         'tagline' => 'La touche finale qui change tout',
         'intro' => 'Une lampe à poser, c\'est la liberté totale. Sur une table de chevet, un bureau, une étagère... Elle s\'installe partout, se déplace au gré de vos envies, et crée instantanément une bulle de lumière intime et chaleureuse.',
         'why' => 'Pourquoi craquer pour une lampe à poser ?',
-        'why_content' => 'Compacte, mobile, polyvalente. La lampe à poser est le luminaire qui s\'adapte à VOUS, et non l\'inverse. Nos créations en bois apportent du cachet même éteintes, et transforment chaque coin en petit havre de douceur une fois allumées.',
-        'promise' => 'Notre savoir-faire',
+        'why_content' => 'Compacte, mobile, polyvalente. La lampe à poser est le luminaire qui s\'adapte à VOUS, et non l\'inverse. Les créations en bois de Robin apportent du cachet même éteintes, et transforment chaque coin en petit havre de douceur une fois allumées.',
+        'promise' => 'Le savoir-faire de Robin',
         'promise_content' => 'Base stable, interrupteur intégré, câble renforcé. Chaque lampe à poser est pensée pour le quotidien : pratique, belle, durable. Pas de fioritures inutiles, juste l\'essentiel fait avec passion.',
         'use_cases' => 'Comment l\'utiliser ?',
         'use_cases_items' => [
@@ -245,9 +264,9 @@ $editorial_style = $ambiance_bg_url ? 'style="background-image: url(' . esc_url(
         'tagline' => 'Les détails qui font toute la différence',
         'intro' => 'Un beau luminaire mérite les bons accessoires. Ampoules à filament pour les jeux d\'ombres, douilles de qualité pour la sécurité, pieds adaptés pour les lampadaires... C\'est ici que vous trouvez tout pour parfaire votre installation.',
         'why' => 'Pourquoi ces accessoires comptent ?',
-        'why_content' => 'Une mauvaise ampoule, c\'est 50% du charme perdu. Une douille fragile, c\'est un risque inutile. Nos accessoires sont sélectionnés avec le même soin que nos luminaires : qualité, sécurité, esthétique. Rien au hasard.',
-        'promise' => 'Notre sélection',
-        'promise_content' => 'Ampoules LED longue durée, douilles certifiées CE, câbles textile premium. Tout est testé, tout est compatible avec nos créations. Vous achetez en toute confiance, avec la garantie que ça marchera parfaitement ensemble.',
+        'why_content' => 'Une mauvaise ampoule, c\'est 50% du charme perdu. Une douille fragile, c\'est un risque inutile. Les accessoires sont sélectionnés avec le même soin que les luminaires : qualité, sécurité, esthétique. Rien au hasard.',
+        'promise' => 'La sélection de Robin',
+        'promise_content' => 'Ampoules LED longue durée, douilles certifiées CE, câbles textile premium. Tout est testé, tout est compatible avec les créations de l\'Atelier Sâpi. Vous achetez en toute confiance, avec la garantie que ça marchera parfaitement ensemble.',
         'use_cases' => 'Que choisir ?',
         'use_cases_items' => [
           'Ampoules filament → Pour les suspensions ouvertes (effet visuel maximal)',

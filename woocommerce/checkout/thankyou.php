@@ -55,7 +55,7 @@ defined('ABSPATH') || exit;
       </svg>
       <div>
         <strong>On fabrique dès que possible</strong>
-        <span>Votre pièce sera préparée avec soin dans notre atelier lyonnais</span>
+        <span>Votre pièce sera préparée avec soin dans l'atelier lyonnais de Robin</span>
       </div>
     </div>
     <div class="thankyou-reassurance-item">
@@ -63,8 +63,8 @@ defined('ABSPATH') || exit;
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
       </svg>
       <div>
-        <strong>Contactez-nous si besoin</strong>
-        <span>Notre équipe est disponible pour toute question sur votre commande</span>
+        <strong>Contactez Robin si besoin</strong>
+        <span>Robin est disponible pour toute question sur votre commande</span>
       </div>
     </div>
     <div class="thankyou-reassurance-item">
@@ -130,8 +130,8 @@ defined('ABSPATH') || exit;
 
   <!-- CTA retour boutique -->
   <div class="thankyou-cta">
-    <a href="<?php echo esc_url(home_url('/nos-creations/')); ?>" class="thankyou-cta-btn">
-      Continuer à explorer nos créations
+    <a href="<?php echo esc_url(home_url('/mes-creations/')); ?>" class="thankyou-cta-btn">
+      Continuer à explorer les créations
     </a>
   </div>
 

@@ -52,7 +52,7 @@ $search_query = get_search_query();
   <?php else : ?>
     <div class="search-no-results">
       <p>Aucun résultat pour cette recherche. Essayez avec d'autres termes&nbsp;!</p>
-      <a href="<?php echo esc_url(home_url('/nos-creations/')); ?>" class="search-browse-btn">Parcourir nos créations</a>
+      <a href="<?php echo esc_url(home_url('/mes-creations/')); ?>" class="search-browse-btn">Parcourir les créations</a>
     </div>
   <?php endif; ?>
 </section>

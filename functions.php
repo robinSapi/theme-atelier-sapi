@@ -4,6 +4,11 @@ if (!defined('ABSPATH')) {
   exit;
 }
 
+/* ─── Feature flag Robin Conseiller V2 ─── */
+if (!defined('SAPI_ROBIN_V2')) {
+  define('SAPI_ROBIN_V2', true);
+}
+
 function sapi_maison_setup() {
   add_theme_support('title-tag');
   add_theme_support('post-thumbnails');
@@ -90,7 +95,7 @@ function sapi_fallback_primary_menu() {
   <nav class="primary-nav" aria-label="<?php esc_attr_e('Menu principal', 'theme-sapi-maison'); ?>">
     <ul class="nav-menu">
       <li class="menu-item menu-item-has-children">
-        <a href="<?php echo esc_url(home_url('/nos-creations/')); ?>">Nos créations</a>
+        <a href="<?php echo esc_url(home_url('/mes-creations/')); ?>">Mes créations</a>
         <ul class="sub-menu">
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/suspensions/')); ?>">Suspensions</a></li>
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampadaires/')); ?>">Lampadaires</a></li>
@@ -113,7 +118,7 @@ function sapi_fallback_mobile_menu() {
     <ul class="mobile-nav-menu" id="mobile-nav-menu">
       <li class="menu-item menu-item-home"><a href="<?php echo esc_url(home_url('/')); ?>">Accueil</a></li>
       <li class="menu-item menu-item-has-children">
-        <a href="<?php echo esc_url(home_url('/nos-creations/')); ?>">Nos créations</a>
+        <a href="<?php echo esc_url(home_url('/mes-creations/')); ?>">Mes créations</a>
         <ul class="sub-menu">
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/suspensions/')); ?>">Suspensions</a></li>
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampadaires/')); ?>">Lampadaires</a></li>
@@ -131,7 +136,7 @@ function sapi_fallback_mobile_menu() {
 }
 
 function sapi_fallback_footer_nav() {
-  echo '<a href="' . esc_url(home_url('/nos-creations/')) . '">Nos créations</a>';
+  echo '<a href="' . esc_url(home_url('/mes-creations/')) . '">Mes créations</a>';
   echo '<a href="' . esc_url(home_url('/lumiere-dartisan/')) . '">L\'artisan</a>';
   echo '<a href="' . esc_url(home_url('/conseils-eclaires/')) . '">Conseils</a>';
   echo '<a href="' . esc_url(home_url('/contact/')) . '">Contact</a>';
@@ -171,12 +176,9 @@ function sapi_maison_enqueue_assets() {
   // Menu burger JavaScript - chargé sur toutes les pages
   $menu_js_path = get_template_directory() . '/assets/menu.js';
   wp_enqueue_script('sapi-maison-menu', get_template_directory_uri() . '/assets/menu.js', [], file_exists($menu_js_path) ? filemtime($menu_js_path) : '1.0.0', true);
-  $guide_pages = get_pages(['meta_key' => '_wp_page_template', 'meta_value' => 'page-guide-luminaire.php', 'number' => 1]);
-  $guide_url = !empty($guide_pages) ? get_permalink($guide_pages[0]) : home_url('/guide-luminaire/');
   wp_localize_script('sapi-maison-menu', 'sapiMenu', [
     'miniCartNonce' => wp_create_nonce('sapi-update-mini-cart-qty'),
     'wcAjaxUrl'     => home_url('/?wc-ajax='),
-    'guideUrl'      => $guide_url,
   ]);
 
   // Product name formatter - chargé sur toutes les pages (prénom en Montserrat, reste en Square Peg)
@@ -236,23 +238,42 @@ function sapi_maison_enqueue_assets() {
     }
   }
 
-  // Guide Luminaire questionnaire
-  if (is_page_template('page-guide-luminaire.php')) {
-    $guide_js_path = get_template_directory() . '/assets/guide-luminaire.js';
-    if (file_exists($guide_js_path)) {
-      wp_enqueue_script('sapi-guide-luminaire', get_template_directory_uri() . '/assets/guide-luminaire.js', [], filemtime($guide_js_path), true);
-    }
-    // Quick View for product results
-    $quick_view_js_path = get_template_directory() . '/assets/quick-view.js';
-    if (file_exists($quick_view_js_path)) {
-      wp_enqueue_script('sapi-maison-quick-view', get_template_directory_uri() . '/assets/quick-view.js', [], filemtime($quick_view_js_path), true);
-    }
-  }
 
   // Scroll Dots — mobile slide indicators (grilles verticales → sliders horizontaux)
   $scroll_dots_path = get_template_directory() . '/assets/scroll-dots.js';
   if (file_exists($scroll_dots_path)) {
     wp_enqueue_script('sapi-maison-scroll-dots', get_template_directory_uri() . '/assets/scroll-dots.js', [], filemtime($scroll_dots_path), true);
+  }
+
+  // Guide luminaire — bandeau + questionnaire (toutes les pages)
+  require_once get_template_directory() . '/inc/guide-data.php';
+
+  if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) {
+    // V2 — Robin Conseiller : modale diaporama
+    $robin_js_path = get_template_directory() . '/assets/robin-conseiller.js';
+    if (file_exists($robin_js_path)) {
+      wp_enqueue_script('sapi-robin-conseiller', get_template_directory_uri() . '/assets/robin-conseiller.js', [], filemtime($robin_js_path), true);
+      $conseils_path = get_template_directory() . '/assets/guide-conseils.json';
+      $conseils_data = file_exists($conseils_path) ? json_decode(file_get_contents($conseils_path), true) : [];
+      wp_localize_script('sapi-robin-conseiller', 'sapiRobinConseiller', [
+        'steps'    => sapi_guide_get_steps(),
+        'icons'    => sapi_guide_get_icons(),
+        'conseils' => $conseils_data,
+        'ajaxUrl'  => admin_url('admin-ajax.php'),
+        'nonce'    => wp_create_nonce('sapi-guide-results'),
+      ]);
+    }
+  } else {
+    // V1 — Mon Projet : bandeau dépliable (legacy)
+    $mon_projet_path = get_template_directory() . '/assets/mon-projet.js';
+    if (file_exists($mon_projet_path)) {
+      wp_enqueue_script('sapi-mon-projet', get_template_directory_uri() . '/assets/mon-projet.js', [], filemtime($mon_projet_path), true);
+      wp_localize_script('sapi-mon-projet', 'sapiMonProjet', [
+        'steps'   => sapi_guide_get_steps(),
+        'ajaxUrl' => admin_url('admin-ajax.php'),
+        'nonce'   => wp_create_nonce('sapi-guide-results'),
+      ]);
+    }
   }
 }
 add_action('wp_enqueue_scripts', 'sapi_maison_enqueue_assets');
@@ -315,7 +336,7 @@ add_action('woocommerce_after_cart', function () {
           </svg>
           <div class="reassurance-text">
             <strong><?php esc_html_e('Fabrication < 5 jours', 'theme-sapi-maison'); ?></strong>
-            <span><?php esc_html_e('Fait main dans notre atelier lyonnais', 'theme-sapi-maison'); ?></span>
+            <span><?php esc_html_e('Fait main dans l\'atelier lyonnais de Robin', 'theme-sapi-maison'); ?></span>
           </div>
         </div>
         <div class="reassurance-item">
@@ -591,9 +612,9 @@ add_action('wp_footer', function () {
           '<div class="empty-cart-content">' +
             '<div class="empty-cart-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div>' +
             '<h1 class="empty-cart-title">Votre panier est vide... pour l\u2019instant\u00a0!</h1>' +
-            '<p class="empty-cart-text">Nos luminaires n\u2019attendent que vous. Laissez-vous inspirer par nos cr\u00e9ations artisanales.</p>' +
+            '<p class="empty-cart-text">Les luminaires de Robin n\u2019attendent que vous. Laissez-vous inspirer par ses cr\u00e9ations artisanales.</p>' +
           '</div>' +
-          '<div class="empty-cart-cta"><a href="' + shopUrl + '" class="empty-cart-btn">D\u00e9couvrir nos cr\u00e9ations</a></div>' +
+          '<div class="empty-cart-cta"><a href="' + shopUrl + '" class="empty-cart-btn">D\u00e9couvrir les cr\u00e9ations</a></div>' +
           productsHTML +
         '</section>';
     }
@@ -642,7 +663,7 @@ add_filter('render_block', function ($content, $block) {
             </svg>
             <div class="reassurance-text">
               <strong><?php esc_html_e('Fabrication < 5 jours', 'theme-sapi-maison'); ?></strong>
-              <span><?php esc_html_e('Fait main dans notre atelier lyonnais', 'theme-sapi-maison'); ?></span>
+              <span><?php esc_html_e('Fait main dans l\'atelier lyonnais de Robin', 'theme-sapi-maison'); ?></span>
             </div>
           </div>
           <div class="reassurance-item">
@@ -920,8 +941,8 @@ function sapi_maison_meta_description() {
     $term = get_queried_object();
     if ($term) {
       $descs = [
-        'suspension' => 'Découvrez nos suspensions artisanales en bois. Luminaires suspendus design, découpés au laser et assemblés à la main dans notre atelier lyonnais.',
-        'lampadaire' => 'Nos lampadaires en bois sculptés transforment vos espaces. Éclairage d\'ambiance unique, fabriqués en France à Lyon.',
+        'suspension' => 'Découvrez les suspensions artisanales en bois de l\'Atelier Sâpi. Luminaires suspendus design, découpés au laser et assemblés à la main à Lyon.',
+        'lampadaire' => 'Les lampadaires en bois sculptés de Robin transforment vos espaces. Éclairage d\'ambiance unique, fabriqués en France à Lyon.',
         'applique' => 'Appliques murales artisanales en bois. Créez des jeux de lumière poétiques sur vos murs. Chaque pièce est unique.',
         'lampe-a-poser' => 'Lampes à poser portables en bois. Déplacez-les où vous voulez pour créer une bulle de lumière intime.',
         'accessoires' => 'Accessoires pour luminaires artisanaux. Ampoules, câbles textile et pièces détachées pour vos créations Atelier Sâpi.',
@@ -954,8 +975,8 @@ function sapi_maison_breadcrumbs() {
 
   if (is_product()) {
     $breadcrumbs[] = [
-      'name' => 'Nos créations',
-      'url' => home_url('/nos-creations/')
+      'name' => 'Mes créations',
+      'url' => home_url('/mes-creations/')
     ];
     $terms = get_the_terms(get_the_ID(), 'product_cat');
     if ($terms && !is_wp_error($terms)) {
@@ -971,8 +992,8 @@ function sapi_maison_breadcrumbs() {
     ];
   } elseif (is_product_category()) {
     $breadcrumbs[] = [
-      'name' => 'Nos créations',
-      'url' => home_url('/nos-creations/')
+      'name' => 'Mes créations',
+      'url' => home_url('/mes-creations/')
     ];
     $term = get_queried_object();
     $breadcrumbs[] = [
@@ -1568,7 +1589,7 @@ function sapi_guide_check_rate_limit() {
   $ip  = md5(isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : 'unknown');
   $key = 'sapi_guide_rl_' . $ip;
   $hits = (int) get_transient($key);
-  if ($hits >= 10) {
+  if ($hits >= 30) {
     return false;
   }
   set_transient($key, $hits + 1, HOUR_IN_SECONDS);
@@ -1616,6 +1637,12 @@ function sapi_ajax_guide_results() {
     $clean[sanitize_key($key)] = sanitize_text_field($val);
   }
 
+  // Normalise taille_escalier → taille pour le filtrage produits
+  // standard → petite (suspensions compactes), ouvert → grande (grandes suspensions verticales)
+  if (!empty($clean['taille_escalier']) && empty($clean['taille'])) {
+    $clean['taille'] = ($clean['taille_escalier'] === 'ouvert') ? 'grande' : 'petite';
+  }
+
   // 3. Determine product categories
   $categories = sapi_guide_get_categories($clean);
 
@@ -1658,15 +1685,20 @@ function sapi_ajax_guide_results() {
   }
 
   // 6. Build response
-  $ai_text = null;
-
-  if ($ai_response && isset($ai_response['recommendation'])) {
-    $ai_text = $ai_response['recommendation'];
-  }
-
+  $conseils_text = null;
+  $selection_text = null;
   $sur_mesure_text = null;
-  if ($ai_response && isset($ai_response['sur_mesure_text'])) {
-    $sur_mesure_text = $ai_response['sur_mesure_text'];
+
+  if ($ai_response) {
+    if (isset($ai_response['conseils_text'])) {
+      $conseils_text = $ai_response['conseils_text'];
+    }
+    if (isset($ai_response['selection_text'])) {
+      $selection_text = $ai_response['selection_text'];
+    }
+    if (isset($ai_response['sur_mesure_text'])) {
+      $sur_mesure_text = $ai_response['sur_mesure_text'];
+    }
   }
 
   if (empty($display_products)) {
@@ -1677,10 +1709,11 @@ function sapi_ajax_guide_results() {
   // Log session
   $session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : wp_generate_uuid4();
   $product_ids_for_log = array_map(function($p) { return $p['id']; }, $display_products);
-  sapi_guide_log_initial($session_id, $clean, $product_ids_for_log, $ai_text ?: '');
+  sapi_guide_log_initial($session_id, $clean, $product_ids_for_log, $conseils_text ?: '');
 
   wp_send_json_success([
-    'ai_text'           => $ai_text,
+    'conseils_text'     => $conseils_text,
+    'selection_text'    => $selection_text,
     'products'          => $display_products,
     'show_sur_mesure'   => $show_sur_mesure,
     'sur_mesure_reason' => $sur_mesure_reason,
@@ -1799,6 +1832,84 @@ function sapi_ajax_guide_contact() {
 }
 
 /**
+ * ── Contact inline depuis la card Robin-Conseil ──
+ * Envoie vers Brevo (liste dédiée) + email de notification à Robin.
+ */
+add_action('wp_ajax_sapi_robin_contact', 'sapi_ajax_robin_contact');
+add_action('wp_ajax_nopriv_sapi_robin_contact', 'sapi_ajax_robin_contact');
+
+function sapi_ajax_robin_contact() {
+  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
+    wp_send_json_error(['message' => 'Nonce invalide']);
+    return;
+  }
+
+  $email   = sanitize_email(wp_unslash($_POST['email'] ?? ''));
+  $phone   = sanitize_text_field(wp_unslash($_POST['phone'] ?? ''));
+  $message = sanitize_textarea_field(wp_unslash($_POST['message'] ?? ''));
+  $project = sanitize_text_field(wp_unslash($_POST['project'] ?? ''));
+  $page    = sanitize_text_field(wp_unslash($_POST['page'] ?? ''));
+
+  if (empty($email) || !is_email($email)) {
+    wp_send_json_error(['message' => 'Email requis']);
+    return;
+  }
+
+  // 1. Envoyer vers Brevo (liste 7 = demandes de contact Mon Projet)
+  $api_key = defined('BREVO_API_KEY') ? BREVO_API_KEY : '';
+  if ($api_key) {
+    $attributes = [];
+    if ($phone)   $attributes['SMS']     = $phone;
+    if ($message) $attributes['MESSAGE']  = $message;
+    if ($project) $attributes['PROJET']   = $project;
+    if ($page)    $attributes['PAGE']     = $page;
+
+    wp_remote_post('https://api.brevo.com/v3/contacts', [
+      'headers' => [
+        'api-key'      => $api_key,
+        'Content-Type' => 'application/json',
+        'Accept'       => 'application/json',
+      ],
+      'body' => wp_json_encode([
+        'email'         => $email,
+        'listIds'       => [6],
+        'attributes'    => $attributes,
+        'updateEnabled' => true,
+      ]),
+      'timeout' => 15,
+    ]);
+  }
+
+  // 2. Email de notification à Robin
+  $body  = "Demande de contact depuis « Contacter Robin »\n";
+  $body .= "=============================================\n\n";
+  $body .= "EMAIL : " . esc_html($email) . "\n";
+  if ($phone) {
+    $body .= "TÉLÉPHONE : " . esc_html($phone) . "\n";
+  }
+  if ($message) {
+    $body .= "\nMESSAGE : " . esc_html($message) . "\n";
+  }
+  if ($project) {
+    $body .= "\nPROJET : " . esc_html($project) . "\n";
+  }
+  $body .= "\nPAGE : " . esc_html($page) . "\n";
+  $body .= "DATE : " . wp_date('d/m/Y H:i') . "\n";
+
+  wp_mail(
+    'contact@atelier-sapi.fr',
+    '[Mon Projet] Demande de contact',
+    $body,
+    [
+      'Content-Type: text/plain; charset=UTF-8',
+      'Reply-To: ' . $email,
+    ]
+  );
+
+  wp_send_json_success(['message' => 'Envoyé']);
+}
+
+/**
  * ── Phase C : Smart refinement — AI routes client message ──
  * Client sends a follow-up message after seeing initial results.
  * Claude decides: refine products, show contact form, or both.
@@ -1817,7 +1928,7 @@ function sapi_ajax_guide_refine() {
   if (!sapi_guide_check_rate_limit()) {
     wp_send_json_success([
       'action'         => 'contact',
-      'ai_text'        => 'Je ne peux plus affiner ma recherche pour le moment. Laissez vos coordonnées et Robin vous répondra personnellement.',
+      'ai_text'        => 'Je ne peux pas affiner davantage pour le moment. Laissez vos coordonnées et Robin vous répondra personnellement.',
       'conversation'   => [],
     ]);
     return;
@@ -1841,6 +1952,9 @@ function sapi_ajax_guide_refine() {
   if (!is_array($answers)) $answers = [];
   if (!is_array($conversation)) $conversation = [];
   if (!is_array($current_product_ids)) $current_product_ids = [];
+
+  // Limiter l'historique de conversation pour éviter de dépasser les limites de tokens
+  $conversation = array_slice($conversation, -20);
 
   // Sanitize answers
   $clean = [];
@@ -1974,6 +2088,739 @@ function sapi_ajax_guide_refine() {
   ]);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   ROBIN CONSEILLER V2 — Filtrage produits pour "Ma sélection"
+═══════════════════════════════════════════════════════════ */
+add_action('wp_ajax_sapi_robin_filter_products', 'sapi_ajax_robin_filter_products');
+add_action('wp_ajax_nopriv_sapi_robin_filter_products', 'sapi_ajax_robin_filter_products');
+
+function sapi_ajax_robin_filter_products() {
+  // 1. Nonce
+  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
+    wp_send_json_error(['message' => 'Nonce invalide']);
+  }
+
+  // 2. Parse answers
+  $answers = [];
+  if (!empty($_POST['answers'])) {
+    $raw = json_decode(sanitize_text_field(wp_unslash($_POST['answers'])), true);
+    if (is_array($raw)) {
+      foreach ($raw as $k => $v) {
+        $answers[sanitize_key($k)] = sanitize_text_field($v);
+      }
+    }
+  }
+
+  if (empty($answers)) {
+    wp_send_json_error(['message' => 'Pas de réponses']);
+  }
+
+  // 3. Normaliser taille_escalier → taille
+  if (!empty($answers['taille_escalier'])) {
+    $answers['taille'] = $answers['taille_escalier'] === 'ouvert' ? 'grande' : 'petite';
+  }
+
+  // 4. Filtrage via le pipeline existant
+  require_once get_template_directory() . '/inc/guide-data.php';
+  $categories = sapi_guide_get_categories($answers);
+  $result = sapi_guide_query_products($answers, $categories);
+  $products = isset($result['products']) ? $result['products'] : [];
+
+  // 5. Extraire les IDs
+  $ids = array_map(function($p) { return $p['id']; }, $products);
+
+  wp_send_json_success([
+    'product_ids' => $ids,
+    'count'       => count($ids),
+  ]);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ROBIN CONSEILLER V2 — Endpoint per-step AI conseil
+═══════════════════════════════════════════════════════════ */
+add_action('wp_ajax_sapi_robin_conseil_step', 'sapi_ajax_robin_conseil_step');
+add_action('wp_ajax_nopriv_sapi_robin_conseil_step', 'sapi_ajax_robin_conseil_step');
+
+function sapi_ajax_robin_conseil_step() {
+  // 1. Nonce
+  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
+    wp_send_json_error(['message' => 'Nonce invalide']);
+  }
+
+  // 2. Honeypot
+  if (!empty($_POST['guide_website'])) {
+    wp_send_json_error(['message' => 'Erreur']);
+  }
+
+  // 3. Rate limit
+  $ai_allowed = sapi_guide_check_rate_limit();
+
+  // 4. Parse inputs
+  $step_id = isset($_POST['step_id']) ? sanitize_key($_POST['step_id']) : '';
+  $answers = [];
+  if (!empty($_POST['answers'])) {
+    $raw = json_decode(sanitize_text_field(wp_unslash($_POST['answers'])), true);
+    if (is_array($raw)) {
+      foreach ($raw as $k => $v) {
+        $answers[sanitize_key($k)] = sanitize_text_field($v);
+      }
+    }
+  }
+
+  $opening_context = isset($_POST['opening_context']) ? sanitize_key($_POST['opening_context']) : 'bandeau';
+  $context_data = [];
+  if (!empty($_POST['context_data'])) {
+    $cd = json_decode(sanitize_text_field(wp_unslash($_POST['context_data'])), true);
+    if (is_array($cd)) {
+      foreach ($cd as $k => $v) {
+        $context_data[sanitize_key($k)] = sanitize_text_field($v);
+      }
+    }
+  }
+
+  $user_message = isset($_POST['user_message']) ? sanitize_textarea_field(wp_unslash($_POST['user_message'])) : '';
+  $ai_call_count = isset($_POST['ai_call_count']) ? (int) $_POST['ai_call_count'] : 0;
+
+  if (empty($step_id)) {
+    wp_send_json_error(['message' => 'step_id manquant']);
+  }
+
+  // 5. Si pas d'IA (rate limit), renvoyer un fallback
+  if (!$ai_allowed) {
+    wp_send_json_success([
+      'conseil_text' => 'Le service est temporairement indisponible. Pour une réponse rapide, contactez Robin directement.',
+      'link_url'     => null,
+      'link_label'   => null,
+      'suggested_buttons' => [
+        ['label' => 'Contacter Robin', 'url' => '/contact/'],
+      ],
+      'next_step_id' => 'hors_parcours',
+      'answered_steps' => new \stdClass(),
+    ]);
+  }
+
+  // 6. Recommendation finale — pipeline complet
+  if ($step_id === 'recommendation') {
+    sapi_robin_handle_recommendation($answers, $ai_allowed);
+    return; // sapi_robin_handle_recommendation fait son propre wp_send_json
+  }
+
+  // 7. Étapes normales — construire le prompt et appeler Claude
+  $system_prompt = sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $context_data, $user_message, $ai_call_count);
+
+  // Message user contextuel
+  $user_prompt = '';
+  if (!empty($user_message)) {
+    $user_prompt = $user_message;
+  } elseif ($step_id === 'recommendation') {
+    $user_prompt = 'Voici mes réponses complètes. Recommande-moi des luminaires précis.';
+  } elseif ($step_id === 'product_page') {
+    $product_name = isset($context_data['product_name']) ? $context_data['product_name'] : 'ce luminaire';
+    $user_prompt = 'Je regarde ' . $product_name . '. Qu\'en penses-tu par rapport à mon projet ?';
+  } else {
+    // Step normal — le dernier choix fait
+    $last_answer = isset($answers[$step_id]) ? $answers[$step_id] : '';
+    $user_prompt = $last_answer
+      ? 'J\'ai répondu "' . $last_answer . '" à la question sur ' . $step_id . '. Donne-moi ton conseil.'
+      : 'Donne-moi ton conseil pour cette étape.';
+  }
+
+  $result = sapi_robin_call_claude_step($system_prompt, $user_prompt);
+
+  if (!$result || empty($result['conseil_text'])) {
+    wp_send_json_success([
+      'conseil_text' => 'Je ne peux pas répondre à cette question. Le mieux est d\'en parler directement avec Robin.',
+      'link_url'     => null,
+      'link_label'   => null,
+      'suggested_buttons' => [
+        ['label' => 'Contacter Robin', 'url' => '/contact/'],
+        ['label' => 'Reprendre le questionnaire', 'slug' => 'restart', 'step_id' => 'piece'],
+      ],
+      'next_step_id' => 'hors_parcours',
+      'answered_steps' => new \stdClass(),
+    ]);
+  }
+
+  // Filtrer les boutons et réponses invalides avant d'envoyer
+  $result = sapi_robin_validate_response($result);
+
+  wp_send_json_success($result);
+}
+
+/**
+ * Robin V2 — Valide et nettoie la réponse IA.
+ * Supprime les boutons avec des slugs invalides et les answered_steps incorrects.
+ */
+function sapi_robin_validate_response($result) {
+  require_once get_template_directory() . '/inc/guide-data.php';
+  $all_steps = sapi_guide_get_steps();
+
+  // Construire la map des slugs valides par step_id
+  $valid_slugs = [];
+  foreach ($all_steps as $s) {
+    $valid_slugs[$s['id']] = array_map(function($c) { return $c['slug']; }, $s['choices']);
+  }
+
+  // URLs valides pour les boutons liens
+  $valid_urls = ['/contact/', '/mes-creations/', '/mes-creations/?robin_selection=1', '/sur-mesure/',
+    '/categorie-produit/suspensions/', '/categorie-produit/appliques/',
+    '/categorie-produit/lampadaires/', '/categorie-produit/lampes-a-poser/'];
+
+  // Filtrer suggested_buttons
+  if (!empty($result['suggested_buttons']) && is_array($result['suggested_buttons'])) {
+    $clean_buttons = [];
+    foreach ($result['suggested_buttons'] as $btn) {
+      if (!empty($btn['url'])) {
+        // Bouton lien — vérifier que l'URL est dans la liste
+        if (in_array($btn['url'], $valid_urls, true)) {
+          $clean_buttons[] = $btn;
+        }
+      } elseif (!empty($btn['step_id']) && !empty($btn['slug'])) {
+        // Bouton questionnaire — vérifier que le slug est valide pour cette étape
+        if (isset($valid_slugs[$btn['step_id']]) && in_array($btn['slug'], $valid_slugs[$btn['step_id']], true)) {
+          $clean_buttons[] = $btn;
+        }
+      } elseif (!empty($btn['label'])) {
+        // Bouton conversation — juste un label, renvoie comme texte libre
+        $clean_buttons[] = ['label' => sanitize_text_field($btn['label'])];
+      }
+    }
+    $result['suggested_buttons'] = $clean_buttons;
+  }
+
+  // Filtrer answered_steps
+  if (!empty($result['answered_steps']) && is_array($result['answered_steps'])) {
+    $clean_answers = [];
+    foreach ($result['answered_steps'] as $step_id => $slug) {
+      if (isset($valid_slugs[$step_id]) && in_array($slug, $valid_slugs[$step_id], true)) {
+        $clean_answers[$step_id] = $slug;
+      }
+    }
+    $result['answered_steps'] = $clean_answers;
+  }
+
+  return $result;
+}
+
+/**
+ * Robin V2 — Build system prompt for a single step.
+ */
+/**
+ * Robin V2 — Recommandation finale : filtrage + Claude + produits.
+ */
+function sapi_robin_handle_recommendation($answers, $ai_allowed) {
+  require_once get_template_directory() . '/inc/guide-data.php';
+
+  // Normaliser taille_escalier → taille
+  if (!empty($answers['taille_escalier'])) {
+    $answers['taille'] = $answers['taille_escalier'] === 'ouvert' ? 'grande' : 'petite';
+  }
+
+  // Détecter si le projet relève du sur mesure
+  $piece   = isset($answers['piece']) ? $answers['piece'] : '';
+  $taille  = isset($answers['taille']) ? $answers['taille'] : '';
+  $hauteur = isset($answers['hauteur']) ? $answers['hauteur'] : '';
+  $is_sur_mesure = ($piece === 'escalier')
+    || ($taille === 'grande' && in_array($hauteur, ['haute', 'confortable'], true))
+    || ($taille === 'grande' && $piece === 'escalier');
+
+  if ($is_sur_mesure) {
+    sapi_robin_handle_sur_mesure($answers, $ai_allowed);
+    return;
+  }
+
+  // Pipeline de filtrage (parcours standard)
+  $categories = sapi_guide_get_categories($answers);
+  $result = sapi_guide_query_products($answers, $categories);
+  $products = isset($result['products']) ? $result['products'] : [];
+
+  $picked = sapi_guide_pick_four($products, 4);
+
+  if (empty($picked)) {
+    wp_send_json_success([
+      'conseil_text' => 'Je n\'ai pas trouvé de luminaire qui corresponde exactement à vos critères. Explorez le catalogue ou contactez Robin directement.',
+      'products' => [],
+    ]);
+    return;
+  }
+
+  // Préparer les données produit pour le front
+  $front_products = [];
+  foreach ($picked as $p) {
+    $front_products[] = [
+      'id'              => $p['id'],
+      'title'           => $p['title'],
+      'price'           => $p['price'],
+      'image'           => $p['image'],
+      'hover_image'     => isset($p['hover_image']) ? $p['hover_image'] : '',
+      'ambiance'        => isset($p['ambiance']) ? $p['ambiance'] : '',
+      'permalink'       => $p['permalink'],
+      'variation_label' => isset($p['variation_label']) ? $p['variation_label'] : '',
+      'size_label'      => isset($p['size_label']) ? $p['size_label'] : '',
+      'category_label'  => isset($p['category_label']) ? $p['category_label'] : '',
+      'reason'          => '', // Sera rempli par Claude
+    ];
+  }
+
+  // Appeler Claude pour le texte A + texte B par produit
+  if ($ai_allowed) {
+    $ai_result = sapi_robin_call_recommendation($picked, $answers);
+    if ($ai_result) {
+      // Texte A
+      $conseil_text = isset($ai_result['conseil_text']) ? $ai_result['conseil_text'] : '';
+
+      // Textes B par produit
+      if (!empty($ai_result['products'])) {
+        foreach ($ai_result['products'] as $ai_prod) {
+          $pid = isset($ai_prod['id']) ? (int) $ai_prod['id'] : 0;
+          $reason = isset($ai_prod['reason']) ? $ai_prod['reason'] : '';
+          for ($i = 0; $i < count($front_products); $i++) {
+            if ($front_products[$i]['id'] === $pid) {
+              $front_products[$i]['reason'] = $reason;
+              break;
+            }
+          }
+        }
+      }
+
+      wp_send_json_success([
+        'conseil_text' => $conseil_text,
+        'products'     => $front_products,
+      ]);
+      return;
+    }
+  }
+
+  // Fallback sans IA
+  wp_send_json_success([
+    'conseil_text' => 'Voici les luminaires qui correspondent le mieux à votre projet. Contactez Robin si vous souhaitez en discuter.',
+    'products'     => $front_products,
+  ]);
+}
+
+/**
+ * Robin V2 — Gestion du parcours "sur mesure" (escalier, grande pièce + plafond haut).
+ */
+function sapi_robin_handle_sur_mesure($answers, $ai_allowed) {
+  $label_map = [
+    'piece' => 'Pièce', 'taille' => 'Taille', 'taille_escalier' => 'Type escalier',
+    'eclairage' => 'Éclairage', 'sortie' => 'Installation', 'hauteur' => 'Hauteur plafond',
+    'table' => 'Au-dessus table/îlot', 'style' => 'Style',
+  ];
+  $answers_text = '';
+  foreach ($answers as $k => $v) {
+    $label = isset($label_map[$k]) ? $label_map[$k] : $k;
+    $answers_text .= '- ' . $label . ' : ' . $v . "\n";
+  }
+
+  $conseil_text = '';
+  if ($ai_allowed) {
+    $conseil_text = sapi_robin_call_sur_mesure($answers_text);
+  }
+  if (empty($conseil_text)) {
+    // Fallback sans IA
+    $conseil_text = 'Ce type de projet mérite une attention particulière. Robin a déjà réalisé des luminaires pour des situations similaires. Le mieux est d\'en discuter directement avec lui.';
+  }
+
+  wp_send_json_success([
+    'recommend_type' => 'sur_mesure',
+    'conseil_text'   => $conseil_text,
+    'products'       => [],
+  ]);
+}
+
+/**
+ * Robin V2 — Appel Claude pour le texte sur mesure.
+ */
+function sapi_robin_call_sur_mesure($answers_text) {
+  $theme_dir = get_template_directory();
+  $ton = @file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt') ?: '';
+
+  $prompt  = $ton . "\n\n";
+  $prompt .= "CONTEXTE : Le client a un projet qui relève du sur mesure. Robin crée des luminaires sur mesure pour ce genre de situations.\n\n";
+  $prompt .= "RÉPONSES DU CLIENT :\n" . $answers_text . "\n";
+  $prompt .= "MISSION : Rédige un court texte (3-4 phrases MAX) qui :\n";
+  $prompt .= "1. Valide que le sur mesure est la bonne option pour ce projet\n";
+  $prompt .= "2. Rassure le client en mentionnant que Robin a déjà créé des luminaires pour des situations similaires\n";
+  $prompt .= "3. Donne envie de contacter Robin pour en discuter\n\n";
+  $prompt .= "RÈGLES ABSOLUES :\n";
+  $prompt .= "- Tu ne proposes PAS de luminaire, tu ne décris PAS ce que Robin pourrait créer. C'est la mission de Robin, pas la tienne.\n";
+  $prompt .= "- Tu parles du projet du client (sa pièce, ses contraintes) et tu expliques pourquoi le sur mesure est adapté.\n";
+  $prompt .= "- Pas de guillemets « ». Pas de markdown. Texte brut uniquement.\n";
+  $prompt .= "- Réponds UNIQUEMENT avec le texte, rien d'autre (pas de JSON, pas de commentaire).\n";
+
+  $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
+  if (empty($api_key)) return '';
+
+  $body = [
+    'model'      => 'claude-sonnet-4-6',
+    'max_tokens' => 256,
+    'system'     => $prompt,
+    'messages'   => [
+      ['role' => 'user', 'content' => 'Voici mon projet. Est-ce que le sur mesure est adapté ?'],
+    ],
+  ];
+
+  $response = wp_remote_post('https://api.anthropic.com/v1/messages', [
+    'timeout' => 20,
+    'headers' => [
+      'Content-Type'      => 'application/json',
+      'x-api-key'         => $api_key,
+      'anthropic-version'  => '2023-06-01',
+    ],
+    'body' => wp_json_encode($body),
+  ]);
+
+  if (is_wp_error($response)) return '';
+
+  $resp_body = json_decode(wp_remote_retrieve_body($response), true);
+  if (!$resp_body || empty($resp_body['content'][0]['text'])) return '';
+
+  return trim($resp_body['content'][0]['text']);
+}
+
+/**
+ * Robin V2 — Appel Claude pour la recommandation finale.
+ */
+function sapi_robin_call_recommendation($products, $answers) {
+  $theme_dir = get_template_directory();
+  $ton    = @file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt') ?: '';
+  $savoir = @file_get_contents($theme_dir . '/assets/guide-prompt-savoir.txt') ?: '';
+  $regles = @file_get_contents($theme_dir . '/assets/guide-prompt-regles.txt') ?: '';
+
+  // Construire la liste des produits pour le prompt
+  $product_lines = [];
+  foreach ($products as $p) {
+    $line = '- ' . $p['title'] . ' (ID: ' . $p['id'] . ')';
+    $line .= ' | Catégorie: ' . ($p['category_label'] ?? '');
+    $line .= ' | Format: ' . ($p['format'] ?? '');
+    $line .= ' | Ampoule: ' . ($p['type_ampoule'] ?? '');
+    if (!empty($p['variation_label'])) $line .= ' | Essence: ' . $p['variation_label'];
+    $line .= ' | Ventes: ' . ($p['total_sales'] ?? 0);
+    $product_lines[] = $line;
+  }
+
+  // Résumé des réponses
+  $label_map = [
+    'piece' => 'Pièce', 'taille' => 'Taille', 'taille_escalier' => 'Type escalier',
+    'eclairage' => 'Éclairage', 'sortie' => 'Installation', 'hauteur' => 'Hauteur plafond',
+    'table' => 'Au-dessus table/îlot', 'style' => 'Style',
+  ];
+  $answers_text = '';
+  foreach ($answers as $k => $v) {
+    $label = isset($label_map[$k]) ? $label_map[$k] : $k;
+    $answers_text .= '- ' . $label . ' : ' . $v . "\n";
+  }
+
+  $prompt = $ton . "\n\n" . $savoir . "\n\n" . $regles . "\n\n";
+  $prompt .= "PRODUITS SÉLECTIONNÉS POUR CE CLIENT :\n" . implode("\n", $product_lines) . "\n\n";
+  $prompt .= "RÉPONSES DU CLIENT :\n" . $answers_text . "\n";
+  $prompt .= "MISSION : Rédige une recommandation finale personnalisée.\n\n";
+  $prompt .= "FORMAT DE RÉPONSE (JSON strict, pas de markdown) :\n";
+  $prompt .= "{\n";
+  $prompt .= '  "conseil_text": "Texte A : 2 phrases MAXIMUM. Synthèse technique courte. Ne cite pas les noms des produits.",' . "\n";
+  $prompt .= '  "products": [' . "\n";
+  $prompt .= '    { "id": 123, "reason": "Texte B : 1 seule phrase. Pourquoi ce modèle précis convient." }' . "\n";
+  $prompt .= '  ]' . "\n";
+  $prompt .= "}\n\n";
+  $prompt .= "RÈGLES :\n";
+  $prompt .= "- Le conseil_text ne mentionne PAS les noms de produits (ils sont affichés à côté).\n";
+  $prompt .= "- Chaque reason est personnalisée (pas générique).\n";
+  $prompt .= "- Pas de guillemets « » (ajoutés côté front).\n";
+  $prompt .= "- Pas de markdown.\n";
+  $prompt .= "- Les IDs dans products doivent correspondre exactement aux IDs des produits fournis.\n";
+
+  // Appel avec plus de tokens (la recommandation est plus longue)
+  $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
+  if (empty($api_key)) return null;
+
+  $body = [
+    'model'      => 'claude-sonnet-4-6',
+    'max_tokens' => 2048,
+    'system'     => $prompt,
+    'messages'   => [
+      ['role' => 'user', 'content' => 'Voici mon projet complet. Recommande-moi des luminaires.'],
+    ],
+  ];
+
+  $response = wp_remote_post('https://api.anthropic.com/v1/messages', [
+    'timeout' => 45,
+    'headers' => [
+      'Content-Type'      => 'application/json',
+      'x-api-key'         => $api_key,
+      'anthropic-version'  => '2023-06-01',
+    ],
+    'body' => wp_json_encode($body),
+  ]);
+
+  if (is_wp_error($response)) {
+    error_log('Robin V2 Reco API error: ' . $response->get_error_message());
+    return null;
+  }
+
+  $status   = wp_remote_retrieve_response_code($response);
+  $raw_body = wp_remote_retrieve_body($response);
+
+  if ($status !== 200) {
+    error_log('Robin V2 Reco API HTTP ' . $status . ': ' . $raw_body);
+    return null;
+  }
+
+  $data = json_decode($raw_body, true);
+  if (!isset($data['content'][0]['text'])) return null;
+
+  $text = $data['content'][0]['text'];
+  $text = preg_replace('/^```json\s*/i', '', trim($text));
+  $text = preg_replace('/\s*```$/i', '', $text);
+
+  $parsed = json_decode(trim($text), true);
+  if (!$parsed || !isset($parsed['conseil_text'])) {
+    // Fallback : essayer d'extraire conseil_text par regex
+    if (preg_match('/"conseil_text"\s*:\s*"((?:[^"\\\\]|\\\\.)*)"/s', $text, $m)) {
+      return ['conseil_text' => stripslashes($m[1]), 'products' => []];
+    }
+    return ['conseil_text' => 'Explorez les luminaires sélectionnés ci-dessous, ou contactez Robin pour un conseil personnalisé.', 'products' => []];
+  }
+
+  return $parsed;
+}
+
+function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $context_data, $user_message, $ai_call_count = 0) {
+  $theme_dir = get_template_directory();
+
+  // Load prompt files
+  $ton      = @file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt') ?: '';
+  $savoir   = @file_get_contents($theme_dir . '/assets/guide-prompt-savoir.txt') ?: '';
+  $regles   = @file_get_contents($theme_dir . '/assets/guide-prompt-regles.txt') ?: '';
+  $exemples = @file_get_contents($theme_dir . '/assets/guide-prompt-exemples.txt') ?: '';
+
+  // Load full catalog
+  require_once $theme_dir . '/inc/guide-data.php';
+  $all_products = sapi_guide_query_all_products($answers);
+
+  $catalog_lines = [];
+  foreach ($all_products as $p) {
+    $line = '- ' . $p['title'];
+    $line .= ' | Catégorie: ' . ($p['category_label'] ?? '');
+    $line .= ' | Format: ' . ($p['format'] ?? '');
+    $line .= ' | Ampoule: ' . ($p['type_ampoule'] ?? '');
+    if (!empty($p['variation_label'])) {
+      $line .= ' | Essence recommandée: ' . $p['variation_label'];
+    }
+    $line .= ' | Ventes: ' . ($p['total_sales'] ?? 0);
+    $line .= ' | ID: ' . $p['id'];
+    $line .= ' | URL: ' . ($p['permalink'] ?? '');
+
+    if (!empty($p['variations'])) {
+      $vars = [];
+      foreach ($p['variations'] as $v) {
+        $vars[] = $v['essence'] . ' ' . ($v['taille'] ?? '') . ' (var:' . $v['variation_id'] . ')';
+      }
+      $line .= ' | Variations: ' . implode(', ', $vars);
+    }
+
+    $catalog_lines[] = $line;
+  }
+
+  // Build answers summary
+  $answers_text = '';
+  $label_map = [
+    'piece' => 'Pièce', 'taille' => 'Taille', 'taille_escalier' => 'Type escalier',
+    'eclairage' => 'Éclairage', 'sortie' => 'Installation', 'hauteur' => 'Hauteur plafond',
+    'table' => 'Au-dessus table/îlot', 'style' => 'Style',
+  ];
+  foreach ($answers as $k => $v) {
+    $label = isset($label_map[$k]) ? $label_map[$k] : $k;
+    $answers_text .= '- ' . $label . ' : ' . $v . "\n";
+  }
+
+  // Compose system prompt
+  $prompt = $ton . "\n\n" . $savoir . "\n\n" . $regles . "\n\n";
+
+  $prompt .= "EXEMPLES DE CONSEILS PAR ÉTAPE (pour le ton et la direction) :\n";
+  $prompt .= $exemples . "\n\n";
+
+  $prompt .= "CATALOGUE COMPLET DES LUMINAIRES :\n";
+  $prompt .= implode("\n", $catalog_lines) . "\n\n";
+
+  if (!empty($answers_text)) {
+    $prompt .= "RÉPONSES DU CLIENT JUSQU'À PRÉSENT :\n" . $answers_text . "\n";
+  }
+
+  $prompt .= "CONTEXTE D'OUVERTURE : " . $opening_context . "\n";
+  if (!empty($context_data)) {
+    $prompt .= "DONNÉES CONTEXTUELLES : " . wp_json_encode($context_data) . "\n";
+  }
+  $prompt .= "ÉTAPE ACTUELLE : " . $step_id . "\n\n";
+
+  // Output format — différent selon texte libre ou pas
+  $is_free_text = !empty($user_message);
+
+  $prompt .= "FORMAT DE RÉPONSE (JSON strict, pas de markdown, pas de code fences) :\n";
+
+  if ($is_free_text) {
+    $prompt .= "Le client a écrit un message libre. Analyse ce qu'il dit et réponds.\n";
+
+    // Compteur d'échanges IA — limite à 3
+    $exchange_num = $ai_call_count + 1;
+    $prompt .= "\nÉCHANGE IA N°" . $exchange_num . " sur 3 maximum.\n";
+    if ($exchange_num >= 3) {
+      $prompt .= "C'est ton DERNIER échange. Tu DOIS conclure maintenant :\n";
+      $prompt .= "- Plus de boutons conversation. Uniquement des boutons liens (catalogue, contact, sur-mesure) ou questionnaire.\n";
+      $prompt .= "- Oriente le client vers une action concrète : voir les modèles, contacter Robin, ou imaginer un sur-mesure.\n";
+    } elseif ($exchange_num === 2) {
+      $prompt .= "C'est ton avant-dernier échange. Commence à orienter le client vers une action.\n";
+    }
+    $prompt .= "\n";
+    $prompt .= "{\n";
+    $prompt .= '  "conseil_text": "Ta réponse personnalisée (2-5 phrases, style Robin)",' . "\n";
+    $prompt .= '  "link_url": "/mes-creations/suspensions/" ou null,' . "\n";
+    $prompt .= '  "link_label": "Voir les suspensions" ou null,' . "\n";
+    $prompt .= '  "answered_steps": { "piece": "cuisine", "taille": "petite" } ou {} si rien déduit,' . "\n";
+    $prompt .= '  "suggested_buttons": [' . "\n";
+    $prompt .= '    { "label": "Voir les suspensions", "url": "/categorie-produit/suspensions/" },' . "\n";
+    $prompt .= '    { "label": "Contacter Robin", "url": "/contact/" },' . "\n";
+    $prompt .= '    { "label": "Sortie plafond", "slug": "plafond", "step_id": "sortie" }' . "\n";
+    $prompt .= '  ] ou [] si pas pertinent,' . "\n";
+    $prompt .= '  "next_step_id": "sortie" ou "hors_parcours" ou null' . "\n";
+    $prompt .= "}\n\n";
+
+    $prompt .= "RÈGLES TEXTE LIBRE :\n";
+    $prompt .= "- Analyse le message du client et déduis les réponses aux questions du questionnaire.\n";
+    $prompt .= "- answered_steps : les step_id → slug que tu as pu déduire du message. Utilise UNIQUEMENT les slugs valides des étapes du questionnaire.\n";
+
+    // Liste des slugs valides par étape
+    $prompt .= "- Slugs valides :\n";
+    require_once get_template_directory() . '/inc/guide-data.php';
+    $all_steps = sapi_guide_get_steps();
+    foreach ($all_steps as $s) {
+      $slugs = array_map(function($c) { return $c['slug']; }, $s['choices']);
+      $prompt .= '  - ' . $s['id'] . ' : ' . implode(', ', $slugs) . "\n";
+    }
+
+    $prompt .= "- next_step_id : la prochaine étape logique du questionnaire, ou 'hors_parcours' si le message sort du cadre.\n";
+    $prompt .= "- suggested_buttons : trois types possibles :\n";
+    $prompt .= "  - Bouton lien (ouvre une page) : { \"label\": \"...\", \"url\": \"/chemin/\" }\n";
+    $prompt .= "  - Bouton questionnaire (valide une étape) : { \"label\": \"...\", \"slug\": \"...\", \"step_id\": \"...\" }\n";
+    $prompt .= "  - Bouton conversation (continue la discussion) : { \"label\": \"...\" } — le label est renvoyé comme message\n";
+    $prompt .= "  URLs valides : /contact/, /mes-creations/?robin_selection=1, /sur-mesure/\n";
+    $prompt .= "- BOUTONS PAR DÉFAUT : si tu n'as pas de meilleure idée, utilise ces boutons liens :\n";
+
+    // Injecter les boutons par défaut selon le contexte
+    $taille = isset($answers['taille']) ? $answers['taille'] : '';
+    $hauteur = isset($answers['hauteur']) ? $answers['hauteur'] : '';
+    $show_sur_mesure_prompt = ($taille === 'grande' || $hauteur === 'haute');
+
+    $prompt .= '  { "label": "Voir les modèles filtrés pour votre projet", "url": "/mes-creations/?robin_selection=1" }' . "\n";
+    if ($show_sur_mesure_prompt) {
+      $prompt .= '  { "label": "Imaginer un modèle sur mesure", "url": "/sur-mesure/" }' . "\n";
+    } else {
+      $prompt .= '  { "label": "Contacter Robin", "url": "/contact/" }' . "\n";
+    }
+    $prompt .= "  Tu peux garder ces boutons, les remplacer, ou en ajouter selon ta réponse. Retourne la liste complète dans suggested_buttons.\n";
+    $prompt .= "- Si le message est une question hors questionnaire (livraison, prix, sur mesure...), réponds et mets next_step_id à 'hors_parcours'.\n";
+  } else {
+    $prompt .= "{\n";
+    $prompt .= '  "conseil_text": "Ton conseil personnalisé pour cette étape (2-4 phrases, style citation Robin)",' . "\n";
+    $prompt .= '  "link_url": "/mes-creations/suspensions/" ou null si pas pertinent,' . "\n";
+    $prompt .= '  "link_label": "Voir les suspensions" ou null' . "\n";
+    $prompt .= "}\n\n";
+  }
+
+  $prompt .= "RÈGLES IMPORTANTES :\n";
+  $prompt .= "- Le conseil_text doit être personnel et adapté.\n";
+  $prompt .= "- Ne répète pas la question, donne directement le conseil.\n";
+  $prompt .= "- Le link_url doit pointer vers une page existante du site (catégorie, page nos-créations, etc.) ou null.\n";
+  $prompt .= "- Pas de markdown. Texte brut uniquement.\n";
+  $prompt .= "- Pas de guillemets « » dans le texte (ils sont ajoutés côté front).\n";
+  $prompt .= "- Les labels des boutons : première lettre majuscule, reste en minuscule. Exemple : \"Voir les suspensions\", \"Contacter Robin\".\n";
+  $prompt .= "- CRITIQUE : ta réponse doit être UNIQUEMENT du JSON valide. Pas de texte avant, pas de texte après, pas de commentaire, pas d'analyse. Juste le JSON.\n";
+  $prompt .= "- Tu es l'assistant de Robin, l'artisan de l'Atelier Sâpi. Tu parles directement au visiteur, naturellement, sans prétendre être Robin. Tu connais bien ses créations et tu guides le client. Ne dis jamais 'le client', 'mon analyse', 'voici ma réflexion'. Quand tu parles de Robin ou de son travail, utilise la 3e personne (\"Robin\", \"son atelier\"). Pour tes recommandations, utilise le \"je\" naturellement (\"je vous recommande\").\n";
+
+  return $prompt;
+}
+
+/**
+ * Robin V2 — Call Claude API with custom user message.
+ */
+function sapi_robin_call_claude_step($system_prompt, $user_message) {
+  $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
+  if (empty($api_key)) {
+    return null;
+  }
+
+  $body = [
+    'model'      => 'claude-sonnet-4-6',
+    'max_tokens' => 512,
+    'system'     => $system_prompt,
+    'messages'   => [
+      ['role' => 'user', 'content' => $user_message],
+    ],
+  ];
+
+  $response = wp_remote_post('https://api.anthropic.com/v1/messages', [
+    'timeout' => 30,
+    'headers' => [
+      'Content-Type'      => 'application/json',
+      'x-api-key'         => $api_key,
+      'anthropic-version'  => '2023-06-01',
+    ],
+    'body' => wp_json_encode($body),
+  ]);
+
+  if (is_wp_error($response)) {
+    error_log('Robin V2 Claude API error: ' . $response->get_error_message());
+    return null;
+  }
+
+  $status   = wp_remote_retrieve_response_code($response);
+  $raw_body = wp_remote_retrieve_body($response);
+
+  if ($status !== 200) {
+    error_log('Robin V2 Claude API HTTP ' . $status . ': ' . $raw_body);
+    return null;
+  }
+
+  $data = json_decode($raw_body, true);
+  if (!isset($data['content'][0]['text'])) {
+    return null;
+  }
+
+  $text = $data['content'][0]['text'];
+
+  // Nettoyer les code fences
+  $text = preg_replace('/^```json\s*/i', '', trim($text));
+  $text = preg_replace('/\s*```$/i', '', $text);
+
+  // Essai 1 : parser directement
+  $parsed = json_decode(trim($text), true);
+  if ($parsed && isset($parsed['conseil_text'])) {
+    return $parsed;
+  }
+
+  // Essai 2 : extraire le JSON du texte (si Claude a mis du texte autour)
+  if (preg_match('/\{[\s\S]*"conseil_text"[\s\S]*\}/s', $text, $match)) {
+    $parsed = json_decode($match[0], true);
+    if ($parsed && isset($parsed['conseil_text'])) {
+      return $parsed;
+    }
+  }
+
+  // Essai 3 : extraire juste le conseil_text par regex
+  if (preg_match('/"conseil_text"\s*:\s*"((?:[^"\\\\]|\\\\.)*)"/s', $text, $m)) {
+    return ['conseil_text' => stripslashes($m[1]), 'link_url' => null, 'link_label' => null];
+  }
+
+  // Fallback : texte brut nettoyé
+  $clean = preg_replace('/\{[\s\S]*\}/', '', $text);
+  $clean = trim($clean);
+  if (!empty($clean)) {
+    return ['conseil_text' => $clean, 'link_url' => null, 'link_label' => null];
+  }
+
+  return ['conseil_text' => $text, 'link_url' => null, 'link_label' => null];
+}
+
 /**
  * Step 1 → WooCommerce product categories
  */
@@ -2061,10 +2908,9 @@ function sapi_guide_query_products(array $answers, array $categories) {
   $eclairage = isset($answers['eclairage']) ? $answers['eclairage'] : '';
 
   $allow_vertical = (
-    $eclairage === 'grappe' ||
     $piece === 'escalier' ||
-    ($piece === 'entree' && in_array($hauteur, ['grande', 'confortable'], true)) ||
-    ($taille === 'petite' && in_array($hauteur, ['grande', 'confortable'], true))
+    ($piece === 'entree' && in_array($hauteur, ['haute', 'confortable'], true)) ||
+    ($taille === 'petite' && in_array($hauteur, ['haute', 'confortable'], true))
   );
 
   if (in_array('suspensions', $categories) && !$allow_vertical) {
@@ -2076,8 +2922,12 @@ function sapi_guide_query_products(array $answers, array $categories) {
     ];
   }
 
-  // Règle B : escalier → exclure format horizontal (préférer boule ou vertical)
-  if ($piece === 'escalier' && in_array('suspensions', $categories)) {
+  // Règle B : exclure format horizontal dans les espaces étroits + hauts
+  $exclude_horizontal = (
+    ($piece === 'escalier') ||
+    ($taille === 'petite' && $hauteur === 'haute')
+  );
+  if ($exclude_horizontal && in_array('suspensions', $categories)) {
     $tax_query[] = [
       'taxonomy' => 'pa_format',
       'field'    => 'slug',
@@ -2312,8 +3162,8 @@ function sapi_guide_collect_results($query, array $answers, $skip_exclusions = f
       if ($taille_answer) {
         $taille_terms = wc_get_product_terms($product->get_id(), 'pa_taille', ['orderby' => 'menu_order']);
 
-        // Grande pièce : exclure les produits avec 2 tailles ou moins (sauf en refine)
-        if (!$skip_exclusions && $taille_answer === 'grande' && !empty($taille_terms) && count($taille_terms) <= 2) {
+        // Grande pièce + suspension : exclure les produits avec 2 tailles ou moins (sauf en refine)
+        if (!$skip_exclusions && $taille_answer === 'grande' && !empty($taille_terms) && count($taille_terms) <= 2 && array_intersect($cat_slugs, ['suspensions'])) {
           continue;
         }
 
@@ -2588,11 +3438,18 @@ function sapi_guide_build_system_prompt(array $products_data, array $answers, ar
   }
 
   // Format de réponse JSON
-  $prompt .= "\nFORMAT DE RÉPONSE (JSON strict, sans commentaires) :\n";
-  $prompt .= "{\n";
-  $prompt .= "  \"recommendation\": \"Texte expliquant pourquoi cette sélection correspond aux critères du client...\"";
+  $prompt .= "\nTEXTES À GÉNÉRER :\n";
+  $prompt .= "1. \"conseils_text\" (~150-200 mots) : Conseils CONCRETS, TECHNIQUES et FACTUELS adaptés au projet du client. Type d'éclairage selon la pièce, hauteur de suspension idéale, nombre de points lumineux, puissance recommandée, température de couleur, type d'ampoule, etc. NE mentionne AUCUN nom de modèle — le client verra sa sélection personnalisée sur une autre page. Reste purement sur le conseil technique et l'expertise artisanale.\n";
+  $prompt .= "2. \"selection_text\" (~60-80 mots) : Texte pour la page Nos Créations. Justifie le choix de ces modèles précis pour le projet du client. Explique pourquoi chaque type de luminaire recommandé correspond à sa situation (pièce, hauteur, style…). Plus technique et factuel que le texte conseils.\n";
   if ($show_sur_mesure) {
-    $prompt .= ",\n  \"sur_mesure_text\": \"Par exemple, Robin pourrait imaginer… (idée ouverte, 30 mots max)\"";
+    $prompt .= "3. \"sur_mesure_text\" (30 mots max) : DOIT commencer par \"Par exemple\" ou \"Et pourquoi pas\". Propose une IDÉE ouverte de création sur mesure, pas une solution. Reste rêveur et suggestif.\n";
+  }
+  $prompt .= "\nFORMAT DE RÉPONSE (JSON strict, sans commentaires, sans markdown) :\n";
+  $prompt .= "{\n";
+  $prompt .= "  \"conseils_text\": \"...\",\n";
+  $prompt .= "  \"selection_text\": \"...\"";
+  if ($show_sur_mesure) {
+    $prompt .= ",\n  \"sur_mesure_text\": \"...\"";
   }
   $prompt .= "\n}\n";
 
@@ -2652,10 +3509,10 @@ function sapi_guide_call_claude($system_prompt) {
   $text = preg_replace('/\s*```$/i', '', $text);
 
   $parsed = json_decode(trim($text), true);
-  if (!$parsed || !isset($parsed['recommendation'])) {
-    // If Claude didn't return valid JSON, use the raw text as recommendation
+  if (!$parsed || (!isset($parsed['conseils_text']) && !isset($parsed['recommendation']))) {
+    // If Claude didn't return valid JSON, use the raw text as conseils_text
     return [
-      'recommendation' => $text,
+      'conseils_text' => $text,
     ];
   }
 
@@ -3205,7 +4062,7 @@ function sapi_handle_surmesure_form() {
     return ['submitted' => true, 'success' => false, 'error' => 'Spam détecté.'];
   }
 
-  $name    = sanitize_text_field($_POST['name'] ?? '');
+  $name    = sanitize_text_field($_POST['fullname'] ?? '');
   $email   = sanitize_email($_POST['email'] ?? '');
   $message = sanitize_textarea_field($_POST['message'] ?? '');
 
@@ -3221,6 +4078,12 @@ function sapi_handle_surmesure_form() {
   $subject = '[Sur Mesure] Nouveau projet de ' . $name;
   $body    = "Nom: $name\n";
   $body   .= "Email: $email\n\n";
+  // Projet Robin (si existant)
+  $robin_project = sanitize_textarea_field($_POST['robin_project'] ?? '');
+  if (!empty($robin_project)) {
+    $body .= "Projet du client (questionnaire):\n$robin_project\n\n";
+  }
+
   $body   .= "Projet sur mesure:\n$message";
 
   $headers = [
@@ -3233,7 +4096,7 @@ function sapi_handle_surmesure_form() {
     return ['submitted' => true, 'success' => true, 'error' => ''];
   }
 
-  return ['submitted' => true, 'success' => false, 'error' => "Erreur lors de l'envoi. Veuillez réessayer ou nous contacter directement par email."];
+  return ['submitted' => true, 'success' => false, 'error' => "Erreur lors de l'envoi. Veuillez réessayer ou contacter Robin directement par email."];
 }
 
 /*
@@ -3352,7 +4215,7 @@ function sapi_guide_log_initial($session_id, $answers, $product_ids, $ai_text) {
     'session_id'     => $session_id,
     'created_at'     => current_time('mysql'),
     'piece'          => isset($answers['piece'])     ? $answers['piece']     : '',
-    'taille'         => isset($answers['taille'])    ? $answers['taille']    : '',
+    'taille'         => !empty($answers['taille']) ? $answers['taille'] : (!empty($answers['taille_escalier']) ? $answers['taille_escalier'] : ''),
     'eclairage'      => isset($answers['eclairage']) ? $answers['eclairage'] : '',
     'sortie'         => isset($answers['sortie'])    ? $answers['sortie']    : '',
     'hauteur'        => isset($answers['hauteur'])   ? $answers['hauteur']   : '',
@@ -3573,7 +4436,7 @@ function sapi_guide_admin_page() {
                   } elseif ($ref_path === '' || $ref_path === 'accueil') {
                     $ref_label = 'Accueil';
                   } elseif (strpos($ref_path, 'nos-creations') !== false) {
-                    $ref_label = 'Nos créations';
+                    $ref_label = 'Mes créations';
                   } else {
                     $ref_label = ucfirst(str_replace(['-', '/'], [' ', ' › '], $ref_path));
                   }
@@ -3638,5 +4501,48 @@ function sapi_guide_admin_page() {
     <?php endif; ?>
   </div>
   <?php
+}
+
+// ─── AJAX: Render product cards for Conseils page ───
+add_action('wp_ajax_sapi_conseils_products', 'sapi_ajax_conseils_products');
+add_action('wp_ajax_nopriv_sapi_conseils_products', 'sapi_ajax_conseils_products');
+
+function sapi_ajax_conseils_products() {
+  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
+    wp_send_json_error(['message' => 'Nonce invalide']);
+    return;
+  }
+
+  $ids_raw = isset($_POST['ids']) ? sanitize_text_field(wp_unslash($_POST['ids'])) : '[]';
+  $ids = json_decode($ids_raw, true);
+
+  if (!is_array($ids) || empty($ids)) {
+    wp_send_json_error('No product IDs');
+    return;
+  }
+
+  // Limit to 12 products max
+  $ids = array_slice(array_map('absint', $ids), 0, 12);
+
+  $query = new WP_Query([
+    'post_type'      => 'product',
+    'post__in'       => $ids,
+    'orderby'        => 'post__in',
+    'posts_per_page' => 12,
+  ]);
+
+  ob_start();
+  if ($query->have_posts()) {
+    echo '<ul class="products columns-4">';
+    while ($query->have_posts()) {
+      $query->the_post();
+      wc_get_template_part('content', 'product');
+    }
+    echo '</ul>';
+    wp_reset_postdata();
+  }
+  $html = ob_get_clean();
+
+  wp_send_json_success($html);
 }
 
