@@ -318,17 +318,6 @@
     state.contextData   = contextData || {};
     state.history       = [];
     state.conversation  = [];
-    state._recoShown       = false;
-    state._recoProductIds  = [];
-    state._filterActivated = false;
-    state._contactSent     = false;
-    state._contactName     = '';
-    state._contactEmail    = '';
-    state._contactPhone    = '';
-
-    // Nouvelle session pour le logging
-    _sessionId = '';
-    _sessionLogged = false;
 
     var startStep;
 
@@ -447,80 +436,9 @@
       state._recoInterval = null;
     }
 
-    // Log session via sendBeacon (un seul appel, pas de blocage)
-    logSession();
-
     saveState();
     refreshPageVisuals();
   }
-
-  /* ═══════════════════════════════════════════
-     Session logging — sendBeacon à la fermeture
-  ═══════════════════════════════════════════ */
-  var _sessionId = '';
-  var _sessionLogged = false;
-
-  function getSessionId() {
-    if (!_sessionId) {
-      // Générer un UUID simple
-      _sessionId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random() * 16 | 0;
-        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-      });
-    }
-    return _sessionId;
-  }
-
-  function logSession() {
-    if (_sessionLogged) return;
-    // Ne loguer que si le visiteur a interagi (au moins 1 réponse)
-    if (!state.answers || !Object.keys(state.answers).length) return;
-
-    _sessionLogged = true;
-
-    // Déterminer si le quiz est complet
-    var allSteps = steps || [];
-    var answeredCount = Object.keys(state.answers).length;
-    var completion = (state.answers.style) ? 'complete' : 'partial';
-
-    var payload = JSON.stringify({
-      nonce: NONCE,
-      session_id: getSessionId(),
-      opening_context: state.openingContext || '',
-      context_data: JSON.stringify(state.contextData || {}),
-      answers: JSON.stringify(state.answers || {}),
-      completion: completion,
-      reco_shown: state._recoShown ? 1 : 0,
-      reco_product_ids: (state._recoProductIds || []).join(','),
-      filter_activated: state._filterActivated ? 1 : 0,
-      ai_call_count: state.aiCallCount || 0,
-      conversation: JSON.stringify(state.conversation || []),
-      contact_sent: state._contactSent ? 1 : 0,
-      contact_name: state._contactName || '',
-      contact_email: state._contactEmail || '',
-      contact_phone: state._contactPhone || ''
-    });
-
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon(
-        AJAX_URL + '?action=sapi_robin_log_session',
-        new Blob([payload], { type: 'application/json' })
-      );
-    } else {
-      // Fallback XHR synchrone pour vieux navigateurs
-      var xhr = new XMLHttpRequest();
-      xhr.open('POST', AJAX_URL + '?action=sapi_robin_log_session', false);
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.send(payload);
-    }
-  }
-
-  // Filet de sécurité — si l'utilisateur ferme l'onglet avec la modale ouverte
-  window.addEventListener('beforeunload', function() {
-    if (state.isOpen) {
-      logSession();
-    }
-  });
 
   /* ═══════════════════════════════════════════
      Rendu d'une fiche
@@ -887,12 +805,6 @@
       var projectEl2 = document.getElementById('robin-modal-project');
       if (headerEl) headerEl.classList.add('is-collapsed');
       if (projectEl2) projectEl2.classList.add('is-collapsed');
-
-      // Tracker la recommandation vue
-      state._recoShown = true;
-      if (recoData && recoData.products) {
-        state._recoProductIds = recoData.products.map(function(p) { return String(p.id); });
-      }
 
       // Préparer le contenu DERRIÈRE le rideau (déjà en place)
       body.classList.add('robin-modal__body--reco');
