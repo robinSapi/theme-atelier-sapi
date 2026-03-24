@@ -154,13 +154,46 @@ $hero_url = $ambiance_1 ?: $main_image_url;
       }
     }
 
+    // Insérer les cards storytelling après la 3e et 5e photo
+    $storytelling_cards = [
+      3 => [
+        'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
+        'title' => '100% artisanal',
+        'text' => 'Conçu, découpé au laser et assemblé à la main par Robin dans son atelier lyonnais. Bois issu de forêts gérées durablement (PEFC).',
+        'link' => home_url('/lumiere-dartisan/'),
+        'link_label' => 'Découvrir l\'atelier',
+      ],
+      5 => [
+        'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+        'title' => 'Un accompagnement personnel',
+        'text' => 'Une question sur ce modèle ? Robin vous accompagne personnellement, du choix de l\'essence à l\'installation.',
+        'link' => home_url('/contact/'),
+        'link_label' => 'Contacter Robin',
+      ],
+    ];
+
+    $photo_index = 0;
     foreach ($all_mosaic as $photo) :
       $large_class = $photo['large'] ? ' star-mosaic__item--large' : '';
     ?>
     <div class="star-mosaic__item<?php echo $large_class; ?>">
       <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
     </div>
-    <?php endforeach; ?>
+    <?php
+      $photo_index++;
+      if (isset($storytelling_cards[$photo_index])) :
+        $card = $storytelling_cards[$photo_index];
+    ?>
+    <div class="star-mosaic__item star-mosaic__item--card">
+      <div class="star-storytelling__card">
+        <div class="star-storytelling__icon"><?php echo $card['icon']; ?></div>
+        <h3><?php echo esc_html($card['title']); ?></h3>
+        <p><?php echo esc_html($card['text']); ?></p>
+        <a href="<?php echo esc_url($card['link']); ?>" class="star-storytelling__link"><?php echo esc_html($card['link_label']); ?></a>
+      </div>
+    </div>
+    <?php endif;
+    endforeach; ?>
   </div>
 </section>
 
@@ -173,28 +206,6 @@ $hero_url = $ambiance_1 ?: $main_image_url;
   </div>
 </section>
 <?php endif; ?>
-
-<!-- ========== STORYTELLING ARTISANAT ========== -->
-<section class="star-storytelling">
-  <div class="star-storytelling__grid">
-    <div class="star-storytelling__card">
-      <div class="star-storytelling__icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      </div>
-      <h3>100% artisanal</h3>
-      <p>Ce luminaire est entièrement conçu, découpé au laser et assemblé à la main par Robin dans son atelier lyonnais. Chaque pièce est unique, fabriquée avec des bois issus de forêts gérées durablement (PEFC).</p>
-      <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="star-storytelling__link">Découvrir l'atelier</a>
-    </div>
-    <div class="star-storytelling__card">
-      <div class="star-storytelling__icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-      </div>
-      <h3>Un accompagnement personnel</h3>
-      <p>Une question sur ce modèle ? Besoin de conseils pour l'installer ou choisir la bonne essence de bois ? Robin vous accompagne personnellement, du choix à l'installation.</p>
-      <a href="<?php echo esc_url(home_url('/contact/')); ?>" class="star-storytelling__link">Contacter Robin</a>
-    </div>
-  </div>
-</section>
 
 <!-- ========== CTA FINAL ========== -->
 <section class="star-cta">

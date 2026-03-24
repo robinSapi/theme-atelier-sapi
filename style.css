@@ -21472,31 +21472,23 @@ html.sapi-intro-active body {
   color: var(--color-dark);
 }
 
-/* Storytelling artisanat */
-.star-storytelling {
-  padding: 4rem 2rem;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.star-storytelling__grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
+/* Storytelling cards dans la mosaïque */
+.star-mosaic__item--card {
+  display: flex;
+  align-items: stretch;
+  aspect-ratio: auto;
 }
 
 .star-storytelling__card {
-  background: var(--color-cream, #FEFDFB);
-  border: 1px solid rgba(147, 125, 104, 0.1);
-  border-radius: 16px;
-  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: var(--color-warm, #FBF6EA);
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
   text-align: center;
-  transition: transform 0.3s var(--ease-smooth), box-shadow 0.3s var(--ease-smooth);
-}
-
-.star-storytelling__card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(147, 125, 104, 0.12);
 }
 
 .star-storytelling__icon {
@@ -21649,13 +21641,8 @@ html.sapi-intro-active body {
     font-size: 2rem;
   }
 
-  .star-storytelling__grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .star-storytelling__card {
-    padding: 2rem 1.5rem;
+  .star-mosaic__item--card {
+    grid-column: span 2;
   }
 
   .star-cta {
