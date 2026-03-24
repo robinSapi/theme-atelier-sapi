@@ -326,11 +326,8 @@
     state._contactEmail    = '';
     state._contactPhone    = '';
 
-    // Réutiliser la session existante si le visiteur a déjà des réponses
-    // Nouvelle session uniquement si aucune réponse en cours
-    if (!hasAnyAnswer()) {
-      _sessionId = '';
-    }
+    // Nouvelle session pour le logging
+    _sessionId = '';
     _sessionLogged = false;
 
     var startStep;
@@ -460,24 +457,16 @@
   /* ═══════════════════════════════════════════
      Session logging — sendBeacon à la fermeture
   ═══════════════════════════════════════════ */
+  var _sessionId = '';
   var _sessionLogged = false;
-
-  // Persister le sessionId dans localStorage pour regrouper les réouvertures
-  var _sessionId = (function() {
-    var prefs = safeLoad();
-    return prefs._robinSessionId || '';
-  })();
 
   function getSessionId() {
     if (!_sessionId) {
+      // Générer un UUID simple
       _sessionId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
         var r = Math.random() * 16 | 0;
         return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
       });
-      // Persister dans localStorage
-      var prefs = safeLoad();
-      prefs._robinSessionId = _sessionId;
-      safeSave(prefs);
     }
     return _sessionId;
   }
