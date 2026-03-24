@@ -75,12 +75,6 @@ $all_photos = array_filter(array_merge(
 // Hero = ambiance_1 ou image principale
 $hero_url = $ambiance_1 ?: $main_image_url;
 
-// Données techniques
-$dimensions = $has_acf ? get_field('dimensions', $star_id) : '';
-$bois       = $has_acf ? get_field('bois', $star_id) : '';
-$finition   = $has_acf ? get_field('finition', $star_id) : '';
-$culot      = $has_acf ? get_field('culot', $star_id) : '';
-$poids      = $has_acf ? get_field('poids', $star_id) : '';
 
 ?>
 
@@ -180,46 +174,27 @@ $poids      = $has_acf ? get_field('poids', $star_id) : '';
 </section>
 <?php endif; ?>
 
-<!-- ========== FICHE TECHNIQUE ========== -->
-<?php if ($dimensions || $bois || $finition || $culot) : ?>
-<section class="star-specs">
-  <div class="star-specs__inner">
-    <h2>Fiche technique</h2>
-    <div class="star-specs__grid">
-      <?php if ($dimensions) : ?>
-      <div class="star-specs__item">
-        <span class="star-specs__label">Dimensions</span>
-        <span class="star-specs__value"><?php echo esc_html($dimensions); ?></span>
+<!-- ========== STORYTELLING ARTISANAT ========== -->
+<section class="star-storytelling">
+  <div class="star-storytelling__grid">
+    <div class="star-storytelling__card">
+      <div class="star-storytelling__icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
       </div>
-      <?php endif; ?>
-      <?php if ($bois) : ?>
-      <div class="star-specs__item">
-        <span class="star-specs__label">Bois</span>
-        <span class="star-specs__value"><?php echo esc_html($bois); ?></span>
+      <h3>100% artisanal</h3>
+      <p>Ce luminaire est entièrement conçu, découpé au laser et assemblé à la main par Robin dans son atelier lyonnais. Chaque pièce est unique, fabriquée avec des bois issus de forêts gérées durablement (PEFC).</p>
+      <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="star-storytelling__link">Découvrir l'atelier</a>
+    </div>
+    <div class="star-storytelling__card">
+      <div class="star-storytelling__icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       </div>
-      <?php endif; ?>
-      <?php if ($finition) : ?>
-      <div class="star-specs__item">
-        <span class="star-specs__label">Finition</span>
-        <span class="star-specs__value"><?php echo esc_html($finition); ?></span>
-      </div>
-      <?php endif; ?>
-      <?php if ($culot) : ?>
-      <div class="star-specs__item">
-        <span class="star-specs__label">Culot</span>
-        <span class="star-specs__value"><?php echo esc_html($culot); ?></span>
-      </div>
-      <?php endif; ?>
-      <?php if ($poids) : ?>
-      <div class="star-specs__item">
-        <span class="star-specs__label">Poids</span>
-        <span class="star-specs__value"><?php echo esc_html($poids); ?></span>
-      </div>
-      <?php endif; ?>
+      <h3>Un accompagnement personnel</h3>
+      <p>Une question sur ce modèle ? Besoin de conseils pour l'installer ou choisir la bonne essence de bois ? Robin vous accompagne personnellement, du choix à l'installation.</p>
+      <a href="<?php echo esc_url(home_url('/contact/')); ?>" class="star-storytelling__link">Contacter Robin</a>
     </div>
   </div>
 </section>
-<?php endif; ?>
 
 <!-- ========== CTA FINAL ========== -->
 <section class="star-cta">
