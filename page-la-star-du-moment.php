@@ -122,27 +122,45 @@ $poids      = $has_acf ? get_field('poids', $star_id) : '';
   </div>
   <?php endif; ?>
 
-  <!-- Mosaïque de photos ACF -->
+  <!-- Mosaïque de photos -->
   <div class="star-mosaic">
     <?php
-    // Construire la liste des photos ACF disponibles
-    $acf_photos = array_filter([
-      ['url' => $bandeau,    'alt' => 'Bandeau',    'large' => true],
-      ['url' => $ambiance_1, 'alt' => 'Ambiance',   'large' => false],
-      ['url' => $detail_1,   'alt' => 'Détail',     'large' => false],
-      ['url' => $detail_2,   'alt' => 'Détail',     'large' => false],
-      ['url' => $ambiance_2, 'alt' => 'Ambiance',   'large' => true],
-      ['url' => $ambiance_3, 'alt' => 'Ambiance',   'large' => false],
-    ], function($p) { return !empty($p['url']); });
+    // Toutes les photos : ACF + produit principale + galerie WooCommerce
+    // On évite les doublons via les URLs
+    $seen_urls = [];
+    $all_mosaic = [];
 
-    // Si peu de photos ACF, compléter avec la galerie WooCommerce
-    if (count($acf_photos) < 4) {
-      foreach ($gallery_urls as $gurl) {
-        $acf_photos[] = ['url' => $gurl, 'alt' => 'Galerie', 'large' => false];
+    // 1. Photos ACF (ordre éditorial)
+    $acf_candidates = [
+      ['url' => $bandeau,    'alt' => 'Bandeau',  'large' => true],
+      ['url' => $ambiance_1, 'alt' => 'Ambiance', 'large' => false],
+      ['url' => $detail_1,   'alt' => 'Détail',   'large' => false],
+      ['url' => $detail_2,   'alt' => 'Détail',   'large' => false],
+      ['url' => $ambiance_2, 'alt' => 'Ambiance', 'large' => true],
+      ['url' => $ambiance_3, 'alt' => 'Ambiance', 'large' => false],
+    ];
+    foreach ($acf_candidates as $p) {
+      if (!empty($p['url']) && !isset($seen_urls[$p['url']])) {
+        $all_mosaic[] = $p;
+        $seen_urls[$p['url']] = true;
       }
     }
 
-    foreach ($acf_photos as $photo) :
+    // 2. Photo principale produit
+    if ($main_image_url && !isset($seen_urls[$main_image_url])) {
+      $all_mosaic[] = ['url' => $main_image_url, 'alt' => 'Produit', 'large' => false];
+      $seen_urls[$main_image_url] = true;
+    }
+
+    // 3. Galerie WooCommerce
+    foreach ($gallery_urls as $gurl) {
+      if (!isset($seen_urls[$gurl])) {
+        $all_mosaic[] = ['url' => $gurl, 'alt' => 'Galerie', 'large' => false];
+        $seen_urls[$gurl] = true;
+      }
+    }
+
+    foreach ($all_mosaic as $photo) :
       $large_class = $photo['large'] ? ' star-mosaic__item--large' : '';
     ?>
     <div class="star-mosaic__item<?php echo $large_class; ?>">
