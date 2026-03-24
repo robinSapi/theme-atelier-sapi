@@ -173,7 +173,7 @@ if ($accroche || $texte_principal || $descriptif) :
       $inline_cards[2] = ['type' => 'descriptif', 'content' => $descriptif];
     }
 
-    // Cards storytelling en positions 4 et 6
+    // Card storytelling 1 en position 4
     $inline_cards[4] = [
       'type' => 'storytelling',
       'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
@@ -182,7 +182,11 @@ if ($accroche || $texte_principal || $descriptif) :
       'link' => home_url('/lumiere-dartisan/'),
       'link_label' => 'Découvrir l\'atelier',
     ];
-    $inline_cards[6] = [
+
+    // Card storytelling 2 en avant-dernière position
+    $total_photos = count($all_mosaic);
+    $avant_derniere = max(5, $total_photos - 1);
+    $inline_cards[$avant_derniere] = [
       'type' => 'storytelling',
       'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
       'title' => 'Un accompagnement personnel',
