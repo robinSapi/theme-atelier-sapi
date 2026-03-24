@@ -79,10 +79,6 @@ $finition   = $has_acf ? get_field('finition', $star_id) : '';
 $culot      = $has_acf ? get_field('culot', $star_id) : '';
 $poids      = $has_acf ? get_field('poids', $star_id) : '';
 
-// Formater le nom avec le product-name-formatter (prénom + nom)
-$name_parts = explode(' ', $name, 2);
-$firstname  = $name_parts[0] ?? '';
-$restname   = $name_parts[1] ?? '';
 ?>
 
 <!-- ========== HERO PLEIN ÉCRAN ========== -->
@@ -96,12 +92,7 @@ $restname   = $name_parts[1] ?? '';
   <div class="star-hero__overlay"></div>
   <div class="star-hero__content">
     <span class="star-hero__badge">La star du moment</span>
-    <h1 class="star-hero__title">
-      <span class="product-firstname"><?php echo esc_html($firstname); ?></span>
-      <?php if ($restname) : ?>
-        <span class="product-restname"><?php echo esc_html($restname); ?></span>
-      <?php endif; ?>
-    </h1>
+    <h1 class="star-hero__title product-name"><?php echo esc_html($name); ?></h1>
     <?php if ($phrase_accroche) : ?>
       <p class="star-hero__accroche"><?php echo esc_html($phrase_accroche); ?></p>
     <?php endif; ?>
@@ -215,12 +206,7 @@ $restname   = $name_parts[1] ?? '';
 <!-- ========== CTA FINAL ========== -->
 <section class="star-cta">
   <div class="star-cta__inner">
-    <h2 class="star-cta__title">
-      <span class="product-firstname"><?php echo esc_html($firstname); ?></span>
-      <?php if ($restname) : ?>
-        <span class="product-restname"><?php echo esc_html($restname); ?></span>
-      <?php endif; ?>
-    </h2>
+    <h2 class="star-cta__title product-name"><?php echo esc_html($name); ?></h2>
     <div class="star-cta__price"><?php echo $price; ?></div>
     <a href="<?php echo esc_url($permalink); ?>" class="star-cta__btn">
       Découvrir ce luminaire
