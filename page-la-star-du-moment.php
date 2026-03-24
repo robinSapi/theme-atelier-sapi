@@ -36,7 +36,8 @@ endif;
 $name       = $star_product->get_name();
 $price      = $star_product->get_price_html();
 $permalink  = get_permalink($star_id);
-$short_desc = $star_product->get_short_description();
+$description = $star_product->get_description();
+$short_desc  = $star_product->get_short_description();
 
 // ACF fields
 $has_acf          = function_exists('get_field');
@@ -103,14 +104,20 @@ $hero_url = $ambiance_1 ?: $main_image_url;
 </section>
 
 <!-- ========== PRÉSENTATION ========== -->
-<?php if ($short_desc || $mini_desc || $descriptif) : ?>
+<?php
+// Accroche : phrase_daccroche ou mini_description
+$accroche = $phrase_accroche ?: $mini_desc;
+// Texte principal : description longue WooCommerce
+$texte_principal = $description ?: $short_desc;
+if ($accroche || $texte_principal || $descriptif) :
+?>
 <section class="star-presentation">
   <div class="star-presentation__inner">
-    <?php if ($mini_desc) : ?>
-      <p class="star-presentation__accroche"><?php echo esc_html($mini_desc); ?></p>
+    <?php if ($accroche) : ?>
+      <p class="star-presentation__accroche"><?php echo esc_html($accroche); ?></p>
     <?php endif; ?>
-    <?php if ($short_desc) : ?>
-      <div class="star-presentation__desc"><?php echo wp_kses_post($short_desc); ?></div>
+    <?php if ($texte_principal) : ?>
+      <div class="star-presentation__desc"><?php echo wp_kses_post($texte_principal); ?></div>
     <?php endif; ?>
     <?php if ($descriptif) : ?>
       <div class="star-presentation__detail"><?php echo wp_kses_post($descriptif); ?></div>
