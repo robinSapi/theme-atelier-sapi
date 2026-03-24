@@ -21456,8 +21456,21 @@ html.sapi-intro-active body {
 
 .star-mosaic__item--large {
   grid-column: span 2;
+  aspect-ratio: 16 / 9;
+}
+
+.star-mosaic__item--tall {
   grid-row: span 2;
   aspect-ratio: auto;
+}
+
+.star-mosaic__item--wide {
+  grid-column: span 2;
+  aspect-ratio: 21 / 9;
+}
+
+.star-mosaic__item--landscape {
+  aspect-ratio: 3 / 2;
 }
 
 .star-mosaic__item img {
@@ -21715,10 +21728,20 @@ html.sapi-intro-active body {
     gap: 0.5rem;
   }
 
-  .star-mosaic__item--large {
+  .star-mosaic__item--large,
+  .star-mosaic__item--wide {
     grid-column: span 2;
     grid-row: span 1;
     aspect-ratio: 16 / 10;
+  }
+
+  .star-mosaic__item--tall {
+    grid-row: span 1;
+    aspect-ratio: 1 / 1;
+  }
+
+  .star-mosaic__item--landscape {
+    aspect-ratio: 1 / 1;
   }
 
   .star-pourquoi {

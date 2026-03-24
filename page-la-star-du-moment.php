@@ -135,14 +135,14 @@ if ($accroche || $texte_principal || $descriptif) :
     $seen_urls = [];
     $all_mosaic = [];
 
-    // 1. Photos ACF (ordre éditorial)
+    // 1. Photos ACF (ordre éditorial, avec variantes de format)
     $acf_candidates = [
-      ['url' => $bandeau,    'alt' => 'Bandeau',  'large' => true],
-      ['url' => $ambiance_1, 'alt' => 'Ambiance', 'large' => false],
-      ['url' => $detail_1,   'alt' => 'Détail',   'large' => false],
-      ['url' => $detail_2,   'alt' => 'Détail',   'large' => false],
-      ['url' => $ambiance_2, 'alt' => 'Ambiance', 'large' => true],
-      ['url' => $ambiance_3, 'alt' => 'Ambiance', 'large' => false],
+      ['url' => $bandeau,    'alt' => 'Bandeau',  'variant' => 'large'],
+      ['url' => $ambiance_1, 'alt' => 'Ambiance', 'variant' => 'tall'],
+      ['url' => $detail_1,   'alt' => 'Détail',   'variant' => ''],
+      ['url' => $detail_2,   'alt' => 'Détail',   'variant' => 'landscape'],
+      ['url' => $ambiance_2, 'alt' => 'Ambiance', 'variant' => 'wide'],
+      ['url' => $ambiance_3, 'alt' => 'Ambiance', 'variant' => ''],
     ];
     foreach ($acf_candidates as $p) {
       if (!empty($p['url']) && !isset($seen_urls[$p['url']])) {
@@ -153,15 +153,18 @@ if ($accroche || $texte_principal || $descriptif) :
 
     // 2. Photo principale produit
     if ($main_image_url && !isset($seen_urls[$main_image_url])) {
-      $all_mosaic[] = ['url' => $main_image_url, 'alt' => 'Produit', 'large' => false];
+      $all_mosaic[] = ['url' => $main_image_url, 'alt' => 'Produit', 'variant' => ''];
       $seen_urls[$main_image_url] = true;
     }
 
-    // 3. Galerie WooCommerce
+    // 3. Galerie WooCommerce (alterner les formats)
+    $gallery_variants = ['landscape', '', 'tall', '', 'landscape', ''];
+    $gi = 0;
     foreach ($gallery_urls as $gurl) {
       if (!isset($seen_urls[$gurl])) {
-        $all_mosaic[] = ['url' => $gurl, 'alt' => 'Galerie', 'large' => false];
+        $all_mosaic[] = ['url' => $gurl, 'alt' => 'Galerie', 'variant' => $gallery_variants[$gi % count($gallery_variants)]];
         $seen_urls[$gurl] = true;
+        $gi++;
       }
     }
 
@@ -197,9 +200,9 @@ if ($accroche || $texte_principal || $descriptif) :
 
     $photo_index = 0;
     foreach ($all_mosaic as $photo) :
-      $large_class = $photo['large'] ? ' star-mosaic__item--large' : '';
+      $variant_class = !empty($photo['variant']) ? ' star-mosaic__item--' . $photo['variant'] : '';
     ?>
-    <div class="star-mosaic__item<?php echo $large_class; ?>">
+    <div class="star-mosaic__item<?php echo $variant_class; ?>">
       <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
     </div>
     <?php
