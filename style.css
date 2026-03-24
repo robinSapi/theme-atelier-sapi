@@ -21389,31 +21389,67 @@ html.sapi-intro-active body {
   50% { transform: translateY(8px); }
 }
 
+/* Présentation produit */
+.star-presentation {
+  padding: 5rem 2rem;
+  background: var(--color-cream, #FEFDFB);
+}
+
+.star-presentation__inner {
+  max-width: 750px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.star-presentation__accroche {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  color: var(--color-wood);
+  margin: 0 0 2rem;
+  line-height: 1.3;
+}
+
+.star-presentation__desc {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.9;
+  color: var(--color-dark);
+  margin: 0 0 1.5rem;
+}
+
+.star-presentation__detail {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--color-dark);
+  opacity: 0.8;
+  margin: 0 0 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(147, 125, 104, 0.15);
+}
+
+.star-presentation__link {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-wood, #937D68);
+  text-decoration: none;
+  border-bottom: 1.5px solid rgba(147, 125, 104, 0.3);
+  padding-bottom: 2px;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.star-presentation__link:hover {
+  color: var(--color-orange, #E35B24);
+  border-bottom-color: var(--color-orange, #E35B24);
+}
+
 /* Galerie immersive */
 .star-galerie {
   max-width: 1400px;
   margin: 0 auto;
   padding: 4rem 2rem;
-}
-
-.star-intro {
-  max-width: 800px;
-  margin: 0 auto 3rem;
-  text-align: center;
-}
-
-.star-intro__mini {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  color: var(--color-wood);
-  margin: 0 0 1.5rem;
-}
-
-.star-intro__text {
-  font-family: var(--font-body);
-  font-size: 1rem;
-  line-height: 1.8;
-  color: var(--color-dark);
 }
 
 /* Mosaïque photos */
@@ -21614,12 +21650,16 @@ html.sapi-intro-active body {
     font-size: 0.95rem;
   }
 
-  .star-galerie {
-    padding: 2.5rem 1rem;
+  .star-presentation {
+    padding: 3rem 1.5rem;
   }
 
-  .star-intro__mini {
-    font-size: 1.6rem;
+  .star-presentation__accroche {
+    font-size: 1.7rem;
+  }
+
+  .star-galerie {
+    padding: 2.5rem 1rem;
   }
 
   .star-mosaic {

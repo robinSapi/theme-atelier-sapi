@@ -102,19 +102,26 @@ $hero_url = $ambiance_1 ?: $main_image_url;
   </div>
 </section>
 
-<!-- ========== GALERIE IMMERSIVE ========== -->
-<section class="star-galerie" id="star-galerie">
-
-  <?php if ($mini_desc || $descriptif) : ?>
-  <div class="star-intro">
+<!-- ========== PRÉSENTATION ========== -->
+<?php if ($short_desc || $mini_desc || $descriptif) : ?>
+<section class="star-presentation">
+  <div class="star-presentation__inner">
     <?php if ($mini_desc) : ?>
-      <p class="star-intro__mini"><?php echo esc_html($mini_desc); ?></p>
+      <p class="star-presentation__accroche"><?php echo esc_html($mini_desc); ?></p>
+    <?php endif; ?>
+    <?php if ($short_desc) : ?>
+      <div class="star-presentation__desc"><?php echo wp_kses_post($short_desc); ?></div>
     <?php endif; ?>
     <?php if ($descriptif) : ?>
-      <div class="star-intro__text"><?php echo wp_kses_post($descriptif); ?></div>
+      <div class="star-presentation__detail"><?php echo wp_kses_post($descriptif); ?></div>
     <?php endif; ?>
+    <a href="<?php echo esc_url($permalink); ?>" class="star-presentation__link">Voir la fiche complète &rarr;</a>
   </div>
-  <?php endif; ?>
+</section>
+<?php endif; ?>
+
+<!-- ========== GALERIE IMMERSIVE ========== -->
+<section class="star-galerie" id="star-galerie">
 
   <!-- Mosaïque de photos -->
   <div class="star-mosaic">
