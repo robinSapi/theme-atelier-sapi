@@ -119,9 +119,6 @@ if ($accroche || $texte_principal || $descriptif) :
     <?php if ($texte_principal) : ?>
       <div class="star-presentation__desc"><?php echo wp_kses_post($texte_principal); ?></div>
     <?php endif; ?>
-    <?php if ($descriptif) : ?>
-      <div class="star-presentation__detail"><?php echo wp_kses_post($descriptif); ?></div>
-    <?php endif; ?>
     <a href="<?php echo esc_url($permalink); ?>" class="star-presentation__link">Voir la fiche complète &rarr;</a>
   </div>
 </section>
@@ -168,22 +165,30 @@ if ($accroche || $texte_principal || $descriptif) :
       }
     }
 
-    // Insérer les cards storytelling après la 3e et 5e photo
-    $storytelling_cards = [
-      3 => [
-        'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
-        'title' => '100% artisanal',
-        'text' => 'Conçu, découpé au laser et assemblé à la main par Robin dans son atelier lyonnais. Bois issu de forêts gérées durablement (PEFC).',
-        'link' => home_url('/lumiere-dartisan/'),
-        'link_label' => 'Découvrir l\'atelier',
-      ],
-      5 => [
-        'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
-        'title' => 'Un accompagnement personnel',
-        'text' => 'Une question sur ce modèle ? Robin vous accompagne personnellement, du choix de l\'essence à l\'installation.',
-        'link' => home_url('/contact/'),
-        'link_label' => 'Contacter Robin',
-      ],
+    // Cards à insérer dans la grille (position = après la Nème photo)
+    $inline_cards = [];
+
+    // Card descriptif en position 2
+    if ($descriptif) {
+      $inline_cards[2] = ['type' => 'descriptif', 'content' => $descriptif];
+    }
+
+    // Cards storytelling en positions 4 et 6
+    $inline_cards[4] = [
+      'type' => 'storytelling',
+      'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
+      'title' => '100% artisanal',
+      'text' => 'Conçu, découpé au laser et assemblé à la main par Robin dans son atelier lyonnais. Bois issu de forêts gérées durablement (PEFC).',
+      'link' => home_url('/lumiere-dartisan/'),
+      'link_label' => 'Découvrir l\'atelier',
+    ];
+    $inline_cards[6] = [
+      'type' => 'storytelling',
+      'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+      'title' => 'Un accompagnement personnel',
+      'text' => 'Une question sur ce modèle ? Robin vous accompagne personnellement, du choix de l\'essence à l\'installation.',
+      'link' => home_url('/contact/'),
+      'link_label' => 'Contacter Robin',
     ];
 
     $photo_index = 0;
@@ -195,9 +200,16 @@ if ($accroche || $texte_principal || $descriptif) :
     </div>
     <?php
       $photo_index++;
-      if (isset($storytelling_cards[$photo_index])) :
-        $card = $storytelling_cards[$photo_index];
+      if (isset($inline_cards[$photo_index])) :
+        $card = $inline_cards[$photo_index];
+        if ($card['type'] === 'descriptif') :
     ?>
+    <div class="star-mosaic__item star-mosaic__item--card star-mosaic__item--descriptif">
+      <div class="star-descriptif__card">
+        <?php echo wp_kses_post($card['content']); ?>
+      </div>
+    </div>
+    <?php   else : ?>
     <div class="star-mosaic__item star-mosaic__item--card">
       <div class="star-storytelling__card">
         <div class="star-storytelling__icon"><?php echo $card['icon']; ?></div>
@@ -206,7 +218,9 @@ if ($accroche || $texte_principal || $descriptif) :
         <a href="<?php echo esc_url($card['link']); ?>" class="star-storytelling__link"><?php echo esc_html($card['link_label']); ?></a>
       </div>
     </div>
-    <?php endif;
+    <?php
+        endif;
+      endif;
     endforeach; ?>
   </div>
 </section>

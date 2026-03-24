@@ -21411,21 +21411,10 @@ html.sapi-intro-active body {
 
 .star-presentation__desc {
   font-family: var(--font-body);
-  font-size: 1.05rem;
+  font-size: 1.2rem;
   line-height: 1.9;
   color: var(--color-dark);
-  margin: 0 0 1.5rem;
-}
-
-.star-presentation__detail {
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  line-height: 1.8;
-  color: var(--color-dark);
-  opacity: 0.8;
   margin: 0 0 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(147, 125, 104, 0.15);
 }
 
 .star-presentation__link {
@@ -21515,12 +21504,71 @@ html.sapi-intro-active body {
   aspect-ratio: auto;
 }
 
+/* Card descriptif dans la mosaïque */
+.star-mosaic__item--descriptif {
+  grid-column: span 2;
+}
+
+.star-descriptif__card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--color-cream, #FEFDFB);
+  border: 1px solid rgba(147, 125, 104, 0.1);
+  border-radius: 12px;
+  padding: 2rem 2.5rem;
+  text-align: left;
+}
+
+.star-descriptif__card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.star-descriptif__card li {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--color-dark);
+  padding: 0.4rem 0 0.4rem 1.5rem;
+  position: relative;
+}
+
+.star-descriptif__card li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.85rem;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-wood, #937D68);
+}
+
+.star-descriptif__card p {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--color-dark);
+  margin: 0 0 0.5rem;
+}
+
+.star-descriptif__card a {
+  color: var(--color-orange, #E35B24);
+  font-weight: 600;
+}
+
+/* Card storytelling dans la mosaïque */
 .star-storytelling__card {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
+  height: 100%;
   background: var(--color-warm, #FBF6EA);
   border-radius: 12px;
   padding: 2rem 1.5rem;
@@ -21681,8 +21729,13 @@ html.sapi-intro-active body {
     font-size: 2rem;
   }
 
-  .star-mosaic__item--card {
+  .star-mosaic__item--card,
+  .star-mosaic__item--descriptif {
     grid-column: span 2;
+  }
+
+  .star-descriptif__card {
+    padding: 1.5rem;
   }
 
   .star-cta {
