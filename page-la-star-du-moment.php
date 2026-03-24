@@ -45,10 +45,13 @@ $mini_desc        = $has_acf ? get_field('mini_description', $star_id) : '';
 $pourquoi         = $has_acf ? get_field('pourquoi_cette_piece', $star_id) : '';
 $descriptif       = $has_acf ? get_field('descriptif', $star_id) : '';
 
-// Photos : ambiance ACF
+// Photos ACF
 $ambiance_1 = $has_acf ? sapi_get_acf_image_url(get_field('ambiance_1', $star_id)) : '';
 $ambiance_2 = $has_acf ? sapi_get_acf_image_url(get_field('ambiance_2', $star_id)) : '';
 $ambiance_3 = $has_acf ? sapi_get_acf_image_url(get_field('ambiance_3', $star_id)) : '';
+$bandeau    = $has_acf ? sapi_get_acf_image_url(get_field('bandeau', $star_id)) : '';
+$detail_1   = $has_acf ? sapi_get_acf_image_url(get_field('detail_1', $star_id)) : '';
+$detail_2   = $has_acf ? sapi_get_acf_image_url(get_field('detail_2', $star_id)) : '';
 
 // Photo principale produit
 $main_image_id  = $star_product->get_image_id();
@@ -119,36 +122,33 @@ $poids      = $has_acf ? get_field('poids', $star_id) : '';
   </div>
   <?php endif; ?>
 
-  <!-- Mosaïque de photos -->
+  <!-- Mosaïque de photos ACF -->
   <div class="star-mosaic">
     <?php
-    // Photo principale grande
-    ?>
-    <div class="star-mosaic__item star-mosaic__item--large">
-      <img src="<?php echo esc_url($main_image_url); ?>" alt="<?php echo esc_attr($name); ?>" loading="lazy" />
-    </div>
+    // Construire la liste des photos ACF disponibles
+    $acf_photos = array_filter([
+      ['url' => $bandeau,    'alt' => 'Bandeau',    'large' => true],
+      ['url' => $ambiance_1, 'alt' => 'Ambiance',   'large' => false],
+      ['url' => $detail_1,   'alt' => 'Détail',     'large' => false],
+      ['url' => $detail_2,   'alt' => 'Détail',     'large' => false],
+      ['url' => $ambiance_2, 'alt' => 'Ambiance',   'large' => true],
+      ['url' => $ambiance_3, 'alt' => 'Ambiance',   'large' => false],
+    ], function($p) { return !empty($p['url']); });
 
-    <?php if ($ambiance_2) : ?>
-    <div class="star-mosaic__item">
-      <img src="<?php echo esc_url($ambiance_2); ?>" alt="<?php echo esc_attr($name); ?> - Ambiance" loading="lazy" />
-    </div>
-    <?php endif; ?>
+    // Si peu de photos ACF, compléter avec la galerie WooCommerce
+    if (count($acf_photos) < 4) {
+      foreach ($gallery_urls as $gurl) {
+        $acf_photos[] = ['url' => $gurl, 'alt' => 'Galerie', 'large' => false];
+      }
+    }
 
-    <?php
-    // Galerie WooCommerce
-    foreach (array_slice($gallery_urls, 0, 4) as $i => $gurl) :
-      $large_class = ($i === 1) ? ' star-mosaic__item--large' : '';
+    foreach ($acf_photos as $photo) :
+      $large_class = $photo['large'] ? ' star-mosaic__item--large' : '';
     ?>
     <div class="star-mosaic__item<?php echo $large_class; ?>">
-      <img src="<?php echo esc_url($gurl); ?>" alt="<?php echo esc_attr($name); ?> - Photo <?php echo $i + 1; ?>" loading="lazy" />
+      <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
     </div>
     <?php endforeach; ?>
-
-    <?php if ($ambiance_3) : ?>
-    <div class="star-mosaic__item">
-      <img src="<?php echo esc_url($ambiance_3); ?>" alt="<?php echo esc_attr($name); ?> - Ambiance" loading="lazy" />
-    </div>
-    <?php endif; ?>
   </div>
 </section>
 
