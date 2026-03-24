@@ -44,7 +44,7 @@ $has_acf          = function_exists('get_field');
 $phrase_accroche  = $has_acf ? get_field('phrase_daccroche', $star_id) : '';
 $mini_desc        = $has_acf ? get_field('mini_description', $star_id) : '';
 $pourquoi         = $has_acf ? get_field('pourquoi_cette_piece', $star_id) : '';
-$descriptif       = $has_acf ? get_field('descriptif', $star_id) : '';
+$descriptif       = $has_acf ? (get_field('Descriptif', $star_id) ?: get_field('descriptif', $star_id)) : '';
 
 // Photos ACF
 $ambiance_1 = $has_acf ? sapi_get_acf_image_url(get_field('ambiance_1', $star_id)) : '';
