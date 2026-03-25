@@ -21457,10 +21457,7 @@ html.sapi-intro-active body {
 /* Duo : photo galerie carrée + texte côte à côte */
 .star-duo {
   display: grid;
-  grid-template-columns: 2fr 3fr;
-  max-width: 1200px;
-  margin: 0 auto;
-  min-height: 450px;
+  grid-template-columns: 1fr 1fr;
   background: var(--color-cream, #FEFDFB);
 }
 
@@ -21473,20 +21470,15 @@ html.sapi-intro-active body {
 }
 
 .star-duo__photo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem;
   overflow: hidden;
+  aspect-ratio: 1 / 1;
 }
 
 .star-duo__photo img {
   width: 100%;
-  max-height: 350px;
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
   display: block;
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(147, 125, 104, 0.12);
 }
 
 .star-duo__text {
@@ -21494,6 +21486,7 @@ html.sapi-intro-active body {
   flex-direction: column;
   justify-content: center;
   padding: 3rem 4rem;
+  aspect-ratio: 1 / 1;
 }
 
 .star-duo__title {
@@ -21503,19 +21496,19 @@ html.sapi-intro-active body {
   margin: 0 0 1.5rem;
 }
 
-/* Photo galerie restante (sans texte) — style card bento */
+/* Photo galerie restante (sans texte) */
 .star-frame--small {
-  max-width: 700px;
+  max-width: 50%;
   margin: 0 auto;
-  padding: 3rem 2rem;
-  background: var(--color-warm, #FBF6EA);
+  background: var(--color-cream, #FEFDFB);
+  padding: 0;
 }
 
 .star-frame--small img {
-  border-radius: 12px;
+  width: 100%;
   aspect-ratio: 1 / 1;
-  object-fit: contain;
-  box-shadow: 0 8px 30px rgba(147, 125, 104, 0.12);
+  object-fit: cover;
+  display: block;
 }
 
 /* Pourquoi cette pièce */
@@ -21738,16 +21731,16 @@ html.sapi-intro-active body {
   }
 
   .star-duo__photo {
-    padding: 1.5rem;
-    min-height: 300px;
+    aspect-ratio: 1 / 1;
   }
 
   .star-duo__text {
+    aspect-ratio: auto;
     padding: 2rem 1.5rem;
   }
 
   .star-frame--small {
-    padding: 0 1rem;
+    max-width: 100%;
   }
 
   .star-pourquoi {
