@@ -15237,35 +15237,27 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   gap: 0.2rem !important;
 }
 
-/* Chaque attribut sur sa ligne — masquer le "/" quel que soit son format */
+/* Chaque attribut sur sa ligne */
 .sapi-cart-outer .wc-block-components-product-details li {
   display: block !important;
-  font-size: 0 !important;
-  line-height: 0 !important;
-  color: transparent !important;
   margin: 0 !important;
   padding: 0.15rem 0 !important;
-  overflow: hidden !important;
-}
-
-/* Réafficher uniquement les spans label + valeur */
-.sapi-cart-outer .wc-block-components-product-details__name,
-.sapi-cart-outer .wc-block-components-product-details__value {
-  font-size: 0.9rem !important;
-  line-height: 1.5 !important;
-  color: var(--color-dark) !important;
 }
 
 .sapi-cart-outer .wc-block-components-product-details__name {
   font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  color: var(--color-dark) !important;
 }
 
 .sapi-cart-outer .wc-block-components-product-details__value {
   font-weight: 400 !important;
+  font-size: 0.9rem !important;
+  color: var(--color-dark) !important;
 }
 
-/* Cacher tout autre contenu (séparateurs, texte brut "/") */
-.sapi-cart-outer .wc-block-components-product-details__separator {
+/* Cacher le séparateur "/" — <span aria-hidden="true"> / </span> */
+.sapi-cart-outer .wc-block-components-product-details li > span[aria-hidden="true"] {
   display: none !important;
 }
 
