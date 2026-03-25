@@ -3,7 +3,7 @@ get_header();
 
 // Supprime le préfixe et les balises HTML du titre
 $archive_title = wp_strip_all_tags(get_the_archive_title());
-$archive_title = preg_replace('/^(Catégorie|Tag|Archives)\s*:\s*/i', '', $archive_title);
+$archive_title = preg_replace('/^.+:\s*/', '', $archive_title);
 ?>
 
 <!-- Archive Hero -->
