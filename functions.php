@@ -1084,21 +1084,21 @@ add_action('wp_enqueue_scripts', function() {
 }, 30);
 
 /**
- * Réordonner les données panier dans WooCommerce Blocks (Store API) :
- * Variations (Matériau, Taille) avant add-ons (Couleur câble).
+ * Réordonner les données panier : variations avant add-ons.
  *
- * Le Store API construit item_data en deux étapes :
- * 1) Variation attributes depuis $cart_item['variation']
- * 2) Extra data depuis woocommerce_get_item_data (add-ons)
- * => On injecte les variations dans woocommerce_get_item_data en premier,
- *    puis on supprime leur affichage par défaut via le Store API.
+ * WooCommerce Blocks (Store API) appelle ce filtre avec un array vide,
+ * puis le plugin WC Product Add-Ons y ajoute ses données.
+ * Les variations sont affichées séparément par Blocks via $cart_item['variation'].
+ *
+ * Stratégie : on vide $cart_item['variation'] pour que Blocks ne les affiche pas,
+ * et on les injecte nous-mêmes dans item_data en premier (avant les add-ons).
  */
 add_filter('woocommerce_get_item_data', function($item_data, $cart_item) {
   if (empty($cart_item['variation'])) {
     return $item_data;
   }
 
-  // Construire les entrées de variation avec le même format que les add-ons
+  // Construire les entrées de variation
   $variation_entries = [];
   foreach ($cart_item['variation'] as $attr_key => $attr_val) {
     if (empty($attr_val)) {
@@ -1106,7 +1106,6 @@ add_filter('woocommerce_get_item_data', function($item_data, $cart_item) {
     }
     $taxonomy = str_replace('attribute_', '', $attr_key);
     $label    = wc_attribute_label($taxonomy);
-    // Valeur lisible (terme de taxonomie ou valeur brute)
     if (taxonomy_exists($taxonomy)) {
       $term = get_term_by('slug', $attr_val, $taxonomy);
       $value = $term ? $term->name : $attr_val;
@@ -1120,13 +1119,38 @@ add_filter('woocommerce_get_item_data', function($item_data, $cart_item) {
     ];
   }
 
-  // Variations d'abord, puis add-ons (item_data existant)
+  // Variations d'abord, puis add-ons
   return array_merge($variation_entries, $item_data);
 }, 5, 2);
 
-// Note : les variations pourraient apparaître en double dans WooCommerce Blocks
-// car le Store API les ajoute aussi séparément. Le CSS masque les doublons
-// via le font-size:0 trick qui ne montre que __name et __value spans.
+// Supprimer les variations de la réponse Store API pour éviter le doublon
+// (les variations sont déjà dans item_data grâce au filtre ci-dessus)
+add_filter('rest_request_after_callbacks', function($response, $handler, $request) {
+  if (! ($response instanceof WP_REST_Response)) {
+    return $response;
+  }
+  $route = $request->get_route();
+  if (strpos($route, 'wc/store') === false) {
+    return $response;
+  }
+  $data = $response->get_data();
+  // Panier complet (/wc/store/v1/cart)
+  if (isset($data['items']) && is_array($data['items'])) {
+    foreach ($data['items'] as &$item) {
+      if (isset($item['variation'])) {
+        $item['variation'] = [];
+      }
+    }
+    unset($item);
+    $response->set_data($data);
+  }
+  // Endpoints batch ou item individuel
+  if (isset($data['variation'])) {
+    $data['variation'] = [];
+    $response->set_data($data);
+  }
+  return $response;
+}, 10, 3);
 
 // Update cart count fragment after AJAX add-to-cart
 add_filter('woocommerce_add_to_cart_fragments', function($fragments) {
