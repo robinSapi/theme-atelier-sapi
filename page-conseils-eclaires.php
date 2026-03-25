@@ -84,65 +84,6 @@ sapi_robin_conseil_card( 'conseils' );
   </div>
 </section>
 
-<!-- Grille : articles de la catégorie Conseils -->
-<?php
-$conseils_paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
-$conseils_query = new WP_Query([
-  'posts_per_page' => 6,
-  'post_status'    => 'publish',
-  'category_name'  => 'conseils',
-  'orderby'        => 'date',
-  'order'          => 'DESC',
-  'paged'          => $conseils_paged
-]);
-
-if ($conseils_query->have_posts()) :
-?>
-<section class="blog-grid-section">
-  <div class="blog-grid-container">
-    <h2 class="advice-articles-title">Nos derniers conseils</h2>
-    <div class="blog-grid">
-      <?php while ($conseils_query->have_posts()) : $conseils_query->the_post(); ?>
-        <article <?php post_class('blog-grid-card'); ?>>
-          <?php if (has_post_thumbnail()) : ?>
-            <div class="blog-grid-media">
-              <a href="<?php the_permalink(); ?>">
-                <?php echo wp_get_attachment_image(get_post_thumbnail_id(), 'large'); ?>
-              </a>
-            </div>
-          <?php endif; ?>
-          <div class="blog-grid-content">
-            <h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
-            <p><?php echo wp_trim_words(get_the_excerpt(), 20, '...'); ?></p>
-            <div class="blog-grid-meta">
-              <span class="blog-grid-date"><?php echo esc_html(get_the_date('d/m/Y')); ?></span>
-              <a href="<?php the_permalink(); ?>" class="blog-grid-link">Lire →</a>
-            </div>
-          </div>
-        </article>
-      <?php endwhile; ?>
-    </div>
-
-    <?php if ($conseils_query->max_num_pages > 1) : ?>
-      <nav class="blog-pagination" role="navigation">
-        <?php
-        echo paginate_links([
-          'total'     => $conseils_query->max_num_pages,
-          'current'   => $conseils_paged,
-          'prev_text' => '← Précédent',
-          'next_text' => 'Suivant →',
-          'mid_size'  => 2
-        ]);
-        ?>
-      </nav>
-    <?php endif; ?>
-  </div>
-</section>
-<?php
-wp_reset_postdata();
-endif;
-?>
-
 <!-- Card "Pour quelle pièce" — ouvre la modale Robin -->
 <section class="advice-room-picker-section">
   <div class="advice-room-picker">
@@ -249,6 +190,65 @@ endif;
 
 })();
 </script>
+
+<!-- Grille : articles de la catégorie Conseils -->
+<?php
+$conseils_paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
+$conseils_query = new WP_Query([
+  'posts_per_page' => 6,
+  'post_status'    => 'publish',
+  'category_name'  => 'conseils',
+  'orderby'        => 'date',
+  'order'          => 'DESC',
+  'paged'          => $conseils_paged
+]);
+
+if ($conseils_query->have_posts()) :
+?>
+<section class="blog-grid-section">
+  <div class="blog-grid-container">
+    <h2 class="advice-articles-title">Nos derniers conseils</h2>
+    <div class="blog-grid">
+      <?php while ($conseils_query->have_posts()) : $conseils_query->the_post(); ?>
+        <article <?php post_class('blog-grid-card'); ?>>
+          <?php if (has_post_thumbnail()) : ?>
+            <div class="blog-grid-media">
+              <a href="<?php the_permalink(); ?>">
+                <?php echo wp_get_attachment_image(get_post_thumbnail_id(), 'large'); ?>
+              </a>
+            </div>
+          <?php endif; ?>
+          <div class="blog-grid-content">
+            <h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+            <p><?php echo wp_trim_words(get_the_excerpt(), 20, '...'); ?></p>
+            <div class="blog-grid-meta">
+              <span class="blog-grid-date"><?php echo esc_html(get_the_date('d/m/Y')); ?></span>
+              <a href="<?php the_permalink(); ?>" class="blog-grid-link">Lire →</a>
+            </div>
+          </div>
+        </article>
+      <?php endwhile; ?>
+    </div>
+
+    <?php if ($conseils_query->max_num_pages > 1) : ?>
+      <nav class="blog-pagination" role="navigation">
+        <?php
+        echo paginate_links([
+          'total'     => $conseils_query->max_num_pages,
+          'current'   => $conseils_paged,
+          'prev_text' => '← Précédent',
+          'next_text' => 'Suivant →',
+          'mid_size'  => 2
+        ]);
+        ?>
+      </nav>
+    <?php endif; ?>
+  </div>
+</section>
+<?php
+wp_reset_postdata();
+endif;
+?>
 
 <?php
 get_footer();
