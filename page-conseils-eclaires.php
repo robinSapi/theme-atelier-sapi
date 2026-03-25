@@ -193,14 +193,12 @@ sapi_robin_conseil_card( 'conseils' );
 
 <!-- Grille : articles de la catégorie Conseils -->
 <?php
-$conseils_paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
 $conseils_query = new WP_Query([
   'posts_per_page' => 3,
   'post_status'    => 'publish',
   'category_name'  => 'conseils',
   'orderby'        => 'date',
   'order'          => 'DESC',
-  'paged'          => $conseils_paged
 ]);
 
 if ($conseils_query->have_posts()) :
@@ -230,18 +228,12 @@ if ($conseils_query->have_posts()) :
       <?php endwhile; ?>
     </div>
 
-    <?php if ($conseils_query->max_num_pages > 1) : ?>
-      <nav class="blog-pagination" role="navigation">
-        <?php
-        echo paginate_links([
-          'total'     => $conseils_query->max_num_pages,
-          'current'   => $conseils_paged,
-          'prev_text' => '← Précédent',
-          'next_text' => 'Suivant →',
-          'mid_size'  => 2
-        ]);
-        ?>
-      </nav>
+    <?php
+    $conseils_cat = get_category_by_slug('conseils');
+    if ($conseils_cat && $conseils_query->found_posts > 3) : ?>
+      <div class="advice-articles-more">
+        <a href="<?php echo esc_url(get_category_link($conseils_cat)); ?>">Voir tous les conseils →</a>
+      </div>
     <?php endif; ?>
   </div>
 </section>

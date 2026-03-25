@@ -8481,6 +8481,24 @@ li.carousel-editorial-slide,
   margin-bottom: 2rem;
 }
 
+.advice-articles-more {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.advice-articles-more a {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-orange, #E35B24);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+
+.advice-articles-more a:hover {
+  text-decoration: underline;
+}
+
 .advice-room-picker-section {
   max-width: 1400px;
   margin: 2rem auto;
