@@ -113,10 +113,14 @@ $totals = $order->get_order_item_totals();
 
 			<?php do_action( 'woocommerce_pay_order_before_submit' ); ?>
 
-			<?php echo apply_filters( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				'woocommerce_pay_order_button_html',
-				'<button type="submit" class="button alt' . esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ) . '" id="place_order" value="' . esc_attr( $order_button_text ) . '" data-value="' . esc_attr( $order_button_text ) . '">' . esc_html( $order_button_text ) . '</button>'
-			); ?>
+			<div class="sapi-order-pay-actions">
+				<a href="<?php echo esc_url( wc_get_cart_url() ); ?>" class="sapi-order-pay-back">&larr; <?php esc_html_e( 'Retour au panier', 'theme-sapi-maison' ); ?></a>
+
+				<?php echo apply_filters( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					'woocommerce_pay_order_button_html',
+					'<button type="submit" class="button alt' . esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ) . '" id="place_order" value="' . esc_attr( $order_button_text ) . '" data-value="' . esc_attr( $order_button_text ) . '">' . esc_html( $order_button_text ) . '</button>'
+				); ?>
+			</div>
 
 			<?php do_action( 'woocommerce_pay_order_after_submit' ); ?>
 

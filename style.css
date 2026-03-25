@@ -16680,6 +16680,34 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
   color: var(--color-wood);
 }
 
+/* Actions (retour panier + bouton payer) */
+.sapi-order-pay-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.sapi-order-pay-back {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-gray);
+  text-decoration: none;
+  white-space: nowrap;
+  -webkit-transition: color 0.2s ease;
+  transition: color 0.2s ease;
+}
+
+@media (hover: hover) {
+  .sapi-order-pay-back:hover {
+    color: var(--color-wood);
+  }
+}
+
+.sapi-order-pay-actions #place_order {
+  flex: 1;
+}
+
 /* Mobile order-pay */
 @media (max-width: 768px) {
   body.woocommerce-order-pay .checkout-page-cinetique #order_review {
