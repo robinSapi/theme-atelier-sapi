@@ -3924,6 +3924,23 @@ add_action('woocommerce_set_additional_field_value', function ($key, $value, $gr
   $wc_object->update_meta_data('_sapi_newsletter_optout', wc_bool_to_string($value));
 }, 10, 4);
 
+// Sauvegarder la note et l'opt-out newsletter depuis la page Order Pay
+add_action('woocommerce_before_pay_action', function ($order) {
+  // Note de commande
+  if (! empty($_POST['sapi_order_note'])) {
+    $note = sanitize_textarea_field(wp_unslash($_POST['sapi_order_note']));
+    if ($note) {
+      $order->add_order_note(esc_html($note), 1); // 1 = note client
+      $order->set_customer_note($note);
+    }
+  }
+  // Newsletter opt-out
+  if (! empty($_POST['sapi_newsletter_optout'])) {
+    $order->update_meta_data('_sapi_newsletter_optout', 'yes');
+  }
+  $order->save();
+});
+
 /**
  * ============================================================
  * NEWSLETTER BREVO — AJAX subscription

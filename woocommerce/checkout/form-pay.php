@@ -90,6 +90,36 @@ $totals = $order->get_order_item_totals();
 
 	<?php do_action( 'woocommerce_pay_order_before_payment' ); ?>
 
+	<div class="sapi-order-pay-additional">
+		<h3 class="sapi-order-pay-additional__title"><?php esc_html_e( 'Informations de commande supplémentaires', 'theme-sapi-maison' ); ?></h3>
+
+		<label class="sapi-order-pay-additional__checkbox">
+			<input type="checkbox" name="sapi_newsletter_optout" value="1" />
+			<span><?php esc_html_e( 'Je ne souhaite pas recevoir les actualités de l\'Atelier Sâpi (facultatif)', 'theme-sapi-maison' ); ?></span>
+		</label>
+
+		<label class="sapi-order-pay-additional__checkbox">
+			<input type="checkbox" name="sapi_order_note_toggle" value="1" id="sapi-order-note-toggle" />
+			<span><?php esc_html_e( 'Ajouter une note à votre commande', 'theme-sapi-maison' ); ?></span>
+		</label>
+
+		<div class="sapi-order-pay-additional__note-field" id="sapi-order-note-field" style="display: none;">
+			<textarea name="sapi_order_note" rows="3" placeholder="<?php esc_attr_e( 'Notes concernant votre commande, par exemple des instructions pour la livraison.', 'theme-sapi-maison' ); ?>"></textarea>
+		</div>
+	</div>
+
+	<script>
+	(function(){
+		var toggle = document.getElementById('sapi-order-note-toggle');
+		var field = document.getElementById('sapi-order-note-field');
+		if (toggle && field) {
+			toggle.addEventListener('change', function() {
+				field.style.display = this.checked ? 'block' : 'none';
+			});
+		}
+	})();
+	</script>
+
 	<div id="payment">
 		<?php if ( $order->needs_payment() ) : ?>
 			<ul class="wc_payment_methods payment_methods methods">
