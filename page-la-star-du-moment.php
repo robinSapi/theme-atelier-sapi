@@ -130,54 +130,41 @@ if ($accroche || $texte_principal || $descriptif) :
   <!-- Mosaïque de photos -->
   <div class="star-mosaic">
     <?php
-    // Toutes les photos : ACF + produit principale + galerie WooCommerce
-    // On évite les doublons via les URLs
+    // 1. Collecter toutes les photos (dédoublonnées)
     $seen_urls = [];
-    $all_mosaic = [];
+    $photos = [];
 
-    // 1. Photos ACF (ordre éditorial, avec variantes de format)
     $acf_candidates = [
-      ['url' => $bandeau,    'alt' => 'Bandeau',  'variant' => 'large'],
-      ['url' => $ambiance_1, 'alt' => 'Ambiance', 'variant' => 'tall'],
-      ['url' => $detail_1,   'alt' => 'Détail',   'variant' => ''],
-      ['url' => $detail_2,   'alt' => 'Détail',   'variant' => 'landscape'],
-      ['url' => $ambiance_2, 'alt' => 'Ambiance', 'variant' => 'wide'],
-      ['url' => $ambiance_3, 'alt' => 'Ambiance', 'variant' => ''],
+      ['url' => $bandeau,    'alt' => 'Bandeau'],
+      ['url' => $ambiance_1, 'alt' => 'Ambiance'],
+      ['url' => $detail_1,   'alt' => 'Détail'],
+      ['url' => $detail_2,   'alt' => 'Détail'],
+      ['url' => $ambiance_2, 'alt' => 'Ambiance'],
+      ['url' => $ambiance_3, 'alt' => 'Ambiance'],
     ];
     foreach ($acf_candidates as $p) {
       if (!empty($p['url']) && !isset($seen_urls[$p['url']])) {
-        $all_mosaic[] = $p;
+        $photos[] = $p;
         $seen_urls[$p['url']] = true;
       }
     }
-
-    // 2. Photo principale produit
     if ($main_image_url && !isset($seen_urls[$main_image_url])) {
-      $all_mosaic[] = ['url' => $main_image_url, 'alt' => 'Produit', 'variant' => ''];
+      $photos[] = ['url' => $main_image_url, 'alt' => 'Produit'];
       $seen_urls[$main_image_url] = true;
     }
-
-    // 3. Galerie WooCommerce (alterner les formats)
-    $gallery_variants = ['landscape', '', 'tall', '', 'landscape', ''];
-    $gi = 0;
     foreach ($gallery_urls as $gurl) {
       if (!isset($seen_urls[$gurl])) {
-        $all_mosaic[] = ['url' => $gurl, 'alt' => 'Galerie', 'variant' => $gallery_variants[$gi % count($gallery_variants)]];
+        $photos[] = ['url' => $gurl, 'alt' => 'Galerie'];
         $seen_urls[$gurl] = true;
-        $gi++;
       }
     }
 
-    // Cards à insérer dans la grille (position = après la Nème photo)
-    $inline_cards = [];
-
-    // Card descriptif en position 2
-    if ($descriptif) {
-      $inline_cards[2] = ['type' => 'descriptif', 'content' => $descriptif];
-    }
-
-    // Card storytelling 1 en position 4
-    $inline_cards[4] = [
+    // 2. Construire le flux : photos + cards intercalées
+    //    Chaque élément = photo ou card
+    //    On insère les cards à des positions fixes dans le flux
+    $flux = [];
+    $card_descriptif = $descriptif ? ['type' => 'descriptif', 'content' => $descriptif] : null;
+    $card_artisanal = [
       'type' => 'storytelling',
       'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
       'title' => '100% artisanal',
@@ -185,11 +172,7 @@ if ($accroche || $texte_principal || $descriptif) :
       'link' => home_url('/lumiere-dartisan/'),
       'link_label' => 'Découvrir l\'atelier',
     ];
-
-    // Card storytelling 2 en avant-dernière position
-    $total_photos = count($all_mosaic);
-    $avant_derniere = max(5, $total_photos - 1);
-    $inline_cards[$avant_derniere] = [
+    $card_accompagnement = [
       'type' => 'storytelling',
       'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
       'title' => 'Un accompagnement personnel',
@@ -198,26 +181,114 @@ if ($accroche || $texte_principal || $descriptif) :
       'link_label' => 'Contacter Robin',
     ];
 
-    $photo_index = 0;
-    foreach ($all_mosaic as $photo) :
-      $variant_class = !empty($photo['variant']) ? ' star-mosaic__item--' . $photo['variant'] : '';
+    // Insérer les photos et les cards dans le flux
+    $pi = 0;
+    foreach ($photos as $photo) {
+      $flux[] = ['kind' => 'photo', 'data' => $photo];
+      $pi++;
+      // Card descriptif après la 2e photo
+      if ($pi === 2 && $card_descriptif) {
+        $flux[] = ['kind' => 'card', 'data' => $card_descriptif];
+      }
+      // Card artisanal après la 5e photo
+      if ($pi === 5) {
+        $flux[] = ['kind' => 'card', 'data' => $card_artisanal];
+      }
+    }
+    // Card accompagnement en avant-dernière position
+    $last_photo = array_pop($flux);
+    $flux[] = ['kind' => 'card', 'data' => $card_accompagnement];
+    $flux[] = $last_photo;
+
+    // 3. Assigner les tailles par rangée pour remplir exactement 3 colonnes
+    //    Pattern de rangées (en colonnes occupées) :
+    //    A: [2, 1]    → 1 large + 1 carré
+    //    B: [1, 1, 1] → 3 carrés
+    //    C: [3]       → 1 pleine largeur (cards descriptif)
+    //    D: [1, 2]    → 1 carré + 1 large (inversé)
+    $row_patterns = ['A', 'B', 'D', 'B']; // cycle
+    $pattern_idx = 0;
+    $flux_idx = 0;
+    $total = count($flux);
+
+    while ($flux_idx < $total) {
+      $remaining = $total - $flux_idx;
+      $item = $flux[$flux_idx];
+
+      // Cards descriptif = toujours pleine largeur
+      if ($item['kind'] === 'card' && $item['data']['type'] === 'descriptif') {
+        $item['cols'] = 3;
+        $flux[$flux_idx] = $item;
+        $flux_idx++;
+        continue;
+      }
+
+      // Cards storytelling = 1 colonne (s'insère dans la rangée)
+      if ($item['kind'] === 'card') {
+        $item['cols'] = 1;
+        $flux[$flux_idx] = $item;
+        $flux_idx++;
+        // Compléter la rangée avec les items suivants
+        // La card prend 1 col, il reste 2 cols
+        $filled = 1;
+        while ($filled < 3 && $flux_idx < $total) {
+          $next = $flux[$flux_idx];
+          $next['cols'] = ($filled === 1) ? 2 : 1;
+          $flux[$flux_idx] = $next;
+          $filled += $next['cols'];
+          $flux_idx++;
+        }
+        continue;
+      }
+
+      // Photos : appliquer le pattern de rangée
+      $pattern = $row_patterns[$pattern_idx % count($row_patterns)];
+      if ($pattern === 'A') {
+        $sizes = [2, 1];
+      } elseif ($pattern === 'D') {
+        $sizes = [1, 2];
+      } else {
+        $sizes = [1, 1, 1];
+      }
+
+      // Si pas assez d'items pour remplir le pattern, passer en carrés
+      if ($remaining < count($sizes)) {
+        $sizes = array_fill(0, $remaining, 1);
+      }
+
+      foreach ($sizes as $s) {
+        if ($flux_idx >= $total) break;
+        $cur = $flux[$flux_idx];
+        // Si on tombe sur une card, on sort du pattern et on la traite au prochain tour
+        if ($cur['kind'] === 'card') break;
+        $cur['cols'] = $s;
+        $flux[$flux_idx] = $cur;
+        $flux_idx++;
+      }
+      $pattern_idx++;
+    }
+
+    // 4. Rendu
+    foreach ($flux as $item) :
+      $cols = isset($item['cols']) ? (int) $item['cols'] : 1;
+      $col_class = $cols === 2 ? ' star-mosaic__item--span2' : ($cols === 3 ? ' star-mosaic__item--span3' : '');
+
+      if ($item['kind'] === 'photo') :
+        $photo = $item['data'];
     ?>
-    <div class="star-mosaic__item<?php echo $variant_class; ?>">
+    <div class="star-mosaic__item<?php echo $col_class; ?>">
       <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
     </div>
-    <?php
-      $photo_index++;
-      if (isset($inline_cards[$photo_index])) :
-        $card = $inline_cards[$photo_index];
-        if ($card['type'] === 'descriptif') :
-    ?>
-    <div class="star-mosaic__item star-mosaic__item--card star-mosaic__item--descriptif">
+    <?php elseif ($item['data']['type'] === 'descriptif') : ?>
+    <div class="star-mosaic__item star-mosaic__item--card<?php echo $col_class; ?>">
       <div class="star-descriptif__card">
-        <?php echo wp_kses_post($card['content']); ?>
+        <?php echo wp_kses_post($item['data']['content']); ?>
       </div>
     </div>
-    <?php   else : ?>
-    <div class="star-mosaic__item star-mosaic__item--card">
+    <?php else :
+      $card = $item['data'];
+    ?>
+    <div class="star-mosaic__item star-mosaic__item--card<?php echo $col_class; ?>">
       <div class="star-storytelling__card">
         <div class="star-storytelling__icon"><?php echo $card['icon']; ?></div>
         <h3><?php echo esc_html($card['title']); ?></h3>
@@ -225,9 +296,7 @@ if ($accroche || $texte_principal || $descriptif) :
         <a href="<?php echo esc_url($card['link']); ?>" class="star-storytelling__link"><?php echo esc_html($card['link_label']); ?></a>
       </div>
     </div>
-    <?php
-        endif;
-      endif;
+    <?php endif;
     endforeach; ?>
   </div>
 </section>
