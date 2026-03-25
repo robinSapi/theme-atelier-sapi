@@ -119,7 +119,7 @@ if ($accroche || $texte_principal || $descriptif) :
     <?php if ($texte_principal) : ?>
       <div class="star-presentation__desc"><?php echo wp_kses_post($texte_principal); ?></div>
     <?php endif; ?>
-    <a href="<?php echo esc_url($permalink); ?>" class="star-presentation__link">Voir la fiche complète &rarr;</a>
+    <a href="<?php echo esc_url($permalink . '?from=star'); ?>" class="star-presentation__link">Voir la fiche complète &rarr;</a>
   </div>
 </section>
 <?php endif; ?>
@@ -166,7 +166,7 @@ if ($accroche || $texte_principal || $descriptif) :
   <div class="star-carousel" id="star-carousel-1">
     <div class="star-carousel__track">
       <?php foreach ($group1 as $photo) : ?>
-      <a href="<?php echo esc_url($permalink); ?>" class="star-carousel__slide">
+      <a href="<?php echo esc_url($permalink . '?from=star'); ?>" class="star-carousel__slide">
         <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
       </a>
       <?php endforeach; ?>
@@ -202,7 +202,7 @@ if ($accroche || $texte_principal || $descriptif) :
   <div class="star-carousel star-carousel--small" id="star-carousel-2">
     <div class="star-carousel__track">
       <?php foreach ($group2 as $photo) : ?>
-      <a href="<?php echo esc_url($permalink); ?>" class="star-carousel__slide">
+      <a href="<?php echo esc_url($permalink . '?from=star'); ?>" class="star-carousel__slide">
         <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
       </a>
       <?php endforeach; ?>
@@ -285,7 +285,7 @@ if ($accroche || $texte_principal || $descriptif) :
   <div class="star-cta__inner">
     <h2 class="star-cta__title product-name"><?php echo esc_html($name); ?></h2>
     <div class="star-cta__price"><?php echo $price; ?></div>
-    <a href="<?php echo esc_url($permalink); ?>" class="star-cta__btn">
+    <a href="<?php echo esc_url($permalink . '?from=star'); ?>" class="star-cta__btn">
       Découvrir ce luminaire
     </a>
     <a href="<?php echo esc_url(home_url('/mes-creations/')); ?>" class="star-cta__link">
