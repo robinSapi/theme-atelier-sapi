@@ -109,9 +109,9 @@
     new MutationObserver(function (mutations, obs) {
       if (!cartBlock.classList.contains('is-loading')) {
         obs.disconnect();
+        // Kicks initiaux après hydratation React — l'observer continu prend le relais ensuite
         setTimeout(function () { apply(); fixFrenchColons(); reorderProductDetails(); }, 100);
         setTimeout(function () { apply(); fixFrenchColons(); reorderProductDetails(); }, 600);
-        setTimeout(function () { apply(); fixFrenchColons(); reorderProductDetails(); }, 1500);
       }
     }).observe(cartBlock, { attributes: true, attributeFilter: ['class'] });
 

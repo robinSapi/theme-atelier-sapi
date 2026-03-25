@@ -1090,8 +1090,10 @@ add_action('wp_enqueue_scripts', function() {
  * puis le plugin WC Product Add-Ons y ajoute ses données.
  * Les variations sont affichées séparément par Blocks via $cart_item['variation'].
  *
- * Stratégie : on vide $cart_item['variation'] pour que Blocks ne les affiche pas,
- * et on les injecte nous-mêmes dans item_data en premier (avant les add-ons).
+ * Stratégie : on injecte les variations dans item_data à priorité 5 (avant les
+ * add-ons à priorité 10+). Le filtre rest_request_after_callbacks vide ensuite
+ * le champ variation[] de la réponse Store API pour éviter le doublon.
+ * Le CSS cache aussi le 2ème .product-details en sécurité.
  */
 add_filter('woocommerce_get_item_data', function($item_data, $cart_item) {
   if (empty($cart_item['variation'])) {
@@ -1130,7 +1132,7 @@ add_filter('rest_request_after_callbacks', function($response, $handler, $reques
     return $response;
   }
   $route = $request->get_route();
-  if (strpos($route, 'wc/store') === false) {
+  if (strpos($route, 'wc/store/v1/cart') === false && strpos($route, 'wc/store/v1/batch') === false) {
     return $response;
   }
   $data = $response->get_data();

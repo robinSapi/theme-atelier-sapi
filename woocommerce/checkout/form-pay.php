@@ -57,9 +57,12 @@ $totals = $order->get_order_item_totals();
 									}
 									$taxonomy = str_replace( 'attribute_', '', $attr_key );
 									$label    = wc_attribute_label( $taxonomy, $product );
-									$value    = taxonomy_exists( $taxonomy )
-										? get_term_by( 'slug', $attr_value, $taxonomy )->name ?? $attr_value
-										: $attr_value;
+									if ( taxonomy_exists( $taxonomy ) ) {
+										$term  = get_term_by( 'slug', $attr_value, $taxonomy );
+										$value = $term ? $term->name : $attr_value;
+									} else {
+										$value = $attr_value;
+									}
 									echo '<li><strong>' . esc_html( $label ) . ':</strong> <p>' . esc_html( $value ) . '</p></li>';
 								}
 								echo '</ul>';

@@ -15227,18 +15227,11 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   display: none !important;
 }
 
-/* Variations + add-ons : chaque attribut sur sa propre ligne */
+/* Variations + add-ons : chaque attribut sur sa propre ligne (Blocks = div + span) */
 .sapi-cart-outer .wc-block-components-product-details {
   list-style: none !important;
   padding: 0 !important;
   margin: 0.5rem 0 0.75rem !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 0.2rem !important;
-}
-
-/* Chaque attribut sur sa ligne (Blocks utilise des <div> + <span>, pas <ul>/<li>) */
-.sapi-cart-outer .wc-block-components-product-details {
   display: flex !important;
   flex-direction: column !important;
   gap: 0.15rem !important;
