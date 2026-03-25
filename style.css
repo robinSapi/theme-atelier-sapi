@@ -21716,7 +21716,6 @@ html.sapi-intro-active body {
 .star-carousel__slide {
   flex: 0 0 auto;
   width: 70vw;
-  max-width: 800px;
   scroll-snap-align: center;
   border-radius: 12px;
   overflow: hidden;
