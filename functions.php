@@ -1083,36 +1083,50 @@ add_action('wp_enqueue_scripts', function() {
   }
 }, 30);
 
-// Réordonner les données panier : variations (Matériau, Taille) avant add-ons (Couleur câble)
+/**
+ * Réordonner les données panier dans WooCommerce Blocks (Store API) :
+ * Variations (Matériau, Taille) avant add-ons (Couleur câble).
+ *
+ * Le Store API construit item_data en deux étapes :
+ * 1) Variation attributes depuis $cart_item['variation']
+ * 2) Extra data depuis woocommerce_get_item_data (add-ons)
+ * => On injecte les variations dans woocommerce_get_item_data en premier,
+ *    puis on supprime leur affichage par défaut via le Store API.
+ */
 add_filter('woocommerce_get_item_data', function($item_data, $cart_item) {
-  if (empty($item_data) || count($item_data) < 2) {
+  if (empty($cart_item['variation'])) {
     return $item_data;
   }
 
-  // Construire la liste des labels de variation pour ce produit
-  $variation_labels = [];
-  if (! empty($cart_item['variation'])) {
-    foreach ($cart_item['variation'] as $attr_key => $attr_val) {
-      $taxonomy = str_replace('attribute_', '', $attr_key);
-      $variation_labels[] = strtolower(wc_attribute_label($taxonomy));
+  // Construire les entrées de variation avec le même format que les add-ons
+  $variation_entries = [];
+  foreach ($cart_item['variation'] as $attr_key => $attr_val) {
+    if (empty($attr_val)) {
+      continue;
     }
+    $taxonomy = str_replace('attribute_', '', $attr_key);
+    $label    = wc_attribute_label($taxonomy);
+    // Valeur lisible (terme de taxonomie ou valeur brute)
+    if (taxonomy_exists($taxonomy)) {
+      $term = get_term_by('slug', $attr_val, $taxonomy);
+      $value = $term ? $term->name : $attr_val;
+    } else {
+      $value = $attr_val;
+    }
+    $variation_entries[] = [
+      'key'     => $label,
+      'value'   => $value,
+      'display' => esc_html($value),
+    ];
   }
 
-  // Séparer : variation vs add-on en comparant le label (insensible à la casse)
-  $variations = [];
-  $addons     = [];
-  foreach ($item_data as $data) {
-    $key_lower = isset($data['key']) ? strtolower($data['key']) : '';
-    $name_lower = isset($data['name']) ? strtolower($data['name']) : '';
-    $match = $key_lower ?: $name_lower;
-    if (in_array($match, $variation_labels, true)) {
-      $variations[] = $data;
-    } else {
-      $addons[] = $data;
-    }
-  }
-  return array_merge($variations, $addons);
-}, 99, 2);
+  // Variations d'abord, puis add-ons (item_data existant)
+  return array_merge($variation_entries, $item_data);
+}, 5, 2);
+
+// Note : les variations pourraient apparaître en double dans WooCommerce Blocks
+// car le Store API les ajoute aussi séparément. Le CSS masque les doublons
+// via le font-size:0 trick qui ne montre que __name et __value spans.
 
 // Update cart count fragment after AJAX add-to-cart
 add_filter('woocommerce_add_to_cart_fragments', function($fragments) {
