@@ -272,7 +272,6 @@ var nodes = [
   { id: 'lampadaires',    name: 'Lampadaires',       url: '/categorie-produit/lampadaires/',  cat: 'shop',    r: 17 },
   { id: 'appliques',      name: 'Appliques',         url: '/categorie-produit/appliques/',    cat: 'shop',    r: 17 },
   { id: 'a-poser',        name: '\u00c0 poser',      url: '/categorie-produit/lampesaposer/',  cat: 'shop',    r: 17 },
-  { id: 'guide',          name: 'Guide Luminaire',   url: '/guide-luminaire/',                cat: 'tool',    r: 23 },
   { id: 'artisan',        name: "L'Artisan",         url: '/lumiere-dartisan/',               cat: 'content', r: 20 },
   { id: 'conseils',       name: 'Conseils',          url: '/conseils-eclaires/',              cat: 'content', r: 17 },
   { id: 'contact',        name: 'Contact',           url: '/contact/',                        cat: 'content', r: 17 },
@@ -328,10 +327,6 @@ var edges = [
   { from: 'accueil', to: 'actus',          type: 'content', label: 'Carte Flash Actu (bento)' },
   { from: 'accueil', to: 'contact',        type: 'content', label: 'CTA Contacter Robin (Mon Projet)' },
 
-  // ── Guide Luminaire ──
-  { from: 'guide',   to: 'mes-creations',  type: 'content', label: 'Voir toute la collection' },
-  { from: 'guide',   to: 'produit',        type: 'content', label: 'Recommandation IA' },
-
   // ── Fiche produit ──
   { from: 'produit', to: 'artisan',        type: 'content', label: "D\u00e9couvrir l'artisan" },
   { from: 'produit', to: 'mes-creations',  type: 'content', label: 'Breadcrumb + cat\u00e9gorie' },
@@ -341,7 +336,6 @@ var edges = [
   { from: 'artisan', to: 'mes-creations',  type: 'content', label: 'Voir la collection' },
 
   // ── Conseils ──
-  { from: 'conseils', to: 'guide',         type: 'content', label: 'Room picker \u00d76 (Robin Conseiller)' },
   { from: 'conseils', to: 'article',       type: 'content', label: 'Grille articles r\u00e9cents' },
 
   // ── Star du moment ──
