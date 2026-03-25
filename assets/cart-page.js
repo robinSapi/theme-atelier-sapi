@@ -51,23 +51,79 @@
     });
   }
 
+  /**
+   * Réordonne les attributs produit dans le panier :
+   * Variations (Matériau, Taille) avant add-ons (Couleur câble).
+   * Supprime aussi le "/" séparateur ajouté par WooCommerce Blocks.
+   */
+  var VARIATION_LABELS = ['matériau', 'taille', 'materiau'];
+  function reorderProductDetails() {
+    var lists = document.querySelectorAll(
+      '.sapi-cart-outer .wc-block-components-product-details'
+    );
+    lists.forEach(function (ul) {
+      if (ul.dataset.sapiReordered) return;
+      var items = Array.from(ul.querySelectorAll(':scope > li'));
+      if (items.length < 2) return;
+
+      // Supprimer les spans séparateurs "/" (élément séparé, pas du texte)
+      items.forEach(function (li) {
+        var seps = li.querySelectorAll('.wc-block-components-product-details__separator');
+        seps.forEach(function (sep) { sep.remove(); });
+        // Aussi nettoyer le "/" qui peut se glisser dans le texte de la valeur
+        var val = li.querySelector('.wc-block-components-product-details__value');
+        if (val) {
+          val.textContent = val.textContent.replace(/\s*\/\s*$/, '').trim();
+        }
+      });
+
+      // Séparer variations vs add-ons par le label
+      var variations = [];
+      var addons = [];
+      items.forEach(function (li) {
+        var nameEl = li.querySelector('.wc-block-components-product-details__name');
+        if (!nameEl) { addons.push(li); return; }
+        // Nettoyer : retirer ":", espaces insécables, mettre en minuscule
+        var label = nameEl.textContent
+          .replace(/[\u00a0]/g, ' ')
+          .replace(/\s*:?\s*$/, '')
+          .toLowerCase()
+          .trim();
+        if (VARIATION_LABELS.indexOf(label) !== -1) {
+          variations.push(li);
+        } else {
+          addons.push(li);
+        }
+      });
+
+      // Réinsérer : variations d'abord, puis add-ons
+      var reordered = variations.concat(addons);
+      reordered.forEach(function (li) { ul.appendChild(li); });
+      ul.dataset.sapiReordered = '1';
+    });
+  }
+
   // Observe la suppression de is-loading = fin de l'hydratation React
   var cartBlock = document.querySelector('.wp-block-woocommerce-cart');
   if (cartBlock) {
     new MutationObserver(function (mutations, obs) {
       if (!cartBlock.classList.contains('is-loading')) {
         obs.disconnect();
-        setTimeout(function () { apply(); fixFrenchColons(); }, 100);
-        setTimeout(function () { apply(); fixFrenchColons(); }, 600);
-        setTimeout(function () { apply(); fixFrenchColons(); }, 1500);
+        // Kicks initiaux après hydratation React — l'observer continu prend le relais ensuite
+        setTimeout(function () { apply(); fixFrenchColons(); reorderProductDetails(); }, 100);
+        setTimeout(function () { apply(); fixFrenchColons(); reorderProductDetails(); }, 600);
       }
     }).observe(cartBlock, { attributes: true, attributeFilter: ['class'] });
 
     // Observer continu pour les mises à jour dynamiques (quantité, etc.)
     // Debounce pour éviter la boucle infinie (notre modif DOM re-déclenche l'observer)
     new MutationObserver(function () {
+      // Reset le flag car React peut re-render les listes
+      document.querySelectorAll('[data-sapi-reordered]').forEach(function(el) {
+        delete el.dataset.sapiReordered;
+      });
       clearTimeout(colonTimer);
-      colonTimer = setTimeout(fixFrenchColons, 200);
+      colonTimer = setTimeout(function() { fixFrenchColons(); reorderProductDetails(); }, 200);
     }).observe(cartBlock, { childList: true, subtree: true });
   }
 
@@ -75,7 +131,7 @@
   window.addEventListener('load', function () {
     apply();
     fixFrenchColons();
-    setTimeout(function () { apply(); fixFrenchColons(); }, 800);
+    setTimeout(function () { apply(); fixFrenchColons(); reorderProductDetails(); }, 800);
   });
 
   // Resize

@@ -31,7 +31,8 @@
       '.product-name-small',             // Petites cartes bento
       '.quick-view-title',               // Quick view modal
       '.wc-block-components-product-name', // Panier + récap commande (WooCommerce Blocks)
-      '.guide-result-name'               // Résultat questionnaire guide luminaire
+      '.guide-result-name',              // Résultat questionnaire guide luminaire
+      '.sapi-order-pay-item__name'       // Page Order Pay
     ];
 
     // Sélecteurs spéciaux mini-cart (nom + variation séparés)
@@ -182,7 +183,8 @@
             '.product-name-small',
             '.quick-view-title',
             '.wc-block-components-product-name',
-            '.guide-result-name'
+            '.guide-result-name',
+            '.sapi-order-pay-item__name'
           ];
 
           selectors.forEach(selector => {

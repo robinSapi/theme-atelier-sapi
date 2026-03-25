@@ -2049,6 +2049,7 @@ button:hover,
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
+  width: fit-content;
   background: var(--color-warm, #FBF6EA);
   border: 2px dashed rgba(var(--color-wood-rgb, 147, 125, 104), 0.3);
   border-radius: 50px;
@@ -15226,10 +15227,47 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   display: none !important;
 }
 
-/* Supprimer le padding gauche des variations */
+/* Variations + add-ons : chaque attribut sur sa propre ligne (Blocks = div + span) */
 .sapi-cart-outer .wc-block-components-product-details {
-  padding-left: 0 !important;
-  margin-bottom: 0.75rem !important;
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0.5rem 0 0.75rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.15rem !important;
+}
+
+.sapi-cart-outer .wc-block-components-product-details > span {
+  display: block !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  color: transparent !important;
+}
+
+/* Réafficher uniquement les spans label + valeur à l'intérieur */
+.sapi-cart-outer .wc-block-components-product-details__name {
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  line-height: 1.5 !important;
+  color: var(--color-dark) !important;
+  margin-right: 0.3em !important;
+}
+
+.sapi-cart-outer .wc-block-components-product-details__value {
+  font-weight: 400 !important;
+  font-size: 0.9rem !important;
+  line-height: 1.5 !important;
+  color: var(--color-dark) !important;
+}
+
+/* Cacher le séparateur "/" — <span aria-hidden="true"> */
+.sapi-cart-outer .wc-block-components-product-details span[aria-hidden="true"] {
+  display: none !important;
+}
+
+/* Cacher le 2ème .product-details (variations par défaut de Blocks = doublon) */
+.sapi-cart-outer .wc-block-components-product-metadata > .wc-block-components-product-details ~ .wc-block-components-product-details {
+  display: none !important;
 }
 
 /* Prix total à droite — conservé et stylisé */
@@ -15808,22 +15846,44 @@ body.woocommerce-cart {
   display: none !important;
 }
 
-/* Variations compactes */
+/* Variations compactes — chaque attribut sur sa ligne */
 .sapi-checkout-outer .wc-block-components-product-details {
-  list-style: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.1rem !important;
   padding: 0 !important;
   margin: 0.25rem 0 0 !important;
-  font-size: 0.8rem !important;
+}
+
+.sapi-checkout-outer .wc-block-components-product-details > span {
+  display: block !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  color: transparent !important;
 }
 
 .sapi-checkout-outer .wc-block-components-product-details__name {
   font-weight: 600 !important;
+  font-size: 0.8rem !important;
+  line-height: 1.4 !important;
   color: var(--color-dark) !important;
+  margin-right: 0.3em !important;
 }
 
 .sapi-checkout-outer .wc-block-components-product-details__value {
   font-weight: 400 !important;
+  font-size: 0.8rem !important;
+  line-height: 1.4 !important;
   color: var(--color-gray) !important;
+}
+
+/* Cacher le "/" et le doublon variations dans le checkout */
+.sapi-checkout-outer .wc-block-components-product-details span[aria-hidden="true"] {
+  display: none !important;
+}
+
+.sapi-checkout-outer .wc-block-components-product-metadata > .wc-block-components-product-details ~ .wc-block-components-product-details {
+  display: none !important;
 }
 
 /* Prix total */
@@ -16402,6 +16462,388 @@ body.woocommerce-cart {
 
   .woocommerce-checkout .col2-set {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ========================================
+   ORDER PAY PAGE - Harmonisation tunnel
+   ======================================== */
+
+/* Conteneur formulaire order-pay */
+body.woocommerce-order-pay .checkout-page-cinetique #order_review {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* ---- Récap commande (card blanche) ---- */
+.sapi-order-pay-recap {
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-light);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.sapi-order-pay-recap__title {
+  font-family: var(--font-body);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-dark);
+  margin: 0 0 1.5rem 0;
+}
+
+/* ---- Produit item (card interne) ---- */
+.sapi-order-pay-item {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-gray-light);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.sapi-order-pay-item__image {
+  position: relative;
+  align-self: center;
+  margin-bottom: 1rem;
+}
+
+.sapi-order-pay-item__image img {
+  display: block;
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.sapi-order-pay-item__qty {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 28px;
+  height: 28px;
+  background: var(--color-gray-light);
+  color: var(--color-dark);
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-white);
+}
+
+.sapi-order-pay-item__details {
+  text-align: left;
+}
+
+.sapi-order-pay-item__name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-dark);
+  margin: 0 0 0.75rem 0;
+  text-align: left;
+}
+
+.sapi-order-pay-item__details .wc-item-meta {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem 0;
+}
+
+.sapi-order-pay-item__details .wc-item-meta li {
+  font-size: 0.9rem;
+  color: var(--color-dark);
+  margin-bottom: 0.35rem;
+  line-height: 1.5;
+  display: block;
+}
+
+.sapi-order-pay-item__details .wc-item-meta li strong {
+  font-weight: 700;
+  display: inline;
+}
+
+.sapi-order-pay-item__details .wc-item-meta li p {
+  display: inline;
+  font-weight: 400;
+}
+
+.sapi-order-pay-item__price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-wood);
+  text-align: right;
+  margin: 0.5rem 0 0;
+}
+
+/* ---- Totaux ---- */
+.sapi-order-pay-totals {
+  border-top: 1px solid var(--color-gray-light);
+  padding-top: 1rem;
+}
+
+.sapi-order-pay-totals__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgba(147, 125, 104, 0.1);
+  font-size: 0.95rem;
+  color: var(--color-dark);
+}
+
+.sapi-order-pay-totals__row:last-child {
+  border-bottom: none;
+  padding-top: 1rem;
+  padding-bottom: 0;
+}
+
+.sapi-order-pay-totals__row:last-child .sapi-order-pay-totals__label {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.sapi-order-pay-totals__row:last-child .sapi-order-pay-totals__value {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.sapi-order-pay-totals__label {
+  font-weight: 500;
+}
+
+.sapi-order-pay-totals__value {
+  font-weight: 600;
+  text-align: right;
+}
+
+.sapi-order-pay-totals__value .amount {
+  font-weight: 700;
+  color: var(--color-wood);
+}
+
+/* ---- Notice invité ---- */
+body.woocommerce-order-pay .woocommerce-info {
+  background: var(--color-warm);
+  border: 1px solid rgba(147, 125, 104, 0.25);
+  border-left: 3px solid var(--color-wood);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  font-size: 0.9rem;
+  color: var(--color-dark);
+  margin-bottom: 2rem;
+}
+
+body.woocommerce-order-pay .woocommerce-info::before {
+  color: var(--color-wood);
+}
+
+/* ---- Section paiement ---- */
+body.woocommerce-order-pay #payment {
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-light);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-top: 0;
+  -webkit-box-shadow: 0 2px 12px rgba(147, 125, 104, 0.08);
+  box-shadow: 0 2px 12px rgba(147, 125, 104, 0.08);
+}
+
+body.woocommerce-order-pay #payment .wc_payment_methods {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+
+body.woocommerce-order-pay #payment .wc_payment_method {
+  padding: 1.25rem;
+  border: 2px solid var(--color-gray-light);
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+  background: var(--color-white);
+  -webkit-transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+@media (hover: hover) {
+  body.woocommerce-order-pay #payment .wc_payment_method:hover {
+    border-color: var(--color-wood);
+    -webkit-box-shadow: 0 2px 8px rgba(147, 125, 104, 0.12);
+    box-shadow: 0 2px 8px rgba(147, 125, 104, 0.12);
+  }
+}
+
+body.woocommerce-order-pay #payment .wc_payment_method label {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+body.woocommerce-order-pay #payment .payment_box {
+  padding: 1rem 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: var(--color-gray);
+}
+
+/* Bouton Payer — vert comme le checkout classique */
+body.woocommerce-order-pay #place_order {
+  display: block;
+  width: 100%;
+  padding: 1.25rem 2rem;
+  background: linear-gradient(180deg, #018501 0%, #026B02 100%);
+  color: var(--color-white);
+  border: none;
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  -webkit-transition: box-shadow 0.3s ease, transform 0.2s ease;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  -webkit-box-shadow: 0 4px 15px rgba(1, 133, 1, 0.25);
+  box-shadow: 0 4px 15px rgba(1, 133, 1, 0.25);
+  margin-top: 0.5rem;
+}
+
+@media (hover: hover) {
+  body.woocommerce-order-pay #place_order:hover {
+    background: linear-gradient(180deg, #017101 0%, #015A02 100%);
+    -webkit-box-shadow: 0 6px 20px rgba(1, 133, 1, 0.35);
+    box-shadow: 0 6px 20px rgba(1, 133, 1, 0.35);
+    -webkit-transform: translateY(-1px);
+    transform: translateY(-1px);
+  }
+}
+
+/* Conditions + privacy */
+body.woocommerce-order-pay .woocommerce-terms-and-conditions-wrapper {
+  padding: 1rem 0;
+  font-size: 0.85rem;
+  color: var(--color-gray);
+  line-height: 1.5;
+}
+
+body.woocommerce-order-pay .woocommerce-terms-and-conditions-wrapper a {
+  color: var(--color-wood);
+  text-decoration: underline;
+}
+
+body.woocommerce-order-pay .woocommerce-privacy-policy-text {
+  font-size: 0.8rem;
+  color: var(--color-gray);
+  line-height: 1.5;
+}
+
+body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
+  color: var(--color-wood);
+}
+
+/* Section informations supplémentaires */
+.sapi-order-pay-additional {
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-light);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.sapi-order-pay-additional__title {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-dark);
+  margin: 0 0 1.25rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-gray-light);
+}
+
+.sapi-order-pay-additional__checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--color-dark);
+  line-height: 1.5;
+}
+
+.sapi-order-pay-additional__checkbox input[type="checkbox"] {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-wood);
+  cursor: pointer;
+}
+
+.sapi-order-pay-additional__note-field {
+  padding-top: 0.5rem;
+}
+
+.sapi-order-pay-additional__note-field textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--color-gray-light);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  resize: vertical;
+  -webkit-transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease;
+}
+
+.sapi-order-pay-additional__note-field textarea:focus {
+  outline: none;
+  border-color: var(--color-wood);
+}
+
+/* Actions (retour panier + bouton payer) */
+.sapi-order-pay-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.sapi-order-pay-back {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-gray);
+  text-decoration: none;
+  white-space: nowrap;
+  -webkit-transition: color 0.2s ease;
+  transition: color 0.2s ease;
+}
+
+@media (hover: hover) {
+  .sapi-order-pay-back:hover {
+    color: var(--color-wood);
+  }
+}
+
+.sapi-order-pay-actions #place_order {
+  flex: 1;
+}
+
+/* Mobile order-pay */
+@media (max-width: 768px) {
+  body.woocommerce-order-pay .checkout-page-cinetique #order_review {
+    max-width: 100%;
+  }
+
+  .sapi-order-pay-recap {
+    padding: 1.25rem;
+  }
+
+  .sapi-order-pay-item__image img {
+    max-height: 160px;
+  }
+
+  body.woocommerce-order-pay #payment {
+    padding: 1.25rem;
   }
 }
 
@@ -21434,54 +21876,127 @@ html.sapi-intro-active body {
   border-bottom-color: var(--color-orange, #E35B24);
 }
 
-/* Galerie immersive */
+/* Galerie — carrousel horizontal */
 .star-galerie {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 4rem 2rem;
+  padding: 0;
 }
 
-/* Mosaïque photos */
-.star-mosaic {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+.star-carousel {
+  position: relative;
+  overflow: hidden;
+}
+
+.star-carousel__track {
+  display: flex;
   gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 2rem 10vw;
 }
 
-.star-mosaic__item {
+.star-carousel__track::-webkit-scrollbar {
+  display: none;
+}
+
+.star-carousel__slide {
+  flex: 0 0 auto;
+  width: 70vw;
+  scroll-snap-align: center;
   border-radius: 12px;
   overflow: hidden;
-  aspect-ratio: 1 / 1;
+  transition: transform 0.4s var(--ease-smooth), box-shadow 0.4s var(--ease-smooth);
 }
 
-.star-mosaic__item--large {
-  grid-column: span 2;
-  aspect-ratio: 16 / 9;
-}
-
-.star-mosaic__item--tall {
-  grid-row: span 2;
-  aspect-ratio: auto;
-}
-
-.star-mosaic__item--wide {
-  grid-column: span 2;
-  aspect-ratio: 21 / 9;
-}
-
-.star-mosaic__item--landscape {
-  aspect-ratio: 3 / 2;
-}
-
-.star-mosaic__item img {
+.star-carousel__slide img {
   width: 100%;
   height: 100%;
+  aspect-ratio: 3 / 2;
   object-fit: cover;
-  transition: transform 0.6s var(--ease-smooth);
+  display: block;
+  transition: transform 0.4s var(--ease-smooth);
 }
 
-.star-mosaic__item:hover img {
-  transform: scale(1.03);
+@media (hover: hover) {
+  .star-carousel__slide:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(147, 125, 104, 0.15);
+  }
+
+  .star-carousel__slide:hover img {
+    transform: scale(1.05);
+  }
+}
+
+/* Flèches navigation */
+.star-carousel__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--color-dark);
+  font-size: 1.5rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.star-carousel__arrow:hover {
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.star-carousel__arrow--prev {
+  left: 1rem;
+}
+
+.star-carousel__arrow--next {
+  right: 1rem;
+}
+
+/* Carrousel 2 — slides plus petites */
+.star-carousel--small .star-carousel__slide {
+  width: 45vw;
+  max-width: 500px;
+}
+
+.star-carousel--small .star-carousel__slide img {
+  aspect-ratio: 4 / 3;
+}
+
+/* Interludes entre les carrousels */
+.star-interlude {
+  display: flex;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: var(--color-cream, #FEFDFB);
+}
+
+.star-interlude__inner {
+  max-width: 700px;
+  width: 100%;
+}
+
+.star-interlude__title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--color-wood);
+  margin: 0 0 1.5rem;
+  text-align: left;
 }
 
 /* Pourquoi cette pièce */
@@ -21510,28 +22025,8 @@ html.sapi-intro-active body {
   color: var(--color-dark);
 }
 
-/* Storytelling cards dans la mosaïque */
-.star-mosaic__item--card {
-  display: flex;
-  align-items: stretch;
-  aspect-ratio: auto;
-}
-
-/* Card descriptif dans la mosaïque */
-.star-mosaic__item--descriptif {
-  grid-column: span 2;
-}
-
 .star-descriptif__card {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  background: var(--color-cream, #FEFDFB);
-  border: 1px solid rgba(147, 125, 104, 0.1);
-  border-radius: 12px;
-  padding: 2rem 2.5rem;
+  padding: 0;
   text-align: left;
 }
 
@@ -21543,7 +22038,7 @@ html.sapi-intro-active body {
 
 .star-descriptif__card li {
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   line-height: 1.7;
   color: var(--color-dark);
   padding: 0.4rem 0 0.4rem 1.5rem;
@@ -21563,7 +22058,7 @@ html.sapi-intro-active body {
 
 .star-descriptif__card p {
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   line-height: 1.7;
   color: var(--color-dark);
   margin: 0 0 0.5rem;
@@ -21574,17 +22069,12 @@ html.sapi-intro-active body {
   font-weight: 600;
 }
 
-/* Card storytelling dans la mosaïque */
 .star-storytelling__card {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
-  background: var(--color-warm, #FBF6EA);
-  border-radius: 12px;
-  padding: 2rem 1.5rem;
+  padding: 1rem 0;
   text-align: center;
 }
 
@@ -21602,7 +22092,7 @@ html.sapi-intro-active body {
 
 .star-storytelling__card h3 {
   font-family: var(--font-body);
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--color-dark);
   margin: 0 0 0.75rem;
@@ -21610,7 +22100,7 @@ html.sapi-intro-active body {
 
 .star-storytelling__card p {
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   line-height: 1.7;
   color: var(--color-dark);
   opacity: 0.8;
@@ -21719,29 +22209,22 @@ html.sapi-intro-active body {
     font-size: 1.7rem;
   }
 
-  .star-galerie {
-    padding: 2.5rem 1rem;
+  .star-carousel__slide {
+    width: 85vw;
   }
 
-  .star-mosaic {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
+  .star-carousel__track {
+    padding: 1.5rem 5vw;
   }
 
-  .star-mosaic__item--large,
-  .star-mosaic__item--wide {
-    grid-column: span 2;
-    grid-row: span 1;
-    aspect-ratio: 16 / 10;
+  .star-carousel__arrow {
+    width: 36px;
+    height: 36px;
+    font-size: 1.2rem;
   }
 
-  .star-mosaic__item--tall {
-    grid-row: span 1;
-    aspect-ratio: 1 / 1;
-  }
-
-  .star-mosaic__item--landscape {
-    aspect-ratio: 1 / 1;
+  .star-interlude {
+    padding: 2.5rem 1.5rem;
   }
 
   .star-pourquoi {
@@ -21750,15 +22233,6 @@ html.sapi-intro-active body {
 
   .star-pourquoi__inner h2 {
     font-size: 2rem;
-  }
-
-  .star-mosaic__item--card,
-  .star-mosaic__item--descriptif {
-    grid-column: span 2;
-  }
-
-  .star-descriptif__card {
-    padding: 1.5rem;
   }
 
   .star-cta {

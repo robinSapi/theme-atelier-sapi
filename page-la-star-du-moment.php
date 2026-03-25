@@ -119,118 +119,156 @@ if ($accroche || $texte_principal || $descriptif) :
     <?php if ($texte_principal) : ?>
       <div class="star-presentation__desc"><?php echo wp_kses_post($texte_principal); ?></div>
     <?php endif; ?>
-    <a href="<?php echo esc_url($permalink); ?>" class="star-presentation__link">Voir la fiche complète &rarr;</a>
+    <a href="<?php echo esc_url($permalink . '?from=star'); ?>" class="star-presentation__link">Voir la fiche complète &rarr;</a>
   </div>
 </section>
 <?php endif; ?>
 
-<!-- ========== GALERIE IMMERSIVE ========== -->
+<!-- ========== GALERIE — CARROUSEL HORIZONTAL ========== -->
 <section class="star-galerie" id="star-galerie">
+  <?php
+  // Collecter toutes les photos (dédoublonnées)
+  $seen_urls = [];
+  $all_photos = [];
 
-  <!-- Mosaïque de photos -->
-  <div class="star-mosaic">
-    <?php
-    // Toutes les photos : ACF + produit principale + galerie WooCommerce
-    // On évite les doublons via les URLs
-    $seen_urls = [];
-    $all_mosaic = [];
-
-    // 1. Photos ACF (ordre éditorial, avec variantes de format)
-    $acf_candidates = [
-      ['url' => $bandeau,    'alt' => 'Bandeau',  'variant' => 'large'],
-      ['url' => $ambiance_1, 'alt' => 'Ambiance', 'variant' => 'tall'],
-      ['url' => $detail_1,   'alt' => 'Détail',   'variant' => ''],
-      ['url' => $detail_2,   'alt' => 'Détail',   'variant' => 'landscape'],
-      ['url' => $ambiance_2, 'alt' => 'Ambiance', 'variant' => 'wide'],
-      ['url' => $ambiance_3, 'alt' => 'Ambiance', 'variant' => ''],
-    ];
-    foreach ($acf_candidates as $p) {
-      if (!empty($p['url']) && !isset($seen_urls[$p['url']])) {
-        $all_mosaic[] = $p;
-        $seen_urls[$p['url']] = true;
-      }
+  $acf_candidates = [
+    ['url' => $bandeau,    'alt' => 'Bandeau'],
+    ['url' => $ambiance_1, 'alt' => 'Ambiance'],
+    ['url' => $detail_1,   'alt' => 'Détail'],
+    ['url' => $detail_2,   'alt' => 'Détail'],
+    ['url' => $ambiance_2, 'alt' => 'Ambiance'],
+    ['url' => $ambiance_3, 'alt' => 'Ambiance'],
+  ];
+  foreach ($acf_candidates as $p) {
+    if (!empty($p['url']) && !isset($seen_urls[$p['url']])) {
+      $all_photos[] = $p;
+      $seen_urls[$p['url']] = true;
     }
-
-    // 2. Photo principale produit
-    if ($main_image_url && !isset($seen_urls[$main_image_url])) {
-      $all_mosaic[] = ['url' => $main_image_url, 'alt' => 'Produit', 'variant' => ''];
-      $seen_urls[$main_image_url] = true;
+  }
+  if ($main_image_url && !isset($seen_urls[$main_image_url])) {
+    $all_photos[] = ['url' => $main_image_url, 'alt' => 'Produit'];
+    $seen_urls[$main_image_url] = true;
+  }
+  foreach ($gallery_urls as $gurl) {
+    if (!isset($seen_urls[$gurl])) {
+      $all_photos[] = ['url' => $gurl, 'alt' => 'Galerie'];
+      $seen_urls[$gurl] = true;
     }
+  }
 
-    // 3. Galerie WooCommerce (alterner les formats)
-    $gallery_variants = ['landscape', '', 'tall', '', 'landscape', ''];
-    $gi = 0;
-    foreach ($gallery_urls as $gurl) {
-      if (!isset($seen_urls[$gurl])) {
-        $all_mosaic[] = ['url' => $gurl, 'alt' => 'Galerie', 'variant' => $gallery_variants[$gi % count($gallery_variants)]];
-        $seen_urls[$gurl] = true;
-        $gi++;
-      }
-    }
+  // Séparer en 2 groupes pour intercaler les interludes
+  $mid = (int) ceil(count($all_photos) / 2);
+  $group1 = array_slice($all_photos, 0, $mid);
+  $group2 = array_slice($all_photos, $mid);
+  ?>
 
-    // Cards à insérer dans la grille (position = après la Nème photo)
-    $inline_cards = [];
-
-    // Card descriptif en position 2
-    if ($descriptif) {
-      $inline_cards[2] = ['type' => 'descriptif', 'content' => $descriptif];
-    }
-
-    // Card storytelling 1 en position 4
-    $inline_cards[4] = [
-      'type' => 'storytelling',
-      'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
-      'title' => '100% artisanal',
-      'text' => 'Conçu, découpé au laser et assemblé à la main par Robin dans son atelier lyonnais. Bois issu de forêts gérées durablement (PEFC).',
-      'link' => home_url('/lumiere-dartisan/'),
-      'link_label' => 'Découvrir l\'atelier',
-    ];
-
-    // Card storytelling 2 en avant-dernière position
-    $total_photos = count($all_mosaic);
-    $avant_derniere = max(5, $total_photos - 1);
-    $inline_cards[$avant_derniere] = [
-      'type' => 'storytelling',
-      'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
-      'title' => 'Un accompagnement personnel',
-      'text' => 'Une question sur ce modèle ? Robin vous accompagne personnellement, du choix de l\'essence à l\'installation.',
-      'link' => home_url('/contact/'),
-      'link_label' => 'Contacter Robin',
-    ];
-
-    $photo_index = 0;
-    foreach ($all_mosaic as $photo) :
-      $variant_class = !empty($photo['variant']) ? ' star-mosaic__item--' . $photo['variant'] : '';
-    ?>
-    <div class="star-mosaic__item<?php echo $variant_class; ?>">
-      <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
+  <!-- Carrousel 1 -->
+  <div class="star-carousel" id="star-carousel-1">
+    <div class="star-carousel__track">
+      <?php foreach ($group1 as $photo) : ?>
+      <a href="<?php echo esc_url($permalink . '?from=star'); ?>" class="star-carousel__slide">
+        <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
+      </a>
+      <?php endforeach; ?>
     </div>
-    <?php
-      $photo_index++;
-      if (isset($inline_cards[$photo_index])) :
-        $card = $inline_cards[$photo_index];
-        if ($card['type'] === 'descriptif') :
-    ?>
-    <div class="star-mosaic__item star-mosaic__item--card star-mosaic__item--descriptif">
-      <div class="star-descriptif__card">
-        <?php echo wp_kses_post($card['content']); ?>
+    <button class="star-carousel__arrow star-carousel__arrow--prev" aria-label="Précédent">&#8249;</button>
+    <button class="star-carousel__arrow star-carousel__arrow--next" aria-label="Suivant">&#8250;</button>
+  </div>
+
+  <!-- Interlude : descriptif -->
+  <?php if ($descriptif) : ?>
+  <div class="star-interlude">
+    <div class="star-interlude__inner">
+      <h2 class="star-interlude__title">En détail</h2>
+      <div class="star-descriptif__card"><?php echo wp_kses_post($descriptif); ?></div>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <!-- Interlude : storytelling artisanat -->
+  <div class="star-interlude">
+    <div class="star-interlude__inner star-storytelling__card">
+      <div class="star-storytelling__icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
       </div>
+      <h3>100% artisanal</h3>
+      <p>Conçu, découpé au laser et assemblé à la main par Robin dans son atelier lyonnais. Bois issu de forêts gérées durablement (PEFC).</p>
+      <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="star-storytelling__link">Découvrir l'atelier</a>
     </div>
-    <?php   else : ?>
-    <div class="star-mosaic__item star-mosaic__item--card">
-      <div class="star-storytelling__card">
-        <div class="star-storytelling__icon"><?php echo $card['icon']; ?></div>
-        <h3><?php echo esc_html($card['title']); ?></h3>
-        <p><?php echo esc_html($card['text']); ?></p>
-        <a href="<?php echo esc_url($card['link']); ?>" class="star-storytelling__link"><?php echo esc_html($card['link_label']); ?></a>
+  </div>
+
+  <!-- Carrousel 2 -->
+  <?php if (!empty($group2)) : ?>
+  <div class="star-carousel star-carousel--small" id="star-carousel-2">
+    <div class="star-carousel__track">
+      <?php foreach ($group2 as $photo) : ?>
+      <a href="<?php echo esc_url($permalink . '?from=star'); ?>" class="star-carousel__slide">
+        <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
+      </a>
+      <?php endforeach; ?>
+    </div>
+    <button class="star-carousel__arrow star-carousel__arrow--prev" aria-label="Précédent">&#8249;</button>
+    <button class="star-carousel__arrow star-carousel__arrow--next" aria-label="Suivant">&#8250;</button>
+  </div>
+  <?php endif; ?>
+
+  <!-- Interlude : accompagnement -->
+  <div class="star-interlude">
+    <div class="star-interlude__inner star-storytelling__card">
+      <div class="star-storytelling__icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       </div>
+      <h3>Un accompagnement personnel</h3>
+      <p>Une question sur ce modèle ? Robin vous accompagne personnellement, du choix de l'essence à l'installation.</p>
+      <a href="<?php echo esc_url(home_url('/contact/')); ?>" class="star-storytelling__link">Contacter Robin</a>
     </div>
-    <?php
-        endif;
-      endif;
-    endforeach; ?>
   </div>
 </section>
+
+<!-- Carrousel JS -->
+<script>
+(function() {
+  document.querySelectorAll('.star-carousel').forEach(function(carousel) {
+    var track = carousel.querySelector('.star-carousel__track');
+    var prev = carousel.querySelector('.star-carousel__arrow--prev');
+    var next = carousel.querySelector('.star-carousel__arrow--next');
+    if (!track || !prev || !next) return;
+
+    var slides = Array.from(track.querySelectorAll('.star-carousel__slide'));
+
+    function getCenterIndex() {
+      var trackCenter = track.scrollLeft + track.offsetWidth / 2;
+      var closest = 0;
+      var closestDist = Infinity;
+      slides.forEach(function(slide, i) {
+        var slideCenter = slide.offsetLeft - track.offsetLeft + slide.offsetWidth / 2;
+        var dist = Math.abs(trackCenter - slideCenter);
+        if (dist < closestDist) {
+          closestDist = dist;
+          closest = i;
+        }
+      });
+      return closest;
+    }
+
+    function scrollToSlide(idx) {
+      if (idx < 0) idx = 0;
+      if (idx >= slides.length) idx = slides.length - 1;
+      var slide = slides[idx];
+      var slideCenter = slide.offsetLeft - track.offsetLeft + slide.offsetWidth / 2;
+      var trackCenter = track.offsetWidth / 2;
+      track.scrollTo({ left: slideCenter - trackCenter, behavior: 'smooth' });
+    }
+
+    prev.addEventListener('click', function() {
+      scrollToSlide(getCenterIndex() - 1);
+    });
+    next.addEventListener('click', function() {
+      scrollToSlide(getCenterIndex() + 1);
+    });
+  });
+})();
+</script>
 
 <!-- ========== POURQUOI CETTE PIÈCE ========== -->
 <?php if ($pourquoi) : ?>
@@ -247,7 +285,7 @@ if ($accroche || $texte_principal || $descriptif) :
   <div class="star-cta__inner">
     <h2 class="star-cta__title product-name"><?php echo esc_html($name); ?></h2>
     <div class="star-cta__price"><?php echo $price; ?></div>
-    <a href="<?php echo esc_url($permalink); ?>" class="star-cta__btn">
+    <a href="<?php echo esc_url($permalink . '?from=star'); ?>" class="star-cta__btn">
       Découvrir ce luminaire
     </a>
     <a href="<?php echo esc_url(home_url('/mes-creations/')); ?>" class="star-cta__link">

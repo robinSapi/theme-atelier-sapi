@@ -980,8 +980,10 @@ get_header();
     // N'afficher l'intro qu'une seule fois par session par produit.
     // Après un ajout au panier (rechargement), l'intro ne réapparaît pas.
     const introKey = 'sapi_intro_<?php echo $product->get_id(); ?>';
-    if (sessionStorage.getItem(introKey)) {
+    const fromStar = new URLSearchParams(window.location.search).get('from') === 'star';
+    if (sessionStorage.getItem(introKey) || fromStar) {
       introScreen.remove();
+      if (fromStar) window.history.replaceState({}, '', window.location.pathname);
     } else {
       sessionStorage.setItem(introKey, '1');
 

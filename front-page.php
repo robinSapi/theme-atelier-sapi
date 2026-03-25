@@ -82,18 +82,13 @@ foreach ($categories_order as $cat_slug) {
   }
 }
 
-// Query Olivia La Gardiéna — Bestseller
-$olivia_product = null;
-$olivia_query = new WP_Query([
-  'post_type'      => 'product',
-  'posts_per_page' => 1,
-  'post_status'    => 'publish',
-  'name'           => 'olivia-la-gardiena',
-]);
-
-if ($olivia_query->have_posts()) {
-  $olivia_query->the_post();
-  $product = wc_get_product(get_the_ID());
+// Star du moment — lit le champ ACF produit_star de la page "La star du moment"
+$star_product_data = null;
+$star_page = get_page_by_path('la-star-du-moment');
+if ($star_page && function_exists('get_field')) {
+  $star_post = get_field('produit_star', $star_page->ID);
+  $star_id = $star_post ? (is_object($star_post) ? $star_post->ID : (int) $star_post) : 0;
+  $product = $star_id ? wc_get_product($star_id) : null;
 
   if ($product) {
     if ($product->is_type('variable')) {
@@ -103,7 +98,7 @@ if ($olivia_query->have_posts()) {
       $price_display = wc_price($product->get_price());
     }
 
-    $categories = get_the_terms(get_the_ID(), 'product_cat');
+    $categories = get_the_terms($star_id, 'product_cat');
     $category_name = '';
     if ($categories && !is_wp_error($categories)) {
       foreach ($categories as $cat) {
@@ -119,25 +114,22 @@ if ($olivia_query->have_posts()) {
     }
 
     $image_url = '';
-    if (function_exists('get_field')) {
-      $detail_2 = get_field('detail_2', get_the_ID());
-      if ($detail_2) {
-        $image_url = sapi_get_acf_image_url($detail_2);
-      }
+    $detail_2 = get_field('detail_2', $star_id);
+    if ($detail_2) {
+      $image_url = sapi_get_acf_image_url($detail_2);
     }
     if (!$image_url) {
-      $image_url = get_the_post_thumbnail_url(get_the_ID(), 'woocommerce_single');
+      $image_url = get_the_post_thumbnail_url($star_id, 'woocommerce_single');
     }
 
-    $olivia_product = [
-      'name'     => get_the_title(),
+    $star_product_data = [
+      'name'     => $product->get_name(),
       'category' => $category_name,
       'price'    => $price_display,
       'image'    => $image_url,
-      'url'      => get_permalink(),
+      'url'      => home_url('/la-star-du-moment/'),
     ];
   }
-  wp_reset_postdata();
 }
 
 // Query Carte Cadeau
@@ -372,15 +364,15 @@ foreach ($collection_slugs as $col) {
 <section class="hero-bento">
   <div class="bento-container">
 
-    <!-- Olivia Bestseller -->
-    <?php if ($olivia_product) : ?>
-    <a href="<?php echo esc_url($olivia_product['url']); ?>" class="bento-card bento-hero">
-      <div class="bento-bg" style="background-image: url('<?php echo esc_url($olivia_product['image']); ?>');"></div>
-      <span class="bento-bestseller-badge">Coup de cœur</span>
+    <!-- Star du moment -->
+    <?php if ($star_product_data) : ?>
+    <a href="<?php echo esc_url($star_product_data['url']); ?>" class="bento-card bento-hero">
+      <div class="bento-bg" style="background-image: url('<?php echo esc_url($star_product_data['image']); ?>');"></div>
+      <span class="bento-bestseller-badge">Star du moment</span>
       <div class="bento-content">
-        <h2 class="bento-title"><?php echo esc_html($olivia_product['name']); ?></h2>
-        <?php if ($olivia_product['category']) : ?>
-          <p class="bento-category"><?php echo esc_html($olivia_product['category']); ?></p>
+        <h2 class="bento-title product-name"><?php echo esc_html($star_product_data['name']); ?></h2>
+        <?php if ($star_product_data['category']) : ?>
+          <p class="bento-category"><?php echo esc_html($star_product_data['category']); ?></p>
         <?php endif; ?>
       </div>
     </a>

@@ -1083,6 +1083,77 @@ add_action('wp_enqueue_scripts', function() {
   }
 }, 30);
 
+/**
+ * Réordonner les données panier : variations avant add-ons.
+ *
+ * WooCommerce Blocks (Store API) appelle ce filtre avec un array vide,
+ * puis le plugin WC Product Add-Ons y ajoute ses données.
+ * Les variations sont affichées séparément par Blocks via $cart_item['variation'].
+ *
+ * Stratégie : on injecte les variations dans item_data à priorité 5 (avant les
+ * add-ons à priorité 10+). Le filtre rest_request_after_callbacks vide ensuite
+ * le champ variation[] de la réponse Store API pour éviter le doublon.
+ * Le CSS cache aussi le 2ème .product-details en sécurité.
+ */
+add_filter('woocommerce_get_item_data', function($item_data, $cart_item) {
+  if (empty($cart_item['variation'])) {
+    return $item_data;
+  }
+
+  // Construire les entrées de variation
+  $variation_entries = [];
+  foreach ($cart_item['variation'] as $attr_key => $attr_val) {
+    if (empty($attr_val)) {
+      continue;
+    }
+    $taxonomy = str_replace('attribute_', '', $attr_key);
+    $label    = wc_attribute_label($taxonomy);
+    if (taxonomy_exists($taxonomy)) {
+      $term = get_term_by('slug', $attr_val, $taxonomy);
+      $value = $term ? $term->name : $attr_val;
+    } else {
+      $value = $attr_val;
+    }
+    $variation_entries[] = [
+      'key'     => $label,
+      'value'   => $value,
+      'display' => esc_html($value),
+    ];
+  }
+
+  // Variations d'abord, puis add-ons
+  return array_merge($variation_entries, $item_data);
+}, 5, 2);
+
+// Supprimer les variations de la réponse Store API pour éviter le doublon
+// (les variations sont déjà dans item_data grâce au filtre ci-dessus)
+add_filter('rest_request_after_callbacks', function($response, $handler, $request) {
+  if (! ($response instanceof WP_REST_Response)) {
+    return $response;
+  }
+  $route = $request->get_route();
+  if (strpos($route, 'wc/store/v1/cart') === false && strpos($route, 'wc/store/v1/batch') === false) {
+    return $response;
+  }
+  $data = $response->get_data();
+  // Panier complet (/wc/store/v1/cart)
+  if (isset($data['items']) && is_array($data['items'])) {
+    foreach ($data['items'] as &$item) {
+      if (isset($item['variation'])) {
+        $item['variation'] = [];
+      }
+    }
+    unset($item);
+    $response->set_data($data);
+  }
+  // Endpoints batch ou item individuel
+  if (isset($data['variation'])) {
+    $data['variation'] = [];
+    $response->set_data($data);
+  }
+  return $response;
+}, 10, 3);
+
 // Update cart count fragment after AJAX add-to-cart
 add_filter('woocommerce_add_to_cart_fragments', function($fragments) {
   $count = WC()->cart->get_cart_contents_count();
@@ -3854,6 +3925,23 @@ add_action('woocommerce_set_additional_field_value', function ($key, $value, $gr
   if (!($wc_object instanceof WC_Order)) return;
   $wc_object->update_meta_data('_sapi_newsletter_optout', wc_bool_to_string($value));
 }, 10, 4);
+
+// Sauvegarder la note et l'opt-out newsletter depuis la page Order Pay
+add_action('woocommerce_before_pay_action', function ($order) {
+  // Note de commande
+  if (! empty($_POST['sapi_order_note'])) {
+    $note = sanitize_textarea_field(wp_unslash($_POST['sapi_order_note']));
+    if ($note) {
+      $order->add_order_note(esc_html($note), 1); // 1 = note client
+      $order->set_customer_note($note);
+    }
+  }
+  // Newsletter opt-out
+  if (! empty($_POST['sapi_newsletter_optout'])) {
+    $order->update_meta_data('_sapi_newsletter_optout', 'yes');
+  }
+  $order->save();
+});
 
 /**
  * ============================================================
