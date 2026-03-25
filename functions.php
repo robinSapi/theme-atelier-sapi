@@ -1083,6 +1083,37 @@ add_action('wp_enqueue_scripts', function() {
   }
 }, 30);
 
+// Réordonner les données panier : variations (Matériau, Taille) avant add-ons (Couleur câble)
+add_filter('woocommerce_get_item_data', function($item_data, $cart_item) {
+  if (empty($item_data) || count($item_data) < 2) {
+    return $item_data;
+  }
+  // Les attributs de variation ont une clé 'key' correspondant à un attribut WC (pa_...)
+  // Les add-ons ont une clé ajoutée par le plugin WC Product Add-Ons
+  $variations = [];
+  $addons     = [];
+  foreach ($item_data as $data) {
+    // Les variations WC natifs ont généralement 'attribute_' dans leur source
+    // ou correspondent aux attributs du produit
+    if (isset($cart_item['variation']) && ! empty($cart_item['variation'])) {
+      $is_variation = false;
+      foreach ($cart_item['variation'] as $attr_key => $attr_val) {
+        $attr_label = wc_attribute_label(str_replace('attribute_', '', $attr_key));
+        if (isset($data['key']) && $data['key'] === $attr_label) {
+          $is_variation = true;
+          break;
+        }
+      }
+      if ($is_variation) {
+        $variations[] = $data;
+        continue;
+      }
+    }
+    $addons[] = $data;
+  }
+  return array_merge($variations, $addons);
+}, 99, 2);
+
 // Update cart count fragment after AJAX add-to-cart
 add_filter('woocommerce_add_to_cart_fragments', function($fragments) {
   $count = WC()->cart->get_cart_contents_count();
