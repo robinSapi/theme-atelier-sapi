@@ -511,6 +511,41 @@ foreach ($collection_slugs as $col) {
       </div>
     </a>
 
+    <!-- Conseil -->
+    <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>" class="bento-card bento-conseil">
+      <span class="bento-conseil-badge">Conseil</span>
+      <div class="bento-conseil-content">
+        <h3>Éclairer une pièce, c'est un peu comme choisir la bonne sauce pour ses pâtes : tout est une question de préférence et de dosage !</h3>
+        <span class="bento-conseil-cta">Découvrir les conseils de Robin →</span>
+      </div>
+    </a>
+
+    <!-- Dernier Flash Actu -->
+    <?php
+    $last_actu = new WP_Query([
+      'posts_per_page' => 1,
+      'post_status'    => 'publish',
+      'category_name'  => 'flash-actu',
+      'orderby'        => 'date',
+      'order'          => 'DESC'
+    ]);
+    if ($last_actu->have_posts()) : $last_actu->the_post();
+    ?>
+    <a href="<?php the_permalink(); ?>" class="bento-card bento-actu">
+      <?php if (has_post_thumbnail()) : ?>
+        <div class="bento-bg" style="background-image: url('<?php echo esc_url(get_the_post_thumbnail_url(get_the_ID(), 'large')); ?>');"></div>
+      <?php endif; ?>
+      <span class="bento-actu-badge">Flash actu</span>
+      <div class="bento-actu-content">
+        <h3><?php echo esc_html(get_the_title()); ?></h3>
+        <span class="bento-actu-date"><?php echo esc_html(get_the_date('d/m/Y')); ?></span>
+      </div>
+    </a>
+    <?php
+    wp_reset_postdata();
+    endif;
+    ?>
+
     <!-- CTA Card -->
     <a href="<?php echo home_url('/mes-creations/'); ?>" class="bento-card bento-cta">
       <h3 class="cta-title">Toutes les créations</h3>

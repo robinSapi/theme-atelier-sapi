@@ -1803,14 +1803,16 @@ button:hover,
   margin: 0 0 0.5rem;
 }
 .robin-fiche__citation-text::before {
-  content: '\00AB\00A0';
+  content: '\201C\00A0';
+  font-family: Georgia, serif;
   color: var(--color-orange, #E35B24);
-  opacity: 0.4;
+  opacity: 0.2;
 }
 .robin-fiche__citation-text::after {
-  content: '\00A0\00BB';
+  content: '\00A0\201D';
+  font-family: Georgia, serif;
   color: var(--color-orange, #E35B24);
-  opacity: 0.4;
+  opacity: 0.2;
 }
 .robin-fiche__citation-text--animated::before,
 .robin-fiche__citation-text--animated::after {
@@ -7230,13 +7232,16 @@ li.carousel-editorial-slide,
 }
 
 .artisan-quote-cinetique blockquote::before {
-  content: '"';
-  font-size: 4rem;
-  color: var(--bois-dore, #937D68);
-  opacity: 0.3;
+  content: '\201C';
+  font-family: Georgia, serif;
+  font-size: clamp(8rem, 15vw, 14rem);
+  font-style: normal;
+  color: var(--color-orange, #E35B24);
+  opacity: 0.2;
   position: absolute;
-  top: -1rem;
-  left: 0;
+  top: -0.4em;
+  left: -0.1em;
+  line-height: 1;
 }
 
 .artisan-quote-cinetique cite {
@@ -7554,7 +7559,7 @@ li.carousel-editorial-slide,
   font-family: Georgia, serif;
   font-size: 4rem;
   color: var(--color-orange, #E35B24);
-  opacity: 0.25;
+  opacity: 0.2;
   line-height: 1;
   user-select: none;
 }
@@ -8466,6 +8471,14 @@ li.carousel-editorial-slide,
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
   }
+}
+
+.advice-articles-title {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  color: var(--color-wood);
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
 .advice-room-picker-section {
@@ -9449,6 +9462,14 @@ li.carousel-editorial-slide,
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 13px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.2s;
+}
+
+a.single-post-category:hover {
+  background: rgba(227, 91, 36, 0.2);
+  color: var(--color-orange, #E35B24);
 }
 
 .single-post-featured {
@@ -9470,6 +9491,23 @@ li.carousel-editorial-slide,
     0 8px 24px rgba(0, 0, 0, 0.08);
   display: block;
   margin: 0 auto;
+}
+
+.single-post-back {
+  display: block;
+  text-align: center;
+  max-width: 800px;
+  margin: 2rem auto 3rem;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-wood, #937D68);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+
+.single-post-back:hover {
+  color: var(--color-orange, #E35B24);
 }
 
 .single-post-content {
@@ -11329,6 +11367,131 @@ transform: translateY(15px);
   }
 }
 
+/* Bento - Flash Actu Card */
+.bento-actu {
+  grid-column: span 4;
+  grid-row: span 2;
+  min-height: 400px;
+}
+
+.bento-actu::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 30%, rgba(50, 50, 50, 0.7) 100%);
+  z-index: 1;
+}
+
+.bento-actu-badge {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  padding: 0.4rem 1rem;
+  background: var(--color-orange);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 50px;
+  z-index: 2;
+}
+
+.bento-actu-content {
+  position: absolute;
+  bottom: 2rem;
+  left: 2rem;
+  right: 2rem;
+  z-index: 2;
+}
+
+.bento-actu-content h3 {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.4;
+}
+
+.bento-actu-date {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 400;
+}
+
+/* Bento - Conseil Card */
+.bento-conseil {
+  grid-column: span 8;
+  grid-row: span 2;
+  min-height: 400px;
+  background: var(--color-warm);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 3rem;
+  text-align: center;
+}
+
+.bento-conseil-badge {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  padding: 0.4rem 1rem;
+  background: var(--color-wood);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 50px;
+  z-index: 2;
+}
+
+.bento-conseil-content {
+  z-index: 2;
+}
+
+.bento-conseil-content h3 {
+  font-family: var(--font-display, "Square Peg", Georgia, serif);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 400;
+  font-style: italic;
+  color: var(--bois-profond, #6B5A4A);
+  margin: 0 0 1rem 0;
+  line-height: 1.3;
+  text-transform: none;
+  position: relative;
+}
+
+.bento-conseil-content h3::before {
+  content: '\201C';
+  font-family: Georgia, serif;
+  font-size: clamp(5rem, 10vw, 8rem);
+  font-style: normal;
+  color: var(--color-orange, #E35B24);
+  opacity: 0.2;
+  position: absolute;
+  top: -0.5em;
+  left: -0.15em;
+  line-height: 1;
+}
+
+.bento-conseil-cta {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-orange);
+  letter-spacing: 0.03em;
+}
+
+@media (hover: hover) {
+  .bento-conseil:hover .bento-conseil-cta {
+    text-decoration: underline;
+  }
+}
+
 /* ========================================
    CINÉTIQUE - Collections Section
    ======================================== */
@@ -11685,6 +11848,14 @@ transform: translateY(15px);
   .bento-room-picker {
     grid-column: span 6;
   }
+
+  .bento-actu {
+    grid-column: span 6;
+  }
+
+  .bento-conseil {
+    grid-column: span 6;
+  }
 }
 
 @media (max-width: 768px) {
@@ -11746,6 +11917,8 @@ transform: translateY(15px);
   .bento-process,
   .bento-cta,
   .bento-atelier,
+  .bento-actu,
+  .bento-conseil,
   .bento-storytelling,
   .bento-giftcard,
   .bento-room-picker {
@@ -11765,6 +11938,14 @@ transform: translateY(15px);
 
   .bento-atelier {
     min-height: 250px;
+  }
+
+  .bento-actu {
+    min-height: 250px;
+  }
+
+  .bento-conseil {
+    min-height: 200px;
   }
 
   .bento-product-small {
@@ -22404,13 +22585,16 @@ html.sapi-intro-active body {
 }
 
 .presse-quote blockquote::before {
-  content: '\00AB';
-  font-family: var(--font-display, 'Square Peg', cursive);
-  font-size: 4rem;
+  content: '\201C';
+  font-family: Georgia, serif;
+  font-size: clamp(8rem, 15vw, 14rem);
+  font-style: normal;
   color: var(--color-orange, #E35B24);
+  opacity: 0.2;
+  position: absolute;
+  top: -0.4em;
+  left: -0.1em;
   line-height: 1;
-  display: block;
-  margin-bottom: 0.5rem;
 }
 
 .presse-quote blockquote p {
