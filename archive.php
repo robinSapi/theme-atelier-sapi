@@ -1,8 +1,8 @@
 <?php
 get_header();
 
-// Supprime le préfixe "Catégorie :" du titre
-$archive_title = get_the_archive_title();
+// Supprime le préfixe et les balises HTML du titre
+$archive_title = wp_strip_all_tags(get_the_archive_title());
 $archive_title = preg_replace('/^(Catégorie|Tag|Archives)\s*:\s*/i', '', $archive_title);
 ?>
 
