@@ -21731,6 +21731,97 @@ html.sapi-intro-active body {
   text-align: left;
 }
 
+/* Lightbox plein écran */
+.star-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.star-lightbox[aria-hidden="true"] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.star-lightbox__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.star-lightbox__img {
+  position: relative;
+  z-index: 1;
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.star-lightbox__close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.star-lightbox__close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.star-lightbox__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.star-lightbox__arrow:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.star-lightbox__arrow--prev {
+  left: 1.5rem;
+}
+
+.star-lightbox__arrow--next {
+  right: 1.5rem;
+}
+
+.star-lightbox__counter {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
 /* Pourquoi cette pièce */
 .star-pourquoi {
   background: var(--color-warm, #FBF6EA);
