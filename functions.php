@@ -1088,28 +1088,28 @@ add_filter('woocommerce_get_item_data', function($item_data, $cart_item) {
   if (empty($item_data) || count($item_data) < 2) {
     return $item_data;
   }
-  // Les attributs de variation ont une clé 'key' correspondant à un attribut WC (pa_...)
-  // Les add-ons ont une clé ajoutée par le plugin WC Product Add-Ons
+
+  // Construire la liste des labels de variation pour ce produit
+  $variation_labels = [];
+  if (! empty($cart_item['variation'])) {
+    foreach ($cart_item['variation'] as $attr_key => $attr_val) {
+      $taxonomy = str_replace('attribute_', '', $attr_key);
+      $variation_labels[] = strtolower(wc_attribute_label($taxonomy));
+    }
+  }
+
+  // Séparer : variation vs add-on en comparant le label (insensible à la casse)
   $variations = [];
   $addons     = [];
   foreach ($item_data as $data) {
-    // Les variations WC natifs ont généralement 'attribute_' dans leur source
-    // ou correspondent aux attributs du produit
-    if (isset($cart_item['variation']) && ! empty($cart_item['variation'])) {
-      $is_variation = false;
-      foreach ($cart_item['variation'] as $attr_key => $attr_val) {
-        $attr_label = wc_attribute_label(str_replace('attribute_', '', $attr_key));
-        if (isset($data['key']) && $data['key'] === $attr_label) {
-          $is_variation = true;
-          break;
-        }
-      }
-      if ($is_variation) {
-        $variations[] = $data;
-        continue;
-      }
+    $key_lower = isset($data['key']) ? strtolower($data['key']) : '';
+    $name_lower = isset($data['name']) ? strtolower($data['name']) : '';
+    $match = $key_lower ?: $name_lower;
+    if (in_array($match, $variation_labels, true)) {
+      $variations[] = $data;
+    } else {
+      $addons[] = $data;
     }
-    $addons[] = $data;
   }
   return array_merge($variations, $addons);
 }, 99, 2);
