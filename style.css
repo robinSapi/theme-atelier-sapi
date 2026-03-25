@@ -1803,14 +1803,16 @@ button:hover,
   margin: 0 0 0.5rem;
 }
 .robin-fiche__citation-text::before {
-  content: '\00AB\00A0';
+  content: '\201C\00A0';
+  font-family: Georgia, serif;
   color: var(--color-orange, #E35B24);
-  opacity: 0.4;
+  opacity: 0.2;
 }
 .robin-fiche__citation-text::after {
-  content: '\00A0\00BB';
+  content: '\00A0\201D';
+  font-family: Georgia, serif;
   color: var(--color-orange, #E35B24);
-  opacity: 0.4;
+  opacity: 0.2;
 }
 .robin-fiche__citation-text--animated::before,
 .robin-fiche__citation-text--animated::after {
@@ -7230,13 +7232,16 @@ li.carousel-editorial-slide,
 }
 
 .artisan-quote-cinetique blockquote::before {
-  content: '"';
-  font-size: 4rem;
-  color: var(--bois-dore, #937D68);
-  opacity: 0.3;
+  content: '\201C';
+  font-family: Georgia, serif;
+  font-size: clamp(8rem, 15vw, 14rem);
+  font-style: normal;
+  color: var(--color-orange, #E35B24);
+  opacity: 0.2;
   position: absolute;
-  top: -1rem;
-  left: 0;
+  top: -0.4em;
+  left: -0.1em;
+  line-height: 1;
 }
 
 .artisan-quote-cinetique cite {
@@ -7554,7 +7559,7 @@ li.carousel-editorial-slide,
   font-family: Georgia, serif;
   font-size: 4rem;
   color: var(--color-orange, #E35B24);
-  opacity: 0.25;
+  opacity: 0.2;
   line-height: 1;
   user-select: none;
 }
@@ -22555,13 +22560,16 @@ html.sapi-intro-active body {
 }
 
 .presse-quote blockquote::before {
-  content: '\00AB';
-  font-family: var(--font-display, 'Square Peg', cursive);
-  font-size: 4rem;
+  content: '\201C';
+  font-family: Georgia, serif;
+  font-size: clamp(8rem, 15vw, 14rem);
+  font-style: normal;
   color: var(--color-orange, #E35B24);
+  opacity: 0.2;
+  position: absolute;
+  top: -0.4em;
+  left: -0.1em;
   line-height: 1;
-  display: block;
-  margin-bottom: 0.5rem;
 }
 
 .presse-quote blockquote p {
