@@ -30,6 +30,12 @@ while (have_posts()) : the_post();
     </div>
   <?php endif; ?>
 
+  <?php if (has_category('flash-actu')) : ?>
+    <a href="<?php echo esc_url(get_permalink(get_option('page_for_posts'))); ?>" class="single-post-back">← Retour aux actus</a>
+  <?php elseif (has_category('conseils')) : ?>
+    <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>" class="single-post-back">← Retour aux conseils</a>
+  <?php endif; ?>
+
   <div class="single-post-content">
     <?php the_content(); ?>
   </div>

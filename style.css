@@ -9485,6 +9485,23 @@ li.carousel-editorial-slide,
   margin: 0 auto;
 }
 
+.single-post-back {
+  display: inline-block;
+  max-width: 800px;
+  margin: 1.5rem auto 0;
+  padding: 0 2rem;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-wood, #937D68);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+
+.single-post-back:hover {
+  color: var(--color-orange, #E35B24);
+}
+
 .single-post-content {
   max-width: 800px;
   margin: 0 auto;
