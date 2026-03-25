@@ -124,12 +124,13 @@ if ($accroche || $texte_principal || $descriptif) :
 </section>
 <?php endif; ?>
 
-<!-- ========== GALERIE IMMERSIVE — SCROLL VERTICAL ========== -->
+<!-- ========== GALERIE IMMERSIVE ========== -->
 <section class="star-galerie" id="star-galerie">
   <?php
-  // Collecter toutes les photos (dédoublonnées)
+  // Séparer photos ACF (plein écran) et galerie (carrées, à pairer avec texte)
   $seen_urls = [];
-  $photos = [];
+  $acf_photos = [];
+  $gallery_photos = [];
 
   $acf_candidates = [
     ['url' => $bandeau,    'alt' => 'Bandeau'],
@@ -141,27 +142,27 @@ if ($accroche || $texte_principal || $descriptif) :
   ];
   foreach ($acf_candidates as $p) {
     if (!empty($p['url']) && !isset($seen_urls[$p['url']])) {
-      $photos[] = $p;
+      $acf_photos[] = $p;
       $seen_urls[$p['url']] = true;
     }
   }
   if ($main_image_url && !isset($seen_urls[$main_image_url])) {
-    $photos[] = ['url' => $main_image_url, 'alt' => 'Produit'];
+    $gallery_photos[] = ['url' => $main_image_url, 'alt' => 'Produit'];
     $seen_urls[$main_image_url] = true;
   }
   foreach ($gallery_urls as $gurl) {
     if (!isset($seen_urls[$gurl])) {
-      $photos[] = ['url' => $gurl, 'alt' => 'Galerie'];
+      $gallery_photos[] = ['url' => $gurl, 'alt' => 'Galerie'];
       $seen_urls[$gurl] = true;
     }
   }
 
-  // Positions des interludes (après la Nème photo)
-  $interludes = [];
+  // Sections texte à pairer avec les photos galerie
+  $text_sections = [];
   if ($descriptif) {
-    $interludes[2] = ['type' => 'descriptif', 'content' => $descriptif];
+    $text_sections[] = ['type' => 'descriptif', 'content' => $descriptif];
   }
-  $interludes[5] = [
+  $text_sections[] = [
     'type' => 'storytelling',
     'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
     'title' => '100% artisanal',
@@ -169,7 +170,7 @@ if ($accroche || $texte_principal || $descriptif) :
     'link' => home_url('/lumiere-dartisan/'),
     'link_label' => 'Découvrir l\'atelier',
   ];
-  $interludes[max(7, count($photos) - 1)] = [
+  $text_sections[] = [
     'type' => 'storytelling',
     'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
     'title' => 'Un accompagnement personnel',
@@ -178,36 +179,73 @@ if ($accroche || $texte_principal || $descriptif) :
     'link_label' => 'Contacter Robin',
   ];
 
-  $pi = 0;
-  foreach ($photos as $photo) :
-    $pi++;
+  // Rendu : alterner photos ACF plein écran et duos galerie+texte
+  $acf_i = 0;
+  $gal_i = 0;
+  $txt_i = 0;
+  $total_acf = count($acf_photos);
+
+  // Afficher les 2 premières photos ACF
+  while ($acf_i < min(2, $total_acf)) :
+    $photo = $acf_photos[$acf_i]; $acf_i++;
+  ?>
+  <div class="star-frame">
+    <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
+  </div>
+  <?php endwhile; ?>
+
+  <?php
+  // Alterner : duo (galerie + texte), puis photo ACF, puis duo, etc.
+  while ($acf_i < $total_acf || $gal_i < count($gallery_photos) || $txt_i < count($text_sections)) :
+
+    // Duo : photo galerie + section texte côte à côte
+    if ($gal_i < count($gallery_photos) && $txt_i < count($text_sections)) :
+      $gphoto = $gallery_photos[$gal_i]; $gal_i++;
+      $text = $text_sections[$txt_i]; $txt_i++;
+      $reverse = ($txt_i % 2 === 0) ? ' star-duo--reverse' : '';
+  ?>
+  <div class="star-duo<?php echo $reverse; ?>">
+    <div class="star-duo__photo">
+      <img src="<?php echo esc_url($gphoto['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $gphoto['alt']); ?>" loading="lazy" />
+    </div>
+    <div class="star-duo__text">
+      <?php if ($text['type'] === 'descriptif') : ?>
+        <h2 class="star-duo__title">En détail</h2>
+        <div class="star-descriptif__card"><?php echo wp_kses_post($text['content']); ?></div>
+      <?php else : ?>
+        <div class="star-storytelling__card">
+          <div class="star-storytelling__icon"><?php echo $text['icon']; ?></div>
+          <h3><?php echo esc_html($text['title']); ?></h3>
+          <p><?php echo esc_html($text['text']); ?></p>
+          <a href="<?php echo esc_url($text['link']); ?>" class="star-storytelling__link"><?php echo esc_html($text['link_label']); ?></a>
+        </div>
+      <?php endif; ?>
+    </div>
+  </div>
+  <?php
+    endif;
+
+    // Photo ACF plein écran entre les duos
+    if ($acf_i < $total_acf) :
+      $photo = $acf_photos[$acf_i]; $acf_i++;
   ?>
   <div class="star-frame">
     <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
   </div>
   <?php
-    if (isset($interludes[$pi])) :
-      $interlude = $interludes[$pi];
-      if ($interlude['type'] === 'descriptif') :
+    endif;
+
+    // Photos galerie restantes sans texte = en duo simple
+    if ($txt_i >= count($text_sections) && $gal_i < count($gallery_photos)) :
+      $gphoto = $gallery_photos[$gal_i]; $gal_i++;
   ?>
-  <div class="star-interlude">
-    <div class="star-interlude__inner star-descriptif__card">
-      <?php echo wp_kses_post($interlude['content']); ?>
-    </div>
-  </div>
-  <?php else : ?>
-  <div class="star-interlude">
-    <div class="star-interlude__inner star-storytelling__card">
-      <div class="star-storytelling__icon"><?php echo $interlude['icon']; ?></div>
-      <h3><?php echo esc_html($interlude['title']); ?></h3>
-      <p><?php echo esc_html($interlude['text']); ?></p>
-      <a href="<?php echo esc_url($interlude['link']); ?>" class="star-storytelling__link"><?php echo esc_html($interlude['link_label']); ?></a>
-    </div>
+  <div class="star-frame star-frame--small">
+    <img src="<?php echo esc_url($gphoto['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $gphoto['alt']); ?>" loading="lazy" />
   </div>
   <?php
-      endif;
     endif;
-  endforeach;
+
+  endwhile;
   ?>
 </section>
 
