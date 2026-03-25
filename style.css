@@ -11398,8 +11398,10 @@ transform: translateY(15px);
   background: var(--color-warm);
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: 2rem;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 3rem;
+  text-align: center;
 }
 
 .bento-conseil-badge {
@@ -11426,8 +11428,28 @@ transform: translateY(15px);
   font-size: 2.4rem;
   color: var(--color-wood);
   margin: 0 0 1rem 0;
-  line-height: 1.2;
+  line-height: 1.3;
   text-transform: none;
+}
+
+.bento-conseil-content h3::before {
+  content: '\201C';
+  display: block;
+  font-family: var(--font-body);
+  font-size: 4rem;
+  line-height: 0.6;
+  color: var(--color-orange);
+  margin-bottom: 0.5rem;
+}
+
+.bento-conseil-content h3::after {
+  content: '\201D';
+  font-family: var(--font-body);
+  font-size: 4rem;
+  line-height: 0;
+  color: var(--color-orange);
+  display: block;
+  margin-top: 0.8rem;
 }
 
 .bento-conseil-cta {
