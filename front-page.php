@@ -542,7 +542,7 @@ foreach ($collection_slugs as $col) {
       <span class="bento-conseil-badge">Conseil</span>
       <div class="bento-conseil-content">
         <h3>Éclairer une pièce, c'est un peu comme choisir la bonne sauce pour ses pâtes : tout est une question de préférence et de dosage !</h3>
-        <span class="bento-conseil-cta">Découvrir les conseils →</span>
+        <span class="bento-conseil-cta">Découvrir les conseils de Robin →</span>
       </div>
     </a>
 

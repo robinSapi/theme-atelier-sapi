@@ -11427,6 +11427,7 @@ transform: translateY(15px);
   color: var(--color-wood);
   margin: 0 0 1rem 0;
   line-height: 1.2;
+  text-transform: none;
 }
 
 .bento-conseil-cta {
