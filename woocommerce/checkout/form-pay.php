@@ -46,7 +46,7 @@ $totals = $order->get_order_item_totals();
 						<?php
 						do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, false );
 
-						// Afficher TOUS les attributs de variation (y compris ceux intégrés au titre)
+						// Attributs de variation (matériau, taille…)
 						if ( $product && $product->is_type( 'variation' ) ) {
 							$variation_attrs = $product->get_variation_attributes();
 							if ( ! empty( $variation_attrs ) ) {
@@ -57,17 +57,16 @@ $totals = $order->get_order_item_totals();
 									}
 									$taxonomy = str_replace( 'attribute_', '', $attr_key );
 									$label    = wc_attribute_label( $taxonomy, $product );
-									// Valeur lisible (terme de taxonomie ou valeur brute)
-									$value = taxonomy_exists( $taxonomy )
+									$value    = taxonomy_exists( $taxonomy )
 										? get_term_by( 'slug', $attr_value, $taxonomy )->name ?? $attr_value
 										: $attr_value;
 									echo '<li><strong>' . esc_html( $label ) . ':</strong> <p>' . esc_html( $value ) . '</p></li>';
 								}
 								echo '</ul>';
 							}
-						} else {
-							wc_display_item_meta( $item );
 						}
+						// Meta de commande (add-ons : couleur câble/pavillon, etc.)
+						wc_display_item_meta( $item );
 
 						do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, false );
 						?>
