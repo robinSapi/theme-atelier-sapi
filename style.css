@@ -21720,6 +21720,7 @@ html.sapi-intro-active body {
   scroll-snap-align: center;
   border-radius: 12px;
   overflow: hidden;
+  transition: transform 0.4s var(--ease-smooth), box-shadow 0.4s var(--ease-smooth);
 }
 
 .star-carousel__slide img {
@@ -21728,12 +21729,18 @@ html.sapi-intro-active body {
   aspect-ratio: 4 / 3;
   object-fit: cover;
   display: block;
-  transition: transform 0.5s var(--ease-smooth), filter 0.5s var(--ease-smooth);
+  transition: transform 0.4s var(--ease-smooth);
 }
 
-.star-carousel__slide:hover img {
-  transform: scale(1.04);
-  filter: brightness(1.05);
+@media (hover: hover) {
+  .star-carousel__slide:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(147, 125, 104, 0.15);
+  }
+
+  .star-carousel__slide:hover img {
+    transform: scale(1.05);
+  }
 }
 
 /* Flèches navigation */
