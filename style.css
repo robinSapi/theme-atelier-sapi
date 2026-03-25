@@ -11337,6 +11337,59 @@ transform: translateY(15px);
   }
 }
 
+/* Bento - Flash Actu Card */
+.bento-actu {
+  grid-column: span 4;
+  grid-row: span 2;
+  min-height: 400px;
+}
+
+.bento-actu::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 30%, rgba(50, 50, 50, 0.7) 100%);
+  z-index: 1;
+}
+
+.bento-actu-badge {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  padding: 0.4rem 1rem;
+  background: var(--color-orange);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 50px;
+  z-index: 2;
+}
+
+.bento-actu-content {
+  position: absolute;
+  bottom: 2rem;
+  left: 2rem;
+  right: 2rem;
+  z-index: 2;
+}
+
+.bento-actu-content h3 {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.4;
+}
+
+.bento-actu-date {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 400;
+}
+
 /* ========================================
    CINÉTIQUE - Collections Section
    ======================================== */
@@ -11693,6 +11746,10 @@ transform: translateY(15px);
   .bento-room-picker {
     grid-column: span 6;
   }
+
+  .bento-actu {
+    grid-column: span 6;
+  }
 }
 
 @media (max-width: 768px) {
@@ -11754,6 +11811,7 @@ transform: translateY(15px);
   .bento-process,
   .bento-cta,
   .bento-atelier,
+  .bento-actu,
   .bento-storytelling,
   .bento-giftcard,
   .bento-room-picker {
@@ -11772,6 +11830,10 @@ transform: translateY(15px);
   }
 
   .bento-atelier {
+    min-height: 250px;
+  }
+
+  .bento-actu {
     min-height: 250px;
   }
 
