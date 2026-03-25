@@ -11390,6 +11390,59 @@ transform: translateY(15px);
   font-weight: 400;
 }
 
+/* Bento - Conseil Card */
+.bento-conseil {
+  grid-column: span 8;
+  grid-row: span 2;
+  min-height: 400px;
+  background: var(--color-warm);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 2rem;
+}
+
+.bento-conseil-badge {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  padding: 0.4rem 1rem;
+  background: var(--color-wood);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 50px;
+  z-index: 2;
+}
+
+.bento-conseil-content {
+  z-index: 2;
+}
+
+.bento-conseil-content h3 {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  color: var(--color-wood);
+  margin: 0 0 1rem 0;
+  line-height: 1.2;
+}
+
+.bento-conseil-cta {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-orange);
+  letter-spacing: 0.03em;
+}
+
+@media (hover: hover) {
+  .bento-conseil:hover .bento-conseil-cta {
+    text-decoration: underline;
+  }
+}
+
 /* ========================================
    CINÉTIQUE - Collections Section
    ======================================== */
@@ -11750,6 +11803,10 @@ transform: translateY(15px);
   .bento-actu {
     grid-column: span 6;
   }
+
+  .bento-conseil {
+    grid-column: span 6;
+  }
 }
 
 @media (max-width: 768px) {
@@ -11812,6 +11869,7 @@ transform: translateY(15px);
   .bento-cta,
   .bento-atelier,
   .bento-actu,
+  .bento-conseil,
   .bento-storytelling,
   .bento-giftcard,
   .bento-room-picker {
@@ -11835,6 +11893,10 @@ transform: translateY(15px);
 
   .bento-actu {
     min-height: 250px;
+  }
+
+  .bento-conseil {
+    min-height: 200px;
   }
 
   .bento-product-small {

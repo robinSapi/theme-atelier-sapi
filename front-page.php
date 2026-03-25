@@ -537,6 +537,29 @@ foreach ($collection_slugs as $col) {
     endif;
     ?>
 
+    <!-- Dernier Conseil -->
+    <?php
+    $last_conseil = new WP_Query([
+      'posts_per_page' => 1,
+      'post_status'    => 'publish',
+      'category_name'  => 'conseils',
+      'orderby'        => 'date',
+      'order'          => 'DESC'
+    ]);
+    if ($last_conseil->have_posts()) : $last_conseil->the_post();
+    ?>
+    <a href="<?php the_permalink(); ?>" class="bento-card bento-conseil">
+      <span class="bento-conseil-badge">Conseil</span>
+      <div class="bento-conseil-content">
+        <h3><?php echo esc_html(get_the_title()); ?></h3>
+        <span class="bento-conseil-cta">Lire le conseil →</span>
+      </div>
+    </a>
+    <?php
+    wp_reset_postdata();
+    endif;
+    ?>
+
     <!-- CTA Card -->
     <a href="<?php echo home_url('/mes-creations/'); ?>" class="bento-card bento-cta">
       <h3 class="cta-title">Toutes les créations</h3>
