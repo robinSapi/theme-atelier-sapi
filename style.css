@@ -15257,6 +15257,7 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   font-size: 0.9rem !important;
   line-height: 1.5 !important;
   color: var(--color-dark) !important;
+  margin-right: 0.3em !important;
 }
 
 .sapi-cart-outer .wc-block-components-product-details__value {
