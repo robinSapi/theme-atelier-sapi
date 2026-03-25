@@ -21434,45 +21434,37 @@ html.sapi-intro-active body {
   border-bottom-color: var(--color-orange, #E35B24);
 }
 
-/* Galerie immersive */
+/* Galerie immersive — scroll vertical */
 .star-galerie {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 4rem 2rem;
+  padding: 0;
 }
 
-/* Mosaïque photos */
-.star-mosaic {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-}
-
-.star-mosaic__item {
-  border-radius: 12px;
+/* Chaque photo = quasi plein écran */
+.star-frame {
+  width: 100%;
+  max-height: 85vh;
   overflow: hidden;
-  aspect-ratio: 1 / 1;
 }
 
-.star-mosaic__item--span2 {
-  grid-column: span 2;
-  aspect-ratio: 16 / 9;
-}
-
-.star-mosaic__item--span3 {
-  grid-column: span 3;
-  aspect-ratio: auto;
-}
-
-.star-mosaic__item img {
+.star-frame img {
   width: 100%;
   height: 100%;
+  max-height: 85vh;
   object-fit: cover;
-  transition: transform 0.6s var(--ease-smooth);
+  display: block;
 }
 
-.star-mosaic__item:hover img {
-  transform: scale(1.03);
+/* Interludes entre les photos */
+.star-interlude {
+  display: flex;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: var(--color-cream, #FEFDFB);
+}
+
+.star-interlude__inner {
+  max-width: 700px;
+  width: 100%;
 }
 
 /* Pourquoi cette pièce */
@@ -21501,23 +21493,8 @@ html.sapi-intro-active body {
   color: var(--color-dark);
 }
 
-/* Storytelling cards dans la mosaïque */
-.star-mosaic__item--card {
-  display: flex;
-  align-items: stretch;
-  aspect-ratio: auto;
-}
-
 .star-descriptif__card {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  background: var(--color-cream, #FEFDFB);
-  border: 1px solid rgba(147, 125, 104, 0.1);
-  border-radius: 12px;
-  padding: 2rem 2.5rem;
+  padding: 0;
   text-align: left;
 }
 
@@ -21560,17 +21537,12 @@ html.sapi-intro-active body {
   font-weight: 600;
 }
 
-/* Card storytelling dans la mosaïque */
 .star-storytelling__card {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
-  background: var(--color-warm, #FBF6EA);
-  border-radius: 12px;
-  padding: 2rem 1.5rem;
+  padding: 1rem 0;
   text-align: center;
 }
 
@@ -21705,19 +21677,8 @@ html.sapi-intro-active body {
     font-size: 1.7rem;
   }
 
-  .star-galerie {
-    padding: 2.5rem 1rem;
-  }
-
-  .star-mosaic {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-  }
-
-  .star-mosaic__item--span2,
-  .star-mosaic__item--span3 {
-    grid-column: span 2;
-    aspect-ratio: 16 / 10;
+  .star-interlude {
+    padding: 2.5rem 1.5rem;
   }
 
   .star-pourquoi {
@@ -21726,14 +21687,6 @@ html.sapi-intro-active body {
 
   .star-pourquoi__inner h2 {
     font-size: 2rem;
-  }
-
-  .star-mosaic__item--card {
-    grid-column: span 2;
-  }
-
-  .star-descriptif__card {
-    padding: 1.5rem;
   }
 
   .star-cta {
