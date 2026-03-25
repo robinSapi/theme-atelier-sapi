@@ -15,6 +15,7 @@ $featured_id = 0;
 $featured_query = new WP_Query([
   'posts_per_page' => 1,
   'post_status' => 'publish',
+  'category_name' => 'flash-actu',
   'orderby' => 'date',
   'order' => 'DESC'
 ]);
@@ -54,6 +55,7 @@ endif;
     $grid_query = new WP_Query([
       'posts_per_page' => 9,
       'post_status' => 'publish',
+      'category_name' => 'flash-actu',
       'orderby' => 'date',
       'order' => 'DESC',
       'post__not_in' => $featured_id ? [$featured_id] : [],

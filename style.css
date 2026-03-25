@@ -8468,6 +8468,14 @@ li.carousel-editorial-slide,
   }
 }
 
+.advice-articles-title {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  color: var(--color-wood);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
 .advice-room-picker-section {
   max-width: 1400px;
   margin: 2rem auto;
