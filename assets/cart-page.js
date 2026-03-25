@@ -63,23 +63,32 @@
     );
     lists.forEach(function (ul) {
       if (ul.dataset.sapiReordered) return;
-      var items = Array.from(ul.children);
+      var items = Array.from(ul.querySelectorAll(':scope > li'));
       if (items.length < 2) return;
 
-      // Supprimer les "/" dans les valeurs
+      // Supprimer les spans séparateurs "/" (élément séparé, pas du texte)
       items.forEach(function (li) {
+        var seps = li.querySelectorAll('.wc-block-components-product-details__separator');
+        seps.forEach(function (sep) { sep.remove(); });
+        // Aussi nettoyer le "/" qui peut se glisser dans le texte de la valeur
         var val = li.querySelector('.wc-block-components-product-details__value');
         if (val) {
           val.textContent = val.textContent.replace(/\s*\/\s*$/, '').trim();
         }
       });
 
-      // Séparer variations vs add-ons
+      // Séparer variations vs add-ons par le label
       var variations = [];
       var addons = [];
       items.forEach(function (li) {
         var nameEl = li.querySelector('.wc-block-components-product-details__name');
-        var label = nameEl ? nameEl.textContent.replace(/\s*:\s*$/, '').toLowerCase().trim() : '';
+        if (!nameEl) { addons.push(li); return; }
+        // Nettoyer : retirer ":", espaces insécables, mettre en minuscule
+        var label = nameEl.textContent
+          .replace(/[\u00a0]/g, ' ')
+          .replace(/\s*:?\s*$/, '')
+          .toLowerCase()
+          .trim();
         if (VARIATION_LABELS.indexOf(label) !== -1) {
           variations.push(li);
         } else {
@@ -87,7 +96,7 @@
         }
       });
 
-      // Réinsérer dans l'ordre : variations d'abord, puis add-ons
+      // Réinsérer : variations d'abord, puis add-ons
       var reordered = variations.concat(addons);
       reordered.forEach(function (li) { ul.appendChild(li); });
       ul.dataset.sapiReordered = '1';

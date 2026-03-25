@@ -15257,6 +15257,11 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   display: none !important;
 }
 
+/* Cacher le span séparateur "/" de WooCommerce Blocks */
+.sapi-cart-outer .wc-block-components-product-details__separator {
+  display: none !important;
+}
+
 .sapi-cart-outer .wc-block-components-product-details__name {
   font-weight: 700 !important;
 }
