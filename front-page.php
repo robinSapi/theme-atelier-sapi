@@ -511,6 +511,15 @@ foreach ($collection_slugs as $col) {
       </div>
     </a>
 
+    <!-- Conseil -->
+    <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>" class="bento-card bento-conseil">
+      <span class="bento-conseil-badge">Conseil</span>
+      <div class="bento-conseil-content">
+        <h3>Éclairer une pièce, c'est un peu comme choisir la bonne sauce pour ses pâtes : tout est une question de préférence et de dosage !</h3>
+        <span class="bento-conseil-cta">Découvrir les conseils de Robin →</span>
+      </div>
+    </a>
+
     <!-- Dernier Flash Actu -->
     <?php
     $last_actu = new WP_Query([
@@ -536,15 +545,6 @@ foreach ($collection_slugs as $col) {
     wp_reset_postdata();
     endif;
     ?>
-
-    <!-- Conseil -->
-    <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>" class="bento-card bento-conseil">
-      <span class="bento-conseil-badge">Conseil</span>
-      <div class="bento-conseil-content">
-        <h3>Éclairer une pièce, c'est un peu comme choisir la bonne sauce pour ses pâtes : tout est une question de préférence et de dosage !</h3>
-        <span class="bento-conseil-cta">Découvrir les conseils de Robin →</span>
-      </div>
-    </a>
 
     <!-- CTA Card -->
     <a href="<?php echo home_url('/mes-creations/'); ?>" class="bento-card bento-cta">

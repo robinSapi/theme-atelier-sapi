@@ -11339,7 +11339,7 @@ transform: translateY(15px);
 
 /* Bento - Flash Actu Card */
 .bento-actu {
-  grid-column: span 4;
+  grid-column: span 8;
   grid-row: span 2;
   min-height: 400px;
 }
@@ -11392,7 +11392,7 @@ transform: translateY(15px);
 
 /* Bento - Conseil Card */
 .bento-conseil {
-  grid-column: span 8;
+  grid-column: span 4;
   grid-row: span 2;
   min-height: 400px;
   background: var(--color-warm);
