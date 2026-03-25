@@ -26,16 +26,23 @@ $totals = $order->get_order_item_totals();
 				$image_id  = $product ? $product->get_image_id() : 0;
 				$image_url = $image_id ? wp_get_attachment_image_url( $image_id, 'woocommerce_thumbnail' ) : wc_placeholder_img_src( 'woocommerce_thumbnail' );
 				$qty       = $item->get_quantity();
+
+				// Nom du produit parent (sans les variations dans le titre)
+				$parent_product = $product;
+				if ( $product && $product->is_type( 'variation' ) ) {
+					$parent_product = wc_get_product( $product->get_parent_id() );
+				}
+				$display_name = $parent_product ? $parent_product->get_name() : $item->get_name();
 				?>
 				<div class="sapi-order-pay-item <?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'order_item', $item, $order ) ); ?>">
 					<div class="sapi-order-pay-item__image">
 						<?php if ( $qty > 1 ) : ?>
 							<span class="sapi-order-pay-item__qty"><?php echo esc_html( $qty ); ?></span>
 						<?php endif; ?>
-						<img src="<?php echo esc_url( $image_url ); ?>" alt="<?php echo esc_attr( $item->get_name() ); ?>" />
+						<img src="<?php echo esc_url( $image_url ); ?>" alt="<?php echo esc_attr( $display_name ); ?>" />
 					</div>
 					<div class="sapi-order-pay-item__details">
-						<h3 class="sapi-order-pay-item__name product-card-title"><?php echo wp_kses_post( $item->get_name() ); ?></h3>
+						<h3 class="sapi-order-pay-item__name product-card-title"><?php echo wp_kses_post( $display_name ); ?></h3>
 						<?php
 						do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, false );
 						wc_display_item_meta( $item );

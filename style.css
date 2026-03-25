@@ -16473,11 +16473,16 @@ body.woocommerce-order-pay .checkout-page-cinetique #order_review {
   border: 2px solid var(--color-white);
 }
 
+.sapi-order-pay-item__details {
+  text-align: left;
+}
+
 .sapi-order-pay-item__name {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--color-dark);
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.75rem 0;
+  text-align: left;
 }
 
 .sapi-order-pay-item__details .wc-item-meta {
@@ -16489,13 +16494,19 @@ body.woocommerce-order-pay .checkout-page-cinetique #order_review {
 .sapi-order-pay-item__details .wc-item-meta li {
   font-size: 0.9rem;
   color: var(--color-dark);
-  margin-bottom: 0.15rem;
-  line-height: 1.4;
+  margin-bottom: 0.35rem;
+  line-height: 1.5;
+  display: block;
 }
 
-.sapi-order-pay-item__details .wc-item-meta li strong,
+.sapi-order-pay-item__details .wc-item-meta li strong {
+  font-weight: 700;
+  display: inline;
+}
+
 .sapi-order-pay-item__details .wc-item-meta li p {
   display: inline;
+  font-weight: 400;
 }
 
 .sapi-order-pay-item__price {
@@ -16503,7 +16514,7 @@ body.woocommerce-order-pay .checkout-page-cinetique #order_review {
   font-weight: 700;
   color: var(--color-wood);
   text-align: right;
-  margin: 0;
+  margin: 0.5rem 0 0;
 }
 
 /* ---- Totaux ---- */
