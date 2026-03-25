@@ -124,13 +124,12 @@ if ($accroche || $texte_principal || $descriptif) :
 </section>
 <?php endif; ?>
 
-<!-- ========== GALERIE IMMERSIVE ========== -->
+<!-- ========== GALERIE — CARROUSEL HORIZONTAL ========== -->
 <section class="star-galerie" id="star-galerie">
   <?php
-  // Séparer photos ACF (plein écran) et galerie (carrées, à pairer avec texte)
+  // Collecter toutes les photos (dédoublonnées)
   $seen_urls = [];
-  $acf_photos = [];
-  $gallery_photos = [];
+  $all_photos = [];
 
   $acf_candidates = [
     ['url' => $bandeau,    'alt' => 'Bandeau'],
@@ -142,112 +141,113 @@ if ($accroche || $texte_principal || $descriptif) :
   ];
   foreach ($acf_candidates as $p) {
     if (!empty($p['url']) && !isset($seen_urls[$p['url']])) {
-      $acf_photos[] = $p;
+      $all_photos[] = $p;
       $seen_urls[$p['url']] = true;
     }
   }
   if ($main_image_url && !isset($seen_urls[$main_image_url])) {
-    $gallery_photos[] = ['url' => $main_image_url, 'alt' => 'Produit'];
+    $all_photos[] = ['url' => $main_image_url, 'alt' => 'Produit'];
     $seen_urls[$main_image_url] = true;
   }
   foreach ($gallery_urls as $gurl) {
     if (!isset($seen_urls[$gurl])) {
-      $gallery_photos[] = ['url' => $gurl, 'alt' => 'Galerie'];
+      $all_photos[] = ['url' => $gurl, 'alt' => 'Galerie'];
       $seen_urls[$gurl] = true;
     }
   }
 
-  // Sections texte à pairer avec les photos galerie
-  $text_sections = [];
-  if ($descriptif) {
-    $text_sections[] = ['type' => 'descriptif', 'content' => $descriptif];
-  }
-  $text_sections[] = [
-    'type' => 'storytelling',
-    'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
-    'title' => '100% artisanal',
-    'text' => 'Conçu, découpé au laser et assemblé à la main par Robin dans son atelier lyonnais. Bois issu de forêts gérées durablement (PEFC).',
-    'link' => home_url('/lumiere-dartisan/'),
-    'link_label' => 'Découvrir l\'atelier',
-  ];
-  $text_sections[] = [
-    'type' => 'storytelling',
-    'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
-    'title' => 'Un accompagnement personnel',
-    'text' => 'Une question sur ce modèle ? Robin vous accompagne personnellement, du choix de l\'essence à l\'installation.',
-    'link' => home_url('/contact/'),
-    'link_label' => 'Contacter Robin',
-  ];
-
-  // Rendu : alterner photos ACF plein écran et duos galerie+texte
-  $acf_i = 0;
-  $gal_i = 0;
-  $txt_i = 0;
-  $total_acf = count($acf_photos);
-
-  // Afficher les 2 premières photos ACF
-  while ($acf_i < min(2, $total_acf)) :
-    $photo = $acf_photos[$acf_i]; $acf_i++;
+  // Séparer en 2 groupes pour intercaler les interludes
+  $mid = (int) ceil(count($all_photos) / 2);
+  $group1 = array_slice($all_photos, 0, $mid);
+  $group2 = array_slice($all_photos, $mid);
   ?>
-  <div class="star-frame">
-    <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
-  </div>
-  <?php endwhile; ?>
 
-  <?php
-  // Alterner : duo (galerie + texte), puis photo ACF, puis duo, etc.
-  while ($acf_i < $total_acf || $gal_i < count($gallery_photos) || $txt_i < count($text_sections)) :
-
-    // Duo : photo galerie + section texte côte à côte
-    if ($gal_i < count($gallery_photos) && $txt_i < count($text_sections)) :
-      $gphoto = $gallery_photos[$gal_i]; $gal_i++;
-      $text = $text_sections[$txt_i]; $txt_i++;
-      $reverse = ($txt_i % 2 === 0) ? ' star-duo--reverse' : '';
-  ?>
-  <div class="star-duo<?php echo $reverse; ?>">
-    <div class="star-duo__photo">
-      <img src="<?php echo esc_url($gphoto['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $gphoto['alt']); ?>" loading="lazy" />
+  <!-- Carrousel 1 -->
+  <div class="star-carousel" id="star-carousel-1">
+    <div class="star-carousel__track">
+      <?php foreach ($group1 as $photo) : ?>
+      <div class="star-carousel__slide">
+        <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
+      </div>
+      <?php endforeach; ?>
     </div>
-    <div class="star-duo__text">
-      <?php if ($text['type'] === 'descriptif') : ?>
-        <h2 class="star-duo__title">En détail</h2>
-        <div class="star-descriptif__card"><?php echo wp_kses_post($text['content']); ?></div>
-      <?php else : ?>
-        <div class="star-storytelling__card">
-          <div class="star-storytelling__icon"><?php echo $text['icon']; ?></div>
-          <h3><?php echo esc_html($text['title']); ?></h3>
-          <p><?php echo esc_html($text['text']); ?></p>
-          <a href="<?php echo esc_url($text['link']); ?>" class="star-storytelling__link"><?php echo esc_html($text['link_label']); ?></a>
-        </div>
-      <?php endif; ?>
+    <button class="star-carousel__arrow star-carousel__arrow--prev" aria-label="Précédent">&#8249;</button>
+    <button class="star-carousel__arrow star-carousel__arrow--next" aria-label="Suivant">&#8250;</button>
+  </div>
+
+  <!-- Interlude : descriptif -->
+  <?php if ($descriptif) : ?>
+  <div class="star-interlude">
+    <div class="star-interlude__inner">
+      <h2 class="star-interlude__title">En détail</h2>
+      <div class="star-descriptif__card"><?php echo wp_kses_post($descriptif); ?></div>
     </div>
   </div>
-  <?php
-    endif;
+  <?php endif; ?>
 
-    // Photo ACF plein écran entre les duos
-    if ($acf_i < $total_acf) :
-      $photo = $acf_photos[$acf_i]; $acf_i++;
-  ?>
-  <div class="star-frame">
-    <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
+  <!-- Interlude : storytelling artisanat -->
+  <div class="star-interlude">
+    <div class="star-interlude__inner star-storytelling__card">
+      <div class="star-storytelling__icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <h3>100% artisanal</h3>
+      <p>Conçu, découpé au laser et assemblé à la main par Robin dans son atelier lyonnais. Bois issu de forêts gérées durablement (PEFC).</p>
+      <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="star-storytelling__link">Découvrir l'atelier</a>
+    </div>
   </div>
-  <?php
-    endif;
 
-    // Photos galerie restantes sans texte = en duo simple
-    if ($txt_i >= count($text_sections) && $gal_i < count($gallery_photos)) :
-      $gphoto = $gallery_photos[$gal_i]; $gal_i++;
-  ?>
-  <div class="star-frame star-frame--small">
-    <img src="<?php echo esc_url($gphoto['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $gphoto['alt']); ?>" loading="lazy" />
+  <!-- Carrousel 2 -->
+  <?php if (!empty($group2)) : ?>
+  <div class="star-carousel" id="star-carousel-2">
+    <div class="star-carousel__track">
+      <?php foreach ($group2 as $photo) : ?>
+      <div class="star-carousel__slide">
+        <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
+      </div>
+      <?php endforeach; ?>
+    </div>
+    <button class="star-carousel__arrow star-carousel__arrow--prev" aria-label="Précédent">&#8249;</button>
+    <button class="star-carousel__arrow star-carousel__arrow--next" aria-label="Suivant">&#8250;</button>
   </div>
-  <?php
-    endif;
+  <?php endif; ?>
 
-  endwhile;
-  ?>
+  <!-- Interlude : accompagnement -->
+  <div class="star-interlude">
+    <div class="star-interlude__inner star-storytelling__card">
+      <div class="star-storytelling__icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <h3>Un accompagnement personnel</h3>
+      <p>Une question sur ce modèle ? Robin vous accompagne personnellement, du choix de l'essence à l'installation.</p>
+      <a href="<?php echo esc_url(home_url('/contact/')); ?>" class="star-storytelling__link">Contacter Robin</a>
+    </div>
+  </div>
 </section>
+
+<!-- Carrousel JS minimal -->
+<script>
+(function() {
+  document.querySelectorAll('.star-carousel').forEach(function(carousel) {
+    var track = carousel.querySelector('.star-carousel__track');
+    var prev = carousel.querySelector('.star-carousel__arrow--prev');
+    var next = carousel.querySelector('.star-carousel__arrow--next');
+    if (!track || !prev || !next) return;
+
+    var slideWidth = function() {
+      var slide = track.querySelector('.star-carousel__slide');
+      return slide ? slide.offsetWidth + 16 : 300;
+    };
+
+    prev.addEventListener('click', function() {
+      track.scrollBy({ left: -slideWidth(), behavior: 'smooth' });
+    });
+    next.addEventListener('click', function() {
+      track.scrollBy({ left: slideWidth(), behavior: 'smooth' });
+    });
+  });
+})();
+</script>
 
 <!-- ========== POURQUOI CETTE PIÈCE ========== -->
 <?php if ($pourquoi) : ?>
