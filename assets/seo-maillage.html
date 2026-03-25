@@ -195,7 +195,7 @@
 <div id="app">
   <div id="sidebar">
     <h1>Maillage Interne</h1>
-    <p class="subtitle">Atelier Sâpi — Audit SEO — 9 mars 2026</p>
+    <p class="subtitle">Atelier Sâpi — Audit SEO — 25 mars 2026</p>
 
     <div class="stat-grid">
       <div class="stat-card"><div class="value" id="stat-pages">0</div><div class="label">Pages</div></div>
@@ -267,7 +267,7 @@ var CATEGORIES = {
 
 var nodes = [
   { id: 'accueil',        name: 'Accueil',           url: '/',                               cat: 'hub',     r: 30 },
-  { id: 'nos-creations',  name: 'Nos cr\u00e9ations',url: '/nos-creations/',                 cat: 'shop',    r: 26 },
+  { id: 'mes-creations',  name: 'Mes cr\u00e9ations',url: '/mes-creations/',                 cat: 'shop',    r: 26 },
   { id: 'suspensions',    name: 'Suspensions',       url: '/categorie-produit/suspensions/',  cat: 'shop',    r: 17 },
   { id: 'lampadaires',    name: 'Lampadaires',       url: '/categorie-produit/lampadaires/',  cat: 'shop',    r: 17 },
   { id: 'appliques',      name: 'Appliques',         url: '/categorie-produit/appliques/',    cat: 'shop',    r: 17 },
@@ -277,6 +277,8 @@ var nodes = [
   { id: 'conseils',       name: 'Conseils',          url: '/conseils-eclaires/',              cat: 'content', r: 17 },
   { id: 'contact',        name: 'Contact',           url: '/contact/',                        cat: 'content', r: 17 },
   { id: 'sur-mesure',     name: 'Sur mesure',        url: '/sur-mesure/',                     cat: 'content', r: 17 },
+  { id: 'star',           name: 'Star du moment',    url: '/la-star-du-moment/',              cat: 'content', r: 18 },
+  { id: 'presse',         name: 'Presse',            url: '/presse-et-partenariats/',         cat: 'content', r: 14 },
   { id: 'actus',          name: 'Actus',             url: '/actus/',                          cat: 'blog',    r: 17 },
   { id: 'article',        name: 'Articles blog',     url: '/article/*',                       cat: 'blog',    r: 14 },
   { id: 'produit',        name: 'Fiches produits',   url: '/produit/*',                       cat: 'shop',    r: 22 },
@@ -292,7 +294,7 @@ var nodes = [
 // type: 'content' (CTA/inline), 'nav' (header menu), 'footer' (footer menu)
 var edges = [
   // ── Header navigation (menu principal, toutes pages) ──
-  { from: 'accueil', to: 'nos-creations',  type: 'nav', label: 'Menu principal' },
+  { from: 'accueil', to: 'mes-creations',  type: 'nav', label: 'Menu principal' },
   { from: 'accueil', to: 'suspensions',    type: 'nav', label: 'Sous-menu' },
   { from: 'accueil', to: 'lampadaires',    type: 'nav', label: 'Sous-menu' },
   { from: 'accueil', to: 'appliques',      type: 'nav', label: 'Sous-menu' },
@@ -305,7 +307,7 @@ var edges = [
   { from: 'accueil', to: 'commande',       type: 'nav', label: 'Mini-cart' },
 
   // ── Footer (toutes pages) ──
-  { from: 'accueil', to: 'nos-creations',  type: 'footer', label: 'Footer nav' },
+  { from: 'accueil', to: 'mes-creations',  type: 'footer', label: 'Footer nav' },
   { from: 'accueil', to: 'artisan',        type: 'footer', label: 'Footer nav' },
   { from: 'accueil', to: 'conseils',       type: 'footer', label: 'Footer nav' },
   { from: 'accueil', to: 'contact',        type: 'footer', label: 'Footer nav' },
@@ -315,51 +317,66 @@ var edges = [
   { from: 'accueil', to: 'confidentialite',type: 'footer', label: 'Footer l\u00e9gal' },
 
   // ── Homepage (contenu) ──
-  { from: 'accueil', to: 'artisan',        type: 'content', label: "D\u00e9couvrir l'artisan" },
-  { from: 'accueil', to: 'guide',          type: 'content', label: 'Room picker \u00d76 + CTA texte' },
-  { from: 'accueil', to: 'nos-creations',  type: 'content', label: 'Bento CTA' },
-  { from: 'accueil', to: 'produit',        type: 'content', label: 'Carousel + Featured + Bestseller + Gift' },
+  { from: 'accueil', to: 'artisan',        type: 'content', label: "D\u00e9couvrir l'artisan (bento)" },
+  { from: 'accueil', to: 'mes-creations',  type: 'content', label: 'Toutes les cr\u00e9ations CTA' },
+  { from: 'accueil', to: 'produit',        type: 'content', label: 'Star + Featured + Carte cadeau' },
   { from: 'accueil', to: 'suspensions',    type: 'content', label: 'Collection cards' },
   { from: 'accueil', to: 'lampadaires',    type: 'content', label: 'Collection cards' },
   { from: 'accueil', to: 'appliques',      type: 'content', label: 'Collection cards' },
   { from: 'accueil', to: 'a-poser',        type: 'content', label: 'Collection cards' },
+  { from: 'accueil', to: 'conseils',       type: 'content', label: 'CTA Conseils de Robin (bento + Mon Projet)' },
+  { from: 'accueil', to: 'actus',          type: 'content', label: 'Carte Flash Actu (bento)' },
+  { from: 'accueil', to: 'contact',        type: 'content', label: 'CTA Contacter Robin (Mon Projet)' },
 
   // ── Guide Luminaire ──
-  { from: 'guide',   to: 'nos-creations',  type: 'content', label: 'Voir toute la collection' },
+  { from: 'guide',   to: 'mes-creations',  type: 'content', label: 'Voir toute la collection' },
   { from: 'guide',   to: 'produit',        type: 'content', label: 'Recommandation IA' },
 
   // ── Fiche produit ──
   { from: 'produit', to: 'artisan',        type: 'content', label: "D\u00e9couvrir l'artisan" },
-  { from: 'produit', to: 'nos-creations',  type: 'content', label: 'Cat\u00e9gorie associ\u00e9e' },
+  { from: 'produit', to: 'mes-creations',  type: 'content', label: 'Breadcrumb + cat\u00e9gorie' },
   { from: 'produit', to: 'sur-mesure',     type: 'content', label: 'Version sur-mesure' },
 
   // ── L'Artisan ──
-  { from: 'artisan', to: 'nos-creations',  type: 'content', label: 'D\u00e9couvrir la collection' },
+  { from: 'artisan', to: 'mes-creations',  type: 'content', label: 'Voir la collection' },
 
   // ── Conseils ──
-  { from: 'conseils', to: 'guide',         type: 'content', label: 'Room picker \u00d76' },
+  { from: 'conseils', to: 'guide',         type: 'content', label: 'Room picker \u00d76 (Robin Conseiller)' },
+  { from: 'conseils', to: 'article',       type: 'content', label: 'Grille articles r\u00e9cents' },
+
+  // ── Star du moment ──
+  { from: 'star', to: 'produit',           type: 'content', label: 'Carousel + CTA fiche' },
+  { from: 'star', to: 'artisan',           type: 'content', label: "D\u00e9couvrir l'atelier" },
+  { from: 'star', to: 'contact',           type: 'content', label: 'Contacter Robin' },
+  { from: 'star', to: 'mes-creations',     type: 'content', label: 'Voir toutes mes cr\u00e9ations' },
+
+  // ── Presse ──
+  { from: 'presse', to: 'accueil',         type: 'content', label: 'Lien site web' },
 
   // ── Checkout (merci) ──
-  { from: 'commande', to: 'nos-creations', type: 'content', label: 'Continuer shopping' },
+  { from: 'commande', to: 'mes-creations', type: 'content', label: 'Continuer shopping' },
 
   // ── Panier vide ──
-  { from: 'panier',  to: 'nos-creations',  type: 'content', label: 'Panier vide CTA' },
+  { from: 'panier',  to: 'mes-creations',  type: 'content', label: 'Panier vide CTA' },
   { from: 'panier',  to: 'produit',        type: 'content', label: 'Produits vus r\u00e9cemment' },
 
   // ── Blog ──
-  { from: 'actus',   to: 'article',        type: 'content', label: 'Carousel articles' },
+  { from: 'actus',   to: 'article',        type: 'content', label: 'Grille + featured articles' },
   { from: 'article', to: 'article',        type: 'content', label: 'Prev/Next article' },
+  { from: 'article', to: 'actus',          type: 'content', label: 'Retour aux actus' },
+  { from: 'article', to: 'conseils',       type: 'content', label: 'Retour aux conseils' },
 
   // ── Boutique + Cat\u00e9gories ──
-  { from: 'nos-creations', to: 'produit',  type: 'content', label: 'Cards produits' },
-  { from: 'nos-creations', to: 'sur-mesure', type: 'content', label: 'Outro sur-mesure' },
-  { from: 'suspensions',   to: 'produit',  type: 'content', label: 'Cards produits' },
-  { from: 'lampadaires',   to: 'produit',  type: 'content', label: 'Cards produits' },
-  { from: 'appliques',     to: 'produit',  type: 'content', label: 'Cards produits' },
-  { from: 'a-poser',       to: 'produit',  type: 'content', label: 'Cards produits' },
+  { from: 'mes-creations', to: 'produit',    type: 'content', label: 'Cards produits' },
+  { from: 'mes-creations', to: 'sur-mesure', type: 'content', label: 'Outro sur-mesure' },
+  { from: 'mes-creations', to: 'artisan',    type: 'content', label: 'Carte artisan dans grille' },
+  { from: 'suspensions',   to: 'produit',    type: 'content', label: 'Cards produits' },
+  { from: 'lampadaires',   to: 'produit',    type: 'content', label: 'Cards produits' },
+  { from: 'appliques',     to: 'produit',    type: 'content', label: 'Cards produits' },
+  { from: 'a-poser',       to: 'produit',    type: 'content', label: 'Cards produits' },
 
   // ── Recherche ──
-  { from: 'recherche', to: 'nos-creations', type: 'content', label: 'Fallback parcourir' },
+  { from: 'recherche', to: 'mes-creations', type: 'content', label: 'Fallback parcourir' },
   { from: 'recherche', to: 'produit',       type: 'content', label: 'R\u00e9sultats recherche' },
 
   // ── 404 ──
