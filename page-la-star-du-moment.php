@@ -166,9 +166,9 @@ if ($accroche || $texte_principal || $descriptif) :
   <div class="star-carousel" id="star-carousel-1">
     <div class="star-carousel__track">
       <?php foreach ($group1 as $photo) : ?>
-      <div class="star-carousel__slide">
+      <a href="<?php echo esc_url($permalink); ?>" class="star-carousel__slide">
         <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
-      </div>
+      </a>
       <?php endforeach; ?>
     </div>
     <button class="star-carousel__arrow star-carousel__arrow--prev" aria-label="Précédent">&#8249;</button>
@@ -202,9 +202,9 @@ if ($accroche || $texte_principal || $descriptif) :
   <div class="star-carousel star-carousel--small" id="star-carousel-2">
     <div class="star-carousel__track">
       <?php foreach ($group2 as $photo) : ?>
-      <div class="star-carousel__slide">
+      <a href="<?php echo esc_url($permalink); ?>" class="star-carousel__slide">
         <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
-      </div>
+      </a>
       <?php endforeach; ?>
     </div>
     <button class="star-carousel__arrow star-carousel__arrow--prev" aria-label="Précédent">&#8249;</button>
@@ -225,20 +225,9 @@ if ($accroche || $texte_principal || $descriptif) :
   </div>
 </section>
 
-<!-- Lightbox plein écran -->
-<div class="star-lightbox" id="star-lightbox" aria-hidden="true" role="dialog">
-  <div class="star-lightbox__overlay"></div>
-  <button class="star-lightbox__close" aria-label="Fermer">&times;</button>
-  <button class="star-lightbox__arrow star-lightbox__arrow--prev" aria-label="Précédente">&#8249;</button>
-  <img class="star-lightbox__img" src="" alt="" />
-  <button class="star-lightbox__arrow star-lightbox__arrow--next" aria-label="Suivante">&#8250;</button>
-  <div class="star-lightbox__counter"></div>
-</div>
-
-<!-- Carrousel + Lightbox JS -->
+<!-- Carrousel JS -->
 <script>
 (function() {
-  // Carrousels : flèches — centrer la slide suivante/précédente
   document.querySelectorAll('.star-carousel').forEach(function(carousel) {
     var track = carousel.querySelector('.star-carousel__track');
     var prev = carousel.querySelector('.star-carousel__arrow--prev');
@@ -246,10 +235,8 @@ if ($accroche || $texte_principal || $descriptif) :
     if (!track || !prev || !next) return;
 
     var slides = Array.from(track.querySelectorAll('.star-carousel__slide'));
-    var currentIdx = 0;
 
     function getCenterIndex() {
-      // Trouver la slide la plus proche du centre du track
       var trackCenter = track.scrollLeft + track.offsetWidth / 2;
       var closest = 0;
       var closestDist = Infinity;
@@ -267,7 +254,6 @@ if ($accroche || $texte_principal || $descriptif) :
     function scrollToSlide(idx) {
       if (idx < 0) idx = 0;
       if (idx >= slides.length) idx = slides.length - 1;
-      currentIdx = idx;
       var slide = slides[idx];
       var slideCenter = slide.offsetLeft - track.offsetLeft + slide.offsetWidth / 2;
       var trackCenter = track.offsetWidth / 2;
@@ -280,60 +266,6 @@ if ($accroche || $texte_principal || $descriptif) :
     next.addEventListener('click', function() {
       scrollToSlide(getCenterIndex() + 1);
     });
-  });
-
-  // Lightbox
-  var lightbox = document.getElementById('star-lightbox');
-  if (!lightbox) return;
-
-  var lbImg = lightbox.querySelector('.star-lightbox__img');
-  var lbCounter = lightbox.querySelector('.star-lightbox__counter');
-  var allSlides = Array.from(document.querySelectorAll('.star-carousel__slide img'));
-  var currentIdx = 0;
-
-  function openLightbox(idx) {
-    currentIdx = idx;
-    updateLightbox();
-    lightbox.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeLightbox() {
-    lightbox.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-  }
-
-  function updateLightbox() {
-    if (!allSlides[currentIdx]) return;
-    lbImg.src = allSlides[currentIdx].src;
-    lbImg.alt = allSlides[currentIdx].alt;
-    lbCounter.textContent = (currentIdx + 1) + ' / ' + allSlides.length;
-  }
-
-  // Clic sur les slides
-  allSlides.forEach(function(img, i) {
-    img.style.cursor = 'pointer';
-    img.addEventListener('click', function() { openLightbox(i); });
-  });
-
-  // Contrôles lightbox
-  lightbox.querySelector('.star-lightbox__close').addEventListener('click', closeLightbox);
-  lightbox.querySelector('.star-lightbox__overlay').addEventListener('click', closeLightbox);
-  lightbox.querySelector('.star-lightbox__arrow--prev').addEventListener('click', function() {
-    currentIdx = (currentIdx - 1 + allSlides.length) % allSlides.length;
-    updateLightbox();
-  });
-  lightbox.querySelector('.star-lightbox__arrow--next').addEventListener('click', function() {
-    currentIdx = (currentIdx + 1) % allSlides.length;
-    updateLightbox();
-  });
-
-  // Clavier
-  document.addEventListener('keydown', function(e) {
-    if (lightbox.getAttribute('aria-hidden') !== 'false') return;
-    if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'ArrowLeft') { currentIdx = (currentIdx - 1 + allSlides.length) % allSlides.length; updateLightbox(); }
-    if (e.key === 'ArrowRight') { currentIdx = (currentIdx + 1) % allSlides.length; updateLightbox(); }
   });
 })();
 </script>
