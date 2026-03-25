@@ -9462,6 +9462,14 @@ li.carousel-editorial-slide,
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 13px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.2s;
+}
+
+a.single-post-category:hover {
+  background: rgba(227, 91, 36, 0.2);
+  color: var(--color-orange, #E35B24);
 }
 
 .single-post-featured {
@@ -9486,12 +9494,12 @@ li.carousel-editorial-slide,
 }
 
 .single-post-back {
-  display: inline-block;
+  display: block;
+  text-align: center;
   max-width: 800px;
-  margin: 1.5rem auto 0;
-  padding: 0 2rem;
+  margin: 2rem auto 3rem;
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: var(--color-wood, #937D68);
   text-decoration: none;

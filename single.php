@@ -17,7 +17,17 @@ while (have_posts()) : the_post();
         <?php
         $categories = get_the_category();
         if (!empty($categories)) :
-          echo '<span class="single-post-category">' . esc_html($categories[0]->name) . '</span>';
+          $back_url = '';
+          if (has_category('flash-actu')) {
+            $back_url = get_permalink(get_option('page_for_posts'));
+          } elseif (has_category('conseils')) {
+            $back_url = home_url('/conseils-eclaires/');
+          }
+          if ($back_url) {
+            echo '<a href="' . esc_url($back_url) . '" class="single-post-category">' . esc_html($categories[0]->name) . '</a>';
+          } else {
+            echo '<span class="single-post-category">' . esc_html($categories[0]->name) . '</span>';
+          }
         endif;
         ?>
       </div>
@@ -28,12 +38,6 @@ while (have_posts()) : the_post();
     <div class="single-post-featured" data-parallax="0.3">
       <?php the_post_thumbnail('full'); ?>
     </div>
-  <?php endif; ?>
-
-  <?php if (has_category('flash-actu')) : ?>
-    <a href="<?php echo esc_url(get_permalink(get_option('page_for_posts'))); ?>" class="single-post-back">← Retour aux actus</a>
-  <?php elseif (has_category('conseils')) : ?>
-    <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>" class="single-post-back">← Retour aux conseils</a>
   <?php endif; ?>
 
   <div class="single-post-content">
@@ -75,6 +79,12 @@ if ($prev_post || $next_post) :
       </div>
     <?php endif; ?>
   </nav>
+<?php endif; ?>
+
+<?php if (has_category('flash-actu')) : ?>
+  <a href="<?php echo esc_url(get_permalink(get_option('page_for_posts'))); ?>" class="single-post-back">← Retour aux actus</a>
+<?php elseif (has_category('conseils')) : ?>
+  <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>" class="single-post-back">← Retour aux conseils</a>
 <?php endif; ?>
 
 <?php
