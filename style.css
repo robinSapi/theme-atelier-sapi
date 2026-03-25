@@ -21470,14 +21470,21 @@ html.sapi-intro-active body {
 }
 
 .star-duo__photo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  background: var(--color-warm, #FBF6EA);
   overflow: hidden;
 }
 
 .star-duo__photo img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-height: 100%;
+  object-fit: contain;
   display: block;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(147, 125, 104, 0.12);
 }
 
 .star-duo__text {
@@ -21495,17 +21502,19 @@ html.sapi-intro-active body {
   margin: 0 0 1.5rem;
 }
 
-/* Photo galerie restante (sans texte) */
+/* Photo galerie restante (sans texte) — style card bento */
 .star-frame--small {
   max-width: 700px;
-  margin: 2rem auto;
-  padding: 0 2rem;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  background: var(--color-warm, #FBF6EA);
 }
 
 .star-frame--small img {
   border-radius: 12px;
   aspect-ratio: 1 / 1;
-  object-fit: cover;
+  object-fit: contain;
+  box-shadow: 0 8px 30px rgba(147, 125, 104, 0.12);
 }
 
 /* Pourquoi cette pièce */
@@ -21728,8 +21737,8 @@ html.sapi-intro-active body {
   }
 
   .star-duo__photo {
-    aspect-ratio: 1 / 1;
-    max-height: 400px;
+    padding: 1.5rem;
+    min-height: 300px;
   }
 
   .star-duo__text {
