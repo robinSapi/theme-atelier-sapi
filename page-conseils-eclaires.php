@@ -195,7 +195,7 @@ sapi_robin_conseil_card( 'conseils' );
 <?php
 $conseils_paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
 $conseils_query = new WP_Query([
-  'posts_per_page' => 6,
+  'posts_per_page' => 3,
   'post_status'    => 'publish',
   'category_name'  => 'conseils',
   'orderby'        => 'date',
