@@ -11430,7 +11430,7 @@ transform: translateY(15px);
 
 .bento-conseil-content h3 {
   font-family: var(--font-display, "Square Peg", Georgia, serif);
-  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-size: clamp(2rem, 4vw, 3.2rem);
   font-weight: 400;
   font-style: italic;
   color: var(--bois-profond, #6B5A4A);
