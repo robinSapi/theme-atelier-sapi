@@ -2049,6 +2049,7 @@ button:hover,
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
+  width: fit-content;
   background: var(--color-warm, #FBF6EA);
   border: 2px dashed rgba(var(--color-wood-rgb, 147, 125, 104), 0.3);
   border-radius: 50px;
