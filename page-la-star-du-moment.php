@@ -199,7 +199,7 @@ if ($accroche || $texte_principal || $descriptif) :
 
   <!-- Carrousel 2 -->
   <?php if (!empty($group2)) : ?>
-  <div class="star-carousel" id="star-carousel-2">
+  <div class="star-carousel star-carousel--small" id="star-carousel-2">
     <div class="star-carousel__track">
       <?php foreach ($group2 as $photo) : ?>
       <div class="star-carousel__slide">

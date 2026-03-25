@@ -21809,6 +21809,16 @@ html.sapi-intro-active body {
   right: 1rem;
 }
 
+/* Carrousel 2 — slides plus petites */
+.star-carousel--small .star-carousel__slide {
+  width: 45vw;
+  max-width: 500px;
+}
+
+.star-carousel--small .star-carousel__slide img {
+  aspect-ratio: 4 / 3;
+}
+
 /* Interludes entre les carrousels */
 .star-interlude {
   display: flex;
