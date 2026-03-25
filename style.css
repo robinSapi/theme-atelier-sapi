@@ -15237,27 +15237,42 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   gap: 0.2rem !important;
 }
 
-/* Chaque attribut sur sa ligne */
-.sapi-cart-outer .wc-block-components-product-details li {
-  display: block !important;
-  margin: 0 !important;
-  padding: 0.15rem 0 !important;
+/* Chaque attribut sur sa ligne (Blocks utilise des <div> + <span>, pas <ul>/<li>) */
+.sapi-cart-outer .wc-block-components-product-details {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.15rem !important;
 }
 
+.sapi-cart-outer .wc-block-components-product-details > span {
+  display: block !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  color: transparent !important;
+}
+
+/* Réafficher uniquement les spans label + valeur à l'intérieur */
 .sapi-cart-outer .wc-block-components-product-details__name {
   font-weight: 700 !important;
   font-size: 0.9rem !important;
+  line-height: 1.5 !important;
   color: var(--color-dark) !important;
 }
 
 .sapi-cart-outer .wc-block-components-product-details__value {
   font-weight: 400 !important;
   font-size: 0.9rem !important;
+  line-height: 1.5 !important;
   color: var(--color-dark) !important;
 }
 
-/* Cacher le séparateur "/" — <span aria-hidden="true"> / </span> */
-.sapi-cart-outer .wc-block-components-product-details li > span[aria-hidden="true"] {
+/* Cacher le séparateur "/" — <span aria-hidden="true"> */
+.sapi-cart-outer .wc-block-components-product-details span[aria-hidden="true"] {
+  display: none !important;
+}
+
+/* Cacher le 2ème .product-details (variations par défaut de Blocks = doublon) */
+.sapi-cart-outer .wc-block-components-product-metadata > .wc-block-components-product-details ~ .wc-block-components-product-details {
   display: none !important;
 }
 
