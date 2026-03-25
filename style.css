@@ -21706,7 +21706,7 @@ html.sapi-intro-active body {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  padding: 2rem 4rem;
+  padding: 2rem 10vw;
 }
 
 .star-carousel__track::-webkit-scrollbar {
@@ -22112,7 +22112,7 @@ html.sapi-intro-active body {
   }
 
   .star-carousel__track {
-    padding: 1.5rem 1.5rem;
+    padding: 1.5rem 5vw;
   }
 
   .star-carousel__arrow {
