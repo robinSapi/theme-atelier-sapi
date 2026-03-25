@@ -21457,8 +21457,11 @@ html.sapi-intro-active body {
 /* Duo : photo galerie carrée + texte côte à côte */
 .star-duo {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  min-height: 500px;
+  grid-template-columns: 2fr 3fr;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 450px;
+  background: var(--color-cream, #FEFDFB);
 }
 
 .star-duo--reverse {
@@ -21473,14 +21476,13 @@ html.sapi-intro-active body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2.5rem;
-  background: var(--color-warm, #FBF6EA);
+  padding: 3rem;
   overflow: hidden;
 }
 
 .star-duo__photo img {
   width: 100%;
-  max-height: 100%;
+  max-height: 350px;
   object-fit: contain;
   display: block;
   border-radius: 12px;
@@ -21491,8 +21493,7 @@ html.sapi-intro-active body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 3rem;
-  background: var(--color-cream, #FEFDFB);
+  padding: 3rem 4rem;
 }
 
 .star-duo__title {
@@ -21556,7 +21557,7 @@ html.sapi-intro-active body {
 
 .star-descriptif__card li {
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   line-height: 1.7;
   color: var(--color-dark);
   padding: 0.4rem 0 0.4rem 1.5rem;
@@ -21576,7 +21577,7 @@ html.sapi-intro-active body {
 
 .star-descriptif__card p {
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   line-height: 1.7;
   color: var(--color-dark);
   margin: 0 0 0.5rem;
@@ -21610,7 +21611,7 @@ html.sapi-intro-active body {
 
 .star-storytelling__card h3 {
   font-family: var(--font-body);
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--color-dark);
   margin: 0 0 0.75rem;
@@ -21618,7 +21619,7 @@ html.sapi-intro-active body {
 
 .star-storytelling__card p {
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   line-height: 1.7;
   color: var(--color-dark);
   opacity: 0.8;
