@@ -238,23 +238,47 @@ if ($accroche || $texte_principal || $descriptif) :
 <!-- Carrousel + Lightbox JS -->
 <script>
 (function() {
-  // Carrousels : flèches
+  // Carrousels : flèches — centrer la slide suivante/précédente
   document.querySelectorAll('.star-carousel').forEach(function(carousel) {
     var track = carousel.querySelector('.star-carousel__track');
     var prev = carousel.querySelector('.star-carousel__arrow--prev');
     var next = carousel.querySelector('.star-carousel__arrow--next');
     if (!track || !prev || !next) return;
 
-    var slideWidth = function() {
-      var slide = track.querySelector('.star-carousel__slide');
-      return slide ? slide.offsetWidth + 16 : 300;
-    };
+    var slides = Array.from(track.querySelectorAll('.star-carousel__slide'));
+    var currentIdx = 0;
+
+    function getCenterIndex() {
+      // Trouver la slide la plus proche du centre du track
+      var trackCenter = track.scrollLeft + track.offsetWidth / 2;
+      var closest = 0;
+      var closestDist = Infinity;
+      slides.forEach(function(slide, i) {
+        var slideCenter = slide.offsetLeft - track.offsetLeft + slide.offsetWidth / 2;
+        var dist = Math.abs(trackCenter - slideCenter);
+        if (dist < closestDist) {
+          closestDist = dist;
+          closest = i;
+        }
+      });
+      return closest;
+    }
+
+    function scrollToSlide(idx) {
+      if (idx < 0) idx = 0;
+      if (idx >= slides.length) idx = slides.length - 1;
+      currentIdx = idx;
+      var slide = slides[idx];
+      var slideCenter = slide.offsetLeft - track.offsetLeft + slide.offsetWidth / 2;
+      var trackCenter = track.offsetWidth / 2;
+      track.scrollTo({ left: slideCenter - trackCenter, behavior: 'smooth' });
+    }
 
     prev.addEventListener('click', function() {
-      track.scrollBy({ left: -slideWidth(), behavior: 'smooth' });
+      scrollToSlide(getCenterIndex() - 1);
     });
     next.addEventListener('click', function() {
-      track.scrollBy({ left: slideWidth(), behavior: 'smooth' });
+      scrollToSlide(getCenterIndex() + 1);
     });
   });
 
