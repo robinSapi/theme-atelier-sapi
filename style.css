@@ -16410,198 +16410,252 @@ body.woocommerce-cart {
    ======================================== */
 
 /* Tableau produits */
-.woocommerce-order-pay .shop_table {
+/* Conteneur du formulaire order-pay */
+body.woocommerce-order-pay .checkout-page-cinetique #order_review {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* Wrapper card pour le tableau produits */
+body.woocommerce-order-pay .shop_table.order_details {
   width: 100%;
-  border-collapse: collapse;
-  background: var(--color-cream);
-  border-radius: 12px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--color-warm);
+  border: 1px solid var(--color-gray-light);
+  border-radius: 16px;
   overflow: hidden;
   margin-bottom: 2rem;
 }
 
-.woocommerce-order-pay .shop_table thead th {
-  padding: 1rem 1.25rem;
-  font-size: 0.75rem;
+body.woocommerce-order-pay .shop_table.order_details thead th {
+  padding: 1rem 1.5rem;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-gray);
-  border-bottom: 1px solid rgba(147, 125, 104, 0.2);
+  letter-spacing: 0.08em;
+  color: var(--color-wood);
+  background: rgba(147, 125, 104, 0.08);
+  border-bottom: 1px solid rgba(147, 125, 104, 0.15);
   text-align: left;
 }
 
-.woocommerce-order-pay .shop_table td {
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid rgba(147, 125, 104, 0.15);
+body.woocommerce-order-pay .shop_table.order_details tbody td {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(147, 125, 104, 0.12);
   font-size: 0.95rem;
   color: var(--color-dark);
   vertical-align: middle;
 }
 
-.woocommerce-order-pay .shop_table .product-name {
-  font-weight: 600;
+body.woocommerce-order-pay .shop_table.order_details tbody tr:last-child td {
+  border-bottom: 1px solid rgba(147, 125, 104, 0.15);
 }
 
-.woocommerce-order-pay .shop_table .product-quantity {
+body.woocommerce-order-pay .shop_table.order_details .product-name {
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+body.woocommerce-order-pay .shop_table.order_details .product-quantity {
   text-align: center;
   color: var(--color-gray);
+  font-size: 0.9rem;
 }
 
-.woocommerce-order-pay .shop_table .product-total,
-.woocommerce-order-pay .shop_table .amount {
+body.woocommerce-order-pay .shop_table.order_details .product-total {
+  font-weight: 700;
+  color: var(--color-wood);
+  text-align: right;
+}
+
+body.woocommerce-order-pay .shop_table.order_details .amount {
   font-weight: 700;
   color: var(--color-wood);
 }
 
-.woocommerce-order-pay .shop_table tfoot th {
-  padding: 0.75rem 1.25rem;
+/* Footer du tableau (sous-total, expédition, total) */
+body.woocommerce-order-pay .shop_table.order_details tfoot th {
+  padding: 0.85rem 1.5rem;
   font-weight: 600;
   font-size: 0.9rem;
   text-align: left;
   color: var(--color-dark);
+  background: transparent;
+  border-bottom: 1px solid rgba(147, 125, 104, 0.1);
 }
 
-.woocommerce-order-pay .shop_table tfoot td {
-  padding: 0.75rem 1.25rem;
+body.woocommerce-order-pay .shop_table.order_details tfoot td {
+  padding: 0.85rem 1.5rem;
   text-align: right;
+  border-bottom: 1px solid rgba(147, 125, 104, 0.1);
 }
 
-.woocommerce-order-pay .shop_table tfoot .order-total th,
-.woocommerce-order-pay .shop_table tfoot .order-total td {
-  font-size: 1.1rem;
+body.woocommerce-order-pay .shop_table.order_details tfoot .order-total th,
+body.woocommerce-order-pay .shop_table.order_details tfoot .order-total td {
+  font-size: 1.15rem;
   font-weight: 700;
   border-bottom: none;
-  padding-top: 1rem;
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+  background: rgba(147, 125, 104, 0.06);
 }
 
 /* Notice invité */
-.woocommerce-order-pay .woocommerce-info {
-  background: var(--color-cream);
+body.woocommerce-order-pay .woocommerce-info {
+  background: var(--color-warm);
   border: 1px solid rgba(147, 125, 104, 0.25);
+  border-left: 3px solid var(--color-wood);
   border-radius: 10px;
   padding: 1rem 1.25rem;
   font-size: 0.9rem;
   color: var(--color-dark);
-  margin-bottom: 1.5rem;
-  border-left: none;
+  margin-bottom: 2rem;
 }
 
-.woocommerce-order-pay .woocommerce-info::before {
+body.woocommerce-order-pay .woocommerce-info::before {
   color: var(--color-wood);
 }
 
-/* Section paiement */
-.woocommerce-order-pay #payment {
+/* Section paiement — card englobante */
+body.woocommerce-order-pay #payment {
   background: var(--color-white);
   border: 1px solid var(--color-gray-light);
-  border-radius: 12px;
-  padding: 1.5rem;
+  border-radius: 16px;
+  padding: 2rem;
   margin-top: 0;
+  -webkit-box-shadow: 0 2px 12px rgba(147, 125, 104, 0.08);
+  box-shadow: 0 2px 12px rgba(147, 125, 104, 0.08);
 }
 
-.woocommerce-order-pay #payment .wc_payment_methods {
+body.woocommerce-order-pay #payment .wc_payment_methods {
   list-style: none;
   padding: 0;
   margin: 0 0 1.5rem 0;
 }
 
-.woocommerce-order-pay #payment .wc_payment_method {
-  padding: 1rem;
-  border: 1px solid var(--color-gray-light);
-  border-radius: 8px;
+body.woocommerce-order-pay #payment .wc_payment_method {
+  padding: 1.25rem;
+  border: 2px solid var(--color-gray-light);
+  border-radius: 12px;
   margin-bottom: 0.75rem;
-  -webkit-transition: border-color 0.2s ease;
-  transition: border-color 0.2s ease;
+  background: var(--color-white);
+  -webkit-transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 @media (hover: hover) {
-  .woocommerce-order-pay #payment .wc_payment_method:hover {
+  body.woocommerce-order-pay #payment .wc_payment_method:hover {
     border-color: var(--color-wood);
+    -webkit-box-shadow: 0 2px 8px rgba(147, 125, 104, 0.12);
+    box-shadow: 0 2px 8px rgba(147, 125, 104, 0.12);
   }
 }
 
-.woocommerce-order-pay #payment .wc_payment_method label {
+body.woocommerce-order-pay #payment .wc_payment_method label {
   font-weight: 600;
   cursor: pointer;
 }
 
-.woocommerce-order-pay #payment .payment_box {
+body.woocommerce-order-pay #payment .payment_box {
   padding: 1rem 0 0.5rem 0;
   font-size: 0.9rem;
   color: var(--color-gray);
 }
 
-/* Bouton Payer */
-.woocommerce-order-pay #place_order {
+/* Bouton Payer — vert comme le checkout classique */
+body.woocommerce-order-pay #place_order {
   display: block;
   width: 100%;
   padding: 1.25rem 2rem;
-  background: var(--color-wood);
+  background: linear-gradient(180deg, #018501 0%, #026B02 100%);
   color: var(--color-white);
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   font-family: var(--font-body);
   font-size: 1.1rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   cursor: pointer;
-  -webkit-transition: background-color 0.3s ease;
-  transition: background-color 0.3s ease;
+  -webkit-transition: box-shadow 0.3s ease, transform 0.2s ease;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  -webkit-box-shadow: 0 4px 15px rgba(1, 133, 1, 0.25);
+  box-shadow: 0 4px 15px rgba(1, 133, 1, 0.25);
+  margin-top: 0.5rem;
 }
 
 @media (hover: hover) {
-  .woocommerce-order-pay #place_order:hover {
-    background: var(--color-dark);
+  body.woocommerce-order-pay #place_order:hover {
+    background: linear-gradient(180deg, #017101 0%, #015A02 100%);
+    -webkit-box-shadow: 0 6px 20px rgba(1, 133, 1, 0.35);
+    box-shadow: 0 6px 20px rgba(1, 133, 1, 0.35);
+    -webkit-transform: translateY(-1px);
+    transform: translateY(-1px);
   }
 }
 
 /* Conditions + privacy */
-.woocommerce-order-pay .woocommerce-terms-and-conditions-wrapper {
+body.woocommerce-order-pay .woocommerce-terms-and-conditions-wrapper {
   padding: 1rem 0;
   font-size: 0.85rem;
   color: var(--color-gray);
+  line-height: 1.5;
 }
 
-.woocommerce-order-pay .woocommerce-terms-and-conditions-wrapper a {
+body.woocommerce-order-pay .woocommerce-terms-and-conditions-wrapper a {
   color: var(--color-wood);
   text-decoration: underline;
 }
 
+body.woocommerce-order-pay .woocommerce-privacy-policy-text {
+  font-size: 0.8rem;
+  color: var(--color-gray);
+  line-height: 1.5;
+}
+
+body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
+  color: var(--color-wood);
+}
+
 /* Mobile */
 @media (max-width: 768px) {
-  .woocommerce-order-pay .shop_table thead {
+  body.woocommerce-order-pay .checkout-page-cinetique #order_review {
+    max-width: 100%;
+  }
+
+  body.woocommerce-order-pay .shop_table.order_details thead {
     display: none;
   }
 
-  .woocommerce-order-pay .shop_table tbody tr {
+  body.woocommerce-order-pay .shop_table.order_details tbody tr {
     display: flex;
     flex-wrap: wrap;
-    padding: 1rem;
+    padding: 1rem 1.25rem;
     gap: 0.25rem;
   }
 
-  .woocommerce-order-pay .shop_table tbody td {
+  body.woocommerce-order-pay .shop_table.order_details tbody td {
     border-bottom: none;
     padding: 0.25rem 0;
   }
 
-  .woocommerce-order-pay .shop_table .product-name {
+  body.woocommerce-order-pay .shop_table.order_details .product-name {
     flex: 1 1 70%;
   }
 
-  .woocommerce-order-pay .shop_table .product-quantity {
+  body.woocommerce-order-pay .shop_table.order_details .product-quantity {
     flex: 0 0 auto;
     text-align: right;
   }
 
-  .woocommerce-order-pay .shop_table .product-total {
+  body.woocommerce-order-pay .shop_table.order_details .product-total {
     flex: 1 1 100%;
     text-align: right;
   }
 
-  .woocommerce-order-pay #payment {
-    padding: 1rem;
+  body.woocommerce-order-pay #payment {
+    padding: 1.25rem;
   }
 }
 
@@ -21652,7 +21706,7 @@ html.sapi-intro-active body {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  padding: 2rem;
+  padding: 2rem 4rem;
 }
 
 .star-carousel__track::-webkit-scrollbar {
@@ -21674,6 +21728,12 @@ html.sapi-intro-active body {
   aspect-ratio: 4 / 3;
   object-fit: cover;
   display: block;
+  transition: transform 0.5s var(--ease-smooth), filter 0.5s var(--ease-smooth);
+}
+
+.star-carousel__slide:hover img {
+  transform: scale(1.04);
+  filter: brightness(1.05);
 }
 
 /* Flèches navigation */
@@ -22045,7 +22105,7 @@ html.sapi-intro-active body {
   }
 
   .star-carousel__track {
-    padding: 1.5rem 1rem;
+    padding: 1.5rem 1.5rem;
   }
 
   .star-carousel__arrow {
