@@ -21690,6 +21690,10 @@ html.sapi-intro-active body {
   -webkit-backdrop-filter: blur(8px);
   color: var(--color-dark);
   font-size: 1.5rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   z-index: 2;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
@@ -21795,6 +21799,10 @@ html.sapi-intro-active body {
   background: rgba(255, 255, 255, 0.15);
   color: #fff;
   font-size: 1.8rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: background 0.2s;
 }
