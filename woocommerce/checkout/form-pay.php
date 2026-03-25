@@ -45,7 +45,30 @@ $totals = $order->get_order_item_totals();
 						<h3 class="sapi-order-pay-item__name product-card-title"><?php echo wp_kses_post( $display_name ); ?></h3>
 						<?php
 						do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, false );
-						wc_display_item_meta( $item );
+
+						// Afficher TOUS les attributs de variation (y compris ceux intégrés au titre)
+						if ( $product && $product->is_type( 'variation' ) ) {
+							$variation_attrs = $product->get_variation_attributes();
+							if ( ! empty( $variation_attrs ) ) {
+								echo '<ul class="wc-item-meta">';
+								foreach ( $variation_attrs as $attr_key => $attr_value ) {
+									if ( empty( $attr_value ) ) {
+										continue;
+									}
+									$taxonomy = str_replace( 'attribute_', '', $attr_key );
+									$label    = wc_attribute_label( $taxonomy, $product );
+									// Valeur lisible (terme de taxonomie ou valeur brute)
+									$value = taxonomy_exists( $taxonomy )
+										? get_term_by( 'slug', $attr_value, $taxonomy )->name ?? $attr_value
+										: $attr_value;
+									echo '<li><strong>' . esc_html( $label ) . ':</strong> <p>' . esc_html( $value ) . '</p></li>';
+								}
+								echo '</ul>';
+							}
+						} else {
+							wc_display_item_meta( $item );
+						}
+
 						do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, false );
 						?>
 						<p class="sapi-order-pay-item__price"><?php echo wp_kses_post( $order->get_formatted_line_subtotal( $item ) ); ?></p>
