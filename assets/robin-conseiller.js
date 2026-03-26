@@ -1759,7 +1759,7 @@
       if (pill && pill.dataset.robinContext) {
         var context = pill.dataset.robinContext;
         if (context === '_product_reselect') {
-          reselectVariation();
+          openModal('_product_reselect', {});
           return;
         }
         var data = {};
