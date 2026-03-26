@@ -308,6 +308,7 @@ get_header();
             <form class="robin-contact-form" data-product="<?php echo esc_attr($product->get_name()); ?>">
               <?php wp_nonce_field('sapi-guide-results', 'robin_contact_nonce', false); ?>
               <input type="email" name="email" class="robin-contact-email" placeholder="votre@email.com" required>
+              <textarea name="message" class="robin-contact-message" placeholder="Votre message (optionnel)" rows="2"></textarea>
               <button type="submit" class="robin-contact-submit">Envoyer</button>
             </form>
           </div>
@@ -1825,8 +1826,10 @@ get_header();
     var fd = new FormData();
     fd.append('action', 'sapi_robin_contact');
     fd.append('nonce', form.querySelector('[name="robin_contact_nonce"]').value);
+    var message = form.querySelector('.robin-contact-message').value;
     fd.append('email', email);
     fd.append('page', form.dataset.product || window.location.pathname);
+    if (message) fd.append('message', message);
     if (project) fd.append('project', project);
 
     fetch('<?php echo esc_url(admin_url("admin-ajax.php")); ?>', {
