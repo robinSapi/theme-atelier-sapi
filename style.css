@@ -5068,6 +5068,42 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   color: var(--color-text-light);
 }
 
+/* Read more toggle */
+.testimonial-text-full {
+  display: none;
+}
+
+.testimonial-text.is-expanded .testimonial-text-short {
+  display: none;
+}
+
+.testimonial-text.is-expanded .testimonial-text-full {
+  display: inline;
+}
+
+.testimonial-text.is-expanded .testimonial-read-more {
+  display: none;
+}
+
+.testimonial-read-more {
+  display: inline;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 0.25rem;
+  color: var(--color-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+@media (hover: hover) {
+  .testimonial-read-more:hover {
+    color: var(--color-dark);
+  }
+}
+
 .testimonial-author {
   display: flex;
   align-items: center;

@@ -741,14 +741,23 @@ get_header();
             <?php endif; ?>
           <?php endfor; ?>
         </div>
-        <p class="testimonial-text"><?php
+        <?php
           $text = $review['text'];
-          if (mb_strlen($text) > 200) {
-            $text = mb_substr($text, 0, 200);
-            $text = mb_substr($text, 0, mb_strrpos($text, ' ')) . '…';
+          $words = explode(' ', $text);
+          $is_long = count($words) > 150;
+          if ($is_long) {
+            $short = implode(' ', array_slice($words, 0, 150)) . '…';
           }
-          echo esc_html($text);
-        ?></p>
+        ?>
+        <p class="testimonial-text<?php echo $is_long ? ' is-truncated' : ''; ?>">
+          <?php if ($is_long) : ?>
+            <span class="testimonial-text-short"><?php echo esc_html($short); ?></span>
+            <span class="testimonial-text-full"><?php echo esc_html($text); ?></span>
+            <button type="button" class="testimonial-read-more">Lire la suite</button>
+          <?php else : ?>
+            <?php echo esc_html($text); ?>
+          <?php endif; ?>
+        </p>
       </div>
       <?php endforeach; ?>
     </div>
@@ -758,6 +767,13 @@ get_header();
       <span class="testimonials-cta-sep">·</span>
       <a href="https://www.google.com/maps/place/?q=place_id:ChIJYyWUfZOV9EcRDRhbW4HM6KY" target="_blank" rel="noopener noreferrer">Voir les <?php echo esc_html($google_reviews['total']); ?> avis</a>
     </div>
+    <script>
+    document.querySelectorAll('.testimonial-read-more').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        this.closest('.testimonial-text').classList.add('is-expanded');
+      });
+    });
+    </script>
     <?php else : ?>
     <div class="testimonials-cta">
       <p>Vous avez ce produit ? <a href="https://g.page/r/CQ0YW1uBzOimEAE/review" target="_blank" rel="noopener noreferrer">Partagez votre avis</a></p>
