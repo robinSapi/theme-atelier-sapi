@@ -4891,6 +4891,22 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 
 .product-atelier-content .button {
   margin-top: 0.5rem;
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  color: var(--color-wood);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.product-atelier-content .button:hover {
+  color: var(--color-orange);
+  background: none;
+  box-shadow: none;
 }
 
 /* Mobile: Stack the atelier grid - DS 4.5 */
