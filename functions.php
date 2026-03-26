@@ -4671,11 +4671,7 @@ function sapi_get_google_reviews() {
   $api_key  = defined('SAPI_GOOGLE_API_KEY') ? SAPI_GOOGLE_API_KEY : '';
   $place_id = defined('SAPI_GOOGLE_PLACE_ID') ? SAPI_GOOGLE_PLACE_ID : '';
 
-  // DEBUG temporaire — à retirer après résolution
-  $debug = defined('WP_DEBUG') && WP_DEBUG;
-
   if (empty($api_key) || empty($place_id)) {
-    if ($debug) { error_log('[SAPI Google Reviews] Constantes manquantes — API_KEY: ' . ($api_key ? 'OK' : 'VIDE') . ', PLACE_ID: ' . ($place_id ? 'OK' : 'VIDE')); }
     return null;
   }
 
@@ -4702,13 +4698,11 @@ function sapi_get_google_reviews() {
   ]);
 
   if (is_wp_error($response)) {
-    if ($debug) { error_log('[SAPI Google Reviews] WP_Error: ' . $response->get_error_message()); }
     return null;
   }
 
   $body = json_decode(wp_remote_retrieve_body($response), true);
   if (empty($body) || !isset($body['rating'])) {
-    if ($debug) { error_log('[SAPI Google Reviews] Réponse API invalide: ' . wp_remote_retrieve_body($response)); }
     return null;
   }
 
