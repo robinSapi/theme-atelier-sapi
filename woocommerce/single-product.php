@@ -276,14 +276,13 @@ get_header();
         <div class="product-reassurance-v2">
           <?php if (!$is_accessoire) : ?>
           <div class="reassurance-item-v2">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <!-- Lucide person-standing icon -->
-              <circle cx="12" cy="5" r="1"/>
-              <path d="m9 20 3-6 3 6"/>
-              <path d="m6 8 6 2 6-2"/>
-              <path d="M12 10v4"/>
+            <svg width="20" height="14" viewBox="0 0 21 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0.5" y="0.5" width="20" height="14" rx="1.5" stroke="#ddd"/>
+              <rect width="7" height="15" fill="#002395"/>
+              <rect x="7" width="7" height="15" fill="#fff"/>
+              <rect x="14" width="7" height="15" fill="#ED2939"/>
             </svg>
-            <span>Fabrication <strong>&lt;5 jours</strong></span>
+            <span>Créé à <strong>Lyon</strong></span>
           </div>
           <?php endif; ?>
           <div class="reassurance-item-v2 reassurance-delivery">
