@@ -721,7 +721,12 @@ get_header();
 
     <?php if ($google_reviews && !empty($google_reviews['reviews'])) : ?>
     <div class="testimonials-grid">
-      <?php foreach (array_slice($google_reviews['reviews'], 0, 3) as $review) : ?>
+      <?php
+      $reviews_pool = $google_reviews['reviews'];
+      shuffle($reviews_pool);
+      $reviews_display = array_slice($reviews_pool, 0, 3);
+      ?>
+      <?php foreach ($reviews_display as $review) : ?>
       <div class="testimonial-card">
         <div class="testimonial-card-header">
           <?php if (!empty($review['photo'])) : ?>
