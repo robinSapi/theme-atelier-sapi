@@ -777,9 +777,10 @@ get_header();
         <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
         <h2>Fabriqué avec passion</h2>
         <p class="atelier-intro">Chaque luminaire est conçu et fabriqué à la main par Robin dans son atelier lyonnais.</p>
-        <blockquote class="atelier-quote">
-          « Je crée chaque pièce comme si elle allait éclairer ma propre maison. La précision de la découpe laser combinée au savoir-faire artisanal, c'est ce qui rend chaque luminaire unique. »
-        </blockquote>
+        <div class="atelier-quote-body">
+          <div class="robin-conseil__quote">&ldquo;</div>
+          <p class="atelier-quote-text">Je crée chaque pièce comme si elle allait éclairer ma propre maison. La précision de la découpe laser combinée au savoir-faire artisanal, c'est ce qui rend chaque luminaire unique.</p>
+        </div>
         <p class="atelier-signature">Robin, créateur à l'Atelier Sâpi</p>
         <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="robin-conseil__product-link">Découvrir l'histoire de Robin &rarr;</a>
       </div>

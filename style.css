@@ -4866,27 +4866,40 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   margin-bottom: 2rem;
 }
 
-/* Citation artisan - DS 4.5 */
-.atelier-quote {
-  font-family: var(--font-body);
-  font-style: italic;
-  font-size: 17px;
-  line-height: 1.7;
-  color: var(--bois-profond, #6B5A4A);
-  margin: 0;
-  padding: 0;
-  border: none;
+/* Citation artisan — style Card Conseil */
+.atelier-quote-body {
+  position: relative;
+  padding-left: 2.5rem;
 }
 
-/* Signature artisan harmonisée - DS 4.5 */
+.atelier-quote-body .robin-conseil__quote {
+  position: absolute;
+  left: 0;
+  top: -0.3rem;
+  font-family: Georgia, serif;
+  font-size: 4rem;
+  color: var(--color-orange, #E35B24);
+  opacity: 0.2;
+  line-height: 1;
+  user-select: none;
+}
+
+.atelier-quote-text {
+  font-family: var(--font-display, 'Square Peg', cursive);
+  font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+  line-height: 1.5;
+  color: var(--bois-profond, #6B5A4A);
+  margin: 0;
+}
+
+/* Signature artisan — style Card Conseil */
 .atelier-signature {
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 500;
   font-style: italic;
-  letter-spacing: 0.03em;
   color: var(--bois-sombre, #4A3F35);
-  margin: 8px 0 1rem;
+  margin: 0.5rem 0 1rem;
 }
 
 .product-atelier-content .robin-conseil__product-link:hover {
