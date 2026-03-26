@@ -1583,7 +1583,7 @@
       if (lbl) answered.push({ stepId: visible[i], label: lbl });
     }
 
-    if (answered.length === 0) {
+    if (answered.length === 0 || state.openingContext === 'product_guide' || state.openingContext === '_product_reselect') {
       projectEl.style.display = 'none';
       return;
     }
