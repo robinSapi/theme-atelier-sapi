@@ -4793,27 +4793,25 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 
 .product-atelier-grid {
   display: grid;
-  grid-template-columns: 120px 1fr;
+  grid-template-columns: 280px 1fr;
   gap: var(--space-xl, 32px);
   align-items: center;
 }
 
 .product-atelier-image {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
+  width: 280px;
+  border-radius: 16px;
   overflow: hidden;
   flex-shrink: 0;
-
-  /* Bordure bois - DS 4.5 */
-  border: 4px solid var(--bois-dore, #937D68);
   box-shadow: 0 4px 16px rgba(147, 125, 104, 0.15);
+  align-self: stretch;
 }
 
 .product-atelier-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 16px;
 }
 
 .atelier-placeholder {
@@ -4868,31 +4866,44 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   margin-bottom: 2rem;
 }
 
-/* Citation artisan - DS 4.5 */
-.atelier-quote {
-  font-family: var(--font-body);
-  font-style: italic;
-  font-size: 17px;
-  line-height: 1.7;
+/* Citation artisan — style Card Conseil */
+.atelier-quote-body {
+  position: relative;
+  padding-left: 2.5rem;
+}
+
+.atelier-quote-body .robin-conseil__quote {
+  position: absolute;
+  left: 0;
+  top: -0.3rem;
+  font-family: Georgia, serif;
+  font-size: 4rem;
+  color: var(--color-orange, #E35B24);
+  opacity: 0.2;
+  line-height: 1;
+  user-select: none;
+}
+
+.atelier-quote-text {
+  font-family: var(--font-display, 'Square Peg', cursive);
+  font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+  line-height: 1.5;
   color: var(--bois-profond, #6B5A4A);
   margin: 0;
-  padding: 0;
-  border: none;
 }
 
-/* Signature artisan harmonisée - DS 4.5 */
+/* Signature artisan — style Card Conseil */
 .atelier-signature {
   font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 500;
   font-style: italic;
-  letter-spacing: 0.03em;
   color: var(--bois-sombre, #4A3F35);
-  margin: 8px 0 1rem;
+  margin: 0.5rem 0 1rem;
 }
 
-.product-atelier-content .button {
-  margin-top: 0.5rem;
+.product-atelier-content .robin-conseil__product-link:hover {
+  color: var(--color-orange, #E35B24);
 }
 
 /* Mobile: Stack the atelier grid - DS 4.5 */
@@ -4911,8 +4922,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 
   .product-atelier-image {
     margin: 0 auto;
-    width: 120px;
-    height: 120px;
+    width: 220px;
   }
 }
 
@@ -4947,6 +4957,41 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   font-weight: 900;
   color: var(--color-dark);
   margin: 0;
+}
+
+/* Google Reviews Badge */
+.google-reviews-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.google-logo {
+  flex-shrink: 0;
+}
+
+.google-reviews-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.google-stars {
+  display: flex;
+  gap: 1px;
+}
+
+.google-rating-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-light);
+  white-space: nowrap;
 }
 
 .testimonials-grid {
@@ -4991,6 +5036,37 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   font-style: italic;
 }
 
+/* Google review card header with avatar */
+.testimonial-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+.testimonial-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.testimonial-author-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.testimonial-author-info .author-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+
+.author-time {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+}
+
 .testimonial-author {
   display: flex;
   align-items: center;
@@ -5030,6 +5106,15 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   font-weight: 500;
 }
 
+.testimonials-cta-sep {
+  color: var(--color-text-light);
+  margin: 0 0.25rem;
+}
+
+.testimonials-cta-review {
+  font-weight: 600;
+}
+
 @media (hover: hover) {
   .testimonials-cta a:hover {
     color: var(--color-dark);
@@ -5054,6 +5139,13 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 
   .product-testimonials .testimonials-header {
     padding: 0 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .google-reviews-badge {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
   }
 
   .testimonials-grid {

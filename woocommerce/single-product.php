@@ -686,117 +686,79 @@ get_header();
     </div>
   </section>
 
-  <!-- ═══════════════════════════════════════════════════════════════
-       SECTION — FAQ
-       ═══════════════════════════════════════════════════════════════ -->
-  <section class="product-faq product-faq-cinetique">
-    <div class="product-faq-header">
-      <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
-      <h2>Des Questions ?</h2>
-    </div>
-    <div class="faq-list">
-      <details class="faq-item">
-        <summary><span class="faq-question">Quelle ampoule choisir ?</span><span class="faq-chevron"></span></summary>
-        <div class="faq-answer">
-          <p>Avec chaque modèle, Robin recommande une ampoule adaptée, soigneusement choisie et disponible à l'achat comme accessoire.</p>
-          <ul>
-            <li>Puissance : 4-6W (équivalent 40-60W)</li>
-            <li>Température : blanc chaud (2700K)</li>
-            <li>Type : LED filament E27</li>
-          </ul>
-        </div>
-      </details>
-      <details class="faq-item">
-        <summary><span class="faq-question">Comment se passe le montage ?</span><span class="faq-chevron"></span></summary>
-        <div class="faq-answer">
-          <p>Les luminaires sont livrés pré-assemblés ou avec un guide d'assemblage clair et illustré. Le montage se fait en quelques minutes, sans outil spécial.</p>
-        </div>
-      </details>
-      <details class="faq-item">
-        <summary><span class="faq-question">Puis-je personnaliser mon luminaire ?</span><span class="faq-chevron"></span></summary>
-        <div class="faq-answer">
-          <p>Absolument ! Contactez Robin pour discuter de vos envies : dimensions sur-mesure, gravures personnalisées, finitions spéciales... Chaque demande est étudiée avec plaisir.</p>
-        </div>
-      </details>
-      <details class="faq-item">
-        <summary><span class="faq-question">Quels sont les délais de livraison ?</span><span class="faq-chevron"></span></summary>
-        <div class="faq-answer">
-          <p>Fabrication en moins de 5 jours ouvrés, puis expédition sous 48-72h. Vous recevez un email de suivi dès l'envoi de votre colis.</p>
-        </div>
-      </details>
-    </div>
-  </section>
 
   <?php if (!$is_accessoire) : ?>
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION — TÉMOIGNAGES (Preuve Sociale)
        ═══════════════════════════════════════════════════════════════ -->
+  <?php
+  $google_reviews = sapi_get_google_reviews();
+  ?>
   <section class="product-testimonials">
     <div class="testimonials-header">
       <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
       <h2>Ce qu'en pensent les clients</h2>
+      <?php if ($google_reviews) : ?>
+      <div class="google-reviews-badge">
+        <svg class="google-logo" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        <div class="google-reviews-summary">
+          <div class="google-stars">
+            <?php
+            $rating = $google_reviews['rating'];
+            for ($i = 1; $i <= 5; $i++) :
+              if ($i <= floor($rating)) : ?>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#FBBC05"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <?php else : ?>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#ddd"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <?php endif;
+            endfor; ?>
+          </div>
+          <span class="google-rating-text"><?php echo esc_html($rating); ?>/5 · <?php echo esc_html($google_reviews['total']); ?> avis</span>
+        </div>
+      </div>
+      <?php endif; ?>
     </div>
 
-    <?php
-    // Hook pour intégrer Judge.me, Trustpilot ou autre système d'avis
-    do_action('sapi_product_reviews', $product_id);
-
-    // Afficher les avis WooCommerce natifs si disponibles
-    $reviews_count = $product->get_review_count();
-
-    if ($reviews_count > 0) :
-      // WooCommerce reviews template
-      comments_template();
-    else :
-      // Afficher des témoignages génériques si pas d'avis spécifiques
-    ?>
+    <?php if ($google_reviews && !empty($google_reviews['reviews'])) : ?>
     <div class="testimonials-grid">
+      <?php foreach (array_slice($google_reviews['reviews'], 0, 3) as $review) : ?>
       <div class="testimonial-card">
+        <div class="testimonial-card-header">
+          <?php if (!empty($review['photo'])) : ?>
+          <img class="testimonial-avatar" src="<?php echo esc_url($review['photo']); ?>" alt="" width="36" height="36" loading="lazy">
+          <?php endif; ?>
+          <div class="testimonial-author-info">
+            <span class="author-name"><?php echo esc_html($review['author']); ?></span>
+            <span class="author-time"><?php echo esc_html($review['time']); ?></span>
+          </div>
+        </div>
         <div class="testimonial-rating">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <?php for ($i = 1; $i <= 5; $i++) : ?>
+            <?php if ($i <= $review['rating']) : ?>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#FBBC05"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <?php else : ?>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#ddd"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <?php endif; ?>
+          <?php endfor; ?>
         </div>
-        <p class="testimonial-text">« Le luminaire est magnifique, le montage était simple et le résultat dépasse mes attentes. Un vrai coup de cœur ! »</p>
-        <div class="testimonial-author">
-          <span class="author-name">Sophie M.</span>
-          <span class="author-location">Lyon</span>
-        </div>
+        <p class="testimonial-text"><?php
+          $text = $review['text'];
+          if (mb_strlen($text) > 200) {
+            $text = mb_substr($text, 0, 200);
+            $text = mb_substr($text, 0, mb_strrpos($text, ' ')) . '…';
+          }
+          echo esc_html($text);
+        ?></p>
       </div>
-
-      <div class="testimonial-card">
-        <div class="testimonial-rating">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </div>
-        <p class="testimonial-text">« La qualité du bois et des finitions est exceptionnelle. On sent le travail artisanal. Livraison rapide et soignée. »</p>
-        <div class="testimonial-author">
-          <span class="author-name">Thomas R.</span>
-          <span class="author-location">Paris</span>
-        </div>
-      </div>
-
-      <div class="testimonial-card">
-        <div class="testimonial-rating">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </div>
-        <p class="testimonial-text">« J'adore les jeux d'ombres que projette ce luminaire. Robin a été très réactif pour répondre à mes questions. »</p>
-        <div class="testimonial-author">
-          <span class="author-name">Marie-Claire D.</span>
-          <span class="author-location">Bordeaux</span>
-        </div>
-      </div>
+      <?php endforeach; ?>
     </div>
 
+    <div class="testimonials-cta">
+      <a href="https://g.page/r/CQ0YW1uBzOimEAE/review" target="_blank" rel="noopener noreferrer" class="testimonials-cta-review">Laisser un avis sur Google</a>
+      <span class="testimonials-cta-sep">·</span>
+      <a href="https://www.google.com/maps/place/?q=place_id:ChIJYyWUfZOV9EcRDRhbW4HM6KY" target="_blank" rel="noopener noreferrer">Voir les <?php echo esc_html($google_reviews['total']); ?> avis</a>
+    </div>
+    <?php else : ?>
     <div class="testimonials-cta">
       <p>Vous avez ce produit ? <a href="https://g.page/r/CQ0YW1uBzOimEAE/review" target="_blank" rel="noopener noreferrer">Partagez votre avis</a></p>
     </div>
@@ -811,41 +773,18 @@ get_header();
   <section class="product-atelier product-atelier-cinetique">
     <div class="product-atelier-grid">
       <div class="product-atelier-image">
-        <?php
-        $atelier_img_url = null;
-        $atelier_img = function_exists('get_field') ? get_field('atelier_photo', 'option') : null;
-
-        if ($atelier_img && isset($atelier_img['url'])) {
-          $atelier_img_url = $atelier_img['url'];
-        } else {
-          $theme_image = get_template_directory() . '/assets/images/atelier-robin.jpg';
-          if (file_exists($theme_image)) {
-            $atelier_img_url = get_template_directory_uri() . '/assets/images/atelier-robin.jpg';
-          }
-        }
-
-        if ($atelier_img_url) :
-        ?>
-          <img src="<?php echo esc_url($atelier_img_url); ?>" alt="Robin dans l'atelier Sapi" loading="lazy">
-        <?php else : ?>
-          <div class="atelier-placeholder">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-            </svg>
-            <span>Photo atelier</span>
-          </div>
-        <?php endif; ?>
+          <img src="https://atelier-sapi.fr/wp-content/uploads/2026/03/Robin-au-poncage.jpg" alt="Robin au ponçage dans l'atelier Sapi" loading="lazy">
       </div>
       <div class="product-atelier-content">
         <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
         <h2>Fabriqué avec passion</h2>
         <p class="atelier-intro">Chaque luminaire est conçu et fabriqué à la main par Robin dans son atelier lyonnais.</p>
-        <blockquote class="atelier-quote">
-          « Je crée chaque pièce comme si elle allait éclairer ma propre maison. La précision de la découpe laser combinée au savoir-faire artisanal, c'est ce qui rend chaque luminaire unique. »
-        </blockquote>
+        <div class="atelier-quote-body">
+          <div class="robin-conseil__quote">&ldquo;</div>
+          <p class="atelier-quote-text">Je crée chaque pièce comme si elle allait éclairer ma propre maison. La précision de la découpe laser combinée au savoir-faire artisanal, c'est ce qui rend chaque luminaire unique.</p>
+        </div>
         <p class="atelier-signature">Robin, créateur à l'Atelier Sâpi</p>
-        <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="button button-outline">Découvrir l'histoire de Robin</a>
+        <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="robin-conseil__product-link">Découvrir l'histoire de Robin &rarr;</a>
       </div>
     </div>
   </section>
