@@ -2080,16 +2080,24 @@
     }
   }
 
+  function isProductGuideComplete() {
+    // Le mini-questionnaire produit est complet si pièce + (taille ou taille_escalier) + style sont répondus
+    return state.answers.piece && (state.answers.taille || state.answers.taille_escalier) && state.answers.style;
+  }
+
   function adaptProductPill() {
     var pill = document.getElementById('robin-product-pill');
     if (!pill) return;
 
-    if (hasAnyAnswer()) {
-      // Projet existant → afficher le contexte + sélectionner la variation
+    if (isProductGuideComplete()) {
+      // Questionnaire produit complet → afficher le contexte + sélectionner la variation
       updateProductPillContextual();
       reselectVariation();
+    } else {
+      // Pas de projet ou incomplet → texte par défaut
+      pill.textContent = 'Comment choisir le bon mod\u00e8le ?';
+      pill.dataset.robinContext = 'product_guide';
     }
-    // Sans projet → texte par défaut "Comment choisir le bon modèle ?"
   }
 
   function reselectVariation() {
