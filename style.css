@@ -4889,30 +4889,6 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   margin: 8px 0 1rem;
 }
 
-.product-atelier-cinetique .product-atelier-content .button.button-outline {
-  margin-top: 0.5rem;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  color: var(--color-orange, #E35B24);
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  text-decoration: none;
-  text-transform: none;
-  display: inline-block;
-  width: auto;
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.2s;
-}
-
-.product-atelier-cinetique .product-atelier-content .button.button-outline:hover {
-  color: var(--color-orange, #E35B24);
-  border-bottom-color: var(--color-orange, #E35B24);
-  background: transparent;
-  box-shadow: none;
-}
 
 /* Mobile: Stack the atelier grid - DS 4.5 */
 @media (max-width: 768px) {
