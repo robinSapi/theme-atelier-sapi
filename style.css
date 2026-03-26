@@ -4793,7 +4793,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 
 .product-atelier-grid {
   display: grid;
-  grid-template-columns: 120px 1fr;
+  grid-template-columns: 280px 1fr;
   gap: var(--space-xl, 32px);
   align-items: center;
 }
