@@ -276,9 +276,8 @@ get_header();
         <div class="product-reassurance-v2">
           <?php if (!$is_accessoire) : ?>
           <div class="reassurance-item-v2">
-            <svg width="16" height="18" viewBox="0 0 55 60" fill="rgba(147,125,104,0.15)" stroke="var(--color-wood)" stroke-width="1.5" stroke-linejoin="round">
-              <path d="M28 2L33 3L38 1L42 4L46 3L48 7L53 10L52 15L50 18L52 22L50 26L53 30L52 34L48 36L46 40L48 44L45 47L42 52L38 55L34 58L30 57L26 58L22 56L18 54L15 50L12 47L10 43L8 39L5 36L3 32L4 28L3 24L5 20L8 17L7 13L9 9L13 7L17 5L21 3L25 2L28 2Z"/>
-              <circle cx="35" cy="40" r="2" fill="var(--color-orange)" stroke="none"/>
+            <svg width="18" height="18" viewBox="0 0 512 512" fill="var(--color-wood)">
+              <path d="M283.4 19.83c-3.2 0-31.2 5.09-31.2 5.09-1.3 41.61-30.4 78.48-90.3 84.88l-12.8-23.07-25.1 2.48 11.3 60.09-113.79-4.9 12.2 41.5C156.3 225.4 150.7 338.4 124 439.4c47 53 141.8 47.8 186 43.1 3.1-62.2 52.4-64.5 135.9-32.2 11.3-17.6 18.8-36 44.6-50.7l-46.6-139.5-27.5 6.2c11-21.1 32.2-49.9 50.4-63.4l15.6-86.9c-88.6-6.3-146.4-46.36-199-96.17z"/>
             </svg>
             <span>Créé à <strong>Lyon</strong></span>
           </div>
