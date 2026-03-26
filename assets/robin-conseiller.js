@@ -1592,7 +1592,9 @@
     for (var j = 0; j < answered.length; j++) {
       html += '<span class="robin-modal__chip" data-step="' + escAttr(answered[j].stepId) + '" style="cursor:pointer;">' + escHtml(answered[j].label) + '</span>';
     }
-    html += '<button class="robin-modal__reset" id="robin-modal-reset" type="button">Recommencer</button>';
+    if (state.openingContext !== 'product_guide' && state.openingContext !== '_product_reselect') {
+      html += '<button class="robin-modal__reset" id="robin-modal-reset" type="button">Recommencer</button>';
+    }
 
     projectEl.innerHTML = html;
     projectEl.style.display = '';
