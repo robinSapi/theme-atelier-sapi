@@ -1957,10 +1957,11 @@
     var redoBtn = document.getElementById('robin-result-redo');
     if (redoBtn) {
       redoBtn.addEventListener('click', function() {
-        // Reset les réponses
+        // Reset les réponses et forcer le parcours raccourci produit
         state.answers = {};
         state.labels = {};
         state.history = [];
+        state.openingContext = 'product_guide';
         saveState();
         showFiche(steps[0].id);
       });
