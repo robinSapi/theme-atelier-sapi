@@ -397,21 +397,6 @@ get_header();
         ?>
         </div><!-- .product-why-content -->
       </div><!-- .product-why-left -->
-      <div class="product-why-usage">
-        <h3>Idéal pour</h3>
-        <ul class="usage-list">
-          <?php
-          $pieces = get_the_terms($product->get_id(), 'pa_piece');
-          if ($pieces && !is_wp_error($pieces)) {
-            foreach ($pieces as $piece) {
-              echo '<li>' . esc_html($piece->name) . '</li>';
-            }
-          } else {
-            echo '<li>Toutes pièces</li>';
-          }
-          ?>
-        </ul>
-      </div>
     </div>
   </section>
 
