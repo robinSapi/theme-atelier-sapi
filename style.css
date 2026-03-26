@@ -4889,6 +4889,9 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   margin: 8px 0 1rem;
 }
 
+.product-atelier-content .robin-conseil__product-link:hover {
+  color: var(--color-orange, #E35B24);
+}
 
 /* Mobile: Stack the atelier grid - DS 4.5 */
 @media (max-width: 768px) {
