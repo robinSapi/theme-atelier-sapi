@@ -781,7 +781,7 @@ get_header();
           « Je crée chaque pièce comme si elle allait éclairer ma propre maison. La précision de la découpe laser combinée au savoir-faire artisanal, c'est ce qui rend chaque luminaire unique. »
         </blockquote>
         <p class="atelier-signature">Robin, créateur à l'Atelier Sâpi</p>
-        <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="button button-outline">Découvrir l'histoire de Robin</a>
+        <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="button button-outline">Découvrir l'histoire de Robin &rarr;</a>
       </div>
     </div>
   </section>
