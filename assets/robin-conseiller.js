@@ -455,6 +455,8 @@
 
     saveState();
     refreshPageVisuals();
+    adaptProductPill();
+    updateBandeauChips();
   }
 
   /* ═══════════════════════════════════════════
