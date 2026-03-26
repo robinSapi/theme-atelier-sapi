@@ -743,21 +743,18 @@ get_header();
         </div>
         <?php
           $text = $review['text'];
-          $words = explode(' ', $text);
-          $is_long = count($words) > 150;
-          if ($is_long) {
-            $short = implode(' ', array_slice($words, 0, 150)) . '…';
+          $short = $text;
+          if (mb_strlen($text) > 200) {
+            $short = mb_substr($text, 0, 200);
+            $short = mb_substr($short, 0, mb_strrpos($short, ' ')) . '…';
           }
         ?>
-        <p class="testimonial-text<?php echo $is_long ? ' is-truncated' : ''; ?>">
-          <?php if ($is_long) : ?>
-            <span class="testimonial-text-short"><?php echo esc_html($short); ?></span>
-            <span class="testimonial-text-full"><?php echo esc_html($text); ?></span>
-            <button type="button" class="testimonial-read-more">Lire la suite</button>
-          <?php else : ?>
-            <?php echo esc_html($text); ?>
-          <?php endif; ?>
-        </p>
+        <p class="testimonial-text"><?php echo esc_html($short); ?></p>
+        <span class="testimonial-full-text" hidden><?php echo esc_attr($text); ?></span>
+        <span class="testimonial-full-author" hidden><?php echo esc_attr($review['author']); ?></span>
+        <span class="testimonial-full-photo" hidden><?php echo esc_attr($review['photo'] ?? ''); ?></span>
+        <span class="testimonial-full-time" hidden><?php echo esc_attr($review['time'] ?? ''); ?></span>
+        <span class="testimonial-full-rating" hidden><?php echo esc_attr($review['rating']); ?></span>
       </div>
       <?php endforeach; ?>
     </div>
@@ -767,12 +764,68 @@ get_header();
       <span class="testimonials-cta-sep">·</span>
       <a href="https://www.google.com/maps/place/?q=place_id:ChIJYyWUfZOV9EcRDRhbW4HM6KY" target="_blank" rel="noopener noreferrer">Voir les <?php echo esc_html($google_reviews['total']); ?> avis</a>
     </div>
+    <!-- Modale avis Google -->
+    <div class="review-modal-overlay" id="reviewModal" hidden>
+      <div class="review-modal">
+        <button type="button" class="review-modal-close" aria-label="Fermer">&times;</button>
+        <div class="review-modal-header">
+          <img class="review-modal-avatar" src="" alt="" width="48" height="48">
+          <div class="review-modal-author-info">
+            <span class="review-modal-name"></span>
+            <span class="review-modal-time"></span>
+          </div>
+        </div>
+        <div class="review-modal-rating"></div>
+        <p class="review-modal-text"></p>
+      </div>
+    </div>
     <script>
-    document.querySelectorAll('.testimonial-read-more').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        this.closest('.testimonial-text').classList.add('is-expanded');
+    (function() {
+      var modal = document.getElementById('reviewModal');
+      var overlay = modal;
+      var closeBtn = modal.querySelector('.review-modal-close');
+
+      document.querySelectorAll('.testimonial-card').forEach(function(card) {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', function() {
+          var fullText = card.querySelector('.testimonial-full-text').textContent;
+          var author = card.querySelector('.testimonial-full-author').textContent;
+          var photo = card.querySelector('.testimonial-full-photo').textContent;
+          var time = card.querySelector('.testimonial-full-time').textContent;
+          var rating = parseInt(card.querySelector('.testimonial-full-rating').textContent);
+
+          modal.querySelector('.review-modal-name').textContent = author;
+          modal.querySelector('.review-modal-time').textContent = time;
+          modal.querySelector('.review-modal-text').textContent = fullText;
+
+          var avatar = modal.querySelector('.review-modal-avatar');
+          if (photo) { avatar.src = photo; avatar.style.display = ''; }
+          else { avatar.style.display = 'none'; }
+
+          var stars = '';
+          for (var i = 1; i <= 5; i++) {
+            stars += '<svg width="16" height="16" viewBox="0 0 24 24" fill="' + (i <= rating ? '#FBBC05' : '#ddd') + '"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+          }
+          modal.querySelector('.review-modal-rating').innerHTML = stars;
+
+          modal.hidden = false;
+          document.body.style.overflow = 'hidden';
+        });
       });
-    });
+
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) closeModal();
+      });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !modal.hidden) closeModal();
+      });
+
+      function closeModal() {
+        modal.hidden = true;
+        document.body.style.overflow = '';
+      }
+    })();
     </script>
     <?php else : ?>
     <div class="testimonials-cta">

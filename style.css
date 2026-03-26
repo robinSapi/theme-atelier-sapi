@@ -5068,40 +5068,95 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   color: var(--color-text-light);
 }
 
-/* Read more toggle */
-.testimonial-text-full {
+/* Modale avis Google */
+.review-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.review-modal-overlay[hidden] {
   display: none;
 }
 
-.testimonial-text.is-expanded .testimonial-text-short {
-  display: none;
+.review-modal {
+  background: var(--color-white, #fff);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 560px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
 
-.testimonial-text.is-expanded .testimonial-text-full {
-  display: inline;
-}
-
-.testimonial-text.is-expanded .testimonial-read-more {
-  display: none;
-}
-
-.testimonial-read-more {
-  display: inline;
+.review-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
   background: none;
   border: none;
-  padding: 0;
-  margin-left: 0.25rem;
-  color: var(--color-accent);
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 1.75rem;
+  color: var(--color-text-light);
   cursor: pointer;
-  font-family: inherit;
+  line-height: 1;
+  padding: 0.25rem;
 }
 
 @media (hover: hover) {
-  .testimonial-read-more:hover {
+  .review-modal-close:hover {
     color: var(--color-dark);
   }
+}
+
+.review-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.review-modal-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.review-modal-author-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.review-modal-name {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-dark);
+}
+
+.review-modal-time {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+}
+
+.review-modal-rating {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 1rem;
+}
+
+.review-modal-text {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--color-text);
+  margin: 0;
+  white-space: pre-line;
 }
 
 .testimonial-author {
