@@ -4903,14 +4903,13 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   text-transform: none;
   display: inline-block;
   width: auto;
-  transition: text-decoration 0.2s;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
 }
 
 .product-atelier-cinetique .product-atelier-content .button.button-outline:hover {
   color: var(--color-orange, #E35B24);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  text-decoration-thickness: 1px;
+  border-bottom-color: var(--color-orange, #E35B24);
   background: transparent;
   box-shadow: none;
 }
