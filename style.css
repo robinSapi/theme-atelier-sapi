@@ -4889,9 +4889,9 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   margin: 8px 0 1rem;
 }
 
-.product-atelier-content .button {
+.product-atelier-cinetique .product-atelier-content .button.button-outline {
   margin-top: 0.5rem;
-  background: none;
+  background: transparent;
   border: none;
   box-shadow: none;
   padding: 0;
@@ -4901,11 +4901,14 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   letter-spacing: 0.03em;
   text-decoration: underline;
   text-underline-offset: 3px;
+  text-transform: none;
+  display: inline;
+  width: auto;
 }
 
-.product-atelier-content .button:hover {
+.product-atelier-cinetique .product-atelier-content .button.button-outline:hover {
   color: var(--color-orange);
-  background: none;
+  background: transparent;
   box-shadow: none;
 }
 
