@@ -743,10 +743,11 @@ get_header();
         </div>
         <?php
           $text = $review['text'];
-          $short = $text;
-          if (mb_strlen($text) > 200) {
-            $short = mb_substr($text, 0, 200);
-            $short = mb_substr($short, 0, mb_strrpos($short, ' ')) . '…';
+          $words = explode(' ', $text);
+          if (count($words) > 20) {
+            $short = implode(' ', array_slice($words, 0, 20)) . '…';
+          } else {
+            $short = $text;
           }
         ?>
         <p class="testimonial-text"><?php echo esc_html($short); ?></p>
