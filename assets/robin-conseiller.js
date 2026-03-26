@@ -1891,8 +1891,9 @@
     if (tailleLabel) introText += ' de taille ' + escHtml(tailleLabel.toLowerCase());
     introText += ', Robin recommande\u00A0:';
 
+    // Tous les éléments démarrent cachés pour animation séquentielle
     var html = '';
-    html += '<div class="robin-fiche__top">';
+    html += '<div class="robin-fiche__top robin-result-anim" style="opacity:0;transform:translateY(12px);">';
     html += '<div class="robin-fiche__conseil">';
     html += '<div class="robin-fiche__citation">';
     html += '<p class="robin-fiche__citation-text">' + introText + '</p>';
@@ -1901,7 +1902,7 @@
     html += '</div>';
 
     // Récap
-    html += '<div class="robin-fiche__result-recap">';
+    html += '<div class="robin-fiche__result-recap robin-result-anim" style="opacity:0;transform:translateY(12px);">';
     if (essence) {
       html += '<div class="robin-result-item">';
       html += '<span class="robin-result-label">Essence</span>';
@@ -1918,16 +1919,28 @@
 
     // Conseil essence
     if (conseilText) {
-      html += '<p class="robin-result-conseil">' + escHtml(conseilText) + '</p>';
+      html += '<p class="robin-result-conseil robin-result-anim" style="opacity:0;transform:translateY(12px);">' + escHtml(conseilText) + '</p>';
     }
 
     // Boutons
-    html += '<div class="robin-fiche__result-actions">';
+    html += '<div class="robin-fiche__result-actions robin-result-anim" style="opacity:0;transform:translateY(12px);">';
     html += '<button type="button" class="robin-result-apply" id="robin-result-apply">Appliquer cette s\u00e9lection \u2192</button>';
     html += '<button type="button" class="robin-result-redo" id="robin-result-redo">Recommencer le questionnaire</button>';
     html += '</div>';
 
     body.innerHTML = html;
+
+    // Animation séquentielle
+    var animItems = body.querySelectorAll('.robin-result-anim');
+    for (var a = 0; a < animItems.length; a++) {
+      (function(el, delay) {
+        setTimeout(function() {
+          el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        }, delay);
+      })(animItems[a], 300 + a * 250);
+    }
 
     // Bind bouton appliquer
     var applyBtn = document.getElementById('robin-result-apply');
