@@ -686,46 +686,6 @@ get_header();
     </div>
   </section>
 
-  <!-- ═══════════════════════════════════════════════════════════════
-       SECTION — FAQ
-       ═══════════════════════════════════════════════════════════════ -->
-  <section class="product-faq product-faq-cinetique">
-    <div class="product-faq-header">
-      <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
-      <h2>Des Questions ?</h2>
-    </div>
-    <div class="faq-list">
-      <details class="faq-item">
-        <summary><span class="faq-question">Quelle ampoule choisir ?</span><span class="faq-chevron"></span></summary>
-        <div class="faq-answer">
-          <p>Avec chaque modèle, Robin recommande une ampoule adaptée, soigneusement choisie et disponible à l'achat comme accessoire.</p>
-          <ul>
-            <li>Puissance : 4-6W (équivalent 40-60W)</li>
-            <li>Température : blanc chaud (2700K)</li>
-            <li>Type : LED filament E27</li>
-          </ul>
-        </div>
-      </details>
-      <details class="faq-item">
-        <summary><span class="faq-question">Comment se passe le montage ?</span><span class="faq-chevron"></span></summary>
-        <div class="faq-answer">
-          <p>Les luminaires sont livrés pré-assemblés ou avec un guide d'assemblage clair et illustré. Le montage se fait en quelques minutes, sans outil spécial.</p>
-        </div>
-      </details>
-      <details class="faq-item">
-        <summary><span class="faq-question">Puis-je personnaliser mon luminaire ?</span><span class="faq-chevron"></span></summary>
-        <div class="faq-answer">
-          <p>Absolument ! Contactez Robin pour discuter de vos envies : dimensions sur-mesure, gravures personnalisées, finitions spéciales... Chaque demande est étudiée avec plaisir.</p>
-        </div>
-      </details>
-      <details class="faq-item">
-        <summary><span class="faq-question">Quels sont les délais de livraison ?</span><span class="faq-chevron"></span></summary>
-        <div class="faq-answer">
-          <p>Fabrication en moins de 5 jours ouvrés, puis expédition sous 48-72h. Vous recevez un email de suivi dès l'envoi de votre colis.</p>
-        </div>
-      </details>
-    </div>
-  </section>
 
   <?php if (!$is_accessoire) : ?>
   <!-- ═══════════════════════════════════════════════════════════════
