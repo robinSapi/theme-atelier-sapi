@@ -18329,100 +18329,92 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
 
 /* ---- STOCK BADGE V2 ---- */
 /* ---- CTA SUR-MESURE ---- */
-.product-custom-cta {
-  padding: 1rem 1.25rem;
-  background: rgba(0, 0, 0, 0.02);
-  border-radius: 8px;
-  border-left: 3px solid var(--color-accent);
+/* ---- BANDEAU ROBIN CONTACT ---- */
+.robin-contact-bandeau {
+  background: var(--color-warm);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  text-align: center;
 }
 
-.custom-cta-text {
+.robin-contact-closed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.robin-contact-question {
   font-size: 0.9rem;
-  margin: 0 0 0.35rem;
   color: var(--color-text);
 }
 
-.custom-cta-link {
+.robin-contact-toggle {
   font-size: 0.85rem;
   color: var(--color-accent);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s ease;
-  -webkit-transition: color 0.2s ease;
+  font-weight: 600;
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
   font-family: inherit;
+  transition: color 0.2s;
 }
 
 @media (hover: hover) {
-  .custom-cta-link:hover {
+  .robin-contact-toggle:hover {
     color: var(--color-dark);
-    text-decoration: underline;
   }
 }
 
-/* Robin contact form */
 .robin-contact-label {
   font-size: 0.85rem;
   color: var(--color-text-light);
-  margin: 0 0 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .robin-contact-form {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 0.5rem;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
-.robin-contact-email {
-  flex: 1;
-  padding: 0.45rem 0.75rem;
-  border: 1px solid rgba(147, 125, 104, 0.3);
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-family: inherit;
-  background: var(--color-white, #fff);
-  color: var(--color-dark);
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.robin-contact-email:focus {
-  border-color: var(--color-wood);
-}
-
+.robin-contact-email,
 .robin-contact-message {
-  width: 100%;
-  padding: 0.45rem 0.75rem;
-  border: 1px solid rgba(147, 125, 104, 0.3);
-  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(147, 125, 104, 0.25);
+  border-radius: 8px;
   font-size: 0.85rem;
   font-family: inherit;
   background: var(--color-white, #fff);
   color: var(--color-dark);
   outline: none;
   transition: border-color 0.2s;
-  resize: vertical;
 }
 
+.robin-contact-email:focus,
 .robin-contact-message:focus {
   border-color: var(--color-wood);
 }
 
+.robin-contact-message {
+  resize: vertical;
+}
+
 .robin-contact-submit {
-  padding: 0.45rem 1rem;
+  padding: 0.5rem 1.25rem;
   background: var(--color-accent);
   color: #fff;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
   transition: background 0.2s;
-  white-space: nowrap;
+  align-self: center;
 }
 
 @media (hover: hover) {
@@ -18437,10 +18429,9 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
 }
 
 .robin-contact-done {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--color-wood);
   font-weight: 600;
-  margin: 0;
 }
 
 /* ---- NOTE ARTISAN ---- */

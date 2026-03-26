@@ -298,13 +298,13 @@ get_header();
 
 
         <!-- CTA Échanger avec Robin -->
-        <div class="product-custom-cta" id="ctaRobinContact">
+        <div class="robin-contact-bandeau" id="ctaRobinContact">
           <div class="robin-contact-closed">
-            <p class="custom-cta-text">Envie d'en discuter ?</p>
-            <button type="button" class="custom-cta-link robin-contact-toggle">Échanger avec Robin →</button>
+            <span class="robin-contact-question">Envie d'en discuter ?</span>
+            <button type="button" class="robin-contact-toggle">Échanger avec Robin →</button>
           </div>
           <div class="robin-contact-open" hidden>
-            <p class="robin-contact-label">Laissez votre email, Robin vous recontacte rapidement.</p>
+            <span class="robin-contact-label">Robin vous recontacte rapidement.</span>
             <form class="robin-contact-form" data-product="<?php echo esc_attr($product->get_name()); ?>">
               <?php wp_nonce_field('sapi-guide-results', 'robin_contact_nonce', false); ?>
               <input type="email" name="email" class="robin-contact-email" placeholder="votre@email.com" required>
@@ -313,7 +313,7 @@ get_header();
             </form>
           </div>
           <div class="robin-contact-success" hidden>
-            <p class="robin-contact-done">Message envoyé ! Robin revient vers vous très vite.</p>
+            <span class="robin-contact-done">Message envoyé ! Robin revient vers vous très vite.</span>
           </div>
         </div>
         <?php endif; // fin !$is_carte_cadeau ?>
