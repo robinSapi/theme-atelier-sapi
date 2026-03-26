@@ -4678,8 +4678,12 @@ function sapi_get_google_reviews() {
   // Cache 6h via transient
   $cache_key = 'sapi_google_reviews_' . md5($place_id);
   $cached = get_transient($cache_key);
-  if ($cached !== false) {
+  if ($cached !== false && is_array($cached) && isset($cached['rating'])) {
     return $cached;
+  }
+  // Nettoyer un éventuel transient invalide
+  if ($cached !== false) {
+    delete_transient($cache_key);
   }
 
   $url = 'https://places.googleapis.com/v1/places/' . $place_id;

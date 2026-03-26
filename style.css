@@ -4900,6 +4900,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   font-style: italic;
   color: var(--bois-sombre, #4A3F35);
   margin: 0.5rem 0 1rem;
+  text-align: right;
 }
 
 .product-atelier-content .robin-conseil__product-link:hover {
