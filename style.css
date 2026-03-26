@@ -4959,6 +4959,41 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   margin: 0;
 }
 
+/* Google Reviews Badge */
+.google-reviews-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.google-logo {
+  flex-shrink: 0;
+}
+
+.google-reviews-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.google-stars {
+  display: flex;
+  gap: 1px;
+}
+
+.google-rating-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-light);
+  white-space: nowrap;
+}
+
 .testimonials-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -5001,6 +5036,37 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   font-style: italic;
 }
 
+/* Google review card header with avatar */
+.testimonial-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+.testimonial-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.testimonial-author-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.testimonial-author-info .author-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+
+.author-time {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+}
+
 .testimonial-author {
   display: flex;
   align-items: center;
@@ -5040,6 +5106,15 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   font-weight: 500;
 }
 
+.testimonials-cta-sep {
+  color: var(--color-text-light);
+  margin: 0 0.25rem;
+}
+
+.testimonials-cta-review {
+  font-weight: 600;
+}
+
 @media (hover: hover) {
   .testimonials-cta a:hover {
     color: var(--color-dark);
@@ -5064,6 +5139,13 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 
   .product-testimonials .testimonials-header {
     padding: 0 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .google-reviews-badge {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
   }
 
   .testimonials-grid {

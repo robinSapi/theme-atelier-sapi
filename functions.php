@@ -4666,3 +4666,70 @@ function sapi_ajax_conseils_products() {
   wp_send_json_success($html);
 }
 
+/* ─── Google Reviews (Places API New) ─── */
+function sapi_get_google_reviews() {
+  $api_key  = defined('SAPI_GOOGLE_API_KEY') ? SAPI_GOOGLE_API_KEY : '';
+  $place_id = defined('SAPI_GOOGLE_PLACE_ID') ? SAPI_GOOGLE_PLACE_ID : '';
+
+  if (empty($api_key) || empty($place_id)) {
+    return null;
+  }
+
+  // Cache 6h via transient
+  $cache_key = 'sapi_google_reviews_' . md5($place_id);
+  $cached = get_transient($cache_key);
+  if ($cached !== false) {
+    return $cached;
+  }
+
+  $url = 'https://places.googleapis.com/v1/places/' . $place_id;
+
+  $response = wp_remote_get($url, [
+    'timeout' => 10,
+    'headers' => [
+      'X-Goog-Api-Key'    => $api_key,
+      'X-Goog-FieldMask'  => 'reviews,rating,userRatingCount',
+      'Referer'            => home_url('/'),
+    ],
+  ]);
+
+  if (is_wp_error($response)) {
+    return null;
+  }
+
+  $body = json_decode(wp_remote_retrieve_body($response), true);
+  if (empty($body) || !isset($body['rating'])) {
+    return null;
+  }
+
+  $result = [
+    'rating'      => floatval($body['rating']),
+    'total'       => intval($body['userRatingCount'] ?? 0),
+    'reviews'     => [],
+  ];
+
+  if (!empty($body['reviews'])) {
+    foreach ($body['reviews'] as $review) {
+      // Prefer originalText (French) over translated text
+      $text = '';
+      if (!empty($review['originalText']['text'])) {
+        $text = $review['originalText']['text'];
+      } elseif (!empty($review['text']['text'])) {
+        $text = $review['text']['text'];
+      }
+
+      $result['reviews'][] = [
+        'author'  => $review['authorAttribution']['displayName'] ?? '',
+        'rating'  => intval($review['rating'] ?? 5),
+        'text'    => $text,
+        'time'    => $review['relativePublishTimeDescription'] ?? '',
+        'photo'   => $review['authorAttribution']['photoUri'] ?? '',
+      ];
+    }
+  }
+
+  set_transient($cache_key, $result, 6 * HOUR_IN_SECONDS);
+
+  return $result;
+}
+
