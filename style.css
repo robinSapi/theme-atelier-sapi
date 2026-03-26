@@ -18349,6 +18349,11 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
   font-weight: 500;
   transition: color 0.2s ease;
   -webkit-transition: color 0.2s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
 }
 
 @media (hover: hover) {
@@ -18356,6 +18361,67 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
     color: var(--color-dark);
     text-decoration: underline;
   }
+}
+
+/* Robin contact form */
+.robin-contact-label {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  margin: 0 0 0.5rem;
+}
+
+.robin-contact-form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.robin-contact-email {
+  flex: 1;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(147, 125, 104, 0.3);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  background: var(--color-white, #fff);
+  color: var(--color-dark);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.robin-contact-email:focus {
+  border-color: var(--color-wood);
+}
+
+.robin-contact-submit {
+  padding: 0.45rem 1rem;
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .robin-contact-submit:hover {
+    background: var(--color-dark);
+  }
+}
+
+.robin-contact-submit:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.robin-contact-done {
+  font-size: 0.85rem;
+  color: var(--color-wood);
+  font-weight: 600;
+  margin: 0;
 }
 
 /* ---- NOTE ARTISAN ---- */

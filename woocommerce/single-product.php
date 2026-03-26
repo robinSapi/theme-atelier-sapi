@@ -297,12 +297,23 @@ get_header();
         </div>
 
 
-        <!-- CTA Sur-mesure -->
-        <div class="product-custom-cta">
-          <p class="custom-cta-text">Besoin d'une version sur-mesure ?</p>
-          <a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>" class="custom-cta-link">
-            Parlons de votre projet →
-          </a>
+        <!-- CTA Échanger avec Robin -->
+        <div class="product-custom-cta" id="ctaRobinContact">
+          <div class="robin-contact-closed">
+            <p class="custom-cta-text">Envie d'en discuter ?</p>
+            <button type="button" class="custom-cta-link robin-contact-toggle">Échanger avec Robin →</button>
+          </div>
+          <div class="robin-contact-open" hidden>
+            <p class="robin-contact-label">Laissez votre email, Robin vous recontacte rapidement.</p>
+            <form class="robin-contact-form" data-product="<?php echo esc_attr($product->get_name()); ?>">
+              <?php wp_nonce_field('sapi-guide-results', 'robin_contact_nonce', false); ?>
+              <input type="email" name="email" class="robin-contact-email" placeholder="votre@email.com" required>
+              <button type="submit" class="robin-contact-submit">Envoyer</button>
+            </form>
+          </div>
+          <div class="robin-contact-success" hidden>
+            <p class="robin-contact-done">Message envoyé ! Robin revient vers vous très vite.</p>
+          </div>
         </div>
         <?php endif; // fin !$is_carte_cadeau ?>
 
@@ -1772,6 +1783,65 @@ get_header();
 })();
 </script>
 <?php endif; ?>
+
+<script>
+(function() {
+  var cta = document.getElementById('ctaRobinContact');
+  if (!cta) return;
+
+  var toggle = cta.querySelector('.robin-contact-toggle');
+  var closed = cta.querySelector('.robin-contact-closed');
+  var open = cta.querySelector('.robin-contact-open');
+  var success = cta.querySelector('.robin-contact-success');
+  var form = cta.querySelector('.robin-contact-form');
+
+  toggle.addEventListener('click', function() {
+    closed.hidden = true;
+    open.hidden = false;
+    cta.querySelector('.robin-contact-email').focus();
+  });
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var email = form.querySelector('.robin-contact-email').value;
+    var btn = form.querySelector('.robin-contact-submit');
+    btn.disabled = true;
+    btn.textContent = 'Envoi…';
+
+    // Récupérer le projet Robin Conseiller si disponible
+    var project = '';
+    try {
+      var stored = localStorage.getItem('sapi_robin_project');
+      if (stored) {
+        var p = JSON.parse(stored);
+        var parts = [];
+        if (p.piece) parts.push(p.piece);
+        if (p.taille) parts.push(p.taille);
+        if (p.style) parts.push(p.style);
+        if (parts.length) project = parts.join(' · ');
+      }
+    } catch(err) {}
+
+    var fd = new FormData();
+    fd.append('action', 'sapi_robin_contact');
+    fd.append('nonce', form.querySelector('[name="robin_contact_nonce"]').value);
+    fd.append('email', email);
+    fd.append('page', form.dataset.product || window.location.pathname);
+    if (project) fd.append('project', project);
+
+    fetch('<?php echo esc_url(admin_url("admin-ajax.php")); ?>', {
+      method: 'POST',
+      body: fd
+    }).then(function() {
+      open.hidden = true;
+      success.hidden = false;
+    }).catch(function() {
+      btn.disabled = false;
+      btn.textContent = 'Envoyer';
+    });
+  });
+})();
+</script>
 
 <?php
 get_footer();
