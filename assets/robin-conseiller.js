@@ -710,7 +710,7 @@
       setTimeout(function() {
         signature.style.transition = 'opacity 0.4s';
         signature.style.opacity = '1';
-      }, endTime + 200);
+      }, endTime + 100);
     }
 
     // Lien sortant apparaît après la signature
@@ -719,7 +719,7 @@
       setTimeout(function() {
         link.style.transition = 'opacity 0.4s';
         link.style.opacity = '1';
-      }, endTime + 500);
+      }, endTime + 200);
     }
 
     // Zone basse apparaît après le lien
@@ -727,7 +727,7 @@
       setTimeout(function() {
         bottom.style.transition = 'opacity 0.4s';
         bottom.style.opacity = '1';
-      }, endTime + 800);
+      }, endTime + 350);
     }
   }
 
