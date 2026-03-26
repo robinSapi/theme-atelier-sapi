@@ -276,11 +276,9 @@ get_header();
         <div class="product-reassurance-v2">
           <?php if (!$is_accessoire) : ?>
           <div class="reassurance-item-v2">
-            <svg width="20" height="14" viewBox="0 0 21 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="0.5" y="0.5" width="20" height="14" rx="1.5" stroke="#ddd"/>
-              <rect width="7" height="15" fill="#002395"/>
-              <rect x="7" width="7" height="15" fill="#fff"/>
-              <rect x="14" width="7" height="15" fill="#ED2939"/>
+            <svg width="16" height="18" viewBox="0 0 55 60" fill="rgba(147,125,104,0.15)" stroke="var(--color-wood)" stroke-width="1.5" stroke-linejoin="round">
+              <path d="M28 2L33 3L38 1L42 4L46 3L48 7L53 10L52 15L50 18L52 22L50 26L53 30L52 34L48 36L46 40L48 44L45 47L42 52L38 55L34 58L30 57L26 58L22 56L18 54L15 50L12 47L10 43L8 39L5 36L3 32L4 28L3 24L5 20L8 17L7 13L9 9L13 7L17 5L21 3L25 2L28 2Z"/>
+              <circle cx="35" cy="40" r="2" fill="var(--color-orange)" stroke="none"/>
             </svg>
             <span>Créé à <strong>Lyon</strong></span>
           </div>
