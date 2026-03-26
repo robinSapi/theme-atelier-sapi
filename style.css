@@ -4895,20 +4895,21 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   border: none;
   box-shadow: none;
   padding: 0;
-  color: var(--color-orange);
+  color: var(--color-orange, #E35B24);
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.03em;
   text-decoration: none;
   text-transform: none;
   display: inline;
   width: auto;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
 }
 
 .product-atelier-cinetique .product-atelier-content .button.button-outline:hover {
-  color: var(--color-dark);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  color: var(--color-orange, #E35B24);
+  border-bottom-color: var(--color-orange, #E35B24);
   background: transparent;
   box-shadow: none;
 }
