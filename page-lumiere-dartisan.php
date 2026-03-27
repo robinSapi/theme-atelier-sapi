@@ -63,39 +63,47 @@ get_header();
   <div class="steps-slider-viewport">
   <div class="steps-slider-track" id="stepsSliderTrack">
     <div class="steps-slide">
-      <div class="steps-slide-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.png');"></div>
-      <div class="steps-slide-content">
-        <span class="section-number">01</span>
-        <h3>Tout commence par une idée</h3>
-        <p>Mon inspiration ? Elle vient de ce que je vois, de ce que j'entends, de vos idées, de vos envies, de vos retours. Je puise dans la nature, l'architecture, les mouvements du quotidien. Je tiens compte des contraintes d'éclairage que vous partagez avec moi, et je cherche à proposer des luminaires pour toutes les situations.</p>
-        <p>Je dessine des croquis dans mes carnets, ou parfois sur ce qui me tombe sous la main ! Certaines idées prennent des mois à mûrir, d'autres surgissent en un éclair ... Mais chaque luminaire est né ici, dans ma tête et à l'atelier ! Chaque idée est originale par essence.</p>
+      <div class="steps-slide-inner">
+        <div class="steps-slide-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.png');"></div>
+        <div class="steps-slide-content">
+          <span class="section-number">01</span>
+          <h3>Tout commence par une idée</h3>
+          <p>Mon inspiration ? Elle vient de ce que je vois, de ce que j'entends, de vos idées, de vos envies, de vos retours. Je puise dans la nature, l'architecture, les mouvements du quotidien. Je tiens compte des contraintes d'éclairage que vous partagez avec moi, et je cherche à proposer des luminaires pour toutes les situations.</p>
+          <p>Je dessine des croquis dans mes carnets, ou parfois sur ce qui me tombe sous la main ! Certaines idées prennent des mois à mûrir, d'autres surgissent en un éclair ... Mais chaque luminaire est né ici, dans ma tête et à l'atelier ! Chaque idée est originale par essence.</p>
+        </div>
       </div>
     </div>
     <div class="steps-slide">
-      <div class="steps-slide-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Retouchee1.jpg');"></div>
-      <div class="steps-slide-content">
-        <span class="section-number">02</span>
-        <h3>Comment je la concrétise ?</h3>
-        <p>Quand une idée tient la route et que je veux lui donner vie, je passe à l'étape suivante, sur ordinateur. Je dessine un modèle en 3D et j'affine chaque pièce, chaque détail, chaque assemblage. C'est aussi à cette étape que j'imagine les variations possibles : différentes tailles, formes, finitions …</p>
-        <p>L'essentiel est d'imaginer le réel et de garder en vue que le luminaire sera suspendu dans un vrai intérieur. Comment va-t-il épouser l'espace, quelles ombres va-t-il projeter, à quoi ressemblera l'ambiance qu'il créera ? Lorsque ma conception est prête, j'exporte chaque pièce en format 2D pour la production. Et comme je suis un peu maniaque, je classe bien tous les documents : bien archiver le passé, c'est bien construire le futur ! Ensuite, place à la découpe ...</p>
+      <div class="steps-slide-inner">
+        <div class="steps-slide-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Retouchee1.jpg');"></div>
+        <div class="steps-slide-content">
+          <span class="section-number">02</span>
+          <h3>Comment je la concrétise ?</h3>
+          <p>Quand une idée tient la route et que je veux lui donner vie, je passe à l'étape suivante, sur ordinateur. Je dessine un modèle en 3D et j'affine chaque pièce, chaque détail, chaque assemblage. C'est aussi à cette étape que j'imagine les variations possibles : différentes tailles, formes, finitions …</p>
+          <p>L'essentiel est d'imaginer le réel et de garder en vue que le luminaire sera suspendu dans un vrai intérieur. Comment va-t-il épouser l'espace, quelles ombres va-t-il projeter, à quoi ressemblera l'ambiance qu'il créera ? Lorsque ma conception est prête, j'exporte chaque pièce en format 2D pour la production. Et comme je suis un peu maniaque, je classe bien tous les documents : bien archiver le passé, c'est bien construire le futur ! Ensuite, place à la découpe ...</p>
+        </div>
       </div>
     </div>
     <div class="steps-slide">
-      <div class="steps-slide-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_7638.jpg');"></div>
-      <div class="steps-slide-content">
-        <span class="section-number">03</span>
-        <h3>J'adore l'étape de fabrication</h3>
-        <p>C'est le moment où j'utilise ma machine de découpe laser, que j'ai installée dans l'atelier. Je prépare les panneaux de bois (peuplier ou okoumé, soigneusement sélectionnés), je les positionne dans la machine, je paramètre la découpe, puis je lance les programmes.</p>
-        <p>Pendant 20 à 40 minutes, la machine découpe et grave avec précision les pièces qui composeront le luminaire. J'avoue, j'ai été obnubilé par le mouvement chorégraphié… mais, ça va mieux maintenant.</p>
+      <div class="steps-slide-inner">
+        <div class="steps-slide-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_7638.jpg');"></div>
+        <div class="steps-slide-content">
+          <span class="section-number">03</span>
+          <h3>J'adore l'étape de fabrication</h3>
+          <p>C'est le moment où j'utilise ma machine de découpe laser, que j'ai installée dans l'atelier. Je prépare les panneaux de bois (peuplier ou okoumé, soigneusement sélectionnés), je les positionne dans la machine, je paramètre la découpe, puis je lance les programmes.</p>
+          <p>Pendant 20 à 40 minutes, la machine découpe et grave avec précision les pièces qui composeront le luminaire. J'avoue, j'ai été obnubilé par le mouvement chorégraphié… mais, ça va mieux maintenant.</p>
+        </div>
       </div>
     </div>
     <div class="steps-slide">
-      <div class="steps-slide-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/P1130073-scaled.jpg');"></div>
-      <div class="steps-slide-content">
-        <span class="section-number">04</span>
-        <h3>Et maintenant, elle vous appartient !</h3>
-        <p>Chaque pièce est ensuite contrôlée à la main : je ponce, j'affine, je vérifie la qualité avant de passer à l'assemblage puis à l'emballage. En effet, certains modèles vous arrivent pré-assemblés, et il ne vous reste que quelques étapes faciles et guidées !</p>
-        <p>Je prépare chaque colis avec soin : pièces, accessoires commandés, notice d'installation… et bien sûr, un bon emballage pour garantir une livraison impeccable !</p>
+      <div class="steps-slide-inner">
+        <div class="steps-slide-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/P1130073-scaled.jpg');"></div>
+        <div class="steps-slide-content">
+          <span class="section-number">04</span>
+          <h3>Et maintenant, elle vous appartient !</h3>
+          <p>Chaque pièce est ensuite contrôlée à la main : je ponce, j'affine, je vérifie la qualité avant de passer à l'assemblage puis à l'emballage. En effet, certains modèles vous arrivent pré-assemblés, et il ne vous reste que quelques étapes faciles et guidées !</p>
+          <p>Je prépare chaque colis avec soin : pièces, accessoires commandés, notice d'installation… et bien sûr, un bon emballage pour garantir une livraison impeccable !</p>
+        </div>
       </div>
     </div>
   </div>
