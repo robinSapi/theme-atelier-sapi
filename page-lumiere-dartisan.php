@@ -199,7 +199,7 @@ get_header();
         </svg>
       </div>
       <h3>Éco-responsabilité</h3>
-      <p>Bois issus de forêts gérées, production locale, emballages recyclables.</p>
+      <p>Bois issus de forêts gérées, production locale et à la commande, emballages recyclables ou récupérés.</p>
     </div>
   </div>
 </section>
