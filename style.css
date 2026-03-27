@@ -1921,6 +1921,21 @@ button:hover,
   transition: color 0.2s;
 }
 
+.robin-result-contact {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-wood, #937D68);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+@media (hover: hover) {
+  .robin-result-contact:hover {
+    color: var(--color-dark, #323232);
+    text-decoration: underline;
+  }
+}
+
 @media (hover: hover) {
   .robin-result-redo:hover {
     color: var(--color-dark, #323232);

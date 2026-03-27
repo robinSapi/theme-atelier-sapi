@@ -1929,6 +1929,7 @@
     // Boutons
     html += '<div class="robin-fiche__result-actions robin-result-anim" style="opacity:0;transform:translateY(12px);">';
     html += '<button type="button" class="robin-result-apply" id="robin-result-apply">Appliquer cette s\u00e9lection \u2192</button>';
+    html += '<a href="/contact/" class="robin-result-contact" id="robin-result-contact">Contacter Robin</a>';
     html += '<button type="button" class="robin-result-redo" id="robin-result-redo">Modifier mon projet</button>';
     html += '</div>';
 
