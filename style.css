@@ -7274,8 +7274,8 @@ li.carousel-editorial-slide,
 }
 
 .steps-slider-btn {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: 1px solid rgba(147, 125, 104, 0.3);
   background: none;
@@ -7284,6 +7284,10 @@ li.carousel-editorial-slide,
   align-items: center;
   justify-content: center;
   color: var(--color-wood, #937D68);
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  line-height: 1;
   transition: all 0.2s;
 }
 

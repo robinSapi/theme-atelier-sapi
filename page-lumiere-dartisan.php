@@ -55,13 +55,9 @@ get_header();
   <div class="steps-slider-header">
     <h2>De l'idée à chez vous</h2>
     <div class="steps-slider-nav">
-      <button type="button" class="steps-slider-btn steps-slider-prev" aria-label="Étape précédente">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
+      <button type="button" class="steps-slider-btn steps-slider-prev" aria-label="Étape précédente">&lt;</button>
       <span class="steps-slider-counter">01 / 04</span>
-      <button type="button" class="steps-slider-btn steps-slider-next" aria-label="Étape suivante">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
+      <button type="button" class="steps-slider-btn steps-slider-next" aria-label="Étape suivante">&gt;</button>
     </div>
   </div>
   <div class="steps-slider-track" id="stepsSliderTrack">
