@@ -7248,7 +7248,7 @@ li.carousel-editorial-slide,
 /* Steps Slider */
 .artisan-steps-slider {
   padding: 80px 0;
-  background: var(--color-warm, #FBF6EA);
+  background: var(--color-white, #fff);
   overflow: hidden;
 }
 
@@ -7315,7 +7315,8 @@ li.carousel-editorial-slide,
 }
 
 .steps-slider-viewport {
-  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
   padding: 0 2rem;
   overflow: hidden;
   box-sizing: border-box;
@@ -7336,10 +7337,9 @@ li.carousel-editorial-slide,
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: stretch;
-  background: var(--color-white, #fff);
+  background: var(--color-warm, #FBF6EA);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 24px rgba(147, 125, 104, 0.1);
   height: 100%;
 }
 
