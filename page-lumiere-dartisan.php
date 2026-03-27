@@ -21,53 +21,15 @@ get_header();
 
 <!-- Video Section -->
 <section class="artisan-video" id="artisan-video">
-  <div class="artisan-video-wrapper">
-    <div class="artisan-video-container">
-      <?php
-      // Try to get video from ACF, otherwise use placeholder
-      $video_url = function_exists('get_field') ? get_field('video_atelier') : '';
-      $video_poster = function_exists('get_field') ? get_field('video_poster') : '';
-      $poster_url = $video_poster ? $video_poster['url'] : home_url('/wp-content/uploads/2025/05/Robin-Sapi-A.jpg');
-
-      if ($video_url) :
-        // Check if it's a YouTube/Vimeo URL or a local video
-        if (strpos($video_url, 'youtube.com') !== false || strpos($video_url, 'youtu.be') !== false) :
-          // Extract YouTube ID
-          preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/', $video_url, $matches);
-          $youtube_id = isset($matches[1]) ? $matches[1] : '';
-          if ($youtube_id) :
-      ?>
-        <div class="video-embed-wrapper">
-          <iframe
-            src="https://www.youtube.com/embed/<?php echo esc_attr($youtube_id); ?>?rel=0&modestbranding=1"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-            loading="lazy"
-          ></iframe>
-        </div>
-      <?php
-          endif;
-        else :
-      ?>
-        <video controls poster="<?php echo esc_url($poster_url); ?>">
-          <source src="<?php echo esc_url($video_url); ?>" type="video/mp4">
-          Votre navigateur ne supporte pas la lecture vidéo.
-        </video>
-      <?php endif; ?>
-      <?php else : ?>
-        <!-- Placeholder when no video is configured -->
-        <div class="video-placeholder" style="background-image: url('<?php echo esc_url($poster_url); ?>');">
-          <div class="video-placeholder-content">
-            <div class="video-play-btn">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-              </svg>
-            </div>
-            <p>Vidéo de l'atelier bientôt disponible</p>
-          </div>
-        </div>
-      <?php endif; ?>
+  <div class="artisan-video-grid">
+    <div class="artisan-video-container artisan-video-portrait">
+      <iframe
+        src="https://www.youtube.com/embed/FTTmlrgIJPY?rel=0&modestbranding=1"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+        loading="lazy"
+      ></iframe>
     </div>
     <div class="artisan-video-caption">
       <h2>Bienvenue dans mon univers</h2>
