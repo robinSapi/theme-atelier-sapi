@@ -7336,7 +7336,7 @@ li.carousel-editorial-slide,
 }
 
 .steps-slide {
-  flex: 0 0 min(85%, 950px);
+  flex: 0 0 min(85%, 1050px);
   scroll-snap-align: start;
 }
 
