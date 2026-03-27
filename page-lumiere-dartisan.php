@@ -41,7 +41,6 @@ get_header();
 <section class="artisan-intro artisan-intro-cinetique">
   <div class="artisan-intro-grid">
     <div class="artisan-intro-content">
-      <span class="section-number">01</span>
       <h2>Créer, c'est tout ce que j'adore !</h2>
       <p>Alors l'Atelier Sâpi, c'est mon coin de paradis. Ici, j'imagine, je conçois, je fabrique et j'expédie moi-même tous les luminaires que j'ai le plaisir de vous faire découvrir. Je me déplace aussi régulièrement pour tester les prototypes, réaliser des photos et des vidéos, afin de vous montrer mes créations dans des lieux réels, vivants.</p>
     </div>
@@ -51,58 +50,93 @@ get_header();
   </div>
 </section>
 
-<section class="artisan-step artisan-step-cinetique">
-  <div class="artisan-step-grid">
-    <div class="artisan-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.png');"></div>
-    <div class="artisan-step-content">
-      <span class="section-number">02</span>
-      <h2>Tout commence par une idée</h2>
-      <p>Mon inspiration ? Elle vient de ce que je vois, de ce que j'entends, de vos idées, de vos envies, de vos retours. Je puise dans la nature, l'architecture, les mouvements du quotidien. Je tiens compte des contraintes d'éclairage que vous partagez avec moi, et je cherche à proposer des luminaires pour toutes les situations.</p>
-      <p>Je dessine des croquis dans mes carnets, ou parfois sur ce qui me tombe sous la main ! Certaines idées prennent des mois à mûrir, d'autres surgissent en un éclair ... Mais chaque luminaire est né ici, dans ma tête et à l'atelier ! Chaque idée est originale par essence.</p>
+<!-- Steps Slider -->
+<section class="artisan-steps-slider">
+  <div class="steps-slider-header">
+    <h2>De l'idée à chez vous</h2>
+    <div class="steps-slider-nav">
+      <button type="button" class="steps-slider-btn steps-slider-prev" aria-label="Étape précédente">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="steps-slider-counter">01 / 04</span>
+      <button type="button" class="steps-slider-btn steps-slider-next" aria-label="Étape suivante">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="steps-slider-track" id="stepsSliderTrack">
+    <div class="steps-slide">
+      <div class="steps-slide-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.png');"></div>
+      <div class="steps-slide-content">
+        <span class="section-number">01</span>
+        <h3>Tout commence par une idée</h3>
+        <p>Mon inspiration ? Elle vient de ce que je vois, de ce que j'entends, de vos idées, de vos envies, de vos retours. Je puise dans la nature, l'architecture, les mouvements du quotidien. Je tiens compte des contraintes d'éclairage que vous partagez avec moi, et je cherche à proposer des luminaires pour toutes les situations.</p>
+        <p>Je dessine des croquis dans mes carnets, ou parfois sur ce qui me tombe sous la main ! Certaines idées prennent des mois à mûrir, d'autres surgissent en un éclair ... Mais chaque luminaire est né ici, dans ma tête et à l'atelier ! Chaque idée est originale par essence.</p>
+      </div>
+    </div>
+    <div class="steps-slide">
+      <div class="steps-slide-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Retouchee1.jpg');"></div>
+      <div class="steps-slide-content">
+        <span class="section-number">02</span>
+        <h3>Comment je la concrétise ?</h3>
+        <p>Quand une idée tient la route et que je veux lui donner vie, je passe à l'étape suivante, sur ordinateur. Je dessine un modèle en 3D et j'affine chaque pièce, chaque détail, chaque assemblage. C'est aussi à cette étape que j'imagine les variations possibles : différentes tailles, formes, finitions …</p>
+        <p>L'essentiel est d'imaginer le réel et de garder en vue que le luminaire sera suspendu dans un vrai intérieur. Comment va-t-il épouser l'espace, quelles ombres va-t-il projeter, à quoi ressemblera l'ambiance qu'il créera ? Lorsque ma conception est prête, j'exporte chaque pièce en format 2D pour la production. Et comme je suis un peu maniaque, je classe bien tous les documents : bien archiver le passé, c'est bien construire le futur ! Ensuite, place à la découpe ...</p>
+      </div>
+    </div>
+    <div class="steps-slide">
+      <div class="steps-slide-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_7638.jpg');"></div>
+      <div class="steps-slide-content">
+        <span class="section-number">03</span>
+        <h3>J'adore l'étape de fabrication</h3>
+        <p>C'est le moment où j'utilise ma machine de découpe laser, que j'ai installée dans l'atelier. Je prépare les panneaux de bois (peuplier ou okoumé, soigneusement sélectionnés), je les positionne dans la machine, je paramètre la découpe, puis je lance les programmes.</p>
+        <p>Pendant 20 à 40 minutes, la machine découpe et grave avec précision les pièces qui composeront le luminaire. J'avoue, j'ai été obnubilé par le mouvement chorégraphié… mais, ça va mieux maintenant.</p>
+      </div>
+    </div>
+    <div class="steps-slide">
+      <div class="steps-slide-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/P1130073-scaled.jpg');"></div>
+      <div class="steps-slide-content">
+        <span class="section-number">04</span>
+        <h3>Et maintenant, elle vous appartient !</h3>
+        <p>Chaque pièce est ensuite contrôlée à la main : je ponce, j'affine, je vérifie la qualité avant de passer à l'assemblage puis à l'emballage. En effet, certains modèles vous arrivent pré-assemblés, et il ne vous reste que quelques étapes faciles et guidées !</p>
+        <p>Je prépare chaque colis avec soin : pièces, accessoires commandés, notice d'installation… et bien sûr, un bon emballage pour garantir une livraison impeccable !</p>
+      </div>
     </div>
   </div>
 </section>
 
-<section class="artisan-step artisan-step-cinetique">
-  <div class="artisan-step-grid reverse">
-    <div class="artisan-step-content">
-      <span class="section-number">03</span>
-      <h2>Comment je la concrétise ?</h2>
-      <p>Quand une idée tient la route et que je veux lui donner vie, je passe à l'étape suivante, sur ordinateur. Je dessine un modèle en 3D et j'affine chaque pièce, chaque détail, chaque assemblage. C'est aussi à cette étape que j'imagine les variations possibles : différentes tailles, formes, finitions …</p>
-      <p>L'essentiel est d'imaginer le réel et de garder en vue que le luminaire sera suspendu dans un vrai intérieur. Comment va-t-il épouser l'espace, quelles ombres va-t-il projeter, à quoi ressemblera l'ambiance qu'il créera ? Lorsque ma conception est prête, j'exporte chaque pièce en format 2D pour la production. Et comme je suis un peu maniaque, je classe bien tous les documents : bien archiver le passé, c'est bien construire le futur ! Ensuite, place à la découpe ...</p>
-    </div>
-    <div class="artisan-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Retouchee1.jpg');"></div>
-  </div>
-</section>
+<script>
+(function() {
+  var track = document.getElementById('stepsSliderTrack');
+  if (!track) return;
+  var slides = track.querySelectorAll('.steps-slide');
+  var counter = document.querySelector('.steps-slider-counter');
+  var current = 0;
+  var total = slides.length;
 
-<section class="artisan-step artisan-step-cinetique">
-  <div class="artisan-step-grid">
-    <div class="artisan-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_7638.jpg');"></div>
-    <div class="artisan-step-content">
-      <span class="section-number">04</span>
-      <h2>J'adore l'étape de fabrication</h2>
-      <p>C'est le moment où j'utilise ma machine de découpe laser, que j'ai installée dans l'atelier. Je prépare les panneaux de bois (peuplier ou okoumé, soigneusement sélectionnés), je les positionne dans la machine, je paramètre la découpe, puis je lance les programmes.</p>
-      <p>Pendant 20 à 40 minutes, la machine découpe et grave avec précision les pièces qui composeront le luminaire. J'avoue, j'ai été obnubilé par le mouvement chorégraphié… mais, ça va mieux maintenant.</p>
-    </div>
-  </div>
-</section>
+  function goTo(idx) {
+    if (idx < 0) idx = total - 1;
+    if (idx >= total) idx = 0;
+    current = idx;
+    track.style.transform = 'translateX(-' + (current * 100) + '%)';
+    counter.textContent = String(current + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+  }
 
-<section class="artisan-step artisan-step-cinetique">
-  <div class="artisan-step-grid reverse">
-    <div class="artisan-step-content">
-      <span class="section-number">05</span>
-      <h2>Et maintenant, elle vous appartient !</h2>
-      <p>Chaque pièce est ensuite contrôlée à la main : je ponce, j'affine, je vérifie la qualité avant de passer à l'assemblage puis à l'emballage. En effet, certains modèles vous arrivent pré-assemblés, et il ne vous reste que quelques étapes faciles et guidées !</p>
-      <p>Je prépare chaque colis avec soin : pièces, accessoires commandés, notice d'installation… et bien sûr, un bon emballage pour garantir une livraison impeccable !</p>
-    </div>
-    <div class="artisan-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/P1130073-scaled.jpg');"></div>
-  </div>
-</section>
+  document.querySelector('.steps-slider-prev').addEventListener('click', function() { goTo(current - 1); });
+  document.querySelector('.steps-slider-next').addEventListener('click', function() { goTo(current + 1); });
+
+  // Swipe mobile
+  var startX = 0;
+  track.addEventListener('touchstart', function(e) { startX = e.touches[0].clientX; }, { passive: true });
+  track.addEventListener('touchend', function(e) {
+    var diff = startX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) goTo(current + (diff > 0 ? 1 : -1));
+  });
+})();
+</script>
 
 <!-- Values Section -->
 <section class="artisan-values artisan-values-cinetique">
   <div class="artisan-values-header">
-    <span class="section-number">06</span>
     <h2>Mes valeurs</h2>
   </div>
   <div class="artisan-values-grid">
