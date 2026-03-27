@@ -7276,6 +7276,8 @@ li.carousel-editorial-slide,
 .steps-slider-btn {
   width: 36px;
   height: 36px;
+  min-width: 36px;
+  min-height: 36px;
   border-radius: 50%;
   border: 1px solid rgba(147, 125, 104, 0.3);
   background: none;
@@ -7287,7 +7289,8 @@ li.carousel-editorial-slide,
   font-size: 1rem;
   font-weight: 600;
   font-family: inherit;
-  line-height: 1;
+  line-height: 0;
+  padding: 0;
   transition: all 0.2s;
 }
 
