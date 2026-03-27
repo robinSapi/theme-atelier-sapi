@@ -7105,12 +7105,20 @@ li.carousel-editorial-slide,
 .artisan-hero-cinetique {
   padding: 140px 20px 100px;
   text-align: center;
-  background: linear-gradient(135deg,
-    var(--creme-papier, #FEFDFB) 0%,
-    var(--color-warm, #FBF6EA) 50%,
-    var(--creme-chaud, #FAF6F0) 100%
-  );
+  background: url('https://atelier-sapi.fr/wp-content/uploads/2026/02/Fond-bois.webp') center/cover no-repeat;
   position: relative;
+}
+
+.artisan-hero-cinetique::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(254, 253, 251, 0.95);
+}
+
+.artisan-hero-inner {
+  position: relative;
+  z-index: 1;
 }
 
 .artisan-hero-cinetique .section-number {
@@ -7468,7 +7476,7 @@ li.carousel-editorial-slide,
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(254, 253, 251, 0.85);
+  background: rgba(254, 253, 251, 0.95);
 }
 
 .artisan-intro-cinetique .artisan-intro-grid {
@@ -7963,6 +7971,56 @@ li.carousel-editorial-slide,
   color: rgba(255, 255, 255, 0.95);
   max-width: 700px;
   margin: 0 auto;
+}
+
+/* Hero Conseils — style artisan */
+.advice-hero-artisan {
+  padding: 140px 20px 100px;
+  text-align: center;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.advice-hero-artisan::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(254, 253, 251, 0.95);
+}
+
+.advice-hero-artisan-inner {
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.advice-hero-artisan h1 {
+  font-family: var(--font-display, 'Square Peg', Georgia, serif);
+  font-size: clamp(72px, 14vw, 150px);
+  font-weight: 400;
+  color: var(--bois-sombre, #4A3F35);
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
+}
+
+.advice-hero-artisan p {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: var(--bois-profond, #6B5A4A);
+  max-width: 600px;
+  margin: 0 auto;
+  font-weight: 400;
+}
+
+@media (max-width: 768px) {
+  .advice-hero-artisan {
+    padding: 100px 20px 60px;
+  }
+
+  .advice-hero-artisan h1 {
+    font-size: clamp(48px, 12vw, 80px);
+  }
 }
 
 /* Conseil personnalisé de Robin */
@@ -12761,14 +12819,19 @@ transform: translateY(15px);
 .shop-hero-artisan {
   padding: 140px 20px 100px;
   text-align: center;
-  background: linear-gradient(135deg,
-    var(--creme-papier, #FEFDFB) 0%,
-    var(--color-warm, #FBF6EA) 50%,
-    var(--creme-chaud, #FAF6F0) 100%
-  );
+  background: url('https://atelier-sapi.fr/wp-content/uploads/2026/02/Bandeau-1.jpg') center/cover no-repeat;
+  position: relative;
+}
+
+.shop-hero-artisan::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(254, 253, 251, 0.95);
 }
 
 .shop-hero-artisan-inner {
+  position: relative;
   max-width: 800px;
   margin: 0 auto;
 }

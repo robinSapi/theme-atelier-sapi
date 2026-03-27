@@ -33,9 +33,8 @@ for ($i = 1; $i <= 4; $i++) {
 }
 ?>
 
-<section class="advice-hero" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/03/Sapi-header_idees.jpg');">
-  <div class="advice-hero-overlay"></div>
-  <div class="advice-hero-content">
+<section class="advice-hero-artisan" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/03/Sapi-header_idees.jpg');">
+  <div class="advice-hero-artisan-inner">
     <h1>Conseils éclairés</h1>
     <p>Suspensions ou lampadaire ? Quelle ampoule choisir ? Retrouvez ici les infos idéales pour une décoration réussie !</p>
   </div>
