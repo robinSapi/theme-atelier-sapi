@@ -7478,8 +7478,8 @@ li.carousel-editorial-slide,
 .artisan-intro-content--right {
   position: relative;
   max-width: 700px;
-  margin-left: auto;
-  text-align: right;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .artisan-step-cinetique:nth-child(odd) {
