@@ -39,14 +39,9 @@ get_header();
 </section>
 
 <section class="artisan-intro artisan-intro-cinetique">
-  <div class="artisan-intro-grid">
-    <div class="artisan-intro-content">
-      <h2>Créer, c'est tout ce que j'adore !</h2>
-      <p>Alors l'Atelier Sâpi, c'est mon coin de paradis. Ici, j'imagine, je conçois, je fabrique et j'expédie moi-même tous les luminaires que j'ai le plaisir de vous faire découvrir. Je me déplace aussi régulièrement pour tester les prototypes, réaliser des photos et des vidéos, afin de vous montrer mes créations dans des lieux réels, vivants.</p>
-    </div>
-    <div class="artisan-intro-image-wrapper">
-      <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Robin-Sapi-A.jpg" alt="Robin dans l'atelier Sapi" class="artisan-intro-robin-photo" loading="lazy">
-    </div>
+  <div class="artisan-intro-content artisan-intro-content--right">
+    <h2>Créer, c'est tout ce que j'adore !</h2>
+    <p>Alors l'Atelier Sâpi, c'est mon coin de paradis. Ici, j'imagine, je conçois, je fabrique et j'expédie moi-même tous les luminaires que j'ai le plaisir de vous faire découvrir. Je me déplace aussi régulièrement pour tester les prototypes, réaliser des photos et des vidéos, afin de vous montrer mes créations dans des lieux réels, vivants.</p>
   </div>
 </section>
 
