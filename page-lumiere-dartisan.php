@@ -113,7 +113,6 @@ get_header();
     <button class="steps-slider-dot" data-idx="2"></button>
     <button class="steps-slider-dot" data-idx="3"></button>
   </div>
-  </div>
 </section>
 
 <script>
@@ -126,30 +125,40 @@ get_header();
   var current = 0;
   var total = slides.length;
 
-  function goTo(idx) {
-    if (idx < 0) idx = total - 1;
-    if (idx >= total) idx = 0;
-    current = idx;
-    track.style.transform = 'translateX(-' + (current * 100) + '%)';
+  function updateUI() {
     counter.textContent = String(current + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
     dots.forEach(function(d, i) {
       d.classList.toggle('is-active', i === current);
     });
   }
 
+  function goTo(idx) {
+    if (idx < 0 || idx >= total) return;
+    current = idx;
+    slides[idx].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+    updateUI();
+  }
+
+  // Détecter le slide visible au scroll
+  var scrollTimer;
+  track.addEventListener('scroll', function() {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(function() {
+      var scrollLeft = track.scrollLeft;
+      var slideWidth = slides[0].offsetWidth + 24; // gap 1.5rem ≈ 24px
+      var idx = Math.round(scrollLeft / slideWidth);
+      if (idx !== current && idx >= 0 && idx < total) {
+        current = idx;
+        updateUI();
+      }
+    }, 80);
+  }, { passive: true });
+
   document.querySelector('.steps-slider-prev').addEventListener('click', function() { goTo(current - 1); });
   document.querySelector('.steps-slider-next').addEventListener('click', function() { goTo(current + 1); });
 
   dots.forEach(function(dot) {
     dot.addEventListener('click', function() { goTo(parseInt(this.dataset.idx)); });
-  });
-
-  // Swipe mobile
-  var startX = 0;
-  track.addEventListener('touchstart', function(e) { startX = e.touches[0].clientX; }, { passive: true });
-  track.addEventListener('touchend', function(e) {
-    var diff = startX - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 50) goTo(current + (diff > 0 ? 1 : -1));
   });
 })();
 </script>
