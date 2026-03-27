@@ -7105,18 +7105,11 @@ li.carousel-editorial-slide,
 .artisan-hero-cinetique {
   padding: 140px 20px 100px;
   text-align: center;
-  background: url('https://atelier-sapi.fr/wp-content/uploads/2026/03/IMG_1673.jpg') center/cover no-repeat;
-  position: relative;
-}
-
-.artisan-hero-cinetique::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(254, 253, 251, 0.82);
-}
-
-.artisan-hero-inner {
+  background: linear-gradient(135deg,
+    var(--creme-papier, #FEFDFB) 0%,
+    var(--color-warm, #FBF6EA) 50%,
+    var(--creme-chaud, #FAF6F0) 100%
+  );
   position: relative;
 }
 
@@ -7254,8 +7247,20 @@ li.carousel-editorial-slide,
 }
 
 .artisan-intro-cinetique {
-  background: var(--creme-papier, #FEFDFB);
+  background: url('https://atelier-sapi.fr/wp-content/uploads/2026/03/IMG_1673.jpg') center/cover no-repeat;
   padding: 100px 20px;
+  position: relative;
+}
+
+.artisan-intro-cinetique::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(254, 253, 251, 0.85);
+}
+
+.artisan-intro-cinetique .artisan-intro-grid {
+  position: relative;
 }
 
 .artisan-step-cinetique:nth-child(odd) {
