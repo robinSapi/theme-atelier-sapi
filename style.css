@@ -7113,7 +7113,7 @@ li.carousel-editorial-slide,
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(254, 253, 251, 0.85);
+  background: rgba(254, 253, 251, 0.95);
 }
 
 .artisan-hero-inner {
