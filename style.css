@@ -7105,12 +7105,20 @@ li.carousel-editorial-slide,
 .artisan-hero-cinetique {
   padding: 140px 20px 100px;
   text-align: center;
-  background: linear-gradient(135deg,
-    var(--creme-papier, #FEFDFB) 0%,
-    var(--color-warm, #FBF6EA) 50%,
-    var(--creme-chaud, #FAF6F0) 100%
-  );
+  background: url('https://atelier-sapi.fr/wp-content/uploads/2026/02/Fond-bois.webp') center/cover no-repeat;
   position: relative;
+}
+
+.artisan-hero-cinetique::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(254, 253, 251, 0.85);
+}
+
+.artisan-hero-inner {
+  position: relative;
+  z-index: 1;
 }
 
 .artisan-hero-cinetique .section-number {
