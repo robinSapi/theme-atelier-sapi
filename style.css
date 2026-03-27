@@ -7965,6 +7965,56 @@ li.carousel-editorial-slide,
   margin: 0 auto;
 }
 
+/* Hero Conseils — style artisan */
+.advice-hero-artisan {
+  padding: 140px 20px 100px;
+  text-align: center;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.advice-hero-artisan::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(254, 253, 251, 0.85);
+}
+
+.advice-hero-artisan-inner {
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.advice-hero-artisan h1 {
+  font-family: var(--font-display, 'Square Peg', Georgia, serif);
+  font-size: clamp(72px, 14vw, 150px);
+  font-weight: 400;
+  color: var(--bois-sombre, #4A3F35);
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
+}
+
+.advice-hero-artisan p {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: var(--bois-profond, #6B5A4A);
+  max-width: 600px;
+  margin: 0 auto;
+  font-weight: 400;
+}
+
+@media (max-width: 768px) {
+  .advice-hero-artisan {
+    padding: 100px 20px 60px;
+  }
+
+  .advice-hero-artisan h1 {
+    font-size: clamp(48px, 12vw, 80px);
+  }
+}
+
 /* Conseil personnalisé de Robin */
 .robin-conseil {
   max-width: 1400px;
