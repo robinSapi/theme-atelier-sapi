@@ -71,20 +71,10 @@ if (!$hero_img_url) {
   }
 }
 ?>
-<section class="shop-hero-cinetique shop-hero-magazine">
-  <?php if ($hero_img_url) : ?>
-    <img
-      class="shop-hero-magazine-bg"
-      src="<?php echo esc_url($hero_img_url); ?>"
-      alt="<?php echo esc_attr($hero_alt); ?>"
-      style="object-position: center;"
-      fetchpriority="high"
-    />
-  <?php endif; ?>
-  <div class="shop-hero-magazine-overlay"></div>
-  <div class="shop-hero-magazine-content">
+<section class="shop-hero-artisan">
+  <div class="shop-hero-artisan-inner">
     <h1><?php esc_html_e('Mes Créations', 'theme-sapi-maison'); ?></h1>
-    <p class="shop-subtitle">
+    <p class="shop-hero-artisan-subtitle">
       <?php esc_html_e('Luminaires uniques, découpés au laser et assemblés à la main dans l\'atelier lyonnais de Robin.', 'theme-sapi-maison'); ?>
     </p>
   </div>

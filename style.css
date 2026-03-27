@@ -12757,6 +12757,50 @@ transform: translateY(15px);
    WOOCOMMERCE - Shop Page Hero
    ======================================== */
 
+/* Hero style artisan pour /nos-creations/ */
+.shop-hero-artisan {
+  padding: 140px 20px 100px;
+  text-align: center;
+  background: linear-gradient(135deg,
+    var(--creme-papier, #FEFDFB) 0%,
+    var(--color-warm, #FBF6EA) 50%,
+    var(--creme-chaud, #FAF6F0) 100%
+  );
+}
+
+.shop-hero-artisan-inner {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.shop-hero-artisan h1 {
+  font-family: var(--font-display, 'Square Peg', Georgia, serif);
+  font-size: clamp(72px, 14vw, 150px);
+  font-weight: 400;
+  color: var(--bois-sombre, #4A3F35);
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
+}
+
+.shop-hero-artisan-subtitle {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: var(--bois-profond, #6B5A4A);
+  max-width: 600px;
+  margin: 0 auto;
+  font-weight: 400;
+}
+
+@media (max-width: 768px) {
+  .shop-hero-artisan {
+    padding: 100px 20px 60px;
+  }
+
+  .shop-hero-artisan h1 {
+    font-size: clamp(48px, 12vw, 80px);
+  }
+}
+
 .shop-hero-cinetique {
   position: relative;
   padding: 2rem 3rem 1.5rem;
