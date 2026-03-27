@@ -7320,15 +7320,15 @@ li.carousel-editorial-slide,
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   gap: 1.5rem;
-  padding: 1rem 5rem 2rem;
-  scroll-padding-left: 5rem;
+  padding: 1rem calc((100vw - min(85vw, 1050px)) / 2) 2rem;
+  scroll-padding-inline: calc((100vw - min(85vw, 1050px)) / 2);
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 
 .steps-slider-track::after {
   content: '';
-  flex: 0 0 5rem;
+  flex: 0 0 calc((100vw - min(85vw, 1050px)) / 2);
 }
 
 .steps-slider-track::-webkit-scrollbar {
@@ -7337,7 +7337,7 @@ li.carousel-editorial-slide,
 
 .steps-slide {
   flex: 0 0 min(85%, 1050px);
-  scroll-snap-align: start;
+  scroll-snap-align: center;
 }
 
 .steps-slide-inner {
