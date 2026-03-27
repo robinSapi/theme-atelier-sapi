@@ -53,7 +53,7 @@ get_header();
 <!-- Steps Slider -->
 <section class="artisan-steps-slider">
   <div class="steps-slider-header">
-    <h2>De l'idée à chez vous</h2>
+    <h2>Mon processus</h2>
     <div class="steps-slider-nav">
       <button type="button" class="steps-slider-btn steps-slider-prev" aria-label="Étape précédente">&lt;</button>
       <span class="steps-slider-counter">01 / 04</span>
