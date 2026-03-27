@@ -7315,9 +7315,8 @@ li.carousel-editorial-slide,
 }
 
 .steps-slider-viewport {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 2rem;
+  width: 100%;
+  padding: 0;
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -7329,8 +7328,10 @@ li.carousel-editorial-slide,
 
 .steps-slide {
   min-width: 100%;
-  padding: 0 1rem;
+  padding: 0;
   box-sizing: border-box;
+  display: flex;
+  justify-content: center;
 }
 
 .steps-slide-inner {
@@ -7340,7 +7341,8 @@ li.carousel-editorial-slide,
   background: var(--color-warm, #FBF6EA);
   border-radius: 16px;
   overflow: hidden;
-  height: 100%;
+  max-width: 900px;
+  width: 100%;
 }
 
 .steps-slide-image {
