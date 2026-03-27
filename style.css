@@ -1835,6 +1835,113 @@ button:hover,
   color: var(--color-orange, #E35B24);
 }
 
+/* Fiche résultat product guide */
+.robin-fiche__result-recap {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 1.25rem 0;
+  padding: 1rem;
+  background: var(--color-warm, #FBF6EA);
+  border-radius: 10px;
+}
+
+.robin-result-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.robin-result-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-light, #888);
+  font-weight: 600;
+}
+
+.robin-result-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-dark, #323232);
+}
+
+.robin-result-conseil {
+  font-size: 0.88rem;
+  font-style: italic;
+  color: var(--color-text, #555);
+  text-align: center;
+  line-height: 1.6;
+  margin: 0 0 1.25rem;
+  padding: 0 1rem;
+}
+
+.robin-fiche__result-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1.5rem 3rem;
+}
+
+.robin-result-apply {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1.5rem;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
+}
+
+@media (hover: hover) {
+  .robin-result-apply:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35);
+  }
+}
+
+.robin-result-redo {
+  background: none;
+  border: none;
+  color: var(--color-text-light, #888);
+  font-size: 0.8rem;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.robin-result-contact {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-wood, #937D68);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+@media (hover: hover) {
+  .robin-result-contact:hover {
+    color: var(--color-dark, #323232);
+    text-decoration: underline;
+  }
+}
+
+@media (hover: hover) {
+  .robin-result-redo:hover {
+    color: var(--color-dark, #323232);
+  }
+}
+
 /* Loader conseil (ampoule + messages) */
 .robin-fiche__loader {
   display: flex;
@@ -5066,6 +5173,97 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 .author-time {
   font-size: 0.75rem;
   color: var(--color-text-light);
+}
+
+/* Modale avis Google */
+.review-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.review-modal-overlay[hidden] {
+  display: none;
+}
+
+.review-modal {
+  background: var(--color-white, #fff);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 560px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.review-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  color: var(--color-text-light);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.25rem;
+}
+
+@media (hover: hover) {
+  .review-modal-close:hover {
+    color: var(--color-dark);
+  }
+}
+
+.review-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.review-modal-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.review-modal-author-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.review-modal-name {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-dark);
+}
+
+.review-modal-time {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+}
+
+.review-modal-rating {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 1rem;
+}
+
+.review-modal-text {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--color-text);
+  margin: 0;
+  white-space: pre-line;
 }
 
 .testimonial-author {
@@ -18238,33 +18436,109 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
 
 /* ---- STOCK BADGE V2 ---- */
 /* ---- CTA SUR-MESURE ---- */
-.product-custom-cta {
-  padding: 1rem 1.25rem;
-  background: rgba(0, 0, 0, 0.02);
-  border-radius: 8px;
-  border-left: 3px solid var(--color-accent);
+/* ---- BANDEAU ROBIN CONTACT ---- */
+.robin-contact-bandeau {
+  background: var(--color-warm);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  text-align: center;
 }
 
-.custom-cta-text {
+.robin-contact-closed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.robin-contact-question {
   font-size: 0.9rem;
-  margin: 0 0 0.35rem;
   color: var(--color-text);
 }
 
-.custom-cta-link {
+.robin-contact-toggle {
   font-size: 0.85rem;
   color: var(--color-accent);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s ease;
-  -webkit-transition: color 0.2s ease;
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  transition: color 0.2s;
 }
 
 @media (hover: hover) {
-  .custom-cta-link:hover {
+  .robin-contact-toggle:hover {
     color: var(--color-dark);
-    text-decoration: underline;
   }
+}
+
+.robin-contact-label {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  margin-bottom: 0.75rem;
+}
+
+.robin-contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.robin-contact-email,
+.robin-contact-message {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(147, 125, 104, 0.25);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  background: var(--color-white, #fff);
+  color: var(--color-dark);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.robin-contact-email:focus,
+.robin-contact-message:focus {
+  border-color: var(--color-wood);
+}
+
+.robin-contact-message {
+  resize: vertical;
+}
+
+.robin-contact-submit {
+  padding: 0.5rem 1.25rem;
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s;
+  align-self: center;
+}
+
+@media (hover: hover) {
+  .robin-contact-submit:hover {
+    background: var(--color-dark);
+  }
+}
+
+.robin-contact-submit:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.robin-contact-done {
+  font-size: 0.9rem;
+  color: var(--color-wood);
+  font-weight: 600;
 }
 
 /* ---- NOTE ARTISAN ---- */

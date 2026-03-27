@@ -807,9 +807,7 @@ function sapi_maison_content_width() {
 }
 add_action('after_setup_theme', 'sapi_maison_content_width', 0);
 
-// ACF hero image is attached to the WooCommerce Shop page
-// Field: shop_hero_image (Image, return format: Array)
-// Location rule in ACF: Page = Boutique (Shop page)
+
 
 
 function sapi_maison_cart_count() {

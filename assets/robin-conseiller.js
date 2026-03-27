@@ -362,9 +362,9 @@
         break;
 
       case '_product_reselect':
-        // Avec projet → resélectionner la variation
-        reselectVariation();
-        return; // ne pas ouvrir la modale
+        // Avec projet → ouvrir la fiche résultat
+        startStep = '_product_guide_result';
+        break;
 
       case 'homepage':
         // La pièce est déjà sélectionnée via contextData.piece
@@ -455,6 +455,8 @@
 
     saveState();
     refreshPageVisuals();
+    adaptProductPill();
+    updateBandeauChips();
   }
 
   /* ═══════════════════════════════════════════
@@ -548,8 +550,8 @@
       renderCategoryConfirm();
       return;
     }
-    if (stepId === '_product_guide_done') {
-      finishProductGuide();
+    if (stepId === '_product_guide_done' || stepId === '_product_guide_result') {
+      renderProductGuideResult();
       return;
     }
     if (stepId === '_product_compare') {
@@ -708,7 +710,7 @@
       setTimeout(function() {
         signature.style.transition = 'opacity 0.4s';
         signature.style.opacity = '1';
-      }, endTime + 200);
+      }, endTime + 100);
     }
 
     // Lien sortant apparaît après la signature
@@ -717,7 +719,7 @@
       setTimeout(function() {
         link.style.transition = 'opacity 0.4s';
         link.style.opacity = '1';
-      }, endTime + 500);
+      }, endTime + 200);
     }
 
     // Zone basse apparaît après le lien
@@ -725,7 +727,7 @@
       setTimeout(function() {
         bottom.style.transition = 'opacity 0.4s';
         bottom.style.opacity = '1';
-      }, endTime + 800);
+      }, endTime + 350);
     }
   }
 
@@ -1583,7 +1585,7 @@
       if (lbl) answered.push({ stepId: visible[i], label: lbl });
     }
 
-    if (answered.length === 0) {
+    if (answered.length === 0 || state.openingContext === 'product_guide' || state.openingContext === '_product_reselect') {
       projectEl.style.display = 'none';
       return;
     }
@@ -1592,7 +1594,9 @@
     for (var j = 0; j < answered.length; j++) {
       html += '<span class="robin-modal__chip" data-step="' + escAttr(answered[j].stepId) + '" style="cursor:pointer;">' + escHtml(answered[j].label) + '</span>';
     }
-    html += '<button class="robin-modal__reset" id="robin-modal-reset" type="button">Recommencer</button>';
+    if (state.openingContext !== 'product_guide' && state.openingContext !== '_product_reselect') {
+      html += '<button class="robin-modal__reset" id="robin-modal-reset" type="button">Recommencer</button>';
+    }
 
     projectEl.innerHTML = html;
     projectEl.style.display = '';
@@ -1759,7 +1763,7 @@
       if (pill && pill.dataset.robinContext) {
         var context = pill.dataset.robinContext;
         if (context === '_product_reselect') {
-          reselectVariation();
+          openModal('_product_reselect', {});
           return;
         }
         var data = {};
@@ -1853,25 +1857,138 @@
   /* ═══════════════════════════════════════════
      Pill produit adaptative
   ═══════════════════════════════════════════ */
-  function finishProductGuide() {
-    // Sauvegarder les réponses
+  function renderProductGuideResult() {
     saveState();
 
-    // Fermer la modale
-    closeModal();
+    var essenceMap = { moderne: 'peuplier', ancien: 'okoume' };
+    var essenceLabel = { peuplier: 'Peuplier', okoume: 'Okoumé' };
+    var style = state.answers.style || null;
+    var essence = essenceMap[style] || null;
+    var pieceLabel = state.labels.piece || '';
+    var tailleLabel = state.labels.taille || state.labels.taille_escalier || '';
+    var styleLabel = state.labels.style || '';
 
-    // Sélectionner la variation adaptée
-    reselectVariation();
-
-    // Mettre à jour la pill
-    var pill = document.getElementById('robin-product-pill');
-    if (pill) {
-      pill.textContent = 'Ce mod\u00e8le correspond \u00e0 votre projet \u2713';
-      pill.dataset.robinContext = '_product_reselect';
+    // Lire la vraie taille produit depuis le select WooCommerce
+    var tailleMap = { petite: 0, moyenne: 1, grande: 2 };
+    var taille = state.answers.taille || state.answers.taille_escalier || null;
+    var tailleIndex = taille in tailleMap ? tailleMap[taille] : null;
+    var productTailleLabel = '';
+    var tailleSelect = document.querySelector('select[name="attribute_pa_taille"]');
+    if (tailleSelect && tailleIndex !== null) {
+      var options = [];
+      for (var i = 0; i < tailleSelect.options.length; i++) {
+        if (tailleSelect.options[i].value) options.push(tailleSelect.options[i]);
+      }
+      if (options.length) {
+        var idx = Math.min(tailleIndex, options.length - 1);
+        productTailleLabel = options[idx].text;
+      }
     }
 
-    // Mettre à jour bandeau
-    updateBandeauChips();
+    // Conseil de style
+    var conseilKey = 'pg_style:' + style;
+    var conseilData = conseils[conseilKey];
+    var conseilText = conseilData ? conseilData.conseil_text : '';
+
+    // Construire le texte personnalisé
+    var introText = 'Pour votre ' + escHtml(pieceLabel.toLowerCase());
+    if (tailleLabel) introText += ' de taille ' + escHtml(tailleLabel.toLowerCase());
+    introText += ', Robin recommande\u00A0:';
+
+    // Tous les éléments démarrent cachés pour animation séquentielle
+    var html = '';
+    html += '<div class="robin-fiche__top robin-result-anim" style="opacity:0;transform:translateY(12px);">';
+    html += '<div class="robin-fiche__conseil">';
+    html += '<div class="robin-fiche__citation">';
+    html += '<p class="robin-fiche__citation-text">' + introText + '</p>';
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+
+    // Récap
+    html += '<div class="robin-fiche__result-recap robin-result-anim" style="opacity:0;transform:translateY(12px);">';
+    if (essence) {
+      html += '<div class="robin-result-item">';
+      html += '<span class="robin-result-label">Essence</span>';
+      html += '<span class="robin-result-value">' + escHtml(essenceLabel[essence] || essence) + '</span>';
+      html += '</div>';
+    }
+    if (productTailleLabel) {
+      html += '<div class="robin-result-item">';
+      html += '<span class="robin-result-label">Taille recommand\u00e9e</span>';
+      html += '<span class="robin-result-value">' + escHtml(productTailleLabel) + '</span>';
+      html += '</div>';
+    }
+    html += '</div>';
+
+    // Conseil essence
+    if (conseilText) {
+      html += '<p class="robin-result-conseil robin-result-anim" style="opacity:0;transform:translateY(12px);">' + escHtml(conseilText) + '</p>';
+    }
+
+    // Boutons
+    html += '<div class="robin-fiche__result-actions robin-result-anim" style="opacity:0;transform:translateY(12px);">';
+    html += '<button type="button" class="robin-result-apply" id="robin-result-apply">Appliquer cette s\u00e9lection \u2192</button>';
+    html += '<a href="/contact/" class="robin-result-contact" id="robin-result-contact">Contacter Robin</a>';
+    html += '<button type="button" class="robin-result-redo" id="robin-result-redo">Modifier mon projet</button>';
+    html += '</div>';
+
+    body.innerHTML = html;
+
+    // Animation séquentielle
+    var animItems = body.querySelectorAll('.robin-result-anim');
+    for (var a = 0; a < animItems.length; a++) {
+      (function(el, delay) {
+        setTimeout(function() {
+          el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        }, delay);
+      })(animItems[a], 300 + a * 250);
+    }
+
+    // Bind bouton appliquer
+    var applyBtn = document.getElementById('robin-result-apply');
+    if (applyBtn) {
+      applyBtn.addEventListener('click', function() {
+        closeModal();
+        reselectVariation();
+        updateProductPillContextual();
+        updateBandeauChips();
+      });
+    }
+
+    // Bind bouton recommencer
+    var redoBtn = document.getElementById('robin-result-redo');
+    if (redoBtn) {
+      redoBtn.addEventListener('click', function() {
+        // Reset les réponses et forcer le parcours raccourci produit
+        state.answers = {};
+        state.labels = {};
+        state.history = [];
+        state.openingContext = 'product_guide';
+        saveState();
+        showFiche(steps[0].id);
+      });
+    }
+  }
+
+  function updateProductPillContextual() {
+    var pill = document.getElementById('robin-product-pill');
+    if (!pill) return;
+
+    var chips = [];
+    if (state.labels.piece) chips.push(state.labels.piece);
+    if (state.labels.taille || state.labels.taille_escalier) chips.push(state.labels.taille || state.labels.taille_escalier);
+
+    var essenceMap = { moderne: 'peuplier', ancien: 'okoume' };
+    var essenceLabel = { peuplier: 'Peuplier', okoume: 'Okoumé' };
+    var style = state.answers.style || null;
+    var essence = essenceMap[style] || null;
+    if (essence) chips.push(essenceLabel[essence]);
+
+    pill.textContent = chips.join(' \u00b7 ') + ' \u2713';
+    pill.dataset.robinContext = '_product_reselect';
   }
 
   function adaptContactForm() {
@@ -1964,20 +2081,24 @@
     }
   }
 
+  function isProductGuideComplete() {
+    // Le mini-questionnaire produit est complet si pièce + (taille ou taille_escalier) + style sont répondus
+    return state.answers.piece && (state.answers.taille || state.answers.taille_escalier) && state.answers.style;
+  }
+
   function adaptProductPill() {
     var pill = document.getElementById('robin-product-pill');
     if (!pill) return;
 
-    if (hasAnyAnswer()) {
-      // Projet existant → sélectionner la variation adaptée
-      pill.textContent = 'Ce mod\u00e8le correspond \u00e0 votre projet \u2713';
-      pill.dataset.robinContext = '_product_reselect';
-
-      // Sélectionner la variation au chargement (cinetique.js le fait déjà,
-      // mais on s'assure que c'est fait)
+    if (isProductGuideComplete()) {
+      // Questionnaire produit complet → afficher le contexte + sélectionner la variation
+      updateProductPillContextual();
       reselectVariation();
+    } else {
+      // Pas de projet ou incomplet → texte par défaut
+      pill.textContent = 'Comment choisir le bon mod\u00e8le ?';
+      pill.dataset.robinContext = 'product_guide';
     }
-    // Sans projet → texte par défaut "Comment choisir le bon modèle ?"
   }
 
   function reselectVariation() {

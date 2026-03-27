@@ -276,14 +276,10 @@ get_header();
         <div class="product-reassurance-v2">
           <?php if (!$is_accessoire) : ?>
           <div class="reassurance-item-v2">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <!-- Lucide person-standing icon -->
-              <circle cx="12" cy="5" r="1"/>
-              <path d="m9 20 3-6 3 6"/>
-              <path d="m6 8 6 2 6-2"/>
-              <path d="M12 10v4"/>
+            <svg width="18" height="18" viewBox="0 0 512 512" fill="none" stroke="var(--color-wood)" stroke-width="35">
+              <path d="M283.4 19.83c-3.2 0-31.2 5.09-31.2 5.09-1.3 41.61-30.4 78.48-90.3 84.88l-12.8-23.07-25.1 2.48 11.3 60.09-113.79-4.9 12.2 41.5C156.3 225.4 150.7 338.4 124 439.4c47 53 141.8 47.8 186 43.1 3.1-62.2 52.4-64.5 135.9-32.2 11.3-17.6 18.8-36 44.6-50.7l-46.6-139.5-27.5 6.2c11-21.1 32.2-49.9 50.4-63.4l15.6-86.9c-88.6-6.3-146.4-46.36-199-96.17z"/>
             </svg>
-            <span>Fabrication <strong>&lt;5 jours</strong></span>
+            <span>Fabriqué à <strong>Lyon</strong></span>
           </div>
           <?php endif; ?>
           <div class="reassurance-item-v2 reassurance-delivery">
@@ -301,12 +297,24 @@ get_header();
         </div>
 
 
-        <!-- CTA Sur-mesure -->
-        <div class="product-custom-cta">
-          <p class="custom-cta-text">Besoin d'une version sur-mesure ?</p>
-          <a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>" class="custom-cta-link">
-            Parlons de votre projet →
-          </a>
+        <!-- CTA Échanger avec Robin -->
+        <div class="robin-contact-bandeau" id="ctaRobinContact">
+          <div class="robin-contact-closed">
+            <span class="robin-contact-question">Envie d'en discuter ?</span>
+            <button type="button" class="robin-contact-toggle">Échanger avec Robin →</button>
+          </div>
+          <div class="robin-contact-open" hidden>
+            <span class="robin-contact-label">Robin vous recontacte rapidement.</span>
+            <form class="robin-contact-form" data-product="<?php echo esc_attr($product->get_name()); ?>">
+              <?php wp_nonce_field('sapi-guide-results', 'robin_contact_nonce', false); ?>
+              <input type="email" name="email" class="robin-contact-email" placeholder="votre@email.com" required>
+              <textarea name="message" class="robin-contact-message" placeholder="Votre message (optionnel)" rows="2"></textarea>
+              <button type="submit" class="robin-contact-submit">Envoyer</button>
+            </form>
+          </div>
+          <div class="robin-contact-success" hidden>
+            <span class="robin-contact-done">Message envoyé ! Robin revient vers vous très vite.</span>
+          </div>
         </div>
         <?php endif; // fin !$is_carte_cadeau ?>
 
@@ -389,21 +397,6 @@ get_header();
         ?>
         </div><!-- .product-why-content -->
       </div><!-- .product-why-left -->
-      <div class="product-why-usage">
-        <h3>Idéal pour</h3>
-        <ul class="usage-list">
-          <?php
-          $pieces = get_the_terms($product->get_id(), 'pa_piece');
-          if ($pieces && !is_wp_error($pieces)) {
-            foreach ($pieces as $piece) {
-              echo '<li>' . esc_html($piece->name) . '</li>';
-            }
-          } else {
-            echo '<li>Toutes pièces</li>';
-          }
-          ?>
-        </ul>
-      </div>
     </div>
   </section>
 
@@ -721,7 +714,12 @@ get_header();
 
     <?php if ($google_reviews && !empty($google_reviews['reviews'])) : ?>
     <div class="testimonials-grid">
-      <?php foreach (array_slice($google_reviews['reviews'], 0, 3) as $review) : ?>
+      <?php
+      $reviews_pool = $google_reviews['reviews'];
+      shuffle($reviews_pool);
+      $reviews_display = array_slice($reviews_pool, 0, 3);
+      ?>
+      <?php foreach ($reviews_display as $review) : ?>
       <div class="testimonial-card">
         <div class="testimonial-card-header">
           <?php if (!empty($review['photo'])) : ?>
@@ -741,14 +739,20 @@ get_header();
             <?php endif; ?>
           <?php endfor; ?>
         </div>
-        <p class="testimonial-text"><?php
+        <?php
           $text = $review['text'];
+          $short = $text;
           if (mb_strlen($text) > 200) {
-            $text = mb_substr($text, 0, 200);
-            $text = mb_substr($text, 0, mb_strrpos($text, ' ')) . '…';
+            $short = mb_substr($text, 0, 200);
+            $short = mb_substr($short, 0, mb_strrpos($short, ' ')) . '…';
           }
-          echo esc_html($text);
-        ?></p>
+        ?>
+        <p class="testimonial-text"><?php echo esc_html($short); ?></p>
+        <span class="testimonial-full-text" hidden><?php echo esc_attr($text); ?></span>
+        <span class="testimonial-full-author" hidden><?php echo esc_attr($review['author']); ?></span>
+        <span class="testimonial-full-photo" hidden><?php echo esc_attr($review['photo'] ?? ''); ?></span>
+        <span class="testimonial-full-time" hidden><?php echo esc_attr($review['time'] ?? ''); ?></span>
+        <span class="testimonial-full-rating" hidden><?php echo esc_attr($review['rating']); ?></span>
       </div>
       <?php endforeach; ?>
     </div>
@@ -758,6 +762,69 @@ get_header();
       <span class="testimonials-cta-sep">·</span>
       <a href="https://www.google.com/maps/place/?q=place_id:ChIJYyWUfZOV9EcRDRhbW4HM6KY" target="_blank" rel="noopener noreferrer">Voir les <?php echo esc_html($google_reviews['total']); ?> avis</a>
     </div>
+    <!-- Modale avis Google -->
+    <div class="review-modal-overlay" id="reviewModal" hidden>
+      <div class="review-modal">
+        <button type="button" class="review-modal-close" aria-label="Fermer">&times;</button>
+        <div class="review-modal-header">
+          <img class="review-modal-avatar" src="" alt="" width="48" height="48">
+          <div class="review-modal-author-info">
+            <span class="review-modal-name"></span>
+            <span class="review-modal-time"></span>
+          </div>
+        </div>
+        <div class="review-modal-rating"></div>
+        <p class="review-modal-text"></p>
+      </div>
+    </div>
+    <script>
+    (function() {
+      var modal = document.getElementById('reviewModal');
+      var overlay = modal;
+      var closeBtn = modal.querySelector('.review-modal-close');
+
+      document.querySelectorAll('.testimonial-card').forEach(function(card) {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', function() {
+          var fullText = card.querySelector('.testimonial-full-text').textContent;
+          var author = card.querySelector('.testimonial-full-author').textContent;
+          var photo = card.querySelector('.testimonial-full-photo').textContent;
+          var time = card.querySelector('.testimonial-full-time').textContent;
+          var rating = parseInt(card.querySelector('.testimonial-full-rating').textContent);
+
+          modal.querySelector('.review-modal-name').textContent = author;
+          modal.querySelector('.review-modal-time').textContent = time;
+          modal.querySelector('.review-modal-text').textContent = fullText;
+
+          var avatar = modal.querySelector('.review-modal-avatar');
+          if (photo) { avatar.src = photo; avatar.style.display = ''; }
+          else { avatar.style.display = 'none'; }
+
+          var stars = '';
+          for (var i = 1; i <= 5; i++) {
+            stars += '<svg width="16" height="16" viewBox="0 0 24 24" fill="' + (i <= rating ? '#FBBC05' : '#ddd') + '"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+          }
+          modal.querySelector('.review-modal-rating').innerHTML = stars;
+
+          modal.hidden = false;
+          document.body.style.overflow = 'hidden';
+        });
+      });
+
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) closeModal();
+      });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !modal.hidden) closeModal();
+      });
+
+      function closeModal() {
+        modal.hidden = true;
+        document.body.style.overflow = '';
+      }
+    })();
+    </script>
     <?php else : ?>
     <div class="testimonials-cta">
       <p>Vous avez ce produit ? <a href="https://g.page/r/CQ0YW1uBzOimEAE/review" target="_blank" rel="noopener noreferrer">Partagez votre avis</a></p>
@@ -1702,6 +1769,67 @@ get_header();
 })();
 </script>
 <?php endif; ?>
+
+<script>
+(function() {
+  var cta = document.getElementById('ctaRobinContact');
+  if (!cta) return;
+
+  var toggle = cta.querySelector('.robin-contact-toggle');
+  var closed = cta.querySelector('.robin-contact-closed');
+  var open = cta.querySelector('.robin-contact-open');
+  var success = cta.querySelector('.robin-contact-success');
+  var form = cta.querySelector('.robin-contact-form');
+
+  toggle.addEventListener('click', function() {
+    closed.hidden = true;
+    open.hidden = false;
+    cta.querySelector('.robin-contact-email').focus();
+  });
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var email = form.querySelector('.robin-contact-email').value;
+    var btn = form.querySelector('.robin-contact-submit');
+    btn.disabled = true;
+    btn.textContent = 'Envoi…';
+
+    // Récupérer le projet Robin Conseiller si disponible
+    var project = '';
+    try {
+      var stored = localStorage.getItem('sapi_robin_project');
+      if (stored) {
+        var p = JSON.parse(stored);
+        var parts = [];
+        if (p.piece) parts.push(p.piece);
+        if (p.taille) parts.push(p.taille);
+        if (p.style) parts.push(p.style);
+        if (parts.length) project = parts.join(' · ');
+      }
+    } catch(err) {}
+
+    var fd = new FormData();
+    fd.append('action', 'sapi_robin_contact');
+    fd.append('nonce', form.querySelector('[name="robin_contact_nonce"]').value);
+    var message = form.querySelector('.robin-contact-message').value;
+    fd.append('email', email);
+    fd.append('page', form.dataset.product || window.location.pathname);
+    if (message) fd.append('message', message);
+    if (project) fd.append('project', project);
+
+    fetch('<?php echo esc_url(admin_url("admin-ajax.php")); ?>', {
+      method: 'POST',
+      body: fd
+    }).then(function() {
+      open.hidden = true;
+      success.hidden = false;
+    }).catch(function() {
+      btn.disabled = false;
+      btn.textContent = 'Envoyer';
+    });
+  });
+})();
+</script>
 
 <?php
 get_footer();
