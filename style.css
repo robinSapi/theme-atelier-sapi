@@ -7341,7 +7341,7 @@ li.carousel-editorial-slide,
   background: var(--color-warm, #FBF6EA);
   border-radius: 16px;
   overflow: hidden;
-  max-width: 900px;
+  max-width: 1050px;
   width: 100%;
 }
 
