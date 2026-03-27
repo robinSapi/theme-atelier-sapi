@@ -60,6 +60,7 @@ get_header();
       <button type="button" class="steps-slider-btn steps-slider-next" aria-label="Étape suivante">&gt;</button>
     </div>
   </div>
+  <div class="steps-slider-viewport">
   <div class="steps-slider-track" id="stepsSliderTrack">
     <div class="steps-slide">
       <div class="steps-slide-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.png');"></div>
@@ -98,6 +99,13 @@ get_header();
       </div>
     </div>
   </div>
+  <div class="steps-slider-dots" id="stepsSliderDots">
+    <button class="steps-slider-dot is-active" data-idx="0"></button>
+    <button class="steps-slider-dot" data-idx="1"></button>
+    <button class="steps-slider-dot" data-idx="2"></button>
+    <button class="steps-slider-dot" data-idx="3"></button>
+  </div>
+  </div>
 </section>
 
 <script>
@@ -106,6 +114,7 @@ get_header();
   if (!track) return;
   var slides = track.querySelectorAll('.steps-slide');
   var counter = document.querySelector('.steps-slider-counter');
+  var dots = document.querySelectorAll('.steps-slider-dot');
   var current = 0;
   var total = slides.length;
 
@@ -115,10 +124,17 @@ get_header();
     current = idx;
     track.style.transform = 'translateX(-' + (current * 100) + '%)';
     counter.textContent = String(current + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+    dots.forEach(function(d, i) {
+      d.classList.toggle('is-active', i === current);
+    });
   }
 
   document.querySelector('.steps-slider-prev').addEventListener('click', function() { goTo(current - 1); });
   document.querySelector('.steps-slider-next').addEventListener('click', function() { goTo(current + 1); });
+
+  dots.forEach(function(dot) {
+    dot.addEventListener('click', function() { goTo(parseInt(this.dataset.idx)); });
+  });
 
   // Swipe mobile
   var startX = 0;
