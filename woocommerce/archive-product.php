@@ -33,20 +33,9 @@ $all_products = new WP_Query([
 
 <!-- Hero Section - Magazine Style -->
 <?php
-// Priority 1: ACF custom hero image (attached to WooCommerce Shop page)
+// Hero image: featured product gallery image (ambiance photo)
 $hero_img_url = '';
 $hero_alt = 'Mes Créations - Atelier Sâpi';
-$shop_page_id = wc_get_page_id('shop');
-
-if (function_exists('get_field')) {
-  $acf_hero = get_field('shop_hero_image', $shop_page_id);
-  if ($acf_hero) {
-    $hero_img_url = sapi_get_acf_image_url($acf_hero);
-    $hero_alt = is_array($acf_hero) && !empty($acf_hero['alt']) ? $acf_hero['alt'] : $hero_alt;
-  }
-}
-
-// Priority 2: Fallback to featured product gallery image (ambiance photo)
 if (!$hero_img_url) {
   $hero_products = wc_get_products([
     'limit'    => 1,
