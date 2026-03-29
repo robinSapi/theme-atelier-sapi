@@ -10115,6 +10115,34 @@ a.single-post-category:hover {
   }
 }
 
+/* === FAQ Yoast Block === */
+.single-post-content .schema-faq {
+  margin: 3rem 0;
+  padding: 2rem 0;
+  border-top: 2px solid rgba(147, 125, 104, 0.15);
+}
+
+.single-post-content .schema-faq-section {
+  padding: 1.5rem 0;
+  border-bottom: 1px solid rgba(147, 125, 104, 0.1);
+}
+
+.single-post-content .schema-faq-section:last-child {
+  border-bottom: none;
+}
+
+.single-post-content .schema-faq-question {
+  font-size: clamp(18px, 3.5vw, 22px);
+  font-weight: 600;
+  color: var(--color-orange, #E35B24);
+  margin-bottom: 0.5rem;
+}
+
+.single-post-content .schema-faq-answer p {
+  margin-bottom: 0;
+  color: var(--bois-profond, #6B5A4A);
+}
+
 .single-post-footer {
   max-width: 800px;
   margin: 0 auto;
