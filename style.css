@@ -10079,17 +10079,33 @@ a.single-post-category:hover {
 }
 
 .single-post-content h2 {
-  font-size: clamp(28px, 5vw, 36px);
+  font-size: clamp(22px, 4vw, 28px);
   font-weight: 600;
   color: var(--bois-sombre, #4A3F35);
   margin: 3rem 0 1.5rem;
 }
 
 .single-post-content h3 {
-  font-size: clamp(22px, 4vw, 28px);
+  font-size: clamp(18px, 3.5vw, 22px);
   font-weight: 600;
   color: var(--color-orange, #E35B24);
   margin: 2.5rem 0 1rem;
+}
+
+.single-post-content figcaption {
+  text-align: center;
+  margin-top: 0.5rem;
+  font-size: 14px;
+  color: var(--color-wood, #937D68);
+  font-style: italic;
+}
+
+.single-post-content figure {
+  margin-bottom: 1.5rem;
+}
+
+.single-post-content figure img {
+  margin-bottom: 0;
 }
 
 .single-post-content img {
@@ -10113,6 +10129,42 @@ a.single-post-category:hover {
   .single-post-content a:hover {
     opacity: 0.8;
   }
+}
+
+/* === FAQ Yoast Block === */
+.single-post-content .schema-faq {
+  margin: 3rem 0;
+  padding: 2rem 0;
+  border-top: 2px solid rgba(147, 125, 104, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.single-post-content .schema-faq-section {
+  background: var(--color-warm, #FBF6EA);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  border: 1px solid rgba(147, 125, 104, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.single-post-content .schema-faq-section:hover {
+  box-shadow: 0 2px 12px rgba(147, 125, 104, 0.12);
+}
+
+.single-post-content .schema-faq-question {
+  font-size: clamp(16px, 3vw, 19px);
+  font-weight: 600;
+  color: var(--bois-sombre, #4A3F35);
+  margin-bottom: 0.5rem;
+}
+
+.single-post-content .schema-faq-answer p {
+  margin-bottom: 0;
+  color: var(--bois-profond, #6B5A4A);
+  font-size: 15px;
+  line-height: 1.7;
 }
 
 .single-post-footer {
