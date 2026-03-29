@@ -4536,7 +4536,7 @@ function sapi_robin_admin_page() {
         <?php else : ?>
           <?php foreach ($rows as $r) : ?>
             <tr>
-              <td style="white-space:nowrap;"><?php echo esc_html(wp_date('d/m H:i', strtotime($r->created_at))); ?></td>
+              <td style="white-space:nowrap;"><?php echo esc_html(date_i18n('d/m H:i', strtotime($r->created_at))); ?></td>
               <td>
                 <?php
                 $ctx = $r->opening_context;
