@@ -5620,11 +5620,12 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   overflow: hidden;
 }
 
-.category-editorial-img {
+.category-editorial > .category-editorial-img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  max-width: none;
   object-fit: cover;
   object-position: center;
   z-index: 0;
