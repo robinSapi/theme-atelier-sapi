@@ -17976,6 +17976,43 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
   }
 }
 
+/* Video thumbnail play icon */
+.gallery-thumb-video {
+  position: relative;
+}
+
+.gallery-thumb-play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.gallery-thumb-video:hover .gallery-thumb-play {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Video player in main gallery */
+.gallery-main-video {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.gallery-main-video iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 .gallery-thumbnails .gallery-thumb.active {
   border-color: var(--color-accent);
 }
