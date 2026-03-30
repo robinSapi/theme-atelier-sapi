@@ -9356,6 +9356,82 @@ li.carousel-editorial-slide,
   font-size: 18px;
 }
 
+/* ---- Section Atelier (page contact) ---- */
+.contact-atelier {
+  padding: 60px 5%;
+  background: var(--color-warm);
+}
+
+.contact-atelier-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  align-items: center;
+}
+
+.contact-atelier h2 {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  color: var(--color-dark);
+  margin-bottom: 1rem;
+}
+
+.contact-atelier > .contact-atelier-grid > .contact-atelier-info > p {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--color-dark);
+  opacity: 0.85;
+  margin-bottom: 2rem;
+}
+
+.contact-atelier-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.contact-atelier-detail {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.contact-atelier-detail svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--color-wood);
+}
+
+.contact-atelier-detail strong {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-dark);
+  margin-bottom: 0.15rem;
+}
+
+.contact-atelier-detail span {
+  font-size: 0.95rem;
+  color: var(--color-dark);
+  opacity: 0.8;
+}
+
+.contact-atelier-detail a {
+  color: var(--color-wood);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.contact-atelier-map {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
 /* ---- Contact Responsive ---- */
 @media (max-width: 768px) {
   .contact-hero {
@@ -9374,6 +9450,19 @@ li.carousel-editorial-slide,
 
   .contact-form-card {
     padding: 1.5rem;
+  }
+
+  .contact-atelier {
+    padding: 40px 20px;
+  }
+
+  .contact-atelier-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .contact-atelier h2 {
+    font-size: 2rem;
   }
 }
 
@@ -12366,6 +12455,15 @@ transform: translateY(15px);
   font-size: 0.875rem;
   font-weight: 400;
   color: var(--color-gray-mid);
+}
+
+.footer-atelier-rdv {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--color-gray);
+  opacity: 0.8;
 }
 
 .footer-kinetic .footer-links {

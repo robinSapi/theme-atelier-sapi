@@ -173,7 +173,7 @@ get_header();
         </svg>
       </div>
       <h3>Artisanat local</h3>
-      <p>Tout est fabriqué à la main dans mon atelier à Lyon, du dessin à l'expédition.</p>
+      <p>Tout est fabriqué à la main dans mon atelier à Lyon, du dessin à l'expédition. Envie de voir les luminaires en vrai ? <a href="<?php echo esc_url(home_url('/contact/')); ?>">Contactez-moi</a></p>
     </div>
     <div class="artisan-value-item">
       <div class="value-icon">
