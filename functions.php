@@ -749,8 +749,8 @@ add_filter('render_block', function ($content, $block) {
 function sapi_get_video_thumbnail($url) {
   if (!$url) return '';
 
-  // YouTube
-  if (preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $url, $m)) {
+  // YouTube (watch, embed, shorts, youtu.be)
+  if (preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $url, $m)) {
     return 'https://img.youtube.com/vi/' . $m[1] . '/hqdefault.jpg';
   }
 
