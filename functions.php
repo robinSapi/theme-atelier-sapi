@@ -774,6 +774,60 @@ function sapi_get_video_thumbnail($url) {
 }
 
 /**
+ * Helper: get photo URLs from galerie_produit repeater by type.
+ * Returns array of URLs matching the given type, or all photos if no type specified.
+ * Falls back to old fixed ACF fields if repeater is empty.
+ *
+ * @param int    $post_id  Product ID
+ * @param string $type     Photo type: 'ambiance', 'detail', 'taille', 'client', 'fabrication', or '' for all
+ * @param int    $limit    Max number of photos to return (0 = all)
+ * @return array           Array of image URLs
+ */
+function sapi_get_product_photos($post_id, $type = '', $limit = 0) {
+  if (!function_exists('get_field')) return [];
+
+  $photos = [];
+  $galerie = get_field('galerie_produit', $post_id);
+
+  if (!empty($galerie) && is_array($galerie)) {
+    foreach ($galerie as $row) {
+      if ($type && isset($row['type_photo']) && $row['type_photo'] !== $type) continue;
+      $url = sapi_get_acf_image_url(isset($row['image']) ? $row['image'] : null);
+      if ($url) {
+        $photos[] = $url;
+        if ($limit > 0 && count($photos) >= $limit) break;
+      }
+    }
+  } else {
+    // Fallback: old fixed fields
+    $old_fields_by_type = [
+      'ambiance' => ['ambiance_1', 'ambiance_2', 'ambiance_3'],
+      'detail'   => ['detail_1', 'detail_2'],
+      'taille'   => ['tailles'],
+    ];
+
+    $fields_to_check = [];
+    if ($type && isset($old_fields_by_type[$type])) {
+      $fields_to_check = $old_fields_by_type[$type];
+    } elseif (!$type) {
+      foreach ($old_fields_by_type as $flds) {
+        $fields_to_check = array_merge($fields_to_check, $flds);
+      }
+    }
+
+    foreach ($fields_to_check as $field_name) {
+      $url = sapi_get_acf_image_url(get_field($field_name, $post_id));
+      if ($url) {
+        $photos[] = $url;
+        if ($limit > 0 && count($photos) >= $limit) break;
+      }
+    }
+  }
+
+  return $photos;
+}
+
+/**
  * Helper: extract URL from ACF image field (handles all return formats)
  * Centralized here to avoid duplication across templates.
  */
@@ -3324,16 +3378,11 @@ function sapi_guide_collect_results($query, array $answers, $skip_exclusions = f
       }
     }
 
-    // Ambiance photo for full-width banner (fallback: ambiance_2 → ambiance_1)
-    $ambiance_url = '';
+    // Ambiance photo for full-width banner
     $pid = $product->get_id();
-    $ambiance_raw = get_field('ambiance_2', $pid);
-    if (!$ambiance_raw) {
-      $ambiance_raw = get_field('ambiance_1', $pid);
-    }
-    if ($ambiance_raw) {
-      $ambiance_url = sapi_get_acf_image_url($ambiance_raw, 'full');
-    }
+    $ambiance_photos = sapi_get_product_photos($pid, 'ambiance', 2);
+    // Prefer second ambiance photo, fallback to first
+    $ambiance_url = isset($ambiance_photos[1]) ? $ambiance_photos[1] : (isset($ambiance_photos[0]) ? $ambiance_photos[0] : '');
 
     // Hover image (first gallery image for card hover effect)
     $hover_image_url = '';

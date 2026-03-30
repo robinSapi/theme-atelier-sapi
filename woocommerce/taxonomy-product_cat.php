@@ -185,11 +185,8 @@ if ($bg_query->have_posts()) {
   $bg_query->the_post();
   $bg_product_id = get_the_ID();
 
-  if (function_exists('get_field')) {
-    $ambiance_image = get_field('ambiance_1', $bg_product_id);
-
-    $ambiance_bg_url = sapi_get_acf_image_url($ambiance_image);
-  }
+  $ambiance_photos = sapi_get_product_photos($bg_product_id, 'ambiance', 1);
+  $ambiance_bg_url = !empty($ambiance_photos) ? $ambiance_photos[0] : '';
 
   wp_reset_postdata();
 }

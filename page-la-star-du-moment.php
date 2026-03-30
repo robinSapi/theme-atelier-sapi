@@ -46,13 +46,15 @@ $mini_desc        = $has_acf ? get_field('mini_description', $star_id) : '';
 $pourquoi         = $has_acf ? get_field('pourquoi_cette_piece', $star_id) : '';
 $descriptif       = $has_acf ? (get_field('Descriptif', $star_id) ?: get_field('descriptif', $star_id)) : '';
 
-// Photos ACF
-$ambiance_1 = $has_acf ? sapi_get_acf_image_url(get_field('ambiance_1', $star_id)) : '';
-$ambiance_2 = $has_acf ? sapi_get_acf_image_url(get_field('ambiance_2', $star_id)) : '';
-$ambiance_3 = $has_acf ? sapi_get_acf_image_url(get_field('ambiance_3', $star_id)) : '';
+// Photos ACF (repeater)
+$ambiance_photos = sapi_get_product_photos($star_id, 'ambiance');
+$detail_photos   = sapi_get_product_photos($star_id, 'detail');
+$ambiance_1 = isset($ambiance_photos[0]) ? $ambiance_photos[0] : '';
+$ambiance_2 = isset($ambiance_photos[1]) ? $ambiance_photos[1] : '';
+$ambiance_3 = isset($ambiance_photos[2]) ? $ambiance_photos[2] : '';
+$detail_1   = isset($detail_photos[0]) ? $detail_photos[0] : '';
+$detail_2   = isset($detail_photos[1]) ? $detail_photos[1] : '';
 $bandeau    = $has_acf ? sapi_get_acf_image_url(get_field('bandeau', $star_id)) : '';
-$detail_1   = $has_acf ? sapi_get_acf_image_url(get_field('detail_1', $star_id)) : '';
-$detail_2   = $has_acf ? sapi_get_acf_image_url(get_field('detail_2', $star_id)) : '';
 
 // Photo principale produit
 $main_image_id  = $star_product->get_image_id();
