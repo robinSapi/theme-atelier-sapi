@@ -382,15 +382,8 @@ get_header();
   <?php
   {
     // Photo client : piocher au hasard parmi les photos de type 'client' du repeater
+    // Pas de fallback : si aucune photo client, la section est masquée
     $client_photos = sapi_get_product_photos($product_id, 'client');
-    // Fallback: ancien champ bandeau
-    if (empty($client_photos) && function_exists('get_field')) {
-      $bandeau = get_field('bandeau');
-      if ($bandeau) {
-        $url = sapi_get_acf_image_url($bandeau);
-        if ($url) $client_photos[] = $url;
-      }
-    }
     $bandeau_url = !empty($client_photos) ? $client_photos[array_rand($client_photos)] : '';
 
     $section_num = 0;
