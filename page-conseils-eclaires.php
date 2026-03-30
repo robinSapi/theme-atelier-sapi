@@ -33,7 +33,8 @@ for ($i = 1; $i <= 4; $i++) {
 }
 ?>
 
-<section class="advice-hero-artisan" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/03/Sapi-header_idees.jpg');">
+<section class="advice-hero-artisan">
+  <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/03/Sapi-header_idees.jpg" alt="Conseils éclairage — Atelier Sâpi" class="advice-hero-artisan-img">
   <div class="advice-hero-artisan-inner">
     <h1>Conseils éclairés</h1>
     <p>Suspensions ou lampadaire ? Quelle ampoule choisir ? Retrouvez ici les infos idéales pour une décoration réussie !</p>
@@ -58,7 +59,8 @@ sapi_robin_conseil_card( 'conseils' );
       <div class="advice-tip-flipper">
         <!-- Face avant -->
         <div class="advice-tip-front">
-          <div class="advice-tip-image" style="background-image: url('<?php echo esc_url($tip['image']); ?>');">
+          <div class="advice-tip-image">
+            <img src="<?php echo esc_url($tip['image']); ?>" alt="<?php echo esc_attr($tip['title']); ?>" class="advice-tip-image-img" loading="lazy">
             <div class="advice-tip-overlay"></div>
             <div class="advice-tip-content">
               <span class="advice-tip-number"><?php echo esc_html($tip['number']); ?></span>

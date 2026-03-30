@@ -59,7 +59,9 @@ get_header();
   <div class="steps-slider-track" id="stepsSliderTrack">
     <div class="steps-slide">
       <div class="steps-slide-inner">
-        <div class="steps-slide-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.png');"></div>
+        <div class="steps-slide-image">
+          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.png" alt="Dessin d'un luminaire — Étape création Atelier Sâpi" class="steps-slide-image-img" loading="lazy">
+        </div>
         <div class="steps-slide-content">
           <span class="section-number">01</span>
           <h3>Tout commence par une idée</h3>
@@ -70,7 +72,9 @@ get_header();
     </div>
     <div class="steps-slide">
       <div class="steps-slide-inner">
-        <div class="steps-slide-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Retouchee1.jpg');"></div>
+        <div class="steps-slide-image">
+          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Retouchee1.jpg" alt="Conception 3D d'un luminaire en bois" class="steps-slide-image-img" loading="lazy">
+        </div>
         <div class="steps-slide-content">
           <span class="section-number">02</span>
           <h3>Comment je la concrétise ?</h3>
@@ -81,7 +85,9 @@ get_header();
     </div>
     <div class="steps-slide">
       <div class="steps-slide-inner">
-        <div class="steps-slide-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_7638.jpg');"></div>
+        <div class="steps-slide-image">
+          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_7638.jpg" alt="Découpe laser du bois pour luminaire artisanal" class="steps-slide-image-img" loading="lazy">
+        </div>
         <div class="steps-slide-content">
           <span class="section-number">03</span>
           <h3>J'adore l'étape de fabrication</h3>
@@ -92,7 +98,9 @@ get_header();
     </div>
     <div class="steps-slide">
       <div class="steps-slide-inner">
-        <div class="steps-slide-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/P1130073-scaled.jpg');"></div>
+        <div class="steps-slide-image">
+          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/P1130073-scaled.jpg" alt="Finitions et assemblage d'un luminaire en bois" class="steps-slide-image-img" loading="lazy">
+        </div>
         <div class="steps-slide-content">
           <span class="section-number">04</span>
           <h3>Et maintenant, elle vous appartient !</h3>
@@ -204,7 +212,8 @@ get_header();
   </div>
 </section>
 
-<section class="artisan-quote artisan-quote-cinetique" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/2025/04/Vue-detail-1.jpg")); ?>');">
+<section class="artisan-quote artisan-quote-cinetique">
+  <img src="<?php echo esc_url(home_url("/wp-content/uploads/2025/04/Vue-detail-1.jpg")); ?>" alt="Détail d'un luminaire en bois Atelier Sâpi" class="artisan-quote-img" loading="lazy">
   <blockquote>
     « Je vous souhaite autant de plaisir à monter et à profiter de votre luminaire Sâpi que j'en ai eu lors de sa conception et de sa fabrication ! »
     <cite>Robin, créateur à l'Atelier Sâpi</cite>

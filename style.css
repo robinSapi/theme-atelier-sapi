@@ -5617,14 +5617,21 @@ ul.products.products-carousel-track > li.products-carousel-slide {
     var(--color-warm, #FBF6EA) 50%,
     var(--creme-chaud, #FAF6F0) 100%
   );
-  /* Background image support */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+.category-editorial-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
 }
 
 /* Semi-transparent overlay for readability when background image is present */
-.category-editorial[style*="background-image"]::before {
+.category-editorial:has(.category-editorial-img)::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -6653,7 +6660,8 @@ li.carousel-editorial-slide,
   padding: 0 3rem;
 }
 
-.product-mini-card > a {
+.product-mini-card > a,
+.product-mini-card-link {
   display: block;
   position: relative;
   border-radius: 12px;
@@ -6661,20 +6669,19 @@ li.carousel-editorial-slide,
   aspect-ratio: 21 / 9;
 }
 
-.product-mini-card > a::before {
-  content: '';
+.product-mini-card-img {
   position: absolute;
   inset: 0;
-  background: inherit;
-  background-size: cover;
-  background-position: 50% 10%;
-  background-repeat: no-repeat;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 10%;
   -webkit-transition: -webkit-transform 600ms cubic-bezier(0.34, 0.61, 0.4, 0.97);
   transition: transform 600ms cubic-bezier(0.34, 0.61, 0.4, 0.97);
 }
 
 @media (hover: hover) {
-  .product-mini-card > a:hover::before {
+  .product-mini-card > a:hover .product-mini-card-img {
     -webkit-transform: scale(1.03);
     transform: scale(1.03);
   }
@@ -7377,8 +7384,17 @@ li.carousel-editorial-slide,
 
 .steps-slide-image {
   min-height: 420px;
-  background-size: cover;
-  background-position: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.steps-slide-image-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
 .steps-slide-content {
@@ -7720,9 +7736,17 @@ li.carousel-editorial-slide,
   padding: 120px 20px;
   text-align: center;
   position: relative;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+.artisan-quote-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
 }
 
 .artisan-quote-cinetique::before {
@@ -8004,9 +8028,18 @@ li.carousel-editorial-slide,
 .advice-hero-artisan {
   padding: 140px 20px 100px;
   text-align: center;
-  background-size: cover;
-  background-position: center;
   position: relative;
+  overflow: hidden;
+}
+
+.advice-hero-artisan-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
 }
 
 .advice-hero-artisan::before {
@@ -8574,7 +8607,7 @@ li.carousel-editorial-slide,
     transform: translateY(-10px) scale(1.02);
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
   }
-  .advice-tip:hover .advice-tip-image::before {
+  .advice-tip:hover .advice-tip-image-img {
     transform: scale(1.05);
   }
 }
@@ -8714,19 +8747,18 @@ li.carousel-editorial-slide,
   position: relative;
   min-height: 550px;
   height: 100%;
-  background-size: cover;
-  background-position: center;
   display: flex;
   align-items: flex-end;
   overflow: hidden;
 }
 
-/* Pseudo-élément pour zoomer uniquement le fond (pas le texte) */
-.advice-tip-image::before {
-  content: '';
+.advice-tip-image-img {
   position: absolute;
   inset: 0;
-  background: inherit;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
   transition: transform 0.8s var(--ease-expo);
   will-change: transform;
   z-index: 0;
@@ -9122,13 +9154,22 @@ li.carousel-editorial-slide,
 .contact-hero {
   position: relative;
   padding: 120px 20px 80px;
-  background-size: cover;
-  background-position: center;
   color: var(--creme-papier, #FEFDFB);
   min-height: 50vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+}
+
+.contact-hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
 }
 
 .contact-hero-overlay {
