@@ -9386,8 +9386,7 @@ li.carousel-editorial-slide,
 /* ---- Carte atelier enrichie (page contact) ---- */
 .contact-card--atelier {
   cursor: default;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .contact-card-atelier-map {
