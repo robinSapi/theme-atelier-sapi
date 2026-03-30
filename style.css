@@ -5010,6 +5010,23 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   text-align: right;
 }
 
+.atelier-rdv {
+  font-size: 0.85rem;
+  color: var(--color-gray-mid);
+  margin-top: 1rem;
+  font-style: italic;
+}
+
+.atelier-rdv a {
+  color: var(--color-wood, #937D68);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.atelier-rdv a:hover {
+  color: var(--color-orange, #E35B24);
+}
+
 .product-atelier-content .robin-conseil__product-link:hover {
   color: var(--color-orange, #E35B24);
 }
@@ -7686,6 +7703,16 @@ li.carousel-editorial-slide,
   font-size: 0.9rem;
   color: var(--color-gray-mid);
   margin: 0;
+}
+
+.artisan-value-item a {
+  color: var(--color-wood, #937D68);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.artisan-value-item a:hover {
+  color: var(--color-orange, #E35B24);
 }
 
 /* Quote Finale Premium */

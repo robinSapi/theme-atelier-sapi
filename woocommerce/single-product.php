@@ -668,7 +668,7 @@ get_header();
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
         </svg>
-        <span>Fabriqué à Lyon — atelier ouvert sur rendez-vous</span>
+        <span>Fabriqué à Lyon</span>
       </div>
       <div class="spec-badge">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -852,6 +852,7 @@ get_header();
         </div>
         <p class="atelier-signature">Robin, créateur à l'Atelier Sâpi</p>
         <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="robin-conseil__product-link">Découvrir l'histoire de Robin &rarr;</a>
+        <p class="atelier-rdv">Atelier ouvert sur rendez-vous — <a href="<?php echo esc_url(home_url('/contact/')); ?>">prendre rendez-vous</a></p>
       </div>
     </div>
   </section>

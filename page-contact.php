@@ -208,7 +208,7 @@ get_header();
       </div>
     </div>
     <div class="contact-atelier-map">
-      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2783.5!2d4.8357!3d45.764!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47f4c13884e3dd17%3A0xd44da86bc5398e8c!2sAtelier%20S%C3%A2pi!5e0!3m2!1sfr!2sfr!4v1711800000000" width="100%" height="100%" style="border:0; border-radius: 12px; min-height: 300px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3559.286880997081!2d4.836447276816423!3d45.81514300995407!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47f495937d942563%3A0xa6e8cc815b5b180d!2sAtelier%20S%C3%A2pi!5e1!3m2!1sfr!2sfr!4v1774865107774!5m2!1sfr!2sfr" width="100%" height="100%" style="border:0; border-radius: 12px; min-height: 300px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
   </div>
 </section>
