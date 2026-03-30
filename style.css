@@ -4288,20 +4288,19 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 .client-photo-wrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 21 / 9;
   overflow: hidden;
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(147, 125, 104, 0.08);
 }
 
-.client-photo-wrapper img,
 .client-photo-image {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100% !important;
   object-fit: cover;
-  object-position: 50% 50%;
+  object-position: center center;
   display: block;
 }
 
