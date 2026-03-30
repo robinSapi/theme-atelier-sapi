@@ -92,7 +92,8 @@ if ($featured_image_url) :
   </div>
 
   <div class="product-mini-card">
-    <a href="<?php echo esc_url($featured_product_url); ?>" style="background-image: url(<?php echo esc_url($featured_image_url); ?>);">
+    <a href="<?php echo esc_url($featured_product_url); ?>" class="product-mini-card-link">
+      <img src="<?php echo esc_url($featured_image_url); ?>" alt="<?php echo esc_attr($featured_product_name); ?> — Luminaire artisanal en bois" class="product-mini-card-img" loading="lazy">
       <span class="product-hero-name"><?php echo esc_html($featured_product_name); ?></span>
     </a>
   </div>
@@ -193,9 +194,11 @@ if ($bg_query->have_posts()) {
   wp_reset_postdata();
 }
 
-$editorial_style = $ambiance_bg_url ? 'style="background-image: url(' . esc_url($ambiance_bg_url) . ');"' : '';
 ?>
-<section class="category-editorial" data-particles="wood" <?php echo $editorial_style; ?>>
+<section class="category-editorial" data-particles="wood">
+  <?php if ($ambiance_bg_url) : ?>
+    <img src="<?php echo esc_url($ambiance_bg_url); ?>" alt="<?php echo esc_attr(single_term_title('', false)); ?> — Collection luminaires en bois" class="category-editorial-img" loading="lazy">
+  <?php endif; ?>
   <div class="category-editorial-inner">
     <?php
     // Rich editorial content per category

@@ -78,20 +78,59 @@ get_header();
 
   $first_acf_index = count($acf_photos); // index where ACF photos start
 
-  // 2. ACF ambiance/detail/tailles
+  // 2. Video oEmbed
+  $video_oembed = '';
+  $video_url_raw = '';
   if (function_exists('get_field')) {
-    $acf_field_labels = [
-      'ambiance_1' => 'Ambiance',
-      'ambiance_2' => 'Ambiance',
-      'ambiance_3' => 'Ambiance',
-      'detail_1'   => 'Détail',
-      'detail_2'   => 'Détail',
-      'tailles'    => 'Tailles',
-    ];
-    foreach ($acf_field_labels as $field_name => $label) {
-      $url = sapi_get_acf_image_url(get_field($field_name));
-      if ($url) {
-        $acf_photos[] = ['url' => $url, 'label' => $label];
+    $video_raw = get_field('video_produit', false, false); // Raw URL
+    $video_rendered = get_field('video_produit'); // oEmbed HTML or URL
+
+    if ($video_raw) {
+      $video_url_raw = $video_raw;
+      // If ACF returns HTML (iframe), use it directly; otherwise convert URL to embed
+      if ($video_rendered && $video_rendered !== $video_raw && strpos($video_rendered, '<') !== false) {
+        $video_oembed = $video_rendered;
+      } else {
+        // Fallback: use wp_oembed_get to convert URL to iframe
+        $video_oembed = wp_oembed_get($video_raw);
+      }
+    }
+  }
+
+  // 3. ACF photos: try repeater first, fallback to old fixed fields
+  if (function_exists('get_field')) {
+    $galerie_repeater = get_field('galerie_produit');
+    if (!empty($galerie_repeater) && is_array($galerie_repeater)) {
+      // New repeater
+      $type_labels = [
+        'ambiance'    => 'Ambiance',
+        'detail'      => 'Détail',
+        'taille'      => 'Tailles',
+        'client'      => 'Client',
+        'fabrication' => 'Fabrication',
+      ];
+      foreach ($galerie_repeater as $row) {
+        $url = sapi_get_acf_image_url(isset($row['image']) ? $row['image'] : null);
+        if ($url) {
+          $type = isset($row['type_photo']) ? $row['type_photo'] : 'ambiance';
+          $acf_photos[] = ['url' => $url, 'label' => isset($type_labels[$type]) ? $type_labels[$type] : ucfirst($type)];
+        }
+      }
+    } else {
+      // Fallback: old fixed fields
+      $acf_field_labels = [
+        'ambiance_1' => 'Ambiance',
+        'ambiance_2' => 'Ambiance',
+        'ambiance_3' => 'Ambiance',
+        'detail_1'   => 'Détail',
+        'detail_2'   => 'Détail',
+        'tailles'    => 'Tailles',
+      ];
+      foreach ($acf_field_labels as $field_name => $label) {
+        $url = sapi_get_acf_image_url(get_field($field_name));
+        if ($url) {
+          $acf_photos[] = ['url' => $url, 'label' => $label];
+        }
       }
     }
   }
@@ -145,6 +184,11 @@ get_header();
           ?>
           <div class="gallery-main" style="cursor: pointer;">
               <img src="<?php echo esc_url($main_image_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="gallery-main-image">
+              <?php if ($video_oembed) : ?>
+              <div class="gallery-main-video" style="display: none;">
+                <?php echo $video_oembed; ?>
+              </div>
+              <?php endif; ?>
             <!-- Mobile navigation arrows (minimal style) -->
             <button type="button" class="gallery-nav gallery-nav-prev" aria-label="Image précédente">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -164,9 +208,23 @@ get_header();
         if (!empty($gallery_ids) || $main_image_id) {
           $all_images = $main_image_id ? array_merge([$main_image_id], $gallery_ids) : $gallery_ids;
 
-          if (count($all_images) + $acf_only_count > 1) {
+          $has_video = !empty($video_oembed);
+          if (count($all_images) + $acf_only_count + ($has_video ? 1 : 0) > 1) {
+            $video_thumb = $has_video ? sapi_get_video_thumbnail($video_url_raw) : '';
             ?>
             <div class="gallery-thumbnails">
+              <?php if ($has_video) : ?>
+              <button class="gallery-thumb gallery-thumb-video" data-video="true" aria-label="Voir la vidéo">
+                <?php if ($video_thumb) : ?>
+                  <img src="<?php echo esc_url($video_thumb); ?>" alt="<?php echo esc_attr(get_the_title() . ' - Vidéo'); ?>">
+                <?php else : ?>
+                  <span class="gallery-thumb-video-placeholder"></span>
+                <?php endif; ?>
+                <span class="gallery-thumb-play">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"></polygon></svg>
+                </span>
+              </button>
+              <?php endif; ?>
               <?php foreach ($all_images as $index => $image_id) :
                 $thumb_url = wp_get_attachment_image_url($image_id, 'woocommerce_gallery_thumbnail');
                 // Use 'full' size for main display to ensure ACF images display properly
@@ -1363,17 +1421,38 @@ get_header();
 
   // Gallery thumbnail switching
   const thumbnails = document.querySelectorAll('.gallery-thumb');
+  const videoContainer = document.querySelector('.gallery-main-video');
+
+  function showVideo() {
+    if (videoContainer && mainImage) {
+      mainImage.style.display = 'none';
+      videoContainer.style.display = 'block';
+    }
+  }
+
+  function hideVideo() {
+    if (videoContainer && mainImage) {
+      videoContainer.style.display = 'none';
+      mainImage.style.display = '';
+    }
+  }
 
   thumbnails.forEach(thumb => {
     thumb.addEventListener('click', function() {
       thumbnails.forEach(t => t.classList.remove('active'));
       this.classList.add('active');
-      if (mainImage) {
-        mainImage.src = this.dataset.image;
-        mainImage.srcset = ''; // Clear srcset to prevent variation image from showing
+
+      if (this.dataset.video === 'true') {
+        showVideo();
+      } else {
+        hideVideo();
+        if (mainImage) {
+          mainImage.src = this.dataset.image;
+          mainImage.srcset = '';
+        }
       }
       if (galleryZoomLink) {
-        galleryZoomLink.href = this.dataset.image;
+        galleryZoomLink.href = this.dataset.image || '';
       }
     });
   });
@@ -1414,15 +1493,20 @@ get_header();
       thumbnails.forEach(t => t.classList.remove('active'));
       targetThumb.classList.add('active');
 
-      // Update main image
-      if (mainImage) {
-        mainImage.src = targetThumb.dataset.image;
-        mainImage.srcset = ''; // Clear srcset to prevent variation image from showing
+      if (targetThumb.dataset.video === 'true') {
+        showVideo();
+      } else {
+        hideVideo();
+        // Update main image
+        if (mainImage) {
+          mainImage.src = targetThumb.dataset.image;
+          mainImage.srcset = '';
+        }
       }
 
       // Update zoom link if available
       if (galleryZoomLink) {
-        galleryZoomLink.href = targetThumb.dataset.image;
+        galleryZoomLink.href = targetThumb.dataset.image || '';
       }
     }
 

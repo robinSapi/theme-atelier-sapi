@@ -64,7 +64,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sapi_contact_nonce'])
 get_header();
 ?>
 
-<section class="contact-hero" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/Charlie-Bandeau-2.jpg');">
+<section class="contact-hero">
+  <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/Charlie-Bandeau-2.jpg" alt="Contact Atelier Sâpi — Créateur de luminaires à Lyon" class="contact-hero-img">
   <div class="contact-hero-overlay"></div>
   <div class="contact-hero-content">
     <h1>Parlons de votre projet</h1>

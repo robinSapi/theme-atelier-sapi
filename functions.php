@@ -744,6 +744,36 @@ add_filter('render_block', function ($content, $block) {
 }, 10, 2);
 
 /**
+ * Helper: extract video thumbnail URL from YouTube or Vimeo URL
+ */
+function sapi_get_video_thumbnail($url) {
+  if (!$url) return '';
+
+  // YouTube (watch, embed, shorts, youtu.be)
+  if (preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $url, $m)) {
+    return 'https://img.youtube.com/vi/' . $m[1] . '/hqdefault.jpg';
+  }
+
+  // Vimeo – use oembed API (cached by WordPress transients)
+  if (preg_match('/vimeo\.com\/(\d+)/', $url, $m)) {
+    $transient_key = 'sapi_vimeo_thumb_' . $m[1];
+    $cached = get_transient($transient_key);
+    if ($cached) return $cached;
+
+    $response = wp_remote_get('https://vimeo.com/api/v2/video/' . $m[1] . '.json');
+    if (!is_wp_error($response)) {
+      $data = json_decode(wp_remote_retrieve_body($response), true);
+      if (!empty($data[0]['thumbnail_large'])) {
+        set_transient($transient_key, $data[0]['thumbnail_large'], DAY_IN_SECONDS * 30);
+        return $data[0]['thumbnail_large'];
+      }
+    }
+  }
+
+  return '';
+}
+
+/**
  * Helper: extract URL from ACF image field (handles all return formats)
  * Centralized here to avoid duplication across templates.
  */
@@ -4115,6 +4145,120 @@ function sapi_register_acf_projet_sur_mesure() {
   ]);
 }
 add_action('acf/init', 'sapi_register_acf_projet_sur_mesure');
+
+/*
+ * ACF fields for Product media (video + photo gallery repeater)
+ * Created MANUALLY via ACF Pro UI — not registered in PHP.
+ *
+ * Field names expected by the template:
+ *   - video_produit     (oEmbed)       → URL YouTube/Vimeo
+ *   - galerie_produit   (Repeater)     → Photos supplémentaires
+ *     ├─ type_photo     (Select)       → ambiance / detail / taille / client / fabrication
+ *     └─ image          (Image, array) → Photo
+ *
+ * Location: Post Type = product
+ */
+
+/**
+ * Migration: old ACF fixed fields → repeater galerie_produit
+ * Adds a one-shot admin page under Tools menu.
+ * Safe to run multiple times (skips products already migrated).
+ */
+function sapi_migration_acf_photos_menu() {
+  add_management_page(
+    'Migration photos ACF',
+    'Migration photos ACF',
+    'manage_options',
+    'sapi-migration-photos',
+    'sapi_migration_acf_photos_page'
+  );
+}
+add_action('admin_menu', 'sapi_migration_acf_photos_menu');
+
+function sapi_migration_acf_photos_page() {
+  if (!current_user_can('manage_options')) return;
+
+  $migrated = false;
+  $results = [];
+
+  if (isset($_POST['sapi_migrate_photos']) && wp_verify_nonce($_POST['_wpnonce'], 'sapi_migrate_photos')) {
+    $old_fields = [
+      'ambiance_1' => 'ambiance',
+      'ambiance_2' => 'ambiance',
+      'ambiance_3' => 'ambiance',
+      'detail_1'   => 'detail',
+      'detail_2'   => 'detail',
+      'tailles'    => 'taille',
+    ];
+
+    $products = get_posts([
+      'post_type'      => 'product',
+      'posts_per_page' => 100,
+      'post_status'    => 'publish',
+    ]);
+
+    foreach ($products as $p) {
+      // Skip if repeater already has data
+      $existing = get_field('galerie_produit', $p->ID);
+      if (!empty($existing)) {
+        $results[] = $p->post_title . ' — déjà migré, ignoré';
+        continue;
+      }
+
+      $rows = [];
+      foreach ($old_fields as $field_name => $type) {
+        $value = get_field($field_name, $p->ID);
+        if (!$value) continue;
+
+        // Get attachment ID
+        $attach_id = null;
+        if (is_array($value) && isset($value['ID'])) {
+          $attach_id = $value['ID'];
+        } elseif (is_numeric($value)) {
+          $attach_id = intval($value);
+        } elseif (is_array($value) && isset($value['id'])) {
+          $attach_id = $value['id'];
+        }
+
+        if ($attach_id) {
+          $rows[] = ['type_photo' => $type, 'image' => $attach_id];
+        }
+      }
+
+      if (!empty($rows)) {
+        update_field('galerie_produit', $rows, $p->ID);
+        $results[] = $p->post_title . ' — ' . count($rows) . ' photos migrées';
+      } else {
+        $results[] = $p->post_title . ' — aucune photo ACF trouvée';
+      }
+    }
+
+    $migrated = true;
+  }
+
+  echo '<div class="wrap">';
+  echo '<h1>Migration photos ACF → Repeater</h1>';
+
+  if ($migrated) {
+    echo '<div class="notice notice-success"><p>Migration terminée !</p></div>';
+    echo '<ul>';
+    foreach ($results as $r) {
+      echo '<li>' . esc_html($r) . '</li>';
+    }
+    echo '</ul>';
+    echo '<p><strong>Vous pouvez maintenant supprimer les anciens champs ACF (ambiance_1, ambiance_2, ambiance_3, detail_1, detail_2, tailles) depuis l\'interface ACF.</strong></p>';
+  } else {
+    echo '<p>Ce script migre les anciennes photos ACF (ambiance_1/2/3, detail_1/2, tailles) vers le nouveau repeater <code>galerie_produit</code>.</p>';
+    echo '<p>Les produits déjà migrés (repeater non vide) seront ignorés.</p>';
+    echo '<form method="post">';
+    wp_nonce_field('sapi_migrate_photos');
+    echo '<input type="hidden" name="sapi_migrate_photos" value="1">';
+    submit_button('Lancer la migration');
+    echo '</form>';
+  }
+
+  echo '</div>';
+}
 
 /**
  * Handle "Sur Mesure" contact form submission
