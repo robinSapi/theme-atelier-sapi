@@ -112,6 +112,7 @@ get_header();
         if ($url) {
           $type = isset($row['type_photo']) ? $row['type_photo'] : 'ambiance';
           if (is_array($type)) $type = isset($type['value']) ? $type['value'] : 'ambiance';
+          if ($type === 'client') continue; // Photos client exclues de la galerie
           $acf_photos[] = ['url' => $url, 'label' => isset($type_labels[$type]) ? $type_labels[$type] : ucfirst($type)];
         }
       }
