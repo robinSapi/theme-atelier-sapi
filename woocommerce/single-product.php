@@ -111,6 +111,7 @@ get_header();
         $url = sapi_get_acf_image_url(isset($row['image']) ? $row['image'] : null);
         if ($url) {
           $type = isset($row['type_photo']) ? $row['type_photo'] : 'ambiance';
+          if (is_array($type)) $type = isset($type['value']) ? $type['value'] : 'ambiance';
           $acf_photos[] = ['url' => $url, 'label' => isset($type_labels[$type]) ? $type_labels[$type] : ucfirst($type)];
         }
       }

@@ -791,7 +791,10 @@ function sapi_get_product_photos($post_id, $type = '', $limit = 0) {
 
   if (!empty($galerie) && is_array($galerie)) {
     foreach ($galerie as $row) {
-      if ($type && isset($row['type_photo']) && $row['type_photo'] !== $type) continue;
+      $row_type = isset($row['type_photo']) ? $row['type_photo'] : '';
+      // Handle case where select field returns array instead of string
+      if (is_array($row_type)) $row_type = isset($row_type['value']) ? $row_type['value'] : '';
+      if ($type && $row_type !== $type) continue;
       $url = sapi_get_acf_image_url(isset($row['image']) ? $row['image'] : null);
       if ($url) {
         $photos[] = $url;
