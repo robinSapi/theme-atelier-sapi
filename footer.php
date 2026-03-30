@@ -56,6 +56,7 @@ $is_simplified = function_exists('is_cart') && (is_cart() || is_checkout());
       <a href="mailto:contact@atelier-sapi.fr">contact@atelier-sapi.fr</a>
       <a href="tel:+33680435585">06 80 43 55 85</a>
       <a href="https://maps.app.goo.gl/9MtqzyVPvZ3oxuze6" target="_blank" rel="noopener noreferrer" class="footer-location">Lyon, France</a>
+      <span class="footer-atelier-rdv">Atelier ouvert sur rendez-vous</span>
     </div>
 
     <!-- Social Column -->

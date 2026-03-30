@@ -5010,6 +5010,23 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   text-align: right;
 }
 
+.atelier-rdv {
+  font-size: 0.85rem;
+  color: var(--color-gray-mid);
+  margin-top: 1rem;
+  font-style: italic;
+}
+
+.atelier-rdv a {
+  color: var(--color-wood, #937D68);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.atelier-rdv a:hover {
+  color: var(--color-orange, #E35B24);
+}
+
 .product-atelier-content .robin-conseil__product-link:hover {
   color: var(--color-orange, #E35B24);
 }
@@ -7688,6 +7705,16 @@ li.carousel-editorial-slide,
   margin: 0;
 }
 
+.artisan-value-item a {
+  color: var(--color-wood, #937D68);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.artisan-value-item a:hover {
+  color: var(--color-orange, #E35B24);
+}
+
 /* Quote Finale Premium */
 .artisan-quote-cinetique {
   padding: 120px 20px;
@@ -9356,6 +9383,54 @@ li.carousel-editorial-slide,
   font-size: 18px;
 }
 
+/* ---- Carte atelier enrichie (page contact) ---- */
+.contact-card--atelier {
+  cursor: default;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.contact-card-atelier-map {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.contact-card-atelier-map iframe {
+  width: 100%;
+  height: 180px;
+  display: block;
+}
+
+.contact-card-sub {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--color-gray-mid);
+  margin-top: 0.25rem;
+  line-height: 1.5;
+}
+
+.contact-card-sub a {
+  color: var(--color-wood, #937D68);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.contact-card-sub a:hover {
+  color: var(--color-orange, #E35B24);
+}
+
+.contact-card--atelier .contact-card-value a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.contact-card--atelier .contact-card-value a:hover {
+  color: var(--color-wood, #937D68);
+}
+
 /* ---- Contact Responsive ---- */
 @media (max-width: 768px) {
   .contact-hero {
@@ -9375,6 +9450,7 @@ li.carousel-editorial-slide,
   .contact-form-card {
     padding: 1.5rem;
   }
+
 }
 
 /* ========================================
@@ -12366,6 +12442,15 @@ transform: translateY(15px);
   font-size: 0.875rem;
   font-weight: 400;
   color: var(--color-gray-mid);
+}
+
+.footer-atelier-rdv {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--color-gray);
+  opacity: 0.8;
 }
 
 .footer-kinetic .footer-links {

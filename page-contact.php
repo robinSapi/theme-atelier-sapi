@@ -106,18 +106,17 @@ get_header();
           </span>
         </a>
 
-        <a href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer" class="contact-card">
-          <span class="contact-card-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-          </span>
+        <div class="contact-card contact-card--atelier">
+          <div class="contact-card-atelier-map">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d381.97568401845297!2d4.8402947801140135!3d45.81651268781072!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47f495937d942563%3A0xa6e8cc815b5b180d!2sAtelier%20S%C3%A2pi!5e1!3m2!1sfr!2sfr!4v1774866581452!5m2!1sfr!2sfr" width="100%" height="180" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
           <span class="contact-card-content">
-            <span class="contact-card-label">L'atelier</span>
-            <span class="contact-card-value">Lyon, France</span>
+            <span class="contact-card-label">L'atelier — sur rendez-vous</span>
+            <span class="contact-card-value"><a href="https://maps.app.goo.gl/vt9whr9AN9At9cMF8" target="_blank" rel="noopener noreferrer">Lyon, France</a></span>
+            <span class="contact-card-sub">Lun&ndash;Ven : 9h&ndash;18h &middot; Sam : sur rendez-vous</span>
+            <span class="contact-card-sub"><a href="tel:+33680435585">Appelez pour prendre rendez-vous</a></span>
           </span>
-        </a>
+        </div>
       </div>
     </div>
 

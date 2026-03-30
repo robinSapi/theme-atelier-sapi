@@ -852,6 +852,7 @@ get_header();
         </div>
         <p class="atelier-signature">Robin, créateur à l'Atelier Sâpi</p>
         <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="robin-conseil__product-link">Découvrir l'histoire de Robin &rarr;</a>
+        <p class="atelier-rdv">Atelier ouvert sur rendez-vous — <a href="<?php echo esc_url(home_url('/contact/')); ?>">prendre rendez-vous</a></p>
       </div>
     </div>
   </section>
