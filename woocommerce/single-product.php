@@ -82,9 +82,19 @@ get_header();
   $video_oembed = '';
   $video_url_raw = '';
   if (function_exists('get_field')) {
-    $video_oembed = get_field('video_produit');
-    // Extract raw URL from oEmbed field for thumbnail generation
-    $video_url_raw = get_field('video_produit', false, false);
+    $video_raw = get_field('video_produit', false, false); // Raw URL
+    $video_rendered = get_field('video_produit'); // oEmbed HTML or URL
+
+    if ($video_raw) {
+      $video_url_raw = $video_raw;
+      // If ACF returns HTML (iframe), use it directly; otherwise convert URL to embed
+      if ($video_rendered && $video_rendered !== $video_raw && strpos($video_rendered, '<') !== false) {
+        $video_oembed = $video_rendered;
+      } else {
+        // Fallback: use wp_oembed_get to convert URL to iframe
+        $video_oembed = wp_oembed_get($video_raw);
+      }
+    }
   }
 
   // 3. ACF photos: try repeater first, fallback to old fixed fields
@@ -203,9 +213,13 @@ get_header();
             $video_thumb = $has_video ? sapi_get_video_thumbnail($video_url_raw) : '';
             ?>
             <div class="gallery-thumbnails">
-              <?php if ($has_video && $video_thumb) : ?>
+              <?php if ($has_video) : ?>
               <button class="gallery-thumb gallery-thumb-video" data-video="true" aria-label="Voir la vidéo">
-                <img src="<?php echo esc_url($video_thumb); ?>" alt="<?php echo esc_attr(get_the_title() . ' - Vidéo'); ?>">
+                <?php if ($video_thumb) : ?>
+                  <img src="<?php echo esc_url($video_thumb); ?>" alt="<?php echo esc_attr(get_the_title() . ' - Vidéo'); ?>">
+                <?php else : ?>
+                  <span class="gallery-thumb-video-placeholder"></span>
+                <?php endif; ?>
                 <span class="gallery-thumb-play">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"></polygon></svg>
                 </span>
