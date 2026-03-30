@@ -46,13 +46,10 @@ $mini_desc        = $has_acf ? get_field('mini_description', $star_id) : '';
 $pourquoi         = $has_acf ? get_field('pourquoi_cette_piece', $star_id) : '';
 $descriptif       = $has_acf ? (get_field('Descriptif', $star_id) ?: get_field('descriptif', $star_id)) : '';
 
-// Photos ACF
-$ambiance_1 = $has_acf ? sapi_get_acf_image_url(get_field('ambiance_1', $star_id)) : '';
-$ambiance_2 = $has_acf ? sapi_get_acf_image_url(get_field('ambiance_2', $star_id)) : '';
-$ambiance_3 = $has_acf ? sapi_get_acf_image_url(get_field('ambiance_3', $star_id)) : '';
-$bandeau    = $has_acf ? sapi_get_acf_image_url(get_field('bandeau', $star_id)) : '';
-$detail_1   = $has_acf ? sapi_get_acf_image_url(get_field('detail_1', $star_id)) : '';
-$detail_2   = $has_acf ? sapi_get_acf_image_url(get_field('detail_2', $star_id)) : '';
+// Photos ACF (repeater)
+$ambiance_photos = sapi_get_product_photos($star_id, 'ambiance');
+$detail_photos   = sapi_get_product_photos($star_id, 'detail');
+$bandeau         = $has_acf ? sapi_get_acf_image_url(get_field('bandeau', $star_id)) : '';
 
 // Photo principale produit
 $main_image_id  = $star_product->get_image_id();
@@ -66,15 +63,8 @@ foreach ($gallery_ids as $gid) {
   if ($url) $gallery_urls[] = $url;
 }
 
-// Toutes les photos pour la galerie (ambiance + principale + galerie)
-$all_photos = array_filter(array_merge(
-  [$ambiance_1, $ambiance_2, $ambiance_3],
-  [$main_image_url],
-  $gallery_urls
-));
-
-// Hero = ambiance_1 ou image principale
-$hero_url = $ambiance_1 ?: $main_image_url;
+// Hero = première ambiance ou image principale
+$hero_url = !empty($ambiance_photos[0]) ? $ambiance_photos[0] : $main_image_url;
 
 
 ?>
@@ -131,14 +121,18 @@ if ($accroche || $texte_principal || $descriptif) :
   $seen_urls = [];
   $all_photos = [];
 
-  $acf_candidates = [
-    ['url' => $bandeau,    'alt' => 'Bandeau'],
-    ['url' => $ambiance_1, 'alt' => 'Ambiance'],
-    ['url' => $detail_1,   'alt' => 'Détail'],
-    ['url' => $detail_2,   'alt' => 'Détail'],
-    ['url' => $ambiance_2, 'alt' => 'Ambiance'],
-    ['url' => $ambiance_3, 'alt' => 'Ambiance'],
-  ];
+  // ACF photos: bandeau + ambiance + détail
+  $acf_candidates = [];
+  if ($bandeau) $acf_candidates[] = ['url' => $bandeau, 'alt' => 'Bandeau'];
+  foreach ($ambiance_photos as $url) {
+    $acf_candidates[] = ['url' => $url, 'alt' => 'Ambiance'];
+  }
+  foreach ($detail_photos as $url) {
+    $acf_candidates[] = ['url' => $url, 'alt' => 'Détail'];
+  }
+  // Mélanger l'ordre à chaque chargement
+  shuffle($acf_candidates);
+
   foreach ($acf_candidates as $p) {
     if (!empty($p['url']) && !isset($seen_urls[$p['url']])) {
       $all_photos[] = $p;

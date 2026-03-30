@@ -68,8 +68,11 @@ while ($featured_query->have_posts()) :
   $featured_query->the_post();
   $pid = get_the_ID();
 
-  // Chercher l'image ACF bandeau uniquement
-  if (function_exists('get_field')) {
+  // Chercher une photo ambiance du repeater, fallback bandeau
+  $amb_photos = sapi_get_product_photos($pid, 'ambiance', 1);
+  if (!empty($amb_photos)) {
+    $featured_image_url = $amb_photos[0];
+  } elseif (function_exists('get_field')) {
     $bandeau = get_field('bandeau', $pid);
     if ($bandeau) {
       $featured_image_url = sapi_get_acf_image_url($bandeau);
@@ -185,11 +188,8 @@ if ($bg_query->have_posts()) {
   $bg_query->the_post();
   $bg_product_id = get_the_ID();
 
-  if (function_exists('get_field')) {
-    $ambiance_image = get_field('ambiance_1', $bg_product_id);
-
-    $ambiance_bg_url = sapi_get_acf_image_url($ambiance_image);
-  }
+  $ambiance_photos = sapi_get_product_photos($bg_product_id, 'ambiance');
+  $ambiance_bg_url = !empty($ambiance_photos) ? $ambiance_photos[array_rand($ambiance_photos)] : '';
 
   wp_reset_postdata();
 }

@@ -55,11 +55,9 @@ get_header();
   <?php
   // sapi_get_acf_image_url() is defined in functions.php
 
-  // Get Ambiance 1 image for intro screen
-  $ambiance_intro = '';
-  if (function_exists('get_field')) {
-    $ambiance_intro = sapi_get_acf_image_url(get_field('ambiance_1'));
-  }
+  // Get first ambiance image for intro screen
+  $ambiance_intro_photos = sapi_get_product_photos(get_the_ID(), 'ambiance', 1);
+  $ambiance_intro = !empty($ambiance_intro_photos) ? $ambiance_intro_photos[0] : '';
 
   // Collect ALL photos for lightbox: product images + ACF ambiance/detail
   $acf_photos = [];
@@ -97,40 +95,31 @@ get_header();
     }
   }
 
-  // 3. ACF photos: try repeater first, fallback to old fixed fields
+  // 3. ACF photos from repeater (with fallback to old fields in helper)
+  $type_labels = [
+    'ambiance'    => 'Ambiance',
+    'detail'      => 'Détail',
+    'taille'      => 'Tailles',
+    'client'      => 'Client',
+    'fabrication' => 'Fabrication',
+  ];
+
   if (function_exists('get_field')) {
     $galerie_repeater = get_field('galerie_produit');
     if (!empty($galerie_repeater) && is_array($galerie_repeater)) {
-      // New repeater
-      $type_labels = [
-        'ambiance'    => 'Ambiance',
-        'detail'      => 'Détail',
-        'taille'      => 'Tailles',
-        'client'      => 'Client',
-        'fabrication' => 'Fabrication',
-      ];
       foreach ($galerie_repeater as $row) {
         $url = sapi_get_acf_image_url(isset($row['image']) ? $row['image'] : null);
         if ($url) {
           $type = isset($row['type_photo']) ? $row['type_photo'] : 'ambiance';
+          if (is_array($type)) $type = isset($type['value']) ? $type['value'] : 'ambiance';
           $acf_photos[] = ['url' => $url, 'label' => isset($type_labels[$type]) ? $type_labels[$type] : ucfirst($type)];
         }
       }
     } else {
-      // Fallback: old fixed fields
-      $acf_field_labels = [
-        'ambiance_1' => 'Ambiance',
-        'ambiance_2' => 'Ambiance',
-        'ambiance_3' => 'Ambiance',
-        'detail_1'   => 'Détail',
-        'detail_2'   => 'Détail',
-        'tailles'    => 'Tailles',
-      ];
-      foreach ($acf_field_labels as $field_name => $label) {
-        $url = sapi_get_acf_image_url(get_field($field_name));
-        if ($url) {
-          $acf_photos[] = ['url' => $url, 'label' => $label];
-        }
+      // Fallback: use helper which reads old fixed fields
+      $all_product_photos = sapi_get_product_photos(get_the_ID());
+      foreach ($all_product_photos as $url) {
+        $acf_photos[] = ['url' => $url, 'label' => 'Photo'];
       }
     }
   }
@@ -392,19 +381,16 @@ get_header();
        SECTION PHOTO CLIENT — BANDEAU
        ═══════════════════════════════════════════════════════════════ -->
   <?php
-  if (function_exists('get_field')) {
-    $bandeau = get_field('bandeau');
-    if ($bandeau) {
-      $bandeau_url = sapi_get_acf_image_url($bandeau);
+  $client_photos = sapi_get_product_photos($product_id, 'client');
+  $bandeau_url = !empty($client_photos) ? $client_photos[array_rand($client_photos)] : '';
 
-      $section_num = 0; // Compteur dynamique pour numérotation des sections
-      if ($bandeau_url) :
-        // Random caption
-        $captions = [
-          'Photo envoyée par une cliente',
-          'Photo envoyée récemment par un client'
-        ];
-        $random_caption = $captions[array_rand($captions)];
+  if ($bandeau_url) :
+    $section_num = 0;
+    $captions = [
+      'Photo envoyée par une cliente',
+      'Photo envoyée récemment par un client'
+    ];
+    $random_caption = $captions[array_rand($captions)];
   ?>
   <section class="product-client-photo">
     <div class="client-photo-header">
@@ -415,11 +401,7 @@ get_header();
       <img src="<?php echo esc_url($bandeau_url); ?>" alt="Photo client - <?php echo esc_attr(get_the_title()); ?>" class="client-photo-image">
     </div>
   </section>
-  <?php
-      endif;
-    }
-  }
-  ?>
+  <?php endif; ?>
 
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION 02 — POURQUOI CETTE PIÈCE

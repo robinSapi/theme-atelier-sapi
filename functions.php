@@ -774,6 +774,63 @@ function sapi_get_video_thumbnail($url) {
 }
 
 /**
+ * Helper: get photo URLs from galerie_produit repeater by type.
+ * Returns array of URLs matching the given type, or all photos if no type specified.
+ * Falls back to old fixed ACF fields if repeater is empty.
+ *
+ * @param int    $post_id  Product ID
+ * @param string $type     Photo type: 'ambiance', 'detail', 'taille', 'client', 'fabrication', or '' for all
+ * @param int    $limit    Max number of photos to return (0 = all)
+ * @return array           Array of image URLs
+ */
+function sapi_get_product_photos($post_id, $type = '', $limit = 0) {
+  if (!function_exists('get_field')) return [];
+
+  $photos = [];
+  $galerie = get_field('galerie_produit', $post_id);
+
+  if (!empty($galerie) && is_array($galerie)) {
+    foreach ($galerie as $row) {
+      $row_type = isset($row['type_photo']) ? $row['type_photo'] : '';
+      // Handle case where select field returns array instead of string
+      if (is_array($row_type)) $row_type = isset($row_type['value']) ? $row_type['value'] : '';
+      if ($type && $row_type !== $type) continue;
+      $url = sapi_get_acf_image_url(isset($row['image']) ? $row['image'] : null);
+      if ($url) {
+        $photos[] = $url;
+        if ($limit > 0 && count($photos) >= $limit) break;
+      }
+    }
+  } else {
+    // Fallback: old fixed fields
+    $old_fields_by_type = [
+      'ambiance' => ['ambiance_1', 'ambiance_2', 'ambiance_3'],
+      'detail'   => ['detail_1', 'detail_2'],
+      'taille'   => ['tailles'],
+    ];
+
+    $fields_to_check = [];
+    if ($type && isset($old_fields_by_type[$type])) {
+      $fields_to_check = $old_fields_by_type[$type];
+    } elseif (!$type) {
+      foreach ($old_fields_by_type as $flds) {
+        $fields_to_check = array_merge($fields_to_check, $flds);
+      }
+    }
+
+    foreach ($fields_to_check as $field_name) {
+      $url = sapi_get_acf_image_url(get_field($field_name, $post_id));
+      if ($url) {
+        $photos[] = $url;
+        if ($limit > 0 && count($photos) >= $limit) break;
+      }
+    }
+  }
+
+  return $photos;
+}
+
+/**
  * Helper: extract URL from ACF image field (handles all return formats)
  * Centralized here to avoid duplication across templates.
  */
@@ -3324,16 +3381,11 @@ function sapi_guide_collect_results($query, array $answers, $skip_exclusions = f
       }
     }
 
-    // Ambiance photo for full-width banner (fallback: ambiance_2 → ambiance_1)
-    $ambiance_url = '';
+    // Ambiance photo for full-width banner
     $pid = $product->get_id();
-    $ambiance_raw = get_field('ambiance_2', $pid);
-    if (!$ambiance_raw) {
-      $ambiance_raw = get_field('ambiance_1', $pid);
-    }
-    if ($ambiance_raw) {
-      $ambiance_url = sapi_get_acf_image_url($ambiance_raw, 'full');
-    }
+    $ambiance_photos = sapi_get_product_photos($pid, 'ambiance', 2);
+    // Prefer second ambiance photo, fallback to first
+    $ambiance_url = isset($ambiance_photos[1]) ? $ambiance_photos[1] : (isset($ambiance_photos[0]) ? $ambiance_photos[0] : '');
 
     // Hover image (first gallery image for card hover effect)
     $hover_image_url = '';
@@ -4158,107 +4210,6 @@ add_action('acf/init', 'sapi_register_acf_projet_sur_mesure');
  *
  * Location: Post Type = product
  */
-
-/**
- * Migration: old ACF fixed fields → repeater galerie_produit
- * Adds a one-shot admin page under Tools menu.
- * Safe to run multiple times (skips products already migrated).
- */
-function sapi_migration_acf_photos_menu() {
-  add_management_page(
-    'Migration photos ACF',
-    'Migration photos ACF',
-    'manage_options',
-    'sapi-migration-photos',
-    'sapi_migration_acf_photos_page'
-  );
-}
-add_action('admin_menu', 'sapi_migration_acf_photos_menu');
-
-function sapi_migration_acf_photos_page() {
-  if (!current_user_can('manage_options')) return;
-
-  $migrated = false;
-  $results = [];
-
-  if (isset($_POST['sapi_migrate_photos']) && wp_verify_nonce($_POST['_wpnonce'], 'sapi_migrate_photos')) {
-    $old_fields = [
-      'ambiance_1' => 'ambiance',
-      'ambiance_2' => 'ambiance',
-      'ambiance_3' => 'ambiance',
-      'detail_1'   => 'detail',
-      'detail_2'   => 'detail',
-      'tailles'    => 'taille',
-    ];
-
-    $products = get_posts([
-      'post_type'      => 'product',
-      'posts_per_page' => 100,
-      'post_status'    => 'publish',
-    ]);
-
-    foreach ($products as $p) {
-      // Skip if repeater already has data
-      $existing = get_field('galerie_produit', $p->ID);
-      if (!empty($existing)) {
-        $results[] = $p->post_title . ' — déjà migré, ignoré';
-        continue;
-      }
-
-      $rows = [];
-      foreach ($old_fields as $field_name => $type) {
-        $value = get_field($field_name, $p->ID);
-        if (!$value) continue;
-
-        // Get attachment ID
-        $attach_id = null;
-        if (is_array($value) && isset($value['ID'])) {
-          $attach_id = $value['ID'];
-        } elseif (is_numeric($value)) {
-          $attach_id = intval($value);
-        } elseif (is_array($value) && isset($value['id'])) {
-          $attach_id = $value['id'];
-        }
-
-        if ($attach_id) {
-          $rows[] = ['type_photo' => $type, 'image' => $attach_id];
-        }
-      }
-
-      if (!empty($rows)) {
-        update_field('galerie_produit', $rows, $p->ID);
-        $results[] = $p->post_title . ' — ' . count($rows) . ' photos migrées';
-      } else {
-        $results[] = $p->post_title . ' — aucune photo ACF trouvée';
-      }
-    }
-
-    $migrated = true;
-  }
-
-  echo '<div class="wrap">';
-  echo '<h1>Migration photos ACF → Repeater</h1>';
-
-  if ($migrated) {
-    echo '<div class="notice notice-success"><p>Migration terminée !</p></div>';
-    echo '<ul>';
-    foreach ($results as $r) {
-      echo '<li>' . esc_html($r) . '</li>';
-    }
-    echo '</ul>';
-    echo '<p><strong>Vous pouvez maintenant supprimer les anciens champs ACF (ambiance_1, ambiance_2, ambiance_3, detail_1, detail_2, tailles) depuis l\'interface ACF.</strong></p>';
-  } else {
-    echo '<p>Ce script migre les anciennes photos ACF (ambiance_1/2/3, detail_1/2, tailles) vers le nouveau repeater <code>galerie_produit</code>.</p>';
-    echo '<p>Les produits déjà migrés (repeater non vide) seront ignorés.</p>';
-    echo '<form method="post">';
-    wp_nonce_field('sapi_migrate_photos');
-    echo '<input type="hidden" name="sapi_migrate_photos" value="1">';
-    submit_button('Lancer la migration');
-    echo '</form>';
-  }
-
-  echo '</div>';
-}
 
 /**
  * Handle "Sur Mesure" contact form submission

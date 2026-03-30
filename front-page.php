@@ -7,7 +7,7 @@
 
 get_header();
 
-// Query products for full-page carousel - two from each category with ambiance_1 field
+// Query products for full-page carousel - two from each category with ambiance photos
 // Order: suspension, applique, lampe à poser, lampadaire (x2)
 $carousel_products = [];
 $categories_order = ['suspensions', 'appliques', 'lampesaposer', 'lampadaires'];
@@ -17,19 +17,13 @@ $products_by_category = [];
 foreach ($categories_order as $cat_slug) {
   $args = [
     'post_type' => 'product',
-    'posts_per_page' => 2, // Get 2 products instead of 1
+    'posts_per_page' => 4,
     'post_status' => 'publish',
     'tax_query' => [
       [
         'taxonomy' => 'product_cat',
         'field' => 'slug',
         'terms' => $cat_slug,
-      ],
-    ],
-    'meta_query' => [
-      [
-        'key' => 'ambiance_1',
-        'compare' => 'EXISTS',
       ],
     ],
     'orderby' => 'rand',
@@ -42,20 +36,20 @@ foreach ($categories_order as $cat_slug) {
     while ($query->have_posts()) {
       $query->the_post();
       $product = wc_get_product(get_the_ID());
-      $ambiance_1 = get_field('ambiance_1');
 
-      if ($ambiance_1 && $product) {
-        $image_url = sapi_get_acf_image_url($ambiance_1);
-
-        // Get minimum price
-        if ($product->is_type('variable')) {
-          $min_price = $product->get_variation_price('min');
-          $price_display = $min_price ? wc_price($min_price) : $product->get_price_html();
-        } else {
-          $price_display = wc_price($product->get_price());
-        }
+      if ($product) {
+        $ambiance_photos = sapi_get_product_photos(get_the_ID(), 'ambiance', 1);
+        $image_url = !empty($ambiance_photos) ? $ambiance_photos[0] : '';
 
         if ($image_url) {
+          // Get minimum price
+          if ($product->is_type('variable')) {
+            $min_price = $product->get_variation_price('min');
+            $price_display = $min_price ? wc_price($min_price) : $product->get_price_html();
+          } else {
+            $price_display = wc_price($product->get_price());
+          }
+
           $products_by_category[$cat_slug][] = [
             'id' => get_the_ID(),
             'name' => get_the_title(),
@@ -63,6 +57,8 @@ foreach ($categories_order as $cat_slug) {
             'url' => get_permalink(),
             'image' => $image_url,
           ];
+
+          if (count($products_by_category[$cat_slug]) >= 2) break;
         }
       }
     }
@@ -113,11 +109,8 @@ if ($star_page && function_exists('get_field')) {
       }
     }
 
-    $image_url = '';
-    $detail_2 = get_field('detail_2', $star_id);
-    if ($detail_2) {
-      $image_url = sapi_get_acf_image_url($detail_2);
-    }
+    $detail_photos = sapi_get_product_photos($star_id, 'detail', 1);
+    $image_url = !empty($detail_photos) ? $detail_photos[0] : '';
     if (!$image_url) {
       $image_url = get_the_post_thumbnail_url($star_id, 'woocommerce_single');
     }
@@ -201,7 +194,7 @@ $room_icons = [
 $featured_products = [];
 $featured_query = new WP_Query([
   'post_type' => 'product',
-  'posts_per_page' => 1,
+  'posts_per_page' => 4,
   'post_status' => 'publish',
   'orderby' => 'rand',
   'tax_query' => [
@@ -212,17 +205,6 @@ $featured_query = new WP_Query([
       'operator' => 'IN',
     ],
   ],
-  'meta_query' => [
-    [
-      'key' => 'detail_1',
-      'compare' => 'EXISTS',
-    ],
-    [
-      'key' => 'detail_1',
-      'value' => '',
-      'compare' => '!=',
-    ],
-  ],
 ]);
 
 if ($featured_query->have_posts()) {
@@ -231,13 +213,8 @@ if ($featured_query->have_posts()) {
     $product = wc_get_product(get_the_ID());
 
     if ($product) {
-      // Get detail_1 ACF field
-      $detail_1 = get_field('detail_1', get_the_ID());
-      $image_url = '';
-
-      if ($detail_1) {
-        $image_url = sapi_get_acf_image_url($detail_1);
-      }
+      $detail_photos = sapi_get_product_photos(get_the_ID(), 'detail', 1);
+      $image_url = !empty($detail_photos) ? $detail_photos[0] : '';
 
       if ($image_url) {
         // Get price
@@ -254,6 +231,7 @@ if ($featured_query->have_posts()) {
           'image' => $image_url,
           'url' => get_permalink(),
         ];
+        break; // Only need 1
       }
     }
   }
