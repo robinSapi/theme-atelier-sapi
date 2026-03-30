@@ -9383,80 +9383,55 @@ li.carousel-editorial-slide,
   font-size: 18px;
 }
 
-/* ---- Section Atelier (page contact) ---- */
-.contact-atelier {
-  padding: 60px 5%;
-  background: var(--color-warm);
-}
-
-.contact-atelier-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  align-items: center;
-}
-
-.contact-atelier h2 {
-  font-family: var(--font-display);
-  font-size: 2.5rem;
-  color: var(--color-dark);
-  margin-bottom: 1rem;
-}
-
-.contact-atelier > .contact-atelier-grid > .contact-atelier-info > p {
-  font-size: 1.05rem;
-  line-height: 1.7;
-  color: var(--color-dark);
-  opacity: 0.85;
-  margin-bottom: 2rem;
-}
-
-.contact-atelier-details {
-  display: flex;
+/* ---- Carte atelier enrichie (page contact) ---- */
+.contact-card--atelier {
+  cursor: default;
   flex-direction: column;
-  gap: 1.25rem;
-}
-
-.contact-atelier-detail {
-  display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
 }
 
-.contact-atelier-detail svg {
-  flex-shrink: 0;
-  margin-top: 2px;
-  color: var(--color-wood);
+.contact-card--atelier .contact-card-icon {
+  align-self: flex-start;
 }
 
-.contact-atelier-detail strong {
+.contact-card-sub {
   display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-dark);
-  margin-bottom: 0.15rem;
+  font-size: 0.8rem;
+  color: var(--color-gray-mid);
+  margin-top: 0.25rem;
+  line-height: 1.5;
 }
 
-.contact-atelier-detail span {
-  font-size: 0.95rem;
-  color: var(--color-dark);
-  opacity: 0.8;
-}
-
-.contact-atelier-detail a {
-  color: var(--color-wood);
+.contact-card-sub a {
+  color: var(--color-wood, #937D68);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
-.contact-atelier-map {
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+.contact-card-sub a:hover {
+  color: var(--color-orange, #E35B24);
+}
+
+.contact-card--atelier .contact-card-value a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.contact-card--atelier .contact-card-value a:hover {
+  color: var(--color-wood, #937D68);
+}
+
+/* ---- Bandeau Maps pleine largeur ---- */
+.contact-map-band {
+  width: 100%;
+  line-height: 0;
+}
+
+.contact-map-band iframe {
+  width: 100%;
+  height: 350px;
+  display: block;
 }
 
 /* ---- Contact Responsive ---- */
@@ -9479,17 +9454,8 @@ li.carousel-editorial-slide,
     padding: 1.5rem;
   }
 
-  .contact-atelier {
-    padding: 40px 20px;
-  }
-
-  .contact-atelier-grid {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-
-  .contact-atelier h2 {
-    font-size: 2rem;
+  .contact-map-band iframe {
+    height: 250px;
   }
 }
 

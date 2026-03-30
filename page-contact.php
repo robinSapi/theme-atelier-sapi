@@ -106,7 +106,7 @@ get_header();
           </span>
         </a>
 
-        <a href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer" class="contact-card">
+        <div class="contact-card contact-card--atelier">
           <span class="contact-card-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
@@ -114,10 +114,12 @@ get_header();
             </svg>
           </span>
           <span class="contact-card-content">
-            <span class="contact-card-label">L'atelier</span>
-            <span class="contact-card-value">Lyon, France</span>
+            <span class="contact-card-label">L'atelier — sur rendez-vous</span>
+            <span class="contact-card-value"><a href="https://maps.app.goo.gl/vt9whr9AN9At9cMF8" target="_blank" rel="noopener noreferrer">Lyon, France</a></span>
+            <span class="contact-card-sub">Lun&ndash;Ven : 9h&ndash;18h &middot; Sam : sur rendez-vous</span>
+            <span class="contact-card-sub"><a href="tel:+33680435585">Appelez pour prendre rendez-vous</a></span>
           </span>
-        </a>
+        </div>
       </div>
     </div>
 
@@ -171,46 +173,9 @@ get_header();
   </div>
 </section>
 
-<!-- Section Visiter l'atelier -->
-<section class="contact-atelier">
-  <div class="contact-atelier-grid">
-    <div class="contact-atelier-info">
-      <h2>Visiter l'atelier</h2>
-      <p>Envie de voir les luminaires en vrai, toucher le bois, découvrir les coulisses de la fabrication ? L'atelier est ouvert sur rendez-vous.</p>
-      <div class="contact-atelier-details">
-        <div class="contact-atelier-detail">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-          </svg>
-          <div>
-            <strong>Horaires</strong>
-            <span>Lun&ndash;Ven : 9h&ndash;18h &middot; Sam : sur rendez-vous</span>
-          </div>
-        </div>
-        <div class="contact-atelier-detail">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
-          </svg>
-          <div>
-            <strong>Prendre rendez-vous</strong>
-            <span><a href="tel:+33680435585">06 80 43 55 85</a></span>
-          </div>
-        </div>
-        <div class="contact-atelier-detail">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-          </svg>
-          <div>
-            <strong>Adresse</strong>
-            <span><a href="https://maps.app.goo.gl/vt9whr9AN9At9cMF8" target="_blank" rel="noopener noreferrer">Voir sur Google Maps</a></span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="contact-atelier-map">
-      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3559.286880997081!2d4.836447276816423!3d45.81514300995407!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47f495937d942563%3A0xa6e8cc815b5b180d!2sAtelier%20S%C3%A2pi!5e1!3m2!1sfr!2sfr!4v1774865107774!5m2!1sfr!2sfr" width="100%" height="100%" style="border:0; border-radius: 12px; min-height: 300px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    </div>
-  </div>
+<!-- Bandeau Maps pleine largeur -->
+<section class="contact-map-band">
+  <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3559.286880997081!2d4.836447276816423!3d45.81514300995407!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47f495937d942563%3A0xa6e8cc815b5b180d!2sAtelier%20S%C3%A2pi!5e1!3m2!1sfr!2sfr!4v1774865107774!5m2!1sfr!2sfr" width="100%" height="350" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
 </section>
 
 <?php
