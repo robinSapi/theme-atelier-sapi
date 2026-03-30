@@ -341,8 +341,8 @@ foreach ($collection_slugs as $col) {
   <div class="carousel-container">
     <div class="carousel-slides">
     <?php foreach ($carousel_products as $index => $product) : ?>
-      <div class="carousel-slide<?php echo $index === 0 ? ' active' : ''; ?>"
-           style="background-image: url('<?php echo esc_url($product['image']); ?>');">
+      <div class="carousel-slide<?php echo $index === 0 ? ' active' : ''; ?>">
+        <img src="<?php echo esc_url($product['image']); ?>" alt="<?php echo esc_attr($product['name']); ?> — Luminaire artisanal en bois" class="carousel-slide-img" <?php echo $index === 0 ? '' : 'loading="lazy"'; ?>>
         <div class="carousel-overlay"></div>
         <div class="carousel-content">
           <p class="carousel-product-name"><?php echo esc_html($product['name']); ?></p>
@@ -367,7 +367,7 @@ foreach ($collection_slugs as $col) {
     <!-- Star du moment -->
     <?php if ($star_product_data) : ?>
     <a href="<?php echo esc_url($star_product_data['url']); ?>" class="bento-card bento-hero">
-      <div class="bento-bg" style="background-image: url('<?php echo esc_url($star_product_data['image']); ?>');"></div>
+      <img src="<?php echo esc_url($star_product_data['image']); ?>" alt="<?php echo esc_attr($star_product_data['name']); ?> — Star du moment" class="bento-bg-img" loading="lazy">
       <span class="bento-bestseller-badge">Star du moment</span>
       <div class="bento-content">
         <h2 class="bento-title product-name"><?php echo esc_html($star_product_data['name']); ?></h2>
@@ -396,7 +396,7 @@ foreach ($collection_slugs as $col) {
     <!-- Carte Cadeau -->
     <?php if ($gift_card) : ?>
     <a href="<?php echo esc_url($gift_card['url']); ?>" class="bento-card bento-giftcard">
-      <div class="bento-bg" style="background-image: url('<?php echo esc_url($gift_card['image']); ?>'); background-position: bottom right;"></div>
+      <img src="<?php echo esc_url($gift_card['image']); ?>" alt="Carte cadeau Atelier Sâpi" class="bento-bg-img bento-bg-img--bottom-right" loading="lazy">
       <span class="giftcard-badge">Idée cadeau</span>
       <div class="giftcard-info">
         <h3>Offrez la lumière avec une carte cadeau</h3>
@@ -441,7 +441,9 @@ foreach ($collection_slugs as $col) {
   <div class="collections-grid">
     <?php foreach ($collections as $collection) : ?>
       <a href="<?php echo esc_url($collection['url']); ?>" class="collection-card">
-        <div class="collection-visual" style="background-image: url('<?php echo esc_url($collection['image']); ?>');"></div>
+        <div class="collection-visual">
+          <img src="<?php echo esc_url($collection['image']); ?>" alt="Collection <?php echo esc_attr($collection['name']); ?> — Luminaires en bois" class="collection-visual-img" loading="lazy">
+        </div>
         <div class="collection-details">
           <h3><?php echo esc_html($collection['name']); ?></h3>
           <div class="collection-meta">
@@ -467,27 +469,27 @@ foreach ($collection_slugs as $col) {
         <div class="process-step">
           <span class="step-num">01</span>
           <span class="step-text">Dessin</span>
-          <div class="step-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.png');"></div>
+          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.png" alt="Dessin d'un luminaire en bois — Atelier Sâpi" class="step-image-img" loading="lazy">
         </div>
         <div class="process-step">
           <span class="step-num">02</span>
           <span class="step-text">Découpe laser</span>
-          <div class="step-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_7638.jpg');"></div>
+          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_7638.jpg" alt="Découpe laser du bois pour luminaire" class="step-image-img" loading="lazy">
         </div>
         <div class="process-step">
           <span class="step-num">03</span>
           <span class="step-text">Finitions</span>
-          <div class="step-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/03/P_SLM_XL_det5.jpg');"></div>
+          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/03/P_SLM_XL_det5.jpg" alt="Finitions manuelles d'un luminaire en bois" class="step-image-img" loading="lazy">
         </div>
         <div class="process-step">
           <span class="step-num">04</span>
           <span class="step-text">Assemblage</span>
-          <div class="step-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Robin-Sapi-A.jpg');"></div>
+          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Robin-Sapi-A.jpg" alt="Robin assemble un luminaire dans son atelier à Lyon" class="step-image-img" loading="lazy">
         </div>
         <div class="process-step">
           <span class="step-num">05</span>
           <span class="step-text">Expédition</span>
-          <div class="step-image" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/Claudine-bandeau-1.jpg');"></div>
+          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/Claudine-bandeau-1.jpg" alt="Luminaire Claudine prêt pour l'expédition" class="step-image-img" loading="lazy">
         </div>
       </div>
     </div>
@@ -495,7 +497,7 @@ foreach ($collection_slugs as $col) {
     <!-- Product Card - Random Featured Product -->
     <?php if (!empty($featured_products)) : ?>
     <a href="<?php echo esc_url($featured_products[0]['url']); ?>" class="bento-card bento-product-featured">
-      <div class="bento-bg" style="background-image: url('<?php echo esc_url($featured_products[0]['image']); ?>');"></div>
+      <img src="<?php echo esc_url($featured_products[0]['image']); ?>" alt="<?php echo esc_attr($featured_products[0]['name']); ?> — Luminaire artisanal" class="bento-bg-img" loading="lazy">
       <div class="bento-product-featured-info">
         <h3><?php echo esc_html($featured_products[0]['name']); ?></h3>
         <span class="bento-product-featured-price"><?php echo wp_kses_post($featured_products[0]['price']); ?></span>
@@ -505,7 +507,7 @@ foreach ($collection_slugs as $col) {
 
     <!-- Atelier Image -->
     <a href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer" class="bento-card bento-atelier">
-      <div class="bento-bg" style="background-image: url('<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Robin-Sapi-A.jpg');"></div>
+      <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Robin-Sapi-A.jpg" alt="Atelier Sâpi — Atelier de fabrication de luminaires à Lyon" class="bento-bg-img" loading="lazy">
       <div class="atelier-label">
         <span>L'atelier · Lyon</span>
       </div>
@@ -533,7 +535,7 @@ foreach ($collection_slugs as $col) {
     ?>
     <a href="<?php the_permalink(); ?>" class="bento-card bento-actu">
       <?php if (has_post_thumbnail()) : ?>
-        <div class="bento-bg" style="background-image: url('<?php echo esc_url(get_the_post_thumbnail_url(get_the_ID(), 'large')); ?>');"></div>
+        <img src="<?php echo esc_url(get_the_post_thumbnail_url(get_the_ID(), 'large')); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="bento-bg-img" loading="lazy">
       <?php endif; ?>
       <span class="bento-actu-badge">Flash actu</span>
       <div class="bento-actu-content">
