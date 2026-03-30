@@ -381,20 +381,16 @@ get_header();
        SECTION PHOTO CLIENT — BANDEAU
        ═══════════════════════════════════════════════════════════════ -->
   <?php
-  {
-    // Photo client : piocher au hasard parmi les photos de type 'client' du repeater
-    // Pas de fallback : si aucune photo client, la section est masquée
-    $client_photos = sapi_get_product_photos($product_id, 'client');
-    $bandeau_url = !empty($client_photos) ? $client_photos[array_rand($client_photos)] : '';
+  $client_photos = sapi_get_product_photos($product_id, 'client');
+  $bandeau_url = !empty($client_photos) ? $client_photos[array_rand($client_photos)] : '';
 
+  if ($bandeau_url) :
     $section_num = 0;
-    if ($bandeau_url) :
-        // Random caption
-        $captions = [
-          'Photo envoyée par une cliente',
-          'Photo envoyée récemment par un client'
-        ];
-        $random_caption = $captions[array_rand($captions)];
+    $captions = [
+      'Photo envoyée par une cliente',
+      'Photo envoyée récemment par un client'
+    ];
+    $random_caption = $captions[array_rand($captions)];
   ?>
   <section class="product-client-photo">
     <div class="client-photo-header">
@@ -405,11 +401,7 @@ get_header();
       <img src="<?php echo esc_url($bandeau_url); ?>" alt="Photo client - <?php echo esc_attr(get_the_title()); ?>" class="client-photo-image">
     </div>
   </section>
-  <?php
-      endif;
-    }
-  }
-  ?>
+  <?php endif; ?>
 
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION 02 — POURQUOI CETTE PIÈCE
