@@ -4146,79 +4146,18 @@ function sapi_register_acf_projet_sur_mesure() {
 }
 add_action('acf/init', 'sapi_register_acf_projet_sur_mesure');
 
-/**
+/*
  * ACF fields for Product media (video + photo gallery repeater)
- * Replaces old fixed fields (ambiance_1/2/3, detail_1/2, tailles)
+ * Created MANUALLY via ACF Pro UI — not registered in PHP.
+ *
+ * Field names expected by the template:
+ *   - video_produit     (oEmbed)       → URL YouTube/Vimeo
+ *   - galerie_produit   (Repeater)     → Photos supplémentaires
+ *     ├─ type_photo     (Select)       → ambiance / detail / taille / client / fabrication
+ *     └─ image          (Image, array) → Photo
+ *
+ * Location: Post Type = product
  */
-function sapi_register_acf_produit_medias() {
-  if (!function_exists('acf_add_local_field_group')) return;
-
-  acf_add_local_field_group([
-    'key'      => 'group_produit_medias',
-    'title'    => 'Médias produit',
-    'fields'   => [
-      [
-        'key'           => 'field_produit_video',
-        'label'         => 'Vidéo produit',
-        'name'          => 'video_produit',
-        'type'          => 'oembed',
-        'instructions'  => 'Coller une URL YouTube ou Vimeo',
-        'width'         => '',
-        'height'        => '',
-      ],
-      [
-        'key'           => 'field_produit_galerie',
-        'label'         => 'Galerie photos',
-        'name'          => 'galerie_produit',
-        'type'          => 'repeater',
-        'instructions'  => 'Photos supplémentaires (ambiance, détail, taille, client, fabrication)',
-        'layout'        => 'block',
-        'button_label'  => 'Ajouter une photo',
-        'min'           => 0,
-        'max'           => 15,
-        'sub_fields'    => [
-          [
-            'key'           => 'field_galerie_type',
-            'label'         => 'Type',
-            'name'          => 'type_photo',
-            'type'          => 'select',
-            'choices'       => [
-              'ambiance'    => 'Ambiance',
-              'detail'      => 'Détail',
-              'taille'      => 'Taille',
-              'client'      => 'Client',
-              'fabrication' => 'Fabrication',
-            ],
-            'default_value' => 'ambiance',
-            'wrapper'       => ['width' => '30'],
-          ],
-          [
-            'key'           => 'field_galerie_image',
-            'label'         => 'Image',
-            'name'          => 'image',
-            'type'          => 'image',
-            'return_format' => 'array',
-            'preview_size'  => 'medium',
-            'wrapper'       => ['width' => '70'],
-          ],
-        ],
-      ],
-    ],
-    'location' => [
-      [
-        [
-          'param'    => 'post_type',
-          'operator' => '==',
-          'value'    => 'product',
-        ],
-      ],
-    ],
-    'position'     => 'normal',
-    'style'        => 'default',
-    'menu_order'   => 5,
-  ]);
-}
-add_action('acf/init', 'sapi_register_acf_produit_medias');
 
 /**
  * Migration: old ACF fixed fields → repeater galerie_produit
