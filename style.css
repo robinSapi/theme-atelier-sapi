@@ -9390,8 +9390,17 @@ li.carousel-editorial-slide,
   align-items: flex-start;
 }
 
-.contact-card--atelier .contact-card-icon {
-  align-self: flex-start;
+.contact-card-atelier-map {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.contact-card-atelier-map iframe {
+  width: 100%;
+  height: 180px;
+  display: block;
 }
 
 .contact-card-sub {
@@ -9422,18 +9431,6 @@ li.carousel-editorial-slide,
   color: var(--color-wood, #937D68);
 }
 
-/* ---- Bandeau Maps pleine largeur ---- */
-.contact-map-band {
-  width: 100%;
-  line-height: 0;
-}
-
-.contact-map-band iframe {
-  width: 100%;
-  height: 350px;
-  display: block;
-}
-
 /* ---- Contact Responsive ---- */
 @media (max-width: 768px) {
   .contact-hero {
@@ -9454,9 +9451,6 @@ li.carousel-editorial-slide,
     padding: 1.5rem;
   }
 
-  .contact-map-band iframe {
-    height: 250px;
-  }
 }
 
 /* ========================================
