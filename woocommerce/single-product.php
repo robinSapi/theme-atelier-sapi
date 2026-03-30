@@ -380,13 +380,21 @@ get_header();
        SECTION PHOTO CLIENT — BANDEAU
        ═══════════════════════════════════════════════════════════════ -->
   <?php
-  if (function_exists('get_field')) {
-    $bandeau = get_field('bandeau');
-    if ($bandeau) {
-      $bandeau_url = sapi_get_acf_image_url($bandeau);
+  {
+    // Photo client : piocher au hasard parmi les photos de type 'client' du repeater
+    $client_photos = sapi_get_product_photos($product_id, 'client');
+    // Fallback: ancien champ bandeau
+    if (empty($client_photos) && function_exists('get_field')) {
+      $bandeau = get_field('bandeau');
+      if ($bandeau) {
+        $url = sapi_get_acf_image_url($bandeau);
+        if ($url) $client_photos[] = $url;
+      }
+    }
+    $bandeau_url = !empty($client_photos) ? $client_photos[array_rand($client_photos)] : '';
 
-      $section_num = 0; // Compteur dynamique pour numérotation des sections
-      if ($bandeau_url) :
+    $section_num = 0;
+    if ($bandeau_url) :
         // Random caption
         $captions = [
           'Photo envoyée par une cliente',
