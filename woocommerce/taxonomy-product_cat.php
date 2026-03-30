@@ -96,7 +96,7 @@ if ($featured_image_url) :
 
   <div class="product-mini-card">
     <a href="<?php echo esc_url($featured_product_url); ?>" class="product-mini-card-link">
-      <img src="<?php echo esc_url($featured_image_url); ?>" alt="<?php echo esc_attr($featured_product_name); ?> — Luminaire artisanal en bois" class="product-mini-card-img" loading="lazy">
+      <img src="<?php echo esc_url($featured_image_url); ?>" srcset="" alt="<?php echo esc_attr($featured_product_name); ?> — Luminaire artisanal en bois" class="product-mini-card-img" loading="lazy">
       <span class="product-hero-name"><?php echo esc_html($featured_product_name); ?></span>
     </a>
   </div>

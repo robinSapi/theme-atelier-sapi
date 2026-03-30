@@ -398,7 +398,7 @@ get_header();
       <h2><?php echo esc_html($random_caption); ?></h2>
     </div>
     <div class="client-photo-wrapper">
-      <img src="<?php echo esc_url($bandeau_url); ?>" alt="Photo client - <?php echo esc_attr(get_the_title()); ?>" class="client-photo-image">
+      <img src="<?php echo esc_url($bandeau_url); ?>" srcset="" alt="Photo client - <?php echo esc_attr(get_the_title()); ?>" class="client-photo-image">
     </div>
   </section>
   <?php endif; ?>
