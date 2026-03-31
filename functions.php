@@ -172,6 +172,30 @@ add_action('wp_head', function() {
   $uri = get_template_directory_uri();
   echo '<link rel="preload" href="' . esc_url($uri) . '/assets/fonts/SquarePeg-Regular.woff2" as="font" type="font/woff2" crossorigin>' . "\n";
   echo '<link rel="preload" href="' . esc_url($uri) . '/assets/fonts/SquarePeg-Regular-latin-ext.woff2" as="font" type="font/woff2" crossorigin>' . "\n";
+
+  // Preload LCP : première image du carousel (accueil uniquement)
+  if (is_front_page()) {
+    $categories_order = ['suspensions', 'appliques-murales', 'lampes-a-poser', 'lampadaires'];
+    foreach ($categories_order as $cat_slug) {
+      $term = get_term_by('slug', $cat_slug, 'product_cat');
+      if (!$term) continue;
+      $q = new WP_Query([
+        'post_type' => 'product',
+        'posts_per_page' => 1,
+        'tax_query' => [['taxonomy' => 'product_cat', 'field' => 'term_id', 'terms' => $term->term_id]],
+        'fields' => 'ids',
+      ]);
+      if ($q->have_posts()) {
+        $lcp_photos = sapi_get_product_photos($q->posts[0], 'ambiance', 1, 'large');
+        if (!empty($lcp_photos)) {
+          echo '<link rel="preload" href="' . esc_url($lcp_photos[0]) . '" as="image" fetchpriority="high">' . "\n";
+        }
+        wp_reset_postdata();
+        break;
+      }
+      wp_reset_postdata();
+    }
+  }
 }, 1);
 
 /**
@@ -807,7 +831,7 @@ function sapi_get_video_thumbnail($url) {
  * @param int    $limit    Max number of photos to return (0 = all)
  * @return array           Array of image URLs
  */
-function sapi_get_product_photos($post_id, $type = '', $limit = 0) {
+function sapi_get_product_photos($post_id, $type = '', $limit = 0, $size = 'full') {
   if (!function_exists('get_field')) return [];
 
   $photos = [];
@@ -819,7 +843,7 @@ function sapi_get_product_photos($post_id, $type = '', $limit = 0) {
       // Handle case where select field returns array instead of string
       if (is_array($row_type)) $row_type = isset($row_type['value']) ? $row_type['value'] : '';
       if ($type && $row_type !== $type) continue;
-      $url = sapi_get_acf_image_url(isset($row['image']) ? $row['image'] : null);
+      $url = sapi_get_acf_image_url(isset($row['image']) ? $row['image'] : null, $size);
       if ($url) {
         $photos[] = $url;
         if ($limit > 0 && count($photos) >= $limit) break;
@@ -843,7 +867,7 @@ function sapi_get_product_photos($post_id, $type = '', $limit = 0) {
     }
 
     foreach ($fields_to_check as $field_name) {
-      $url = sapi_get_acf_image_url(get_field($field_name, $post_id));
+      $url = sapi_get_acf_image_url(get_field($field_name, $post_id), $size);
       if ($url) {
         $photos[] = $url;
         if ($limit > 0 && count($photos) >= $limit) break;

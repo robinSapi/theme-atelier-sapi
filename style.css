@@ -10785,6 +10785,11 @@ body.cursor-hover .cursor-dot {
   overflow: hidden;
 }
 
+.carousel-slide:first-child {
+  opacity: 1;
+  z-index: 1;
+}
+
 .carousel-slide-img {
   position: absolute;
   inset: 0;

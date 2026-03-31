@@ -38,7 +38,7 @@ foreach ($categories_order as $cat_slug) {
       $product = wc_get_product(get_the_ID());
 
       if ($product) {
-        $ambiance_photos = sapi_get_product_photos(get_the_ID(), 'ambiance', 1);
+        $ambiance_photos = sapi_get_product_photos(get_the_ID(), 'ambiance', 1, 'large');
         $image_url = !empty($ambiance_photos) ? $ambiance_photos[0] : '';
 
         if ($image_url) {
