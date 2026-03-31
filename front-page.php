@@ -447,7 +447,7 @@ foreach ($collection_slugs as $col) {
         <div class="process-step">
           <span class="step-num">01</span>
           <span class="step-text">Dessin</span>
-          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.png" alt="Dessin d'un luminaire en bois — Atelier Sâpi" class="step-image-img" loading="lazy">
+          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.jpg" alt="Dessin d'un luminaire en bois — Atelier Sâpi" class="step-image-img" loading="lazy">
         </div>
         <div class="process-step">
           <span class="step-num">02</span>
