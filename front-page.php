@@ -447,27 +447,27 @@ foreach ($collection_slugs as $col) {
         <div class="process-step">
           <span class="step-num">01</span>
           <span class="step-text">Dessin</span>
-          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.jpg" alt="Dessin d'un luminaire en bois — Atelier Sâpi" class="step-image-img" loading="lazy">
+          <?php echo sapi_image('2025/05/IMG_1928.jpg', 'large', ['alt' => "Dessin d'un luminaire en bois — Atelier Sâpi", 'class' => 'step-image-img', 'loading' => 'lazy']); ?>
         </div>
         <div class="process-step">
           <span class="step-num">02</span>
           <span class="step-text">Découpe laser</span>
-          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_7638.jpg" alt="Découpe laser du bois pour luminaire" class="step-image-img" loading="lazy">
+          <?php echo sapi_image('2025/05/IMG_7638.jpg', 'large', ['alt' => 'Découpe laser du bois pour luminaire', 'class' => 'step-image-img', 'loading' => 'lazy']); ?>
         </div>
         <div class="process-step">
           <span class="step-num">03</span>
           <span class="step-text">Finitions</span>
-          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/03/P_SLM_XL_det5.jpg" alt="Finitions manuelles d'un luminaire en bois" class="step-image-img" loading="lazy">
+          <?php echo sapi_image('2025/03/P_SLM_XL_det5.jpg', 'large', ['alt' => "Finitions manuelles d'un luminaire en bois", 'class' => 'step-image-img', 'loading' => 'lazy']); ?>
         </div>
         <div class="process-step">
           <span class="step-num">04</span>
           <span class="step-text">Assemblage</span>
-          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Robin-Sapi-A.jpg" alt="Robin assemble un luminaire dans son atelier à Lyon" class="step-image-img" loading="lazy">
+          <?php echo sapi_image('2025/05/Robin-Sapi-A.jpg', 'large', ['alt' => "Robin assemble un luminaire dans son atelier à Lyon", 'class' => 'step-image-img', 'loading' => 'lazy']); ?>
         </div>
         <div class="process-step">
           <span class="step-num">05</span>
           <span class="step-text">Expédition</span>
-          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/07/Claudine-bandeau-1.jpg" alt="Luminaire Claudine prêt pour l'expédition" class="step-image-img" loading="lazy">
+          <?php echo sapi_image('2025/07/Claudine-bandeau-1.jpg', 'large', ['alt' => "Luminaire Claudine prêt pour l'expédition", 'class' => 'step-image-img', 'loading' => 'lazy']); ?>
         </div>
       </div>
     </div>
@@ -485,7 +485,7 @@ foreach ($collection_slugs as $col) {
 
     <!-- Atelier Image -->
     <a href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer" class="bento-card bento-atelier">
-      <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/Robin-Sapi-A.jpg" alt="Atelier Sâpi — Atelier de fabrication de luminaires à Lyon" class="bento-bg-img" loading="lazy">
+      <?php echo sapi_image('2025/05/Robin-Sapi-A.jpg', 'large', ['alt' => 'Atelier Sâpi — Atelier de fabrication de luminaires à Lyon', 'class' => 'bento-bg-img', 'loading' => 'lazy']); ?>
       <div class="atelier-label">
         <span>L'atelier · Lyon</span>
       </div>
