@@ -447,7 +447,7 @@ foreach ($collection_slugs as $col) {
         <div class="process-step">
           <span class="step-num">01</span>
           <span class="step-text">Dessin</span>
-          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.png" alt="Dessin d'un luminaire en bois — Atelier Sâpi" class="step-image-img" loading="lazy">
+          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.jpg" alt="Dessin d'un luminaire en bois — Atelier Sâpi" class="step-image-img" loading="lazy">
         </div>
         <div class="process-step">
           <span class="step-num">02</span>
@@ -547,6 +547,8 @@ foreach ($collection_slugs as $col) {
   </div>
   <p class="newsletter-subtitle">Nouveautés, éditions limitées, coulisses d'atelier.</p>
   <form class="newsletter-form" action="#" method="post" id="newsletter-form">
+    <!-- Honeypot anti-spam -->
+    <div style="display:none;" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
     <input type="email" placeholder="votre@email.fr" class="newsletter-input-kinetic" required />
     <button type="submit" class="newsletter-submit-kinetic">
       <span>S'inscrire</span>
@@ -572,9 +574,8 @@ foreach ($collection_slugs as $col) {
       btn.querySelector('span').textContent = 'Envoi…';
       feedback.style.display = 'none';
 
-      var data = new FormData();
+      var data = new FormData(form);
       data.append('action', 'sapi_newsletter_subscribe');
-      data.append('email', email);
       data.append('nonce', '<?php echo esc_js(wp_create_nonce("sapi_newsletter_nonce")); ?>');
 
       fetch('<?php echo esc_url(admin_url("admin-ajax.php")); ?>', {

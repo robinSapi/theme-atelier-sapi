@@ -60,7 +60,7 @@ get_header();
     <div class="steps-slide">
       <div class="steps-slide-inner">
         <div class="steps-slide-image">
-          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.png" alt="Dessin d'un luminaire — Étape création Atelier Sâpi" class="steps-slide-image-img" loading="lazy">
+          <img src="<?php echo esc_url(home_url("/wp-content/uploads/")); ?>2025/05/IMG_1928.jpg" alt="Dessin d'un luminaire — Étape création Atelier Sâpi" class="steps-slide-image-img" loading="lazy">
         </div>
         <div class="steps-slide-content">
           <span class="section-number">01</span>
