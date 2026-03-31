@@ -38,10 +38,10 @@ foreach ($categories_order as $cat_slug) {
       $product = wc_get_product(get_the_ID());
 
       if ($product) {
-        $ambiance_photos = sapi_get_product_photos(get_the_ID(), 'ambiance', 1, 'large');
-        $image_url = !empty($ambiance_photos) ? $ambiance_photos[0] : '';
+        $photo_ids = sapi_get_product_photo_ids(get_the_ID(), 'ambiance', 1);
+        $image_id = !empty($photo_ids) ? $photo_ids[0] : 0;
 
-        if ($image_url) {
+        if ($image_id) {
           // Get minimum price
           if ($product->is_type('variable')) {
             $min_price = $product->get_variation_price('min');
@@ -55,7 +55,7 @@ foreach ($categories_order as $cat_slug) {
             'name' => get_the_title(),
             'price' => $price_display,
             'url' => get_permalink(),
-            'image' => $image_url,
+            'image_id' => $image_id,
           ];
 
           if (count($products_by_category[$cat_slug]) >= 2) break;
@@ -320,7 +320,13 @@ foreach ($collection_slugs as $col) {
     <div class="carousel-slides">
     <?php foreach ($carousel_products as $index => $product) : ?>
       <div class="carousel-slide<?php echo $index === 0 ? ' active' : ''; ?>">
-        <img src="<?php echo esc_url($product['image']); ?>" alt="<?php echo esc_attr($product['name']); ?> — Luminaire artisanal en bois" class="carousel-slide-img" <?php echo $index === 0 ? 'fetchpriority="high"' : 'loading="lazy"'; ?>>
+        <?php echo wp_get_attachment_image($product['image_id'], 'full', false, [
+          'class' => 'carousel-slide-img',
+          'alt' => esc_attr($product['name']) . ' — Luminaire artisanal en bois',
+          'fetchpriority' => $index === 0 ? 'high' : false,
+          'loading' => $index === 0 ? 'eager' : 'lazy',
+          'sizes' => '100vw',
+        ]); ?>
         <div class="carousel-overlay"></div>
         <div class="carousel-content">
           <p class="carousel-product-name"><?php echo esc_html($product['name']); ?></p>
