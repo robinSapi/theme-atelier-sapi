@@ -17,6 +17,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sapi_contact_nonce'])
   elseif (!empty($_POST['website'])) {
     $form_error = 'Spam détecté.';
   }
+  // Rate limiting (5 soumissions/heure par IP)
+  elseif (!sapi_check_form_rate_limit('contact')) {
+    $form_error = 'Trop de messages envoyés. Réessayez plus tard.';
+  }
   else {
     $form_submitted = true;
 

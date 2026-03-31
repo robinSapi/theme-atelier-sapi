@@ -31,6 +31,8 @@ function sapi_robin_conseil_card( $prefix = 'conseils' ) {
     <div class="robin-conseil__contact-form" id="<?php echo $prefix; ?>-contact-form" style="display:none">
       <p class="robin-conseil__contact-intro">Robin vous recontactera rapidement&nbsp;:</p>
       <div class="robin-conseil__contact-fields">
+        <!-- Honeypot anti-spam -->
+        <div style="display:none;" aria-hidden="true"><input type="text" name="website" class="robin-conseil__hp" tabindex="-1" autocomplete="off"></div>
         <div class="robin-conseil__contact-row">
           <input type="email" class="robin-conseil__contact-input" id="<?php echo $prefix; ?>-contact-email"
                  placeholder="E-mail *"

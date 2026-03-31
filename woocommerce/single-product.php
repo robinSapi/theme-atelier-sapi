@@ -355,6 +355,8 @@ get_header();
             <span class="robin-contact-label">Robin vous recontacte rapidement.</span>
             <form class="robin-contact-form" data-product="<?php echo esc_attr($product->get_name()); ?>">
               <?php wp_nonce_field('sapi-guide-results', 'robin_contact_nonce', false); ?>
+              <!-- Honeypot anti-spam -->
+              <div style="display:none;" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
               <input type="email" name="email" class="robin-contact-email" placeholder="votre@email.com" required>
               <textarea name="message" class="robin-contact-message" placeholder="Votre message (optionnel)" rows="2"></textarea>
               <button type="submit" class="robin-contact-submit">Envoyer</button>

@@ -4,6 +4,18 @@ if (!defined('ABSPATH')) {
   exit;
 }
 
+/* ─── Anti-spam : rate limiting formulaires de contact ─── */
+function sapi_check_form_rate_limit($form_id = 'contact', $max_hits = 5) {
+  $ip  = md5(isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : 'unknown');
+  $key = 'sapi_form_rl_' . $form_id . '_' . $ip;
+  $hits = (int) get_transient($key);
+  if ($hits >= $max_hits) {
+    return false;
+  }
+  set_transient($key, $hits + 1, HOUR_IN_SECONDS);
+  return true;
+}
+
 /* ─── Feature flag Robin Conseiller V2 ─── */
 if (!defined('SAPI_ROBIN_V2')) {
   define('SAPI_ROBIN_V2', true);
@@ -1989,6 +2001,18 @@ add_action('wp_ajax_nopriv_sapi_robin_contact', 'sapi_ajax_robin_contact');
 function sapi_ajax_robin_contact() {
   if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
     wp_send_json_error(['message' => 'Nonce invalide']);
+    return;
+  }
+
+  // Honeypot
+  if (!empty($_POST['website'])) {
+    wp_send_json_error(['message' => 'Spam détecté.']);
+    return;
+  }
+
+  // Rate limiting (5 soumissions/heure par IP)
+  if (!sapi_check_form_rate_limit('robin_contact')) {
+    wp_send_json_error(['message' => 'Trop de messages envoyés. Réessayez plus tard.']);
     return;
   }
 
@@ -4034,6 +4058,16 @@ add_action('wp_ajax_nopriv_sapi_newsletter_subscribe', 'sapi_newsletter_subscrib
 function sapi_newsletter_subscribe() {
     check_ajax_referer('sapi_newsletter_nonce', 'nonce');
 
+    // Honeypot
+    if (!empty($_POST['website'])) {
+        wp_send_json_error(['message' => 'Spam détecté.']);
+    }
+
+    // Rate limiting (5 inscriptions/heure par IP)
+    if (!sapi_check_form_rate_limit('newsletter')) {
+        wp_send_json_error(['message' => 'Trop de tentatives. Réessayez plus tard.']);
+    }
+
     $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
     if (!is_email($email)) {
         wp_send_json_error(['message' => 'Adresse email invalide.']);
@@ -4226,6 +4260,11 @@ function sapi_handle_surmesure_form() {
   // Honeypot
   if (!empty($_POST['website'])) {
     return ['submitted' => true, 'success' => false, 'error' => 'Spam détecté.'];
+  }
+
+  // Rate limiting (5 soumissions/heure par IP)
+  if (!sapi_check_form_rate_limit('surmesure')) {
+    return ['submitted' => true, 'success' => false, 'error' => 'Trop de messages envoyés. Réessayez plus tard.'];
   }
 
   $name    = sanitize_text_field($_POST['fullname'] ?? '');
