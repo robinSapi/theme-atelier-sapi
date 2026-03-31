@@ -320,13 +320,16 @@ foreach ($collection_slugs as $col) {
     <div class="carousel-slides">
     <?php foreach ($carousel_products as $index => $product) : ?>
       <div class="carousel-slide<?php echo $index === 0 ? ' active' : ''; ?>">
-        <?php echo wp_get_attachment_image($product['image_id'], 'full', false, [
-          'class' => 'carousel-slide-img',
-          'alt' => esc_attr($product['name']) . ' — Luminaire artisanal en bois',
-          'fetchpriority' => $index === 0 ? 'high' : false,
-          'loading' => $index === 0 ? 'eager' : 'lazy',
-          'sizes' => '100vw',
-        ]); ?>
+        <?php
+          $img_attr = [
+            'class' => 'carousel-slide-img',
+            'alt' => esc_attr($product['name']) . ' — Luminaire artisanal en bois',
+            'loading' => $index === 0 ? 'eager' : 'lazy',
+            'sizes' => '100vw',
+          ];
+          if ($index === 0) $img_attr['fetchpriority'] = 'high';
+          echo wp_get_attachment_image($product['image_id'], 'full', false, $img_attr);
+        ?>
         <div class="carousel-overlay"></div>
         <div class="carousel-content">
           <p class="carousel-product-name"><?php echo esc_html($product['name']); ?></p>
