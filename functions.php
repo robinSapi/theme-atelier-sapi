@@ -843,6 +843,46 @@ function sapi_get_product_photos($post_id, $type = '', $limit = 0) {
 }
 
 /**
+ * Helper: output an <img> tag with proper srcset from a media library filename.
+ * Looks up the attachment by filename, caches the ID, and uses wp_get_attachment_image().
+ *
+ * @param string $filename  Filename relative to uploads (e.g. '2025/05/IMG_1928.jpg')
+ * @param string $size      WordPress image size (default 'large')
+ * @param array  $attr      Extra attributes for the img tag (alt, class, loading, etc.)
+ * @return string            HTML <img> tag with srcset, or fallback <img> if not found
+ */
+function sapi_image($filename, $size = 'large', $attr = []) {
+  // Cache attachment IDs to avoid repeated DB queries
+  static $cache = [];
+
+  if (!isset($cache[$filename])) {
+    global $wpdb;
+    $cache[$filename] = $wpdb->get_var($wpdb->prepare(
+      "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_wp_attached_file' AND meta_value = %s LIMIT 1",
+      $filename
+    ));
+  }
+
+  $id = $cache[$filename];
+
+  if ($id) {
+    return wp_get_attachment_image((int) $id, $size, false, $attr);
+  }
+
+  // Fallback: hardcoded img without srcset
+  $alt = isset($attr['alt']) ? $attr['alt'] : '';
+  $class = isset($attr['class']) ? $attr['class'] : '';
+  $loading = isset($attr['loading']) ? $attr['loading'] : 'lazy';
+  return sprintf(
+    '<img src="%s" alt="%s" class="%s" loading="%s">',
+    esc_url(home_url('/wp-content/uploads/' . $filename)),
+    esc_attr($alt),
+    esc_attr($class),
+    esc_attr($loading)
+  );
+}
+
+/**
  * Helper: extract URL from ACF image field (handles all return formats)
  * Centralized here to avoid duplication across templates.
  */

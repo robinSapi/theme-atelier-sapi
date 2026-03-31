@@ -883,7 +883,7 @@ get_header();
   <section class="product-atelier product-atelier-cinetique">
     <div class="product-atelier-grid">
       <div class="product-atelier-image">
-          <img src="https://atelier-sapi.fr/wp-content/uploads/2026/03/Robin-au-poncage.jpg" alt="Robin au ponçage dans l'atelier Sapi" loading="lazy">
+          <?php echo sapi_image('2026/03/Robin-au-poncage.jpg', 'large', ['alt' => "Robin au ponçage dans l'atelier Sapi", 'loading' => 'lazy']); ?>
       </div>
       <div class="product-atelier-content">
         <span class="section-number"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>

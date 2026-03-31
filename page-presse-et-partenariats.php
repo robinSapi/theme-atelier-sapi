@@ -101,7 +101,7 @@ $uploads = esc_url(home_url('/wp-content/uploads/'));
     <div class="presse-dossier-grid">
       <div class="presse-dossier-image">
         <a href="<?php echo $uploads; ?>2025/10/Dossier-de-presentation-MD.pdf" target="_blank" rel="noopener noreferrer">
-          <img src="<?php echo $uploads; ?>2025/10/Couverture-Dossier-de-presentation-768x543.jpg" alt="Couverture du dossier de présentation Atelier Sâpi" loading="lazy">
+          <?php echo sapi_image('2025/10/Couverture-Dossier-de-presentation.jpg', 'medium_large', ['alt' => "Couverture du dossier de présentation Atelier Sâpi", 'loading' => 'lazy']); ?>
           <span class="presse-dossier-overlay">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -139,7 +139,7 @@ $uploads = esc_url(home_url('/wp-content/uploads/'));
     </div>
     <div class="presse-case-grid">
       <div class="presse-case-image">
-        <img src="<?php echo $uploads; ?>2025/08/527529068_17941741197024710_7783854538841845160_n-768x914.jpg" alt="Luminaires Morane La Gogane au Restaurant Circle Lyon" loading="lazy">
+        <?php echo sapi_image('2025/08/527529068_17941741197024710_7783854538841845160_n.jpg', 'medium_large', ['alt' => 'Luminaires Morane La Gogane au Restaurant Circle Lyon', 'loading' => 'lazy']); ?>
       </div>
       <div class="presse-case-content">
         <p class="presse-case-location">

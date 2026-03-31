@@ -35,7 +35,7 @@ get_header();
       <p>C'est pour cela que je propose la création sur mesure. On part de votre vision pour aboutir à un luminaire artisanal qui vous ressemble, fabriqué à la main dans mon atelier lyonnais.</p>
     </div>
     <div class="surmesure-intro-image">
-      <img src="<?php echo esc_url(home_url('/wp-content/uploads/')); ?>2025/05/Robin-Sapi-A.jpg" alt="Robin dans l'atelier Sâpi" loading="lazy">
+      <?php echo sapi_image('2025/05/Robin-Sapi-A.jpg', 'large', ['alt' => "Robin dans l'atelier Sâpi", 'loading' => 'lazy']); ?>
     </div>
   </div>
 </section>
