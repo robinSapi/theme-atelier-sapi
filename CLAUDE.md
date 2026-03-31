@@ -267,6 +267,42 @@ Ce fichier contient :
 
 ---
 
+## 🧠 GESTION MÉMOIRE
+
+La mémoire est stockée dans `~/.claude/projects/.../memory/`. Elle persiste entre les conversations.
+
+### Quand ÉCRIRE dans la mémoire
+1. **Décision d'architecture** — ex: "on utilise un repeater plutôt que des champs fixes"
+2. **Piège technique découvert** — ex: "WooCommerce force height:auto sur les images"
+3. **Préférence de Robin** — ex: "je préfère créer les champs ACF moi-même"
+4. **Chantier terminé** — noter ce qui a été fait et ce qui reste
+5. **Planification future** — quelque chose à faire plus tard
+
+### Quand NE PAS écrire
+- Détails d'implémentation (c'est dans le code/git)
+- Discussions en cours qui n'ont pas abouti à une décision
+- Infos dérivables du code ou de git log
+
+### Degré de précision
+- Toujours noter le **pourquoi** d'une décision, pas juste le quoi
+- Pour un bug résolu, noter la **cause racine** (pas les tentatives ratées)
+
+### En DÉBUT de conversation
+- Si Robin parle d'un sujet qui a un fichier mémoire, le lire avant de répondre
+
+### En FIN de session
+- Checkpoint : "Est-ce qu'il y a des décisions/découvertes à sauvegarder ?"
+- Nettoyer le fichier de session temporaire s'il existe
+- Les projets terminés → une ligne dans "Historique notable" de MEMORY.md, fichier supprimé
+
+### Organisation des fichiers
+- **feedback_*.md** — préférences de travail (permanent, rarement obsolète)
+- **project_*.md** — chantiers en cours avec date de dernière MAJ
+- **reference_*.md** — outils et ressources externes
+- Chaque fichier a une `date_updated` dans le frontmatter. Si > 2 mois, signaler à Robin.
+
+---
+
 **Fin du fichier CLAUDE.md**
 
 *Ce fichier = référence rapide. CUSTOMIZATIONS.md = documentation complète.*
