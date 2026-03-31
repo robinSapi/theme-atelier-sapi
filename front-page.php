@@ -320,7 +320,7 @@ foreach ($collection_slugs as $col) {
     <div class="carousel-slides">
     <?php foreach ($carousel_products as $index => $product) : ?>
       <div class="carousel-slide<?php echo $index === 0 ? ' active' : ''; ?>">
-        <img src="<?php echo esc_url($product['image']); ?>" alt="<?php echo esc_attr($product['name']); ?> — Luminaire artisanal en bois" class="carousel-slide-img" <?php echo $index === 0 ? '' : 'loading="lazy"'; ?>>
+        <img src="<?php echo esc_url($product['image']); ?>" alt="<?php echo esc_attr($product['name']); ?> — Luminaire artisanal en bois" class="carousel-slide-img" <?php echo $index === 0 ? 'fetchpriority="high"' : 'loading="lazy"'; ?>>
         <div class="carousel-overlay"></div>
         <div class="carousel-content">
           <p class="carousel-product-name"><?php echo esc_html($product['name']); ?></p>

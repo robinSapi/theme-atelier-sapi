@@ -174,6 +174,18 @@ add_action('wp_head', function() {
   echo '<link rel="preload" href="' . esc_url($uri) . '/assets/fonts/SquarePeg-Regular-latin-ext.woff2" as="font" type="font/woff2" crossorigin>' . "\n";
 }, 1);
 
+/**
+ * Dequeue scripts/styles not needed on non-WooCommerce pages
+ */
+function sapi_dequeue_unnecessary_assets() {
+  if (is_front_page() || is_page()) {
+    // jQuery UI datepicker — only needed on admin/checkout
+    wp_dequeue_script('jquery-ui-datepicker');
+    wp_dequeue_style('jquery-ui-datepicker');
+  }
+}
+add_action('wp_enqueue_scripts', 'sapi_dequeue_unnecessary_assets', 100);
+
 function sapi_maison_enqueue_assets() {
   // Montserrat only from Google Fonts — Square Peg is self-hosted (Safari fix)
   $fonts = [
