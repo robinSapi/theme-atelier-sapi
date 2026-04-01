@@ -1062,6 +1062,28 @@ function sapi_maison_structured_data() {
         'seller' => [
           '@type' => 'Organization',
           'name' => 'Atelier Sâpi'
+        ],
+        'shippingDetails' => [
+          '@type' => 'OfferShippingDetails',
+          'shippingDestination' => [
+            '@type' => 'DefinedRegion',
+            'addressCountry' => 'EU'
+          ],
+          'deliveryTime' => [
+            '@type' => 'ShippingDeliveryTime',
+            'handlingTime' => [
+              '@type' => 'QuantitativeValue',
+              'minValue' => 3,
+              'maxValue' => 5,
+              'unitCode' => 'd'
+            ],
+            'transitTime' => [
+              '@type' => 'QuantitativeValue',
+              'minValue' => 1,
+              'maxValue' => 2,
+              'unitCode' => 'd'
+            ]
+          ]
         ]
       ]
     ];
