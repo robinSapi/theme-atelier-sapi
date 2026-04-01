@@ -1033,6 +1033,87 @@ function sapi_maison_cart_count() {
   return WC()->cart ? WC()->cart->get_cart_contents_count() : 0;
 }
 
+/**
+ * Génère le shippingDetails Schema.org à partir des zones WooCommerce.
+ */
+function sapi_get_shipping_schema($product) {
+  $shipping_details = [];
+  $zones = WC_Shipping_Zones::get_zones();
+
+  foreach ($zones as $zone_data) {
+    $zone = new WC_Shipping_Zone($zone_data['zone_id']);
+    $locations = $zone->get_zone_locations();
+    $methods = $zone->get_shipping_methods(true);
+
+    // Collecter les pays de cette zone
+    $countries = [];
+    foreach ($locations as $location) {
+      if ($location->type === 'country') {
+        $countries[] = $location->code;
+      } elseif ($location->type === 'continent') {
+        $countries[] = $location->code;
+      }
+    }
+
+    if (empty($countries) || empty($methods)) {
+      continue;
+    }
+
+    foreach ($methods as $method) {
+      if ($method->id === 'local_pickup') {
+        continue;
+      }
+
+      foreach ($countries as $country_code) {
+        $detail = [
+          '@type' => 'OfferShippingDetails',
+          'shippingDestination' => [
+            '@type' => 'DefinedRegion',
+            'addressCountry' => $country_code
+          ],
+          'deliveryTime' => [
+            '@type' => 'ShippingDeliveryTime',
+            'handlingTime' => [
+              '@type' => 'QuantitativeValue',
+              'minValue' => 3,
+              'maxValue' => 5,
+              'unitCode' => 'd'
+            ],
+            'transitTime' => [
+              '@type' => 'QuantitativeValue',
+              'minValue' => 1,
+              'maxValue' => 2,
+              'unitCode' => 'd'
+            ]
+          ]
+        ];
+
+        // Tarif : flat_rate ou free_shipping
+        if ($method->id === 'flat_rate') {
+          $cost = $method->get_option('cost');
+          if ($cost !== '' && $cost !== false) {
+            $detail['shippingRate'] = [
+              '@type' => 'MonetaryAmount',
+              'value' => $cost,
+              'currency' => 'EUR'
+            ];
+          }
+        } elseif ($method->id === 'free_shipping') {
+          $detail['shippingRate'] = [
+            '@type' => 'MonetaryAmount',
+            'value' => '0',
+            'currency' => 'EUR'
+          ];
+        }
+
+        $shipping_details[] = $detail;
+      }
+    }
+  }
+
+  return !empty($shipping_details) ? $shipping_details : [];
+}
+
 function sapi_maison_structured_data() {
   if (is_product()) {
     global $product;
@@ -1063,28 +1144,7 @@ function sapi_maison_structured_data() {
           '@type' => 'Organization',
           'name' => 'Atelier Sâpi'
         ],
-        'shippingDetails' => [
-          '@type' => 'OfferShippingDetails',
-          'shippingDestination' => [
-            '@type' => 'DefinedRegion',
-            'addressCountry' => 'EU'
-          ],
-          'deliveryTime' => [
-            '@type' => 'ShippingDeliveryTime',
-            'handlingTime' => [
-              '@type' => 'QuantitativeValue',
-              'minValue' => 3,
-              'maxValue' => 5,
-              'unitCode' => 'd'
-            ],
-            'transitTime' => [
-              '@type' => 'QuantitativeValue',
-              'minValue' => 1,
-              'maxValue' => 2,
-              'unitCode' => 'd'
-            ]
-          ]
-        ]
+        'shippingDetails' => sapi_get_shipping_schema($product)
       ]
     ];
 
