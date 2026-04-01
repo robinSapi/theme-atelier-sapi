@@ -373,10 +373,22 @@ if ( isset( $cross_links[ $term_slug ] ) ) :
     $thumb_url = '';
     if ( $cat_query->have_posts() ) {
       $cat_query->the_post();
-      $thumb_id = get_post_thumbnail_id();
-      if ( $thumb_id ) {
-        $thumb_src = wp_get_attachment_image_src( $thumb_id, 'medium' );
-        $thumb_url = $thumb_src ? $thumb_src[0] : '';
+      $pid = get_the_ID();
+
+      // Photo ambiance du repeater ACF (comme le hero)
+      $amb = sapi_get_product_photos( $pid, 'ambiance', 1 );
+      if ( ! empty( $amb ) ) {
+        $thumb_url = $amb[0];
+      } else {
+        // Fallback : image produit WooCommerce
+        $product = wc_get_product( $pid );
+        if ( $product ) {
+          $img_id = $product->get_image_id();
+          if ( $img_id ) {
+            $src = wp_get_attachment_image_src( $img_id, 'medium' );
+            $thumb_url = $src ? $src[0] : '';
+          }
+        }
       }
       wp_reset_postdata();
     }
