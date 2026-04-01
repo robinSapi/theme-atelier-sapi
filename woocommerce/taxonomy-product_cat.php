@@ -345,4 +345,45 @@ if ($bg_query->have_posts()) {
 </section>
 
 <?php
+// ── Bloc « Découvrez aussi » — maillage interne entre catégories ──
+$cross_links = [
+  'suspensions'  => ['appliques', 'lampadaires'],
+  'appliques'    => ['suspensions', 'lampesaposer'],
+  'lampadaires'  => ['lampesaposer', 'suspensions'],
+  'lampesaposer' => ['lampadaires', 'appliques'],
+];
+
+if ( isset( $cross_links[ $term_slug ] ) ) :
+  $linked_slugs = $cross_links[ $term_slug ];
+  $linked_terms = [];
+
+  foreach ( $linked_slugs as $slug ) {
+    $linked_term = get_term_by( 'slug', $slug, 'product_cat' );
+    if ( $linked_term ) {
+      $linked_terms[] = $linked_term;
+    }
+  }
+
+  $carte_cadeau = get_term_by( 'slug', 'carte-cadeau', 'product_cat' );
+?>
+<section class="category-cross-links">
+  <h2><span class="section-num">04</span> Découvrez aussi</h2>
+  <div class="cross-links-list">
+    <?php foreach ( $linked_terms as $lt ) : ?>
+      <a href="<?php echo esc_url( get_term_link( $lt ) ); ?>" class="cross-link-item">
+        <?php echo esc_html( $lt->name ); ?>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    <?php endforeach; ?>
+    <?php if ( $carte_cadeau && ! is_wp_error( get_term_link( $carte_cadeau ) ) ) : ?>
+      <a href="<?php echo esc_url( get_term_link( $carte_cadeau ) ); ?>" class="cross-link-item cross-link-gift">
+        Vous hésitez ? Offrez une carte cadeau
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    <?php endif; ?>
+  </div>
+</section>
+<?php endif; ?>
+
+<?php
 get_footer();
