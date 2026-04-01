@@ -323,9 +323,6 @@ Ce fichier contient :
 
 La mémoire est stockée dans `~/.claude/projects/.../memory/`. Elle persiste entre les conversations.
 
-### ⚠️ EN DÉBUT DE CONVERSATION — OBLIGATOIRE
-**Lire TOUS les fichiers listés dans MEMORY.md** (feedback_*, project_*, reference_*) avant de commencer à travailler. Pas d'exception.
-
 ### Quand ÉCRIRE dans la mémoire
 1. **Décision d'architecture** — ex: "on utilise un repeater plutôt que des champs fixes"
 2. **Piège technique découvert** — ex: "WooCommerce force height:auto sur les images"
