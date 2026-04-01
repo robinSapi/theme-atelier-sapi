@@ -1046,12 +1046,18 @@ function sapi_maison_structured_data() {
       '@type' => 'Product',
       'name' => get_the_title(),
       'description' => wp_strip_all_tags(get_the_excerpt()),
+      'url' => get_permalink(),
       'sku' => $product->get_sku(),
+      'brand' => [
+        '@type' => 'Brand',
+        'name' => 'Atelier Sâpi'
+      ],
       'offers' => [
         '@type' => 'Offer',
         'url' => get_permalink(),
         'priceCurrency' => 'EUR',
         'price' => $product->get_price(),
+        'priceValidUntil' => gmdate('Y-m-d', strtotime('+1 year')),
         'availability' => $product->is_in_stock() ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
         'seller' => [
           '@type' => 'Organization',
@@ -1075,21 +1081,7 @@ function sapi_maison_structured_data() {
     echo '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
   }
 
-  if (is_front_page()) {
-    $schema = [
-      '@context' => 'https://schema.org',
-      '@type' => 'Organization',
-      'name' => 'Atelier Sâpi',
-      'url' => home_url(),
-      'logo' => get_theme_mod('custom_logo') ? wp_get_attachment_image_url(get_theme_mod('custom_logo'), 'full') : '',
-      'sameAs' => [
-        'https://www.instagram.com/atelier.sapi/',
-        'https://www.facebook.com/ateliersapi'
-      ]
-    ];
-
-    echo '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
-  }
+  // Organization schema supprimé — Yoast le génère déjà dans son @graph
 }
 add_action('wp_head', 'sapi_maison_structured_data');
 
@@ -1219,22 +1211,10 @@ function sapi_maison_breadcrumbs() {
   // SVG flèche comme séparateur
   $bulb = '<span class="breadcrumb-separator"><svg width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.5 1L6.5 6L1.5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
 
-  $schema = [
-    '@context' => 'https://schema.org',
-    '@type' => 'BreadcrumbList',
-    'itemListElement' => []
-  ];
-
+  // BreadcrumbList JSON-LD supprimé — Yoast le génère déjà dans son @graph
   echo '<nav class="breadcrumbs" aria-label="Fil d\'Ariane"><div class="breadcrumbs-inner">';
   foreach ($breadcrumbs as $index => $crumb) {
     $position = $index + 1;
-
-    $schema['itemListElement'][] = [
-      '@type' => 'ListItem',
-      'position' => $position,
-      'name' => $crumb['name'],
-      'item' => $crumb['url'] ?: null
-    ];
 
     if ($crumb['url']) {
       echo '<a href="' . esc_url($crumb['url']) . '">' . esc_html($crumb['name']) . '</a>';
@@ -1246,8 +1226,6 @@ function sapi_maison_breadcrumbs() {
     }
   }
   echo '</div></nav>';
-
-  echo '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
 }
 
 // Redirect static category pages to WooCommerce native categories

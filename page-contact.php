@@ -121,7 +121,7 @@ get_header();
           <span class="contact-card-content">
             <span class="contact-card-label">L'atelier — sur rendez-vous</span>
             <span class="contact-card-value"><a href="https://maps.app.goo.gl/vt9whr9AN9At9cMF8" target="_blank" rel="noopener noreferrer">Lyon, France</a></span>
-            <span class="contact-card-sub">Lun&ndash;Ven : 9h&ndash;18h &middot; Sam : sur rendez-vous</span>
+            <span class="contact-card-sub">Sur rendez-vous</span>
             <span class="contact-card-sub"><a href="tel:+33680435585">Appelez pour prendre rendez-vous</a></span>
           </span>
           <div class="contact-card-atelier-map">
