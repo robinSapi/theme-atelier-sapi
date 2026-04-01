@@ -255,8 +255,9 @@ $local_business = [
   'openingHoursSpecification' => [
     [
       '@type' => 'OpeningHoursSpecification',
-      'dayOfWeek' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-      'description' => 'Sur rendez-vous'
+      'dayOfWeek' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      'opens' => '09:00',
+      'closes' => '19:00'
     ]
   ],
   'priceRange' => '€€',
