@@ -5944,6 +5944,118 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 }
 
 /* ----------------------------------------
+   Pages - Category Archives - Cross Links
+   ---------------------------------------- */
+.category-cross-links {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 5% 4rem;
+  text-align: center;
+}
+
+.category-cross-links h2 {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-dark);
+  margin-bottom: 2rem;
+}
+
+.cross-links-cards {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.cross-link-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: var(--color-dark);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 220px;
+}
+
+.cross-link-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.cross-link-card-img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+.cross-link-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.cross-link-card:hover .cross-link-card-img img {
+  transform: scale(1.05);
+}
+
+.cross-link-card-name {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 0.75rem 1rem;
+  color: var(--color-wood);
+}
+
+.cross-link-gift {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  color: var(--color-orange);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.cross-link-gift:hover {
+  opacity: 0.7;
+}
+
+.cross-link-gift svg {
+  transition: transform 0.3s ease;
+}
+
+.cross-link-gift:hover svg {
+  transform: translateX(4px);
+}
+
+@media (max-width: 768px) {
+  .category-cross-links {
+    padding: 2rem 5% 3rem;
+  }
+
+  .cross-links-cards {
+    gap: 1rem;
+  }
+
+  .cross-link-card {
+    width: 48%;
+  }
+}
+
+/* ----------------------------------------
    Pages - Category Archives - Featured Grid
    ---------------------------------------- */
 

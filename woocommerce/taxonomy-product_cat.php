@@ -345,4 +345,84 @@ if ($bg_query->have_posts()) {
 </section>
 
 <?php
+// ── Bloc « Découvrez aussi » — maillage interne entre catégories ──
+$cross_links = [
+  'suspensions'  => ['appliques', 'lampadaires', 'lampesaposer'],
+  'appliques'    => ['suspensions', 'lampesaposer', 'lampadaires'],
+  'lampadaires'  => ['lampesaposer', 'suspensions', 'appliques'],
+  'lampesaposer' => ['lampadaires', 'appliques', 'suspensions'],
+];
+
+if ( isset( $cross_links[ $term_slug ] ) ) :
+  $linked_slugs = $cross_links[ $term_slug ];
+  $linked_cards = [];
+
+  foreach ( $linked_slugs as $slug ) {
+    $linked_term = get_term_by( 'slug', $slug, 'product_cat' );
+    if ( ! $linked_term ) continue;
+
+    // Récupérer la photo du 1er produit de cette catégorie
+    $cat_query = new WP_Query([
+      'post_type'      => 'product',
+      'posts_per_page' => 1,
+      'tax_query'      => [[ 'taxonomy' => 'product_cat', 'field' => 'term_id', 'terms' => $linked_term->term_id ]],
+      'orderby'        => 'menu_order date',
+      'order'          => 'ASC',
+    ]);
+
+    $thumb_url = '';
+    if ( $cat_query->have_posts() ) {
+      $cat_query->the_post();
+      $pid = get_the_ID();
+
+      // Photo ambiance du repeater ACF (comme le hero)
+      $amb = sapi_get_product_photos( $pid, 'ambiance', 1 );
+      if ( ! empty( $amb ) ) {
+        $thumb_url = $amb[0];
+      } else {
+        // Fallback : image produit WooCommerce
+        $product = wc_get_product( $pid );
+        if ( $product ) {
+          $img_id = $product->get_image_id();
+          if ( $img_id ) {
+            $src = wp_get_attachment_image_src( $img_id, 'medium' );
+            $thumb_url = $src ? $src[0] : '';
+          }
+        }
+      }
+      wp_reset_postdata();
+    }
+
+    $linked_cards[] = [
+      'term'  => $linked_term,
+      'thumb' => $thumb_url,
+    ];
+  }
+
+  $carte_cadeau = get_term_by( 'slug', 'carte-cadeau', 'product_cat' );
+?>
+<section class="category-cross-links">
+  <h2><span class="section-num">04</span> Découvrez aussi</h2>
+  <div class="cross-links-cards">
+    <?php foreach ( $linked_cards as $card ) : ?>
+      <a href="<?php echo esc_url( get_term_link( $card['term'] ) ); ?>" class="cross-link-card">
+        <?php if ( $card['thumb'] ) : ?>
+          <div class="cross-link-card-img">
+            <img src="<?php echo esc_url( $card['thumb'] ); ?>" alt="<?php echo esc_attr( $card['term']->name ); ?>" loading="lazy">
+          </div>
+        <?php endif; ?>
+        <span class="cross-link-card-name"><?php echo esc_html( $card['term']->name ); ?></span>
+      </a>
+    <?php endforeach; ?>
+  </div>
+  <?php if ( $carte_cadeau && ! is_wp_error( get_term_link( $carte_cadeau ) ) ) : ?>
+    <a href="<?php echo esc_url( get_term_link( $carte_cadeau ) ); ?>" class="cross-link-gift">
+      Vous hésitez ? Offrez une carte cadeau
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  <?php endif; ?>
+</section>
+<?php endif; ?>
+
+<?php
 get_footer();

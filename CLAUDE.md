@@ -4,7 +4,7 @@
 > **⚠️ LIRE CE FICHIER + `CUSTOMIZATIONS.md` AVANT TOUTE MODIFICATION**
 > Ce fichier = référence rapide. CUSTOMIZATIONS.md = historique complet.
 
-**Dernière synchro :** 10 mars 2026
+**Dernière synchro :** 31 mars 2026
 
 ---
 
@@ -55,6 +55,16 @@ Claude crée une branche hotfix/xxx depuis master
 - Merge dans `master` : **UNIQUEMENT** après validation explicite de Robin ("go prod", "go en production", etc.)
 - **JAMAIS** push directement sur master sans passer par le merge
 - **Hotfix** : quand Robin veut passer un fix en prod sans embarquer le travail en cours, Claude crée une branche `hotfix/xxx` depuis master, fait le fix, et merge uniquement cette branche dans master
+
+---
+
+## 🧭 PHILOSOPHIE DE TRAVAIL
+
+- **Toujours implémenter ce qui se fait de mieux aujourd'hui** — les standards actuels du secteur, pas juste "ça marche"
+- **Analyser le vrai problème** avant de coder — pas juste le symptôme
+- **Proposer un refactoring** si le code existant est la source du problème
+- **Pas de contournement** : si la bonne solution implique un changement côté Robin (ACF, réglage WordPress, upload), le dire clairement
+- **Découper les tâches complexes** et mettre à jour la mémoire entre chaque étape
 
 ---
 
@@ -138,7 +148,20 @@ $has_acf = function_exists('get_field');
 ```
 **Variables globales réservées à éviter** : `$acf`, `$wpdb`, `$wp`, `$wp_query`, `$post`
 
-### 11. ❌ Afficher un titre produit sans le formatter
+### 11. ❌ Image statique sans `sapi_image()`
+**Les images hardcodées en PHP ne bénéficient pas du srcset → le mobile charge l'image en pleine résolution.**
+```php
+// INTERDIT – pas de srcset, pèse des Mo sur mobile
+<img src="<?php echo get_template_directory_uri(); ?>/assets/img/photo.jpg">
+
+// CORRECT – srcset automatique, lazy loading
+<?php echo sapi_image('2025/05/photo.jpg', 'large', ['alt' => 'Description', 'loading' => 'lazy']); ?>
+```
+- Utiliser `'large'` pour les images standard, `'full'` pour les hero plein écran
+- Les images ACF/WooCommerce ont déjà leur srcset — pas besoin du helper
+- Si on remplace une photo : plugin "Enable Media Replace" pour garder le même nom de fichier
+
+### 12. ❌ Afficher un titre produit sans le formatter
 **Tous les titres de produits DOIVENT passer par `product-name-formatter.js`.**
 Le formatter sépare automatiquement le prénom (1er mot) du reste du nom :
 - **Prénom** → `<span class="product-firstname">` = Montserrat gras, uppercase, 0.75em
@@ -159,12 +182,15 @@ Le formatter sépare automatiquement le prénom (1er mot) du reste du nom :
 
 | Fichier | Rôle | ⚠️ Attention |
 |---------|------|--------------|
-| `functions.php` | Cœur du thème (~1164 lignes) | Complexe, bien documenté |
-| `style.css` | Styles (~13114 lignes) | Design System unifié |
+| `functions.php` | Cœur du thème | Contient `sapi_image()`, `sapi_get_product_photos()`, `sapi_get_video_thumbnail()` |
+| `style.css` | Styles (~13000+ lignes) | Design System unifié |
 | `assets/cinetique.js` | Animations + interactions | Premium v2.0 |
 | `assets/quick-view.js` | Modal aperçu rapide | 746 lignes |
 | `assets/menu.js` | Menu burger + recherche | Focus trap WCAG |
 | `assets/shop.js` | Filtres + variations | 781 lignes |
+| `assets/robin-conseiller.js` | Robin Conseiller V2 | Contrôleur modale + questionnaire |
+| `assets/guide-conseils.json` | Robin Conseiller V2 | 192 textes pré-générés |
+| `inc/guide-data.php` | Robin Conseiller V2 | Questions/choix/visibilité (7 étapes) |
 | `woocommerce/single-product.php` | Fiche produit | Template custom complet |
 | `woocommerce/archive-product.php` | Page /nos-creations/ | Hero magazine + carrousel |
 | `woocommerce/taxonomy-product_cat.php` | Pages catégorie | Mini-carousel + grille |
@@ -213,6 +239,19 @@ Tout le site a été harmonisé en **5 vagues de design premium** :
 - Navigation complète préservée (flèches, clics)
 - Restauration automatique à la désélection
 
+**ACF Pro — Galerie produit flexible** (mars 2026)
+- Repeater `galerie_produit` : types ambiance / détail / taille / client / fabrication (max 15 photos)
+- Vidéo oEmbed `video_produit` : URL YouTube/Vimeo → miniature avec picto play en 1ère vignette
+- Helper `sapi_get_product_photos($post_id, $type, $limit)` — fallback automatique vers anciens champs
+- Helper `sapi_get_video_thumbnail($url)` — miniatures YouTube/Vimeo avec cache Vimeo
+- Photos "client" exclues de la galerie principale (section dédiée uniquement)
+
+**Robin Conseiller V2** (en prod, mars 2026)
+- Questionnaire 7 étapes → 192 textes pré-générés → recommandation avec rideau cinématique
+- Feature flag : `SAPI_ROBIN_V2` dans functions.php
+- Filtre "Ma sélection" sur /nos-creations/ via ?robin_selection=1
+- ⚠️ À affiner : présentation du sur-mesure dans la proposition finale
+
 ➡️ **Voir CUSTOMIZATIONS.md pour le détail complet de chaque vague**
 
 ---
@@ -234,6 +273,19 @@ Tout le site a été harmonisé en **5 vagues de design premium** :
 ### ✅ CSS spécificité `.is-filtered-out` (RÉSOLU)
 - **Problème :** `!important` ne suffisait pas
 - **Solution :** Triple approche (overflow + flex-wrap + nth-child)
+
+### ✅ Images non centrées sur mobile (RÉSOLU — mars 2026)
+- **Problème :** WooCommerce force `height: auto` sur toutes les images (`.woocommerce img`), cassant `object-fit: cover`
+- **Solution :** `height: 100% !important` sur `.client-photo-image` et `.product-mini-card-img`
+
+### ✅ Tracking conversions Google Ads inactif (RÉSOLU — mars 2026)
+- **Problème :** Déclencheur GTM pointait vers l'ancienne URL Elementor `/check-out-confirmation`
+- **Solution :** Déclencheur → événement `purchase`, variables → data layer `ecommerce.value` / `ecommerce.transaction_id`
+
+### ⚠️ Google for WooCommerce — connexion Google Ads cassée (NON RÉSOLU)
+- Erreur API au moment du setup, bouton Continue grisé
+- Impact limité : les conversions passent par GTM. Manque Enhanced Conversions et remarketing dynamique.
+- À retenter lors d'une prochaine mise à jour du plugin
 
 ➡️ **Voir CUSTOMIZATIONS.md section "Historique des Modifications" pour tous les détails**
 
