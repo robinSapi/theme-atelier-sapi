@@ -1144,7 +1144,17 @@ function sapi_maison_structured_data() {
           '@type' => 'Organization',
           'name' => 'Atelier Sâpi'
         ],
-        'shippingDetails' => sapi_get_shipping_schema($product)
+        'shippingDetails' => sapi_get_shipping_schema($product),
+        'hasMerchantReturnPolicy' => [
+          '@type' => 'MerchantReturnPolicy',
+          'applicableCountry' => 'FR',
+          'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
+          'merchantReturnDays' => 30,
+          'returnMethod' => 'https://schema.org/ReturnByMail',
+          'returnFees' => 'https://schema.org/ReturnFeesCustomerResponsibility',
+          'refundType' => 'https://schema.org/FullRefund',
+          'returnPolicySeasonalOverride' => []
+        ]
       ]
     ];
 
