@@ -347,10 +347,10 @@ if ($bg_query->have_posts()) {
 <?php
 // ── Bloc « Découvrez aussi » — maillage interne entre catégories ──
 $cross_links = [
-  'suspensions'  => ['appliques', 'lampadaires'],
-  'appliques'    => ['suspensions', 'lampesaposer'],
-  'lampadaires'  => ['lampesaposer', 'suspensions'],
-  'lampesaposer' => ['lampadaires', 'appliques'],
+  'suspensions'  => ['appliques', 'lampadaires', 'lampesaposer'],
+  'appliques'    => ['suspensions', 'lampesaposer', 'lampadaires'],
+  'lampadaires'  => ['lampesaposer', 'suspensions', 'appliques'],
+  'lampesaposer' => ['lampadaires', 'appliques', 'suspensions'],
 ];
 
 if ( isset( $cross_links[ $term_slug ] ) ) :
