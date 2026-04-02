@@ -5677,16 +5677,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   opacity: 0.9;
 }
 
-/* Section numbers for category headings */
-.section-num {
-  display: inline-block;
-  font-size: 0.875rem;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--bois-dore, #937D68);
-  margin-right: 0.75rem;
-  opacity: 0.8;
-}
+/* Section numbers — définition unique dans le bloc Design System (ligne ~12437) */
 
 .editorial-tagline {
   font-family: var(--font-display, "Square Peg", Georgia, serif);
@@ -12435,10 +12426,13 @@ transform: translateY(15px);
 }
 
 .section-num {
+  display: inline-block;
   font-size: 0.875rem;
-  font-weight: 900;
-  letter-spacing: 0.15em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   color: var(--color-wood);
+  opacity: 0.85;
+  margin-right: 0.75rem;
 }
 
 .section-title-kinetic {
