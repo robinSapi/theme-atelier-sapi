@@ -14217,6 +14217,28 @@ transform: translateY(15px);
   }
 }
 
+/* CTA maillage interne SEO — lien discret entre sections */
+.seo-cta-maillage {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  color: var(--color-wood);
+  letter-spacing: 0.2px;
+}
+.seo-cta-maillage a {
+  color: var(--color-orange);
+  text-decoration: none;
+  font-weight: 600;
+  -webkit-transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease;
+}
+@media (hover: hover) {
+  .seo-cta-maillage a:hover {
+    opacity: 0.8;
+  }
+}
+
 .product-card-cinetique {
   position: relative;
   background: var(--color-white);
