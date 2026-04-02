@@ -10233,7 +10233,7 @@ li.carousel-editorial-slide,
 }
 
 .single-post-header {
-  padding: 100px 20px 60px;
+  padding: 140px 20px 100px;
   text-align: center;
   /* Premium gradient background */
   background: linear-gradient(
@@ -10251,7 +10251,7 @@ li.carousel-editorial-slide,
 
 .single-post-header h1 {
   font-family: var(--font-display, "Square Peg", Georgia, serif);
-  font-size: clamp(42px, 8vw, 72px);
+  font-size: clamp(52px, 8vw, 80px);
   font-weight: 400;
   color: var(--bois-sombre, #4A3F35);
   margin-bottom: 1.5rem;
