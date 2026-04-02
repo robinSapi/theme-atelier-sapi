@@ -12,7 +12,7 @@ get_header();
 <!-- HERO -->
 <section class="surmesure-hero">
   <div class="surmesure-hero-content">
-    <h1 class="surmesure-title-animated" data-text="Créons ensemble votre luminaire"></h1>
+    <h1 class="surmesure-title-animated" data-text="Créons ensemble votre luminaire !"></h1>
     <p class="surmesure-hero-subtitle">Vous avez une idée, un espace, une envie ? Je conçois et fabrique votre luminaire sur mesure, pièce unique pensée pour votre intérieur.</p>
     <a href="#surmesure-form" class="surmesure-scroll-cta surmesure-hero-fade">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
