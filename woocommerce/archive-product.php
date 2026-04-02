@@ -77,6 +77,8 @@ if (!$hero_img_url) {
     <p class="shop-hero-artisan-subtitle">
       <?php esc_html_e('Luminaires uniques, découpés au laser et assemblés à la main dans l\'atelier lyonnais de Robin.', 'theme-sapi-maison'); ?>
     </p>
+    <!-- CTA maillage interne → Conseils éclairés -->
+    <p class="seo-cta-maillage-inline">Vous ne savez pas par où commencer ? <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>">Lisez les conseils de Robin →</a></p>
   </div>
 </section>
 

@@ -991,6 +991,11 @@ get_header();
   <?php endif; ?>
   <?php endif; // fin carte cadeau vs standard ?>
 
+  <!-- CTA maillage interne → Conseils éclairés -->
+  <div class="seo-cta-maillage">
+    <p>Pas sûr de votre choix ? <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>">Consultez les conseils de Robin →</a></p>
+  </div>
+
   <?php do_action('woocommerce_after_single_product'); ?>
   </div><!-- /.product-page-cinetique -->
 
