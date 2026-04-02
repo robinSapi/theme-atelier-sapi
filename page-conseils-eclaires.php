@@ -239,7 +239,7 @@ if ($conseils_query->have_posts()) :
     $conseils_cat = get_category_by_slug('conseils');
     if ($conseils_cat && $conseils_query->found_posts > 3) : ?>
       <div class="advice-articles-more">
-        <a href="<?php echo esc_url(get_category_link($conseils_cat)); ?>">Voir tous les conseils →</a>
+        <a href="<?php echo esc_url(get_category_link($conseils_cat)); ?>">Lire tous les articles du blog →</a>
       </div>
     <?php endif; ?>
   </div>
