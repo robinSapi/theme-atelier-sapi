@@ -112,7 +112,7 @@ get_header();
     <div class="steps-slide">
       <div class="steps-slide-inner">
         <div class="steps-slide-image">
-          <?php echo sapi_image('2025/05/IMG_7638.jpg', 'large', ['alt' => "Coulisses de l'Atelier Sâpi — actus et nouveautés", 'class' => 'steps-slide-image-img', 'loading' => 'lazy']); ?>
+          <?php echo sapi_image('2025/05/ambiance-3.jpg', 'large', ['alt' => "Coulisses de l'Atelier Sâpi — actus et nouveautés", 'class' => 'steps-slide-image-img', 'loading' => 'lazy']); ?>
         </div>
         <div class="steps-slide-content">
           <span class="section-number">05</span>
