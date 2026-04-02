@@ -12,9 +12,15 @@ get_header();
 <!-- HERO -->
 <section class="surmesure-hero">
   <div class="surmesure-hero-content">
-    <h1>Créons ensemble votre luminaire</h1>
-    <p>Vous avez une idée, un espace, une envie ? Je conçois et fabrique votre luminaire sur mesure, pièce unique pensée pour votre intérieur.</p>
-    <a href="#surmesure-form" class="surmesure-scroll-cta">
+    <h1 class="sr-only">Créons ensemble votre luminaire</h1>
+    <div class="surmesure-merci" aria-hidden="true">
+      <svg viewBox="0 0 820 280" class="surmesure-merci-svg">
+        <text x="410" y="110" text-anchor="middle">Créons ensemble</text>
+        <text x="410" y="240" text-anchor="middle">votre luminaire</text>
+      </svg>
+    </div>
+    <p class="surmesure-hero-subtitle">Vous avez une idée, un espace, une envie ? Je conçois et fabrique votre luminaire sur mesure, pièce unique pensée pour votre intérieur.</p>
+    <a href="#surmesure-form" class="surmesure-scroll-cta surmesure-hero-fade">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="12" y1="5" x2="12" y2="19"></line>
         <polyline points="19 12 12 19 5 12"></polyline>
