@@ -413,6 +413,7 @@ get_header();
 
 <!-- FORMULAIRE -->
 <section id="surmesure-form" class="surmesure-form-section">
+  <img src="https://atelier-sapi.fr/wp-content/uploads/2025/03/IMG_2202-scaled.jpg" alt="" class="surmesure-form-bg" loading="lazy">
   <div class="surmesure-form-wrapper">
     <h2>Votre projet commence ici</h2>
     <p class="surmesure-form-intro">Décrivez-moi votre idée, même vaguement. Je vous recontacte sous 48h pour en discuter ensemble.</p>

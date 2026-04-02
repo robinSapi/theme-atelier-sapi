@@ -22081,12 +22081,41 @@ html.sapi-intro-active body {
 /* --- Formulaire --- */
 .surmesure-form-section {
   padding: 100px 20px;
+  position: relative;
   background: linear-gradient(135deg, var(--creme-chaud, #FAF6F0) 0%, var(--creme-papier, #FEFDFB) 100%);
+  overflow: hidden;
+}
+
+.surmesure-form-section > .surmesure-form-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+.surmesure-form-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(254, 253, 251, 0.92) 0%,
+    rgba(251, 246, 234, 0.88) 50%,
+    rgba(250, 246, 240, 0.92) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
 }
 
 .surmesure-form-wrapper {
   max-width: 650px;
   margin: 0 auto;
+  position: relative;
+  z-index: 2;
 }
 
 .surmesure-form-wrapper h2 {
