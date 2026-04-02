@@ -7245,7 +7245,7 @@ li.carousel-editorial-slide,
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(74, 63, 53, 0.55);
 }
 
 .artisan-hero-inner {
@@ -8169,7 +8169,7 @@ li.carousel-editorial-slide,
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(74, 63, 53, 0.55);
   z-index: 1;
 }
 
@@ -9300,7 +9300,7 @@ li.carousel-editorial-slide,
 .contact-hero-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(74, 63, 53, 0.55);
 }
 
 .contact-hero-content {
@@ -13211,7 +13211,7 @@ transform: translateY(15px);
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(74, 63, 53, 0.55);
 }
 
 .shop-hero-artisan-inner {
