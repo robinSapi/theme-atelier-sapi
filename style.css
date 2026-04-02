@@ -14272,6 +14272,24 @@ transform: translateY(15px);
     opacity: 1;
   }
 }
+.seo-cta-maillage-inline {
+  margin-top: 1.2rem;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: var(--color-wood);
+}
+.seo-cta-maillage-inline a {
+  color: var(--color-orange);
+  text-decoration: none;
+  font-weight: 600;
+  -webkit-transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease;
+}
+@media (hover: hover) {
+  .seo-cta-maillage-inline a:hover {
+    opacity: 0.8;
+  }
+}
 
 .product-card-cinetique {
   position: relative;

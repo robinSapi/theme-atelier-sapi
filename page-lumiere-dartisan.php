@@ -226,6 +226,7 @@ get_header();
     <h2>Envie de découvrir mes créations ?</h2>
     <p>Chaque luminaire est une pièce unique, pensée pour sublimer votre intérieur.</p>
     <a href="<?php echo home_url('/mes-creations/'); ?>" class="button">Voir la collection</a>
+    <p class="seo-cta-maillage-inline">Besoin de conseils pour choisir ? <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>">Voir les conseils éclairés →</a></p>
   </div>
 </section>
 
