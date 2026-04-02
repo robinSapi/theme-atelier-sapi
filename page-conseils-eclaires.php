@@ -33,6 +33,7 @@ for ($i = 1; $i <= 4; $i++) {
 }
 ?>
 
+<!-- 1. Hero -->
 <section class="advice-hero-artisan">
   <?php echo sapi_image('2025/03/Sapi-header_idees.jpg', 'full', ['alt' => 'Conseils éclairage — Atelier Sâpi', 'class' => 'advice-hero-artisan-img']); ?>
   <div class="advice-hero-artisan-inner">
@@ -41,7 +42,7 @@ for ($i = 1; $i <= 4; $i++) {
   </div>
 </section>
 
-<!-- Conseil personnalisé de Robin (shown by mon-projet.js if available) -->
+<!-- 2. Conseil personnalisé de Robin (shown by mon-projet.js if available) -->
 <?php
 require_once get_template_directory() . '/inc/template-robin-conseil.php';
 sapi_robin_conseil_card( 'conseils' );
@@ -52,6 +53,7 @@ sapi_robin_conseil_card( 'conseils' );
   <button type="button" class="conseils-refresh-btn">Obtenir les conseils de Robin</button>
 </div>
 
+<!-- 3. Cartes conseils -->
 <section class="advice-tips-section">
   <div class="advice-tips-grid">
     <?php foreach ($tips as $i => $tip) : ?>
@@ -85,31 +87,7 @@ sapi_robin_conseil_card( 'conseils' );
   </div>
 </section>
 
-<!-- Card "Pour quelle pièce" — ouvre la modale Robin -->
-<section class="advice-room-picker-section">
-  <div class="advice-room-picker">
-    <div class="room-picker-inner">
-      <span class="robin-modal__badge" style="margin-bottom: 0.5rem;">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
-        Conseil de Robin
-      </span>
-      <h3 class="room-picker-title">Pour quelle pièce cherchez-vous un luminaire ?</h3>
-      <p class="room-picker-sub">Quelques questions et Robin vous guide vers le luminaire idéal</p>
-      <div class="room-picker-cards">
-        <?php foreach ($room_choices as $room) :
-          $icon_svg = isset($room_icons[$room['icon']]) ? $room_icons[$room['icon']] : '';
-        ?>
-          <button type="button" class="room-card" data-piece="<?php echo esc_attr($room['slug']); ?>" onclick="if(window.sapiRobinOpen)window.sapiRobinOpen('homepage',{piece:this.dataset.piece});">
-            <span class="room-card-icon"><?php echo $icon_svg; ?></span>
-            <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
-          </button>
-        <?php endforeach; ?>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Overlay plein écran -->
+<!-- Overlay plein écran (utilisé par les cartes conseils) -->
 <div class="advice-overlay" aria-hidden="true">
   <div class="advice-overlay-inner">
     <button class="advice-overlay-close" aria-label="Fermer">&times;</button>
@@ -117,17 +95,13 @@ sapi_robin_conseil_card( 'conseils' );
   </div>
 </div>
 
-<!-- CTA maillage interne → Mes Créations -->
-<section class="seo-cta-maillage seo-cta-maillage--button">
-  <p>Prêt à passer à l'action ?</p>
-  <a href="<?php echo esc_url(home_url('/mes-creations/')); ?>" class="button">Voir toutes les créations</a>
-</section>
-
+<!-- 4. Citation Robin -->
 <section class="advice-outro">
   <p>Éclairer une pièce, c'est un peu comme choisir la bonne sauce pour ses pâtes : tout est une question de préférence et de dosage !</p>
   <span class="advice-outro-signature">Robin, créateur à l'Atelier Sâpi</span>
 </section>
 
+<!-- Script cartes conseils -->
 <script>
 (function() {
   'use strict';
@@ -198,7 +172,7 @@ sapi_robin_conseil_card( 'conseils' );
 })();
 </script>
 
-<!-- Grille : articles de la catégorie Conseils -->
+<!-- 5. Articles blog -->
 <?php
 $conseils_query = new WP_Query([
   'posts_per_page' => 3,
@@ -210,7 +184,7 @@ $conseils_query = new WP_Query([
 
 if ($conseils_query->have_posts()) :
 ?>
-<section class="blog-grid-section">
+<section class="blog-grid-section advice-section--warm">
   <div class="blog-grid-container">
     <h2 class="advice-articles-title">Nos derniers conseils</h2>
     <div class="blog-grid">
@@ -248,6 +222,36 @@ if ($conseils_query->have_posts()) :
 wp_reset_postdata();
 endif;
 ?>
+
+<!-- 6. Room picker Robin — transition vers l'action -->
+<section class="advice-room-picker-section">
+  <div class="advice-room-picker">
+    <div class="room-picker-inner">
+      <span class="robin-modal__badge" style="margin-bottom: 0.5rem;">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+        Conseil de Robin
+      </span>
+      <h3 class="room-picker-title">Pour quelle pièce cherchez-vous un luminaire ?</h3>
+      <p class="room-picker-sub">Quelques questions et Robin vous guide vers le luminaire idéal</p>
+      <div class="room-picker-cards">
+        <?php foreach ($room_choices as $room) :
+          $icon_svg = isset($room_icons[$room['icon']]) ? $room_icons[$room['icon']] : '';
+        ?>
+          <button type="button" class="room-card" data-piece="<?php echo esc_attr($room['slug']); ?>" onclick="if(window.sapiRobinOpen)window.sapiRobinOpen('homepage',{piece:this.dataset.piece});">
+            <span class="room-card-icon"><?php echo $icon_svg; ?></span>
+            <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
+          </button>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. CTA maillage interne → Mes Créations -->
+<section class="seo-cta-maillage seo-cta-maillage--button">
+  <p>Prêt à passer à l'action ?</p>
+  <a href="<?php echo esc_url(home_url('/mes-creations/')); ?>" class="button">Voir toutes les créations</a>
+</section>
 
 <?php
 get_footer();

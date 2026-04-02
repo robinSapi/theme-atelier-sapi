@@ -9991,6 +9991,9 @@ li.carousel-editorial-slide,
   background: var(--color-white, #FFFFFF);
   padding: 80px 40px;
 }
+.blog-grid-section.advice-section--warm {
+  background: var(--color-warm, #FBF6EA);
+}
 
 .blog-grid-container {
   max-width: 1400px;
