@@ -456,7 +456,7 @@ foreach ($collection_slugs as $col) {
         <div class="process-step">
           <span class="step-num">01</span>
           <span class="step-text">Dessin</span>
-          <?php echo sapi_image('2025/05/IMG_1928.jpg', 'large', ['alt' => "Dessin d'un luminaire en bois — Atelier Sâpi", 'class' => 'step-image-img', 'loading' => 'lazy']); ?>
+          <?php echo sapi_image('2025/05/IMG_1928-e1761747188966.png', 'large', ['alt' => "Dessin d'un luminaire en bois — Atelier Sâpi", 'class' => 'step-image-img', 'loading' => 'lazy']); ?>
         </div>
         <div class="process-step">
           <span class="step-num">02</span>
