@@ -9312,11 +9312,12 @@ li.carousel-editorial-slide,
 
 .contact-hero h1 {
   font-family: var(--font-display, "Square Peg", Georgia, serif);
-  font-size: clamp(72px, 14vw, 150px);
+  font-size: clamp(3rem, 7vw, 5rem);
   font-weight: 400;
   line-height: 1.1;
   margin-bottom: 1rem;
   color: #fff;
+  white-space: nowrap;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
@@ -9605,7 +9606,8 @@ li.carousel-editorial-slide,
   }
 
   .contact-hero h1 {
-    font-size: clamp(48px, 12vw, 80px);
+    font-size: clamp(2.5rem, 10vw, 3.5rem);
+    white-space: normal;
   }
 
   .contact-main {
@@ -21715,7 +21717,7 @@ html.sapi-intro-active body {
 /* --- Introduction --- */
 .surmesure-intro {
   padding: 100px 20px;
-  background: var(--creme-papier, #FEFDFB);
+  background: var(--color-warm, #FBF6EA);
 }
 
 .surmesure-intro-grid {
