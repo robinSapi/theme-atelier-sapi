@@ -12,13 +12,7 @@ get_header();
 <!-- HERO -->
 <section class="surmesure-hero">
   <div class="surmesure-hero-content">
-    <h1 class="sr-only">Créons ensemble votre luminaire</h1>
-    <div class="surmesure-merci" aria-hidden="true">
-      <svg viewBox="0 0 820 280" class="surmesure-merci-svg">
-        <text x="410" y="110" text-anchor="middle">Créons ensemble</text>
-        <text x="410" y="240" text-anchor="middle">votre luminaire</text>
-      </svg>
-    </div>
+    <h1 class="surmesure-title-animated" data-text="Créons ensemble votre luminaire"></h1>
     <p class="surmesure-hero-subtitle">Vous avez une idée, un espace, une envie ? Je conçois et fabrique votre luminaire sur mesure, pièce unique pensée pour votre intérieur.</p>
     <a href="#surmesure-form" class="surmesure-scroll-cta surmesure-hero-fade">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -28,6 +22,26 @@ get_header();
       Parlons de votre projet
     </a>
   </div>
+  <script>
+  (function() {
+    var el = document.querySelector('.surmesure-title-animated');
+    if (!el) return;
+    var text = el.getAttribute('data-text');
+    var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) { el.textContent = text; el.classList.add('is-visible'); return; }
+    var delay = 80;
+    text.split('').forEach(function(char, i) {
+      var span = document.createElement('span');
+      span.textContent = char;
+      span.className = 'surmesure-letter';
+      span.style.animationDelay = (0.5 + i * delay / 1000) + 's';
+      span.style.WebkitAnimationDelay = (0.5 + i * delay / 1000) + 's';
+      el.appendChild(span);
+    });
+    var totalDuration = 0.5 + text.length * delay / 1000 + 0.3;
+    el.closest('.surmesure-hero-content').style.setProperty('--title-end', totalDuration + 's');
+  })();
+  </script>
 </section>
 
 <!-- INTRODUCTION -->

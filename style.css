@@ -21670,46 +21670,37 @@ html.sapi-intro-active body {
   z-index: 1;
 }
 
-/* Animation SVG manuscrite — effet écriture */
-.surmesure-merci {
-  text-align: center;
-  margin-bottom: 1.25rem;
+/* Animation lettre par lettre */
+.surmesure-title-animated {
+  font-family: 'Square Peg', cursive;
+  font-size: clamp(72px, 14vw, 150px);
+  font-weight: 400;
+  color: var(--color-wood-dark, #4A3F35);
+  line-height: 1.1;
+  margin: 0 0 1.25rem;
 }
 
-.surmesure-merci-svg {
-  width: clamp(320px, 70vw, 820px);
-  height: auto;
-  overflow: visible;
+.surmesure-letter {
+  display: inline-block;
+  opacity: 0;
+  -webkit-transform: translateY(15px);
+  transform: translateY(15px);
+  -webkit-animation: surmesureLetterIn 0.3s ease forwards;
+  animation: surmesureLetterIn 0.3s ease forwards;
 }
 
-.surmesure-merci-svg text {
-  font-family: var(--font-display, 'Square Peg', cursive);
-  font-size: 120px;
-  fill: transparent;
-  stroke: var(--color-wood-dark, #4A3F35);
-  stroke-width: 1.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 1200;
-  stroke-dashoffset: 1200;
-  -webkit-animation:
-    surmesureStroke 4s ease 0.5s forwards,
-    surmesureFill 1s ease 4s forwards;
-  animation:
-    surmesureStroke 4s ease 0.5s forwards,
-    surmesureFill 1s ease 4s forwards;
+/* Préserver les espaces */
+.surmesure-letter:empty,
+.surmesure-title-animated {
+  white-space: pre-wrap;
 }
 
-@keyframes surmesureStroke {
-  to { stroke-dashoffset: 0; }
+@keyframes surmesureLetterIn {
+  0% { opacity: 0; -webkit-transform: translateY(15px); transform: translateY(15px); }
+  100% { opacity: 1; -webkit-transform: translateY(0); transform: translateY(0); }
 }
 
-@keyframes surmesureFill {
-  from { fill: transparent; }
-  to { fill: var(--color-wood-dark, #4A3F35); }
-}
-
-/* Sous-titre et CTA apparaissent après l'animation */
+/* Sous-titre et CTA apparaissent après l'animation titre */
 .surmesure-hero-subtitle,
 .surmesure-hero-fade {
   opacity: 0;
@@ -21717,10 +21708,14 @@ html.sapi-intro-active body {
   transform: translateY(20px);
   -webkit-animation: surmesureFadeUp 0.6s ease forwards;
   animation: surmesureFadeUp 0.6s ease forwards;
+  animation-delay: var(--title-end, 4s);
+  -webkit-animation-delay: var(--title-end, 4s);
 }
 
-.surmesure-hero-subtitle { animation-delay: 4.5s; -webkit-animation-delay: 4.5s; }
-.surmesure-hero-fade { animation-delay: 5s; -webkit-animation-delay: 5s; }
+.surmesure-hero-fade {
+  animation-delay: calc(var(--title-end, 4s) + 0.3s);
+  -webkit-animation-delay: calc(var(--title-end, 4s) + 0.3s);
+}
 
 @keyframes surmesureFadeUp {
   0% { opacity: 0; -webkit-transform: translateY(20px); transform: translateY(20px); }
@@ -21737,11 +21732,12 @@ html.sapi-intro-active body {
 
 /* Respect prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
-  .surmesure-merci-svg text {
+  .surmesure-letter {
     animation: none;
     -webkit-animation: none;
-    fill: var(--color-wood-dark, #4A3F35);
-    stroke-dashoffset: 0;
+    opacity: 1;
+    -webkit-transform: none;
+    transform: none;
   }
   .surmesure-hero-subtitle,
   .surmesure-hero-fade {
@@ -22214,8 +22210,8 @@ html.sapi-intro-active body {
     padding: 100px 20px 60px;
   }
 
-  .surmesure-merci-svg {
-    width: clamp(260px, 85vw, 400px);
+  .surmesure-title-animated {
+    font-size: clamp(48px, 12vw, 80px);
   }
 
   .surmesure-intro {
