@@ -7552,6 +7552,19 @@ li.carousel-editorial-slide,
   margin-bottom: 0;
 }
 
+.steps-slide-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--color-orange, #E35B24);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: opacity 0.3s;
+}
+.steps-slide-link:hover {
+  opacity: 0.8;
+}
+
 /* Progress dots */
 .steps-slider-dots {
   display: flex;
@@ -12301,6 +12314,32 @@ transform: translateY(15px);
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.7);
   font-weight: 400;
+}
+.bento-actu-link {
+  display: block;
+  position: absolute;
+  inset: 0;
+  color: inherit;
+  text-decoration: none;
+}
+.bento-actu-all {
+  position: absolute;
+  bottom: 1rem;
+  right: 1.5rem;
+  z-index: 3;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  -webkit-transition: color 0.2s ease;
+  transition: color 0.2s ease;
+}
+@media (hover: hover) {
+  .bento-actu-all:hover {
+    color: #fff;
+  }
 }
 
 /* Bento - Conseil Card */

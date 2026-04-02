@@ -51,7 +51,7 @@ get_header();
     <h2>Mon processus</h2>
     <div class="steps-slider-nav">
       <button type="button" class="steps-slider-btn steps-slider-prev" aria-label="Étape précédente">&lt;</button>
-      <span class="steps-slider-counter">01 / 04</span>
+      <span class="steps-slider-counter">01 / 06</span>
       <button type="button" class="steps-slider-btn steps-slider-next" aria-label="Étape suivante">&gt;</button>
     </div>
   </div>
@@ -99,13 +99,39 @@ get_header();
     <div class="steps-slide">
       <div class="steps-slide-inner">
         <div class="steps-slide-image">
-          <?php echo sapi_image('2025/07/P1130073-scaled.jpg', 'large', ['alt' => "Finitions et assemblage d'un luminaire en bois", 'class' => 'steps-slide-image-img', 'loading' => 'lazy']); ?>
+          <?php echo sapi_image('2025/09/Poncage.jpg', 'large', ['alt' => "Ponçage et contrôle qualité d'un luminaire en bois", 'class' => 'steps-slide-image-img', 'loading' => 'lazy']); ?>
         </div>
         <div class="steps-slide-content">
           <span class="section-number">04</span>
+          <h3>Le soin du détail</h3>
+          <p>Après la découpe, chaque pièce passe entre mes mains. Je ponce, j'ajuste, je vérifie les assemblages un par un. C'est une étape que j'affectionne particulièrement : c'est là que le luminaire prend vraiment vie, que le bois révèle sa douceur et que je m'assure que tout est impeccable.</p>
+          <p>Rien ne quitte l'atelier sans ce contrôle minutieux. Un défaut, même discret, je le repère et je le corrige. C'est ma garantie que chaque luminaire que vous recevrez est à la hauteur de ce que j'imagine pour vous.</p>
+        </div>
+      </div>
+    </div>
+    <div class="steps-slide">
+      <div class="steps-slide-inner">
+        <div class="steps-slide-image">
+          <?php echo sapi_image('2025/07/P1130073-scaled.jpg', 'large', ['alt' => "Emballage et expédition soignée d'un luminaire en bois", 'class' => 'steps-slide-image-img', 'loading' => 'lazy']); ?>
+        </div>
+        <div class="steps-slide-content">
+          <span class="section-number">05</span>
           <h3>Et maintenant, elle vous appartient !</h3>
-          <p>Chaque pièce est ensuite contrôlée à la main : je ponce, j'affine, je vérifie la qualité avant de passer à l'assemblage puis à l'emballage. En effet, certains modèles vous arrivent pré-assemblés, et il ne vous reste que quelques étapes faciles et guidées !</p>
+          <p>Certains modèles vous arrivent pré-assemblés, et il ne vous reste que quelques étapes faciles et guidées ! D'autres sont à monter vous-même — mais pas d'inquiétude, tout est pensé pour que l'expérience soit simple et agréable.</p>
           <p>Je prépare chaque colis avec soin : pièces, accessoires commandés, notice d'installation… et bien sûr, un bon emballage pour garantir une livraison impeccable !</p>
+        </div>
+      </div>
+    </div>
+    <div class="steps-slide">
+      <div class="steps-slide-inner">
+        <div class="steps-slide-image">
+          <?php echo sapi_image('2025/05/ambiance-3.jpg', 'large', ['alt' => "Coulisses de l'Atelier Sâpi — actus et nouveautés", 'class' => 'steps-slide-image-img', 'loading' => 'lazy']); ?>
+        </div>
+        <div class="steps-slide-content">
+          <span class="section-number">06</span>
+          <h3>Et après...</h3>
+          <p>Mon histoire vous intéresse ? Je partage les coulisses de l'atelier, les collaborations, les marchés et les nouveautés dans mes actus.</p>
+          <a href="<?php echo esc_url(home_url('/actus/')); ?>" class="steps-slide-link">Suivre les actus →</a>
         </div>
       </div>
     </div>
@@ -115,6 +141,8 @@ get_header();
     <button class="steps-slider-dot" data-idx="1"></button>
     <button class="steps-slider-dot" data-idx="2"></button>
     <button class="steps-slider-dot" data-idx="3"></button>
+    <button class="steps-slider-dot" data-idx="4"></button>
+    <button class="steps-slider-dot" data-idx="5"></button>
   </div>
 </section>
 
