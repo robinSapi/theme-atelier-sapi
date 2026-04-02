@@ -21681,23 +21681,14 @@ html.sapi-intro-active body {
 }
 
 .surmesure-letter {
-  display: inline-block;
   opacity: 0;
-  -webkit-transform: translateY(15px);
-  transform: translateY(15px);
   -webkit-animation: surmesureLetterIn 0.3s ease forwards;
   animation: surmesureLetterIn 0.3s ease forwards;
 }
 
-/* Préserver les espaces */
-.surmesure-letter:empty,
-.surmesure-title-animated {
-  white-space: pre-wrap;
-}
-
 @keyframes surmesureLetterIn {
-  0% { opacity: 0; -webkit-transform: translateY(15px); transform: translateY(15px); }
-  100% { opacity: 1; -webkit-transform: translateY(0); transform: translateY(0); }
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 /* Sous-titre et CTA apparaissent après l'animation titre */
