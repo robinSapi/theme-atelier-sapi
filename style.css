@@ -9642,7 +9642,7 @@ li.carousel-editorial-slide,
 
 /* Blog Archive Hero Premium */
 .blog-hero {
-  padding: 100px 20px 80px;
+  padding: 140px 20px 100px;
   text-align: center;
   /* Premium gradient background */
   background: linear-gradient(
@@ -9660,7 +9660,7 @@ li.carousel-editorial-slide,
 
 .blog-hero h1 {
   font-family: var(--font-display, "Square Peg", Georgia, serif);
-  font-size: clamp(56px, 10vw, 96px);
+  font-size: clamp(64px, 10vw, 96px);
   font-weight: 400;
   color: var(--bois-sombre, #4A3F35);
   margin-bottom: 1rem;
@@ -19608,7 +19608,7 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
   .artisan-hero,
   .blog-hero {
     min-height: 45vh !important; /* Réduit de 60vh à 45vh */
-    padding: 100px 20px 60px !important;
+    padding: 120px 20px 80px !important;
   }
 
   /* Images sections conseils moins hautes */
