@@ -3809,7 +3809,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   margin-bottom: 0.5rem;
 }
 
-.product-summary-header .section-number {
+.product-summary-header .section-num {
   font-size: 0.875rem;
   font-weight: 900;
   letter-spacing: 0.15em;
@@ -4121,7 +4121,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   margin-bottom: 2rem;
 }
 
-.product-details-header .section-number {
+.product-details-header .section-num {
   font-size: 0.875rem;
   font-weight: 900;
   letter-spacing: 0.15em;
@@ -4270,7 +4270,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   opacity: 1 !important;
 }
 
-.client-photo-header .section-number {
+.client-photo-header .section-num {
   font-size: 0.875rem;
   font-weight: 900;
   color: var(--color-wood);
@@ -4315,7 +4315,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
     margin-bottom: 1.5rem;
   }
 
-  .client-photo-header .section-number {
+  .client-photo-header .section-num {
     font-size: 0.75rem;
   }
 
@@ -4351,7 +4351,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   flex-direction: column;
 }
 
-.product-why-header .section-number {
+.product-why-header .section-num {
   font-size: 0.875rem;
   font-weight: 900;
   letter-spacing: 0.15em;
@@ -4463,7 +4463,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   margin-bottom: 2.5rem;
 }
 
-.product-specs-header .section-number {
+.product-specs-header .section-num {
   font-size: 0.875rem;
   font-weight: 900;
   letter-spacing: 0.15em;
@@ -4570,7 +4570,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   margin-bottom: 2.5rem;
 }
 
-.product-specs-v2 .product-specs-header .section-number {
+.product-specs-v2 .product-specs-header .section-num {
   font-size: 0.875rem;
   font-weight: 900;
   letter-spacing: 0.15em;
@@ -4953,7 +4953,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 }
 
 /* Label "L'ARTISAN" - DS 4.5 */
-.product-atelier-content .section-number {
+.product-atelier-content .section-num {
   display: inline-block;
   font-family: var(--font-body);
   font-size: 0.875rem;
@@ -5073,7 +5073,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   margin-bottom: 2.5rem;
 }
 
-.testimonials-header .section-number {
+.testimonials-header .section-num {
   font-size: 0.875rem;
   font-weight: 900;
   letter-spacing: 0.15em;
@@ -5426,7 +5426,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   margin-bottom: 2rem;
 }
 
-.product-faq-header .section-number {
+.product-faq-header .section-num {
   font-size: 0.875rem;
   font-weight: 900;
   letter-spacing: 0.15em;
@@ -5580,7 +5580,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   padding: 0 3rem;
 }
 
-.product-related-header .section-number {
+.product-related-header .section-num {
   font-size: 0.875rem;
   font-weight: 900;
   letter-spacing: 0.15em;
@@ -9642,7 +9642,7 @@ li.carousel-editorial-slide,
 
 /* Blog Archive Hero Premium */
 .blog-hero {
-  padding: 100px 20px 80px;
+  padding: 140px 20px 100px;
   text-align: center;
   /* Premium gradient background */
   background: linear-gradient(
@@ -9660,7 +9660,7 @@ li.carousel-editorial-slide,
 
 .blog-hero h1 {
   font-family: var(--font-display, "Square Peg", Georgia, serif);
-  font-size: clamp(56px, 10vw, 96px);
+  font-size: clamp(64px, 10vw, 96px);
   font-weight: 400;
   color: var(--bois-sombre, #4A3F35);
   margin-bottom: 1rem;
@@ -10233,7 +10233,7 @@ li.carousel-editorial-slide,
 }
 
 .single-post-header {
-  padding: 100px 20px 60px;
+  padding: 140px 20px 100px;
   text-align: center;
   /* Premium gradient background */
   background: linear-gradient(
@@ -10251,7 +10251,7 @@ li.carousel-editorial-slide,
 
 .single-post-header h1 {
   font-family: var(--font-display, "Square Peg", Georgia, serif);
-  font-size: clamp(42px, 8vw, 72px);
+  font-size: clamp(52px, 8vw, 80px);
   font-weight: 400;
   color: var(--bois-sombre, #4A3F35);
   margin-bottom: 1.5rem;
@@ -19608,7 +19608,7 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
   .artisan-hero,
   .blog-hero {
     min-height: 45vh !important; /* Réduit de 60vh à 45vh */
-    padding: 100px 20px 60px !important;
+    padding: 120px 20px 80px !important;
   }
 
   /* Images sections conseils moins hautes */
