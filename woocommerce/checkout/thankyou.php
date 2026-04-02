@@ -128,8 +128,12 @@ defined('ABSPATH') || exit;
     </div>
   </div>
 
-  <!-- CTA retour boutique -->
+  <!-- CTA maillage interne + retour boutique -->
   <div class="thankyou-cta">
+    <div class="seo-cta-maillage seo-cta-maillage--thankyou">
+      <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>">Découvrir l'histoire de l'atelier →</a>
+      <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>">Conseils d'installation et d'éclairage →</a>
+    </div>
     <a href="<?php echo esc_url(home_url('/mes-creations/')); ?>" class="thankyou-cta-btn">
       Continuer à explorer les créations
     </a>

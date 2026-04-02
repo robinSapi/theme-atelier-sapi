@@ -14290,6 +14290,13 @@ transform: translateY(15px);
     opacity: 0.8;
   }
 }
+.seo-cta-maillage--thankyou {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
 
 .product-card-cinetique {
   position: relative;
