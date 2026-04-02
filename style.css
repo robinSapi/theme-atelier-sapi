@@ -22108,7 +22108,12 @@ html.sapi-intro-active body {
 
 .surmesure-form-wrapper form {
   display: grid;
-  gap: 1.5rem;
+  gap: 1.25rem;
+  background: var(--color-white, #FFFFFF);
+  border-radius: 16px;
+  border: 1px solid rgba(147, 125, 104, 0.12);
+  padding: 2.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .surmesure-form-wrapper label {
@@ -22117,8 +22122,8 @@ html.sapi-intro-active body {
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--bois-sombre, #4A3F35);
-  margin-bottom: 6px;
+  color: var(--bois-profond, #6B5A4A);
+  margin-bottom: 0.4rem;
 }
 
 .surmesure-form-wrapper input[type="text"],
@@ -22126,12 +22131,13 @@ html.sapi-intro-active body {
 .surmesure-form-wrapper textarea {
   width: 100%;
   padding: 14px 16px;
-  border: 2px solid rgba(147, 125, 104, 0.2);
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--bois-sombre, #4A3F35);
+  background: var(--creme-papier, #FEFDFB);
+  border: 2px solid rgba(147, 125, 104, 0.15);
   border-radius: 8px;
-  background: #fff;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.95rem;
-  color: var(--color-dark, #323232);
+  -webkit-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
 }
@@ -22140,8 +22146,15 @@ html.sapi-intro-active body {
 .surmesure-form-wrapper textarea:focus {
   outline: none;
   border-color: var(--color-orange, #E35B24);
-  box-shadow: 0 0 0 3px rgba(227, 91, 36, 0.1);
-  background: #fff;
+  background: var(--color-white, #FFFFFF);
+  box-shadow:
+    0 0 0 3px rgba(227, 91, 36, 0.1),
+    0 2px 8px rgba(227, 91, 36, 0.15);
+}
+
+.surmesure-form-wrapper textarea {
+  min-height: 140px;
+  resize: vertical;
 }
 
 .surmesure-form-wrapper input::placeholder,
@@ -22150,28 +22163,37 @@ html.sapi-intro-active body {
 }
 
 .surmesure-form-wrapper button[type="submit"] {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  padding: 18px 48px;
-  background: var(--gradient-cta);
-  color: var(--creme-papier, #FEFDFB);
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.95rem;
+  padding: 16px 40px;
+  font-size: 15px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  color: var(--creme-papier, #FEFDFB);
+  background: var(--gradient-cta);
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(227, 91, 36, 0.25), 0 2px 4px rgba(227, 91, 36, 0.15);
+  box-shadow:
+    0 4px 12px rgba(227, 91, 36, 0.25),
+    0 2px 4px rgba(227, 91, 36, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  -webkit-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (hover: hover) {
   .surmesure-form-wrapper button[type="submit"]:hover {
     background: linear-gradient(180deg, #D14F1C 0%, #B8441A 100%);
+    -webkit-transform: translateY(-2px);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(227, 91, 36, 0.3), 0 4px 8px rgba(227, 91, 36, 0.2);
+    box-shadow:
+      0 8px 20px rgba(227, 91, 36, 0.3),
+      0 4px 8px rgba(227, 91, 36, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
   }
 }
 
