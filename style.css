@@ -7624,22 +7624,15 @@ li.carousel-editorial-slide,
 
 .artisan-intro-cinetique {
   background: url('https://atelier-sapi.fr/wp-content/uploads/2026/03/IMG_1673.jpg') center/cover no-repeat;
-  padding: 140px 20px;
+  padding: 100px 20px;
   position: relative;
-  overflow: hidden;
 }
 
 .artisan-intro-cinetique::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(254, 253, 251, 0.92) 0%,
-    rgba(251, 246, 234, 0.88) 50%,
-    rgba(250, 246, 240, 0.92) 100%
-  );
-  pointer-events: none;
+  background: rgba(254, 253, 251, 0.95);
 }
 
 .artisan-intro-cinetique .artisan-intro-grid {
@@ -7872,7 +7865,7 @@ li.carousel-editorial-slide,
 
 /* Quote Finale Premium */
 .artisan-quote-cinetique {
-  padding: 160px 20px;
+  padding: 120px 20px;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -7892,13 +7885,7 @@ li.carousel-editorial-slide,
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(254, 253, 251, 0.92) 0%,
-    rgba(251, 246, 234, 0.88) 50%,
-    rgba(250, 246, 240, 0.92) 100%
-  );
-  pointer-events: none;
+  background: rgba(254, 253, 251, 0.88);
   z-index: 1;
 }
 
