@@ -117,6 +117,12 @@ sapi_robin_conseil_card( 'conseils' );
   </div>
 </div>
 
+<!-- CTA maillage interne → Mes Créations -->
+<section class="seo-cta-maillage seo-cta-maillage--button">
+  <p>Prêt à passer à l'action ?</p>
+  <a href="<?php echo esc_url(home_url('/mes-creations/')); ?>" class="button">Voir toutes les créations</a>
+</section>
+
 <section class="advice-outro">
   <p>Éclairer une pièce, c'est un peu comme choisir la bonne sauce pour ses pâtes : tout est une question de préférence et de dosage !</p>
   <span class="advice-outro-signature">Robin, créateur à l'Atelier Sâpi</span>
@@ -242,11 +248,6 @@ if ($conseils_query->have_posts()) :
 wp_reset_postdata();
 endif;
 ?>
-
-<!-- CTA maillage interne → Mes Créations -->
-<div class="seo-cta-maillage">
-  <p>Prêt à passer à l'action ? <a href="<?php echo esc_url(home_url('/mes-creations/')); ?>">Voir toutes les créations →</a></p>
-</div>
 
 <?php
 get_footer();

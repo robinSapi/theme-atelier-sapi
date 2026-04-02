@@ -14238,6 +14238,37 @@ transform: translateY(15px);
     opacity: 0.8;
   }
 }
+.seo-cta-maillage--button {
+  padding: 3rem 1.5rem;
+}
+.seo-cta-maillage--button p {
+  margin-bottom: 1rem;
+  font-size: 1.05rem;
+}
+.seo-cta-maillage--button .button {
+  display: inline-block;
+  padding: 0.75rem 2rem;
+  background: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 6px;
+  box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
+  -webkit-transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+@media (hover: hover) {
+  .seo-cta-maillage--button .button:hover {
+    -webkit-transform: translateY(-2px);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(227, 91, 36, 0.4);
+    opacity: 1;
+  }
+}
 
 .product-card-cinetique {
   position: relative;
