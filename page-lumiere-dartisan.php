@@ -51,7 +51,7 @@ get_header();
     <h2>Mon processus</h2>
     <div class="steps-slider-nav">
       <button type="button" class="steps-slider-btn steps-slider-prev" aria-label="Étape précédente">&lt;</button>
-      <span class="steps-slider-counter">01 / 04</span>
+      <span class="steps-slider-counter">01 / 05</span>
       <button type="button" class="steps-slider-btn steps-slider-next" aria-label="Étape suivante">&gt;</button>
     </div>
   </div>
@@ -109,12 +109,26 @@ get_header();
         </div>
       </div>
     </div>
+    <div class="steps-slide">
+      <div class="steps-slide-inner">
+        <div class="steps-slide-image">
+          <?php echo sapi_image('2025/05/IMG_7638.jpg', 'large', ['alt' => "Coulisses de l'Atelier Sâpi — actus et nouveautés", 'class' => 'steps-slide-image-img', 'loading' => 'lazy']); ?>
+        </div>
+        <div class="steps-slide-content">
+          <span class="section-number">05</span>
+          <h3>Et après...</h3>
+          <p>Mon histoire vous intéresse ? Je partage les coulisses de l'atelier, les collaborations, les marchés et les nouveautés dans mes actus.</p>
+          <a href="<?php echo esc_url(home_url('/actus/')); ?>" class="steps-slide-link">Suivre les actus →</a>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="steps-slider-dots" id="stepsSliderDots">
     <button class="steps-slider-dot is-active" data-idx="0"></button>
     <button class="steps-slider-dot" data-idx="1"></button>
     <button class="steps-slider-dot" data-idx="2"></button>
     <button class="steps-slider-dot" data-idx="3"></button>
+    <button class="steps-slider-dot" data-idx="4"></button>
   </div>
 </section>
 
@@ -227,7 +241,6 @@ get_header();
     <p>Chaque luminaire est une pièce unique, pensée pour sublimer votre intérieur.</p>
     <a href="<?php echo home_url('/mes-creations/'); ?>" class="button">Voir la collection</a>
     <p class="seo-cta-maillage-inline">Besoin de conseils pour choisir ? <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>">Voir les conseils de Robin →</a></p>
-    <p class="seo-cta-maillage-inline">Je partage régulièrement les coulisses de l'atelier dans <a href="<?php echo esc_url(home_url('/actus/')); ?>">mes actus →</a></p>
   </div>
 </section>
 

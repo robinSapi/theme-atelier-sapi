@@ -7552,6 +7552,19 @@ li.carousel-editorial-slide,
   margin-bottom: 0;
 }
 
+.steps-slide-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--color-orange, #E35B24);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: opacity 0.3s;
+}
+.steps-slide-link:hover {
+  opacity: 0.8;
+}
+
 /* Progress dots */
 .steps-slider-dots {
   display: flex;
