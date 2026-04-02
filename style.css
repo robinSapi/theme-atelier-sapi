@@ -51,6 +51,8 @@ Text Domain: theme-sapi-maison
 
   /* Colors - Brand */
   --color-wood: #937D68;
+  --color-wood-dark: #4A3F35;     /* Ancien --bois-sombre */
+  --color-wood-mid: #6B5A4A;      /* Ancien --bois-profond */
   --color-orange: #E35B24;        /* Référence unique orange Sâpi — harmonisée */
   --color-orange-hover: #C94D1E;
   --color-green: #018501; /* Keep for success states */
