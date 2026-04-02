@@ -9281,7 +9281,6 @@ li.carousel-editorial-slide,
   position: relative;
   padding: 140px 20px 100px;
   color: var(--creme-papier, #FEFDFB);
-  min-height: 50vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -9602,7 +9601,6 @@ li.carousel-editorial-slide,
 /* ---- Contact Responsive ---- */
 @media (max-width: 768px) {
   .contact-hero {
-    min-height: 40vh;
     padding: 100px 20px 60px;
   }
 
@@ -21653,7 +21651,6 @@ html.sapi-intro-active body {
 /* --- Hero --- */
 .surmesure-hero {
   position: relative;
-  min-height: 65vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22144,8 +22141,7 @@ html.sapi-intro-active body {
 /* --- Responsive --- */
 @media (max-width: 768px) {
   .surmesure-hero {
-    min-height: 50vh;
-    padding: 120px 20px 80px;
+    padding: 100px 20px 60px;
   }
 
   .surmesure-hero-content h1 {
