@@ -5056,3 +5056,14 @@ function sapi_get_google_reviews() {
   return $result;
 }
 
+
+
+// ─── Robots.txt — règles supplémentaires ─────────────────────────────────────
+// Bloque les URLs parasites crawlées par Google (audit GSC 2 avril 2026)
+add_filter( 'robots_txt', function ( $output ) {
+  $output .= "\n# Atelier Sapi — règles personnalisées\n";
+  $output .= "Disallow: /*?wc-ajax=*\n";
+  $output .= "Disallow: /wp-json/complianz/\n";
+  $output .= "Disallow: /*?PageSpeed=*\n";
+  return $output;
+}, 99 );
