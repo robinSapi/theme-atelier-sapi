@@ -13239,6 +13239,10 @@ transform: translateY(15px);
   font-weight: 400;
 }
 
+.shop-hero-artisan .seo-cta-maillage-inline {
+  color: rgba(255, 255, 255, 0.8);
+}
+
 @media (max-width: 768px) {
   .shop-hero-artisan {
     padding: 100px 20px 60px;
