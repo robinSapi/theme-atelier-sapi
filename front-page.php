@@ -520,16 +520,19 @@ foreach ($collection_slugs as $col) {
     ]);
     if ($last_actu->have_posts()) : $last_actu->the_post();
     ?>
-    <a href="<?php the_permalink(); ?>" class="bento-card bento-actu">
-      <?php if (has_post_thumbnail()) : ?>
-        <img src="<?php echo esc_url(get_the_post_thumbnail_url(get_the_ID(), 'large')); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="bento-bg-img" loading="lazy">
-      <?php endif; ?>
-      <span class="bento-actu-badge">Flash actu</span>
-      <div class="bento-actu-content">
-        <h3><?php echo esc_html(get_the_title()); ?></h3>
-        <span class="bento-actu-date"><?php echo esc_html(get_the_date('d/m/Y')); ?></span>
-      </div>
-    </a>
+    <div class="bento-card bento-actu">
+      <a href="<?php the_permalink(); ?>" class="bento-actu-link">
+        <?php if (has_post_thumbnail()) : ?>
+          <img src="<?php echo esc_url(get_the_post_thumbnail_url(get_the_ID(), 'large')); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="bento-bg-img" loading="lazy">
+        <?php endif; ?>
+        <span class="bento-actu-badge">Flash actu</span>
+        <div class="bento-actu-content">
+          <h3><?php echo esc_html(get_the_title()); ?></h3>
+          <span class="bento-actu-date"><?php echo esc_html(get_the_date('d/m/Y')); ?></span>
+        </div>
+      </a>
+      <a href="<?php echo esc_url(home_url('/actus/')); ?>" class="bento-actu-all">Voir toutes les actus →</a>
+    </div>
     <?php
     wp_reset_postdata();
     endif;

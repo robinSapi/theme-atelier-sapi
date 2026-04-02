@@ -227,6 +227,7 @@ get_header();
     <p>Chaque luminaire est une pièce unique, pensée pour sublimer votre intérieur.</p>
     <a href="<?php echo home_url('/mes-creations/'); ?>" class="button">Voir la collection</a>
     <p class="seo-cta-maillage-inline">Besoin de conseils pour choisir ? <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>">Voir les conseils de Robin →</a></p>
+    <p class="seo-cta-maillage-inline">Je partage régulièrement les coulisses de l'atelier dans <a href="<?php echo esc_url(home_url('/actus/')); ?>">mes actus →</a></p>
   </div>
 </section>
 
