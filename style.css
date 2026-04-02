@@ -7353,8 +7353,10 @@ li.carousel-editorial-slide,
 }
 
 .artisan-video-caption h2 {
-  font-size: 1.5rem;
-  color: var(--color-gray);
+  font-family: var(--font-display, 'Square Peg', Georgia, serif);
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  font-weight: 400;
+  color: var(--bois-sombre, #4A3F35);
   margin-bottom: 0.75rem;
 }
 
@@ -7683,7 +7685,15 @@ li.carousel-editorial-slide,
   opacity: 0.9;
 }
 
-.artisan-intro-content h2,
+.artisan-intro-content h2 {
+  font-family: var(--font-display, 'Square Peg', Georgia, serif);
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  font-weight: 400;
+  color: var(--bois-sombre, #4A3F35);
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
 .artisan-step-content h2 {
   font-size: clamp(1.75rem, 4vw, 2.5rem);
   font-weight: 700;
@@ -7778,8 +7788,9 @@ li.carousel-editorial-slide,
 }
 
 .artisan-values-header h2 {
-  font-size: clamp(2rem, 4vw, 2.5rem);
-  font-weight: 700;
+  font-family: var(--font-display, 'Square Peg', Georgia, serif);
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  font-weight: 400;
   color: var(--bois-sombre, #4A3F35);
 }
 
@@ -7933,8 +7944,9 @@ li.carousel-editorial-slide,
 }
 
 .artisan-cta h2 {
-  font-size: clamp(2rem, 5vw, 2.75rem);
-  font-weight: 700;
+  font-family: var(--font-display, 'Square Peg', Georgia, serif);
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  font-weight: 400;
   color: var(--bois-sombre, #4A3F35);
   margin-bottom: 1rem;
   line-height: 1.2;
