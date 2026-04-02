@@ -60,7 +60,7 @@ get_header();
     <div class="steps-slide">
       <div class="steps-slide-inner">
         <div class="steps-slide-image">
-          <?php echo sapi_image('2025/05/IMG_1928.jpg', 'large', ['alt' => "Dessin d'un luminaire — Étape création Atelier Sâpi", 'class' => 'steps-slide-image-img', 'loading' => 'lazy']); ?>
+          <?php echo sapi_image('2025/05/IMG_1928-e1761747188966.png', 'large', ['alt' => "Dessin d'un luminaire — Étape création Atelier Sâpi", 'class' => 'steps-slide-image-img', 'loading' => 'lazy']); ?>
         </div>
         <div class="steps-slide-content">
           <span class="section-number">01</span>
