@@ -11,11 +11,10 @@ get_header();
 
 <!-- HERO -->
 <section class="surmesure-hero">
-  <div class="surmesure-hero-overlay"></div>
   <div class="surmesure-hero-content">
-    <h1>Créons ensemble votre luminaire</h1>
-    <p>Vous avez une idée, un espace, une envie ? Je conçois et fabrique votre luminaire sur mesure, pièce unique pensée pour votre intérieur.</p>
-    <a href="#surmesure-form" class="surmesure-scroll-cta">
+    <h1 class="surmesure-title-animated" data-text="Créons ensemble votre luminaire !"></h1>
+    <p class="surmesure-hero-subtitle">Vous avez une idée, un espace, une envie ? Je conçois et fabrique votre luminaire sur mesure, pièce unique pensée pour votre intérieur.</p>
+    <a href="#surmesure-form" class="surmesure-scroll-cta surmesure-hero-fade">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="12" y1="5" x2="12" y2="19"></line>
         <polyline points="19 12 12 19 5 12"></polyline>
@@ -23,6 +22,26 @@ get_header();
       Parlons de votre projet
     </a>
   </div>
+  <script>
+  (function() {
+    var el = document.querySelector('.surmesure-title-animated');
+    if (!el) return;
+    var text = el.getAttribute('data-text');
+    var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) { el.textContent = text; el.classList.add('is-visible'); return; }
+    var delay = 80;
+    text.split('').forEach(function(char, i) {
+      var span = document.createElement('span');
+      span.textContent = char;
+      span.className = 'surmesure-letter';
+      span.style.animationDelay = (0.5 + i * delay / 1000) + 's';
+      span.style.WebkitAnimationDelay = (0.5 + i * delay / 1000) + 's';
+      el.appendChild(span);
+    });
+    var totalDuration = 0.5 + text.length * delay / 1000 + 0.3;
+    el.closest('.surmesure-hero-content').style.setProperty('--title-end', totalDuration + 's');
+  })();
+  </script>
 </section>
 
 <!-- INTRODUCTION -->
@@ -394,6 +413,7 @@ get_header();
 
 <!-- FORMULAIRE -->
 <section id="surmesure-form" class="surmesure-form-section">
+  <img src="https://atelier-sapi.fr/wp-content/uploads/2025/03/IMG_2202-scaled.jpg" alt="" class="surmesure-form-bg" loading="lazy">
   <div class="surmesure-form-wrapper">
     <h2>Votre projet commence ici</h2>
     <p class="surmesure-form-intro">Décrivez-moi votre idée, même vaguement. Je vous recontacte sous 48h pour en discuter ensemble.</p>

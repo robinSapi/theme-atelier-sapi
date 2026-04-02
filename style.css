@@ -51,6 +51,8 @@ Text Domain: theme-sapi-maison
 
   /* Colors - Brand */
   --color-wood: #937D68;
+  --color-wood-dark: #4A3F35;     /* Ancien --bois-sombre */
+  --color-wood-mid: #6B5A4A;      /* Ancien --bois-profond */
   --color-orange: #E35B24;        /* Référence unique orange Sâpi — harmonisée */
   --color-orange-hover: #C94D1E;
   --color-green: #018501; /* Keep for success states */
@@ -5677,16 +5679,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   opacity: 0.9;
 }
 
-/* Section numbers for category headings */
-.section-num {
-  display: inline-block;
-  font-size: 0.875rem;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--bois-dore, #937D68);
-  margin-right: 0.75rem;
-  opacity: 0.8;
-}
+/* Section numbers — définition unique dans le bloc Design System (ligne ~12437) */
 
 .editorial-tagline {
   font-family: var(--font-display, "Square Peg", Georgia, serif);
@@ -7252,7 +7245,7 @@ li.carousel-editorial-slide,
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(254, 253, 251, 0.95);
+  background: rgba(74, 63, 53, 0.75);
 }
 
 .artisan-hero-inner {
@@ -7265,25 +7258,25 @@ li.carousel-editorial-slide,
   font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 3px;
-  color: var(--bois-dore, #937D68);
+  color: rgba(255, 255, 255, 0.8);
   text-transform: uppercase;
   margin-bottom: 1.5rem;
-  opacity: 0.9;
 }
 
 .artisan-hero-cinetique h1 {
   font-family: var(--font-display, "Square Peg", Georgia, serif);
   font-size: clamp(72px, 14vw, 150px);
   font-weight: 400;
-  color: var(--bois-sombre, #4A3F35);
+  color: #fff;
   margin-bottom: 1.5rem;
   line-height: 1.1;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .artisan-hero-subtitle {
   font-size: 1.25rem;
   line-height: 1.6;
-  color: var(--bois-profond, #6B5A4A);
+  color: rgba(255, 255, 255, 0.95);
   max-width: 800px;
   margin: 0 auto 3rem;
   font-weight: 400;
@@ -7294,7 +7287,7 @@ li.carousel-editorial-slide,
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  color: var(--color-wood);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
@@ -7360,8 +7353,10 @@ li.carousel-editorial-slide,
 }
 
 .artisan-video-caption h2 {
-  font-size: 1.5rem;
-  color: var(--color-gray);
+  font-family: var(--font-display, 'Square Peg', Georgia, serif);
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  font-weight: 400;
+  color: var(--bois-sombre, #4A3F35);
   margin-bottom: 0.75rem;
 }
 
@@ -7690,7 +7685,15 @@ li.carousel-editorial-slide,
   opacity: 0.9;
 }
 
-.artisan-intro-content h2,
+.artisan-intro-content h2 {
+  font-family: var(--font-display, 'Square Peg', Georgia, serif);
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  font-weight: 400;
+  color: var(--bois-sombre, #4A3F35);
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
 .artisan-step-content h2 {
   font-size: clamp(1.75rem, 4vw, 2.5rem);
   font-weight: 700;
@@ -7785,8 +7788,9 @@ li.carousel-editorial-slide,
 }
 
 .artisan-values-header h2 {
-  font-size: clamp(2rem, 4vw, 2.5rem);
-  font-weight: 700;
+  font-family: var(--font-display, 'Square Peg', Georgia, serif);
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  font-weight: 400;
   color: var(--bois-sombre, #4A3F35);
 }
 
@@ -7940,8 +7944,9 @@ li.carousel-editorial-slide,
 }
 
 .artisan-cta h2 {
-  font-size: clamp(2rem, 5vw, 2.75rem);
-  font-weight: 700;
+  font-family: var(--font-display, 'Square Peg', Georgia, serif);
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  font-weight: 400;
   color: var(--bois-sombre, #4A3F35);
   margin-bottom: 1rem;
   line-height: 1.2;
@@ -8176,7 +8181,7 @@ li.carousel-editorial-slide,
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(254, 253, 251, 0.95);
+  background: rgba(74, 63, 53, 0.75);
   z-index: 1;
 }
 
@@ -8191,15 +8196,16 @@ li.carousel-editorial-slide,
   font-family: var(--font-display, 'Square Peg', Georgia, serif);
   font-size: clamp(72px, 14vw, 150px);
   font-weight: 400;
-  color: var(--bois-sombre, #4A3F35);
+  color: #fff;
   margin-bottom: 1.5rem;
   line-height: 1.1;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .advice-hero-artisan p {
   font-size: 1.25rem;
   line-height: 1.6;
-  color: var(--bois-profond, #6B5A4A);
+  color: rgba(255, 255, 255, 0.95);
   max-width: 600px;
   margin: 0 auto;
   font-weight: 400;
@@ -9285,9 +9291,8 @@ li.carousel-editorial-slide,
 /* ---- Contact Hero ---- */
 .contact-hero {
   position: relative;
-  padding: 120px 20px 80px;
+  padding: 140px 20px 100px;
   color: var(--creme-papier, #FEFDFB);
-  min-height: 50vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -9307,23 +9312,24 @@ li.carousel-editorial-slide,
 .contact-hero-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(74, 63, 53, 0.75);
 }
 
 .contact-hero-content {
   position: relative;
   z-index: 1;
-  max-width: 800px;
+  max-width: 1200px;
   text-align: center;
 }
 
 .contact-hero h1 {
   font-family: var(--font-display, "Square Peg", Georgia, serif);
-  font-size: clamp(3rem, 8vw, 5.5rem);
+  font-size: clamp(72px, 14vw, 150px);
   font-weight: 400;
   line-height: 1.1;
   margin-bottom: 1rem;
   color: #fff;
+  white-space: nowrap;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
@@ -9607,8 +9613,12 @@ li.carousel-editorial-slide,
 /* ---- Contact Responsive ---- */
 @media (max-width: 768px) {
   .contact-hero {
-    min-height: 40vh;
     padding: 100px 20px 60px;
+  }
+
+  .contact-hero h1 {
+    font-size: clamp(2.5rem, 10vw, 3.5rem);
+    white-space: normal;
   }
 
   .contact-main {
@@ -12435,10 +12445,13 @@ transform: translateY(15px);
 }
 
 .section-num {
+  display: inline-block;
   font-size: 0.875rem;
-  font-weight: 900;
-  letter-spacing: 0.15em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   color: var(--color-wood);
+  opacity: 0.85;
+  margin-right: 0.75rem;
 }
 
 .section-title-kinetic {
@@ -13210,7 +13223,7 @@ transform: translateY(15px);
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(254, 253, 251, 0.95);
+  background: rgba(74, 63, 53, 0.75);
 }
 
 .shop-hero-artisan-inner {
@@ -13223,18 +13236,23 @@ transform: translateY(15px);
   font-family: var(--font-display, 'Square Peg', Georgia, serif);
   font-size: clamp(72px, 14vw, 150px);
   font-weight: 400;
-  color: var(--bois-sombre, #4A3F35);
+  color: #fff;
   margin-bottom: 1.5rem;
   line-height: 1.1;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .shop-hero-artisan-subtitle {
   font-size: 1.25rem;
   line-height: 1.6;
-  color: var(--bois-profond, #6B5A4A);
+  color: rgba(255, 255, 255, 0.95);
   max-width: 600px;
   margin: 0 auto;
   font-weight: 400;
+}
+
+.shop-hero-artisan .seo-cta-maillage-inline {
+  color: rgba(255, 255, 255, 0.8);
 }
 
 @media (max-width: 768px) {
@@ -21649,52 +21667,96 @@ html.sapi-intro-active body {
 /* --- Hero --- */
 .surmesure-hero {
   position: relative;
-  min-height: 65vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #4A3F35 0%, #6B5A4A 50%, #937D68 100%);
+  background: var(--color-cream, #FEFDFB);
   padding: 140px 20px 100px;
   overflow: hidden;
-}
-
-.surmesure-hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 30% 50%, rgba(227, 91, 36, 0.08) 0%, transparent 70%);
-  pointer-events: none;
 }
 
 .surmesure-hero-content {
   position: relative;
   text-align: center;
-  max-width: 700px;
+  max-width: 900px;
   z-index: 1;
 }
 
-.surmesure-hero-content h1 {
+/* Animation lettre par lettre */
+.surmesure-title-animated {
   font-family: 'Square Peg', cursive;
-  font-size: clamp(3rem, 6vw, 5rem);
+  font-size: clamp(72px, 14vw, 150px);
   font-weight: 400;
-  color: var(--creme-papier, #FEFDFB);
+  color: var(--color-wood-dark, #4A3F35);
   line-height: 1.1;
   margin: 0 0 1.25rem;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.surmesure-letter {
+  opacity: 0;
+  -webkit-animation: surmesureLetterIn 0.3s ease forwards;
+  animation: surmesureLetterIn 0.3s ease forwards;
+}
+
+@keyframes surmesureLetterIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Sous-titre et CTA apparaissent après l'animation titre */
+.surmesure-hero-subtitle,
+.surmesure-hero-fade {
+  opacity: 0;
+  -webkit-transform: translateY(20px);
+  transform: translateY(20px);
+  -webkit-animation: surmesureFadeUp 0.6s ease forwards;
+  animation: surmesureFadeUp 0.6s ease forwards;
+  animation-delay: var(--title-end, 4s);
+  -webkit-animation-delay: var(--title-end, 4s);
+}
+
+.surmesure-hero-fade {
+  animation-delay: calc(var(--title-end, 4s) + 0.3s);
+  -webkit-animation-delay: calc(var(--title-end, 4s) + 0.3s);
+}
+
+@keyframes surmesureFadeUp {
+  0% { opacity: 0; -webkit-transform: translateY(20px); transform: translateY(20px); }
+  100% { opacity: 1; -webkit-transform: translateY(0); transform: translateY(0); }
 }
 
 .surmesure-hero-content p {
   font-family: 'Montserrat', sans-serif;
-  font-size: clamp(1rem, 2vw, 1.15rem);
-  color: rgba(254, 253, 251, 0.85);
+  font-size: 1.25rem;
+  color: var(--color-wood-mid, #6B5A4A);
   line-height: 1.7;
   margin: 0 0 2rem;
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .surmesure-letter {
+    animation: none;
+    -webkit-animation: none;
+    opacity: 1;
+    -webkit-transform: none;
+    transform: none;
+  }
+  .surmesure-hero-subtitle,
+  .surmesure-hero-fade {
+    animation: none;
+    -webkit-animation: none;
+    opacity: 1;
+    -webkit-transform: none;
+    transform: none;
+  }
 }
 
 .surmesure-scroll-cta {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--creme-papier, #FEFDFB);
+  color: var(--color-wood, #937D68);
   font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -21723,7 +21785,7 @@ html.sapi-intro-active body {
 /* --- Introduction --- */
 .surmesure-intro {
   padding: 100px 20px;
-  background: var(--creme-papier, #FEFDFB);
+  background: var(--color-warm, #FBF6EA);
 }
 
 .surmesure-intro-grid {
@@ -22031,12 +22093,41 @@ html.sapi-intro-active body {
 /* --- Formulaire --- */
 .surmesure-form-section {
   padding: 100px 20px;
+  position: relative;
   background: linear-gradient(135deg, var(--creme-chaud, #FAF6F0) 0%, var(--creme-papier, #FEFDFB) 100%);
+  overflow: hidden;
+}
+
+.surmesure-form-section > .surmesure-form-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+.surmesure-form-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(254, 253, 251, 0.92) 0%,
+    rgba(251, 246, 234, 0.88) 50%,
+    rgba(250, 246, 240, 0.92) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
 }
 
 .surmesure-form-wrapper {
   max-width: 650px;
   margin: 0 auto;
+  position: relative;
+  z-index: 2;
 }
 
 .surmesure-form-wrapper h2 {
@@ -22058,7 +22149,12 @@ html.sapi-intro-active body {
 
 .surmesure-form-wrapper form {
   display: grid;
-  gap: 1.5rem;
+  gap: 1.25rem;
+  background: var(--color-white, #FFFFFF);
+  border-radius: 16px;
+  border: 1px solid rgba(147, 125, 104, 0.12);
+  padding: 2.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .surmesure-form-wrapper label {
@@ -22067,8 +22163,8 @@ html.sapi-intro-active body {
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--bois-sombre, #4A3F35);
-  margin-bottom: 6px;
+  color: var(--bois-profond, #6B5A4A);
+  margin-bottom: 0.4rem;
 }
 
 .surmesure-form-wrapper input[type="text"],
@@ -22076,12 +22172,13 @@ html.sapi-intro-active body {
 .surmesure-form-wrapper textarea {
   width: 100%;
   padding: 14px 16px;
-  border: 2px solid rgba(147, 125, 104, 0.2);
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--bois-sombre, #4A3F35);
+  background: var(--creme-papier, #FEFDFB);
+  border: 2px solid rgba(147, 125, 104, 0.15);
   border-radius: 8px;
-  background: #fff;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.95rem;
-  color: var(--color-dark, #323232);
+  -webkit-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
 }
@@ -22090,8 +22187,15 @@ html.sapi-intro-active body {
 .surmesure-form-wrapper textarea:focus {
   outline: none;
   border-color: var(--color-orange, #E35B24);
-  box-shadow: 0 0 0 3px rgba(227, 91, 36, 0.1);
-  background: #fff;
+  background: var(--color-white, #FFFFFF);
+  box-shadow:
+    0 0 0 3px rgba(227, 91, 36, 0.1),
+    0 2px 8px rgba(227, 91, 36, 0.15);
+}
+
+.surmesure-form-wrapper textarea {
+  min-height: 140px;
+  resize: vertical;
 }
 
 .surmesure-form-wrapper input::placeholder,
@@ -22100,28 +22204,37 @@ html.sapi-intro-active body {
 }
 
 .surmesure-form-wrapper button[type="submit"] {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  padding: 18px 48px;
-  background: var(--gradient-cta);
-  color: var(--creme-papier, #FEFDFB);
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.95rem;
+  padding: 16px 40px;
+  font-size: 15px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  color: var(--creme-papier, #FEFDFB);
+  background: var(--gradient-cta);
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(227, 91, 36, 0.25), 0 2px 4px rgba(227, 91, 36, 0.15);
+  box-shadow:
+    0 4px 12px rgba(227, 91, 36, 0.25),
+    0 2px 4px rgba(227, 91, 36, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  -webkit-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (hover: hover) {
   .surmesure-form-wrapper button[type="submit"]:hover {
     background: linear-gradient(180deg, #D14F1C 0%, #B8441A 100%);
+    -webkit-transform: translateY(-2px);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(227, 91, 36, 0.3), 0 4px 8px rgba(227, 91, 36, 0.2);
+    box-shadow:
+      0 8px 20px rgba(227, 91, 36, 0.3),
+      0 4px 8px rgba(227, 91, 36, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
   }
 }
 
@@ -22148,8 +22261,11 @@ html.sapi-intro-active body {
 /* --- Responsive --- */
 @media (max-width: 768px) {
   .surmesure-hero {
-    min-height: 50vh;
-    padding: 120px 20px 80px;
+    padding: 100px 20px 60px;
+  }
+
+  .surmesure-title-animated {
+    font-size: clamp(48px, 12vw, 80px);
   }
 
   .surmesure-intro {
