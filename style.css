@@ -8169,7 +8169,7 @@ li.carousel-editorial-slide,
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(254, 253, 251, 0.95);
+  background: rgba(0, 0, 0, 0.35);
   z-index: 1;
 }
 
@@ -8184,15 +8184,16 @@ li.carousel-editorial-slide,
   font-family: var(--font-display, 'Square Peg', Georgia, serif);
   font-size: clamp(72px, 14vw, 150px);
   font-weight: 400;
-  color: var(--bois-sombre, #4A3F35);
+  color: #fff;
   margin-bottom: 1.5rem;
   line-height: 1.1;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .advice-hero-artisan p {
   font-size: 1.25rem;
   line-height: 1.6;
-  color: var(--bois-profond, #6B5A4A);
+  color: rgba(255, 255, 255, 0.95);
   max-width: 600px;
   margin: 0 auto;
   font-weight: 400;
