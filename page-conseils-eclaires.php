@@ -243,5 +243,10 @@ wp_reset_postdata();
 endif;
 ?>
 
+<!-- CTA maillage interne → Mes Créations -->
+<div class="seo-cta-maillage">
+  <p>Prêt à passer à l'action ? <a href="<?php echo esc_url(home_url('/mes-creations/')); ?>">Voir toutes les créations →</a></p>
+</div>
+
 <?php
 get_footer();
