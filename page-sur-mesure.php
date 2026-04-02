@@ -11,7 +11,6 @@ get_header();
 
 <!-- HERO -->
 <section class="surmesure-hero">
-  <div class="surmesure-hero-overlay"></div>
   <div class="surmesure-hero-content">
     <h1>Créons ensemble votre luminaire</h1>
     <p>Vous avez une idée, un espace, une envie ? Je conçois et fabrique votre luminaire sur mesure, pièce unique pensée pour votre intérieur.</p>

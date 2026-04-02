@@ -21649,16 +21649,9 @@ html.sapi-intro-active body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #4A3F35 0%, #6B5A4A 50%, #937D68 100%);
+  background: var(--color-cream, #FEFDFB);
   padding: 140px 20px 100px;
   overflow: hidden;
-}
-
-.surmesure-hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 30% 50%, rgba(227, 91, 36, 0.08) 0%, transparent 70%);
-  pointer-events: none;
 }
 
 .surmesure-hero-content {
@@ -21670,18 +21663,17 @@ html.sapi-intro-active body {
 
 .surmesure-hero-content h1 {
   font-family: 'Square Peg', cursive;
-  font-size: clamp(3rem, 6vw, 5rem);
+  font-size: clamp(72px, 14vw, 150px);
   font-weight: 400;
-  color: var(--creme-papier, #FEFDFB);
+  color: var(--color-wood-dark, #4A3F35);
   line-height: 1.1;
   margin: 0 0 1.25rem;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .surmesure-hero-content p {
   font-family: 'Montserrat', sans-serif;
-  font-size: clamp(1rem, 2vw, 1.15rem);
-  color: rgba(254, 253, 251, 0.85);
+  font-size: 1.25rem;
+  color: var(--color-wood-mid, #6B5A4A);
   line-height: 1.7;
   margin: 0 0 2rem;
 }
@@ -21690,7 +21682,7 @@ html.sapi-intro-active body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--creme-papier, #FEFDFB);
+  color: var(--color-wood, #937D68);
   font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -22146,6 +22138,10 @@ html.sapi-intro-active body {
   .surmesure-hero {
     min-height: 50vh;
     padding: 120px 20px 80px;
+  }
+
+  .surmesure-hero-content h1 {
+    font-size: clamp(48px, 12vw, 80px);
   }
 
   .surmesure-intro {
