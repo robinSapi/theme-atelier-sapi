@@ -132,7 +132,7 @@ get_header();
   <!-- Product Intro Screen with Ambiance Image -->
   <div class="product-intro-screen" id="product-intro-screen" style="--intro-bg-image: url('<?php echo esc_url($ambiance_intro); ?>');">
     <div class="product-intro-content">
-      <h1 class="product-intro-title"><?php the_title(); ?></h1>
+      <p class="product-intro-title"><?php the_title(); ?></p>
       <span class="product-intro-skip">Scrollez ou cliquez pour découvrir</span>
     </div>
   </div>
@@ -151,7 +151,7 @@ get_header();
 
         <!-- Mobile-only: Titre et phrase d'accroche au-dessus de la photo -->
         <div class="product-gallery-mobile-header">
-          <h1 class="product-title-mobile"><?php the_title(); ?></h1>
+          <div class="product-title-mobile"><?php the_title(); ?></div>
           <?php if ($phrase || $mini_description) : ?>
             <p class="product-tagline-mobile">
               <?php echo esc_html($phrase ? $phrase : $mini_description); ?>

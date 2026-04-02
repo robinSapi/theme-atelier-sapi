@@ -230,4 +230,42 @@ get_header();
 </section>
 
 <?php
+// Schema LocalBusiness — données structurées pour la page artisan
+$local_business = [
+  '@context' => 'https://schema.org',
+  '@type' => 'LocalBusiness',
+  'name' => 'Atelier Sâpi',
+  'description' => 'Fabrication artisanale de luminaires en bois',
+  'url' => home_url('/'),
+  'image' => get_theme_mod('custom_logo') ? wp_get_attachment_image_url(get_theme_mod('custom_logo'), 'full') : '',
+  'telephone' => '+33680435585',
+  'email' => 'contact@atelier-sapi.fr',
+  'address' => [
+    '@type' => 'PostalAddress',
+    'streetAddress' => '3 rue Pierre Termier',
+    'addressLocality' => 'Collonges-au-Mont-d\'Or',
+    'postalCode' => '69660',
+    'addressCountry' => 'FR'
+  ],
+  'geo' => [
+    '@type' => 'GeoCoordinates',
+    'latitude' => 45.8165,
+    'longitude' => 4.8403
+  ],
+  'openingHoursSpecification' => [
+    [
+      '@type' => 'OpeningHoursSpecification',
+      'dayOfWeek' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      'opens' => '09:00',
+      'closes' => '19:00'
+    ]
+  ],
+  'priceRange' => '€€',
+  'sameAs' => [
+    'https://www.instagram.com/atelier.sapi/',
+    'https://www.facebook.com/ateliersapi'
+  ]
+];
+echo '<script type="application/ld+json">' . wp_json_encode($local_business, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
+
 get_footer();

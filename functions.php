@@ -1033,6 +1033,87 @@ function sapi_maison_cart_count() {
   return WC()->cart ? WC()->cart->get_cart_contents_count() : 0;
 }
 
+/**
+ * Génère le shippingDetails Schema.org à partir des zones WooCommerce.
+ */
+function sapi_get_shipping_schema($product) {
+  $shipping_details = [];
+  $zones = WC_Shipping_Zones::get_zones();
+
+  foreach ($zones as $zone_data) {
+    $zone = new WC_Shipping_Zone($zone_data['zone_id']);
+    $locations = $zone->get_zone_locations();
+    $methods = $zone->get_shipping_methods(true);
+
+    // Collecter les pays de cette zone
+    $countries = [];
+    foreach ($locations as $location) {
+      if ($location->type === 'country') {
+        $countries[] = $location->code;
+      } elseif ($location->type === 'continent') {
+        $countries[] = $location->code;
+      }
+    }
+
+    if (empty($countries) || empty($methods)) {
+      continue;
+    }
+
+    foreach ($methods as $method) {
+      if ($method->id === 'local_pickup') {
+        continue;
+      }
+
+      foreach ($countries as $country_code) {
+        $detail = [
+          '@type' => 'OfferShippingDetails',
+          'shippingDestination' => [
+            '@type' => 'DefinedRegion',
+            'addressCountry' => $country_code
+          ],
+          'deliveryTime' => [
+            '@type' => 'ShippingDeliveryTime',
+            'handlingTime' => [
+              '@type' => 'QuantitativeValue',
+              'minValue' => 3,
+              'maxValue' => 5,
+              'unitCode' => 'd'
+            ],
+            'transitTime' => [
+              '@type' => 'QuantitativeValue',
+              'minValue' => 1,
+              'maxValue' => 2,
+              'unitCode' => 'd'
+            ]
+          ]
+        ];
+
+        // Tarif : flat_rate ou free_shipping
+        if ($method->id === 'flat_rate') {
+          $cost = $method->get_option('cost');
+          if ($cost !== '' && $cost !== false) {
+            $detail['shippingRate'] = [
+              '@type' => 'MonetaryAmount',
+              'value' => $cost,
+              'currency' => 'EUR'
+            ];
+          }
+        } elseif ($method->id === 'free_shipping') {
+          $detail['shippingRate'] = [
+            '@type' => 'MonetaryAmount',
+            'value' => '0',
+            'currency' => 'EUR'
+          ];
+        }
+
+        $shipping_details[] = $detail;
+      }
+    }
+  }
+
+  return !empty($shipping_details) ? $shipping_details : [];
+}
+
 function sapi_maison_structured_data() {
   if (is_product()) {
     global $product;
@@ -1046,16 +1127,33 @@ function sapi_maison_structured_data() {
       '@type' => 'Product',
       'name' => get_the_title(),
       'description' => wp_strip_all_tags(get_the_excerpt()),
+      'url' => get_permalink(),
       'sku' => $product->get_sku(),
+      'brand' => [
+        '@type' => 'Brand',
+        'name' => 'Atelier Sâpi'
+      ],
       'offers' => [
         '@type' => 'Offer',
         'url' => get_permalink(),
         'priceCurrency' => 'EUR',
         'price' => $product->get_price(),
+        'priceValidUntil' => gmdate('Y-m-d', strtotime('+1 year')),
         'availability' => $product->is_in_stock() ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
         'seller' => [
           '@type' => 'Organization',
           'name' => 'Atelier Sâpi'
+        ],
+        'shippingDetails' => sapi_get_shipping_schema($product),
+        'hasMerchantReturnPolicy' => [
+          '@type' => 'MerchantReturnPolicy',
+          'applicableCountry' => 'FR',
+          'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
+          'merchantReturnDays' => 30,
+          'returnMethod' => 'https://schema.org/ReturnByMail',
+          'returnFees' => 'https://schema.org/ReturnFeesCustomerResponsibility',
+          'refundType' => 'https://schema.org/FullRefund',
+          'returnPolicySeasonalOverride' => []
         ]
       ]
     ];
@@ -1075,21 +1173,7 @@ function sapi_maison_structured_data() {
     echo '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
   }
 
-  if (is_front_page()) {
-    $schema = [
-      '@context' => 'https://schema.org',
-      '@type' => 'Organization',
-      'name' => 'Atelier Sâpi',
-      'url' => home_url(),
-      'logo' => get_theme_mod('custom_logo') ? wp_get_attachment_image_url(get_theme_mod('custom_logo'), 'full') : '',
-      'sameAs' => [
-        'https://www.instagram.com/atelier.sapi/',
-        'https://www.facebook.com/ateliersapi'
-      ]
-    ];
-
-    echo '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
-  }
+  // Organization schema supprimé — Yoast le génère déjà dans son @graph
 }
 add_action('wp_head', 'sapi_maison_structured_data');
 
@@ -1219,22 +1303,10 @@ function sapi_maison_breadcrumbs() {
   // SVG flèche comme séparateur
   $bulb = '<span class="breadcrumb-separator"><svg width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.5 1L6.5 6L1.5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
 
-  $schema = [
-    '@context' => 'https://schema.org',
-    '@type' => 'BreadcrumbList',
-    'itemListElement' => []
-  ];
-
+  // BreadcrumbList JSON-LD supprimé — Yoast le génère déjà dans son @graph
   echo '<nav class="breadcrumbs" aria-label="Fil d\'Ariane"><div class="breadcrumbs-inner">';
   foreach ($breadcrumbs as $index => $crumb) {
     $position = $index + 1;
-
-    $schema['itemListElement'][] = [
-      '@type' => 'ListItem',
-      'position' => $position,
-      'name' => $crumb['name'],
-      'item' => $crumb['url'] ?: null
-    ];
 
     if ($crumb['url']) {
       echo '<a href="' . esc_url($crumb['url']) . '">' . esc_html($crumb['name']) . '</a>';
@@ -1246,8 +1318,6 @@ function sapi_maison_breadcrumbs() {
     }
   }
   echo '</div></nav>';
-
-  echo '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
 }
 
 // Redirect static category pages to WooCommerce native categories
@@ -4986,3 +5056,14 @@ function sapi_get_google_reviews() {
   return $result;
 }
 
+
+
+// ─── Robots.txt — règles supplémentaires ─────────────────────────────────────
+// Bloque les URLs parasites crawlées par Google (audit GSC 2 avril 2026)
+add_filter( 'robots_txt', function ( $output ) {
+  $output .= "\n# Atelier Sapi — règles personnalisées\n";
+  $output .= "Disallow: /*?wc-ajax=*\n";
+  $output .= "Disallow: /wp-json/complianz/\n";
+  $output .= "Disallow: /*?PageSpeed=*\n";
+  return $output;
+}, 99 );
