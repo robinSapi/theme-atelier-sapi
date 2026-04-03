@@ -382,11 +382,7 @@ get_header();
       <div class="product-why-left">
         <div class="product-why-header">
           <span class="section-num"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
-          <?php
-          $name_parts = explode(' ', $product->get_name(), 2);
-          $model_name = $name_parts[0];
-          ?>
-          <h2>L'histoire de <?php echo esc_html($model_name); ?></h2>
+          <h2><?php echo esc_html(get_the_title()); ?> en détails</h2>
         </div>
         <div class="product-why-content">
         <?php
@@ -408,6 +404,16 @@ get_header();
         ?>
         </div><!-- .product-why-content -->
       </div><!-- .product-why-left -->
+
+      <?php
+      $descriptif_right = function_exists('get_field') ? get_field('descriptif') : '';
+      if ($descriptif_right) : ?>
+      <div class="product-why-right">
+        <div class="product-why-content">
+          <?php echo wp_kses_post($descriptif_right); ?>
+        </div>
+      </div><!-- .product-why-right -->
+      <?php endif; ?>
     </div>
   </section>
 

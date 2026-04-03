@@ -4351,6 +4351,11 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   flex-direction: column;
 }
 
+.product-why-right {
+  display: flex;
+  flex-direction: column;
+}
+
 .product-why-header .section-num {
   font-size: 0.875rem;
   font-weight: 900;
