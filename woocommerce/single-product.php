@@ -385,7 +385,7 @@ get_header();
     <div class="product-why-grid">
       <div class="product-why-left">
         <div class="product-why-content">
-          <?php the_content(); ?>
+          <?php echo wp_kses_post($product->get_description()); ?>
         </div><!-- .product-why-content -->
       </div><!-- .product-why-left -->
 
