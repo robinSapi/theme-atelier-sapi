@@ -385,23 +385,7 @@ get_header();
     <div class="product-why-grid">
       <div class="product-why-left">
         <div class="product-why-content">
-        <?php
-        $why_content = '';
-        if (function_exists('get_field')) {
-          $pourquoi = get_field('pourquoi_cette_piece');
-          $descriptif = get_field('Descriptif');
-          if ($pourquoi) {
-            $why_content = $pourquoi;
-          } elseif ($descriptif) {
-            $why_content = $descriptif;
-          }
-        }
-        if ($why_content) {
-          echo wp_kses_post($why_content);
-        } else {
-          the_content();
-        }
-        ?>
+          <?php the_content(); ?>
         </div><!-- .product-why-content -->
       </div><!-- .product-why-left -->
 
