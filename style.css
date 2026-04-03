@@ -20403,7 +20403,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   justify-content: center;
   flex: 1;
   min-height: 0;
-  padding: 0.35rem;
+  padding: 1.25rem;
 }
 
 .ambiance-lightbox-image {
@@ -20516,7 +20516,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   }
 
   .ambiance-lightbox-main {
-    padding: 0.35rem;
+    padding: 0.75rem;
   }
 
   .ambiance-lightbox-image {
