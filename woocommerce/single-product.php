@@ -41,7 +41,7 @@ get_header();
   }
 
   // ACF fields
-  $phrase = function_exists('get_field') ? get_field('phrase_daccroche') : '';
+  $short_desc = $product->get_short_description();
   $mini_description = function_exists('get_field') ? get_field('mini_description') : '';
 
   // Price display
@@ -149,16 +149,12 @@ get_header();
       <!-- COLONNE GAUCHE: Galerie (60%) -->
       <div class="product-gallery-v2">
 
-        <!-- Mobile-only: Titre et phrase d'accroche au-dessus de la photo -->
+        <!-- Mobile-only: Titre et description courte au-dessus de la photo -->
         <div class="product-gallery-mobile-header">
           <div class="product-title-mobile"><?php the_title(); ?></div>
-          <?php if ($phrase || $mini_description) : ?>
+          <?php if ($short_desc || $mini_description) : ?>
             <p class="product-tagline-mobile">
-              <?php echo esc_html($phrase ? $phrase : $mini_description); ?>
-            </p>
-          <?php elseif ($product->get_short_description()) : ?>
-            <p class="product-tagline-mobile">
-              <?php echo wp_strip_all_tags($product->get_short_description()); ?>
+              <?php echo esc_html(wp_strip_all_tags($short_desc ? $short_desc : $mini_description)); ?>
             </p>
           <?php endif; ?>
         </div>
@@ -254,14 +250,10 @@ get_header();
         <!-- Titre H1 (nom du modèle) -->
         <h1 class="product-title-v2"><?php the_title(); ?></h1>
 
-        <!-- Mini description / Phrase d'accroche -->
-        <?php if ($phrase || $mini_description) : ?>
+        <!-- Description courte WooCommerce -->
+        <?php if ($short_desc || $mini_description) : ?>
           <p class="product-tagline">
-            <?php echo esc_html($phrase ? $phrase : $mini_description); ?>
-          </p>
-        <?php elseif ($product->get_short_description()) : ?>
-          <p class="product-tagline">
-            <?php echo wp_strip_all_tags($product->get_short_description()); ?>
+            <?php echo esc_html(wp_strip_all_tags($short_desc ? $short_desc : $mini_description)); ?>
           </p>
         <?php endif; ?>
 
