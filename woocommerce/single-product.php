@@ -384,19 +384,20 @@ get_header();
     </div>
     <div class="product-why-grid">
       <div class="product-why-left">
-        <div class="product-why-content">
+        <div class="product-why-story">
           <?php echo wp_kses_post($product->get_description()); ?>
-        </div><!-- .product-why-content -->
-      </div><!-- .product-why-left -->
+        </div>
+      </div>
 
       <?php
       $descriptif_right = function_exists('get_field') ? get_field('Descriptif') : '';
       if ($descriptif_right) : ?>
       <div class="product-why-right">
-        <div class="product-why-content">
+        <span class="product-why-right-label">Caractéristiques</span>
+        <div class="product-why-specs">
           <?php echo wp_kses_post($descriptif_right); ?>
         </div>
-      </div><!-- .product-why-right -->
+      </div>
       <?php endif; ?>
     </div>
   </section>
