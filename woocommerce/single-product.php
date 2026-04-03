@@ -378,18 +378,18 @@ get_header();
        SECTION 01 — POURQUOI CETTE PIÈCE
        ═══════════════════════════════════════════════════════════════ -->
   <section class="product-why product-why-cinetique">
+    <div class="product-why-header">
+      <span class="section-num"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
+      <h2><?php echo esc_html(get_the_title()); ?> en détails</h2>
+    </div>
     <div class="product-why-grid">
       <div class="product-why-left">
-        <div class="product-why-header">
-          <span class="section-num"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
-          <h2><?php echo esc_html(get_the_title()); ?> en détails</h2>
-        </div>
         <div class="product-why-content">
         <?php
         $why_content = '';
         if (function_exists('get_field')) {
           $pourquoi = get_field('pourquoi_cette_piece');
-          $descriptif = get_field('descriptif');
+          $descriptif = get_field('descriptif') ?: get_field('Descriptif');
           if ($pourquoi) {
             $why_content = $pourquoi;
           } elseif ($descriptif) {
@@ -406,7 +406,7 @@ get_header();
       </div><!-- .product-why-left -->
 
       <?php
-      $descriptif_right = function_exists('get_field') ? get_field('descriptif') : '';
+      $descriptif_right = function_exists('get_field') ? (get_field('descriptif') ?: get_field('Descriptif')) : '';
       if ($descriptif_right) : ?>
       <div class="product-why-right">
         <div class="product-why-content">
