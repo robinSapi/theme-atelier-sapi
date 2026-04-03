@@ -272,7 +272,7 @@ get_header();
           ?>
         </div>
 
-        <?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) : ?>
+        <?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2 && !$is_accessoire) : ?>
           <button type="button" class="robin-pill" id="robin-product-pill"
             data-robin-context="product_guide"
             data-robin-data='<?php echo esc_attr(wp_json_encode(['product_id' => $product_id, 'product_name' => get_the_title()])); ?>'>
@@ -371,7 +371,7 @@ get_header();
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION 01 — POURQUOI CETTE PIÈCE
        ═══════════════════════════════════════════════════════════════ -->
-  <section class="product-why product-why-cinetique">
+  <section class="product-why product-why-cinetique<?php if ($is_accessoire) echo ' product-why--accessoire'; ?>">
     <div class="product-why-header">
       <span class="section-num"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
       <h2>Détails</h2>
@@ -568,6 +568,7 @@ get_header();
   </section>
   <?php endif; // fin exclusion témoignages accessoires ?>
 
+  <?php if (!$is_accessoire) : ?>
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION 03 — FICHE TECHNIQUE (Dynamique via ACF)
        ═══════════════════════════════════════════════════════════════ -->
@@ -846,6 +847,7 @@ get_header();
       </div>
     </div>
   </section>
+  <?php endif; // fin exclusion fiche technique accessoires ?>
 
   <?php if (!$is_accessoire) : ?>
   <!-- ═══════════════════════════════════════════════════════════════

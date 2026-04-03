@@ -4368,6 +4368,10 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   align-items: start;
 }
 
+.product-why--accessoire .product-why-grid {
+  grid-template-columns: 2fr 1fr;
+}
+
 /* Colonne gauche — histoire / description longue */
 .product-why-left {
   display: flex;
