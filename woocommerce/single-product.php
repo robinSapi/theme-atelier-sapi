@@ -1721,17 +1721,18 @@ get_header();
       <img src="" alt="" class="ambiance-lightbox-image">
     </div>
     <div class="ambiance-lightbox-footer">
-      <button class="ambiance-lightbox-prev" aria-label="<?php esc_attr_e('Image précédente', 'theme-sapi-maison'); ?>" type="button">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-      </button>
       <div class="ambiance-lightbox-thumbs-wrapper">
         <div class="ambiance-lightbox-thumbs"></div>
       </div>
-      <button class="ambiance-lightbox-next" aria-label="<?php esc_attr_e('Image suivante', 'theme-sapi-maison'); ?>" type="button">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-      </button>
     </div>
   </div>
+  <!-- Boutons prev/next sur l'overlay, hors de la carte -->
+  <button class="ambiance-lightbox-prev" aria-label="<?php esc_attr_e('Image précédente', 'theme-sapi-maison'); ?>" type="button">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+  </button>
+  <button class="ambiance-lightbox-next" aria-label="<?php esc_attr_e('Image suivante', 'theme-sapi-maison'); ?>" type="button">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+  </button>
 </div>
 
 <script>
@@ -1744,23 +1745,8 @@ get_header();
 
   var current = 0;
   var img = lightbox.querySelector('.ambiance-lightbox-image');
-  var content = lightbox.querySelector('.ambiance-lightbox-content');
   var thumbsContainer = lightbox.querySelector('.ambiance-lightbox-thumbs');
   var productName = <?php echo wp_json_encode(get_the_title()); ?>;
-
-  // Adjust card width to fit current image
-  function adjustCardWidth() {
-    if (!img.naturalWidth || !img.naturalHeight) return;
-    var ratio = img.naturalWidth / img.naturalHeight;
-    var maxH = window.innerHeight * 0.75;
-    var maxW = Math.min(window.innerWidth * 0.94, 1200);
-    var w = Math.min(ratio * maxH, maxW);
-    // Minimum width for thumbnails row
-    w = Math.max(w, 360);
-    content.style.maxWidth = Math.ceil(w + 12) + 'px';
-  }
-
-  img.addEventListener('load', adjustCardWidth);
 
   // Build thumbnails
   photos.forEach(function(photo, i) {
