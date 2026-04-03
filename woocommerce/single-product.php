@@ -1710,28 +1710,28 @@ get_header();
 <!-- Lightbox Ambiance/Détail -->
 <div class="ambiance-lightbox" id="ambiance-lightbox" aria-hidden="true" role="dialog" aria-modal="true" data-photos='<?php echo wp_json_encode($acf_photos, JSON_HEX_APOS | JSON_HEX_QUOT); ?>' data-first-acf="<?php echo esc_attr($first_acf_index); ?>">
   <div class="ambiance-lightbox-overlay"></div>
-  <div class="ambiance-lightbox-content">
-    <button class="ambiance-lightbox-close" aria-label="<?php esc_attr_e('Fermer', 'theme-sapi-maison'); ?>" type="button">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-    </button>
-    <div class="ambiance-lightbox-main">
-      <img src="" alt="" class="ambiance-lightbox-image">
-    </div>
-    <div class="ambiance-lightbox-footer">
-      <button class="ambiance-lightbox-prev" aria-label="<?php esc_attr_e('Image précédente', 'theme-sapi-maison'); ?>" type="button">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-      </button>
-      <div class="ambiance-lightbox-thumbs-wrapper">
-        <div class="ambiance-lightbox-thumbs"></div>
-      </div>
-      <button class="ambiance-lightbox-next" aria-label="<?php esc_attr_e('Image suivante', 'theme-sapi-maison'); ?>" type="button">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-      </button>
-    </div>
-  </div>
+
+  <!-- Photo centrale, flottante sur l'overlay -->
+  <img src="" alt="" class="ambiance-lightbox-image">
+
+  <!-- Bouton fermer -->
+  <button class="ambiance-lightbox-close" aria-label="<?php esc_attr_e('Fermer', 'theme-sapi-maison'); ?>" type="button">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
+
+  <!-- Boutons prev/next -->
+  <button class="ambiance-lightbox-prev" aria-label="<?php esc_attr_e('Image précédente', 'theme-sapi-maison'); ?>" type="button">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+  </button>
+  <button class="ambiance-lightbox-next" aria-label="<?php esc_attr_e('Image suivante', 'theme-sapi-maison'); ?>" type="button">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+  </button>
+
+  <!-- Strip miniatures -->
+  <div class="ambiance-lightbox-thumbs"></div>
 </div>
 
 <script>
@@ -1744,23 +1744,8 @@ get_header();
 
   var current = 0;
   var img = lightbox.querySelector('.ambiance-lightbox-image');
-  var content = lightbox.querySelector('.ambiance-lightbox-content');
   var thumbsContainer = lightbox.querySelector('.ambiance-lightbox-thumbs');
   var productName = <?php echo wp_json_encode(get_the_title()); ?>;
-
-  // Adjust card width to fit current image
-  function adjustCardWidth() {
-    if (!img.naturalWidth || !img.naturalHeight) return;
-    var ratio = img.naturalWidth / img.naturalHeight;
-    var maxH = window.innerHeight * 0.75;
-    var maxW = Math.min(window.innerWidth * 0.94, 1200);
-    var w = Math.min(ratio * maxH, maxW);
-    // Minimum width for thumbnails row
-    w = Math.max(w, 360);
-    content.style.maxWidth = Math.ceil(w + 12) + 'px';
-  }
-
-  img.addEventListener('load', adjustCardWidth);
 
   // Build thumbnails
   photos.forEach(function(photo, i) {
@@ -1834,6 +1819,18 @@ get_header();
     if (e.key === 'Escape') close();
     if (e.key === 'ArrowLeft') goTo(current > 0 ? current - 1 : photos.length - 1);
     if (e.key === 'ArrowRight') goTo(current < photos.length - 1 ? current + 1 : 0);
+  });
+
+  // Swipe mobile
+  var touchStartX = 0;
+  lightbox.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].clientX;
+  }, { passive: true });
+  lightbox.addEventListener('touchend', function(e) {
+    if (lightbox.getAttribute('aria-hidden') === 'true') return;
+    var deltaX = e.changedTouches[0].clientX - touchStartX;
+    if (deltaX > 50) goTo(current > 0 ? current - 1 : photos.length - 1);
+    else if (deltaX < -50) goTo(current < photos.length - 1 ? current + 1 : 0);
   });
 })();
 </script>
