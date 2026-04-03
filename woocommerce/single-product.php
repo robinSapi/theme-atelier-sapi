@@ -272,7 +272,7 @@ get_header();
           ?>
         </div>
 
-        <?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) : ?>
+        <?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2 && !$is_accessoire) : ?>
           <button type="button" class="robin-pill" id="robin-product-pill"
             data-robin-context="product_guide"
             data-robin-data='<?php echo esc_attr(wp_json_encode(['product_id' => $product_id, 'product_name' => get_the_title()])); ?>'>
@@ -360,12 +360,6 @@ get_header();
         </div>
         <?php endif; // fin !$is_carte_cadeau ?>
 
-        <?php if (!$is_accessoire) : ?>
-        <!-- Micro-copy artisan -->
-        <p class="product-artisan-note">
-          <em>Chaque pièce est découpée au laser puis assemblée à la main à l'Atelier Sâpi, à Lyon.</em>
-        </p>
-        <?php endif; ?>
 
       </div>
     </div>
@@ -377,37 +371,28 @@ get_header();
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION 01 — POURQUOI CETTE PIÈCE
        ═══════════════════════════════════════════════════════════════ -->
-  <section class="product-why product-why-cinetique">
+  <section class="product-why product-why-cinetique<?php if ($is_accessoire) echo ' product-why--accessoire'; ?>">
+    <div class="product-why-header">
+      <span class="section-num"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
+      <h2>Détails</h2>
+    </div>
     <div class="product-why-grid">
       <div class="product-why-left">
-        <div class="product-why-header">
-          <span class="section-num"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
-          <?php
-          $name_parts = explode(' ', $product->get_name(), 2);
-          $model_name = $name_parts[0];
-          ?>
-          <h2>L'histoire de <?php echo esc_html($model_name); ?></h2>
+        <div class="product-why-story">
+          <?php echo wp_kses_post($product->get_description()); ?>
         </div>
-        <div class="product-why-content">
-        <?php
-        $why_content = '';
-        if (function_exists('get_field')) {
-          $pourquoi = get_field('pourquoi_cette_piece');
-          $descriptif = get_field('descriptif');
-          if ($pourquoi) {
-            $why_content = $pourquoi;
-          } elseif ($descriptif) {
-            $why_content = $descriptif;
-          }
-        }
-        if ($why_content) {
-          echo wp_kses_post($why_content);
-        } else {
-          the_content();
-        }
-        ?>
-        </div><!-- .product-why-content -->
-      </div><!-- .product-why-left -->
+      </div>
+
+      <?php
+      $descriptif_right = function_exists('get_field') ? get_field('Descriptif') : '';
+      if ($descriptif_right) : ?>
+      <div class="product-why-right">
+        <span class="product-why-right-label">Caractéristiques</span>
+        <div class="product-why-specs">
+          <?php echo wp_kses_post($descriptif_right); ?>
+        </div>
+      </div>
+      <?php endif; ?>
     </div>
   </section>
 
@@ -583,6 +568,7 @@ get_header();
   </section>
   <?php endif; // fin exclusion témoignages accessoires ?>
 
+  <?php if (!$is_accessoire) : ?>
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION 03 — FICHE TECHNIQUE (Dynamique via ACF)
        ═══════════════════════════════════════════════════════════════ -->
@@ -861,6 +847,7 @@ get_header();
       </div>
     </div>
   </section>
+  <?php endif; // fin exclusion fiche technique accessoires ?>
 
   <?php if (!$is_accessoire) : ?>
   <!-- ═══════════════════════════════════════════════════════════════

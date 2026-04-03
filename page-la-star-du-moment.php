@@ -44,7 +44,7 @@ $has_acf          = function_exists('get_field');
 $star_short_desc  = $star_product->get_short_description();
 $mini_desc        = $has_acf ? get_field('mini_description', $star_id) : '';
 $pourquoi         = $has_acf ? get_field('pourquoi_cette_piece', $star_id) : '';
-$descriptif       = $has_acf ? (get_field('Descriptif', $star_id) ?: get_field('descriptif', $star_id)) : '';
+$descriptif       = $has_acf ? get_field('Descriptif', $star_id) : '';
 
 // Photos ACF (repeater)
 $ambiance_photos = sapi_get_product_photos($star_id, 'ambiance');
