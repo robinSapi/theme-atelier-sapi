@@ -380,7 +380,7 @@ get_header();
   <section class="product-why product-why-cinetique">
     <div class="product-why-header">
       <span class="section-num"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
-      <h2><?php echo esc_html(get_the_title()); ?> en détails</h2>
+      <h2>Détails</h2>
     </div>
     <div class="product-why-grid">
       <div class="product-why-left">
