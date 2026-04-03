@@ -389,7 +389,7 @@ get_header();
         $why_content = '';
         if (function_exists('get_field')) {
           $pourquoi = get_field('pourquoi_cette_piece');
-          $descriptif = get_field('descriptif') ?: get_field('Descriptif');
+          $descriptif = get_field('Descriptif');
           if ($pourquoi) {
             $why_content = $pourquoi;
           } elseif ($descriptif) {
@@ -406,7 +406,7 @@ get_header();
       </div><!-- .product-why-left -->
 
       <?php
-      $descriptif_right = function_exists('get_field') ? (get_field('descriptif') ?: get_field('Descriptif')) : '';
+      $descriptif_right = function_exists('get_field') ? get_field('Descriptif') : '';
       if ($descriptif_right) : ?>
       <div class="product-why-right">
         <div class="product-why-content">
