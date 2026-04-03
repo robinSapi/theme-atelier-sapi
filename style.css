@@ -20321,7 +20321,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
    ========================================= */
 
 
-/* Lightbox — même style que Quick View */
+/* Lightbox overlay — fond sombre, tout flotte dessus */
 .ambiance-lightbox {
   position: fixed;
   inset: 0;
@@ -20342,88 +20342,62 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .ambiance-lightbox-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
-/* Content — carte blanche arrondie, taille FIXE, bordure crème */
-.ambiance-lightbox-content {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 90vw;
-  max-width: 1200px;
-  height: 90vh;
-  box-sizing: border-box;
-  padding: 24px;
-  background: var(--color-cream, #FEFDFB);
-  border-radius: 24px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
+/* Photo : taille naturelle, contrainte par max */
+.ambiance-lightbox-image {
+  display: block;
+  max-width: 90vw;
+  max-height: 80vh;
+  width: auto;
+  height: auto;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  user-select: none;
   z-index: 1;
-  transform: scale(0.95);
-  transition: transform 0.4s cubic-bezier(0.34, 0.61, 0.4, 0.97);
 }
 
-.ambiance-lightbox[aria-hidden="false"] .ambiance-lightbox-content {
-  transform: scale(1);
-}
-
-/* Close — par-dessus la photo */
+/* Bouton fermer — fixed en haut à droite */
 .ambiance-lightbox-close {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.6rem;
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
   background: rgba(0, 0, 0, 0.45);
   border: none;
   border-radius: 50%;
   cursor: pointer;
   padding: 0;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  transition: all 0.3s ease;
-  z-index: 100;
+  transition: background 0.3s ease, -webkit-transform 0.3s ease;
+  transition: background 0.3s ease, transform 0.3s ease;
+  z-index: 10;
 }
 
 @media (hover: hover) {
   .ambiance-lightbox-close:hover {
     background: var(--color-orange, #E35B24);
+    -webkit-transform: scale(1.1);
     transform: scale(1.1);
   }
 }
 
-/* Main image area */
-.ambiance-lightbox-main {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  min-height: 0;
-}
-
-.ambiance-lightbox-image {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  border-radius: 18px;
-  user-select: none;
-}
-
-/* Navigation arrows — proches de la modale, sur l'overlay */
+/* Navigation arrows — fixed sur les bords du viewport */
 .ambiance-lightbox-prev,
 .ambiance-lightbox-next {
-  position: absolute;
+  position: fixed;
   top: 50%;
   -webkit-transform: translateY(-50%);
   transform: translateY(-50%);
-  z-index: 2;
+  z-index: 10;
   background: rgba(255, 255, 255, 0.9);
   border: 1.5px solid var(--color-wood, #937D68);
   border-radius: 50%;
@@ -20438,13 +20412,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
   transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
-.ambiance-lightbox-prev {
-  left: calc(50% - min(45vw, 600px) - 24px);
-}
-
-.ambiance-lightbox-next {
-  right: calc(50% - min(45vw, 600px) - 24px);
-}
+.ambiance-lightbox-prev { left: 16px; }
+.ambiance-lightbox-next { right: 16px; }
 
 @media (hover: hover) {
   .ambiance-lightbox-prev:hover,
@@ -20455,40 +20424,35 @@ body.woocommerce-cart div.woocommerce-wrapper {
   }
 }
 
-/* Footer: thumbnails */
-.ambiance-lightbox-footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem 1rem 1rem;
-}
-
-.ambiance-lightbox-thumbs-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-/* Thumbnails strip */
+/* Strip miniatures — fixed en bas, centré */
 .ambiance-lightbox-thumbs {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
   display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  z-index: 10;
+  max-width: 90vw;
+  overflow-x: auto;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .ambiance-thumb {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.3rem;
   background: none;
   border: 2px solid transparent;
   border-radius: 8px;
   padding: 3px;
   cursor: pointer;
   transition: border-color 0.2s;
+  flex-shrink: 0;
 }
 
 .ambiance-thumb.active {
@@ -20497,7 +20461,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 
 @media (hover: hover) {
   .ambiance-thumb:hover:not(.active) {
-    border-color: var(--color-wood, #937D68);
+    border-color: rgba(255, 255, 255, 0.6);
   }
 }
 
@@ -20508,54 +20472,34 @@ body.woocommerce-cart div.woocommerce-wrapper {
   border-radius: 6px;
 }
 
-
-/* Responsive */
+/* Responsive mobile */
 @media (max-width: 768px) {
-  .ambiance-lightbox-content {
-    width: 96vw;
-    height: 92vh;
-    padding: 16px;
-    border-radius: 16px;
-  }
-
   .ambiance-lightbox-image {
-    border-radius: 12px;
+    max-width: 95vw;
+    max-height: 70vh;
+    border-radius: 6px;
   }
 
+  /* Boutons masqués — navigation au swipe */
   .ambiance-lightbox-prev,
   .ambiance-lightbox-next {
-    width: 44px;
-    height: 44px;
+    display: none;
   }
 
-  .ambiance-lightbox-prev {
-    left: calc(50% - 48vw - 22px);
-  }
-
-  .ambiance-lightbox-next {
-    right: calc(50% - 48vw - 22px);
-  }
-
-  .ambiance-lightbox-prev svg,
-  .ambiance-lightbox-next svg {
-    width: 16px;
-    height: 16px;
+  .ambiance-lightbox-thumbs {
+    bottom: 12px;
+    max-width: 95vw;
   }
 
   .ambiance-thumb img {
     width: 44px;
     height: 44px;
   }
-
-  .ambiance-lightbox-footer {
-    padding: 0.75rem;
-  }
 }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .ambiance-lightbox,
-  .ambiance-lightbox-content {
+  .ambiance-lightbox {
     transition: none;
   }
 }
