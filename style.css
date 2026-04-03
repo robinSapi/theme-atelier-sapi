@@ -20395,7 +20395,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   }
 }
 
-/* Main image area — bordure fine, écart uniforme haut/gauche/droite */
+/* Main image area — bordure crème constante autour de l'image */
 .ambiance-lightbox-main {
   position: relative;
   display: flex;
@@ -20403,7 +20403,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   justify-content: center;
   flex: 1;
   min-height: 0;
-  padding: 0.35rem 0.35rem 0;
+  padding: 1.25rem 1.25rem 0;
 }
 
 .ambiance-lightbox-image {
@@ -20414,10 +20414,10 @@ body.woocommerce-cart div.woocommerce-wrapper {
   user-select: none;
 }
 
-/* Navigation arrows — ancrés sur les bords du viewport */
+/* Navigation arrows — proches de la modale, sur l'overlay */
 .ambiance-lightbox-prev,
 .ambiance-lightbox-next {
-  position: fixed;
+  position: absolute;
   top: 50%;
   -webkit-transform: translateY(-50%);
   transform: translateY(-50%);
@@ -20437,11 +20437,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 .ambiance-lightbox-prev {
-  left: 1.5rem;
+  left: calc(50% - min(45vw, 600px) - 3.5rem);
 }
 
 .ambiance-lightbox-next {
-  right: 1.5rem;
+  right: calc(50% - min(45vw, 600px) - 3.5rem);
 }
 
 @media (hover: hover) {
@@ -20516,7 +20516,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   }
 
   .ambiance-lightbox-main {
-    padding: 0.5rem 0.25rem 0;
+    padding: 0.75rem 0.75rem 0;
   }
 
   .ambiance-lightbox-image {
@@ -20530,11 +20530,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
   }
 
   .ambiance-lightbox-prev {
-    left: 0.5rem;
+    left: calc(50% - 48vw + 0.5rem);
   }
 
   .ambiance-lightbox-next {
-    right: 0.5rem;
+    right: calc(50% - 48vw + 0.5rem);
   }
 
   .ambiance-lightbox-prev svg,
