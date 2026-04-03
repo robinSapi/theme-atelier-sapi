@@ -20437,11 +20437,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 .ambiance-lightbox-prev {
-  left: calc(50% - min(45vw, 600px) - 3.5rem);
+  left: calc(50% - min(45vw, 600px) - 24px);
 }
 
 .ambiance-lightbox-next {
-  right: calc(50% - min(45vw, 600px) - 3.5rem);
+  right: calc(50% - min(45vw, 600px) - 24px);
 }
 
 @media (hover: hover) {
@@ -20530,11 +20530,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
   }
 
   .ambiance-lightbox-prev {
-    left: calc(50% - 48vw + 0.5rem);
+    left: calc(50% - 48vw - 22px);
   }
 
   .ambiance-lightbox-next {
-    right: calc(50% - 48vw + 0.5rem);
+    right: calc(50% - 48vw - 22px);
   }
 
   .ambiance-lightbox-prev svg,
