@@ -5088,6 +5088,21 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   margin: 0;
 }
 
+/* Photo client intégrée dans témoignages */
+.testimonials-client-photo {
+  margin-bottom: 2.5rem;
+}
+
+.testimonials-client-caption {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-wood);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 1rem 0;
+}
+
 /* Google Reviews Badge */
 .google-reviews-badge {
   display: flex;
@@ -5366,6 +5381,16 @@ ul.products.products-carousel-track > li.products-carousel-slide {
     margin-left: 0;
     width: 100%;
     justify-content: center;
+  }
+
+  .testimonials-client-photo {
+    padding: 0 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .testimonials-client-photo .client-photo-wrapper {
+    aspect-ratio: 16 / 9;
+    border-radius: 8px;
   }
 
   .testimonials-grid {
