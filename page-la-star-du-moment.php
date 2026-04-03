@@ -41,7 +41,7 @@ $short_desc  = $star_product->get_short_description();
 
 // ACF fields
 $has_acf          = function_exists('get_field');
-$phrase_accroche  = $has_acf ? get_field('phrase_daccroche', $star_id) : '';
+$star_short_desc  = $star_product->get_short_description();
 $mini_desc        = $has_acf ? get_field('mini_description', $star_id) : '';
 $pourquoi         = $has_acf ? get_field('pourquoi_cette_piece', $star_id) : '';
 $descriptif       = $has_acf ? (get_field('Descriptif', $star_id) ?: get_field('descriptif', $star_id)) : '';
@@ -81,8 +81,8 @@ $hero_url = !empty($ambiance_photos[0]) ? $ambiance_photos[0] : $main_image_url;
   <div class="star-hero__content">
     <span class="star-hero__badge">La star du moment</span>
     <h1 class="star-hero__title product-name"><?php echo esc_html($name); ?></h1>
-    <?php if ($phrase_accroche) : ?>
-      <p class="star-hero__accroche"><?php echo esc_html($phrase_accroche); ?></p>
+    <?php if ($star_short_desc) : ?>
+      <p class="star-hero__accroche"><?php echo esc_html(wp_strip_all_tags($star_short_desc)); ?></p>
     <?php endif; ?>
     <a href="#star-galerie" class="star-hero__scroll">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -96,7 +96,7 @@ $hero_url = !empty($ambiance_photos[0]) ? $ambiance_photos[0] : $main_image_url;
 <!-- ========== PRÉSENTATION ========== -->
 <?php
 // Accroche : phrase_daccroche ou mini_description
-$accroche = $phrase_accroche ?: $mini_desc;
+$accroche = $star_short_desc ? wp_strip_all_tags($star_short_desc) : $mini_desc;
 // Texte principal : description longue WooCommerce
 $texte_principal = $description ?: $short_desc;
 if ($accroche || $texte_principal || $descriptif) :
