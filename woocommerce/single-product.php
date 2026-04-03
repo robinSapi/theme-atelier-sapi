@@ -380,34 +380,10 @@ get_header();
   </section>
 
   <?php if (!$is_carte_cadeau) : // Masquer tout le contenu détaillé pour la carte cadeau ?>
-  <!-- ═══════════════════════════════════════════════════════════════
-       SECTION PHOTO CLIENT — BANDEAU
-       ═══════════════════════════════════════════════════════════════ -->
-  <?php
-  $client_photos = sapi_get_product_photos($product_id, 'client');
-  $bandeau_url = !empty($client_photos) ? $client_photos[array_rand($client_photos)] : '';
-
-  if ($bandeau_url) :
-    $section_num = 0;
-    $captions = [
-      'Photo envoyée par une cliente',
-      'Photo envoyée récemment par un client'
-    ];
-    $random_caption = $captions[array_rand($captions)];
-  ?>
-  <section class="product-client-photo">
-    <div class="client-photo-header">
-      <span class="section-num"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
-      <h2><?php echo esc_html($random_caption); ?></h2>
-    </div>
-    <div class="client-photo-wrapper">
-      <img src="<?php echo esc_url($bandeau_url); ?>" srcset="" alt="Photo client - <?php echo esc_attr(get_the_title()); ?>" class="client-photo-image">
-    </div>
-  </section>
-  <?php endif; ?>
+  <?php $section_num = 0; ?>
 
   <!-- ═══════════════════════════════════════════════════════════════
-       SECTION 02 — POURQUOI CETTE PIÈCE
+       SECTION 01 — POURQUOI CETTE PIÈCE
        ═══════════════════════════════════════════════════════════════ -->
   <section class="product-why product-why-cinetique">
     <div class="product-why-grid">
@@ -442,6 +418,178 @@ get_header();
       </div><!-- .product-why-left -->
     </div>
   </section>
+
+  <?php if (!$is_accessoire) : ?>
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 02 — TÉMOIGNAGES + PHOTO CLIENT (Preuve Sociale)
+       ═══════════════════════════════════════════════════════════════ -->
+  <?php
+  $google_reviews = sapi_get_google_reviews();
+  ?>
+  <section class="product-testimonials">
+    <div class="testimonials-header">
+      <span class="section-num"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
+      <h2>Ce qu'en pensent les clients</h2>
+      <?php if ($google_reviews) : ?>
+      <div class="google-reviews-badge">
+        <svg class="google-logo" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        <div class="google-reviews-summary">
+          <div class="google-stars">
+            <?php
+            $rating = $google_reviews['rating'];
+            for ($i = 1; $i <= 5; $i++) :
+              if ($i <= floor($rating)) : ?>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#FBBC05"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <?php else : ?>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#ddd"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <?php endif;
+            endfor; ?>
+          </div>
+          <span class="google-rating-text"><?php echo esc_html($rating); ?>/5 · <?php echo esc_html($google_reviews['total']); ?> avis</span>
+        </div>
+      </div>
+      <?php endif; ?>
+    </div>
+
+    <?php
+    // Photo client intégrée (preuve sociale visuelle)
+    $client_photos = sapi_get_product_photos($product_id, 'client');
+    $bandeau_url = !empty($client_photos) ? $client_photos[array_rand($client_photos)] : '';
+    if ($bandeau_url) :
+      $captions = [
+        'Photo envoyée par une cliente',
+        'Photo envoyée récemment par un client'
+      ];
+      $random_caption = $captions[array_rand($captions)];
+    ?>
+    <div class="testimonials-client-photo">
+      <p class="testimonials-client-caption"><?php echo esc_html($random_caption); ?></p>
+      <div class="client-photo-wrapper">
+        <img src="<?php echo esc_url($bandeau_url); ?>" srcset="" alt="Photo client - <?php echo esc_attr(get_the_title()); ?>" class="client-photo-image">
+      </div>
+    </div>
+    <?php endif; ?>
+
+    <?php if ($google_reviews && !empty($google_reviews['reviews'])) : ?>
+    <div class="testimonials-grid">
+      <?php
+      $reviews_pool = $google_reviews['reviews'];
+      shuffle($reviews_pool);
+      $reviews_display = array_slice($reviews_pool, 0, 3);
+      ?>
+      <?php foreach ($reviews_display as $review) : ?>
+      <div class="testimonial-card">
+        <div class="testimonial-card-header">
+          <?php if (!empty($review['photo'])) : ?>
+          <img class="testimonial-avatar" src="<?php echo esc_url($review['photo']); ?>" alt="" width="36" height="36" loading="lazy">
+          <?php endif; ?>
+          <div class="testimonial-author-info">
+            <span class="author-name"><?php echo esc_html($review['author']); ?></span>
+            <span class="author-time"><?php echo esc_html($review['time']); ?></span>
+          </div>
+        </div>
+        <div class="testimonial-rating">
+          <?php for ($i = 1; $i <= 5; $i++) : ?>
+            <?php if ($i <= $review['rating']) : ?>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#FBBC05"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <?php else : ?>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#ddd"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <?php endif; ?>
+          <?php endfor; ?>
+        </div>
+        <?php
+          $text = $review['text'];
+          $short = $text;
+          if (mb_strlen($text) > 200) {
+            $short = mb_substr($text, 0, 200);
+            $short = mb_substr($short, 0, mb_strrpos($short, ' ')) . '…';
+          }
+        ?>
+        <p class="testimonial-text"><?php echo esc_html($short); ?></p>
+        <span class="testimonial-full-text" hidden><?php echo esc_attr($text); ?></span>
+        <span class="testimonial-full-author" hidden><?php echo esc_attr($review['author']); ?></span>
+        <span class="testimonial-full-photo" hidden><?php echo esc_attr($review['photo'] ?? ''); ?></span>
+        <span class="testimonial-full-time" hidden><?php echo esc_attr($review['time'] ?? ''); ?></span>
+        <span class="testimonial-full-rating" hidden><?php echo esc_attr($review['rating']); ?></span>
+      </div>
+      <?php endforeach; ?>
+    </div>
+
+    <div class="testimonials-cta">
+      <a href="https://g.page/r/CQ0YW1uBzOimEAE/review" target="_blank" rel="noopener noreferrer" class="testimonials-cta-review">Laisser un avis sur Google</a>
+      <span class="testimonials-cta-sep">·</span>
+      <a href="https://www.google.com/maps/place/?q=place_id:ChIJYyWUfZOV9EcRDRhbW4HM6KY" target="_blank" rel="noopener noreferrer">Voir les <?php echo esc_html($google_reviews['total']); ?> avis</a>
+    </div>
+    <!-- Modale avis Google -->
+    <div class="review-modal-overlay" id="reviewModal" hidden>
+      <div class="review-modal">
+        <button type="button" class="review-modal-close" aria-label="Fermer">&times;</button>
+        <div class="review-modal-header">
+          <img class="review-modal-avatar" src="" alt="" width="48" height="48">
+          <div class="review-modal-author-info">
+            <span class="review-modal-name"></span>
+            <span class="review-modal-time"></span>
+          </div>
+        </div>
+        <div class="review-modal-rating"></div>
+        <p class="review-modal-text"></p>
+      </div>
+    </div>
+    <script>
+    (function() {
+      var modal = document.getElementById('reviewModal');
+      var overlay = modal;
+      var closeBtn = modal.querySelector('.review-modal-close');
+
+      document.querySelectorAll('.testimonial-card').forEach(function(card) {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', function() {
+          var fullText = card.querySelector('.testimonial-full-text').textContent;
+          var author = card.querySelector('.testimonial-full-author').textContent;
+          var photo = card.querySelector('.testimonial-full-photo').textContent;
+          var time = card.querySelector('.testimonial-full-time').textContent;
+          var rating = parseInt(card.querySelector('.testimonial-full-rating').textContent);
+
+          modal.querySelector('.review-modal-name').textContent = author;
+          modal.querySelector('.review-modal-time').textContent = time;
+          modal.querySelector('.review-modal-text').textContent = fullText;
+
+          var avatar = modal.querySelector('.review-modal-avatar');
+          if (photo) { avatar.src = photo; avatar.style.display = ''; }
+          else { avatar.style.display = 'none'; }
+
+          var stars = '';
+          for (var i = 1; i <= 5; i++) {
+            stars += '<svg width="16" height="16" viewBox="0 0 24 24" fill="' + (i <= rating ? '#FBBC05' : '#ddd') + '"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+          }
+          modal.querySelector('.review-modal-rating').innerHTML = stars;
+
+          modal.hidden = false;
+          document.body.style.overflow = 'hidden';
+        });
+      });
+
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) closeModal();
+      });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !modal.hidden) closeModal();
+      });
+
+      function closeModal() {
+        modal.hidden = true;
+        document.body.style.overflow = '';
+      }
+    })();
+    </script>
+    <?php else : ?>
+    <div class="testimonials-cta">
+      <p>Vous avez ce produit ? <a href="https://g.page/r/CQ0YW1uBzOimEAE/review" target="_blank" rel="noopener noreferrer">Partagez votre avis</a></p>
+    </div>
+    <?php endif; ?>
+  </section>
+  <?php endif; // fin exclusion témoignages accessoires ?>
 
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION 03 — FICHE TECHNIQUE (Dynamique via ACF)
@@ -722,163 +870,9 @@ get_header();
     </div>
   </section>
 
-
   <?php if (!$is_accessoire) : ?>
   <!-- ═══════════════════════════════════════════════════════════════
-       SECTION — TÉMOIGNAGES (Preuve Sociale)
-       ═══════════════════════════════════════════════════════════════ -->
-  <?php
-  $google_reviews = sapi_get_google_reviews();
-  ?>
-  <section class="product-testimonials">
-    <div class="testimonials-header">
-      <span class="section-num"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
-      <h2>Ce qu'en pensent les clients</h2>
-      <?php if ($google_reviews) : ?>
-      <div class="google-reviews-badge">
-        <svg class="google-logo" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-        <div class="google-reviews-summary">
-          <div class="google-stars">
-            <?php
-            $rating = $google_reviews['rating'];
-            for ($i = 1; $i <= 5; $i++) :
-              if ($i <= floor($rating)) : ?>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#FBBC05"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              <?php else : ?>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#ddd"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              <?php endif;
-            endfor; ?>
-          </div>
-          <span class="google-rating-text"><?php echo esc_html($rating); ?>/5 · <?php echo esc_html($google_reviews['total']); ?> avis</span>
-        </div>
-      </div>
-      <?php endif; ?>
-    </div>
-
-    <?php if ($google_reviews && !empty($google_reviews['reviews'])) : ?>
-    <div class="testimonials-grid">
-      <?php
-      $reviews_pool = $google_reviews['reviews'];
-      shuffle($reviews_pool);
-      $reviews_display = array_slice($reviews_pool, 0, 3);
-      ?>
-      <?php foreach ($reviews_display as $review) : ?>
-      <div class="testimonial-card">
-        <div class="testimonial-card-header">
-          <?php if (!empty($review['photo'])) : ?>
-          <img class="testimonial-avatar" src="<?php echo esc_url($review['photo']); ?>" alt="" width="36" height="36" loading="lazy">
-          <?php endif; ?>
-          <div class="testimonial-author-info">
-            <span class="author-name"><?php echo esc_html($review['author']); ?></span>
-            <span class="author-time"><?php echo esc_html($review['time']); ?></span>
-          </div>
-        </div>
-        <div class="testimonial-rating">
-          <?php for ($i = 1; $i <= 5; $i++) : ?>
-            <?php if ($i <= $review['rating']) : ?>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="#FBBC05"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <?php else : ?>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="#ddd"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <?php endif; ?>
-          <?php endfor; ?>
-        </div>
-        <?php
-          $text = $review['text'];
-          $short = $text;
-          if (mb_strlen($text) > 200) {
-            $short = mb_substr($text, 0, 200);
-            $short = mb_substr($short, 0, mb_strrpos($short, ' ')) . '…';
-          }
-        ?>
-        <p class="testimonial-text"><?php echo esc_html($short); ?></p>
-        <span class="testimonial-full-text" hidden><?php echo esc_attr($text); ?></span>
-        <span class="testimonial-full-author" hidden><?php echo esc_attr($review['author']); ?></span>
-        <span class="testimonial-full-photo" hidden><?php echo esc_attr($review['photo'] ?? ''); ?></span>
-        <span class="testimonial-full-time" hidden><?php echo esc_attr($review['time'] ?? ''); ?></span>
-        <span class="testimonial-full-rating" hidden><?php echo esc_attr($review['rating']); ?></span>
-      </div>
-      <?php endforeach; ?>
-    </div>
-
-    <div class="testimonials-cta">
-      <a href="https://g.page/r/CQ0YW1uBzOimEAE/review" target="_blank" rel="noopener noreferrer" class="testimonials-cta-review">Laisser un avis sur Google</a>
-      <span class="testimonials-cta-sep">·</span>
-      <a href="https://www.google.com/maps/place/?q=place_id:ChIJYyWUfZOV9EcRDRhbW4HM6KY" target="_blank" rel="noopener noreferrer">Voir les <?php echo esc_html($google_reviews['total']); ?> avis</a>
-    </div>
-    <!-- Modale avis Google -->
-    <div class="review-modal-overlay" id="reviewModal" hidden>
-      <div class="review-modal">
-        <button type="button" class="review-modal-close" aria-label="Fermer">&times;</button>
-        <div class="review-modal-header">
-          <img class="review-modal-avatar" src="" alt="" width="48" height="48">
-          <div class="review-modal-author-info">
-            <span class="review-modal-name"></span>
-            <span class="review-modal-time"></span>
-          </div>
-        </div>
-        <div class="review-modal-rating"></div>
-        <p class="review-modal-text"></p>
-      </div>
-    </div>
-    <script>
-    (function() {
-      var modal = document.getElementById('reviewModal');
-      var overlay = modal;
-      var closeBtn = modal.querySelector('.review-modal-close');
-
-      document.querySelectorAll('.testimonial-card').forEach(function(card) {
-        card.style.cursor = 'pointer';
-        card.addEventListener('click', function() {
-          var fullText = card.querySelector('.testimonial-full-text').textContent;
-          var author = card.querySelector('.testimonial-full-author').textContent;
-          var photo = card.querySelector('.testimonial-full-photo').textContent;
-          var time = card.querySelector('.testimonial-full-time').textContent;
-          var rating = parseInt(card.querySelector('.testimonial-full-rating').textContent);
-
-          modal.querySelector('.review-modal-name').textContent = author;
-          modal.querySelector('.review-modal-time').textContent = time;
-          modal.querySelector('.review-modal-text').textContent = fullText;
-
-          var avatar = modal.querySelector('.review-modal-avatar');
-          if (photo) { avatar.src = photo; avatar.style.display = ''; }
-          else { avatar.style.display = 'none'; }
-
-          var stars = '';
-          for (var i = 1; i <= 5; i++) {
-            stars += '<svg width="16" height="16" viewBox="0 0 24 24" fill="' + (i <= rating ? '#FBBC05' : '#ddd') + '"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
-          }
-          modal.querySelector('.review-modal-rating').innerHTML = stars;
-
-          modal.hidden = false;
-          document.body.style.overflow = 'hidden';
-        });
-      });
-
-      closeBtn.addEventListener('click', closeModal);
-      overlay.addEventListener('click', function(e) {
-        if (e.target === overlay) closeModal();
-      });
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && !modal.hidden) closeModal();
-      });
-
-      function closeModal() {
-        modal.hidden = true;
-        document.body.style.overflow = '';
-      }
-    })();
-    </script>
-    <?php else : ?>
-    <div class="testimonials-cta">
-      <p>Vous avez ce produit ? <a href="https://g.page/r/CQ0YW1uBzOimEAE/review" target="_blank" rel="noopener noreferrer">Partagez votre avis</a></p>
-    </div>
-    <?php endif; ?>
-  </section>
-  <?php endif; // fin exclusion avis accessoires ?>
-
-  <?php if (!$is_accessoire) : ?>
-  <!-- ═══════════════════════════════════════════════════════════════
-       SECTION — L'ATELIER (Fabriqué avec passion)
+       SECTION 04 — L'ATELIER (Fabriqué avec passion)
        ═══════════════════════════════════════════════════════════════ -->
   <section class="product-atelier product-atelier-cinetique">
     <div class="product-atelier-grid">
