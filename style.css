@@ -20347,7 +20347,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   -webkit-backdrop-filter: blur(8px);
 }
 
-/* Content — carte blanche arrondie, taille FIXE */
+/* Content — carte blanche arrondie, taille FIXE, bordure crème */
 .ambiance-lightbox-content {
   position: relative;
   display: flex;
@@ -20355,6 +20355,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
   width: 90vw;
   max-width: 1200px;
   height: 90vh;
+  box-sizing: border-box;
+  padding: 24px;
   background: var(--color-cream, #FEFDFB);
   border-radius: 24px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -20406,8 +20408,9 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 .ambiance-lightbox-image {
-  max-width: calc(100% - 1.5rem);
-  max-height: calc(100% - 1.5rem);
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   border-radius: 18px;
   user-select: none;
@@ -20511,6 +20514,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   .ambiance-lightbox-content {
     width: 96vw;
     height: 92vh;
+    padding: 16px;
     border-radius: 16px;
   }
 
