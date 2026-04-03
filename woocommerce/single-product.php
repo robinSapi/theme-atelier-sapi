@@ -360,12 +360,6 @@ get_header();
         </div>
         <?php endif; // fin !$is_carte_cadeau ?>
 
-        <?php if (!$is_accessoire) : ?>
-        <!-- Micro-copy artisan -->
-        <p class="product-artisan-note">
-          <em>Chaque pièce est découpée au laser puis assemblée à la main à l'Atelier Sâpi, à Lyon.</em>
-        </p>
-        <?php endif; ?>
 
       </div>
     </div>
