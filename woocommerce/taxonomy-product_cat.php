@@ -23,11 +23,11 @@ $term_slug = $term->slug;
 $term_id = $term->term_id;
 
 $category_intro = [
-  'suspensions' => "Des luminaires suspendus en bois qui transforment votre plafond en œuvre d'art. Du lustre design au modèle artisanal, trouvez la suspension qui raconte votre histoire.",
-  'lampadaires' => "L'éclairage d'ambiance parfait pour structurer votre espace sans percer le plafond. Les lampadaires en bois de l'Atelier Sâpi allient design sculptural et lumière chaleureuse.",
+  'suspensions' => "Des luminaires suspendus en bois qui transforment votre plafond en œuvre d'art. Du lustre design et moderne au modèle plus traditionnel, trouvez la suspension qui raconte votre histoire.",
+  'lampadaires' => "L'éclairage d'ambiance parfait pour structurer votre espace sans percer le plafond. Les lampadaires en bois Atelier Sâpi allient design sculptural et lumière chaleureuse.",
   'appliques' => "Libérez vos sols, habillez vos murs. Les appliques murales en bois créent une atmosphère unique tout en dessinant des jeux d'ombres poétiques.",
   'lampesaposer' => "La touche finale qui change tout. Posez-la où vous voulez, déplacez-la au gré de vos envies : les lampes nomades créent une bulle de lumière intime partout chez vous.",
-  'accessoires' => "Les bons accessoires font toute la différence. Ampoules filament, douilles certifiées, câbles premium : tout pour sublimer vos luminaires en toute sécurité.",
+  'accessoires' => "Les bons accessoires font toute la différence. Ampoules filament, douilles certifiées, câbles textiles, pied de lampe : tout pour sublimer vos luminaires en toute sécurité.",
 ];
 
 if (function_exists('sapi_maison_breadcrumbs')) {
@@ -209,10 +209,10 @@ if ($bg_query->have_posts()) {
         'why' => 'Pourquoi choisir une suspension en bois ?',
         'why_content' => 'Le bois apporte une chaleur incomparable. Il filtre la lumière avec douceur, créant des jeux d\'ombres poétiques sur vos murs. Ces suspensions ne sont pas de simples objets décoratifs : elles racontent une histoire, celle de l\'artisanat français, du savoir-faire et de la passion.',
         'promise' => 'La promesse de Robin',
-        'promise_content' => 'Chaque suspension est unique. Découpée au laser dans l\'atelier lyonnais de Robin, assemblée à la main, testée avec soin. Vous recevez bien plus qu\'un luminaire : vous recevez une pièce d\'art fonctionnelle, pensée pour durer, conçue pour sublimer votre quotidien.',
+        'promise_content' => 'Chaque suspension est unique. Découpée au laser dans l\'atelier de Robin près de Lyon, poncée à la main, vérifiée avec soin. Vous recevez bien plus qu\'un luminaire : vous recevez une pièce d\'art fonctionnelle, pensée pour durer, conçue pour sublimer votre quotidien.',
         'use_cases' => 'Où installer votre suspension ?',
         'use_cases_items' => [
-          'Au-dessus de la table à manger → Pour créer une ambiance conviviale lors des repas',
+          'Au-dessus de la table à manger → Pour créer une ambiance conviviale lors des repas et impressionner vos convives',
           'Dans le salon → Comme pièce maîtresse qui structure l\'espace',
           'Dans la chambre → Pour une atmosphère apaisante et enveloppante',
           'Au-dessus d\'un îlot central → Design et fonctionnel pour cuisiner avec style'
@@ -224,7 +224,7 @@ if ($bg_query->have_posts()) {
         'why' => 'Pourquoi un lampadaire fait la différence ?',
         'why_content' => 'Contrairement à un plafonnier, le lampadaire crée une lumière d\'ambiance, plus douce, plus humaine. Il se fond dans votre décoration tout en affirmant son caractère. Les modèles en bois de Robin sculptent l\'espace avec poésie, entre ombre et lumière.',
         'promise' => 'L\'engagement de Robin',
-        'promise_content' => 'Stabilité, robustesse, élégance. Les lampadaires sont conçus pour être beaux ET pratiques. Base lestée pour éviter tout basculement, bois PEFC pour une démarche responsable, assemblage précis pour une finition irréprochable.',
+        'promise_content' => 'Stabilité, robustesse, élégance. Les lampadaires sont conçus pour être beaux ET pratiques. Base lestée pour éviter tout basculement, bois PEFC pour une démarche responsable, découpe précise pour une finition irréprochable.',
         'use_cases' => 'Dans quelles pièces l\'utiliser ?',
         'use_cases_items' => [
           'Salon → À côté du canapé pour lire confortablement',
@@ -242,9 +242,9 @@ if ($bg_query->have_posts()) {
         'promise_content' => 'Installation simplifiée, câblage textile de qualité, fixations fournies. Chaque applique est testée et emballée avec soin. Vous recevez un luminaire prêt à poser, avec notice illustrée claire et assistance disponible si besoin.',
         'use_cases' => 'Où installer vos appliques ?',
         'use_cases_items' => [
-          'De chaque côté du lit → Pour lire sans déranger l\'autre',
+          'De chaque côté du lit → Pour lire doucement avant de s\'endormir',
           'Dans le couloir → Lumière douce qui guide sans éblouir',
-          'Salle de bain → Éclairage d\'ambiance autour du miroir',
+          'Salon → Éclairage d\'appoint idéal pour les grands espaces, ou pour les soirées tranquilles',
           'Escalier → Sécurité + décoration en un seul geste'
         ]
       ],
@@ -254,7 +254,7 @@ if ($bg_query->have_posts()) {
         'why' => 'Pourquoi craquer pour une lampe à poser ?',
         'why_content' => 'Compacte, mobile, polyvalente. La lampe à poser est le luminaire qui s\'adapte à VOUS, et non l\'inverse. Les créations en bois de Robin apportent du cachet même éteintes, et transforment chaque coin en petit havre de douceur une fois allumées.',
         'promise' => 'Le savoir-faire de Robin',
-        'promise_content' => 'Base stable, interrupteur intégré, câble renforcé. Chaque lampe à poser est pensée pour le quotidien : pratique, belle, durable. Pas de fioritures inutiles, juste l\'essentiel fait avec passion.',
+        'promise_content' => 'Base stable, interrupteur intégré, câble textile. Chaque lampe à poser est pensée pour le quotidien : pratique, belle, durable. Pas de fioritures inutiles, juste l\'essentiel fait avec passion.',
         'use_cases' => 'Comment l\'utiliser ?',
         'use_cases_items' => [
           'Chevet → Lumière douce pour lire avant de dormir',
@@ -272,8 +272,8 @@ if ($bg_query->have_posts()) {
         'promise_content' => 'Ampoules LED longue durée, douilles certifiées CE, câbles textile premium. Tout est testé, tout est compatible avec les créations de l\'Atelier Sâpi. Vous achetez en toute confiance, avec la garantie que ça marchera parfaitement ensemble.',
         'use_cases' => 'Que choisir ?',
         'use_cases_items' => [
-          'Ampoules filament → Pour les suspensions ouvertes (effet visuel maximal)',
-          'Ampoules opaques → Pour les luminaires fermés (lumière uniforme)',
+          'Ampoules filament → Pour tous nos luminaires. Puissance maximale, consommation maitrisée, et jeux de lumière qui font rêver',
+          'Quelle couleur ? → A vous de choisir ! Noir ou blanc disponible en ligne.',
           'Pieds de lampadaire → Pour transformer une suspension en lampe sur pied',
           'Douilles E27 → Pour personnaliser ou réparer vos luminaires'
         ]
