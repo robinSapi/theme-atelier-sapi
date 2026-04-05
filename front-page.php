@@ -341,7 +341,7 @@ foreach ($collection_slugs as $col) {
     <!-- Hero Text -->
     <div class="carousel-hero-text">
       <h1 class="carousel-hero-title">Luminaires en bois · Atelier Sâpi</h1>
-      <h2 class="carousel-hero-subtitle">Fabriqués à la main, à la commande, dans mon atelier Lyonnais !</h2>
+      <h2 class="carousel-hero-subtitle">Fabriqués à la main, à la commande, dans mon atelier à Lyon</h2>
     </div>
   </div>
 </section>
@@ -369,7 +369,7 @@ foreach ($collection_slugs as $col) {
     <div class="bento-card bento-storytelling">
       <div class="storytelling-inner">
         <span class="storytelling-label"><span class="storytelling-num">01</span> L'atelier</span>
-        <h2 class="storytelling-title">Des créations imaginées et fabriquées avec passion</h2>
+        <h2 class="storytelling-title">Des sculptures lumineuses</h2>
         <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
         <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="storytelling-link">
           <span>Découvrir l'artisan</span>
