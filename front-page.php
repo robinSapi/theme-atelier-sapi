@@ -341,7 +341,7 @@ foreach ($collection_slugs as $col) {
     <!-- Hero Text -->
     <div class="carousel-hero-text">
       <h1 class="carousel-hero-title">Luminaires en bois · Atelier Sâpi</h1>
-      <h2 class="carousel-hero-subtitle">Fabriqués à la main dans mon atelier lyonnais, à la commande !</h2>
+      <h2 class="carousel-hero-subtitle">Fabriqués à la main, à la commande, dans mon atelier Lyonnais !</h2>
     </div>
   </div>
 </section>
