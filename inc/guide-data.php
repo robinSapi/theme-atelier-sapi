@@ -29,9 +29,10 @@ function sapi_guide_get_steps() {
       'question'   => 'Quelle est la taille de votre pièce ?',
       'visibility' => ['piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'entree']],
       'choices'    => [
-        ['label' => 'Petite',   'dim' => '< 10 m²',   'slug' => 'petite',  'icon' => 'square-sm'],
-        ['label' => 'Moyenne',  'dim' => '10–20 m²',   'slug' => 'moyenne', 'icon' => 'square-md'],
-        ['label' => 'Grande',   'dim' => '> 20 m²',    'slug' => 'grande',  'icon' => 'square-lg'],
+        ['label' => 'Intime',       'dim' => 'petite pièce',   'slug' => 'petite',     'icon' => 'square-sm'],
+        ['label' => 'Confortable',  'dim' => 'pièce standard', 'slug' => 'moyenne',    'icon' => 'square-md'],
+        ['label' => 'Spacieuse',    'dim' => 'grande pièce',   'slug' => 'grande',     'icon' => 'square-lg'],
+        ['label' => 'Je ne sais pas', 'dim' => '',             'slug' => 'ne-sais-pas', 'icon' => 'question'],
       ],
     ],
     [
@@ -56,7 +57,7 @@ function sapi_guide_get_steps() {
       'id'         => 'sortie',
       'question'   => 'Où installerez-vous votre luminaire ?',
       'visibility' => ['_or' => [
-        ['taille' => ['petite', 'moyenne']],
+        ['taille' => ['petite', 'moyenne', 'ne-sais-pas']],
         ['eclairage' => ['principal', 'secondaire']],
         ['piece' => ['escalier']],
       ]],
@@ -127,6 +128,7 @@ function sapi_guide_get_icons() {
     'square-sm'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="8" height="8" rx="1"/></svg>',
     'square-md'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="1"/></svg>',
     'square-lg'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>',
+    'question'     => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>',
     // Pièce
     'sofa'         => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3"/><rect x="2" y="11" width="20" height="7" rx="2"/><path d="M5 18v2m14-2v2"/></svg>',
     'dining'       => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V20H6Z"/><line x1="6" y1="17" x2="18" y2="17"/></svg>',
