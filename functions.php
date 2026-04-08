@@ -1998,6 +1998,11 @@ function sapi_ajax_guide_results() {
     $clean['taille'] = ($clean['taille_escalier'] === 'ouvert') ? 'grande' : 'petite';
   }
 
+  // "Je ne sais pas" → pas de filtre taille (montrer tous les produits quelle que soit leur taille)
+  if (isset($clean['taille']) && $clean['taille'] === 'ne-sais-pas') {
+    unset($clean['taille']);
+  }
+
   // 3. Determine product categories
   $categories = sapi_guide_get_categories($clean);
 
@@ -2470,6 +2475,11 @@ function sapi_ajax_robin_filter_products() {
   // 3. Normaliser taille_escalier → taille
   if (!empty($answers['taille_escalier'])) {
     $answers['taille'] = $answers['taille_escalier'] === 'ouvert' ? 'grande' : 'petite';
+  }
+
+  // "Je ne sais pas" → pas de filtre taille
+  if (isset($answers['taille']) && $answers['taille'] === 'ne-sais-pas') {
+    unset($answers['taille']);
   }
 
   // 4. Filtrage via le pipeline existant
@@ -3242,6 +3252,11 @@ function sapi_guide_get_ampoule_filter($piece, $taille = '') {
  * Query main products based on guide answers
  */
 function sapi_guide_query_products(array $answers, array $categories) {
+  // "Je ne sais pas" → pas de filtre taille (sécurité si appelé directement)
+  if (isset($answers['taille']) && $answers['taille'] === 'ne-sais-pas') {
+    unset($answers['taille']);
+  }
+
   $tax_query = ['relation' => 'AND'];
 
   // Category filter
