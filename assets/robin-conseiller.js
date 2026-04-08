@@ -585,7 +585,15 @@
       var pgIntro = conseils['pg_intro'];
       html += renderConseil(pgIntro || { conseil_text: 'Quelques questions pour vous aider à choisir.' }, true);
     } else if (isFirstFiche) {
-      html += renderConseil({ conseil_text: 'Chaque luminaire est une pi\u00e8ce unique, fa\u00e7onn\u00e9e \u00e0 la main par Robin dans son atelier. Pour vous orienter au mieux, dites-moi dans quelle pi\u00e8ce vous imaginez votre futur luminaire.' }, true);
+      var introVariations = [
+        'Chaque luminaire est une pi\u00e8ce unique, fa\u00e7onn\u00e9e \u00e0 la main par Robin dans son atelier. Pour vous orienter au mieux, dites-moi dans quelle pi\u00e8ce vous imaginez votre futur luminaire.',
+        'Robin fa\u00e7onne chaque luminaire \u00e0 la main, dans son atelier lyonnais. Pour vous proposer ce qui vous correspond vraiment, commen\u00e7ons par le commencement\u00A0: dans quelle pi\u00e8ce s\'installera-t-il\u00A0?',
+        'Trouver le bon luminaire, c\'est d\'abord imaginer o\u00f9 il vivra. Dites-moi dans quelle pi\u00e8ce vous le voyez, et je vous guide vers les cr\u00e9ations de Robin qui s\'y pr\u00eatent le mieux.',
+        'Bienvenue dans l\'atelier de Robin. Quelques questions suffisent pour vous orienter parmi ses cr\u00e9ations en bois \u2014 et la premi\u00e8re est la plus simple\u00A0: quelle pi\u00e8ce souhaitez-vous \u00e9clairer\u00A0?',
+        'Chaque cr\u00e9ation na\u00eet d\'une rencontre entre un bois, une lumi\u00e8re et un lieu. Pour vous accompagner vers le luminaire qui vous ressemble, dites-moi d\'abord dans quelle pi\u00e8ce il prendra place.'
+      ];
+      var introText = introVariations[Math.floor(Math.random() * introVariations.length)];
+      html += renderConseil({ conseil_text: introText }, true);
     } else {
       var lastStep = state.history.length > 0 ? state.history[state.history.length - 1] : null;
       var lastSlug = lastStep ? state.answers[lastStep] : null;
