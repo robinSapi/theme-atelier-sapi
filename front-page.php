@@ -281,12 +281,18 @@ foreach ($collection_slugs as $col) {
         $fallback_id = $pid;
       }
     }
-
-    // Image à la une du produit prioritaire
-    if ($fallback_id) {
-      $col_image = get_the_post_thumbnail_url($fallback_id, 'large');
-    }
     wp_reset_postdata();
+
+    // Image collection : 3ème photo ambiance du repeater galerie_produit du produit prioritaire,
+    // fallback sur la dernière ambiance disponible, puis vignette WC en dernier recours.
+    if ($fallback_id) {
+      $amb_photos = sapi_get_product_photos($fallback_id, 'ambiance');
+      if (!empty($amb_photos)) {
+        $col_image = isset($amb_photos[2]) ? $amb_photos[2] : end($amb_photos);
+      } else {
+        $col_image = get_the_post_thumbnail_url($fallback_id, 'large');
+      }
+    }
   }
 
   $collections[] = [
