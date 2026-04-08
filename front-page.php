@@ -268,7 +268,6 @@ foreach ($collection_slugs as $col) {
   ]);
   if ($col_query->have_posts()) {
     $fallback_id = null;
-    $preferred_id = null;
     while ($col_query->have_posts()) {
       $col_query->the_post();
       $pid = get_the_ID();
@@ -276,28 +275,18 @@ foreach ($collection_slugs as $col) {
 
       // Priorité à un produit spécifique si défini (ex: "vincent" pour suspensions, "ampoule" pour accessoires)
       if (!empty($col['prefer']) && stripos(get_the_title(), $col['prefer']) !== false) {
-        $preferred_id = $pid;
+        $fallback_id = $pid;
       }
       if ($col['slug'] === 'suspensions' && stripos(get_the_title(), 'vincent') !== false) {
-        $preferred_id = $pid;
+        $fallback_id = $pid;
       }
+    }
+
+    // Image à la une du produit prioritaire
+    if ($fallback_id) {
+      $col_image = get_the_post_thumbnail_url($fallback_id, 'large');
     }
     wp_reset_postdata();
-
-    // Essayer d'abord le produit prioritaire avec une photo ambiance, puis le 1er produit
-    $candidate_ids = array_filter([$preferred_id, $fallback_id]);
-    foreach ($candidate_ids as $cid) {
-      $amb = sapi_get_product_photos($cid, 'ambiance', 1);
-      if (!empty($amb)) {
-        $col_image = $amb[0];
-        break;
-      }
-    }
-    // Dernier recours : vignette WC du produit prioritaire
-    if (empty($col_image)) {
-      $target = $preferred_id ?: $fallback_id;
-      if ($target) $col_image = get_the_post_thumbnail_url($target, 'large');
-    }
   }
 
   $collections[] = [

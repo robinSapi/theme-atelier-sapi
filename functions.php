@@ -831,9 +831,6 @@ function sapi_get_video_thumbnail($url) {
 /**
  * Helper: get photo URLs from galerie_produit repeater by type.
  * Returns array of URLs matching the given type, or all photos if no type specified.
- * Falls back to old fixed ACF fields (ambiance_1/2/3, detail_1/2, tailles, bandeau)
- * for products not yet migrated to the new repeater. Read raw postmeta directly
- * because the field groups have been deleted from ACF UI but data persists in DB.
  *
  * @param int    $post_id  Product ID
  * @param string $type     Photo type: 'ambiance', 'detail', 'taille', 'client', 'fabrication', or '' for all
@@ -852,34 +849,6 @@ function sapi_get_product_photo_ids($post_id, $type = '', $limit = 0) {
       if (is_array($row_type)) $row_type = isset($row_type['value']) ? $row_type['value'] : '';
       if ($type && $row_type !== $type) continue;
       $id = sapi_get_acf_image_id(isset($row['image']) ? $row['image'] : null);
-      if ($id) {
-        $ids[] = $id;
-        if ($limit > 0 && count($ids) >= $limit) break;
-      }
-    }
-  }
-
-  // Fallback : anciens champs ACF (data persistante en postmeta même si le field group a été supprimé).
-  // À retirer une fois que tous les produits auront été migrés vers galerie_produit.
-  if (empty($ids)) {
-    $old_fields_by_type = [
-      'ambiance' => ['bandeau', 'ambiance_1', 'ambiance_2', 'ambiance_3'],
-      'detail'   => ['detail_1', 'detail_2'],
-      'taille'   => ['tailles'],
-    ];
-
-    $fields_to_check = [];
-    if ($type && isset($old_fields_by_type[$type])) {
-      $fields_to_check = $old_fields_by_type[$type];
-    } elseif (!$type) {
-      foreach ($old_fields_by_type as $flds) {
-        $fields_to_check = array_merge($fields_to_check, $flds);
-      }
-    }
-
-    foreach ($fields_to_check as $field_name) {
-      $raw = get_post_meta($post_id, $field_name, true);
-      $id = sapi_get_acf_image_id($raw);
       if ($id) {
         $ids[] = $id;
         if ($limit > 0 && count($ids) >= $limit) break;
