@@ -29,9 +29,9 @@ function sapi_guide_get_steps() {
       'question'   => 'Quelle est la taille de votre pièce ?',
       'visibility' => ['piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'entree']],
       'choices'    => [
-        ['label' => 'Intime',       'dim' => 'petite pièce',   'slug' => 'petite',     'icon' => 'square-sm'],
-        ['label' => 'Confortable',  'dim' => 'pièce standard', 'slug' => 'moyenne',    'icon' => 'square-md'],
-        ['label' => 'Spacieuse',    'dim' => 'grande pièce',   'slug' => 'grande',     'icon' => 'square-lg'],
+        ['label' => 'Petite pièce',   'dim' => 'intime',      'slug' => 'petite',     'icon' => 'square-sm'],
+        ['label' => 'Pièce standard', 'dim' => 'confortable', 'slug' => 'moyenne',    'icon' => 'square-md'],
+        ['label' => 'Grande pièce',   'dim' => 'spacieuse',   'slug' => 'grande',     'icon' => 'square-lg'],
         ['label' => 'Je ne sais pas', 'dim' => '',             'slug' => 'ne-sais-pas', 'icon' => 'question'],
       ],
     ],
