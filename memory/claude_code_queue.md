@@ -12,12 +12,14 @@
   - **Note :** les occurrences de `'bandeau'` qui restent dans `functions.php` (lignes ~2532, ~4818, ~4880) appartiennent au **nouveau système Robin Conseiller** (contexte d'ouverture du bandeau dual-mode) et sont conservées.
   - **Diff :** +4 / −45 lignes. Branche `test-theme-sapi-maison`.
 
-- **Bandeau dual-mode : réassurance + Robin Conseiller** (2026-04-08) — Bandeau `#robin-bandeau` transformé en deux modes :
-  - **Mode repos** (par défaut, aucun label projet en localStorage) : 4 items réassurance statiques (Livraison 48-72h, Fabrication <5j, Retours 30j, Paiement sécurisé) centrés, scope CSS `var(--color-warm)` + border-bottom wood/0.1, font-size 11px, icônes wood. À droite, CTA discret « Trouver mon luminaire › » séparé par border-left.
-  - **Mode projet** (au moins un `state.labels[step]`) : badge `var(--color-wood)` + chips résumant les réponses + flèche, comme avant. Toggle via classe `.has-project` ajoutée par `updateBandeauChips()` dans `assets/robin-conseiller.js`.
-  - Le clic sur le bandeau (déjà câblé via `#robin-bandeau` → `openModal('bandeau')`) reste inchangé : ouvre la modale en mode `bandeau` (step 1 si pas de projet, résumé si projet).
-  - Mobile ≤600px : nouvelle fonction `randomizeMobileReassurance()` (Fisher-Yates) masque 2 items au hasard via classe `.is-mobile-hidden` au chargement.
-  - Fichiers modifiés : [inc/template-robin-bandeau-v2.php](../inc/template-robin-bandeau-v2.php), [style.css](../style.css) (bloc `.robin-bandeau`), [assets/robin-conseiller.js](../assets/robin-conseiller.js) (`updateBandeauChips`, `randomizeMobileReassurance`).
+- **Bandeau dual-mode : réassurance + Robin Conseiller** (2026-04-08) — Bandeau `#robin-bandeau` transformé en deux modes, validé par Robin après 4 itérations. Branche `test-theme-sapi-maison`, commits `45104da` → `c82a3c4`.
+  - **Mode repos** (par défaut, aucun label projet en localStorage) : 4 items réassurance statiques (Livraison 48-72h, Fabrication <5j, Retours 30j, Paiement sécurisé) + badge wood **« Démarrer mon projet »** en 5ème position, le tout centré sur la largeur du bandeau. Hover du bandeau → badge passe en orange pour signaler l'interactivité. Scope CSS `var(--color-warm)` + border-bottom wood/0.1, font-size 11px, icônes wood.
+  - **Mode projet** (au moins un `state.labels[step]`) : badge `var(--color-wood)` « Mon projet » + chips résumant les réponses + flèche, comme avant.
+  - **Toggle des modes** : classes explicites `.robin-bandeau--mode-repos` (par défaut, mise en PHP) et `.robin-bandeau--mode-projet` (basculée par `updateBandeauChips()` dans `assets/robin-conseiller.js`). Plus prévisible que la première version qui utilisait un toggle implicite `has-project` — Robin avait constaté un bug d'affichage lors du premier essai.
+  - **Clic** : n'importe où dans le bandeau ouvre la modale Robin Conseiller via le câblage existant `#robin-bandeau` → `openModal('bandeau')`. Pas de JS supplémentaire à câbler pour le badge.
+  - **Mobile ≤600px** : `flex-wrap` actif, le badge a `flex-basis: 100%` pour s'isoler sur sa propre ligne (centré, `max-width: max-content`) sous 2 items réassurance tirés au sort. Tirage au sort par `randomizeMobileReassurance()` (Fisher-Yates) qui ajoute la classe `.is-mobile-hidden` au chargement.
+  - **Fichiers modifiés** : [inc/template-robin-bandeau-v2.php](../inc/template-robin-bandeau-v2.php) (template restructuré en deux blocs `__repos` / `__projet`), [style.css](../style.css) (bloc `.robin-bandeau` lignes ~1551-1670 + media query mobile), [assets/robin-conseiller.js](../assets/robin-conseiller.js) (`updateBandeauChips`, `randomizeMobileReassurance`).
+  - **Itérations notables** : (1) première version avec toggle `has-project` → bug d'affichage chez Robin, (2) refonte avec classes `--mode-repos` / `--mode-projet` explicites → OK, (3) centrage parfait des items via CTA en `position: absolute` desktop, (4) finale : remplacement du CTA texte par un badge wood « Démarrer mon projet » en 5ème position, layout simplifié sans positionnement absolu.
 
 *(purgé le 8 avril 2026)*
 
