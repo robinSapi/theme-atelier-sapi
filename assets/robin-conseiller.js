@@ -1583,9 +1583,11 @@
     // Toggle mode repos / projet sur le bandeau
     if (bandeau) {
       if (parts.length > 0) {
-        bandeau.classList.add('has-project');
+        bandeau.classList.add('robin-bandeau--mode-projet');
+        bandeau.classList.remove('robin-bandeau--mode-repos');
       } else {
-        bandeau.classList.remove('has-project');
+        bandeau.classList.add('robin-bandeau--mode-repos');
+        bandeau.classList.remove('robin-bandeau--mode-projet');
       }
     }
   }

@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) exit;
 
 function sapi_robin_bandeau_v2() {
 ?>
-<div class="robin-bandeau" id="robin-bandeau" role="button" tabindex="0"
+<div class="robin-bandeau robin-bandeau--mode-repos" id="robin-bandeau" role="button" tabindex="0"
      data-robin-context="bandeau" aria-label="Ouvrir le conseiller Robin">
 
   <!-- ── Mode REPOS : réassurance + CTA Robin ── -->
