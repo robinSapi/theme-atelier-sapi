@@ -280,19 +280,10 @@ foreach ($collection_slugs as $col) {
       if ($col['slug'] === 'suspensions' && stripos(get_the_title(), 'vincent') !== false) {
         $fallback_id = $pid;
       }
-
-      // Essayer le bandeau ACF
-      if (function_exists('get_field')) {
-        $bandeau = get_field('bandeau', $pid);
-        if ($bandeau) {
-          $col_image = sapi_get_acf_image_url($bandeau, 'large');
-          if ($col_image) break;
-        }
-      }
     }
 
-    // Fallback : image à la une du produit prioritaire
-    if (empty($col_image) && $fallback_id) {
+    // Image à la une du produit prioritaire
+    if ($fallback_id) {
       $col_image = get_the_post_thumbnail_url($fallback_id, 'large');
     }
     wp_reset_postdata();

@@ -2,9 +2,15 @@
 
 ## 📋 À faire
 
-*(rien en attente)*
-
 ## ✅ Terminées
+
+- **Nettoyage fallbacks anciens champs ACF photos** (2026-04-08) — Suppression des références aux champs `bandeau`, `ambiance_1/2/3`, `detail_1/2`, `tailles`. 4 fichiers modifiés :
+  - [functions.php](../functions.php) `sapi_get_product_photo_ids()` : suppression du bloc `else { ... old fixed fields fallback ... }` (le repeater `galerie_produit` est désormais la seule source).
+  - [front-page.php](../front-page.php) (collections homepage) : suppression du lookup `get_field('bandeau', $pid)`. Image collection = vignette du produit prioritaire (suspension Vincent / accessoire Ampoule).
+  - [page-la-star-du-moment.php](../page-la-star-du-moment.php) : suppression de `$bandeau` et de l'entrée `Bandeau` dans `$acf_candidates` du carousel galerie. Reste : ambiance + détail (depuis le repeater).
+  - [woocommerce/taxonomy-product_cat.php](../woocommerce/taxonomy-product_cat.php) : suppression du fallback `bandeau` dans le bloc « coup de cœur ». Source unique = `sapi_get_product_photos($pid, 'ambiance', 1)`.
+  - **Note :** les occurrences de `'bandeau'` qui restent dans `functions.php` (lignes ~2532, ~4818, ~4880) appartiennent au **nouveau système Robin Conseiller** (contexte d'ouverture du bandeau dual-mode) et sont conservées.
+  - **Diff :** +4 / −45 lignes. Branche `test-theme-sapi-maison`.
 
 - **Bandeau dual-mode : réassurance + Robin Conseiller** (2026-04-08) — Bandeau `#robin-bandeau` transformé en deux modes :
   - **Mode repos** (par défaut, aucun label projet en localStorage) : 4 items réassurance statiques (Livraison 48-72h, Fabrication <5j, Retours 30j, Paiement sécurisé) centrés, scope CSS `var(--color-warm)` + border-bottom wood/0.1, font-size 11px, icônes wood. À droite, CTA discret « Trouver mon luminaire › » séparé par border-left.
