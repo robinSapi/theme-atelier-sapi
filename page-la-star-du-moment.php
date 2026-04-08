@@ -49,7 +49,6 @@ $descriptif       = $has_acf ? get_field('Descriptif', $star_id) : '';
 // Photos ACF (repeater)
 $ambiance_photos = sapi_get_product_photos($star_id, 'ambiance');
 $detail_photos   = sapi_get_product_photos($star_id, 'detail');
-$bandeau         = $has_acf ? sapi_get_acf_image_url(get_field('bandeau', $star_id)) : '';
 
 // Photo principale produit
 $main_image_id  = $star_product->get_image_id();
@@ -121,9 +120,8 @@ if ($accroche || $texte_principal || $descriptif) :
   $seen_urls = [];
   $all_photos = [];
 
-  // ACF photos: bandeau + ambiance + détail
+  // ACF photos: ambiance + détail
   $acf_candidates = [];
-  if ($bandeau) $acf_candidates[] = ['url' => $bandeau, 'alt' => 'Bandeau'];
   foreach ($ambiance_photos as $url) {
     $acf_candidates[] = ['url' => $url, 'alt' => 'Ambiance'];
   }

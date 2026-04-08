@@ -68,15 +68,10 @@ while ($featured_query->have_posts()) :
   $featured_query->the_post();
   $pid = get_the_ID();
 
-  // Chercher une photo ambiance du repeater, fallback bandeau
+  // Chercher une photo ambiance du repeater
   $amb_photos = sapi_get_product_photos($pid, 'ambiance', 1);
   if (!empty($amb_photos)) {
     $featured_image_url = $amb_photos[0];
-  } elseif (function_exists('get_field')) {
-    $bandeau = get_field('bandeau', $pid);
-    if ($bandeau) {
-      $featured_image_url = sapi_get_acf_image_url($bandeau);
-    }
   }
 
   if ($featured_image_url) {

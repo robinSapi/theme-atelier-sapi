@@ -280,22 +280,19 @@ foreach ($collection_slugs as $col) {
       if ($col['slug'] === 'suspensions' && stripos(get_the_title(), 'vincent') !== false) {
         $fallback_id = $pid;
       }
-
-      // Essayer le bandeau ACF
-      if (function_exists('get_field')) {
-        $bandeau = get_field('bandeau', $pid);
-        if ($bandeau) {
-          $col_image = sapi_get_acf_image_url($bandeau, 'large');
-          if ($col_image) break;
-        }
-      }
-    }
-
-    // Fallback : image à la une du produit prioritaire
-    if (empty($col_image) && $fallback_id) {
-      $col_image = get_the_post_thumbnail_url($fallback_id, 'large');
     }
     wp_reset_postdata();
+
+    // Image collection : 3ème photo ambiance du repeater galerie_produit du produit prioritaire,
+    // fallback sur la dernière ambiance disponible, puis vignette WC en dernier recours.
+    if ($fallback_id) {
+      $amb_photos = sapi_get_product_photos($fallback_id, 'ambiance');
+      if (!empty($amb_photos)) {
+        $col_image = isset($amb_photos[2]) ? $amb_photos[2] : end($amb_photos);
+      } else {
+        $col_image = get_the_post_thumbnail_url($fallback_id, 'large');
+      }
+    }
   }
 
   $collections[] = [

@@ -1561,11 +1561,11 @@
   }
 
   /* ═══════════════════════════════════════════
-     Bandeau : mise à jour des chips
+     Bandeau dual-mode : repos / projet
   ═══════════════════════════════════════════ */
   function updateBandeauChips() {
+    var bandeau = document.getElementById('robin-bandeau');
     var chipsEl = document.getElementById('robin-bandeau-chips');
-    if (!chipsEl) return;
 
     var parts = [];
     var visible = getVisibleSteps();
@@ -1574,9 +1574,40 @@
       if (lbl) parts.push(lbl);
     }
 
-    chipsEl.textContent = parts.length > 0
-      ? parts.join(' · ')
-      : 'Robin peut vous conseiller';
+    if (chipsEl) {
+      chipsEl.textContent = parts.length > 0
+        ? parts.join(' · ')
+        : 'Robin peut vous conseiller';
+    }
+
+    // Toggle mode repos / projet sur le bandeau
+    if (bandeau) {
+      if (parts.length > 0) {
+        bandeau.classList.add('robin-bandeau--mode-projet');
+        bandeau.classList.remove('robin-bandeau--mode-repos');
+      } else {
+        bandeau.classList.add('robin-bandeau--mode-repos');
+        bandeau.classList.remove('robin-bandeau--mode-projet');
+      }
+    }
+  }
+
+  /* Sur ≤600px, masquer 2 items réassurance au hasard pour économiser la largeur */
+  function randomizeMobileReassurance() {
+    if (window.innerWidth > 600) return;
+    var items = document.querySelectorAll('#robin-bandeau .reassurance-item');
+    if (items.length <= 2) return;
+    var indices = [];
+    for (var i = 0; i < items.length; i++) indices.push(i);
+    // Fisher-Yates shuffle
+    for (var j = indices.length - 1; j > 0; j--) {
+      var k = Math.floor(Math.random() * (j + 1));
+      var tmp = indices[j]; indices[j] = indices[k]; indices[k] = tmp;
+    }
+    var toHide = items.length - 2;
+    for (var h = 0; h < toHide; h++) {
+      items[indices[h]].classList.add('is-mobile-hidden');
+    }
   }
 
   /* ═══════════════════════════════════════════
@@ -1857,6 +1888,7 @@
     loadState();
     bindEvents();
     updateBandeauChips();
+    randomizeMobileReassurance();
     adaptProductPill();
     adaptCategoryCard();
     adaptContactForm();
