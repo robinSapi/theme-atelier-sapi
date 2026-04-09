@@ -22056,6 +22056,9 @@ html.sapi-intro-active body {
 }
 
 .surmesure-slider-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   max-width: 1100px;
   margin: 0 auto 1.5rem;
   padding: 0 2rem;
