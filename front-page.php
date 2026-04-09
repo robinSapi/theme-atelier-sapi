@@ -268,29 +268,29 @@ foreach ($collection_slugs as $col) {
   ]);
   if ($col_query->have_posts()) {
     $fallback_id = null;
+    $preferred_id = null;
     while ($col_query->have_posts()) {
       $col_query->the_post();
       $pid = get_the_ID();
       if (!$fallback_id) $fallback_id = $pid;
 
-      // Priorité à un produit spécifique si défini (ex: "vincent" pour suspensions, "ampoule" pour accessoires)
+      // Priorité à un produit spécifique si défini (ex: "ampoule" pour accessoires)
       if (!empty($col['prefer']) && stripos(get_the_title(), $col['prefer']) !== false) {
-        $fallback_id = $pid;
-      }
-      if ($col['slug'] === 'suspensions' && stripos(get_the_title(), 'vincent') !== false) {
-        $fallback_id = $pid;
+        $preferred_id = $pid;
       }
     }
     wp_reset_postdata();
 
-    // Image collection : 3ème photo ambiance du repeater galerie_produit du produit prioritaire,
+    // Image collection : 3ème photo ambiance du repeater galerie_produit
+    // (produit "preferred" si défini, sinon 1er produit de la catégorie),
     // fallback sur la dernière ambiance disponible, puis vignette WC en dernier recours.
-    if ($fallback_id) {
-      $amb_photos = sapi_get_product_photos($fallback_id, 'ambiance');
+    $target_id = $preferred_id ?: $fallback_id;
+    if ($target_id) {
+      $amb_photos = sapi_get_product_photos($target_id, 'ambiance');
       if (!empty($amb_photos)) {
         $col_image = isset($amb_photos[2]) ? $amb_photos[2] : end($amb_photos);
       } else {
-        $col_image = get_the_post_thumbnail_url($fallback_id, 'large');
+        $col_image = get_the_post_thumbnail_url($target_id, 'large');
       }
     }
   }
