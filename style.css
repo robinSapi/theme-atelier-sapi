@@ -22060,7 +22060,6 @@ html.sapi-intro-active body {
 
 .surmesure-realisations-header p {
   width: 100%;
-  text-align: center;
   font-size: 1.05rem;
   color: var(--bois-dore, #937D68);
   margin: 0;
@@ -22080,7 +22079,7 @@ html.sapi-intro-active body {
   scrollbar-width: none;
   scroll-behavior: smooth;
   gap: 1.5rem;
-  padding: 10px calc((100vw - 420px) / 2);
+  padding: 10px calc((100vw - 480px) / 2);
 }
 
 .surmesure-grid::-webkit-scrollbar {
@@ -22088,7 +22087,7 @@ html.sapi-intro-active body {
 }
 
 .surmesure-grid .surmesure-card {
-  flex: 0 0 420px;
+  flex: 0 0 480px;
   scroll-snap-align: center;
 }
 
@@ -22115,7 +22114,7 @@ html.sapi-intro-active body {
 }
 
 .surmesure-card-image {
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 4 / 5;
   overflow: hidden;
 }
 
