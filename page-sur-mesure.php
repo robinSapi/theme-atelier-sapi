@@ -131,6 +131,7 @@ get_header();
         $dims       = $has_acf ? get_field('dimensions_projet') : '';
         $temoignage = $has_acf ? get_field('temoignage_client') : '';
         $nom_client = $has_acf ? get_field('nom_client') : '';
+        $sous_titre = $has_acf ? get_field('sous_titre') : '';
         $full_desc  = get_the_content();
         $thumb_url  = get_the_post_thumbnail_url(get_the_ID(), 'large');
 
@@ -153,6 +154,7 @@ get_header();
           data-modal-dims="<?php echo esc_attr($dims); ?>"
           data-modal-temoignage="<?php echo esc_attr($temoignage); ?>"
           data-modal-client="<?php echo esc_attr($nom_client); ?>"
+          data-modal-soustitre="<?php echo esc_attr($sous_titre); ?>"
         >
           <?php if (has_post_thumbnail()) : ?>
             <div class="surmesure-card-image">
@@ -327,8 +329,26 @@ get_header();
         detailsEl.style.display = html ? '' : 'none';
 
         // Description
-        descEl.textContent = data.modalDesc || '';
-        descEl.style.display = data.modalDesc ? '' : 'none';
+        var sousTitre = data.modalSoustitre || '';
+        var desc = data.modalDesc || '';
+        if (sousTitre || desc) {
+          descEl.innerHTML = '';
+          if (sousTitre) {
+            var stEl = document.createElement('strong');
+            stEl.textContent = sousTitre;
+            descEl.appendChild(stEl);
+            if (desc) {
+              descEl.appendChild(document.createElement('br'));
+              descEl.appendChild(document.createTextNode(desc));
+            }
+          } else {
+            descEl.textContent = desc;
+          }
+          descEl.style.display = '';
+        } else {
+          descEl.textContent = '';
+          descEl.style.display = 'none';
+        }
 
         // Testimonial
         if (data.modalTemoignage) {

@@ -4330,6 +4330,14 @@ function sapi_register_acf_projet_sur_mesure() {
     'title'    => 'Détails du projet',
     'fields'   => [
       [
+        'key'          => 'field_psm_sous_titre',
+        'label'        => 'Sous-titre',
+        'name'         => 'sous_titre',
+        'type'         => 'text',
+        'placeholder'  => 'Ex : Restaurant gastronomique à Lyon',
+        'instructions' => 'Courte accroche affichée en gras au début de la description dans la modale (optionnel)',
+      ],
+      [
         'key'   => 'field_psm_essence',
         'label' => 'Essence de bois',
         'name'  => 'essence_bois',
