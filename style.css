@@ -22055,11 +22055,11 @@ html.sapi-intro-active body {
   margin: 0;
 }
 
-.surmesure-slider {
-  position: relative;
+.surmesure-slider-nav {
   max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 50px;
+  margin: 0 auto 1.5rem;
+  padding: 0 2rem;
+  justify-content: flex-end;
 }
 
 .surmesure-grid {
@@ -22068,8 +22068,9 @@ html.sapi-intro-active body {
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  gap: 24px;
   scroll-behavior: smooth;
+  gap: 1.5rem;
+  padding: 0 calc((100vw - 1050px) / 2);
 }
 
 .surmesure-grid::-webkit-scrollbar {
@@ -22077,49 +22078,13 @@ html.sapi-intro-active body {
 }
 
 .surmesure-grid .surmesure-card {
-  flex: 0 0 calc((100% - 48px) / 3);
-  min-width: 280px;
+  flex: 0 0 340px;
   scroll-snap-align: start;
 }
 
-.surmesure-slider-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid rgba(147, 125, 104, 0.2);
-  background: #fff;
-  color: var(--color-dark, #323232);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.25s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-
-.surmesure-slider-nav:disabled {
-  opacity: 0.3;
-  cursor: default;
-}
-
-@media (hover: hover) {
-  .surmesure-slider-nav:not(:disabled):hover {
-    background: var(--color-orange, #E35B24);
-    color: #fff;
-    border-color: var(--color-orange, #E35B24);
-  }
-}
-
-.surmesure-slider-prev {
-  left: 0;
-}
-
-.surmesure-slider-next {
-  right: 0;
+.surmesure-slider-dots {
+  max-width: 1100px;
+  margin: 2rem auto 0;
 }
 
 .surmesure-card {
@@ -22485,18 +22450,13 @@ html.sapi-intro-active body {
     padding: 0 20px;
   }
 
-  .surmesure-slider {
-    padding: 0;
-  }
-
   .surmesure-grid {
     gap: 1rem;
-    padding: 15px 5%;
+    padding: 0 1.25rem;
   }
 
   .surmesure-grid .surmesure-card {
     flex: 0 0 85%;
-    min-width: 0;
     scroll-snap-align: center;
   }
 

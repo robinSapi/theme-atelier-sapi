@@ -123,15 +123,15 @@ get_header();
     'order'          => 'DESC',
   ]);
 
-  if ($projets->have_posts()) : ?>
-    <div class="surmesure-slider">
-      <button class="surmesure-slider-nav surmesure-slider-prev" aria-label="Projets précédents">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-      </button>
-      <button class="surmesure-slider-nav surmesure-slider-next" aria-label="Projets suivants">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
-      </button>
-    <div class="surmesure-grid">
+  if ($projets->have_posts()) :
+    $total = $projets->found_posts;
+  ?>
+    <div class="steps-slider-nav surmesure-slider-nav">
+      <button type="button" class="steps-slider-btn surmesure-slider-prev" aria-label="Projet précédent">&lt;</button>
+      <span class="steps-slider-counter surmesure-slider-counter">01 / <?php echo str_pad($total, 2, '0', STR_PAD_LEFT); ?></span>
+      <button type="button" class="steps-slider-btn surmesure-slider-next" aria-label="Projet suivant">&gt;</button>
+    </div>
+    <div class="surmesure-grid" id="surmesure-slider-track">
       <?php while ($projets->have_posts()) : $projets->the_post();
         $essence    = $has_acf ? get_field('essence_bois') : '';
         $piece      = $has_acf ? get_field('piece_destination') : '';
@@ -202,7 +202,11 @@ get_header();
         </article>
       <?php endwhile; ?>
     </div>
-    </div><!-- .surmesure-slider -->
+    <div class="steps-slider-dots surmesure-slider-dots">
+      <?php for ($d = 0; $d < $total; $d++) : ?>
+        <button class="steps-slider-dot<?php echo $d === 0 ? ' is-active' : ''; ?>" data-idx="<?php echo $d; ?>"></button>
+      <?php endfor; ?>
+    </div>
     <?php wp_reset_postdata(); ?>
 
     <!-- Modale projet -->
@@ -248,35 +252,49 @@ get_header();
     (function() {
       'use strict';
 
-      // --- Slider navigation ---
-      var slider = document.querySelector('.surmesure-slider');
-      var grid = document.querySelector('.surmesure-grid');
-      if (slider && grid) {
-        var sPrev = slider.querySelector('.surmesure-slider-prev');
-        var sNext = slider.querySelector('.surmesure-slider-next');
+      // --- Slider navigation (même pattern que page artisan) ---
+      var track = document.getElementById('surmesure-slider-track');
+      if (track) {
+        var cards = track.querySelectorAll('.surmesure-card');
+        var counter = document.querySelector('.surmesure-slider-counter');
+        var dots = document.querySelectorAll('.surmesure-slider-dots .steps-slider-dot');
+        var cur = 0;
+        var tot = cards.length;
 
-        function updateSliderNav() {
-          if (!sPrev || !sNext) return;
-          sPrev.disabled = grid.scrollLeft <= 5;
-          sNext.disabled = grid.scrollLeft + grid.clientWidth >= grid.scrollWidth - 5;
+        function updateSliderUI() {
+          counter.textContent = String(cur + 1).padStart(2, '0') + ' / ' + String(tot).padStart(2, '0');
+          dots.forEach(function(d, i) {
+            d.classList.toggle('is-active', i === cur);
+          });
         }
 
-        function getScrollStep() {
-          var card = grid.querySelector('.surmesure-card');
-          if (!card) return grid.clientWidth;
-          return card.offsetWidth + 24;
+        function sliderGoTo(idx) {
+          if (idx < 0 || idx >= tot) return;
+          cur = idx;
+          cards[idx].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+          updateSliderUI();
         }
 
-        if (sPrev) sPrev.addEventListener('click', function() {
-          grid.scrollBy({ left: -getScrollStep(), behavior: 'smooth' });
-        });
-        if (sNext) sNext.addEventListener('click', function() {
-          grid.scrollBy({ left: getScrollStep(), behavior: 'smooth' });
-        });
+        var scrollTimer;
+        track.addEventListener('scroll', function() {
+          clearTimeout(scrollTimer);
+          scrollTimer = setTimeout(function() {
+            var scrollLeft = track.scrollLeft;
+            var cardWidth = cards[0].offsetWidth + 24;
+            var idx = Math.round(scrollLeft / cardWidth);
+            if (idx !== cur && idx >= 0 && idx < tot) {
+              cur = idx;
+              updateSliderUI();
+            }
+          }, 80);
+        }, { passive: true });
 
-        grid.addEventListener('scroll', updateSliderNav, { passive: true });
-        updateSliderNav();
-        window.addEventListener('resize', updateSliderNav);
+        document.querySelector('.surmesure-slider-prev').addEventListener('click', function() { sliderGoTo(cur - 1); });
+        document.querySelector('.surmesure-slider-next').addEventListener('click', function() { sliderGoTo(cur + 1); });
+
+        dots.forEach(function(dot) {
+          dot.addEventListener('click', function() { sliderGoTo(parseInt(this.dataset.idx)); });
+        });
       }
 
       // --- Modale ---
