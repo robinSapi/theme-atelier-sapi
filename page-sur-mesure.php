@@ -271,7 +271,7 @@ get_header();
         function sliderGoTo(idx) {
           if (idx < 0 || idx >= tot) return;
           cur = idx;
-          cards[idx].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+          cards[idx].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
           updateSliderUI();
         }
 
@@ -279,9 +279,14 @@ get_header();
         track.addEventListener('scroll', function() {
           clearTimeout(scrollTimer);
           scrollTimer = setTimeout(function() {
-            var scrollLeft = track.scrollLeft;
-            var cardWidth = cards[0].offsetWidth + 24;
-            var idx = Math.round(scrollLeft / cardWidth);
+            var trackCenter = track.scrollLeft + track.clientWidth / 2;
+            var idx = 0;
+            var minDist = Infinity;
+            for (var i = 0; i < tot; i++) {
+              var cardCenter = cards[i].offsetLeft + cards[i].offsetWidth / 2;
+              var dist = Math.abs(cardCenter - trackCenter);
+              if (dist < minDist) { minDist = dist; idx = i; }
+            }
             if (idx !== cur && idx >= 0 && idx < tot) {
               cur = idx;
               updateSliderUI();
