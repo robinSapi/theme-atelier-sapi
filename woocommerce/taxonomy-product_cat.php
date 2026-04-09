@@ -163,10 +163,10 @@ endif;
 
 <!-- Rich Editorial Content Section (MOVED TO BOTTOM) -->
 <?php
-// Query one product to get Ambiance 1 background
+// Background éditorial : photo "fabrication" aléatoire prise dans tous les produits de la catégorie
 $bg_query = new WP_Query([
   'post_type' => 'product',
-  'posts_per_page' => 1,
+  'posts_per_page' => 20,
   'tax_query' => [
     [
       'taxonomy' => 'product_cat',
@@ -180,12 +180,17 @@ $bg_query = new WP_Query([
 
 $ambiance_bg_url = '';
 if ($bg_query->have_posts()) {
-  $bg_query->the_post();
-  $bg_product_id = get_the_ID();
-
-  $ambiance_photos = sapi_get_product_photos($bg_product_id, 'ambiance');
-  $ambiance_bg_url = !empty($ambiance_photos) ? $ambiance_photos[array_rand($ambiance_photos)] : '';
-
+  $fabrication_pool = [];
+  while ($bg_query->have_posts()) {
+    $bg_query->the_post();
+    $fab_photos = sapi_get_product_photos(get_the_ID(), 'fabrication');
+    if (!empty($fab_photos)) {
+      $fabrication_pool = array_merge($fabrication_pool, $fab_photos);
+    }
+  }
+  if (!empty($fabrication_pool)) {
+    $ambiance_bg_url = $fabrication_pool[array_rand($fabrication_pool)];
+  }
   wp_reset_postdata();
 }
 
