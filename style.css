@@ -22073,7 +22073,7 @@ html.sapi-intro-active body {
   scrollbar-width: none;
   scroll-behavior: smooth;
   gap: 1.5rem;
-  padding: 0 calc((100vw - 1050px) / 2);
+  padding: 10px max(2rem, calc((100vw - 1050px) / 2));
 }
 
 .surmesure-grid::-webkit-scrollbar {
