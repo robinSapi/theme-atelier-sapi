@@ -22529,6 +22529,7 @@ html.sapi-intro-active body {
 .surmesure-modal-body {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(0, 1fr);
   max-height: 85vh;
   overflow: hidden;
 }
