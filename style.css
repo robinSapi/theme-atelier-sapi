@@ -22685,6 +22685,12 @@ html.sapi-intro-active body {
   margin: 0;
 }
 
+.surmesure-modal-subtitle {
+  font-size: 0.95rem;
+  color: var(--bois-dore, #937D68);
+  margin: 0.25rem 0 0;
+}
+
 .surmesure-modal-details {
   display: flex;
   flex-wrap: wrap;
