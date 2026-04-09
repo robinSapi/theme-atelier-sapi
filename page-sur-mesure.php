@@ -124,6 +124,13 @@ get_header();
   ]);
 
   if ($projets->have_posts()) : ?>
+    <div class="surmesure-slider">
+      <button class="surmesure-slider-nav surmesure-slider-prev" aria-label="Projets précédents">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <button class="surmesure-slider-nav surmesure-slider-next" aria-label="Projets suivants">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
+      </button>
     <div class="surmesure-grid">
       <?php while ($projets->have_posts()) : $projets->the_post();
         $essence    = $has_acf ? get_field('essence_bois') : '';
@@ -195,6 +202,7 @@ get_header();
         </article>
       <?php endwhile; ?>
     </div>
+    </div><!-- .surmesure-slider -->
     <?php wp_reset_postdata(); ?>
 
     <!-- Modale projet -->
@@ -239,6 +247,39 @@ get_header();
     <script>
     (function() {
       'use strict';
+
+      // --- Slider navigation ---
+      var slider = document.querySelector('.surmesure-slider');
+      var grid = document.querySelector('.surmesure-grid');
+      if (slider && grid) {
+        var sPrev = slider.querySelector('.surmesure-slider-prev');
+        var sNext = slider.querySelector('.surmesure-slider-next');
+
+        function updateSliderNav() {
+          if (!sPrev || !sNext) return;
+          sPrev.disabled = grid.scrollLeft <= 5;
+          sNext.disabled = grid.scrollLeft + grid.clientWidth >= grid.scrollWidth - 5;
+        }
+
+        function getScrollStep() {
+          var card = grid.querySelector('.surmesure-card');
+          if (!card) return grid.clientWidth;
+          return card.offsetWidth + 24;
+        }
+
+        if (sPrev) sPrev.addEventListener('click', function() {
+          grid.scrollBy({ left: -getScrollStep(), behavior: 'smooth' });
+        });
+        if (sNext) sNext.addEventListener('click', function() {
+          grid.scrollBy({ left: getScrollStep(), behavior: 'smooth' });
+        });
+
+        grid.addEventListener('scroll', updateSliderNav, { passive: true });
+        updateSliderNav();
+        window.addEventListener('resize', updateSliderNav);
+      }
+
+      // --- Modale ---
       var modal = document.getElementById('surmesure-modal');
       if (!modal) return;
 
