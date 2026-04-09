@@ -22055,15 +22055,44 @@ html.sapi-intro-active body {
   margin: 0;
 }
 
-.surmesure-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
+.surmesure-slider-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   max-width: 1100px;
-  margin: 0 auto;
+  margin: 0 auto 1.5rem;
+  padding: 0 2rem;
+  justify-content: flex-end;
+}
+
+.surmesure-grid {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  gap: 1.5rem;
+  padding: 0 calc((100vw - 1050px) / 2);
+}
+
+.surmesure-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.surmesure-grid .surmesure-card {
+  flex: 0 0 340px;
+  scroll-snap-align: start;
+}
+
+.surmesure-slider-dots {
+  max-width: 1100px;
+  margin: 2rem auto 0;
 }
 
 .surmesure-card {
+  display: flex;
+  flex-direction: column;
   background: #fff;
   border-radius: 16px;
   overflow: hidden;
@@ -22098,6 +22127,9 @@ html.sapi-intro-active body {
 
 .surmesure-card-content {
   padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .surmesure-card-content h3 {
@@ -22136,6 +22168,22 @@ html.sapi-intro-active body {
   line-height: 1.6;
   color: var(--color-dark, #323232);
   margin: 0 0 0.75rem;
+}
+
+.surmesure-card-cta {
+  display: inline-block;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-orange, #E35B24);
+  transition: color 0.25s ease;
+}
+
+@media (hover: hover) {
+  .surmesure-card:hover .surmesure-card-cta {
+    color: var(--bois-sombre, #4A3F35);
+  }
 }
 
 .surmesure-card-quote {
@@ -22406,23 +22454,17 @@ html.sapi-intro-active body {
   }
 
   .surmesure-grid {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
     gap: 1rem;
-    padding: 15px 5%;
-  }
-
-  .surmesure-grid::-webkit-scrollbar {
-    display: none;
+    padding: 0 1.25rem;
   }
 
   .surmesure-grid .surmesure-card {
-    flex: 0 0 95%;
-    max-width: none;
+    flex: 0 0 85%;
     scroll-snap-align: center;
+  }
+
+  .surmesure-slider-nav {
+    display: none;
   }
 
   .surmesure-card-content {
@@ -22432,13 +22474,6 @@ html.sapi-intro-active body {
   .surmesure-card-details .surmesure-detail:last-child {
     display: none;
   }
-  .surmesure-card-desc {
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
   .surmesure-form-section {
     padding: 60px 20px;
   }
@@ -22529,7 +22564,9 @@ html.sapi-intro-active body {
 .surmesure-modal-body {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(0, 1fr);
   max-height: 85vh;
+  overflow: hidden;
 }
 
 .surmesure-modal-gallery {

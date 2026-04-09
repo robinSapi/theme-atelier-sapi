@@ -123,14 +123,22 @@ get_header();
     'order'          => 'DESC',
   ]);
 
-  if ($projets->have_posts()) : ?>
-    <div class="surmesure-grid">
+  if ($projets->have_posts()) :
+    $total = $projets->found_posts;
+  ?>
+    <div class="steps-slider-nav surmesure-slider-nav">
+      <button type="button" class="steps-slider-btn surmesure-slider-prev" aria-label="Projet précédent">&lt;</button>
+      <span class="steps-slider-counter surmesure-slider-counter">01 / <?php echo str_pad($total, 2, '0', STR_PAD_LEFT); ?></span>
+      <button type="button" class="steps-slider-btn surmesure-slider-next" aria-label="Projet suivant">&gt;</button>
+    </div>
+    <div class="surmesure-grid" id="surmesure-slider-track">
       <?php while ($projets->have_posts()) : $projets->the_post();
         $essence    = $has_acf ? get_field('essence_bois') : '';
         $piece      = $has_acf ? get_field('piece_destination') : '';
         $dims       = $has_acf ? get_field('dimensions_projet') : '';
         $temoignage = $has_acf ? get_field('temoignage_client') : '';
         $nom_client = $has_acf ? get_field('nom_client') : '';
+        $sous_titre = $has_acf ? get_field('sous_titre') : '';
         $full_desc  = get_the_content();
         $thumb_url  = get_the_post_thumbnail_url(get_the_ID(), 'large');
 
@@ -153,6 +161,7 @@ get_header();
           data-modal-dims="<?php echo esc_attr($dims); ?>"
           data-modal-temoignage="<?php echo esc_attr($temoignage); ?>"
           data-modal-client="<?php echo esc_attr($nom_client); ?>"
+          data-modal-soustitre="<?php echo esc_attr($sous_titre); ?>"
         >
           <?php if (has_post_thumbnail()) : ?>
             <div class="surmesure-card-image">
@@ -184,21 +193,19 @@ get_header();
               </div>
             <?php endif; ?>
 
-            <?php if ($full_desc) : ?>
-              <p class="surmesure-card-desc"><?php echo esc_html(wp_trim_words($full_desc, 25)); ?></p>
+            <?php if ($sous_titre) : ?>
+              <p class="surmesure-card-desc"><?php echo esc_html($sous_titre); ?></p>
             <?php endif; ?>
 
-            <?php if ($temoignage) : ?>
-              <blockquote class="surmesure-card-quote">
-                <p><?php echo esc_html($temoignage); ?></p>
-                <?php if ($nom_client) : ?>
-                  <cite>— <?php echo esc_html($nom_client); ?></cite>
-                <?php endif; ?>
-              </blockquote>
-            <?php endif; ?>
+            <span class="surmesure-card-cta">Découvrir le projet →</span>
           </div>
         </article>
       <?php endwhile; ?>
+    </div>
+    <div class="steps-slider-dots surmesure-slider-dots">
+      <?php for ($d = 0; $d < $total; $d++) : ?>
+        <button class="steps-slider-dot<?php echo $d === 0 ? ' is-active' : ''; ?>" data-idx="<?php echo $d; ?>"></button>
+      <?php endfor; ?>
     </div>
     <?php wp_reset_postdata(); ?>
 
@@ -244,6 +251,53 @@ get_header();
     <script>
     (function() {
       'use strict';
+
+      // --- Slider navigation (même pattern que page artisan) ---
+      var track = document.getElementById('surmesure-slider-track');
+      if (track) {
+        var cards = track.querySelectorAll('.surmesure-card');
+        var counter = document.querySelector('.surmesure-slider-counter');
+        var dots = document.querySelectorAll('.surmesure-slider-dots .steps-slider-dot');
+        var cur = 0;
+        var tot = cards.length;
+
+        function updateSliderUI() {
+          counter.textContent = String(cur + 1).padStart(2, '0') + ' / ' + String(tot).padStart(2, '0');
+          dots.forEach(function(d, i) {
+            d.classList.toggle('is-active', i === cur);
+          });
+        }
+
+        function sliderGoTo(idx) {
+          if (idx < 0 || idx >= tot) return;
+          cur = idx;
+          cards[idx].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+          updateSliderUI();
+        }
+
+        var scrollTimer;
+        track.addEventListener('scroll', function() {
+          clearTimeout(scrollTimer);
+          scrollTimer = setTimeout(function() {
+            var scrollLeft = track.scrollLeft;
+            var cardWidth = cards[0].offsetWidth + 24;
+            var idx = Math.round(scrollLeft / cardWidth);
+            if (idx !== cur && idx >= 0 && idx < tot) {
+              cur = idx;
+              updateSliderUI();
+            }
+          }, 80);
+        }, { passive: true });
+
+        document.querySelector('.surmesure-slider-prev').addEventListener('click', function() { sliderGoTo(cur - 1); });
+        document.querySelector('.surmesure-slider-next').addEventListener('click', function() { sliderGoTo(cur + 1); });
+
+        dots.forEach(function(dot) {
+          dot.addEventListener('click', function() { sliderGoTo(parseInt(this.dataset.idx)); });
+        });
+      }
+
+      // --- Modale ---
       var modal = document.getElementById('surmesure-modal');
       if (!modal) return;
 
@@ -327,8 +381,26 @@ get_header();
         detailsEl.style.display = html ? '' : 'none';
 
         // Description
-        descEl.textContent = data.modalDesc || '';
-        descEl.style.display = data.modalDesc ? '' : 'none';
+        var sousTitre = data.modalSoustitre || '';
+        var desc = data.modalDesc || '';
+        if (sousTitre || desc) {
+          descEl.innerHTML = '';
+          if (sousTitre) {
+            var stEl = document.createElement('strong');
+            stEl.textContent = sousTitre;
+            descEl.appendChild(stEl);
+            if (desc) {
+              descEl.appendChild(document.createElement('br'));
+              descEl.appendChild(document.createTextNode(desc));
+            }
+          } else {
+            descEl.textContent = desc;
+          }
+          descEl.style.display = '';
+        } else {
+          descEl.textContent = '';
+          descEl.style.display = 'none';
+        }
 
         // Testimonial
         if (data.modalTemoignage) {

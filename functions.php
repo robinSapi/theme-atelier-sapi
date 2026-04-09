@@ -4330,6 +4330,27 @@ function sapi_register_acf_projet_sur_mesure() {
     'title'    => 'Détails du projet',
     'fields'   => [
       [
+        'key'           => 'field_psm_type_client',
+        'label'         => 'Type de projet',
+        'name'          => 'type_client',
+        'type'          => 'button_group',
+        'choices'       => [
+          'particulier'   => 'Particulier',
+          'professionnel' => 'Professionnel',
+        ],
+        'default_value' => 'particulier',
+        'layout'        => 'horizontal',
+        'instructions'  => 'Permettra de filtrer l\'affichage Pro / Particulier sur le site.',
+      ],
+      [
+        'key'          => 'field_psm_sous_titre',
+        'label'        => 'Sous-titre',
+        'name'         => 'sous_titre',
+        'type'         => 'text',
+        'placeholder'  => 'Ex : Restaurant gastronomique à Lyon',
+        'instructions' => 'Courte accroche affichée en gras au début de la description dans la modale (optionnel)',
+      ],
+      [
         'key'   => 'field_psm_essence',
         'label' => 'Essence de bois',
         'name'  => 'essence_bois',
@@ -4408,6 +4429,44 @@ function sapi_register_acf_projet_sur_mesure() {
   ]);
 }
 add_action('acf/init', 'sapi_register_acf_projet_sur_mesure');
+
+// Notice admin : limite de 6 projets affichés sur le site
+function sapi_projet_sur_mesure_admin_notice() {
+  $screen = get_current_screen();
+  if (!$screen || $screen->post_type !== 'projet_sur_mesure') return;
+
+  if ($screen->base === 'edit') {
+    $count = wp_count_posts('projet_sur_mesure')->publish;
+    $msg = 'Seuls les <strong>6 projets les plus récents</strong> sont affichés sur la page Sur Mesure du site.';
+    if ($count > 6) {
+      $hidden = $count - 6;
+      $msg .= ' ' . $hidden . ' projet' . ($hidden > 1 ? 's ne sont pas visibles' : ' n\'est pas visible') . ' actuellement.';
+    }
+    echo '<div class="notice notice-info"><p>' . $msg . '</p></div>';
+  }
+}
+add_action('admin_notices', 'sapi_projet_sur_mesure_admin_notice');
+
+// Colonne admin "Type" dans la liste des projets sur mesure
+function sapi_psm_admin_columns($columns) {
+  $new = [];
+  foreach ($columns as $key => $label) {
+    $new[$key] = $label;
+    if ($key === 'title') {
+      $new['type_client'] = 'Type';
+    }
+  }
+  return $new;
+}
+add_filter('manage_projet_sur_mesure_posts_columns', 'sapi_psm_admin_columns');
+
+function sapi_psm_admin_column_content($column, $post_id) {
+  if ($column !== 'type_client') return;
+  $type = get_field('type_client', $post_id);
+  $labels = ['particulier' => 'Particulier', 'professionnel' => 'Pro'];
+  echo esc_html($labels[$type] ?? 'Particulier');
+}
+add_action('manage_projet_sur_mesure_posts_custom_column', 'sapi_psm_admin_column_content', 10, 2);
 
 /*
  * ACF fields for Product media (video + photo gallery repeater)
