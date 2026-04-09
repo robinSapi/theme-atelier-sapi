@@ -4330,6 +4330,19 @@ function sapi_register_acf_projet_sur_mesure() {
     'title'    => 'Détails du projet',
     'fields'   => [
       [
+        'key'           => 'field_psm_type_client',
+        'label'         => 'Type de projet',
+        'name'          => 'type_client',
+        'type'          => 'button_group',
+        'choices'       => [
+          'particulier'   => 'Particulier',
+          'professionnel' => 'Professionnel',
+        ],
+        'default_value' => 'particulier',
+        'layout'        => 'horizontal',
+        'instructions'  => 'Permettra de filtrer l\'affichage Pro / Particulier sur le site.',
+      ],
+      [
         'key'          => 'field_psm_sous_titre',
         'label'        => 'Sous-titre',
         'name'         => 'sous_titre',
@@ -4433,6 +4446,27 @@ function sapi_projet_sur_mesure_admin_notice() {
   }
 }
 add_action('admin_notices', 'sapi_projet_sur_mesure_admin_notice');
+
+// Colonne admin "Type" dans la liste des projets sur mesure
+function sapi_psm_admin_columns($columns) {
+  $new = [];
+  foreach ($columns as $key => $label) {
+    $new[$key] = $label;
+    if ($key === 'title') {
+      $new['type_client'] = 'Type';
+    }
+  }
+  return $new;
+}
+add_filter('manage_projet_sur_mesure_posts_columns', 'sapi_psm_admin_columns');
+
+function sapi_psm_admin_column_content($column, $post_id) {
+  if ($column !== 'type_client') return;
+  $type = get_field('type_client', $post_id);
+  $labels = ['particulier' => 'Particulier', 'professionnel' => 'Pro'];
+  echo esc_html($labels[$type] ?? 'Particulier');
+}
+add_action('manage_projet_sur_mesure_posts_custom_column', 'sapi_psm_admin_column_content', 10, 2);
 
 /*
  * ACF fields for Product media (video + photo gallery repeater)
