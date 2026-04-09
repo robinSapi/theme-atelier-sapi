@@ -55,9 +55,9 @@ get_header();
   <?php
   // sapi_get_acf_image_url() is defined in functions.php
 
-  // Get first ambiance image for intro screen
-  $ambiance_intro_photos = sapi_get_product_photos(get_the_ID(), 'ambiance', 1);
-  $ambiance_intro = !empty($ambiance_intro_photos) ? $ambiance_intro_photos[0] : '';
+  // Photo ambiance aléatoire pour l'intro screen
+  $ambiance_intro_photos = sapi_get_product_photos(get_the_ID(), 'ambiance');
+  $ambiance_intro = !empty($ambiance_intro_photos) ? $ambiance_intro_photos[array_rand($ambiance_intro_photos)] : '';
 
   // Collect ALL photos for lightbox: product images + ACF ambiance/detail
   $acf_photos = [];
