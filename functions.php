@@ -4417,6 +4417,23 @@ function sapi_register_acf_projet_sur_mesure() {
 }
 add_action('acf/init', 'sapi_register_acf_projet_sur_mesure');
 
+// Notice admin : limite de 6 projets affichés sur le site
+function sapi_projet_sur_mesure_admin_notice() {
+  $screen = get_current_screen();
+  if (!$screen || $screen->post_type !== 'projet_sur_mesure') return;
+
+  if ($screen->base === 'edit') {
+    $count = wp_count_posts('projet_sur_mesure')->publish;
+    $msg = 'Seuls les <strong>6 projets les plus récents</strong> sont affichés sur la page Sur Mesure du site.';
+    if ($count > 6) {
+      $hidden = $count - 6;
+      $msg .= ' ' . $hidden . ' projet' . ($hidden > 1 ? 's ne sont pas visibles' : ' n\'est pas visible') . ' actuellement.';
+    }
+    echo '<div class="notice notice-info"><p>' . $msg . '</p></div>';
+  }
+}
+add_action('admin_notices', 'sapi_projet_sur_mesure_admin_notice');
+
 /*
  * ACF fields for Product media (video + photo gallery repeater)
  * Created MANUALLY via ACF Pro UI — not registered in PHP.
