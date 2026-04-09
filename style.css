@@ -22064,6 +22064,8 @@ html.sapi-intro-active body {
 }
 
 .surmesure-card {
+  display: flex;
+  flex-direction: column;
   background: #fff;
   border-radius: 16px;
   overflow: hidden;
@@ -22098,6 +22100,9 @@ html.sapi-intro-active body {
 
 .surmesure-card-content {
   padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .surmesure-card-content h3 {
@@ -22136,6 +22141,22 @@ html.sapi-intro-active body {
   line-height: 1.6;
   color: var(--color-dark, #323232);
   margin: 0 0 0.75rem;
+}
+
+.surmesure-card-cta {
+  display: inline-block;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-orange, #E35B24);
+  transition: color 0.25s ease;
+}
+
+@media (hover: hover) {
+  .surmesure-card:hover .surmesure-card-cta {
+    color: var(--bois-sombre, #4A3F35);
+  }
 }
 
 .surmesure-card-quote {
@@ -22432,13 +22453,6 @@ html.sapi-intro-active body {
   .surmesure-card-details .surmesure-detail:last-child {
     display: none;
   }
-  .surmesure-card-desc {
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
   .surmesure-form-section {
     padding: 60px 20px;
   }

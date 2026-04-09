@@ -186,18 +186,11 @@ get_header();
               </div>
             <?php endif; ?>
 
-            <?php if ($full_desc) : ?>
-              <p class="surmesure-card-desc"><?php echo esc_html(wp_trim_words($full_desc, 25)); ?></p>
+            <?php if ($sous_titre) : ?>
+              <p class="surmesure-card-desc"><?php echo esc_html($sous_titre); ?></p>
             <?php endif; ?>
 
-            <?php if ($temoignage) : ?>
-              <blockquote class="surmesure-card-quote">
-                <p><?php echo esc_html($temoignage); ?></p>
-                <?php if ($nom_client) : ?>
-                  <cite>— <?php echo esc_html($nom_client); ?></cite>
-                <?php endif; ?>
-              </blockquote>
-            <?php endif; ?>
+            <span class="surmesure-card-cta">Découvrir le projet →</span>
           </div>
         </article>
       <?php endwhile; ?>
