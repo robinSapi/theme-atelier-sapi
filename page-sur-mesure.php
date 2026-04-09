@@ -107,12 +107,6 @@ get_header();
 
 <!-- RÉALISATIONS -->
 <section class="surmesure-realisations">
-  <div class="surmesure-realisations-header">
-    <span class="section-number">02</span>
-    <h2>Réalisations sur mesure</h2>
-    <p>Chaque projet est unique, voici quelques exemples de créations personnalisées.</p>
-  </div>
-
   <?php
   $has_acf = function_exists('get_field');
   $projets = new WP_Query([
@@ -122,15 +116,24 @@ get_header();
     'orderby'        => 'date',
     'order'          => 'DESC',
   ]);
-
-  if ($projets->have_posts()) :
-    $total = $projets->found_posts;
+  $total = $projets->found_posts ?: 0;
   ?>
-    <div class="steps-slider-nav surmesure-slider-nav">
-      <button type="button" class="steps-slider-btn surmesure-slider-prev" aria-label="Projet précédent">&lt;</button>
-      <span class="steps-slider-counter surmesure-slider-counter">01 / <?php echo str_pad($total, 2, '0', STR_PAD_LEFT); ?></span>
-      <button type="button" class="steps-slider-btn surmesure-slider-next" aria-label="Projet suivant">&gt;</button>
+  <div class="surmesure-realisations-header">
+    <div class="surmesure-realisations-title">
+      <span class="section-number">02</span>
+      <h2>Réalisations sur mesure</h2>
     </div>
+    <?php if ($total > 0) : ?>
+      <div class="steps-slider-nav surmesure-slider-nav">
+        <button type="button" class="steps-slider-btn surmesure-slider-prev" aria-label="Projet précédent">&lt;</button>
+        <span class="steps-slider-counter surmesure-slider-counter">01 / <?php echo str_pad($total, 2, '0', STR_PAD_LEFT); ?></span>
+        <button type="button" class="steps-slider-btn surmesure-slider-next" aria-label="Projet suivant">&gt;</button>
+      </div>
+    <?php endif; ?>
+    <p>Chaque projet est unique, voici quelques exemples de créations personnalisées.</p>
+  </div>
+
+  <?php if ($projets->have_posts()) : ?>
     <div class="surmesure-grid" id="surmesure-slider-track">
       <?php while ($projets->have_posts()) : $projets->the_post();
         $essence    = $has_acf ? get_field('essence_bois') : '';
