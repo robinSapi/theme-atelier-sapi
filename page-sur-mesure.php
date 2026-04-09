@@ -170,6 +170,9 @@ get_header();
           <?php endif; ?>
           <div class="surmesure-card-content">
             <h3><?php the_title(); ?></h3>
+            <?php if ($sous_titre) : ?>
+              <p class="surmesure-card-desc"><?php echo esc_html($sous_titre); ?></p>
+            <?php endif; ?>
             <?php if ($essence || $piece || $dims) : ?>
               <div class="surmesure-card-details">
                 <?php if ($essence) : ?>
@@ -191,10 +194,6 @@ get_header();
                   </span>
                 <?php endif; ?>
               </div>
-            <?php endif; ?>
-
-            <?php if ($sous_titre) : ?>
-              <p class="surmesure-card-desc"><?php echo esc_html($sous_titre); ?></p>
             <?php endif; ?>
 
             <span class="surmesure-card-cta">Découvrir le projet →</span>
@@ -234,6 +233,7 @@ get_header();
           </div>
           <div class="surmesure-modal-content">
             <h3 class="surmesure-modal-title"></h3>
+            <p class="surmesure-modal-subtitle" style="display:none;"></p>
             <div class="surmesure-modal-details surmesure-card-details"></div>
             <div class="surmesure-modal-desc"></div>
             <blockquote class="surmesure-modal-quote surmesure-card-quote" style="display:none;">
@@ -271,7 +271,7 @@ get_header();
         function sliderGoTo(idx) {
           if (idx < 0 || idx >= tot) return;
           cur = idx;
-          cards[idx].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+          cards[idx].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
           updateSliderUI();
         }
 
@@ -279,9 +279,14 @@ get_header();
         track.addEventListener('scroll', function() {
           clearTimeout(scrollTimer);
           scrollTimer = setTimeout(function() {
-            var scrollLeft = track.scrollLeft;
-            var cardWidth = cards[0].offsetWidth + 24;
-            var idx = Math.round(scrollLeft / cardWidth);
+            var trackCenter = track.scrollLeft + track.clientWidth / 2;
+            var idx = 0;
+            var minDist = Infinity;
+            for (var i = 0; i < tot; i++) {
+              var cardCenter = cards[i].offsetLeft + cards[i].offsetWidth / 2;
+              var dist = Math.abs(cardCenter - trackCenter);
+              if (dist < minDist) { minDist = dist; idx = i; }
+            }
             if (idx !== cur && idx >= 0 && idx < tot) {
               cur = idx;
               updateSliderUI();
@@ -308,6 +313,7 @@ get_header();
       var prevBtn   = modal.querySelector('.surmesure-modal-nav-prev');
       var nextBtn   = modal.querySelector('.surmesure-modal-nav-next');
       var titleEl   = modal.querySelector('.surmesure-modal-title');
+      var subtitleEl = modal.querySelector('.surmesure-modal-subtitle');
       var detailsEl = modal.querySelector('.surmesure-modal-details');
       var descEl    = modal.querySelector('.surmesure-modal-desc');
       var quoteEl   = modal.querySelector('.surmesure-modal-quote');
@@ -342,6 +348,9 @@ get_header();
         previousFocus = document.activeElement;
 
         titleEl.textContent = data.modalTitle || '';
+        var st = data.modalSoustitre || '';
+        subtitleEl.textContent = st;
+        subtitleEl.style.display = st ? '' : 'none';
         imgEl.src = data.modalImage || '';
         imgEl.srcset = '';
         imgEl.alt = data.modalTitle || '';
@@ -381,26 +390,8 @@ get_header();
         detailsEl.style.display = html ? '' : 'none';
 
         // Description
-        var sousTitre = data.modalSoustitre || '';
-        var desc = data.modalDesc || '';
-        if (sousTitre || desc) {
-          descEl.innerHTML = '';
-          if (sousTitre) {
-            var stEl = document.createElement('strong');
-            stEl.textContent = sousTitre;
-            descEl.appendChild(stEl);
-            if (desc) {
-              descEl.appendChild(document.createElement('br'));
-              descEl.appendChild(document.createTextNode(desc));
-            }
-          } else {
-            descEl.textContent = desc;
-          }
-          descEl.style.display = '';
-        } else {
-          descEl.textContent = '';
-          descEl.style.display = 'none';
-        }
+        descEl.textContent = data.modalDesc || '';
+        descEl.style.display = data.modalDesc ? '' : 'none';
 
         // Testimonial
         if (data.modalTemoignage) {
