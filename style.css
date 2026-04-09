@@ -21817,7 +21817,7 @@ html.sapi-intro-active body {
   -webkit-backdrop-filter: blur(8px);
   border-radius: 100px;
   padding: 4px;
-  margin-bottom: 2rem;
+  margin-top: 0.5rem;
 }
 
 .surmesure-tab {
@@ -21867,37 +21867,6 @@ html.sapi-intro-active body {
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* CTA hero */
-.surmesure-hero-cta {
-  display: inline-block;
-  padding: 16px 40px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--creme-papier, #FEFDFB);
-  background: var(--gradient-cta);
-  border: none;
-  border-radius: 8px;
-  text-decoration: none;
-  box-shadow:
-    0 4px 12px rgba(227, 91, 36, 0.25),
-    0 2px 4px rgba(227, 91, 36, 0.15);
-  -webkit-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@media (hover: hover) {
-  .surmesure-hero-cta:hover {
-    background: linear-gradient(180deg, #D14F1C 0%, #B8441A 100%);
-    -webkit-transform: translateY(-2px);
-    transform: translateY(-2px);
-    box-shadow:
-      0 8px 20px rgba(227, 91, 36, 0.3),
-      0 4px 8px rgba(227, 91, 36, 0.2);
-  }
-}
 
 /* --- Processus --- */
 .surmesure-process {

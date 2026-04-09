@@ -19,15 +19,14 @@ get_header();
   </div>
   <div class="surmesure-hero-overlay"></div>
   <div class="surmesure-hero-content">
-    <div class="surmesure-tabs">
-      <button class="surmesure-tab is-active" data-tab="particulier" type="button">Particuliers</button>
-      <button class="surmesure-tab" data-tab="pro" type="button">Professionnels</button>
-    </div>
     <h1 class="surmesure-hero-title" data-tab-content="particulier">Cr&eacute;ons votre luminaire sur mesure</h1>
     <h1 class="surmesure-hero-title" data-tab-content="pro" style="display:none;">Des luminaires &agrave; l'image de votre espace</h1>
     <p class="surmesure-hero-subtitle" data-tab-content="particulier">Une id&eacute;e, un espace, une envie &mdash; je con&ccedil;ois et fabrique votre pi&egrave;ce unique.</p>
     <p class="surmesure-hero-subtitle" data-tab-content="pro" style="display:none;">Restaurants, h&ocirc;tels, boutiques : des cr&eacute;ations artisanales adapt&eacute;es &agrave; votre identit&eacute;.</p>
-    <a href="#surmesure-form" class="surmesure-hero-cta">D&eacute;marrer mon projet</a>
+    <div class="surmesure-tabs">
+      <button class="surmesure-tab is-active" data-tab="particulier" type="button">Particuliers</button>
+      <button class="surmesure-tab" data-tab="pro" type="button">Professionnels</button>
+    </div>
   </div>
 </section>
 
