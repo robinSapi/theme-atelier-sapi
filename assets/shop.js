@@ -438,7 +438,7 @@
 
       // Show/hide "no results" message
       const noResults = document.querySelector('.woocommerce-no-products-found');
-      const productsList = document.querySelector('.products.columns-3');
+      const productsList = document.querySelector('.product-grid') || document.querySelector('.products.columns-3');
       if (noResults && productsList) {
         if (visibleCount === 0 && slides.length > 0) {
           noResults.style.display = 'block';
