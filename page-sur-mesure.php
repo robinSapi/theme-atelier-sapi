@@ -460,7 +460,7 @@ get_header();
 
   var activeTab = 'particulier';
   var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var LETTER_DELAY = 60;
+  var LETTER_DELAY = 40;
 
   // --- Onglets ---
   var tabs = document.querySelectorAll('.surmesure-tab');
