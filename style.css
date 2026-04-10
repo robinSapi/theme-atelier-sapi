@@ -6994,7 +6994,7 @@ li.carousel-editorial-slide,
   margin: 0 auto;
   padding: 0 3rem;
   display: grid !important;
-  grid-template-columns: repeat(4, 1fr) !important;
+  grid-template-columns: repeat(2, 1fr) !important;
   gap: 2rem;
 }
 
@@ -7012,11 +7012,6 @@ li.carousel-editorial-slide,
 
   .featured-products-header {
     padding: 0 2rem;
-  }
-
-  .category-products-grid ul.products {
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 1.5rem;
   }
 }
 
