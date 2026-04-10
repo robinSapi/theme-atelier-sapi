@@ -1,9 +1,9 @@
 <?php
 /**
- * Robin Conseiller V2 — Bandeau dual-mode (réassurance + projet).
+ * Robin Conseiller V2 — Bandeau dual-mode (redesigné + projet).
  *
  * Mode REPOS (par défaut, pas de projet en localStorage) :
- *   bandeau réassurance statique 4 items + lien "Trouver mon luminaire" à droite.
+ *   Bandeau fond bois avec picto, copy, 3 étapes visuelles et CTA blanc.
  *
  * Mode PROJET (projet en cours détecté par robin-conseiller.js) :
  *   badge "Mon projet" + chips résumant les réponses + flèche.
@@ -21,45 +21,34 @@ function sapi_robin_bandeau_v2() {
 <div class="robin-bandeau robin-bandeau--mode-repos" id="robin-bandeau" role="button" tabindex="0"
      data-robin-context="bandeau" aria-label="Ouvrir le conseiller Robin">
 
-  <!-- ── Mode REPOS : réassurance + CTA Robin ── -->
+  <!-- ── Mode REPOS : redesigné — fond bois, étapes, CTA blanc ── -->
   <div class="robin-bandeau__repos" aria-hidden="false">
-    <div class="reassurance-bar-inner">
-      <div class="reassurance-item">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="1" y="3" width="15" height="13"/>
-          <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
-          <circle cx="5.5" cy="18.5" r="2.5"/>
-          <circle cx="18.5" cy="18.5" r="2.5"/>
+    <div class="robin-left">
+      <div class="robin-picto">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+          <line x1="12" y1="1" x2="12" y2="5"/>
+          <path d="M6 5 Q4 12 6 18 Q9 22 12 22 Q15 22 18 18 Q20 12 18 5 Z"/>
+          <line x1="7" y1="13" x2="17" y2="13"/>
         </svg>
-        <span>Livraison 48-72h</span>
       </div>
-      <div class="reassurance-item">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-        <span>Fabrication &lt;5 jours</span>
+      <div class="robin-copy">
+        <h3>Pas sûr de votre choix ? Robin vous guide.</h3>
+        <p>3 minutes pour trouver le luminaire idéal pour votre espace.</p>
       </div>
-      <div class="reassurance-item">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <polyline points="23 4 23 10 17 10"/>
-          <polyline points="1 20 1 14 7 14"/>
-          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-        </svg>
-        <span>Retours 30 jours</span>
-      </div>
-      <div class="reassurance-item">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-        <span>Paiement sécurisé</span>
-      </div>
-      <span class="robin-bandeau__badge robin-bandeau__badge--cta">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
-        Démarrer mon projet
-      </span>
     </div>
+    <div class="robin-steps">
+      <div class="robin-step"><div class="robin-step-num">1</div><span>Votre pièce</span></div>
+      <div class="robin-step-sep"></div>
+      <div class="robin-step"><div class="robin-step-num">2</div><span>Votre style</span></div>
+      <div class="robin-step-sep"></div>
+      <div class="robin-step"><div class="robin-step-num">3</div><span>Votre reco</span></div>
+    </div>
+    <button type="button" class="robin-cta-btn js-open-robin">
+      Me guider
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+        <path d="M3 8h10M9 4l4 4-4 4"/>
+      </svg>
+    </button>
   </div>
 
   <!-- ── Mode PROJET : badge + chips ── -->

@@ -175,61 +175,34 @@ sapi_robin_conseil_card( 'selection' );
 
 </div>
 
-<!-- Products Grid -->
+<!-- Products Grid — grille 2 colonnes photos ambiance -->
 <section class="shop-products" id="shop-products">
   <?php if ($all_products->have_posts()) : ?>
+
     <?php
-    // "Pourquoi choisir l'Atelier Sâpi" — cards inserted in the product grid
-    // Positions aléatoires dans des zones pour varier la colonne à chaque chargement
-    $sapi_card_contents = [
-      [
-        'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
-        'title' => '100% artisanal français',
-        'text' => 'Chaque luminaire est conçu, découpé et assemblé à la main dans l\'atelier lyonnais de Robin. Pas de production de masse, juste du savoir-faire et de la passion.',
-      ],
-      [
-        'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>',
-        'title' => 'Pièces uniques & originales',
-        'text' => 'Chaque modèle est une création originale signée Robin. Vous ne trouverez ces luminaires nulle part ailleurs. Votre intérieur sera unique, comme vous.',
-      ],
-      [
-        'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
-        'title' => 'Bois PEFC & éco-responsable',
-        'text' => 'Les bois proviennent de forêts gérées durablement (PEFC). Production locale, emballages recyclables, zéro gaspillage. Beauté et responsabilité vont de pair.',
-      ],
-      [
-        'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
-        'title' => 'Service client réactif',
-        'text' => 'Une question ? Un doute ? Besoin de conseils ? Robin est là pour vous accompagner personnellement, du choix à l\'installation. Réponse rapide garantie.',
-      ],
-      [
-        'icon' => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
-        'title' => 'Fabriqué avec amour à Lyon',
-        'text' => 'Robin conçoit, découpe, assemble et expédie personnellement chaque luminaire. Vous recevez bien plus qu\'un objet : vous recevez une histoire, un bout de son atelier, une pièce qui porte son attention aux détails.',
-        'highlight' => true,
-      ],
-    ];
-    // Zones d'insertion : chaque card apparaît dans une plage aléatoire
-    $sapi_card_zones = [[3, 6], [8, 11], [13, 16], [18, 21], [23, 26]];
-    $sapi_text_cards = [];
-    foreach ($sapi_card_zones as $i => $zone) {
-      if (isset($sapi_card_contents[$i])) {
-        $pos = wp_rand($zone[0], $zone[1]);
-        $sapi_text_cards[$pos] = $sapi_card_contents[$i];
+    /**
+     * Sépare un nom de produit en prénom + surnom.
+     */
+    if (!function_exists('sapi_split_product_name')) {
+      function sapi_split_product_name($title) {
+        $words = explode(' ', $title, 2);
+        return [
+          'firstname' => $words[0],
+          'surname'   => isset($words[1]) ? $words[1] : '',
+        ];
       }
     }
-    $sapi_product_counter = 0;
     ?>
 
-    <ul class="products columns-3">
+    <div class="product-grid" id="sapi-product-grid">
       <?php
       while ($all_products->have_posts()) :
         $all_products->the_post();
-        global $product, $sapi_carousel_context;
+        global $product;
         $product = wc_get_product(get_the_ID());
-
-        // Pass category context for filters
         $product_id = $product->get_id();
+
+        // Catégories pour le filtrage JS
         $product_cats = get_the_terms($product_id, 'product_cat');
         $cat_slugs = [];
         if ($product_cats && !is_wp_error($product_cats)) {
@@ -237,34 +210,90 @@ sapi_robin_conseil_card( 'selection' );
             $cat_slugs[] = $cat->slug;
           }
         }
-        $sapi_carousel_context = [
-          'is_carousel' => false,
-          'categories' => implode(' ', $cat_slugs),
-        ];
+        $filter_categories = implode(' ', $cat_slugs);
 
-        wc_get_template_part('content', 'product');
+        // Prix pour le filtrage
+        $filter_price = $product->get_price();
 
-        $sapi_carousel_context = null;
-        $sapi_product_counter++;
+        // Essence de bois
+        $wood_terms = wc_get_product_terms($product_id, 'pa_essence-de-bois');
+        $wood_essence = !empty($wood_terms) ? $wood_terms[0]->name : '';
 
-        if (isset($sapi_text_cards[$sapi_product_counter])) :
-          $card = $sapi_text_cards[$sapi_product_counter];
-          $card_class = 'product-text-card';
-          if (!empty($card['highlight'])) $card_class .= ' product-text-card--highlight';
-        ?>
-        <li class="<?php echo esc_attr($card_class); ?>">
-          <div class="product-text-card-inner">
-            <div class="product-text-card-icon"><?php echo $card['icon']; ?></div>
-            <h3><?php echo esc_html($card['title']); ?></h3>
-            <p><?php echo esc_html($card['text']); ?></p>
-            <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="product-text-card-discover">En savoir plus</a>
-          </div>
-        </li>
-        <?php endif;
+        // Taille
+        $size_dimension = 0;
+        $taille_terms = wc_get_product_terms($product_id, 'pa_taille');
+        if (!empty($taille_terms)) {
+          preg_match('/\d+/', $taille_terms[0]->name, $m);
+          if (!empty($m)) $size_dimension = (int) $m[0];
+        }
 
-      endwhile;
+        // Photo ambiance ACF
+        $amb_photos = sapi_get_product_photos($product_id, 'ambiance', 1, 'large');
+        $ambiance_url = !empty($amb_photos) ? $amb_photos[0] : get_the_post_thumbnail_url($product_id, 'large');
+
+        // Nom splitté
+        $name_parts = sapi_split_product_name(get_the_title());
+
+        // Prix min
+        $is_variable = $product->is_type('variable');
+        $price_min = $is_variable ? $product->get_variation_price('min') : $product->get_price();
+
+        // Data attributes pour le filtrage shop.js
+        $data_attrs  = 'data-id="' . esc_attr($product_id) . '"';
+        $data_attrs .= ' data-categories="' . esc_attr($filter_categories) . '"';
+        $data_attrs .= ' data-name="' . esc_attr(strtolower(get_the_title())) . '"';
+        $data_attrs .= ' data-price="' . esc_attr($filter_price) . '"';
+        $data_attrs .= $wood_essence ? ' data-wood="' . esc_attr(sanitize_title($wood_essence)) . '"' : '';
+        $data_attrs .= $size_dimension > 0 ? ' data-size="' . esc_attr($size_dimension) . '"' : '';
       ?>
-    </ul>
+        <a href="<?php echo esc_url(get_permalink($product_id)); ?>"
+           class="product-card product-card-cinetique"
+           data-product-id="<?php echo esc_attr($product_id); ?>"
+           <?php echo $data_attrs; ?>>
+          <div class="card-photo">
+            <?php if ($ambiance_url) : ?>
+              <img src="<?php echo esc_url($ambiance_url); ?>" srcset=""
+                   alt="<?php echo esc_attr(get_the_title()); ?>" loading="lazy"/>
+            <?php else : ?>
+              <span class="card-photo-empty-text">Bientôt…</span>
+            <?php endif; ?>
+            <div class="badge-selection" style="display:none;">Ma sélection</div>
+            <div class="card-hover-cta">
+              Découvrir
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+            </div>
+          </div>
+          <div class="card-info">
+            <span class="p-firstname"><?php echo esc_html(mb_strtoupper($name_parts['firstname'])); ?></span>
+            <span class="p-surname"><?php echo esc_html($name_parts['surname']); ?></span>
+            <div class="card-price">
+              <?php if ($is_variable) : ?>
+                À partir de <strong><?php echo esc_html(number_format((float)$price_min, 2, ',', '')); ?>&nbsp;€</strong>
+              <?php else : ?>
+                <strong><?php echo esc_html(number_format((float)$product->get_price(), 2, ',', '')); ?>&nbsp;€</strong>
+              <?php endif; ?>
+            </div>
+          </div>
+        </a>
+      <?php endwhile; ?>
+    </div>
+
+    <!-- Badge "Ma sélection" — activé via localStorage Robin Conseiller -->
+    <script>
+    (function() {
+      try {
+        var prefs = JSON.parse(localStorage.getItem('sapiGuidePrefs'));
+        if (!prefs || !prefs.recommendedIds || !prefs.recommendedIds.length) return;
+        var ids = prefs.recommendedIds.map(function(id) { return String(id); });
+        document.querySelectorAll('.product-card[data-product-id]').forEach(function(card) {
+          if (ids.indexOf(card.getAttribute('data-product-id')) !== -1) {
+            var badge = card.querySelector('.badge-selection');
+            if (badge) badge.style.display = '';
+          }
+        });
+      } catch(e) {}
+    })();
+    </script>
 
     <!-- Message "aucun résultat" pour le filtrage JS côté client -->
     <div class="woocommerce-no-products-found" style="display: none;">
@@ -279,52 +308,6 @@ sapi_robin_conseil_card( 'selection' );
 
   <?php endif; ?>
   <?php wp_reset_postdata(); ?>
-
-  <!-- Grosse card récap "Pourquoi choisir Sâpi" — visible uniquement avec filtres actifs -->
-  <div class="why-sapi-recap" style="display: none;">
-    <div class="why-sapi-recap-inner">
-      <h2>Pourquoi choisir l'Atelier Sâpi ?</h2>
-      <div class="why-sapi-recap-grid">
-        <div class="why-sapi-recap-item">
-          <div class="product-text-card-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-          </div>
-          <h3>100% artisanal français</h3>
-          <p>Chaque luminaire est conçu, découpé et assemblé à la main dans l'atelier lyonnais de Robin.</p>
-        </div>
-        <div class="why-sapi-recap-item">
-          <div class="product-text-card-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-          </div>
-          <h3>Pièces uniques & originales</h3>
-          <p>Chaque modèle est une création originale signée Robin. Votre intérieur sera unique, comme vous.</p>
-        </div>
-        <div class="why-sapi-recap-item">
-          <div class="product-text-card-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-          </div>
-          <h3>Bois PEFC & éco-responsable</h3>
-          <p>Les bois proviennent de forêts gérées durablement (PEFC). Beauté et responsabilité vont de pair.</p>
-        </div>
-        <div class="why-sapi-recap-item">
-          <div class="product-text-card-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </div>
-          <h3>Service client réactif</h3>
-          <p>Robin est là pour vous accompagner personnellement, du choix à l'installation.</p>
-        </div>
-      </div>
-      <div class="why-sapi-recap-highlight">
-        <div class="product-text-card-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        </div>
-        <div>
-          <h3>Fabriqué avec amour à Lyon</h3>
-          <p>Vous recevez bien plus qu'un objet : vous recevez une histoire, un bout de l'atelier de Robin, une pièce qui porte son attention aux détails.</p>
-        </div>
-      </div>
-    </div>
-  </div>
 </section>
 
 <!-- Outro Section with CTA -->
