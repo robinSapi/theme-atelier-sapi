@@ -127,11 +127,46 @@ endif;
   if ($grid_query->have_posts()) :
     $product_count = 0;
   ?>
-    <ul class="products columns-4">
+    <ul class="products columns-4 sapi-ambiance-grid">
       <?php
       while ($grid_query->have_posts()) :
         $grid_query->the_post();
-        wc_get_template_part('content', 'product');
+        $pid      = get_the_ID();
+        $product  = wc_get_product($pid);
+        if ($product) :
+            $permalink = get_permalink($pid);
+            $title     = get_the_title();
+            $amb       = sapi_get_product_photos($pid, 'ambiance', 1, 'large');
+            $img_url   = !empty($amb) ? $amb[0] : get_the_post_thumbnail_url($pid, 'large');
+            $parts     = explode(' ', $title, 2);
+            $firstname = mb_strtoupper($parts[0]);
+            $surname   = isset($parts[1]) ? $parts[1] : '';
+            $price_html = $product->is_type('variable')
+                ? 'À partir de ' . wc_price($product->get_variation_price('min'))
+                : $product->get_price_html();
+        ?>
+        <li>
+        <a href="<?php echo esc_url($permalink); ?>" class="sapi-ambiance-card">
+            <div class="sapi-ambiance-card__photo">
+                <?php if ($img_url) : ?>
+                    <img src="<?php echo esc_url($img_url); ?>" alt="<?php echo esc_attr($title); ?>" loading="lazy" />
+                <?php else : ?>
+                    <span class="sapi-ambiance-card__empty">Bientôt…</span>
+                <?php endif; ?>
+                <div class="sapi-ambiance-card__overlay">
+                    <span class="sapi-ambiance-card__price"><?php echo $price_html; ?></span>
+                    <span class="sapi-ambiance-card__cta">Voir le luminaire</span>
+                </div>
+            </div>
+            <div class="sapi-ambiance-card__caption">
+                <span class="sapi-ambiance-card__firstname"><?php echo esc_html($firstname); ?></span>
+                <?php if ($surname) : ?>
+                    <span class="sapi-ambiance-card__surname"><?php echo esc_html($surname); ?></span>
+                <?php endif; ?>
+            </div>
+        </a>
+        </li>
+        <?php endif;
         $product_count++;
 
         // Card Robin après le 4ème produit
