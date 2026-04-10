@@ -21853,9 +21853,30 @@ html.sapi-intro-active body {
   font-size: clamp(56px, 12vw, 120px);
   font-weight: 400;
   color: #fff;
-  line-height: 1.1;
+  line-height: 0.95;
   margin: 0 0 1rem;
   text-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
+  min-height: 1.2em;
+}
+
+/* Animation lettre par lettre */
+.surmesure-letter {
+  opacity: 0;
+  -webkit-animation: surmesureLetterIn 0.3s ease forwards;
+  animation: surmesureLetterIn 0.3s ease forwards;
+}
+
+@keyframes surmesureLetterIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .surmesure-letter {
+    animation: none;
+    -webkit-animation: none;
+    opacity: 1;
+  }
 }
 
 .surmesure-hero-subtitle {
@@ -21865,6 +21886,17 @@ html.sapi-intro-active body {
   line-height: 1.7;
   margin: 0 0 2rem;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  -webkit-transform: translateY(12px);
+  transform: translateY(12px);
+  -webkit-transition: opacity 0.5s ease, transform 0.5s ease;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.surmesure-hero-subtitle.is-visible {
+  opacity: 1;
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
 }
 
 
@@ -22352,10 +22384,7 @@ html.sapi-intro-active body {
 
   .surmesure-hero-title {
     font-size: clamp(40px, 10vw, 64px);
-  }
-
-  .surmesure-hero-subtitle {
-    font-size: 1.05rem;
+    min-height: 1.4em;
   }
 
   .surmesure-tabs {

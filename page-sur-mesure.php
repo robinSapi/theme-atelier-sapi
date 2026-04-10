@@ -19,10 +19,10 @@ get_header();
   </div>
   <div class="surmesure-hero-overlay"></div>
   <div class="surmesure-hero-content">
-    <h1 class="surmesure-hero-title" data-tab-content="particulier">Cr&eacute;ons votre luminaire sur mesure</h1>
-    <h1 class="surmesure-hero-title" data-tab-content="pro" style="display:none;">Des luminaires &agrave; l'image de votre espace</h1>
-    <p class="surmesure-hero-subtitle" data-tab-content="particulier">Une id&eacute;e, un espace, une envie &mdash; je con&ccedil;ois et fabrique votre pi&egrave;ce unique.</p>
-    <p class="surmesure-hero-subtitle" data-tab-content="pro" style="display:none;">Restaurants, h&ocirc;tels, boutiques : des cr&eacute;ations artisanales adapt&eacute;es &agrave; votre identit&eacute;.</p>
+    <h1 class="surmesure-hero-title" data-tab-content="particulier" data-text="Créons votre luminaire sur mesure"></h1>
+    <h1 class="surmesure-hero-title" data-tab-content="pro" style="display:none;" data-text="Des luminaires à l'image de votre espace"></h1>
+    <p class="surmesure-hero-subtitle" data-tab-content="particulier">Une idée, un espace, une envie — je conçois et fabrique votre pièce unique.</p>
+    <p class="surmesure-hero-subtitle" data-tab-content="pro" style="display:none;">Restaurants, hôtels, boutiques : des créations artisanales adaptées à votre identité.</p>
     <div class="surmesure-tabs">
       <button class="surmesure-tab is-active" data-tab="particulier" type="button">Particuliers</button>
       <button class="surmesure-tab" data-tab="pro" type="button">Professionnels</button>
@@ -459,6 +459,8 @@ get_header();
   'use strict';
 
   var activeTab = 'particulier';
+  var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var LETTER_DELAY = 60;
 
   // --- Onglets ---
   var tabs = document.querySelectorAll('.surmesure-tab');
@@ -466,6 +468,39 @@ get_header();
   var heroBgParticulier = document.querySelector('.surmesure-hero-bg--particulier');
   var heroBgPro = document.querySelector('.surmesure-hero-bg--pro');
   var proFields = document.querySelectorAll('.is-pro-field');
+  var heroTitles = document.querySelectorAll('.surmesure-hero-title');
+  var heroSubtitles = document.querySelectorAll('.surmesure-hero-subtitle');
+
+  // --- Animation écriture H1 ---
+  function animateTitle(tab) {
+    var title = document.querySelector('.surmesure-hero-title[data-tab-content="' + tab + '"]');
+    var subtitle = document.querySelector('.surmesure-hero-subtitle[data-tab-content="' + tab + '"]');
+    if (!title) return;
+
+    var text = title.getAttribute('data-text') || '';
+    subtitle.classList.remove('is-visible');
+
+    if (prefersReduced) {
+      title.textContent = text;
+      subtitle.classList.add('is-visible');
+      return;
+    }
+
+    title.innerHTML = '';
+    text.split('').forEach(function(char, i) {
+      var span = document.createElement('span');
+      span.textContent = char;
+      span.className = 'surmesure-letter';
+      span.style.animationDelay = (i * LETTER_DELAY / 1000) + 's';
+      span.style.webkitAnimationDelay = (i * LETTER_DELAY / 1000) + 's';
+      title.appendChild(span);
+    });
+
+    var totalMs = text.length * LETTER_DELAY + 300;
+    setTimeout(function() {
+      subtitle.classList.add('is-visible');
+    }, totalMs);
+  }
 
   function switchTab(tab) {
     if (tab === activeTab) return;
@@ -480,6 +515,11 @@ get_header();
     heroBgParticulier.classList.toggle('is-active', tab === 'particulier');
     heroBgPro.classList.toggle('is-active', tab === 'pro');
 
+    // Masquer sous-titres immédiatement
+    heroSubtitles.forEach(function(el) {
+      el.classList.remove('is-visible');
+    });
+
     // Contenu onglets
     tabContents.forEach(function(el) {
       el.style.display = el.dataset.tabContent === tab ? '' : 'none';
@@ -489,7 +529,13 @@ get_header();
     proFields.forEach(function(el) {
       el.style.display = tab === 'pro' ? '' : 'none';
     });
+
+    // Animation titre
+    animateTitle(tab);
   }
+
+  // Animation initiale au chargement
+  animateTitle('particulier');
 
   tabs.forEach(function(btn) {
     btn.addEventListener('click', function() {
