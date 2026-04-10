@@ -6998,6 +6998,10 @@ li.carousel-editorial-slide,
   gap: 2rem;
 }
 
+.category-products-grid .product-card-cinetique .product-media {
+  aspect-ratio: 4 / 3;
+}
+
 /* Kill WooCommerce clearfix pseudo-elements that steal grid cells */
 .category-products-grid ul.products::before,
 .category-products-grid ul.products::after {
