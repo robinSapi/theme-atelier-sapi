@@ -1,9 +1,9 @@
 <?php
 /**
- * Product Category Archive Template — Refonte grille 2 colonnes + ambiance
+ * Product Category Archive Template
  *
  * @package Sapi-Maison
- * @version 10.0.0
+ * @version 9.5.1
  */
 
 defined('ABSPATH') || exit;
@@ -12,6 +12,7 @@ get_header();
 
 $term = get_queried_object();
 
+// Ensure $term is valid
 if (!$term || !is_a($term, 'WP_Term')) {
   get_footer();
   return;
@@ -32,29 +33,6 @@ $category_intro = [
 if (function_exists('sapi_maison_breadcrumbs')) {
   sapi_maison_breadcrumbs();
 }
-
-/**
- * Récupère la 1ère photo ambiance ACF d'un produit, avec fallback featured image.
- */
-function sapi_get_ambiance_url($product_id, $size = 'large') {
-  $amb_photos = sapi_get_product_photos($product_id, 'ambiance', 1, $size);
-  if (!empty($amb_photos)) {
-    return $amb_photos[0];
-  }
-  return get_the_post_thumbnail_url($product_id, $size);
-}
-
-/**
- * Sépare un nom de produit en prénom + surnom.
- * "Gaston Le Chardon" → ['Gaston', 'Le Chardon']
- */
-function sapi_split_product_name($title) {
-  $words = explode(' ', $title, 2);
-  return [
-    'firstname' => $words[0],
-    'surname'   => isset($words[1]) ? $words[1] : '',
-  ];
-}
 ?>
 
 <section class="shop-hero-cinetique">
@@ -64,115 +42,12 @@ function sapi_split_product_name($title) {
   <?php endif; ?>
 </section>
 
+<?php if ($term_slug !== 'accessoires') : ?>
 <?php
-// ══════════════════════════════════════════════════════
-//  COUP DE CŒUR — pleine largeur, overlay texte, photo ambiance
-// ══════════════════════════════════════════════════════
-if ($term_slug !== 'accessoires') :
-
-  $featured_query = new WP_Query([
-    'post_type' => 'product',
-    'posts_per_page' => 10,
-    'tax_query' => [
-      [
-        'taxonomy' => 'product_cat',
-        'field' => 'term_id',
-        'terms' => $term_id,
-      ],
-    ],
-    'meta_key' => 'total_sales',
-    'orderby' => 'meta_value_num',
-    'order' => 'DESC',
-  ]);
-
-  $featured_data = null;
-
-  while ($featured_query->have_posts()) :
-    $featured_query->the_post();
-    $pid = get_the_ID();
-    $ambiance_url = sapi_get_ambiance_url($pid);
-
-    if ($ambiance_url) {
-      $product = wc_get_product($pid);
-      $name_parts = sapi_split_product_name(get_the_title());
-      $price_html = '';
-      if ($product->is_type('variable')) {
-        $price_html = 'À partir de &ensp;<strong>' . esc_html(wc_price($product->get_variation_price('min'))) . '</strong>';
-      } else {
-        $price_html = '<strong>' . esc_html($product->get_price()) . '&nbsp;€</strong>';
-      }
-      $featured_data = [
-        'url'         => $ambiance_url,
-        'name'        => get_the_title(),
-        'firstname'   => $name_parts['firstname'],
-        'surname'     => $name_parts['surname'],
-        'desc'        => $product->get_short_description(),
-        'price'       => $product->get_price(),
-        'price_min'   => $product->is_type('variable') ? $product->get_variation_price('min') : $product->get_price(),
-        'is_variable' => $product->is_type('variable'),
-        'permalink'   => get_permalink($pid),
-      ];
-      break;
-    }
-  endwhile;
-  wp_reset_postdata();
-
-  if ($featured_data) :
-?>
-
-  <div class="section-header">
-    <span class="section-num">01</span>
-    <h2>Le coup de cœur de l'Atelier</h2>
-  </div>
-
-  <div class="featured-wrap">
-    <a href="<?php echo esc_url($featured_data['permalink']); ?>" class="featured-photo">
-      <img src="<?php echo esc_url($featured_data['url']); ?>" srcset=""
-           alt="<?php echo esc_attr($featured_data['name']); ?> — Luminaire artisanal en bois" loading="eager"/>
-      <div class="featured-overlay">
-        <div class="featured-label">✦ Coup de cœur de l'atelier</div>
-        <span class="featured-name-first"><?php echo esc_html(mb_strtoupper($featured_data['firstname'])); ?></span>
-        <span class="featured-name-sur"><?php echo esc_html($featured_data['surname']); ?></span>
-        <?php if ($featured_data['desc']) : ?>
-          <p class="featured-desc"><?php echo esc_html(wp_strip_all_tags($featured_data['desc'])); ?></p>
-        <?php endif; ?>
-        <div class="featured-footer">
-          <div class="featured-price">
-            <?php if ($featured_data['is_variable']) : ?>
-              À partir de &ensp;<strong><?php echo esc_html(number_format((float)$featured_data['price_min'], 2, ',', '')); ?>&nbsp;€</strong>
-            <?php else : ?>
-              <strong><?php echo esc_html(number_format((float)$featured_data['price'], 2, ',', '')); ?>&nbsp;€</strong>
-            <?php endif; ?>
-          </div>
-          <span class="btn-white">
-            Découvrir
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
-              <path d="M3 8h10M9 4l4 4-4 4"/>
-            </svg>
-          </span>
-        </div>
-      </div>
-    </a>
-  </div>
-
-<?php
-  endif;
-endif; // fin exclusion accessoire
-?>
-
-<!-- ══════════════════════════════════════════════════════
-     GRILLE 2 COLONNES — photos d'ambiance 3:4
-══════════════════════════════════════════════════════ -->
-<div class="section-header">
-  <?php $masculin = in_array($term_slug, ['accessoires', 'lampadaires']); ?>
-  <span class="section-num">02</span>
-  <h2><?php echo $masculin ? 'Tous nos' : 'Toutes nos'; ?> <?php echo esc_html(strtolower($term_name)); ?></h2>
-</div>
-
-<?php
-$grid_query = new WP_Query([
+// Section "Le coup de cœur de l'Atelier" — best-seller avec image ACF
+$featured_query = new WP_Query([
   'post_type' => 'product',
-  'posts_per_page' => -1,
+  'posts_per_page' => 10,
   'tax_query' => [
     [
       'taxonomy' => 'product_cat',
@@ -180,78 +55,115 @@ $grid_query = new WP_Query([
       'terms' => $term_id,
     ],
   ],
-  'orderby' => 'menu_order date',
-  'order' => 'ASC',
+  'meta_key' => 'total_sales',
+  'orderby' => 'meta_value_num',
+  'order' => 'DESC',
 ]);
 
-if ($grid_query->have_posts()) :
+$featured_image_url = '';
+$featured_product_name = '';
+$featured_product_url = '';
+
+while ($featured_query->have_posts()) :
+  $featured_query->the_post();
+  $pid = get_the_ID();
+
+  // Chercher une photo ambiance du repeater
+  $amb_photos = sapi_get_product_photos($pid, 'ambiance', 1);
+  if (!empty($amb_photos)) {
+    $featured_image_url = $amb_photos[0];
+  }
+
+  if ($featured_image_url) {
+    $featured_product_name = get_the_title();
+    $featured_product_url = get_permalink($pid);
+    break;
+  }
+endwhile;
+wp_reset_postdata();
+
+if ($featured_image_url) :
 ?>
-<div class="product-grid" id="sapi-product-grid">
-  <?php
-  while ($grid_query->have_posts()) :
-    $grid_query->the_post();
-    $pid = get_the_ID();
-    $product = wc_get_product($pid);
-    $ambiance_url = sapi_get_ambiance_url($pid);
-    $name_parts = sapi_split_product_name(get_the_title());
-    $permalink = get_permalink($pid);
-    $price_min = $product->is_type('variable') ? $product->get_variation_price('min') : $product->get_price();
-    $is_variable = $product->is_type('variable');
-  ?>
-    <a href="<?php echo esc_url($permalink); ?>" class="product-card" data-product-id="<?php echo esc_attr($pid); ?>">
-      <div class="card-photo">
-        <?php if ($ambiance_url) : ?>
-          <img src="<?php echo esc_url($ambiance_url); ?>" srcset=""
-               alt="<?php echo esc_attr(get_the_title()); ?>" loading="lazy"/>
-        <?php else : ?>
-          <span class="card-photo-empty-text">Bientôt…</span>
-        <?php endif; ?>
-        <div class="badge-selection" style="display:none;">Ma sélection</div>
-        <div class="card-hover-cta">
-          Découvrir
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
-        </div>
-      </div>
-      <div class="card-info">
-        <span class="p-firstname"><?php echo esc_html(mb_strtoupper($name_parts['firstname'])); ?></span>
-        <span class="p-surname"><?php echo esc_html($name_parts['surname']); ?></span>
-        <div class="card-price">
-          <?php if ($is_variable) : ?>
-            À partir de <strong><?php echo esc_html(number_format((float)$price_min, 2, ',', '')); ?>&nbsp;€</strong>
-          <?php else : ?>
-            <strong><?php echo esc_html(number_format((float)$product->get_price(), 2, ',', '')); ?>&nbsp;€</strong>
-          <?php endif; ?>
-        </div>
-      </div>
+<section class="featured-products-mini">
+  <div class="featured-products-header">
+    <h2><span class="section-num">01</span> Le coup de cœur de l'Atelier</h2>
+  </div>
+
+  <div class="product-mini-card">
+    <a href="<?php echo esc_url($featured_product_url); ?>" class="product-mini-card-link">
+      <img src="<?php echo esc_url($featured_image_url); ?>" srcset="" alt="<?php echo esc_attr($featured_product_name); ?> — Luminaire artisanal en bois" class="product-mini-card-img" loading="lazy">
+      <span class="product-hero-name"><?php echo esc_html($featured_product_name); ?></span>
     </a>
-  <?php endwhile; ?>
-</div>
+  </div>
+</section>
 <?php
-  wp_reset_postdata();
-else :
-  wc_no_products_found();
 endif;
 ?>
+<?php endif; // fin exclusion accessoire ?>
 
-<!-- Badge "Ma sélection" — activé via localStorage Robin Conseiller -->
-<script>
-(function() {
-  try {
-    var prefs = JSON.parse(localStorage.getItem('sapiGuidePrefs'));
-    if (!prefs || !prefs.recommendedIds || !prefs.recommendedIds.length) return;
-    var ids = prefs.recommendedIds.map(function(id) { return String(id); });
-    document.querySelectorAll('.product-card[data-product-id]').forEach(function(card) {
-      if (ids.indexOf(card.getAttribute('data-product-id')) !== -1) {
-        var badge = card.querySelector('.badge-selection');
-        if (badge) badge.style.display = '';
-      }
-    });
-  } catch(e) {}
-})();
-</script>
+<!-- PHASE 2: Full product grid (all products) -->
+<section class="category-products-grid">
+  <div class="products-grid-header">
+    <?php $masculin = in_array($term_slug, ['accessoires', 'lampadaires']); ?>
+    <h2><span class="section-num">02</span> <?php echo $masculin ? 'Tous nos' : 'Toutes nos'; ?> <?php echo esc_html(strtolower($term_name)); ?></h2>
+  </div>
 
-<!-- Rich Editorial Content Section -->
+  <?php
+  // Query all products in this category for the grid
+  $grid_query = new WP_Query([
+    'post_type' => 'product',
+    'posts_per_page' => -1,
+    'tax_query' => [
+      [
+        'taxonomy' => 'product_cat',
+        'field' => 'term_id',
+        'terms' => $term_id,
+      ],
+    ],
+    'orderby' => 'menu_order date',
+    'order' => 'ASC',
+  ]);
+
+  if ($grid_query->have_posts()) :
+    $product_count = 0;
+  ?>
+    <ul class="products columns-4">
+      <?php
+      while ($grid_query->have_posts()) :
+        $grid_query->the_post();
+        wc_get_template_part('content', 'product');
+        $product_count++;
+
+        // Card Robin après le 4ème produit
+        if ($product_count === 4 && defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) :
+        ?>
+          <li class="robin-category-card" id="robin-category-card">
+            <div class="robin-category-card__inner" data-robin-context="category" data-robin-data='<?php echo esc_attr(wp_json_encode(['category_slug' => $term_slug])); ?>'>
+              <span class="robin-modal__badge">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+                Conseil de Robin
+              </span>
+              <p class="robin-category-card__text">Quel mod&egrave;le est fait pour vous ? R&eacute;pondez &agrave; quelques questions, Robin vous guide.</p>
+              <span class="robin-category-card__cta">D&eacute;couvrir &rarr;</span>
+            </div>
+          </li>
+        <?php
+        endif;
+
+      endwhile;
+      ?>
+    </ul>
+  <?php
+    wp_reset_postdata();
+  else :
+    wc_no_products_found();
+  endif;
+  ?>
+</section>
+
+<!-- Rich Editorial Content Section (MOVED TO BOTTOM) -->
 <?php
+// Background éditorial : photo "fabrication" aléatoire prise dans tous les produits de la catégorie
 $bg_query = new WP_Query([
   'post_type' => 'product',
   'posts_per_page' => 20,
@@ -281,6 +193,7 @@ if ($bg_query->have_posts()) {
   }
   wp_reset_postdata();
 }
+
 ?>
 <section class="category-editorial" data-particles="wood">
   <?php if ($ambiance_bg_url) : ?>
@@ -288,6 +201,7 @@ if ($bg_query->have_posts()) {
   <?php endif; ?>
   <div class="category-editorial-inner">
     <?php
+    // Rich editorial content per category
     $editorial_content = [
       'suspensions' => [
         'tagline' => 'La lumière qui vous ressemble',
@@ -447,6 +361,7 @@ if ( isset( $cross_links[ $term_slug ] ) ) :
     $linked_term = get_term_by( 'slug', $slug, 'product_cat' );
     if ( ! $linked_term ) continue;
 
+    // Récupérer la photo du 1er produit de cette catégorie
     $cat_query = new WP_Query([
       'post_type'      => 'product',
       'posts_per_page' => 1,
@@ -460,10 +375,12 @@ if ( isset( $cross_links[ $term_slug ] ) ) :
       $cat_query->the_post();
       $pid = get_the_ID();
 
+      // Photo ambiance du repeater ACF (comme le hero)
       $amb = sapi_get_product_photos( $pid, 'ambiance', 1 );
       if ( ! empty( $amb ) ) {
         $thumb_url = $amb[0];
       } else {
+        // Fallback : image produit WooCommerce
         $product = wc_get_product( $pid );
         if ( $product ) {
           $img_id = $product->get_image_id();
