@@ -123,6 +123,16 @@ $hover_image_url = '';
 if (!empty($gallery_ids)) {
   $hover_image_url = wp_get_attachment_image_url($gallery_ids[0], 'woocommerce_thumbnail');
 }
+
+// Pages catégories : photo ambiance ACF en image principale, pas de hover
+$sapi_category_ambiance_url = '';
+if (is_product_category()) {
+  $amb = sapi_get_product_photos($product_id, 'ambiance', 1, 'woocommerce_thumbnail');
+  if (!empty($amb)) {
+    $sapi_category_ambiance_url = $amb[0];
+    $hover_image_url = ''; // désactiver le hover
+  }
+}
 ?>
 
 <?php
@@ -217,8 +227,10 @@ if ($is_editorial_carousel) {
   <a href="<?php the_permalink(); ?>" class="product-card-link">
     <div class="product-media<?php echo $hover_image_url ? ' has-hover-image' : ''; ?>">
       <?php
-      // Product image (main)
-      if (has_post_thumbnail()) {
+      // Product image (main) — photo ambiance ACF sur pages catégories
+      if ($sapi_category_ambiance_url) {
+        echo '<span class="product-image-main"><img src="' . esc_url($sapi_category_ambiance_url) . '" alt="' . esc_attr(get_the_title()) . '" loading="lazy" /></span>';
+      } elseif (has_post_thumbnail()) {
         echo '<span class="product-image-main">' . woocommerce_get_product_thumbnail('woocommerce_thumbnail') . '</span>';
       } else {
         echo '<span class="product-image-main">' . wc_placeholder_img('woocommerce_thumbnail') . '</span>';
