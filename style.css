@@ -7163,7 +7163,7 @@ li.carousel-editorial-slide,
   height: 100%;
   -o-object-fit: contain;
   object-fit: contain;
-  border-radius: 50%;
+  border-radius: var(--radius-lg, 12px);
 }
 
 .sapi-showcase-card .showcase-product-img-hover {
