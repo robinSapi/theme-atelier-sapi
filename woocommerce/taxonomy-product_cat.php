@@ -42,72 +42,8 @@ if (function_exists('sapi_maison_breadcrumbs')) {
   <?php endif; ?>
 </section>
 
-<?php if ($term_slug !== 'accessoires') : ?>
-<?php
-// Section "Le coup de cœur de l'Atelier" — best-seller avec image ACF
-$featured_query = new WP_Query([
-  'post_type' => 'product',
-  'posts_per_page' => 10,
-  'tax_query' => [
-    [
-      'taxonomy' => 'product_cat',
-      'field' => 'term_id',
-      'terms' => $term_id,
-    ],
-  ],
-  'meta_key' => 'total_sales',
-  'orderby' => 'meta_value_num',
-  'order' => 'DESC',
-]);
-
-$featured_image_url = '';
-$featured_product_name = '';
-$featured_product_url = '';
-
-while ($featured_query->have_posts()) :
-  $featured_query->the_post();
-  $pid = get_the_ID();
-
-  // Chercher une photo ambiance du repeater
-  $amb_photos = sapi_get_product_photos($pid, 'ambiance', 1);
-  if (!empty($amb_photos)) {
-    $featured_image_url = $amb_photos[0];
-  }
-
-  if ($featured_image_url) {
-    $featured_product_name = get_the_title();
-    $featured_product_url = get_permalink($pid);
-    break;
-  }
-endwhile;
-wp_reset_postdata();
-
-if ($featured_image_url) :
-?>
-<section class="featured-products-mini">
-  <div class="featured-products-header">
-    <h2><span class="section-num">01</span> Le coup de cœur de l'Atelier</h2>
-  </div>
-
-  <div class="product-mini-card">
-    <a href="<?php echo esc_url($featured_product_url); ?>" class="product-mini-card-link">
-      <img src="<?php echo esc_url($featured_image_url); ?>" srcset="" alt="<?php echo esc_attr($featured_product_name); ?> — Luminaire artisanal en bois" class="product-mini-card-img" loading="lazy">
-      <span class="product-hero-name"><?php echo esc_html($featured_product_name); ?></span>
-    </a>
-  </div>
-</section>
-<?php
-endif;
-?>
-<?php endif; // fin exclusion accessoire ?>
-
-<!-- PHASE 2: Full product grid (all products) -->
+<!-- Full product grid (all products) -->
 <section class="category-products-grid">
-  <div class="products-grid-header">
-    <?php $masculin = in_array($term_slug, ['accessoires', 'lampadaires']); ?>
-    <h2><span class="section-num">02</span> <?php echo $masculin ? 'Tous nos' : 'Toutes nos'; ?> <?php echo esc_html(strtolower($term_name)); ?></h2>
-  </div>
-
   <?php
   // Query all products in this category for the grid
   $grid_query = new WP_Query([
@@ -120,24 +56,64 @@ endif;
         'terms' => $term_id,
       ],
     ],
-    'orderby' => 'menu_order date',
-    'order' => 'ASC',
+    'meta_key' => 'total_sales',
+    'orderby' => 'meta_value_num',
+    'order' => 'DESC',
   ]);
 
   if ($grid_query->have_posts()) :
     $product_count = 0;
   ?>
-    <ul class="products columns-4">
+    <div class="sapi-showcase-grid">
       <?php
       while ($grid_query->have_posts()) :
         $grid_query->the_post();
-        wc_get_template_part('content', 'product');
+        $pid = get_the_ID();
+        $product = wc_get_product($pid);
+        if (!$product) continue;
         $product_count++;
+
+        $permalink = get_permalink($pid);
+        $title = get_the_title();
+        $amb = ($term_slug !== 'accessoires') ? sapi_get_product_photos($pid, 'ambiance', 1, 'large') : [];
+        $ambiance_url = !empty($amb) ? $amb[0] : get_the_post_thumbnail_url($pid, 'large');
+        $studio_url = get_the_post_thumbnail_url($pid, 'medium');
+        $gallery_ids = $product->get_gallery_image_ids();
+        $gallery_hover_url = !empty($gallery_ids) ? wp_get_attachment_image_url($gallery_ids[0], 'medium') : '';
+        $is_variable = $product->is_type('variable');
+        $price_html = $is_variable
+          ? 'À partir de <strong>' . esc_html(number_format((float)$product->get_variation_price('min'), 2, ',', '')) . '&nbsp;€</strong>'
+          : '<strong>' . esc_html(number_format((float)$product->get_price(), 2, ',', '')) . '&nbsp;€</strong>';
+
+        // Alternance gauche/droite
+        $side_class = ($product_count % 2 === 1) ? 'showcase-left' : 'showcase-right';
+      ?>
+        <a href="<?php echo esc_url($permalink); ?>" class="sapi-showcase-card <?php echo esc_attr($side_class); ?>">
+          <div class="showcase-info">
+            <?php if ($studio_url) : ?>
+              <div class="showcase-product-img-wrap">
+                <img src="<?php echo esc_url($studio_url); ?>" alt="<?php echo esc_attr($title); ?>" class="showcase-product-img showcase-product-img-main" loading="lazy" />
+                <?php if ($gallery_hover_url) : ?>
+                  <img src="<?php echo esc_url($gallery_hover_url); ?>" alt="<?php echo esc_attr($title); ?> — allumé" class="showcase-product-img showcase-product-img-hover" loading="lazy" />
+                <?php endif; ?>
+              </div>
+            <?php endif; ?>
+            <h3 class="showcase-name product-name"><?php echo esc_html($title); ?></h3>
+            <div class="showcase-price"><?php echo $price_html; ?></div>
+            <span class="showcase-cta">Découvrir ⇾</span>
+          </div>
+          <div class="showcase-photo">
+            <?php if ($ambiance_url) : ?>
+              <img src="<?php echo esc_url($ambiance_url); ?>" alt="<?php echo esc_attr($title); ?> — ambiance" class="showcase-bg" loading="lazy" />
+            <?php endif; ?>
+          </div>
+        </a>
+      <?php
 
         // Card Robin après le 4ème produit
         if ($product_count === 4 && defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) :
         ?>
-          <li class="robin-category-card" id="robin-category-card">
+          <div class="robin-category-card" id="robin-category-card">
             <div class="robin-category-card__inner" data-robin-context="category" data-robin-data='<?php echo esc_attr(wp_json_encode(['category_slug' => $term_slug])); ?>'>
               <span class="robin-modal__badge">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
@@ -146,13 +122,13 @@ endif;
               <p class="robin-category-card__text">Quel mod&egrave;le est fait pour vous ? R&eacute;pondez &agrave; quelques questions, Robin vous guide.</p>
               <span class="robin-category-card__cta">D&eacute;couvrir &rarr;</span>
             </div>
-          </li>
+          </div>
         <?php
         endif;
 
       endwhile;
       ?>
-    </ul>
+    </div>
   <?php
     wp_reset_postdata();
   else :
@@ -285,7 +261,7 @@ if ($bg_query->have_posts()) {
     if ($content) :
     ?>
       <div class="editorial-hero">
-        <h2 class="editorial-tagline"><span class="section-num">03</span> <?php echo esc_html($content['tagline']); ?></h2>
+        <h2 class="editorial-tagline"><span class="section-num">02</span> <?php echo esc_html($content['tagline']); ?></h2>
         <p class="editorial-intro"><?php echo esc_html($content['intro']); ?></p>
       </div>
 
@@ -402,7 +378,7 @@ if ( isset( $cross_links[ $term_slug ] ) ) :
   $carte_cadeau = get_term_by( 'slug', 'carte-cadeau', 'product_cat' );
 ?>
 <section class="category-cross-links">
-  <h2><span class="section-num">04</span> Découvrez aussi</h2>
+  <h2><span class="section-num">03</span> Découvrez aussi</h2>
   <div class="cross-links-cards">
     <?php foreach ( $linked_cards as $card ) : ?>
       <a href="<?php echo esc_url( get_term_link( $card['term'] ) ); ?>" class="cross-link-card">
