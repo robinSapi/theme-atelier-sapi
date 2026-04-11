@@ -7271,6 +7271,10 @@ li.carousel-editorial-slide,
   .sapi-showcase-card .showcase-name {
     font-size: 1.2rem;
   }
+
+  .sapi-showcase-card .showcase-cta {
+    background: var(--gradient-cta, var(--color-orange));
+  }
 }
 
 /* Responsive adjustments */
