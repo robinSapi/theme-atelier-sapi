@@ -76,7 +76,7 @@ if (function_exists('sapi_maison_breadcrumbs')) {
         $permalink = get_permalink($pid);
         $title = get_the_title();
         $amb = ($term_slug !== 'accessoires') ? sapi_get_product_photos($pid, 'ambiance', 1, 'large') : [];
-        $ambiance_url = !empty($amb) ? $amb[0] : '';
+        $ambiance_url = !empty($amb) ? $amb[0] : get_the_post_thumbnail_url($pid, 'large');
         $studio_url = get_the_post_thumbnail_url($pid, 'medium');
         $gallery_ids = $product->get_gallery_image_ids();
         $gallery_hover_url = !empty($gallery_ids) ? wp_get_attachment_image_url($gallery_ids[0], 'medium') : '';
