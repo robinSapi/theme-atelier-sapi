@@ -7090,7 +7090,7 @@ li.carousel-editorial-slide,
   margin: 0;
 }
 
-/* ── Showcase grid (cards pleine largeur, photo ambiance + encart produit) ── */
+/* ── Showcase grid (cards pleine largeur, split info + photo) ── */
 .sapi-showcase-grid {
   max-width: 1400px;
   margin: 0 auto;
@@ -7101,8 +7101,7 @@ li.carousel-editorial-slide,
 }
 
 .sapi-showcase-card {
-  position: relative;
-  display: block;
+  display: flex;
   width: 100%;
   height: 450px;
   border-radius: var(--radius-lg, 12px);
@@ -7111,62 +7110,52 @@ li.carousel-editorial-slide,
   color: var(--color-dark);
 }
 
+/* Alternance : showcase-left = info à gauche, photo à droite */
+.sapi-showcase-card.showcase-left {
+  flex-direction: row;
+}
+
+/* showcase-right = photo à gauche, info à droite */
+.sapi-showcase-card.showcase-right {
+  flex-direction: row-reverse;
+}
+
+/* ── Zone blanche (info produit) ── */
+.sapi-showcase-card .showcase-info {
+  flex: 0 0 40%;
+  background: var(--color-white, #fff);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+/* ── Zone photo ambiance ── */
+.sapi-showcase-card .showcase-photo {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
 .sapi-showcase-card .showcase-bg {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
   -o-object-fit: cover;
   object-fit: cover;
-  z-index: 1;
+  display: block;
   -webkit-transition: -webkit-transform 0.6s ease;
   transition: transform 0.6s ease;
 }
 
-.sapi-showcase-card .showcase-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.sapi-showcase-card.showcase-left .showcase-overlay {
-  background: linear-gradient(to right, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.7) 35%, transparent 60%);
-}
-
-.sapi-showcase-card.showcase-right .showcase-overlay {
-  background: linear-gradient(to left, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.7) 35%, transparent 60%);
-}
-
-.sapi-showcase-card .showcase-encart {
-  position: absolute;
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-  transform: translateY(-50%);
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.5rem;
-  padding: 2rem;
-  max-width: 320px;
-}
-
-.sapi-showcase-card.showcase-left .showcase-encart {
-  left: 3rem;
-}
-
-.sapi-showcase-card.showcase-right .showcase-encart {
-  right: 3rem;
-  align-items: flex-end;
-  text-align: right;
-}
-
+/* ── Vignette produit studio ── */
 .sapi-showcase-card .showcase-product-img-wrap {
   position: relative;
   width: 200px;
   height: 200px;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .sapi-showcase-card .showcase-product-img {
@@ -7174,8 +7163,6 @@ li.carousel-editorial-slide,
   height: 100%;
   -o-object-fit: contain;
   object-fit: contain;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.6);
 }
 
 .sapi-showcase-card .showcase-product-img-hover {
@@ -7192,6 +7179,7 @@ li.carousel-editorial-slide,
   }
 }
 
+/* ── Texte ── */
 .sapi-showcase-card .showcase-name {
   font-family: var(--font-body);
   font-size: 1.5rem;
@@ -7210,7 +7198,7 @@ li.carousel-editorial-slide,
 
 .sapi-showcase-card .showcase-cta {
   display: inline-block;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
   padding: 0.6rem 1.5rem;
   background: var(--color-wood);
   color: var(--color-white, #fff);
@@ -7221,6 +7209,7 @@ li.carousel-editorial-slide,
   transition: background 0.3s ease, transform 0.3s ease;
 }
 
+/* ── Hover ── */
 @media (hover: hover) {
   .sapi-showcase-card:hover .showcase-bg {
     -webkit-transform: scale(1.04);
@@ -7240,17 +7229,9 @@ li.carousel-editorial-slide,
     height: 380px;
   }
 
-  .sapi-showcase-card .showcase-encart {
-    max-width: 280px;
-    padding: 1.5rem;
-  }
-
-  .sapi-showcase-card.showcase-left .showcase-encart {
-    left: 1.5rem;
-  }
-
-  .sapi-showcase-card.showcase-right .showcase-encart {
-    right: 1.5rem;
+  .sapi-showcase-card .showcase-info {
+    flex: 0 0 45%;
+    padding: 2rem 1.5rem;
   }
 
   .sapi-showcase-card .showcase-product-img-wrap {
@@ -7265,37 +7246,24 @@ li.carousel-editorial-slide,
     gap: 1rem;
   }
 
+  /* Mobile : empilé verticalement, photo en haut, info en bas */
   .sapi-showcase-card {
-    height: 420px;
+    height: auto;
+    flex-direction: column-reverse !important;
   }
 
-  /* Mobile : encart centré en bas */
-  .sapi-showcase-card.showcase-left .showcase-overlay,
-  .sapi-showcase-card.showcase-right .showcase-overlay {
-    background: linear-gradient(to top, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.7) 50%, transparent 70%);
+  .sapi-showcase-card .showcase-photo {
+    height: 250px;
   }
 
-  .sapi-showcase-card.showcase-left .showcase-encart,
-  .sapi-showcase-card.showcase-right .showcase-encart {
-    left: 0;
-    right: 0;
-    top: auto;
-    bottom: 0;
-    -webkit-transform: none;
-    transform: none;
-    max-width: 100%;
-    align-items: center;
-    text-align: center;
+  .sapi-showcase-card .showcase-info {
+    flex: none;
     padding: 1.5rem;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
   }
 
   .sapi-showcase-card .showcase-product-img-wrap {
-    width: 80px;
-    height: 80px;
+    width: 120px;
+    height: 120px;
   }
 
   .sapi-showcase-card .showcase-name {

@@ -88,11 +88,7 @@ if (function_exists('sapi_maison_breadcrumbs')) {
         $side_class = ($product_count % 2 === 1) ? 'showcase-left' : 'showcase-right';
       ?>
         <a href="<?php echo esc_url($permalink); ?>" class="sapi-showcase-card <?php echo esc_attr($side_class); ?>">
-          <?php if ($ambiance_url) : ?>
-            <img src="<?php echo esc_url($ambiance_url); ?>" alt="<?php echo esc_attr($title); ?> — ambiance" class="showcase-bg" loading="lazy" />
-          <?php endif; ?>
-          <div class="showcase-overlay"></div>
-          <div class="showcase-encart">
+          <div class="showcase-info">
             <?php if ($studio_url) : ?>
               <div class="showcase-product-img-wrap">
                 <img src="<?php echo esc_url($studio_url); ?>" alt="<?php echo esc_attr($title); ?>" class="showcase-product-img showcase-product-img-main" loading="lazy" />
@@ -104,6 +100,11 @@ if (function_exists('sapi_maison_breadcrumbs')) {
             <h3 class="showcase-name product-name"><?php echo esc_html($title); ?></h3>
             <div class="showcase-price"><?php echo $price_html; ?></div>
             <span class="showcase-cta">Découvrir ⇾</span>
+          </div>
+          <div class="showcase-photo">
+            <?php if ($ambiance_url) : ?>
+              <img src="<?php echo esc_url($ambiance_url); ?>" alt="<?php echo esc_attr($title); ?> — ambiance" class="showcase-bg" loading="lazy" />
+            <?php endif; ?>
           </div>
         </a>
       <?php
