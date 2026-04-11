@@ -44,11 +44,6 @@ if (function_exists('sapi_maison_breadcrumbs')) {
 
 <!-- Full product grid (all products) -->
 <section class="category-products-grid">
-  <div class="products-grid-header">
-    <?php $masculin = in_array($term_slug, ['accessoires', 'lampadaires']); ?>
-    <h2><span class="section-num">01</span> <?php echo $masculin ? 'Tous nos' : 'Toutes nos'; ?> <?php echo esc_html(strtolower($term_name)); ?></h2>
-  </div>
-
   <?php
   // Query all products in this category for the grid
   $grid_query = new WP_Query([
