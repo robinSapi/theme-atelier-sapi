@@ -63,17 +63,48 @@ if (function_exists('sapi_maison_breadcrumbs')) {
   if ($grid_query->have_posts()) :
     $product_count = 0;
   ?>
-    <ul class="products columns-3">
+    <div class="sapi-showcase-grid">
       <?php
       while ($grid_query->have_posts()) :
         $grid_query->the_post();
-        wc_get_template_part('content', 'product');
+        $pid = get_the_ID();
+        $product = wc_get_product($pid);
+        if (!$product) continue;
         $product_count++;
+
+        $permalink = get_permalink($pid);
+        $title = get_the_title();
+        $amb = sapi_get_product_photos($pid, 'ambiance', 1, 'large');
+        $ambiance_url = !empty($amb) ? $amb[0] : '';
+        $studio_url = get_the_post_thumbnail_url($pid, 'medium');
+        $is_variable = $product->is_type('variable');
+        $price_html = $is_variable
+          ? 'À partir de <strong>' . esc_html(number_format((float)$product->get_variation_price('min'), 2, ',', '')) . '&nbsp;€</strong>'
+          : '<strong>' . esc_html(number_format((float)$product->get_price(), 2, ',', '')) . '&nbsp;€</strong>';
+
+        // Alternance gauche/droite
+        $side_class = ($product_count % 2 === 1) ? 'showcase-left' : 'showcase-right';
+      ?>
+        <a href="<?php echo esc_url($permalink); ?>" class="sapi-showcase-card <?php echo esc_attr($side_class); ?>">
+          <?php if ($ambiance_url) : ?>
+            <img src="<?php echo esc_url($ambiance_url); ?>" alt="<?php echo esc_attr($title); ?> — ambiance" class="showcase-bg" loading="lazy" />
+          <?php endif; ?>
+          <div class="showcase-overlay"></div>
+          <div class="showcase-encart">
+            <?php if ($studio_url) : ?>
+              <img src="<?php echo esc_url($studio_url); ?>" alt="<?php echo esc_attr($title); ?>" class="showcase-product-img" loading="lazy" />
+            <?php endif; ?>
+            <h3 class="showcase-name"><?php echo esc_html($title); ?></h3>
+            <div class="showcase-price"><?php echo $price_html; ?></div>
+            <span class="showcase-cta">Découvrir ⇾</span>
+          </div>
+        </a>
+      <?php
 
         // Card Robin après le 4ème produit
         if ($product_count === 4 && defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) :
         ?>
-          <li class="robin-category-card" id="robin-category-card">
+          <div class="robin-category-card" id="robin-category-card">
             <div class="robin-category-card__inner" data-robin-context="category" data-robin-data='<?php echo esc_attr(wp_json_encode(['category_slug' => $term_slug])); ?>'>
               <span class="robin-modal__badge">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
@@ -82,13 +113,13 @@ if (function_exists('sapi_maison_breadcrumbs')) {
               <p class="robin-category-card__text">Quel mod&egrave;le est fait pour vous ? R&eacute;pondez &agrave; quelques questions, Robin vous guide.</p>
               <span class="robin-category-card__cta">D&eacute;couvrir &rarr;</span>
             </div>
-          </li>
+          </div>
         <?php
         endif;
 
       endwhile;
       ?>
-    </ul>
+    </div>
   <?php
     wp_reset_postdata();
   else :
