@@ -126,7 +126,7 @@ get_header();
     'order'          => 'DESC',
     'meta_query'     => [
       [
-        'key'   => 'type_projet',
+        'key'   => 'type_client',
         'value' => 'particulier',
       ],
     ],
@@ -142,8 +142,8 @@ get_header();
     'order'          => 'DESC',
     'meta_query'     => [
       [
-        'key'   => 'type_projet',
-        'value' => 'pro',
+        'key'   => 'type_client',
+        'value' => 'professionnel',
       ],
     ],
   ]);
