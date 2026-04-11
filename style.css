@@ -7102,6 +7102,14 @@ li.carousel-editorial-slide,
   overflow: hidden;
   text-decoration: none;
   color: var(--color-dark);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.4s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+@media (hover: hover) {
+  .sapi-showcase-card:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
 }
 
 /* Alternance : showcase-left = info à gauche, photo à droite */
