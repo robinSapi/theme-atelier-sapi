@@ -75,7 +75,7 @@ if (function_exists('sapi_maison_breadcrumbs')) {
 
         $permalink = get_permalink($pid);
         $title = get_the_title();
-        $amb = sapi_get_product_photos($pid, 'ambiance', 1, 'large');
+        $amb = ($term_slug !== 'accessoires') ? sapi_get_product_photos($pid, 'ambiance', 1, 'large') : [];
         $ambiance_url = !empty($amb) ? $amb[0] : '';
         $studio_url = get_the_post_thumbnail_url($pid, 'medium');
         $gallery_ids = $product->get_gallery_image_ids();

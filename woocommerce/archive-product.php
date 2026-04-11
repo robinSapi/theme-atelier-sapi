@@ -227,8 +227,9 @@ sapi_robin_conseil_card( 'selection' );
           if (!empty($m)) $size_dimension = (int) $m[0];
         }
 
-        // Photo ambiance ACF
-        $amb_photos = sapi_get_product_photos($product_id, 'ambiance', 1, 'large');
+        // Photo ambiance ACF (sauf accessoires → photo produit WooCommerce)
+        $is_accessoire = in_array('accessoires', $cat_slugs);
+        $amb_photos = !$is_accessoire ? sapi_get_product_photos($product_id, 'ambiance', 1, 'large') : [];
         $ambiance_url = !empty($amb_photos) ? $amb_photos[0] : get_the_post_thumbnail_url($product_id, 'large');
 
         // Nom splitté
