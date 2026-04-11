@@ -7122,7 +7122,7 @@ li.carousel-editorial-slide,
 
 /* ── Zone blanche (info produit) ── */
 .sapi-showcase-card .showcase-info {
-  flex: 0 0 40%;
+  flex: 0 0 25%;
   background: var(--color-white, #fff);
   display: flex;
   flex-direction: column;
@@ -7163,6 +7163,7 @@ li.carousel-editorial-slide,
   height: 100%;
   -o-object-fit: contain;
   object-fit: contain;
+  border-radius: 50%;
 }
 
 .sapi-showcase-card .showcase-product-img-hover {
@@ -7230,7 +7231,7 @@ li.carousel-editorial-slide,
   }
 
   .sapi-showcase-card .showcase-info {
-    flex: 0 0 45%;
+    flex: 0 0 35%;
     padding: 2rem 1.5rem;
   }
 
