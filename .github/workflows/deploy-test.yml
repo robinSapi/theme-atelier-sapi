@@ -11,7 +11,7 @@ env:
 
 jobs:
   deploy:
-    name: Deploy to testLumineux.atelier-sapi.fr
+    name: Deploy to test.atelier-sapi.fr
     runs-on: ubuntu-latest
 
     steps:
@@ -32,8 +32,15 @@ jobs:
           exclude: |
             **/.git*
             **/.git*/**
-            **/README.md
             **/.DS_Store
             **/node_modules/**
             **/.vscode/**
             **/.idea/**
+            .claude/**
+            memory/**
+            mockups/**
+            **/*.md
+            **/*.csv
+            **/*.txt
+            **/*.html
+            .ftp-deploy-sync-state.json
