@@ -7124,7 +7124,7 @@ li.carousel-editorial-slide,
 
 /* ── Zone blanche (info produit) ── */
 .sapi-showcase-card .showcase-info {
-  flex: 0 0 25%;
+  flex: 0 0 20%;
   background: var(--color-white, #fff);
   display: flex;
   flex-direction: column;
