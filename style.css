@@ -22557,8 +22557,8 @@ html.sapi-intro-active body {
   }
 
   .surmesure-steps {
-    display: flex !important;
-    flex-wrap: nowrap !important;
+    display: flex;
+    flex-wrap: nowrap;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
