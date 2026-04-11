@@ -13445,7 +13445,7 @@ transform: translateY(15px);
   font-family: var(--font-body);
   font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 900;
-  color: var(--color-dark);
+  color: var(--color-orange);
   margin-bottom: 1rem;
 }
 
