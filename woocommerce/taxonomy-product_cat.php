@@ -77,6 +77,8 @@ if (function_exists('sapi_maison_breadcrumbs')) {
         $amb = sapi_get_product_photos($pid, 'ambiance', 1, 'large');
         $ambiance_url = !empty($amb) ? $amb[0] : '';
         $studio_url = get_the_post_thumbnail_url($pid, 'medium');
+        $gallery_ids = $product->get_gallery_image_ids();
+        $gallery_hover_url = !empty($gallery_ids) ? wp_get_attachment_image_url($gallery_ids[0], 'medium') : '';
         $is_variable = $product->is_type('variable');
         $price_html = $is_variable
           ? 'À partir de <strong>' . esc_html(number_format((float)$product->get_variation_price('min'), 2, ',', '')) . '&nbsp;€</strong>'
@@ -92,9 +94,14 @@ if (function_exists('sapi_maison_breadcrumbs')) {
           <div class="showcase-overlay"></div>
           <div class="showcase-encart">
             <?php if ($studio_url) : ?>
-              <img src="<?php echo esc_url($studio_url); ?>" alt="<?php echo esc_attr($title); ?>" class="showcase-product-img" loading="lazy" />
+              <div class="showcase-product-img-wrap">
+                <img src="<?php echo esc_url($studio_url); ?>" alt="<?php echo esc_attr($title); ?>" class="showcase-product-img showcase-product-img-main" loading="lazy" />
+                <?php if ($gallery_hover_url) : ?>
+                  <img src="<?php echo esc_url($gallery_hover_url); ?>" alt="<?php echo esc_attr($title); ?> — allumé" class="showcase-product-img showcase-product-img-hover" loading="lazy" />
+                <?php endif; ?>
+              </div>
             <?php endif; ?>
-            <h3 class="showcase-name"><?php echo esc_html($title); ?></h3>
+            <h3 class="showcase-name product-name"><?php echo esc_html($title); ?></h3>
             <div class="showcase-price"><?php echo $price_html; ?></div>
             <span class="showcase-cta">Découvrir ⇾</span>
           </div>
