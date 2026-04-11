@@ -9,6 +9,11 @@
 defined('ABSPATH') || exit;
 
 get_header();
+?>
+<div style="background: red; color: white; font-size: 20px; padding: 16px; text-align: center; font-family: monospace;">
+  ✅ TEST PIPELINE OK – PHP déployé le 11 avril
+</div>
+<?php
 
 $term = get_queried_object();
 
