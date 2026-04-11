@@ -10,11 +10,6 @@ defined('ABSPATH') || exit;
 
 get_header();
 ?>
-<div style="background: red; color: white; font-size: 20px; padding: 16px; text-align: center; font-family: monospace;">
-  ✅ TEST PIPELINE OK – PHP déployé le 11 avril
-</div>
-<?php
-
 $term = get_queried_object();
 
 // Ensure $term is valid
@@ -110,7 +105,7 @@ endif;
 <section class="category-products-grid">
   <div class="products-grid-header">
     <?php $masculin = in_array($term_slug, ['accessoires', 'lampadaires']); ?>
-    <h2><span class="section-num">🌿 02</span> <?php echo $masculin ? 'Tous nos' : 'Toutes nos'; ?> <?php echo esc_html(strtolower($term_name)); ?></h2>
+    <h2><span class="section-num">02</span> <?php echo $masculin ? 'Tous nos' : 'Toutes nos'; ?> <?php echo esc_html(strtolower($term_name)); ?></h2>
   </div>
 
   <?php
