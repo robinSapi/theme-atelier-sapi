@@ -7265,8 +7265,7 @@ li.carousel-editorial-slide,
   }
 
   .sapi-showcase-card .showcase-product-img-wrap {
-    width: 120px;
-    height: 120px;
+    display: none;
   }
 
   .sapi-showcase-card .showcase-name {
