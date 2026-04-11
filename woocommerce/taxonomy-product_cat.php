@@ -42,70 +42,11 @@ if (function_exists('sapi_maison_breadcrumbs')) {
   <?php endif; ?>
 </section>
 
-<?php if ($term_slug !== 'accessoires') : ?>
-<?php
-// Section "Le coup de cœur de l'Atelier" — best-seller avec image ACF
-$featured_query = new WP_Query([
-  'post_type' => 'product',
-  'posts_per_page' => 10,
-  'tax_query' => [
-    [
-      'taxonomy' => 'product_cat',
-      'field' => 'term_id',
-      'terms' => $term_id,
-    ],
-  ],
-  'meta_key' => 'total_sales',
-  'orderby' => 'meta_value_num',
-  'order' => 'DESC',
-]);
-
-$featured_image_url = '';
-$featured_product_name = '';
-$featured_product_url = '';
-
-while ($featured_query->have_posts()) :
-  $featured_query->the_post();
-  $pid = get_the_ID();
-
-  // Chercher une photo ambiance du repeater
-  $amb_photos = sapi_get_product_photos($pid, 'ambiance', 1);
-  if (!empty($amb_photos)) {
-    $featured_image_url = $amb_photos[0];
-  }
-
-  if ($featured_image_url) {
-    $featured_product_name = get_the_title();
-    $featured_product_url = get_permalink($pid);
-    break;
-  }
-endwhile;
-wp_reset_postdata();
-
-if ($featured_image_url) :
-?>
-<section class="featured-products-mini">
-  <div class="featured-products-header">
-    <h2><span class="section-num">01</span> Le coup de cœur de l'Atelier</h2>
-  </div>
-
-  <div class="product-mini-card">
-    <a href="<?php echo esc_url($featured_product_url); ?>" class="product-mini-card-link">
-      <img src="<?php echo esc_url($featured_image_url); ?>" srcset="" alt="<?php echo esc_attr($featured_product_name); ?> — Luminaire artisanal en bois" class="product-mini-card-img" loading="lazy">
-      <span class="product-hero-name"><?php echo esc_html($featured_product_name); ?></span>
-    </a>
-  </div>
-</section>
-<?php
-endif;
-?>
-<?php endif; // fin exclusion accessoire ?>
-
-<!-- PHASE 2: Full product grid (all products) -->
+<!-- Full product grid (all products) -->
 <section class="category-products-grid">
   <div class="products-grid-header">
     <?php $masculin = in_array($term_slug, ['accessoires', 'lampadaires']); ?>
-    <h2><span class="section-num">02</span> <?php echo $masculin ? 'Tous nos' : 'Toutes nos'; ?> <?php echo esc_html(strtolower($term_name)); ?></h2>
+    <h2><span class="section-num">01</span> <?php echo $masculin ? 'Tous nos' : 'Toutes nos'; ?> <?php echo esc_html(strtolower($term_name)); ?></h2>
   </div>
 
   <?php
@@ -285,7 +226,7 @@ if ($bg_query->have_posts()) {
     if ($content) :
     ?>
       <div class="editorial-hero">
-        <h2 class="editorial-tagline"><span class="section-num">03</span> <?php echo esc_html($content['tagline']); ?></h2>
+        <h2 class="editorial-tagline"><span class="section-num">02</span> <?php echo esc_html($content['tagline']); ?></h2>
         <p class="editorial-intro"><?php echo esc_html($content['intro']); ?></p>
       </div>
 
@@ -402,7 +343,7 @@ if ( isset( $cross_links[ $term_slug ] ) ) :
   $carte_cadeau = get_term_by( 'slug', 'carte-cadeau', 'product_cat' );
 ?>
 <section class="category-cross-links">
-  <h2><span class="section-num">04</span> Découvrez aussi</h2>
+  <h2><span class="section-num">03</span> Découvrez aussi</h2>
   <div class="cross-links-cards">
     <?php foreach ( $linked_cards as $card ) : ?>
       <a href="<?php echo esc_url( get_term_link( $card['term'] ) ); ?>" class="cross-link-card">

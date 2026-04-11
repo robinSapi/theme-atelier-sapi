@@ -124,13 +124,13 @@ if (!empty($gallery_ids)) {
   $hover_image_url = wp_get_attachment_image_url($gallery_ids[0], 'woocommerce_thumbnail');
 }
 
-// Pages catégories : photo ambiance ACF en image principale, pas de hover
+// Pages catégories : photo ambiance 1 en image principale, photo ambiance 2 en hover
 $sapi_category_ambiance_url = '';
 if (is_product_category()) {
-  $amb = sapi_get_product_photos($product_id, 'ambiance', 1, 'woocommerce_thumbnail');
+  $amb = sapi_get_product_photos($product_id, 'ambiance', 2, 'woocommerce_thumbnail');
   if (!empty($amb)) {
     $sapi_category_ambiance_url = $amb[0];
-    $hover_image_url = ''; // désactiver le hover
+    $hover_image_url = isset($amb[1]) ? $amb[1] : '';
   }
 }
 ?>
