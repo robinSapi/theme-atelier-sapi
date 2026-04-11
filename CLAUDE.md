@@ -13,7 +13,7 @@
 | Info | Valeur |
 |------|--------|
 | **Projet** | Atelier Sâpi – Luminaires artisanaux bois |
-| **Site test** | `testlumineux.atelier-sapi.fr` |
+| **Site test** | `test.atelier-sapi.fr` |
 | **Site prod** | `atelier-sapi.fr` |
 | **Repo GitHub** | `github.com/robinSapi/theme-atelier-sapi` |
 | **Branche test** | `test-theme-sapi-maison` |
@@ -42,7 +42,7 @@ Je suis l'instance technique. Je m'occupe exclusivement du code du thème WordPr
 
 ### Flux normal (test → prod)
 ```
-Code → commit + push sur test-theme-sapi-maison → auto-deploy → testlumineux.atelier-sapi.fr
+Code → commit + push sur test-theme-sapi-maison → auto-deploy → test.atelier-sapi.fr
                                                                         ↓
                                                                   Robin teste
                                                                         ↓
@@ -111,7 +111,7 @@ Claude crée une branche hotfix/xxx depuis master
 Avant de dire "vide ton cache", vérifier :
 - Le fichier est-il bien enregistré ?
 - Le bon fichier est-il modifié (pas un doublon) ?
-- Git push effectué ? Déployé sur testlumineux ?
+- Git push effectué ? Déployé sur test ?
 - Erreur PHP silencieuse ? (regarder les logs)
 - `rsync` nested → root fait avant commit ?
 
