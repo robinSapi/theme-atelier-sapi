@@ -10,6 +10,7 @@ defined('ABSPATH') || exit;
 
 get_header();
 ?>
+<?php
 $term = get_queried_object();
 
 // Ensure $term is valid
