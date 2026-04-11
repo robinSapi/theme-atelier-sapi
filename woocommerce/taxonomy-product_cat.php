@@ -127,7 +127,7 @@ endif;
   if ($grid_query->have_posts()) :
     $product_count = 0;
   ?>
-    <ul class="products columns-4">
+    <ul class="products columns-3">
       <?php
       while ($grid_query->have_posts()) :
         $grid_query->the_post();
