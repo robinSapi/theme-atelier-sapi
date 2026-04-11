@@ -7130,9 +7130,9 @@ li.carousel-editorial-slide,
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2.5rem 2rem;
+  padding: 1.5rem 1.5rem;
   text-align: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 /* ── Zone photo ambiance ── */
@@ -7155,9 +7155,10 @@ li.carousel-editorial-slide,
 /* ── Vignette produit studio ── */
 .sapi-showcase-card .showcase-product-img-wrap {
   position: relative;
-  width: 240px;
-  height: 240px;
-  margin-bottom: 0.75rem;
+  width: 180px;
+  height: 180px;
+  margin-bottom: 0.5rem;
+  flex-shrink: 1;
 }
 
 .sapi-showcase-card .showcase-product-img {
