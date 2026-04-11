@@ -7245,8 +7245,8 @@ li.carousel-editorial-slide,
 
 @media (max-width: 600px) {
   .sapi-showcase-grid {
-    padding: 0 1rem;
-    gap: 1rem;
+    padding: 0 1.5rem;
+    gap: 2rem;
   }
 
   /* Mobile : empilé verticalement, photo en haut, info en bas */
