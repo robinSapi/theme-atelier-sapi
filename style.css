@@ -3380,6 +3380,7 @@ button:hover,
 }
 
 .shop-products ul.products,
+.shop-products .product-grid,
 .woocommerce ul.products,
 .product-related ul.products {
   max-width: 1400px;
@@ -3421,6 +3422,7 @@ ul.products.products-carousel-track {
 
 @media (max-width: 1024px) {
   .shop-products ul.products,
+  .shop-products .product-grid,
   .woocommerce ul.products,
   .product-related ul.products {
     grid-template-columns: repeat(3, 1fr) !important;
@@ -3429,6 +3431,7 @@ ul.products.products-carousel-track {
 
 @media (max-width: 768px) {
   .shop-products ul.products,
+  .shop-products .product-grid,
   .woocommerce ul.products,
   .product-related ul.products {
     grid-template-columns: repeat(2, 1fr) !important;
@@ -3437,6 +3440,7 @@ ul.products.products-carousel-track {
 
 @media (max-width: 480px) {
   .shop-products ul.products,
+  .shop-products .product-grid,
   .woocommerce ul.products,
   .product-related ul.products {
     grid-template-columns: 1fr !important;
