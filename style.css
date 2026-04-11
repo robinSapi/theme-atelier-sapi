@@ -1583,97 +1583,6 @@ button:hover,
   padding: 6px 1.25rem;
   margin: 0 auto;
 }
-/* ── Mode REPOS : layout interne ── */
-.robin-bandeau__repos {
-  justify-content: space-between;
-}
-.robin-left {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex: 1;
-  min-width: 0;
-}
-.robin-picto {
-  width: 30px;
-  height: 30px;
-  flex-shrink: 0;
-}
-.robin-picto svg {
-  width: 100%;
-  height: 100%;
-  stroke: var(--color-wood, #937D68);
-}
-.robin-copy h3 {
-  font-size: 0.85rem;
-  font-weight: 700;
-  margin: 0 0 0.1rem;
-  line-height: 1.2;
-  color: var(--color-dark, #323232);
-}
-.robin-copy p {
-  font-size: 0.78rem;
-  margin: 0;
-  color: #666;
-  line-height: 1.3;
-}
-.robin-steps {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  flex-shrink: 0;
-}
-.robin-step {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.78rem;
-  color: var(--color-dark, #323232);
-  white-space: nowrap;
-}
-.robin-step-num {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--color-wood, #937D68);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: white;
-  flex-shrink: 0;
-}
-.robin-step-sep {
-  width: 16px;
-  height: 1px;
-  background: #ccc;
-  flex-shrink: 0;
-}
-.robin-cta-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: var(--color-wood, #937D68);
-  color: white;
-  border: none;
-  border-radius: 2rem;
-  padding: 0.45rem 1.1rem;
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.82rem;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.2s;
-  flex-shrink: 0;
-}
-.robin-cta-btn svg {
-  width: 12px;
-  height: 12px;
-}
-.robin-cta-btn:hover {
-  background: var(--color-orange, #E35B24);
-}
 .robin-bandeau .reassurance-bar-inner {
   display: flex;
   align-items: center;
@@ -2426,16 +2335,6 @@ button:hover,
   .robin-bandeau__repos {
     padding: 6px 0.85rem;
     gap: 0.5rem;
-  }
-  .robin-steps {
-    display: none;
-  }
-  .robin-copy p {
-    display: none;
-  }
-  .robin-left {
-    flex: 1;
-    min-width: 0;
   }
   .robin-bandeau .reassurance-bar-inner {
     gap: 1rem;
