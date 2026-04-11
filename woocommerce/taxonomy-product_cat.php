@@ -56,8 +56,9 @@ if (function_exists('sapi_maison_breadcrumbs')) {
         'terms' => $term_id,
       ],
     ],
-    'orderby' => 'menu_order date',
-    'order' => 'ASC',
+    'meta_key' => 'total_sales',
+    'orderby' => 'meta_value_num',
+    'order' => 'DESC',
   ]);
 
   if ($grid_query->have_posts()) :
