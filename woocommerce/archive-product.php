@@ -246,35 +246,63 @@ sapi_robin_conseil_card( 'selection' );
         $data_attrs .= $wood_essence ? ' data-wood="' . esc_attr(sanitize_title($wood_essence)) . '"' : '';
         $data_attrs .= $size_dimension > 0 ? ' data-size="' . esc_attr($size_dimension) . '"' : '';
       ?>
-        <a href="<?php echo esc_url(get_permalink($product_id)); ?>"
-           class="product-card product-card-cinetique"
-           data-product-id="<?php echo esc_attr($product_id); ?>"
-           <?php echo $data_attrs; ?>>
-          <div class="card-photo">
-            <?php if ($ambiance_url) : ?>
-              <img src="<?php echo esc_url($ambiance_url); ?>" srcset=""
-                   alt="<?php echo esc_attr(get_the_title()); ?>" loading="lazy"/>
-            <?php else : ?>
-              <span class="card-photo-empty-text">Bientôt…</span>
-            <?php endif; ?>
-            <div class="badge-selection" style="display:none;">Ma sélection</div>
-            <div class="card-hover-cta">
-              Découvrir
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
-            </div>
-          </div>
-          <div class="card-info">
-            <span class="p-firstname"><?php echo esc_html(mb_strtoupper($name_parts['firstname'])); ?></span>
-            <span class="p-surname"><?php echo esc_html($name_parts['surname']); ?></span>
-            <div class="card-price">
-              <?php if ($is_variable) : ?>
-                À partir de <strong><?php echo esc_html(number_format((float)$price_min, 2, ',', '')); ?>&nbsp;€</strong>
+        <?php
+          // Catégorie affichée (singulier)
+          $display_cat = '';
+          if ($product_cats && !is_wp_error($product_cats)) {
+            foreach ($product_cats as $cat) {
+              if ($cat->slug !== 'uncategorized') {
+                $display_cat = str_replace(
+                  ['Suspensions', 'Appliques', 'Lampadaires', 'Lampes à poser'],
+                  ['Suspension',  'Applique',  'Lampadaire',  'Lampe à poser'],
+                  $cat->name
+                );
+                break;
+              }
+            }
+          }
+
+          // Hover image (1re photo galerie WooCommerce)
+          $gallery_ids = $product->get_gallery_image_ids();
+          $hover_url = !empty($gallery_ids) ? wp_get_attachment_image_url($gallery_ids[0], 'woocommerce_thumbnail') : '';
+
+          // Prix HTML
+          $price_html = $is_variable ? wc_price($price_min) : $product->get_price_html();
+        ?>
+        <div class="product-card-cinetique" data-product-id="<?php echo esc_attr($product_id); ?>" <?php echo $data_attrs; ?>>
+          <a href="<?php echo esc_url(get_permalink($product_id)); ?>" class="product-card-link">
+            <div class="product-media<?php echo $hover_url ? ' has-hover-image' : ''; ?>">
+              <?php if ($ambiance_url) : ?>
+                <span class="product-image-main"><img src="<?php echo esc_url($ambiance_url); ?>" srcset="" alt="<?php echo esc_attr(get_the_title()); ?>" loading="lazy" /></span>
               <?php else : ?>
-                <strong><?php echo esc_html(number_format((float)$product->get_price(), 2, ',', '')); ?>&nbsp;€</strong>
+                <span class="product-image-main"><?php echo woocommerce_get_product_thumbnail('woocommerce_thumbnail'); ?></span>
               <?php endif; ?>
+              <?php if ($hover_url) : ?>
+                <span class="product-image-hover"><img src="<?php echo esc_url($hover_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?> - ambiance" loading="lazy"></span>
+              <?php endif; ?>
+              <div class="badge-selection" style="display:none;">Ma sélection</div>
             </div>
-          </div>
-        </a>
+
+            <div class="product-info">
+              <h3 class="product-name"><?php echo esc_html(get_the_title()); ?></h3>
+              <?php if ($display_cat) : ?>
+                <p class="product-category"><?php echo esc_html($display_cat); ?></p>
+              <?php endif; ?>
+              <div class="product-price">
+                <?php if ($is_variable) : ?>
+                  <span class="price-from"><?php esc_html_e('À partir de', 'theme-sapi-maison'); ?></span>
+                <?php endif; ?>
+                <span class="price-value"><?php echo $price_html; ?></span>
+              </div>
+            </div>
+
+            <div class="product-actions">
+              <span class="btn-view">
+                <?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> ⇾
+              </span>
+            </div>
+          </a>
+        </div>
       <?php endwhile; ?>
     </div>
 
