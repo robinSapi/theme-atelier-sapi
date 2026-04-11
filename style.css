@@ -14760,7 +14760,8 @@ transform: translateY(15px);
 }
 
 @media (hover: hover) {
-  .product-card-cinetique .btn-view:hover {
+  .product-card-cinetique .btn-view:hover,
+  .product-card-cinetique:hover .btn-view {
     background: var(--gradient-cta);
     color: var(--color-white);
     -webkit-transform: translateY(-2px);
