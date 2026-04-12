@@ -22588,7 +22588,7 @@ html.sapi-intro-active body {
 
   .surmesure-grid {
     gap: 1rem;
-    padding: 0 7.5% 10px;
+    padding: 0 7.5% 30px;
   }
 
   .surmesure-grid .surmesure-card {
@@ -22601,7 +22601,7 @@ html.sapi-intro-active body {
   }
 
   .surmesure-slider-dots {
-    margin: 1.5rem auto 0;
+    margin: 0.25rem auto 0;
   }
 
   .surmesure-card-content {
