@@ -22096,13 +22096,14 @@ html.sapi-intro-active body {
   background: rgba(255, 255, 255, 0.7);
   border-radius: 16px;
   border: 1px solid rgba(147, 125, 104, 0.1);
+  box-shadow: var(--shadow-card);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (hover: hover) {
   .surmesure-step:hover {
     transform: translateY(-6px);
-    box-shadow: 0 20px 60px rgba(147, 125, 104, 0.12);
+    box-shadow: var(--shadow-card-hover);
   }
 }
 
@@ -22226,13 +22227,14 @@ html.sapi-intro-active body {
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid rgba(147, 125, 104, 0.1);
+  box-shadow: var(--shadow-card);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (hover: hover) {
   .surmesure-card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 20px 60px rgba(147, 125, 104, 0.15);
+    box-shadow: var(--shadow-card-hover);
   }
 }
 
