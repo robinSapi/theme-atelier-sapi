@@ -22189,12 +22189,6 @@ html.sapi-intro-active body {
   margin: 0;
 }
 
-.surmesure-slider-nav {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
 .surmesure-grid {
   display: flex;
   overflow-x: auto;
@@ -22213,15 +22207,6 @@ html.sapi-intro-active body {
 .surmesure-grid .surmesure-card {
   flex: 0 0 580px;
   scroll-snap-align: center;
-}
-
-.surmesure-slider-wrapper {
-  position: relative;
-}
-
-.surmesure-slider-dots {
-  max-width: 1100px;
-  margin: 0 auto;
 }
 
 .surmesure-card {
@@ -22594,14 +22579,6 @@ html.sapi-intro-active body {
   .surmesure-grid .surmesure-card {
     flex: 0 0 85%;
     scroll-snap-align: center;
-  }
-
-  .surmesure-slider-nav {
-    display: none;
-  }
-
-  .surmesure-slider-dots {
-    margin: 0 auto;
   }
 
   .surmesure-card-content {
@@ -23037,8 +23014,33 @@ html.sapi-intro-active body {
    SCROLL DOTS — Grilles verticales → Sliders horizontaux sur mobile
    ======================================== */
 
+/* Dots masqués par défaut en desktop (activés en mobile par media query) */
 .scroll-dots {
   display: none;
+}
+
+/* Dots toujours visibles pour les sliders "alwaysActive" (réalisations sur mesure) */
+.surmesure-grid + .scroll-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0;
+}
+
+.surmesure-grid + .scroll-dots .scroll-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-gray-light, #e8e2d9);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.surmesure-grid + .scroll-dots .scroll-dot.active {
+  background: var(--color-wood);
+  transform: scale(1.3);
 }
 
 @media (max-width: 768px) {

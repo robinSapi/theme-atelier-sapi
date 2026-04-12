@@ -131,7 +131,6 @@ get_header();
       ],
     ],
   ]);
-  $total_particulier = $projets_particulier->found_posts ?: 0;
 
   // Projets Professionnels
   $projets_pro = new WP_Query([
@@ -147,7 +146,6 @@ get_header();
       ],
     ],
   ]);
-  $total_pro = $projets_pro->found_posts ?: 0;
   ?>
 
   <!-- Slider Particuliers -->
@@ -157,91 +155,77 @@ get_header();
         <span class="section-number">02</span>
         <h2>R&eacute;alisations sur mesure</h2>
       </div>
-      <?php if ($total_particulier > 0) : ?>
-        <div class="steps-slider-nav surmesure-slider-nav" data-slider="particulier">
-          <button type="button" class="steps-slider-btn surmesure-slider-prev" aria-label="Projet pr&eacute;c&eacute;dent">&lt;</button>
-          <span class="steps-slider-counter surmesure-slider-counter">01 / <?php echo str_pad($total_particulier, 2, '0', STR_PAD_LEFT); ?></span>
-          <button type="button" class="steps-slider-btn surmesure-slider-next" aria-label="Projet suivant">&gt;</button>
-        </div>
-      <?php endif; ?>
       <p>Chaque projet est unique, voici quelques exemples de cr&eacute;ations personnalis&eacute;es.</p>
     </div>
 
     <?php if ($projets_particulier->have_posts()) : ?>
-      <div class="surmesure-slider-wrapper">
-        <div class="surmesure-grid" data-slider-track="particulier">
-          <?php while ($projets_particulier->have_posts()) : $projets_particulier->the_post();
-            $essence    = $has_acf ? get_field('essence_bois') : '';
-            $piece      = $has_acf ? get_field('piece_destination') : '';
-            $dims       = $has_acf ? get_field('dimensions_projet') : '';
-            $temoignage = $has_acf ? get_field('temoignage_client') : '';
-            $nom_client = $has_acf ? get_field('nom_client') : '';
-            $sous_titre = $has_acf ? get_field('sous_titre') : '';
-            $full_desc  = get_the_content();
-            $thumb_url  = get_the_post_thumbnail_url(get_the_ID(), 'large');
+      <div class="surmesure-grid">
+        <?php while ($projets_particulier->have_posts()) : $projets_particulier->the_post();
+          $essence    = $has_acf ? get_field('essence_bois') : '';
+          $piece      = $has_acf ? get_field('piece_destination') : '';
+          $dims       = $has_acf ? get_field('dimensions_projet') : '';
+          $temoignage = $has_acf ? get_field('temoignage_client') : '';
+          $nom_client = $has_acf ? get_field('nom_client') : '';
+          $sous_titre = $has_acf ? get_field('sous_titre') : '';
+          $full_desc  = get_the_content();
+          $thumb_url  = get_the_post_thumbnail_url(get_the_ID(), 'large');
 
-            $gallery_urls = [];
-            if ($thumb_url) $gallery_urls[] = $thumb_url;
-            for ($i = 2; $i <= 4; $i++) {
-              $photo = $has_acf ? get_field('photo_' . $i) : '';
-              $url = sapi_get_acf_image_url($photo, 'large');
-              if ($url) $gallery_urls[] = $url;
-            }
-          ?>
-            <article class="surmesure-card" role="button" tabindex="0"
-              data-modal-title="<?php echo esc_attr(get_the_title()); ?>"
-              data-modal-image="<?php echo esc_attr($thumb_url ?: ''); ?>"
-              data-modal-gallery="<?php echo esc_attr(wp_json_encode($gallery_urls)); ?>"
-              data-modal-desc="<?php echo esc_attr($full_desc); ?>"
-              data-modal-essence="<?php echo esc_attr($essence); ?>"
-              data-modal-piece="<?php echo esc_attr($piece); ?>"
-              data-modal-dims="<?php echo esc_attr($dims); ?>"
-              data-modal-temoignage="<?php echo esc_attr($temoignage); ?>"
-              data-modal-client="<?php echo esc_attr($nom_client); ?>"
-              data-modal-soustitre="<?php echo esc_attr($sous_titre); ?>"
-            >
-              <?php if (has_post_thumbnail()) : ?>
-                <div class="surmesure-card-image">
-                  <?php the_post_thumbnail('large', ['loading' => 'lazy']); ?>
+          $gallery_urls = [];
+          if ($thumb_url) $gallery_urls[] = $thumb_url;
+          for ($i = 2; $i <= 4; $i++) {
+            $photo = $has_acf ? get_field('photo_' . $i) : '';
+            $url = sapi_get_acf_image_url($photo, 'large');
+            if ($url) $gallery_urls[] = $url;
+          }
+        ?>
+          <article class="surmesure-card" role="button" tabindex="0"
+            data-modal-title="<?php echo esc_attr(get_the_title()); ?>"
+            data-modal-image="<?php echo esc_attr($thumb_url ?: ''); ?>"
+            data-modal-gallery="<?php echo esc_attr(wp_json_encode($gallery_urls)); ?>"
+            data-modal-desc="<?php echo esc_attr($full_desc); ?>"
+            data-modal-essence="<?php echo esc_attr($essence); ?>"
+            data-modal-piece="<?php echo esc_attr($piece); ?>"
+            data-modal-dims="<?php echo esc_attr($dims); ?>"
+            data-modal-temoignage="<?php echo esc_attr($temoignage); ?>"
+            data-modal-client="<?php echo esc_attr($nom_client); ?>"
+            data-modal-soustitre="<?php echo esc_attr($sous_titre); ?>"
+          >
+            <?php if (has_post_thumbnail()) : ?>
+              <div class="surmesure-card-image">
+                <?php the_post_thumbnail('large', ['loading' => 'lazy']); ?>
+              </div>
+            <?php endif; ?>
+            <div class="surmesure-card-content">
+              <h3><?php the_title(); ?></h3>
+              <?php if ($sous_titre) : ?>
+                <p class="surmesure-card-desc"><?php echo esc_html($sous_titre); ?></p>
+              <?php endif; ?>
+              <?php if ($essence || $piece || $dims) : ?>
+                <div class="surmesure-card-details">
+                  <?php if ($essence) : ?>
+                    <span class="surmesure-detail">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                      <?php echo esc_html($essence); ?>
+                    </span>
+                  <?php endif; ?>
+                  <?php if ($piece) : ?>
+                    <span class="surmesure-detail">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                      <?php echo esc_html($piece); ?>
+                    </span>
+                  <?php endif; ?>
+                  <?php if ($dims) : ?>
+                    <span class="surmesure-detail">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 8 21"></polyline><line x1="16" y1="3" x2="3" y2="16"></line></svg>
+                      <?php echo esc_html($dims); ?>
+                    </span>
+                  <?php endif; ?>
                 </div>
               <?php endif; ?>
-              <div class="surmesure-card-content">
-                <h3><?php the_title(); ?></h3>
-                <?php if ($sous_titre) : ?>
-                  <p class="surmesure-card-desc"><?php echo esc_html($sous_titre); ?></p>
-                <?php endif; ?>
-                <?php if ($essence || $piece || $dims) : ?>
-                  <div class="surmesure-card-details">
-                    <?php if ($essence) : ?>
-                      <span class="surmesure-detail">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
-                        <?php echo esc_html($essence); ?>
-                      </span>
-                    <?php endif; ?>
-                    <?php if ($piece) : ?>
-                      <span class="surmesure-detail">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                        <?php echo esc_html($piece); ?>
-                      </span>
-                    <?php endif; ?>
-                    <?php if ($dims) : ?>
-                      <span class="surmesure-detail">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 8 21"></polyline><line x1="16" y1="3" x2="3" y2="16"></line></svg>
-                        <?php echo esc_html($dims); ?>
-                      </span>
-                    <?php endif; ?>
-                  </div>
-                <?php endif; ?>
-                <span class="surmesure-card-cta">D&eacute;couvrir le projet &rarr;</span>
-              </div>
-            </article>
-          <?php endwhile; ?>
-        </div>
-        <div class="steps-slider-dots surmesure-slider-dots" data-slider-dots="particulier">
-          <?php for ($d = 0; $d < $total_particulier; $d++) : ?>
-            <button class="steps-slider-dot<?php echo $d === 0 ? ' is-active' : ''; ?>" data-idx="<?php echo $d; ?>"></button>
-          <?php endfor; ?>
-        </div>
+              <span class="surmesure-card-cta">D&eacute;couvrir le projet &rarr;</span>
+            </div>
+          </article>
+        <?php endwhile; ?>
       </div>
       <?php wp_reset_postdata(); ?>
     <?php else : ?>
@@ -258,91 +242,77 @@ get_header();
         <span class="section-number">02</span>
         <h2>R&eacute;alisations professionnelles</h2>
       </div>
-      <?php if ($total_pro > 0) : ?>
-        <div class="steps-slider-nav surmesure-slider-nav" data-slider="pro">
-          <button type="button" class="steps-slider-btn surmesure-slider-prev" aria-label="Projet pr&eacute;c&eacute;dent">&lt;</button>
-          <span class="steps-slider-counter surmesure-slider-counter">01 / <?php echo str_pad($total_pro, 2, '0', STR_PAD_LEFT); ?></span>
-          <button type="button" class="steps-slider-btn surmesure-slider-next" aria-label="Projet suivant">&gt;</button>
-        </div>
-      <?php endif; ?>
       <p>Des cr&eacute;ations sur mesure pour les professionnels de l'h&ocirc;tellerie, la restauration et le commerce.</p>
     </div>
 
     <?php if ($projets_pro->have_posts()) : ?>
-      <div class="surmesure-slider-wrapper">
-        <div class="surmesure-grid" data-slider-track="pro">
-          <?php while ($projets_pro->have_posts()) : $projets_pro->the_post();
-            $essence    = $has_acf ? get_field('essence_bois') : '';
-            $piece      = $has_acf ? get_field('piece_destination') : '';
-            $dims       = $has_acf ? get_field('dimensions_projet') : '';
-            $temoignage = $has_acf ? get_field('temoignage_client') : '';
-            $nom_client = $has_acf ? get_field('nom_client') : '';
-            $sous_titre = $has_acf ? get_field('sous_titre') : '';
-            $full_desc  = get_the_content();
-            $thumb_url  = get_the_post_thumbnail_url(get_the_ID(), 'large');
+      <div class="surmesure-grid">
+        <?php while ($projets_pro->have_posts()) : $projets_pro->the_post();
+          $essence    = $has_acf ? get_field('essence_bois') : '';
+          $piece      = $has_acf ? get_field('piece_destination') : '';
+          $dims       = $has_acf ? get_field('dimensions_projet') : '';
+          $temoignage = $has_acf ? get_field('temoignage_client') : '';
+          $nom_client = $has_acf ? get_field('nom_client') : '';
+          $sous_titre = $has_acf ? get_field('sous_titre') : '';
+          $full_desc  = get_the_content();
+          $thumb_url  = get_the_post_thumbnail_url(get_the_ID(), 'large');
 
-            $gallery_urls = [];
-            if ($thumb_url) $gallery_urls[] = $thumb_url;
-            for ($i = 2; $i <= 4; $i++) {
-              $photo = $has_acf ? get_field('photo_' . $i) : '';
-              $url = sapi_get_acf_image_url($photo, 'large');
-              if ($url) $gallery_urls[] = $url;
-            }
-          ?>
-            <article class="surmesure-card" role="button" tabindex="0"
-              data-modal-title="<?php echo esc_attr(get_the_title()); ?>"
-              data-modal-image="<?php echo esc_attr($thumb_url ?: ''); ?>"
-              data-modal-gallery="<?php echo esc_attr(wp_json_encode($gallery_urls)); ?>"
-              data-modal-desc="<?php echo esc_attr($full_desc); ?>"
-              data-modal-essence="<?php echo esc_attr($essence); ?>"
-              data-modal-piece="<?php echo esc_attr($piece); ?>"
-              data-modal-dims="<?php echo esc_attr($dims); ?>"
-              data-modal-temoignage="<?php echo esc_attr($temoignage); ?>"
-              data-modal-client="<?php echo esc_attr($nom_client); ?>"
-              data-modal-soustitre="<?php echo esc_attr($sous_titre); ?>"
-            >
-              <?php if (has_post_thumbnail()) : ?>
-                <div class="surmesure-card-image">
-                  <?php the_post_thumbnail('large', ['loading' => 'lazy']); ?>
+          $gallery_urls = [];
+          if ($thumb_url) $gallery_urls[] = $thumb_url;
+          for ($i = 2; $i <= 4; $i++) {
+            $photo = $has_acf ? get_field('photo_' . $i) : '';
+            $url = sapi_get_acf_image_url($photo, 'large');
+            if ($url) $gallery_urls[] = $url;
+          }
+        ?>
+          <article class="surmesure-card" role="button" tabindex="0"
+            data-modal-title="<?php echo esc_attr(get_the_title()); ?>"
+            data-modal-image="<?php echo esc_attr($thumb_url ?: ''); ?>"
+            data-modal-gallery="<?php echo esc_attr(wp_json_encode($gallery_urls)); ?>"
+            data-modal-desc="<?php echo esc_attr($full_desc); ?>"
+            data-modal-essence="<?php echo esc_attr($essence); ?>"
+            data-modal-piece="<?php echo esc_attr($piece); ?>"
+            data-modal-dims="<?php echo esc_attr($dims); ?>"
+            data-modal-temoignage="<?php echo esc_attr($temoignage); ?>"
+            data-modal-client="<?php echo esc_attr($nom_client); ?>"
+            data-modal-soustitre="<?php echo esc_attr($sous_titre); ?>"
+          >
+            <?php if (has_post_thumbnail()) : ?>
+              <div class="surmesure-card-image">
+                <?php the_post_thumbnail('large', ['loading' => 'lazy']); ?>
+              </div>
+            <?php endif; ?>
+            <div class="surmesure-card-content">
+              <h3><?php the_title(); ?></h3>
+              <?php if ($sous_titre) : ?>
+                <p class="surmesure-card-desc"><?php echo esc_html($sous_titre); ?></p>
+              <?php endif; ?>
+              <?php if ($essence || $piece || $dims) : ?>
+                <div class="surmesure-card-details">
+                  <?php if ($essence) : ?>
+                    <span class="surmesure-detail">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                      <?php echo esc_html($essence); ?>
+                    </span>
+                  <?php endif; ?>
+                  <?php if ($piece) : ?>
+                    <span class="surmesure-detail">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                      <?php echo esc_html($piece); ?>
+                    </span>
+                  <?php endif; ?>
+                  <?php if ($dims) : ?>
+                    <span class="surmesure-detail">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 8 21"></polyline><line x1="16" y1="3" x2="3" y2="16"></line></svg>
+                      <?php echo esc_html($dims); ?>
+                    </span>
+                  <?php endif; ?>
                 </div>
               <?php endif; ?>
-              <div class="surmesure-card-content">
-                <h3><?php the_title(); ?></h3>
-                <?php if ($sous_titre) : ?>
-                  <p class="surmesure-card-desc"><?php echo esc_html($sous_titre); ?></p>
-                <?php endif; ?>
-                <?php if ($essence || $piece || $dims) : ?>
-                  <div class="surmesure-card-details">
-                    <?php if ($essence) : ?>
-                      <span class="surmesure-detail">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
-                        <?php echo esc_html($essence); ?>
-                      </span>
-                    <?php endif; ?>
-                    <?php if ($piece) : ?>
-                      <span class="surmesure-detail">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                        <?php echo esc_html($piece); ?>
-                      </span>
-                    <?php endif; ?>
-                    <?php if ($dims) : ?>
-                      <span class="surmesure-detail">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 8 21"></polyline><line x1="16" y1="3" x2="3" y2="16"></line></svg>
-                        <?php echo esc_html($dims); ?>
-                      </span>
-                    <?php endif; ?>
-                  </div>
-                <?php endif; ?>
-                <span class="surmesure-card-cta">D&eacute;couvrir le projet &rarr;</span>
-              </div>
-            </article>
-          <?php endwhile; ?>
-        </div>
-        <div class="steps-slider-dots surmesure-slider-dots" data-slider-dots="pro">
-          <?php for ($d = 0; $d < $total_pro; $d++) : ?>
-            <button class="steps-slider-dot<?php echo $d === 0 ? ' is-active' : ''; ?>" data-idx="<?php echo $d; ?>"></button>
-          <?php endfor; ?>
-        </div>
+              <span class="surmesure-card-cta">D&eacute;couvrir le projet &rarr;</span>
+            </div>
+          </article>
+        <?php endwhile; ?>
       </div>
       <?php wp_reset_postdata(); ?>
     <?php else : ?>
@@ -548,68 +518,6 @@ get_header();
       switchTab(this.dataset.tab);
     });
   });
-
-  // --- Slider navigation (pour chaque slider) ---
-  function initSlider(sliderKey) {
-    var track = document.querySelector('[data-slider-track="' + sliderKey + '"]');
-    if (!track) return;
-
-    var cards = track.querySelectorAll('.surmesure-card');
-    var nav = document.querySelector('[data-slider="' + sliderKey + '"]');
-    var dotsContainer = document.querySelector('[data-slider-dots="' + sliderKey + '"]');
-    if (!cards.length) return;
-
-    var counter = nav ? nav.querySelector('.surmesure-slider-counter') : null;
-    var dots = dotsContainer ? dotsContainer.querySelectorAll('.steps-slider-dot') : [];
-    var cur = 0;
-    var tot = cards.length;
-
-    function updateUI() {
-      if (counter) {
-        counter.textContent = String(cur + 1).padStart(2, '0') + ' / ' + String(tot).padStart(2, '0');
-      }
-      if (dots.length) {
-        dots.forEach(function(d, i) {
-          d.classList.toggle('is-active', i === cur);
-        });
-      }
-    }
-
-    function goTo(idx) {
-      if (idx < 0 || idx >= tot) return;
-      cur = idx;
-      cards[idx].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-      updateUI();
-    }
-
-    var observer = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) {
-          var idx = Array.prototype.indexOf.call(cards, entry.target);
-          if (idx !== -1 && idx !== cur) {
-            cur = idx;
-            updateUI();
-          }
-        }
-      });
-    }, { root: track, threshold: 0.6 });
-
-    cards.forEach(function(card) { observer.observe(card); });
-
-    if (nav) {
-      nav.querySelector('.surmesure-slider-prev').addEventListener('click', function() { goTo(cur - 1); });
-      nav.querySelector('.surmesure-slider-next').addEventListener('click', function() { goTo(cur + 1); });
-    }
-
-    if (dots.length) {
-      dots.forEach(function(dot) {
-        dot.addEventListener('click', function() { goTo(parseInt(this.dataset.idx)); });
-      });
-    }
-  }
-
-  initSlider('particulier');
-  initSlider('pro');
 
   // --- Modale ---
   var modal = document.getElementById('surmesure-modal');
