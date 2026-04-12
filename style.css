@@ -22592,8 +22592,7 @@ html.sapi-intro-active body {
     scroll-snap-align: center;
   }
 
-  .surmesure-slider-nav,
-  .surmesure-slider-dots {
+  .surmesure-slider-nav {
     display: none;
   }
 
