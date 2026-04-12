@@ -14404,7 +14404,7 @@ transform: translateY(15px);
   }
 
   .product-search-bar {
-    padding: 0.75rem 1rem 0;
+    margin: 0.75rem 1rem 0;
   }
 
   /* Filtres : rows empilées verticalement, scroll horizontal par row */
@@ -14438,6 +14438,8 @@ transform: translateY(15px);
     overflow-x: visible;
     border-radius: 16px;
     max-width: 100%;
+    margin: 0 0.5rem;
+    width: calc(100% - 1rem);
   }
 
   .robin-selection-btn {
