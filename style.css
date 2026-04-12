@@ -14403,6 +14403,10 @@ transform: translateY(15px);
     padding: 0;
   }
 
+  .product-search-bar {
+    padding: 0.75rem 1rem 0;
+  }
+
   /* Filtres : rows empilées verticalement, scroll horizontal par row */
   .product-filters {
     padding: 0.75rem 0.5rem;
