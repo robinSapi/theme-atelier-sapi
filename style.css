@@ -8275,7 +8275,7 @@ li.carousel-editorial-slide,
   /* Premium gradient orange */
   background: var(--gradient-cta);
   border: none;
-  border-radius: 8px;
+  border-radius: 50px;
   /* Warm shadow (not gray!) */
   box-shadow:
     0 4px 12px rgba(227, 91, 36, 0.25),
@@ -14611,7 +14611,7 @@ transform: translateY(15px);
   letter-spacing: 0.5px;
   text-transform: uppercase;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: 50px;
   box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
   -webkit-transition: transform 0.2s ease, box-shadow 0.2s ease;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -19748,7 +19748,7 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   text-decoration: none;
   box-shadow: 0 4px 12px rgba(1, 133, 1, 0.25), 0 2px 4px rgba(1, 133, 1, 0.15);
@@ -22866,12 +22866,14 @@ html.sapi-intro-active body {
 
   .surmesure-modal-body {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto auto;
+    height: auto;
     overflow: visible;
   }
 
   .surmesure-modal-gallery {
     position: relative;
+    height: auto;
   }
 
   /* Slider photos mobile : scroll horizontal */
@@ -22888,15 +22890,24 @@ html.sapi-intro-active body {
   .surmesure-modal-image img {
     flex: 0 0 100%;
     scroll-snap-align: center;
-    aspect-ratio: 4 / 3;
+    height: 55vh;
+    height: 55dvh;
     object-fit: cover;
   }
 
+  /* Dots en overlay sur les photos */
   .surmesure-modal-photo-dots {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     justify-content: center;
     gap: 6px;
-    padding: 8px 0;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    z-index: 2;
   }
 
   .surmesure-modal-photo-dot {
