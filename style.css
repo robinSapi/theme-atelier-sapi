@@ -8275,7 +8275,7 @@ li.carousel-editorial-slide,
   /* Premium gradient orange */
   background: var(--gradient-cta);
   border: none;
-  border-radius: 8px;
+  border-radius: 50px;
   /* Warm shadow (not gray!) */
   box-shadow:
     0 4px 12px rgba(227, 91, 36, 0.25),
@@ -14611,7 +14611,7 @@ transform: translateY(15px);
   letter-spacing: 0.5px;
   text-transform: uppercase;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: 50px;
   box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25);
   -webkit-transition: transform 0.2s ease, box-shadow 0.2s ease;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -19748,7 +19748,7 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   text-decoration: none;
   box-shadow: 0 4px 12px rgba(1, 133, 1, 0.25), 0 2px 4px rgba(1, 133, 1, 0.15);
@@ -22096,13 +22096,14 @@ html.sapi-intro-active body {
   background: rgba(255, 255, 255, 0.7);
   border-radius: 16px;
   border: 1px solid rgba(147, 125, 104, 0.1);
+  box-shadow: var(--shadow-card);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (hover: hover) {
   .surmesure-step:hover {
     transform: translateY(-6px);
-    box-shadow: 0 20px 60px rgba(147, 125, 104, 0.12);
+    box-shadow: var(--shadow-card-hover);
   }
 }
 
@@ -22188,12 +22189,6 @@ html.sapi-intro-active body {
   margin: 0;
 }
 
-.surmesure-slider-nav {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
 .surmesure-grid {
   display: flex;
   overflow-x: auto;
@@ -22202,7 +22197,7 @@ html.sapi-intro-active body {
   scrollbar-width: none;
   scroll-behavior: smooth;
   gap: 1.5rem;
-  padding: 10px calc((100vw - 580px) / 2);
+  padding: 10px calc((100vw - 580px) / 2) 30px;
 }
 
 .surmesure-grid::-webkit-scrollbar {
@@ -22214,11 +22209,6 @@ html.sapi-intro-active body {
   scroll-snap-align: center;
 }
 
-.surmesure-slider-dots {
-  max-width: 1100px;
-  margin: 2rem auto 0;
-}
-
 .surmesure-card {
   display: flex;
   flex-direction: column;
@@ -22226,13 +22216,14 @@ html.sapi-intro-active body {
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid rgba(147, 125, 104, 0.1);
+  box-shadow: var(--shadow-card);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (hover: hover) {
   .surmesure-card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 20px 60px rgba(147, 125, 104, 0.15);
+    box-shadow: var(--shadow-card-hover);
   }
 }
 
@@ -22301,17 +22292,21 @@ html.sapi-intro-active body {
 
 .surmesure-card-cta {
   display: inline-block;
+  align-self: flex-start;
   margin-top: auto;
   padding-top: 0.75rem;
   font-size: 0.88rem;
   font-weight: 600;
   color: var(--color-orange, #E35B24);
-  transition: color 0.25s ease;
+  border-radius: 50px;
+  transition: all 0.3s ease;
 }
 
 @media (hover: hover) {
   .surmesure-card:hover .surmesure-card-cta {
-    color: var(--bois-sombre, #4A3F35);
+    background: var(--color-orange, #E35B24);
+    color: #fff;
+    padding: 10px 24px;
   }
 }
 
@@ -22564,7 +22559,7 @@ html.sapi-intro-active body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 1rem;
-    padding: 15px 5%;
+    padding: 15px 5% 30px;
   }
   .surmesure-steps::-webkit-scrollbar { display: none; }
   .surmesure-steps > .surmesure-step {
@@ -22582,16 +22577,12 @@ html.sapi-intro-active body {
 
   .surmesure-grid {
     gap: 1rem;
-    padding: 0 7.5%;
+    padding: 0 7.5% 30px;
   }
 
   .surmesure-grid .surmesure-card {
-    flex: 0 0 85%;
+    flex: 0 0 90%;
     scroll-snap-align: center;
-  }
-
-  .surmesure-slider-nav {
-    display: none;
   }
 
   .surmesure-card-content {
@@ -22620,7 +22611,7 @@ html.sapi-intro-active body {
 .surmesure-modal {
   position: fixed;
   inset: 0;
-  z-index: 10000;
+  z-index: 10020;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22646,7 +22637,7 @@ html.sapi-intro-active body {
   position: relative;
   width: 92vw;
   max-width: 1100px;
-  max-height: 85vh;
+  height: 85vh;
   background: #fff;
   border-radius: 16px;
   overflow: hidden;
@@ -22696,14 +22687,15 @@ html.sapi-intro-active body {
 .surmesure-modal-body {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: minmax(0, 1fr);
-  max-height: 85vh;
+  grid-template-rows: 1fr;
+  height: 100%;
   overflow: hidden;
 }
 
 .surmesure-modal-gallery {
   display: flex;
   flex-direction: column;
+  height: 100%;
   min-height: 0;
 }
 
@@ -22858,48 +22850,91 @@ html.sapi-intro-active body {
 
 /* Modale responsive */
 @media (max-width: 768px) {
+  .surmesure-modal {
+    padding: 1rem;
+  }
+
   .surmesure-modal-container {
-    width: 95vw;
-    max-height: 90vh;
+    width: 100%;
+    height: auto;
+    max-height: 92vh;
+    max-height: 92dvh;
+    border-radius: 16px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .surmesure-modal-body {
     grid-template-columns: 1fr;
-    max-height: 90vh;
-    overflow-y: auto;
+    grid-template-rows: auto auto;
+    height: auto;
+    overflow: visible;
   }
 
+  .surmesure-modal-gallery {
+    position: relative;
+    height: auto;
+  }
+
+  /* Slider photos mobile : scroll horizontal */
   .surmesure-modal-image {
-    aspect-ratio: 16 / 10;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex: none;
+  }
+  .surmesure-modal-image::-webkit-scrollbar { display: none; }
+
+  .surmesure-modal-image img {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    height: 55vh;
+    height: 55dvh;
+    object-fit: cover;
   }
 
-  .surmesure-modal-thumb {
-    width: 48px;
-    height: 48px;
+  /* Dots en overlay sur les photos */
+  .surmesure-modal-photo-dots {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    z-index: 2;
+  }
+
+  .surmesure-modal-photo-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-gray-light, #e8e2d9);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .surmesure-modal-photo-dot.active {
+    background: var(--color-wood);
+    transform: scale(1.3);
+  }
+
+  /* Masquer thumbnails et flèches en mobile */
+  .surmesure-modal-thumbs,
+  .surmesure-modal-nav {
+    display: none;
   }
 
   .surmesure-modal-content {
     padding: 24px 20px 32px;
-  }
-
-  .surmesure-modal-nav {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    min-height: 36px;
-  }
-
-  .surmesure-modal-nav svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  .surmesure-modal-nav-prev {
-    left: 8px;
-  }
-
-  .surmesure-modal-nav-next {
-    right: 8px;
   }
 
   .surmesure-modal-close {
@@ -22907,6 +22942,7 @@ html.sapi-intro-active body {
     right: 0.75rem;
     width: 36px;
     height: 36px;
+    z-index: 2;
   }
 }
 
@@ -23027,8 +23063,34 @@ html.sapi-intro-active body {
    SCROLL DOTS — Grilles verticales → Sliders horizontaux sur mobile
    ======================================== */
 
+/* --- Scroll Dots (base) --- */
 .scroll-dots {
   display: none;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0;
+}
+
+.scroll-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-gray-light, #e8e2d9);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.scroll-dot.active {
+  background: var(--color-wood);
+  transform: scale(1.3);
+}
+
+/* Dots toujours visibles pour les sliders alwaysActive */
+.surmesure-grid + .scroll-dots {
+  display: flex;
 }
 
 @media (max-width: 768px) {
@@ -23148,26 +23210,6 @@ html.sapi-intro-active body {
   /* --- Dots --- */
   .scroll-dots {
     display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 1rem 0 0;
-  }
-
-  .scroll-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--color-gray-light, #e8e2d9);
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .scroll-dot.active {
-    background: var(--color-wood);
-    transform: scale(1.3);
   }
 }
 

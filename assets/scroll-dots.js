@@ -1,7 +1,8 @@
 /**
- * Scroll Dots — Mobile slide indicators
- * Transforme les grilles verticales en sliders horizontaux avec dots sur mobile.
- * Activé uniquement sur mobile (max-width: 768px) via matchMedia.
+ * Scroll Dots — Slide indicators
+ * Transforme les grilles en sliders horizontaux avec dots.
+ * Par défaut activé uniquement sur mobile (max-width: 768px).
+ * Les sections avec alwaysActive: true sont actives sur toutes les tailles.
  */
 (function() {
   'use strict';
@@ -12,13 +13,14 @@
     { container: '.testimonials-grid', child: '.testimonial-card', snap: 'center' },
     { container: '.artisan-values-grid', child: '.artisan-value-item', snap: 'center' },
     { container: '.process-inner', child: '.process-step', snap: 'center' },
-    { container: '.surmesure-grid', child: '.surmesure-card', snap: 'center' },
     { container: '.surmesure-steps', child: '.surmesure-step', snap: 'center' },
+    { container: '.surmesure-grid', child: '.surmesure-card', snap: 'center', alwaysActive: true },
     { container: '.use-cases-list', child: 'li', snap: 'center' },
     { container: '.guide-result-products-grid', child: '.guide-result-card', snap: 'center' }
   ];
 
-  var instances = [];
+  var mobileInstances = [];
+  var alwaysInstances = [];
   var mql = window.matchMedia('(max-width: 768px)');
 
   function createDots(container, children, config) {
@@ -48,6 +50,15 @@
         dotsEl.appendChild(dot);
         dots.push(dot);
       })(i);
+    }
+
+    // Hériter du data-tab-content pour que le JS d'onglets masque/affiche les dots
+    var tabParent = container.closest('[data-tab-content]') || (container.dataset.tabContent ? container : null);
+    if (tabParent) {
+      dotsEl.setAttribute('data-tab-content', tabParent.dataset.tabContent);
+      if (tabParent.style.display === 'none') {
+        dotsEl.style.display = 'none';
+      }
     }
 
     container.parentNode.insertBefore(dotsEl, container.nextSibling);
@@ -86,40 +97,52 @@
     };
   }
 
-  function activateAll() {
+  function activate(filterFn, targetArray) {
     sections.forEach(function(config) {
+      if (!filterFn(config)) return;
       var containers = document.querySelectorAll(config.container);
       containers.forEach(function(container) {
         var children = container.querySelectorAll(config.child);
         if (children.length < 2) return;
         var inst = createDots(container, children, config);
-        if (inst) instances.push(inst);
+        if (inst) targetArray.push(inst);
       });
     });
   }
 
-  function destroyAll() {
-    instances.forEach(function(inst) { inst.destroy(); });
-    instances = [];
+  function destroyArray(arr) {
+    arr.forEach(function(inst) { inst.destroy(); });
+    arr.length = 0;
+  }
+
+  function activateMobile() {
+    activate(function(c) { return !c.alwaysActive; }, mobileInstances);
+  }
+
+  function activateAlways() {
+    activate(function(c) { return !!c.alwaysActive; }, alwaysInstances);
   }
 
   function handleChange(e) {
     if (e.matches) {
-      activateAll();
+      activateMobile();
     } else {
-      destroyAll();
+      destroyArray(mobileInstances);
     }
   }
 
   function init() {
-    if (mql.matches) activateAll();
+    activateAlways();
+    if (mql.matches) activateMobile();
     mql.addEventListener('change', handleChange);
   }
 
-  // Public API: allow dynamic content to trigger dot creation
+  // Public API
   window.scrollDotsRefresh = function() {
-    destroyAll();
-    if (mql.matches) activateAll();
+    destroyArray(mobileInstances);
+    destroyArray(alwaysInstances);
+    activateAlways();
+    if (mql.matches) activateMobile();
   };
 
   if (document.readyState === 'loading') {

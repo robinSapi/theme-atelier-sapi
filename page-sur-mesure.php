@@ -131,7 +131,6 @@ get_header();
       ],
     ],
   ]);
-  $total_particulier = $projets_particulier->found_posts ?: 0;
 
   // Projets Professionnels
   $projets_pro = new WP_Query([
@@ -147,7 +146,6 @@ get_header();
       ],
     ],
   ]);
-  $total_pro = $projets_pro->found_posts ?: 0;
   ?>
 
   <!-- Slider Particuliers -->
@@ -157,18 +155,11 @@ get_header();
         <span class="section-number">02</span>
         <h2>R&eacute;alisations sur mesure</h2>
       </div>
-      <?php if ($total_particulier > 0) : ?>
-        <div class="steps-slider-nav surmesure-slider-nav" data-slider="particulier">
-          <button type="button" class="steps-slider-btn surmesure-slider-prev" aria-label="Projet pr&eacute;c&eacute;dent">&lt;</button>
-          <span class="steps-slider-counter surmesure-slider-counter">01 / <?php echo str_pad($total_particulier, 2, '0', STR_PAD_LEFT); ?></span>
-          <button type="button" class="steps-slider-btn surmesure-slider-next" aria-label="Projet suivant">&gt;</button>
-        </div>
-      <?php endif; ?>
       <p>Chaque projet est unique, voici quelques exemples de cr&eacute;ations personnalis&eacute;es.</p>
     </div>
 
     <?php if ($projets_particulier->have_posts()) : ?>
-      <div class="surmesure-grid" data-slider-track="particulier">
+      <div class="surmesure-grid">
         <?php while ($projets_particulier->have_posts()) : $projets_particulier->the_post();
           $essence    = $has_acf ? get_field('essence_bois') : '';
           $piece      = $has_acf ? get_field('piece_destination') : '';
@@ -236,11 +227,6 @@ get_header();
           </article>
         <?php endwhile; ?>
       </div>
-      <div class="steps-slider-dots surmesure-slider-dots" data-slider-dots="particulier">
-        <?php for ($d = 0; $d < $total_particulier; $d++) : ?>
-          <button class="steps-slider-dot<?php echo $d === 0 ? ' is-active' : ''; ?>" data-idx="<?php echo $d; ?>"></button>
-        <?php endfor; ?>
-      </div>
       <?php wp_reset_postdata(); ?>
     <?php else : ?>
       <div class="surmesure-empty">
@@ -256,18 +242,11 @@ get_header();
         <span class="section-number">02</span>
         <h2>R&eacute;alisations professionnelles</h2>
       </div>
-      <?php if ($total_pro > 0) : ?>
-        <div class="steps-slider-nav surmesure-slider-nav" data-slider="pro">
-          <button type="button" class="steps-slider-btn surmesure-slider-prev" aria-label="Projet pr&eacute;c&eacute;dent">&lt;</button>
-          <span class="steps-slider-counter surmesure-slider-counter">01 / <?php echo str_pad($total_pro, 2, '0', STR_PAD_LEFT); ?></span>
-          <button type="button" class="steps-slider-btn surmesure-slider-next" aria-label="Projet suivant">&gt;</button>
-        </div>
-      <?php endif; ?>
       <p>Des cr&eacute;ations sur mesure pour les professionnels de l'h&ocirc;tellerie, la restauration et le commerce.</p>
     </div>
 
     <?php if ($projets_pro->have_posts()) : ?>
-      <div class="surmesure-grid" data-slider-track="pro">
+      <div class="surmesure-grid">
         <?php while ($projets_pro->have_posts()) : $projets_pro->the_post();
           $essence    = $has_acf ? get_field('essence_bois') : '';
           $piece      = $has_acf ? get_field('piece_destination') : '';
@@ -334,11 +313,6 @@ get_header();
             </div>
           </article>
         <?php endwhile; ?>
-      </div>
-      <div class="steps-slider-dots surmesure-slider-dots" data-slider-dots="pro">
-        <?php for ($d = 0; $d < $total_pro; $d++) : ?>
-          <button class="steps-slider-dot<?php echo $d === 0 ? ' is-active' : ''; ?>" data-idx="<?php echo $d; ?>"></button>
-        <?php endfor; ?>
       </div>
       <?php wp_reset_postdata(); ?>
     <?php else : ?>
@@ -464,11 +438,9 @@ get_header();
 
   // --- Onglets ---
   var tabs = document.querySelectorAll('.surmesure-tab');
-  var tabContents = document.querySelectorAll('[data-tab-content]');
   var heroBgParticulier = document.querySelector('.surmesure-hero-bg--particulier');
   var heroBgPro = document.querySelector('.surmesure-hero-bg--pro');
   var proFields = document.querySelectorAll('.is-pro-field');
-  var heroTitles = document.querySelectorAll('.surmesure-hero-title');
   var heroSubtitles = document.querySelectorAll('.surmesure-hero-subtitle');
 
   // --- Animation écriture H1 ---
@@ -496,10 +468,14 @@ get_header();
       title.appendChild(span);
     });
 
-    var totalMs = text.length * LETTER_DELAY + 300;
-    setTimeout(function() {
-      subtitle.classList.add('is-visible');
-    }, totalMs);
+    // Afficher le sous-titre quand la dernière lettre finit son animation
+    var lastSpan = title.lastElementChild;
+    if (lastSpan) {
+      lastSpan.addEventListener('animationend', function onEnd() {
+        lastSpan.removeEventListener('animationend', onEnd);
+        subtitle.classList.add('is-visible');
+      });
+    }
   }
 
   function switchTab(tab) {
@@ -520,8 +496,8 @@ get_header();
       el.classList.remove('is-visible');
     });
 
-    // Contenu onglets
-    tabContents.forEach(function(el) {
+    // Contenu onglets (re-query pour inclure les dots créés dynamiquement)
+    document.querySelectorAll('[data-tab-content]').forEach(function(el) {
       el.style.display = el.dataset.tabContent === tab ? '' : 'none';
     });
 
@@ -543,80 +519,13 @@ get_header();
     });
   });
 
-  // --- Slider navigation (pour chaque slider) ---
-  function initSlider(sliderKey) {
-    var track = document.querySelector('[data-slider-track="' + sliderKey + '"]');
-    if (!track) return;
-
-    var cards = track.querySelectorAll('.surmesure-card');
-    var nav = document.querySelector('[data-slider="' + sliderKey + '"]');
-    var dotsContainer = document.querySelector('[data-slider-dots="' + sliderKey + '"]');
-    if (!cards.length) return;
-
-    var counter = nav ? nav.querySelector('.surmesure-slider-counter') : null;
-    var dots = dotsContainer ? dotsContainer.querySelectorAll('.steps-slider-dot') : [];
-    var cur = 0;
-    var tot = cards.length;
-
-    function updateUI() {
-      if (counter) {
-        counter.textContent = String(cur + 1).padStart(2, '0') + ' / ' + String(tot).padStart(2, '0');
-      }
-      if (dots.length) {
-        dots.forEach(function(d, i) {
-          d.classList.toggle('is-active', i === cur);
-        });
-      }
-    }
-
-    function goTo(idx) {
-      if (idx < 0 || idx >= tot) return;
-      cur = idx;
-      cards[idx].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-      updateUI();
-    }
-
-    var scrollTimer;
-    track.addEventListener('scroll', function() {
-      clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(function() {
-        var trackCenter = track.scrollLeft + track.clientWidth / 2;
-        var idx = 0;
-        var minDist = Infinity;
-        for (var i = 0; i < tot; i++) {
-          var cardCenter = cards[i].offsetLeft + cards[i].offsetWidth / 2;
-          var dist = Math.abs(cardCenter - trackCenter);
-          if (dist < minDist) { minDist = dist; idx = i; }
-        }
-        if (idx !== cur && idx >= 0 && idx < tot) {
-          cur = idx;
-          updateUI();
-        }
-      }, 80);
-    }, { passive: true });
-
-    if (nav) {
-      nav.querySelector('.surmesure-slider-prev').addEventListener('click', function() { goTo(cur - 1); });
-      nav.querySelector('.surmesure-slider-next').addEventListener('click', function() { goTo(cur + 1); });
-    }
-
-    if (dots.length) {
-      dots.forEach(function(dot) {
-        dot.addEventListener('click', function() { goTo(parseInt(this.dataset.idx)); });
-      });
-    }
-  }
-
-  initSlider('particulier');
-  initSlider('pro');
-
   // --- Modale ---
   var modal = document.getElementById('surmesure-modal');
   if (!modal) return;
 
   var overlay   = modal.querySelector('.surmesure-modal-overlay');
   var closeBtn  = modal.querySelector('.surmesure-modal-close');
-  var imgEl     = modal.querySelector('.surmesure-modal-image img');
+  var imageContainer = modal.querySelector('.surmesure-modal-image');
   var thumbsEl  = modal.querySelector('.surmesure-modal-thumbs');
   var prevBtn   = modal.querySelector('.surmesure-modal-nav-prev');
   var nextBtn   = modal.querySelector('.surmesure-modal-nav-next');
@@ -628,9 +537,12 @@ get_header();
   var quotePEl  = quoteEl.querySelector('p');
   var citeEl    = quoteEl.querySelector('cite');
   var ctaLink   = modal.querySelector('.surmesure-modal-cta');
+  var galleryEl = modal.querySelector('.surmesure-modal-gallery');
   var previousFocus = null;
   var currentGallery = [];
   var currentIndex = 0;
+  var isMobile = window.matchMedia('(max-width: 768px)');
+  var photoDots = null;
 
   function buildDetail(svg, text) {
     return '<span class="surmesure-detail">' + svg + ' ' + text + '</span>';
@@ -643,12 +555,32 @@ get_header();
     });
   }
 
+  function setActiveDot(index) {
+    if (!photoDots) return;
+    var dots = photoDots.querySelectorAll('.surmesure-modal-photo-dot');
+    dots.forEach(function(d, i) {
+      d.classList.toggle('active', i === index);
+    });
+  }
+
   function goToPhoto(index) {
     if (index < 0 || index >= currentGallery.length) return;
     currentIndex = index;
-    imgEl.src = currentGallery[index];
-    imgEl.srcset = '';
-    setActiveThumb(index);
+
+    if (isMobile.matches) {
+      var imgs = imageContainer.querySelectorAll('img');
+      if (imgs[index]) {
+        imgs[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+      setActiveDot(index);
+    } else {
+      var mainImg = imageContainer.querySelector('img');
+      if (mainImg) {
+        mainImg.src = currentGallery[index];
+        mainImg.srcset = '';
+      }
+      setActiveThumb(index);
+    }
   }
 
   function openModal(card) {
@@ -659,17 +591,71 @@ get_header();
     var st = data.modalSoustitre || '';
     subtitleEl.textContent = st;
     subtitleEl.style.display = st ? '' : 'none';
-    imgEl.src = data.modalImage || '';
-    imgEl.srcset = '';
-    imgEl.alt = data.modalTitle || '';
 
     currentGallery = [];
     currentIndex = 0;
     try { currentGallery = JSON.parse(data.modalGallery || '[]'); } catch(e) {}
+    if (!currentGallery.length && data.modalImage) currentGallery = [data.modalImage];
 
-    thumbsEl.innerHTML = '';
     var hasGallery = currentGallery.length > 1;
-    if (hasGallery) {
+
+    // Construire les images
+    imageContainer.innerHTML = '';
+    if (isMobile.matches && hasGallery) {
+      // Mobile : toutes les images côte à côte pour scroll horizontal
+      currentGallery.forEach(function(url) {
+        var img = document.createElement('img');
+        img.src = url;
+        img.srcset = '';
+        img.alt = data.modalTitle || '';
+        imageContainer.appendChild(img);
+      });
+
+      // Dots
+      if (photoDots) photoDots.remove();
+      photoDots = document.createElement('div');
+      photoDots.className = 'surmesure-modal-photo-dots';
+      currentGallery.forEach(function(url, i) {
+        var dot = document.createElement('button');
+        dot.className = 'surmesure-modal-photo-dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', 'Photo ' + (i + 1));
+        dot.addEventListener('click', function() { goToPhoto(i); });
+        photoDots.appendChild(dot);
+      });
+      imageContainer.parentNode.insertBefore(photoDots, imageContainer.nextSibling);
+
+      // Scroll listener pour mettre à jour les dots
+      imageContainer.addEventListener('scroll', function onImgScroll() {
+        if (!modal.classList.contains('is-open')) {
+          imageContainer.removeEventListener('scroll', onImgScroll);
+          return;
+        }
+        var center = imageContainer.scrollLeft + imageContainer.clientWidth / 2;
+        var imgs = imageContainer.querySelectorAll('img');
+        var closest = 0;
+        var minDist = Infinity;
+        imgs.forEach(function(img, j) {
+          var imgCenter = img.offsetLeft + img.offsetWidth / 2;
+          var dist = Math.abs(imgCenter - center);
+          if (dist < minDist) { minDist = dist; closest = j; }
+        });
+        if (closest !== currentIndex) {
+          currentIndex = closest;
+          setActiveDot(closest);
+        }
+      }, { passive: true });
+    } else {
+      // Desktop : une seule image
+      var img = document.createElement('img');
+      img.src = currentGallery[0] || data.modalImage || '';
+      img.srcset = '';
+      img.alt = data.modalTitle || '';
+      imageContainer.appendChild(img);
+    }
+
+    // Thumbnails (desktop uniquement)
+    thumbsEl.innerHTML = '';
+    if (hasGallery && !isMobile.matches) {
       currentGallery.forEach(function(url, i) {
         var thumb = document.createElement('button');
         thumb.className = 'surmesure-modal-thumb' + (i === 0 ? ' is-active' : '');
@@ -683,8 +669,8 @@ get_header();
       thumbsEl.style.display = 'none';
     }
 
-    prevBtn.style.display = hasGallery ? '' : 'none';
-    nextBtn.style.display = hasGallery ? '' : 'none';
+    prevBtn.style.display = hasGallery && !isMobile.matches ? '' : 'none';
+    nextBtn.style.display = hasGallery && !isMobile.matches ? '' : 'none';
 
     var html = '';
     if (data.modalEssence) html += buildDetail('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>', data.modalEssence);
@@ -715,6 +701,7 @@ get_header();
     modal.setAttribute('aria-hidden', 'true');
     modal.classList.remove('is-open');
     document.body.style.overflow = '';
+    if (photoDots) { photoDots.remove(); photoDots = null; }
     if (previousFocus) previousFocus.focus();
   }
 
