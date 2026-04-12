@@ -22570,7 +22570,7 @@ html.sapi-intro-active body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 1rem;
-    padding: 15px 5%;
+    padding: 15px 5% 30px;
   }
   .surmesure-steps::-webkit-scrollbar { display: none; }
   .surmesure-steps > .surmesure-step {
@@ -22601,7 +22601,7 @@ html.sapi-intro-active body {
   }
 
   .surmesure-slider-dots {
-    margin: 0.25rem auto 0;
+    margin: 0 auto;
   }
 
   .surmesure-card-content {
@@ -23160,7 +23160,7 @@ html.sapi-intro-active body {
     display: flex;
     justify-content: center;
     gap: 0.5rem;
-    padding: 1rem 0 0;
+    padding: 0;
   }
 
   .scroll-dot {
