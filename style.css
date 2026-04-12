@@ -14507,6 +14507,15 @@ transform: translateY(15px);
   }
 }
 
+/* No results message */
+.shop-products .woocommerce-no-products-found {
+  text-align: center;
+  padding: 3rem 2rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-gray-mid, #888);
+}
+
 /* ========================================
    WOOCOMMERCE - Enhanced Product Cards
    ======================================== */
