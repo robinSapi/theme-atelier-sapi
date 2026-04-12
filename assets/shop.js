@@ -281,6 +281,24 @@
       searchInput.addEventListener('input', () => {
         this.searchQuery = searchInput.value.trim().toLowerCase();
         clearBtn.style.display = this.searchQuery ? 'flex' : 'none';
+
+        // Reset catégorie sur "all" quand l'utilisateur recherche
+        if (this.searchQuery && this.filters.category !== 'all') {
+          this.filters.category = 'all';
+          var filterContainer = document.querySelector('.product-filters-js');
+          if (filterContainer) {
+            var activeBtn = filterContainer.querySelector('.filter-btn.active');
+            if (activeBtn) activeBtn.classList.remove('active');
+            var allBtn = filterContainer.querySelector('.filter-btn[data-filter="all"]');
+            if (allBtn) allBtn.classList.add('active');
+          }
+          this._syncMobileDropdown('all');
+          // Désactiver Robin si actif
+          this._robinProductIds = null;
+          var robinRow = document.getElementById('filter-row-robin');
+          if (robinRow) robinRow.classList.remove('is-active');
+        }
+
         this.applyFilters();
       });
 
