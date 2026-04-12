@@ -22611,7 +22611,7 @@ html.sapi-intro-active body {
 .surmesure-modal {
   position: fixed;
   inset: 0;
-  z-index: 10000;
+  z-index: 10020;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22849,24 +22849,44 @@ html.sapi-intro-active body {
 
 /* Modale responsive */
 @media (max-width: 768px) {
+  .surmesure-modal {
+    padding: 0;
+  }
+
   .surmesure-modal-container {
-    width: 95vw;
-    max-height: 90vh;
+    width: 100vw;
+    max-height: 100vh;
+    max-height: 100dvh;
+    border-radius: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .surmesure-modal-body {
     grid-template-columns: 1fr;
-    max-height: 90vh;
-    overflow-y: auto;
+    grid-template-rows: auto 1fr;
+    overflow: visible;
+  }
+
+  .surmesure-modal-gallery {
+    position: relative;
   }
 
   .surmesure-modal-image {
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 4 / 3;
+    flex: none;
   }
+
+  .surmesure-modal-thumbs {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .surmesure-modal-thumbs::-webkit-scrollbar { display: none; }
 
   .surmesure-modal-thumb {
     width: 48px;
     height: 48px;
+    flex-shrink: 0;
   }
 
   .surmesure-modal-content {
@@ -22898,6 +22918,7 @@ html.sapi-intro-active body {
     right: 0.75rem;
     width: 36px;
     height: 36px;
+    z-index: 2;
   }
 }
 
