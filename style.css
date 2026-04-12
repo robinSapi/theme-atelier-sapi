@@ -14408,8 +14408,14 @@ transform: translateY(15px);
     padding: 0;
   }
 
+  /* === Harmonisation filtres mobile === */
   .product-search-bar {
     margin: 0.75rem 1rem 0;
+  }
+
+  .product-search-input {
+    border-radius: 50px;
+    padding: 12px 48px;
   }
 
   /* Dropdown mobile visible, pills masquées */
@@ -14422,12 +14428,18 @@ transform: translateY(15px);
   .filter-dropdown--mobile .filter-dropdown-toggle {
     width: 100%;
     justify-content: space-between;
+    border-radius: 50px;
+    border-color: var(--color-gray-light);
+    background: var(--color-white, #fff);
+    padding: 12px 20px;
+    font-size: 0.875rem;
   }
 
   .filter-dropdown--mobile .filter-dropdown-menu {
     width: 100%;
     left: 0;
     right: 0;
+    border-radius: 20px;
   }
 
   .filter-row--categories,
@@ -14436,7 +14448,7 @@ transform: translateY(15px);
   }
 
   .product-filters {
-    padding: 0.75rem 0.5rem;
+    padding: 0.5rem 0.5rem;
     gap: 0.5rem;
     flex-wrap: wrap;
     overflow-x: visible;
@@ -14444,8 +14456,8 @@ transform: translateY(15px);
   }
 
   .filter-row--robin {
-    padding: 0.6rem 1rem;
-    border-radius: 16px;
+    padding: 12px 20px;
+    border-radius: 50px;
     max-width: 100%;
     margin: 0 0.5rem;
     width: calc(100% - 1rem);
