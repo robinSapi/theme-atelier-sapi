@@ -50,6 +50,12 @@
       })(i);
     }
 
+    // Hériter du data-tab-content pour que le JS d'onglets masque/affiche les dots
+    var tabParent = container.closest('[data-tab-content]') || (container.dataset.tabContent ? container : null);
+    if (tabParent) {
+      dotsEl.setAttribute('data-tab-content', tabParent.dataset.tabContent);
+    }
+
     container.parentNode.insertBefore(dotsEl, container.nextSibling);
 
     function onScroll() {
