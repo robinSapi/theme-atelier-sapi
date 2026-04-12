@@ -22305,8 +22305,8 @@ html.sapi-intro-active body {
   .surmesure-card:hover .surmesure-card-cta {
     background: var(--color-orange, #E35B24);
     color: #fff;
-    padding: 8px 20px;
-    border-radius: 6px;
+    padding: 10px 24px;
+    border-radius: 50px;
   }
 }
 
