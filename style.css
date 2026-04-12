@@ -14086,6 +14086,11 @@ transform: translateY(15px);
   display: none;
 }
 
+/* Dropdown mobile — masqué sur desktop */
+.filter-dropdown--mobile {
+  display: none;
+}
+
 /* Filter Rows — 3 niveaux visuels */
 .filter-row {
   display: flex;
@@ -14407,7 +14412,29 @@ transform: translateY(15px);
     margin: 0.75rem 1rem 0;
   }
 
-  /* Filtres : rows empilées verticalement, scroll horizontal par row */
+  /* Dropdown mobile visible, pills masquées */
+  .filter-dropdown--mobile {
+    display: block;
+    width: 100%;
+    padding: 0 1rem;
+  }
+
+  .filter-dropdown--mobile .filter-dropdown-toggle {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .filter-dropdown--mobile .filter-dropdown-menu {
+    width: 100%;
+    left: 0;
+    right: 0;
+  }
+
+  .filter-row--categories,
+  .filter-row--extras {
+    display: none;
+  }
+
   .product-filters {
     padding: 0.75rem 0.5rem;
     gap: 0.5rem;
@@ -14416,34 +14443,12 @@ transform: translateY(15px);
     justify-content: flex-start;
   }
 
-  .filter-row {
-    flex-wrap: nowrap;
-    gap: 0.5rem;
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    align-items: center;
-  }
-
-  .filter-row::-webkit-scrollbar {
-    display: none;
-  }
-
   .filter-row--robin {
-    flex-wrap: wrap;
-    gap: 0.5rem;
     padding: 0.6rem 1rem;
-    overflow-x: visible;
     border-radius: 16px;
     max-width: 100%;
     margin: 0 0.5rem;
     width: calc(100% - 1rem);
-  }
-
-  .robin-selection-btn {
-    margin-left: 0;
   }
 
   .filter-btn {

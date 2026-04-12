@@ -31,7 +31,7 @@
         return;
       }
 
-      // Category filter buttons
+      // Category filter buttons (pills desktop)
       const filterBtns = filterContainer.querySelectorAll('.filter-btn:not(.filter-btn--robin)');
       filterBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -47,11 +47,17 @@
           filterContainer.querySelector('.filter-btn.active')?.classList.remove('active');
           btn.classList.add('active');
 
+          // Sync dropdown mobile
+          this._syncMobileDropdown(filter);
+
           // Apply filter
           this.filters.category = filter;
           this.applyFilters();
         });
       });
+
+      // Mobile dropdown filter
+      this.initMobileDropdown(filterContainer);
 
       // Search bar
       this.initSearch();
@@ -66,6 +72,76 @@
       this.applyFilters();
     },
 
+    initMobileDropdown: function(filterContainer) {
+      var dropdown = document.getElementById('mobile-category-dropdown');
+      if (!dropdown) return;
+
+      var toggle = dropdown.querySelector('.filter-dropdown-toggle');
+      var menu = dropdown.querySelector('.filter-dropdown-menu');
+      var options = dropdown.querySelectorAll('.filter-option');
+      var label = dropdown.querySelector('.filter-label');
+      var self = this;
+
+      // Ouvrir/fermer
+      toggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdown.classList.toggle('open');
+      });
+
+      // Sélection d'une option
+      options.forEach(function(option) {
+        option.addEventListener('click', function(e) {
+          e.preventDefault();
+          var filter = option.dataset.filter;
+
+          // Update active state dans le dropdown
+          dropdown.querySelector('.filter-option.active')?.classList.remove('active');
+          option.classList.add('active');
+          label.textContent = option.textContent;
+          dropdown.classList.remove('open');
+
+          // Désactiver Robin si actif
+          self._robinProductIds = null;
+          var robinRow = document.getElementById('filter-row-robin');
+          if (robinRow) robinRow.classList.remove('is-active');
+
+          // Sync pills desktop
+          var activeBtn = filterContainer.querySelector('.filter-btn.active');
+          if (activeBtn) activeBtn.classList.remove('active');
+          var matchBtn = filterContainer.querySelector('.filter-btn[data-filter="' + filter + '"]');
+          if (matchBtn) matchBtn.classList.add('active');
+
+          // Appliquer le filtre
+          self.filters.category = filter;
+          self.applyFilters();
+        });
+      });
+
+      // Fermer au clic extérieur
+      document.addEventListener('click', function(e) {
+        if (!dropdown.contains(e.target)) {
+          dropdown.classList.remove('open');
+        }
+      });
+    },
+
+    _syncMobileDropdown: function(filter) {
+      var dropdown = document.getElementById('mobile-category-dropdown');
+      if (!dropdown) return;
+      var options = dropdown.querySelectorAll('.filter-option');
+      var label = dropdown.querySelector('.filter-label');
+      options.forEach(function(opt) {
+        if (filter === null) {
+          opt.classList.remove('active');
+        } else {
+          opt.classList.toggle('active', opt.dataset.filter === filter);
+          if (opt.dataset.filter === filter) {
+            label.textContent = opt.textContent;
+          }
+        }
+      });
+    },
+
     initRobinSelection: function(filterContainer) {
       if (!filterContainer) return;
 
@@ -78,39 +154,47 @@
       var robinRow = document.getElementById('filter-row-robin');
       if (!robinRow) return;
 
-      // Construire les chips à partir des réponses
-      var labels = prefs.labels || {};
-      var chipLabels = [];
-      var labelOrder = ['piece', 'taille', 'taille_escalier', 'sortie', 'hauteur', 'table', 'style'];
-      labelOrder.forEach(function(key) {
-        if (labels[key]) chipLabels.push(labels[key]);
-      });
-
-      var chipsHtml = '';
-      chipLabels.forEach(function(label, i) {
-        if (i > 0) chipsHtml += '<span class="robin-selection-chip-sep" aria-hidden="true">\u00b7</span>';
-        chipsHtml += '<span class="robin-selection-chip">' + label + '</span>';
-      });
-
       // Icône crayon
       var iconSvg = '<svg class="robin-selection-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>';
 
-      robinRow.innerHTML =
-        iconSvg +
-        '<span class="robin-selection-label">La s\u00e9lection pour mon projet</span>' +
-        '<div class="robin-selection-chips">' + chipsHtml + '</div>' +
-        '<button type="button" class="robin-selection-btn" id="robin-selection-btn">Modifier le projet</button>';
+      var isMobile = window.innerWidth <= 768;
+
+      if (isMobile) {
+        // Mobile : version simplifiée sans chips ni bouton modifier
+        robinRow.innerHTML =
+          iconSvg +
+          '<span class="robin-selection-label">Voir la s\u00e9lection pour mon projet</span>';
+      } else {
+        // Desktop : version complète avec chips et bouton modifier
+        var labels = prefs.labels || {};
+        var chipLabels = [];
+        var labelOrder = ['piece', 'taille', 'taille_escalier', 'sortie', 'hauteur', 'table', 'style'];
+        labelOrder.forEach(function(key) {
+          if (labels[key]) chipLabels.push(labels[key]);
+        });
+
+        var chipsHtml = '';
+        chipLabels.forEach(function(label, i) {
+          if (i > 0) chipsHtml += '<span class="robin-selection-chip-sep" aria-hidden="true">\u00b7</span>';
+          chipsHtml += '<span class="robin-selection-chip">' + label + '</span>';
+        });
+
+        robinRow.innerHTML =
+          iconSvg +
+          '<span class="robin-selection-label">La s\u00e9lection pour mon projet</span>' +
+          '<div class="robin-selection-chips">' + chipsHtml + '</div>' +
+          '<button type="button" class="robin-selection-btn" id="robin-selection-btn">Modifier le projet</button>';
+      }
 
       robinRow.style.display = 'flex';
 
-      // Références
       var editBtn = document.getElementById('robin-selection-btn');
       var self = this;
 
       // Clic sur le bandeau — active/désactive le filtre
       robinRow.addEventListener('click', function(e) {
-        // Ne pas filtrer si clic sur le bouton "Modifier le projet"
-        if (e.target === editBtn || editBtn.contains(e.target)) return;
+        // Ne pas filtrer si clic sur le bouton "Modifier le projet" (desktop)
+        if (editBtn && (e.target === editBtn || editBtn.contains(e.target))) return;
 
         var isActive = robinRow.classList.contains('is-active');
 
@@ -122,28 +206,32 @@
             filterContainer.querySelectorAll('.filter-btn.active').forEach(function(b) { b.classList.remove('active'); });
             allBtn.classList.add('active');
           }
+          self._syncMobileDropdown('all');
           self.filters.category = 'all';
           self._robinProductIds = null;
           self.applyFilters();
         } else {
           // Activer Ma sélection
           filterContainer.querySelectorAll('.filter-btn.active').forEach(function(b) { b.classList.remove('active'); });
+          self._syncMobileDropdown(null);
           robinRow.classList.add('is-active');
           self.fetchRobinSelection(prefs.answers);
         }
       });
 
-      // Clic sur "Modifier le projet" — ouvrir la modale Robin
-      editBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (window.sapiRobinConseiller && typeof window.openRobinModal === 'function') {
-          window.openRobinModal('bandeau');
-        } else {
-          var bandeau = document.getElementById('robin-bandeau');
-          if (bandeau) bandeau.click();
-        }
-      });
+      // Clic sur "Modifier le projet" — desktop uniquement
+      if (editBtn) {
+        editBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (window.sapiRobinConseiller && typeof window.openRobinModal === 'function') {
+            window.openRobinModal('bandeau');
+          } else {
+            var bandeau = document.getElementById('robin-bandeau');
+            if (bandeau) bandeau.click();
+          }
+        });
+      }
 
       // Auto-activer si URL contient robin_selection=1 (différé après init)
       var params = new URLSearchParams(window.location.search);
