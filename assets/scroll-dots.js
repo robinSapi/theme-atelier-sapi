@@ -54,6 +54,9 @@
     var tabParent = container.closest('[data-tab-content]') || (container.dataset.tabContent ? container : null);
     if (tabParent) {
       dotsEl.setAttribute('data-tab-content', tabParent.dataset.tabContent);
+      if (tabParent.style.display === 'none') {
+        dotsEl.style.display = 'none';
+      }
     }
 
     container.parentNode.insertBefore(dotsEl, container.nextSibling);

@@ -520,8 +520,8 @@ get_header();
       el.classList.remove('is-visible');
     });
 
-    // Contenu onglets
-    tabContents.forEach(function(el) {
+    // Contenu onglets (re-query pour inclure les dots créés dynamiquement)
+    document.querySelectorAll('[data-tab-content]').forEach(function(el) {
       el.style.display = el.dataset.tabContent === tab ? '' : 'none';
     });
 
