@@ -23014,20 +23014,15 @@ html.sapi-intro-active body {
    SCROLL DOTS — Grilles verticales → Sliders horizontaux sur mobile
    ======================================== */
 
-/* Dots masqués par défaut en desktop (activés en mobile par media query) */
+/* --- Scroll Dots (base) --- */
 .scroll-dots {
   display: none;
-}
-
-/* Dots toujours visibles pour les sliders "alwaysActive" (réalisations sur mesure) */
-.surmesure-grid + .scroll-dots {
-  display: flex;
   justify-content: center;
   gap: 0.5rem;
   padding: 0;
 }
 
-.surmesure-grid + .scroll-dots .scroll-dot {
+.scroll-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -23036,11 +23031,17 @@ html.sapi-intro-active body {
   padding: 0;
   cursor: pointer;
   transition: all 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.surmesure-grid + .scroll-dots .scroll-dot.active {
+.scroll-dot.active {
   background: var(--color-wood);
   transform: scale(1.3);
+}
+
+/* Dots toujours visibles pour les sliders alwaysActive */
+.surmesure-grid + .scroll-dots {
+  display: flex;
 }
 
 @media (max-width: 768px) {
@@ -23160,26 +23161,6 @@ html.sapi-intro-active body {
   /* --- Dots --- */
   .scroll-dots {
     display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0;
-  }
-
-  .scroll-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--color-gray-light, #e8e2d9);
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .scroll-dot.active {
-    background: var(--color-wood);
-    transform: scale(1.3);
   }
 }
 
