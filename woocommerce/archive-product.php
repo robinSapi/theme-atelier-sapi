@@ -131,18 +131,40 @@ sapi_robin_conseil_card( 'selection' );
     }
     ?>
 
-    <!-- Ligne 1 : Filtres catégorie (luminaires) -->
+    <!-- Dropdown mobile (remplace les pills sur mobile) -->
+    <?php
+    $creations_order = ['suspensions', 'appliques', 'lampadaires', 'lampesaposer'];
+    $all_filter_label = esc_html__('Toutes mes créations', 'theme-sapi-maison') . ' (' . esc_html($creations_count) . ')';
+    ?>
+    <div class="filter-dropdown filter-dropdown--mobile" id="mobile-category-dropdown">
+      <button type="button" class="filter-dropdown-toggle">
+        <span class="filter-label"><?php echo $all_filter_label; ?></span>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="filter-dropdown-menu">
+        <button type="button" class="filter-option active" data-filter="all"><?php echo $all_filter_label; ?></button>
+        <?php foreach ($creations_order as $slug) :
+          if (!isset($cats_by_slug[$slug])) continue;
+          $cat = $cats_by_slug[$slug]; ?>
+          <button type="button" class="filter-option" data-filter="<?php echo esc_attr($cat->slug); ?>"><?php echo esc_html($cat->name); ?> (<?php echo esc_html($cat->count); ?>)</button>
+        <?php endforeach; ?>
+        <?php foreach ($extras_slugs as $slug) :
+          if (!isset($cats_by_slug[$slug])) continue;
+          $cat = $cats_by_slug[$slug]; ?>
+          <button type="button" class="filter-option" data-filter="<?php echo esc_attr($cat->slug); ?>"><?php echo esc_html($cat->name); ?> (<?php echo esc_html($cat->count); ?>)</button>
+        <?php endforeach; ?>
+      </div>
+    </div>
+
+    <!-- Ligne 1 : Filtres catégorie (luminaires) — desktop only -->
     <div class="filter-row filter-row--categories">
       <button type="button" class="filter-btn active" data-filter="all">
         <?php esc_html_e('Toutes mes créations', 'theme-sapi-maison'); ?>
         <span class="filter-count">(<?php echo esc_html($creations_count); ?>)</span>
       </button>
-      <?php
-      $creations_order = ['suspensions', 'appliques', 'lampadaires', 'lampesaposer'];
-      foreach ($creations_order as $slug) :
+      <?php foreach ($creations_order as $slug) :
         if (!isset($cats_by_slug[$slug])) continue;
-        $cat = $cats_by_slug[$slug];
-      ?>
+        $cat = $cats_by_slug[$slug]; ?>
         <button type="button" class="filter-btn" data-filter="<?php echo esc_attr($cat->slug); ?>">
           <?php echo esc_html($cat->name); ?>
           <span class="filter-count">(<?php echo esc_html($cat->count); ?>)</span>
@@ -150,7 +172,7 @@ sapi_robin_conseil_card( 'selection' );
       <?php endforeach; ?>
     </div>
 
-    <!-- Ligne 2 : Extras (accessoires, carte cadeau) -->
+    <!-- Ligne 2 : Extras (accessoires, carte cadeau) — desktop only -->
     <div class="filter-row filter-row--extras">
       <?php
       foreach ($extras_slugs as $slug) :

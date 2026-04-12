@@ -14086,6 +14086,11 @@ transform: translateY(15px);
   display: none;
 }
 
+/* Dropdown mobile — masqué sur desktop */
+.filter-dropdown--mobile {
+  display: none;
+}
+
 /* Filter Rows — 3 niveaux visuels */
 .filter-row {
   display: flex;
@@ -14400,37 +14405,62 @@ transform: translateY(15px);
 /* Responsive - Mobile filters */
 @media (max-width: 768px) {
   .product-filters-wrapper {
+    padding: 0;
+  }
+
+  /* === Harmonisation filtres mobile === */
+  .product-search-bar {
+    margin: 0.75rem 1rem 0;
+  }
+
+  .product-search-input {
+    border-radius: 50px;
+    padding: 12px 48px;
+  }
+
+  /* Dropdown mobile visible, pills masquées */
+  .filter-dropdown--mobile {
+    display: block;
+    width: 100%;
     padding: 0 1rem;
   }
 
-  /* Filtres catégories - horizontal scroll pour économiser l'espace vertical */
+  .filter-dropdown--mobile .filter-dropdown-toggle {
+    width: 100%;
+    justify-content: space-between;
+    border-radius: 50px;
+    border-color: var(--color-gray-light);
+    background: var(--color-white, #fff);
+    padding: 12px 20px;
+    font-size: 0.875rem;
+  }
+
+  .filter-dropdown--mobile .filter-dropdown-menu {
+    width: 100%;
+    left: 0;
+    right: 0;
+    border-radius: 20px;
+  }
+
+  .filter-row--categories,
+  .filter-row--extras {
+    display: none;
+  }
+
   .product-filters {
-    padding: 1rem 1rem;
+    padding: 0.5rem 0.5rem;
     gap: 0.5rem;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    justify-content: flex-start;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .filter-row {
-    flex-wrap: nowrap;
-    gap: 0.5rem;
-  }
-
-  .filter-row--robin {
     flex-wrap: wrap;
-    gap: 0.5rem;
-    padding: 0.6rem 1rem;
+    overflow-x: visible;
+    justify-content: flex-start;
   }
 
   .filter-row--robin {
-    border-radius: 16px;
+    padding: 12px 20px;
+    border-radius: 50px;
     max-width: 100%;
-  }
-
-  .robin-selection-btn {
-    margin-left: 0;
+    margin: 0 0.5rem;
+    width: calc(100% - 1rem);
   }
 
   .filter-btn {
@@ -14475,6 +14505,15 @@ transform: translateY(15px);
     padding: 6px 10px;
     font-size: 12px;
   }
+}
+
+/* No results message */
+.shop-products .woocommerce-no-products-found {
+  text-align: center;
+  padding: 3rem 2rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-gray-mid, #888);
 }
 
 /* ========================================
