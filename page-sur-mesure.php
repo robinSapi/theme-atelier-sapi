@@ -464,11 +464,9 @@ get_header();
 
   // --- Onglets ---
   var tabs = document.querySelectorAll('.surmesure-tab');
-  var tabContents = document.querySelectorAll('[data-tab-content]');
   var heroBgParticulier = document.querySelector('.surmesure-hero-bg--particulier');
   var heroBgPro = document.querySelector('.surmesure-hero-bg--pro');
   var proFields = document.querySelectorAll('.is-pro-field');
-  var heroTitles = document.querySelectorAll('.surmesure-hero-title');
   var heroSubtitles = document.querySelectorAll('.surmesure-hero-subtitle');
 
   // --- Animation écriture H1 ---
@@ -496,10 +494,14 @@ get_header();
       title.appendChild(span);
     });
 
-    var totalMs = text.length * LETTER_DELAY + 300;
-    setTimeout(function() {
-      subtitle.classList.add('is-visible');
-    }, totalMs);
+    // Afficher le sous-titre quand la dernière lettre finit son animation
+    var lastSpan = title.lastElementChild;
+    if (lastSpan) {
+      lastSpan.addEventListener('animationend', function onEnd() {
+        lastSpan.removeEventListener('animationend', onEnd);
+        subtitle.classList.add('is-visible');
+      });
+    }
   }
 
   function switchTab(tab) {
@@ -576,24 +578,19 @@ get_header();
       updateUI();
     }
 
-    var scrollTimer;
-    track.addEventListener('scroll', function() {
-      clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(function() {
-        var trackCenter = track.scrollLeft + track.clientWidth / 2;
-        var idx = 0;
-        var minDist = Infinity;
-        for (var i = 0; i < tot; i++) {
-          var cardCenter = cards[i].offsetLeft + cards[i].offsetWidth / 2;
-          var dist = Math.abs(cardCenter - trackCenter);
-          if (dist < minDist) { minDist = dist; idx = i; }
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var idx = Array.prototype.indexOf.call(cards, entry.target);
+          if (idx !== -1 && idx !== cur) {
+            cur = idx;
+            updateUI();
+          }
         }
-        if (idx !== cur && idx >= 0 && idx < tot) {
-          cur = idx;
-          updateUI();
-        }
-      }, 80);
-    }, { passive: true });
+      });
+    }, { root: track, threshold: 0.6 });
+
+    cards.forEach(function(card) { observer.observe(card); });
 
     if (nav) {
       nav.querySelector('.surmesure-slider-prev').addEventListener('click', function() { goTo(cur - 1); });
