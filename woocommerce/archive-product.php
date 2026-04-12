@@ -441,7 +441,7 @@ sapi_robin_conseil_card( 'selection' );
     <p class="shop-outro-subtitle">
       <?php esc_html_e('Dites à Robin ce que vous imaginez et créez ensemble votre luminaire sur-mesure.', 'theme-sapi-maison'); ?>
     </p>
-    <a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>" class="button button-outline shop-outro-cta">
+    <a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>" class="shop-outro-cta">
       <?php esc_html_e('Découvrir le sur mesure', 'theme-sapi-maison'); ?>
     </a>
   </div>
