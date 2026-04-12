@@ -22687,14 +22687,15 @@ html.sapi-intro-active body {
 .surmesure-modal-body {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: minmax(0, 1fr);
-  max-height: 85vh;
+  grid-template-rows: 1fr;
+  height: 100%;
   overflow: hidden;
 }
 
 .surmesure-modal-gallery {
   display: flex;
   flex-direction: column;
+  height: 100%;
   min-height: 0;
 }
 
