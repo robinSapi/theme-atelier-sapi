@@ -22292,12 +22292,13 @@ html.sapi-intro-active body {
 
 .surmesure-card-cta {
   display: inline-block;
+  align-self: flex-start;
   margin-top: auto;
   padding-top: 0.75rem;
   font-size: 0.88rem;
   font-weight: 600;
   color: var(--color-orange, #E35B24);
-  border-radius: 6px;
+  border-radius: 50px;
   transition: all 0.3s ease;
 }
 
@@ -22306,8 +22307,6 @@ html.sapi-intro-active body {
     background: var(--color-orange, #E35B24);
     color: #fff;
     padding: 10px 24px;
-    border-radius: 50px;
-    align-self: flex-start;
   }
 }
 
