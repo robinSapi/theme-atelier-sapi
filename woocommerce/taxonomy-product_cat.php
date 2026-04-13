@@ -106,6 +106,14 @@ if (function_exists('sapi_maison_breadcrumbs')) {
             <?php if ($ambiance_url) : ?>
               <img src="<?php echo esc_url($ambiance_url); ?>" alt="<?php echo esc_attr($title); ?> — ambiance" class="showcase-bg" loading="lazy" />
             <?php endif; ?>
+            <button
+              type="button"
+              class="product-quick-view"
+              data-product-id="<?php echo esc_attr($pid); ?>"
+              data-product-url="<?php echo esc_url($permalink); ?>"
+              aria-label="<?php echo esc_attr('Aperçu rapide de ' . $title); ?>">
+              Aperçu
+            </button>
           </div>
         </a>
       <?php
