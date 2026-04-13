@@ -1231,12 +1231,15 @@ document.addEventListener('DOMContentLoaded', () => {
       let timer = null;
       let current = 0;
 
+      function advance() {
+        slides[current].classList.remove('is-active');
+        current = (current + 1) % slides.length;
+        slides[current].classList.add('is-active');
+      }
+
       card.addEventListener('mouseenter', () => {
-        timer = setInterval(() => {
-          slides[current].classList.remove('is-active');
-          current = (current + 1) % slides.length;
-          slides[current].classList.add('is-active');
-        }, 1800);
+        advance();
+        timer = setInterval(advance, 1800);
       });
 
       card.addEventListener('mouseleave', () => {
