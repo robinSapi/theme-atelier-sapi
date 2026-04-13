@@ -240,9 +240,9 @@ function sapi_maison_enqueue_assets() {
   $formatter_js_path = get_template_directory() . '/assets/product-name-formatter.js';
   wp_enqueue_script('sapi-maison-product-formatter', get_template_directory_uri() . '/assets/product-name-formatter.js', [], file_exists($formatter_js_path) ? filemtime($formatter_js_path) : '1.0.0', true);
 
-  // CINÉTIQUE interactions (bento animations, custom cursor, parallax, quantity buttons)
-  // Chargé sur homepage ET pages produit
-  if (is_front_page() || (class_exists('WooCommerce') && is_product())) {
+  // CINÉTIQUE interactions (bento animations, custom cursor, parallax, quantity buttons, showcase slideshow)
+  // Chargé sur homepage, pages produit ET pages catégorie
+  if (is_front_page() || (class_exists('WooCommerce') && (is_product() || is_product_category()))) {
     $cinetique_js_path = get_template_directory() . '/assets/cinetique.js';
     wp_enqueue_script('sapi-maison-cinetique', get_template_directory_uri() . '/assets/cinetique.js', [], file_exists($cinetique_js_path) ? filemtime($cinetique_js_path) : '1.0.0', true);
   }
@@ -270,11 +270,6 @@ function sapi_maison_enqueue_assets() {
 
     // Editorial Carousel removed — products now displayed in grid
 
-    // Quick View modal for product previews
-    $quick_view_js_path = get_template_directory() . '/assets/quick-view.js';
-    if (file_exists($quick_view_js_path)) {
-      wp_enqueue_script('sapi-maison-quick-view', get_template_directory_uri() . '/assets/quick-view.js', [], filemtime($quick_view_js_path), true);
-    }
   }
 
   // Guide personalization — swap product card images based on guide preferences

@@ -109,17 +109,17 @@ if ($star_page && function_exists('get_field')) {
       }
     }
 
-    $detail_photos = sapi_get_product_photos($star_id, 'detail', 1);
-    $image_url = !empty($detail_photos) ? $detail_photos[0] : '';
-    if (!$image_url) {
-      $image_url = get_the_post_thumbnail_url($star_id, 'woocommerce_single');
+    $detail_photo_ids = sapi_get_product_photo_ids($star_id, 'detail', 1);
+    $star_image_id = !empty($detail_photo_ids) ? $detail_photo_ids[0] : 0;
+    if (!$star_image_id) {
+      $star_image_id = get_post_thumbnail_id($star_id);
     }
 
     $star_product_data = [
       'name'     => $product->get_name(),
       'category' => $category_name,
       'price'    => $price_display,
-      'image'    => $image_url,
+      'image_id' => $star_image_id,
       'url'      => home_url('/la-star-du-moment/'),
     ];
   }
@@ -153,15 +153,15 @@ if ($gc_query->have_posts()) {
       'post_status'    => 'inherit',
       'meta_query'     => [['key' => '_wp_attached_file', 'value' => 'Bandeau-Noel', 'compare' => 'LIKE']],
     ]);
-    $gc_image = $bandeau_noel
-      ? wp_get_attachment_image_url($bandeau_noel[0]->ID, 'large')
-      : get_the_post_thumbnail_url(get_the_ID(), 'woocommerce_single');
+    $gc_image_id = $bandeau_noel
+      ? $bandeau_noel[0]->ID
+      : get_post_thumbnail_id(get_the_ID());
 
     $gift_card = [
-      'name'  => get_the_title(),
-      'price' => $price_display,
-      'image' => $gc_image,
-      'url'   => get_permalink(),
+      'name'     => get_the_title(),
+      'price'    => $price_display,
+      'image_id' => $gc_image_id,
+      'url'      => get_permalink(),
     ];
   }
   wp_reset_postdata();
@@ -213,10 +213,10 @@ if ($featured_query->have_posts()) {
     $product = wc_get_product(get_the_ID());
 
     if ($product) {
-      $detail_photos = sapi_get_product_photos(get_the_ID(), 'detail', 1);
-      $image_url = !empty($detail_photos) ? $detail_photos[0] : '';
+      $detail_photo_ids = sapi_get_product_photo_ids(get_the_ID(), 'detail', 1);
+      $featured_image_id = !empty($detail_photo_ids) ? $detail_photo_ids[0] : 0;
 
-      if ($image_url) {
+      if ($featured_image_id) {
         // Get price
         if ($product->is_type('variable')) {
           $min_price = $product->get_variation_price('min');
@@ -228,7 +228,7 @@ if ($featured_query->have_posts()) {
         $featured_products[] = [
           'name' => get_the_title(),
           'price' => $price_display,
-          'image' => $image_url,
+          'image_id' => $featured_image_id,
           'url' => get_permalink(),
         ];
         break; // Only need 1
@@ -286,11 +286,11 @@ foreach ($collection_slugs as $col) {
     // fallback sur la dernière ambiance disponible, puis vignette WC en dernier recours.
     $target_id = $preferred_id ?: $fallback_id;
     if ($target_id) {
-      $amb_photos = sapi_get_product_photos($target_id, 'ambiance');
-      if (!empty($amb_photos)) {
-        $col_image = isset($amb_photos[2]) ? $amb_photos[2] : end($amb_photos);
+      $amb_photo_ids = sapi_get_product_photo_ids($target_id, 'ambiance');
+      if (!empty($amb_photo_ids)) {
+        $col_image_id = isset($amb_photo_ids[2]) ? $amb_photo_ids[2] : end($amb_photo_ids);
       } else {
-        $col_image = get_the_post_thumbnail_url($target_id, 'large');
+        $col_image_id = get_post_thumbnail_id($target_id);
       }
     }
   }
@@ -298,7 +298,7 @@ foreach ($collection_slugs as $col) {
   $collections[] = [
     'name' => $col['name'],
     'count' => $cat_count . ' ' . ($cat_count > 1 ? 'créations' : 'création'),
-    'image' => $col_image,
+    'image_id' => $col_image_id,
     'url' => $cat_url,
   ];
 }
@@ -351,7 +351,7 @@ foreach ($collection_slugs as $col) {
     <!-- Star du moment -->
     <?php if ($star_product_data) : ?>
     <a href="<?php echo esc_url($star_product_data['url']); ?>" class="bento-card bento-hero">
-      <img src="<?php echo esc_url($star_product_data['image']); ?>" alt="<?php echo esc_attr($star_product_data['name']); ?> — Star du moment" class="bento-bg-img" loading="lazy">
+      <?php echo wp_get_attachment_image($star_product_data['image_id'], 'woocommerce_single', false, ['class' => 'bento-bg-img', 'loading' => 'lazy', 'alt' => $star_product_data['name'] . ' — Star du moment']); ?>
       <span class="bento-bestseller-badge">Star du moment</span>
       <div class="bento-content">
         <h2 class="bento-title product-name"><?php echo esc_html($star_product_data['name']); ?></h2>
@@ -380,7 +380,7 @@ foreach ($collection_slugs as $col) {
     <!-- Carte Cadeau -->
     <?php if ($gift_card) : ?>
     <a href="<?php echo esc_url($gift_card['url']); ?>" class="bento-card bento-giftcard">
-      <img src="<?php echo esc_url($gift_card['image']); ?>" alt="Carte cadeau Atelier Sâpi" class="bento-bg-img bento-bg-img--bottom-right" loading="lazy">
+      <?php echo wp_get_attachment_image($gift_card['image_id'], 'large', false, ['class' => 'bento-bg-img bento-bg-img--bottom-right', 'loading' => 'lazy', 'alt' => 'Carte cadeau Atelier Sâpi']); ?>
       <span class="giftcard-badge">Idée cadeau</span>
       <div class="giftcard-info">
         <h3>Offrez la lumière avec une carte cadeau</h3>
@@ -426,7 +426,7 @@ foreach ($collection_slugs as $col) {
     <?php foreach ($collections as $collection) : ?>
       <a href="<?php echo esc_url($collection['url']); ?>" class="collection-card">
         <div class="collection-visual">
-          <img src="<?php echo esc_url($collection['image']); ?>" alt="Collection <?php echo esc_attr($collection['name']); ?> — Luminaires en bois" class="collection-visual-img" loading="lazy">
+          <?php echo wp_get_attachment_image($collection['image_id'], 'large', false, ['class' => 'collection-visual-img', 'loading' => 'lazy', 'alt' => 'Collection ' . $collection['name'] . ' — Luminaires en bois']); ?>
         </div>
         <div class="collection-details">
           <h3><?php echo esc_html($collection['name']); ?></h3>
@@ -481,7 +481,7 @@ foreach ($collection_slugs as $col) {
     <!-- Product Card - Random Featured Product -->
     <?php if (!empty($featured_products)) : ?>
     <a href="<?php echo esc_url($featured_products[0]['url']); ?>" class="bento-card bento-product-featured">
-      <img src="<?php echo esc_url($featured_products[0]['image']); ?>" alt="<?php echo esc_attr($featured_products[0]['name']); ?> — Luminaire artisanal" class="bento-bg-img" loading="lazy">
+      <?php echo wp_get_attachment_image($featured_products[0]['image_id'], 'large', false, ['class' => 'bento-bg-img', 'loading' => 'lazy', 'alt' => $featured_products[0]['name'] . ' — Luminaire artisanal']); ?>
       <div class="bento-product-featured-info">
         <h3><?php echo esc_html($featured_products[0]['name']); ?></h3>
         <span class="bento-product-featured-price"><?php echo wp_kses_post($featured_products[0]['price']); ?></span>
@@ -520,7 +520,7 @@ foreach ($collection_slugs as $col) {
     <div class="bento-card bento-actu">
       <a href="<?php the_permalink(); ?>" class="bento-actu-link">
         <?php if (has_post_thumbnail()) : ?>
-          <img src="<?php echo esc_url(get_the_post_thumbnail_url(get_the_ID(), 'large')); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="bento-bg-img" loading="lazy">
+          <?php echo get_the_post_thumbnail(get_the_ID(), 'large', ['class' => 'bento-bg-img', 'loading' => 'lazy', 'alt' => get_the_title()]); ?>
         <?php endif; ?>
         <span class="bento-actu-badge">Flash actu</span>
         <div class="bento-actu-content">

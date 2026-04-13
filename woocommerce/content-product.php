@@ -2,7 +2,7 @@
 /**
  * The template for displaying product content within loops
  *
- * SAPI CINÉTIQUE - Enhanced product card with badges, hover effects, and quick view
+ * SAPI CINÉTIQUE - Enhanced product card with badges and hover effects
  *
  * @package Sapi-Maison
  * @version 9.4.0
@@ -119,18 +119,15 @@ if (!$size_dimension) {
 
 // Get gallery image for hover effect (lifestyle/ambiance photo)
 $gallery_ids = $product->get_gallery_image_ids();
-$hover_image_url = '';
-if (!empty($gallery_ids)) {
-  $hover_image_url = wp_get_attachment_image_url($gallery_ids[0], 'woocommerce_thumbnail');
-}
+$hover_image_id = !empty($gallery_ids) ? $gallery_ids[0] : 0;
 
 // Pages catégories : photo ambiance 1 en image principale, photo ambiance 2 en hover
-$sapi_category_ambiance_url = '';
+$sapi_category_ambiance_id = 0;
 if (is_product_category()) {
-  $amb = sapi_get_product_photos($product_id, 'ambiance', 2, 'woocommerce_thumbnail');
-  if (!empty($amb)) {
-    $sapi_category_ambiance_url = $amb[0];
-    $hover_image_url = isset($amb[1]) ? $amb[1] : '';
+  $amb_ids = sapi_get_product_photo_ids($product_id, 'ambiance', 2);
+  if (!empty($amb_ids)) {
+    $sapi_category_ambiance_id = $amb_ids[0];
+    $hover_image_id = isset($amb_ids[1]) ? $amb_ids[1] : 0;
   }
 }
 ?>
@@ -225,11 +222,11 @@ if ($is_editorial_carousel) {
 ?>
 <li <?php wc_product_class($card_classes, $product); ?> <?php echo $data_attrs; ?>>
   <a href="<?php the_permalink(); ?>" class="product-card-link">
-    <div class="product-media<?php echo $hover_image_url ? ' has-hover-image' : ''; ?>">
+    <div class="product-media<?php echo $hover_image_id ? ' has-hover-image' : ''; ?>">
       <?php
       // Product image (main) — photo ambiance ACF sur pages catégories
-      if ($sapi_category_ambiance_url) {
-        echo '<span class="product-image-main"><img src="' . esc_url($sapi_category_ambiance_url) . '" alt="' . esc_attr(get_the_title()) . '" loading="lazy" /></span>';
+      if ($sapi_category_ambiance_id) {
+        echo '<span class="product-image-main">' . wp_get_attachment_image($sapi_category_ambiance_id, 'woocommerce_thumbnail', false, ['alt' => get_the_title(), 'loading' => 'lazy']) . '</span>';
       } elseif (has_post_thumbnail()) {
         echo '<span class="product-image-main">' . woocommerce_get_product_thumbnail('woocommerce_thumbnail') . '</span>';
       } else {
@@ -237,8 +234,8 @@ if ($is_editorial_carousel) {
       }
 
       // Hover image (lifestyle/ambiance)
-      if ($hover_image_url) {
-        echo '<span class="product-image-hover"><img src="' . esc_url($hover_image_url) . '" alt="' . esc_attr(get_the_title()) . ' - ambiance" loading="lazy"></span>';
+      if ($hover_image_id) {
+        echo '<span class="product-image-hover">' . wp_get_attachment_image($hover_image_id, 'woocommerce_thumbnail', false, ['alt' => get_the_title() . ' - ambiance', 'loading' => 'lazy']) . '</span>';
       }
       ?>
 
@@ -250,18 +247,6 @@ if ($is_editorial_carousel) {
         <span class="product-badge badge-signature"><?php esc_html_e('Signature', 'theme-sapi-maison'); ?></span>
       <?php endif; ?>
 
-      <button
-        type="button"
-        class="product-quick-view"
-        data-product-id="<?php echo esc_attr($product_id); ?>"
-        data-product-url="<?php echo esc_url(get_permalink($product_id)); ?>"
-        aria-label="<?php echo esc_attr(sprintf(__('Aperçu rapide de %s', 'theme-sapi-maison'), get_the_title())); ?>">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-          <circle cx="12" cy="12" r="3"/>
-        </svg>
-        <?php esc_html_e('Aperçu', 'theme-sapi-maison'); ?>
-      </button>
     </div>
 
     <div class="product-info">

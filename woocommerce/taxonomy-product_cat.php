@@ -75,11 +75,27 @@ if (function_exists('sapi_maison_breadcrumbs')) {
 
         $permalink = get_permalink($pid);
         $title = get_the_title();
-        $amb = ($term_slug !== 'accessoires') ? sapi_get_product_photos($pid, 'ambiance', 1, 'large') : [];
-        $ambiance_url = !empty($amb) ? $amb[0] : get_the_post_thumbnail_url($pid, 'large');
-        $studio_url = get_the_post_thumbnail_url($pid, 'medium');
+        if ($term_slug !== 'accessoires') {
+            $amb_ids    = sapi_get_product_photo_ids($pid, 'ambiance', 6);
+            $detail_ids = sapi_get_product_photo_ids($pid, 'detail',   6);
+            // Alternance ambiance / détail
+            $slide_ids = [];
+            $max = max(count($amb_ids), count($detail_ids));
+            for ($j = 0; $j < $max; $j++) {
+                if (isset($amb_ids[$j]))    $slide_ids[] = $amb_ids[$j];
+                if (isset($detail_ids[$j])) $slide_ids[] = $detail_ids[$j];
+            }
+            $slide_ids = array_values(array_unique($slide_ids));
+            $slide_ids = array_slice($slide_ids, 0, 6);
+        } else {
+            $slide_ids = [];
+        }
+        if (empty($slide_ids)) {
+            $fallback_id = get_post_thumbnail_id($pid);
+            if ($fallback_id) $slide_ids = [$fallback_id];
+        }
+        $studio_id = get_post_thumbnail_id($pid);
         $gallery_ids = $product->get_gallery_image_ids();
-        $gallery_hover_url = !empty($gallery_ids) ? wp_get_attachment_image_url($gallery_ids[0], 'medium') : '';
         $is_variable = $product->is_type('variable');
         $price_html = $is_variable
           ? 'À partir de <strong>' . esc_html(number_format((float)$product->get_variation_price('min'), 2, ',', '')) . '&nbsp;€</strong>'
@@ -90,11 +106,11 @@ if (function_exists('sapi_maison_breadcrumbs')) {
       ?>
         <a href="<?php echo esc_url($permalink); ?>" class="sapi-showcase-card <?php echo esc_attr($side_class); ?>">
           <div class="showcase-info">
-            <?php if ($studio_url) : ?>
+            <?php if ($studio_id) : ?>
               <div class="showcase-product-img-wrap">
-                <img src="<?php echo esc_url($studio_url); ?>" alt="<?php echo esc_attr($title); ?>" class="showcase-product-img showcase-product-img-main" loading="lazy" />
-                <?php if ($gallery_hover_url) : ?>
-                  <img src="<?php echo esc_url($gallery_hover_url); ?>" alt="<?php echo esc_attr($title); ?> — allumé" class="showcase-product-img showcase-product-img-hover" loading="lazy" />
+                <?php echo wp_get_attachment_image($studio_id, 'medium', false, ['class' => 'showcase-product-img showcase-product-img-main', 'loading' => 'lazy', 'alt' => $title]); ?>
+                <?php if (!empty($gallery_ids)) : ?>
+                  <?php echo wp_get_attachment_image($gallery_ids[0], 'medium', false, ['class' => 'showcase-product-img showcase-product-img-hover', 'loading' => 'lazy', 'alt' => $title . ' — allumé']); ?>
                 <?php endif; ?>
               </div>
             <?php endif; ?>
@@ -103,9 +119,13 @@ if (function_exists('sapi_maison_breadcrumbs')) {
             <span class="showcase-cta">Découvrir ⇾</span>
           </div>
           <div class="showcase-photo">
-            <?php if ($ambiance_url) : ?>
-              <img src="<?php echo esc_url($ambiance_url); ?>" alt="<?php echo esc_attr($title); ?> — ambiance" class="showcase-bg" loading="lazy" />
-            <?php endif; ?>
+            <?php foreach ($slide_ids as $i => $slide_id) : ?>
+              <?php echo wp_get_attachment_image($slide_id, 'large', false, [
+                'class' => 'showcase-bg' . ($i === 0 ? ' is-active' : ''),
+                'loading' => $i === 0 ? 'eager' : 'lazy',
+                'alt' => $title,
+              ]); ?>
+            <?php endforeach; ?>
           </div>
         </a>
       <?php
@@ -154,26 +174,26 @@ $bg_query = new WP_Query([
   'order' => 'ASC',
 ]);
 
-$ambiance_bg_url = '';
+$ambiance_bg_id = 0;
 if ($bg_query->have_posts()) {
   $fabrication_pool = [];
   while ($bg_query->have_posts()) {
     $bg_query->the_post();
-    $fab_photos = sapi_get_product_photos(get_the_ID(), 'fabrication');
-    if (!empty($fab_photos)) {
-      $fabrication_pool = array_merge($fabrication_pool, $fab_photos);
+    $fab_photo_ids = sapi_get_product_photo_ids(get_the_ID(), 'fabrication');
+    if (!empty($fab_photo_ids)) {
+      $fabrication_pool = array_merge($fabrication_pool, $fab_photo_ids);
     }
   }
   if (!empty($fabrication_pool)) {
-    $ambiance_bg_url = $fabrication_pool[array_rand($fabrication_pool)];
+    $ambiance_bg_id = $fabrication_pool[array_rand($fabrication_pool)];
   }
   wp_reset_postdata();
 }
 
 ?>
 <section class="category-editorial" data-particles="wood">
-  <?php if ($ambiance_bg_url) : ?>
-    <img src="<?php echo esc_url($ambiance_bg_url); ?>" alt="<?php echo esc_attr(single_term_title('', false)); ?> — Collection luminaires en bois" class="category-editorial-img" loading="lazy">
+  <?php if ($ambiance_bg_id) : ?>
+    <?php echo wp_get_attachment_image($ambiance_bg_id, 'large', false, ['class' => 'category-editorial-img', 'loading' => 'lazy', 'alt' => single_term_title('', false) . ' — Collection luminaires en bois']); ?>
   <?php endif; ?>
   <div class="category-editorial-inner">
     <?php
@@ -346,32 +366,25 @@ if ( isset( $cross_links[ $term_slug ] ) ) :
       'order'          => 'ASC',
     ]);
 
-    $thumb_url = '';
+    $thumb_id = 0;
     if ( $cat_query->have_posts() ) {
       $cat_query->the_post();
       $pid = get_the_ID();
 
       // Photo ambiance du repeater ACF (comme le hero)
-      $amb = sapi_get_product_photos( $pid, 'ambiance', 1 );
-      if ( ! empty( $amb ) ) {
-        $thumb_url = $amb[0];
+      $amb_ids = sapi_get_product_photo_ids( $pid, 'ambiance', 1 );
+      if ( ! empty( $amb_ids ) ) {
+        $thumb_id = $amb_ids[0];
       } else {
         // Fallback : image produit WooCommerce
-        $product = wc_get_product( $pid );
-        if ( $product ) {
-          $img_id = $product->get_image_id();
-          if ( $img_id ) {
-            $src = wp_get_attachment_image_src( $img_id, 'medium' );
-            $thumb_url = $src ? $src[0] : '';
-          }
-        }
+        $thumb_id = get_post_thumbnail_id( $pid );
       }
       wp_reset_postdata();
     }
 
     $linked_cards[] = [
-      'term'  => $linked_term,
-      'thumb' => $thumb_url,
+      'term'     => $linked_term,
+      'thumb_id' => $thumb_id,
     ];
   }
 
@@ -382,9 +395,9 @@ if ( isset( $cross_links[ $term_slug ] ) ) :
   <div class="cross-links-cards">
     <?php foreach ( $linked_cards as $card ) : ?>
       <a href="<?php echo esc_url( get_term_link( $card['term'] ) ); ?>" class="cross-link-card">
-        <?php if ( $card['thumb'] ) : ?>
+        <?php if ( $card['thumb_id'] ) : ?>
           <div class="cross-link-card-img">
-            <img src="<?php echo esc_url( $card['thumb'] ); ?>" alt="<?php echo esc_attr( $card['term']->name ); ?>" loading="lazy">
+            <?php echo wp_get_attachment_image( $card['thumb_id'], 'medium', false, ['loading' => 'lazy', 'alt' => $card['term']->name] ); ?>
           </div>
         <?php endif; ?>
         <span class="cross-link-card-name"><?php echo esc_html( $card['term']->name ); ?></span>

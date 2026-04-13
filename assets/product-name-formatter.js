@@ -29,7 +29,6 @@
       '.bento-product-featured h3',      // Bento grid homepage
       '.bento-hero .bento-title',        // Hero bestseller homepage
       '.product-name-small',             // Petites cartes bento
-      '.quick-view-title',               // Quick view modal
       '.wc-block-components-product-name', // Panier + récap commande (WooCommerce Blocks)
       '.guide-result-name',              // Résultat questionnaire guide luminaire
       '.sapi-order-pay-item__name'       // Page Order Pay
@@ -181,7 +180,6 @@
             '.bento-product-featured h3',
             '.bento-hero .bento-title',
             '.product-name-small',
-            '.quick-view-title',
             '.wc-block-components-product-name',
             '.guide-result-name',
             '.sapi-order-pay-item__name'

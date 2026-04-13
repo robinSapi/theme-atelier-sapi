@@ -67,11 +67,11 @@ get_header();
   $lb_gallery_ids = wc_get_product(get_the_ID()) ? wc_get_product(get_the_ID())->get_gallery_image_ids() : [];
   if ($lb_main_id) {
     $lb_url = wp_get_attachment_image_url($lb_main_id, 'full');
-    if ($lb_url) $acf_photos[] = ['url' => $lb_url, 'label' => 'Produit'];
+    if ($lb_url) $acf_photos[] = ['url' => $lb_url, 'label' => 'Produit', 'id' => $lb_main_id];
   }
   foreach ($lb_gallery_ids as $lb_gid) {
     $lb_url = wp_get_attachment_image_url($lb_gid, 'full');
-    if ($lb_url) $acf_photos[] = ['url' => $lb_url, 'label' => 'Galerie'];
+    if ($lb_url) $acf_photos[] = ['url' => $lb_url, 'label' => 'Galerie', 'id' => $lb_gid];
   }
 
   $first_acf_index = count($acf_photos); // index where ACF photos start
@@ -108,19 +108,22 @@ get_header();
     $galerie_repeater = get_field('galerie_produit');
     if (!empty($galerie_repeater) && is_array($galerie_repeater)) {
       foreach ($galerie_repeater as $row) {
-        $url = sapi_get_acf_image_url(isset($row['image']) ? $row['image'] : null);
+        $img_field = isset($row['image']) ? $row['image'] : null;
+        $img_id = sapi_get_acf_image_id($img_field);
+        $url = $img_id ? wp_get_attachment_image_url($img_id, 'full') : '';
         if ($url) {
           $type = isset($row['type_photo']) ? $row['type_photo'] : 'ambiance';
           if (is_array($type)) $type = isset($type['value']) ? $type['value'] : 'ambiance';
           if ($type === 'client') continue; // Photos client exclues de la galerie
-          $acf_photos[] = ['url' => $url, 'label' => isset($type_labels[$type]) ? $type_labels[$type] : ucfirst($type)];
+          $acf_photos[] = ['url' => $url, 'label' => isset($type_labels[$type]) ? $type_labels[$type] : ucfirst($type), 'id' => $img_id];
         }
       }
     } else {
       // Fallback: use helper which reads old fixed fields
-      $all_product_photos = sapi_get_product_photos(get_the_ID());
-      foreach ($all_product_photos as $url) {
-        $acf_photos[] = ['url' => $url, 'label' => 'Photo'];
+      $all_photo_ids = sapi_get_product_photo_ids(get_the_ID());
+      foreach ($all_photo_ids as $photo_id) {
+        $photo_url = wp_get_attachment_image_url($photo_id, 'full');
+        if ($photo_url) $acf_photos[] = ['url' => $photo_url, 'label' => 'Photo', 'id' => $photo_id];
       }
     }
   }
@@ -169,7 +172,7 @@ get_header();
           $main_image_full = wp_get_attachment_image_url($main_image_id, 'full');
           ?>
           <div class="gallery-main" style="cursor: pointer;">
-              <img src="<?php echo esc_url($main_image_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="gallery-main-image">
+              <?php echo wp_get_attachment_image($main_image_id, 'woocommerce_single', false, ['class' => 'gallery-main-image', 'alt' => get_the_title()]); ?>
               <?php if ($video_oembed) : ?>
               <div class="gallery-main-video" style="display: none;">
                 <?php echo $video_oembed; ?>
@@ -211,21 +214,19 @@ get_header();
                 </span>
               </button>
               <?php endif; ?>
+              <?php
+                $cat_names = wp_list_pluck(wc_get_product_terms($product->get_id(), 'product_cat'), 'name');
+                $cat_label = !empty($cat_names) ? $cat_names[0] : 'luminaire';
+              ?>
               <?php foreach ($all_images as $index => $image_id) :
-                $thumb_url = wp_get_attachment_image_url($image_id, 'woocommerce_gallery_thumbnail');
-                // Use 'full' size for main display to ensure ACF images display properly
+                // URL full pour le data-image (swap JS galerie principale)
                 $full_url = wp_get_attachment_image_url($image_id, 'full');
-                // Fallback to woocommerce_single if full is not available
                 if (!$full_url) {
                   $full_url = wp_get_attachment_image_url($image_id, 'woocommerce_single');
                 }
                 ?>
                 <button class="gallery-thumb<?php echo $index === 0 ? ' active' : ''; ?>" data-image="<?php echo esc_url($full_url); ?>">
-                  <?php
-                    $cat_names = wp_list_pluck(wc_get_product_terms($product->get_id(), 'product_cat'), 'name');
-                    $cat_label = !empty($cat_names) ? $cat_names[0] : 'luminaire';
-                  ?>
-                  <img src="<?php echo esc_url($thumb_url); ?>" alt="<?php echo esc_attr(get_the_title() . ' - ' . $cat_label . ' photo ' . ($index + 1)); ?>">
+                  <?php echo wp_get_attachment_image($image_id, 'woocommerce_gallery_thumbnail', false, ['alt' => get_the_title() . ' - ' . $cat_label . ' photo ' . ($index + 1)]); ?>
                 </button>
               <?php endforeach; ?>
               <?php
@@ -234,7 +235,11 @@ get_header();
                 $acf_photo = $acf_photos[$i];
               ?>
                 <button class="gallery-thumb" data-image="<?php echo esc_url($acf_photo['url']); ?>">
-                  <img src="<?php echo esc_url($acf_photo['url']); ?>" alt="<?php echo esc_attr(get_the_title() . ' - ' . $acf_photo['label']); ?>">
+                  <?php if (!empty($acf_photo['id'])) : ?>
+                    <?php echo wp_get_attachment_image($acf_photo['id'], 'woocommerce_gallery_thumbnail', false, ['alt' => get_the_title() . ' - ' . $acf_photo['label']]); ?>
+                  <?php else : ?>
+                    <img src="<?php echo esc_url($acf_photo['url']); ?>" alt="<?php echo esc_attr(get_the_title() . ' - ' . $acf_photo['label']); ?>">
+                  <?php endif; ?>
                 </button>
               <?php endfor; ?>
             </div>
@@ -430,9 +435,9 @@ get_header();
 
     <?php
     // Photo client intégrée (preuve sociale visuelle)
-    $client_photos = sapi_get_product_photos($product_id, 'client');
-    $bandeau_url = !empty($client_photos) ? $client_photos[array_rand($client_photos)] : '';
-    if ($bandeau_url) :
+    $client_photo_ids = sapi_get_product_photo_ids($product_id, 'client');
+    $bandeau_id = !empty($client_photo_ids) ? $client_photo_ids[array_rand($client_photo_ids)] : 0;
+    if ($bandeau_id) :
       $captions = [
         'Photo envoyée par une cliente',
         'Photo envoyée récemment par un client'
@@ -442,7 +447,7 @@ get_header();
     <div class="testimonials-client-photo">
       <p class="testimonials-client-caption"><?php echo esc_html($random_caption); ?></p>
       <div class="client-photo-wrapper">
-        <img src="<?php echo esc_url($bandeau_url); ?>" srcset="" alt="Photo client - <?php echo esc_attr(get_the_title()); ?>" class="client-photo-image">
+        <?php echo wp_get_attachment_image($bandeau_id, 'large', false, ['class' => 'client-photo-image', 'alt' => 'Photo client - ' . get_the_title()]); ?>
       </div>
     </div>
     <?php endif; ?>
