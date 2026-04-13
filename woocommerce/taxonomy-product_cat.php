@@ -366,32 +366,25 @@ if ( isset( $cross_links[ $term_slug ] ) ) :
       'order'          => 'ASC',
     ]);
 
-    $thumb_url = '';
+    $thumb_id = 0;
     if ( $cat_query->have_posts() ) {
       $cat_query->the_post();
       $pid = get_the_ID();
 
       // Photo ambiance du repeater ACF (comme le hero)
-      $amb = sapi_get_product_photos( $pid, 'ambiance', 1 );
-      if ( ! empty( $amb ) ) {
-        $thumb_url = $amb[0];
+      $amb_ids = sapi_get_product_photo_ids( $pid, 'ambiance', 1 );
+      if ( ! empty( $amb_ids ) ) {
+        $thumb_id = $amb_ids[0];
       } else {
         // Fallback : image produit WooCommerce
-        $product = wc_get_product( $pid );
-        if ( $product ) {
-          $img_id = $product->get_image_id();
-          if ( $img_id ) {
-            $src = wp_get_attachment_image_src( $img_id, 'medium' );
-            $thumb_url = $src ? $src[0] : '';
-          }
-        }
+        $thumb_id = get_post_thumbnail_id( $pid );
       }
       wp_reset_postdata();
     }
 
     $linked_cards[] = [
-      'term'  => $linked_term,
-      'thumb' => $thumb_url,
+      'term'     => $linked_term,
+      'thumb_id' => $thumb_id,
     ];
   }
 
@@ -402,9 +395,9 @@ if ( isset( $cross_links[ $term_slug ] ) ) :
   <div class="cross-links-cards">
     <?php foreach ( $linked_cards as $card ) : ?>
       <a href="<?php echo esc_url( get_term_link( $card['term'] ) ); ?>" class="cross-link-card">
-        <?php if ( $card['thumb'] ) : ?>
+        <?php if ( $card['thumb_id'] ) : ?>
           <div class="cross-link-card-img">
-            <img src="<?php echo esc_url( $card['thumb'] ); ?>" alt="<?php echo esc_attr( $card['term']->name ); ?>" loading="lazy">
+            <?php echo wp_get_attachment_image( $card['thumb_id'], 'medium', false, ['loading' => 'lazy', 'alt' => $card['term']->name] ); ?>
           </div>
         <?php endif; ?>
         <span class="cross-link-card-name"><?php echo esc_html( $card['term']->name ); ?></span>
