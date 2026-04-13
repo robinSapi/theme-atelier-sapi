@@ -199,12 +199,13 @@
    * Open mini cart
    */
   function openMiniCart() {
-    // Fermer la recherche si ouverte
-    var searchModal = document.querySelector('.global-search-modal');
-    var searchOverlay = document.querySelector('.global-search-overlay');
-    if (searchModal && searchModal.getAttribute('aria-hidden') === 'false') {
-      searchModal.setAttribute('aria-hidden', 'true');
-      if (searchOverlay) searchOverlay.classList.remove('is-visible');
+    // Fermer la recherche si ouverte (via son bouton pour déclencher le vrai closeSearch)
+    var searchCloseBtn = document.querySelector('.global-search-close');
+    if (searchCloseBtn) {
+      var searchModal = document.querySelector('.global-search-modal');
+      if (searchModal && searchModal.getAttribute('aria-hidden') === 'false') {
+        searchCloseBtn.click();
+      }
     }
 
     miniCartToggle.setAttribute('aria-expanded', 'true');
@@ -428,15 +429,13 @@
    * Open search modal
    */
   function openSearch() {
-    // Fermer le panier si ouvert
-    var miniCart = document.querySelector('.mini-cart');
-    var miniCartOverlay = document.querySelector('.mini-cart-overlay');
-    var miniCartToggle = document.querySelector('.mini-cart-toggle');
-    if (miniCart && miniCart.classList.contains('is-open')) {
-      miniCart.classList.remove('is-open');
-      miniCart.setAttribute('aria-hidden', 'true');
-      if (miniCartOverlay) miniCartOverlay.classList.remove('is-visible');
-      if (miniCartToggle) miniCartToggle.setAttribute('aria-expanded', 'false');
+    // Fermer le panier si ouvert (via son bouton pour déclencher le vrai closeMiniCart)
+    var miniCartCloseBtn = document.querySelector('.mini-cart-close');
+    if (miniCartCloseBtn) {
+      var miniCart = document.querySelector('.mini-cart');
+      if (miniCart && miniCart.classList.contains('is-open')) {
+        miniCartCloseBtn.click();
+      }
     }
 
     previouslyFocused = document.activeElement;
