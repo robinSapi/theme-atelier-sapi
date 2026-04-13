@@ -76,23 +76,23 @@ if (function_exists('sapi_maison_breadcrumbs')) {
         $permalink = get_permalink($pid);
         $title = get_the_title();
         if ($term_slug !== 'accessoires') {
-            $amb_photos    = sapi_get_product_photos($pid, 'ambiance', 6, 'large');
-            $detail_photos = sapi_get_product_photos($pid, 'detail',   6, 'large');
+            $amb_ids    = sapi_get_product_photo_ids($pid, 'ambiance', 6);
+            $detail_ids = sapi_get_product_photo_ids($pid, 'detail',   6);
             // Alternance ambiance / détail
-            $slide_photos = [];
-            $max = max(count($amb_photos), count($detail_photos));
+            $slide_ids = [];
+            $max = max(count($amb_ids), count($detail_ids));
             for ($j = 0; $j < $max; $j++) {
-                if (isset($amb_photos[$j]))    $slide_photos[] = $amb_photos[$j];
-                if (isset($detail_photos[$j])) $slide_photos[] = $detail_photos[$j];
+                if (isset($amb_ids[$j]))    $slide_ids[] = $amb_ids[$j];
+                if (isset($detail_ids[$j])) $slide_ids[] = $detail_ids[$j];
             }
-            $slide_photos = array_values(array_unique($slide_photos));
-            $slide_photos = array_slice($slide_photos, 0, 6);
+            $slide_ids = array_values(array_unique($slide_ids));
+            $slide_ids = array_slice($slide_ids, 0, 6);
         } else {
-            $slide_photos = [];
+            $slide_ids = [];
         }
-        if (empty($slide_photos)) {
-            $fallback = get_the_post_thumbnail_url($pid, 'large');
-            if ($fallback) $slide_photos = [$fallback];
+        if (empty($slide_ids)) {
+            $fallback_id = get_post_thumbnail_id($pid);
+            if ($fallback_id) $slide_ids = [$fallback_id];
         }
         $studio_id = get_post_thumbnail_id($pid);
         $gallery_ids = $product->get_gallery_image_ids();
@@ -119,13 +119,12 @@ if (function_exists('sapi_maison_breadcrumbs')) {
             <span class="showcase-cta">Découvrir ⇾</span>
           </div>
           <div class="showcase-photo">
-            <?php foreach ($slide_photos as $i => $slide_url) : ?>
-              <img
-                src="<?php echo esc_url($slide_url); ?>"
-                alt="<?php echo esc_attr($title); ?>"
-                class="showcase-bg<?php echo $i === 0 ? ' is-active' : ''; ?>"
-                loading="<?php echo $i === 0 ? 'eager' : 'lazy'; ?>"
-              />
+            <?php foreach ($slide_ids as $i => $slide_id) : ?>
+              <?php echo wp_get_attachment_image($slide_id, 'large', false, [
+                'class' => 'showcase-bg' . ($i === 0 ? ' is-active' : ''),
+                'loading' => $i === 0 ? 'eager' : 'lazy',
+                'alt' => $title,
+              ]); ?>
             <?php endforeach; ?>
           </div>
         </a>
