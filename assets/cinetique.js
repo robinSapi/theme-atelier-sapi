@@ -1220,5 +1220,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // ========================================
+  // Showcase Cards — Slideshow au hover
+  // ========================================
+  function initShowcaseSlideshow() {
+    document.querySelectorAll('.sapi-showcase-card').forEach(card => {
+      const slides = card.querySelectorAll('.showcase-bg');
+      if (slides.length <= 1) return;
+
+      let timer = null;
+      let current = 0;
+
+      card.addEventListener('mouseenter', () => {
+        timer = setInterval(() => {
+          slides[current].classList.remove('is-active');
+          current = (current + 1) % slides.length;
+          slides[current].classList.add('is-active');
+        }, 1800);
+      });
+
+      card.addEventListener('mouseleave', () => {
+        clearInterval(timer);
+        timer = null;
+        slides.forEach(s => s.classList.remove('is-active'));
+        current = 0;
+        slides[0].classList.add('is-active');
+      });
+    });
+  }
+  initShowcaseSlideshow();
 
 });

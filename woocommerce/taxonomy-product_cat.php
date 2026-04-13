@@ -75,8 +75,18 @@ if (function_exists('sapi_maison_breadcrumbs')) {
 
         $permalink = get_permalink($pid);
         $title = get_the_title();
-        $amb = ($term_slug !== 'accessoires') ? sapi_get_product_photos($pid, 'ambiance', 1, 'large') : [];
-        $ambiance_url = !empty($amb) ? $amb[0] : get_the_post_thumbnail_url($pid, 'large');
+        if ($term_slug !== 'accessoires') {
+            $amb_photos    = sapi_get_product_photos($pid, 'ambiance', 3, 'large');
+            $detail_photos = sapi_get_product_photos($pid, 'detail',   2, 'large');
+            $slide_photos  = array_values(array_unique(array_merge($amb_photos, $detail_photos)));
+            $slide_photos  = array_slice($slide_photos, 0, 4);
+        } else {
+            $slide_photos = [];
+        }
+        if (empty($slide_photos)) {
+            $fallback = get_the_post_thumbnail_url($pid, 'large');
+            if ($fallback) $slide_photos = [$fallback];
+        }
         $studio_url = get_the_post_thumbnail_url($pid, 'medium');
         $gallery_ids = $product->get_gallery_image_ids();
         $gallery_hover_url = !empty($gallery_ids) ? wp_get_attachment_image_url($gallery_ids[0], 'medium') : '';
@@ -103,9 +113,14 @@ if (function_exists('sapi_maison_breadcrumbs')) {
             <span class="showcase-cta">Découvrir ⇾</span>
           </div>
           <div class="showcase-photo">
-            <?php if ($ambiance_url) : ?>
-              <img src="<?php echo esc_url($ambiance_url); ?>" alt="<?php echo esc_attr($title); ?> — ambiance" class="showcase-bg" loading="lazy" />
-            <?php endif; ?>
+            <?php foreach ($slide_photos as $i => $slide_url) : ?>
+              <img
+                src="<?php echo esc_url($slide_url); ?>"
+                alt="<?php echo esc_attr($title); ?>"
+                class="showcase-bg<?php echo $i === 0 ? ' is-active' : ''; ?>"
+                loading="<?php echo $i === 0 ? 'eager' : 'lazy'; ?>"
+              />
+            <?php endforeach; ?>
             <button
               type="button"
               class="product-quick-view"
