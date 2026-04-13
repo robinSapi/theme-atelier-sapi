@@ -7168,6 +7168,7 @@ li.carousel-editorial-slide,
 
   .sapi-showcase-card .showcase-photo {
     height: 250px;
+    min-height: 250px; /* Fix: flex: 1 devient flex-basis: 0 en colonne → s'effondre sans min-height */
   }
 
   .sapi-showcase-card .showcase-info {
