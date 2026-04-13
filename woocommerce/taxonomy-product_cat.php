@@ -76,10 +76,17 @@ if (function_exists('sapi_maison_breadcrumbs')) {
         $permalink = get_permalink($pid);
         $title = get_the_title();
         if ($term_slug !== 'accessoires') {
-            $amb_photos    = sapi_get_product_photos($pid, 'ambiance', 3, 'large');
-            $detail_photos = sapi_get_product_photos($pid, 'detail',   2, 'large');
-            $slide_photos  = array_values(array_unique(array_merge($amb_photos, $detail_photos)));
-            $slide_photos  = array_slice($slide_photos, 0, 4);
+            $amb_photos    = sapi_get_product_photos($pid, 'ambiance', 6, 'large');
+            $detail_photos = sapi_get_product_photos($pid, 'detail',   6, 'large');
+            // Alternance ambiance / détail
+            $slide_photos = [];
+            $max = max(count($amb_photos), count($detail_photos));
+            for ($j = 0; $j < $max; $j++) {
+                if (isset($amb_photos[$j]))    $slide_photos[] = $amb_photos[$j];
+                if (isset($detail_photos[$j])) $slide_photos[] = $detail_photos[$j];
+            }
+            $slide_photos = array_values(array_unique($slide_photos));
+            $slide_photos = array_slice($slide_photos, 0, 6);
         } else {
             $slide_photos = [];
         }
