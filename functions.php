@@ -270,11 +270,6 @@ function sapi_maison_enqueue_assets() {
 
     // Editorial Carousel removed — products now displayed in grid
 
-    // Quick View modal for product previews
-    $quick_view_js_path = get_template_directory() . '/assets/quick-view.js';
-    if (file_exists($quick_view_js_path)) {
-      wp_enqueue_script('sapi-maison-quick-view', get_template_directory_uri() . '/assets/quick-view.js', [], filemtime($quick_view_js_path), true);
-    }
   }
 
   // Guide personalization — swap product card images based on guide preferences

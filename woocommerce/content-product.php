@@ -2,7 +2,7 @@
 /**
  * The template for displaying product content within loops
  *
- * SAPI CINÉTIQUE - Enhanced product card with badges, hover effects, and quick view
+ * SAPI CINÉTIQUE - Enhanced product card with badges and hover effects
  *
  * @package Sapi-Maison
  * @version 9.4.0
@@ -250,18 +250,6 @@ if ($is_editorial_carousel) {
         <span class="product-badge badge-signature"><?php esc_html_e('Signature', 'theme-sapi-maison'); ?></span>
       <?php endif; ?>
 
-      <button
-        type="button"
-        class="product-quick-view"
-        data-product-id="<?php echo esc_attr($product_id); ?>"
-        data-product-url="<?php echo esc_url(get_permalink($product_id)); ?>"
-        aria-label="<?php echo esc_attr(sprintf(__('Aperçu rapide de %s', 'theme-sapi-maison'), get_the_title())); ?>">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-          <circle cx="12" cy="12" r="3"/>
-        </svg>
-        <?php esc_html_e('Aperçu', 'theme-sapi-maison'); ?>
-      </button>
     </div>
 
     <div class="product-info">
