@@ -169,7 +169,7 @@ get_header();
           $main_image_full = wp_get_attachment_image_url($main_image_id, 'full');
           ?>
           <div class="gallery-main" style="cursor: pointer;">
-              <img src="<?php echo esc_url($main_image_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="gallery-main-image">
+              <?php echo wp_get_attachment_image($main_image_id, 'woocommerce_single', false, ['class' => 'gallery-main-image', 'alt' => get_the_title()]); ?>
               <?php if ($video_oembed) : ?>
               <div class="gallery-main-video" style="display: none;">
                 <?php echo $video_oembed; ?>
@@ -430,9 +430,9 @@ get_header();
 
     <?php
     // Photo client intégrée (preuve sociale visuelle)
-    $client_photos = sapi_get_product_photos($product_id, 'client');
-    $bandeau_url = !empty($client_photos) ? $client_photos[array_rand($client_photos)] : '';
-    if ($bandeau_url) :
+    $client_photo_ids = sapi_get_product_photo_ids($product_id, 'client');
+    $bandeau_id = !empty($client_photo_ids) ? $client_photo_ids[array_rand($client_photo_ids)] : 0;
+    if ($bandeau_id) :
       $captions = [
         'Photo envoyée par une cliente',
         'Photo envoyée récemment par un client'
@@ -442,7 +442,7 @@ get_header();
     <div class="testimonials-client-photo">
       <p class="testimonials-client-caption"><?php echo esc_html($random_caption); ?></p>
       <div class="client-photo-wrapper">
-        <img src="<?php echo esc_url($bandeau_url); ?>" srcset="" alt="Photo client - <?php echo esc_attr(get_the_title()); ?>" class="client-photo-image">
+        <?php echo wp_get_attachment_image($bandeau_id, 'large', false, ['class' => 'client-photo-image', 'alt' => 'Photo client - ' . get_the_title()]); ?>
       </div>
     </div>
     <?php endif; ?>

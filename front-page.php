@@ -520,7 +520,7 @@ foreach ($collection_slugs as $col) {
     <div class="bento-card bento-actu">
       <a href="<?php the_permalink(); ?>" class="bento-actu-link">
         <?php if (has_post_thumbnail()) : ?>
-          <img src="<?php echo esc_url(get_the_post_thumbnail_url(get_the_ID(), 'large')); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="bento-bg-img" loading="lazy">
+          <?php echo get_the_post_thumbnail(get_the_ID(), 'large', ['class' => 'bento-bg-img', 'loading' => 'lazy', 'alt' => get_the_title()]); ?>
         <?php endif; ?>
         <span class="bento-actu-badge">Flash actu</span>
         <div class="bento-actu-content">

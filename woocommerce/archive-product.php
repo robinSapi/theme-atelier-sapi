@@ -292,8 +292,8 @@ sapi_robin_conseil_card( 'selection' );
 
         // Photo ambiance ACF (sauf accessoires → photo produit WooCommerce)
         $is_accessoire = in_array('accessoires', $cat_slugs);
-        $amb_photos = !$is_accessoire ? sapi_get_product_photos($product_id, 'ambiance', 1, 'large') : [];
-        $ambiance_url = !empty($amb_photos) ? $amb_photos[0] : get_the_post_thumbnail_url($product_id, 'large');
+        $amb_photo_ids = !$is_accessoire ? sapi_get_product_photo_ids($product_id, 'ambiance', 1) : [];
+        $ambiance_id = !empty($amb_photo_ids) ? $amb_photo_ids[0] : get_post_thumbnail_id($product_id);
 
         // Nom splitté
         $name_parts = sapi_split_product_name(get_the_title());
@@ -328,21 +328,21 @@ sapi_robin_conseil_card( 'selection' );
 
           // Hover image (1re photo galerie WooCommerce)
           $gallery_ids = $product->get_gallery_image_ids();
-          $hover_url = !empty($gallery_ids) ? wp_get_attachment_image_url($gallery_ids[0], 'woocommerce_thumbnail') : '';
+          $hover_id = !empty($gallery_ids) ? $gallery_ids[0] : 0;
 
           // Prix HTML
           $price_html = $is_variable ? wc_price($price_min) : $product->get_price_html();
         ?>
         <div class="product-card-cinetique" data-product-id="<?php echo esc_attr($product_id); ?>" <?php echo $data_attrs; ?>>
           <a href="<?php echo esc_url(get_permalink($product_id)); ?>" class="product-card-link">
-            <div class="product-media<?php echo $hover_url ? ' has-hover-image' : ''; ?>">
-              <?php if ($ambiance_url) : ?>
-                <span class="product-image-main"><img src="<?php echo esc_url($ambiance_url); ?>" srcset="" alt="<?php echo esc_attr(get_the_title()); ?>" loading="lazy" /></span>
+            <div class="product-media<?php echo $hover_id ? ' has-hover-image' : ''; ?>">
+              <?php if ($ambiance_id) : ?>
+                <span class="product-image-main"><?php echo wp_get_attachment_image($ambiance_id, 'large', false, ['alt' => get_the_title(), 'loading' => 'lazy']); ?></span>
               <?php else : ?>
                 <span class="product-image-main"><?php echo woocommerce_get_product_thumbnail('woocommerce_thumbnail'); ?></span>
               <?php endif; ?>
-              <?php if ($hover_url) : ?>
-                <span class="product-image-hover"><img src="<?php echo esc_url($hover_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?> - ambiance" loading="lazy"></span>
+              <?php if ($hover_id) : ?>
+                <span class="product-image-hover"><?php echo wp_get_attachment_image($hover_id, 'woocommerce_thumbnail', false, ['alt' => get_the_title() . ' - ambiance', 'loading' => 'lazy']); ?></span>
               <?php endif; ?>
               <div class="badge-selection" style="display:none;">Ma sélection</div>
             </div>

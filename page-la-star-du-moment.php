@@ -46,36 +46,25 @@ $mini_desc        = $has_acf ? get_field('mini_description', $star_id) : '';
 $pourquoi         = $has_acf ? get_field('pourquoi_cette_piece', $star_id) : '';
 $descriptif       = $has_acf ? get_field('Descriptif', $star_id) : '';
 
-// Photos ACF (repeater)
-$ambiance_photos = sapi_get_product_photos($star_id, 'ambiance');
-$detail_photos   = sapi_get_product_photos($star_id, 'detail');
+// Photos ACF (repeater) — IDs pour wp_get_attachment_image()
+$ambiance_photo_ids = sapi_get_product_photo_ids($star_id, 'ambiance');
+$detail_photo_ids   = sapi_get_product_photo_ids($star_id, 'detail');
 
 // Photo principale produit
-$main_image_id  = $star_product->get_image_id();
-$main_image_url = $main_image_id ? wp_get_attachment_image_url($main_image_id, 'full') : wc_placeholder_img_src('full');
+$main_image_id = $star_product->get_image_id();
 
 // Galerie produit
-$gallery_ids  = $star_product->get_gallery_image_ids();
-$gallery_urls = [];
-foreach ($gallery_ids as $gid) {
-  $url = wp_get_attachment_image_url($gid, 'full');
-  if ($url) $gallery_urls[] = $url;
-}
+$gallery_ids = $star_product->get_gallery_image_ids();
 
 // Hero = première ambiance ou image principale
-$hero_url = !empty($ambiance_photos[0]) ? $ambiance_photos[0] : $main_image_url;
+$hero_id = !empty($ambiance_photo_ids[0]) ? $ambiance_photo_ids[0] : $main_image_id;
 
 
 ?>
 
 <!-- ========== HERO PLEIN ÉCRAN ========== -->
 <section class="star-hero">
-  <img
-    class="star-hero__bg"
-    src="<?php echo esc_url($hero_url); ?>"
-    alt="<?php echo esc_attr($name); ?> - Ambiance"
-    fetchpriority="high"
-  />
+  <?php echo wp_get_attachment_image($hero_id, 'full', false, ['class' => 'star-hero__bg', 'alt' => $name . ' - Ambiance', 'fetchpriority' => 'high']); ?>
   <div class="star-hero__overlay"></div>
   <div class="star-hero__content">
     <span class="star-hero__badge">La star du moment</span>
@@ -116,35 +105,35 @@ if ($accroche || $texte_principal || $descriptif) :
 <!-- ========== GALERIE — CARROUSEL HORIZONTAL ========== -->
 <section class="star-galerie" id="star-galerie">
   <?php
-  // Collecter toutes les photos (dédoublonnées)
-  $seen_urls = [];
+  // Collecter toutes les photos par ID (dédoublonnées)
+  $seen_ids = [];
   $all_photos = [];
 
   // ACF photos: ambiance + détail
   $acf_candidates = [];
-  foreach ($ambiance_photos as $url) {
-    $acf_candidates[] = ['url' => $url, 'alt' => 'Ambiance'];
+  foreach ($ambiance_photo_ids as $id) {
+    $acf_candidates[] = ['id' => $id, 'alt' => 'Ambiance'];
   }
-  foreach ($detail_photos as $url) {
-    $acf_candidates[] = ['url' => $url, 'alt' => 'Détail'];
+  foreach ($detail_photo_ids as $id) {
+    $acf_candidates[] = ['id' => $id, 'alt' => 'Détail'];
   }
   // Mélanger l'ordre à chaque chargement
   shuffle($acf_candidates);
 
   foreach ($acf_candidates as $p) {
-    if (!empty($p['url']) && !isset($seen_urls[$p['url']])) {
+    if ($p['id'] && !isset($seen_ids[$p['id']])) {
       $all_photos[] = $p;
-      $seen_urls[$p['url']] = true;
+      $seen_ids[$p['id']] = true;
     }
   }
-  if ($main_image_url && !isset($seen_urls[$main_image_url])) {
-    $all_photos[] = ['url' => $main_image_url, 'alt' => 'Produit'];
-    $seen_urls[$main_image_url] = true;
+  if ($main_image_id && !isset($seen_ids[$main_image_id])) {
+    $all_photos[] = ['id' => $main_image_id, 'alt' => 'Produit'];
+    $seen_ids[$main_image_id] = true;
   }
-  foreach ($gallery_urls as $gurl) {
-    if (!isset($seen_urls[$gurl])) {
-      $all_photos[] = ['url' => $gurl, 'alt' => 'Galerie'];
-      $seen_urls[$gurl] = true;
+  foreach ($gallery_ids as $gid) {
+    if ($gid && !isset($seen_ids[$gid])) {
+      $all_photos[] = ['id' => $gid, 'alt' => 'Galerie'];
+      $seen_ids[$gid] = true;
     }
   }
 
@@ -159,7 +148,7 @@ if ($accroche || $texte_principal || $descriptif) :
     <div class="star-carousel__track">
       <?php foreach ($group1 as $photo) : ?>
       <a href="<?php echo esc_url($permalink . '?from=star'); ?>" class="star-carousel__slide">
-        <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
+        <?php echo wp_get_attachment_image($photo['id'], 'large', false, ['loading' => 'lazy', 'alt' => $name . ' - ' . $photo['alt']]); ?>
       </a>
       <?php endforeach; ?>
     </div>
@@ -195,7 +184,7 @@ if ($accroche || $texte_principal || $descriptif) :
     <div class="star-carousel__track">
       <?php foreach ($group2 as $photo) : ?>
       <a href="<?php echo esc_url($permalink . '?from=star'); ?>" class="star-carousel__slide">
-        <img src="<?php echo esc_url($photo['url']); ?>" alt="<?php echo esc_attr($name . ' - ' . $photo['alt']); ?>" loading="lazy" />
+        <?php echo wp_get_attachment_image($photo['id'], 'large', false, ['loading' => 'lazy', 'alt' => $name . ' - ' . $photo['alt']]); ?>
       </a>
       <?php endforeach; ?>
     </div>

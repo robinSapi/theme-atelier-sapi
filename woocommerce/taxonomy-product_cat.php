@@ -94,9 +94,8 @@ if (function_exists('sapi_maison_breadcrumbs')) {
             $fallback = get_the_post_thumbnail_url($pid, 'large');
             if ($fallback) $slide_photos = [$fallback];
         }
-        $studio_url = get_the_post_thumbnail_url($pid, 'medium');
+        $studio_id = get_post_thumbnail_id($pid);
         $gallery_ids = $product->get_gallery_image_ids();
-        $gallery_hover_url = !empty($gallery_ids) ? wp_get_attachment_image_url($gallery_ids[0], 'medium') : '';
         $is_variable = $product->is_type('variable');
         $price_html = $is_variable
           ? 'À partir de <strong>' . esc_html(number_format((float)$product->get_variation_price('min'), 2, ',', '')) . '&nbsp;€</strong>'
@@ -107,11 +106,11 @@ if (function_exists('sapi_maison_breadcrumbs')) {
       ?>
         <a href="<?php echo esc_url($permalink); ?>" class="sapi-showcase-card <?php echo esc_attr($side_class); ?>">
           <div class="showcase-info">
-            <?php if ($studio_url) : ?>
+            <?php if ($studio_id) : ?>
               <div class="showcase-product-img-wrap">
-                <img src="<?php echo esc_url($studio_url); ?>" alt="<?php echo esc_attr($title); ?>" class="showcase-product-img showcase-product-img-main" loading="lazy" />
-                <?php if ($gallery_hover_url) : ?>
-                  <img src="<?php echo esc_url($gallery_hover_url); ?>" alt="<?php echo esc_attr($title); ?> — allumé" class="showcase-product-img showcase-product-img-hover" loading="lazy" />
+                <?php echo wp_get_attachment_image($studio_id, 'medium', false, ['class' => 'showcase-product-img showcase-product-img-main', 'loading' => 'lazy', 'alt' => $title]); ?>
+                <?php if (!empty($gallery_ids)) : ?>
+                  <?php echo wp_get_attachment_image($gallery_ids[0], 'medium', false, ['class' => 'showcase-product-img showcase-product-img-hover', 'loading' => 'lazy', 'alt' => $title . ' — allumé']); ?>
                 <?php endif; ?>
               </div>
             <?php endif; ?>
@@ -176,26 +175,26 @@ $bg_query = new WP_Query([
   'order' => 'ASC',
 ]);
 
-$ambiance_bg_url = '';
+$ambiance_bg_id = 0;
 if ($bg_query->have_posts()) {
   $fabrication_pool = [];
   while ($bg_query->have_posts()) {
     $bg_query->the_post();
-    $fab_photos = sapi_get_product_photos(get_the_ID(), 'fabrication');
-    if (!empty($fab_photos)) {
-      $fabrication_pool = array_merge($fabrication_pool, $fab_photos);
+    $fab_photo_ids = sapi_get_product_photo_ids(get_the_ID(), 'fabrication');
+    if (!empty($fab_photo_ids)) {
+      $fabrication_pool = array_merge($fabrication_pool, $fab_photo_ids);
     }
   }
   if (!empty($fabrication_pool)) {
-    $ambiance_bg_url = $fabrication_pool[array_rand($fabrication_pool)];
+    $ambiance_bg_id = $fabrication_pool[array_rand($fabrication_pool)];
   }
   wp_reset_postdata();
 }
 
 ?>
 <section class="category-editorial" data-particles="wood">
-  <?php if ($ambiance_bg_url) : ?>
-    <img src="<?php echo esc_url($ambiance_bg_url); ?>" alt="<?php echo esc_attr(single_term_title('', false)); ?> — Collection luminaires en bois" class="category-editorial-img" loading="lazy">
+  <?php if ($ambiance_bg_id) : ?>
+    <?php echo wp_get_attachment_image($ambiance_bg_id, 'large', false, ['class' => 'category-editorial-img', 'loading' => 'lazy', 'alt' => single_term_title('', false) . ' — Collection luminaires en bois']); ?>
   <?php endif; ?>
   <div class="category-editorial-inner">
     <?php
