@@ -199,6 +199,15 @@
    * Open mini cart
    */
   function openMiniCart() {
+    // Fermer la recherche si ouverte (via son bouton pour déclencher le vrai closeSearch)
+    var searchCloseBtn = document.querySelector('.global-search-close');
+    if (searchCloseBtn) {
+      var searchModal = document.querySelector('.global-search-modal');
+      if (searchModal && searchModal.getAttribute('aria-hidden') === 'false') {
+        searchCloseBtn.click();
+      }
+    }
+
     miniCartToggle.setAttribute('aria-expanded', 'true');
     miniCart.classList.add('is-open');
     miniCart.setAttribute('aria-hidden', 'false');
@@ -420,6 +429,15 @@
    * Open search modal
    */
   function openSearch() {
+    // Fermer le panier si ouvert (via son bouton pour déclencher le vrai closeMiniCart)
+    var miniCartCloseBtn = document.querySelector('.mini-cart-close');
+    if (miniCartCloseBtn) {
+      var miniCart = document.querySelector('.mini-cart');
+      if (miniCart && miniCart.classList.contains('is-open')) {
+        miniCartCloseBtn.click();
+      }
+    }
+
     previouslyFocused = document.activeElement;
     searchModal.setAttribute('aria-hidden', 'false');
     searchOverlay.classList.add('is-visible');
