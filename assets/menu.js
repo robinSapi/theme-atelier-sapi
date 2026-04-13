@@ -199,6 +199,14 @@
    * Open mini cart
    */
   function openMiniCart() {
+    // Fermer la recherche si ouverte
+    var searchModal = document.querySelector('.global-search-modal');
+    var searchOverlay = document.querySelector('.global-search-overlay');
+    if (searchModal && searchModal.getAttribute('aria-hidden') === 'false') {
+      searchModal.setAttribute('aria-hidden', 'true');
+      if (searchOverlay) searchOverlay.classList.remove('is-visible');
+    }
+
     miniCartToggle.setAttribute('aria-expanded', 'true');
     miniCart.classList.add('is-open');
     miniCart.setAttribute('aria-hidden', 'false');
@@ -420,6 +428,17 @@
    * Open search modal
    */
   function openSearch() {
+    // Fermer le panier si ouvert
+    var miniCart = document.querySelector('.mini-cart');
+    var miniCartOverlay = document.querySelector('.mini-cart-overlay');
+    var miniCartToggle = document.querySelector('.mini-cart-toggle');
+    if (miniCart && miniCart.classList.contains('is-open')) {
+      miniCart.classList.remove('is-open');
+      miniCart.setAttribute('aria-hidden', 'true');
+      if (miniCartOverlay) miniCartOverlay.classList.remove('is-visible');
+      if (miniCartToggle) miniCartToggle.setAttribute('aria-expanded', 'false');
+    }
+
     previouslyFocused = document.activeElement;
     searchModal.setAttribute('aria-hidden', 'false');
     searchOverlay.classList.add('is-visible');
