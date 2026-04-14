@@ -7088,8 +7088,8 @@ li.carousel-editorial-slide,
   -webkit-box-flex: 1;
   -ms-flex: 1;
   flex: 1;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.35);
+  height: 4px;
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 2px;
   overflow: hidden;
 }
@@ -7097,7 +7097,7 @@ li.carousel-editorial-slide,
 .showcase-progress-bar__fill {
   width: 0;
   height: 100%;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 2px;
 }
 
