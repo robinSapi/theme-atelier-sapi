@@ -7066,8 +7066,10 @@ li.carousel-editorial-slide,
 .showcase-progress {
   position: absolute;
   bottom: 12px;
-  left: 12px;
-  right: 12px;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  width: 33%;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
