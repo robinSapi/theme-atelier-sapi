@@ -1223,31 +1223,77 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========================================
   // Showcase Cards — Slideshow au hover
   // ========================================
+  var SLIDE_DURATION = 1800;
+
   function initShowcaseSlideshow() {
-    document.querySelectorAll('.sapi-showcase-card').forEach(card => {
-      const slides = card.querySelectorAll('.showcase-bg');
+    document.querySelectorAll('.sapi-showcase-card').forEach(function(card) {
+      var slides = card.querySelectorAll('.showcase-bg');
       if (slides.length <= 1) return;
 
-      let timer = null;
-      let current = 0;
+      // Créer les barres de progression
+      var photoZone = card.querySelector('.showcase-photo');
+      var progressContainer = document.createElement('div');
+      progressContainer.className = 'showcase-progress';
+
+      var bars = [];
+      for (var i = 0; i < slides.length; i++) {
+        var bar = document.createElement('div');
+        bar.className = 'showcase-progress-bar';
+        var fill = document.createElement('div');
+        fill.className = 'showcase-progress-bar__fill';
+        bar.appendChild(fill);
+        progressContainer.appendChild(bar);
+        bars.push(bar);
+      }
+      photoZone.appendChild(progressContainer);
+
+      var timer = null;
+      var current = 0;
+
+      function updateBars() {
+        for (var j = 0; j < bars.length; j++) {
+          bars[j].classList.remove('is-active', 'is-done');
+          bars[j].querySelector('.showcase-progress-bar__fill').style.transitionDuration = '';
+          bars[j].querySelector('.showcase-progress-bar__fill').style.width = '';
+        }
+        // Barres précédentes : pleines
+        for (var j = 0; j < current; j++) {
+          bars[j].classList.add('is-done');
+        }
+        // Barre active : animation de remplissage
+        var activeFill = bars[current].querySelector('.showcase-progress-bar__fill');
+        // Force reflow pour redémarrer l'animation
+        activeFill.style.width = '0';
+        void activeFill.offsetWidth;
+        bars[current].classList.add('is-active');
+        activeFill.style.transitionDuration = SLIDE_DURATION + 'ms';
+        activeFill.style.width = '100%';
+      }
 
       function advance() {
         slides[current].classList.remove('is-active');
         current = (current + 1) % slides.length;
         slides[current].classList.add('is-active');
+        updateBars();
       }
 
-      card.addEventListener('mouseenter', () => {
+      card.addEventListener('mouseenter', function() {
         advance();
-        timer = setInterval(advance, 1800);
+        timer = setInterval(advance, SLIDE_DURATION);
       });
 
-      card.addEventListener('mouseleave', () => {
+      card.addEventListener('mouseleave', function() {
         clearInterval(timer);
         timer = null;
-        slides.forEach(s => s.classList.remove('is-active'));
+        slides.forEach(function(s) { s.classList.remove('is-active'); });
         current = 0;
         slides[0].classList.add('is-active');
+        // Reset barres
+        for (var j = 0; j < bars.length; j++) {
+          bars[j].classList.remove('is-active', 'is-done');
+          bars[j].querySelector('.showcase-progress-bar__fill').style.transitionDuration = '';
+          bars[j].querySelector('.showcase-progress-bar__fill').style.width = '';
+        }
       });
     });
   }

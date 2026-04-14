@@ -7062,6 +7062,55 @@ li.carousel-editorial-slide,
   opacity: 1;
 }
 
+/* ── Barres de progression slideshow ── */
+.showcase-progress {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  width: 33%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  gap: 4px;
+  z-index: 2;
+  opacity: 0;
+  -webkit-transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease;
+}
+
+.sapi-showcase-card:hover .showcase-progress {
+  opacity: 1;
+}
+
+.showcase-progress-bar {
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.showcase-progress-bar__fill {
+  width: 0;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 2px;
+}
+
+.showcase-progress-bar.is-done .showcase-progress-bar__fill {
+  width: 100%;
+}
+
+.showcase-progress-bar.is-active .showcase-progress-bar__fill {
+  width: 100%;
+  -webkit-transition: width linear;
+  transition: width linear;
+}
+
 /* ── Vignette produit studio ── */
 .sapi-showcase-card .showcase-product-img-wrap {
   position: relative;
