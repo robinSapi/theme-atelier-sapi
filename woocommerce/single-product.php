@@ -1067,8 +1067,8 @@ get_header();
   // ── Calcul dynamique du top sticky pour le slideshow ──
   var slideshow = document.getElementById('product-slideshow');
   if (slideshow && window.innerWidth > 600) {
-    var header = document.querySelector('.site-header, header');
-    var bar = document.getElementById('mon-projet-bar');
+    var header = document.querySelector('.site-header');
+    var bar = document.getElementById('mon-projet-bar') || document.getElementById('robin-bandeau');
     var stickyTop = 0;
     if (header) stickyTop += header.offsetHeight;
     if (bar) stickyTop += bar.offsetHeight;
