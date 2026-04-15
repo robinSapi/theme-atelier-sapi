@@ -20935,7 +20935,16 @@ body.woocommerce-cart div.woocommerce-wrapper {
   }
 
   .product-slideshow-bars {
-    width: 50%;
+    width: calc(100% - 2rem);
+  }
+
+  .product-slideshow-bar {
+    height: 20px;
+    border-radius: 10px;
+  }
+
+  .product-slideshow-bar__fill {
+    border-radius: 10px;
   }
 }
 
