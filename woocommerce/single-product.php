@@ -1438,6 +1438,11 @@ get_header();
           galleryZoomLink.href = variationImageFull;
         }
 
+        // Mobile : revenir sur la première slide (image principale)
+        if (galleryMain && window.innerWidth <= 600) {
+          galleryMain.scrollTo({ left: 0, behavior: 'smooth' });
+        }
+
         // Replace first thumbnail with variation image
         if (firstThumb) {
           const firstThumbImg = firstThumb.querySelector('img');
