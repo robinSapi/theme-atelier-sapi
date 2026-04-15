@@ -18484,7 +18484,7 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
 /* ---- GALERIE V2 ---- */
 .product-gallery-v2 {
   position: sticky;
-  top: 100px;
+  top: var(--gallery-sticky-top, 100px);
   display: flex;
   flex-direction: column;
   gap: 1rem;

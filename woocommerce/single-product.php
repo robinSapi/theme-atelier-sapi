@@ -1074,6 +1074,16 @@ get_header();
     if (bar) stickyTop += bar.offsetHeight;
     slideshow.style.setProperty('--slideshow-sticky-top', stickyTop + 'px');
   }
+  // Même calcul pour la card galerie produit
+  var gallery = document.querySelector('.product-gallery-v2');
+  if (gallery && window.innerWidth > 600) {
+    var hdr = document.querySelector('.site-header');
+    var bnd = document.getElementById('mon-projet-bar') || document.getElementById('robin-bandeau');
+    var galTop = 0;
+    if (hdr) galTop += hdr.offsetHeight;
+    if (bnd) galTop += bnd.offsetHeight;
+    gallery.style.setProperty('--gallery-sticky-top', (galTop + 16) + 'px');
+  }
 
   // ── Product Slideshow ──
   if (slideshow) {
