@@ -20958,7 +20958,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* Barres de progression — cohérence avec showcase cards */
 .product-slideshow-bars {
   position: absolute;
-  bottom: calc(8vh + 20px);
+  bottom: calc(8vh + 10px);
   left: 50%;
   -webkit-transform: translateX(-50%);
   transform: translateX(-50%);
