@@ -19959,6 +19959,17 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
   }
 }
 
+/* ---- GALERIE DESKTOP — masquer les slides extra ---- */
+@media (min-width: 601px) {
+  .gallery-slide-extra {
+    display: none;
+  }
+
+  .gallery-main-video {
+    display: none;
+  }
+}
+
 /* ---- GALERIE MOBILE — scroll-snap horizontal ---- */
 @media (max-width: 600px) {
   .gallery-thumbnails {
@@ -19986,6 +19997,7 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
   }
 
   .gallery-main .gallery-main-image,
+  .gallery-main .gallery-slide-extra,
   .gallery-main .gallery-main-video {
     position: relative;
     inset: auto;
@@ -19993,6 +20005,7 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
     -ms-flex: 0 0 100%;
     flex: 0 0 100%;
     scroll-snap-align: center;
+    display: block;
     width: 100%;
     height: 100%;
     -o-object-fit: cover;

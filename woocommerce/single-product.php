@@ -246,8 +246,27 @@ get_header();
           ?>
           <div class="gallery-main" style="cursor: pointer;">
               <?php echo wp_get_attachment_image($main_image_id, 'woocommerce_single', false, ['class' => 'gallery-main-image', 'alt' => get_the_title()]); ?>
+              <?php // Slides supplémentaires pour le scroll-snap mobile
+              foreach ($gallery_ids as $slide_idx => $slide_id) :
+                $slide_full = wp_get_attachment_image_url($slide_id, 'full');
+              ?>
+                <?php echo wp_get_attachment_image($slide_id, 'woocommerce_single', false, [
+                  'class' => 'gallery-slide-extra',
+                  'alt' => get_the_title() . ' - photo ' . ($slide_idx + 2),
+                  'data-image' => esc_url($slide_full),
+                ]); ?>
+              <?php endforeach; ?>
+              <?php // Photos ACF (ambiance 1 + taille + accessoires)
+              foreach ($gallery_acf_photos as $gal_slide) :
+              ?>
+                <?php echo wp_get_attachment_image($gal_slide['id'], 'woocommerce_single', false, [
+                  'class' => 'gallery-slide-extra',
+                  'alt' => get_the_title() . ' - ' . $gal_slide['label'],
+                  'data-image' => esc_url($gal_slide['url']),
+                ]); ?>
+              <?php endforeach; ?>
               <?php if ($video_oembed) : ?>
-              <div class="gallery-main-video" style="display: none;">
+              <div class="gallery-main-video">
                 <?php echo $video_oembed; ?>
               </div>
               <?php endif; ?>
