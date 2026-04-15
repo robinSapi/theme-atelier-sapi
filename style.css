@@ -5185,7 +5185,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 
 /* ---- Atelier compact (refonte fiche produit) ---- */
 .product-atelier.product-atelier-cinetique.product-atelier-compact {
-  padding: 1.5rem 0;
+  padding: 0 0 4rem;
   background: transparent;
   border: none;
   border-radius: 0;
@@ -5225,7 +5225,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 .product-atelier-compact .product-atelier-compact-text h2 {
   font-size: 1.25rem;
   font-weight: 700;
-  margin: 0 0 0.5rem;
+  margin: 0 0 1rem;
   color: var(--color-dark, #323232);
 }
 
@@ -5252,7 +5252,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 
 @media (max-width: 768px) {
   .product-atelier.product-atelier-cinetique.product-atelier-compact {
-    padding: 1rem 1rem;
+    padding: 0 1rem 2.5rem;
   }
 }
 
