@@ -2136,7 +2136,7 @@
       reselectVariation();
     } else {
       // Pas de projet ou incomplet → texte par défaut
-      pill.textContent = 'Comment choisir le bon mod\u00e8le ?';
+      pill.textContent = 'Comment choisir ?';
       pill.dataset.robinContext = 'product_guide';
     }
   }
