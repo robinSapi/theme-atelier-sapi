@@ -125,6 +125,27 @@ get_header();
   }
 
   $acf_only_count = count($acf_photos) - $first_acf_index;
+
+  // Photos ACF filtrées pour les thumbnails galerie (seulement taille + accessoires)
+  // Les autres types (ambiance, detail, fabrication, vue de dessous) sont dans le slideshow
+  $gallery_acf_photos = [];
+  if (function_exists('get_field')) {
+    $galerie_repeater_gal = get_field('galerie_produit');
+    if (!empty($galerie_repeater_gal) && is_array($galerie_repeater_gal)) {
+      foreach ($galerie_repeater_gal as $row) {
+        $type = isset($row['type_photo']) ? $row['type_photo'] : '';
+        if (is_array($type)) $type = isset($type['value']) ? $type['value'] : '';
+        if ($type !== 'taille' && $type !== 'accessoires') continue;
+        $img_field = isset($row['image']) ? $row['image'] : null;
+        $img_id = sapi_get_acf_image_id($img_field);
+        $url = $img_id ? wp_get_attachment_image_url($img_id, 'full') : '';
+        if ($url) {
+          $gallery_acf_photos[] = ['url' => $url, 'label' => isset($type_labels[$type]) ? $type_labels[$type] : ucfirst($type), 'id' => $img_id];
+        }
+      }
+    }
+  }
+  $gallery_acf_count = count($gallery_acf_photos);
   ?>
 
   <?php sapi_maison_breadcrumbs(); ?>
@@ -229,7 +250,7 @@ get_header();
           $all_images = $main_image_id ? array_merge([$main_image_id], $gallery_ids) : $gallery_ids;
 
           $has_video = !empty($video_oembed);
-          if (count($all_images) + $acf_only_count + ($has_video ? 1 : 0) > 1) {
+          if (count($all_images) + $gallery_acf_count + ($has_video ? 1 : 0) > 1) {
             $video_thumb = $has_video ? sapi_get_video_thumbnail($video_url_raw) : '';
             ?>
             <div class="gallery-thumbnails">
@@ -261,18 +282,17 @@ get_header();
                 </button>
               <?php endforeach; ?>
               <?php
-              // ACF ambiance/detail photos as additional gallery thumbnails
-              for ($i = $first_acf_index; $i < count($acf_photos); $i++) :
-                $acf_photo = $acf_photos[$i];
+              // ACF photos filtrées pour la galerie (taille + accessoires uniquement)
+              foreach ($gallery_acf_photos as $gal_photo) :
               ?>
-                <button class="gallery-thumb" data-image="<?php echo esc_url($acf_photo['url']); ?>">
-                  <?php if (!empty($acf_photo['id'])) : ?>
-                    <?php echo wp_get_attachment_image($acf_photo['id'], 'woocommerce_gallery_thumbnail', false, ['alt' => get_the_title() . ' - ' . $acf_photo['label']]); ?>
+                <button class="gallery-thumb" data-image="<?php echo esc_url($gal_photo['url']); ?>">
+                  <?php if (!empty($gal_photo['id'])) : ?>
+                    <?php echo wp_get_attachment_image($gal_photo['id'], 'woocommerce_gallery_thumbnail', false, ['alt' => get_the_title() . ' - ' . $gal_photo['label']]); ?>
                   <?php else : ?>
-                    <img src="<?php echo esc_url($acf_photo['url']); ?>" alt="<?php echo esc_attr(get_the_title() . ' - ' . $acf_photo['label']); ?>">
+                    <img src="<?php echo esc_url($gal_photo['url']); ?>" alt="<?php echo esc_attr(get_the_title() . ' - ' . $gal_photo['label']); ?>">
                   <?php endif; ?>
                 </button>
-              <?php endfor; ?>
+              <?php endforeach; ?>
             </div>
             <?php
           }
@@ -1466,33 +1486,29 @@ get_header();
       });
     }
 
-    // Touch swipe detection
-    let touchStartX = 0;
-    let touchEndX = 0;
-    const minSwipeDistance = 50; // minimum distance for a swipe
+    // Touch swipe detection (desktop only — mobile uses scroll-snap)
+    if (window.innerWidth > 600) {
+      let touchStartX = 0;
+      let touchEndX = 0;
+      const minSwipeDistance = 50;
 
-    galleryMain.addEventListener('touchstart', function(e) {
-      touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
+      galleryMain.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
 
-    galleryMain.addEventListener('touchend', function(e) {
-      touchEndX = e.changedTouches[0].screenX;
-      handleSwipe();
-    }, { passive: true });
+      galleryMain.addEventListener('touchend', function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+      }, { passive: true });
 
-    function handleSwipe() {
-      const swipeDistance = touchEndX - touchStartX;
-
-      if (Math.abs(swipeDistance) < minSwipeDistance) return; // Not a swipe
-
-      if (swipeDistance > 0) {
-        // Swipe right - go to previous image
-        const newIndex = currentIndex > 0 ? currentIndex - 1 : thumbnails.length - 1;
-        navigateToImage(newIndex);
-      } else {
-        // Swipe left - go to next image
-        const newIndex = currentIndex < thumbnails.length - 1 ? currentIndex + 1 : 0;
-        navigateToImage(newIndex);
+      function handleSwipe() {
+        const swipeDistance = touchEndX - touchStartX;
+        if (Math.abs(swipeDistance) < minSwipeDistance) return;
+        if (swipeDistance > 0) {
+          navigateToImage(currentIndex > 0 ? currentIndex - 1 : thumbnails.length - 1);
+        } else {
+          navigateToImage(currentIndex < thumbnails.length - 1 ? currentIndex + 1 : 0);
+        }
       }
     }
   }
