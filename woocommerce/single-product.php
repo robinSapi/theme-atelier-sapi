@@ -1154,25 +1154,30 @@ get_header();
       goToSlide(0);
       timer = setTimeout(nextSlide, slideDuration);
 
-      // Desktop : pause + masque barres quand hero recouvre le slideshow (5%)
+      // Desktop : pause + masque barres quand les cards hero recouvrent le slideshow
       if (window.innerWidth > 600) {
         var barsEl = slideshow.querySelector('.product-slideshow-bars');
+        var heroEl = document.querySelector('.product-hero-v2');
         var isPaused = false;
 
-        var scrollObserver = new IntersectionObserver(function(entries) {
-          var ratio = entries[0].intersectionRatio;
-          if (ratio < 0.95 && !isPaused) {
-            isPaused = true;
-            clearTimeout(timer);
-            if (barsEl) barsEl.style.opacity = '0';
-          } else if (ratio >= 0.95 && isPaused) {
-            isPaused = false;
-            if (barsEl) barsEl.style.opacity = '';
-            timer = setTimeout(nextSlide, slideDuration);
-          }
-        }, { threshold: [0.95] });
+        if (heroEl) {
+          var scrollObserver = new IntersectionObserver(function(entries) {
+            var isHeroVisible = entries[0].isIntersecting;
+            if (isHeroVisible && !isPaused) {
+              // Les cards commencent à recouvrir le slideshow
+              isPaused = true;
+              clearTimeout(timer);
+              if (barsEl) barsEl.style.opacity = '0';
+            } else if (!isHeroVisible && isPaused) {
+              // Les cards ne recouvrent plus le slideshow
+              isPaused = false;
+              if (barsEl) barsEl.style.opacity = '';
+              timer = setTimeout(nextSlide, slideDuration);
+            }
+          }, { threshold: 0 });
 
-        scrollObserver.observe(slideshow);
+          scrollObserver.observe(heroEl);
+        }
       }
     }
   }
