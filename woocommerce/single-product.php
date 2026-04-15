@@ -1069,12 +1069,19 @@ get_header();
       }
 
       function nextSlide() {
-        if (currentSlide < total - 1) {
-          goToSlide(currentSlide + 1);
-          timer = setTimeout(nextSlide, slideDuration);
-        }
-        // Dernière slide : on s'arrête, pas de loop
+        goToSlide((currentSlide + 1) % total);
+        timer = setTimeout(nextSlide, slideDuration);
       }
+
+      // Barres cliquables
+      bars.forEach(function(bar, i) {
+        bar.style.cursor = 'pointer';
+        bar.addEventListener('click', function() {
+          clearTimeout(timer);
+          goToSlide(i);
+          timer = setTimeout(nextSlide, slideDuration);
+        });
+      });
 
       // Démarrer la première barre
       goToSlide(0);
