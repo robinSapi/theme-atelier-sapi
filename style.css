@@ -20852,7 +20852,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
    ═══════════════════════════════════════════════════════════════ */
 .product-slideshow {
   position: relative;
-  width: 100%;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
   height: 80vh;
   height: 80dvh;
   overflow: hidden;
