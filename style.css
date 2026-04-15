@@ -20940,7 +20940,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   .product-slideshow {
     position: -webkit-sticky;
     position: sticky;
-    top: 120px; /* header (80px) + bandeau Mon Projet (~40px) */
+    top: var(--slideshow-sticky-top, 0px);
     z-index: 2;
   }
 }

@@ -1064,8 +1064,18 @@ get_header();
 
 <script>
 (function() {
-  // ── Product Slideshow ──
+  // ── Calcul dynamique du top sticky pour le slideshow ──
   var slideshow = document.getElementById('product-slideshow');
+  if (slideshow && window.innerWidth > 600) {
+    var header = document.querySelector('.site-header, header');
+    var bar = document.getElementById('mon-projet-bar');
+    var stickyTop = 0;
+    if (header) stickyTop += header.offsetHeight;
+    if (bar) stickyTop += bar.offsetHeight;
+    slideshow.style.setProperty('--slideshow-sticky-top', stickyTop + 'px');
+  }
+
+  // ── Product Slideshow ──
   if (slideshow) {
     var slides = slideshow.querySelectorAll('.product-slideshow-slide');
     var bars = slideshow.querySelectorAll('.product-slideshow-bar');
