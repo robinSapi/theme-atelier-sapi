@@ -191,6 +191,9 @@ get_header();
       </div>
       <?php endforeach; ?>
     </div>
+    <!-- Zones tap Stories (mobile) -->
+    <div class="product-slideshow-tap product-slideshow-tap--prev" data-dir="prev"></div>
+    <div class="product-slideshow-tap product-slideshow-tap--next" data-dir="next"></div>
     <?php endif; ?>
   </div>
   <?php endif; ?>
@@ -1106,6 +1109,19 @@ get_header();
         bar.addEventListener('click', function() {
           clearTimeout(timer);
           goToSlide(i);
+          timer = setTimeout(nextSlide, slideDuration);
+        });
+      });
+
+      // Zones tap Stories (mobile)
+      slideshow.querySelectorAll('.product-slideshow-tap').forEach(function(tap) {
+        tap.addEventListener('click', function() {
+          clearTimeout(timer);
+          if (tap.dataset.dir === 'prev') {
+            goToSlide(currentSlide > 0 ? currentSlide - 1 : total - 1);
+          } else {
+            goToSlide((currentSlide + 1) % total);
+          }
           timer = setTimeout(nextSlide, slideDuration);
         });
       });

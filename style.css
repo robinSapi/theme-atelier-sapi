@@ -19851,7 +19851,7 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
 @media (max-width: 768px) {
   .product-hero-v2 {
     padding: 1rem 0 2rem;
-    margin-top: -6vh;
+    margin-top: -3vh;
   }
 
   .product-hero-container {
@@ -20994,21 +20994,58 @@ body.woocommerce-cart div.woocommerce-wrapper {
 
 @media (max-width: 768px) {
   .product-slideshow {
-    height: 75vh;
-    height: 75dvh;
+    height: 85vh;
+    height: 85dvh;
+    margin-bottom: 0;
   }
 
+  /* Barres fines en haut — style Stories Instagram */
   .product-slideshow-bars {
-    width: calc(100% - 2rem);
+    top: 12px;
+    bottom: auto;
+    width: calc(100% - 1.5rem);
+    gap: 3px;
   }
 
   .product-slideshow-bar {
-    height: 20px;
-    border-radius: 10px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.3);
   }
 
   .product-slideshow-bar__fill {
-    border-radius: 10px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  /* Zones tap gauche/droite */
+  .product-slideshow-tap {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    z-index: 3;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .product-slideshow-tap--prev {
+    left: 0;
+  }
+
+  .product-slideshow-tap--next {
+    right: 0;
+  }
+}
+
+/* Zones tap masquées sur desktop */
+.product-slideshow-tap {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .product-slideshow-tap {
+    display: block;
   }
 }
 
