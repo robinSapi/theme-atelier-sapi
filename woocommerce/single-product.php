@@ -55,10 +55,6 @@ get_header();
   <?php
   // sapi_get_acf_image_url() is defined in functions.php
 
-  // Photo ambiance aléatoire pour l'intro screen
-  $ambiance_intro_photos = sapi_get_product_photos(get_the_ID(), 'ambiance');
-  $ambiance_intro = !empty($ambiance_intro_photos) ? $ambiance_intro_photos[array_rand($ambiance_intro_photos)] : '';
-
   // Collect ALL photos for lightbox: product images + ACF ambiance/detail
   $acf_photos = [];
 
@@ -129,17 +125,6 @@ get_header();
   }
 
   $acf_only_count = count($acf_photos) - $first_acf_index;
-
-  if ($ambiance_intro) :
-  ?>
-  <!-- Product Intro Screen with Ambiance Image -->
-  <div class="product-intro-screen" id="product-intro-screen" style="--intro-bg-image: url('<?php echo esc_url($ambiance_intro); ?>');">
-    <div class="product-intro-content">
-      <p class="product-intro-title"><?php the_title(); ?></p>
-      <span class="product-intro-skip">Scrollez ou cliquez pour découvrir</span>
-    </div>
-  </div>
-  <?php endif; ?>
 
   <?php sapi_maison_breadcrumbs(); ?>
 
@@ -1006,127 +991,6 @@ get_header();
 
 <script>
 (function() {
-  // Product Intro Screen Animation with Scroll-to-Reveal
-  const introScreen = document.getElementById('product-intro-screen');
-
-  if (introScreen) {
-    // N'afficher l'intro qu'une seule fois par session par produit.
-    // Après un ajout au panier (rechargement), l'intro ne réapparaît pas.
-    const introKey = 'sapi_intro_<?php echo $product->get_id(); ?>';
-    const fromStar = new URLSearchParams(window.location.search).get('from') === 'star';
-    if (sessionStorage.getItem(introKey) || fromStar) {
-      introScreen.remove();
-      if (fromStar) window.history.replaceState({}, '', window.location.pathname);
-    } else {
-      sessionStorage.setItem(introKey, '1');
-
-    let introRemoved = false;
-    let scrollProgress = 0;
-    const fadeDistance = 200;
-    const snapThreshold = 0.3; // 30% → au-delà on ferme, en-deçà on ramène
-
-    // Bloquer le scroll de la page derrière l'intro
-    document.documentElement.classList.add('sapi-intro-active');
-
-    // Fade in the image after initial black fade
-    setTimeout(function() {
-      introScreen.classList.add('loaded');
-    }, 300);
-
-    // Snap : fermer ou ramener selon la progression
-    function snapIntro() {
-      var progress = Math.min(1, scrollProgress / fadeDistance);
-      if (progress > 0 && progress < 1) {
-        introScreen.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-        if (progress >= snapThreshold) {
-          removeIntro();
-        } else {
-          // Ramener à la position initiale
-          scrollProgress = 0;
-          introScreen.style.transform = 'translateY(0)';
-          // Retirer la transition après l'animation
-          setTimeout(function() { introScreen.style.transition = ''; }, 400);
-        }
-      }
-    }
-
-    // Glissement vers le haut via wheel
-    var wheelTimer = null;
-    function handleWheel(e) {
-      if (introRemoved) return;
-      e.preventDefault();
-
-      scrollProgress += Math.abs(e.deltaY);
-      var progress = Math.min(1, scrollProgress / fadeDistance);
-      introScreen.style.transform = 'translateY(-' + (progress * 100) + 'vh)';
-
-      if (progress >= 1) {
-        removeIntro();
-      } else {
-        // Snap après un court délai sans scroll (l'utilisateur a arrêté)
-        clearTimeout(wheelTimer);
-        wheelTimer = setTimeout(snapIntro, 150);
-      }
-    }
-
-    // Glissement via touch (swipe up)
-    let touchStartY = 0;
-    function handleTouchStart(e) {
-      touchStartY = e.touches[0].clientY;
-    }
-    function handleTouchMove(e) {
-      if (introRemoved) return;
-      e.preventDefault();
-
-      const deltaY = touchStartY - e.touches[0].clientY;
-      if (deltaY > 0) {
-        scrollProgress += deltaY;
-        touchStartY = e.touches[0].clientY;
-        var progress = Math.min(1, scrollProgress / fadeDistance);
-        introScreen.style.transform = 'translateY(-' + (progress * 100) + 'vh)';
-
-        if (progress >= 1) {
-          removeIntro();
-        }
-      }
-    }
-    function handleTouchEnd() {
-      if (!introRemoved) snapIntro();
-    }
-
-    function removeIntro() {
-      if (introRemoved) return;
-      introRemoved = true;
-      clearTimeout(wheelTimer);
-      introScreen.style.transform = 'translateY(-100vh)';
-      document.documentElement.classList.remove('sapi-intro-active');
-      window.removeEventListener('wheel', handleWheel, { passive: false });
-      introScreen.removeEventListener('touchstart', handleTouchStart);
-      introScreen.removeEventListener('touchmove', handleTouchMove);
-      introScreen.removeEventListener('touchend', handleTouchEnd);
-      setTimeout(function() {
-        introScreen.remove();
-      }, 400);
-    }
-
-    // Click to skip — glisse vers le haut
-    introScreen.addEventListener('click', function() {
-      if (!introRemoved) {
-        introScreen.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-        removeIntro();
-      }
-    });
-
-    // Écouter après le chargement de l'image
-    setTimeout(function() {
-      window.addEventListener('wheel', handleWheel, { passive: false });
-      introScreen.addEventListener('touchstart', handleTouchStart, { passive: true });
-      introScreen.addEventListener('touchmove', handleTouchMove, { passive: false });
-      introScreen.addEventListener('touchend', handleTouchEnd, { passive: true });
-    }, 800);
-    } // end else (intro non encore vue)
-  }
-
   const stickyBar = document.getElementById('sticky-add-to-cart');
   const heroSection = document.querySelector('.product-hero-v2');
 
