@@ -335,7 +335,7 @@ get_header();
           <button type="button" class="robin-pill" id="robin-product-pill"
             data-robin-context="product_guide"
             data-robin-data='<?php echo esc_attr(wp_json_encode(['product_id' => $product_id, 'product_name' => get_the_title()])); ?>'>
-            Comment choisir le bon mod&egrave;le ?
+            Comment choisir ?
           </button>
         <?php endif; ?>
 

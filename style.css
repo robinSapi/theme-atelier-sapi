@@ -18747,6 +18747,7 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
   .product-gallery-mobile-header {
     display: block;
     margin-bottom: 1.5rem;
+    text-align: center;
   }
 
   .product-title-mobile {
@@ -18756,8 +18757,8 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
     line-height: 1.2;
     color: var(--color-dark, #323232);
     margin: 0 0 0.5rem 0;
-    text-transform: uppercase; /* Match desktop style */
-    letter-spacing: 0.02em; /* Match desktop style */
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
   }
 
   .product-tagline-mobile {
