@@ -1134,16 +1134,30 @@ get_header();
 
   const stickyBar = document.getElementById('sticky-add-to-cart');
   const heroSection = document.querySelector('.product-hero-v2');
+  const slideshowSection = document.getElementById('product-slideshow');
 
-  // Show/hide sticky bar based on scroll position
+  // Show/hide sticky bar : visible seulement quand ni le slideshow ni le hero ne sont à l'écran
   if (stickyBar && heroSection) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        stickyBar.classList.toggle('is-visible', !entry.isIntersecting);
-      });
-    }, { threshold: 0, rootMargin: '-100px 0px 0px 0px' });
+    var heroVisible = true;
+    var slideshowVisible = !!slideshowSection;
 
-    observer.observe(heroSection);
+    function updateStickyBar() {
+      stickyBar.classList.toggle('is-visible', !heroVisible && !slideshowVisible);
+    }
+
+    var heroObserver = new IntersectionObserver(function(entries) {
+      heroVisible = entries[0].isIntersecting;
+      updateStickyBar();
+    }, { threshold: 0, rootMargin: '-100px 0px 0px 0px' });
+    heroObserver.observe(heroSection);
+
+    if (slideshowSection) {
+      var ssObserver = new IntersectionObserver(function(entries) {
+        slideshowVisible = entries[0].isIntersecting;
+        updateStickyBar();
+      }, { threshold: 0 });
+      ssObserver.observe(slideshowSection);
+    }
   }
 
   // Handle simple product add to cart (Safari compatible)
