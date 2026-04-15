@@ -20042,7 +20042,15 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
     font-size: 0.75rem;
   }
 
+  .product-form-v2 .variations tbody {
+    display: flex;
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+
   .product-form-v2 .variations tr {
+    flex: 1;
+    min-width: 0;
     gap: 0.15rem;
     padding: 0.5rem 0.75rem !important;
   }
