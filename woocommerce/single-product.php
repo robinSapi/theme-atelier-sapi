@@ -126,12 +126,29 @@ get_header();
 
   $acf_only_count = count($acf_photos) - $first_acf_index;
 
-  // Photos ACF filtrées pour les thumbnails galerie (seulement taille + accessoires)
-  // Les autres types (ambiance, detail, fabrication, vue de dessous) sont dans le slideshow
+  // Photos ACF filtrées pour les thumbnails galerie :
+  // - Ambiance 1 (première photo ambiance uniquement)
+  // - Types taille et accessoires
   $gallery_acf_photos = [];
+  $ambiance_added = false;
   if (function_exists('get_field')) {
     $galerie_repeater_gal = get_field('galerie_produit');
     if (!empty($galerie_repeater_gal) && is_array($galerie_repeater_gal)) {
+      // D'abord : première photo ambiance
+      foreach ($galerie_repeater_gal as $row) {
+        $type = isset($row['type_photo']) ? $row['type_photo'] : '';
+        if (is_array($type)) $type = isset($type['value']) ? $type['value'] : '';
+        if ($type !== 'ambiance') continue;
+        $img_field = isset($row['image']) ? $row['image'] : null;
+        $img_id = sapi_get_acf_image_id($img_field);
+        $url = $img_id ? wp_get_attachment_image_url($img_id, 'full') : '';
+        if ($url) {
+          $gallery_acf_photos[] = ['url' => $url, 'label' => 'Ambiance', 'id' => $img_id];
+          $ambiance_added = true;
+          break; // Seulement la première
+        }
+      }
+      // Ensuite : taille + accessoires
       foreach ($galerie_repeater_gal as $row) {
         $type = isset($row['type_photo']) ? $row['type_photo'] : '';
         if (is_array($type)) $type = isset($type['value']) ? $type['value'] : '';
