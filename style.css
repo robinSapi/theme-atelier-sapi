@@ -20043,7 +20043,14 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
   }
 
   .product-form-v2 .variations tr {
-    gap: 0.35rem;
+    gap: 0.15rem;
+    padding: 0.5rem 0.75rem !important;
+  }
+
+  .product-form-v2 .variations .label,
+  .product-form-v2 .variations th.label {
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   .gallery-main-wrap {
