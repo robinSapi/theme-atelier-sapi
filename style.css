@@ -5185,11 +5185,11 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 
 /* ---- Atelier compact (refonte fiche produit) ---- */
 .product-atelier.product-atelier-cinetique.product-atelier-compact {
-  padding: 0;
+  padding: 4rem 3rem;
   background: transparent;
   border: none;
   border-radius: 0;
-  max-width: 720px;
+  max-width: 1200px;
   margin: 0 auto 3rem;
 }
 
@@ -5200,8 +5200,6 @@ ul.products.products-carousel-track > li.products-carousel-slide {
   overflow: hidden;
   background: #fff;
   box-shadow: var(--shadow-card);
-  max-width: 720px;
-  margin: 0 auto;
 }
 
 .product-atelier-compact .product-atelier-compact-photo {
@@ -5246,9 +5244,7 @@ ul.products.products-carousel-track > li.products-carousel-slide {
 
 @media (max-width: 768px) {
   .product-atelier.product-atelier-cinetique.product-atelier-compact {
-    padding: 0;
-    margin-left: 1rem;
-    margin-right: 1rem;
+    padding: 3rem 1.5rem;
   }
 }
 
