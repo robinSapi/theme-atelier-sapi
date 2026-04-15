@@ -19959,6 +19959,11 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
   }
 }
 
+/* ---- Dots pagination galerie mobile ---- */
+.gallery-dots {
+  display: none;
+}
+
 /* ---- GALERIE DESKTOP — masquer les slides extra ---- */
 @media (min-width: 601px) {
   .gallery-slide-extra {
@@ -20021,6 +20026,28 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
 
   .product-gallery-mobile-header {
     padding: 1rem 1rem 0;
+  }
+
+  .gallery-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 0.75rem 0;
+  }
+
+  .gallery-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-gray-light, #ddd);
+    -webkit-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+  }
+
+  .gallery-dot.active {
+    background: var(--color-wood, #937D68);
+    -webkit-transform: scale(1.2);
+    transform: scale(1.2);
   }
 }
 

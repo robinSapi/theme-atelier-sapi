@@ -283,6 +283,17 @@ get_header();
             </button>
           </div>
           <?php
+          // Dots pagination mobile (scroll-snap)
+          $total_slides = 1 + count($gallery_ids) + count($gallery_acf_photos) + (!empty($video_oembed) ? 1 : 0);
+          if ($total_slides > 1) :
+          ?>
+          <div class="gallery-dots">
+            <?php for ($d = 0; $d < $total_slides; $d++) : ?>
+            <span class="gallery-dot<?php echo $d === 0 ? ' active' : ''; ?>"></span>
+            <?php endfor; ?>
+          </div>
+          <?php endif; ?>
+          <?php
         }
 
         // Thumbnails (horizontal)
@@ -1627,6 +1638,26 @@ get_header();
         } else {
           navigateToImage(currentIndex < thumbnails.length - 1 ? currentIndex + 1 : 0);
         }
+      }
+    }
+
+    // Mobile : mise à jour des dots au scroll-snap
+    if (window.innerWidth <= 600) {
+      var dots = document.querySelectorAll('.gallery-dot');
+      if (dots.length > 0 && galleryMain) {
+        var scrollRaf = null;
+        galleryMain.addEventListener('scroll', function() {
+          if (scrollRaf) return;
+          scrollRaf = requestAnimationFrame(function() {
+            scrollRaf = null;
+            var scrollLeft = galleryMain.scrollLeft;
+            var slideWidth = galleryMain.offsetWidth;
+            var activeIdx = Math.round(scrollLeft / slideWidth);
+            dots.forEach(function(dot, i) {
+              dot.classList.toggle('active', i === activeIdx);
+            });
+          });
+        }, { passive: true });
       }
     }
   }
