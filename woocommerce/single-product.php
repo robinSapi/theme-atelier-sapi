@@ -972,22 +972,18 @@ get_header();
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION 04 — L'ATELIER (Fabriqué avec passion)
        ═══════════════════════════════════════════════════════════════ -->
-  <section class="product-atelier product-atelier-cinetique">
-    <div class="product-atelier-grid">
-      <div class="product-atelier-image">
-          <?php echo sapi_image('2026/03/Robin-au-poncage.jpg', 'large', ['alt' => "Robin au ponçage dans l'atelier Sapi", 'loading' => 'lazy']); ?>
+  <section class="product-atelier product-atelier-cinetique product-atelier-compact">
+    <div class="product-atelier-compact-inner">
+      <div class="product-atelier-compact-photo">
+        <?php echo sapi_image('2026/03/Robin-au-poncage.jpg', 'medium', ['alt' => "Robin dans l'atelier Sapi", 'loading' => 'lazy']); ?>
       </div>
-      <div class="product-atelier-content">
+      <div class="product-atelier-compact-text">
         <span class="section-num"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
-        <h2>Fabriqué avec passion</h2>
-        <p class="atelier-intro">Chaque luminaire est conçu et fabriqué à la main par Robin dans son atelier lyonnais.</p>
-        <div class="atelier-quote-body">
-          <div class="robin-conseil__quote">&ldquo;</div>
-          <p class="atelier-quote-text">Je crée chaque pièce comme si elle allait éclairer ma propre maison. La précision de la découpe laser combinée au savoir-faire artisanal, c'est ce qui rend chaque luminaire unique.</p>
+        <p><strong>Fabriqué à la main à Lyon</strong> par Robin, artisan créateur.</p>
+        <div class="product-atelier-compact-links">
+          <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="robin-conseil__product-link">Découvrir l'histoire de Robin &rarr;</a>
+          <a href="<?php echo esc_url(home_url('/contact/')); ?>" class="robin-conseil__product-link">Prendre rendez-vous à l'atelier &rarr;</a>
         </div>
-        <p class="atelier-signature">Robin, créateur à l'Atelier Sâpi</p>
-        <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="robin-conseil__product-link">Découvrir l'histoire de Robin &rarr;</a>
-        <p class="atelier-rdv">Atelier ouvert sur rendez-vous — <a href="<?php echo esc_url(home_url('/contact/')); ?>">prendre rendez-vous</a></p>
       </div>
     </div>
   </section>
