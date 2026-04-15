@@ -979,6 +979,7 @@ get_header();
       </div>
       <div class="product-atelier-compact-text">
         <span class="section-num"><?php echo esc_html(sprintf('%02d', ++$section_num)); ?></span>
+        <h2>Fabriqué avec passion</h2>
         <p><strong>Fabriqué à la main à Lyon</strong> par Robin, artisan créateur.</p>
         <div class="product-atelier-compact-links">
           <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="robin-conseil__product-link">Découvrir l'histoire de Robin &rarr;</a>
