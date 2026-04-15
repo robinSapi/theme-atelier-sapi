@@ -2221,6 +2221,10 @@ button:hover,
   font-size: 0.82rem;
   color: var(--color-wood, #937D68);
 }
+
+#robin-product-pill {
+  margin: 0.5rem 0 1rem;
+}
 .robin-pill:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
@@ -20040,6 +20044,10 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
 
   .product-form-v2 .variations tr {
     gap: 0.35rem;
+  }
+
+  .gallery-main-wrap {
+    position: relative;
   }
 
   .gallery-dots {

@@ -244,6 +244,7 @@ get_header();
           $main_image_url = wp_get_attachment_image_url($main_image_id, 'woocommerce_single');
           $main_image_full = wp_get_attachment_image_url($main_image_id, 'full');
           ?>
+          <div class="gallery-main-wrap">
           <div class="gallery-main" style="cursor: pointer;">
               <?php echo wp_get_attachment_image($main_image_id, 'woocommerce_single', false, ['class' => 'gallery-main-image', 'alt' => get_the_title()]); ?>
               <?php // Slides supplémentaires pour le scroll-snap mobile
@@ -281,17 +282,19 @@ get_header();
                 <polyline points="9 18 15 12 9 6"></polyline>
               </svg>
             </button>
-            <?php
-            // Dots pagination mobile (scroll-snap) — dans .gallery-main pour overlay
-            $total_slides = 1 + count($gallery_ids) + count($gallery_acf_photos) + (!empty($video_oembed) ? 1 : 0);
-            if ($total_slides > 1) :
-            ?>
-            <div class="gallery-dots">
-              <?php for ($d = 0; $d < $total_slides; $d++) : ?>
-              <span class="gallery-dot<?php echo $d === 0 ? ' active' : ''; ?>"></span>
-              <?php endfor; ?>
-            </div>
-            <?php endif; ?>
+          </div>
+          <?php
+          // Dots pagination mobile (scroll-snap) — en sibling hors de .gallery-main
+          // (Safari iOS : position absolute dans overflow-x auto scroll avec le contenu)
+          $total_slides = 1 + count($gallery_ids) + count($gallery_acf_photos) + (!empty($video_oembed) ? 1 : 0);
+          if ($total_slides > 1) :
+          ?>
+          <div class="gallery-dots">
+            <?php for ($d = 0; $d < $total_slides; $d++) : ?>
+            <span class="gallery-dot<?php echo $d === 0 ? ' active' : ''; ?>"></span>
+            <?php endfor; ?>
+          </div>
+          <?php endif; ?>
           </div>
           <?php
         }
