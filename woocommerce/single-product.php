@@ -1052,19 +1052,26 @@ get_header();
       function goToSlide(index) {
         slides.forEach(function(s, i) { s.classList.toggle('is-active', i === index); });
         bars.forEach(function(b, i) {
+          var fill = b.querySelector('.product-slideshow-bar__fill');
           b.classList.remove('is-active', 'is-done');
-          if (i < index) b.classList.add('is-done');
-          else if (i === index) b.classList.add('is-active');
+          // Reset tous les inline styles d'abord
+          if (fill) {
+            fill.style.transition = 'none';
+            fill.style.width = '';
+          }
+          if (i < index) {
+            b.classList.add('is-done');
+          } else if (i === index) {
+            b.classList.add('is-active');
+            // Animer la barre active
+            if (fill) {
+              fill.style.width = '0';
+              fill.offsetHeight; // force reflow
+              fill.style.transition = 'width ' + (slideDuration / 1000) + 's linear';
+              fill.style.width = '100%';
+            }
+          }
         });
-        // Restart fill animation
-        var activeFill = bars[index].querySelector('.product-slideshow-bar__fill');
-        if (activeFill) {
-          activeFill.style.transition = 'none';
-          activeFill.style.width = '0';
-          activeFill.offsetHeight; // force reflow
-          activeFill.style.transition = 'width ' + (slideDuration / 1000) + 's linear';
-          activeFill.style.width = '100%';
-        }
         currentSlide = index;
       }
 
