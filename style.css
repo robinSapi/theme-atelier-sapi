@@ -20925,8 +20925,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   z-index: 1;
   width: 100vw;
   margin-left: calc(-50vw + 50%);
-  height: 80vh;
-  height: 80dvh;
+  height: var(--slideshow-height, 80vh);
   overflow: hidden;
   background: #000;
 }

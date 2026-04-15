@@ -1073,6 +1073,8 @@ get_header();
     if (header) stickyTop += header.offsetHeight;
     if (bar) stickyTop += bar.offsetHeight;
     slideshow.style.setProperty('--slideshow-sticky-top', stickyTop + 'px');
+    slideshow.style.setProperty('--slideshow-height', 'calc(100vh - ' + stickyTop + 'px)');
+    slideshow.style.setProperty('--slideshow-height', 'calc(100dvh - ' + stickyTop + 'px)');
   }
   // Même calcul pour la card galerie produit
   var gallery = document.querySelector('.product-gallery-v2');
