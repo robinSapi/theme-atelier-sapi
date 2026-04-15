@@ -20919,6 +20919,20 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* ═══════════════════════════════════════════════════════════════
    PRODUCT SLIDESHOW — Ambiance plein-largeur (refonte fiche produit)
    ═══════════════════════════════════════════════════════════════ */
+
+/* Wrapper sticky desktop */
+@media (min-width: 601px) {
+  .product-intro-wrapper {
+    position: relative;
+  }
+
+  .product-slideshow {
+    position: sticky;
+    top: 0;
+    z-index: 2; /* inférieur au hero (10) et au .mon-projet-bar (998) */
+  }
+}
+
 .product-slideshow {
   position: relative;
   z-index: 1;
@@ -20968,6 +20982,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
   display: flex;
   gap: 4px;
   z-index: 2;
+  -webkit-transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease;
 }
 
 .product-slideshow-bar {

@@ -175,6 +175,7 @@ get_header();
   ?>
 
   <?php if (!empty($slideshow_photos)) : ?>
+  <div class="product-intro-wrapper">
   <div class="product-slideshow" id="product-slideshow">
     <div class="product-slideshow-track">
       <?php foreach ($slideshow_photos as $ss_index => $ss_img_id) : ?>
@@ -196,7 +197,7 @@ get_header();
     <div class="product-slideshow-tap product-slideshow-tap--next" data-dir="next"></div>
     <?php endif; ?>
   </div>
-  <?php endif; ?>
+  <?php endif; // fin slideshow bars ?>
 
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION 01 — HERO PRODUIT (Premium Layout)
@@ -423,6 +424,9 @@ get_header();
       </div>
     </div>
   </section>
+  <?php if (!empty($slideshow_photos)) : ?>
+  </div><!-- /.product-intro-wrapper -->
+  <?php endif; ?>
 
   <?php if (!$is_carte_cadeau) : // Masquer tout le contenu détaillé pour la carte cadeau ?>
   <?php $section_num = 0; ?>
@@ -1129,6 +1133,27 @@ get_header();
       // Démarrer la première barre
       goToSlide(0);
       timer = setTimeout(nextSlide, slideDuration);
+
+      // Desktop : pause + masque barres quand hero recouvre le slideshow (5%)
+      if (window.innerWidth > 600) {
+        var barsEl = slideshow.querySelector('.product-slideshow-bars');
+        var isPaused = false;
+
+        var scrollObserver = new IntersectionObserver(function(entries) {
+          var ratio = entries[0].intersectionRatio;
+          if (ratio < 0.95 && !isPaused) {
+            isPaused = true;
+            clearTimeout(timer);
+            if (barsEl) barsEl.style.opacity = '0';
+          } else if (ratio >= 0.95 && isPaused) {
+            isPaused = false;
+            if (barsEl) barsEl.style.opacity = '';
+            timer = setTimeout(nextSlide, slideDuration);
+          }
+        }, { threshold: [0.95] });
+
+        scrollObserver.observe(slideshow);
+      }
     }
   }
 
