@@ -125,6 +125,7 @@ get_header();
   }
 
   $acf_only_count = count($acf_photos) - $first_acf_index;
+  ?>
 
   <?php sapi_maison_breadcrumbs(); ?>
 
