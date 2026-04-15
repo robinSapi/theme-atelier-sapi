@@ -2967,7 +2967,10 @@ button:hover,
   gap: 0.35rem;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--color-wood, #937D68);
+  color: #fff;
+  background: var(--color-wood, #937D68);
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
@@ -2975,7 +2978,7 @@ button:hover,
 }
 
 .mon-projet-label svg {
-  color: var(--color-orange, #E35B24);
+  color: #fff;
   flex-shrink: 0;
 }
 
@@ -2983,8 +2986,10 @@ button:hover,
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mon-projet-placeholder {
