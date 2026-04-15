@@ -129,6 +129,51 @@ get_header();
 
   <?php sapi_maison_breadcrumbs(); ?>
 
+  <?php
+  // ── Slideshow ambiance : photos ACF filtrées par type ──
+  $slideshow_types = ['ambiance', 'vue de dessous', 'detail', 'fabrication'];
+  $slideshow_photos = [];
+  if (function_exists('get_field')) {
+    $galerie_repeater_ss = get_field('galerie_produit');
+    if (!empty($galerie_repeater_ss) && is_array($galerie_repeater_ss)) {
+      // Trier par ordre des types demandés
+      foreach ($slideshow_types as $ss_type) {
+        foreach ($galerie_repeater_ss as $row) {
+          $type = isset($row['type_photo']) ? $row['type_photo'] : '';
+          if (is_array($type)) $type = isset($type['value']) ? $type['value'] : '';
+          if ($type !== $ss_type) continue;
+          $img_field = isset($row['image']) ? $row['image'] : null;
+          $img_id = sapi_get_acf_image_id($img_field);
+          if ($img_id) {
+            $slideshow_photos[] = $img_id;
+          }
+        }
+      }
+    }
+  }
+  ?>
+
+  <?php if (!empty($slideshow_photos)) : ?>
+  <div class="product-slideshow" id="product-slideshow">
+    <div class="product-slideshow-track">
+      <?php foreach ($slideshow_photos as $ss_index => $ss_img_id) : ?>
+      <div class="product-slideshow-slide<?php echo $ss_index === 0 ? ' is-active' : ''; ?>">
+        <?php echo wp_get_attachment_image($ss_img_id, 'full', false, ['class' => 'product-slideshow-img', 'alt' => get_the_title() . ' - photo ' . ($ss_index + 1)]); ?>
+      </div>
+      <?php endforeach; ?>
+    </div>
+    <?php if (count($slideshow_photos) > 1) : ?>
+    <div class="product-slideshow-bars">
+      <?php foreach ($slideshow_photos as $ss_bar_index => $ss_bar_id) : ?>
+      <div class="product-slideshow-bar<?php echo $ss_bar_index === 0 ? ' is-active' : ''; ?>">
+        <div class="product-slideshow-bar__fill"></div>
+      </div>
+      <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+  </div>
+  <?php endif; ?>
+
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION 01 — HERO PRODUIT (Premium Layout)
        ═══════════════════════════════════════════════════════════════ -->
@@ -992,6 +1037,51 @@ get_header();
 
 <script>
 (function() {
+  // ── Product Slideshow ──
+  var slideshow = document.getElementById('product-slideshow');
+  if (slideshow) {
+    var slides = slideshow.querySelectorAll('.product-slideshow-slide');
+    var bars = slideshow.querySelectorAll('.product-slideshow-bar');
+    var total = slides.length;
+
+    if (total > 1) {
+      var currentSlide = 0;
+      var slideDuration = 4500;
+      var timer = null;
+
+      function goToSlide(index) {
+        slides.forEach(function(s, i) { s.classList.toggle('is-active', i === index); });
+        bars.forEach(function(b, i) {
+          b.classList.remove('is-active', 'is-done');
+          if (i < index) b.classList.add('is-done');
+          else if (i === index) b.classList.add('is-active');
+        });
+        // Restart fill animation
+        var activeFill = bars[index].querySelector('.product-slideshow-bar__fill');
+        if (activeFill) {
+          activeFill.style.transition = 'none';
+          activeFill.style.width = '0';
+          activeFill.offsetHeight; // force reflow
+          activeFill.style.transition = 'width ' + (slideDuration / 1000) + 's linear';
+          activeFill.style.width = '100%';
+        }
+        currentSlide = index;
+      }
+
+      function nextSlide() {
+        if (currentSlide < total - 1) {
+          goToSlide(currentSlide + 1);
+          timer = setTimeout(nextSlide, slideDuration);
+        }
+        // Dernière slide : on s'arrête, pas de loop
+      }
+
+      // Démarrer la première barre
+      goToSlide(0);
+      timer = setTimeout(nextSlide, slideDuration);
+    }
+  }
+
   const stickyBar = document.getElementById('sticky-add-to-cart');
   const heroSection = document.querySelector('.product-hero-v2');
 
