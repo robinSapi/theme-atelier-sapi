@@ -281,18 +281,18 @@ get_header();
                 <polyline points="9 18 15 12 9 6"></polyline>
               </svg>
             </button>
+            <?php
+            // Dots pagination mobile (scroll-snap) — dans .gallery-main pour overlay
+            $total_slides = 1 + count($gallery_ids) + count($gallery_acf_photos) + (!empty($video_oembed) ? 1 : 0);
+            if ($total_slides > 1) :
+            ?>
+            <div class="gallery-dots">
+              <?php for ($d = 0; $d < $total_slides; $d++) : ?>
+              <span class="gallery-dot<?php echo $d === 0 ? ' active' : ''; ?>"></span>
+              <?php endfor; ?>
+            </div>
+            <?php endif; ?>
           </div>
-          <?php
-          // Dots pagination mobile (scroll-snap)
-          $total_slides = 1 + count($gallery_ids) + count($gallery_acf_photos) + (!empty($video_oembed) ? 1 : 0);
-          if ($total_slides > 1) :
-          ?>
-          <div class="gallery-dots">
-            <?php for ($d = 0; $d < $total_slides; $d++) : ?>
-            <span class="gallery-dot<?php echo $d === 0 ? ' active' : ''; ?>"></span>
-            <?php endfor; ?>
-          </div>
-          <?php endif; ?>
           <?php
         }
 
@@ -379,14 +379,6 @@ get_header();
           ?>
         </div>
 
-        <?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2 && !$is_accessoire) : ?>
-          <button type="button" class="robin-pill" id="robin-product-pill"
-            data-robin-context="product_guide"
-            data-robin-data='<?php echo esc_attr(wp_json_encode(['product_id' => $product_id, 'product_name' => get_the_title()])); ?>'>
-            Comment choisir ?
-          </button>
-        <?php endif; ?>
-
         <!-- Séparateur visuel -->
         <hr class="product-divider">
 
@@ -404,8 +396,22 @@ get_header();
           remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_price', 10);
           remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 20);
 
+          // Injecter le pill Robin entre </table> des variations et la description de variation
+          if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2 && !$is_accessoire) {
+            $robin_pill_data = esc_attr(wp_json_encode(['product_id' => $product_id, 'product_name' => get_the_title()]));
+            $render_robin_pill = function() use ($robin_pill_data) {
+              echo '<button type="button" class="robin-pill" id="robin-product-pill" data-robin-context="product_guide" data-robin-data="' . $robin_pill_data . '">Comment choisir ?</button>';
+            };
+            add_action('woocommerce_before_single_variation', $render_robin_pill, 5);
+          }
+
           // Only render add to cart form
           woocommerce_template_single_add_to_cart();
+
+          // Nettoyer le hook pour éviter les effets de bord
+          if (isset($render_robin_pill)) {
+            remove_action('woocommerce_before_single_variation', $render_robin_pill, 5);
+          }
           ?>
         </div>
 
