@@ -1163,20 +1163,20 @@ get_header();
         var isPaused = false;
 
         if (heroEl) {
-          // Le hero a margin-top: -8vh donc il intersecte toujours un peu.
-          // On pause quand >15% du hero est visible (= scroll réel au-delà du chevauchement initial).
+          // Le hero a margin-top: -15vh donc il intersecte toujours un peu.
+          // On pause quand >25% du hero est visible (= scroll réel au-delà du chevauchement initial).
           var scrollObserver = new IntersectionObserver(function(entries) {
             var ratio = entries[0].intersectionRatio;
-            if (ratio >= 0.15 && !isPaused) {
+            if (ratio >= 0.25 && !isPaused) {
               isPaused = true;
               clearTimeout(timer);
               if (barsEl) barsEl.style.opacity = '0';
-            } else if (ratio < 0.15 && isPaused) {
+            } else if (ratio < 0.25 && isPaused) {
               isPaused = false;
               if (barsEl) barsEl.style.opacity = '';
               timer = setTimeout(nextSlide, slideDuration);
             }
-          }, { threshold: [0.15] });
+          }, { threshold: [0.25] });
 
           scrollObserver.observe(heroEl);
         }

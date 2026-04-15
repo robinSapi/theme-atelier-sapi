@@ -18466,7 +18466,7 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
 .product-hero-v2 {
   position: relative;
   z-index: 10;
-  margin-top: -8vh;
+  margin-top: -15vh;
   padding: 2rem 0 4rem;
   background: transparent;
 }
@@ -19857,7 +19857,7 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
 @media (max-width: 768px) {
   .product-hero-v2 {
     padding: 1rem 0 2rem;
-    margin-top: -6vh;
+    margin-top: -10vh;
   }
 
   .product-hero-container {
@@ -20972,7 +20972,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* Barres de progression — cohérence avec showcase cards */
 .product-slideshow-bars {
   position: absolute;
-  bottom: calc(8vh + 10px);
+  bottom: calc(15vh + 10px);
   left: 50%;
   -webkit-transform: translateX(-50%);
   transform: translateX(-50%);
