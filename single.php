@@ -62,29 +62,43 @@ if ($prev_post || $next_post) :
 ?>
   <nav class="post-navigation">
     <?php if ($prev_post) : ?>
-      <div class="post-nav-item post-nav-prev">
-        <span class="post-nav-label">← Article précédent</span>
-        <a href="<?php echo esc_url(get_permalink($prev_post)); ?>">
-          <?php echo esc_html(get_the_title($prev_post)); ?>
-        </a>
-      </div>
+      <a href="<?php echo esc_url(get_permalink($prev_post)); ?>" class="post-nav-item post-nav-prev">
+        <?php if (has_post_thumbnail($prev_post)) : ?>
+          <div class="post-nav-thumb">
+            <?php echo get_the_post_thumbnail($prev_post, 'medium_large', ['alt' => esc_attr(get_the_title($prev_post))]); ?>
+          </div>
+        <?php endif; ?>
+        <div class="post-nav-text">
+          <span class="post-nav-label">← Article précédent</span>
+          <span class="post-nav-title"><?php echo esc_html(get_the_title($prev_post)); ?></span>
+        </div>
+      </a>
     <?php endif; ?>
 
     <?php if ($next_post) : ?>
-      <div class="post-nav-item post-nav-next">
-        <span class="post-nav-label">Article suivant →</span>
-        <a href="<?php echo esc_url(get_permalink($next_post)); ?>">
-          <?php echo esc_html(get_the_title($next_post)); ?>
-        </a>
-      </div>
+      <a href="<?php echo esc_url(get_permalink($next_post)); ?>" class="post-nav-item post-nav-next">
+        <?php if (has_post_thumbnail($next_post)) : ?>
+          <div class="post-nav-thumb">
+            <?php echo get_the_post_thumbnail($next_post, 'medium_large', ['alt' => esc_attr(get_the_title($next_post))]); ?>
+          </div>
+        <?php endif; ?>
+        <div class="post-nav-text">
+          <span class="post-nav-label">Article suivant →</span>
+          <span class="post-nav-title"><?php echo esc_html(get_the_title($next_post)); ?></span>
+        </div>
+      </a>
     <?php endif; ?>
   </nav>
 <?php endif; ?>
 
-<?php if (has_category('flash-actu')) : ?>
-  <a href="<?php echo esc_url(get_permalink(get_option('page_for_posts'))); ?>" class="single-post-back">← Retour aux actus</a>
-<?php elseif (has_category('conseils')) : ?>
-  <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>" class="single-post-back">← Retour aux conseils</a>
+<?php if (has_category('flash-actu') || has_category('conseils')) : ?>
+  <div class="single-post-back-wrap">
+    <?php if (has_category('flash-actu')) : ?>
+      <a href="<?php echo esc_url(get_permalink(get_option('page_for_posts'))); ?>" class="single-post-back">← Retour aux actus</a>
+    <?php else : ?>
+      <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>" class="single-post-back">← Retour aux conseils</a>
+    <?php endif; ?>
+  </div>
 <?php endif; ?>
 
 <?php
