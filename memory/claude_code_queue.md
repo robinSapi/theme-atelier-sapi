@@ -50,6 +50,55 @@ Validé en conditions réelles : commande test sur atelier-sapi.fr (Robin Garnie
 
 ---
 
+## 📊 Config Brevo + état RGPD — état des lieux 16 avril 2026 (pour Cowork)
+
+Audit réalisé pendant la mise en prod du champ opt-in newsletter. **À lire par Cowork** pour comprendre la situation Brevo/RGPD actuelle et prioriser les actions marketing.
+
+### Architecture actuelle des listes Brevo
+
+| # | Nom | Contacts | Rôle | À utiliser ? |
+|---|-----|----------|------|--------------|
+| **#6** | Les nouveautés Sâpi | 315 | Newsletter — opt-in explicite (popup cookies + checkbox checkout) | ✅ **Pour campagnes marketing** |
+| **#7** | Clients | 111 | Tous les clients ayant commandé (opt-in ou pas) | ⚠️ **Transactionnel uniquement** (confirmations, factures, livraisons) |
+| #5 | Atelier Sâpi_NonSubscribers_(Do_Not_Delete) | 47 | Liste technique — contacts non opt-in d'une ancienne intégration (probablement plugin Sendinblue historique) | ❌ Ne pas toucher |
+| #10 | WooCommerce | 0 | Liste parent auto-créée par le plugin Brevo WooCommerce, jamais utilisée | ❌ Ne pas toucher |
+| #11 | WooCommerce_NonSubscribers_(Do_Not_Delete) | 67 | Liste technique miroir de #10 | ❌ Ne pas toucher |
+
+Les listes en "Do_Not_Delete" sont des artefacts techniques des intégrations Brevo — les supprimer casse la sync. Recommandation Robin : déplacer #5, #10, #11 dans un dossier "Archives" pour les sortir de la vue principale sans les supprimer.
+
+### Config de la sync Brevo ↔ WooCommerce (corrigée aujourd'hui)
+
+- **Avant** : trigger sur "Commande terminée" (`wc-completed`) → ne firait **jamais** car Robin n'utilise pas ce statut (cycle de vie custom : En attente → En cours → Colissimo livré, sans passer par Terminée).
+- **Après** : trigger sur "Ordre créé" → chaque nouvelle commande pousse le client dans la liste #7.
+- Toggle *"Importez les contacts en tant qu'inscrits"* : **OFF** (bien). Les clients arrivent en #7 mais sont automatiquement blocklistés côté marketing → conforme RGPD.
+- Toggle *"Afficher un champ opt-in au moment du paiement"* : **OFF** (bien). On a notre propre champ custom via le thème, pas besoin de double.
+
+### Découverte importante pour Cowork : consentement historique = zone grise RGPD
+
+Jusqu'au matin du 16 avril 2026, le champ newsletter du checkout était un **opt-OUT pré-coché** (*"Je ne souhaite PAS recevoir…"*). Conséquences :
+- **Clients qui n'ont rien coché** = pas de consentement explicite au sens RGPD (qui exige un acte positif). **Zone grise, ne PAS les considérer comme opt-in** pour des envois marketing.
+- **Clients qui ont coché la case opt-OUT** = refus explicite → blocklisté.
+- **Clients post-16 avril qui cochent le nouvel opt-IN** = consentement valide → liste #6.
+
+**Décision Robin (16 avril 2026)** : ne pas débloquer en masse les anciens clients blocklistés par Brevo lors de l'import automatique du plugin. Seulement débloquer au cas par cas ceux dont Robin a un consentement explicite (ex. ami, client qui a dit "oui envoie-moi tes trucs" par email).
+
+### Recommandation stratégique pour Cowork : campagne de ré-engagement
+
+Pour récupérer du consentement sur la base historique (les 111 clients en liste #7 + d'autres contacts), Robin peut lancer une **campagne single-shot de ré-engagement / double opt-in** via Brevo :
+- Email unique *"Voulez-vous recevoir nos nouveautés ?"* — sans contenu commercial, juste la demande
+- Bouton CTA *"Oui, je m'abonne"* → Brevo ajoute automatiquement à la liste #6
+- Les non-cliqueurs sont laissés tranquilles
+
+C'est le seul moyen propre de constituer une base newsletter opt-in rétroactivement sans risque CNIL. Brevo a des templates tout faits pour ça.
+
+### Pièges techniques pour futures tâches code (pour Claude Code)
+
+- **WC Blocks ≠ checkout classique** pour les hooks : utiliser `woocommerce_store_api_checkout_order_processed` (objet `$order`) et pas `woocommerce_checkout_order_processed` (classique).
+- Le statut `wc-completed` n'est **jamais atteint** sur ce site. Ne jamais hook là-dessus. Préférer des triggers basés sur la création de commande ou des événements de paiement.
+- La constante `BREVO_API_KEY` est définie dans `wp-config.php` de prod (et de test normalement aussi). Pattern standard pour tous les appels Brevo côté theme.
+
+---
+
 ## 🚀 Popup cookies custom — EN PRODUCTION (16 avril 2026)
 Snippet `sapi-cookie-popup` activé sur **atelier-sapi.fr** (Code Snippets, emplacement "Exécuter partout"). Flux complet testé et validé par Robin : popup cookies → promo email → code `BIENVENUE10` → confirmation Brevo liste #6.
 
