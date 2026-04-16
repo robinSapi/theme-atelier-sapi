@@ -16,9 +16,10 @@ Commit `17e87ac` sur **`master`** (pas encore poussé — Robin lance le workflo
 - Champ WC `sapi-maison/newsletter-optin` (ex-`optout`), label *"Je souhaite recevoir des nouvelles de l'atelier et de jolies idées pour m'inspirer"*, `default: false`, `type: checkbox`, `location: order`.
 - Hook `woocommerce_set_additional_field_value` → sauvegarde dans meta `_sapi_newsletter_optin`.
 - Hook `woocommerce_before_pay_action` → sauvegarde `_sapi_newsletter_optin = 'yes'` si `$_POST['sapi_newsletter_optin']` coché.
-- **Nouveau hook `woocommerce_order_status_completed`** (priorité 20) → fonction `sapi_brevo_newsletter_sync_on_completed($order_id)` :
+- **Hook `woocommerce_checkout_order_processed`** (priorité 20) → fonction `sapi_brevo_newsletter_sync_optin($order_id)`. Choix du trigger "commande créée" (et pas "Terminée") car Robin n'utilise jamais le statut `wc-completed` dans son cycle de vie commande (statuts finaux custom type "Colissimo livré"). Le consentement étant donné au submit, on pousse vers Brevo dès la création.
+  - Également rappelé depuis `woocommerce_before_pay_action` pour couvrir le cas où la case est cochée seulement au retry paiement.
   - Si meta `_sapi_newsletter_optin !== 'yes'` → return (pas de push).
-  - Idempotence : flag `_sapi_newsletter_brevo_synced = 'yes'` après succès, re-passage ignoré.
+  - Idempotence : flag `_sapi_newsletter_brevo_synced = 'yes'` après succès, double-appel ignoré.
   - POST `https://api.brevo.com/v3/contacts` avec `email`, `listIds: [6]`, `updateEnabled: true`, `attributes.PRENOM / .NOM` si dispos côté billing.
   - Clé lue via `defined('BREVO_API_KEY')` (même constante wp-config que le snippet popup cookies).
   - Erreurs loguées dans `error_log` avec préfixe `[sapi-brevo-newsletter]`, ne bloque jamais la commande.
@@ -32,13 +33,13 @@ Commit `17e87ac` sur **`master`** (pas encore poussé — Robin lance le workflo
 
 Le snippet n'a pas pu être testé localement (pas de PHP dispo). Avant déploiement prod, Robin doit :
 
-1. **Déployer d'abord sur `test.atelier-sapi.fr`** : cherry-pick le commit sur `test-theme-sapi-maison` (ou merger master dedans), laisser le workflow auto-deploy tourner.
+1. **Déployé sur `test.atelier-sapi.fr`** via force-push de `master` sur `test-theme-sapi-maison`.
 2. **Sur test, 2 commandes de validation** (méthode Virement, moins cher à rembourser) :
-   - **Commande A sans cocher la case** → passer en statut "Terminée" → vérifier qu'elle apparaît uniquement en liste #7 sur Brevo, **pas** en liste #6.
-   - **Commande B en cochant la case** → passer en statut "Terminée" → vérifier qu'elle apparaît dans **liste #7 ET liste #6** + que `PRENOM` et `NOM` sont bien remplis sur le contact Brevo.
+   - **Commande A sans cocher la case** → juste après submit, vérifier liste #6 Brevo : le contact **ne doit PAS** y apparaître.
+   - **Commande B en cochant la case** → juste après submit, vérifier liste #6 Brevo : doit apparaître **immédiatement** (pas besoin d'attendre un changement de statut), avec `PRENOM` et `NOM` remplis.
 3. Vérifier les logs PHP (`error_log`) : aucun message `[sapi-brevo-newsletter]` inattendu.
 4. Vérifier visuellement que la case est bien **décochée par défaut** sur les deux formulaires (checkout classique Blocks + page order-pay retry paiement).
-5. Si OK → merger sur master côté prod et lancer le workflow GitHub Actions.
+5. Si OK → pousser `master` sur origin et lancer le workflow GitHub Actions.
 
 **Points à surveiller spécifiquement :**
 - Noms d'attributs Brevo : le code utilise `PRENOM` / `NOM`. Si les attributs du compte Brevo de Robin sont nommés autrement (`FIRSTNAME` / `LASTNAME`, `PRÉNOM`, etc.), les valeurs seront ignorées côté Brevo (pas d'erreur, juste pas remplis). À ajuster si besoin.
@@ -46,7 +47,7 @@ Le snippet n'a pas pu être testé localement (pas de PHP dispo). Avant déploie
 
 ### Ce qui n'a PAS été fait (volontairement)
 - Aucune migration des anciennes meta `_sapi_newsletter_optout`. Ces données d'opt-out historiques dorment (décision Cowork).
-- Pas de tâche WP-Cron pour rattraper les commandes déjà Terminées : le hook ne fire que sur les nouveaux passages en statut Terminée à partir du déploiement.
+- Pas de rattrapage des commandes existantes : le hook ne fire que sur les nouvelles commandes à partir du déploiement.
 
 ---
 

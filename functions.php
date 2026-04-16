@@ -4181,8 +4181,8 @@ function sapi_format_product_for_search($product) {
 /**
  * Newsletter opt-in checkbox on checkout (RGPD — opt-in explicite)
  * Case à cocher activement ; la meta _sapi_newsletter_optin est exploitée
- * par sapi_brevo_newsletter_sync_on_completed() pour pousser le contact
- * dans la liste Brevo #6 "Newsletter" au passage en statut Terminé.
+ * par sapi_brevo_newsletter_sync_optin() pour pousser le contact dans la
+ * liste Brevo #6 "Newsletter" dès la création de la commande.
  */
 add_action('woocommerce_init', function () {
   if (!function_exists('woocommerce_register_additional_checkout_field')) return;
@@ -4204,7 +4204,9 @@ add_action('woocommerce_set_additional_field_value', function ($key, $value, $gr
   $wc_object->update_meta_data('_sapi_newsletter_optin', wc_bool_to_string($value));
 }, 10, 4);
 
-// Sauvegarder la note et l'opt-in newsletter depuis la page Order Pay
+// Sauvegarder la note et l'opt-in newsletter depuis la page Order Pay,
+// puis déclencher la sync Brevo si la case vient d'être cochée (cas retry
+// paiement où la case a été oubliée au checkout initial).
 add_action('woocommerce_before_pay_action', function ($order) {
   // Note de commande
   if (! empty($_POST['sapi_order_note'])) {
@@ -4219,22 +4221,27 @@ add_action('woocommerce_before_pay_action', function ($order) {
     $order->update_meta_data('_sapi_newsletter_optin', 'yes');
   }
   $order->save();
+
+  sapi_brevo_newsletter_sync_optin($order->get_id());
 });
 
 /**
- * Au passage d'une commande en statut "Terminée", si le client a coché
- * l'opt-in newsletter, on l'ajoute à la liste Brevo #6 avec son prénom/nom.
+ * Push vers la liste Brevo #6 (Newsletter) si le client a coché l'opt-in.
+ *
+ * Déclenché à la création de la commande (tous moyens de paiement, avant
+ * validation du paiement — le consentement est donné au submit). Également
+ * rappelé depuis la page order-pay si l'opt-in est coché au retry. Le flag
+ * _sapi_newsletter_brevo_synced garantit l'idempotence.
+ *
  * updateEnabled: true → dédoublonne si déjà inscrit via la popup cookie.
  * Un échec Brevo n'interrompt pas le workflow commande (log uniquement).
  */
-add_action('woocommerce_order_status_completed', 'sapi_brevo_newsletter_sync_on_completed', 20, 1);
-function sapi_brevo_newsletter_sync_on_completed($order_id) {
+add_action('woocommerce_checkout_order_processed', 'sapi_brevo_newsletter_sync_optin', 20, 1);
+function sapi_brevo_newsletter_sync_optin($order_id) {
   $order = wc_get_order($order_id);
   if (!$order) return;
 
   if ($order->get_meta('_sapi_newsletter_optin') !== 'yes') return;
-
-  // Idempotence : ne pas re-poster si déjà synchronisé (ex. Terminée → En attente → Terminée)
   if ($order->get_meta('_sapi_newsletter_brevo_synced') === 'yes') return;
 
   $email = $order->get_billing_email();
