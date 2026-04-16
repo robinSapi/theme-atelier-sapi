@@ -10743,8 +10743,7 @@ a.single-post-category:hover {
 .single-post-featured img {
   width: 100%;
   max-width: 800px;
-  aspect-ratio: 3 / 2;
-  object-fit: cover;
+  height: auto;
   border-radius: 16px;
   box-shadow:
     0 16px 48px rgba(0, 0, 0, 0.12),
