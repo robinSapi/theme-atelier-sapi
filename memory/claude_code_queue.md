@@ -8,7 +8,7 @@
 
 ## ✅ Newsletter checkout : bascule opt-out → opt-in + sync Brevo liste #6 (16 avril 2026)
 
-Commit sur **`master`** (pas encore poussé — Robin lance le workflow GitHub Actions "Deploy to Production" quand il veut déployer).
+Commit `17e87ac` sur **`master`** (pas encore poussé — Robin lance le workflow GitHub Actions "Deploy to Production" quand il veut déployer, **après validation sur test**).
 
 ### Changements
 
