@@ -10815,7 +10815,7 @@ a.single-post-category:hover {
 .single-post-content img {
   width: 100%;
   max-width: 100%;
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 3 / 2;
   object-fit: cover;
   border-radius: 12px;
   margin: 2rem auto;
