@@ -4236,7 +4236,15 @@ add_action('woocommerce_before_pay_action', function ($order) {
  * updateEnabled: true → dédoublonne si déjà inscrit via la popup cookie.
  * Un échec Brevo n'interrompt pas le workflow commande (log uniquement).
  */
+// Checkout Blocks (Store API) — hook principal sur ce site
+add_action('woocommerce_store_api_checkout_order_processed', function ($order) {
+  if ($order instanceof WC_Order) {
+    sapi_brevo_newsletter_sync_optin($order->get_id());
+  }
+}, 20, 1);
+// Checkout classique (fallback / compat)
 add_action('woocommerce_checkout_order_processed', 'sapi_brevo_newsletter_sync_optin', 20, 1);
+
 function sapi_brevo_newsletter_sync_optin($order_id) {
   $order = wc_get_order($order_id);
   if (!$order) return;
