@@ -97,8 +97,8 @@ $totals = $order->get_order_item_totals();
 		<h3 class="sapi-order-pay-additional__title"><?php esc_html_e( 'Informations de commande supplémentaires', 'theme-sapi-maison' ); ?></h3>
 
 		<label class="sapi-order-pay-additional__checkbox">
-			<input type="checkbox" name="sapi_newsletter_optout" value="1" />
-			<span><?php esc_html_e( 'Je ne souhaite pas recevoir les actualités de l\'Atelier Sâpi (facultatif)', 'theme-sapi-maison' ); ?></span>
+			<input type="checkbox" name="sapi_newsletter_optin" value="1" />
+			<span><?php esc_html_e( 'Je souhaite recevoir des nouvelles de l\'atelier et de jolies idées pour m\'inspirer (facultatif)', 'theme-sapi-maison' ); ?></span>
 		</label>
 
 		<label class="sapi-order-pay-additional__checkbox">

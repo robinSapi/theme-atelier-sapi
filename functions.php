@@ -4179,15 +4179,17 @@ function sapi_format_product_for_search($product) {
 }
 
 /**
- * Newsletter opt-out checkbox on checkout
- * Adds a checkbox below "Ajouter une note de commande" (location: order)
+ * Newsletter opt-in checkbox on checkout (RGPD — opt-in explicite)
+ * Case à cocher activement ; la meta _sapi_newsletter_optin est exploitée
+ * par sapi_brevo_newsletter_sync_on_completed() pour pousser le contact
+ * dans la liste Brevo #6 "Newsletter" au passage en statut Terminé.
  */
 add_action('woocommerce_init', function () {
   if (!function_exists('woocommerce_register_additional_checkout_field')) return;
 
   woocommerce_register_additional_checkout_field([
-    'id'       => 'sapi-maison/newsletter-optout',
-    'label'    => 'Je ne souhaite pas recevoir les actualités de l\'Atelier Sâpi',
+    'id'       => 'sapi-maison/newsletter-optin',
+    'label'    => 'Je souhaite recevoir des nouvelles de l\'atelier et de jolies idées pour m\'inspirer',
     'location' => 'order',
     'type'     => 'checkbox',
     'default'  => false,
@@ -4195,14 +4197,14 @@ add_action('woocommerce_init', function () {
 });
 
 
-// Save the opt-out choice as order meta
+// Save the opt-in choice as order meta
 add_action('woocommerce_set_additional_field_value', function ($key, $value, $group, $wc_object) {
-  if ($key !== 'sapi-maison/newsletter-optout') return;
+  if ($key !== 'sapi-maison/newsletter-optin') return;
   if (!($wc_object instanceof WC_Order)) return;
-  $wc_object->update_meta_data('_sapi_newsletter_optout', wc_bool_to_string($value));
+  $wc_object->update_meta_data('_sapi_newsletter_optin', wc_bool_to_string($value));
 }, 10, 4);
 
-// Sauvegarder la note et l'opt-out newsletter depuis la page Order Pay
+// Sauvegarder la note et l'opt-in newsletter depuis la page Order Pay
 add_action('woocommerce_before_pay_action', function ($order) {
   // Note de commande
   if (! empty($_POST['sapi_order_note'])) {
@@ -4212,12 +4214,77 @@ add_action('woocommerce_before_pay_action', function ($order) {
       $order->set_customer_note($note);
     }
   }
-  // Newsletter opt-out
-  if (! empty($_POST['sapi_newsletter_optout'])) {
-    $order->update_meta_data('_sapi_newsletter_optout', 'yes');
+  // Newsletter opt-in
+  if (! empty($_POST['sapi_newsletter_optin'])) {
+    $order->update_meta_data('_sapi_newsletter_optin', 'yes');
   }
   $order->save();
 });
+
+/**
+ * Au passage d'une commande en statut "Terminée", si le client a coché
+ * l'opt-in newsletter, on l'ajoute à la liste Brevo #6 avec son prénom/nom.
+ * updateEnabled: true → dédoublonne si déjà inscrit via la popup cookie.
+ * Un échec Brevo n'interrompt pas le workflow commande (log uniquement).
+ */
+add_action('woocommerce_order_status_completed', 'sapi_brevo_newsletter_sync_on_completed', 20, 1);
+function sapi_brevo_newsletter_sync_on_completed($order_id) {
+  $order = wc_get_order($order_id);
+  if (!$order) return;
+
+  if ($order->get_meta('_sapi_newsletter_optin') !== 'yes') return;
+
+  // Idempotence : ne pas re-poster si déjà synchronisé (ex. Terminée → En attente → Terminée)
+  if ($order->get_meta('_sapi_newsletter_brevo_synced') === 'yes') return;
+
+  $email = $order->get_billing_email();
+  if (!$email || !is_email($email)) return;
+
+  $api_key = defined('BREVO_API_KEY') ? BREVO_API_KEY : '';
+  if (!$api_key) {
+    error_log('[sapi-brevo-newsletter] BREVO_API_KEY manquante, opt-in non synchronisé (commande #' . $order_id . ')');
+    return;
+  }
+
+  $attributes = [];
+  $firstname = $order->get_billing_first_name();
+  $lastname  = $order->get_billing_last_name();
+  if ($firstname) $attributes['PRENOM'] = $firstname;
+  if ($lastname)  $attributes['NOM']    = $lastname;
+
+  $payload = [
+    'email'         => $email,
+    'listIds'       => [6],
+    'updateEnabled' => true,
+  ];
+  if (!empty($attributes)) {
+    $payload['attributes'] = $attributes;
+  }
+
+  $response = wp_remote_post('https://api.brevo.com/v3/contacts', [
+    'timeout' => 10,
+    'headers' => [
+      'accept'       => 'application/json',
+      'content-type' => 'application/json',
+      'api-key'      => $api_key,
+    ],
+    'body'    => wp_json_encode($payload),
+  ]);
+
+  if (is_wp_error($response)) {
+    error_log('[sapi-brevo-newsletter] Erreur HTTP commande #' . $order_id . ' : ' . $response->get_error_message());
+    return;
+  }
+
+  $code = wp_remote_retrieve_response_code($response);
+  if ($code >= 200 && $code < 300) {
+    $order->update_meta_data('_sapi_newsletter_brevo_synced', 'yes');
+    $order->save();
+    return;
+  }
+
+  error_log('[sapi-brevo-newsletter] Brevo a répondu ' . $code . ' pour commande #' . $order_id . ' : ' . wp_remote_retrieve_body($response));
+}
 
 /**
  * ============================================================
