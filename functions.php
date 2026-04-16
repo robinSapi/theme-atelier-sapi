@@ -253,6 +253,14 @@ function sapi_maison_enqueue_assets() {
     wp_enqueue_script('sapi-maison-homepage-carousel', get_template_directory_uri() . '/assets/homepage-carousel.js', [], file_exists($carousel_js_path) ? filemtime($carousel_js_path) : '1.0.0', true);
   }
 
+  // FAQ accordion — articles de blog (Yoast FAQ block)
+  if (is_single() && 'post' === get_post_type()) {
+    $faq_js_path = get_template_directory() . '/assets/faq-accordion.js';
+    if (file_exists($faq_js_path)) {
+      wp_enqueue_script('sapi-maison-faq-accordion', get_template_directory_uri() . '/assets/faq-accordion.js', [], filemtime($faq_js_path), true);
+    }
+  }
+
   // WooCommerce shop interactions (filters, animations)
   if (class_exists('WooCommerce') && (is_shop() || is_product_category() || is_product())) {
     $shop_js_path = get_template_directory() . '/assets/shop.js';
