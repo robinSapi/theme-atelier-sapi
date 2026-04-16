@@ -6,9 +6,11 @@
 
 ---
 
-## ✅ Newsletter checkout : bascule opt-out → opt-in + sync Brevo liste #6 (16 avril 2026)
+## 🚀 Newsletter checkout : bascule opt-out → opt-in + sync Brevo liste #6 — EN PRODUCTION (16 avril 2026)
 
-Commit `17e87ac` sur **`master`** (pas encore poussé — Robin lance le workflow GitHub Actions "Deploy to Production" quand il veut déployer, **après validation sur test**).
+Validé en conditions réelles : commande test sur atelier-sapi.fr (Robin Garnier) → contact ajouté à la liste **#6 "Les nouveautés Sâpi"** dans la minute, avec `PRENOM` + `NOM` remplis. Historique Brevo trace l'event "Contact ajouté à la liste (#6)" avec timestamp — suffisant comme preuve de consentement RGPD.
+
+**Commits sur `master`** (déployés) : `17e87ac` (bascule + hook), `e01b11b` (MAJ queue), `2ec9783` (change trigger de `order_status_completed` → `checkout_order_processed`), **`36b455d` (fix final : ajout hook `woocommerce_store_api_checkout_order_processed` pour WC Blocks, le checkout du site)**.
 
 ### Changements
 
@@ -29,21 +31,18 @@ Commit `17e87ac` sur **`master`** (pas encore poussé — Robin lance le workflo
 
 **Grep final** : plus aucune occurrence de `newsletter_optout` / `newsletter-optout` dans le code (seulement dans ce fichier de doc).
 
-### ⚠️ Test en conditions réelles REQUIS avant d'annoncer que ça marche
+### Pièges rencontrés pendant la mise en prod (pour mémoire)
 
-Le snippet n'a pas pu être testé localement (pas de PHP dispo). Avant déploiement prod, Robin doit :
+1. **Statut "Terminée" jamais atteint** : Robin utilise un cycle de vie commande custom (statuts type "Colissimo livré") et ne met jamais les commandes en `wc-completed`. → Abandon du hook `woocommerce_order_status_completed`, bascule sur la création de commande.
 
-1. **Déployé sur `test.atelier-sapi.fr`** via force-push de `master` sur `test-theme-sapi-maison`.
-2. **Sur test, 2 commandes de validation** (méthode Virement, moins cher à rembourser) :
-   - **Commande A sans cocher la case** → juste après submit, vérifier liste #6 Brevo : le contact **ne doit PAS** y apparaître.
-   - **Commande B en cochant la case** → juste après submit, vérifier liste #6 Brevo : doit apparaître **immédiatement** (pas besoin d'attendre un changement de statut), avec `PRENOM` et `NOM` remplis.
-3. Vérifier les logs PHP (`error_log`) : aucun message `[sapi-brevo-newsletter]` inattendu.
-4. Vérifier visuellement que la case est bien **décochée par défaut** sur les deux formulaires (checkout classique Blocks + page order-pay retry paiement).
-5. Si OK → pousser `master` sur origin et lancer le workflow GitHub Actions.
+2. **`woocommerce_checkout_order_processed` ne fire PAS pour WC Blocks** : le checkout du site utilise WC Blocks (Store API), qui a son propre hook `woocommerce_store_api_checkout_order_processed` (reçoit l'objet order, pas l'ID). Le hook classique est resté en fallback compat, mais c'est le hook Blocks qui fait le vrai travail.
 
-**Points à surveiller spécifiquement :**
-- Noms d'attributs Brevo : le code utilise `PRENOM` / `NOM`. Si les attributs du compte Brevo de Robin sont nommés autrement (`FIRSTNAME` / `LASTNAME`, `PRÉNOM`, etc.), les valeurs seront ignorées côté Brevo (pas d'erreur, juste pas remplis). À ajuster si besoin.
-- Si Robin ne voit pas apparaître le contact en liste #6 alors que la case était cochée : vérifier la meta `_sapi_newsletter_optin` sur la commande côté admin WC, puis regarder les logs. Le flag `_sapi_newsletter_brevo_synced` permet de voir si l'API a répondu en succès.
+3. **Diagnostic rapide quand ça ne pousse pas** : ouvrir la commande en admin WC → voir si le champ "Je souhaite recevoir des nouvelles…" affiche "Oui". Si oui, la meta est bien posée, c'est un problème de hook. Si vide, problème de sauvegarde (WC additional field config).
+
+### Points à surveiller pour évolutions futures
+
+- Attributs Brevo `PRENOM` / `NOM` — confirmés corrects sur le compte Brevo d'Atelier Sâpi (pas `FIRSTNAME` / `LASTNAME`).
+- Flag `_sapi_newsletter_brevo_synced` sur la commande = preuve que l'API Brevo a répondu en succès (visible en admin WC dans les meta).
 
 ### Ce qui n'a PAS été fait (volontairement)
 - Aucune migration des anciennes meta `_sapi_newsletter_optout`. Ces données d'opt-out historiques dorment (décision Cowork).
