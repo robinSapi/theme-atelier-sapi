@@ -10888,9 +10888,13 @@ a.single-post-category:hover {
 .single-post-content .schema-faq-section {
   background: var(--color-warm, #FBF6EA);
   border-radius: 12px;
-  padding: 1.5rem 2rem;
+  padding: 1rem 1.5rem;
   border: 1px solid rgba(147, 125, 104, 0.1);
-  transition: box-shadow 0.3s ease;
+  transition: box-shadow 0.3s ease, padding 0.3s ease;
+}
+
+.single-post-content .schema-faq-section.faq-open {
+  padding-bottom: 1.25rem;
 }
 
 .single-post-content .schema-faq-section:hover {
@@ -10934,8 +10938,9 @@ a.single-post-category:hover {
 .single-post-content .schema-faq-answer {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.35s ease, padding-top 0.35s ease;
+  transition: max-height 0.35s ease, padding-top 0.35s ease, margin 0.35s ease;
   padding-top: 0;
+  margin: 0;
 }
 
 .single-post-content .schema-faq-section.faq-open .schema-faq-answer {
