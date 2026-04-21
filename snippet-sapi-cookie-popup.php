@@ -6,8 +6,9 @@
  * charte Atelier Sapi). La logique de consentement reste geree par Complianz.
  *
  * Etape 2 : apres le choix cookies (Accepter ou Refuser), transition vers un
- * ecran promo capturant l'email pour ajouter le contact a la liste Brevo #6
- * et afficher le code BIENVENUE10.
+ * ecran promo capturant l'email pour ajouter le contact a la liste Brevo #6.
+ * Le code BIENVENUE10 est ensuite (a) envoye par email via une automation Brevo
+ * et (b) auto-applique dans le panier via un cookie lu par functions.php.
  *
  * A coller dans Code Snippets (frontend only). NE PAS mettre dans functions.php.
  */
@@ -339,63 +340,24 @@ add_action( 'wp_footer', function () {
 		#sapi-promo-skip:hover { opacity: 1; }
 
 		/* ========== ECRAN 3 : CONFIRMATION ========== */
-		#sapi-promo-confirm-label {
+		#sapi-promo-confirm-title {
 			font-family: 'Montserrat', sans-serif;
-			font-size: 0.95rem;
+			font-size: 1.3rem;
+			font-weight: 700;
 			color: var(--color-wood-dark, #6b5644);
-			margin: 0 0 0.75rem 0;
-		}
-		#sapi-promo-code {
-			font-family: 'Montserrat', sans-serif;
-			font-size: 1.6rem;
-			font-weight: 700;
-			color: var(--color-wood, #937D68);
-			letter-spacing: 0.15em;
-			text-align: center;
-			background: rgba(147, 125, 104, 0.12);
-			border-radius: 8px;
-			padding: 0.75rem 1rem;
 			margin: 0 0 1rem 0;
-		}
-		#sapi-promo-copy {
-			background: transparent;
-			border: 1.5px solid var(--color-wood, #937D68);
-			color: var(--color-wood, #937D68);
-			border-radius: 50px;
-			padding: 0.45rem 1.25rem;
-			font-family: 'Montserrat', sans-serif;
-			font-size: 0.8rem;
-			font-weight: 600;
-			letter-spacing: 0.05em;
-			text-transform: uppercase;
-			cursor: pointer;
-			transition: background-color 0.2s ease, color 0.2s ease;
-		}
-		#sapi-promo-copy:hover {
-			background: var(--color-wood, #937D68);
-			color: #fff;
-		}
-		#sapi-promo-copy.sapi-copied {
-			background: var(--color-wood, #937D68);
-			color: #fff;
-		}
-		#sapi-promo-remember {
-			font-family: 'Montserrat', sans-serif;
-			font-size: 0.9rem;
-			color: var(--color-orange, #E35B24);
-			line-height: 1.5;
-			margin: 1.25rem 0 0 0;
-		}
-		#sapi-promo-remember strong {
-			font-weight: 700;
-			letter-spacing: 0.03em;
 		}
 		#sapi-promo-confirm-text {
 			font-family: 'Montserrat', sans-serif;
-			font-size: 0.85rem;
+			font-size: 0.95rem;
 			color: var(--color-wood-dark, #6b5644);
-			opacity: 0.75;
-			margin: 0.5rem 0 1.5rem 0;
+			opacity: 0.85;
+			line-height: 1.6;
+			margin: 0 0 1.5rem 0;
+		}
+		#sapi-promo-confirm-text strong {
+			color: var(--color-orange, #E35B24);
+			font-weight: 700;
 		}
 		#sapi-promo-close {
 			width: 100%;
@@ -424,7 +386,6 @@ add_action( 'wp_footer', function () {
 			#sapi-cookie-buttons { gap: 0.75rem; }
 			#sapi-cookie-deny,
 			#sapi-cookie-accept { min-width: 0; flex: 1; padding: 0.7rem 1rem; }
-			#sapi-promo-code { font-size: 1.3rem; }
 		}
 
 		@keyframes sapiCookieFadeIn {
@@ -493,14 +454,14 @@ add_action( 'wp_footer', function () {
 				<button type="button" id="sapi-promo-skip">Non merci</button>
 			</div>
 
-			<!-- ECRAN 3 : Confirmation code -->
+			<!-- ECRAN 3 : Confirmation (coupon auto-applique + email) -->
 			<div id="sapi-screen-confirm" class="sapi-screen">
-				<p id="sapi-promo-confirm-label">Votre code&nbsp;:</p>
-				<p id="sapi-promo-code">BIENVENUE10</p>
-				<button type="button" id="sapi-promo-copy">Copier le code</button>
-				<p id="sapi-promo-remember"><strong>Notez-le bien !</strong><br>Il ne s'affichera plus.</p>
-				<p id="sapi-promo-confirm-text">Valable sur votre première commande 🎁</p>
-				<button type="button" id="sapi-promo-close">J'ai noté mon code</button>
+				<p id="sapi-promo-confirm-title">C'est noté !</p>
+				<p id="sapi-promo-confirm-text">
+					Votre réduction de <strong>10%</strong> s'appliquera automatiquement à votre prochain ajout au panier.<br>
+					Vous recevrez aussi une confirmation par email.
+				</p>
+				<button type="button" id="sapi-promo-close">Je continue ma visite</button>
 			</div>
 
 		</div>
@@ -508,9 +469,9 @@ add_action( 'wp_footer', function () {
 
 	<script id="sapi-cookie-popup-js">
 	(function () {
-		var AJAX_URL = <?php echo wp_json_encode( $ajax_url ); ?>;
-		var NONCE    = <?php echo wp_json_encode( $nonce ); ?>;
-		var PROMO_CODE = 'BIENVENUE10';
+		var AJAX_URL   = <?php echo wp_json_encode( $ajax_url ); ?>;
+		var NONCE      = <?php echo wp_json_encode( $nonce ); ?>;
+		var PROMO_CODE = 'BIENVENUE10'; // applique automatiquement cote panier via functions.php
 
 		// ----------------------------------------------------------
 		// Detection des cookies existants
@@ -707,6 +668,9 @@ add_action( 'wp_footer', function () {
 
 		function goToConfirm() {
 			setCookie('sapi_promo_dismissed', '1', 365);
+			// Pose le cookie qui sera lu par functions.php pour appliquer le coupon
+			// automatiquement au prochain ajout panier (365j pour que la promesse tienne).
+			setCookie('sapi_pending_coupon', PROMO_CODE, 365);
 			switchScreen('confirm');
 		}
 
@@ -760,36 +724,10 @@ add_action( 'wp_footer', function () {
 		});
 
 		// ----------------------------------------------------------
-		// Ecran 3 : copier le code
+		// Ecran 3 : bouton fermeture
 		// ----------------------------------------------------------
 		var btnClose = document.getElementById('sapi-promo-close');
 		if (btnClose) btnClose.addEventListener('click', closePopup);
-
-		var btnCopy = document.getElementById('sapi-promo-copy');
-		if (btnCopy) btnCopy.addEventListener('click', function () {
-			var done = function () {
-				btnCopy.textContent = 'Copié ✓';
-				btnCopy.classList.add('sapi-copied');
-			};
-			if (navigator.clipboard && navigator.clipboard.writeText) {
-				navigator.clipboard.writeText(PROMO_CODE).then(done).catch(function () {
-					// fallback
-					var ta = document.createElement('textarea');
-					ta.value = PROMO_CODE;
-					document.body.appendChild(ta);
-					ta.select();
-					try { document.execCommand('copy'); done(); } catch (e) {}
-					document.body.removeChild(ta);
-				});
-			} else {
-				var ta = document.createElement('textarea');
-				ta.value = PROMO_CODE;
-				document.body.appendChild(ta);
-				ta.select();
-				try { document.execCommand('copy'); done(); } catch (e) {}
-				document.body.removeChild(ta);
-			}
-		});
 
 	})();
 	</script>
