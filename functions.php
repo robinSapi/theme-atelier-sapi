@@ -5201,3 +5201,63 @@ add_filter( 'robots_txt', function ( $output ) {
   $output .= "Disallow: /*?PageSpeed=*\n";
   return $output;
 }, 99 );
+
+/**
+ * ============================================================
+ * COUPON BIENVENUE10 — Auto-application via cookie
+ * ============================================================
+ * Le snippet popup cookies (sapi-cookie-popup) pose le cookie
+ * `sapi_pending_coupon` quand un visiteur laisse son email. On lit ce cookie
+ * ici pour appliquer automatiquement le coupon BIENVENUE10 dès qu'un produit
+ * est ajouté au panier, puis on détruit le cookie pour ne plus rejouer.
+ *
+ * Sécurité : la valeur du cookie est ignorée et le code est forcé en dur à
+ * 'BIENVENUE10' — ça empêche de faire appliquer un autre coupon en manipulant
+ * le cookie côté client.
+ */
+add_action('woocommerce_add_to_cart', 'sapi_auto_apply_welcome_coupon');
+add_action('woocommerce_cart_loaded_from_session', 'sapi_auto_apply_welcome_coupon');
+
+function sapi_auto_apply_welcome_coupon() {
+  if (empty($_COOKIE['sapi_pending_coupon'])) return;
+  if (!function_exists('WC') || !WC()->cart) return;
+
+  $cart = WC()->cart;
+  if ($cart->is_empty()) return;
+
+  $coupon_code = 'bienvenue10'; // WC normalise en lowercase
+  if ($cart->has_discount($coupon_code)) {
+    sapi_clear_pending_coupon_cookie();
+    return;
+  }
+
+  // apply_coupon() affiche lui-même les notices WC (succès ou refus).
+  // Qu'il soit accepté ou refusé, on détruit le cookie pour ne pas rejouer
+  // à chaque ajout panier suivant (sinon spam de notices).
+  $cart->apply_coupon($coupon_code);
+  sapi_clear_pending_coupon_cookie();
+}
+
+function sapi_clear_pending_coupon_cookie() {
+  if (!headers_sent()) {
+    $path   = defined('COOKIEPATH') && COOKIEPATH ? COOKIEPATH : '/';
+    $domain = defined('COOKIE_DOMAIN') ? COOKIE_DOMAIN : '';
+    setcookie('sapi_pending_coupon', '', time() - 3600, $path, $domain);
+  }
+  unset($_COOKIE['sapi_pending_coupon']);
+}
+
+/**
+ * Notice WC personnalisée lors de l'application du coupon BIENVENUE10.
+ * Remplace le "Code promo appliqué avec succès" générique par un message
+ * de bienvenue aligné sur le ton de l'Atelier.
+ */
+add_filter('woocommerce_coupon_success_message', 'sapi_welcome_coupon_success_message', 10, 3);
+
+function sapi_welcome_coupon_success_message($msg, $msg_code, $coupon) {
+  if (!$coupon || !is_object($coupon) || !method_exists($coupon, 'get_code')) return $msg;
+  if (strtolower($coupon->get_code()) !== 'bienvenue10') return $msg;
+  if ((int) $msg_code !== WC_Coupon::WC_COUPON_SUCCESS) return $msg;
+
+  return 'Bienvenue à l\'Atelier Sâpi ! Votre réduction de 10% a été appliquée. 🌿';
+}
