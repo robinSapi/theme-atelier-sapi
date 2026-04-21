@@ -4310,6 +4310,72 @@ function sapi_brevo_newsletter_sync_optin($order_id) {
 }
 
 /**
+ * Push systématique vers la liste Brevo #12 "Commande récente" à chaque commande.
+ *
+ * Sert de file d'attente pour l'automation post-achat : +14 jours → email
+ * demande d'avis Google → ajout liste #7 "Clients" → retrait #12 (ce qui
+ * permet la ré-entrée à la commande suivante). Aucune condition opt-in :
+ * tous les clients passent par ce tunnel. Aucun flag d'idempotence : on
+ * veut que chaque nouvelle commande (re)pousse dans la file. Brevo gère
+ * le dédoublonnage via updateEnabled=true.
+ */
+add_action('woocommerce_store_api_checkout_order_processed', function ($order) {
+  if ($order instanceof WC_Order) {
+    sapi_brevo_commande_recente_sync($order->get_id());
+  }
+}, 20, 1);
+add_action('woocommerce_checkout_order_processed', 'sapi_brevo_commande_recente_sync', 20, 1);
+
+function sapi_brevo_commande_recente_sync($order_id) {
+  $order = wc_get_order($order_id);
+  if (!$order) return;
+
+  $email = $order->get_billing_email();
+  if (!$email || !is_email($email)) return;
+
+  $api_key = defined('BREVO_API_KEY') ? BREVO_API_KEY : '';
+  if (!$api_key) {
+    error_log('[sapi-brevo-commande-recente] BREVO_API_KEY manquante (commande #' . $order_id . ')');
+    return;
+  }
+
+  $attributes = [];
+  $firstname = $order->get_billing_first_name();
+  $lastname  = $order->get_billing_last_name();
+  if ($firstname) $attributes['PRENOM'] = $firstname;
+  if ($lastname)  $attributes['NOM']    = $lastname;
+
+  $payload = [
+    'email'         => $email,
+    'listIds'       => [12],
+    'updateEnabled' => true,
+  ];
+  if (!empty($attributes)) {
+    $payload['attributes'] = $attributes;
+  }
+
+  $response = wp_remote_post('https://api.brevo.com/v3/contacts', [
+    'timeout' => 10,
+    'headers' => [
+      'accept'       => 'application/json',
+      'content-type' => 'application/json',
+      'api-key'      => $api_key,
+    ],
+    'body'    => wp_json_encode($payload),
+  ]);
+
+  if (is_wp_error($response)) {
+    error_log('[sapi-brevo-commande-recente] Erreur HTTP commande #' . $order_id . ' : ' . $response->get_error_message());
+    return;
+  }
+
+  $code = wp_remote_retrieve_response_code($response);
+  if ($code >= 200 && $code < 300) return;
+
+  error_log('[sapi-brevo-commande-recente] Brevo a répondu ' . $code . ' pour commande #' . $order_id . ' : ' . wp_remote_retrieve_body($response));
+}
+
+/**
  * ============================================================
  * NEWSLETTER BREVO — AJAX subscription
  * ============================================================
