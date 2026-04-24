@@ -18243,6 +18243,15 @@ body.woocommerce-cart {
   }
 }
 
+/* Masquer le titre "Validation de commande express" — WooPayments pose le
+   title-container en position:absolute (top:-4px) et le <h2> hérite de
+   font-size:22.4px du thème, ce qui fait 97px de haut qui recouvrent les
+   boutons (~73px d'overlap). Apple Pay / Google Pay sont self-explanatory
+   et la barre "Ou continuez ci-dessous" assure la séparation visuelle. */
+.wc-block-components-express-payment--checkout .wc-block-components-express-payment__title-container {
+  display: none !important;
+}
+
 /* Payment Methods */
 .woocommerce-checkout-payment {
   background: var(--color-white);
