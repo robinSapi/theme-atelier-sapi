@@ -18216,6 +18216,33 @@ body.woocommerce-cart {
   padding-top: 1rem;
 }
 
+/* ==========================================================================
+   Fix Express Payment (Apple Pay / Google Pay) — WooPayments + WC Blocks
+   ==========================================================================
+   Le sélecteur `.page-default .entry-content ul` du thème écrase le reset
+   de WooCommerce Blocks sur le <ul> des boutons Express Payment et y ajoute
+   un padding-left asymétrique. WooPayments pose aussi des règles
+   `> li { margin-left: 1px; width: 99% }` qui décalent les boutons.
+   Enfin sur mobile le grid auto-fit force 2 colonnes qui débordent.
+   On remet à zéro le padding, on neutralise le margin/width bizarres, et
+   on force 1 colonne sous 768px sur la page checkout.
+*/
+.wc-block-components-express-payment .wc-block-components-express-payment__event-buttons {
+  padding-left: 0 !important;
+  margin-bottom: 20px !important;
+}
+
+.wc-block-components-express-payment .wc-block-components-express-payment__event-buttons > li {
+  margin-left: 0 !important;
+  width: 100% !important;
+}
+
+@media (max-width: 768px) {
+  .wc-block-components-express-payment--checkout .wc-block-components-express-payment__event-buttons {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* Payment Methods */
 .woocommerce-checkout-payment {
   background: var(--color-white);
