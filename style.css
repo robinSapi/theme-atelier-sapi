@@ -18252,6 +18252,38 @@ body.woocommerce-cart {
   display: none !important;
 }
 
+/* Masquer le <li> Apple Pay quand le navigateur ne supporte pas Apple Pay
+   (Chrome, Firefox, Edge, ...). Stripe rend un iframe vide de 8px dans ce li
+   et WooPayments impose min-height: 48px → d'où un vide de ~60px au-dessus de
+   Google Pay en layout mobile (1fr). La règle :has() native de WooPayments ne
+   protège pas dans cette config car elle dépend d'un élément preview parfois
+   absent. Safari (qui supporte -apple-pay-button) voit le li normalement. */
+@supports not (-webkit-appearance: -apple-pay-button) {
+  #express-payment-method-woocommerce_payments_express_checkout_applePay {
+    display: none !important;
+  }
+}
+
+/* Fermer le cadre et resserrer les paddings
+   - Le title-container masqué avait des ::before/::after qui dessinaient le
+     top-border du .content (initialement border-width: 0 1px 1px). On ferme
+     avec un border-top continu et on passe le border-radius à 4px uniforme.
+   - On enlève le margin-top: 5px résiduel (prévu pour laisser passer le title
+     absolu) et le margin-bottom: 20px du ul, pour obtenir 16px en haut + 16px
+     en bas autour des boutons — symétrique. */
+.wc-block-components-express-payment--checkout .wc-block-components-express-payment__content {
+  border-top-width: 1px !important;
+  border-top-style: solid !important;
+  border-top-color: color-mix(in srgb, currentcolor 20%, transparent) !important;
+  border-radius: 4px !important;
+  margin-top: 0 !important;
+  padding: 16px !important;
+}
+
+.wc-block-components-express-payment--checkout .wc-block-components-express-payment__event-buttons {
+  margin-bottom: 0 !important;
+}
+
 /* Payment Methods */
 .woocommerce-checkout-payment {
   background: var(--color-white);
