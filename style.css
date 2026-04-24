@@ -23545,6 +23545,57 @@ body.woocommerce-cart div.woocommerce-wrapper {
   }
 }
 
+/* ==========================================================================
+   Modal choix point relais Colissimo — Fix responsive mobile
+   ==========================================================================
+   Le plugin utilise des dimensions fixes en px (container 1000x574, map
+   598x483 floatée à droite) et n'a que 3 media queries cosmétiques. Sur
+   mobile, la map est écrasée et la liste prend tout l'écran.
+   On force une répartition lisible : liste limitée à 40vh, map au moins
+   300px / 50vh. Fallback : tâche S22 pour évaluer un autre plugin à terme.
+*/
+@media (max-width: 768px) {
+  /* Container + contenu : plein écran, hauteur auto */
+  #lpc_widget_container {
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+
+  .widget_colissimo_contenu {
+    width: 100% !important;
+    max-width: 100vw !important;
+    height: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Map : pleine largeur, hauteur confortable, non-floatée */
+  #widget_colissimo_map,
+  .widget_colissimo_map {
+    width: 100% !important;
+    height: 50vh !important;
+    min-height: 300px !important;
+    float: none !important;
+    top: 0 !important;
+    position: relative !important;
+    border: none !important;
+  }
+
+  /* Liste : pleine largeur, scrollable, limitée à 40vh */
+  #widget_colissimo_liste,
+  .widget_colissimo_liste {
+    width: 100% !important;
+    max-height: 40vh !important;
+    float: none !important;
+    overflow-y: auto !important;
+  }
+
+  /* Zones adresse + filtres : pleine largeur */
+  #widget_colissimo_table_adresse,
+  #widget_colissimo_filtres {
+    width: 100% !important;
+  }
+}
+
 /* ========================================
    PAGE STAR DU MOMENT
    ======================================== */
