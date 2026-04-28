@@ -99,11 +99,7 @@ $render_card = function ($card_id) {
       <article class="inspiration-card inspiration-card--reassurance inspiration-card--c1">
         <div class="inspiration-card__inner">
           <span class="inspiration-card__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M15 12l-8.5 8.5a2.12 2.12 0 0 1-3-3L12 9"/>
-              <path d="M17.64 15L22 10.64"/>
-              <path d="M20.91 11.7l-1.25-1.25a2.12 2.12 0 0 1 0-3l1.13-1.13a2.12 2.12 0 0 0 0-3L19 1l-3.4 3.4a2.12 2.12 0 0 0 0 3L17 8.85"/>
-            </svg>
+            <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/icons/picto-french.svg'); ?>" width="32" height="32" alt="" loading="lazy" decoding="async">
           </span>
           <h3 class="inspiration-card__title">Fait main en France</h3>
           <p class="inspiration-card__text">Chaque luminaire est conçu, découpé et assemblé dans l'atelier.</p>
@@ -127,8 +123,8 @@ $render_card = function ($card_id) {
       ?>
       <article class="inspiration-card inspiration-card--cta inspiration-card--c3">
         <div class="inspiration-card__inner">
-          <h3 class="inspiration-card__title">Pas sûr du modèle pour votre pièce&nbsp;?</h3>
-          <p class="inspiration-card__text">Robin Conseiller vous oriente en 3 questions.</p>
+          <h3 class="inspiration-card__title">Besoin d'aide pour choisir&nbsp;?</h3>
+          <p class="inspiration-card__text">En quelques questions, Robin vous accompagne.</p>
           <button type="button" class="inspiration-card__button" data-robin-open="bandeau" aria-label="Démarrer le configurateur Robin Conseiller">Démarrer le configurateur</button>
         </div>
       </article>
@@ -166,8 +162,8 @@ $render_card = function ($card_id) {
       ?>
       <article class="inspiration-card inspiration-card--reassurance inspiration-card--c5">
         <div class="inspiration-card__inner">
-          <h3 class="inspiration-card__title">Sur-mesure possible</h3>
-          <p class="inspiration-card__text">Une dimension, une teinte ou une essence spécifique&nbsp;? Parlons-en.</p>
+          <h3 class="inspiration-card__title">Et une création sur mesure&nbsp;?</h3>
+          <p class="inspiration-card__text">Dimension spécifique, forme nouvelle, couleur favorite&nbsp;?</p>
           <a href="<?php echo esc_url(home_url('/contact/')); ?>" class="inspiration-card__link">Me contacter →</a>
         </div>
       </article>
@@ -179,7 +175,7 @@ $render_card = function ($card_id) {
       <article class="inspiration-card inspiration-card--story inspiration-card--story-dark inspiration-card--c6">
         <div class="inspiration-card__inner">
           <p class="inspiration-card__display inspiration-card__display--lg">Du bois, de la lumière, et beaucoup de patience</p>
-          <p class="inspiration-card__text">Découpe laser de précision, assemblage à la main, finitions soignées. Chaque pièce est unique.</p>
+          <p class="inspiration-card__text">Découpe laser de précision, ponçage à la main, finitions soignées. Chaque pièce est unique.</p>
         </div>
       </article>
       <?php
