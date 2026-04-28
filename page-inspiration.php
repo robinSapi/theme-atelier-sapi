@@ -13,6 +13,13 @@ $products_query = new WP_Query([
   'posts_per_page' => 200,
   'fields'         => 'ids',
   'no_found_rows'  => true,
+  'tax_query'      => [
+    [
+      'taxonomy' => 'product_cat',
+      'field'    => 'slug',
+      'terms'    => ['suspensions', 'appliques', 'lampadaires', 'lampesaposer'],
+    ],
+  ],
 ]);
 
 $photos = [];
