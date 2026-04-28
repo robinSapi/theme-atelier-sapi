@@ -235,8 +235,8 @@ $render_photo = function ($photo, $position_in_grid) {
     <p class="inspiration-empty">Aucune image à afficher pour le moment.</p>
   <?php else :
     for ($i = 1; $i <= $total_tiles; $i++) {
-      if (isset($visible_cards[$i])) {
-        $render_card($visible_cards[$i]);
+      if (isset($cards_at[$i])) {
+        $render_card($cards_at[$i]);
       } elseif (!empty($photo_pile)) {
         $photo = array_shift($photo_pile);
         $render_photo($photo, $i);
