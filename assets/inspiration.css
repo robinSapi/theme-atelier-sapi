@@ -1,0 +1,174 @@
+/* =========================================================
+   Galerie Inspiration — page autonome
+   Toutes les classes sont préfixées .inspiration-*
+   pour éviter les collisions avec le reste du site.
+   ========================================================= */
+
+.inspiration-intro {
+  max-width: 720px;
+  margin: 48px auto 32px;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.inspiration-title {
+  font-family: var(--font-display, 'Square Peg', cursive);
+  font-weight: 400;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  color: var(--color-dark, #323232);
+  margin: 0 0 12px;
+  line-height: 1.1;
+}
+
+.inspiration-content {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  color: var(--color-text-light, #717171);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.inspiration-content p {
+  margin: 0 0 12px;
+}
+
+/* ----- Galerie masonry CSS columns ----- */
+.inspiration-gallery {
+  column-count: 2;
+  column-gap: 16px;
+  padding: 0 16px 80px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+@media (min-width: 1024px) {
+  .inspiration-gallery {
+    column-count: 3;
+    column-gap: 24px;
+    padding: 0 32px 96px;
+  }
+}
+
+.inspiration-empty {
+  text-align: center;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  color: var(--color-text-light, #717171);
+  padding: 80px 16px;
+}
+
+/* ----- Tuile ----- */
+.inspiration-tile {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin: 0 0 16px;
+  border-radius: var(--radius, 5px);
+  overflow: hidden;
+  background: var(--color-warm, #FBF6EA);
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (min-width: 1024px) {
+  .inspiration-tile {
+    margin: 0 0 24px;
+  }
+}
+
+.inspiration-tile-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius, 5px);
+  transition: transform 0.6s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+  will-change: transform;
+}
+
+/* ----- Overlay (commun) ----- */
+.inspiration-tile-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  pointer-events: none;
+  border-radius: var(--radius, 5px);
+}
+
+.inspiration-tile-name {
+  display: block;
+  text-align: center;
+  color: var(--color-white, #FFFFFF);
+  font-size: 1rem;
+  line-height: 1.2;
+  padding: 0 16px;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+  word-break: break-word;
+}
+
+/* ----- Mobile / tablette : nom permanent en bas, dégradé subtil ----- */
+@media (max-width: 1023px) {
+  .inspiration-tile-overlay {
+    background: linear-gradient(
+      to bottom,
+      rgba(50, 50, 50, 0) 60%,
+      rgba(50, 50, 50, 0.55) 100%
+    );
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0 0 12px;
+  }
+  .inspiration-tile-name {
+    font-size: 0.875rem;
+  }
+}
+
+/* ----- Desktop : overlay sombre + nom centré au hover ----- */
+@media (min-width: 1024px) {
+  .inspiration-tile-overlay {
+    background: rgba(50, 50, 50, 0);
+    align-items: center;
+    justify-content: center;
+    transition: background 0.35s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+  }
+  .inspiration-tile-name {
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity 0.35s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1)),
+      transform 0.35s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
+    font-size: 1.125rem;
+  }
+  .inspiration-tile:hover .inspiration-tile-overlay,
+  .inspiration-tile:focus-visible .inspiration-tile-overlay {
+    background: rgba(50, 50, 50, 0.55);
+  }
+  .inspiration-tile:hover .inspiration-tile-name,
+  .inspiration-tile:focus-visible .inspiration-tile-name {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .inspiration-tile:hover .inspiration-tile-img {
+    transform: scale(1.03);
+  }
+}
+
+/* ----- Focus visible (accessibilité clavier) ----- */
+.inspiration-tile:focus-visible {
+  outline: 2px solid var(--color-orange, #E35B24);
+  outline-offset: 3px;
+}
+
+/* ----- Reduced motion ----- */
+@media (prefers-reduced-motion: reduce) {
+  .inspiration-tile-img,
+  .inspiration-tile-overlay,
+  .inspiration-tile-name {
+    transition: none;
+  }
+  .inspiration-tile:hover .inspiration-tile-img {
+    transform: none;
+  }
+}

@@ -296,6 +296,16 @@ function sapi_maison_enqueue_assets() {
     }
   }
 
+  // Galerie Inspiration — page autonome (CSS dédié, masonry CSS columns).
+  // Slug 'inspiration' → WordPress charge page-inspiration.php via la hiérarchie
+  // de templates, sans qu'il faille assigner le template depuis l'admin.
+  if (is_page('inspiration') || is_page_template('page-inspiration.php')) {
+    $inspiration_css_path = get_template_directory() . '/assets/inspiration.css';
+    if (file_exists($inspiration_css_path)) {
+      wp_enqueue_style('sapi-maison-inspiration', get_template_directory_uri() . '/assets/inspiration.css', ['sapi-maison-style'], filemtime($inspiration_css_path));
+    }
+  }
+
 
   // Scroll Dots — mobile slide indicators (grilles verticales → sliders horizontaux)
   $scroll_dots_path = get_template_directory() . '/assets/scroll-dots.js';
