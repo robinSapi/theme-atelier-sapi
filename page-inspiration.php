@@ -61,27 +61,35 @@ if (!function_exists('inspiration_format_product_name')) {
 }
 
 // ---- Cards intercalées ----
-// Positions fixes dans la grille finale (1-indexed). Si une position est
-// hors borne (galerie plus courte), la card n'est pas affichée — pas de
-// répétition cyclique ni de placeholder.
-$cards_at = [
-  4  => 'c1',
-  9  => 'c2',
-  14 => 'c3',
-  19 => 'c4',
-  24 => 'c5',
-  29 => 'c6',
-];
+// Distribution proportionnelle au total d'items. Avec CSS columns, le
+// navigateur remplit la colonne 1 d'abord, puis 2, puis 3 — donc des
+// positions fixes type [4, 9, 14, …] avec espacement 5 et 70-90 photos
+// font tomber les 6 cards toutes dans le 1er tiers du DOM (= colonne 1).
+// La formule floor(total * i / (nb_cards + 1)) répartit les cards sur
+// toute la longueur de la grille, donc dans toutes les colonnes.
+$num_photos  = count($photos);
+$nb_cards    = 6;
+$card_keys   = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'];
+$total_tiles = $num_photos + $nb_cards;
+$cards_at    = [];
 
-$num_photos    = count($photos);
-$visible_cards = [];
-foreach ($cards_at as $pos => $card_id) {
-  if ($pos <= $num_photos + count($visible_cards)) {
-    $visible_cards[$pos] = $card_id;
+if ($num_photos > 0) {
+  for ($i = 1; $i <= $nb_cards; $i++) {
+    $pos = (int) floor($total_tiles * $i / ($nb_cards + 1));
+    if ($pos < 1) $pos = 1;
+    if ($pos > $total_tiles) $pos = $total_tiles;
+    // Garde-fou : si deux cards tombent sur la même position
+    // (cas extrême avec très peu de photos), on décale d'un cran.
+    while (isset($cards_at[$pos]) && $pos < $total_tiles) {
+      $pos++;
+    }
+    $cards_at[$pos] = $card_keys[$i - 1];
   }
 }
 
-$total_tiles = $num_photos + count($visible_cards);
+// Si on a moins de cards effectives qu'attendu (collision/garde-fou),
+// $total_tiles est ajusté en conséquence.
+$total_tiles = $num_photos + count($cards_at);
 $photo_pile  = $photos;
 
 $render_card = function ($card_id) {

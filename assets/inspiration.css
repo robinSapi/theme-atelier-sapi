@@ -61,7 +61,7 @@
   display: block;
   width: 100%;
   margin: 0 0 16px;
-  border-radius: var(--radius, 5px);
+  border-radius: var(--radius-lg, 16px);
   overflow: hidden;
   background: var(--color-warm, #FBF6EA);
   break-inside: avoid;
@@ -83,7 +83,7 @@
   display: block;
   width: 100%;
   height: auto;
-  border-radius: var(--radius, 5px);
+  border-radius: var(--radius-lg, 16px);
   transition: transform 0.6s var(--ease-smooth, cubic-bezier(0.4, 0, 0.2, 1));
   will-change: transform;
 }
@@ -94,7 +94,7 @@
   inset: 0;
   display: flex;
   pointer-events: none;
-  border-radius: var(--radius, 5px);
+  border-radius: var(--radius-lg, 16px);
 }
 
 .inspiration-tile-name {
@@ -184,7 +184,7 @@
   display: block;
   width: 100%;
   margin: 0 0 16px;
-  border-radius: var(--radius, 5px);
+  border-radius: var(--radius-lg, 16px);
   overflow: hidden;
   background: var(--color-warm, #FBF6EA);
   break-inside: avoid;
