@@ -102,7 +102,7 @@ $render_card = function ($card_id) {
             <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/icons/picto-french.svg'); ?>" width="32" height="32" alt="" loading="lazy" decoding="async">
           </span>
           <h3 class="inspiration-card__title">Fait main en France</h3>
-          <p class="inspiration-card__text">Chaque luminaire est conçu, découpé et assemblé dans l'atelier.</p>
+          <p class="inspiration-card__text">Chaque luminaire est conçu, découpé et assemblé dans mon atelier.</p>
         </div>
       </article>
       <?php
@@ -136,8 +136,8 @@ $render_card = function ($card_id) {
       ?>
       <article class="inspiration-card inspiration-card--newsletter inspiration-card--c4">
         <div class="inspiration-card__inner">
-          <h3 class="inspiration-card__title">Recevez les coulisses de l'atelier</h3>
-          <p class="inspiration-card__text">Nouveautés, projets en cours, et inspirations directement dans votre boîte mail.</p>
+          <h3 class="inspiration-card__title">Recevez les coulisses de mon atelier</h3>
+          <p class="inspiration-card__text">Nouveautés, mes projets en cours, mes inspirations directement dans votre boîte mail.</p>
           <form class="inspiration-card__form" data-inspiration-newsletter novalidate>
             <label for="<?php echo esc_attr($form_id); ?>" class="inspiration-card__form-label">Adresse email</label>
             <div class="inspiration-card__form-row">
