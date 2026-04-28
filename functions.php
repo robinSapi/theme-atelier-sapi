@@ -304,6 +304,14 @@ function sapi_maison_enqueue_assets() {
     if (file_exists($inspiration_css_path)) {
       wp_enqueue_style('sapi-maison-inspiration', get_template_directory_uri() . '/assets/inspiration.css', ['sapi-maison-style'], filemtime($inspiration_css_path));
     }
+    $inspiration_js_path = get_template_directory() . '/assets/inspiration.js';
+    if (file_exists($inspiration_js_path)) {
+      wp_enqueue_script('sapi-maison-inspiration', get_template_directory_uri() . '/assets/inspiration.js', [], filemtime($inspiration_js_path), true);
+      wp_localize_script('sapi-maison-inspiration', 'sapiInspiration', [
+        'ajaxUrl' => admin_url('admin-ajax.php'),
+        'nonce'   => wp_create_nonce('sapi_inspiration_brevo_nonce'),
+      ]);
+    }
   }
 
 
@@ -5336,4 +5344,80 @@ function sapi_welcome_coupon_success_message($msg, $msg_code, $coupon) {
   if ((int) $msg_code !== WC_Coupon::WC_COUPON_SUCCESS) return $msg;
 
   return 'Bienvenue à l\'Atelier Sâpi ! Votre réduction de 10% a été appliquée. 🌿';
+}
+
+/**
+ * Galerie Inspiration — handler AJAX inscription newsletter Brevo (liste #6).
+ * Mirroir du handler `sapi_brevo_subscribe` du snippet popup cookies, mais
+ * avec SOURCE = "Galerie Inspiration" pour distinguer l'origine côté Brevo.
+ *
+ * Pourquoi un handler dédié plutôt que de réutiliser celui du snippet :
+ * - Le snippet hardcode SOURCE = 'popup', non paramétrable.
+ * - Garde le snippet (gestion par Robin via Code Snippets) totalement indépendant
+ *   du déploiement du thème.
+ */
+if (!function_exists('sapi_get_brevo_api_key')) {
+  function sapi_get_brevo_api_key() {
+    foreach (['BREVO_API_KEY', 'SAPI_BREVO_API_KEY', 'SIB_API_KEY', 'SENDINBLUE_API_KEY'] as $const) {
+      if (defined($const) && constant($const)) {
+        return constant($const);
+      }
+    }
+    $key = get_option('sib_api_key_v3');
+    if (!empty($key)) return $key;
+    $options = get_option('mailin_options');
+    if (is_array($options)) {
+      foreach (['api_key_v3', 'api_key', 'access_key', 'apikey'] as $k) {
+        if (!empty($options[$k])) return $options[$k];
+      }
+    }
+    return null;
+  }
+}
+
+add_action('wp_ajax_nopriv_sapi_inspiration_brevo_subscribe', 'sapi_inspiration_brevo_subscribe');
+add_action('wp_ajax_sapi_inspiration_brevo_subscribe', 'sapi_inspiration_brevo_subscribe');
+function sapi_inspiration_brevo_subscribe() {
+  if (!check_ajax_referer('sapi_inspiration_brevo_nonce', 'nonce', false)) {
+    wp_send_json_error(['message' => 'invalid_nonce'], 403);
+  }
+
+  $email = isset($_POST['email']) ? sanitize_email(wp_unslash($_POST['email'])) : '';
+  if (empty($email) || !is_email($email)) {
+    wp_send_json_error(['message' => 'invalid_email'], 400);
+  }
+
+  $api_key = sapi_get_brevo_api_key();
+  if (empty($api_key)) {
+    wp_send_json_error(['message' => 'no_api_key'], 500);
+  }
+
+  $response = wp_remote_post('https://api.brevo.com/v3/contacts', [
+    'timeout' => 10,
+    'headers' => [
+      'accept'       => 'application/json',
+      'content-type' => 'application/json',
+      'api-key'      => $api_key,
+    ],
+    'body' => wp_json_encode([
+      'email'         => $email,
+      'listIds'       => [6],
+      'updateEnabled' => true,
+      'attributes'    => [
+        'SOURCE' => 'Galerie Inspiration',
+      ],
+    ]),
+  ]);
+
+  if (is_wp_error($response)) {
+    wp_send_json_error(['message' => 'http_error', 'details' => $response->get_error_message()], 500);
+  }
+
+  $code = wp_remote_retrieve_response_code($response);
+  if ($code >= 200 && $code < 300) {
+    wp_send_json_success();
+  }
+
+  $body = wp_remote_retrieve_body($response);
+  wp_send_json_error(['message' => 'brevo_error', 'code' => $code, 'body' => $body], $code);
 }

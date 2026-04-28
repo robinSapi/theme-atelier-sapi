@@ -1788,12 +1788,23 @@
       });
     }
 
-    // Ouverture : bandeau + pills
+    // Ouverture : bandeau + pills + triggers génériques [data-robin-open]
     document.addEventListener('click', function (e) {
       // Bandeau
       var bandeau = e.target.closest('#robin-bandeau');
       if (bandeau) {
         openModal('bandeau');
+        return;
+      }
+
+      // Trigger générique : tout élément avec [data-robin-open]
+      // Permet aux templates / pages d'ouvrir la modale sans dépendre des classes
+      // .robin-pill / .robin-category-card__inner (utilisé par la card C3 de la
+      // Galerie Inspiration, et réutilisable ailleurs).
+      var trigger = e.target.closest('[data-robin-open]');
+      if (trigger) {
+        var ctx = trigger.getAttribute('data-robin-open') || 'bandeau';
+        openModal(ctx);
         return;
       }
 
