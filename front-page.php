@@ -78,6 +78,25 @@ foreach ($categories_order as $cat_slug) {
   }
 }
 
+// Slides "en avant" — ACF Repeater sur la front page
+// Filtrage : actives ET dans la fenêtre temporelle ET avec image valide.
+$promo_slides = [];
+$front_page_id = (int) get_option('page_on_front');
+if ($front_page_id && function_exists('get_field')) {
+  $raw_slides = get_field('slides_en_avant', $front_page_id) ?: [];
+  $today = current_time('Y-m-d');
+  foreach ($raw_slides as $slide) {
+    if (empty($slide['active'])) continue;
+    if (empty($slide['image']))  continue;
+    if (!empty($slide['date_debut']) && $today < $slide['date_debut']) continue;
+    if (!empty($slide['date_fin'])   && $today > $slide['date_fin'])   continue;
+    $promo_slides[] = [
+      'image_id' => (int) $slide['image'],
+      'url'      => trim((string) ($slide['url'] ?? '')),
+    ];
+  }
+}
+
 // Star du moment — lit le champ ACF produit_star de la page "La star du moment"
 $star_product_data = null;
 $star_page = get_page_by_path('la-star-du-moment');
@@ -311,31 +330,69 @@ foreach ($collection_slugs as $col) {
 </div>
 
 <!-- Full Page Carousel -->
-<?php if (!empty($carousel_products)) : ?>
+<?php
+$total_slides = count($promo_slides) + count($carousel_products);
+$slide_index = 0; // compteur global pour déterminer la première slide active
+?>
+<?php if ($total_slides > 0) : ?>
 <section class="homepage-carousel-fullscreen">
   <div class="carousel-container">
     <div class="carousel-slides">
-    <?php foreach ($carousel_products as $index => $product) : ?>
-      <div class="carousel-slide<?php echo $index === 0 ? ' active' : ''; ?>">
-        <?php
-          $img_attr = [
-            'class' => 'carousel-slide-img',
-            'alt' => esc_attr($product['name']) . ' — Luminaire artisanal en bois',
-            'loading' => $index === 0 ? 'eager' : 'lazy',
-            'sizes' => '100vw',
-          ];
-          if ($index === 0) $img_attr['fetchpriority'] = 'high';
-          echo wp_get_attachment_image($product['image_id'], 'full', false, $img_attr);
-        ?>
-        <div class="carousel-overlay"></div>
-        <div class="carousel-content">
-          <p class="carousel-product-name"><?php echo esc_html($product['name']); ?></p>
-        </div>
-      </div>
-    <?php endforeach; ?>
-  </div>
 
-    <!-- Hero Text -->
+      <?php foreach ($promo_slides as $promo) :
+        $is_first = $slide_index === 0;
+        $has_url  = $promo['url'] !== '';
+        $classes  = 'carousel-slide carousel-slide-promo';
+        if ($is_first) $classes .= ' active';
+
+        // Pas de surcharge du 'alt' : on utilise le texte alternatif natif de la médiathèque WP.
+        $img_attr = [
+          'class'   => 'carousel-slide-img',
+          'loading' => $is_first ? 'eager' : 'lazy',
+          'sizes'   => '100vw',
+        ];
+        if ($is_first) $img_attr['fetchpriority'] = 'high';
+      ?>
+        <?php if ($has_url) : ?>
+          <a class="<?php echo esc_attr($classes); ?>" href="<?php echo esc_url($promo['url']); ?>">
+        <?php else : ?>
+          <div class="<?php echo esc_attr($classes); ?>">
+        <?php endif; ?>
+            <?php echo wp_get_attachment_image($promo['image_id'], 'full', false, $img_attr); ?>
+            <div class="carousel-overlay"></div>
+        <?php if ($has_url) : ?>
+          </a>
+        <?php else : ?>
+          </div>
+        <?php endif; ?>
+        <?php $slide_index++; ?>
+      <?php endforeach; ?>
+
+      <?php foreach ($carousel_products as $product) :
+        $is_first = $slide_index === 0;
+      ?>
+        <div class="carousel-slide<?php echo $is_first ? ' active' : ''; ?>">
+          <?php
+            $img_attr = [
+              'class'   => 'carousel-slide-img',
+              'alt'     => esc_attr($product['name']) . ' — Luminaire artisanal en bois',
+              'loading' => $is_first ? 'eager' : 'lazy',
+              'sizes'   => '100vw',
+            ];
+            if ($is_first) $img_attr['fetchpriority'] = 'high';
+            echo wp_get_attachment_image($product['image_id'], 'full', false, $img_attr);
+          ?>
+          <div class="carousel-overlay"></div>
+          <div class="carousel-content">
+            <p class="carousel-product-name"><?php echo esc_html($product['name']); ?></p>
+          </div>
+        </div>
+        <?php $slide_index++; ?>
+      <?php endforeach; ?>
+
+    </div>
+
+    <!-- Hero Text global — visible sur TOUTES les slides, y compris promo. À ne pas masquer. -->
     <div class="carousel-hero-text">
       <h1 class="carousel-hero-title">Luminaires en bois · Atelier Sâpi</h1>
       <h2 class="carousel-hero-subtitle">Fabriqués à la main, à la commande, dans mon atelier à Lyon</h2>
