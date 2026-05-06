@@ -11504,6 +11504,14 @@ body.cursor-hover .cursor-dot {
 .carousel-slide.active {
   opacity: 1;
   z-index: 1;
+  pointer-events: auto;
+}
+
+/* Critique : empêcher les slides non-actives (opacity: 0) de capturer
+   les clics ou le focus clavier — sinon les <a> empilés provoquent
+   des navigations fantômes. */
+.carousel-slide:not(.active) {
+  pointer-events: none;
 }
 
 .carousel-overlay {
@@ -11575,13 +11583,17 @@ body.cursor-hover .cursor-dot {
   }
 }
 
-/* Nom du produit : petit, bas-droite, non cliquable */
+/* CTA "Découvrir" + nom du produit, empilés en bas-droite */
 .carousel-content {
   position: absolute;
   bottom: 1.75rem;
   right: 2.5rem;
   z-index: 2;
   text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
 }
 
 .carousel-product-name {
@@ -11694,6 +11706,52 @@ a.carousel-slide-promo {
   }
 }
 
+/* Slide produit cliquable — même base que les slides promo */
+a.carousel-slide-product {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  a.carousel-slide-product:hover .carousel-slide-img {
+    transform: scale(1.02);
+    transition: transform 0.6s var(--ease-smooth);
+  }
+}
+
+/* Badge CTA "Découvrir cette création" — fond blanc semi-opaque
+   pour rester lisible sur les 8 photos ambiance aux dominantes variées. */
+.carousel-cta-discover {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-dark);
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: 50px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  transition: background 0.3s var(--ease-smooth), box-shadow 0.3s var(--ease-smooth);
+}
+
+.carousel-cta-discover svg {
+  flex-shrink: 0;
+  stroke: currentColor;
+}
+
+@media (hover: hover) {
+  a.carousel-slide-product:hover .carousel-cta-discover {
+    background: var(--color-orange);
+    color: var(--color-white);
+    box-shadow: 0 4px 14px rgba(227, 91, 36, 0.35);
+  }
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .carousel-hero-text {
@@ -11703,6 +11761,14 @@ a.carousel-slide-promo {
   .carousel-content {
     right: 1.25rem;
     bottom: 1.25rem;
+  }
+
+  /* Cible tactile minimum 44 px (recommandation Apple/Google).
+     Le <a> couvre toute la slide ; le badge n'est qu'un repère visuel. */
+  .carousel-cta-discover {
+    min-height: 44px;
+    padding: 0.7rem 1rem;
+    font-size: 0.7rem;
   }
 }
 

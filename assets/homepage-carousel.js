@@ -80,6 +80,18 @@
     // Start auto-rotation (continue même au survol)
     startAutoRotate();
 
+    // Mobile : pause au touch pour laisser le temps de viser une slide,
+    // redémarrage 3 s après le relâchement.
+    let touchResumeTimer;
+    carousel.addEventListener('touchstart', function() {
+      stopAutoRotate();
+      clearTimeout(touchResumeTimer);
+    }, { passive: true });
+    carousel.addEventListener('touchend', function() {
+      clearTimeout(touchResumeTimer);
+      touchResumeTimer = setTimeout(startAutoRotate, 3000);
+    }, { passive: true });
+
     // Cleanup on page unload
     window.addEventListener('beforeunload', stopAutoRotate);
   }

@@ -370,8 +370,10 @@ $slide_index = 0; // compteur global pour déterminer la première slide active
 
       <?php foreach ($carousel_products as $product) :
         $is_first = $slide_index === 0;
+        $classes  = 'carousel-slide carousel-slide-product';
+        if ($is_first) $classes .= ' active';
       ?>
-        <div class="carousel-slide<?php echo $is_first ? ' active' : ''; ?>">
+        <a class="<?php echo esc_attr($classes); ?>" href="<?php echo esc_url($product['url']); ?>" aria-label="Découvrir <?php echo esc_attr($product['name']); ?>">
           <?php
             $img_attr = [
               'class'   => 'carousel-slide-img',
@@ -384,9 +386,15 @@ $slide_index = 0; // compteur global pour déterminer la première slide active
           ?>
           <div class="carousel-overlay"></div>
           <div class="carousel-content">
+            <span class="carousel-cta-discover">
+              Découvrir cette création
+              <svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </span>
             <p class="carousel-product-name"><?php echo esc_html($product['name']); ?></p>
           </div>
-        </div>
+        </a>
         <?php $slide_index++; ?>
       <?php endforeach; ?>
 
