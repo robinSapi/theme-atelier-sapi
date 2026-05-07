@@ -11713,13 +11713,6 @@ a.carousel-slide-product {
   cursor: pointer;
 }
 
-@media (hover: hover) {
-  a.carousel-slide-product:hover .carousel-slide-img {
-    transform: scale(1.02);
-    transition: transform 0.6s var(--ease-smooth);
-  }
-}
-
 /* Badge CTA "Découvrir cette création" — fond blanc semi-opaque
    pour rester lisible sur les 8 photos ambiance aux dominantes variées. */
 .carousel-cta-discover {
@@ -11736,20 +11729,11 @@ a.carousel-slide-product {
   letter-spacing: 0.06em;
   border-radius: 50px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
-  transition: background 0.3s var(--ease-smooth), box-shadow 0.3s var(--ease-smooth);
 }
 
 .carousel-cta-discover svg {
   flex-shrink: 0;
   stroke: currentColor;
-}
-
-@media (hover: hover) {
-  a.carousel-slide-product:hover .carousel-cta-discover {
-    background: var(--color-orange);
-    color: var(--color-white);
-    box-shadow: 0 4px 14px rgba(227, 91, 36, 0.35);
-  }
 }
 
 /* Mobile Responsive */
