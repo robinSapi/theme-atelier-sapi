@@ -93,6 +93,7 @@ if ($front_page_id && function_exists('get_field')) {
     $promo_slides[] = [
       'image_id' => (int) $slide['image'],
       'url'      => trim((string) ($slide['url'] ?? '')),
+      'titre'    => trim((string) ($slide['titre'] ?? '')),
     ];
   }
 }
@@ -333,10 +334,30 @@ foreach ($collection_slugs as $col) {
 <?php
 $total_slides = count($promo_slides) + count($carousel_products);
 $slide_index = 0; // compteur global pour déterminer la première slide active
+
+// Data slides à exposer au JS pour mettre à jour la naming card au changement de slide.
+// Ordre : slides promo en premier, puis slides produits — DOIT correspondre à l'ordre des slides rendues ci-dessous.
+$carousel_slides_data = [];
+foreach ($promo_slides as $promo) {
+  $carousel_slides_data[] = [
+    'name'    => (string) ($promo['titre'] ?? ''),
+    'url'     => (string) ($promo['url'] ?? ''),
+    'isPromo' => true,
+  ];
+}
+foreach ($carousel_products as $product) {
+  $carousel_slides_data[] = [
+    'name'    => (string) $product['name'],
+    'url'     => (string) $product['url'],
+    'isPromo' => false,
+  ];
+}
 ?>
 <?php if ($total_slides > 0) : ?>
 <section class="homepage-carousel-fullscreen">
   <div class="carousel-container">
+
+    <!-- Couche 1 : slides image (cliquabilité M22 préservée sur les slides produits) -->
     <div class="carousel-slides">
 
       <?php foreach ($promo_slides as $promo) :
@@ -385,22 +406,52 @@ $slide_index = 0; // compteur global pour déterminer la première slide active
             echo wp_get_attachment_image($product['image_id'], 'full', false, $img_attr);
           ?>
           <div class="carousel-overlay"></div>
-          <div class="carousel-content">
-            <p class="carousel-product-name"><?php echo esc_html($product['name']); ?></p>
-          </div>
         </a>
         <?php $slide_index++; ?>
       <?php endforeach; ?>
 
     </div>
 
-    <!-- Hero Text global — visible sur TOUTES les slides, y compris promo. À ne pas masquer. -->
-    <div class="carousel-hero-text">
-      <h1 class="carousel-hero-title">Luminaires en bois · Atelier Sâpi</h1>
-      <h2 class="carousel-hero-subtitle">Fabriqués à la main, à la commande, dans mon atelier à Lyon</h2>
+    <!-- Couche 2 : foreground en flex column — zone texte (H1+H2) + zone card naming/nav.
+         pointer-events: none sur le wrapper laisse passer les clics sur les slides.
+         La naming card et son contenu remettent pointer-events: auto. -->
+    <div class="carousel-foreground">
+
+      <div class="hero-text-area">
+        <h1 class="carousel-hero-title">Luminaires en bois · Atelier Sâpi</h1>
+        <p class="carousel-hero-subtitle">Fabriqués à la main, à la commande, dans mon atelier à Lyon</p>
+      </div>
+
+      <div class="card-area">
+        <div class="naming-card">
+          <a class="naming-link" href="#" id="carousel-naming-link" aria-label="Découvrir le modèle affiché"></a>
+          <div class="card-controls">
+            <button type="button" class="carousel-arrow carousel-arrow-prev" aria-label="Slide précédente">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+            </button>
+            <div class="carousel-dots">
+              <?php for ($i = 0; $i < $total_slides; $i++) : ?>
+                <button type="button"
+                        class="carousel-dot<?php echo $i === 0 ? ' active' : ''; ?>"
+                        aria-label="Aller à la slide <?php echo ($i + 1); ?>"></button>
+              <?php endfor; ?>
+            </div>
+            <button type="button" class="carousel-arrow carousel-arrow-next" aria-label="Slide suivante">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
+
+<script>window.SAPI_CAROUSEL_DATA = <?php echo wp_json_encode($carousel_slides_data); ?>;</script>
 <?php endif; ?>
 
 <!-- Hero Bento Grid -->
