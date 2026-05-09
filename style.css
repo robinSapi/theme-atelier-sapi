@@ -11646,10 +11646,17 @@ body.cursor-hover .cursor-dot {
   display: contents;
 }
 
-/* Réordonnement : flèche prev — naming — flèche next */
+/* Réordonnement : flèche prev — naming — flèche next.
+   flex: 1 sur le naming → il occupe tout l'espace entre les flèches, qui
+   restent collées aux bords de la card. text-align: center → le texte est
+   centré dans cette zone, peu importe sa longueur. */
 .card-controls .carousel-arrow:first-child { order: -1; }
 .card-controls .carousel-arrow:last-child  { order:  1; }
-.naming-link { order: 0; }
+.naming-link {
+  order: 0;
+  flex: 1;
+  text-align: center;
+}
 
 /* Naming dans la card — cliquable vers la fiche / l'URL promo.
    Override explicite du :hover global a:hover { color: var(--color-link-hover) }
