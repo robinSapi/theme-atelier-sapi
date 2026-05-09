@@ -11624,7 +11624,7 @@ body.cursor-hover .cursor-dot {
   background: transparent; /* glass pur : seul le blur crée l'effet verre dépoli */
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(251, 246, 234, 0.55);
   border-radius: 16px;
   padding: 18px 24px;
   display: flex;
@@ -11640,10 +11640,11 @@ body.cursor-hover .cursor-dot {
 .naming-link {
   font-size: 1.5rem;
   line-height: 1;
-  color: var(--color-wood-dark);
+  color: var(--color-warm);
   white-space: nowrap;
   text-decoration: none;
   cursor: pointer;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
   transition: color 0.2s var(--ease-smooth);
 }
 
@@ -11691,10 +11692,10 @@ body.cursor-hover .cursor-dot {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(74, 63, 53, 0.06);
-  border: 1px solid rgba(74, 63, 53, 0.22);
+  background: rgba(251, 246, 234, 0.10);
+  border: 1px solid rgba(251, 246, 234, 0.55);
   border-radius: 50%;
-  color: var(--color-wood-dark);
+  color: var(--color-warm);
   cursor: pointer;
   padding: 0;
   transition: all 0.3s var(--ease-smooth);
@@ -11703,8 +11704,8 @@ body.cursor-hover .cursor-dot {
 
 @media (hover: hover) {
   .carousel-arrow:hover {
-    background: rgba(74, 63, 53, 0.12);
-    border-color: rgba(74, 63, 53, 0.4);
+    background: rgba(251, 246, 234, 0.22);
+    border-color: var(--color-warm);
   }
 }
 
@@ -11724,7 +11725,7 @@ body.cursor-hover .cursor-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  border: 1.5px solid rgba(139, 115, 85, 0.5);
+  border: 1.5px solid rgba(251, 246, 234, 0.55);
   background: transparent;
   cursor: pointer;
   padding: 0;
@@ -11732,13 +11733,13 @@ body.cursor-hover .cursor-dot {
 }
 
 .carousel-dot.active {
-  background: var(--color-wood);
-  border-color: var(--color-wood);
+  background: var(--color-warm);
+  border-color: var(--color-warm);
 }
 
 @media (hover: hover) {
   .carousel-dot:hover:not(.active) {
-    background: rgba(139, 115, 85, 0.3);
+    background: rgba(251, 246, 234, 0.35);
   }
 }
 
