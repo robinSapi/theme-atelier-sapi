@@ -337,17 +337,21 @@ $slide_index = 0; // compteur global pour déterminer la première slide active
 
 // Data slides à exposer au JS pour mettre à jour la naming card au changement de slide.
 // Ordre : slides promo en premier, puis slides produits — DOIT correspondre à l'ordre des slides rendues ci-dessous.
+// html_entity_decode : certains titres WP contiennent l'entité HTML littérale (ex. « L&rsquo;Incandescent »
+// au lieu de « L'Incandescent »). Sans décodage, ça remonte tel quel dans le DOM, et la règle globale
+// .product-restname { text-transform: capitalize } capitalise le « r » après le « & » (word-boundary CSS),
+// donnant « L&Rsquo;Incandescent » à l'écran.
 $carousel_slides_data = [];
 foreach ($promo_slides as $promo) {
   $carousel_slides_data[] = [
-    'name'    => (string) ($promo['titre'] ?? ''),
+    'name'    => html_entity_decode((string) ($promo['titre'] ?? ''), ENT_QUOTES, 'UTF-8'),
     'url'     => (string) ($promo['url'] ?? ''),
     'isPromo' => true,
   ];
 }
 foreach ($carousel_products as $product) {
   $carousel_slides_data[] = [
-    'name'    => (string) $product['name'],
+    'name'    => html_entity_decode((string) $product['name'], ENT_QUOTES, 'UTF-8'),
     'url'     => (string) $product['url'],
     'isPromo' => false,
   ];
