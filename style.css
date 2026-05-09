@@ -11635,7 +11635,7 @@ body.cursor-hover .cursor-dot {
   flex-direction: row;
   align-items: center;
   gap: 14px;
-  min-width: 360px; /* verrou : la card ne resize pas selon la longueur du naming */
+  min-width: 440px; /* verrou : la card ne resize pas selon la longueur du naming */
 }
 
 .naming-card .carousel-dots {
