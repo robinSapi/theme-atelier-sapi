@@ -11619,6 +11619,10 @@ body.cursor-hover .cursor-dot {
    NAMING CARD — fond crème avec naming + controls
    ======================================== */
 
+/* Layout horizontal compact « ‹ NAMING › » sur tous les viewports.
+   Les dots sont masqués (display: none plus bas), card-controls est en
+   display: contents pour que les flèches deviennent siblings du naming
+   et puissent être réordonnées via order. */
 .naming-card {
   pointer-events: auto;
   background: transparent; /* glass pur : seul le blur crée l'effet verre dépoli */
@@ -11626,13 +11630,26 @@ body.cursor-hover .cursor-dot {
   backdrop-filter: blur(12px);
   border: 1px solid rgba(251, 246, 234, 0.55);
   border-radius: 16px;
-  padding: 18px 24px;
+  padding: 14px 22px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   gap: 14px;
   min-width: 360px; /* verrou : la card ne resize pas selon la longueur du naming */
 }
+
+.naming-card .carousel-dots {
+  display: none;
+}
+
+.naming-card .card-controls {
+  display: contents;
+}
+
+/* Réordonnement : flèche prev — naming — flèche next */
+.card-controls .carousel-arrow:first-child { order: -1; }
+.card-controls .carousel-arrow:last-child  { order:  1; }
+.naming-link { order: 0; }
 
 /* Naming dans la card — cliquable vers la fiche / l'URL promo.
    Override explicite du :hover global a:hover { color: var(--color-link-hover) }
@@ -11692,6 +11709,7 @@ body.cursor-hover .cursor-dot {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   background: rgba(251, 246, 234, 0.10);
   border: 1px solid rgba(251, 246, 234, 0.55);
   border-radius: 50%;
@@ -11743,31 +11761,17 @@ body.cursor-hover .cursor-dot {
   }
 }
 
-/* Mobile : card horizontale compacte « ‹ NAMING › », sans dots */
+/* Mobile : card un peu plus compacte que desktop (padding/gap/typo plus petits).
+   Le layout horizontal et le masquage des dots sont définis en base au-dessus. */
 @media (max-width: 768px) {
   .naming-card {
-    flex-direction: row;
-    align-items: center;
     gap: 12px;
     padding: 12px 16px;
     max-width: calc(100% - 8px);
     min-width: 0; /* override desktop : pas de min-width sur mobile (overflow sinon) */
   }
 
-  .naming-card .carousel-dots {
-    display: none;
-  }
-
-  /* card-controls en display:contents pour que les flèches deviennent
-     siblings du naming-link → réordonnement « ‹ NAMING › » via order */
-  .naming-card .card-controls {
-    display: contents;
-  }
-
-  .card-controls .carousel-arrow:first-child { order: -1; }
-  .card-controls .carousel-arrow:last-child  { order: 1; }
   .naming-link {
-    order: 0;
     font-size: 1.2rem;
   }
   .naming-link.is-promo {
