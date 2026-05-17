@@ -280,6 +280,54 @@ function sapi_maison_enqueue_assets() {
 
   }
 
+  // Méga-filtre intelligent — page Mes créations uniquement (F1a)
+  if (class_exists('WooCommerce') && is_shop()) {
+    $megafilter_js_path = get_template_directory() . '/assets/mega-filtre.js';
+    if (file_exists($megafilter_js_path)) {
+      require_once get_template_directory() . '/inc/guide-data.php';
+      wp_enqueue_script(
+        'sapi-mega-filtre',
+        get_template_directory_uri() . '/assets/mega-filtre.js',
+        ['sapi-maison-shop'],
+        filemtime($megafilter_js_path),
+        true
+      );
+      wp_localize_script('sapi-mega-filtre', 'SAPI_MEGAFILTER', [
+        'steps' => sapi_guide_get_steps(),
+        'rules' => [
+          // Pièces avec filtre ampoule (mirror sapi_guide_get_ampoule_filter)
+          'ampoule_by_piece' => [
+            'cuisine'  => ['ampoule_degagee', 'semi_degagee'],
+            'bureau'   => ['ampoule_degagee', 'semi_degagee'],
+            'salon'    => ['ampoule_entouree', 'semi_degagee'],
+            'chambre'  => ['ampoule_entouree', 'semi_degagee'],
+            'entree'   => null, // tous
+            'escalier' => null,
+          ],
+          // Si grande pièce (cuisine/bureau), pas de filtre ampoule
+          'ampoule_skip_when_grande' => ['cuisine', 'bureau'],
+          // Catégories selon sortie (mirror sapi_guide_get_categories)
+          'cats_by_sortie' => [
+            'plafond'       => ['suspensions'],
+            'mur'           => ['appliques'],
+            'pas-de-sortie' => ['lampadaires', 'lampesaposer', 'appliques'],
+            'ne-sais-pas'   => ['suspensions', 'lampadaires', 'lampesaposer'],
+            ''              => ['suspensions', 'lampadaires', 'lampesaposer', 'appliques'],
+          ],
+          // Éclairage secondaire (mirror branche eclairage === 'secondaire')
+          'cats_secondaire_by_sortie' => [
+            'plafond'       => ['suspensions'],
+            'mur'           => ['appliques'],
+            'pas-de-sortie' => ['lampadaires', 'lampesaposer', 'appliques'],
+            ''              => ['lampadaires', 'lampesaposer'],
+          ],
+          // Catégorie "Toutes" = total - extras
+          'extras_slugs' => ['accessoires', 'carte-cadeau'],
+        ],
+      ]);
+    }
+  }
+
   // Guide personalization — swap product card images based on guide preferences
   if (is_front_page() || (class_exists('WooCommerce') && (is_shop() || is_product_category()))) {
     $gp_path = get_template_directory() . '/assets/guide-personalize.js';

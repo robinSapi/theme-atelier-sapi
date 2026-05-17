@@ -114,6 +114,9 @@ Text Domain: theme-sapi-maison
   /* Easings supplémentaires */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-elegant: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* Bordure discrète bois — utilisée par les chips/dropdowns */
+  --color-line: rgba(147, 125, 104, 0.18);
 }
 
 /* ========================================
@@ -635,7 +638,6 @@ button:active::after,
 .filter-btn:active {
   animation: buttonPress 0.2s ease;
 }
-/* .filter-btn--robin supprimé — remplacé par le bandeau .filter-row--robin */
 
 /* Smooth product reveal animations */
 @keyframes productReveal {
@@ -14515,114 +14517,6 @@ transform: translateY(15px);
   opacity: 1;
 }
 
-/* Ligne 3 — Ma sélection personnalisée */
-.filter-row--robin {
-  max-width: fit-content;
-  margin: 0 auto;
-  padding: 0.55rem 0.75rem 0.55rem 1.25rem;
-  border-radius: 50px;
-  background: var(--color-warm, #FBF6EA);
-  border: 1.5px solid rgba(147, 125, 104, 0.15);
-  align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
-  transition: all 0.3s var(--ease-smooth);
-}
-
-.filter-row--robin:hover {
-  border-color: rgba(147, 125, 104, 0.35);
-  box-shadow: 0 2px 8px rgba(147, 125, 104, 0.1);
-}
-
-.filter-row--robin.is-active {
-  background: var(--color-wood, #937D68);
-  border-color: var(--color-wood, #937D68);
-}
-
-.filter-row--robin.is-active .robin-selection-icon,
-.filter-row--robin.is-active .robin-selection-label {
-  color: #fff;
-}
-
-.filter-row--robin.is-active .robin-selection-chip {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-}
-
-.filter-row--robin.is-active .robin-selection-chip-sep {
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.robin-selection-icon {
-  flex-shrink: 0;
-  color: var(--color-wood, #937D68);
-}
-
-.robin-selection-label {
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-wood, #937D68);
-  white-space: nowrap;
-}
-
-.robin-selection-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  align-items: center;
-}
-
-.robin-selection-chip {
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  border-radius: 50px;
-  background: rgba(147, 125, 104, 0.1);
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--color-dark, #323232);
-  white-space: nowrap;
-}
-
-.robin-selection-chip-sep {
-  color: rgba(147, 125, 104, 0.4);
-  font-size: 0.65rem;
-}
-
-.robin-selection-btn {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.35rem 0.85rem;
-  border-radius: 50px;
-  border: 1.5px solid rgba(147, 125, 104, 0.25);
-  background: transparent;
-  color: var(--color-wood, #937D68);
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s var(--ease-smooth);
-  white-space: nowrap;
-}
-
-.robin-selection-btn:hover {
-  border-color: var(--color-wood, #937D68);
-  background: rgba(147, 125, 104, 0.08);
-}
-
-.filter-row--robin.is-active .robin-selection-btn {
-  border-color: rgba(255, 255, 255, 0.4);
-  color: #fff;
-}
-
-.filter-row--robin.is-active .robin-selection-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.6);
-}
-
 .filter-btn {
   display: inline-flex;
   align-items: center;
@@ -14847,14 +14741,6 @@ transform: translateY(15px);
     flex-wrap: wrap;
     overflow-x: visible;
     justify-content: flex-start;
-  }
-
-  .filter-row--robin {
-    padding: 12px 20px;
-    border-radius: 50px;
-    max-width: 100%;
-    margin: 0 0.5rem;
-    width: calc(100% - 1rem);
   }
 
   .filter-btn {
@@ -24786,5 +24672,616 @@ body.woocommerce-cart div.woocommerce-wrapper {
 
   .presse-tagline {
     font-size: 1.8rem;
+  }
+}
+
+/* ============================================================
+   MÉGA-FILTRE INTELLIGENT — /mes-creations/ (F1a)
+   Chips conditionnels + commentaire débouncé + modale plein écran
+   ============================================================ */
+
+/* ── Barre Affiner avec Robin ── */
+.megafilter-bar {
+  max-width: 1200px;
+  margin: 1.5rem auto 0;
+  padding: 0 1rem;
+}
+
+.megafilter-bar-inner {
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: var(--shadow-card);
+}
+
+.megafilter-header {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+  margin-bottom: 0.875rem;
+}
+
+.megafilter-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-wood);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.megafilter-ai-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.125rem;
+  background: var(--color-orange);
+  color: var(--color-white);
+  border: none;
+  border-radius: 50px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-transition: background 0.2s ease;
+  transition: background 0.2s ease;
+}
+
+.megafilter-ai-btn:hover,
+.megafilter-ai-btn:focus-visible {
+  background: var(--color-orange-hover);
+  outline: none;
+}
+
+.megafilter-ai-btn svg {
+  flex-shrink: 0;
+}
+
+/* ── Chips ── */
+.megafilter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.megafilter-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.megafilter-chip-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: 50px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-wood-dark);
+  cursor: pointer;
+  -webkit-transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.megafilter-chip-toggle:hover {
+  border-color: var(--color-wood);
+  background: var(--color-warm);
+}
+
+.megafilter-chip-toggle:focus-visible {
+  outline: 2px solid var(--color-wood);
+  outline-offset: 2px;
+}
+
+.megafilter-chip.has-value .megafilter-chip-toggle {
+  border-color: var(--color-wood);
+  background: var(--color-warm);
+  padding-right: 1.875rem;
+}
+
+.megafilter-chip-value {
+  color: var(--color-wood);
+  font-weight: 600;
+}
+
+.megafilter-chip-arrow {
+  opacity: 0.6;
+  margin-left: 0.125rem;
+}
+
+.megafilter-chip-clear {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-wood);
+  color: var(--color-white);
+  border: none;
+  font-size: 0.75rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.megafilter-chip-clear:hover {
+  background: var(--color-wood-dark);
+}
+
+/* Chips conditionnels : cachés par défaut, fade-in à l'apparition */
+.megafilter-chip.is-conditional {
+  opacity: 0;
+  -webkit-transform: translateY(-4px);
+  transform: translateY(-4px);
+  pointer-events: none;
+  max-width: 0;
+  margin: 0;
+  overflow: hidden;
+  -webkit-transition: opacity 0.25s ease, transform 0.25s ease, max-width 0.3s ease;
+  transition: opacity 0.25s ease, transform 0.25s ease, max-width 0.3s ease;
+}
+
+.megafilter-chip.is-conditional .megafilter-chip-toggle,
+.megafilter-chip.is-conditional .megafilter-chip-clear {
+  visibility: hidden;
+}
+
+.megafilter-chip.is-conditional.is-visible {
+  opacity: 1;
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
+  pointer-events: auto;
+  max-width: 400px;
+}
+
+.megafilter-chip.is-conditional.is-visible .megafilter-chip-toggle,
+.megafilter-chip.is-conditional.is-visible .megafilter-chip-clear {
+  visibility: visible;
+}
+
+/* Menu dropdown du chip */
+.megafilter-chip-menu {
+  position: absolute;
+  top: calc(100% + 0.375rem);
+  left: 0;
+  z-index: 20;
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  padding: 0.375rem;
+  min-width: 220px;
+  max-width: 320px;
+  box-shadow: var(--shadow-card);
+}
+
+.megafilter-chip-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  color: var(--color-wood-dark);
+  cursor: pointer;
+  -webkit-transition: background 0.15s ease;
+  transition: background 0.15s ease;
+}
+
+.megafilter-chip-option:hover {
+  background: var(--color-warm);
+}
+
+.megafilter-chip-option.is-selected {
+  background: var(--color-warm);
+  color: var(--color-wood);
+  font-weight: 600;
+}
+
+/* ── Commentaire de Robin ── */
+.megafilter-commentary {
+  max-width: 900px;
+  margin: 1.25rem auto 0;
+  padding: 0 1rem;
+  text-align: center;
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--color-wood-dark);
+  opacity: 0;
+  -webkit-transform: translateY(8px);
+  transform: translateY(8px);
+  -webkit-transition: opacity 0.5s ease, transform 0.5s ease;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.megafilter-commentary.is-visible {
+  opacity: 1;
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
+}
+
+.megafilter-commentary strong {
+  font-weight: 700;
+  color: var(--color-wood);
+}
+
+.megafilter-commentary-sig {
+  display: inline-block;
+  margin-left: 0.375rem;
+  font-family: var(--font-display);
+  font-style: normal;
+  font-size: 1.125rem;
+  color: var(--color-wood);
+  line-height: 1;
+}
+
+/* ── Compteur résultats ── */
+.megafilter-results-bar {
+  max-width: 1200px;
+  margin: 1.25rem auto 0;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.megafilter-results-count {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--color-wood);
+  line-height: 1.1;
+}
+
+.megafilter-results-num {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: var(--color-wood-dark);
+  margin-right: 0.25rem;
+  letter-spacing: -0.01em;
+}
+
+.megafilter-results-suffix {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--color-wood);
+}
+
+.megafilter-reset {
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-wood);
+  background: transparent;
+  border: 1px solid var(--color-line);
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  cursor: pointer;
+  -webkit-transition: background 0.2s ease, border-color 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.megafilter-reset:hover,
+.megafilter-reset:focus-visible {
+  background: var(--color-warm);
+  border-color: var(--color-wood);
+  outline: none;
+}
+
+/* ── Modale plein écran "Décrire mon projet" ── */
+.megafilter-modal {
+  position: fixed;
+  inset: 0;
+  background: var(--color-cream);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  /* iOS safe area + clavier */
+  height: 100dvh;
+}
+
+.megafilter-modal[hidden] {
+  display: none;
+}
+
+.megafilter-modal-header {
+  flex-shrink: 0;
+  padding: 1rem 1.25rem;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.megafilter-modal-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-wood);
+}
+
+.megafilter-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--color-wood-dark);
+  padding: 0.25rem 0.5rem;
+}
+
+.megafilter-modal-close:hover {
+  color: var(--color-orange);
+}
+
+.megafilter-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1.5rem 1rem 5rem;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.megafilter-modal-start {
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+.megafilter-modal-headline {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  color: var(--color-wood);
+  font-weight: normal;
+  line-height: 1;
+  margin: 0 0 0.5rem;
+}
+
+.megafilter-modal-intro {
+  color: var(--color-wood-mid);
+  font-size: 0.9375rem;
+  margin: 0 0 1.5rem;
+}
+
+.megafilter-modal-input-wrap {
+  margin-bottom: 1.25rem;
+}
+
+.megafilter-modal-input {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border: 2px solid var(--color-line);
+  border-radius: 50px;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  background: var(--color-white);
+  color: var(--color-wood-dark);
+  -webkit-transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease;
+}
+
+.megafilter-modal-input:focus {
+  outline: none;
+  border-color: var(--color-wood);
+}
+
+.megafilter-modal-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.megafilter-modal-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.megafilter-modal-sug {
+  padding: 0.5rem 0.875rem;
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: 50px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  color: var(--color-wood);
+  cursor: pointer;
+  -webkit-transition: background 0.2s ease, border-color 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.megafilter-modal-sug:hover {
+  background: var(--color-warm);
+  border-color: var(--color-wood);
+}
+
+/* Chat dans la modale */
+.megafilter-modal-chat {
+  padding-top: 1rem;
+}
+
+.megafilter-chat-msg {
+  margin-bottom: 1rem;
+  max-width: 80%;
+}
+
+.megafilter-chat-msg--user {
+  margin-left: auto;
+}
+
+.megafilter-chat-bubble {
+  padding: 0.75rem 1.125rem;
+  border-radius: 18px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.megafilter-chat-msg--user .megafilter-chat-bubble {
+  background: var(--color-wood);
+  color: var(--color-white);
+  border-bottom-right-radius: 4px;
+}
+
+.megafilter-chat-msg--robin .megafilter-chat-bubble {
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  color: var(--color-wood-dark);
+  border-bottom-left-radius: 4px;
+}
+
+.megafilter-chat-filters {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-warm);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  color: var(--color-wood);
+}
+
+.megafilter-chat-filters strong {
+  color: var(--color-wood-dark);
+  font-weight: 600;
+}
+
+.megafilter-modal-return {
+  flex-shrink: 0;
+  padding: 1rem;
+  text-align: center;
+}
+
+.megafilter-modal-return-btn {
+  padding: 0.875rem 1.75rem;
+  background: var(--color-orange);
+  color: var(--color-white);
+  border: none;
+  border-radius: 50px;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-transition: background 0.2s ease;
+  transition: background 0.2s ease;
+}
+
+.megafilter-modal-return-btn:hover {
+  background: var(--color-orange-hover);
+}
+
+.megafilter-modal-footer {
+  flex-shrink: 0;
+  padding: 1rem;
+  background: var(--color-white);
+  border-top: 1px solid var(--color-line);
+  display: flex;
+  gap: 0.75rem;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.megafilter-modal-input--footer {
+  flex: 1;
+  padding: 0.75rem 1rem;
+}
+
+.megafilter-modal-send {
+  padding: 0 1.5rem;
+  background: var(--color-orange);
+  color: var(--color-white);
+  border: none;
+  border-radius: 50px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.megafilter-modal-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Desktop ≥ 768px ── */
+@media (min-width: 768px) {
+  .megafilter-bar {
+    margin-top: 2rem;
+    padding: 0 1.25rem;
+  }
+
+  .megafilter-bar-inner {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .megafilter-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.875rem;
+  }
+
+  .megafilter-ai-btn {
+    width: auto;
+  }
+
+  .megafilter-chips {
+    gap: 0.625rem;
+  }
+
+  .megafilter-chip-toggle {
+    font-size: 0.8125rem;
+    padding: 0.5625rem 1rem;
+  }
+
+  .megafilter-commentary {
+    font-size: 1.0625rem;
+  }
+
+  .megafilter-commentary-sig {
+    font-size: 1.375rem;
+  }
+
+  .megafilter-results-bar {
+    margin-top: 1.75rem;
+    padding: 0 1.25rem;
+  }
+
+  .megafilter-results-count,
+  .megafilter-results-suffix {
+    font-size: 2rem;
+  }
+
+  .megafilter-results-num {
+    font-size: 1.375rem;
+  }
+
+  .megafilter-modal-headline {
+    font-size: 3.5rem;
   }
 }

@@ -19,8 +19,6 @@
       size: 'all'
     },
 
-    _robinProductIds: null,
-
     searchQuery: '',
 
     init: function() {
@@ -37,11 +35,6 @@
         btn.addEventListener('click', (e) => {
           e.preventDefault();
           const filter = btn.dataset.filter;
-
-          // Désactiver le filtre Robin si actif
-          this._robinProductIds = null;
-          var robinRow = document.getElementById('filter-row-robin');
-          if (robinRow) robinRow.classList.remove('is-active');
 
           // Update active state
           filterContainer.querySelector('.filter-btn.active')?.classList.remove('active');
@@ -64,9 +57,6 @@
 
       // Advanced dropdown filters
       this.initAdvancedFilters();
-
-      // "Ma sélection" — bouton Robin si projet en cours
-      try { this.initRobinSelection(filterContainer); } catch(e) { /* ne jamais casser les filtres */ }
 
       // Appliquer le filtre initial (masque accessoires par défaut)
       this.applyFilters();
@@ -99,11 +89,6 @@
           option.classList.add('active');
           label.textContent = option.textContent;
           dropdown.classList.remove('open');
-
-          // Désactiver Robin si actif
-          self._robinProductIds = null;
-          var robinRow = document.getElementById('filter-row-robin');
-          if (robinRow) robinRow.classList.remove('is-active');
 
           // Sync pills desktop
           var activeBtn = filterContainer.querySelector('.filter-btn.active');
@@ -142,137 +127,6 @@
       });
     },
 
-    initRobinSelection: function(filterContainer) {
-      if (!filterContainer) return;
-
-      // Vérifier si le visiteur a un projet en cours
-      var prefs = {};
-      try { prefs = JSON.parse(localStorage.getItem('sapiGuidePrefs') || '{}'); } catch(e) {}
-      if (!prefs.answers || !Object.keys(prefs.answers).length) return;
-
-      // Conteneur ligne 3 — bandeau personnalisé
-      var robinRow = document.getElementById('filter-row-robin');
-      if (!robinRow) return;
-
-      // Icône crayon
-      var iconSvg = '<svg class="robin-selection-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>';
-
-      var isMobile = window.innerWidth <= 768;
-
-      if (isMobile) {
-        // Mobile : version simplifiée sans chips ni bouton modifier
-        robinRow.innerHTML =
-          iconSvg +
-          '<span class="robin-selection-label">Voir la s\u00e9lection pour mon projet</span>';
-      } else {
-        // Desktop : version complète avec chips et bouton modifier
-        var labels = prefs.labels || {};
-        var chipLabels = [];
-        var labelOrder = ['piece', 'taille', 'taille_escalier', 'sortie', 'hauteur', 'table', 'style'];
-        labelOrder.forEach(function(key) {
-          if (labels[key]) chipLabels.push(labels[key]);
-        });
-
-        var chipsHtml = '';
-        chipLabels.forEach(function(label, i) {
-          if (i > 0) chipsHtml += '<span class="robin-selection-chip-sep" aria-hidden="true">\u00b7</span>';
-          chipsHtml += '<span class="robin-selection-chip">' + label + '</span>';
-        });
-
-        robinRow.innerHTML =
-          iconSvg +
-          '<span class="robin-selection-label">La s\u00e9lection pour mon projet</span>' +
-          '<div class="robin-selection-chips">' + chipsHtml + '</div>' +
-          '<button type="button" class="robin-selection-btn" id="robin-selection-btn">Modifier le projet</button>';
-      }
-
-      robinRow.style.display = 'flex';
-
-      var editBtn = document.getElementById('robin-selection-btn');
-      var self = this;
-
-      // Clic sur le bandeau — active/désactive le filtre
-      robinRow.addEventListener('click', function(e) {
-        // Ne pas filtrer si clic sur le bouton "Modifier le projet" (desktop)
-        if (editBtn && (e.target === editBtn || editBtn.contains(e.target))) return;
-
-        var isActive = robinRow.classList.contains('is-active');
-
-        if (isActive) {
-          // Désactiver → revenir à "tout"
-          robinRow.classList.remove('is-active');
-          var allBtn = filterContainer.querySelector('.filter-btn[data-filter="all"]');
-          if (allBtn) {
-            filterContainer.querySelectorAll('.filter-btn.active').forEach(function(b) { b.classList.remove('active'); });
-            allBtn.classList.add('active');
-          }
-          self._syncMobileDropdown('all');
-          self.filters.category = 'all';
-          self._robinProductIds = null;
-          self.applyFilters();
-        } else {
-          // Activer Ma sélection
-          filterContainer.querySelectorAll('.filter-btn.active').forEach(function(b) { b.classList.remove('active'); });
-          self._syncMobileDropdown(null);
-          robinRow.classList.add('is-active');
-          self.fetchRobinSelection(prefs.answers);
-        }
-      });
-
-      // Clic sur "Modifier le projet" — desktop uniquement
-      if (editBtn) {
-        editBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          if (window.sapiRobinConseiller && typeof window.openRobinModal === 'function') {
-            window.openRobinModal('bandeau');
-          } else {
-            var bandeau = document.getElementById('robin-bandeau');
-            if (bandeau) bandeau.click();
-          }
-        });
-      }
-
-      // Auto-activer si URL contient robin_selection=1 (différé après init)
-      var params = new URLSearchParams(window.location.search);
-      if (params.get('robin_selection') === '1') {
-        window.history.replaceState({}, '', window.location.pathname);
-        setTimeout(function() { robinRow.click(); }, 50);
-      }
-    },
-
-    fetchRobinSelection: function(answers) {
-      var self = this;
-      var nonce = '';
-      if (window.sapiRobinConseiller) nonce = window.sapiRobinConseiller.nonce;
-      else if (window.sapiMonProjet) nonce = window.sapiMonProjet.nonce;
-
-      var fd = new FormData();
-      fd.append('action', 'sapi_robin_filter_products');
-      fd.append('nonce', nonce);
-      fd.append('answers', JSON.stringify(answers));
-
-      var xhr = new XMLHttpRequest();
-      xhr.open('POST', (window.sapiRobinConseiller || window.sapiMonProjet || {}).ajaxUrl || '/wp-admin/admin-ajax.php', true);
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState !== 4) return;
-        if (xhr.status === 200) {
-          try {
-            var resp = JSON.parse(xhr.responseText);
-            if (resp.success && resp.data && resp.data.product_ids) {
-              self._robinProductIds = resp.data.product_ids.map(String);
-              self.applyFilters();
-              return;
-            }
-          } catch(e) {}
-        }
-        // Erreur — désactiver le filtre
-        self._robinProductIds = null;
-        self.applyFilters();
-      };
-      xhr.send(fd);
-    },
-
     initSearch: function() {
       const searchInput = document.getElementById('product-search-input');
       const clearBtn = document.querySelector('.search-clear');
@@ -293,10 +147,6 @@
             if (allBtn) allBtn.classList.add('active');
           }
           this._syncMobileDropdown('all');
-          // Désactiver Robin si actif
-          this._robinProductIds = null;
-          var robinRow = document.getElementById('filter-row-robin');
-          if (robinRow) robinRow.classList.remove('is-active');
         }
 
         this.applyFilters();
@@ -506,13 +356,10 @@
         const matchesSize = this.filters.size === 'all' || this.matchesSize(size, this.filters.size);
         const matchesSearch = !this.searchQuery || name.includes(this.searchQuery);
 
-        let shouldShow;
-        if (this._robinProductIds) {
-          // Filtre "Ma sélection" actif → seuls les IDs filtrés par Robin
-          shouldShow = this._robinProductIds.includes(slide.dataset.id);
-        } else {
-          shouldShow = matchesCategory && matchesPrice && matchesWood && matchesSize && matchesSearch;
-        }
+        // Méga-filtre intelligent (F1a) — chips de questions Robin sur /mes-creations/
+        const matchesMega = !window.sapiMegaFilter || window.sapiMegaFilter.cardMatches(slide);
+
+        const shouldShow = matchesCategory && matchesPrice && matchesWood && matchesSize && matchesSearch && matchesMega;
 
         // Use both class AND inline styles to guarantee hiding
         if (shouldShow) {
@@ -528,7 +375,8 @@
       // Show/hide individual text cards + recap card based on filters
       var textCards = document.querySelectorAll('.product-text-card');
       var recapCard = document.querySelector('.why-sapi-recap');
-      var isFiltered = this.filters.category !== 'all' || this.searchQuery || this._robinProductIds;
+      var megaActive = !!(window.sapiMegaFilter && window.sapiMegaFilter.hasAnyAnswer && window.sapiMegaFilter.hasAnyAnswer());
+      var isFiltered = this.filters.category !== 'all' || this.searchQuery || megaActive;
       textCards.forEach(function(card) {
         if (isFiltered) {
           card.classList.add('is-filtered-out');
@@ -563,7 +411,17 @@
         productsCarousel.updateCarousel();
         productsCarousel.resetAutoScroll();
       }
+
+      // Méga-filtre : met à jour le compteur affiché
+      if (window.sapiMegaFilter && typeof window.sapiMegaFilter.updateResultsCount === 'function') {
+        window.sapiMegaFilter.updateResultsCount(visibleCount);
+      }
     }
+  };
+
+  // Hook public pour le méga-filtre — re-trigger applyFilters depuis l'extérieur
+  window.sapiShopRefilter = function() {
+    productFilters.applyFilters();
   };
 
   // =============================================
