@@ -24799,7 +24799,6 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .megafilter-chip.has-value .megafilter-chip-toggle {
   border-color: var(--color-wood);
   background: var(--color-warm);
-  padding-right: 1.875rem;
 }
 
 .megafilter-chip-value {
@@ -24810,31 +24809,18 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .megafilter-chip-arrow {
   opacity: 0.6;
   margin-left: 0.125rem;
+  -webkit-transition: transform 0.2s ease, opacity 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-.megafilter-chip-clear {
-  position: absolute;
-  right: 0.5rem;
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-  transform: translateY(-50%);
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--color-wood);
-  color: var(--color-white);
-  border: none;
-  font-size: 0.75rem;
-  line-height: 1;
-  cursor: pointer;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.megafilter-chip.has-value .megafilter-chip-arrow {
+  opacity: 0.9;
+  color: var(--color-wood);
 }
 
-.megafilter-chip-clear:hover {
-  background: var(--color-wood-dark);
+.megafilter-chip.is-open .megafilter-chip-arrow {
+  -webkit-transform: rotate(180deg);
+  transform: rotate(180deg);
 }
 
 /* Chips conditionnels : cachés par défaut, fade-in à l'apparition */
@@ -24850,8 +24836,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   transition: opacity 0.25s ease, transform 0.25s ease, max-width 0.3s ease;
 }
 
-.megafilter-chip.is-conditional .megafilter-chip-toggle,
-.megafilter-chip.is-conditional .megafilter-chip-clear {
+.megafilter-chip.is-conditional .megafilter-chip-toggle {
   visibility: hidden;
 }
 
@@ -24863,8 +24848,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   max-width: 400px;
 }
 
-.megafilter-chip.is-conditional.is-visible .megafilter-chip-toggle,
-.megafilter-chip.is-conditional.is-visible .megafilter-chip-clear {
+.megafilter-chip.is-conditional.is-visible .megafilter-chip-toggle {
   visibility: visible;
 }
 
@@ -24907,6 +24891,19 @@ body.woocommerce-cart div.woocommerce-wrapper {
   background: var(--color-warm);
   color: var(--color-wood);
   font-weight: 600;
+  position: relative;
+  padding-right: 1.875rem;
+}
+
+.megafilter-chip-option.is-selected::after {
+  content: "✓";
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
+  font-size: 0.875rem;
+  color: var(--color-wood);
 }
 
 /* ── Commentaire de Robin ── */

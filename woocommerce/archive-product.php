@@ -238,7 +238,6 @@ $megafilter_chip_labels = [
               <path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
-          <button type="button" class="megafilter-chip-clear" hidden aria-label="<?php esc_attr_e('Effacer ce filtre', 'theme-sapi-maison'); ?>">×</button>
           <div class="megafilter-chip-menu" role="listbox" hidden>
             <?php foreach ($step['choices'] as $choice) : ?>
               <button type="button" class="megafilter-chip-option" role="option" data-value="<?php echo esc_attr($choice['slug']); ?>" data-label="<?php echo esc_attr($choice['label']); ?>">

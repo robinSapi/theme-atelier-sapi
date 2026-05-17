@@ -204,19 +204,17 @@
 
       var labelEl = chip.querySelector('.megafilter-chip-label');
       var valueEl = chip.querySelector('.megafilter-chip-value');
-      var clearBtn = chip.querySelector('.megafilter-chip-clear');
       var arrow = chip.querySelector('.megafilter-chip-arrow');
 
       if (hasValue) {
         // Chip répondu : on affiche uniquement la valeur (la question disparaît)
+        // Le chevron reste : il signale qu'on peut toujours changer la réponse.
         var displayLabel = state.labels[sid] || state.answers[sid];
         if (valueEl) {
           valueEl.textContent = displayLabel;
           valueEl.hidden = false;
         }
         if (labelEl) labelEl.hidden = true;
-        if (clearBtn) clearBtn.hidden = false;
-        if (arrow) arrow.style.display = 'none';
       } else {
         // Chip vide : on affiche la question (label) + flèche
         if (valueEl) {
@@ -227,8 +225,6 @@
           labelEl.textContent = getChipLabel(sid);
           labelEl.hidden = false;
         }
-        if (clearBtn) clearBtn.hidden = true;
-        if (arrow) arrow.style.display = '';
       }
 
       // Mettre à jour les options du menu (highlight sélection courante)
@@ -554,19 +550,18 @@
       els.chipsContainer.addEventListener('click', function (e) {
         var toggle = e.target.closest('.megafilter-chip-toggle');
         var option = e.target.closest('.megafilter-chip-option');
-        var clearBtn = e.target.closest('.megafilter-chip-clear');
-
-        if (clearBtn) {
-          e.stopPropagation();
-          var clearedChip = clearBtn.closest('.megafilter-chip');
-          if (clearedChip) clearAnswer(clearedChip.dataset.step);
-          return;
-        }
 
         if (option) {
           var chipFromOpt = option.closest('.megafilter-chip');
           if (!chipFromOpt) return;
-          setAnswer(chipFromOpt.dataset.step, option.dataset.value, option.dataset.label || option.textContent.trim());
+          var sid = chipFromOpt.dataset.step;
+          var newValue = option.dataset.value;
+          // Toggle : re-cliquer sur l'option déjà sélectionnée la décoche
+          if (state.answers[sid] === newValue) {
+            clearAnswer(sid);
+          } else {
+            setAnswer(sid, newValue, option.dataset.label || option.textContent.trim());
+          }
           closeAllMenus();
           return;
         }
