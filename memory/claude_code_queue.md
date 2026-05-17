@@ -174,15 +174,56 @@ Ce mockup capture le comportement attendu en interaction. **Mais ses classes CSS
 
 ---
 
-### ✅ Retour Claude Code (17 mai 2026)
+### ✅ Retour Claude Code — F1a livrée + 2 itérations Robin (17 mai 2026)
 
-**Statut :** ✅ Implémentation terminée, branche `feature/mega-filtre-mes-creations` créée depuis master propre, mergée en fast-forward via `--no-ff` dans `test-theme-sapi-maison`, poussée → auto-deploy GitHub Actions vers `test.atelier-sapi.fr` en cours.
+**Statut :** ✅ F1a complète sur `test.atelier-sapi.fr/mes-creations/`. 3 commits successifs sur `test-theme-sapi-maison` après 3 retours de Robin (compteur, position du Tout effacer, design des chips, croix → chevron). En attente de validation Robin avant merge master.
 
-**Commits :**
+---
+
+#### 🔁 Itérations Robin — Journal de design (17 mai 2026)
+
+| Commit | Date | Retour Robin | Action |
+|--------|------|--------------|--------|
+| `47683c1` | 17 mai initial | Spec Cowork | Implémentation complète F1a v1 (compteur résultats + Tout effacer en barre séparée + chips à labels courts type "Pièce ▾") |
+| `59972c6` | 17 mai | (merge) | Merge `feature/mega-filtre-mes-creations` → `test-theme-sapi-maison` |
+| `a38cf2f` | 17 mai | (retour Cowork) | Mise à jour `claude_code_queue.md` avec le retour technique |
+| `4a78cdf` | 17 mai v2 | (1) "Le texte 'X correspondent à votre projet' est inutile, supprime." (2) "Le bouton 'Tout effacer' est mal placé, il devrait être dans la card." (3) "On ne comprend pas qu'on peut sélectionner des réponses en cliquant sur les pills, il faut un autre design." | 1. `.megafilter-results-bar` entière supprimée (PHP + JS + CSS). 2. `Tout effacer` déplacé dans un footer interne `.megafilter-footer` séparé par un border-top discret, style en lien souligné. 3. **Option B retenue** : chips deviennent des questions courtes (`Pour quelle pièce ?`, `Quelle taille ?`, etc.) + ligne d'intro sous le titre ("Réponds aux questions ci-dessous pour voir les modèles qui te correspondent."). Chip répondu n'affiche plus que la valeur. |
+| `46e1faf` | 17 mai v3 | "Il faudrait remplacer la croix dans chaque pill par un chevron qui fasse comprendre qu'il y a des réponses possibles" | Croix `×` supprimée du markup, JS, CSS. Le chevron `▾` reste en permanence (vide ou rempli), pivote à 180° quand le menu est ouvert. Comportement **toggle dans le menu** : re-cliquer sur l'option déjà cochée la décoche (remplace fonctionnellement la croix). Option sélectionnée marquée par un `✓` à droite + fond crème dans le menu. |
+
+---
+
+#### 🎨 État final de l'UI (après v3)
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│ AFFINER AVEC ROBIN                       [✎ Décrire précisé…] │
+│ Réponds aux questions ci-dessous pour voir les modèles qui    │
+│ te correspondent.                                              │
+│                                                                │
+│ [Pour quelle pièce ? ▾]  [Quelle taille ? ▾]  [Quel style ?▾]│
+│ [Quelle sortie ? ▾]  …                                         │
+│                                                                │
+│ ──────────────────────────────────────────────────────────── │
+│                                              Tout effacer      │
+└────────────────────────────────────────────────────────────────┘
+
+Sous la card, commentaire débouncé 2,5s :
+   Pour ton **salon** confortable, j'ai sélectionné… — Robin
+```
+
+Une fois une chip répondue, elle affiche `Salon ▾` (juste la valeur + chevron). Re-cliquer ouvre le menu, où l'option `Salon / Salle à manger` est marquée par un `✓`. Re-cliquer sur cette option la décoche.
+
+---
+
+#### 📋 Sommaire des commits sur `test-theme-sapi-maison`
+
 | Commit | Sujet |
 |--------|-------|
-| `47683c1` | F1a frontend complet (chips + JS + CSS + modale + cleanup ancien bandeau) |
+| `47683c1` | F1a v1 — frontend complet (chips + JS + CSS + modale + cleanup ancien bandeau) |
 | `59972c6` | Merge `feature/mega-filtre-mes-creations` → `test-theme-sapi-maison` |
+| `a38cf2f` | Retour Cowork v1 dans la queue |
+| `4a78cdf` | F1a v2 — itérations Robin : suppression compteur, Tout effacer dans la card, chips en mode questions |
+| `46e1faf` | F1a v3 — chips : croix remplacée par chevron + toggle dans le menu |
 
 **Volumétrie :** 5 fichiers modifiés, +1483/-278 lignes. Nouveau `assets/mega-filtre.js` (663 lignes).
 
@@ -264,6 +305,16 @@ Ce mockup capture le comportement attendu en interaction. **Mais ses classes CSS
 5. **Mégafiltre + recherche texte** : ils cohabitent. Si l'utilisateur tape dans la barre de recherche, ça filtre EN PLUS du méga-filtre (AND). La recherche n'est PAS reset par "Tout effacer" (comme tu as confirmé).
 
 6. **Commentaire de Robin** : 5 phrases-modèles selon la combinaison `piece × taille × style` (avec fallbacks). C'est volontairement simple en F1a — l'enrichissement viendra avec l'IA en F1b.
+
+---
+
+#### 📝 À mettre à jour côté Cowork (memories / notes)
+
+- **`memory/design_system.md`** — section page Mes créations : noter le nouveau composant `.megafilter-*` (bar + chips + commentaire + modale), le bandeau "Ma sélection" supprimé, et la convention "chips = questions courtes en mode interrogatif" pour les futurs composants de filtrage Sapi.
+- **`memory/project_robin_conseiller_v2.md`** (ou créer `project_robin_v3_megafilter.md`) — acter le pivot stratégique : modale-tunnel ↓ taux de complétion (55% mais 0 contact) → méga-filtre intégré, qui devient la pierre angulaire de la découverte produit. Le Conseiller V2 (template-robin-conseil.php + robin-conseiller.js) reste actif partout ailleurs jusqu'à F1c.
+- **Tâches suivantes à créer dans `tasks_globales.md`** :
+  - **F1b** — Intégration IA : endpoint AJAX `traduire_projet_to_filtres` (Claude API → filtres méga-filtre), endpoint conversationnel pour la modale, câblage réel du bouton "Envoyer".
+  - **F1c** — Cleanup : suppression `template-robin-conseil.php`, `robin-conseiller.js`, pill "Démarrer mon projet" du bandeau réassurance, redirection des cards-pièces de la home → `/mes-creations/?piece=X`, audit des références au localStorage `sapiGuidePrefs`.
 
 ---
 
