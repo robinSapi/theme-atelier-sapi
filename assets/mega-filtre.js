@@ -208,20 +208,25 @@
       var arrow = chip.querySelector('.megafilter-chip-arrow');
 
       if (hasValue) {
+        // Chip répondu : on affiche uniquement la valeur (la question disparaît)
         var displayLabel = state.labels[sid] || state.answers[sid];
         if (valueEl) {
           valueEl.textContent = displayLabel;
           valueEl.hidden = false;
         }
-        if (labelEl) labelEl.textContent = getChipLabel(sid) + ' :';
+        if (labelEl) labelEl.hidden = true;
         if (clearBtn) clearBtn.hidden = false;
         if (arrow) arrow.style.display = 'none';
       } else {
+        // Chip vide : on affiche la question (label) + flèche
         if (valueEl) {
           valueEl.textContent = '';
           valueEl.hidden = true;
         }
-        if (labelEl) labelEl.textContent = getChipLabel(sid);
+        if (labelEl) {
+          labelEl.textContent = getChipLabel(sid);
+          labelEl.hidden = false;
+        }
         if (clearBtn) clearBtn.hidden = true;
         if (arrow) arrow.style.display = '';
       }
@@ -305,33 +310,21 @@
   //  Application des filtres à la grille
   // ═══════════════════════════════════════════════════════════
   function applyFiltersToGrid() {
+    // Affiche / masque le footer "Tout effacer" selon qu'au moins un chip est répondu
+    if (els.footer) els.footer.hidden = !hasAnyAnswer();
+
     // Délègue à shop.js pour appliquer le pipeline complet (catégorie + recherche + méga)
     if (typeof window.sapiShopRefilter === 'function') {
       window.sapiShopRefilter();
-    } else {
-      // Fallback autonome (cas où shop.js ne serait pas chargé)
-      var cards = document.querySelectorAll('.product-card-cinetique');
-      var visibleCount = 0;
-      cards.forEach(function (card) {
-        var show = cardMatches(card);
-        card.style.display = show ? '' : 'none';
-        card.classList.toggle('is-filtered-out', !show);
-        if (show) visibleCount++;
-      });
-      updateResultsCount(visibleCount);
+      return;
     }
-  }
-
-  function updateResultsCount(count) {
-    if (!els.resultsBar) return;
-    var anyAnswer = hasAnyAnswer();
-    els.resultsBar.hidden = !anyAnswer;
-    if (els.resultsNum) els.resultsNum.textContent = count;
-    if (els.resultsSuffix) {
-      els.resultsSuffix.textContent = count === 1
-        ? ' correspond à ton projet'
-        : ' correspondent à ton projet';
-    }
+    // Fallback autonome (cas où shop.js ne serait pas chargé)
+    var cards = document.querySelectorAll('.product-card-cinetique');
+    cards.forEach(function (card) {
+      var show = cardMatches(card);
+      card.style.display = show ? '' : 'none';
+      card.classList.toggle('is-filtered-out', !show);
+    });
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -631,13 +624,11 @@
     els.chipsContainer = document.getElementById('megafilter-chips');
     if (!els.chipsContainer) return; // pas sur la page concernée
 
-    els.commentary    = document.getElementById('megafilter-commentary');
-    els.resultsBar    = document.getElementById('megafilter-results-bar');
-    els.resultsNum    = els.resultsBar ? els.resultsBar.querySelector('.megafilter-results-num') : null;
-    els.resultsSuffix = els.resultsBar ? els.resultsBar.querySelector('.megafilter-results-suffix') : null;
-    els.reset         = document.getElementById('megafilter-reset');
-    els.openAiBtn     = document.getElementById('megafilter-open-ai');
-    els.modal         = document.getElementById('megafilter-modal');
+    els.commentary = document.getElementById('megafilter-commentary');
+    els.footer     = document.getElementById('megafilter-footer');
+    els.reset      = document.getElementById('megafilter-reset');
+    els.openAiBtn  = document.getElementById('megafilter-open-ai');
+    els.modal      = document.getElementById('megafilter-modal');
 
     bindEvents();
     readQueryParams();
@@ -652,7 +643,6 @@
   window.sapiMegaFilter = {
     cardMatches: cardMatches,
     hasAnyAnswer: hasAnyAnswer,
-    updateResultsCount: updateResultsCount,
   };
 
   if (document.readyState === 'loading') {

@@ -198,20 +198,23 @@ sapi_robin_conseil_card( 'selection' );
 <?php
 $megafilter_steps = sapi_guide_get_steps();
 $megafilter_chip_labels = [
-  'piece'           => __('Pièce', 'theme-sapi-maison'),
-  'taille'          => __('Taille', 'theme-sapi-maison'),
-  'taille_escalier' => __('Escalier', 'theme-sapi-maison'),
-  'eclairage'       => __('Éclairage', 'theme-sapi-maison'),
-  'sortie'          => __('Sortie', 'theme-sapi-maison'),
-  'hauteur'         => __('Hauteur', 'theme-sapi-maison'),
-  'table'           => __('Au-dessus', 'theme-sapi-maison'),
-  'style'           => __('Style', 'theme-sapi-maison'),
+  'piece'           => __('Pour quelle pièce ?', 'theme-sapi-maison'),
+  'taille'          => __('Quelle taille ?', 'theme-sapi-maison'),
+  'taille_escalier' => __('Quel escalier ?', 'theme-sapi-maison'),
+  'eclairage'       => __('Éclairage principal ?', 'theme-sapi-maison'),
+  'sortie'          => __('Quelle sortie ?', 'theme-sapi-maison'),
+  'hauteur'         => __('Quelle hauteur ?', 'theme-sapi-maison'),
+  'table'           => __('Au-dessus d\'une table ?', 'theme-sapi-maison'),
+  'style'           => __('Quel style ?', 'theme-sapi-maison'),
 ];
 ?>
 <section class="megafilter-bar" id="megafilter-bar" aria-label="<?php esc_attr_e('Affiner les créations', 'theme-sapi-maison'); ?>">
   <div class="megafilter-bar-inner">
     <div class="megafilter-header">
-      <h2 class="megafilter-title"><?php esc_html_e('Affiner avec Robin', 'theme-sapi-maison'); ?></h2>
+      <div class="megafilter-header-text">
+        <h2 class="megafilter-title"><?php esc_html_e('Affiner avec Robin', 'theme-sapi-maison'); ?></h2>
+        <p class="megafilter-intro"><?php esc_html_e('Réponds aux questions ci-dessous pour voir les modèles qui te correspondent.', 'theme-sapi-maison'); ?></p>
+      </div>
       <button type="button" class="megafilter-ai-btn" id="megafilter-open-ai">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
@@ -246,20 +249,16 @@ $megafilter_chip_labels = [
         </div>
       <?php endforeach; ?>
     </div>
+
+    <div class="megafilter-footer" id="megafilter-footer" hidden>
+      <button type="button" class="megafilter-reset" id="megafilter-reset">
+        <?php esc_html_e('Tout effacer', 'theme-sapi-maison'); ?>
+      </button>
+    </div>
   </div>
 
   <p class="megafilter-commentary" id="megafilter-commentary" aria-live="polite" hidden></p>
 </section>
-
-<div class="megafilter-results-bar" id="megafilter-results-bar" hidden>
-  <p class="megafilter-results-count" aria-live="polite">
-    <strong class="megafilter-results-num">0</strong>
-    <span class="megafilter-results-suffix"><?php esc_html_e('correspondent à ton projet', 'theme-sapi-maison'); ?></span>
-  </p>
-  <button type="button" class="megafilter-reset" id="megafilter-reset">
-    <?php esc_html_e('Tout effacer', 'theme-sapi-maison'); ?>
-  </button>
-</div>
 
 <!-- Products Grid — grille 2 colonnes photos ambiance -->
 <section class="shop-products" id="shop-products">

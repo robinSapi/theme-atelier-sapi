@@ -411,11 +411,6 @@
         productsCarousel.updateCarousel();
         productsCarousel.resetAutoScroll();
       }
-
-      // Méga-filtre : met à jour le compteur affiché
-      if (window.sapiMegaFilter && typeof window.sapiMegaFilter.updateResultsCount === 'function') {
-        window.sapiMegaFilter.updateResultsCount(visibleCount);
-      }
     }
   };
 
