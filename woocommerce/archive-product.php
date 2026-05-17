@@ -190,11 +190,75 @@ sapi_robin_conseil_card( 'selection' );
       <?php endforeach; ?>
     </div>
 
-    <!-- Ligne 3 : Ma sélection personnalisée (injecté par shop.js si projet en cours) -->
-    <div class="filter-row filter-row--robin" id="filter-row-robin" style="display: none;"></div>
-
   </nav>
 
+</div>
+
+<!-- ── Méga-filtre intelligent (F1a) ── -->
+<?php
+$megafilter_steps = sapi_guide_get_steps();
+$megafilter_chip_labels = [
+  'piece'           => __('Pièce', 'theme-sapi-maison'),
+  'taille'          => __('Taille', 'theme-sapi-maison'),
+  'taille_escalier' => __('Escalier', 'theme-sapi-maison'),
+  'eclairage'       => __('Éclairage', 'theme-sapi-maison'),
+  'sortie'          => __('Sortie', 'theme-sapi-maison'),
+  'hauteur'         => __('Hauteur', 'theme-sapi-maison'),
+  'table'           => __('Au-dessus', 'theme-sapi-maison'),
+  'style'           => __('Style', 'theme-sapi-maison'),
+];
+?>
+<section class="megafilter-bar" id="megafilter-bar" aria-label="<?php esc_attr_e('Affiner les créations', 'theme-sapi-maison'); ?>">
+  <div class="megafilter-bar-inner">
+    <div class="megafilter-header">
+      <h2 class="megafilter-title"><?php esc_html_e('Affiner avec Robin', 'theme-sapi-maison'); ?></h2>
+      <button type="button" class="megafilter-ai-btn" id="megafilter-open-ai">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+          <path d="m15 5 4 4"/>
+        </svg>
+        <span><?php esc_html_e('Décrire précisément mon projet', 'theme-sapi-maison'); ?></span>
+      </button>
+    </div>
+
+    <div class="megafilter-chips" id="megafilter-chips" role="group" aria-label="<?php esc_attr_e('Filtres du projet', 'theme-sapi-maison'); ?>">
+      <?php foreach ($megafilter_steps as $step) :
+        $sid = $step['id'];
+        $label = isset($megafilter_chip_labels[$sid]) ? $megafilter_chip_labels[$sid] : ucfirst($sid);
+        $is_always = ($step['visibility'] === 'always');
+      ?>
+        <div class="megafilter-chip<?php echo $is_always ? '' : ' is-conditional'; ?>" data-step="<?php echo esc_attr($sid); ?>">
+          <button type="button" class="megafilter-chip-toggle" aria-haspopup="listbox" aria-expanded="false">
+            <span class="megafilter-chip-label"><?php echo esc_html($label); ?></span>
+            <span class="megafilter-chip-value" hidden></span>
+            <svg class="megafilter-chip-arrow" width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button type="button" class="megafilter-chip-clear" hidden aria-label="<?php esc_attr_e('Effacer ce filtre', 'theme-sapi-maison'); ?>">×</button>
+          <div class="megafilter-chip-menu" role="listbox" hidden>
+            <?php foreach ($step['choices'] as $choice) : ?>
+              <button type="button" class="megafilter-chip-option" role="option" data-value="<?php echo esc_attr($choice['slug']); ?>" data-label="<?php echo esc_attr($choice['label']); ?>">
+                <?php echo esc_html($choice['label']); ?>
+              </button>
+            <?php endforeach; ?>
+          </div>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  </div>
+
+  <p class="megafilter-commentary" id="megafilter-commentary" aria-live="polite" hidden></p>
+</section>
+
+<div class="megafilter-results-bar" id="megafilter-results-bar" hidden>
+  <p class="megafilter-results-count" aria-live="polite">
+    <strong class="megafilter-results-num">0</strong>
+    <span class="megafilter-results-suffix"><?php esc_html_e('correspondent à ton projet', 'theme-sapi-maison'); ?></span>
+  </p>
+  <button type="button" class="megafilter-reset" id="megafilter-reset">
+    <?php esc_html_e('Tout effacer', 'theme-sapi-maison'); ?>
+  </button>
 </div>
 
 <!-- Products Grid — grille 2 colonnes photos ambiance -->
@@ -290,6 +354,20 @@ sapi_robin_conseil_card( 'selection' );
           if (!empty($m)) $size_dimension = (int) $m[0];
         }
 
+        // Nombre de variations de taille (utile au filtrage taille=spacieuse)
+        $taille_variations_count = count($taille_terms);
+
+        // Méga-filtre — format luminaire (boule/horizontal/vertical) et type d'ampoule
+        $format_terms = wc_get_product_terms($product_id, 'pa_format');
+        $format_slugs = [];
+        foreach ($format_terms as $t) { $format_slugs[] = $t->slug; }
+        $format_attr = implode(' ', $format_slugs);
+
+        $ampoule_terms = wc_get_product_terms($product_id, 'pa_type-ampoule');
+        $ampoule_slugs = [];
+        foreach ($ampoule_terms as $t) { $ampoule_slugs[] = $t->slug; }
+        $ampoule_attr = implode(' ', $ampoule_slugs);
+
         // Photo ambiance ACF (sauf accessoires → photo produit WooCommerce)
         $is_accessoire = in_array('accessoires', $cat_slugs);
         $amb_photo_ids = !$is_accessoire ? sapi_get_product_photo_ids($product_id, 'ambiance', 1) : [];
@@ -309,6 +387,9 @@ sapi_robin_conseil_card( 'selection' );
         $data_attrs .= ' data-price="' . esc_attr($filter_price) . '"';
         $data_attrs .= $wood_essence ? ' data-wood="' . esc_attr(sanitize_title($wood_essence)) . '"' : '';
         $data_attrs .= $size_dimension > 0 ? ' data-size="' . esc_attr($size_dimension) . '"' : '';
+        $data_attrs .= $format_attr ? ' data-format-luminaire="' . esc_attr($format_attr) . '"' : '';
+        $data_attrs .= $ampoule_attr ? ' data-type-ampoule="' . esc_attr($ampoule_attr) . '"' : '';
+        $data_attrs .= ' data-size-variations="' . esc_attr($taille_variations_count) . '"';
       ?>
         <?php
           // Catégorie affichée (singulier)
@@ -468,6 +549,64 @@ sapi_robin_conseil_card( 'selection' );
     </a>
   </div>
 </section>
+
+<!-- ── Modale "Décrire mon projet" (F1a — UI shell uniquement, IA en F1b) ── -->
+<div class="megafilter-modal" id="megafilter-modal" role="dialog" aria-modal="true" aria-labelledby="megafilter-modal-title" hidden>
+  <div class="megafilter-modal-header">
+    <span class="megafilter-modal-title" id="megafilter-modal-title"><?php esc_html_e('Décrire mon projet', 'theme-sapi-maison'); ?></span>
+    <button type="button" class="megafilter-modal-close" id="megafilter-modal-close" aria-label="<?php esc_attr_e('Fermer', 'theme-sapi-maison'); ?>">×</button>
+  </div>
+
+  <div class="megafilter-modal-body" id="megafilter-modal-body">
+    <div class="megafilter-modal-start" id="megafilter-modal-start">
+      <h3 class="megafilter-modal-headline"><?php esc_html_e('Décris ton projet', 'theme-sapi-maison'); ?></h3>
+      <p class="megafilter-modal-intro"><?php esc_html_e('Je transforme tes mots en sélection de luminaires.', 'theme-sapi-maison'); ?></p>
+      <div class="megafilter-modal-input-wrap">
+        <input type="text" class="megafilter-modal-input" id="megafilter-modal-input-initial"
+               placeholder="<?php esc_attr_e('Ex. : Un luminaire pour mon salon, au-dessus de la table…', 'theme-sapi-maison'); ?>"
+               aria-label="<?php esc_attr_e('Décris ton projet en quelques mots', 'theme-sapi-maison'); ?>">
+      </div>
+      <div class="megafilter-modal-suggestions">
+        <button type="button" class="megafilter-modal-sug" data-sim="suspension-salon-table">
+          <?php esc_html_e('Une suspension moderne pour mon salon', 'theme-sapi-maison'); ?>
+        </button>
+        <button type="button" class="megafilter-modal-sug" data-sim="escalier">
+          <?php esc_html_e('Quelque chose pour éclairer mon escalier', 'theme-sapi-maison'); ?>
+        </button>
+        <button type="button" class="megafilter-modal-sug" data-sim="lampe-chambre">
+          <?php esc_html_e('Une lampe d\'appoint chambre bois clair', 'theme-sapi-maison'); ?>
+        </button>
+      </div>
+    </div>
+
+    <div class="megafilter-modal-chat" id="megafilter-modal-chat" hidden>
+      <div class="megafilter-chat-msg megafilter-chat-msg--user">
+        <div class="megafilter-chat-bubble" id="megafilter-chat-user-bubble"></div>
+      </div>
+      <div class="megafilter-chat-msg megafilter-chat-msg--robin">
+        <div class="megafilter-chat-bubble" id="megafilter-chat-robin-bubble"></div>
+        <div class="megafilter-chat-filters" id="megafilter-chat-filters" hidden>
+          <strong><?php esc_html_e('Filtres appliqués :', 'theme-sapi-maison'); ?></strong>
+          <span id="megafilter-chat-filters-list"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="megafilter-modal-return" id="megafilter-modal-return" hidden>
+    <button type="button" class="megafilter-modal-return-btn" id="megafilter-modal-return-btn">
+      <?php esc_html_e('Voir la sélection', 'theme-sapi-maison'); ?>
+      (<span id="megafilter-modal-return-num">0</span> <?php esc_html_e('modèles', 'theme-sapi-maison'); ?>) →
+    </button>
+  </div>
+
+  <div class="megafilter-modal-footer" id="megafilter-modal-footer" hidden>
+    <input type="text" class="megafilter-modal-input megafilter-modal-input--footer"
+           placeholder="<?php esc_attr_e('Continuer à discuter avec Robin…', 'theme-sapi-maison'); ?>"
+           aria-label="<?php esc_attr_e('Message', 'theme-sapi-maison'); ?>" disabled>
+    <button type="button" class="megafilter-modal-send" disabled><?php esc_html_e('Envoyer', 'theme-sapi-maison'); ?></button>
+  </div>
+</div>
 
 <?php
 get_footer();
