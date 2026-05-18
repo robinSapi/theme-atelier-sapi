@@ -24682,10 +24682,12 @@ body.woocommerce-cart div.woocommerce-wrapper {
 
 /* ── Barre Affiner avec Robin ── */
 /* Alignée sur la grille produit : max-width 1400px + padding 3rem (cf .shop-products .product-grid) */
+/* padding-bottom obligatoire : sinon .shop-products (fond crème) colle juste dessous
+   et masque l'ombre var(--shadow-card) de .megafilter-bar-inner */
 .megafilter-bar {
   max-width: 1400px;
   margin: 1.5rem auto 0;
-  padding: 0 1rem;
+  padding: 0 1rem 1.5rem;
 }
 
 .megafilter-bar-inner {
@@ -25185,7 +25187,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 @media (min-width: 768px) {
   .megafilter-bar {
     margin-top: 2rem;
-    padding: 0 3rem;
+    padding: 0 3rem 2rem;
   }
 
   .megafilter-bar-inner {
