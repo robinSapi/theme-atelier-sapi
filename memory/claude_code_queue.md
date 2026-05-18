@@ -2,6 +2,243 @@
 
 ## 📋 À faire
 
+## [TÂCHE] F1b — Intégration IA dans la modale "Décrire précisément mon projet"
+
+**Date :** 2026-05-18
+**Priorité :** haute (dernière brique avant merge master du méga-filtre)
+**Branche :** `test-theme-sapi-maison`
+**Prérequis :** F1a-ter et F1c mergées sur test (déjà fait).
+
+---
+
+### Contexte
+
+Le shell de la modale plein écran "Décrire précisément mon projet" est livré depuis F1a, mais c'est aujourd'hui une démo :
+- L'input central "Décris ton projet" ne fait rien (pas de submit câblé)
+- Les 3 suggestions sont des simulations en dur qui cochent des filtres pré-déterminés
+- Le footer input "Continuer à discuter avec Robin" + bouton Envoyer sont disabled
+- Aucune intégration Claude API
+
+F1b transforme tout ça en vraie modale IA, en **réutilisant le backend déjà existant** (endpoints AJAX qui parlent à Claude API, helpers PHP, rate limit, logging). On adapte le format des payloads pour le contexte méga-filtre — on ne réécrit pas la plomberie Claude.
+
+**Décision Robin (option A) :** pas de commentaire de Robin sur la grille pour le moment. L'IA s'exprime UNIQUEMENT dans la modale, quand le visiteur la sollicite explicitement.
+
+---
+
+### À LIRE AVANT TOUTE MODIFICATION
+
+1. `assets/mega-filtre.js` — le shell de la modale (états start/chat, les 3 simulations câblées à virer)
+2. `functions.php` lignes 1949 — `sapi_ajax_guide_results()` : endpoint de reco initiale (à adapter ou réutiliser)
+3. `functions.php` lignes 2279 — `sapi_ajax_guide_refine()` : endpoint conversationnel chat, déjà rate-limited et câblé sur Claude API
+4. `functions.php` lignes 4775 — `sapi_ajax_robin_log_session()` : endpoint de logging des sessions (le CSV qu'on utilise pour analytics)
+5. `functions.php` — chercher `sapi_guide_build_*_prompt()` (builders de system prompts) et `sapi_guide_check_rate_limit()`
+6. Les system prompts existants côté `sapi_guide_build_refine_prompt()` etc. — on en adapte la structure pour le méga-filtre
+
+---
+
+### Périmètre F1b
+
+#### A. Deux nouveaux endpoints AJAX (côté backend)
+
+Créer dans `functions.php` deux nouveaux endpoints **distincts** de ceux de l'ancien Conseiller pour éviter de mélanger les contextes (l'ancien Conseiller étant mort, ses endpoints peuvent à terme être supprimés sans risque) :
+
+**A1. `sapi_ajax_megafilter_freetext`** — extraction filtres depuis texte libre
+- Reçoit : `{message: string, nonce: string}`
+- Calls Claude **Haiku** (rapide, déterministe pour extraction)
+- System prompt : "Tu es Robin. Extrait les filtres structurés du texte libre. Réponds en JSON pur, sans prose. Format : `{filters: {piece?, taille?, eclairage?, sortie?, hauteur?, table?, style?}, message: \"<1-2 phrases de Robin\">}`. Les slugs autorisés pour chaque clé sont (cf. `sapi_guide_get_steps()`). Si tu ne peux pas extraire un filtre avec confiance, laisse-le absent."
+- Retourne : `{success: true, filters: {...}, message: "...", session_id?: string}`
+- Rate-limited via `sapi_guide_check_rate_limit()`
+- Log la session via le même mécanisme que l'ancien Conseiller (contexte = `megafilter_freetext`)
+
+**A2. `sapi_ajax_megafilter_chat`** — conversation libre dans la modale
+- Reçoit : `{user_message: string, current_filters: object, conversation: array, session_id?: string, nonce: string}`
+- Calls Claude **Sonnet** (qualité du ton de Robin)
+- System prompt :
+  - Persona Robin (ton chaleureux, tutoiement, artisan lyonnais)
+  - État actuel des chips comme contexte
+  - Catalogue produit dynamique (réutiliser `sapi_guide_query_all_products()` ou similaire pour passer la liste filtrée actuelle)
+  - Instruction : "Tu peux répondre en prose conversationnelle. Si tu veux ajuster les filtres (parce que l'utilisateur a clarifié ou changé d'avis), inclus un objet `filters_update` optionnel dans ta réponse JSON. Sinon, juste `{message: \"...\"}`. Tu peux aussi suggérer un contact via `{action: \"contact\"}` si l'utilisateur est bloqué."
+- Retourne : `{success: true, message: "...", filters_update?: {...}, action?: "contact"|null, conversation: array}` (renvoyer la conversation mise à jour pour le state frontend)
+- Rate-limited, logged (contexte = `megafilter_chat`), max 15 messages par session comme l'ancien Conseiller
+
+Le code des deux endpoints **réutilise** :
+- `sapi_guide_check_rate_limit()` (rate limit)
+- Le wrapper d'appel Claude API existant (extraire en helper `sapi_claude_call($model, $system, $messages)` si pas déjà fait)
+- `sapi_guide_query_all_products()` pour le catalogue dynamique
+- Le mécanisme de log session du CSV admin
+- Le nonce `sapi-guide-results` (ou un nouveau `sapi-megafilter` à créer)
+
+**Anciens endpoints à NE PAS toucher pour l'instant** : `sapi_ajax_guide_refine`, `sapi_ajax_guide_results`, `sapi_ajax_robin_conseil_step`, `sapi_ajax_robin_filter_products`. Ils sont orphelins (plus de frontend), on les supprimera dans une F1d cleanup plus tard une fois qu'on a confirmé que les nouveaux endpoints couvrent tous les cas d'usage.
+
+#### B. Câblage frontend dans `assets/mega-filtre.js`
+
+**B1. Input central "Décris ton projet" (état start de la modale)**
+- Au submit (Entrée ou clic sur un bouton) : appel POST `sapi_ajax_megafilter_freetext` avec `{message: input.value, nonce}`
+- Pendant l'appel : afficher un état loading ("Robin réfléchit…" avec animation discrète — pas de spinner intrusif)
+- Au retour success :
+  - Stocker `session_id` dans le state
+  - Basculer en état chat : bulle utilisateur (le texte tapé) + bulle Robin (le `message`) + encart "Filtres appliqués : <chips cochés>"
+  - **Cocher réellement les chips** correspondants dans le méga-filtre (utiliser l'API publique `window.sapiMegaFilter` ou directement le state)
+  - Déclencher `window.sapiShopRefilter()` pour mettre à jour la grille en arrière-plan
+- Au retour error (rate limit, API down, parsing JSON foireux) :
+  - Bulle Robin neutre : "Je ne peux pas analyser ton message pour l'instant. Tu peux essayer de répondre directement aux questions ci-dessous, ou me contacter via le formulaire."
+  - Bouton secondaire "Fermer la modale" + bouton "Contacter Robin"
+
+**B2. Suggestions cliquables (état start)**
+- Les 3 suggestions actuelles ("Une suspension moderne pour mon salon", etc.) deviennent des **vraies inputs** : un clic = équivalent à taper ce texte et submit
+- Le mécanisme passe par le même endpoint `megafilter_freetext` (pas de chemin parallèle)
+- Donc on **vire** les 3 simulations en dur de F1a (les fonctions qui cochaient des filtres prédéfinis)
+
+**B3. Footer input "Continuer à discuter avec Robin" (état chat)**
+- Bouton Envoyer + Entrée câblés
+- Au submit : appel POST `sapi_ajax_megafilter_chat` avec `{user_message, current_filters: state.answers, conversation: state.modal_conversation, session_id, nonce}`
+- Pendant l'appel : input disabled + bouton en loading
+- Au retour success :
+  - Ajouter la bulle utilisateur + la bulle Robin (message)
+  - Si `filters_update` présent : appliquer les changements aux chips + refresh grille
+  - Si `action: "contact"` : afficher un CTA "Contacter Robin" (à câbler sur le formulaire contact existant — `/contact/` ou modal contact)
+  - Scroll auto vers le bas pour voir la nouvelle bulle
+- Compteur de messages : à 15 messages, désactiver l'input avec un message "Tu as atteint la limite. Robin peut te répondre directement si tu lui écris."
+- Au retour error : bulle Robin neutre d'erreur + input réactivé
+
+**B4. Bouton "Voir la sélection (X modèles) →"**
+- Visible dès qu'au moins un filtre a été appliqué via la modale
+- Au clic : ferme la modale, scroll smooth vers la grille produit, met à jour le compteur si nécessaire
+- Le X est dynamique : on lit le nombre de produits visibles à ce moment dans `window.sapiShopRefilter` ou via un compte local
+
+**B5. Loading states unifiés**
+- État "Robin réfléchit…" : 1 petite ligne sous l'input/bulle en train d'être traitée, avec 3 points qui pulsent (CSS animation)
+- Pas de spinner full-screen, pas de modal-de-loading. La modale reste lisible et l'utilisateur ne perd pas son contexte.
+
+#### C. Gestion du `session_id`
+
+- Le 1er appel `freetext` ou `chat` crée une session côté serveur (UUID ou similaire)
+- Renvoyé au frontend qui le stocke dans `state.modal_session_id`
+- Tous les appels suivants dans la même session passent ce `session_id`
+- Permet au backend de retrouver l'historique pour le logging et pour le contexte conversationnel
+- Persiste le temps de la modale ouverte ; reset à la fermeture (nouvelle session si réouverture)
+
+#### D. Logging continu
+
+- Le CSV admin actuel (cf. `business/etsy/` ou wherever le CSV des sessions Conseiller est exporté) doit continuer à fonctionner
+- Adapter le champ `Contexte` pour accepter les nouvelles valeurs : `megafilter_freetext`, `megafilter_chat`
+- Garder les autres champs (Date, Appareil, Provenance, Pièce, Taille, Éclairage, Sortie, Hauteur, Table, Style, Avancement, Reco vue, Produits reco, Filtre activé, Appels IA, Conversation, Contact, Nom, Email, Téléphone)
+- Pour le méga-filtre, "Avancement" = `complete` si modale a abouti à des filtres appliqués, sinon `partial`
+- "Filtre activé" = `Oui` si l'utilisateur a coché des chips ou utilisé la modale (devrait être `Oui` quasi-systématiquement maintenant — l'analyse au début de F1 montrait 0/155, c'était à cause de l'ancienne UI)
+
+---
+
+### Décisions techniques actées (sans question à Robin)
+
+- **Modèles Claude** : Haiku pour `freetext` (extraction structurée rapide ~0.001€/appel), Sonnet pour `chat` (qualité du ton ~0.01€/appel)
+- **Pas de commentaire IA sur la grille** (décision Robin option A) — l'IA ne s'exprime que dans la modale
+- **Endpoints séparés** des anciens (`sapi_ajax_megafilter_*` vs `sapi_ajax_guide_*`) — anciens orphelins, à supprimer en F1d plus tard
+- **Réutilisation des helpers** : `sapi_guide_check_rate_limit`, `sapi_guide_query_all_products`, le wrapper Claude API
+- **Persona Robin** : tutoiement, chaleureux, artisan lyonnais, mention possible de la fabrication (laser, Lyon)
+- **Limite conversation** : 15 messages max par session (comme l'ancien Conseiller)
+
+---
+
+### Ce qui n'est PAS dans F1b
+
+- ❌ Commentaire de Robin sur la grille (en dehors de la modale)
+- ❌ Suppression des anciens endpoints orphelins `sapi_ajax_guide_*` — réservé à une future F1d
+- ❌ Refonte du CSV admin (on continue avec le format existant)
+- ❌ Endpoint séparé pour "Recommander des produits sur-mesure si rien ne matche" — l'IA conversationnelle peut le suggérer via `action: "contact"`
+
+---
+
+### Critères de succès
+
+1. Ouvrir la modale → input central centré + 3 suggestions
+2. Taper "Une suspension moderne pour mon salon au-dessus de la table" + Entrée :
+   - État loading "Robin réfléchit…"
+   - Au retour : bascule en mode chat, bulles affichées, chips Pièce=Salon + Style=Moderne + Sortie=Plafond + Table=Oui cochés en arrière-plan
+   - La grille a déjà été filtrée
+3. Continuer "Et plutôt en bois clair" + Envoyer :
+   - Bulle utilisateur + bulle Robin (la couleur n'étant pas un chip, l'IA commente sans changer les filtres — ou peut suggérer un produit spécifique en bois clair)
+4. Cliquer une suggestion ("Quelque chose pour éclairer mon escalier") → même comportement que B2, traité comme un texte libre
+5. Cliquer "Voir la sélection (17 modèles) →" → modale se ferme, grille visible avec filtres appliqués
+6. Rouvrir la modale → état start réinitialisé (nouvelle session)
+7. Atteindre 15 messages → input désactivé avec message clair
+8. Si Claude API timeout / erreur réseau : bulle Robin d'erreur + bouton "Contacter Robin"
+9. Si rate limit dépassé : message clair + fallback formulaire contact
+10. Mobile (375px) : modale `100dvh`, input footer accessible avec clavier ouvert, bulles scrollables, pas de glitch
+11. Session loggée dans le CSV admin (vérifier en exportant le CSV après quelques tests)
+12. Aucune erreur console pendant le flow complet
+
+---
+
+### Précautions
+
+- **Ne PAS toucher** aux anciens endpoints `sapi_ajax_guide_*` (orphelins, mais conservés pour comparaison/rollback éventuel). Ils seront supprimés en F1d.
+- **Ne PAS modifier** `inc/guide-data.php`, ni les helpers `sapi_guide_*` (ils sont partagés entre `mega-filtre.js` côté JS et les endpoints méga-filtre côté PHP)
+- **Tester les system prompts** avec une batterie de 5-10 textes types avant validation (ex : "Lampe à poser pour mon bureau", "Suspension cuisine ampoule visible", "Salle à manger 20m² moderne", etc.) — vérifier que l'extraction JSON est consistante
+- **Vérifier le budget Claude API** sur les 100 premières requêtes : si > 10€/jour, alerter Robin (on est sur quelques dizaines de centimes max attendus)
+- Branche `test-theme-sapi-maison`, push test uniquement
+- Pas de stockage de PII dans le CSV admin sans consentement (les champs Nom/Email/Téléphone restent vides tant que l'utilisateur ne clique pas explicitement sur "Contacter Robin")
+- Si Claude API renvoie un JSON malformé (toujours possible avec les LLMs), gérer le parsing avec try/catch et fallback : afficher une bulle Robin neutre + ne PAS appliquer les filtres extraits
+
+---
+
+### Référence — le mockup de la modale
+
+Cf. `site-web/mockups/mes-creations-mega-filtre-v1.html` : ouvrir, cliquer sur "Décrire précisément mon projet" en haut à droite, voir la transition état start → état chat avec les bulles. Comportement attendu identique, mais avec de vrais appels IA et chips cochés en arrière-plan.
+
+---
+
+### ⏳ RÉSULTAT — implémentation poussée sur `test-theme-sapi-maison` (2026-05-19)
+
+**Backend — functions.php :**
+- 2 endpoints AJAX `sapi_megafilter_freetext` (Haiku) + `sapi_megafilter_chat` (Sonnet), tous deux nonce `sapi-megafilter`, rate-limited via `sapi_guide_check_rate_limit()` (réutilisé), cap serveur 15 échanges côté chat (en plus du cap frontend)
+- 4 helpers locaux : `sapi_megafilter_filters_whitelist()` (dérive les slugs valides de `sapi_guide_get_steps()` — source de vérité unique), `sapi_megafilter_call_claude($model, $system, $messages, $max_tokens)` (wrapper API générique), `sapi_megafilter_parse_json()` (tolérant aux fences markdown), 2 builders de system prompts
+- Validation stricte des slugs côté serveur : toute clé/slug hors whitelist est dropée avant retour → hallucinations Claude neutralisées
+- Anciens endpoints `sapi_ajax_guide_*` non touchés (orphelins, à supprimer en F1d)
+
+**Frontend — assets/mega-filtre.js :**
+- Section `SIMULATIONS` / `simulateChat` / `applyPendingSimAndClose` virée (~110 lignes)
+- Nouveau `state.modal = {session_id, conversation, ai_call_count, status, contact_shown}`
+- Helpers DOM : `addUserBubble`, `addRobinBubble` (avec encart "Filtres appliqués"), `addThinkingBubble` (3 dots pulsants), `setChatFooterState('idle'|'loading'|'locked')`, `showContactCta()`
+- Application des filtres en batch via nouveau `applyFiltersBatch({piece: 'salon', style: null})` — `null` = suppression
+- 2 fonctions de soumission : `submitFreetext(text)` (input start + 3 suggestions, même chemin) et `submitChat(text)` (footer)
+- Compteur "Voir la sélection (X)" mis à jour après chaque application de filtres (compte les `.product-card-cinetique:not(.is-filtered-out)`)
+- Logging : `sendBeacon` vers `sapi_ajax_robin_log_session` à la fermeture, `opening_context: 'megafilter'`, nonce `sapi-guide-results` (séparé du nonce des endpoints méga-filtre)
+
+**Modale DOM — woocommerce/archive-product.php :**
+- Bulles statiques retirées, panneau `#megafilter-modal-chat` devient un conteneur vide alimenté par JS
+- Footer input + bouton Envoyer ne sont plus `disabled` au chargement
+- `data-sim` retirés des 3 suggestions (le texte du bouton devient le texte soumis)
+
+**Style — style.css :**
+- `.megafilter-thinking-dot` + keyframes `megafilter-thinking-pulse` (animation 3 dots)
+- `.megafilter-modal-contact` (CTA injecté quand `action: contact`)
+
+**Localize — SAPI_MEGAFILTER étendu :**
+- `ajaxUrl`, `nonce` (`sapi-megafilter`), `logNonce` (`sapi-guide-results`), `maxMessages: 15`
+
+**Décisions retenues lors de l'exécution (à valider) :**
+- Catalogue produit complet (~50 modèles) injecté dans le system prompt du chat — choix Robin
+- 1 seul commit / pas de découpage backend / frontend — choix Robin
+- Modèle Haiku utilisé : `claude-haiku-4-5` (cohérent avec `claude-sonnet-4-6` côté Sonnet)
+- Format `filters_update` : `{key: "slug"}` pour ajouter/modifier, `{key: null}` pour supprimer
+- `current_filters` envoyés au chat = `state.answers` direct (mêmes slugs que les chips)
+
+**À tester sur `test.atelier-sapi.fr/mes-creations/` :**
+1. Ouvrir la modale, taper "Une suspension moderne pour mon salon au-dessus de la table" + Entrée → vérifier bulles + chips cochés + grille filtrée
+2. Cliquer une des 3 suggestions → même comportement
+3. Footer chat : "Plutôt en bois clair" → vérifier que Claude répond + éventuellement met à jour les chips
+4. Atteindre 15 messages → input désactivé + CTA contact
+5. Bouton "Voir la sélection (X)" → fermeture modale + scroll vers grille
+6. Réouverture modale → nouvelle session, état start réinitialisé
+7. Vérifier le CSV admin Robin Conseiller : nouvelle ligne avec `opening_context = megafilter`
+8. Console réseau : pas d'erreur, status 200 sur les 2 endpoints
+
+**Précautions à valider en prod :**
+- Budget Claude API à suivre les premiers jours (Haiku ~0.001€/appel, Sonnet ~0.01€/appel)
+- Si Sonnet renvoie souvent du JSON malformé, ajuster le system prompt (ajouter une mention "réponds STRICTEMENT en JSON, sans préambule")
+
+---
+
 ## [TÂCHE] F1c — Cleanup frontend de l'ancien Conseiller (backend préservé pour F1b)
 
 **Date :** 2026-05-18

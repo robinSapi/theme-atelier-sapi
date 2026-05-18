@@ -429,7 +429,7 @@ $megafilter_chip_labels = [
   </div>
 </section>
 
-<!-- ── Modale "Décrire mon projet" (F1a — UI shell uniquement, IA en F1b) ── -->
+<!-- ── Modale "Décrire mon projet" (F1b — IA en place via Haiku/Sonnet) ── -->
 <div class="megafilter-modal" id="megafilter-modal" role="dialog" aria-modal="true" aria-labelledby="megafilter-modal-title" hidden>
   <div class="megafilter-modal-header">
     <span class="megafilter-modal-title" id="megafilter-modal-title"><?php esc_html_e('Décrire mon projet', 'theme-sapi-maison'); ?></span>
@@ -446,29 +446,20 @@ $megafilter_chip_labels = [
                aria-label="<?php esc_attr_e('Décris ton projet en quelques mots', 'theme-sapi-maison'); ?>">
       </div>
       <div class="megafilter-modal-suggestions">
-        <button type="button" class="megafilter-modal-sug" data-sim="suspension-salon-table">
+        <button type="button" class="megafilter-modal-sug">
           <?php esc_html_e('Une suspension moderne pour mon salon', 'theme-sapi-maison'); ?>
         </button>
-        <button type="button" class="megafilter-modal-sug" data-sim="escalier">
+        <button type="button" class="megafilter-modal-sug">
           <?php esc_html_e('Quelque chose pour éclairer mon escalier', 'theme-sapi-maison'); ?>
         </button>
-        <button type="button" class="megafilter-modal-sug" data-sim="lampe-chambre">
+        <button type="button" class="megafilter-modal-sug">
           <?php esc_html_e('Une lampe d\'appoint chambre bois clair', 'theme-sapi-maison'); ?>
         </button>
       </div>
     </div>
 
     <div class="megafilter-modal-chat" id="megafilter-modal-chat" hidden>
-      <div class="megafilter-chat-msg megafilter-chat-msg--user">
-        <div class="megafilter-chat-bubble" id="megafilter-chat-user-bubble"></div>
-      </div>
-      <div class="megafilter-chat-msg megafilter-chat-msg--robin">
-        <div class="megafilter-chat-bubble" id="megafilter-chat-robin-bubble"></div>
-        <div class="megafilter-chat-filters" id="megafilter-chat-filters" hidden>
-          <strong><?php esc_html_e('Filtres appliqués :', 'theme-sapi-maison'); ?></strong>
-          <span id="megafilter-chat-filters-list"></span>
-        </div>
-      </div>
+      <!-- Bulles ajoutées dynamiquement par mega-filtre.js -->
     </div>
   </div>
 
@@ -480,10 +471,10 @@ $megafilter_chip_labels = [
   </div>
 
   <div class="megafilter-modal-footer" id="megafilter-modal-footer" hidden>
-    <input type="text" class="megafilter-modal-input megafilter-modal-input--footer"
+    <input type="text" class="megafilter-modal-input megafilter-modal-input--footer" id="megafilter-modal-input-footer"
            placeholder="<?php esc_attr_e('Continuer à discuter avec Robin…', 'theme-sapi-maison'); ?>"
-           aria-label="<?php esc_attr_e('Message', 'theme-sapi-maison'); ?>" disabled>
-    <button type="button" class="megafilter-modal-send" disabled><?php esc_html_e('Envoyer', 'theme-sapi-maison'); ?></button>
+           aria-label="<?php esc_attr_e('Message', 'theme-sapi-maison'); ?>">
+    <button type="button" class="megafilter-modal-send" id="megafilter-modal-send"><?php esc_html_e('Envoyer', 'theme-sapi-maison'); ?></button>
   </div>
 </div>
 

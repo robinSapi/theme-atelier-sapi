@@ -288,6 +288,10 @@ function sapi_maison_enqueue_assets() {
         true
       );
       wp_localize_script('sapi-mega-filtre', 'SAPI_MEGAFILTER', [
+        'ajaxUrl'     => admin_url('admin-ajax.php'),
+        'nonce'       => wp_create_nonce('sapi-megafilter'),
+        'logNonce'    => wp_create_nonce('sapi-guide-results'),
+        'maxMessages' => 15,
         'steps' => sapi_guide_get_steps(),
         'rules' => [
           // Pièces avec filtre ampoule (mirror sapi_guide_get_ampoule_filter)
@@ -2437,6 +2441,406 @@ function sapi_ajax_guide_refine() {
     'ai_text'      => $recommendation,
     'products'     => $new_products,
     'conversation' => $updated_conversation,
+  ]);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MÉGA-FILTRE INTELLIGENT (F1b) — IA dans la modale "Décrire mon projet"
+
+   Deux endpoints AJAX dédiés :
+   - sapi_megafilter_freetext : extraction de filtres structurés depuis texte
+     libre (Haiku — rapide, déterministe)
+   - sapi_megafilter_chat     : conversation libre dans la modale, peut
+     ajuster les chips et router vers le formulaire de contact (Sonnet)
+
+   Réutilise sapi_guide_check_rate_limit() et sapi_guide_query_all_products()
+   du Conseiller. Endpoints distincts de sapi_ajax_guide_* pour éviter de
+   mélanger les contextes (anciens orphelins, à supprimer en F1d).
+═══════════════════════════════════════════════════════════ */
+
+/**
+ * Whitelist des slugs valides par clé de filtre, dérivée de
+ * sapi_guide_get_steps() (source de vérité unique). Sert à la fois pour
+ * lister les valeurs autorisées dans le system prompt et pour filtrer
+ * les hallucinations Claude.
+ */
+function sapi_megafilter_filters_whitelist() {
+  require_once get_template_directory() . '/inc/guide-data.php';
+  $whitelist = [];
+  foreach (sapi_guide_get_steps() as $step) {
+    $slugs = [];
+    foreach ($step['choices'] as $choice) {
+      $slugs[] = $choice['slug'];
+    }
+    $whitelist[$step['id']] = $slugs;
+  }
+  return $whitelist;
+}
+
+/**
+ * Wrapper Claude API local au méga-filtre. Retourne le texte brut de la
+ * réponse (ou null en cas d'erreur). Le parsing JSON est délégué à
+ * sapi_megafilter_parse_json() pour rester tolérant aux fences markdown.
+ *
+ * Note : on duplique légèrement sapi_guide_call_claude{,_refine} pour
+ * isoler le nouveau contexte. Un refactor global est prévu en F1d.
+ */
+function sapi_megafilter_call_claude($model, $system, array $messages, $max_tokens = 1024) {
+  $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
+  if (empty($api_key)) {
+    return null;
+  }
+
+  $body = [
+    'model'      => $model,
+    'max_tokens' => $max_tokens,
+    'system'     => $system,
+    'messages'   => $messages,
+  ];
+
+  $response = wp_remote_post('https://api.anthropic.com/v1/messages', [
+    'timeout' => 30,
+    'headers' => [
+      'Content-Type'      => 'application/json',
+      'x-api-key'         => $api_key,
+      'anthropic-version' => '2023-06-01',
+    ],
+    'body' => wp_json_encode($body),
+  ]);
+
+  if (is_wp_error($response)) {
+    error_log('Sapi MegaFilter Claude API error: ' . $response->get_error_message());
+    return null;
+  }
+
+  $status   = wp_remote_retrieve_response_code($response);
+  $raw_body = wp_remote_retrieve_body($response);
+
+  if ($status !== 200) {
+    error_log('Sapi MegaFilter Claude API HTTP ' . $status . ': ' . $raw_body);
+    return null;
+  }
+
+  $data = json_decode($raw_body, true);
+  if (!isset($data['content'][0]['text'])) {
+    return null;
+  }
+
+  return $data['content'][0]['text'];
+}
+
+/**
+ * Parse JSON tolérant (fences markdown éventuels). Retourne null si KO.
+ */
+function sapi_megafilter_parse_json($text) {
+  if (!is_string($text)) return null;
+  $clean = trim($text);
+  $clean = preg_replace('/^```(?:json)?\s*/i', '', $clean);
+  $clean = preg_replace('/\s*```$/', '', $clean);
+  $parsed = json_decode(trim($clean), true);
+  return is_array($parsed) ? $parsed : null;
+}
+
+/**
+ * System prompt — extraction freetext (Haiku).
+ */
+function sapi_megafilter_build_freetext_prompt(array $whitelist) {
+  $labels = [
+    'piece'           => 'pièce',
+    'taille'          => 'taille de pièce',
+    'taille_escalier' => 'type d\'escalier (uniquement si piece=escalier)',
+    'eclairage'       => 'source principale ou secondaire',
+    'sortie'          => 'où installer (plafond, mur, prise)',
+    'hauteur'         => 'hauteur sous plafond',
+    'table'           => 'au-dessus d\'une table/lit',
+    'style'           => 'style d\'intérieur',
+  ];
+
+  $prompt  = "Tu es Robin, artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser.\n";
+  $prompt .= "Un visiteur décrit son projet en quelques mots. Ton rôle : extraire les filtres structurés qu'il indique et lui répondre en 1-2 phrases.\n\n";
+
+  $prompt .= "FILTRES DISPONIBLES (utilise UNIQUEMENT ces slugs exacts) :\n";
+  foreach ($labels as $key => $label) {
+    if (!isset($whitelist[$key])) continue;
+    $prompt .= '- ' . $key . ' (' . $label . ') : ' . implode(' | ', $whitelist[$key]) . "\n";
+  }
+
+  $prompt .= "\nFORMAT DE RÉPONSE (JSON strict, sans markdown, sans prose autour) :\n";
+  $prompt .= "{\n";
+  $prompt .= '  "filters": { "piece": "salon", "style": "moderne" },' . "\n";
+  $prompt .= '  "message": "Très bien, ..."' . "\n";
+  $prompt .= "}\n\n";
+
+  $prompt .= "RÈGLES :\n";
+  $prompt .= "- N'inclus une clé dans `filters` QUE si tu peux la déduire avec confiance du texte. En cas de doute, laisse-la absente.\n";
+  $prompt .= "- N'invente PAS de slug : utilise exactement ceux listés.\n";
+  $prompt .= "- `message` : 1-2 phrases chaleureuses, tutoiement, ton artisan. Mentionne ce que tu as compris du projet.\n";
+  $prompt .= "- Pas d'emoji, pas de markdown dans `message`.\n";
+
+  return $prompt;
+}
+
+/**
+ * System prompt — conversation libre (Sonnet).
+ */
+function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_products, array $whitelist) {
+  $prompt  = "Tu es Robin, artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser dans son atelier à Lyon.\n";
+  $prompt .= "Tu accompagnes un visiteur qui explore ta collection sur le site atelier-sapi.fr.\n\n";
+
+  $prompt .= "TON :\n";
+  $prompt .= "- Chaleureux, simple, tutoiement systématique\n";
+  $prompt .= "- Artisan passionné, pas vendeur\n";
+  $prompt .= "- 2-4 phrases max par réponse\n";
+  $prompt .= "- Tu peux mentionner la fabrication (laser, atelier à Lyon, bois français) si pertinent\n";
+  $prompt .= "- Pas d'emoji, pas de markdown\n\n";
+
+  $prompt .= "FILTRES ACTUELLEMENT APPLIQUÉS DANS LE MÉGA-FILTRE :\n";
+  if (empty($current_filters)) {
+    $prompt .= "(aucun)\n";
+  } else {
+    foreach ($current_filters as $k => $v) {
+      $prompt .= '- ' . $k . ' = ' . $v . "\n";
+    }
+  }
+
+  $prompt .= "\nCATALOGUE COMPLET (tous les luminaires disponibles) :\n";
+  foreach ($all_products as $p) {
+    $cats = isset($p['categories']) && is_array($p['categories']) ? implode(', ', $p['categories']) : '';
+    $format = isset($p['format']) ? $p['format'] : '';
+    $ampoule = isset($p['type_ampoule']) ? $p['type_ampoule'] : '';
+    $prompt .= '- ' . $p['title']
+      . ' | Catégorie : ' . $cats
+      . ' | Format : ' . $format
+      . ' | Ampoule : ' . $ampoule
+      . "\n";
+  }
+
+  $prompt .= "\nSLUGS VALIDES (pour `filters_update`) :\n";
+  foreach ($whitelist as $key => $slugs) {
+    $prompt .= '- ' . $key . ' : ' . implode(' | ', $slugs) . "\n";
+  }
+
+  $prompt .= "\nFORMAT DE RÉPONSE (JSON strict, sans markdown, sans prose autour) :\n";
+  $prompt .= "{\n";
+  $prompt .= '  "message": "Réponse de Robin en 2-4 phrases...",' . "\n";
+  $prompt .= '  "filters_update": { "piece": "cuisine", "style": null },' . "\n";
+  $prompt .= '  "action": "contact"' . "\n";
+  $prompt .= "}\n\n";
+
+  $prompt .= "RÈGLES :\n";
+  $prompt .= "- `message` : obligatoire, 2-4 phrases.\n";
+  $prompt .= "- `filters_update` : optionnel. À inclure UNIQUEMENT si tu veux changer les chips suite au message du visiteur (ex. il précise, change d'avis). Utilise les slugs exacts. `null` pour supprimer un filtre. Ne touche pas aux chips non concernés.\n";
+  $prompt .= "- `action: \"contact\"` : optionnel. Inclure UNIQUEMENT si le visiteur cherche quelque chose qui n'existe pas dans le catalogue ou semble bloqué → tu lui suggères de te contacter directement.\n";
+  $prompt .= "- Tu peux référencer un modèle précis du catalogue par son nom dans `message` si pertinent.\n";
+
+  return $prompt;
+}
+
+/* ── Endpoint A1 : extraction freetext (Haiku) ───────────────────────── */
+add_action('wp_ajax_sapi_megafilter_freetext', 'sapi_ajax_megafilter_freetext');
+add_action('wp_ajax_nopriv_sapi_megafilter_freetext', 'sapi_ajax_megafilter_freetext');
+
+function sapi_ajax_megafilter_freetext() {
+  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-megafilter')) {
+    wp_send_json_error(['message' => 'Nonce invalide']);
+    return;
+  }
+
+  if (!sapi_guide_check_rate_limit()) {
+    wp_send_json_error([
+      'message'  => 'rate_limit',
+      'fallback' => 'Trop de demandes pour le moment, réessaie dans une heure ou contacte-moi directement via le formulaire.',
+    ]);
+    return;
+  }
+
+  $message = sanitize_textarea_field(wp_unslash($_POST['message'] ?? ''));
+  if (empty($message) || mb_strlen($message) > 500) {
+    wp_send_json_error(['message' => 'Message invalide']);
+    return;
+  }
+
+  $session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : '';
+  if (empty($session_id)) {
+    $session_id = 'mfs_' . bin2hex(random_bytes(8));
+  }
+
+  $whitelist = sapi_megafilter_filters_whitelist();
+  $system_prompt = sapi_megafilter_build_freetext_prompt($whitelist);
+
+  $ai_text = sapi_megafilter_call_claude(
+    'claude-haiku-4-5',
+    $system_prompt,
+    [['role' => 'user', 'content' => $message]],
+    512
+  );
+
+  if (!$ai_text) {
+    wp_send_json_error([
+      'message'  => 'api_error',
+      'fallback' => 'Je n\'arrive pas à analyser ton message pour l\'instant. Tu peux essayer de répondre directement aux questions ci-dessous, ou me contacter via le formulaire.',
+    ]);
+    return;
+  }
+
+  $parsed = sapi_megafilter_parse_json($ai_text);
+  if (!$parsed || !isset($parsed['filters']) || !is_array($parsed['filters'])) {
+    wp_send_json_error([
+      'message'  => 'parse_error',
+      'fallback' => 'Je n\'ai pas bien compris ton message. Tu peux essayer de répondre directement aux questions ci-dessous.',
+    ]);
+    return;
+  }
+
+  $clean_filters = [];
+  foreach ($parsed['filters'] as $key => $val) {
+    if (!isset($whitelist[$key])) continue;
+    if (!is_string($val)) continue;
+    if (!in_array($val, $whitelist[$key], true)) continue;
+    $clean_filters[$key] = $val;
+  }
+
+  $robin_message = (isset($parsed['message']) && is_string($parsed['message']))
+    ? sanitize_textarea_field($parsed['message'])
+    : '';
+
+  wp_send_json_success([
+    'filters'    => $clean_filters,
+    'message'    => $robin_message,
+    'session_id' => $session_id,
+  ]);
+}
+
+/* ── Endpoint A2 : conversation libre (Sonnet) ───────────────────────── */
+add_action('wp_ajax_sapi_megafilter_chat', 'sapi_ajax_megafilter_chat');
+add_action('wp_ajax_nopriv_sapi_megafilter_chat', 'sapi_ajax_megafilter_chat');
+
+function sapi_ajax_megafilter_chat() {
+  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-megafilter')) {
+    wp_send_json_error(['message' => 'Nonce invalide']);
+    return;
+  }
+
+  if (!sapi_guide_check_rate_limit()) {
+    wp_send_json_success([
+      'message'      => 'Je ne peux pas répondre davantage pour le moment. Si tu veux, écris-moi directement via le formulaire et je te répondrai personnellement.',
+      'action'       => 'contact',
+      'conversation' => [],
+    ]);
+    return;
+  }
+
+  $user_message = sanitize_textarea_field(wp_unslash($_POST['user_message'] ?? ''));
+  if (empty($user_message) || mb_strlen($user_message) > 1000) {
+    wp_send_json_error(['message' => 'Message invalide']);
+    return;
+  }
+
+  $session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : '';
+  if (empty($session_id)) {
+    $session_id = 'mfs_' . bin2hex(random_bytes(8));
+  }
+
+  $filters_raw = isset($_POST['current_filters']) ? wp_unslash($_POST['current_filters']) : '{}';
+  $current_filters = json_decode($filters_raw, true);
+  if (!is_array($current_filters)) $current_filters = [];
+
+  $conversation_raw = isset($_POST['conversation']) ? wp_unslash($_POST['conversation']) : '[]';
+  $conversation = json_decode($conversation_raw, true);
+  if (!is_array($conversation)) $conversation = [];
+
+  // Garde-fou serveur : 15 échanges utilisateur max (= 30 messages user+assistant)
+  $user_msg_count = 0;
+  foreach ($conversation as $m) {
+    if (isset($m['role']) && $m['role'] === 'user') $user_msg_count++;
+  }
+  if ($user_msg_count >= 15) {
+    wp_send_json_success([
+      'message'      => 'On a bien discuté ! Pour aller plus loin, écris-moi directement via le formulaire de contact et on continuera ensemble.',
+      'action'       => 'contact',
+      'conversation' => $conversation,
+      'session_id'   => $session_id,
+    ]);
+    return;
+  }
+
+  $whitelist = sapi_megafilter_filters_whitelist();
+  $clean_current = [];
+  foreach ($current_filters as $k => $v) {
+    if (!isset($whitelist[$k])) continue;
+    if (!is_string($v)) continue;
+    if (!in_array($v, $whitelist[$k], true)) continue;
+    $clean_current[$k] = $v;
+  }
+
+  $all_products = sapi_guide_query_all_products([]);
+
+  $system_prompt = sapi_megafilter_build_chat_prompt($clean_current, $all_products, $whitelist);
+
+  $messages = [];
+  foreach ($conversation as $msg) {
+    if (!isset($msg['role']) || !isset($msg['content'])) continue;
+    $role = ($msg['role'] === 'assistant') ? 'assistant' : 'user';
+    $messages[] = ['role' => $role, 'content' => sanitize_textarea_field($msg['content'])];
+  }
+  $messages[] = ['role' => 'user', 'content' => $user_message];
+
+  $ai_text = sapi_megafilter_call_claude(
+    'claude-sonnet-4-6',
+    $system_prompt,
+    $messages,
+    1024
+  );
+
+  if (!$ai_text) {
+    wp_send_json_error([
+      'message'  => 'api_error',
+      'fallback' => 'Je n\'arrive pas à te répondre pour l\'instant. Tu peux me contacter directement via le formulaire.',
+    ]);
+    return;
+  }
+
+  $parsed = sapi_megafilter_parse_json($ai_text);
+
+  // Si le JSON est foireux, on tombe sur le texte brut comme message neutre
+  $robin_message = '';
+  $filters_update = null;
+  $action = null;
+
+  if ($parsed && isset($parsed['message']) && is_string($parsed['message'])) {
+    $robin_message = sanitize_textarea_field($parsed['message']);
+  } else {
+    $robin_message = sanitize_textarea_field($ai_text);
+  }
+
+  if ($parsed && isset($parsed['filters_update']) && is_array($parsed['filters_update'])) {
+    $filters_update = [];
+    foreach ($parsed['filters_update'] as $k => $v) {
+      if (!isset($whitelist[$k])) continue;
+      if ($v === null) {
+        $filters_update[$k] = null;
+      } elseif (is_string($v) && in_array($v, $whitelist[$k], true)) {
+        $filters_update[$k] = $v;
+      }
+    }
+    if (empty($filters_update)) $filters_update = null;
+  }
+
+  if ($parsed && isset($parsed['action']) && $parsed['action'] === 'contact') {
+    $action = 'contact';
+  }
+
+  $new_conversation = array_merge($conversation, [
+    ['role' => 'user',      'content' => $user_message],
+    ['role' => 'assistant', 'content' => $robin_message],
+  ]);
+
+  wp_send_json_success([
+    'message'        => $robin_message,
+    'filters_update' => $filters_update,
+    'action'         => $action,
+    'conversation'   => $new_conversation,
+    'session_id'     => $session_id,
   ]);
 }
 

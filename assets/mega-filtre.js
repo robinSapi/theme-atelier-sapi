@@ -16,6 +16,13 @@
   var state = {
     answers: {}, // ex. { piece: 'salon', taille: 'moyenne' }
     labels:  {}, // ex. { piece: 'Salon / Salle à manger' }
+    modal: {
+      session_id: null,
+      conversation: [],   // [{role:'user'|'assistant', content:'...'}]
+      ai_call_count: 0,
+      status: 'idle',     // 'idle' | 'thinking'
+      contact_shown: false,
+    },
   };
 
   // ═══ DOM refs (peuplé dans init) ═══
@@ -299,6 +306,35 @@
     applyFiltersToGrid();
   }
 
+  // Récupère le label humain d'un slug dans STEPS (utilisé quand l'IA renvoie un slug brut)
+  function getChoiceLabel(stepId, slug) {
+    for (var i = 0; i < STEPS.length; i++) {
+      if (STEPS[i].id !== stepId) continue;
+      var choices = STEPS[i].choices || [];
+      for (var j = 0; j < choices.length; j++) {
+        if (choices[j].slug === slug) return choices[j].label;
+      }
+    }
+    return slug;
+  }
+
+  // Applique un batch de filtres (ajout / mise à jour / suppression via null) en un seul render
+  function applyFiltersBatch(filters) {
+    if (!filters || typeof filters !== 'object') return;
+    Object.keys(filters).forEach(function (key) {
+      var val = filters[key];
+      if (val === null) {
+        delete state.answers[key];
+        delete state.labels[key];
+      } else if (typeof val === 'string' && val) {
+        state.answers[key] = val;
+        state.labels[key]  = getChoiceLabel(key, val);
+      }
+    });
+    cleanInvisibleAnswers();
+    onStateChange();
+  }
+
   // ═══════════════════════════════════════════════════════════
   //  Application des filtres à la grille
   // ═══════════════════════════════════════════════════════════
@@ -321,22 +357,21 @@
   }
 
   // ═══════════════════════════════════════════════════════════
-  //  Modale "Décrire mon projet" (UI shell uniquement)
+  //  Modale "Décrire mon projet" (F1b — IA Haiku + Sonnet)
   // ═══════════════════════════════════════════════════════════
   function openModal() {
     if (!els.modal) return;
     els.modal.hidden = false;
     document.body.style.overflow = 'hidden';
-    // Focus l'input d'entrée
     var input = document.getElementById('megafilter-modal-input-initial');
     if (input) setTimeout(function () { input.focus(); }, 50);
   }
 
   function closeModal() {
     if (!els.modal) return;
+    logSession();
     els.modal.hidden = true;
     document.body.style.overflow = '';
-    // Reset à l'état initial pour la prochaine ouverture
     resetModalState();
   }
 
@@ -346,118 +381,347 @@
     var ret    = document.getElementById('megafilter-modal-return');
     var footer = document.getElementById('megafilter-modal-footer');
     if (start)  start.hidden  = false;
-    if (chat)   chat.hidden   = true;
+    if (chat)   { chat.hidden = true; chat.innerHTML = ''; }
     if (ret)    ret.hidden    = true;
     if (footer) footer.hidden = true;
+
+    var startInput  = document.getElementById('megafilter-modal-input-initial');
+    var footerInput = document.getElementById('megafilter-modal-input-footer');
+    if (startInput)  startInput.value = '';
+    if (footerInput) { footerInput.value = ''; footerInput.disabled = false; }
+
+    var sendBtn = document.getElementById('megafilter-modal-send');
+    if (sendBtn) sendBtn.disabled = false;
+
+    // Réinitialise le state modale (nouvelle session si réouverture)
+    state.modal = {
+      session_id: null,
+      conversation: [],
+      ai_call_count: 0,
+      status: 'idle',
+      contact_shown: false,
+    };
   }
 
-  // Simulations cablées sur les 3 suggestions (F1a — pas d'IA réelle)
-  var SIMULATIONS = {
-    'suspension-salon-table': {
-      userMsg: 'Une suspension moderne pour mon salon, au-dessus de la table',
-      robinMsg: 'Très bien ! Pour un salon moderne avec une suspension au-dessus de la table, je te recommande des modèles à ampoule entourée (lumière diffuse, agréable pour les repas) et un format plutôt boule ou horizontal.',
-      filters: {
-        piece:    { value: 'salon',    label: 'Salon / Salle à manger' },
-        style:    { value: 'moderne',  label: 'Moderne, neuf, tons clairs' },
-        taille:   { value: 'moyenne',  label: 'Pièce standard' },
-        sortie:   { value: 'plafond',  label: 'Au plafond' },
-        hauteur:  { value: 'standard', label: 'Standard' },
-        table:    { value: 'oui',      label: 'Oui' },
-      },
-    },
-    'escalier': {
-      userMsg: 'Quelque chose pour éclairer mon escalier',
-      robinMsg: 'Pour un escalier, je sélectionne des suspensions verticales qui occupent bien la hauteur du vide.',
-      filters: {
-        piece:           { value: 'escalier', label: 'Cage d\'escalier' },
-        taille_escalier: { value: 'standard', label: 'Escalier standard' },
-        sortie:          { value: 'plafond',  label: 'Au plafond' },
-      },
-    },
-    'lampe-chambre': {
-      userMsg: 'Une lampe d\'appoint chambre bois clair',
-      robinMsg: 'Pour une chambre, je te propose des lampes à poser ou des appliques avec une ampoule entourée pour une lumière douce.',
-      filters: {
-        piece:  { value: 'chambre',       label: 'Chambre' },
-        taille: { value: 'moyenne',       label: 'Pièce standard' },
-        sortie: { value: 'pas-de-sortie', label: 'Sur prise classique 230V' },
-        style:  { value: 'moderne',       label: 'Moderne, neuf, tons clairs' },
-      },
-    },
-  };
+  // ─── Affichage des bulles ───
+  function showChatPanel() {
+    var start  = document.getElementById('megafilter-modal-start');
+    var chat   = document.getElementById('megafilter-modal-chat');
+    var footer = document.getElementById('megafilter-modal-footer');
+    if (start)  start.hidden  = true;
+    if (chat)   chat.hidden   = false;
+    if (footer) footer.hidden = false;
+  }
 
-  // Filtres simulés en attente, appliqués au clic sur "Voir la sélection"
-  var pendingSim = null;
+  function addUserBubble(text) {
+    var chat = document.getElementById('megafilter-modal-chat');
+    if (!chat) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'megafilter-chat-msg megafilter-chat-msg--user';
+    var bubble = document.createElement('div');
+    bubble.className = 'megafilter-chat-bubble';
+    bubble.textContent = text;
+    wrap.appendChild(bubble);
+    chat.appendChild(wrap);
+    scrollChatToBottom();
+  }
 
-  function simulateChat(simKey) {
-    var sim = SIMULATIONS[simKey];
-    if (!sim) return;
+  function addRobinBubble(text, opts) {
+    opts = opts || {};
+    var chat = document.getElementById('megafilter-modal-chat');
+    if (!chat) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'megafilter-chat-msg megafilter-chat-msg--robin';
 
-    document.getElementById('megafilter-modal-start').hidden = true;
-    document.getElementById('megafilter-modal-chat').hidden = false;
-    document.getElementById('megafilter-modal-return').hidden = false;
-    document.getElementById('megafilter-modal-footer').hidden = false;
+    var bubble = document.createElement('div');
+    bubble.className = 'megafilter-chat-bubble';
+    bubble.textContent = text || '';
+    wrap.appendChild(bubble);
 
-    var userBubble  = document.getElementById('megafilter-chat-user-bubble');
-    var robinBubble = document.getElementById('megafilter-chat-robin-bubble');
-    var filtersBox  = document.getElementById('megafilter-chat-filters');
-    var filtersList = document.getElementById('megafilter-chat-filters-list');
-
-    if (userBubble)  userBubble.textContent = sim.userMsg;
-    if (robinBubble) robinBubble.textContent = sim.robinMsg;
-
-    // Compose la liste des filtres affichés
-    if (filtersBox && filtersList) {
+    // Encart "Filtres appliqués"
+    if (opts.filters && Object.keys(opts.filters).length) {
+      var fb = document.createElement('div');
+      fb.className = 'megafilter-chat-filters';
+      var label = document.createElement('strong');
+      label.textContent = 'Filtres appliqués :';
+      fb.appendChild(label);
+      var list = document.createElement('span');
       var parts = [];
-      Object.keys(sim.filters).forEach(function (k) {
-        parts.push(getChipLabel(k) + ' = ' + sim.filters[k].label);
+      Object.keys(opts.filters).forEach(function (k) {
+        var slug = opts.filters[k];
+        if (slug === null) return; // suppression : ne pas afficher
+        parts.push(getChipLabel(k) + ' = ' + getChoiceLabel(k, slug));
       });
-      filtersList.textContent = ' ' + parts.join(' · ');
-      filtersBox.hidden = false;
+      if (parts.length) {
+        list.textContent = ' ' + parts.join(' · ');
+        fb.appendChild(list);
+        wrap.appendChild(fb);
+      }
     }
 
-    // Pré-calcule combien de modèles matchent (sans appliquer encore)
-    pendingSim = sim.filters;
-    var previewCount = countMatchesForSimulation(sim.filters);
-    var num = document.getElementById('megafilter-modal-return-num');
-    if (num) num.textContent = previewCount;
+    chat.appendChild(wrap);
+    scrollChatToBottom();
   }
 
-  function countMatchesForSimulation(filtersObj) {
-    // Simule l'application sans toucher au state global
-    var backup = { answers: state.answers, labels: state.labels };
-    state.answers = {};
-    state.labels = {};
-    Object.keys(filtersObj).forEach(function (k) {
-      state.answers[k] = filtersObj[k].value;
-      state.labels[k]  = filtersObj[k].label;
-    });
-    cleanInvisibleAnswers();
+  function addThinkingBubble() {
+    var chat = document.getElementById('megafilter-modal-chat');
+    if (!chat) return;
+    if (document.getElementById('megafilter-chat-thinking')) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'megafilter-chat-msg megafilter-chat-msg--robin megafilter-chat-msg--thinking';
+    wrap.id = 'megafilter-chat-thinking';
+    var bubble = document.createElement('div');
+    bubble.className = 'megafilter-chat-bubble megafilter-thinking-bubble';
+    bubble.setAttribute('aria-label', 'Robin réfléchit');
+    for (var i = 0; i < 3; i++) {
+      var dot = document.createElement('span');
+      dot.className = 'megafilter-thinking-dot';
+      bubble.appendChild(dot);
+    }
+    wrap.appendChild(bubble);
+    chat.appendChild(wrap);
+    scrollChatToBottom();
+  }
 
+  function removeThinkingBubble() {
+    var el = document.getElementById('megafilter-chat-thinking');
+    if (el) el.parentNode.removeChild(el);
+  }
+
+  function scrollChatToBottom() {
+    // C'est .megafilter-modal-body qui scrolle (overflow-y: auto), pas le chat lui-même
+    var body = document.getElementById('megafilter-modal-body');
+    if (body) body.scrollTop = body.scrollHeight;
+  }
+
+  // ─── Compteur "Voir la sélection (X)" ───
+  function countVisibleCards() {
     var cards = document.querySelectorAll('.product-card-cinetique');
     var count = 0;
     cards.forEach(function (card) {
-      if (cardMatches(card)) count++;
+      if (!card.classList.contains('is-filtered-out')) count++;
     });
-
-    state.answers = backup.answers;
-    state.labels  = backup.labels;
     return count;
   }
 
-  function applyPendingSimAndClose() {
-    if (pendingSim) {
-      state.answers = {};
-      state.labels = {};
-      Object.keys(pendingSim).forEach(function (k) {
-        state.answers[k] = pendingSim[k].value;
-        state.labels[k]  = pendingSim[k].label;
-      });
-      cleanInvisibleAnswers();
-      pendingSim = null;
-      onStateChange();
+  function showReturnButton() {
+    var ret = document.getElementById('megafilter-modal-return');
+    if (ret) ret.hidden = false;
+    updateReturnCount();
+  }
+
+  function updateReturnCount() {
+    var num = document.getElementById('megafilter-modal-return-num');
+    if (num) num.textContent = countVisibleCards();
+  }
+
+  // ─── Footer chat enable/disable ───
+  function setChatFooterState(stateName) {
+    var input = document.getElementById('megafilter-modal-input-footer');
+    var btn   = document.getElementById('megafilter-modal-send');
+    if (!input || !btn) return;
+    if (stateName === 'loading') {
+      input.disabled = true;
+      btn.disabled = true;
+    } else if (stateName === 'locked') {
+      input.disabled = true;
+      btn.disabled = true;
+      input.value = '';
+      input.placeholder = 'Tu as atteint la limite. Contacte Robin directement.';
+    } else { // 'idle'
+      input.disabled = false;
+      btn.disabled = false;
     }
-    closeModal();
+  }
+
+  function showContactCta() {
+    if (state.modal.contact_shown) return;
+    var footer = document.getElementById('megafilter-modal-footer');
+    if (!footer) return;
+    var cta = document.createElement('a');
+    cta.className = 'megafilter-modal-send megafilter-modal-contact';
+    cta.href = '/contact/';
+    cta.textContent = 'Contacter Robin';
+    footer.appendChild(cta);
+    state.modal.contact_shown = true;
+  }
+
+  // ─── Appel IA : extraction freetext ───
+  function submitFreetext(text) {
+    if (state.modal.status !== 'idle') return;
+    text = (text || '').trim();
+    if (!text) return;
+
+    showChatPanel();
+    addUserBubble(text);
+    addThinkingBubble();
+    state.modal.status = 'thinking';
+    state.modal.ai_call_count++;
+    setChatFooterState('loading');
+
+    var formData = new FormData();
+    formData.append('action', 'sapi_megafilter_freetext');
+    formData.append('nonce', config.nonce || '');
+    formData.append('message', text);
+    if (state.modal.session_id) formData.append('session_id', state.modal.session_id);
+
+    fetch(config.ajaxUrl, { method: 'POST', body: formData, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (resp) {
+        removeThinkingBubble();
+        state.modal.status = 'idle';
+        setChatFooterState('idle');
+
+        if (!resp || !resp.success) {
+          var fallback = (resp && resp.data && resp.data.fallback) ||
+            'Je n\'arrive pas à analyser ton message. Tu peux essayer de répondre directement aux questions ci-dessous, ou me contacter via le formulaire.';
+          addRobinBubble(fallback);
+          state.modal.conversation.push({ role: 'user', content: text });
+          state.modal.conversation.push({ role: 'assistant', content: fallback });
+          showContactCta();
+          return;
+        }
+
+        var data = resp.data || {};
+        state.modal.session_id = data.session_id || state.modal.session_id;
+
+        var filters = data.filters || {};
+        if (Object.keys(filters).length) {
+          applyFiltersBatch(filters);
+        }
+
+        addRobinBubble(data.message || '', { filters: filters });
+        state.modal.conversation.push({ role: 'user', content: text });
+        state.modal.conversation.push({ role: 'assistant', content: data.message || '' });
+
+        showReturnButton();
+      })
+      .catch(function () {
+        removeThinkingBubble();
+        state.modal.status = 'idle';
+        setChatFooterState('idle');
+        addRobinBubble('Petit souci de connexion. Tu peux réessayer ou me contacter directement.');
+        showContactCta();
+      });
+  }
+
+  // ─── Appel IA : conversation chat ───
+  function submitChat(text) {
+    if (state.modal.status !== 'idle') return;
+    text = (text || '').trim();
+    if (!text) return;
+
+    var userMsgCount = 0;
+    for (var i = 0; i < state.modal.conversation.length; i++) {
+      if (state.modal.conversation[i].role === 'user') userMsgCount++;
+    }
+    var maxMsg = config.maxMessages || 15;
+    if (userMsgCount >= maxMsg) {
+      addRobinBubble('On a bien discuté ! Pour aller plus loin, écris-moi directement via le formulaire de contact.');
+      showContactCta();
+      setChatFooterState('locked');
+      return;
+    }
+
+    addUserBubble(text);
+    addThinkingBubble();
+    state.modal.status = 'thinking';
+    state.modal.ai_call_count++;
+    setChatFooterState('loading');
+
+    var formData = new FormData();
+    formData.append('action', 'sapi_megafilter_chat');
+    formData.append('nonce', config.nonce || '');
+    formData.append('user_message', text);
+    formData.append('current_filters', JSON.stringify(state.answers));
+    formData.append('conversation', JSON.stringify(state.modal.conversation));
+    if (state.modal.session_id) formData.append('session_id', state.modal.session_id);
+
+    fetch(config.ajaxUrl, { method: 'POST', body: formData, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (resp) {
+        removeThinkingBubble();
+        state.modal.status = 'idle';
+        setChatFooterState('idle');
+
+        if (!resp || !resp.success) {
+          var fallback = (resp && resp.data && resp.data.fallback) ||
+            'Je n\'arrive pas à te répondre pour l\'instant. Tu peux me contacter directement.';
+          addRobinBubble(fallback);
+          state.modal.conversation.push({ role: 'user', content: text });
+          state.modal.conversation.push({ role: 'assistant', content: fallback });
+          showContactCta();
+          return;
+        }
+
+        var data = resp.data || {};
+        state.modal.session_id = data.session_id || state.modal.session_id;
+
+        if (data.filters_update) {
+          applyFiltersBatch(data.filters_update);
+          updateReturnCount();
+        }
+
+        addRobinBubble(data.message || '', { filters: data.filters_update });
+
+        if (Array.isArray(data.conversation)) {
+          state.modal.conversation = data.conversation;
+        } else {
+          state.modal.conversation.push({ role: 'user', content: text });
+          state.modal.conversation.push({ role: 'assistant', content: data.message || '' });
+        }
+
+        if (data.action === 'contact') {
+          showContactCta();
+        }
+
+        showReturnButton();
+      })
+      .catch(function () {
+        removeThinkingBubble();
+        state.modal.status = 'idle';
+        setChatFooterState('idle');
+        addRobinBubble('Petit souci de connexion. Tu peux réessayer ou me contacter directement.');
+      });
+  }
+
+  // ─── Logging session (sendBeacon à la fermeture) ───
+  function logSession() {
+    if (!state.modal.session_id || state.modal.ai_call_count === 0) return;
+
+    var convStr = '';
+    state.modal.conversation.forEach(function (m) {
+      convStr += (m.role === 'user' ? 'U: ' : 'R: ') + m.content + '\n';
+    });
+
+    var payload = {
+      action: 'sapi_robin_log_session',
+      nonce: config.logNonce || '',
+      session_id: state.modal.session_id,
+      opening_context: 'megafilter',
+      answers: JSON.stringify(state.answers),
+      completion: hasAnyAnswer() ? 'complete' : 'partial',
+      filter_activated: '1',
+      ai_call_count: String(state.modal.ai_call_count),
+      conversation: convStr,
+      reco_shown: '1',
+    };
+
+    try {
+      var fd = new FormData();
+      Object.keys(payload).forEach(function (k) { fd.append(k, payload[k]); });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(config.ajaxUrl, fd);
+        return;
+      }
+    } catch (e) { /* fallthrough */ }
+
+    fetch(config.ajaxUrl, {
+      method: 'POST',
+      body: new URLSearchParams(payload),
+      credentials: 'same-origin',
+      keepalive: true,
+    }).catch(function () {});
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -540,17 +804,59 @@
     var closeBtn = document.getElementById('megafilter-modal-close');
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
 
-    // Modale : clic sur suggestion
+    // Modale : input central — Entrée soumet le texte libre
+    var startInput = document.getElementById('megafilter-modal-input-initial');
+    if (startInput) {
+      startInput.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        var val = startInput.value;
+        startInput.value = '';
+        submitFreetext(val);
+      });
+    }
+
+    // Modale : clic sur suggestion = même chemin que le texte libre
     var suggestions = document.querySelectorAll('.megafilter-modal-sug');
     suggestions.forEach(function (sug) {
       sug.addEventListener('click', function () {
-        simulateChat(sug.dataset.sim);
+        submitFreetext(sug.textContent.trim());
       });
     });
 
-    // Modale : bouton "Voir la sélection" — applique les filtres simulés et ferme
+    // Modale : footer chat — Entrée ou clic Envoyer
+    var footerInput = document.getElementById('megafilter-modal-input-footer');
+    var sendBtn = document.getElementById('megafilter-modal-send');
+    if (footerInput) {
+      footerInput.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        var val = footerInput.value;
+        footerInput.value = '';
+        submitChat(val);
+      });
+    }
+    if (sendBtn) {
+      sendBtn.addEventListener('click', function () {
+        if (!footerInput) return;
+        var val = footerInput.value;
+        footerInput.value = '';
+        submitChat(val);
+      });
+    }
+
+    // Modale : bouton "Voir la sélection" — ferme et laisse les chips appliqués
     var returnBtn = document.getElementById('megafilter-modal-return-btn');
-    if (returnBtn) returnBtn.addEventListener('click', applyPendingSimAndClose);
+    if (returnBtn) {
+      returnBtn.addEventListener('click', function () {
+        closeModal();
+        // Scroll smooth vers la grille
+        var grid = document.querySelector('.products, .product-list, [class*="product-grid"]');
+        if (grid && grid.scrollIntoView) {
+          grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    }
   }
 
   // ═══════════════════════════════════════════════════════════
