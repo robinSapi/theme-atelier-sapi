@@ -11,14 +11,12 @@
   var config = window.SAPI_MEGAFILTER || {};
   var STEPS = Array.isArray(config.steps) ? config.steps : [];
   var RULES = config.rules || {};
-  var COMMENTARY_DELAY_MS = 2500;
 
   // ═══ State partagé ═══
   var state = {
     answers: {}, // ex. { piece: 'salon', taille: 'moyenne' }
     labels:  {}, // ex. { piece: 'Salon / Salle à manger' }
   };
-  var commentaryTimer = null;
 
   // ═══ DOM refs (peuplé dans init) ═══
   var els = {};
@@ -299,7 +297,6 @@
   function onStateChange() {
     renderChips();
     applyFiltersToGrid();
-    scheduleCommentary();
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -321,63 +318,6 @@
       card.style.display = show ? '' : 'none';
       card.classList.toggle('is-filtered-out', !show);
     });
-  }
-
-  // ═══════════════════════════════════════════════════════════
-  //  Commentaire de Robin (débouncé 2,5s)
-  // ═══════════════════════════════════════════════════════════
-  var TAILLE_DIM = { petite: 'compact', moyenne: 'confortable', grande: 'spacieux' };
-
-  function buildCommentary() {
-    var a = state.answers;
-    var l = state.labels;
-    if (!hasAnyAnswer()) return '';
-
-    var pieceLabel = l.piece ? l.piece.toLowerCase() : '';
-    var styleLabel = l.style ? l.style.toLowerCase() : '';
-    var taille = TAILLE_DIM[a.taille] || '';
-
-    var sentence;
-    if (pieceLabel && taille && styleLabel) {
-      sentence = 'Pour ton <strong>' + pieceLabel + '</strong> ' + taille + ' et de style ' + styleLabel +
-                 ', j\'ai sélectionné une lumière qui te correspond.';
-    } else if (pieceLabel && taille) {
-      sentence = 'Pour ton <strong>' + pieceLabel + '</strong> ' + taille +
-                 ', voici une première sélection. Précise ton style pour affiner.';
-    } else if (pieceLabel && styleLabel) {
-      sentence = 'Pour ton <strong>' + pieceLabel + '</strong> de style ' + styleLabel +
-                 ', voici ce qui peut convenir.';
-    } else if (pieceLabel) {
-      sentence = 'Pour ton <strong>' + pieceLabel + '</strong>, voici ce qui peut convenir. Réponds à quelques questions pour affiner.';
-    } else if (styleLabel) {
-      sentence = 'Pour un intérieur ' + styleLabel + ', voici ma première sélection.';
-    } else {
-      sentence = 'Réponds à quelques questions et je te montre les modèles qui te correspondent.';
-    }
-
-    return sentence + ' <span class="megafilter-commentary-sig">— Robin</span>';
-  }
-
-  function scheduleCommentary() {
-    if (!els.commentary) return;
-    // Masquer immédiatement à chaque changement (la zone reste réservée par CSS min-height)
-    els.commentary.classList.remove('is-visible');
-
-    if (commentaryTimer) clearTimeout(commentaryTimer);
-    if (!hasAnyAnswer()) {
-      els.commentary.innerHTML = '';
-      return;
-    }
-
-    commentaryTimer = setTimeout(function () {
-      var html = buildCommentary();
-      if (!html) return;
-      els.commentary.innerHTML = html;
-      // Reflow puis classe pour transition d'opacité
-      // eslint-disable-next-line no-unused-expressions
-      els.commentary.offsetHeight;
-      els.commentary.classList.add('is-visible');
-    }, COMMENTARY_DELAY_MS);
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -620,18 +560,14 @@
     els.chipsContainer = document.getElementById('megafilter-chips');
     if (!els.chipsContainer) return; // pas sur la page concernée
 
-    els.commentary = document.getElementById('megafilter-commentary');
-    els.reset      = document.getElementById('megafilter-reset');
-    els.openAiBtn  = document.getElementById('megafilter-open-ai');
-    els.modal      = document.getElementById('megafilter-modal');
+    els.reset     = document.getElementById('megafilter-reset');
+    els.openAiBtn = document.getElementById('megafilter-open-ai');
+    els.modal     = document.getElementById('megafilter-modal');
 
     bindEvents();
     readQueryParams();
     renderChips();
-
-    // Premier passage : applique les filtres + déclenche commentaire si réponses depuis l'URL
     applyFiltersToGrid();
-    if (hasAnyAnswer()) scheduleCommentary();
   }
 
   // API publique pour shop.js

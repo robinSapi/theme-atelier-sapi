@@ -252,10 +252,6 @@ $megafilter_chip_labels = [
         <?php esc_html_e('Tout effacer', 'theme-sapi-maison'); ?>
       </button>
     </div>
-
-    <div class="megafilter-commentary-zone">
-      <p class="megafilter-commentary" id="megafilter-commentary" aria-live="polite"></p>
-    </div>
   </div>
 </section>
 
