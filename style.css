@@ -24692,7 +24692,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   background: var(--color-white);
   border: 1px solid var(--color-line);
   border-radius: 16px;
-  padding: 1rem 1.25rem;
+  padding: 0.875rem 1.25rem;
   box-shadow: var(--shadow-card);
 }
 
@@ -24700,7 +24700,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  margin-bottom: 0.875rem;
+  margin-bottom: 0.625rem;
 }
 
 .megafilter-title {
@@ -24723,7 +24723,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 
 /* Actions sous les chips : CTA à gauche, "Tout effacer" à droite (alignés sur la même ligne) */
 .megafilter-actions {
-  margin-top: 0.875rem;
+  margin-top: 0.625rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -25189,7 +25189,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   }
 
   .megafilter-bar-inner {
-    padding: 1.125rem 1.5rem;
+    padding: 1rem 1.5rem;
   }
 
   .megafilter-intro {
