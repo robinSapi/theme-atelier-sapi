@@ -24846,6 +24846,10 @@ body.woocommerce-cart div.woocommerce-wrapper {
   transform: translateY(0);
   pointer-events: auto;
   max-width: 400px;
+  /* overflow visible une fois la transition d'apparition terminée — sinon
+     le menu déroulant absolu (top: 100%) est clippé par l'overflow hidden
+     du fade-in et ne s'affiche pas au clic. */
+  overflow: visible;
 }
 
 .megafilter-chip.is-conditional.is-visible .megafilter-chip-toggle {
