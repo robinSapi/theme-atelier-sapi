@@ -12,15 +12,6 @@ defined('ABSPATH') || exit;
 
 get_header();
 
-// Get all product categories for filters
-$product_categories = get_terms([
-  'taxonomy' => 'product_cat',
-  'hide_empty' => true,
-  'exclude' => [get_option('default_product_cat')], // Exclude "Uncategorized"
-  'orderby' => 'menu_order',
-  'order' => 'ASC',
-]);
-
 // Get ALL products (no pagination)
 $all_products = new WP_Query([
   'post_type' => 'product',
@@ -172,112 +163,6 @@ $megafilter_chip_labels = [
     </div>
   </div>
 </section>
-
-<!-- Product Filters with dynamic counts -->
-<div class="product-filters-wrapper">
-  <!-- Search Bar -->
-  <div class="product-search-bar">
-    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <circle cx="11" cy="11" r="8"></circle>
-      <path d="m21 21-4.35-4.35"></path>
-    </svg>
-    <input
-      type="text"
-      id="product-search-input"
-      class="product-search-input"
-      placeholder="<?php esc_attr_e('Rechercher un luminaire...', 'theme-sapi-maison'); ?>"
-      aria-label="<?php esc_attr_e('Rechercher un produit', 'theme-sapi-maison'); ?>"
-    />
-    <button type="button" class="search-clear" style="display: none;" aria-label="<?php esc_attr_e('Effacer la recherche', 'theme-sapi-maison'); ?>">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-    </button>
-  </div>
-
-  <nav class="product-filters product-filters-js" role="navigation" aria-label="<?php esc_attr_e('Filtres produits', 'theme-sapi-maison'); ?>">
-    <?php
-    // Build category lookup
-    $cats_by_slug = [];
-    if ($product_categories && !is_wp_error($product_categories)) {
-      foreach ($product_categories as $cat) {
-        $cats_by_slug[$cat->slug] = $cat;
-      }
-    }
-
-    // Count for "Toutes nos créations" = total minus extras
-    $extras_slugs = ['accessoires', 'carte-cadeau'];
-    $creations_count = $all_products->found_posts;
-    foreach ($extras_slugs as $es) {
-      if (isset($cats_by_slug[$es])) {
-        $creations_count -= $cats_by_slug[$es]->count;
-      }
-    }
-    ?>
-
-    <!-- Dropdown mobile (remplace les pills sur mobile) -->
-    <?php
-    $creations_order = ['suspensions', 'appliques', 'lampadaires', 'lampesaposer'];
-    $all_filter_label = esc_html__('Toutes mes créations', 'theme-sapi-maison') . ' (' . esc_html($creations_count) . ')';
-    ?>
-    <div class="filter-dropdown filter-dropdown--mobile" id="mobile-category-dropdown">
-      <button type="button" class="filter-dropdown-toggle">
-        <span class="filter-label"><?php echo $all_filter_label; ?></span>
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <div class="filter-dropdown-menu">
-        <button type="button" class="filter-option active" data-filter="all"><?php echo $all_filter_label; ?></button>
-        <?php foreach ($creations_order as $slug) :
-          if (!isset($cats_by_slug[$slug])) continue;
-          $cat = $cats_by_slug[$slug]; ?>
-          <button type="button" class="filter-option" data-filter="<?php echo esc_attr($cat->slug); ?>"><?php echo esc_html($cat->name); ?> (<?php echo esc_html($cat->count); ?>)</button>
-        <?php endforeach; ?>
-        <?php foreach ($extras_slugs as $slug) :
-          if (!isset($cats_by_slug[$slug])) continue;
-          $cat = $cats_by_slug[$slug]; ?>
-          <button type="button" class="filter-option" data-filter="<?php echo esc_attr($cat->slug); ?>"><?php echo esc_html($cat->name); ?> (<?php echo esc_html($cat->count); ?>)</button>
-        <?php endforeach; ?>
-      </div>
-    </div>
-
-    <!-- Ligne 1 : Filtres catégorie (luminaires) — desktop only -->
-    <div class="filter-row filter-row--categories">
-      <button type="button" class="filter-btn active" data-filter="all">
-        <?php esc_html_e('Toutes mes créations', 'theme-sapi-maison'); ?>
-        <span class="filter-count">(<?php echo esc_html($creations_count); ?>)</span>
-      </button>
-      <?php foreach ($creations_order as $slug) :
-        if (!isset($cats_by_slug[$slug])) continue;
-        $cat = $cats_by_slug[$slug]; ?>
-        <button type="button" class="filter-btn" data-filter="<?php echo esc_attr($cat->slug); ?>">
-          <?php echo esc_html($cat->name); ?>
-          <span class="filter-count">(<?php echo esc_html($cat->count); ?>)</span>
-        </button>
-      <?php endforeach; ?>
-    </div>
-
-    <!-- Ligne 2 : Extras (accessoires, carte cadeau) — desktop only -->
-    <div class="filter-row filter-row--extras">
-      <?php
-      foreach ($extras_slugs as $slug) :
-        if (!isset($cats_by_slug[$slug])) continue;
-        $cat = $cats_by_slug[$slug];
-        $btn_class = 'filter-btn filter-btn--extra';
-        if ($slug === 'carte-cadeau') {
-          $btn_class .= ' filter-btn--gift';
-        }
-      ?>
-        <button type="button" class="<?php echo esc_attr($btn_class); ?>" data-filter="<?php echo esc_attr($cat->slug); ?>">
-          <?php echo esc_html($cat->name); ?>
-          <span class="filter-count">(<?php echo esc_html($cat->count); ?>)</span>
-        </button>
-      <?php endforeach; ?>
-    </div>
-
-  </nav>
-
-</div>
 
 <!-- Products Grid — grille 2 colonnes photos ambiance -->
 <section class="shop-products" id="shop-products">
