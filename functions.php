@@ -1205,20 +1205,6 @@ function sapi_maison_open_graph() {
 }
 add_action('wp_head', 'sapi_maison_open_graph');
 
-function sapi_maison_canonical() {
-  if (is_singular()) {
-    echo '<link rel="canonical" href="' . esc_url(get_permalink()) . '">' . "\n";
-  } elseif (is_archive()) {
-    $url = get_term_link(get_queried_object());
-    if (!is_wp_error($url)) {
-      echo '<link rel="canonical" href="' . esc_url($url) . '">' . "\n";
-    }
-  } elseif (is_front_page()) {
-    echo '<link rel="canonical" href="' . esc_url(home_url('/')) . '">' . "\n";
-  }
-}
-add_action('wp_head', 'sapi_maison_canonical');
-
 // Meta descriptions (SEO)
 function sapi_maison_meta_description() {
   $description = '';
