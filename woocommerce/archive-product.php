@@ -71,14 +71,38 @@ if (!$hero_img_url) {
   }
 }
 ?>
+<?php
+// Hero réactif : si ?piece=… présent dans l'URL et reconnu, on adapte H1 + sous-titre
+// et on cache le lien Conseils (qui contredit le contexte filtré).
+$piece_hero_map = [
+  'salon'    => ['det' => 'ton', 'nom' => 'salon'],
+  'chambre'  => ['det' => 'ta',  'nom' => 'chambre'],
+  'cuisine'  => ['det' => 'ta',  'nom' => 'cuisine'],
+  'bureau'   => ['det' => 'ton', 'nom' => 'bureau'],
+  'entree'   => ['det' => 'ton', 'nom' => 'entrée'],
+  'escalier' => ['det' => 'ton', 'nom' => 'escalier'],
+];
+$piece_param = isset($_GET['piece']) ? sanitize_key(wp_unslash($_GET['piece'])) : '';
+$piece_hero  = isset($piece_hero_map[$piece_param]) ? $piece_hero_map[$piece_param] : null;
+?>
 <section class="shop-hero-artisan">
   <div class="shop-hero-artisan-inner">
-    <h1><?php esc_html_e('Mes Créations', 'theme-sapi-maison'); ?></h1>
-    <p class="shop-hero-artisan-subtitle">
-      <?php esc_html_e('Luminaires uniques, découpés au laser et assemblés à la main dans l\'atelier lyonnais de Robin.', 'theme-sapi-maison'); ?>
-    </p>
-    <!-- CTA maillage interne → Conseils éclairés -->
-    <p class="seo-cta-maillage-inline">Vous ne savez pas par où commencer ? <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>">Lisez les conseils de Robin →</a></p>
+    <?php if ($piece_hero) : ?>
+      <h1><?php
+        /* translators: 1: déterminant possessif (ton/ta), 2: nom de la pièce */
+        printf(esc_html__('Pour %1$s %2$s', 'theme-sapi-maison'), esc_html($piece_hero['det']), esc_html($piece_hero['nom']));
+      ?></h1>
+      <p class="shop-hero-artisan-subtitle">
+        <?php esc_html_e('Ma sélection pour cette pièce — affine ton projet juste en-dessous.', 'theme-sapi-maison'); ?>
+      </p>
+    <?php else : ?>
+      <h1><?php esc_html_e('Mes Créations', 'theme-sapi-maison'); ?></h1>
+      <p class="shop-hero-artisan-subtitle">
+        <?php esc_html_e('Luminaires uniques, découpés au laser et assemblés à la main dans l\'atelier lyonnais de Robin.', 'theme-sapi-maison'); ?>
+      </p>
+      <!-- CTA maillage interne → Conseils éclairés (masqué quand un piece est sélectionné) -->
+      <p class="seo-cta-maillage-inline">Vous ne savez pas par où commencer ? <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>">Lisez les conseils de Robin →</a></p>
+    <?php endif; ?>
   </div>
 </section>
 
@@ -87,6 +111,67 @@ if (!$hero_img_url) {
 require_once get_template_directory() . '/inc/template-robin-conseil.php';
 sapi_robin_conseil_card( 'selection' );
 ?>
+
+<!-- ── Méga-filtre intelligent (F1a) — placé juste après le hero (F1a-bis) ── -->
+<?php
+$megafilter_steps = sapi_guide_get_steps();
+$megafilter_chip_labels = [
+  'piece'           => __('Pour quelle pièce ?', 'theme-sapi-maison'),
+  'taille'          => __('Quelle taille ?', 'theme-sapi-maison'),
+  'taille_escalier' => __('Quel escalier ?', 'theme-sapi-maison'),
+  'eclairage'       => __('Éclairage principal ?', 'theme-sapi-maison'),
+  'sortie'          => __('Quelle sortie ?', 'theme-sapi-maison'),
+  'hauteur'         => __('Quelle hauteur ?', 'theme-sapi-maison'),
+  'table'           => __('Au-dessus d\'une table ?', 'theme-sapi-maison'),
+  'style'           => __('Quel style ?', 'theme-sapi-maison'),
+];
+?>
+<section class="megafilter-bar" id="megafilter-bar" aria-label="<?php esc_attr_e('Affiner les créations', 'theme-sapi-maison'); ?>">
+  <div class="megafilter-bar-inner">
+    <div class="megafilter-header">
+      <h2 class="megafilter-title"><?php esc_html_e('Affiner avec Robin', 'theme-sapi-maison'); ?></h2>
+      <p class="megafilter-intro"><?php esc_html_e('Réponds aux questions ci-dessous pour voir les modèles qui te correspondent.', 'theme-sapi-maison'); ?></p>
+    </div>
+
+    <div class="megafilter-chips" id="megafilter-chips" role="group" aria-label="<?php esc_attr_e('Filtres du projet', 'theme-sapi-maison'); ?>">
+      <?php foreach ($megafilter_steps as $step) :
+        $sid = $step['id'];
+        $label = isset($megafilter_chip_labels[$sid]) ? $megafilter_chip_labels[$sid] : ucfirst($sid);
+        $is_always = ($step['visibility'] === 'always');
+      ?>
+        <div class="megafilter-chip<?php echo $is_always ? '' : ' is-conditional'; ?>" data-step="<?php echo esc_attr($sid); ?>">
+          <button type="button" class="megafilter-chip-toggle" aria-haspopup="listbox" aria-expanded="false">
+            <span class="megafilter-chip-label"><?php echo esc_html($label); ?></span>
+            <span class="megafilter-chip-value" hidden></span>
+            <svg class="megafilter-chip-arrow" width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="megafilter-chip-menu" role="listbox" hidden>
+            <?php foreach ($step['choices'] as $choice) : ?>
+              <button type="button" class="megafilter-chip-option" role="option" data-value="<?php echo esc_attr($choice['slug']); ?>" data-label="<?php echo esc_attr($choice['label']); ?>">
+                <?php echo esc_html($choice['label']); ?>
+              </button>
+            <?php endforeach; ?>
+          </div>
+        </div>
+      <?php endforeach; ?>
+    </div>
+
+    <div class="megafilter-actions">
+      <button type="button" class="megafilter-ai-btn" id="megafilter-open-ai">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+          <path d="m15 5 4 4"/>
+        </svg>
+        <span><?php esc_html_e('Décrire précisément mon projet', 'theme-sapi-maison'); ?></span>
+      </button>
+      <button type="button" class="megafilter-reset" id="megafilter-reset" hidden>
+        <?php esc_html_e('Tout effacer', 'theme-sapi-maison'); ?>
+      </button>
+    </div>
+  </div>
+</section>
 
 <!-- Product Filters with dynamic counts -->
 <div class="product-filters-wrapper">
@@ -193,67 +278,6 @@ sapi_robin_conseil_card( 'selection' );
   </nav>
 
 </div>
-
-<!-- ── Méga-filtre intelligent (F1a) ── -->
-<?php
-$megafilter_steps = sapi_guide_get_steps();
-$megafilter_chip_labels = [
-  'piece'           => __('Pour quelle pièce ?', 'theme-sapi-maison'),
-  'taille'          => __('Quelle taille ?', 'theme-sapi-maison'),
-  'taille_escalier' => __('Quel escalier ?', 'theme-sapi-maison'),
-  'eclairage'       => __('Éclairage principal ?', 'theme-sapi-maison'),
-  'sortie'          => __('Quelle sortie ?', 'theme-sapi-maison'),
-  'hauteur'         => __('Quelle hauteur ?', 'theme-sapi-maison'),
-  'table'           => __('Au-dessus d\'une table ?', 'theme-sapi-maison'),
-  'style'           => __('Quel style ?', 'theme-sapi-maison'),
-];
-?>
-<section class="megafilter-bar" id="megafilter-bar" aria-label="<?php esc_attr_e('Affiner les créations', 'theme-sapi-maison'); ?>">
-  <div class="megafilter-bar-inner">
-    <div class="megafilter-header">
-      <h2 class="megafilter-title"><?php esc_html_e('Affiner avec Robin', 'theme-sapi-maison'); ?></h2>
-      <p class="megafilter-intro"><?php esc_html_e('Réponds aux questions ci-dessous pour voir les modèles qui te correspondent.', 'theme-sapi-maison'); ?></p>
-    </div>
-
-    <div class="megafilter-chips" id="megafilter-chips" role="group" aria-label="<?php esc_attr_e('Filtres du projet', 'theme-sapi-maison'); ?>">
-      <?php foreach ($megafilter_steps as $step) :
-        $sid = $step['id'];
-        $label = isset($megafilter_chip_labels[$sid]) ? $megafilter_chip_labels[$sid] : ucfirst($sid);
-        $is_always = ($step['visibility'] === 'always');
-      ?>
-        <div class="megafilter-chip<?php echo $is_always ? '' : ' is-conditional'; ?>" data-step="<?php echo esc_attr($sid); ?>">
-          <button type="button" class="megafilter-chip-toggle" aria-haspopup="listbox" aria-expanded="false">
-            <span class="megafilter-chip-label"><?php echo esc_html($label); ?></span>
-            <span class="megafilter-chip-value" hidden></span>
-            <svg class="megafilter-chip-arrow" width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <div class="megafilter-chip-menu" role="listbox" hidden>
-            <?php foreach ($step['choices'] as $choice) : ?>
-              <button type="button" class="megafilter-chip-option" role="option" data-value="<?php echo esc_attr($choice['slug']); ?>" data-label="<?php echo esc_attr($choice['label']); ?>">
-                <?php echo esc_html($choice['label']); ?>
-              </button>
-            <?php endforeach; ?>
-          </div>
-        </div>
-      <?php endforeach; ?>
-    </div>
-
-    <div class="megafilter-actions">
-      <button type="button" class="megafilter-ai-btn" id="megafilter-open-ai">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
-          <path d="m15 5 4 4"/>
-        </svg>
-        <span><?php esc_html_e('Décrire précisément mon projet', 'theme-sapi-maison'); ?></span>
-      </button>
-      <button type="button" class="megafilter-reset" id="megafilter-reset" hidden>
-        <?php esc_html_e('Tout effacer', 'theme-sapi-maison'); ?>
-      </button>
-    </div>
-  </div>
-</section>
 
 <!-- Products Grid — grille 2 colonnes photos ambiance -->
 <section class="shop-products" id="shop-products">

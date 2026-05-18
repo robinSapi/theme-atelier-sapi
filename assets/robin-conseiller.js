@@ -1561,35 +1561,13 @@
   }
 
   /* ═══════════════════════════════════════════
-     Bandeau dual-mode : repos / projet
+     Bandeau réassurance (mode projet retiré en F1a-bis)
+     Fonction conservée en no-op pour ne pas casser les ~6 call sites éparpillés.
+     L'état projet est désormais affiché dans la card "Affiner avec Robin"
+     intégrée à /mes-creations/ (cf. assets/mega-filtre.js).
   ═══════════════════════════════════════════ */
   function updateBandeauChips() {
-    var bandeau = document.getElementById('robin-bandeau');
-    var chipsEl = document.getElementById('robin-bandeau-chips');
-
-    var parts = [];
-    var visible = getVisibleSteps();
-    for (var i = 0; i < visible.length; i++) {
-      var lbl = state.labels[visible[i]];
-      if (lbl) parts.push(lbl);
-    }
-
-    if (chipsEl) {
-      chipsEl.textContent = parts.length > 0
-        ? parts.join(' · ')
-        : 'Robin peut vous conseiller';
-    }
-
-    // Toggle mode repos / projet sur le bandeau
-    if (bandeau) {
-      if (parts.length > 0) {
-        bandeau.classList.add('robin-bandeau--mode-projet');
-        bandeau.classList.remove('robin-bandeau--mode-repos');
-      } else {
-        bandeau.classList.add('robin-bandeau--mode-repos');
-        bandeau.classList.remove('robin-bandeau--mode-projet');
-      }
-    }
+    /* no-op */
   }
 
   /* Sur ≤600px, masquer 2 items réassurance au hasard pour économiser la largeur */
@@ -1788,15 +1766,10 @@
       });
     }
 
-    // Ouverture : bandeau + pills + triggers génériques [data-robin-open]
+    // Ouverture : pills + triggers génériques [data-robin-open]
+    // Note F1a-bis : le clic sur #robin-bandeau n'ouvre plus la modale — le
+    // bandeau est devenu un simple bandeau réassurance statique.
     document.addEventListener('click', function (e) {
-      // Bandeau
-      var bandeau = e.target.closest('#robin-bandeau');
-      if (bandeau) {
-        openModal('bandeau');
-        return;
-      }
-
       // Trigger générique : tout élément avec [data-robin-open]
       // Permet aux templates / pages d'ouvrir la modale sans dépendre des classes
       // .robin-pill / .robin-category-card__inner (utilisé par la card C3 de la
@@ -1822,17 +1795,6 @@
         return;
       }
     });
-
-    // Bandeau accessible au clavier
-    var bandeau = document.getElementById('robin-bandeau');
-    if (bandeau) {
-      bandeau.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          openModal('bandeau');
-        }
-      });
-    }
   }
 
   /* ═══════════════════════════════════════════
