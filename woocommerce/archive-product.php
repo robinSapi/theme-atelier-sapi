@@ -240,7 +240,7 @@ $megafilter_chip_labels = [
       <?php endforeach; ?>
     </div>
 
-    <div class="megafilter-cta">
+    <div class="megafilter-actions">
       <button type="button" class="megafilter-ai-btn" id="megafilter-open-ai">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
@@ -248,16 +248,13 @@ $megafilter_chip_labels = [
         </svg>
         <span><?php esc_html_e('Décrire précisément mon projet', 'theme-sapi-maison'); ?></span>
       </button>
+      <button type="button" class="megafilter-reset" id="megafilter-reset" hidden>
+        <?php esc_html_e('Tout effacer', 'theme-sapi-maison'); ?>
+      </button>
     </div>
 
     <div class="megafilter-commentary-zone">
       <p class="megafilter-commentary" id="megafilter-commentary" aria-live="polite"></p>
-    </div>
-
-    <div class="megafilter-footer" id="megafilter-footer" hidden>
-      <button type="button" class="megafilter-reset" id="megafilter-reset">
-        <?php esc_html_e('Tout effacer', 'theme-sapi-maison'); ?>
-      </button>
     </div>
   </div>
 </section>

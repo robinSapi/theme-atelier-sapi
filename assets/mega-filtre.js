@@ -306,8 +306,8 @@
   //  Application des filtres à la grille
   // ═══════════════════════════════════════════════════════════
   function applyFiltersToGrid() {
-    // Affiche / masque le footer "Tout effacer" selon qu'au moins un chip est répondu
-    if (els.footer) els.footer.hidden = !hasAnyAnswer();
+    // Affiche / masque le bouton "Tout effacer" selon qu'au moins un chip est répondu
+    if (els.reset) els.reset.hidden = !hasAnyAnswer();
 
     // Délègue à shop.js pour appliquer le pipeline complet (catégorie + recherche + méga)
     if (typeof window.sapiShopRefilter === 'function') {
@@ -621,7 +621,6 @@
     if (!els.chipsContainer) return; // pas sur la page concernée
 
     els.commentary = document.getElementById('megafilter-commentary');
-    els.footer     = document.getElementById('megafilter-footer');
     els.reset      = document.getElementById('megafilter-reset');
     els.openAiBtn  = document.getElementById('megafilter-open-ai');
     els.modal      = document.getElementById('megafilter-modal');
