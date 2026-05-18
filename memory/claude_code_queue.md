@@ -407,7 +407,26 @@ Workflow auto-deploy en cours (lance par le push sur `test-theme-sapi-maison`). 
 
 ### ✅ Retour Claude Code v3 — itérations 18 mai 2026
 
-**Statut :** ✅ Toujours sur `test-theme-sapi-maison`, **6 commits supplémentaires** depuis le retour v2 (`8c77799`). L'UI a beaucoup changé — la card est maintenant épurée, sans commentaire, alignée pixel-perfect sur la grille. Toujours en attente de validation Robin avant merge master.
+**Statut :** ✅ Toujours sur `test-theme-sapi-maison`, **6 commits supplémentaires** depuis le retour v2 (`2348e49`, ex-`8c77799`). L'UI a beaucoup changé — la card est maintenant épurée, sans commentaire, alignée pixel-perfect sur la grille. Toujours en attente de validation Robin avant merge master.
+
+> ⚠️ **L'historique a été rebasé entre les retours v2 et v3** : tous les SHAs F1a ont été réécrits (probablement un cleanup en préparation du merge master). Les refs dans les retours v1 et v2 ci-dessus sont obsolètes. Voir le tableau "Sommaire complet des commits" en bas de ce retour v3 pour les SHAs actuels. Mapping rapide ancien → nouveau :
+>
+> | Ancien (v1/v2) | Nouveau (post-rebase) | Sujet |
+> |---|---|---|
+> | `47683c1` | `5ec28ba` | F1a v1 frontend |
+> | `59972c6` | *(linéarisé)* | merge dissous |
+> | `a38cf2f` | `2bb4309` | retour Cowork v1 |
+> | `4a78cdf` | `18343d6` | F1a v2 |
+> | `46e1faf` | `ab8092b` | F1a v3 chevron |
+> | `8c77799` | `2348e49` | retour Cowork v2 |
+> | `e2eda83` | `b301cfc` | fix overflow |
+> | `07574ba` | `5bb6d11` | réorga card |
+> | `98a349d` | `fe2f9d9` | UI v4 |
+> | `b76f441` | `1a58cc4` | suppression commentaire |
+> | `0cc83b9` | `cd56c12` | espaces resserrés |
+> | `4c91743` | `e8de051` | padding-bottom |
+>
+> Un commit non-F1a a aussi été inséré dans l'historique : `1bc611d` *"fix(seo): remove duplicate canonical from theme — Yoast handles it"* — entre le carousel home (`10aaeb9`) et le début F1a.
 
 ⚠️ **L'état décrit ci-dessus dans le retour v1/v2 N'EST PLUS VALIDE pour 3 points :**
 - ❌ Le compteur résultats n'existe plus (retiré v2)
@@ -420,12 +439,12 @@ Workflow auto-deploy en cours (lance par le push sur `test-theme-sapi-maison`). 
 
 | Commit | Retour Robin | Action |
 |--------|--------------|--------|
-| `e2eda83` | "La question 'Quelle taille' ne fonctionne pas : quand on clique, rien ne s'affiche" | **Bug menu déroulant clippé** : `.megafilter-chip.is-conditional` avait `overflow: hidden` pour permettre l'animation `max-width: 0 → 400px` au fade-in. Mais `overflow: hidden` restait actif après l'apparition, ce qui clippait le `.megafilter-chip-menu` positionné en `absolute` sous le chip. Fix : `.is-conditional.is-visible { overflow: visible }`. Affectait Taille, Hauteur, Éclairage, Au-dessus, Escalier (tous les chips conditionnels). |
-| `07574ba` | Screenshot Robin : le menu déroulant passe sous le commentaire ; "Décrire précisément" mal placé ; phrase doit être DANS la card | **Réorganisation profonde** : (a) commentaire déplacé hors de la `section` parente → dans `.megafilter-bar-inner` (résout aussi le bug stacking : `transform` sur `.is-conditional` créait un stacking context isolé qui maintenait le menu sous le commentaire malgré `z-index: 20`) ; (b) `z-index: 30` sur `.megafilter-chip.is-open` pour passer devant la zone commentaire ; (c) bouton "Décrire précisément" sorti du header, placé dans `.megafilter-cta` sous les chips ; (d) zone commentaire `.megafilter-commentary-zone` avec `min-height` pour réserver l'espace même quand vide. |
-| `98a349d` | "Card doit faire la même largeur que la grille en dessous, espacement vertical perdu, Tout effacer aligné avec les chips" | (a) Card alignée sur `.shop-products .product-grid` : `max-width: 1400px` (était `1200px`) + `padding: 0 3rem` desktop (était `1.25rem`) ; (b) condensation verticale (padding card, margins headers, min-height commentaire) ; (c) `.megafilter-footer` séparé avec border-top **supprimé** — `.megafilter-cta` renommé en `.megafilter-actions` qui contient maintenant le CTA orange à gauche **et** "Tout effacer" à droite dans la même rangée flex `space-between`. |
-| `b76f441` | "La phrase affichée vient d'où ? — Supprime tout ça, c'est nul. Pas de phrase." | **Suppression complète du commentaire** : la mécanique `buildCommentary()` reposait sur 5 phrases-modèles JS en dur qui ignoraient 5 chips sur 8 (`sortie`, `hauteur`, `table`, `eclairage`, `taille_escalier`) et sonnaient artificiel. Supprimé en entier : PHP (zone retirée), JS (~80 lignes : `buildCommentary`, `scheduleCommentary`, `TAILLE_DIM`, `commentaryTimer`, `COMMENTARY_DELAY_MS`, refs `els.commentary`), CSS (toutes les règles `.megafilter-commentary*` + desktop). Sera reconstruit en F1b avec Claude API — un vrai commentaire conversationnel. |
-| `0cc83b9` | "Toujours trop d'espace vertical entre les chips et le bouton 'Décrire…'" | Resserrement des marges : `.megafilter-actions margin-top` 14px → 10px, `.megafilter-header margin-bottom` 14px → 10px, padding vertical de la card 16→14px mobile / 18→16px desktop. |
-| `4c91743` | Screenshot Robin : "Section suivante collée, on ne voit pas l'ombre" | `.megafilter-bar` reçoit `padding-bottom: 1.5rem` (mobile) / `2rem` (desktop) pour créer de l'espace visible entre la card et `.shop-products` (fond crème) qui masquait l'ombre `var(--shadow-card)`. |
+| `b301cfc` | "La question 'Quelle taille' ne fonctionne pas : quand on clique, rien ne s'affiche" | **Bug menu déroulant clippé** : `.megafilter-chip.is-conditional` avait `overflow: hidden` pour permettre l'animation `max-width: 0 → 400px` au fade-in. Mais `overflow: hidden` restait actif après l'apparition, ce qui clippait le `.megafilter-chip-menu` positionné en `absolute` sous le chip. Fix : `.is-conditional.is-visible { overflow: visible }`. Affectait Taille, Hauteur, Éclairage, Au-dessus, Escalier (tous les chips conditionnels). |
+| `5bb6d11` | Screenshot Robin : le menu déroulant passe sous le commentaire ; "Décrire précisément" mal placé ; phrase doit être DANS la card | **Réorganisation profonde** : (a) commentaire déplacé hors de la `section` parente → dans `.megafilter-bar-inner` (résout aussi le bug stacking : `transform` sur `.is-conditional` créait un stacking context isolé qui maintenait le menu sous le commentaire malgré `z-index: 20`) ; (b) `z-index: 30` sur `.megafilter-chip.is-open` pour passer devant la zone commentaire ; (c) bouton "Décrire précisément" sorti du header, placé dans `.megafilter-cta` sous les chips ; (d) zone commentaire `.megafilter-commentary-zone` avec `min-height` pour réserver l'espace même quand vide. |
+| `fe2f9d9` | "Card doit faire la même largeur que la grille en dessous, espacement vertical perdu, Tout effacer aligné avec les chips" | (a) Card alignée sur `.shop-products .product-grid` : `max-width: 1400px` (était `1200px`) + `padding: 0 3rem` desktop (était `1.25rem`) ; (b) condensation verticale (padding card, margins headers, min-height commentaire) ; (c) `.megafilter-footer` séparé avec border-top **supprimé** — `.megafilter-cta` renommé en `.megafilter-actions` qui contient maintenant le CTA orange à gauche **et** "Tout effacer" à droite dans la même rangée flex `space-between`. |
+| `1a58cc4` | "La phrase affichée vient d'où ? — Supprime tout ça, c'est nul. Pas de phrase." | **Suppression complète du commentaire** : la mécanique `buildCommentary()` reposait sur 5 phrases-modèles JS en dur qui ignoraient 5 chips sur 8 (`sortie`, `hauteur`, `table`, `eclairage`, `taille_escalier`) et sonnaient artificiel. Supprimé en entier : PHP (zone retirée), JS (~80 lignes : `buildCommentary`, `scheduleCommentary`, `TAILLE_DIM`, `commentaryTimer`, `COMMENTARY_DELAY_MS`, refs `els.commentary`), CSS (toutes les règles `.megafilter-commentary*` + desktop). Sera reconstruit en F1b avec Claude API — un vrai commentaire conversationnel. |
+| `cd56c12` | "Toujours trop d'espace vertical entre les chips et le bouton 'Décrire…'" | Resserrement des marges : `.megafilter-actions margin-top` 14px → 10px, `.megafilter-header margin-bottom` 14px → 10px, padding vertical de la card 16→14px mobile / 18→16px desktop. |
+| `e8de051` | Screenshot Robin : "Section suivante collée, on ne voit pas l'ombre" | `.megafilter-bar` reçoit `padding-bottom: 1.5rem` (mobile) / `2rem` (desktop) pour créer de l'espace visible entre la card et `.shop-products` (fond crème) qui masquait l'ombre `var(--shadow-card)`. |
 
 ---
 
@@ -457,22 +476,21 @@ Workflow auto-deploy en cours (lance par le push sur `test-theme-sapi-maison`). 
 
 ---
 
-#### 📋 Sommaire complet des commits sur `test-theme-sapi-maison`
+#### 📋 Sommaire complet des commits sur `test-theme-sapi-maison` (post-rebase)
 
 | Commit | Sujet |
 |--------|-------|
-| `47683c1` | F1a v1 — frontend complet (chips + JS + CSS + modale + cleanup ancien bandeau) |
-| `59972c6` | Merge `feature/mega-filtre-mes-creations` → `test-theme-sapi-maison` |
-| `a38cf2f` | Retour Cowork v1 dans la queue |
-| `4a78cdf` | F1a v2 — itérations : suppression compteur, Tout effacer dans la card, chips en mode questions |
-| `46e1faf` | F1a v3 — croix remplacée par chevron + toggle dans le menu |
-| `8c77799` | Retour Cowork v2 dans la queue |
-| `e2eda83` | F1a v4 — fix overflow chips conditionnels (menu déroulant clippé) |
-| `07574ba` | F1a v5 — CTA sous chips, commentaire DANS la card, z-index menu corrigé |
-| `98a349d` | F1a v6 — card alignée sur la grille, espacements condensés, Tout effacer aligné CTA |
-| `b76f441` | F1a v7 — suppression du commentaire de Robin (placeholder pas pertinent) |
-| `0cc83b9` | F1a v8 — espaces verticaux resserrés |
-| `4c91743` | F1a v9 — padding-bottom sur la barre méga-filtre pour révéler l'ombre |
+| `5ec28ba` | F1a v1 — frontend complet (chips + JS + CSS + modale + cleanup ancien bandeau) |
+| `2bb4309` | Retour Cowork v1 dans la queue |
+| `18343d6` | F1a v2 — itérations : suppression compteur, Tout effacer dans la card, chips en mode questions |
+| `ab8092b` | F1a v3 — croix remplacée par chevron + toggle dans le menu |
+| `2348e49` | Retour Cowork v2 dans la queue |
+| `b301cfc` | F1a v4 — fix overflow chips conditionnels (menu déroulant clippé) |
+| `5bb6d11` | F1a v5 — CTA sous chips, commentaire DANS la card, z-index menu corrigé |
+| `fe2f9d9` | F1a v6 — card alignée sur la grille, espacements condensés, Tout effacer aligné CTA |
+| `1a58cc4` | F1a v7 — suppression du commentaire de Robin (placeholder pas pertinent) |
+| `cd56c12` | F1a v8 — espaces verticaux resserrés |
+| `e8de051` | F1a v9 — padding-bottom sur la barre méga-filtre pour révéler l'ombre |
 
 ---
 
