@@ -360,19 +360,20 @@
 
   function scheduleCommentary() {
     if (!els.commentary) return;
-    // Masquer immédiatement à chaque changement
+    // Masquer immédiatement à chaque changement (la zone reste réservée par CSS min-height)
     els.commentary.classList.remove('is-visible');
-    els.commentary.hidden = true;
 
     if (commentaryTimer) clearTimeout(commentaryTimer);
-    if (!hasAnyAnswer()) return;
+    if (!hasAnyAnswer()) {
+      els.commentary.innerHTML = '';
+      return;
+    }
 
     commentaryTimer = setTimeout(function () {
       var html = buildCommentary();
       if (!html) return;
       els.commentary.innerHTML = html;
-      els.commentary.hidden = false;
-      // Reflow puis classe pour transition
+      // Reflow puis classe pour transition d'opacité
       // eslint-disable-next-line no-unused-expressions
       els.commentary.offsetHeight;
       els.commentary.classList.add('is-visible');

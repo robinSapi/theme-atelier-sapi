@@ -24698,16 +24698,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .megafilter-header {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  gap: 0.875rem;
-  margin-bottom: 1rem;
-}
-
-.megafilter-header-text {
-  display: flex;
-  flex-direction: column;
   gap: 0.375rem;
-  min-width: 0;
+  margin-bottom: 1rem;
 }
 
 .megafilter-title {
@@ -24726,6 +24718,13 @@ body.woocommerce-cart div.woocommerce-wrapper {
   font-size: 0.875rem;
   line-height: 1.45;
   color: var(--color-wood-mid);
+}
+
+/* CTA "Décrire précisément mon projet" sous les chips */
+.megafilter-cta {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .megafilter-ai-btn {
@@ -24767,6 +24766,13 @@ body.woocommerce-cart div.woocommerce-wrapper {
   position: relative;
   display: inline-flex;
   align-items: center;
+}
+
+/* Quand un chip est ouvert (menu déroulé), il doit passer devant ses voisins
+   et la zone commentaire — le menu est positionné en absolute et serait
+   autrement masqué par les éléments suivants dans le DOM. */
+.megafilter-chip.is-open {
+  z-index: 30;
 }
 
 .megafilter-chip-toggle {
@@ -24910,20 +24916,24 @@ body.woocommerce-cart div.woocommerce-wrapper {
   color: var(--color-wood);
 }
 
-/* ── Commentaire de Robin ── */
+/* ── Zone commentaire (toujours présente dans la card, min-height pour éviter les sauts) ── */
+.megafilter-commentary-zone {
+  margin-top: 1rem;
+  min-height: 3.25rem;
+  display: flex;
+  align-items: center;
+}
+
 .megafilter-commentary {
-  max-width: 900px;
-  margin: 1.25rem auto 0;
-  padding: 0 1rem;
-  text-align: center;
+  margin: 0;
   font-family: var(--font-body);
   font-style: italic;
   font-size: 0.9375rem;
   line-height: 1.55;
   color: var(--color-wood-dark);
   opacity: 0;
-  -webkit-transform: translateY(8px);
-  transform: translateY(8px);
+  -webkit-transform: translateY(6px);
+  transform: translateY(6px);
   -webkit-transition: opacity 0.5s ease, transform 0.5s ease;
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
@@ -24932,6 +24942,12 @@ body.woocommerce-cart div.woocommerce-wrapper {
   opacity: 1;
   -webkit-transform: translateY(0);
   transform: translateY(0);
+}
+
+.megafilter-commentary:empty {
+  /* Vide : on garde l'espace réservé via min-height de la zone mais on
+     ne montre rien — pas de fantôme accessible aux lecteurs d'écran. */
+  display: none;
 }
 
 .megafilter-commentary strong {
@@ -25229,25 +25245,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
     padding: 1.25rem 1.5rem;
   }
 
-  .megafilter-header {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-    gap: 1.5rem;
-  }
-
-  .megafilter-header-text {
-    flex: 1;
-  }
-
   .megafilter-intro {
     font-size: 0.9375rem;
-  }
-
-  .megafilter-ai-btn {
-    width: auto;
-    flex-shrink: 0;
   }
 
   .megafilter-chips {
