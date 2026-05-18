@@ -587,6 +587,10 @@
 
         var filters = data.filters || {};
         if (Object.keys(filters).length) {
+          // Freetext = nouvelle description complète du projet : on remplace les chips
+          // existants par l'interprétation de l'IA (sinon des chips fantômes survivent).
+          state.answers = {};
+          state.labels  = {};
           applyFiltersBatch(filters);
         }
 
