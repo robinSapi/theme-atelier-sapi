@@ -22,7 +22,7 @@
   var els = {};
 
   // ═══════════════════════════════════════════════════════════
-  //  Visibilité conditionnelle (mirror robin-conseiller.js)
+  //  Visibilité conditionnelle (mirror des règles inc/guide-data.php)
   // ═══════════════════════════════════════════════════════════
   function getVisibleSteps() {
     var visible = [];

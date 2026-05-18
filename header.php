@@ -175,77 +175,12 @@ $logo_alt = get_bloginfo('name');
   <div class="global-search-overlay" id="global-search-overlay"></div>
 </header>
 
-<?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) : ?>
-<!-- Robin Conseiller V2 — Bandeau simplifié -->
+<!-- Bandeau réassurance (4 items statiques) -->
 <?php
 require_once get_template_directory() . '/inc/template-robin-bandeau-v2.php';
 sapi_robin_bandeau_v2();
 ?>
-<?php else : ?>
-<!-- V1 — Bandeau "Mon projet" dépliable -->
-<?php
-require_once get_template_directory() . '/inc/guide-data.php';
-$mon_projet_steps = sapi_guide_get_steps();
-$mon_projet_icons = sapi_guide_get_icons();
-$conseils_url  = get_permalink(get_page_by_path('conseils-eclaires'));
-$creations_url = get_permalink(wc_get_page_id('shop'));
-$contact_url   = get_permalink(get_page_by_path('contact'));
-?>
-<div class="mon-projet-bar" id="mon-projet-bar">
-  <div class="mon-projet-collapsed">
-    <div class="mon-projet-left">
-      <span class="mon-projet-label">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-        Mon projet
-      </span>
-      <div class="mon-projet-chips" id="mon-projet-chips">
-        <span class="mon-projet-placeholder">Cliquez pour d&eacute;finir votre projet</span>
-      </div>
-    </div>
-    <button class="mon-projet-toggle" id="mon-projet-toggle" type="button" aria-expanded="false" aria-controls="mon-projet-expanded">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-    </button>
-  </div>
-  <div class="mon-projet-expanded" id="mon-projet-expanded" aria-hidden="true">
-    <?php foreach ($mon_projet_steps as $step) :
-      $step_id = esc_attr($step['id']);
-      $icon_map = $mon_projet_icons;
-    ?>
-    <div class="mon-projet-question" data-step="<?php echo $step_id; ?>">
-      <span class="mon-projet-question-label"><?php echo esc_html($step['question']); ?></span>
-      <div class="mon-projet-choices" data-step="<?php echo $step_id; ?>">
-        <?php foreach ($step['choices'] as $choice) :
-          $icon_key = isset($choice['icon']) ? $choice['icon'] : '';
-          $icon_svg = isset($icon_map[$icon_key]) ? $icon_map[$icon_key] : '';
-        ?>
-        <button class="mon-projet-choice" type="button"
-                data-step="<?php echo $step_id; ?>"
-                data-slug="<?php echo esc_attr($choice['slug']); ?>"
-                data-label="<?php echo esc_attr($choice['label']); ?>">
-          <?php if ($icon_svg) : ?>
-            <span class="mon-projet-choice-icon"><?php echo $icon_svg; ?></span>
-          <?php endif; ?>
-          <span class="mon-projet-choice-text"><?php echo esc_html($choice['label']); ?></span>
-          <?php if (!empty($choice['dim'])) : ?>
-            <span class="mon-projet-choice-dim"><?php echo esc_html($choice['dim']); ?></span>
-          <?php endif; ?>
-        </button>
-        <?php endforeach; ?>
-      </div>
-    </div>
-    <?php endforeach; ?>
-    <div class="mon-projet-actions-row">
-      <a href="<?php echo esc_url($conseils_url); ?>" class="mon-projet-btn mon-projet-btn-conseils" id="mon-projet-btn-conseils">Les conseils de Robin</a>
-      <a href="<?php echo esc_url($creations_url); ?>" class="mon-projet-btn mon-projet-btn-selection" id="mon-projet-btn-selection">La s&eacute;lection de Robin</a>
-      <a href="<?php echo esc_url($contact_url); ?>" class="mon-projet-btn mon-projet-btn-contact">Contacter Robin</a>
-    </div>
-    <div class="mon-projet-reset-row">
-      <button class="mon-projet-reset" id="mon-projet-reset" type="button">R&eacute;initialiser</button>
-    </div>
-  </div>
-</div>
-<?php endif; ?>
 
-<?php endif; ?>
+<?php endif; // $is_simplified ?>
 
 <main class="site-content" id="main-content">

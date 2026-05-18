@@ -124,8 +124,8 @@ $render_card = function ($card_id) {
       <article class="inspiration-card inspiration-card--cta inspiration-card--c3">
         <div class="inspiration-card__inner">
           <h3 class="inspiration-card__title">Besoin d'aide pour choisir&nbsp;?</h3>
-          <p class="inspiration-card__text">En quelques questions, Robin vous accompagne.</p>
-          <button type="button" class="inspiration-card__button" data-robin-open="bandeau" aria-label="Démarrer le configurateur Robin Conseiller">Démarrer le configurateur</button>
+          <p class="inspiration-card__text">Réponds à quelques questions et je te montre les modèles qui correspondent.</p>
+          <a class="inspiration-card__button" href="<?php echo esc_url(home_url('/mes-creations/')); ?>" aria-label="Affiner ma sélection avec Robin">Affiner ma sélection</a>
         </div>
       </article>
       <?php

@@ -97,12 +97,6 @@ $piece_hero  = isset($piece_hero_map[$piece_param]) ? $piece_hero_map[$piece_par
   </div>
 </section>
 
-<!-- Conseil personnalisé de Robin pour Mes Créations (shown by mon-projet.js if available) -->
-<?php
-require_once get_template_directory() . '/inc/template-robin-conseil.php';
-sapi_robin_conseil_card( 'selection' );
-?>
-
 <!-- ── Méga-filtre intelligent (F1a) — placé juste après le hero (F1a-bis) ── -->
 <?php
 $megafilter_steps = sapi_guide_get_steps();
@@ -328,7 +322,6 @@ $megafilter_chip_labels = [
               <?php if ($hover_id) : ?>
                 <span class="product-image-hover"><?php echo wp_get_attachment_image($hover_id, 'woocommerce_thumbnail', false, ['alt' => get_the_title() . ' - ambiance', 'loading' => 'lazy']); ?></span>
               <?php endif; ?>
-              <div class="badge-selection" style="display:none;">Ma sélection</div>
             </div>
 
             <div class="product-info">
@@ -405,23 +398,6 @@ $megafilter_chip_labels = [
         </div>
       </div>
     </div>
-
-    <!-- Badge "Ma sélection" — activé via localStorage Robin Conseiller -->
-    <script>
-    (function() {
-      try {
-        var prefs = JSON.parse(localStorage.getItem('sapiGuidePrefs'));
-        if (!prefs || !prefs.recommendedIds || !prefs.recommendedIds.length) return;
-        var ids = prefs.recommendedIds.map(function(id) { return String(id); });
-        document.querySelectorAll('.product-card[data-product-id]').forEach(function(card) {
-          if (ids.indexOf(card.getAttribute('data-product-id')) !== -1) {
-            var badge = card.querySelector('.badge-selection');
-            if (badge) badge.style.display = '';
-          }
-        });
-      } catch(e) {}
-    })();
-    </script>
 
     <!-- Message "aucun résultat" pour le filtrage JS côté client -->
     <div class="woocommerce-no-products-found" style="display: none;">

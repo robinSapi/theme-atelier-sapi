@@ -1,8 +1,7 @@
 /**
  * Galerie Inspiration — JS de page
  * Gère uniquement le submit AJAX du formulaire newsletter (card C4).
- * Les triggers Robin Conseiller (card C3) sont gérés par robin-conseiller.js
- * via le listener générique [data-robin-open].
+ * La card C3 est un simple lien vers /mes-creations/ depuis F1c.
  */
 
 (function () {

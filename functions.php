@@ -16,11 +16,6 @@ function sapi_check_form_rate_limit($form_id = 'contact', $max_hits = 5) {
   return true;
 }
 
-/* ─── Feature flag Robin Conseiller V2 ─── */
-if (!defined('SAPI_ROBIN_V2')) {
-  define('SAPI_ROBIN_V2', true);
-}
-
 function sapi_maison_setup() {
   add_theme_support('title-tag');
   add_theme_support('post-thumbnails');
@@ -328,14 +323,6 @@ function sapi_maison_enqueue_assets() {
     }
   }
 
-  // Guide personalization — swap product card images based on guide preferences
-  if (is_front_page() || (class_exists('WooCommerce') && (is_shop() || is_product_category()))) {
-    $gp_path = get_template_directory() . '/assets/guide-personalize.js';
-    if (file_exists($gp_path)) {
-      wp_enqueue_script('sapi-guide-personalize', get_template_directory_uri() . '/assets/guide-personalize.js', [], filemtime($gp_path), true);
-    }
-  }
-
   // Cart page JS — enqueued when is_cart() returns true
   if (class_exists('WooCommerce') && is_cart()) {
     $cart_js_path = get_template_directory() . '/assets/cart-page.js';
@@ -369,35 +356,13 @@ function sapi_maison_enqueue_assets() {
     wp_enqueue_script('sapi-maison-scroll-dots', get_template_directory_uri() . '/assets/scroll-dots.js', [], filemtime($scroll_dots_path), true);
   }
 
-  // Guide luminaire — bandeau + questionnaire (toutes les pages)
+  // Guide luminaire — helpers PHP utilisés par le méga-filtre (et F1b à venir)
   require_once get_template_directory() . '/inc/guide-data.php';
 
-  if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) {
-    // V2 — Robin Conseiller : modale diaporama
-    $robin_js_path = get_template_directory() . '/assets/robin-conseiller.js';
-    if (file_exists($robin_js_path)) {
-      wp_enqueue_script('sapi-robin-conseiller', get_template_directory_uri() . '/assets/robin-conseiller.js', [], filemtime($robin_js_path), true);
-      $conseils_path = get_template_directory() . '/assets/guide-conseils.json';
-      $conseils_data = file_exists($conseils_path) ? json_decode(file_get_contents($conseils_path), true) : [];
-      wp_localize_script('sapi-robin-conseiller', 'sapiRobinConseiller', [
-        'steps'    => sapi_guide_get_steps(),
-        'icons'    => sapi_guide_get_icons(),
-        'conseils' => $conseils_data,
-        'ajaxUrl'  => admin_url('admin-ajax.php'),
-        'nonce'    => wp_create_nonce('sapi-guide-results'),
-      ]);
-    }
-  } else {
-    // V1 — Mon Projet : bandeau dépliable (legacy)
-    $mon_projet_path = get_template_directory() . '/assets/mon-projet.js';
-    if (file_exists($mon_projet_path)) {
-      wp_enqueue_script('sapi-mon-projet', get_template_directory_uri() . '/assets/mon-projet.js', [], filemtime($mon_projet_path), true);
-      wp_localize_script('sapi-mon-projet', 'sapiMonProjet', [
-        'steps'   => sapi_guide_get_steps(),
-        'ajaxUrl' => admin_url('admin-ajax.php'),
-        'nonce'   => wp_create_nonce('sapi-guide-results'),
-      ]);
-    }
+  // Bandeau réassurance : randomisation mobile + cleanup localStorage legacy
+  $bandeau_path = get_template_directory() . '/assets/bandeau-reassurance.js';
+  if (file_exists($bandeau_path)) {
+    wp_enqueue_script('sapi-bandeau-reassurance', get_template_directory_uri() . '/assets/bandeau-reassurance.js', [], filemtime($bandeau_path), true);
   }
 }
 add_action('wp_enqueue_scripts', 'sapi_maison_enqueue_assets');

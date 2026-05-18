@@ -399,22 +399,8 @@ get_header();
           remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_price', 10);
           remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 20);
 
-          // Injecter le pill Robin entre </table> des variations et la description de variation
-          if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2 && !$is_accessoire) {
-            $robin_pill_data = esc_attr(wp_json_encode(['product_id' => $product_id, 'product_name' => get_the_title()]));
-            $render_robin_pill = function() use ($robin_pill_data) {
-              echo '<button type="button" class="robin-pill" id="robin-product-pill" data-robin-context="product_guide" data-robin-data="' . $robin_pill_data . '">Comment choisir ?</button>';
-            };
-            add_action('woocommerce_before_single_variation', $render_robin_pill, 5);
-          }
-
           // Only render add to cart form
           woocommerce_template_single_add_to_cart();
-
-          // Nettoyer le hook pour éviter les effets de bord
-          if (isset($render_robin_pill)) {
-            remove_action('woocommerce_before_single_variation', $render_robin_pill, 5);
-          }
           ?>
         </div>
 
@@ -982,8 +968,8 @@ get_header();
         <h2>Fabriqué avec passion</h2>
         <p><strong>Conçu et assemblé à Lyon</strong>, par Robin, artisan créateur.</p>
         <div class="product-atelier-compact-links">
-          <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="robin-conseil__product-link">Découvrir l'histoire de Robin &rarr;</a>
-          <a href="<?php echo esc_url(home_url('/contact/')); ?>" class="robin-conseil__product-link">Prendre rendez-vous à l'atelier &rarr;</a>
+          <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="product-atelier-link">Découvrir l'histoire de Robin &rarr;</a>
+          <a href="<?php echo esc_url(home_url('/contact/')); ?>" class="product-atelier-link">Prendre rendez-vous à l'atelier &rarr;</a>
         </div>
       </div>
     </div>
@@ -1121,7 +1107,7 @@ get_header();
   var slideshow = document.getElementById('product-slideshow');
   if (slideshow && window.innerWidth > 600) {
     var header = document.querySelector('.site-header');
-    var bar = document.getElementById('mon-projet-bar') || document.getElementById('robin-bandeau');
+    var bar = document.getElementById('robin-bandeau');
     var stickyTop = 0;
     if (header) stickyTop += header.offsetHeight;
     if (bar) stickyTop += bar.offsetHeight;
@@ -1133,7 +1119,7 @@ get_header();
   var gallery = document.querySelector('.product-gallery-v2');
   if (gallery && window.innerWidth > 600) {
     var hdr = document.querySelector('.site-header');
-    var bnd = document.getElementById('mon-projet-bar') || document.getElementById('robin-bandeau');
+    var bnd = document.getElementById('robin-bandeau');
     var galTop = 0;
     if (hdr) galTop += hdr.offsetHeight;
     if (bnd) galTop += bnd.offsetHeight;

@@ -130,18 +130,14 @@ if (function_exists('sapi_maison_breadcrumbs')) {
         </a>
       <?php
 
-        // Card Robin après le 4ème produit
-        if ($product_count === 4 && defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) :
+        // CTA simple après le 4ème produit — mène vers le méga-filtre /mes-creations/
+        if ($product_count === 4) :
         ?>
-          <div class="robin-category-card" id="robin-category-card">
-            <div class="robin-category-card__inner" data-robin-context="category" data-robin-data='<?php echo esc_attr(wp_json_encode(['category_slug' => $term_slug])); ?>'>
-              <span class="robin-modal__badge">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
-                Conseil de Robin
-              </span>
-              <p class="robin-category-card__text">Quel mod&egrave;le est fait pour vous ? R&eacute;pondez &agrave; quelques questions, Robin vous guide.</p>
-              <span class="robin-category-card__cta">D&eacute;couvrir &rarr;</span>
-            </div>
+          <div class="category-affiner-cta">
+            <a href="<?php echo esc_url(home_url('/mes-creations/')); ?>" class="category-affiner-cta__link">
+              <span class="category-affiner-cta__text">Affiner ma sélection avec Robin</span>
+              <span class="category-affiner-cta__arrow" aria-hidden="true">&rarr;</span>
+            </a>
           </div>
         <?php
         endif;

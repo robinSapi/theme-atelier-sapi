@@ -505,15 +505,9 @@ foreach ($carousel_products as $product) {
     <!-- Pour quelle pièce ? -->
     <div class="bento-card bento-room-picker">
       <div class="room-picker-inner">
-        <?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) : ?>
-          <span class="robin-modal__badge" style="margin-bottom: 0.5rem;">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
-            Conseil de Robin
-          </span>
-        <?php endif; ?>
         <h3 class="room-picker-title">Pour quelle pièce cherchez-vous un luminaire ?</h3>
         <p class="room-picker-sub">
-          Quelques questions et Robin vous guide vers le luminaire idéal
+          Choisis une pièce, je te guide vers les modèles qui correspondent.
         </p>
         <div class="room-picker-cards">
           <?php foreach ($room_choices as $room) : ?>
@@ -735,11 +729,11 @@ foreach ($carousel_products as $product) {
 (function() {
   const carousel = document.querySelector('.homepage-carousel-fullscreen');
 
-  // 1. Déplacer le bandeau juste sous le carousel (V1 ou V2)
-  const monProjetBar = document.querySelector('.mon-projet-bar') || document.querySelector('.robin-bandeau');
-  if (monProjetBar && carousel) {
-    carousel.parentNode.insertBefore(monProjetBar, carousel.nextSibling);
-    monProjetBar.classList.add('home-repositioned-bar');
+  // 1. Déplacer le bandeau réassurance juste sous le carousel
+  const reassuranceBar = document.querySelector('.robin-bandeau');
+  if (reassuranceBar && carousel) {
+    carousel.parentNode.insertBefore(reassuranceBar, carousel.nextSibling);
+    reassuranceBar.classList.add('home-repositioned-bar');
   }
 
   // 2. Menu : transparent sur le carousel, opaque après

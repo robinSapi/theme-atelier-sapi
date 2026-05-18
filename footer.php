@@ -94,14 +94,6 @@ $is_simplified = function_exists('is_cart') && (is_cart() || is_checkout());
 
 <?php endif; ?>
 
-
-<?php
-if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) {
-  require_once get_template_directory() . '/inc/template-robin-modal.php';
-  sapi_robin_modal();
-}
-?>
-
 <?php wp_footer(); ?>
 </body>
 </html>
