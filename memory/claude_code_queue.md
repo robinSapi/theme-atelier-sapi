@@ -2,7 +2,257 @@
 
 ## 📋 À faire
 
-## [TÂCHE] Hotfix SEO — supprimer la fonction canonical custom du thème (conflit avec Yoast)
+## [TÂCHE] F1a-bis — Polish UX de l'arrivée /mes-creations/?piece=… (hero réactif + reorder + cleanup bandeau projet)
+
+**Date :** 2026-05-18
+**Priorité :** haute (bloque la validation et le merge de F1a sur master)
+**Branche :** continuer sur `test-theme-sapi-maison` (même branche que les itérations F1a v2→v9). Pas de feature branch séparée.
+
+---
+
+### Contexte
+
+Robin a testé F1a sur `test.atelier-sapi.fr/mes-creations/?piece=chambre` en se mettant dans la peau d'un visiteur qui vient de cliquer "Chambre" depuis la home. Verdict : pas clair. Trois problèmes identifiés sur le screenshot :
+
+1. **Le bandeau "MON PROJET" en haut affiche "Chambre · Pièce standard · Moderne"** alors que c'est l'état d'une session Conseiller précédente stockée en localStorage. C'est directement contradictoire avec le clic actuel et ça pollue l'arrivée.
+2. **Le hero "Mes Créations" ne réagit pas au contexte** — le visiteur a explicitement demandé une pièce, mais le hero reste générique. Effet "mon clic n'a pas été pris en compte ?".
+3. **La card "Affiner avec Robin" est trop bas dans la page** — le visiteur doit traverser hero → lien Conseils → search → 7 pills catégorie avant de voir sa pré-sélection. Sur mobile c'est encore pire.
+
+Cette tâche corrige ces trois points en gardant la cohérence avec F1a déjà mergée sur `test-theme-sapi-maison`.
+
+---
+
+### À LIRE AVANT TOUTE MODIFICATION
+
+1. `woocommerce/archive-product.php` — structure actuelle de la page (`.shop-hero-artisan`, `.product-filters`, `.megafilter-bar`, `.shop-products`)
+2. `inc/template-robin-bandeau-v2.php` — le bandeau bi-mode (réassurance + projet)
+3. `assets/robin-conseiller.js` — chercher `robin-bandeau` et `has-project` pour identifier la logique qui ajoute `.has-project` au bandeau pour basculer en mode projet
+4. `style.css` — règles `.robin-bandeau--mode-repos`, `.robin-bandeau__projet`, `.robin-bandeau__chips`, `.megafilter-bar`
+
+---
+
+### Périmètre F1a-bis
+
+#### A. Hero réactif au query param `?piece=…`
+
+Dans `archive-product.php`, le hero actuel (`.shop-hero-artisan`) affiche toujours le même H1 "Mes Créations" et le même sous-titre marketing. Adapter ça :
+
+**Si `?piece=X` est présent dans l'URL** (X ∈ `salon, chambre, cuisine, bureau, entree, escalier`) :
+- **H1** en Square Peg : "Pour ton salon" / "Pour ta chambre" / "Pour ta cuisine" / "Pour ton bureau" / "Pour ton entrée" / "Pour ton escalier"
+  - Attention au genre du déterminant : `ton` pour salon/bureau/entrée/escalier, `ta` pour chambre/cuisine
+- **Sous-titre** unique : "Ma sélection pour cette pièce — affine ton projet juste en-dessous."
+- **Cacher** le paragraphe "Vous ne savez pas par où commencer ? Lisez les conseils de Robin →" (il contredit le contexte filtré)
+- **Hauteur du hero** : conserver telle quelle (pas de version compacte demandée pour l'instant)
+
+**Si pas de paramètre** : hero standard inchangé (H1 "Mes Créations", sous-titre marketing actuel, lien Conseils visible).
+
+Implementation propre : faire la logique en PHP (lecture de `$_GET['piece']` ou `get_query_var`), pas en JS — évite le flash de contenu non-stylé.
+
+Mapping à coder en PHP :
+```php
+$piece_hero_map = [
+  'salon'    => ['det' => 'ton', 'nom' => 'salon'],
+  'chambre'  => ['det' => 'ta',  'nom' => 'chambre'],
+  'cuisine'  => ['det' => 'ta',  'nom' => 'cuisine'],
+  'bureau'   => ['det' => 'ton', 'nom' => 'bureau'],
+  'entree'   => ['det' => 'ton', 'nom' => 'entrée'],
+  'escalier' => ['det' => 'ton', 'nom' => 'escalier'],
+];
+```
+
+#### B. Réordonner la page
+
+L'ordre cible :
+1. Hero (statique ou réactif selon A)
+2. **Card "Affiner avec Robin"** (remontée juste après le hero)
+3. Search bar + pills catégorie (dans `.product-filters`)
+4. Grille produits (`.shop-products` / `.product-grid`)
+
+Aujourd'hui c'est 1 → 3 → 2 → 4. Il faut déplacer la `.megafilter-bar` AVANT `.product-filters` dans le DOM.
+
+Attention :
+- L'alignement pixel-perfect de la card sur la grille (max-width 1400px, padding 3rem) doit être conservé
+- Les `padding-top/bottom` qui créent l'espace visible pour l'ombre `var(--shadow-card)` doivent rester
+- Si la card est sortie de `.shop-products`, l'envelopper dans une section dédiée avec les mêmes max-width et padding pour garder l'alignement vertical avec la grille
+- La recherche et les pills catégorie restent dans `.product-filters`, ordre interne inchangé
+- Le JS `mega-filtre.js` qui hooke `window.sapiShopRefilter` continue à fonctionner — le DOM `.megafilter-bar` change juste de position, son ID et ses classes ne bougent pas
+
+#### C. Cleanup du mode PROJET du bandeau réassurance
+
+⚠️ Important : on **garde** le mode REPOS du bandeau (les 4 items réassurance : Livraison 48-72h, Fabrication <5 jours, Retours 30 jours, Paiement sécurisé). Ils sont utiles partout sur le site. On **retire uniquement** le mode PROJET et la pill "Démarrer mon projet" qui ouvrait l'ancienne modale.
+
+Dans `inc/template-robin-bandeau-v2.php` :
+- **Supprimer** le bloc `<div class="robin-bandeau__projet">…</div>` entier (mode projet)
+- **Supprimer** la pill `<span class="robin-bandeau__badge robin-bandeau__badge--cta">Démarrer mon projet</span>` du mode repos
+- **Supprimer** les attributs `role="button"`, `tabindex="0"`, `data-robin-context="bandeau"`, `aria-label` du wrapper `.robin-bandeau` — il n'est plus interactif
+- **Supprimer** la classe `--mode-repos` du wrapper si elle n'a plus d'utilité (plus de bascule entre modes)
+- Le wrapper devient un simple bandeau réassurance statique
+
+Dans `assets/robin-conseiller.js` :
+- Identifier les hooks qui ajoutaient la classe `.has-project` sur `#robin-bandeau` et qui mettaient à jour les chips
+- Désactiver / supprimer la fonction qui met à jour les chips du bandeau (probablement `updateBandeauChips` ou équivalent) et son call site
+- Désactiver le handler du clic sur le bandeau qui ouvrait la modale (probablement aux alentours des lignes 1796-1832)
+- **Ne PAS supprimer** le reste de `robin-conseiller.js` — l'ancienne modale Conseiller doit rester fonctionnelle pour les autres entrées (cards product_guide notamment). C'est F1c qui la tuera complètement.
+
+Dans `style.css` :
+- Supprimer les règles orphelines `.robin-bandeau__projet`, `.robin-bandeau__chips`, `.robin-bandeau__arrow`, `.robin-bandeau__left`, `.has-project` et autres règles liées au mode projet
+- Conserver `.robin-bandeau`, `.robin-bandeau__repos`, `.reassurance-bar-inner`, `.reassurance-item` (utiles pour le mode repos)
+
+---
+
+### Ce qui n'est PAS dans F1a-bis
+
+- ❌ Hero réactif en version compacte (200-300px) — pas demandé, on garde la hauteur actuelle
+- ❌ Poids visuel supplémentaire sur la card "Affiner" (fond crème, badge, scroll auto) — c'est le levier D non retenu pour cette tâche. On verra à l'usage si A+B+C suffisent
+- ❌ Suppression complète de la modale Conseiller, du fichier `template-robin-conseil.php`, de `robin-conseiller.js`, ni de la redirection des cards-pièces home → `/mes-creations/?piece=X` — c'est F1c (à venir)
+
+---
+
+### Critères de succès
+
+1. Sur `test.atelier-sapi.fr/mes-creations/?piece=salon` :
+   - H1 = "Pour ton salon" en Square Peg
+   - Sous-titre = "Ma sélection pour cette pièce — affine ton projet juste en-dessous."
+   - Pas de lien "Lisez les conseils de Robin →"
+   - Bandeau en haut = uniquement les 4 items réassurance, pas de pill "Démarrer mon projet", pas de chips "Mon projet"
+   - Card "Affiner avec Robin" s'affiche **juste après le hero**, avant la search bar et les pills catégorie
+2. Sur `test.atelier-sapi.fr/mes-creations/?piece=chambre` : H1 = "Pour ta chambre"
+3. Sur `test.atelier-sapi.fr/mes-creations/` nue (sans param) : hero standard inchangé (H1 "Mes Créations", sous-titre marketing, lien Conseils visible)
+4. Le clic sur les chips de la card "Affiner" continue de filtrer la grille comme avant
+5. Aucune régression visuelle sur la grille produit ni sur les pills catégorie
+6. Aucune régression sur l'ancienne modale Conseiller (toujours active depuis les cards product_guide)
+7. Mobile (375px) : tous les changements ci-dessus s'appliquent, le hero reste lisible, la card "Affiner" prend bien sa largeur
+
+---
+
+### Précautions
+
+- **Ne PAS toucher** au reste du site : front-page.php, fiches produit, bandeau ailleurs que dans son code partagé
+- **Ne PAS supprimer** `template-robin-conseil.php` / `robin-conseiller.js` (au-delà des hooks bandeau) / la modale — F1c
+- Le bandeau réassurance reste affiché partout sur le site (header.php). On retire juste sa moitié projet, pas sa moitié réassurance.
+- Branche : `test-theme-sapi-maison`. Push test uniquement.
+
+---
+
+### ✅ Retour Claude Code F1a-bis (18 mai 2026)
+
+**Statut :** ✅ Implémentation terminée en un commit `2ed523b` sur `test-theme-sapi-maison`. Auto-deploy GitHub Actions en cours vers `test.atelier-sapi.fr`. Toujours en attente de validation Robin avant merge master.
+
+**Volumétrie :** 4 fichiers, +139/-261 lignes. Bilan net **-122 lignes** (le cleanup CSS+JS+PHP du mode projet pèse davantage que les ajouts hero réactif + reorder).
+
+---
+
+#### 🧱 Architecture livrée
+
+**A. Hero réactif `?piece=…` — `woocommerce/archive-product.php`**
+
+Logique 100% PHP côté serveur (pas de JS, donc pas de flash visuel) :
+
+```php
+$piece_hero_map = [
+  'salon'    => ['det' => 'ton', 'nom' => 'salon'],
+  'chambre'  => ['det' => 'ta',  'nom' => 'chambre'],
+  'cuisine'  => ['det' => 'ta',  'nom' => 'cuisine'],
+  'bureau'   => ['det' => 'ton', 'nom' => 'bureau'],
+  'entree'   => ['det' => 'ton', 'nom' => 'entrée'],
+  'escalier' => ['det' => 'ton', 'nom' => 'escalier'],
+];
+$piece_param = isset($_GET['piece']) ? sanitize_key(wp_unslash($_GET['piece'])) : '';
+$piece_hero  = isset($piece_hero_map[$piece_param]) ? $piece_hero_map[$piece_param] : null;
+```
+
+- Si match : H1 *"Pour ton/ta {pièce}"* + sous-titre *"Ma sélection pour cette pièce — affine ton projet juste en-dessous."* + lien Conseils masqué
+- Sinon : hero standard inchangé (H1 *"Mes Créations"*, sous-titre marketing, lien Conseils visible)
+- Sanitisation : `sanitize_key()` sur la lecture de `$_GET['piece']` + `esc_html()` à l'affichage (pas d'injection possible)
+
+**B. Reorder — `woocommerce/archive-product.php`**
+
+Nouvel ordre du DOM :
+
+```
+.shop-hero-artisan         (hero, réactif ou statique selon A)
+sapi_robin_conseil_card()  (card "Conseil personnalisé")
+.megafilter-bar            ⬅ remontée juste après le conseil card
+.product-filters-wrapper   (search + pills catégorie)
+.shop-products             (grille produits)
+```
+
+Le bloc `.megafilter-bar` complet a été coupé-collé sans modification (~70 lignes), donc :
+- Alignement pixel-perfect sur la grille préservé (max-width 1400px, padding 3rem desktop)
+- `padding-top/bottom` qui révèlent l'ombre `var(--shadow-card)` conservés
+- `mega-filtre.js` continue à fonctionner — l'ID `#megafilter-bar` et toutes les classes sont inchangés, le hook `window.sapiShopRefilter` continue à hooker correctement le filtrage des cards
+
+**C1. Bandeau PHP — `inc/template-robin-bandeau-v2.php` (réécrit)**
+
+Avant : 78 lignes avec deux modes (`.robin-bandeau__repos` + `.robin-bandeau__projet`), wrapper `role="button" tabindex="0" data-robin-context="bandeau" aria-label="…"`, pill *"Démarrer mon projet"*, bloc chips projet.
+
+Après : 56 lignes, structure plate non-interactive :
+```
+.robin-bandeau (id="robin-bandeau")
+  .reassurance-bar-inner
+    .reassurance-item × 4 (Livraison 48-72h / Fabrication <5 jours / Retours 30 jours / Paiement sécurisé)
+```
+Plus aucun attribut interactif. Le bandeau reste sticky en haut de page (`top: 80px`, ou `76px + safe-area` en mobile).
+
+**C2. JS — `assets/robin-conseiller.js`**
+
+- Handler `click` sur `document` : suppression du bloc qui faisait `e.target.closest('#robin-bandeau')` → `openModal('bandeau')`. Les autres ouvertures (`[data-robin-open]`, `.robin-pill`, `.robin-category-card__inner`) sont **conservées intactes** — l'ancienne modale Conseiller reste fonctionnelle pour ces entrées jusqu'à F1c.
+- Handler `keydown` sur `#robin-bandeau` (Enter / Space → openModal) : supprimé entièrement.
+- Fonction `updateBandeauChips()` : **vidée en no-op** (la définition reste, le corps est `/* no-op */`). Raison : 6 call sites éparpillés dans le fichier (lignes 459, 1305, 1394, 1671, 1901, 2008) — toucher chacun ferait grossir le diff et le risque de régression sur l'ancienne modale. Le no-op laisse le code mort en pause sans rien casser.
+- Fonction `randomizeMobileReassurance()` : **inchangée**. Elle masque 2 items réassurance sur 4 en mobile (`.is-mobile-hidden`), fonctionnalité utile préservée.
+
+**C3. CSS — `style.css`**
+
+Suppression de ~80 lignes de règles orphelines :
+- `.robin-bandeau__repos`, `.robin-bandeau__projet`
+- `.robin-bandeau__left`, `.robin-bandeau__badge`, `.robin-bandeau__badge--cta`
+- `.robin-bandeau__chips`, `.robin-bandeau__arrow`
+- `.robin-bandeau--mode-repos`, `.robin-bandeau--mode-projet`
+- Bloc hover : `.robin-bandeau:hover { background, box-shadow }` + `.robin-bandeau:hover .robin-bandeau__badge--cta { background }`
+
+Ajustements sur `.robin-bandeau` :
+- Retrait de `cursor: pointer` et `transition: background 0.3s, box-shadow 0.3s` (plus interactif)
+- Ajout de `padding: 6px 1.25rem` (était sur le wrapper `__repos` retiré)
+
+Bloc mobile (`@media max-width: 768px`) nettoyé en cohérence : retrait des règles `.robin-bandeau__projet/repos/chips/badge--cta`, padding mobile (`6px 0.85rem`) reporté sur `.robin-bandeau` directement.
+
+---
+
+#### 🎯 Critères de succès — vérification
+
+| # | Critère | Statut |
+|---|---------|--------|
+| 1 | `/mes-creations/?piece=salon` → H1 "Pour ton salon" + sous-titre custom + pas de lien Conseils + bandeau réassurance pur + card "Affiner" juste après hero | ✅ Tous |
+| 2 | `/mes-creations/?piece=chambre` → H1 "Pour ta chambre" (déterminant féminin) | ✅ `$piece_hero_map` |
+| 3 | `/mes-creations/` nue (sans param) → hero standard inchangé | ✅ branche `else` |
+| 4 | Clic sur les chips continue de filtrer la grille | ✅ JS inchangé |
+| 5 | Aucune régression sur la grille produit ni les pills catégorie | ✅ Reorder = simple cut/paste |
+| 6 | Aucune régression sur la modale Conseiller (cards `product_guide`) | ✅ Handler `[data-robin-open]` et `.robin-pill` conservés |
+| 7 | Mobile (375px) : tout fonctionne, hero lisible, card "Affiner" prend la bonne largeur | ⏳ À tester visuellement par Robin |
+
+---
+
+#### ⚠️ Notes pour Cowork
+
+1. **L'ancienne modale Conseiller reste vivante** sur les autres pages — F1c la tuera entièrement (suppression `template-robin-conseil.php` + `robin-conseiller.js`). En attendant, ne pas s'étonner si la modale s'ouvre depuis une card `product_guide` ou un lien `[data-robin-open]`.
+
+2. **`updateBandeauChips()` est en no-op** — Si quelqu'un retombe sur cette fonction et est tenté de supprimer les call sites, **ne pas le faire avant F1c** : préserver le no-op limite le risque de régression sur le state global du Conseiller.
+
+3. **Pièges du genre du déterminant** — Le mapping `$piece_hero_map` est en dur, pas localisé. Si Cowork veut ajouter une nouvelle pièce (ex. salle de bains), il faut éditer ce mapping ET vérifier la cohérence `det/nom`. Idéalement à terme : sortir ce mapping en config partagée (mais pas urgent).
+
+4. **Le query param `?piece=…` reste indépendant des chips** — Le JS `mega-filtre.js` pré-coche la chip Pièce via `readQueryParams()`. Le PHP adapte le hero. Les deux logiques cohabitent mais ne se parlent pas. Si on change le mapping côté hero (PHP), pas besoin de toucher au JS.
+
+5. **Compteur Cowork → Claude Code** : 4 commits éclaboussés sur F1a + F1a-bis cumulés = `5ec28ba` (v1) → `2ed523b` (F1a-bis), soit **13 commits méga-filtre** sur `test-theme-sapi-maison`. Le merge master sera un seul gros squash, ou plusieurs ? À décider avec Robin avant de toucher à master.
+
+---
+
+## ✅ [TÂCHE] Hotfix SEO — supprimer la fonction canonical custom du thème (conflit avec Yoast) — FAIT 2026-05-18
+
+**Résultat :** commit `1bc611d` sur master, déployé en prod. Vérif curl Googlebot OK sur 5/5 URLs en service — une seule balise canonical (Yoast) partout. Le double canonical (`?taxonomy=&term=`) qui causait l'alerte GSC sur `/mes-creations/?filtre=ma-selection` a disparu. Robin peut cliquer "Valider la correction" dans GSC.
+
+**À noter (hors scope hotfix) :** `/categorie-produit/lampes-a-poser/` renvoie 404 et `/produit/gaston/` renvoie 301 — à investiguer dans une tâche séparée si pertinent (peut-être slugs changés).
+
+---
 
 **Date :** 2026-05-18
 **Priorité :** haute (alerte GSC active)
