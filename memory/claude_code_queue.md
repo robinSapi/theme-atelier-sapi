@@ -2,7 +2,86 @@
 
 ## 📋 À faire
 
-## [TÂCHE] F1a — Refonte page /mes-creations/ : Méga-filtre intelligent (frontend uniquement)
+## [TÂCHE] Hotfix SEO — supprimer la fonction canonical custom du thème (conflit avec Yoast)
+
+**Date :** 2026-05-18
+**Priorité :** haute (alerte GSC active)
+**Branche :** `master` (hotfix simple, à déployer en prod après merge)
+
+---
+
+### Contexte
+
+Le 16/05/2026, Google Search Console a remonté une alerte "Page en double sans URL canonique sélectionnée par l'utilisateur" sur `https://atelier-sapi.fr/mes-creations/?filtre=ma-selection` (URL générée par le bouton "Voir la sélection personnalisée" de Robin Conseiller v2, cf. `inc/template-robin-conseil.php` ligne 28).
+
+Diagnostic en curl Googlebot : **deux balises `<link rel="canonical">` cohabitent dans le `<head>` de toutes les pages archive du site** :
+
+```
+✅ Yoast : <link rel="canonical" href="https://atelier-sapi.fr/mes-creations/" />
+❌ Thème : <link rel="canonical" href="https://atelier-sapi.fr/?taxonomy=&term=">
+```
+
+Le 2e canonical (foireux, avec paramètres vides) provient de la fonction custom `sapi_maison_canonical()` dans `functions.php` lignes 1256-1268. Sur les pages archive (shop, catégories produit, blog), elle appelle `get_term_link(get_queried_object())` qui ne retourne pas un term exploitable sur la page Shop WooCommerce → URL pourrie `?taxonomy=&term=`.
+
+Pourquoi seule `?filtre=ma-selection` est flaggée par GSC : sur `/mes-creations/` nue, la canonical Yoast = l'URL crawlée → Google ignore le canonical foireux. Sur `?filtre=ma-selection`, Yoast renvoie une URL différente de l'URL crawlée → conflit + 2e canonical bizarre → Google laisse tomber l'indexation.
+
+Le bug latent touche probablement **toutes les pages d'archive** (catégories produit, pagination blog, archives auteur) — pas qu'une URL.
+
+---
+
+### À faire
+
+**Fichier :** `functions.php`
+
+Supprimer la fonction `sapi_maison_canonical()` ET son `add_action`. Précisément, retirer les lignes 1256 à 1268 (inclusivement) :
+
+```php
+function sapi_maison_canonical() {
+  if (is_singular()) {
+    echo '<link rel="canonical" href="' . esc_url(get_permalink()) . '">' . "\n";
+  } elseif (is_archive()) {
+    $url = get_term_link(get_queried_object());
+    if (!is_wp_error($url)) {
+      echo '<link rel="canonical" href="' . esc_url($url) . '">' . "\n";
+    }
+  } elseif (is_front_page()) {
+    echo '<link rel="canonical" href="' . esc_url(home_url('/')) . '">' . "\n";
+  }
+}
+add_action('wp_head', 'sapi_maison_canonical');
+```
+
+Yoast SEO gère déjà tous ces cas correctement (et bien mieux : pagination, taxonomies WC, archives, singular, home). Pas de remplacement nécessaire.
+
+Commit message proposé : `fix(seo): remove duplicate canonical from theme — Yoast handles it`
+
+---
+
+### Critères de succès
+
+Après déploiement en prod, vérifier en curl Googlebot que sur chaque URL ci-dessous il n'y a **qu'UNE SEULE** balise `<link rel="canonical">` :
+
+```bash
+for u in \
+  "https://atelier-sapi.fr/" \
+  "https://atelier-sapi.fr/mes-creations/" \
+  "https://atelier-sapi.fr/mes-creations/?filtre=ma-selection" \
+  "https://atelier-sapi.fr/categorie-produit/suspensions/" \
+  "https://atelier-sapi.fr/categorie-produit/lampes-a-poser/" \
+  "https://atelier-sapi.fr/lumiere-dartisan/" \
+  "https://atelier-sapi.fr/produit/gaston/" ; do
+  echo "=== $u ===" ;
+  curl -sL "$u" -A "Mozilla/5.0 Googlebot" | grep -oE '<link rel="canonical"[^>]*>' ;
+done
+```
+
+Attendu : 1 ligne par URL, toutes pointant vers la bonne URL canonique Yoast.
+
+Une fois validé en prod, Robin clique sur "Valider la correction" dans le rapport GSC.
+
+---
+
+
 
 **Date :** 2026-05-17
 **Priorité :** haute
@@ -323,6 +402,93 @@ Une fois une chip répondue, elle affiche `Salon ▾` (juste la valeur + chevron
 Workflow auto-deploy en cours (lance par le push sur `test-theme-sapi-maison`). Une fois live :
 - Desktop : flow chips Pièce → Taille → Sortie → Hauteur (vérifier fade-in conditionnel)
 - Mobile (375px) : bouton "Décrire précisément" passe en full-width sous le titre
+
+---
+
+### ✅ Retour Claude Code v3 — itérations 18 mai 2026
+
+**Statut :** ✅ Toujours sur `test-theme-sapi-maison`, **6 commits supplémentaires** depuis le retour v2 (`8c77799`). L'UI a beaucoup changé — la card est maintenant épurée, sans commentaire, alignée pixel-perfect sur la grille. Toujours en attente de validation Robin avant merge master.
+
+⚠️ **L'état décrit ci-dessus dans le retour v1/v2 N'EST PLUS VALIDE pour 3 points :**
+- ❌ Le compteur résultats n'existe plus (retiré v2)
+- ❌ Le commentaire débouncé de Robin n'existe plus (retiré v7 — voir ci-dessous)
+- ❌ Le `.megafilter-footer` avec border-top a disparu, "Tout effacer" est maintenant inline avec le CTA
+
+---
+
+#### 🔁 Suite des itérations (18 mai 2026)
+
+| Commit | Retour Robin | Action |
+|--------|--------------|--------|
+| `e2eda83` | "La question 'Quelle taille' ne fonctionne pas : quand on clique, rien ne s'affiche" | **Bug menu déroulant clippé** : `.megafilter-chip.is-conditional` avait `overflow: hidden` pour permettre l'animation `max-width: 0 → 400px` au fade-in. Mais `overflow: hidden` restait actif après l'apparition, ce qui clippait le `.megafilter-chip-menu` positionné en `absolute` sous le chip. Fix : `.is-conditional.is-visible { overflow: visible }`. Affectait Taille, Hauteur, Éclairage, Au-dessus, Escalier (tous les chips conditionnels). |
+| `07574ba` | Screenshot Robin : le menu déroulant passe sous le commentaire ; "Décrire précisément" mal placé ; phrase doit être DANS la card | **Réorganisation profonde** : (a) commentaire déplacé hors de la `section` parente → dans `.megafilter-bar-inner` (résout aussi le bug stacking : `transform` sur `.is-conditional` créait un stacking context isolé qui maintenait le menu sous le commentaire malgré `z-index: 20`) ; (b) `z-index: 30` sur `.megafilter-chip.is-open` pour passer devant la zone commentaire ; (c) bouton "Décrire précisément" sorti du header, placé dans `.megafilter-cta` sous les chips ; (d) zone commentaire `.megafilter-commentary-zone` avec `min-height` pour réserver l'espace même quand vide. |
+| `98a349d` | "Card doit faire la même largeur que la grille en dessous, espacement vertical perdu, Tout effacer aligné avec les chips" | (a) Card alignée sur `.shop-products .product-grid` : `max-width: 1400px` (était `1200px`) + `padding: 0 3rem` desktop (était `1.25rem`) ; (b) condensation verticale (padding card, margins headers, min-height commentaire) ; (c) `.megafilter-footer` séparé avec border-top **supprimé** — `.megafilter-cta` renommé en `.megafilter-actions` qui contient maintenant le CTA orange à gauche **et** "Tout effacer" à droite dans la même rangée flex `space-between`. |
+| `b76f441` | "La phrase affichée vient d'où ? — Supprime tout ça, c'est nul. Pas de phrase." | **Suppression complète du commentaire** : la mécanique `buildCommentary()` reposait sur 5 phrases-modèles JS en dur qui ignoraient 5 chips sur 8 (`sortie`, `hauteur`, `table`, `eclairage`, `taille_escalier`) et sonnaient artificiel. Supprimé en entier : PHP (zone retirée), JS (~80 lignes : `buildCommentary`, `scheduleCommentary`, `TAILLE_DIM`, `commentaryTimer`, `COMMENTARY_DELAY_MS`, refs `els.commentary`), CSS (toutes les règles `.megafilter-commentary*` + desktop). Sera reconstruit en F1b avec Claude API — un vrai commentaire conversationnel. |
+| `0cc83b9` | "Toujours trop d'espace vertical entre les chips et le bouton 'Décrire…'" | Resserrement des marges : `.megafilter-actions margin-top` 14px → 10px, `.megafilter-header margin-bottom` 14px → 10px, padding vertical de la card 16→14px mobile / 18→16px desktop. |
+| `4c91743` | Screenshot Robin : "Section suivante collée, on ne voit pas l'ombre" | `.megafilter-bar` reçoit `padding-bottom: 1.5rem` (mobile) / `2rem` (desktop) pour créer de l'espace visible entre la card et `.shop-products` (fond crème) qui masquait l'ombre `var(--shadow-card)`. |
+
+---
+
+#### 🎨 État final de l'UI (après v9 = commit `4c91743`)
+
+```
+┌──── card max-width 1400px, padding 3rem (= largeur grille) ───┐
+│ AFFINER AVEC ROBIN                                             │
+│ Réponds aux questions ci-dessous pour voir les modèles...     │
+│                                                                 │
+│ [POUR QUELLE PIÈCE ? ▾]  [QUEL STYLE ? ▾]                     │
+│ (autres chips conditionnels apparaissent après réponse)        │
+│                                                                 │
+│ [✎ DÉCRIRE PRÉCISÉMENT MON PROJET]                Tout effacer │
+└───────────────────────────────────────────────────────────────┘
+                  ↕ padding-bottom (ombre visible)
+┌─────────── .shop-products (max-width 1400 px, padding 3rem) ──┐
+│  [card] [card] [card] [card]                                   │
+```
+
+**Différences notables vs spec initiale :**
+- Plus de compteur "X modèles correspondent à ton projet" (retiré v2)
+- Plus de commentaire dynamique de Robin (retiré v7 — pas avant F1b avec IA)
+- `Tout effacer` n'est plus un footer séparé : sur la même ligne que le CTA orange
+- Les chips sont des questions courtes (`Pour quelle pièce ?` au lieu de `Pièce`)
+- Chip répondu affiche juste la valeur (`Salon ▾`) — re-clic → menu, re-clic sur option déjà cochée la décoche (toggle)
+- Card alignée pixel-perfect sur la grille produit en dessous
+- Pas de croix sur les chips répondus (chevron uniquement, qui pivote à 180° quand ouvert)
+
+---
+
+#### 📋 Sommaire complet des commits sur `test-theme-sapi-maison`
+
+| Commit | Sujet |
+|--------|-------|
+| `47683c1` | F1a v1 — frontend complet (chips + JS + CSS + modale + cleanup ancien bandeau) |
+| `59972c6` | Merge `feature/mega-filtre-mes-creations` → `test-theme-sapi-maison` |
+| `a38cf2f` | Retour Cowork v1 dans la queue |
+| `4a78cdf` | F1a v2 — itérations : suppression compteur, Tout effacer dans la card, chips en mode questions |
+| `46e1faf` | F1a v3 — croix remplacée par chevron + toggle dans le menu |
+| `8c77799` | Retour Cowork v2 dans la queue |
+| `e2eda83` | F1a v4 — fix overflow chips conditionnels (menu déroulant clippé) |
+| `07574ba` | F1a v5 — CTA sous chips, commentaire DANS la card, z-index menu corrigé |
+| `98a349d` | F1a v6 — card alignée sur la grille, espacements condensés, Tout effacer aligné CTA |
+| `b76f441` | F1a v7 — suppression du commentaire de Robin (placeholder pas pertinent) |
+| `0cc83b9` | F1a v8 — espaces verticaux resserrés |
+| `4c91743` | F1a v9 — padding-bottom sur la barre méga-filtre pour révéler l'ombre |
+
+---
+
+#### ⚠️ Notes opérationnelles pour Cowork
+
+**Le commentaire de Robin n'existe plus** — Quand on planifiera F1b (intégration IA), prévoir explicitement un endpoint qui génère le commentaire conversationnel à partir du state des chips. Le composant `.megafilter-commentary*` n'existe plus côté CSS — il faudra le recréer ou le ré-imaginer. Recommandation : avant F1b, valider avec Robin si le commentaire revient ou s'il préfère une autre forme d'aide contextuelle.
+
+**Convention de design émergente sur le site Sapi** — les composants de filtrage interactifs Sapi suivent maintenant un pattern à acter dans `design_system.md` :
+- Chips = **questions courtes** au format interrogatif (`Quelle pièce ?`, `Quel style ?`) — pas de label nu
+- Chip répondu = valeur uniquement + chevron qui pivote
+- Toggle dans le menu pour décocher (pas de croix séparée)
+- Action "Tout effacer" en lien souligné discret, sur la même rangée que le CTA principal
+
+**Stacking context piège à retenir** — `transform` (autre que `none`) crée un nouveau stacking context. Un élément absolu enfant avec un `z-index` élevé ne pourra pas remonter au-dessus des éléments hors de ce contexte. Si un menu déroulant doit passer "au-dessus de tout", il faut soit éviter le `transform` sur les ancêtres, soit appliquer un `z-index` élevé à l'ancêtre lui-même (ce que `.megafilter-chip.is-open { z-index: 30 }` fait).
+
+**Auteure de la queue** : noter dans tasks_globales que les bugs UX du méga-filtre ont nécessité **6 commits supplémentaires** après les 5 initiaux — soit 2 jours d'itérations pour une feature spec'ée "frontend uniquement". À garder en tête pour estimer F1b et F1c (probable ratio similaire).
 - Modale : `100dvh`, scroll vertical OK, clavier ne masque pas le footer
 - Compteur : 27 modèles par défaut (sans chip), descend avec les filtres
 - Cohabitation : sélectionner pill "Lampadaires" + chip "Salon" → AND (intersection)
