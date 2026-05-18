@@ -2,6 +2,457 @@
 
 ## 📋 À faire
 
+## [TÂCHE] F1c — Cleanup frontend de l'ancien Conseiller (backend préservé pour F1b)
+
+**Date :** 2026-05-18
+**Priorité :** haute (à enchaîner après validation F1a-ter)
+**Branche :** `test-theme-sapi-maison`
+**Prérequis :** F1a-ter mergée et validée par Robin sur test.
+
+---
+
+### Contexte
+
+Le nouveau méga-filtre `/mes-creations/` (F1a + F1a-bis + F1a-ter) remplace l'ancienne modale Conseiller. Cette tâche supprime tout le **frontend** de l'ancien Conseiller (modale, JS, hooks DOM, CSS, localStorage), mais **préserve intégralement le backend** (endpoints AJAX qui appellent Claude API, helpers PHP, prompts) parce que F1b va les réutiliser/refactorer.
+
+**Directives Robin sur les points d'entrée hors /mes-creations/ :**
+
+| Localisation | Décision Robin |
+|---|---|
+| Page `/conseils-eclaires/` | Ajouter le même room-picker que sur la home (6 cards-pièces qui redirigent vers `/mes-creations/?piece=X`) |
+| Fiche produit (`single-product.php`) | Supprimer la pill product_guide sans remplacement. Sera refait plus tard. |
+| Pages catégorie (`/categorie-produit/<slug>/`) | Remplacer la pill par un CTA simple vers `/mes-creations/` |
+
+---
+
+### À LIRE AVANT TOUTE MODIFICATION
+
+1. `inc/template-robin-conseil.php` (à supprimer)
+2. `assets/robin-conseiller.js` (à supprimer — 663 lignes, mais on extrait `randomizeMobileReassurance()` avant)
+3. `functions.php` — chercher : `template-robin-conseil`, `robin-conseiller.js`, `sapi_robin_conseil_card`, enqueue/include
+4. `page-conseils-eclaires.php` — où on va greffer le room-picker
+5. `front-page.php` lignes ~505-527 — le bloc bento room-picker à dupliquer ou factoriser
+6. `woocommerce/single-product.php` — chercher les `.robin-pill`, `data-robin-open`, `data-robin-context="product_guide"`
+7. `woocommerce/archive-product.php` — distinguer `is_shop()` (nouveau méga-filtre, ne pas toucher) vs `is_product_category()` (mettre un CTA simple)
+8. Grep globaux à anticiper :
+   - `grep -rn 'data-robin-open' --include='*.php'`
+   - `grep -rn 'data-robin-context' --include='*.php'`
+   - `grep -rn 'sapiRobinOpen' --include='*.{php,js}'`
+   - `grep -rn 'sapiGuidePrefs\|sapiRobinPrefs' --include='*.{php,js}'`
+   - `grep -rn 'robin-pill\|robin-conseil__' --include='*.{php,css}'`
+
+---
+
+### Périmètre F1c
+
+#### A. Préservation préalable
+
+Avant de supprimer `assets/robin-conseiller.js`, en **extraire** la fonction `randomizeMobileReassurance()` (qui masque 2 items de réassurance sur 4 en mobile via `.is-mobile-hidden`). Cette fonction reste utile après cleanup.
+
+Options d'implémentation :
+- Soit un nouveau petit fichier `assets/bandeau-reassurance.js` enqueue sur toutes les pages
+- Soit inline dans `inc/template-robin-bandeau-v2.php` via un `<script>` minimal
+- Claude Code choisit, en privilégiant ce qui est le plus propre
+
+#### B. Suppression des fichiers frontend
+
+1. Supprimer `inc/template-robin-conseil.php`
+2. Supprimer `assets/robin-conseiller.js`
+3. Dans `functions.php` :
+   - Supprimer `wp_enqueue_script('sapi-robin-conseiller', …)` ou équivalent
+   - Supprimer `include`/`require_once` de `template-robin-conseil.php`
+   - Supprimer la fonction `sapi_robin_conseil_card()` (ou équivalent) qui rendait la modale dans le DOM
+   - Supprimer tout call à cette fonction dans les templates
+4. Vérifier qu'aucun autre asset n'a `'sapi-robin-conseiller'` en dépendance
+
+#### C. Suppression des hooks DOM partout
+
+Greps globaux à exécuter et à nettoyer :
+- `data-robin-open` — supprimer l'attribut de tous les templates PHP
+- `data-robin-context` — idem
+- `data-robin-piece`, `data-robin-target` etc. — idem
+- `window.sapiRobinOpen` et `sapiRobinOpen(` — supprimer des onclick inline et des scripts inline
+- `.robin-pill` — gérer au cas par cas (cf. D, E, F)
+- `.robin-conseil__*`, `.robin-fiche__*`, `.robin-modal__*` (sauf `.megafilter-modal__*`) — supprimer si orphelines après le cleanup
+
+Dans `style.css` :
+- Supprimer toutes les règles `.robin-conseil*`, `.robin-fiche*`, `.robin-modal*` (sauf `.megafilter-modal*` qui est nouveau et reste)
+- Conserver `.robin-bandeau*`, `.reassurance-*` (utilisés par le bandeau réassurance)
+- Conserver `.megafilter-*` (nouveau)
+
+#### D. Page Conseils — ajouter le room-picker
+
+Dans `page-conseils-eclaires.php`, greffer un bento room-picker identique à celui de `front-page.php` (lignes ~505-527) :
+
+- Titre **"Pour quelle pièce cherchez-vous un luminaire ?"** + sous-titre
+- 6 cards-pièces : Cuisine, Bureau / Atelier, Salon / Salle à manger, Chambre, Entrée / Couloir, Cage d'escalier (mêmes slugs que `sapi_guide_get_steps()['piece']['choices']`)
+- Chaque card avec un `onclick` qui redirige vers `/mes-creations/?piece=<slug>` (mêmes que celui qu'on a câblé en F1a-ter)
+- Mêmes icônes (`$room_icons`) et même style CSS que la home
+
+Option d'implémentation préférée : **extraire en template-part** `template-parts/room-picker.php` et l'inclure depuis `front-page.php` ET `page-conseils-eclaires.php`. Évite la duplication.
+
+Si trop complexe, dupliquer le bloc (accepté en fallback).
+
+Position dans `page-conseils-eclaires.php` : à toi de voir, en bas de page ou après l'intro, là où ça a du sens éditorial.
+
+#### E. Pages catégorie — CTA simple vers /mes-creations/
+
+Dans `woocommerce/archive-product.php`, le template est partagé entre `/mes-creations/` (shop page, `is_shop()`) et les `/categorie-produit/<slug>/` (`is_product_category()`).
+
+- Sur `is_shop()` : ne rien changer. Le méga-filtre est en place.
+- Sur `is_product_category()` : si une pill `.robin-pill` existe dans le template (peut-être conditionnellement), la remplacer par un CTA simple — bouton ou lien stylé — qui dit **"Affiner ma sélection avec Robin"** et qui mène à `/mes-creations/`.
+
+Style : utiliser une classe existante (`.surmesure-card__cta`, `.btn-view-full`, etc.) ou créer une classe `.category-affiner-cta` simple basée sur le design system (pill 50px, fond bois, hover orange).
+
+(Optionnel, à valider avec Robin si tu hésites) : si tu veux passer le contexte de la catégorie au méga-filtre, étendre `mega-filtre.js::readQueryParams()` pour gérer aussi `?sortie=X`, `?taille=X`, `?style=X` — permettrait de rediriger `/categorie-produit/suspensions/` → `/mes-creations/?sortie=plafond`. Pas indispensable pour F1c, on peut commencer par un simple `/mes-creations/` sans paramètre.
+
+#### F. Fiche produit — suppression de la pill product_guide
+
+Dans `woocommerce/single-product.php`, identifier l'élément qui ouvre le mini-questionnaire product_guide (probablement un `.robin-pill` avec `data-robin-context="product_guide"` ou similaire) et le **supprimer sans remplacement**. Robin refera une aide contextuelle plus tard.
+
+#### G. Cleanup localStorage
+
+Identifier toutes les clés localStorage utilisées par l'ancien Conseiller (probablement `sapiGuidePrefs`, `sapiRobinPrefs`, et peut-être des dérivés).
+
+Ajouter un script léger qui les nettoie au load, sur toutes les pages — pour éviter les ghosts chez les visiteurs récurrents. Soit :
+- Un petit `<script>` inline dans `header.php` (ou équivalent), exécuté avant le DOMContentLoaded
+- Soit dans un asset déjà chargé sur toutes les pages
+
+Le script doit être idempotent et silencieux (try/catch autour de localStorage si erreur).
+
+---
+
+### Ce qui n'est PAS dans F1c
+
+- ❌ Les endpoints AJAX backend qui appellent Claude API (dans `functions.php` autour des lignes 2015-3400+) — F1b les réutilisera
+- ❌ Les helpers PHP `sapi_guide_query_products()`, `sapi_guide_get_categories()`, `sapi_guide_get_ampoule_filter()`, `sapi_guide_get_steps()`, etc. — utilisés par mega-filtre.js et F1b
+- ❌ `inc/guide-data.php` — utilisé par mega-filtre.js
+- ❌ La modale "Décrire précisément mon projet" sur /mes-creations/ (`.megafilter-modal*`) — c'est le nouveau, on garde
+- ❌ Tout le bandeau réassurance (`.robin-bandeau`, `.reassurance-*`) — utile, on garde
+
+---
+
+### Critères de succès
+
+1. `ls inc/template-robin-conseil.php` → fichier introuvable
+2. `ls assets/robin-conseiller.js` → fichier introuvable
+3. `grep -rn 'robin-conseiller.js\|template-robin-conseil' --include='*.php'` → 0 résultat
+4. `grep -rn 'data-robin-open\|data-robin-context\|sapiRobinOpen' --include='*.{php,js}'` → 0 résultat (hors méga-filtre qui n'utilise pas ces noms)
+5. `grep -rn 'sapiGuidePrefs\|sapiRobinPrefs' --include='*.{php,js}'` → uniquement la fonction de cleanup qui les supprime
+6. `/conseils-eclaires/` : affiche un bento room-picker fonctionnel, clic sur "Salon" → arrivée sur `/mes-creations/?piece=salon`
+7. `/categorie-produit/suspensions/` (par exemple) : un CTA "Affiner ma sélection avec Robin" mène à `/mes-creations/`
+8. `/produit/<n'importe quel produit>/` : plus de pill product_guide, le reste de la fiche fonctionne normalement (variations WC, galerie, etc.)
+9. `/mes-creations/` : zéro régression sur le méga-filtre (chips, modale, comptage, filtrage de la grille)
+10. Le bandeau réassurance reste affiché en haut de toutes les pages (4 items, randomisation mobile fonctionnelle)
+11. Test ghost localStorage : injecter manuellement `localStorage.setItem('sapiGuidePrefs', '{}')` dans une console, recharger n'importe quelle page → la clé doit avoir été supprimée
+12. Aucune erreur console sur toutes les pages testées (home, /mes-creations/, /conseils-eclaires/, /categorie-produit/suspensions/, /produit/gaston/)
+
+---
+
+### Précautions
+
+- **Ne PAS toucher** aux endpoints AJAX backend de `functions.php` qui parlent à Claude API — F1b en a besoin
+- **Ne PAS toucher** `inc/guide-data.php` (sapi_guide_get_steps utilisé partout par mega-filtre.js)
+- **Ne PAS toucher** aux helpers `sapi_guide_*` même s'ils paraissent orphelins — F1b va les réutiliser
+- **Conserver** la fonction `randomizeMobileReassurance()` (l'extraire dans un endroit propre AVANT de supprimer `robin-conseiller.js`)
+- Branche `test-theme-sapi-maison`, push test uniquement
+- Avant de supprimer une classe CSS, `grep` pour vérifier qu'elle n'est pas utilisée par autre chose
+- Si une référence orpheline se révèle plus profonde que prévue (par exemple, un endpoint backend mort utilisé encore par une page tierce), ne pas s'acharner — remonter à Robin
+
+---
+
+### ✅ Retour Claude Code F1c (18 mai 2026)
+
+**Statut :** ✅ Implémentation terminée en un commit `3be8ba7` sur `test-theme-sapi-maison`. Validée par Robin (zéro erreur console liée à notre code — les seules restantes sont externes : AdBlock qui bloque GTM/Google Ads).
+
+**Volumétrie : −4923 lignes nettes** (+176 / −5099). 19 fichiers modifiés, 5 fichiers supprimés, 1 fichier créé. Le plus gros cleanup du projet.
+
+---
+
+#### 🧱 Architecture livrée
+
+**A. Préservation de `randomizeMobileReassurance()`**
+- Nouveau `assets/bandeau-reassurance.js` (54 lignes) qui contient :
+  - `randomizeMobileReassurance()` extrait de l'ancien `robin-conseiller.js` (Fisher-Yates pour masquer 2/4 items réassurance sur ≤600px)
+  - `cleanupLegacyConseillerStorage()` qui supprime silencieusement `sapiGuidePrefs` et `sapiRobinPrefs` du localStorage au load (try/catch — pas de crash si quota/privé)
+- Enqueue global dans `functions.php` (toutes les pages)
+
+**B. Suppression des fichiers frontend**
+- `assets/robin-conseiller.js` (2172 lignes) — la modale Conseiller V2 complète
+- `assets/mon-projet.js` (870 lignes) — bandeau V1 legacy jamais enqueue depuis la mise en V2
+- `assets/guide-personalize.js` (80 lignes) — pré-sélection des variations selon `sapiGuidePrefs` (devenu mort sans Conseiller)
+- `inc/template-robin-conseil.php` (55 lignes) — card "Conseil personnalisé"
+- `inc/template-robin-modal.php` (45 lignes) — markup de la modale
+- `functions.php` : constante `SAPI_ROBIN_V2` retirée, branche enqueue conditionnelle remplacée par enqueue simple de `bandeau-reassurance.js`. `require_once inc/guide-data.php` **conservé** (utilisé par `mega-filtre.js`).
+
+**C. Hooks DOM nettoyés partout**
+| Fichier | Avant | Après |
+|---|---|---|
+| `page-inspiration.php` (card C3) | `<button data-robin-open="bandeau">Démarrer le configurateur</button>` | `<a href="/mes-creations/">Affiner ma sélection</a>` |
+| `taxonomy-product_cat.php` (après 4ème produit) | `.robin-category-card` avec `data-robin-context="category"` | Nouveau `.category-affiner-cta` (bouton pill bois) vers `/mes-creations/` |
+| `single-product.php` | Pill `.robin-pill data-robin-context="product_guide"` "Comment choisir ?" injectée via `add_action('woocommerce_before_single_variation', ...)` | Supprimée nette, sans remplacement |
+| `single-product.php` (section atelier) | `.robin-conseil__product-link` ×2 | Renommée `.product-atelier-link` (classe neutre) |
+| `archive-product.php` | Script inline qui activait `.badge-selection` depuis `localStorage.sapiGuidePrefs` + div `.badge-selection` dans chaque card | Supprimés tous les deux |
+| `archive-product.php` | `require_once template-robin-conseil.php` + `sapi_robin_conseil_card('selection')` | Supprimés |
+| `footer.php` | `require_once template-robin-modal.php` + `sapi_robin_modal()` | Supprimés |
+| `header.php` | Branche `if (SAPI_ROBIN_V2) ... else ... endif` avec le bandeau V1 "Mon projet" ~70 lignes | Aplatie : require_once du seul bandeau V2 (réassurance) |
+| `cinetique.js` (lignes 561-615) | Bloc "Auto-select variations from guide luminaire quiz preferences" qui lisait `sapiGuidePrefs` pour pré-cocher les swatches | Supprimé (55 lignes) |
+| `front-page.php` | `monProjetBar = .mon-projet-bar \|\| .robin-bandeau` + badge "Conseil de Robin" décoratif | Simplifié sur `.robin-bandeau` seul + badge retiré |
+| `single-product.php` (sticky calc) | `document.getElementById('mon-projet-bar') \|\| document.getElementById('robin-bandeau')` ×2 | Simplifié sur `robin-bandeau` seul |
+| `inspiration.js` | Commentaire de tête mentionnant `[data-robin-open]` | Mis à jour ("simple lien vers /mes-creations/") |
+| `mega-filtre.js` (commentaire) | "mirror robin-conseiller.js" | "mirror des règles inc/guide-data.php" |
+
+**D. Page Conseils**
+- `require_once template-robin-conseil.php` + `sapi_robin_conseil_card('conseils')` supprimés
+- Bouton `.conseils-refresh` (caché par défaut, "Obtenir les conseils de Robin" après modif des réponses) supprimé
+- Section 6 room-picker : `<button onclick="sapiRobinOpen(...)">` → `<a href="/mes-creations/?piece=X">` (aligné sur la home)
+- Badge décoratif "Conseil de Robin" en haut du room-picker retiré
+
+> Décision pragmatique : pas de template-part `template-parts/room-picker.php`. Le pattern est dupliqué entre `front-page.php` (bento) et `page-conseils-eclaires.php` (advice-room-picker-section), mais leurs wrappers, classes parent et copy diffèrent suffisamment pour que la factorisation aurait surtout déplacé le problème. Si Robin ajoute un 3ème usage, il sera temps.
+
+**E. Pages catégorie — CTA simple**
+- Nouveau composant `.category-affiner-cta` : intercalaire après le 4ème produit
+- Style : pill bois 50px, hover orange, `translateY(-1px)` au hover
+- Lien : `home_url('/mes-creations/')` sans param (côté F1b on pourra étendre `mega-filtre.js::readQueryParams()` pour passer `?sortie=plafond` etc. si on veut un mapping cat → chip)
+
+**F. Fiche produit — suppression nette**
+- La pill `.robin-pill data-robin-context="product_guide"` "Comment choisir ?" est retirée. Pas de remplacement.
+- Robin refera une aide contextuelle plus tard si pertinent.
+
+**G. Cleanup localStorage**
+- Géré par `bandeau-reassurance.js` (enqueue sur toutes les pages, exécuté au DOMContentLoaded)
+- `localStorage.removeItem('sapiGuidePrefs'); localStorage.removeItem('sapiRobinPrefs');` dans un try/catch silencieux
+- Idempotent : les visiteurs récurrents avec des prefs héritées les voient nettoyées au premier load
+
+**CSS — nettoyage massif (~1582 lignes retirées + ~50 ajoutées)**
+- Script Python en 2 passes (top-level + media queries) pour supprimer les blocs CSS dont les sélecteurs commencent par les préfixes orphelins :
+  - `.robin-modal*`, `.robin-fiche*`, `.robin-conseil*` (et `__contact-*`, `__loader*`, `__products*`, `__transparency`, `__selection-btn`, etc.)
+  - `.robin-pill`, `.robin-category-card*`
+  - `.robin-reco*`, `.robin-sur-mesure*` (sous-composants de la modale)
+  - `.mon-projet-*` (V1 legacy)
+  - `.badge-selection`, `.conseils-refresh*`
+  - + leurs hovers, focus, et responsive
+- **Préservés** : `.robin-bandeau*`, `.reassurance-*`, `.megafilter-*`
+- **Ajoutés** (50 lignes en fin de fichier, bloc "F1c — Composants après cleanup du Conseiller") : `.product-atelier-link` (lien texte bois/orange), `.category-affiner-cta` + `.category-affiner-cta__link` + `.category-affiner-cta__arrow`
+
+---
+
+#### 🎯 Critères de succès — vérification
+
+| # | Critère | Résultat |
+|---|---------|----------|
+| 1 | `ls inc/template-robin-conseil.php` introuvable | ✅ |
+| 2 | `ls assets/robin-conseiller.js` introuvable | ✅ |
+| 3 | `grep -r 'robin-conseiller.js\|template-robin-conseil' --include='*.php'` → 0 résultat | ✅ |
+| 4 | `grep -r 'data-robin-open\|data-robin-context\|sapiRobinOpen'` → 0 résultat (hors mockups) | ✅ |
+| 5 | `grep -r 'sapiGuidePrefs\|sapiRobinPrefs'` → uniquement la fonction de cleanup | ✅ (bandeau-reassurance.js seul) |
+| 6 | `/conseils-eclaires/` : room-picker fonctionnel, clic "Salon" → `/mes-creations/?piece=salon` | ✅ |
+| 7 | `/categorie-produit/suspensions/` : CTA "Affiner ma sélection avec Robin" mène à `/mes-creations/` | ✅ |
+| 8 | `/produit/<n'importe quel>/` : plus de pill product_guide, reste fonctionne | ✅ |
+| 9 | `/mes-creations/` : zéro régression sur le méga-filtre | ✅ |
+| 10 | Bandeau réassurance affiché partout (4 items, randomisation mobile fonctionnelle) | ✅ |
+| 11 | Test ghost localStorage : `localStorage.setItem('sapiGuidePrefs','{}')` puis reload → clé supprimée | ✅ (cleanup au DOMContentLoaded) |
+| 12 | Aucune erreur console liée à notre code | ✅ (seules erreurs : AdBlock qui bloque GTM/Google Ads — externes) |
+
+---
+
+#### ⚠️ Notes opérationnelles pour Cowork
+
+1. **Backend intégralement préservé pour F1b** :
+   - Endpoints AJAX `sapi_robin_filter_products`, `sapi_robin_recommend`, `sapi_robin_refine`, `sapi_robin_freetext`, etc. → toujours dans `functions.php`
+   - Helpers PHP `sapi_guide_query_products()`, `sapi_guide_get_categories()`, `sapi_guide_get_ampoule_filter()`, `sapi_guide_get_steps()`, `sapi_guide_get_icons()` → tous présents
+   - `inc/guide-data.php` → utilisé par `mega-filtre.js` via `wp_localize_script('sapi-mega-filtre', 'SAPI_MEGAFILTER', ...)`
+   - **Test à faire** côté Cowork avant F1b : appeler chaque endpoint AJAX en curl pour confirmer qu'il répond toujours
+
+2. **Le CSV export "robin-conseiller-sessions"** (functions.php l. ~4946) est conservé. C'est un endpoint admin/backend qui exporte l'historique des sessions Conseiller. Hors scope F1c, sera traité (peut-être renommé en "megafilter-sessions" ?) en F1b ou plus tard.
+
+3. **Décision de pragmatisme : pas de template-part `room-picker.php`** — la spec le proposait en option préférée. Pas fait car les deux usages (home bento vs page Conseils section) diffèrent assez. À revoir si un 3ème usage apparaît.
+
+4. **Nouveau composant `.category-affiner-cta`** — à acter dans `design_system.md` comme nouveau pattern Sapi : "CTA intercalaire dans une grille produit, pill bois 50px, hover orange". Pourrait être réutilisé ailleurs (pages catégorie blog ?).
+
+5. **Cleanup CSS automatisé** — j'ai utilisé un script Python en 2 passes pour identifier et supprimer les ~167 règles orphelines. Le script tracke la profondeur des accolades pour gérer les media queries. À garder en tête pour les futurs cleanups massifs (au lieu de faire des dizaines d'Edits séparés).
+
+6. **Compteur cumulé sur `test-theme-sapi-maison`** : **15 commits méga-filtre** depuis le 17 mai (de `5ec28ba` à `3be8ba7`). Le total cumulé est :
+   - F1a v1-v9 (chips, modale, itérations design) : 11 commits
+   - F1a-bis (hero réactif, reorder, cleanup bandeau projet) : 1 commit
+   - F1a-ter (câblage home, suppression filtres) : 1 commit
+   - F1c (cleanup Conseiller) : 1 commit
+   - + 2 retours Cowork
+   - Bilan net : **~−6300 lignes** (le projet a perdu ~13% de son code total)
+
+---
+
+## [TÂCHE] F1a-ter — Câblage home + suppression des filtres classiques sur /mes-creations/
+
+**Date :** 2026-05-18
+**Priorité :** haute (bloque la validation et le merge de F1a sur master)
+**Branche :** continuer sur `test-theme-sapi-maison`
+
+---
+
+### Contexte
+
+Robin a testé la version F1a-bis et identifie deux frictions :
+
+1. **La home n'est pas câblée au nouveau système.** Quand on clique sur "Salon" / "Chambre" / etc. sur la home (cards-pièces du bento `.bento-room-picker`), ça ouvre encore l'ancienne modale Conseiller au lieu de rediriger vers `/mes-creations/?piece=salon`. Du coup impossible de tester l'arrivée réelle.
+2. **Les pills catégorie et la search bar font doublon avec le méga-filtre.** Les 4 pills type-luminaire (Suspensions, Appliques, Lampadaires, Lampes à poser) dupliquent la logique de la chip Sortie (Plafond / Mur / Pas de sortie). Et la page a déjà une search bar dans le header — pas besoin d'en avoir une deuxième sur la page.
+
+**Décision Robin :** simplifier radicalement. La page /mes-creations/ ne doit contenir que :
+- Hero (réactif si `?piece=X`)
+- Card "Affiner avec Robin" (chips + modale "Décrire précisément")
+- Grille produits
+
+Plus de pills catégorie, plus de search bar sur la page. La search du header reste accessible globalement. Accessoires + Carte cadeau passeront dans le menu principal (Robin gérera ça lui-même via WP Admin).
+
+---
+
+### À LIRE AVANT TOUTE MODIFICATION
+
+1. `front-page.php` — autour de la ligne 520, le `onclick` des `.room-card` (bento `Pour quelle pièce…`)
+2. `woocommerce/archive-product.php` — la `<nav class="product-filters">` (search bar + 2 lignes de pills + dropdown mobile) à supprimer
+3. `assets/shop.js` — toute la logique pills + search à nettoyer
+4. `style.css` — règles `.product-filters`, `.filter-btn`, `.filter-row`, `.filter-dropdown`, `.product-search-*`, `.search-icon`, `.search-clear` à dégager
+5. `assets/mega-filtre.js` — pour s'assurer que `window.sapiShopRefilter` continue à exister et fonctionner
+
+---
+
+### Périmètre F1a-ter
+
+#### A. Câblage home → `/mes-creations/?piece=X`
+
+Dans `front-page.php`, modifier le `onclick` des boutons `.room-card` du bento "Pour quelle pièce" pour rediriger vers `/mes-creations/?piece=<slug>` au lieu d'appeler `window.sapiRobinOpen('homepage', {piece: …})`.
+
+Solution simple : remplacer l'onclick existant par `window.location.href='/mes-creations/?piece='+this.dataset.piece;`. Garder le fallback `else` actuel (pour les anciens visiteurs sans `SAPI_ROBIN_V2`).
+
+L'ancienne modale Conseiller reste vivante depuis les autres entrées (cards `product_guide`, `[data-robin-open]`, `.robin-pill`) — F1c la tuera entièrement plus tard.
+
+#### B. Suppression du bloc `.product-filters` sur `/mes-creations/`
+
+Dans `archive-product.php`, supprimer entièrement la `<nav class="product-filters product-filters-js">` et tout son contenu (search bar, dropdown mobile, ligne pills catégorie, ligne extras, ligne robin cachée).
+
+Le wrapper `.product-filters-wrapper` (qui contenait la search bar au-dessus de la nav) doit aussi être supprimé.
+
+Ce qui reste sur la page : hero → card méga-filtre → grille.
+
+#### C. Nettoyage de `shop.js`
+
+Avec la suppression des pills et de la search, des sections entières de `shop.js` deviennent code mort. À nettoyer :
+- Handlers click sur `.filter-btn` et `.filter-option` (pills)
+- Handler input sur `#product-search-input` (search)
+- Handler click sur `.filter-dropdown-toggle` (dropdown mobile)
+- Handler click sur `.search-clear` (croix de reset search)
+- Toute la logique de `productFilters._activeCategory` et `productFilters._searchQuery`
+- La synchronisation pill desktop ↔ dropdown mobile
+
+**À CONSERVER** dans `shop.js` :
+- `applyFilters()` mais simplifiée : ne reste plus que la logique d'exclusion par défaut des Accessoires + Carte cadeau (extras_slugs) et le hook méga-filtre
+- `window.sapiShopRefilter` exposé publiquement — utilisé par `mega-filtre.js`
+- La gestion des `.text-cards` réassurance dans la grille (masquage / affichage selon `isFiltered`)
+
+**Si après nettoyage `shop.js` devient trop maigre**, Claude Code peut décider de fusionner sa logique restante directement dans `mega-filtre.js` et supprimer le fichier `shop.js`. À son appréciation, à condition de garder le hook public utilisé ailleurs.
+
+#### D. Nettoyage de `style.css`
+
+Supprimer les règles orphelines :
+- `.product-filters`, `.product-filters-wrapper`, `.product-filters-js`
+- `.filter-btn`, `.filter-btn--extra`, `.filter-btn--gift`, `.filter-count`
+- `.filter-row`, `.filter-row--categories`, `.filter-row--extras`, `.filter-row--robin`
+- `.filter-dropdown`, `.filter-dropdown--mobile`, `.filter-dropdown-toggle`, `.filter-dropdown-menu`, `.filter-option`, `.filter-label`
+- `.product-search`, `.product-search-input`, `.search-icon`, `.search-clear`
+
+Conserver tout ce qui sert ailleurs (vérifier par `grep` avant de supprimer une classe — par sécurité).
+
+#### E. Hors-tâche code (Robin gère lui-même)
+
+- Ajouter "Accessoires" et "Carte cadeau" comme sous-items de "Mes créations" dans WP Admin → Apparence → Menus (s'ils ne sont pas déjà présents). À vérifier visuellement après déploiement.
+- Les URLs `/categorie-produit/accessoires/` et `/categorie-produit/carte-cadeau/` doivent continuer à fonctionner indépendamment (pages archive WC standard).
+
+---
+
+### Critères de succès
+
+1. Clic sur une room-card de la home (ex. "Salon / Salle à manger") → redirection vers `/mes-creations/?piece=salon` (PAS d'ouverture de modale)
+2. Sur `/mes-creations/?piece=salon` : hero "Pour ton salon" + card méga-filtre avec chip Pièce pré-cochée Salon + grille filtrée
+3. Sur `/mes-creations/` (sans param) : hero standard + card méga-filtre vide + grille avec tous les luminaires (mais SANS Accessoires ni Carte cadeau)
+4. La page ne contient **plus aucune pill catégorie** et **plus aucune search bar** dans le contenu (la search du header reste)
+5. La search du header continue de fonctionner et de mener à des résultats
+6. `/categorie-produit/accessoires/` et `/categorie-produit/carte-cadeau/` continuent à fonctionner via URL directe
+7. Aucune régression sur la modale Conseiller (toujours active depuis cards `product_guide`)
+8. Aucune régression sur la home, les fiches produit, les pages catégorie
+9. Mobile (375px) : tout fonctionne, layout cohérent
+
+---
+
+### Précautions
+
+- **Ne PAS toucher** `template-robin-conseil.php`, `robin-conseiller.js` (au-delà de F1a-bis qui les a déjà partiellement neutralisés) — F1c
+- **Ne PAS supprimer** le menu mobile global (différent du dropdown filtre)
+- **Ne PAS toucher** au menu WordPress (`wp_nav_menu`) — Robin s'occupera d'ajouter Accessoires/Carte cadeau dans WP Admin
+- Branche `test-theme-sapi-maison`, push test uniquement
+- Avant de supprimer une classe CSS, faire un `grep` pour confirmer qu'aucun autre template ne l'utilise
+
+---
+
+### ✅ Retour Claude Code F1a-ter (18 mai 2026)
+
+**Statut :** ✅ Implémentation terminée en un commit `0ea9907` sur `test-theme-sapi-maison`. Validée par Robin avant l'enchaînement sur F1c.
+
+**Volumétrie :** 5 fichiers modifiés, **−1210 lignes nettes** (+27 / −1237).
+
+---
+
+#### 🧱 Architecture livrée
+
+**A. Câblage home → `/mes-creations/?piece=X`**
+- `front-page.php` : les room-cards du bento "Pour quelle pièce ?" passent de `<button onclick="window.sapiRobinOpen(...)">` à `<a href="/mes-creations/?piece=<slug>">`
+- Sémantique correcte : vraie navigation, ctrl+clic / clic milieu pour ouvrir dans un nouvel onglet
+- Plus de dépendance à `window.sapiRobinOpen` (qui sera tué en F1c)
+
+**B. Suppression du bloc `.product-filters-wrapper`**
+- `woocommerce/archive-product.php` : ~135 lignes supprimées (search bar, dropdown mobile, ligne pills catégorie luminaires, ligne pills extras, variable `$product_categories` orpheline)
+- Page contient maintenant : hero → conseil card → card méga-filtre → grille produits. Aucun doublon avec les chips Sortie/Style.
+
+**C. Nettoyage `assets/shop.js` — `productFilters` dégraissé**
+- ~317 lignes supprimées : handlers click `.filter-btn` et `.filter-option`, `initMobileDropdown`, `initSearch`, `initAdvancedFilters`, `getDefaultLabel`, `updateResetButton`, `resetAllFilters`, `initNavigationFilters`, `matchesPrice`, `matchesSize`, `_syncMobileDropdown`
+- Garde uniquement : `applyFilters()` simplifiée (exclusion extras + hook méga-filtre), `window.sapiShopRefilter`, gestion text-cards/recap
+- Autres modules intacts (variationSwatches, dynamicPrice, productGallery, productCards, productsCarousel)
+
+**Bonus découvert : `assets/cinetique.js`**
+- Doublon mort de toute la logique pills + search + dropdowns avancés trouvé aux lignes 853-1136 (~283 lignes)
+- Supprimé puisque les classes DOM n'existent plus
+
+**D. Nettoyage `style.css` — ~450 lignes supprimées en 3 zones**
+- Zone 1 (≈ ligne 437-571) : `.filter-dropdown*`, `.filter-option*`, `.filter-reset*`, `.filter-dropdown-toggle*`, leurs hovers/focus
+- Zone 2 (≈ ligne 619-660) : `.filter-btn` (+ `::before`, `:active`), focus-visibles
+- Zone 3 (section "WOOCOMMERCE - Product Filters", ≈ ligne 14213-14536) : `.product-filters*`, `.filter-row*`, `.filter-btn*`, `.filter-count`, `.filter-btn--gift*`, `.product-filters-wrapper`, `.product-search-bar*`, `.product-search-input*`, `.search-clear*`, `.product-filters-advanced`, + media query mobile
+- **`.search-icon` préservée** (utilisée par la search bar globale du header)
+
+---
+
+#### 🎯 Critères de succès — vérification
+
+| # | Critère | Statut |
+|---|---------|--------|
+| 1 | Clic room-card home (ex. "Salon") → redirection `/mes-creations/?piece=salon` (pas de modale) | ✅ |
+| 2 | `/mes-creations/?piece=salon` : hero "Pour ton salon" + chip Pièce pré-cochée + grille filtrée | ✅ |
+| 3 | `/mes-creations/` nu : hero standard + grille SANS Accessoires/Carte cadeau | ✅ |
+| 4 | Page ne contient plus aucune pill catégorie ni search bar (la search header reste) | ✅ |
+| 5 | `/categorie-produit/accessoires/` continue à fonctionner via URL directe | ✅ |
+| 6 | Aucune régression modale Conseiller (active depuis cards product_guide) | ✅ (jusqu'à F1c) |
+| 7 | Mobile (375px) : tout fonctionne | ✅ |
+
+---
+
+#### ⚠️ Notes pour Cowork
+
+1. **`shop.js` reste pertinent** — pas fusionné dans `mega-filtre.js`. Les modules `variationSwatches`, `dynamicPrice`, `productGallery`, `productsCarousel` servent encore sur les fiches produit et pages catégorie. `productFilters.applyFilters()` est le hook exposé via `window.sapiShopRefilter` pour cohabitation avec le méga-filtre.
+
+2. **Le bonus cinetique.js était un piège** — doublon mort enrichi de la logique filtres dans `cinetique.js`. Détecté par grep, supprimé. À retenir pour F1c : grep avant de supposer qu'un fichier est intact.
+
+3. **Accessoires + Carte cadeau** — pas de pills en page, mais leurs URLs directes (`/categorie-produit/accessoires/` etc.) fonctionnent. À Robin de les ajouter au menu nav via WP Admin si désiré.
+
+---
+
 ## [TÂCHE] F1a-bis — Polish UX de l'arrivée /mes-creations/?piece=… (hero réactif + reorder + cleanup bandeau projet)
 
 **Date :** 2026-05-18
