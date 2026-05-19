@@ -260,6 +260,16 @@
     els.cardConseil && (els.cardConseil.hidden = true);
     els.cardMonProjet.hidden = false;
 
+    // F2a-quater : pendant l'animation morph + l'attente IA, on n'écrit pas
+    // le texte générique. Le CSS .is-awaiting-advice affiche 3 dots pulsants.
+    // Quand le modal retire la classe (advice arrivé), le subscribe re-fire
+    // renderMonProjet qui passe alors dans le bloc typewriter normal.
+    if (els.cardMonProjet.classList.contains('is-awaiting-advice')) {
+      els.phraseContent.textContent = '';
+      delete els.phraseContent.dataset.lastText;
+      return;
+    }
+
     var project = window.sapiProject ? window.sapiProject.get() : null;
     var newText = getAdviceText(project);
 

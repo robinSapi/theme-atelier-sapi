@@ -243,10 +243,53 @@
     opts = opts || {};
     if (state.transition) return; // évite double-trigger
     state.transition = true;
-    showScreen('s-transition');
 
-    var startedAt = Date.now();
+    // 1. Lancer le fetch IA en parallèle (résolu indépendamment de l'anim)
+    var pendingAdvice = null;
+    var adviceResolved = false;
+    var fetchPromise = fetchAdviceFromIA(opts).then(function (advice) {
+      pendingAdvice = advice;
+      adviceResolved = true;
+      return advice;
+    });
 
+    // 2. Save les réponses dans sapiProject SANS advice_text. Add la class
+    //    .is-awaiting-advice sur la card AVANT le set, pour que le subscribe
+    //    qui fire ne déclenche pas un typewriter sur le texte générique.
+    var monProjetCard = document.querySelector('.conseiller-card--mon-projet');
+    if (monProjetCard) monProjetCard.classList.add('is-awaiting-advice');
+    if (window.sapiProject) {
+      window.sapiProject.set(state.answers, state.labels);
+    }
+
+    // 3. Animer la modale (overlay + card) → position de la card "Mon projet"
+    morphModalToCard(monProjetCard).then(function () {
+      // Cleanup état modale
+      state.open = false;
+      els.modal.hidden = true;
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+      exitChatMode();
+
+      // 4. Refilter la grille
+      if (typeof window.sapiShopRefilter === 'function') window.sapiShopRefilter();
+
+      // 5. Quand l'IA arrive (peut être déjà résolu pendant le morph),
+      //    retirer la classe + setAdviceText → trigger typewriter.
+      if (adviceResolved) {
+        finishAdvice(monProjetCard, pendingAdvice);
+      } else {
+        fetchPromise.then(function (advice) {
+          finishAdvice(monProjetCard, advice);
+        });
+      }
+
+      state.transition = false;
+    });
+  }
+
+  // Helper : appel IA dédié, isolé pour pouvoir le tester séparément
+  function fetchAdviceFromIA(opts) {
     var fd = new FormData();
     fd.append('action', 'sapi_megafilter_advice');
     fd.append('nonce', config.nonce || '');
@@ -255,36 +298,117 @@
     if (opts.conversation && Array.isArray(opts.conversation) && opts.conversation.length) {
       fd.append('conversation', JSON.stringify(opts.conversation));
     }
-
-    var fetchPromise = fetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
+    return fetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
       .then(function (r) { return r.json(); })
       .then(function (resp) {
         if (resp && resp.success && resp.data && typeof resp.data.advice_text === 'string' && resp.data.advice_text) {
           return resp.data.advice_text;
         }
-        return null; // fallback géré côté front (texte générique de la pièce)
+        return null;
       })
       .catch(function () { return null; });
+  }
 
-    fetchPromise.then(function (advice) {
-      var elapsed = Date.now() - startedAt;
-      // Minimum 700ms d'écran transition pour la lisibilité du "Robin réfléchit"
-      var wait = Math.max(0, 700 - elapsed);
+  function finishAdvice(card, advice) {
+    if (card) card.classList.remove('is-awaiting-advice');
+    if (advice && window.sapiProject) {
+      window.sapiProject.setAdviceText(advice);
+    } else if (window.sapiProject) {
+      // Force un re-render même sans advice pour sortir des dots et afficher
+      // le texte générique de la pièce. Le typewriter va se déclencher.
+      // Hack : notify manuel via un setAdviceText(null) — pas idéal mais OK.
+      window.sapiProject.setAdviceText(null);
+    }
+  }
+
+  // Animation FLIP : la modale (overlay + dialog) se rétracte vers la
+  // position de la card "Mon projet" en 1s. À la fin, on cache la modale
+  // pour révéler la vraie card en place.
+  function morphModalToCard(targetCard) {
+    return new Promise(function (resolve) {
+      var modalCard = els.modalCard;
+      if (!modalCard || !targetCard || !els.modal) {
+        // Fallback : pas d'animation, juste cleanup
+        if (els.modal) els.modal.hidden = true;
+        setTimeout(resolve, 0);
+        return;
+      }
+
+      // 1. Révéler temporairement la target pour mesurer sa position cible
+      var prevHidden = targetCard.hidden;
+      var prevVisibility = targetCard.style.visibility;
+      targetCard.style.visibility = 'hidden';
+      targetCard.hidden = false;
+      void targetCard.offsetWidth; // force layout
+
+      var fromRect = modalCard.getBoundingClientRect();
+      var toRect = targetCard.getBoundingClientRect();
+
+      // 2. Si la target est hors viewport, on scroll smooth en parallèle
+      if (toRect.top < 0 || toRect.top > window.innerHeight - 100) {
+        try {
+          window.scrollTo({
+            top: window.scrollY + toRect.top - Math.max(40, (window.innerHeight - toRect.height) / 2),
+            behavior: 'smooth',
+          });
+          // Re-mesurer après scroll demandé
+          void targetCard.offsetWidth;
+          toRect = targetCard.getBoundingClientRect();
+        } catch (e) { /* legacy browser */ }
+      }
+
+      // 3. Calculer la transformation (origin top-left)
+      var dx = toRect.left - fromRect.left;
+      var dy = toRect.top - fromRect.top;
+      var sx = toRect.width / fromRect.width;
+      var sy = toRect.height / fromRect.height;
+
+      // 4. Préparer styles initiaux pour l'animation
+      modalCard.style.transformOrigin = '0 0';
+      modalCard.style.willChange = 'transform, opacity';
+
+      // 5. Fade-out overlay sombre
+      els.modal.style.transition = 'background-color 0.6s ease';
+      els.modal.style.backgroundColor = 'transparent';
+
+      // 6. Fade-out du contenu interne (les screens)
+      var visibleScreen = els.modal.querySelector('[data-screen]:not([hidden])');
+      if (visibleScreen) {
+        visibleScreen.style.transition = 'opacity 0.5s ease';
+        visibleScreen.style.opacity = '0';
+      }
+
+      // 7. Animer la modal-card → position cible (transform 1s)
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          modalCard.style.transition = 'transform 1s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.5s ease 0.6s';
+          modalCard.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + sx + ', ' + sy + ')';
+          // Fade-out de la modal-card sur les 400 dernières ms (overlap avec arrivée)
+          modalCard.style.opacity = '0';
+        });
+      });
+
+      // 8. Restaurer la target dans son état initial (revisible / hidden)
+      //    Le subscribe sapiProject l'aura déjà passée en hidden=false si
+      //    la card "Mon projet" doit être visible. Sinon on la rehide.
+      targetCard.style.visibility = prevVisibility || '';
+      targetCard.hidden = prevHidden;
+
+      // 9. À la fin de l'animation (1s + 50ms buffer), cleanup styles
       setTimeout(function () {
-        // Sauvegarde du projet final avec advice_text (un seul write côté localStorage)
-        if (window.sapiProject) {
-          window.sapiProject.set(state.answers, state.labels, { advice_text: advice });
+        els.modal.style.transition = '';
+        els.modal.style.backgroundColor = '';
+        modalCard.style.transition = '';
+        modalCard.style.transform = '';
+        modalCard.style.opacity = '';
+        modalCard.style.transformOrigin = '';
+        modalCard.style.willChange = '';
+        if (visibleScreen) {
+          visibleScreen.style.transition = '';
+          visibleScreen.style.opacity = '';
         }
-        state.transition = false;
-        closeModal();
-        // Force le refilter au cas où le subscriber ne suffit pas
-        if (typeof window.sapiShopRefilter === 'function') window.sapiShopRefilter();
-        // Scroll vers la grille pour montrer le résultat
-        var grid = document.getElementById('sapi-product-grid');
-        if (grid && grid.scrollIntoView) {
-          grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, wait);
+        resolve();
+      }, 1050);
     });
   }
 
@@ -906,9 +1030,9 @@
       openModal(st);
     });
 
-    // ESC pour fermer
+    // ESC pour fermer — désactivé pendant l'animation morph (state.transition)
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && state.open) {
+      if (e.key === 'Escape' && state.open && !state.transition) {
         e.preventDefault();
         closeModal();
       }
@@ -918,6 +1042,8 @@
 
     // Délégation : clics dans la modale (close, door, choice, back, apply)
     els.modal.addEventListener('click', function (e) {
+      // Pendant l'animation morph, on ignore les clics pour ne pas casser
+      if (state.transition) return;
       // Click sur l'overlay (en dehors du dialog) → ferme
       if (e.target === els.modal) {
         closeModal();

@@ -22964,6 +22964,39 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* F2a-bis : Loading state de la phrase IA supprimé — la card "Mon projet"
    lit synchronement advice_text ou texte générique, plus de pulse au load. */
 
+/* F2a-quater : pendant l'animation morph "modale → card" et tant que l'IA
+   n'a pas répondu, la card affiche 3 dots pulsants à la place de la
+   citation, et la signature est masquée. Quand l'IA arrive, le JS retire
+   la classe et déclenche le typewriter normalement. */
+.conseiller-card--mon-projet.is-awaiting-advice .conseiller-mon-projet__text-content::before {
+  content: '';
+}
+.conseiller-card--mon-projet.is-awaiting-advice .conseiller-mon-projet__text-content::after {
+  content: '· · ·';
+  color: var(--color-wood);
+  font-style: normal;
+  font-size: 28px;
+  letter-spacing: 0.15em;
+  opacity: 0.5;
+  -webkit-animation: awaiting-pulse 1.4s ease-in-out infinite;
+  animation: awaiting-pulse 1.4s ease-in-out infinite;
+}
+.conseiller-card--mon-projet.is-awaiting-advice .conseiller-mon-projet__text-content > * {
+  /* Cache tout caractère pré-existant (chars du typewriter) le cas échéant */
+  display: none;
+}
+.conseiller-card--mon-projet.is-awaiting-advice .conseiller-signature {
+  opacity: 0;
+}
+@-webkit-keyframes awaiting-pulse {
+  0%, 100% { opacity: 0.25; }
+  50%      { opacity: 0.75; }
+}
+@keyframes awaiting-pulse {
+  0%, 100% { opacity: 0.25; }
+  50%      { opacity: 0.75; }
+}
+
 /* F2a-ter raffinement : le bouton .conseiller-mon-projet__edit a été
    supprimé du markup — la card entière est désormais cliquable. */
 
