@@ -65,13 +65,15 @@ if (!$hero_img_url) {
 <?php
 // Hero réactif : si ?piece=… présent dans l'URL et reconnu, on adapte H1 + sous-titre
 // et on cache le lien Conseils (qui contredit le contexte filtré).
+// F2a-bis : on utilise un article indéfini (un/une) plutôt qu'un déterminant possessif
+// (ton/ta) qui présume une appartenance qu'on ne peut pas affirmer.
 $piece_hero_map = [
-  'salon'    => ['det' => 'ton', 'nom' => 'salon'],
-  'chambre'  => ['det' => 'ta',  'nom' => 'chambre'],
-  'cuisine'  => ['det' => 'ta',  'nom' => 'cuisine'],
-  'bureau'   => ['det' => 'ton', 'nom' => 'bureau'],
-  'entree'   => ['det' => 'ton', 'nom' => 'entrée'],
-  'escalier' => ['det' => 'ton', 'nom' => 'escalier'],
+  'salon'    => ['article' => 'un',  'nom' => 'salon'],
+  'chambre'  => ['article' => 'une', 'nom' => 'chambre'],
+  'cuisine'  => ['article' => 'une', 'nom' => 'cuisine'],
+  'bureau'   => ['article' => 'un',  'nom' => 'bureau'],
+  'entree'   => ['article' => 'une', 'nom' => 'entrée'],
+  'escalier' => ['article' => 'un',  'nom' => 'escalier'],
 ];
 $piece_param = isset($_GET['piece']) ? sanitize_key(wp_unslash($_GET['piece'])) : '';
 $piece_hero  = isset($piece_hero_map[$piece_param]) ? $piece_hero_map[$piece_param] : null;
@@ -80,11 +82,11 @@ $piece_hero  = isset($piece_hero_map[$piece_param]) ? $piece_hero_map[$piece_par
   <div class="shop-hero-artisan-inner">
     <?php if ($piece_hero) : ?>
       <h1><?php
-        /* translators: 1: déterminant possessif (ton/ta), 2: nom de la pièce */
-        printf(esc_html__('Pour %1$s %2$s', 'theme-sapi-maison'), esc_html($piece_hero['det']), esc_html($piece_hero['nom']));
+        /* translators: 1: article indéfini (un/une), 2: nom de la pièce */
+        printf(esc_html__('Pour %1$s %2$s', 'theme-sapi-maison'), esc_html($piece_hero['article']), esc_html($piece_hero['nom']));
       ?></h1>
       <p class="shop-hero-artisan-subtitle">
-        <?php esc_html_e('Ma sélection pour cette pièce — affine ton projet juste en-dessous.', 'theme-sapi-maison'); ?>
+        <?php esc_html_e('Découvre la sélection de l\'atelier pour ton projet', 'theme-sapi-maison'); ?>
       </p>
     <?php else : ?>
       <h1><?php esc_html_e('Mes Créations', 'theme-sapi-maison'); ?></h1>
