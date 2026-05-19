@@ -22967,28 +22967,43 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 /* La card Conseiller devient elle-même le dialog flottant centré dans l'overlay.
-   Pas de chrome blanc ni de croix : click outside ou ESC pour fermer. */
+   Pas de chrome blanc ni de croix : click outside ou ESC pour fermer.
+   F2a-bis : taille fixe (600px desktop, 100dvh-32 mobile) pour éviter le
+   "respirer" entre écrans S0/S1/S2/s-transition. Le contenu se cale en haut,
+   l'espace restant tombe en bas. */
 .conseiller-card--modal {
   width: 100%;
   max-width: 880px;
+  height: 600px;
   max-height: calc(100dvh - 64px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: 44px 40px 36px;
   text-align: center;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
   box-shadow: 0 28px 80px rgba(0, 0, 0, 0.32), 0 6px 24px rgba(0, 0, 0, 0.12);
   -webkit-animation: conseiller-dialog-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   animation: conseiller-dialog-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Les 3 écrans sont rendus dans le même DOM, JS toggle hidden */
-.conseiller-modal__screen[hidden] {
-  display: none;
-}
-
+/* Les écrans sont rendus dans le même DOM, JS toggle hidden.
+   F2a-bis : chaque écran actif prend flex: 1 pour remplir la card à taille fixe. */
 .conseiller-modal__screen {
+  -webkit-flex: 1;
+  flex: 1;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
   -webkit-animation: conseiller-screen-fade 0.2s ease-out;
   animation: conseiller-screen-fade 0.2s ease-out;
+}
+
+.conseiller-modal__screen[hidden] {
+  display: none;
 }
 
 @-webkit-keyframes conseiller-screen-fade {
@@ -23246,6 +23261,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
     padding: 16px 12px;
   }
   .conseiller-card--modal {
+    height: calc(100dvh - 32px);
     max-height: calc(100dvh - 32px);
     padding: 32px 22px 28px;
   }
