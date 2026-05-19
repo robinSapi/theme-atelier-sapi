@@ -422,15 +422,7 @@ $conseiller_porte_feather_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="cu
 $conseiller_arrow_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
 ?>
 <div class="conseiller-modal" data-conseiller-modal hidden>
-  <div class="conseiller-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="conseiller-modal-title">
-
-  <header class="conseiller-modal__header">
-    <span class="conseiller-modal__title" id="conseiller-modal-title"><?php esc_html_e('Décrire mon projet', 'theme-sapi-maison'); ?></span>
-    <button type="button" class="conseiller-modal__close" data-action="close" aria-label="<?php esc_attr_e('Fermer', 'theme-sapi-maison'); ?>">×</button>
-  </header>
-
-  <div class="conseiller-modal__body" data-modal-body>
-    <div class="conseiller-card conseiller-card--modal" data-modal-card>
+  <div class="conseiller-card conseiller-card--modal" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e('Conseil de Robin', 'theme-sapi-maison'); ?>" data-modal-card>
 
       <!-- S0 — Écran de démarrage 2 portes -->
       <div class="conseiller-modal__screen" data-screen="s0" hidden>
@@ -512,9 +504,7 @@ $conseiller_arrow_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCol
         </div>
       </div>
 
-    </div>
-  </div>
-  </div><!-- /.conseiller-modal__dialog -->
+  </div><!-- /.conseiller-card--modal -->
 </div>
 
 <?php

@@ -119,8 +119,8 @@
       void visible.offsetWidth;
       visible.style.animation = '';
     }
-    // Scroll body to top quand on change d'écran
-    if (els.body) els.body.scrollTop = 0;
+    // Scroll la card au top quand on change d'écran (la card est scrollable)
+    if (els.modalCard) els.modalCard.scrollTop = 0;
   }
 
   function showQuestion(stepId) {
@@ -393,10 +393,12 @@
       showScreen('s0');
     }
 
-    // Focus le bouton de fermeture pour annoncer l'ouverture aux screen readers
+    // Focus la card (rôle dialog) pour annoncer l'ouverture aux screen readers
     setTimeout(function () {
-      var close = els.modal.querySelector('[data-action="close"]');
-      if (close) close.focus();
+      if (els.modalCard && els.modalCard.focus) {
+        els.modalCard.setAttribute('tabindex', '-1');
+        els.modalCard.focus({ preventScroll: true });
+      }
     }, 50);
   }
 
@@ -480,7 +482,7 @@
   function init() {
     els.modal = document.querySelector('[data-conseiller-modal]');
     if (!els.modal) return; // pas sur la page concernée
-    els.body          = els.modal.querySelector('[data-modal-body]');
+    els.modalCard     = els.modal.querySelector('[data-modal-card]');
     els.questionTitle = els.modal.querySelector('[data-question-title]');
     els.choices       = els.modal.querySelector('[data-choices]');
     els.progressFill  = els.modal.querySelector('[data-progress-fill]');

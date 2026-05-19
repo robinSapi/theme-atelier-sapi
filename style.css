@@ -22974,24 +22974,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   to   { opacity: 1; }
 }
 
-/* Dialog : la fenêtre flottante qui contient header + body */
-.conseiller-modal__dialog {
-  position: relative;
-  background: var(--color-cream);
-  border-radius: 20px;
-  width: 100%;
-  max-width: 960px;
-  max-height: calc(100dvh - 64px);
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-direction: column;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.32), 0 6px 24px rgba(0, 0, 0, 0.12);
-  -webkit-animation: conseiller-dialog-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  animation: conseiller-dialog-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
+/* Animation d'apparition du dialog (card) */
 @-webkit-keyframes conseiller-dialog-pop {
   from { opacity: 0; -webkit-transform: scale(0.96) translateY(10px); transform: scale(0.96) translateY(10px); }
   to   { opacity: 1; -webkit-transform: scale(1) translateY(0);       transform: scale(1) translateY(0);       }
@@ -23001,72 +22984,19 @@ body.woocommerce-cart div.woocommerce-wrapper {
   to   { opacity: 1; -webkit-transform: scale(1) translateY(0);       transform: scale(1) translateY(0);       }
 }
 
-/* Header — fixe en haut */
-.conseiller-modal__header {
-  flex-shrink: 0;
-  padding: 16px 24px;
-  background: var(--color-white);
-  border-bottom: 1px solid var(--color-line);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.conseiller-modal__title {
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-wood);
-}
-
-.conseiller-modal__close {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: transparent;
-  border: none;
-  color: var(--color-wood-dark);
-  font-size: 24px;
-  line-height: 1;
-  cursor: pointer;
-  display: -webkit-inline-flex;
-  display: inline-flex;
-  -webkit-align-items: center;
-  align-items: center;
-  -webkit-justify-content: center;
-  justify-content: center;
-  -webkit-transition: background 0.2s ease;
-  transition: background 0.2s ease;
-}
-
-.conseiller-modal__close:hover,
-.conseiller-modal__close:focus-visible {
-  background: var(--color-warm);
-  outline: none;
-}
-
-/* Body — scrollable, contient la card unique centrée */
-.conseiller-modal__body {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 32px 28px 36px;
-  display: flex;
-  -webkit-align-items: flex-start;
-  align-items: flex-start;
-  -webkit-justify-content: center;
-  justify-content: center;
-}
-
-/* Variante modale du pattern card : max-width 880px, padding adapté */
+/* La card Conseiller devient elle-même le dialog flottant centré dans l'overlay.
+   Pas de chrome blanc ni de croix : click outside ou ESC pour fermer. */
 .conseiller-card--modal {
   width: 100%;
   max-width: 880px;
-  padding: 36px 40px 28px;
+  max-height: calc(100dvh - 64px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 44px 40px 36px;
   text-align: center;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.32), 0 6px 24px rgba(0, 0, 0, 0.12);
+  -webkit-animation: conseiller-dialog-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: conseiller-dialog-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Les 3 écrans sont rendus dans le même DOM, JS toggle hidden */
@@ -23376,21 +23306,9 @@ body.woocommerce-cart div.woocommerce-wrapper {
   .conseiller-modal {
     padding: 16px 12px;
   }
-  .conseiller-modal__dialog {
-    max-height: calc(100dvh - 32px);
-    border-radius: 16px;
-  }
-  .conseiller-modal__header {
-    padding: 14px 16px;
-  }
-  .conseiller-modal__title {
-    font-size: 12px;
-  }
-  .conseiller-modal__body {
-    padding: 22px 16px 28px;
-  }
   .conseiller-card--modal {
-    padding: 28px 22px 24px;
+    max-height: calc(100dvh - 32px);
+    padding: 32px 22px 28px;
   }
   .conseiller-card--modal .conseiller-h2 {
     font-size: 19px;
