@@ -128,9 +128,9 @@ $conseiller_pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCo
         <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
         <?php esc_html_e('Mon projet', 'theme-sapi-maison'); ?>
       </span>
-      <p class="conseiller-mon-projet__text" data-mon-projet-phrase>
+      <p class="conseiller-mon-projet__text" data-mon-projet-phrase data-state="loading">
         <span class="conseiller-mon-projet__text-content" data-mon-projet-phrase-content>
-          <?php esc_html_e('Voici ma sélection pour ton projet.', 'theme-sapi-maison'); ?>
+          <?php esc_html_e('Robin prépare ton conseil…', 'theme-sapi-maison'); ?>
         </span>
         <span class="conseiller-signature">— Robin</span>
       </p>

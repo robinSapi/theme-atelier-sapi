@@ -239,14 +239,22 @@
     els.cardConseil && (els.cardConseil.hidden = true);
     els.cardMonProjet.hidden = false;
 
-    // État loading pour la phrase pendant le fetch IA
+    // État loading : présent dans le HTML server-side dès le rendu PHP, on le
+    // remet ici aussi pour les re-renders (après changement de projet).
     els.phrase.setAttribute('data-state', 'loading');
 
+    // Minimum 600 ms avant swap : garantit que le pulse est visible même si
+    // la réponse IA arrive en quelques ms (cache transient PHP 1h).
+    var startedAt = Date.now();
     fetchAdvice().then(function (text) {
-      // Garde-fou : si entre-temps le projet a été vidé, ne plus écrire
       if (!window.sapiProject || !window.sapiProject.hasProject()) return;
-      els.phraseContent.textContent = text;
-      els.phrase.removeAttribute('data-state');
+      var elapsed = Date.now() - startedAt;
+      var wait = Math.max(0, 600 - elapsed);
+      setTimeout(function () {
+        if (!window.sapiProject || !window.sapiProject.hasProject()) return;
+        els.phraseContent.textContent = text;
+        els.phrase.removeAttribute('data-state');
+      }, wait);
     });
   }
 

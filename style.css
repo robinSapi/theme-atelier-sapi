@@ -22689,7 +22689,10 @@ body.woocommerce-cart div.woocommerce-wrapper {
   color: var(--color-white);
 }
 
+/* Taille SVG explicite — Chrome rend les SVG sans width/height à 100%, Safari diffère. */
 .conseiller-cta svg {
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
 }
 
@@ -22870,20 +22873,25 @@ body.woocommerce-cart div.woocommerce-wrapper {
   /* Square Peg ne supporte pas l'italic — on neutralise l'héritage */
 }
 
-/* État chargement de la phrase IA — pulse léger */
+/* État chargement de la phrase IA — pulse visible (Robin réfléchit) */
 .conseiller-mon-projet__text[data-state="loading"] .conseiller-mon-projet__text-content {
-  opacity: 0.5;
-  -webkit-animation: sapi-mon-projet-pulse 1.6s ease-in-out infinite;
-  animation: sapi-mon-projet-pulse 1.6s ease-in-out infinite;
+  -webkit-animation: sapi-mon-projet-pulse 1.4s ease-in-out infinite;
+  animation: sapi-mon-projet-pulse 1.4s ease-in-out infinite;
+}
+
+/* La phrase pulse également quand elle n'est pas en loading mais a un fade-in */
+.conseiller-mon-projet__text-content {
+  -webkit-transition: opacity 0.35s ease;
+  transition: opacity 0.35s ease;
 }
 
 @-webkit-keyframes sapi-mon-projet-pulse {
-  0%, 100% { opacity: 0.4; }
-  50%      { opacity: 0.7; }
+  0%, 100% { opacity: 0.32; }
+  50%      { opacity: 0.78; }
 }
 @keyframes sapi-mon-projet-pulse {
-  0%, 100% { opacity: 0.4; }
-  50%      { opacity: 0.7; }
+  0%, 100% { opacity: 0.32; }
+  50%      { opacity: 0.78; }
 }
 
 /* Lien "Préciser ou modifier mon projet ✎" — discret */
