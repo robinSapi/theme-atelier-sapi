@@ -22510,593 +22510,6 @@ body.woocommerce-cart div.woocommerce-wrapper {
   }
 }
 
-/* ============================================================
-   MÉGA-FILTRE INTELLIGENT — /mes-creations/ (F1a)
-   Chips conditionnels + commentaire débouncé + modale plein écran
-   ============================================================ */
-
-/* ── Barre Affiner avec Robin ── */
-/* Alignée sur la grille produit : max-width 1400px + padding 3rem (cf .shop-products .product-grid) */
-/* padding-bottom obligatoire : sinon .shop-products (fond crème) colle juste dessous
-   et masque l'ombre var(--shadow-card) de .megafilter-bar-inner */
-.megafilter-bar {
-  max-width: 1400px;
-  margin: 1.5rem auto 0;
-  padding: 0 1rem 1.5rem;
-}
-
-.megafilter-bar-inner {
-  background: var(--color-white);
-  border: 1px solid var(--color-line);
-  border-radius: 16px;
-  padding: 0.875rem 1.25rem;
-  box-shadow: var(--shadow-card);
-}
-
-.megafilter-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  margin-bottom: 0.625rem;
-}
-
-.megafilter-title {
-  font-size: 0.8125rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-wood);
-  margin: 0;
-  line-height: 1.4;
-}
-
-.megafilter-intro {
-  margin: 0;
-  font-family: var(--font-body);
-  font-size: 0.875rem;
-  line-height: 1.45;
-  color: var(--color-wood-mid);
-}
-
-/* Actions sous les chips : CTA à gauche, "Tout effacer" à droite (alignés sur la même ligne) */
-.megafilter-actions {
-  margin-top: 0.625rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.megafilter-ai-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.125rem;
-  background: var(--color-orange);
-  color: var(--color-white);
-  border: none;
-  border-radius: 50px;
-  font-family: inherit;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  -webkit-transition: background 0.2s ease;
-  transition: background 0.2s ease;
-}
-
-.megafilter-ai-btn:hover,
-.megafilter-ai-btn:focus-visible {
-  background: var(--color-orange-hover);
-  outline: none;
-}
-
-.megafilter-ai-btn svg {
-  flex-shrink: 0;
-}
-
-/* ── Chips ── */
-.megafilter-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.megafilter-chip {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
-
-/* Quand un chip est ouvert (menu déroulé), il doit passer devant ses voisins
-   et la zone commentaire — le menu est positionné en absolute et serait
-   autrement masqué par les éléments suivants dans le DOM. */
-.megafilter-chip.is-open {
-  z-index: 30;
-}
-
-.megafilter-chip-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 0.875rem;
-  background: var(--color-white);
-  border: 1px solid var(--color-line);
-  border-radius: 50px;
-  font-family: inherit;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-wood-dark);
-  cursor: pointer;
-  -webkit-transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-}
-
-.megafilter-chip-toggle:hover {
-  border-color: var(--color-wood);
-  background: var(--color-warm);
-}
-
-.megafilter-chip-toggle:focus-visible {
-  outline: 2px solid var(--color-wood);
-  outline-offset: 2px;
-}
-
-.megafilter-chip.has-value .megafilter-chip-toggle {
-  border-color: var(--color-wood);
-  background: var(--color-warm);
-}
-
-.megafilter-chip-value {
-  color: var(--color-wood);
-  font-weight: 600;
-}
-
-.megafilter-chip-arrow {
-  opacity: 0.6;
-  margin-left: 0.125rem;
-  -webkit-transition: transform 0.2s ease, opacity 0.2s ease;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.megafilter-chip.has-value .megafilter-chip-arrow {
-  opacity: 0.9;
-  color: var(--color-wood);
-}
-
-.megafilter-chip.is-open .megafilter-chip-arrow {
-  -webkit-transform: rotate(180deg);
-  transform: rotate(180deg);
-}
-
-/* Chips conditionnels : cachés par défaut, fade-in à l'apparition */
-.megafilter-chip.is-conditional {
-  opacity: 0;
-  -webkit-transform: translateY(-4px);
-  transform: translateY(-4px);
-  pointer-events: none;
-  max-width: 0;
-  margin: 0;
-  overflow: hidden;
-  -webkit-transition: opacity 0.25s ease, transform 0.25s ease, max-width 0.3s ease;
-  transition: opacity 0.25s ease, transform 0.25s ease, max-width 0.3s ease;
-}
-
-.megafilter-chip.is-conditional .megafilter-chip-toggle {
-  visibility: hidden;
-}
-
-.megafilter-chip.is-conditional.is-visible {
-  opacity: 1;
-  -webkit-transform: translateY(0);
-  transform: translateY(0);
-  pointer-events: auto;
-  max-width: 400px;
-  /* overflow visible une fois la transition d'apparition terminée — sinon
-     le menu déroulant absolu (top: 100%) est clippé par l'overflow hidden
-     du fade-in et ne s'affiche pas au clic. */
-  overflow: visible;
-}
-
-.megafilter-chip.is-conditional.is-visible .megafilter-chip-toggle {
-  visibility: visible;
-}
-
-/* Menu dropdown du chip */
-.megafilter-chip-menu {
-  position: absolute;
-  top: calc(100% + 0.375rem);
-  left: 0;
-  z-index: 20;
-  background: var(--color-white);
-  border: 1px solid var(--color-line);
-  border-radius: 12px;
-  padding: 0.375rem;
-  min-width: 220px;
-  max-width: 320px;
-  box-shadow: var(--shadow-card);
-}
-
-.megafilter-chip-option {
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: 0.5rem 0.75rem;
-  border: none;
-  background: transparent;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 0.8125rem;
-  color: var(--color-wood-dark);
-  cursor: pointer;
-  -webkit-transition: background 0.15s ease;
-  transition: background 0.15s ease;
-}
-
-.megafilter-chip-option:hover {
-  background: var(--color-warm);
-}
-
-.megafilter-chip-option.is-selected {
-  background: var(--color-warm);
-  color: var(--color-wood);
-  font-weight: 600;
-  position: relative;
-  padding-right: 1.875rem;
-}
-
-.megafilter-chip-option.is-selected::after {
-  content: "✓";
-  position: absolute;
-  right: 0.75rem;
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-  transform: translateY(-50%);
-  font-size: 0.875rem;
-  color: var(--color-wood);
-}
-
-/* Bouton "Tout effacer" — discret, à droite des actions, visible si au moins un chip répondu */
-.megafilter-reset {
-  font-family: inherit;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-wood);
-  background: transparent;
-  border: none;
-  padding: 0.25rem 0.5rem;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  -webkit-transition: color 0.2s ease;
-  transition: color 0.2s ease;
-}
-
-.megafilter-reset:hover,
-.megafilter-reset:focus-visible {
-  color: var(--color-wood-dark);
-  outline: none;
-}
-
-/* ── Modale plein écran "Décrire mon projet" ── */
-.megafilter-modal {
-  position: fixed;
-  inset: 0;
-  background: var(--color-cream);
-  z-index: 10000;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  /* iOS safe area + clavier */
-  height: 100dvh;
-}
-
-.megafilter-modal[hidden] {
-  display: none;
-}
-
-.megafilter-modal-header {
-  flex-shrink: 0;
-  padding: 1rem 1.25rem;
-  background: var(--color-white);
-  border-bottom: 1px solid var(--color-line);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.megafilter-modal-title {
-  font-size: 0.875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-wood);
-}
-
-.megafilter-modal-close {
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
-  line-height: 1;
-  cursor: pointer;
-  color: var(--color-wood-dark);
-  padding: 0.25rem 0.5rem;
-}
-
-.megafilter-modal-close:hover {
-  color: var(--color-orange);
-}
-
-.megafilter-modal-body {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 1.5rem 1rem 5rem;
-  max-width: 720px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.megafilter-modal-start {
-  text-align: center;
-  padding: 1.5rem 0;
-}
-
-.megafilter-modal-headline {
-  font-family: var(--font-display);
-  font-size: 2.5rem;
-  color: var(--color-wood);
-  font-weight: normal;
-  line-height: 1;
-  margin: 0 0 0.5rem;
-}
-
-.megafilter-modal-intro {
-  color: var(--color-wood-mid);
-  font-size: 0.9375rem;
-  margin: 0 0 1.5rem;
-}
-
-.megafilter-modal-input-wrap {
-  margin-bottom: 1.25rem;
-}
-
-.megafilter-modal-input {
-  width: 100%;
-  padding: 1rem 1.25rem;
-  border: 2px solid var(--color-line);
-  border-radius: 50px;
-  font-family: inherit;
-  font-size: 0.9375rem;
-  background: var(--color-white);
-  color: var(--color-wood-dark);
-  -webkit-transition: border-color 0.2s ease;
-  transition: border-color 0.2s ease;
-}
-
-.megafilter-modal-input:focus {
-  outline: none;
-  border-color: var(--color-wood);
-}
-
-.megafilter-modal-input:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.megafilter-modal-suggestions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
-}
-
-.megafilter-modal-sug {
-  padding: 0.5rem 0.875rem;
-  background: var(--color-white);
-  border: 1px solid var(--color-line);
-  border-radius: 50px;
-  font-family: inherit;
-  font-size: 0.75rem;
-  color: var(--color-wood);
-  cursor: pointer;
-  -webkit-transition: background 0.2s ease, border-color 0.2s ease;
-  transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.megafilter-modal-sug:hover {
-  background: var(--color-warm);
-  border-color: var(--color-wood);
-}
-
-/* Chat dans la modale */
-.megafilter-modal-chat {
-  padding-top: 1rem;
-}
-
-.megafilter-chat-msg {
-  margin-bottom: 1rem;
-  max-width: 80%;
-}
-
-.megafilter-chat-msg--user {
-  margin-left: auto;
-}
-
-.megafilter-chat-bubble {
-  padding: 0.75rem 1.125rem;
-  border-radius: 18px;
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
-.megafilter-chat-msg--user .megafilter-chat-bubble {
-  background: var(--color-wood);
-  color: var(--color-white);
-  border-bottom-right-radius: 4px;
-}
-
-.megafilter-chat-msg--robin .megafilter-chat-bubble {
-  background: var(--color-white);
-  border: 1px solid var(--color-line);
-  color: var(--color-wood-dark);
-  border-bottom-left-radius: 4px;
-}
-
-.megafilter-chat-filters {
-  margin-top: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: var(--color-warm);
-  border-radius: 12px;
-  font-size: 0.75rem;
-  color: var(--color-wood);
-}
-
-.megafilter-chat-filters strong {
-  color: var(--color-wood-dark);
-  font-weight: 600;
-}
-
-.megafilter-modal-return {
-  flex-shrink: 0;
-  padding: 1rem;
-  text-align: center;
-}
-
-.megafilter-modal-return-btn {
-  padding: 0.875rem 1.75rem;
-  background: var(--color-orange);
-  color: var(--color-white);
-  border: none;
-  border-radius: 50px;
-  font-family: inherit;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  cursor: pointer;
-  -webkit-transition: background 0.2s ease;
-  transition: background 0.2s ease;
-}
-
-.megafilter-modal-return-btn:hover {
-  background: var(--color-orange-hover);
-}
-
-.megafilter-modal-footer {
-  flex-shrink: 0;
-  padding: 1rem;
-  background: var(--color-white);
-  border-top: 1px solid var(--color-line);
-  display: flex;
-  gap: 0.75rem;
-  max-width: 720px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.megafilter-modal-input--footer {
-  flex: 1;
-  padding: 0.75rem 1rem;
-}
-
-.megafilter-modal-send {
-  padding: 0 1.5rem;
-  background: var(--color-orange);
-  color: var(--color-white);
-  border: none;
-  border-radius: 50px;
-  font-family: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.megafilter-modal-send:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ── F1b : bulle "Robin réfléchit" (3 dots pulsants) ── */
-.megafilter-chat-msg--thinking .megafilter-chat-bubble {
-  display: -webkit-inline-flex;
-  display: inline-flex;
-  -webkit-align-items: center;
-  align-items: center;
-  gap: 5px;
-  padding: 0.875rem 1.125rem;
-}
-
-.megafilter-thinking-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-wood);
-  display: inline-block;
-  -webkit-animation: megafilter-thinking-pulse 1.2s infinite ease-in-out;
-  animation: megafilter-thinking-pulse 1.2s infinite ease-in-out;
-}
-
-.megafilter-thinking-dot:nth-child(2) { -webkit-animation-delay: 0.2s; animation-delay: 0.2s; }
-.megafilter-thinking-dot:nth-child(3) { -webkit-animation-delay: 0.4s; animation-delay: 0.4s; }
-
-@-webkit-keyframes megafilter-thinking-pulse {
-  0%, 80%, 100% { opacity: 0.3; -webkit-transform: scale(0.8); transform: scale(0.8); }
-  40%           { opacity: 1;   -webkit-transform: scale(1);   transform: scale(1);   }
-}
-
-@keyframes megafilter-thinking-pulse {
-  0%, 80%, 100% { opacity: 0.3; -webkit-transform: scale(0.8); transform: scale(0.8); }
-  40%           { opacity: 1;   -webkit-transform: scale(1);   transform: scale(1);   }
-}
-
-/* ── F1b : CTA "Contacter Robin" injecté dans le footer ── */
-.megafilter-modal-contact {
-  display: -webkit-inline-flex;
-  display: inline-flex;
-  -webkit-align-items: center;
-  align-items: center;
-  -webkit-justify-content: center;
-  justify-content: center;
-  text-decoration: none;
-  text-align: center;
-}
-
-.megafilter-modal-contact:hover {
-  background: var(--color-orange-hover);
-  color: var(--color-white);
-  text-decoration: none;
-}
-
-/* ── Desktop ≥ 768px ── */
-@media (min-width: 768px) {
-  .megafilter-bar {
-    margin-top: 2rem;
-    padding: 0 3rem 2rem;
-  }
-
-  .megafilter-bar-inner {
-    padding: 1rem 1.5rem;
-  }
-
-  .megafilter-intro {
-    font-size: 0.9375rem;
-  }
-
-  .megafilter-chips {
-    gap: 0.625rem;
-  }
-
-  .megafilter-chip-toggle {
-    font-size: 0.8125rem;
-    padding: 0.5625rem 1rem;
-  }
-
-  .megafilter-modal-headline {
-    font-size: 3.5rem;
-  }
-}
 
 /* ============================================================
    F1c — Composants après cleanup du Conseiller
@@ -23156,4 +22569,237 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .category-affiner-cta__arrow {
   font-size: 1.125rem;
   line-height: 1;
+}
+
+/* ============================================================
+   F2a — Pattern visuel universel Conseiller V3
+   Réutilisé par :
+   - Card "Conseil de Robin" / "Mon projet" sur /mes-creations/
+   - Modale tunnel 2 portes (S0/S1/S2/S3)
+   - Card "Sur-mesure" intercalée dans la grille
+   - Pill "Comment choisir ?" sur fiche produit (F2b)
+   ============================================================ */
+
+/* ── Wrapper card crème + bordure dashed décorative interne ── */
+.conseiller-card {
+  position: relative;
+  background: var(--color-warm);
+  border-radius: 16px;
+  padding: 36px 28px 32px;
+  overflow: hidden;
+}
+
+/* Bordure dashed décorative, inset 12px par rapport au bord — décor uniquement */
+.conseiller-card::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 1.5px dashed rgba(147, 125, 104, 0.35);
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+.conseiller-card__inner {
+  position: relative; /* passe devant le ::before */
+  z-index: 1;
+}
+
+/* ── Badge "Conseil de Robin" / "Mon projet" / "Sur-mesure" ── */
+.conseiller-badge {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-white);
+  margin-bottom: 18px;
+}
+
+.conseiller-badge--default {
+  background: var(--color-wood-dark);
+}
+
+.conseiller-badge--surmesure {
+  background: var(--color-orange);
+}
+
+.conseiller-badge svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+/* ── H2 Conseiller : Montserrat 700 uppercase wood-dark ── */
+.conseiller-h2 {
+  font-family: var(--font-body);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--color-wood-dark);
+  font-size: clamp(20px, 3vw, 32px);
+  line-height: 1.2;
+  margin: 0 0 14px;
+}
+
+.conseiller-subtitle {
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--color-wood-mid);
+  margin: 0 0 22px;
+  max-width: 580px;
+}
+
+/* ── CTA principal : pill orange ── */
+.conseiller-cta {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 9px;
+  padding: 14px 30px;
+  background: var(--color-orange);
+  color: var(--color-white);
+  border: none;
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-transition: background 0.2s ease, transform 0.2s ease;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.conseiller-cta:hover,
+.conseiller-cta:focus-visible {
+  background: var(--color-orange-hover);
+  -webkit-transform: translateY(-1px);
+  transform: translateY(-1px);
+  outline: none;
+  color: var(--color-white);
+}
+
+.conseiller-cta svg {
+  flex-shrink: 0;
+}
+
+/* ── Pill secondaire : crème + dashed wood (style "Comment choisir ?" F2b) ── */
+.conseiller-pill-secondary {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 18px;
+  background: var(--color-warm);
+  color: var(--color-wood-dark);
+  border: 1.5px dashed rgba(147, 125, 104, 0.5);
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-transition: background 0.2s ease, border-color 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.conseiller-pill-secondary:hover,
+.conseiller-pill-secondary:focus-visible {
+  background: var(--color-white);
+  border-color: var(--color-wood-dark);
+  border-style: solid;
+  outline: none;
+}
+
+/* ── Signature "— Robin" en Square Peg cursive ── */
+.conseiller-signature {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--color-wood);
+  line-height: 1;
+}
+
+/* ── Chip récap (non interactif) : <key> : <valeur> ── */
+.conseiller-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.conseiller-chip {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  padding: 7px 14px;
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--color-wood-dark);
+  line-height: 1.2;
+}
+
+.conseiller-chip__key {
+  color: var(--color-wood);
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+/* Variante condensée : juste les valeurs, sans labels, fond transparent (état B card sur-mesure) */
+.conseiller-chip--condensed {
+  background: transparent;
+  border-style: dashed;
+  border-color: rgba(147, 125, 104, 0.45);
+  padding: 5px 12px;
+  font-size: 11.5px;
+}
+
+/* ── Bouton "Retour" : lien souligné centré dans la modale ── */
+.conseiller-back-link {
+  background: transparent;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-wood);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  padding: 8px 12px;
+}
+
+.conseiller-back-link:hover,
+.conseiller-back-link:focus-visible {
+  color: var(--color-wood-dark);
+  outline: none;
+}
+
+/* ── Adaptations mobile ── */
+@media (max-width: 600px) {
+  .conseiller-card {
+    padding: 28px 18px 24px;
+  }
+  .conseiller-card::before {
+    inset: 8px;
+  }
+  .conseiller-cta {
+    padding: 13px 24px;
+    font-size: 12.5px;
+  }
 }
