@@ -22803,3 +22803,130 @@ body.woocommerce-cart div.woocommerce-wrapper {
     font-size: 12.5px;
   }
 }
+
+/* ============================================================
+   F2a Phase 2 — Cards Conseiller V3 sur /mes-creations/
+   Variantes du pattern universel : Conseil (sans projet) / Mon projet
+   ============================================================ */
+
+.conseiller-cards-zone {
+  max-width: 1200px;
+  margin: 32px auto 0;
+  padding: 0 20px;
+}
+
+/* Variante Conseil — centrée, accent CTA orange */
+.conseiller-card--conseil {
+  padding: 50px 32px 52px;
+  text-align: center;
+}
+.conseiller-card--conseil .conseiller-h2 {
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.conseiller-card--conseil .conseiller-subtitle {
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 28px;
+}
+
+/* Variante Mon projet — centrée, phrase IA italique + lien Modifier */
+.conseiller-card--mon-projet {
+  padding: 40px 32px 38px;
+  text-align: center;
+}
+
+.conseiller-mon-projet__text {
+  font-family: var(--font-body);
+  font-size: 17px;
+  font-style: italic;
+  color: var(--color-wood-dark);
+  line-height: 1.55;
+  max-width: 640px;
+  margin: 0 auto 14px;
+}
+
+.conseiller-mon-projet__text-content {
+  /* Quotation marks around the AI phrase */
+}
+.conseiller-mon-projet__text-content::before {
+  content: "« ";
+  font-style: normal;
+  color: var(--color-wood);
+  opacity: 0.7;
+}
+.conseiller-mon-projet__text-content::after {
+  content: " »";
+  font-style: normal;
+  color: var(--color-wood);
+  opacity: 0.7;
+}
+
+.conseiller-mon-projet__text .conseiller-signature {
+  display: inline;
+  margin-left: 8px;
+  font-style: normal;
+  /* Square Peg ne supporte pas l'italic — on neutralise l'héritage */
+}
+
+/* État chargement de la phrase IA — pulse léger */
+.conseiller-mon-projet__text[data-state="loading"] .conseiller-mon-projet__text-content {
+  opacity: 0.5;
+  -webkit-animation: sapi-mon-projet-pulse 1.6s ease-in-out infinite;
+  animation: sapi-mon-projet-pulse 1.6s ease-in-out infinite;
+}
+
+@-webkit-keyframes sapi-mon-projet-pulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 0.7; }
+}
+@keyframes sapi-mon-projet-pulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 0.7; }
+}
+
+/* Lien "Préciser ou modifier mon projet ✎" — discret */
+.conseiller-mon-projet__edit {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-wood);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  padding: 6px 8px;
+  margin-top: 4px;
+  -webkit-transition: color 0.2s ease;
+  transition: color 0.2s ease;
+}
+
+.conseiller-mon-projet__edit:hover,
+.conseiller-mon-projet__edit:focus-visible {
+  color: var(--color-orange);
+  outline: none;
+}
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  .conseiller-cards-zone {
+    margin: 22px auto 0;
+    padding: 0 14px;
+  }
+  .conseiller-card--conseil {
+    padding: 36px 20px 40px;
+  }
+  .conseiller-card--mon-projet {
+    padding: 32px 18px 32px;
+  }
+  .conseiller-mon-projet__text {
+    font-size: 15.5px;
+  }
+}

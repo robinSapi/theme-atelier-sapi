@@ -286,11 +286,41 @@ function sapi_maison_enqueue_assets() {
 
   }
 
-  // Méga-filtre intelligent — page Mes créations uniquement (F1a)
+  // Méga-filtre intelligent — page Mes créations uniquement (F1a/F2a)
   if (class_exists('WooCommerce') && is_shop()) {
+    require_once get_template_directory() . '/inc/guide-data.php';
+
+    // Règles de filtrage partagées entre mega-filtre.js (no-op Phase 1)
+    // et sapi-cards-conseiller.js (Phase 2). Phase 3 consolidera.
+    $sapi_filter_rules = [
+      // Pièces avec filtre ampoule (mirror sapi_guide_get_ampoule_filter)
+      'ampoule_by_piece' => [
+        'cuisine'  => ['ampoule_degagee', 'semi_degagee'],
+        'bureau'   => ['ampoule_degagee', 'semi_degagee'],
+        'salon'    => ['ampoule_entouree', 'semi_degagee'],
+        'chambre'  => ['ampoule_entouree', 'semi_degagee'],
+        'entree'   => null,
+        'escalier' => null,
+      ],
+      'ampoule_skip_when_grande' => ['cuisine', 'bureau'],
+      'cats_by_sortie' => [
+        'plafond'       => ['suspensions'],
+        'mur'           => ['appliques'],
+        'pas-de-sortie' => ['lampadaires', 'lampesaposer', 'appliques'],
+        'ne-sais-pas'   => ['suspensions', 'lampadaires', 'lampesaposer'],
+        ''              => ['suspensions', 'lampadaires', 'lampesaposer', 'appliques'],
+      ],
+      'cats_secondaire_by_sortie' => [
+        'plafond'       => ['suspensions'],
+        'mur'           => ['appliques'],
+        'pas-de-sortie' => ['lampadaires', 'lampesaposer', 'appliques'],
+        ''              => ['lampadaires', 'lampesaposer'],
+      ],
+      'extras_slugs' => ['accessoires', 'carte-cadeau'],
+    ];
+
     $megafilter_js_path = get_template_directory() . '/assets/mega-filtre.js';
     if (file_exists($megafilter_js_path)) {
-      require_once get_template_directory() . '/inc/guide-data.php';
       wp_enqueue_script(
         'sapi-mega-filtre',
         get_template_directory_uri() . '/assets/mega-filtre.js',
@@ -304,36 +334,26 @@ function sapi_maison_enqueue_assets() {
         'logNonce'    => wp_create_nonce('sapi-guide-results'),
         'maxMessages' => 15,
         'steps' => sapi_guide_get_steps(),
-        'rules' => [
-          // Pièces avec filtre ampoule (mirror sapi_guide_get_ampoule_filter)
-          'ampoule_by_piece' => [
-            'cuisine'  => ['ampoule_degagee', 'semi_degagee'],
-            'bureau'   => ['ampoule_degagee', 'semi_degagee'],
-            'salon'    => ['ampoule_entouree', 'semi_degagee'],
-            'chambre'  => ['ampoule_entouree', 'semi_degagee'],
-            'entree'   => null, // tous
-            'escalier' => null,
-          ],
-          // Si grande pièce (cuisine/bureau), pas de filtre ampoule
-          'ampoule_skip_when_grande' => ['cuisine', 'bureau'],
-          // Catégories selon sortie (mirror sapi_guide_get_categories)
-          'cats_by_sortie' => [
-            'plafond'       => ['suspensions'],
-            'mur'           => ['appliques'],
-            'pas-de-sortie' => ['lampadaires', 'lampesaposer', 'appliques'],
-            'ne-sais-pas'   => ['suspensions', 'lampadaires', 'lampesaposer'],
-            ''              => ['suspensions', 'lampadaires', 'lampesaposer', 'appliques'],
-          ],
-          // Éclairage secondaire (mirror branche eclairage === 'secondaire')
-          'cats_secondaire_by_sortie' => [
-            'plafond'       => ['suspensions'],
-            'mur'           => ['appliques'],
-            'pas-de-sortie' => ['lampadaires', 'lampesaposer', 'appliques'],
-            ''              => ['lampadaires', 'lampesaposer'],
-          ],
-          // Catégorie "Toutes" = total - extras
-          'extras_slugs' => ['accessoires', 'carte-cadeau'],
-        ],
+        'rules' => $sapi_filter_rules,
+      ]);
+    }
+
+    // F2a Phase 2 — cards "Conseil de Robin" / "Mon projet" sur /mes-creations/
+    $cards_conseiller_js_path = get_template_directory() . '/assets/sapi-cards-conseiller.js';
+    if (file_exists($cards_conseiller_js_path)) {
+      wp_enqueue_script(
+        'sapi-cards-conseiller',
+        get_template_directory_uri() . '/assets/sapi-cards-conseiller.js',
+        ['sapi-project', 'sapi-mega-filtre'],
+        filemtime($cards_conseiller_js_path),
+        true
+      );
+      wp_localize_script('sapi-cards-conseiller', 'SAPI_CARDS_CONSEILLER', [
+        'ajaxUrl'        => admin_url('admin-ajax.php'),
+        'nonce'          => wp_create_nonce('sapi-megafilter'),
+        'steps'          => sapi_guide_get_steps(),
+        'rules'          => $sapi_filter_rules,
+        'fallbackPhrase' => __('Voici ma sélection pour ton projet.', 'theme-sapi-maison'),
       ]);
     }
   }

@@ -97,7 +97,50 @@ $piece_hero  = isset($piece_hero_map[$piece_param]) ? $piece_hero_map[$piece_par
   </div>
 </section>
 
-<!-- F2a — Cards Conseiller V3 (Conseil de Robin / Mon projet) injectées Phase 2 -->
+<!-- ── F2a Phase 2 — Cards Conseiller V3 (sans projet / avec projet) ── -->
+<?php
+// Icône SVG crayon (badge "Conseil de Robin" / "Mon projet") + CTA.
+$conseiller_pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>';
+?>
+<section class="conseiller-cards-zone" data-conseiller-zone aria-label="<?php esc_attr_e('Conseil de Robin', 'theme-sapi-maison'); ?>">
+  <!-- Card "Conseil de Robin" — visible sans projet en localStorage -->
+  <div class="conseiller-card conseiller-card--conseil" data-conseiller-card="conseil" hidden>
+    <div class="conseiller-card__inner">
+      <span class="conseiller-badge conseiller-badge--default">
+        <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput — SVG statique en dur ?>
+        <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
+      </span>
+      <h2 class="conseiller-h2"><?php esc_html_e('Un coup de main pour choisir ?', 'theme-sapi-maison'); ?></h2>
+      <p class="conseiller-subtitle">
+        <?php esc_html_e('Décrivez votre projet — pièce, taille, style — et Robin vous propose une sélection de luminaires adaptés.', 'theme-sapi-maison'); ?>
+      </p>
+      <button type="button" class="conseiller-cta" data-action="open-modal" data-modal-state="s0">
+        <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+        <span><?php esc_html_e('Décrire mon projet', 'theme-sapi-maison'); ?></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Card "Mon projet" — visible avec projet en localStorage -->
+  <div class="conseiller-card conseiller-card--mon-projet" data-conseiller-card="mon-projet" hidden>
+    <div class="conseiller-card__inner">
+      <span class="conseiller-badge conseiller-badge--default">
+        <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+        <?php esc_html_e('Mon projet', 'theme-sapi-maison'); ?>
+      </span>
+      <p class="conseiller-mon-projet__text" data-mon-projet-phrase>
+        <span class="conseiller-mon-projet__text-content" data-mon-projet-phrase-content>
+          <?php esc_html_e('Voici ma sélection pour ton projet.', 'theme-sapi-maison'); ?>
+        </span>
+        <span class="conseiller-signature">— Robin</span>
+      </p>
+      <button type="button" class="conseiller-mon-projet__edit" data-action="open-modal" data-modal-state="s3">
+        <?php esc_html_e('Préciser ou modifier mon projet', 'theme-sapi-maison'); ?>
+        <span aria-hidden="true">✎</span>
+      </button>
+    </div>
+  </div>
+</section>
 
 <!-- Products Grid — grille 2 colonnes photos ambiance -->
 <section class="shop-products" id="shop-products">
