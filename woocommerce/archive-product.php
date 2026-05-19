@@ -352,7 +352,7 @@ $conseiller_pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCo
         if ($sapi_product_counter === 7) :
           $surmesure_badge_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>';
         ?>
-        <div class="conseiller-surmesure-wrap" data-surmesure-wrap>
+        <div class="conseiller-surmesure-wrap" data-surmesure-wrap hidden>
 
           <!-- État A — Sans projet (form complet) -->
           <div class="conseiller-card conseiller-surmesure-card" data-surmesure-state="empty" hidden>

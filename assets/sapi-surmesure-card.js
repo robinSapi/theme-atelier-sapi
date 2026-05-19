@@ -17,6 +17,11 @@
   var els = {};
   var submitted = false; // local — perdu au reload, acceptable
 
+  // Seuil de produits visibles sous lequel on affiche la card sur-mesure.
+  // Intent : suggérer le sur-mesure quand la grille filtrée est maigre.
+  // Au-dessus du seuil, la card reste cachée pour ne pas spammer.
+  var VISIBLE_THRESHOLD = 6;
+
   /* ─────────────────────────────────────────────
      Rendu
      ───────────────────────────────────────────── */
@@ -58,6 +63,33 @@
       showState('project');
     } else {
       showState('empty');
+    }
+  }
+
+  function countVisibleProducts() {
+    var products = document.querySelectorAll('.product-card-cinetique');
+    var count = 0;
+    products.forEach(function (p) {
+      if (!p.classList.contains('is-filtered-out')) count++;
+    });
+    return count;
+  }
+
+  function maybeShowOrHide() {
+    if (!els.wrap) return;
+    // État success : on garde la card visible (confirmation à l'utilisateur)
+    if (submitted) {
+      els.wrap.hidden = false;
+      showState('success');
+      return;
+    }
+    // Sinon : visible UNIQUEMENT si la grille filtrée a peu de résultats
+    var visibleCount = countVisibleProducts();
+    if (visibleCount > 0 && visibleCount <= VISIBLE_THRESHOLD) {
+      els.wrap.hidden = false;
+      render();
+    } else {
+      els.wrap.hidden = true;
     }
   }
 
@@ -126,7 +158,8 @@
     if (!els.wrap) return; // pas sur /mes-creations/
     els.chipsCompact = els.wrap.querySelector('[data-surmesure-chips]');
 
-    render();
+    // Affichage initial : count des produits déjà filtrés par sapi-cards-conseiller
+    maybeShowOrHide();
 
     // Délégation submit sur les forms
     els.wrap.addEventListener('submit', function (e) {
@@ -136,10 +169,11 @@
       submitForm(form);
     });
 
-    // React aux changements de projet (utilisateur complète la modale → projet apparaît)
+    // React aux changements de projet (sapi-cards-conseiller refiltre la grille
+    // dans son subscriber qui tourne AVANT le nôtre, donc le compte est à jour)
     if (window.sapiProject && typeof window.sapiProject.subscribe === 'function') {
       window.sapiProject.subscribe(function () {
-        if (!submitted) render();
+        maybeShowOrHide();
       });
     }
   }
