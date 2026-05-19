@@ -23364,3 +23364,509 @@ body.woocommerce-cart div.woocommerce-wrapper {
     font-size: 14.5px;
   }
 }
+
+/* ============================================================
+   F2a Phase 4 — Modale S2 (texte libre + chat IA)
+   ============================================================ */
+
+/* ── S2.start : input pill central + bouton submit orange + 3 suggestions ── */
+.conseiller-freetext {
+  max-width: 680px;
+  margin: 0 auto 22px;
+}
+
+.conseiller-freetext__wrap {
+  position: relative;
+}
+
+.conseiller-freetext__input {
+  width: 100%;
+  padding: 18px 64px 18px 24px;
+  border: 1.5px solid var(--color-line);
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  background: var(--color-white);
+  color: var(--color-wood-dark);
+  -webkit-transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease;
+}
+
+.conseiller-freetext__input:focus {
+  outline: none;
+  border-color: var(--color-wood);
+}
+
+.conseiller-freetext__input::placeholder {
+  color: var(--color-wood-mid);
+  opacity: 0.7;
+}
+
+.conseiller-freetext__submit {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--color-orange);
+  border: none;
+  color: var(--color-white);
+  cursor: pointer;
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-transition: background 0.2s ease;
+  transition: background 0.2s ease;
+}
+
+.conseiller-freetext__submit:hover,
+.conseiller-freetext__submit:focus-visible {
+  background: var(--color-orange-hover);
+  outline: none;
+}
+
+.conseiller-freetext__submit svg {
+  width: 18px;
+  height: 18px;
+}
+
+.conseiller-freetext__submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.conseiller-suggestions {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  gap: 8px;
+  -webkit-justify-content: center;
+  justify-content: center;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.conseiller-suggestion {
+  padding: 8px 16px;
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-wood-dark);
+  cursor: pointer;
+  -webkit-transition: border-color 0.2s ease, background 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.conseiller-suggestion:hover,
+.conseiller-suggestion:focus-visible {
+  border-color: var(--color-wood);
+  outline: none;
+}
+
+/* ── S2.chat : card devient flex column 100% hauteur, chat scrollable ── */
+.conseiller-card--modal.is-chat-mode {
+  height: calc(100dvh - 64px);
+  max-height: calc(100dvh - 64px);
+  overflow: hidden;
+  padding: 0;
+}
+
+.conseiller-card--modal.is-chat-mode::before {
+  inset: 8px;
+}
+
+.conseiller-card--modal.is-chat-mode .conseiller-modal__screen[data-screen="s2-chat"] {
+  height: 100%;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+}
+
+.conseiller-card__inner--chat {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  height: 100%;
+  padding: 28px 28px 0;
+}
+
+.conseiller-chat-header {
+  -webkit-flex-shrink: 0;
+  flex-shrink: 0;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.conseiller-chat-header .conseiller-badge {
+  margin-bottom: 0;
+}
+
+.conseiller-chat {
+  -webkit-flex: 1;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  text-align: left;
+  padding: 4px 6px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(147, 125, 104, 0.35) transparent;
+}
+
+.conseiller-chat::-webkit-scrollbar { width: 6px; }
+.conseiller-chat::-webkit-scrollbar-thumb {
+  background: rgba(147, 125, 104, 0.35);
+  border-radius: 50px;
+}
+
+.conseiller-chat-msg {
+  margin-bottom: 14px;
+  max-width: 85%;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+}
+
+.conseiller-chat-msg--user {
+  margin-left: auto;
+  -webkit-align-items: flex-end;
+  align-items: flex-end;
+}
+
+.conseiller-chat-msg--robin {
+  margin-right: auto;
+  -webkit-align-items: flex-start;
+  align-items: flex-start;
+}
+
+.conseiller-chat-bubble {
+  padding: 12px 18px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.conseiller-chat-msg--user .conseiller-chat-bubble {
+  background: var(--color-wood-dark);
+  color: var(--color-white);
+  border-radius: 18px 18px 4px 18px;
+}
+
+.conseiller-chat-msg--robin .conseiller-chat-bubble {
+  background: var(--color-white);
+  color: var(--color-wood-dark);
+  border-radius: 18px 18px 18px 4px;
+  border: 1px solid var(--color-line);
+}
+
+/* Encart "Filtres appliqués" sous une bulle Robin qui change les filtres */
+.conseiller-chat-filters {
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: rgba(147, 125, 104, 0.08);
+  border-left: 3px solid var(--color-wood);
+  border-radius: 4px 12px 12px 4px;
+  font-size: 12.5px;
+  color: var(--color-wood-dark);
+  max-width: 100%;
+}
+
+.conseiller-chat-filters__label {
+  display: block;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  color: var(--color-wood);
+  margin-bottom: 4px;
+}
+
+.conseiller-chat-filters__chips {
+  color: var(--color-wood-dark);
+  font-weight: 500;
+}
+
+/* Bulle "Robin réfléchit" — 3 dots pulsants */
+.conseiller-chat-thinking {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 5px;
+  padding: 14px 18px !important;
+}
+
+.conseiller-chat-thinking__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-wood);
+  display: inline-block;
+  -webkit-animation: conseiller-chat-pulse 1.2s infinite ease-in-out;
+  animation: conseiller-chat-pulse 1.2s infinite ease-in-out;
+}
+.conseiller-chat-thinking__dot:nth-child(2) { -webkit-animation-delay: 0.2s; animation-delay: 0.2s; }
+.conseiller-chat-thinking__dot:nth-child(3) { -webkit-animation-delay: 0.4s; animation-delay: 0.4s; }
+
+@-webkit-keyframes conseiller-chat-pulse {
+  0%, 80%, 100% { opacity: 0.3; -webkit-transform: scale(0.8); transform: scale(0.8); }
+  40%           { opacity: 1;   -webkit-transform: scale(1);   transform: scale(1);   }
+}
+@keyframes conseiller-chat-pulse {
+  0%, 80%, 100% { opacity: 0.3; -webkit-transform: scale(0.8); transform: scale(0.8); }
+  40%           { opacity: 1;   -webkit-transform: scale(1);   transform: scale(1);   }
+}
+
+/* CTA "Voir la sélection" — en bas du chat, sticky */
+.conseiller-chat-cta {
+  -webkit-flex-shrink: 0;
+  flex-shrink: 0;
+  text-align: center;
+  padding: 12px 0 14px;
+}
+
+.conseiller-chat-cta[hidden] {
+  display: none;
+}
+
+/* Footer chat fixe : input + Envoyer */
+.conseiller-chat-footer {
+  -webkit-flex-shrink: 0;
+  flex-shrink: 0;
+  background: var(--color-white);
+  border-top: 1px solid var(--color-line);
+  padding: 14px 20px;
+  margin: 0 -28px;
+  display: -webkit-flex;
+  display: flex;
+  gap: 10px;
+  -webkit-align-items: center;
+  align-items: center;
+}
+
+.conseiller-chat-footer__input {
+  -webkit-flex: 1;
+  flex: 1;
+  padding: 12px 20px;
+  border: 1.5px solid var(--color-line);
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  background: var(--color-white);
+  color: var(--color-wood-dark);
+  -webkit-transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease;
+}
+
+.conseiller-chat-footer__input:focus {
+  outline: none;
+  border-color: var(--color-wood);
+}
+
+.conseiller-chat-footer__input::placeholder {
+  color: var(--color-wood-mid);
+  opacity: 0.7;
+}
+
+.conseiller-chat-footer__input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.conseiller-chat-footer__send {
+  padding: 0 22px;
+  height: 44px;
+  background: var(--color-wood-dark);
+  color: var(--color-white);
+  border: none;
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-transition: background 0.2s ease;
+  transition: background 0.2s ease;
+}
+
+.conseiller-chat-footer__send:hover,
+.conseiller-chat-footer__send:focus-visible {
+  background: var(--color-wood);
+  outline: none;
+}
+
+.conseiller-chat-footer__send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   F2a Phase 4 — Card Sur-mesure dans la grille produit
+   ============================================================ */
+
+.conseiller-surmesure-wrap {
+  grid-column: 1 / -1;
+  margin: 28px 0;
+}
+
+.conseiller-surmesure-card {
+  padding: 50px 40px 46px;
+  text-align: center;
+}
+
+.conseiller-surmesure-card--compact {
+  padding: 32px 30px 30px;
+}
+
+.conseiller-surmesure-card--compact .conseiller-h2 {
+  font-size: clamp(18px, 2.4vw, 22px);
+  margin-bottom: 6px;
+}
+
+.conseiller-surmesure-card--success {
+  padding: 44px 30px 40px;
+}
+
+/* Form */
+.conseiller-surmesure-form {
+  max-width: 560px;
+  margin: 0 auto;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.conseiller-surmesure-form__input,
+.conseiller-surmesure-form__textarea {
+  width: 100%;
+  padding: 14px 22px;
+  border: 1.5px solid var(--color-line);
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  background: var(--color-white);
+  color: var(--color-wood-dark);
+  -webkit-transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease;
+}
+
+.conseiller-surmesure-form__textarea {
+  border-radius: 18px;
+  min-height: 92px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.conseiller-surmesure-form__input:focus,
+.conseiller-surmesure-form__textarea:focus {
+  outline: none;
+  border-color: var(--color-orange);
+}
+
+.conseiller-surmesure-form__input::placeholder,
+.conseiller-surmesure-form__textarea::placeholder {
+  color: var(--color-wood-mid);
+  opacity: 0.7;
+}
+
+.conseiller-surmesure-form__input--small {
+  padding: 11px 18px;
+  font-size: 13.5px;
+  background: rgba(255, 255, 255, 0.65);
+  border-color: rgba(147, 125, 104, 0.2);
+}
+
+.conseiller-surmesure-form__input--small::placeholder {
+  font-style: italic;
+}
+
+.conseiller-surmesure-form button[type="submit"] {
+  align-self: center;
+  margin-top: 6px;
+}
+
+/* Honeypot anti-bot (caché visuellement, accessible aux bots) */
+.conseiller-surmesure-form__honeypot {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.conseiller-surmesure-reassurance {
+  margin-top: 18px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--color-wood-mid);
+  opacity: 0.85;
+}
+
+/* ── Mobile S2 + Sur-mesure ── */
+@media (max-width: 720px) {
+  .conseiller-freetext__input {
+    font-size: 15px;
+    padding: 16px 56px 16px 20px;
+  }
+  .conseiller-freetext__submit {
+    width: 38px;
+    height: 38px;
+    right: 6px;
+  }
+  .conseiller-suggestion {
+    font-size: 12.5px;
+    padding: 7px 13px;
+  }
+
+  .conseiller-chat-bubble {
+    font-size: 14px;
+    padding: 11px 16px;
+  }
+  .conseiller-card__inner--chat {
+    padding: 22px 18px 0;
+  }
+  .conseiller-chat-footer {
+    margin: 0 -18px;
+    padding: 12px 14px;
+    gap: 8px;
+  }
+  .conseiller-chat-footer__input {
+    font-size: 13px;
+    padding: 11px 16px;
+  }
+  .conseiller-chat-footer__send {
+    padding: 0 16px;
+    height: 40px;
+    font-size: 12px;
+  }
+
+  .conseiller-surmesure-wrap {
+    margin: 22px 0;
+  }
+  .conseiller-surmesure-card {
+    padding: 36px 22px 36px;
+  }
+  .conseiller-surmesure-card--compact {
+    padding: 28px 20px 24px;
+  }
+  .conseiller-surmesure-form__input,
+  .conseiller-surmesure-form__textarea {
+    font-size: 14px;
+    padding: 12px 18px;
+  }
+}

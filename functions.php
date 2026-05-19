@@ -357,7 +357,7 @@ function sapi_maison_enqueue_assets() {
       ]);
     }
 
-    // F2a Phase 3 — modale tunnel 2 portes (S0/S1/S3)
+    // F2a Phase 3 — modale tunnel 2 portes (S0/S1/S3) + Phase 4 (S2)
     $modal_conseiller_js_path = get_template_directory() . '/assets/sapi-modal-conseiller.js';
     if (file_exists($modal_conseiller_js_path)) {
       wp_enqueue_script(
@@ -373,6 +373,7 @@ function sapi_maison_enqueue_assets() {
         'steps'         => sapi_guide_get_steps(),
         'icons'         => sapi_guide_get_icons(),
         'fallbackRecap' => __('Voici une sélection adaptée à ton projet.', 'theme-sapi-maison'),
+        'maxMessages'   => 15,
         'keyLabels'     => [
           'piece'           => __('Pièce', 'theme-sapi-maison'),
           'taille'          => __('Taille', 'theme-sapi-maison'),
@@ -384,6 +385,18 @@ function sapi_maison_enqueue_assets() {
           'style'           => __('Style', 'theme-sapi-maison'),
         ],
       ]);
+    }
+
+    // F2a Phase 4 — card Sur-mesure intercalée dans la grille
+    $surmesure_js_path = get_template_directory() . '/assets/sapi-surmesure-card.js';
+    if (file_exists($surmesure_js_path)) {
+      wp_enqueue_script(
+        'sapi-surmesure-card',
+        get_template_directory_uri() . '/assets/sapi-surmesure-card.js',
+        ['sapi-project'],
+        filemtime($surmesure_js_path),
+        true
+      );
     }
   }
 

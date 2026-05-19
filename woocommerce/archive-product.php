@@ -344,6 +344,84 @@ $conseiller_pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCo
           </div>
         </div>
         <?php endif; ?>
+
+        <?php
+        // F2a Phase 4 — Card Sur-mesure insérée une fois, après le 7e produit.
+        // Le wrap span sur toute la largeur de la grille (grid-column: 1 / -1).
+        // JS bascule entre l'état empty/project/success selon sapiProject.
+        if ($sapi_product_counter === 7) :
+          $surmesure_badge_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>';
+        ?>
+        <div class="conseiller-surmesure-wrap" data-surmesure-wrap>
+
+          <!-- État A — Sans projet (form complet) -->
+          <div class="conseiller-card conseiller-surmesure-card" data-surmesure-state="empty" hidden>
+            <div class="conseiller-card__inner">
+              <span class="conseiller-badge conseiller-badge--surmesure">
+                <?php echo $surmesure_badge_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                <?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?>
+              </span>
+              <h2 class="conseiller-h2"><?php esc_html_e('Et si on créait ton luminaire sur-mesure ?', 'theme-sapi-maison'); ?></h2>
+              <p class="conseiller-subtitle"><?php esc_html_e('Laisse ton email et décris ton projet en quelques mots. Robin te revient avec une proposition personnalisée.', 'theme-sapi-maison'); ?></p>
+
+              <form class="conseiller-surmesure-form" data-surmesure-form data-surmesure-mode="full">
+                <input type="email" class="conseiller-surmesure-form__input" name="email" required
+                       placeholder="<?php esc_attr_e('Ton adresse email', 'theme-sapi-maison'); ?>"
+                       aria-label="<?php esc_attr_e('Email', 'theme-sapi-maison'); ?>">
+                <textarea class="conseiller-surmesure-form__textarea" name="description" required rows="3"
+                          placeholder="<?php esc_attr_e('Décris ton projet (taille, pièce, contraintes, inspirations…)', 'theme-sapi-maison'); ?>"
+                          aria-label="<?php esc_attr_e('Description du projet', 'theme-sapi-maison'); ?>"></textarea>
+                <input type="text" name="website" tabindex="-1" autocomplete="off" class="conseiller-surmesure-form__honeypot" aria-hidden="true">
+                <button type="submit" class="conseiller-cta">
+                  <span><?php esc_html_e('Recevoir une proposition', 'theme-sapi-maison'); ?></span>
+                  <?php echo $conseiller_arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                </button>
+              </form>
+              <p class="conseiller-surmesure-reassurance"><?php esc_html_e('Réponse de Robin sous 48h · Aucun engagement', 'theme-sapi-maison'); ?></p>
+            </div>
+          </div>
+
+          <!-- État B — Avec projet (compact, chips discrets + précisions optionnelles) -->
+          <div class="conseiller-card conseiller-surmesure-card conseiller-surmesure-card--compact" data-surmesure-state="project" hidden>
+            <div class="conseiller-card__inner">
+              <span class="conseiller-badge conseiller-badge--surmesure">
+                <?php echo $surmesure_badge_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                <?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?>
+              </span>
+              <h2 class="conseiller-h2"><?php esc_html_e('Un sur-mesure pour ce projet ?', 'theme-sapi-maison'); ?></h2>
+              <div class="conseiller-chips conseiller-chips--compact" data-surmesure-chips></div>
+
+              <form class="conseiller-surmesure-form" data-surmesure-form data-surmesure-mode="project">
+                <input type="email" class="conseiller-surmesure-form__input" name="email" required
+                       placeholder="<?php esc_attr_e('Ton adresse email', 'theme-sapi-maison'); ?>"
+                       aria-label="<?php esc_attr_e('Email', 'theme-sapi-maison'); ?>">
+                <input type="text" class="conseiller-surmesure-form__input conseiller-surmesure-form__input--small" name="description"
+                       placeholder="<?php esc_attr_e('Précisions ou inspirations (optionnel)', 'theme-sapi-maison'); ?>"
+                       aria-label="<?php esc_attr_e('Précisions', 'theme-sapi-maison'); ?>">
+                <input type="text" name="website" tabindex="-1" autocomplete="off" class="conseiller-surmesure-form__honeypot" aria-hidden="true">
+                <button type="submit" class="conseiller-cta">
+                  <span><?php esc_html_e('Recevoir une proposition', 'theme-sapi-maison'); ?></span>
+                  <?php echo $conseiller_arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                </button>
+              </form>
+              <p class="conseiller-surmesure-reassurance"><?php esc_html_e('Réponse de Robin sous 48h · Aucun engagement', 'theme-sapi-maison'); ?></p>
+            </div>
+          </div>
+
+          <!-- État succès (commun aux deux modes) -->
+          <div class="conseiller-card conseiller-surmesure-card conseiller-surmesure-card--success" data-surmesure-state="success" hidden>
+            <div class="conseiller-card__inner">
+              <span class="conseiller-badge conseiller-badge--surmesure">
+                <?php echo $surmesure_badge_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                <?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?>
+              </span>
+              <h2 class="conseiller-h2"><?php esc_html_e('Reçu — Robin t\'écrit sous 48h', 'theme-sapi-maison'); ?></h2>
+              <p class="conseiller-subtitle"><?php esc_html_e('Merci pour ta demande. Tu vas recevoir un email de confirmation et Robin te répondra personnellement.', 'theme-sapi-maison'); ?></p>
+            </div>
+          </div>
+
+        </div>
+        <?php endif; ?>
       <?php endwhile; ?>
     </div>
 
@@ -443,11 +521,10 @@ $conseiller_arrow_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCol
               <span class="conseiller-porte__desc"><?php esc_html_e('Robin pose ses questions, je sélectionne parmi ses propositions.', 'theme-sapi-maison'); ?></span>
             </button>
 
-            <button type="button" class="conseiller-porte conseiller-porte--soon" data-action="door" data-door="decris" disabled aria-disabled="true">
+            <button type="button" class="conseiller-porte" data-action="door" data-door="decris">
               <span class="conseiller-porte__icon"><?php echo $conseiller_porte_feather_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
               <span class="conseiller-porte__title"><?php esc_html_e('Je décris', 'theme-sapi-maison'); ?></span>
               <span class="conseiller-porte__desc"><?php esc_html_e('Je raconte mon projet à Robin, l\'IA m\'accompagne pour préciser.', 'theme-sapi-maison'); ?></span>
-              <span class="conseiller-porte__soon"><?php esc_html_e('Bientôt', 'theme-sapi-maison'); ?></span>
             </button>
           </div>
         </div>
@@ -472,6 +549,74 @@ $conseiller_arrow_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCol
           <div class="conseiller-modal__nav">
             <button type="button" class="conseiller-back-link" data-action="back">← <?php esc_html_e('Retour', 'theme-sapi-maison'); ?></button>
           </div>
+        </div>
+      </div>
+
+      <!-- S2.start — Mode texte libre, écran initial -->
+      <div class="conseiller-modal__screen" data-screen="s2-start" hidden>
+        <div class="conseiller-card__inner">
+          <span class="conseiller-badge conseiller-badge--default">
+            <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+            <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
+          </span>
+          <h2 class="conseiller-h2"><?php esc_html_e('Raconte ton projet', 'theme-sapi-maison'); ?></h2>
+
+          <form class="conseiller-freetext" data-freetext-form>
+            <div class="conseiller-freetext__wrap">
+              <input type="text" class="conseiller-freetext__input" data-freetext-input
+                     placeholder="<?php esc_attr_e('Ex. : Une suspension moderne pour mon salon, au-dessus de la table…', 'theme-sapi-maison'); ?>"
+                     maxlength="500"
+                     aria-label="<?php esc_attr_e('Décris ton projet en quelques mots', 'theme-sapi-maison'); ?>">
+              <button type="submit" class="conseiller-freetext__submit" aria-label="<?php esc_attr_e('Envoyer', 'theme-sapi-maison'); ?>">
+                <?php echo $conseiller_arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+              </button>
+            </div>
+          </form>
+
+          <div class="conseiller-suggestions">
+            <button type="button" class="conseiller-suggestion" data-suggestion="<?php esc_attr_e('Une suspension moderne pour mon salon', 'theme-sapi-maison'); ?>">
+              <?php esc_html_e('Une suspension moderne pour mon salon', 'theme-sapi-maison'); ?>
+            </button>
+            <button type="button" class="conseiller-suggestion" data-suggestion="<?php esc_attr_e('Une lampe d\'appoint pour ma chambre', 'theme-sapi-maison'); ?>">
+              <?php esc_html_e('Une lampe d\'appoint pour ma chambre', 'theme-sapi-maison'); ?>
+            </button>
+            <button type="button" class="conseiller-suggestion" data-suggestion="<?php esc_attr_e('Quelque chose pour éclairer mon escalier', 'theme-sapi-maison'); ?>">
+              <?php esc_html_e('Quelque chose pour éclairer mon escalier', 'theme-sapi-maison'); ?>
+            </button>
+          </div>
+
+          <div class="conseiller-modal__nav">
+            <button type="button" class="conseiller-back-link" data-action="back">← <?php esc_html_e('Retour', 'theme-sapi-maison'); ?></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- S2.chat — Mode texte libre, conversation -->
+      <div class="conseiller-modal__screen" data-screen="s2-chat" hidden>
+        <div class="conseiller-card__inner conseiller-card__inner--chat">
+          <div class="conseiller-chat-header">
+            <span class="conseiller-badge conseiller-badge--default">
+              <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+              <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
+            </span>
+          </div>
+
+          <div class="conseiller-chat" data-chat-messages></div>
+
+          <div class="conseiller-chat-cta" data-chat-cta hidden>
+            <button type="button" class="conseiller-cta" data-action="apply">
+              <span><?php esc_html_e('Voir la sélection', 'theme-sapi-maison'); ?></span>
+              <?php echo $conseiller_arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+            </button>
+          </div>
+
+          <form class="conseiller-chat-footer" data-chat-form>
+            <input type="text" class="conseiller-chat-footer__input" data-chat-input
+                   placeholder="<?php esc_attr_e('Continuer à discuter avec Robin…', 'theme-sapi-maison'); ?>"
+                   maxlength="1000"
+                   aria-label="<?php esc_attr_e('Message', 'theme-sapi-maison'); ?>">
+            <button type="submit" class="conseiller-chat-footer__send"><?php esc_html_e('Envoyer', 'theme-sapi-maison'); ?></button>
+          </form>
         </div>
       </div>
 
