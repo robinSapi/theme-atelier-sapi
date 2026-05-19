@@ -509,22 +509,19 @@ $conseiller_arrow_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCol
             <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
             <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
           </span>
-          <h2 class="conseiller-h2"><?php esc_html_e('Comment veux-tu me parler de ton projet ?', 'theme-sapi-maison'); ?></h2>
-          <p class="conseiller-subtitle"><?php esc_html_e('Deux manières d\'arriver à une sélection de luminaires adaptés à ton projet.', 'theme-sapi-maison'); ?></p>
+          <h2 class="conseiller-h2"><?php esc_html_e('Que préfères-tu ?', 'theme-sapi-maison'); ?></h2>
 
           <div class="conseiller-portes">
             <span class="conseiller-portes__or" aria-hidden="true"><?php esc_html_e('ou', 'theme-sapi-maison'); ?></span>
 
             <button type="button" class="conseiller-porte" data-action="door" data-door="choisis">
               <span class="conseiller-porte__icon"><?php echo $conseiller_porte_checklist_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-              <span class="conseiller-porte__title"><?php esc_html_e('Je choisis', 'theme-sapi-maison'); ?></span>
-              <span class="conseiller-porte__desc"><?php esc_html_e('Robin pose ses questions, je sélectionne parmi ses propositions.', 'theme-sapi-maison'); ?></span>
+              <span class="conseiller-porte__title"><?php esc_html_e('Questions — Réponses', 'theme-sapi-maison'); ?></span>
             </button>
 
             <button type="button" class="conseiller-porte" data-action="door" data-door="decris">
               <span class="conseiller-porte__icon"><?php echo $conseiller_porte_feather_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-              <span class="conseiller-porte__title"><?php esc_html_e('Je décris', 'theme-sapi-maison'); ?></span>
-              <span class="conseiller-porte__desc"><?php esc_html_e('Je raconte mon projet à Robin, l\'IA m\'accompagne pour préciser.', 'theme-sapi-maison'); ?></span>
+              <span class="conseiller-porte__title"><?php esc_html_e('Décrire ton projet', 'theme-sapi-maison'); ?></span>
             </button>
           </div>
         </div>

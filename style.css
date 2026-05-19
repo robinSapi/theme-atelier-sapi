@@ -23079,15 +23079,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-wood-dark);
-  margin-bottom: 8px;
-}
-
-.conseiller-porte__desc {
-  display: block;
-  font-family: var(--font-body);
-  font-size: 13.5px;
-  color: var(--color-wood-mid);
-  line-height: 1.5;
+  /* Pas de description sous le titre — on ne sépare pas du bas de card */
 }
 
 .conseiller-porte__soon {
