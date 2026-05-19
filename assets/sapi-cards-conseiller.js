@@ -206,35 +206,53 @@
     return FALLBACK_ADVICE;
   }
 
-  // F2a-ter raffinement : effet "machine à écrire" sur la citation, suivi
-  // d'un fondu sur la signature "— Robin". Annule toute frappe en cours
-  // avant d'en lancer une nouvelle (cas où advice_text change pendant la
-  // frappe).
-  var typewriterTimer = null;
+  // F2a-ter raffinement : effet typewriter avec fade-in par lettre.
+  // Chaque caractère est wrappé dans un <span class="conseiller-typewriter__char">
+  // avec un transition-delay cascadé. Tous les spans démarrent opacity:0
+  // (via CSS) puis passent à opacity:1 quand la classe .is-revealing est
+  // ajoutée — l'effet visuel = chaque lettre fade-in en cascade fluide.
+  // À la fin, fondu de la signature "— Robin" via .is-typing-done.
+  var signatureTimer = null;
 
-  function typewriterEffect(contentEl, phraseEl, text, speed) {
-    if (typewriterTimer) {
-      clearTimeout(typewriterTimer);
-      typewriterTimer = null;
+  function typewriterEffect(contentEl, phraseEl, text, perCharDelay) {
+    if (signatureTimer) {
+      clearTimeout(signatureTimer);
+      signatureTimer = null;
     }
-    // Reset état : signature invisible jusqu'à fin de frappe
+    // Reset état : signature invisible, content vidé
     if (phraseEl) phraseEl.classList.remove('is-typing-done');
-
+    contentEl.classList.remove('is-revealing');
     contentEl.textContent = '';
-    var i = 0;
-    function step() {
-      typewriterTimer = null;
-      if (i >= text.length) {
-        // Frappe terminée → fade-in signature
-        if (phraseEl) phraseEl.classList.add('is-typing-done');
-        return;
-      }
-      contentEl.textContent += text.charAt(i);
-      i++;
-      typewriterTimer = setTimeout(step, speed);
-    }
-    // Petit délai pour laisser la card apparaître avant de démarrer la frappe
-    typewriterTimer = setTimeout(step, 280);
+
+    var fadeDuration = 400; // doit matcher .conseiller-typewriter__char transition
+    var initialDelay = 200; // laisse la card s'afficher avant la frappe
+    var chars = text.split('');
+    var fragment = document.createDocumentFragment();
+    chars.forEach(function (ch, i) {
+      var span = document.createElement('span');
+      span.className = 'conseiller-typewriter__char';
+      span.style.transitionDelay = (initialDelay + i * perCharDelay) + 'ms';
+      // L'espace blanc en début/fin de span doit être préservé visuellement.
+      // textContent rend exactement le caractère, donc OK.
+      span.textContent = ch;
+      fragment.appendChild(span);
+    });
+    contentEl.appendChild(fragment);
+
+    // Trigger la transition après 2 rAF (assure que les spans sont peints
+    // avec opacity:0 avant qu'on ajoute la classe qui les fade vers 1).
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        contentEl.classList.add('is-revealing');
+      });
+    });
+
+    // Schedule signature fade-in après que TOUS les chars aient fini leur fade.
+    var totalMs = initialDelay + (chars.length - 1) * perCharDelay + fadeDuration;
+    signatureTimer = setTimeout(function () {
+      signatureTimer = null;
+      if (phraseEl) phraseEl.classList.add('is-typing-done');
+    }, totalMs);
   }
 
   function renderMonProjet() {
@@ -249,7 +267,7 @@
     // relancer l'animation à chaque subscribe notification.
     if (els.phraseContent.dataset.lastText !== newText) {
       els.phraseContent.dataset.lastText = newText;
-      typewriterEffect(els.phraseContent, els.phrase, newText, 38);
+      typewriterEffect(els.phraseContent, els.phrase, newText, 32);
     }
   }
 
