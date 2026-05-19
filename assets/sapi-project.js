@@ -174,6 +174,17 @@
 
   function clear() {
     var ok = clearRaw();
+    // F2a-quater : nettoyer aussi ?piece= de l'URL pour éviter sa ré-ingestion
+    // par ingestQueryParams() au prochain chargement de page (sinon le projet
+    // "effacé" reviendrait dès le refresh).
+    try {
+      var url = new URL(window.location.href);
+      if (url.searchParams.has('piece')) {
+        url.searchParams.delete('piece');
+        var newUrl = url.pathname + (url.search || '') + (url.hash || '');
+        window.history.replaceState({}, '', newUrl);
+      }
+    } catch (e) { /* silencieux */ }
     if (ok) notify();
     return ok;
   }
