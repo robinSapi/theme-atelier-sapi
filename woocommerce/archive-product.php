@@ -127,7 +127,7 @@ $conseiller_pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCo
        F2a-ter raffinement : la card entière est cliquable (button) → ouvre S3.
        Le bouton "Modifier mon projet" interne est supprimé, l'interaction
        passe par la card complète. Pill "Mon projet" devient orange au hover. -->
-  <button type="button" class="conseiller-card conseiller-card--mon-projet" data-conseiller-card="mon-projet" data-action="open-modal" data-modal-state="s3" aria-label="<?php esc_attr_e('Modifier mon projet', 'theme-sapi-maison'); ?>" hidden>
+  <button type="button" class="conseiller-card conseiller-card--mon-projet" data-conseiller-card="mon-projet" data-action="open-modal" data-modal-state="s0" aria-label="<?php esc_attr_e('Modifier mon projet', 'theme-sapi-maison'); ?>" hidden>
     <span class="conseiller-card__inner">
       <span class="conseiller-badge conseiller-badge--default">
         <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
@@ -490,37 +490,47 @@ $conseiller_pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCo
   </div>
 </section>
 
-<!-- ── F2a Phase 3 — Modale Conseiller V3 (tunnel 2 portes : S0/S1/S3) ── -->
+<!-- ── F2a Phase 3 — Modale Conseiller V3 (F2a-quater : S0 hybride) ── -->
 <?php
-// SVG portes S0
-$conseiller_porte_checklist_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 10l2 2 4-4"/><path d="M8 16h8"/></svg>';
-$conseiller_porte_feather_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><path d="M16 8 2 22"/><path d="M17.5 15H9"/></svg>';
-// SVG flèche CTA récap
+// SVG flèche CTA récap + submit input
 $conseiller_arrow_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
 ?>
 <div class="conseiller-modal" data-conseiller-modal hidden>
   <div class="conseiller-card conseiller-card--modal" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e('Conseil de Robin', 'theme-sapi-maison'); ?>" data-modal-card>
 
-      <!-- S0 — Écran de démarrage 2 portes -->
+      <!-- S0 — Écran hybride (F2a-quater) : question dynamique + choices + séparateur "ou" + champ texte.
+           Bascule dynamique selon sapiProject : "Conseil de Robin" (initial) ou "Mon projet" (partiel).
+           Si projet complet → la logique d'ouverture montre S3 directement à la place. -->
       <div class="conseiller-modal__screen" data-screen="s0" hidden>
         <div class="conseiller-card__inner">
-          <span class="conseiller-badge conseiller-badge--default">
+          <span class="conseiller-badge conseiller-badge--default" data-s0-badge>
             <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-            <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
+            <span data-s0-badge-text><?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?></span>
           </span>
-          <h2 class="conseiller-h2"><?php esc_html_e('Que préfères-tu ?', 'theme-sapi-maison'); ?></h2>
 
-          <div class="conseiller-portes">
-            <span class="conseiller-portes__or" aria-hidden="true"><?php esc_html_e('ou', 'theme-sapi-maison'); ?></span>
+          <h2 class="conseiller-h2" data-s0-question aria-live="polite">…</h2>
 
-            <button type="button" class="conseiller-porte" data-action="door" data-door="choisis">
-              <span class="conseiller-porte__icon"><?php echo $conseiller_porte_checklist_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-              <span class="conseiller-porte__title"><?php esc_html_e('Questions — Réponses', 'theme-sapi-maison'); ?></span>
-            </button>
+          <div class="conseiller-choices" data-s0-choices></div>
 
-            <button type="button" class="conseiller-porte" data-action="door" data-door="decris">
-              <span class="conseiller-porte__icon"><?php echo $conseiller_porte_feather_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-              <span class="conseiller-porte__title"><?php esc_html_e('Décrire ton projet', 'theme-sapi-maison'); ?></span>
+          <div class="conseiller-separator-or" aria-hidden="true">
+            <span class="conseiller-separator-or__text"><?php esc_html_e('ou', 'theme-sapi-maison'); ?></span>
+          </div>
+
+          <form class="conseiller-freetext" data-s0-form>
+            <div class="conseiller-freetext__wrap">
+              <input type="text" class="conseiller-freetext__input" data-s0-input
+                     placeholder="<?php esc_attr_e('Décris ton projet en quelques mots…', 'theme-sapi-maison'); ?>"
+                     maxlength="500"
+                     aria-label="<?php esc_attr_e('Décris ton projet en quelques mots', 'theme-sapi-maison'); ?>">
+              <button type="submit" class="conseiller-freetext__submit" aria-label="<?php esc_attr_e('Envoyer', 'theme-sapi-maison'); ?>">
+                <?php echo $conseiller_arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+              </button>
+            </div>
+          </form>
+
+          <div class="conseiller-modal__nav" data-s0-reset-wrap hidden>
+            <button type="button" class="conseiller-s3-reset" data-action="s0-reset">
+              <?php esc_html_e('Effacer et recommencer', 'theme-sapi-maison'); ?>
             </button>
           </div>
         </div>
@@ -548,44 +558,8 @@ $conseiller_arrow_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCol
         </div>
       </div>
 
-      <!-- S2.start — Mode texte libre, écran initial -->
-      <div class="conseiller-modal__screen" data-screen="s2-start" hidden>
-        <div class="conseiller-card__inner">
-          <span class="conseiller-badge conseiller-badge--default">
-            <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-            <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
-          </span>
-          <h2 class="conseiller-h2"><?php esc_html_e('Raconte ton projet', 'theme-sapi-maison'); ?></h2>
-
-          <form class="conseiller-freetext" data-freetext-form>
-            <div class="conseiller-freetext__wrap">
-              <input type="text" class="conseiller-freetext__input" data-freetext-input
-                     placeholder="<?php esc_attr_e('Ex. : Une suspension moderne pour mon salon, au-dessus de la table…', 'theme-sapi-maison'); ?>"
-                     maxlength="500"
-                     aria-label="<?php esc_attr_e('Décris ton projet en quelques mots', 'theme-sapi-maison'); ?>">
-              <button type="submit" class="conseiller-freetext__submit" aria-label="<?php esc_attr_e('Envoyer', 'theme-sapi-maison'); ?>">
-                <?php echo $conseiller_arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-              </button>
-            </div>
-          </form>
-
-          <div class="conseiller-suggestions">
-            <button type="button" class="conseiller-suggestion" data-suggestion="<?php esc_attr_e('Une suspension moderne pour mon salon', 'theme-sapi-maison'); ?>">
-              <?php esc_html_e('Une suspension moderne pour mon salon', 'theme-sapi-maison'); ?>
-            </button>
-            <button type="button" class="conseiller-suggestion" data-suggestion="<?php esc_attr_e('Une lampe d\'appoint pour ma chambre', 'theme-sapi-maison'); ?>">
-              <?php esc_html_e('Une lampe d\'appoint pour ma chambre', 'theme-sapi-maison'); ?>
-            </button>
-            <button type="button" class="conseiller-suggestion" data-suggestion="<?php esc_attr_e('Quelque chose pour éclairer mon escalier', 'theme-sapi-maison'); ?>">
-              <?php esc_html_e('Quelque chose pour éclairer mon escalier', 'theme-sapi-maison'); ?>
-            </button>
-          </div>
-
-          <div class="conseiller-modal__nav">
-            <button type="button" class="conseiller-back-link" data-action="back">← <?php esc_html_e('Retour', 'theme-sapi-maison'); ?></button>
-          </div>
-        </div>
-      </div>
+      <!-- S2.start supprimé en F2a-quater : le champ texte freetext est intégré
+           au S0 hybride. Le submit de S0 bascule directement vers S2.chat. -->
 
       <!-- S2.chat — Mode texte libre, conversation -->
       <div class="conseiller-modal__screen" data-screen="s2-chat" hidden>

@@ -212,6 +212,8 @@
 
     if (nextStep) {
       showQuestion(nextStep);
+      // F2a-quater : bascule visuelle S0→S1 (ou no-op si déjà S1)
+      if (state.screen !== 's1') showScreen('s1');
     } else {
       // F2a-bis : dernière question répondue → écran transition + appel IA + close
       showTransitionAndExit({ source: 's1' });
@@ -219,13 +221,10 @@
   }
 
   function backFromQuestion() {
-    // Si on est sur S2-start (mode "Je décris"), Retour ramène à S0
-    if (state.screen === 's2-start') {
-      showScreen('s0');
-      return;
-    }
+    // F2a-quater : Retour depuis S1 → revient à la question précédente, ou à
+    // l'écran S0 hybride si on est sur la 1re question (history vide).
     if (state.questionHistory.length === 0) {
-      showScreen('s0');
+      renderS0Hybrid(determineInitialState());
       return;
     }
     var prev = state.questionHistory.pop();
@@ -332,27 +331,10 @@
     if (els.modalCard) els.modalCard.classList.remove('is-chat-mode');
   }
 
-  function startFreetextFlow() {
-    // Réinitialise la session chat à chaque ouverture de S2
-    state.chat.conversation = [];
-    state.chat.sessionId = null;
-    state.chat.status = 'idle';
-    if (els.chatMessages) els.chatMessages.innerHTML = '';
-    if (els.chatCta) els.chatCta.hidden = true;
-    if (els.freetextInput) els.freetextInput.value = '';
-    if (els.chatInput) {
-      els.chatInput.value = '';
-      els.chatInput.disabled = false;
-      if (els.chatInputDefaultPlaceholder) {
-        els.chatInput.placeholder = els.chatInputDefaultPlaceholder;
-      }
-    }
-    if (els.chatSend) els.chatSend.disabled = false;
-    showScreen('s2-start');
-    // Focus l'input pour saisir directement
-    setTimeout(function () {
-      if (els.freetextInput) els.freetextInput.focus();
-    }, 100);
+  // F2a-quater : startFreetextFlow supprimé. Le champ texte est intégré dans
+  // S0 hybride et submitFromS0Text() bascule directement vers S2.chat.
+  function startFreetextFlow_DEPRECATED() {
+    return;
   }
 
   function addUserBubble(text) {
@@ -593,22 +575,160 @@
   }
 
   /* ─────────────────────────────────────────────
-     S0 — Choix de porte
+     F2a-quater — S0 hybride (question + choices + "ou" + texte libre)
+     Remplace l'ancien S0 "Que préfères-tu ?" avec 2 portes.
+     3 sous-états selon sapiProject : initial / partiel / complet (S3).
      ───────────────────────────────────────────── */
-  function chooseDoor(door) {
-    if (door === 'choisis') {
-      startQuestionsFlow();
-    } else if (door === 'decris') {
-      startFreetextFlow();
+
+  // Décide quel écran afficher quand on ouvre la modale via state="s0".
+  // Renvoie 's0-initial' | 's0-partiel' | 's3-carrefour'.
+  function determineInitialState() {
+    if (!window.sapiProject || !window.sapiProject.hasProject()) return 's0-initial';
+    var visible = getVisibleStepIds(state.answers);
+    if (visible.length === 0) return 's0-initial';
+    var anyAnswered = false;
+    var allAnswered = true;
+    for (var i = 0; i < visible.length; i++) {
+      if (state.answers[visible[i]]) anyAnswered = true;
+      else allAnswered = false;
     }
+    if (allAnswered) return 's3-carrefour';
+    if (anyAnswered) return 's0-partiel';
+    return 's0-initial';
   }
 
-  function startQuestionsFlow() {
-    state.questionHistory = [];
+  // Trouve la prochaine question visible non répondue (1re question si initial).
+  function getNextUnansweredVisibleStep() {
     var visible = getVisibleStepIds(state.answers);
-    var first = visible[0] || 'piece';
-    showQuestion(first);
-    showScreen('s1');
+    for (var i = 0; i < visible.length; i++) {
+      if (!state.answers[visible[i]]) return visible[i];
+    }
+    return null;
+  }
+
+  // Peuple le S0 hybride selon le mode (initial ou partiel) et l'affiche.
+  function renderS0Hybrid(mode) {
+    var nextStepId, badgeText, placeholderText, resetVisible;
+
+    if (mode === 's0-partiel') {
+      nextStepId = getNextUnansweredVisibleStep() || 'piece';
+      badgeText = 'Mon projet';
+      placeholderText = 'Précise ton projet en quelques mots…';
+      resetVisible = true;
+    } else {
+      // 's0-initial' (fallback)
+      var visible = getVisibleStepIds(state.answers);
+      nextStepId = visible[0] || 'piece';
+      badgeText = 'Conseil de Robin';
+      placeholderText = 'Décris ton projet en quelques mots…';
+      resetVisible = false;
+    }
+
+    // Update badge text
+    if (els.s0BadgeText) els.s0BadgeText.textContent = badgeText;
+
+    // Update question + choices
+    var step = getStep(nextStepId);
+    if (step) {
+      state.currentQuestion = nextStepId;
+      if (els.s0Question) els.s0Question.textContent = getDynamicQuestion(step);
+      if (els.s0Choices) {
+        els.s0Choices.innerHTML = '';
+        var choices = step.choices || [];
+        choices.forEach(function (choice) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'conseiller-choice';
+          btn.setAttribute('data-choice', choice.slug);
+          btn.setAttribute('data-label', choice.label);
+          var iconWrap = document.createElement('span');
+          iconWrap.className = 'conseiller-choice__icon';
+          iconWrap.innerHTML = ICONS[choice.icon] || '';
+          btn.appendChild(iconWrap);
+          var label = document.createElement('span');
+          label.className = 'conseiller-choice__label';
+          label.textContent = choice.label;
+          btn.appendChild(label);
+          if (choice.dim) {
+            var dim = document.createElement('span');
+            dim.className = 'conseiller-choice__dim';
+            dim.textContent = choice.dim;
+            btn.appendChild(dim);
+          }
+          els.s0Choices.appendChild(btn);
+        });
+      }
+    }
+
+    // Placeholder + value reset du champ texte
+    if (els.s0Input) {
+      els.s0Input.placeholder = placeholderText;
+      els.s0Input.value = '';
+    }
+
+    // Toggle reset link (visible uniquement état partiel)
+    if (els.s0ResetWrap) els.s0ResetWrap.hidden = !resetVisible;
+
+    // Reset questionHistory : si state partiel, on pré-remplit avec les
+    // questions déjà répondues avant la prochaine (pour permettre Retour).
+    state.questionHistory = [];
+    if (mode === 's0-partiel') {
+      var visibleSteps = getVisibleStepIds(state.answers);
+      for (var i = 0; i < visibleSteps.length; i++) {
+        if (visibleSteps[i] === nextStepId) break;
+        state.questionHistory.push(visibleSteps[i]);
+      }
+    }
+
+    showScreen('s0');
+  }
+
+  // Soumission du champ texte S0 → bascule vers S2.chat avec bulle initiale.
+  function submitFromS0Text(text) {
+    text = (text || '').trim();
+    if (!text) return;
+
+    // Reset complet de l'état chat
+    state.chat.conversation = [];
+    state.chat.sessionId = null;
+    state.chat.status = 'idle';
+    if (els.chatMessages) els.chatMessages.innerHTML = '';
+    if (els.chatCta) els.chatCta.hidden = true;
+    if (els.chatInput) {
+      els.chatInput.value = '';
+      els.chatInput.disabled = false;
+      if (els.chatInputDefaultPlaceholder) {
+        els.chatInput.placeholder = els.chatInputDefaultPlaceholder;
+      }
+    }
+    if (els.chatSend) els.chatSend.disabled = false;
+
+    // Bulle initiale Robin (cosmétique, construite côté client — zéro IA)
+    var greeting = getInitialChatGreeting();
+    enterChatMode();
+    addRobinBubble(greeting);
+    state.chat.conversation.push({ role: 'assistant', content: greeting });
+
+    // Soumet le texte saisi via le flow freetext existant (Haiku + transition)
+    submitFreetext(text);
+  }
+
+  // Bulle d'accueil Robin selon l'état du projet (zéro appel IA).
+  function getInitialChatGreeting() {
+    if (!window.sapiProject || !window.sapiProject.hasProject()) {
+      return 'Décris-moi ton projet, je vais t\'aider à trouver une sélection adaptée.';
+    }
+    return getInitialChatAdvice() + ' Qu\'est-ce que tu veux affiner ?';
+  }
+
+  // Action "Effacer et recommencer" depuis S0 (état partiel) : vide le projet
+  // et bascule vers l'état initial dans la même modale. Pas de fermeture.
+  function resetFromS0() {
+    if (window.sapiProject) window.sapiProject.clear();
+    state.answers = {};
+    state.labels = {};
+    state.questionHistory = [];
+    renderS0Hybrid('s0-initial');
   }
 
   /* ─────────────────────────────────────────────
@@ -736,15 +856,21 @@
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
 
-    // F2a-ter : S3 ressuscité comme carrefour "Modifier mon projet". Ouvert
-    // uniquement depuis la card "Mon projet" sur /mes-creations/ (jamais en
-    // fin de S1 qui ferme directement la modale via showTransitionAndExit).
+    // F2a-quater : ouverture state="s0" → détermine dynamiquement le sous-état
+    // (initial / partiel / s3-carrefour) selon le contenu du sapiProject.
+    // state="s3" force le carrefour (compat avec anciens liens).
     if (initialScreen === 's3' && window.sapiProject && window.sapiProject.hasProject()) {
       showS3Recap();
-    } else if (initialScreen === 's1') {
-      startQuestionsFlow();
+    } else if (initialScreen === 's0' || !initialScreen) {
+      var detected = determineInitialState();
+      if (detected === 's3-carrefour') {
+        showS3Recap();
+      } else {
+        renderS0Hybrid(detected); // 's0-initial' ou 's0-partiel'
+      }
     } else {
-      showScreen('s0');
+      // Fallback ultime (autres valeurs anciennes) → S0 hybride
+      renderS0Hybrid(determineInitialState());
     }
 
     // Focus la card (rôle dialog) pour annoncer l'ouverture aux screen readers
@@ -805,10 +931,6 @@
         case 'close':
           closeModal();
           break;
-        case 'door':
-          var door = actionBtn.getAttribute('data-door');
-          chooseDoor(door);
-          break;
         case 'back':
           backFromQuestion();
           break;
@@ -830,11 +952,16 @@
         case 's3-reset':
           resetFromS3();
           break;
+        // F2a-quater : lien "Effacer et recommencer" sur S0 hybride (état partiel)
+        case 's0-reset':
+          resetFromS0();
+          break;
       }
     });
 
-    // Click sur un choix de question (délégué)
-    els.choices && els.choices.addEventListener('click', function (e) {
+    // Click sur un choix (S0 hybride OU S1) — délégué sur toute la modale
+    // pour couvrir les 2 contextes (refs DOM distinctes pour S0 et S1).
+    els.modal.addEventListener('click', function (e) {
       var btn = e.target.closest('.conseiller-choice');
       if (!btn) return;
       var slug = btn.getAttribute('data-choice');
@@ -842,27 +969,19 @@
       answerCurrentQuestion(slug, label);
     });
 
-    // S2.start : submit freetext (Enter ou clic sur le bouton flèche)
-    var freetextForm = els.modal.querySelector('[data-freetext-form]');
-    if (freetextForm) {
-      freetextForm.addEventListener('submit', function (e) {
+    // F2a-quater : submit du champ texte S0 hybride → bascule vers S2.chat
+    var s0Form = els.modal.querySelector('[data-s0-form]');
+    if (s0Form) {
+      s0Form.addEventListener('submit', function (e) {
         e.preventDefault();
-        if (!els.freetextInput) return;
-        var val = els.freetextInput.value;
-        els.freetextInput.value = '';
-        submitFreetext(val);
+        if (!els.s0Input) return;
+        var val = els.s0Input.value;
+        els.s0Input.value = '';
+        submitFromS0Text(val);
       });
     }
 
-    // S2.start : clic sur une suggestion → submitFreetext
-    els.modal.addEventListener('click', function (e) {
-      var sug = e.target.closest('[data-suggestion]');
-      if (!sug) return;
-      var text = sug.getAttribute('data-suggestion') || sug.textContent.trim();
-      submitFreetext(text);
-    });
-
-    // S2.chat : submit message
+    // S2.chat : submit message dans le footer chat
     var chatForm = els.modal.querySelector('[data-chat-form]');
     if (chatForm) {
       chatForm.addEventListener('submit', function (e) {
@@ -882,15 +1001,23 @@
     els.modal = document.querySelector('[data-conseiller-modal]');
     if (!els.modal) return; // pas sur la page concernée
     els.modalCard     = els.modal.querySelector('[data-modal-card]');
+    // S0 hybride (F2a-quater)
+    els.s0BadgeText   = els.modal.querySelector('[data-s0-badge-text]');
+    els.s0Question    = els.modal.querySelector('[data-s0-question]');
+    els.s0Choices     = els.modal.querySelector('[data-s0-choices]');
+    els.s0Input       = els.modal.querySelector('[data-s0-input]');
+    els.s0ResetWrap   = els.modal.querySelector('[data-s0-reset-wrap]');
+    // S1 (questions guidées)
     els.questionTitle = els.modal.querySelector('[data-question-title]');
     els.choices       = els.modal.querySelector('[data-choices]');
     els.progressFill  = els.modal.querySelector('[data-progress-fill]');
-    els.freetextInput = els.modal.querySelector('[data-freetext-input]');
+    // S2 chat
     els.chatMessages  = els.modal.querySelector('[data-chat-messages]');
     els.chatCta       = els.modal.querySelector('[data-chat-cta]');
     els.chatInput     = els.modal.querySelector('[data-chat-input]');
     els.chatSend      = els.modal.querySelector('.conseiller-chat-footer__send');
     els.chatInputDefaultPlaceholder = els.chatInput ? els.chatInput.getAttribute('placeholder') : '';
+    // S3 carrefour
     els.recapChips    = els.modal.querySelector('[data-recap-chips]');
 
     // Marqueur pour les cards Phase 2 (évite leur fallback console.info)

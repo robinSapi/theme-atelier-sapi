@@ -23074,35 +23074,30 @@ body.woocommerce-cart div.woocommerce-wrapper {
   align-items: center;
 }
 
-/* Les "grilles" (portes/choix/freetext/suggestions) gardent leur full-width
-   malgré align-items: center sur le parent — sinon elles se rétractent à
-   leur largeur intrinsèque qui peut être trop étroite. */
-.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-portes,
+/* Les "grilles" gardent leur full-width malgré align-items: center sur le
+   parent — sinon elles se rétractent à leur largeur intrinsèque. */
 .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-choices,
 .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-freetext,
-.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-suggestions,
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-separator-or,
 .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-transition-dots,
 .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-progress {
   width: 100%;
 }
 
-/* Centrage vertical du contenu principal — varie selon l'écran.
-   S0 et s-transition n'ont pas de nav retour : on centre le contenu seul.
-   S1 et S2.start ont un nav retour en bas : on pousse contenu et nav avec
-   2 auto-margins → header en haut, contenu au milieu, nav en bas. */
-.conseiller-modal__screen[data-screen="s0"] .conseiller-portes,
+/* Centrage vertical du contenu — varie selon l'écran.
+   F2a-quater : S0 hybride a un layout serré avec reset éventuel en bas.
+   s-transition centre les dots. S1 pousse choices+nav. */
 .conseiller-modal__screen[data-screen="s-transition"] .conseiller-transition-dots {
   margin-top: auto;
   margin-bottom: auto;
 }
 
-.conseiller-modal__screen[data-screen="s1"] .conseiller-choices,
-.conseiller-modal__screen[data-screen="s2-start"] .conseiller-freetext {
+.conseiller-modal__screen[data-screen="s1"] .conseiller-choices {
   margin-top: auto;
 }
 
-.conseiller-modal__screen[data-screen="s1"] .conseiller-modal__nav,
-.conseiller-modal__screen[data-screen="s2-start"] .conseiller-modal__nav {
+.conseiller-modal__screen[data-screen="s0"] .conseiller-modal__nav,
+.conseiller-modal__screen[data-screen="s1"] .conseiller-modal__nav {
   margin-top: auto;
 }
 
@@ -23135,114 +23130,43 @@ body.woocommerce-cart div.woocommerce-wrapper {
   margin-bottom: 36px;
 }
 
-/* ── S0 : Les 2 portes ── */
-.conseiller-portes {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  max-width: 720px;
-  margin: 0 auto;
-}
+/* F2a-quater : Anciennes portes S0 (.conseiller-portes / .conseiller-porte*) supprimées —
+   remplacées par l'écran hybride question + séparateur "ou" + champ texte. */
 
-.conseiller-porte {
-  position: relative;
-  background: var(--color-white);
-  border: 1px solid var(--color-line);
-  border-radius: 12px;
-  padding: 32px 26px 26px;
-  text-align: center;
-  cursor: pointer;
-  font-family: var(--font-body);
-  color: inherit;
-  box-shadow: var(--shadow-card);
-  -webkit-transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.conseiller-porte:hover:not([disabled]),
-.conseiller-porte:focus-visible:not([disabled]) {
-  -webkit-transform: translateY(-2px);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card-hover);
-  border-color: var(--color-wood);
-  outline: none;
-}
-
-.conseiller-porte[disabled] {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.conseiller-porte__icon {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 18px;
-  background: var(--color-warm);
-  border-radius: 50%;
+/* ── S0 : Séparateur "ou" horizontal avec pastille centrée ── */
+.conseiller-separator-or {
   display: -webkit-flex;
   display: flex;
   -webkit-align-items: center;
   align-items: center;
   -webkit-justify-content: center;
   justify-content: center;
-  color: var(--color-wood);
+  margin: 12px 0 16px;
+  position: relative;
 }
 
-.conseiller-porte__icon svg {
-  width: 26px;
-  height: 26px;
+.conseiller-separator-or::before,
+.conseiller-separator-or::after {
+  content: '';
+  -webkit-flex: 1;
+  flex: 1;
+  height: 1px;
+  background: rgba(147, 125, 104, 0.25);
+  max-width: 80px;
 }
 
-.conseiller-porte__title {
-  display: block;
+.conseiller-separator-or__text {
+  margin: 0 14px;
+  padding: 4px 12px;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 10.5px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--color-wood-dark);
-  /* Pas de description sous le titre — on ne sépare pas du bas de card */
-}
-
-.conseiller-porte__soon {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: var(--color-wood);
-  color: var(--color-white);
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 50px;
-}
-
-.conseiller-portes__or {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: var(--color-warm);
-  border: 1.5px solid rgba(147, 125, 104, 0.35);
   color: var(--color-wood);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  display: -webkit-inline-flex;
-  display: inline-flex;
-  -webkit-align-items: center;
-  align-items: center;
-  -webkit-justify-content: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 2;
+  background: var(--color-warm);
+  border-radius: 50px;
+  border: 1px solid rgba(147, 125, 104, 0.25);
 }
 
 /* ── S1 : Progress bar + grille de choix ── */
@@ -23431,22 +23355,6 @@ body.woocommerce-cart div.woocommerce-wrapper {
     margin-bottom: 28px;
   }
 
-  .conseiller-portes {
-    grid-template-columns: 1fr;
-    gap: 28px;
-  }
-  .conseiller-porte {
-    padding: 28px 20px 22px;
-  }
-  .conseiller-porte__icon {
-    width: 50px;
-    height: 50px;
-    margin-bottom: 14px;
-  }
-  .conseiller-porte__icon svg {
-    width: 22px;
-    height: 22px;
-  }
 
   .conseiller-choices {
     grid-template-columns: 1fr 1fr;
