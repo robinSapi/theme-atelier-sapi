@@ -23049,9 +23049,16 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 .conseiller-modal__screen[data-screen="s1"] .conseiller-modal__nav,
-.conseiller-modal__screen[data-screen="s2-start"] .conseiller-modal__nav,
-.conseiller-modal__screen[data-screen="s3"] .conseiller-modal__nav {
+.conseiller-modal__screen[data-screen="s2-start"] .conseiller-modal__nav {
   margin-top: auto;
+}
+
+/* F2a-ter S3 : chips récap centrées verticalement, actions + reset link
+   collés en bas de la card (auto sur chips top+bottom absorbe tout le free
+   space → actions/nav poussés en bas). */
+.conseiller-modal__screen[data-screen="s3"] .conseiller-chips {
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 @-webkit-keyframes conseiller-screen-fade {
@@ -23316,7 +23323,6 @@ body.woocommerce-cart div.woocommerce-wrapper {
   justify-content: center;
   gap: 14px;
   width: 100%;
-  margin-top: 22px;
 }
 
 /* Lien tertiaire "Effacer et recommencer" — discret, sous les 2 boutons. */
