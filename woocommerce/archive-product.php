@@ -134,8 +134,8 @@ $conseiller_pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCo
         <span class="conseiller-mon-projet__text-content" data-mon-projet-phrase-content></span>
         <span class="conseiller-signature">— Robin</span>
       </p>
-      <button type="button" class="conseiller-mon-projet__edit" data-action="open-modal" data-modal-state="s0">
-        <?php esc_html_e('Préciser ou modifier mon projet', 'theme-sapi-maison'); ?>
+      <button type="button" class="conseiller-mon-projet__edit" data-action="open-modal" data-modal-state="s3">
+        <?php esc_html_e('Modifier mon projet', 'theme-sapi-maison'); ?>
         <span aria-hidden="true">✎</span>
       </button>
     </div>
@@ -631,6 +631,37 @@ $conseiller_arrow_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCol
             <span class="conseiller-transition-dots__dot"></span>
             <span class="conseiller-transition-dots__dot"></span>
             <span class="conseiller-transition-dots__dot"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 — F2a-ter : carrefour "Modifier mon projet" déclenché uniquement
+           depuis la card "Mon projet" sur /mes-creations/. Chips récap + 3
+           actions hiérarchisées (Voir / Préciser / Effacer). Aucun appel IA. -->
+      <div class="conseiller-modal__screen" data-screen="s3" hidden>
+        <div class="conseiller-card__inner">
+          <span class="conseiller-badge conseiller-badge--default">
+            <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+            <?php esc_html_e('Mon projet', 'theme-sapi-maison'); ?>
+          </span>
+          <h2 class="conseiller-h2"><?php esc_html_e('Voici ton projet', 'theme-sapi-maison'); ?></h2>
+
+          <div class="conseiller-chips" data-recap-chips></div>
+
+          <div class="conseiller-s3-actions">
+            <button type="button" class="conseiller-cta" data-action="s3-view">
+              <span><?php esc_html_e('Voir la sélection', 'theme-sapi-maison'); ?></span>
+              <?php echo $conseiller_arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+            </button>
+            <button type="button" class="conseiller-cta conseiller-cta--secondary" data-action="s3-refine">
+              <span><?php esc_html_e('Préciser avec Robin', 'theme-sapi-maison'); ?></span>
+            </button>
+          </div>
+
+          <div class="conseiller-modal__nav">
+            <button type="button" class="conseiller-s3-reset" data-action="s3-reset">
+              <?php esc_html_e('Effacer et recommencer', 'theme-sapi-maison'); ?>
+            </button>
           </div>
         </div>
       </div>

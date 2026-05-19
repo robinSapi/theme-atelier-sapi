@@ -23044,12 +23044,14 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 .conseiller-modal__screen[data-screen="s1"] .conseiller-choices,
-.conseiller-modal__screen[data-screen="s2-start"] .conseiller-freetext {
+.conseiller-modal__screen[data-screen="s2-start"] .conseiller-freetext,
+.conseiller-modal__screen[data-screen="s3"] .conseiller-chips {
   margin-top: auto;
 }
 
 .conseiller-modal__screen[data-screen="s1"] .conseiller-modal__nav,
-.conseiller-modal__screen[data-screen="s2-start"] .conseiller-modal__nav {
+.conseiller-modal__screen[data-screen="s2-start"] .conseiller-modal__nav,
+.conseiller-modal__screen[data-screen="s3"] .conseiller-modal__nav {
   margin-top: auto;
 }
 
@@ -23285,9 +23287,58 @@ body.woocommerce-cart div.woocommerce-wrapper {
   margin-top: 4px;
 }
 
-/* F2a-bis : Styles S3 (chips récap + IA quote dans la modale) supprimés —
-   l'écran S3 n'existe plus, remplacé par un écran transition "Robin réfléchit"
-   qui mène directement à la fermeture de la modale. */
+/* F2a-ter — S3 ressuscité comme carrefour "Modifier mon projet" :
+   chips récap lecture seule + 3 actions hiérarchisées. */
+.conseiller-card--modal .conseiller-chips {
+  -webkit-justify-content: center;
+  justify-content: center;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Variante secondaire du CTA : pill wood-dark pour l'action "Préciser avec Robin"
+   (hiérarchie visuelle : orange = primaire, wood-dark = secondaire). */
+.conseiller-cta--secondary {
+  background: var(--color-wood-dark);
+}
+.conseiller-cta--secondary:hover,
+.conseiller-cta--secondary:focus-visible {
+  background: var(--color-wood);
+}
+
+/* Layout 2 boutons côte à côte desktop, empilés mobile. */
+.conseiller-s3-actions {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-justify-content: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+}
+
+/* Lien tertiaire "Effacer et recommencer" — discret, sous les 2 boutons. */
+.conseiller-s3-reset {
+  background: transparent;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-wood);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  padding: 6px 8px;
+  -webkit-transition: color 0.2s ease;
+  transition: color 0.2s ease;
+}
+.conseiller-s3-reset:hover,
+.conseiller-s3-reset:focus-visible {
+  color: var(--color-orange);
+  outline: none;
+}
 
 .conseiller-modal__cta {
   text-align: center;
@@ -23356,6 +23407,16 @@ body.woocommerce-cart div.woocommerce-wrapper {
   }
   .conseiller-choice__label {
     font-size: 11px;
+  }
+
+  /* S3 mobile : boutons empilés verticalement */
+  .conseiller-s3-actions {
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .conseiller-s3-actions .conseiller-cta {
+    width: 100%;
   }
 }
 

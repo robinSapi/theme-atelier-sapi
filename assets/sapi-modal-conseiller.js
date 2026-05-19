@@ -18,6 +18,18 @@
   var STEPS = Array.isArray(config.steps) ? config.steps : [];
   var ICONS = config.icons || {};
 
+  // F2a-ter : labels humains des clés pour les chips récap S3 ("Pièce : Salon").
+  var KEY_LABELS = {
+    piece: 'Pièce',
+    taille: 'Taille',
+    taille_escalier: 'Escalier',
+    eclairage: 'Éclairage',
+    sortie: 'Sortie',
+    hauteur: 'Hauteur',
+    table: 'Au-dessus',
+    style: 'Style',
+  };
+
   /* ─────────────────────────────────────────────
      State
      ───────────────────────────────────────────── */
@@ -600,6 +612,103 @@
   }
 
   /* ─────────────────────────────────────────────
+     S3 — Carrefour "Modifier mon projet" (F2a-ter)
+     Chips récap lecture seule + 3 actions : Voir / Préciser / Effacer.
+     Aucun appel IA — la bulle initiale en mode "Préciser" est construite
+     côté client à partir de sapiProject.advice_text déjà stocké.
+     ───────────────────────────────────────────── */
+
+  function populateRecapChips() {
+    if (!els.recapChips) return;
+    els.recapChips.innerHTML = '';
+    var visible = getVisibleStepIds(state.answers);
+    visible.forEach(function (sid) {
+      var slug = state.answers[sid];
+      if (!slug) return;
+      var label = state.labels[sid] || slug;
+      var keyLabel = KEY_LABELS[sid] || sid;
+
+      var chip = document.createElement('span');
+      chip.className = 'conseiller-chip';
+      var keyEl = document.createElement('span');
+      keyEl.className = 'conseiller-chip__key';
+      keyEl.textContent = keyLabel + ' :';
+      chip.appendChild(keyEl);
+      chip.appendChild(document.createTextNode(' ' + label));
+      els.recapChips.appendChild(chip);
+    });
+  }
+
+  function showS3Recap() {
+    populateRecapChips();
+    showScreen('s3');
+  }
+
+  // Action "Voir la sélection" depuis S3 : ferme la modale + scroll grille.
+  // Projet inchangé, pas d'appel IA.
+  function viewSelectionFromS3() {
+    closeModal();
+    var grid = document.getElementById('sapi-product-grid');
+    if (grid && grid.scrollIntoView) {
+      grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  // Action "Préciser avec Robin" depuis S3 : bascule vers S2.chat avec une
+  // bulle initiale construite à partir de sapiProject.advice_text (zéro IA).
+  function refineFromS3() {
+    state.chat.conversation = [];
+    state.chat.sessionId = null;
+    state.chat.status = 'idle';
+    if (els.chatMessages) els.chatMessages.innerHTML = '';
+    if (els.chatCta) els.chatCta.hidden = false; // CTA visible direct (advice est déjà en mémoire)
+    if (els.chatInput) {
+      els.chatInput.value = '';
+      els.chatInput.disabled = false;
+      if (els.chatInputDefaultPlaceholder) {
+        els.chatInput.placeholder = els.chatInputDefaultPlaceholder;
+      }
+    }
+    if (els.chatSend) els.chatSend.disabled = false;
+
+    var initialMsg = getInitialChatAdvice() + ' Qu\'est-ce que tu veux affiner ?';
+    enterChatMode();
+    addRobinBubble(initialMsg);
+    state.chat.conversation.push({ role: 'assistant', content: initialMsg });
+
+    setTimeout(function () {
+      if (els.chatInput) els.chatInput.focus();
+    }, 100);
+  }
+
+  // Récupère le texte conseil à utiliser dans la bulle initiale chat :
+  // priorité advice_text → texte générique de la pièce (depuis SAPI_CARDS_CONSEILLER)
+  // → fallback ultime.
+  function getInitialChatAdvice() {
+    var project = window.sapiProject ? window.sapiProject.get() : null;
+    if (project && typeof project.advice_text === 'string' && project.advice_text) {
+      return project.advice_text;
+    }
+    var piece = project && project.answers && project.answers.piece;
+    var cardsConfig = window.SAPI_CARDS_CONSEILLER || {};
+    var generics = cardsConfig.genericAdvice || {};
+    if (piece && generics[piece]) return generics[piece];
+    return cardsConfig.fallbackAdvice || 'Voici ma sélection pour ton projet.';
+  }
+
+  // Action "Effacer et recommencer" depuis S3 : vide sapiProject + revient
+  // à S0 (2 portes) avec state.answers réinitialisé.
+  function resetFromS3() {
+    if (window.sapiProject) {
+      window.sapiProject.clear();
+    }
+    state.answers = {};
+    state.labels = {};
+    state.questionHistory = [];
+    showScreen('s0');
+  }
+
+  /* ─────────────────────────────────────────────
      Open / close
      ───────────────────────────────────────────── */
   function hydrateFromProject() {
@@ -627,9 +736,12 @@
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
 
-    // F2a-bis : plus d'écran S3, donc plus de "ouvrir directement au récap".
-    // Si state.s3 demandé (anciens liens / data-modal-state), on retombe sur S0.
-    if (initialScreen === 's1') {
+    // F2a-ter : S3 ressuscité comme carrefour "Modifier mon projet". Ouvert
+    // uniquement depuis la card "Mon projet" sur /mes-creations/ (jamais en
+    // fin de S1 qui ferme directement la modale via showTransitionAndExit).
+    if (initialScreen === 's3' && window.sapiProject && window.sapiProject.hasProject()) {
+      showS3Recap();
+    } else if (initialScreen === 's1') {
       startQuestionsFlow();
     } else {
       showScreen('s0');
@@ -708,6 +820,16 @@
             conversation: (state.chat && state.chat.conversation) || [],
           });
           break;
+        // F2a-ter : 3 actions du carrefour S3 "Modifier mon projet"
+        case 's3-view':
+          viewSelectionFromS3();
+          break;
+        case 's3-refine':
+          refineFromS3();
+          break;
+        case 's3-reset':
+          resetFromS3();
+          break;
       }
     });
 
@@ -769,6 +891,7 @@
     els.chatInput     = els.modal.querySelector('[data-chat-input]');
     els.chatSend      = els.modal.querySelector('.conseiller-chat-footer__send');
     els.chatInputDefaultPlaceholder = els.chatInput ? els.chatInput.getAttribute('placeholder') : '';
+    els.recapChips    = els.modal.querySelector('[data-recap-chips]');
 
     // Marqueur pour les cards Phase 2 (évite leur fallback console.info)
     window.__sapiModalReady = true;
