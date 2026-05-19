@@ -206,27 +206,35 @@
     return FALLBACK_ADVICE;
   }
 
-  // F2a-ter raffinement : effet "machine à écrire" sur la citation.
-  // Démarre une fois la card visible. Annule toute frappe en cours avant
-  // d'en lancer une nouvelle (cas où advice_text change pendant la frappe).
+  // F2a-ter raffinement : effet "machine à écrire" sur la citation, suivi
+  // d'un fondu sur la signature "— Robin". Annule toute frappe en cours
+  // avant d'en lancer une nouvelle (cas où advice_text change pendant la
+  // frappe).
   var typewriterTimer = null;
 
-  function typewriterEffect(element, text, speed) {
+  function typewriterEffect(contentEl, phraseEl, text, speed) {
     if (typewriterTimer) {
       clearTimeout(typewriterTimer);
       typewriterTimer = null;
     }
-    element.textContent = '';
+    // Reset état : signature invisible jusqu'à fin de frappe
+    if (phraseEl) phraseEl.classList.remove('is-typing-done');
+
+    contentEl.textContent = '';
     var i = 0;
     function step() {
       typewriterTimer = null;
-      if (i >= text.length) return;
-      element.textContent += text.charAt(i);
+      if (i >= text.length) {
+        // Frappe terminée → fade-in signature
+        if (phraseEl) phraseEl.classList.add('is-typing-done');
+        return;
+      }
+      contentEl.textContent += text.charAt(i);
       i++;
       typewriterTimer = setTimeout(step, speed);
     }
     // Petit délai pour laisser la card apparaître avant de démarrer la frappe
-    typewriterTimer = setTimeout(step, 250);
+    typewriterTimer = setTimeout(step, 280);
   }
 
   function renderMonProjet() {
@@ -241,7 +249,7 @@
     // relancer l'animation à chaque subscribe notification.
     if (els.phraseContent.dataset.lastText !== newText) {
       els.phraseContent.dataset.lastText = newText;
-      typewriterEffect(els.phraseContent, newText, 22);
+      typewriterEffect(els.phraseContent, els.phrase, newText, 38);
     }
   }
 

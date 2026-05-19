@@ -22836,18 +22836,50 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 /* Variante Mon projet — card entière cliquable (button). Le hover signale
-   l'interaction (translateY + badge orange). */
+   l'interaction (translateY + badge orange). Hauteur verrouillée pour
+   accepter n'importe quel texte sans changer de gabarit. */
 .conseiller-card--mon-projet {
   padding: 44px 36px 42px;
   text-align: center;
-  /* Reset du button HTML pour qu'il hérite du style .conseiller-card */
+  min-height: 340px;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  /* Reset du button HTML : le selector global `button` impose uppercase +
+     bg orange + font-size 14px → on neutralise pour hériter le style card */
   width: 100%;
   border: none;
+  background: var(--color-warm);
   font-family: var(--font-body);
+  font-size: inherit;
+  text-transform: none;
   color: inherit;
   cursor: pointer;
   -webkit-transition: -webkit-transform 0.2s ease, box-shadow 0.25s ease;
   transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+/* Inner devient flex column pour permettre le centrage vertical de la citation.
+   align-items: center pour que la pill badge garde sa taille naturelle (sans
+   ce reset, elle serait étirée pleine largeur par le default flex stretch). */
+.conseiller-card--mon-projet .conseiller-card__inner {
+  -webkit-flex: 1;
+  flex: 1;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-align-items: center;
+  align-items: center;
+}
+
+/* Citation : largeur pleine (jusqu'au max-width 820px de la règle de base)
+   + centrée verticalement dans la card via margin auto top+bottom */
+.conseiller-card--mon-projet .conseiller-mon-projet__text {
+  width: 100%;
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 .conseiller-card--mon-projet:hover,
@@ -22896,6 +22928,16 @@ body.woocommerce-cart div.woocommerce-wrapper {
   margin-left: 8px;
   font-style: normal;
   /* Square Peg ne supporte pas l'italic — on neutralise l'héritage */
+  /* F2a-ter raffinement : la signature apparaît en fondu après la frappe
+     typewriter. La classe .is-typing-done est ajoutée par le JS quand le
+     texte est entièrement écrit. */
+  opacity: 0;
+  -webkit-transition: opacity 0.6s ease 0.1s;
+  transition: opacity 0.6s ease 0.1s;
+}
+
+.conseiller-mon-projet__text.is-typing-done .conseiller-signature {
+  opacity: 1;
 }
 
 /* F2a-bis : Loading state de la phrase IA supprimé — la card "Mon projet"
