@@ -434,6 +434,12 @@
 
     // Délégation : clics dans la modale (close, door, choice, back, apply)
     els.modal.addEventListener('click', function (e) {
+      // Click sur l'overlay (en dehors du dialog) → ferme
+      if (e.target === els.modal) {
+        closeModal();
+        return;
+      }
+
       var actionBtn = e.target.closest('[data-action]');
       if (!actionBtn) return;
       var action = actionBtn.getAttribute('data-action');

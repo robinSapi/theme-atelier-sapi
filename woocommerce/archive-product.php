@@ -421,7 +421,8 @@ $conseiller_porte_feather_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="cu
 // SVG flèche CTA récap
 $conseiller_arrow_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
 ?>
-<div class="conseiller-modal" data-conseiller-modal hidden role="dialog" aria-modal="true" aria-labelledby="conseiller-modal-title">
+<div class="conseiller-modal" data-conseiller-modal hidden>
+  <div class="conseiller-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="conseiller-modal-title">
 
   <header class="conseiller-modal__header">
     <span class="conseiller-modal__title" id="conseiller-modal-title"><?php esc_html_e('Décrire mon projet', 'theme-sapi-maison'); ?></span>
@@ -513,6 +514,7 @@ $conseiller_arrow_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCol
 
     </div>
   </div>
+  </div><!-- /.conseiller-modal__dialog -->
 </div>
 
 <?php
