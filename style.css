@@ -23027,7 +23027,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .conseiller-card--modal {
   width: 100%;
   max-width: 880px;
-  height: 600px;
+  height: 680px;
   max-height: calc(100dvh - 64px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
