@@ -123,23 +123,22 @@ $conseiller_pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCo
     </div>
   </div>
 
-  <!-- Card "Mon projet" — visible avec projet en localStorage -->
-  <div class="conseiller-card conseiller-card--mon-projet" data-conseiller-card="mon-projet" hidden>
-    <div class="conseiller-card__inner">
+  <!-- Card "Mon projet" — visible avec projet en localStorage.
+       F2a-ter raffinement : la card entière est cliquable (button) → ouvre S3.
+       Le bouton "Modifier mon projet" interne est supprimé, l'interaction
+       passe par la card complète. Pill "Mon projet" devient orange au hover. -->
+  <button type="button" class="conseiller-card conseiller-card--mon-projet" data-conseiller-card="mon-projet" data-action="open-modal" data-modal-state="s3" aria-label="<?php esc_attr_e('Modifier mon projet', 'theme-sapi-maison'); ?>" hidden>
+    <span class="conseiller-card__inner">
       <span class="conseiller-badge conseiller-badge--default">
         <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
         <?php esc_html_e('Mon projet', 'theme-sapi-maison'); ?>
       </span>
-      <p class="conseiller-mon-projet__text" data-mon-projet-phrase>
+      <span class="conseiller-mon-projet__text" data-mon-projet-phrase>
         <span class="conseiller-mon-projet__text-content" data-mon-projet-phrase-content></span>
         <span class="conseiller-signature">— Robin</span>
-      </p>
-      <button type="button" class="conseiller-mon-projet__edit" data-action="open-modal" data-modal-state="s3">
-        <?php esc_html_e('Modifier mon projet', 'theme-sapi-maison'); ?>
-        <span aria-hidden="true">✎</span>
-      </button>
-    </div>
-  </div>
+      </span>
+    </span>
+  </button>
 </section>
 
 <!-- Products Grid — grille 2 colonnes photos ambiance -->

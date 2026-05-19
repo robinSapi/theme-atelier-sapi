@@ -22813,9 +22813,10 @@ body.woocommerce-cart div.woocommerce-wrapper {
    ============================================================ */
 
 .conseiller-cards-zone {
-  max-width: 1200px;
+  /* Alignée sur .shop-products .product-grid : max-width 1400 + padding 0 3rem */
+  max-width: 1400px;
   margin: 32px auto 0;
-  padding: 0 20px;
+  padding: 0 3rem;
 }
 
 /* Variante Conseil — centrée, accent CTA orange */
@@ -22834,20 +22835,44 @@ body.woocommerce-cart div.woocommerce-wrapper {
   margin-bottom: 28px;
 }
 
-/* Variante Mon projet — centrée, phrase IA italique + lien Modifier */
+/* Variante Mon projet — card entière cliquable (button). Le hover signale
+   l'interaction (translateY + badge orange). */
 .conseiller-card--mon-projet {
-  padding: 40px 32px 38px;
+  padding: 44px 36px 42px;
   text-align: center;
+  /* Reset du button HTML pour qu'il hérite du style .conseiller-card */
+  width: 100%;
+  border: none;
+  font-family: var(--font-body);
+  color: inherit;
+  cursor: pointer;
+  -webkit-transition: -webkit-transform 0.2s ease, box-shadow 0.25s ease;
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.conseiller-card--mon-projet:hover,
+.conseiller-card--mon-projet:focus-visible {
+  -webkit-transform: translateY(-2px);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(147, 125, 104, 0.18);
+  outline: none;
+}
+
+/* Au hover, la pill "Mon projet" devient orange pour signaler l'action */
+.conseiller-card--mon-projet:hover .conseiller-badge,
+.conseiller-card--mon-projet:focus-visible .conseiller-badge {
+  background: var(--color-orange);
 }
 
 .conseiller-mon-projet__text {
+  display: block;
   font-family: var(--font-body);
-  font-size: 17px;
+  font-size: clamp(20px, 2.4vw, 26px);
   font-style: italic;
   color: var(--color-wood-dark);
-  line-height: 1.55;
-  max-width: 640px;
-  margin: 0 auto 14px;
+  line-height: 1.5;
+  max-width: 820px;
+  margin: 0 auto;
 }
 
 .conseiller-mon-projet__text-content {
@@ -22876,48 +22901,20 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* F2a-bis : Loading state de la phrase IA supprimé — la card "Mon projet"
    lit synchronement advice_text ou texte générique, plus de pulse au load. */
 
-/* Lien "Préciser ou modifier mon projet ✎" — discret */
-.conseiller-mon-projet__edit {
-  display: -webkit-inline-flex;
-  display: inline-flex;
-  -webkit-align-items: center;
-  align-items: center;
-  gap: 6px;
-  background: transparent;
-  border: none;
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-wood);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  cursor: pointer;
-  padding: 6px 8px;
-  margin-top: 4px;
-  -webkit-transition: color 0.2s ease;
-  transition: color 0.2s ease;
-}
-
-.conseiller-mon-projet__edit:hover,
-.conseiller-mon-projet__edit:focus-visible {
-  color: var(--color-orange);
-  outline: none;
-}
+/* F2a-ter raffinement : le bouton .conseiller-mon-projet__edit a été
+   supprimé du markup — la card entière est désormais cliquable. */
 
 /* ── Mobile ── */
 @media (max-width: 600px) {
   .conseiller-cards-zone {
     margin: 22px auto 0;
-    padding: 0 14px;
+    padding: 0 1rem;
   }
   .conseiller-card--conseil {
     padding: 36px 20px 40px;
   }
   .conseiller-card--mon-projet {
-    padding: 32px 18px 32px;
-  }
-  .conseiller-mon-projet__text {
-    font-size: 15.5px;
+    padding: 36px 22px 34px;
   }
 }
 

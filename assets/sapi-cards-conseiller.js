@@ -206,15 +206,43 @@
     return FALLBACK_ADVICE;
   }
 
+  // F2a-ter raffinement : effet "machine à écrire" sur la citation.
+  // Démarre une fois la card visible. Annule toute frappe en cours avant
+  // d'en lancer une nouvelle (cas où advice_text change pendant la frappe).
+  var typewriterTimer = null;
+
+  function typewriterEffect(element, text, speed) {
+    if (typewriterTimer) {
+      clearTimeout(typewriterTimer);
+      typewriterTimer = null;
+    }
+    element.textContent = '';
+    var i = 0;
+    function step() {
+      typewriterTimer = null;
+      if (i >= text.length) return;
+      element.textContent += text.charAt(i);
+      i++;
+      typewriterTimer = setTimeout(step, speed);
+    }
+    // Petit délai pour laisser la card apparaître avant de démarrer la frappe
+    typewriterTimer = setTimeout(step, 250);
+  }
+
   function renderMonProjet() {
     if (!els.cardMonProjet || !els.phraseContent) return;
     els.cardConseil && (els.cardConseil.hidden = true);
     els.cardMonProjet.hidden = false;
 
     var project = window.sapiProject ? window.sapiProject.get() : null;
-    els.phraseContent.textContent = getAdviceText(project);
-    // F2a-bis : plus de loading state, l'attribut data-state n'est plus utilisé
-    if (els.phrase) els.phrase.removeAttribute('data-state');
+    var newText = getAdviceText(project);
+
+    // Ne déclenche le typewriter QUE si le texte a changé — évite de
+    // relancer l'animation à chaque subscribe notification.
+    if (els.phraseContent.dataset.lastText !== newText) {
+      els.phraseContent.dataset.lastText = newText;
+      typewriterEffect(els.phraseContent, newText, 22);
+    }
   }
 
   function renderConseil() {
