@@ -22838,6 +22838,13 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* Variante Mon projet — card entière cliquable (button). Le hover signale
    l'interaction (translateY + badge orange). Hauteur verrouillée pour
    accepter n'importe quel texte sans changer de gabarit. */
+
+/* L'attribut [hidden] doit garder son effet display:none malgré
+   notre display:flex plus spécifique ci-dessous. */
+.conseiller-card--mon-projet[hidden] {
+  display: none;
+}
+
 .conseiller-card--mon-projet {
   padding: 40px 36px 38px;
   text-align: center;
