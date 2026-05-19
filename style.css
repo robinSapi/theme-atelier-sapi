@@ -23006,10 +23006,10 @@ body.woocommerce-cart div.woocommerce-wrapper {
   display: none;
 }
 
-/* F2a-bis : sur les écrans non-chat, l'inner devient flex column space-between
-   pour distribuer le contenu sur toute la hauteur de la card. Le premier
-   élément (badge/progress) reste en haut, le dernier (portes/nav) en bas,
-   les éléments intermédiaires occupent l'espace au milieu. */
+/* F2a-bis : sur les écrans non-chat, l'inner devient flex column avec
+   align-items: center pour que les items (pill badge, h2) gardent leur
+   largeur naturelle. Le contenu principal (portes/choix/dots) est poussé
+   au centre vertical de l'espace résiduel via margin: auto. */
 .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner {
   -webkit-flex: 1;
   flex: 1;
@@ -23017,8 +23017,40 @@ body.woocommerce-cart div.woocommerce-wrapper {
   display: flex;
   -webkit-flex-direction: column;
   flex-direction: column;
-  -webkit-justify-content: space-between;
-  justify-content: space-between;
+  -webkit-align-items: center;
+  align-items: center;
+}
+
+/* Les "grilles" (portes/choix/freetext/suggestions) gardent leur full-width
+   malgré align-items: center sur le parent — sinon elles se rétractent à
+   leur largeur intrinsèque qui peut être trop étroite. */
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-portes,
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-choices,
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-freetext,
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-suggestions,
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-transition-dots,
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-progress {
+  width: 100%;
+}
+
+/* Centrage vertical du contenu principal — varie selon l'écran.
+   S0 et s-transition n'ont pas de nav retour : on centre le contenu seul.
+   S1 et S2.start ont un nav retour en bas : on pousse contenu et nav avec
+   2 auto-margins → header en haut, contenu au milieu, nav en bas. */
+.conseiller-modal__screen[data-screen="s0"] .conseiller-portes,
+.conseiller-modal__screen[data-screen="s-transition"] .conseiller-transition-dots {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.conseiller-modal__screen[data-screen="s1"] .conseiller-choices,
+.conseiller-modal__screen[data-screen="s2-start"] .conseiller-freetext {
+  margin-top: auto;
+}
+
+.conseiller-modal__screen[data-screen="s1"] .conseiller-modal__nav,
+.conseiller-modal__screen[data-screen="s2-start"] .conseiller-modal__nav {
+  margin-top: auto;
 }
 
 @-webkit-keyframes conseiller-screen-fade {
