@@ -23355,6 +23355,12 @@ body.woocommerce-cart div.woocommerce-wrapper {
   justify-content: center;
 }
 
+/* L'attribut [hidden] doit garder son effet display:none malgré
+   notre display:flex plus spécifique ci-dessus. */
+.conseiller-modal__nav[hidden] {
+  display: none;
+}
+
 /* ── Mobile ── */
 @media (max-width: 720px) {
   .conseiller-modal {

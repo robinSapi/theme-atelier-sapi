@@ -817,7 +817,8 @@
   }
 
   // Action "Effacer et recommencer" depuis S3 : vide sapiProject + revient
-  // à S0 (2 portes) avec state.answers réinitialisé.
+  // à S0 hybride en mode initial (peuplé via renderS0Hybrid pour avoir le
+  // badge, la question, les choices et le placeholder corrects).
   function resetFromS3() {
     if (window.sapiProject) {
       window.sapiProject.clear();
@@ -825,7 +826,7 @@
     state.answers = {};
     state.labels = {};
     state.questionHistory = [];
-    showScreen('s0');
+    renderS0Hybrid('s0-initial');
   }
 
   /* ─────────────────────────────────────────────
