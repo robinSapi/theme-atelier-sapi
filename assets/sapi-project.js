@@ -65,9 +65,10 @@
   function get() {
     var p = readRaw();
     if (!p) {
-      return { answers: {}, labels: {}, created_at: null, updated_at: null, session_id: null };
+      return { answers: {}, labels: {}, created_at: null, updated_at: null, session_id: null, advice_text: null };
     }
     if (!p.labels || typeof p.labels !== 'object') p.labels = {};
+    if (!('advice_text' in p)) p.advice_text = null;
     return p;
   }
 
@@ -97,7 +98,9 @@
    * Remplace entièrement le projet.
    * @param {Object} answers  { piece: 'salon', ... }
    * @param {Object} [labels] { piece: 'Salon / Salle à manger', ... }
-   * @param {Object} [extra]  { session_id, ... }
+   * @param {Object} [extra]  { session_id, advice_text } — advice_text est
+   *                          remis à null si non fourni (sortie d'un parcours
+   *                          modale = nouveau projet ≠ ancien advice).
    */
   function set(answers, labels, extra) {
     if (!answers || typeof answers !== 'object') return false;
@@ -109,6 +112,9 @@
       created_at: existing && existing.created_at ? existing.created_at : now,
       updated_at: now,
       session_id: (extra && extra.session_id) || (existing && existing.session_id) || null,
+      advice_text: (extra && typeof extra.advice_text === 'string' && extra.advice_text)
+                     ? extra.advice_text
+                     : null,
     };
     Object.keys(answers).forEach(function (k) {
       var v = answers[k];
@@ -172,6 +178,24 @@
     return ok;
   }
 
+  /**
+   * Définit le texte conseil IA (advice_text). Passer null pour l'effacer.
+   * Utilisé par la modale à la sortie d'un parcours abouti (F2a-bis).
+   */
+  function setAdviceText(text) {
+    var p = readRaw();
+    var now = Math.floor(Date.now() / 1000);
+    if (!p) {
+      p = { answers: {}, labels: {}, created_at: now, updated_at: now, session_id: null, advice_text: null };
+    }
+    if (!p.labels) p.labels = {};
+    p.advice_text = (typeof text === 'string' && text) ? text : null;
+    p.updated_at = now;
+    var ok = writeRaw(p);
+    if (ok) notify();
+    return ok;
+  }
+
   /* ─────────────────────────────────────────────
      Observateurs (cards qui doivent se redessiner
      quand le projet change dans la même session)
@@ -210,11 +234,22 @@
       var params = new URLSearchParams(window.location.search);
       var piece = params.get('piece');
       if (!piece || !Object.prototype.hasOwnProperty.call(VALID_PIECES, piece)) return;
-      // Si le projet n'a pas déjà cette pièce, on la sauvegarde silencieusement.
-      // Si la pièce est différente, on respecte le projet en cours (le visiteur a
-      // peut-être suivi un lien externe ; on ne veut pas écraser son projet).
+
       var existingPiece = getAnswer('piece');
-      if (existingPiece) return;
+
+      // F2a-bis : URL fait autorité. Si la pièce de l'URL est différente de celle
+      // du projet en cours, on réécrit silencieusement la pièce. On efface aussi
+      // l'advice_text qui correspondait à l'ancienne pièce (incohérence sinon).
+      // Les autres réponses (taille/style/...) restent inchangées et seront
+      // nettoyées par le modal si l'utilisateur reprend le parcours.
+      if (existingPiece && existingPiece !== piece) {
+        update({ piece: piece }, { piece: VALID_PIECES[piece] });
+        setAdviceText(null);
+        return;
+      }
+      // Même pièce → rien à faire
+      if (existingPiece === piece) return;
+      // Pas de projet existant → ingestion classique
       update({ piece: piece }, { piece: VALID_PIECES[piece] });
     } catch (e) {
       // URLSearchParams indisponible → silencieux
@@ -250,6 +285,7 @@
     set: set,
     update: update,
     clear: clear,
+    setAdviceText: setAdviceText,
     subscribe: subscribe,
     STORAGE_KEY: STORAGE_KEY,
   };

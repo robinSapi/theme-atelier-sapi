@@ -15,7 +15,6 @@
   var config = window.SAPI_CARDS_CONSEILLER || {};
   var STEPS = Array.isArray(config.steps) ? config.steps : [];
   var RULES = config.rules || {};
-  var FALLBACK_PHRASE = config.fallbackPhrase || 'Voici ma sélection pour ton projet.';
 
   /* ─────────────────────────────────────────────
      Helpers visibilité (mirror inc/guide-data.php + mega-filtre.js)
@@ -188,74 +187,34 @@
   };
 
   /* ─────────────────────────────────────────────
-     Rendu des cards
+     Rendu des cards (F2a-bis : 100% synchronous, zéro AJAX au load)
      ───────────────────────────────────────────── */
   var els = {};
-  var advicePromise = null;
-  var lastAdviceKey = null;
+  var GENERIC_ADVICE = config.genericAdvice || {};
+  var FALLBACK_ADVICE = config.fallbackAdvice || 'Voici ma sélection pour ton projet.';
 
-  function buildAnswersKey(answers) {
-    var keys = Object.keys(answers).sort();
-    var parts = [];
-    for (var i = 0; i < keys.length; i++) {
-      parts.push(keys[i] + '=' + answers[keys[i]]);
+  /**
+   * Texte à afficher sur la card "Mon projet" — résolu synchronement.
+   * Priorité : advice_text (issu d'un parcours abouti) → générique de la pièce → fallback.
+   */
+  function getAdviceText(project) {
+    if (project && typeof project.advice_text === 'string' && project.advice_text) {
+      return project.advice_text;
     }
-    return parts.join('|');
-  }
-
-  function fetchAdvice() {
-    var project = window.sapiProject && window.sapiProject.get();
-    if (!project) return Promise.resolve(FALLBACK_PHRASE);
-
-    var answers = cleanInvisibleAnswers(project.answers || {});
-    var labels  = project.labels  || {};
-    var key = buildAnswersKey(answers);
-
-    // Réutilise un fetch en cours pour la même combinaison
-    if (advicePromise && lastAdviceKey === key) return advicePromise;
-    lastAdviceKey = key;
-
-    var fd = new FormData();
-    fd.append('action', 'sapi_megafilter_advice');
-    fd.append('nonce', config.nonce || '');
-    fd.append('answers', JSON.stringify(answers));
-    fd.append('labels',  JSON.stringify(labels));
-
-    advicePromise = fetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
-      .then(function (r) { return r.json(); })
-      .then(function (resp) {
-        if (resp && resp.success && resp.data && typeof resp.data.message === 'string' && resp.data.message) {
-          return resp.data.message;
-        }
-        return FALLBACK_PHRASE;
-      })
-      .catch(function () { return FALLBACK_PHRASE; });
-
-    return advicePromise;
+    var piece = project && project.answers && project.answers.piece;
+    if (piece && GENERIC_ADVICE[piece]) return GENERIC_ADVICE[piece];
+    return FALLBACK_ADVICE;
   }
 
   function renderMonProjet() {
-    if (!els.cardMonProjet || !els.phrase || !els.phraseContent) return;
+    if (!els.cardMonProjet || !els.phraseContent) return;
     els.cardConseil && (els.cardConseil.hidden = true);
     els.cardMonProjet.hidden = false;
 
-    // État loading : présent dans le HTML server-side dès le rendu PHP, on le
-    // remet ici aussi pour les re-renders (après changement de projet).
-    els.phrase.setAttribute('data-state', 'loading');
-
-    // Minimum 600 ms avant swap : garantit que le pulse est visible même si
-    // la réponse IA arrive en quelques ms (cache transient PHP 1h).
-    var startedAt = Date.now();
-    fetchAdvice().then(function (text) {
-      if (!window.sapiProject || !window.sapiProject.hasProject()) return;
-      var elapsed = Date.now() - startedAt;
-      var wait = Math.max(0, 600 - elapsed);
-      setTimeout(function () {
-        if (!window.sapiProject || !window.sapiProject.hasProject()) return;
-        els.phraseContent.textContent = text;
-        els.phrase.removeAttribute('data-state');
-      }, wait);
-    });
+    var project = window.sapiProject ? window.sapiProject.get() : null;
+    els.phraseContent.textContent = getAdviceText(project);
+    // F2a-bis : plus de loading state, l'attribut data-state n'est plus utilisé
+    if (els.phrase) els.phrase.removeAttribute('data-state');
   }
 
   function renderConseil() {
@@ -314,9 +273,6 @@
     // Réagit aux changements du projet (autre onglet, modale, dev tools)
     if (window.sapiProject && typeof window.sapiProject.subscribe === 'function') {
       window.sapiProject.subscribe(function () {
-        // Invalide le fetch IA en cours (les réponses ont changé)
-        advicePromise = null;
-        lastAdviceKey = null;
         render();
       });
     }

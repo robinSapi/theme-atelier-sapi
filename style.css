@@ -22873,26 +22873,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
   /* Square Peg ne supporte pas l'italic — on neutralise l'héritage */
 }
 
-/* État chargement de la phrase IA — pulse visible (Robin réfléchit) */
-.conseiller-mon-projet__text[data-state="loading"] .conseiller-mon-projet__text-content {
-  -webkit-animation: sapi-mon-projet-pulse 1.4s ease-in-out infinite;
-  animation: sapi-mon-projet-pulse 1.4s ease-in-out infinite;
-}
-
-/* La phrase pulse également quand elle n'est pas en loading mais a un fade-in */
-.conseiller-mon-projet__text-content {
-  -webkit-transition: opacity 0.35s ease;
-  transition: opacity 0.35s ease;
-}
-
-@-webkit-keyframes sapi-mon-projet-pulse {
-  0%, 100% { opacity: 0.32; }
-  50%      { opacity: 0.78; }
-}
-@keyframes sapi-mon-projet-pulse {
-  0%, 100% { opacity: 0.32; }
-  50%      { opacity: 0.78; }
-}
+/* F2a-bis : Loading state de la phrase IA supprimé — la card "Mon projet"
+   lit synchronement advice_text ou texte générique, plus de pulse au load. */
 
 /* Lien "Préciser ou modifier mon projet ✎" — discret */
 .conseiller-mon-projet__edit {
@@ -23249,44 +23231,9 @@ body.woocommerce-cart div.woocommerce-wrapper {
   margin-top: 4px;
 }
 
-/* ── S3 : Récap chips + IA quote + CTA ── */
-.conseiller-card--modal .conseiller-chips {
-  justify-content: center;
-  max-width: 720px;
-  margin: 0 auto 26px;
-}
-
-.conseiller-ia-quote {
-  position: relative;
-  max-width: 620px;
-  margin: 0 auto 28px;
-  padding: 22px 26px 18px;
-  background: var(--color-white);
-  border-radius: 12px;
-  box-shadow: var(--shadow-card);
-  text-align: left;
-}
-
-.conseiller-ia-quote__text {
-  font-family: var(--font-body);
-  font-size: 15.5px;
-  font-style: italic;
-  color: var(--color-wood-dark);
-  line-height: 1.6;
-  margin: 0 0 6px;
-}
-
-.conseiller-ia-quote__text[data-state="loading"] {
-  -webkit-animation: sapi-mon-projet-pulse 1.4s ease-in-out infinite;
-  animation: sapi-mon-projet-pulse 1.4s ease-in-out infinite;
-}
-
-.conseiller-ia-quote__sig {
-  display: block;
-  text-align: right;
-  font-style: normal;
-  font-size: 22px;
-}
+/* F2a-bis : Styles S3 (chips récap + IA quote dans la modale) supprimés —
+   l'écran S3 n'existe plus, remplacé par un écran transition "Robin réfléchit"
+   qui mène directement à la fermeture de la modale. */
 
 .conseiller-modal__cta {
   text-align: center;
@@ -23354,14 +23301,6 @@ body.woocommerce-cart div.woocommerce-wrapper {
   }
   .conseiller-choice__label {
     font-size: 11px;
-  }
-
-  .conseiller-ia-quote {
-    padding: 18px 20px 14px;
-    margin-bottom: 24px;
-  }
-  .conseiller-ia-quote__text {
-    font-size: 14.5px;
   }
 }
 
@@ -23617,6 +23556,28 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 .conseiller-chat-thinking__dot:nth-child(2) { -webkit-animation-delay: 0.2s; animation-delay: 0.2s; }
 .conseiller-chat-thinking__dot:nth-child(3) { -webkit-animation-delay: 0.4s; animation-delay: 0.4s; }
+
+/* F2a-bis : 3 dots pulsants sur l'écran transition (sortie modale → close) */
+.conseiller-transition-dots {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-justify-content: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+  margin-bottom: 8px;
+}
+.conseiller-transition-dots__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-wood);
+  display: inline-block;
+  -webkit-animation: conseiller-chat-pulse 1.2s infinite ease-in-out;
+  animation: conseiller-chat-pulse 1.2s infinite ease-in-out;
+}
+.conseiller-transition-dots__dot:nth-child(2) { -webkit-animation-delay: 0.2s; animation-delay: 0.2s; }
+.conseiller-transition-dots__dot:nth-child(3) { -webkit-animation-delay: 0.4s; animation-delay: 0.4s; }
 
 @-webkit-keyframes conseiller-chat-pulse {
   0%, 80%, 100% { opacity: 0.3; -webkit-transform: scale(0.8); transform: scale(0.8); }

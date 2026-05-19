@@ -17,23 +17,18 @@
   var config = window.SAPI_MODAL_CONSEILLER || {};
   var STEPS = Array.isArray(config.steps) ? config.steps : [];
   var ICONS = config.icons || {};
-  var FALLBACK_RECAP = config.fallbackRecap || 'Voici une sélection adaptée à ton projet.';
-  var KEY_LABELS = config.keyLabels || {
-    piece: 'Pièce', taille: 'Taille', taille_escalier: 'Escalier',
-    eclairage: 'Éclairage', sortie: 'Sortie', hauteur: 'Hauteur',
-    table: 'Table', style: 'Style',
-  };
 
   /* ─────────────────────────────────────────────
      State
      ───────────────────────────────────────────── */
   var state = {
     open: false,
-    screen: null,         // 's0' | 's1' | 's2-start' | 's2-chat' | 's3'
+    screen: null,         // 's0' | 's1' | 's2-start' | 's2-chat' | 's-transition'
     answers: {},
     labels: {},
     currentQuestion: null,
     questionHistory: [],  // pile des questions traversées (pour Retour)
+    transition: false,    // F2a-bis : true pendant l'écran "Robin réfléchit"
     chat: {
       conversation: [],   // [{role:'user'|'assistant', content:'...'}]
       sessionId: null,
@@ -206,7 +201,8 @@
     if (nextStep) {
       showQuestion(nextStep);
     } else {
-      showRecap();
+      // F2a-bis : dernière question répondue → écran transition + appel IA + close
+      showTransitionAndExit({ source: 's1' });
     }
   }
 
@@ -224,105 +220,61 @@
     showQuestion(prev);
   }
 
-  function backToQuestions() {
-    // Depuis S3, on revient à la dernière question répondue
-    var visible = getVisibleStepIds(state.answers);
-    var lastAnswered = null;
-    for (var i = visible.length - 1; i >= 0; i--) {
-      if (state.answers[visible[i]]) { lastAnswered = visible[i]; break; }
-    }
-    if (!lastAnswered) lastAnswered = visible[0];
-
-    // Reconstruit l'historique jusqu'à cette question (exclu)
-    state.questionHistory = [];
-    for (var j = 0; j < visible.length; j++) {
-      if (visible[j] === lastAnswered) break;
-      state.questionHistory.push(visible[j]);
-    }
-    showQuestion(lastAnswered);
-    showScreen('s1');
-  }
-
   /* ─────────────────────────────────────────────
-     S3 — Récap + fetch phrase IA Sonnet
+     F2a-bis — Écran transition + 1 seul appel IA à la sortie de la modale
+     S3 récap supprimé. À la dernière question répondue (S1) ou au CTA
+     "Voir la sélection" (S2.chat), on affiche un écran "Robin réfléchit",
+     on appelle sapi_megafilter_advice (Sonnet), on stocke le résultat
+     dans sapiProject.advice_text, puis on ferme la modale.
      ───────────────────────────────────────────── */
-  var lastRecapKey = null;
-  var recapPromise = null;
 
-  function populateRecapChips() {
-    if (!els.recapChips) return;
-    els.recapChips.innerHTML = '';
-    var visible = getVisibleStepIds(state.answers);
-    visible.forEach(function (sid) {
-      var slug = state.answers[sid];
-      if (!slug) return;
-      var label = state.labels[sid] || slug;
-      var keyLabel = KEY_LABELS[sid] || sid;
+  function showTransitionAndExit(opts) {
+    opts = opts || {};
+    if (state.transition) return; // évite double-trigger
+    state.transition = true;
+    showScreen('s-transition');
 
-      var chip = document.createElement('span');
-      chip.className = 'conseiller-chip';
-      var keyEl = document.createElement('span');
-      keyEl.className = 'conseiller-chip__key';
-      keyEl.textContent = keyLabel + ' :';
-      chip.appendChild(keyEl);
-      chip.appendChild(document.createTextNode(' ' + label));
-      els.recapChips.appendChild(chip);
-    });
-  }
-
-  function buildAnswersKey() {
-    var visible = getVisibleStepIds(state.answers);
-    var parts = [];
-    visible.forEach(function (sid) {
-      if (state.answers[sid]) parts.push(sid + '=' + state.answers[sid]);
-    });
-    return parts.join('|');
-  }
-
-  function fetchRecapPhrase() {
-    var key = buildAnswersKey();
-    if (recapPromise && lastRecapKey === key) return recapPromise;
-    lastRecapKey = key;
+    var startedAt = Date.now();
 
     var fd = new FormData();
-    fd.append('action', 'sapi_megafilter_recap');
+    fd.append('action', 'sapi_megafilter_advice');
     fd.append('nonce', config.nonce || '');
     fd.append('answers', JSON.stringify(state.answers));
     fd.append('labels',  JSON.stringify(state.labels));
-
-    recapPromise = fetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
-      .then(function (r) { return r.json(); })
-      .then(function (resp) {
-        if (resp && resp.success && resp.data && typeof resp.data.message === 'string' && resp.data.message) {
-          return resp.data.message;
-        }
-        return FALLBACK_RECAP;
-      })
-      .catch(function () { return FALLBACK_RECAP; });
-
-    return recapPromise;
-  }
-
-  function showRecap() {
-    populateRecapChips();
-
-    if (els.recapText) {
-      els.recapText.setAttribute('data-state', 'loading');
+    if (opts.conversation && Array.isArray(opts.conversation) && opts.conversation.length) {
+      fd.append('conversation', JSON.stringify(opts.conversation));
     }
 
-    var startedAt = Date.now();
-    fetchRecapPhrase().then(function (text) {
-      if (!els.recapText) return;
+    var fetchPromise = fetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (resp) {
+        if (resp && resp.success && resp.data && typeof resp.data.advice_text === 'string' && resp.data.advice_text) {
+          return resp.data.advice_text;
+        }
+        return null; // fallback géré côté front (texte générique de la pièce)
+      })
+      .catch(function () { return null; });
+
+    fetchPromise.then(function (advice) {
       var elapsed = Date.now() - startedAt;
+      // Minimum 700ms d'écran transition pour la lisibilité du "Robin réfléchit"
       var wait = Math.max(0, 700 - elapsed);
       setTimeout(function () {
-        if (!state.open || state.screen !== 's3') return;
-        els.recapText.textContent = text;
-        els.recapText.removeAttribute('data-state');
+        // Sauvegarde du projet final avec advice_text (un seul write côté localStorage)
+        if (window.sapiProject) {
+          window.sapiProject.set(state.answers, state.labels, { advice_text: advice });
+        }
+        state.transition = false;
+        closeModal();
+        // Force le refilter au cas où le subscriber ne suffit pas
+        if (typeof window.sapiShopRefilter === 'function') window.sapiShopRefilter();
+        // Scroll vers la grille pour montrer le résultat
+        var grid = document.getElementById('sapi-product-grid');
+        if (grid && grid.scrollIntoView) {
+          grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       }, wait);
     });
-
-    showScreen('s3');
   }
 
   /* ─────────────────────────────────────────────
@@ -648,32 +600,6 @@
   }
 
   /* ─────────────────────────────────────────────
-     CTA Voir la sélection — applique le projet
-     ───────────────────────────────────────────── */
-  function applyAndClose() {
-    if (window.sapiProject) {
-      window.sapiProject.set(state.answers, state.labels);
-    }
-    closeModal();
-
-    // Force le refilter (au cas où subscribe ne tire pas le pipeline complet)
-    if (typeof window.sapiShopRefilter === 'function') {
-      window.sapiShopRefilter();
-    }
-
-    // Scroll vers la grille pour montrer le résultat
-    var grid = document.getElementById('sapi-product-grid');
-    if (grid && grid.scrollIntoView) {
-      grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }
-
-  function closeModalCleanup() {
-    // Hook après close : remettre la card en mode normal (sortie chat)
-    exitChatMode();
-  }
-
-  /* ─────────────────────────────────────────────
      Open / close
      ───────────────────────────────────────────── */
   function hydrateFromProject() {
@@ -694,17 +620,16 @@
     if (!els.modal) return;
     hydrateFromProject();
     state.questionHistory = [];
-    recapPromise = null;
-    lastRecapKey = null;
+    state.transition = false;
 
     state.open = true;
     els.modal.hidden = false;
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
 
-    if (initialScreen === 's3' && window.sapiProject && window.sapiProject.hasProject()) {
-      showRecap();
-    } else if (initialScreen === 's1') {
+    // F2a-bis : plus d'écran S3, donc plus de "ouvrir directement au récap".
+    // Si state.s3 demandé (anciens liens / data-modal-state), on retombe sur S0.
+    if (initialScreen === 's1') {
       startQuestionsFlow();
     } else {
       showScreen('s0');
@@ -775,11 +700,13 @@
         case 'back':
           backFromQuestion();
           break;
-        case 'back-to-questions':
-          backToQuestions();
-          break;
         case 'apply':
-          applyAndClose();
+          // F2a-bis : CTA "Voir la sélection" en S2.chat → écran transition + appel IA
+          // unique (avec la conversation), puis save + close. Plus de S3 récap.
+          showTransitionAndExit({
+            source: 's2',
+            conversation: (state.chat && state.chat.conversation) || [],
+          });
           break;
       }
     });
@@ -836,8 +763,6 @@
     els.questionTitle = els.modal.querySelector('[data-question-title]');
     els.choices       = els.modal.querySelector('[data-choices]');
     els.progressFill  = els.modal.querySelector('[data-progress-fill]');
-    els.recapChips    = els.modal.querySelector('[data-recap-chips]');
-    els.recapText     = els.modal.querySelector('[data-recap-text]');
     els.freetextInput = els.modal.querySelector('[data-freetext-input]');
     els.chatMessages  = els.modal.querySelector('[data-chat-messages]');
     els.chatCta       = els.modal.querySelector('[data-chat-cta]');

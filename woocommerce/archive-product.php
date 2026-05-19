@@ -130,13 +130,11 @@ $conseiller_pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCo
         <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
         <?php esc_html_e('Mon projet', 'theme-sapi-maison'); ?>
       </span>
-      <p class="conseiller-mon-projet__text" data-mon-projet-phrase data-state="loading">
-        <span class="conseiller-mon-projet__text-content" data-mon-projet-phrase-content>
-          <?php esc_html_e('Robin prépare ton conseil…', 'theme-sapi-maison'); ?>
-        </span>
+      <p class="conseiller-mon-projet__text" data-mon-projet-phrase>
+        <span class="conseiller-mon-projet__text-content" data-mon-projet-phrase-content></span>
         <span class="conseiller-signature">— Robin</span>
       </p>
-      <button type="button" class="conseiller-mon-projet__edit" data-action="open-modal" data-modal-state="s3">
+      <button type="button" class="conseiller-mon-projet__edit" data-action="open-modal" data-modal-state="s0">
         <?php esc_html_e('Préciser ou modifier mon projet', 'theme-sapi-maison'); ?>
         <span aria-hidden="true">✎</span>
       </button>
@@ -622,31 +620,20 @@ $conseiller_arrow_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCol
         </div>
       </div>
 
-      <!-- S3 — Récap final -->
-      <div class="conseiller-modal__screen" data-screen="s3" hidden>
+      <!-- S-transition — F2a-bis : écran "Robin réfléchit" entre la dernière
+           réponse et la fermeture de la modale (durée min 700ms même si l'IA
+           répond instantanément, pour la lisibilité). -->
+      <div class="conseiller-modal__screen" data-screen="s-transition" hidden>
         <div class="conseiller-card__inner">
           <span class="conseiller-badge conseiller-badge--default">
             <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
             <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
           </span>
-          <h2 class="conseiller-h2"><?php esc_html_e('Voici ton projet', 'theme-sapi-maison'); ?></h2>
-
-          <div class="conseiller-chips" data-recap-chips></div>
-
-          <div class="conseiller-ia-quote" data-recap-phrase>
-            <p class="conseiller-ia-quote__text" data-state="loading" data-recap-text><?php esc_html_e('Robin réfléchit à ton projet…', 'theme-sapi-maison'); ?></p>
-            <span class="conseiller-ia-quote__sig conseiller-signature">— Robin</span>
-          </div>
-
-          <div class="conseiller-modal__cta">
-            <button type="button" class="conseiller-cta" data-action="apply">
-              <span><?php esc_html_e('Voir la sélection', 'theme-sapi-maison'); ?></span>
-              <?php echo $conseiller_arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-            </button>
-          </div>
-
-          <div class="conseiller-modal__nav">
-            <button type="button" class="conseiller-back-link" data-action="back-to-questions">← <?php esc_html_e('Modifier mes réponses', 'theme-sapi-maison'); ?></button>
+          <h2 class="conseiller-h2"><?php esc_html_e('Robin réfléchit à ton projet', 'theme-sapi-maison'); ?></h2>
+          <div class="conseiller-transition-dots" aria-hidden="true">
+            <span class="conseiller-transition-dots__dot"></span>
+            <span class="conseiller-transition-dots__dot"></span>
+            <span class="conseiller-transition-dots__dot"></span>
           </div>
         </div>
       </div>

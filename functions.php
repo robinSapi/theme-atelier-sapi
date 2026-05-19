@@ -353,7 +353,10 @@ function sapi_maison_enqueue_assets() {
         'nonce'          => wp_create_nonce('sapi-megafilter'),
         'steps'          => sapi_guide_get_steps(),
         'rules'          => $sapi_filter_rules,
-        'fallbackPhrase' => __('Voici ma sélection pour ton projet.', 'theme-sapi-maison'),
+        // F2a-bis : textes génériques par pièce + fallback ultime — lus
+        // synchronement par sapi-cards-conseiller.js (zéro AJAX au load).
+        'genericAdvice'  => sapi_megafilter_get_generic_advices(),
+        'fallbackAdvice' => __('Voici ma sélection pour ton projet.', 'theme-sapi-maison'),
       ]);
     }
 
@@ -368,22 +371,11 @@ function sapi_maison_enqueue_assets() {
         true
       );
       wp_localize_script('sapi-modal-conseiller', 'SAPI_MODAL_CONSEILLER', [
-        'ajaxUrl'       => admin_url('admin-ajax.php'),
-        'nonce'         => wp_create_nonce('sapi-megafilter'),
-        'steps'         => sapi_guide_get_steps(),
-        'icons'         => sapi_guide_get_icons(),
-        'fallbackRecap' => __('Voici une sélection adaptée à ton projet.', 'theme-sapi-maison'),
-        'maxMessages'   => 15,
-        'keyLabels'     => [
-          'piece'           => __('Pièce', 'theme-sapi-maison'),
-          'taille'          => __('Taille', 'theme-sapi-maison'),
-          'taille_escalier' => __('Escalier', 'theme-sapi-maison'),
-          'eclairage'       => __('Éclairage', 'theme-sapi-maison'),
-          'sortie'          => __('Sortie', 'theme-sapi-maison'),
-          'hauteur'         => __('Hauteur', 'theme-sapi-maison'),
-          'table'           => __('Au-dessus', 'theme-sapi-maison'),
-          'style'           => __('Style', 'theme-sapi-maison'),
-        ],
+        'ajaxUrl'     => admin_url('admin-ajax.php'),
+        'nonce'       => wp_create_nonce('sapi-megafilter'),
+        'steps'       => sapi_guide_get_steps(),
+        'icons'       => sapi_guide_get_icons(),
+        'maxMessages' => 15,
       ]);
     }
 
@@ -2918,11 +2910,34 @@ function sapi_ajax_megafilter_chat() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   MÉGA-FILTRE F2a — Endpoints additionnels
-   - sapi_megafilter_advice    : phrase IA courte card "Mon projet" (Haiku, cache 1h)
-   - sapi_megafilter_recap     : phrase IA conseillère écran récap S3 (Sonnet, pas de cache)
+   MÉGA-FILTRE F2a / F2a-bis — Endpoints additionnels
+   - sapi_megafilter_advice    : phrase IA conseillère unique, appelée à la sortie
+     de la modale (Sonnet, sans cache). Stockée dans sapiProject.advice_text côté
+     front et réutilisée sans nouvel appel.
    - sapi_megafilter_surmesure : soumission form sur-mesure (email Robin)
 ═══════════════════════════════════════════════════════════ */
+
+/**
+ * Textes génériques pré-rédigés par pièce — utilisés en fallback si l'IA plante
+ * et en affichage par défaut sur la card "Mon projet" tant qu'aucun parcours
+ * n'a abouti dans la modale. Source de vérité unique partagée PHP / JS.
+ */
+function sapi_megafilter_get_generic_advices() {
+  return [
+    'salon'    => __("Pour un salon, j'ai sélectionné une variété de luminaires qui créent une atmosphère chaleureuse.", 'theme-sapi-maison'),
+    'chambre'  => __("Pour une chambre, ma sélection privilégie les lumières douces et apaisantes.", 'theme-sapi-maison'),
+    'cuisine'  => __("Pour une cuisine, je propose des éclairages à la fois fonctionnels et conviviaux.", 'theme-sapi-maison'),
+    'bureau'   => __("Pour un bureau, j'ai retenu des luminaires qui aident à la concentration tout en restant beaux.", 'theme-sapi-maison'),
+    'entree'   => __("Pour une entrée, voici des modèles qui marquent l'arrivée sans encombrer.", 'theme-sapi-maison'),
+    'escalier' => __("Pour un escalier, des luminaires conçus pour éclairer et habiller la cage.", 'theme-sapi-maison'),
+  ];
+}
+
+function sapi_megafilter_generic_advice_for($piece) {
+  $advices = sapi_megafilter_get_generic_advices();
+  if (is_string($piece) && isset($advices[$piece])) return $advices[$piece];
+  return __('Voici ma sélection pour ton projet.', 'theme-sapi-maison');
+}
 
 /**
  * Sanitise un payload {answers, labels} en ne gardant que les paires reconnues
@@ -2978,7 +2993,14 @@ function sapi_megafilter_format_project_text(array $answers, array $labels) {
   return implode(' · ', $parts);
 }
 
-/* ── Endpoint F2a-1 : phrase IA courte pour card "Mon projet" (Haiku, cache 1h) ──── */
+/* ── Endpoint F2a-bis : phrase IA conseillère unique, appelée à la sortie modale
+   ─────────────────────────────────────────────────────────────────────────────
+   - Modèle Sonnet (qualité du ton, sortie unique → on peut se permettre le coût)
+   - Input :  answers + labels (+ conversation optionnel en sortie de S2)
+   - Output : { advice_text: "..." }
+   - Pas de cache serveur — chaque parcours est unique
+   - Fallback : texte générique correspondant à la pièce
+   ───────────────────────────────────────────────────────────────────────────── */
 add_action('wp_ajax_sapi_megafilter_advice', 'sapi_ajax_megafilter_advice');
 add_action('wp_ajax_nopriv_sapi_megafilter_advice', 'sapi_ajax_megafilter_advice');
 
@@ -2992,116 +3014,53 @@ function sapi_ajax_megafilter_advice() {
   $labels_raw  = isset($_POST['labels'])  ? json_decode(wp_unslash($_POST['labels']),  true) : [];
   list($answers, $labels) = sapi_megafilter_sanitize_project($answers_raw, $labels_raw);
 
-  // Fallback générique si projet vide
-  if (empty($answers)) {
+  $piece = isset($answers['piece']) ? $answers['piece'] : '';
+
+  // Fallback si projet sans pièce
+  if (empty($answers) || empty($piece)) {
     wp_send_json_success([
-      'message' => 'Voici ma sélection — n\'hésite pas à préciser ton projet pour affiner.',
-      'cached'  => false,
+      'advice_text' => sapi_megafilter_generic_advice_for($piece),
     ]);
     return;
   }
 
-  // Cache 1h par combinaison (piece+taille+style en premier — combinaison la plus
-  // courante côté card "Mon projet" sans toutes les questions conditionnelles)
-  $cache_key = 'sapi_advice_' . md5(wp_json_encode($answers));
-  $cached = get_transient($cache_key);
-  if (is_string($cached) && $cached !== '') {
-    wp_send_json_success(['message' => $cached, 'cached' => true]);
-    return;
-  }
-
+  // Rate-limit : on tombe sur le texte générique de la pièce (pas d'erreur visible)
   if (!sapi_guide_check_rate_limit()) {
     wp_send_json_success([
-      'message' => 'Voici ma sélection pour ton projet.',
-      'cached'  => false,
+      'advice_text' => sapi_megafilter_generic_advice_for($piece),
     ]);
     return;
   }
 
-  $project_text = sapi_megafilter_format_project_text($answers, $labels);
-
-  $system_prompt  = "Tu es Robin, artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser.\n";
-  $system_prompt .= "Un visiteur a précisé son projet. Tu lui adresses une phrase courte (1-2 phrases max) qui résume ce que tu lui proposes.\n\n";
-  $system_prompt .= "TON :\n";
-  $system_prompt .= "- Tutoiement, chaleureux, simple, jamais commercial\n";
-  $system_prompt .= "- Mentionne 1-2 caractéristiques de sa sélection (matière, format, ambiance) sans citer de modèle précis\n";
-  $system_prompt .= "- Pas d'emoji, pas de markdown, pas de signature (elle est ajoutée séparément)\n";
-  $system_prompt .= "- Ne répète PAS bêtement les choix du visiteur — apporte une vraie valeur, un angle artisan\n";
-  $system_prompt .= "- Format : 1 à 2 phrases, max 220 caractères\n\n";
-  $system_prompt .= "FORMAT DE RÉPONSE (JSON strict, sans markdown) :\n";
-  $system_prompt .= "{ \"message\": \"...\" }\n";
-
-  $user_msg = "Projet du visiteur : " . $project_text;
-
-  $ai_text = sapi_megafilter_call_claude(
-    'claude-haiku-4-5',
-    $system_prompt,
-    [['role' => 'user', 'content' => $user_msg]],
-    256
-  );
-
-  $message = '';
-  if ($ai_text) {
-    $parsed = sapi_megafilter_parse_json($ai_text);
-    if ($parsed && isset($parsed['message']) && is_string($parsed['message'])) {
-      $message = sanitize_textarea_field($parsed['message']);
+  // Conversation optionnelle (présente en sortie de S2 mode texte libre)
+  $conversation_raw = isset($_POST['conversation']) ? json_decode(wp_unslash($_POST['conversation']), true) : [];
+  $conversation_block = '';
+  if (is_array($conversation_raw) && !empty($conversation_raw)) {
+    $lines = [];
+    foreach ($conversation_raw as $msg) {
+      if (!isset($msg['role'], $msg['content'])) continue;
+      $role = ($msg['role'] === 'assistant') ? 'Robin' : 'Visiteur';
+      $lines[] = $role . ' : ' . sanitize_textarea_field($msg['content']);
     }
-  }
-
-  if (empty($message)) {
-    $message = 'Voici ma sélection pour ton projet — quelques pièces qui devraient te plaire.';
-  }
-
-  set_transient($cache_key, $message, HOUR_IN_SECONDS);
-
-  wp_send_json_success([
-    'message' => $message,
-    'cached'  => false,
-  ]);
-}
-
-/* ── Endpoint F2a-2 : phrase IA conseillère pour écran récap S3 (Sonnet) ──────── */
-add_action('wp_ajax_sapi_megafilter_recap', 'sapi_ajax_megafilter_recap');
-add_action('wp_ajax_nopriv_sapi_megafilter_recap', 'sapi_ajax_megafilter_recap');
-
-function sapi_ajax_megafilter_recap() {
-  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-megafilter')) {
-    wp_send_json_error(['message' => 'Nonce invalide']);
-    return;
-  }
-
-  if (!sapi_guide_check_rate_limit()) {
-    wp_send_json_success([
-      'message' => 'Voici votre projet. Je vous propose une sélection de luminaires adaptés.',
-    ]);
-    return;
-  }
-
-  $answers_raw = isset($_POST['answers']) ? json_decode(wp_unslash($_POST['answers']), true) : [];
-  $labels_raw  = isset($_POST['labels'])  ? json_decode(wp_unslash($_POST['labels']),  true) : [];
-  list($answers, $labels) = sapi_megafilter_sanitize_project($answers_raw, $labels_raw);
-
-  if (empty($answers)) {
-    wp_send_json_success([
-      'message' => 'Voici une sélection à découvrir — précise ton projet si tu veux affiner.',
-    ]);
-    return;
+    if (!empty($lines)) {
+      $conversation_block = "\n\nÉCHANGES avec le visiteur :\n" . implode("\n", $lines);
+    }
   }
 
   $project_text = sapi_megafilter_format_project_text($answers, $labels);
 
   $system_prompt  = "Tu es Robin, artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser dans son atelier de Lyon.\n";
-  $system_prompt .= "Un visiteur vient de répondre aux questions de ton conseiller. Tu lui présentes ta sélection en 2-3 phrases personnalisées.\n\n";
+  $system_prompt .= "Un visiteur vient de te décrire son projet (via questionnaire ou conversation libre). Tu lui présentes ta sélection en 1-2 phrases personnalisées.\n\n";
   $system_prompt .= "TON :\n";
   $system_prompt .= "- Tutoiement, chaleureux, artisan passionné, jamais vendeur\n";
   $system_prompt .= "- Évoque concrètement ce que tu as compris du projet et pourquoi ta sélection lui correspond\n";
   $system_prompt .= "- Tu peux mentionner une essence de bois, un format, une ambiance — mais PAS de modèle précis (le visiteur va les voir juste après)\n";
-  $system_prompt .= "- Pas d'emoji, pas de markdown, pas de signature (elle est ajoutée séparément)\n";
-  $system_prompt .= "- Format : 2 à 3 phrases, max 400 caractères\n\n";
+  $system_prompt .= "- Pas d'emoji, pas de markdown, pas de signature (elle est ajoutée séparément côté front)\n";
+  $system_prompt .= "- Format : 1 à 2 phrases, max 300 caractères\n\n";
   $system_prompt .= "FORMAT DE RÉPONSE (JSON strict, sans markdown) :\n";
-  $system_prompt .= "{ \"message\": \"...\" }\n";
+  $system_prompt .= "{ \"advice_text\": \"...\" }\n";
 
-  $user_msg = "Projet du visiteur : " . $project_text;
+  $user_msg = "PROJET DU VISITEUR :\n" . $project_text . $conversation_block;
 
   $ai_text = sapi_megafilter_call_claude(
     'claude-sonnet-4-6',
@@ -3110,19 +3069,20 @@ function sapi_ajax_megafilter_recap() {
     512
   );
 
-  $message = '';
+  $advice = '';
   if ($ai_text) {
     $parsed = sapi_megafilter_parse_json($ai_text);
-    if ($parsed && isset($parsed['message']) && is_string($parsed['message'])) {
-      $message = sanitize_textarea_field($parsed['message']);
+    if ($parsed && isset($parsed['advice_text']) && is_string($parsed['advice_text'])) {
+      $advice = sanitize_textarea_field($parsed['advice_text']);
     }
   }
 
-  if (empty($message)) {
-    $message = 'J\'ai préparé une sélection de luminaires qui collent à ton projet — découvre-les juste après.';
+  // Fallback gracieux si IA plante ou format inattendu
+  if (empty($advice)) {
+    $advice = sapi_megafilter_generic_advice_for($piece);
   }
 
-  wp_send_json_success(['message' => $message]);
+  wp_send_json_success(['advice_text' => $advice]);
 }
 
 /* ── Endpoint F2a-3 : soumission form sur-mesure (email Robin) ────────────────── */
