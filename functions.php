@@ -380,16 +380,21 @@ function sapi_maison_enqueue_assets() {
     }
 
     // F2a Phase 4 — card Sur-mesure intercalée dans la grille
-    $surmesure_js_path = get_template_directory() . '/assets/sapi-surmesure-card.js';
-    if (file_exists($surmesure_js_path)) {
-      wp_enqueue_script(
-        'sapi-surmesure-card',
-        get_template_directory_uri() . '/assets/sapi-surmesure-card.js',
-        ['sapi-project'],
-        filemtime($surmesure_js_path),
-        true
-      );
-    }
+    // MASQUÉE TEMPORAIREMENT — Robin a demandé de désactiver l'affichage pour
+    // l'instant. Le markup PHP reste en place (rendu avec attribut `hidden`)
+    // mais sans le JS pour le révéler, la card ne s'affiche jamais.
+    // Pour réactiver : décommenter le bloc ci-dessous.
+    //
+    // $surmesure_js_path = get_template_directory() . '/assets/sapi-surmesure-card.js';
+    // if (file_exists($surmesure_js_path)) {
+    //   wp_enqueue_script(
+    //     'sapi-surmesure-card',
+    //     get_template_directory_uri() . '/assets/sapi-surmesure-card.js',
+    //     ['sapi-project'],
+    //     filemtime($surmesure_js_path),
+    //     true
+    //   );
+    // }
   }
 
   // Cart page JS — enqueued when is_cart() returns true
