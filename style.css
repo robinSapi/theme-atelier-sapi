@@ -23466,10 +23466,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
   outline: none;
 }
 
-/* ── S2.chat : card devient flex column 100% hauteur, chat scrollable ── */
+/* ── S2.chat : la card reste à sa taille fixe (600px desktop), seul le chat
+   zone scrolle en interne. F2a-bis : on retire l'override de hauteur qui
+   prenait toute la viewport — la taille modale doit être cohérente entre
+   tous les écrans. */
 .conseiller-card--modal.is-chat-mode {
-  height: calc(100dvh - 64px);
-  max-height: calc(100dvh - 64px);
   overflow: hidden;
   padding: 0;
 }
