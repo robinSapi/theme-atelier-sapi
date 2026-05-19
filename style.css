@@ -22653,7 +22653,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   font-size: 14.5px;
   line-height: 1.55;
   color: var(--color-wood-mid);
-  margin: 0 0 22px;
+  margin: 0 auto 22px;
   max-width: 580px;
 }
 
@@ -23716,17 +23716,17 @@ body.woocommerce-cart div.woocommerce-wrapper {
    ============================================================ */
 
 .conseiller-surmesure-wrap {
-  grid-column: 1 / -1;
-  margin: 28px 0;
+  grid-column: span 2;
+  margin: 0;
 }
 
 .conseiller-surmesure-card {
-  padding: 50px 40px 46px;
+  padding: 32px 26px 28px;
   text-align: center;
 }
 
 .conseiller-surmesure-card--compact {
-  padding: 32px 30px 30px;
+  padding: 28px 22px 24px;
 }
 
 .conseiller-surmesure-card--compact .conseiller-h2 {
@@ -23734,9 +23734,6 @@ body.woocommerce-cart div.woocommerce-wrapper {
   margin-bottom: 6px;
 }
 
-.conseiller-surmesure-card--success {
-  padding: 44px 30px 40px;
-}
 
 /* Form */
 .conseiller-surmesure-form {
