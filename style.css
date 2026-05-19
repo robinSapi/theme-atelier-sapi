@@ -23006,6 +23006,21 @@ body.woocommerce-cart div.woocommerce-wrapper {
   display: none;
 }
 
+/* F2a-bis : sur les écrans non-chat, l'inner devient flex column space-between
+   pour distribuer le contenu sur toute la hauteur de la card. Le premier
+   élément (badge/progress) reste en haut, le dernier (portes/nav) en bas,
+   les éléments intermédiaires occupent l'espace au milieu. */
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner {
+  -webkit-flex: 1;
+  flex: 1;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
+}
+
 @-webkit-keyframes conseiller-screen-fade {
   from { opacity: 0; }
   to   { opacity: 1; }
