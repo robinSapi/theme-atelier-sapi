@@ -356,6 +356,35 @@ function sapi_maison_enqueue_assets() {
         'fallbackPhrase' => __('Voici ma sélection pour ton projet.', 'theme-sapi-maison'),
       ]);
     }
+
+    // F2a Phase 3 — modale tunnel 2 portes (S0/S1/S3)
+    $modal_conseiller_js_path = get_template_directory() . '/assets/sapi-modal-conseiller.js';
+    if (file_exists($modal_conseiller_js_path)) {
+      wp_enqueue_script(
+        'sapi-modal-conseiller',
+        get_template_directory_uri() . '/assets/sapi-modal-conseiller.js',
+        ['sapi-project', 'sapi-cards-conseiller'],
+        filemtime($modal_conseiller_js_path),
+        true
+      );
+      wp_localize_script('sapi-modal-conseiller', 'SAPI_MODAL_CONSEILLER', [
+        'ajaxUrl'       => admin_url('admin-ajax.php'),
+        'nonce'         => wp_create_nonce('sapi-megafilter'),
+        'steps'         => sapi_guide_get_steps(),
+        'icons'         => sapi_guide_get_icons(),
+        'fallbackRecap' => __('Voici une sélection adaptée à ton projet.', 'theme-sapi-maison'),
+        'keyLabels'     => [
+          'piece'           => __('Pièce', 'theme-sapi-maison'),
+          'taille'          => __('Taille', 'theme-sapi-maison'),
+          'taille_escalier' => __('Escalier', 'theme-sapi-maison'),
+          'eclairage'       => __('Éclairage', 'theme-sapi-maison'),
+          'sortie'          => __('Sortie', 'theme-sapi-maison'),
+          'hauteur'         => __('Hauteur', 'theme-sapi-maison'),
+          'table'           => __('Au-dessus', 'theme-sapi-maison'),
+          'style'           => __('Style', 'theme-sapi-maison'),
+        ],
+      ]);
+    }
   }
 
   // Cart page JS — enqueued when is_cart() returns true

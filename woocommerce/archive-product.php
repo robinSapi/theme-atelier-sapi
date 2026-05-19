@@ -413,7 +413,107 @@ $conseiller_pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCo
   </div>
 </section>
 
-<!-- F2a — Modale Conseiller V3 (tunnel 2 portes) injectée Phase 3 -->
+<!-- ── F2a Phase 3 — Modale Conseiller V3 (tunnel 2 portes : S0/S1/S3) ── -->
+<?php
+// SVG portes S0
+$conseiller_porte_checklist_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 10l2 2 4-4"/><path d="M8 16h8"/></svg>';
+$conseiller_porte_feather_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><path d="M16 8 2 22"/><path d="M17.5 15H9"/></svg>';
+// SVG flèche CTA récap
+$conseiller_arrow_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+?>
+<div class="conseiller-modal" data-conseiller-modal hidden role="dialog" aria-modal="true" aria-labelledby="conseiller-modal-title">
+
+  <header class="conseiller-modal__header">
+    <span class="conseiller-modal__title" id="conseiller-modal-title"><?php esc_html_e('Décrire mon projet', 'theme-sapi-maison'); ?></span>
+    <button type="button" class="conseiller-modal__close" data-action="close" aria-label="<?php esc_attr_e('Fermer', 'theme-sapi-maison'); ?>">×</button>
+  </header>
+
+  <div class="conseiller-modal__body" data-modal-body>
+    <div class="conseiller-card conseiller-card--modal" data-modal-card>
+
+      <!-- S0 — Écran de démarrage 2 portes -->
+      <div class="conseiller-modal__screen" data-screen="s0" hidden>
+        <div class="conseiller-card__inner">
+          <span class="conseiller-badge conseiller-badge--default">
+            <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+            <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
+          </span>
+          <h2 class="conseiller-h2"><?php esc_html_e('Comment veux-tu me parler de ton projet ?', 'theme-sapi-maison'); ?></h2>
+          <p class="conseiller-subtitle"><?php esc_html_e('Deux manières d\'arriver à une sélection de luminaires adaptés à ton projet.', 'theme-sapi-maison'); ?></p>
+
+          <div class="conseiller-portes">
+            <span class="conseiller-portes__or" aria-hidden="true"><?php esc_html_e('ou', 'theme-sapi-maison'); ?></span>
+
+            <button type="button" class="conseiller-porte" data-action="door" data-door="choisis">
+              <span class="conseiller-porte__icon"><?php echo $conseiller_porte_checklist_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+              <span class="conseiller-porte__title"><?php esc_html_e('Je choisis', 'theme-sapi-maison'); ?></span>
+              <span class="conseiller-porte__desc"><?php esc_html_e('Robin pose ses questions, je sélectionne parmi ses propositions.', 'theme-sapi-maison'); ?></span>
+            </button>
+
+            <button type="button" class="conseiller-porte conseiller-porte--soon" data-action="door" data-door="decris" disabled aria-disabled="true">
+              <span class="conseiller-porte__icon"><?php echo $conseiller_porte_feather_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+              <span class="conseiller-porte__title"><?php esc_html_e('Je décris', 'theme-sapi-maison'); ?></span>
+              <span class="conseiller-porte__desc"><?php esc_html_e('Je raconte mon projet à Robin, l\'IA m\'accompagne pour préciser.', 'theme-sapi-maison'); ?></span>
+              <span class="conseiller-porte__soon"><?php esc_html_e('Bientôt', 'theme-sapi-maison'); ?></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- S1 — Mode questions guidées -->
+      <div class="conseiller-modal__screen" data-screen="s1" hidden>
+        <div class="conseiller-card__inner">
+          <div class="conseiller-progress" aria-hidden="true">
+            <div class="conseiller-progress__fill" data-progress-fill style="width: 0%"></div>
+          </div>
+
+          <span class="conseiller-badge conseiller-badge--default">
+            <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+            <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
+          </span>
+
+          <h2 class="conseiller-h2" data-question-title aria-live="polite">…</h2>
+
+          <div class="conseiller-choices" data-choices></div>
+
+          <div class="conseiller-modal__nav">
+            <button type="button" class="conseiller-back-link" data-action="back">← <?php esc_html_e('Retour', 'theme-sapi-maison'); ?></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 — Récap final -->
+      <div class="conseiller-modal__screen" data-screen="s3" hidden>
+        <div class="conseiller-card__inner">
+          <span class="conseiller-badge conseiller-badge--default">
+            <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+            <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
+          </span>
+          <h2 class="conseiller-h2"><?php esc_html_e('Voici ton projet', 'theme-sapi-maison'); ?></h2>
+
+          <div class="conseiller-chips" data-recap-chips></div>
+
+          <div class="conseiller-ia-quote" data-recap-phrase>
+            <p class="conseiller-ia-quote__text" data-state="loading" data-recap-text><?php esc_html_e('Robin réfléchit à ton projet…', 'theme-sapi-maison'); ?></p>
+            <span class="conseiller-ia-quote__sig conseiller-signature">— Robin</span>
+          </div>
+
+          <div class="conseiller-modal__cta">
+            <button type="button" class="conseiller-cta" data-action="apply">
+              <span><?php esc_html_e('Voir la sélection', 'theme-sapi-maison'); ?></span>
+              <?php echo $conseiller_arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+            </button>
+          </div>
+
+          <div class="conseiller-modal__nav">
+            <button type="button" class="conseiller-back-link" data-action="back-to-questions">← <?php esc_html_e('Modifier mes réponses', 'theme-sapi-maison'); ?></button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
 
 <?php
 get_footer();
