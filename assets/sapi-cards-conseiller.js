@@ -277,7 +277,7 @@
     // relancer l'animation à chaque subscribe notification.
     if (els.phraseContent.dataset.lastText !== newText) {
       els.phraseContent.dataset.lastText = newText;
-      typewriterEffect(els.phraseContent, els.phrase, newText, 32);
+      typewriterEffect(els.phraseContent, els.phrase, newText, 26);
     }
   }
 

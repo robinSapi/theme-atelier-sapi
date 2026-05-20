@@ -22935,13 +22935,20 @@ body.woocommerce-cart div.woocommerce-wrapper {
   content: "« ";
   font-style: normal;
   color: var(--color-wood);
-  opacity: 0.7;
+  /* Guillemets cachés par défaut, fade-in en même temps que la signature
+     (F2a-quinquies raffinement) — apparaissent quand .is-typing-done est
+     ajoutée par le JS à la fin de la frappe. */
+  opacity: 0;
+  -webkit-transition: opacity 0.6s ease 0.1s;
+  transition: opacity 0.6s ease 0.1s;
 }
 .conseiller-mon-projet__text-content::after {
   content: " »";
   font-style: normal;
   color: var(--color-wood);
-  opacity: 0.7;
+  opacity: 0;
+  -webkit-transition: opacity 0.6s ease 0.1s;
+  transition: opacity 0.6s ease 0.1s;
 }
 
 .conseiller-mon-projet__text .conseiller-signature {
@@ -22955,6 +22962,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
   opacity: 0;
   -webkit-transition: opacity 0.6s ease 0.1s;
   transition: opacity 0.6s ease 0.1s;
+}
+
+.conseiller-mon-projet__text.is-typing-done .conseiller-mon-projet__text-content::before,
+.conseiller-mon-projet__text.is-typing-done .conseiller-mon-projet__text-content::after {
+  opacity: 0.7;
 }
 
 .conseiller-mon-projet__text.is-typing-done .conseiller-signature {
