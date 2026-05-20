@@ -2,6 +2,43 @@
 
 ## ✅ Livré
 
+## [RETOUR] F2b Phase 3 — Pré-sélection variation au load + hint + listener apply
+**Date livrée :** 2026-05-20
+**Branche :** `test-theme-sapi-maison`
+**URL test :** `test.atelier-sapi.fr/produit/<un-luminaire-variable>/`
+**Statut :** Phase 3/4 livrée. La logique éprouvée pré-F1c (pattern jQuery `wc_variation_form`) est reprise, adaptée à `sapiProject` au lieu de `sapiGuidePrefs`.
+
+### Livraison Phase 3
+- `assets/sapi-product-preselect.js` (nouveau, ~190 lignes) :
+  - **AU LOAD** : si `sapiProject` contient `taille` (ou `taille_escalier`), map vers code S/M/L (`petite→S`, `moyenne→M`, `grande→L`, `escalier ouvert→M`), trouve l'option dans `select[name="attribute_pa_taille"]` (ou variantes `pa_format`, `pa_taille*`), applique + trigger `change` jQuery (pour que WC réagisse)
+  - **ÉVÉNEMENT** `sapi:apply-product-selection` (dispatché par la modale au CTA "Appliquer cette sélection") : utilise en priorité l'ID variation retourné par l'IA serveur (lit `data-product_variations` pour mapper variation_id → attributs), fallback sur mapping S/M/L côté client
+  - Matching cascade : value exacte → préfixe (s-petit, l-grande) → label textuel → index (S=0, M=1, L=2) en dernier recours
+  - Échec silencieux si rien ne matche (décision Robin C)
+  - Hint discret "✓ Pré-sélectionné pour votre projet" injecté dans le `<th class="label">` de l'attribut taille (apparait avec un fade léger)
+
+- `functions.php` : enqueue `sapi-product-preselect` sur `is_product()` avec deps `['sapi-project', 'jquery']`
+
+- `style.css` : style `.conseiller-preselect-hint` (italic 11px, color wood, opacity 0.85 avec fade-in)
+
+### Ce qui marche désormais bout-en-bout
+1. Visiteur arrive sur une fiche produit avec un projet existant → variation taille pré-sélectionnée automatiquement + hint visible
+2. Visiteur clique la pill → modale → 3 questions ou récap → "Appliquer cette sélection" → modale ferme + variation pré-sélectionnée + scroll vers le selector + hint apparaît
+3. Visiteur sans projet → aucune pré-sélection (état WC standard)
+4. Si attribut taille n'a pas de valeur S/M/L matchable → fallback index ; si rien ne matche → silence total (pas d'erreur)
+
+### Question pour Robin
+1. **Test #1 — Arrivée directe avec projet** : ouvrir `/mes-creations/`, créer un projet (au minimum piece + taille), puis cliquer sur une carte produit → la fiche doit s'ouvrir avec la taille déjà cochée et un hint "✓ Pré-sélectionné pour votre projet" sous le label Taille
+2. **Test #2 — Via pill modale** : ouvrir une fiche produit en navigation directe, cliquer pill, répondre aux 3 questions (ou si projet déjà → récap direct) → "Appliquer cette sélection" doit fermer la modale ET pré-sélectionner la taille
+3. **À VÉRIFIER (important)** : sur ton catalogue, l'attribut taille est bien sluggé `pa_taille` (donc `attribute_pa_taille` dans le select WC) ? Et les valeurs sont quoi : `s/m/l`, `petite/moyenne/grande`, ou autre ? Je suppose `s/m/l` mais le matcher couvre plusieurs cas en cascade — dis-moi si rien ne se pré-sélectionne, j'aurai besoin du nom exact de l'attribut + des slugs de variation
+4. **Card sur-mesure** (héritage F2a), **Brevo opt-in**, **merge master** : toujours les 3 mêmes décisions en attente
+
+### Ce qui reste optionnel (Phase 4 — finitions)
+- Polish UX : meilleure animation de focus sur la variation pré-sélectionnée
+- Sauvegarde projet partiel si modale fermée avant la fin (`update` incrémental déjà en place — à vérifier)
+- Suppression `assets/guide-personalize.js` si pas déjà fait (legacy F1c, ne sert plus à rien)
+
+---
+
 ## [RETOUR] F2b Phase 2 — Mode court + écran s-product-recap + endpoint IA produit
 **Date livrée :** 2026-05-20
 **Branche :** `test-theme-sapi-maison`

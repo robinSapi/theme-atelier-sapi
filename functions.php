@@ -418,6 +418,18 @@ function sapi_maison_enqueue_assets() {
           true
         );
       }
+
+      // F2b Phase 3 — Pré-sélection variation au load + listener apply event
+      $preselect_js_path = get_template_directory() . '/assets/sapi-product-preselect.js';
+      if (file_exists($preselect_js_path)) {
+        wp_enqueue_script(
+          'sapi-product-preselect',
+          get_template_directory_uri() . '/assets/sapi-product-preselect.js',
+          ['sapi-project', 'jquery'],
+          filemtime($preselect_js_path),
+          true
+        );
+      }
     }
 
     // F2a Phase 4 — card Sur-mesure intercalée dans la grille

@@ -23259,6 +23259,28 @@ body.woocommerce-cart div.woocommerce-wrapper {
   transition: opacity 0.4s ease;
 }
 
+/* F2b Phase 3 — Hint discret "✓ Pré-sélectionné pour votre projet" injecté
+   à côté du label de l'attribut taille par sapi-product-preselect.js. */
+.conseiller-preselect-hint {
+  display: inline-block;
+  margin-left: 8px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--color-wood);
+  letter-spacing: 0.02em;
+  opacity: 0;
+  -webkit-animation: preselect-hint-fade 0.4s ease 0.1s forwards;
+  animation: preselect-hint-fade 0.4s ease 0.1s forwards;
+}
+@-webkit-keyframes preselect-hint-fade {
+  to { opacity: 0.85; }
+}
+@keyframes preselect-hint-fade {
+  to { opacity: 0.85; }
+}
+
 @-webkit-keyframes conseiller-screen-fade {
   from { opacity: 0; }
   to   { opacity: 1; }
