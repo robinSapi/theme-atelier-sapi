@@ -30,6 +30,15 @@
     return ''; // ne-sais-pas ou rien
   }
 
+  // Mapping projet.style → essence (repris à l'identique du legacy mon-projet.js
+  // pré-F1c : moderne → peuplier, ancien → okoume, neutre → rien).
+  function projectToEssence(answers) {
+    if (!answers || !answers.style) return '';
+    if (answers.style === 'moderne') return 'peuplier';
+    if (answers.style === 'ancien')  return 'okoume';
+    return '';
+  }
+
   // Trouve l'option dans un <select> dont la value correspond au code S/M/L.
   // Stratégies en cascade : value exacte → préfixe → index (S=0, M=1, L=2).
   function findOptionForSize(select, sizeCode) {
@@ -120,6 +129,34 @@
     return applied;
   }
 
+  // Pré-sélection de l'essence (matière). Pattern repris du legacy cinetique.js
+  // pré-F1c : on cherche d'abord un swatch custom .material-option[data-value="X"]
+  // (qu'on clique pour déclencher la logique WC custom), fallback select natif.
+  function preselectEssence(form, essenceSlug) {
+    if (!form || !essenceSlug) return false;
+    // 1. Swatch custom prioritaire
+    var swatch = form.querySelector('.material-option[data-value="' + essenceSlug + '"]') ||
+                 document.querySelector('.material-option[data-value="' + essenceSlug + '"]');
+    if (swatch && !swatch.classList.contains('selected')) {
+      try { swatch.click(); return true; } catch (e) { /* fall through au select */ }
+    } else if (swatch && swatch.classList.contains('selected')) {
+      return true; // déjà bon
+    }
+    // 2. Fallback : select WC standard attribute_pa_materiau
+    var matSelect = form.querySelector('select[name="attribute_pa_materiau"]') ||
+                    form.querySelector('select[name^="attribute_pa_materiau"]') ||
+                    form.querySelector('select[name="attribute_pa_essence"]');
+    if (!matSelect) return false;
+    var match = null;
+    for (var i = 0; i < matSelect.options.length; i++) {
+      if (matSelect.options[i].value && matSelect.options[i].value.toLowerCase() === essenceSlug.toLowerCase()) {
+        match = matSelect.options[i];
+        break;
+      }
+    }
+    return match ? applyOption(matSelect, match) : false;
+  }
+
   // Pré-sélection à partir d'un variation_id (utilisé après "Appliquer cette
   // sélection" depuis la modale). On lit data-product_variations sur le form
   // pour récupérer les attributs de cette variation, puis on applique chaque
@@ -181,25 +218,36 @@
       var detail = (e && e.detail) || {};
       var f = document.querySelector('form.variations_form');
       if (!f) return;
-      // Priorité au variation_id fourni par le serveur
+      // Priorité au variation_id fourni par le serveur (couvre taille ET essence
+      // car la variation porte tous les attributs)
       if (detail.variationId) {
         preselectFromVariationId(f, detail.variationId);
+        // Essence quand même en plus si la variation matchée n'inclut pas le
+        // matériau (cas d'un produit où matériau n'est pas une variation mais
+        // un swatch custom contrôlé en dehors des variations)
+        var essence = projectToEssence(detail.answers || {});
+        if (essence) preselectEssence(f, essence);
         return;
       }
       // Sinon fallback : mapper depuis answers
       var sizeCode = projectToSizeCode(detail.answers || {});
       if (sizeCode) preselectFromSizeCode(f, sizeCode);
+      var ess = projectToEssence(detail.answers || {});
+      if (ess) preselectEssence(f, ess);
     });
 
     if (!form) return;
 
-    // Pré-sélection au load si sapiProject existe
+    // Pré-sélection au load si sapiProject existe (taille + essence)
     if (window.sapiProject && window.sapiProject.hasProject()) {
       var p = window.sapiProject.get();
-      var sizeCode = projectToSizeCode(p.answers || {});
-      if (sizeCode) {
+      var answers = p.answers || {};
+      var sizeCode = projectToSizeCode(answers);
+      var essence  = projectToEssence(answers);
+      if (sizeCode || essence) {
         whenFormReady(form, function () {
-          preselectFromSizeCode(form, sizeCode);
+          if (sizeCode) preselectFromSizeCode(form, sizeCode);
+          if (essence)  preselectEssence(form, essence);
         });
       }
     }
