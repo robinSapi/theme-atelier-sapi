@@ -23142,23 +23142,25 @@ body.woocommerce-cart div.woocommerce-wrapper {
 
 /* ─── F2a-quater — Distribution verticale par écran ───────────────────
    Chaque écran utilise le pattern flex column avec align-items: center.
-   Les margin-top: auto agissent comme "spacers" qui absorbent le free
-   space et poussent les éléments suivants vers le bas. 2 autos
-   non-adjacents = free space split en 2 portions distinctes.
 
-   - S0 hybride : header en haut, choices, GAP, separator+input au
-     centre, GAP, nav reset (si projet partiel) en bas.
-       → margin-top auto sur separator-or + sur nav
-   - S1 : header en haut, GAP, choices au centre, GAP, nav retour en bas.
-       → margin-top auto sur choices + sur nav
-   - S3 : header en haut, GAP, chips+secondary-actions au centre, GAP,
-     CTA "Voir la sélection" en bas.
-       → margin-top auto sur chips + sur cta
+   - S0 hybride : TOUT le bloc (badge + h2 + choices + separator + input
+     + reset) est centré verticalement via justify-content: center sur
+     l'inner. Pas de margin auto — le contenu se déplace en bloc selon
+     l'espace disponible (cohérent état initial sans reset et état
+     partiel avec reset).
+   - S1 : header collé en haut, choices centrées au milieu, nav retour
+     en bas. → margin-top auto sur choices + sur nav (2 autos = split
+     équitable du free space en 2 portions).
+   - S3 : header en haut, chips+secondary-actions au centre, CTA "Voir
+     la sélection" en bas. → margin-top auto sur chips + sur cta.
    - S2-chat : layout dédié flex column avec chat scrollable, header
      fixe en haut, CTA + footer fixes en bas (pas de margin auto). */
 
-.conseiller-modal__screen[data-screen="s0"] .conseiller-separator-or,
-.conseiller-modal__screen[data-screen="s0"] .conseiller-modal__nav,
+.conseiller-modal__screen[data-screen="s0"] .conseiller-card__inner {
+  -webkit-justify-content: center;
+  justify-content: center;
+}
+
 .conseiller-modal__screen[data-screen="s1"] .conseiller-choices,
 .conseiller-modal__screen[data-screen="s1"] .conseiller-modal__nav {
   margin-top: auto;
