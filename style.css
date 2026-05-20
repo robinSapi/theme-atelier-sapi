@@ -23017,27 +23017,49 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .conseiller-card--mon-projet.is-awaiting-advice .conseiller-mon-projet__text-content::before {
   content: '';
 }
-.conseiller-card--mon-projet.is-awaiting-advice .conseiller-mon-projet__text-content::after {
-  content: '· · ·';
-  display: block;                  /* block-level → centré par text-align du parent */
-  color: var(--color-wood);
-  font-style: normal;
-  font-size: clamp(44px, 5.5vw, 60px);
-  letter-spacing: 0.22em;
-  line-height: 1;
-  opacity: 0.5;
+/* Container des dots : block centré, on neutralise le quote::before */
+.conseiller-card--mon-projet.is-awaiting-advice .conseiller-mon-projet__text-content {
+  display: block;
   text-align: center;
-  -webkit-animation: awaiting-pulse 1.4s ease-in-out infinite;
-  animation: awaiting-pulse 1.4s ease-in-out infinite;
 }
-.conseiller-card--mon-projet.is-awaiting-advice .conseiller-mon-projet__text-content > * {
-  /* Cache tout caractère pré-existant (chars du typewriter) le cas échéant */
-  display: none;
+.conseiller-card--mon-projet.is-awaiting-advice .conseiller-mon-projet__text-content::after {
+  content: none; /* plus de '· · ·' : on a 3 vrais ronds .conseiller-awaiting-dot */
 }
 .conseiller-card--mon-projet.is-awaiting-advice .conseiller-signature {
   /* display: none (au lieu d'opacity: 0) pour libérer l'espace inline et
      laisser les dots se centrer proprement dans le bloc text. */
   display: none;
+}
+
+/* 3 ronds pulsants, vrais discs, légèrement décalés (cascade) */
+.conseiller-awaiting-dot {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin: 0 4px;
+  border-radius: 50%;
+  background: var(--color-wood);
+  opacity: 0.25;
+  vertical-align: middle;
+  -webkit-animation: awaiting-dot-pulse 1.2s ease-in-out infinite;
+  animation: awaiting-dot-pulse 1.2s ease-in-out infinite;
+}
+.conseiller-awaiting-dot:nth-child(2) {
+  -webkit-animation-delay: 0.18s;
+  animation-delay: 0.18s;
+}
+.conseiller-awaiting-dot:nth-child(3) {
+  -webkit-animation-delay: 0.36s;
+  animation-delay: 0.36s;
+}
+
+@-webkit-keyframes awaiting-dot-pulse {
+  0%, 100% { opacity: 0.2; -webkit-transform: scale(0.85); transform: scale(0.85); }
+  50%      { opacity: 0.85; -webkit-transform: scale(1); transform: scale(1); }
+}
+@keyframes awaiting-dot-pulse {
+  0%, 100% { opacity: 0.2; transform: scale(0.85); }
+  50%      { opacity: 0.85; transform: scale(1); }
 }
 @-webkit-keyframes awaiting-pulse {
   0%, 100% { opacity: 0.25; }
