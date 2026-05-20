@@ -7849,14 +7849,28 @@ li.carousel-editorial-slide,
   margin: 2rem auto;
   padding: 0 2rem;
 }
-/* Harmonisé avec .conseiller-card : fond warm + dashed wood + radius 16px,
-   pas de hover (c'est un panneau statique comme la modale, pas un bouton). */
+/* Harmonisé avec .conseiller-card : fond warm + bordure dashed INSET via
+   ::before (décor décalé 12px vers l'intérieur, comme dans la modale).
+   Pas de hover (panneau statique). */
 .advice-room-picker {
+  position: relative;
   background: var(--color-warm, #FBF6EA);
-  border: 2px dashed rgba(var(--color-wood-rgb, 147, 125, 104), 0.3);
   border-radius: 16px;
   padding: 2.5rem 2rem;
   text-align: center;
+  overflow: hidden;
+}
+.advice-room-picker::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 1.5px dashed rgba(147, 125, 104, 0.35);
+  border-radius: 12px;
+  pointer-events: none;
+}
+.advice-room-picker .room-picker-inner {
+  position: relative;
+  z-index: 1;
 }
 .advice-room-picker .room-picker-cards {
   display: flex;
@@ -10762,12 +10776,26 @@ transform: translateY(15px);
 }
 
 /* Room Picker — "Pour quelle pièce ?" — harmonisé avec .conseiller-card
-   (fond warm + dashed wood, pas de hover sur le panneau). */
+   (fond warm + bordure dashed INSET via ::before, décalée 12px vers
+   l'intérieur). On désactive la bordure grise héritée de .bento-card et
+   on n'a pas de hover sur le panneau. */
 .bento-room-picker {
   grid-column: span 12;
   grid-row: span 2;
   background: var(--color-warm, #FBF6EA);
-  border: 2px dashed rgba(var(--color-wood-rgb, 147, 125, 104), 0.3);
+  border: none;
+}
+.bento-room-picker::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 1.5px dashed rgba(147, 125, 104, 0.35);
+  border-radius: 12px;
+  pointer-events: none;
+}
+.bento-room-picker .room-picker-inner {
+  position: relative;
+  z-index: 1;
 }
 
 .room-picker-inner {
