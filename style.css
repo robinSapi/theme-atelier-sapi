@@ -23141,13 +23141,17 @@ body.woocommerce-cart div.woocommerce-wrapper {
   margin-top: auto;
 }
 
-/* F2a-ter S3 : chips récap centrées verticalement, actions + reset link
-   collés en bas de la card (auto sur chips top+bottom absorbe tout le free
-   space → actions/nav poussés en bas). */
+/* F2a-quater S3 : chips au centre-haut, secondary-actions collés juste
+   sous, CTA "Voir la sélection" en bas. 2 auto-margins (chips top + cta
+   top) → free space split en 2 portions. */
 .conseiller-modal__screen[data-screen="s3"] .conseiller-chips {
   margin-top: auto;
-  margin-bottom: auto;
   gap: 10px;
+}
+
+.conseiller-modal__screen[data-screen="s3"] .conseiller-modal__cta {
+  margin-top: auto;
+  margin-bottom: 0;
 }
 
 /* Chips récap plus grosses sur l'écran S3 que sur les autres contextes */
@@ -23342,7 +23346,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
   background: var(--color-wood);
 }
 
-/* Layout 2 boutons côte à côte desktop, empilés mobile. */
+/* Layout 2 boutons côte à côte desktop, empilés mobile (ancienne version
+   S3, conservée pour compat — markup actuel utilise s3-secondary-actions). */
 .conseiller-s3-actions {
   display: -webkit-flex;
   display: flex;
@@ -23352,6 +23357,20 @@ body.woocommerce-cart div.woocommerce-wrapper {
   justify-content: center;
   gap: 14px;
   width: 100%;
+}
+
+/* F2a-quater : 2 boutons secondaires côte à côte (Recommencer + Préciser)
+   juste sous les chips récap. Empilés sur mobile. */
+.conseiller-s3-secondary-actions {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-justify-content: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  margin-top: 20px;
 }
 
 /* Lien tertiaire "Effacer et recommencer" — discret, sous les 2 boutons. */
@@ -23435,12 +23454,14 @@ body.woocommerce-cart div.woocommerce-wrapper {
   }
 
   /* S3 mobile : boutons empilés verticalement */
-  .conseiller-s3-actions {
+  .conseiller-s3-actions,
+  .conseiller-s3-secondary-actions {
     -webkit-flex-direction: column;
     flex-direction: column;
     gap: 10px;
   }
-  .conseiller-s3-actions .conseiller-cta {
+  .conseiller-s3-actions .conseiller-cta,
+  .conseiller-s3-secondary-actions .conseiller-cta {
     width: 100%;
   }
 }

@@ -608,9 +608,10 @@ $conseiller_arrow_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCol
         </div>
       </div>
 
-      <!-- S3 — F2a-ter : carrefour "Modifier mon projet" déclenché uniquement
-           depuis la card "Mon projet" sur /mes-creations/. Chips récap + 3
-           actions hiérarchisées (Voir / Préciser / Effacer). Aucun appel IA. -->
+      <!-- S3 — F2a-ter / quater : carrefour "Modifier mon projet" déclenché
+           depuis la card "Mon projet". Layout réorganisé : chips récap au
+           centre, 2 boutons secondaires (Recommencer + Préciser) juste sous,
+           CTA primaire "Voir la sélection" seul en bas. Aucun appel IA. -->
       <div class="conseiller-modal__screen" data-screen="s3" hidden>
         <div class="conseiller-card__inner">
           <span class="conseiller-badge conseiller-badge--default">
@@ -621,19 +622,21 @@ $conseiller_arrow_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCol
 
           <div class="conseiller-chips" data-recap-chips></div>
 
-          <div class="conseiller-s3-actions">
-            <button type="button" class="conseiller-cta" data-action="s3-view">
-              <span><?php esc_html_e('Voir la sélection', 'theme-sapi-maison'); ?></span>
-              <?php echo $conseiller_arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+          <div class="conseiller-s3-secondary-actions">
+            <button type="button" class="conseiller-cta conseiller-cta--secondary" data-action="s3-reset">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+              <span><?php esc_html_e('Recommencer', 'theme-sapi-maison'); ?></span>
             </button>
             <button type="button" class="conseiller-cta conseiller-cta--secondary" data-action="s3-refine">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               <span><?php esc_html_e('Préciser avec Robin', 'theme-sapi-maison'); ?></span>
             </button>
           </div>
 
-          <div class="conseiller-modal__nav">
-            <button type="button" class="conseiller-s3-reset" data-action="s3-reset">
-              <?php esc_html_e('Effacer et recommencer', 'theme-sapi-maison'); ?>
+          <div class="conseiller-modal__cta">
+            <button type="button" class="conseiller-cta" data-action="s3-view">
+              <span><?php esc_html_e('Voir la sélection', 'theme-sapi-maison'); ?></span>
+              <?php echo $conseiller_arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
             </button>
           </div>
         </div>
