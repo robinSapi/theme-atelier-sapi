@@ -23019,6 +23019,15 @@ body.woocommerce-cart div.woocommerce-wrapper {
    Plein écran 100dvh, header fixe + body scrollable + card unique
    ============================================================ */
 
+/* Garde-fou défensif : tout élément `[hidden]` à l'intérieur de la modale
+   ou de la cards-zone doit rester invisible, même si une règle author a
+   forcé display:flex/grid sur lui (le user-agent stylesheet a une
+   spécificité inférieure et peut être écrasé). Nous a déjà piégé 2 fois. */
+.conseiller-modal [hidden],
+.conseiller-cards-zone [hidden] {
+  display: none !important;
+}
+
 /* Overlay : voile sombre centré qui couvre la page */
 .conseiller-modal {
   position: fixed;
@@ -23127,24 +23136,30 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-choices,
 .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-freetext,
 .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-separator-or,
-.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-transition-dots,
 .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-progress {
   width: 100%;
 }
 
-/* Centrage vertical du contenu — varie selon l'écran.
-   F2a-quater : S0 hybride a un layout serré avec reset éventuel en bas.
-   s-transition centre les dots. S1 pousse choices+nav. */
-.conseiller-modal__screen[data-screen="s-transition"] .conseiller-transition-dots {
-  margin-top: auto;
-  margin-bottom: auto;
-}
+/* ─── F2a-quater — Distribution verticale par écran ───────────────────
+   Chaque écran utilise le pattern flex column avec align-items: center.
+   Les margin-top: auto agissent comme "spacers" qui absorbent le free
+   space et poussent les éléments suivants vers le bas. 2 autos
+   non-adjacents = free space split en 2 portions distinctes.
 
-.conseiller-modal__screen[data-screen="s1"] .conseiller-choices {
-  margin-top: auto;
-}
+   - S0 hybride : header en haut, choices, GAP, separator+input au
+     centre, GAP, nav reset (si projet partiel) en bas.
+       → margin-top auto sur separator-or + sur nav
+   - S1 : header en haut, GAP, choices au centre, GAP, nav retour en bas.
+       → margin-top auto sur choices + sur nav
+   - S3 : header en haut, GAP, chips+secondary-actions au centre, GAP,
+     CTA "Voir la sélection" en bas.
+       → margin-top auto sur chips + sur cta
+   - S2-chat : layout dédié flex column avec chat scrollable, header
+     fixe en haut, CTA + footer fixes en bas (pas de margin auto). */
 
+.conseiller-modal__screen[data-screen="s0"] .conseiller-separator-or,
 .conseiller-modal__screen[data-screen="s0"] .conseiller-modal__nav,
+.conseiller-modal__screen[data-screen="s1"] .conseiller-choices,
 .conseiller-modal__screen[data-screen="s1"] .conseiller-modal__nav {
   margin-top: auto;
 }
@@ -23566,36 +23581,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
   cursor: not-allowed;
 }
 
-.conseiller-suggestions {
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-wrap: wrap;
-  flex-wrap: wrap;
-  gap: 8px;
-  -webkit-justify-content: center;
-  justify-content: center;
-  max-width: 720px;
-  margin: 0 auto;
-}
-
-.conseiller-suggestion {
-  padding: 8px 16px;
-  background: var(--color-white);
-  border: 1px solid var(--color-line);
-  border-radius: 50px;
-  font-family: var(--font-body);
-  font-size: 13px;
-  color: var(--color-wood-dark);
-  cursor: pointer;
-  -webkit-transition: border-color 0.2s ease, background 0.2s ease;
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.conseiller-suggestion:hover,
-.conseiller-suggestion:focus-visible {
-  border-color: var(--color-wood);
-  outline: none;
-}
+/* F2a-quater : .conseiller-suggestions / .conseiller-suggestion supprimés
+   (anciennes UI S2.start avec 3 suggestions cliquables, plus dans le markup). */
 
 /* ── S2.chat : la card reste à sa taille fixe (600px desktop), seul le chat
    zone scrolle en interne. F2a-bis : on retire l'override de hauteur qui
@@ -23744,27 +23731,9 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .conseiller-chat-thinking__dot:nth-child(2) { -webkit-animation-delay: 0.2s; animation-delay: 0.2s; }
 .conseiller-chat-thinking__dot:nth-child(3) { -webkit-animation-delay: 0.4s; animation-delay: 0.4s; }
 
-/* F2a-bis : 3 dots pulsants sur l'écran transition (sortie modale → close) */
-.conseiller-transition-dots {
-  display: -webkit-flex;
-  display: flex;
-  -webkit-justify-content: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 18px;
-  margin-bottom: 8px;
-}
-.conseiller-transition-dots__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--color-wood);
-  display: inline-block;
-  -webkit-animation: conseiller-chat-pulse 1.2s infinite ease-in-out;
-  animation: conseiller-chat-pulse 1.2s infinite ease-in-out;
-}
-.conseiller-transition-dots__dot:nth-child(2) { -webkit-animation-delay: 0.2s; animation-delay: 0.2s; }
-.conseiller-transition-dots__dot:nth-child(3) { -webkit-animation-delay: 0.4s; animation-delay: 0.4s; }
+/* F2a-quater : .conseiller-transition-dots supprimés (l'écran s-transition
+   n'existe plus, remplacé par l'animation morph). Les keyframes
+   conseiller-chat-pulse restent utilisées par .conseiller-chat-thinking__dot. */
 
 @-webkit-keyframes conseiller-chat-pulse {
   0%, 80%, 100% { opacity: 0.3; -webkit-transform: scale(0.8); transform: scale(0.8); }
@@ -23973,11 +23942,6 @@ body.woocommerce-cart div.woocommerce-wrapper {
     height: 38px;
     right: 6px;
   }
-  .conseiller-suggestion {
-    font-size: 12.5px;
-    padding: 7px 13px;
-  }
-
   .conseiller-chat-bubble {
     font-size: 14px;
     padding: 11px 16px;

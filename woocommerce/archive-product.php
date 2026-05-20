@@ -590,23 +590,10 @@ $conseiller_arrow_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCol
         </div>
       </div>
 
-      <!-- S-transition — F2a-bis : écran "Robin réfléchit" entre la dernière
-           réponse et la fermeture de la modale (durée min 700ms même si l'IA
-           répond instantanément, pour la lisibilité). -->
-      <div class="conseiller-modal__screen" data-screen="s-transition" hidden>
-        <div class="conseiller-card__inner">
-          <span class="conseiller-badge conseiller-badge--default">
-            <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-            <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
-          </span>
-          <h2 class="conseiller-h2"><?php esc_html_e('Robin réfléchit à ton projet', 'theme-sapi-maison'); ?></h2>
-          <div class="conseiller-transition-dots" aria-hidden="true">
-            <span class="conseiller-transition-dots__dot"></span>
-            <span class="conseiller-transition-dots__dot"></span>
-            <span class="conseiller-transition-dots__dot"></span>
-          </div>
-        </div>
-      </div>
+      <!-- F2a-quater : ancien screen s-transition supprimé. L'animation de
+           sortie (morphing modale → card "Mon projet") gère désormais la
+           transition vers la grille pendant que l'IA répond en arrière-plan. -->
+
 
       <!-- S3 — F2a-ter / quater : carrefour "Modifier mon projet" déclenché
            depuis la card "Mon projet". Layout réorganisé : chips récap au

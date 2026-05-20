@@ -35,7 +35,7 @@
      ───────────────────────────────────────────── */
   var state = {
     open: false,
-    screen: null,         // 's0' | 's1' | 's2-start' | 's2-chat' | 's-transition'
+    screen: null,         // 's0' | 's1' | 's2-chat' | 's3'
     answers: {},
     labels: {},
     currentQuestion: null,
@@ -433,9 +433,6 @@
 
   // F2a-quater : startFreetextFlow supprimé. Le champ texte est intégré dans
   // S0 hybride et submitFromS0Text() bascule directement vers S2.chat.
-  function startFreetextFlow_DEPRECATED() {
-    return;
-  }
 
   function addUserBubble(text) {
     if (!els.chatMessages) return;
@@ -1033,9 +1030,6 @@
       var action = actionBtn.getAttribute('data-action');
 
       switch (action) {
-        case 'close':
-          closeModal();
-          break;
         case 'back':
           backFromQuestion();
           break;
