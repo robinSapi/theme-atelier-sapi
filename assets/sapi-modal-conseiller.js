@@ -959,9 +959,12 @@
     // F2a-quater : ouverture state="s0" → détermine dynamiquement le sous-état
     // (initial / partiel / s3-carrefour) selon le contenu du sapiProject.
     // state="s3" force le carrefour (compat avec anciens liens).
+    // F2b state="product" : ouvert depuis la pill "Comment choisir ?" sur fiche
+    // produit. Phase 1 = routé vers S0 hybride normal (validation du câblage).
+    // Phase 2 introduira le mode court + écran s-product-recap dédié.
     if (initialScreen === 's3' && window.sapiProject && window.sapiProject.hasProject()) {
       showS3Recap();
-    } else if (initialScreen === 's0' || !initialScreen) {
+    } else if (initialScreen === 's0' || initialScreen === 'product' || !initialScreen) {
       var detected = determineInitialState();
       if (detected === 's3-carrefour') {
         showS3Recap();

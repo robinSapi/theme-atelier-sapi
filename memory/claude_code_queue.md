@@ -1,6 +1,1549 @@
 # Tasks — Coordination Cowork ↔ Claude Code
 
+## ✅ Livré
+
+## [RETOUR] F2b Phase 1 — Modale partagée + Pill "Comment choisir ?" sur fiche produit
+**Date livrée :** 2026-05-20
+**Branche :** `test-theme-sapi-maison`
+**URL test :** `test.atelier-sapi.fr/produit/<un-luminaire-variable>/`
+**Statut :** Phase 1/4 livrée. Câblage uniquement — la modale s'ouvre depuis la fiche produit avec le même contenu que sur /mes-creations/.
+
+### Décisions cadre validées par Robin
+- **A — Mapping variation** : petite/intime→S, moyenne/confortable→M, grande/spacieuse→L, escalier ouvert→M
+- **B — Recommandation IA** : phrase IA doit explicitement nommer une taille (ex. "Taille L")
+- **C — Préselection silencieuse** : si fail, ni erreur ni hint affiché
+- **D — Pill dynamique** : "Comment choisir ?" (sans projet) → "Adapter à mon projet" (avec projet)
+
+### Livraison Phase 1
+- `functions.php` : nouveau helper `sapi_render_conseiller_modal()` hooké sur `wp_footer` (condition `is_shop() || is_product()`) → la modale est rendue une seule fois, mutualisée entre les deux templates
+- `woocommerce/archive-product.php` : markup modale supprimé (était inline en lignes 478-618), placeholder commentaire qui pointe vers le helper
+- Bloc enqueues méga-filtre + cards + modale étendu de `is_shop()` à `is_shop() || is_product()`. Les scripts no-op silencieusement si leurs sélecteurs ne sont pas présents
+- `woocommerce/single-product.php` : pill `.conseiller-pill-secondary` ajoutée juste au-dessus de `<p class="variations-intro">` (variables uniquement), `data-action="open-modal" data-modal-state="product"` + `data-help-pill-text` pour update live
+- `assets/sapi-help-pill.js` (nouveau, ~50 lignes) : subscribe à `sapiProject`, met à jour le texte ("Comment choisir ?" ↔ "Adapter à mon projet"), dispatch `sapi:open-modal { state: 'product' }` au click
+- `assets/sapi-modal-conseiller.js` : `openModal('product')` route vers S0 hybride normal — câblage validé sans logique métier (Phase 2 ajoutera le mode court + écran s-product-recap)
+- `style.css` : `margin-bottom: 1.25rem` sur la pill dans `.product-form-v2` (+ `margin-top: 0.5rem` desktop)
+
+### Ce qui marche déjà
+- Pill visible sur toute fiche produit variable (donc tous les luminaires)
+- Click pill → modale s'ouvre par-dessus la fiche produit avec overlay et S0 hybride
+- Si projet déjà en localStorage : pill affiche "Adapter à mon projet" et la modale s'ouvre directement sur S3 carrefour
+- Modale fonctionne identiquement à la version /mes-creations/ (puisque c'est le même DOM)
+
+### Ce qui reste à faire (Phases 2-4)
+- **Phase 2** : mode court (3 questions sur fiche produit pour préselectionner une variation) + écran `s-product-recap` + endpoint `sapi_megafilter_product_advice` (Sonnet, doit citer une taille explicite)
+- **Phase 3** : pré-sélection variation au load de fiche produit selon `sapiProject.answers.taille` ou `taille_escalier` (mapping S/M/L) + hint discret "✓ Pré-sélectionné pour votre projet"
+- **Phase 4** : CTA "Appliquer cette sélection" → save projet partiel + close modal + preselect + scroll vers variations
+
+### Question pour Robin
+1. **Test rapide** : ouvre une fiche produit variable sur `test.atelier-sapi.fr/produit/...`, vérifie que la pill apparaît au bon endroit et que la modale s'ouvre. Si OK, on enchaîne Phase 2.
+2. **Card sur-mesure (héritage F2a)** : toujours désactivée. Décision à prendre : réactiver / supprimer / revoir le wording ?
+3. **Brevo opt-in sur formulaire sur-mesure** : toujours bloqué. Tu veux qu'on creuse ?
+4. **Merge master** : pas encore fait pour F2a + tous les sous-points. Toujours en attente — on continue F2b ou on merge le bloc F2a d'abord ?
+
+---
+
+## [RETOUR] F2a-quater — Modale hybride (suppression des portes) + animation sortie + audit refactor
+**Date livrée :** 2026-05-20
+**Branche :** `test-theme-sapi-maison`
+**URL test :** `test.atelier-sapi.fr/mes-creations/`
+**Statut :** Livré et déployé. Périmètre majeur (refonte modale + animation sortie + audit) — recommandation de tests intensifs avant merge master.
+
+### Périmètre livré
+
+**Refonte structurelle S0 hybride (commit `f389a88`)**
+- Suppression de l'écran S0 "Que préfères-tu ?" avec ses 2 portes (Questions — Réponses / Décrire ton projet)
+- Remplacement par un **écran hybride unique** qui affiche simultanément la question courante + champ texte libre
+- 3 sous-états déterminés par `determineInitialState()` selon `sapiProject` :
+  - **s0-initial** (projet vide) : badge "Conseil de Robin", question Pièce, placeholder "Décris ton projet en quelques mots…", lien Effacer caché
+  - **s0-partiel** (au moins 1 réponse, reste des questions) : badge "Mon projet", question = prochaine non répondue, placeholder "Précise ton projet en quelques mots…", lien "Effacer et recommencer" visible
+  - **s3-carrefour** (toutes les visibles répondues) : route vers le S3 inchangé depuis F2a-ter (chips + 3 actions)
+- Suppression du markup S2.start (input + suggestions), JS associé (`startFreetextFlow`, `chooseDoor`, handlers `[data-freetext-form]` / `[data-suggestion]`)
+- Nouveau `submitFromS0Text` qui bascule de S0 vers S2.chat avec bulle initiale construite côté client (advice_text + "Qu'est-ce que tu veux affiner ?") puis appel Haiku via `submitFreetext` réutilisé
+- Délégation `.conseiller-choice` au niveau modale (couvre S0 hybride ET S1 d'un coup)
+- Card "Mon projet" : `data-modal-state` passe de `s3` à `s0` (uniformisation — la modale décide)
+- Le **point ouvert "Compléter projet partiel"** évoqué dans le retour F2a-ter devient obsolète — l'état partiel affiche directement la prochaine question
+
+**Hauteur modale ajustée (commit `d4eabcb`)**
+- `height: 600px → 680px` desktop pour accueillir le S0 hybride (badge + H2 + 6 choices + separator + input + reset) sans scroll interne. Mobile inchangé `calc(100dvh - 32px)`.
+
+**Animation de sortie modale (commits `34e40d5` → `01cfe78`)**
+- Suppression de l'écran s-transition "Robin réfléchit" qui forçait une attente passive
+- 1re tentative : morphing FLIP modale → position card "Mon projet" en 1s (Robin a trouvé trop rapide)
+- Solution retenue : **séquence en 3 phases (~1,9 s)** :
+  - Phase 1 (0–600 ms) : fade-out du contenu interne (screens) → opacity 0
+  - Phase 2 (500–1100 ms) : fade-out de la modale entière (overlay fade transparent + card-dialog opacity 0 + scale 0.96)
+  - Phase 3 (1100–1900 ms) : scroll smooth de la page pour centrer la card "Mon projet" dans la viewport
+- Texte (advice IA) apparaît après la séquence via typewriter, signature fade-in
+- Pendant l'attente : class `.is-awaiting-advice` sur la card "Mon projet" affiche 3 dots pulsants à la place de la phrase, signature cachée
+- ESC + click-outside désactivés pendant `state.transition` (protection animation)
+
+**Réorganisation boutons S3 carrefour (commit `475d5c5`)**
+- Avant : `[Voir la sélection (orange)] [Préciser avec Robin (wood-dark)]` côte à côte + lien souligné "Effacer et recommencer" en bas
+- Après :
+  - `[↻ Recommencer (wood-dark)] [💬 Préciser avec Robin (wood-dark)]` côte à côte (2 secondaires, icônes refresh + bulle de chat)
+  - `[VOIR LA SÉLECTION →]` (primaire orange) seul en bas
+- "Effacer et recommencer" → "Recommencer" (raccourci) avec promotion en bouton wood-dark
+- Nouvelle classe CSS `.conseiller-s3-secondary-actions`
+
+**Centrage et stabilité S0 hybride (commit `98cf84d`)**
+- Refonte du centrage : `justify-content: center` sur l'inner du S0 → tout le bloc (badge + h2 + choices + separator + input + reset) est un groupe unique centré verticalement dans la card
+- Cohérent état initial et partiel
+- Plus de découpe en 2 zones via auto-margins (qui sectionnait la lecture)
+
+**Hotfixes successifs** (résolus en cours de travail)
+- Card "Mon projet" : 2 cards visibles simultanément → fix `.conseiller-card--mon-projet[hidden] { display: none }` (commit `17c4a72`)
+- Chips récap S3 trop petits → padding+font augmentés (commit `5da8c8a`)
+- "Effacer et recommencer" depuis S3 cassait l'écran (S0 vide, reset link visible) → fix `resetFromS3` appelle `renderS0Hybrid('s0-initial')` + nouvelle règle `[hidden]` sur `.conseiller-modal__nav` (commit `bc91aeb`)
+- Projet effacé revenait au refresh à cause de `?piece=` dans l'URL → `clear()` nettoie aussi `?piece` via `history.replaceState` (commit `f4328d7`)
+- Reset complet du projet quand `?piece=X` arrive avec une pièce différente (depuis home / roompicker) → `clearRaw()` silencieux + update piece, un seul notify (commit `a54a232`)
+- Focus ring visible autour du dialog → `outline: none` (commit `c6ab47e`)
+- Cards isolées sur la 2e ligne du grid quand 2 ou 4 choices → `.conseiller-choices--2col` appliqué dynamiquement par JS (commit `c6ab47e`)
+- Bouton submit du champ texte écrasé (padding du selector global `button {}`) → `padding: 0` explicite (commit `c6ab47e`)
+- Plus d'air entre la pill badge et le H2 dans la modale (28px au lieu de 18px) (commit `ea53be6`)
+
+**Audit + refactor (commit `56aa3c8`)**
+Suite à la complexité accumulée, lancement d'un agent d'exploration pour identifier le code mort et les conflits CSS. Trouvailles + actions :
+- Markup PHP : suppression du screen `s-transition` (orphelin depuis le morphing)
+- CSS : suppression `.conseiller-transition-dots` + `.conseiller-suggestions` (anciennes UI) + règles mobile associées
+- JS : suppression `startFreetextFlow_DEPRECATED()` + `case 'close'` du switch
+- **Nouvelle règle défensive** : `.conseiller-modal [hidden], .conseiller-cards-zone [hidden] { display: none !important }` au top du bloc CSS → prévient les régressions futures (déjà piégé 2× sur mon-projet et modal__nav)
+- Commentaire structurant au-dessus des règles margin-auto qui documente l'intention par écran (S0/S1/S3)
+- Commentaire `state.screen` mis à jour : `'s0' | 's1' | 's2-chat' | 's3'`
+- Bilan : –55 LOC nettes, code mort balayé, garde-fou anti-régression en place
+
+### Critères de succès — état
+
+✅ S0 hybride affiche question + texte libre simultanément, sans écran de portes intermédiaire
+✅ Détection automatique état initial / partiel / complet selon `sapiProject`
+✅ Clic réponse → bascule S1 sur question suivante avec parcours classique
+✅ Submit texte → S2.chat avec bulle initiale (zéro nouvel appel IA pour la bulle)
+✅ "Effacer et recommencer" S0 partiel : `sapiProject.clear()` + bascule fluide vers initial dans même modale
+✅ S3 carrefour reste fonctionnel (déclenché si projet complet)
+✅ Animation sortie en 3 phases ~1,9 s (fade contenu → fade modale → scroll page → texte)
+✅ Class `.is-awaiting-advice` affiche dots pendant l'attente IA, typewriter prend le relais à l'arrivée
+✅ Modale hauteur 680px desktop / calc(100dvh - 32px) mobile
+✅ Card "Mon projet" entièrement cliquable (passe par `data-modal-state="s0"`, modale route automatiquement)
+✅ Card sur-mesure toujours masquée
+✅ Reset complet du projet quand `?piece=X` arrive avec une autre pièce (depuis home, roompicker, lien externe)
+✅ ESC + click-outside protégés pendant l'animation morph
+✅ Bouton submit S0 rond avec flèche visible (padding override du `button {}` global)
+✅ Grid 2 cols quand 2 ou 4 choices (taille, escalier, etc.)
+✅ Focus ring de la card-dialog masqué
+
+### Audit code identifié + résolu
+
+- **s-transition** orphelin (markup PHP + CSS + référence JS) → supprimé
+- `.conseiller-suggestions` + `.conseiller-suggestion` CSS orphelin (S2.start retiré) → supprimé
+- `startFreetextFlow_DEPRECATED` fonction JS jamais appelée → supprimée
+- `case 'close'` du switch jamais déclenché (croix supprimée depuis F2a-quater Phase 3) → supprimé
+- Commentaires obsolètes mis à jour
+- Règle `[hidden]` défensive globale ajoutée pour la modale + cards-zone
+
+### Écarts vs spec initiale F2a-quater
+
+1. **Animation morph FLIP → séquence 3 phases** : la spec n'imposait pas de méthode précise. 1re tentative en morphing FLIP rejetée par Robin (1s trop rapide), final en séquence 3 phases (1,9 s) avec scroll smooth.
+2. **Réorganisation boutons S3** : non prévu dans F2a-quater initial. Robin a demandé en cours de travail (recommencer + préciser en haut, Voir la sélection en bas).
+3. **Audit + cleanup** : non prévu, déclenché par Robin face à l'instabilité visuelle après accumulation de hotfixes.
+
+### Tests qui restent à valider par Robin
+
+- [ ] Mobile 375px : S0 hybride avec 6 choices en 2 cols, séparateur + input visibles sans scroll
+- [ ] Animation sortie sur connexion réelle : fluidité, timing, scroll smooth fonctionne bien
+- [ ] Cycle complet d'un parcours S1 : entrée → 7 questions → sortie animation → card "Mon projet" avec advice IA
+- [ ] S2.chat depuis S0 hybride (submit texte) : bulle initiale + fetch Haiku + bulles correctes
+- [ ] Effacer depuis S0 partiel ET depuis S3 carrefour : bascule sans bug visuel
+- [ ] Roompicker → `/mes-creations/?piece=X` (différent pièce existante) : reset complet du projet précédent
+- [ ] Centrage S0 sur tous les écrans (questions à 2, 3, 4, 6 choices)
+- [ ] Cas où l'IA est lente (>3s) : dots pulsants restent affichés jusqu'à arrivée
+
+### Questions ouvertes pour Cowork → Robin
+
+1. **Merge master ?** F2a + F2a-bis + F2a-ter + F2a-quater livrés sur `test-theme-sapi-maison`. Le module est en bon état désormais (après audit + refactor), recommandation : tester intensivement en conditions réelles puis merger.
+2. **Card sur-mesure** : toujours masquée. Décision pending.
+3. **Brevo opt-in** sur form sur-mesure : bloqué tant que card sur-mesure masquée.
+4. **F2b** : prochaine tâche dans la queue (fiche produit). Démarrer avant merge master ou après ?
+
+### Prochaine tâche
+
+**F2b** — Logique projet sur fiche produit (pill "Comment choisir ?" + mode court 3 questions + pré-sélection variation). Plan inchangé depuis le retour F2a-ter.
+
+⚠️ F2b devra intégrer le modèle IA F2a-bis (1 appel à la sortie). L'endpoint `sapi_megafilter_product_advice` à créer suivra le même pattern.
+
+---
+
+## [RETOUR] F2a-ter — Carrefour S3 "Modifier mon projet" + raffinements card "Mon projet"
+**Date livrée :** 2026-05-19
+**Branche :** `test-theme-sapi-maison`
+**URL test :** `test.atelier-sapi.fr/mes-creations/`
+**Statut :** Livré et déployé. Un point UX ouvert en attente de décision Robin (cf. § Point ouvert plus bas).
+
+### Périmètre livré
+
+**S3 ressuscité comme carrefour 3 actions (commit `2ffb4dd` + ajustements `589686d`, `92a2d0c`)**
+- Spec respectée : écran S3 réactivé UNIQUEMENT quand le visiteur ouvre la modale depuis la card "Mon projet" (le flow S1 normal continue de fermer direct via showTransitionAndExit)
+- Card "Mon projet" → bouton "Modifier mon projet ✎" pointe vers `data-modal-state="s3"` (au lieu de `s0` avant)
+- Markup S3 : badge wood-dark "Mon projet" + H2 "Voici ton projet" + chips récap (lecture seule) + 3 actions
+- 3 actions hiérarchisées :
+  - **Voir la sélection** (pill orange primaire) → close modale + scroll vers grille
+  - **Préciser avec Robin** (pill wood-dark secondaire) → bascule S2.chat avec **bulle initiale construite côté client** à partir de `sapiProject.advice_text` (ou texte générique de la pièce via `SAPI_CARDS_CONSEILLER.genericAdvice`) suivi de "Qu'est-ce que tu veux affiner ?". La bulle est pushée dans `state.chat.conversation` pour que les messages suivants l'incluent dans l'historique envoyé à `sapi_megafilter_chat`. **ZÉRO nouvel appel IA pour la bulle initiale.**
+  - **Effacer et recommencer** (lien tertiaire souligné) → `sapiProject.clear()` + state local vidé + bascule S0 (2 portes vides). Pas de confirmation modale.
+- Layout final S3 : header + chips collés en haut, actions+reset collés en bas, gap au milieu (chips poussées par `margin: auto`)
+- KEY_LABELS hardcoded restaurées dans le JS pour les chips ("Pièce", "Taille", "Escalier", etc.)
+- `populateRecapChips()` restaurée
+- CSS `.conseiller-cta--secondary` (variante wood-dark du CTA primaire orange)
+- Layout 3 actions : 2 boutons côte à côte desktop / empilés mobile, lien reset dessous centré
+
+**Refonte de la card "Mon projet" (commits `20347ce` → `90f71b8` → `e90222e`)**
+- **Largeur alignée sur la grille produit** : `.conseiller-cards-zone` max-width 1400px + padding `0 3rem` (cohérent avec `.shop-products .product-grid`), mobile `0 1rem`
+- **Card entière cliquable** : `.conseiller-card--mon-projet` transformée en `<button data-action="open-modal" data-modal-state="s3" aria-label="Modifier mon projet">`. Bouton interne "Modifier mon projet ✎" supprimé. Enfants `<div>`/`<p>` changés en `<span>` pour respecter le HTML valide (button ne peut contenir d'éléments block-level).
+- **Reset des styles button HTML** : le selector global `button {}` du thème imposait `text-transform: uppercase` + `background: orange` + `font-size: 14px` + autres. Override explicite sur `.conseiller-card--mon-projet` (border none, text-transform none, font-size inherit, bg warm).
+- **Hover** : pill "Mon projet" devient orange + translateY(-2px) + box-shadow → signal visuel d'interactivité
+- **Hauteur verrouillée** : `min-height: 280px` + flex column + `align-items: center` sur l'inner → la card garde la même hauteur quel que soit le texte. La pill reste en haut, la citation centrée verticalement.
+- **Citation agrandie** : `clamp(22px, 2.8vw, 30px)` (était 17px fixed à l'origine) + max-width 880px
+- **Effet typewriter avec fade-in cascadé** : refonte complète. Chaque caractère wrappé dans un `<span class="conseiller-typewriter__char">` avec `transition-delay` individuel (initialDelay + index × 32ms). Tous les spans démarrent `opacity: 0` (CSS) puis passent à `opacity: 1` quand la classe `.is-revealing` est ajoutée → chaque lettre fade-in en cascade fluide (`transition: opacity 0.4s ease`). Pour ~100 caractères : ~3.8s total. Beaucoup plus doux que l'apparition brutale char-by-char d'avant.
+- **Signature "— Robin" en fondu après la frappe** : `opacity: 0` par défaut, transition 0.6s. Le JS ajoute `.is-typing-done` à la fin du dernier fade-in caractère → opacity 1, fade-in doux.
+- Triggers : animation déclenchée uniquement quand le texte change (`dataset.lastText` guard) — pas à chaque `sapiProject.subscribe` notification.
+
+### Critères de succès — état
+
+✅ Card "Mon projet" : lien "Modifier mon projet ✎" remplacé par cliquabilité entière de la card
+✅ Click sur card → modale s'ouvre directement à S3 (carrefour)
+✅ Chips récap reflètent les réponses du sapiProject
+✅ "Voir la sélection" → ferme, statu quo
+✅ "Préciser avec Robin" → S2.chat avec bulle initiale (zéro appel IA pour la bulle)
+✅ "Effacer et recommencer" → `clear()` + S0 sans pré-remplissage
+✅ Largeur card alignée sur la grille (1400px max + padding 3rem)
+✅ Hover : pill orange + élévation
+✅ Hauteur card stable indépendamment du texte (min-height 280px)
+✅ Typewriter avec fade-in fluide par lettre + signature en fondu après
+✅ Pas d'uppercase sur la citation (reset button text-transform)
+✅ Esthétique cohérente avec le pattern Conseiller universel
+
+### Point UX ouvert — en attente de décision Robin
+
+Sur un **projet partiel** (ex. `?piece=entrée` sans avoir répondu à taille/sortie/etc.), Robin a remarqué qu'**il manque une option pour continuer le parcours questions là où il s'est arrêté**. Actuellement S3 ne propose que "Préciser avec Robin" (qui bascule en mode chat libre) — pas d'option pour répondre aux questions restantes en mode guidé.
+
+**Solution proposée par Claude Code** : ajouter un 2ème bouton secondaire wood-dark, visible UNIQUEMENT si le projet est partiel (il reste des questions visibles sans réponse) :
+
+Layout S3 projet partiel = **4 actions** :
+- Voir la sélection (orange primaire)
+- **[Nouveau bouton]** (wood-dark secondaire) → bascule en S1 sur la prochaine question non répondue, avec questionHistory pré-remplie
+- Préciser avec Robin (wood-dark secondaire)
+- Effacer et recommencer (lien tertiaire)
+
+Layout S3 projet complet = statu quo 3 actions (le nouveau bouton est caché).
+
+Détection projet partiel : `getNextUnansweredVisibleStep()` qui itère `getVisibleStepIds(answers)` et retourne le premier step sans answer.
+
+**3 wordings au choix** :
+- A — "Continuer mes réponses" (court, suppose un parcours entamé)
+- B — "Compléter mon projet" ⭐ recommandé (universel, marche pour ?piece= sans clic préalable)
+- C — "Répondre aux questions" (factuel, technique)
+
+**Robin doit choisir** A/B/C avant que Claude Code code. Ou modifier wording. Estimation impl : ~30 lignes (1 bouton dans markup S3 + détection partiel dans showS3Recap + handler dans switch + fonction continueQuestionsFromS3).
+
+### Écarts vs spec initiale F2a-ter
+
+1. **Card "Mon projet" refondue en bouton cliquable** : pas dans la spec F2a-ter originale (le lien "Modifier mon projet" était toujours un sub-button). Robin a demandé ce changement après livraison initiale du carrefour S3. Implémenté commit `20347ce`.
+2. **Hauteur verrouillée + typewriter fade** : raffinements UX successifs demandés par Robin (commits `90f71b8`, `e90222e`). Pas dans la spec F2a-ter.
+3. **Largeur alignée sur la grille** : pas dans la spec, demande implicite "card alignée visuellement". Réutilise les valeurs CSS de la grille pour rester cohérent.
+
+### Tests qui restent à valider par Robin
+
+- [ ] Mobile 375px : layout 3 actions en colonne, hauteur card mobile OK, typewriter fluide
+- [ ] Effet typewriter : observer la cascade fade-in sur un texte long (100+ caractères) — fluidité OK ?
+- [ ] Signature "— Robin" : fade-in visible après la dernière lettre ?
+- [ ] Card cliquable : tab clavier focus visible (focus-visible), Enter/Space ouvre la modale
+- [ ] Hover : pill orange + élévation perceptible
+- [ ] Click sur card → modale S3, 3 actions fonctionnelles
+- [ ] "Préciser avec Robin" depuis S3 → S2.chat avec bulle initiale OK (advice_text injecté + "Qu'est-ce que tu veux affiner ?")
+- [ ] "Effacer et recommencer" → projet vidé, retour à card "Conseil de Robin" si on ferme modale
+
+### Questions ouvertes pour Cowork → Robin
+
+1. **Wording A/B/C** pour le nouveau bouton "Compléter projet partiel" (point UX ci-dessus). Recommandation Claude Code : B.
+2. **Merge master ?** F2a + F2a-bis + F2a-ter livrés sur `test-theme-sapi-maison`. Toujours en attente du feu vert pour merger ou enchaîner F2b.
+3. **Card sur-mesure** : toujours masquée temporairement. Décision pending.
+4. **Brevo opt-in** sur form sur-mesure : bloqué.
+
+### Prochaine tâche
+
+Soit :
+- **Action immédiate** : décision Robin sur wording → coder le bouton "Compléter projet partiel"
+- **Plus tard** : F2b (fiche produit) si décision Robin de continuer sur la branche test ou merger d'abord
+
+---
+
+## [RETOUR] F2a-bis — Correctif wording hero + simplification IA + ajustements modale
+**Date livrée :** 2026-05-19
+**Branche :** `test-theme-sapi-maison`
+**URL test :** `test.atelier-sapi.fr/mes-creations/`
+**Statut :** Livré et déployé. En attente de validation Robin.
+
+### Périmètre livré
+
+**Phase A — Hero wording (commit `916fe07`)**
+- Mapping `$piece_hero_map` passé de `det` (ton/ta) à `article` (un/une)
+- H1 : "Pour un salon" / "Pour une chambre" / "Pour une cuisine" / "Pour un bureau" / "Pour une entrée" / "Pour un escalier"
+- Sous-titre raccourci : "Découvre la sélection de l'atelier pour ton projet"
+- Hero standard (sans `?piece=`) inchangé
+
+**Phases B+C+D+E — 1 seul appel IA par parcours (commit `d46edd6`)**
+- `sapi_megafilter_advice` refactoré : modèle Sonnet (était Haiku), accepte `answers + labels + conversation?`, output `{advice_text}`, **pas de cache** transient, fallback gracieux sur texte générique par pièce
+- `sapi_megafilter_recap` **supprimé** proprement (fonction + add_action)
+- Nouvelle source de vérité PHP : `sapi_megafilter_get_generic_advices()` retourne 6 phrases pré-rédigées par pièce, partagées PHP/JS via `wp_localize_script`
+- `sapi-project.js` étendu :
+  - Schema avec `advice_text` + setter `setAdviceText`
+  - `set()` accepte `extra.advice_text` (1 seul write au lieu de 2)
+  - `ingestQueryParams` règle URL autorité : si `?piece=X` ≠ piece localStorage, on réécrit + on efface l'`advice_text` (correspondait à l'ancienne pièce)
+- `sapi-cards-conseiller.js` allégé :
+  - Suppression complète de `fetchAdvice` + pulse loading + setTimeout 600ms
+  - `getAdviceText(project)` synchronous : advice_text → générique de la pièce → fallback
+  - Card "Mon projet" s'affiche immédiatement, **ZÉRO AJAX au load**
+- `sapi-modal-conseiller.js` refondu :
+  - Suppression écran **S3 récap** (chips + IA quote + CTA "Voir la sélection")
+  - Suppression `showRecap`, `populateRecapChips`, `fetchRecapPhrase`, `backToQuestions`
+  - Suppression handlers `'back-to-questions'` et `'apply'` (ancienne version)
+  - Nouveau `showTransitionAndExit(opts)` : affiche écran s-transition, fetch advice (avec conversation optionnelle), attend min 700ms (lisibilité), `sapiProject.set + advice_text`, close + refilter + scroll
+  - S1 dernière question répondue → `showTransitionAndExit({source: 's1'})`
+  - S2.chat CTA "Voir la sélection" → `showTransitionAndExit({source: 's2', conversation: ...})`
+  - Lien "Préciser ou modifier mon projet" pointe maintenant vers `s0` (au lieu de `s3` supprimé). **Point 3 (UX modification fine du projet) reste à reprendre plus tard avec Robin.**
+- Markup + CSS :
+  - Écran `s-transition` ajouté (badge + H2 "Robin réfléchit à ton projet" + 3 dots pulsants `.conseiller-transition-dots`)
+  - CSS S3 supprimé (`.conseiller-ia-quote`, `.conseiller-card--modal .conseiller-chips`)
+  - CSS pulse loading sur card "Mon projet" supprimé
+  - `data-state="loading"` + placeholder text retirés du markup card "Mon projet"
+
+**Ajustements UX modale (séries d'allers-retours avec Robin)**
+- Simplification écran S0 (commit `9b56b5e`) :
+  - H2 raccourci : "Que préfères-tu ?"
+  - Sous-titre supprimé
+  - Porte 1 titre : "Questions — Réponses" (au lieu de "Je choisis")
+  - Porte 2 titre : "Décrire ton projet" (au lieu de "Je décris")
+  - Descriptions sous les portes supprimées
+- Modale à taille fixe (commit `f5607c1`) :
+  - Card 600px desktop / `calc(100dvh - 32px)` mobile
+  - Plus de "respirer" entre écrans S0/S1/S2.start/s-transition
+- Centrage du contenu (commits `f4e3944` → `17e0a44`) :
+  - 1re tentative `space-between` rejetée par Robin (pill "Conseil de Robin" étirée plein-largeur)
+  - Solution finale : `align-items: center` sur inner flex column + `margin: auto` ciblé sur le contenu principal de chaque écran
+  - Résultat : badge "Conseil de Robin" garde sa taille naturelle, H2 stable juste sous la pill, contenu "réponses" centré verticalement dans l'espace restant
+- Mode chat respecte la taille fixe (commit `da8adca`) :
+  - Retrait de l'override `height: calc(100dvh - 64px)` sur `.is-chat-mode`
+  - La card reste à 600px en mode chat, seule la zone chat scrolle en interne
+
+**Card Sur-mesure masquée temporairement (commit `8bad8cf`)**
+- Robin a demandé de désactiver l'affichage pour l'instant
+- Enqueue `sapi-surmesure-card.js` commenté dans `functions.php`
+- Markup + JS + CSS + endpoint restent intacts pour réactivation triviale
+- Pour réactiver : décommenter le bloc enqueue (1 minute)
+
+### Critères de succès — état
+
+✅ `?piece=salon` → H1 "Pour un salon" + sous-titre court
+✅ `?piece=chambre` → H1 "Pour une chambre"
+✅ `/mes-creations/` nu → "Mes Créations" (inchangé)
+✅ `?piece=salon` sans parcours modale : card "Mon projet" affiche texte générique salon + **ZÉRO AJAX au load**
+✅ Parcours S1 complet : écran transition "Robin réfléchit" (700ms min) → fermeture → card affiche `advice_text` IA
+✅ Parcours S2 chat + "Voir la sélection" : même transition + appel IA + stockage + fermeture
+✅ Refresh `/mes-creations/` après parcours : `advice_text` toujours là, **zéro appel IA réseau**
+✅ Navigation `?piece=salon` → `?piece=chambre` : sapiProject mis à jour + advice_text effacé → texte générique chambre affiché → **cohérence hero/card garantie**
+✅ Endpoint `sapi_megafilter_recap` supprimé (`grep` retourne 0)
+✅ Écran S3 (chips + récap) n'apparaît plus jamais
+✅ Fallback gracieux si IA plante → texte générique de la pièce
+✅ Modale taille fixe stable entre tous les écrans (y compris mode chat)
+✅ Pill "Conseil de Robin" petite et centrée, H2 stable, réponses centrées verticalement
+
+### Écarts vs spec initiale F2a-bis
+
+1. **Card sur-mesure masquée** : non prévu par la spec F2a-bis mais Robin a demandé après livraison initiale. Réactivation triviale (décommenter 11 lignes dans functions.php).
+2. **Layout modale** : la spec disait "taille fixe + contenu adapté" sans préciser comment. Plusieurs itérations ont été nécessaires (space-between rejeté, centrage final via margin auto). Solution finale validée visuellement par Robin.
+3. **Lien "Modifier mon projet"** : la spec laissait Point 3 (UX modification fine du projet) hors scope. Solution intermédiaire : le lien ouvre la modale à S0 au lieu de s3 (qui n'existe plus). À reprendre dans une tâche dédiée si Robin veut une UX plus fine.
+
+### Tests qui restent à valider par Robin
+
+- [ ] Mobile 375px : modale `calc(100dvh - 32px)`, centrage des éléments, mode chat avec scroll interne
+- [ ] Parcours S1 complet desktop + mobile : 7 questions conditionnelles, écran transition, sauvegarde projet
+- [ ] Parcours S2 chat sur cas réels : qualité IA Sonnet avec conversation, sortie via "Voir la sélection"
+- [ ] Cohérence URL > localStorage : `?piece=X` différent → effacement advice_text + texte générique nouvelle pièce
+- [ ] Lien "Préciser ou modifier mon projet" : ouvre S0 avec réponses pré-remplies, nouveau parcours génère nouveau advice_text
+
+### Questions ouvertes pour Cowork → Robin
+
+1. **Merge master ?** F2a + F2a-bis livrés sur `test-theme-sapi-maison`. Soit on merge maintenant, soit on attend F2b (fiche produit) pour merger l'ensemble.
+2. **Card sur-mesure** : masquée temporairement. Voulez-vous :
+   - La réactiver telle quelle (seuil ≤ 6 produits visibles)
+   - L'enlever définitivement (suppression du markup PHP + JS + CSS + endpoint surmesure)
+   - La revoir (autre seuil, autre UX, autre wording)
+3. **Point 3 (réinitialiser/modifier le projet)** : actuellement le lien "Préciser ou modifier mon projet" ouvre S0 (2 portes) avec réponses pré-remplies. Robin trouve-t-il ça suffisant ou veut-il une UX plus fine (bouton "Effacer mon projet" séparé, modale dédiée…) ?
+4. **Brevo opt-in** sur form sur-mesure (question pendante depuis F2a) : statut bloqué tant que la card est masquée.
+
+### Prochaine tâche dans la queue
+
+**F2b** — Logique projet sur fiche produit (pill "Comment choisir ?" + mode court 3 questions + pré-sélection variation). Plan de découpe Claude Code proposé :
+- Phase 1 : modal partagée (wp_footer hook) + pill sur single-product.php
+- Phase 2 : mode court S1-short (3 questions piece/taille/style) + endpoint `sapi_megafilter_product_advice` (Sonnet, recommande UNE variation)
+- Phase 3 : pré-sélection variation au load (récupérer code git pré-F1c commit `3be8ba7`) + hint "✓ Pré-sélectionné pour votre projet"
+- Phase 4 : CTA "Appliquer cette sélection" → ferme modale + pré-sélectionne variation + scroll vers sélecteurs
+
+⚠️ F2b devra intégrer le nouveau modèle IA F2a-bis (1 appel à la sortie, pas au load) — l'endpoint `sapi_megafilter_product_advice` suivra le même pattern.
+
+En attente du feu vert Robin pour démarrer F2b ou merger F2a+F2a-bis d'abord.
+
+---
+
+## [RETOUR] F2a — Refonte UX /mes-creations/ livrée sur test
+**Date livrée :** 2026-05-19
+**Branche :** `test-theme-sapi-maison`
+**URL test :** `test.atelier-sapi.fr/mes-creations/`
+**Statut :** Livré et déployé. En attente de validation Robin avant merge master.
+
+### Périmètre livré (4 phases + hotfixes)
+
+**Fondations (commit `8af6f2d`)**
+- Suppression complète de la card méga-filtre inline + chips dropdowns + modale shell F1b (~700 lignes supprimées)
+- Module `assets/sapi-project.js` : source unique `localStorage.sapiProject` (get/set/update/clear/subscribe, sync inter-onglets, ingestion `?piece=X`)
+- Pattern visuel universel Conseiller V3 en CSS : `.conseiller-card`, badge wood-dark/orange, h2 uppercase, CTA orange, pill secondaire dashed, signature Square Peg, chips récap, back link
+- 3 endpoints AJAX dans `functions.php` :
+  - `sapi_megafilter_advice` (Haiku, cache 1h serveur) — phrase courte card "Mon projet"
+  - `sapi_megafilter_recap` (Sonnet) — phrase conseillère écran récap S3
+  - `sapi_megafilter_surmesure` — soumission form sur-mesure (email Robin + honeypot anti-bot)
+- Helpers `sapi_megafilter_sanitize_project` + `format_project_text`
+- Tous endpoints : nonce + rate-limit + fallback générique si IA down
+
+**Cards d'invitation entre hero et grille (commit `7e668cb` + hotfix `c9c98b4`)**
+- Card "Conseil de Robin" (sans projet) : badge + H2 "Un coup de main pour choisir ?" + sous-titre + CTA orange "Décrire mon projet"
+- Card "Mon projet" (avec projet) : phrase IA italique entre « » + signature Square Peg "— Robin" inline + lien souligné "Préciser ou modifier mon projet ✎"
+- Filtrage grille au load via `window.sapiMegaFilter.cardMatches()` (override des no-ops de mega-filtre.js Phase 1) qui lit `sapiProject.answers` et mirror la logique de `inc/guide-data.php`
+- Rules factorisées en `$sapi_filter_rules` (cats_by_sortie, ampoule_by_piece, etc.)
+- Hotfix : SVG du CTA fixé à 14×14px (Chrome rendait à 100%), phrase pulse loading visible 600ms minimum même si réponse IA cachée serveur
+
+**Modale tunnel S0/S1/S3 (commits `1f7a37f` → `8def608`)**
+- Overlay sombre `rgba(50,40,30,0.55)` couvre la page, card Conseiller crème flottante centrée (max 880px, calc(100dvh−64px), radius 16px, ombre prononcée, animation pop scale 0.96→1)
+- Click sur l'overlay OU touche ESC pour fermer (pas de croix, pas de bandeau blanc — Robin a explicitement demandé de retirer le chrome dialog)
+- **S0** : 2 portes "Je choisis" + "Je décris" avec séparateur "ou" circulaire entre
+- **S1** : barre progression fine, H2 question dynamique (table-bureau/lit selon piece), grille 3 cols desktop / 2 mobile de boutons-cards (icônes `sapi_guide_get_icons()`), avance auto à la question suivante, Retour vers question précédente ou S0
+- **S3** : chips récap (Pièce : Salon · Taille : Spacieuse · …), card blanche IA quote italique + signature Square Peg à droite, CTA orange "Voir la sélection →", lien "Modifier mes réponses" → revient à S1 sur la dernière question répondue
+- State machine + questionHistory pour Retour, sauvegarde incrémentale dans sapiProject à chaque réponse (S1), fetch IA Sonnet via `sapi_megafilter_recap` (minimum 700ms avant swap), focus management, scroll lock body
+
+**Porte "Je décris" S2 + card Sur-mesure (commit `eb86567` + hotfixes `cab9a22`, `fa212a3`)**
+- Porte "Je décris" activée → **S2.start** : input pill central + bouton submit orange (flèche) + 3 suggestions cliquables ("Une suspension moderne pour mon salon", "Une lampe d'appoint pour ma chambre", "Quelque chose pour éclairer mon escalier")
+- Submit → fetch `sapi_megafilter_freetext` (Haiku, endpoint F1b existant réutilisé) → transition vers **S2.chat**
+- **S2.chat** : card devient flex column 100dvh (classe `.is-chat-mode`, padding 0), badge fixe en haut, zone chat scrollable, CTA "Voir la sélection" et footer fixes en bas
+- Bulles user à droite (wood-dark blanc) + bulles Robin à gauche (blanc + bordure), encarts "Filtres appliqués" sous bulles Robin qui touchent aux chips
+- Bulle "Robin réfléchit" 3 dots pulsants pendant fetch
+- Footer fixe : input "Continuer à discuter avec Robin…" + bouton Envoyer wood-dark
+- Garde-fou 15 messages user max → CTA forcée + input locked
+- Endpoints F1b réutilisés tels quels (`sapi_megafilter_freetext` Haiku + `sapi_megafilter_chat` Sonnet)
+- **Card Sur-mesure** intercalée dans la grille après le 7e produit, `grid-column: span 2` (2 colonnes au lieu de toute la largeur — Robin a précisé "2x1")
+- 3 états : `empty` (form complet email + textarea), `project` (compact + chips dashed + précisions optionnelles), `success` (confirmation après envoi)
+- Bascule selon `sapiProject.hasProject()` + state local `submitted`
+- Honeypot anti-bot (champ `website` caché en `position: absolute left -10000px`)
+- **Condition d'affichage** : visible UNIQUEMENT si grille filtrée ≤ 6 produits (seuil `VISIBLE_THRESHOLD` ajustable dans sapi-surmesure-card.js) — Robin veut suggérer le sur-mesure quand la sélection est maigre, pas spammer
+
+### Écarts vs spec initiale (décidés en cours de travail avec Robin)
+
+1. **Modale plein écran → overlay centré** : la spec disait "plein écran 100dvh", Robin a demandé un overlay sombre + dialog flottant centré pendant la livraison Phase 3
+2. **Suppression du chrome dialog** : la spec prévoyait un header blanc avec titre "Décrire mon projet" et croix de fermeture. Robin a demandé de retirer ce chrome — la card Conseiller crème devient elle-même le dialog, fermeture par click-outside ou ESC uniquement
+3. **Porte "Je décris" disabled en Phase 3** puis activée Phase 4 (jamais montré "Bientôt" en prod après Phase 3, le badge a été retiré au commit eb86567)
+4. **Card Sur-mesure conditionnelle** : la spec disait "toujours intercalée après les 6-8 premiers produits". Robin a précisé : afficher seulement si grille filtrée ≤ 6 produits (suggérer le sur-mesure quand la sélection est maigre). Robin a précisé pour plus tard : "le filtre IA dira lui-même quand c'est du sur-mesure qu'il faut" — pour l'instant seuil fixe.
+5. **Brevo** : la spec mentionnait "Optionnel : ajoute l'email à une liste Brevo dédiée (à confirmer avec Robin avant)". Non implémenté Phase 4. À confirmer si on veut le rajouter.
+
+### Fichiers nouveaux
+
+- `assets/sapi-project.js` (256 lignes)
+- `assets/sapi-cards-conseiller.js` (322 lignes)
+- `assets/sapi-modal-conseiller.js` (865 lignes)
+- `assets/sapi-surmesure-card.js` (~180 lignes)
+
+### Tests qui restent à valider par Robin
+
+- [ ] Mobile 375px : portes en colonne, choix 2 cols, modal padding réduit, sur-mesure prend toute la largeur (1 col sur mobile)
+- [ ] Soumission réelle du form sur-mesure : email arrive-t-il bien à `robin@atelier-sapi.fr` ?
+- [ ] Mode chat S2 sur cas réels : qualité des réponses IA, pertinence des filtres extraits, robustesse sur questions hors-scope
+- [ ] Limit 15 messages user en chat : message d'arrêt OK, locked input/CTA forcée
+- [ ] Retour navigation S1 : sur la 1re question → ramène à S0, sur S2-start → ramène à S0
+- [ ] Flow `?piece=salon` direct → card "Mon projet" + phrase IA + grille filtrée
+- [ ] Card sur-mesure : tester avec une combinaison qui restreint à ≤6 produits (ex. `?piece=escalier`)
+
+### Questions ouvertes pour Cowork → Robin
+
+1. **Merge master ou pas ?** F2a est livré sur `test-theme-sapi-maison`. Soit on merge maintenant sur master pour engranger, soit on enchaîne F2b sur la même branche test puis on merge les deux ensemble.
+2. **Brevo opt-in côté form sur-mesure** : on l'ajoute (newsletter ou liste dédiée) ou on laisse seulement l'email à Robin pour l'instant ?
+3. **Seuil card sur-mesure à 6** : à ajuster ? Plus haut (8) pour exposer plus, ou plus bas (4) pour être plus contextuel ?
+4. **Décision long terme** sur la logique "IA flagge le sur-mesure" : c'est un projet séparé (extension du prompt Sonnet pour inclure un flag dans la réponse JSON ?), à backlogger.
+5. **Mega-filtre.js dead code** : Phase 1 a neutralisé `assets/mega-filtre.js` (init early-return). Il reste enqueué mais ne fait rien. À supprimer proprement dans un commit dédié (Phase 5 cleanup) ou pendant F2b ?
+
+### Prochaine tâche dans la queue
+
+**F2b** — Logique projet sur fiche produit (pill "Comment choisir ?" + mode court 3 questions + pré-sélection variation). Spec complète juste en dessous dans cette queue. Plan de découpe Claude Code proposé :
+- Phase 1 : modal partagée (wp_footer hook) + pill sur single-product.php
+- Phase 2 : mode court S1-short (3 questions piece/taille/style) + endpoint `sapi_megafilter_product_advice` (Sonnet, recommande UNE variation)
+- Phase 3 : pré-sélection variation au load (récupérer code git pré-F1c commit `3be8ba7`) + hint "✓ Pré-sélectionné pour votre projet"
+- Phase 4 : CTA "Appliquer cette sélection" → ferme modale + pré-sélectionne variation + scroll vers sélecteurs
+
+En attente du feu vert Robin pour démarrer F2b ou merger F2a d'abord.
+
+---
+
 ## 📋 À faire
+
+## [TÂCHE] F2a-quinquies — Hero /mes-creations/ qui s'adapte en live + suppression du sous-titre
+
+**Date :** 2026-05-20
+**Priorité :** moyenne (raffinement UX après F2a-quater)
+**Branche :** `test-theme-sapi-maison`
+**Prérequis :** F2a-quater livrée et validée.
+
+---
+
+### Contexte
+
+Aujourd'hui, le H1 du hero ("Pour un salon" / "Pour une chambre" / etc.) est rendu côté serveur PHP à partir de `?piece=X` dans l'URL. Mais si le visiteur **modifie son projet sans recharger la page** — typiquement en sortant de la modale après un parcours, en cliquant "Recommencer" depuis S3, ou en changeant la pièce via la modale — le hero **reste figé** sur l'ancienne valeur. Désynchronisation visuelle.
+
+Robin veut que le hero **s'adapte en live** au changement de `sapiProject.answers.piece`, avec une transition fluide. Et il veut **supprimer le sous-titre H2** ("Découvre la sélection de l'atelier pour ton projet") — l'air gagné fait respirer le H1.
+
+**Périmètre étroit** : on touche au H1 et au sous-titre. **La photo de fond du hero N'EST PAS modifiée** par cette tâche — le swap de photo selon la pièce relève du chantier **S28 (photos par pièce)** déjà planifié et en pause (cf. mémoire Cowork `project_photos_par_piece.md`).
+
+---
+
+### À LIRE AVANT TOUTE MODIFICATION
+
+1. `woocommerce/archive-product.php` — où vit le hero (`.shop-hero-artisan`) avec son mapping `$piece_hero_map`
+2. `assets/sapi-project.js` — `sapiProject.subscribe()` qui notifie au changement
+3. Mémoire Cowork `project_photos_par_piece.md` (S28) — pour comprendre pourquoi la photo n'est pas touchée ici
+
+---
+
+### Périmètre F2a-quinquies
+
+#### A. Suppression du sous-titre H2
+
+Dans `archive-product.php`, retirer le `<p>` ou `<h2>` qui affiche *"Découvre la sélection de l'atelier pour ton projet"* (ou son équivalent quand pas de pièce). Suppression **du DOM**, pas juste `display: none`.
+
+L'ancien sous-titre marketing (cas hero sans `?piece=`) est **également supprimé** pour cohérence — désormais le hero ne contient que H1 + photo de fond. Le hero "standard" et le hero "réactif" affichent la même structure minimale : juste le titre.
+
+#### B. H1 mis à jour en live au changement de `sapiProject.answers.piece`
+
+Créer un nouveau module léger `assets/sapi-hero-live.js` :
+- S'abonne à `sapiProject.subscribe()` au load
+- Reçoit la config du mapping piece → titre via `wp_localize_script` (variable `SAPI_HERO_TITLES`) — source PHP = même `$piece_hero_map` que le hero (cohérence stricte)
+- Au notify, lit la nouvelle valeur `answers.piece` :
+  - Si pièce reconnue dans le mapping → met à jour le `textContent` du H1 avec *"Pour un/une X"*
+  - Si pas de pièce (projet vide ou pièce inconnue) → met à jour avec *"Mes Créations"* (le titre par défaut)
+- Crossfade subtil (~250ms) sur le H1 : opacity 1 → 0 → swap textContent → opacity 0 → 1
+
+Le module est enqueue sur `is_shop()` uniquement (page /mes-creations/).
+
+#### C. wp_localize_script du mapping
+
+Dans `functions.php` (ou le fichier où sont déjà localizés les variables de la page), ajouter :
+
+```php
+wp_localize_script('sapi-hero-live', 'SAPI_HERO_TITLES', [
+  'default' => 'Mes Créations',
+  'pieces'  => [
+    'salon'    => 'Pour un salon',
+    'chambre'  => 'Pour une chambre',
+    'cuisine'  => 'Pour une cuisine',
+    'bureau'   => 'Pour un bureau',
+    'entree'   => 'Pour une entrée',
+    'escalier' => 'Pour un escalier',
+  ],
+]);
+```
+
+Idéalement, factoriser le mapping `$piece_hero_map` dans une fonction helper `sapi_get_hero_piece_titles()` qui sert à la fois au rendu PHP initial du hero ET au localize JS. Évite la duplication des labels.
+
+#### D. Comportement à la première charge (PHP)
+
+Au load initial de la page :
+- Si `?piece=X` est présent et reconnu → H1 = *"Pour un/une X"* (comportement actuel F2a-bis, inchangé)
+- Si pas de `?piece=` MAIS `sapiProject` en localStorage contient une pièce → on garde la logique PHP (qui ne sait pas lire localStorage). Le H1 s'affiche en *"Mes Créations"* au premier paint, puis le JS prend le relais via `sapiProject.subscribe` au load et met à jour le H1 vers la bonne valeur. **Cela peut créer un flash visuel**. Acceptable car rare en pratique (les visiteurs récurrents avec projet stocké arrivent généralement avec `?piece=` redirigés par la home, sauf cas direct mes-creations/ sans param)
+- Si pas de `?piece=` ET sapiProject vide → H1 = *"Mes Créations"* (comportement actuel inchangé)
+
+Le flash mentionné ci-dessus pourrait être atténué par un `<script inline>` ultra-early dans `<head>` qui lit localStorage et override le textContent du H1 avant le premier paint — **mais pas dans le périmètre de cette tâche**, à voir plus tard si Robin le demande.
+
+#### E. Hauteur du hero conservée
+
+Pas de changement de hauteur. L'espace vertical qui était occupé par le sous-titre devient de l'air autour du H1.
+
+---
+
+### Ce qui n'est PAS dans F2a-quinquies
+
+- ❌ Changement de la photo de fond du hero — réservé à S28 (cf. mémoire `project_photos_par_piece.md`)
+- ❌ Refonte du hero standard `/mes-creations/` sans `?piece=` — juste suppression du sous-titre
+- ❌ Modification du hero sur d'autres pages (catégorie, conseils-eclaires, home) — non concernées
+- ❌ Script `<head>` inline pour éviter le flash localStorage — à voir plus tard si gênant
+
+---
+
+### Critères de succès
+
+1. Sur `/mes-creations/?piece=salon` : H1 = *"Pour un salon"*, pas de sous-titre, photo de fond inchangée
+2. Sur `/mes-creations/` sans param : H1 = *"Mes Créations"*, pas de sous-titre, photo inchangée
+3. Ouvrir la modale depuis `/mes-creations/` (projet vide), faire un parcours S1 complet jusqu'à la sortie → pendant l'animation de sortie (1,9s), le H1 du hero se met à jour en crossfade vers *"Pour un X"* selon la pièce répondue
+4. Depuis S3 carrefour, clic "Recommencer" → `sapiProject.clear()` → le H1 revient à *"Mes Créations"* en crossfade
+5. Naviguer de `/mes-creations/?piece=salon` à `/mes-creations/?piece=chambre` (URL externe) → au load PHP le H1 est directement *"Pour une chambre"*, pas de flash
+6. Aucun appel réseau supplémentaire — l'update est local, basé sur le mapping localisé
+7. Pas de flash visuel sur les cas standards (avec `?piece=` ou sans projet)
+8. Mobile 375px : H1 reste lisible, plus aéré sans le sous-titre
+9. Le module `sapi-hero-live.js` n'est enqueue que sur `is_shop()` (pas chargé sur les autres pages)
+
+---
+
+### Précautions
+
+- **Ne PAS toucher** à la photo de fond du hero — S28 s'en occupera (lecture seule de sapiProject pour cette tâche, juste pour le titre)
+- **Ne PAS supprimer** `$piece_hero_map` côté PHP — il sert toujours au rendu initial server-side
+- **Factoriser** le mapping en helper PHP réutilisable par les 2 contextes (rendu PHP + localize JS) pour éviter la duplication
+- **Crossfade subtil** : 250ms maxi, pas d'effet wow (sobre, lisible)
+- Branche `test-theme-sapi-maison`, push test uniquement
+
+---
+
+
+## [TÂCHE] F2a-quater — Modale hybride : suppression du choix de portes, écran unique question + texte
+
+**Date :** 2026-05-19
+**Priorité :** moyenne (raffinement UX modale après F2a-ter)
+**Branche :** `test-theme-sapi-maison`
+**Prérequis :** F2a + F2a-bis + F2a-ter livrées et validées.
+
+---
+
+### Contexte
+
+L'écran S0 actuel ("Que préfères-tu ?" avec 2 grosses portes "Questions — Réponses" / "Décrire ton projet") est une étape intermédiaire qui force un choix avant de commencer. Robin veut la supprimer.
+
+**Nouveau S0** = un écran unique qui affiche **simultanément les deux modes** :
+- En haut : la première question disponible avec ses boutons-cards de réponse
+- Au milieu : séparateur "ou"
+- En bas : un champ texte pour décrire son projet librement
+
+Cet écran s'adapte automatiquement à 3 contextes selon l'état du `sapiProject` :
+
+| État | Quand | Badge | Question affichée | Placeholder texte | Lien Effacer |
+|---|---|---|---|---|---|
+| **Initial** | sapiProject vide | "Conseil de Robin" | Pièce (1re question) | *"Décris ton projet en quelques mots…"* | Caché |
+| **Partiel** | sapiProject contient au moins 1 réponse mais il reste des questions visibles non répondues | "Mon projet" | Prochaine question non répondue | *"Précise ton projet en quelques mots…"* | Visible (lien souligné en bas) |
+| **Complet** | Toutes les questions visibles répondues | (S3 carrefour 3 actions — pas concerné par cette tâche, inchangé depuis F2a-ter) | — | — | — |
+
+---
+
+### À LIRE AVANT TOUTE MODIFICATION
+
+1. **Mockup de référence** : `site-web/mockups/mockup-09-modale-hybride.html` — montre les 2 états (initial + partiel) sur la même page
+2. `assets/sapi-modal-conseiller.js` — la modale actuelle avec ses états s0/s1/s2/s3
+3. `assets/sapi-project.js` — `sapiProject.answers` et helpers
+4. `inc/guide-data.php` — `sapi_guide_get_steps()` (visibility logic des questions)
+5. Spec F2a-ter au-dessus dans cette queue — le carrefour S3 reste comme spec'é, pas touché
+
+---
+
+### Périmètre F2a-quater
+
+#### A. Suppression de l'ancien écran S0 (2 portes "Que préfères-tu ?")
+
+Dans `assets/sapi-modal-conseiller.js` :
+- Supprimer le markup des 2 portes (`.conseiller-portes` ou similaire)
+- Supprimer le H2 *"Que préfères-tu ?"*
+- Supprimer le séparateur "ou" circulaire entre les 2 portes
+- Supprimer les handlers `'choose-questions'` et `'choose-text'` (les boutons des portes)
+- Supprimer le CSS associé (`.conseiller-porte`, `.conseiller-portes__or`, etc.)
+
+#### B. Nouveau S0 hybride
+
+L'état `s0` est refondu. Structure (suivre le mockup #9) :
+
+```
+.conseiller-card
+  .conseiller-card__badge        ← dynamique : "Conseil de Robin" ou "Mon projet"
+  .conseiller-card__title        ← dynamique : question courante (H2 uppercase)
+  .conseiller-choices            ← grille de boutons-cards (3 cols desktop / 2 mobile)
+  .conseiller-or                 ← séparateur "ou" horizontal avec pastille centrée
+  .conseiller-text-input         ← input pill + bouton submit orange
+  .conseiller-reset-link         ← lien souligné "Effacer et recommencer" (uniquement état partiel)
+```
+
+**Le séparateur "ou"** : pastille crème centrée avec lignes horizontales de chaque côté (cf. mockup). Plus le séparateur circulaire entre 2 portes qui existait.
+
+**Le champ texte** : input pill 50px + bouton flèche orange dans un wrapper relative. Identique à S2.start actuel mais sans les 3 suggestions cliquables (supprimées — épuration validée).
+
+#### C. Logique de détection automatique de l'état
+
+À l'ouverture de la modale via le sélecteur `data-modal-state="s0"` (ou similaire) :
+
+```js
+function determineInitialState() {
+  const project = sapiProject.get();
+  const visibleSteps = getVisibleStepIds(project.answers);
+  const allAnswered = visibleSteps.every(id => project.answers[id]);
+  const noneAnswered = visibleSteps.every(id => !project.answers[id]);
+
+  if (allAnswered && visibleSteps.length > 0) return 's3-carrefour';   // toutes répondues → S3 3 actions
+  if (noneAnswered) return 's0-initial';                                // aucune → état initial
+  return 's0-partiel';                                                  // entre les deux → partiel
+}
+```
+
+Selon le résultat :
+- **s3-carrefour** : afficher S3 (inchangé depuis F2a-ter)
+- **s0-initial** : afficher le nouveau hybride avec badge "Conseil de Robin", question Pièce (la 1re du parcours), placeholder *"Décris ton projet en quelques mots…"*, lien Effacer caché
+- **s0-partiel** : afficher le nouveau hybride avec badge "Mon projet", question = `getNextUnansweredVisibleStep(answers)`, placeholder *"Précise ton projet en quelques mots…"*, lien Effacer visible
+
+#### D. Comportements interactifs
+
+**Clic sur une réponse de la grille** (Pièce, Taille, etc.) :
+- Enregistre la réponse dans `sapiProject.answers`
+- Bascule vers **S1 normal** sur la question suivante (le parcours guidé continue comme avant)
+- Le texte tapé dans le champ texte (s'il y en avait) est **ignoré sans avertissement** — le clic bouton gagne (décision Robin)
+
+**Submit du champ texte** (Entrée ou clic bouton orange) :
+- Bascule vers **S2.chat** avec une **bulle initiale Robin** construite côté client : `advice_text + "Qu'est-ce que tu veux affiner ?"` (advice_text = stocké dans sapiProject, ou texte générique de la pièce si projet partiel sans advice, ou rien si projet vide → dans ce cas la bulle initiale = *"Décris-moi ton projet, je t'aide à trouver une sélection."* ou similaire)
+- La bulle initiale est pushée dans `state.chat.conversation` (comme F2a-ter pour "Préciser avec Robin")
+- Le texte tapé par le visiteur devient la 1re bulle user du chat
+- Le chat continue normalement (footer input, endpoints `sapi_megafilter_chat`)
+- Aucun nouvel appel IA pour la bulle initiale
+
+**Clic sur "Effacer et recommencer"** (état partiel) :
+- Appelle `sapiProject.clear()`
+- **Bascule fluide vers l'état initial dans la même modale** (badge "Conseil de Robin", question Pièce, placeholder "Décris…", lien Effacer disparaît)
+- Pas de fermeture de la modale, pas de redirect
+
+#### E. Conséquences sur la card "Mon projet"
+
+La card "Mon projet" (sur /mes-creations/) reste cliquable comme aujourd'hui (refondue en bouton entier en F2a-ter). Son action :
+- Ouvre la modale en mode `s0` (le nouvel hybride)
+- C'est `determineInitialState()` qui décide ensuite si on affiche s0-initial, s0-partiel ou s3-carrefour selon l'état du projet
+
+**Aucun changement** sur la card "Conseil de Robin" (sans projet) — son CTA "Décrire mon projet" ouvre la modale en mode `s0`, et la modale tombe automatiquement sur s0-initial parce que sapiProject est vide.
+
+---
+
+### Ce qui n'est PAS dans F2a-quater
+
+- ❌ S1 (parcours questions guidées) — inchangé après le 1er clic depuis l'hybride
+- ❌ S2.chat — inchangé (mais la bulle initiale construite par F2a-ter est réutilisée par l'hybride)
+- ❌ S3 carrefour 3 actions pour projet complet — inchangé
+- ❌ Tout autre composant (cards /mes-creations/, hero, grille, fiche produit) — inchangés
+- ❌ Suggestions cliquables sous le champ texte — **supprimées** (épuration)
+- ❌ Chips récap dans l'état partiel — **non affichés** (visibles sur la card "Mon projet" avant ouverture, pas besoin de les répéter)
+
+---
+
+### Critères de succès
+
+1. **L'ancien écran "Que préfères-tu ?" avec les 2 portes n'existe plus dans le code** (grep retourne 0)
+2. **Ouverture de la modale via card "Conseil de Robin"** (sapiProject vide) → écran hybride état initial : badge "Conseil de Robin", question Pièce, 6 boutons-cards, séparateur "ou", champ texte placeholder "Décris ton projet…", pas de lien Effacer
+3. **Ouverture de la modale via card "Mon projet" avec projet partiel** (`?piece=salon` direct depuis home, par exemple) → écran hybride état partiel : badge "Mon projet", question Taille (la prochaine non répondue), 4 boutons, champ texte placeholder "Précise ton projet…", lien "Effacer et recommencer" en bas
+4. **Ouverture de la modale via card "Mon projet" avec projet complet** → S3 carrefour 3 actions (inchangé depuis F2a-ter)
+5. Clic sur un bouton-card de réponse → bascule en S1 sur la question suivante, le parcours continue normalement
+6. Si du texte avait été tapé dans le champ et le visiteur clique sur une réponse bouton → le texte est ignoré, parcours S1 démarre (comportement implicite, pas de message d'avertissement)
+7. Submit du champ texte (état initial OU partiel) → bascule en S2.chat avec bulle initiale Robin construite côté client à partir d'`advice_text` + *"Qu'est-ce que tu veux affiner ?"*, suivie de la 1re bulle user
+8. Clic sur "Effacer et recommencer" en état partiel → `sapiProject.clear()` + bascule fluide vers état initial dans la même modale (badge change, question Pièce s'affiche, lien Effacer disparaît). **Pas de fermeture de la modale.**
+9. ESC ou click-outside → ferme la modale, sapiProject conservé tel quel
+10. Mobile 375px : grille passe à 2 colonnes, séparateur "ou" et champ texte responsive, lien Effacer reste centré
+
+---
+
+### Précautions
+
+- **Ne PAS toucher** au S1 (les questions une à une après le 1er clic), ni au S2.chat (la conversation libre), ni au S3 carrefour (projet complet)
+- **Ne PAS rajouter** les 3 suggestions cliquables sous le champ texte (épuration validée)
+- **Ne PAS afficher** de chips récap des réponses précédentes dans l'état partiel (le visiteur les voit déjà sur la card "Mon projet" avant d'ouvrir)
+- **Référence visuelle obligatoire** : `mockups/mockup-09-modale-hybride.html` — Claude Code doit l'ouvrir avant de coder pour voir la structure
+- Le séparateur "ou" est **horizontal avec pastille centrée** (cf. mockup), pas circulaire entre 2 portes
+- Branche `test-theme-sapi-maison`, push test uniquement
+
+---
+
+
+## [TÂCHE] F2a-ter — Carrefour S3 "Modifier mon projet" (récap + 3 actions, zéro appel IA)
+
+**Date :** 2026-05-19
+**Priorité :** moyenne (UX du retour visiteur sur son projet)
+**Branche :** `test-theme-sapi-maison`
+**Prérequis :** F2a + F2a-bis livrées et validées.
+
+---
+
+### Contexte
+
+Dans F2a-bis, l'écran S3 de la modale (récap + phrase IA + CTA) a été supprimé : la fin du parcours S1 ferme directement la modale, et le lien *"Préciser ou modifier mon projet"* sur la card "Mon projet" ouvre la modale à S0 (2 portes) avec les réponses pré-remplies.
+
+Solution intermédiaire fonctionnelle mais pas optimale : le visiteur tombe sur l'écran de démarrage 2 portes alors qu'il a déjà un projet en cours. Pas de récap, pas de choix d'action clair.
+
+**Nouvelle idée Robin :** ressusciter S3, mais avec un contenu radicalement différent — un **carrefour d'options** quand le visiteur revient sur son projet :
+- Voir le récap de son projet (chips lecture seule)
+- Choisir entre 3 actions claires : consulter, affiner par chat, ou recommencer
+
+---
+
+### À LIRE AVANT TOUTE MODIFICATION
+
+1. `assets/sapi-modal-conseiller.js` — modale S0/S1/S2 (S3 supprimé en F2a-bis, à restaurer avec nouveau contenu)
+2. `assets/sapi-cards-conseiller.js` — la card "Mon projet" et son lien *"Préciser ou modifier mon projet"*
+3. `assets/sapi-project.js` — sapiProject.advice_text + clear()
+4. `style.css` — chercher `.conseiller-card--modal .conseiller-chips` (supprimé en F2a-bis, à réintégrer)
+5. Mémoire Cowork `project_conseiller_v3_pivot.md` — pattern visuel universel Conseiller
+
+---
+
+### Périmètre F2a-ter
+
+#### A. Restaurer un écran S3 dans la modale (contenu nouveau)
+
+L'écran S3 réapparaît, mais **uniquement déclenché depuis la card "Mon projet"** (pas à la fin de S1 qui continue de fermer directement la modale comme dans F2a-bis).
+
+**Structure visuelle :**
+- Card Conseiller universelle (fond crème, dashed, badge wood-dark "Mon projet")
+- H2 *"Voici votre projet"*
+- Chips récap des réponses, lecture seule, format `<key> : <valeur>` (Pièce : Salon · Taille : Spacieuse · etc.) — réutiliser/recréer le composant `.conseiller-chips` supprimé en F2a-bis
+- **3 actions hiérarchisées visuellement** :
+
+| Niveau | Style | Wording | Effet |
+|---|---|---|---|
+| 1 (primaire) | Pill orange (`var(--color-orange)`) | **Voir la sélection** | Ferme la modale, retour à la grille filtrée. Statu quo. |
+| 2 (secondaire) | Pill wood-dark (cohérent badge) | **Préciser avec Robin** | Bascule vers S2.chat avec bulle initiale (cf. C) |
+| 3 (tertiaire) | Lien souligné `var(--color-wood)` discret | **Effacer et recommencer** | `sapiProject.clear()` + bascule vers S0 |
+
+Layout : les 2 boutons (orange + wood-dark) côte à côte (ou empilés sur mobile), le lien souligné en dessous, centré.
+
+#### B. Adapter le lien sur la card "Mon projet"
+
+Dans `assets/sapi-cards-conseiller.js` :
+- Renommer le lien *"Préciser ou modifier mon projet ✎"* → **"Modifier mon projet ✎"** (plus court, plus direct)
+- Le handler ouvre maintenant la modale **à S3** (au lieu de S0 actuellement)
+
+#### C. Action "Préciser avec Robin" → bascule vers S2.chat avec bulle initiale
+
+Quand le visiteur clique sur "Préciser avec Robin" depuis S3 :
+- La modale bascule vers **S2.chat** (pas S2.start)
+- Une **bulle initiale Robin** est injectée automatiquement, qui réutilise `sapiProject.advice_text` déjà stocké, suivi d'une invite à préciser
+
+Construction de la bulle initiale :
+```
+<advice_text>
+
+Qu'est-ce que tu veux affiner ?
+```
+
+Exemple si advice_text = *"Pour un salon spacieux et moderne, j'ai sélectionné 17 luminaires à ampoule entourée."* :
+> *"Pour un salon spacieux et moderne, j'ai sélectionné 17 luminaires à ampoule entourée. Qu'est-ce que tu veux affiner ?"*
+
+Si advice_text est un texte générique (projet partiel via `?piece=X`), même principe : *"Pour un salon, j'ai sélectionné une variété de luminaires qui créent une atmosphère chaleureuse. Qu'est-ce que tu veux affiner ?"*
+
+**Aucun nouvel appel IA** — la bulle initiale est construite côté client à partir d'`advice_text` + l'invite. C'est cohérent avec la règle F2a-bis "1 seul appel IA par parcours".
+
+Le chat continue ensuite normalement (footer input + bouton Envoyer, endpoints `sapi_megafilter_chat` Sonnet déjà câblés). À la sortie ("Voir la sélection"), le projet est mis à jour, advice_text est regénéré via `sapi_megafilter_advice` comme dans F2a-bis.
+
+#### D. Action "Effacer et recommencer"
+
+- Appel `sapiProject.clear()` (méthode existante de `sapi-project.js`)
+- Bascule de la modale vers **S0** (écran 2 portes) sans réponses pré-remplies
+- **Pas de confirmation modale ni popup** — le libellé du lien est explicite et le visiteur sait ce qu'il fait
+- Si le visiteur veut annuler le reset, il peut fermer la modale (ESC ou click-outside) — mais le projet est déjà effacé. C'est le compromis assumé.
+
+Note : si tu veux ajouter une mini-confirmation inline (genre "Confirmer l'effacement" qui apparaît au clic), à voir avec Robin. Pour la première version, pas de confirmation.
+
+#### E. Action "Voir la sélection"
+
+- Ferme la modale
+- Pas de modification du projet
+- Pas d'appel IA
+- Retour à la grille filtrée (statu quo)
+
+---
+
+### Ce qui n'est PAS dans F2a-ter
+
+- ❌ Confirmation modale pour "Effacer et recommencer" — à voir plus tard si besoin
+- ❌ Modification fine d'une réponse individuelle (genre cliquer sur une chip pour la changer) — option C de la discussion non retenue. Si visiteur veut modifier finement, il utilise "Préciser avec Robin" (chat) ou "Effacer et recommencer".
+- ❌ Tout autre changement sur S0/S1/S2 — inchangés
+- ❌ F2b (fiche produit) — séparé
+
+---
+
+### Critères de succès
+
+1. Sur `/mes-creations/` avec projet : card "Mon projet" affiche un lien **"Modifier mon projet ✎"** (raccourci)
+2. Clic sur ce lien → modale s'ouvre **directement à S3** (carrefour) avec chips récap + 3 actions
+3. Les chips récap reflètent les réponses du `sapiProject` (Pièce : Salon · Taille : …)
+4. Bouton "Voir la sélection" (orange) → ferme la modale, projet inchangé, grille toujours filtrée
+5. Bouton "Préciser avec Robin" (wood-dark) → modale bascule vers S2.chat. **Une bulle initiale Robin** apparaît, contenant `advice_text` + *"Qu'est-ce que tu veux affiner ?"*. Aucun nouvel appel IA pour générer cette bulle.
+6. Footer chat S2 fonctionne normalement (input, bouton Envoyer)
+7. À la sortie du chat ("Voir la sélection" dans S2.chat) → fermeture + advice_text regénéré (comportement F2a-bis inchangé)
+8. Lien "Effacer et recommencer" (souligné, en dessous des 2 boutons) → `sapiProject.clear()` + modale bascule vers S0 (2 portes, vide)
+9. Aucune confirmation modale pour le reset
+10. Esthétique : card Conseiller crème + dashed + badge "Mon projet" (wood-dark), chips standard, hiérarchie visuelle claire des 3 actions
+11. Mobile (375px) : 2 boutons s'empilent verticalement + lien souligné en dessous, lisible
+
+---
+
+### Précautions
+
+- **Ne PAS toucher** au flow de fin de S1 (qui continue de fermer direct la modale après écran transition "Robin réfléchit")
+- **Ne PAS rajouter** d'appel IA — la bulle initiale Robin est construite côté client à partir d'`advice_text` déjà stocké
+- **Mockup #6 reste OBSOLÈTE pour le contenu** — on s'en inspire uniquement pour le composant chips récap (lecture seule). Le reste du mockup (card IA blanche + CTA seul) ne s'applique pas.
+- Branche `test-theme-sapi-maison`, push test uniquement
+- Si impasse layout 3 actions (mobile notamment), remonter à Robin avec capture
+
+---
+
+
+## [TÂCHE] F2a-bis — Correctif wording hero + simplification du modèle IA (1 seul appel à la sortie de la modale)
+
+**Date :** 2026-05-19
+**Priorité :** haute (correctif F2a livré sur test — Robin a identifié un bug d'incohérence + revoit le rôle de l'IA)
+**Branche :** `test-theme-sapi-maison`
+**Prérequis :** F2a livrée sur test (cf. retour plus haut).
+
+---
+
+### Contexte
+
+Après test de F2a, Robin a fait 3 retours :
+1. **Wording hero** : "Pour ta chambre" présume une appartenance qu'on ne peut pas affirmer. Le sous-titre est trop long.
+2. **Incohérence textes IA** : hero "chambre" + phrase IA "cuisine" sur le même écran — symptôme d'un modèle où l'IA est appelée trop souvent et désynchronisée avec le hero PHP.
+3. **Réinitialiser/modifier le projet** : la méthode actuelle ne lui plaît pas (sujet traité dans une tâche séparée).
+
+F2a-bis couvre **les Points 1 + 2**. Le Point 3 viendra dans une autre tâche après échange avec Robin.
+
+**Décision Robin sur l'IA :** moins d'IA, et pas n'importe quand. **Un seul appel IA par parcours, à la sortie de la modale.** Le résultat est stocké dans `sapiProject.advice_text` et réutilisé partout ensuite sans nouvel appel. Si pas de parcours fait, on affiche un texte générique pré-rédigé selon la pièce.
+
+---
+
+### À LIRE AVANT TOUTE MODIFICATION
+
+1. `woocommerce/archive-product.php` — où vit le hero (statique PHP avec mapping piece)
+2. `assets/sapi-cards-conseiller.js` — la card "Mon projet" qui appelle aujourd'hui `sapi_megafilter_advice` à chaque load
+3. `assets/sapi-modal-conseiller.js` — modale S0/S1/S2/S3
+4. `functions.php` — endpoints `sapi_megafilter_advice`, `sapi_megafilter_recap`, `sapi_megafilter_freetext`, `sapi_megafilter_chat`
+5. `assets/sapi-project.js` — gestion `localStorage.sapiProject`
+6. Mémoire Cowork `feedback_wording_selection_luminaires.md` — règle "sélection de luminaires"
+
+---
+
+### Périmètre F2a-bis
+
+#### A. Correctif wording hero (Point 1)
+
+Dans `archive-product.php`, mapping `$piece_hero_map` à corriger :
+
+```php
+$piece_hero_map = [
+  'salon'    => ['article' => 'un',  'nom' => 'salon'],
+  'chambre'  => ['article' => 'une', 'nom' => 'chambre'],
+  'cuisine'  => ['article' => 'une', 'nom' => 'cuisine'],
+  'bureau'   => ['article' => 'un',  'nom' => 'bureau'],
+  'entree'   => ['article' => 'une', 'nom' => 'entrée'],
+  'escalier' => ['article' => 'un',  'nom' => 'escalier'],
+];
+```
+
+H1 devient : `"Pour {article} {nom}"` → *"Pour un salon"*, *"Pour une chambre"*, etc.
+
+**Sous-titre** remplacé par : *"Découvre la sélection de l'atelier pour ton projet"*
+
+Le hero standard (pas de `?piece=`) reste inchangé : H1 *"Mes Créations"* + sous-titre marketing actuel + lien "Conseils de Robin →" visible.
+
+#### B. Nouveau modèle IA — 1 seul appel, à la sortie de la modale
+
+**Règle d'or** : l'IA est appelée **une et une seule fois** par parcours abouti dans la modale. Le résultat est persistant dans `sapiProject.advice_text`. Plus aucun appel IA au load de /mes-creations/, ni au refresh, ni à la navigation.
+
+##### B1. Suppression de l'écran S3 récap (modale mode S1 questions)
+
+L'écran S3 (chips récap + phrase IA + CTA "Voir la sélection") **disparaît** du flow S1.
+
+Nouveau flow S1 :
+1. Visiteur répond à la dernière question visible (selon `sapi_guide_get_steps()` visibility logic)
+2. **Écran de transition très court** : la modale affiche *"Robin réfléchit à votre projet"* + animation 3 dots pulsants (minimum 700ms même si la réponse IA arrive plus vite — pour la lisibilité)
+3. En parallèle, appel `sapi_megafilter_advice` avec le projet final
+4. Au retour : `sapiProject.advice_text` est stocké côté client
+5. Fermeture de la modale + soft refresh ou re-render de la card "Mon projet" + filtrage grille via `window.sapiShopRefilter()`
+
+**Plus de bouton "Voir la sélection" dans S1.** L'avancée est automatique.
+
+##### B2. Sortie de S2 (mode texte libre) — Option B retenue
+
+Au clic sur "Voir la sélection" depuis le chat S2 :
+1. Même écran de transition *"Robin réfléchit à votre projet"* + 3 dots (~700ms minimum)
+2. Appel `sapi_megafilter_advice` avec `{answers, conversation: state.modal.conversation, nonce}`
+3. L'endpoint reçoit l'historique de chat + les chips activés et génère une phrase de synthèse
+4. Stockage `sapiProject.advice_text` + fermeture modale + refresh card "Mon projet"
+
+**Pas de raccourci** sur la dernière bulle Robin — on régénère une phrase de synthèse propre.
+
+##### B3. Endpoint `sapi_megafilter_advice` refactoré
+
+Avant (F2a) : appelé à chaque load de /mes-creations/ avec un projet, retourne une phrase rapide (Haiku, cache 1h serveur).
+
+Après (F2a-bis) :
+- Appelé **uniquement** à la sortie de la modale (S1 ou S2)
+- **Modèle Sonnet** (qualité du ton, sortie unique, on peut se permettre le coût)
+- Input : `{answers, conversation?, nonce}` — `conversation` optionnel, présent uniquement en sortie de S2
+- System prompt : génère 1-2 phrases qui *résument le conseil et la sélection* selon le projet (et le chat si présent). Ton chaleureux, signature implicite "— Robin" ajoutée côté front
+- Output : `{advice_text: "..."}`
+- **Pas de cache serveur** — chaque parcours est unique
+- Rate-limited via `sapi_guide_check_rate_limit()` existant
+- Fallback en cas d'échec API : retourner le texte générique correspondant à la pièce (cf. B6)
+
+##### B4. Endpoint `sapi_megafilter_recap` supprimé
+
+Cet endpoint pilotait l'écran S3 supprimé. À retirer proprement de `functions.php` (la fonction + le `add_action`).
+
+##### B5. Suppression de l'appel IA au load de /mes-creations/
+
+Dans `assets/sapi-cards-conseiller.js`, retirer tout appel AJAX qui charge la phrase IA au load. Plus de loading state, plus de pulse 600ms — la card "Mon projet" lit sa valeur synchroniquement depuis `sapiProject.advice_text` ou les textes génériques.
+
+##### B6. Textes génériques par pièce — 6 phrases pré-rédigées
+
+Stocker en PHP via `wp_localize_script` (ou directement en JS) :
+
+```php
+$piece_generic_advice = [
+  'salon'    => "Pour un salon, j'ai sélectionné une variété de luminaires qui créent une atmosphère chaleureuse.",
+  'chambre'  => "Pour une chambre, ma sélection privilégie les lumières douces et apaisantes.",
+  'cuisine'  => "Pour une cuisine, je propose des éclairages à la fois fonctionnels et conviviaux.",
+  'bureau'   => "Pour un bureau, j'ai retenu des luminaires qui aident à la concentration tout en restant beaux.",
+  'entree'   => "Pour une entrée, voici des modèles qui marquent l'arrivée sans encombrer.",
+  'escalier' => "Pour un escalier, des luminaires conçus pour éclairer et habiller la cage.",
+];
+```
+
+Suivis tous de la signature *"— Robin"* en Square Peg côté front (le PHP renvoie juste le texte sans signature).
+
+##### B7. Card "Mon projet" — nouvelle logique d'affichage
+
+Côté `assets/sapi-cards-conseiller.js`, l'affichage de la card "Mon projet" suit cette logique synchronisée (zéro AJAX au load) :
+
+```js
+function getAdviceText(project) {
+  // 1. Si advice_text existe (parcours modale fait) → l'utiliser
+  if (project.advice_text) return project.advice_text;
+  // 2. Sinon si une pièce est définie → texte générique
+  if (project.answers && project.answers.piece) {
+    return SAPI_GENERIC_ADVICE[project.answers.piece] || FALLBACK;
+  }
+  // 3. Fallback ultime (ne devrait jamais arriver)
+  return "Voici ma sélection pour votre projet.";
+}
+```
+
+Plus de loading state visible — la card s'affiche tout de suite avec le texte stocké ou générique.
+
+##### B8. Cohérence hero ↔ card ↔ sapiProject
+
+Pour éviter le bug "hero chambre + texte IA cuisine" observé :
+- Au load de `/mes-creations/`, **si `?piece=X` est présent dans l'URL et différent de `sapiProject.answers.piece`**, le `?piece=X` **écrase** la valeur du localStorage immédiatement (avant le render des cards). Le URL fait autorité.
+- Le sapiProject est mis à jour, advice_text est effacé (parce qu'il correspondait à l'ancienne pièce), et la card "Mon projet" utilise le texte générique de la nouvelle pièce.
+- Sans `?piece=`, le sapiProject existant est utilisé tel quel.
+
+Cette règle vit côté `assets/sapi-project.js` au moment de l'init.
+
+#### C. Mockup #6 (récap S3) — OBSOLÈTE
+
+Le mockup `mockups/mockup-06-modale-recap.html` ne correspond plus au flow. **Ne pas l'implémenter.** Il peut être laissé dans `/mockups/` comme trace historique, ou supprimé si on veut nettoyer.
+
+---
+
+### Ce qui n'est PAS dans F2a-bis
+
+- ❌ Point 3 (réinitialiser/modifier le projet) — discussion à reprendre avec Robin
+- ❌ Toucher à F2b (logique projet sur fiche produit) — la même règle "IA minimale" s'appliquera mais on cadrera en F2b
+- ❌ Modification de la card "Conseil de Robin" (sans projet) — inchangée
+- ❌ Modification de la card sur-mesure — inchangée
+- ❌ Modification du flow S0 (2 portes) — inchangé
+- ❌ Modification de la conversation S2 elle-même — inchangée (les bulles, les filtres appliqués, etc.)
+
+---
+
+### Critères de succès
+
+1. Sur `/mes-creations/?piece=salon` : H1 = *"Pour un salon"*, sous-titre = *"Découvre la sélection de l'atelier pour ton projet"*
+2. Sur `/mes-creations/?piece=chambre` : H1 = *"Pour une chambre"*
+3. Sur `/mes-creations/` nu : H1 = *"Mes Créations"* (standard inchangé)
+4. Sur `/mes-creations/?piece=salon` sans parcours modale fait : card "Mon projet" affiche **"Pour un salon, j'ai sélectionné une variété de luminaires qui créent une atmosphère chaleureuse. — Robin"** (texte générique, ZÉRO appel AJAX au load — vérifier dans l'onglet Network du navigateur)
+5. Parcours S1 complet (réponses jusqu'au bout) : écran transition *"Robin réfléchit"* (~700ms) → fermeture modale → card "Mon projet" affiche le `advice_text` IA fraîchement généré
+6. Parcours S2 chat + clic "Voir la sélection" : même écran transition + appel IA + stockage + fermeture
+7. Refresh `/mes-creations/` après parcours : `advice_text` toujours là, **zéro appel IA réseau** (vérifier Network)
+8. Visiteur navigue de `/mes-creations/?piece=salon` à `/mes-creations/?piece=chambre` (sans vider localStorage) : sapiProject est mis à jour avec chambre, advice_text est effacé, le texte générique chambre s'affiche → **cohérence hero/card garantie**
+9. Endpoint `sapi_megafilter_recap` n'existe plus dans `functions.php` (grep retourne 0)
+10. L'écran S3 (chips récap + phrase IA + CTA "Voir la sélection") n'apparaît plus jamais dans la modale
+11. Si l'appel IA échoue à la sortie : on stocke le texte générique de la pièce comme advice_text et on ferme la modale (pas de blocage)
+
+---
+
+### Précautions
+
+- **Ne PAS appeler l'IA au load** — uniquement à la sortie de la modale. Si Claude Code est tenté de remettre un appel "rapide" sur la card "Mon projet", c'est NON.
+- **Sauvegarder `advice_text` AVANT de fermer la modale** pour que la card "Mon projet" puisse l'afficher immédiatement
+- **Fallback gracieux si l'IA plante** : utiliser le texte générique de la pièce. Ne pas afficher d'erreur au visiteur.
+- **Mockup #6 (récap S3) est OBSOLÈTE** — ne pas s'en inspirer pour le flow.
+- Branche `test-theme-sapi-maison`, push test uniquement
+- Si impasse, remonter à Robin avec captures plutôt que s'acharner
+
+---
+
+
+## [TÂCHE] F2a — Refonte UX /mes-creations/ + modale-tunnel 2 portes + card sur-mesure + projet persistant
+
+**Date :** 2026-05-19
+**Priorité :** haute (pivot après livraison F1 — Robin a jugé la card méga-filtre inline trop froide)
+**Branche :** `test-theme-sapi-maison`
+**Prérequis :** F1a/F1a-bis/F1a-ter/F1c/F1b livrées et validées (déjà fait).
+
+---
+
+### Contexte
+
+Suite à la livraison complète du méga-filtre F1, Robin a constaté que la **card "Affiner avec Robin" inline** avec ses 7 chips dropdowns sur /mes-creations/ ne donnait pas le ressenti voulu — trop "filtre catalogue", pas assez "conseiller chaleureux". **Pivot acté** vers une modale-tunnel à 2 portes (questions guidées / texte libre), avec un projet persistant qui suit le visiteur sur tout le site.
+
+**Ce qu'on garde de F1 :**
+- Câblage home → `/mes-creations/?piece=X` (intact)
+- Hero réactif au `?piece=` (intact)
+- Cleanup ancien Conseiller V2 effectué (intact)
+- Backend IA F1b : endpoints `sapi_megafilter_freetext` (Haiku) + `sapi_megafilter_chat` (Sonnet) — réutilisés tels quels, juste appelés depuis la nouvelle modale
+- Roompicker sur `/conseils-eclaires/` (intact)
+- CTA "Affiner ma sélection" sur pages catégorie (intact)
+- Plus de pills catégorie ni search bar sur /mes-creations/ (intact)
+- Filtrage client-side `mega-filtre.js` `cardMatches()` (réutilisé)
+
+**Ce qui change avec F2a :**
+- Suppression de la card `.megafilter-bar` inline + ses chips dropdowns
+- Sur /mes-creations/ sans projet → **card "Conseil de Robin"** invite à ouvrir la modale
+- Sur /mes-creations/ avec projet → **card "Mon projet"** avec phrase IA + lien Modifier
+- La modale devient **un tunnel à 2 portes** (questions guidées / texte libre)
+- Mode questions = parcours linéaire conditionnel avec gros boutons (1 question / écran)
+- Mode texte = chat IA (la version actuelle F1b reste, juste avec le nouvel écran de démarrage en amont)
+- Écran récap final commun avec phrase IA personnalisée
+- Nouvelle card **"Sur-mesure"** dans la grille (2 états : sans projet / avec projet)
+- **Persistance projet** dans `localStorage.sapiProject` — silencieux (pas d'indicateur visuel global)
+
+---
+
+### ⚠️ À LIRE AVANT TOUTE MODIFICATION
+
+**Mockups de référence visuelle** (DOIVENT être ouverts dans un navigateur pour comprendre les interactions — leurs classes CSS sont des noms de travail, pas la convention finale) :
+
+1. `site-web/mockups/mockup-01-message-invitation-v2.html` — Card "Conseil de Robin" sans projet
+2. `site-web/mockups/mockup-02-phrase-ia-projet-v2.html` — Card "Mon projet" avec projet
+3. `site-web/mockups/mockup-03-modale-demarrage.html` — Écran 2 portes
+4. `site-web/mockups/mockup-04-modale-questions.html` — Mode questions guidées
+5. `site-web/mockups/mockup-05-modale-texte-libre.html` — Mode texte (état initial + chat)
+6. `site-web/mockups/mockup-06-modale-recap.html` — Écran récap (variante A : fin mode complet)
+7. `site-web/mockups/mockup-07-card-sur-mesure.html` — Card sur-mesure (2 états)
+
+**Code existant à lire** :
+
+1. `woocommerce/archive-product.php` — actuellement contient `.megafilter-bar` et tout le shell modale F1b. À refondre.
+2. `assets/mega-filtre.js` — état + logique filtrage + appels endpoints IA. Beaucoup à réutiliser/refactorer.
+3. `style.css` — chercher `.megafilter-*` (à dégager ou re-styler), `.robin-bandeau*` (à conserver), `.reassurance-*` (à conserver), `.product-card-cinetique` (à conserver — c'est la grille).
+4. `inc/guide-data.php` — `sapi_guide_get_steps()` toujours utilisé pour la config des 7 questions et leur logique de visibilité conditionnelle.
+5. `functions.php` — endpoints `sapi_megafilter_freetext` / `sapi_megafilter_chat` à réutiliser tels quels.
+6. `memory/design_system.md` (côté Cowork) — typo, couleurs, ombres, border-radius officiels.
+7. `memory/project_conseiller_v3_pivot.md` (côté Cowork) — pattern visuel universel Conseiller acté.
+
+---
+
+### Pattern visuel universel Conseiller (à respecter partout)
+
+Acté pendant les 8 mockups, applicable à TOUS les composants Conseiller sur le site :
+
+- **Fond** : `var(--color-warm)` (crème)
+- **Bordure dashed décorative interne** : `1.5px dashed rgba(139, 115, 85, 0.35)`, `border-radius: 12px`, `position: absolute; inset: 12px`
+- **Border-radius container** : `16px`
+- **Badge en haut** :
+  - Variante par défaut (Conseil/Mon projet) : fond `var(--color-wood-dark)` + texte blanc uppercase
+  - Variante Sur-mesure : fond `var(--color-orange)` + texte blanc uppercase
+  - Padding `7px 16px`, `border-radius: 50px`, font-size 10.5px, letter-spacing 0.14em, icône SVG crayon
+- **H2** : Montserrat 700 uppercase `var(--color-wood-dark)`, `clamp(20px, 3vw, 32px)`
+- **CTA principal** : pill orange (`var(--color-orange)`, hover `--color-orange-dark`) avec icône SVG, padding `14px 30px`, border-radius 50px, font-size 13px uppercase 700
+- **Pill secondaire** ("Comment choisir ?", style F2b) : fond crème + bordure dashed wood, hover fond blanc + bordure pleine
+- **Signature** : "— Robin" en `'Square Peg'` cursive `var(--color-wood)` 22-24px
+- **Chips récap** (non interactifs) : fond blanc + bordure `var(--color-line)`, padding `7px 14px`, font-size 12.5px, format `<key> : <valeur>`
+- **Pas de sous-titres superflus** — le H2 + les chips parlent d'eux-mêmes
+- **Bouton Retour** centré dans la modale, style lien souligné `var(--color-wood)` 13px
+
+---
+
+### Périmètre F2a
+
+#### A. Suppression de la card méga-filtre inline (chips)
+
+Dans `archive-product.php`, supprimer entièrement la section `.megafilter-bar` (les 7 chips dropdowns + bouton "Décrire précisément" + Tout effacer). Et tout le CSS `.megafilter-bar*`, `.megafilter-chip*`, `.megafilter-header*`, `.megafilter-actions*`, etc.
+
+**À conserver** : la modale plein écran (`.megafilter-modal*`) — on la refond mais on garde le shell HTML pour ne pas tout réécrire. Ses sous-éléments seront repensés selon mockups #3 à #6.
+
+#### B. Sur /mes-creations/ — Card "Conseil de Robin" (sans projet) vs "Mon projet" (avec projet)
+
+État du projet déterminé par `localStorage.sapiProject` (cf. section G) **ou** par `?piece=X` dans l'URL (qui crée un projet partiel immédiat).
+
+**Si pas de projet** (`localStorage.sapiProject` vide ET pas de `?piece=`) :
+- Insérer **la card "Conseil de Robin"** selon mockup #1 v2, juste entre le hero et la grille
+- Container `<section>` max-width 1200px
+- Card crème + dashed (pattern universel)
+- Badge "Conseil de Robin"
+- H2 "Un coup de main pour choisir ?"
+- Sous-titre "Décrivez votre projet — pièce, taille, style — et Robin vous propose une sélection de luminaires adaptés."
+- CTA orange "Décrire mon projet" — ouvre la modale (cf. section D)
+- Pas de chips inline, pas de search bar — c'est tout
+
+**Si projet existant** :
+- Insérer **la card "Mon projet"** selon mockup #2 v2, même position
+- Badge "Mon projet"
+- Phrase IA italique (générée côté serveur via `sapi_megafilter_chat` ou similaire) + signature "— Robin" Square Peg
+- Lien discret "Préciser ou modifier mon projet ✎" → ouvre la modale au récap (mockup #6) avec le projet pré-chargé
+- Le filtrage de la grille produit utilise les réponses du projet (logique `cardMatches()` réutilisée de F1b)
+
+Pour la phrase IA :
+- Côté serveur, créer un nouvel endpoint léger `sapi_ajax_megafilter_advice` qui prend l'état du projet (chips répondus) en input et retourne une phrase courte de 2-3 phrases
+- Modèle Haiku (rapide, peu cher)
+- Cache 1h par combinaison (piece+taille+style) — pas besoin de regénérer à chaque visite
+- Si l'endpoint plante, fallback à une phrase générique : "Voici ma sélection pour votre projet. — Robin"
+
+#### C. La modale — refonte complète à partir des mockups #3 à #6
+
+La modale est plein écran (`100dvh` mobile, `100vh` desktop). Layout flexbox :
+```
+.megafilter-modal (flex column, 100dvh)
+  .megafilter-modal__header (flex-shrink: 0)
+  .megafilter-modal__body (flex: 1, overflow: hidden)
+    .conseiller-card (display: flex column, max-height: 100%)
+      [contenu selon état]
+  .chat-footer (flex-shrink: 0) — uniquement en mode chat
+```
+
+**Plusieurs états gérés par JS :**
+
+**État S0 — Écran de démarrage 2 portes** (mockup #3)
+- Card Conseiller avec badge, H2 "Comment voulez-vous me parler de votre projet ?", sous-titre "Deux manières d'arriver à une sélection de luminaires adaptés à votre projet."
+- 2 grosses cards-portes côte à côte (grille 1fr 1fr, empilées mobile) avec séparateur "ou" entre
+- Porte A "Je choisis" + icône checklist → bascule vers S1
+- Porte B "Je décris" + icône plume → bascule vers S2
+
+**État S1 — Mode questions guidées** (mockup #4)
+- Card Conseiller
+- Barre de progression fine en haut (sans chiffre)
+- Badge "Conseil de Robin"
+- H2 = question courante (depuis `sapi_guide_get_steps()`)
+- Grille de choix : gros boutons-cards (3 colonnes desktop / 2 mobile), même style que les room-cards du roompicker existant (`.room-card`) — icône dans un fond crème circulaire + label uppercase
+- Clic sur un choix → enregistre la réponse + avance auto à la question suivante (la prochaine `visible` selon `sapi_guide_get_steps()` — mirror de la logique conditionnelle existante)
+- À la dernière question répondue → bascule vers S3 (récap)
+- Bouton "← Retour" centré en bas → revient à la question précédente, ou à S0 si on est sur la 1re question
+- **PAS de sous-titre superflu** sous le H2, **PAS de hint** "Cliquez sur une réponse"
+
+**État S2 — Mode texte libre** (mockup #5, 2 sous-états)
+- Réutilise la logique F1b actuelle (`submitFreetext` + `submitChat`) avec adaptations UI
+- **Sous-état S2.start** : input central pill + bouton submit orange (flèche) + 3 suggestions cliquables en pills crème + bouton "← Retour" centré
+- **Sous-état S2.chat** : 
+  - Layout flex column (badge en haut fixe, zone chat scrollable au milieu, CTA + footer en bas fixes)
+  - Bulles user à droite (fond `wood-dark`, blanc, border-radius 18px sauf bottom-right 4px)
+  - Bulles Robin à gauche (fond blanc, bordure `--color-line`, border-radius 18px sauf bottom-left 4px)
+  - Sous chaque bulle Robin qui applique des filtres : encart "Filtres appliqués" (fond `rgba(139,115,85,0.08)`, border-left 3px wood)
+  - Zone chat = `overflow-y: auto` avec scrollbar fine wood
+  - Autoscroll vers la nouvelle bulle après chaque envoi
+  - Le CTA "Voir la sélection" reste en bas de card, jamais dans le scroll (`flex-shrink: 0`)
+  - Footer fixe avec input "Continuer à discuter avec Robin…" + bouton Envoyer wood-dark
+
+**État S3 — Récap final** (mockup #6 variante A)
+- Card Conseiller
+- Badge "Conseil de Robin"
+- H2 "Voici votre projet"
+- Chips de récap : tous les `<key> : <valeur>` des réponses (Pièce : Salon · Taille : Spacieuse · etc.)
+- **Phrase IA personnalisée** dans une card blanche ombrée à part (italique + signature "— Robin" Square Peg à droite). Endpoint `sapi_megafilter_chat` ou un nouveau plus léger (Sonnet pour la qualité).
+- CTA orange "Voir la sélection →" → ferme la modale, applique les filtres à la grille via `window.sapiShopRefilter()`, sauvegarde le projet en localStorage
+- Bouton "← Modifier mes réponses" centré → revient à S1 sur la dernière question
+
+**Transitions S0 → S1, S0 → S2, S1 → S3, S2 → S1 (si user clique Retour vers questions), etc.**
+- Animation fade-in/out 200ms
+- L'état de la modale est tracké dans `state.modal.screen = 's0' | 's1' | 's2start' | 's2chat' | 's3'`
+
+#### D. Câblage du CTA "Décrire mon projet" de la card "Conseil de Robin"
+
+Sur /mes-creations/ sans projet, le CTA de la card "Conseil de Robin" ouvre la modale **à l'état S0** (écran 2 portes).
+
+Sur /mes-creations/ avec projet, le lien "Préciser ou modifier mon projet" de la card "Mon projet" ouvre la modale **à l'état S3** (récap) avec le projet pré-chargé. L'utilisateur peut alors cliquer "Modifier mes réponses" pour repasser en S1.
+
+#### E. Card "Sur-mesure" dans la grille produit (mockup #7)
+
+**Emplacement** : insérer la card **dans la grille produit**, intercalée. Position à arbitrer côté Claude Code (après les 6-8 premiers produits ? après les best-sellers ? toujours à la fin ?). Robin a précisé : "pour le moment seulement dans la grille de la page mes-creations" (pas sur les pages catégorie pour l'instant).
+
+**Deux états selon `localStorage.sapiProject`** :
+
+**État A — Sans projet** (mockup #7 v2)
+- Card crème + dashed + badge **orange** "Sur-mesure"
+- H2 "Et si on créait votre luminaire sur-mesure ?"
+- Intro "Laissez votre email et décrivez votre projet en quelques mots."
+- Form : input email (obligatoire) + textarea description du projet (obligatoire)
+- CTA orange "Recevoir une proposition →"
+- Réassurance "Réponse de Robin sous 48h · Aucun engagement"
+
+**État B — Avec projet** (mockup #7 v2 état condensé)
+- Card crème + dashed + badge orange "Sur-mesure" — **version compacte** (padding réduit)
+- H2 court "Un sur-mesure pour ce projet ?"
+- Pas d'intro (le H2 + chips parlent d'eux-mêmes)
+- Chips récap discrets (fond transparent, bordure dashed wood-mid, juste les valeurs sans labels)
+- Form : input email (obligatoire) + input texte single-line "Précisions ou inspirations (optionnel)" plus discret
+- CTA orange "Recevoir une proposition →"
+- Réassurance idem
+
+**Backend** : nouvel endpoint AJAX `sapi_ajax_megafilter_surmesure` qui :
+- Reçoit `{email, description, project_snapshot, nonce}`
+- Envoie un email à `robin@atelier-sapi.fr` avec le contenu (description + snapshot projet si présent)
+- Optionnel : ajoute l'email à une liste Brevo dédiée (à confirmer avec Robin avant)
+- Retourne un succès qui affiche un message de confirmation dans la card ("✓ Reçu, Robin vous écrit sous 48h.")
+
+#### F. Persistance projet — `localStorage.sapiProject`
+
+Format JSON :
+```json
+{
+  "answers": { "piece": "salon", "taille": "spacieuse", "sortie": "plafond", ... },
+  "labels":  { "piece": "Salon / Salle à manger", ... },
+  "created_at": 1716000000,
+  "updated_at": 1716000123,
+  "session_id": "optional-uuid-from-modale-session"
+}
+```
+
+**Sauvegarde** :
+- À chaque réponse dans la modale (état S1 questions OU état S2 chat avec filters_update)
+- À l'arrivée sur /mes-creations/?piece=X (crée un projet partiel avec juste la pièce)
+- À la fermeture de la modale (sauvegarde finale)
+
+**Lecture** :
+- Au load de /mes-creations/ → détermine si on affiche la card "Conseil de Robin" ou "Mon projet"
+- Au load de fiche produit (F2b) → détermine la pré-sélection variation
+- Au load de toute page → SILENCIEUX pour l'instant (pas d'indicateur global)
+
+**Reset** :
+- Pas de bouton "Vider mon projet" explicite pour l'instant (à voir selon usage)
+- Le projet vit aussi longtemps que le localStorage. À voir si on ajoute une expiration (genre 30 jours).
+
+#### G. Filtrage de la grille produit selon le projet
+
+La logique `cardMatches()` de `mega-filtre.js` est conservée. Elle prend en input les `answers` du projet et filtre les cards `.product-card-cinetique` via `display: none` / `display: block`. Le compteur est mis à jour aussi.
+
+Quand un projet est actif : la grille est filtrée à l'arrivée. Sinon la grille montre tous les modèles (sauf Accessoires + Carte cadeau, exclusion par défaut).
+
+---
+
+### Endpoints IA à réutiliser ou créer
+
+**Réutilisés tels quels (F1b)** :
+- `sapi_ajax_megafilter_freetext` — pour les inputs S2.start (1er message + 3 suggestions)
+- `sapi_ajax_megafilter_chat` — pour les messages suivants en S2.chat
+
+**Nouveaux à créer en F2a** :
+- `sapi_ajax_megafilter_advice` — phrase IA courte pour la card "Mon projet" sur /mes-creations/. Input : projet. Output : 1-2 phrases. Modèle Haiku. Cache 1h.
+- `sapi_ajax_megafilter_recap` — phrase IA pour l'écran récap S3. Input : projet complet. Output : phrase plus longue/conseillère. Modèle Sonnet (qualité du ton). Pas de cache (chaque récap est unique).
+- `sapi_ajax_megafilter_surmesure` — soumission de la card sur-mesure. Input : email + description + snapshot projet. Output : succès/erreur + envoi email Robin.
+
+---
+
+### Ce qui n'est PAS dans F2a
+
+- ❌ La logique de pré-sélection variation sur fiche produit — c'est F2b
+- ❌ La pill "Comment choisir ?" sur fiche produit — c'est F2b
+- ❌ Le mode court de la modale (3 questions) — c'est F2b (appelé depuis la pill)
+- ❌ L'indicateur projet global visible (bandeau, badge) — pas pour l'instant
+- ❌ La logique d'expiration du projet localStorage — pas pour l'instant
+- ❌ Photos produit adaptées à la pièce — projet futur séparé (cf. mémoire `project_photos_par_piece.md`)
+
+---
+
+### Critères de succès
+
+1. Sur `/mes-creations/` sans projet : la card "Conseil de Robin" s'affiche entre le hero et la grille, avec le CTA "Décrire mon projet"
+2. Clic sur CTA → modale s'ouvre à l'état S0 (écran 2 portes)
+3. Clic sur "Je choisis" → S1 (1re question : Pièce avec 6 choix gros boutons-cards)
+4. Clic sur "Salon / Salle à manger" → avance auto à la question suivante (Taille)
+5. Quand toutes les questions visibles sont répondues → S3 (récap avec chips + phrase IA + CTA "Voir la sélection")
+6. Clic sur "Voir la sélection" → modale se ferme, projet sauvegardé en localStorage, grille filtrée, page rechargée propre avec card "Mon projet" affichée
+7. Sur retour /mes-creations/ avec projet → card "Mon projet" affichée (pas card "Conseil de Robin"), grille déjà filtrée, phrase IA visible
+8. Clic sur "Préciser ou modifier mon projet" depuis card "Mon projet" → modale s'ouvre à S3, on peut cliquer "Modifier mes réponses" pour repasser en S1
+9. Sur S0, clic "Je décris" → S2.start (input texte + 3 suggestions). Idem au comportement F1b actuel mais avec le pré-écran S0 en amont
+10. Le câblage `?piece=salon` continue de fonctionner — il crée un projet partiel en localStorage et la card "Mon projet" s'affiche (avec juste la pièce + phrase IA légère)
+11. Card "Sur-mesure" s'affiche dans la grille (position à arbitrer) :
+    - Sans projet → état A (form complet)
+    - Avec projet → état B (compact, chips récap, input optionnel)
+12. Soumission du form sur-mesure → email envoyé à Robin + message de confirmation dans la card
+13. Le bandeau réassurance reste affiché en haut de toutes les pages, fonction `randomizeMobileReassurance()` toujours active
+14. Mobile (375px) : tout fonctionne, modale en `100dvh`, zone chat scrollable, gros boutons-cards en 2 colonnes, card sur-mesure prend toute la largeur
+
+---
+
+### Précautions
+
+- **Pattern visuel universel** (cf. section dédiée) à respecter STRICTEMENT sur toutes les cards Conseiller. Pas d'écart.
+- **Ne PAS toucher** au bandeau réassurance (`.robin-bandeau`, `.reassurance-*`), aux cards produit (`.product-card-cinetique`), au hero, au footer, à la page conseils, à la home
+- **Ne PAS supprimer** les helpers `sapi_guide_*` ni `inc/guide-data.php` — la logique conditionnelle des questions vit toujours là
+- **Ne PAS supprimer** les endpoints F1b — réutilisés directement
+- **Ne PAS introduire** de hex en dur — toutes les couleurs via variables CSS
+- **Mockups = STRUCTURE et WORDING, pas pixel-perfect.** Les classes CSS des mockups (`.conseiller-card`, `.megafilter-*`, etc.) sont des noms de travail. Adapter aux conventions existantes du thème quand pertinent (réutiliser `.product-card-cinetique`, classes Sapi existantes…).
+- Branche `test-theme-sapi-maison`, push test uniquement
+- **Volumétrie attendue** : ~800-1200 lignes ajoutées (HTML + JS + CSS), suppressions du méga-filtre inline (~300 lignes). Bilan net positif modéré.
+- Si impasse CSS/layout, ne pas s'acharner — remonter à Robin avec captures
+
+---
+
+
+## [TÂCHE] F2b — Logique projet sur fiche produit + pill "Comment choisir ?"
+
+**Date :** 2026-05-19
+**Priorité :** moyenne (à enchaîner après validation F2a sur test)
+**Branche :** `test-theme-sapi-maison`
+**Prérequis :** F2a mergée sur test, modale fonctionnelle avec modes S0/S1/S3.
+
+---
+
+### Contexte
+
+F2a livre la modale Conseiller V3 sur /mes-creations/ avec persistance du projet en `localStorage.sapiProject`. F2b porte cette logique projet sur les **fiches produit** :
+
+- **Pré-sélection automatique de la variation** selon le projet (logique qui existait avant F1c — supprimée en cleanup, à récupérer du git history)
+- **Pill "Comment choisir ?"** au-dessus des sélecteurs de variation
+- **Mode court de la modale** (3 questions : pièce, taille, style) appelé depuis la pill quand le visiteur n'a pas encore de projet
+- **Mode récap direct** (saute les questions) quand le visiteur a déjà un projet
+
+---
+
+### À LIRE AVANT TOUTE MODIFICATION
+
+**Mockups de référence** :
+- `site-web/mockups/mockup-06-modale-recap.html` — variante B (mode court fiche produit, CTA "Appliquer cette sélection")
+- `site-web/mockups/mockup-08-pill-fiche-produit.html` — pill "Comment choisir ?" sur fiche produit + cas A/B
+
+**Code existant à lire** :
+- `woocommerce/single-product.php` — la fiche produit. Repérer où s'insère la pill (juste au-dessus des sélecteurs de variation)
+- `assets/cinetique.js` (et autres modules WC) — pour la logique de présélection variation
+- **Git history** : avant le commit F1c (`3be8ba7`), les fichiers `assets/guide-personalize.js` (80 lignes) et le bloc lignes 561-615 de `assets/cinetique.js` (55 lignes) contenaient la logique de pré-sélection. Récupérer ces deux blocs via `git show <commit-avant-F1c>:path/to/file` et les adapter au nouveau localStorage `sapiProject`.
+- `assets/mega-filtre.js` (livré en F2a) — la modale et ses états S0/S1/S2/S3. Pour F2b on ajoute un état S1-court (3 questions seulement)
+- `memory/project_conseiller_v3_pivot.md` — la vision globale
+
+---
+
+### Périmètre F2b
+
+#### A. Pill "Comment choisir ?" sur fiche produit
+
+Dans `woocommerce/single-product.php`, insérer une pill **juste au-dessus** des sélecteurs de variation WooCommerce (taille, essence). Pattern visuel exact selon mockup #8 :
+
+```css
+.help-pill {
+  display: inline-flex; gap: 7px; padding: 8px 18px;
+  background: var(--color-warm);
+  color: var(--color-wood-dark);
+  border: 1.5px dashed rgba(139, 115, 85, 0.5);
+  border-radius: 50px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
+  cursor: pointer;
+}
+.help-pill:hover {
+  background: #fff;
+  border-color: var(--color-wood-dark);
+}
+```
+
+Icône SVG = point d'interrogation rond. Libellé = "Comment choisir ?".
+
+Position : juste avant le 1er sélecteur de variation, dans une `<div class="help-pill-row">` (cf. mockup).
+
+#### B. Au clic sur la pill — comportement conditionnel
+
+**Si pas de projet** (`localStorage.sapiProject` absent ou vide) :
+- Ouvrir la modale Conseiller en **mode court S1-court**
+- Mode court = **3 questions seulement** : `piece`, `taille`, `style` (les questions "always" + Taille qui se débloque dès qu'une pièce est répondue)
+- Skip toutes les autres questions conditionnelles (Éclairage, Sortie, Hauteur, Table)
+- À la fin des 3 questions → écran S3-recap variante B (mockup #6 variante B) avec CTA "Appliquer cette sélection"
+
+**Si projet existant** (`localStorage.sapiProject` présent) :
+- Ouvrir la modale directement à l'état **S3-recap variante B** (saute les questions)
+- Le récap affiche les chips du projet + une phrase IA spécifique au produit en cours :
+  - Endpoint dédié `sapi_ajax_megafilter_product_advice` qui prend `{project, product_id}` en input
+  - Modèle Sonnet
+  - Output : phrase qui recommande explicitement UNE variation du produit en cours
+  - Exemple : *"Pour un salon spacieux et moderne comme le vôtre, je vous recommande la version **Taille L** de Gaston, en peuplier."*
+
+#### C. Pré-sélection de la variation à l'arrivée sur la fiche produit
+
+**Au load de single-product.php**, si `localStorage.sapiProject` existe :
+- Lire les `answers` du projet (notamment `taille`)
+- Appliquer le mapping pour pré-cocher la bonne variation côté JS WooCommerce
+- Ajouter une classe `.is-selected` sur le swatch ciblé
+- Afficher un petit **hint discret** à côté du label de l'attribut : *"✓ Pré-sélectionné pour votre projet"* en italique wood (cf. mockup #8 cas B)
+
+**Mapping de pré-sélection** (à reprendre du git history pré-F1c) :
+- Taille du projet → variation de taille du produit
+- Logique : matcher le slug `taille` du projet (`petite`, `moyenne`, `grande`, `ouvert`) au format/dimension de la variation WC
+- Le code historique faisait `intime → S`, `confortable → M`, `spacieuse → L` (à confirmer en lisant `assets/guide-personalize.js` avant F1c)
+- Note : tous les produits n'ont pas le même set de variations — gérer le cas où aucune variation ne matche (rien faire, pas d'erreur)
+
+#### D. CTA "Appliquer cette sélection" du récap mode court
+
+Au clic sur le CTA orange "Appliquer cette sélection" du récap S3-court :
+- Fermer la modale
+- Appliquer la pré-sélection variation comme décrit en C
+- Animer / scroller vers les sélecteurs de variation pour montrer le résultat
+- Sauvegarder le projet en localStorage (s'il vient d'être créé dans la modale court)
+
+#### E. État du mode court de la modale (nouveau)
+
+Côté `assets/mega-filtre.js`, ajouter un mode `state.modal.short = true` qui :
+- Filtre les questions à `piece`, `taille`, `style` uniquement
+- Saute les autres questions même si elles seraient visibles selon `sapi_guide_get_steps()` visibility logic
+- Au récap (S3) : affiche le CTA "Appliquer cette sélection" au lieu de "Voir la sélection"
+- À la fermeture/clic CTA : applique la logique de pré-sélection produit (au lieu de filtrer la grille /mes-creations/)
+
+#### F. Endpoint backend `sapi_ajax_megafilter_product_advice`
+
+Nouveau dans `functions.php` :
+- Reçoit `{project_answers, product_id, nonce}`
+- Récupère les variations WC du produit
+- Détermine la variation recommandée selon les règles (taille du projet → taille du produit, + éventuellement style si on a une vision plus fine)
+- Construit un system prompt qui inclut : nom du produit, variations disponibles, projet du visiteur
+- Appelle Claude Sonnet
+- Output : phrase IA qui recommande explicitement UNE variation avec un mot sur le pourquoi
+- Cache 1h par combinaison (project_hash + product_id)
+
+---
+
+### Ce qui n'est PAS dans F2b
+
+- ❌ Le changement de variation au-delà de la pré-sélection initiale (l'utilisateur garde la main complète sur les sélecteurs WC)
+- ❌ Photos produit adaptées à la pièce (projet futur séparé)
+- ❌ Pill sur les pages catégorie (Robin a dit "plus tard pour les pages catégorie")
+
+---
+
+### Critères de succès
+
+1. Sur n'importe quelle fiche produit `/produit/<slug>/` : la pill "Comment choisir ?" s'affiche juste au-dessus des sélecteurs de variation
+2. Sans projet : clic pill → modale S0 → utilisateur clique "Je choisis" → modale **S1-court** (3 questions max) → S3-recap variante B
+3. Avec projet : clic pill → modale directement à **S3-recap variante B** (saute les questions) avec phrase IA spécifique au produit
+4. CTA "Appliquer cette sélection" → ferme la modale + pré-sélectionne la bonne variation côté WC
+5. À l'arrivée sur fiche produit avec projet existant : variation pré-sélectionnée automatiquement (sans clic) + hint discret "Pré-sélectionné pour votre projet"
+6. Sans projet : aucune variation pré-sélectionnée par défaut (état standard WC)
+7. La logique de pré-sélection ne casse PAS le comportement WC normal (changement manuel de variation, ajout au panier, etc.)
+8. Aucune régression sur les autres fonctionnalités fiche produit (galerie, prix, description, etc.)
+9. Mobile (375px) : pill bien visible, modale 100dvh, tout fluide
+
+---
+
+### Précautions
+
+- **Récupérer le code de pré-sélection variation du git history** (commit avant `3be8ba7` F1c) — ne pas le réécrire from scratch. Adapter aux noms localStorage actuels.
+- **Pattern visuel Conseiller** à respecter (pill dashed wood crème, modale identique à F2a)
+- **Ne PAS toucher** au bandeau réassurance, à la grille /mes-creations/ (F2a), à la home
+- **Ne PAS modifier** la logique métier WooCommerce native (variations, panier, etc.) — juste pré-cocher
+- Branche `test-theme-sapi-maison`, push test uniquement
+- Si impasse, remonter à Robin avant d'écrire 200 lignes de hack
+
+---
+
 
 ## [TÂCHE] F1b — Intégration IA dans la modale "Décrire précisément mon projet"
 

@@ -302,8 +302,11 @@ function sapi_maison_enqueue_assets() {
     }
   }
 
-  // Méga-filtre intelligent — page Mes créations uniquement (F1a/F2a)
-  if (class_exists('WooCommerce') && is_shop()) {
+  // Méga-filtre intelligent + modale Conseiller V3
+  // - is_shop() : tous les scripts (méga-filtre, cards Conseil/Mon projet, modale)
+  // - is_product() (F2b) : on étend à la fiche produit pour la modale partagée
+  //   (la pill "Comment choisir ?" déclenche un sapi:open-modal).
+  if (class_exists('WooCommerce') && (is_shop() || is_product())) {
     require_once get_template_directory() . '/inc/guide-data.php';
 
     // Règles de filtrage partagées entre mega-filtre.js (no-op Phase 1)
@@ -393,6 +396,20 @@ function sapi_maison_enqueue_assets() {
         'icons'       => sapi_guide_get_icons(),
         'maxMessages' => 15,
       ]);
+    }
+
+    // F2b — Pill "Comment choisir ?" / "Adapter à mon projet" sur fiche produit
+    if (is_product()) {
+      $help_pill_js_path = get_template_directory() . '/assets/sapi-help-pill.js';
+      if (file_exists($help_pill_js_path)) {
+        wp_enqueue_script(
+          'sapi-help-pill',
+          get_template_directory_uri() . '/assets/sapi-help-pill.js',
+          ['sapi-project', 'sapi-modal-conseiller'],
+          filemtime($help_pill_js_path),
+          true
+        );
+      }
     }
 
     // F2a Phase 4 — card Sur-mesure intercalée dans la grille
@@ -3033,6 +3050,153 @@ function sapi_megafilter_format_project_text(array $answers, array $labels) {
   }
   return implode(' · ', $parts);
 }
+
+/**
+ * F2b — Modale Conseiller V3 partagée entre /mes-creations/ et fiche produit.
+ *
+ * Le markup ne change pas selon la page : c'est sapi-modal-conseiller.js qui
+ * adapte l'écran à l'ouverture (S0/S1/S2-chat/S3, et bientôt s-product-recap).
+ *
+ * Hookée sur wp_footer pour éviter de dupliquer le markup dans deux templates.
+ * Condition d'activation : is_shop() || is_product() — les scripts associés
+ * (sapi-modal-conseiller, sapi-project, sapi-cards-conseiller) sont enqueués
+ * en miroir dans la même condition.
+ */
+function sapi_render_conseiller_modal() {
+  if (!class_exists('WooCommerce')) return;
+  if (!(is_shop() || is_product())) return;
+
+  $pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>';
+  $arrow_svg  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+  ?>
+  <div class="conseiller-modal" data-conseiller-modal hidden>
+    <div class="conseiller-card conseiller-card--modal" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e('Conseil de Robin', 'theme-sapi-maison'); ?>" data-modal-card>
+
+      <!-- S0 — Écran hybride (F2a-quater) : question dynamique + choices + séparateur "ou" + champ texte.
+           Bascule dynamique selon sapiProject : "Conseil de Robin" (initial) ou "Mon projet" (partiel).
+           Si projet complet → la logique d'ouverture montre S3 directement à la place. -->
+      <div class="conseiller-modal__screen" data-screen="s0" hidden>
+        <div class="conseiller-card__inner">
+          <span class="conseiller-badge conseiller-badge--default" data-s0-badge>
+            <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+            <span data-s0-badge-text><?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?></span>
+          </span>
+
+          <h2 class="conseiller-h2" data-s0-question aria-live="polite">…</h2>
+
+          <div class="conseiller-choices" data-s0-choices></div>
+
+          <div class="conseiller-separator-or" aria-hidden="true">
+            <span class="conseiller-separator-or__text"><?php esc_html_e('ou', 'theme-sapi-maison'); ?></span>
+          </div>
+
+          <form class="conseiller-freetext" data-s0-form>
+            <div class="conseiller-freetext__wrap">
+              <input type="text" class="conseiller-freetext__input" data-s0-input
+                     placeholder="<?php esc_attr_e('Décris ton projet en quelques mots…', 'theme-sapi-maison'); ?>"
+                     maxlength="500"
+                     aria-label="<?php esc_attr_e('Décris ton projet en quelques mots', 'theme-sapi-maison'); ?>">
+              <button type="submit" class="conseiller-freetext__submit" aria-label="<?php esc_attr_e('Envoyer', 'theme-sapi-maison'); ?>">
+                <?php echo $arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+              </button>
+            </div>
+          </form>
+
+          <div class="conseiller-modal__nav" data-s0-reset-wrap hidden>
+            <button type="button" class="conseiller-s3-reset" data-action="s0-reset">
+              <?php esc_html_e('Effacer et recommencer', 'theme-sapi-maison'); ?>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- S1 — Mode questions guidées -->
+      <div class="conseiller-modal__screen" data-screen="s1" hidden>
+        <div class="conseiller-card__inner">
+          <div class="conseiller-progress" aria-hidden="true">
+            <div class="conseiller-progress__fill" data-progress-fill style="width: 0%"></div>
+          </div>
+
+          <span class="conseiller-badge conseiller-badge--default">
+            <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+            <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
+          </span>
+
+          <h2 class="conseiller-h2" data-question-title aria-live="polite">…</h2>
+
+          <div class="conseiller-choices" data-choices></div>
+
+          <div class="conseiller-modal__nav">
+            <button type="button" class="conseiller-back-link" data-action="back">← <?php esc_html_e('Retour', 'theme-sapi-maison'); ?></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- S2.chat — Mode texte libre, conversation -->
+      <div class="conseiller-modal__screen" data-screen="s2-chat" hidden>
+        <div class="conseiller-card__inner conseiller-card__inner--chat">
+          <div class="conseiller-chat-header">
+            <span class="conseiller-badge conseiller-badge--default">
+              <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+              <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
+            </span>
+          </div>
+
+          <div class="conseiller-chat" data-chat-messages></div>
+
+          <div class="conseiller-chat-cta" data-chat-cta hidden>
+            <button type="button" class="conseiller-cta" data-action="apply">
+              <span><?php esc_html_e('Voir la sélection', 'theme-sapi-maison'); ?></span>
+              <?php echo $arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+            </button>
+          </div>
+
+          <form class="conseiller-chat-footer" data-chat-form>
+            <input type="text" class="conseiller-chat-footer__input" data-chat-input
+                   placeholder="<?php esc_attr_e('Continuer à discuter avec Robin…', 'theme-sapi-maison'); ?>"
+                   maxlength="1000"
+                   aria-label="<?php esc_attr_e('Message', 'theme-sapi-maison'); ?>">
+            <button type="submit" class="conseiller-chat-footer__send"><?php esc_html_e('Envoyer', 'theme-sapi-maison'); ?></button>
+          </form>
+        </div>
+      </div>
+
+      <!-- S3 — Carrefour "Modifier mon projet" -->
+      <div class="conseiller-modal__screen" data-screen="s3" hidden>
+        <div class="conseiller-card__inner">
+          <span class="conseiller-badge conseiller-badge--default">
+            <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+            <?php esc_html_e('Mon projet', 'theme-sapi-maison'); ?>
+          </span>
+          <h2 class="conseiller-h2"><?php esc_html_e('Voici ton projet', 'theme-sapi-maison'); ?></h2>
+
+          <div class="conseiller-chips" data-recap-chips></div>
+
+          <div class="conseiller-s3-secondary-actions">
+            <button type="button" class="conseiller-cta conseiller-cta--secondary" data-action="s3-reset">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+              <span><?php esc_html_e('Recommencer', 'theme-sapi-maison'); ?></span>
+            </button>
+            <button type="button" class="conseiller-cta conseiller-cta--secondary" data-action="s3-refine">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span><?php esc_html_e('Préciser avec Robin', 'theme-sapi-maison'); ?></span>
+            </button>
+          </div>
+
+          <div class="conseiller-modal__cta">
+            <button type="button" class="conseiller-cta" data-action="s3-view">
+              <span><?php esc_html_e('Voir la sélection', 'theme-sapi-maison'); ?></span>
+              <?php echo $arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.conseiller-card--modal -->
+  </div>
+  <?php
+}
+add_action('wp_footer', 'sapi_render_conseiller_modal');
 
 /* ── Endpoint F2a-bis : phrase IA conseillère unique, appelée à la sortie modale
    ─────────────────────────────────────────────────────────────────────────────

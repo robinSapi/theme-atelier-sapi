@@ -387,6 +387,16 @@ get_header();
 
         <!-- Formulaire d'achat (variations + quantité + CTA) -->
         <div class="product-form-v2">
+          <!-- F2b — Pill "Comment choisir ?" / "Adapter à mon projet" (variables only).
+               Le texte est mis à jour en live par sapi-help-pill.js selon sapiProject.
+               Click → dispatch sapi:open-modal avec state="product". -->
+          <?php if ($product->is_type('variable')) : ?>
+          <button type="button" class="conseiller-pill-secondary" data-action="open-modal" data-modal-state="product" data-help-pill>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="14" height="14"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+            <span data-help-pill-text><?php esc_html_e('Comment choisir ?', 'theme-sapi-maison'); ?></span>
+          </button>
+          <?php endif; ?>
+
           <!-- Introduction aux variations -->
           <?php if ($product->is_type('variable')) : ?>
           <p class="variations-intro">Composez votre luminaire :</p>
