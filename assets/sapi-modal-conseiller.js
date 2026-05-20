@@ -150,6 +150,9 @@
     if (els.choices) {
       els.choices.innerHTML = '';
       var choices = step.choices || [];
+      // F2a-quater : 2 cols quand 2 ou 4 choix (sinon items isolés sur la
+      // dernière ligne d'un grid 3 cols)
+      els.choices.classList.toggle('conseiller-choices--2col', choices.length === 2 || choices.length === 4);
       choices.forEach(function (choice) {
         var btn = document.createElement('button');
         btn.type = 'button';
@@ -732,6 +735,8 @@
       if (els.s0Choices) {
         els.s0Choices.innerHTML = '';
         var choices = step.choices || [];
+        // F2a-quater : 2 cols quand 2 ou 4 choix pour éviter les items isolés
+        els.s0Choices.classList.toggle('conseiller-choices--2col', choices.length === 2 || choices.length === 4);
         choices.forEach(function (choice) {
           var btn = document.createElement('button');
           btn.type = 'button';

@@ -23064,6 +23064,14 @@ body.woocommerce-cart div.woocommerce-wrapper {
    F2a-bis : taille fixe (600px desktop, 100dvh-32 mobile) pour éviter le
    "respirer" entre écrans S0/S1/S2/s-transition. Le contenu se cale en haut,
    l'espace restant tombe en bas. */
+
+/* Pas de focus ring (la card est focusée par JS pour l'a11y mais ne doit
+   pas afficher de bordure visible) */
+.conseiller-card--modal:focus,
+.conseiller-card--modal:focus-visible {
+  outline: none;
+}
+
 .conseiller-card--modal {
   width: 100%;
   max-width: 880px;
@@ -23251,6 +23259,13 @@ body.woocommerce-cart div.woocommerce-wrapper {
   gap: 14px;
   max-width: 760px;
   margin: 0 auto;
+}
+
+/* F2a-quater : grille 2 cols quand la question a 2 ou 4 choix (sinon ils
+   se retrouvent isolés sur la dernière ligne d'un grid 3 cols). */
+.conseiller-choices--2col {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 540px;
 }
 
 .conseiller-choice {
@@ -23514,6 +23529,9 @@ body.woocommerce-cart div.woocommerce-wrapper {
   border-radius: 50%;
   background: var(--color-orange);
   border: none;
+  /* Override du padding 10/25 imposé par le selector global `button` du
+     thème (sinon le SVG est écrasé hors du cadre 42×42). */
+  padding: 0;
   color: var(--color-white);
   cursor: pointer;
   display: -webkit-inline-flex;
