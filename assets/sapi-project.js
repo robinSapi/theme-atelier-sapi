@@ -248,14 +248,13 @@
 
       var existingPiece = getAnswer('piece');
 
-      // F2a-bis : URL fait autorité. Si la pièce de l'URL est différente de celle
-      // du projet en cours, on réécrit silencieusement la pièce. On efface aussi
-      // l'advice_text qui correspondait à l'ancienne pièce (incohérence sinon).
-      // Les autres réponses (taille/style/...) restent inchangées et seront
-      // nettoyées par le modal si l'utilisateur reprend le parcours.
+      // F2a-quater : nouvelle pièce arrivée par URL (depuis home, roompicker,
+      // lien externe) → reset COMPLET du projet précédent. Les anciennes
+      // réponses (taille/sortie/hauteur/table/style) n'ont plus de sens sur
+      // une autre pièce — l'utilisateur démarre un nouveau parcours.
       if (existingPiece && existingPiece !== piece) {
+        clearRaw(); // wipe localStorage silencieusement (notify unique via update)
         update({ piece: piece }, { piece: VALID_PIECES[piece] });
-        setAdviceText(null);
         return;
       }
       // Même pièce → rien à faire
