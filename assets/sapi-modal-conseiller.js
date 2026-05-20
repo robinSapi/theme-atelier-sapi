@@ -987,14 +987,10 @@
     return (options[idx].textContent || options[idx].text || '').trim();
   }
 
-  // Construit l'intro "Pour votre <pièce> de taille <taille>, Robin recommande :"
+  // Construit l'intro "Pour votre <pièce>, Robin recommande :"
   function buildRecapIntro(answers, labels) {
     var pieceLbl = (labels.piece || '').toLowerCase();
-    var tailleLbl = (labels.taille || labels.taille_escalier || '').toLowerCase();
-    var intro = 'Pour votre ' + pieceLbl;
-    if (tailleLbl) intro += ' de taille ' + tailleLbl;
-    intro += ', Robin recommande :';
-    return intro;
+    return 'Pour votre ' + pieceLbl + ', Robin recommande :';
   }
 
   // Affiche l'écran s-product-recap (immédiat, aucun fetch).
