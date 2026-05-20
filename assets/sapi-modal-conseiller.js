@@ -1066,10 +1066,13 @@
     }, 150);
   }
 
-  // Action "Modifier mes réponses" depuis s-product-recap : revient au début
-  // du parcours court (vide le projet en cours dans le state local SEULEMENT,
-  // pas dans sapiProject — l'utilisateur n'a pas confirmé "Appliquer").
+  // Action "Modifier mes réponses" depuis s-product-recap : reset complet,
+  // pattern éprouvé pré-F1c (renderProductGuideResult > redoBtn) — efface le
+  // projet entièrement et redémarre le parcours court à la 1re question.
   function modifyProductAnswers() {
+    if (window.sapiProject) window.sapiProject.clear();
+    state.answers = {};
+    state.labels = {};
     state.questionHistory = [];
     state.productAdviceFetch = null;
     state.recommendedVariationId = null;

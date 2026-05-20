@@ -23223,6 +23223,23 @@ body.woocommerce-cart div.woocommerce-wrapper {
   margin-bottom: 0;
 }
 
+/* F2b — Nav s-product-recap : "Modifier mes réponses" + "Contacter Robin"
+   alignés horizontalement avec un séparateur visuel léger. */
+.conseiller-modal__nav--product-recap {
+  gap: 18px;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+.conseiller-back-link--contact {
+  text-decoration: none;
+}
+.conseiller-back-link--contact::before {
+  content: '·';
+  margin-right: 8px;
+  color: var(--color-wood);
+  opacity: 0.5;
+}
+
 /* Quote IA dédiée produit (variation recommandée) */
 .conseiller-product-quote {
   margin: 20px auto 0;

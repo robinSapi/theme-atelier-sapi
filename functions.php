@@ -3209,8 +3209,11 @@ function sapi_render_conseiller_modal() {
             </button>
           </div>
 
-          <div class="conseiller-modal__nav">
+          <div class="conseiller-modal__nav conseiller-modal__nav--product-recap">
             <button type="button" class="conseiller-back-link" data-action="product-modify">← <?php esc_html_e('Modifier mes réponses', 'theme-sapi-maison'); ?></button>
+            <a class="conseiller-back-link conseiller-back-link--contact" href="<?php echo esc_url(home_url('/contact/')); ?>">
+              <?php esc_html_e('Contacter Robin', 'theme-sapi-maison'); ?>
+            </a>
           </div>
         </div>
       </div>

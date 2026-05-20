@@ -17,17 +17,30 @@
 (function () {
   'use strict';
 
-  // Mapping projet → code de taille S/M/L (mirror PHP sapi_megafilter_project_to_size_code)
-  function projectToSizeCode(answers) {
-    if (!answers) return '';
+  // Mapping projet → index dans les options du select taille.
+  // Repris du legacy mon-projet.js (pré-F1c) : petite=0, moyenne=1, grande=2,
+  // escalier ouvert=1 (décision Robin). Retourne null si pas de reco.
+  function projectToTailleIndex(answers) {
+    if (!answers) return null;
     if (answers.piece === 'escalier') {
-      if (answers.taille_escalier === 'ouvert') return 'M';
-      return ''; // escalier standard : pas de reco
+      if (answers.taille_escalier === 'ouvert') return 1;
+      return null;
     }
-    if (answers.taille === 'petite')  return 'S';
-    if (answers.taille === 'moyenne') return 'M';
-    if (answers.taille === 'grande')  return 'L';
-    return ''; // ne-sais-pas ou rien
+    if (answers.taille === 'petite')  return 0;
+    if (answers.taille === 'moyenne') return 1;
+    if (answers.taille === 'grande')  return 2;
+    return null;
+  }
+
+  // Mapping projet → code de taille S/M/L (fallback si l'index dépasse, ou pour
+  // les produits dont les valeurs sont sluggées en S/M/L). Sert au matching
+  // secondaire dans findOptionForSize après échec du mapping par index.
+  function projectToSizeCode(answers) {
+    var idx = projectToTailleIndex(answers);
+    if (idx === 0) return 'S';
+    if (idx === 1) return 'M';
+    if (idx === 2) return 'L';
+    return '';
   }
 
   // Mapping projet.style → essence (repris à l'identique du legacy mon-projet.js
@@ -117,16 +130,36 @@
     labelCell.appendChild(hint);
   }
 
-  // Pré-sélection à partir d'un code S/M/L (utilisé au load).
-  function preselectFromSizeCode(form, sizeCode) {
-    if (!sizeCode) return false;
+  // Pré-sélection taille : on essaie d'abord par INDEX (pattern éprouvé pré-F1c
+  // qui ignore complètement les noms d'options) ; si l'index n'est pas
+  // disponible (escalier standard, ne-sais-pas), on retombe sur le matching
+  // S/M/L via findOptionForSize.
+  function preselectTaille(form, answers) {
     var sizeSelect = findSizeSelect(form);
     if (!sizeSelect) return false;
-    var option = findOptionForSize(sizeSelect, sizeCode);
-    if (!option) return false;
-    var applied = applyOption(sizeSelect, option);
-    if (applied) showPreselectHint(form);
-    return applied;
+    var options = [];
+    for (var i = 0; i < sizeSelect.options.length; i++) {
+      if (sizeSelect.options[i].value) options.push(sizeSelect.options[i]);
+    }
+    if (!options.length) return false;
+
+    // 1. INDEX-based (pattern éprouvé)
+    var idx = projectToTailleIndex(answers);
+    if (typeof idx === 'number') {
+      var clamped = Math.min(idx, options.length - 1);
+      var applied = applyOption(sizeSelect, options[clamped]);
+      if (applied) showPreselectHint(form);
+      return applied;
+    }
+
+    // 2. Fallback : matching S/M/L par value/label/préfixe
+    var sizeCode = projectToSizeCode(answers);
+    if (!sizeCode) return false;
+    var match = findOptionForSize(sizeSelect, sizeCode);
+    if (!match) return false;
+    var ok = applyOption(sizeSelect, match);
+    if (ok) showPreselectHint(form);
+    return ok;
   }
 
   // Pré-sélection de l'essence (matière). Pattern repris du legacy cinetique.js
@@ -209,6 +242,18 @@
     }
   }
 
+  // Applique essence puis taille avec délai (pattern éprouvé pré-F1c).
+  // L'essence est appliquée immédiatement ; la taille avec 400ms de délai pour
+  // laisser WC traiter le change d'essence (qui peut recharger/filtrer les
+  // options de taille selon les variations disponibles).
+  function preselectAll(form, answers) {
+    var essence = projectToEssence(answers);
+    if (essence) preselectEssence(form, essence);
+    setTimeout(function () {
+      preselectTaille(form, answers);
+    }, 400);
+  }
+
   function init() {
     var form = document.querySelector('form.variations_form');
 
@@ -219,37 +264,27 @@
       var f = document.querySelector('form.variations_form');
       if (!f) return;
       // Priorité au variation_id fourni par le serveur (couvre taille ET essence
-      // car la variation porte tous les attributs)
+      // si la matière est une variation WC)
       if (detail.variationId) {
         preselectFromVariationId(f, detail.variationId);
-        // Essence quand même en plus si la variation matchée n'inclut pas le
-        // matériau (cas d'un produit où matériau n'est pas une variation mais
-        // un swatch custom contrôlé en dehors des variations)
+        // Essence en plus si elle est gérée hors variations (swatch custom)
         var essence = projectToEssence(detail.answers || {});
         if (essence) preselectEssence(f, essence);
         return;
       }
-      // Sinon fallback : mapper depuis answers
-      var sizeCode = projectToSizeCode(detail.answers || {});
-      if (sizeCode) preselectFromSizeCode(f, sizeCode);
-      var ess = projectToEssence(detail.answers || {});
-      if (ess) preselectEssence(f, ess);
+      // Fallback : essence immédiate + taille avec délai
+      preselectAll(f, detail.answers || {});
     });
 
     if (!form) return;
 
-    // Pré-sélection au load si sapiProject existe (taille + essence)
+    // Pré-sélection au load si sapiProject existe
     if (window.sapiProject && window.sapiProject.hasProject()) {
       var p = window.sapiProject.get();
       var answers = p.answers || {};
-      var sizeCode = projectToSizeCode(answers);
-      var essence  = projectToEssence(answers);
-      if (sizeCode || essence) {
-        whenFormReady(form, function () {
-          if (sizeCode) preselectFromSizeCode(form, sizeCode);
-          if (essence)  preselectEssence(form, essence);
-        });
-      }
+      whenFormReady(form, function () {
+        preselectAll(form, answers);
+      });
     }
   }
 
