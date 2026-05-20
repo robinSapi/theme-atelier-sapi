@@ -2,6 +2,70 @@
 
 ## ✅ Livré
 
+## [RETOUR] Finitions production — Cleanup + harmonisation design + raccourcis titres + loading dots
+**Date livrée :** 2026-05-20
+**Branche :** `test-theme-sapi-maison`
+**Statut :** Tout sur test, prêt à merger master après validation finale Robin.
+
+### Commits livrés depuis F2b Phase 4
+
+1. **`4e76747` Cleanup mega-filtre.js orphelin**
+   - Suppression de `assets/mega-filtre.js` (894 lignes mortes neutralisées en F1a)
+   - Suppression de l'enqueue + localize SAPI_MEGAFILTER dans `functions.php`
+   - Remplacement de la dep `'sapi-mega-filtre'` par `'sapi-maison-shop'` sur sapi-cards-conseiller
+   - **Bilan : -913 lignes nettes**
+
+2. **`4ce79e3` Harmonisation roompicker → design system Conseiller (référence : modale)**
+   - `.room-picker-title` : uppercase wood-dark letter-spacing 0.02em (= conseiller-h2)
+   - `.room-picker-sub` : 14.5px wood-mid line-height 1.55 max-width 580px (= conseiller-subtitle)
+   - `.room-card` : fond blanc + bordure 1px var(--color-line) + radius 12 + shadow-card (au lieu de cream + bordure orange + radius 16). Hover : transform Y-2 + shadow-card-hover + bordure wood
+   - `.room-card-icon` : 48x48 + SVG 24x24 (au lieu de 56/30)
+   - `.room-card-label` : 12px UPPERCASE letter-spacing 0.08em wood-dark
+   - Conteneurs outer `.advice-room-picker` + `.bento-room-picker` : radius 16, plus de hover sur le panneau
+
+3. **`f37977d` Roompicker : bordure dashed INSET (=modale)**
+   - Pseudo `::before` `inset: 12px` + 1.5px dashed wood-35% + radius 12 (= pattern .conseiller-card)
+   - Suppression de la bordure directe `2px dashed wood-30%` qui était plaquée au bord
+
+4. **`1b86eed` Raccourcissement titres modale (7 questions + intro récap)**
+   - `inc/guide-data.php` : toutes les questions raccourcies (cf. tableau ci-dessous)
+   - `sapi-modal-conseiller.js` : intro récap fiche produit → "Pour votre cuisine, Robin recommande :" (suppression de la dimension)
+
+5. **`977dea3` Dots loading IA "Mon projet" : plus gros + bien centrés**
+   - Bump font-size 28 → clamp(44, 5.5vw, 60)
+   - `display: block` sur le pseudo ::after → centré par text-align parent
+   - `.conseiller-signature` passe de opacity:0 à display:none en awaiting → libère l'espace pour le centrage
+
+6. **`7077612` Dots loading : 3 vrais ronds décalés en cascade**
+   - Remplacement du glyph "·" par 3 spans `<span class="conseiller-awaiting-dot">` injectés en JS
+   - Chaque rond 18x18 wood radius 50% → vrai disc visible
+   - Espacement inchangé (margin 0 4px)
+   - Animation décalée : dot 2 à +0.18s, dot 3 à +0.36s, scale 0.85↔1 + opacity 0.2↔0.85 sur 1.2s
+
+### Tableau des titres modale raccourcis
+
+| Question | Avant | Après |
+|---|---|---|
+| piece | Pour quelle pièce cherchez-vous un luminaire ? | Pour quelle pièce ? |
+| taille | Quelle est la taille de votre pièce ? | Taille de la pièce ? |
+| eclairage | Ce luminaire sera-t-il votre principale source de lumière ? | Éclairage principal ? |
+| sortie | Où installerez-vous votre luminaire ? | Où l'installer ? |
+| hauteur | Quelle est votre hauteur sous-plafond ? | Hauteur sous plafond ? |
+| style | Quel est le style de votre intérieur ? | Style de l'intérieur ? |
+| table cuisine | Sera-t-il au-dessus d'une table ou d'un îlot ? | Au-dessus d'une table ou d'un îlot ? |
+| table bureau | Sera-t-il au-dessus du bureau ? | Au-dessus du bureau ? |
+| table salon | Sera-t-il au-dessus d'une table ? | Au-dessus d'une table ? |
+| table chambre | Sera-t-il au-dessus du lit ? | Au-dessus du lit ? |
+| taille_escalier | Quel type d'escalier ? | _déjà court — gardé_ |
+| Récap fiche produit | Pour votre cuisine de taille petite pièce, Robin recommande : | Pour votre cuisine, Robin recommande : |
+
+### Décisions encore en attente (héritées F2a)
+1. **Card sur-mesure** sur `/mes-creations/` : toujours masquée (enqueue commenté dans `functions.php`). Réactiver / supprimer / revoir le wording ?
+2. **Brevo opt-in** sur le formulaire sur-mesure : toujours bloqué
+3. **Merge master** : tout le bloc F2a + F2b + cleanup + finitions est sur `test-theme-sapi-maison`. Plus rien de cassé ni en attente sur le code, donc dès que Robin valide le test → merge.
+
+---
+
 ## [RETOUR] F2b Phase 3 — Pré-sélection variation au load + hint + listener apply
 **Date livrée :** 2026-05-20
 **Branche :** `test-theme-sapi-maison`
