@@ -7849,18 +7849,14 @@ li.carousel-editorial-slide,
   margin: 2rem auto;
   padding: 0 2rem;
 }
+/* Harmonisé avec .conseiller-card : fond warm + dashed wood + radius 16px,
+   pas de hover (c'est un panneau statique comme la modale, pas un bouton). */
 .advice-room-picker {
   background: var(--color-warm, #FBF6EA);
   border: 2px dashed rgba(var(--color-wood-rgb, 147, 125, 104), 0.3);
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 2.5rem 2rem;
   text-align: center;
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-}
-.advice-room-picker:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
-  border-color: var(--color-wood, #937D68);
 }
 .advice-room-picker .room-picker-cards {
   display: flex;
@@ -10765,18 +10761,13 @@ transform: translateY(15px);
   white-space: nowrap;
 }
 
-/* Room Picker — "Pour quelle pièce ?" */
+/* Room Picker — "Pour quelle pièce ?" — harmonisé avec .conseiller-card
+   (fond warm + dashed wood, pas de hover sur le panneau). */
 .bento-room-picker {
   grid-column: span 12;
   grid-row: span 2;
   background: var(--color-warm, #FBF6EA);
   border: 2px dashed rgba(var(--color-wood-rgb, 147, 125, 104), 0.3);
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-}
-.bento-room-picker:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(var(--color-wood-rgb, 147, 125, 104), 0.1);
-  border-color: var(--color-wood, #937D68);
 }
 
 .room-picker-inner {
@@ -10789,13 +10780,27 @@ transform: translateY(15px);
   gap: 1.25rem;
 }
 
+/* Titre + subtitle harmonisés avec .conseiller-h2 / .conseiller-subtitle */
 .room-picker-title {
   font-family: var(--font-body);
-  font-size: clamp(1.3rem, 2.5vw, 1.75rem);
+  font-size: clamp(20px, 3vw, 32px);
   font-weight: 700;
-  color: var(--color-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--color-wood-dark);
   text-align: center;
-  margin: 0;
+  line-height: 1.2;
+  margin: 0 0 14px;
+}
+
+.room-picker-sub {
+  margin: 0 auto 4px;
+  max-width: 580px;
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--color-wood-mid);
+  text-align: center;
 }
 
 .room-picker-cards {
@@ -10805,6 +10810,8 @@ transform: translateY(15px);
   width: 100%;
 }
 
+/* Cards harmonisées avec .conseiller-choice : fond blanc, bordure neutre,
+   radius 12, shadow-card, hover wood (plus de bordure orange). */
 .room-card {
   flex: 1;
   max-width: 200px;
@@ -10812,59 +10819,58 @@ transform: translateY(15px);
   flex-direction: column;
   align-items: center;
   gap: 0.75rem;
-  padding: 1.5rem 1.25rem;
-  background: var(--color-cream, #FEFDFB);
-  border: 1.5px solid rgba(227, 91, 36, 0.3);
-  border-radius: 16px;
+  padding: 22px 14px 18px;
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
   text-decoration: none;
-  transition: all 0.3s var(--ease-expo);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   cursor: pointer;
 }
 
 @media (hover: hover) {
   .room-card:hover {
-    border-color: var(--color-orange, #E35B24);
-    background: rgba(227, 91, 36, 0.06);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(227, 91, 36, 0.1);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: var(--color-wood);
   }
 }
 
+/* Icon harmonisé avec .conseiller-choice__icon : 48x48 + SVG 24x24 */
 .room-card-icon {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--color-wood);
   background: var(--color-warm);
   border-radius: 12px;
-  transition: all 0.3s ease;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .room-card-icon svg {
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
 }
 
 @media (hover: hover) {
   .room-card:hover .room-card-icon {
-    color: var(--color-orange);
-    background: rgba(227, 91, 36, 0.08);
+    /* On garde le fond warm cohérent avec la modale (pas de bascule orange) */
+    color: var(--color-wood-dark);
   }
 }
 
+/* Label harmonisé avec .conseiller-choice__label : 12px UPPERCASE wood-dark */
 .room-card-label {
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: 12px;
   font-weight: 700;
-  color: var(--color-dark);
-}
-
-.room-picker-sub {
-  margin: 0;
-  font-family: var(--font-body);
-  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-wood-dark);
+  line-height: 1.3;
 }
 
 .room-picker-sub a {
