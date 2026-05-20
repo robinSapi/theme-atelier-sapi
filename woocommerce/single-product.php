@@ -387,16 +387,6 @@ get_header();
 
         <!-- Formulaire d'achat (variations + quantité + CTA) -->
         <div class="product-form-v2">
-          <!-- F2b — Pill "Comment choisir ?" / "Adapter à mon projet" (variables only).
-               Le texte est mis à jour en live par sapi-help-pill.js selon sapiProject.
-               Click → dispatch sapi:open-modal avec state="product". -->
-          <?php if ($product->is_type('variable')) : ?>
-          <button type="button" class="conseiller-pill-secondary" data-action="open-modal" data-modal-state="product" data-help-pill>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="14" height="14"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
-            <span data-help-pill-text><?php esc_html_e('Comment choisir ?', 'theme-sapi-maison'); ?></span>
-          </button>
-          <?php endif; ?>
-
           <!-- Introduction aux variations -->
           <?php if ($product->is_type('variable')) : ?>
           <p class="variations-intro">Composez votre luminaire :</p>
@@ -409,8 +399,28 @@ get_header();
           remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_price', 10);
           remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 20);
 
+          // F2b — Pill "Comment choisir ?" / "Adapter à mon projet" (variables only,
+          // jamais sur accessoires / carte-cadeau). Position d'origine éprouvée :
+          // hook woocommerce_before_single_variation (après </table> des variations,
+          // juste au-dessus du bloc description+qty+CTA de la variation choisie).
+          // Le texte est mis à jour en live par sapi-help-pill.js selon sapiProject.
+          if ($product->is_type('variable') && !$is_accessoire && !$is_carte_cadeau) {
+            $render_help_pill = function () {
+              echo '<button type="button" class="conseiller-pill-secondary" id="robin-product-pill" data-action="open-modal" data-modal-state="product" data-help-pill>';
+              echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="14" height="14"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>';
+              echo '<span data-help-pill-text>' . esc_html__('Comment choisir ?', 'theme-sapi-maison') . '</span>';
+              echo '</button>';
+            };
+            add_action('woocommerce_before_single_variation', $render_help_pill, 5);
+          }
+
           // Only render add to cart form
           woocommerce_template_single_add_to_cart();
+
+          // Nettoyer le hook pour éviter les effets de bord
+          if (isset($render_help_pill)) {
+            remove_action('woocommerce_before_single_variation', $render_help_pill, 5);
+          }
           ?>
         </div>
 
