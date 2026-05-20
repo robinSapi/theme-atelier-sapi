@@ -390,16 +390,19 @@ function sapi_maison_enqueue_assets() {
         true
       );
       wp_localize_script('sapi-modal-conseiller', 'SAPI_MODAL_CONSEILLER', [
-        'ajaxUrl'     => admin_url('admin-ajax.php'),
-        'nonce'       => wp_create_nonce('sapi-megafilter'),
-        'steps'       => sapi_guide_get_steps(),
-        'icons'       => sapi_guide_get_icons(),
-        'maxMessages' => 15,
+        'ajaxUrl'        => admin_url('admin-ajax.php'),
+        'nonce'          => wp_create_nonce('sapi-megafilter'),
+        'steps'          => sapi_guide_get_steps(),
+        'icons'          => sapi_guide_get_icons(),
+        'maxMessages'    => 15,
         // F2b Phase 2 — Mode court : whitelist des steps utilisés sur fiche produit
         // (le reste est skip même si la visibility le permettrait).
-        'shortSteps'  => ['piece', 'taille', 'taille_escalier', 'style'],
+        'shortSteps'     => ['piece', 'taille', 'taille_escalier', 'style'],
+        // F2b Phase 2 — Conseils de style fixes (pattern legacy pg_style:* —
+        // textes pré-générés affichés immédiatement, zéro IA).
+        'styleConseils'  => sapi_megafilter_get_style_conseils(),
         // F2b Phase 2 — Contexte produit (null hors is_product, sinon ID + nom).
-        'product'     => is_product() ? [
+        'product'        => is_product() ? [
           'id'   => get_queried_object_id(),
           'name' => get_the_title(get_queried_object_id()),
         ] : null,
@@ -3182,25 +3185,33 @@ function sapi_render_conseiller_modal() {
       </div>
 
       <!-- s-product-recap (F2b Phase 2) — Mode court fin de parcours sur fiche
-           produit : chips récap + phrase IA dédiée au produit + CTA "Appliquer
-           cette sélection". Affiché soit après le parcours court (3 questions),
-           soit directement à l'ouverture si projet déjà complet. -->
+           produit. Récap 100% statique (textes pré-générés, zéro IA), pattern
+           repris du legacy renderProductGuideResult() :
+             - intro dynamique "Pour votre <pièce> de taille <taille>, Robin recommande :"
+             - récap card 2 lignes : Essence / Taille recommandée (label lu du select WC)
+             - conseil de style fixe (pg_style:moderne/ancien/neutre)
+             - 3 actions : Appliquer / Modifier / Contacter -->
       <div class="conseiller-modal__screen" data-screen="s-product-recap" hidden>
         <div class="conseiller-card__inner">
           <span class="conseiller-badge conseiller-badge--default">
             <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
             <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
           </span>
-          <h2 class="conseiller-h2"><?php esc_html_e('Voici ton projet', 'theme-sapi-maison'); ?></h2>
 
-          <div class="conseiller-chips" data-product-recap-chips></div>
+          <p class="conseiller-product-recap__intro" data-product-recap-intro></p>
 
-          <div class="conseiller-product-quote" data-product-quote>
-            <p class="conseiller-product-quote__text" data-product-quote-text aria-live="polite">
-              <span class="conseiller-product-quote__dots" data-product-quote-dots>· · ·</span>
-            </p>
-            <span class="conseiller-signature conseiller-product-quote__sig" data-product-quote-sig hidden>— Robin</span>
+          <div class="conseiller-product-recap__card" data-product-recap-card hidden>
+            <div class="conseiller-product-recap__row" data-product-recap-essence hidden>
+              <span class="conseiller-product-recap__label"><?php esc_html_e('Essence', 'theme-sapi-maison'); ?></span>
+              <span class="conseiller-product-recap__value" data-product-recap-essence-value></span>
+            </div>
+            <div class="conseiller-product-recap__row" data-product-recap-taille hidden>
+              <span class="conseiller-product-recap__label"><?php esc_html_e('Taille recommandée', 'theme-sapi-maison'); ?></span>
+              <span class="conseiller-product-recap__value" data-product-recap-taille-value></span>
+            </div>
           </div>
+
+          <p class="conseiller-product-recap__conseil" data-product-recap-conseil></p>
 
           <div class="conseiller-modal__cta">
             <button type="button" class="conseiller-cta" data-action="product-apply">
@@ -3347,177 +3358,19 @@ function sapi_ajax_megafilter_advice() {
   wp_send_json_success(['advice_text' => $advice]);
 }
 
-/* ── F2b Phase 2 : mapping projet → variation produit + endpoint phrase IA produit
+/* ── F2b Phase 2 : conseils de style pré-générés pour le récap fiche produit
    ─────────────────────────────────────────────────────────────────────────────
-   - Mapping côté serveur (utilisé par le prompt IA + retourné au front pour
-     pré-sélection variation par Phase 3)
-   - Logique : taille_projet → taille_variation (S/M/L)
-     - petite/intime → S
-     - moyenne/confortable → M
-     - grande/spacieuse → L
-     - escalier ouvert → M (cf. décision Robin)
-   - Si aucune variation ne matche : retourne null (pas d'erreur, pré-sélection silencieuse)
+   Pattern d'origine pré-F1c (assets/guide-conseils.json → pg_style:*) : textes
+   fixes affichés immédiatement, ZÉRO appel IA. La modale produit reproduit
+   à l'identique ce comportement statique.
    ───────────────────────────────────────────────────────────────────────────── */
 
-function sapi_megafilter_project_to_size_code($answers) {
-  if (!is_array($answers)) return '';
-  $piece = isset($answers['piece']) ? $answers['piece'] : '';
-  if ($piece === 'escalier') {
-    $te = isset($answers['taille_escalier']) ? $answers['taille_escalier'] : '';
-    if ($te === 'ouvert') return 'M';
-    if ($te === 'standard') return ''; // pas de reco pour escalier standard
-    return '';
-  }
-  $taille = isset($answers['taille']) ? $answers['taille'] : '';
-  if ($taille === 'petite')  return 'S';
-  if ($taille === 'moyenne') return 'M';
-  if ($taille === 'grande')  return 'L';
-  return '';
-}
-
-/**
- * Trouve une variation du produit dont l'attribut "Taille" (ou "Format")
- * correspond au code projet (S/M/L). Retourne :
- *   ['variation_id' => int, 'size_label' => 'L', 'attribute_name' => 'taille']
- * ou null si rien ne match.
- */
-function sapi_megafilter_find_variation_for_size($product_id, $size_code) {
-  if (!$size_code || !function_exists('wc_get_product')) return null;
-  $product = wc_get_product($product_id);
-  if (!$product || !$product->is_type('variable')) return null;
-
-  $variations = $product->get_available_variations();
-  if (empty($variations)) return null;
-
-  // L'attribut de taille peut s'appeler 'taille', 'format', 'pa_taille', etc.
-  // On cherche un attribut qui contient une valeur S, M, ou L (insensible casse).
-  $target = strtolower($size_code);
-  foreach ($variations as $v) {
-    if (empty($v['attributes']) || !is_array($v['attributes'])) continue;
-    foreach ($v['attributes'] as $attr_name => $attr_val) {
-      if (!is_string($attr_val) || $attr_val === '') continue;
-      $val_norm = strtolower(trim($attr_val));
-      // Match strict sur "s" / "m" / "l" ou label commençant par (ex. "L - Grande")
-      if ($val_norm === $target || strpos($val_norm, $target . ' ') === 0 || strpos($val_norm, $target . '-') === 0) {
-        return [
-          'variation_id'   => (int) $v['variation_id'],
-          'size_label'     => strtoupper($size_code),
-          'attribute_name' => $attr_name,
-          'attribute_value'=> $attr_val,
-        ];
-      }
-    }
-  }
-  return null;
-}
-
-/* ── Endpoint F2b Phase 2 : phrase IA spécifique produit (recommande UNE variation)
-   ─────────────────────────────────────────────────────────────────────────────
-   - Reçoit : answers + labels + product_id + nonce
-   - Calcule la variation recommandée (mapping serveur, S/M/L)
-   - Construit le prompt avec : nom du produit, variation recommandée, projet
-   - Sonnet → phrase qui DOIT explicitement nommer la taille recommandée
-   - Output : { advice_text, recommended_variation_id?, recommended_size? }
-   - Fallback : générique sans mention de taille si IA plante / pas de match
-   ───────────────────────────────────────────────────────────────────────────── */
-
-add_action('wp_ajax_sapi_megafilter_product_advice', 'sapi_ajax_megafilter_product_advice');
-add_action('wp_ajax_nopriv_sapi_megafilter_product_advice', 'sapi_ajax_megafilter_product_advice');
-
-function sapi_ajax_megafilter_product_advice() {
-  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-megafilter')) {
-    wp_send_json_error(['message' => 'Nonce invalide']);
-    return;
-  }
-
-  $product_id  = isset($_POST['product_id']) ? absint($_POST['product_id']) : 0;
-  $answers_raw = isset($_POST['answers']) ? json_decode(wp_unslash($_POST['answers']), true) : [];
-  $labels_raw  = isset($_POST['labels'])  ? json_decode(wp_unslash($_POST['labels']),  true) : [];
-  list($answers, $labels) = sapi_megafilter_sanitize_project($answers_raw, $labels_raw);
-
-  $piece = isset($answers['piece']) ? $answers['piece'] : '';
-
-  if (!$product_id || empty($answers) || empty($piece)) {
-    wp_send_json_success([
-      'advice_text' => sapi_megafilter_generic_advice_for($piece),
-      'recommended_variation_id' => null,
-      'recommended_size' => null,
-    ]);
-    return;
-  }
-
-  $product = function_exists('wc_get_product') ? wc_get_product($product_id) : null;
-  if (!$product) {
-    wp_send_json_success([
-      'advice_text' => sapi_megafilter_generic_advice_for($piece),
-      'recommended_variation_id' => null,
-      'recommended_size' => null,
-    ]);
-    return;
-  }
-
-  $product_name = $product->get_name();
-  $size_code = sapi_megafilter_project_to_size_code($answers);
-  $variation = $size_code ? sapi_megafilter_find_variation_for_size($product_id, $size_code) : null;
-
-  // Rate-limit : fallback générique sans taille
-  if (!sapi_guide_check_rate_limit()) {
-    wp_send_json_success([
-      'advice_text' => sapi_megafilter_generic_advice_for($piece),
-      'recommended_variation_id' => $variation ? $variation['variation_id'] : null,
-      'recommended_size' => $variation ? $variation['size_label'] : null,
-    ]);
-    return;
-  }
-
-  $project_text = sapi_megafilter_format_project_text($answers, $labels);
-
-  $system_prompt  = "Tu es Robin, artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser.\n";
-  $system_prompt .= "Un visiteur consulte la fiche produit d'un de tes luminaires. Il t'a décrit son projet (pièce, taille, style). Tu lui recommandes UNE variation précise de ce luminaire.\n\n";
-  $system_prompt .= "TON :\n";
-  $system_prompt .= "- Tutoiement, chaleureux, artisan passionné\n";
-  $system_prompt .= "- Cite EXPLICITEMENT la taille recommandée (ex. \"Taille L\", \"version M\")\n";
-  $system_prompt .= "- Justifie en 1 phrase concrète liée au projet (pièce, ambiance, hauteur)\n";
-  $system_prompt .= "- Pas d'emoji, pas de markdown, pas de signature (ajoutée séparément)\n";
-  $system_prompt .= "- Format : 1 à 2 phrases, max 280 caractères\n\n";
-  $system_prompt .= "FORMAT DE RÉPONSE (JSON strict, sans markdown) :\n";
-  $system_prompt .= "{ \"advice_text\": \"...\" }\n";
-
-  $reco_block = '';
-  if ($variation) {
-    $reco_block = "\n\nTAILLE RECOMMANDÉE (à citer explicitement) : " . $variation['size_label'];
-  } else {
-    $reco_block = "\n\nPas de taille spécifique à recommander pour ce projet — reste général sur le luminaire.";
-  }
-
-  $user_msg = "PRODUIT : " . $product_name . "\n";
-  $user_msg .= "PROJET DU VISITEUR :\n" . $project_text;
-  $user_msg .= $reco_block;
-
-  $ai_text = sapi_megafilter_call_claude(
-    'claude-sonnet-4-6',
-    $system_prompt,
-    [['role' => 'user', 'content' => $user_msg]],
-    512
-  );
-
-  $advice = '';
-  if ($ai_text) {
-    $parsed = sapi_megafilter_parse_json($ai_text);
-    if ($parsed && isset($parsed['advice_text']) && is_string($parsed['advice_text'])) {
-      $advice = sanitize_textarea_field($parsed['advice_text']);
-    }
-  }
-
-  if (empty($advice)) {
-    $advice = sapi_megafilter_generic_advice_for($piece);
-  }
-
-  wp_send_json_success([
-    'advice_text'              => $advice,
-    'recommended_variation_id' => $variation ? $variation['variation_id'] : null,
-    'recommended_size'         => $variation ? $variation['size_label'] : null,
-  ]);
+function sapi_megafilter_get_style_conseils() {
+  return [
+    'moderne' => __("Le Peuplier, clair et lumineux, s'accordera parfaitement avec votre intérieur moderne.", 'theme-sapi-maison'),
+    'ancien'  => __("L'Okoumé, chaud et ambré, s'intègrera naturellement dans votre intérieur aux tons chauds.", 'theme-sapi-maison'),
+    'neutre'  => __("Les deux essences sont belles — vous pourrez voir les photos de chaque finition sur la fiche.", 'theme-sapi-maison'),
+  ];
 }
 
 /* ── Endpoint F2a-3 : soumission form sur-mesure (email Robin) ────────────────── */

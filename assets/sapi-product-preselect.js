@@ -112,24 +112,6 @@
     return true;
   }
 
-  // Affiche le hint discret "✓ Pré-sélectionné pour votre projet" à côté du label
-  // de l'attribut taille. Idempotent (ne duplique pas si déjà présent).
-  function showPreselectHint(form) {
-    if (!form) return;
-    if (form.querySelector('[data-preselect-hint]')) return; // déjà là
-    var sizeSelect = findSizeSelect(form);
-    if (!sizeSelect) return;
-    // Remonter à la ligne <tr> du tableau variations pour trouver le label
-    var row = sizeSelect.closest('tr');
-    var labelCell = row ? row.querySelector('th.label, td.label') : null;
-    if (!labelCell) return;
-    var hint = document.createElement('span');
-    hint.className = 'conseiller-preselect-hint';
-    hint.setAttribute('data-preselect-hint', '');
-    hint.textContent = '✓ Pré-sélectionné pour votre projet';
-    labelCell.appendChild(hint);
-  }
-
   // Pré-sélection taille : on essaie d'abord par INDEX (pattern éprouvé pré-F1c
   // qui ignore complètement les noms d'options) ; si l'index n'est pas
   // disponible (escalier standard, ne-sais-pas), on retombe sur le matching
@@ -147,9 +129,7 @@
     var idx = projectToTailleIndex(answers);
     if (typeof idx === 'number') {
       var clamped = Math.min(idx, options.length - 1);
-      var applied = applyOption(sizeSelect, options[clamped]);
-      if (applied) showPreselectHint(form);
-      return applied;
+      return applyOption(sizeSelect, options[clamped]);
     }
 
     // 2. Fallback : matching S/M/L par value/label/préfixe
@@ -157,9 +137,7 @@
     if (!sizeCode) return false;
     var match = findOptionForSize(sizeSelect, sizeCode);
     if (!match) return false;
-    var ok = applyOption(sizeSelect, match);
-    if (ok) showPreselectHint(form);
-    return ok;
+    return applyOption(sizeSelect, match);
   }
 
   // Pré-sélection de l'essence (matière). Pattern repris du legacy cinetique.js
@@ -226,7 +204,6 @@
       }
       if (match && applyOption(sel, match)) any = true;
     });
-    if (any) showPreselectHint(form);
     return any;
   }
 

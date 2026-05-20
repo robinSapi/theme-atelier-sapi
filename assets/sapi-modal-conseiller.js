@@ -19,7 +19,14 @@
   var ICONS = config.icons || {};
   // F2b Phase 2 — Mode court (fiche produit) : whitelist des steps autorisés
   var SHORT_STEPS = Array.isArray(config.shortSteps) ? config.shortSteps : ['piece', 'taille', 'taille_escalier', 'style'];
+  var STYLE_CONSEILS = config.styleConseils || {};
   var PRODUCT_CTX = config.product || null;
+
+  // Mapping projet → essence (legacy mon-projet.js pré-F1c)
+  var ESSENCE_FROM_STYLE = { moderne: 'peuplier', ancien: 'okoume' };
+  var ESSENCE_LABEL      = { peuplier: 'Peuplier', okoume: 'Okoumé' };
+  // Mapping taille → index dans le select WC (legacy)
+  var TAILLE_TO_INDEX    = { petite: 0, moyenne: 1, grande: 2 };
 
   // F2a-ter : labels humains des clés pour les chips récap S3 ("Pièce : Salon").
   var KEY_LABELS = {
@@ -45,7 +52,6 @@
     questionHistory: [],  // pile des questions traversées (pour Retour)
     transition: false,    // F2a-bis : true pendant l'écran "Robin réfléchit"
     shortMode: false,     // F2b Phase 2 — true quand ouvert depuis fiche produit
-    productAdviceFetch: null, // F2b Phase 2 — promesse en cours pour éviter double-fetch
     chat: {
       conversation: [],   // [{role:'user'|'assistant', content:'...'}]
       sessionId: null,
@@ -958,100 +964,87 @@
   }
 
   /* ─────────────────────────────────────────────
-     F2b Phase 2 — s-product-recap : récap fiche produit + phrase IA dédiée
+     F2b Phase 2 — s-product-recap : récap fiche produit, 100% statique
+     Pattern repris du legacy renderProductGuideResult() pré-F1c :
+       - intro construite côté client (pas d'IA)
+       - récap Essence + Taille (label lu depuis le select WC du produit)
+       - conseil de style fixe (mapping styleConseils localisé via PHP)
      ───────────────────────────────────────────── */
 
-  function populateProductRecapChips() {
-    if (!els.productRecapChips) return;
-    els.productRecapChips.innerHTML = '';
-    var visible = getVisibleStepIds(state.answers);
-    visible.forEach(function (sid) {
-      var slug = state.answers[sid];
-      if (!slug) return;
-      var label = state.labels[sid] || slug;
-      var keyLabel = KEY_LABELS[sid] || sid;
-      var chip = document.createElement('span');
-      chip.className = 'conseiller-chip';
-      var keyEl = document.createElement('span');
-      keyEl.className = 'conseiller-chip__key';
-      keyEl.textContent = keyLabel + ' :';
-      chip.appendChild(keyEl);
-      chip.appendChild(document.createTextNode(' ' + label));
-      els.productRecapChips.appendChild(chip);
-    });
+  // Lit le label de l'option taille effectivement disponible sur le produit
+  // (correspondant à l'index dérivé du projet). Renvoie '' si pas de match.
+  function readTailleLabelFromProductSelect(answers) {
+    var sel = document.querySelector('select[name="attribute_pa_taille"]');
+    if (!sel) return '';
+    var options = [];
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value) options.push(sel.options[i]);
+    }
+    if (!options.length) return '';
+    var taille = answers.taille || (answers.piece === 'escalier' && answers.taille_escalier === 'ouvert' ? 'moyenne' : '');
+    if (!(taille in TAILLE_TO_INDEX)) return '';
+    var idx = Math.min(TAILLE_TO_INDEX[taille], options.length - 1);
+    return (options[idx].textContent || options[idx].text || '').trim();
   }
 
-  // Affiche l'écran s-product-recap : chips + dots loading puis phrase IA dédiée
-  function showProductRecap() {
-    state.shortMode = true; // garantit short mode actif (cas ouverture directe avec projet existant)
-    populateProductRecapChips();
+  // Construit l'intro "Pour votre <pièce> de taille <taille>, Robin recommande :"
+  function buildRecapIntro(answers, labels) {
+    var pieceLbl = (labels.piece || '').toLowerCase();
+    var tailleLbl = (labels.taille || labels.taille_escalier || '').toLowerCase();
+    var intro = 'Pour votre ' + pieceLbl;
+    if (tailleLbl) intro += ' de taille ' + tailleLbl;
+    intro += ', Robin recommande :';
+    return intro;
+  }
 
-    // Reset zone IA : dots visibles, texte vide, signature cachée
-    if (els.productQuoteText) {
-      els.productQuoteText.innerHTML = '<span class="conseiller-product-quote__dots" data-product-quote-dots>· · ·</span>';
-      // Re-grab dots ref (innerHTML a recréé l'élément)
-      els.productQuoteDots = els.productQuoteText.querySelector('[data-product-quote-dots]');
+  // Affiche l'écran s-product-recap (immédiat, aucun fetch).
+  function showProductRecap() {
+    state.shortMode = true;
+
+    var answers = state.answers;
+    var labels = state.labels;
+    var style = answers.style;
+    var essence = ESSENCE_FROM_STYLE[style] || null;
+    var essenceLabel = essence ? ESSENCE_LABEL[essence] : '';
+    var tailleLabel = readTailleLabelFromProductSelect(answers);
+
+    // Intro
+    if (els.productRecapIntro) {
+      els.productRecapIntro.textContent = buildRecapIntro(answers, labels);
     }
-    if (els.productQuoteSig) els.productQuoteSig.hidden = true;
+
+    // Récap card : Essence + Taille (chacune masquée si non disponible)
+    var hasEssence = !!essence;
+    var hasTaille = !!tailleLabel;
+    if (els.productRecapCard) els.productRecapCard.hidden = !(hasEssence || hasTaille);
+    if (els.productRecapEssence) {
+      els.productRecapEssence.hidden = !hasEssence;
+      if (hasEssence && els.productRecapEssenceValue) {
+        els.productRecapEssenceValue.textContent = essenceLabel;
+      }
+    }
+    if (els.productRecapTaille) {
+      els.productRecapTaille.hidden = !hasTaille;
+      if (hasTaille && els.productRecapTailleValue) {
+        els.productRecapTailleValue.textContent = tailleLabel;
+      }
+    }
+
+    // Conseil de style (texte fixe pré-généré)
+    if (els.productRecapConseil) {
+      var conseil = (style && STYLE_CONSEILS[style]) || '';
+      els.productRecapConseil.textContent = conseil;
+      els.productRecapConseil.hidden = !conseil;
+    }
 
     showScreen('s-product-recap');
-
-    // Fetch IA dédiée produit. Si déjà en cours pour ce projet+produit, ne pas re-fetch.
-    if (!state.productAdviceFetch) {
-      state.productAdviceFetch = fetchProductAdvice().then(function (data) {
-        // Affiche le texte une fois reçu (même si la modale a été fermée entre-temps,
-        // pas grave — on update le DOM caché). state.productAdviceFetch reste résolu.
-        renderProductAdvice(data);
-        return data;
-      });
-    }
-  }
-
-  function fetchProductAdvice() {
-    var productId = PRODUCT_CTX && PRODUCT_CTX.id ? PRODUCT_CTX.id : 0;
-    var fd = new FormData();
-    fd.append('action', 'sapi_megafilter_product_advice');
-    fd.append('nonce', config.nonce || '');
-    fd.append('product_id', String(productId));
-    fd.append('answers', JSON.stringify(state.answers));
-    fd.append('labels',  JSON.stringify(state.labels));
-    return fetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
-      .then(function (r) { return r.json(); })
-      .then(function (resp) {
-        if (resp && resp.success && resp.data) return resp.data;
-        return null;
-      })
-      .catch(function () { return null; });
-  }
-
-  function renderProductAdvice(data) {
-    if (!els.productQuoteText) return;
-    var advice = data && data.advice_text ? data.advice_text : '';
-    if (!advice) {
-      // Fallback ultime : texte générique de la pièce
-      var piece = state.answers.piece;
-      var cardsConfig = window.SAPI_CARDS_CONSEILLER || {};
-      var generics = cardsConfig.genericAdvice || {};
-      advice = (piece && generics[piece]) || cardsConfig.fallbackAdvice || 'Voici ma recommandation pour ton projet.';
-    }
-    // Wrap text en guillemets côté JS (pas via CSS ::before/::after — plus simple ici)
-    els.productQuoteText.textContent = '« ' + advice + ' »';
-    if (els.productQuoteSig) els.productQuoteSig.hidden = false;
-
-    // Stocke la variation recommandée pour applyProductSelection()
-    if (data && data.recommended_variation_id) {
-      state.recommendedVariationId = data.recommended_variation_id;
-    } else {
-      state.recommendedVariationId = null;
-    }
   }
 
   // CTA "Appliquer cette sélection" : ferme la modale, dispatch un event pour
-  // que la fiche produit (Phase 3) applique la pré-sélection variation.
+  // que la fiche produit applique la pré-sélection variation.
   function applyProductSelection() {
     var detail = {
       productId: PRODUCT_CTX && PRODUCT_CTX.id ? PRODUCT_CTX.id : 0,
-      variationId: state.recommendedVariationId || null,
       answers: state.answers,
       labels: state.labels,
     };
@@ -1074,8 +1067,6 @@
     state.answers = {};
     state.labels = {};
     state.questionHistory = [];
-    state.productAdviceFetch = null;
-    state.recommendedVariationId = null;
     renderS0Hybrid('s0-initial');
   }
 
@@ -1102,8 +1093,6 @@
     // Doit être positionné AVANT hydrateFromProject pour que cleanInvisibleAnswers
     // utilise la bonne liste de visibles (sinon des steps non-court restent en answers).
     state.shortMode = (initialScreen === 'product');
-    state.productAdviceFetch = null;
-    state.recommendedVariationId = null;
 
     hydrateFromProject();
     state.questionHistory = [];
@@ -1296,10 +1285,14 @@
     els.chatInputDefaultPlaceholder = els.chatInput ? els.chatInput.getAttribute('placeholder') : '';
     // S3 carrefour
     els.recapChips    = els.modal.querySelector('[data-recap-chips]');
-    // s-product-recap (F2b Phase 2)
-    els.productRecapChips = els.modal.querySelector('[data-product-recap-chips]');
-    els.productQuoteText  = els.modal.querySelector('[data-product-quote-text]');
-    els.productQuoteSig   = els.modal.querySelector('[data-product-quote-sig]');
+    // s-product-recap (F2b Phase 2 — récap statique sans IA)
+    els.productRecapIntro        = els.modal.querySelector('[data-product-recap-intro]');
+    els.productRecapCard         = els.modal.querySelector('[data-product-recap-card]');
+    els.productRecapEssence      = els.modal.querySelector('[data-product-recap-essence]');
+    els.productRecapEssenceValue = els.modal.querySelector('[data-product-recap-essence-value]');
+    els.productRecapTaille       = els.modal.querySelector('[data-product-recap-taille]');
+    els.productRecapTailleValue  = els.modal.querySelector('[data-product-recap-taille-value]');
+    els.productRecapConseil      = els.modal.querySelector('[data-product-recap-conseil]');
 
     // Marqueur pour les cards Phase 2 (évite leur fallback console.info)
     window.__sapiModalReady = true;
