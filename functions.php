@@ -309,8 +309,8 @@ function sapi_maison_enqueue_assets() {
   if (class_exists('WooCommerce') && (is_shop() || is_product())) {
     require_once get_template_directory() . '/inc/guide-data.php';
 
-    // Règles de filtrage partagées entre mega-filtre.js (no-op Phase 1)
-    // et sapi-cards-conseiller.js (Phase 2). Phase 3 consolidera.
+    // Règles de filtrage utilisées par sapi-cards-conseiller.js pour décider
+    // quels produits matchent le projet du visiteur (pièce/sortie/taille).
     $sapi_filter_rules = [
       // Pièces avec filtre ampoule (mirror sapi_guide_get_ampoule_filter)
       'ampoule_by_piece' => [
@@ -338,32 +338,13 @@ function sapi_maison_enqueue_assets() {
       'extras_slugs' => ['accessoires', 'carte-cadeau'],
     ];
 
-    $megafilter_js_path = get_template_directory() . '/assets/mega-filtre.js';
-    if (file_exists($megafilter_js_path)) {
-      wp_enqueue_script(
-        'sapi-mega-filtre',
-        get_template_directory_uri() . '/assets/mega-filtre.js',
-        ['sapi-maison-shop'],
-        filemtime($megafilter_js_path),
-        true
-      );
-      wp_localize_script('sapi-mega-filtre', 'SAPI_MEGAFILTER', [
-        'ajaxUrl'     => admin_url('admin-ajax.php'),
-        'nonce'       => wp_create_nonce('sapi-megafilter'),
-        'logNonce'    => wp_create_nonce('sapi-guide-results'),
-        'maxMessages' => 15,
-        'steps' => sapi_guide_get_steps(),
-        'rules' => $sapi_filter_rules,
-      ]);
-    }
-
     // F2a Phase 2 — cards "Conseil de Robin" / "Mon projet" sur /mes-creations/
     $cards_conseiller_js_path = get_template_directory() . '/assets/sapi-cards-conseiller.js';
     if (file_exists($cards_conseiller_js_path)) {
       wp_enqueue_script(
         'sapi-cards-conseiller',
         get_template_directory_uri() . '/assets/sapi-cards-conseiller.js',
-        ['sapi-project', 'sapi-mega-filtre'],
+        ['sapi-project', 'sapi-maison-shop'],
         filemtime($cards_conseiller_js_path),
         true
       );
