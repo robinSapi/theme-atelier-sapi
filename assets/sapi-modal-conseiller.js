@@ -17,6 +17,9 @@
   var config = window.SAPI_MODAL_CONSEILLER || {};
   var STEPS = Array.isArray(config.steps) ? config.steps : [];
   var ICONS = config.icons || {};
+  // F2b Phase 2 — Mode court (fiche produit) : whitelist des steps autorisés
+  var SHORT_STEPS = Array.isArray(config.shortSteps) ? config.shortSteps : ['piece', 'taille', 'taille_escalier', 'style'];
+  var PRODUCT_CTX = config.product || null;
 
   // F2a-ter : labels humains des clés pour les chips récap S3 ("Pièce : Salon").
   var KEY_LABELS = {
@@ -35,12 +38,14 @@
      ───────────────────────────────────────────── */
   var state = {
     open: false,
-    screen: null,         // 's0' | 's1' | 's2-chat' | 's3'
+    screen: null,         // 's0' | 's1' | 's2-chat' | 's3' | 's-product-recap'
     answers: {},
     labels: {},
     currentQuestion: null,
     questionHistory: [],  // pile des questions traversées (pour Retour)
     transition: false,    // F2a-bis : true pendant l'écran "Robin réfléchit"
+    shortMode: false,     // F2b Phase 2 — true quand ouvert depuis fiche produit
+    productAdviceFetch: null, // F2b Phase 2 — promesse en cours pour éviter double-fetch
     chat: {
       conversation: [],   // [{role:'user'|'assistant', content:'...'}]
       sessionId: null,
@@ -55,7 +60,11 @@
   /* ─────────────────────────────────────────────
      Helpers visibilité (mirror inc/guide-data.php)
      ───────────────────────────────────────────── */
-  function getVisibleStepIds(answers) {
+  // Renvoie la liste brute des steps visibles (logique visibility uniquement).
+  // Ne tient PAS compte du mode court — c'est cette base qui sert à
+  // cleanInvisibleAnswers (qui ne doit pas effacer eclairage/sortie/hauteur/table
+  // juste parce qu'on est sur une fiche produit en short mode).
+  function computeRawVisibleSteps(answers) {
     var visible = [];
     for (var i = 0; i < STEPS.length; i++) {
       var step = STEPS[i];
@@ -89,8 +98,21 @@
     return visible;
   }
 
+  // Visibilité effective pour le flow modale : applique le filtre mode court
+  // si actif. C'est la liste utilisée pour les questions affichées, la barre
+  // de progression, les chips récap et le routing fin-de-parcours.
+  function getVisibleStepIds(answers) {
+    var visible = computeRawVisibleSteps(answers);
+    if (state.shortMode) {
+      visible = visible.filter(function (id) { return SHORT_STEPS.indexOf(id) !== -1; });
+    }
+    return visible;
+  }
+
   function cleanInvisibleAnswers() {
-    var visible = getVisibleStepIds(state.answers);
+    // Utilise la visibilité BRUTE (sans short mode) pour ne pas effacer les
+    // réponses des steps longs quand on navigue depuis une fiche produit.
+    var visible = computeRawVisibleSteps(state.answers);
     Object.keys(state.answers).forEach(function (sid) {
       if (visible.indexOf(sid) === -1) {
         delete state.answers[sid];
@@ -217,6 +239,13 @@
       showQuestion(nextStep);
       // F2a-quater : bascule visuelle S0→S1 (ou no-op si déjà S1)
       if (state.screen !== 's1') showScreen('s1');
+    } else if (state.shortMode) {
+      // F2b Phase 2 — fin du parcours court : récap produit + IA dédiée (pas de
+      // morphing modale→card, on reste dans la modale ouverte).
+      if (window.sapiProject) {
+        window.sapiProject.set(state.answers, state.labels);
+      }
+      showProductRecap();
     } else {
       // F2a-bis : dernière question répondue → écran transition + appel IA + close
       showTransitionAndExit({ source: 's1' });
@@ -929,6 +958,125 @@
   }
 
   /* ─────────────────────────────────────────────
+     F2b Phase 2 — s-product-recap : récap fiche produit + phrase IA dédiée
+     ───────────────────────────────────────────── */
+
+  function populateProductRecapChips() {
+    if (!els.productRecapChips) return;
+    els.productRecapChips.innerHTML = '';
+    var visible = getVisibleStepIds(state.answers);
+    visible.forEach(function (sid) {
+      var slug = state.answers[sid];
+      if (!slug) return;
+      var label = state.labels[sid] || slug;
+      var keyLabel = KEY_LABELS[sid] || sid;
+      var chip = document.createElement('span');
+      chip.className = 'conseiller-chip';
+      var keyEl = document.createElement('span');
+      keyEl.className = 'conseiller-chip__key';
+      keyEl.textContent = keyLabel + ' :';
+      chip.appendChild(keyEl);
+      chip.appendChild(document.createTextNode(' ' + label));
+      els.productRecapChips.appendChild(chip);
+    });
+  }
+
+  // Affiche l'écran s-product-recap : chips + dots loading puis phrase IA dédiée
+  function showProductRecap() {
+    state.shortMode = true; // garantit short mode actif (cas ouverture directe avec projet existant)
+    populateProductRecapChips();
+
+    // Reset zone IA : dots visibles, texte vide, signature cachée
+    if (els.productQuoteText) {
+      els.productQuoteText.innerHTML = '<span class="conseiller-product-quote__dots" data-product-quote-dots>· · ·</span>';
+      // Re-grab dots ref (innerHTML a recréé l'élément)
+      els.productQuoteDots = els.productQuoteText.querySelector('[data-product-quote-dots]');
+    }
+    if (els.productQuoteSig) els.productQuoteSig.hidden = true;
+
+    showScreen('s-product-recap');
+
+    // Fetch IA dédiée produit. Si déjà en cours pour ce projet+produit, ne pas re-fetch.
+    if (!state.productAdviceFetch) {
+      state.productAdviceFetch = fetchProductAdvice().then(function (data) {
+        // Affiche le texte une fois reçu (même si la modale a été fermée entre-temps,
+        // pas grave — on update le DOM caché). state.productAdviceFetch reste résolu.
+        renderProductAdvice(data);
+        return data;
+      });
+    }
+  }
+
+  function fetchProductAdvice() {
+    var productId = PRODUCT_CTX && PRODUCT_CTX.id ? PRODUCT_CTX.id : 0;
+    var fd = new FormData();
+    fd.append('action', 'sapi_megafilter_product_advice');
+    fd.append('nonce', config.nonce || '');
+    fd.append('product_id', String(productId));
+    fd.append('answers', JSON.stringify(state.answers));
+    fd.append('labels',  JSON.stringify(state.labels));
+    return fetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (resp) {
+        if (resp && resp.success && resp.data) return resp.data;
+        return null;
+      })
+      .catch(function () { return null; });
+  }
+
+  function renderProductAdvice(data) {
+    if (!els.productQuoteText) return;
+    var advice = data && data.advice_text ? data.advice_text : '';
+    if (!advice) {
+      // Fallback ultime : texte générique de la pièce
+      var piece = state.answers.piece;
+      var cardsConfig = window.SAPI_CARDS_CONSEILLER || {};
+      var generics = cardsConfig.genericAdvice || {};
+      advice = (piece && generics[piece]) || cardsConfig.fallbackAdvice || 'Voici ma recommandation pour ton projet.';
+    }
+    // Wrap text en guillemets côté JS (pas via CSS ::before/::after — plus simple ici)
+    els.productQuoteText.textContent = '« ' + advice + ' »';
+    if (els.productQuoteSig) els.productQuoteSig.hidden = false;
+
+    // Stocke la variation recommandée pour applyProductSelection()
+    if (data && data.recommended_variation_id) {
+      state.recommendedVariationId = data.recommended_variation_id;
+    } else {
+      state.recommendedVariationId = null;
+    }
+  }
+
+  // CTA "Appliquer cette sélection" : ferme la modale, dispatch un event pour
+  // que la fiche produit (Phase 3) applique la pré-sélection variation.
+  function applyProductSelection() {
+    var detail = {
+      productId: PRODUCT_CTX && PRODUCT_CTX.id ? PRODUCT_CTX.id : 0,
+      variationId: state.recommendedVariationId || null,
+      answers: state.answers,
+      labels: state.labels,
+    };
+    document.dispatchEvent(new CustomEvent('sapi:apply-product-selection', { detail: detail }));
+    closeModal();
+    // Scroll smooth vers les variations WC pour montrer le résultat
+    setTimeout(function () {
+      var form = document.querySelector('form.variations_form');
+      if (form && form.scrollIntoView) {
+        form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 150);
+  }
+
+  // Action "Modifier mes réponses" depuis s-product-recap : revient au début
+  // du parcours court (vide le projet en cours dans le state local SEULEMENT,
+  // pas dans sapiProject — l'utilisateur n'a pas confirmé "Appliquer").
+  function modifyProductAnswers() {
+    state.questionHistory = [];
+    state.productAdviceFetch = null;
+    state.recommendedVariationId = null;
+    renderS0Hybrid('s0-initial');
+  }
+
+  /* ─────────────────────────────────────────────
      Open / close
      ───────────────────────────────────────────── */
   function hydrateFromProject() {
@@ -947,6 +1095,13 @@
 
   function openModal(initialScreen) {
     if (!els.modal) return;
+    // F2b Phase 2 — Active le mode court UNIQUEMENT pour l'état "product".
+    // Doit être positionné AVANT hydrateFromProject pour que cleanInvisibleAnswers
+    // utilise la bonne liste de visibles (sinon des steps non-court restent en answers).
+    state.shortMode = (initialScreen === 'product');
+    state.productAdviceFetch = null;
+    state.recommendedVariationId = null;
+
     hydrateFromProject();
     state.questionHistory = [];
     state.transition = false;
@@ -956,15 +1111,25 @@
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
 
-    // F2a-quater : ouverture state="s0" → détermine dynamiquement le sous-état
-    // (initial / partiel / s3-carrefour) selon le contenu du sapiProject.
-    // state="s3" force le carrefour (compat avec anciens liens).
-    // F2b state="product" : ouvert depuis la pill "Comment choisir ?" sur fiche
-    // produit. Phase 1 = routé vers S0 hybride normal (validation du câblage).
-    // Phase 2 introduira le mode court + écran s-product-recap dédié.
-    if (initialScreen === 's3' && window.sapiProject && window.sapiProject.hasProject()) {
+    // F2a-quater : state="s0" → détermine dynamiquement le sous-état
+    //   (initial / partiel / s3-carrefour) selon le contenu du sapiProject.
+    // F2a-ter : state="s3" force le carrefour (compat avec anciens liens).
+    // F2b Phase 2 : state="product" → mode court fiche produit.
+    //   - Si tous les steps courts sont répondus → directement s-product-recap
+    //   - Sinon → S0 hybride avec mode court actif (la prochaine question est
+    //     la 1re question du parcours court non répondue)
+    if (initialScreen === 'product') {
+      var visible = getVisibleStepIds(state.answers); // filtré short mode
+      var allAnswered = visible.length > 0 && visible.every(function (id) { return !!state.answers[id]; });
+      if (allAnswered) {
+        showProductRecap();
+      } else {
+        var anyAnswered = visible.some(function (id) { return !!state.answers[id]; });
+        renderS0Hybrid(anyAnswered ? 's0-partiel' : 's0-initial');
+      }
+    } else if (initialScreen === 's3' && window.sapiProject && window.sapiProject.hasProject()) {
       showS3Recap();
-    } else if (initialScreen === 's0' || initialScreen === 'product' || !initialScreen) {
+    } else if (initialScreen === 's0' || !initialScreen) {
       var detected = determineInitialState();
       if (detected === 's3-carrefour') {
         showS3Recap();
@@ -1058,6 +1223,13 @@
         case 's0-reset':
           resetFromS0();
           break;
+        // F2b Phase 2 : actions de l'écran s-product-recap
+        case 'product-apply':
+          applyProductSelection();
+          break;
+        case 'product-modify':
+          modifyProductAnswers();
+          break;
       }
     });
 
@@ -1121,6 +1293,10 @@
     els.chatInputDefaultPlaceholder = els.chatInput ? els.chatInput.getAttribute('placeholder') : '';
     // S3 carrefour
     els.recapChips    = els.modal.querySelector('[data-recap-chips]');
+    // s-product-recap (F2b Phase 2)
+    els.productRecapChips = els.modal.querySelector('[data-product-recap-chips]');
+    els.productQuoteText  = els.modal.querySelector('[data-product-quote-text]');
+    els.productQuoteSig   = els.modal.querySelector('[data-product-quote-sig]');
 
     // Marqueur pour les cards Phase 2 (évite leur fallback console.info)
     window.__sapiModalReady = true;

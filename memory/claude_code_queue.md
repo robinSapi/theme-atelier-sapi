@@ -2,6 +2,56 @@
 
 ## ✅ Livré
 
+## [RETOUR] F2b Phase 2 — Mode court + écran s-product-recap + endpoint IA produit
+**Date livrée :** 2026-05-20
+**Branche :** `test-theme-sapi-maison`
+**URL test :** `test.atelier-sapi.fr/produit/<un-luminaire-variable>/`
+**Statut :** Phase 2/4 livrée. Le parcours modale sur fiche produit est désormais court (3 questions) et débouche sur une phrase IA dédiée qui recommande une taille explicite.
+
+### Livraison Phase 2
+- `functions.php` :
+  - Helper `sapi_megafilter_project_to_size_code()` : mapping projet → S/M/L (`petite→S`, `moyenne→M`, `grande→L`, `escalier ouvert→M`, escalier standard → pas de reco)
+  - Helper `sapi_megafilter_find_variation_for_size()` : cherche dans les variations WC du produit une variation dont la valeur d'attribut matche le code taille
+  - Endpoint AJAX `sapi_megafilter_product_advice` (Sonnet) : prompt qui DOIT citer la taille recommandée explicitement ("Taille L", etc.). Output : `{ advice_text, recommended_variation_id?, recommended_size? }`
+  - Localize : ajout de `shortSteps` (whitelist `['piece','taille','taille_escalier','style']`) + `product: {id, name}` (null hors fiche produit)
+  - Markup `s-product-recap` ajouté à `sapi_render_conseiller_modal()` : badge + h2 + chips + quote IA (dots loading) + CTA "Appliquer cette sélection" (svg check) + back link "Modifier mes réponses"
+
+- `assets/sapi-modal-conseiller.js` :
+  - Nouvel état `state.shortMode` (set par `openModal('product')` uniquement)
+  - Refactor visibilité : `computeRawVisibleSteps()` pour `cleanInvisibleAnswers` (ne supprime pas les réponses long-mode quand on est en court), `getVisibleStepIds()` applique le filtre court par dessus
+  - `openModal('product')` :
+    - Projet complet (piece + taille|taille_escalier + style) → directement `showProductRecap()` (fetch IA immédiat)
+    - Projet partiel → `renderS0Hybrid('s0-partiel')`, parcourt SHORT_STEPS uniquement
+    - Pas de projet → `renderS0Hybrid('s0-initial')`
+  - À la fin du parcours court → `sapiProject.set()` + `showProductRecap()` (au lieu du morphing modale→card du long mode)
+  - `showProductRecap()` : populate chips + dots loading + fetch IA produit (mémoïsé via `state.productAdviceFetch`)
+  - `applyProductSelection()` : dispatch `sapi:apply-product-selection { productId, variationId, answers, labels }` + close + scroll smooth vers `form.variations_form` (Phase 3 ajoutera le listener qui pré-sélectionne réellement)
+  - `modifyProductAnswers()` : reset history + revient sur S0 hybride pour recommencer le parcours court
+
+- `style.css` : styles dédiés `[data-screen="s-product-recap"]` (chips identiques au S3 + nouvelle zone `.conseiller-product-quote` avec dots pulsants + signature en Square Peg)
+
+### Ce qui marche déjà
+- Pill sur fiche produit (Phase 1) → clic ouvre la modale en mode court
+- **Sans projet** : 3 questions seulement (piece, taille|escalier, style) puis récap avec phrase IA spécifique au produit
+- **Avec projet partiel** : reprend là où c'est manquant parmi les 3 questions courtes
+- **Avec projet complet** : récap direct + phrase IA dédiée au produit (mention de taille explicite)
+- "Appliquer cette sélection" → ferme modale + scroll smooth vers `form.variations_form` (la pré-sélection elle-même est Phase 3)
+- "Modifier mes réponses" → revient à S0 pour reprendre le parcours court
+
+### Ce qui reste à faire (Phases 3-4)
+- **Phase 3** : listener `sapi:apply-product-selection` sur fiche produit → applique réellement la pré-sélection variation (radio WC) + scroll. Pré-sélection automatique aussi au LOAD de la page si projet existant. Hint discret "✓ Pré-sélectionné pour votre projet" sous le label de l'attribut taille
+- **Phase 4** : sauvegarde projet partiel si modale fermée avant la fin (déjà gérée par `update` incrémental) + petites finitions UX
+
+### Question pour Robin
+1. **Test #1 — Sans projet** : sur une fiche produit variable, clic pill → modale s'ouvre → réponds aux 3 questions → vérifie que la phrase IA mentionne bien une taille (S/M/L) cohérente
+2. **Test #2 — Avec projet** : passe d'abord sur `/mes-creations/` pour créer un projet (au moins piece + taille), reviens sur la fiche → clic pill → modale doit s'ouvrir directement sur le récap avec la phrase IA
+3. **Test #3 — Mapping attribut** : sur ton catalogue, l'attribut taille de variation s'appelle bien quelque chose comme "Taille" avec valeurs S/M/L ? Si c'est un autre nom (ex. "Format" → "Petit/Moyen/Grand"), il faudra adapter le matcher dans `sapi_megafilter_find_variation_for_size()`. Pour Phase 3 je récupèrerai les noms d'attribut depuis le catalogue réel.
+4. **Card sur-mesure** (héritage F2a) : toujours désactivée — même décision à prendre
+5. **Brevo opt-in** : toujours bloqué
+6. **Merge master** : on continue F2b jusqu'au bout ou on merge le bloc F2a avant ?
+
+---
+
 ## [RETOUR] F2b Phase 1 — Modale partagée + Pill "Comment choisir ?" sur fiche produit
 **Date livrée :** 2026-05-20
 **Branche :** `test-theme-sapi-maison`
