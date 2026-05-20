@@ -286,6 +286,22 @@ function sapi_maison_enqueue_assets() {
 
   }
 
+  // F2a-quinquies — Hero live update (H1 qui s'adapte au changement de
+  // sapiProject.answers.piece). Enqueue sur is_shop() uniquement.
+  if (class_exists('WooCommerce') && is_shop()) {
+    $hero_live_js_path = get_template_directory() . '/assets/sapi-hero-live.js';
+    if (file_exists($hero_live_js_path)) {
+      wp_enqueue_script(
+        'sapi-hero-live',
+        get_template_directory_uri() . '/assets/sapi-hero-live.js',
+        ['sapi-project'],
+        filemtime($hero_live_js_path),
+        true
+      );
+      wp_localize_script('sapi-hero-live', 'SAPI_HERO_TITLES', sapi_get_hero_piece_titles());
+    }
+  }
+
   // Méga-filtre intelligent — page Mes créations uniquement (F1a/F2a)
   if (class_exists('WooCommerce') && is_shop()) {
     require_once get_template_directory() . '/inc/guide-data.php';
@@ -2927,6 +2943,26 @@ function sapi_ajax_megafilter_chat() {
  * et en affichage par défaut sur la card "Mon projet" tant qu'aucun parcours
  * n'a abouti dans la modale. Source de vérité unique partagée PHP / JS.
  */
+/**
+ * Titres du hero /mes-creations/ par pièce (F2a-quinquies).
+ * Source unique partagée entre le rendu PHP initial (archive-product.php)
+ * et la localize JS (sapi-hero-live.js qui met à jour le H1 en live au
+ * changement de sapiProject.answers.piece).
+ */
+function sapi_get_hero_piece_titles() {
+  return [
+    'default' => __('Mes Créations', 'theme-sapi-maison'),
+    'pieces'  => [
+      'salon'    => __('Pour un salon', 'theme-sapi-maison'),
+      'chambre'  => __('Pour une chambre', 'theme-sapi-maison'),
+      'cuisine'  => __('Pour une cuisine', 'theme-sapi-maison'),
+      'bureau'   => __('Pour un bureau', 'theme-sapi-maison'),
+      'entree'   => __('Pour une entrée', 'theme-sapi-maison'),
+      'escalier' => __('Pour un escalier', 'theme-sapi-maison'),
+    ],
+  ];
+}
+
 function sapi_megafilter_get_generic_advices() {
   return [
     'salon'    => __("Pour un salon, j'ai sélectionné une variété de luminaires qui créent une atmosphère chaleureuse.", 'theme-sapi-maison'),

@@ -63,39 +63,24 @@ if (!$hero_img_url) {
 }
 ?>
 <?php
-// Hero réactif : si ?piece=… présent dans l'URL et reconnu, on adapte H1 + sous-titre
-// et on cache le lien Conseils (qui contredit le contexte filtré).
-// F2a-bis : on utilise un article indéfini (un/une) plutôt qu'un déterminant possessif
-// (ton/ta) qui présume une appartenance qu'on ne peut pas affirmer.
-$piece_hero_map = [
-  'salon'    => ['article' => 'un',  'nom' => 'salon'],
-  'chambre'  => ['article' => 'une', 'nom' => 'chambre'],
-  'cuisine'  => ['article' => 'une', 'nom' => 'cuisine'],
-  'bureau'   => ['article' => 'un',  'nom' => 'bureau'],
-  'entree'   => ['article' => 'une', 'nom' => 'entrée'],
-  'escalier' => ['article' => 'un',  'nom' => 'escalier'],
-];
+// F2a-quinquies : hero qui s'adapte au changement de sapiProject.answers.piece
+// en live (crossfade via sapi-hero-live.js). Le mapping est centralisé dans
+// la fonction helper sapi_get_hero_piece_titles() (functions.php) — source
+// unique partagée entre le rendu PHP initial et la localize JS.
+// Sous-titre et CTA "Conseils de Robin" supprimés : le hero ne contient
+// que H1 + photo de fond. La photo reste statique (refonte par pièce =
+// chantier S28 séparé, en pause).
+$hero_titles = function_exists('sapi_get_hero_piece_titles')
+  ? sapi_get_hero_piece_titles()
+  : ['default' => __('Mes Créations', 'theme-sapi-maison'), 'pieces' => []];
 $piece_param = isset($_GET['piece']) ? sanitize_key(wp_unslash($_GET['piece'])) : '';
-$piece_hero  = isset($piece_hero_map[$piece_param]) ? $piece_hero_map[$piece_param] : null;
+$hero_title  = isset($hero_titles['pieces'][$piece_param])
+  ? $hero_titles['pieces'][$piece_param]
+  : $hero_titles['default'];
 ?>
 <section class="shop-hero-artisan">
   <div class="shop-hero-artisan-inner">
-    <?php if ($piece_hero) : ?>
-      <h1><?php
-        /* translators: 1: article indéfini (un/une), 2: nom de la pièce */
-        printf(esc_html__('Pour %1$s %2$s', 'theme-sapi-maison'), esc_html($piece_hero['article']), esc_html($piece_hero['nom']));
-      ?></h1>
-      <p class="shop-hero-artisan-subtitle">
-        <?php esc_html_e('Découvre la sélection de l\'atelier pour ton projet', 'theme-sapi-maison'); ?>
-      </p>
-    <?php else : ?>
-      <h1><?php esc_html_e('Mes Créations', 'theme-sapi-maison'); ?></h1>
-      <p class="shop-hero-artisan-subtitle">
-        <?php esc_html_e('Luminaires uniques, découpés au laser et assemblés à la main dans l\'atelier lyonnais de Robin.', 'theme-sapi-maison'); ?>
-      </p>
-      <!-- CTA maillage interne → Conseils éclairés (masqué quand un piece est sélectionné) -->
-      <p class="seo-cta-maillage-inline">Vous ne savez pas par où commencer ? <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>">Lisez les conseils de Robin →</a></p>
-    <?php endif; ?>
+    <h1 data-hero-title><?php echo esc_html($hero_title); ?></h1>
   </div>
 </section>
 
