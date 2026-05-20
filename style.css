@@ -23019,11 +23019,14 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 .conseiller-card--mon-projet.is-awaiting-advice .conseiller-mon-projet__text-content::after {
   content: '· · ·';
+  display: block;                  /* block-level → centré par text-align du parent */
   color: var(--color-wood);
   font-style: normal;
-  font-size: 28px;
-  letter-spacing: 0.15em;
+  font-size: clamp(44px, 5.5vw, 60px);
+  letter-spacing: 0.22em;
+  line-height: 1;
   opacity: 0.5;
+  text-align: center;
   -webkit-animation: awaiting-pulse 1.4s ease-in-out infinite;
   animation: awaiting-pulse 1.4s ease-in-out infinite;
 }
@@ -23032,7 +23035,9 @@ body.woocommerce-cart div.woocommerce-wrapper {
   display: none;
 }
 .conseiller-card--mon-projet.is-awaiting-advice .conseiller-signature {
-  opacity: 0;
+  /* display: none (au lieu d'opacity: 0) pour libérer l'espace inline et
+     laisser les dots se centrer proprement dans le bloc text. */
+  display: none;
 }
 @-webkit-keyframes awaiting-pulse {
   0%, 100% { opacity: 0.25; }
