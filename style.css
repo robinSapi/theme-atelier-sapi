@@ -23194,6 +23194,12 @@ body.woocommerce-cart div.woocommerce-wrapper {
   margin-bottom: 36px;
 }
 
+/* Plus d'air entre le badge (Conseil de Robin / Mon projet) et le H2
+   dans tous les écrans de la modale (S0/S1/S2/S3/transition). */
+.conseiller-card--modal .conseiller-badge {
+  margin-bottom: 28px;
+}
+
 /* F2a-quater : Anciennes portes S0 (.conseiller-portes / .conseiller-porte*) supprimées —
    remplacées par l'écran hybride question + séparateur "ou" + champ texte. */
 
