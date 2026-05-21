@@ -2,6 +2,73 @@
 
 ## ✅ Livré
 
+## [RETOUR] Polish modale — Titres avec contexte (dynamiques par pièce) + choix taille raccourcis
+**Date livrée :** 2026-05-21
+**Branche :** `test-theme-sapi-maison`
+**Statut :** Livré, prêt à tester.
+
+### Contexte
+
+Suite à F2a-sexies, l'utilisateur peut atterrir au milieu du parcours modale via la chip-card "Mon projet" — sans contexte amont sur la pièce qu'il est en train de configurer. Les titres "Style de l'intérieur ?" ou "Hauteur sous plafond ?" perdent leur ancrage. On rallonge légèrement les titres et on dynamise certains par pièce.
+
+### Commits
+
+1. **`50174be`** Titres modale avec plus de contexte
+2. **`c9c563a`** Choix taille raccourcis "Petite/Standard/Grande"
+
+### Titres modale (`inc/guide-data.php`)
+
+**Statiques :**
+| Step | Avant | Après |
+|---|---|---|
+| piece | Pour quelle pièce ? | _inchangé_ |
+| taille_escalier | Quel type d'escalier ? | _inchangé_ |
+| eclairage | Éclairage principal ? | **Ce sera l'éclairage principal ?** |
+| sortie | Où l'installer ? | **Où installerez-vous votre luminaire ?** |
+| hauteur | Hauteur sous plafond ? | **Quelle hauteur sous plafond ?** |
+
+**Dynamiques par pièce (via `dynamic_question.piece`)**
+| Step | Fallback | Variantes |
+|---|---|---|
+| **taille** | Quelle taille fait votre pièce ? | cuisine / bureau / salon / chambre / entrée |
+| **style** | Quel style pour votre intérieur ? | cuisine / bureau / salon / chambre / entrée / escalier |
+| **table** | Au-dessus d'une table ou d'un îlot ? | cuisine ("votre table ou d'un îlot") / bureau / salon / chambre — ajout de "votre" |
+
+→ Ex. avec piece=cuisine et taille pas répondu : la modale affiche *"Quelle taille fait votre cuisine ?"*
+
+### Côté JS — sapi-cards-conseiller.js
+
+- Ajout du helper `getDynamicQuestion(step, answers)` (mirror exact de celui de sapi-modal-conseiller.js)
+- `renderInlineQuestion(step, answers)` honore désormais `dynamic_question` → la chip-question sur la card "Mon projet" affiche aussi le titre dynamique par pièce
+
+### Choix taille — labels raccourcis
+
+| Avant | Après |
+|---|---|
+| Petite pièce | **Petite** |
+| Pièce standard | **Standard** |
+| Grande pièce | **Grande** |
+| Je ne sais pas | _inchangé_ |
+
+Le mot "pièce" est désormais redondant puisque la question le mentionne déjà ("Quelle taille fait votre cuisine ?"). Le `dim` subtitle (intime / confortable / spacieuse) reste inchangé.
+
+**Slugs inchangés** (`petite/moyenne/grande/ne-sais-pas`) → aucun impact sur :
+- filtrage produits
+- mapping S/M/L des variations
+- projets déjà persistés en localStorage
+
+### Effet de bord positif
+
+Les chips affichées sur la card "Mon projet" et dans les récaps (S3, pill produit) deviennent plus concises. Ex. pill produit : **Cuisine · Petite · Peuplier ✓**
+
+### Question pour Robin
+
+- **Test** : ouvrir la modale via la chip-card de `/mes-creations/?piece=cuisine` → vérifier que les titres se cuisinisent ("Quelle taille fait votre cuisine ?", "Quel style pour votre cuisine ?", "Au-dessus de votre table ou d'un îlot ?")
+- Idem pour `?piece=chambre` (devrait afficher "votre chambre", "votre lit" pour table)
+- Récap S3 / pill produit : vérifier que les labels raccourcis "Petite/Standard/Grande" rendent bien
+
+---
+
 ## [RETOUR] F2a-sexies — Card "Mon projet" : chip-question d'accroche + lien Modifier + card cliquable + 2 fixes
 **Date livrée :** 2026-05-21
 **Branche :** `test-theme-sapi-maison`
