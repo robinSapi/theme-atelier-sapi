@@ -2637,15 +2637,46 @@ function sapi_megafilter_call_claude($model, $system, array $messages, $max_toke
 }
 
 /**
- * Parse JSON tolérant (fences markdown éventuels). Retourne null si KO.
+ * Parse JSON tolérant — gère plusieurs cas pathologiques :
+ *  1. JSON pur
+ *  2. JSON entouré de fences markdown ```json ... ```
+ *  3. Prose avant + bloc ```json ... ``` après (cas rencontré quand les
+ *     exemples conversationnels priment dans le prompt — Claude écrit
+ *     la prose ET le JSON)
+ *  4. Prose mélangée avec une accolade {...} valide quelque part
+ * Retourne null si rien n'a pu être extrait.
  */
 function sapi_megafilter_parse_json($text) {
   if (!is_string($text)) return null;
   $clean = trim($text);
-  $clean = preg_replace('/^```(?:json)?\s*/i', '', $clean);
-  $clean = preg_replace('/\s*```$/', '', $clean);
-  $parsed = json_decode(trim($clean), true);
-  return is_array($parsed) ? $parsed : null;
+
+  // Stratégie 1 : essai direct (cas idéal)
+  $direct = json_decode($clean, true);
+  if (is_array($direct)) return $direct;
+
+  // Stratégie 2 : fences markdown au début/fin
+  $stripped = preg_replace('/^```(?:json)?\s*/i', '', $clean);
+  $stripped = preg_replace('/\s*```$/', '', $stripped);
+  $stripped = trim($stripped);
+  $direct = json_decode($stripped, true);
+  if (is_array($direct)) return $direct;
+
+  // Stratégie 3 : trouve un bloc ```json ... ``` (ou ``` ... ```) n'importe où
+  if (preg_match('/```(?:json)?\s*(\{[\s\S]*?\})\s*```/i', $clean, $m)) {
+    $direct = json_decode(trim($m[1]), true);
+    if (is_array($direct)) return $direct;
+  }
+
+  // Stratégie 4 : extrait la 1re accolade ouvrante à la dernière fermante
+  $first = strpos($clean, '{');
+  $last  = strrpos($clean, '}');
+  if ($first !== false && $last !== false && $last > $first) {
+    $candidate = substr($clean, $first, $last - $first + 1);
+    $direct = json_decode($candidate, true);
+    if (is_array($direct)) return $direct;
+  }
+
+  return null;
 }
 
 /**
@@ -2719,7 +2750,14 @@ function sapi_megafilter_build_freetext_prompt(array $whitelist) {
   $prompt .= "- N'inclus une clé dans `filters` QUE si tu peux la déduire avec confiance du texte. En cas de doute, laisse-la absente.\n";
   $prompt .= "- N'invente PAS de slug : utilise exactement ceux listés.\n";
   $prompt .= "- `message` : 1-2 phrases chaleureuses, tutoiement, ton artisan. Mentionne ce que tu as compris du projet.\n";
-  $prompt .= "- Pas d'emoji, pas de markdown dans `message`.\n";
+  $prompt .= "- Pas d'emoji, pas de markdown dans `message`.\n\n";
+
+  $prompt .= "⚠️ FORMAT DE SORTIE — IMPÉRATIF :\n";
+  $prompt .= "Ta réponse DOIT être UNIQUEMENT le JSON décrit ci-dessus. RIEN d'autre :\n";
+  $prompt .= "- PAS de prose avant le JSON\n";
+  $prompt .= "- PAS de prose après le JSON\n";
+  $prompt .= "- PAS de bloc ```markdown autour\n";
+  $prompt .= "Premier caractère = `{`, dernier caractère = `}`. Point.\n";
 
   return $prompt;
 }
@@ -2779,7 +2817,15 @@ function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_pr
   $prompt .= "- `message` : obligatoire, 2-4 phrases.\n";
   $prompt .= "- `filters_update` : optionnel. À inclure UNIQUEMENT si tu veux changer les chips suite au message du visiteur (ex. il précise, change d'avis). Utilise les slugs exacts. `null` pour supprimer un filtre. Ne touche pas aux chips non concernés.\n";
   $prompt .= "- `action: \"contact\"` : optionnel. Inclure UNIQUEMENT si le visiteur cherche quelque chose qui n'existe pas dans le catalogue ou semble bloqué → tu lui suggères de te contacter directement.\n";
-  $prompt .= "- Tu peux référencer un modèle précis du catalogue par son nom dans `message` si pertinent.\n";
+  $prompt .= "- Tu peux référencer un modèle précis du catalogue par son nom dans `message` si pertinent.\n\n";
+
+  $prompt .= "⚠️ FORMAT DE SORTIE — IMPÉRATIF :\n";
+  $prompt .= "Les EXEMPLES de ton plus haut sont là pour calibrer TA VOIX dans le champ `message`. Ta réponse, elle, DOIT être UNIQUEMENT le JSON décrit ci-dessus. RIEN d'autre :\n";
+  $prompt .= "- PAS de prose avant le JSON\n";
+  $prompt .= "- PAS de prose après le JSON\n";
+  $prompt .= "- PAS de bloc ```markdown autour\n";
+  $prompt .= "- Tout ton texte conversationnel va DANS le champ `message`, pas dehors.\n";
+  $prompt .= "Premier caractère de ta réponse = `{`, dernier caractère = `}`. Point.\n";
 
   return $prompt;
 }
@@ -3358,7 +3404,14 @@ function sapi_ajax_megafilter_advice() {
   $system_prompt .= "- Pas d'emoji, pas de markdown, pas de signature (elle est ajoutée séparément côté front)\n";
   $system_prompt .= "- Format : 1 à 2 phrases, max 300 caractères\n\n";
   $system_prompt .= "FORMAT DE RÉPONSE (JSON strict, sans markdown) :\n";
-  $system_prompt .= "{ \"advice_text\": \"...\" }\n";
+  $system_prompt .= "{ \"advice_text\": \"...\" }\n\n";
+
+  $system_prompt .= "⚠️ FORMAT DE SORTIE — IMPÉRATIF :\n";
+  $system_prompt .= "Ta réponse DOIT être UNIQUEMENT le JSON ci-dessus. RIEN d'autre :\n";
+  $system_prompt .= "- PAS de prose avant le JSON\n";
+  $system_prompt .= "- PAS de prose après le JSON\n";
+  $system_prompt .= "- PAS de bloc ```markdown autour\n";
+  $system_prompt .= "Premier caractère = `{`, dernier caractère = `}`. Point.\n";
 
   $user_msg = "PROJET DU VISITEUR :\n" . $project_text . $conversation_block;
 
