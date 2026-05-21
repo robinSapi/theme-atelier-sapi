@@ -385,17 +385,20 @@
       }
     }
 
-    // 1. Enregistre la réponse en PREMIER → sapiProject à jour
+    // 1. Enregistre la réponse en PREMIER → sapiProject à jour.
+    //    ⚠️ Effet de bord : le subscribe re-render renderInlineQuestion qui
+    //    DÉTACHE le chip cliqué du DOM (innerHTML wipe). On ne peut donc
+    //    plus dispatcher l'événement DEPUIS le chip (le bubbling cassé).
     if (window.sapiProject && typeof window.sapiProject.update === 'function') {
       var patch  = {}; patch[stepId]  = slug;
       var lpatch = {}; lpatch[stepId] = label || slug;
       window.sapiProject.update(patch, lpatch);
     }
 
-    // 2. Puis ouvre la modale qui lit l'état frais via hydrateFromProject
-    // → determineInitialState → s0-partiel → prochaine question non répondue
-    chip.dispatchEvent(new CustomEvent('sapi:open-modal', {
-      bubbles: true,
+    // 2. Dispatch sur document directement (le listener modale est sur
+    //    document.addEventListener) — pas besoin de bubbling, le chip
+    //    détaché ne porte plus.
+    document.dispatchEvent(new CustomEvent('sapi:open-modal', {
       detail: { state: 's0' },
     }));
   }
