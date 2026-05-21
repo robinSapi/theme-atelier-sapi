@@ -2649,6 +2649,39 @@ function sapi_megafilter_parse_json($text) {
 }
 
 /**
+ * Charge le contenu des 4 fichiers prompt V2 (assets/guide-prompt-*.txt) et
+ * retourne la concaténation prête à coller en tête d'un system prompt
+ * méga-filtre V3.
+ *
+ * Pattern repris de sapi_robin_build_step_prompt (V2) pour rapatrier la
+ * voix Robin (ton chaleureux, tutoiement) et les règles métier dures
+ * (cuisine sans lampe à poser, multi-ampoules, escalier, applique kit
+ * prise, etc.) dans les prompts V3.
+ *
+ * @param bool $with_exemples Inclure guide-prompt-exemples.txt (verbeux,
+ *                            à réserver aux prompts conversationnels —
+ *                            risque de pollution de sortie JSON sinon).
+ * @return string
+ */
+function sapi_megafilter_load_v2_prompts($with_exemples = false) {
+  $theme_dir = get_template_directory();
+  $ton    = @file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt')    ?: '';
+  $savoir = @file_get_contents($theme_dir . '/assets/guide-prompt-savoir.txt') ?: '';
+  $regles = @file_get_contents($theme_dir . '/assets/guide-prompt-regles.txt') ?: '';
+
+  $out  = $ton . "\n\n" . $savoir . "\n\n" . $regles . "\n\n";
+
+  if ($with_exemples) {
+    $exemples = @file_get_contents($theme_dir . '/assets/guide-prompt-exemples.txt') ?: '';
+    if ($exemples) {
+      $out .= "EXEMPLES DE CONSEILS PAR ÉTAPE (pour le ton et la direction) :\n" . $exemples . "\n\n";
+    }
+  }
+
+  return $out;
+}
+
+/**
  * System prompt — extraction freetext (Haiku).
  */
 function sapi_megafilter_build_freetext_prompt(array $whitelist) {
@@ -2663,7 +2696,11 @@ function sapi_megafilter_build_freetext_prompt(array $whitelist) {
     'style'           => 'style d\'intérieur',
   ];
 
-  $prompt  = "Tu es Robin, artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser.\n";
+  // Injecte ton + savoir + regles V2 en tête (PAS exemples : risque de
+  // polluer la sortie JSON stricte attendue par cet endpoint Haiku).
+  $prompt  = sapi_megafilter_load_v2_prompts(false);
+
+  $prompt .= "Tu es Robin, artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser.\n";
   $prompt .= "Un visiteur décrit son projet en quelques mots. Ton rôle : extraire les filtres structurés qu'il indique et lui répondre en 1-2 phrases.\n\n";
 
   $prompt .= "FILTRES DISPONIBLES (utilise UNIQUEMENT ces slugs exacts) :\n";
@@ -2691,7 +2728,11 @@ function sapi_megafilter_build_freetext_prompt(array $whitelist) {
  * System prompt — conversation libre (Sonnet).
  */
 function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_products, array $whitelist) {
-  $prompt  = "Tu es Robin, artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser dans son atelier à Lyon.\n";
+  // Injecte ton + savoir + regles + exemples V2 en tête (équivalent V2
+  // sapi_robin_build_step_prompt — les exemples guident le ton conversationnel).
+  $prompt  = sapi_megafilter_load_v2_prompts(true);
+
+  $prompt .= "Tu es Robin, artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser dans son atelier à Lyon.\n";
   $prompt .= "Tu accompagnes un visiteur qui explore ta collection sur le site atelier-sapi.fr.\n\n";
 
   $prompt .= "TON :\n";
@@ -3303,7 +3344,12 @@ function sapi_ajax_megafilter_advice() {
 
   $project_text = sapi_megafilter_format_project_text($answers, $labels);
 
-  $system_prompt  = "Tu es Robin, artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser dans son atelier de Lyon.\n";
+  // Injecte ton + savoir + regles V2 en tête (PAS exemples : équivalent V2
+  // sapi_robin_call_recommendation qui n'inclut pas les exemples — sortie
+  // JSON courte à 1-2 phrases, pas besoin d'amorces conversationnelles).
+  $system_prompt  = sapi_megafilter_load_v2_prompts(false);
+
+  $system_prompt .= "Tu es Robin, artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser dans son atelier de Lyon.\n";
   $system_prompt .= "Un visiteur vient de te décrire son projet (via questionnaire ou conversation libre). Tu lui présentes ta sélection en 1-2 phrases personnalisées.\n\n";
   $system_prompt .= "TON :\n";
   $system_prompt .= "- Tutoiement, chaleureux, artisan passionné, jamais vendeur\n";
