@@ -2,6 +2,339 @@
 
 ## ✅ Livré
 
+## [RETOUR] Rapatriement voix Robin V2 + règles métier dans les prompts IA V3
+**Date livrée :** 2026-05-21
+**Branche :** `test-theme-sapi-maison`
+**Commit :** `318b112`
+**Statut :** Livré.
+
+### Implémentation
+
+**Helper créé :** `sapi_megafilter_load_v2_prompts($with_exemples = false)` dans `functions.php`. Lit les 4 fichiers `assets/guide-prompt-*.txt` (ton + savoir + regles obligatoires, exemples optionnel) et retourne la concaténation prête à coller en tête d'un system prompt.
+
+**Injection dans les 3 builders :**
+
+| Builder | Modèle | V2 prompts injectés | Position |
+|---|---|---|---|
+| `sapi_megafilter_build_freetext_prompt` | Haiku (extraction JSON) | ton + savoir + regles | En tête, avant `"Tu es Robin..."` |
+| `sapi_megafilter_build_chat_prompt` | Sonnet (chat libre) | ton + savoir + regles + **exemples** | En tête, avant `"Tu es Robin..."` |
+| Prompt inline de `sapi_ajax_megafilter_advice` | Sonnet (phrase finale) | ton + savoir + regles | En tête, avant `"Tu es Robin..."` |
+
+**Pattern V2 respecté :** `exemples.txt` UNIQUEMENT dans le mode conversationnel (chat S2 — équivalent V2 `build_step_prompt`). Pas d'exemples dans les prompts à sortie JSON structurée (équivalent V2 `call_recommendation`) — risque de pollution sinon.
+
+**Aucune modification :** format de sortie JSON, whitelist anti-hallucination, hooks AJAX, appels JS.
+
+### Notes opérationnelles
+
+- **Taille** : +22 KB max ajoutés en tête (les 4 .txt totalisent ~22 KB). Largement dans les marges Haiku/Sonnet (200K tokens de contexte).
+- **Échantillon de prompt** : pas capturé localement (pas de PHP CLI dispo). À vérifier sur le live via `error_log($system_prompt)` temporaire si besoin.
+- **Effets de bord à observer en test** :
+  - Mode chat S2 : Robin devrait tutoyer systématiquement + refuser activement les lampes à poser pour une cuisine (règle de `regles.txt`)
+  - Card "Mon projet" : `advice_text` devrait refléter le ton artisan
+  - Mode freetext : extraction JSON toujours fiable, message court chaleureux
+
+### Question pour Robin
+
+- Test sur `testlumineux.atelier-sapi.fr` : parcours complet en modale (S0 → questions → S1 → IA) sur une cuisine pour observer si Robin refuse bien les lampes à poser
+- Test chat S2 : soumettre un freetext → vérifier ton chaleureux des exemples V2
+
+---
+
+## [TÂCHE — LIVRÉ] Rapatrier la voix Robin + règles métier V2 dans les prompts IA V3
+**Date :** 2026-05-21
+**Branche :** `test-theme-sapi-maison`
+**Priorité :** normale
+
+### Contexte
+
+L'audit IA du 21/05 a confirmé que les 3 system prompts V3 actuels (`sapi_megafilter_build_freetext_prompt`, `sapi_megafilter_build_chat_prompt`, et le prompt inline de `sapi_ajax_megafilter_advice`) **ne réutilisent pas** les 4 fichiers `assets/guide-prompt-*.txt` construits pour V2. Conséquence : la voix de Robin (tutoiement chaleureux, artisan passionné) et les règles métier dures (cuisine sans lampe à poser, multi-ampoules, escalier, applique kit prise…) n'agissent plus sur les sorties IA quand un visiteur passe par la modale V3.
+
+Cette tâche rapatrie la logique V2 dans V3 **sans changer l'UX ni le format de sortie**. On respecte le même découpage que V2 :
+- `exemples.txt` injecté **seulement** dans le mode conversationnel (chat S2) — comme V2 l'injecte dans `sapi_robin_build_step_prompt`
+- `exemples.txt` **pas injecté** dans les prompts à sortie JSON structurée — comme V2 ne l'injecte pas dans `sapi_robin_call_recommendation`
+
+Référence : rapport d'audit complet dans `business/docs/audit-appels-ia-master-vs-test-2026-05-21.md` (côté Cowork).
+
+### À faire
+
+Dans `functions.php` (branche `test-theme-sapi-maison`), modifier les 3 builders de system prompt V3 pour injecter le contenu des fichiers `.txt` en tête du prompt actuel.
+
+**Pattern de chargement à reprendre tel quel** depuis `sapi_robin_build_step_prompt` (l. ~2960 actuel test) :
+
+```php
+$theme_dir = get_template_directory();
+$ton      = @file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt') ?: '';
+$savoir   = @file_get_contents($theme_dir . '/assets/guide-prompt-savoir.txt') ?: '';
+$regles   = @file_get_contents($theme_dir . '/assets/guide-prompt-regles.txt') ?: '';
+$exemples = @file_get_contents($theme_dir . '/assets/guide-prompt-exemples.txt') ?: '';
+```
+
+**Recommandation perso : créer un helper unique** pour éviter de dupliquer 4 fois ce bloc :
+
+```php
+/**
+ * Charge le contenu des 4 fichiers prompt V2 et retourne la concaténation
+ * prête à coller en tête d'un system prompt méga-filtre.
+ *
+ * @param bool $with_exemples Inclure guide-prompt-exemples.txt (verbeux, à
+ *                            réserver aux prompts conversationnels).
+ * @return string
+ */
+function sapi_megafilter_load_v2_prompts($with_exemples = false) {
+  $theme_dir = get_template_directory();
+  $ton      = @file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt') ?: '';
+  $savoir   = @file_get_contents($theme_dir . '/assets/guide-prompt-savoir.txt') ?: '';
+  $regles   = @file_get_contents($theme_dir . '/assets/guide-prompt-regles.txt') ?: '';
+  $out  = $ton . "\n\n" . $savoir . "\n\n" . $regles . "\n\n";
+  if ($with_exemples) {
+    $exemples = @file_get_contents($theme_dir . '/assets/guide-prompt-exemples.txt') ?: '';
+    if ($exemples) {
+      $out .= "EXEMPLES DE CONSEILS PAR ÉTAPE (pour le ton et la direction) :\n" . $exemples . "\n\n";
+    }
+  }
+  return $out;
+}
+```
+
+**Modifications par endpoint :**
+
+| Builder | Fichiers à injecter | Position |
+|---|---|---|
+| `sapi_megafilter_build_freetext_prompt` (Haiku, extraction filtres) | ton + savoir + regles (**pas** exemples — risque de pollution sortie JSON) | En tête du prompt actuel, avant `"Tu es Robin, artisan menuisier lyonnais…"` |
+| `sapi_megafilter_build_chat_prompt` (Sonnet, conversation libre) | ton + savoir + regles + **exemples** (équivalent V2 `build_step_prompt`) | En tête du prompt actuel |
+| Prompt inline de `sapi_ajax_megafilter_advice` (Sonnet, phrase finale) | ton + savoir + regles (**pas** exemples — équivalent V2 `call_recommendation`) | En tête du prompt actuel |
+
+Le **reste de chaque prompt** (sections "FILTRES DISPONIBLES", "CATALOGUE", "FORMAT DE RÉPONSE", "RÈGLES" inline) reste **strictement inchangé**. On ne fait qu'ajouter du contexte en amont.
+
+**Aucune modification :**
+- du format de sortie JSON de chaque endpoint
+- de la whitelist anti-hallucination dans freetext et chat
+- des hooks AJAX
+- des appels côté JS (`sapi-modal-conseiller.js`, `sapi-cards-conseiller.js`)
+
+### Critères de succès
+
+1. Les 3 system prompts V3 contiennent le contenu des fichiers `.txt` en tête (vérifiable en faisant un `error_log()` temporaire du prompt complet sur un appel test).
+2. La structure de sortie JSON de chaque endpoint reste **identique** (pas de régression front).
+3. La whitelist anti-hallucination de freetext continue de filtrer correctement.
+4. Test manuel sur testlumineux.atelier-sapi.fr — observer une amélioration sur :
+   - **Mode chat S2** : Robin tutoie systématiquement, ton chaleureux d'artisan, mentionne les essences/règles si pertinent. Refuse activement les lampes à poser pour une cuisine (règle de `regles.txt`).
+   - **Card "Mon projet" sur /mes-creations/** : l'`advice_text` reflète la voix Robin (Square Peg signature côté front, mais le texte lui-même doit avoir le ton artisan).
+   - **Mode freetext** : extraction de filtres toujours fiable (JSON correct), message court (1-2 phrases) et chaleureux.
+5. Pas de timeout — les 4 fichiers font au total ~22 KB, largement dans les marges de Haiku/Sonnet.
+
+### Notes pour le retour
+
+Au retour, indiquer :
+- Le hash des commits livrés
+- Si un helper a été créé (et son nom)
+- Un échantillon de prompt complet (capturé via `error_log()` puis retiré) pour vérifier que les 4 fichiers sont bien injectés
+- Tout effet de bord observé en test (rate limit, longueur réponse, ton)
+
+---
+
+## [TÂCHE] Mass-update GPC Pinterest + Brand Google for WC + Condition variations (script one-shot)
+**Date :** 2026-05-21
+**Branche :** prod (master) — c'est une opération sur les metas DB, pas sur le code thème
+**Priorité :** haute
+
+### Contexte
+
+Diagnostic Pinterest mai 2026 : sur 167 produits ingérés dans Pinterest, **141 sont en warning** parce que `google_product_category` est soit manquante (105), soit incomplète (34 avec seulement 2 niveaux `Home & Garden > Lighting`). Conséquence : -90% de visibilité organique sur Pinterest (1 960 impressions/mois sur 167 produits = 11,7 par produit, vs norme 200-1000).
+
+Le plugin **Pinterest for WooCommerce** expose un champ "Catégorie Google" dans l'onglet Pinterest de chaque fiche produit parent (UI native), avec propagation auto vers les variations. Pas d'UI de mass-update — d'où ce script one-shot.
+
+On en profite pour aligner :
+- **Brand = "Atelier Sâpi"** dans Google for WC sur chaque parent (déjà géré globalement via Attribute Mapping mais Robin veut la persistance au niveau produit)
+- **Pinterest Condition = "new"** sur toutes les variations (actuellement "Default" partout, pas de signal envoyé)
+
+### Mapping retenu (catégorie WC → Google Product Category)
+
+| Slug catégorie WC | Google Product Category (chaîne complète) |
+|---|---|
+| `suspensions` | `Home & Garden > Lighting > Light Fixtures > Ceiling Light Fixtures` |
+| `lampadaires` | `Home & Garden > Lighting > Lamps > Floor Lamps` |
+| `lampesaposer` | `Home & Garden > Lighting > Lamps > Table Lamps` |
+| `appliques` | `Home & Garden > Lighting > Light Fixtures > Wall Light Fixtures` |
+| `accessoires` | **EXCLU** — ne rien modifier sur ces produits |
+
+### À faire
+
+**Étape 1 — Découverte des meta keys exactes** (préalable obligatoire)
+
+Avant d'écrire le script, grep dans `wp-content/plugins/pinterest-for-woocommerce/` et `wp-content/plugins/google-listings-and-ads/` pour identifier les meta keys utilisées :
+- Pinterest "Catégorie Google" sur le produit parent → probablement `_pinterest_for_woocommerce_google_product_category` mais à confirmer
+- Pinterest "Condition" sur la variation → probablement `_pinterest_for_woocommerce_condition`
+- Google for WC "Google Product Category" → probablement `_wc_gla_google_product_category`
+- Google for WC "Brand" → probablement `_wc_gla_brand`
+
+Confirmer le **slug exact** de la catégorie WC "accessoires" via `wp term list product_cat` (peut être `accessoires`, `accessoire`, `accessories`...).
+
+**Étape 2 — Écrire le snippet PHP "Run once"**
+
+Snippet à créer dans Code Snippets WP, type "Run once", avec ce squelette :
+
+```php
+<?php
+/**
+ * One-shot mass-update : GPC Pinterest + Google for WC + Brand + Condition variations.
+ * Date : 2026-05-21
+ * À exécuter une seule fois puis supprimer.
+ */
+
+// =========================================================================
+// CONFIG — à ajuster après découverte des meta keys exactes (étape 1)
+// =========================================================================
+$dry_run = true; // <<<<< METTRE À false POUR EXÉCUTION RÉELLE
+
+$gpc_mapping = array(
+    'suspensions'   => 'Home & Garden > Lighting > Light Fixtures > Ceiling Light Fixtures',
+    'lampadaires'   => 'Home & Garden > Lighting > Lamps > Floor Lamps',
+    'lampesaposer'  => 'Home & Garden > Lighting > Lamps > Table Lamps',
+    'appliques'     => 'Home & Garden > Lighting > Light Fixtures > Wall Light Fixtures',
+);
+
+$excluded_categories = array( 'accessoires' ); // à confirmer slug exact
+
+// Meta keys (à confirmer par grep dans les plugins)
+$meta_pinterest_gpc       = '_pinterest_for_woocommerce_google_product_category';
+$meta_pinterest_condition = '_pinterest_for_woocommerce_condition';
+$meta_gla_gpc             = '_wc_gla_google_product_category';
+$meta_gla_brand           = '_wc_gla_brand';
+
+$brand_value = 'Atelier Sâpi';
+
+// =========================================================================
+// LOGIQUE
+// =========================================================================
+$log = array();
+$updated_parents = 0;
+$updated_variations = 0;
+$skipped_accessoires = 0;
+$skipped_no_category = 0;
+
+$products = wc_get_products( array(
+    'limit'  => -1,
+    'status' => 'publish',
+    'type'   => array( 'simple', 'variable' ),
+) );
+
+foreach ( $products as $product ) {
+    $product_id = $product->get_id();
+    $slugs = wp_get_post_terms( $product_id, 'product_cat', array( 'fields' => 'slugs' ) );
+
+    if ( is_wp_error( $slugs ) || empty( $slugs ) ) {
+        $skipped_no_category++;
+        $log[] = "SKIP #$product_id (" . $product->get_name() . ") : aucune catégorie";
+        continue;
+    }
+
+    if ( array_intersect( $excluded_categories, $slugs ) ) {
+        $skipped_accessoires++;
+        $log[] = "SKIP #$product_id (" . $product->get_name() . ") : accessoire";
+        continue;
+    }
+
+    // Identifier la catégorie cible
+    $matched_category = null;
+    foreach ( $slugs as $slug ) {
+        if ( isset( $gpc_mapping[ $slug ] ) ) {
+            $matched_category = $slug;
+            break;
+        }
+    }
+
+    if ( ! $matched_category ) {
+        $skipped_no_category++;
+        $log[] = "SKIP #$product_id (" . $product->get_name() . ") : aucune catégorie mappée (slugs : " . implode( ',', $slugs ) . ")";
+        continue;
+    }
+
+    $gpc = $gpc_mapping[ $matched_category ];
+
+    if ( ! $dry_run ) {
+        update_post_meta( $product_id, $meta_pinterest_gpc, $gpc );
+        update_post_meta( $product_id, $meta_gla_gpc, $gpc );
+        update_post_meta( $product_id, $meta_gla_brand, $brand_value );
+    }
+    $updated_parents++;
+    $log[] = "OK parent #$product_id (" . $product->get_name() . ") → GPC = $gpc, brand = $brand_value";
+
+    // Mettre à jour les variations
+    if ( $product->is_type( 'variable' ) ) {
+        $variation_ids = $product->get_children();
+        foreach ( $variation_ids as $variation_id ) {
+            if ( ! $dry_run ) {
+                update_post_meta( $variation_id, $meta_pinterest_condition, 'new' );
+            }
+            $updated_variations++;
+            $log[] = "  └─ OK variation #$variation_id → Pinterest condition = new";
+        }
+    }
+}
+
+// =========================================================================
+// REPORT
+// =========================================================================
+$report = sprintf(
+    "[Mass-update Pinterest/GMC %s]\nParents updated : %d\nVariations updated : %d\nSkipped accessoires : %d\nSkipped no-category : %d\n\nDétail :\n%s",
+    $dry_run ? 'DRY-RUN' : 'LIVE',
+    $updated_parents,
+    $updated_variations,
+    $skipped_accessoires,
+    $skipped_no_category,
+    implode( "\n", $log )
+);
+
+// Écrire le rapport dans un fichier pour audit
+$log_file = WP_CONTENT_DIR . '/uploads/mass-update-' . date('Y-m-d-His') . '.log';
+file_put_contents( $log_file, $report );
+
+error_log( "[Mass-update] Rapport écrit dans : $log_file" );
+error_log( $report );
+```
+
+**Étape 3 — Exécuter en dry-run d'abord**
+
+1. Coller le snippet dans Code Snippets, type "Run once", `$dry_run = true`
+2. Sauvegarder + activer
+3. Lire le fichier log généré dans `wp-content/uploads/`
+4. **Renvoyer le log à Robin via le claude_code_queue pour validation** avant exécution réelle
+
+**Étape 4 — Exécution réelle après validation Robin**
+
+1. Passer `$dry_run = false`
+2. Ré-activer le snippet (Run once)
+3. Vérifier le nouveau log
+4. **Désactiver et supprimer le snippet** une fois exécuté
+5. Confirmer à Robin via le claude_code_queue
+
+### Critères de succès
+
+1. **Dry-run** : log montre ~24 parents updated + ~140 variations updated + N accessoires skipped + 0 erreurs
+2. **Exécution réelle** : log identique au dry-run, tous les metas posés en DB
+3. **Vérification manuelle** : Robin ouvre 2-3 fiches au hasard dans WP admin → la "Catégorie Google" Pinterest est bien remplie + la Condition variation est bien "new" + le Brand Google for WC est bien "Atelier Sâpi"
+4. **Pas de side-effect** sur les accessoires (à vérifier en ouvrant un accessoire après exécution)
+
+### Notes pour le retour
+
+Au retour, indiquer :
+- Les meta keys exactes trouvées dans les deux plugins
+- Le slug exact de la catégorie accessoires (et tout slug "produit non-luminaire" qu'il aurait fallu exclure)
+- Le log complet du dry-run et de l'exécution réelle
+- Toute anomalie (produit sans catégorie, catégorie inattendue, échec d'écriture meta…)
+- L'emplacement du fichier log d'audit pour archivage
+
+### Étapes post-exécution (Robin, côté Cowork)
+
+Une fois Claude Code a confirmé l'exécution :
+1. Sync Pinterest forcée (Pinterest > Settings > Sync)
+2. Attendre 24h pour le re-ingest complet
+3. Vérifier dans Pinterest > Catalog > Diagnostics : warnings passent de 141 à <5
+4. Vérifier dans Google for WC > Product Feed : statut des produits, warnings GMC
+
+---
+
 ## [RETOUR] Polish modale — Titres avec contexte (dynamiques par pièce) + choix taille raccourcis
 **Date livrée :** 2026-05-21
 **Branche :** `test-theme-sapi-maison`
