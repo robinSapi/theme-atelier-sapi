@@ -363,7 +363,10 @@
      ───────────────────────────────────────────── */
 
   // F2a-sexies : clic sur une chip-réponse de la prochaine question.
-  // Dispatch open-modal AVANT update (sinon subscribe re-render → flash visuel).
+  // ORDRE CRITIQUE : update AVANT dispatch — sinon la modale hydrate l'ancien
+  // état et ouvre sur la question qu'on vient de répondre au lieu de la
+  // suivante. Le re-render de la card par le subscribe est masqué par
+  // l'ouverture immédiate de la modale par-dessus (pas de flash visible).
   function handleChipAnswer(chip) {
     var stepId = chip.getAttribute('data-step-id');
     var slug   = chip.getAttribute('data-slug');
@@ -382,20 +385,19 @@
       }
     }
 
-    // 1. Dispatch open-modal en PREMIER (la modale lit le projet à l'ouverture
-    // via determineInitialState → s0-partiel → 1re question non répondue)
-    chip.dispatchEvent(new CustomEvent('sapi:open-modal', {
-      bubbles: true,
-      detail: { state: 's0' },
-    }));
-
-    // 2. Puis enregistre la réponse (notifie subscribers, mais la modale est
-    // déjà en cours d'ouverture donc pas de flash)
+    // 1. Enregistre la réponse en PREMIER → sapiProject à jour
     if (window.sapiProject && typeof window.sapiProject.update === 'function') {
       var patch  = {}; patch[stepId]  = slug;
       var lpatch = {}; lpatch[stepId] = label || slug;
       window.sapiProject.update(patch, lpatch);
     }
+
+    // 2. Puis ouvre la modale qui lit l'état frais via hydrateFromProject
+    // → determineInitialState → s0-partiel → prochaine question non répondue
+    chip.dispatchEvent(new CustomEvent('sapi:open-modal', {
+      bubbles: true,
+      detail: { state: 's0' },
+    }));
   }
 
   function bindCTAs() {
