@@ -2,11 +2,29 @@
 
 ## ✅ Livré
 
-## [RETOUR] F2a-sexies — Card "Mon projet" : chip-question d'accroche + lien Modifier
+## [RETOUR] F2a-sexies — Card "Mon projet" : chip-question d'accroche + lien Modifier + card cliquable + 2 fixes
 **Date livrée :** 2026-05-21
 **Branche :** `test-theme-sapi-maison`
 **URL test :** `test.atelier-sapi.fr/mes-creations/?piece=chambre` (ou `?piece=cuisine`)
 **Statut :** Livré. La card invite désormais explicitement le visiteur à continuer son parcours.
+
+### Commits de la séquence
+
+1. **`3b77461`** F2a-sexies — Implémentation initiale (chip-question + lien Modifier + 3 états)
+2. **`3319dbe`** F2a-sexies-bis — Card cliquable comme un tout (sur retour utilisateur)
+3. **`7192bc6`** Fix — Ordre update/dispatch inversé (modale s'ouvrait sur la question déjà répondue)
+4. **`d1d598e`** Fix — Dispatch sur document (chip détaché par le re-render bloquait le bubbling)
+
+### Bugs corrigés en cours de route
+
+**Bug #1 : modale s'ouvrait sur la question qu'on venait de répondre**
+- Cause : le spec disait "dispatch AVANT update pour éviter le flash", mais `openModal` appelle `hydrateFromProject()` immédiatement → lit le projet AVANT que l'update soit appliqué → `determineInitialState` retourne la même question comme "non répondue"
+- Fix : inverser l'ordre — update en PREMIER, dispatch ensuite. La modale lit l'état frais.
+- Aucun flash perceptible : la modale s'ouvre dans le même tick que le re-render de la card.
+
+**Bug #2 : modale ne s'ouvrait plus du tout après le fix #1**
+- Cause : `sapiProject.update` notifie le subscribe → render → `renderInlineQuestion` réécrit `els.inlineQuestion.innerHTML` → le chip cliqué est DÉTACHÉ du DOM. Dispatcher l'event DEPUIS un chip détaché ne bubble pas jusqu'à `document` où le listener écoute.
+- Fix : `document.dispatchEvent(...)` directement (pas besoin de bubbling, le listener est sur document).
 
 ### Implémentation
 
