@@ -64,6 +64,21 @@
     return clean;
   }
 
+  // F2a-sexies : retourne le step COMPLET (avec question + choices) pour la
+  // prochaine question visible non répondue, ou null si parcours complet.
+  function getNextUnansweredStep(answers) {
+    var visibleIds = getVisibleStepIds(answers);
+    for (var i = 0; i < visibleIds.length; i++) {
+      var id = visibleIds[i];
+      if (!answers[id]) {
+        for (var j = 0; j < STEPS.length; j++) {
+          if (STEPS[j].id === id) return STEPS[j];
+        }
+      }
+    }
+    return null;
+  }
+
   /* ─────────────────────────────────────────────
      Filtrage produit (mirror mega-filtre.js Phase 1)
      ───────────────────────────────────────────── */
@@ -255,20 +270,49 @@
     }, totalMs);
   }
 
+  // F2a-sexies : escape HTML pour injection sécurisée des labels de choix
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  // F2a-sexies : injecte le markup "question + chips de réponse" dans la
+  // zone data-inline-question. step = objet step complet du localize.
+  function renderInlineQuestion(step) {
+    if (!els.inlineQuestion || !step) return;
+    var choices = step.choices || [];
+    var html = '<span class="inline-question__label">' + escHtml(step.question) + '</span>';
+    html += '<div class="inline-question__answers">';
+    for (var i = 0; i < choices.length; i++) {
+      var c = choices[i];
+      html += '<button class="answer-chip" type="button"' +
+        ' data-step-id="' + escHtml(step.id) + '"' +
+        ' data-slug="' + escHtml(c.slug) + '"' +
+        ' data-label="' + escHtml(c.label) + '">' +
+        escHtml(c.label) +
+        '</button>';
+    }
+    html += '</div>';
+    els.inlineQuestion.innerHTML = html;
+  }
+
   function renderMonProjet() {
     if (!els.cardMonProjet || !els.phraseContent) return;
     els.cardConseil && (els.cardConseil.hidden = true);
     els.cardMonProjet.hidden = false;
 
     // F2a-quater : pendant l'animation morph + l'attente IA, on injecte 3
-    // ronds qui pulsent en cascade. Quand le modal retire la classe (advice
-    // arrivé), le typewriter écrase ce contenu via textContent = ''.
+    // ronds qui pulsent en cascade. Pendant ce temps : pas de chip-question,
+    // pas de lien Modifier — juste la card et les dots.
     if (els.cardMonProjet.classList.contains('is-awaiting-advice')) {
       els.phraseContent.innerHTML =
         '<span class="conseiller-awaiting-dot"></span>' +
         '<span class="conseiller-awaiting-dot"></span>' +
         '<span class="conseiller-awaiting-dot"></span>';
       delete els.phraseContent.dataset.lastText;
+      if (els.inlineQuestion) els.inlineQuestion.hidden = true;
+      if (els.editLink) els.editLink.hidden = true;
       return;
     }
 
@@ -280,6 +324,22 @@
     if (els.phraseContent.dataset.lastText !== newText) {
       els.phraseContent.dataset.lastText = newText;
       typewriterEffect(els.phraseContent, els.phrase, newText, 26);
+    }
+
+    // F2a-sexies : bascule entre chip-question (parcours incomplet) et lien
+    // Modifier (parcours complet).
+    var answers = (project && project.answers) || {};
+    var next = getNextUnansweredStep(answers);
+    if (next) {
+      renderInlineQuestion(next);
+      if (els.inlineQuestion) els.inlineQuestion.hidden = false;
+      if (els.editLink) els.editLink.hidden = true;
+    } else {
+      if (els.inlineQuestion) {
+        els.inlineQuestion.innerHTML = '';
+        els.inlineQuestion.hidden = true;
+      }
+      if (els.editLink) els.editLink.hidden = false;
     }
   }
 
@@ -299,24 +359,67 @@
   }
 
   /* ─────────────────────────────────────────────
-     CTA → dispatch événement (Phase 3 écoutera)
+     CTA → dispatch événement
      ───────────────────────────────────────────── */
+
+  // F2a-sexies : clic sur une chip-réponse de la prochaine question.
+  // Dispatch open-modal AVANT update (sinon subscribe re-render → flash visuel).
+  function handleChipAnswer(chip) {
+    var stepId = chip.getAttribute('data-step-id');
+    var slug   = chip.getAttribute('data-slug');
+    var label  = chip.getAttribute('data-label');
+    if (!stepId || !slug) return;
+
+    // Fallback label depuis STEPS si attribut manquant
+    if (!label) {
+      for (var i = 0; i < STEPS.length; i++) {
+        if (STEPS[i].id !== stepId) continue;
+        var choices = STEPS[i].choices || [];
+        for (var j = 0; j < choices.length; j++) {
+          if (choices[j].slug === slug) { label = choices[j].label; break; }
+        }
+        break;
+      }
+    }
+
+    // 1. Dispatch open-modal en PREMIER (la modale lit le projet à l'ouverture
+    // via determineInitialState → s0-partiel → 1re question non répondue)
+    chip.dispatchEvent(new CustomEvent('sapi:open-modal', {
+      bubbles: true,
+      detail: { state: 's0' },
+    }));
+
+    // 2. Puis enregistre la réponse (notifie subscribers, mais la modale est
+    // déjà en cours d'ouverture donc pas de flash)
+    if (window.sapiProject && typeof window.sapiProject.update === 'function') {
+      var patch  = {}; patch[stepId]  = slug;
+      var lpatch = {}; lpatch[stepId] = label || slug;
+      window.sapiProject.update(patch, lpatch);
+    }
+  }
+
   function bindCTAs() {
     if (!els.zone) return;
     els.zone.addEventListener('click', function (e) {
+      // F2a-sexies : clic sur une chip de réponse (priorité sur open-modal)
+      var chip = e.target.closest('.answer-chip[data-step-id]');
+      if (chip) {
+        e.preventDefault();
+        handleChipAnswer(chip);
+        return;
+      }
+
       var btn = e.target.closest('[data-action="open-modal"]');
       if (!btn) return;
       e.preventDefault();
       var modalState = btn.getAttribute('data-modal-state') || 's0';
-      var event = new CustomEvent('sapi:open-modal', {
+      btn.dispatchEvent(new CustomEvent('sapi:open-modal', {
         bubbles: true,
         detail: { state: modalState },
-      });
-      btn.dispatchEvent(event);
-      // Phase 2 : pas encore de modale — on log discrètement pour debug
+      }));
       if (!window.__sapiModalReady) {
         // eslint-disable-next-line no-console
-        console.info('[sapi] open-modal demandé (state=' + modalState + ') — modale Phase 3 à venir');
+        console.info('[sapi] open-modal demandé (state=' + modalState + ') — modale non chargée ?');
       }
     });
   }
@@ -332,6 +435,9 @@
     els.cardMonProjet     = els.zone.querySelector('[data-conseiller-card="mon-projet"]');
     els.phrase            = els.zone.querySelector('[data-mon-projet-phrase]');
     els.phraseContent     = els.zone.querySelector('[data-mon-projet-phrase-content]');
+    // F2a-sexies : zone chip-question + lien Modifier coin haut-droit
+    els.inlineQuestion    = els.zone.querySelector('[data-inline-question]');
+    els.editLink          = els.zone.querySelector('[data-mon-projet-edit]');
 
     bindCTAs();
     render();

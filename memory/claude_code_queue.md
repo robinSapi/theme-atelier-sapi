@@ -2,6 +2,55 @@
 
 ## ✅ Livré
 
+## [RETOUR] F2a-sexies — Card "Mon projet" : chip-question d'accroche + lien Modifier
+**Date livrée :** 2026-05-21
+**Branche :** `test-theme-sapi-maison`
+**URL test :** `test.atelier-sapi.fr/mes-creations/?piece=chambre` (ou `?piece=cuisine`)
+**Statut :** Livré. La card invite désormais explicitement le visiteur à continuer son parcours.
+
+### Implémentation
+
+**1. Markup `woocommerce/archive-product.php`**
+- Conversion `<button>` Mon projet → `<section>` (la card n'est plus cliquable comme un tout)
+- Ajout du lien Modifier `<a class="conseiller-mon-projet__edit" data-action="open-modal" data-modal-state="s3" data-mon-projet-edit hidden>` positionné absolute coin haut-droite
+- Ajout de la zone `<div class="conseiller-mon-projet__inline-question" data-inline-question hidden></div>` sous la phrase IA
+
+**2. JS `assets/sapi-cards-conseiller.js`**
+- Nouveau helper `getNextUnansweredStep(answers)` : retourne le step COMPLET (question + choices) de la prochaine question visible non répondue, ou null si parcours complet
+- Helper `escHtml()` pour injection sécurisée des labels de choix
+- Helper `renderInlineQuestion(step)` : injecte le markup `<span class="inline-question__label">…</span><div class="inline-question__answers"><button class="answer-chip" data-step-id="…" data-slug="…" data-label="…">…</button>…</div>`
+- Refactor `renderMonProjet()` : 3 états gérés
+  - **awaiting** (inchangé) : dots pulsants, chip et edit masqués
+  - **parcours incomplet** : phrase IA générique + chip-question affiché + edit caché
+  - **parcours complet** : phrase IA enrichie + chip caché + edit affiché
+- Nouveau handler `handleChipAnswer(chip)` : dispatch `sapi:open-modal { state: 's0' }` AVANT `sapiProject.update()` (évite le flash visuel — la modale est en cours d'ouverture quand le subscribe re-render)
+- Délégation click étendue : `.answer-chip[data-step-id]` capturé en priorité, sinon fallback sur `[data-action="open-modal"]`
+
+**3. CSS `style.css`**
+- Suppression hover global `.conseiller-card--mon-projet:hover` (translate + shadow + badge orange) — la card n'est plus un bouton
+- Suppression `cursor: pointer` + `border: none` (reset button devenu inutile)
+- Ajout `position: relative` sur la card pour ancrer le lien Modifier
+- `.conseiller-mon-projet__edit` : pill coin haut-droit, 12px wood, border-bottom dashed, hover orange
+- `.conseiller-mon-projet__inline-question` : flex wrap centré, gap 10/14px, margin-top 18
+- `.inline-question__label` : 13px italic wood, font-weight 600
+- `.answer-chip` : 8px 16px white bg + 1.5px dashed wood-35% + radius 50, hover warm bg + border orange + translateY -1
+
+### Comportement bout-en-bout
+1. Visiteur arrive sur `/mes-creations/?piece=chambre` → card "Mon projet" affiche phrase générique chambre + chip "Taille de la pièce ?" avec 4 chips
+2. Clic sur "Pièce standard" → modale s'ouvre sur S0 hybride → `determineInitialState` détecte projet partiel → renderS0Hybrid avec next step (Style de l'intérieur ? si chambre, car eclairage/sortie/hauteur/table tous masqués pour ne-pas-grande)
+3. Visiteur finit le parcours → animation sortie → IA → advice_text → retour grille
+4. Card "Mon projet" : phrase enrichie + lien Modifier en haut-droite + plus de chip-question
+5. Clic Modifier → modale S3 carrefour (3 actions : Recommencer / Préciser / Voir la sélection)
+
+### Question pour Robin
+- **Tests** :
+  - `/mes-creations/?piece=chambre` → vérifier chip "Taille de la pièce ?" en bas de la card
+  - `/mes-creations/?piece=cuisine` → vérifier chip "Taille de la pièce ?" puis enchaînement automatique vers les questions cuisine (éclairage si grande, sortie, hauteur si plafond, table)
+  - Compléter un parcours → vérifier que le chip disparaît et que le lien Modifier apparaît
+  - Mobile 375px : chip wrap proprement
+
+---
+
 ## [RETOUR] Finitions production — Cleanup + harmonisation design + raccourcis titres + loading dots
 **Date livrée :** 2026-05-20
 **Branche :** `test-theme-sapi-maison`
@@ -638,6 +687,269 @@ En attente du feu vert Robin pour démarrer F2b ou merger F2a d'abord.
 ---
 
 ## 📋 À faire
+
+## [TÂCHE] F2a-sexies — Card "Mon projet" : chip-question d'accroche qui embarque dans la modale
+
+**Date :** 2026-05-21
+**Priorité :** haute (dernière modif UX avant prod)
+**Branche :** `test-theme-sapi-maison`
+**Prérequis :** F2a-quater livrée et validée (F2a-quinquies indépendant — ordre libre).
+
+---
+
+### Contexte
+
+Aujourd'hui, sur `/mes-creations/?piece=chambre` (visiteur arrivant via le roompicker de la home), la card "Mon projet" affiche le badge + la phrase IA générique + la signature Robin… et **rien n'invite à aller plus loin**. Le visiteur n'a pas de signal qu'il peut préciser son projet. La card "ferme la porte" au lieu de l'ouvrir.
+
+Robin a validé sur le mockup #10 (variante F + F bis) le principe suivant : **afficher sous la phrase IA un chip-question d'accroche** = la prochaine question non répondue du parcours. **Au clic sur une réponse, on enregistre la réponse en localStorage puis on ouvre la modale directement sur la question d'après.**
+
+Le visiteur est embarqué dans le parcours guidé dès son 1er clic. À la sortie de la modale (parcours complet), l'appel IA génère l'advice_text personnalisé qui remplace la phrase générique. La règle "1 seul appel IA par parcours" est respectée.
+
+**Mockup de référence :** `site-web/mockups/mockup-10-card-mon-projet-variantes.html` — variantes **F** (état entrée) et **F bis** (état sortie).
+
+---
+
+### À LIRE AVANT TOUTE MODIFICATION
+
+1. `assets/sapi-cards-conseiller.js` — rendu actuel de la card "Mon projet" (`renderMonProjet`), helpers `getVisibleStepIds()`, `cleanInvisibleAnswers()`, dispatch `sapi:open-modal`
+2. `assets/sapi-project.js` — API `update(patchAnswers, patchLabels)`, `subscribe()`, `hasProject()`
+3. `assets/sapi-modal-conseiller.js` — listener `sapi:open-modal` + `openModal('s0')` qui appelle `determineInitialState()` (s0-partiel démarre automatiquement sur la 1re question non répondue)
+4. `inc/guide-data.php` — `sapi_guide_get_steps()` (id, question, choices[], visibility)
+5. Mockup `site-web/mockups/mockup-10-card-mon-projet-variantes.html` — variantes F + F bis pour le visuel cible
+6. Mémoire Cowork `project_conseiller_v3_pivot.md` — pattern visuel universel Conseiller (à respecter)
+
+---
+
+### Périmètre F2a-sexies
+
+#### A. Nouveau helper JS — `getNextUnansweredStep(answers)`
+
+Dans `sapi-cards-conseiller.js`, ajouter à côté de `getVisibleStepIds()` :
+
+```js
+function getNextUnansweredStep(answers) {
+  var visibleIds = getVisibleStepIds(answers);
+  for (var i = 0; i < visibleIds.length; i++) {
+    var id = visibleIds[i];
+    if (!answers[id]) {
+      // Retourne le step complet pour avoir question + choices
+      for (var j = 0; j < STEPS.length; j++) {
+        if (STEPS[j].id === id) return STEPS[j];
+      }
+    }
+  }
+  return null; // parcours complet
+}
+```
+
+#### B. Rendu de la card "Mon projet" — 3 états
+
+Refonte de `renderMonProjet()` pour gérer trois états selon le projet :
+
+1. **État "awaiting"** (transition modale → IA, déjà existant)
+   - 3 dots qui pulsent → inchangé.
+
+2. **État "parcours incomplet"** (au moins 1 answer, au moins 1 step visible non répondu)
+   - Badge "Mon projet" + phrase IA générique de la pièce + signature Robin
+   - **Sous la phrase** : nouvelle zone `.conseiller-bento__inline-question` contenant :
+     - Un label italique : la question du step (ex: *"Taille de la pièce ?"*) — provient de `step.question` raccourci (déjà fait dans le commit `1b86eed`)
+     - Une liste de chips boutons = `step.choices[]` (label, slug, optionnellement dim)
+   - **Pas** de séparateur dashed entre la phrase et la question. **Pas** de texte explicatif sous les chips.
+
+3. **État "parcours complet"** (tous les steps visibles répondus → `getNextUnansweredStep` retourne null)
+   - Badge "Mon projet" + phrase IA enrichie (advice_text personnalisé) + signature Robin
+   - **Lien "Modifier" en haut-droite** de la card (déjà câblé en F2a-ter pour ouvrir S3 carrefour — réutiliser tel quel)
+   - Pas de chip-question (puisque tout est répondu)
+
+L'état actuel "phrase + signature" sans rien sous devient un **cas qui ne doit plus exister** : soit on a un chip-question (parcours incomplet), soit on a le lien Modifier (parcours complet). Le seul cas particulier qui resterait sans chip ni lien : projet vide → la card "Mon projet" n'est pas affichée du tout (c'est la card "Conseil de Robin" qui prend le relais via `renderConseil()`).
+
+#### C. Comportement au clic sur une chip-réponse
+
+Au clic sur `.answer-chip[data-step-id="taille"][data-slug="moyenne"]` :
+
+1. Récupérer `stepId` et `slug` depuis les data-attributes du bouton
+2. Récupérer le `label` du choice depuis STEPS (pour `sapiProject.labels`)
+3. `sapiProject.update({ [stepId]: slug }, { [stepId]: label })` → enregistre la réponse silencieusement
+4. **Dispatch `sapi:open-modal`** avec `detail: { state: 's0' }`
+   - La modale `openModal('s0')` appelle `determineInitialState()` qui retourne automatiquement `'s0-partiel'` (puisqu'il y a maintenant ≥1 answer) → démarre sur la 1re question non répondue, soit la **question d'après** celle qu'on vient de répondre
+   - Pas besoin d'ajouter un mécanisme `startAt` : la logique existante fait déjà ça
+5. **Important** : `sapiProject.update()` notifie les subscribers → ça re-déclenche `render()` côté card. Pour éviter un flash visuel "chip change pendant que la modale s'ouvre", **dispatcher l'événement modal AVANT** d'écrire en localStorage (ou avec un petit setTimeout). Au final, quand la modale se ferme et que le visiteur revient sur la page, la card aura le bon état (parcours complet ou question encore en cours).
+
+#### D. Markup HTML cible (à injecter dans la card)
+
+Dans le template PHP de la card "Mon projet" (probablement dans `woocommerce/archive-product.php` ou un partial dédié — vérifier où vit le markup actuel), ajouter un placeholder pour la zone chip :
+
+```html
+<div class="conseiller-bento__card" data-conseiller-card="mon-projet" hidden>
+  <a class="conseiller-bento__edit" href="#" data-action="open-modal" data-modal-state="s3" hidden>
+    <svg>...crayon...</svg> Modifier
+  </a>
+
+  <span class="conseiller-bento__badge">
+    <svg>...crayon...</svg> Mon projet
+  </span>
+
+  <p class="conseiller-bento__text" data-mon-projet-phrase>
+    <span data-mon-projet-phrase-content></span>
+    <span class="conseiller-bento__sig">— Robin</span>
+  </p>
+
+  <div class="conseiller-bento__inline-question" data-inline-question hidden>
+    <!-- injecté par JS selon getNextUnansweredStep() -->
+  </div>
+</div>
+```
+
+Le `data-inline-question` est injecté par JS au render :
+
+```html
+<span class="inline-question__label">Taille de la pièce ?</span>
+<div class="inline-question__answers">
+  <button class="answer-chip" type="button" data-step-id="taille" data-slug="petite">Petite</button>
+  <button class="answer-chip" type="button" data-step-id="taille" data-slug="moyenne">Standard</button>
+  <button class="answer-chip" type="button" data-step-id="taille" data-slug="grande">Grande</button>
+  <button class="answer-chip" type="button" data-step-id="taille" data-slug="ne-sais-pas">Je ne sais pas</button>
+</div>
+```
+
+Le lien `.conseiller-bento__edit` est masqué par défaut, révélé uniquement en état "parcours complet" (toggled par `renderMonProjet()` selon le retour de `getNextUnansweredStep()`).
+
+#### E. CSS à ajouter
+
+Référence visuelle = mockup #10 variante F (version épurée finale). Styles à ajouter dans le CSS de la card conseiller (probablement `style.css` ou un partial) :
+
+```css
+.conseiller-bento__inline-question {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px 12px;
+}
+.inline-question__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-wood);
+  font-style: italic;
+}
+.inline-question__answers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.answer-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: #fff;
+  border: 1.5px solid rgba(139, 115, 85, 0.35);
+  border-radius: 50px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-wood-dark);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+.answer-chip:hover {
+  background: var(--color-warm);
+  border-color: var(--color-orange);
+  transform: translateY(-1px);
+}
+```
+
+Mobile (déjà appliqué via les query existantes du fichier) : si la ligne ne tient pas, ça wrap naturellement grâce au `flex-wrap`.
+
+#### F. Délégation événements
+
+Étendre le `bindCTAs()` existant pour intercepter aussi les `.answer-chip` :
+
+```js
+els.zone.addEventListener('click', function (e) {
+  var chip = e.target.closest('.answer-chip[data-step-id]');
+  if (chip) {
+    e.preventDefault();
+    handleChipAnswer(chip);
+    return;
+  }
+  var btn = e.target.closest('[data-action="open-modal"]');
+  if (btn) {
+    // ...code existant
+  }
+});
+
+function handleChipAnswer(chip) {
+  var stepId = chip.getAttribute('data-step-id');
+  var slug = chip.getAttribute('data-slug');
+  if (!stepId || !slug) return;
+
+  // Récupère le label depuis STEPS
+  var label = '';
+  for (var i = 0; i < STEPS.length; i++) {
+    if (STEPS[i].id !== stepId) continue;
+    var choices = STEPS[i].choices || [];
+    for (var j = 0; j < choices.length; j++) {
+      if (choices[j].slug === slug) { label = choices[j].label; break; }
+    }
+    break;
+  }
+
+  // Dispatch modal AVANT update pour ouvrir immédiatement
+  var event = new CustomEvent('sapi:open-modal', {
+    bubbles: true, detail: { state: 's0' }
+  });
+  chip.dispatchEvent(event);
+
+  // Puis enregistre la réponse (notifiera les subscribers, mais la modale est déjà ouverte)
+  if (window.sapiProject && typeof window.sapiProject.update === 'function') {
+    var patch = {}; patch[stepId] = slug;
+    var lpatch = {}; lpatch[stepId] = label;
+    window.sapiProject.update(patch, lpatch);
+  }
+}
+```
+
+---
+
+### Ce qui n'est PAS dans F2a-sexies
+
+- ❌ Modification de la modale interne (pas de nouveau `startAt`, on réutilise `s0-partiel` qui démarre déjà sur la 1re non répondue)
+- ❌ Modification du fonctionnement de la phrase IA (typewriter, advice_text, génération) — strict statu quo
+- ❌ Modification du filtrage produit (la grille se filtre normalement après modale, pas au clic chip)
+- ❌ Modification de la card "Conseil de Robin" (état projet vide) — inchangée
+- ❌ Logique fiche produit (F2b déjà livrée)
+- ❌ Bug `advice_text` qui ne s'invalide pas — sera traité dans le gros chantier IA + filtrage PHP qui suit
+
+---
+
+### Critères de succès
+
+1. Sur `/mes-creations/?piece=chambre` (visiteur depuis la home, projet contenant uniquement `piece`) : la card "Mon projet" affiche la phrase générique chambre + la signature + **un chip-question "Taille de la pièce ?" avec 4 chips de réponse**. Pas de lien "Modifier".
+2. Clic sur "Standard" → la modale s'ouvre directement sur **Éclairage principal ?** (la question d'après dans `sapi_guide_get_steps()` selon visibility chambre). La réponse "Standard" est bien enregistrée dans `sapiProject.answers.taille`.
+3. Le visiteur termine le parcours dans la modale → animation de sortie → advice_text généré → retour sur `/mes-creations/`. La card "Mon projet" affiche maintenant la phrase enrichie + le lien "Modifier" en haut-droite + **plus de chip-question**.
+4. Clic sur "Modifier" → ouvre S3 carrefour (comportement F2a-ter inchangé).
+5. Recommencer depuis S3 → `sapiProject.clear()` → la card "Mon projet" disparaît, remplacée par la card "Conseil de Robin" (état projet vide). Pas de chip orphelin.
+6. Si le visiteur arrive avec une URL `?piece=cuisine` + n'a jamais terminé de parcours : le chip-question affiché est bien la 1re question visible non répondue selon `visibility` (différent pour cuisine vs chambre — ex: chambre n'a pas de `table`, cuisine oui).
+7. Mobile 375px : la zone `.conseiller-bento__inline-question` wrap proprement (label au-dessus, chips dessous) sans déborder.
+8. Aucun appel réseau au clic chip — l'ouverture de modale est purement front. L'AJAX (advice_text) ne se déclenche qu'en sortie de modale comme aujourd'hui.
+9. Pas de flash visuel "chip qui change pendant que la modale s'ouvre" — l'ordre d'opérations (dispatch event puis update) garantit que la modale est déjà ouverte quand la card re-render.
+10. Le rendu reste cohérent quel que soit le nombre de réponses déjà cochées (1, 2, 3… jusqu'à N-1).
+
+---
+
+### Précautions
+
+- **Strict statu quo sur le typewriter et la génération d'advice_text** — F2a-sexies ne touche pas à la phrase IA, juste ce qui est dessous.
+- **Lien "Modifier" en haut-droite** = celui déjà existant (F2a-ter). Juste son hidden state qui devient piloté par `getNextUnansweredStep()`.
+- **Ne pas re-déclencher l'IA** sur le clic chip — la phrase reste générique tant que la modale n'a pas été terminée.
+- **L'ordre dispatch → update** est important pour éviter le flash visuel. Sinon `subscribe()` re-rend la card avant que la modale s'ouvre.
+- **Pas de spinner** sur le clic chip — c'est instantané pour l'utilisateur, l'enregistrement est synchrone localStorage.
+- Branche `test-theme-sapi-maison`, push test uniquement.
+
+---
+
 
 ## [TÂCHE] F2a-quinquies — Hero /mes-creations/ qui s'adapte en live + suppression du sous-titre
 

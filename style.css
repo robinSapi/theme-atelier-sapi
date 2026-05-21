@@ -22880,6 +22880,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 .conseiller-card--mon-projet {
+  position: relative; /* F2a-sexies : pour positionner .conseiller-mon-projet__edit */
   padding: 40px 36px 38px;
   text-align: center;
   min-height: 280px;
@@ -22887,18 +22888,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
   display: flex;
   -webkit-flex-direction: column;
   flex-direction: column;
-  /* Reset du button HTML : le selector global `button` impose uppercase +
-     bg orange + font-size 14px → on neutralise pour hériter le style card */
   width: 100%;
-  border: none;
   background: var(--color-warm);
   font-family: var(--font-body);
   font-size: inherit;
-  text-transform: none;
   color: inherit;
-  cursor: pointer;
-  -webkit-transition: -webkit-transform 0.2s ease, box-shadow 0.25s ease;
-  transition: transform 0.2s ease, box-shadow 0.25s ease;
 }
 
 /* Inner devient flex column pour permettre le centrage vertical de la citation.
@@ -22923,19 +22917,9 @@ body.woocommerce-cart div.woocommerce-wrapper {
   margin-bottom: auto;
 }
 
-.conseiller-card--mon-projet:hover,
-.conseiller-card--mon-projet:focus-visible {
-  -webkit-transform: translateY(-2px);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(147, 125, 104, 0.18);
-  outline: none;
-}
-
-/* Au hover, la pill "Mon projet" devient orange pour signaler l'action */
-.conseiller-card--mon-projet:hover .conseiller-badge,
-.conseiller-card--mon-projet:focus-visible .conseiller-badge {
-  background: var(--color-orange);
-}
+/* F2a-sexies : la card n'est plus un <button> ; pas de hover global. Les
+   interactions sont portées par .conseiller-mon-projet__edit (coin) et les
+   .answer-chip (zone inline-question). */
 
 .conseiller-mon-projet__text {
   display: block;
@@ -23029,6 +23013,95 @@ body.woocommerce-cart div.woocommerce-wrapper {
   /* display: none (au lieu d'opacity: 0) pour libérer l'espace inline et
      laisser les dots se centrer proprement dans le bloc text. */
   display: none;
+}
+
+/* F2a-sexies : lien "Modifier" coin haut-droit de la card "Mon projet"
+   (visible uniquement quand le projet est complet — toggled par JS). */
+.conseiller-mon-projet__edit {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-wood);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(147, 125, 104, 0.4);
+  padding-bottom: 1px;
+  cursor: pointer;
+  z-index: 2; /* au-dessus du ::before dashed décoratif et du contenu */
+  -webkit-transition: color 0.2s ease, border-color 0.2s ease;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.conseiller-mon-projet__edit svg {
+  width: 11px;
+  height: 11px;
+}
+.conseiller-mon-projet__edit:hover,
+.conseiller-mon-projet__edit:focus-visible {
+  color: var(--color-orange);
+  border-bottom-color: var(--color-orange);
+  outline: none;
+}
+
+/* F2a-sexies : zone "Question d'accroche + chips de réponse" sous la phrase IA
+   (visible quand le parcours est incomplet — toggled par JS via [hidden]). */
+.conseiller-mon-projet__inline-question {
+  margin-top: 18px;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 10px 14px;
+}
+.inline-question__label {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--color-wood);
+}
+.inline-question__answers {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-justify-content: center;
+  justify-content: center;
+  gap: 8px;
+}
+.answer-chip {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--color-white);
+  border: 1.5px solid rgba(147, 125, 104, 0.35);
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-wood-dark);
+  cursor: pointer;
+  -webkit-transition: border-color 0.2s ease, background 0.2s ease, -webkit-transform 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+.answer-chip:hover,
+.answer-chip:focus-visible {
+  background: var(--color-warm);
+  border-color: var(--color-orange);
+  -webkit-transform: translateY(-1px);
+  transform: translateY(-1px);
+  outline: none;
 }
 
 /* 3 ronds pulsants, vrais discs, légèrement décalés (cascade) */
