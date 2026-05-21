@@ -22893,6 +22893,19 @@ body.woocommerce-cart div.woocommerce-wrapper {
   font-family: var(--font-body);
   font-size: inherit;
   color: inherit;
+  /* F2a-sexies-bis : la card entière reste cliquable (ouvre s0 sur la 1re
+     question non répondue). Les chips et le lien Modifier captent leur
+     propre clic via délégation, donc cliquer dessus ne déclenche pas
+     l'ouverture s0 doublement. */
+  cursor: pointer;
+  -webkit-transition: -webkit-transform 0.2s ease, box-shadow 0.25s ease;
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.conseiller-card--mon-projet:hover {
+  -webkit-transform: translateY(-2px);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(147, 125, 104, 0.18);
 }
 
 /* Inner devient flex column pour permettre le centrage vertical de la citation.
@@ -22917,9 +22930,6 @@ body.woocommerce-cart div.woocommerce-wrapper {
   margin-bottom: auto;
 }
 
-/* F2a-sexies : la card n'est plus un <button> ; pas de hover global. Les
-   interactions sont portées par .conseiller-mon-projet__edit (coin) et les
-   .answer-chip (zone inline-question). */
 
 .conseiller-mon-projet__text {
   display: block;

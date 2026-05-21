@@ -409,17 +409,32 @@
         return;
       }
 
+      // CTAs explicites (data-action="open-modal" sur la Conseil card + lien Modifier)
       var btn = e.target.closest('[data-action="open-modal"]');
-      if (!btn) return;
-      e.preventDefault();
-      var modalState = btn.getAttribute('data-modal-state') || 's0';
-      btn.dispatchEvent(new CustomEvent('sapi:open-modal', {
-        bubbles: true,
-        detail: { state: modalState },
-      }));
-      if (!window.__sapiModalReady) {
-        // eslint-disable-next-line no-console
-        console.info('[sapi] open-modal demandé (state=' + modalState + ') — modale non chargée ?');
+      if (btn) {
+        e.preventDefault();
+        var modalState = btn.getAttribute('data-modal-state') || 's0';
+        btn.dispatchEvent(new CustomEvent('sapi:open-modal', {
+          bubbles: true,
+          detail: { state: modalState },
+        }));
+        if (!window.__sapiModalReady) {
+          // eslint-disable-next-line no-console
+          console.info('[sapi] open-modal demandé (state=' + modalState + ') — modale non chargée ?');
+        }
+        return;
+      }
+
+      // F2a-sexies-bis : clic ailleurs sur la card "Mon projet" → ouvre s0
+      // (determineInitialState → s0-partiel → prochaine question non répondue).
+      // Les éléments interactifs internes (chip, lien Modifier) sont déjà
+      // captés ci-dessus, donc on n'arrive ici qu'au clic sur la card elle-même.
+      var monProjetCard = e.target.closest('.conseiller-card--mon-projet');
+      if (monProjetCard) {
+        monProjetCard.dispatchEvent(new CustomEvent('sapi:open-modal', {
+          bubbles: true,
+          detail: { state: 's0' },
+        }));
       }
     });
   }
