@@ -2986,8 +2986,8 @@ function sapi_get_hero_piece_titles() {
 
 function sapi_megafilter_get_generic_advices() {
   return [
-    'cuisine'  => __("Pour une cuisine, ma sélection privilégie les luminaires à ampoule dégagée ou semi-ouverte. La lumière descend franchement sur le plan de travail, sans reflet.", 'theme-sapi-maison'),
-    'bureau'   => __("Pour un bureau, je retiens les modèles à ampoule dégagée. La lumière est directe et tranchée, idéale pour la concentration sans fatiguer les yeux.", 'theme-sapi-maison'),
+    'cuisine'  => __("Pour une cuisine, je privilégie les modèles où l'ampoule reste à découvert. La lumière descend franchement sur le plan de travail, sans zone d'ombre.", 'theme-sapi-maison'),
+    'bureau'   => __("Pour un bureau, je retiens les modèles où l'ampoule reste à découvert. La lumière est directe et tranchée, idéale pour la concentration sans fatiguer les yeux.", 'theme-sapi-maison'),
     'salon'    => __("Pour un salon, je privilégie l'ampoule entourée. La lumière passe à travers le bois et dessine ses motifs au mur, l'ambiance s'installe.", 'theme-sapi-maison'),
     'chambre'  => __("Pour une chambre, je sélectionne des modèles à ampoule entourée. Une lumière douce et diffuse, qui invite au calme et révèle les jeux du bois.", 'theme-sapi-maison'),
     'entree'   => __("Pour une entrée, ma sélection mise sur l'ampoule entourée. La lumière joue avec les découpes du bois, donne le ton dès le pas de porte.", 'theme-sapi-maison'),
