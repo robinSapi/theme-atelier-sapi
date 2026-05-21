@@ -277,12 +277,24 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  // Renvoie le titre dynamique d'un step selon la pièce courante (pattern
+  // identique à sapi-modal-conseiller.js getDynamicQuestion). Fallback sur
+  // step.question si pas de dynamic_question.piece pour la pièce courante.
+  function getDynamicQuestion(step, answers) {
+    if (step.dynamic_question && step.dynamic_question.piece) {
+      var p = answers && answers.piece;
+      if (p && step.dynamic_question.piece[p]) return step.dynamic_question.piece[p];
+    }
+    return step.question;
+  }
+
   // F2a-sexies : injecte le markup "question + chips de réponse" dans la
   // zone data-inline-question. step = objet step complet du localize.
-  function renderInlineQuestion(step) {
+  function renderInlineQuestion(step, answers) {
     if (!els.inlineQuestion || !step) return;
     var choices = step.choices || [];
-    var html = '<span class="inline-question__label">' + escHtml(step.question) + '</span>';
+    var question = getDynamicQuestion(step, answers || {});
+    var html = '<span class="inline-question__label">' + escHtml(question) + '</span>';
     html += '<div class="inline-question__answers">';
     for (var i = 0; i < choices.length; i++) {
       var c = choices[i];
@@ -331,7 +343,7 @@
     var answers = (project && project.answers) || {};
     var next = getNextUnansweredStep(answers);
     if (next) {
-      renderInlineQuestion(next);
+      renderInlineQuestion(next, answers);
       if (els.inlineQuestion) els.inlineQuestion.hidden = false;
       if (els.editLink) els.editLink.hidden = true;
     } else {

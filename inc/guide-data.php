@@ -26,8 +26,17 @@ function sapi_guide_get_steps() {
     ],
     [
       'id'         => 'taille',
-      'question'   => 'Taille de la pièce ?',
+      'question'   => 'Quelle taille fait votre pièce ?',
       'visibility' => ['piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'entree']],
+      'dynamic_question' => [
+        'piece' => [
+          'cuisine' => 'Quelle taille fait votre cuisine ?',
+          'bureau'  => 'Quelle taille fait votre bureau ?',
+          'salon'   => 'Quelle taille fait votre salon ?',
+          'chambre' => 'Quelle taille fait votre chambre ?',
+          'entree'  => 'Quelle taille fait votre entrée ?',
+        ],
+      ],
       'choices'    => [
         ['label' => 'Petite pièce',   'dim' => 'intime',      'slug' => 'petite',     'icon' => 'square-sm'],
         ['label' => 'Pièce standard', 'dim' => 'confortable', 'slug' => 'moyenne',    'icon' => 'square-md'],
@@ -46,7 +55,7 @@ function sapi_guide_get_steps() {
     ],
     [
       'id'         => 'eclairage',
-      'question'   => 'Éclairage principal ?',
+      'question'   => 'Ce sera l\'éclairage principal ?',
       'visibility' => ['taille' => ['grande']],
       'choices'    => [
         ['label' => 'Ce sera la principale source d\'éclairage', 'slug' => 'principal',  'icon' => 'sun'],
@@ -55,7 +64,7 @@ function sapi_guide_get_steps() {
     ],
     [
       'id'         => 'sortie',
-      'question'   => 'Où l\'installer ?',
+      'question'   => 'Où installerez-vous votre luminaire ?',
       'visibility' => ['_or' => [
         ['taille' => ['petite', 'moyenne', 'ne-sais-pas']],
         ['eclairage' => ['principal', 'secondaire']],
@@ -70,7 +79,7 @@ function sapi_guide_get_steps() {
     ],
     [
       'id'         => 'hauteur',
-      'question'   => 'Hauteur sous plafond ?',
+      'question'   => 'Quelle hauteur sous plafond ?',
       'visibility' => ['sortie' => ['plafond'], 'piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'entree']],
       'choices'    => [
         ['label' => 'Standard',    'dim' => '< 2,50 m',  'slug' => 'standard',    'icon' => 'ceiling-low'],
@@ -84,10 +93,10 @@ function sapi_guide_get_steps() {
       'visibility' => ['hauteur' => ['standard'], 'piece' => ['cuisine', 'bureau', 'salon', 'chambre']],
       'dynamic_question' => [
         'piece' => [
-          'cuisine' => 'Au-dessus d\'une table ou d\'un îlot ?',
-          'bureau'  => 'Au-dessus du bureau ?',
-          'salon'   => 'Au-dessus d\'une table ?',
-          'chambre' => 'Au-dessus du lit ?',
+          'cuisine' => 'Au-dessus de votre table ou d\'un îlot ?',
+          'bureau'  => 'Au-dessus de votre bureau ?',
+          'salon'   => 'Au-dessus de votre table ?',
+          'chambre' => 'Au-dessus de votre lit ?',
         ],
       ],
       'choices'    => [
@@ -97,8 +106,18 @@ function sapi_guide_get_steps() {
     ],
     [
       'id'         => 'style',
-      'question'   => 'Style de l\'intérieur ?',
+      'question'   => 'Quel style pour votre intérieur ?',
       'visibility' => 'always',
+      'dynamic_question' => [
+        'piece' => [
+          'cuisine'  => 'Quel style pour votre cuisine ?',
+          'bureau'   => 'Quel style pour votre bureau ?',
+          'salon'    => 'Quel style pour votre salon ?',
+          'chambre'  => 'Quel style pour votre chambre ?',
+          'entree'   => 'Quel style pour votre entrée ?',
+          'escalier' => 'Quel style pour votre escalier ?',
+        ],
+      ],
       'choices'    => [
         ['label' => 'Moderne, neuf, tons clairs',        'slug' => 'moderne', 'icon' => 'minimal'],
         ['label' => 'Ancien, pierre, bois, tons chauds', 'slug' => 'ancien',  'icon' => 'organic'],
