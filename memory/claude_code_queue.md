@@ -1,5 +1,347 @@
 # Tasks — Coordination Cowork ↔ Claude Code
 
+## 🔧 À faire
+
+## ✅ Livré
+
+## [RETOUR] Conseiller V3 — Round 2 : 17 bugs livrés sur 6 chantiers
+**Date livrée :** 2026-05-22
+**Branche :** `test-theme-sapi-maison`
+**Commits :** `a29ae5a` (5) → `9f6d8ec` (1) → `0fb0722` (4) → `49cdbda` (2) → `bcbc37d` (3)
+**Statut :** 16 fixes appliqués + 1 rapport (Chantier 6). Pas d'aller-retour 4.1 (diagnostic code-only).
+
+### Récap par chantier
+
+| Chantier | Bugs | Commit | Statut |
+|---|---|---|---|
+| 5 — UX wording | 5.1 + 5.2 | `a29ae5a` | ✅ |
+| 1 — Prompts IA | 1.1 + 1.2 + 1.3 + 1.4 | `9f6d8ec` | ✅ |
+| 4 — Freetext + catalogue | 4.1 + 4.2 + 4.3 (check) | `0fb0722` | ✅ |
+| 2 — Filtre JS | 2.1 + 2.2 + 2.3 | `49cdbda` | ✅ |
+| 3 — Modale JS | 3.1 + 3.2 + 3.3 + 3.4 | `bcbc37d` | ✅ |
+| 6 — Investigation N8 | 6.1 | — | 📝 rapport ci-dessous |
+
+### Chantier 4.1 — Diagnostic freetext (sans error_log)
+
+**Décision Robin** dans la spec : *"investigue + fixe d'un coup (pas d'aller-retour)"*. J'ai donc fait le diagnostic à l'aveugle code-only, qui s'est avéré sans ambiguïté possible — pas besoin du log d'extraction Haiku pour identifier la cause.
+
+**Cause root identifiée :**
+
+Test C1 ("Je cherche une applique pour ma chambre") → Haiku extrait `{piece:'chambre', sortie:'mur'}`. Côté JS, `submitFreetext` appelle `applyFiltersBatch(filters)` qui termine par `cleanInvisibleAnswers()`. Cette fonction calcule les steps visibles selon `state.answers` :
+
+- Visibilité de `sortie` dans `inc/guide-data.php` (avant fix) :
+  ```php
+  'visibility' => ['_or' => [
+    ['taille' => ['petite', 'moyenne', 'ne-sais-pas']],
+    ['eclairage' => ['principal', 'secondaire']],
+    ['piece' => ['escalier']],
+  ]],
+  ```
+- Avec `{piece:'chambre', sortie:'mur'}` : aucune des 3 clauses n'est satisfaite (taille absent, eclairage absent, piece='chambre' ≠ 'escalier') → `sortie` n'est PAS visible → **`cleanInvisibleAnswers` supprime `sortie=mur` en silence**.
+
+Résultat : `state.answers = {piece:'chambre'}`, `sapiProject.update` reçoit juste la pièce, la grille filtre uniquement sur `piece` → tous types de luminaires affichés au lieu des appliques seules.
+
+**Fix appliqué en 2 axes :**
+
+1. **Visibility relaxée** (`inc/guide-data.php`) : 4e clause OR sur `piece ∈ [cuisine, bureau, salon, chambre, entree, escalier]`. `sortie` reste visible dès qu'une pièce est connue. Le parcours linéaire (piece → taille → sortie) n'est pas affecté car STEPS reste traversé dans l'ordre du tableau. Vérifié mentalement : après piece=chambre, `getVisibleStepIds` retourne `[piece, taille, sortie, style]` → la prochaine après piece est bien `taille`, pas `sortie`.
+
+2. **Prompt freetext renforcé** (`sapi_megafilter_build_freetext_prompt`) :
+   - 3 voies explicites (standard / incomplet / hors-norme)
+   - Exemples de déductions métier intégrés au prompt :
+     - "applique" → `sortie=mur`
+     - "suspension" → `sortie=plafond`
+     - "lampadaire" / "lampe à poser" → `sortie=pas-de-sortie`
+   - Support `action: contact` pour projets pro / sur-mesure / multi-luminaires
+   - Backend propage `action` au front, JS lock le chat si `action=contact`
+
+**Échantillon de prompt freetext :** non capturé (pas de PHP CLI dispo). Si tu veux valider la sortie Haiku après le fix, ajoute temporairement un `error_log($parsed)` à la ligne 2876 de functions.php, fais un test C1, et envoie-moi le log cPanel — je vérifie.
+
+### Chantier 6 — Mini-rapport N8 (bureau + sortie=ne-sais-pas)
+
+**Hypothèse retenue (cause #2 dans la spec) :** asymétrie entre `cats_by_sortie['ne-sais-pas']` et `cats_secondaire_by_sortie['ne-sais-pas']` dans `functions.php` L325-338 :
+
+```php
+'cats_by_sortie' => [
+  ...
+  'ne-sais-pas'   => ['suspensions', 'lampadaires', 'lampesaposer'],  // ❌ pas d'appliques
+],
+'cats_secondaire_by_sortie' => [
+  ...
+  'ne-sais-pas'   => ['lampadaires', 'lampesaposer', 'appliques'],     // ✅ inclut appliques
+],
+```
+
+**Constat :** en éclairage **principal** + sortie=ne-sais-pas, les appliques sont exclues. En éclairage **secondaire** + sortie=ne-sais-pas, elles sont incluses. Sémantiquement, si le visiteur "ne sait pas où installer", l'applique reste possible dans les 2 cas (via le kit prise électrique mentionné dans `regles.txt:37` et `savoir.txt:48`).
+
+**Reproduction mentale du scénario bureau** : `{piece:'bureau', taille:'moyenne', sortie:'ne-sais-pas'}` → `getAcceptedCategories` retourne `['suspensions', 'lampadaires', 'lampesaposer']` (sortie=ne-sais-pas, eclairage absent, pas en escalier) → filtre ampoule bureau = `['ampoule_degagee', 'semi_degagee']`. Le pool est étroit : suspensions ou lampadaires ou lampes à poser, ET ampoule_degagee ou semi_degagee. Selon le catalogue, peut donner 0-3 produits.
+
+L'élargissement progressif (ordre `style, table, hauteur, eclairage, taille, piece`) **n'élargit jamais `sortie`** (intentionnel d'après le commentaire L209-211 de `sapi-cards-conseiller.js`). Donc même à l'étape la plus large (sans piece), on reste sur les 3 catégories ne-sais-pas. Si le catalogue manque de produits dans ces 3 catégories avec ampoule dégagée/semi-dégagée, on tombe à 0.
+
+**Hypothèse moins probable mais à noter :** un bug dans l'enchaînement filtre principal + filtre secondaire pour `eclairage=secondaire` — mais ce n'est pas le cas N8 (bureau+taille=moyenne implique `eclairage` non visible, donc absent, donc branche principal).
+
+**Décision proposée à Robin :**
+
+Option A — ajouter `'appliques'` à `cats_by_sortie['ne-sais-pas']` (symétrie avec le secondaire) :
+```php
+'ne-sais-pas' => ['suspensions', 'lampadaires', 'lampesaposer', 'appliques'],
+```
+Effet : bureau+sortie=ne-sais-pas montrera aussi les appliques ampoule_degagee/semi_degagee. Cohérent avec le secondaire et avec le kit prise électrique disponible. Safe (n'exclut rien).
+
+Option B — ne rien changer si tu considères que "ne sais pas où installer" doit pousser vers suspensions/lampadaires (objets faciles à placer) plutôt qu'appliques.
+
+Je n'ai pas appliqué de fix automatique — la spec dit "décision Robin après lecture". Si tu veux Option A, dis-moi et je commit.
+
+### Toute déviation par rapport à la spec (justifications)
+
+- **3.2 commentaire mirror PHP** : la spec demande d'ajouter un commentaire *"MIRROR de sapiProject.cleanInvisibleAnswers"* dans `inc/guide-data.php`. Or il n'existe **aucune fonction PHP équivalente** à `cleanInvisibleAnswers` — le PHP fait juste de la validation contre la whitelist via `sapi_megafilter_sanitize_project` (functions.php:3124), qui ne calcule pas la visibility tree. Pas de duplication réelle → pas de commentaire à mettre. La centralisation JS dans `sapi-project.js` reste appliquée comme demandé.
+
+- **3.4 close button** : ajouté à la card modale directement (pas au .conseiller-modal__inner inexistant — c'est `.conseiller-card__inner` qui existe, à l'intérieur de chaque écran). Position absolute top-right de `.conseiller-card--modal` (passée en `position: relative`).
+
+- **5.2 conseil taille markup** : ajouté juste après le conseil de style avec une classe modifier `--taille` pour le margin-top 10px. Tu pourras voir les 2 paragraphes empilés sur la fiche produit.
+
+### Critères de succès — checklist
+
+À tester sur `test.atelier-sapi.fr` :
+
+1. **Chantier 1** (C1-C5) : tutoiement OK (déjà acquis Round 1), plus de "tu vois les modèles à côté" (1.3), phrase d'élargissement nomme précisément la contrainte (1.4) ex. *"j'ai relâché ta préférence de style pour pouvoir te montrer mes appliques"*
+2. **Chantier 2** (B3 escalier ouvert) : grille montre uniquement suspensions, pas de lampadaires ni lampes à poser
+3. **Chantier 3** (G6 mobile) : croix top-right visible et fonctionnelle, modale fermable sur mobile
+4. **Chantier 4.1** (C1 "applique pour ma chambre") : `sapiProject.answers` contient bien `{piece:'chambre', sortie:'mur'}` après "Voir la sélection", grille filtre sur appliques seules
+5. **Chantier 5.1** (A3 salon) : choix taille = Petit / Standard / Grand
+6. **Chantier 5.2** (F3 fiche produit) : 2 paragraphes italiques en récap — conseil de style + conseil de taille
+7. **Chantier 6** : à toi de trancher Option A/B (cf. rapport ci-dessus)
+
+### Notes finales
+
+- Aucune régression attendue sur les fixes Round 1 (`e41f735`).
+- 16 bugs traités sur 17. Le 17e (6.1) est livré en rapport — ton appel.
+- Push effectué sur `test-theme-sapi-maison` (workflow auto-deploy O2switch déclenché).
+
+---
+
+## [TÂCHE] Conseiller V3 — Round 2 : 17 bugs (audit code restant + tests UX Robin)
+**Date :** 2026-05-22
+**Branche :** `test-theme-sapi-maison`
+**Priorité :** haute — finalisation V3 avant merge master
+
+### Contexte
+
+Round 1 (`e41f735`) a livré 7 fixes. Restent **17 sujets** identifiés par :
+- L'audit code initial du 22/05 (Groupes A et B non encore traités)
+- Les tests UX de Robin sur `test.atelier-sapi.fr` (nouveaux bugs N1-N8)
+
+Référence tests Robin (annotations dans la colonne "Observé") : `business/docs/scenarios-test-conseiller-v3-2026-05-22.md` côté Cowork.
+
+Structuré en **6 chantiers thématiques** indépendants — Claude Code peut les attaquer dans l'ordre ou en parallèle, à sa discrétion. Tous les fichiers du périmètre sont sur `test-theme-sapi-maison`.
+
+### Décisions Robin actées avant rédaction
+- **N4** (accord grammatical labels taille) : Option C → **Petit / Standard / Grand** (masculin court)
+- **N1** (freetext extraction filtres) : Claude Code investigue + fixe d'un coup (pas d'aller-retour)
+- **Toutes les autres décisions** par défaut acceptées (cf. présentation Cowork du 22/05)
+
+---
+
+### CHANTIER 1 — Prompts IA (cohérence + conscience contextuelle)
+
+**1.1 — Conflit ampoule cuisine vs filtre élargi.** Quand `ignored_answers` contient `piece`, l'IA peut citer la règle "pas de lampe à poser en cuisine" de `regles.txt` alors que la grille élargie en propose. Solution : dans `adaptive_consigne_block` (functions.php), ajouter une consigne conditionnelle :
+
+> *"Si la clé `piece` figure parmi les RÉPONSES ÉLARGIES, les règles métier par pièce ont été assouplies volontairement pour pouvoir te montrer une sélection. N'oppose donc PAS au visiteur les règles 'pas de lampe à poser en cuisine' ou autres règles ampoule par pièce. Présente la sélection telle qu'elle, sans contredire la grille."*
+
+**1.2 — `savoir.txt` parle d'un bouton "Contacter Robin" inexistant.** Modifier `assets/guide-prompt-savoir.txt` ligne 4 : remplacer *"propose un bouton 'Contacter Robin'"* par *"propose au visiteur de me contacter via le formulaire (utilise `action: contact` dans ton JSON de sortie, pas un bouton littéral)."*
+
+**1.3 — Chat IA ment sur le contexte ("tu vois les modèles à côté").** Dans `sapi_megafilter_build_chat_prompt`, ajouter en TÊTE du system prompt (avant tout autre contenu) un bloc :
+
+```
+CONTEXTE D'INTERACTION :
+Tu es Robin dans une modale flottante ouverte par-dessus la grille des modèles.
+TANT QUE le visiteur n'a pas cliqué sur "Voir la sélection" pour fermer la modale,
+IL NE VOIT PAS la grille en dessous (elle est masquée par la modale).
+Ne dis donc JAMAIS "tu vois les modèles à côté", "regarde la sélection", ou équivalent.
+Présente-lui la sélection en mots, comme si vous étiez au téléphone ensemble.
+```
+
+**1.4 — Phrase IA d'élargissement trop vague.** Aujourd'hui l'IA dit *"j'ai un peu élargi"* sans préciser quoi. Modifier `adaptive_consigne_block` (le cas "réponses élargies") pour exiger une explication précise :
+
+> *"Si des réponses ont été élargies, NOMME précisément lesquelles avec leur libellé humain (ex: 'j'ai relâché ta préférence de style', 'j'ai mis de côté la taille de pièce') et explique brièvement pourquoi ('pour pouvoir te montrer mes appliques', 'pour t'ouvrir plus de modèles'). Pas de formule générique vague."*
+
+Vérifier qu'on passe bien les **labels humains** des contraintes élargies (pas juste les slugs) au prompt — utiliser `sapi_megafilter_format_ignored_answers` ou helper équivalent.
+
+---
+
+### CHANTIER 2 — Logique filtre JS (règles métier + edge cases)
+
+**2.1 — Event `sapi:open-modal` sans garde-fou PRODUCT_CTX.** Dans `sapi-modal-conseiller.js`, listener `sapi:open-modal` (~L1178-1182) : avant de traiter `e.detail.state === 'product'`, vérifier que `config.product` (= `SAPI_MODAL_CONSEILLER.product`) est non-null. Sinon :
+```js
+console.warn('[sapi-modal] open-modal state=product reçu sans config.product, abort.');
+return;
+```
+Évite le `applyProductSelection` avec `productId:0` silencieux.
+
+**2.2 — `taille_escalier` pas normalisé côté JS.** Dans `sapi-cards-conseiller.js`, en tête de `computeEffectiveAnswers(rawAnswers)`, normaliser avant tout traitement :
+```js
+const answers = { ...rawAnswers };
+if (answers.taille_escalier === 'ouvert')    answers.taille = 'grande';
+else if (answers.taille_escalier === 'standard') answers.taille = 'petite';
+// taille_escalier reste en place (pas supprimé) — sert juste à dériver taille
+```
+Mirror exact de `sapi_robin_handle_recommendation` côté PHP.
+
+**2.3 — Escalier + lampadaires (règle métier manquante).** Un lampadaire dans un escalier n'a aucun sens. Dans `sapi-cards-conseiller.js`, après `getAcceptedCategories(answers)`, ajouter :
+```js
+if (answers.piece === 'escalier') {
+  // Règle métier : pas de lampadaires ni lampes à poser dans un escalier
+  acceptedCats = acceptedCats.filter(c => c !== 'lampadaires' && c !== 'lampesaposer');
+}
+```
+Quel que soit `taille_escalier`. Si après ce filtre il ne reste plus rien, l'élargissement progressif prend le relais normalement.
+
+---
+
+### CHANTIER 3 — Modale JS (qualité + accessibilité)
+
+**3.1 — `state.shortMode` jamais reset à `closeModal`.** Dans `sapi-modal-conseiller.js:closeModal()`, ajouter avant le reset visuel :
+```js
+state.shortMode = false;
+```
+
+**3.2 — Centraliser `cleanInvisibleAnswers`.** Aujourd'hui 3 implémentations (`sapi-modal-conseiller.js`, `sapi-cards-conseiller.js`, et côté PHP `inc/guide-data.php`). Solution :
+- Exposer dans `assets/sapi-project.js` une fonction `sapiProject.cleanInvisibleAnswers(answers, steps)` qui implémente la logique unique.
+- Les 2 consommateurs JS l'appellent (`sapi-modal-conseiller.js` et `sapi-cards-conseiller.js`).
+- Côté PHP : garder la fonction native (partage JS-PHP impossible sans transpiler), mais ajouter un commentaire en tête : *"MIRROR de sapiProject.cleanInvisibleAnswers (assets/sapi-project.js) — keep in sync."*
+
+**3.3 — `hasAnyAnswer` lit answers brutes.** Dans le ou les consommateurs JS de `hasAnyAnswer()`, faire passer les answers par `cleanInvisibleAnswers` (du chantier 3.2) **avant** le compte. Évite les chips fantômes.
+
+**3.4 — Pas de bouton close sur mobile.** Critique accessibilité — la modale plein écran sans croix sur mobile bloque le visiteur.
+
+Dans `sapi_render_conseiller_modal` (functions.php), ajouter en haut de la card modale (avant le contenu des écrans), un bouton close visible toutes tailles d'écran :
+```php
+<button class="conseiller-modal__close" data-action="close" aria-label="<?php esc_attr_e('Fermer', 'theme-sapi-maison'); ?>">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <line x1="18" y1="6" x2="6" y2="18"/>
+    <line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+</button>
+```
+
+Style.css : positionner en absolute top-right de `.conseiller-modal__inner` ou `.conseiller-card--modal`, taille de touch target mobile (~44×44px), z-index au-dessus des écrans, couleur discrète mais cliquable.
+
+Câbler côté JS : dans `sapi-modal-conseiller.js`, le handler `data-action="close"` doit appeler `closeModal()` (probablement déjà câblé pour d'autres triggers, vérifier).
+
+---
+
+### CHANTIER 4 — Catalogue & freetext (CRITIQUE — investigation + fix)
+
+**4.1 — Extraction freetext qui n'applique pas les filtres (CRITIQUE).** Test C1 : visiteur tape *"Je cherche une applique pour ma chambre"*, l'IA répond qu'elle a compris `piece=chambre, sortie=mur` mais les filtres ne sont PAS appliqués à `sapiProject` quand on clique "Voir la sélection".
+
+Approche en 3 sous-étapes (à enchaîner dans la même session) :
+
+**4.1.a — Investigation.** Ajouter temporairement `error_log()` dans `sapi_ajax_megafilter_freetext` juste après réception de la réponse Haiku, qui dump :
+- Le raw text retourné par Haiku
+- Le `$parsed` après `sapi_megafilter_parse_json()`
+- Le `$clean_filters` après whitelist
+- Ce qui est retourné côté `wp_send_json_success`
+
+Lancer un test ("Je cherche une applique pour ma chambre"), récupérer le log (cPanel → Logs d'erreurs du domaine), inclure le contenu dans le retour de la tâche.
+
+**4.1.b — Diagnostic.** Sur la base du dump, identifier la cause :
+- L'IA ne retourne pas `filters` ? → renforcer prompt
+- L'IA retourne `filters` mais le JS ne les applique pas ? → fixer `submitFreetext` côté `sapi-modal-conseiller.js`
+- Le `sapiProject.update({answers: ...})` n'est pas appelé ? → câblage manquant
+
+**4.1.c — Fix.** Selon le diagnostic. Le prompt freetext doit aussi être renforcé pour gérer **3 cas de sortie explicites** (à demander à l'IA) :
+1. **Projet standard** → extraire `filters` aussi complet que possible
+2. **Projet incomplet** (manque info) → poser une question de précision dans `message`
+3. **Projet hors-norme** (pro, pièce inconnue, demande spéciale, sur-mesure) → retourner `action: contact` + `message` chaleureux qui explique la démarche
+
+Ajouter à la consigne du system prompt freetext une note explicite sur ces 3 voies. Aujourd'hui l'IA peut juste discuter sans appliquer ni router — c'est ce qui crée le bug.
+
+**4.2 — `format_catalog_split` sans essence ni prix.** Aujourd'hui le catalogue split passé à l'IA contient `title | Catégorie | Format | Ampoule`. `ton.txt` demande de parler de matière, `regles.txt` demande de mentionner l'essence — l'IA n'a pas la donnée → risque d'inventer.
+
+Solution : enrichir `sapi_megafilter_format_catalog_split` pour inclure :
+- **Essences disponibles** : récupérer via les variations WooCommerce du produit (typiquement `peuplier`, `okoume`)
+- **Prix dès** : récupérer le prix minimum (`get_variation_prices('min')` ou équivalent)
+
+Nouveau format ligne : `- <title> | Catégorie : <cats> | Format : <format> | Ampoule : <type> | Essences : <peuplier, okoume> | Prix dès : <85>€`
+
+Réutiliser autant que possible la fonction existante `sapi_guide_query_all_products` qui charge déjà ces métadonnées (voir si `variation_label` ou autre champ porte déjà les essences).
+
+**4.3 — Slug `eclairage` à vérifier vs whitelist.** Grep dans `regles.txt` et `savoir.txt` les références aux slugs `eclairage`, comparer avec la sortie de `sapi_megafilter_filters_whitelist()`. Si discordance, harmoniser le `.txt`. Pas de fix automatique nécessaire si tout est cohérent.
+
+---
+
+### CHANTIER 5 — UX wording
+
+**5.1 — Accord grammatical labels taille (N4).** Décision Robin : **Option C — Petit / Standard / Grand** (masculin court).
+
+Modifier `inc/guide-data.php`, question `taille`, choices :
+```php
+'choices' => [
+  ['label' => 'Petit',         'dim' => 'intime',      'slug' => 'petite',     'icon' => 'square-sm'],
+  ['label' => 'Standard',      'dim' => 'confortable', 'slug' => 'moyenne',    'icon' => 'square-md'],
+  ['label' => 'Grand',         'dim' => 'spacieuse',   'slug' => 'grande',     'icon' => 'square-lg'],
+  ['label' => 'Je ne sais pas','dim' => '',            'slug' => 'ne-sais-pas','icon' => 'question'],
+],
+```
+
+Les `slug` restent inchangés (`petite`, `moyenne`, `grande`) pour ne pas casser la logique de filtrage.
+
+**5.2 — Récap fiche produit manque phrase taille.** Aujourd'hui seul `sapi_megafilter_get_style_conseils()` existe. Créer un mirror `sapi_megafilter_get_size_conseils()` :
+
+```php
+function sapi_megafilter_get_size_conseils() {
+  return [
+    'petite'  => __("Cette taille s'adapte bien à un petit espace sans être trop imposante.", 'theme-sapi-maison'),
+    'moyenne' => __("Cette taille standard convient à la plupart des pièces.", 'theme-sapi-maison'),
+    'grande'  => __("Cette grande taille créera un point focal fort dans ton espace.", 'theme-sapi-maison'),
+  ];
+}
+```
+
+Localizer côté JS (`SAPI_MODAL_CONSEILLER.sizeConseils = sapi_megafilter_get_size_conseils()`), et dans `sapi-modal-conseiller.js` écran `s-product-recap`, ajouter un deuxième paragraphe `conseil de taille` sous le conseil de style, en utilisant le slug de taille dérivé de `sapiProject.answers.taille` (ou `taille_escalier` mappé).
+
+Markup à ajouter dans `sapi_render_conseiller_modal` :
+```html
+<p class="conseiller-product-recap__conseil-taille" data-product-recap-conseil-taille></p>
+```
+
+---
+
+### CHANTIER 6 — Investigation (rapport uniquement)
+
+**6.1 — `sortie=ne-sais-pas` dans bureau ne fonctionne pas (N8).** Robin a constaté que le scénario `bureau + sortie=ne-sais-pas` ne renvoie pas de produits (alors qu'on s'y attendrait). Normal en cuisine (règles ampoule strictes), bizarre en bureau.
+
+Tester manuellement le cas, identifier ce qui se passe côté JS (`computeEffectiveAnswers` + `cardMatchesAnswers`). Trois hypothèses :
+1. Manque catalogue (très peu de produits matchent la combinaison) → l'élargissement devrait prendre le relais, vérifier qu'il le fait
+2. Bug dans `cats_by_sortie['ne-sais-pas']` côté JS (peut-être pas câblé pareil que côté PHP)
+3. Bug dans l'enchaînement filtre principal + filtre secondaire pour `eclairage=secondaire`
+
+Livrer un mini-rapport (pas de fix automatique — décision Robin après lecture). Si bug évident, fixer.
+
+---
+
+### Critères de succès globaux
+
+À tester sur `test.atelier-sapi.fr` après livraison :
+
+1. **Chantier 1** : retester C1-C5 → tutoiement OK, plus de "tu vois les modèles à côté" (1.3), phrase d'élargissement précise qui nomme la contrainte (1.4)
+2. **Chantier 2** : test B3 (escalier ouvert) → grille montre uniquement suspensions (pas de lampadaires) (2.3)
+3. **Chantier 3** : test G6 mobile → croix visible et fonctionnelle, modale fermable (3.4)
+4. **Chantier 4.1** : retester C1 → filtres `piece=chambre, sortie=mur` réellement appliqués à `sapiProject` quand on clique "Voir la sélection". Inclure dans le retour le résultat de l'investigation 4.1.a + le diagnostic + le fix appliqué.
+5. **Chantier 5.1** : test A3 (salon) → labels Petit/Standard/Grand cohérents quel que soit le genre du sujet
+6. **Chantier 5.2** : test F3 (fiche produit récap) → conseil taille présent en plus du conseil style
+7. **Chantier 6** : rapport sur G3 bureau livré
+
+### Notes pour le retour
+
+Au retour, indiquer pour chaque chantier :
+- Hash des commits livrés
+- Liste des bugs traités vs reportés (si quelque chose n'a pas pu être fait)
+- Échantillon de prompt freetext capturé via `error_log` (chantier 4.1.a) — utile pour valider le diagnostic
+- Mini-rapport investigation 6.1
+- Toute déviation par rapport à la spec (avec justification)
+
+---
+
 ## ✅ Livré
 
 ## [RETOUR] Audit Conseiller V3 — 7 fixes livrés (3 critiques + 4 réels)
