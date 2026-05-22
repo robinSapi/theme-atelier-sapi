@@ -2768,9 +2768,18 @@ function sapi_megafilter_build_freetext_prompt(array $whitelist) {
  * System prompt — conversation libre (Sonnet).
  */
 function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_products, array $whitelist, array $matching_ids = [], array $ignored_keys = []) {
-  // Injecte ton + savoir + regles + exemples V2 en tête (équivalent V2
+  // Round 2 — 1.3 : contexte d'interaction EN PREMIER (avant ton/savoir/regles/exemples)
+  // pour que l'IA arrête de prétendre que le visiteur voit la grille pendant le chat.
+  $prompt  = "CONTEXTE D'INTERACTION :\n";
+  $prompt .= "Tu es Robin dans une modale flottante ouverte par-dessus la grille des modèles.\n";
+  $prompt .= "TANT QUE le visiteur n'a pas cliqué sur \"Voir la sélection\" pour fermer la modale,\n";
+  $prompt .= "IL NE VOIT PAS la grille en dessous (elle est masquée par la modale).\n";
+  $prompt .= "Ne dis donc JAMAIS \"tu vois les modèles à côté\", \"regarde la sélection\", ou équivalent.\n";
+  $prompt .= "Présente-lui la sélection en mots, comme si vous étiez au téléphone ensemble.\n\n";
+
+  // Injecte ton + savoir + regles + exemples V2 (équivalent V2
   // sapi_robin_build_step_prompt — les exemples guident le ton conversationnel).
-  $prompt  = sapi_megafilter_load_v2_prompts(true);
+  $prompt .= sapi_megafilter_load_v2_prompts(true);
 
   $prompt .= "Tu es Robin, artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser dans son atelier à Lyon.\n";
   $prompt .= "Tu accompagnes un visiteur qui explore ta collection sur le site atelier-sapi.fr.\n\n";
@@ -3457,9 +3466,12 @@ function sapi_megafilter_format_ignored_answers(array $ignored_keys) {
 function sapi_megafilter_adaptive_consigne_block() {
   $out  = "\nCOMPORTEMENT ATTENDU SELON LA SITUATION FILTRE :\n";
   $out .= "- Si AUCUN produit présenté au visiteur (liste vide) : propose chaleureusement le sur-mesure (Robin peut créer un modèle qui n'existe pas dans le catalogue), sans baratin, sans promesse de modèles imaginaires.\n";
-  $out .= "- Si certaines RÉPONSES ONT ÉTÉ ÉLARGIES : mentionne-le subtilement et sincèrement (une demi-phrase suffit, naturel — ex. \"j'ai un peu élargi ta sélection pour pouvoir te montrer des modèles…\").\n";
+  $out .= "- Si certaines RÉPONSES ONT ÉTÉ ÉLARGIES : NOMME précisément lesquelles avec leur libellé humain (ex: \"j'ai relâché ta préférence de style\", \"j'ai mis de côté la taille de pièce\") et explique brièvement pourquoi (\"pour pouvoir te montrer mes appliques\", \"pour t'ouvrir plus de modèles\"). Pas de formule générique vague type \"j'ai un peu élargi ta sélection\".\n";
   $out .= "- Sinon (filtre direct OK) : présente la sélection naturellement, comme d'habitude.\n";
   $out .= "- Dans TOUS les cas : NE NOMME PAS de modèle précis du catalogue — le visiteur les voit dans la grille juste après.\n";
+
+  $out .= "\nRÈGLES MÉTIER vs RÉPONSES ÉLARGIES :\n";
+  $out .= "- Si la clé `piece` figure parmi les RÉPONSES ÉLARGIES, les règles métier par pièce ont été assouplies volontairement pour pouvoir te montrer une sélection. N'oppose donc PAS au visiteur les règles \"pas de lampe à poser en cuisine\" ou autres règles ampoule par pièce. Présente la sélection telle qu'elle, sans contredire la grille.\n";
 
   $out .= "\nCONTENU DE LA PHRASE :\n";
   $out .= "- N'ÉNUMÈRE PAS chaque réponse du projet. Va à l'essentiel.\n";
