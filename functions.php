@@ -3119,27 +3119,30 @@ function sapi_megafilter_sanitize_project($answers_raw, $labels_raw = []) {
 }
 
 /**
- * Construit un résumé textuel "Pièce : Salon · Taille : Spacieuse · ..." utilisé
- * dans les prompts IA et le fallback.
+ * Construit un résumé textuel multi-ligne du projet visiteur, avec des CLÉS
+ * EXPLICITES qui lèvent l'ambiguïté pour l'IA (ex. "Emplacement de la sortie
+ * électrique : Au mur" plutôt que "Sortie : Au mur" qui pouvait être lu
+ * comme "la pièce est au mur"). Utilisé dans les prompts IA et l'email
+ * sur-mesure à Robin.
  */
 function sapi_megafilter_format_project_text(array $answers, array $labels) {
   $key_labels = [
-    'piece'           => 'Pièce',
-    'taille'          => 'Taille',
-    'taille_escalier' => 'Escalier',
-    'eclairage'       => 'Éclairage',
-    'sortie'          => 'Sortie',
-    'hauteur'         => 'Hauteur',
-    'table'           => 'Au-dessus',
-    'style'           => 'Style',
+    'piece'           => 'Pièce où installer le luminaire',
+    'taille'          => 'Taille de la pièce',
+    'taille_escalier' => "Type d'escalier",
+    'eclairage'       => "Rôle d'éclairage attendu",
+    'sortie'          => "Emplacement de la sortie électrique",
+    'hauteur'         => 'Hauteur sous plafond',
+    'table'           => "Sera-t-il au-dessus d'un meuble (table/lit/bureau)",
+    'style'           => 'Style décoratif souhaité',
   ];
   $parts = [];
   foreach ($key_labels as $k => $label) {
     if (!isset($answers[$k])) continue;
     $value = isset($labels[$k]) ? $labels[$k] : $answers[$k];
-    $parts[] = $label . ' : ' . $value;
+    $parts[] = '- ' . $label . ' : ' . $value;
   }
-  return implode(' · ', $parts);
+  return implode("\n", $parts);
 }
 
 /**
@@ -3427,6 +3430,11 @@ function sapi_megafilter_adaptive_consigne_block() {
   $out .= "- Si certaines RÉPONSES ONT ÉTÉ ÉLARGIES : mentionne-le subtilement et sincèrement (une demi-phrase suffit, naturel — ex. \"j'ai un peu élargi ta sélection pour pouvoir te montrer des modèles…\").\n";
   $out .= "- Sinon (filtre direct OK) : présente la sélection naturellement, comme d'habitude.\n";
   $out .= "- Dans TOUS les cas : NE NOMME PAS de modèle précis du catalogue — le visiteur les voit dans la grille juste après.\n";
+
+  $out .= "\nCONTENU DE LA PHRASE :\n";
+  $out .= "- N'ÉNUMÈRE PAS chaque réponse du projet. Va à l'essentiel.\n";
+  $out .= "- Si le style est \"Pas de préférence\" (ou \"neutre\"), NE LE MENTIONNE PAS du tout — ce n'est pas une info.\n";
+  $out .= "- Évite les tournures qui confondent une caractéristique de la PIÈCE avec une RÉPONSE du visiteur. Exemple à NE PAS faire : \"ta cuisine est au mur\" (la cuisine n'est PAS au mur — c'est l'arrivée électrique qui est au mur, ce qui détermine le type de produit côté filtre).\n";
   return $out;
 }
 
