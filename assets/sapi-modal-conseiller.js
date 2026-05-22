@@ -1297,6 +1297,14 @@
     document.addEventListener('sapi:open-modal', function (e) {
       lastTrigger = e.target && e.target.closest ? e.target.closest('[data-action="open-modal"]') : null;
       var st = (e.detail && e.detail.state) || 's0';
+      // Round 2 — 2.1 : garde-fou. state='product' sans config.product (pas
+      // sur fiche produit) déclencherait applyProductSelection avec
+      // productId:0 silencieux. Mieux vaut abort et logger.
+      if (st === 'product' && !PRODUCT_CTX) {
+        // eslint-disable-next-line no-console
+        console.warn('[sapi-modal] open-modal state=product reçu sans config.product, abort.');
+        return;
+      }
       openModal(st);
     });
 

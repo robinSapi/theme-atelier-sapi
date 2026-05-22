@@ -107,13 +107,20 @@
       if (piece === 'cuisine') {
         pool = pool.filter(function (c) { return c !== 'lampesaposer'; });
       }
-      return pool;
+    } else {
+      var cats = RULES.cats_by_sortie || {};
+      pool = (cats[sortie] || cats[''] || ['suspensions', 'lampadaires', 'lampesaposer', 'appliques']).slice();
+      if (piece === 'cuisine') {
+        pool = pool.filter(function (c) { return c !== 'lampesaposer'; });
+      }
     }
 
-    var cats = RULES.cats_by_sortie || {};
-    pool = (cats[sortie] || cats[''] || ['suspensions', 'lampadaires', 'lampesaposer', 'appliques']).slice();
-    if (piece === 'cuisine') {
-      pool = pool.filter(function (c) { return c !== 'lampesaposer'; });
+    // Round 2 — 2.3 : règle métier escalier. Un lampadaire ou une lampe à
+    // poser dans un escalier n'a aucun sens, quel que soit taille_escalier
+    // ou eclairage. Si le pool se vide après filtre, l'élargissement
+    // progressif (computeEffectiveAnswers) prend le relais normalement.
+    if (piece === 'escalier') {
+      pool = pool.filter(function (c) { return c !== 'lampadaires' && c !== 'lampesaposer'; });
     }
     return pool;
   }
@@ -217,6 +224,18 @@
   // dans rawAnswers (skip silencieux pour les questions non répondues).
   function computeEffectiveAnswers(rawAnswers) {
     rawAnswers = rawAnswers || {};
+
+    // Round 2 — 2.2 : normaliser taille_escalier → taille (mirror exact de
+    // sapi_robin_handle_recommendation côté PHP : ouvert→grande, autre→petite).
+    // Le filtrage côté JS dépend de `taille` (isVerticalAllowed, ampoule_skip,
+    // etc.) — sans cette dérivation, un escalier "ouvert" passait avec
+    // taille=undefined → résultats incohérents avec le PHP.
+    rawAnswers = Object.assign({}, rawAnswers);
+    if (rawAnswers.taille_escalier === 'ouvert') {
+      rawAnswers.taille = 'grande';
+    } else if (rawAnswers.taille_escalier === 'standard') {
+      rawAnswers.taille = 'petite';
+    }
 
     // Itération 0 : tous les filtres en place
     var effective = {};
