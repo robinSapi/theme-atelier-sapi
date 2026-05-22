@@ -23501,14 +23501,13 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 /* Round 3 — Lot C2 : écran s-contact dans la modale (action=contact).
-   Distribution verticale : message poussé au centre + nav retour ancré en
-   bas via 2 margin-top:auto (pattern S1/S3). Contenu centré horizontalement
-   via align-items:center hérité du parent. */
-.conseiller-modal__screen[data-screen="s-contact"] .conseiller-contact__message {
-  margin-top: auto;
-}
-.conseiller-modal__screen[data-screen="s-contact"] .conseiller-modal__nav {
-  margin-top: auto;
+   Distribution verticale : bloc compact centré (pattern S0) — sur cet écran
+   le contenu est court (message + CTA + nav), donc on évite d'étaler les
+   extrêmes contre les bords. Tout est aligné center horizontal + center
+   vertical via justify-content sur l'inner. */
+.conseiller-modal__screen[data-screen="s-contact"] .conseiller-card__inner {
+  -webkit-justify-content: center;
+  justify-content: center;
 }
 .conseiller-contact__message {
   margin: 18px auto 0;
