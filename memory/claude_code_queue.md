@@ -2,6 +2,56 @@
 
 ## ✅ Livré
 
+## [RETOUR] Fix IA "Ta cuisine est au mur" — clés explicites + consigne contenu
+**Date livrée :** 2026-05-22
+**Branche :** `test-theme-sapi-maison`
+**Commit :** `f221ba0`
+**Statut :** Livré, à tester sur le même cas que celui qui a produit le bug.
+
+### Symptôme
+
+Sur le cas "Cuisine · Petite · Au mur · Pas de préf" testé après la refonte (`c0e1f02`), la phrase IA disait :
+
+> *"Ta cuisine est au mur, donc j'ai sélectionné des appliques — j'ai un peu élargi la sélection pour pouvoir te montrer des modèles. Garde en tête qu'avec une ampoule entourée, ces pièces habillent bien l'espace mais demandent une autre source lumineuse principale pour bien éclairer un plan de travail."*
+
+L'IA a interprété la réponse `Sortie : Au mur` comme si la cuisine elle-même était au mur. Cause : le `project_text` envoyé était trop télégraphique (`Sortie : Au mur`), l'IA ne savait pas que "Sortie" désignait l'emplacement de l'arrivée électrique.
+
+### Décisions actées
+
+- **Axe 1** retenu : enrichir les **clés** du project_text (pas les valeurs)
+- **Axe 2** retenu : consigne explicite dans le prompt sur le contenu de la phrase
+- **Pas d'indice de type de produit** dans le mapping de `sortie` : le filtre s'en occupe déjà, l'IA déduit du catalogue split déjà injecté
+
+### Implémentation
+
+**Axe 1 — `sapi_megafilter_format_project_text`** refondu en multi-ligne avec clés explicites :
+
+| Slug | Avant | Après |
+|---|---|---|
+| piece | Pièce | **Pièce où installer le luminaire** |
+| sortie | Sortie | **Emplacement de la sortie électrique** |
+| taille | Taille | **Taille de la pièce** |
+| eclairage | Éclairage | **Rôle d'éclairage attendu** |
+| hauteur | Hauteur | **Hauteur sous plafond** |
+| table | Au-dessus | **Sera-t-il au-dessus d'un meuble (table/lit/bureau)** |
+| style | Style | **Style décoratif souhaité** |
+| taille_escalier | Escalier | **Type d'escalier** |
+
+Format : `- <clé> : <valeur>` une ligne par champ (au lieu du `·` compact). Cohabite avec l'email sur-mesure à Robin (lisibilité préservée).
+
+**Axe 2 — `sapi_megafilter_adaptive_consigne_block`** étendu d'une section `CONTENU DE LA PHRASE` :
+- N'énumère PAS chaque réponse, va à l'essentiel
+- Si style = "Pas de préférence" / "neutre" → NE LE MENTIONNE PAS
+- Évite les tournures qui confondent caractéristique de la PIÈCE avec RÉPONSE du visiteur, **avec anti-exemple littéral** du bug ("ta cuisine est au mur") pour conditionner négativement l'IA
+
+Bloc commun → s'applique automatiquement à `advice` ET `chat`.
+
+### Question pour Robin
+
+- Retester le même cas "Cuisine · Petite · Au mur · Pas de préf" : la phrase IA ne devrait plus mal interpréter le `sortie=mur` ni mentionner le style "Pas de préférence".
+
+---
+
 ## [RETOUR] Fallback filtre global + contrat IA enrichi (refonte + bug latéral C)
 **Date livrée :** 2026-05-22
 **Branche :** `test-theme-sapi-maison`
