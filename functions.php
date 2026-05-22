@@ -2750,18 +2750,41 @@ function sapi_megafilter_build_freetext_prompt(array $whitelist) {
   $prompt .= "{\n";
   $prompt .= '  "filters": { "piece": "chambre", "sortie": "mur" },' . "\n";
   $prompt .= '  "message": "Très bien, ...",' . "\n";
-  $prompt .= '  "action": "contact"' . "\n";
+  $prompt .= '  "action": "contact",' . "\n";
+  $prompt .= '  "contact_kind": "sur-mesure",' . "\n";
+  $prompt .= '  "contact_subject": "Projet ...",' . "\n";
+  $prompt .= '  "contact_message": "Bonjour Robin, ..."' . "\n";
   $prompt .= "}\n\n";
 
-  $prompt .= "TROIS CAS DE SORTIE À DISTINGUER :\n";
-  $prompt .= "1. Projet STANDARD (cas le plus fréquent) → extrait `filters` aussi complet que possible et écris un `message` chaleureux qui résume ce que tu as compris. Pas de champ `action`.\n";
+  $prompt .= "3 VOIES DE SORTIE — arbitre selon la nature du projet du visiteur :\n";
+  $prompt .= "1) PROJET STANDARD : tu extrais les filtres possibles depuis sa phrase. Renvoie {filters: {...}, message: \"...\", action: null}\n";
   $prompt .= "   Exemples de déductions à faire (extrait ce que tu peux INFÉRER, pas seulement ce qui est explicite) :\n";
   $prompt .= "   - \"applique pour ma chambre\" → piece=chambre, sortie=mur (applique = mur)\n";
   $prompt .= "   - \"suspension salon\" → piece=salon, sortie=plafond (suspension = plafond)\n";
   $prompt .= "   - \"lampadaire chambre\" → piece=chambre, sortie=pas-de-sortie (lampadaire = prise 230V)\n";
   $prompt .= "   - \"lampe à poser bureau\" → piece=bureau, sortie=pas-de-sortie\n";
-  $prompt .= "2. Projet INCOMPLET (pièce ou type pas clair) → `filters` partiel + `message` qui pose UNE question de précision. Pas de champ `action`.\n";
-  $prompt .= "3. Projet HORS-NORME (pro, pièce inconnue, demande spéciale, sur-mesure explicite, multi-luminaires) → `filters` vide ou minimal + `message` chaleureux qui explique pourquoi tu préfères en discuter directement + `\"action\": \"contact\"`.\n\n";
+  $prompt .= "2) PROJET INCOMPLET : il manque une info essentielle pour proposer une sélection. Tu poses une question de précision dans message : {filters: {}, message: \"...\", action: null}\n";
+  $prompt .= "3) PROJET CONTACT : la demande sort du périmètre catalogue, ou nécessite un échange direct. Renvoie {filters: {...} OU {}, message: \"...\", action: \"contact\", contact_kind: \"pro\"|\"sur-mesure\"|\"simple\"}\n\n";
+
+  $prompt .= "CRITÈRES POUR `action: \"contact\"` :\n";
+  $prompt .= "- Multi-luminaires : visiteur cherche plusieurs lampes pour un même projet (≥2 explicitement)\n";
+  $prompt .= "- Pro / B2B : hôtel, restaurant, bureaux d'entreprise, salle d'événement, cadeau d'entreprise, retail, espace public\n";
+  $prompt .= "- Dimensions custom : hauteur précise hors catalogue, format inhabituel demandé\n";
+  $prompt .= "- Essence custom : bois non catalogue (chêne, noyer, etc.)\n";
+  $prompt .= "- Combinaison qui sort manifestement du catalogue (style/format/usage spécial)\n\n";
+
+  $prompt .= "CHOIX DE `contact_kind` :\n";
+  $prompt .= "- \"pro\" : projet professionnel/B2B. CTA principal côté UI = \"Ouvrir le formulaire sur-mesure\".\n";
+  $prompt .= "- \"sur-mesure\" : résidentiel avec demande très spécifique (custom dimensions, essence, design). CTAs côté UI = \"Formulaire sur-mesure\" + \"Email\" côte à côte.\n";
+  $prompt .= "- \"simple\" : résidentiel léger qui veut juste un échange rapide. CTA principal = \"M'envoyer un email\".\n\n";
+
+  $prompt .= "RÈGLE DU CAS PAR CAS (très important) :\n";
+  $prompt .= "- Si malgré la complexité tu peux quand même proposer 1-2 modèles approchants du catalogue, fais-le : remplis `filters` AVEC `action: \"contact\"`. Le visiteur voit la sélection ET la porte sur-mesure côte à côte.\n";
+  $prompt .= "- Si l'écart est trop grand (ex: hôtelier 30 chambres) : bascule directement en `action: \"contact\"` avec `filters: {}` — ne simule pas une recherche catalogue qui n'a aucun sens.\n\n";
+
+  $prompt .= "CHAMPS BONUS pour l'UI contact (à remplir SI action = \"contact\") :\n";
+  $prompt .= "- `contact_subject` : résumé court du projet (1 ligne max, ex: \"Projet hôtel — 30 chambres équipées\")\n";
+  $prompt .= "- `contact_message` : message d'amorce pour le formulaire/email (3-4 lignes), comme si le visiteur l'écrivait lui-même à Robin. Pas de bullet points, ton humain.\n\n";
 
   $prompt .= "RÈGLES :\n";
   $prompt .= "- N'invente PAS de slug : utilise exactement ceux listés dans FILTRES DISPONIBLES.\n";
@@ -2830,13 +2853,37 @@ function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_pr
   $prompt .= "{\n";
   $prompt .= '  "message": "Réponse de Robin en 2-4 phrases...",' . "\n";
   $prompt .= '  "filters_update": { "piece": "cuisine", "style": null },' . "\n";
-  $prompt .= '  "action": "contact"' . "\n";
+  $prompt .= '  "action": "contact",' . "\n";
+  $prompt .= '  "contact_kind": "pro",' . "\n";
+  $prompt .= '  "contact_subject": "Projet hôtel — 30 chambres équipées",' . "\n";
+  $prompt .= '  "contact_message": "Bonjour Robin, je suis hôtelier..."' . "\n";
   $prompt .= "}\n\n";
+
+  // Round 3 — Lot C1 : aligne les 3 voies de sortie sur le freetext (Haiku).
+  $prompt .= "3 VOIES DE SORTIE — arbitre au fil de la conversation :\n";
+  $prompt .= "1) Conversation NORMALE : `message` + éventuellement `filters_update`, pas d'`action`.\n";
+  $prompt .= "2) Demande INCOMPLÈTE : tu poses une question de précision dans `message`, pas d'`action`.\n";
+  $prompt .= "3) PROJET CONTACT : la demande sort du périmètre catalogue ou nécessite un échange direct → `action: \"contact\"` + `contact_kind: \"pro\"|\"sur-mesure\"|\"simple\"` + `contact_subject` + `contact_message`.\n\n";
+
+  $prompt .= "CRITÈRES POUR `action: \"contact\"` :\n";
+  $prompt .= "- Multi-luminaires (≥2 lampes pour un même projet), pro/B2B (hôtel, restaurant, retail, espace public), dimensions custom, essence custom (chêne, noyer, etc.), combinaison hors catalogue.\n\n";
+
+  $prompt .= "CHOIX DE `contact_kind` :\n";
+  $prompt .= "- \"pro\" : projet professionnel/B2B → CTA UI principal = formulaire sur-mesure.\n";
+  $prompt .= "- \"sur-mesure\" : résidentiel avec demande très spécifique → CTAs UI = formulaire + email côte à côte.\n";
+  $prompt .= "- \"simple\" : résidentiel léger qui veut juste un échange rapide → CTA UI principal = email direct.\n\n";
+
+  $prompt .= "RÈGLE DU CAS PAR CAS :\n";
+  $prompt .= "- Si malgré la complexité tu peux quand même proposer 1-2 modèles approchants, fais-le : remplis `filters_update` AVEC `action: \"contact\"`. Le visiteur voit la sélection ET la porte sur-mesure côte à côte.\n";
+  $prompt .= "- Si l'écart est trop grand (ex: hôtelier 30 chambres) : bascule directement en `action: \"contact\"` sans `filters_update`.\n\n";
+
+  $prompt .= "CHAMPS BONUS pour l'UI contact (à remplir SI action = \"contact\") :\n";
+  $prompt .= "- `contact_subject` : résumé court du projet (1 ligne, ex: \"Projet hôtel — 30 chambres équipées\").\n";
+  $prompt .= "- `contact_message` : message d'amorce pour le formulaire/email (3-4 lignes), comme si le visiteur l'écrivait à Robin. Ton humain, pas de bullet points.\n\n";
 
   $prompt .= "RÈGLES :\n";
   $prompt .= "- `message` : obligatoire, 2-4 phrases.\n";
   $prompt .= "- `filters_update` : optionnel. À inclure UNIQUEMENT si tu veux changer les chips suite au message du visiteur (ex. il précise, change d'avis). Utilise les slugs exacts. `null` pour supprimer un filtre. Ne touche pas aux chips non concernés.\n";
-  $prompt .= "- `action: \"contact\"` : optionnel. Inclure UNIQUEMENT si le visiteur cherche quelque chose qui n'existe pas dans le catalogue ou semble bloqué → tu lui suggères de te contacter directement.\n";
   $prompt .= "- Ne nomme JAMAIS de modèle précis dans `message` (le visiteur les voit dans la grille à côté). Présente plutôt l'ambiance, la matière, le format.\n\n";
 
   $prompt .= "⚠️ FORMAT DE SORTIE — IMPÉRATIF :\n";
@@ -2921,16 +2968,34 @@ function sapi_ajax_megafilter_freetext() {
   // Round 2 — 4.1.c : on propage `action: contact` quand l'IA route vers le
   // formulaire (projet hors-norme : pro, sur-mesure explicite, demande
   // spéciale). Le JS affichera un CTA Contact au lieu de "Voir la sélection".
+  // Round 3 — Lot C1 : enrichissement avec contact_kind/subject/message pour
+  // que le front puisse construire l'UI dédiée + pré-remplir le formulaire.
   $action = null;
+  $contact_kind = null;
+  $contact_subject = '';
+  $contact_message = '';
   if (isset($parsed['action']) && $parsed['action'] === 'contact') {
     $action = 'contact';
+    $allowed_kinds = ['pro', 'sur-mesure', 'simple'];
+    if (isset($parsed['contact_kind']) && is_string($parsed['contact_kind']) && in_array($parsed['contact_kind'], $allowed_kinds, true)) {
+      $contact_kind = $parsed['contact_kind'];
+    }
+    if (isset($parsed['contact_subject']) && is_string($parsed['contact_subject'])) {
+      $contact_subject = sanitize_text_field($parsed['contact_subject']);
+    }
+    if (isset($parsed['contact_message']) && is_string($parsed['contact_message'])) {
+      $contact_message = sanitize_textarea_field($parsed['contact_message']);
+    }
   }
 
   wp_send_json_success([
-    'filters'    => $clean_filters,
-    'message'    => $robin_message,
-    'action'     => $action,
-    'session_id' => $session_id,
+    'filters'         => $clean_filters,
+    'message'         => $robin_message,
+    'action'          => $action,
+    'contact_kind'    => $contact_kind,
+    'contact_subject' => $contact_subject,
+    'contact_message' => $contact_message,
+    'session_id'      => $session_id,
   ]);
 }
 
@@ -3053,8 +3118,24 @@ function sapi_ajax_megafilter_chat() {
     if (empty($filters_update)) $filters_update = null;
   }
 
+  // Round 3 — Lot C1 : enrichissement avec contact_kind/subject/message,
+  // miroir du endpoint freetext. Permet à l'UI de construire CTAs adaptés
+  // + pré-remplir le formulaire /sur-mesure/.
+  $contact_kind = null;
+  $contact_subject = '';
+  $contact_message = '';
   if ($parsed && isset($parsed['action']) && $parsed['action'] === 'contact') {
     $action = 'contact';
+    $allowed_kinds = ['pro', 'sur-mesure', 'simple'];
+    if (isset($parsed['contact_kind']) && is_string($parsed['contact_kind']) && in_array($parsed['contact_kind'], $allowed_kinds, true)) {
+      $contact_kind = $parsed['contact_kind'];
+    }
+    if (isset($parsed['contact_subject']) && is_string($parsed['contact_subject'])) {
+      $contact_subject = sanitize_text_field($parsed['contact_subject']);
+    }
+    if (isset($parsed['contact_message']) && is_string($parsed['contact_message'])) {
+      $contact_message = sanitize_textarea_field($parsed['contact_message']);
+    }
   }
 
   $new_conversation = array_merge($conversation, [
@@ -3063,11 +3144,14 @@ function sapi_ajax_megafilter_chat() {
   ]);
 
   wp_send_json_success([
-    'message'        => $robin_message,
+    'message'         => $robin_message,
     'filters_update' => $filters_update,
-    'action'         => $action,
-    'conversation'   => $new_conversation,
-    'session_id'     => $session_id,
+    'action'          => $action,
+    'contact_kind'    => $contact_kind,
+    'contact_subject' => $contact_subject,
+    'contact_message' => $contact_message,
+    'conversation'    => $new_conversation,
+    'session_id'      => $session_id,
   ]);
 }
 

@@ -65,10 +65,15 @@
   function get() {
     var p = readRaw();
     if (!p) {
-      return { answers: {}, labels: {}, created_at: null, updated_at: null, session_id: null, advice_text: null };
+      return { answers: {}, labels: {}, created_at: null, updated_at: null, session_id: null, advice_text: null, action: null, contact_kind: null, contact_subject: '', contact_message: '' };
     }
     if (!p.labels || typeof p.labels !== 'object') p.labels = {};
     if (!('advice_text' in p)) p.advice_text = null;
+    // Round 3 — Lot C1 : champs contact (action="contact" + kind/subject/message)
+    if (!('action' in p)) p.action = null;
+    if (!('contact_kind' in p)) p.contact_kind = null;
+    if (!('contact_subject' in p)) p.contact_subject = '';
+    if (!('contact_message' in p)) p.contact_message = '';
     return p;
   }
 
@@ -115,6 +120,12 @@
       advice_text: (extra && typeof extra.advice_text === 'string' && extra.advice_text)
                      ? extra.advice_text
                      : null,
+      // Round 3 — Lot C1 : set() = remplace entièrement le projet (sortie
+      // modale), donc on remet à zéro l'état contact aussi.
+      action: null,
+      contact_kind: null,
+      contact_subject: '',
+      contact_message: '',
     };
     Object.keys(answers).forEach(function (k) {
       var v = answers[k];
@@ -180,6 +191,14 @@
     var afterAnswersJson = JSON.stringify(p.answers || {});
     if (beforeAnswersJson !== afterAnswersJson) {
       p.advice_text = null;
+      // Round 3 — Lot C1 : invalide aussi l'état contact (le routing IA
+      // précédent référençait l'ancien projet — un changement d'answers
+      // peut faire passer de "contact" à "standard" ou changer le kind).
+      // setContactState écrit en direct via writeRaw — pas de boucle.
+      p.action = null;
+      p.contact_kind = null;
+      p.contact_subject = '';
+      p.contact_message = '';
     }
 
     p.updated_at = now;
@@ -189,6 +208,8 @@
   }
 
   function clear() {
+    // Round 3 — Lot C1 : clear l'état contact aussi (action + kind/subject/message
+    // sont stockés au même niveau que answers dans le storage)
     var ok = clearRaw();
     // F2a-quater : nettoyer aussi ?piece= de l'URL pour éviter sa ré-ingestion
     // par ingestQueryParams() au prochain chargement de page (sinon le projet
@@ -201,6 +222,38 @@
         window.history.replaceState({}, '', newUrl);
       }
     } catch (e) { /* silencieux */ }
+    if (ok) notify();
+    return ok;
+  }
+
+  /**
+   * Round 3 — Lot C1 : enregistre l'état contact renvoyé par l'IA
+   * (action=contact + contact_kind/subject/message). Écrit en direct via
+   * writeRaw pour ne pas déclencher l'invalidation d'advice_text par update().
+   * Passer null pour clear l'état contact.
+   */
+  function setContactState(payload) {
+    var p = readRaw();
+    var now = Math.floor(Date.now() / 1000);
+    if (!p) {
+      p = { answers: {}, labels: {}, created_at: now, updated_at: now, session_id: null };
+    }
+    if (!p.labels) p.labels = {};
+    if (!payload) {
+      p.action = null;
+      p.contact_kind = null;
+      p.contact_subject = '';
+      p.contact_message = '';
+    } else {
+      p.action = (payload.action === 'contact') ? 'contact' : null;
+      var validKinds = ['pro', 'sur-mesure', 'simple'];
+      p.contact_kind = (typeof payload.contact_kind === 'string' && validKinds.indexOf(payload.contact_kind) !== -1)
+        ? payload.contact_kind : null;
+      p.contact_subject = (typeof payload.contact_subject === 'string') ? payload.contact_subject : '';
+      p.contact_message = (typeof payload.contact_message === 'string') ? payload.contact_message : '';
+    }
+    p.updated_at = now;
+    var ok = writeRaw(p);
     if (ok) notify();
     return ok;
   }
@@ -365,6 +418,7 @@
     update: update,
     clear: clear,
     setAdviceText: setAdviceText,
+    setContactState: setContactState,
     subscribe: subscribe,
     STORAGE_KEY: STORAGE_KEY,
     // Round 2 — 3.2 : helpers visibility centralisés. Les consommateurs JS
