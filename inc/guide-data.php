@@ -65,10 +65,16 @@ function sapi_guide_get_steps() {
     [
       'id'         => 'sortie',
       'question'   => 'Où installerez-vous votre luminaire ?',
+      // Round 2 — 4.1 : `sortie` doit rester visible dès qu'une pièce est
+      // connue, même si taille/eclairage manquent. Sinon le freetext
+      // ("applique pour ma chambre" → piece+sortie sans taille intermédiaire)
+      // se fait manger sa réponse par cleanInvisibleAnswers. Le parcours
+      // linéaire (piece → taille → sortie) n'est pas affecté car STEPS est
+      // traversé dans l'ordre du tableau.
       'visibility' => ['_or' => [
         ['taille' => ['petite', 'moyenne', 'ne-sais-pas']],
         ['eclairage' => ['principal', 'secondaire']],
-        ['piece' => ['escalier']],
+        ['piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'entree', 'escalier']],
       ]],
       'choices'    => [
         ['label' => 'Au plafond',               'slug' => 'plafond',       'icon' => 'ceiling-plug'],

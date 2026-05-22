@@ -701,6 +701,14 @@
         addRobinBubble(data.message || '', { filters: filters });
         state.chat.conversation.push({ role: 'user', content: text });
         state.chat.conversation.push({ role: 'assistant', content: data.message || '' });
+
+        // Round 2 — 4.1.c : action=contact → projet hors-norme, on lock le
+        // chat et on révèle le CTA. Pas de routing automatique : le visiteur
+        // peut toujours cliquer "Voir la sélection" s'il veut quand même la
+        // grille filtrée.
+        if (data.action === 'contact') {
+          setChatFooterState('locked');
+        }
         revealChatCta();
       })
       .catch(function (err) {

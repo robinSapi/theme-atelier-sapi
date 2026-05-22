@@ -2744,13 +2744,23 @@ function sapi_megafilter_build_freetext_prompt(array $whitelist) {
 
   $prompt .= "\nFORMAT DE RÉPONSE (JSON strict, sans markdown, sans prose autour) :\n";
   $prompt .= "{\n";
-  $prompt .= '  "filters": { "piece": "salon", "style": "moderne" },' . "\n";
-  $prompt .= '  "message": "Très bien, ..."' . "\n";
+  $prompt .= '  "filters": { "piece": "chambre", "sortie": "mur" },' . "\n";
+  $prompt .= '  "message": "Très bien, ...",' . "\n";
+  $prompt .= '  "action": "contact"' . "\n";
   $prompt .= "}\n\n";
 
+  $prompt .= "TROIS CAS DE SORTIE À DISTINGUER :\n";
+  $prompt .= "1. Projet STANDARD (cas le plus fréquent) → extrait `filters` aussi complet que possible et écris un `message` chaleureux qui résume ce que tu as compris. Pas de champ `action`.\n";
+  $prompt .= "   Exemples de déductions à faire (extrait ce que tu peux INFÉRER, pas seulement ce qui est explicite) :\n";
+  $prompt .= "   - \"applique pour ma chambre\" → piece=chambre, sortie=mur (applique = mur)\n";
+  $prompt .= "   - \"suspension salon\" → piece=salon, sortie=plafond (suspension = plafond)\n";
+  $prompt .= "   - \"lampadaire chambre\" → piece=chambre, sortie=pas-de-sortie (lampadaire = prise 230V)\n";
+  $prompt .= "   - \"lampe à poser bureau\" → piece=bureau, sortie=pas-de-sortie\n";
+  $prompt .= "2. Projet INCOMPLET (pièce ou type pas clair) → `filters` partiel + `message` qui pose UNE question de précision. Pas de champ `action`.\n";
+  $prompt .= "3. Projet HORS-NORME (pro, pièce inconnue, demande spéciale, sur-mesure explicite, multi-luminaires) → `filters` vide ou minimal + `message` chaleureux qui explique pourquoi tu préfères en discuter directement + `\"action\": \"contact\"`.\n\n";
+
   $prompt .= "RÈGLES :\n";
-  $prompt .= "- N'inclus une clé dans `filters` QUE si tu peux la déduire avec confiance du texte. En cas de doute, laisse-la absente.\n";
-  $prompt .= "- N'invente PAS de slug : utilise exactement ceux listés.\n";
+  $prompt .= "- N'invente PAS de slug : utilise exactement ceux listés dans FILTRES DISPONIBLES.\n";
   $prompt .= "- `message` : 1-2 phrases chaleureuses, tutoiement, ton artisan. Mentionne ce que tu as compris du projet.\n";
   $prompt .= "- Pas d'emoji, pas de markdown dans `message`.\n\n";
 
@@ -2904,9 +2914,18 @@ function sapi_ajax_megafilter_freetext() {
     ? sanitize_textarea_field($parsed['message'])
     : '';
 
+  // Round 2 — 4.1.c : on propage `action: contact` quand l'IA route vers le
+  // formulaire (projet hors-norme : pro, sur-mesure explicite, demande
+  // spéciale). Le JS affichera un CTA Contact au lieu de "Voir la sélection".
+  $action = null;
+  if (isset($parsed['action']) && $parsed['action'] === 'contact') {
+    $action = 'contact';
+  }
+
   wp_send_json_success([
     'filters'    => $clean_filters,
     'message'    => $robin_message,
+    'action'     => $action,
     'session_id' => $session_id,
   ]);
 }
@@ -3412,6 +3431,10 @@ function sapi_megafilter_parse_ignored_answers($raw) {
 
 // Construit les 2 sections "PRODUITS PRÉSENTÉS" + "PRODUITS ÉCARTÉS" depuis un
 // $all_products (sapi_guide_query_all_products) + les matching_ids.
+// Round 2 — 4.2 : enrichi avec essences disponibles + prix dès, lus depuis
+// $p['variations'] (essence) et $p['price_min_raw'] (déjà calculés dans
+// sapi_guide_collect_results) — l'IA peut désormais parler de matière et de
+// prix sans inventer.
 function sapi_megafilter_format_catalog_split(array $all_products, array $matching_ids) {
   $matching_set = array_flip(array_map('intval', $matching_ids));
   $presented = [];
@@ -3422,10 +3445,30 @@ function sapi_megafilter_format_catalog_split(array $all_products, array $matchi
     $cats = isset($p['categories']) && is_array($p['categories']) ? implode(', ', $p['categories']) : '';
     $format = isset($p['format']) ? $p['format'] : '';
     $ampoule = isset($p['type_ampoule']) ? $p['type_ampoule'] : '';
+
+    // Essences uniques depuis les variations (typiquement Peuplier, Okoumé)
+    $essences_uniques = [];
+    if (!empty($p['variations']) && is_array($p['variations'])) {
+      foreach ($p['variations'] as $v) {
+        if (!empty($v['essence']) && !in_array($v['essence'], $essences_uniques, true)) {
+          $essences_uniques[] = $v['essence'];
+        }
+      }
+    }
+    $essences = empty($essences_uniques) ? '?' : implode(', ', $essences_uniques);
+
+    // Prix dès — utilise price_min_raw (float) pour formater proprement
+    $prix = '?';
+    if (isset($p['price_min_raw']) && $p['price_min_raw'] > 0) {
+      $prix = number_format((float) $p['price_min_raw'], 0, ',', ' ') . '€';
+    }
+
     $line = '- ' . (isset($p['title']) ? $p['title'] : '?')
           . ' | Catégorie : ' . $cats
           . ' | Format : ' . $format
-          . ' | Ampoule : ' . $ampoule;
+          . ' | Ampoule : ' . $ampoule
+          . ' | Essences : ' . $essences
+          . ' | Prix dès : ' . $prix;
     if (isset($matching_set[$id])) $presented[] = $line;
     else                            $ecarted[] = $line;
   }
@@ -4891,10 +4934,25 @@ function sapi_guide_collect_results($query, array $answers, $skip_exclusions = f
     $cat_names = wp_get_post_terms($product->get_id(), 'product_cat', ['fields' => 'names']);
     $cat_label = !empty($cat_names) ? $cat_names[0] : '';
 
+    // Round 2 — 4.2 : prix min raw (float) pour le catalogue passé à l'IA.
+    // Pour les produits variables : min des prix de variation (sans taxes,
+    // version raw — pas le HTML formaté).
+    $price_min_raw = 0.0;
+    if ($product->is_type('variable')) {
+      $var_prices = $product->get_variation_prices(false);
+      if (!empty($var_prices['price'])) {
+        $price_min_raw = (float) min($var_prices['price']);
+      }
+    } else {
+      $raw = $product->get_price();
+      $price_min_raw = is_numeric($raw) ? (float) $raw : 0.0;
+    }
+
     $products[] = [
       'id'              => $product->get_id(),
       'title'           => $product->get_name(),
       'price'           => $price,
+      'price_min_raw'   => $price_min_raw,
       'image'           => $image_id ? wp_get_attachment_url($image_id) : '',
       'image_alt'       => $image_id ? get_post_meta($image_id, '_wp_attachment_image_alt', true) : '',
       'hover_image'     => $hover_image_url,
