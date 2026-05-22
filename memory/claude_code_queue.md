@@ -2,7 +2,375 @@
 
 ## 🔧 À faire
 
+## [TÂCHE] Conseiller V3 — Round 3 : voix IA + sur-mesure + contact (Lots A/B/C)
+**Date :** 2026-05-22
+**Branche :** `test-theme-sapi-maison`
+**Priorité :** haute — chantier sur-mesure + alignement voix IA
+
+### Contexte
+
+Tests Round 2 par Robin ont validé la majorité des fixes, mais 2 retours UX restent :
+- **B2** : le vocabulaire IA utilisé pour expliquer l'élargissement des filtres est trop technique et donne au client la sensation d'un catalogue pauvre, ou révèle un mécanisme interne (filtre par pièce, etc.) que le visiteur n'a pas à connaître.
+- **G3** : bureau + ne-sais-pas ne renvoie ni appliques ni lampadaires. Vérification Robin : les appliques et lampadaires du catalogue sont tous `ampoule_entouree`, donc le filtre `ampoule_degagee + semi_degagee` du bureau les exclut → réalité catalogue, pas un bug logique. MAIS à harmoniser : la fonction `sapi_guide_get_main_categories` (L4535-4547) a une 2e définition de la règle qui n'est pas alignée avec la décision N8 du commit `d8be0ff`.
+
+Et nouveau chantier majeur :
+- **Sur-mesure + contact** : passe complète pour mieux orienter les projets pro/B2B/sur-mesure dans la conversation IA et l'UI, et rendre la card sur-mesure plus visible.
+
+### Décisions Robin actées avant rédaction
+- **Lot A B2 (voix IA)** : approche pivot — l'IA ne révèle JAMAIS le mécanisme de filtrage. Cf. `feedback_ia_ne_revele_pas_mecanisme.md` côté Cowork (mémoire) pour la doctrine complète (vocab banni + voix attendue + exemples canoniques).
+- **Lot C C1-C4** : tous validés.
+- **Canaux de contact** : formulaire `/sur-mesure/` pour pro/B2B, email direct `robin@atelier-sapi.fr` pour résidentiel simple, les deux côte à côte pour sur-mesure résidentiel complexe.
+- **Cas par cas selon l'écart** : l'IA peut proposer une sélection ET le contact en complément si l'écart catalogue/demande est modéré ; bascule directe en contact si l'écart est trop grand.
+
+Structuré en **3 lots** indépendants et déployables séparément.
+
+---
+
+### LOT A — Voix IA : ne JAMAIS révéler le mécanisme de filtrage (B2)
+
+**Fichier :** `functions.php`, fonction `sapi_megafilter_adaptive_consigne_block` (L3524-3539).
+
+**Réécriture complète de la fonction.** Remplacer le contenu actuel par une consigne qui :
+1. INTERDIT explicitement le vocabulaire technique
+2. EXIGE une voix artisan qui présente la sélection comme une proposition naturelle
+3. INVITE au sur-mesure comme porte de sortie
+
+**Nouveau corps de la fonction (à coller mot pour mot) :**
+
+```php
+function sapi_megafilter_adaptive_consigne_block() {
+  $out  = "\nPRÉSENTATION DE LA SÉLECTION AU VISITEUR :\n";
+  $out .= "- Si AUCUN produit présenté au visiteur (liste vide) : propose chaleureusement le sur-mesure (Robin peut créer un modèle qui n'existe pas dans le catalogue), sans baratin, sans promesse de modèles imaginaires.\n";
+  $out .= "- Si la sélection présentée correspond EXACTEMENT à la demande de départ : présente la sélection naturellement.\n";
+  $out .= "- Si la sélection s'écarte de la demande de départ (sans dire pourquoi !) : présente la sélection comme une proposition d'artisan. Tu peux reconnaître la demande initiale en intro (\"tu cherches plutôt du moderne pour ta cuisine\") puis présenter ta sélection, et invite le visiteur au sur-mesure comme alternative naturelle si la sélection ne lui plaît pas.\n";
+
+  $out .= "\nVOCABULAIRE STRICTEMENT INTERDIT — ne le mentionne JAMAIS au visiteur :\n";
+  $out .= "- \"j'ai élargi\", \"j'ai relâché\", \"j'ai mis de côté\", \"j'ai assoupli\", \"j'ai été plus large sur…\", \"j'ai un peu débordé sur d'autres pièces\"\n";
+  $out .= "- \"comme je n'avais pas grand-chose à te montrer\", \"sinon je n'avais que 2-3 modèles\"\n";
+  $out .= "- \"contrainte\", \"paramètre\", \"préférence\", \"filtre\", \"critère\", \"sélection élargie\", \"élargissement\"\n";
+  $out .= "Le visiteur ne sait pas comment fonctionne le filtre en interne, et n'a pas à le savoir. Tu présentes simplement ta sélection.\n";
+
+  $out .= "\nEXEMPLES CANONIQUES (le ton, pas le texte exact à recopier) :\n";
+  $out .= "- \"Tu cherches plutôt du moderne pour ta cuisine. Voilà ma sélection — si tu ne trouves pas exactement ce que tu imaginais, on peut aussi imaginer quelque chose de sur-mesure ensemble.\"\n";
+  $out .= "- \"Voilà ma proposition pour ton salon. Pense à vérifier les dimensions sur chaque fiche pour être sûr du rendu — et n'hésite pas à me dire si tu veux qu'on en parle ensemble.\"\n";
+  $out .= "- \"Voilà ce que je te propose. Si tu cherches quelque chose de très précis qui ne figure pas dans ces modèles, on peut imaginer du sur-mesure ensemble.\"\n";
+  $out .= "- \"Voilà ma sélection. Si tu as besoin de quelque chose de très spécifique pour ton projet, je peux te faire du sur-mesure — il suffit qu'on échange ensemble.\"\n";
+
+  $out .= "\nRÈGLES MÉTIER vs RÉPONSES ÉLARGIES :\n";
+  $out .= "- Si la clé `piece` figure parmi les RÉPONSES ÉLARGIES, les règles métier par pièce ont été assouplies volontairement pour pouvoir te montrer une sélection. N'oppose donc PAS au visiteur les règles \"pas de lampe à poser en cuisine\" ou autres règles ampoule par pièce. Présente la sélection telle qu'elle, sans contredire la grille.\n";
+
+  $out .= "\nCONTENU DE LA PHRASE :\n";
+  $out .= "- N'ÉNUMÈRE PAS chaque réponse du projet. Va à l'essentiel.\n";
+  $out .= "- Si le style est \"Pas de préférence\" (ou \"neutre\"), NE LE MENTIONNE PAS du tout — ce n'est pas une info.\n";
+  $out .= "- Évite les tournures qui confondent une caractéristique de la PIÈCE avec une RÉPONSE du visiteur. Exemple à NE PAS faire : \"ta cuisine est au mur\" (la cuisine n'est PAS au mur — c'est l'arrivée électrique qui est au mur, ce qui détermine le type de produit côté filtre).\n";
+  $out .= "- Dans TOUS les cas : NE NOMME PAS de modèle précis du catalogue — le visiteur les voit dans la grille juste après.\n";
+  $out .= "- Le sur-mesure est ta porte de sortie naturelle quand la sélection s'écarte de la demande initiale. JAMAIS comme un aveu d'échec, toujours comme une alternative que tu peux proposer.\n";
+
+  return $out;
+}
+```
+
+**Critère de succès Lot A :** refaire scénario B2 (Cuisine + Petite + Mur + Pas de préférence) sur `test.atelier-sapi.fr`. La phrase IA :
+- N'utilise AUCUN mot de la liste bannie
+- Ne mentionne pas le mécanisme de filtre par pièce
+- Reconnaît éventuellement la demande de départ en intro
+- Propose le sur-mesure comme alternative naturelle si la sélection s'écarte
+- Ne mentionne pas "pas grand-chose à te montrer"
+
+---
+
+### LOT B — Harmoniser `sapi_guide_get_main_categories` avec `cats_by_sortie['ne-sais-pas']`
+
+**Contexte :** le commit `d8be0ff` du Round 2 a ajouté `'appliques'` à `$sapi_filter_rules['cats_by_sortie']['ne-sais-pas']` (L325-334 de `functions.php`), mais la fonction `sapi_guide_get_main_categories` qui sert le backend V2 (recommendation IA legacy) garde l'ancienne logique L4545-4547 sans appliques.
+
+**Fichier :** `functions.php`, fonction `sapi_guide_get_main_categories`, autour de L4535-4547.
+
+**Modification :**
+
+Avant :
+```php
+default: // "ne-sais-pas" → pas d'appliques (nécessite sortie mur)
+  $cats = ['suspensions', 'lampadaires', 'lampesaposer'];
+```
+
+Après :
+```php
+default:
+  // "ne-sais-pas" → cohérence avec cats_by_sortie['ne-sais-pas']
+  // (Round 2 — 6.1 N8, commit d8be0ff) : appliques incluses car le kit prise
+  // électrique (savoir.txt:48, regles.txt:37) permet l'installation sans sortie
+  // murale dédiée.
+  $cats = ['suspensions', 'lampadaires', 'lampesaposer', 'appliques'];
+```
+
+**Critère de succès Lot B :** grep sur `'ne-sais-pas'` dans `functions.php` montre la même liste 4 catégories pour `cats_by_sortie['ne-sais-pas']` ET pour le default de `sapi_guide_get_main_categories`.
+
+---
+
+### LOT C — Sur-mesure + contact (passe complète)
+
+Découpé en 4 sous-chantiers indépendants (C1-C4) qui peuvent être livrés en plusieurs commits.
+
+#### C1 — Détection IA enrichie + champ `contact_kind`
+
+**Fichiers :**
+- `functions.php` : `sapi_megafilter_build_freetext_prompt` (~L2724)
+- `functions.php` : prompt builder du chat S2 (chercher `sapi_megafilter_build_chat_prompt` ou équivalent)
+
+**Enrichir les 2 prompts** avec les directives suivantes (à intégrer dans les sections "voies de sortie" existantes ou à créer si absentes) :
+
+```
+3 VOIES DE SORTIE — arbitre selon la nature du projet du visiteur :
+
+1) PROJET STANDARD : tu extrais les filtres possibles depuis sa phrase. Renvoie :
+   {filters: {...}, message: "...", action: null}
+
+2) PROJET INCOMPLET : il manque une info essentielle pour proposer une sélection. Tu poses
+   une question de précision dans message :
+   {filters: {}, message: "...", action: null}
+
+3) PROJET CONTACT : la demande sort du périmètre catalogue, ou nécessite un échange direct
+   avec Robin. Renvoie :
+   {filters: {...} OU {}, message: "...", action: "contact", contact_kind: "pro"|"sur-mesure"|"simple"}
+
+CRITÈRES POUR `action: "contact"` :
+- Multi-luminaires : visiteur cherche plusieurs lampes pour un même projet (≥2 explicitement)
+- Pro / B2B : hôtel, restaurant, bureaux d'entreprise, salle d'événement, cadeau d'entreprise,
+  retail, espace public
+- Dimensions custom : hauteur précise hors catalogue, format inhabituel demandé
+- Essence custom : bois non catalogue (chêne, noyer, etc.)
+- Combinaison qui sort manifestement du catalogue (style/format/usage spécial)
+
+CHOIX DE `contact_kind` :
+- "pro" : projet professionnel/B2B. CTA principal côté UI = "Ouvrir le formulaire sur-mesure".
+- "sur-mesure" : résidentiel avec demande très spécifique (custom dimensions, essence, design).
+  CTAs côté UI = "Formulaire sur-mesure" + "Email" côte à côte.
+- "simple" : résidentiel léger qui veut juste un échange rapide. CTA principal = "M'envoyer un email".
+
+RÈGLE DU CAS PAR CAS (très important) :
+- Si malgré la complexité tu peux quand même proposer 1-2 modèles approchants du catalogue,
+  fais-le : remplis `filters` AVEC `action: "contact"`. Le visiteur voit la sélection ET la
+  porte sur-mesure côte à côte.
+- Si l'écart est trop grand (ex: hôtelier 30 chambres) : bascule directement en `action: "contact"`
+  avec `filters: {}` — ne simule pas une recherche catalogue qui n'a aucun sens.
+
+CHAMPS BONUS pour l'UI contact (à remplir SI action = "contact") :
+- "contact_subject" : résumé court du projet (1 ligne max, ex: "Projet hôtel — 30 chambres équipées")
+- "contact_message" : message d'amorce pour le formulaire/email (3-4 lignes), comme si le visiteur
+  l'écrivait lui-même à Robin. Pas de bullet points, ton humain.
+```
+
+**Côté handler PHP** (`sapi_ajax_megafilter_freetext` et équivalent chat) : propager `contact_kind`, `contact_subject`, `contact_message` côté front via `wp_send_json_success`.
+
+**Côté `sapiProject`** (`sapi-project.js`) : stocker `action`, `contact_kind`, `contact_subject`, `contact_message` dans le state quand l'IA les renvoie.
+
+#### C2 — UI dédiée mode contact dans la modale
+
+**Fichiers :**
+- `functions.php` : `sapi_render_conseiller_modal` (markup)
+- `assets/sapi-modal-conseiller.js` : handler
+- `style.css` : styles propres au mode contact
+
+**Markup à ajouter** dans `sapi_render_conseiller_modal` (à la suite des autres écrans `data-screen`) :
+
+```html
+<section class="conseiller-card conseiller-card--modal" data-screen="s-contact" hidden>
+  <div class="conseiller-card__inner">
+    <p class="conseiller-contact__message" data-contact-message></p>
+    <div class="conseiller-contact__recap" data-contact-recap></div>
+    <div class="conseiller-contact__ctas" data-contact-ctas></div>
+    <div class="conseiller-contact__secondary">
+      <button type="button" class="conseiller-link" data-action="back-to-chat">
+        <?php esc_html_e('Continuer la discussion avec Robin', 'theme-sapi-maison'); ?>
+      </button>
+    </div>
+  </div>
+</section>
+```
+
+**CSS :** styles propres au mode contact, CTAs visibles, layout aéré, cohérent avec la charte (couleurs `#937D68`, `#E35B24`).
+
+**JS** (`sapi-modal-conseiller.js`) : ajouter un handler `showContact(payload)` qui :
+1. Affiche l'écran `s-contact`
+2. Remplit `data-contact-message` avec `payload.message`
+3. Remplit `data-contact-recap` avec un résumé du projet (chips ou texte court depuis `sapiProject.answers`)
+4. Construit les CTAs dans `data-contact-ctas` selon `payload.contact_kind` :
+   - `pro` : 1 bouton principal *"Ouvrir le formulaire sur-mesure"* (orange #E35B24)
+   - `simple` : 1 bouton principal *"M'envoyer un email"*
+   - `sur-mesure` : 2 boutons côte à côte (formulaire + email)
+5. Chaque CTA est un `<a>` avec URL construite via query params (cf. C4 pour le détail)
+6. Le lien "Continuer la discussion avec Robin" retourne à l'écran de chat S2
+
+**Déclenchement :** quand `submitFreetext` ou `submitChat` reçoit une réponse avec `action: "contact"`, au lieu d'afficher la bulle de réponse classique + bouton "Voir la sélection", appeler `showContact(payload)` directement.
+
+#### C3 — Card sur-mesure visible dans la grille quand contact détecté
+
+**Fichiers :**
+- `assets/sapi-cards-conseiller.js` : logique grille
+- `assets/sapi-project.js` : exposer `action` au refilter
+- Template grille (probablement `archive-product.php` ou un partial dans `inc/`) : markup card sur-mesure
+
+**Comportement attendu :**
+- Quand `sapiProject.action === 'contact'`, la grille `/mes-creations/` affiche la card sur-mesure (réutilisation du composant empty state E2 — panneau crème dashed + CTA orange vers `/sur-mesure/`) **EN PREMIÈRE POSITION** dans la grille.
+- Si l'IA a aussi rempli `filters` (cas par cas, écart modéré), les produits matchants s'affichent à la suite.
+- Si `filters` est vide (écart trop grand, bascule directe contact), seule la card sur-mesure s'affiche.
+
+**Implémentation suggérée :**
+1. Côté `sapi-cards-conseiller.js`, dans `refilterGrid`, après calcul de `matchingIds`, vérifier `sapiProject.action`. Si `contact`, prepend une carte sur-mesure à la grille (DOM insertion ou flag CSS qui rend une carte hidden visible).
+2. La card sur-mesure doit avoir un wording adapté au `contact_kind` :
+   - `pro` : titre "Projet professionnel ?" + texte court
+   - `sur-mesure` : titre "Une idée précise en tête ?" + texte court
+   - `simple` : titre "Envie d'en parler ?" + texte court
+3. Le CTA de la card reprend la même logique que les CTAs C2 (lien construit avec query params).
+
+**Note :** la card sur-mesure empty state existe déjà pour le cas 0 produit (cf. scénarios E2). Réutiliser le markup et la stylize pour qu'elle puisse aussi apparaître EN INSERT dans la grille (pas seulement en empty state).
+
+#### C4 — Pré-remplissage du formulaire `/sur-mesure/`
+
+**Fichiers :**
+- Template page `/sur-mesure/` (probablement `page-sur-mesure.php` ou un Elementor template — à vérifier via le slug)
+- `sapi-modal-conseiller.js` (côté C2 — construction des URLs)
+- `sapi-cards-conseiller.js` (côté C3 — construction du CTA de la card)
+
+**Côté lien (C2 + C3) :** construire l'URL du formulaire en injectant 2 query params :
+- `subject` : `sapiProject.contact_subject` (encoded)
+- `message` : `sapiProject.contact_message` (encoded)
+- `kind` : `sapiProject.contact_kind` (pour preselect d'un champ éventuel si pertinent)
+
+URL résultat type : `/sur-mesure/?from=conseiller&kind=pro&subject=Projet+h%C3%B4tel&message=Bonjour+Robin%2C+...`
+
+**Côté page `/sur-mesure/` :** ajouter un script (Code Snippets plugin, "Exécuter uniquement sur la page sur-mesure") qui :
+1. Au DOMContentLoaded, parse `window.location.search`
+2. Si `subject` ou `message` présent, remplit les champs correspondants du formulaire :
+   - Le formulaire est très probablement Contact Form 7 (vérifier le shortcode utilisé). Les champs ont des noms du type `your-subject`, `your-message`.
+   - Sélecteurs probables : `input[name="your-subject"]`, `textarea[name="your-message"]`.
+3. Le pré-remplissage doit être discret (l'utilisateur peut modifier librement). Pas de readonly, pas de hint visible.
+
+**Côté lien email (cas `simple`) :** construire un lien mailto avec subject et body :
+`mailto:robin@atelier-sapi.fr?subject=ENCODED&body=ENCODED`
+
+**Critère de succès C4 :** test sur `test.atelier-sapi.fr` — taper *"Je suis hôtelier, j'ai 30 chambres à équiper"* dans la modale → action contact détectée → écran s-contact affiché avec CTA "Ouvrir le formulaire sur-mesure" → click sur le CTA ouvre `/sur-mesure/` avec subject et message pré-remplis.
+
+---
+
+### Critères de succès globaux Round 3
+
+À tester sur `test.atelier-sapi.fr` après livraison :
+
+1. **Lot A** : B2 cuisine + petite + mur + neutre → phrase IA sans vocabulaire banni, sans révélation du mécanisme, avec porte sur-mesure si écart.
+2. **Lot B** : recommendation IA pour bureau + ne-sais-pas ne perd plus les appliques côté backend V2.
+3. **Lot C1** : taper *"Je cherche une lampe pour mon hôtel, 30 chambres"* → IA renvoie `action: contact, contact_kind: pro` + `contact_subject` + `contact_message` non vides.
+4. **Lot C2** : action contact déclenche l'écran s-contact avec récap + CTAs adaptés au `contact_kind`.
+5. **Lot C3** : grille affiche la card sur-mesure en première position quand projet en mode contact.
+6. **Lot C4** : click sur CTA "Formulaire sur-mesure" ouvre `/sur-mesure/?...` avec subject + message pré-remplis dans le formulaire.
+
+### Notes pour le retour
+
+- Hash des commits par lot
+- Liste des fichiers modifiés
+- Toute déviation par rapport à la spec (avec justification)
+- Si C3 nécessite de toucher au template grille — préciser quel template et quelles classes CSS ont été touchées (pour éviter régression future)
+- Si C4 nécessite de toucher au plugin du formulaire (Contact Form 7 ?) ou si un snippet Code Snippets suffit
+
+---
+
 ## ✅ Livré
+
+## [RETOUR] Conseiller V3 — Round 3 : voix IA + sur-mesure + contact (Lots A/B/C)
+**Date livrée :** 2026-05-22
+**Branche :** `test-theme-sapi-maison`
+**Commits :** `0bd68c1` (B) → `01f4e01` (A) → `8ca8a93` (C1) → `469b399` (C2) → `4093bab` (C3) → `2cb60f0` (C4)
+**Statut :** 6 lots livrés en 6 commits. Tout déployable.
+
+### Récap par lot
+
+| Lot | Sujet | Commit | Fichiers touchés |
+|---|---|---|---|
+| B | Harmonise `sapi_guide_get_categories` default (ne-sais-pas + appliques) | `0bd68c1` | `functions.php` |
+| A | Voix IA : ne JAMAIS révéler le mécanisme de filtrage (B2) | `01f4e01` | `functions.php` |
+| C1 | Détection IA : 3 voies + contact_kind/subject/message | `8ca8a93` | `functions.php`, `assets/sapi-project.js` |
+| C2 | UI écran s-contact dans la modale | `469b399` | `functions.php`, `style.css`, `assets/sapi-modal-conseiller.js` |
+| C3 | Card sur-mesure en 1re position quand action=contact | `4093bab` | `woocommerce/archive-product.php`, `assets/sapi-surmesure-card.js`, `style.css` |
+| C4 | Pré-remplissage formulaire `/sur-mesure/` | `2cb60f0` | `page-sur-mesure.php` |
+
+### Détails techniques par lot
+
+**Lot B — Harmonisation backend V2**
+
+`sapi_guide_get_categories` sert le backend Robin V2 legacy (`sapi_robin_handle_recommendation`). Son default sortie=ne-sais-pas n'incluait pas les appliques, alors que `$sapi_filter_rules['cats_by_sortie']['ne-sais-pas']` côté JS les inclut depuis le commit `d8be0ff` (Round 2 N8). Conséquence avant Round 3 : `bureau + ne-sais-pas` produisait deux sélections différentes selon qu'on passait par le filtre JS ou la recommendation IA backend. Lot B aligne le default à `['suspensions', 'lampadaires', 'lampesaposer', 'appliques']`.
+
+**Note hors-scope :** la branche `eclairage=secondaire` de `sapi_guide_get_categories` (L4521) reste désalignée — son default est `['lampadaires', 'lampesaposer']` sans appliques, alors que `cats_secondaire_by_sortie['ne-sais-pas']` côté JS contient `['lampadaires', 'lampesaposer', 'appliques']`. Pas traité dans Lot B (spec ne le mentionnait pas). Si tu veux aligner, ping-moi.
+
+**Lot A — Voix IA**
+
+Réécriture complète de `sapi_megafilter_adaptive_consigne_block`. 4 sections :
+1. **Présentation de la sélection** : 3 cas (vide / exacte / écart). Si écart, présenter comme proposition d'artisan, optionnellement reconnaître la demande initiale en intro, inviter au sur-mesure comme alternative.
+2. **Vocabulaire interdit** : liste exhaustive ("j'ai élargi/relâché/assoupli", "débordé sur d'autres pièces", "pas grand-chose à te montrer", "contrainte/paramètre/préférence/filtre/critère/sélection élargie/élargissement"). Phrase de clôture explicite.
+3. **Exemples canoniques** : 4 phrases types pour calibrer le ton (sur-mesure comme porte de sortie).
+4. **Règles métier vs élargies** + **contenu de la phrase** (héritage Round 2 préservé).
+
+**Lot C1 — Détection IA enrichie**
+
+Côté prompts (functions.php) : restructuration de `sapi_megafilter_build_freetext_prompt` et `sapi_megafilter_build_chat_prompt` en **3 voies de sortie**. Critères contact enrichis (multi-luminaires, pro/B2B, dimensions custom, essence custom, combinaisons hors catalogue). Choix de `contact_kind` documenté (pro / sur-mesure / simple) avec impact UI explicite. Règle du cas par cas (filters+action côte à côte si écart modéré). Champs bonus `contact_subject` (1 ligne max) + `contact_message` (3-4 lignes ton humain).
+
+Côté handlers : `sapi_ajax_megafilter_freetext` + `sapi_ajax_megafilter_chat` propagent `contact_kind` (whitelist `['pro','sur-mesure','simple']`), `contact_subject` (sanitize_text_field), `contact_message` (sanitize_textarea_field).
+
+Côté state (sapi-project.js) : champs `action`/`contact_kind`/`contact_subject`/`contact_message` ajoutés. Nouvelle méthode `setContactState(payload)` qui écrit en direct via `writeRaw` (pas d'auto-invalidation). `update()` invalide l'état contact quand answers change (mirror du pattern advice_text). `set()` (sortie modale) remet à zéro. `clear()` wipe via `clearRaw`.
+
+**Lot C2 — UI écran s-contact**
+
+Markup : nouvel écran `data-screen="s-contact"` avec badge "Échangeons ensemble", message IA, récap projet (chips ordonnées), CTAs dynamiques, lien retour vers le chat (`data-action="back-to-chat"`).
+
+Localize : ajout de `contactSurmesureUrl` et `contactEmail` (= `robin@atelier-sapi.fr`).
+
+JS : `buildContactUrl/buildMailtoUrl/buildContactCtas/buildContactRecap/showContact`. `submitFreetext`+`submitChat` : si `data.action==='contact'`, appelle `showContact(data)` au lieu de `revealChatCta()`. `back-to-chat` : clear contact state + `enterChatMode()`.
+
+CSS : styles `.conseiller-contact__message/recap/ctas`, CTAs `--primary` orange #E35B24 / `--secondary` outline beige, layout max-width 560px gap 12px wrap.
+
+**Lot C3 — Card sur-mesure 1re position**
+
+Au lieu de créer une nouvelle card, j'ai étendu la card existante (`.conseiller-surmesure-wrap`) avec un nouvel état `data-surmesure-state="contact"`. Avantage : pas de doublon markup, comportement unifié avec project/empty/success.
+
+JS : `CONTACT_WORDINGS` map `contact_kind` → `{title, subtitle}`. `renderContactState(project)` remplit titre/subtitle + CTAs (même logique URL que C2). `render()` : bascule sur l'état "contact" si `sapiProject.action === 'contact'`. `maybeShowOrHide()` : en mode contact, card visible quel que soit le count + classe `.conseiller-surmesure-wrap--first`.
+
+CSS : `.conseiller-surmesure-wrap--first { order: -1; grid-row: 1; }` — compatible CSS Grid de `.woocommerce ul.products` (repeat 4 cols).
+
+**Lot C4 — Pré-remplissage formulaire**
+
+Script inline dans `page-sur-mesure.php` (intégré au IIFE existant — pas de snippet Code Snippets externe, pas de plugin externe). Au DOMContentLoaded, parse query params si `from=conseiller` :
+
+1. `kind=pro` → `switchTab('pro')` (révèle les champs `etablissement`/`nb_luminaires` via la logique d'onglets existante).
+2. `subject` + `message` → injection dans `#surmesure-message` (textarea principal), format `subject + "\n\n" + message`, trim. Modifiable (pas readonly).
+3. Bandeau `#robin-contact-project` (déjà présent caché) affiché si subject présent, style beige discret, texte *"Depuis le conseiller Robin · {subject}"*.
+4. Input hidden `#robin-contact-project-data` peuplé avec `{kind, subject}` JSON → capté par `sapi_handle_surmesure_form()` L6167-6169 qui l'injecte déjà dans le body email.
+5. Scroll smooth vers `#surmesure-form` 400ms après load.
+
+Try/catch silencieux (URLSearchParams indisponible → form vide normal).
+
+**Form custom (pas Contact Form 7)** — confirmation : `page-sur-mesure.php` est un template PHP avec form `action="#surmesure-form" method="post"`, handler `sapi_handle_surmesure_form()` L6131. Pas de plugin externe.
+
+### Critères de succès — checklist test.atelier-sapi.fr
+
+1. **Lot A — B2** : cuisine + petite + mur + neutre. Phrase IA sans aucun mot de la liste bannie. Sur-mesure proposé si écart.
+2. **Lot B — bureau ne-sais-pas backend** : recommendation IA legacy inclut désormais les appliques.
+3. **Lot C1 — détection contact** : *"Je suis hôtelier, 30 chambres"* → `action=contact, contact_kind=pro` + `contact_subject` non vide + `contact_message` non vide.
+4. **Lot C2 — écran s-contact** : même test → écran s-contact affiché, récap projet, CTA orange "Ouvrir le formulaire sur-mesure", lien retour vers chat.
+5. **Lot C3 — card grille 1re position** : `/mes-creations/` avec `sapiProject.action==='contact'` → card sur-mesure EN 1RE POSITION, wording adapté au kind.
+6. **Lot C4 — pré-remplissage** : click sur CTA "Formulaire sur-mesure" → ouvre `/sur-mesure/?from=conseiller&kind=pro&subject=...&message=...` → onglet pro actif, textarea pré-rempli, bandeau beige, scroll auto.
+
+### Notes / déviations spec
+
+- **C2 markup** : la spec demandait `<section class="conseiller-card conseiller-card--modal">` pour l'écran s-contact. J'ai utilisé `<div class="conseiller-modal__screen" data-screen="s-contact">` pour rester cohérent avec les autres écrans (s0/s1/s2-chat/s3/s-product-recap) — un seul `data-modal-card` parent. Effet visuel identique.
+- **C2 CTA secondary** : `.conseiller-contact__cta--secondary` (style propre outline beige) plutôt que `.conseiller-cta--secondary` (existant, aurait pu entrer en conflit visuel).
+- **C3 état contact intégré** : étendu la card sur-mesure existante avec un 4e état au lieu de créer un composant séparé. Plus simple, comportement unifié.
+- **C4 form custom** : `page-sur-mesure.php` héberge un form PHP custom (pas Contact Form 7, pas de plugin). Pré-remplissage 100% dans le `<script>` inline du template.
+- **Lot B hors-scope secondaire** : `sapi_guide_get_categories` branche `eclairage=secondaire` default reste désaligné — cf. note Lot B ci-dessus.
+
+### Push & déploiement
+
+Tous les commits sur `test-theme-sapi-maison`. Push final effectué, auto-deploy O2switch déclenché. Roulement Round 3 → Round 4 selon retours UX.
+
+---
 
 ## [RETOUR] Conseiller V3 — Round 2 : 17 bugs livrés sur 6 chantiers
 **Date livrée :** 2026-05-22
