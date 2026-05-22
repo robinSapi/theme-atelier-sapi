@@ -1177,53 +1177,11 @@
   }
 
   /* ─────────────────────────────────────────────
-     Round 3 — Lot C2 : écran s-contact (action=contact)
+     Round 3 — Lot C2 v2 : écran s-contact avec formulaire intégré
+     Remplace les anciens CTAs externes (formulaire sur-mesure / mailto)
+     par un form AJAX direct → endpoint sapi_megafilter_surmesure existant.
      ───────────────────────────────────────────── */
-  function buildContactUrl(payload) {
-    var params = new URLSearchParams();
-    params.set('from', 'conseiller');
-    if (payload.contact_kind)    params.set('kind', payload.contact_kind);
-    if (payload.contact_subject) params.set('subject', payload.contact_subject);
-    if (payload.contact_message) params.set('message', payload.contact_message);
-    return CONTACT_SURMESURE_URL + (CONTACT_SURMESURE_URL.indexOf('?') === -1 ? '?' : '&') + params.toString();
-  }
-
-  function buildMailtoUrl(payload) {
-    var subj = payload.contact_subject || 'Projet luminaire';
-    var body = payload.contact_message || '';
-    return 'mailto:' + CONTACT_EMAIL + '?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(body);
-  }
-
-  // Construit le bloc CTAs selon le contact_kind. Retourne un fragment DOM
-  // (pour insertion via appendChild). Réutilisé par showContact + Lot C3.
-  function buildContactCtas(payload) {
-    var kind = payload.contact_kind || 'sur-mesure';
-    var frag = document.createDocumentFragment();
-
-    function makeBtn(href, label, variant) {
-      var a = document.createElement('a');
-      a.className = 'conseiller-contact__cta conseiller-contact__cta--' + variant;
-      a.href = href;
-      a.textContent = label;
-      return a;
-    }
-
-    var formUrl = buildContactUrl(payload);
-    var mailUrl = buildMailtoUrl(payload);
-
-    if (kind === 'pro') {
-      frag.appendChild(makeBtn(formUrl, 'Ouvrir le formulaire sur-mesure', 'primary'));
-    } else if (kind === 'simple') {
-      frag.appendChild(makeBtn(mailUrl, "M'envoyer un email", 'primary'));
-    } else {
-      // sur-mesure (default) : 2 CTAs côte à côte
-      frag.appendChild(makeBtn(formUrl, 'Formulaire sur-mesure', 'primary'));
-      frag.appendChild(makeBtn(mailUrl, 'Email', 'secondary'));
-    }
-    return frag;
-  }
-
-  // Construit le récap projet pour l'écran s-contact (chips ordonnées).
+  // Construit le récap projet (chips ordonnées séparées par " · ").
   function buildContactRecap(answers, labels) {
     var orderedKeys = ['piece', 'taille', 'taille_escalier', 'eclairage', 'sortie', 'hauteur', 'table', 'style'];
     var lines = [];
@@ -1236,13 +1194,30 @@
     return lines;
   }
 
-  function showContact(payload) {
-    if (!els.contactMessage || !els.contactCtas) return;
+  // Toggle l'état form/success de l'écran s-contact.
+  function setContactScreenState(name) {
+    if (!els.modal) return;
+    var states = els.modal.querySelectorAll('[data-contact-state]');
+    states.forEach(function (s) {
+      s.hidden = (s.getAttribute('data-contact-state') !== name);
+    });
+  }
 
-    // Message
+  function showContact(payload) {
+    if (!els.contactMessage || !els.contactForm) return;
+
+    // Reset état visuel : on entre toujours par le form (pas le success).
+    setContactScreenState('form');
+    // Reset erreur inline si présente
+    var prevErr = els.contactForm.querySelector('.conseiller-contact-form__error');
+    if (prevErr) prevErr.remove();
+    var submitBtn = els.contactForm.querySelector('[data-contact-submit]');
+    if (submitBtn) submitBtn.disabled = false;
+
+    // Message IA
     els.contactMessage.textContent = (payload && payload.message) || '';
 
-    // Récap projet (chips simples sur une ligne)
+    // Récap projet (caché si vide — cas contact direct sans filters extraits)
     els.contactRecap.innerHTML = '';
     var recapLines = buildContactRecap(state.answers, state.labels);
     if (recapLines.length) {
@@ -1253,12 +1228,20 @@
       els.contactRecap.appendChild(document.createTextNode(recapLines.join(' · ')));
     }
 
-    // CTAs
-    els.contactCtas.innerHTML = '';
-    els.contactCtas.appendChild(buildContactCtas(payload));
+    // Pré-remplit le textarea avec contact_subject + contact_message générés par l'IA
+    if (els.contactMessageField) {
+      var pre = '';
+      if (payload && payload.contact_subject) pre += payload.contact_subject + '\n\n';
+      if (payload && payload.contact_message) pre += payload.contact_message;
+      els.contactMessageField.value = pre.trim();
+    }
 
-    // Persiste l'état contact dans sapiProject — sera utilisé par Lot C3
-    // pour afficher la card sur-mesure en première position dans la grille.
+    // Email vide (le visiteur le remplit)
+    var emailInput = els.contactForm.querySelector('input[name="email"]');
+    if (emailInput) emailInput.value = '';
+
+    // Persiste l'état contact dans sapiProject — utilisé par Lot C3 pour la
+    // card sur-mesure en 1re position de la grille /mes-creations/.
     if (window.sapiProject && typeof window.sapiProject.setContactState === 'function') {
       window.sapiProject.setContactState({
         action: 'contact',
@@ -1269,6 +1252,85 @@
     }
 
     showScreen('s-contact');
+  }
+
+  // Submission du form de contact intégré → endpoint sapi_megafilter_surmesure.
+  function submitContactForm(form) {
+    if (!form || !config.ajaxUrl) return;
+    var submitBtn = form.querySelector('[data-contact-submit]');
+    var emailInput = form.querySelector('input[name="email"]');
+    var msgInput = form.querySelector('[data-contact-message-field]');
+
+    // Validation client minimale
+    var emailVal = (emailInput && emailInput.value || '').trim();
+    var msgVal = (msgInput && msgInput.value || '').trim();
+    if (emailInput) emailInput.classList.remove('is-invalid');
+    if (msgInput) msgInput.classList.remove('is-invalid');
+    var hasErr = false;
+    if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      if (emailInput) emailInput.classList.add('is-invalid');
+      hasErr = true;
+    }
+    if (!msgVal) {
+      if (msgInput) msgInput.classList.add('is-invalid');
+      hasErr = true;
+    }
+    var prevErr = form.querySelector('.conseiller-contact-form__error');
+    if (prevErr) prevErr.remove();
+    if (hasErr) {
+      var err = document.createElement('p');
+      err.className = 'conseiller-contact-form__error';
+      err.textContent = 'Email et message sont requis.';
+      form.appendChild(err);
+      return;
+    }
+
+    if (submitBtn) submitBtn.disabled = true;
+
+    var project = window.sapiProject ? window.sapiProject.get() : null;
+    var contactKind    = project && project.contact_kind || '';
+    var contactSubject = project && project.contact_subject || '';
+
+    var fd = new FormData();
+    fd.append('action', 'sapi_megafilter_surmesure');
+    fd.append('nonce', config.nonce || '');
+    fd.append('email', emailVal);
+    fd.append('description', msgVal);
+    fd.append('source', 'conseiller-modal');
+    fd.append('source_url', window.location.href);
+    if (contactKind)    fd.append('contact_kind', contactKind);
+    if (contactSubject) fd.append('contact_subject', contactSubject);
+    if (project) fd.append('project', JSON.stringify(project));
+
+    fetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (resp) {
+        if (resp && resp.success) {
+          // Clear l'état contact (la demande a été envoyée, plus besoin de
+          // re-router sur cette session). La card sur-mesure de la grille
+          // /mes-creations/ basculera sur son état "project" ou "empty"
+          // au prochain refresh subscribe.
+          if (window.sapiProject && typeof window.sapiProject.setContactState === 'function') {
+            window.sapiProject.setContactState(null);
+          }
+          setContactScreenState('success');
+          return;
+        }
+        if (submitBtn) submitBtn.disabled = false;
+        var fallback = (resp && resp.data && resp.data.fallback) ||
+          "L'envoi a échoué. Tu peux m'écrire directement à " + CONTACT_EMAIL + ".";
+        var errEl = document.createElement('p');
+        errEl.className = 'conseiller-contact-form__error';
+        errEl.textContent = fallback;
+        form.appendChild(errEl);
+      })
+      .catch(function () {
+        if (submitBtn) submitBtn.disabled = false;
+        var errEl = document.createElement('p');
+        errEl.className = 'conseiller-contact-form__error';
+        errEl.textContent = "Petit souci de connexion. Tu peux réessayer ou m'écrire à " + CONTACT_EMAIL + ".";
+        form.appendChild(errEl);
+      });
   }
 
   /* ─────────────────────────────────────────────
@@ -1490,6 +1552,14 @@
         submitChat(val);
       });
     }
+
+    // Round 3 — Lot C2 v2 : submit du form contact intégré
+    if (els.contactForm) {
+      els.contactForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        submitContactForm(els.contactForm);
+      });
+    }
   }
 
   /* ─────────────────────────────────────────────
@@ -1526,10 +1596,11 @@
     els.productRecapTailleValue  = els.modal.querySelector('[data-product-recap-taille-value]');
     els.productRecapConseil      = els.modal.querySelector('[data-product-recap-conseil]');
     els.productRecapConseilTaille = els.modal.querySelector('[data-product-recap-conseil-taille]');
-    // Round 3 — Lot C2 : écran s-contact
-    els.contactMessage = els.modal.querySelector('[data-contact-message]');
-    els.contactRecap   = els.modal.querySelector('[data-contact-recap]');
-    els.contactCtas    = els.modal.querySelector('[data-contact-ctas]');
+    // Round 3 — Lot C2 v2 : écran s-contact avec form intégré
+    els.contactMessage      = els.modal.querySelector('[data-contact-message]');
+    els.contactRecap        = els.modal.querySelector('[data-contact-recap]');
+    els.contactForm         = els.modal.querySelector('[data-contact-form]');
+    els.contactMessageField = els.modal.querySelector('[data-contact-message-field]');
 
     // Marqueur pour les cards Phase 2 (évite leur fallback console.info)
     window.__sapiModalReady = true;

@@ -3471,25 +3471,61 @@ function sapi_render_conseiller_modal() {
         </div>
       </div>
 
-      <!-- Round 3 — Lot C2 : écran s-contact pour les projets routés vers
-           Robin (pro / sur-mesure / simple). Reçoit message + recap + CTAs
-           dynamiques selon contact_kind. Le visiteur peut revenir au chat. -->
+      <!-- Round 3 — Lot C2 v2 : écran s-contact avec formulaire intégré.
+           Remplace les anciens CTAs externes (formulaire sur-mesure / mailto)
+           par un form AJAX direct (réutilise l'endpoint sapi_ajax_megafilter_surmesure).
+           2 états togglés via data-contact-state : form (par défaut) / success. -->
       <div class="conseiller-modal__screen" data-screen="s-contact" hidden>
         <div class="conseiller-card__inner">
-          <span class="conseiller-badge conseiller-badge--default">
-            <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-            <span data-contact-badge-text><?php esc_html_e('Échangeons ensemble', 'theme-sapi-maison'); ?></span>
-          </span>
 
-          <p class="conseiller-contact__message" data-contact-message></p>
-          <div class="conseiller-contact__recap" data-contact-recap></div>
-          <div class="conseiller-contact__ctas" data-contact-ctas></div>
+          <!-- État form (défaut) -->
+          <div data-contact-state="form">
+            <span class="conseiller-badge conseiller-badge--default">
+              <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+              <span data-contact-badge-text><?php esc_html_e('Échangeons ensemble', 'theme-sapi-maison'); ?></span>
+            </span>
 
-          <div class="conseiller-modal__nav">
-            <button type="button" class="conseiller-back-link" data-action="back-to-chat">
-              ← <?php esc_html_e('Continuer la discussion avec Robin', 'theme-sapi-maison'); ?>
-            </button>
+            <p class="conseiller-contact__message" data-contact-message></p>
+            <div class="conseiller-contact__recap" data-contact-recap></div>
+
+            <form class="conseiller-contact-form" data-contact-form novalidate>
+              <input type="email" class="conseiller-contact-form__input" name="email" required
+                     placeholder="<?php esc_attr_e('Ton email', 'theme-sapi-maison'); ?>"
+                     aria-label="<?php esc_attr_e('Ton email', 'theme-sapi-maison'); ?>">
+              <textarea class="conseiller-contact-form__textarea" name="description" rows="5"
+                        placeholder="<?php esc_attr_e('Décris ton projet…', 'theme-sapi-maison'); ?>"
+                        aria-label="<?php esc_attr_e('Ton message', 'theme-sapi-maison'); ?>"
+                        data-contact-message-field></textarea>
+              <input type="text" name="website" tabindex="-1" autocomplete="off" class="conseiller-contact-form__honeypot" aria-hidden="true">
+              <button type="submit" class="conseiller-cta" data-contact-submit>
+                <span><?php esc_html_e('Envoyer ma demande', 'theme-sapi-maison'); ?></span>
+                <?php echo $arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+              </button>
+            </form>
+            <p class="conseiller-contact-form__reassurance"><?php esc_html_e('Réponse de Robin sous 48h · Aucun engagement', 'theme-sapi-maison'); ?></p>
+
+            <div class="conseiller-modal__nav">
+              <button type="button" class="conseiller-back-link" data-action="back-to-chat">
+                ← <?php esc_html_e('Reprendre la discussion', 'theme-sapi-maison'); ?>
+              </button>
+            </div>
           </div>
+
+          <!-- État succès -->
+          <div data-contact-state="success" hidden>
+            <span class="conseiller-badge conseiller-badge--default">
+              <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+              <?php esc_html_e('Demande envoyée', 'theme-sapi-maison'); ?>
+            </span>
+            <h2 class="conseiller-h2"><?php esc_html_e('Reçu — Robin t\'écrit sous 48h', 'theme-sapi-maison'); ?></h2>
+            <p class="conseiller-subtitle"><?php esc_html_e('Merci pour ta demande. Tu vas recevoir un email de confirmation et Robin te répondra personnellement.', 'theme-sapi-maison'); ?></p>
+            <div class="conseiller-modal__cta">
+              <button type="button" class="conseiller-cta conseiller-cta--secondary" data-action="close">
+                <span><?php esc_html_e('Fermer', 'theme-sapi-maison'); ?></span>
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -3872,11 +3908,27 @@ function sapi_ajax_megafilter_surmesure() {
     }
   }
 
+  // Round 3 — Lot C2 v2 : enrichissement avec contact_kind / contact_subject /
+  // source quand la demande vient de la modale conseiller (action=contact IA).
+  $allowed_kinds   = ['pro', 'sur-mesure', 'simple'];
+  $contact_kind    = isset($_POST['contact_kind']) && in_array($_POST['contact_kind'], $allowed_kinds, true)
+                       ? sanitize_text_field(wp_unslash($_POST['contact_kind'])) : '';
+  $contact_subject = isset($_POST['contact_subject']) ? sanitize_text_field(wp_unslash($_POST['contact_subject'])) : '';
+  $source          = isset($_POST['source']) && $_POST['source'] === 'conseiller-modal' ? 'conseiller-modal' : 'card-mes-creations';
+
   // Construction de l'email à Robin
   $to      = 'robin@atelier-sapi.fr';
-  $subject = '[Sur-mesure] Nouvelle demande de ' . $email;
-  $body    = "Nouvelle demande sur-mesure reçue depuis /mes-creations/\n\n";
+  $subject_prefix = ($source === 'conseiller-modal' && $contact_kind === 'pro') ? '[Pro] ' : '[Sur-mesure] ';
+  $subject = $subject_prefix . ($contact_subject !== '' ? $contact_subject : ('Nouvelle demande de ' . $email));
+  $body    = "Nouvelle demande reçue depuis " . ($source === 'conseiller-modal' ? 'la modale Conseiller' : '/mes-creations/') . "\n\n";
   $body   .= "── Email visiteur ──\n" . $email . "\n\n";
+  if ($contact_kind !== '') {
+    $kind_labels = ['pro' => 'Professionnel / B2B', 'sur-mesure' => 'Résidentiel sur-mesure', 'simple' => 'Résidentiel — échange rapide'];
+    $body .= "── Type de projet (détection IA) ──\n" . $kind_labels[$contact_kind] . "\n\n";
+  }
+  if ($contact_subject !== '') {
+    $body .= "── Sujet (détection IA) ──\n" . $contact_subject . "\n\n";
+  }
   if ($project_text_snapshot !== '') {
     $body .= "── Projet en cours ──\n" . $project_text_snapshot . "\n\n";
   }

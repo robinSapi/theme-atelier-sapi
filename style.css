@@ -23500,35 +23500,47 @@ body.woocommerce-cart div.woocommerce-wrapper {
   color: var(--color-dark);
 }
 
-/* Round 3 — Lot C2 : écran s-contact dans la modale (action=contact).
-   Distribution verticale : bloc compact centré (pattern S0) — sur cet écran
-   le contenu est court (message + CTA + nav), donc on évite d'étaler les
-   extrêmes contre les bords. Tout est aligné center horizontal + center
-   vertical via justify-content sur l'inner. */
+/* Round 3 — Lot C2 v2 : écran s-contact avec formulaire intégré.
+   Distribution verticale : bloc compact centré (pattern S0). */
 .conseiller-modal__screen[data-screen="s-contact"] .conseiller-card__inner {
   -webkit-justify-content: center;
   justify-content: center;
 }
+/* Les 2 états (form / success) occupent toute la largeur disponible et
+   s'auto-centrent dans la card. align-items:center du parent les recentre. */
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-align-items: center;
+  align-items: center;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state][hidden] {
+  display: none;
+}
+
 .conseiller-contact__message {
   margin: 18px auto 0;
-  max-width: 560px;
   font-family: var(--font-body);
-  font-size: clamp(15px, 1.9vw, 16.5px);
+  font-size: clamp(14.5px, 1.8vw, 16px);
   line-height: 1.55;
   color: var(--color-dark, #323232);
   text-align: center;
 }
 .conseiller-contact__recap {
-  margin: 18px auto 0;
-  max-width: 560px;
-  padding: 14px 18px;
-  border-radius: 10px;
+  margin: 14px auto 0;
+  padding: 10px 14px;
+  border-radius: 8px;
   background: var(--color-warm, #FBF6EA);
   font-family: var(--font-body);
-  font-size: 13.5px;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.4;
   color: var(--color-wood-dark, #6f5e4d);
-  text-align: left;
+  text-align: center;
 }
 .conseiller-contact__recap:empty {
   display: none;
@@ -23536,59 +23548,84 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .conseiller-contact__recap-label {
   display: block;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-wood, #937D68);
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
-.conseiller-contact__ctas {
-  margin: 22px auto 0;
+
+/* Form */
+.conseiller-contact-form {
+  margin: 18px auto 0;
+  width: 100%;
   display: -webkit-flex;
   display: flex;
-  -webkit-flex-wrap: wrap;
-  flex-wrap: wrap;
-  -webkit-justify-content: center;
-  justify-content: center;
-  gap: 12px;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  gap: 10px;
+}
+.conseiller-contact-form__input,
+.conseiller-contact-form__textarea {
   width: 100%;
-  max-width: 560px;
-}
-.conseiller-contact__cta {
-  display: -webkit-inline-flex;
-  display: inline-flex;
-  -webkit-align-items: center;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 22px;
-  border-radius: 999px;
+  padding: 12px 14px;
+  border: 1px solid rgba(147, 125, 104, 0.35);
+  border-radius: 10px;
+  background: #fff;
   font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  -webkit-transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
-  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
-  cursor: pointer;
-  border: 1px solid transparent;
-}
-.conseiller-contact__cta--primary {
-  background: var(--color-orange, #E35B24);
-  color: #fff;
-}
-.conseiller-contact__cta--primary:hover,
-.conseiller-contact__cta--primary:focus-visible {
-  background: #c54d1d;
-  outline: none;
-}
-.conseiller-contact__cta--secondary {
-  background: transparent;
+  font-size: 14.5px;
   color: var(--color-dark, #323232);
-  border-color: var(--color-wood, #937D68);
+  -webkit-transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  box-sizing: border-box;
 }
-.conseiller-contact__cta--secondary:hover,
-.conseiller-contact__cta--secondary:focus-visible {
-  background: rgba(147, 125, 104, 0.08);
+.conseiller-contact-form__textarea {
+  resize: vertical;
+  min-height: 110px;
+  line-height: 1.5;
+}
+.conseiller-contact-form__input:focus,
+.conseiller-contact-form__textarea:focus {
   outline: none;
+  border-color: var(--color-wood, #937D68);
+  box-shadow: 0 0 0 3px rgba(147, 125, 104, 0.15);
+}
+.conseiller-contact-form__input.is-invalid,
+.conseiller-contact-form__textarea.is-invalid {
+  border-color: #c44a1d;
+  box-shadow: 0 0 0 3px rgba(196, 74, 29, 0.12);
+}
+.conseiller-contact-form__honeypot {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.conseiller-contact-form .conseiller-cta {
+  margin-top: 6px;
+  align-self: center;
+}
+.conseiller-contact-form .conseiller-cta[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.conseiller-contact-form__reassurance {
+  margin: 10px auto 0;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--color-wood, #937D68);
+  text-align: center;
+}
+.conseiller-contact-form__error {
+  margin: 8px auto 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(196, 74, 29, 0.08);
+  color: #c44a1d;
+  font-size: 13px;
+  text-align: center;
 }
 
 /* Conseil de style fixe (italic, ton confidentiel) */
