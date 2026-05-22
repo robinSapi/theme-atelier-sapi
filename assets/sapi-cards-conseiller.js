@@ -146,9 +146,12 @@
     );
   }
 
-  function cardMatches(card) {
-    if (!hasAnyAnswer()) return true;
-    var answers = getAnswers();
+  // Refactor : la logique de match prend explicitement le set d'answers en
+  // paramètre. Permet de tester avec des sous-ensembles lors de l'élargissement
+  // progressif (computeEffectiveAnswers).
+  function cardMatchesAnswers(card, answers) {
+    if (!answers || Object.keys(answers).length === 0) return true;
+
     var catsAttr = card.getAttribute('data-categories') || '';
     var cardCats = catsAttr.split(/\s+/).filter(Boolean);
 
@@ -180,7 +183,86 @@
     return true;
   }
 
+  // Wrapper public utilisé par shop.js — utilise les effectiveAnswers calculées
+  // par computeEffectiveAnswers (window.sapiFilterMeta.effectiveAnswers) si dispo,
+  // sinon fallback sur les answers brutes.
+  function cardMatches(card) {
+    var meta = window.sapiFilterMeta;
+    var ans = meta && meta.effectiveAnswers ? meta.effectiveAnswers : getAnswers();
+    return cardMatchesAnswers(card, ans);
+  }
+
+  // Compte/liste les IDs des cards matchant un set d'answers donné.
+  function computeMatchingIds(answers) {
+    var ids = [];
+    var cards = document.querySelectorAll('.product-card-cinetique');
+    cards.forEach(function (card) {
+      if (cardMatchesAnswers(card, answers)) {
+        var id = card.getAttribute('data-id') || card.getAttribute('data-product-id');
+        if (id) ids.push(id);
+      }
+    });
+    return ids;
+  }
+
+  // Ordre de retrait pour l'élargissement progressif (du moins critique au plus).
+  // 'sortie' n'est JAMAIS dans cette liste — c'est ce qui détermine le type de
+  // produit (applique vs suspension vs lampadaire), intouchable.
+  var WIDENING_ORDER = ['style', 'table', 'hauteur', 'eclairage', 'taille', 'piece'];
+
+  // Élargissement progressif : si le filtre direct ramène 0, retire les réponses
+  // dans WIDENING_ORDER (cumul à partir du début), jusqu'à trouver ≥1 produit ou
+  // épuiser la liste. Retourne {effectiveAnswers, ignoredAnswers, matchingIds}.
+  // ignoredAnswers ne contient que des clés qui étaient réellement présentes
+  // dans rawAnswers (skip silencieux pour les questions non répondues).
+  function computeEffectiveAnswers(rawAnswers) {
+    rawAnswers = rawAnswers || {};
+
+    // Itération 0 : tous les filtres en place
+    var effective = {};
+    Object.keys(rawAnswers).forEach(function (k) { effective[k] = rawAnswers[k]; });
+    var ids = computeMatchingIds(effective);
+    if (ids.length > 0 || Object.keys(rawAnswers).length === 0) {
+      return { effectiveAnswers: effective, ignoredAnswers: [], matchingIds: ids };
+    }
+
+    // Liste ordonnée des clés à retirer, restreinte aux clés effectivement
+    // présentes (skip silencieux des questions non répondues — pas de bruit
+    // dans ignored_answers pour ce que le visiteur n'avait pas indiqué).
+    var orderedKeys = WIDENING_ORDER.filter(function (k) {
+      var v = rawAnswers[k];
+      return typeof v === 'string' && v !== '';
+    });
+    // taille_escalier est l'avatar de taille pour la pièce escalier
+    if (typeof rawAnswers.taille_escalier === 'string' && rawAnswers.taille_escalier !== '') {
+      // Insère taille_escalier juste avant taille (ou en fin si taille absente)
+      var idxTaille = orderedKeys.indexOf('taille');
+      if (idxTaille === -1) orderedKeys.push('taille_escalier');
+      else orderedKeys.splice(idxTaille, 0, 'taille_escalier');
+    }
+
+    // Itère et retire cumulativement
+    var ignored = [];
+    for (var i = 0; i < orderedKeys.length; i++) {
+      var key = orderedKeys[i];
+      ignored.push(key);
+      delete effective[key];
+      ids = computeMatchingIds(effective);
+      if (ids.length > 0) {
+        return { effectiveAnswers: effective, ignoredAnswers: ignored, matchingIds: ids };
+      }
+    }
+
+    // Cas extrême : 0 même au max d'élargissement (seul 'sortie' reste)
+    return { effectiveAnswers: effective, ignoredAnswers: ignored, matchingIds: [] };
+  }
+
   function refilterGrid() {
+    // Calcule l'élargissement AVANT que shop.js itère sur les cards (puisque
+    // shop.js va appeler cardMatches qui lit window.sapiFilterMeta).
+    var raw = getAnswers();
+    window.sapiFilterMeta = computeEffectiveAnswers(raw);
+
     if (typeof window.sapiShopRefilter === 'function') {
       window.sapiShopRefilter();
       return;
@@ -199,6 +281,11 @@
   window.sapiMegaFilter = {
     cardMatches: cardMatches,
     hasAnyAnswer: hasAnyAnswer,
+    // Expose pour que sapi-modal-conseiller.js puisse calculer la meta du
+    // filtre (effectiveAnswers + ignoredAnswers + matchingIds) à la volée
+    // avec un set d'answers précis (ex. l'état modale qui n'a pas encore
+    // été persisté dans sapiProject).
+    computeFilterMeta: computeEffectiveAnswers,
   };
 
   /* ─────────────────────────────────────────────

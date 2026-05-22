@@ -324,13 +324,29 @@
     });
   }
 
+  // Calcule la meta du filtre à la volée avec les answers donnés (élargissement
+  // progressif + IDs matchant). Permet d'envoyer au backend l'image exacte
+  // de ce que le visiteur va voir dans la grille.
+  function buildFilterMeta(answers) {
+    if (window.sapiMegaFilter && typeof window.sapiMegaFilter.computeFilterMeta === 'function') {
+      try {
+        return window.sapiMegaFilter.computeFilterMeta(answers || {});
+      } catch (e) { /* fallback */ }
+    }
+    return { effectiveAnswers: answers || {}, ignoredAnswers: [], matchingIds: [] };
+  }
+
   // Helper : appel IA dédié, isolé pour pouvoir le tester séparément
   function fetchAdviceFromIA(opts) {
+    var meta = buildFilterMeta(state.answers);
+
     var fd = new FormData();
     fd.append('action', 'sapi_megafilter_advice');
     fd.append('nonce', config.nonce || '');
     fd.append('answers', JSON.stringify(state.answers));
     fd.append('labels',  JSON.stringify(state.labels));
+    fd.append('matching_product_ids', JSON.stringify(meta.matchingIds));
+    fd.append('ignored_answers', JSON.stringify(meta.ignoredAnswers));
     if (opts.conversation && Array.isArray(opts.conversation) && opts.conversation.length) {
       fd.append('conversation', JSON.stringify(opts.conversation));
     }
@@ -652,10 +668,14 @@
     state.chat.status = 'thinking';
     setChatFooterState('loading');
 
+    var meta = buildFilterMeta(state.answers);
+
     var fd = new FormData();
     fd.append('action', 'sapi_megafilter_chat');
     fd.append('nonce', config.nonce || '');
     fd.append('user_message', text);
+    fd.append('matching_product_ids', JSON.stringify(meta.matchingIds));
+    fd.append('ignored_answers', JSON.stringify(meta.ignoredAnswers));
     fd.append('current_filters', JSON.stringify(state.answers));
     fd.append('conversation', JSON.stringify(state.chat.conversation));
     if (state.chat.sessionId) fd.append('session_id', state.chat.sessionId);

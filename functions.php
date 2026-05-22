@@ -2765,7 +2765,7 @@ function sapi_megafilter_build_freetext_prompt(array $whitelist) {
 /**
  * System prompt — conversation libre (Sonnet).
  */
-function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_products, array $whitelist) {
+function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_products, array $whitelist, array $matching_ids = [], array $ignored_keys = []) {
   // Injecte ton + savoir + regles + exemples V2 en tête (équivalent V2
   // sapi_robin_build_step_prompt — les exemples guident le ton conversationnel).
   $prompt  = sapi_megafilter_load_v2_prompts(true);
@@ -2789,17 +2789,13 @@ function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_pr
     }
   }
 
-  $prompt .= "\nCATALOGUE COMPLET (tous les luminaires disponibles) :\n";
-  foreach ($all_products as $p) {
-    $cats = isset($p['categories']) && is_array($p['categories']) ? implode(', ', $p['categories']) : '';
-    $format = isset($p['format']) ? $p['format'] : '';
-    $ampoule = isset($p['type_ampoule']) ? $p['type_ampoule'] : '';
-    $prompt .= '- ' . $p['title']
-      . ' | Catégorie : ' . $cats
-      . ' | Format : ' . $format
-      . ' | Ampoule : ' . $ampoule
-      . "\n";
-  }
+  // Contrat enrichi : catalogue split (présentés/écartés) + réponses élargies.
+  // Remplace l'ancienne section "CATALOGUE COMPLET" : maintenant l'IA sait
+  // précisément ce que le visiteur voit dans la grille.
+  $prompt .= sapi_megafilter_format_ignored_answers($ignored_keys);
+  $prompt .= sapi_megafilter_format_catalog_split($all_products, $matching_ids);
+
+  $prompt .= sapi_megafilter_adaptive_consigne_block();
 
   $prompt .= "\nSLUGS VALIDES (pour `filters_update`) :\n";
   foreach ($whitelist as $key => $slugs) {
@@ -2969,7 +2965,11 @@ function sapi_ajax_megafilter_chat() {
 
   $all_products = sapi_guide_query_all_products([]);
 
-  $system_prompt = sapi_megafilter_build_chat_prompt($clean_current, $all_products, $whitelist);
+  // Contrat enrichi : matching IDs + ignored answers (envoyés par le JS).
+  $matching_ids = sapi_megafilter_parse_matching_ids(isset($_POST['matching_product_ids']) ? wp_unslash($_POST['matching_product_ids']) : '');
+  $ignored_keys = sapi_megafilter_parse_ignored_answers(isset($_POST['ignored_answers']) ? wp_unslash($_POST['ignored_answers']) : '');
+
+  $system_prompt = sapi_megafilter_build_chat_prompt($clean_current, $all_products, $whitelist, $matching_ids, $ignored_keys);
 
   $messages = [];
   foreach ($conversation as $msg) {
@@ -3334,10 +3334,107 @@ function sapi_render_conseiller_modal() {
 }
 add_action('wp_footer', 'sapi_render_conseiller_modal');
 
+/* ── Helpers contrat IA enrichi : passes catalogue split + ignored_answers
+   ─────────────────────────────────────────────────────────────────────────────
+   Utilisés par sapi_ajax_megafilter_advice ET sapi_ajax_megafilter_chat pour
+   construire les sections "PRODUITS PRÉSENTÉS" / "PRODUITS ÉCARTÉS" /
+   "RÉPONSES ÉLARGIES" dans les prompts IA.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+// Parse le POST 'matching_product_ids' (JSON array d'IDs côté JS) en array d'ints.
+function sapi_megafilter_parse_matching_ids($raw) {
+  if (!is_string($raw) || $raw === '') return [];
+  $decoded = json_decode($raw, true);
+  if (!is_array($decoded)) return [];
+  $ids = [];
+  foreach ($decoded as $v) {
+    $id = absint($v);
+    if ($id > 0) $ids[] = $id;
+  }
+  return array_values(array_unique($ids));
+}
+
+// Parse le POST 'ignored_answers' (JSON array de slugs step côté JS) en array
+// filtré aux step IDs reconnus par le guide.
+function sapi_megafilter_parse_ignored_answers($raw) {
+  if (!is_string($raw) || $raw === '') return [];
+  $decoded = json_decode($raw, true);
+  if (!is_array($decoded)) return [];
+  $valid_keys = ['piece','taille','taille_escalier','eclairage','sortie','hauteur','table','style'];
+  $out = [];
+  foreach ($decoded as $v) {
+    if (is_string($v) && in_array($v, $valid_keys, true)) $out[] = $v;
+  }
+  return array_values(array_unique($out));
+}
+
+// Construit les 2 sections "PRODUITS PRÉSENTÉS" + "PRODUITS ÉCARTÉS" depuis un
+// $all_products (sapi_guide_query_all_products) + les matching_ids.
+function sapi_megafilter_format_catalog_split(array $all_products, array $matching_ids) {
+  $matching_set = array_flip(array_map('intval', $matching_ids));
+  $presented = [];
+  $ecarted = [];
+  foreach ($all_products as $p) {
+    $id = isset($p['id']) ? intval($p['id']) : 0;
+    if ($id <= 0) continue;
+    $cats = isset($p['categories']) && is_array($p['categories']) ? implode(', ', $p['categories']) : '';
+    $format = isset($p['format']) ? $p['format'] : '';
+    $ampoule = isset($p['type_ampoule']) ? $p['type_ampoule'] : '';
+    $line = '- ' . (isset($p['title']) ? $p['title'] : '?')
+          . ' | Catégorie : ' . $cats
+          . ' | Format : ' . $format
+          . ' | Ampoule : ' . $ampoule;
+    if (isset($matching_set[$id])) $presented[] = $line;
+    else                            $ecarted[] = $line;
+  }
+
+  $out = "\nPRODUITS PRÉSENTÉS AU VISITEUR APRÈS FILTRAGE (" . count($presented) . ") :\n";
+  $out .= empty($presented) ? "(aucun)\n" : implode("\n", $presented) . "\n";
+
+  if (!empty($ecarted)) {
+    $out .= "\nPRODUITS ÉCARTÉS PAR LE FILTRE (" . count($ecarted) . ") — non visibles par le visiteur :\n";
+    $out .= implode("\n", $ecarted) . "\n";
+  }
+  return $out;
+}
+
+// Construit la section "RÉPONSES ÉLARGIES" (ligne unique, "" si aucune).
+function sapi_megafilter_format_ignored_answers(array $ignored_keys) {
+  if (empty($ignored_keys)) return '';
+  $labels = [
+    'piece'           => 'la pièce',
+    'taille'          => 'la taille de pièce',
+    'taille_escalier' => "le type d'escalier",
+    'eclairage'       => "le rôle d'éclairage",
+    'sortie'          => "le type de sortie",
+    'hauteur'         => 'la hauteur sous plafond',
+    'table'           => "l'emplacement au-dessus d'un meuble",
+    'style'           => 'le style',
+  ];
+  $parts = [];
+  foreach ($ignored_keys as $k) {
+    if (isset($labels[$k])) $parts[] = $labels[$k];
+  }
+  if (empty($parts)) return '';
+  return "\nRÉPONSES ÉLARGIES POUR TROUVER DES MODÈLES : " . implode(', ', $parts)
+       . "\n(le visiteur avait répondu, mais le filtre direct ne ramenait rien → on a relâché ces contraintes pour pouvoir lui montrer des modèles)\n";
+}
+
+// Bloc consigne adaptative à ajouter au system prompt advice + chat.
+function sapi_megafilter_adaptive_consigne_block() {
+  $out  = "\nCOMPORTEMENT ATTENDU SELON LA SITUATION FILTRE :\n";
+  $out .= "- Si AUCUN produit présenté au visiteur (liste vide) : propose chaleureusement le sur-mesure (Robin peut créer un modèle qui n'existe pas dans le catalogue), sans baratin, sans promesse de modèles imaginaires.\n";
+  $out .= "- Si certaines RÉPONSES ONT ÉTÉ ÉLARGIES : mentionne-le subtilement et sincèrement (une demi-phrase suffit, naturel — ex. \"j'ai un peu élargi ta sélection pour pouvoir te montrer des modèles…\").\n";
+  $out .= "- Sinon (filtre direct OK) : présente la sélection naturellement, comme d'habitude.\n";
+  $out .= "- Dans TOUS les cas : NE NOMME PAS de modèle précis du catalogue — le visiteur les voit dans la grille juste après.\n";
+  return $out;
+}
+
 /* ── Endpoint F2a-bis : phrase IA conseillère unique, appelée à la sortie modale
    ─────────────────────────────────────────────────────────────────────────────
    - Modèle Sonnet (qualité du ton, sortie unique → on peut se permettre le coût)
-   - Input :  answers + labels (+ conversation optionnel en sortie de S2)
+   - Input :  answers + labels + matching_product_ids + ignored_answers
+              (+ conversation optionnel en sortie de S2)
    - Output : { advice_text: "..." }
    - Pas de cache serveur — chaque parcours est unique
    - Fallback : texte générique correspondant à la pièce
@@ -3390,6 +3487,16 @@ function sapi_ajax_megafilter_advice() {
 
   $project_text = sapi_megafilter_format_project_text($answers, $labels);
 
+  // Contexte filtre : matching IDs + ignored answers (envoyés par le JS, qui
+  // est la source de vérité du filtrage côté client). On enrichit le prompt
+  // pour que l'IA sache combien de produits sont présentés au visiteur et
+  // si des contraintes ont été élargies — pour adapter sa phrase en conséquence.
+  $matching_ids = sapi_megafilter_parse_matching_ids(isset($_POST['matching_product_ids']) ? wp_unslash($_POST['matching_product_ids']) : '');
+  $ignored_keys = sapi_megafilter_parse_ignored_answers(isset($_POST['ignored_answers']) ? wp_unslash($_POST['ignored_answers']) : '');
+  $all_products = sapi_guide_query_all_products([]);
+  $catalog_split_block  = sapi_megafilter_format_catalog_split($all_products, $matching_ids);
+  $ignored_answers_block = sapi_megafilter_format_ignored_answers($ignored_keys);
+
   // Injecte ton + savoir + regles V2 en tête (PAS exemples : équivalent V2
   // sapi_robin_call_recommendation qui n'inclut pas les exemples — sortie
   // JSON courte à 1-2 phrases, pas besoin d'amorces conversationnelles).
@@ -3403,7 +3510,10 @@ function sapi_ajax_megafilter_advice() {
   $system_prompt .= "- Tu peux mentionner une essence de bois, un format, une ambiance — mais PAS de modèle précis (le visiteur va les voir juste après)\n";
   $system_prompt .= "- Pas d'emoji, pas de markdown, pas de signature (elle est ajoutée séparément côté front)\n";
   $system_prompt .= "- Format : 1 à 2 phrases, max 300 caractères\n\n";
-  $system_prompt .= "FORMAT DE RÉPONSE (JSON strict, sans markdown) :\n";
+
+  $system_prompt .= sapi_megafilter_adaptive_consigne_block();
+
+  $system_prompt .= "\nFORMAT DE RÉPONSE (JSON strict, sans markdown) :\n";
   $system_prompt .= "{ \"advice_text\": \"...\" }\n\n";
 
   $system_prompt .= "⚠️ FORMAT DE SORTIE — IMPÉRATIF :\n";
@@ -3413,7 +3523,10 @@ function sapi_ajax_megafilter_advice() {
   $system_prompt .= "- PAS de bloc ```markdown autour\n";
   $system_prompt .= "Premier caractère = `{`, dernier caractère = `}`. Point.\n";
 
-  $user_msg = "PROJET DU VISITEUR :\n" . $project_text . $conversation_block;
+  $user_msg  = "PROJET DU VISITEUR :\n" . $project_text;
+  $user_msg .= $ignored_answers_block;
+  $user_msg .= $catalog_split_block;
+  $user_msg .= $conversation_block;
 
   $ai_text = sapi_megafilter_call_claude(
     'claude-sonnet-4-6',

@@ -23114,6 +23114,65 @@ body.woocommerce-cart div.woocommerce-wrapper {
   outline: none;
 }
 
+/* F2b — Empty state quand le filtre méga ne ramène aucun produit (cas
+   extrême : 0 même après élargissement progressif au maximum). Panneau
+   crème + dashed wood (langage Conseiller) + CTA orange sur-mesure. */
+.shop-empty-state {
+  margin: 32px auto;
+  padding: 48px 32px;
+  max-width: 720px;
+  background: var(--color-warm);
+  border: 2px dashed rgba(147, 125, 104, 0.35);
+  border-radius: 16px;
+  text-align: center;
+}
+.shop-empty-state__text {
+  margin: 0 0 8px;
+  font-family: var(--font-body);
+  font-size: clamp(16px, 2vw, 18px);
+  font-weight: 600;
+  color: var(--color-wood-dark);
+  line-height: 1.4;
+}
+.shop-empty-state__subtext {
+  margin: 0 0 22px;
+  font-family: var(--font-body);
+  font-size: clamp(14px, 1.8vw, 15.5px);
+  font-style: italic;
+  color: var(--color-wood);
+  line-height: 1.5;
+}
+.shop-empty-state__cta {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 9px;
+  padding: 14px 30px;
+  background: var(--color-orange);
+  color: var(--color-white);
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  -webkit-transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.shop-empty-state__cta:hover,
+.shop-empty-state__cta:focus-visible {
+  -webkit-transform: translateY(-2px);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(227, 91, 36, 0.25);
+  color: var(--color-white);
+  outline: none;
+}
+.shop-empty-state__cta svg {
+  flex-shrink: 0;
+}
+
 /* 3 ronds pulsants, vrais discs, légèrement décalés (cascade) */
 .conseiller-awaiting-dot {
   display: inline-block;

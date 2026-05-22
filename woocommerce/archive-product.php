@@ -451,15 +451,36 @@ $conseiller_pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCo
       </div>
     </div>
 
-    <!-- Message "aucun résultat" pour le filtrage JS côté client -->
-    <div class="woocommerce-no-products-found" style="display: none;">
-      <p><?php esc_html_e('Aucun produit ne correspond à votre recherche.', 'theme-sapi-maison'); ?></p>
+    <!-- Empty-state "aucun produit" pour le filtrage JS côté client.
+         Cas extrême après l'élargissement progressif : aucun produit catalogue
+         ne match même avec toutes les contraintes relâchées sauf sortie.
+         CTA sur-mesure pour donner une issue concrète au visiteur. -->
+    <div class="woocommerce-no-products-found shop-empty-state" style="display: none;">
+      <p class="shop-empty-state__text">
+        <?php esc_html_e('Aucun modèle de notre catalogue ne correspond à ce projet.', 'theme-sapi-maison'); ?>
+      </p>
+      <p class="shop-empty-state__subtext">
+        <?php esc_html_e('Robin peut imaginer un luminaire sur-mesure pour ton projet.', 'theme-sapi-maison'); ?>
+      </p>
+      <a class="shop-empty-state__cta" href="<?php echo esc_url(home_url('/sur-mesure/')); ?>">
+        <?php esc_html_e('Découvrir le sur-mesure', 'theme-sapi-maison'); ?>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
     </div>
 
   <?php else : ?>
 
-    <div class="woocommerce-no-products-found">
-      <p><?php esc_html_e('Aucun produit ne correspond à votre recherche.', 'theme-sapi-maison'); ?></p>
+    <div class="woocommerce-no-products-found shop-empty-state">
+      <p class="shop-empty-state__text">
+        <?php esc_html_e('Aucun modèle de notre catalogue ne correspond à ce projet.', 'theme-sapi-maison'); ?>
+      </p>
+      <p class="shop-empty-state__subtext">
+        <?php esc_html_e('Robin peut imaginer un luminaire sur-mesure pour ton projet.', 'theme-sapi-maison'); ?>
+      </p>
+      <a class="shop-empty-state__cta" href="<?php echo esc_url(home_url('/sur-mesure/')); ?>">
+        <?php esc_html_e('Découvrir le sur-mesure', 'theme-sapi-maison'); ?>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
     </div>
 
   <?php endif; ?>
