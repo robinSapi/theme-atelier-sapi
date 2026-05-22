@@ -326,7 +326,11 @@ function sapi_maison_enqueue_assets() {
         'plafond'       => ['suspensions'],
         'mur'           => ['appliques'],
         'pas-de-sortie' => ['lampadaires', 'lampesaposer', 'appliques'],
-        'ne-sais-pas'   => ['suspensions', 'lampadaires', 'lampesaposer'],
+        // Round 2 — 6.1 (N8) : appliques ajoutées par symétrie avec
+        // cats_secondaire_by_sortie['ne-sais-pas']. Cohérent avec le kit
+        // prise électrique (regles.txt:37, savoir.txt:48) qui permet
+        // d'installer une applique sans sortie murale.
+        'ne-sais-pas'   => ['suspensions', 'lampadaires', 'lampesaposer', 'appliques'],
         ''              => ['suspensions', 'lampadaires', 'lampesaposer', 'appliques'],
       ],
       'cats_secondaire_by_sortie' => [
