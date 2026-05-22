@@ -57,6 +57,9 @@
   var STYLE_CONSEILS = config.styleConseils || {};
   var SIZE_CONSEILS  = config.sizeConseils  || {};
   var PRODUCT_CTX = config.product || null;
+  // Round 3 — Lot C2/C4 : URLs pour les CTAs de l'écran s-contact.
+  var CONTACT_SURMESURE_URL = config.contactSurmesureUrl || '/sur-mesure/';
+  var CONTACT_EMAIL         = config.contactEmail || 'robin@atelier-sapi.fr';
 
   // Mapping projet → essence (legacy mon-projet.js pré-F1c)
   var ESSENCE_FROM_STYLE = { moderne: 'peuplier', ancien: 'okoume' };
@@ -673,12 +676,14 @@
         state.chat.conversation.push({ role: 'user', content: text });
         state.chat.conversation.push({ role: 'assistant', content: data.message || '' });
 
-        // Round 2 — 4.1.c : action=contact → projet hors-norme, on lock le
-        // chat et on révèle le CTA. Pas de routing automatique : le visiteur
-        // peut toujours cliquer "Voir la sélection" s'il veut quand même la
-        // grille filtrée.
+        // Round 3 — Lot C2 : action=contact → écran s-contact dédié (CTAs
+        // formulaire/email selon contact_kind, pré-remplis subject/message).
+        // Si filters non vide en plus (cas par cas, écart modéré), on passe
+        // d'abord showContact mais sapiProject.action est stocké pour que
+        // la grille montre la card sur-mesure en 1re position (Lot C3).
         if (data.action === 'contact') {
-          setChatFooterState('locked');
+          showContact(data);
+          return;
         }
         revealChatCta();
       })
@@ -772,9 +777,10 @@
           state.chat.conversation.push({ role: 'assistant', content: data.message || '' });
         }
 
+        // Round 3 — Lot C2 : action=contact → écran s-contact dédié.
         if (data.action === 'contact') {
-          // Pas de routing contact pour Phase 4 — on garde la CTA "Voir la sélection"
-          setChatFooterState('locked');
+          showContact(data);
+          return;
         }
 
         revealChatCta();
@@ -1171,6 +1177,101 @@
   }
 
   /* ─────────────────────────────────────────────
+     Round 3 — Lot C2 : écran s-contact (action=contact)
+     ───────────────────────────────────────────── */
+  function buildContactUrl(payload) {
+    var params = new URLSearchParams();
+    params.set('from', 'conseiller');
+    if (payload.contact_kind)    params.set('kind', payload.contact_kind);
+    if (payload.contact_subject) params.set('subject', payload.contact_subject);
+    if (payload.contact_message) params.set('message', payload.contact_message);
+    return CONTACT_SURMESURE_URL + (CONTACT_SURMESURE_URL.indexOf('?') === -1 ? '?' : '&') + params.toString();
+  }
+
+  function buildMailtoUrl(payload) {
+    var subj = payload.contact_subject || 'Projet luminaire';
+    var body = payload.contact_message || '';
+    return 'mailto:' + CONTACT_EMAIL + '?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(body);
+  }
+
+  // Construit le bloc CTAs selon le contact_kind. Retourne un fragment DOM
+  // (pour insertion via appendChild). Réutilisé par showContact + Lot C3.
+  function buildContactCtas(payload) {
+    var kind = payload.contact_kind || 'sur-mesure';
+    var frag = document.createDocumentFragment();
+
+    function makeBtn(href, label, variant) {
+      var a = document.createElement('a');
+      a.className = 'conseiller-contact__cta conseiller-contact__cta--' + variant;
+      a.href = href;
+      a.textContent = label;
+      return a;
+    }
+
+    var formUrl = buildContactUrl(payload);
+    var mailUrl = buildMailtoUrl(payload);
+
+    if (kind === 'pro') {
+      frag.appendChild(makeBtn(formUrl, 'Ouvrir le formulaire sur-mesure', 'primary'));
+    } else if (kind === 'simple') {
+      frag.appendChild(makeBtn(mailUrl, "M'envoyer un email", 'primary'));
+    } else {
+      // sur-mesure (default) : 2 CTAs côte à côte
+      frag.appendChild(makeBtn(formUrl, 'Formulaire sur-mesure', 'primary'));
+      frag.appendChild(makeBtn(mailUrl, 'Email', 'secondary'));
+    }
+    return frag;
+  }
+
+  // Construit le récap projet pour l'écran s-contact (chips ordonnées).
+  function buildContactRecap(answers, labels) {
+    var orderedKeys = ['piece', 'taille', 'taille_escalier', 'eclairage', 'sortie', 'hauteur', 'table', 'style'];
+    var lines = [];
+    orderedKeys.forEach(function (k) {
+      var slug = answers && answers[k];
+      if (!slug) return;
+      var lbl = (labels && labels[k]) || slug;
+      lines.push(lbl);
+    });
+    return lines;
+  }
+
+  function showContact(payload) {
+    if (!els.contactMessage || !els.contactCtas) return;
+
+    // Message
+    els.contactMessage.textContent = (payload && payload.message) || '';
+
+    // Récap projet (chips simples sur une ligne)
+    els.contactRecap.innerHTML = '';
+    var recapLines = buildContactRecap(state.answers, state.labels);
+    if (recapLines.length) {
+      var label = document.createElement('span');
+      label.className = 'conseiller-contact__recap-label';
+      label.textContent = 'Ton projet';
+      els.contactRecap.appendChild(label);
+      els.contactRecap.appendChild(document.createTextNode(recapLines.join(' · ')));
+    }
+
+    // CTAs
+    els.contactCtas.innerHTML = '';
+    els.contactCtas.appendChild(buildContactCtas(payload));
+
+    // Persiste l'état contact dans sapiProject — sera utilisé par Lot C3
+    // pour afficher la card sur-mesure en première position dans la grille.
+    if (window.sapiProject && typeof window.sapiProject.setContactState === 'function') {
+      window.sapiProject.setContactState({
+        action: 'contact',
+        contact_kind: payload.contact_kind || null,
+        contact_subject: payload.contact_subject || '',
+        contact_message: payload.contact_message || '',
+      });
+    }
+
+    showScreen('s-contact');
+  }
+
+  /* ─────────────────────────────────────────────
      Open / close
      ───────────────────────────────────────────── */
   function hydrateFromProject() {
@@ -1345,6 +1446,14 @@
         case 'product-modify':
           modifyProductAnswers();
           break;
+        case 'back-to-chat':
+          // Round 3 — Lot C2 : retour au chat depuis l'écran s-contact.
+          // Le state.chat.conversation est préservé, on bascule juste la vue.
+          if (window.sapiProject && typeof window.sapiProject.setContactState === 'function') {
+            window.sapiProject.setContactState(null);
+          }
+          enterChatMode();
+          break;
       }
     });
 
@@ -1417,6 +1526,10 @@
     els.productRecapTailleValue  = els.modal.querySelector('[data-product-recap-taille-value]');
     els.productRecapConseil      = els.modal.querySelector('[data-product-recap-conseil]');
     els.productRecapConseilTaille = els.modal.querySelector('[data-product-recap-conseil-taille]');
+    // Round 3 — Lot C2 : écran s-contact
+    els.contactMessage = els.modal.querySelector('[data-contact-message]');
+    els.contactRecap   = els.modal.querySelector('[data-contact-recap]');
+    els.contactCtas    = els.modal.querySelector('[data-contact-ctas]');
 
     // Marqueur pour les cards Phase 2 (évite leur fallback console.info)
     window.__sapiModalReady = true;

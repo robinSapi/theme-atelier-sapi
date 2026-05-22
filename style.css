@@ -23500,6 +23500,89 @@ body.woocommerce-cart div.woocommerce-wrapper {
   color: var(--color-dark);
 }
 
+/* Round 3 — Lot C2 : écran s-contact dans la modale (action=contact) */
+.conseiller-contact__message {
+  margin: 18px auto 0;
+  max-width: 560px;
+  font-family: var(--font-body);
+  font-size: clamp(15px, 1.9vw, 16.5px);
+  line-height: 1.55;
+  color: var(--color-dark, #323232);
+  text-align: center;
+}
+.conseiller-contact__recap {
+  margin: 18px auto 0;
+  max-width: 560px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  background: var(--color-warm, #FBF6EA);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--color-wood-dark, #6f5e4d);
+  text-align: left;
+}
+.conseiller-contact__recap:empty {
+  display: none;
+}
+.conseiller-contact__recap-label {
+  display: block;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-wood, #937D68);
+  margin-bottom: 4px;
+}
+.conseiller-contact__ctas {
+  margin: 22px auto 0;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-justify-content: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 560px;
+}
+.conseiller-contact__cta {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  -webkit-transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.conseiller-contact__cta--primary {
+  background: var(--color-orange, #E35B24);
+  color: #fff;
+}
+.conseiller-contact__cta--primary:hover,
+.conseiller-contact__cta--primary:focus-visible {
+  background: #c54d1d;
+  outline: none;
+}
+.conseiller-contact__cta--secondary {
+  background: transparent;
+  color: var(--color-dark, #323232);
+  border-color: var(--color-wood, #937D68);
+}
+.conseiller-contact__cta--secondary:hover,
+.conseiller-contact__cta--secondary:focus-visible {
+  background: rgba(147, 125, 104, 0.08);
+  outline: none;
+}
+
 /* Conseil de style fixe (italic, ton confidentiel) */
 .conseiller-product-recap__conseil {
   margin: 16px auto 0;

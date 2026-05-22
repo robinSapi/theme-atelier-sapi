@@ -393,6 +393,10 @@ function sapi_maison_enqueue_assets() {
           'id'   => get_queried_object_id(),
           'name' => get_the_title(get_queried_object_id()),
         ] : null,
+        // Round 3 — Lot C2/C4 : URL formulaire + email contact pour les CTAs
+        // de l'écran s-contact et de la card sur-mesure routée contact.
+        'contactSurmesureUrl' => home_url('/sur-mesure/'),
+        'contactEmail'        => 'robin@atelier-sapi.fr',
       ]);
     }
 
@@ -3453,6 +3457,28 @@ function sapi_render_conseiller_modal() {
             <a class="conseiller-back-link conseiller-back-link--contact" href="<?php echo esc_url(home_url('/contact/')); ?>">
               <?php esc_html_e('Contacter Robin', 'theme-sapi-maison'); ?>
             </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Round 3 — Lot C2 : écran s-contact pour les projets routés vers
+           Robin (pro / sur-mesure / simple). Reçoit message + recap + CTAs
+           dynamiques selon contact_kind. Le visiteur peut revenir au chat. -->
+      <div class="conseiller-modal__screen" data-screen="s-contact" hidden>
+        <div class="conseiller-card__inner">
+          <span class="conseiller-badge conseiller-badge--default">
+            <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+            <span data-contact-badge-text><?php esc_html_e('Échangeons ensemble', 'theme-sapi-maison'); ?></span>
+          </span>
+
+          <p class="conseiller-contact__message" data-contact-message></p>
+          <div class="conseiller-contact__recap" data-contact-recap></div>
+          <div class="conseiller-contact__ctas" data-contact-ctas></div>
+
+          <div class="conseiller-modal__nav">
+            <button type="button" class="conseiller-back-link" data-action="back-to-chat">
+              ← <?php esc_html_e('Continuer la discussion avec Robin', 'theme-sapi-maison'); ?>
+            </button>
           </div>
         </div>
       </div>
