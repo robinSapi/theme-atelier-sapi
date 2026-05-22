@@ -23500,7 +23500,16 @@ body.woocommerce-cart div.woocommerce-wrapper {
   color: var(--color-dark);
 }
 
-/* Round 3 — Lot C2 : écran s-contact dans la modale (action=contact) */
+/* Round 3 — Lot C2 : écran s-contact dans la modale (action=contact).
+   Distribution verticale : message poussé au centre + nav retour ancré en
+   bas via 2 margin-top:auto (pattern S1/S3). Contenu centré horizontalement
+   via align-items:center hérité du parent. */
+.conseiller-modal__screen[data-screen="s-contact"] .conseiller-contact__message {
+  margin-top: auto;
+}
+.conseiller-modal__screen[data-screen="s-contact"] .conseiller-modal__nav {
+  margin-top: auto;
+}
 .conseiller-contact__message {
   margin: 18px auto 0;
   max-width: 560px;
