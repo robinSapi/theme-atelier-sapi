@@ -133,6 +133,11 @@
 
   /**
    * Fusionne un patch dans le projet existant. `null` supprime une clé.
+   * Invalidation auto de `advice_text` quand les `answers` changent : un
+   * advice IA précédent ne reflète plus le nouveau projet, donc on l'écarte
+   * pour repartir sur le texte générique en attendant un nouveau parcours
+   * (corrige le bug 19/05 où la card "Mon projet" gardait un advice
+   * mentionnant "cuisine" alors que le visiteur avait changé pour "salon").
    * @param {Object} patchAnswers  { taille: 'grande', sortie: null }
    * @param {Object} [patchLabels] { taille: 'Grande pièce' }
    */
@@ -144,6 +149,9 @@
       p = { answers: {}, labels: {}, created_at: now, updated_at: now, session_id: null };
     }
     if (!p.labels) p.labels = {};
+
+    // Snapshot avant patch pour détecter un changement effectif des answers
+    var beforeAnswersJson = JSON.stringify(p.answers || {});
 
     Object.keys(patchAnswers).forEach(function (k) {
       var v = patchAnswers[k];
@@ -164,6 +172,14 @@
           p.labels[k] = v;
         }
       });
+    }
+
+    // Si les answers ont vraiment changé, on invalide l'advice_text précédent
+    // (il référence l'ancien projet). setAdviceText() écrit en direct via
+    // writeRaw — il ne passe pas par update() — donc pas de risque de boucle.
+    var afterAnswersJson = JSON.stringify(p.answers || {});
+    if (beforeAnswersJson !== afterAnswersJson) {
+      p.advice_text = null;
     }
 
     p.updated_at = now;

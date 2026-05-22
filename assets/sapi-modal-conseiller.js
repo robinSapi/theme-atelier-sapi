@@ -14,6 +14,41 @@
 (function () {
   'use strict';
 
+  /* ─────────────────────────────────────────────
+     sapiSafeFetch (audit #5) — fetch JSON avec :
+       - timeout configurable (15s Haiku, 25s Sonnet)
+       - check r.ok (sinon throw HTTP <status>)
+       - support d'un AbortSignal externe (cancel quand modale ferme)
+     Throw une Error 'timeout' / 'aborted' / 'HTTP xxx' au caller, qui
+     décide du message UX et du reset state.transition.
+     ───────────────────────────────────────────── */
+  function sapiSafeFetch(url, options, opts) {
+    options = options || {};
+    opts = opts || {};
+    var timeoutMs = typeof opts.timeout === 'number' ? opts.timeout : 15000;
+    var externalSignal = opts.signal || null;
+    var controller = new AbortController();
+    var aborted = false;
+    var timer = setTimeout(function () { aborted = 'timeout'; controller.abort(); }, timeoutMs);
+    if (externalSignal) {
+      if (externalSignal.aborted) { aborted = 'external'; controller.abort(); }
+      externalSignal.addEventListener('abort', function () { aborted = aborted || 'external'; controller.abort(); }, { once: true });
+    }
+    var fetchOpts = Object.assign({}, options, { signal: controller.signal });
+    return fetch(url, fetchOpts).then(function (r) {
+      clearTimeout(timer);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).catch(function (e) {
+      clearTimeout(timer);
+      if (e && e.name === 'AbortError') {
+        var reason = aborted || 'aborted';
+        throw new Error(reason === 'timeout' ? 'timeout' : 'aborted');
+      }
+      throw e;
+    });
+  }
+
   var config = window.SAPI_MODAL_CONSEILLER || {};
   var STEPS = Array.isArray(config.steps) ? config.steps : [];
   var ICONS = config.icons || {};
@@ -51,6 +86,7 @@
     currentQuestion: null,
     questionHistory: [],  // pile des questions traversées (pour Retour)
     transition: false,    // F2a-bis : true pendant l'écran "Robin réfléchit"
+    aiController: null,   // Audit #7 : AbortController de la requête IA en cours, abort sur close/replace
     shortMode: false,     // F2b Phase 2 — true quand ouvert depuis fiche produit
     chat: {
       conversation: [],   // [{role:'user'|'assistant', content:'...'}]
@@ -336,9 +372,23 @@
     return { effectiveAnswers: answers || {}, ignoredAnswers: [], matchingIds: [] };
   }
 
+  // Audit #7 : démarre une nouvelle requête IA — abort la précédente s'il y en
+  // a une en cours. Retourne le signal à passer à sapiSafeFetch.
+  function startAiRequest() {
+    if (state.aiController) {
+      try { state.aiController.abort(); } catch (e) { /* swallow */ }
+    }
+    state.aiController = new AbortController();
+    return state.aiController.signal;
+  }
+  function clearAiRequest() {
+    state.aiController = null;
+  }
+
   // Helper : appel IA dédié, isolé pour pouvoir le tester séparément
   function fetchAdviceFromIA(opts) {
     var meta = buildFilterMeta(state.answers);
+    var signal = startAiRequest();
 
     var fd = new FormData();
     fd.append('action', 'sapi_megafilter_advice');
@@ -350,15 +400,26 @@
     if (opts.conversation && Array.isArray(opts.conversation) && opts.conversation.length) {
       fd.append('conversation', JSON.stringify(opts.conversation));
     }
-    return fetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
-      .then(function (r) { return r.json(); })
+    // Sonnet : 25s de timeout (plus lent que Haiku)
+    return sapiSafeFetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' }, { timeout: 25000, signal: signal })
       .then(function (resp) {
+        clearAiRequest();
         if (resp && resp.success && resp.data && typeof resp.data.advice_text === 'string' && resp.data.advice_text) {
           return resp.data.advice_text;
         }
         return null;
       })
-      .catch(function () { return null; });
+      .catch(function (err) {
+        clearAiRequest();
+        // Pour advice : on garde le fallback générique côté JS (la card "Mon
+        // projet" affichera le texte générique de la pièce, pas d'erreur
+        // visible). MAIS on reset state.transition pour ne pas bloquer la
+        // modale si l'animation de sortie est en cours.
+        state.transition = false;
+        // eslint-disable-next-line no-console
+        console.warn('[sapi] advice fetch fail:', err && err.message);
+        return null;
+      });
   }
 
   function finishAdvice(card, advice) {
@@ -605,9 +666,13 @@
     fd.append('message', text);
     if (state.chat.sessionId) fd.append('session_id', state.chat.sessionId);
 
-    fetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
-      .then(function (r) { return r.json(); })
+    var signal = startAiRequest();
+    // Haiku : 15s de timeout
+    sapiSafeFetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' }, { timeout: 15000, signal: signal })
       .then(function (resp) {
+        clearAiRequest();
+        // Audit #7 : garde-fou DOM démonté (modale fermée pendant le fetch)
+        if (!state.open) return;
         removeThinkingBubble();
         state.chat.status = 'idle';
         setChatFooterState('idle');
@@ -637,11 +702,23 @@
         state.chat.conversation.push({ role: 'assistant', content: data.message || '' });
         revealChatCta();
       })
-      .catch(function () {
+      .catch(function (err) {
+        clearAiRequest();
+        // Aborted (modal close ou replaced) : silence — la modale est fermée ou un nouveau fetch a démarré
+        if (err && (err.message === 'aborted' || err.message === 'timeout')) {
+          if (err.message === 'timeout' && state.open) {
+            removeThinkingBubble();
+            state.chat.status = 'idle';
+            setChatFooterState('idle');
+            addRobinBubble('Le serveur ne répond pas. Tu peux réessayer ou me contacter via le formulaire.');
+          }
+          return;
+        }
+        if (!state.open) return;
         removeThinkingBubble();
         state.chat.status = 'idle';
         setChatFooterState('idle');
-        addRobinBubble('Petit souci de connexion. Tu peux réessayer.');
+        addRobinBubble('Je n\'arrive pas à te répondre pour l\'instant. Tu peux réessayer ou me contacter via le formulaire.');
       });
   }
 
@@ -680,9 +757,13 @@
     fd.append('conversation', JSON.stringify(state.chat.conversation));
     if (state.chat.sessionId) fd.append('session_id', state.chat.sessionId);
 
-    fetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
-      .then(function (r) { return r.json(); })
+    var signal = startAiRequest();
+    // Sonnet : 25s de timeout (plus lent que Haiku)
+    sapiSafeFetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' }, { timeout: 25000, signal: signal })
       .then(function (resp) {
+        clearAiRequest();
+        // Audit #7 : garde-fou DOM démonté (modale fermée pendant le fetch)
+        if (!state.open) return;
         removeThinkingBubble();
         state.chat.status = 'idle';
         setChatFooterState('idle');
@@ -718,11 +799,22 @@
 
         revealChatCta();
       })
-      .catch(function () {
+      .catch(function (err) {
+        clearAiRequest();
+        if (err && (err.message === 'aborted' || err.message === 'timeout')) {
+          if (err.message === 'timeout' && state.open) {
+            removeThinkingBubble();
+            state.chat.status = 'idle';
+            setChatFooterState('idle');
+            addRobinBubble('Le serveur ne répond pas. Tu peux réessayer ou me contacter via le formulaire.');
+          }
+          return;
+        }
+        if (!state.open) return;
         removeThinkingBubble();
         state.chat.status = 'idle';
         setChatFooterState('idle');
-        addRobinBubble('Petit souci de connexion. Tu peux réessayer.');
+        addRobinBubble('Je n\'arrive pas à te répondre pour l\'instant. Tu peux réessayer ou me contacter via le formulaire.');
       });
   }
 
@@ -1161,6 +1253,12 @@
   function closeModal() {
     if (!els.modal) return;
     state.open = false;
+    // Audit #7 : abort tout fetch IA en cours (chat/freetext) — évite que la
+    // réponse arrive après la fermeture et tente d'écrire dans le DOM démonté.
+    if (state.aiController) {
+      try { state.aiController.abort(); } catch (e) { /* swallow */ }
+      state.aiController = null;
+    }
     els.modal.hidden = true;
     document.documentElement.style.overflow = '';
     document.body.style.overflow = '';

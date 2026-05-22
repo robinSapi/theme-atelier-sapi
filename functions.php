@@ -333,6 +333,7 @@ function sapi_maison_enqueue_assets() {
         'plafond'       => ['suspensions'],
         'mur'           => ['appliques'],
         'pas-de-sortie' => ['lampadaires', 'lampesaposer', 'appliques'],
+        'ne-sais-pas'   => ['lampadaires', 'lampesaposer', 'appliques'],
         ''              => ['lampadaires', 'lampesaposer'],
       ],
       'extras_slugs' => ['accessoires', 'carte-cadeau'],
@@ -2780,13 +2781,12 @@ function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_pr
   $prompt .= "- Tu peux mentionner la fabrication (laser, atelier à Lyon, bois français) si pertinent\n";
   $prompt .= "- Pas d'emoji, pas de markdown\n\n";
 
-  $prompt .= "FILTRES ACTUELLEMENT APPLIQUÉS DANS LE MÉGA-FILTRE :\n";
+  $prompt .= "PROJET DU VISITEUR :\n";
   if (empty($current_filters)) {
-    $prompt .= "(aucun)\n";
+    $prompt .= "(aucun filtre indiqué pour l'instant)\n";
   } else {
-    foreach ($current_filters as $k => $v) {
-      $prompt .= '- ' . $k . ' = ' . $v . "\n";
-    }
+    $human_labels = sapi_megafilter_labels_from_slugs($current_filters);
+    $prompt .= sapi_megafilter_format_project_text($current_filters, $human_labels) . "\n";
   }
 
   // Contrat enrichi : catalogue split (présentés/écartés) + réponses élargies.
@@ -2813,7 +2813,7 @@ function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_pr
   $prompt .= "- `message` : obligatoire, 2-4 phrases.\n";
   $prompt .= "- `filters_update` : optionnel. À inclure UNIQUEMENT si tu veux changer les chips suite au message du visiteur (ex. il précise, change d'avis). Utilise les slugs exacts. `null` pour supprimer un filtre. Ne touche pas aux chips non concernés.\n";
   $prompt .= "- `action: \"contact\"` : optionnel. Inclure UNIQUEMENT si le visiteur cherche quelque chose qui n'existe pas dans le catalogue ou semble bloqué → tu lui suggères de te contacter directement.\n";
-  $prompt .= "- Tu peux référencer un modèle précis du catalogue par son nom dans `message` si pertinent.\n\n";
+  $prompt .= "- Ne nomme JAMAIS de modèle précis dans `message` (le visiteur les voit dans la grille à côté). Présente plutôt l'ambiance, la matière, le format.\n\n";
 
   $prompt .= "⚠️ FORMAT DE SORTIE — IMPÉRATIF :\n";
   $prompt .= "Les EXEMPLES de ton plus haut sont là pour calibrer TA VOIX dans le champ `message`. Ta réponse, elle, DOIT être UNIQUEMENT le JSON décrit ci-dessus. RIEN d'autre :\n";
@@ -3143,6 +3143,34 @@ function sapi_megafilter_format_project_text(array $answers, array $labels) {
     $parts[] = '- ' . $label . ' : ' . $value;
   }
   return implode("\n", $parts);
+}
+
+/**
+ * Mappe un tableau de slugs {key => slug} vers le tableau de labels affichables
+ * correspondants {key => label} en lookup sur sapi_guide_get_steps()[].choices[].
+ * Permet à sapi_megafilter_build_chat_prompt de réutiliser
+ * sapi_megafilter_format_project_text quand le POST ne fournit que les slugs.
+ */
+function sapi_megafilter_labels_from_slugs(array $filters) {
+  if (empty($filters)) return [];
+  $steps = function_exists('sapi_guide_get_steps') ? sapi_guide_get_steps() : [];
+  $by_step = [];
+  foreach ($steps as $step) {
+    if (!isset($step['id']) || !isset($step['choices'])) continue;
+    $by_step[$step['id']] = $step['choices'];
+  }
+  $out = [];
+  foreach ($filters as $key => $slug) {
+    if (!is_string($slug) || $slug === '') continue;
+    if (!isset($by_step[$key])) continue;
+    foreach ($by_step[$key] as $choice) {
+      if (isset($choice['slug'], $choice['label']) && $choice['slug'] === $slug) {
+        $out[$key] = $choice['label'];
+        break;
+      }
+    }
+  }
+  return $out;
 }
 
 /**
