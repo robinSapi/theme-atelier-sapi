@@ -2,6 +2,270 @@
 
 ## ✅ Livré
 
+## [RETOUR] Audit Conseiller V3 — 7 fixes livrés (3 critiques + 4 réels)
+**Date livrée :** 2026-05-22
+**Branche :** `test-theme-sapi-maison`
+**Commit :** `e41f735`
+**Statut :** Livré. 7 bugs sur 7 du périmètre actés.
+
+### Récap des fixes
+
+| # | Type | Sujet | Statut |
+|---|---|---|---|
+| 1 | 🔴 Critique | Chat S2 format brut → utilise `format_project_text` | ✅ |
+| 2 | 🔴 Critique | `advice_text` figé → reset auto dans `update()` | ✅ |
+| 3 | 🔴 Critique | Contradiction tu/vous → ton.txt + exemples.txt réécrits | ✅ |
+| 4 | 🟡 Réel | `cats_secondaire_by_sortie['ne-sais-pas']` manquant | ✅ |
+| 5 | 🟡 Réel | Fetches IA sans timeout/r.ok → `sapiSafeFetch` | ✅ |
+| 6 | 🟡 Réel | "Nommer / ne pas nommer" → interdit partout | ✅ |
+| 7 | 🟡 Réel | Race + callbacks orphelins → `AbortController` + garde-fou DOM | ✅ |
+
+### Implémentation par fix
+
+**#1 Chat S2 format**
+- Nouveau helper PHP `sapi_megafilter_labels_from_slugs($filters)` : lookup slug→label via `sapi_guide_get_steps()`
+- Section "FILTRES APPLIQUÉS" du chat builder remplacée par `PROJET DU VISITEUR :` + `format_project_text` (clés explicites multi-ligne — héritage du fix `f221ba0`)
+
+**#2 advice_text invalidation**
+- `sapi-project.js:update()` snapshote `JSON.stringify(p.answers)` avant/après patch, invalide `advice_text = null` si différent
+- `setAdviceText()` écrit en direct via `writeRaw` (ne passe pas par `update`) → pas de boucle d'auto-invalidation
+
+**#3 Tutoiement**
+- `guide-prompt-ton.txt` : 2 modifications principales (vouvoiement → tutoiement, "tu ne prétends pas être Robin" → "tu es Robin, tu parles à la première personne")
+- `guide-prompt-exemples.txt` : RÉÉCRITURE COMPLÈTE (256 lignes) au tutoiement systématique
+- Gardé inchangé : structure fiches, libellés boutons UI, contenu sémantique
+- **Vérification grep** : 0 occurrence résiduelle de `vous/votre/vos/vôtre` sur les 2 fichiers
+
+**#4 ne-sais-pas key**
+```php
+'cats_secondaire_by_sortie' => [
+  ...
+  'ne-sais-pas' => ['lampadaires', 'lampesaposer', 'appliques'], // ← AJOUTÉ
+],
+```
+
+**#5 sapiSafeFetch**
+- Helper en haut de `sapi-modal-conseiller.js` : timeout (15s Haiku / 25s Sonnet) + check `r.ok` + support `AbortSignal` externe
+- Throw `'timeout'` / `'aborted'` / `'HTTP <status>'` au caller
+- Les 3 fetches IA utilisent ce helper
+- En cas d'erreur : reset `state.transition = false`, message explicite côté UI (chat/freetext) ou fallback générique silencieux côté card "Mon projet" pour advice (pour ne pas perturber la rendering)
+
+**#6 Interdire nommer**
+- `regles.txt` L2 : "Ne nomme JAMAIS de modèle précis..."
+- `exemples.txt` FICHE 8 : "Évoque l'ambiance, les essences et formats sans nommer..."
+- `build_chat_prompt` : "Ne nomme JAMAIS de modèle précis dans `message`..."
+
+**#7 AbortController + garde-fou**
+- `state.aiController` (AbortController de la requête IA en cours)
+- `startAiRequest()` / `clearAiRequest()` : abort la précédente + crée un nouveau controller
+- Garde-fou `if (!state.open) return;` au début des `.then` et `.catch` (évite écriture DOM démonté)
+- `closeModal()` abort le controller pendant la fermeture
+
+### Notes pour le retour
+
+- **Échantillon de prompt chat** non capturé localement (pas de PHP CLI dispo). Si Robin veut vérifier la présence des 3 sections (PROJET multi-ligne / catalogue split / ignored_answers) ET la directive "Ne nomme JAMAIS de modèle précis", je peux ajouter un `error_log()` temporaire dans `sapi_ajax_megafilter_chat` ou `sapi_ajax_megafilter_advice` juste avant le `sapi_megafilter_call_claude` — déclencher un test puis récupérer dans le log d'erreurs cPanel.
+- **Régressions** : aucune attendue sur les fixes précédents (`318b112`, `c0e1f02`, `f221ba0`).
+
+### Question pour Robin
+
+8 cas à tester côté `scenarios-test-conseiller-v3-2026-05-22.md` (référence Cowork). En particulier :
+- **C1-C4 + B2** : tutoiement systématique + plus de "ta cuisine est au mur"
+- **G2** : parcours Salon → Recommencer → parcours Bureau → `advice_text` reflète bien Bureau (pas reste de Salon)
+- **G3** : `salon+grande+secondaire+sortie="Je ne sais pas"` affiche bien des appliques
+- **H1** : bloquer admin-ajax → message d'erreur clair après timeout, modale déblocable
+
+---
+
+## [TÂCHE — LIVRÉ] Fixes audit Conseiller V3 — 3 critiques + 4 réels (7 bugs)
+**Date :** 2026-05-22
+**Branche :** `test-theme-sapi-maison`
+**Priorité :** haute — bloque la validation V3 avant merge master
+
+### Contexte
+
+L'audit côté Cowork du 22/05 (3 sous-agents en parallèle sur les angles filtre JS, prompts IA, intégration JS↔PHP) a identifié 12 trouvailles. Robin a tranché pour fixer **les 3 critiques + 4 réels** dans une seule passe. Les 5 mineurs (8-12) restent en backlog.
+
+Rapport d'audit complet côté Cowork : `business/docs/scenarios-test-conseiller-v3-2026-05-22.md` (et la synthèse des 3 sous-agents dans le transcript Cowork).
+
+### Les 7 bugs à fixer
+
+---
+
+#### 🔴 CRITIQUE #1 — Chat S2 utilise le format brut au lieu de `format_project_text`
+
+**Symptôme :** dans `sapi_megafilter_build_chat_prompt` (~L2783-2790 de `functions.php`), la section "FILTRES ACTUELLEMENT APPLIQUÉS DANS LE MÉGA-FILTRE" dump `- piece = cuisine\n- sortie = mur`. **C'est exactement le format qui a déclenché le bug "ta cuisine est au mur"**, déjà corrigé pour `advice` au commit `f221ba0` mais pas pour le chat. Reproductible en testant un parcours puis en passant en chat S2.
+
+**Fix :**
+1. Créer un helper `sapi_megafilter_labels_from_slugs($filters)` qui mappe `slug → label affichable` en parcourant `sapi_guide_get_steps()[].choices[]`. Ex : `['piece' => 'cuisine']` → `['piece' => 'Cuisine']`.
+2. Dans `sapi_megafilter_build_chat_prompt`, remplacer la boucle existante par :
+   ```php
+   $labels = sapi_megafilter_labels_from_slugs($current_filters);
+   $prompt .= "PROJET DU VISITEUR :\n" . sapi_megafilter_format_project_text($current_filters, $labels) . "\n";
+   ```
+
+---
+
+#### 🔴 CRITIQUE #2 — `advice_text` figé après changement d'answers (bug 19/05 toujours actif)
+
+**Symptôme :** dans `sapi-project.js:update()` (~L139-173), la fonction patche les `answers` mais ne touche jamais `advice_text`. Quand le visiteur change une réponse via chip dans la modale (`handleChipAnswer → update`), l'ancien `advice_text` est conservé. Pattern observé le 19/05 (Hero "Pour un salon" + advice mentionnant "cuisine"). Confirmé toujours actif par l'audit.
+
+**Fix dans `sapi-project.js:update()`** :
+```js
+function update(patch) {
+  const data = load();
+  const oldAnswersHash = JSON.stringify(data.answers || {});
+  // ... apply patch ...
+  const newAnswersHash = JSON.stringify(data.answers || {});
+  if (oldAnswersHash !== newAnswersHash && !patch._keepAdvice) {
+    data.advice_text = null;
+  }
+  save(data);
+  notify();
+}
+```
+Le `setAdviceText` (fin de parcours modale) doit alors être appelé avec un flag interne pour éviter l'auto-invalidation pendant qu'on le re-renseigne. Solution simple : `setAdviceText` n'utilise pas `update()` mais une voie directe `setAdviceTextRaw` qui écrit `data.advice_text` sans toucher aux answers.
+
+---
+
+#### 🔴 CRITIQUE #3 — Contradiction tutoiement/vouvoiement dans les prompts
+
+**Symptôme :** `assets/guide-prompt-ton.txt` dit *"Vouvoie toujours le client"* et *"Tu ne prétends pas être Robin"*. Les 3 builders inline (`functions.php` L2734, L2773, L3513) injectent juste après *"Tu es Robin… tutoiement systématique"*. Tous les exemples de `exemples.txt` (12 KB) sont au vouvoiement. → L'IA reçoit deux directives opposées, résultat instable selon le dernier token gagnant.
+
+**Fix :**
+1. Modifier `assets/guide-prompt-ton.txt` :
+   - Remplacer *"Vouvoie toujours le client"* par *"Tutoie toujours le visiteur (jamais le vouvoiement)"*
+   - Remplacer *"Tu ne prétends pas être Robin"* par *"Tu es Robin, artisan menuisier lyonnais. Tu parles à la première personne."*
+   - Vérifier le reste du fichier : tout "vous/votre/vos" résiduel doit passer au tutoiement.
+2. **Réécrire entièrement `assets/guide-prompt-exemples.txt` au tutoiement** (décision Robin actée — 12 KB à passer du vouvoiement au tutoiement singulier) :
+   - Tous les "vous" (sujet) → "tu"
+   - Tous les "votre/vos/vôtre" → "ton/ta/tes/tien" selon le genre
+   - Adapter les terminaisons verbales : "vous cherchez" → "tu cherches", "vous avez" → "tu as", "vous voulez" → "tu veux", "vous m'avez indiqué" → "tu m'as indiqué", etc.
+   - Adapter les pronoms compléments : "vous orienter" → "t'orienter", "vous aider" → "t'aider", "vous propose" → "te propose"
+   - Adapter les formules de politesse : "Si vous voulez" → "Si tu veux", "Vous pouvez" → "Tu peux"
+   - Garder STRICTEMENT inchangés :
+     - La structure du fichier (fiches numérotées, sections, contextes)
+     - Le contenu sémantique (règles, exemples métier, descriptions de pièces, descriptions de produits)
+     - Les libellés de boutons (ex: "Boutons : Cuisine / Bureau …") — ce sont des choix UI, pas du langage humain
+     - Les références techniques (slugs, IDs, conditionnels "si taille = grande")
+3. Vérification finale obligatoire : `grep -iE "\bvou(s|tre|s)\b|\bvôtre\b|\bvos\b" assets/guide-prompt-exemples.txt` doit retourner **0 ligne**. Si des occurrences subsistent (cas litigieux ex. "vous (collectif)" dans une règle), les annoter en commentaire et demander confirmation Robin.
+4. Pas besoin de note en tête du fichier après réécriture — la cohérence interne suffit.
+
+---
+
+#### 🟡 RÉEL #4 — `cats_secondaire_by_sortie` manque la clé `'ne-sais-pas'`
+
+**Symptôme :** `$sapi_filter_rules['cats_secondaire_by_sortie']` (`functions.php` ~L332-337) ne couvre pas `'ne-sais-pas'` alors que `cats_by_sortie` le fait. Scénario reproductible : `piece=salon, taille=grande, eclairage=secondaire, sortie=ne-sais-pas` → on perd les appliques alors qu'on les aurait en `sortie=pas-de-sortie`.
+
+**Fix :** ajouter la clé manquante, par symétrie avec `cats_by_sortie` :
+```php
+'cats_secondaire_by_sortie' => [
+  'plafond'       => ['suspensions'],
+  'mur'           => ['appliques'],
+  'pas-de-sortie' => ['lampadaires', 'lampesaposer', 'appliques'],
+  'ne-sais-pas'   => ['lampadaires', 'lampesaposer', 'appliques'],  // ← AJOUTER
+  ''              => ['lampadaires', 'lampesaposer'],
+],
+```
+
+---
+
+#### 🟡 RÉEL #5 — Aucune gestion d'erreur HTTP sur les fetches IA
+
+**Symptôme :** `fetchAdviceFromIA` (`sapi-modal-conseiller.js` ~L353-362), `submitChat` (~L683), `submitFreetext` (~L608) appellent `.then(r => r.json())` sans check de `r.ok` ni timeout. Un 500 PHP renvoyant du HTML crash dans `.json()` → catch silencieux → fallback générique sans message. Pire : pas de timeout, donc un endpoint qui hang laisse `state.transition = true` indéfiniment et la modale est bloquée (ESC désactivé pendant transition).
+
+**Fix :** créer un helper partagé `sapiSafeFetch(url, options, opts)` (inline en haut de `sapi-modal-conseiller.js` ou nouveau fichier `assets/sapi-safe-fetch.js`) :
+
+```js
+async function sapiSafeFetch(url, options = {}, { timeout = 15000, signal: externalSignal } = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort('timeout'), timeout);
+  if (externalSignal) {
+    externalSignal.addEventListener('abort', () => controller.abort('external'), { once: true });
+  }
+  try {
+    const r = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timer);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.json();
+  } catch (e) {
+    clearTimeout(timer);
+    if (e.name === 'AbortError') {
+      throw new Error(controller.signal.reason === 'timeout' ? 'timeout' : 'aborted');
+    }
+    throw e;
+  }
+}
+```
+
+Utiliser dans les 3 endpoints IA. Dans le catch :
+- Reset `state.transition = false` pour débloquer la modale
+- Afficher un message d'erreur clair côté UI : *"Je n'arrive pas à te répondre pour l'instant, tu peux réessayer ou me contacter directement via le formulaire."* (ou message rate-limit existant si erreur 429)
+- Pas de fallback silencieux
+
+Timeout par défaut : 15s pour Haiku (freetext), 25s pour Sonnet (chat/advice, plus lent).
+
+---
+
+#### 🟡 RÉEL #6 — Contradiction "nommer / ne pas nommer un produit"
+
+**Symptôme :** Plusieurs directives qui se contredisent dans le prompt du chat :
+- `adaptive_consigne_block` (L3432) : *"Ne nomme pas de modèle précis"*
+- `exemples.txt` FICHE 8 (L215) : *"Nomme 2-3 produits précis avec explications personnalisées"*
+- `regles.txt` (L5) : *"Tu peux mentionner des noms de produits du catalogue pour illustrer"*
+- `sapi_megafilter_build_chat_prompt` (L2816) : *"Tu peux référencer un modèle précis du catalogue par son nom"*
+
+Le chat va probablement nommer un produit (3 directives le poussent à le faire), tandis que l'`advice` final ne nommera rien → incohérence vécue par le visiteur.
+
+**Fix : interdire de nommer partout** (décision Robin actée, plus cohérent avec l'esprit "le visiteur voit les produits dans la grille à côté") :
+1. `assets/guide-prompt-regles.txt` L5 : remplacer *"Tu peux mentionner des noms de produits du catalogue pour illustrer, mais ne désigne pas UN produit comme 'le bon choix'"* par *"Ne nomme JAMAIS de modèle précis du catalogue dans ta réponse — le visiteur les voit dans la grille à côté. Présente plutôt l'ambiance, la matière, le format."*
+2. `assets/guide-prompt-exemples.txt` FICHE 8 L215 : remplacer *"Nomme 2-3 produits précis avec explications personnalisées"* par *"Évoque l'ambiance, les essences et formats de la sélection sans nommer de modèle précis (le visiteur les voit dans la grille à côté)."*
+3. `sapi_megafilter_build_chat_prompt` (~L2816) : retirer la ligne *"Tu peux référencer un modèle précis du catalogue par son nom dans `message` si pertinent."* — remplacer par *"Ne nomme JAMAIS de modèle précis dans `message` (le visiteur les voit dans la grille)."*
+
+---
+
+#### 🟡 RÉEL #7 — Race condition + callbacks orphelins
+
+**Symptôme :** si l'utilisateur clique "Voir la sélection" pendant qu'un fetch chat IA est en cours, la réponse arrive après la fermeture de la modale et écrit dans le DOM démonté (`addRobinBubble` ligne 686 référence `els.chatMessages`). Pas un crash mais une fuite de callback orphelin + consommation Sonnet pour rien.
+
+**Fix combiné avec #5 :**
+1. Garder un `AbortController` au niveau du state de la modale : `state.aiController`
+2. Quand un nouveau fetch démarre : `state.aiController?.abort('replaced'); state.aiController = new AbortController();` et passer son signal à `sapiSafeFetch` en `externalSignal`
+3. Dans `showTransitionAndExit` et `closeModal` : `state.aiController?.abort('closed');`
+4. Au début de chaque `.then` de fetch IA : `if (!state.open) return;` (garde-fou écriture DOM démonté)
+
+---
+
+### Décisions actées par Robin (22/05/2026, Cowork)
+
+- **#3** : **réécriture complète de `exemples.txt` au tutoiement** (décision Robin contre ma reco initiale). Modifier aussi `ton.txt` minimalement. Vérification grep obligatoire pour zéro résiduel.
+- **#6** : interdire de nommer partout (option B). Plus cohérent que de différencier chat vs advice.
+- **#5/#7** : helper `sapiSafeFetch` partagé. Pas de fallback silencieux : on affiche un message d'erreur explicite.
+
+### Critères de succès
+
+Référence : `business/docs/scenarios-test-conseiller-v3-2026-05-22.md` côté Cowork (8 blocs de test).
+
+1. **Test C1-C4 + B2** (chat S2) : l'IA ne dit plus jamais "ta cuisine est au mur" ni variantes (#1)
+2. **Test G2** : parcours Salon → Recommencer → parcours Bureau → l'`advice_text` reflète Bureau (pas reste de Salon) (#2)
+3. **Tests C1-C4 + B2** : tutoiement systématique partout ("tu", "ton", jamais "vous") (#3)
+4. **Test G3** : salon+grande+secondaire+sortie="Je ne sais pas" affiche bien des appliques (#4)
+5. **Test H1** : bloquer admin-ajax → message d'erreur clair après timeout, modale déblocable (Escape, click hors zone) (#5)
+6. **Tests C1-C5 + B2** : l'IA ne nomme JAMAIS un modèle précis dans `message` (#6)
+7. **Test manuel** : ouvrir modale, taper un message en chat S2, cliquer "Voir la sélection" avant que la réponse arrive → pas d'erreur console, pas d'écriture DOM démonté, modale ferme proprement (#7)
+8. **Pas de régression** sur les fixes précédents (`318b112`, `c0e1f02`, `f221ba0`)
+
+### Notes pour le retour
+
+Au retour, indiquer :
+- Hash des commits livrés
+- Confirmation que `sapiSafeFetch` est bien partagé entre les 3 endpoints
+- Échantillon de prompt `chat` capturé via `error_log` montrant le `PROJET DU VISITEUR :` avec clés explicites (#1)
+- Échantillon de prompt `chat` montrant la directive "Ne nomme JAMAIS de modèle précis" (#6)
+
+---
+
+## ✅ Livré
+
 ## [RETOUR] Fix IA "Ta cuisine est au mur" — clés explicites + consigne contenu
 **Date livrée :** 2026-05-22
 **Branche :** `test-theme-sapi-maison`
