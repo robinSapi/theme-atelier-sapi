@@ -1,73 +1,178 @@
 # Tasks — Coordination Cowork ↔ Claude Code
 
-## 🔍 Enquête (en attente de décision)
+## ✅ Livré
 
-## [ENQUÊTE] Cas "cuisine + petite + sortie=mur + neutre" → 0 produit + IA qui propose des modèles inexistants
+## [RETOUR] Fallback filtre global + contrat IA enrichi (refonte + bug latéral C)
+**Date livrée :** 2026-05-22
+**Branche :** `test-theme-sapi-maison`
+**Commit :** `c0e1f02`
+**Statut :** Livré, à tester.
+
+### Décisions techniques actées en cours
+
+- **Option α** : le JS calcule le filtre + l'élargissement + les matching_ids et les passe au PHP. Pas de duplication PHP de la logique de match.
+- **Catalogue split** : sections "PRÉSENTÉS AU VISITEUR" + "ÉCARTÉS PAR LE FILTRE" dans les prompts (plus lisible que juste des IDs).
+- **ignored_answers filtré** aux clés vraiment répondues (skip silencieux pour ce que le visiteur n'avait pas indiqué).
+- **Chat builder enrichi aussi** (le visiteur peut atterrir en chat via "Préciser avec Robin" depuis S3).
+- **Cumul rigide** confirmé pour l'élargissement (style → table → hauteur → eclairage → taille → piece, sortie intouchable).
+
+### Implémentation
+
+**Architecture en 3 couches :**
+
+1. **JS = source de vérité du filtre** (`assets/sapi-cards-conseiller.js`) :
+   - Refactor `cardMatches` → `cardMatchesAnswers(card, answers)` (signature explicite)
+   - Nouveau `computeMatchingIds(answers)` : compte les cards matchant
+   - Nouveau `computeEffectiveAnswers(rawAnswers)` : élargissement progressif cumulatif selon `WIDENING_ORDER = ['style','table','hauteur','eclairage','taille','piece']`. Retourne `{effectiveAnswers, ignoredAnswers, matchingIds}`. `taille_escalier` géré comme avatar de `taille`. `sortie` JAMAIS retirée.
+   - `refilterGrid` calcule la meta AVANT que shop.js itère
+   - `window.sapiMegaFilter.computeFilterMeta` exposé pour la modale
+
+2. **Modale enrichit ses POSTs** (`assets/sapi-modal-conseiller.js`) :
+   - Helper `buildFilterMeta(answers)` lit l'API exposée
+   - `fetchAdviceFromIA` + `submitChat` appendent `matching_product_ids` + `ignored_answers` (calculés à la volée depuis `state.answers` — peut différer de `sapiProject` quand la modale n'a pas encore persisté)
+
+3. **PHP enrichit les system prompts** (`functions.php`) :
+   - 4 nouveaux helpers communs : `parse_matching_ids`, `parse_ignored_answers`, `format_catalog_split`, `format_ignored_answers` (avec labels humains FR : "la pièce", "la taille de pièce", etc.), `adaptive_consigne_block`
+   - `sapi_ajax_megafilter_advice` : parse + 3 sections dans user_msg + consigne adaptative dans system prompt
+   - `sapi_megafilter_build_chat_prompt` : signature étendue, remplace l'ancienne section "CATALOGUE COMPLET" par split présentés/écartés + ignored_answers + consigne adaptative
+   - `sapi_ajax_megafilter_chat` : parse + passe au builder
+   - `freetext` (Haiku) inchangé (décision Robin)
+
+**Consigne adaptative** ajoutée au prompt (commune advice + chat) :
+- 0 produit présenté → propose sur-mesure sans baratin
+- Réponses élargies → mentionne subtilement et sincèrement (demi-phrase)
+- OK → présente naturellement
+- Dans TOUS les cas → ne nomme PAS de modèle précis
+
+**Bug latéral C — Empty state** :
+- `archive-product.php` : refonte du markup `.woocommerce-no-products-found` → `.shop-empty-state` avec texte principal + sous-texte italique + CTA orange vers `/sur-mesure/`
+- `style.css` : panneau crème dashed wood (langage Conseiller) + bouton orange
+- Le message ne devrait s'afficher que dans le cas extrême "0 même après élargissement max" (très rare avec le fallback global)
+
+### Cas testables sur `test.atelier-sapi.fr`
+
+| Cas | Comportement attendu |
+|---|---|
+| **Cuisine · Petite · Au mur · Pas de préf** | Grille montre les 4 appliques (élargissement retire style + taille + piece), phrase IA mentionne l'élargissement ("j'ai un peu élargi ta sélection...") |
+| **Cuisine · Grande · Au plafond · Moderne** | Grille montre les suspensions ampoule dégagée/semi (filtre direct OK), phrase IA présente normalement |
+| **Escalier · Ouvert** | Grille montre suspensions verticales (filtre direct OK selon visibility), phrase IA présente normalement |
+| **Cas extrême : combinaison impossible** | Empty state `.shop-empty-state` visible avec CTA sur-mesure, phrase IA propose le sur-mesure |
+
+### Pour vérifier les prompts envoyés (échantillon)
+
+Phase 5 (capture du prompt via `error_log`) n'est pas faite — j'ai pas accès aux logs O2switch en local. Si Robin veut vérifier que les 3 sections sont bien injectées, je peux ajouter temporairement `error_log("=== ADVICE PROMPT ===\n" . $system_prompt . "\n=== USER MSG ===\n" . $user_msg);` dans `sapi_ajax_megafilter_advice` juste avant l'appel `sapi_megafilter_call_claude`. Robin déclenche un parcours, récupère le log dans cPanel (`error_log` du domaine), me le passe, je retire.
+
+### Notes opérationnelles
+
+- **Taille prompts** : advice passe de ~22 KB (V2 prompts) à ~22 + ~5 KB (catalogue split + ignored = ~27 KB total). Largement dans les marges Sonnet (200K tokens contexte).
+- **Aucune régression** sur `freetext` (Haiku, inchangé).
+- **Effet de bord à observer** : longueur des phrases IA peut varier selon la consigne adaptative — à monitorer côté UX si certaines phrases deviennent trop longues.
+
+### Question pour Robin
+
+- Tests sur les 4 cas du tableau ci-dessus.
+- Si tu veux le sample de prompt, dis-le, je rajoute le `error_log` temporaire.
+- Le message "Aucun produit" devrait être beaucoup plus visible désormais (encart crème dashed avec CTA orange). Si l'élargissement fonctionne, il ne devrait s'afficher qu'en cas extrême.
+
+---
+
+## [TÂCHE — LIVRÉ] Fallback filtre global + contrat IA `advice` enrichi (refonte)
 **Date :** 2026-05-22
-**Branche test :** `test-theme-sapi-maison`
-**Statut :** Diagnostiqué, en attente d'arbitrage Robin sur la stratégie de fix.
+**Branche :** `test-theme-sapi-maison`
+**Priorité :** haute (bug fonctionnel actif sur test)
 
-### Symptôme observé
+### Contexte & arbitrage Robin
 
-Sur `test.atelier-sapi.fr/mes-creations/?piece=cuisine` après parcours :
-- Projet : Cuisine · Petite · Au mur · Pas de préférence
-- Grille produits **VIDE** (aucun modèle affiché)
-- Phrase IA sur la card "Mon projet" : *"Pour une petite cuisine avec une sortie au mur, une applique bien placée peut vraiment transformer l'ambiance — voici quelques modèles qui pourraient vous convenir."*
-- → l'IA promet des modèles qui n'existent pas dans la grille
+L'enquête du 22/05 (voir historique de la queue) a identifié 2 problèmes sur le cas *Cuisine · Petite · Au mur · Pas de préférence* : grille vide ET phrase IA qui promet des modèles inexistants. Plutôt que de patcher au cas par cas, Robin a tranché pour une refonte unifiée du contrat filtre + IA :
 
-### Diagnostic — 2 problèmes distincts
+1. **Si une réponse mène à 0 produit, on la retire et on relance** — règle générale, pas juste pour cuisine+mur
+2. **L'IA doit avoir le catalogue + le résultat du filtre dans tous les cas** pour que ses phrases reflètent la réalité
+3. **L'IA doit signaler subtilement et sincèrement** quand des contraintes ont été élargies
 
-#### Problème 1 — Le filtre retourne 0 produit
+Cohérent avec la Phase 1 livrée (`318b112`) qui a déjà rapatrié la voix Robin V2 dans les prompts.
 
-Trace dans `sapi-cards-conseiller.js:98-129` pour `{piece:cuisine, taille:petite, sortie:mur}` :
-1. `getAcceptedCategories` → `['appliques']` (cats_by_sortie['mur'] = ['appliques'])
-2. `getAmpouleFilter` → `['ampoule_degagee', 'semi_degagee']` (ampoule_by_piece['cuisine'])
-3. Produit doit donc être un applique AVEC ampoule dégagée ou semi-ouverte
+### À faire — 3 chantiers couplés
 
-**Confirmation Robin** : les 4 appliques du catalogue ont TOUS l'ampoule entourée (signature visuelle Sâpi). Donc 0 match systématique pour cette combinaison.
+#### A. Côté JS — Fallback global du filtre
 
-**Conséquence secondaire** : le fallback "Aucun produit ne correspond" (`shop.js:80`) ne s'affiche pas visiblement sur le screenshot — soit le carousel masque le message, soit le visibleCount n'arrive pas à 0 dans la logique slides/carousel. **À investiguer en sus**.
+Dans `sapi-cards-conseiller.js`, refonte de la logique d'élargissement progressif :
 
-#### Problème 2 — L'IA `advice` ne connaît pas le catalogue ni le résultat du filtre
+1. Tenter le filtre avec **toutes** les réponses du projet
+2. Si 0 produit, retirer les réponses dans cet ordre fixe (du moins critique au plus) :
+   - `style` (préférence esthétique)
+   - `table` (Au-dessus de…)
+   - `hauteur` (sous-plafond)
+   - `eclairage` (principal / secondaire)
+   - `taille` (de la pièce)
+   - `piece` (cuisine / salon / chambre / bureau / entrée / escalier — retire le filtre ampoule par pièce et toute logique d'ambiance ; classé en dernier car moins structurant que `sortie`)
+3. Stratégie : retirer **une** réponse à la fois (dans l'ordre), si toujours 0, retirer **2** (cumul à partir du début), puis 3, etc., jusqu'à toutes (cumul des 6).
+4. **Ne JAMAIS retirer `sortie`** — c'est le client qui a indiqué où installer son luminaire, ça détermine le type de produit (applique / suspension / lampadaire / lampe à poser). Intouchable.
+5. Si toujours 0 même au maximum d'élargissement (les 6 retirées, seule `sortie` reste) : tomber sur état "0 produit catalogue → CTA sur-mesure proéminent"
 
-Il y a 3 endpoints IA et l'asymétrie est claire :
+À chaque relance, mémoriser la **liste des slugs retirés** dans une variable accessible (ex. `projectMeta.ignoredAnswers`) pour la transmettre ensuite à l'endpoint `advice`.
 
-| Endpoint | Modèle | Catalogue ? | Compteur match ? |
-|---|---|---|---|
-| `sapi_megafilter_freetext` (extraction filtres) | Haiku | ❌ | ❌ |
-| `sapi_megafilter_chat` (chat libre S2) | Sonnet | ✅ (`$all_products`) | ❌ |
-| **`sapi_megafilter_advice` (phrase finale)** | **Sonnet** | **❌** | **❌** |
+#### B. Côté PHP — Contrat enrichi de `sapi_ajax_megafilter_advice`
 
-C'est le 3e endpoint qui génère la phrase typewriter sur la card "Mon projet". Il ne reçoit que `PROJET DU VISITEUR :\n<chips récap>`. **Aucune info** sur le résultat du filtre. Donc il écrit toujours "voici quelques modèles" peu importe le réel.
+Le POST reçoit maintenant en plus 2 nouveaux champs :
+- `matching_product_ids` (JSON array) : IDs des produits qui matchent après filtrage final côté JS
+- `ignored_answers` (JSON array de slugs) : ex `["style"]`, `["style","table"]`, ou `[]` si filtre direct OK
 
-Choix historique volontaire : ne pas passer le catalogue pour empêcher l'IA de nommer un produit spécifique dans la phrase générique (le visiteur va les voir dans la grille). Mais elle pourrait au moins savoir **combien** matchent.
+Le system prompt est enrichi de **3 nouvelles sections** (en plus du rapatriement V2 déjà fait) :
 
-### Options proposées pour fix Problème 1
+1. **Catalogue complet** — repris du builder `sapi_megafilter_build_chat_prompt` (qui le passe déjà via `$all_products = sapi_guide_query_all_products([])`) :
+   ```
+   CATALOGUE COMPLET (tous les luminaires disponibles) :
+   - <title> | Catégorie : <cats> | Format : <format> | Ampoule : <type>
+   ...
+   ```
 
-| Option | Description | Impact | Coût |
-|---|---|---|---|
-| **1A** Assouplir | Pour cuisine + sortie=mur, retirer le filtre ampoule (un applique au mur est rapproché, l'ampoule entourée passe bien) | Solution rapide, philosophie cohérente | 5 lignes JS |
-| **1B** Fallback dégradé | Si 0 produit après filtre ampoule complet, relancer SANS ce filtre (sécurité côté JS) | Préserve la règle normale, garantit toujours ≥1 résultat | 15 lignes JS |
-| **1C** Garder strict + UX du vide | Laisser 0 produit, soigner le message vide (CTA sur-mesure proéminent + texte explicite "Cette combinaison est très spécifique") | Plus radical mais honnête, valorise le sur-mesure | UX work + bug shop.js à fixer |
+2. **Résultat filtre** — extrait depuis `matching_product_ids` :
+   ```
+   PRODUITS RETENUS APRÈS FILTRAGE (N modèles) :
+   - <title> (ID <id>)
+   ...
+   ```
+   ou `(aucun)` si liste vide.
 
-Et il faut **dans tous les cas** corriger le bug du message "Aucun produit" qui ne s'affiche pas visiblement (Robin n'a pas vu de message du tout sur le screenshot).
+3. **Contraintes ignorées** — depuis `ignored_answers`, avec labels humains :
+   ```
+   RÉPONSES ÉLARGIES POUR TROUVER DES MODÈLES : style, taille
+   ```
+   ou ligne absente si `ignored_answers = []`.
 
-### Options proposées pour fix Problème 2
+**Consigne ajoutée au prompt** :
+> Si la liste des produits retenus est vide après élargissement maximum, propose chaleureusement le sur-mesure (sans baratin). Si certaines réponses ont été élargies, mentionne-le subtilement et sincèrement (une demi-phrase suffit, naturel). Sinon, présente la sélection comme d'habitude. **Ne nomme pas de modèle précis** — le visiteur les voit dans la grille.
 
-| Option | Description | Coût |
-|---|---|---|
-| **2A** Count only (recommandé) | Compter côté PHP les produits matchant le projet + injecter dans user_msg : `PRODUITS MATCHANT : N`. Adapter la consigne système : "Si 0 → propose sur-mesure / Si 1-3 → sélection précise / Si 4+ → voici une sélection adaptée." | Helper PHP mirror de la logique JS (~80 lignes) + 5 lignes prompt |
-| **2B** Liste complète | Passer la liste des produits matchant à l'IA pour qu'elle puisse nommer un modèle. Risque : produits hors stock, sortie out-of-date. | Plus de code, plus de risque, plus d'effort |
+#### C. Côté JS — Bug latéral du message "Aucun produit"
 
-→ **2A** est largement préférable : on garde l'esprit "la phrase est générique sans nommer de modèle" mais on évite la promesse mensongère.
+Investiguer pourquoi le fallback de `shop.js:80` (message "Aucun produit ne correspond") ne s'affiche pas visiblement quand le filtre retourne 0. Hypothèses listées dans l'enquête : carousel qui masque, `visibleCount` qui n'arrive pas à 0, condition d'affichage cassée. **À corriger dans la même livraison.**
 
-### Question pour Robin (Cowork)
+Dans le nouveau monde (avec fallback global du chantier A), ce message ne devrait s'afficher que dans le cas extrême "0 produit même au max d'élargissement". Mais il faut qu'il s'affiche bien quand ce cas se produit.
 
-1. **Fix 1 — Quelle option pour le filtre vide ?** Mon avis : **1B (fallback dégradé)** est le meilleur compromis — on garde la règle métier en condition normale et on évite le piège du vide silencieux. Mais 1A est tentant si ta conviction métier est qu'une applique au mur en cuisine est OK avec ampoule entourée.
-2. **Fix 2 — On code 2A ?** (helper PHP `sapi_megafilter_count_matching_products` qui mirror la logique JS, puis injection du count + consigne adaptative dans le prompt advice).
-3. **Bug latéral** : le message "Aucun produit" ne s'affiche pas visiblement. Tu veux que je creuse en sus ?
+### Critères de succès
 
-Pas de code écrit pour cette session — j'attends ton arbitrage avant d'implémenter.
+1. **Cas "Cuisine · Petite · Au mur · Pas de préf"** : la grille affiche ≥1 produit (élargissement automatique a retiré `style` puis éventuellement `taille`), et la phrase IA mentionne l'élargissement de manière naturelle (*"j'ai un peu élargi ta sélection pour pouvoir te montrer des modèles…"* par exemple).
+2. **Cas extrême "0 même après élargissement max"** : grille montre un message + CTA sur-mesure proéminent, et l'IA propose le sur-mesure sans détour ni promesse de modèle catalogue.
+3. **Cas standard (filtre direct OK)** : aucun changement visible, l'IA répond avec sa voix V2 + ses règles métier.
+4. Le system prompt de `advice` contient bien les 3 nouvelles sections (catalogue + résultat filtre + contraintes ignorées) — vérifiable par `error_log($system_prompt)` temporaire.
+5. Pas de régression sur `chat` ni `freetext` (inchangés).
+6. Test du cycle complet sur `test.atelier-sapi.fr` : parcours en modale → grille → phrase IA cohérente.
+
+### Décisions Robin actées (Cowork, 22/05/2026)
+
+- **Ordre de retrait** : style → table → hauteur → eclairage → taille → piece. **Seule `sortie` est intouchable** (le client a indiqué où installer, ça détermine le type de produit).
+- **Visibilité UI** des réponses élargies : aucune chip atténuée / barrée / hint pour le MVP. Le texte IA suffit. Si pas clair en test, on ajoutera.
+- **Catalogue dans freetext** (Haiku) : NON. Haiku reste sans catalogue. Son rôle est l'extraction JSON, pas la formulation de phrases sur des produits.
+- **Catalogue dans chat** (Sonnet) : déjà présent, inchangé.
+- **Catalogue dans advice** (Sonnet) : oui, à ajouter (objet du fix).
+
+### Notes pour le retour
+
+Au retour, indiquer :
+- Hash des commits livrés
+- Un échantillon de prompt complet `advice` (capturé via `error_log`) avec les 3 nouvelles sections visibles
+- Les cas testés (au moins : cuisine+petite+mur+neutre, cuisine+grande+plafond+moderne, escalier+ouvert)
+- Tout effet de bord (longueur de réponse IA, temps de réponse, rate-limit)
 
 ---
 
