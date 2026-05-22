@@ -1,5 +1,76 @@
 # Tasks — Coordination Cowork ↔ Claude Code
 
+## 🔍 Enquête (en attente de décision)
+
+## [ENQUÊTE] Cas "cuisine + petite + sortie=mur + neutre" → 0 produit + IA qui propose des modèles inexistants
+**Date :** 2026-05-22
+**Branche test :** `test-theme-sapi-maison`
+**Statut :** Diagnostiqué, en attente d'arbitrage Robin sur la stratégie de fix.
+
+### Symptôme observé
+
+Sur `test.atelier-sapi.fr/mes-creations/?piece=cuisine` après parcours :
+- Projet : Cuisine · Petite · Au mur · Pas de préférence
+- Grille produits **VIDE** (aucun modèle affiché)
+- Phrase IA sur la card "Mon projet" : *"Pour une petite cuisine avec une sortie au mur, une applique bien placée peut vraiment transformer l'ambiance — voici quelques modèles qui pourraient vous convenir."*
+- → l'IA promet des modèles qui n'existent pas dans la grille
+
+### Diagnostic — 2 problèmes distincts
+
+#### Problème 1 — Le filtre retourne 0 produit
+
+Trace dans `sapi-cards-conseiller.js:98-129` pour `{piece:cuisine, taille:petite, sortie:mur}` :
+1. `getAcceptedCategories` → `['appliques']` (cats_by_sortie['mur'] = ['appliques'])
+2. `getAmpouleFilter` → `['ampoule_degagee', 'semi_degagee']` (ampoule_by_piece['cuisine'])
+3. Produit doit donc être un applique AVEC ampoule dégagée ou semi-ouverte
+
+**Confirmation Robin** : les 4 appliques du catalogue ont TOUS l'ampoule entourée (signature visuelle Sâpi). Donc 0 match systématique pour cette combinaison.
+
+**Conséquence secondaire** : le fallback "Aucun produit ne correspond" (`shop.js:80`) ne s'affiche pas visiblement sur le screenshot — soit le carousel masque le message, soit le visibleCount n'arrive pas à 0 dans la logique slides/carousel. **À investiguer en sus**.
+
+#### Problème 2 — L'IA `advice` ne connaît pas le catalogue ni le résultat du filtre
+
+Il y a 3 endpoints IA et l'asymétrie est claire :
+
+| Endpoint | Modèle | Catalogue ? | Compteur match ? |
+|---|---|---|---|
+| `sapi_megafilter_freetext` (extraction filtres) | Haiku | ❌ | ❌ |
+| `sapi_megafilter_chat` (chat libre S2) | Sonnet | ✅ (`$all_products`) | ❌ |
+| **`sapi_megafilter_advice` (phrase finale)** | **Sonnet** | **❌** | **❌** |
+
+C'est le 3e endpoint qui génère la phrase typewriter sur la card "Mon projet". Il ne reçoit que `PROJET DU VISITEUR :\n<chips récap>`. **Aucune info** sur le résultat du filtre. Donc il écrit toujours "voici quelques modèles" peu importe le réel.
+
+Choix historique volontaire : ne pas passer le catalogue pour empêcher l'IA de nommer un produit spécifique dans la phrase générique (le visiteur va les voir dans la grille). Mais elle pourrait au moins savoir **combien** matchent.
+
+### Options proposées pour fix Problème 1
+
+| Option | Description | Impact | Coût |
+|---|---|---|---|
+| **1A** Assouplir | Pour cuisine + sortie=mur, retirer le filtre ampoule (un applique au mur est rapproché, l'ampoule entourée passe bien) | Solution rapide, philosophie cohérente | 5 lignes JS |
+| **1B** Fallback dégradé | Si 0 produit après filtre ampoule complet, relancer SANS ce filtre (sécurité côté JS) | Préserve la règle normale, garantit toujours ≥1 résultat | 15 lignes JS |
+| **1C** Garder strict + UX du vide | Laisser 0 produit, soigner le message vide (CTA sur-mesure proéminent + texte explicite "Cette combinaison est très spécifique") | Plus radical mais honnête, valorise le sur-mesure | UX work + bug shop.js à fixer |
+
+Et il faut **dans tous les cas** corriger le bug du message "Aucun produit" qui ne s'affiche pas visiblement (Robin n'a pas vu de message du tout sur le screenshot).
+
+### Options proposées pour fix Problème 2
+
+| Option | Description | Coût |
+|---|---|---|
+| **2A** Count only (recommandé) | Compter côté PHP les produits matchant le projet + injecter dans user_msg : `PRODUITS MATCHANT : N`. Adapter la consigne système : "Si 0 → propose sur-mesure / Si 1-3 → sélection précise / Si 4+ → voici une sélection adaptée." | Helper PHP mirror de la logique JS (~80 lignes) + 5 lignes prompt |
+| **2B** Liste complète | Passer la liste des produits matchant à l'IA pour qu'elle puisse nommer un modèle. Risque : produits hors stock, sortie out-of-date. | Plus de code, plus de risque, plus d'effort |
+
+→ **2A** est largement préférable : on garde l'esprit "la phrase est générique sans nommer de modèle" mais on évite la promesse mensongère.
+
+### Question pour Robin (Cowork)
+
+1. **Fix 1 — Quelle option pour le filtre vide ?** Mon avis : **1B (fallback dégradé)** est le meilleur compromis — on garde la règle métier en condition normale et on évite le piège du vide silencieux. Mais 1A est tentant si ta conviction métier est qu'une applique au mur en cuisine est OK avec ampoule entourée.
+2. **Fix 2 — On code 2A ?** (helper PHP `sapi_megafilter_count_matching_products` qui mirror la logique JS, puis injection du count + consigne adaptative dans le prompt advice).
+3. **Bug latéral** : le message "Aucun produit" ne s'affiche pas visiblement. Tu veux que je creuse en sus ?
+
+Pas de code écrit pour cette session — j'attends ton arbitrage avant d'implémenter.
+
+---
+
 ## ✅ Livré
 
 ## [RETOUR] Rapatriement voix Robin V2 + règles métier dans les prompts IA V3
@@ -35,7 +106,7 @@
 
 ### Question pour Robin
 
-- Test sur `testlumineux.atelier-sapi.fr` : parcours complet en modale (S0 → questions → S1 → IA) sur une cuisine pour observer si Robin refuse bien les lampes à poser
+- Test sur `test.atelier-sapi.fr` : parcours complet en modale (S0 → questions → S1 → IA) sur une cuisine pour observer si Robin refuse bien les lampes à poser
 - Test chat S2 : soumettre un freetext → vérifier ton chaleureux des exemples V2
 
 ---
@@ -117,7 +188,7 @@ Le **reste de chaque prompt** (sections "FILTRES DISPONIBLES", "CATALOGUE", "FOR
 1. Les 3 system prompts V3 contiennent le contenu des fichiers `.txt` en tête (vérifiable en faisant un `error_log()` temporaire du prompt complet sur un appel test).
 2. La structure de sortie JSON de chaque endpoint reste **identique** (pas de régression front).
 3. La whitelist anti-hallucination de freetext continue de filtrer correctement.
-4. Test manuel sur testlumineux.atelier-sapi.fr — observer une amélioration sur :
+4. Test manuel sur test.atelier-sapi.fr — observer une amélioration sur :
    - **Mode chat S2** : Robin tutoie systématiquement, ton chaleureux d'artisan, mentionne les essences/règles si pertinent. Refuse activement les lampes à poser pour une cuisine (règle de `regles.txt`).
    - **Card "Mon projet" sur /mes-creations/** : l'`advice_text` reflète la voix Robin (Square Peg signature côté front, mais le texte lui-même doit avoir le ton artisan).
    - **Mode freetext** : extraction de filtres toujours fiable (JSON correct), message court (1-2 phrases) et chaleureux.
@@ -133,12 +204,11 @@ Au retour, indiquer :
 
 ---
 
-## [TÂCHE] Mass-update GPC Pinterest + Brand Google for WC + Condition variations (script one-shot)
+## [ANNULÉE] Mass-update GPC Pinterest + Brand Google for WC + Condition variations (script one-shot)
 **Date :** 2026-05-21
-**Branche :** prod (master) — c'est une opération sur les metas DB, pas sur le code thème
-**Priorité :** haute
+**Statut :** Robin gère l'exécution du snippet lui-même via Code Snippets. Pas besoin de Claude Code. Voir le guide dans `business/docs/snippet-pinterest-mass-update-mai-2026.md`.
 
-### Contexte
+### Contexte (pour archive)
 
 Diagnostic Pinterest mai 2026 : sur 167 produits ingérés dans Pinterest, **141 sont en warning** parce que `google_product_category` est soit manquante (105), soit incomplète (34 avec seulement 2 niveaux `Home & Garden > Lighting`). Conséquence : -90% de visibilité organique sur Pinterest (1 960 impressions/mois sur 167 produits = 11,7 par produit, vs norme 200-1000).
 
@@ -162,13 +232,33 @@ On en profite pour aligner :
 
 **Étape 1 — Découverte des meta keys exactes** (préalable obligatoire)
 
-Avant d'écrire le script, grep dans `wp-content/plugins/pinterest-for-woocommerce/` et `wp-content/plugins/google-listings-and-ads/` pour identifier les meta keys utilisées :
+**Méthode sécurisée — Rosetta stone via produits pilotes :**
+
+Robin va configurer **manuellement avant cette tâche** un produit pilote + une variation pilote dans WP admin (Pinterest > Catégorie Google + Brand Google for WC sur le parent, Pinterest > Condition sur 1 variation). Les IDs des produits pilotes seront communiqués dans la tâche queue.
+
+Pour identifier les meta keys exactes :
+
+1. Récupérer les IDs produits pilotes communiqués par Robin (parent + variation).
+2. Requête DB directe :
+   ```sql
+   SELECT meta_key, meta_value
+   FROM wp_postmeta
+   WHERE post_id IN (<ID_parent>, <ID_variation>)
+     AND (meta_key LIKE '%pinterest%' OR meta_key LIKE '%gla%' OR meta_key LIKE '%google_product_category%' OR meta_key LIKE '%brand%')
+   ORDER BY post_id, meta_key;
+   ```
+3. Identifier les 4 meta keys cibles (Pinterest GPC parent, Pinterest Condition variation, GLA GPC parent, GLA Brand parent).
+4. **Validation croisée** : grep ces meta keys dans `wp-content/plugins/pinterest-for-woocommerce/src/` et `wp-content/plugins/google-listings-and-ads/src/` pour vérifier que ce sont bien les clés primaires utilisées par les plugins (pas des sous-clés ou des artefacts).
+
+**Méthode fallback (si Robin n'a pas eu le temps de faire le pilote) :**
+
+Grep direct dans `wp-content/plugins/pinterest-for-woocommerce/` et `wp-content/plugins/google-listings-and-ads/` pour identifier les meta keys utilisées :
 - Pinterest "Catégorie Google" sur le produit parent → probablement `_pinterest_for_woocommerce_google_product_category` mais à confirmer
 - Pinterest "Condition" sur la variation → probablement `_pinterest_for_woocommerce_condition`
 - Google for WC "Google Product Category" → probablement `_wc_gla_google_product_category`
 - Google for WC "Brand" → probablement `_wc_gla_brand`
 
-Confirmer le **slug exact** de la catégorie WC "accessoires" via `wp term list product_cat` (peut être `accessoires`, `accessoire`, `accessories`...).
+Dans tous les cas, confirmer le **slug exact** de la catégorie WC "accessoires" via `wp term list product_cat` (peut être `accessoires`, `accessoire`, `accessories`...).
 
 **Étape 2 — Écrire le snippet PHP "Run once"**
 
