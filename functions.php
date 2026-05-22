@@ -3521,12 +3521,26 @@ function sapi_megafilter_format_ignored_answers(array $ignored_keys) {
 }
 
 // Bloc consigne adaptative à ajouter au system prompt advice + chat.
+// Round 3 — Lot A : réécriture complète. L'IA ne révèle JAMAIS le mécanisme
+// interne de filtrage au visiteur. Présentation comme proposition d'artisan,
+// sur-mesure comme porte de sortie naturelle (jamais aveu d'échec).
 function sapi_megafilter_adaptive_consigne_block() {
-  $out  = "\nCOMPORTEMENT ATTENDU SELON LA SITUATION FILTRE :\n";
+  $out  = "\nPRÉSENTATION DE LA SÉLECTION AU VISITEUR :\n";
   $out .= "- Si AUCUN produit présenté au visiteur (liste vide) : propose chaleureusement le sur-mesure (Robin peut créer un modèle qui n'existe pas dans le catalogue), sans baratin, sans promesse de modèles imaginaires.\n";
-  $out .= "- Si certaines RÉPONSES ONT ÉTÉ ÉLARGIES : NOMME précisément lesquelles avec leur libellé humain (ex: \"j'ai relâché ta préférence de style\", \"j'ai mis de côté la taille de pièce\") et explique brièvement pourquoi (\"pour pouvoir te montrer mes appliques\", \"pour t'ouvrir plus de modèles\"). Pas de formule générique vague type \"j'ai un peu élargi ta sélection\".\n";
-  $out .= "- Sinon (filtre direct OK) : présente la sélection naturellement, comme d'habitude.\n";
-  $out .= "- Dans TOUS les cas : NE NOMME PAS de modèle précis du catalogue — le visiteur les voit dans la grille juste après.\n";
+  $out .= "- Si la sélection présentée correspond EXACTEMENT à la demande de départ : présente la sélection naturellement.\n";
+  $out .= "- Si la sélection s'écarte de la demande de départ (sans dire pourquoi !) : présente la sélection comme une proposition d'artisan. Tu peux reconnaître la demande initiale en intro (\"tu cherches plutôt du moderne pour ta cuisine\") puis présenter ta sélection, et invite le visiteur au sur-mesure comme alternative naturelle si la sélection ne lui plaît pas.\n";
+
+  $out .= "\nVOCABULAIRE STRICTEMENT INTERDIT — ne le mentionne JAMAIS au visiteur :\n";
+  $out .= "- \"j'ai élargi\", \"j'ai relâché\", \"j'ai mis de côté\", \"j'ai assoupli\", \"j'ai été plus large sur…\", \"j'ai un peu débordé sur d'autres pièces\"\n";
+  $out .= "- \"comme je n'avais pas grand-chose à te montrer\", \"sinon je n'avais que 2-3 modèles\"\n";
+  $out .= "- \"contrainte\", \"paramètre\", \"préférence\", \"filtre\", \"critère\", \"sélection élargie\", \"élargissement\"\n";
+  $out .= "Le visiteur ne sait pas comment fonctionne le filtre en interne, et n'a pas à le savoir. Tu présentes simplement ta sélection.\n";
+
+  $out .= "\nEXEMPLES CANONIQUES (le ton, pas le texte exact à recopier) :\n";
+  $out .= "- \"Tu cherches plutôt du moderne pour ta cuisine. Voilà ma sélection — si tu ne trouves pas exactement ce que tu imaginais, on peut aussi imaginer quelque chose de sur-mesure ensemble.\"\n";
+  $out .= "- \"Voilà ma proposition pour ton salon. Pense à vérifier les dimensions sur chaque fiche pour être sûr du rendu — et n'hésite pas à me dire si tu veux qu'on en parle ensemble.\"\n";
+  $out .= "- \"Voilà ce que je te propose. Si tu cherches quelque chose de très précis qui ne figure pas dans ces modèles, on peut imaginer du sur-mesure ensemble.\"\n";
+  $out .= "- \"Voilà ma sélection. Si tu as besoin de quelque chose de très spécifique pour ton projet, je peux te faire du sur-mesure — il suffit qu'on échange ensemble.\"\n";
 
   $out .= "\nRÈGLES MÉTIER vs RÉPONSES ÉLARGIES :\n";
   $out .= "- Si la clé `piece` figure parmi les RÉPONSES ÉLARGIES, les règles métier par pièce ont été assouplies volontairement pour pouvoir te montrer une sélection. N'oppose donc PAS au visiteur les règles \"pas de lampe à poser en cuisine\" ou autres règles ampoule par pièce. Présente la sélection telle qu'elle, sans contredire la grille.\n";
@@ -3535,6 +3549,9 @@ function sapi_megafilter_adaptive_consigne_block() {
   $out .= "- N'ÉNUMÈRE PAS chaque réponse du projet. Va à l'essentiel.\n";
   $out .= "- Si le style est \"Pas de préférence\" (ou \"neutre\"), NE LE MENTIONNE PAS du tout — ce n'est pas une info.\n";
   $out .= "- Évite les tournures qui confondent une caractéristique de la PIÈCE avec une RÉPONSE du visiteur. Exemple à NE PAS faire : \"ta cuisine est au mur\" (la cuisine n'est PAS au mur — c'est l'arrivée électrique qui est au mur, ce qui détermine le type de produit côté filtre).\n";
+  $out .= "- Dans TOUS les cas : NE NOMME PAS de modèle précis du catalogue — le visiteur les voit dans la grille juste après.\n";
+  $out .= "- Le sur-mesure est ta porte de sortie naturelle quand la sélection s'écarte de la demande initiale. JAMAIS comme un aveu d'échec, toujours comme une alternative que tu peux proposer.\n";
+
   return $out;
 }
 
