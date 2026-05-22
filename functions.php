@@ -2788,7 +2788,15 @@ function sapi_megafilter_build_freetext_prompt(array $whitelist) {
 
   $prompt .= "CHAMPS BONUS pour l'UI contact (à remplir SI action = \"contact\") :\n";
   $prompt .= "- `contact_subject` : résumé court du projet (1 ligne max, ex: \"Projet hôtel — 30 chambres équipées\")\n";
-  $prompt .= "- `contact_message` : message d'amorce pour le formulaire/email (3-4 lignes), comme si le visiteur l'écrivait lui-même à Robin. Pas de bullet points, ton humain.\n\n";
+  $prompt .= "- `contact_message` : message d'amorce pour le formulaire (3-4 lignes), écrit COMME SI le visiteur l'écrivait à Robin (\"Bonjour Robin, je cherche...\"). Tu peux y mentionner les éléments à préciser sous forme déclarative (\"je préciserai le nombre de couloirs et l'ambiance souhaitée\"), pas sous forme de questions ouvertes. Le visiteur éditera ce texte avant d'envoyer.\n\n";
+
+  $prompt .= "⚠️ CONTRAINTE IMPORTANTE sur le champ `message` quand action=\"contact\" :\n";
+  $prompt .= "Quand action=\"contact\", le `message` s'affiche AU-DESSUS d'un formulaire intégré (email + textarea). Le visiteur ne peut PLUS te répondre en chat — il n'a plus que ce formulaire pour communiquer. Donc le `message` :\n";
+  $prompt .= "- DOIT être une intro d'accueil chaleureuse qui valide le projet (1-2 phrases courtes).\n";
+  $prompt .= "- DOIT inviter à utiliser le formulaire (\"laisse-moi tes coordonnées\", \"écris-moi ton projet en détail\", \"complète juste le formulaire ci-dessous\").\n";
+  $prompt .= "- NE DOIT PAS poser de questions ouvertes (\"combien de…\", \"quelle ambiance…\", \"as-tu des contraintes…\") — le visiteur ne peut PAS y répondre en chat. Les précisions à demander vont dans `contact_message` sous forme déclarative.\n";
+  $prompt .= "- Exemple OK : \"Super, un projet hôtel pour les couloirs, c'est un beau chantier. Laisse-moi tes coordonnées et précise ton projet ci-dessous — je te recontacte sous 48h pour qu'on en discute ensemble.\"\n";
+  $prompt .= "- Exemple À ÉVITER : \"J'aimerais en savoir plus : combien de couloirs, quelle ambiance ?\" (questions ouvertes = visiteur bloqué).\n\n";
 
   $prompt .= "RÈGLES :\n";
   $prompt .= "- N'invente PAS de slug : utilise exactement ceux listés dans FILTRES DISPONIBLES.\n";
@@ -2883,7 +2891,13 @@ function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_pr
 
   $prompt .= "CHAMPS BONUS pour l'UI contact (à remplir SI action = \"contact\") :\n";
   $prompt .= "- `contact_subject` : résumé court du projet (1 ligne, ex: \"Projet hôtel — 30 chambres équipées\").\n";
-  $prompt .= "- `contact_message` : message d'amorce pour le formulaire/email (3-4 lignes), comme si le visiteur l'écrivait à Robin. Ton humain, pas de bullet points.\n\n";
+  $prompt .= "- `contact_message` : message d'amorce pour le formulaire (3-4 lignes), écrit COMME SI le visiteur l'écrivait à Robin (\"Bonjour Robin, je cherche…\"). Tu peux y mentionner les éléments à préciser sous forme déclarative (\"je préciserai le nombre et l'ambiance\"), pas sous forme de questions ouvertes. Le visiteur éditera ce texte avant d'envoyer.\n\n";
+
+  $prompt .= "⚠️ CONTRAINTE IMPORTANTE sur le champ `message` quand action=\"contact\" :\n";
+  $prompt .= "Quand action=\"contact\", le `message` s'affiche AU-DESSUS d'un formulaire intégré (email + textarea). Le visiteur ne peut PLUS te répondre en chat — il n'a plus que ce formulaire pour communiquer. Donc le `message` :\n";
+  $prompt .= "- DOIT être une intro d'accueil chaleureuse qui valide le projet (1-2 phrases courtes).\n";
+  $prompt .= "- DOIT inviter à utiliser le formulaire (\"laisse-moi tes coordonnées\", \"complète juste le formulaire ci-dessous\").\n";
+  $prompt .= "- NE DOIT PAS poser de questions ouvertes (\"combien de…\", \"quelle ambiance…\") — le visiteur ne peut PAS y répondre en chat. Les précisions vont dans `contact_message` sous forme déclarative.\n\n";
 
   $prompt .= "RÈGLES :\n";
   $prompt .= "- `message` : obligatoire, 2-4 phrases.\n";
