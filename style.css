@@ -23475,6 +23475,9 @@ body.woocommerce-cart div.woocommerce-wrapper {
   line-height: 1.55;
   text-align: center;
 }
+.conseiller-product-recap__conseil--taille {
+  margin-top: 10px;
+}
 
 /* F2b — Nav s-product-recap : "Modifier mes réponses" + "Contacter Robin"
    alignés horizontalement avec un séparateur visuel léger. */

@@ -383,6 +383,7 @@ function sapi_maison_enqueue_assets() {
         // F2b Phase 2 — Conseils de style fixes (pattern legacy pg_style:* —
         // textes pré-générés affichés immédiatement, zéro IA).
         'styleConseils'  => sapi_megafilter_get_style_conseils(),
+        'sizeConseils'   => sapi_megafilter_get_size_conseils(),
         // F2b Phase 2 — Contexte produit (null hors is_product, sinon ID + nom).
         'product'        => is_product() ? [
           'id'   => get_queried_object_id(),
@@ -3311,6 +3312,7 @@ function sapi_render_conseiller_modal() {
           </div>
 
           <p class="conseiller-product-recap__conseil" data-product-recap-conseil></p>
+          <p class="conseiller-product-recap__conseil conseiller-product-recap__conseil--taille" data-product-recap-conseil-taille></p>
 
           <div class="conseiller-modal__cta">
             <button type="button" class="conseiller-cta" data-action="product-apply">
@@ -3599,6 +3601,14 @@ function sapi_megafilter_get_style_conseils() {
     'moderne' => __("Le Peuplier, clair et lumineux, s'accordera parfaitement avec votre intérieur moderne.", 'theme-sapi-maison'),
     'ancien'  => __("L'Okoumé, chaud et ambré, s'intègrera naturellement dans votre intérieur aux tons chauds.", 'theme-sapi-maison'),
     'neutre'  => __("Les deux essences sont belles — vous pourrez voir les photos de chaque finition sur la fiche.", 'theme-sapi-maison'),
+  ];
+}
+
+function sapi_megafilter_get_size_conseils() {
+  return [
+    'petite'  => __("Cette taille s'adapte bien à un petit espace sans être trop imposante.", 'theme-sapi-maison'),
+    'moyenne' => __("Cette taille standard convient à la plupart des pièces.", 'theme-sapi-maison'),
+    'grande'  => __("Cette grande taille créera un point focal fort dans ton espace.", 'theme-sapi-maison'),
   ];
 }
 

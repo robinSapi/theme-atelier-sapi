@@ -55,6 +55,7 @@
   // F2b Phase 2 — Mode court (fiche produit) : whitelist des steps autorisés
   var SHORT_STEPS = Array.isArray(config.shortSteps) ? config.shortSteps : ['piece', 'taille', 'taille_escalier', 'style'];
   var STYLE_CONSEILS = config.styleConseils || {};
+  var SIZE_CONSEILS  = config.sizeConseils  || {};
   var PRODUCT_CTX = config.product || null;
 
   // Mapping projet → essence (legacy mon-projet.js pré-F1c)
@@ -1145,6 +1146,18 @@
       els.productRecapConseil.hidden = !conseil;
     }
 
+    // Conseil de taille (mirror conseil de style — texte fixe pré-généré).
+    // Slug dérivé : pour escalier, taille_escalier=ouvert→grande, standard→petite.
+    if (els.productRecapConseilTaille) {
+      var tailleSlug = answers.taille || '';
+      if (!tailleSlug && answers.piece === 'escalier' && answers.taille_escalier) {
+        tailleSlug = answers.taille_escalier === 'ouvert' ? 'grande' : 'petite';
+      }
+      var conseilTaille = (tailleSlug && SIZE_CONSEILS[tailleSlug]) || '';
+      els.productRecapConseilTaille.textContent = conseilTaille;
+      els.productRecapConseilTaille.hidden = !conseilTaille;
+    }
+
     showScreen('s-product-recap');
   }
 
@@ -1407,6 +1420,7 @@
     els.productRecapTaille       = els.modal.querySelector('[data-product-recap-taille]');
     els.productRecapTailleValue  = els.modal.querySelector('[data-product-recap-taille-value]');
     els.productRecapConseil      = els.modal.querySelector('[data-product-recap-conseil]');
+    els.productRecapConseilTaille = els.modal.querySelector('[data-product-recap-conseil-taille]');
 
     // Marqueur pour les cards Phase 2 (évite leur fallback console.info)
     window.__sapiModalReady = true;

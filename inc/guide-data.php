@@ -38,9 +38,9 @@ function sapi_guide_get_steps() {
         ],
       ],
       'choices'    => [
-        ['label' => 'Petite',          'dim' => 'intime',      'slug' => 'petite',     'icon' => 'square-sm'],
+        ['label' => 'Petit',           'dim' => 'intime',      'slug' => 'petite',     'icon' => 'square-sm'],
         ['label' => 'Standard',        'dim' => 'confortable', 'slug' => 'moyenne',    'icon' => 'square-md'],
-        ['label' => 'Grande',          'dim' => 'spacieuse',   'slug' => 'grande',     'icon' => 'square-lg'],
+        ['label' => 'Grand',           'dim' => 'spacieuse',   'slug' => 'grande',     'icon' => 'square-lg'],
         ['label' => 'Je ne sais pas',  'dim' => '',             'slug' => 'ne-sais-pas', 'icon' => 'question'],
       ],
     ],
