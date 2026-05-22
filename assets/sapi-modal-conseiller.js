@@ -654,7 +654,7 @@
 
         if (!resp || !resp.success) {
           var fallback = (resp && resp.data && resp.data.fallback) ||
-            'Je n\'arrive pas à analyser ton message. Tu peux essayer de répondre directement aux questions ou me contacter via le formulaire.';
+            'Je n\'arrive pas à analyser ton message. Tu peux réessayer ou m\'écrire directement.';
           addRobinBubble(fallback);
           state.chat.conversation.push({ role: 'user', content: text });
           state.chat.conversation.push({ role: 'assistant', content: fallback });

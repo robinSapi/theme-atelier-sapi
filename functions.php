@@ -2943,22 +2943,32 @@ function sapi_ajax_megafilter_freetext() {
   if (!$ai_text) {
     wp_send_json_error([
       'message'  => 'api_error',
-      'fallback' => 'Je n\'arrive pas à analyser ton message pour l\'instant. Tu peux essayer de répondre directement aux questions ci-dessous, ou me contacter via le formulaire.',
+      'fallback' => 'Je n\'arrive pas à analyser ton message pour l\'instant. Tu peux réessayer ou m\'écrire directement.',
     ]);
     return;
   }
 
+  // Round 3 fix — Le prompt Lot C1 permet 3 voies de sortie : standard
+  // (filters peuplés), incomplet (filters vide + question dans message),
+  // contact (action=contact sans filters). On accepte donc tant qu'on a
+  // un JSON parsé valide avec au moins un message ou une action — sinon
+  // seulement fallback parse_error.
   $parsed = sapi_megafilter_parse_json($ai_text);
-  if (!$parsed || !isset($parsed['filters']) || !is_array($parsed['filters'])) {
+  $has_message = ($parsed && isset($parsed['message']) && is_string($parsed['message']) && $parsed['message'] !== '');
+  $has_action  = ($parsed && isset($parsed['action']) && is_string($parsed['action']));
+  if (!$parsed || (!$has_message && !$has_action)) {
     wp_send_json_error([
       'message'  => 'parse_error',
-      'fallback' => 'Je n\'ai pas bien compris ton message. Tu peux essayer de répondre directement aux questions ci-dessous.',
+      'fallback' => 'Je n\'ai pas bien compris ton message. Tu peux reformuler ou m\'écrire directement.',
     ]);
     return;
   }
 
+  // filters peut être absent (cas action=contact direct ou question de
+  // précision). On normalise à array vide pour la suite du traitement.
+  $raw_filters = (isset($parsed['filters']) && is_array($parsed['filters'])) ? $parsed['filters'] : [];
   $clean_filters = [];
-  foreach ($parsed['filters'] as $key => $val) {
+  foreach ($raw_filters as $key => $val) {
     if (!isset($whitelist[$key])) continue;
     if (!is_string($val)) continue;
     if (!in_array($val, $whitelist[$key], true)) continue;
