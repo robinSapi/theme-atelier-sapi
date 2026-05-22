@@ -579,7 +579,7 @@
     wrap.id = 'conseiller-chat-thinking';
     var bubble = document.createElement('div');
     bubble.className = 'conseiller-chat-bubble conseiller-chat-thinking';
-    bubble.setAttribute('aria-label', 'Robin réfléchit');
+    bubble.setAttribute('aria-label', 'Réponse en cours de préparation');
     for (var i = 0; i < 3; i++) {
       var dot = document.createElement('span');
       dot.className = 'conseiller-chat-thinking__dot';
@@ -695,7 +695,7 @@
             removeThinkingBubble();
             state.chat.status = 'idle';
             setChatFooterState('idle');
-            addRobinBubble('Le serveur ne répond pas. Tu peux réessayer ou me contacter via le formulaire.');
+            addRobinBubble('Le serveur ne répond pas. Tu peux réessayer ou contacter Robin via le formulaire.');
           }
           return;
         }
@@ -703,7 +703,7 @@
         removeThinkingBubble();
         state.chat.status = 'idle';
         setChatFooterState('idle');
-        addRobinBubble('Je n\'arrive pas à te répondre pour l\'instant. Tu peux réessayer ou me contacter via le formulaire.');
+        addRobinBubble('Je n\'arrive pas à te répondre pour l\'instant. Tu peux réessayer ou contacter Robin via le formulaire.');
       });
   }
 
@@ -792,7 +792,7 @@
             removeThinkingBubble();
             state.chat.status = 'idle';
             setChatFooterState('idle');
-            addRobinBubble('Le serveur ne répond pas. Tu peux réessayer ou me contacter via le formulaire.');
+            addRobinBubble('Le serveur ne répond pas. Tu peux réessayer ou contacter Robin via le formulaire.');
           }
           return;
         }
@@ -800,7 +800,7 @@
         removeThinkingBubble();
         state.chat.status = 'idle';
         setChatFooterState('idle');
-        addRobinBubble('Je n\'arrive pas à te répondre pour l\'instant. Tu peux réessayer ou me contacter via le formulaire.');
+        addRobinBubble('Je n\'arrive pas à te répondre pour l\'instant. Tu peux réessayer ou contacter Robin via le formulaire.');
       });
   }
 
@@ -935,7 +935,7 @@
     }
     if (els.chatSend) els.chatSend.disabled = false;
 
-    // Bulle initiale Robin (cosmétique, construite côté client — zéro IA)
+    // Bulle initiale de l'assistant (cosmétique, construite côté client — zéro IA)
     var greeting = getInitialChatGreeting();
     enterChatMode();
     addRobinBubble(greeting);
@@ -945,10 +945,10 @@
     submitFreetext(text);
   }
 
-  // Bulle d'accueil Robin selon l'état du projet (zéro appel IA).
+  // Bulle d'accueil de l'assistant selon l'état du projet (zéro appel IA).
   function getInitialChatGreeting() {
     if (!window.sapiProject || !window.sapiProject.hasProject()) {
-      return 'Décris-moi ton projet, je vais t\'aider à trouver une sélection adaptée.';
+      return 'Décris-moi ton projet, je vais t\'aider à trouver une sélection adaptée dans le catalogue de Robin.';
     }
     return getInitialChatAdvice() + ' Qu\'est-ce que tu veux affiner ?';
   }
@@ -1045,7 +1045,7 @@
     var cardsConfig = window.SAPI_CARDS_CONSEILLER || {};
     var generics = cardsConfig.genericAdvice || {};
     if (piece && generics[piece]) return generics[piece];
-    return cardsConfig.fallbackAdvice || 'Voici ma sélection pour ton projet.';
+    return cardsConfig.fallbackAdvice || 'Voici la sélection que je te propose dans le catalogue de Robin.';
   }
 
   // Action "Effacer et recommencer" depuis S3 : vide sapiProject + revient

@@ -286,7 +286,7 @@
      ───────────────────────────────────────────── */
   var els = {};
   var GENERIC_ADVICE = config.genericAdvice || {};
-  var FALLBACK_ADVICE = config.fallbackAdvice || 'Voici ma sélection pour ton projet.';
+  var FALLBACK_ADVICE = config.fallbackAdvice || 'Voici la sélection que je te propose dans le catalogue de Robin.';
 
   /**
    * Texte à afficher sur la card "Mon projet" — résolu synchronement.

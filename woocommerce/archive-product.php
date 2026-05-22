@@ -99,7 +99,7 @@ $conseiller_pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCo
       </span>
       <h2 class="conseiller-h2"><?php esc_html_e('Un coup de main pour choisir ?', 'theme-sapi-maison'); ?></h2>
       <p class="conseiller-subtitle">
-        <?php esc_html_e('Décrivez votre projet — pièce, taille, style — et Robin vous propose une sélection de luminaires adaptés.', 'theme-sapi-maison'); ?>
+        <?php esc_html_e('Décris ton projet — pièce, taille, style — et je te propose une sélection adaptée dans le catalogue de Robin.', 'theme-sapi-maison'); ?>
       </p>
       <button type="button" class="conseiller-cta" data-action="open-modal" data-modal-state="s0">
         <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
@@ -125,7 +125,6 @@ $conseiller_pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCo
       </span>
       <p class="conseiller-mon-projet__text" data-mon-projet-phrase>
         <span class="conseiller-mon-projet__text-content" data-mon-projet-phrase-content></span>
-        <span class="conseiller-signature">— Robin</span>
       </p>
       <div class="conseiller-mon-projet__inline-question" data-inline-question hidden></div>
     </div>

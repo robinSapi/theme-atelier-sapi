@@ -361,7 +361,7 @@ function sapi_maison_enqueue_assets() {
         // F2a-bis : textes génériques par pièce + fallback ultime — lus
         // synchronement par sapi-cards-conseiller.js (zéro AJAX au load).
         'genericAdvice'  => sapi_megafilter_get_generic_advices(),
-        'fallbackAdvice' => __('Voici ma sélection pour ton projet.', 'theme-sapi-maison'),
+        'fallbackAdvice' => __('Voici la sélection que je te propose dans le catalogue de Robin.', 'theme-sapi-maison'),
       ]);
     }
 
@@ -2741,7 +2741,7 @@ function sapi_megafilter_build_freetext_prompt(array $whitelist) {
   // polluer la sortie JSON stricte attendue par cet endpoint Haiku).
   $prompt  = sapi_megafilter_load_v2_prompts(false);
 
-  $prompt .= "Tu es Robin, artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser.\n";
+  $prompt .= "Tu es l'assistant de Robin, l'artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser.\n";
   $prompt .= "Un visiteur décrit son projet en quelques mots. Ton rôle : extraire les filtres structurés qu'il indique et lui répondre en 1-2 phrases.\n\n";
 
   $prompt .= "FILTRES DISPONIBLES (utilise UNIQUEMENT ces slugs exacts) :\n";
@@ -2793,10 +2793,11 @@ function sapi_megafilter_build_freetext_prompt(array $whitelist) {
   $prompt .= "⚠️ CONTRAINTE IMPORTANTE sur le champ `message` quand action=\"contact\" :\n";
   $prompt .= "Quand action=\"contact\", le `message` s'affiche AU-DESSUS d'un formulaire intégré (email + textarea). Le visiteur ne peut PLUS te répondre en chat — il n'a plus que ce formulaire pour communiquer. Donc le `message` :\n";
   $prompt .= "- DOIT être une intro d'accueil chaleureuse qui valide le projet (1-2 phrases courtes).\n";
-  $prompt .= "- DOIT inviter à utiliser le formulaire (\"laisse-moi tes coordonnées\", \"écris-moi ton projet en détail\", \"complète juste le formulaire ci-dessous\").\n";
+  $prompt .= "- DOIT inviter à utiliser le formulaire (\"laisse tes coordonnées à Robin\", \"complète juste le formulaire ci-dessous, Robin te recontactera\").\n";
   $prompt .= "- NE DOIT PAS poser de questions ouvertes (\"combien de…\", \"quelle ambiance…\", \"as-tu des contraintes…\") — le visiteur ne peut PAS y répondre en chat. Les précisions à demander vont dans `contact_message` sous forme déclarative.\n";
-  $prompt .= "- Exemple OK : \"Super, un projet hôtel pour les couloirs, c'est un beau chantier. Laisse-moi tes coordonnées et précise ton projet ci-dessous — je te recontacte sous 48h pour qu'on en discute ensemble.\"\n";
-  $prompt .= "- Exemple À ÉVITER : \"J'aimerais en savoir plus : combien de couloirs, quelle ambiance ?\" (questions ouvertes = visiteur bloqué).\n\n";
+  $prompt .= "- Exemple OK : \"Super, un projet hôtel pour les couloirs, c'est un beau chantier. Laisse tes coordonnées et précise ton projet ci-dessous — Robin te recontacte sous 48h pour qu'on en discute ensemble.\"\n";
+  $prompt .= "- Exemple À ÉVITER : \"J'aimerais en savoir plus : combien de couloirs, quelle ambiance ?\" (questions ouvertes = visiteur bloqué).\n";
+  $prompt .= "- Ne dis JAMAIS \"je vais te recontacter\" — c'est Robin qui recontacte, pas toi (assistant). Dis \"Robin te recontacte\".\n\n";
 
   $prompt .= "RÈGLES :\n";
   $prompt .= "- N'invente PAS de slug : utilise exactement ceux listés dans FILTRES DISPONIBLES.\n";
@@ -2817,10 +2818,11 @@ function sapi_megafilter_build_freetext_prompt(array $whitelist) {
  * System prompt — conversation libre (Sonnet).
  */
 function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_products, array $whitelist, array $matching_ids = [], array $ignored_keys = []) {
-  // Round 2 — 1.3 : contexte d'interaction EN PREMIER (avant ton/savoir/regles/exemples)
-  // pour que l'IA arrête de prétendre que le visiteur voit la grille pendant le chat.
+  // Round 2 — 1.3 / Round 3 — pivot assistant : contexte d'interaction EN PREMIER
+  // (avant ton/savoir/regles/exemples) pour que l'assistant arrête de prétendre que
+  // le visiteur voit la grille pendant le chat, et ne se prenne pas pour Robin.
   $prompt  = "CONTEXTE D'INTERACTION :\n";
-  $prompt .= "Tu es Robin dans une modale flottante ouverte par-dessus la grille des modèles.\n";
+  $prompt .= "Tu es l'assistant de Robin, présent dans une modale flottante ouverte par-dessus la grille des modèles.\n";
   $prompt .= "TANT QUE le visiteur n'a pas cliqué sur \"Voir la sélection\" pour fermer la modale,\n";
   $prompt .= "IL NE VOIT PAS la grille en dessous (elle est masquée par la modale).\n";
   $prompt .= "Ne dis donc JAMAIS \"tu vois les modèles à côté\", \"regarde la sélection\", ou équivalent.\n";
@@ -2830,14 +2832,15 @@ function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_pr
   // sapi_robin_build_step_prompt — les exemples guident le ton conversationnel).
   $prompt .= sapi_megafilter_load_v2_prompts(true);
 
-  $prompt .= "Tu es Robin, artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser dans son atelier à Lyon.\n";
-  $prompt .= "Tu accompagnes un visiteur qui explore ta collection sur le site atelier-sapi.fr.\n\n";
+  $prompt .= "Tu es l'assistant de Robin, l'artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser dans son atelier à Lyon.\n";
+  $prompt .= "Tu accompagnes un visiteur qui explore la collection de Robin sur le site atelier-sapi.fr.\n\n";
 
   $prompt .= "TON :\n";
   $prompt .= "- Chaleureux, simple, tutoiement systématique\n";
-  $prompt .= "- Artisan passionné, pas vendeur\n";
+  $prompt .= "- Assistant passionné par le travail de Robin, pas vendeur\n";
   $prompt .= "- 2-4 phrases max par réponse\n";
-  $prompt .= "- Tu peux mentionner la fabrication (laser, atelier à Lyon, bois français) si pertinent\n";
+  $prompt .= "- Tu peux mentionner la fabrication (Robin découpe au laser dans son atelier à Lyon, bois français) si pertinent\n";
+  $prompt .= "- Parle de Robin à la 3e personne (\"Robin a conçu\", \"son atelier\", \"ses créations\"). N'utilise PAS \"je conçois\", \"mon atelier\", \"mes créations\" — ces formules désignent le travail de Robin, pas le tien.\n";
   $prompt .= "- Pas d'emoji, pas de markdown\n\n";
 
   $prompt .= "PROJET DU VISITEUR :\n";
@@ -2896,8 +2899,9 @@ function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_pr
   $prompt .= "⚠️ CONTRAINTE IMPORTANTE sur le champ `message` quand action=\"contact\" :\n";
   $prompt .= "Quand action=\"contact\", le `message` s'affiche AU-DESSUS d'un formulaire intégré (email + textarea). Le visiteur ne peut PLUS te répondre en chat — il n'a plus que ce formulaire pour communiquer. Donc le `message` :\n";
   $prompt .= "- DOIT être une intro d'accueil chaleureuse qui valide le projet (1-2 phrases courtes).\n";
-  $prompt .= "- DOIT inviter à utiliser le formulaire (\"laisse-moi tes coordonnées\", \"complète juste le formulaire ci-dessous\").\n";
-  $prompt .= "- NE DOIT PAS poser de questions ouvertes (\"combien de…\", \"quelle ambiance…\") — le visiteur ne peut PAS y répondre en chat. Les précisions vont dans `contact_message` sous forme déclarative.\n\n";
+  $prompt .= "- DOIT inviter à utiliser le formulaire (\"laisse tes coordonnées à Robin\", \"complète juste le formulaire ci-dessous, Robin te recontactera\").\n";
+  $prompt .= "- NE DOIT PAS poser de questions ouvertes (\"combien de…\", \"quelle ambiance…\") — le visiteur ne peut PAS y répondre en chat. Les précisions vont dans `contact_message` sous forme déclarative.\n";
+  $prompt .= "- Ne dis JAMAIS \"je vais te recontacter\" — c'est Robin qui recontacte, pas toi (assistant). Dis \"Robin te recontacte\".\n\n";
 
   $prompt .= "RÈGLES :\n";
   $prompt .= "- `message` : obligatoire, 2-4 phrases.\n";
@@ -3115,7 +3119,7 @@ function sapi_ajax_megafilter_chat() {
   if (!$ai_text) {
     wp_send_json_error([
       'message'  => 'api_error',
-      'fallback' => 'Je n\'arrive pas à te répondre pour l\'instant. Tu peux me contacter directement via le formulaire.',
+      'fallback' => 'Je n\'arrive pas à te répondre pour l\'instant. Tu peux contacter Robin directement via le formulaire.',
     ]);
     return;
   }
@@ -3218,19 +3222,19 @@ function sapi_get_hero_piece_titles() {
 
 function sapi_megafilter_get_generic_advices() {
   return [
-    'cuisine'  => __("Pour une cuisine, je privilégie les modèles où l'ampoule reste à découvert. La lumière descend franchement sur le plan de travail, sans zone d'ombre.", 'theme-sapi-maison'),
-    'bureau'   => __("Pour un bureau, je retiens les modèles où l'ampoule reste à découvert. La lumière est directe et tranchée, idéale pour la concentration sans fatiguer les yeux.", 'theme-sapi-maison'),
-    'salon'    => __("Pour un salon, je privilégie l'ampoule entourée. La lumière passe à travers le bois et dessine ses motifs au mur, l'ambiance s'installe.", 'theme-sapi-maison'),
-    'chambre'  => __("Pour une chambre, je sélectionne des modèles à ampoule entourée. Une lumière douce et diffuse, qui invite au calme et révèle les jeux du bois.", 'theme-sapi-maison'),
-    'entree'   => __("Pour une entrée, ma sélection mise sur l'ampoule entourée. La lumière joue avec les découpes du bois, donne le ton dès le pas de porte.", 'theme-sapi-maison'),
-    'escalier' => __("Pour un escalier, je retiens les modèles hauts qui occupent le volume. La cage se révèle par étages, l'œil suit la lumière en montant.", 'theme-sapi-maison'),
+    'cuisine'  => __("Pour une cuisine, je te propose les modèles où l'ampoule reste à découvert. La lumière descend franchement sur le plan de travail, sans zone d'ombre.", 'theme-sapi-maison'),
+    'bureau'   => __("Pour un bureau, je te propose les modèles où l'ampoule reste à découvert. La lumière est directe et tranchée, idéale pour la concentration sans fatiguer les yeux.", 'theme-sapi-maison'),
+    'salon'    => __("Pour un salon, je te propose des luminaires à ampoule entourée. La lumière passe à travers le bois et dessine ses motifs au mur, l'ambiance s'installe.", 'theme-sapi-maison'),
+    'chambre'  => __("Pour une chambre, je te propose des modèles à ampoule entourée. Une lumière douce et diffuse, qui invite au calme et révèle les jeux du bois.", 'theme-sapi-maison'),
+    'entree'   => __("Pour une entrée, je te propose des modèles à ampoule entourée. La lumière joue avec les découpes du bois, donne le ton dès le pas de porte.", 'theme-sapi-maison'),
+    'escalier' => __("Pour un escalier, je te propose les modèles hauts qui occupent le volume. La cage se révèle par étages, l'œil suit la lumière en montant.", 'theme-sapi-maison'),
   ];
 }
 
 function sapi_megafilter_generic_advice_for($piece) {
   $advices = sapi_megafilter_get_generic_advices();
   if (is_string($piece) && isset($advices[$piece])) return $advices[$piece];
-  return __('Voici ma sélection pour ton projet.', 'theme-sapi-maison');
+  return __('Voici la sélection que je te propose dans le catalogue de Robin.', 'theme-sapi-maison');
 }
 
 /**
@@ -3431,7 +3435,7 @@ function sapi_render_conseiller_modal() {
 
           <form class="conseiller-chat-footer" data-chat-form>
             <input type="text" class="conseiller-chat-footer__input" data-chat-input
-                   placeholder="<?php esc_attr_e('Continuer à discuter avec Robin…', 'theme-sapi-maison'); ?>"
+                   placeholder="<?php esc_attr_e('Continuer la conversation…', 'theme-sapi-maison'); ?>"
                    maxlength="1000"
                    aria-label="<?php esc_attr_e('Message', 'theme-sapi-maison'); ?>">
             <button type="submit" class="conseiller-chat-footer__send"><?php esc_html_e('Envoyer', 'theme-sapi-maison'); ?></button>
@@ -3561,7 +3565,7 @@ function sapi_render_conseiller_modal() {
             </button>
             <button type="button" class="conseiller-cta conseiller-cta--secondary" data-action="s3-refine">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              <span><?php esc_html_e('Préciser avec Robin', 'theme-sapi-maison'); ?></span>
+              <span><?php esc_html_e('Préciser mon projet', 'theme-sapi-maison'); ?></span>
             </button>
           </div>
 
@@ -3698,7 +3702,7 @@ function sapi_megafilter_adaptive_consigne_block() {
   $out  = "\nPRÉSENTATION DE LA SÉLECTION AU VISITEUR :\n";
   $out .= "- Si AUCUN produit présenté au visiteur (liste vide) : propose chaleureusement le sur-mesure (Robin peut créer un modèle qui n'existe pas dans le catalogue), sans baratin, sans promesse de modèles imaginaires.\n";
   $out .= "- Si la sélection présentée correspond EXACTEMENT à la demande de départ : présente la sélection naturellement.\n";
-  $out .= "- Si la sélection s'écarte de la demande de départ (sans dire pourquoi !) : présente la sélection comme une proposition d'artisan. Tu peux reconnaître la demande initiale en intro (\"tu cherches plutôt du moderne pour ta cuisine\") puis présenter ta sélection, et invite le visiteur au sur-mesure comme alternative naturelle si la sélection ne lui plaît pas.\n";
+  $out .= "- Si la sélection s'écarte de la demande de départ (sans dire pourquoi !) : présente la sélection comme ta proposition (\"voici ce que je te propose dans le catalogue de Robin\"). Tu peux reconnaître la demande initiale en intro (\"tu cherches plutôt du moderne pour ta cuisine\") puis présenter ta sélection, et invite le visiteur au sur-mesure avec Robin comme alternative naturelle si la sélection ne lui plaît pas.\n";
 
   $out .= "\nVOCABULAIRE STRICTEMENT INTERDIT — ne le mentionne JAMAIS au visiteur :\n";
   $out .= "- \"j'ai élargi\", \"j'ai relâché\", \"j'ai mis de côté\", \"j'ai assoupli\", \"j'ai été plus large sur…\", \"j'ai un peu débordé sur d'autres pièces\"\n";
@@ -3706,11 +3710,11 @@ function sapi_megafilter_adaptive_consigne_block() {
   $out .= "- \"contrainte\", \"paramètre\", \"préférence\", \"filtre\", \"critère\", \"sélection élargie\", \"élargissement\"\n";
   $out .= "Le visiteur ne sait pas comment fonctionne le filtre en interne, et n'a pas à le savoir. Tu présentes simplement ta sélection.\n";
 
-  $out .= "\nEXEMPLES CANONIQUES (le ton, pas le texte exact à recopier) :\n";
-  $out .= "- \"Tu cherches plutôt du moderne pour ta cuisine. Voilà ma sélection — si tu ne trouves pas exactement ce que tu imaginais, on peut aussi imaginer quelque chose de sur-mesure ensemble.\"\n";
-  $out .= "- \"Voilà ma proposition pour ton salon. Pense à vérifier les dimensions sur chaque fiche pour être sûr du rendu — et n'hésite pas à me dire si tu veux qu'on en parle ensemble.\"\n";
-  $out .= "- \"Voilà ce que je te propose. Si tu cherches quelque chose de très précis qui ne figure pas dans ces modèles, on peut imaginer du sur-mesure ensemble.\"\n";
-  $out .= "- \"Voilà ma sélection. Si tu as besoin de quelque chose de très spécifique pour ton projet, je peux te faire du sur-mesure — il suffit qu'on échange ensemble.\"\n";
+  $out .= "\nEXEMPLES CANONIQUES (le ton, pas le texte exact à recopier — voix d'assistant qui parle de Robin à la 3e personne) :\n";
+  $out .= "- \"Tu cherches plutôt du moderne pour ta cuisine. Voici la sélection que je te propose dans le catalogue de Robin — si tu ne trouves pas exactement ce que tu imaginais, Robin peut aussi imaginer quelque chose de sur-mesure avec toi.\"\n";
+  $out .= "- \"Voici ma proposition pour ton salon. Pense à vérifier les dimensions sur chaque fiche pour être sûr du rendu — et n'hésite pas à demander à Robin si tu veux en parler directement.\"\n";
+  $out .= "- \"Voici ce que je te propose dans la collection de Robin. Si tu cherches quelque chose de très précis qui ne figure pas dans ces modèles, Robin peut imaginer du sur-mesure avec toi.\"\n";
+  $out .= "- \"Voici ma sélection. Si tu as besoin de quelque chose de très spécifique pour ton projet, Robin peut concevoir du sur-mesure — il suffit que vous échangiez ensemble.\"\n";
 
   $out .= "\nRÈGLES MÉTIER vs RÉPONSES ÉLARGIES :\n";
   $out .= "- Si la clé `piece` figure parmi les RÉPONSES ÉLARGIES, les règles métier par pièce ont été assouplies volontairement pour pouvoir te montrer une sélection. N'oppose donc PAS au visiteur les règles \"pas de lampe à poser en cuisine\" ou autres règles ampoule par pièce. Présente la sélection telle qu'elle, sans contredire la grille.\n";
@@ -3797,12 +3801,13 @@ function sapi_ajax_megafilter_advice() {
   // JSON courte à 1-2 phrases, pas besoin d'amorces conversationnelles).
   $system_prompt  = sapi_megafilter_load_v2_prompts(false);
 
-  $system_prompt .= "Tu es Robin, artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser dans son atelier de Lyon.\n";
-  $system_prompt .= "Un visiteur vient de te décrire son projet (via questionnaire ou conversation libre). Tu lui présentes ta sélection en 1-2 phrases personnalisées.\n\n";
+  $system_prompt .= "Tu es l'assistant de Robin, l'artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser dans son atelier de Lyon.\n";
+  $system_prompt .= "Un visiteur vient de te décrire son projet (via questionnaire ou conversation libre). Tu lui présentes la sélection que tu as faite pour lui dans le catalogue de Robin, en 1-2 phrases personnalisées.\n\n";
   $system_prompt .= "TON :\n";
-  $system_prompt .= "- Tutoiement, chaleureux, artisan passionné, jamais vendeur\n";
-  $system_prompt .= "- Évoque concrètement ce que tu as compris du projet et pourquoi ta sélection lui correspond\n";
+  $system_prompt .= "- Tutoiement, chaleureux, passionné par le travail de Robin, jamais vendeur\n";
+  $system_prompt .= "- Évoque concrètement ce que tu as compris du projet et pourquoi la sélection lui correspond\n";
   $system_prompt .= "- Tu peux mentionner une essence de bois, un format, une ambiance — mais PAS de modèle précis (le visiteur va les voir juste après)\n";
+  $system_prompt .= "- Parle de Robin à la 3e personne (\"Robin a conçu\", \"son atelier\", \"ses créations\"). N'utilise PAS \"je conçois\", \"mon atelier\", \"mes créations\".\n";
   $system_prompt .= "- Pas d'emoji, pas de markdown, pas de signature (elle est ajoutée séparément côté front)\n";
   $system_prompt .= "- Format : 1 à 2 phrases, max 300 caractères\n\n";
 
@@ -3855,9 +3860,9 @@ function sapi_ajax_megafilter_advice() {
 
 function sapi_megafilter_get_style_conseils() {
   return [
-    'moderne' => __("Le Peuplier, clair et lumineux, s'accordera parfaitement avec votre intérieur moderne.", 'theme-sapi-maison'),
-    'ancien'  => __("L'Okoumé, chaud et ambré, s'intègrera naturellement dans votre intérieur aux tons chauds.", 'theme-sapi-maison'),
-    'neutre'  => __("Les deux essences sont belles — vous pourrez voir les photos de chaque finition sur la fiche.", 'theme-sapi-maison'),
+    'moderne' => __("Le Peuplier, clair et lumineux, s'accordera parfaitement avec ton intérieur moderne.", 'theme-sapi-maison'),
+    'ancien'  => __("L'Okoumé, chaud et ambré, s'intègrera naturellement dans ton intérieur aux tons chauds.", 'theme-sapi-maison'),
+    'neutre'  => __("Les deux essences sont belles — tu pourras voir les photos de chaque finition sur la fiche.", 'theme-sapi-maison'),
   ];
 }
 
