@@ -4542,8 +4542,12 @@ function sapi_guide_get_categories(array $answers) {
     case 'pas-de-sortie':
       $cats = ['lampadaires', 'lampesaposer', 'appliques'];
       break;
-    default: // "ne-sais-pas" → pas d'appliques (nécessite sortie mur)
-      $cats = ['suspensions', 'lampadaires', 'lampesaposer'];
+    default:
+      // Round 3 — Lot B : "ne-sais-pas" inclut désormais appliques, par cohérence
+      // avec $sapi_filter_rules['cats_by_sortie']['ne-sais-pas'] (Round 2 — N8,
+      // commit d8be0ff). Le kit prise électrique (savoir.txt:48, regles.txt:37)
+      // permet l'installation d'une applique sans sortie murale dédiée.
+      $cats = ['suspensions', 'lampadaires', 'lampesaposer', 'appliques'];
   }
 
   // Règle A : jamais de lampe à poser en cuisine
