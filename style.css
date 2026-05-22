@@ -24264,6 +24264,29 @@ body.woocommerce-cart div.woocommerce-wrapper {
   margin: 0;
 }
 
+/* Round 3 — Lot C3 : quand l'IA route en mode contact, la card passe en
+   première position dans la grille via order:-1 (compatible CSS Grid + Flex). */
+.conseiller-surmesure-wrap--first {
+  order: -1;
+  grid-row: 1;
+}
+
+/* Round 3 — Lot C3 : état "contact" — CTAs centrés, layout aéré */
+.conseiller-surmesure-contact-ctas {
+  margin: 20px auto 12px;
+  max-width: 560px;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-justify-content: center;
+  justify-content: center;
+  gap: 12px;
+}
+.conseiller-surmesure-contact-ctas .conseiller-cta {
+  white-space: nowrap;
+}
+
 .conseiller-surmesure-card {
   padding: 32px 26px 28px;
   text-align: center;

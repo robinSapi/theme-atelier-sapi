@@ -398,6 +398,23 @@ $conseiller_pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentCo
             </div>
           </div>
 
+          <!-- Round 3 — Lot C3 : état "contact" routé par l'IA (action=contact).
+               Affiche un wording adapté au contact_kind (pro / sur-mesure / simple)
+               + CTA(s) vers le formulaire /sur-mesure/ ou email — pré-remplis via
+               sapiProject.contact_subject + contact_message (Lot C4). -->
+          <div class="conseiller-card conseiller-surmesure-card conseiller-surmesure-card--contact" data-surmesure-state="contact" hidden>
+            <div class="conseiller-card__inner">
+              <span class="conseiller-badge conseiller-badge--surmesure">
+                <?php echo $surmesure_badge_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                <?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?>
+              </span>
+              <h2 class="conseiller-h2" data-surmesure-contact-title><?php esc_html_e('On en parle ensemble ?', 'theme-sapi-maison'); ?></h2>
+              <p class="conseiller-subtitle" data-surmesure-contact-subtitle><?php esc_html_e('Décris-moi ton projet, je te recontacte directement.', 'theme-sapi-maison'); ?></p>
+              <div class="conseiller-surmesure-contact-ctas" data-surmesure-contact-ctas></div>
+              <p class="conseiller-surmesure-reassurance"><?php esc_html_e('Réponse de Robin sous 48h · Aucun engagement', 'theme-sapi-maison'); ?></p>
+            </div>
+          </div>
+
           <!-- État succès (commun aux deux modes) -->
           <div class="conseiller-card conseiller-surmesure-card conseiller-surmesure-card--success" data-surmesure-state="success" hidden>
             <div class="conseiller-card__inner">

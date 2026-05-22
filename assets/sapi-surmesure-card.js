@@ -22,6 +22,29 @@
   // Au-dessus du seuil, la card reste cachée pour ne pas spammer.
   var VISIBLE_THRESHOLD = 6;
 
+  // Round 3 — Lot C3/C4 : URLs pour les CTAs en mode contact. Sapi-modal-conseiller
+  // a déjà ces valeurs dans son config, mais on peut tomber ici sans la modale
+  // chargée (page mes-creations sans interaction conseiller récente).
+  var MODAL_CFG = window.SAPI_MODAL_CONSEILLER || {};
+  var CONTACT_SURMESURE_URL = MODAL_CFG.contactSurmesureUrl || '/sur-mesure/';
+  var CONTACT_EMAIL         = MODAL_CFG.contactEmail || 'robin@atelier-sapi.fr';
+
+  // Round 3 — Lot C3 : wording de la card contact selon contact_kind.
+  var CONTACT_WORDINGS = {
+    'pro': {
+      title: 'Projet professionnel ?',
+      subtitle: "Hôtel, restaurant, retail… Robin conçoit des luminaires adaptés à ton espace pro."
+    },
+    'sur-mesure': {
+      title: 'Une idée précise en tête ?',
+      subtitle: "Dimensions custom, essence particulière, design unique : on peut imaginer ton luminaire ensemble."
+    },
+    'simple': {
+      title: "Envie d'en parler ?",
+      subtitle: "Décris-moi ton projet en deux mots, je te recontacte directement."
+    }
+  };
+
   /* ─────────────────────────────────────────────
      Rendu
      ───────────────────────────────────────────── */
@@ -53,10 +76,67 @@
     });
   }
 
+  // Round 3 — Lot C3/C4 : remplit la card "contact" selon contact_kind
+  // (titre + subtitle + CTAs avec URL pré-remplie) depuis sapiProject.
+  function buildContactUrl(project) {
+    var params = new URLSearchParams();
+    params.set('from', 'conseiller');
+    if (project.contact_kind)    params.set('kind', project.contact_kind);
+    if (project.contact_subject) params.set('subject', project.contact_subject);
+    if (project.contact_message) params.set('message', project.contact_message);
+    return CONTACT_SURMESURE_URL + (CONTACT_SURMESURE_URL.indexOf('?') === -1 ? '?' : '&') + params.toString();
+  }
+  function buildMailtoUrl(project) {
+    var subj = project.contact_subject || 'Projet luminaire';
+    var body = project.contact_message || '';
+    return 'mailto:' + CONTACT_EMAIL + '?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(body);
+  }
+  function renderContactState(project) {
+    var kind = project.contact_kind || 'sur-mesure';
+    var w = CONTACT_WORDINGS[kind] || CONTACT_WORDINGS['sur-mesure'];
+    if (els.contactTitle)    els.contactTitle.textContent = w.title;
+    if (els.contactSubtitle) els.contactSubtitle.textContent = w.subtitle;
+
+    if (els.contactCtas) {
+      els.contactCtas.innerHTML = '';
+      var formUrl = buildContactUrl(project);
+      var mailUrl = buildMailtoUrl(project);
+
+      function makeBtn(href, label, variant) {
+        var a = document.createElement('a');
+        a.className = 'conseiller-cta' + (variant === 'secondary' ? ' conseiller-cta--secondary' : '');
+        a.href = href;
+        a.innerHTML = '<span></span>';
+        a.firstChild.textContent = label;
+        return a;
+      }
+
+      if (kind === 'pro') {
+        els.contactCtas.appendChild(makeBtn(formUrl, 'Ouvrir le formulaire sur-mesure', 'primary'));
+      } else if (kind === 'simple') {
+        els.contactCtas.appendChild(makeBtn(mailUrl, "M'envoyer un email", 'primary'));
+      } else {
+        els.contactCtas.appendChild(makeBtn(formUrl, 'Formulaire sur-mesure', 'primary'));
+        els.contactCtas.appendChild(makeBtn(mailUrl, 'Email', 'secondary'));
+      }
+    }
+  }
+
   function render() {
     if (submitted) {
       showState('success');
       return;
+    }
+    // Round 3 — Lot C3 : si l'IA a routé vers contact, on affiche l'état dédié
+    // au lieu du form classique. Le wrap est aussi déplacé en 1re position
+    // dans la grille (via maybeShowOrHide).
+    if (window.sapiProject) {
+      var p = window.sapiProject.get();
+      if (p && p.action === 'contact') {
+        renderContactState(p);
+        showState('contact');
+        return;
+      }
     }
     if (window.sapiProject && window.sapiProject.hasProject()) {
       buildChipsCompact();
@@ -80,9 +160,21 @@
     // État success : on garde la card visible (confirmation à l'utilisateur)
     if (submitted) {
       els.wrap.hidden = false;
+      els.wrap.classList.remove('conseiller-surmesure-wrap--first');
       showState('success');
       return;
     }
+    // Round 3 — Lot C3 : si l'IA a routé vers contact, la card devient
+    // visible quel que soit le count de produits, et passe en 1re position
+    // dans la grille (via classe CSS grid-row: 1; order: -1).
+    var project = window.sapiProject ? window.sapiProject.get() : null;
+    if (project && project.action === 'contact') {
+      els.wrap.hidden = false;
+      els.wrap.classList.add('conseiller-surmesure-wrap--first');
+      render();
+      return;
+    }
+    els.wrap.classList.remove('conseiller-surmesure-wrap--first');
     // Sinon : visible UNIQUEMENT si la grille filtrée a peu de résultats
     var visibleCount = countVisibleProducts();
     if (visibleCount > 0 && visibleCount <= VISIBLE_THRESHOLD) {
@@ -157,6 +249,10 @@
     els.wrap = document.querySelector('[data-surmesure-wrap]');
     if (!els.wrap) return; // pas sur /mes-creations/
     els.chipsCompact = els.wrap.querySelector('[data-surmesure-chips]');
+    // Round 3 — Lot C3 : sélecteurs de l'état "contact"
+    els.contactTitle    = els.wrap.querySelector('[data-surmesure-contact-title]');
+    els.contactSubtitle = els.wrap.querySelector('[data-surmesure-contact-subtitle]');
+    els.contactCtas     = els.wrap.querySelector('[data-surmesure-contact-ctas]');
 
     // Affichage initial : count des produits déjà filtrés par sapi-cards-conseiller
     maybeShowOrHide();
