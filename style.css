@@ -23297,6 +23297,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 .conseiller-card--modal {
+  position: relative; /* Round 2 — 3.4 : ancre du bouton close en absolute */
   width: 100%;
   max-width: 880px;
   height: 680px;
@@ -23312,6 +23313,41 @@ body.woocommerce-cart div.woocommerce-wrapper {
   box-shadow: 0 28px 80px rgba(0, 0, 0, 0.32), 0 6px 24px rgba(0, 0, 0, 0.12);
   -webkit-animation: conseiller-dialog-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   animation: conseiller-dialog-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Round 2 — 3.4 : bouton close (croix) visible toutes tailles.
+   44x44px touch target conforme mobile, au-dessus de tout contenu via z-index. */
+.conseiller-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 44px;
+  height: 44px;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-wood, #937D68);
+  border-radius: 50%;
+  z-index: 10;
+  -webkit-transition: background-color 0.18s ease, color 0.18s ease;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+.conseiller-modal__close:hover,
+.conseiller-modal__close:focus-visible {
+  background-color: rgba(50, 50, 50, 0.06);
+  color: var(--color-dark, #323232);
+  outline: none;
+}
+.conseiller-modal__close svg {
+  width: 22px;
+  height: 22px;
 }
 
 /* Les écrans sont rendus dans le même DOM, JS toggle hidden.

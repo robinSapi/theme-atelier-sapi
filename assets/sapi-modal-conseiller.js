@@ -101,44 +101,16 @@
   var lastTrigger = null; // pour restaurer le focus à la fermeture
 
   /* ─────────────────────────────────────────────
-     Helpers visibilité (mirror inc/guide-data.php)
+     Helpers visibilité (proxy vers sapiProject — Round 2 / 3.2)
      ───────────────────────────────────────────── */
-  // Renvoie la liste brute des steps visibles (logique visibility uniquement).
-  // Ne tient PAS compte du mode court — c'est cette base qui sert à
-  // cleanInvisibleAnswers (qui ne doit pas effacer eclairage/sortie/hauteur/table
-  // juste parce qu'on est sur une fiche produit en short mode).
+  // Visibilité BRUTE (sans short mode) — utilisée par cleanInvisibleAnswers
+  // pour ne pas effacer eclairage/sortie/hauteur/table juste parce qu'on est
+  // sur une fiche produit en short mode.
   function computeRawVisibleSteps(answers) {
-    var visible = [];
-    for (var i = 0; i < STEPS.length; i++) {
-      var step = STEPS[i];
-      var vis = step.visibility;
-      if (vis === 'always') { visible.push(step.id); continue; }
-      if (typeof vis !== 'object' || vis === null) continue;
-
-      if (vis._or) {
-        var orMatch = false;
-        for (var g = 0; g < vis._or.length; g++) {
-          var group = vis._or[g];
-          var groupOk = true;
-          for (var k in group) {
-            if (!group.hasOwnProperty(k)) continue;
-            var ans = answers[k];
-            if (!ans || group[k].indexOf(ans) === -1) { groupOk = false; break; }
-          }
-          if (groupOk) { orMatch = true; break; }
-        }
-        if (orMatch) visible.push(step.id);
-      } else {
-        var show = true;
-        for (var key in vis) {
-          if (!vis.hasOwnProperty(key)) continue;
-          var a = answers[key];
-          if (!a || vis[key].indexOf(a) === -1) { show = false; break; }
-        }
-        if (show) visible.push(step.id);
-      }
+    if (window.sapiProject && typeof window.sapiProject.computeVisibleStepIds === 'function') {
+      return window.sapiProject.computeVisibleStepIds(answers, STEPS);
     }
-    return visible;
+    return [];
   }
 
   // Visibilité effective pour le flow modale : applique le filtre mode court
@@ -153,11 +125,10 @@
   }
 
   function cleanInvisibleAnswers() {
-    // Utilise la visibilité BRUTE (sans short mode) pour ne pas effacer les
-    // réponses des steps longs quand on navigue depuis une fiche produit.
-    var visible = computeRawVisibleSteps(state.answers);
+    if (!window.sapiProject || typeof window.sapiProject.cleanInvisibleAnswers !== 'function') return;
+    var clean = window.sapiProject.cleanInvisibleAnswers(state.answers, STEPS);
     Object.keys(state.answers).forEach(function (sid) {
-      if (visible.indexOf(sid) === -1) {
+      if (!Object.prototype.hasOwnProperty.call(clean, sid)) {
         delete state.answers[sid];
         delete state.labels[sid];
       }
@@ -1274,6 +1245,11 @@
   function closeModal() {
     if (!els.modal) return;
     state.open = false;
+    // Round 2 — 3.1 : reset shortMode pour ne pas leak l'état "fiche produit"
+    // dans une réouverture suivante (sinon modifyProductAnswers reste en mode
+    // court, et la modale rouvre filtrée sur 4 steps au lieu du parcours
+    // complet — confusion observée en navigation fiche→shop→fiche).
+    state.shortMode = false;
     // Audit #7 : abort tout fetch IA en cours (chat/freetext) — évite que la
     // réponse arrive après la fermeture et tente d'écrire dans le DOM démonté.
     if (state.aiController) {
@@ -1333,6 +1309,10 @@
       var action = actionBtn.getAttribute('data-action');
 
       switch (action) {
+        case 'close':
+          // Round 2 — 3.4 : bouton close visible (croix top-right)
+          closeModal();
+          break;
         case 'back':
           backFromQuestion();
           break;

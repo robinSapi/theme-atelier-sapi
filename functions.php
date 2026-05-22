@@ -3223,6 +3223,17 @@ function sapi_render_conseiller_modal() {
   <div class="conseiller-modal" data-conseiller-modal hidden>
     <div class="conseiller-card conseiller-card--modal" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e('Conseil de Robin', 'theme-sapi-maison'); ?>" data-modal-card>
 
+      <!-- Round 2 — 3.4 : bouton close visible toutes tailles (critique mobile,
+           sinon modale plein écran sans croix = visiteur bloqué). Câblé via
+           data-action="close" sur le handler de délégation existant. -->
+      <button type="button" class="conseiller-modal__close" data-action="close" aria-label="<?php esc_attr_e('Fermer', 'theme-sapi-maison'); ?>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+
       <!-- S0 — Écran hybride (F2a-quater) : question dynamique + choices + séparateur "ou" + champ texte.
            Bascule dynamique selon sapiProject : "Conseil de Robin" (initial) ou "Mon projet" (partiel).
            Si projet complet → la logique d'ouverture montre S3 directement à la place. -->

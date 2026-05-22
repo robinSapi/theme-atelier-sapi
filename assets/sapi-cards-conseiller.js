@@ -17,51 +17,20 @@
   var RULES = config.rules || {};
 
   /* ─────────────────────────────────────────────
-     Helpers visibilité (mirror inc/guide-data.php + mega-filtre.js)
+     Helpers visibilité (proxy vers sapiProject — Round 2 / 3.2)
      ───────────────────────────────────────────── */
   function getVisibleStepIds(answers) {
-    var visible = [];
-    for (var i = 0; i < STEPS.length; i++) {
-      var step = STEPS[i];
-      var vis = step.visibility;
-      if (vis === 'always') { visible.push(step.id); continue; }
-      if (typeof vis !== 'object' || vis === null) continue;
-
-      if (vis._or) {
-        var orMatch = false;
-        for (var g = 0; g < vis._or.length; g++) {
-          var group = vis._or[g];
-          var groupOk = true;
-          for (var k in group) {
-            if (!group.hasOwnProperty(k)) continue;
-            var ans = answers[k];
-            if (!ans || group[k].indexOf(ans) === -1) { groupOk = false; break; }
-          }
-          if (groupOk) { orMatch = true; break; }
-        }
-        if (orMatch) visible.push(step.id);
-      } else {
-        var show = true;
-        for (var key in vis) {
-          if (!vis.hasOwnProperty(key)) continue;
-          var a = answers[key];
-          if (!a || vis[key].indexOf(a) === -1) { show = false; break; }
-        }
-        if (show) visible.push(step.id);
-      }
+    if (window.sapiProject && typeof window.sapiProject.computeVisibleStepIds === 'function') {
+      return window.sapiProject.computeVisibleStepIds(answers, STEPS);
     }
-    return visible;
+    return [];
   }
 
   function cleanInvisibleAnswers(answers) {
-    var visible = getVisibleStepIds(answers);
-    var clean = {};
-    for (var sid in answers) {
-      if (answers.hasOwnProperty(sid) && visible.indexOf(sid) !== -1) {
-        clean[sid] = answers[sid];
-      }
+    if (window.sapiProject && typeof window.sapiProject.cleanInvisibleAnswers === 'function') {
+      return window.sapiProject.cleanInvisibleAnswers(answers, STEPS);
     }
-    return clean;
+    return answers;
   }
 
   // F2a-sexies : retourne le step COMPLET (avec question + choices) pour la
@@ -82,10 +51,15 @@
   /* ─────────────────────────────────────────────
      Filtrage produit (mirror mega-filtre.js Phase 1)
      ───────────────────────────────────────────── */
+  // Round 2 — 3.3 : passe par cleanInvisibleAnswers avant de compter pour
+  // éviter les "chips fantômes" — une answer présente dans le storage mais
+  // dont la step n'est pas visible (parce qu'un parent a changé) ne doit
+  // pas faire basculer la card en mode "Mon projet".
   function hasAnyAnswer() {
-    var a = (window.sapiProject && window.sapiProject.get().answers) || {};
-    for (var k in a) {
-      if (a.hasOwnProperty(k)) return true;
+    var raw = (window.sapiProject && window.sapiProject.get().answers) || {};
+    var clean = cleanInvisibleAnswers(raw);
+    for (var k in clean) {
+      if (Object.prototype.hasOwnProperty.call(clean, k)) return true;
     }
     return false;
   }

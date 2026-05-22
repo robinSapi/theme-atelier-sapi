@@ -244,6 +244,59 @@
   }
 
   /* ─────────────────────────────────────────────
+     Round 2 — 3.2 : visibility helpers centralisés
+     Mirror de inc/guide-data.php (côté PHP : sapi_guide_get_steps + même
+     algorithme). Avant Round 2, 3 implémentations dupliquées de
+     cleanInvisibleAnswers existaient (sapi-modal-conseiller.js,
+     sapi-cards-conseiller.js, inc/guide-data.php). Source unique JS ici.
+     ───────────────────────────────────────────── */
+  function computeVisibleStepIds(answers, steps) {
+    var visible = [];
+    if (!Array.isArray(steps)) return visible;
+    for (var i = 0; i < steps.length; i++) {
+      var step = steps[i];
+      var vis = step.visibility;
+      if (vis === 'always') { visible.push(step.id); continue; }
+      if (typeof vis !== 'object' || vis === null) continue;
+
+      if (vis._or) {
+        var orMatch = false;
+        for (var g = 0; g < vis._or.length; g++) {
+          var group = vis._or[g];
+          var groupOk = true;
+          for (var k in group) {
+            if (!group.hasOwnProperty(k)) continue;
+            var ans = answers[k];
+            if (!ans || group[k].indexOf(ans) === -1) { groupOk = false; break; }
+          }
+          if (groupOk) { orMatch = true; break; }
+        }
+        if (orMatch) visible.push(step.id);
+      } else {
+        var show = true;
+        for (var key in vis) {
+          if (!vis.hasOwnProperty(key)) continue;
+          var a = answers[key];
+          if (!a || vis[key].indexOf(a) === -1) { show = false; break; }
+        }
+        if (show) visible.push(step.id);
+      }
+    }
+    return visible;
+  }
+
+  function cleanInvisibleAnswersImpl(answers, steps) {
+    var visible = computeVisibleStepIds(answers, steps);
+    var clean = {};
+    for (var sid in answers) {
+      if (answers.hasOwnProperty(sid) && visible.indexOf(sid) !== -1) {
+        clean[sid] = answers[sid];
+      }
+    }
+    return clean;
+  }
+
+  /* ─────────────────────────────────────────────
      Câblage initial : ?piece=X → projet partiel
      Mirror de la validation existante côté mega-filtre.js.
      ───────────────────────────────────────────── */
@@ -314,5 +367,9 @@
     setAdviceText: setAdviceText,
     subscribe: subscribe,
     STORAGE_KEY: STORAGE_KEY,
+    // Round 2 — 3.2 : helpers visibility centralisés. Les consommateurs JS
+    // (modal, cards) appellent ces helpers au lieu de dupliquer la logique.
+    computeVisibleStepIds: computeVisibleStepIds,
+    cleanInvisibleAnswers: cleanInvisibleAnswersImpl,
   };
 })();
