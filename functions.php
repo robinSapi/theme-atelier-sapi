@@ -2787,8 +2787,15 @@ function sapi_megafilter_build_freetext_prompt(array $whitelist) {
   $prompt .= "- Si l'écart est trop grand (ex: hôtelier 30 chambres) : bascule directement en `action: \"contact\"` avec `filters: {}` — ne simule pas une recherche catalogue qui n'a aucun sens.\n\n";
 
   $prompt .= "CHAMPS BONUS pour l'UI contact (à remplir SI action = \"contact\") :\n";
-  $prompt .= "- `contact_subject` : résumé court du projet (1 ligne max, ex: \"Projet hôtel — 30 chambres équipées\")\n";
-  $prompt .= "- `contact_message` : message d'amorce pour le formulaire (3-4 lignes), écrit COMME SI le visiteur l'écrivait à Robin (\"Bonjour Robin, je cherche...\"). Tu peux y mentionner les éléments à préciser sous forme déclarative (\"je préciserai le nombre de couloirs et l'ambiance souhaitée\"), pas sous forme de questions ouvertes. Le visiteur éditera ce texte avant d'envoyer.\n\n";
+  $prompt .= "- `contact_subject` : résumé court du projet (1 ligne max, ex: \"Projet hôtel — 30 chambres à équiper\").\n";
+  $prompt .= "- `contact_message` : pré-remplissage MINIMAL du formulaire, écrit COMME SI le visiteur l'écrivait à Robin (1re personne visiteur). RÈGLES STRICTES :\n";
+  $prompt .= "  - Format : 1 à 2 phrases max, jamais plus.\n";
+  $prompt .= "  - Contenu : UNIQUEMENT un rappel sobre de ce que le visiteur a explicitement dit dans son message. RIEN d'inventé, RIEN de supposé.\n";
+  $prompt .= "  - N'invente JAMAIS de détails (ne mentionne pas le style, les dimensions, les essences, les types de luminaires, l'ambiance, etc. SAUF si le visiteur les a explicitement cités).\n";
+  $prompt .= "  - Ne fais PAS la liste \"je préciserai X, Y, Z\" — le visiteur complète seul ses précisions.\n";
+  $prompt .= "  - Ne signe pas avec des formules type \"Hâte d'en discuter\", \"Cordialement\", etc.\n";
+  $prompt .= "  - Exemple visiteur \"Je suis hôtelier, 30 chambres à équiper\" → contact_message OK : \"Bonjour Robin, je suis hôtelier et je cherche à équiper 30 chambres.\"\n";
+  $prompt .= "  - Exemple À ÉVITER : \"Bonjour Robin… je préciserai le style, les dimensions, les types de luminaires, les essences… Hâte d'en discuter.\" (trop long, suppose à la place du visiteur).\n\n";
 
   $prompt .= "⚠️ CONTRAINTE IMPORTANTE sur le champ `message` quand action=\"contact\" :\n";
   $prompt .= "Quand action=\"contact\", le `message` s'affiche AU-DESSUS d'un formulaire intégré (email + textarea). Le visiteur ne peut PLUS te répondre en chat — il n'a plus que ce formulaire pour communiquer. Donc le `message` :\n";
@@ -2893,8 +2900,14 @@ function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_pr
   $prompt .= "- Si l'écart est trop grand (ex: hôtelier 30 chambres) : bascule directement en `action: \"contact\"` sans `filters_update`.\n\n";
 
   $prompt .= "CHAMPS BONUS pour l'UI contact (à remplir SI action = \"contact\") :\n";
-  $prompt .= "- `contact_subject` : résumé court du projet (1 ligne, ex: \"Projet hôtel — 30 chambres équipées\").\n";
-  $prompt .= "- `contact_message` : message d'amorce pour le formulaire (3-4 lignes), écrit COMME SI le visiteur l'écrivait à Robin (\"Bonjour Robin, je cherche…\"). Tu peux y mentionner les éléments à préciser sous forme déclarative (\"je préciserai le nombre et l'ambiance\"), pas sous forme de questions ouvertes. Le visiteur éditera ce texte avant d'envoyer.\n\n";
+  $prompt .= "- `contact_subject` : résumé court du projet (1 ligne, ex: \"Projet hôtel — 30 chambres à équiper\").\n";
+  $prompt .= "- `contact_message` : pré-remplissage MINIMAL du formulaire, 1re personne visiteur. RÈGLES STRICTES :\n";
+  $prompt .= "  - Format : 1 à 2 phrases max, jamais plus.\n";
+  $prompt .= "  - Contenu : UNIQUEMENT un rappel sobre de ce que le visiteur a explicitement dit. RIEN d'inventé, RIEN de supposé (pas de style, dimensions, essences, types de luminaires, ambiance si pas mentionnés par le visiteur).\n";
+  $prompt .= "  - Ne fais PAS la liste \"je préciserai X, Y, Z\" — le visiteur complète seul.\n";
+  $prompt .= "  - Ne signe pas (\"Hâte d'en discuter\", etc.).\n";
+  $prompt .= "  - Exemple OK : \"Bonjour Robin, je suis hôtelier et je cherche à équiper 30 chambres.\"\n";
+  $prompt .= "  - Exemple À ÉVITER : long pré-remplissage avec détails supposés.\n\n";
 
   $prompt .= "⚠️ CONTRAINTE IMPORTANTE sur le champ `message` quand action=\"contact\" :\n";
   $prompt .= "Quand action=\"contact\", le `message` s'affiche AU-DESSUS d'un formulaire intégré (email + textarea). Le visiteur ne peut PLUS te répondre en chat — il n'a plus que ce formulaire pour communiquer. Donc le `message` :\n";
