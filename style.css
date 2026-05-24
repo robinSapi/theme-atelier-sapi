@@ -23514,16 +23514,18 @@ body.woocommerce-cart div.woocommerce-wrapper {
   color: var(--color-dark);
 }
 
-/* Round 3 — Lot C2 v2 : écran s-contact avec formulaire intégré.
-   Round 4 : harmonisation 3 zones — le wrapper [data-contact-state] devient
-   le conteneur flex column qui occupe TOUTE la hauteur de l'inner et
-   applique le même pattern que les autres écrans (badge en haut, contenu
-   au centre, lien retour en bas). */
+/* Round 3 — Lot C2 v2 / Round 4 fix : écran s-contact avec formulaire intégré.
+   Structure 3 zones explicites (header / body / footer) + justify-content:
+   space-between sur le wrapper [data-contact-state]. Robuste quel que soit
+   le volume de contenu central — pas de dépendance fragile à margin-top:auto
+   sur 6+ enfants. */
 .conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] {
   display: -webkit-flex;
   display: flex;
   -webkit-flex-direction: column;
   flex-direction: column;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
   -webkit-align-items: center;
   align-items: center;
   width: 100%;
@@ -23536,22 +23538,26 @@ body.woocommerce-cart div.woocommerce-wrapper {
   display: none;
 }
 
-/* État form : header = badge. Contenu = message + recap + form + reassurance.
-   Footer = nav (← Reprendre la discussion). 2 spacers pour clamper. */
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state="form"] > .conseiller-contact__message {
-  margin-top: auto;
-}
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state="form"] > .conseiller-modal__nav {
-  margin-top: auto;
+/* Header : juste le badge, centré. */
+.conseiller-contact__header {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-justify-content: center;
+  justify-content: center;
+  width: 100%;
 }
 
-/* État success : header = badge. Contenu = h2 + subtitle. Footer = CTA Fermer. */
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state="success"] > .conseiller-h2 {
-  margin-top: auto;
-}
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state="success"] > .conseiller-modal__cta {
-  margin-top: auto;
-  margin-bottom: 0;
+/* Body : zone scrollable potentielle si contenu trop long. flex column,
+   contenu centré horizontalement, prend l'espace résiduel entre header
+   et footer. */
+.conseiller-contact__body {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-align-items: center;
+  align-items: center;
+  width: 100%;
 }
 
 .conseiller-contact__message {
