@@ -23367,10 +23367,17 @@ body.woocommerce-cart div.woocommerce-wrapper {
   display: none;
 }
 
-/* F2a-bis : sur les écrans non-chat, l'inner devient flex column avec
-   align-items: center pour que les items (pill badge, h2) gardent leur
-   largeur naturelle. Le contenu principal (portes/choix/dots) est poussé
-   au centre vertical de l'espace résiduel via margin: auto. */
+/* ─── Harmonisation 3 zones (Round 4) ─────────────────────────────────
+   Tous les écrans non-chat utilisent le MÊME pattern flex column avec
+   2 spacers `margin-top: auto` :
+     - 1er spacer sur le premier élément du CONTENU (juste après badge/progress)
+       → pousse tout le bloc header (badge+progress) vers le haut.
+     - 2e spacer sur le DERNIER élément (CTA ou nav)
+       → pousse le footer vers le bas.
+   Résultat : le badge est TOUJOURS au padding-top de la card (44px),
+   le lien/CTA du bas TOUJOURS au padding-bottom (36px), peu importe
+   le contenu central. Plus de "jump" visuel entre écrans.
+   S2-chat conserve son layout dédié (chat scrollable). */
 .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner {
   -webkit-flex: 1;
   flex: 1;
@@ -23380,69 +23387,76 @@ body.woocommerce-cart div.woocommerce-wrapper {
   flex-direction: column;
   -webkit-align-items: center;
   align-items: center;
-}
-
-/* Les "grilles" gardent leur full-width malgré align-items: center sur le
-   parent — sinon elles se rétractent à leur largeur intrinsèque. */
-.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-choices,
-.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-freetext,
-.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-separator-or,
-.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-progress {
   width: 100%;
 }
 
-/* ─── F2a-quater — Distribution verticale par écran ───────────────────
-   Chaque écran utilise le pattern flex column avec align-items: center.
-
-   - S0 hybride : TOUT le bloc (badge + h2 + choices + separator + input
-     + reset) est centré verticalement via justify-content: center sur
-     l'inner. Pas de margin auto — le contenu se déplace en bloc selon
-     l'espace disponible (cohérent état initial sans reset et état
-     partiel avec reset).
-   - S1 : header collé en haut, choices centrées au milieu, nav retour
-     en bas. → margin-top auto sur choices + sur nav (2 autos = split
-     équitable du free space en 2 portions).
-   - S3 : header en haut, chips+secondary-actions au centre, CTA "Voir
-     la sélection" en bas. → margin-top auto sur chips + sur cta.
-   - S2-chat : layout dédié flex column avec chat scrollable, header
-     fixe en haut, CTA + footer fixes en bas (pas de margin auto). */
-
-.conseiller-modal__screen[data-screen="s0"] .conseiller-card__inner {
-  -webkit-justify-content: center;
-  justify-content: center;
+/* Les "grilles" / éléments full-width gardent leur 100% malgré
+   align-items: center du parent (sinon ils se rétractent à leur
+   largeur intrinsèque). */
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-choices,
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-freetext,
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-separator-or,
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-progress,
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-chips,
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-s3-secondary-actions,
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-contact-form,
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-modal__nav,
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-modal__cta,
+.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > [data-contact-state] {
+  width: 100%;
 }
 
-.conseiller-modal__screen[data-screen="s1"] .conseiller-choices,
-.conseiller-modal__screen[data-screen="s1"] .conseiller-modal__nav {
+/* Distribution par écran : 2 margin-top:auto pour clamper le contenu
+   central et pousser header en haut + footer en bas. */
+
+/* S0 — Header : badge. Contenu : h2 + choices + separator + freetext.
+   Footer : nav (Effacer et recommencer). Si nav hidden → freetext en bas. */
+.conseiller-modal__screen[data-screen="s0"] .conseiller-card__inner > .conseiller-h2 {
+  margin-top: auto;
+}
+.conseiller-modal__screen[data-screen="s0"] .conseiller-card__inner > .conseiller-modal__nav {
+  margin-top: auto;
+}
+/* Quand le nav est hidden, la freetext devient le dernier élément visible
+   et doit être ancrée en bas pour préserver la même hauteur de footer. */
+.conseiller-modal__screen[data-screen="s0"] .conseiller-card__inner > .conseiller-freetext:last-child {
   margin-top: auto;
 }
 
-/* F2a-quater S3 : chips au centre-haut, secondary-actions collés juste
-   sous, CTA "Voir la sélection" en bas. 2 auto-margins (chips top + cta
-   top) → free space split en 2 portions. */
-.conseiller-modal__screen[data-screen="s3"] .conseiller-chips {
+/* S1 — Header : progress + badge. Contenu : h2 + choices. Footer : nav retour. */
+.conseiller-modal__screen[data-screen="s1"] .conseiller-card__inner > .conseiller-h2 {
+  margin-top: auto;
+}
+.conseiller-modal__screen[data-screen="s1"] .conseiller-card__inner > .conseiller-modal__nav {
+  margin-top: auto;
+}
+
+/* S3 — Header : badge + h2 (h2 fait partie du header car court et statique).
+   Contenu : chips + secondary-actions. Footer : CTA "Voir la sélection". */
+.conseiller-modal__screen[data-screen="s3"] .conseiller-card__inner > .conseiller-chips {
   margin-top: auto;
   gap: 10px;
 }
-
-.conseiller-modal__screen[data-screen="s3"] .conseiller-modal__cta {
+.conseiller-modal__screen[data-screen="s3"] .conseiller-card__inner > .conseiller-modal__cta {
   margin-top: auto;
   margin-bottom: 0;
 }
-
-/* Chips récap plus grosses sur l'écran S3 que sur les autres contextes */
 .conseiller-modal__screen[data-screen="s3"] .conseiller-chip {
   padding: 10px 18px;
   font-size: 14.5px;
   line-height: 1.3;
 }
-
 .conseiller-modal__screen[data-screen="s3"] .conseiller-chip__key {
   margin-right: 7px;
 }
 
-/* ── F2b Phase 2 — s-product-recap (mode court fiche produit, statique) ── */
-.conseiller-modal__screen[data-screen="s-product-recap"] .conseiller-modal__cta {
+/* s-product-recap — Header : badge. Contenu : intro + card + conseils.
+   Footer : CTA Appliquer + nav (Modifier/Contacter).
+   Le CTA absorbe le 2e spacer ; le nav suit naturellement juste après. */
+.conseiller-modal__screen[data-screen="s-product-recap"] .conseiller-card__inner > .conseiller-product-recap__intro {
+  margin-top: auto;
+}
+.conseiller-modal__screen[data-screen="s-product-recap"] .conseiller-card__inner > .conseiller-modal__cta {
   margin-top: auto;
   margin-bottom: 0;
 }
@@ -23501,13 +23515,10 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 /* Round 3 — Lot C2 v2 : écran s-contact avec formulaire intégré.
-   Distribution verticale : bloc compact centré (pattern S0). */
-.conseiller-modal__screen[data-screen="s-contact"] .conseiller-card__inner {
-  -webkit-justify-content: center;
-  justify-content: center;
-}
-/* Les 2 états (form / success) occupent toute la largeur disponible et
-   s'auto-centrent dans la card. align-items:center du parent les recentre. */
+   Round 4 : harmonisation 3 zones — le wrapper [data-contact-state] devient
+   le conteneur flex column qui occupe TOUTE la hauteur de l'inner et
+   applique le même pattern que les autres écrans (badge en haut, contenu
+   au centre, lien retour en bas). */
 .conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] {
   display: -webkit-flex;
   display: flex;
@@ -23518,9 +23529,29 @@ body.woocommerce-cart div.woocommerce-wrapper {
   width: 100%;
   max-width: 560px;
   margin: 0 auto;
+  -webkit-flex: 1;
+  flex: 1;
 }
 .conseiller-modal__screen[data-screen="s-contact"] [data-contact-state][hidden] {
   display: none;
+}
+
+/* État form : header = badge. Contenu = message + recap + form + reassurance.
+   Footer = nav (← Reprendre la discussion). 2 spacers pour clamper. */
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state="form"] > .conseiller-contact__message {
+  margin-top: auto;
+}
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state="form"] > .conseiller-modal__nav {
+  margin-top: auto;
+}
+
+/* État success : header = badge. Contenu = h2 + subtitle. Footer = CTA Fermer. */
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state="success"] > .conseiller-h2 {
+  margin-top: auto;
+}
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state="success"] > .conseiller-modal__cta {
+  margin-top: auto;
+  margin-bottom: 0;
 }
 
 .conseiller-contact__message {
