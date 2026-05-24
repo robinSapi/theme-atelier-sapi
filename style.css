@@ -23504,13 +23504,23 @@ body.woocommerce-cart div.woocommerce-wrapper {
   border: 1px solid var(--color-line);
   border-radius: 12px;
   padding: 14px 8px 11px;
+  min-height: 92px;
   cursor: pointer;
   -webkit-transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   font-family: inherit;
   color: inherit;
   text-align: center;
+  text-transform: none; /* override règle button global text-transform: uppercase */
   box-shadow: var(--shadow-card);
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
 }
 .choice:hover {
   -webkit-transform: translateY(-2px);
@@ -23568,6 +23578,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   transform: translateY(-50%);
   width: 36px;
   height: 36px;
+  padding: 0; /* override règle button global padding: 10px 25px */
   border-radius: 50%;
   background: var(--color-orange);
   border: none;
@@ -23579,8 +23590,13 @@ body.woocommerce-cart div.woocommerce-wrapper {
   align-items: center;
   -webkit-justify-content: center;
   justify-content: center;
+  flex-shrink: 0;
 }
-.text-submit svg { width: 14px; height: 14px; }
+.text-submit svg {
+  width: 14px;
+  height: 14px;
+  display: block; /* évite l'inline gap navigateur sur svg */
+}
 
 /* Séparateur "ou" */
 .separator-or {
