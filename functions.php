@@ -4767,7 +4767,11 @@ function sapi_guide_get_categories(array $answers) {
 
   // Éclairage secondaire → pool limité, affiné par sortie
   if ($eclairage === 'secondaire') {
-    $pool = ['lampadaires', 'lampesaposer']; // default (NSP) : pas d'appliques
+    // Round 3.1 — Fix 2 : default (sortie=ne-sais-pas) inclut désormais
+    // 'appliques' par cohérence avec $sapi_filter_rules['cats_secondaire_by_sortie']['ne-sais-pas']
+    // (Round 1 — e41f735, RÉEL #4). Le kit prise électrique (savoir.txt:48,
+    // regles.txt:37) permet l'installation d'une applique sans sortie murale dédiée.
+    $pool = ['lampadaires', 'lampesaposer', 'appliques'];
     if ($sortie === 'plafond') {
       $pool = ['suspensions'];
     } elseif ($sortie === 'mur') {
