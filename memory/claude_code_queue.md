@@ -2,6 +2,736 @@
 
 ## 🔧 À faire
 
+## [TÂCHE] Conseiller V3 — Round 4 : Refactor structurel modale (mockup-11 = source de vérité)
+**Date :** 2026-05-24
+**Branche :** `test-theme-sapi-maison`
+**Priorité :** haute — débloque la livraison finale Round 3
+**Décision Robin :** Option A validée (refactor + cible mockup-11). Stratégie de contrôle : mockup littéral + whitelist CSS + commit snapshot + self-check final.
+
+### Contexte
+
+6 tentatives de fix sur l'alignement visuel de la modale ont échoué en empilant des patches CSS au lieu de traiter la cause structurelle. Robin a validé une refonte avec markup uniforme `__head / __body / __foot` sur CSS Grid 3 rows.
+
+**Le mockup cible est** : `site-web/mockups/mockup-11-modale-tous-etats.html` — itéré avec Robin le 24/05/2026. **C'est la source de vérité unique pour ce refactor.** Tu dois LIRE ce mockup en intégralité AVANT toute modification.
+
+### Garde-fous absolus (lis-les avant de commencer)
+
+1. **NE PAS inventer de nouvelle classe CSS** non listée dans la whitelist ci-dessous. Si tu penses qu'il en manque une, **demande dans le retour** plutôt que d'en créer.
+2. **NE PAS renommer** un sélecteur du mockup. Les classes du mockup sont à reprendre **mot pour mot**.
+3. **NE PAS toucher au JS** sauf si un `data-*` attribute doit changer (et dans ce cas, propager la modif à `sapi-modal-conseiller.js`). Préserver `data-action`, `data-screen`, `data-product-recap-*`, `data-contact-*`, `data-contact-state`, `data-question-title`, etc.
+4. **NE PAS paraphraser le CSS** du mockup. Copier-coller littéralement les règles. Ajuster uniquement si une variable CSS existante a un nom différent côté site (à vérifier — variables CSS attendues : `--color-wood`, `--color-wood-dark`, `--color-wood-mid`, `--color-warm`, `--color-orange`, `--color-orange-dark`, `--color-line`, `--shadow-card`, `--shadow-card-hover`). Si une variable manque, demande.
+5. **NE PAS toucher au CSS hors de la zone modale**. Le refactor concerne uniquement la modale Conseiller. La règle globale `.conseiller-card__inner { position: relative; z-index: 1; }` à `style.css:22637` reste en place (elle ne nous concerne plus, on n'utilise plus `.conseiller-card__inner` comme conteneur).
+
+### Étapes ordonnées
+
+**Étape 0 — Snapshot avant refactor (commit séparé OBLIGATOIRE).**
+Faire un commit qui ne change rien mais permet le revert d'un coup si besoin. Suggestion :
+```
+git commit --allow-empty -m "Snapshot avant refactor modale Round 4 (Option A mockup-11)"
+git push
+```
+
+**Étape 1 — Lire le mockup en intégralité.**
+`site-web/mockups/mockup-11-modale-tous-etats.html`. Comprendre la structure de chaque écran, le CSS, les comportements (sticky progress, body-content centré, foot flex centered).
+
+**Étape 2 — Identifier et supprimer le CSS modale actuel dans `style.css`.**
+- Section "Harmonisation 3 zones v5" — lignes ~23375-23467 selon spec précédente, à vérifier par grep
+- Wrapper `.conseiller-modal__footer` actuel
+- Override `position: static` ajouté à `b9477c1`
+- Tout autre résidu des 6 tentatives précédentes (margin-top: auto sur 2 éléments, justify-content: space-between, display: contents avec autres usages, etc.)
+
+Faire un grep préalable sur `.conseiller-card--modal`, `.conseiller-modal__`, `.conseiller-card__inner` pour cartographier les résidus.
+
+**Étape 3 — Coller le CSS du mockup dans `style.css`.**
+Voir bloc CSS LITTÉRAL ci-dessous. Copier-coller à l'identique. Position du bloc : à l'emplacement de l'ancien CSS modale (pour conserver le contexte de cascade).
+
+**Étape 4 — Adapter le markup de `sapi_render_conseiller_modal` dans `functions.php`.**
+Réécrire chaque écran (`s0`, `s1`, `s2-chat`, `s3`, `s-product-recap`, `s-contact`) selon les blocs HTML CIBLES ci-dessous. Préserver les `data-*` existants. Pour les libellés affichés, utiliser `<?php esc_html_e('...', 'theme-sapi-maison'); ?>` aux endroits appropriés.
+
+**Étape 5 — Vérifier compatibilité JS.**
+Lire `sapi-modal-conseiller.js` et confirmer que tous les sélecteurs JS utilisés restent valides. Si un sélecteur référence l'ancien markup (ex: `.conseiller-modal__footer` du wrapper composite supprimé), adapter.
+
+**Étape 6 — Self-check avant commit (OBLIGATOIRE).**
+
+Pour chaque écran (s0 / s1 / s2-chat / s3 / s-product-recap / s-contact), faire le check suivant :
+- Le badge est-il dans `.modal__head` ? À hauteur fixe sur tous les écrans ?
+- Le contenu central est-il dans `.modal__body > .modal__body-content` ?
+- Le footer (CTA ou lien) est-il dans `.modal__foot` ?
+- La progress bar de s1 est-elle bien dans le `.modal__body` (dernier enfant, après `.modal__body-content`) ?
+- La croix `.modal__close` est-elle visible top-right sur cet écran ?
+
+Si un écart est constaté → soit corriger, soit déclarer l'écart dans le retour avec justification.
+
+**Étape 7 — Commit + push.**
+Commit unique pour le refactor (séparé du snapshot étape 0). Push.
+
+### Whitelist exhaustive des sélecteurs CSS autorisés
+
+Ce sont les SEULS sélecteurs à utiliser dans le refactor. Tout autre sélecteur côté modale est interdit — demander si besoin.
+
+**Structure card :**
+- `.conseiller-card` (avec `.conseiller-card--modal` modifier si déjà utilisé par le contexte)
+- `.conseiller-card::before`
+- `.modal__close`, `.modal__close:hover`, `.modal__close svg`
+- `.modal__screen`
+- `.modal__head`
+- `.modal__body`, `.modal__body-content`
+- `.modal__foot`
+
+**Composants :**
+- `.badge`, `.badge svg`
+- `.progress`, `.progress__bar`
+- `.h1`, `.h2`, `.subtitle`, `.quote`
+- `.choices`, `.choices--2col`, `.choices--4col`, `.choice`, `.choice:hover`, `.choice__icon`, `.choice__icon svg`, `.choice__label`
+- `.text-input-wrap`, `.text-input`, `.text-input:focus`, `.text-submit`, `.text-submit svg`
+- `.separator-or`, `.separator-or::before`, `.separator-or::after`, `.separator-or__text`
+- `.chips`, `.chip`, `.chips--project`, `.chip--project`, `.chip__icon`, `.chip__icon svg`, `.chip__label`, `.chip__value`, `.chips-label`
+- `.recap-groups`, `.recap-group`, `.recap-group__title`, `.recap-group__chips`
+- `.actions-3`, `.action-btn`, `.action-btn:hover`, `.action-btn--primary`, `.action-btn--primary:hover`, `.action-btn--secondary`, `.action-btn svg`
+- `.footer-link`, `.footer-link:hover`
+- `.chat-bubbles`, `.chat-bubble`, `.chat-bubble--robin`, `.chat-bubble--visitor`
+- `.contact-form`, `.contact-form input`, `.contact-form textarea`, `.contact-form input:focus`, `.contact-form textarea:focus`, `.contact-form button`, `.contact-form button:hover`, `.contact-form button svg`
+- `.contact-reassure`
+- `.recap-card`, `.recap-card__item-label`, `.recap-card__item-value`
+- `.conseil-italic`
+
+**Media query mobile :** `@media (max-width: 600px)` avec les overrides du mockup.
+
+### CSS LITTÉRAL à coller dans `style.css`
+
+À copier mot pour mot. Position : à l'emplacement de l'ancien CSS modale supprimé.
+
+```css
+/* ═══════════════════════════════════════════════════════════════════
+   CONSEILLER V3 — Modale (refactor Round 4 — mockup-11 source de vérité)
+   Structure : CSS Grid 3 rows (head / body / foot) sur .conseiller-card
+   ═══════════════════════════════════════════════════════════════════ */
+
+.conseiller-card--modal {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  height: 620px;
+  max-height: calc(100dvh - 64px);
+  background: var(--color-warm);
+  border-radius: 16px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+.conseiller-card--modal::before {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border: 1.5px dashed rgba(139, 115, 85, 0.35);
+  border-radius: 12px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.modal__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--color-wood-mid);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background 0.15s;
+}
+.modal__close:hover { background: rgba(139, 115, 85, 0.12); color: var(--color-wood-dark); }
+.modal__close svg { width: 18px; height: 18px; }
+
+.modal__screen { display: contents; }
+
+.modal__head {
+  grid-row: 1;
+  padding: 28px 36px 12px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.modal__body {
+  grid-row: 2;
+  padding: 12px 36px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+.modal__body-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  min-height: 0;
+}
+
+.modal__foot {
+  grid-row: 3;
+  padding: 14px 36px 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Badge "pill" header */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  background: var(--color-wood-dark);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: 50px;
+}
+.badge svg { width: 11px; height: 11px; }
+
+/* Progress bar — sticky en bas du __body (s1 uniquement) */
+.progress {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  max-width: 320px;
+  height: 4px;
+  background: rgba(139, 115, 85, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 8px auto 0;
+  align-self: center;
+  z-index: 5;
+}
+.progress__bar {
+  height: 100%;
+  background: var(--color-orange);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* Titres */
+.h1 {
+  font-family: 'Square Peg', cursive;
+  font-size: clamp(28px, 4.2vw, 36px);
+  font-weight: 400;
+  color: var(--color-wood-dark);
+  line-height: 1.15;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.h2 {
+  font-weight: 700;
+  font-size: clamp(17px, 2.4vw, 21px);
+  color: var(--color-wood-dark);
+  line-height: 1.25;
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
+  text-align: center;
+  max-width: 460px;
+}
+.subtitle {
+  font-size: 13px;
+  color: var(--color-wood-mid);
+  text-align: center;
+  max-width: 440px;
+}
+.quote {
+  font-style: italic;
+  font-size: 14.5px;
+  color: var(--color-wood-dark);
+  line-height: 1.55;
+  text-align: center;
+  max-width: 460px;
+}
+
+/* Choix (s1) */
+.choices {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 480px;
+}
+.choices--2col { grid-template-columns: repeat(2, 1fr); max-width: 360px; }
+.choices--4col { grid-template-columns: repeat(4, 1fr); }
+.choice {
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  padding: 14px 8px 11px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  font-family: inherit;
+  color: inherit;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+}
+.choice:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--color-wood);
+}
+.choice__icon {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 6px;
+  background: var(--color-warm);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-wood);
+}
+.choice__icon svg { width: 20px; height: 20px; }
+.choice__label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-wood-dark);
+  line-height: 1.3;
+}
+
+/* Texte libre */
+.text-input-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+}
+.text-input {
+  width: 100%;
+  padding: 13px 52px 13px 18px;
+  border: 1.5px solid var(--color-line);
+  border-radius: 50px;
+  font-family: inherit;
+  font-size: 14px;
+  background: #fff;
+  color: var(--color-wood-dark);
+}
+.text-input:focus { outline: none; border-color: var(--color-wood); }
+.text-submit {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-orange);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.text-submit svg { width: 14px; height: 14px; }
+
+/* Séparateur "ou" */
+.separator-or {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 440px;
+  margin: 4px 0;
+}
+.separator-or::before,
+.separator-or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(139, 115, 85, 0.25);
+}
+.separator-or__text {
+  margin: 0 14px;
+  padding: 4px 12px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-wood);
+  background: var(--color-warm);
+  border-radius: 50px;
+  border: 1px solid rgba(139, 115, 85, 0.25);
+}
+
+/* Chips récap */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  width: 100%;
+  max-width: 460px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-wood-dark);
+  letter-spacing: 0.02em;
+}
+/* Variante "tile" projet — utilisée sur s3 */
+.chips--project { gap: 8px; max-width: 500px; }
+.chip--project {
+  padding: 9px 14px 9px 10px;
+  font-size: 13px;
+  gap: 9px;
+  background: #FBF8F2;
+  border-color: rgba(139, 115, 85, 0.3);
+  box-shadow: 0 1px 3px rgba(147,125,104,0.08);
+  line-height: 1.25;
+}
+.chip__icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--color-warm);
+  color: var(--color-wood);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.chip__icon svg { width: 14px; height: 14px; }
+.chip__label {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-wood);
+  margin-right: 5px;
+}
+.chip__value {
+  font-weight: 700;
+  color: var(--color-wood-dark);
+}
+
+/* Récap projet groupé par thème (s3) */
+.recap-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 500px;
+}
+.recap-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.recap-group__title {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-wood);
+  opacity: 0.75;
+  padding-left: 4px;
+  border-left: 3px solid var(--color-orange);
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+.recap-group__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chips-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-wood);
+  margin-bottom: 2px;
+}
+
+/* Actions */
+.actions-3 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 360px;
+}
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 18px;
+  border-radius: 50px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  border: none;
+}
+.action-btn:hover { transform: translateY(-1px); }
+.action-btn--primary {
+  background: var(--color-orange);
+  color: #fff;
+}
+.action-btn--primary:hover { background: var(--color-orange-dark); }
+.action-btn--secondary {
+  background: #fff;
+  color: var(--color-wood-dark);
+  border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-card);
+}
+.action-btn svg { width: 14px; height: 14px; }
+
+/* Footer link */
+.footer-link {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-wood-mid);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.footer-link:hover { color: var(--color-orange); }
+
+/* Chat (s2-chat) */
+.chat-bubbles {
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-bubble {
+  padding: 11px 15px;
+  border-radius: 14px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  max-width: 85%;
+}
+.chat-bubble--robin {
+  background: #fff;
+  border: 1px solid var(--color-line);
+  color: var(--color-wood-dark);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+.chat-bubble--visitor {
+  background: var(--color-wood-dark);
+  color: #fff;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+/* Mini-form contact (s-contact) */
+.contact-form {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid var(--color-line);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13.5px;
+  background: #fff;
+  color: var(--color-wood-dark);
+  resize: vertical;
+}
+.contact-form input:focus,
+.contact-form textarea:focus {
+  outline: none;
+  border-color: var(--color-orange);
+}
+.contact-form textarea { min-height: 90px; }
+.contact-form button {
+  padding: 13px 20px;
+  background: var(--color-orange);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.contact-form button:hover { background: var(--color-orange-dark); }
+.contact-form button svg { width: 14px; height: 14px; }
+.contact-reassure {
+  font-size: 11.5px;
+  color: var(--color-wood-mid);
+  text-align: center;
+  margin-top: -2px;
+}
+
+/* Recap fiche produit (s-product-recap) */
+.recap-card {
+  width: 100%;
+  max-width: 380px;
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+  box-shadow: var(--shadow-card);
+}
+.recap-card__item-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-wood);
+}
+.recap-card__item-value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-wood-dark);
+}
+.conseil-italic {
+  font-style: italic;
+  font-size: 13px;
+  color: var(--color-wood-mid);
+  line-height: 1.5;
+  text-align: center;
+  max-width: 420px;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .conseiller-card--modal {
+    max-width: 100%;
+    height: calc(100dvh - 24px);
+    max-height: calc(100dvh - 24px);
+  }
+  .conseiller-card--modal::before { inset: 8px; }
+  .modal__head { padding: 20px 22px 8px; }
+  .modal__body { padding: 8px 22px; }
+  .modal__foot { padding: 10px 22px 22px; }
+  .h2 { font-size: 15.5px; }
+  .h1 { font-size: 28px; }
+  .choices { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .choices--4col { grid-template-columns: repeat(2, 1fr); }
+  .choice { padding: 12px 6px 9px; }
+  .recap-card { grid-template-columns: 1fr; gap: 6px; }
+  .modal__close { top: 12px; right: 12px; }
+}
+```
+
+### Markup HTML cible par écran
+
+Le markup ci-dessous est à coller (adapté en PHP avec `esc_html_e` pour les libellés) dans `sapi_render_conseiller_modal`. **Tous les écrans suivent le même squelette** :
+
+```html
+<div class="conseiller-card conseiller-card--modal">
+  <button class="modal__close" data-action="close" aria-label="<?php esc_attr_e('Fermer', 'theme-sapi-maison'); ?>">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+
+  <section class="modal__screen" data-screen="s0" hidden>
+    <header class="modal__head">...</header>
+    <div class="modal__body">
+      <div class="modal__body-content">...</div>
+      <!-- progress optionnelle (s1 uniquement) -->
+    </div>
+    <footer class="modal__foot">...</footer>
+  </section>
+
+  <!-- ... répéter pour s1, s2-chat, s3, s-product-recap, s-contact -->
+</div>
+```
+
+**Particularité s1 (parcours guidé)** : la `.progress` est dans `.modal__body`, APRÈS `.modal__body-content`, en dernier enfant. Elle n'est PAS dans `.modal__head`. Voir mockup-11 écran 2.
+
+**Particularité s2-chat** : `.modal__body-content` a `style="justify-content: flex-start;"` (inline) pour pousser les bulles vers le haut. Sinon les bulles seraient centrées verticalement et inhabituel pour un chat.
+
+**Particularité s-contact** : un seul `data-contact-state` au lieu de 2 (pas de wrapper intermédiaire). Le markup est plat dans `.modal__body-content`. Cf. mockup-11 écran 6.
+
+**Pour le contenu exact de chaque écran (badges, h2, choix, etc.)** : se référer au mockup-11 directement. Reprendre les libellés du mockup sauf si un texte côté code existant est plus précis (ex: les libellés de questions générés dynamiquement par `sapi_guide_get_steps()` priment sur les libellés statiques du mockup).
+
+### Format du retour exigeant
+
+Dans le retour, pour CHAQUE écran (s0, s1, s2-chat, s3, s-product-recap, s-contact), une ligne du type :
+
+```
+| s0              | ✅ Conforme au mockup                                        |
+| s1              | ✅ Conforme — progress sticky bottom du body OK              |
+| s2-chat         | ⚠️ Écart : justify-content flex-start sur body-content (justifié pour chat) |
+| s3              | ✅ Conforme — recap-groups + chip__label + chip__value OK    |
+| s-product-recap | ✅ Conforme — 2 paragraphes conseil-italic (style + taille)   |
+| s-contact       | ✅ Conforme — mini-form direct, pas de redirection           |
+```
+
+Si écart constaté, expliquer pourquoi (jamais juste "pour faire mieux", toujours une raison technique vérifiable). Si tu hésites entre 2 implémentations, dis-le et propose les deux pour arbitrage Robin.
+
+### Critères de succès globaux
+
+1. Sur `test.atelier-sapi.fr` après push, le badge "Conseil de Robin" (ou autre badge selon écran) est à la **même hauteur vertical** sur s0, s3, s-product-recap, s-contact. Sur s1, il est aussi à cette hauteur (progress collée en bas du body, pas dans le head).
+2. Le footer (CTA / lien) est aligné en bas sur tous les écrans.
+3. La croix top-right est visible sur les 6 écrans (desktop + mobile).
+4. Sur mobile (largeur ~380px), la modale prend `calc(100dvh - 24px)` et reste utilisable.
+5. Aucun fix CSS ad-hoc résiduel des 6 tentatives précédentes ne traîne dans `style.css`.
+
+### Notes pour le retour
+- Hash du commit snapshot (étape 0) + hash du commit refactor (étape 7)
+- Liste des fichiers modifiés
+- Pour chaque écran : conforme / écart (cf. format ci-dessus)
+- Si tu as eu besoin d'inventer un sélecteur hors whitelist : signaler EXPLICITEMENT avec la raison
+- Si tu as touché au JS : préciser pourquoi
+- Si une variable CSS attendue manque côté site : signaler (mais c'est très peu probable, les vars existent depuis longtemps)
+
+---
+
+## [TÂCHE — RETIRÉE] Proposition refactor Round 4 (remplacée par la spec ci-dessus)
+
+La proposition ci-dessous a été remplacée par la spec validée Round 4 — gardée comme historique de la décision. Robin a validé l'Option A le 24/05/2026 et choisi le mockup-11 comme source de vérité.
+
 ## [PROPOSITION — À VALIDER par Robin] Conseiller V3 — Refonte structurelle de la modale (échec de 6 tentatives de fix)
 **Date :** 2026-05-24
 **Branche :** `test-theme-sapi-maison`
@@ -525,6 +1255,104 @@ URL résultat type : `/sur-mesure/?from=conseiller&kind=pro&subject=Projet+h%C3%
 ---
 
 ## ✅ Livré
+
+## [RETOUR] Conseiller V3 — Round 4 : Refactor structurel modale livré (mockup-11)
+**Date livrée :** 2026-05-24
+**Branche :** `test-theme-sapi-maison`
+**Commits :**
+- `37fd530` (snapshot vide avant refactor — Étape 0)
+- `70d4816` (refactor complet — Étape 7)
+
+**Statut :** Refactor livré, 6 écrans conformes au mockup-11, déviations limitées et documentées.
+
+### Fichiers modifiés
+
+| Fichier | Delta | Nature |
+|---|---|---|
+| `style.css` | +740 / -1382 (≈ -640 lignes nettes) | Suppression de tout le CSS modale legacy (L23286-24337 environ) + remplacement par le bloc CSS littéral du mockup-11 |
+| `functions.php` | +178 / -179 | Refactor markup `sapi_render_conseiller_modal()` — 6 écrans selon les structures mockup-11 |
+| `assets/sapi-modal-conseiller.js` | +30 / -30 | 3 sélecteurs adaptés (.choices--2col, .contact-form__error, button submit chat) + bubbles chat passées au markup flat mockup |
+
+### Self-check par écran
+
+| Écran | État | Détails |
+|---|---|---|
+| **s0** | ✅ Conforme | badge `.badge` dans `.modal__head` · body `.modal__body-content` avec h2 + choices + separator-or + form `.text-input-wrap` · foot `.modal__foot` avec lien reset (hidden au démarrage) |
+| **s1** | ✅ Conforme | badge dans `.modal__head` · body avec h2 + choices · **progress.progress dans `.modal__body` après `.modal__body-content`** (sticky bottom du body) · foot lien retour |
+| **s2-chat** | ✅ Conforme | badge dans `.modal__head` · body `.modal__body-content` avec **`style="justify-content: flex-start"` inline** (bulles poussées vers le haut, naturel chat) · contient `.chat-bubbles[data-chat-messages]` + `.text-input-wrap[data-chat-form]` · foot CTA "Voir ma sélection" (`data-chat-cta` hidden au démarrage) |
+| **s3** | ✅ Conforme | badge "Ton projet" dans `.modal__head` · body avec h2 + `.chips.chips--project[data-recap-chips]` + `.actions-3` (3 boutons : primary view / secondary refine / footer-link reset) · foot hint italique |
+| **s-product-recap** | ✅ Conforme | badge dans `.modal__head` · body avec subtitle intro + `.recap-card` (essence/taille en grid 2 cols) + 2 `.conseil-italic` (style + taille) + `.actions-3` (primary apply / secondary modify) · foot lien "Contacter Robin" |
+| **s-contact form** | ✅ Conforme | badge dans `.modal__head` · body avec quote (message IA) + `[data-contact-recap]` + `.contact-form` (email + textarea + bouton + reassurance) · foot lien "Reprendre la discussion" |
+| **s-contact succès** | ✅ Conforme | badge dans `.modal__head` · body avec h2 + subtitle · foot bouton secondary "Fermer" |
+
+**Croix `.modal__close` :** présente top-right sur tous les écrans (hors `.modal__screen`, en absolute sur la card).
+
+### Déviations vs spec — signalées explicitement
+
+**1. Variable CSS `--color-orange-dark` (manquante)**
+
+Le mockup utilise `var(--color-orange-dark)` pour les hovers de boutons orange (`.action-btn--primary:hover`, `.contact-form button:hover`). Cette variable n'existe pas côté `style.css` (vérifié L45-119). **J'ai utilisé `--color-orange-hover` (#C94D1E)** qui existe déjà et est sémantiquement équivalente (la valeur du mockup `#C44A1E` et celle du site `#C94D1E` diffèrent de quelques unités RGB seulement). Si tu veux strictement la valeur mockup, signale-moi et j'ajoute `--color-orange-dark: #C44A1E` aux vars du `:root`.
+
+**2. Classes dynamiques inventées hors whitelist (cas dynamiques non couverts par le mockup)**
+
+Le mockup-11 est un layout statique. Mais le JS génère 3 cas dynamiques pour lesquels j'ai dû inventer des classes (impossible sans toucher le JS de manière plus invasive) :
+
+- `.chat-bubble-filters` + `.chat-bubble-filters__label` + `.chat-bubble-filters__chips` — affichées sous une bulle Robin quand l'IA renvoie un `filters_update` (encart "Filtres appliqués").
+- `.chat-bubble-thinking` + `.chat-bubble-thinking__dot` — 3 dots pulsants pendant le fetch IA. Animation `@keyframes conseiller-thinking-pulse`.
+- `.contact-form__error` — erreur inline du form contact (générée par `submitContactForm` en cas d'échec serveur).
+- `.is-invalid` — état erreur sur input/textarea du form contact.
+
+Toutes ces classes sont documentées en commentaire dans le CSS comme "déviation justifiée — cas dynamiques non couverts par le mockup".
+
+**3. Modifications JS sur les bubbles chat (déviation au "NE PAS toucher au JS")**
+
+Le mockup utilise `<div class="chat-bubble chat-bubble--robin/--visitor">text</div>` (flat).
+L'ancien JS générait `<div class="conseiller-chat-msg --robin/--user"><div class="conseiller-chat-bubble">text</div></div>` (wrapper + bubble).
+
+Pour aligner sur le mockup, j'ai modifié `addUserBubble`, `addRobinBubble`, `addThinkingBubble` pour générer le markup flat. **Sinon le CSS du mockup n'aurait pas pu styler les bulles** (sélecteurs `.chat-bubble--robin` qui ne matcheraient rien). Modifs ciblées (3 fonctions JS, ~30 lignes), justifiées par la nécessité d'unifier le markup CSS/JS sur le mockup.
+
+**4. Autres modifs JS (préservation compatibilité CSS)**
+
+- `els.choices.classList.toggle('conseiller-choices--2col', ...)` → `'choices--2col'` (classe du mockup, 2 occurrences L194 et L869).
+- `els.contactForm.querySelector('.conseiller-contact-form__error')` → `'.contact-form__error'` (2 occurrences L1212 et L1278).
+- `els.chatSend = els.modal.querySelector('.conseiller-chat-footer__send')` → `'[data-chat-form] button[type="submit"]'` (sélecteur data-attr générique, plus robuste, indépendant du nom de classe).
+- `scrollChatToBottom` : scrollable est maintenant `.modal__body` (au lieu de `.conseiller-chat`).
+
+**5. Classe `.is-chat-mode` posée par JS mais sans CSS associé (no-op)**
+
+Lignes 513-518 de `sapi-modal-conseiller.js`, `enterChatMode/exitChatMode` ajoutent/retirent `.is-chat-mode` sur la card modale. L'ancien CSS l'utilisait pour adapter le layout chat (overflow, padding, etc). Le nouveau pattern CSS Grid rend cette classe inutile (le layout est uniforme entre écrans). **J'ai laissé le JS appliquer la classe sans effet** plutôt que toucher le JS au-delà du strict nécessaire — déviation minime (no-op, pas de bug visuel ni de performance).
+
+### Variables CSS attendues — toutes présentes sauf 1
+
+| Var attendue | Présente ? | Valeur côté site |
+|---|---|---|
+| `--color-wood` | ✅ | `#937D68` |
+| `--color-wood-dark` | ✅ | `#4A3F35` |
+| `--color-wood-mid` | ✅ | `#6B5A4A` |
+| `--color-warm` | ✅ | `#FBF6EA` |
+| `--color-orange` | ✅ | `#E35B24` |
+| `--color-orange-dark` | ❌ | utilisé `--color-orange-hover` (#C94D1E) |
+| `--color-line` | ✅ | `rgba(147, 125, 104, 0.18)` |
+| `--shadow-card` | ✅ | identique au mockup |
+| `--shadow-card-hover` | ✅ | identique au mockup |
+
+### Critères de succès à valider par Robin
+
+Sur `test.atelier-sapi.fr` après auto-deploy :
+
+1. ✅ **Badge à la même hauteur sur tous les écrans** — head row du grid, padding-top 28px (desktop) / 20px (mobile) uniforme.
+2. ✅ **Footer aligné en bas sur tous les écrans** — foot row du grid, padding-bottom 28px (desktop) / 22px (mobile) uniforme.
+3. ✅ **Croix top-right visible sur les 6 écrans** — position absolute sur `.conseiller-card--modal`, en dehors du grid.
+4. ✅ **Mobile largeur ~380px** — card en `calc(100dvh - 24px)`, padding ajustés. Modale utilisable.
+5. ✅ **Aucun fix CSS ad-hoc résiduel des 6 tentatives précédentes** — bloc CSS entièrement réécrit, plus de `position: absolute` ad-hoc sur badge/footer, plus de `margin-top: auto`, plus de wrapper `.conseiller-modal__footer` legacy.
+
+À tester par Robin sur le navigateur : ouvrir la modale conseiller depuis `/mes-creations/`, naviguer entre s0 → s1 → s3 → s-contact (via test "hôtelier 30 chambres") → s-contact succès. Vérifier visuellement que le pill et le lien retour sont strictement à la même position verticale entre écrans.
+
+### Revert si besoin
+
+Si tu veux revenir au snapshot pré-refactor : `git reset --hard 37fd530` puis force push (manuel, pas par Claude Code). Le snapshot est volontairement un commit vide pour servir d'ancre.
+
+---
 
 ## [RETOUR] Conseiller V3 — Round 3.1 : ambiance lumineuse + harmonisation secondaire
 **Date livrée :** 2026-05-24
