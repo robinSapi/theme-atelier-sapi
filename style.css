@@ -23382,6 +23382,14 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner {
   display: block;
   width: 100%;
+  /* Round 4 v5 fix — Override le `position: relative` global (style.css:22637)
+     hérité de .conseiller-card__inner (présent pour les cards conseiller hors
+     modale qui ont un ::before dashed à passer derrière).
+     Dans la modale, on a besoin que .conseiller-card--modal soit le système
+     de coordonnées du badge (top:44px) et du footer (bottom:36px) positionnés
+     en absolute. Sans ce override, ces éléments s'ancrent sur l'inner (hauteur
+     auto, position arbitraire dans le screen) → badge et footer en plein milieu. */
+  position: static;
 }
 
 /* Badge — ancré en absolute top, centré horizontalement.
