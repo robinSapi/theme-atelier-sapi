@@ -964,24 +964,88 @@
      côté client à partir de sapiProject.advice_text déjà stocké.
      ───────────────────────────────────────────── */
 
+  // Round 4 — mockup-11 : recap groupé par thème (Espace / Installation /
+  // Esthétique) avec chips icône + label uppercase + valeur.
+  var S3_GROUPS = [
+    { title: 'Espace',       steps: ['piece', 'taille', 'taille_escalier'] },
+    { title: 'Installation', steps: ['sortie', 'eclairage', 'hauteur', 'table'] },
+    { title: 'Esthétique',   steps: ['style'] }
+  ];
+  var S3_KEY_LABELS = {
+    piece: 'Pièce',
+    taille: 'Taille',
+    taille_escalier: 'Escalier',
+    eclairage: 'Éclairage',
+    sortie: 'Sortie électrique',
+    hauteur: 'Hauteur sous plafond',
+    table: 'Au-dessus',
+    style: 'Style'
+  };
+
   function populateRecapChips() {
     if (!els.recapChips) return;
     els.recapChips.innerHTML = '';
-    var visible = getVisibleStepIds(state.answers);
-    visible.forEach(function (sid) {
-      var slug = state.answers[sid];
-      if (!slug) return;
-      var label = state.labels[sid] || slug;
-      var keyLabel = KEY_LABELS[sid] || sid;
 
-      var chip = document.createElement('span');
-      chip.className = 'conseiller-chip';
-      var keyEl = document.createElement('span');
-      keyEl.className = 'conseiller-chip__key';
-      keyEl.textContent = keyLabel + ' :';
-      chip.appendChild(keyEl);
-      chip.appendChild(document.createTextNode(' ' + label));
-      els.recapChips.appendChild(chip);
+    S3_GROUPS.forEach(function (group) {
+      var stepsWithValue = group.steps.filter(function (sid) {
+        return state.answers[sid];
+      });
+      if (!stepsWithValue.length) return; // skip groupe si aucune réponse
+
+      var groupEl = document.createElement('div');
+      groupEl.className = 'recap-group';
+
+      var titleEl = document.createElement('div');
+      titleEl.className = 'recap-group__title';
+      titleEl.textContent = group.title;
+      groupEl.appendChild(titleEl);
+
+      var chipsEl = document.createElement('div');
+      chipsEl.className = 'recap-group__chips';
+
+      stepsWithValue.forEach(function (sid) {
+        var slug = state.answers[sid];
+        var step = getStep(sid);
+        var labelText = state.labels[sid] || slug;
+        var keyLabel = S3_KEY_LABELS[sid] || sid;
+
+        var chip = document.createElement('span');
+        chip.className = 'chip chip--project';
+
+        // Icône : depuis l'icône du choix sélectionné dans le step
+        var iconName = null;
+        if (step && step.choices) {
+          for (var i = 0; i < step.choices.length; i++) {
+            if (step.choices[i].slug === slug) {
+              iconName = step.choices[i].icon;
+              break;
+            }
+          }
+        }
+        if (iconName && ICONS[iconName]) {
+          var iconEl = document.createElement('span');
+          iconEl.className = 'chip__icon';
+          iconEl.innerHTML = ICONS[iconName];
+          chip.appendChild(iconEl);
+        }
+
+        // Wrapper texte (label uppercase + valeur)
+        var textWrap = document.createElement('span');
+        var labelEl = document.createElement('span');
+        labelEl.className = 'chip__label';
+        labelEl.textContent = keyLabel;
+        var valueEl = document.createElement('span');
+        valueEl.className = 'chip__value';
+        valueEl.textContent = labelText;
+        textWrap.appendChild(labelEl);
+        textWrap.appendChild(valueEl);
+        chip.appendChild(textWrap);
+
+        chipsEl.appendChild(chip);
+      });
+
+      groupEl.appendChild(chipsEl);
+      els.recapChips.appendChild(groupEl);
     });
   }
 

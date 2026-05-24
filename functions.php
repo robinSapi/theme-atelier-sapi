@@ -3582,7 +3582,7 @@ function sapi_render_conseiller_modal() {
           <div class="modal__body-content">
             <h2 class="h2"><?php esc_html_e('Voici ton projet', 'theme-sapi-maison'); ?></h2>
 
-            <div class="chips chips--project" data-recap-chips></div>
+            <div class="recap-groups" data-recap-chips></div>
 
             <div class="actions-3">
               <button type="button" class="action-btn action-btn--primary" data-action="s3-view">
