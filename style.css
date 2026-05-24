@@ -23514,49 +23514,53 @@ body.woocommerce-cart div.woocommerce-wrapper {
   color: var(--color-dark);
 }
 
-/* Round 3 — Lot C2 v2 / Round 4 fix : écran s-contact avec formulaire intégré.
-   Structure 3 zones explicites (header / body / footer) + justify-content:
-   space-between sur le wrapper [data-contact-state]. Robuste quel que soit
-   le volume de contenu central — pas de dépendance fragile à margin-top:auto
-   sur 6+ enfants. */
+/* Round 3 — Lot C2 v2 / Round 4 fix (v3) : écran s-contact avec formulaire intégré.
+   APPROCHE display: contents — le wrapper [data-contact-state] devient
+   "transparent" pour le layout : ses enfants se comportent comme s'ils
+   étaient enfants directs de .conseiller-card__inner, exactement comme
+   les autres écrans (s0/s1/s3). Le pattern margin-top:auto x2 utilisé
+   par les autres écrans s'applique alors directement aux enfants : badge
+   reste à padding-top de la card (44px), nav reste à padding-bottom (36px).
+   Plus de wrapper qui stretche bizarrement et déborde. */
 .conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] {
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-direction: column;
-  flex-direction: column;
-  -webkit-justify-content: space-between;
-  justify-content: space-between;
-  -webkit-align-items: center;
-  align-items: center;
-  width: 100%;
-  max-width: 560px;
-  margin: 0 auto;
-  -webkit-flex: 1;
-  flex: 1;
+  display: contents;
 }
 .conseiller-modal__screen[data-screen="s-contact"] [data-contact-state][hidden] {
   display: none;
 }
 
-/* Header : juste le badge, centré. */
-.conseiller-contact__header {
-  display: -webkit-flex;
-  display: flex;
-  -webkit-justify-content: center;
-  justify-content: center;
-  width: 100%;
+/* État form — pattern 2 spacers (badge top → message via auto → contenu →
+   nav via auto). Le sélecteur descendant fonctionne malgré display:contents
+   car le DOM tree est inchangé. */
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state="form"] .conseiller-contact__message {
+  margin-top: auto;
+}
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state="form"] .conseiller-modal__nav {
+  margin-top: auto;
 }
 
-/* Body : zone scrollable potentielle si contenu trop long. flex column,
-   contenu centré horizontalement, prend l'espace résiduel entre header
-   et footer. */
-.conseiller-contact__body {
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-direction: column;
-  flex-direction: column;
-  -webkit-align-items: center;
-  align-items: center;
+/* État success — pattern 2 spacers (badge top → h2 via auto → subtitle →
+   cta via auto). */
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state="success"] .conseiller-h2 {
+  margin-top: auto;
+}
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state="success"] .conseiller-modal__cta {
+  margin-top: auto;
+  margin-bottom: 0;
+}
+
+/* Contrainte de largeur sur les enfants directs du wrapper (qui en
+   display:contents deviennent des enfants effectifs de .card__inner) —
+   sinon ils prendraient toute la largeur de la card (~800px). */
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-contact__message,
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-contact__recap,
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-contact-form,
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-contact-form__reassurance,
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-modal__nav,
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-modal__cta,
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-h2,
+.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-subtitle {
+  max-width: 560px;
   width: 100%;
 }
 
