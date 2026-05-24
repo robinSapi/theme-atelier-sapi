@@ -195,24 +195,24 @@
       choices.forEach(function (choice) {
         var btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'conseiller-choice';
+        btn.className = 'choice';
         btn.setAttribute('data-choice', choice.slug);
         btn.setAttribute('data-label', choice.label);
         if (state.answers[stepId] === choice.slug) btn.classList.add('is-selected');
 
         var iconWrap = document.createElement('span');
-        iconWrap.className = 'conseiller-choice__icon';
+        iconWrap.className = 'choice__icon';
         iconWrap.innerHTML = ICONS[choice.icon] || '';
         btn.appendChild(iconWrap);
 
         var label = document.createElement('span');
-        label.className = 'conseiller-choice__label';
+        label.className = 'choice__label';
         label.textContent = choice.label;
         btn.appendChild(label);
 
         if (choice.dim) {
           var dim = document.createElement('span');
-          dim.className = 'conseiller-choice__dim';
+          dim.className = 'choice__dim';
           dim.textContent = choice.dim;
           btn.appendChild(dim);
         }
@@ -864,20 +864,20 @@
         choices.forEach(function (choice) {
           var btn = document.createElement('button');
           btn.type = 'button';
-          btn.className = 'conseiller-choice';
+          btn.className = 'choice';
           btn.setAttribute('data-choice', choice.slug);
           btn.setAttribute('data-label', choice.label);
           var iconWrap = document.createElement('span');
-          iconWrap.className = 'conseiller-choice__icon';
+          iconWrap.className = 'choice__icon';
           iconWrap.innerHTML = ICONS[choice.icon] || '';
           btn.appendChild(iconWrap);
           var label = document.createElement('span');
-          label.className = 'conseiller-choice__label';
+          label.className = 'choice__label';
           label.textContent = choice.label;
           btn.appendChild(label);
           if (choice.dim) {
             var dim = document.createElement('span');
-            dim.className = 'conseiller-choice__dim';
+            dim.className = 'choice__dim';
             dim.textContent = choice.dim;
             btn.appendChild(dim);
           }
@@ -1516,7 +1516,7 @@
     // Click sur un choix (S0 hybride OU S1) — délégué sur toute la modale
     // pour couvrir les 2 contextes (refs DOM distinctes pour S0 et S1).
     els.modal.addEventListener('click', function (e) {
-      var btn = e.target.closest('.conseiller-choice');
+      var btn = e.target.closest('.choice');
       if (!btn) return;
       var slug = btn.getAttribute('data-choice');
       var label = btn.getAttribute('data-label') || btn.textContent.trim();
