@@ -191,7 +191,7 @@
       var choices = step.choices || [];
       // F2a-quater : 2 cols quand 2 ou 4 choix (sinon items isolés sur la
       // dernière ligne d'un grid 3 cols)
-      els.choices.classList.toggle('conseiller-choices--2col', choices.length === 2 || choices.length === 4);
+      els.choices.classList.toggle('choices--2col', choices.length === 2 || choices.length === 4);
       choices.forEach(function (choice) {
         var btn = document.createElement('button');
         btn.type = 'button';
@@ -523,28 +523,25 @@
 
   function addUserBubble(text) {
     if (!els.chatMessages) return;
-    var wrap = document.createElement('div');
-    wrap.className = 'conseiller-chat-msg conseiller-chat-msg--user';
+    // Round 4 — markup mockup-11 : flat <div class="chat-bubble chat-bubble--visitor">
     var bubble = document.createElement('div');
-    bubble.className = 'conseiller-chat-bubble';
+    bubble.className = 'chat-bubble chat-bubble--visitor';
     bubble.textContent = text;
-    wrap.appendChild(bubble);
-    els.chatMessages.appendChild(wrap);
+    els.chatMessages.appendChild(bubble);
     scrollChatToBottom();
   }
 
   function addRobinBubble(text, opts) {
     if (!els.chatMessages) return;
     opts = opts || {};
-    var wrap = document.createElement('div');
-    wrap.className = 'conseiller-chat-msg conseiller-chat-msg--robin';
-
+    // Round 4 — markup mockup-11 : flat <div class="chat-bubble chat-bubble--robin">
     var bubble = document.createElement('div');
-    bubble.className = 'conseiller-chat-bubble';
+    bubble.className = 'chat-bubble chat-bubble--robin';
     bubble.textContent = text || '';
-    wrap.appendChild(bubble);
+    els.chatMessages.appendChild(bubble);
 
-    // Encart "Filtres appliqués"
+    // Encart "Filtres appliqués" — affiché en dessous de la bulle, classe
+    // dédiée (déviation mockup justifiée : cas dynamique non couvert par le mockup).
     if (opts.filters && typeof opts.filters === 'object') {
       var parts = [];
       Object.keys(opts.filters).forEach(function (k) {
@@ -554,39 +551,36 @@
       });
       if (parts.length) {
         var fb = document.createElement('div');
-        fb.className = 'conseiller-chat-filters';
+        fb.className = 'chat-bubble-filters';
         var label = document.createElement('span');
-        label.className = 'conseiller-chat-filters__label';
+        label.className = 'chat-bubble-filters__label';
         label.textContent = 'Filtres appliqués';
         fb.appendChild(label);
         var chips = document.createElement('span');
-        chips.className = 'conseiller-chat-filters__chips';
+        chips.className = 'chat-bubble-filters__chips';
         chips.textContent = parts.join(' · ');
         fb.appendChild(chips);
-        wrap.appendChild(fb);
+        els.chatMessages.appendChild(fb);
       }
     }
 
-    els.chatMessages.appendChild(wrap);
     scrollChatToBottom();
   }
 
   function addThinkingBubble() {
     if (!els.chatMessages) return;
     if (document.getElementById('conseiller-chat-thinking')) return;
-    var wrap = document.createElement('div');
-    wrap.className = 'conseiller-chat-msg conseiller-chat-msg--robin';
-    wrap.id = 'conseiller-chat-thinking';
+    // Round 4 — markup mockup-11 : flat chat-bubble + classe thinking
     var bubble = document.createElement('div');
-    bubble.className = 'conseiller-chat-bubble conseiller-chat-thinking';
+    bubble.className = 'chat-bubble chat-bubble--robin chat-bubble-thinking';
+    bubble.id = 'conseiller-chat-thinking';
     bubble.setAttribute('aria-label', 'Réponse en cours de préparation');
     for (var i = 0; i < 3; i++) {
       var dot = document.createElement('span');
-      dot.className = 'conseiller-chat-thinking__dot';
+      dot.className = 'chat-bubble-thinking__dot';
       bubble.appendChild(dot);
     }
-    wrap.appendChild(bubble);
-    els.chatMessages.appendChild(wrap);
+    els.chatMessages.appendChild(bubble);
     scrollChatToBottom();
   }
 
@@ -597,8 +591,8 @@
 
   function scrollChatToBottom() {
     if (!els.chatMessages) return;
-    // Le scrollable est .conseiller-chat (parent direct des messages)
-    var scrollable = els.chatMessages.closest('.conseiller-chat') || els.chatMessages;
+    // Round 4 — Le scrollable est .modal__body (CSS Grid row 2, overflow-y: auto)
+    var scrollable = els.chatMessages.closest('.modal__body') || els.chatMessages;
     scrollable.scrollTop = scrollable.scrollHeight;
   }
 
@@ -866,7 +860,7 @@
         els.s0Choices.innerHTML = '';
         var choices = step.choices || [];
         // F2a-quater : 2 cols quand 2 ou 4 choix pour éviter les items isolés
-        els.s0Choices.classList.toggle('conseiller-choices--2col', choices.length === 2 || choices.length === 4);
+        els.s0Choices.classList.toggle('choices--2col', choices.length === 2 || choices.length === 4);
         choices.forEach(function (choice) {
           var btn = document.createElement('button');
           btn.type = 'button';
@@ -1209,7 +1203,7 @@
     // Reset état visuel : on entre toujours par le form (pas le success).
     setContactScreenState('form');
     // Reset erreur inline si présente
-    var prevErr = els.contactForm.querySelector('.conseiller-contact-form__error');
+    var prevErr = els.contactForm.querySelector('.contact-form__error');
     if (prevErr) prevErr.remove();
     var submitBtn = els.contactForm.querySelector('[data-contact-submit]');
     if (submitBtn) submitBtn.disabled = false;
@@ -1275,11 +1269,11 @@
       if (msgInput) msgInput.classList.add('is-invalid');
       hasErr = true;
     }
-    var prevErr = form.querySelector('.conseiller-contact-form__error');
+    var prevErr = form.querySelector('.contact-form__error');
     if (prevErr) prevErr.remove();
     if (hasErr) {
       var err = document.createElement('p');
-      err.className = 'conseiller-contact-form__error';
+      err.className = 'contact-form__error';
       err.textContent = 'Email et message sont requis.';
       form.appendChild(err);
       return;
@@ -1320,14 +1314,14 @@
         var fallback = (resp && resp.data && resp.data.fallback) ||
           "L'envoi a échoué. Tu peux m'écrire directement à " + CONTACT_EMAIL + ".";
         var errEl = document.createElement('p');
-        errEl.className = 'conseiller-contact-form__error';
+        errEl.className = 'contact-form__error';
         errEl.textContent = fallback;
         form.appendChild(errEl);
       })
       .catch(function () {
         if (submitBtn) submitBtn.disabled = false;
         var errEl = document.createElement('p');
-        errEl.className = 'conseiller-contact-form__error';
+        errEl.className = 'contact-form__error';
         errEl.textContent = "Petit souci de connexion. Tu peux réessayer ou m'écrire à " + CONTACT_EMAIL + ".";
         form.appendChild(errEl);
       });
@@ -1583,7 +1577,7 @@
     els.chatMessages  = els.modal.querySelector('[data-chat-messages]');
     els.chatCta       = els.modal.querySelector('[data-chat-cta]');
     els.chatInput     = els.modal.querySelector('[data-chat-input]');
-    els.chatSend      = els.modal.querySelector('.conseiller-chat-footer__send');
+    els.chatSend      = els.modal.querySelector('[data-chat-form] button[type="submit"]');
     els.chatInputDefaultPlaceholder = els.chatInput ? els.chatInput.getAttribute('placeholder') : '';
     // S3 carrefour
     els.recapChips    = els.modal.querySelector('[data-recap-chips]');

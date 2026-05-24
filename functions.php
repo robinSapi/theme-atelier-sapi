@@ -3359,10 +3359,8 @@ function sapi_render_conseiller_modal() {
   <div class="conseiller-modal" data-conseiller-modal hidden>
     <div class="conseiller-card conseiller-card--modal" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e('Conseil de Robin', 'theme-sapi-maison'); ?>" data-modal-card>
 
-      <!-- Round 2 — 3.4 : bouton close visible toutes tailles (critique mobile,
-           sinon modale plein écran sans croix = visiteur bloqué). Câblé via
-           data-action="close" sur le handler de délégation existant. -->
-      <button type="button" class="conseiller-modal__close" data-action="close" aria-label="<?php esc_attr_e('Fermer', 'theme-sapi-maison'); ?>">
+      <!-- Round 4 — Bouton close visible toutes tailles, top-right (mockup-11). -->
+      <button type="button" class="modal__close" data-action="close" aria-label="<?php esc_attr_e('Fermer', 'theme-sapi-maison'); ?>">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <line x1="18" y1="6" x2="6" y2="18"/>
           <line x1="6" y1="6" x2="18" y2="18"/>
@@ -3370,233 +3368,244 @@ function sapi_render_conseiller_modal() {
       </button>
 
 
-      <!-- S0 — Écran hybride (F2a-quater) : question dynamique + choices + séparateur "ou" + champ texte.
-           Bascule dynamique selon sapiProject : "Conseil de Robin" (initial) ou "Mon projet" (partiel).
-           Si projet complet → la logique d'ouverture montre S3 directement à la place. -->
-      <div class="conseiller-modal__screen" data-screen="s0" hidden>
-        <div class="conseiller-card__inner">
-          <span class="conseiller-badge conseiller-badge--default" data-s0-badge>
+      <!-- ═══ S0 — Accueil hybride (question pièce + texte libre) ═══════ -->
+      <section class="modal__screen" data-screen="s0" hidden>
+        <header class="modal__head">
+          <span class="badge" data-s0-badge>
             <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
             <span data-s0-badge-text><?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?></span>
           </span>
+        </header>
 
-          <h2 class="conseiller-h2" data-s0-question aria-live="polite">…</h2>
+        <div class="modal__body">
+          <div class="modal__body-content">
+            <h2 class="h2" data-s0-question aria-live="polite">…</h2>
 
-          <div class="conseiller-choices" data-s0-choices></div>
+            <div class="choices" data-s0-choices></div>
 
-          <div class="conseiller-separator-or" aria-hidden="true">
-            <span class="conseiller-separator-or__text"><?php esc_html_e('ou', 'theme-sapi-maison'); ?></span>
-          </div>
+            <div class="separator-or" aria-hidden="true">
+              <span class="separator-or__text"><?php esc_html_e('ou', 'theme-sapi-maison'); ?></span>
+            </div>
 
-          <form class="conseiller-freetext" data-s0-form>
-            <div class="conseiller-freetext__wrap">
-              <input type="text" class="conseiller-freetext__input" data-s0-input
+            <form class="text-input-wrap" data-s0-form>
+              <input type="text" class="text-input" data-s0-input
                      placeholder="<?php esc_attr_e('Décris ton projet en quelques mots…', 'theme-sapi-maison'); ?>"
                      maxlength="500"
                      aria-label="<?php esc_attr_e('Décris ton projet en quelques mots', 'theme-sapi-maison'); ?>">
-              <button type="submit" class="conseiller-freetext__submit" aria-label="<?php esc_attr_e('Envoyer', 'theme-sapi-maison'); ?>">
-                <?php echo $arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+              <button type="submit" class="text-submit" aria-label="<?php esc_attr_e('Envoyer', 'theme-sapi-maison'); ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
               </button>
-            </div>
-          </form>
-
-          <div class="conseiller-modal__nav" data-s0-reset-wrap hidden>
-            <button type="button" class="conseiller-s3-reset" data-action="s0-reset">
-              <?php esc_html_e('Effacer et recommencer', 'theme-sapi-maison'); ?>
-            </button>
+            </form>
           </div>
         </div>
-      </div>
 
-      <!-- S1 — Mode questions guidées -->
-      <div class="conseiller-modal__screen" data-screen="s1" hidden>
-        <div class="conseiller-card__inner">
-          <div class="conseiller-progress" aria-hidden="true">
-            <div class="conseiller-progress__fill" data-progress-fill style="width: 0%"></div>
-          </div>
+        <footer class="modal__foot" data-s0-reset-wrap hidden>
+          <button type="button" class="footer-link" data-action="s0-reset">
+            <?php esc_html_e('Effacer et recommencer', 'theme-sapi-maison'); ?>
+          </button>
+        </footer>
+      </section>
 
-          <span class="conseiller-badge conseiller-badge--default">
+      <!-- ═══ S1 — Questions guidées (progress sticky bottom du body) ═══════ -->
+      <section class="modal__screen" data-screen="s1" hidden>
+        <header class="modal__head">
+          <span class="badge">
             <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
             <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
           </span>
+        </header>
 
-          <h2 class="conseiller-h2" data-question-title aria-live="polite">…</h2>
-
-          <div class="conseiller-choices" data-choices></div>
-
-          <div class="conseiller-modal__nav">
-            <button type="button" class="conseiller-back-link" data-action="back">← <?php esc_html_e('Retour', 'theme-sapi-maison'); ?></button>
+        <div class="modal__body">
+          <div class="modal__body-content">
+            <h2 class="h2" data-question-title aria-live="polite">…</h2>
+            <div class="choices" data-choices></div>
+          </div>
+          <div class="progress" aria-hidden="true">
+            <div class="progress__bar" data-progress-fill style="width: 0%"></div>
           </div>
         </div>
-      </div>
 
-      <!-- S2.chat — Mode texte libre, conversation -->
-      <div class="conseiller-modal__screen" data-screen="s2-chat" hidden>
-        <div class="conseiller-card__inner conseiller-card__inner--chat">
-          <div class="conseiller-chat-header">
-            <span class="conseiller-badge conseiller-badge--default">
-              <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-              <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
-            </span>
-          </div>
+        <footer class="modal__foot">
+          <button type="button" class="footer-link" data-action="back">← <?php esc_html_e('Étape précédente', 'theme-sapi-maison'); ?></button>
+        </footer>
+      </section>
 
-          <div class="conseiller-chat" data-chat-messages></div>
-
-          <div class="conseiller-chat-cta" data-chat-cta hidden>
-            <button type="button" class="conseiller-cta" data-action="apply">
-              <span><?php esc_html_e('Voir la sélection', 'theme-sapi-maison'); ?></span>
-              <?php echo $arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-            </button>
-          </div>
-
-          <form class="conseiller-chat-footer" data-chat-form>
-            <input type="text" class="conseiller-chat-footer__input" data-chat-input
-                   placeholder="<?php esc_attr_e('Continuer la conversation…', 'theme-sapi-maison'); ?>"
-                   maxlength="1000"
-                   aria-label="<?php esc_attr_e('Message', 'theme-sapi-maison'); ?>">
-            <button type="submit" class="conseiller-chat-footer__send"><?php esc_html_e('Envoyer', 'theme-sapi-maison'); ?></button>
-          </form>
-        </div>
-      </div>
-
-      <!-- s-product-recap (F2b Phase 2) — Mode court fin de parcours sur fiche
-           produit. Récap 100% statique (textes pré-générés, zéro IA), pattern
-           repris du legacy renderProductGuideResult() :
-             - intro dynamique "Pour votre <pièce> de taille <taille>, Robin recommande :"
-             - récap card 2 lignes : Essence / Taille recommandée (label lu du select WC)
-             - conseil de style fixe (pg_style:moderne/ancien/neutre)
-             - 3 actions : Appliquer / Modifier / Contacter -->
-      <div class="conseiller-modal__screen" data-screen="s-product-recap" hidden>
-        <div class="conseiller-card__inner">
-          <span class="conseiller-badge conseiller-badge--default">
+      <!-- ═══ S2-chat — Conversation libre avec Robin (chat bubbles + input) ═══ -->
+      <section class="modal__screen" data-screen="s2-chat" hidden>
+        <header class="modal__head">
+          <span class="badge">
             <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-            <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
+            <?php esc_html_e('Échange avec Robin', 'theme-sapi-maison'); ?>
           </span>
+        </header>
 
-          <p class="conseiller-product-recap__intro" data-product-recap-intro></p>
-
-          <div class="conseiller-product-recap__card" data-product-recap-card hidden>
-            <div class="conseiller-product-recap__row" data-product-recap-essence hidden>
-              <span class="conseiller-product-recap__label"><?php esc_html_e('Essence', 'theme-sapi-maison'); ?></span>
-              <span class="conseiller-product-recap__value" data-product-recap-essence-value></span>
-            </div>
-            <div class="conseiller-product-recap__row" data-product-recap-taille hidden>
-              <span class="conseiller-product-recap__label"><?php esc_html_e('Taille recommandée', 'theme-sapi-maison'); ?></span>
-              <span class="conseiller-product-recap__value" data-product-recap-taille-value></span>
-            </div>
+        <div class="modal__body">
+          <div class="modal__body-content" style="justify-content: flex-start;">
+            <div class="chat-bubbles" data-chat-messages></div>
+            <form class="text-input-wrap" data-chat-form>
+              <input type="text" class="text-input" data-chat-input
+                     placeholder="<?php esc_attr_e('Continuer la conversation…', 'theme-sapi-maison'); ?>"
+                     maxlength="1000"
+                     aria-label="<?php esc_attr_e('Message', 'theme-sapi-maison'); ?>">
+              <button type="submit" class="text-submit" aria-label="<?php esc_attr_e('Envoyer', 'theme-sapi-maison'); ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+              </button>
+            </form>
           </div>
+        </div>
 
-          <p class="conseiller-product-recap__conseil" data-product-recap-conseil></p>
-          <p class="conseiller-product-recap__conseil conseiller-product-recap__conseil--taille" data-product-recap-conseil-taille></p>
+        <footer class="modal__foot" data-chat-cta hidden>
+          <button type="button" class="action-btn action-btn--primary" data-action="apply">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12h18M13 5l7 7-7 7"/></svg>
+            <?php esc_html_e('Voir ma sélection', 'theme-sapi-maison'); ?>
+          </button>
+        </footer>
+      </section>
 
-          <!-- Footer composite (CTA Appliquer + nav Modifier/Contacter) — wrappé
-               pour être ancré en absolute bottom comme un seul bloc. -->
-          <div class="conseiller-modal__footer">
-            <div class="conseiller-modal__cta">
-              <button type="button" class="conseiller-cta" data-action="product-apply">
-                <span><?php esc_html_e('Appliquer cette sélection', 'theme-sapi-maison'); ?></span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+      <!-- ═══ S-product-recap — Récap fiche produit (essence + taille + conseils) ═══ -->
+      <section class="modal__screen" data-screen="s-product-recap" hidden>
+        <header class="modal__head">
+          <span class="badge">
+            <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+            <?php esc_html_e('Mon conseil pour toi', 'theme-sapi-maison'); ?>
+          </span>
+        </header>
+
+        <div class="modal__body">
+          <div class="modal__body-content">
+            <p class="subtitle" data-product-recap-intro></p>
+
+            <div class="recap-card" data-product-recap-card hidden>
+              <span class="recap-card__item-label" data-product-recap-essence hidden><?php esc_html_e('Essence', 'theme-sapi-maison'); ?></span>
+              <span class="recap-card__item-value" data-product-recap-essence-value></span>
+              <span class="recap-card__item-label" data-product-recap-taille hidden><?php esc_html_e('Taille', 'theme-sapi-maison'); ?></span>
+              <span class="recap-card__item-value" data-product-recap-taille-value></span>
+            </div>
+
+            <p class="conseil-italic" data-product-recap-conseil></p>
+            <p class="conseil-italic" data-product-recap-conseil-taille></p>
+
+            <div class="actions-3">
+              <button type="button" class="action-btn action-btn--primary" data-action="product-apply">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+                <?php esc_html_e('Appliquer cette sélection', 'theme-sapi-maison'); ?>
+              </button>
+              <button type="button" class="action-btn action-btn--secondary" data-action="product-modify">
+                <?php esc_html_e('Modifier mon projet', 'theme-sapi-maison'); ?>
               </button>
             </div>
-
-            <div class="conseiller-modal__nav conseiller-modal__nav--product-recap">
-              <button type="button" class="conseiller-back-link" data-action="product-modify">← <?php esc_html_e('Modifier mes réponses', 'theme-sapi-maison'); ?></button>
-              <a class="conseiller-back-link conseiller-back-link--contact" href="<?php echo esc_url(home_url('/contact/')); ?>">
-                <?php esc_html_e('Contacter Robin', 'theme-sapi-maison'); ?>
-              </a>
-            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Round 3 — Lot C2 v2 : écran s-contact avec formulaire intégré.
-           Remplace les anciens CTAs externes (formulaire sur-mesure / mailto)
-           par un form AJAX direct (réutilise l'endpoint sapi_ajax_megafilter_surmesure).
-           2 états togglés via data-contact-state : form (par défaut) / success.
-           v5 : markup plat — badge en absolute top, nav/cta en absolute bottom,
-           contenu central libre dans la zone padding de la card. -->
-      <div class="conseiller-modal__screen" data-screen="s-contact" hidden>
-        <div class="conseiller-card__inner">
+        <footer class="modal__foot">
+          <a class="footer-link" href="<?php echo esc_url(home_url('/contact/')); ?>">
+            <?php esc_html_e('Contacter Robin', 'theme-sapi-maison'); ?>
+          </a>
+        </footer>
+      </section>
 
-          <div data-contact-state="form">
-            <span class="conseiller-badge conseiller-badge--default">
+      <!-- ═══ S-contact — Mini-form contact intégré (projet pro / sur-mesure) ═══ -->
+      <section class="modal__screen" data-screen="s-contact" hidden>
+
+        <!-- État form (défaut) -->
+        <div data-contact-state="form">
+          <header class="modal__head">
+            <span class="badge">
               <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
               <span data-contact-badge-text><?php esc_html_e('Échangeons ensemble', 'theme-sapi-maison'); ?></span>
             </span>
+          </header>
 
-            <p class="conseiller-contact__message" data-contact-message></p>
-            <div class="conseiller-contact__recap" data-contact-recap></div>
+          <div class="modal__body">
+            <div class="modal__body-content">
+              <p class="quote" data-contact-message></p>
+              <div data-contact-recap></div>
 
-            <form class="conseiller-contact-form" data-contact-form novalidate>
-              <input type="email" class="conseiller-contact-form__input" name="email" required
-                     placeholder="<?php esc_attr_e('Ton email', 'theme-sapi-maison'); ?>"
-                     aria-label="<?php esc_attr_e('Ton email', 'theme-sapi-maison'); ?>">
-              <textarea class="conseiller-contact-form__textarea" name="description" rows="5"
-                        placeholder="<?php esc_attr_e('Décris ton projet…', 'theme-sapi-maison'); ?>"
-                        aria-label="<?php esc_attr_e('Ton message', 'theme-sapi-maison'); ?>"
-                        data-contact-message-field></textarea>
-              <input type="text" name="website" tabindex="-1" autocomplete="off" class="conseiller-contact-form__honeypot" aria-hidden="true">
-              <button type="submit" class="conseiller-cta" data-contact-submit>
-                <span><?php esc_html_e('Envoyer ma demande', 'theme-sapi-maison'); ?></span>
-                <?php echo $arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-              </button>
-            </form>
-            <p class="conseiller-contact-form__reassurance"><?php esc_html_e('Réponse de Robin sous 48h · Aucun engagement', 'theme-sapi-maison'); ?></p>
-
-            <div class="conseiller-modal__nav">
-              <button type="button" class="conseiller-back-link" data-action="back-to-chat">
-                ← <?php esc_html_e('Reprendre la discussion', 'theme-sapi-maison'); ?>
-              </button>
+              <form class="contact-form" data-contact-form novalidate>
+                <input type="email" name="email" required
+                       placeholder="<?php esc_attr_e('Ton email', 'theme-sapi-maison'); ?>"
+                       aria-label="<?php esc_attr_e('Ton email', 'theme-sapi-maison'); ?>">
+                <textarea name="description" rows="5"
+                          placeholder="<?php esc_attr_e('Décris ton projet…', 'theme-sapi-maison'); ?>"
+                          aria-label="<?php esc_attr_e('Ton message', 'theme-sapi-maison'); ?>"
+                          data-contact-message-field></textarea>
+                <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;">
+                <button type="submit" data-contact-submit>
+                  <?php esc_html_e('Envoyer ma demande', 'theme-sapi-maison'); ?>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                </button>
+                <p class="contact-reassure"><?php esc_html_e('Réponse de Robin sous 48h · Aucun engagement', 'theme-sapi-maison'); ?></p>
+              </form>
             </div>
           </div>
 
-          <div data-contact-state="success" hidden>
-            <span class="conseiller-badge conseiller-badge--default">
+          <footer class="modal__foot">
+            <button type="button" class="footer-link" data-action="back-to-chat">
+              ← <?php esc_html_e('Reprendre la discussion', 'theme-sapi-maison'); ?>
+            </button>
+          </footer>
+        </div>
+
+        <!-- État succès -->
+        <div data-contact-state="success" hidden>
+          <header class="modal__head">
+            <span class="badge">
               <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
               <?php esc_html_e('Demande envoyée', 'theme-sapi-maison'); ?>
             </span>
-            <h2 class="conseiller-h2"><?php esc_html_e('Reçu — Robin t\'écrit sous 48h', 'theme-sapi-maison'); ?></h2>
-            <p class="conseiller-subtitle"><?php esc_html_e('Merci pour ta demande. Tu vas recevoir un email de confirmation et Robin te répondra personnellement.', 'theme-sapi-maison'); ?></p>
-            <div class="conseiller-modal__cta">
-              <button type="button" class="conseiller-cta conseiller-cta--secondary" data-action="close">
-                <span><?php esc_html_e('Fermer', 'theme-sapi-maison'); ?></span>
+          </header>
+          <div class="modal__body">
+            <div class="modal__body-content">
+              <h2 class="h2"><?php esc_html_e('Reçu — Robin t\'écrit sous 48h', 'theme-sapi-maison'); ?></h2>
+              <p class="subtitle"><?php esc_html_e('Merci pour ta demande. Tu vas recevoir un email de confirmation et Robin te répondra personnellement.', 'theme-sapi-maison'); ?></p>
+            </div>
+          </div>
+          <footer class="modal__foot">
+            <button type="button" class="action-btn action-btn--secondary" data-action="close">
+              <?php esc_html_e('Fermer', 'theme-sapi-maison'); ?>
+            </button>
+          </footer>
+        </div>
+
+      </section>
+
+      <!-- ═══ S3 — Carrefour récap "Ton projet" + 3 actions ═══════ -->
+      <section class="modal__screen" data-screen="s3" hidden>
+        <header class="modal__head">
+          <span class="badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
+            <?php esc_html_e('Ton projet', 'theme-sapi-maison'); ?>
+          </span>
+        </header>
+
+        <div class="modal__body">
+          <div class="modal__body-content">
+            <h2 class="h2"><?php esc_html_e('Voici ton projet', 'theme-sapi-maison'); ?></h2>
+
+            <div class="chips chips--project" data-recap-chips></div>
+
+            <div class="actions-3">
+              <button type="button" class="action-btn action-btn--primary" data-action="s3-view">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12h18M13 5l7 7-7 7"/></svg>
+                <?php esc_html_e('Voir la sélection', 'theme-sapi-maison'); ?>
+              </button>
+              <button type="button" class="action-btn action-btn--secondary" data-action="s3-refine">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9h.01M15 9h.01M9 15c1 1 2 1.5 3 1.5s2-.5 3-1.5"/></svg>
+                <?php esc_html_e('Préciser avec Robin', 'theme-sapi-maison'); ?>
+              </button>
+              <button type="button" class="footer-link" data-action="s3-reset" style="margin-top: 4px;">
+                ↻ <?php esc_html_e('Recommencer', 'theme-sapi-maison'); ?>
               </button>
             </div>
           </div>
-
         </div>
-      </div>
 
-      <!-- S3 — Carrefour "Modifier mon projet" -->
-      <div class="conseiller-modal__screen" data-screen="s3" hidden>
-        <div class="conseiller-card__inner">
-          <span class="conseiller-badge conseiller-badge--default">
-            <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-            <?php esc_html_e('Mon projet', 'theme-sapi-maison'); ?>
+        <footer class="modal__foot">
+          <span style="font-size:11.5px;color:var(--color-wood-mid);font-style:italic;">
+            <?php esc_html_e('Tu peux modifier n\'importe quelle réponse en cliquant sur une chip', 'theme-sapi-maison'); ?>
           </span>
-          <h2 class="conseiller-h2"><?php esc_html_e('Voici ton projet', 'theme-sapi-maison'); ?></h2>
-
-          <div class="conseiller-chips" data-recap-chips></div>
-
-          <div class="conseiller-s3-secondary-actions">
-            <button type="button" class="conseiller-cta conseiller-cta--secondary" data-action="s3-reset">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-              <span><?php esc_html_e('Recommencer', 'theme-sapi-maison'); ?></span>
-            </button>
-            <button type="button" class="conseiller-cta conseiller-cta--secondary" data-action="s3-refine">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              <span><?php esc_html_e('Préciser mon projet', 'theme-sapi-maison'); ?></span>
-            </button>
-          </div>
-
-          <div class="conseiller-modal__cta">
-            <button type="button" class="conseiller-cta" data-action="s3-view">
-              <span><?php esc_html_e('Voir la sélection', 'theme-sapi-maison'); ?></span>
-              <?php echo $arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-            </button>
-          </div>
-        </div>
-      </div>
+        </footer>
+      </section>
 
     </div><!-- /.conseiller-card--modal -->
   </div>

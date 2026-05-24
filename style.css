@@ -23283,456 +23283,328 @@ body.woocommerce-cart div.woocommerce-wrapper {
   to   { opacity: 1; -webkit-transform: scale(1) translateY(0);       transform: scale(1) translateY(0);       }
 }
 
-/* La card Conseiller devient elle-même le dialog flottant centré dans l'overlay.
-   Pas de chrome blanc ni de croix : click outside ou ESC pour fermer.
-   F2a-bis : taille fixe (600px desktop, 100dvh-32 mobile) pour éviter le
-   "respirer" entre écrans S0/S1/S2/s-transition. Le contenu se cale en haut,
-   l'espace restant tombe en bas. */
+/* ═══════════════════════════════════════════════════════════════════
+   CONSEILLER V3 — Modale (refactor Round 4 — mockup-11 source de vérité)
+   Structure : CSS Grid 3 rows (head / body / foot) sur .conseiller-card--modal
+   ═══════════════════════════════════════════════════════════════════ */
 
-/* Pas de focus ring (la card est focusée par JS pour l'a11y mais ne doit
-   pas afficher de bordure visible) */
+.conseiller-card--modal {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  height: 620px;
+  max-height: calc(100dvh - 64px);
+  background: var(--color-warm);
+  border-radius: 16px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+  overflow: hidden;
+  display: -ms-grid;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  -webkit-animation: conseiller-dialog-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: conseiller-dialog-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.conseiller-card--modal::before {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border: 1.5px dashed rgba(139, 115, 85, 0.35);
+  border-radius: 12px;
+  pointer-events: none;
+  z-index: 0;
+}
+
 .conseiller-card--modal:focus,
 .conseiller-card--modal:focus-visible {
   outline: none;
 }
 
-.conseiller-card--modal {
-  position: relative; /* Round 2 — 3.4 : ancre du bouton close en absolute.
-                         v5 : ancre aussi le badge (top) et le footer (bottom) en absolute. */
-  width: 100%;
-  max-width: 880px;
-  height: 680px;
-  max-height: calc(100dvh - 64px);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  /* v5 — Ancrage absolute badge/footer :
-       top = 44px (badge top) + ~32px (hauteur badge) + ~12px (gap) = 88px
-       bottom = 36px (footer bottom) + ~32px (hauteur lien/cta) + ~12px (gap) = 80px
-     Le contenu central s'affiche naturellement dans la zone padding restante. */
-  padding: 88px 40px 80px;
-  text-align: center;
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-direction: column;
-  flex-direction: column;
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.32), 0 6px 24px rgba(0, 0, 0, 0.12);
-  -webkit-animation: conseiller-dialog-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  animation: conseiller-dialog-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Round 2 — 3.4 : bouton close (croix) visible toutes tailles.
-   44x44px touch target conforme mobile, au-dessus de tout contenu via z-index. */
-.conseiller-modal__close {
+/* Bouton close (croix) top-right — hors grid */
+.modal__close {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 44px;
-  height: 44px;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--color-wood-mid);
+  cursor: pointer;
   display: -webkit-flex;
   display: flex;
   -webkit-align-items: center;
   align-items: center;
   -webkit-justify-content: center;
   justify-content: center;
-  background: transparent;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  color: var(--color-wood, #937D68);
-  border-radius: 50%;
   z-index: 10;
-  -webkit-transition: background-color 0.18s ease, color 0.18s ease;
-  transition: background-color 0.18s ease, color 0.18s ease;
+  -webkit-transition: background 0.15s;
+  transition: background 0.15s;
 }
-.conseiller-modal__close:hover,
-.conseiller-modal__close:focus-visible {
-  background-color: rgba(50, 50, 50, 0.06);
-  color: var(--color-dark, #323232);
-  outline: none;
+.modal__close:hover { background: rgba(139, 115, 85, 0.12); color: var(--color-wood-dark); }
+.modal__close svg { width: 18px; height: 18px; }
+
+/* Écran = display: contents → enfants deviennent les grid items */
+.modal__screen {
+  display: contents;
 }
-.conseiller-modal__close svg {
-  width: 22px;
-  height: 22px;
+.modal__screen[hidden] {
+  display: none;
 }
 
-/* Les écrans sont rendus dans le même DOM, JS toggle hidden.
-   F2a-bis : chaque écran actif prend flex: 1 pour remplir la card à taille fixe. */
-.conseiller-modal__screen {
+/* S-contact a 2 sous-états togglables (form/success). Le wrapper
+   [data-contact-state] doit lui aussi être transparent au layout pour que
+   ses enfants (__head, __body, __foot) deviennent les vrais grid items. */
+.modal__screen [data-contact-state] {
+  display: contents;
+}
+.modal__screen [data-contact-state][hidden] {
+  display: none;
+}
+
+.modal__head {
+  grid-row: 1;
+  padding: 28px 36px 12px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.modal__body {
+  grid-row: 2;
+  padding: 12px 36px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+.modal__body-content {
   -webkit-flex: 1;
   flex: 1;
   display: -webkit-flex;
   display: flex;
   -webkit-flex-direction: column;
   flex-direction: column;
-  -webkit-animation: conseiller-screen-fade 0.2s ease-out;
-  animation: conseiller-screen-fade 0.2s ease-out;
-}
-
-.conseiller-modal__screen[hidden] {
-  display: none;
-}
-
-/* ─── Harmonisation 3 zones v5 (approche absolute robuste) ─────────────
-   Position VERROUILLÉE du badge (top) et du footer nav/cta (bottom) sur
-   tous les écrans non-chat, indépendamment du volume de contenu central.
-   Le padding 88px/80px de la card libère ces deux zones. Le contenu central
-   s'affiche dans le flux normal entre les deux.
-   S2-chat conserve son layout dédié (chat scrollable, jamais touché ici). */
-
-.conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner {
-  display: block;
-  width: 100%;
-  /* Round 4 v5 fix — Override le `position: relative` global (style.css:22637)
-     hérité de .conseiller-card__inner (présent pour les cards conseiller hors
-     modale qui ont un ::before dashed à passer derrière).
-     Dans la modale, on a besoin que .conseiller-card--modal soit le système
-     de coordonnées du badge (top:44px) et du footer (bottom:36px) positionnés
-     en absolute. Sans ce override, ces éléments s'ancrent sur l'inner (hauteur
-     auto, position arbitraire dans le screen) → badge et footer en plein milieu. */
-  position: static;
-}
-
-/* Badge — ancré en absolute top, centré horizontalement.
-   Le sélecteur cible tous les badges DANS la modale, sauf le chat (qui a
-   sa propre logique via .conseiller-chat-header). */
-.conseiller-card--modal .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-badge {
-  position: absolute;
-  top: 44px;
-  left: 50%;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-  margin: 0;
-  z-index: 5;
-}
-
-/* S1 — progress bar AU-DESSUS du badge, également absolute pour ne pas
-   décaler le flux normal. Position : 20px du top, badge à 44px → ~12px gap. */
-.conseiller-modal__screen[data-screen="s1"] .conseiller-card__inner > .conseiller-progress {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 360px;
-  margin: 0;
-  z-index: 5;
-}
-/* S1 nécessite un padding-top supplémentaire pour la progress bar (4px haut
-   + 12px gap badge). Le padding card standard 88px reste OK car la progress
-   tient au-dessus du badge sans empiéter sur le contenu (qui commence à 88px). */
-
-/* Footer — ancré en absolute bottom, centré horizontalement.
-   On cible :
-     - les .conseiller-modal__nav et .conseiller-modal__cta DIRECTS de .conseiller-card__inner
-     - les mêmes DIRECTS de [data-contact-state] (s-contact)
-     - le wrapper .conseiller-modal__footer (composite s-product-recap)
-   Sélecteurs ciblés pour exclure :
-     - s2-chat (layout dédié)
-     - les .conseiller-modal__cta dans des sous-wrappers (ex : .conseiller-contact-form .conseiller-cta — qui est .conseiller-cta seul, pas .conseiller-modal__cta, donc déjà OK) */
-.conseiller-card--modal .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-modal__nav,
-.conseiller-card--modal .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-modal__cta,
-.conseiller-card--modal .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-modal__footer,
-.conseiller-card--modal .conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-modal__nav,
-.conseiller-card--modal .conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-modal__cta {
-  position: absolute;
-  bottom: 36px;
-  left: 50%;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-  margin: 0;
-  z-index: 5;
-  width: auto;
-  max-width: calc(100% - 80px);
-}
-
-/* Footer composite s-product-recap : empile verticalement le CTA + nav. */
-.conseiller-modal__footer {
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-direction: column;
-  flex-direction: column;
+  -webkit-justify-content: center;
+  justify-content: center;
   -webkit-align-items: center;
   align-items: center;
-  gap: 10px;
-}
-.conseiller-modal__footer > .conseiller-modal__cta,
-.conseiller-modal__footer > .conseiller-modal__nav {
-  margin: 0;
-}
-
-/* S3 — la grille de chips reste centrée dans le flux normal.
-   Le contenu (chips + secondary-actions) s'affiche au natural dans la zone
-   padding 88px/80px. */
-.conseiller-modal__screen[data-screen="s3"] .conseiller-chip {
-  padding: 10px 18px;
-  font-size: 14.5px;
-  line-height: 1.3;
-}
-.conseiller-modal__screen[data-screen="s3"] .conseiller-chip__key {
-  margin-right: 7px;
-}
-
-/* Intro dynamique "Pour votre <pièce> de taille <taille>, Robin recommande :" */
-.conseiller-product-recap__intro {
-  margin: 18px 0 16px;
-  font-family: var(--font-body);
-  font-size: clamp(15px, 1.8vw, 17px);
-  font-weight: 500;
-  color: var(--color-dark);
-  line-height: 1.45;
-  text-align: center;
-}
-
-/* Récap card : 2 lignes Essence / Taille, label gauche · valeur droite */
-.conseiller-product-recap__card {
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-direction: column;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px 20px;
-  background: var(--color-warm);
-  border: 1px dashed rgba(147, 125, 104, 0.35);
-  border-radius: 14px;
-  max-width: 460px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.conseiller-product-recap__row {
-  display: -webkit-flex;
-  display: flex;
-  -webkit-justify-content: space-between;
-  justify-content: space-between;
-  -webkit-align-items: baseline;
-  align-items: baseline;
   gap: 16px;
+  min-height: 0;
 }
 
-.conseiller-product-recap__label {
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-wood);
-}
-
-.conseiller-product-recap__value {
-  font-family: var(--font-body);
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--color-dark);
-}
-
-/* Round 3 — Lot C2 v2 / v5 : écran s-contact avec formulaire intégré.
-   Badge et footer (nav/cta) sont en absolute (règles plus haut).
-   Le [data-contact-state] est un conteneur block standard ; son contenu
-   central (message + recap + form + reassurance) s'affiche dans le flux. */
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] {
-  display: block;
-  width: 100%;
-  max-width: 560px;
-  margin: 0 auto;
-}
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state][hidden] {
-  display: none;
-}
-
-.conseiller-contact__message {
-  margin: 18px auto 0;
-  font-family: var(--font-body);
-  font-size: clamp(14.5px, 1.8vw, 16px);
-  line-height: 1.55;
-  color: var(--color-dark, #323232);
-  text-align: center;
-}
-.conseiller-contact__recap {
-  margin: 14px auto 0;
-  padding: 10px 14px;
-  border-radius: 8px;
-  background: var(--color-warm, #FBF6EA);
-  font-family: var(--font-body);
-  font-size: 13px;
-  line-height: 1.4;
-  color: var(--color-wood-dark, #6f5e4d);
-  text-align: center;
-}
-.conseiller-contact__recap:empty {
-  display: none;
-}
-.conseiller-contact__recap-label {
-  display: block;
-  font-weight: 600;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-wood, #937D68);
-  margin-bottom: 3px;
-}
-
-/* Form */
-.conseiller-contact-form {
-  margin: 18px auto 0;
-  width: 100%;
+.modal__foot {
+  grid-row: 3;
+  padding: 14px 36px 28px;
   display: -webkit-flex;
   display: flex;
-  -webkit-flex-direction: column;
-  flex-direction: column;
-  gap: 10px;
-}
-.conseiller-contact-form__input,
-.conseiller-contact-form__textarea {
-  width: 100%;
-  padding: 12px 14px;
-  border: 1px solid rgba(147, 125, 104, 0.35);
-  border-radius: 10px;
-  background: #fff;
-  font-family: var(--font-body);
-  font-size: 14.5px;
-  color: var(--color-dark, #323232);
-  -webkit-transition: border-color 0.18s ease, box-shadow 0.18s ease;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
-  box-sizing: border-box;
-}
-.conseiller-contact-form__textarea {
-  resize: vertical;
-  min-height: 110px;
-  line-height: 1.5;
-}
-.conseiller-contact-form__input:focus,
-.conseiller-contact-form__textarea:focus {
-  outline: none;
-  border-color: var(--color-wood, #937D68);
-  box-shadow: 0 0 0 3px rgba(147, 125, 104, 0.15);
-}
-.conseiller-contact-form__input.is-invalid,
-.conseiller-contact-form__textarea.is-invalid {
-  border-color: #c44a1d;
-  box-shadow: 0 0 0 3px rgba(196, 74, 29, 0.12);
-}
-.conseiller-contact-form__honeypot {
-  position: absolute;
-  left: -10000px;
-  top: auto;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-}
-.conseiller-contact-form .conseiller-cta {
-  margin-top: 6px;
-  align-self: center;
-}
-.conseiller-contact-form .conseiller-cta[disabled] {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.conseiller-contact-form__reassurance {
-  margin: 10px auto 0;
-  font-family: var(--font-body);
-  font-size: 12.5px;
-  color: var(--color-wood, #937D68);
-  text-align: center;
-}
-.conseiller-contact-form__error {
-  margin: 8px auto 0;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: rgba(196, 74, 29, 0.08);
-  color: #c44a1d;
-  font-size: 13px;
-  text-align: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
 }
 
-/* Conseil de style fixe (italic, ton confidentiel) */
-.conseiller-product-recap__conseil {
-  margin: 16px auto 0;
-  max-width: 560px;
-  font-family: var(--font-body);
-  font-size: clamp(13.5px, 1.7vw, 15.5px);
+/* Badge "pill" header */
+.badge {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  background: var(--color-wood-dark);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: 50px;
+}
+.badge svg { width: 11px; height: 11px; flex-shrink: 0; }
+
+/* Progress bar — sticky en bas du __body (s1 uniquement) */
+.progress {
+  position: -webkit-sticky;
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  max-width: 320px;
+  height: 4px;
+  background: rgba(139, 115, 85, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 8px auto 0;
+  -webkit-align-self: center;
+  align-self: center;
+  z-index: 5;
+}
+.progress__bar {
+  height: 100%;
+  background: var(--color-orange);
+  border-radius: 2px;
+  -webkit-transition: width 0.3s ease;
+  transition: width 0.3s ease;
+}
+
+/* Titres */
+.h1 {
+  font-family: 'Square Peg', cursive;
+  font-size: clamp(28px, 4.2vw, 36px);
+  font-weight: 400;
+  color: var(--color-wood-dark);
+  line-height: 1.15;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.h2 {
+  font-weight: 700;
+  font-size: clamp(17px, 2.4vw, 21px);
+  color: var(--color-wood-dark);
+  line-height: 1.25;
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
+  text-align: center;
+  max-width: 460px;
+}
+.subtitle {
+  font-size: 13px;
+  color: var(--color-wood-mid);
+  text-align: center;
+  max-width: 440px;
+}
+.quote {
   font-style: italic;
+  font-size: 14.5px;
   color: var(--color-wood-dark);
   line-height: 1.55;
   text-align: center;
-}
-.conseiller-product-recap__conseil--taille {
-  margin-top: 10px;
+  max-width: 460px;
 }
 
-/* F2b — Nav s-product-recap : "Modifier mes réponses" + "Contacter Robin"
-   alignés horizontalement avec un séparateur visuel léger. */
-.conseiller-modal__nav--product-recap {
-  gap: 18px;
-  -webkit-flex-wrap: wrap;
-  flex-wrap: wrap;
+/* Choix (s0, s1) */
+.choices {
+  display: -ms-grid;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 480px;
 }
-.conseiller-back-link--contact {
-  text-decoration: none;
+.choices--2col { grid-template-columns: repeat(2, 1fr); max-width: 360px; }
+.choices--4col { grid-template-columns: repeat(4, 1fr); }
+.choice {
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  padding: 14px 8px 11px;
+  cursor: pointer;
+  -webkit-transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  font-family: inherit;
+  color: inherit;
+  text-align: center;
+  box-shadow: var(--shadow-card);
 }
-.conseiller-back-link--contact::before {
-  content: '·';
-  margin-right: 8px;
-  color: var(--color-wood);
-  opacity: 0.5;
+.choice:hover {
+  -webkit-transform: translateY(-2px);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--color-wood);
 }
-
-@-webkit-keyframes conseiller-screen-fade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@keyframes conseiller-screen-fade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* Card modale ajuste les marges H2/subtitle pour le contexte centré */
-.conseiller-card--modal .conseiller-h2 {
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.conseiller-card--modal .conseiller-subtitle {
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 36px;
-}
-
-/* Plus d'air entre le badge (Conseil de Robin / Mon projet) et le H2
-   dans tous les écrans de la modale (S0/S1/S2/S3/transition). */
-.conseiller-card--modal .conseiller-badge {
-  margin-bottom: 28px;
-}
-
-/* F2a-quater : Anciennes portes S0 (.conseiller-portes / .conseiller-porte*) supprimées —
-   remplacées par l'écran hybride question + séparateur "ou" + champ texte. */
-
-/* ── S0 : Séparateur "ou" horizontal avec pastille centrée ── */
-.conseiller-separator-or {
+.choice__icon {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 6px;
+  background: var(--color-warm);
+  border-radius: 10px;
   display: -webkit-flex;
   display: flex;
   -webkit-align-items: center;
   align-items: center;
   -webkit-justify-content: center;
   justify-content: center;
-  margin: 12px 0 16px;
-  position: relative;
+  color: var(--color-wood);
+}
+.choice__icon svg { width: 20px; height: 20px; }
+.choice__label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-wood-dark);
+  line-height: 1.3;
 }
 
-.conseiller-separator-or::before,
-.conseiller-separator-or::after {
+/* Texte libre input */
+.text-input-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+}
+.text-input {
+  width: 100%;
+  padding: 13px 52px 13px 18px;
+  border: 1.5px solid var(--color-line);
+  border-radius: 50px;
+  font-family: inherit;
+  font-size: 14px;
+  background: #fff;
+  color: var(--color-wood-dark);
+}
+.text-input:focus { outline: none; border-color: var(--color-wood); }
+.text-submit {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-orange);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+}
+.text-submit svg { width: 14px; height: 14px; }
+
+/* Séparateur "ou" */
+.separator-or {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 440px;
+  margin: 4px 0;
+}
+.separator-or::before,
+.separator-or::after {
   content: '';
   -webkit-flex: 1;
   flex: 1;
   height: 1px;
-  background: rgba(147, 125, 104, 0.25);
-  max-width: 80px;
+  background: rgba(139, 115, 85, 0.25);
 }
-
-.conseiller-separator-or__text {
+.separator-or__text {
   margin: 0 14px;
   padding: 4px 12px;
-  font-family: var(--font-body);
   font-size: 10.5px;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -23740,485 +23612,246 @@ body.woocommerce-cart div.woocommerce-wrapper {
   color: var(--color-wood);
   background: var(--color-warm);
   border-radius: 50px;
-  border: 1px solid rgba(147, 125, 104, 0.25);
+  border: 1px solid rgba(139, 115, 85, 0.25);
 }
 
-/* ── S1 : Progress bar + grille de choix ── */
-.conseiller-progress {
-  position: relative;
-  height: 4px;
-  background: rgba(147, 125, 104, 0.18);
-  border-radius: 50px;
-  margin: 0 auto 24px;
-  overflow: hidden;
-  max-width: 360px;
-}
-
-.conseiller-progress__fill {
-  height: 100%;
-  width: 0%;
-  background: var(--color-wood-dark);
-  border-radius: 50px;
-  -webkit-transition: width 0.35s ease;
-  transition: width 0.35s ease;
-}
-
-.conseiller-choices {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  max-width: 760px;
-  margin: 0 auto;
-}
-
-/* F2a-quater : grille 2 cols quand la question a 2 ou 4 choix (sinon ils
-   se retrouvent isolés sur la dernière ligne d'un grid 3 cols). */
-.conseiller-choices--2col {
-  grid-template-columns: repeat(2, 1fr);
-  max-width: 540px;
-}
-
-.conseiller-choice {
-  background: var(--color-white);
-  border: 1px solid var(--color-line);
-  border-radius: 12px;
-  padding: 22px 14px 18px;
-  cursor: pointer;
-  font-family: var(--font-body);
-  color: inherit;
-  text-align: center;
-  box-shadow: var(--shadow-card);
-  -webkit-transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.conseiller-choice:hover,
-.conseiller-choice:focus-visible {
-  -webkit-transform: translateY(-2px);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card-hover);
-  border-color: var(--color-wood);
-  outline: none;
-}
-
-.conseiller-choice.is-selected {
-  border-color: var(--color-wood);
-  background: var(--color-warm);
-}
-
-.conseiller-choice__icon {
-  width: 48px;
-  height: 48px;
-  margin: 0 auto 12px;
-  background: var(--color-warm);
-  border-radius: 12px;
-  display: -webkit-flex;
-  display: flex;
-  -webkit-align-items: center;
-  align-items: center;
-  -webkit-justify-content: center;
-  justify-content: center;
-  color: var(--color-wood);
-}
-
-.conseiller-choice.is-selected .conseiller-choice__icon {
-  background: var(--color-white);
-}
-
-.conseiller-choice__icon svg {
-  width: 24px;
-  height: 24px;
-}
-
-.conseiller-choice__label {
-  display: block;
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-wood-dark);
-  line-height: 1.3;
-}
-
-.conseiller-choice__dim {
-  display: block;
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: none;
-  color: var(--color-wood-mid);
-  margin-top: 4px;
-}
-
-/* F2a-ter — S3 ressuscité comme carrefour "Modifier mon projet" :
-   chips récap lecture seule + 3 actions hiérarchisées. */
-.conseiller-card--modal .conseiller-chips {
-  -webkit-justify-content: center;
-  justify-content: center;
-  max-width: 720px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-/* Variante secondaire du CTA : pill wood-dark pour l'action "Préciser avec Robin"
-   (hiérarchie visuelle : orange = primaire, wood-dark = secondaire). */
-.conseiller-cta--secondary {
-  background: var(--color-wood-dark);
-}
-.conseiller-cta--secondary:hover,
-.conseiller-cta--secondary:focus-visible {
-  background: var(--color-wood);
-}
-
-/* Layout 2 boutons côte à côte desktop, empilés mobile (ancienne version
-   S3, conservée pour compat — markup actuel utilise s3-secondary-actions). */
-.conseiller-s3-actions {
+/* Chips récap */
+.chips {
   display: -webkit-flex;
   display: flex;
   -webkit-flex-wrap: wrap;
   flex-wrap: wrap;
+  gap: 6px;
   -webkit-justify-content: center;
   justify-content: center;
-  gap: 14px;
   width: 100%;
+  max-width: 460px;
 }
-
-/* F2a-quater : 2 boutons secondaires côte à côte (Recommencer + Préciser)
-   juste sous les chips récap. Empilés sur mobile. */
-.conseiller-s3-secondary-actions {
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-wrap: wrap;
-  flex-wrap: wrap;
-  -webkit-justify-content: center;
-  justify-content: center;
-  gap: 14px;
-  width: 100%;
-  margin-top: 20px;
-}
-
-/* Lien tertiaire "Effacer et recommencer" — discret, sous les 2 boutons. */
-.conseiller-s3-reset {
-  background: transparent;
-  border: none;
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-wood);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  cursor: pointer;
-  padding: 6px 8px;
-  -webkit-transition: color 0.2s ease;
-  transition: color 0.2s ease;
-}
-.conseiller-s3-reset:hover,
-.conseiller-s3-reset:focus-visible {
-  color: var(--color-orange);
-  outline: none;
-}
-
-.conseiller-modal__cta {
-  text-align: center;
-  margin-bottom: 8px;
-}
-
-.conseiller-modal__nav {
-  margin-top: 20px;
-  display: -webkit-flex;
-  display: flex;
-  -webkit-justify-content: center;
-  justify-content: center;
-}
-
-/* L'attribut [hidden] doit garder son effet display:none malgré
-   notre display:flex plus spécifique ci-dessus. */
-.conseiller-modal__nav[hidden] {
-  display: none;
-}
-
-/* ── Mobile ── */
-@media (max-width: 720px) {
-  .conseiller-modal {
-    padding: 16px 12px;
-  }
-  .conseiller-card--modal {
-    height: calc(100dvh - 32px);
-    max-height: calc(100dvh - 32px);
-    /* v5 — mobile : top = 28px (badge top) + ~28px (hauteur badge) + ~12px gap = 68px
-                    bottom = 24px (footer bottom) + ~28px + ~12px = 64px */
-    padding: 68px 22px 64px;
-  }
-  /* v5 — Badge mobile : top 28px (au lieu de 44px desktop) */
-  .conseiller-card--modal .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-badge {
-    top: 28px;
-  }
-  /* v5 — Progress bar mobile s1 : top 12px */
-  .conseiller-modal__screen[data-screen="s1"] .conseiller-card__inner > .conseiller-progress {
-    top: 12px;
-  }
-  /* v5 — Footer mobile : bottom 24px (au lieu de 36px desktop) */
-  .conseiller-card--modal .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-modal__nav,
-  .conseiller-card--modal .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-modal__cta,
-  .conseiller-card--modal .conseiller-modal__screen:not([data-screen="s2-chat"]) .conseiller-card__inner > .conseiller-modal__footer,
-  .conseiller-card--modal .conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-modal__nav,
-  .conseiller-card--modal .conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-modal__cta {
-    bottom: 24px;
-    max-width: calc(100% - 44px);
-  }
-  .conseiller-card--modal .conseiller-h2 {
-    font-size: 19px;
-    margin-bottom: 24px;
-  }
-  .conseiller-card--modal .conseiller-subtitle {
-    font-size: 14.5px;
-    margin-bottom: 28px;
-  }
-
-
-  .conseiller-choices {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .conseiller-choice {
-    padding: 18px 10px 14px;
-  }
-  .conseiller-choice__icon {
-    width: 42px;
-    height: 42px;
-    margin-bottom: 10px;
-  }
-  .conseiller-choice__icon svg {
-    width: 20px;
-    height: 20px;
-  }
-  .conseiller-choice__label {
-    font-size: 11px;
-  }
-
-  /* S3 mobile : boutons empilés verticalement */
-  .conseiller-s3-actions,
-  .conseiller-s3-secondary-actions {
-    -webkit-flex-direction: column;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .conseiller-s3-actions .conseiller-cta,
-  .conseiller-s3-secondary-actions .conseiller-cta {
-    width: 100%;
-  }
-}
-
-/* ============================================================
-   F2a Phase 4 — Modale S2 (texte libre + chat IA)
-   ============================================================ */
-
-/* ── S2.start : input pill central + bouton submit orange + 3 suggestions ── */
-.conseiller-freetext {
-  max-width: 680px;
-  margin: 0 auto 22px;
-}
-
-.conseiller-freetext__wrap {
-  position: relative;
-}
-
-.conseiller-freetext__input {
-  width: 100%;
-  padding: 18px 64px 18px 24px;
-  border: 1.5px solid var(--color-line);
-  border-radius: 50px;
-  font-family: var(--font-body);
-  font-size: 16px;
-  background: var(--color-white);
-  color: var(--color-wood-dark);
-  -webkit-transition: border-color 0.2s ease;
-  transition: border-color 0.2s ease;
-}
-
-.conseiller-freetext__input:focus {
-  outline: none;
-  border-color: var(--color-wood);
-}
-
-.conseiller-freetext__input::placeholder {
-  color: var(--color-wood-mid);
-  opacity: 0.7;
-}
-
-.conseiller-freetext__submit {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-  transform: translateY(-50%);
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: var(--color-orange);
-  border: none;
-  /* Override du padding 10/25 imposé par le selector global `button` du
-     thème (sinon le SVG est écrasé hors du cadre 42×42). */
-  padding: 0;
-  color: var(--color-white);
-  cursor: pointer;
+.chip {
   display: -webkit-inline-flex;
   display: inline-flex;
   -webkit-align-items: center;
   align-items: center;
+  padding: 5px 11px;
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-wood-dark);
+  letter-spacing: 0.02em;
+}
+.chips--project { gap: 8px; max-width: 500px; }
+.chip--project {
+  padding: 9px 14px 9px 10px;
+  font-size: 13px;
+  gap: 9px;
+  background: #FBF8F2;
+  border-color: rgba(139, 115, 85, 0.3);
+  box-shadow: 0 1px 3px rgba(147,125,104,0.08);
+  line-height: 1.25;
+}
+.chip__icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--color-warm);
+  color: var(--color-wood);
+  display: -webkit-flex;
+  display: flex;
+  -webkit-align-items: center;
+  align-items: center;
   -webkit-justify-content: center;
   justify-content: center;
-  -webkit-transition: background 0.2s ease;
-  transition: background 0.2s ease;
-}
-
-.conseiller-freetext__submit:hover,
-.conseiller-freetext__submit:focus-visible {
-  background: var(--color-orange-hover);
-  outline: none;
-}
-
-.conseiller-freetext__submit svg {
-  width: 18px;
-  height: 18px;
-}
-
-.conseiller-freetext__submit:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* F2a-quater : .conseiller-suggestions / .conseiller-suggestion supprimés
-   (anciennes UI S2.start avec 3 suggestions cliquables, plus dans le markup). */
-
-/* ── S2.chat : la card reste à sa taille fixe (600px desktop), seul le chat
-   zone scrolle en interne. F2a-bis : on retire l'override de hauteur qui
-   prenait toute la viewport — la taille modale doit être cohérente entre
-   tous les écrans. */
-.conseiller-card--modal.is-chat-mode {
-  overflow: hidden;
-  padding: 0;
-}
-
-.conseiller-card--modal.is-chat-mode::before {
-  inset: 8px;
-}
-
-.conseiller-card--modal.is-chat-mode .conseiller-modal__screen[data-screen="s2-chat"] {
-  height: 100%;
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-direction: column;
-  flex-direction: column;
-}
-
-.conseiller-card__inner--chat {
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-direction: column;
-  flex-direction: column;
-  height: 100%;
-  padding: 28px 28px 0;
-}
-
-.conseiller-chat-header {
   -webkit-flex-shrink: 0;
   flex-shrink: 0;
-  text-align: center;
-  margin-bottom: 16px;
+}
+.chip__icon svg { width: 14px; height: 14px; }
+.chip__label {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-wood);
+  margin-right: 5px;
+}
+.chip__value {
+  font-weight: 700;
+  color: var(--color-wood-dark);
 }
 
-.conseiller-chat-header .conseiller-badge {
-  margin-bottom: 0;
-}
-
-.conseiller-chat {
-  -webkit-flex: 1;
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  text-align: left;
-  padding: 4px 6px 12px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(147, 125, 104, 0.35) transparent;
-}
-
-.conseiller-chat::-webkit-scrollbar { width: 6px; }
-.conseiller-chat::-webkit-scrollbar-thumb {
-  background: rgba(147, 125, 104, 0.35);
-  border-radius: 50px;
-}
-
-.conseiller-chat-msg {
-  margin-bottom: 14px;
-  max-width: 85%;
+/* Récap projet groupé par thème (s3) */
+.recap-groups {
   display: -webkit-flex;
   display: flex;
   -webkit-flex-direction: column;
   flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 500px;
+}
+.recap-group {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  gap: 8px;
+}
+.recap-group__title {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-wood);
+  opacity: 0.75;
+  padding-left: 4px;
+  border-left: 3px solid var(--color-orange);
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+.recap-group__chips {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chips-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-wood);
+  margin-bottom: 2px;
 }
 
-.conseiller-chat-msg--user {
-  margin-left: auto;
-  -webkit-align-items: flex-end;
-  align-items: flex-end;
+/* Actions */
+.actions-3 {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 360px;
 }
-
-.conseiller-chat-msg--robin {
-  margin-right: auto;
-  -webkit-align-items: flex-start;
-  align-items: flex-start;
+.action-btn {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 18px;
+  border-radius: 50px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-transition: transform 0.15s, box-shadow 0.15s;
+  transition: transform 0.15s, box-shadow 0.15s;
+  border: none;
 }
-
-.conseiller-chat-bubble {
-  padding: 12px 18px;
-  font-size: 15px;
-  line-height: 1.5;
+.action-btn:hover { -webkit-transform: translateY(-1px); transform: translateY(-1px); }
+.action-btn--primary {
+  background: var(--color-orange);
+  color: #fff;
 }
-
-.conseiller-chat-msg--user .conseiller-chat-bubble {
-  background: var(--color-wood-dark);
-  color: var(--color-white);
-  border-radius: 18px 18px 4px 18px;
-}
-
-.conseiller-chat-msg--robin .conseiller-chat-bubble {
-  background: var(--color-white);
+.action-btn--primary:hover { background: var(--color-orange-hover); }
+.action-btn--secondary {
+  background: #fff;
   color: var(--color-wood-dark);
-  border-radius: 18px 18px 18px 4px;
   border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-card);
+}
+.action-btn svg { width: 14px; height: 14px; }
+
+/* Footer link */
+.footer-link {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-wood-mid);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.footer-link:hover { color: var(--color-orange); }
+
+/* Chat (s2-chat) — déviation justifiée : les classes .conseiller-chat-*
+   sont conservées car générées dynamiquement par sapi-modal-conseiller.js
+   (addRobinBubble / addUserBubble). Le squelette extérieur __head/__body/
+   __foot du mockup-11 est appliqué via le markup PHP. */
+.chat-bubbles {
+  width: 100%;
+  max-width: 460px;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-bubble {
+  padding: 11px 15px;
+  border-radius: 14px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  max-width: 85%;
+}
+.chat-bubble--robin {
+  background: #fff;
+  border: 1px solid var(--color-line);
+  color: var(--color-wood-dark);
+  -webkit-align-self: flex-start;
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+.chat-bubble--visitor {
+  background: var(--color-wood-dark);
+  color: #fff;
+  -webkit-align-self: flex-end;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
 }
 
-/* Encart "Filtres appliqués" sous une bulle Robin qui change les filtres */
-.conseiller-chat-filters {
-  margin-top: 8px;
-  padding: 10px 14px;
+/* Round 4 — Classes dynamiques générées par sapi-modal-conseiller.js
+   (filters appliqués sous bulle Robin, dots animés "réflexion"). Non
+   couvertes par le mockup-11 (cas dynamiques). Documentées comme
+   déviation justifiée. */
+.chat-bubble-filters {
+  -webkit-align-self: flex-start;
+  align-self: flex-start;
+  max-width: 85%;
+  margin-top: -4px;
+  padding: 8px 14px;
   background: rgba(147, 125, 104, 0.08);
   border-left: 3px solid var(--color-wood);
   border-radius: 4px 12px 12px 4px;
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--color-wood-dark);
-  max-width: 100%;
 }
-
-.conseiller-chat-filters__label {
+.chat-bubble-filters__label {
   display: block;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  font-size: 10.5px;
+  font-size: 10px;
   color: var(--color-wood);
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
-
-.conseiller-chat-filters__chips {
-  color: var(--color-wood-dark);
+.chat-bubble-filters__chips {
   font-weight: 500;
 }
 
-/* Bulle "Robin réfléchit" — 3 dots pulsants */
-.conseiller-chat-thinking {
+.chat-bubble-thinking {
   display: -webkit-inline-flex;
   display: inline-flex;
   -webkit-align-items: center;
@@ -24226,114 +23859,159 @@ body.woocommerce-cart div.woocommerce-wrapper {
   gap: 5px;
   padding: 14px 18px !important;
 }
-
-.conseiller-chat-thinking__dot {
+.chat-bubble-thinking__dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: var(--color-wood);
-  display: inline-block;
-  -webkit-animation: conseiller-chat-pulse 1.2s infinite ease-in-out;
-  animation: conseiller-chat-pulse 1.2s infinite ease-in-out;
+  opacity: 0.4;
+  -webkit-animation: conseiller-thinking-pulse 1.2s infinite ease-in-out;
+  animation: conseiller-thinking-pulse 1.2s infinite ease-in-out;
 }
-.conseiller-chat-thinking__dot:nth-child(2) { -webkit-animation-delay: 0.2s; animation-delay: 0.2s; }
-.conseiller-chat-thinking__dot:nth-child(3) { -webkit-animation-delay: 0.4s; animation-delay: 0.4s; }
-
-/* F2a-quater : .conseiller-transition-dots supprimés (l'écran s-transition
-   n'existe plus, remplacé par l'animation morph). Les keyframes
-   conseiller-chat-pulse restent utilisées par .conseiller-chat-thinking__dot. */
-
-@-webkit-keyframes conseiller-chat-pulse {
-  0%, 80%, 100% { opacity: 0.3; -webkit-transform: scale(0.8); transform: scale(0.8); }
-  40%           { opacity: 1;   -webkit-transform: scale(1);   transform: scale(1);   }
+.chat-bubble-thinking__dot:nth-child(2) {
+  -webkit-animation-delay: 0.2s;
+  animation-delay: 0.2s;
 }
-@keyframes conseiller-chat-pulse {
-  0%, 80%, 100% { opacity: 0.3; -webkit-transform: scale(0.8); transform: scale(0.8); }
-  40%           { opacity: 1;   -webkit-transform: scale(1);   transform: scale(1);   }
+.chat-bubble-thinking__dot:nth-child(3) {
+  -webkit-animation-delay: 0.4s;
+  animation-delay: 0.4s;
+}
+@-webkit-keyframes conseiller-thinking-pulse {
+  0%, 60%, 100% { opacity: 0.4; -webkit-transform: scale(1); transform: scale(1); }
+  30%           { opacity: 1;   -webkit-transform: scale(1.2); transform: scale(1.2); }
+}
+@keyframes conseiller-thinking-pulse {
+  0%, 60%, 100% { opacity: 0.4; -webkit-transform: scale(1); transform: scale(1); }
+  30%           { opacity: 1;   -webkit-transform: scale(1.2); transform: scale(1.2); }
 }
 
-/* CTA "Voir la sélection" — en bas du chat, sticky */
-.conseiller-chat-cta {
-  -webkit-flex-shrink: 0;
-  flex-shrink: 0;
+/* Erreur inline du form contact (générée dynamiquement par submitContactForm) */
+.contact-form__error {
+  margin-top: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(196, 74, 29, 0.08);
+  color: #c44a1d;
+  font-size: 12.5px;
   text-align: center;
-  padding: 12px 0 14px;
+}
+.contact-form input.is-invalid,
+.contact-form textarea.is-invalid {
+  border-color: #c44a1d;
+  box-shadow: 0 0 0 3px rgba(196, 74, 29, 0.12);
 }
 
-.conseiller-chat-cta[hidden] {
-  display: none;
-}
-
-/* Footer chat fixe : input + Envoyer */
-.conseiller-chat-footer {
-  -webkit-flex-shrink: 0;
-  flex-shrink: 0;
-  background: var(--color-white);
-  border-top: 1px solid var(--color-line);
-  padding: 14px 20px;
-  margin: 0 -28px;
+/* Mini-form contact (s-contact) */
+.contact-form {
+  width: 100%;
+  max-width: 440px;
   display: -webkit-flex;
   display: flex;
-  gap: 10px;
-  -webkit-align-items: center;
-  align-items: center;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  gap: 12px;
 }
-
-.conseiller-chat-footer__input {
-  -webkit-flex: 1;
-  flex: 1;
-  padding: 12px 20px;
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 12px 16px;
   border: 1.5px solid var(--color-line);
-  border-radius: 50px;
-  font-family: var(--font-body);
-  font-size: 14px;
-  background: var(--color-white);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13.5px;
+  background: #fff;
   color: var(--color-wood-dark);
-  -webkit-transition: border-color 0.2s ease;
-  transition: border-color 0.2s ease;
+  resize: vertical;
+  box-sizing: border-box;
 }
-
-.conseiller-chat-footer__input:focus {
+.contact-form input:focus,
+.contact-form textarea:focus {
   outline: none;
-  border-color: var(--color-wood);
+  border-color: var(--color-orange);
 }
-
-.conseiller-chat-footer__input::placeholder {
-  color: var(--color-wood-mid);
-  opacity: 0.7;
-}
-
-.conseiller-chat-footer__input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.conseiller-chat-footer__send {
-  padding: 0 22px;
-  height: 44px;
-  background: var(--color-wood-dark);
-  color: var(--color-white);
+.contact-form textarea { min-height: 90px; }
+.contact-form button {
+  padding: 13px 20px;
+  background: var(--color-orange);
+  color: #fff;
   border: none;
   border-radius: 50px;
-  font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 13px;
-  letter-spacing: 0.04em;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
-  -webkit-transition: background 0.2s ease;
-  transition: background 0.2s ease;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  gap: 8px;
+}
+.contact-form button:hover { background: var(--color-orange-hover); }
+.contact-form button svg { width: 14px; height: 14px; }
+.contact-reassure {
+  font-size: 11.5px;
+  color: var(--color-wood-mid);
+  text-align: center;
+  margin-top: -2px;
 }
 
-.conseiller-chat-footer__send:hover,
-.conseiller-chat-footer__send:focus-visible {
-  background: var(--color-wood);
-  outline: none;
+/* Recap fiche produit (s-product-recap) */
+.recap-card {
+  width: 100%;
+  max-width: 380px;
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: -ms-grid;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+  box-shadow: var(--shadow-card);
+}
+.recap-card__item-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-wood);
+}
+.recap-card__item-value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-wood-dark);
+}
+.conseil-italic {
+  font-style: italic;
+  font-size: 13px;
+  color: var(--color-wood-mid);
+  line-height: 1.5;
+  text-align: center;
+  max-width: 420px;
 }
 
-.conseiller-chat-footer__send:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+/* Mobile */
+@media (max-width: 600px) {
+  .conseiller-card--modal {
+    max-width: 100%;
+    height: calc(100dvh - 24px);
+    max-height: calc(100dvh - 24px);
+  }
+  .conseiller-card--modal::before { inset: 8px; }
+  .modal__head { padding: 20px 22px 8px; }
+  .modal__body { padding: 8px 22px; gap: 12px; }
+  .modal__foot { padding: 10px 22px 22px; }
+  .h2 { font-size: 15.5px; }
+  .h1 { font-size: 28px; }
+  .choices { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .choices--4col { grid-template-columns: repeat(2, 1fr); }
+  .choice { padding: 12px 6px 9px; }
+  .recap-card { grid-template-columns: 1fr; gap: 6px; }
+  .modal__close { top: 12px; right: 12px; }
 }
 
 /* ============================================================
