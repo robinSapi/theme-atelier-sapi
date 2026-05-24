@@ -2864,6 +2864,9 @@ function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_pr
   $prompt .= sapi_megafilter_format_ignored_answers($ignored_keys);
   $prompt .= sapi_megafilter_format_catalog_split($all_products, $matching_ids);
 
+  // Round 3.1 — Fix 1 : ambiance lumineuse alignée sur le catalogue présenté.
+  $prompt .= sapi_megafilter_lighting_ambiance_block();
+
   $prompt .= sapi_megafilter_adaptive_consigne_block();
 
   $prompt .= "\nSLUGS VALIDES (pour `filters_update`) :\n";
@@ -3707,6 +3710,29 @@ function sapi_megafilter_format_ignored_answers(array $ignored_keys) {
        . "\n(le visiteur avait répondu, mais le filtre direct ne ramenait rien → on a relâché ces contraintes pour pouvoir lui montrer des modèles)\n";
 }
 
+// Round 3.1 — Fix 1 : ambiance lumineuse = catalogue présenté est la source
+// de vérité (pas les règles théoriques de savoir.txt). Inséré dans les
+// prompts chat + advice juste après le catalogue split.
+function sapi_megafilter_lighting_ambiance_block() {
+  $out  = "\nDESCRIPTION DE L'AMBIANCE LUMINEUSE — règle stricte :\n\n";
+  $out .= "Si tu décris l'effet lumineux ou l'ambiance des modèles présentés, tu DOIS te baser sur le\n";
+  $out .= "type d'ampoule des modèles PRÉSENTÉS (colonne \"Ampoule\" dans le catalogue ci-dessus), PAS\n";
+  $out .= "sur les règles générales du savoir métier.\n\n";
+  $out .= "Mapping ampoule → vocabulaire à utiliser :\n";
+  $out .= "- ampoule_degagee   → \"lumière directe\", \"ampoule visible\", \"éclat franc\",\n";
+  $out .= "                      \"lumière qui descend franchement\", \"sans zone d'ombre\"\n";
+  $out .= "- semi_degagee      → \"lumière mi-tamisée\", \"diffusion mesurée\"\n";
+  $out .= "- ampoule_entouree  → \"lumière diffuse\", \"douceur tamisée\", \"ombres décoratives\",\n";
+  $out .= "                      \"lumière filtrée par le bois\", \"ambiance cocon\"\n\n";
+  $out .= "Si la majorité du catalogue présenté est \"ampoule_entouree\", tu décris une ambiance douce\n";
+  $out .= "et diffuse — JAMAIS \"ampoule à découvert\" ou \"lumière franche\", même si la pièce est une\n";
+  $out .= "cuisine ou un bureau. Le catalogue présenté est la source de vérité, les règles théoriques\n";
+  $out .= "du savoir métier sont secondaires quand il y a conflit avec le catalogue concret.\n\n";
+  $out .= "Si le catalogue présenté contient un mélange de types d'ampoule, reste plus générique : ne\n";
+  $out .= "décris pas l'effet lumineux précis.\n";
+  return $out;
+}
+
 // Bloc consigne adaptative à ajouter au system prompt advice + chat.
 // Round 3 — Lot A : réécriture complète. L'IA ne révèle JAMAIS le mécanisme
 // interne de filtrage au visiteur. Présentation comme proposition d'artisan,
@@ -3839,6 +3865,8 @@ function sapi_ajax_megafilter_advice() {
   $user_msg  = "PROJET DU VISITEUR :\n" . $project_text;
   $user_msg .= $ignored_answers_block;
   $user_msg .= $catalog_split_block;
+  // Round 3.1 — Fix 1 : ambiance lumineuse alignée sur le catalogue présenté.
+  $user_msg .= sapi_megafilter_lighting_ambiance_block();
   $user_msg .= $conversation_block;
 
   $ai_text = sapi_megafilter_call_claude(

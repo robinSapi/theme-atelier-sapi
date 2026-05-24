@@ -27,6 +27,11 @@ AMPOULE — DÉGAGÉE VS ENTOURÉE
 - Ampoule entourée : ombres au sol, murs et plafond. Très déco, évite l'éblouissement. Adapté pour salon, chambre, entrée, couloir. Nécessite de compléter avec d'autres sources lumineuses pour un vrai éclairage.
 - Ampoule semi-dégagée : compromis entre les deux, le luminaire habille l'ampoule jusqu'à la hauteur du regard mais ne gêne pas l'éclairage vers le bas.
 
+IMPORTANT : ces règles sont des PRÉFÉRENCES théoriques (ampoule dégagée pour cuisine/bureau,
+ampoule entourée pour salon/chambre). Quand un catalogue est passé en input avec une colonne
+"Ampoule", c'est le catalogue qui prime — pas ces règles théoriques. Adapter ton vocabulaire
+au type d'ampoule réellement présenté.
+
 ==========================================
 LIVRAISON
 ==========================================
