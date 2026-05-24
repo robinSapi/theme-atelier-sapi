@@ -23514,54 +23514,41 @@ body.woocommerce-cart div.woocommerce-wrapper {
   color: var(--color-dark);
 }
 
-/* Round 3 — Lot C2 v2 / Round 4 fix (v3) : écran s-contact avec formulaire intégré.
-   APPROCHE display: contents — le wrapper [data-contact-state] devient
-   "transparent" pour le layout : ses enfants se comportent comme s'ils
-   étaient enfants directs de .conseiller-card__inner, exactement comme
-   les autres écrans (s0/s1/s3). Le pattern margin-top:auto x2 utilisé
-   par les autres écrans s'applique alors directement aux enfants : badge
-   reste à padding-top de la card (44px), nav reste à padding-bottom (36px).
-   Plus de wrapper qui stretche bizarrement et déborde. */
+/* Round 3 — Lot C2 v2 / Round 4 fix (v4) : écran s-contact avec formulaire intégré.
+   Structure 3 zones EXPLICITES dans [data-contact-state] :
+     1. <span class="conseiller-badge">    (top, hauteur auto)
+     2. <div class="conseiller-modal__body"> (flex: 1, absorbe le free space)
+     3. <div class="conseiller-modal__nav"> ou <div class="conseiller-modal__cta"> (bottom, hauteur auto)
+   Simple, explicite, robuste. Pas de margin-top:auto à débugger. */
 .conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] {
-  display: contents;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-align-items: center;
+  align-items: center;
+  width: 100%;
+  -webkit-flex: 1;
+  flex: 1;
 }
 .conseiller-modal__screen[data-screen="s-contact"] [data-contact-state][hidden] {
   display: none;
 }
 
-/* État form — pattern 2 spacers (badge top → message via auto → contenu →
-   nav via auto). Le sélecteur descendant fonctionne malgré display:contents
-   car le DOM tree est inchangé. */
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state="form"] .conseiller-contact__message {
-  margin-top: auto;
-}
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state="form"] .conseiller-modal__nav {
-  margin-top: auto;
-}
-
-/* État success — pattern 2 spacers (badge top → h2 via auto → subtitle →
-   cta via auto). */
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state="success"] .conseiller-h2 {
-  margin-top: auto;
-}
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state="success"] .conseiller-modal__cta {
-  margin-top: auto;
-  margin-bottom: 0;
-}
-
-/* Contrainte de largeur sur les enfants directs du wrapper (qui en
-   display:contents deviennent des enfants effectifs de .card__inner) —
-   sinon ils prendraient toute la largeur de la card (~800px). */
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-contact__message,
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-contact__recap,
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-contact-form,
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-contact-form__reassurance,
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-modal__nav,
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-modal__cta,
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-h2,
-.conseiller-modal__screen[data-screen="s-contact"] [data-contact-state] > .conseiller-subtitle {
-  max-width: 560px;
+/* Body = absorbe le free space entre badge et footer */
+.conseiller-modal__screen[data-screen="s-contact"] .conseiller-modal__body {
+  -webkit-flex: 1;
+  flex: 1;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-align-items: center;
+  align-items: center;
   width: 100%;
+  max-width: 560px;
 }
 
 .conseiller-contact__message {

@@ -3512,33 +3512,36 @@ function sapi_render_conseiller_modal() {
       <div class="conseiller-modal__screen" data-screen="s-contact" hidden>
         <div class="conseiller-card__inner">
 
-          <!-- État form (défaut) — wrapper en display:contents (cf. CSS) :
-               les enfants deviennent direct enfants de .card__inner et bénéficient
-               du même pattern de distribution verticale que les autres écrans. -->
+          <!-- État form (défaut) — structure 3 zones flex column :
+               1. badge (top)
+               2. body (flex:1, absorbe le free space, centre son contenu)
+               3. nav/cta (bottom) -->
           <div data-contact-state="form">
             <span class="conseiller-badge conseiller-badge--default">
               <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
               <span data-contact-badge-text><?php esc_html_e('Échangeons ensemble', 'theme-sapi-maison'); ?></span>
             </span>
 
-            <p class="conseiller-contact__message" data-contact-message></p>
-            <div class="conseiller-contact__recap" data-contact-recap></div>
+            <div class="conseiller-modal__body">
+              <p class="conseiller-contact__message" data-contact-message></p>
+              <div class="conseiller-contact__recap" data-contact-recap></div>
 
-            <form class="conseiller-contact-form" data-contact-form novalidate>
-              <input type="email" class="conseiller-contact-form__input" name="email" required
-                     placeholder="<?php esc_attr_e('Ton email', 'theme-sapi-maison'); ?>"
-                     aria-label="<?php esc_attr_e('Ton email', 'theme-sapi-maison'); ?>">
-              <textarea class="conseiller-contact-form__textarea" name="description" rows="5"
-                        placeholder="<?php esc_attr_e('Décris ton projet…', 'theme-sapi-maison'); ?>"
-                        aria-label="<?php esc_attr_e('Ton message', 'theme-sapi-maison'); ?>"
-                        data-contact-message-field></textarea>
-              <input type="text" name="website" tabindex="-1" autocomplete="off" class="conseiller-contact-form__honeypot" aria-hidden="true">
-              <button type="submit" class="conseiller-cta" data-contact-submit>
-                <span><?php esc_html_e('Envoyer ma demande', 'theme-sapi-maison'); ?></span>
-                <?php echo $arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-              </button>
-            </form>
-            <p class="conseiller-contact-form__reassurance"><?php esc_html_e('Réponse de Robin sous 48h · Aucun engagement', 'theme-sapi-maison'); ?></p>
+              <form class="conseiller-contact-form" data-contact-form novalidate>
+                <input type="email" class="conseiller-contact-form__input" name="email" required
+                       placeholder="<?php esc_attr_e('Ton email', 'theme-sapi-maison'); ?>"
+                       aria-label="<?php esc_attr_e('Ton email', 'theme-sapi-maison'); ?>">
+                <textarea class="conseiller-contact-form__textarea" name="description" rows="5"
+                          placeholder="<?php esc_attr_e('Décris ton projet…', 'theme-sapi-maison'); ?>"
+                          aria-label="<?php esc_attr_e('Ton message', 'theme-sapi-maison'); ?>"
+                          data-contact-message-field></textarea>
+                <input type="text" name="website" tabindex="-1" autocomplete="off" class="conseiller-contact-form__honeypot" aria-hidden="true">
+                <button type="submit" class="conseiller-cta" data-contact-submit>
+                  <span><?php esc_html_e('Envoyer ma demande', 'theme-sapi-maison'); ?></span>
+                  <?php echo $arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                </button>
+              </form>
+              <p class="conseiller-contact-form__reassurance"><?php esc_html_e('Réponse de Robin sous 48h · Aucun engagement', 'theme-sapi-maison'); ?></p>
+            </div>
 
             <div class="conseiller-modal__nav">
               <button type="button" class="conseiller-back-link" data-action="back-to-chat">
@@ -3547,14 +3550,16 @@ function sapi_render_conseiller_modal() {
             </div>
           </div>
 
-          <!-- État succès — même pattern display:contents -->
+          <!-- État succès — même structure 3 zones -->
           <div data-contact-state="success" hidden>
             <span class="conseiller-badge conseiller-badge--default">
               <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
               <?php esc_html_e('Demande envoyée', 'theme-sapi-maison'); ?>
             </span>
-            <h2 class="conseiller-h2"><?php esc_html_e('Reçu — Robin t\'écrit sous 48h', 'theme-sapi-maison'); ?></h2>
-            <p class="conseiller-subtitle"><?php esc_html_e('Merci pour ta demande. Tu vas recevoir un email de confirmation et Robin te répondra personnellement.', 'theme-sapi-maison'); ?></p>
+            <div class="conseiller-modal__body">
+              <h2 class="conseiller-h2"><?php esc_html_e('Reçu — Robin t\'écrit sous 48h', 'theme-sapi-maison'); ?></h2>
+              <p class="conseiller-subtitle"><?php esc_html_e('Merci pour ta demande. Tu vas recevoir un email de confirmation et Robin te répondra personnellement.', 'theme-sapi-maison'); ?></p>
+            </div>
             <div class="conseiller-modal__cta">
               <button type="button" class="conseiller-cta conseiller-cta--secondary" data-action="close">
                 <span><?php esc_html_e('Fermer', 'theme-sapi-maison'); ?></span>
