@@ -2,6 +2,110 @@
 
 ## 🔧 À faire
 
+## [TÂCHE] Conseiller V3 — Round 3.1 : ambiance lumineuse + harmonisation secondaire
+**Date :** 2026-05-22
+**Branche :** `test-theme-sapi-maison`
+**Priorité :** haute — 2 mini-fixes consécutifs au Round 3, à livrer dans la même passe
+
+### Contexte
+
+Test Round 3 par Robin (scénario B2 — Cuisine · Petite · Au mur · Pas de préférence) a remonté une **incohérence sémantique entre la phrase IA et la grille** :
+
+L'IA a généré : *"Pour une cuisine, je te propose les modèles où l'ampoule reste à découvert. La lumière descend franchement sur le plan de travail, sans zone d'ombre."*
+
+Or **toutes les appliques cuisine du catalogue Robin sont `ampoule_entouree`** — l'IA a appliqué aveuglément la règle théorique de `savoir.txt` (cuisine → ampoule dégagée) sans regarder le catalogue concret qui lui est passé.
+
+### Fix 1 — Alignement ambiance lumineuse sur le catalogue présenté
+
+**Fichier :** `functions.php`, prompts `advice` + `chat` (à chercher autour des fonctions `sapi_megafilter_build_*_prompt`).
+
+**Action :** ajouter un nouveau bloc de consigne dans les 2 prompts (à insérer juste après le catalogue split passé à l'IA), à coller tel quel :
+
+```
+DESCRIPTION DE L'AMBIANCE LUMINEUSE — règle stricte :
+
+Si tu décris l'effet lumineux ou l'ambiance des modèles présentés, tu DOIS te baser sur le
+type d'ampoule des modèles PRÉSENTÉS (colonne "Ampoule" dans le catalogue ci-dessus), PAS
+sur les règles générales du savoir métier.
+
+Mapping ampoule → vocabulaire à utiliser :
+- ampoule_degagee   → "lumière directe", "ampoule visible", "éclat franc",
+                      "lumière qui descend franchement", "sans zone d'ombre"
+- semi_degagee      → "lumière mi-tamisée", "diffusion mesurée"
+- ampoule_entouree  → "lumière diffuse", "douceur tamisée", "ombres décoratives",
+                      "lumière filtrée par le bois", "ambiance cocon"
+
+Si la majorité du catalogue présenté est "ampoule_entouree", tu décris une ambiance douce
+et diffuse — JAMAIS "ampoule à découvert" ou "lumière franche", même si la pièce est une
+cuisine ou un bureau. Le catalogue présenté est la source de vérité, les règles théoriques
+du savoir métier sont secondaires quand il y a conflit avec le catalogue concret.
+
+Si le catalogue présenté contient un mélange de types d'ampoule, reste plus générique : ne
+décris pas l'effet lumineux précis.
+```
+
+**Note de cohérence à ajouter dans `assets/guide-prompt-savoir.txt`** (juste après la section "AMPOULE — DÉGAGÉE VS ENTOURÉE") :
+
+```
+IMPORTANT : ces règles sont des PRÉFÉRENCES théoriques (ampoule dégagée pour cuisine/bureau,
+ampoule entourée pour salon/chambre). Quand un catalogue est passé en input avec une colonne
+"Ampoule", c'est le catalogue qui prime — pas ces règles théoriques. Adapter ton vocabulaire
+au type d'ampoule réellement présenté.
+```
+
+**Critère de succès Fix 1 :** refaire B2 (Cuisine · Petite · Au mur · Pas de préférence). La phrase IA doit décrire une **ambiance diffuse/tamisée** cohérente avec les appliques ampoule entourée du catalogue, JAMAIS "ampoule à découvert" / "lumière franche".
+
+### Fix 2 — Harmoniser branche `eclairage=secondaire` de `sapi_guide_get_categories`
+
+**Contexte :** Round 3 Lot B a harmonisé le default général de `sapi_guide_get_categories`, mais la branche `eclairage=secondaire` (L4521) reste désalignée — son default est `['lampadaires', 'lampesaposer']` sans appliques, alors que `$sapi_filter_rules['cats_secondaire_by_sortie']['ne-sais-pas']` contient `['lampadaires', 'lampesaposer', 'appliques']` depuis Round 1 (`e41f735`).
+
+**Fichier :** `functions.php`, `sapi_guide_get_categories`, autour de L4520-4533.
+
+**Modification :**
+
+Avant :
+```php
+if ($eclairage === 'secondaire') {
+  $pool = ['lampadaires', 'lampesaposer']; // default (NSP) : pas d'appliques
+  if ($sortie === 'plafond') {
+    $pool = ['suspensions'];
+  } elseif ($sortie === 'mur') {
+    $pool = ['appliques'];
+  } elseif ($sortie === 'pas-de-sortie') {
+    $pool = ['lampadaires', 'lampesaposer', 'appliques'];
+  }
+  ...
+}
+```
+
+Après :
+```php
+if ($eclairage === 'secondaire') {
+  // Default (sortie=ne-sais-pas) : cohérence avec cats_secondaire_by_sortie['ne-sais-pas']
+  // (Round 1 — e41f735, RÉEL #4) : appliques incluses car le kit prise électrique
+  // permet l'installation sans sortie murale dédiée.
+  $pool = ['lampadaires', 'lampesaposer', 'appliques'];
+  if ($sortie === 'plafond') {
+    $pool = ['suspensions'];
+  } elseif ($sortie === 'mur') {
+    $pool = ['appliques'];
+  } elseif ($sortie === 'pas-de-sortie') {
+    $pool = ['lampadaires', 'lampesaposer', 'appliques'];
+  }
+  ...
+}
+```
+
+**Critère de succès Fix 2 :** grep sur `'lampesaposer', 'appliques'` dans `functions.php` montre la même liste pour `cats_secondaire_by_sortie['ne-sais-pas']` ET pour le default `eclairage=secondaire` de `sapi_guide_get_categories`.
+
+### Notes pour le retour
+
+- Hash des 2 commits (idéalement 2 commits séparés : fix 1 et fix 2)
+- Indication des fichiers touchés
+- Si une déviation est nécessaire, justification
+
+---
+
 ## [TÂCHE] Conseiller V3 — Round 3 : voix IA + sur-mesure + contact (Lots A/B/C)
 **Date :** 2026-05-22
 **Branche :** `test-theme-sapi-maison`
@@ -275,6 +379,38 @@ URL résultat type : `/sur-mesure/?from=conseiller&kind=pro&subject=Projet+h%C3%
 ---
 
 ## ✅ Livré
+
+## [RETOUR] Conseiller V3 — Round 3.1 : ambiance lumineuse + harmonisation secondaire
+**Date livrée :** 2026-05-24
+**Branche :** `test-theme-sapi-maison`
+**Commits :** `42c86d7` (Fix 1) + `ccc2065` (Fix 2)
+**Statut :** 2 fixes livrés en 2 commits séparés.
+
+### Fix 1 — Ambiance lumineuse alignée sur le catalogue présenté
+
+**Commit :** `42c86d7`
+**Fichiers :** `functions.php`, `assets/guide-prompt-savoir.txt`
+
+- Nouveau helper `sapi_megafilter_lighting_ambiance_block()` qui produit le bloc de consigne strict (mapping ampoule → vocabulaire + règle catalogue prime sur savoir théorique + comportement catalogue mixte).
+- Injecté dans 2 endroits : `sapi_megafilter_build_chat_prompt` (S2 chat Sonnet) et `sapi_ajax_megafilter_advice` (sortie modale Sonnet, dans le `user_msg`). Position : juste après le `catalog_split` pour que la consigne référence directement la colonne "Ampoule" déjà visible plus haut.
+- Note ajoutée dans `savoir.txt` section AMPOULE — DÉGAGÉE VS ENTOURÉE : préfixe "ces règles sont des PRÉFÉRENCES théoriques — quand un catalogue est passé en input, c'est le catalogue qui prime".
+
+### Fix 2 — Harmonisation branche `eclairage=secondaire`
+
+**Commit :** `ccc2065`
+**Fichier :** `functions.php`
+
+- `sapi_guide_get_categories` ligne ~4521 : default `eclairage=secondaire` (sortie=ne-sais-pas) passe de `['lampadaires', 'lampesaposer']` à `['lampadaires', 'lampesaposer', 'appliques']`.
+- Alignement avec `$sapi_filter_rules['cats_secondaire_by_sortie']['ne-sais-pas']` qui contient déjà appliques depuis Round 1 (commit `e41f735`, RÉEL #4).
+- Cohérent avec le kit prise électrique mentionné dans `savoir.txt:48` + `regles.txt:37`.
+
+### Notes
+
+- Aucune déviation par rapport à la spec.
+- Critère Fix 2 vérifié : `grep "'lampesaposer', 'appliques'"` dans `functions.php` matche maintenant les 2 emplacements (secondaire_by_sortie ET le default secondaire de get_categories).
+- À tester côté Robin sur `test.atelier-sapi.fr` : refaire B2 (Cuisine · Petite · Au mur · Pas de préférence) → la phrase IA doit parler de "lumière diffuse/tamisée/cocon", JAMAIS de "ampoule à découvert" puisque les appliques cuisine du catalogue sont toutes `ampoule_entouree`.
+
+---
 
 ## [RETOUR] Conseiller V3 — Round 3 : voix IA + sur-mesure + contact (Lots A/B/C)
 **Date livrée :** 2026-05-22
