@@ -2,6 +2,152 @@
 
 ## 🔧 À faire
 
+## [PROPOSITION — À VALIDER par Robin] Conseiller V3 — Refonte structurelle de la modale (échec de 6 tentatives de fix)
+**Date :** 2026-05-24
+**Branche :** `test-theme-sapi-maison`
+**Priorité :** haute — bloque la livraison finale Round 3
+**Action attendue :** valider le plan ci-dessous ou proposer une alternative avant que Claude Code refactore.
+
+### Contexte
+
+Robin a observé un bug visuel récurrent sur la modale Conseiller V3 (`.conseiller-card--modal`) : le badge "pill" (header) et le lien/CTA bottom ne sont pas alignés visuellement entre les différents écrans (`s0`, `s1`, `s3`, `s-product-recap`, `s-contact`). Sur certains écrans (notamment `s-contact`), le badge est même positionné au milieu du contenu au lieu d'être en haut de la card.
+
+**6 tentatives de fix ont échoué** en accumulant des patchs CSS au lieu de traiter la cause :
+
+| # | Approche | Commit | Résultat |
+|---|---|---|---|
+| 1 | `justify-content: center` sur l'inner | (préexistant) | OK sur s0, KO sur s-contact |
+| 2 | `margin-top: auto` × 2 sur 2 éléments du wrapper | premier fix s-contact | Étalement imprévisible si contenu trop dense |
+| 3 | `justify-content: space-between` sur wrapper | fix s-contact v2 | Badge sort de la card par le haut |
+| 4 | `display: contents` sur wrapper | fix s-contact v3 | Idem |
+| 5 | Nouveau wrapper `.conseiller-modal__body` avec `flex: 1` | fix s-contact v4 | Idem |
+| 6 | `position: absolute` partout (agent Plan v5) | `497df7b` + override `position: static` à `b9477c1` | Badge **toujours** au milieu du contenu — règle `position: relative` globale sur `.card__inner` non détectée pendant 5 itérations |
+
+### Diagnostic — Pourquoi tous ces fixes ont échoué
+
+**Cause root #1 — Markup hétérogène entre écrans**
+
+- s0/s1/s3 : badge + contenu + nav directement à plat dans `.card__inner` (5-6 enfants)
+- s-product-recap : footer composite wrappé (`.conseiller-modal__footer`)
+- **s-contact : niveau d'imbrication supplémentaire** `[data-contact-state]` qui contient badge + contenu + nav
+
+Tout fix qui marche sur s0/s1/s3 ne marche pas pareil sur s-contact à cause de ce wrapper.
+
+**Cause root #2 — Empilement de patterns contradictoires**
+
+Le CSS modale actuel mélange des résidus de 4 des 6 approches. Sélecteurs ultra-spécifiques qui s'invalident mutuellement, type :
+```
+.conseiller-card--modal .conseiller-modal__screen:not([data-screen="s2-chat"])
+  .conseiller-card__inner > .conseiller-modal__nav
+```
+
+**Cause root #3 — Règle globale polluante**
+
+`.conseiller-card__inner { position: relative; z-index: 1; }` à `style.css:22637` est définie pour les cards conseiller **hors modale** (qui ont un `::before` dashed à passer derrière). Cette règle est héritée par la modale et casse `position: absolute` (le badge s'ancre sur l'inner au lieu de la card). Mon dernier fix `position: static` a juste contourné le symptôme.
+
+### Proposition de refonte
+
+**Principe** : markup **uniforme** entre tous les écrans non-chat + **CSS Grid 3 rows** sur la card. Plus de `position: absolute`, plus de `margin-top: auto`, plus de wrappers magiques.
+
+#### Markup cible (identique pour tous les écrans non-chat)
+
+```html
+<div class="conseiller-card--modal">
+  <button class="conseiller-modal__close">×</button>
+
+  <div class="conseiller-modal__screen" data-screen="s0">
+    <header class="conseiller-modal__head">
+      <span class="conseiller-badge">Conseil de Robin</span>
+    </header>
+    <div class="conseiller-modal__body">
+      <h2>...</h2>
+      <!-- contenu central spécifique -->
+    </div>
+    <footer class="conseiller-modal__foot">
+      <button>← Retour</button>
+    </footer>
+  </div>
+</div>
+```
+
+#### CSS cible (~30 lignes)
+
+```css
+.conseiller-card--modal {
+  position: relative;
+  height: 680px;
+  max-height: calc(100dvh - 64px);
+  width: 100%;
+  max-width: 880px;
+  padding: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+}
+
+.conseiller-modal__screen {
+  display: contents;  /* enfants = vrais grid items */
+}
+
+.conseiller-modal__head {
+  grid-row: 1;
+  padding: 32px 40px 16px;
+  text-align: center;
+}
+
+.conseiller-modal__body {
+  grid-row: 2;
+  padding: 16px 40px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+}
+
+.conseiller-modal__foot {
+  grid-row: 3;
+  padding: 16px 40px 32px;
+  text-align: center;
+}
+```
+
+**Avantages :**
+- Badge toujours dans `__head` (row 1 du grid) → top fixe, peu importe le contenu
+- Footer toujours dans `__foot` (row 3) → bottom fixe
+- Body absorbe l'espace restant + scroll interne si déborde
+- Pas de `position: absolute`, pas de `margin-top: auto`, pas de `flex: 1` à débugger
+- Les autres règles CSS héritées (`.card__inner { position: relative }`) deviennent inertes — on ne s'en sert plus comme conteneur principal
+
+#### Plan d'implémentation (3 étapes, ~50 min, 1 commit)
+
+1. **Refactor markup** dans `sapi_render_conseiller_modal` (functions.php) — 6 écrans à wrapper en `__head`/`__body`/`__foot`. Cas s-contact : 2 sous-états `[data-contact-state]` chacun avec head/body/foot. Cas s1 : progress + badge tous deux dans `__head`. Cas s-product-recap : `.conseiller-modal__footer` actuel devient `__foot`.
+
+2. **Réécriture CSS** — supprimer toute la section "Harmonisation 3 zones v5" (lignes ~23375-23467) + le wrapper `.conseiller-modal__footer` + override `position: static` que j'ai ajouté. Remplacer par les ~30 lignes ci-dessus.
+
+3. **Tests** — chaque écran un par un en bascule, mobile + desktop, cas contenu débordant (form contact long).
+
+#### Risque
+
+`display: contents` est supporté partout sauf IE11. Si problème sur très vieux Safari, fallback : sortir le badge et le foot du `__screen` pour les mettre directement dans la card.
+
+#### Modifications JS
+
+Aucune. Les data-attributes existants restent (`data-action`, `data-question-title`, `data-contact-state`, etc.).
+
+### Décision attendue de Robin
+
+- **Option A** : valider le plan tel quel → Claude Code refactore en 1 commit propre.
+- **Option B** : ajuster le plan (ex : garder le `display: contents` mais avec d'autres choix de paddings, ou autre détail).
+- **Option C** : autre approche en tête (revert complet aux margins-auto avec rework manuel ? layout absolute simple ? autre ?)
+
+Une fois la décision actée, ping-moi pour que je lance.
+
+---
+
+
+
 ## [TÂCHE] Conseiller V3 — Round 3.1 : ambiance lumineuse + harmonisation secondaire
 **Date :** 2026-05-22
 **Branche :** `test-theme-sapi-maison`
