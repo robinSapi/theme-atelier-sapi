@@ -2,1404 +2,464 @@
 
 ## 🔧 À faire
 
-## [TÂCHE] Conseiller V3 — Round 4 : Refactor structurel modale (mockup-11 = source de vérité)
-**Date :** 2026-05-24
+## [TÂCHE] Conseiller V3 — Refonte page admin "Robin Conseiller" (tracking V3 + dashboard analytique)
+**Date :** 2026-05-25
 **Branche :** `test-theme-sapi-maison`
-**Priorité :** haute — débloque la livraison finale Round 3
-**Décision Robin :** Option A validée (refactor + cible mockup-11). Stratégie de contrôle : mockup littéral + whitelist CSS + commit snapshot + self-check final.
+**Priorité :** haute — page admin actuellement orpheline (table V2 plus alimentée depuis F1c)
+**Mockup de référence :** `site-web/mockups/mockup-12-admin-conseiller-v3.html` — **source de vérité unique** pour la structure HTML, les noms de classes, le CSS et le comportement UX. À LIRE EN INTÉGRALITÉ avant toute modification.
 
 ### Contexte
 
-6 tentatives de fix sur l'alignement visuel de la modale ont échoué en empilant des patches CSS au lieu de traiter la cause structurelle. Robin a validé une refonte avec markup uniforme `__head / __body / __foot` sur CSS Grid 3 rows.
+La page admin `wp-admin/admin.php?page=sapi-robin-sessions` lit la table `wp_sapi_robin_sessions` qui a été conçue pour la V2 et n'est **plus alimentée** depuis la suppression de `robin-conseiller.js` au commit F1c (`3be8ba7`). Aucune session V3 n'est tracée. Robin veut une refonte complète :
 
-**Le mockup cible est** : `site-web/mockups/mockup-11-modale-tous-etats.html` — itéré avec Robin le 24/05/2026. **C'est la source de vérité unique pour ce refactor.** Tu dois LIRE ce mockup en intégralité AVANT toute modification.
+- **DROP** l'ancienne table (pas besoin d'historique V2)
+- Nouveau schéma adapté V3 (sapiProject + chat + advice + contact)
+- Page admin avec **dashboard analytique en haut** (stats + rankings) et **tableau filtrable en bas**
+- **Filtres globaux** : agissent à la fois sur le dashboard ET sur le tableau (pattern GA4 / Mixpanel — l'utilisateur peut segmenter)
+- **Drill-down par session** : modal au clic sur une ligne avec tous les détails (récap projet, chat formaté messagerie, advice_text, contact, produits matchés, tech)
 
-### Garde-fous absolus (lis-les avant de commencer)
+### Garde-fous absolus
 
-1. **NE PAS inventer de nouvelle classe CSS** non listée dans la whitelist ci-dessous. Si tu penses qu'il en manque une, **demande dans le retour** plutôt que d'en créer.
-2. **NE PAS renommer** un sélecteur du mockup. Les classes du mockup sont à reprendre **mot pour mot**.
-3. **NE PAS toucher au JS** sauf si un `data-*` attribute doit changer (et dans ce cas, propager la modif à `sapi-modal-conseiller.js`). Préserver `data-action`, `data-screen`, `data-product-recap-*`, `data-contact-*`, `data-contact-state`, `data-question-title`, etc.
-4. **NE PAS paraphraser le CSS** du mockup. Copier-coller littéralement les règles. Ajuster uniquement si une variable CSS existante a un nom différent côté site (à vérifier — variables CSS attendues : `--color-wood`, `--color-wood-dark`, `--color-wood-mid`, `--color-warm`, `--color-orange`, `--color-orange-dark`, `--color-line`, `--shadow-card`, `--shadow-card-hover`). Si une variable manque, demande.
-5. **NE PAS toucher au CSS hors de la zone modale**. Le refactor concerne uniquement la modale Conseiller. La règle globale `.conseiller-card__inner { position: relative; z-index: 1; }` à `style.css:22637` reste en place (elle ne nous concerne plus, on n'utilise plus `.conseiller-card__inner` comme conteneur).
+1. **Ne PAS toucher aux endpoints IA existants** : `sapi_megafilter_freetext`, `sapi_megafilter_chat`, `sapi_megafilter_advice`, `sapi_megafilter_surmesure` restent intacts.
+2. **Ne PAS toucher au filtre JS** (`sapi-cards-conseiller.js`) ni à la modale (`sapi-modal-conseiller.js`) au-delà des hooks de tracking décrits ci-dessous.
+3. **Mockup-12 = source de vérité visuelle** : reprendre fidèlement les classes CSS (`.dashboard`, `.stat-card`, `.ranking-card`, `.filters`, `.table-wrap`, `.drill-overlay`, etc.), la structure HTML, les pills colorées, et le CSS littéral. Ne pas réinventer.
+4. **Drop ancienne table propre** : `DROP TABLE IF EXISTS wp_sapi_robin_sessions` exécuté **une seule fois** dans une migration idempotente (option WordPress `sapi_megafilter_sessions_v3_migrated`).
+5. **Endpoint AJAX UPSERT** : un seul endpoint pour le tracking, qui fait insert OR update sur `session_id` (clé unique). Pas de duplication de logique.
+
+### Périmètre — 5 chantiers
+
+---
+
+### Chantier 1 — Schéma SQL V3
+
+**Fichier :** `functions.php` (section "ROBIN CONSEILLER V2 — Sessions tracking" L6349-6404)
+
+**Action :**
+1. **Renommer** la section commentaire en "CONSEILLER V3 — Sessions tracking".
+2. **Renommer** les fonctions :
+   - `sapi_robin_create_sessions_table` → `sapi_megafilter_create_sessions_table`
+   - `sapi_robin_maybe_create_table` → `sapi_megafilter_maybe_create_table`
+3. **Nouveau schéma** (table `wp_sapi_megafilter_sessions`) :
+
+```sql
+CREATE TABLE wp_sapi_megafilter_sessions (
+  id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  session_id VARCHAR(36) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  -- Ouverture
+  entry_point VARCHAR(30) DEFAULT '',         -- 'home_picker' | 'mes_creations' | 'product_pill' | 'freetext'
+  entry_url VARCHAR(500) DEFAULT '',
+  referrer VARCHAR(500) DEFAULT '',
+
+  -- Parcours filtre (mêmes clés que sapiProject.answers)
+  piece VARCHAR(50) DEFAULT '',
+  taille VARCHAR(50) DEFAULT '',
+  taille_escalier VARCHAR(50) DEFAULT '',
+  eclairage VARCHAR(50) DEFAULT '',
+  sortie VARCHAR(50) DEFAULT '',
+  hauteur VARCHAR(50) DEFAULT '',
+  table_reponse VARCHAR(50) DEFAULT '',
+  style VARCHAR(50) DEFAULT '',
+  answers_completed TINYINT(1) DEFAULT 0,     -- 1 si toutes les questions visibles ont une réponse
+
+  -- IA
+  ai_freetext_used TINYINT(1) DEFAULT 0,
+  ai_freetext_input TEXT DEFAULT NULL,        -- texte saisi en S0
+  ai_chat_used TINYINT(1) DEFAULT 0,
+  ai_chat_messages MEDIUMTEXT DEFAULT NULL,   -- JSON array [{role, content}]
+  ai_call_count INT(11) DEFAULT 0,
+  advice_text TEXT DEFAULT NULL,              -- phrase IA finale
+
+  -- Catalogue présenté
+  matching_product_ids TEXT DEFAULT NULL,     -- CSV des IDs matchés à la sortie
+
+  -- Contact
+  contact_triggered TINYINT(1) DEFAULT 0,     -- écran s-contact atteint
+  contact_kind VARCHAR(20) DEFAULT '',        -- 'pro' | 'sur-mesure' | 'simple'
+  contact_subject VARCHAR(200) DEFAULT '',
+  contact_message TEXT DEFAULT NULL,
+  contact_email VARCHAR(100) DEFAULT '',
+  contact_submitted TINYINT(1) DEFAULT 0,
+  contact_submitted_at DATETIME DEFAULT NULL,
+
+  -- Technique
+  device_type VARCHAR(40) DEFAULT '',         -- 'Desktop · Chrome', 'Mobile · Safari'
+  ip_address VARCHAR(45) DEFAULT '',
+  location VARCHAR(200) DEFAULT '',           -- 'Lyon, FR' via ip-api.com (async)
+
+  PRIMARY KEY (id),
+  UNIQUE KEY session_id (session_id),
+  KEY created_at (created_at),
+  KEY entry_point (entry_point),
+  KEY piece (piece)
+) {charset};
+```
+
+4. **Migration idempotente** dans un hook `admin_init` :
+
+```php
+function sapi_megafilter_migrate_v3() {
+  if (get_option('sapi_megafilter_sessions_v3_migrated') === 'yes') return;
+  global $wpdb;
+  $old_table = $wpdb->prefix . 'sapi_robin_sessions';
+  $wpdb->query("DROP TABLE IF EXISTS $old_table");
+  sapi_megafilter_create_sessions_table();
+  update_option('sapi_megafilter_sessions_v3_migrated', 'yes', true);
+}
+add_action('admin_init', 'sapi_megafilter_migrate_v3');
+```
+
+5. **Supprimer** l'ancienne fonction `sapi_ajax_robin_log_session` et ses 2 hooks `add_action('wp_ajax_*_sapi_robin_log_session', ...)` (L6410-6553 environ). Endpoint V2 mort.
+
+---
+
+### Chantier 2 — Endpoint AJAX de tracking V3
+
+**Fichier :** `functions.php` (à insérer juste après `sapi_megafilter_create_sessions_table`)
+
+**Nouvel endpoint :** `sapi_megafilter_log_session` — UPSERT par `session_id`.
+
+**Spécifications :**
+- 2 hooks : `wp_ajax_sapi_megafilter_log_session` + `wp_ajax_nopriv_sapi_megafilter_log_session`
+- Lit le payload via `file_get_contents('php://input')` (compatible `sendBeacon` qui envoie en `application/json` ou `text/plain`)
+- Fallback sur `$_POST` si pas de JSON
+- Vérifie le nonce `sapi-megafilter` (le même que les autres endpoints V3)
+- Champs acceptés (tous optionnels sauf `session_id`) :
+  - `session_id` (obligatoire) — clé d'unicité
+  - `entry_point`, `entry_url`
+  - `answers` (JSON object) — extrait `piece`, `taille`, `taille_escalier`, `eclairage`, `sortie`, `hauteur`, `table`, `style`
+  - `answers_completed` (bool)
+  - `ai_freetext_input` (string)
+  - `ai_chat_messages` (JSON array) — stocké tel quel
+  - `ai_call_count` (int)
+  - `advice_text` (string)
+  - `matching_product_ids` (CSV de int)
+  - `contact_triggered`, `contact_kind`, `contact_subject`, `contact_message`, `contact_email`, `contact_submitted`
+- Logique :
+  1. Sanitization stricte (sanitize_key sur les slugs, sanitize_textarea_field sur les textes, integer cast sur les flags, JSON validation sur les arrays)
+  2. Si row avec `session_id` existe → UPDATE (ne mettre à jour que les champs présents dans le payload, pas tout écraser)
+  3. Sinon → INSERT avec device + IP + referrer dérivés de `$_SERVER`
+  4. Geolocation async (shutdown action) seulement à l'INSERT — reprendre le pattern de l'ancien endpoint V2 L6537-6549
+  5. Réponse `wp_send_json_success(['logged' => true])` minimaliste
+
+**Détection device** : reprendre fonctionnellement le bloc L6466-6484 de l'ancien endpoint (UA → Desktop/Mobile/Tablette + Chrome/Safari/Firefox/Edge).
+
+---
+
+### Chantier 3 — Hooks de tracking côté JS
+
+**Fichier :** `assets/sapi-modal-conseiller.js`
+
+**Action :** ajouter un module de tracking interne qui appelle `sapi_megafilter_log_session` via `navigator.sendBeacon` aux moments clés. **Aucune autre logique de la modale ne change.**
+
+**Moments à hooker :**
+
+1. **Ouverture de la modale** (premier render visible) :
+   - `entry_point` détecté ainsi :
+     - Si page = home (body.home) → `home_picker`
+     - Si page = `/mes-creations/` avec `?freetext=...` dans l'URL → `freetext`
+     - Si page = `/mes-creations/` sans freetext → `mes_creations`
+     - Si page = fiche produit → `product_pill`
+   - `entry_url` = `window.location.pathname + window.location.search`
+   - Génère le `session_id` (si pas déjà dans sapiProject) : `'mfs_' + 16 hex chars` (utiliser `crypto.getRandomValues` pour 8 bytes → 16 hex)
+   - Sauvegarde `session_id` dans `sapiProject.session_id` via `window.SapiProject.update({session_id: ...})`
+
+2. **À chaque transition d'écran significative** (s0 → s1, s1 → s3, s3 → s-contact, s2-chat envoyant un message) :
+   - Push de l'état complet du `sapiProject` (answers, advice_text, action, contact_*)
+   - + `ai_chat_messages` si la conversation S2 a été utilisée (lue depuis l'état interne de la modale)
+   - + `matching_product_ids` si on est sur la grille `/mes-creations/` au moment de la sortie modale (lecture des cards visibles)
+
+3. **Fermeture de la modale** (croix, Echap, ou clic overlay) :
+   - Snapshot final via `navigator.sendBeacon` (résilient au unload)
+
+4. **Soumission form contact** (handler existant `submitContactForm`) :
+   - `contact_submitted: 1` + `contact_email`
+   - **Avant** l'appel `sapi_megafilter_surmesure` — pour qu'on trace même si le visiteur ferme avant la confirmation.
+
+**Implémentation suggérée :** créer un objet interne `SessionTracker` avec une méthode `push(data)` qui merge les données en cours et envoie via `sendBeacon` (avec fallback `fetch` + `keepalive: true` si sendBeacon refuse le content-type). Appeler `SessionTracker.push({...})` aux 4 moments ci-dessus.
+
+**Quota minimum acceptable :** 1 log à l'ouverture + 1 log à la fermeture = 2 appels. Le reste est du nice-to-have pour les abandons en cours de parcours.
+
+---
+
+### Chantier 4 — Page admin (refonte complète)
+
+**Fichier :** `functions.php` (section admin L6555-6797 environ)
+
+**Actions :**
+
+1. **Renommer** :
+   - `sapi_robin_admin_menu` → `sapi_megafilter_admin_menu`
+   - `sapi_robin_admin_page` → `sapi_megafilter_admin_page`
+   - `sapi_robin_export_csv` → `sapi_megafilter_export_csv`
+   - Slug URL : `sapi-robin-sessions` → `sapi-conseiller-sessions`
+   - Hook : `add_action('admin_menu', 'sapi_megafilter_admin_menu')`
+
+2. **Page admin** — reproduire la structure du mockup-12 fidèlement :
+   - `.wrap > .header-row` (titre + bouton Exporter CSV)
+   - `.dashboard` (4 stat-cards) — valeurs **calculées dynamiquement selon les filtres en cours** via une nouvelle fonction `sapi_megafilter_admin_compute_stats($filters)`
+   - `.dashboard-row-2` (2 ranking-cards : pièces + styles/provenance) — mêmes filtres globaux
+   - `.filters` (form GET avec auto-submit sur change) — voir Chantier 5
+   - `.table-wrap` avec table + pagination
+   - `.drill-overlay` HTML inline (caché), rempli au clic sur ligne via AJAX → endpoint `sapi_megafilter_get_session_detail`
+
+3. **CSS** :
+   - Créer `assets/admin-conseiller.css` avec le contenu CSS littéral du mockup-12 (bloc `<style>` complet, ~400 lignes).
+   - Enqueue **uniquement** sur la page admin via un hook `admin_enqueue_scripts` qui check `$hook === 'toplevel_page_sapi-conseiller-sessions'` :
+     ```php
+     add_action('admin_enqueue_scripts', function($hook) {
+       if ($hook !== 'toplevel_page_sapi-conseiller-sessions') return;
+       wp_enqueue_style('sapi-admin-conseiller', get_template_directory_uri() . '/assets/admin-conseiller.css', [], filemtime(...));
+       wp_enqueue_script('sapi-admin-conseiller', get_template_directory_uri() . '/assets/admin-conseiller.js', [], filemtime(...), true);
+       wp_localize_script('sapi-admin-conseiller', 'SAPI_ADMIN_CONSEILLER', [
+         'ajaxUrl' => admin_url('admin-ajax.php'),
+         'nonce'   => wp_create_nonce('sapi-admin-conseiller'),
+       ]);
+     });
+     ```
+
+4. **JS admin** (`assets/admin-conseiller.js`) :
+   - Gestion ouverture/fermeture du drill-overlay (clic ligne → AJAX → remplir + ouvrir ; clic overlay/croix/Escape → fermer)
+   - Endpoint AJAX `sapi_megafilter_get_session_detail` (admin-only, capability `manage_woocommerce`) qui retourne le HTML du contenu drill formaté
+
+5. **Drill-down détail** :
+   - HTML rendu par `sapi_megafilter_render_session_detail($row)` PHP → renvoyé via AJAX au JS qui injecte dans `.drill__body`
+   - Sections : Provenance (avec freetext input si présent), Récap projet (8 answers), Conversation chat formatée messagerie (boucle sur `ai_chat_messages`), Phrase IA finale, Demande de contact (si triggered), Catalogue présenté (liens vers `/produit/<id>/`), Technique
+   - Reprendre tous les noms de classes du mockup-12 (`.answer-grid`, `.quote-box`, `.chat-thread`, `.chat-msg`, `.contact-box`, `.product-tag`, `.tech-grid`)
+
+---
+
+### Chantier 5 — Filtres globaux (dashboard + tableau)
+
+**Pattern technique :** form GET avec submit auto sur change (`onchange="this.form.submit()"`). À chaque submit, la page se recharge avec les paramètres en query string, le PHP relit les filtres et recalcule tout (stats + tableau).
+
+**Paramètres GET acceptés :**
+- `period` : `7d` (défaut) | `30d` | `all`
+- `entry` : `''` (toutes) | `home_picker` | `mes_creations` | `product_pill` | `freetext`
+- `piece` : `''` | `salon` | `cuisine` | etc.
+- `device` : `''` | `desktop` | `mobile`
+- `status` : `''` (toutes) | `chat` (avec chat) | `contact` (avec contact) | `complete` (quiz complet)
+- `q` : recherche libre (matche `location`, `ip_address`, `ai_freetext_input`, `contact_email`)
+- `paged` : pagination
+
+**Fonction de construction WHERE :**
+
+```php
+function sapi_megafilter_admin_build_where($filters) {
+  $where = [];
+  $args = [];
+
+  // Période
+  if (!empty($filters['period']) && $filters['period'] !== 'all') {
+    $days = ($filters['period'] === '30d') ? 30 : 7;
+    $where[] = 'created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)';
+    $args[] = $days;
+  }
+  // Provenance
+  if (!empty($filters['entry'])) {
+    $where[] = 'entry_point = %s';
+    $args[] = $filters['entry'];
+  }
+  // Pièce
+  if (!empty($filters['piece'])) {
+    $where[] = 'piece = %s';
+    $args[] = $filters['piece'];
+  }
+  // Device
+  if (!empty($filters['device'])) {
+    $where[] = 'device_type LIKE %s';
+    $args[] = ($filters['device'] === 'mobile') ? 'Mobile%' : 'Desktop%';
+  }
+  // Status
+  switch ($filters['status'] ?? '') {
+    case 'chat':     $where[] = 'ai_chat_used = 1'; break;
+    case 'contact':  $where[] = 'contact_triggered = 1'; break;
+    case 'complete': $where[] = 'answers_completed = 1'; break;
+  }
+  // Recherche
+  if (!empty($filters['q'])) {
+    $q = '%' . $wpdb->esc_like($filters['q']) . '%';
+    $where[] = '(location LIKE %s OR ip_address LIKE %s OR ai_freetext_input LIKE %s OR contact_email LIKE %s)';
+    array_push($args, $q, $q, $q, $q);
+  }
+
+  return [$where, $args];
+}
+```
+
+**Stats calculées sur filtres :**
+
+```php
+function sapi_megafilter_admin_compute_stats($filters) {
+  // 4 stats principales
+  $total       = $wpdb->get_var(SELECT COUNT(*) ...);
+  $completed   = $wpdb->get_var(SELECT COUNT(*) ... AND answers_completed = 1);
+  $chat_used   = $wpdb->get_var(SELECT COUNT(*) ... AND ai_chat_used = 1);
+  $contacts    = $wpdb->get_var(SELECT COUNT(*) ... AND contact_submitted = 1);
+
+  // Delta % (vs période précédente — seulement si period != 'all')
+  $delta_pct = sapi_megafilter_admin_compute_delta($filters, $total);
+
+  // Top pièces (GROUP BY piece, COUNT)
+  $top_pieces = $wpdb->get_results(SELECT piece, COUNT(*) ... GROUP BY piece ORDER BY 2 DESC LIMIT 6);
+
+  // Top styles (idem)
+  $top_styles = $wpdb->get_results(SELECT style, COUNT(*) ... WHERE style != '' GROUP BY style ORDER BY 2 DESC LIMIT 3);
+
+  // Top provenance (idem)
+  $top_entry = $wpdb->get_results(SELECT entry_point, COUNT(*) ... GROUP BY entry_point ORDER BY 2 DESC LIMIT 4);
+
+  // Breakdown contacts par kind
+  $contact_breakdown = $wpdb->get_results(SELECT contact_kind, COUNT(*) ... WHERE contact_submitted = 1 GROUP BY contact_kind);
+
+  return compact('total', 'completed', 'chat_used', 'contacts', 'delta_pct', 'top_pieces', 'top_styles', 'top_entry', 'contact_breakdown');
+}
+```
+
+**Affichage des stats** : reprendre la structure du mockup-12 (`.stat-card`, `.ranking-card`, `.ranking-row` avec barre `.ranking-row__fill` dont la `width` est calculée en % du total).
+
+---
+
+### Export CSV — refonte
+
+**Fichier :** `functions.php`, fonction `sapi_megafilter_export_csv`
+
+- Respecter les filtres en cours (même `$filters` que la page principale, lus depuis `$_GET`)
+- Colonnes CSV V3 : Date, Provenance, Device, Lieu, IP, Pièce, Taille, Sortie, Hauteur, Éclairage, Style, Quiz complet, IA chat (oui/non), Nb appels IA, Advice text, Contact (oui/non), Contact kind, Contact email, Contact sujet, Contact message, Produits matchés, Referrer, URL d'entrée
+- Encodage UTF-8 BOM + séparateur `;` (Excel FR compatible) — comme l'ancien
+
+---
 
 ### Étapes ordonnées
 
-**Étape 0 — Snapshot avant refactor (commit séparé OBLIGATOIRE).**
-Faire un commit qui ne change rien mais permet le revert d'un coup si besoin. Suggestion :
-```
-git commit --allow-empty -m "Snapshot avant refactor modale Round 4 (Option A mockup-11)"
-git push
-```
-
-**Étape 1 — Lire le mockup en intégralité.**
-`site-web/mockups/mockup-11-modale-tous-etats.html`. Comprendre la structure de chaque écran, le CSS, les comportements (sticky progress, body-content centré, foot flex centered).
-
-**Étape 2 — Identifier et supprimer le CSS modale actuel dans `style.css`.**
-- Section "Harmonisation 3 zones v5" — lignes ~23375-23467 selon spec précédente, à vérifier par grep
-- Wrapper `.conseiller-modal__footer` actuel
-- Override `position: static` ajouté à `b9477c1`
-- Tout autre résidu des 6 tentatives précédentes (margin-top: auto sur 2 éléments, justify-content: space-between, display: contents avec autres usages, etc.)
-
-Faire un grep préalable sur `.conseiller-card--modal`, `.conseiller-modal__`, `.conseiller-card__inner` pour cartographier les résidus.
-
-**Étape 3 — Coller le CSS du mockup dans `style.css`.**
-Voir bloc CSS LITTÉRAL ci-dessous. Copier-coller à l'identique. Position du bloc : à l'emplacement de l'ancien CSS modale (pour conserver le contexte de cascade).
-
-**Étape 4 — Adapter le markup de `sapi_render_conseiller_modal` dans `functions.php`.**
-Réécrire chaque écran (`s0`, `s1`, `s2-chat`, `s3`, `s-product-recap`, `s-contact`) selon les blocs HTML CIBLES ci-dessous. Préserver les `data-*` existants. Pour les libellés affichés, utiliser `<?php esc_html_e('...', 'theme-sapi-maison'); ?>` aux endroits appropriés.
-
-**Étape 5 — Vérifier compatibilité JS.**
-Lire `sapi-modal-conseiller.js` et confirmer que tous les sélecteurs JS utilisés restent valides. Si un sélecteur référence l'ancien markup (ex: `.conseiller-modal__footer` du wrapper composite supprimé), adapter.
-
-**Étape 6 — Self-check avant commit (OBLIGATOIRE).**
-
-Pour chaque écran (s0 / s1 / s2-chat / s3 / s-product-recap / s-contact), faire le check suivant :
-- Le badge est-il dans `.modal__head` ? À hauteur fixe sur tous les écrans ?
-- Le contenu central est-il dans `.modal__body > .modal__body-content` ?
-- Le footer (CTA ou lien) est-il dans `.modal__foot` ?
-- La progress bar de s1 est-elle bien dans le `.modal__body` (dernier enfant, après `.modal__body-content`) ?
-- La croix `.modal__close` est-elle visible top-right sur cet écran ?
-
-Si un écart est constaté → soit corriger, soit déclarer l'écart dans le retour avec justification.
-
-**Étape 7 — Commit + push.**
-Commit unique pour le refactor (séparé du snapshot étape 0). Push.
-
-### Whitelist exhaustive des sélecteurs CSS autorisés
-
-Ce sont les SEULS sélecteurs à utiliser dans le refactor. Tout autre sélecteur côté modale est interdit — demander si besoin.
-
-**Structure card :**
-- `.conseiller-card` (avec `.conseiller-card--modal` modifier si déjà utilisé par le contexte)
-- `.conseiller-card::before`
-- `.modal__close`, `.modal__close:hover`, `.modal__close svg`
-- `.modal__screen`
-- `.modal__head`
-- `.modal__body`, `.modal__body-content`
-- `.modal__foot`
-
-**Composants :**
-- `.badge`, `.badge svg`
-- `.progress`, `.progress__bar`
-- `.h1`, `.h2`, `.subtitle`, `.quote`
-- `.choices`, `.choices--2col`, `.choices--4col`, `.choice`, `.choice:hover`, `.choice__icon`, `.choice__icon svg`, `.choice__label`
-- `.text-input-wrap`, `.text-input`, `.text-input:focus`, `.text-submit`, `.text-submit svg`
-- `.separator-or`, `.separator-or::before`, `.separator-or::after`, `.separator-or__text`
-- `.chips`, `.chip`, `.chips--project`, `.chip--project`, `.chip__icon`, `.chip__icon svg`, `.chip__label`, `.chip__value`, `.chips-label`
-- `.recap-groups`, `.recap-group`, `.recap-group__title`, `.recap-group__chips`
-- `.actions-3`, `.action-btn`, `.action-btn:hover`, `.action-btn--primary`, `.action-btn--primary:hover`, `.action-btn--secondary`, `.action-btn svg`
-- `.footer-link`, `.footer-link:hover`
-- `.chat-bubbles`, `.chat-bubble`, `.chat-bubble--robin`, `.chat-bubble--visitor`
-- `.contact-form`, `.contact-form input`, `.contact-form textarea`, `.contact-form input:focus`, `.contact-form textarea:focus`, `.contact-form button`, `.contact-form button:hover`, `.contact-form button svg`
-- `.contact-reassure`
-- `.recap-card`, `.recap-card__item-label`, `.recap-card__item-value`
-- `.conseil-italic`
-
-**Media query mobile :** `@media (max-width: 600px)` avec les overrides du mockup.
-
-### CSS LITTÉRAL à coller dans `style.css`
-
-À copier mot pour mot. Position : à l'emplacement de l'ancien CSS modale supprimé.
-
-```css
-/* ═══════════════════════════════════════════════════════════════════
-   CONSEILLER V3 — Modale (refactor Round 4 — mockup-11 source de vérité)
-   Structure : CSS Grid 3 rows (head / body / foot) sur .conseiller-card
-   ═══════════════════════════════════════════════════════════════════ */
-
-.conseiller-card--modal {
-  position: relative;
-  width: 100%;
-  max-width: 600px;
-  height: 620px;
-  max-height: calc(100dvh - 64px);
-  background: var(--color-warm);
-  border-radius: 16px;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.25);
-  overflow: hidden;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-}
-.conseiller-card--modal::before {
-  content: '';
-  position: absolute;
-  inset: 12px;
-  border: 1.5px dashed rgba(139, 115, 85, 0.35);
-  border-radius: 12px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.modal__close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: transparent;
-  border: none;
-  color: var(--color-wood-mid);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  transition: background 0.15s;
-}
-.modal__close:hover { background: rgba(139, 115, 85, 0.12); color: var(--color-wood-dark); }
-.modal__close svg { width: 18px; height: 18px; }
-
-.modal__screen { display: contents; }
-
-.modal__head {
-  grid-row: 1;
-  padding: 28px 36px 12px;
-  text-align: center;
-  position: relative;
-  z-index: 1;
-}
-
-.modal__body {
-  grid-row: 2;
-  padding: 12px 36px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  z-index: 1;
-}
-.modal__body-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  min-height: 0;
-}
-
-.modal__foot {
-  grid-row: 3;
-  padding: 14px 36px 28px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  position: relative;
-  z-index: 1;
-}
-
-/* Badge "pill" header */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 7px 16px;
-  background: var(--color-wood-dark);
-  color: #fff;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  border-radius: 50px;
-}
-.badge svg { width: 11px; height: 11px; }
-
-/* Progress bar — sticky en bas du __body (s1 uniquement) */
-.progress {
-  position: sticky;
-  bottom: 0;
-  width: 100%;
-  max-width: 320px;
-  height: 4px;
-  background: rgba(139, 115, 85, 0.15);
-  border-radius: 2px;
-  overflow: hidden;
-  margin: 8px auto 0;
-  align-self: center;
-  z-index: 5;
-}
-.progress__bar {
-  height: 100%;
-  background: var(--color-orange);
-  border-radius: 2px;
-  transition: width 0.3s ease;
-}
-
-/* Titres */
-.h1 {
-  font-family: 'Square Peg', cursive;
-  font-size: clamp(28px, 4.2vw, 36px);
-  font-weight: 400;
-  color: var(--color-wood-dark);
-  line-height: 1.15;
-  text-align: center;
-  margin-bottom: 4px;
-}
-.h2 {
-  font-weight: 700;
-  font-size: clamp(17px, 2.4vw, 21px);
-  color: var(--color-wood-dark);
-  line-height: 1.25;
-  text-transform: uppercase;
-  letter-spacing: 0.005em;
-  text-align: center;
-  max-width: 460px;
-}
-.subtitle {
-  font-size: 13px;
-  color: var(--color-wood-mid);
-  text-align: center;
-  max-width: 440px;
-}
-.quote {
-  font-style: italic;
-  font-size: 14.5px;
-  color: var(--color-wood-dark);
-  line-height: 1.55;
-  text-align: center;
-  max-width: 460px;
-}
-
-/* Choix (s1) */
-.choices {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  width: 100%;
-  max-width: 480px;
-}
-.choices--2col { grid-template-columns: repeat(2, 1fr); max-width: 360px; }
-.choices--4col { grid-template-columns: repeat(4, 1fr); }
-.choice {
-  background: #fff;
-  border: 1px solid var(--color-line);
-  border-radius: 12px;
-  padding: 14px 8px 11px;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-  font-family: inherit;
-  color: inherit;
-  text-align: center;
-  box-shadow: var(--shadow-card);
-}
-.choice:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card-hover);
-  border-color: var(--color-wood);
-}
-.choice__icon {
-  width: 36px;
-  height: 36px;
-  margin: 0 auto 6px;
-  background: var(--color-warm);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-wood);
-}
-.choice__icon svg { width: 20px; height: 20px; }
-.choice__label {
-  display: block;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-wood-dark);
-  line-height: 1.3;
-}
-
-/* Texte libre */
-.text-input-wrap {
-  position: relative;
-  width: 100%;
-  max-width: 440px;
-}
-.text-input {
-  width: 100%;
-  padding: 13px 52px 13px 18px;
-  border: 1.5px solid var(--color-line);
-  border-radius: 50px;
-  font-family: inherit;
-  font-size: 14px;
-  background: #fff;
-  color: var(--color-wood-dark);
-}
-.text-input:focus { outline: none; border-color: var(--color-wood); }
-.text-submit {
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--color-orange);
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.text-submit svg { width: 14px; height: 14px; }
-
-/* Séparateur "ou" */
-.separator-or {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  max-width: 440px;
-  margin: 4px 0;
-}
-.separator-or::before,
-.separator-or::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: rgba(139, 115, 85, 0.25);
-}
-.separator-or__text {
-  margin: 0 14px;
-  padding: 4px 12px;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-wood);
-  background: var(--color-warm);
-  border-radius: 50px;
-  border: 1px solid rgba(139, 115, 85, 0.25);
-}
-
-/* Chips récap */
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
-  width: 100%;
-  max-width: 460px;
-}
-.chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 11px;
-  background: #fff;
-  border: 1px solid var(--color-line);
-  border-radius: 50px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-wood-dark);
-  letter-spacing: 0.02em;
-}
-/* Variante "tile" projet — utilisée sur s3 */
-.chips--project { gap: 8px; max-width: 500px; }
-.chip--project {
-  padding: 9px 14px 9px 10px;
-  font-size: 13px;
-  gap: 9px;
-  background: #FBF8F2;
-  border-color: rgba(139, 115, 85, 0.3);
-  box-shadow: 0 1px 3px rgba(147,125,104,0.08);
-  line-height: 1.25;
-}
-.chip__icon {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  background: var(--color-warm);
-  color: var(--color-wood);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.chip__icon svg { width: 14px; height: 14px; }
-.chip__label {
-  display: inline-block;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-wood);
-  margin-right: 5px;
-}
-.chip__value {
-  font-weight: 700;
-  color: var(--color-wood-dark);
-}
-
-/* Récap projet groupé par thème (s3) */
-.recap-groups {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  width: 100%;
-  max-width: 500px;
-}
-.recap-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.recap-group__title {
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-wood);
-  opacity: 0.75;
-  padding-left: 4px;
-  border-left: 3px solid var(--color-orange);
-  padding-top: 2px;
-  padding-bottom: 2px;
-}
-.recap-group__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.chips-label {
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-wood);
-  margin-bottom: 2px;
-}
-
-/* Actions */
-.actions-3 {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-  max-width: 360px;
-}
-.action-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 13px 18px;
-  border-radius: 50px;
-  font-family: inherit;
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
-  border: none;
-}
-.action-btn:hover { transform: translateY(-1px); }
-.action-btn--primary {
-  background: var(--color-orange);
-  color: #fff;
-}
-.action-btn--primary:hover { background: var(--color-orange-dark); }
-.action-btn--secondary {
-  background: #fff;
-  color: var(--color-wood-dark);
-  border: 1px solid var(--color-line);
-  box-shadow: var(--shadow-card);
-}
-.action-btn svg { width: 14px; height: 14px; }
-
-/* Footer link */
-.footer-link {
-  background: none;
-  border: none;
-  font-family: inherit;
-  font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-wood-mid);
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.footer-link:hover { color: var(--color-orange); }
-
-/* Chat (s2-chat) */
-.chat-bubbles {
-  width: 100%;
-  max-width: 460px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.chat-bubble {
-  padding: 11px 15px;
-  border-radius: 14px;
-  font-size: 13.5px;
-  line-height: 1.45;
-  max-width: 85%;
-}
-.chat-bubble--robin {
-  background: #fff;
-  border: 1px solid var(--color-line);
-  color: var(--color-wood-dark);
-  align-self: flex-start;
-  border-bottom-left-radius: 4px;
-}
-.chat-bubble--visitor {
-  background: var(--color-wood-dark);
-  color: #fff;
-  align-self: flex-end;
-  border-bottom-right-radius: 4px;
-}
-
-/* Mini-form contact (s-contact) */
-.contact-form {
-  width: 100%;
-  max-width: 440px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.contact-form input,
-.contact-form textarea {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1.5px solid var(--color-line);
-  border-radius: 10px;
-  font-family: inherit;
-  font-size: 13.5px;
-  background: #fff;
-  color: var(--color-wood-dark);
-  resize: vertical;
-}
-.contact-form input:focus,
-.contact-form textarea:focus {
-  outline: none;
-  border-color: var(--color-orange);
-}
-.contact-form textarea { min-height: 90px; }
-.contact-form button {
-  padding: 13px 20px;
-  background: var(--color-orange);
-  color: #fff;
-  border: none;
-  border-radius: 50px;
-  font-family: inherit;
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-.contact-form button:hover { background: var(--color-orange-dark); }
-.contact-form button svg { width: 14px; height: 14px; }
-.contact-reassure {
-  font-size: 11.5px;
-  color: var(--color-wood-mid);
-  text-align: center;
-  margin-top: -2px;
-}
-
-/* Recap fiche produit (s-product-recap) */
-.recap-card {
-  width: 100%;
-  max-width: 380px;
-  background: #fff;
-  border: 1px solid var(--color-line);
-  border-radius: 12px;
-  padding: 14px 16px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 16px;
-  box-shadow: var(--shadow-card);
-}
-.recap-card__item-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-wood);
-}
-.recap-card__item-value {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--color-wood-dark);
-}
-.conseil-italic {
-  font-style: italic;
-  font-size: 13px;
-  color: var(--color-wood-mid);
-  line-height: 1.5;
-  text-align: center;
-  max-width: 420px;
-}
-
-/* Mobile */
-@media (max-width: 600px) {
-  .conseiller-card--modal {
-    max-width: 100%;
-    height: calc(100dvh - 24px);
-    max-height: calc(100dvh - 24px);
-  }
-  .conseiller-card--modal::before { inset: 8px; }
-  .modal__head { padding: 20px 22px 8px; }
-  .modal__body { padding: 8px 22px; }
-  .modal__foot { padding: 10px 22px 22px; }
-  .h2 { font-size: 15.5px; }
-  .h1 { font-size: 28px; }
-  .choices { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .choices--4col { grid-template-columns: repeat(2, 1fr); }
-  .choice { padding: 12px 6px 9px; }
-  .recap-card { grid-template-columns: 1fr; gap: 6px; }
-  .modal__close { top: 12px; right: 12px; }
-}
-```
-
-### Markup HTML cible par écran
-
-Le markup ci-dessous est à coller (adapté en PHP avec `esc_html_e` pour les libellés) dans `sapi_render_conseiller_modal`. **Tous les écrans suivent le même squelette** :
-
-```html
-<div class="conseiller-card conseiller-card--modal">
-  <button class="modal__close" data-action="close" aria-label="<?php esc_attr_e('Fermer', 'theme-sapi-maison'); ?>">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-    </svg>
-  </button>
-
-  <section class="modal__screen" data-screen="s0" hidden>
-    <header class="modal__head">...</header>
-    <div class="modal__body">
-      <div class="modal__body-content">...</div>
-      <!-- progress optionnelle (s1 uniquement) -->
-    </div>
-    <footer class="modal__foot">...</footer>
-  </section>
-
-  <!-- ... répéter pour s1, s2-chat, s3, s-product-recap, s-contact -->
-</div>
-```
-
-**Particularité s1 (parcours guidé)** : la `.progress` est dans `.modal__body`, APRÈS `.modal__body-content`, en dernier enfant. Elle n'est PAS dans `.modal__head`. Voir mockup-11 écran 2.
-
-**Particularité s2-chat** : `.modal__body-content` a `style="justify-content: flex-start;"` (inline) pour pousser les bulles vers le haut. Sinon les bulles seraient centrées verticalement et inhabituel pour un chat.
-
-**Particularité s-contact** : un seul `data-contact-state` au lieu de 2 (pas de wrapper intermédiaire). Le markup est plat dans `.modal__body-content`. Cf. mockup-11 écran 6.
-
-**Pour le contenu exact de chaque écran (badges, h2, choix, etc.)** : se référer au mockup-11 directement. Reprendre les libellés du mockup sauf si un texte côté code existant est plus précis (ex: les libellés de questions générés dynamiquement par `sapi_guide_get_steps()` priment sur les libellés statiques du mockup).
-
-### Format du retour exigeant
-
-Dans le retour, pour CHAQUE écran (s0, s1, s2-chat, s3, s-product-recap, s-contact), une ligne du type :
-
-```
-| s0              | ✅ Conforme au mockup                                        |
-| s1              | ✅ Conforme — progress sticky bottom du body OK              |
-| s2-chat         | ⚠️ Écart : justify-content flex-start sur body-content (justifié pour chat) |
-| s3              | ✅ Conforme — recap-groups + chip__label + chip__value OK    |
-| s-product-recap | ✅ Conforme — 2 paragraphes conseil-italic (style + taille)   |
-| s-contact       | ✅ Conforme — mini-form direct, pas de redirection           |
-```
-
-Si écart constaté, expliquer pourquoi (jamais juste "pour faire mieux", toujours une raison technique vérifiable). Si tu hésites entre 2 implémentations, dis-le et propose les deux pour arbitrage Robin.
-
-### Critères de succès globaux
-
-1. Sur `test.atelier-sapi.fr` après push, le badge "Conseil de Robin" (ou autre badge selon écran) est à la **même hauteur vertical** sur s0, s3, s-product-recap, s-contact. Sur s1, il est aussi à cette hauteur (progress collée en bas du body, pas dans le head).
-2. Le footer (CTA / lien) est aligné en bas sur tous les écrans.
-3. La croix top-right est visible sur les 6 écrans (desktop + mobile).
-4. Sur mobile (largeur ~380px), la modale prend `calc(100dvh - 24px)` et reste utilisable.
-5. Aucun fix CSS ad-hoc résiduel des 6 tentatives précédentes ne traîne dans `style.css`.
-
-### Notes pour le retour
-- Hash du commit snapshot (étape 0) + hash du commit refactor (étape 7)
-- Liste des fichiers modifiés
-- Pour chaque écran : conforme / écart (cf. format ci-dessus)
-- Si tu as eu besoin d'inventer un sélecteur hors whitelist : signaler EXPLICITEMENT avec la raison
-- Si tu as touché au JS : préciser pourquoi
-- Si une variable CSS attendue manque côté site : signaler (mais c'est très peu probable, les vars existent depuis longtemps)
-
----
-
-## [TÂCHE — RETIRÉE] Proposition refactor Round 4 (remplacée par la spec ci-dessus)
-
-La proposition ci-dessous a été remplacée par la spec validée Round 4 — gardée comme historique de la décision. Robin a validé l'Option A le 24/05/2026 et choisi le mockup-11 comme source de vérité.
-
-## [PROPOSITION — À VALIDER par Robin] Conseiller V3 — Refonte structurelle de la modale (échec de 6 tentatives de fix)
-**Date :** 2026-05-24
-**Branche :** `test-theme-sapi-maison`
-**Priorité :** haute — bloque la livraison finale Round 3
-**Action attendue :** valider le plan ci-dessous ou proposer une alternative avant que Claude Code refactore.
-
-### Contexte
-
-Robin a observé un bug visuel récurrent sur la modale Conseiller V3 (`.conseiller-card--modal`) : le badge "pill" (header) et le lien/CTA bottom ne sont pas alignés visuellement entre les différents écrans (`s0`, `s1`, `s3`, `s-product-recap`, `s-contact`). Sur certains écrans (notamment `s-contact`), le badge est même positionné au milieu du contenu au lieu d'être en haut de la card.
-
-**6 tentatives de fix ont échoué** en accumulant des patchs CSS au lieu de traiter la cause :
-
-| # | Approche | Commit | Résultat |
-|---|---|---|---|
-| 1 | `justify-content: center` sur l'inner | (préexistant) | OK sur s0, KO sur s-contact |
-| 2 | `margin-top: auto` × 2 sur 2 éléments du wrapper | premier fix s-contact | Étalement imprévisible si contenu trop dense |
-| 3 | `justify-content: space-between` sur wrapper | fix s-contact v2 | Badge sort de la card par le haut |
-| 4 | `display: contents` sur wrapper | fix s-contact v3 | Idem |
-| 5 | Nouveau wrapper `.conseiller-modal__body` avec `flex: 1` | fix s-contact v4 | Idem |
-| 6 | `position: absolute` partout (agent Plan v5) | `497df7b` + override `position: static` à `b9477c1` | Badge **toujours** au milieu du contenu — règle `position: relative` globale sur `.card__inner` non détectée pendant 5 itérations |
-
-### Diagnostic — Pourquoi tous ces fixes ont échoué
-
-**Cause root #1 — Markup hétérogène entre écrans**
-
-- s0/s1/s3 : badge + contenu + nav directement à plat dans `.card__inner` (5-6 enfants)
-- s-product-recap : footer composite wrappé (`.conseiller-modal__footer`)
-- **s-contact : niveau d'imbrication supplémentaire** `[data-contact-state]` qui contient badge + contenu + nav
-
-Tout fix qui marche sur s0/s1/s3 ne marche pas pareil sur s-contact à cause de ce wrapper.
-
-**Cause root #2 — Empilement de patterns contradictoires**
-
-Le CSS modale actuel mélange des résidus de 4 des 6 approches. Sélecteurs ultra-spécifiques qui s'invalident mutuellement, type :
-```
-.conseiller-card--modal .conseiller-modal__screen:not([data-screen="s2-chat"])
-  .conseiller-card__inner > .conseiller-modal__nav
-```
-
-**Cause root #3 — Règle globale polluante**
-
-`.conseiller-card__inner { position: relative; z-index: 1; }` à `style.css:22637` est définie pour les cards conseiller **hors modale** (qui ont un `::before` dashed à passer derrière). Cette règle est héritée par la modale et casse `position: absolute` (le badge s'ancre sur l'inner au lieu de la card). Mon dernier fix `position: static` a juste contourné le symptôme.
-
-### Proposition de refonte
-
-**Principe** : markup **uniforme** entre tous les écrans non-chat + **CSS Grid 3 rows** sur la card. Plus de `position: absolute`, plus de `margin-top: auto`, plus de wrappers magiques.
-
-#### Markup cible (identique pour tous les écrans non-chat)
-
-```html
-<div class="conseiller-card--modal">
-  <button class="conseiller-modal__close">×</button>
-
-  <div class="conseiller-modal__screen" data-screen="s0">
-    <header class="conseiller-modal__head">
-      <span class="conseiller-badge">Conseil de Robin</span>
-    </header>
-    <div class="conseiller-modal__body">
-      <h2>...</h2>
-      <!-- contenu central spécifique -->
-    </div>
-    <footer class="conseiller-modal__foot">
-      <button>← Retour</button>
-    </footer>
-  </div>
-</div>
-```
-
-#### CSS cible (~30 lignes)
-
-```css
-.conseiller-card--modal {
-  position: relative;
-  height: 680px;
-  max-height: calc(100dvh - 64px);
-  width: 100%;
-  max-width: 880px;
-  padding: 0;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  overflow: hidden;
-}
-
-.conseiller-modal__screen {
-  display: contents;  /* enfants = vrais grid items */
-}
-
-.conseiller-modal__head {
-  grid-row: 1;
-  padding: 32px 40px 16px;
-  text-align: center;
-}
-
-.conseiller-modal__body {
-  grid-row: 2;
-  padding: 16px 40px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 18px;
-}
-
-.conseiller-modal__foot {
-  grid-row: 3;
-  padding: 16px 40px 32px;
-  text-align: center;
-}
-```
-
-**Avantages :**
-- Badge toujours dans `__head` (row 1 du grid) → top fixe, peu importe le contenu
-- Footer toujours dans `__foot` (row 3) → bottom fixe
-- Body absorbe l'espace restant + scroll interne si déborde
-- Pas de `position: absolute`, pas de `margin-top: auto`, pas de `flex: 1` à débugger
-- Les autres règles CSS héritées (`.card__inner { position: relative }`) deviennent inertes — on ne s'en sert plus comme conteneur principal
-
-#### Plan d'implémentation (3 étapes, ~50 min, 1 commit)
-
-1. **Refactor markup** dans `sapi_render_conseiller_modal` (functions.php) — 6 écrans à wrapper en `__head`/`__body`/`__foot`. Cas s-contact : 2 sous-états `[data-contact-state]` chacun avec head/body/foot. Cas s1 : progress + badge tous deux dans `__head`. Cas s-product-recap : `.conseiller-modal__footer` actuel devient `__foot`.
-
-2. **Réécriture CSS** — supprimer toute la section "Harmonisation 3 zones v5" (lignes ~23375-23467) + le wrapper `.conseiller-modal__footer` + override `position: static` que j'ai ajouté. Remplacer par les ~30 lignes ci-dessus.
-
-3. **Tests** — chaque écran un par un en bascule, mobile + desktop, cas contenu débordant (form contact long).
-
-#### Risque
-
-`display: contents` est supporté partout sauf IE11. Si problème sur très vieux Safari, fallback : sortir le badge et le foot du `__screen` pour les mettre directement dans la card.
-
-#### Modifications JS
-
-Aucune. Les data-attributes existants restent (`data-action`, `data-question-title`, `data-contact-state`, etc.).
-
-### Décision attendue de Robin
-
-- **Option A** : valider le plan tel quel → Claude Code refactore en 1 commit propre.
-- **Option B** : ajuster le plan (ex : garder le `display: contents` mais avec d'autres choix de paddings, ou autre détail).
-- **Option C** : autre approche en tête (revert complet aux margins-auto avec rework manuel ? layout absolute simple ? autre ?)
-
-Une fois la décision actée, ping-moi pour que je lance.
-
----
-
-
-
-## [TÂCHE] Conseiller V3 — Round 3.1 : ambiance lumineuse + harmonisation secondaire
-**Date :** 2026-05-22
-**Branche :** `test-theme-sapi-maison`
-**Priorité :** haute — 2 mini-fixes consécutifs au Round 3, à livrer dans la même passe
-
-### Contexte
-
-Test Round 3 par Robin (scénario B2 — Cuisine · Petite · Au mur · Pas de préférence) a remonté une **incohérence sémantique entre la phrase IA et la grille** :
-
-L'IA a généré : *"Pour une cuisine, je te propose les modèles où l'ampoule reste à découvert. La lumière descend franchement sur le plan de travail, sans zone d'ombre."*
-
-Or **toutes les appliques cuisine du catalogue Robin sont `ampoule_entouree`** — l'IA a appliqué aveuglément la règle théorique de `savoir.txt` (cuisine → ampoule dégagée) sans regarder le catalogue concret qui lui est passé.
-
-### Fix 1 — Alignement ambiance lumineuse sur le catalogue présenté
-
-**Fichier :** `functions.php`, prompts `advice` + `chat` (à chercher autour des fonctions `sapi_megafilter_build_*_prompt`).
-
-**Action :** ajouter un nouveau bloc de consigne dans les 2 prompts (à insérer juste après le catalogue split passé à l'IA), à coller tel quel :
-
-```
-DESCRIPTION DE L'AMBIANCE LUMINEUSE — règle stricte :
-
-Si tu décris l'effet lumineux ou l'ambiance des modèles présentés, tu DOIS te baser sur le
-type d'ampoule des modèles PRÉSENTÉS (colonne "Ampoule" dans le catalogue ci-dessus), PAS
-sur les règles générales du savoir métier.
-
-Mapping ampoule → vocabulaire à utiliser :
-- ampoule_degagee   → "lumière directe", "ampoule visible", "éclat franc",
-                      "lumière qui descend franchement", "sans zone d'ombre"
-- semi_degagee      → "lumière mi-tamisée", "diffusion mesurée"
-- ampoule_entouree  → "lumière diffuse", "douceur tamisée", "ombres décoratives",
-                      "lumière filtrée par le bois", "ambiance cocon"
-
-Si la majorité du catalogue présenté est "ampoule_entouree", tu décris une ambiance douce
-et diffuse — JAMAIS "ampoule à découvert" ou "lumière franche", même si la pièce est une
-cuisine ou un bureau. Le catalogue présenté est la source de vérité, les règles théoriques
-du savoir métier sont secondaires quand il y a conflit avec le catalogue concret.
-
-Si le catalogue présenté contient un mélange de types d'ampoule, reste plus générique : ne
-décris pas l'effet lumineux précis.
-```
-
-**Note de cohérence à ajouter dans `assets/guide-prompt-savoir.txt`** (juste après la section "AMPOULE — DÉGAGÉE VS ENTOURÉE") :
-
-```
-IMPORTANT : ces règles sont des PRÉFÉRENCES théoriques (ampoule dégagée pour cuisine/bureau,
-ampoule entourée pour salon/chambre). Quand un catalogue est passé en input avec une colonne
-"Ampoule", c'est le catalogue qui prime — pas ces règles théoriques. Adapter ton vocabulaire
-au type d'ampoule réellement présenté.
-```
-
-**Critère de succès Fix 1 :** refaire B2 (Cuisine · Petite · Au mur · Pas de préférence). La phrase IA doit décrire une **ambiance diffuse/tamisée** cohérente avec les appliques ampoule entourée du catalogue, JAMAIS "ampoule à découvert" / "lumière franche".
-
-### Fix 2 — Harmoniser branche `eclairage=secondaire` de `sapi_guide_get_categories`
-
-**Contexte :** Round 3 Lot B a harmonisé le default général de `sapi_guide_get_categories`, mais la branche `eclairage=secondaire` (L4521) reste désalignée — son default est `['lampadaires', 'lampesaposer']` sans appliques, alors que `$sapi_filter_rules['cats_secondaire_by_sortie']['ne-sais-pas']` contient `['lampadaires', 'lampesaposer', 'appliques']` depuis Round 1 (`e41f735`).
-
-**Fichier :** `functions.php`, `sapi_guide_get_categories`, autour de L4520-4533.
-
-**Modification :**
-
-Avant :
-```php
-if ($eclairage === 'secondaire') {
-  $pool = ['lampadaires', 'lampesaposer']; // default (NSP) : pas d'appliques
-  if ($sortie === 'plafond') {
-    $pool = ['suspensions'];
-  } elseif ($sortie === 'mur') {
-    $pool = ['appliques'];
-  } elseif ($sortie === 'pas-de-sortie') {
-    $pool = ['lampadaires', 'lampesaposer', 'appliques'];
-  }
-  ...
-}
-```
-
-Après :
-```php
-if ($eclairage === 'secondaire') {
-  // Default (sortie=ne-sais-pas) : cohérence avec cats_secondaire_by_sortie['ne-sais-pas']
-  // (Round 1 — e41f735, RÉEL #4) : appliques incluses car le kit prise électrique
-  // permet l'installation sans sortie murale dédiée.
-  $pool = ['lampadaires', 'lampesaposer', 'appliques'];
-  if ($sortie === 'plafond') {
-    $pool = ['suspensions'];
-  } elseif ($sortie === 'mur') {
-    $pool = ['appliques'];
-  } elseif ($sortie === 'pas-de-sortie') {
-    $pool = ['lampadaires', 'lampesaposer', 'appliques'];
-  }
-  ...
-}
-```
-
-**Critère de succès Fix 2 :** grep sur `'lampesaposer', 'appliques'` dans `functions.php` montre la même liste pour `cats_secondaire_by_sortie['ne-sais-pas']` ET pour le default `eclairage=secondaire` de `sapi_guide_get_categories`.
-
-### Notes pour le retour
-
-- Hash des 2 commits (idéalement 2 commits séparés : fix 1 et fix 2)
-- Indication des fichiers touchés
-- Si une déviation est nécessaire, justification
-
----
-
-## [TÂCHE] Conseiller V3 — Round 3 : voix IA + sur-mesure + contact (Lots A/B/C)
-**Date :** 2026-05-22
-**Branche :** `test-theme-sapi-maison`
-**Priorité :** haute — chantier sur-mesure + alignement voix IA
-
-### Contexte
-
-Tests Round 2 par Robin ont validé la majorité des fixes, mais 2 retours UX restent :
-- **B2** : le vocabulaire IA utilisé pour expliquer l'élargissement des filtres est trop technique et donne au client la sensation d'un catalogue pauvre, ou révèle un mécanisme interne (filtre par pièce, etc.) que le visiteur n'a pas à connaître.
-- **G3** : bureau + ne-sais-pas ne renvoie ni appliques ni lampadaires. Vérification Robin : les appliques et lampadaires du catalogue sont tous `ampoule_entouree`, donc le filtre `ampoule_degagee + semi_degagee` du bureau les exclut → réalité catalogue, pas un bug logique. MAIS à harmoniser : la fonction `sapi_guide_get_main_categories` (L4535-4547) a une 2e définition de la règle qui n'est pas alignée avec la décision N8 du commit `d8be0ff`.
-
-Et nouveau chantier majeur :
-- **Sur-mesure + contact** : passe complète pour mieux orienter les projets pro/B2B/sur-mesure dans la conversation IA et l'UI, et rendre la card sur-mesure plus visible.
-
-### Décisions Robin actées avant rédaction
-- **Lot A B2 (voix IA)** : approche pivot — l'IA ne révèle JAMAIS le mécanisme de filtrage. Cf. `feedback_ia_ne_revele_pas_mecanisme.md` côté Cowork (mémoire) pour la doctrine complète (vocab banni + voix attendue + exemples canoniques).
-- **Lot C C1-C4** : tous validés.
-- **Canaux de contact** : formulaire `/sur-mesure/` pour pro/B2B, email direct `robin@atelier-sapi.fr` pour résidentiel simple, les deux côte à côte pour sur-mesure résidentiel complexe.
-- **Cas par cas selon l'écart** : l'IA peut proposer une sélection ET le contact en complément si l'écart catalogue/demande est modéré ; bascule directe en contact si l'écart est trop grand.
-
-Structuré en **3 lots** indépendants et déployables séparément.
-
----
-
-### LOT A — Voix IA : ne JAMAIS révéler le mécanisme de filtrage (B2)
-
-**Fichier :** `functions.php`, fonction `sapi_megafilter_adaptive_consigne_block` (L3524-3539).
-
-**Réécriture complète de la fonction.** Remplacer le contenu actuel par une consigne qui :
-1. INTERDIT explicitement le vocabulaire technique
-2. EXIGE une voix artisan qui présente la sélection comme une proposition naturelle
-3. INVITE au sur-mesure comme porte de sortie
-
-**Nouveau corps de la fonction (à coller mot pour mot) :**
-
-```php
-function sapi_megafilter_adaptive_consigne_block() {
-  $out  = "\nPRÉSENTATION DE LA SÉLECTION AU VISITEUR :\n";
-  $out .= "- Si AUCUN produit présenté au visiteur (liste vide) : propose chaleureusement le sur-mesure (Robin peut créer un modèle qui n'existe pas dans le catalogue), sans baratin, sans promesse de modèles imaginaires.\n";
-  $out .= "- Si la sélection présentée correspond EXACTEMENT à la demande de départ : présente la sélection naturellement.\n";
-  $out .= "- Si la sélection s'écarte de la demande de départ (sans dire pourquoi !) : présente la sélection comme une proposition d'artisan. Tu peux reconnaître la demande initiale en intro (\"tu cherches plutôt du moderne pour ta cuisine\") puis présenter ta sélection, et invite le visiteur au sur-mesure comme alternative naturelle si la sélection ne lui plaît pas.\n";
-
-  $out .= "\nVOCABULAIRE STRICTEMENT INTERDIT — ne le mentionne JAMAIS au visiteur :\n";
-  $out .= "- \"j'ai élargi\", \"j'ai relâché\", \"j'ai mis de côté\", \"j'ai assoupli\", \"j'ai été plus large sur…\", \"j'ai un peu débordé sur d'autres pièces\"\n";
-  $out .= "- \"comme je n'avais pas grand-chose à te montrer\", \"sinon je n'avais que 2-3 modèles\"\n";
-  $out .= "- \"contrainte\", \"paramètre\", \"préférence\", \"filtre\", \"critère\", \"sélection élargie\", \"élargissement\"\n";
-  $out .= "Le visiteur ne sait pas comment fonctionne le filtre en interne, et n'a pas à le savoir. Tu présentes simplement ta sélection.\n";
-
-  $out .= "\nEXEMPLES CANONIQUES (le ton, pas le texte exact à recopier) :\n";
-  $out .= "- \"Tu cherches plutôt du moderne pour ta cuisine. Voilà ma sélection — si tu ne trouves pas exactement ce que tu imaginais, on peut aussi imaginer quelque chose de sur-mesure ensemble.\"\n";
-  $out .= "- \"Voilà ma proposition pour ton salon. Pense à vérifier les dimensions sur chaque fiche pour être sûr du rendu — et n'hésite pas à me dire si tu veux qu'on en parle ensemble.\"\n";
-  $out .= "- \"Voilà ce que je te propose. Si tu cherches quelque chose de très précis qui ne figure pas dans ces modèles, on peut imaginer du sur-mesure ensemble.\"\n";
-  $out .= "- \"Voilà ma sélection. Si tu as besoin de quelque chose de très spécifique pour ton projet, je peux te faire du sur-mesure — il suffit qu'on échange ensemble.\"\n";
-
-  $out .= "\nRÈGLES MÉTIER vs RÉPONSES ÉLARGIES :\n";
-  $out .= "- Si la clé `piece` figure parmi les RÉPONSES ÉLARGIES, les règles métier par pièce ont été assouplies volontairement pour pouvoir te montrer une sélection. N'oppose donc PAS au visiteur les règles \"pas de lampe à poser en cuisine\" ou autres règles ampoule par pièce. Présente la sélection telle qu'elle, sans contredire la grille.\n";
-
-  $out .= "\nCONTENU DE LA PHRASE :\n";
-  $out .= "- N'ÉNUMÈRE PAS chaque réponse du projet. Va à l'essentiel.\n";
-  $out .= "- Si le style est \"Pas de préférence\" (ou \"neutre\"), NE LE MENTIONNE PAS du tout — ce n'est pas une info.\n";
-  $out .= "- Évite les tournures qui confondent une caractéristique de la PIÈCE avec une RÉPONSE du visiteur. Exemple à NE PAS faire : \"ta cuisine est au mur\" (la cuisine n'est PAS au mur — c'est l'arrivée électrique qui est au mur, ce qui détermine le type de produit côté filtre).\n";
-  $out .= "- Dans TOUS les cas : NE NOMME PAS de modèle précis du catalogue — le visiteur les voit dans la grille juste après.\n";
-  $out .= "- Le sur-mesure est ta porte de sortie naturelle quand la sélection s'écarte de la demande initiale. JAMAIS comme un aveu d'échec, toujours comme une alternative que tu peux proposer.\n";
-
-  return $out;
-}
-```
-
-**Critère de succès Lot A :** refaire scénario B2 (Cuisine + Petite + Mur + Pas de préférence) sur `test.atelier-sapi.fr`. La phrase IA :
-- N'utilise AUCUN mot de la liste bannie
-- Ne mentionne pas le mécanisme de filtre par pièce
-- Reconnaît éventuellement la demande de départ en intro
-- Propose le sur-mesure comme alternative naturelle si la sélection s'écarte
-- Ne mentionne pas "pas grand-chose à te montrer"
-
----
-
-### LOT B — Harmoniser `sapi_guide_get_main_categories` avec `cats_by_sortie['ne-sais-pas']`
-
-**Contexte :** le commit `d8be0ff` du Round 2 a ajouté `'appliques'` à `$sapi_filter_rules['cats_by_sortie']['ne-sais-pas']` (L325-334 de `functions.php`), mais la fonction `sapi_guide_get_main_categories` qui sert le backend V2 (recommendation IA legacy) garde l'ancienne logique L4545-4547 sans appliques.
-
-**Fichier :** `functions.php`, fonction `sapi_guide_get_main_categories`, autour de L4535-4547.
-
-**Modification :**
-
-Avant :
-```php
-default: // "ne-sais-pas" → pas d'appliques (nécessite sortie mur)
-  $cats = ['suspensions', 'lampadaires', 'lampesaposer'];
-```
-
-Après :
-```php
-default:
-  // "ne-sais-pas" → cohérence avec cats_by_sortie['ne-sais-pas']
-  // (Round 2 — 6.1 N8, commit d8be0ff) : appliques incluses car le kit prise
-  // électrique (savoir.txt:48, regles.txt:37) permet l'installation sans sortie
-  // murale dédiée.
-  $cats = ['suspensions', 'lampadaires', 'lampesaposer', 'appliques'];
-```
-
-**Critère de succès Lot B :** grep sur `'ne-sais-pas'` dans `functions.php` montre la même liste 4 catégories pour `cats_by_sortie['ne-sais-pas']` ET pour le default de `sapi_guide_get_main_categories`.
-
----
-
-### LOT C — Sur-mesure + contact (passe complète)
-
-Découpé en 4 sous-chantiers indépendants (C1-C4) qui peuvent être livrés en plusieurs commits.
-
-#### C1 — Détection IA enrichie + champ `contact_kind`
-
-**Fichiers :**
-- `functions.php` : `sapi_megafilter_build_freetext_prompt` (~L2724)
-- `functions.php` : prompt builder du chat S2 (chercher `sapi_megafilter_build_chat_prompt` ou équivalent)
-
-**Enrichir les 2 prompts** avec les directives suivantes (à intégrer dans les sections "voies de sortie" existantes ou à créer si absentes) :
-
-```
-3 VOIES DE SORTIE — arbitre selon la nature du projet du visiteur :
-
-1) PROJET STANDARD : tu extrais les filtres possibles depuis sa phrase. Renvoie :
-   {filters: {...}, message: "...", action: null}
-
-2) PROJET INCOMPLET : il manque une info essentielle pour proposer une sélection. Tu poses
-   une question de précision dans message :
-   {filters: {}, message: "...", action: null}
-
-3) PROJET CONTACT : la demande sort du périmètre catalogue, ou nécessite un échange direct
-   avec Robin. Renvoie :
-   {filters: {...} OU {}, message: "...", action: "contact", contact_kind: "pro"|"sur-mesure"|"simple"}
-
-CRITÈRES POUR `action: "contact"` :
-- Multi-luminaires : visiteur cherche plusieurs lampes pour un même projet (≥2 explicitement)
-- Pro / B2B : hôtel, restaurant, bureaux d'entreprise, salle d'événement, cadeau d'entreprise,
-  retail, espace public
-- Dimensions custom : hauteur précise hors catalogue, format inhabituel demandé
-- Essence custom : bois non catalogue (chêne, noyer, etc.)
-- Combinaison qui sort manifestement du catalogue (style/format/usage spécial)
-
-CHOIX DE `contact_kind` :
-- "pro" : projet professionnel/B2B. CTA principal côté UI = "Ouvrir le formulaire sur-mesure".
-- "sur-mesure" : résidentiel avec demande très spécifique (custom dimensions, essence, design).
-  CTAs côté UI = "Formulaire sur-mesure" + "Email" côte à côte.
-- "simple" : résidentiel léger qui veut juste un échange rapide. CTA principal = "M'envoyer un email".
-
-RÈGLE DU CAS PAR CAS (très important) :
-- Si malgré la complexité tu peux quand même proposer 1-2 modèles approchants du catalogue,
-  fais-le : remplis `filters` AVEC `action: "contact"`. Le visiteur voit la sélection ET la
-  porte sur-mesure côte à côte.
-- Si l'écart est trop grand (ex: hôtelier 30 chambres) : bascule directement en `action: "contact"`
-  avec `filters: {}` — ne simule pas une recherche catalogue qui n'a aucun sens.
-
-CHAMPS BONUS pour l'UI contact (à remplir SI action = "contact") :
-- "contact_subject" : résumé court du projet (1 ligne max, ex: "Projet hôtel — 30 chambres équipées")
-- "contact_message" : message d'amorce pour le formulaire/email (3-4 lignes), comme si le visiteur
-  l'écrivait lui-même à Robin. Pas de bullet points, ton humain.
-```
-
-**Côté handler PHP** (`sapi_ajax_megafilter_freetext` et équivalent chat) : propager `contact_kind`, `contact_subject`, `contact_message` côté front via `wp_send_json_success`.
-
-**Côté `sapiProject`** (`sapi-project.js`) : stocker `action`, `contact_kind`, `contact_subject`, `contact_message` dans le state quand l'IA les renvoie.
-
-#### C2 — UI dédiée mode contact dans la modale
-
-**Fichiers :**
-- `functions.php` : `sapi_render_conseiller_modal` (markup)
-- `assets/sapi-modal-conseiller.js` : handler
-- `style.css` : styles propres au mode contact
-
-**Markup à ajouter** dans `sapi_render_conseiller_modal` (à la suite des autres écrans `data-screen`) :
-
-```html
-<section class="conseiller-card conseiller-card--modal" data-screen="s-contact" hidden>
-  <div class="conseiller-card__inner">
-    <p class="conseiller-contact__message" data-contact-message></p>
-    <div class="conseiller-contact__recap" data-contact-recap></div>
-    <div class="conseiller-contact__ctas" data-contact-ctas></div>
-    <div class="conseiller-contact__secondary">
-      <button type="button" class="conseiller-link" data-action="back-to-chat">
-        <?php esc_html_e('Continuer la discussion avec Robin', 'theme-sapi-maison'); ?>
-      </button>
-    </div>
-  </div>
-</section>
-```
-
-**CSS :** styles propres au mode contact, CTAs visibles, layout aéré, cohérent avec la charte (couleurs `#937D68`, `#E35B24`).
-
-**JS** (`sapi-modal-conseiller.js`) : ajouter un handler `showContact(payload)` qui :
-1. Affiche l'écran `s-contact`
-2. Remplit `data-contact-message` avec `payload.message`
-3. Remplit `data-contact-recap` avec un résumé du projet (chips ou texte court depuis `sapiProject.answers`)
-4. Construit les CTAs dans `data-contact-ctas` selon `payload.contact_kind` :
-   - `pro` : 1 bouton principal *"Ouvrir le formulaire sur-mesure"* (orange #E35B24)
-   - `simple` : 1 bouton principal *"M'envoyer un email"*
-   - `sur-mesure` : 2 boutons côte à côte (formulaire + email)
-5. Chaque CTA est un `<a>` avec URL construite via query params (cf. C4 pour le détail)
-6. Le lien "Continuer la discussion avec Robin" retourne à l'écran de chat S2
-
-**Déclenchement :** quand `submitFreetext` ou `submitChat` reçoit une réponse avec `action: "contact"`, au lieu d'afficher la bulle de réponse classique + bouton "Voir la sélection", appeler `showContact(payload)` directement.
-
-#### C3 — Card sur-mesure visible dans la grille quand contact détecté
-
-**Fichiers :**
-- `assets/sapi-cards-conseiller.js` : logique grille
-- `assets/sapi-project.js` : exposer `action` au refilter
-- Template grille (probablement `archive-product.php` ou un partial dans `inc/`) : markup card sur-mesure
-
-**Comportement attendu :**
-- Quand `sapiProject.action === 'contact'`, la grille `/mes-creations/` affiche la card sur-mesure (réutilisation du composant empty state E2 — panneau crème dashed + CTA orange vers `/sur-mesure/`) **EN PREMIÈRE POSITION** dans la grille.
-- Si l'IA a aussi rempli `filters` (cas par cas, écart modéré), les produits matchants s'affichent à la suite.
-- Si `filters` est vide (écart trop grand, bascule directe contact), seule la card sur-mesure s'affiche.
-
-**Implémentation suggérée :**
-1. Côté `sapi-cards-conseiller.js`, dans `refilterGrid`, après calcul de `matchingIds`, vérifier `sapiProject.action`. Si `contact`, prepend une carte sur-mesure à la grille (DOM insertion ou flag CSS qui rend une carte hidden visible).
-2. La card sur-mesure doit avoir un wording adapté au `contact_kind` :
-   - `pro` : titre "Projet professionnel ?" + texte court
-   - `sur-mesure` : titre "Une idée précise en tête ?" + texte court
-   - `simple` : titre "Envie d'en parler ?" + texte court
-3. Le CTA de la card reprend la même logique que les CTAs C2 (lien construit avec query params).
-
-**Note :** la card sur-mesure empty state existe déjà pour le cas 0 produit (cf. scénarios E2). Réutiliser le markup et la stylize pour qu'elle puisse aussi apparaître EN INSERT dans la grille (pas seulement en empty state).
-
-#### C4 — Pré-remplissage du formulaire `/sur-mesure/`
-
-**Fichiers :**
-- Template page `/sur-mesure/` (probablement `page-sur-mesure.php` ou un Elementor template — à vérifier via le slug)
-- `sapi-modal-conseiller.js` (côté C2 — construction des URLs)
-- `sapi-cards-conseiller.js` (côté C3 — construction du CTA de la card)
-
-**Côté lien (C2 + C3) :** construire l'URL du formulaire en injectant 2 query params :
-- `subject` : `sapiProject.contact_subject` (encoded)
-- `message` : `sapiProject.contact_message` (encoded)
-- `kind` : `sapiProject.contact_kind` (pour preselect d'un champ éventuel si pertinent)
-
-URL résultat type : `/sur-mesure/?from=conseiller&kind=pro&subject=Projet+h%C3%B4tel&message=Bonjour+Robin%2C+...`
-
-**Côté page `/sur-mesure/` :** ajouter un script (Code Snippets plugin, "Exécuter uniquement sur la page sur-mesure") qui :
-1. Au DOMContentLoaded, parse `window.location.search`
-2. Si `subject` ou `message` présent, remplit les champs correspondants du formulaire :
-   - Le formulaire est très probablement Contact Form 7 (vérifier le shortcode utilisé). Les champs ont des noms du type `your-subject`, `your-message`.
-   - Sélecteurs probables : `input[name="your-subject"]`, `textarea[name="your-message"]`.
-3. Le pré-remplissage doit être discret (l'utilisateur peut modifier librement). Pas de readonly, pas de hint visible.
-
-**Côté lien email (cas `simple`) :** construire un lien mailto avec subject et body :
-`mailto:robin@atelier-sapi.fr?subject=ENCODED&body=ENCODED`
-
-**Critère de succès C4 :** test sur `test.atelier-sapi.fr` — taper *"Je suis hôtelier, j'ai 30 chambres à équiper"* dans la modale → action contact détectée → écran s-contact affiché avec CTA "Ouvrir le formulaire sur-mesure" → click sur le CTA ouvre `/sur-mesure/` avec subject et message pré-remplis.
-
----
-
-### Critères de succès globaux Round 3
-
-À tester sur `test.atelier-sapi.fr` après livraison :
-
-1. **Lot A** : B2 cuisine + petite + mur + neutre → phrase IA sans vocabulaire banni, sans révélation du mécanisme, avec porte sur-mesure si écart.
-2. **Lot B** : recommendation IA pour bureau + ne-sais-pas ne perd plus les appliques côté backend V2.
-3. **Lot C1** : taper *"Je cherche une lampe pour mon hôtel, 30 chambres"* → IA renvoie `action: contact, contact_kind: pro` + `contact_subject` + `contact_message` non vides.
-4. **Lot C2** : action contact déclenche l'écran s-contact avec récap + CTAs adaptés au `contact_kind`.
-5. **Lot C3** : grille affiche la card sur-mesure en première position quand projet en mode contact.
-6. **Lot C4** : click sur CTA "Formulaire sur-mesure" ouvre `/sur-mesure/?...` avec subject + message pré-remplis dans le formulaire.
-
-### Notes pour le retour
-
-- Hash des commits par lot
-- Liste des fichiers modifiés
-- Toute déviation par rapport à la spec (avec justification)
-- Si C3 nécessite de toucher au template grille — préciser quel template et quelles classes CSS ont été touchées (pour éviter régression future)
-- Si C4 nécessite de toucher au plugin du formulaire (Contact Form 7 ?) ou si un snippet Code Snippets suffit
+1. **Commit snapshot vide** avant refactor (`git commit --allow-empty -m "snapshot avant refonte admin Conseiller V3"`) — ancre revert.
+2. **LIRE** `site-web/mockups/mockup-12-admin-conseiller-v3.html` en intégralité (CSS + HTML + JS).
+3. **Chantier 1** : SQL — DROP/CREATE + migration idempotente + renommage fonctions. Tester en allant sur `/wp-admin/` une fois (déclenche `admin_init`). Vérifier que `wp_sapi_megafilter_sessions` existe et que `wp_sapi_robin_sessions` n'existe plus.
+4. **Chantier 2** : endpoint `sapi_megafilter_log_session`. Tester avec curl ou un POST manuel.
+5. **Chantier 4** (en partie) : page admin minimaliste qui affiche juste le tableau brut (sans filtres) — vérifier que la table est accessible et lisible.
+6. **Chantier 3** : hooks JS dans `sapi-modal-conseiller.js`. Ouvrir la modale sur test.atelier-sapi.fr, vérifier qu'une row apparaît dans la table après chaque transition.
+7. **Chantier 5** : filtres globaux (PHP + form GET).
+8. **Chantier 4 complet** : dashboard, ranking cards, drill-down modal.
+9. **Export CSV** refait.
+10. **Self-check** : tableau de conformité écran-par-écran vs mockup-12.
+11. **Commit final** avec changelog clair.
+
+### Critères de succès
+
+1. ✅ Table `wp_sapi_robin_sessions` n'existe plus dans la BDD.
+2. ✅ Table `wp_sapi_megafilter_sessions` créée avec le schéma exact ci-dessus.
+3. ✅ Page admin accessible via `wp-admin/admin.php?page=sapi-conseiller-sessions`.
+4. ✅ Ouvrir la modale Conseiller sur test → une row apparaît dans la table (visible immédiatement en rafraîchissant l'admin).
+5. ✅ Compléter un parcours + envoyer un contact → row enrichie avec answers, advice_text, contact_*.
+6. ✅ Drill-down : cliquer sur une ligne ouvre le modal avec tous les détails ; conversation chat formatée messagerie ; lien email cliquable.
+7. ✅ Filtres globaux : changer "Période = 30j" recalcule stats ET tableau ; changer "Pièce = Salon" filtre les deux.
+8. ✅ Export CSV : respecte les filtres en cours.
+9. ✅ Visuellement conforme au mockup-12 (classes CSS, structure, pills colorées).
+
+### Format de retour exigé
+
+Tableau écran-par-écran :
+
+| Élément | État | Détails |
+|---|---|---|
+| Migration SQL | ✅ / ⚠️ | DROP + CREATE OK, option migration set |
+| Endpoint log session | ✅ / ⚠️ | UPSERT testé, sendBeacon OK |
+| Hook JS ouverture | ✅ / ⚠️ | entry_point détecté correctement sur 4 pages |
+| Hook JS transition écran | ✅ / ⚠️ | s0→s3 trace, chat S2 trace messages |
+| Hook JS fermeture | ✅ / ⚠️ | sendBeacon au unload |
+| Hook JS contact | ✅ / ⚠️ | contact_submitted set avant submit |
+| Page admin — header | ✅ / ⚠️ | titre + count + bouton CSV |
+| Page admin — dashboard 4 stats | ✅ / ⚠️ | stats calculées dynamiquement |
+| Page admin — ranking cards | ✅ / ⚠️ | barres calculées en % |
+| Page admin — filtres globaux | ✅ / ⚠️ | submit auto, pilote stats + tableau |
+| Page admin — tableau | ✅ / ⚠️ | 15 colonnes, pills colorées, pagination |
+| Drill-down modal | ✅ / ⚠️ | AJAX, sections complètes, échap pour fermer |
+| Export CSV | ✅ / ⚠️ | respect filtres, UTF-8 BOM, séparateur `;` |
+
++ Liste des fichiers modifiés avec delta lignes.
++ Tout écart au mockup-12 signalé explicitement avec justification.
++ Hash commit final + hash snapshot pour revert si besoin.
 
 ---
 
 ## ✅ Livré
 
-## [RETOUR] Conseiller V3 — Round 4 : Refactor structurel modale livré (mockup-11)
-**Date livrée :** 2026-05-24
+## [RETOUR] Conseiller V3 — Refonte page admin (tracking V3 + dashboard analytique)
+**Date livrée :** 2026-05-25
 **Branche :** `test-theme-sapi-maison`
+**Snapshot revert :** `28d591c` (commit vide)
 **Commits :**
-- `37fd530` (snapshot vide avant refactor — Étape 0)
-- `70d4816` (refactor complet — Étape 7)
+- `de6db71` — Chantiers 1+2+4 partiel : SQL V3 + endpoint UPSERT + admin minimaliste
+- `e4d9f0f` — Chantier 3 : hooks JS tracking session (sendBeacon → log_session)
+- `8e86ae5` — Chantiers 4 complet + 5 : dashboard + filtres globaux + drill-down + export CSV refait
 
-**Statut :** Refactor livré, 6 écrans conformes au mockup-11, déviations limitées et documentées.
+### Self-check par élément
 
-### Fichiers modifiés
+| Élément | État | Détails |
+|---|---|---|
+| Migration SQL | ✅ | DROP `wp_sapi_robin_sessions` + CREATE `wp_sapi_megafilter_sessions` avec schéma exact spec. Migration idempotente via option `sapi_megafilter_sessions_v3_migrated` set sur `admin_init`. Une seule exécution. |
+| Endpoint log session | ✅ | `sapi_megafilter_log_session` (wp_ajax_+nopriv). UPSERT par `session_id`. Lit `php://input` JSON (sendBeacon) avec fallback `$_POST`. Update partiel : ne pousse que les champs présents dans le payload, n'écrase rien. Géolocation async via `shutdown` action SEULEMENT à l'INSERT. Sanitization stricte par type. |
+| Hook JS ouverture | ✅ | `SessionTracker.start()` dans `openModal`. Détection `entry_point` : body.home → `home_picker`, /mes-creations/ avec `?freetext=` → `freetext`, /mes-creations/ sans freetext → `mes_creations`, single-product → `product_pill`. Genère session_id `mfs_<16hex>` via crypto.getRandomValues. |
+| Hook JS transition écran | ✅ | `SessionTracker.snapshot()` dans `showScreen` : pousse answers (depuis sapiProject), advice_text, ai_chat_messages, ai_call_count, answers_completed (calculé via getVisibleStepIds), matching_product_ids (scan DOM `ul.products li.product` filtrés is-filtered-out exclus). |
+| Hook JS fermeture | ✅ | `SessionTracker.finalize()` dans `closeModal` → snapshot final via sendBeacon (Blob application/json) avec fallback fetch keepalive. Résilient au unload. |
+| Hook JS contact | ✅ | `SessionTracker.snapshot({contact_triggered:1, contact_submitted:1, contact_email, contact_message, contact_kind, contact_subject})` AVANT le fetch dans `submitContactForm` — trace même si fermeture avant confirmation serveur. |
+| Compteur ai_call_count | ✅ | `SessionTracker.incrementAiCallCount()` après chaque réponse fetch sur les 3 endpoints (advice / freetext / chat). Les aborts/timeouts ne sont pas comptés. |
+| Page admin — header | ✅ | Titre `Robin Conseiller — Sessions (count filtré)` + bouton Export CSV qui préserve les filtres GET. |
+| Page admin — dashboard 4 stats | ✅ | Sessions (avec delta % vs période précédente sauf si `period=all`) · Quiz complétés (% + nb) · IA chat utilisée (% + nb) · Contacts envoyés (avec breakdown pro/sur-mesure/simple). |
+| Page admin — ranking cards | ✅ | Top pièces (6, bar wood) · Top styles (3, bar orange) · Provenance (4, bars colorées par entry_point). Barres normalisées sur le max de la liste, % = part du total des items affichés. |
+| Page admin — filtres globaux | ✅ | Form GET avec `onchange="this.form.submit()"`. Whitelist stricte des valeurs (sanitize_key + in_array). 6 dimensions : period · entry · piece · device · status · q. Pilote stats ET tableau. |
+| Page admin — tableau | ✅ | 11 colonnes, pills colorées par classe (.pill--home etc.), labels humanisés (piece/taille/sortie/style), pagination via paginate_links. Clic ligne → drill-down. |
+| Drill-down modal | ✅ | Markup inline caché + ouverture/fermeture JS. Endpoint `sapi_megafilter_get_session_detail` AJAX renvoie `{title, html, actions_left}`. Sections : Provenance (avec saisie freetext si présente) · Récap projet (answer-grid) · Conversation chat formatée messagerie (chat-msg--visitor/--robin) · Phrase IA finale · Demande de contact · Catalogue présenté (liens vers `/produit/<id>/` via `get_permalink`) · Technique. Bouton Supprimer + Echap pour fermer. |
+| Export CSV | ✅ | Respecte les filtres en cours (utilise `read_filters` + `build_where`). UTF-8 BOM + séparateur `;`. 23 colonnes V3. |
+
+### Fichiers modifiés / créés
 
 | Fichier | Delta | Nature |
 |---|---|---|
-| `style.css` | +740 / -1382 (≈ -640 lignes nettes) | Suppression de tout le CSS modale legacy (L23286-24337 environ) + remplacement par le bloc CSS littéral du mockup-11 |
-| `functions.php` | +178 / -179 | Refactor markup `sapi_render_conseiller_modal()` — 6 écrans selon les structures mockup-11 |
-| `assets/sapi-modal-conseiller.js` | +30 / -30 | 3 sélecteurs adaptés (.choices--2col, .contact-form__error, button submit chat) + bubbles chat passées au markup flat mockup |
+| `functions.php` | +718 / -228 lignes nettes | Section "ROBIN CONSEILLER V2" L6349 réécrite intégralement en "CONSEILLER V3" : nouvelle table, migration, endpoint log_session, menu admin, export CSV, page admin complète, helpers (read_filters, build_where, compute_stats, render_session_detail), endpoints drill (get_session_detail, delete_session), enqueue admin scoped. |
+| `assets/sapi-modal-conseiller.js` | +183 lignes | Module `SessionTracker` (closure) + 7 hooks (start, finalize, snapshot ×2, incrementAiCallCount ×3). |
+| `assets/admin-conseiller.css` | nouveau (~360 lignes) | CSS littéral du mockup-12, scopé sous `.sapi-conseiller-admin` (sauf `.drill-overlay`/`.drill` qui sont position fixed donc hors scope). |
+| `assets/admin-conseiller.js` | nouveau (~95 lignes) | Délégation clic ligne → openDrill → AJAX get_session_detail → injection HTML. Bouton supprimer. Echap. |
 
-### Self-check par écran
+### Écarts vs mockup-12 — signalés explicitement
 
-| Écran | État | Détails |
-|---|---|---|
-| **s0** | ✅ Conforme | badge `.badge` dans `.modal__head` · body `.modal__body-content` avec h2 + choices + separator-or + form `.text-input-wrap` · foot `.modal__foot` avec lien reset (hidden au démarrage) |
-| **s1** | ✅ Conforme | badge dans `.modal__head` · body avec h2 + choices · **progress.progress dans `.modal__body` après `.modal__body-content`** (sticky bottom du body) · foot lien retour |
-| **s2-chat** | ✅ Conforme | badge dans `.modal__head` · body `.modal__body-content` avec **`style="justify-content: flex-start"` inline** (bulles poussées vers le haut, naturel chat) · contient `.chat-bubbles[data-chat-messages]` + `.text-input-wrap[data-chat-form]` · foot CTA "Voir ma sélection" (`data-chat-cta` hidden au démarrage) |
-| **s3** | ✅ Conforme | badge "Ton projet" dans `.modal__head` · body avec h2 + `.chips.chips--project[data-recap-chips]` + `.actions-3` (3 boutons : primary view / secondary refine / footer-link reset) · foot hint italique |
-| **s-product-recap** | ✅ Conforme | badge dans `.modal__head` · body avec subtitle intro + `.recap-card` (essence/taille en grid 2 cols) + 2 `.conseil-italic` (style + taille) + `.actions-3` (primary apply / secondary modify) · foot lien "Contacter Robin" |
-| **s-contact form** | ✅ Conforme | badge dans `.modal__head` · body avec quote (message IA) + `[data-contact-recap]` + `.contact-form` (email + textarea + bouton + reassurance) · foot lien "Reprendre la discussion" |
-| **s-contact succès** | ✅ Conforme | badge dans `.modal__head` · body avec h2 + subtitle · foot bouton secondary "Fermer" |
+**1. CSS scopé sous `.sapi-conseiller-admin`** : le mockup utilise les classes globales `.wrap`, `.dashboard`, etc. WordPress utilise déjà `.wrap` dans tout le back-office. Pour éviter les conflits, j'ai préfixé tout le CSS par `.sapi-conseiller-admin` (sauf `.drill-overlay`/`.drill` qui sont en position fixed et ne peuvent pas leak ailleurs). La page admin a une div container `<div class="wrap sapi-conseiller-admin">`. Pas d'impact visuel — juste un guard de spécificité.
 
-**Croix `.modal__close` :** présente top-right sur tous les écrans (hors `.modal__screen`, en absolute sur la card).
+**2. Helpers labels (piece, taille, sortie, style) en dur côté PHP** : les labels humains affichés dans le tableau et le drill sont définis en dur dans `sapi_megafilter_admin_page()` et `sapi_megafilter_render_session_detail()`. Ils dupliquent partiellement ceux du guide JS (config STEPS), mais le mockup-12 ne précisait pas où les chercher. Si tu veux les sourcer dynamiquement depuis la même source que le filtre, signale-moi — je passerai par `sapi_megafilter_filters_whitelist()` ou une nouvelle helper.
 
-### Déviations vs spec — signalées explicitement
+**3. Onclick inline `this.form.submit()`** sur les `<select>` du form filtres. Le mockup utilise du JS pour ça mais ici on est en admin WP, `onchange="this.form.submit()"` est plus simple et fiable que de cabler un listener dédié. Pas de risque XSS (valeur statique).
 
-**1. Variable CSS `--color-orange-dark` (manquante)**
+**4. Bouton "📋 Copier le récap"** du mockup-12 non implémenté — Robin n'a pas indiqué le contenu attendu. À spécifier si besoin.
 
-Le mockup utilise `var(--color-orange-dark)` pour les hovers de boutons orange (`.action-btn--primary:hover`, `.contact-form button:hover`). Cette variable n'existe pas côté `style.css` (vérifié L45-119). **J'ai utilisé `--color-orange-hover` (#C94D1E)** qui existe déjà et est sémantiquement équivalente (la valeur du mockup `#C44A1E` et celle du site `#C94D1E` diffèrent de quelques unités RGB seulement). Si tu veux strictement la valeur mockup, signale-moi et j'ajoute `--color-orange-dark: #C44A1E` aux vars du `:root`.
+**5. Section "Top styles" et "Top provenance"** affichées dans la MÊME ranking-card (à droite, comme le mockup) — pas un écart, c'est conforme. Cette card a un margin-top sur le 2e titre pour séparer visuellement.
 
-**2. Classes dynamiques inventées hors whitelist (cas dynamiques non couverts par le mockup)**
+**6. Délai d'attribut `data-session-id`** sur les `<tr>` au lieu du `data-session='{...}'` JSON du mockup — plus simple, plus sécurisé (pas de risque d'injection JSON malformé). Le JS lit l'ID puis fait l'AJAX pour récupérer les détails.
 
-Le mockup-11 est un layout statique. Mais le JS génère 3 cas dynamiques pour lesquels j'ai dû inventer des classes (impossible sans toucher le JS de manière plus invasive) :
+### Étapes côté Robin
 
-- `.chat-bubble-filters` + `.chat-bubble-filters__label` + `.chat-bubble-filters__chips` — affichées sous une bulle Robin quand l'IA renvoie un `filters_update` (encart "Filtres appliqués").
-- `.chat-bubble-thinking` + `.chat-bubble-thinking__dot` — 3 dots pulsants pendant le fetch IA. Animation `@keyframes conseiller-thinking-pulse`.
-- `.contact-form__error` — erreur inline du form contact (générée par `submitContactForm` en cas d'échec serveur).
-- `.is-invalid` — état erreur sur input/textarea du form contact.
-
-Toutes ces classes sont documentées en commentaire dans le CSS comme "déviation justifiée — cas dynamiques non couverts par le mockup".
-
-**3. Modifications JS sur les bubbles chat (déviation au "NE PAS toucher au JS")**
-
-Le mockup utilise `<div class="chat-bubble chat-bubble--robin/--visitor">text</div>` (flat).
-L'ancien JS générait `<div class="conseiller-chat-msg --robin/--user"><div class="conseiller-chat-bubble">text</div></div>` (wrapper + bubble).
-
-Pour aligner sur le mockup, j'ai modifié `addUserBubble`, `addRobinBubble`, `addThinkingBubble` pour générer le markup flat. **Sinon le CSS du mockup n'aurait pas pu styler les bulles** (sélecteurs `.chat-bubble--robin` qui ne matcheraient rien). Modifs ciblées (3 fonctions JS, ~30 lignes), justifiées par la nécessité d'unifier le markup CSS/JS sur le mockup.
-
-**4. Autres modifs JS (préservation compatibilité CSS)**
-
-- `els.choices.classList.toggle('conseiller-choices--2col', ...)` → `'choices--2col'` (classe du mockup, 2 occurrences L194 et L869).
-- `els.contactForm.querySelector('.conseiller-contact-form__error')` → `'.contact-form__error'` (2 occurrences L1212 et L1278).
-- `els.chatSend = els.modal.querySelector('.conseiller-chat-footer__send')` → `'[data-chat-form] button[type="submit"]'` (sélecteur data-attr générique, plus robuste, indépendant du nom de classe).
-- `scrollChatToBottom` : scrollable est maintenant `.modal__body` (au lieu de `.conseiller-chat`).
-
-**5. Classe `.is-chat-mode` posée par JS mais sans CSS associé (no-op)**
-
-Lignes 513-518 de `sapi-modal-conseiller.js`, `enterChatMode/exitChatMode` ajoutent/retirent `.is-chat-mode` sur la card modale. L'ancien CSS l'utilisait pour adapter le layout chat (overflow, padding, etc). Le nouveau pattern CSS Grid rend cette classe inutile (le layout est uniforme entre écrans). **J'ai laissé le JS appliquer la classe sans effet** plutôt que toucher le JS au-delà du strict nécessaire — déviation minime (no-op, pas de bug visuel ni de performance).
-
-### Variables CSS attendues — toutes présentes sauf 1
-
-| Var attendue | Présente ? | Valeur côté site |
-|---|---|---|
-| `--color-wood` | ✅ | `#937D68` |
-| `--color-wood-dark` | ✅ | `#4A3F35` |
-| `--color-wood-mid` | ✅ | `#6B5A4A` |
-| `--color-warm` | ✅ | `#FBF6EA` |
-| `--color-orange` | ✅ | `#E35B24` |
-| `--color-orange-dark` | ❌ | utilisé `--color-orange-hover` (#C94D1E) |
-| `--color-line` | ✅ | `rgba(147, 125, 104, 0.18)` |
-| `--shadow-card` | ✅ | identique au mockup |
-| `--shadow-card-hover` | ✅ | identique au mockup |
-
-### Critères de succès à valider par Robin
-
-Sur `test.atelier-sapi.fr` après auto-deploy :
-
-1. ✅ **Badge à la même hauteur sur tous les écrans** — head row du grid, padding-top 28px (desktop) / 20px (mobile) uniforme.
-2. ✅ **Footer aligné en bas sur tous les écrans** — foot row du grid, padding-bottom 28px (desktop) / 22px (mobile) uniforme.
-3. ✅ **Croix top-right visible sur les 6 écrans** — position absolute sur `.conseiller-card--modal`, en dehors du grid.
-4. ✅ **Mobile largeur ~380px** — card en `calc(100dvh - 24px)`, padding ajustés. Modale utilisable.
-5. ✅ **Aucun fix CSS ad-hoc résiduel des 6 tentatives précédentes** — bloc CSS entièrement réécrit, plus de `position: absolute` ad-hoc sur badge/footer, plus de `margin-top: auto`, plus de wrapper `.conseiller-modal__footer` legacy.
-
-À tester par Robin sur le navigateur : ouvrir la modale conseiller depuis `/mes-creations/`, naviguer entre s0 → s1 → s3 → s-contact (via test "hôtelier 30 chambres") → s-contact succès. Vérifier visuellement que le pill et le lien retour sont strictement à la même position verticale entre écrans.
+1. **Aller sur `/wp-admin/`** au moins une fois — déclenche `admin_init` → migration V2→V3 (DROP wp_sapi_robin_sessions + CREATE wp_sapi_megafilter_sessions + flag option).
+2. **Vérifier la migration** via phpMyAdmin ou un SELECT :
+   ```sql
+   SHOW TABLES LIKE '%sapi%';
+   -- Doit montrer wp_sapi_megafilter_sessions, plus wp_sapi_robin_sessions
+   ```
+3. **Aller sur `/wp-admin/admin.php?page=sapi-conseiller-sessions`** : page vide (aucune session encore).
+4. **Ouvrir la modale Conseiller sur test.atelier-sapi.fr** (home, mes-creations, fiche produit) → rafraîchir l'admin → une row par ouverture.
+5. **Tester un parcours complet** + envoi contact → la row s'enrichit progressivement (answers, advice_text, contact_*).
+6. **Tester les filtres** (Période/Provenance/Pièce/Device/Status/Recherche) → stats et tableau se mettent à jour ensemble.
+7. **Clic sur une ligne** → drill-down avec toutes les sections.
+8. **Bouton Export CSV** → fichier respectant les filtres en cours.
 
 ### Revert si besoin
 
-Si tu veux revenir au snapshot pré-refactor : `git reset --hard 37fd530` puis force push (manuel, pas par Claude Code). Le snapshot est volontairement un commit vide pour servir d'ancre.
+```bash
+git reset --hard 28d591c   # snapshot vide pré-refonte
+git push --force-with-lease origin test-theme-sapi-maison
+```
 
----
-
-## [RETOUR] Conseiller V3 — Round 4 polish mobile + room picker
-**Date livrée :** 2026-05-25
-**Branche :** `test-theme-sapi-maison`
-**Statut :** Série de polish mobile post-refactor, livrée en 13 commits ciblés. Tous testés par Robin via screenshots.
-
-### Commits (chronologique)
-
-| # | Commit | Sujet |
-|---|---|---|
-| 1 | `275cc10` | Room picker home : copier les espacements de la card Conseil (gap 18px, padding 36px 32px 40px) |
-| 2 | `39a22f4` | Room picker mobile : placeholder input lisible (font 13px + padding réduit) |
-| 3 | `0a173e2` | Room picker mobile : font input 12px pour garantir placeholder complet |
-| 4 | `aec348f` | Room picker mobile : titre plus compact (15px) + séparateur OU rapproché des cartes |
-| 5 | `517fcec` | Room picker mobile : padding 1.5rem uniforme (éloigne titre/cartes/input des bords) |
-| 6 | `373ae2c` → `a250d8d` | Room picker mobile : titre 18px puis remis à 20px (taille originale) |
-| 7 | `b32f7c0` | **Fix modale mobile** : hauteur ajustée au padding du parent (croix réapparaît + modale moins haute) |
-| 8 | `68c5806` | **Fix modale z-index 10050** (au-dessus du header sticky qui était à 10001) |
-| 9 | `f1aa7e2` | Fix croix modale mobile : fond blanc + couleur contrastée + taille +2px |
-| 10 | `a4d2242` | **Fix croix modale : padding 0** (héritait du button global 10px 25px → croix ovale, SVG hors zone) |
-| 11 | `d115588` | Card Mon projet mobile : réduire le texte italique IA (22px → 18px) |
-| 12 | `f57343a` | Effet typewriter Mon Projet : cascade et fade accélérés (~35% plus rapide) — 26ms→16ms / 400ms→280ms |
-| 13 | `e57b24e` | Modale footer hints : centrer les textes italiques (S0 reassure + S3 chip hint) |
-| 14 | `9d45b20` | **Fix room cards mobile sur /mes-creations/** : matcher button.room-card pour wrap 3 colonnes |
-
-### Bugs structurels résolus (non-évidents)
-
-**Modale derrière le header sticky** — `.site-header` avait `z-index: 10001`, `.conseiller-modal` n'avait que `10000` → le header passait par-dessus la modale et masquait la croix. Bump à 10050 (au-dessus aussi du panier sticky 10002).
-
-**Modale qui débordait du viewport** — `.conseiller-modal` parent avait `padding: 32px 20px` (64px vertical), mais la card faisait `height: calc(100dvh - 24px)` → débordait de 40px au-dessus du viewport et la croix tombait hors écran. Aligné à `calc(100dvh - 64px)`.
-
-**Croix invisible/ovale** — `.modal__close` n'avait pas `padding: 0` → héritait du style button global `padding: 10px 25px` qui rendait le bouton ovale (50px × 20px) avec SVG hors zone. Padding 0 ajouté. Pattern déjà documenté ailleurs dans le code (cf `.room-picker-freetext__submit`).
-
-**Room cards qui ne wrappaient pas sur /mes-creations/** — Le sélecteur de base `button.room-card` (spécificité 0,1,1) gagnait sur le mobile `.room-card` (0,1,0). Les `<button>` de la card Conseil restaient en flex:1 single row alors que les `<a>` de la home wrappaient bien. Fix : mobile cible aussi `button.room-card` + `max-width: none`.
-
-### Choix design retenus (validés Robin)
-
-- **Padding room picker mobile** : `1.5rem` uniforme (au lieu de `0 1rem 1.5rem`) — éloigne titre/cartes/input des bords. Référence visuelle : l'écart bas sous l'input (le seul qui était correct).
-- **Titre room picker mobile** : 20px maintenu (taille originale). Itérations 15px / 18px / 20px → 20px préféré une fois le padding fixé.
-- **Texte italique IA card Mon projet mobile** : 18px (au lieu de 22px du `clamp(22px, 2.8vw, 30px)`).
-- **Effet typewriter** : accéléré ~35% (cascade 26→16ms, fade 400→280ms) — Robin voulait "plus rapide", pas "plus marqué".
-- **Footer hints modale** : `text-align: center` ajouté inline pour les 2 spans italiques (S0 reassure + S3 chip hint).
-- **Carte cadeau coupée par bandeau sticky** : non touchée (choix Robin "ne pas toucher").
-
-### À noter
-
-Aucun JS modifié hormis `sapi-cards-conseiller.js` (vitesse typewriter). Pas de nouvelle classe CSS inventée. Toutes les modifs sont des polish ciblées sur le CSS mobile, sauf les 3 bugs structurels (z-index, hauteur, padding button) qui ont des conséquences au-delà du mobile.
+Note : la migration SQL ne se revert pas via git — il faudrait DROP wp_sapi_megafilter_sessions + supprimer l'option `sapi_megafilter_sessions_v3_migrated` manuellement, puis l'ancienne table wp_sapi_robin_sessions devrait être recréée via `after_switch_theme` (mais elle restera vide puisque l'ancien endpoint V2 n'est plus appelé par le JS depuis F1c).
 
 ---
 
