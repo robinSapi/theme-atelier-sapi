@@ -23489,6 +23489,9 @@ body.woocommerce-cart div.woocommerce-wrapper {
   right: 16px;
   width: 36px;
   height: 36px;
+  /* override règle button global padding: 10px 25px qui rendait le close
+     ovale (50×20px) et masquait le SVG */
+  padding: 0;
   border-radius: 50%;
   background: transparent;
   border: none;
