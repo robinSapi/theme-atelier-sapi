@@ -11905,9 +11905,15 @@ button.room-card {
     gap: 0.75rem;
   }
 
-  .room-card {
+  /* Mobile — wrap en 3 colonnes. On match aussi button.room-card pour
+     atteindre la même spécificité (0,1,1) que le sélecteur de base, sinon
+     les <button class="room-card"> de la card Conseil (/mes-creations/)
+     restent en flex:1 et s'écrasent sur une seule ligne. */
+  .room-card,
+  button.room-card {
     flex: 0 0 calc(33.33% - 0.5rem);
     min-width: 0;
+    max-width: none;
     padding: 1rem 0.75rem;
   }
 
