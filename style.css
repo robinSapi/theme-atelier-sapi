@@ -11918,10 +11918,11 @@ button.room-card {
     padding: 1.5rem;
   }
 
-  /* Mobile — titre plus discret pour éviter qu'il occupe 3 grosses lignes
-     en uppercase bold (rendu trop dominant sur l'écran). */
+  /* Mobile — taille intermédiaire entre desktop (20px+) et trop petit.
+     Avec le padding 1.5rem qui resserre la largeur disponible, 18px
+     reste lisible sans dominer. */
   .room-picker-title {
-    font-size: 15px;
+    font-size: 18px;
   }
 
   /* Mobile — rapprocher le séparateur OU des cartes pour un rythme
