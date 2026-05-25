@@ -10923,21 +10923,7 @@ button.room-card {
   }
 }
 
-/* Round 4 — chaque sous-état du room picker est un flex column compact
-   (gap uniforme entre titre, cases/CTA, séparateur, champ texte). */
-[data-room-picker-state] {
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-direction: column;
-  flex-direction: column;
-  -webkit-align-items: center;
-  align-items: center;
-  gap: 18px;
-  width: 100%;
-}
-[data-room-picker-state][hidden] { display: none; }
-
-/* Round 4 — Séparateur "ou" entre cases/CTA et champ texte libre
+/* Round 4 — Séparateur "ou" entre les pièces et le champ texte libre
    (pattern identique au S0 modale). */
 .room-picker-or {
   display: -webkit-flex;
@@ -10969,22 +10955,6 @@ button.room-card {
   background: var(--color-white);
   border-radius: 50px;
   border: 1px solid rgba(139, 115, 85, 0.25);
-}
-
-/* Round 4 — Prochaine question non répondue (état in-progress) */
-.room-picker-resume {
-  margin: 0 auto;
-  max-width: 580px;
-  font-family: var(--font-body);
-  font-size: 14.5px;
-  line-height: 1.55;
-  color: var(--color-wood-mid);
-  text-align: center;
-}
-.room-picker-resume em {
-  font-style: italic;
-  color: var(--color-wood-dark);
-  font-weight: 500;
 }
 
 /* Round 4 — Champ texte libre sous les pièces (room picker homepage) */
@@ -11037,48 +11007,6 @@ button.room-card {
 }
 .room-picker-freetext__submit:hover { background: var(--color-orange-hover); }
 .room-picker-freetext__submit svg { width: 16px; height: 16px; display: block; }
-
-/* Round 4 — CTA "Reprendre" / "Voir ma sélection" sur états in-progress + complete */
-.room-picker-cta {
-  display: -webkit-inline-flex;
-  display: inline-flex;
-  -webkit-align-items: center;
-  align-items: center;
-  gap: 8px;
-  padding: 13px 24px;
-  background: var(--color-orange);
-  color: var(--color-white);
-  border: none;
-  border-radius: 50px;
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  text-decoration: none;
-  cursor: pointer;
-  -webkit-transition: background 0.18s ease, transform 0.15s ease;
-  transition: background 0.18s ease, transform 0.15s ease;
-}
-.room-picker-cta:hover {
-  background: var(--color-orange-hover);
-  color: var(--color-white);
-  -webkit-transform: translateY(-1px);
-  transform: translateY(-1px);
-}
-.room-picker-cta svg { width: 16px; height: 16px; }
-
-/* Round 4 — Advice IA affichée sur l'état "complete" */
-.room-picker-advice {
-  margin: 0 auto;
-  max-width: 580px;
-  font-family: var(--font-body);
-  font-size: 14.5px;
-  line-height: 1.55;
-  color: var(--color-wood-dark);
-  text-align: center;
-  font-style: italic;
-}
 
 /* Process Card */
 .bento-process {

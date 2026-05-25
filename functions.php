@@ -286,25 +286,20 @@ function sapi_maison_enqueue_assets() {
 
   }
 
-  // Round 4 — Room picker 3 états (initial / in-progress / complete) sur la
-  // homepage. Lit sapiProject côté client pour adapter le contenu de la
-  // bento-room-picker selon l'avancement du projet du visiteur.
+  // Round 4 — Room picker homepage : question pièce (6 cases) + champ texte
+  // libre. Le submit du champ libre redirige vers /mes-creations/?freetext=…
+  // pour auto-ouvrir la modale en chat S2 avec le texte saisi.
   if (is_front_page()) {
     $room_picker_js_path = get_template_directory() . '/assets/sapi-room-picker.js';
     if (file_exists($room_picker_js_path)) {
-      require_once get_template_directory() . '/inc/guide-data.php';
       wp_enqueue_script(
         'sapi-room-picker',
         get_template_directory_uri() . '/assets/sapi-room-picker.js',
-        ['sapi-project'],
+        [],
         filemtime($room_picker_js_path),
         true
       );
-      // Steps + icônes pour calculer la prochaine question non répondue
-      // et générer les chips de réponse côté JS (mode in-progress).
       wp_localize_script('sapi-room-picker', 'SAPI_ROOM_PICKER', [
-        'steps' => sapi_guide_get_steps(),
-        'icons' => sapi_guide_get_icons(),
         'creationsUrl' => home_url('/mes-creations/'),
       ]);
     }
