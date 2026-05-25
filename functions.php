@@ -286,10 +286,11 @@ function sapi_maison_enqueue_assets() {
 
   }
 
-  // Round 4 — Room picker homepage : question pièce (6 cases) + champ texte
-  // libre. Le submit du champ libre redirige vers /mes-creations/?freetext=…
-  // pour auto-ouvrir la modale en chat S2 avec le texte saisi.
-  if (is_front_page()) {
+  // Round 4 — Room picker (homepage + page conseils-eclaires) : question
+  // pièce (6 cases) + champ texte libre. Le submit du champ libre redirige
+  // vers /mes-creations/?freetext=… pour auto-ouvrir la modale en chat S2
+  // avec le texte saisi.
+  if (is_front_page() || is_page_template('page-conseils-eclaires.php')) {
     $room_picker_js_path = get_template_directory() . '/assets/sapi-room-picker.js';
     if (file_exists($room_picker_js_path)) {
       wp_enqueue_script(

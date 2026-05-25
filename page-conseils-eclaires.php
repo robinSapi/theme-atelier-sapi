@@ -212,12 +212,13 @@ wp_reset_postdata();
 endif;
 ?>
 
-<!-- 6. Room picker — transition vers /mes-creations/?piece=X -->
+<!-- 6. Room picker — identique à celui de la homepage (titre + 6 pièces +
+     séparateur "ou" + champ texte libre). Le wrapper externe garde son
+     style propre (max-width + padding adaptés à la page conseils). -->
 <section class="advice-room-picker-section">
-  <div class="advice-room-picker">
+  <div class="advice-room-picker" data-room-picker>
     <div class="room-picker-inner">
       <h3 class="room-picker-title">Pour quelle pièce cherchez-vous un luminaire ?</h3>
-      <p class="room-picker-sub">Choisis une pièce, je te guide vers les modèles qui correspondent.</p>
       <div class="room-picker-cards">
         <?php foreach ($room_choices as $room) :
           $icon_svg = isset($room_icons[$room['icon']]) ? $room_icons[$room['icon']] : '';
@@ -228,6 +229,17 @@ endif;
           </a>
         <?php endforeach; ?>
       </div>
+      <div class="room-picker-or" aria-hidden="true">
+        <span class="room-picker-or__text">ou</span>
+      </div>
+      <form class="room-picker-freetext" data-room-picker-freetext>
+        <input type="text" class="room-picker-freetext__input" name="freetext"
+               placeholder="Décris ton projet en quelques mots…" maxlength="500"
+               aria-label="Décris ton projet en quelques mots">
+        <button type="submit" class="room-picker-freetext__submit" aria-label="Envoyer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </button>
+      </form>
     </div>
   </div>
 </section>
