@@ -154,14 +154,17 @@
 
     function send(payload) {
       if (!config.ajaxUrl) return;
-      payload.action = 'sapi_megafilter_log_session';
       payload.nonce = config.nonce || '';
       payload.session_id = getSessionId();
       var body;
       try {
         body = JSON.stringify(payload);
       } catch (e) { return; }
-      var url = config.ajaxUrl;
+      // L'action doit être en query string : admin-ajax.php route via
+      // $_REQUEST['action'] (lu depuis $_GET/$_POST). En envoyant du JSON
+      // brut via php://input, l'action n'arriverait pas dans $_REQUEST.
+      var sep = config.ajaxUrl.indexOf('?') > -1 ? '&' : '?';
+      var url = config.ajaxUrl + sep + 'action=sapi_megafilter_log_session';
       // sendBeacon — résilient au unload (fermeture modale + navigation).
       if (navigator.sendBeacon) {
         try {
