@@ -10784,6 +10784,14 @@ transform: translateY(15px);
   grid-row: span 2;
   background: var(--color-warm, #FBF6EA);
   border: none;
+  /* Round 4 — flex column avec justify-content: center pour centrer
+     verticalement le contenu (room-picker-inner) dans la card. */
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-justify-content: center;
+  justify-content: center;
 }
 .bento-room-picker::before {
   content: "";
@@ -10799,11 +10807,12 @@ transform: translateY(15px);
 }
 
 .room-picker-inner {
-  padding: 0 3rem 1.75rem;
-  height: 100%;
+  /* Round 4 — padding symétrique vertical pour centrage visuel équilibré
+     dans la card (le parent .bento-room-picker en flex column centre déjà
+     verticalement, mais le padding équilibré évite tout désalignement). */
+  padding: 1.75rem 3rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   gap: 1.25rem;
 }
