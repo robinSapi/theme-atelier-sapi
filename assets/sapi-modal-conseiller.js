@@ -1734,6 +1734,27 @@
     window.__sapiModalReady = true;
 
     bindEvents();
+
+    // Round 4 — Si un param URL ?freetext=… est présent (depuis le room
+    // picker homepage), auto-ouvre la modale en S0 puis bascule en chat S2
+    // avec le texte saisi. Nettoie ensuite l'URL pour éviter retrigger
+    // au refresh.
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var initialFreetext = params.get('freetext');
+      if (initialFreetext && initialFreetext.length) {
+        // Nettoyer l'URL
+        params.delete('freetext');
+        var newSearch = params.toString();
+        var newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '') + (window.location.hash || '');
+        window.history.replaceState({}, '', newUrl);
+        // Ouvrir la modale en S0 puis basculer en chat S2 avec le texte
+        setTimeout(function () {
+          openModal('s0');
+          submitFromS0Text(initialFreetext);
+        }, 100);
+      }
+    } catch (e) { /* URLSearchParams indisponible — silencieux */ }
   }
 
   if (document.readyState === 'loading') {

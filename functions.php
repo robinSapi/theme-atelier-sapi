@@ -286,6 +286,22 @@ function sapi_maison_enqueue_assets() {
 
   }
 
+  // Round 4 — Room picker 3 états (initial / in-progress / complete) sur la
+  // homepage. Lit sapiProject côté client pour adapter le contenu de la
+  // bento-room-picker selon l'avancement du projet du visiteur.
+  if (is_front_page()) {
+    $room_picker_js_path = get_template_directory() . '/assets/sapi-room-picker.js';
+    if (file_exists($room_picker_js_path)) {
+      wp_enqueue_script(
+        'sapi-room-picker',
+        get_template_directory_uri() . '/assets/sapi-room-picker.js',
+        ['sapi-project'],
+        filemtime($room_picker_js_path),
+        true
+      );
+    }
+  }
+
   // F2a-quinquies — Hero live update (H1 qui s'adapte au changement de
   // sapiProject.answers.piece). Enqueue sur is_shop() uniquement.
   if (class_exists('WooCommerce') && is_shop()) {

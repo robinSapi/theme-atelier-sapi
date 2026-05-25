@@ -502,21 +502,73 @@ foreach ($carousel_products as $product) {
     </a>
     <?php endif; ?>
 
-    <!-- Pour quelle pièce ? -->
-    <div class="bento-card bento-room-picker">
+    <!-- Pour quelle pièce ? — 3 sous-états (initial / in-progress / complete)
+         togglés par sapi-room-picker.js selon sapiProject côté client. -->
+    <div class="bento-card bento-room-picker" data-room-picker>
       <div class="room-picker-inner">
-        <h3 class="room-picker-title">Pour quelle pièce cherchez-vous un luminaire ?</h3>
-        <p class="room-picker-sub">
-          Choisis une pièce, je te guide vers les modèles qui correspondent.
-        </p>
-        <div class="room-picker-cards">
-          <?php foreach ($room_choices as $room) : ?>
-            <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'])); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
-              <span class="room-card-icon"><?php echo $room_icons[$room['icon']]; ?></span>
-              <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
-            </a>
-          <?php endforeach; ?>
+
+        <!-- État 1 : Initial (par défaut, visible si pas de projet) -->
+        <div data-room-picker-state="initial">
+          <h3 class="room-picker-title">Pour quelle pièce cherchez-vous un luminaire ?</h3>
+          <p class="room-picker-sub">
+            Choisis une pièce, je te guide vers les modèles qui correspondent.
+          </p>
+          <div class="room-picker-cards">
+            <?php foreach ($room_choices as $room) : ?>
+              <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'])); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
+                <span class="room-card-icon"><?php echo $room_icons[$room['icon']]; ?></span>
+                <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
+              </a>
+            <?php endforeach; ?>
+          </div>
+          <form class="room-picker-freetext" data-room-picker-freetext>
+            <input type="text" class="room-picker-freetext__input" name="freetext"
+                   placeholder="Décris ton projet en quelques mots…" maxlength="500"
+                   aria-label="Décris ton projet en quelques mots">
+            <button type="submit" class="room-picker-freetext__submit" aria-label="Envoyer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </button>
+          </form>
         </div>
+
+        <!-- État 2 : Projet en cours non terminé (pousse à terminer) -->
+        <div data-room-picker-state="in-progress" hidden>
+          <h3 class="room-picker-title">Continue ton projet</h3>
+          <p class="room-picker-sub" data-room-picker-resume>
+            Tu as déjà commencé à décrire ton projet — on continue ?
+          </p>
+          <a class="room-picker-cta" href="<?php echo esc_url(home_url('/mes-creations/')); ?>" data-room-picker-resume-cta>
+            <span>Reprendre mon projet</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+          <form class="room-picker-freetext" data-room-picker-freetext>
+            <input type="text" class="room-picker-freetext__input" name="freetext"
+                   placeholder="Affine ton projet en quelques mots…" maxlength="500"
+                   aria-label="Affine ton projet en quelques mots">
+            <button type="submit" class="room-picker-freetext__submit" aria-label="Envoyer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </button>
+          </form>
+        </div>
+
+        <!-- État 3 : Projet terminé (advice IA disponible) -->
+        <div data-room-picker-state="complete" hidden>
+          <h3 class="room-picker-title">Conseil de Robin pour ton projet</h3>
+          <p class="room-picker-advice" data-room-picker-advice></p>
+          <a class="room-picker-cta" href="<?php echo esc_url(home_url('/mes-creations/')); ?>">
+            <span>Voir ma sélection</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+          <form class="room-picker-freetext" data-room-picker-freetext>
+            <input type="text" class="room-picker-freetext__input" name="freetext"
+                   placeholder="Affiner ou changer de projet…" maxlength="500"
+                   aria-label="Affiner ou changer de projet">
+            <button type="submit" class="room-picker-freetext__submit" aria-label="Envoyer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </button>
+          </form>
+        </div>
+
       </div>
     </div>
 
