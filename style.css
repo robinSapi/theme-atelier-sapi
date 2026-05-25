@@ -23103,6 +23103,14 @@ body.woocommerce-cart div.woocommerce-wrapper {
   margin: 0 auto;
 }
 
+/* Mobile — clamp plancher à 22px était un peu trop volumineux dans la card
+   sur petits écrans (texte qui prend trop de place verticale). */
+@media (max-width: 600px) {
+  .conseiller-mon-projet__text {
+    font-size: 18px;
+  }
+}
+
 /* F2a-ter raffinement : effet typewriter avec fade-in par lettre.
    Chaque caractère est wrappé dans un <span> par le JS, avec un
    transition-delay cascadé. La classe .is-revealing sur le content
