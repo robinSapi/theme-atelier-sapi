@@ -189,9 +189,10 @@
     if (els.choices) {
       els.choices.innerHTML = '';
       var choices = step.choices || [];
-      // F2a-quater : 2 cols quand 2 ou 4 choix (sinon items isolés sur la
-      // dernière ligne d'un grid 3 cols)
-      els.choices.classList.toggle('choices--2col', choices.length === 2 || choices.length === 4);
+      // Round 4 — mockup-11 : 2 cols pour 2 choix, 4 cols pour 4 choix,
+      // sinon 3 cols par défaut. Évite les items isolés sur la dernière ligne.
+      els.choices.classList.toggle('choices--2col', choices.length === 2);
+      els.choices.classList.toggle('choices--4col', choices.length === 4);
       choices.forEach(function (choice) {
         var btn = document.createElement('button');
         btn.type = 'button';
@@ -859,8 +860,9 @@
       if (els.s0Choices) {
         els.s0Choices.innerHTML = '';
         var choices = step.choices || [];
-        // F2a-quater : 2 cols quand 2 ou 4 choix pour éviter les items isolés
-        els.s0Choices.classList.toggle('choices--2col', choices.length === 2 || choices.length === 4);
+        // Round 4 — mockup-11 : 2 cols pour 2 choix, 4 cols pour 4 choix, 3 par défaut.
+        els.s0Choices.classList.toggle('choices--2col', choices.length === 2);
+        els.s0Choices.classList.toggle('choices--4col', choices.length === 4);
         choices.forEach(function (choice) {
           var btn = document.createElement('button');
           btn.type = 'button';
@@ -894,6 +896,9 @@
 
     // Toggle reset link (visible uniquement état partiel)
     if (els.s0ResetWrap) els.s0ResetWrap.hidden = !resetVisible;
+    // Round 4 — mode initial : réassurance "Robin t'aide à choisir" visible.
+    // Mode partiel : remplacée par le bouton "Effacer et recommencer".
+    if (els.s0Reassure) els.s0Reassure.hidden = resetVisible;
 
     // Reset questionHistory : si state partiel, on pré-remplit avec les
     // questions déjà répondues avant la prochaine (pour permettre Retour).
@@ -1275,15 +1280,28 @@
     // Message IA
     els.contactMessage.textContent = (payload && payload.message) || '';
 
-    // Récap projet (caché si vide — cas contact direct sans filters extraits)
+    // Récap projet (mockup-11 : .chips-label + .chips > .chip simples)
+    // Caché si vide — cas contact direct sans filters extraits.
     els.contactRecap.innerHTML = '';
     var recapLines = buildContactRecap(state.answers, state.labels);
     if (recapLines.length) {
-      var label = document.createElement('span');
-      label.className = 'conseiller-contact__recap-label';
-      label.textContent = 'Ton projet';
-      els.contactRecap.appendChild(label);
-      els.contactRecap.appendChild(document.createTextNode(recapLines.join(' · ')));
+      els.contactRecap.setAttribute('style', 'text-align: center;');
+      var labelEl = document.createElement('div');
+      labelEl.className = 'chips-label';
+      labelEl.textContent = 'Ton projet';
+      els.contactRecap.appendChild(labelEl);
+      var chipsEl = document.createElement('div');
+      chipsEl.className = 'chips';
+      chipsEl.setAttribute('style', 'margin-top: 6px;');
+      recapLines.forEach(function (line) {
+        var chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = line;
+        chipsEl.appendChild(chip);
+      });
+      els.contactRecap.appendChild(chipsEl);
+    } else {
+      els.contactRecap.removeAttribute('style');
     }
 
     // Pré-remplit le textarea avec contact_subject + contact_message générés par l'IA
@@ -1633,6 +1651,7 @@
     els.s0Choices     = els.modal.querySelector('[data-s0-choices]');
     els.s0Input       = els.modal.querySelector('[data-s0-input]');
     els.s0ResetWrap   = els.modal.querySelector('[data-s0-reset-wrap]');
+    els.s0Reassure    = els.modal.querySelector('[data-s0-reassure]');
     // S1 (questions guidées)
     els.questionTitle = els.modal.querySelector('[data-question-title]');
     els.choices       = els.modal.querySelector('[data-choices]');

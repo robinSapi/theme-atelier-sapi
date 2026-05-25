@@ -3399,8 +3399,11 @@ function sapi_render_conseiller_modal() {
           </div>
         </div>
 
-        <footer class="modal__foot" data-s0-reset-wrap hidden>
-          <button type="button" class="footer-link" data-action="s0-reset">
+        <footer class="modal__foot">
+          <span style="font-size:11.5px;color:var(--color-wood-mid);font-style:italic;" data-s0-reassure>
+            <?php esc_html_e('Robin t\'aide à choisir, sans engagement', 'theme-sapi-maison'); ?>
+          </span>
+          <button type="button" class="footer-link" data-action="s0-reset" data-s0-reset-wrap hidden>
             <?php esc_html_e('Effacer et recommencer', 'theme-sapi-maison'); ?>
           </button>
         </footer>
@@ -3434,7 +3437,7 @@ function sapi_render_conseiller_modal() {
       <section class="modal__screen" data-screen="s2-chat" hidden>
         <header class="modal__head">
           <span class="badge">
-            <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8-1.476 0-2.866-.317-4.083-.876L3 21l1.876-4.917A7.997 7.997 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
             <?php esc_html_e('Échange avec Robin', 'theme-sapi-maison'); ?>
           </span>
         </header>
@@ -3444,7 +3447,7 @@ function sapi_render_conseiller_modal() {
             <div class="chat-bubbles" data-chat-messages></div>
             <form class="text-input-wrap" data-chat-form>
               <input type="text" class="text-input" data-chat-input
-                     placeholder="<?php esc_attr_e('Continuer la conversation…', 'theme-sapi-maison'); ?>"
+                     placeholder="<?php esc_attr_e('Ta réponse…', 'theme-sapi-maison'); ?>"
                      maxlength="1000"
                      aria-label="<?php esc_attr_e('Message', 'theme-sapi-maison'); ?>">
               <button type="submit" class="text-submit" aria-label="<?php esc_attr_e('Envoyer', 'theme-sapi-maison'); ?>">

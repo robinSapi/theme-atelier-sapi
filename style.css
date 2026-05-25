@@ -24001,6 +24001,13 @@ body.woocommerce-cart div.woocommerce-wrapper {
   font-weight: 600;
   color: var(--color-wood-dark);
 }
+/* Round 4 — Si le label est hidden (essence/taille non applicable), cache
+   aussi la valeur qui suit immédiatement, sinon une cellule grid vide
+   s'affiche. Sélecteur adjacent + qui matche `value` directement après un
+   `label[hidden]`. Évite de toucher au JS. */
+.recap-card__item-label[hidden] + .recap-card__item-value {
+  display: none;
+}
 .conseil-italic {
   font-style: italic;
   font-size: 13px;
