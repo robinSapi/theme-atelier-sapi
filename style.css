@@ -11912,7 +11912,10 @@ button.room-card {
   }
 
   .room-picker-inner {
-    padding: 0 1rem 1.5rem;
+    /* Mobile — padding uniforme 1.5rem (24px) tout autour pour éloigner
+       titre, cartes et input des bords de la card (seul l'écart bas
+       sous l'input était correct, on s'aligne dessus). */
+    padding: 1.5rem;
   }
 
   /* Mobile — titre plus discret pour éviter qu'il occupe 3 grosses lignes
