@@ -6697,7 +6697,11 @@ function sapi_megafilter_export_csv() {
 
   global $wpdb;
   $table = $wpdb->prefix . 'sapi_megafilter_sessions';
-  $rows = $wpdb->get_results("SELECT * FROM $table ORDER BY created_at DESC", ARRAY_A);
+  // Respecter les filtres en cours (mêmes paramètres GET que la page admin).
+  $filters = sapi_megafilter_admin_read_filters();
+  list($where_sql, $args) = sapi_megafilter_admin_build_where($filters);
+  $sql = "SELECT * FROM $table $where_sql ORDER BY created_at DESC";
+  $rows = $args ? $wpdb->get_results($wpdb->prepare($sql, $args), ARRAY_A) : $wpdb->get_results($sql, ARRAY_A);
 
   header('Content-Type: text/csv; charset=utf-8');
   header('Content-Disposition: attachment; filename=conseiller-sessions-' . wp_date('Y-m-d') . '.csv');
@@ -6746,9 +6750,180 @@ function sapi_megafilter_export_csv() {
 add_action('admin_init', 'sapi_megafilter_export_csv');
 
 /**
- * Page admin V3 — version minimaliste pour Commit 1 (chantier 4 partiel).
- * Affiche stats basiques + tableau brut. Le dashboard complet (mockup-12)
- * + filtres globaux + drill-down arriveront dans les commits suivants.
+ * Enqueue CSS/JS admin — uniquement sur la page Conseiller (slug
+ * sapi-conseiller-sessions, hook toplevel_page_sapi-conseiller-sessions).
+ */
+function sapi_megafilter_admin_enqueue($hook) {
+  if ($hook !== 'toplevel_page_sapi-conseiller-sessions') return;
+  $base = get_template_directory_uri();
+  $dir  = get_template_directory();
+  wp_enqueue_style(
+    'sapi-admin-conseiller',
+    $base . '/assets/admin-conseiller.css',
+    [],
+    filemtime($dir . '/assets/admin-conseiller.css')
+  );
+  wp_enqueue_script(
+    'sapi-admin-conseiller',
+    $base . '/assets/admin-conseiller.js',
+    [],
+    filemtime($dir . '/assets/admin-conseiller.js'),
+    true
+  );
+  wp_localize_script('sapi-admin-conseiller', 'SAPI_ADMIN_CONSEILLER', [
+    'ajaxUrl' => admin_url('admin-ajax.php'),
+    'nonce'   => wp_create_nonce('sapi-admin-conseiller'),
+  ]);
+}
+add_action('admin_enqueue_scripts', 'sapi_megafilter_admin_enqueue');
+
+/**
+ * Lit les filtres globaux depuis $_GET et retourne un tableau sanitisé.
+ * Utilisé par la page admin et l'export CSV pour garantir la cohérence.
+ */
+function sapi_megafilter_admin_read_filters() {
+  $valid_periods  = ['7d', '30d', 'all'];
+  $valid_entries  = ['home_picker', 'mes_creations', 'product_pill', 'freetext'];
+  $valid_pieces   = ['salon', 'cuisine', 'chambre', 'bureau', 'entree', 'escalier'];
+  $valid_devices  = ['desktop', 'mobile'];
+  $valid_statuses = ['chat', 'contact', 'complete'];
+
+  $period = isset($_GET['period']) ? sanitize_key($_GET['period']) : '7d';
+  if (!in_array($period, $valid_periods, true)) $period = '7d';
+
+  $entry = isset($_GET['entry']) ? sanitize_key($_GET['entry']) : '';
+  if ($entry && !in_array($entry, $valid_entries, true)) $entry = '';
+
+  $piece = isset($_GET['piece']) ? sanitize_key($_GET['piece']) : '';
+  if ($piece && !in_array($piece, $valid_pieces, true)) $piece = '';
+
+  $device = isset($_GET['device']) ? sanitize_key($_GET['device']) : '';
+  if ($device && !in_array($device, $valid_devices, true)) $device = '';
+
+  $status = isset($_GET['status']) ? sanitize_key($_GET['status']) : '';
+  if ($status && !in_array($status, $valid_statuses, true)) $status = '';
+
+  $q = isset($_GET['q']) ? sanitize_text_field(wp_unslash($_GET['q'])) : '';
+
+  return [
+    'period' => $period,
+    'entry'  => $entry,
+    'piece'  => $piece,
+    'device' => $device,
+    'status' => $status,
+    'q'      => $q,
+  ];
+}
+
+/**
+ * Construit la clause WHERE prepared depuis les filtres lus.
+ * @return array [$where_sql (string '' ou 'WHERE ...'), $args (array)]
+ */
+function sapi_megafilter_admin_build_where($filters) {
+  global $wpdb;
+  $where = [];
+  $args  = [];
+
+  if (!empty($filters['period']) && $filters['period'] !== 'all') {
+    $days = ($filters['period'] === '30d') ? 30 : 7;
+    $where[] = 'created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)';
+    $args[] = $days;
+  }
+  if (!empty($filters['entry'])) {
+    $where[] = 'entry_point = %s';
+    $args[] = $filters['entry'];
+  }
+  if (!empty($filters['piece'])) {
+    $where[] = 'piece = %s';
+    $args[] = $filters['piece'];
+  }
+  if (!empty($filters['device'])) {
+    $where[] = 'device_type LIKE %s';
+    $args[] = ($filters['device'] === 'mobile') ? 'Mobile%' : 'Desktop%';
+  }
+  switch ($filters['status'] ?? '') {
+    case 'chat':     $where[] = 'ai_chat_used = 1'; break;
+    case 'contact':  $where[] = 'contact_triggered = 1'; break;
+    case 'complete': $where[] = 'answers_completed = 1'; break;
+  }
+  if (!empty($filters['q'])) {
+    $q = '%' . $wpdb->esc_like($filters['q']) . '%';
+    $where[] = '(location LIKE %s OR ip_address LIKE %s OR ai_freetext_input LIKE %s OR contact_email LIKE %s)';
+    array_push($args, $q, $q, $q, $q);
+  }
+
+  $where_sql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+  return [$where_sql, $args];
+}
+
+/**
+ * Calcule les stats dashboard selon les filtres en cours.
+ */
+function sapi_megafilter_admin_compute_stats($filters) {
+  global $wpdb;
+  $table = $wpdb->prefix . 'sapi_megafilter_sessions';
+  list($where_sql, $args) = sapi_megafilter_admin_build_where($filters);
+
+  $total_q = "SELECT COUNT(*) FROM $table $where_sql";
+  $total = (int) ($args ? $wpdb->get_var($wpdb->prepare($total_q, $args)) : $wpdb->get_var($total_q));
+
+  $completed_q = "SELECT COUNT(*) FROM $table $where_sql " . ($where_sql ? 'AND' : 'WHERE') . ' answers_completed = 1';
+  $completed = (int) ($args ? $wpdb->get_var($wpdb->prepare($completed_q, $args)) : $wpdb->get_var($completed_q));
+
+  $chat_q = "SELECT COUNT(*) FROM $table $where_sql " . ($where_sql ? 'AND' : 'WHERE') . ' ai_chat_used = 1';
+  $chat_used = (int) ($args ? $wpdb->get_var($wpdb->prepare($chat_q, $args)) : $wpdb->get_var($chat_q));
+
+  $contacts_q = "SELECT COUNT(*) FROM $table $where_sql " . ($where_sql ? 'AND' : 'WHERE') . ' contact_submitted = 1';
+  $contacts = (int) ($args ? $wpdb->get_var($wpdb->prepare($contacts_q, $args)) : $wpdb->get_var($contacts_q));
+
+  // Delta % vs période précédente (sauf si period = 'all')
+  $delta_pct = null;
+  if (!empty($filters['period']) && $filters['period'] !== 'all') {
+    $days = ($filters['period'] === '30d') ? 30 : 7;
+    $prev = (int) $wpdb->get_var($wpdb->prepare(
+      "SELECT COUNT(*) FROM $table WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY) AND created_at < DATE_SUB(NOW(), INTERVAL %d DAY)",
+      $days * 2,
+      $days
+    ));
+    if ($prev > 0) {
+      $delta_pct = (int) round((($total - $prev) / $prev) * 100);
+    } elseif ($total > 0) {
+      $delta_pct = 100;
+    }
+  }
+
+  // Top pièces
+  $pieces_q = "SELECT piece, COUNT(*) AS c FROM $table $where_sql " . ($where_sql ? 'AND' : 'WHERE') . " piece != '' GROUP BY piece ORDER BY c DESC LIMIT 6";
+  $top_pieces = $args ? $wpdb->get_results($wpdb->prepare($pieces_q, $args)) : $wpdb->get_results($pieces_q);
+
+  // Top styles
+  $styles_q = "SELECT style, COUNT(*) AS c FROM $table $where_sql " . ($where_sql ? 'AND' : 'WHERE') . " style != '' GROUP BY style ORDER BY c DESC LIMIT 3";
+  $top_styles = $args ? $wpdb->get_results($wpdb->prepare($styles_q, $args)) : $wpdb->get_results($styles_q);
+
+  // Top provenance
+  $entry_q = "SELECT entry_point, COUNT(*) AS c FROM $table $where_sql " . ($where_sql ? 'AND' : 'WHERE') . " entry_point != '' GROUP BY entry_point ORDER BY c DESC LIMIT 4";
+  $top_entry = $args ? $wpdb->get_results($wpdb->prepare($entry_q, $args)) : $wpdb->get_results($entry_q);
+
+  // Breakdown contacts par kind (uniquement parmi les soumis)
+  $contact_break_q = "SELECT contact_kind, COUNT(*) AS c FROM $table $where_sql " . ($where_sql ? 'AND' : 'WHERE') . " contact_submitted = 1 GROUP BY contact_kind";
+  $contact_breakdown = $args ? $wpdb->get_results($wpdb->prepare($contact_break_q, $args)) : $wpdb->get_results($contact_break_q);
+
+  return [
+    'total'             => $total,
+    'completed'         => $completed,
+    'chat_used'         => $chat_used,
+    'contacts'          => $contacts,
+    'delta_pct'         => $delta_pct,
+    'top_pieces'        => $top_pieces ?: [],
+    'top_styles'        => $top_styles ?: [],
+    'top_entry'         => $top_entry ?: [],
+    'contact_breakdown' => $contact_breakdown ?: [],
+  ];
+}
+
+/**
+ * Page admin V3 — version complète (mockup-12) : header + dashboard 4 stats
+ * + 2 ranking cards + filtres globaux + tableau filtrable + drill-down modal.
  */
 function sapi_megafilter_admin_page() {
   global $wpdb;
@@ -6756,174 +6931,686 @@ function sapi_megafilter_admin_page() {
 
   sapi_megafilter_maybe_create_table();
 
-  // Handle delete
-  if (isset($_GET['sapi_megafilter_delete']) && isset($_GET['_wpnonce'])) {
-    $delete_id = (int) $_GET['sapi_megafilter_delete'];
-    if (wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'sapi_megafilter_delete_' . $delete_id)) {
-      $wpdb->delete($table, ['id' => $delete_id], ['%d']);
-      echo '<div class="notice notice-success is-dismissible"><p>Session supprimée.</p></div>';
-    }
-  }
+  $filters = sapi_megafilter_admin_read_filters();
+  list($where_sql, $args) = sapi_megafilter_admin_build_where($filters);
 
   $per_page = 30;
   $paged = isset($_GET['paged']) ? max(1, (int) $_GET['paged']) : 1;
   $offset = ($paged - 1) * $per_page;
 
-  $total = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table");
-  $rows = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table ORDER BY created_at DESC LIMIT %d OFFSET %d", $per_page, $offset));
-  $total_pages = ceil($total / $per_page);
+  $count_q = "SELECT COUNT(*) FROM $table $where_sql";
+  $total_filtered = (int) ($args ? $wpdb->get_var($wpdb->prepare($count_q, $args)) : $wpdb->get_var($count_q));
+  $total_pages = max(1, ceil($total_filtered / $per_page));
 
-  $stats_completed = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE answers_completed = 1");
-  $stats_chat      = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE ai_chat_used = 1");
-  $stats_contact   = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE contact_submitted = 1");
+  $rows_q = "SELECT * FROM $table $where_sql ORDER BY created_at DESC LIMIT %d OFFSET %d";
+  $rows_args = array_merge($args, [$per_page, $offset]);
+  $rows = $wpdb->get_results($wpdb->prepare($rows_q, $rows_args));
 
-  $export_url = wp_nonce_url(admin_url('admin.php?page=sapi-conseiller-sessions&sapi_megafilter_export=1'), 'sapi_megafilter_export');
+  $stats = sapi_megafilter_admin_compute_stats($filters);
 
-  // Labels d'affichage pour entry_point (mockup-12 vocabulaire)
+  // URL export avec filtres préservés
+  $export_args = array_filter(array_merge($filters, ['sapi_megafilter_export' => '1']));
+  $export_url  = wp_nonce_url(
+    add_query_arg($export_args, admin_url('admin.php?page=sapi-conseiller-sessions')),
+    'sapi_megafilter_export'
+  );
+
+  // Labels d'affichage (mockup-12)
   $entry_labels = [
     'home_picker'   => 'Accueil',
     'mes_creations' => 'Mes créations',
     'product_pill'  => 'Fiche produit',
     'freetext'      => 'Texte libre',
   ];
-  $entry_colors = [
-    'home_picker'   => '#2E7D32',
-    'mes_creations' => '#E35B24',
-    'product_pill'  => '#1565C0',
-    'freetext'      => '#7B1FA2',
+  $entry_pill_class = [
+    'home_picker'   => 'pill--home',
+    'mes_creations' => 'pill--mes-creations',
+    'product_pill'  => 'pill--product',
+    'freetext'      => 'pill--freetext',
   ];
   $contact_kind_labels = [
     'pro'        => 'PRO',
     'sur-mesure' => 'SUR-MESURE',
     'simple'     => 'SIMPLE',
   ];
-  $contact_kind_colors = [
-    'pro'        => '#7B1FA2',
-    'sur-mesure' => '#E35B24',
-    'simple'     => '#1565C0',
+  $contact_kind_pill = [
+    'pro'        => 'pill--pro',
+    'sur-mesure' => 'pill--sur-mesure',
+    'simple'     => 'pill--simple',
   ];
-  ?>
-  <div class="wrap">
-    <h1>Robin Conseiller — Sessions <span style="font-size:0.6em; color:#999;">(<?php echo esc_html($total); ?>)</span></h1>
+  $piece_labels = [
+    'salon' => 'Salon', 'cuisine' => 'Cuisine', 'chambre' => 'Chambre',
+    'bureau' => 'Bureau', 'entree' => 'Entrée', 'escalier' => 'Escalier',
+  ];
+  $taille_labels = [
+    'petite' => 'Petite', 'standard' => 'Standard', 'grande' => 'Grande',
+    'intime' => 'Intime', 'confortable' => 'Confortable', 'spacieuse' => 'Spacieuse',
+    'droit' => 'Droit', 'tournant' => 'Tournant',
+  ];
+  $sortie_labels = [
+    'plafond' => 'Plafond', 'mur' => 'Mur', 'aucune' => 'Pas de sortie', 'inconnu' => 'Ne sais pas',
+  ];
+  $style_labels = [
+    'moderne' => 'Moderne', 'neutre' => 'Neutre', 'ancien' => 'Ancien',
+  ];
 
-    <div style="display:flex; gap:1.5rem; margin:1rem 0 1.5rem; flex-wrap:wrap;">
-      <div style="background:#fff; border:1px solid #ddd; border-radius:8px; padding:0.75rem 1.25rem; min-width:120px;">
-        <div style="font-size:1.5em; font-weight:700; color:#1d2327;"><?php echo esc_html($total); ?></div>
-        <div style="font-size:0.8em; color:#666;">Sessions totales</div>
+  // Helpers d'affichage
+  $period = $filters['period'];
+  $period_label_map = ['7d' => '7 jours', '30d' => '30 jours', 'all' => 'Tout'];
+  $period_label = $period_label_map[$period] ?? '7 jours';
+
+  $completed_pct = $stats['total'] > 0 ? round(($stats['completed'] / $stats['total']) * 100) : 0;
+  $chat_pct      = $stats['total'] > 0 ? round(($stats['chat_used'] / $stats['total']) * 100) : 0;
+
+  // Top valeurs absolues pour normaliser les barres
+  $max_piece = $stats['top_pieces'] ? max(array_map(function($r) { return (int)$r->c; }, $stats['top_pieces'])) : 1;
+  $max_style = $stats['top_styles'] ? max(array_map(function($r) { return (int)$r->c; }, $stats['top_styles'])) : 1;
+  $max_entry = $stats['top_entry']  ? max(array_map(function($r) { return (int)$r->c; }, $stats['top_entry']))  : 1;
+  $sum_piece = $stats['top_pieces'] ? array_sum(array_map(function($r) { return (int)$r->c; }, $stats['top_pieces'])) : 0;
+  $sum_style = $stats['top_styles'] ? array_sum(array_map(function($r) { return (int)$r->c; }, $stats['top_styles'])) : 0;
+  $sum_entry = $stats['top_entry']  ? array_sum(array_map(function($r) { return (int)$r->c; }, $stats['top_entry']))  : 0;
+
+  // Breakdown contacts en texte
+  $contact_sub_parts = [];
+  foreach ($stats['contact_breakdown'] as $row) {
+    if (!$row->contact_kind) continue;
+    $label = $contact_kind_labels[$row->contact_kind] ?? strtoupper($row->contact_kind);
+    $contact_sub_parts[] = (int)$row->c . ' ' . strtolower($label);
+  }
+  $contact_sub = $contact_sub_parts ? implode(' · ', $contact_sub_parts) : 'Aucun contact';
+  ?>
+  <div class="wrap sapi-conseiller-admin">
+
+    <div class="header-row">
+      <h1>Robin Conseiller — Sessions <span class="count">(<?php echo esc_html($total_filtered); ?>)</span></h1>
+      <a href="<?php echo esc_url($export_url); ?>" class="button button-primary">📥 Exporter CSV</a>
+    </div>
+
+    <!-- ═══════════════ DASHBOARD ═══════════════ -->
+    <div class="dashboard">
+      <div class="stat-card">
+        <div class="stat-card__label">Sessions · <?php echo esc_html($period_label); ?></div>
+        <div class="stat-card__value"><?php echo esc_html($stats['total']); ?></div>
+        <div class="stat-card__sub">
+          <?php if ($stats['delta_pct'] !== null) : ?>
+            <?php if ($stats['delta_pct'] >= 0) : ?>
+              <span class="delta-up">▲ <?php echo esc_html($stats['delta_pct']); ?> %</span>
+            <?php else : ?>
+              <span class="delta-down">▼ <?php echo esc_html(abs($stats['delta_pct'])); ?> %</span>
+            <?php endif; ?>
+            vs période précédente
+          <?php else : ?>
+            &nbsp;
+          <?php endif; ?>
+        </div>
       </div>
-      <div style="background:#fff; border:1px solid #ddd; border-radius:8px; padding:0.75rem 1.25rem; min-width:120px;">
-        <div style="font-size:1.5em; font-weight:700; color:#2E7D32;"><?php echo esc_html($stats_completed); ?></div>
-        <div style="font-size:0.8em; color:#666;">Quiz complets</div>
+      <div class="stat-card">
+        <div class="stat-card__label">Quiz complétés</div>
+        <div class="stat-card__value"><?php echo esc_html($completed_pct); ?> %</div>
+        <div class="stat-card__sub"><?php echo esc_html($stats['completed']); ?> sessions sur <?php echo esc_html($stats['total']); ?></div>
       </div>
-      <div style="background:#fff; border:1px solid #ddd; border-radius:8px; padding:0.75rem 1.25rem; min-width:120px;">
-        <div style="font-size:1.5em; font-weight:700; color:#937D68;"><?php echo esc_html($stats_chat); ?></div>
-        <div style="font-size:0.8em; color:#666;">Chat IA</div>
+      <div class="stat-card">
+        <div class="stat-card__label">IA chat utilisée</div>
+        <div class="stat-card__value"><?php echo esc_html($chat_pct); ?> %</div>
+        <div class="stat-card__sub"><?php echo esc_html($stats['chat_used']); ?> conversations</div>
       </div>
-      <div style="background:#fff; border:1px solid #ddd; border-radius:8px; padding:0.75rem 1.25rem; min-width:120px;">
-        <div style="font-size:1.5em; font-weight:700; color:#1565C0;"><?php echo esc_html($stats_contact); ?></div>
-        <div style="font-size:0.8em; color:#666;">Contacts envoyés</div>
+      <div class="stat-card">
+        <div class="stat-card__label">Contacts envoyés</div>
+        <div class="stat-card__value"><?php echo esc_html($stats['contacts']); ?></div>
+        <div class="stat-card__sub"><?php echo esc_html($contact_sub); ?></div>
       </div>
     </div>
 
-    <p><a href="<?php echo esc_url($export_url); ?>" class="button button-secondary">Exporter CSV</a></p>
-
-    <table class="widefat striped" style="margin-top:10px; font-size:13px;">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Provenance</th>
-          <th>Device</th>
-          <th>Lieu</th>
-          <th>Pièce</th>
-          <th>Taille</th>
-          <th>Sortie</th>
-          <th>Style</th>
-          <th style="text-align:center;">IA</th>
-          <th style="text-align:center;">Chat</th>
-          <th>Contact</th>
-          <th style="width:40px;"></th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php if (empty($rows)) : ?>
-          <tr><td colspan="12" style="text-align:center; color:#999;">Aucune session enregistrée.</td></tr>
+    <!-- ═══════════════ RANKING CARDS ═══════════════ -->
+    <div class="dashboard-row-2">
+      <div class="ranking-card">
+        <div class="ranking-card__title">Top pièces demandées (<?php echo esc_html($period_label); ?>)</div>
+        <?php if (empty($stats['top_pieces'])) : ?>
+          <p style="color:#8c8f94;font-size:12px;">Aucune donnée.</p>
         <?php else : ?>
-          <?php foreach ($rows as $r) : ?>
-            <tr>
-              <td style="white-space:nowrap;"><?php echo esc_html(date('d/m H:i', strtotime($r->created_at))); ?></td>
-              <td>
-                <?php
-                $entry = $r->entry_point;
-                $entry_label = $entry_labels[$entry] ?? esc_html($entry);
-                $entry_color = $entry_colors[$entry] ?? '#666';
-                ?>
-                <?php if ($entry) : ?>
-                  <span style="background:<?php echo esc_attr($entry_color); ?>;color:#fff;padding:2px 8px;border-radius:10px;font-size:0.75em;font-weight:600;">
-                    <?php echo esc_html($entry_label); ?>
-                  </span>
-                <?php else : ?>
-                  —
-                <?php endif; ?>
-              </td>
-              <td style="white-space:nowrap; font-size:0.85em;"><?php echo esc_html($r->device_type ?: '—'); ?></td>
-              <td style="font-size:0.85em;"><?php echo esc_html($r->location ?: '—'); ?></td>
-              <td><?php echo esc_html($r->piece ?: '—'); ?></td>
-              <td><?php echo esc_html($r->taille ?: $r->taille_escalier ?: '—'); ?></td>
-              <td><?php echo esc_html($r->sortie ?: '—'); ?></td>
-              <td><?php echo esc_html($r->style ?: '—'); ?></td>
-              <td style="text-align:center;">
-                <?php echo $r->ai_call_count > 0 ? esc_html($r->ai_call_count) : '—'; ?>
-              </td>
-              <td style="text-align:center;">
-                <?php echo $r->ai_chat_used ? '<span style="color:#2E7D32;">&#10003;</span>' : '—'; ?>
-              </td>
-              <td>
-                <?php if ($r->contact_submitted) :
-                  $kind = $r->contact_kind;
-                  $kind_label = $contact_kind_labels[$kind] ?? strtoupper(esc_html($kind));
-                  $kind_color = $contact_kind_colors[$kind] ?? '#666';
-                ?>
-                  <span style="background:<?php echo esc_attr($kind_color); ?>;color:#fff;padding:1px 7px;border-radius:10px;font-size:0.7em;font-weight:600;text-transform:uppercase;">
-                    <?php echo esc_html($kind_label); ?>
-                  </span>
-                <?php elseif ($r->contact_triggered) : ?>
-                  <span style="color:#999;font-size:0.8em;">Abandon</span>
-                <?php else : ?>
-                  —
-                <?php endif; ?>
-              </td>
-              <td style="text-align:center;">
-                <?php
-                $delete_url = wp_nonce_url(
-                  admin_url('admin.php?page=sapi-conseiller-sessions&sapi_megafilter_delete=' . (int) $r->id),
-                  'sapi_megafilter_delete_' . (int) $r->id
-                );
-                ?>
-                <a href="<?php echo esc_url($delete_url); ?>"
-                   onclick="return confirm('Supprimer cette session ?');"
-                   style="color:#a00; text-decoration:none; font-size:0.9em;" title="Supprimer">&#10005;</a>
-              </td>
-            </tr>
+          <?php foreach ($stats['top_pieces'] as $row) :
+            $piece_label = $piece_labels[$row->piece] ?? ucfirst($row->piece);
+            $bar_pct = $max_piece > 0 ? round(((int)$row->c / $max_piece) * 100) : 0;
+            $share_pct = $sum_piece > 0 ? round(((int)$row->c / $sum_piece) * 100) : 0;
+          ?>
+            <div class="ranking-row">
+              <div class="ranking-row__label"><?php echo esc_html($piece_label); ?></div>
+              <div class="ranking-row__bar"><div class="ranking-row__fill" style="width:<?php echo esc_attr($bar_pct); ?>%;"></div></div>
+              <div class="ranking-row__pct"><?php echo esc_html($share_pct); ?> %</div>
+            </div>
           <?php endforeach; ?>
         <?php endif; ?>
-      </tbody>
-    </table>
-    <?php if ($total_pages > 1) : ?>
-      <div class="tablenav">
-        <div class="tablenav-pages">
-          <?php
-          echo wp_kses_post(paginate_links([
-            'base'    => add_query_arg('paged', '%#%'),
-            'format'  => '',
-            'current' => $paged,
-            'total'   => $total_pages,
-          ]));
-          ?>
-        </div>
       </div>
-    <?php endif; ?>
+
+      <div class="ranking-card">
+        <div class="ranking-card__title">Top styles demandés (<?php echo esc_html($period_label); ?>)</div>
+        <?php if (empty($stats['top_styles'])) : ?>
+          <p style="color:#8c8f94;font-size:12px;">Aucune donnée.</p>
+        <?php else : ?>
+          <?php foreach ($stats['top_styles'] as $row) :
+            $style_label = $style_labels[$row->style] ?? ucfirst($row->style);
+            $bar_pct = $max_style > 0 ? round(((int)$row->c / $max_style) * 100) : 0;
+            $share_pct = $sum_style > 0 ? round(((int)$row->c / $sum_style) * 100) : 0;
+          ?>
+            <div class="ranking-row">
+              <div class="ranking-row__label"><?php echo esc_html($style_label); ?></div>
+              <div class="ranking-row__bar"><div class="ranking-row__fill" style="width:<?php echo esc_attr($bar_pct); ?>%;background:#E35B24;"></div></div>
+              <div class="ranking-row__pct"><?php echo esc_html($share_pct); ?> %</div>
+            </div>
+          <?php endforeach; ?>
+        <?php endif; ?>
+
+        <div style="margin-top: 22px;" class="ranking-card__title">Provenance des sessions (<?php echo esc_html($period_label); ?>)</div>
+        <?php if (empty($stats['top_entry'])) : ?>
+          <p style="color:#8c8f94;font-size:12px;">Aucune donnée.</p>
+        <?php else : ?>
+          <?php
+          $entry_bar_colors = [
+            'home_picker'   => '#2E7D32',
+            'mes_creations' => '#E35B24',
+            'product_pill'  => '#1565C0',
+            'freetext'      => '#7B1FA2',
+          ];
+          foreach ($stats['top_entry'] as $row) :
+            $entry_label = $entry_labels[$row->entry_point] ?? ucfirst($row->entry_point);
+            $bar_color = $entry_bar_colors[$row->entry_point] ?? '#937D68';
+            $bar_pct = $max_entry > 0 ? round(((int)$row->c / $max_entry) * 100) : 0;
+            $share_pct = $sum_entry > 0 ? round(((int)$row->c / $sum_entry) * 100) : 0;
+          ?>
+            <div class="ranking-row">
+              <div class="ranking-row__label"><?php echo esc_html($entry_label); ?></div>
+              <div class="ranking-row__bar"><div class="ranking-row__fill" style="width:<?php echo esc_attr($bar_pct); ?>%;background:<?php echo esc_attr($bar_color); ?>;"></div></div>
+              <div class="ranking-row__pct"><?php echo esc_html($share_pct); ?> %</div>
+            </div>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </div>
+    </div>
+
+    <!-- ═══════════════ FILTRES ═══════════════ -->
+    <form method="get" class="filters">
+      <input type="hidden" name="page" value="sapi-conseiller-sessions">
+      <span class="filter-label">Période :</span>
+      <select name="period" class="filter-select" onchange="this.form.submit()">
+        <option value="7d"  <?php selected($filters['period'], '7d'); ?>>7 derniers jours</option>
+        <option value="30d" <?php selected($filters['period'], '30d'); ?>>30 derniers jours</option>
+        <option value="all" <?php selected($filters['period'], 'all'); ?>>Tout</option>
+      </select>
+      <span class="filter-sep"></span>
+      <span class="filter-label">Provenance :</span>
+      <select name="entry" class="filter-select" onchange="this.form.submit()">
+        <option value="">Toutes</option>
+        <option value="home_picker"   <?php selected($filters['entry'], 'home_picker'); ?>>Accueil</option>
+        <option value="mes_creations" <?php selected($filters['entry'], 'mes_creations'); ?>>Mes créations</option>
+        <option value="product_pill"  <?php selected($filters['entry'], 'product_pill'); ?>>Fiche produit</option>
+        <option value="freetext"      <?php selected($filters['entry'], 'freetext'); ?>>Texte libre</option>
+      </select>
+      <span class="filter-sep"></span>
+      <span class="filter-label">Pièce :</span>
+      <select name="piece" class="filter-select" onchange="this.form.submit()">
+        <option value="">Toutes</option>
+        <?php foreach ($piece_labels as $slug => $label) : ?>
+          <option value="<?php echo esc_attr($slug); ?>" <?php selected($filters['piece'], $slug); ?>><?php echo esc_html($label); ?></option>
+        <?php endforeach; ?>
+      </select>
+      <span class="filter-sep"></span>
+      <select name="device" class="filter-select" onchange="this.form.submit()">
+        <option value="">Tous devices</option>
+        <option value="desktop" <?php selected($filters['device'], 'desktop'); ?>>Desktop</option>
+        <option value="mobile"  <?php selected($filters['device'], 'mobile'); ?>>Mobile</option>
+      </select>
+      <select name="status" class="filter-select" onchange="this.form.submit()">
+        <option value="">Toutes les sessions</option>
+        <option value="chat"     <?php selected($filters['status'], 'chat'); ?>>Avec chat IA</option>
+        <option value="contact"  <?php selected($filters['status'], 'contact'); ?>>Avec contact</option>
+        <option value="complete" <?php selected($filters['status'], 'complete'); ?>>Quiz complets</option>
+      </select>
+      <input type="search" name="q" class="filter-search" placeholder="Rechercher (lieu, IP, texte libre, email…)" value="<?php echo esc_attr($filters['q']); ?>">
+    </form>
+
+    <!-- ═══════════════ TABLEAU ═══════════════ -->
+    <div class="table-wrap">
+      <table class="widefat">
+        <thead>
+          <tr>
+            <th class="nowrap">Date</th>
+            <th>Provenance</th>
+            <th class="nowrap">Device</th>
+            <th>Lieu</th>
+            <th>Pièce</th>
+            <th>Taille</th>
+            <th>Sortie</th>
+            <th>Style</th>
+            <th class="center">IA</th>
+            <th class="center">Chat</th>
+            <th>Contact</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($rows)) : ?>
+            <tr><td colspan="11" style="text-align:center;color:#8c8f94;padding:24px;">Aucune session pour ces filtres.</td></tr>
+          <?php else : ?>
+            <?php foreach ($rows as $r) :
+              $entry_class = $entry_pill_class[$r->entry_point] ?? '';
+              $entry_label = $entry_labels[$r->entry_point] ?? '—';
+              $piece_label = $piece_labels[$r->piece] ?? ($r->piece ?: '—');
+              $taille_raw  = $r->taille ?: $r->taille_escalier;
+              $taille_label = $taille_labels[$taille_raw] ?? ($taille_raw ?: '—');
+              $sortie_label = $sortie_labels[$r->sortie] ?? ($r->sortie ?: '—');
+              $style_label = $style_labels[$r->style] ?? ($r->style ?: '—');
+            ?>
+              <tr data-session-id="<?php echo esc_attr($r->session_id); ?>">
+                <td class="nowrap"><?php echo esc_html(date('d/m · H:i', strtotime($r->created_at))); ?></td>
+                <td>
+                  <?php if ($r->entry_point) : ?>
+                    <span class="pill <?php echo esc_attr($entry_class); ?> pill--small"><?php echo esc_html($entry_label); ?></span>
+                  <?php else : ?><span class="dash">—</span><?php endif; ?>
+                </td>
+                <td class="nowrap muted"><?php echo esc_html($r->device_type ?: '—'); ?></td>
+                <td><?php echo esc_html($r->location ?: '—'); ?></td>
+                <td><?php echo esc_html($piece_label); ?></td>
+                <td><?php echo $taille_raw ? esc_html($taille_label) : '<span class="dash">—</span>'; ?></td>
+                <td><?php echo $r->sortie ? esc_html($sortie_label) : '<span class="dash">—</span>'; ?></td>
+                <td><?php echo $r->style ? esc_html($style_label) : '<span class="dash">—</span>'; ?></td>
+                <td class="center muted"><?php echo $r->ai_call_count > 0 ? esc_html($r->ai_call_count) : '<span class="dash">—</span>'; ?></td>
+                <td class="center">
+                  <?php if ($r->ai_chat_used) :
+                    $chat_count = 0;
+                    if (!empty($r->ai_chat_messages)) {
+                      $msgs = json_decode($r->ai_chat_messages, true);
+                      if (is_array($msgs)) $chat_count = count($msgs);
+                    }
+                  ?>
+                    <span class="check">✓</span> <small class="muted">(<?php echo esc_html($chat_count); ?>)</small>
+                  <?php else : ?><span class="dash">—</span><?php endif; ?>
+                </td>
+                <td>
+                  <?php if ($r->contact_submitted) :
+                    $kind_class = $contact_kind_pill[$r->contact_kind] ?? '';
+                    $kind_label = $contact_kind_labels[$r->contact_kind] ?? strtoupper($r->contact_kind);
+                  ?>
+                    <span class="pill <?php echo esc_attr($kind_class); ?> pill--small"><?php echo esc_html($kind_label); ?></span>
+                  <?php elseif ($r->contact_triggered) : ?>
+                    <span class="pill pill--outline pill--small">Abandon</span>
+                  <?php else : ?>
+                    <span class="dash">—</span>
+                  <?php endif; ?>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+
+      <div class="pagination">
+        <div>
+          <?php if ($total_filtered > 0) :
+            $start = $offset + 1;
+            $end = min($offset + $per_page, $total_filtered);
+          ?>
+            Affichage <?php echo esc_html($start); ?> - <?php echo esc_html($end); ?> sur <?php echo esc_html($total_filtered); ?>
+          <?php else : ?>
+            &nbsp;
+          <?php endif; ?>
+        </div>
+        <?php if ($total_pages > 1) : ?>
+          <div class="pagination__pages">
+            <?php
+            $links = paginate_links([
+              'base'      => add_query_arg('paged', '%#%'),
+              'format'    => '',
+              'current'   => $paged,
+              'total'     => $total_pages,
+              'prev_text' => '‹ Précédent',
+              'next_text' => 'Suivant ›',
+              'type'      => 'plain',
+            ]);
+            echo wp_kses($links, [
+              'a'    => ['href' => [], 'class' => []],
+              'span' => ['class' => []],
+            ]);
+            ?>
+          </div>
+        <?php endif; ?>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════ DRILL-DOWN MODAL (rempli via JS) ═══════════════ -->
+  <div class="drill-overlay" id="sapi-drill">
+    <div class="drill">
+      <div class="drill__header">
+        <h2>Session</h2>
+        <button class="drill__close" type="button">×</button>
+      </div>
+      <div class="drill__body">
+        <div class="drill-loading">Chargement…</div>
+      </div>
+      <div class="drill__actions">
+        <div class="left"></div>
+        <button class="delete-button" type="button">Supprimer</button>
+      </div>
+    </div>
   </div>
   <?php
+}
+
+/**
+ * Endpoint AJAX — récupère le HTML du drill-down détail pour une session.
+ * Renvoie { title, html, actions_left }.
+ */
+add_action('wp_ajax_sapi_megafilter_get_session_detail', 'sapi_megafilter_ajax_get_session_detail');
+function sapi_megafilter_ajax_get_session_detail() {
+  if (!current_user_can('manage_woocommerce')) {
+    wp_send_json_error(['message' => 'Forbidden']);
+  }
+  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-admin-conseiller')) {
+    wp_send_json_error(['message' => 'Nonce invalide']);
+  }
+  $session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : '';
+  if (empty($session_id)) {
+    wp_send_json_error(['message' => 'session_id manquant']);
+  }
+  global $wpdb;
+  $table = $wpdb->prefix . 'sapi_megafilter_sessions';
+  $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE session_id = %s", $session_id));
+  if (!$row) {
+    wp_send_json_error(['message' => 'Session non trouvée']);
+  }
+  $payload = sapi_megafilter_render_session_detail($row);
+  wp_send_json_success($payload);
+}
+
+/**
+ * Endpoint AJAX — supprime une session (depuis le drill-down).
+ */
+add_action('wp_ajax_sapi_megafilter_delete_session', 'sapi_megafilter_ajax_delete_session');
+function sapi_megafilter_ajax_delete_session() {
+  if (!current_user_can('manage_woocommerce')) {
+    wp_send_json_error(['message' => 'Forbidden']);
+  }
+  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-admin-conseiller')) {
+    wp_send_json_error(['message' => 'Nonce invalide']);
+  }
+  $session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : '';
+  if (empty($session_id)) {
+    wp_send_json_error(['message' => 'session_id manquant']);
+  }
+  global $wpdb;
+  $table = $wpdb->prefix . 'sapi_megafilter_sessions';
+  $wpdb->delete($table, ['session_id' => $session_id], ['%s']);
+  wp_send_json_success(['deleted' => true]);
+}
+
+/**
+ * Render le HTML du drill-down pour une session. Renvoie { title, html,
+ * actions_left }.
+ */
+function sapi_megafilter_render_session_detail($r) {
+  $entry_labels = [
+    'home_picker'   => 'page d\'accueil',
+    'mes_creations' => 'page Mes créations',
+    'product_pill'  => 'fiche produit',
+    'freetext'      => 'texte libre',
+  ];
+  $entry_pill_class = [
+    'home_picker'   => 'pill--home',
+    'mes_creations' => 'pill--mes-creations',
+    'product_pill'  => 'pill--product',
+    'freetext'      => 'pill--freetext',
+  ];
+  $contact_kind_labels = [
+    'pro'        => 'PRO',
+    'sur-mesure' => 'SUR-MESURE',
+    'simple'     => 'SIMPLE',
+  ];
+  $contact_kind_pill = [
+    'pro'        => 'pill--pro',
+    'sur-mesure' => 'pill--sur-mesure',
+    'simple'     => 'pill--simple',
+  ];
+  $piece_labels = [
+    'salon' => 'Salon', 'cuisine' => 'Cuisine', 'chambre' => 'Chambre',
+    'bureau' => 'Bureau', 'entree' => 'Entrée', 'escalier' => 'Escalier',
+  ];
+  $taille_labels = [
+    'petite' => 'Petite', 'standard' => 'Standard', 'grande' => 'Grande',
+    'intime' => 'Intime', 'confortable' => 'Confortable', 'spacieuse' => 'Spacieuse',
+    'droit' => 'Droit', 'tournant' => 'Tournant',
+  ];
+  $sortie_labels = [
+    'plafond' => 'Plafond', 'mur' => 'Mur', 'aucune' => 'Pas de sortie', 'inconnu' => 'Ne sais pas',
+  ];
+  $hauteur_labels = [
+    'standard'   => 'Standard (2,50 m)',
+    'haut'       => 'Plus haut',
+    'tres_haut'  => 'Très haut',
+  ];
+  $eclairage_labels = [
+    'principal'  => 'Principal',
+    'appoint'    => 'Appoint',
+  ];
+  $table_labels = [
+    'oui' => 'Oui',
+    'non' => 'Non',
+  ];
+  $style_labels = [
+    'moderne' => 'Moderne', 'neutre' => 'Neutre', 'ancien' => 'Ancien',
+  ];
+  $key_labels = [
+    'piece'           => 'Pièce',
+    'taille'          => 'Taille',
+    'taille_escalier' => 'Taille escalier',
+    'sortie'          => 'Sortie élec',
+    'hauteur'         => 'Hauteur',
+    'eclairage'       => 'Éclairage',
+    'table_reponse'   => 'Au-dessus d\'un meuble',
+    'style'           => 'Style',
+  ];
+  $value_lookup = [
+    'piece'           => $piece_labels,
+    'taille'          => $taille_labels,
+    'taille_escalier' => $taille_labels,
+    'sortie'          => $sortie_labels,
+    'hauteur'         => $hauteur_labels,
+    'eclairage'       => $eclairage_labels,
+    'table_reponse'   => $table_labels,
+    'style'           => $style_labels,
+  ];
+
+  // ── Title
+  $date_h = wp_date('d/m/Y à H:i', strtotime($r->created_at));
+  $kind = $r->contact_kind;
+  $kind_suffix = $r->contact_submitted && $kind ? ' — ' . ($contact_kind_labels[$kind] ?? strtoupper($kind)) : '';
+  $piece_suffix = $r->piece ? ' — ' . ($piece_labels[$r->piece] ?? ucfirst($r->piece)) : '';
+  $title_extra = $kind_suffix ?: $piece_suffix;
+  $title = sprintf(
+    'Session du %s <span style="font-size:0.7em;color:#8c8f94;font-weight:400;">%s</span>',
+    esc_html($date_h),
+    esc_html($title_extra)
+  );
+
+  // ── Body sections
+  ob_start();
+
+  // Provenance
+  $entry_class = $entry_pill_class[$r->entry_point] ?? 'pill--outline';
+  $entry_label = ucfirst($r->entry_point ?: 'inconnu');
+  if ($r->entry_point === 'home_picker') $entry_label = 'Accueil';
+  if ($r->entry_point === 'mes_creations') $entry_label = 'Mes créations';
+  if ($r->entry_point === 'product_pill') $entry_label = 'Fiche produit';
+  if ($r->entry_point === 'freetext') $entry_label = 'Texte libre';
+  ?>
+  <div class="drill-section">
+    <h3>Provenance</h3>
+    <div style="font-size:13px;">
+      <span class="pill <?php echo esc_attr($entry_class); ?> pill--small"><?php echo esc_html($entry_label); ?></span>
+      <?php if (!empty($r->entry_url)) : ?>
+        &nbsp;via <strong><?php echo esc_html($entry_url_label = $entry_labels[$r->entry_point] ?? $r->entry_url); ?></strong>
+      <?php endif; ?>
+      <?php if (!empty($r->ai_freetext_input)) : ?>
+        · saisie initiale :
+    </div>
+    <div class="quote-box" style="margin-top:8px;">« <?php echo esc_html($r->ai_freetext_input); ?> »</div>
+      <?php else : ?>
+    </div>
+      <?php endif; ?>
+  </div>
+
+  <?php
+  // Récap projet
+  $answer_map = [
+    'piece'           => $r->piece,
+    'taille'          => $r->taille,
+    'taille_escalier' => $r->taille_escalier,
+    'sortie'          => $r->sortie,
+    'hauteur'         => $r->hauteur,
+    'eclairage'       => $r->eclairage,
+    'table_reponse'   => $r->table_reponse,
+    'style'           => $r->style,
+  ];
+  $non_empty = array_filter($answer_map, function($v) { return !empty($v); });
+  if (!empty($non_empty)) : ?>
+  <div class="drill-section">
+    <h3>Récap projet</h3>
+    <div class="answer-grid">
+      <?php foreach ($non_empty as $key => $val) :
+        $label = $key_labels[$key] ?? $key;
+        $val_map = $value_lookup[$key] ?? [];
+        $val_label = $val_map[$val] ?? ucfirst($val);
+      ?>
+        <div><span class="a-key"><?php echo esc_html($label); ?> :</span> <span class="a-val"><?php echo esc_html($val_label); ?></span></div>
+      <?php endforeach; ?>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <?php
+  // Conversation chat
+  $chat_msgs = [];
+  if (!empty($r->ai_chat_messages)) {
+    $decoded = json_decode($r->ai_chat_messages, true);
+    if (is_array($decoded)) $chat_msgs = $decoded;
+  }
+  if (!empty($chat_msgs)) : ?>
+  <div class="drill-section">
+    <h3>Conversation chat (<?php echo esc_html(count($chat_msgs)); ?> échanges)</h3>
+    <div class="chat-thread">
+      <?php foreach ($chat_msgs as $m) :
+        if (!is_array($m) || empty($m['content'])) continue;
+        $is_robin = isset($m['role']) && $m['role'] === 'assistant';
+        $cls = $is_robin ? 'chat-msg--robin' : 'chat-msg--visitor';
+      ?>
+        <div class="chat-msg <?php echo esc_attr($cls); ?>">
+          <div class="chat-msg__bubble"><?php echo esc_html($m['content']); ?></div>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <?php if (!empty($r->advice_text)) : ?>
+  <div class="drill-section">
+    <h3>Phrase IA finale (advice_text)</h3>
+    <div class="quote-box"><?php echo esc_html($r->advice_text); ?></div>
+  </div>
+  <?php endif; ?>
+
+  <?php
+  // Contact
+  if ($r->contact_triggered) : ?>
+  <div class="drill-section">
+    <h3>Demande de contact</h3>
+    <div class="contact-box">
+      <?php if ($r->contact_kind) :
+        $kind_class = $contact_kind_pill[$r->contact_kind] ?? '';
+        $kind_label = $contact_kind_labels[$r->contact_kind] ?? strtoupper($r->contact_kind);
+      ?>
+        <div class="contact-box__row">
+          <span class="contact-box__key">Type :</span>
+          <span class="contact-box__val"><span class="pill <?php echo esc_attr($kind_class); ?> pill--small"><?php echo esc_html($kind_label); ?></span> (kind = <?php echo esc_html($r->contact_kind); ?>)</span>
+        </div>
+      <?php endif; ?>
+      <?php if (!empty($r->contact_subject)) : ?>
+        <div class="contact-box__row"><span class="contact-box__key">Sujet :</span> <span class="contact-box__val"><?php echo esc_html($r->contact_subject); ?></span></div>
+      <?php endif; ?>
+      <?php if (!empty($r->contact_email)) : ?>
+        <div class="contact-box__row"><span class="contact-box__key">Email :</span> <span class="contact-box__val"><a href="mailto:<?php echo esc_attr($r->contact_email); ?>"><?php echo esc_html($r->contact_email); ?></a></span></div>
+      <?php endif; ?>
+      <?php if (!empty($r->contact_message)) : ?>
+        <div class="contact-box__row"><span class="contact-box__key">Message :</span></div>
+        <div class="contact-box__row" style="padding-left:6px;color:#1d2327;font-style:italic;font-size:12.5px;">
+          « <?php echo esc_html($r->contact_message); ?> »
+        </div>
+      <?php endif; ?>
+      <div class="contact-box__row">
+        <span class="contact-box__key">Envoyé :</span>
+        <span class="contact-box__val">
+          <?php if ($r->contact_submitted) : ?>
+            <span class="check">✓ Oui</span>
+            <?php if ($r->contact_submitted_at) : ?>
+              · <?php echo esc_html(wp_date('d/m/Y à H:i', strtotime($r->contact_submitted_at))); ?>
+            <?php endif; ?>
+          <?php else : ?>
+            <span style="color:#8c8f94;">Non (abandon)</span>
+          <?php endif; ?>
+        </span>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <?php
+  // Produits matchés
+  $product_ids = [];
+  if (!empty($r->matching_product_ids)) {
+    $product_ids = array_filter(array_map('intval', explode(',', $r->matching_product_ids)));
+  }
+  if (!empty($product_ids)) : ?>
+  <div class="drill-section">
+    <h3>Catalogue présenté (<?php echo esc_html(count($product_ids)); ?> produits matchés)</h3>
+    <div class="product-list">
+      <?php foreach ($product_ids as $pid) :
+        $p = wc_get_product($pid);
+        if (!$p) continue;
+        $url = get_permalink($pid);
+      ?>
+        <a href="<?php echo esc_url($url); ?>" class="product-tag" target="_blank"><?php echo esc_html($p->get_name()); ?> (<?php echo (int)$pid; ?>)</a>
+      <?php endforeach; ?>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <!-- Technique -->
+  <div class="drill-section">
+    <h3>Technique</h3>
+    <div class="tech-grid">
+      <div><span class="t-key">Session ID :</span> <?php echo esc_html($r->session_id); ?></div>
+      <div><span class="t-key">Device :</span> <?php echo esc_html($r->device_type ?: '—'); ?></div>
+      <div><span class="t-key">IP :</span> <?php echo esc_html($r->ip_address ?: '—'); ?></div>
+      <div><span class="t-key">Localisation :</span> <?php echo esc_html($r->location ?: '—'); ?></div>
+      <div><span class="t-key">Référent :</span> <?php echo esc_html($r->referrer ?: '—'); ?></div>
+      <div><span class="t-key">Appels IA :</span> <?php echo (int)$r->ai_call_count; ?></div>
+      <div><span class="t-key">Page d'entrée :</span> <?php echo esc_html($r->entry_url ?: '—'); ?></div>
+      <div><span class="t-key">Créée :</span> <?php echo esc_html(wp_date('d/m/Y H:i:s', strtotime($r->created_at))); ?></div>
+    </div>
+  </div>
+  <?php
+
+  $html = ob_get_clean();
+
+  // Actions left (mailto si email)
+  $actions_left = '';
+  if (!empty($r->contact_email)) {
+    $actions_left = '<a href="mailto:' . esc_attr($r->contact_email) . '" class="button button-primary">📧 Répondre par email</a>';
+  }
+
+  return [
+    'title'        => $title,
+    'html'         => $html,
+    'actions_left' => $actions_left,
+  ];
 }
 
 // ─── AJAX: Render product cards for Conseils page ───
