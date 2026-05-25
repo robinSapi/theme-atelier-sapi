@@ -23117,8 +23117,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
    déclenche l'apparition (opacity 0 → 1 par char, en cascade). */
 .conseiller-typewriter__char {
   opacity: 0;
-  -webkit-transition: opacity 0.4s ease;
-  transition: opacity 0.4s ease;
+  -webkit-transition: opacity 0.28s ease;
+  transition: opacity 0.28s ease;
 }
 
 .is-revealing .conseiller-typewriter__char {

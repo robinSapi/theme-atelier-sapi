@@ -319,7 +319,7 @@
     contentEl.classList.remove('is-revealing');
     contentEl.textContent = '';
 
-    var fadeDuration = 400; // doit matcher .conseiller-typewriter__char transition
+    var fadeDuration = 280; // doit matcher .conseiller-typewriter__char transition
     var initialDelay = 200; // laisse la card s'afficher avant la frappe
     var chars = text.split('');
     var fragment = document.createDocumentFragment();
@@ -415,7 +415,7 @@
     // relancer l'animation à chaque subscribe notification.
     if (els.phraseContent.dataset.lastText !== newText) {
       els.phraseContent.dataset.lastText = newText;
-      typewriterEffect(els.phraseContent, els.phrase, newText, 26);
+      typewriterEffect(els.phraseContent, els.phrase, newText, 16);
     }
 
     // F2a-sexies : bascule entre chip-question (parcours incomplet) et lien
