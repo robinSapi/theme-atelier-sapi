@@ -509,7 +509,7 @@ foreach ($carousel_products as $product) {
 
         <!-- État 1 : Initial (par défaut, visible si pas de projet) -->
         <div data-room-picker-state="initial">
-          <h3 class="room-picker-title">Pour quelle pièce ?</h3>
+          <h3 class="room-picker-title">Pour quelle pièce cherchez-vous un luminaire ?</h3>
           <div class="room-picker-cards">
             <?php foreach ($room_choices as $room) : ?>
               <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'])); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
