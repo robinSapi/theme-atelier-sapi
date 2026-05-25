@@ -105,6 +105,167 @@
   var lastTrigger = null; // pour restaurer le focus à la fermeture
 
   /* ─────────────────────────────────────────────
+     SessionTracker — log V3 des sessions Conseiller vers
+     `sapi_megafilter_log_session` (UPSERT par session_id).
+     4 moments clés : ouverture, transition d'écran, fermeture,
+     submit contact. sendBeacon avec fallback fetch keepalive
+     pour résilience au unload.
+     ───────────────────────────────────────────── */
+  var SessionTracker = (function () {
+    var sessionId = null;
+    var aiCallCount = 0;
+    var hasStarted = false;
+
+    function generateSessionId() {
+      if (window.crypto && window.crypto.getRandomValues) {
+        var bytes = new Uint8Array(8);
+        window.crypto.getRandomValues(bytes);
+        return 'mfs_' + Array.from(bytes).map(function (b) {
+          var h = b.toString(16);
+          return h.length === 1 ? '0' + h : h;
+        }).join('');
+      }
+      // Fallback non-cryptographique (très anciens navigateurs)
+      return 'mfs_' + Date.now().toString(16) + Math.random().toString(16).slice(2, 10);
+    }
+
+    function getSessionId() {
+      if (sessionId) return sessionId;
+      sessionId = generateSessionId();
+      return sessionId;
+    }
+
+    function detectEntryPoint() {
+      var body = document.body;
+      if (body && body.classList.contains('home')) return 'home_picker';
+      var path = window.location.pathname || '';
+      if (path.indexOf('/mes-creations/') !== -1) {
+        try {
+          var url = new URL(window.location.href);
+          if (url.searchParams.get('freetext')) return 'freetext';
+        } catch (e) { /* swallow */ }
+        return 'mes_creations';
+      }
+      if (body && (body.classList.contains('single-product') || path.indexOf('/produit/') !== -1)) {
+        return 'product_pill';
+      }
+      return '';
+    }
+
+    function send(payload) {
+      if (!config.ajaxUrl) return;
+      payload.action = 'sapi_megafilter_log_session';
+      payload.nonce = config.nonce || '';
+      payload.session_id = getSessionId();
+      var body;
+      try {
+        body = JSON.stringify(payload);
+      } catch (e) { return; }
+      var url = config.ajaxUrl;
+      // sendBeacon — résilient au unload (fermeture modale + navigation).
+      if (navigator.sendBeacon) {
+        try {
+          var blob = new Blob([body], { type: 'application/json' });
+          if (navigator.sendBeacon(url, blob)) return;
+        } catch (e) { /* fallback ci-dessous */ }
+      }
+      // Fallback fetch keepalive (Chrome/Firefox modernes).
+      try {
+        fetch(url, {
+          method: 'POST',
+          body: body,
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          keepalive: true,
+        }).catch(function () { /* swallow */ });
+      } catch (e) { /* swallow */ }
+    }
+
+    function getMatchingProductIds() {
+      // Scan DOM de la grille /mes-creations/ : cards WC ont une classe
+      // `post-<id>` sur le <li.product>. Renvoie un CSV des IDs visibles
+      // (filtrés is-filtered-out exclus si présent).
+      var cards = document.querySelectorAll('ul.products li.product');
+      if (!cards.length) return '';
+      var ids = [];
+      cards.forEach(function (card) {
+        if (card.classList && card.classList.contains('is-filtered-out')) return;
+        var m = card.className.match(/post-(\d+)/);
+        if (m) ids.push(m[1]);
+      });
+      return ids.join(',');
+    }
+
+    function buildSnapshotPayload() {
+      var payload = {};
+      var project = window.sapiProject && window.sapiProject.get ? window.sapiProject.get() : null;
+      if (project) {
+        if (project.answers && Object.keys(project.answers).length) {
+          payload.answers = project.answers;
+        }
+        if (project.advice_text) payload.advice_text = project.advice_text;
+        if (project.contact_kind) payload.contact_kind = project.contact_kind;
+        if (project.contact_subject) payload.contact_subject = project.contact_subject;
+        if (project.contact_message) payload.contact_message = project.contact_message;
+      }
+      // answers_completed : toutes les questions visibles répondues
+      if (project && project.answers) {
+        try {
+          var visible = getVisibleStepIds(project.answers);
+          payload.answers_completed = (visible.length > 0 && visible.every(function (id) {
+            return !!project.answers[id];
+          })) ? 1 : 0;
+        } catch (e) { /* swallow */ }
+      }
+      // Conversation chat
+      if (state.chat && state.chat.conversation && state.chat.conversation.length) {
+        payload.ai_chat_messages = state.chat.conversation;
+      }
+      if (aiCallCount > 0) payload.ai_call_count = aiCallCount;
+      // Produits matchés (uniquement sur /mes-creations/)
+      var ids = getMatchingProductIds();
+      if (ids) payload.matching_product_ids = ids;
+      return payload;
+    }
+
+    function start() {
+      // Reset compteurs pour la session courante.
+      aiCallCount = 0;
+      hasStarted = true;
+      send({
+        entry_point: detectEntryPoint(),
+        entry_url: window.location.pathname + window.location.search,
+      });
+    }
+
+    function snapshot(extra) {
+      if (!hasStarted) return;
+      var payload = buildSnapshotPayload();
+      if (extra && typeof extra === 'object') {
+        Object.keys(extra).forEach(function (k) { payload[k] = extra[k]; });
+      }
+      send(payload);
+    }
+
+    function finalize() {
+      if (!hasStarted) return;
+      send(buildSnapshotPayload());
+      hasStarted = false;
+    }
+
+    function incrementAiCallCount() {
+      aiCallCount++;
+    }
+
+    return {
+      start: start,
+      snapshot: snapshot,
+      finalize: finalize,
+      incrementAiCallCount: incrementAiCallCount,
+    };
+  })();
+
+  /* ─────────────────────────────────────────────
      Helpers visibilité (proxy vers sapiProject — Round 2 / 3.2)
      ───────────────────────────────────────────── */
   // Visibilité BRUTE (sans short mode) — utilisée par cleanInvisibleAnswers
@@ -174,6 +335,8 @@
     }
     // Scroll la card au top quand on change d'écran (la card est scrollable)
     if (els.modalCard) els.modalCard.scrollTop = 0;
+    // Tracking V3 — snapshot à chaque transition d'écran significative.
+    SessionTracker.snapshot();
   }
 
   function showQuestion(stepId) {
@@ -398,6 +561,7 @@
     return sapiSafeFetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' }, { timeout: 25000, signal: signal })
       .then(function (resp) {
         clearAiRequest();
+        SessionTracker.incrementAiCallCount();
         if (resp && resp.success && resp.data && typeof resp.data.advice_text === 'string' && resp.data.advice_text) {
           return resp.data.advice_text;
         }
@@ -659,6 +823,7 @@
     sapiSafeFetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' }, { timeout: 15000, signal: signal })
       .then(function (resp) {
         clearAiRequest();
+        SessionTracker.incrementAiCallCount();
         // Audit #7 : garde-fou DOM démonté (modale fermée pendant le fetch)
         if (!state.open) return;
         removeThinkingBubble();
@@ -760,6 +925,7 @@
     sapiSafeFetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' }, { timeout: 25000, signal: signal })
       .then(function (resp) {
         clearAiRequest();
+        SessionTracker.incrementAiCallCount();
         // Audit #7 : garde-fou DOM démonté (modale fermée pendant le fetch)
         if (!state.open) return;
         removeThinkingBubble();
@@ -1400,6 +1566,17 @@
     var contactKind    = project && project.contact_kind || '';
     var contactSubject = project && project.contact_subject || '';
 
+    // Tracking V3 — snapshot AVANT le submit pour qu'on trace même si le
+    // visiteur ferme la modale avant la confirmation serveur.
+    SessionTracker.snapshot({
+      contact_triggered: 1,
+      contact_submitted: 1,
+      contact_email: emailVal,
+      contact_message: msgVal,
+      contact_kind: contactKind,
+      contact_subject: contactSubject,
+    });
+
     var fd = new FormData();
     fd.append('action', 'sapi_megafilter_surmesure');
     fd.append('nonce', config.nonce || '');
@@ -1475,6 +1652,10 @@
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
 
+    // Tracking V3 — INSERT row (entry_point + entry_url). Doit être appelé
+    // AVANT showScreen() pour que le snapshot suivant soit un UPDATE.
+    SessionTracker.start();
+
     // F2a-quater : state="s0" → détermine dynamiquement le sous-état
     //   (initial / partiel / s3-carrefour) selon le contenu du sapiProject.
     // F2a-ter : state="s3" force le carrefour (compat avec anciens liens).
@@ -1535,6 +1716,8 @@
     if (lastTrigger && lastTrigger.focus) {
       try { lastTrigger.focus(); } catch (e) { /* swallow */ }
     }
+    // Tracking V3 — snapshot final via sendBeacon (résilient au unload).
+    SessionTracker.finalize();
   }
 
   /* ─────────────────────────────────────────────
