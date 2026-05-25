@@ -14,7 +14,10 @@
   'use strict';
 
   var picker = null;
-  var STEPS = (window.SAPI_ROOM_PICKER && Array.isArray(window.SAPI_ROOM_PICKER.steps)) ? window.SAPI_ROOM_PICKER.steps : [];
+  var CFG = window.SAPI_ROOM_PICKER || {};
+  var STEPS = Array.isArray(CFG.steps) ? CFG.steps : [];
+  var ICONS = CFG.icons || {};
+  var CREATIONS_URL = CFG.creationsUrl || '/mes-creations/';
 
   function getProjectSnapshot() {
     if (!window.sapiProject || typeof window.sapiProject.get !== 'function') return null;
@@ -70,15 +73,45 @@
   }
 
   function populateInProgress(project) {
-    var resume = picker.querySelector('[data-room-picker-resume]');
-    if (!resume) return;
+    var titleEl = picker.querySelector('[data-room-picker-question]');
+    var cardsEl = picker.querySelector('[data-room-picker-cards-dynamic]');
+    if (!titleEl || !cardsEl) return;
+
     var nextStep = getNextUnansweredStep(project);
-    if (nextStep) {
-      var question = getDynamicQuestion(nextStep, project.answers);
-      resume.innerHTML = 'Ta prochaine question : <em>«&nbsp;' + escapeHtml(question) + '&nbsp;»</em>';
-    } else {
-      resume.textContent = 'On continue ton projet ?';
+    if (!nextStep) {
+      titleEl.textContent = 'On continue ton projet ?';
+      cardsEl.innerHTML = '';
+      return;
     }
+
+    // Titre = la question dynamique (selon piece)
+    titleEl.textContent = getDynamicQuestion(nextStep, project.answers);
+
+    // Cards de choix cliquables (même pattern que les 6 pièces de l'état initial)
+    cardsEl.innerHTML = '';
+    var choices = nextStep.choices || [];
+    choices.forEach(function (choice) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'room-card';
+      btn.setAttribute('data-step-id', nextStep.id);
+      btn.setAttribute('data-choice-slug', choice.slug);
+      btn.setAttribute('data-choice-label', choice.label);
+
+      if (choice.icon && ICONS[choice.icon]) {
+        var iconEl = document.createElement('span');
+        iconEl.className = 'room-card-icon';
+        iconEl.innerHTML = ICONS[choice.icon];
+        btn.appendChild(iconEl);
+      }
+
+      var labelEl = document.createElement('span');
+      labelEl.className = 'room-card-label';
+      labelEl.textContent = choice.label;
+      btn.appendChild(labelEl);
+
+      cardsEl.appendChild(btn);
+    });
   }
 
   function escapeHtml(s) {
@@ -118,9 +151,30 @@
         if (!text) return;
         // Redirige vers /mes-creations/ avec le texte libre — la modale
         // conseiller détecte le param freetext au load et s'ouvre en S2-chat.
-        var url = '/mes-creations/?freetext=' + encodeURIComponent(text);
+        var url = CREATIONS_URL + '?freetext=' + encodeURIComponent(text);
         window.location.href = url;
       });
+    });
+  }
+
+  // Click sur une card de choix dynamique (état in-progress) : enregistre
+  // la réponse dans sapiProject + redirige vers /mes-creations/ où la
+  // modale poursuivra le parcours (card "Mon projet" affiche la question
+  // suivante via renderInlineQuestion).
+  function bindDynamicCards() {
+    picker.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-step-id][data-choice-slug]');
+      if (!btn) return;
+      e.preventDefault();
+      var stepId = btn.getAttribute('data-step-id');
+      var slug = btn.getAttribute('data-choice-slug');
+      var label = btn.getAttribute('data-choice-label') || slug;
+      if (window.sapiProject && typeof window.sapiProject.update === 'function') {
+        var patch = {}; patch[stepId] = slug;
+        var lpatch = {}; lpatch[stepId] = label;
+        window.sapiProject.update(patch, lpatch);
+      }
+      window.location.href = CREATIONS_URL;
     });
   }
 
@@ -129,6 +183,7 @@
     if (!picker) return;
     refresh();
     bindForms();
+    bindDynamicCards();
     // Réagit aux changements de projet (storage event inter-onglets,
     // ou subscribe si sapiProject est chargé).
     if (window.sapiProject && typeof window.sapiProject.subscribe === 'function') {

@@ -300,10 +300,12 @@ function sapi_maison_enqueue_assets() {
         filemtime($room_picker_js_path),
         true
       );
-      // Steps pour calculer la prochaine question non répondue côté JS
-      // (mode in-progress du room picker).
+      // Steps + icônes pour calculer la prochaine question non répondue
+      // et générer les chips de réponse côté JS (mode in-progress).
       wp_localize_script('sapi-room-picker', 'SAPI_ROOM_PICKER', [
         'steps' => sapi_guide_get_steps(),
+        'icons' => sapi_guide_get_icons(),
+        'creationsUrl' => home_url('/mes-creations/'),
       ]);
     }
   }
