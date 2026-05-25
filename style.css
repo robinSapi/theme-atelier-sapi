@@ -23291,8 +23291,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .conseiller-card--modal {
   position: relative;
   width: 100%;
-  max-width: 600px;
-  height: 620px;
+  max-width: 700px;
+  height: 700px;
   max-height: calc(100dvh - 64px);
   background: var(--color-warm);
   border-radius: 16px;
