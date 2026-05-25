@@ -1354,6 +1354,55 @@ Si tu veux revenir au snapshot pré-refactor : `git reset --hard 37fd530` puis f
 
 ---
 
+## [RETOUR] Conseiller V3 — Round 4 polish mobile + room picker
+**Date livrée :** 2026-05-25
+**Branche :** `test-theme-sapi-maison`
+**Statut :** Série de polish mobile post-refactor, livrée en 13 commits ciblés. Tous testés par Robin via screenshots.
+
+### Commits (chronologique)
+
+| # | Commit | Sujet |
+|---|---|---|
+| 1 | `275cc10` | Room picker home : copier les espacements de la card Conseil (gap 18px, padding 36px 32px 40px) |
+| 2 | `39a22f4` | Room picker mobile : placeholder input lisible (font 13px + padding réduit) |
+| 3 | `0a173e2` | Room picker mobile : font input 12px pour garantir placeholder complet |
+| 4 | `aec348f` | Room picker mobile : titre plus compact (15px) + séparateur OU rapproché des cartes |
+| 5 | `517fcec` | Room picker mobile : padding 1.5rem uniforme (éloigne titre/cartes/input des bords) |
+| 6 | `373ae2c` → `a250d8d` | Room picker mobile : titre 18px puis remis à 20px (taille originale) |
+| 7 | `b32f7c0` | **Fix modale mobile** : hauteur ajustée au padding du parent (croix réapparaît + modale moins haute) |
+| 8 | `68c5806` | **Fix modale z-index 10050** (au-dessus du header sticky qui était à 10001) |
+| 9 | `f1aa7e2` | Fix croix modale mobile : fond blanc + couleur contrastée + taille +2px |
+| 10 | `a4d2242` | **Fix croix modale : padding 0** (héritait du button global 10px 25px → croix ovale, SVG hors zone) |
+| 11 | `d115588` | Card Mon projet mobile : réduire le texte italique IA (22px → 18px) |
+| 12 | `f57343a` | Effet typewriter Mon Projet : cascade et fade accélérés (~35% plus rapide) — 26ms→16ms / 400ms→280ms |
+| 13 | `e57b24e` | Modale footer hints : centrer les textes italiques (S0 reassure + S3 chip hint) |
+| 14 | `9d45b20` | **Fix room cards mobile sur /mes-creations/** : matcher button.room-card pour wrap 3 colonnes |
+
+### Bugs structurels résolus (non-évidents)
+
+**Modale derrière le header sticky** — `.site-header` avait `z-index: 10001`, `.conseiller-modal` n'avait que `10000` → le header passait par-dessus la modale et masquait la croix. Bump à 10050 (au-dessus aussi du panier sticky 10002).
+
+**Modale qui débordait du viewport** — `.conseiller-modal` parent avait `padding: 32px 20px` (64px vertical), mais la card faisait `height: calc(100dvh - 24px)` → débordait de 40px au-dessus du viewport et la croix tombait hors écran. Aligné à `calc(100dvh - 64px)`.
+
+**Croix invisible/ovale** — `.modal__close` n'avait pas `padding: 0` → héritait du style button global `padding: 10px 25px` qui rendait le bouton ovale (50px × 20px) avec SVG hors zone. Padding 0 ajouté. Pattern déjà documenté ailleurs dans le code (cf `.room-picker-freetext__submit`).
+
+**Room cards qui ne wrappaient pas sur /mes-creations/** — Le sélecteur de base `button.room-card` (spécificité 0,1,1) gagnait sur le mobile `.room-card` (0,1,0). Les `<button>` de la card Conseil restaient en flex:1 single row alors que les `<a>` de la home wrappaient bien. Fix : mobile cible aussi `button.room-card` + `max-width: none`.
+
+### Choix design retenus (validés Robin)
+
+- **Padding room picker mobile** : `1.5rem` uniforme (au lieu de `0 1rem 1.5rem`) — éloigne titre/cartes/input des bords. Référence visuelle : l'écart bas sous l'input (le seul qui était correct).
+- **Titre room picker mobile** : 20px maintenu (taille originale). Itérations 15px / 18px / 20px → 20px préféré une fois le padding fixé.
+- **Texte italique IA card Mon projet mobile** : 18px (au lieu de 22px du `clamp(22px, 2.8vw, 30px)`).
+- **Effet typewriter** : accéléré ~35% (cascade 26→16ms, fade 400→280ms) — Robin voulait "plus rapide", pas "plus marqué".
+- **Footer hints modale** : `text-align: center` ajouté inline pour les 2 spans italiques (S0 reassure + S3 chip hint).
+- **Carte cadeau coupée par bandeau sticky** : non touchée (choix Robin "ne pas toucher").
+
+### À noter
+
+Aucun JS modifié hormis `sapi-cards-conseiller.js` (vitesse typewriter). Pas de nouvelle classe CSS inventée. Toutes les modifs sont des polish ciblées sur le CSS mobile, sauf les 3 bugs structurels (z-index, hauteur, padding button) qui ont des conséquences au-delà du mobile.
+
+---
+
 ## [RETOUR] Conseiller V3 — Round 3.1 : ambiance lumineuse + harmonisation secondaire
 **Date livrée :** 2026-05-24
 **Branche :** `test-theme-sapi-maison`
