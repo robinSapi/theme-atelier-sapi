@@ -10915,6 +10915,65 @@ transform: translateY(15px);
   }
 }
 
+/* Round 4 — chaque sous-état du room picker est un flex column compact
+   (gap uniforme entre titre, cases/CTA, séparateur, champ texte). */
+[data-room-picker-state] {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+}
+[data-room-picker-state][hidden] { display: none; }
+
+/* Round 4 — Séparateur "ou" entre cases/CTA et champ texte libre
+   (pattern identique au S0 modale). */
+.room-picker-or {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.room-picker-or::before,
+.room-picker-or::after {
+  content: '';
+  -webkit-flex: 1;
+  flex: 1;
+  height: 1px;
+  background: rgba(139, 115, 85, 0.25);
+}
+.room-picker-or__text {
+  margin: 0 14px;
+  padding: 4px 12px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-wood);
+  background: var(--color-white);
+  border-radius: 50px;
+  border: 1px solid rgba(139, 115, 85, 0.25);
+}
+
+/* Round 4 — Résumé "Tu as commencé : Cuisine · Petite · …" (état in-progress) */
+.room-picker-resume {
+  margin: 0 auto;
+  max-width: 580px;
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--color-wood-mid);
+  text-align: center;
+}
+
 /* Round 4 — Champ texte libre sous les pièces (room picker homepage) */
 .room-picker-freetext {
   position: relative;

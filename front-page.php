@@ -509,10 +509,7 @@ foreach ($carousel_products as $product) {
 
         <!-- État 1 : Initial (par défaut, visible si pas de projet) -->
         <div data-room-picker-state="initial">
-          <h3 class="room-picker-title">Pour quelle pièce cherchez-vous un luminaire ?</h3>
-          <p class="room-picker-sub">
-            Choisis une pièce, je te guide vers les modèles qui correspondent.
-          </p>
+          <h3 class="room-picker-title">Pour quelle pièce ?</h3>
           <div class="room-picker-cards">
             <?php foreach ($room_choices as $room) : ?>
               <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'])); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
@@ -520,6 +517,9 @@ foreach ($carousel_products as $product) {
                 <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
               </a>
             <?php endforeach; ?>
+          </div>
+          <div class="room-picker-or" aria-hidden="true">
+            <span class="room-picker-or__text">ou</span>
           </div>
           <form class="room-picker-freetext" data-room-picker-freetext>
             <input type="text" class="room-picker-freetext__input" name="freetext"
@@ -534,13 +534,16 @@ foreach ($carousel_products as $product) {
         <!-- État 2 : Projet en cours non terminé (pousse à terminer) -->
         <div data-room-picker-state="in-progress" hidden>
           <h3 class="room-picker-title">Continue ton projet</h3>
-          <p class="room-picker-sub" data-room-picker-resume>
+          <p class="room-picker-resume" data-room-picker-resume>
             Tu as déjà commencé à décrire ton projet — on continue ?
           </p>
           <a class="room-picker-cta" href="<?php echo esc_url(home_url('/mes-creations/')); ?>" data-room-picker-resume-cta>
             <span>Reprendre mon projet</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
           </a>
+          <div class="room-picker-or" aria-hidden="true">
+            <span class="room-picker-or__text">ou</span>
+          </div>
           <form class="room-picker-freetext" data-room-picker-freetext>
             <input type="text" class="room-picker-freetext__input" name="freetext"
                    placeholder="Affine ton projet en quelques mots…" maxlength="500"
@@ -559,6 +562,9 @@ foreach ($carousel_products as $product) {
             <span>Voir ma sélection</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
           </a>
+          <div class="room-picker-or" aria-hidden="true">
+            <span class="room-picker-or__text">ou</span>
+          </div>
           <form class="room-picker-freetext" data-room-picker-freetext>
             <input type="text" class="room-picker-freetext__input" name="freetext"
                    placeholder="Affiner ou changer de projet…" maxlength="500"
