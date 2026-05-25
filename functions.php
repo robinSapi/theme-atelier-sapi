@@ -6347,72 +6347,111 @@ function sapi_handle_surmesure_form() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ROBIN CONSEILLER V2 — Sessions tracking (table + endpoint + admin)
+   CONSEILLER V3 — Sessions tracking (table + endpoint + admin)
+   Refonte complète : drop ancienne table V2, nouveau schéma adapté
+   au parcours V3 (sapiProject + chat + advice + contact), endpoint
+   UPSERT par session_id, page admin avec dashboard + drill-down.
 ═══════════════════════════════════════════════════════════ */
 
 /**
- * Create the Robin V2 sessions table
+ * Crée la table sessions V3.
  */
-function sapi_robin_create_sessions_table() {
+function sapi_megafilter_create_sessions_table() {
   global $wpdb;
-  $table = $wpdb->prefix . 'sapi_robin_sessions';
+  $table = $wpdb->prefix . 'sapi_megafilter_sessions';
   $charset = $wpdb->get_charset_collate();
 
-  $sql = "CREATE TABLE IF NOT EXISTS $table (
-    id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-    session_id varchar(36) NOT NULL,
-    created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    opening_context varchar(20) DEFAULT '',
-    context_data text DEFAULT '',
-    piece varchar(50) DEFAULT '',
-    taille varchar(50) DEFAULT '',
-    eclairage varchar(50) DEFAULT '',
-    sortie varchar(50) DEFAULT '',
-    hauteur varchar(50) DEFAULT '',
-    table_reponse varchar(50) DEFAULT '',
-    style varchar(50) DEFAULT '',
-    completion varchar(20) DEFAULT 'partial',
-    reco_shown tinyint(1) DEFAULT 0,
-    reco_product_ids text DEFAULT '',
-    filter_activated tinyint(1) DEFAULT 0,
-    ai_call_count int(11) DEFAULT 0,
-    conversation text DEFAULT '',
-    contact_sent tinyint(1) DEFAULT 0,
-    contact_name varchar(100) DEFAULT '',
-    contact_email varchar(100) DEFAULT '',
-    contact_phone varchar(50) DEFAULT '',
-    device_type varchar(20) DEFAULT '',
-    ip_address varchar(45) DEFAULT '',
-    referrer varchar(500) DEFAULT '',
-    location varchar(200) DEFAULT '',
+  $sql = "CREATE TABLE $table (
+    id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    session_id VARCHAR(36) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    entry_point VARCHAR(30) DEFAULT '',
+    entry_url VARCHAR(500) DEFAULT '',
+    referrer VARCHAR(500) DEFAULT '',
+
+    piece VARCHAR(50) DEFAULT '',
+    taille VARCHAR(50) DEFAULT '',
+    taille_escalier VARCHAR(50) DEFAULT '',
+    eclairage VARCHAR(50) DEFAULT '',
+    sortie VARCHAR(50) DEFAULT '',
+    hauteur VARCHAR(50) DEFAULT '',
+    table_reponse VARCHAR(50) DEFAULT '',
+    style VARCHAR(50) DEFAULT '',
+    answers_completed TINYINT(1) DEFAULT 0,
+
+    ai_freetext_used TINYINT(1) DEFAULT 0,
+    ai_freetext_input TEXT DEFAULT NULL,
+    ai_chat_used TINYINT(1) DEFAULT 0,
+    ai_chat_messages MEDIUMTEXT DEFAULT NULL,
+    ai_call_count INT(11) DEFAULT 0,
+    advice_text TEXT DEFAULT NULL,
+
+    matching_product_ids TEXT DEFAULT NULL,
+
+    contact_triggered TINYINT(1) DEFAULT 0,
+    contact_kind VARCHAR(20) DEFAULT '',
+    contact_subject VARCHAR(200) DEFAULT '',
+    contact_message TEXT DEFAULT NULL,
+    contact_email VARCHAR(100) DEFAULT '',
+    contact_submitted TINYINT(1) DEFAULT 0,
+    contact_submitted_at DATETIME DEFAULT NULL,
+
+    device_type VARCHAR(40) DEFAULT '',
+    ip_address VARCHAR(45) DEFAULT '',
+    location VARCHAR(200) DEFAULT '',
+
     PRIMARY KEY (id),
-    KEY session_id (session_id),
-    KEY created_at (created_at)
+    UNIQUE KEY session_id (session_id),
+    KEY created_at (created_at),
+    KEY entry_point (entry_point),
+    KEY piece (piece)
   ) $charset;";
 
   require_once ABSPATH . 'wp-admin/includes/upgrade.php';
   dbDelta($sql);
 }
-add_action('after_switch_theme', 'sapi_robin_create_sessions_table');
+add_action('after_switch_theme', 'sapi_megafilter_create_sessions_table');
 
-function sapi_robin_maybe_create_table() {
+function sapi_megafilter_maybe_create_table() {
   global $wpdb;
-  $table = $wpdb->prefix . 'sapi_robin_sessions';
+  $table = $wpdb->prefix . 'sapi_megafilter_sessions';
   if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table)) !== $table) {
-    sapi_robin_create_sessions_table();
+    sapi_megafilter_create_sessions_table();
   }
 }
-add_action('admin_init', 'sapi_robin_maybe_create_table');
 
 /**
- * AJAX endpoint — log Robin V2 session (called via sendBeacon on modal close)
+ * Migration idempotente V2 → V3 : DROP ancienne table sapi_robin_sessions
+ * (plus alimentée depuis F1c, suppression robin-conseiller.js) puis CREATE
+ * sapi_megafilter_sessions. Idempotent via une option WP qui marque la
+ * migration comme effectuée.
  */
-add_action('wp_ajax_sapi_robin_log_session', 'sapi_ajax_robin_log_session');
-add_action('wp_ajax_nopriv_sapi_robin_log_session', 'sapi_ajax_robin_log_session');
+function sapi_megafilter_migrate_v3() {
+  if (get_option('sapi_megafilter_sessions_v3_migrated') === 'yes') return;
+  global $wpdb;
+  $old_table = $wpdb->prefix . 'sapi_robin_sessions';
+  $wpdb->query("DROP TABLE IF EXISTS $old_table");
+  sapi_megafilter_create_sessions_table();
+  update_option('sapi_megafilter_sessions_v3_migrated', 'yes', true);
+}
+add_action('admin_init', 'sapi_megafilter_migrate_v3');
 
-function sapi_ajax_robin_log_session() {
+/**
+ * Endpoint AJAX V3 — UPSERT par session_id. Appelé via navigator.sendBeacon
+ * depuis sapi-modal-conseiller.js aux moments clés (ouverture, transition
+ * d'écran, fermeture, submit contact). Payload accepté en JSON via
+ * php://input (sendBeacon) ou en POST classique en fallback.
+ */
+add_action('wp_ajax_sapi_megafilter_log_session', 'sapi_megafilter_log_session');
+add_action('wp_ajax_nopriv_sapi_megafilter_log_session', 'sapi_megafilter_log_session');
+
+function sapi_megafilter_log_session() {
   // sendBeacon sends as application/x-www-form-urlencoded or text/plain
-  // Parse from raw input if needed
+  // Payload : sendBeacon envoie en application/json ou text/plain → on lit
+  // d'abord php://input. Fallback sur $_POST si l'appelant utilise un POST
+  // classique.
   $raw = file_get_contents('php://input');
   $data = [];
   if (!empty($raw)) {
@@ -6427,212 +6466,300 @@ function sapi_ajax_robin_log_session() {
     $data = $_POST;
   }
 
-  // Nonce check
+  // Nonce (sapi-megafilter — identique aux autres endpoints V3).
   $nonce = isset($data['nonce']) ? sanitize_text_field($data['nonce']) : '';
-  if (!wp_verify_nonce($nonce, 'sapi-guide-results')) {
+  if (!wp_verify_nonce($nonce, 'sapi-megafilter')) {
     wp_send_json_error(['message' => 'Nonce invalide']);
   }
 
-  // Parse session data
-  $session_id      = isset($data['session_id']) ? sanitize_text_field($data['session_id']) : '';
-  $opening_context = isset($data['opening_context']) ? sanitize_key($data['opening_context']) : '';
-  $context_data    = isset($data['context_data']) ? sanitize_text_field($data['context_data']) : '';
-
-  $answers = [];
-  if (!empty($data['answers'])) {
-    $raw_answers = is_string($data['answers']) ? json_decode($data['answers'], true) : $data['answers'];
-    if (is_array($raw_answers)) {
-      foreach ($raw_answers as $k => $v) {
-        $answers[sanitize_key($k)] = sanitize_text_field($v);
-      }
-    }
-  }
-
-  $completion       = isset($data['completion']) ? sanitize_key($data['completion']) : 'partial';
-  $reco_shown       = !empty($data['reco_shown']) ? 1 : 0;
-  $reco_product_ids = isset($data['reco_product_ids']) ? sanitize_text_field($data['reco_product_ids']) : '';
-  $filter_activated = !empty($data['filter_activated']) ? 1 : 0;
-  $ai_call_count    = isset($data['ai_call_count']) ? (int) $data['ai_call_count'] : 0;
-  $conversation     = isset($data['conversation']) ? sanitize_textarea_field($data['conversation']) : '';
-  $contact_sent     = !empty($data['contact_sent']) ? 1 : 0;
-  $contact_name     = isset($data['contact_name']) ? sanitize_text_field($data['contact_name']) : '';
-  $contact_email    = isset($data['contact_email']) ? sanitize_email($data['contact_email']) : '';
-  $contact_phone    = isset($data['contact_phone']) ? sanitize_text_field($data['contact_phone']) : '';
-
+  $session_id = isset($data['session_id']) ? sanitize_text_field($data['session_id']) : '';
   if (empty($session_id)) {
     wp_send_json_error(['message' => 'session_id manquant']);
   }
 
-  // Device detection
-  $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])) : '';
-  $device = 'Desktop';
-  if (preg_match('/Mobile|Android|iPhone/i', $user_agent)) {
-    $device = 'Mobile';
-  } elseif (preg_match('/Tablet|iPad/i', $user_agent)) {
-    $device = 'Tablette';
-  }
-  $browser = 'Autre';
-  if (strpos($user_agent, 'Chrome') !== false && strpos($user_agent, 'Edg') === false) {
-    $browser = 'Chrome';
-  } elseif (strpos($user_agent, 'Safari') !== false && strpos($user_agent, 'Chrome') === false) {
-    $browser = 'Safari';
-  } elseif (strpos($user_agent, 'Firefox') !== false) {
-    $browser = 'Firefox';
-  } elseif (strpos($user_agent, 'Edg') !== false) {
-    $browser = 'Edge';
-  }
-  $device_type = $device . ' · ' . $browser;
+  // Champs simples (tous optionnels) — on construit le payload UPDATE/INSERT
+  // en ne gardant que ceux explicitement présents pour ne pas écraser des
+  // valeurs déjà tracées lors d'un appel précédent.
+  $update_data = [];
+  $update_formats = [];
 
-  // IP
-  $ip = '';
-  if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-    $ip = explode(',', sanitize_text_field(wp_unslash($_SERVER['HTTP_X_FORWARDED_FOR'])))[0];
-  } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
-    $ip = sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR']));
+  if (array_key_exists('entry_point', $data)) {
+    $update_data['entry_point'] = sanitize_key($data['entry_point']);
+    $update_formats[] = '%s';
+  }
+  if (array_key_exists('entry_url', $data)) {
+    $update_data['entry_url'] = esc_url_raw($data['entry_url']);
+    $update_formats[] = '%s';
   }
 
-  // Referrer
-  $referrer = isset($_SERVER['HTTP_REFERER']) ? esc_url_raw(wp_unslash($_SERVER['HTTP_REFERER'])) : '';
+  // answers (JSON object) → éclate sur les colonnes piece/taille/…
+  if (!empty($data['answers'])) {
+    $raw_answers = is_string($data['answers']) ? json_decode($data['answers'], true) : $data['answers'];
+    if (is_array($raw_answers)) {
+      $answer_map = [
+        'piece'           => 'piece',
+        'taille'          => 'taille',
+        'taille_escalier' => 'taille_escalier',
+        'eclairage'       => 'eclairage',
+        'sortie'          => 'sortie',
+        'hauteur'         => 'hauteur',
+        'table'           => 'table_reponse',
+        'style'           => 'style',
+      ];
+      foreach ($answer_map as $payload_key => $column) {
+        if (isset($raw_answers[$payload_key])) {
+          $update_data[$column] = sanitize_text_field($raw_answers[$payload_key]);
+          $update_formats[] = '%s';
+        }
+      }
+    }
+  }
+  if (array_key_exists('answers_completed', $data)) {
+    $update_data['answers_completed'] = !empty($data['answers_completed']) ? 1 : 0;
+    $update_formats[] = '%d';
+  }
 
-  // Insert or update
+  // IA
+  if (array_key_exists('ai_freetext_input', $data)) {
+    $input = sanitize_textarea_field($data['ai_freetext_input']);
+    $update_data['ai_freetext_input'] = $input;
+    $update_formats[] = '%s';
+    $update_data['ai_freetext_used'] = !empty($input) ? 1 : 0;
+    $update_formats[] = '%d';
+  }
+  if (array_key_exists('ai_chat_messages', $data)) {
+    $raw_msgs = is_string($data['ai_chat_messages']) ? json_decode($data['ai_chat_messages'], true) : $data['ai_chat_messages'];
+    if (is_array($raw_msgs)) {
+      $sanitized = [];
+      foreach ($raw_msgs as $m) {
+        if (!is_array($m)) continue;
+        $sanitized[] = [
+          'role'    => isset($m['role']) ? sanitize_key($m['role']) : '',
+          'content' => isset($m['content']) ? sanitize_textarea_field($m['content']) : '',
+        ];
+      }
+      $update_data['ai_chat_messages'] = wp_json_encode($sanitized);
+      $update_formats[] = '%s';
+      $update_data['ai_chat_used'] = !empty($sanitized) ? 1 : 0;
+      $update_formats[] = '%d';
+    }
+  }
+  if (array_key_exists('ai_call_count', $data)) {
+    $update_data['ai_call_count'] = (int) $data['ai_call_count'];
+    $update_formats[] = '%d';
+  }
+  if (array_key_exists('advice_text', $data)) {
+    $update_data['advice_text'] = sanitize_textarea_field($data['advice_text']);
+    $update_formats[] = '%s';
+  }
+
+  // Catalogue présenté
+  if (array_key_exists('matching_product_ids', $data)) {
+    $ids_raw = is_array($data['matching_product_ids']) ? $data['matching_product_ids'] : explode(',', (string) $data['matching_product_ids']);
+    $ids = array_filter(array_map('intval', $ids_raw));
+    $update_data['matching_product_ids'] = implode(',', $ids);
+    $update_formats[] = '%s';
+  }
+
+  // Contact
+  if (array_key_exists('contact_triggered', $data)) {
+    $update_data['contact_triggered'] = !empty($data['contact_triggered']) ? 1 : 0;
+    $update_formats[] = '%d';
+  }
+  if (array_key_exists('contact_kind', $data)) {
+    $update_data['contact_kind'] = sanitize_key($data['contact_kind']);
+    $update_formats[] = '%s';
+  }
+  if (array_key_exists('contact_subject', $data)) {
+    $update_data['contact_subject'] = sanitize_text_field($data['contact_subject']);
+    $update_formats[] = '%s';
+  }
+  if (array_key_exists('contact_message', $data)) {
+    $update_data['contact_message'] = sanitize_textarea_field($data['contact_message']);
+    $update_formats[] = '%s';
+  }
+  if (array_key_exists('contact_email', $data)) {
+    $update_data['contact_email'] = sanitize_email($data['contact_email']);
+    $update_formats[] = '%s';
+  }
+  if (array_key_exists('contact_submitted', $data)) {
+    $submitted = !empty($data['contact_submitted']) ? 1 : 0;
+    $update_data['contact_submitted'] = $submitted;
+    $update_formats[] = '%d';
+    if ($submitted) {
+      $update_data['contact_submitted_at'] = current_time('mysql');
+      $update_formats[] = '%s';
+    }
+  }
+
   global $wpdb;
-  $table = $wpdb->prefix . 'sapi_robin_sessions';
-
+  $table = $wpdb->prefix . 'sapi_megafilter_sessions';
   $existing = $wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE session_id = %s", $session_id));
 
-  $row_data = [
-    'opening_context'  => $opening_context,
-    'context_data'     => $context_data,
-    'piece'            => $answers['piece'] ?? '',
-    'taille'           => $answers['taille'] ?? $answers['taille_escalier'] ?? '',
-    'eclairage'        => $answers['eclairage'] ?? '',
-    'sortie'           => $answers['sortie'] ?? '',
-    'hauteur'          => $answers['hauteur'] ?? '',
-    'table_reponse'    => $answers['table'] ?? '',
-    'style'            => $answers['style'] ?? '',
-    'completion'       => $completion,
-    'reco_shown'       => $reco_shown,
-    'reco_product_ids' => $reco_product_ids,
-    'filter_activated' => $filter_activated,
-    'ai_call_count'    => $ai_call_count,
-    'conversation'     => $conversation,
-    'contact_sent'     => $contact_sent,
-    'contact_name'     => $contact_name,
-    'contact_email'    => $contact_email,
-    'contact_phone'    => $contact_phone,
-    'device_type'      => $device_type,
-    'ip_address'       => $ip,
-    'referrer'         => $referrer,
-  ];
-
   if ($existing) {
-    $wpdb->update($table, $row_data, ['session_id' => $session_id]);
+    if (!empty($update_data)) {
+      $wpdb->update($table, $update_data, ['session_id' => $session_id], $update_formats, ['%s']);
+    }
+    $row_id = (int) $existing;
+    $is_insert = false;
   } else {
-    $row_data['session_id'] = $session_id;
-    $row_data['created_at'] = current_time('mysql');
-    $wpdb->insert($table, $row_data);
-    $existing = $wpdb->insert_id;
+    // INSERT — on enrichit avec les métadonnées techniques dérivées de
+    // $_SERVER (device, IP, referrer). Le tracking client n'a pas besoin
+    // de les envoyer.
+    $insert_data = $update_data;
+    $insert_formats = $update_formats;
+
+    $insert_data['session_id'] = $session_id;
+    $insert_formats[] = '%s';
+
+    $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])) : '';
+    $device = 'Desktop';
+    if (preg_match('/Mobile|Android|iPhone/i', $user_agent)) {
+      $device = 'Mobile';
+    } elseif (preg_match('/Tablet|iPad/i', $user_agent)) {
+      $device = 'Tablette';
+    }
+    $browser = 'Autre';
+    if (strpos($user_agent, 'Chrome') !== false && strpos($user_agent, 'Edg') === false) {
+      $browser = 'Chrome';
+    } elseif (strpos($user_agent, 'Safari') !== false && strpos($user_agent, 'Chrome') === false) {
+      $browser = 'Safari';
+    } elseif (strpos($user_agent, 'Firefox') !== false) {
+      $browser = 'Firefox';
+    } elseif (strpos($user_agent, 'Edg') !== false) {
+      $browser = 'Edge';
+    }
+    $insert_data['device_type'] = $device . ' · ' . $browser;
+    $insert_formats[] = '%s';
+
+    $ip = '';
+    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+      $ip = explode(',', sanitize_text_field(wp_unslash($_SERVER['HTTP_X_FORWARDED_FOR'])))[0];
+    } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
+      $ip = sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR']));
+    }
+    $insert_data['ip_address'] = $ip;
+    $insert_formats[] = '%s';
+
+    $insert_data['referrer'] = isset($_SERVER['HTTP_REFERER']) ? esc_url_raw(wp_unslash($_SERVER['HTTP_REFERER'])) : '';
+    $insert_formats[] = '%s';
+
+    $wpdb->insert($table, $insert_data, $insert_formats);
+    $row_id = (int) $wpdb->insert_id;
+    $is_insert = true;
   }
 
-  // Geolocation (async)
-  if ($ip && !empty($existing)) {
-    $row_id = (int) $existing;
-    add_action('shutdown', function () use ($ip, $row_id) {
-      $resp = wp_remote_get("http://ip-api.com/json/{$ip}?fields=city,regionName,country&lang=fr", ['timeout' => 5]);
-      if (is_wp_error($resp)) return;
-      $body = json_decode(wp_remote_retrieve_body($resp), true);
-      if (empty($body['city'])) return;
-      $location = implode(', ', array_filter([$body['city'], $body['regionName'], $body['country']]));
-      global $wpdb;
-      $table = $wpdb->prefix . 'sapi_robin_sessions';
-      $wpdb->update($table, ['location' => mb_substr($location, 0, 200)], ['id' => $row_id], ['%s'], ['%d']);
-    });
+  // Géolocalisation async (shutdown) — seulement à l'INSERT pour éviter
+  // d'appeler ip-api.com à chaque update.
+  if ($is_insert && $row_id) {
+    $ip_for_geo = $insert_data['ip_address'] ?? '';
+    if ($ip_for_geo) {
+      add_action('shutdown', function () use ($ip_for_geo, $row_id) {
+        $resp = wp_remote_get("http://ip-api.com/json/{$ip_for_geo}?fields=city,regionName,country&lang=fr", ['timeout' => 5]);
+        if (is_wp_error($resp)) return;
+        $body = json_decode(wp_remote_retrieve_body($resp), true);
+        if (empty($body['city'])) return;
+        $location = implode(', ', array_filter([$body['city'], $body['regionName'], $body['country']]));
+        global $wpdb;
+        $table = $wpdb->prefix . 'sapi_megafilter_sessions';
+        $wpdb->update($table, ['location' => mb_substr($location, 0, 200)], ['id' => $row_id], ['%s'], ['%d']);
+      });
+    }
   }
 
   wp_send_json_success(['logged' => true]);
 }
 
 /**
- * Admin menu — Robin Conseiller
+ * Menu admin — Conseiller V3. Slug : sapi-conseiller-sessions.
  */
-function sapi_robin_admin_menu() {
+function sapi_megafilter_admin_menu() {
   add_menu_page(
     'Robin Conseiller — Sessions',
     'Robin Conseiller',
     'manage_woocommerce',
-    'sapi-robin-sessions',
-    'sapi_robin_admin_page',
+    'sapi-conseiller-sessions',
+    'sapi_megafilter_admin_page',
     'dashicons-lightbulb',
     26
   );
 }
-add_action('admin_menu', 'sapi_robin_admin_menu');
+add_action('admin_menu', 'sapi_megafilter_admin_menu');
 
 /**
- * CSV Export — Robin V2
+ * Export CSV — version minimaliste pour Commit 1. Sera étendue (filtres
+ * respectés) en chantier 5.
  */
-function sapi_robin_export_csv() {
-  if (!isset($_GET['sapi_robin_export']) || $_GET['sapi_robin_export'] !== '1') return;
+function sapi_megafilter_export_csv() {
+  if (!isset($_GET['sapi_megafilter_export']) || $_GET['sapi_megafilter_export'] !== '1') return;
   if (!current_user_can('manage_woocommerce')) return;
-  if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'sapi_robin_export')) return;
+  if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'sapi_megafilter_export')) return;
 
   global $wpdb;
-  $table = $wpdb->prefix . 'sapi_robin_sessions';
+  $table = $wpdb->prefix . 'sapi_megafilter_sessions';
   $rows = $wpdb->get_results("SELECT * FROM $table ORDER BY created_at DESC", ARRAY_A);
 
   header('Content-Type: text/csv; charset=utf-8');
-  header('Content-Disposition: attachment; filename=robin-conseiller-sessions-' . wp_date('Y-m-d') . '.csv');
+  header('Content-Disposition: attachment; filename=conseiller-sessions-' . wp_date('Y-m-d') . '.csv');
 
   $out = fopen('php://output', 'w');
   fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-  fputcsv($out, ['Date', 'Contexte', 'Appareil', 'Localisation', 'Provenance', 'Pièce', 'Taille', 'Éclairage', 'Sortie', 'Hauteur', 'Table', 'Style', 'Avancement', 'Reco vue', 'Produits reco', 'Filtre activé', 'Appels IA', 'Conversation', 'Contact', 'Nom', 'Email', 'Téléphone'], ';');
+  fputcsv($out, [
+    'Date', 'Provenance', 'Device', 'Lieu', 'IP',
+    'Pièce', 'Taille', 'Sortie', 'Hauteur', 'Éclairage', 'Style',
+    'Quiz complet', 'IA chat', 'Nb appels IA', 'Advice text',
+    'Contact', 'Contact kind', 'Contact email', 'Contact sujet', 'Contact message',
+    'Produits matchés', 'Referrer', 'URL d\'entrée',
+  ], ';');
 
   foreach ($rows as $r) {
     fputcsv($out, [
       $r['created_at'],
-      $r['opening_context'],
+      $r['entry_point'],
       $r['device_type'],
       $r['location'],
-      $r['referrer'],
+      $r['ip_address'],
       $r['piece'],
       $r['taille'],
-      $r['eclairage'],
       $r['sortie'],
       $r['hauteur'],
-      $r['table_reponse'],
+      $r['eclairage'],
       $r['style'],
-      $r['completion'],
-      $r['reco_shown'] ? 'Oui' : 'Non',
-      $r['reco_product_ids'],
-      $r['filter_activated'] ? 'Oui' : 'Non',
+      $r['answers_completed'] ? 'Oui' : 'Non',
+      $r['ai_chat_used'] ? 'Oui' : 'Non',
       $r['ai_call_count'],
-      $r['conversation'],
-      $r['contact_sent'] ? 'Oui' : 'Non',
-      $r['contact_name'],
+      $r['advice_text'],
+      $r['contact_submitted'] ? 'Oui' : 'Non',
+      $r['contact_kind'],
       $r['contact_email'],
-      $r['contact_phone'],
+      $r['contact_subject'],
+      $r['contact_message'],
+      $r['matching_product_ids'],
+      $r['referrer'],
+      $r['entry_url'],
     ], ';');
   }
   fclose($out);
   exit;
 }
-add_action('admin_init', 'sapi_robin_export_csv');
+add_action('admin_init', 'sapi_megafilter_export_csv');
 
 /**
- * Admin page renderer — Robin Conseiller V2
+ * Page admin V3 — version minimaliste pour Commit 1 (chantier 4 partiel).
+ * Affiche stats basiques + tableau brut. Le dashboard complet (mockup-12)
+ * + filtres globaux + drill-down arriveront dans les commits suivants.
  */
-function sapi_robin_admin_page() {
+function sapi_megafilter_admin_page() {
   global $wpdb;
-  $table = $wpdb->prefix . 'sapi_robin_sessions';
+  $table = $wpdb->prefix . 'sapi_megafilter_sessions';
 
-  // Créer la table si elle n'existe pas
-  sapi_robin_maybe_create_table();
+  sapi_megafilter_maybe_create_table();
 
-  // Handle delete action
-  if (isset($_GET['sapi_robin_delete']) && isset($_GET['_wpnonce'])) {
-    $delete_id = (int) $_GET['sapi_robin_delete'];
-    if (wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'sapi_robin_delete_' . $delete_id)) {
+  // Handle delete
+  if (isset($_GET['sapi_megafilter_delete']) && isset($_GET['_wpnonce'])) {
+    $delete_id = (int) $_GET['sapi_megafilter_delete'];
+    if (wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'sapi_megafilter_delete_' . $delete_id)) {
       $wpdb->delete($table, ['id' => $delete_id], ['%d']);
       echo '<div class="notice notice-success is-dismissible"><p>Session supprimée.</p></div>';
     }
@@ -6646,42 +6773,55 @@ function sapi_robin_admin_page() {
   $rows = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table ORDER BY created_at DESC LIMIT %d OFFSET %d", $per_page, $offset));
   $total_pages = ceil($total / $per_page);
 
-  // Stats rapides
-  $stats_complete = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE completion = 'complete'");
-  $stats_reco     = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE reco_shown = 1");
-  $stats_filter   = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE filter_activated = 1");
-  $stats_contact  = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE contact_sent = 1");
+  $stats_completed = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE answers_completed = 1");
+  $stats_chat      = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE ai_chat_used = 1");
+  $stats_contact   = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE contact_submitted = 1");
 
-  $export_url = wp_nonce_url(admin_url('admin.php?page=sapi-robin-sessions&sapi_robin_export=1'), 'sapi_robin_export');
+  $export_url = wp_nonce_url(admin_url('admin.php?page=sapi-conseiller-sessions&sapi_megafilter_export=1'), 'sapi_megafilter_export');
 
-  $context_labels = [
-    'bandeau'       => 'Bandeau',
-    'category'      => 'Catégorie',
-    'product'       => 'Produit',
-    'product_guide' => 'Fiche produit',
-    'homepage'      => 'Accueil',
+  // Labels d'affichage pour entry_point (mockup-12 vocabulaire)
+  $entry_labels = [
+    'home_picker'   => 'Accueil',
+    'mes_creations' => 'Mes créations',
+    'product_pill'  => 'Fiche produit',
+    'freetext'      => 'Texte libre',
+  ];
+  $entry_colors = [
+    'home_picker'   => '#2E7D32',
+    'mes_creations' => '#E35B24',
+    'product_pill'  => '#1565C0',
+    'freetext'      => '#7B1FA2',
+  ];
+  $contact_kind_labels = [
+    'pro'        => 'PRO',
+    'sur-mesure' => 'SUR-MESURE',
+    'simple'     => 'SIMPLE',
+  ];
+  $contact_kind_colors = [
+    'pro'        => '#7B1FA2',
+    'sur-mesure' => '#E35B24',
+    'simple'     => '#1565C0',
   ];
   ?>
   <div class="wrap">
     <h1>Robin Conseiller — Sessions <span style="font-size:0.6em; color:#999;">(<?php echo esc_html($total); ?>)</span></h1>
 
-    <!-- Stats rapides -->
     <div style="display:flex; gap:1.5rem; margin:1rem 0 1.5rem; flex-wrap:wrap;">
       <div style="background:#fff; border:1px solid #ddd; border-radius:8px; padding:0.75rem 1.25rem; min-width:120px;">
-        <div style="font-size:1.5em; font-weight:700; color:#2E7D32;"><?php echo esc_html($stats_complete); ?></div>
-        <div style="font-size:0.8em; color:#666;">Quiz terminés</div>
+        <div style="font-size:1.5em; font-weight:700; color:#1d2327;"><?php echo esc_html($total); ?></div>
+        <div style="font-size:0.8em; color:#666;">Sessions totales</div>
       </div>
       <div style="background:#fff; border:1px solid #ddd; border-radius:8px; padding:0.75rem 1.25rem; min-width:120px;">
-        <div style="font-size:1.5em; font-weight:700; color:#E35B24;"><?php echo esc_html($stats_reco); ?></div>
-        <div style="font-size:0.8em; color:#666;">Reco vues</div>
+        <div style="font-size:1.5em; font-weight:700; color:#2E7D32;"><?php echo esc_html($stats_completed); ?></div>
+        <div style="font-size:0.8em; color:#666;">Quiz complets</div>
       </div>
       <div style="background:#fff; border:1px solid #ddd; border-radius:8px; padding:0.75rem 1.25rem; min-width:120px;">
-        <div style="font-size:1.5em; font-weight:700; color:#937D68;"><?php echo esc_html($stats_filter); ?></div>
-        <div style="font-size:0.8em; color:#666;">Filtre activé</div>
+        <div style="font-size:1.5em; font-weight:700; color:#937D68;"><?php echo esc_html($stats_chat); ?></div>
+        <div style="font-size:0.8em; color:#666;">Chat IA</div>
       </div>
       <div style="background:#fff; border:1px solid #ddd; border-radius:8px; padding:0.75rem 1.25rem; min-width:120px;">
         <div style="font-size:1.5em; font-weight:700; color:#1565C0;"><?php echo esc_html($stats_contact); ?></div>
-        <div style="font-size:0.8em; color:#666;">Contacts</div>
+        <div style="font-size:0.8em; color:#666;">Contacts envoyés</div>
       </div>
     </div>
 
@@ -6691,74 +6831,63 @@ function sapi_robin_admin_page() {
       <thead>
         <tr>
           <th>Date</th>
-          <th>Contexte</th>
-          <th>Appareil</th>
+          <th>Provenance</th>
+          <th>Device</th>
           <th>Lieu</th>
           <th>Pièce</th>
           <th>Taille</th>
           <th>Sortie</th>
           <th>Style</th>
-          <th>Avancement</th>
-          <th style="text-align:center;">Reco</th>
-          <th style="text-align:center;">Filtre</th>
           <th style="text-align:center;">IA</th>
-          <th style="text-align:center;">Contact</th>
+          <th style="text-align:center;">Chat</th>
+          <th>Contact</th>
           <th style="width:40px;"></th>
         </tr>
       </thead>
       <tbody>
         <?php if (empty($rows)) : ?>
-          <tr><td colspan="14" style="text-align:center; color:#999;">Aucune session enregistrée.</td></tr>
+          <tr><td colspan="12" style="text-align:center; color:#999;">Aucune session enregistrée.</td></tr>
         <?php else : ?>
           <?php foreach ($rows as $r) : ?>
             <tr>
               <td style="white-space:nowrap;"><?php echo esc_html(date('d/m H:i', strtotime($r->created_at))); ?></td>
               <td>
                 <?php
-                $ctx = $r->opening_context;
-                $ctx_label = isset($context_labels[$ctx]) ? $context_labels[$ctx] : esc_html($ctx);
-                $ctx_colors = ['bandeau' => '#937D68', 'category' => '#E35B24', 'product' => '#1565C0', 'product_guide' => '#7B1FA2', 'homepage' => '#2E7D32'];
-                $ctx_color = isset($ctx_colors[$ctx]) ? $ctx_colors[$ctx] : '#666';
+                $entry = $r->entry_point;
+                $entry_label = $entry_labels[$entry] ?? esc_html($entry);
+                $entry_color = $entry_colors[$entry] ?? '#666';
                 ?>
-                <span style="background:<?php echo esc_attr($ctx_color); ?>; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.75em; font-weight:600;">
-                  <?php echo esc_html($ctx_label); ?>
-                </span>
-              </td>
-              <td style="white-space:nowrap; font-size:0.85em;"><?php echo esc_html($r->device_type ?: '—'); ?></td>
-              <td style="font-size:0.85em;"><?php echo esc_html($r->location ?: '—'); ?></td>
-              <td><?php echo esc_html($r->piece ?: '—'); ?></td>
-              <td><?php echo esc_html($r->taille ?: '—'); ?></td>
-              <td><?php echo esc_html($r->sortie ?: '—'); ?></td>
-              <td><?php echo esc_html($r->style ?: '—'); ?></td>
-              <td>
-                <?php if ($r->completion === 'complete') : ?>
-                  <span style="color:#2E7D32; font-weight:600;">Complet</span>
-                <?php else : ?>
-                  <span style="color:#999;">Partiel</span>
-                <?php endif; ?>
-              </td>
-              <td style="text-align:center;">
-                <?php if ($r->reco_shown) : ?>
-                  <span title="Produits : <?php echo esc_attr($r->reco_product_ids); ?>" style="cursor:help; color:#E35B24;">&#9733;</span>
-                <?php else : ?>
-                  —
-                <?php endif; ?>
-              </td>
-              <td style="text-align:center;">
-                <?php echo $r->filter_activated ? '<span style="color:#937D68;">&#10003;</span>' : '—'; ?>
-              </td>
-              <td style="text-align:center;">
-                <?php if ($r->ai_call_count > 0) : ?>
-                  <span title="<?php echo esc_attr(mb_substr($r->conversation, 0, 500)); ?>" style="cursor:help; text-decoration:underline dotted;">
-                    <?php echo esc_html($r->ai_call_count); ?>
+                <?php if ($entry) : ?>
+                  <span style="background:<?php echo esc_attr($entry_color); ?>;color:#fff;padding:2px 8px;border-radius:10px;font-size:0.75em;font-weight:600;">
+                    <?php echo esc_html($entry_label); ?>
                   </span>
                 <?php else : ?>
                   —
                 <?php endif; ?>
               </td>
+              <td style="white-space:nowrap; font-size:0.85em;"><?php echo esc_html($r->device_type ?: '—'); ?></td>
+              <td style="font-size:0.85em;"><?php echo esc_html($r->location ?: '—'); ?></td>
+              <td><?php echo esc_html($r->piece ?: '—'); ?></td>
+              <td><?php echo esc_html($r->taille ?: $r->taille_escalier ?: '—'); ?></td>
+              <td><?php echo esc_html($r->sortie ?: '—'); ?></td>
+              <td><?php echo esc_html($r->style ?: '—'); ?></td>
               <td style="text-align:center;">
-                <?php if ($r->contact_sent) : ?>
-                  <span title="<?php echo esc_attr($r->contact_name . ' · ' . $r->contact_email . ' · ' . $r->contact_phone); ?>" style="cursor:help; color:#2E7D32;">&#10003;</span>
+                <?php echo $r->ai_call_count > 0 ? esc_html($r->ai_call_count) : '—'; ?>
+              </td>
+              <td style="text-align:center;">
+                <?php echo $r->ai_chat_used ? '<span style="color:#2E7D32;">&#10003;</span>' : '—'; ?>
+              </td>
+              <td>
+                <?php if ($r->contact_submitted) :
+                  $kind = $r->contact_kind;
+                  $kind_label = $contact_kind_labels[$kind] ?? strtoupper(esc_html($kind));
+                  $kind_color = $contact_kind_colors[$kind] ?? '#666';
+                ?>
+                  <span style="background:<?php echo esc_attr($kind_color); ?>;color:#fff;padding:1px 7px;border-radius:10px;font-size:0.7em;font-weight:600;text-transform:uppercase;">
+                    <?php echo esc_html($kind_label); ?>
+                  </span>
+                <?php elseif ($r->contact_triggered) : ?>
+                  <span style="color:#999;font-size:0.8em;">Abandon</span>
                 <?php else : ?>
                   —
                 <?php endif; ?>
@@ -6766,8 +6895,8 @@ function sapi_robin_admin_page() {
               <td style="text-align:center;">
                 <?php
                 $delete_url = wp_nonce_url(
-                  admin_url('admin.php?page=sapi-robin-sessions&sapi_robin_delete=' . (int) $r->id),
-                  'sapi_robin_delete_' . (int) $r->id
+                  admin_url('admin.php?page=sapi-conseiller-sessions&sapi_megafilter_delete=' . (int) $r->id),
+                  'sapi_megafilter_delete_' . (int) $r->id
                 );
                 ?>
                 <a href="<?php echo esc_url($delete_url); ?>"
