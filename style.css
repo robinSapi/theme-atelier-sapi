@@ -22956,10 +22956,10 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 /* Variante Conseil — centrée, accent CTA orange. Card entière cliquable
-   (le bouton CTA reste pour l'affordance ; le listener JS écoute aussi
-   la card pour permettre un clic n'importe où dessus). */
+   (les éléments internes — pièces + form — captent leur propre clic ;
+   le listener JS écoute aussi la card pour les clics ailleurs). */
 .conseiller-card--conseil {
-  padding: 50px 32px 52px;
+  padding: 36px 32px 40px;
   text-align: center;
   cursor: pointer;
   -webkit-transition: -webkit-transform 0.2s ease, box-shadow 0.25s ease;
@@ -22970,15 +22970,31 @@ body.woocommerce-cart div.woocommerce-wrapper {
   transform: translateY(-2px);
   box-shadow: 0 8px 28px rgba(147, 125, 104, 0.18);
 }
+
+/* Round 4 — Layout flex column avec gap uniforme pour le room picker
+   intégré dans la card Conseil. Reset les marges héritées des enfants. */
+.conseiller-card--conseil .conseiller-card__inner {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 18px;
+}
+.conseiller-card--conseil .conseiller-badge,
+.conseiller-card--conseil .room-picker-title,
+.conseiller-card--conseil .room-picker-cards,
+.conseiller-card--conseil .room-picker-or,
+.conseiller-card--conseil .room-picker-freetext {
+  margin: 0;
+}
+.conseiller-card--conseil .room-picker-cards {
+  width: 100%;
+}
 .conseiller-card--conseil .conseiller-h2 {
   max-width: 760px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.conseiller-card--conseil .conseiller-subtitle {
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 28px;
+  margin: 0 auto;
 }
 
 /* Variante Mon projet — card entière cliquable (button). Le hover signale
