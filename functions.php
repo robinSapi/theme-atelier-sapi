@@ -292,6 +292,7 @@ function sapi_maison_enqueue_assets() {
   if (is_front_page()) {
     $room_picker_js_path = get_template_directory() . '/assets/sapi-room-picker.js';
     if (file_exists($room_picker_js_path)) {
+      require_once get_template_directory() . '/inc/guide-data.php';
       wp_enqueue_script(
         'sapi-room-picker',
         get_template_directory_uri() . '/assets/sapi-room-picker.js',
@@ -299,6 +300,11 @@ function sapi_maison_enqueue_assets() {
         filemtime($room_picker_js_path),
         true
       );
+      // Steps pour calculer la prochaine question non répondue côté JS
+      // (mode in-progress du room picker).
+      wp_localize_script('sapi-room-picker', 'SAPI_ROOM_PICKER', [
+        'steps' => sapi_guide_get_steps(),
+      ]);
     }
   }
 

@@ -14,6 +14,7 @@
   'use strict';
 
   var picker = null;
+  var STEPS = (window.SAPI_ROOM_PICKER && Array.isArray(window.SAPI_ROOM_PICKER.steps)) ? window.SAPI_ROOM_PICKER.steps : [];
 
   function getProjectSnapshot() {
     if (!window.sapiProject || typeof window.sapiProject.get !== 'function') return null;
@@ -41,16 +42,49 @@
     });
   }
 
+  // Question dynamique selon la pièce (mirror de la modale)
+  function getDynamicQuestion(step, answers) {
+    if (step.dynamic_question && step.dynamic_question.piece) {
+      var p = answers && answers.piece;
+      if (p && step.dynamic_question.piece[p]) return step.dynamic_question.piece[p];
+    }
+    return step.question;
+  }
+
+  // Renvoie le step complet de la prochaine question visible non répondue,
+  // ou null si parcours achevé. Utilise sapiProject.computeVisibleStepIds
+  // pour le calcul de visibilité (mirror exact de la modale).
+  function getNextUnansweredStep(project) {
+    if (!STEPS.length || !project || !project.answers) return null;
+    if (!window.sapiProject || typeof window.sapiProject.computeVisibleStepIds !== 'function') return null;
+    var visibleIds = window.sapiProject.computeVisibleStepIds(project.answers, STEPS);
+    for (var i = 0; i < visibleIds.length; i++) {
+      var id = visibleIds[i];
+      if (!project.answers[id]) {
+        for (var j = 0; j < STEPS.length; j++) {
+          if (STEPS[j].id === id) return STEPS[j];
+        }
+      }
+    }
+    return null;
+  }
+
   function populateInProgress(project) {
     var resume = picker.querySelector('[data-room-picker-resume]');
-    if (!resume || !project || !project.labels) return;
-    var labels = project.labels;
-    var ordered = ['piece', 'taille', 'taille_escalier', 'eclairage', 'sortie', 'hauteur', 'table', 'style'];
-    var parts = [];
-    ordered.forEach(function (k) { if (labels[k]) parts.push(labels[k]); });
-    if (parts.length) {
-      resume.textContent = 'Tu as commencé : ' + parts.join(' · ') + '. On continue ?';
+    if (!resume) return;
+    var nextStep = getNextUnansweredStep(project);
+    if (nextStep) {
+      var question = getDynamicQuestion(nextStep, project.answers);
+      resume.innerHTML = 'Ta prochaine question : <em>«&nbsp;' + escapeHtml(question) + '&nbsp;»</em>';
+    } else {
+      resume.textContent = 'On continue ton projet ?';
     }
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
   function populateComplete(project) {

@@ -10963,7 +10963,7 @@ transform: translateY(15px);
   border: 1px solid rgba(139, 115, 85, 0.25);
 }
 
-/* Round 4 — Résumé "Tu as commencé : Cuisine · Petite · …" (état in-progress) */
+/* Round 4 — Prochaine question non répondue (état in-progress) */
 .room-picker-resume {
   margin: 0 auto;
   max-width: 580px;
@@ -10972,6 +10972,11 @@ transform: translateY(15px);
   line-height: 1.55;
   color: var(--color-wood-mid);
   text-align: center;
+}
+.room-picker-resume em {
+  font-style: italic;
+  color: var(--color-wood-dark);
+  font-weight: 500;
 }
 
 /* Round 4 — Champ texte libre sous les pièces (room picker homepage) */
