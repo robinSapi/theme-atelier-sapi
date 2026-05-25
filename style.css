@@ -10807,14 +10807,13 @@ transform: translateY(15px);
 }
 
 .room-picker-inner {
-  /* Round 4 — padding symétrique vertical pour centrage visuel équilibré
-     dans la card (le parent .bento-room-picker en flex column centre déjà
-     verticalement, mais le padding équilibré évite tout désalignement). */
-  padding: 1.75rem 3rem;
+  /* Round 4 — Espacements alignés sur la card Conseil de /mes-creations/
+     (gap 18px = écarts homogènes badge / titre / cases / "ou" / champ texte). */
+  padding: 36px 32px 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
+  gap: 18px;
 }
 
 /* Titre + subtitle harmonisés avec .conseiller-h2 / .conseiller-subtitle */
@@ -10827,7 +10826,9 @@ transform: translateY(15px);
   color: var(--color-wood-dark);
   text-align: center;
   line-height: 1.2;
-  margin: 0 0 14px;
+  /* Round 4 — margin 0 : l'espacement est géré par le gap du parent
+     .room-picker-inner / .conseiller-card__inner. Évite le cumul. */
+  margin: 0;
 }
 
 .room-picker-sub {
