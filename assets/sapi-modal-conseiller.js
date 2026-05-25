@@ -1554,6 +1554,13 @@
         return;
       }
       openModal(st);
+      // Round 4 — Si detail.freetext fourni (depuis le room picker de la
+      // card Conseil sur /mes-creations/), bascule en chat S2 avec le texte
+      // initial — même mécanique que le param URL ?freetext= sur load.
+      var freetext = (e.detail && typeof e.detail.freetext === 'string') ? e.detail.freetext.trim() : '';
+      if (freetext) {
+        setTimeout(function () { submitFromS0Text(freetext); }, 50);
+      }
     });
 
     // ESC pour fermer — désactivé pendant l'animation morph (state.transition)

@@ -506,6 +506,25 @@
         return;
       }
 
+      // Round 4 — Click sur une pièce du room picker dans la card Conseil :
+      // enregistre la pièce dans sapiProject puis ouvre la modale en s0
+      // (determineInitialState basculera en s0-partiel sur la prochaine
+      // question non répondue).
+      var roomCard = e.target.closest('.conseiller-card--conseil .room-card[data-piece]');
+      if (roomCard) {
+        e.preventDefault();
+        var slug = roomCard.getAttribute('data-piece');
+        var label = roomCard.getAttribute('data-piece-label') || slug;
+        if (window.sapiProject && typeof window.sapiProject.update === 'function') {
+          window.sapiProject.update({ piece: slug }, { piece: label });
+        }
+        roomCard.dispatchEvent(new CustomEvent('sapi:open-modal', {
+          bubbles: true,
+          detail: { state: 's0' },
+        }));
+        return;
+      }
+
       // CTAs explicites (data-action="open-modal" sur la Conseil card + lien Modifier)
       var btn = e.target.closest('[data-action="open-modal"]');
       if (btn) {
@@ -536,8 +555,9 @@
       }
 
       // Round 4 — clic ailleurs sur la card "Conseil de Robin" → ouvre s0
-      // (le bouton CTA interne capte déjà via data-action="open-modal"
-      // plus haut, donc on n'arrive ici qu'au clic sur la card elle-même).
+      // (les boutons internes — .room-card / form freetext — sont déjà
+      // captés plus haut, donc on n'arrive ici qu'au clic sur la zone
+      // décorative de la card elle-même).
       var conseilCard = e.target.closest('.conseiller-card--conseil');
       if (conseilCard) {
         conseilCard.dispatchEvent(new CustomEvent('sapi:open-modal', {
@@ -545,6 +565,21 @@
           detail: { state: 's0' },
         }));
       }
+    });
+
+    // Round 4 — Submit du champ texte libre dans la card Conseil : ouvre
+    // la modale en s0 + passe detail.freetext qui basculera en chat S2.
+    els.zone.addEventListener('submit', function (e) {
+      var form = e.target.closest('.conseiller-card--conseil [data-room-picker-freetext]');
+      if (!form) return;
+      e.preventDefault();
+      var input = form.querySelector('input[name="freetext"]');
+      var text = (input && input.value || '').trim();
+      if (!text) return;
+      form.dispatchEvent(new CustomEvent('sapi:open-modal', {
+        bubbles: true,
+        detail: { state: 's0', freetext: text },
+      }));
     });
   }
 
