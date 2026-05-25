@@ -92,6 +92,7 @@
     transition: false,    // F2a-bis : true pendant l'écran "Robin réfléchit"
     aiController: null,   // Audit #7 : AbortController de la requête IA en cours, abort sur close/replace
     shortMode: false,     // F2b Phase 2 — true quand ouvert depuis fiche produit
+    editFromS3: false,    // Round 4 — true quand on édite une chip depuis S3 (retour direct au récap après modif)
     chat: {
       conversation: [],   // [{role:'user'|'assistant', content:'...'}]
       sessionId: null,
@@ -248,15 +249,32 @@
       state.questionHistory.push(step);
     }
 
-    // Cherche la prochaine question visible après la courante
+    // Round 4 — Cherche la prochaine question visible NON RÉPONDUE après
+    // la courante. Skip celles déjà répondues : utile en mode édition S3
+    // (clic sur chip) où on modifie une chip et les questions suivantes
+    // ont déjà des réponses valides, donc on retourne direct au récap.
     var visible = getVisibleStepIds(state.answers);
     var idx = visible.indexOf(step);
-    var nextStep = (idx !== -1 && idx + 1 < visible.length) ? visible[idx + 1] : null;
+    var nextStep = null;
+    for (var i = idx + 1; i < visible.length; i++) {
+      if (!state.answers[visible[i]]) {
+        nextStep = visible[i];
+        break;
+      }
+    }
 
     if (nextStep) {
       showQuestion(nextStep);
       // F2a-quater : bascule visuelle S0→S1 (ou no-op si déjà S1)
       if (state.screen !== 's1') showScreen('s1');
+    } else if (state.editFromS3) {
+      // Round 4 — édition d'une chip depuis S3 : retour direct au récap
+      // (toutes les questions suivantes ont déjà des réponses valides).
+      state.editFromS3 = false;
+      if (window.sapiProject) {
+        window.sapiProject.update(state.answers, state.labels);
+      }
+      showS3Recap();
     } else if (state.shortMode) {
       // F2b Phase 2 — fin du parcours court : récap produit + IA dédiée (pas de
       // morphing modale→card, on reste dans la modale ouverte).
@@ -1014,8 +1032,14 @@
         var labelText = state.labels[sid] || slug;
         var keyLabel = S3_KEY_LABELS[sid] || sid;
 
-        var chip = document.createElement('span');
+        // Round 4 — chip cliquable pour éditer la réponse (mockup-11 hint
+        // promettait cette fonctionnalité). Utilise un <button> au lieu
+        // d'un <span> pour l'accessibilité + cursor pointer naturel.
+        var chip = document.createElement('button');
+        chip.type = 'button';
         chip.className = 'chip chip--project';
+        chip.setAttribute('data-step-edit', sid);
+        chip.setAttribute('aria-label', 'Modifier ' + keyLabel + ' : ' + labelText);
 
         // Icône : depuis l'icône du choix sélectionné dans le step
         var iconName = null;
@@ -1603,6 +1627,24 @@
       var slug = btn.getAttribute('data-choice');
       var label = btn.getAttribute('data-label') || btn.textContent.trim();
       answerCurrentQuestion(slug, label);
+    });
+
+    // Round 4 — Click sur une chip de récap S3 → édite ce step.
+    // Bascule sur S1 avec la question correspondante, en mode editFromS3
+    // pour qu'à la fin du flow (qui peut être immédiate si aucune réponse
+    // n'est invalidée par le changement), on retourne directement au récap.
+    els.modal.addEventListener('click', function (e) {
+      var editChip = e.target.closest('[data-step-edit]');
+      if (!editChip) return;
+      var stepId = editChip.getAttribute('data-step-edit');
+      if (!stepId) return;
+      state.editFromS3 = true;
+      // Reset questionHistory pour que le retour de S1 ne ramène pas à
+      // d'anciennes questions du parcours initial — depuis S3 on est
+      // "hors-flow", on permet juste l'édition ponctuelle.
+      state.questionHistory = [];
+      showQuestion(stepId);
+      showScreen('s1');
     });
 
     // F2a-quater : submit du champ texte S0 hybride → bascule vers S2.chat
