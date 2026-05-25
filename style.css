@@ -11915,6 +11915,23 @@ button.room-card {
     padding: 0 1rem 1.5rem;
   }
 
+  /* Mobile — placeholder "Décris ton projet en quelques mots…" tronqué
+     à cause du padding-right (espace bouton orange). On réduit la police
+     et les paddings de l'input pour que le texte tienne. */
+  .room-picker-freetext__input {
+    font-size: 13px;
+    padding: 12px 46px 12px 16px;
+  }
+  .room-picker-freetext__submit {
+    width: 34px;
+    height: 34px;
+    right: 5px;
+  }
+  .room-picker-freetext__submit svg {
+    width: 14px;
+    height: 14px;
+  }
+
   /* Stats card: compact on mobile, no forced height */
   .bento-stats {
     min-height: auto;
