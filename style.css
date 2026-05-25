@@ -22853,10 +22853,20 @@ body.woocommerce-cart div.woocommerce-wrapper {
   padding: 0 3rem;
 }
 
-/* Variante Conseil — centrée, accent CTA orange */
+/* Variante Conseil — centrée, accent CTA orange. Card entière cliquable
+   (le bouton CTA reste pour l'affordance ; le listener JS écoute aussi
+   la card pour permettre un clic n'importe où dessus). */
 .conseiller-card--conseil {
   padding: 50px 32px 52px;
   text-align: center;
+  cursor: pointer;
+  -webkit-transition: -webkit-transform 0.2s ease, box-shadow 0.25s ease;
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+.conseiller-card--conseil:hover {
+  -webkit-transform: translateY(-2px);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(147, 125, 104, 0.18);
 }
 .conseiller-card--conseil .conseiller-h2 {
   max-width: 760px;

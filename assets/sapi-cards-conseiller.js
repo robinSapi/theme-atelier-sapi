@@ -532,6 +532,18 @@
           bubbles: true,
           detail: { state: 's0' },
         }));
+        return;
+      }
+
+      // Round 4 — clic ailleurs sur la card "Conseil de Robin" → ouvre s0
+      // (le bouton CTA interne capte déjà via data-action="open-modal"
+      // plus haut, donc on n'arrive ici qu'au clic sur la card elle-même).
+      var conseilCard = e.target.closest('.conseiller-card--conseil');
+      if (conseilCard) {
+        conseilCard.dispatchEvent(new CustomEvent('sapi:open-modal', {
+          bubbles: true,
+          detail: { state: 's0' },
+        }));
       }
     });
   }
