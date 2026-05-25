@@ -12,15 +12,6 @@ defined('ABSPATH') || exit;
 
 get_header();
 
-// Get all product categories for filters
-$product_categories = get_terms([
-  'taxonomy' => 'product_cat',
-  'hide_empty' => true,
-  'exclude' => [get_option('default_product_cat')], // Exclude "Uncategorized"
-  'orderby' => 'menu_order',
-  'order' => 'ASC',
-]);
-
 // Get ALL products (no pagination)
 $all_products = new WP_Query([
   'post_type' => 'product',
@@ -71,131 +62,103 @@ if (!$hero_img_url) {
   }
 }
 ?>
+<?php
+// F2a-quinquies : hero qui s'adapte au changement de sapiProject.answers.piece
+// en live (crossfade via sapi-hero-live.js). Le mapping est centralisé dans
+// la fonction helper sapi_get_hero_piece_titles() (functions.php) — source
+// unique partagée entre le rendu PHP initial et la localize JS.
+// Sous-titre et CTA "Conseils de Robin" supprimés : le hero ne contient
+// que H1 + photo de fond. La photo reste statique (refonte par pièce =
+// chantier S28 séparé, en pause).
+$hero_titles = function_exists('sapi_get_hero_piece_titles')
+  ? sapi_get_hero_piece_titles()
+  : ['default' => __('Mes Créations', 'theme-sapi-maison'), 'pieces' => []];
+$piece_param = isset($_GET['piece']) ? sanitize_key(wp_unslash($_GET['piece'])) : '';
+$hero_title  = isset($hero_titles['pieces'][$piece_param])
+  ? $hero_titles['pieces'][$piece_param]
+  : $hero_titles['default'];
+?>
 <section class="shop-hero-artisan">
   <div class="shop-hero-artisan-inner">
-    <h1><?php esc_html_e('Mes Créations', 'theme-sapi-maison'); ?></h1>
-    <p class="shop-hero-artisan-subtitle">
-      <?php esc_html_e('Luminaires uniques, découpés au laser et assemblés à la main dans l\'atelier lyonnais de Robin.', 'theme-sapi-maison'); ?>
-    </p>
-    <!-- CTA maillage interne → Conseils éclairés -->
-    <p class="seo-cta-maillage-inline">Vous ne savez pas par où commencer ? <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>">Lisez les conseils de Robin →</a></p>
+    <h1 data-hero-title><?php echo esc_html($hero_title); ?></h1>
   </div>
 </section>
 
-<!-- Conseil personnalisé de Robin pour Mes Créations (shown by mon-projet.js if available) -->
+<!-- ── F2a Phase 2 — Cards Conseiller V3 (sans projet / avec projet) ── -->
 <?php
-require_once get_template_directory() . '/inc/template-robin-conseil.php';
-sapi_robin_conseil_card( 'selection' );
+// Icône SVG crayon (badge "Conseil de Robin" / "Mon projet") + CTA.
+$conseiller_pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>';
+
+// Round 4 — Room picker dans la card Conseil (même contenu que la homepage).
+require_once get_template_directory() . '/inc/guide-data.php';
+$conseil_room_choices = [
+  ['label' => 'Salon',   'slug' => 'salon',    'icon' => 'sofa'],
+  ['label' => 'Cuisine', 'slug' => 'cuisine',  'icon' => 'dining'],
+  ['label' => 'Chambre', 'slug' => 'chambre',  'icon' => 'bed'],
+  ['label' => 'Bureau',  'slug' => 'bureau',   'icon' => 'monitor'],
+  ['label' => 'Entrée',  'slug' => 'entree',   'icon' => 'door'],
+  ['label' => 'Escalier','slug' => 'escalier', 'icon' => 'stairs'],
+];
+$conseil_room_icons = sapi_guide_get_icons();
 ?>
-
-<!-- Product Filters with dynamic counts -->
-<div class="product-filters-wrapper">
-  <!-- Search Bar -->
-  <div class="product-search-bar">
-    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <circle cx="11" cy="11" r="8"></circle>
-      <path d="m21 21-4.35-4.35"></path>
-    </svg>
-    <input
-      type="text"
-      id="product-search-input"
-      class="product-search-input"
-      placeholder="<?php esc_attr_e('Rechercher un luminaire...', 'theme-sapi-maison'); ?>"
-      aria-label="<?php esc_attr_e('Rechercher un produit', 'theme-sapi-maison'); ?>"
-    />
-    <button type="button" class="search-clear" style="display: none;" aria-label="<?php esc_attr_e('Effacer la recherche', 'theme-sapi-maison'); ?>">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-    </button>
-  </div>
-
-  <nav class="product-filters product-filters-js" role="navigation" aria-label="<?php esc_attr_e('Filtres produits', 'theme-sapi-maison'); ?>">
-    <?php
-    // Build category lookup
-    $cats_by_slug = [];
-    if ($product_categories && !is_wp_error($product_categories)) {
-      foreach ($product_categories as $cat) {
-        $cats_by_slug[$cat->slug] = $cat;
-      }
-    }
-
-    // Count for "Toutes nos créations" = total minus extras
-    $extras_slugs = ['accessoires', 'carte-cadeau'];
-    $creations_count = $all_products->found_posts;
-    foreach ($extras_slugs as $es) {
-      if (isset($cats_by_slug[$es])) {
-        $creations_count -= $cats_by_slug[$es]->count;
-      }
-    }
-    ?>
-
-    <!-- Dropdown mobile (remplace les pills sur mobile) -->
-    <?php
-    $creations_order = ['suspensions', 'appliques', 'lampadaires', 'lampesaposer'];
-    $all_filter_label = esc_html__('Toutes mes créations', 'theme-sapi-maison') . ' (' . esc_html($creations_count) . ')';
-    ?>
-    <div class="filter-dropdown filter-dropdown--mobile" id="mobile-category-dropdown">
-      <button type="button" class="filter-dropdown-toggle">
-        <span class="filter-label"><?php echo $all_filter_label; ?></span>
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <div class="filter-dropdown-menu">
-        <button type="button" class="filter-option active" data-filter="all"><?php echo $all_filter_label; ?></button>
-        <?php foreach ($creations_order as $slug) :
-          if (!isset($cats_by_slug[$slug])) continue;
-          $cat = $cats_by_slug[$slug]; ?>
-          <button type="button" class="filter-option" data-filter="<?php echo esc_attr($cat->slug); ?>"><?php echo esc_html($cat->name); ?> (<?php echo esc_html($cat->count); ?>)</button>
-        <?php endforeach; ?>
-        <?php foreach ($extras_slugs as $slug) :
-          if (!isset($cats_by_slug[$slug])) continue;
-          $cat = $cats_by_slug[$slug]; ?>
-          <button type="button" class="filter-option" data-filter="<?php echo esc_attr($cat->slug); ?>"><?php echo esc_html($cat->name); ?> (<?php echo esc_html($cat->count); ?>)</button>
+<section class="conseiller-cards-zone" data-conseiller-zone aria-label="<?php esc_attr_e('Conseil de Robin', 'theme-sapi-maison'); ?>">
+  <!-- Card "Conseil de Robin" — visible sans projet en localStorage.
+       Round 4 : contenu room picker (titre + 6 pièces + séparateur "ou"
+       + champ texte libre) identique à la homepage. -->
+  <div class="conseiller-card conseiller-card--conseil" data-conseiller-card="conseil" data-room-picker hidden>
+    <div class="conseiller-card__inner">
+      <span class="conseiller-badge conseiller-badge--default">
+        <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput — SVG statique en dur ?>
+        <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
+      </span>
+      <h2 class="room-picker-title"><?php esc_html_e('Pour quelle pièce cherchez-vous un luminaire ?', 'theme-sapi-maison'); ?></h2>
+      <div class="room-picker-cards">
+        <?php foreach ($conseil_room_choices as $room) :
+          $icon_svg = isset($conseil_room_icons[$room['icon']]) ? $conseil_room_icons[$room['icon']] : '';
+        ?>
+          <button type="button" class="room-card" data-piece="<?php echo esc_attr($room['slug']); ?>" data-piece-label="<?php echo esc_attr($room['label']); ?>">
+            <span class="room-card-icon"><?php echo $icon_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+            <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
+          </button>
         <?php endforeach; ?>
       </div>
-    </div>
-
-    <!-- Ligne 1 : Filtres catégorie (luminaires) — desktop only -->
-    <div class="filter-row filter-row--categories">
-      <button type="button" class="filter-btn active" data-filter="all">
-        <?php esc_html_e('Toutes mes créations', 'theme-sapi-maison'); ?>
-        <span class="filter-count">(<?php echo esc_html($creations_count); ?>)</span>
-      </button>
-      <?php foreach ($creations_order as $slug) :
-        if (!isset($cats_by_slug[$slug])) continue;
-        $cat = $cats_by_slug[$slug]; ?>
-        <button type="button" class="filter-btn" data-filter="<?php echo esc_attr($cat->slug); ?>">
-          <?php echo esc_html($cat->name); ?>
-          <span class="filter-count">(<?php echo esc_html($cat->count); ?>)</span>
+      <div class="room-picker-or" aria-hidden="true">
+        <span class="room-picker-or__text"><?php esc_html_e('ou', 'theme-sapi-maison'); ?></span>
+      </div>
+      <form class="room-picker-freetext" data-room-picker-freetext>
+        <input type="text" class="room-picker-freetext__input" name="freetext"
+               placeholder="<?php esc_attr_e('Décris ton projet en quelques mots…', 'theme-sapi-maison'); ?>"
+               maxlength="500"
+               aria-label="<?php esc_attr_e('Décris ton projet en quelques mots', 'theme-sapi-maison'); ?>">
+        <button type="submit" class="room-picker-freetext__submit" aria-label="<?php esc_attr_e('Envoyer', 'theme-sapi-maison'); ?>">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
         </button>
-      <?php endforeach; ?>
+      </form>
     </div>
+  </div>
 
-    <!-- Ligne 2 : Extras (accessoires, carte cadeau) — desktop only -->
-    <div class="filter-row filter-row--extras">
-      <?php
-      foreach ($extras_slugs as $slug) :
-        if (!isset($cats_by_slug[$slug])) continue;
-        $cat = $cats_by_slug[$slug];
-        $btn_class = 'filter-btn filter-btn--extra';
-        if ($slug === 'carte-cadeau') {
-          $btn_class .= ' filter-btn--gift';
-        }
-      ?>
-        <button type="button" class="<?php echo esc_attr($btn_class); ?>" data-filter="<?php echo esc_attr($cat->slug); ?>">
-          <?php echo esc_html($cat->name); ?>
-          <span class="filter-count">(<?php echo esc_html($cat->count); ?>)</span>
-        </button>
-      <?php endforeach; ?>
+  <!-- Card "Mon projet" — visible avec projet en localStorage.
+       F2a-sexies : la card n'est plus un <button> entier. Les interactions
+       sont portées par :
+         - Le lien "Modifier" coin haut-droit (visible quand projet complet) → S3
+         - Les chips de réponse de la prochaine question (visible quand projet incomplet) → enregistre + ouvre la modale sur la question d'après -->
+  <section class="conseiller-card conseiller-card--mon-projet" data-conseiller-card="mon-projet" hidden>
+    <a class="conseiller-mon-projet__edit" href="#" data-action="open-modal" data-modal-state="s3" data-mon-projet-edit hidden>
+      <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+      <span><?php esc_html_e('Modifier', 'theme-sapi-maison'); ?></span>
+    </a>
+    <div class="conseiller-card__inner">
+      <span class="conseiller-badge conseiller-badge--default">
+        <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+        <?php esc_html_e('Mon projet', 'theme-sapi-maison'); ?>
+      </span>
+      <p class="conseiller-mon-projet__text" data-mon-projet-phrase>
+        <span class="conseiller-mon-projet__text-content" data-mon-projet-phrase-content></span>
+      </p>
+      <div class="conseiller-mon-projet__inline-question" data-inline-question hidden></div>
     </div>
-
-    <!-- Ligne 3 : Ma sélection personnalisée (injecté par shop.js si projet en cours) -->
-    <div class="filter-row filter-row--robin" id="filter-row-robin" style="display: none;"></div>
-
-  </nav>
-
-</div>
+  </section>
+</section>
 
 <!-- Products Grid — grille 2 colonnes photos ambiance -->
 <section class="shop-products" id="shop-products">
@@ -290,6 +253,20 @@ sapi_robin_conseil_card( 'selection' );
           if (!empty($m)) $size_dimension = (int) $m[0];
         }
 
+        // Nombre de variations de taille (utile au filtrage taille=spacieuse)
+        $taille_variations_count = count($taille_terms);
+
+        // Méga-filtre — format luminaire (boule/horizontal/vertical) et type d'ampoule
+        $format_terms = wc_get_product_terms($product_id, 'pa_format');
+        $format_slugs = [];
+        foreach ($format_terms as $t) { $format_slugs[] = $t->slug; }
+        $format_attr = implode(' ', $format_slugs);
+
+        $ampoule_terms = wc_get_product_terms($product_id, 'pa_type-ampoule');
+        $ampoule_slugs = [];
+        foreach ($ampoule_terms as $t) { $ampoule_slugs[] = $t->slug; }
+        $ampoule_attr = implode(' ', $ampoule_slugs);
+
         // Photo ambiance ACF (sauf accessoires → photo produit WooCommerce)
         $is_accessoire = in_array('accessoires', $cat_slugs);
         $amb_photo_ids = !$is_accessoire ? sapi_get_product_photo_ids($product_id, 'ambiance', 1) : [];
@@ -309,6 +286,9 @@ sapi_robin_conseil_card( 'selection' );
         $data_attrs .= ' data-price="' . esc_attr($filter_price) . '"';
         $data_attrs .= $wood_essence ? ' data-wood="' . esc_attr(sanitize_title($wood_essence)) . '"' : '';
         $data_attrs .= $size_dimension > 0 ? ' data-size="' . esc_attr($size_dimension) . '"' : '';
+        $data_attrs .= $format_attr ? ' data-format-luminaire="' . esc_attr($format_attr) . '"' : '';
+        $data_attrs .= $ampoule_attr ? ' data-type-ampoule="' . esc_attr($ampoule_attr) . '"' : '';
+        $data_attrs .= ' data-size-variations="' . esc_attr($taille_variations_count) . '"';
       ?>
         <?php
           // Catégorie affichée (singulier)
@@ -344,7 +324,6 @@ sapi_robin_conseil_card( 'selection' );
               <?php if ($hover_id) : ?>
                 <span class="product-image-hover"><?php echo wp_get_attachment_image($hover_id, 'woocommerce_thumbnail', false, ['alt' => get_the_title() . ' - ambiance', 'loading' => 'lazy']); ?></span>
               <?php endif; ?>
-              <div class="badge-selection" style="display:none;">Ma sélection</div>
             </div>
 
             <div class="product-info">
@@ -381,6 +360,101 @@ sapi_robin_conseil_card( 'selection' );
             <p><?php echo esc_html($card['text']); ?></p>
             <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="product-text-card-discover">En savoir plus</a>
           </div>
+        </div>
+        <?php endif; ?>
+
+        <?php
+        // F2a Phase 4 — Card Sur-mesure insérée une fois, après le 7e produit.
+        // Le wrap span sur toute la largeur de la grille (grid-column: 1 / -1).
+        // JS bascule entre l'état empty/project/success selon sapiProject.
+        if ($sapi_product_counter === 7) :
+          $surmesure_badge_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>';
+        ?>
+        <div class="conseiller-surmesure-wrap" data-surmesure-wrap hidden>
+
+          <!-- État A — Sans projet (form complet) -->
+          <div class="conseiller-card conseiller-surmesure-card" data-surmesure-state="empty" hidden>
+            <div class="conseiller-card__inner">
+              <span class="conseiller-badge conseiller-badge--surmesure">
+                <?php echo $surmesure_badge_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                <?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?>
+              </span>
+              <h2 class="conseiller-h2"><?php esc_html_e('Et si on créait ton luminaire sur-mesure ?', 'theme-sapi-maison'); ?></h2>
+              <p class="conseiller-subtitle"><?php esc_html_e('Laisse ton email et décris ton projet en quelques mots. Robin te revient avec une proposition personnalisée.', 'theme-sapi-maison'); ?></p>
+
+              <form class="conseiller-surmesure-form" data-surmesure-form data-surmesure-mode="full">
+                <input type="email" class="conseiller-surmesure-form__input" name="email" required
+                       placeholder="<?php esc_attr_e('Ton adresse email', 'theme-sapi-maison'); ?>"
+                       aria-label="<?php esc_attr_e('Email', 'theme-sapi-maison'); ?>">
+                <textarea class="conseiller-surmesure-form__textarea" name="description" required rows="3"
+                          placeholder="<?php esc_attr_e('Décris ton projet (taille, pièce, contraintes, inspirations…)', 'theme-sapi-maison'); ?>"
+                          aria-label="<?php esc_attr_e('Description du projet', 'theme-sapi-maison'); ?>"></textarea>
+                <input type="text" name="website" tabindex="-1" autocomplete="off" class="conseiller-surmesure-form__honeypot" aria-hidden="true">
+                <button type="submit" class="conseiller-cta">
+                  <span><?php esc_html_e('Recevoir une proposition', 'theme-sapi-maison'); ?></span>
+                  <?php echo $conseiller_arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                </button>
+              </form>
+              <p class="conseiller-surmesure-reassurance"><?php esc_html_e('Réponse de Robin sous 48h · Aucun engagement', 'theme-sapi-maison'); ?></p>
+            </div>
+          </div>
+
+          <!-- État B — Avec projet (compact, chips discrets + précisions optionnelles) -->
+          <div class="conseiller-card conseiller-surmesure-card conseiller-surmesure-card--compact" data-surmesure-state="project" hidden>
+            <div class="conseiller-card__inner">
+              <span class="conseiller-badge conseiller-badge--surmesure">
+                <?php echo $surmesure_badge_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                <?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?>
+              </span>
+              <h2 class="conseiller-h2"><?php esc_html_e('Un sur-mesure pour ce projet ?', 'theme-sapi-maison'); ?></h2>
+              <div class="conseiller-chips conseiller-chips--compact" data-surmesure-chips></div>
+
+              <form class="conseiller-surmesure-form" data-surmesure-form data-surmesure-mode="project">
+                <input type="email" class="conseiller-surmesure-form__input" name="email" required
+                       placeholder="<?php esc_attr_e('Ton adresse email', 'theme-sapi-maison'); ?>"
+                       aria-label="<?php esc_attr_e('Email', 'theme-sapi-maison'); ?>">
+                <input type="text" class="conseiller-surmesure-form__input conseiller-surmesure-form__input--small" name="description"
+                       placeholder="<?php esc_attr_e('Précisions ou inspirations (optionnel)', 'theme-sapi-maison'); ?>"
+                       aria-label="<?php esc_attr_e('Précisions', 'theme-sapi-maison'); ?>">
+                <input type="text" name="website" tabindex="-1" autocomplete="off" class="conseiller-surmesure-form__honeypot" aria-hidden="true">
+                <button type="submit" class="conseiller-cta">
+                  <span><?php esc_html_e('Recevoir une proposition', 'theme-sapi-maison'); ?></span>
+                  <?php echo $conseiller_arrow_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                </button>
+              </form>
+              <p class="conseiller-surmesure-reassurance"><?php esc_html_e('Réponse de Robin sous 48h · Aucun engagement', 'theme-sapi-maison'); ?></p>
+            </div>
+          </div>
+
+          <!-- Round 3 — Lot C3 : état "contact" routé par l'IA (action=contact).
+               Affiche un wording adapté au contact_kind (pro / sur-mesure / simple)
+               + CTA(s) vers le formulaire /sur-mesure/ ou email — pré-remplis via
+               sapiProject.contact_subject + contact_message (Lot C4). -->
+          <div class="conseiller-card conseiller-surmesure-card conseiller-surmesure-card--contact" data-surmesure-state="contact" hidden>
+            <div class="conseiller-card__inner">
+              <span class="conseiller-badge conseiller-badge--surmesure">
+                <?php echo $surmesure_badge_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                <?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?>
+              </span>
+              <h2 class="conseiller-h2" data-surmesure-contact-title><?php esc_html_e('On en parle ensemble ?', 'theme-sapi-maison'); ?></h2>
+              <p class="conseiller-subtitle" data-surmesure-contact-subtitle><?php esc_html_e('Décris-moi ton projet, je te recontacte directement.', 'theme-sapi-maison'); ?></p>
+              <div class="conseiller-surmesure-contact-ctas" data-surmesure-contact-ctas></div>
+              <p class="conseiller-surmesure-reassurance"><?php esc_html_e('Réponse de Robin sous 48h · Aucun engagement', 'theme-sapi-maison'); ?></p>
+            </div>
+          </div>
+
+          <!-- État succès (commun aux deux modes) -->
+          <div class="conseiller-card conseiller-surmesure-card conseiller-surmesure-card--success" data-surmesure-state="success" hidden>
+            <div class="conseiller-card__inner">
+              <span class="conseiller-badge conseiller-badge--surmesure">
+                <?php echo $surmesure_badge_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                <?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?>
+              </span>
+              <h2 class="conseiller-h2"><?php esc_html_e('Reçu — Robin t\'écrit sous 48h', 'theme-sapi-maison'); ?></h2>
+              <p class="conseiller-subtitle"><?php esc_html_e('Merci pour ta demande. Tu vas recevoir un email de confirmation et Robin te répondra personnellement.', 'theme-sapi-maison'); ?></p>
+            </div>
+          </div>
+
         </div>
         <?php endif; ?>
       <?php endwhile; ?>
@@ -422,32 +496,36 @@ sapi_robin_conseil_card( 'selection' );
       </div>
     </div>
 
-    <!-- Badge "Ma sélection" — activé via localStorage Robin Conseiller -->
-    <script>
-    (function() {
-      try {
-        var prefs = JSON.parse(localStorage.getItem('sapiGuidePrefs'));
-        if (!prefs || !prefs.recommendedIds || !prefs.recommendedIds.length) return;
-        var ids = prefs.recommendedIds.map(function(id) { return String(id); });
-        document.querySelectorAll('.product-card[data-product-id]').forEach(function(card) {
-          if (ids.indexOf(card.getAttribute('data-product-id')) !== -1) {
-            var badge = card.querySelector('.badge-selection');
-            if (badge) badge.style.display = '';
-          }
-        });
-      } catch(e) {}
-    })();
-    </script>
-
-    <!-- Message "aucun résultat" pour le filtrage JS côté client -->
-    <div class="woocommerce-no-products-found" style="display: none;">
-      <p><?php esc_html_e('Aucun produit ne correspond à votre recherche.', 'theme-sapi-maison'); ?></p>
+    <!-- Empty-state "aucun produit" pour le filtrage JS côté client.
+         Cas extrême après l'élargissement progressif : aucun produit catalogue
+         ne match même avec toutes les contraintes relâchées sauf sortie.
+         CTA sur-mesure pour donner une issue concrète au visiteur. -->
+    <div class="woocommerce-no-products-found shop-empty-state" style="display: none;">
+      <p class="shop-empty-state__text">
+        <?php esc_html_e('Aucun modèle de notre catalogue ne correspond à ce projet.', 'theme-sapi-maison'); ?>
+      </p>
+      <p class="shop-empty-state__subtext">
+        <?php esc_html_e('Robin peut imaginer un luminaire sur-mesure pour ton projet.', 'theme-sapi-maison'); ?>
+      </p>
+      <a class="shop-empty-state__cta" href="<?php echo esc_url(home_url('/sur-mesure/')); ?>">
+        <?php esc_html_e('Découvrir le sur-mesure', 'theme-sapi-maison'); ?>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
     </div>
 
   <?php else : ?>
 
-    <div class="woocommerce-no-products-found">
-      <p><?php esc_html_e('Aucun produit ne correspond à votre recherche.', 'theme-sapi-maison'); ?></p>
+    <div class="woocommerce-no-products-found shop-empty-state">
+      <p class="shop-empty-state__text">
+        <?php esc_html_e('Aucun modèle de notre catalogue ne correspond à ce projet.', 'theme-sapi-maison'); ?>
+      </p>
+      <p class="shop-empty-state__subtext">
+        <?php esc_html_e('Robin peut imaginer un luminaire sur-mesure pour ton projet.', 'theme-sapi-maison'); ?>
+      </p>
+      <a class="shop-empty-state__cta" href="<?php echo esc_url(home_url('/sur-mesure/')); ?>">
+        <?php esc_html_e('Découvrir le sur-mesure', 'theme-sapi-maison'); ?>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
     </div>
 
   <?php endif; ?>
@@ -470,4 +548,7 @@ sapi_robin_conseil_card( 'selection' );
 </section>
 
 <?php
+// F2b : la modale Conseiller V3 a été extraite vers sapi_render_conseiller_modal()
+// (functions.php) et hookée sur wp_footer pour être partagée avec la fiche produit.
+
 get_footer();

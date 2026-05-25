@@ -13,7 +13,7 @@ function sapi_guide_get_steps() {
   return [
     [
       'id'         => 'piece',
-      'question'   => 'Pour quelle pièce cherchez-vous un luminaire ?',
+      'question'   => 'Pour quelle pièce ?',
       'visibility' => 'always',
       'choices'    => [
         ['label' => 'Cuisine',                   'slug' => 'cuisine',  'icon' => 'dining'],
@@ -26,13 +26,22 @@ function sapi_guide_get_steps() {
     ],
     [
       'id'         => 'taille',
-      'question'   => 'Quelle est la taille de votre pièce ?',
+      'question'   => 'Quelle taille fait votre pièce ?',
       'visibility' => ['piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'entree']],
+      'dynamic_question' => [
+        'piece' => [
+          'cuisine' => 'Quelle taille fait votre cuisine ?',
+          'bureau'  => 'Quelle taille fait votre bureau ?',
+          'salon'   => 'Quelle taille fait votre salon ?',
+          'chambre' => 'Quelle taille fait votre chambre ?',
+          'entree'  => 'Quelle taille fait votre entrée ?',
+        ],
+      ],
       'choices'    => [
-        ['label' => 'Petite pièce',   'dim' => 'intime',      'slug' => 'petite',     'icon' => 'square-sm'],
-        ['label' => 'Pièce standard', 'dim' => 'confortable', 'slug' => 'moyenne',    'icon' => 'square-md'],
-        ['label' => 'Grande pièce',   'dim' => 'spacieuse',   'slug' => 'grande',     'icon' => 'square-lg'],
-        ['label' => 'Je ne sais pas', 'dim' => '',             'slug' => 'ne-sais-pas', 'icon' => 'question'],
+        ['label' => 'Petit',           'dim' => 'intime',      'slug' => 'petite',     'icon' => 'square-sm'],
+        ['label' => 'Standard',        'dim' => 'confortable', 'slug' => 'moyenne',    'icon' => 'square-md'],
+        ['label' => 'Grand',           'dim' => 'spacieuse',   'slug' => 'grande',     'icon' => 'square-lg'],
+        ['label' => 'Je ne sais pas',  'dim' => '',             'slug' => 'ne-sais-pas', 'icon' => 'question'],
       ],
     ],
     [
@@ -46,7 +55,7 @@ function sapi_guide_get_steps() {
     ],
     [
       'id'         => 'eclairage',
-      'question'   => 'Ce luminaire sera-t-il votre principale source de lumière ?',
+      'question'   => 'Ce sera l\'éclairage principal ?',
       'visibility' => ['taille' => ['grande']],
       'choices'    => [
         ['label' => 'Ce sera la principale source d\'éclairage', 'slug' => 'principal',  'icon' => 'sun'],
@@ -56,10 +65,16 @@ function sapi_guide_get_steps() {
     [
       'id'         => 'sortie',
       'question'   => 'Où installerez-vous votre luminaire ?',
+      // Round 2 — 4.1 : `sortie` doit rester visible dès qu'une pièce est
+      // connue, même si taille/eclairage manquent. Sinon le freetext
+      // ("applique pour ma chambre" → piece+sortie sans taille intermédiaire)
+      // se fait manger sa réponse par cleanInvisibleAnswers. Le parcours
+      // linéaire (piece → taille → sortie) n'est pas affecté car STEPS est
+      // traversé dans l'ordre du tableau.
       'visibility' => ['_or' => [
         ['taille' => ['petite', 'moyenne', 'ne-sais-pas']],
         ['eclairage' => ['principal', 'secondaire']],
-        ['piece' => ['escalier']],
+        ['piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'entree', 'escalier']],
       ]],
       'choices'    => [
         ['label' => 'Au plafond',               'slug' => 'plafond',       'icon' => 'ceiling-plug'],
@@ -70,7 +85,7 @@ function sapi_guide_get_steps() {
     ],
     [
       'id'         => 'hauteur',
-      'question'   => 'Quelle est votre hauteur sous-plafond ?',
+      'question'   => 'Quelle hauteur sous plafond ?',
       'visibility' => ['sortie' => ['plafond'], 'piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'entree']],
       'choices'    => [
         ['label' => 'Standard',    'dim' => '< 2,50 m',  'slug' => 'standard',    'icon' => 'ceiling-low'],
@@ -80,14 +95,14 @@ function sapi_guide_get_steps() {
     ],
     [
       'id'         => 'table',
-      'question'   => 'Sera-t-il au-dessus d\'une table ou d\'un îlot ?',
+      'question'   => 'Au-dessus d\'une table ou d\'un îlot ?',
       'visibility' => ['hauteur' => ['standard'], 'piece' => ['cuisine', 'bureau', 'salon', 'chambre']],
       'dynamic_question' => [
         'piece' => [
-          'cuisine' => 'Sera-t-il au-dessus d\'une table ou d\'un îlot ?',
-          'bureau'  => 'Sera-t-il au-dessus du bureau ?',
-          'salon'   => 'Sera-t-il au-dessus d\'une table ?',
-          'chambre' => 'Sera-t-il au-dessus du lit ?',
+          'cuisine' => 'Au-dessus de votre table ou d\'un îlot ?',
+          'bureau'  => 'Au-dessus de votre bureau ?',
+          'salon'   => 'Au-dessus de votre table ?',
+          'chambre' => 'Au-dessus de votre lit ?',
         ],
       ],
       'choices'    => [
@@ -97,8 +112,18 @@ function sapi_guide_get_steps() {
     ],
     [
       'id'         => 'style',
-      'question'   => 'Quel est le style de votre intérieur ?',
+      'question'   => 'Quel style pour votre intérieur ?',
       'visibility' => 'always',
+      'dynamic_question' => [
+        'piece' => [
+          'cuisine'  => 'Quel style pour votre cuisine ?',
+          'bureau'   => 'Quel style pour votre bureau ?',
+          'salon'    => 'Quel style pour votre salon ?',
+          'chambre'  => 'Quel style pour votre chambre ?',
+          'entree'   => 'Quel style pour votre entrée ?',
+          'escalier' => 'Quel style pour votre escalier ?',
+        ],
+      ],
       'choices'    => [
         ['label' => 'Moderne, neuf, tons clairs',        'slug' => 'moderne', 'icon' => 'minimal'],
         ['label' => 'Ancien, pierre, bois, tons chauds', 'slug' => 'ancien',  'icon' => 'organic'],

@@ -9,473 +9,20 @@
   // Mini cart is handled by menu.js (loaded on all pages)
 
   // =============================================
-  // PRODUCT FILTERS (Client-side filtering for shop page)
+  // PRODUCT FILTERS — version simplifiée (F1a-ter)
+  // Plus de pills catégorie ni de search bar sur la page : ce module
+  // applique juste l'exclusion des extras (Accessoires / Carte cadeau)
+  // par défaut + le hook du méga-filtre intelligent.
   // =============================================
   const productFilters = {
-    filters: {
-      category: 'all',
-      price: 'all',
-      wood: 'all',
-      size: 'all'
-    },
-
-    _robinProductIds: null,
-
-    searchQuery: '',
-
     init: function() {
-      const filterContainer = document.querySelector('.product-filters-js');
-      if (!filterContainer) {
-        // Fallback: navigation-based filters for category pages
-        this.initNavigationFilters();
-        return;
-      }
-
-      // Category filter buttons (pills desktop)
-      const filterBtns = filterContainer.querySelectorAll('.filter-btn:not(.filter-btn--robin)');
-      filterBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          const filter = btn.dataset.filter;
-
-          // Désactiver le filtre Robin si actif
-          this._robinProductIds = null;
-          var robinRow = document.getElementById('filter-row-robin');
-          if (robinRow) robinRow.classList.remove('is-active');
-
-          // Update active state
-          filterContainer.querySelector('.filter-btn.active')?.classList.remove('active');
-          btn.classList.add('active');
-
-          // Sync dropdown mobile
-          this._syncMobileDropdown(filter);
-
-          // Apply filter
-          this.filters.category = filter;
-          this.applyFilters();
-        });
-      });
-
-      // Mobile dropdown filter
-      this.initMobileDropdown(filterContainer);
-
-      // Search bar
-      this.initSearch();
-
-      // Advanced dropdown filters
-      this.initAdvancedFilters();
-
-      // "Ma sélection" — bouton Robin si projet en cours
-      try { this.initRobinSelection(filterContainer); } catch(e) { /* ne jamais casser les filtres */ }
-
-      // Appliquer le filtre initial (masque accessoires par défaut)
+      // Premier passage : masque les extras + applique le méga-filtre
+      // si l'utilisateur arrive avec ?piece=… déjà résolu côté JS
       this.applyFilters();
-    },
-
-    initMobileDropdown: function(filterContainer) {
-      var dropdown = document.getElementById('mobile-category-dropdown');
-      if (!dropdown) return;
-
-      var toggle = dropdown.querySelector('.filter-dropdown-toggle');
-      var menu = dropdown.querySelector('.filter-dropdown-menu');
-      var options = dropdown.querySelectorAll('.filter-option');
-      var label = dropdown.querySelector('.filter-label');
-      var self = this;
-
-      // Ouvrir/fermer
-      toggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        dropdown.classList.toggle('open');
-      });
-
-      // Sélection d'une option
-      options.forEach(function(option) {
-        option.addEventListener('click', function(e) {
-          e.preventDefault();
-          var filter = option.dataset.filter;
-
-          // Update active state dans le dropdown
-          dropdown.querySelector('.filter-option.active')?.classList.remove('active');
-          option.classList.add('active');
-          label.textContent = option.textContent;
-          dropdown.classList.remove('open');
-
-          // Désactiver Robin si actif
-          self._robinProductIds = null;
-          var robinRow = document.getElementById('filter-row-robin');
-          if (robinRow) robinRow.classList.remove('is-active');
-
-          // Sync pills desktop
-          var activeBtn = filterContainer.querySelector('.filter-btn.active');
-          if (activeBtn) activeBtn.classList.remove('active');
-          var matchBtn = filterContainer.querySelector('.filter-btn[data-filter="' + filter + '"]');
-          if (matchBtn) matchBtn.classList.add('active');
-
-          // Appliquer le filtre
-          self.filters.category = filter;
-          self.applyFilters();
-        });
-      });
-
-      // Fermer au clic extérieur
-      document.addEventListener('click', function(e) {
-        if (!dropdown.contains(e.target)) {
-          dropdown.classList.remove('open');
-        }
-      });
-    },
-
-    _syncMobileDropdown: function(filter) {
-      var dropdown = document.getElementById('mobile-category-dropdown');
-      if (!dropdown) return;
-      var options = dropdown.querySelectorAll('.filter-option');
-      var label = dropdown.querySelector('.filter-label');
-      options.forEach(function(opt) {
-        if (filter === null) {
-          opt.classList.remove('active');
-        } else {
-          opt.classList.toggle('active', opt.dataset.filter === filter);
-          if (opt.dataset.filter === filter) {
-            label.textContent = opt.textContent;
-          }
-        }
-      });
-    },
-
-    initRobinSelection: function(filterContainer) {
-      if (!filterContainer) return;
-
-      // Vérifier si le visiteur a un projet en cours
-      var prefs = {};
-      try { prefs = JSON.parse(localStorage.getItem('sapiGuidePrefs') || '{}'); } catch(e) {}
-      if (!prefs.answers || !Object.keys(prefs.answers).length) return;
-
-      // Conteneur ligne 3 — bandeau personnalisé
-      var robinRow = document.getElementById('filter-row-robin');
-      if (!robinRow) return;
-
-      // Icône crayon
-      var iconSvg = '<svg class="robin-selection-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>';
-
-      var isMobile = window.innerWidth <= 768;
-
-      if (isMobile) {
-        // Mobile : version simplifiée sans chips ni bouton modifier
-        robinRow.innerHTML =
-          iconSvg +
-          '<span class="robin-selection-label">Voir la s\u00e9lection pour mon projet</span>';
-      } else {
-        // Desktop : version complète avec chips et bouton modifier
-        var labels = prefs.labels || {};
-        var chipLabels = [];
-        var labelOrder = ['piece', 'taille', 'taille_escalier', 'sortie', 'hauteur', 'table', 'style'];
-        labelOrder.forEach(function(key) {
-          if (labels[key]) chipLabels.push(labels[key]);
-        });
-
-        var chipsHtml = '';
-        chipLabels.forEach(function(label, i) {
-          if (i > 0) chipsHtml += '<span class="robin-selection-chip-sep" aria-hidden="true">\u00b7</span>';
-          chipsHtml += '<span class="robin-selection-chip">' + label + '</span>';
-        });
-
-        robinRow.innerHTML =
-          iconSvg +
-          '<span class="robin-selection-label">La s\u00e9lection pour mon projet</span>' +
-          '<div class="robin-selection-chips">' + chipsHtml + '</div>' +
-          '<button type="button" class="robin-selection-btn" id="robin-selection-btn">Modifier le projet</button>';
-      }
-
-      robinRow.style.display = 'flex';
-
-      var editBtn = document.getElementById('robin-selection-btn');
-      var self = this;
-
-      // Clic sur le bandeau — active/désactive le filtre
-      robinRow.addEventListener('click', function(e) {
-        // Ne pas filtrer si clic sur le bouton "Modifier le projet" (desktop)
-        if (editBtn && (e.target === editBtn || editBtn.contains(e.target))) return;
-
-        var isActive = robinRow.classList.contains('is-active');
-
-        if (isActive) {
-          // Désactiver → revenir à "tout"
-          robinRow.classList.remove('is-active');
-          var allBtn = filterContainer.querySelector('.filter-btn[data-filter="all"]');
-          if (allBtn) {
-            filterContainer.querySelectorAll('.filter-btn.active').forEach(function(b) { b.classList.remove('active'); });
-            allBtn.classList.add('active');
-          }
-          self._syncMobileDropdown('all');
-          self.filters.category = 'all';
-          self._robinProductIds = null;
-          self.applyFilters();
-        } else {
-          // Activer Ma sélection
-          filterContainer.querySelectorAll('.filter-btn.active').forEach(function(b) { b.classList.remove('active'); });
-          self._syncMobileDropdown(null);
-          robinRow.classList.add('is-active');
-          self.fetchRobinSelection(prefs.answers);
-        }
-      });
-
-      // Clic sur "Modifier le projet" — desktop uniquement
-      if (editBtn) {
-        editBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          if (window.sapiRobinConseiller && typeof window.openRobinModal === 'function') {
-            window.openRobinModal('bandeau');
-          } else {
-            var bandeau = document.getElementById('robin-bandeau');
-            if (bandeau) bandeau.click();
-          }
-        });
-      }
-
-      // Auto-activer si URL contient robin_selection=1 (différé après init)
-      var params = new URLSearchParams(window.location.search);
-      if (params.get('robin_selection') === '1') {
-        window.history.replaceState({}, '', window.location.pathname);
-        setTimeout(function() { robinRow.click(); }, 50);
-      }
-    },
-
-    fetchRobinSelection: function(answers) {
-      var self = this;
-      var nonce = '';
-      if (window.sapiRobinConseiller) nonce = window.sapiRobinConseiller.nonce;
-      else if (window.sapiMonProjet) nonce = window.sapiMonProjet.nonce;
-
-      var fd = new FormData();
-      fd.append('action', 'sapi_robin_filter_products');
-      fd.append('nonce', nonce);
-      fd.append('answers', JSON.stringify(answers));
-
-      var xhr = new XMLHttpRequest();
-      xhr.open('POST', (window.sapiRobinConseiller || window.sapiMonProjet || {}).ajaxUrl || '/wp-admin/admin-ajax.php', true);
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState !== 4) return;
-        if (xhr.status === 200) {
-          try {
-            var resp = JSON.parse(xhr.responseText);
-            if (resp.success && resp.data && resp.data.product_ids) {
-              self._robinProductIds = resp.data.product_ids.map(String);
-              self.applyFilters();
-              return;
-            }
-          } catch(e) {}
-        }
-        // Erreur — désactiver le filtre
-        self._robinProductIds = null;
-        self.applyFilters();
-      };
-      xhr.send(fd);
-    },
-
-    initSearch: function() {
-      const searchInput = document.getElementById('product-search-input');
-      const clearBtn = document.querySelector('.search-clear');
-      if (!searchInput) return;
-
-      searchInput.addEventListener('input', () => {
-        this.searchQuery = searchInput.value.trim().toLowerCase();
-        clearBtn.style.display = this.searchQuery ? 'flex' : 'none';
-
-        // Reset catégorie sur "all" quand l'utilisateur recherche
-        if (this.searchQuery && this.filters.category !== 'all') {
-          this.filters.category = 'all';
-          var filterContainer = document.querySelector('.product-filters-js');
-          if (filterContainer) {
-            var activeBtn = filterContainer.querySelector('.filter-btn.active');
-            if (activeBtn) activeBtn.classList.remove('active');
-            var allBtn = filterContainer.querySelector('.filter-btn[data-filter="all"]');
-            if (allBtn) allBtn.classList.add('active');
-          }
-          this._syncMobileDropdown('all');
-          // Désactiver Robin si actif
-          this._robinProductIds = null;
-          var robinRow = document.getElementById('filter-row-robin');
-          if (robinRow) robinRow.classList.remove('is-active');
-        }
-
-        this.applyFilters();
-      });
-
-      if (clearBtn) {
-        clearBtn.addEventListener('click', () => {
-          searchInput.value = '';
-          this.searchQuery = '';
-          clearBtn.style.display = 'none';
-          this.applyFilters();
-        });
-      }
-    },
-
-    initAdvancedFilters: function() {
-      const dropdowns = document.querySelectorAll('.filter-dropdown');
-      const resetBtn = document.querySelector('.filter-reset');
-
-      dropdowns.forEach(dropdown => {
-        const toggle = dropdown.querySelector('.filter-dropdown-toggle');
-        const menu = dropdown.querySelector('.filter-dropdown-menu');
-        const options = dropdown.querySelectorAll('.filter-option');
-        const filterType = dropdown.dataset.filterType;
-
-        // Toggle dropdown
-        toggle.addEventListener('click', (e) => {
-          e.stopPropagation();
-          // Close other dropdowns
-          dropdowns.forEach(d => {
-            if (d !== dropdown) d.classList.remove('is-open');
-          });
-          dropdown.classList.toggle('is-open');
-        });
-
-        // Handle option selection
-        options.forEach(option => {
-          option.addEventListener('click', () => {
-            // Update active state
-            menu.querySelector('.filter-option.active')?.classList.remove('active');
-            option.classList.add('active');
-
-            // Get filter value
-            const value = option.dataset[filterType];
-            this.filters[filterType] = value;
-
-            // Update label if filter is active
-            const label = toggle.querySelector('.filter-label');
-            if (value !== 'all') {
-              label.textContent = option.textContent;
-              toggle.classList.add('has-filter');
-            } else {
-              label.textContent = this.getDefaultLabel(filterType);
-              toggle.classList.remove('has-filter');
-            }
-
-            // Close dropdown
-            dropdown.classList.remove('is-open');
-
-            // Apply all filters
-            this.applyFilters();
-            this.updateResetButton();
-          });
-        });
-      });
-
-      // Reset button
-      if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-          this.resetAllFilters();
-        });
-      }
-
-      // Close dropdowns on outside click
-      document.addEventListener('click', () => {
-        dropdowns.forEach(d => d.classList.remove('is-open'));
-      });
-    },
-
-    getDefaultLabel: function(type) {
-      const labels = {
-        price: 'Prix',
-        wood: 'Essence',
-        size: 'Taille'
-      };
-      return labels[type] || type;
-    },
-
-    updateResetButton: function() {
-      const resetBtn = document.querySelector('.filter-reset');
-      if (!resetBtn) return;
-
-      const hasActiveFilters = this.filters.price !== 'all' ||
-                               this.filters.wood !== 'all' ||
-                               this.filters.size !== 'all';
-
-      resetBtn.style.display = hasActiveFilters ? 'inline-flex' : 'none';
-    },
-
-    resetAllFilters: function() {
-      // Reset filter values
-      this.filters.price = 'all';
-      this.filters.wood = 'all';
-      this.filters.size = 'all';
-
-      // Reset UI
-      document.querySelectorAll('.filter-dropdown').forEach(dropdown => {
-        const toggle = dropdown.querySelector('.filter-dropdown-toggle');
-        const filterType = dropdown.dataset.filterType;
-        const label = toggle.querySelector('.filter-label');
-
-        toggle.classList.remove('has-filter');
-        label.textContent = this.getDefaultLabel(filterType);
-
-        // Reset active option
-        const menu = dropdown.querySelector('.filter-dropdown-menu');
-        menu.querySelector('.filter-option.active')?.classList.remove('active');
-        menu.querySelector('.filter-option[data-' + filterType + '="all"]')?.classList.add('active');
-      });
-
-      this.applyFilters();
-      this.updateResetButton();
-    },
-
-    initNavigationFilters: function() {
-      const filterBtns = document.querySelectorAll('.filter-btn');
-      if (!filterBtns.length) return;
-
-      filterBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const currentActive = document.querySelector('.filter-btn.active');
-          if (currentActive) {
-            currentActive.classList.remove('active');
-          }
-          btn.classList.add('active');
-        });
-      });
-
-      // Mark current category as active
-      const currentPath = window.location.pathname;
-      filterBtns.forEach(btn => {
-        const href = btn.getAttribute('href');
-        if (href && currentPath.includes(btn.dataset.filter) && btn.dataset.filter !== 'all') {
-          document.querySelector('.filter-btn.active')?.classList.remove('active');
-          btn.classList.add('active');
-        }
-      });
-    },
-
-    matchesPrice: function(productPrice, filterValue) {
-      if (filterValue === 'all') return true;
-
-      const price = parseFloat(productPrice);
-      if (isNaN(price)) return true;
-
-      if (filterValue === '0-100') return price < 100;
-      if (filterValue === '100-200') return price >= 100 && price < 200;
-      if (filterValue === '200-300') return price >= 200 && price < 300;
-      if (filterValue === '300+') return price >= 300;
-
-      return true;
-    },
-
-    matchesSize: function(productSize, filterValue) {
-      if (filterValue === 'all') return true;
-
-      const size = parseFloat(productSize);
-      if (isNaN(size)) return true;
-
-      if (filterValue === '0-100') return size < 100;
-      if (filterValue === '100-150') return size >= 100 && size < 150;
-      if (filterValue === '150-200') return size >= 150 && size < 200;
-      if (filterValue === '200+') return size >= 200;
-
-      return true;
     },
 
     applyFilters: function() {
-      // Find all product cards — carousel slides or grid items
+      // Toutes les cards produit visibles dans la grille (ou un carousel)
       let slides;
       if (productsCarousel.allSlides && productsCarousel.allSlides.length > 0) {
         slides = productsCarousel.allSlides;
@@ -483,38 +30,21 @@
         slides = document.querySelectorAll('.product-card-cinetique');
       }
 
+      const extraCategories = ['accessoires', 'carte-cadeau'];
       let visibleCount = 0;
 
       slides.forEach(slide => {
-        const categories = slide.dataset.categories || '';
-        const price = slide.dataset.price || '';
-        const wood = slide.dataset.wood || '';
-        const size = slide.dataset.size || '';
-        const name = slide.dataset.name || '';
+        const cats = (slide.dataset.categories || '').split(' ');
 
-        // Check all filter criteria
-        const catList = categories.split(' ');
-        const extraCategories = ['accessoires', 'carte-cadeau'];
-        let matchesCategory;
-        if (this.filters.category === 'all') {
-          matchesCategory = !catList.some(function(c) { return extraCategories.indexOf(c) !== -1; });
-        } else {
-          matchesCategory = catList.includes(this.filters.category);
-        }
-        const matchesPrice = this.matchesPrice(price, this.filters.price);
-        const matchesWood = this.filters.wood === 'all' || wood === this.filters.wood;
-        const matchesSize = this.filters.size === 'all' || this.matchesSize(size, this.filters.size);
-        const matchesSearch = !this.searchQuery || name.includes(this.searchQuery);
+        // Par défaut, on cache les extras de la grille (ils restent accessibles
+        // via le menu et leurs URLs /categorie-produit/accessoires/ etc.)
+        const matchesExtras = !cats.some(c => extraCategories.indexOf(c) !== -1);
 
-        let shouldShow;
-        if (this._robinProductIds) {
-          // Filtre "Ma sélection" actif → seuls les IDs filtrés par Robin
-          shouldShow = this._robinProductIds.includes(slide.dataset.id);
-        } else {
-          shouldShow = matchesCategory && matchesPrice && matchesWood && matchesSize && matchesSearch;
-        }
+        // Méga-filtre (F1a) — chips Robin sur /mes-creations/
+        const matchesMega = !window.sapiMegaFilter || window.sapiMegaFilter.cardMatches(slide);
 
-        // Use both class AND inline styles to guarantee hiding
+        const shouldShow = matchesExtras && matchesMega;
+
         if (shouldShow) {
           slide.classList.remove('is-filtered-out');
           slide.style.display = '';
@@ -525,12 +55,13 @@
         }
       });
 
-      // Show/hide individual text cards + recap card based on filters
-      var textCards = document.querySelectorAll('.product-text-card');
-      var recapCard = document.querySelector('.why-sapi-recap');
-      var isFiltered = this.filters.category !== 'all' || this.searchQuery || this._robinProductIds;
-      textCards.forEach(function(card) {
-        if (isFiltered) {
+      // Text cards (réassurance) + why-sapi-recap : visibles uniquement
+      // quand AUCUN filtre n'est actif (donc grille naturelle)
+      const textCards = document.querySelectorAll('.product-text-card');
+      const recapCard = document.querySelector('.why-sapi-recap');
+      const megaActive = !!(window.sapiMegaFilter && window.sapiMegaFilter.hasAnyAnswer && window.sapiMegaFilter.hasAnyAnswer());
+      textCards.forEach(card => {
+        if (megaActive) {
           card.classList.add('is-filtered-out');
           card.style.display = 'none';
         } else {
@@ -539,10 +70,10 @@
         }
       });
       if (recapCard) {
-        recapCard.style.display = isFiltered ? '' : 'none';
+        recapCard.style.display = megaActive ? '' : 'none';
       }
 
-      // Show/hide "no results" message
+      // Message "aucun résultat"
       const noResults = document.querySelector('.woocommerce-no-products-found');
       const productsList = document.querySelector('.product-grid') || document.querySelector('.products.columns-3');
       if (noResults && productsList) {
@@ -555,7 +86,7 @@
         }
       }
 
-      // Reset carousel to beginning and recalculate
+      // Reset carousel à l'index 0 et recalcul des slides visibles
       if (productsCarousel.carousel) {
         productsCarousel.currentIndex = 0;
         productsCarousel.recalculateVisibleSlides();
@@ -564,6 +95,11 @@
         productsCarousel.resetAutoScroll();
       }
     }
+  };
+
+  // Hook public pour le méga-filtre — re-trigger applyFilters depuis l'extérieur
+  window.sapiShopRefilter = function() {
+    productFilters.applyFilters();
   };
 
   // =============================================

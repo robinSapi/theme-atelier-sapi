@@ -747,6 +747,64 @@ get_header();
   ctaLink.addEventListener('click', function() {
     closeModal();
   });
+
+  // Round 3 — Lot C4 : pré-remplissage du formulaire depuis les query params
+  // injectés par le Conseiller V3 (modale s-contact ou card sur-mesure grille).
+  // URL type : /sur-mesure/?from=conseiller&kind=pro&subject=...&message=...
+  // Le pré-remplissage est discret : l'utilisateur peut modifier librement.
+  try {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('from') === 'conseiller') {
+      var kind = params.get('kind') || '';
+      var subject = params.get('subject') || '';
+      var message = params.get('message') || '';
+
+      // 1. Bascule onglet pro si kind=pro (le subtitle pro + champs établissement/
+      //    nb_luminaires deviennent visibles automatiquement via switchTab).
+      if (kind === 'pro') {
+        switchTab('pro');
+      }
+
+      // 2. Remplit le textarea principal "message" avec subject (préfixé) + message.
+      //    Si l'IA n'a pas fourni de subject, on met juste le message. Si rien
+      //    n'est fourni, on ne touche pas le champ.
+      var msgField = document.getElementById('surmesure-message');
+      if (msgField && (subject || message)) {
+        var body = '';
+        if (subject) body += subject + '\n\n';
+        if (message) body += message;
+        msgField.value = body.trim();
+      }
+
+      // 3. Bandeau récap "Bandeau projet Robin" pré-existant (caché par défaut).
+      //    Affiche le subject + indication d'origine pour rassurer le visiteur
+      //    que son projet n'a pas été perdu.
+      var bandeau = document.getElementById('robin-contact-project');
+      var bandeauHidden = document.getElementById('robin-contact-project-data');
+      if (bandeau && subject) {
+        bandeau.style.display = '';
+        bandeau.style.padding = '10px 14px';
+        bandeau.style.marginBottom = '12px';
+        bandeau.style.background = '#FBF6EA';
+        bandeau.style.borderRadius = '8px';
+        bandeau.style.fontSize = '13px';
+        bandeau.style.color = '#6f5e4d';
+        bandeau.textContent = 'Depuis le conseiller Robin · ' + subject;
+      }
+      if (bandeauHidden) {
+        bandeauHidden.value = JSON.stringify({ kind: kind, subject: subject });
+      }
+
+      // 4. Scroll automatique vers le formulaire (l'utilisateur arrive avec une
+      //    intention claire, inutile de le faire descendre manuellement).
+      setTimeout(function () {
+        var formSection = document.getElementById('surmesure-form');
+        if (formSection && formSection.scrollIntoView) {
+          formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 400);
+    }
+  } catch (e) { /* URLSearchParams indisponible — silencieux */ }
 })();
 </script>
 

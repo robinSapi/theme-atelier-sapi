@@ -502,27 +502,29 @@ foreach ($carousel_products as $product) {
     </a>
     <?php endif; ?>
 
-    <!-- Pour quelle pièce ? -->
-    <div class="bento-card bento-room-picker">
+    <!-- Pour quelle pièce ? — Question pièce + 6 cases + champ texte libre. -->
+    <div class="bento-card bento-room-picker" data-room-picker>
       <div class="room-picker-inner">
-        <?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) : ?>
-          <span class="robin-modal__badge" style="margin-bottom: 0.5rem;">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
-            Conseil de Robin
-          </span>
-        <?php endif; ?>
         <h3 class="room-picker-title">Pour quelle pièce cherchez-vous un luminaire ?</h3>
-        <p class="room-picker-sub">
-          Quelques questions et Robin vous guide vers le luminaire idéal
-        </p>
         <div class="room-picker-cards">
           <?php foreach ($room_choices as $room) : ?>
-            <button type="button" class="room-card" data-piece="<?php echo esc_attr($room['slug']); ?>" onclick="<?php if (defined('SAPI_ROBIN_V2') && SAPI_ROBIN_V2) : ?>if(window.sapiRobinOpen)window.sapiRobinOpen('homepage',{piece:this.dataset.piece});<?php else : ?>var bar=document.getElementById('mon-projet-bar');if(bar){bar.scrollIntoView({behavior:'smooth',block:'start'});var t=document.getElementById('mon-projet-toggle');if(t&&t.getAttribute('aria-expanded')==='false')t.click();}<?php endif; ?>">
+            <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'])); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
               <span class="room-card-icon"><?php echo $room_icons[$room['icon']]; ?></span>
               <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
-            </button>
+            </a>
           <?php endforeach; ?>
         </div>
+        <div class="room-picker-or" aria-hidden="true">
+          <span class="room-picker-or__text">ou</span>
+        </div>
+        <form class="room-picker-freetext" data-room-picker-freetext>
+          <input type="text" class="room-picker-freetext__input" name="freetext"
+                 placeholder="Décris ton projet en quelques mots…" maxlength="500"
+                 aria-label="Décris ton projet en quelques mots">
+          <button type="submit" class="room-picker-freetext__submit" aria-label="Envoyer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </button>
+        </form>
       </div>
     </div>
 
@@ -735,11 +737,11 @@ foreach ($carousel_products as $product) {
 (function() {
   const carousel = document.querySelector('.homepage-carousel-fullscreen');
 
-  // 1. Déplacer le bandeau juste sous le carousel (V1 ou V2)
-  const monProjetBar = document.querySelector('.mon-projet-bar') || document.querySelector('.robin-bandeau');
-  if (monProjetBar && carousel) {
-    carousel.parentNode.insertBefore(monProjetBar, carousel.nextSibling);
-    monProjetBar.classList.add('home-repositioned-bar');
+  // 1. Déplacer le bandeau réassurance juste sous le carousel
+  const reassuranceBar = document.querySelector('.robin-bandeau');
+  if (reassuranceBar && carousel) {
+    carousel.parentNode.insertBefore(reassuranceBar, carousel.nextSibling);
+    reassuranceBar.classList.add('home-repositioned-bar');
   }
 
   // 2. Menu : transparent sur le carousel, opaque après
