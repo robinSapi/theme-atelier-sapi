@@ -1084,8 +1084,17 @@
   }
 
   // Action "Voir la sélection" depuis S3 : ferme la modale + scroll grille.
-  // Projet inchangé, pas d'appel IA.
+  // Round 4 — Si le projet a été modifié depuis le dernier appel IA (chips
+  // éditables, sapiProject.update invalide advice_text à null quand answers
+  // change), on relance un nouveau fetch advice via showTransitionAndExit
+  // pour avoir une phrase à jour sur la card "Mon projet". Sinon ferme direct.
   function viewSelectionFromS3() {
+    var project = window.sapiProject ? window.sapiProject.get() : null;
+    var needsNewAdvice = !project || !project.advice_text;
+    if (needsNewAdvice) {
+      showTransitionAndExit({ source: 's3' });
+      return;
+    }
     closeModal();
     var grid = document.getElementById('sapi-product-grid');
     if (grid && grid.scrollIntoView) {
