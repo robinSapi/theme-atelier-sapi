@@ -23409,7 +23409,9 @@ body.woocommerce-cart div.woocommerce-wrapper {
   position: fixed;
   inset: 0;
   background: rgba(50, 40, 30, 0.55);
-  z-index: 10000;
+  /* z-index 10050 : au-dessus du site-header sticky (10001) et du panier
+     sticky (10002). Sinon le header masque le haut de la modale (croix). */
+  z-index: 10050;
   display: -webkit-flex;
   display: flex;
   -webkit-align-items: center;
