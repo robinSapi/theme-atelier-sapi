@@ -3420,7 +3420,7 @@ function sapi_render_conseiller_modal() {
         </div>
 
         <footer class="modal__foot">
-          <span style="font-size:11.5px;color:var(--color-wood-mid);font-style:italic;" data-s0-reassure>
+          <span style="font-size:11.5px;color:var(--color-wood-mid);font-style:italic;text-align:center;" data-s0-reassure>
             <?php esc_html_e('Robin t\'aide à choisir, sans engagement', 'theme-sapi-maison'); ?>
           </span>
           <button type="button" class="footer-link" data-action="s0-reset" data-s0-reset-wrap hidden>
@@ -3624,7 +3624,7 @@ function sapi_render_conseiller_modal() {
         </div>
 
         <footer class="modal__foot">
-          <span style="font-size:11.5px;color:var(--color-wood-mid);font-style:italic;">
+          <span style="font-size:11.5px;color:var(--color-wood-mid);font-style:italic;text-align:center;">
             <?php esc_html_e('Tu peux modifier n\'importe quelle réponse en cliquant sur une chip', 'theme-sapi-maison'); ?>
           </span>
         </footer>
