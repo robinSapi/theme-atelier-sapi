@@ -475,6 +475,18 @@
       count++;
     });
 
+    // Force le grid-template-columns en inline style (safety net : si une
+    // règle CSS plus spécifique override !important, l'inline style gagne).
+    // Le nombre de colonnes suit les breakpoints CSS (4/3/2/1) — on lit le
+    // viewport pour décider.
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var cols;
+    if (vw <= 480) cols = 1;
+    else if (vw <= 768) cols = 2;
+    else if (vw <= 1024) cols = 3;
+    else cols = 4;
+    els.selectionGrid.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+
     // Card sur-mesure en DERNIÈRE cellule du slot. Cloné depuis le <template>
     // pour préserver le markup PHP i18n. Affichée même si 0 match (cas dégradé)
     // — donne toujours une issue concrète au visiteur.
