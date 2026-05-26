@@ -24462,13 +24462,17 @@ button.chip--project:focus-visible {
   box-shadow: none;
 }
 /* Slot grille à l'intérieur de la card englobante. Mêmes specs que la
-   grille produit du catalogue (auto-fill minmax 220px). */
+   grille produit du catalogue (auto-fill minmax 220px).
+   width: 100% nécessaire car le parent .conseiller-card__inner est en
+   flex column avec align-items: center → sans width explicite, le grid
+   ne s'étire pas et auto-fill ne calcule qu'1 colonne. */
 .mes-creations-selection__grid {
   display: -ms-grid;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 22px;
   margin-top: 28px;
+  width: 100%;
   /* Marge horizontale pour faire respirer les cards dans la card englobante. */
   padding: 0 8px;
 }
