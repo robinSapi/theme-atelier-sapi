@@ -23257,12 +23257,16 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* Override .choice DANS la chip-question : layout horizontal compact —
    icône à gauche, label + dim sur la même ligne séparés par un point
    médian. Hauteur minimale. Le modale garde son layout vertical natif. */
-/* Container .choices : pleine largeur (au lieu du max-width 480px du
-   modale) pour laisser assez de place aux boutons horizontaux, surtout
-   à 4 colonnes (STANDARD · confortable etc.). */
+/* Container .choices : largeur = N × le plus large bouton (au lieu de
+   prendre 100% de la card englobante). Grid 1fr × N + width max-content
+   → chaque colonne adopte la max-content du plus large bouton, le groupe
+   est centré et ne prend pas plus de place que nécessaire. */
 .conseiller-mon-projet__inline-question .choices {
-  max-width: none;
-  width: 100%;
+  width: -webkit-max-content;
+  width: -moz-max-content;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
 }
 .conseiller-mon-projet__inline-question .choice {
   display: -webkit-flex;
