@@ -24462,19 +24462,34 @@ button.chip--project:focus-visible {
   box-shadow: none;
 }
 /* Slot grille à l'intérieur de la card englobante. Mêmes specs que la
-   grille produit du catalogue (auto-fill minmax 220px).
+   grille produit du catalogue (.shop-products .product-grid) :
+   4 cols desktop / 3 cols ≤1024px / 2 cols ≤768px / 1 col ≤480px, gap 2rem.
    width: 100% nécessaire car le parent .conseiller-card__inner est en
    flex column avec align-items: center → sans width explicite, le grid
-   ne s'étire pas et auto-fill ne calcule qu'1 colonne. */
+   ne s'étire pas. */
 .mes-creations-selection__grid {
   display: -ms-grid;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
   margin-top: 28px;
   width: 100%;
-  /* Marge horizontale pour faire respirer les cards dans la card englobante. */
-  padding: 0 8px;
+}
+@media (max-width: 1024px) {
+  .mes-creations-selection__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .mes-creations-selection__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 480px) {
+  .mes-creations-selection__grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
 }
 /* Slot vide (avant que le JS ait peuplé OU si 0 match) : ne pas afficher
    d'espace vide béant. Géré aussi côté JS avec display none si besoin. */
