@@ -132,23 +132,38 @@ $conseil_room_icons = sapi_guide_get_icons();
      Sans projet : card "Conseil de Robin" simple avec CTA → modale V3. -->
 <section class="conseiller-cards-zone mes-creations-selection" data-conseiller-zone data-mes-creations-selection aria-label="<?php esc_attr_e('Ma sélection', 'theme-sapi-maison'); ?>">
 
-  <!-- Card "Conseil de Robin" — visible sans projet. CTA orange → modale V3
-       en création. Le room picker n'est plus ici (reste sur la home). -->
-  <div class="conseiller-card conseiller-card--conseil" data-conseiller-card="conseil" hidden>
+  <!-- Card "Conseil de Robin" — visible sans projet. Contient le room
+       picker complet : titre + 6 pièces clicables + séparateur "ou" +
+       champ texte libre (identique à la home et au pré-refonte). -->
+  <div class="conseiller-card conseiller-card--conseil" data-conseiller-card="conseil" data-room-picker hidden>
     <div class="conseiller-card__inner">
       <span class="conseiller-badge conseiller-badge--default">
         <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
         <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
       </span>
-      <p class="conseiller-mon-projet__text">
-        <span class="conseiller-mon-projet__text-content">
-          <?php esc_html_e('Avant de tout regarder, dis-moi pour quelle pièce tu cherches — je te ferai une sélection adaptée à ton projet.', 'theme-sapi-maison'); ?>
-        </span>
-      </p>
-      <button type="button" class="conseiller-cta" data-action="open-modal" data-modal-state="s0" data-conseil-cta>
-        <span><?php esc_html_e('Démarrer mon projet', 'theme-sapi-maison'); ?></span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-      </button>
+      <h2 class="room-picker-title"><?php esc_html_e('Pour quelle pièce cherchez-vous un luminaire ?', 'theme-sapi-maison'); ?></h2>
+      <div class="room-picker-cards">
+        <?php foreach ($conseil_room_choices as $room) :
+          $icon_svg = isset($conseil_room_icons[$room['icon']]) ? $conseil_room_icons[$room['icon']] : '';
+        ?>
+          <button type="button" class="room-card" data-piece="<?php echo esc_attr($room['slug']); ?>" data-piece-label="<?php echo esc_attr($room['label']); ?>">
+            <span class="room-card-icon"><?php echo $icon_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+            <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
+          </button>
+        <?php endforeach; ?>
+      </div>
+      <div class="room-picker-or" aria-hidden="true">
+        <span class="room-picker-or__text"><?php esc_html_e('ou', 'theme-sapi-maison'); ?></span>
+      </div>
+      <form class="room-picker-freetext" data-room-picker-freetext>
+        <input type="text" class="room-picker-freetext__input" name="freetext"
+               placeholder="<?php esc_attr_e('Décris ton projet en quelques mots…', 'theme-sapi-maison'); ?>"
+               maxlength="500"
+               aria-label="<?php esc_attr_e('Décris ton projet en quelques mots', 'theme-sapi-maison'); ?>">
+        <button type="submit" class="room-picker-freetext__submit" aria-label="<?php esc_attr_e('Envoyer', 'theme-sapi-maison'); ?>">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </button>
+      </form>
     </div>
   </div>
 
