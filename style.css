@@ -23233,24 +23233,25 @@ body.woocommerce-cart div.woocommerce-wrapper {
 
 /* F2a-sexies : zone "Question d'accroche + chips de réponse" sous la phrase IA
    (visible quand le parcours est incomplet — toggled par JS via [hidden]). */
+/* Chip-question refondue (cards .choice harmonisées avec la modale).
+   Container : flex column, label en haut + grille de .choice en dessous. */
 .conseiller-mon-projet__inline-question {
   margin-top: 18px;
   display: -webkit-flex;
   display: flex;
-  -webkit-flex-wrap: wrap;
-  flex-wrap: wrap;
-  -webkit-justify-content: center;
-  justify-content: center;
+  -webkit-flex-direction: column;
+  flex-direction: column;
   -webkit-align-items: center;
   align-items: center;
-  gap: 10px 14px;
+  gap: 12px;
+  width: 100%;
 }
 .inline-question__label {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  font-style: italic;
-  color: var(--color-wood);
+  color: var(--color-wood-dark);
+  text-align: center;
 }
 .inline-question__answers {
   display: -webkit-flex;

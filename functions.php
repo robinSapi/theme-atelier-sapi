@@ -403,6 +403,8 @@ function sapi_maison_enqueue_assets() {
         'nonce'          => wp_create_nonce('sapi-megafilter'),
         'steps'          => sapi_guide_get_steps(),
         'rules'          => $sapi_filter_rules,
+        // Icons SVG — pour harmonisation chip-question avec les .choice du modale
+        'icons'          => sapi_guide_get_icons(),
         // F2a-bis : textes génériques par pièce + fallback ultime — lus
         // synchronement par sapi-cards-conseiller.js (zéro AJAX au load).
         'genericAdvice'  => sapi_megafilter_get_generic_advices(),

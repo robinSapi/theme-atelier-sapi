@@ -14,6 +14,7 @@
 
   var config = window.SAPI_CARDS_CONSEILLER || {};
   var STEPS = Array.isArray(config.steps) ? config.steps : [];
+  var ICONS = config.icons || {};
   var RULES = config.rules || {};
 
   /* ─────────────────────────────────────────────
@@ -368,22 +369,30 @@
     return step.question;
   }
 
-  // F2a-sexies : injecte le markup "question + chips de réponse" dans la
-  // zone data-inline-question. step = objet step complet du localize.
+  // F2a-sexies (refondu) : injecte le markup "question + cards de réponse"
+  // dans la zone data-inline-question — utilise le pattern .choice du modale
+  // pour cohérence visuelle (cards carrées avec icône + label uppercase).
   function renderInlineQuestion(step, answers) {
     if (!els.inlineQuestion || !step) return;
     var choices = step.choices || [];
     var question = getDynamicQuestion(step, answers || {});
-    var html = '<span class="inline-question__label">' + escHtml(question) + '</span>';
-    html += '<div class="inline-question__answers">';
+
+    var choicesClass = 'choices';
+    if (choices.length === 2) choicesClass += ' choices--2col';
+    else if (choices.length === 4) choicesClass += ' choices--4col';
+
+    var html = '<div class="inline-question__label">' + escHtml(question) + '</div>';
+    html += '<div class="' + choicesClass + '">';
     for (var i = 0; i < choices.length; i++) {
       var c = choices[i];
-      html += '<button class="answer-chip" type="button"' +
+      html += '<button class="choice" type="button"' +
         ' data-step-id="' + escHtml(step.id) + '"' +
         ' data-slug="' + escHtml(c.slug) + '"' +
-        ' data-label="' + escHtml(c.label) + '">' +
-        escHtml(c.label) +
-        '</button>';
+        ' data-label="' + escHtml(c.label) + '">';
+      html += '<span class="choice__icon">' + (ICONS[c.icon] || '') + '</span>';
+      html += '<span class="choice__label">' + escHtml(c.label) + '</span>';
+      if (c.dim) html += '<span class="choice__dim">' + escHtml(c.dim) + '</span>';
+      html += '</button>';
     }
     html += '</div>';
     els.inlineQuestion.innerHTML = html;
@@ -682,8 +691,11 @@
   function bindCTAs() {
     if (!els.zone) return;
     els.zone.addEventListener('click', function (e) {
-      // F2a-sexies : clic sur une chip de réponse (priorité sur open-modal)
-      var chip = e.target.closest('.answer-chip[data-step-id]');
+      // F2a-sexies : clic sur une réponse de la chip-question (priorité
+      // sur open-modal). Le data-step-id distingue ces .choice (rendues
+      // par renderInlineQuestion) des .choice du modale (qui n'ont pas
+      // data-step-id).
+      var chip = e.target.closest('.choice[data-step-id]');
       if (chip) {
         e.preventDefault();
         handleChipAnswer(chip);
