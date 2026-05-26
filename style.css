@@ -24480,13 +24480,13 @@ button.chip--project:focus-visible {
   gap: 2rem;
   margin-top: 28px;
   width: 100%;
-  padding: 6px 60px;
+  padding: 18px 20px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
-  /* scroll-padding-inline pour que les cards snappent à 60px du bord
+  /* scroll-padding-inline pour que les cards snappent à 20px du bord
      (sinon elles collent au bord en scroll-snap-align: start). */
-  scroll-padding-inline: 60px;
+  scroll-padding-inline: 20px;
   /* Scrollbar masquée — la nav (flèches + dots) prend le relais */
   scrollbar-width: none;
   -ms-overflow-style: none;
