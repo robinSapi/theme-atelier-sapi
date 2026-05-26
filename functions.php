@@ -376,6 +376,18 @@ function sapi_maison_enqueue_assets() {
       );
     }
 
+    // Tracking GA4 sur /mes-creations/ (Chantier 4) — 5 events via dataLayer.push
+    $mes_creations_ga4_js_path = get_template_directory() . '/assets/sapi-mes-creations-ga4.js';
+    if (file_exists($mes_creations_ga4_js_path)) {
+      wp_enqueue_script(
+        'sapi-mes-creations-ga4',
+        get_template_directory_uri() . '/assets/sapi-mes-creations-ga4.js',
+        [],
+        filemtime($mes_creations_ga4_js_path),
+        true
+      );
+    }
+
     // F2a Phase 2 — cards "Conseil de Robin" / "Mon projet" sur /mes-creations/
     $cards_conseiller_js_path = get_template_directory() . '/assets/sapi-cards-conseiller.js';
     if (file_exists($cards_conseiller_js_path)) {
