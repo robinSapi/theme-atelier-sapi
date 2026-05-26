@@ -20,6 +20,33 @@ $all_products = new WP_Query([
   'orderby' => 'menu_order date',
   'order' => 'ASC',
 ]);
+
+// Pills catégorie (Chantier 3) — récupère les catégories WC avec leurs counts.
+// Ordre fixe : suspensions / lampadaires / lampes-a-poser / appliques. Le
+// total "Tous" exclut les extras (accessoires, carte-cadeau).
+$mes_creations_cat_order = ['suspensions', 'lampadaires', 'lampes-a-poser', 'appliques'];
+$mes_creations_cats_raw  = get_terms([
+  'taxonomy'   => 'product_cat',
+  'hide_empty' => true,
+  'exclude'    => [get_option('default_product_cat')],
+]);
+$mes_creations_cats_by_slug = [];
+if ($mes_creations_cats_raw && !is_wp_error($mes_creations_cats_raw)) {
+  foreach ($mes_creations_cats_raw as $cat) {
+    $mes_creations_cats_by_slug[$cat->slug] = $cat;
+  }
+}
+$mes_creations_total = $all_products->found_posts;
+foreach (['accessoires', 'carte-cadeau'] as $excluded) {
+  if (isset($mes_creations_cats_by_slug[$excluded])) {
+    $mes_creations_total -= (int) $mes_creations_cats_by_slug[$excluded]->count;
+  }
+}
+// Lecture du param GET ?product_cat= pour le filtre actif initial.
+$mes_creations_active_cat = isset($_GET['product_cat']) ? sanitize_key(wp_unslash($_GET['product_cat'])) : '';
+if ($mes_creations_active_cat && !isset($mes_creations_cats_by_slug[$mes_creations_active_cat])) {
+  $mes_creations_active_cat = '';
+}
 ?>
 
 <!-- Hero Section - Magazine Style -->
@@ -191,10 +218,26 @@ $conseil_room_icons = sapi_guide_get_icons();
     <p class="mes-creations-catalogue__sub"><?php esc_html_e('Le catalogue complet, classé par type de luminaire', 'theme-sapi-maison'); ?></p>
   </header>
 
-  <!-- Placeholder pills catégorie — Chantier 4 (récupération git history pré-F1) -->
-  <div class="mes-creations-catalogue__pills" data-mes-creations-pills hidden>
-    <!-- Sera peuplé au Chantier 4 -->
-  </div>
+  <!-- Pills catégorie (Chantier 3) — filtrage AJAX-less (toutes les cards
+       sont déjà dans le DOM, on toggle .is-cat-filtered via JS). URL mise
+       à jour via history.pushState. Au reload avec ?product_cat=<slug>,
+       la classe is-active est appliquée côté PHP. -->
+  <nav class="mes-creations-pills" data-mes-creations-pills aria-label="<?php esc_attr_e('Filtrer par catégorie', 'theme-sapi-maison'); ?>">
+    <button type="button" class="mes-creations-pill<?php echo empty($mes_creations_active_cat) ? ' is-active' : ''; ?>" data-cat="all">
+      <?php esc_html_e('Tous', 'theme-sapi-maison'); ?>
+      <span class="mes-creations-pill__count"><?php echo esc_html($mes_creations_total); ?></span>
+    </button>
+    <?php foreach ($mes_creations_cat_order as $slug) :
+      if (!isset($mes_creations_cats_by_slug[$slug])) continue;
+      $cat = $mes_creations_cats_by_slug[$slug];
+      $is_active = ($mes_creations_active_cat === $slug);
+    ?>
+      <button type="button" class="mes-creations-pill<?php echo $is_active ? ' is-active' : ''; ?>" data-cat="<?php echo esc_attr($cat->slug); ?>">
+        <?php echo esc_html($cat->name); ?>
+        <span class="mes-creations-pill__count"><?php echo esc_html($cat->count); ?></span>
+      </button>
+    <?php endforeach; ?>
+  </nav>
 
 <!-- Products Grid — grille 2 colonnes photos ambiance -->
 <section class="shop-products" id="shop-products">

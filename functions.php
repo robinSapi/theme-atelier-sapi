@@ -363,6 +363,19 @@ function sapi_maison_enqueue_assets() {
       'extras_slugs' => ['accessoires', 'carte-cadeau'],
     ];
 
+    // Pills catégorie sur /mes-creations/ (Chantier 3) — filtrage AJAX-less
+    // de la grille basse par data-categories.
+    $mes_creations_pills_js_path = get_template_directory() . '/assets/sapi-mes-creations-pills.js';
+    if (file_exists($mes_creations_pills_js_path)) {
+      wp_enqueue_script(
+        'sapi-mes-creations-pills',
+        get_template_directory_uri() . '/assets/sapi-mes-creations-pills.js',
+        [],
+        filemtime($mes_creations_pills_js_path),
+        true
+      );
+    }
+
     // F2a Phase 2 — cards "Conseil de Robin" / "Mon projet" sur /mes-creations/
     $cards_conseiller_js_path = get_template_directory() . '/assets/sapi-cards-conseiller.js';
     if (file_exists($cards_conseiller_js_path)) {
