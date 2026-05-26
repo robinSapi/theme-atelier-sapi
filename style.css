@@ -24570,3 +24570,83 @@ button.chip--project:focus-visible {
   /* Pas de style spécifique pour l'instant — les clones héritent du style
      des .product-card-cinetique. Le marker existe pour le sélecteur JS. */
 }
+
+/* Card sur-mesure (Chantier 2) — cellule de grille spéciale en dernière
+   position du slot. Markup mockup-15 ligne 419 (template cloné par JS).
+   Format identique aux cards produit (aspect ratio + body), accent orange. */
+.mes-creations-surmesure-card {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  background: #fff;
+  border: 1px dashed rgba(227, 91, 36, 0.45);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  -webkit-transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+@media (hover: hover) {
+  .mes-creations-surmesure-card:hover {
+    -webkit-transform: translateY(-3px);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(227, 91, 36, 0.18);
+    border-color: var(--color-orange);
+  }
+}
+.mes-creations-surmesure-card__photo {
+  aspect-ratio: 1/1.1;
+  background: linear-gradient(135deg, #FFF4ED 0%, #FFE4D3 100%);
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  color: var(--color-orange);
+  gap: 14px;
+  padding: 20px;
+}
+.mes-creations-surmesure-card__photo svg {
+  width: 42px;
+  height: 42px;
+  opacity: 0.85;
+}
+.mes-creations-surmesure-card__badge {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  padding: 5px 11px;
+  background: var(--color-orange);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: 50px;
+}
+.mes-creations-surmesure-card__body {
+  padding: 14px 12px 18px;
+  text-align: center;
+}
+.mes-creations-surmesure-card__title {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-orange);
+  margin-bottom: 3px;
+}
+.mes-creations-surmesure-card__sub {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--color-wood-mid);
+}

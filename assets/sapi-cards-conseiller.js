@@ -475,7 +475,15 @@
       count++;
     });
 
-    // Badge "Mon projet · N luminaire(s)"
+    // Card sur-mesure en DERNIÈRE cellule du slot. Cloné depuis le <template>
+    // pour préserver le markup PHP i18n. Affichée même si 0 match (cas dégradé)
+    // — donne toujours une issue concrète au visiteur.
+    if (els.surmesureTemplate && els.surmesureTemplate.content) {
+      var surmesureClone = els.surmesureTemplate.content.cloneNode(true);
+      els.selectionGrid.appendChild(surmesureClone);
+    }
+
+    // Badge "Mon projet · N luminaire(s)" — N = produits matchés, hors card sur-mesure
     if (els.badgeText) {
       if (count === 0) {
         els.badgeText.textContent = 'Mon projet';
@@ -640,6 +648,7 @@
     // Refonte /mes-creations/ : slot grille de la card englobante + badge dynamique
     els.selectionGrid     = els.zone.querySelector('[data-mes-creations-selection-grid]');
     els.badgeText         = els.zone.querySelector('[data-mon-projet-badge-text]');
+    els.surmesureTemplate = els.zone.querySelector('[data-mes-creations-surmesure-template]');
 
     bindCTAs();
     render();

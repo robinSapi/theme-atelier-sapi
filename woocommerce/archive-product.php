@@ -146,8 +146,31 @@ $conseil_room_icons = sapi_guide_get_icons();
         <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
       </a>
       <!-- Slot grille : rempli par sapi-cards-conseiller.js avec les clones
-           des cards .product-card-cinetique qui matchent sapiProject. -->
+           des cards .product-card-cinetique qui matchent sapiProject + la
+           card sur-mesure (clonée depuis le <template> ci-dessous) en
+           dernière cellule. -->
       <div class="mes-creations-selection__grid" data-mes-creations-selection-grid aria-live="polite"></div>
+
+      <!-- Template card sur-mesure (Chantier 2) — markup mockup-15 ligne 419.
+           Cloné par populateSelectionGrid() comme dernière cellule du slot.
+           Pas rendu dans le DOM tant que le JS ne le clone pas. -->
+      <template data-mes-creations-surmesure-template>
+        <a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>" class="mes-creations-surmesure-card" data-mes-creations-surmesure-cta>
+          <div class="mes-creations-surmesure-card__photo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+              <path d="M21 3v5h-5"/>
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+              <path d="M8 16H3v5"/>
+            </svg>
+            <span class="mes-creations-surmesure-card__badge"><?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?></span>
+          </div>
+          <div class="mes-creations-surmesure-card__body">
+            <div class="mes-creations-surmesure-card__title"><?php esc_html_e('Et si on créait le tien ?', 'theme-sapi-maison'); ?></div>
+            <div class="mes-creations-surmesure-card__sub"><?php esc_html_e('Décris ton projet à Robin', 'theme-sapi-maison'); ?></div>
+          </div>
+        </a>
+      </template>
     </div>
   </section>
 </section>
