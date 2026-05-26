@@ -24623,14 +24623,6 @@ button.chip--project:focus-visible {
   font-size: 11px;
 }
 
-/* Filtre par catégorie : cache les cards dont data-categories ne match pas.
-   Scopé à #sapi-product-grid pour ne pas affecter les clones de la card
-   "Ma sélection" (qui ont les mêmes data-attrs mais ne doivent pas être
-   filtrés par les pills). */
-#sapi-product-grid .is-cat-filtered {
-  display: none !important;
-}
-
 /* Refonte /mes-creations/ — la grille catalogue "Toutes mes créations"
    affiche TOUS les produits, indépendamment du filtre projet.
    shop.js applique encore .is-filtered-out + style="display:none" inline
@@ -24651,6 +24643,22 @@ button.chip--project:focus-visible {
   overflow: visible !important;
   -webkit-flex: revert !important;
   flex: revert !important;
+}
+
+/* Filtre par catégorie : cache les cards dont data-categories ne match pas.
+   IMPORTANT : sélecteur 2-classes pour battre l'override is-filtered-out
+   ci-dessus (sinon spécificité 0,2,1 > 0,1,1 → cat-filtered ignoré quand
+   projet actif). Le sélecteur combiné .is-filtered-out.is-cat-filtered
+   gère le cas où une card a les deux classes simultanément. */
+#sapi-product-grid .product-card-cinetique.is-cat-filtered,
+#sapi-product-grid .product-card-cinetique.is-filtered-out.is-cat-filtered {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
 }
 
 /* ============================================================
