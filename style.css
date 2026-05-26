@@ -23257,6 +23257,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* Override .choice DANS la chip-question : layout horizontal compact —
    icône à gauche, label + dim sur la même ligne séparés par un point
    médian. Hauteur minimale. Le modale garde son layout vertical natif. */
+/* Container .choices élargi (au lieu du max-width 480px du modale) pour
+   laisser de la place aux boutons horizontaux. */
+.conseiller-mon-projet__inline-question .choices {
+  max-width: 720px;
+}
 .conseiller-mon-projet__inline-question .choice {
   display: -webkit-flex;
   display: flex;
@@ -23266,17 +23271,26 @@ body.woocommerce-cart div.woocommerce-wrapper {
   align-items: center;
   -webkit-justify-content: flex-start;
   justify-content: flex-start;
-  -webkit-flex-wrap: wrap;
-  flex-wrap: wrap;
-  gap: 6px 10px;
+  -webkit-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+  gap: 10px;
   padding: 11px 14px;
   min-height: 0;
+  min-width: 0;
   text-align: left;
+  white-space: nowrap;
 }
+/* Icône réduite (32×32 avec SVG 18px) pour libérer de la place au texte */
 .conseiller-mon-projet__inline-question .choice__icon {
+  width: 32px;
+  height: 32px;
   margin: 0;
   -webkit-flex-shrink: 0;
   flex-shrink: 0;
+}
+.conseiller-mon-projet__inline-question .choice__icon svg {
+  width: 18px;
+  height: 18px;
 }
 .conseiller-mon-projet__inline-question .choice__label {
   text-align: left;
