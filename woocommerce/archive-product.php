@@ -166,6 +166,11 @@ $conseil_room_icons = sapi_guide_get_icons();
       <p class="conseiller-mon-projet__text" data-mon-projet-phrase>
         <span class="conseiller-mon-projet__text-content" data-mon-projet-phrase-content></span>
       </p>
+      <!-- Chip-question : prochaine question non répondue avec ses pills
+           cliquables (héritage F2a-sexies). Visible quand le projet est
+           incomplet, le clic sur une pill enregistre la réponse + ouvre
+           la modale sur la question suivante. -->
+      <div class="conseiller-mon-projet__inline-question" data-inline-question hidden></div>
       <a class="conseiller-link mes-creations-selection__edit" href="#" data-action="open-modal" data-modal-state="s3" data-mon-projet-edit>
         <span><?php esc_html_e('Préciser ou modifier mon projet', 'theme-sapi-maison'); ?></span>
         <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
