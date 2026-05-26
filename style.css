@@ -24467,28 +24467,67 @@ button.chip--project:focus-visible {
    width: 100% nécessaire car le parent .conseiller-card__inner est en
    flex column avec align-items: center → sans width explicite, le grid
    ne s'étire pas. */
+/* Slider horizontal : 4 cards visibles d'un coup sur desktop, scroll
+   horizontal + scroll-snap pour voir le reste. Limite la hauteur de la
+   card englobante (toujours 1 rangée même avec 20 matches). */
 .mes-creations-selection__grid {
-  display: -ms-grid;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: nowrap;
+  flex-wrap: nowrap;
   gap: 2rem;
   margin-top: 28px;
   width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  /* Padding-bottom pour laisser de la place à la scrollbar fine sans
+     que la dernière ligne des cards ne soit coupée */
+  padding-bottom: 8px;
+  /* Scrollbar fine et discrète (wood-mid) */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(147, 125, 104, 0.4) transparent;
+}
+.mes-creations-selection__grid::-webkit-scrollbar {
+  height: 6px;
+}
+.mes-creations-selection__grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+.mes-creations-selection__grid::-webkit-scrollbar-thumb {
+  background: rgba(147, 125, 104, 0.4);
+  border-radius: 3px;
+}
+.mes-creations-selection__grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(147, 125, 104, 0.7);
+}
+/* Chaque cellule : largeur = (100% - 3 gaps de 2rem) / 4 cards visibles.
+   scroll-snap-align: start pour que les cards se calent à gauche au swipe. */
+.mes-creations-selection__grid > * {
+  -webkit-flex: 0 0 calc((100% - 6rem) / 4);
+  flex: 0 0 calc((100% - 6rem) / 4);
+  scroll-snap-align: start;
 }
 @media (max-width: 1024px) {
-  .mes-creations-selection__grid {
-    grid-template-columns: repeat(3, 1fr);
+  .mes-creations-selection__grid > * {
+    -webkit-flex: 0 0 calc((100% - 4rem) / 3);
+    flex: 0 0 calc((100% - 4rem) / 3);
   }
 }
 @media (max-width: 768px) {
   .mes-creations-selection__grid {
-    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    padding-bottom: 6px;
+  }
+  .mes-creations-selection__grid > * {
+    -webkit-flex: 0 0 calc((100% - 1rem) / 2);
+    flex: 0 0 calc((100% - 1rem) / 2);
   }
 }
 @media (max-width: 480px) {
-  .mes-creations-selection__grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+  .mes-creations-selection__grid > * {
+    -webkit-flex: 0 0 80%;
+    flex: 0 0 80%;
   }
 }
 /* Slot vide (avant que le JS ait peuplé OU si 0 match) : ne pas afficher
