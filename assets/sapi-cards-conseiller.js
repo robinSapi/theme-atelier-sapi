@@ -512,51 +512,50 @@
     return 4;
   }
 
-  function getPageWidth() {
-    if (!els.selectionGrid) return 0;
-    var first = els.selectionGrid.querySelector(':scope > *');
-    if (!first) return 0;
-    var cardWidth = first.getBoundingClientRect().width;
-    var gap = parseFloat(window.getComputedStyle(els.selectionGrid).gap) || 0;
-    var perPage = getCardsPerPage();
-    return perPage * cardWidth + (perPage - 1) * gap;
-  }
-
   function getTotalCards() {
     if (!els.selectionGrid) return 0;
     return els.selectionGrid.children.length;
   }
 
-  function getTotalPages() {
+  /**
+   * Nombre de positions de scroll possibles (= dots affichés).
+   * Avec N cards et P cards visibles : positions 0..N-P → totalDots = N - P + 1.
+   * Min 1.
+   */
+  function getTotalDots() {
+    var total = getTotalCards();
     var perPage = getCardsPerPage();
-    return Math.max(1, Math.ceil(getTotalCards() / perPage));
+    return Math.max(1, total - perPage + 1);
   }
 
-  function getCurrentPage() {
+  function getCardStep() {
     if (!els.selectionGrid) return 0;
-    var pageWidth = getPageWidth();
-    if (pageWidth === 0) return 0;
-    return Math.round(els.selectionGrid.scrollLeft / pageWidth);
+    var first = els.selectionGrid.querySelector(':scope > *');
+    if (!first) return 0;
+    var cardWidth = first.getBoundingClientRect().width;
+    var gap = parseFloat(window.getComputedStyle(els.selectionGrid).gap) || 0;
+    return cardWidth + gap;
   }
 
-  function scrollToPage(idx) {
+  function getCurrentDot() {
+    if (!els.selectionGrid) return 0;
+    var step = getCardStep();
+    if (step === 0) return 0;
+    return Math.round(els.selectionGrid.scrollLeft / step);
+  }
+
+  function scrollToDot(idx) {
     if (!els.selectionGrid) return;
-    var pages = getTotalPages();
-    idx = Math.max(0, Math.min(pages - 1, idx));
-    var pageWidth = getPageWidth();
-    var gap = parseFloat(window.getComputedStyle(els.selectionGrid).gap) || 0;
-    // Position du début de la page : idx * (perPage cards + perPage gaps)
-    var scrollLeft = idx * (pageWidth + gap);
-    els.selectionGrid.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+    var totalDots = getTotalDots();
+    idx = Math.max(0, Math.min(totalDots - 1, idx));
+    var step = getCardStep();
+    els.selectionGrid.scrollTo({ left: idx * step, behavior: 'smooth' });
   }
 
   function scrollByOneCard(direction) {
     if (!els.selectionGrid) return;
-    var first = els.selectionGrid.querySelector(':scope > *');
-    if (!first) return;
-    var cardWidth = first.getBoundingClientRect().width;
-    var gap = parseFloat(window.getComputedStyle(els.selectionGrid).gap) || 0;
-    var step = cardWidth + gap;
+    var step = getCardStep();
+    if (step === 0) return;
     var current = els.selectionGrid.scrollLeft;
     var target = direction === 'next' ? current + step : current - step;
     els.selectionGrid.scrollTo({ left: target, behavior: 'smooth' });
@@ -564,7 +563,7 @@
 
   function updateActiveDot() {
     if (!els.selectionNav || !els.selectionGrid) return;
-    var current = getCurrentPage();
+    var current = getCurrentDot();
     var dots = els.selectionNav.querySelectorAll('[data-page]');
     dots.forEach(function (dot) {
       var idx = parseInt(dot.getAttribute('data-page'), 10);
@@ -584,7 +583,7 @@
   var selectionNavBound = false;
   function buildSelectionNav() {
     if (!els.selectionNav || !els.selectionGrid) return;
-    var pages = getTotalPages();
+    var pages = getTotalDots();
     if (pages <= 1) {
       els.selectionNav.hidden = true;
       els.selectionNav.innerHTML = '';
@@ -612,7 +611,7 @@
         var dot = e.target.closest('[data-page]');
         if (dot) {
           var idx = parseInt(dot.getAttribute('data-page'), 10);
-          if (!isNaN(idx)) scrollToPage(idx);
+          if (!isNaN(idx)) scrollToDot(idx);
           return;
         }
         var arrow = e.target.closest('[data-nav]');
