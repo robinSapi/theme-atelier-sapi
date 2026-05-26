@@ -545,26 +545,40 @@
     idx = Math.max(0, Math.min(pages - 1, idx));
     var pageWidth = getPageWidth();
     var gap = parseFloat(window.getComputedStyle(els.selectionGrid).gap) || 0;
-    var perPage = getCardsPerPage();
     // Position du début de la page : idx * (perPage cards + perPage gaps)
     var scrollLeft = idx * (pageWidth + gap);
     els.selectionGrid.scrollTo({ left: scrollLeft, behavior: 'smooth' });
   }
 
+  function scrollByOneCard(direction) {
+    if (!els.selectionGrid) return;
+    var first = els.selectionGrid.querySelector(':scope > *');
+    if (!first) return;
+    var cardWidth = first.getBoundingClientRect().width;
+    var gap = parseFloat(window.getComputedStyle(els.selectionGrid).gap) || 0;
+    var step = cardWidth + gap;
+    var current = els.selectionGrid.scrollLeft;
+    var target = direction === 'next' ? current + step : current - step;
+    els.selectionGrid.scrollTo({ left: target, behavior: 'smooth' });
+  }
+
   function updateActiveDot() {
-    if (!els.selectionNav) return;
+    if (!els.selectionNav || !els.selectionGrid) return;
     var current = getCurrentPage();
     var dots = els.selectionNav.querySelectorAll('[data-page]');
     dots.forEach(function (dot) {
       var idx = parseInt(dot.getAttribute('data-page'), 10);
       dot.classList.toggle('is-active', idx === current);
     });
-    // Flèches : disable aux extrémités
-    var pages = getTotalPages();
+    // Flèches : disable aux extrémités du SCROLL (pas des pages, car les
+    // flèches avancent d'une seule card à la fois). Tolérance 2px pour
+    // les arrondis de subpixel scroll.
     var prevBtn = els.selectionNav.querySelector('[data-nav="prev"]');
     var nextBtn = els.selectionNav.querySelector('[data-nav="next"]');
-    if (prevBtn) prevBtn.disabled = (current === 0);
-    if (nextBtn) nextBtn.disabled = (current === pages - 1);
+    var scrollLeft = els.selectionGrid.scrollLeft;
+    var maxScroll = els.selectionGrid.scrollWidth - els.selectionGrid.clientWidth;
+    if (prevBtn) prevBtn.disabled = (scrollLeft <= 2);
+    if (nextBtn) nextBtn.disabled = (scrollLeft >= maxScroll - 2);
   }
 
   var selectionNavBound = false;
@@ -603,9 +617,7 @@
         }
         var arrow = e.target.closest('[data-nav]');
         if (arrow) {
-          var dir = arrow.getAttribute('data-nav');
-          var current = getCurrentPage();
-          scrollToPage(current + (dir === 'next' ? 1 : -1));
+          scrollByOneCard(arrow.getAttribute('data-nav'));
         }
       });
       // Update dot actif au scroll (throttle via rAF)
