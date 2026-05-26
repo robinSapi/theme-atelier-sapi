@@ -24469,7 +24469,9 @@ button.chip--project:focus-visible {
    ne s'étire pas. */
 /* Slider horizontal : 4 cards visibles d'un coup sur desktop, scroll
    horizontal + scroll-snap pour voir le reste. La navigation (flèches +
-   dots) sous le slider est le seul moyen visuel — scrollbar masquée. */
+   dots) sous le slider est le seul moyen visuel — scrollbar masquée.
+   Padding horizontal pour faire respirer les cards aux extrémités du
+   slider (sinon collées au bord de la card englobante). */
 .mes-creations-selection__grid {
   display: -webkit-flex;
   display: flex;
@@ -24478,9 +24480,13 @@ button.chip--project:focus-visible {
   gap: 2rem;
   margin-top: 28px;
   width: 100%;
+  padding: 6px 20px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
+  /* scroll-padding-inline pour que les cards snappent à 20px du bord
+     (sinon elles collent au bord en scroll-snap-align: start). */
+  scroll-padding-inline: 20px;
   /* Scrollbar masquée — la nav (flèches + dots) prend le relais */
   scrollbar-width: none;
   -ms-overflow-style: none;
