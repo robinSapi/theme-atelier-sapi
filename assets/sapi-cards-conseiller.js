@@ -448,6 +448,43 @@
       renderConseil();
     }
     refilterGrid();
+    populateSelectionGrid();
+  }
+
+  /**
+   * Refonte /mes-creations/ — Peuple le slot grille de la card englobante
+   * "Ma sélection" en clonant les .product-card-cinetique qui matchent
+   * sapiProject (= celles SANS .is-filtered-out après refilterGrid).
+   * Met aussi à jour le badge "Mon projet · N luminaire(s)".
+   */
+  function populateSelectionGrid() {
+    if (!els.selectionGrid) return;
+    els.selectionGrid.innerHTML = '';
+
+    if (!window.sapiProject || !window.sapiProject.hasProject()) return;
+
+    var sourceGrid = document.getElementById('sapi-product-grid');
+    if (!sourceGrid) return;
+
+    var matches = sourceGrid.querySelectorAll('.product-card-cinetique:not(.is-filtered-out)');
+    var count = 0;
+    matches.forEach(function (card) {
+      var clone = card.cloneNode(true);
+      clone.classList.add('is-selection-clone');
+      els.selectionGrid.appendChild(clone);
+      count++;
+    });
+
+    // Badge "Mon projet · N luminaire(s)"
+    if (els.badgeText) {
+      if (count === 0) {
+        els.badgeText.textContent = 'Mon projet';
+      } else if (count === 1) {
+        els.badgeText.textContent = 'Mon projet · 1 luminaire';
+      } else {
+        els.badgeText.textContent = 'Mon projet · ' + count + ' luminaires';
+      }
+    }
   }
 
   /* ─────────────────────────────────────────────
@@ -545,8 +582,11 @@
       // (determineInitialState → s0-partiel → prochaine question non répondue).
       // Les éléments interactifs internes (chip, lien Modifier) sont déjà
       // captés ci-dessus, donc on n'arrive ici qu'au clic sur la card elle-même.
+      // Refonte /mes-creations/ : on EXCLUT la variante englobante (la card
+      // contient maintenant la grille des matches — cliquer dessus ne doit
+      // PAS ouvrir la modale, c'est le lien "Préciser ou modifier" qui le fait).
       var monProjetCard = e.target.closest('.conseiller-card--mon-projet');
-      if (monProjetCard) {
+      if (monProjetCard && !monProjetCard.classList.contains('mes-creations-selection__card')) {
         monProjetCard.dispatchEvent(new CustomEvent('sapi:open-modal', {
           bubbles: true,
           detail: { state: 's0' },
@@ -597,6 +637,9 @@
     // F2a-sexies : zone chip-question + lien Modifier coin haut-droit
     els.inlineQuestion    = els.zone.querySelector('[data-inline-question]');
     els.editLink          = els.zone.querySelector('[data-mon-projet-edit]');
+    // Refonte /mes-creations/ : slot grille de la card englobante + badge dynamique
+    els.selectionGrid     = els.zone.querySelector('[data-mes-creations-selection-grid]');
+    els.badgeText         = els.zone.querySelector('[data-mon-projet-badge-text]');
 
     bindCTAs();
     render();

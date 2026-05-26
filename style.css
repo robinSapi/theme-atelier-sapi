@@ -24426,3 +24426,147 @@ button.chip--project:focus-visible {
     padding: 12px 18px;
   }
 }
+
+/* ============================================================
+   Refonte /mes-creations/ — 2 sections empilées (Chantier 1)
+
+   Structure :
+   [Hero existant] (conservé)
+   [.mes-creations-selection] = card englobante "Mon projet"
+       (badge dynamique N luminaires + phrase IA + lien Modifier
+        + slot grille peuplé par JS via clones depuis la grille basse)
+   [.mes-creations-section-divider] = 3 dots en pointillés
+   [.mes-creations-catalogue] = section "Toutes mes créations"
+       (H2 + sous-titre + placeholder pills cat + grille shop-products)
+   ============================================================ */
+
+/* Card englobante "Mon projet" : la card prend toute la largeur (au lieu
+   du span-X du pattern conseiller universel) — elle contient la grille
+   des matches comme un wrap, pas comme une cellule de la grille produit. */
+.mes-creations-selection {
+  margin-top: 32px;
+}
+/* Override .conseiller-card--mon-projet héritée :
+   - pas de cursor: pointer (la card contient la grille, click sur card
+     ≠ ouverture modale ; c'est le lien Modifier qui ouvre)
+   - pas de hover transform (déplacement perturbant avec la grille dedans)
+   - min-height auto (laisser la card grandir naturellement avec la grille)
+   - text-align reset interne pour les cards de la grille */
+.mes-creations-selection__card {
+  cursor: default;
+  min-height: 0;
+}
+.mes-creations-selection__card:hover {
+  -webkit-transform: none;
+  transform: none;
+  box-shadow: none;
+}
+/* Slot grille à l'intérieur de la card englobante. Mêmes specs que la
+   grille produit du catalogue (auto-fill minmax 220px). */
+.mes-creations-selection__grid {
+  display: -ms-grid;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 22px;
+  margin-top: 28px;
+  /* Marge horizontale pour faire respirer les cards dans la card englobante. */
+  padding: 0 8px;
+}
+/* Slot vide (avant que le JS ait peuplé OU si 0 match) : ne pas afficher
+   d'espace vide béant. Géré aussi côté JS avec display none si besoin. */
+.mes-creations-selection__grid:empty {
+  display: none;
+}
+
+/* Lien "Préciser ou modifier mon projet" sous la phrase IA. Souligné
+   discret, hover orange, icône crayon en suffixe. */
+.mes-creations-selection__edit {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-wood);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  -webkit-transition: color 0.2s ease;
+  transition: color 0.2s ease;
+}
+.mes-creations-selection__edit:hover {
+  color: var(--color-orange);
+}
+.mes-creations-selection__edit svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Séparateur 3 dots entre "Ma sélection" et "Toutes mes créations".
+   Mockup-15 : 3 ronds wood opacity 0.4 + 2 lignes horizontales latérales. */
+.mes-creations-section-divider {
+  max-width: 1400px;
+  margin: 70px auto 0;
+  padding: 0 3rem;
+  text-align: center;
+  position: relative;
+}
+.mes-creations-section-divider::before,
+.mes-creations-section-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: calc(50% - 80px);
+  height: 1px;
+  background: var(--color-line);
+}
+.mes-creations-section-divider::before { left: 3rem; }
+.mes-creations-section-divider::after  { right: 3rem; }
+.mes-creations-section-divider__dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-wood);
+  opacity: 0.4;
+  margin: 0 5px;
+  vertical-align: middle;
+}
+
+/* Section "Toutes mes créations" — H2 + sous-titre + placeholder pills. */
+.mes-creations-catalogue {
+  max-width: 1400px;
+  margin: 44px auto 0;
+  padding: 0 3rem;
+}
+.mes-creations-catalogue__header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.mes-creations-catalogue__title {
+  font-family: var(--font-body);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: clamp(20px, 2.6vw, 26px);
+  letter-spacing: 0.04em;
+  color: var(--color-wood-dark);
+  margin: 0;
+}
+.mes-creations-catalogue__sub {
+  margin: 8px 0 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-wood);
+}
+.mes-creations-catalogue__pills {
+  /* Placeholder Chantier 4 — visuel à venir. */
+  margin-bottom: 24px;
+}
+
+/* Marqueur sur les clones (cards "Ma sélection"). Utile pour le tracking
+   GA4 (Chantier 5) et pour les distinguer des cards originales si besoin. */
+.is-selection-clone {
+  /* Pas de style spécifique pour l'instant — les clones héritent du style
+     des .product-card-cinetique. Le marker existe pour le sélecteur JS. */
+}
