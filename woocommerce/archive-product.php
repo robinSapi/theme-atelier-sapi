@@ -22,9 +22,9 @@ $all_products = new WP_Query([
 ]);
 
 // Pills catégorie (Chantier 3) — récupère les catégories WC avec leurs counts.
-// Ordre fixe : suspensions / lampadaires / lampes-a-poser / appliques. Le
-// total "Tous" exclut les extras (accessoires, carte-cadeau).
-$mes_creations_cat_order = ['suspensions', 'lampadaires', 'lampes-a-poser', 'appliques'];
+// Ordre fixe : suspensions / lampadaires / lampesaposer / appliques / accessoires.
+// Le total "Tous" exclut uniquement carte-cadeau (gift card, hors créations).
+$mes_creations_cat_order = ['suspensions', 'lampadaires', 'lampesaposer', 'appliques', 'accessoires'];
 $mes_creations_cats_raw  = get_terms([
   'taxonomy'   => 'product_cat',
   'hide_empty' => true,
@@ -37,10 +37,8 @@ if ($mes_creations_cats_raw && !is_wp_error($mes_creations_cats_raw)) {
   }
 }
 $mes_creations_total = $all_products->found_posts;
-foreach (['accessoires', 'carte-cadeau'] as $excluded) {
-  if (isset($mes_creations_cats_by_slug[$excluded])) {
-    $mes_creations_total -= (int) $mes_creations_cats_by_slug[$excluded]->count;
-  }
+if (isset($mes_creations_cats_by_slug['carte-cadeau'])) {
+  $mes_creations_total -= (int) $mes_creations_cats_by_slug['carte-cadeau']->count;
 }
 // Lecture du param GET ?product_cat= pour le filtre actif initial.
 $mes_creations_active_cat = isset($_GET['product_cat']) ? sanitize_key(wp_unslash($_GET['product_cat'])) : '';
