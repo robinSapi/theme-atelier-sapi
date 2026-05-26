@@ -10883,10 +10883,9 @@ button.room-card {
   }
 }
 
-/* Icon harmonisé avec .conseiller-choice__icon : 48x48 + SVG 24x24 */
 .room-card-icon {
-  width: 48px;
-  height: 48px;
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -10897,8 +10896,8 @@ button.room-card {
 }
 
 .room-card-icon svg {
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
 }
 
 @media (hover: hover) {
@@ -10908,10 +10907,9 @@ button.room-card {
   }
 }
 
-/* Label harmonisé avec .conseiller-choice__label : 12px UPPERCASE wood-dark */
 .room-card-label {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
