@@ -24530,6 +24530,77 @@ button.chip--project:focus-visible {
     flex: 0 0 80%;
   }
 }
+
+/* Navigation slider : flèches de chaque côté + dots centrés */
+.mes-creations-selection__nav {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 18px;
+}
+.mes-creations-selection__nav-arrow {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  /* override règle button global padding: 10px 25px */
+  padding: 0;
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+  background: var(--color-white);
+  color: var(--color-wood-dark);
+  cursor: pointer;
+  -webkit-transition: background 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
+}
+.mes-creations-selection__nav-arrow:hover:not(:disabled) {
+  background: var(--color-wood-dark);
+  color: #fff;
+  border-color: var(--color-wood-dark);
+}
+.mes-creations-selection__nav-arrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.mes-creations-selection__nav-arrow svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+.mes-creations-selection__nav-dots {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 8px;
+}
+.mes-creations-selection__nav-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  padding: 0;
+  border: none;
+  background: rgba(147, 125, 104, 0.3);
+  cursor: pointer;
+  -webkit-transition: background 0.2s, transform 0.2s;
+  transition: background 0.2s, transform 0.2s;
+}
+.mes-creations-selection__nav-dot:hover {
+  background: rgba(147, 125, 104, 0.6);
+}
+.mes-creations-selection__nav-dot.is-active {
+  background: var(--color-wood-dark);
+  -webkit-transform: scale(1.25);
+  transform: scale(1.25);
+}
 /* Slot vide (avant que le JS ait peuplé OU si 0 match) : ne pas afficher
    d'espace vide béant. Géré aussi côté JS avec display none si besoin. */
 .mes-creations-selection__grid:empty {

@@ -495,6 +495,132 @@
         els.badgeText.textContent = 'Mon projet · ' + count + ' luminaires';
       }
     }
+
+    // Navigation slider (flèches + dots) selon nb de cards total
+    buildSelectionNav();
+  }
+
+  /* ─────────────────────────────────────────────
+     Slider nav : flèches + dots
+     ───────────────────────────────────────────── */
+
+  function getCardsPerPage() {
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    if (vw <= 480) return 1;
+    if (vw <= 768) return 2;
+    if (vw <= 1024) return 3;
+    return 4;
+  }
+
+  function getPageWidth() {
+    if (!els.selectionGrid) return 0;
+    var first = els.selectionGrid.querySelector(':scope > *');
+    if (!first) return 0;
+    var cardWidth = first.getBoundingClientRect().width;
+    var gap = parseFloat(window.getComputedStyle(els.selectionGrid).gap) || 0;
+    var perPage = getCardsPerPage();
+    return perPage * cardWidth + (perPage - 1) * gap;
+  }
+
+  function getTotalCards() {
+    if (!els.selectionGrid) return 0;
+    return els.selectionGrid.children.length;
+  }
+
+  function getTotalPages() {
+    var perPage = getCardsPerPage();
+    return Math.max(1, Math.ceil(getTotalCards() / perPage));
+  }
+
+  function getCurrentPage() {
+    if (!els.selectionGrid) return 0;
+    var pageWidth = getPageWidth();
+    if (pageWidth === 0) return 0;
+    return Math.round(els.selectionGrid.scrollLeft / pageWidth);
+  }
+
+  function scrollToPage(idx) {
+    if (!els.selectionGrid) return;
+    var pages = getTotalPages();
+    idx = Math.max(0, Math.min(pages - 1, idx));
+    var pageWidth = getPageWidth();
+    var gap = parseFloat(window.getComputedStyle(els.selectionGrid).gap) || 0;
+    var perPage = getCardsPerPage();
+    // Position du début de la page : idx * (perPage cards + perPage gaps)
+    var scrollLeft = idx * (pageWidth + gap);
+    els.selectionGrid.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+  }
+
+  function updateActiveDot() {
+    if (!els.selectionNav) return;
+    var current = getCurrentPage();
+    var dots = els.selectionNav.querySelectorAll('[data-page]');
+    dots.forEach(function (dot) {
+      var idx = parseInt(dot.getAttribute('data-page'), 10);
+      dot.classList.toggle('is-active', idx === current);
+    });
+    // Flèches : disable aux extrémités
+    var pages = getTotalPages();
+    var prevBtn = els.selectionNav.querySelector('[data-nav="prev"]');
+    var nextBtn = els.selectionNav.querySelector('[data-nav="next"]');
+    if (prevBtn) prevBtn.disabled = (current === 0);
+    if (nextBtn) nextBtn.disabled = (current === pages - 1);
+  }
+
+  var selectionNavBound = false;
+  function buildSelectionNav() {
+    if (!els.selectionNav || !els.selectionGrid) return;
+    var pages = getTotalPages();
+    if (pages <= 1) {
+      els.selectionNav.hidden = true;
+      els.selectionNav.innerHTML = '';
+      return;
+    }
+    els.selectionNav.hidden = false;
+
+    var html = '<button type="button" class="mes-creations-selection__nav-arrow" data-nav="prev" aria-label="Précédent">';
+    html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>';
+    html += '</button>';
+    html += '<div class="mes-creations-selection__nav-dots">';
+    for (var i = 0; i < pages; i++) {
+      html += '<button type="button" class="mes-creations-selection__nav-dot" data-page="' + i + '" aria-label="Page ' + (i + 1) + '"></button>';
+    }
+    html += '</div>';
+    html += '<button type="button" class="mes-creations-selection__nav-arrow" data-nav="next" aria-label="Suivant">';
+    html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>';
+    html += '</button>';
+
+    els.selectionNav.innerHTML = html;
+
+    if (!selectionNavBound) {
+      // Délégation clic sur dots + arrows
+      els.selectionNav.addEventListener('click', function (e) {
+        var dot = e.target.closest('[data-page]');
+        if (dot) {
+          var idx = parseInt(dot.getAttribute('data-page'), 10);
+          if (!isNaN(idx)) scrollToPage(idx);
+          return;
+        }
+        var arrow = e.target.closest('[data-nav]');
+        if (arrow) {
+          var dir = arrow.getAttribute('data-nav');
+          var current = getCurrentPage();
+          scrollToPage(current + (dir === 'next' ? 1 : -1));
+        }
+      });
+      // Update dot actif au scroll (throttle via rAF)
+      var scrollRaf = null;
+      els.selectionGrid.addEventListener('scroll', function () {
+        if (scrollRaf) return;
+        scrollRaf = requestAnimationFrame(function () {
+          scrollRaf = null;
+          updateActiveDot();
+        });
+      }, { passive: true });
+      selectionNavBound = true;
+    }
+
+    updateActiveDot();
   }
 
   /* ─────────────────────────────────────────────
@@ -649,8 +775,16 @@
     els.editLink          = els.zone.querySelector('[data-mon-projet-edit]');
     // Refonte /mes-creations/ : slot grille de la card englobante + badge dynamique
     els.selectionGrid     = els.zone.querySelector('[data-mes-creations-selection-grid]');
+    els.selectionNav      = els.zone.querySelector('[data-mes-creations-selection-nav]');
     els.badgeText         = els.zone.querySelector('[data-mon-projet-badge-text]');
     els.surmesureTemplate = els.zone.querySelector('[data-mes-creations-surmesure-template]');
+
+    // Resize : rebuild nav (cards visibles par page change selon viewport)
+    var resizeTimer = null;
+    window.addEventListener('resize', function () {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () { buildSelectionNav(); }, 150);
+    }, { passive: true });
 
     bindCTAs();
     render();

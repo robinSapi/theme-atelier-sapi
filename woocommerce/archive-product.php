@@ -181,6 +181,11 @@ $conseil_room_icons = sapi_guide_get_icons();
            dernière cellule. -->
       <div class="mes-creations-selection__grid" data-mes-creations-selection-grid aria-live="polite"></div>
 
+      <!-- Navigation slider : flèches + dots. Peuplé par JS selon le nombre
+           de pages (= total cards / cards visibles par viewport). Masqué
+           si tout tient sur une page. -->
+      <div class="mes-creations-selection__nav" data-mes-creations-selection-nav hidden></div>
+
       <!-- Template card sur-mesure (Chantier 2) — markup mockup-15 ligne 419.
            Cloné par populateSelectionGrid() comme dernière cellule du slot.
            Pas rendu dans le DOM tant que le JS ne le clone pas. -->
