@@ -10884,8 +10884,8 @@ button.room-card {
 }
 
 .room-card-icon {
-  width: 72px;
-  height: 72px;
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -10896,8 +10896,8 @@ button.room-card {
 }
 
 .room-card-icon svg {
-  width: 38px;
-  height: 38px;
+  width: 30px;
+  height: 30px;
 }
 
 @media (hover: hover) {
@@ -10909,7 +10909,7 @@ button.room-card {
 
 .room-card-label {
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
