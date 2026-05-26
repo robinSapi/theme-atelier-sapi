@@ -24631,6 +24631,28 @@ button.chip--project:focus-visible {
   display: none !important;
 }
 
+/* Refonte /mes-creations/ — la grille catalogue "Toutes mes créations"
+   affiche TOUS les produits, indépendamment du filtre projet.
+   shop.js applique encore .is-filtered-out + style="display:none" inline
+   sur les cards qui ne matchent pas sapiProject (utile pour identifier
+   quoi cloner dans le slot "Ma sélection"), MAIS visuellement on force
+   l'affichage dans le catalogue complet. Le `display: revert` annule
+   l'inline style="display:none" car les CSS !important battent les inline
+   sans !important. */
+#sapi-product-grid .product-card-cinetique.is-filtered-out {
+  display: revert !important;
+  visibility: visible !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: auto !important;
+  margin: revert !important;
+  padding: revert !important;
+  overflow: visible !important;
+  -webkit-flex: revert !important;
+  flex: revert !important;
+}
+
 /* ============================================================
    Refonte /mes-creations/ — Responsive mobile (Chantier 5)
    Aligné sur mockup-15 (@media max-width: 768px).

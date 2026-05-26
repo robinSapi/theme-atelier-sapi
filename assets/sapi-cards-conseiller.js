@@ -418,21 +418,15 @@
       typewriterEffect(els.phraseContent, els.phrase, newText, 16);
     }
 
-    // F2a-sexies : bascule entre chip-question (parcours incomplet) et lien
-    // Modifier (parcours complet).
-    var answers = (project && project.answers) || {};
-    var next = getNextUnansweredStep(answers);
-    if (next) {
-      renderInlineQuestion(next, answers);
-      if (els.inlineQuestion) els.inlineQuestion.hidden = false;
-      if (els.editLink) els.editLink.hidden = true;
-    } else {
-      if (els.inlineQuestion) {
-        els.inlineQuestion.innerHTML = '';
-        els.inlineQuestion.hidden = true;
-      }
-      if (els.editLink) els.editLink.hidden = false;
+    // Refonte /mes-creations/ : plus de chip-question (la card englobante
+    // contient la grille des matches, le lien "Préciser ou modifier mon
+    // projet" est toujours visible — c'est le seul point d'entrée vers
+    // la modale d'édition).
+    if (els.inlineQuestion) {
+      els.inlineQuestion.innerHTML = '';
+      els.inlineQuestion.hidden = true;
     }
+    if (els.editLink) els.editLink.hidden = false;
   }
 
   function renderConseil() {
