@@ -24470,24 +24470,26 @@ button.chip--project:focus-visible {
 .mes-creations-selection__grid {
   display: -ms-grid;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* !important pour neutraliser tout override (alignement sur le pattern
+     de .shop-products .product-grid qui utilise déjà !important). */
+  grid-template-columns: repeat(4, 1fr) !important;
   gap: 2rem;
   margin-top: 28px;
   width: 100%;
 }
 @media (max-width: 1024px) {
   .mes-creations-selection__grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr) !important;
   }
 }
 @media (max-width: 768px) {
   .mes-creations-selection__grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 }
 @media (max-width: 480px) {
   .mes-creations-selection__grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
     gap: 1.5rem;
   }
 }
