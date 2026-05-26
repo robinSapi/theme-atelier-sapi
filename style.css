@@ -23253,6 +23253,35 @@ body.woocommerce-cart div.woocommerce-wrapper {
   color: var(--color-wood-dark);
   text-align: center;
 }
+
+/* Override .choice DANS la chip-question : layout horizontal (icône à
+   gauche du label) pour réduire la hauteur des boutons. Le modale garde
+   son layout vertical par défaut. */
+.conseiller-mon-projet__inline-question .choice {
+  display: -ms-grid;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: flex-start;
+  justify-content: flex-start;
+  column-gap: 10px;
+  padding: 12px 14px;
+  min-height: 0;
+  text-align: left;
+}
+.conseiller-mon-projet__inline-question .choice__icon {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  margin: 0;
+  -webkit-flex-shrink: 0;
+  flex-shrink: 0;
+}
+.conseiller-mon-projet__inline-question .choice__label,
+.conseiller-mon-projet__inline-question .choice__dim {
+  grid-column: 2;
+  text-align: left;
+}
 .inline-question__answers {
   display: -webkit-flex;
   display: flex;
