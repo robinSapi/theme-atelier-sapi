@@ -24468,8 +24468,8 @@ button.chip--project:focus-visible {
    flex column avec align-items: center → sans width explicite, le grid
    ne s'étire pas. */
 /* Slider horizontal : 4 cards visibles d'un coup sur desktop, scroll
-   horizontal + scroll-snap pour voir le reste. Limite la hauteur de la
-   card englobante (toujours 1 rangée même avec 20 matches). */
+   horizontal + scroll-snap pour voir le reste. La navigation (flèches +
+   dots) sous le slider est le seul moyen visuel — scrollbar masquée. */
 .mes-creations-selection__grid {
   display: -webkit-flex;
   display: flex;
@@ -24481,25 +24481,14 @@ button.chip--project:focus-visible {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
-  /* Padding-bottom pour laisser de la place à la scrollbar fine sans
-     que la dernière ligne des cards ne soit coupée */
-  padding-bottom: 8px;
-  /* Scrollbar fine et discrète (wood-mid) */
-  scrollbar-width: thin;
-  scrollbar-color: rgba(147, 125, 104, 0.4) transparent;
+  /* Scrollbar masquée — la nav (flèches + dots) prend le relais */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 .mes-creations-selection__grid::-webkit-scrollbar {
-  height: 6px;
-}
-.mes-creations-selection__grid::-webkit-scrollbar-track {
-  background: transparent;
-}
-.mes-creations-selection__grid::-webkit-scrollbar-thumb {
-  background: rgba(147, 125, 104, 0.4);
-  border-radius: 3px;
-}
-.mes-creations-selection__grid::-webkit-scrollbar-thumb:hover {
-  background: rgba(147, 125, 104, 0.7);
+  display: none;
+  width: 0;
+  height: 0;
 }
 /* Chaque cellule : largeur = (100% - 3 gaps de 2rem) / 4 cards visibles.
    scroll-snap-align: start pour que les cards se calent à gauche au swipe. */
@@ -24517,7 +24506,6 @@ button.chip--project:focus-visible {
 @media (max-width: 768px) {
   .mes-creations-selection__grid {
     gap: 1rem;
-    padding-bottom: 6px;
   }
   .mes-creations-selection__grid > * {
     -webkit-flex: 0 0 calc((100% - 1rem) / 2);
