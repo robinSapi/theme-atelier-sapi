@@ -338,7 +338,7 @@ function sapi_maison_enqueue_assets() {
         'bureau'   => ['ampoule_degagee', 'semi_degagee'],
         'salon'    => ['ampoule_entouree', 'semi_degagee'],
         'chambre'  => ['ampoule_entouree', 'semi_degagee'],
-        'entree'   => null,
+        'entree'   => ['ampoule_entouree', 'semi_degagee'], // Round 5 — aligné salon/chambre
         'escalier' => null,
       ],
       'ampoule_skip_when_grande' => ['cuisine', 'bureau'],
@@ -4885,9 +4885,13 @@ function sapi_guide_get_ampoule_filter($piece, $taille = '') {
       return ['ampoule_degagee', 'semi_degagee'];
     case 'salon':
     case 'chambre':
+    case 'entree':
+      // Round 5 — entrée bénéficie du même filtre que salon/chambre :
+      // ampoule entourée privilégiée (cf. guide-prompt-savoir.txt qui
+      // recommande l'ampoule entourée pour salon/chambre/entrée/couloir).
       return ['ampoule_entouree', 'semi_degagee'];
     default:
-      return null; // entrée/couloir: all types OK
+      return null; // escalier : tous types OK
   }
 }
 
