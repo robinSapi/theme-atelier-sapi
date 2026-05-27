@@ -23168,7 +23168,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 
 .conseiller-card--mon-projet {
   position: relative; /* F2a-sexies : pour positionner .conseiller-mon-projet__edit */
-  padding: 40px 36px 38px;
+  padding: 26px;
   text-align: center;
   min-height: 280px;
   display: -webkit-flex;
@@ -24739,7 +24739,6 @@ button.chip--project:focus-visible {
   -webkit-justify-content: center;
   justify-content: center;
   gap: 18px;
-  margin-top: 18px;
 }
 .mes-creations-selection__nav-arrow {
   display: -webkit-inline-flex;
