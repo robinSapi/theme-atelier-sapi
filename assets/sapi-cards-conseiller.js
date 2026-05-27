@@ -542,21 +542,30 @@
   }
 
   /**
-   * Révèle les éléments dynamiques de la card "Ton projet" (slot grid +
-   * chip-question) après la fin du typewriter pour une apparition
-   * synchronisée. Le slot a en plus une cascade stagger via
-   * transition-delay inline (proposition #5).
+   * Chorégraphie 3 phases après le typewriter :
+   * - Phase B (immédiat) : chip-question expand + fade-in → card grandit
+   * - Phase C (+600ms) : slot grid expand + cascade des cards → card grandit
+   *
+   * Le séquencement crée un rythme "card s'agrandit pour accueillir chaque
+   * élément l'un après l'autre" plutôt qu'une apparition simultanée.
    */
   function revealSelectionGrid() {
-    // requestAnimationFrame pour que la classe soit appliquée APRÈS que
-    // les transition-delay inline soient lus par le browser (sinon les
-    // cards apparaissent toutes en même temps).
-    requestAnimationFrame(function () {
+    // Phase B — chip-question : double rAF pour que le browser lise les
+    // valeurs CSS avant la transition.
+    if (els.inlineQuestion) {
       requestAnimationFrame(function () {
-        if (els.selectionGrid) els.selectionGrid.classList.add('is-revealed');
-        if (els.inlineQuestion) els.inlineQuestion.classList.add('is-revealed');
+        requestAnimationFrame(function () {
+          els.inlineQuestion.classList.add('is-revealed');
+        });
       });
-    });
+    }
+    // Phase C — slot grid : delay 600ms après le début de la phase B
+    // pour que la question apparaisse d'abord, puis les cards.
+    if (els.selectionGrid) {
+      setTimeout(function () {
+        els.selectionGrid.classList.add('is-revealed');
+      }, 600);
+    }
   }
 
   /* ─────────────────────────────────────────────

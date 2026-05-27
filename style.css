@@ -23061,16 +23061,59 @@ body.woocommerce-cart div.woocommerce-wrapper {
   transform: scale(0.985);
 }
 
-/* Slot grid (proposition #3 + #5) : cards fade-in en cascade après le
-   typewriter. Par défaut opacity 0 + translateY 8px ; quand le slot
-   reçoit la classe .is-revealed, les cards s'affichent en cascade
-   (transition-delay calculé inline par JS pour chaque enfant). */
+/* Chorégraphie 3 phases (propositions #1 + #3 + #5) :
+   - Phase A : card englobante compacte = badge + typewriter en cours
+   - Phase B : chip-question expand (max-height 0 → valeur) + fade-in
+     → la card grandit pour faire de la place
+   - Phase C : slot grid expand (max-height 0 → valeur) + cascade cards
+     → la card grandit encore
+   Séquencement temporel piloté par JS (revealSelectionGrid).
+*/
+
+/* Phase B — Chip-question collapsed → expanded */
+.conseiller-mon-projet__inline-question:not([hidden]) {
+  opacity: 0;
+  max-height: 0;
+  margin-top: 0;
+  overflow: hidden;
+  -webkit-transform: translateY(8px);
+  transform: translateY(8px);
+  /* Durées : max-height + margin pilotent l'expansion physique de la card,
+     opacity + translate pilotent l'apparition du contenu. */
+  -webkit-transition: opacity 0.5s ease 0.1s, max-height 0.55s cubic-bezier(0.4, 0, 0.2, 1), margin-top 0.55s cubic-bezier(0.4, 0, 0.2, 1), -webkit-transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
+  transition: opacity 0.5s ease 0.1s, max-height 0.55s cubic-bezier(0.4, 0, 0.2, 1), margin-top 0.55s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
+}
+.conseiller-mon-projet__inline-question.is-revealed {
+  opacity: 1;
+  max-height: 320px;
+  margin-top: 18px;
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
+}
+
+/* Phase C — Slot grid collapsed → expanded.
+   On utilise max-height (overflow-y hidden) pour faire grandir la card
+   physiquement. Le slider horizontal (overflow-x: auto) reste fonctionnel. */
+.mes-creations-selection__grid {
+  max-height: 0;
+  margin-top: 0;
+  overflow-y: hidden;
+  -webkit-transition: max-height 0.65s cubic-bezier(0.4, 0, 0.2, 1), margin-top 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: max-height 0.65s cubic-bezier(0.4, 0, 0.2, 1), margin-top 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mes-creations-selection__grid.is-revealed {
+  max-height: 600px; /* assez large pour les cards produit (~330px hauteur) + padding */
+  margin-top: 28px;
+}
+
+/* Cascade des cards à l'intérieur du slot — transition-delay inline par JS.
+   Le fade-in commence après que le slot ait fini son max-height expand. */
 .mes-creations-selection__grid > * {
   opacity: 0;
-  -webkit-transform: translateY(10px);
-  transform: translateY(10px);
-  -webkit-transition: opacity 0.45s ease, -webkit-transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-  transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-transform: translateY(12px);
+  transform: translateY(12px);
+  -webkit-transition: opacity 0.55s ease, -webkit-transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .mes-creations-selection__grid.is-revealed > * {
   opacity: 1;
@@ -23078,28 +23121,18 @@ body.woocommerce-cart div.woocommerce-wrapper {
   transform: translateY(0);
 }
 
-/* Chip-question : même apparition après typewriter, sync avec le slot grid */
-.conseiller-mon-projet__inline-question:not([hidden]) {
-  opacity: 0;
-  -webkit-transform: translateY(8px);
-  transform: translateY(8px);
-  -webkit-transition: opacity 0.4s ease, -webkit-transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.conseiller-mon-projet__inline-question.is-revealed {
-  opacity: 1;
-  -webkit-transform: translateY(0);
-  transform: translateY(0);
-}
-
-/* Respect prefers-reduced-motion : pas de stagger/translate */
+/* Respect prefers-reduced-motion : pas d'animations max-height/transform
+   ni stagger, juste opacity courte */
 @media (prefers-reduced-motion: reduce) {
-  .mes-creations-selection__grid > *,
-  .conseiller-mon-projet__inline-question:not([hidden]) {
+  .conseiller-mon-projet__inline-question:not([hidden]),
+  .mes-creations-selection__grid,
+  .mes-creations-selection__grid > * {
+    max-height: none !important;
     -webkit-transform: none !important;
     transform: none !important;
     -webkit-transition: opacity 0.2s ease !important;
     transition: opacity 0.2s ease !important;
+    transition-delay: 0s !important;
   }
 }
 
