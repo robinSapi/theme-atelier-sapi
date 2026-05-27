@@ -23747,8 +23747,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
   background: #fff;
   border: 1px solid var(--color-line);
   border-radius: 12px;
-  padding: 14px 8px 11px;
-  min-height: 92px;
+  padding: 18px 12px 15px;
+  min-height: 116px;
   cursor: pointer;
   -webkit-transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
@@ -23773,11 +23773,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
   border-color: var(--color-wood);
 }
 .choice__icon {
-  width: 36px;
-  height: 36px;
-  margin: 0 auto 6px;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 8px;
   background: var(--color-warm);
-  border-radius: 10px;
+  border-radius: 12px;
   display: -webkit-flex;
   display: flex;
   -webkit-align-items: center;
@@ -23786,7 +23786,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   justify-content: center;
   color: var(--color-wood);
 }
-.choice__icon svg { width: 20px; height: 20px; }
+.choice__icon svg { width: 24px; height: 24px; }
 .choice__label {
   display: block;
   font-size: 14px;
