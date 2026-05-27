@@ -773,11 +773,17 @@
       window.sapiProject.update(patch, lpatch);
     }
 
-    // 2. Dispatch sur document directement (le listener modale est sur
-    //    document.addEventListener) — pas besoin de bubbling, le chip
-    //    détaché ne porte plus.
+    // 2. Dispatch sur document avec confirmStep/Slug/Label : la modale
+    //    affichera d'abord la question répondue (pill selected visible)
+    //    puis auto-avancera vers la question suivante après un court délai.
+    //    Donne au visiteur un feedback visuel "ma réponse a bien été prise".
     document.dispatchEvent(new CustomEvent('sapi:open-modal', {
-      detail: { state: 's0' },
+      detail: {
+        state: 's0',
+        confirmStep: stepId,
+        confirmSlug: slug,
+        confirmLabel: label || slug,
+      },
     }));
   }
 

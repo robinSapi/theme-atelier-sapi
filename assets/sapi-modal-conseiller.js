@@ -1763,6 +1763,25 @@
       if (freetext) {
         setTimeout(function () { submitFromS0Text(freetext); }, 50);
       }
+      // Confirm-step : la card chip-question a déjà enregistré la réponse,
+      // on ouvre la modale sur la question répondue (pill selected via
+      // state.answers hydraté), puis on auto-avance après 700ms vers la
+      // suivante. Feedback visuel "ma réponse a bien été prise".
+      var confirmStep  = e.detail && e.detail.confirmStep;
+      var confirmSlug  = e.detail && e.detail.confirmSlug;
+      var confirmLabel = e.detail && e.detail.confirmLabel;
+      if (confirmStep && confirmSlug) {
+        requestAnimationFrame(function () {
+          state.currentQuestion = confirmStep;
+          showQuestion(confirmStep);
+          if (state.screen !== 's1') showScreen('s1');
+          // Auto-avance : reuse answerCurrentQuestion qui gère history +
+          // sapiProject sync + transition vers la prochaine question.
+          setTimeout(function () {
+            answerCurrentQuestion(confirmSlug, confirmLabel);
+          }, 700);
+        });
+      }
     });
 
     // ESC pour fermer — désactivé pendant l'animation morph (state.transition)
