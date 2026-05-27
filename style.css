@@ -23135,13 +23135,30 @@ body.woocommerce-cart div.woocommerce-wrapper {
   transform: translateY(0);
 }
 
+/* Lien "Préciser ou modifier mon projet" (visible quand projet complet,
+   à la place de la chip-question) : même fade-in que la chip-question
+   pour cohérence visuelle (apparaît en phase B). */
+.mes-creations-selection__edit:not([hidden]) {
+  opacity: 0;
+  -webkit-transform: translateY(6px);
+  transform: translateY(6px);
+  -webkit-transition: opacity 0.4s ease, -webkit-transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
+}
+.mes-creations-selection__edit.is-revealed {
+  opacity: 1;
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
+}
+
 /* Respect prefers-reduced-motion : pas d'animations max-height/transform
    ni stagger, juste opacity courte */
 @media (prefers-reduced-motion: reduce) {
   .conseiller-mon-projet__inline-question:not([hidden]),
   .mes-creations-selection__grid,
   .mes-creations-selection__grid > *,
-  .mes-creations-selection__nav:not([hidden]) {
+  .mes-creations-selection__nav:not([hidden]),
+  .mes-creations-selection__edit:not([hidden]) {
     max-height: none !important;
     -webkit-transform: none !important;
     transform: none !important;

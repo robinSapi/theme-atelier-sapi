@@ -463,14 +463,21 @@
         els.inlineQuestion.classList.remove('is-revealed');
         els.inlineQuestion.hidden = false;
       }
-      if (els.editLink) els.editLink.hidden = true;
+      if (els.editLink) {
+        els.editLink.hidden = true;
+        els.editLink.classList.remove('is-revealed');
+      }
     } else {
       if (els.inlineQuestion) {
         els.inlineQuestion.innerHTML = '';
         els.inlineQuestion.hidden = true;
         els.inlineQuestion.classList.remove('is-revealed');
       }
-      if (els.editLink) els.editLink.hidden = false;
+      if (els.editLink) {
+        // Reset état revealed pour relancer la fade-in en phase E
+        els.editLink.classList.remove('is-revealed');
+        els.editLink.hidden = false;
+      }
     }
   }
 
@@ -543,10 +550,14 @@
   }
 
   /**
-   * Chorégraphie 4 phases après le typewriter :
+   * Chorégraphie 5 phases après le typewriter :
    * - Phase B (immédiat) : chip-question expand + fade-in → card grandit
    * - Phase C (+600ms) : slot grid expand + cascade des cards → card grandit
    * - Phase D (+1200ms) : nav slider (flèches + dots) apparaît
+   * - Phase E (+1800ms) : lien "Préciser ou modifier mon projet" apparaît
+   *   (en dernier, action secondaire qui ne doit pas perturber la découverte
+   *   du contenu principal — uniquement visible quand projet complet, donc
+   *   à la place de la chip-question)
    *
    * Le séquencement crée un rythme "card s'agrandit pour accueillir chaque
    * élément l'un après l'autre" plutôt qu'une apparition simultanée.
@@ -574,6 +585,13 @@
       setTimeout(function () {
         els.selectionNav.classList.add('is-revealed');
       }, 1200);
+    }
+    // Phase E — lien Modifier : 600ms après phase D (= +1800ms total),
+    // action secondaire qui apparaît en dernier.
+    if (els.editLink) {
+      setTimeout(function () {
+        els.editLink.classList.add('is-revealed');
+      }, 1800);
     }
   }
 
