@@ -23921,6 +23921,22 @@ body.woocommerce-cart div.woocommerce-wrapper {
   line-height: 1.3;
 }
 
+/* État sélectionné — appliqué par JS quand state.answers[stepId] === choice.slug.
+   Utilisé notamment pour le feedback "ta réponse est prise" quand on ouvre
+   la modale sur la question répondue depuis la chip-question de la card. */
+.choice.is-selected {
+  border-color: var(--color-wood-dark);
+  background: var(--color-warm);
+  box-shadow: var(--shadow-card-hover);
+}
+.choice.is-selected .choice__icon {
+  background: var(--color-wood-dark);
+  color: #fff;
+}
+.choice.is-selected .choice__label {
+  color: var(--color-wood-dark);
+}
+
 /* Texte libre input */
 .text-input-wrap {
   position: relative;
