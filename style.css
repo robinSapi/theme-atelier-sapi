@@ -25037,6 +25037,24 @@ button.chip--project:focus-visible {
      des .product-card-cinetique. Le marker existe pour le sélecteur JS. */
 }
 
+/* Slot "Ma sélection" : forcer le nom des produits sur 1 ligne (avec
+   ellipsis si trop long) → toutes les cards ont la même hauteur de zone
+   "name" et donc le même bottom (DÉCOUVRIR aligné).
+   Scope au slot uniquement — la grille principale et les catégories
+   gardent le comportement multi-lignes natif. */
+.mes-creations-selection__grid .product-card-cinetique .product-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mes-creations-selection__grid .product-card-cinetique .product-firstname,
+.mes-creations-selection__grid .product-card-cinetique .product-restname {
+  /* Les 2 spans formattés (Montserrat upper + Square Peg) doivent
+     respecter le nowrap du parent : pas de display block. */
+  display: inline;
+  white-space: nowrap;
+}
+
 /* Card sur-mesure (Chantier 2) — cellule de grille spéciale en dernière
    position du slot. Markup mockup-15 ligne 419 (template cloné par JS).
    Format identique aux cards produit (aspect ratio + body), accent orange. */
