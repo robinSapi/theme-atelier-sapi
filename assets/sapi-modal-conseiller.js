@@ -502,7 +502,18 @@
       state.open = false;
       exitChatMode();
 
-      // 4. Refilter la grille
+      // Fix audit — Bug 2 : reprendre les notifications sapiProject (sinon
+      // le notify bufferisé de sapiProject.set() ligne 496 n'est jamais
+      // flushé puisque ce chemin ne passe pas par closeModal()) +
+      // finaliser le tracking V3 (sinon la session n'est pas terminée
+      // dans l'admin). Le resume déclenche un render() des cards qui va
+      // basculer Conseil → Ton projet + repopulate le slot.
+      SessionTracker.finalize();
+      if (window.sapiProject && typeof window.sapiProject.resumeNotifications === 'function') {
+        window.sapiProject.resumeNotifications();
+      }
+
+      // 4. Refilter la grille (idempotent — déjà déclenché par resume → render)
       if (typeof window.sapiShopRefilter === 'function') window.sapiShopRefilter();
 
       // 5. Le texte apparaît maintenant : retire .is-awaiting-advice +

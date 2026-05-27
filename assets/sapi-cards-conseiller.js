@@ -738,6 +738,13 @@
       }
     }
 
+    // Fix audit — Bug 1 : pauser AVANT update() pour éviter que le notify
+    // synchrone ne déclenche refilterGrid en arrière-plan avant que la
+    // modale ait posé son propre pauseNotifications (race condition
+    // visible à travers l'overlay non encore opaque).
+    if (window.sapiProject && typeof window.sapiProject.pauseNotifications === 'function') {
+      window.sapiProject.pauseNotifications();
+    }
     // 1. Enregistre la réponse en PREMIER → sapiProject à jour.
     //    ⚠️ Effet de bord : le subscribe re-render renderInlineQuestion qui
     //    DÉTACHE le chip cliqué du DOM (innerHTML wipe). On ne peut donc
@@ -779,6 +786,14 @@
         e.preventDefault();
         var slug = roomCard.getAttribute('data-piece');
         var label = roomCard.getAttribute('data-piece-label') || slug;
+        // Fix audit — Bug 1 : pauser AVANT update() pour éviter que le
+        // notify synchrone de update() ne déclenche refilterGrid() sur
+        // la grille en arrière-plan (visible à travers l'overlay non
+        // encore opaque). openModal pose aussi pauseNotifications de
+        // manière idempotente.
+        if (window.sapiProject && typeof window.sapiProject.pauseNotifications === 'function') {
+          window.sapiProject.pauseNotifications();
+        }
         if (window.sapiProject && typeof window.sapiProject.update === 'function') {
           window.sapiProject.update({ piece: slug }, { piece: label });
         }
