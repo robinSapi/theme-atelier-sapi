@@ -23096,14 +23096,12 @@ body.woocommerce-cart div.woocommerce-wrapper {
    physiquement. Le slider horizontal (overflow-x: auto) reste fonctionnel. */
 .mes-creations-selection__grid {
   max-height: 0;
-  margin-top: 0;
   overflow-y: hidden;
-  -webkit-transition: max-height 0.65s cubic-bezier(0.4, 0, 0.2, 1), margin-top 0.65s cubic-bezier(0.4, 0, 0.2, 1);
-  transition: max-height 0.65s cubic-bezier(0.4, 0, 0.2, 1), margin-top 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-transition: max-height 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: max-height 0.65s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .mes-creations-selection__grid.is-revealed {
   max-height: 600px; /* assez large pour les cards produit (~330px hauteur) + padding */
-  margin-top: 28px;
 }
 
 /* Cascade des cards à l'intérieur du slot — transition-delay inline par JS.
@@ -23391,7 +23389,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   width: max-content;
   max-width: 100%;
   margin: 0 auto;
-  padding: 20px;
+  padding: 24px;
 }
 .conseiller-mon-projet__inline-question .choice {
   display: -webkit-flex;
@@ -24686,15 +24684,14 @@ button.chip--project:focus-visible {
   -webkit-flex-wrap: nowrap;
   flex-wrap: nowrap;
   gap: 2rem;
-  margin-top: 28px;
   width: 100%;
-  padding: 18px 20px;
+  padding: 24px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
-  /* scroll-padding-inline pour que les cards snappent à 20px du bord
+  /* scroll-padding-inline pour que les cards snappent à 24px du bord
      (sinon elles collent au bord en scroll-snap-align: start). */
-  scroll-padding-inline: 20px;
+  scroll-padding-inline: 24px;
   /* Scrollbar masquée — la nav (flèches + dots) prend le relais */
   scrollbar-width: none;
   -ms-overflow-style: none;
