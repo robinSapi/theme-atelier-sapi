@@ -494,15 +494,9 @@
       els.selectionGrid.appendChild(surmesureClone);
     }
 
-    // Badge "Ton projet · N luminaire(s)" — N = produits matchés, hors card sur-mesure
+    // Badge "Ton projet" — texte fixe (count retiré sur demande Robin)
     if (els.badgeText) {
-      if (count === 0) {
-        els.badgeText.textContent = 'Ton projet';
-      } else if (count === 1) {
-        els.badgeText.textContent = 'Ton projet · 1 luminaire';
-      } else {
-        els.badgeText.textContent = 'Ton projet · ' + count + ' luminaires';
-      }
+      els.badgeText.textContent = 'Ton projet';
     }
 
     // Navigation slider (flèches + dots) selon nb de cards total
