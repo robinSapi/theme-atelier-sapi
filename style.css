@@ -23383,6 +23383,13 @@ body.woocommerce-cart div.woocommerce-wrapper {
    Le grid .choices garde la responsivité native via .choices--2col /
    .choices--4col (set par le JS renderInlineQuestion selon nb de choix). */
 .conseiller-mon-projet__inline-question .choices {
+  /* width: max-content fait rétracter le container à la largeur de ses
+     colonnes 1fr = N × le plus large bouton. Le groupe ne prend que la
+     place strictement nécessaire et se centre via margin auto. Si jamais
+     ça dépasse le parent, max-width: 100% clamp et 1fr revient en relatif. */
+  width: -webkit-max-content;
+  width: -moz-max-content;
+  width: max-content;
   max-width: 100%;
   margin: 0 auto;
   padding: 24px;
