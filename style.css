@@ -23044,6 +23044,49 @@ body.woocommerce-cart div.woocommerce-wrapper {
   display: none;
 }
 
+/* Fade-in à l'entrée des cards Conseil / Mon projet (proposition #4) —
+   classe .is-entering posée par JS au moment du toggle hidden → false,
+   puis retirée à la frame suivante → transition opacity 0→1 + scale
+   subtile pour signaler l'apparition. */
+.conseiller-card--conseil,
+.conseiller-card--mon-projet {
+  opacity: 1;
+  -webkit-transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+  transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+}
+.conseiller-card--conseil.is-entering,
+.conseiller-card--mon-projet.is-entering {
+  opacity: 0;
+  -webkit-transform: scale(0.985);
+  transform: scale(0.985);
+}
+
+/* Slot grid (proposition #3 + #5) : cards fade-in en cascade après le
+   typewriter. Par défaut opacity 0 + translateY 8px ; quand le slot
+   reçoit la classe .is-revealed, les cards s'affichent en cascade
+   (transition-delay calculé inline par JS pour chaque enfant). */
+.mes-creations-selection__grid > * {
+  opacity: 0;
+  -webkit-transform: translateY(10px);
+  transform: translateY(10px);
+  -webkit-transition: opacity 0.45s ease, -webkit-transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mes-creations-selection__grid.is-revealed > * {
+  opacity: 1;
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
+}
+/* Respect prefers-reduced-motion : pas de stagger/translate */
+@media (prefers-reduced-motion: reduce) {
+  .mes-creations-selection__grid > * {
+    -webkit-transform: none !important;
+    transform: none !important;
+    -webkit-transition: opacity 0.2s ease !important;
+    transition: opacity 0.2s ease !important;
+  }
+}
+
 .conseiller-card--mon-projet {
   position: relative; /* F2a-sexies : pour positionner .conseiller-mon-projet__edit */
   padding: 40px 36px 38px;

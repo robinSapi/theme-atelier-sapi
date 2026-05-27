@@ -348,6 +348,9 @@
     signatureTimer = setTimeout(function () {
       signatureTimer = null;
       if (phraseEl) phraseEl.classList.add('is-typing-done');
+      // Proposition #3 : révéler les cards du slot après le typewriter.
+      // La cascade stagger (proposition #5) prend ensuite le relais.
+      if (typeof revealSelectionGrid === 'function') revealSelectionGrid();
     }, totalMs);
   }
 
@@ -398,10 +401,26 @@
     els.inlineQuestion.innerHTML = html;
   }
 
+  // Petit helper crossfade : ajoute .is-entering au moment où la card
+  // passe de hidden à visible, puis l'enlève à la frame suivante → le
+  // transition CSS opacity + scale joue automatiquement.
+  function revealCard(card) {
+    if (!card) return;
+    var wasHidden = card.hidden;
+    card.hidden = false;
+    if (!wasHidden) return; // déjà visible : pas de re-fade
+    card.classList.add('is-entering');
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        card.classList.remove('is-entering');
+      });
+    });
+  }
+
   function renderMonProjet() {
     if (!els.cardMonProjet || !els.phraseContent) return;
     els.cardConseil && (els.cardConseil.hidden = true);
-    els.cardMonProjet.hidden = false;
+    revealCard(els.cardMonProjet);
 
     // F2a-quater : pendant l'animation morph + l'attente IA, on injecte 3
     // ronds qui pulsent en cascade. Pendant ce temps : pas de chip-question,
@@ -425,6 +444,10 @@
     if (els.phraseContent.dataset.lastText !== newText) {
       els.phraseContent.dataset.lastText = newText;
       typewriterEffect(els.phraseContent, els.phrase, newText, 16);
+    } else {
+      // Texte inchangé → on révèle quand même le slot (sinon les clones
+      // restent opacity 0 après populateSelectionGrid).
+      revealSelectionGrid();
     }
 
     // F2a-sexies (restauré) : bascule entre chip-question (parcours
@@ -449,7 +472,7 @@
   function renderConseil() {
     if (!els.cardConseil) return;
     els.cardMonProjet && (els.cardMonProjet.hidden = true);
-    els.cardConseil.hidden = false;
+    revealCard(els.cardConseil);
   }
 
   function render() {
@@ -477,11 +500,18 @@
     var sourceGrid = document.getElementById('sapi-product-grid');
     if (!sourceGrid) return;
 
+    // Reset état revealed avant repopulation (cards opacity 0, prêtes à
+    // re-fade-in après le typewriter via revealSelectionGrid()).
+    els.selectionGrid.classList.remove('is-revealed');
+
     var matches = sourceGrid.querySelectorAll('.product-card-cinetique:not(.is-filtered-out)');
     var count = 0;
-    matches.forEach(function (card) {
+    var staggerStep = 60; // ms entre chaque card (cascade visuelle)
+    matches.forEach(function (card, idx) {
       var clone = card.cloneNode(true);
       clone.classList.add('is-selection-clone');
+      // Stagger transition-delay calculé par card pour cascade (proposition #5)
+      clone.style.transitionDelay = (idx * staggerStep) + 'ms';
       els.selectionGrid.appendChild(clone);
       count++;
     });
@@ -492,6 +522,9 @@
     if (els.surmesureTemplate && els.surmesureTemplate.content) {
       var surmesureClone = els.surmesureTemplate.content.cloneNode(true);
       els.selectionGrid.appendChild(surmesureClone);
+      // Délai du sur-mesure : juste après la dernière card produit
+      var lastChild = els.selectionGrid.lastElementChild;
+      if (lastChild) lastChild.style.transitionDelay = (count * staggerStep) + 'ms';
     }
 
     // Badge "Ton projet" — texte fixe (count retiré sur demande Robin)
@@ -501,6 +534,23 @@
 
     // Navigation slider (flèches + dots) selon nb de cards total
     buildSelectionNav();
+  }
+
+  /**
+   * Révèle les cards du slot grid (fade-in cascade). Appelé après que le
+   * typewriter de la phrase IA ait terminé pour synchroniser visuellement
+   * texte + sélection.
+   */
+  function revealSelectionGrid() {
+    if (!els.selectionGrid) return;
+    // requestAnimationFrame pour que la classe soit appliquée APRÈS que
+    // les transition-delay inline soient lus par le browser (sinon les
+    // cards apparaissent toutes en même temps).
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        els.selectionGrid.classList.add('is-revealed');
+      });
+    });
   }
 
   /* ─────────────────────────────────────────────

@@ -289,10 +289,33 @@
     };
   }
 
+  // Notifications pause/resume : appelé par la modale au open/close pour
+  // éviter que les cards en arrière-plan refilter à chaque réponse cliquée
+  // (sinon flashs visibles à travers l'overlay). À resumeNotifications(),
+  // on flush une seule notification finale si des update ont eu lieu.
+  var notifyPaused = false;
+  var pendingNotify = false;
+
   function notify() {
+    if (notifyPaused) {
+      pendingNotify = true;
+      return;
+    }
     var snapshot = get();
     for (var i = 0; i < listeners.length; i++) {
       try { listeners[i](snapshot); } catch (e) { /* swallow */ }
+    }
+  }
+
+  function pauseNotifications() {
+    notifyPaused = true;
+  }
+
+  function resumeNotifications() {
+    notifyPaused = false;
+    if (pendingNotify) {
+      pendingNotify = false;
+      notify();
     }
   }
 
@@ -420,6 +443,8 @@
     setAdviceText: setAdviceText,
     setContactState: setContactState,
     subscribe: subscribe,
+    pauseNotifications: pauseNotifications,
+    resumeNotifications: resumeNotifications,
     STORAGE_KEY: STORAGE_KEY,
     // Round 2 — 3.2 : helpers visibility centralisés. Les consommateurs JS
     // (modal, cards) appellent ces helpers au lieu de dupliquer la logique.

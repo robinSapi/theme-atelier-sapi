@@ -1655,6 +1655,14 @@
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
 
+    // Geler les notifications sapiProject pendant la modale : évite que
+    // les cards en arrière-plan (Conseil/Mon projet sur /mes-creations/)
+    // refilter à chaque réponse cliquée (sinon flashs visibles à travers
+    // l'overlay). À closeModal(), un flush unique met tout à jour d'un coup.
+    if (window.sapiProject && typeof window.sapiProject.pauseNotifications === 'function') {
+      window.sapiProject.pauseNotifications();
+    }
+
     // Tracking V3 — INSERT row (entry_point + entry_url). Doit être appelé
     // AVANT showScreen() pour que le snapshot suivant soit un UPDATE.
     SessionTracker.start();
@@ -1721,6 +1729,11 @@
     }
     // Tracking V3 — snapshot final via sendBeacon (résilient au unload).
     SessionTracker.finalize();
+    // Reprendre les notifications sapiProject + flush l'éventuel update
+    // accumulé pendant la modale (un seul refresh des cards à la fermeture).
+    if (window.sapiProject && typeof window.sapiProject.resumeNotifications === 'function') {
+      window.sapiProject.resumeNotifications();
+    }
   }
 
   /* ─────────────────────────────────────────────
