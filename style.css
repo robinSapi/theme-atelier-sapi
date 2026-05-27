@@ -24685,7 +24685,8 @@ button.chip--project:focus-visible {
   -webkit-transition: color 0.2s ease;
   transition: color 0.2s ease;
 }
-.mes-creations-selection__edit:hover {
+.mes-creations-selection__edit:hover,
+.mes-creations-selection__card:hover .mes-creations-selection__edit {
   color: var(--color-orange);
 }
 .mes-creations-selection__edit svg {
