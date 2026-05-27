@@ -176,7 +176,7 @@ $conseil_room_icons = sapi_guide_get_icons();
     <div class="conseiller-card__inner">
       <span class="conseiller-badge conseiller-badge--default" data-mon-projet-badge>
         <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-        <span data-mon-projet-badge-text><?php esc_html_e('Mon projet', 'theme-sapi-maison'); ?></span>
+        <span data-mon-projet-badge-text><?php esc_html_e('Ton projet', 'theme-sapi-maison'); ?></span>
       </span>
       <p class="conseiller-mon-projet__text" data-mon-projet-phrase>
         <span class="conseiller-mon-projet__text-content" data-mon-projet-phrase-content></span>

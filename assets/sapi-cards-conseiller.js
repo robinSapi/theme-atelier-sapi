@@ -494,14 +494,14 @@
       els.selectionGrid.appendChild(surmesureClone);
     }
 
-    // Badge "Mon projet · N luminaire(s)" — N = produits matchés, hors card sur-mesure
+    // Badge "Ton projet · N luminaire(s)" — N = produits matchés, hors card sur-mesure
     if (els.badgeText) {
       if (count === 0) {
-        els.badgeText.textContent = 'Mon projet';
+        els.badgeText.textContent = 'Ton projet';
       } else if (count === 1) {
-        els.badgeText.textContent = 'Mon projet · 1 luminaire';
+        els.badgeText.textContent = 'Ton projet · 1 luminaire';
       } else {
-        els.badgeText.textContent = 'Mon projet · ' + count + ' luminaires';
+        els.badgeText.textContent = 'Ton projet · ' + count + ' luminaires';
       }
     }
 

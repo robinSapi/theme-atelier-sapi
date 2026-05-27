@@ -1024,7 +1024,7 @@
 
     if (mode === 's0-partiel') {
       nextStepId = getNextUnansweredVisibleStep() || 'piece';
-      badgeText = 'Mon projet';
+      badgeText = 'Ton projet';
       placeholderText = 'Précise ton projet en quelques mots…';
       resetVisible = true;
     } else {
