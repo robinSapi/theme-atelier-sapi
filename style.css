@@ -23430,13 +23430,21 @@ body.woocommerce-cart div.woocommerce-wrapper {
 
 /* Mobile (≤768px) : forcer grid 2 colonnes (au lieu de 4) pour que les
    boutons aient assez de largeur. 2×2 = 4 choix sur 2 lignes, plus compact
-   verticalement que 1 par ligne mais lisible. Override .choices--4col. */
+   verticalement que 1 par ligne mais lisible. Override .choices--4col.
+   Width 100% (au lieu de max-content desktop) clampé à 360px : force le
+   container à respecter la largeur du parent → cols 1fr ajustées, le texte
+   wrappe à l'intérieur sans déborder. */
 @media (max-width: 768px) {
   .conseiller-mon-projet__inline-question .choices {
+    width: 100%;
+    max-width: 360px;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
     padding: 16px;
-    max-width: 360px;
+  }
+  /* Label réduit pour tenir mieux dans la largeur réduite des boutons */
+  .conseiller-mon-projet__inline-question .choice__label {
+    font-size: 12px;
   }
 }
 .inline-question__answers {
