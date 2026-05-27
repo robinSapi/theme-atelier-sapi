@@ -23441,6 +23441,26 @@ body.woocommerce-cart div.woocommerce-wrapper {
   color: var(--color-wood);
   opacity: 0.5;
 }
+
+/* Mobile (≤768px) : stack vertical des boutons (1 par ligne, pleine largeur).
+   Permet au texte (label + · dim) de tenir confortablement quelle que soit
+   sa longueur, sans risque de clip ou de wrap chaotique. */
+@media (max-width: 768px) {
+  .conseiller-mon-projet__inline-question .choices {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    width: 100%;
+    max-width: 360px;
+    gap: 8px;
+    padding: 16px;
+  }
+  .conseiller-mon-projet__inline-question .choice {
+    width: 100%;
+    white-space: normal;
+  }
+}
 .inline-question__answers {
   display: -webkit-flex;
   display: flex;
