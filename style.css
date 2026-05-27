@@ -23377,16 +23377,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 /* Override .choice DANS la chip-question : layout horizontal compact —
-   icône à gauche, label + dim sur la même ligne séparés par un point
-   médian. Hauteur minimale. Le modale garde son layout vertical natif. */
-/* Container .choices : largeur = N × le plus large bouton (au lieu de
-   prendre 100% de la card englobante). Grid 1fr × N + width max-content
-   → chaque colonne adopte la max-content du plus large bouton, le groupe
-   est centré et ne prend pas plus de place que nécessaire. */
+   icône à gauche du label (pas de dim affiché, retiré côté JS).
+   Le modale garde son layout vertical natif (.choice base CSS).
+   Le grid .choices garde la responsivité native via .choices--2col /
+   .choices--4col (set par le JS renderInlineQuestion selon nb de choix). */
 .conseiller-mon-projet__inline-question .choices {
-  width: -webkit-max-content;
-  width: -moz-max-content;
-  width: max-content;
   max-width: 100%;
   margin: 0 auto;
   padding: 24px;
@@ -23403,11 +23398,10 @@ body.woocommerce-cart div.woocommerce-wrapper {
   -webkit-flex-wrap: nowrap;
   flex-wrap: nowrap;
   gap: 10px;
-  padding: 11px 14px;
+  padding: 12px 14px;
   min-height: 0;
   min-width: 0;
   text-align: center;
-  white-space: nowrap;
 }
 /* Icône réduite (32×32 avec SVG 18px) pour libérer de la place au texte */
 .conseiller-mon-projet__inline-question .choice__icon {
@@ -23422,43 +23416,18 @@ body.woocommerce-cart div.woocommerce-wrapper {
   height: 18px;
 }
 .conseiller-mon-projet__inline-question .choice__label {
-  text-align: left;
-}
-/* Dim affiché en suffixe inline avec séparateur "·". Texte normal,
-   font plus petite, couleur wood-mid pour hiérarchie visuelle. */
-.conseiller-mon-projet__inline-question .choice__dim {
-  font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: none;
-  letter-spacing: 0;
-  color: var(--color-wood-mid);
-  text-align: left;
-}
-.conseiller-mon-projet__inline-question .choice__dim::before {
-  content: "·";
-  margin-right: 6px;
-  color: var(--color-wood);
-  opacity: 0.5;
+  text-align: center;
 }
 
-/* Mobile (≤768px) : stack vertical des boutons (1 par ligne, pleine largeur).
-   Permet au texte (label + · dim) de tenir confortablement quelle que soit
-   sa longueur, sans risque de clip ou de wrap chaotique. */
+/* Mobile (≤768px) : forcer grid 2 colonnes (au lieu de 4) pour que les
+   boutons aient assez de largeur. 2×2 = 4 choix sur 2 lignes, plus compact
+   verticalement que 1 par ligne mais lisible. Override .choices--4col. */
 @media (max-width: 768px) {
   .conseiller-mon-projet__inline-question .choices {
-    display: -webkit-flex;
-    display: flex;
-    -webkit-flex-direction: column;
-    flex-direction: column;
-    width: 100%;
-    max-width: 360px;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
     padding: 16px;
-  }
-  .conseiller-mon-projet__inline-question .choice {
-    width: 100%;
-    white-space: normal;
+    max-width: 360px;
   }
 }
 .inline-question__answers {

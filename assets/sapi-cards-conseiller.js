@@ -394,7 +394,9 @@
         ' data-label="' + escHtml(c.label) + '">';
       html += '<span class="choice__icon">' + (ICONS[c.icon] || '') + '</span>';
       html += '<span class="choice__label">' + escHtml(c.label) + '</span>';
-      if (c.dim) html += '<span class="choice__dim">' + escHtml(c.dim) + '</span>';
+      // Round 6 — dim retiré du rendu chip-question (le label seul tient
+      // mieux dans les boutons compacts horizontaux, surtout sur mobile).
+      // Le dim reste rendu par le modale via showQuestion (layout vertical).
       html += '</button>';
     }
     html += '</div>';
