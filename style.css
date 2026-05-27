@@ -25046,6 +25046,23 @@ button.chip--project:focus-visible {
      des .product-card-cinetique. Le marker existe pour le sélecteur JS. */
 }
 
+/* Slot "Ma sélection" : homogénéiser les cards produit.
+   - Titre forcé à occuper 2 lignes (ligne-clamp 2 + min-height) pour que
+     les noms courts comme longs aient la même hauteur réservée → toutes
+     les cards alignées sur la même hauteur de body
+   - Prix centré horizontalement */
+.mes-creations-selection__grid .product-card-cinetique .product-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 3.4em;
+}
+.mes-creations-selection__grid .product-card-cinetique .product-price {
+  -webkit-justify-content: center;
+  justify-content: center;
+}
+
 
 /* Card sur-mesure (Chantier 2) — cellule de grille spéciale en dernière
    position du slot. Markup mockup-15 ligne 419 (template cloné par JS).
