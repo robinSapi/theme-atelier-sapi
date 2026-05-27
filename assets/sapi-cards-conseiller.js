@@ -737,18 +737,24 @@
         return;
       }
 
-      // F2a-sexies-bis : clic ailleurs sur la card "Mon projet" → ouvre s0
-      // (determineInitialState → s0-partiel → prochaine question non répondue).
-      // Les éléments interactifs internes (chip, lien Modifier) sont déjà
-      // captés ci-dessus, donc on n'arrive ici qu'au clic sur la card elle-même.
-      // Refonte /mes-creations/ : on EXCLUT la variante englobante (la card
-      // contient maintenant la grille des matches — cliquer dessus ne doit
-      // PAS ouvrir la modale, c'est le lien "Préciser ou modifier" qui le fait).
+      // F2a-sexies-bis : clic ailleurs sur la card "Mon projet" → ouvre la
+      // modale. Les éléments interactifs internes (chip-question, lien
+      // Modifier, CTAs data-action) sont déjà captés ci-dessus, donc on
+      // n'arrive ici qu'au clic sur la card elle-même.
+      // Refonte /mes-creations/ : pour la variante englobante, on exclut
+      // les zones interactives internes (cards produit, card sur-mesure,
+      // slider nav) pour ne pas déclencher la modale en double action.
       var monProjetCard = e.target.closest('.conseiller-card--mon-projet');
-      if (monProjetCard && !monProjetCard.classList.contains('mes-creations-selection__card')) {
+      if (monProjetCard) {
+        var isEnglobante = monProjetCard.classList.contains('mes-creations-selection__card');
+        if (isEnglobante && e.target.closest('.product-card-cinetique, .mes-creations-surmesure-card, .mes-creations-selection__nav')) {
+          return; // laisser l'élément interne gérer son propre clic
+        }
+        // État initial : s3 si projet complet (récap), s0 sinon
+        var hasProj = window.sapiProject && window.sapiProject.hasProject();
         monProjetCard.dispatchEvent(new CustomEvent('sapi:open-modal', {
           bubbles: true,
-          detail: { state: 's0' },
+          detail: { state: hasProj ? 's3' : 's0' },
         }));
         return;
       }

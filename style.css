@@ -24513,19 +24513,20 @@ button.chip--project:focus-visible {
   margin-top: 32px;
 }
 /* Override .conseiller-card--mon-projet héritée :
-   - pas de cursor: pointer (la card contient la grille, click sur card
-     ≠ ouverture modale ; c'est le lien Modifier qui ouvre)
-   - pas de hover transform (déplacement perturbant avec la grille dedans)
    - min-height auto (laisser la card grandir naturellement avec la grille)
-   - text-align reset interne pour les cards de la grille */
+   - cursor pointer : la card entière est cliquable (ouvre la modale en
+     s3 si projet complet, s0 sinon). Les zones interactives internes
+     (cards produit, sur-mesure, slider nav, lien Modifier, chip-question)
+     sont exclues côté JS pour ne pas déclencher la modale en double action.
+   - Hover : pas de translateY pour éviter le déplacement de toute la card
+     avec son contenu. Box-shadow subtile pour signaler le clic possible. */
 .mes-creations-selection__card {
-  cursor: default;
   min-height: 0;
 }
 .mes-creations-selection__card:hover {
   -webkit-transform: none;
   transform: none;
-  box-shadow: none;
+  box-shadow: 0 4px 16px rgba(147, 125, 104, 0.12);
 }
 /* Slot grille à l'intérieur de la card englobante. Mêmes specs que la
    grille produit du catalogue (.shop-products .product-grid) :
