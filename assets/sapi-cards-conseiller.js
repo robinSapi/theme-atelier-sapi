@@ -508,6 +508,7 @@
     // Reset état revealed avant repopulation (cards opacity 0, prêtes à
     // re-fade-in après le typewriter via revealSelectionGrid()).
     els.selectionGrid.classList.remove('is-revealed');
+    if (els.selectionNav) els.selectionNav.classList.remove('is-revealed');
 
     var matches = sourceGrid.querySelectorAll('.product-card-cinetique:not(.is-filtered-out)');
     var count = 0;
@@ -542,9 +543,10 @@
   }
 
   /**
-   * Chorégraphie 3 phases après le typewriter :
+   * Chorégraphie 4 phases après le typewriter :
    * - Phase B (immédiat) : chip-question expand + fade-in → card grandit
    * - Phase C (+600ms) : slot grid expand + cascade des cards → card grandit
+   * - Phase D (+1200ms) : nav slider (flèches + dots) apparaît
    *
    * Le séquencement crée un rythme "card s'agrandit pour accueillir chaque
    * élément l'un après l'autre" plutôt qu'une apparition simultanée.
@@ -565,6 +567,13 @@
       setTimeout(function () {
         els.selectionGrid.classList.add('is-revealed');
       }, 600);
+    }
+    // Phase D — nav slider : 600ms après phase C (= +1200ms total) pour
+    // arriver après que la cascade des cards soit visible.
+    if (els.selectionNav) {
+      setTimeout(function () {
+        els.selectionNav.classList.add('is-revealed');
+      }, 1200);
     }
   }
 

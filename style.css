@@ -23121,12 +23121,27 @@ body.woocommerce-cart div.woocommerce-wrapper {
   transform: translateY(0);
 }
 
+/* Phase D — Nav slider (flèches + dots) apparaît après les cards. */
+.mes-creations-selection__nav:not([hidden]) {
+  opacity: 0;
+  -webkit-transform: translateY(6px);
+  transform: translateY(6px);
+  -webkit-transition: opacity 0.4s ease, -webkit-transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mes-creations-selection__nav.is-revealed {
+  opacity: 1;
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
+}
+
 /* Respect prefers-reduced-motion : pas d'animations max-height/transform
    ni stagger, juste opacity courte */
 @media (prefers-reduced-motion: reduce) {
   .conseiller-mon-projet__inline-question:not([hidden]),
   .mes-creations-selection__grid,
-  .mes-creations-selection__grid > * {
+  .mes-creations-selection__grid > *,
+  .mes-creations-selection__nav:not([hidden]) {
     max-height: none !important;
     -webkit-transform: none !important;
     transform: none !important;
