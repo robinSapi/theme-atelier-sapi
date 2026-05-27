@@ -25037,21 +25037,13 @@ button.chip--project:focus-visible {
      des .product-card-cinetique. Le marker existe pour le sélecteur JS. */
 }
 
-/* Slot "Ma sélection" : forcer le nom des produits sur 1 ligne (avec
-   ellipsis si trop long) → toutes les cards ont la même hauteur de zone
-   "name" et donc le même bottom (DÉCOUVRIR aligné).
-   Scope au slot uniquement — la grille principale et les catégories
-   gardent le comportement multi-lignes natif. */
+/* Slot "Ma sélection" : réduire le font-size du nom pour que les longs
+   noms (ex: "Vincent L'incandescent") tiennent sur 1 ligne sans wrap.
+   Les 2 spans formattés (firstname 0.75em + restname 1.6em) suivent en
+   em-relatif. Scope au slot uniquement — la grille principale conserve
+   la taille native. */
 .mes-creations-selection__grid .product-card-cinetique .product-name {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.mes-creations-selection__grid .product-card-cinetique .product-firstname,
-.mes-creations-selection__grid .product-card-cinetique .product-restname {
-  /* Les 2 spans formattés (Montserrat upper + Square Peg) doivent
-     respecter le nowrap du parent : pas de display block. */
-  display: inline;
+  font-size: 1.1rem !important; /* override le 1.4rem !important du natif */
   white-space: nowrap;
 }
 
