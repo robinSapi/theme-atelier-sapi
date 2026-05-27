@@ -11902,6 +11902,7 @@ button.room-card {
   .room-picker-cards {
     flex-wrap: wrap;
     gap: 0.75rem;
+    padding: 0;
   }
 
   /* Mobile — wrap en 3 colonnes. On match aussi button.room-card pour
