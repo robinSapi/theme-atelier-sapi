@@ -23593,7 +23593,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .conseiller-modal {
   position: fixed;
   inset: 0;
-  background: rgba(50, 40, 30, 0.55);
+  background: rgba(30, 22, 14, 0.82);
   /* z-index 10050 : au-dessus du site-header sticky (10001) et du panier
      sticky (10002). Sinon le header masque le haut de la modale (croix). */
   z-index: 10050;
