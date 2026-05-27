@@ -458,12 +458,17 @@
     var next = getNextUnansweredStep(answers);
     if (next) {
       renderInlineQuestion(next, answers);
-      if (els.inlineQuestion) els.inlineQuestion.hidden = false;
+      if (els.inlineQuestion) {
+        // Reset état revealed avant ré-affichage pour relancer la fade-in
+        els.inlineQuestion.classList.remove('is-revealed');
+        els.inlineQuestion.hidden = false;
+      }
       if (els.editLink) els.editLink.hidden = true;
     } else {
       if (els.inlineQuestion) {
         els.inlineQuestion.innerHTML = '';
         els.inlineQuestion.hidden = true;
+        els.inlineQuestion.classList.remove('is-revealed');
       }
       if (els.editLink) els.editLink.hidden = false;
     }
@@ -537,18 +542,19 @@
   }
 
   /**
-   * Révèle les cards du slot grid (fade-in cascade). Appelé après que le
-   * typewriter de la phrase IA ait terminé pour synchroniser visuellement
-   * texte + sélection.
+   * Révèle les éléments dynamiques de la card "Ton projet" (slot grid +
+   * chip-question) après la fin du typewriter pour une apparition
+   * synchronisée. Le slot a en plus une cascade stagger via
+   * transition-delay inline (proposition #5).
    */
   function revealSelectionGrid() {
-    if (!els.selectionGrid) return;
     // requestAnimationFrame pour que la classe soit appliquée APRÈS que
     // les transition-delay inline soient lus par le browser (sinon les
     // cards apparaissent toutes en même temps).
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
-        els.selectionGrid.classList.add('is-revealed');
+        if (els.selectionGrid) els.selectionGrid.classList.add('is-revealed');
+        if (els.inlineQuestion) els.inlineQuestion.classList.add('is-revealed');
       });
     });
   }

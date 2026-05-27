@@ -23077,9 +23077,25 @@ body.woocommerce-cart div.woocommerce-wrapper {
   -webkit-transform: translateY(0);
   transform: translateY(0);
 }
+
+/* Chip-question : même apparition après typewriter, sync avec le slot grid */
+.conseiller-mon-projet__inline-question:not([hidden]) {
+  opacity: 0;
+  -webkit-transform: translateY(8px);
+  transform: translateY(8px);
+  -webkit-transition: opacity 0.4s ease, -webkit-transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.conseiller-mon-projet__inline-question.is-revealed {
+  opacity: 1;
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
+}
+
 /* Respect prefers-reduced-motion : pas de stagger/translate */
 @media (prefers-reduced-motion: reduce) {
-  .mes-creations-selection__grid > * {
+  .mes-creations-selection__grid > *,
+  .conseiller-mon-projet__inline-question:not([hidden]) {
     -webkit-transform: none !important;
     transform: none !important;
     -webkit-transition: opacity 0.2s ease !important;
