@@ -851,11 +851,15 @@
         if (isEnglobante && e.target.closest('.product-card-cinetique, .mes-creations-surmesure-card, .mes-creations-selection__nav')) {
           return; // laisser l'élément interne gérer son propre clic
         }
-        // État initial : s3 si projet complet (récap), s0 sinon
-        var hasProj = window.sapiProject && window.sapiProject.hasProject();
+        // On passe toujours s0 — la modale route automatiquement via
+        // determineInitialState() :
+        // - projet complet (toutes questions visibles répondues) → s3-carrefour
+        // - projet partiel (au moins 1 réponse, manque des questions) → s0-partiel
+        //   sur la prochaine question non répondue (= la chip-question visible)
+        // - projet vide → s0-initial (1re question)
         monProjetCard.dispatchEvent(new CustomEvent('sapi:open-modal', {
           bubbles: true,
-          detail: { state: hasProj ? 's3' : 's0' },
+          detail: { state: 's0' },
         }));
         return;
       }
