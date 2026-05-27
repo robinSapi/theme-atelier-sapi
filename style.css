@@ -23391,6 +23391,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   width: max-content;
   max-width: 100%;
   margin: 0 auto;
+  padding: 20px;
 }
 .conseiller-mon-projet__inline-question .choice {
   display: -webkit-flex;
