@@ -25037,15 +25037,6 @@ button.chip--project:focus-visible {
      des .product-card-cinetique. Le marker existe pour le sélecteur JS. */
 }
 
-/* Slot "Ma sélection" : réduire le font-size du nom pour que les longs
-   noms (ex: "Vincent L'incandescent") tiennent sur 1 ligne sans wrap.
-   Les 2 spans formattés (firstname 0.75em + restname 1.6em) suivent en
-   em-relatif. Scope au slot uniquement — la grille principale conserve
-   la taille native. */
-.mes-creations-selection__grid .product-card-cinetique .product-name {
-  font-size: 1.1rem !important; /* override le 1.4rem !important du natif */
-  white-space: nowrap;
-}
 
 /* Card sur-mesure (Chantier 2) — cellule de grille spéciale en dernière
    position du slot. Markup mockup-15 ligne 419 (template cloné par JS).
