@@ -242,7 +242,7 @@ get_header();
         <span class="section-number">02</span>
         <h2>R&eacute;alisations professionnelles</h2>
       </div>
-      <p>Des cr&eacute;ations sur mesure pour les professionnels de l'h&ocirc;tellerie, la restauration et le commerce.</p>
+      <p>Des cr&eacute;ations sur mesure pour les professionnels de l'h&ocirc;tellerie, la restauration et du commerce.</p>
     </div>
 
     <?php if ($projets_pro->have_posts()) : ?>
