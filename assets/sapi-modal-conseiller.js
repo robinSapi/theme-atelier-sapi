@@ -598,9 +598,12 @@
   // Séquence de sortie en 3 phases (~2s) :
   //   Phase 1 (0–600ms)     : fade-out du contenu interne (screens)
   //   Phase 2 (500–1100ms)  : fade-out de la modale entière (overlay + dialog)
-  //   Phase 3 (1100–1900ms) : scroll smooth de la page pour centrer la card
-  //                           "Mon projet" puis resolve (texte apparaît ensuite
-  //                           via finishAdvice + typewriter)
+  //   Phase 3 (1100–1900ms) : hide modale + cleanup styles puis resolve
+  //                           (le texte apparaît ensuite via finishAdvice +
+  //                           typewriter sur la card "Mon projet")
+  // Round 6 — scroll auto retiré : trop perturbant avec la chorégraphie
+  // 4 phases de la card "Ton projet" (apparition étagée typewriter →
+  // chip-question → cards → nav). Le visiteur garde sa position de scroll.
   function runExitSequence(targetCard) {
     return new Promise(function (resolve) {
       var modalCard = els.modalCard;
@@ -642,20 +645,9 @@
         document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
 
-        // Scroll smooth pour centrer la card "Mon projet" dans la viewport
-        if (targetCard) {
-          try {
-            var rect = targetCard.getBoundingClientRect();
-            var targetY = window.scrollY + rect.top - Math.max(40, (window.innerHeight - rect.height) / 2);
-            window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
-          } catch (e) {
-            // Fallback navigateur sans behavior:smooth
-            targetCard.scrollIntoView();
-          }
-        }
-
-        // Attendre ~800ms pour laisser le scroll smooth se terminer
-        // avant de résoudre (= avant que le texte apparaisse)
+        // Round 6 — scroll auto retiré. Le délai 800ms est conservé pour
+        // laisser le fade-out modale finir avant que le texte typewriter
+        // ne démarre sur la card "Ton projet".
         setTimeout(resolve, 800);
       }, 1100);
     });
