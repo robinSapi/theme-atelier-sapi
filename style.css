@@ -10846,6 +10846,7 @@ transform: translateY(15px);
   justify-content: center;
   gap: 1.25rem;
   width: 100%;
+  padding: 0 24px;
 }
 
 /* Cards harmonisées avec .conseiller-choice : fond blanc, bordure neutre,
