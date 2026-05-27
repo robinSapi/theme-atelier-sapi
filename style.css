@@ -22823,7 +22823,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 
 .conseiller-subtitle {
   font-family: var(--font-body);
-  font-size: 14.5px;
+  font-size: 16px;
   line-height: 1.55;
   color: var(--color-wood-mid);
   margin: 0 auto 22px;
@@ -23662,10 +23662,10 @@ body.woocommerce-cart div.woocommerce-wrapper {
   -webkit-align-items: center;
   align-items: center;
   gap: 7px;
-  padding: 7px 16px;
+  padding: 8px 17px;
   background: var(--color-wood-dark);
   color: #fff;
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -23709,7 +23709,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 .h2 {
   font-weight: 700;
-  font-size: clamp(17px, 2.4vw, 21px);
+  font-size: clamp(19px, 2.6vw, 23px);
   color: var(--color-wood-dark);
   line-height: 1.25;
   text-transform: uppercase;
@@ -23789,7 +23789,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .choice__icon svg { width: 20px; height: 20px; }
 .choice__label {
   display: block;
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
