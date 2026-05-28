@@ -2,202 +2,246 @@
 
 ## 🔧 À faire
 
-## [TÂCHE] S28 — Phase 2 : script de migration repeater `galerie_produit` → 8 Gallery ACF (dual-write)
+## [TÂCHE] S28 — Phase 3 : refactor `sapi_get_product_photo_ids` en dual-read + params `$piece` / `$essence`
 **Date :** 2026-05-28
 **Branche :** `feature/photos-par-piece`
-**Priorité :** haute — déverrouille Phase 3 (helper dual-read) et Phase 4 (activation swap)
-**Mémoire de contexte** (côté Cowork) : `project_photos_par_piece.md` — relire AVANT toute action pour comprendre l'architecture cible et l'état Phase 1 livré le 28/05 (snippet taxonomies + 19 termes + 8 Gallery ACF déjà créés sur test).
-**Audit Phase 0** (déjà commité sur la branche) : `site-web/memory/audit_galerie_produit_callsites.md` — 25 call-sites, top file `single-product.php`.
+**Priorité :** haute — déverrouille Phase 4 (activation du swap surface par surface)
+**Mémoire de contexte** (côté Cowork) : `project_photos_par_piece.md` — relire AVANT toute action. État livré : Phases 0, 1, 2 sur test. 274 photos déjà migrées dans les 8 Gallery, repeater intact (dual-write).
+**Audit Phase 0** : `site-web/memory/audit_galerie_produit_callsites.md` — 17 appels indirects au helper, lecture indispensable pour préserver la rétrocompatibilité.
 
 ### Contexte
 
-La Phase 1 a livré sur test les **8 Gallery ACF vides** (`galerie_ambiance`, `galerie_detail`, `galerie_vue_de_dessous`, `galerie_tailles`, `galerie_packshot`, `galerie_fabrication`, `galerie_client`, `galerie_accessoires`) dans le groupe `Photos produits`, à côté du repeater existant `galerie_produit`. Les produits ont actuellement leurs photos dans le repeater, et les 8 nouveaux Gallery sont vides.
+Aujourd'hui, le helper canonique `sapi_get_product_photo_ids($post_id, $type, $limit)` lit **uniquement** le repeater `galerie_produit` (via `get_field('galerie_produit', $post_id)` + foreach sur `type_photo`). Les 17 call-sites indirects passent tous par ce helper, donc son refactor fait suivre 17 surfaces gratuitement.
 
-**Objectif Phase 2** : copier les photos du repeater vers les 8 Gallery selon le `type_photo` de chaque row, en mode **dual-write** (le repeater reste intact, on n'y touche pas).
+**Objectif Phase 3** : faire passer le helper en **mode dual-read** — lit en priorité les 8 Gallery ACF (nouvelle source de vérité depuis Phase 2), fallback sur le repeater si la Gallery cible est vide. **+** ajouter 2 paramètres optionnels `$piece` et `$essence` pour filtrer par taxonomies `media_room` / `media_essence`.
 
-**Pourquoi dual-write** : préserver les données originales pendant Phases 3-4 (helper dual-read + activation swap). Le repeater ne sera vidé qu'en Phase 6 après plusieurs semaines de stabilité prod.
+**Critique** : **rétrocompatibilité absolue**. Aucun call-site existant ne doit changer de comportement. Les 17 appels du type `sapi_get_product_photo_ids($id, 'ambiance', 1)` continuent de retourner exactement la même chose qu'avant — l'API du helper est strictement étendue (nouveaux params optionnels avec valeur par défaut), pas modifiée.
 
 ### Garde-fous absolus
 
-1. **NE PAS toucher au repeater `galerie_produit`** — il reste intact en lecture et en données. Aucun `delete_post_meta`, aucun `update_field('galerie_produit', ...)`.
-2. **NE PAS modifier les attachments** eux-mêmes (pas de `update_post_meta` sur les attachments, pas de renommage, pas de tagging media_room/media_essence automatique — ça c'est manuel en Phase 5 par Robin).
-3. **Idempotent** : relancer le script ne doit pas dupliquer les IDs dans les Gallery. Si une Gallery contient déjà un ID, on ne l'ajoute pas en double.
-4. **Restriction admin** : seul un user `current_user_can('manage_options')` peut lancer la migration. Nonce CSRF obligatoire sur les boutons.
-5. **Mode DRY-RUN par défaut** : le script doit pouvoir tourner en lecture seule pour générer un rapport, sans rien écrire dans la DB. Le mode "Lancer en mode réel" est une action explicite séparée.
-6. **Préserver l'ordre des rows** : les photos du repeater sont ordonnées (par Robin via drag & drop). L'ordre doit être préservé dans les Gallery cibles (premier row ambiance du repeater = première image de `galerie_ambiance`, etc.).
+1. **Rétrocompatibilité stricte** : tous les call-sites existants (cf audit Phase 0) doivent continuer à fonctionner identiquement. Aucune modification de leur appel.
+2. **NE PAS toucher au repeater** `galerie_produit` — il reste lu en fallback. Aucun write dessus.
+3. **NE PAS modifier les 17 call-sites** dans cette phase (single-product.php, taxonomy-product_cat.php, archive-product.php, content-product.php, page-inspiration.php, page-la-star-du-moment.php, front-page.php, functions.php). C'est Phase 4 qui activera le swap surface par surface.
+4. **Préserver l'ordre** : les IDs retournés doivent rester dans l'ordre stocké (par Gallery, l'ordre est celui défini par Robin via drag & drop ACF).
+5. **Wrapper `sapi_get_product_photos`** (URLs version, functions.php:1073) doit aussi suivre. Il appelle déjà `sapi_get_product_photo_ids` en interne, donc gratuit si on garde le contrat.
+6. **Helper `sapi_get_acf_image_id`** (functions.php:1127) intact — il est agnostique du nom du champ, sera réutilisé pour la branche fallback repeater.
 
-### Périmètre — 3 chantiers
-
----
-
-### Chantier 1 — Modifier le workflow GHA pour auto-deploy de la branche feature
-
-**Fichier** : `.github/workflows/deploy-test.yml`
-
-**Action** : ajouter `feature/photos-par-piece` aux branches déclencheuses du workflow.
-
-**Diff** (avant) :
-```yaml
-on:
-  push:
-    branches:
-      - test-theme-sapi-maison
-  workflow_dispatch:
-```
-
-**Diff** (après) :
-```yaml
-on:
-  push:
-    branches:
-      - test-theme-sapi-maison
-      - feature/photos-par-piece
-  workflow_dispatch:
-```
-
-Ce chantier doit être committé en **premier** (avant le chantier 2) pour que le push suivant déploie automatiquement le code sur test.
+### Périmètre — 4 chantiers
 
 ---
 
-### Chantier 2 — Page admin custom de migration
-
-**Fichier nouveau** : `inc/sapi-migrate-galerie.php` (ou équivalent — à inclure depuis `functions.php`)
-
-**Comportement** :
-
-- Ajouter un sous-menu sous **Outils** dans WP Admin : `add_submenu_page('tools.php', 'Migration galerie produit', 'Migration galerie', 'manage_options', 'sapi-migrate-galerie', 'sapi_migrate_galerie_render_page');`
-- URL : `/wp-admin/tools.php?page=sapi-migrate-galerie`
-- Page protégée par `current_user_can('manage_options')`
-
-**UI de la page** :
-
-```
-=== MIGRATION REPEATER galerie_produit → 8 Gallery ACF ===
-
-État actuel :
-- N produits avec repeater non vide : XX
-- Total photos dans les repeaters : YYY
-- N Gallery déjà peuplées (audit) : ZZ
-
-[Bouton bleu : Lancer en DRY-RUN]     (lit sans écrire, produit le rapport)
-[Bouton orange : Lancer en mode RÉEL] (écrit dans les Gallery, dual-write)
-
-(zone de résultat après clic)
-```
-
-**Mode DRY-RUN** :
-- Boucle sur tous les produits publiés (`get_posts(['post_type' => 'product', 'posts_per_page' => -1, 'post_status' => 'publish'])`)
-- Pour chaque produit, lire `get_field('galerie_produit', $product_id)` (le repeater)
-- Pour chaque row, identifier `type_photo` + `image` (utiliser `sapi_get_acf_image_id()` existant pour normaliser l'image en ID)
-- Mapper le type vers le slug Gallery cible (voir mapping ci-dessous)
-- Accumuler en mémoire un plan `[product_id => [gallery_name => [photo_ids...]]]`
-- **NE RIEN écrire dans la DB**
-- Afficher un tableau récap : par produit, N photos → galerie_ambiance, N → galerie_detail, etc. + erreurs (types inconnus, photos sans ID résolvable, etc.)
-- Total global en bas : N produits scannés, M photos prêtes à migrer, K types orphelins
-
-**Mode RÉEL** :
-- Exécuter la même logique que dry-run (pour le calcul du plan)
-- Pour chaque Gallery cible non vide dans le plan :
-  - Lire le contenu actuel de cette Gallery via `get_field('galerie_ambiance', $product_id)` → array d'IDs (ou vide)
-  - Calculer la **diff idempotente** : `$new_ids = array_values(array_unique(array_merge($existing_ids, $plan_ids)))` (préserve l'ordre + déduplique)
-  - Écrire via **ACF API** : `update_field('galerie_ambiance', $new_ids, $product_id);` (PAS `update_post_meta` direct — ACF a besoin de son traitement)
-- Logguer chaque écriture
-- Afficher le même tableau récap + une colonne "Action effectuée : OK / Skipped (déjà à jour) / Erreur".
-
-**Mapping `type_photo` → Gallery cible** :
-
-```php
-$type_to_gallery = [
-    'ambiance'         => 'galerie_ambiance',
-    'detail'           => 'galerie_detail',
-    'vue de dessous'   => 'galerie_vue_de_dessous',  // ⚠️ type avec espaces et accent
-    'taille'           => 'galerie_tailles',         // ⚠️ singulier dans repeater → pluriel dans Gallery
-    'tailles'          => 'galerie_tailles',         // tolérance si le type a été corrigé entre temps
-    'studio'           => 'galerie_packshot',        // legacy "studio" remappé sur packshot
-    'packshot'         => 'galerie_packshot',
-    'fabrication'      => 'galerie_fabrication',
-    'client'           => 'galerie_client',
-    'accessoires'      => 'galerie_accessoires',
-];
-```
-
-**Types orphelins** (un `type_photo` qui n'est pas dans le mapping) :
-- NE PAS migrer la photo dans une Gallery par défaut
-- **Lister explicitement** dans le rapport : "Produit X — N photos avec type orphelin 'Y' (non migrées, à clarifier avec Robin)"
-
-**Lecture du `type_photo` ACF** : peut être string OU array (`['value' => 'ambiance']`). Normaliser comme dans le helper existant `sapi_get_product_photo_ids` :
-
-```php
-$type = isset($row['type_photo']) ? $row['type_photo'] : '';
-if (is_array($type)) $type = isset($type['value']) ? $type['value'] : '';
-```
-
----
-
-### Chantier 3 — Helper bas niveau pour itérer le repeater (optionnel, recommandé)
-
-**Recommandation issue de l'audit Phase 0** : factoriser un helper bas niveau `sapi_iterate_product_photos($post_id)` qui yield `[$type, $img_id, $row_index]` pour chaque row du repeater. Permet à `page-inspiration.php` (qui duplique actuellement la logique) de l'utiliser plus tard.
+### Chantier 1 — Factoriser le mapping `type` → Gallery dans une fonction réutilisable
 
 **Fichier** : `functions.php` (à côté de `sapi_get_product_photo_ids`)
 
-**Code suggéré** :
+**Objectif** : éviter la duplication du mapping entre Phase 2 (page admin migration, dans `inc/sapi-migrate-galerie.php`) et Phase 3 (helper read).
+
+**Action** :
 
 ```php
 /**
- * Itère les rows du repeater galerie_produit d'un produit, en yield-style.
- * Retourne un array de tableaux ['type' => string, 'image_id' => int, 'index' => int].
- * Type normalisé (string, pas array). Image ID résolu via sapi_get_acf_image_id.
- * Skip les rows sans image résolvable.
+ * Mapping `type_photo` (string du repeater) → nom du champ Gallery ACF cible.
+ * Source de vérité unique, partagée entre la migration (Phase 2) et le helper (Phase 3).
+ *
+ * @param string $type Type photo (ex: 'ambiance', 'detail', 'vue de dessous').
+ *                     Tolère 'taille'/'tailles' et 'studio'/'packshot' pour les legacy.
+ * @return string|null Nom du Gallery ACF (ex: 'galerie_ambiance') ou null si type inconnu.
  */
-function sapi_iterate_product_photos($post_id) {
-    if (!function_exists('get_field')) return [];
-    $galerie = get_field('galerie_produit', $post_id);
-    if (empty($galerie) || !is_array($galerie)) return [];
-
-    $out = [];
-    foreach ($galerie as $index => $row) {
-        $type = isset($row['type_photo']) ? $row['type_photo'] : '';
-        if (is_array($type)) $type = isset($type['value']) ? $type['value'] : '';
-        $img_id = sapi_get_acf_image_id(isset($row['image']) ? $row['image'] : null);
-        if (!$img_id) continue;
-        $out[] = ['type' => (string) $type, 'image_id' => (int) $img_id, 'index' => $index];
-    }
-    return $out;
+function sapi_type_to_gallery_name($type) {
+    static $map = [
+        'ambiance'         => 'galerie_ambiance',
+        'detail'           => 'galerie_detail',
+        'vue de dessous'   => 'galerie_vue_de_dessous',
+        'taille'           => 'galerie_tailles',
+        'tailles'          => 'galerie_tailles',
+        'studio'           => 'galerie_packshot',
+        'packshot'         => 'galerie_packshot',
+        'fabrication'      => 'galerie_fabrication',
+        'client'           => 'galerie_client',
+        'accessoires'      => 'galerie_accessoires',
+    ];
+    $type = (string) $type;
+    return isset($map[$type]) ? $map[$type] : null;
 }
 ```
 
-Utiliser ce helper dans la page admin de migration (chantier 2) pour ne pas dupliquer la logique de parcours. Si Claude Code juge le chantier 3 hors scope, le mentionner dans le retour, mais le helper sera quand même utile pour Phase 3.
+**Bonus** : faire que `inc/sapi-migrate-galerie.php` (Phase 2) utilise désormais cette fonction (DRY). Si Claude Code juge le changement trop risqué (la migration est livrée et idempotente, on ne veut pas la casser), il peut **dupliquer** le mapping et laisser `sapi-migrate-galerie.php` avec son mapping local. Mentionner le choix dans le retour.
 
 ---
 
+### Chantier 2 — Refactor `sapi_get_product_photo_ids` en dual-read
+
+**Fichier** : `functions.php:1042` (helper existant)
+
+**Nouvelle signature** :
+
+```php
+/**
+ * Récupère les IDs d'attachments d'un produit, filtré par type/pièce/essence.
+ *
+ * Mode dual-read (Phase 3 S28) :
+ * 1. Lit en priorité les 8 Gallery ACF (galerie_ambiance, galerie_detail, etc.)
+ * 2. Fallback sur le repeater galerie_produit si la Gallery cible est vide
+ * 3. Filtre par taxonomies media_room (pièce) et media_essence (essence) si fournies
+ *
+ * @param int    $post_id  ID du produit
+ * @param string $type     Type photo ('ambiance', 'detail', etc.) ou '' pour tous les types
+ * @param int    $limit    Max N photos retournées (0 = sans limite)
+ * @param string|null $piece   Slug taxonomie media_room (ex: 'salon') ou null pour pas de filtre
+ * @param string|null $essence Slug taxonomie media_essence (ex: 'peuplier') ou null pour pas de filtre
+ * @return int[] Array d'IDs d'attachments, ordre préservé
+ */
+function sapi_get_product_photo_ids($post_id, $type = '', $limit = 0, $piece = null, $essence = null) {
+    // ... voir logique ci-dessous
+}
+```
+
+**Logique détaillée** :
+
+```php
+function sapi_get_product_photo_ids($post_id, $type = '', $limit = 0, $piece = null, $essence = null) {
+    if (!$post_id || !function_exists('get_field')) return [];
+
+    $ids = [];
+
+    if ($type === '') {
+        // Cas "tous les types" : on lit toutes les Gallery puis fallback repeater par type manquant
+        $all_types_ordered = ['ambiance', 'detail', 'vue de dessous', 'tailles', 'packshot', 'fabrication', 'client', 'accessoires'];
+        foreach ($all_types_ordered as $t) {
+            $ids = array_merge($ids, sapi_get_product_photo_ids($post_id, $t, 0, null, null));
+        }
+        $ids = array_values(array_unique($ids));
+    } else {
+        // Cas "type spécifique" : Gallery prioritaire, fallback repeater si vide
+        $gallery_name = sapi_type_to_gallery_name($type);
+
+        if ($gallery_name) {
+            $gallery_ids = get_field($gallery_name, $post_id);
+            if (!empty($gallery_ids) && is_array($gallery_ids)) {
+                $ids = array_map('intval', $gallery_ids);
+            }
+        }
+
+        // Fallback sur le repeater si Gallery vide
+        if (empty($ids)) {
+            $galerie = get_field('galerie_produit', $post_id);
+            if (!empty($galerie) && is_array($galerie)) {
+                foreach ($galerie as $row) {
+                    $row_type = isset($row['type_photo']) ? $row['type_photo'] : '';
+                    if (is_array($row_type)) $row_type = isset($row_type['value']) ? $row_type['value'] : '';
+                    if ($type && $row_type !== $type) continue;
+                    $id = sapi_get_acf_image_id(isset($row['image']) ? $row['image'] : null);
+                    if ($id) $ids[] = (int) $id;
+                }
+            }
+        }
+    }
+
+    // Filtre par taxonomie media_room (pièce) si fourni
+    if ($piece !== null && $piece !== '' && !empty($ids)) {
+        $ids = sapi_filter_attachment_ids_by_term($ids, 'media_room', $piece);
+    }
+
+    // Filtre par taxonomie media_essence (essence) si fourni
+    if ($essence !== null && $essence !== '' && !empty($ids)) {
+        $ids = sapi_filter_attachment_ids_by_term($ids, 'media_essence', $essence);
+    }
+
+    // Appliquer le limit
+    if ($limit > 0 && count($ids) > $limit) {
+        $ids = array_slice($ids, 0, $limit);
+    }
+
+    return $ids;
+}
+```
+
+---
+
+### Chantier 3 — Helper de filtre par taxonomie
+
+**Fichier** : `functions.php` (à côté de `sapi_get_product_photo_ids`)
+
+**Action** :
+
+```php
+/**
+ * Filtre une liste d'IDs d'attachments par un slug de terme dans une taxonomie donnée.
+ * Préserve l'ordre des IDs en entrée.
+ *
+ * @param int[]  $attachment_ids IDs d'attachments à filtrer
+ * @param string $taxonomy       'media_room' ou 'media_essence'
+ * @param string $term_slug      Slug du terme (ex: 'salon', 'peuplier')
+ * @return int[] IDs filtrés (preserve l'ordre d'entrée)
+ */
+function sapi_filter_attachment_ids_by_term($attachment_ids, $taxonomy, $term_slug) {
+    if (empty($attachment_ids) || !$taxonomy || !$term_slug) return [];
+
+    $term = get_term_by('slug', $term_slug, $taxonomy);
+    if (!$term || is_wp_error($term)) return [];
+    $term_id = (int) $term->term_id;
+
+    // Optimisation : récupérer en une seule requête tous les attachments du term
+    $tagged_ids = get_objects_in_term($term_id, $taxonomy);
+    if (is_wp_error($tagged_ids) || empty($tagged_ids)) return [];
+    $tagged_ids = array_map('intval', $tagged_ids);
+    $tagged_set = array_flip($tagged_ids);
+
+    // Intersect en préservant l'ordre d'entrée
+    $filtered = [];
+    foreach ($attachment_ids as $id) {
+        $id = (int) $id;
+        if (isset($tagged_set[$id])) {
+            $filtered[] = $id;
+        }
+    }
+    return $filtered;
+}
+```
+
+**Note** : `get_objects_in_term()` est plus performant que de faire `wp_get_object_terms` sur chaque ID dans une boucle. Une seule requête DB par taxonomie.
+
+---
+
+### Chantier 4 — Tests de non-régression (rapport texte dans le retour)
+
+Sur la branche `feature/photos-par-piece` déployée sur test, vérifier manuellement (sans modifier le code) que les fonctions de rendu existantes continuent à marcher :
+
+1. **`/mes-creations/`** : ouvrir la page sur test, vérifier que les cards produits ont bien leurs photos d'ambiance affichées (= helper appelé via `sapi_get_product_photo_ids($id, 'ambiance', 1)` → maintenant lit la Gallery au lieu du repeater)
+2. **Fiche produit** (ex: Olivia La gardiena #5035) : ouvrir, vérifier que la galerie principale, les thumbnails et le slideshow ambiance fonctionnent (= 3 lectures directes du repeater dans single-product.php — ces 3 NE PASSENT PAS par le helper, donc elles utilisent toujours le repeater, c'est OK)
+3. **Page catégorie** (ex: `/categorie-produit/suspensions/`) : vérifier hero carousel ambiance/detail + background fabrication
+4. **Home** : vérifier carousel ambiance + star du moment + featured products + section collections
+
+**Si tout marche identiquement sur test** → Phase 3 est validée. Phase 4 pourra alors activer le swap en passant `$piece` aux call-sites surface par surface.
+
+Inclure dans le retour côté queue les screenshots ou un descriptif texte de ce qui a été vérifié.
+
 ### Critères de succès
 
-- [ ] **Chantier 1** : `feature/photos-par-piece` est ajoutée à `deploy-test.yml`, committée en premier, et un push ultérieur déclenche le workflow GHA
-- [ ] **Chantier 2** : page admin accessible à `/wp-admin/tools.php?page=sapi-migrate-galerie`, restreinte aux administrateurs
-- [ ] Bouton DRY-RUN affiche le plan complet par produit sans rien modifier dans la DB
-- [ ] Bouton mode RÉEL exécute la migration via `update_field('galerie_*', $ids, $product_id)`
-- [ ] Idempotence vérifiée : 2 lancements consécutifs en mode RÉEL = même état final (pas de doublons dans les Gallery)
-- [ ] Le repeater `galerie_produit` reste intact (vérifiable via `get_field('galerie_produit', $product_id)` après migration)
-- [ ] Préservation de l'ordre : la 1re photo ambiance du repeater est en 1re position de `galerie_ambiance`
-- [ ] Types orphelins listés explicitement dans le rapport (et NON migrés)
-- [ ] Tableau récapitulatif lisible : produits scannés, photos migrées par Gallery, erreurs, types orphelins
-- [ ] **Chantier 3** : helper `sapi_iterate_product_photos` ajouté à `functions.php` ET utilisé par la page admin (si le chantier 3 a été fait)
-- [ ] CSRF nonce sur les 2 boutons d'action
+- [ ] **Chantier 1** : `sapi_type_to_gallery_name($type)` existe dans `functions.php`, retourne le bon nom Gallery ou `null` pour les types inconnus
+- [ ] **Chantier 2** : `sapi_get_product_photo_ids` signature étendue (5 params au lieu de 3) avec defaults rétro-compatibles
+- [ ] Helper en mode dual-read : Gallery prioritaire, fallback repeater par type
+- [ ] Cas `$type = ''` (tous types) : concatène les 8 Gallery dans l'ordre, dédoublonne
+- [ ] **Chantier 3** : `sapi_filter_attachment_ids_by_term` existe, optimisé via `get_objects_in_term`
+- [ ] `$piece` et `$essence` filtrent correctement (tester avec Robin qui aura tagué quelques photos)
+- [ ] `$limit` appliqué APRÈS les filtres taxonomies (pour que le filtrage ne réduise pas le pool avant troncature)
+- [ ] **Chantier 4** : test de non-régression manuel sur test — toutes les surfaces front affichent les photos identiquement à avant
+- [ ] Le repeater `galerie_produit` reste intact (zéro write)
+- [ ] Les 17 call-sites existants ne sont PAS modifiés dans cette phase
+- [ ] `sapi_get_product_photos` (wrapper URLs) suit l'évolution gratuitement (vérifier qu'il marche encore)
+- [ ] PHPDoc à jour sur les 3 fonctions
 
 ### Notes pour le retour
 
-Dans le retour côté queue (section `## ✅ Livré`), indiquer :
-- Hash des commits livrés (chantier 1 + chantier 2 + éventuel chantier 3 séparés)
-- Sortie du DRY-RUN sur test (capture ou copie texte du tableau) — utile pour valider que les chiffres sont cohérents avec ce qu'on attend
-- Type orphelins découverts (si certains) — à clarifier avec Robin avant d'envisager le mode RÉEL
-- N photos potentiellement migrables au total
+Dans le retour côté queue (section `## ✅ Livré`) :
+- Hash des commits livrés (idéalement 3 commits séparés : factorisation mapping, refactor helper, helper filtre taxonomie)
+- Résultat des tests de non-régression sur test (liste des surfaces vérifiées + verdict OK/KO)
+- Si le chantier 1 bonus (factoriser dans sapi-migrate-galerie.php) a été fait ou pas, avec justification
+- Push automatique sur `feature/photos-par-piece` (cf [[feedback_claude_code_push_test]])
 
-Robin lancera le mode RÉEL manuellement après validation visuelle du dry-run.
+### Suite (hors scope Phase 3, pour information)
 
-### Suite (hors scope Phase 2, pour information)
-
-Phase 3 = refactor du helper canonique `sapi_get_product_photo_ids($post_id, $type, $limit, $piece = null, $essence = null)` en mode dual-read : lit d'abord les 8 Gallery, fallback sur le repeater si Gallery vide. Pour permettre une transition douce.
-Phase 4 = activation du swap surface par surface (mes-creations → catégorie → fiche produit → home).
+Phase 4 = activation du swap surface par surface. On modifiera les 17 call-sites un par un pour passer `$piece = sapi_get_visitor_piece()` (qui lit `sapiProject.piece` côté JS hydratée en PHP). Surfaces dans l'ordre : `/mes-creations/` → pages catégorie → fiche produit (positions 1 et 2 du carousel ambiance) → home (featured uniquement). Cf règles de swap dans `project_photos_par_piece`.
 
 ---
 
