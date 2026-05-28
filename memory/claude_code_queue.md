@@ -2,6 +2,231 @@
 
 ## 🔧 À faire
 
+## [TÂCHE] S28 — Phase 0 : audit exhaustif des call-sites du repeater `galerie_produit`
+**Date :** 2026-05-28
+**Branche :** `feature/photos-par-piece` (créée depuis master à jour, commit `e092f1d` ou plus récent)
+**Priorité :** haute — bloquant pour Phase 1 (création des 8 Gallery ACF) et Phase 2 (script de migration)
+**Mémoire de contexte** (côté Cowork) : `project_photos_par_piece.md` — relire AVANT toute action pour comprendre l'architecture cible (option B = 8 Gallery ACF distincts + taxonomie `media_room` 15 termes + plugin EML).
+
+### Contexte
+
+Le repeater ACF `galerie_produit` actuellement attaché aux produits WooCommerce sera **remplacé** par 8 champs Gallery ACF distincts (un par type de photo) en Phase 2. Avant de migrer, on a besoin d'un **inventaire exhaustif** de tous les endroits du code thème qui lisent, écrivent ou raisonnent sur ce repeater, pour :
+
+1. Savoir quels fichiers devront être modifiés en Phase 3 (helper dual-read transitoire)
+2. Évaluer les risques de la migration (combien de surfaces touchées, complexité)
+3. Identifier les éventuels helpers à factoriser
+
+Cette phase est **lecture seule** — pas de modif, pas de commit, juste un rapport markdown structuré.
+
+### Sortie attendue
+
+**Un seul fichier markdown** créé à : `site-web/memory/audit_galerie_produit_callsites.md`
+
+Format strict :
+
+```markdown
+# Audit call-sites repeater `galerie_produit` — Phase 0 S28
+**Date audit :** 2026-05-XX
+**Branche :** feature/photos-par-piece
+**Commit base :** <hash>
+
+## Résumé
+- Nombre total de call-sites : N
+- Fichiers PHP impactés : N
+- Fichiers JS impactés : N
+- Snippets Code Snippets impactés : N (si applicable, sinon "non auditable depuis le repo")
+
+## Par catégorie d'usage
+
+### Lecture meta directe (`get_post_meta`, `get_field`)
+... (call-sites de ce type)
+
+### Boucles repeater (`have_rows` / `the_row` / `get_sub_field`)
+... (call-sites de ce type)
+
+### Helpers existants
+... (fonctions wrappers du thème qui encapsulent l'accès au repeater)
+
+### Rendu front (templates WC, single-product, archive, etc.)
+... (call-sites qui produisent du HTML à partir des données du repeater)
+
+### JS / AJAX
+... (call-sites JS qui consomment les données — typiquement via wp_localize_script ou data-attributes)
+
+### Admin / WP-Admin
+... (si le repeater est manipulé côté admin custom — métaboxes, colonnes liste produits, etc.)
+
+## Détail par call-site
+
+### [#1] `path/to/file.php:LINE` — <type d'usage en 3 mots>
+**Contexte** : <template / helper / JS / admin>
+**Pattern matché** : `get_field('galerie_produit')` (ou autre)
+**Extrait** :
+\`\`\`php
+<5 à 10 lignes de code centrées sur la ligne matchée>
+\`\`\`
+**Note** : <ce que ce call-site fait, en 1 phrase>
+**Impact migration** : <faible | moyen | fort> — <justification courte>
+
+### [#2] ...
+```
+
+### Méthode de recherche (à appliquer rigoureusement)
+
+**Patterns à grep** (case-insensitive, sur tout le repo thème) :
+
+1. **Nom direct** : `galerie_produit` (toutes occurrences, y compris dans les commentaires — utile pour traquer l'historique)
+2. **Variantes de nom** : `galerie-produit`, `_galerie_produit`, `gallerie_produit` (typo défensive)
+3. **API ACF lecture** :
+   - `get_field\s*\(\s*['"]galerie` (regex)
+   - `the_field\s*\(\s*['"]galerie`
+   - `have_rows\s*\(\s*['"]galerie`
+   - `get_sub_field` dans un bloc qui contient `galerie_produit` plus haut
+4. **Méta WP brut** :
+   - `get_post_meta.*galerie_produit`
+   - `update_post_meta.*galerie_produit`
+   - `meta_key.*galerie_produit` (pour les requêtes WP_Query / meta_query)
+5. **JS / data-attributes** :
+   - `galerie_produit` dans assets/*.js
+   - `data-galerie` dans templates
+   - `wp_localize_script` qui passe `galerie_produit` au JS
+
+**Périmètre** :
+- `wp-content/themes/theme-sapi-maison/**` (tout le thème)
+- **Inclure** : functions.php, inc/*, woocommerce/*, assets/*.js, *.php templates
+- **Exclure** : vendor/, node_modules/ (si présents), backup/, *.min.js
+- **Hors scope** : Code Snippets (plugin WP) — pas accessibles depuis le repo. Si la mémoire `reference_snippets_actifs` (côté Cowork) liste des snippets liés à `galerie_produit`, mentionner dans le rapport mais ne pas chercher dans le repo (Robin auditera côté admin si besoin).
+
+### Garde-fous absolus
+
+1. **LECTURE SEULE — AUCUNE MODIFICATION** du code. Pas de commit, pas de fichier édité. Le seul fichier créé est `site-web/memory/audit_galerie_produit_callsites.md`.
+2. **Pas de filtrage prématuré** — lister TOUS les matches, même ceux qui semblent triviaux (commentaires, anciennes routes). On filtrera ensuite. Mieux : pour chaque match, noter dans le rapport si c'est "actif" (du code qui s'exécute) ou "mort" (commentaire, code dans une branche conditionnelle jamais atteinte, etc.).
+3. **Ne pas confondre `galerie_produit` (le repeater) avec `gallery` ou `product_gallery_images`** (galerie WC native, qui elle a son propre système). Si un call-site mentionne les deux, le préciser dans la note.
+4. **Ne pas anticiper la solution** — ne pas commenter "ici on devrait remplacer par sapi_get_product_photo_ids()". Juste documenter l'état actuel. Les recommandations viendront en Phase 1.
+
+### Critères de succès
+
+- [ ] Fichier `site-web/memory/audit_galerie_produit_callsites.md` créé et commité sur `feature/photos-par-piece`
+- [ ] Tous les patterns listés ci-dessus ont été grepés
+- [ ] Le rapport contient une section "Résumé" avec les compteurs N
+- [ ] Le rapport est organisé par catégorie d'usage (lecture meta / boucles repeater / helpers / rendu front / JS / admin)
+- [ ] Chaque call-site individuel a : fichier:ligne, contexte, pattern matché, extrait 5-10 lignes, note, impact migration estimé (faible/moyen/fort)
+- [ ] Les matches "actifs" vs "morts" (commentaires, code mort) sont distingués
+- [ ] Aucune modification au code thème (vérification : `git diff master..feature/photos-par-piece` doit montrer UNIQUEMENT le nouveau fichier audit)
+- [ ] Un commit propre type `feat(s28): audit phase 0 — inventaire call-sites galerie_produit`
+
+### Notes pour le retour
+
+Dans la réponse côté queue Cowork (section ✅ Livré), indiquer :
+- Hash du commit audit
+- N total de call-sites trouvés (résumé chiffré)
+- Top 3 fichiers les plus impactés
+- Surfaces ou helpers qu'il faudra factoriser en Phase 1 (recommandations brèves, max 5 bullets)
+
+### Suite (hors scope Phase 0, pour information)
+
+Phase 1 = création des 8 Gallery ACF + installation EML + déclaration taxonomie `media_room` (UI WordPress par Robin, pas Claude Code).
+Phase 2 = script de migration repeater → 8 Gallery (dry-run d'abord). C'est là que le rapport Phase 0 sera consulté pour identifier le code consommateur à migrer.
+
+---
+
+## [TÂCHE] Card sur-mesure dans /mes-creations/ — refonte visuelle "carnet d'atelier"
+**Date :** 2026-05-28
+**Branche :** `test-theme-sapi-maison`
+**Priorité :** moyenne — la card actuelle fonctionne, mais son visuel ne plait pas à Robin (trop "service abstrait", pas assez "artisan")
+**Mockup de référence :** `site-web/mockups/mockup-16-card-surmesure-alternatives.html` — **variante C UNIQUEMENT** (section "Carnet d'atelier", marqueur orange "Variante C")
+
+### Contexte
+
+La card sur-mesure actuellement en prod (dernière cellule de la grille "Ma sélection" sur `/mes-creations/`, classes `.mes-creations-surmesure-card*`) utilise un design "service" : fond dégradé orange clair, icône recyclage SVG, badge pill orange. Robin trouve ça trop abstrait, pas assez en lien avec son univers d'artisan.
+
+**Nouvelle direction validée Robin (28/05/2026) — variante C "Carnet d'atelier"** : esthétique page de carnet, croquis trait fin d'une suspension dessinée à la main (SVG), lignes de cahier discrètes en arrière-plan, signature "— Robin" en Square Peg orange. Plus intimiste, plus personnel, raconte une histoire.
+
+### Garde-fous absolus
+
+1. **Lire avant d'écrire** : ouvrir le mockup #16, identifier la section variante C uniquement (classes `.v-carnet*`). Lire l'état actuel des classes `.mes-creations-surmesure-card*` dans `style.css` ET le `<template>` correspondant dans `woocommerce/archive-product.php` AVANT toute modification.
+2. **Réutiliser les classes existantes** `.mes-creations-surmesure-card*` — modifier leur contenu CSS et le markup du template, NE PAS créer de nouvelles classes parallèles. Cf. mémoire Cowork `feedback_claude_code_refonte_grille`.
+3. **Aucun changement JS** : `populateSelectionGrid()` dans `sapi-cards-conseiller.js` continue de cloner le `<template>` tel quel — seul le contenu du template change.
+4. **Aucun changement comportement** : `href="/sur-mesure/"` préservé, event GA4 `mes_creations_card_surmesure_click` continue de fire au clic.
+
+### Spec visuelle (variante C)
+
+**Fond** : papier crème pur `#FDFBF5` (plus clair que `--color-warm`). PAS de dégradé. PAS d'orange.
+
+**Lignes de cahier décoratives** : pseudo-élément `::before` en `position: absolute; inset: 0`, `pointer-events: none`, avec :
+```css
+background-image: repeating-linear-gradient(
+  to bottom,
+  transparent 0,
+  transparent 21px,
+  rgba(139, 115, 85, 0.06) 22px
+);
+```
+
+**Bordure** : aucune bordure visible (PAS de dashed, PAS d'outline orange). Garder un léger `box-shadow: 0 2px 8px rgba(74, 63, 53, 0.06)`.
+
+**Padding interne** : `22px 18px 18px`.
+
+**Contenu vertical** (de haut en bas, texte centré) :
+
+1. **Eyebrow** "Croquis..." en Square Peg, `font-family: 'Square Peg', cursive; font-size: 22px; color: var(--color-wood); line-height: 1; margin-bottom: 4px;`
+
+2. **SVG croquis suspension** centré (`95×95px` desktop, `75×75px` mobile, `margin: 10px auto 14px;`, `color: var(--color-wood-dark);`). Markup exact :
+```html
+<svg class="mes-creations-surmesure-card__sketch" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M50 6 L50 24"/>
+  <ellipse cx="50" cy="26" rx="6" ry="2.5"/>
+  <path d="M28 32 Q50 30 72 32 Q62 60 50 75 Q38 60 28 32"/>
+  <path d="M34 34 Q50 33 66 34"/>
+  <path d="M32 42 Q50 40 68 42"/>
+  <path d="M32 52 Q50 51 68 52"/>
+  <path d="M36 62 Q50 61 64 62"/>
+  <ellipse cx="50" cy="80" rx="4" ry="5" fill="rgba(227, 91, 36, 0.12)"/>
+  <path d="M48 86 L52 86 M47 88 L53 88"/>
+</svg>
+```
+
+3. **Titre** "Sur-mesure" : `font-size: 14px; font-weight: 700; color: var(--color-wood-dark); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; line-height: 1.25;`
+
+4. **Sous-titre italique** "Et si on dessinait le tien ensemble ?" : `font-size: 12px; color: var(--color-wood-mid); line-height: 1.5; font-style: italic; padding: 0 8px;`
+
+5. **Signature** "— Robin" : `font-family: 'Square Peg', cursive; font-size: 22px; color: var(--color-orange); margin-top: 14px; line-height: 1;`
+
+**Hover** : `transform: translateY(-3px) rotate(0.4deg);` (la petite rotation donne un effet "page qui bouge"). `transition: transform 0.2s;`
+
+**Aspect ratio / alignement de cellule** : la card doit s'aligner en hauteur avec les cards produits voisines dans le slot. Si les cards produits utilisent un pattern `[photo aspect-ratio + body]`, la card sur-mesure peut soit imiter ce pattern, soit occuper la cellule en bloc unique (préférer le bloc unique avec padding interne uniforme — c'est ce que fait le mockup #16). À adapter pour que la hauteur soit cohérente avec les voisines.
+
+### Wordings exacts (respecter mot pour mot)
+
+- Eyebrow : `Croquis...`
+- Titre : `Sur-mesure`
+- Sous-titre : `Et si on dessinait le tien ensemble ?`
+- Signature : `— Robin`
+
+### Critères de succès
+
+- [ ] Card sur-mesure dans le slot "Ma sélection" affiche le nouveau visuel "carnet d'atelier"
+- [ ] Plus aucune trace du dégradé orange clair, de l'icône recyclage, du badge pill orange "Sur-mesure"
+- [ ] SVG croquis suspension présent, centré, `95px` desktop / `75px` mobile
+- [ ] Wordings respectés mot pour mot (eyebrow Square Peg "Croquis...", titre "Sur-mesure" uppercase wood-dark, sous-titre italique wood-mid, signature "— Robin" orange Square Peg)
+- [ ] Hover : `translateY(-3px) rotate(0.4deg)`, transition 0.2s
+- [ ] Lignes de cahier discrètes en arrière-plan (`repeating-linear-gradient` 22px, opacity `rgba(139, 115, 85, 0.06)`)
+- [ ] `href="/sur-mesure/"` préservé sur l'élément cliquable
+- [ ] Event GA4 `mes_creations_card_surmesure_click` continue de fire au clic (delegate via `sapi-mes-creations-ga4.js`)
+- [ ] Mobile (≤768px) : SVG redimensionné à `75×75px`, layout intact, lisible
+- [ ] Cellule de grille s'aligne en hauteur avec les cards produits voisines (pas plus haute, pas plus basse)
+- [ ] Aucune régression sur les autres cards du slot
+- [ ] Aucune régression sur le `populateSelectionGrid()` JS (le clone du template fonctionne identique)
+
+### Notes
+
+- **Pas de modification JS prévue** : `populateSelectionGrid()` dans `assets/sapi-cards-conseiller.js` continue de cloner le `<template>` tel quel.
+- **Branche** : code sur `test-theme-sapi-maison`, auto-deploy test, validation Robin avant merge master + déploiement prod.
+- **Si le SVG croquis pose problème de rendu** (trop fin, mal aligné, etc.) : Claude Code peut ajuster le stroke-width ou le viewBox mais pas changer la silhouette générale (Robin a validé ce dessin).
+- **Évolution future** (hors scope) : Robin pourrait fournir un scan d'un croquis dessiné à la main pour remplacer le SVG. Pas demandé pour cette livraison.
+
+---
+
 ## [TÂCHE] Conseiller V3 — Round 2 : 17 bugs (audit code restant + tests UX Robin)
 **Date :** 2026-05-22
 **Branche :** `test-theme-sapi-maison`
