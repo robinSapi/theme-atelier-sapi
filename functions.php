@@ -1062,6 +1062,39 @@ function sapi_get_product_photo_ids($post_id, $type = '', $limit = 0) {
 }
 
 /**
+ * Helper bas niveau : itère les rows du repeater galerie_produit d'un produit.
+ * Renvoie un tableau de ['type' => string, 'image_id' => int, 'index' => int]
+ * pour chaque row dont l'image est résolvable en attachment ID.
+ *
+ * - Le type est normalisé en string (gère le cas array ['value' => ...]).
+ * - L'image est résolue via sapi_get_acf_image_id (ID, array ACF ou URL).
+ * - Les rows sans image résolvable sont skippées silencieusement.
+ * - L'ordre du repeater est préservé.
+ *
+ * Utilisé par la page admin de migration (inc/sapi-migrate-galerie.php) et,
+ * à terme, par les autres consommateurs qui dupliquent aujourd'hui la logique
+ * de parcours (page-inspiration.php).
+ *
+ * @param int $post_id Product ID
+ * @return array       Liste d'entrées ['type', 'image_id', 'index']
+ */
+function sapi_iterate_product_photos($post_id) {
+  if (!function_exists('get_field')) return [];
+  $galerie = get_field('galerie_produit', $post_id);
+  if (empty($galerie) || !is_array($galerie)) return [];
+
+  $out = [];
+  foreach ($galerie as $index => $row) {
+    $type = isset($row['type_photo']) ? $row['type_photo'] : '';
+    if (is_array($type)) $type = isset($type['value']) ? $type['value'] : '';
+    $img_id = sapi_get_acf_image_id(isset($row['image']) ? $row['image'] : null);
+    if (!$img_id) continue;
+    $out[] = ['type' => (string) $type, 'image_id' => (int) $img_id, 'index' => (int) $index];
+  }
+  return $out;
+}
+
+/**
  * Get product photos as URLs (backward-compatible wrapper).
  *
  * @param int    $post_id  Product post ID
