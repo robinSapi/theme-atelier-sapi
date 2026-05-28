@@ -246,6 +246,7 @@ if ($featured_query->have_posts()) {
         }
 
         $featured_products[] = [
+          'id' => get_the_ID(),
           'name' => get_the_title(),
           'price' => $price_display,
           'image_id' => $featured_image_id,
@@ -596,7 +597,7 @@ foreach ($carousel_products as $product) {
 
     <!-- Product Card - Random Featured Product -->
     <?php if (!empty($featured_products)) : ?>
-    <a href="<?php echo esc_url($featured_products[0]['url']); ?>" class="bento-card bento-product-featured">
+    <a href="<?php echo esc_url($featured_products[0]['url']); ?>" class="bento-card bento-product-featured" data-product-id="<?php echo esc_attr($featured_products[0]['id']); ?>" data-piece-swap data-piece-swap-type="detail" data-piece-swap-size="large">
       <?php echo wp_get_attachment_image($featured_products[0]['image_id'], 'large', false, ['class' => 'bento-bg-img', 'loading' => 'lazy', 'alt' => $featured_products[0]['name'] . ' — Luminaire artisanal']); ?>
       <div class="bento-product-featured-info">
         <h3><?php echo esc_html($featured_products[0]['name']); ?></h3>
