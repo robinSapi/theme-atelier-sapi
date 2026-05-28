@@ -2,83 +2,86 @@
 
 ## 🔧 À faire
 
-## [TÂCHE] S28 — Phase 4a : investigation + proposition d'architecture du swap photos par pièce
+## [TÂCHE] S28 — Phase 4b : implémentation du swap photos par pièce (Option B, surface par surface)
 **Date :** 2026-05-28
 **Branche :** `feature/photos-par-piece`
-**Priorité :** haute — bloquant pour Phase 4b (implémentation du swap)
-**Type :** INVESTIGATION + DOCUMENT DE RECO. **Ne PAS implémenter le swap dans cette phase** — uniquement lire le code et produire une reco d'architecture.
-**Mémoire de contexte** (Cowork) : `project_photos_par_piece.md` (règles de swap section "Règles de swap"). **Audit Phase 0** : `site-web/memory/audit_galerie_produit_callsites.md` (les 25 call-sites).
+**Priorité :** haute — dernière phase de code du chantier S28 (avant Phase 5 tagging + Phase 6 cleanup)
+**Spec d'implémentation = source de vérité** : `site-web/memory/phase4-archi-swap-photos.md` (le doc de reco produit en Phase 4a). **LIRE EN INTÉGRALITÉ avant de coder** — il contient l'architecture détaillée, le découpage des 5 chantiers, et les décisions techniques.
+**Mémoire de contexte** (Cowork) : `project_photos_par_piece.md` (règles de swap).
+
+### Décisions tranchées par Robin (28/05/2026)
+
+1. **Approche = Option B** : swap JS post-rendu via AJAX. Micro-flash de ~150ms accepté (imperceptible sur un swap d'image). Compatible cache, zéro config infra.
+2. **Fallback = F1** : wrapper centralisé `sapi_get_product_photo_ids_with_fallback($id, $type, $limit, $piece, $essence)` qui retombe sur la photo par défaut si le filtre pièce retourne `[]`. Le helper canonique `sapi_get_product_photo_ids` reste sémantiquement strict.
+3. **Fiche produit = OUI** : refactor de `single-product.php` (positions 1+2 du carousel ambiance) pour activer le swap dessus.
 
 ### Contexte
 
-Phases 0-3 livrées. Le helper `sapi_get_product_photo_ids($post_id, $type, $limit, $piece, $essence)` est en dual-read avec filtres taxonomies (Phase 3). Il reste à **activer le swap** : afficher la photo de la pièce du visiteur au lieu de la photo par défaut, sur les bonnes surfaces.
+Phases 0-3 livrées. Helper dual-read + filtres taxonomies en place (Phase 3). Phase 4a a établi l'architecture. Il reste à **activer le swap** : afficher la photo de la pièce du visiteur sur 4 surfaces, via swap JS post-rendu.
 
-**Le problème d'architecture à résoudre** : `sapiProject` (dont `sapiProject.answers.piece`) est stocké **uniquement en localStorage côté JS**. Il n'y a **aucun cookie PHP** actuellement. Le PHP côté serveur ne peut donc pas connaître la pièce du visiteur au moment du rendu.
+**4 surfaces concernées** (les seules, cf reco Phase 4a) :
+1. Cards `/mes-creations/`
+2. Cards page catégorie (hover)
+3. Fiche produit (positions 1+2 du carousel ambiance)
+4. Home featured (produit coup de cœur uniquement)
 
-Le pattern actuel du site = **PHP rend une version par défaut, JS adapte en live** (cf `sapi-hero-live.js`, `sapi-help-pill.js`, `sapi-cards-conseiller.js`).
+**Rappel important** : le swap n'aura d'effet VISIBLE que sur les produits dont des photos sont taguées `media_room`. Robin n'a pas encore tagué (Phase 5). Donc Phase 4b met en place le MÉCANISME ; pour le tester, il faudra tagger quelques photos d'abord (voir protocole de test).
 
-**Préférence Robin** : viser le **zéro flash** (idéalement rendu serveur direct), MAIS il accepte que tu explores et proposes la meilleure approche selon les contraintes réelles (cache, etc.).
+### Garde-fous absolus
 
-### Mission Phase 4a — produire un document de reco
+1. **Progressive enhancement** : si le JS échoue (AJAX timeout, pas de projet, pièce sans photo), le rendu par défaut (photo ambiance par défaut, rendue par le PHP) DOIT rester affiché. Le swap est un "plus", jamais un prérequis. Aucune surface ne doit se retrouver sans photo si le swap échoue.
+2. **Surface par surface** : implémenter et tester chaque surface AVANT de passer à la suivante. Commit séparé par surface. Ordre : infra → /mes-creations/ → catégorie → home → fiche produit (la plus délicate en dernier).
+3. **Ne pas casser le rendu par défaut** : les 4 call-sites continuent de rendre la photo par défaut côté PHP. Le swap JS vient PAR-DESSUS.
+4. **Helper canonique intact** : `sapi_get_product_photo_ids` (Phase 3) n'est pas modifié. Le wrapper fallback F1 est une NOUVELLE fonction qui l'enveloppe.
+5. **Repeater intact** : zéro write.
+6. **Lecture `sapiProject`** : lecture seule du localStorage (clé `sapiProject`), via le mécanisme `subscribe()` existant. Pas d'écriture, pas de cookie créé.
 
-**Fichier de sortie** : `site-web/memory/phase4-archi-swap-photos.md`
+### Périmètre — 5 chantiers (cf doc §5.2)
 
-Le document doit contenir :
+Suivre le découpage détaillé du document `phase4-archi-swap-photos.md`. En résumé :
 
-**1. État des lieux du mécanisme `sapiProject` actuel**
-- Lire `assets/sapi-project.js` : comment `sapiProject` est stocké (clé localStorage exacte), lu, mis à jour, et quels events sont émis lors d'un changement
-- Lire `assets/sapi-hero-live.js`, `assets/sapi-cards-conseiller.js`, `assets/sapi-help-pill.js`, `assets/sapi-product-preselect.js` : comprendre le pattern de "swap live JS" existant (comment ils réagissent au changement de pièce, comment ils manipulent le DOM)
-- Documenter : y a-t-il déjà un event type `sapi:project-changed` que le JS écoute ?
+1. **Infra** : nouveau module JS `sapi-photo-swap.js` + handler AJAX PHP (qui appelle le wrapper fallback F1) + wrapper `sapi_get_product_photo_ids_with_fallback`. Le module lit `sapiProject.answers.piece` (+ essence si pertinent), fait 1 appel AJAX batché pour toutes les cards de la page, et remplace les `img.src`.
+2. **Activation `/mes-creations/`** : les cards swappent leur photo principale vers la photo pièce.
+3. **Activation cards page catégorie** : idem sur `/categorie-produit/*`.
+4. **Activation home featured** : seul le produit coup de cœur swappe.
+5. **Activation fiche produit** : refactor `single-product.php` positions 1+2 du carousel ambiance (chantier le plus délicat — bien tester que le reste de la galerie est inchangé).
 
-**2. Analyse des contraintes de cache (prod)**
-- Identifier les caches actifs en prod susceptibles d'impacter un rendu serveur par pièce : LiteSpeed LsCache, WP Super Cache, Autoptimize, Redis Object Cache (cf mémoire Cowork `reference_plugins_actifs`)
-- Question clé : si on optait pour un rendu serveur basé sur un cookie `sapi_piece`, est-ce que le cache de page servirait une version figée (cassant le swap) ? Le cache varie-t-il par cookie ?
-- Conclusion : le rendu serveur direct (zéro flash) est-il réellement viable sur cette infra, ou le cache l'empêche-t-il en pratique ?
+### Protocole de test (à exécuter par Robin sur test après déploiement)
 
-**3. Surfaces à swapper (rappel des règles de swap validées)**
-D'après `project_photos_par_piece` :
-- Cards `/mes-creations/` + cards page catégorie : photo principale = photo pièce si elle existe, sinon fallback ambiance par défaut
-- Fiche produit : positions 1 et 2 du carousel ambiance = photos pièce si elles existent, reste inchangé
-- Home : seul le produit featured/coup de cœur swap
-- Aucune autre surface ne swap
+Comme le swap dépend du tagging (pas encore fait), préparer un jeu de test minimal :
 
-Pour chaque surface, indiquer le(s) call-site(s) concerné(s) (depuis l'audit Phase 0) et si c'est un appel via helper ou une lecture directe.
-
-**4. Options d'architecture proposées (avec trade-offs)**
-
-Au minimum analyser :
-
-- **Option A — Cookie + rendu serveur direct (zéro flash)** : le JS écrit `sapiProject.answers.piece` dans un cookie `sapi_piece`, le PHP le lit (`$_COOKIE['sapi_piece']`) et passe `$piece` au helper au moment du rendu. Trade-offs : zéro flash, MAIS dépend de la compatibilité cache (point 2), et 1er chargement sans cookie = pas de swap (acceptable ?).
-- **Option B — Swap JS post-rendu (micro-flash)** : le PHP rend la photo par défaut, le JS lit le localStorage et remplace les `src` via data-attributes ou AJAX. Cohérent avec l'archi existante. Trade-offs : compatible cache, mais flash possible.
-- **Option C — Hybride** : data-attributes pré-rendus en PHP (toutes les variantes par pièce exposées dans le HTML) + JS qui pick la bonne sans AJAX. Zéro flash si le HTML contient déjà la bonne photo via CSS/JS instantané. Trade-offs à détailler.
-- Toute autre option pertinente que l'analyse révèle.
-
-**5. Recommandation argumentée**
-- Quelle option Claude Code recommande, pourquoi, et comment elle concilie au mieux la préférence "zéro flash" de Robin avec les contraintes réelles
-- Le découpage suggéré de Phase 4b (ordre des surfaces, dépendances)
-- La gestion du **fallback** : si une pièce n'a pas de photo taguée pour un produit, le helper retourne `[]` avec le filtre `$piece` → il faut re-appeler sans filtre pour retomber sur l'ambiance par défaut. Où mettre cette logique (wrapper helper ? dans chaque call-site ?).
-
-### Garde-fous
-
-1. **AUCUNE implémentation du swap** — Phase 4a est lecture + rédaction du doc uniquement. Pas de modif des call-sites, pas de nouveau JS de swap, pas de cookie créé.
-2. Le seul fichier créé/modifié = `site-web/memory/phase4-archi-swap-photos.md`.
-3. Ne pas modifier le helper (Phase 3 est figée et validée).
+1. **Tagger quelques photos** : sur 2-3 produits (ex: Gaston, Olivia), taguer 1-2 photos `galerie_ambiance` avec `media_room = salon` via la modale média
+2. **Créer un projet "salon"** dans le navigateur : ouvrir le Conseiller sur test, faire un parcours qui aboutit à `sapiProject.answers.piece = salon`
+3. **Vérifier le swap** sur les 4 surfaces : les produits taggés salon doivent montrer leur photo salon ; les produits NON taggés salon doivent montrer leur photo par défaut (fallback F1)
+4. **Vérifier sans projet** : en navigation privée (pas de projet), toutes les surfaces montrent les photos par défaut (comportement actuel inchangé)
+5. **Vérifier le micro-flash** : recharger une page avec projet actif, observer le swap (doit être quasi imperceptible)
 
 ### Critères de succès
 
-- [ ] Fichier `site-web/memory/phase4-archi-swap-photos.md` créé et commité
-- [ ] État des lieux `sapiProject` documenté (clé localStorage, events, pattern swap JS existant)
-- [ ] Analyse cache prod : verdict sur la viabilité du rendu serveur direct
-- [ ] Surfaces à swapper listées avec call-sites associés
-- [ ] Au moins 3 options d'architecture avec trade-offs concrets
-- [ ] Recommandation argumentée + découpage Phase 4b proposé
-- [ ] Gestion du fallback (pièce sans photo) traitée
-- [ ] Aucune modification de code (vérif : `git diff` ne montre que le nouveau .md)
+- [ ] Module `sapi-photo-swap.js` créé, enqueue sur les bonnes surfaces
+- [ ] Handler AJAX PHP créé (nonce + sanitization du `piece`/`essence`)
+- [ ] Wrapper `sapi_get_product_photo_ids_with_fallback` créé (F1)
+- [ ] Les 4 surfaces swappent vers la photo pièce quand projet actif ET photo taguée
+- [ ] Fallback OK : produit sans photo de la pièce → photo par défaut (jamais de trou)
+- [ ] Sans projet → rendu par défaut strictement inchangé (progressive enhancement)
+- [ ] Si AJAX échoue → rendu par défaut reste (pas de page cassée)
+- [ ] Fiche produit : positions 1+2 swappées, reste de la galerie inchangé
+- [ ] Repeater intact, helper canonique Phase 3 intact
+- [ ] Commit séparé par chantier (infra + 4 surfaces)
 - [ ] Push auto sur `feature/photos-par-piece` (cf [[feedback_claude_code_push_test]])
 
 ### Notes pour le retour
 
-Dans le retour côté queue : résumé de la reco (3-5 bullets), l'option recommandée, et les 2-3 décisions que Robin devra trancher avant Phase 4b.
+- Hash des commits (1 par chantier idéalement)
+- Confirmer que le rendu par défaut est préservé sur chaque surface (progressive enhancement)
+- Indiquer à Robin le protocole de test exact à suivre (avec le tagging minimal requis)
+- Toute déviation vs le doc d'archi, avec justification
+
+### Suite (hors scope Phase 4b)
+
+- **Phase 5** : tagging massif des photos par Robin (media_room + media_essence), dans l'ordre du trafic (salon → chambre → cuisine → ...). C'est ce qui rendra le swap réellement visible sur le site.
+- **Phase 6** : vidage du repeater `galerie_produit` (après plusieurs semaines de stabilité prod).
+- **Mise en prod de Phase 3+4** : merge master + déploiement, après validation complète sur test. (Phase 1+2 sont déjà en prod.)
 
 ---
 
@@ -306,6 +309,156 @@ Au retour, indiquer pour chaque chantier :
 ---
 
 ## ✅ Livré
+
+## [RETOUR] S28 Phase 4b — Implémentation du swap photos par pièce (Option B, 5 chantiers)
+**Date livrée :** 2026-05-28
+**Branche :** `feature/photos-par-piece` (5 commits code + 1 commit retour, **poussés** sur origin — GHA déclenché, déploie sur test)
+**Périmètre :** 5 chantiers livrés strictement dans l'ordre prescrit, commits séparés
+
+### Commits livrés
+
+| # | Hash | Chantier | Fichier(s) | Lignes |
+|---|------|----------|------------|--------|
+| 1 | `ab400f1` | Infra (wrapper fallback + handler AJAX + JS swap + enqueue) | `functions.php` + nouveau `assets/sapi-photo-swap.js` | +363/0 |
+| 2 | `94d04ab` | Activer cards `/mes-creations/` | `woocommerce/archive-product.php` | +1/-1 |
+| 3 | `979aa51` | Activer cards page catégorie | `woocommerce/content-product.php` | +12/-1 |
+| 4 | `9ecaff8` | Activer home featured (coup de cœur) | `front-page.php` | +2/-1 |
+| 5 | `9cd7593` | Activer fiche produit positions 1+2 | `woocommerce/single-product.php` | +21/-2 |
+
+**Total :** ~399 lignes ajoutées, ~5 supprimées. **Aucun call-site existant n'est modifié** (sauf l'ajout chirurgical des `data-*` côté HTML). Le helper canonique Phase 3, le wrapper Phase 3, et le repeater sont tous intacts.
+
+### Garde-fous respectés (tous ✅)
+
+- **Progressive enhancement strict** :
+  - Sans projet → le JS détecte `piece === ''` → no-op, rendu PHP par défaut intact
+  - Pièce sans photo taguée → handler AJAX renvoie rien pour ce produit → défaut conservé
+  - AJAX échoue (timeout 5s, erreur réseau) → catch silencieux → défaut conservé
+  - Pas d'élément `[data-piece-swap]` sur la page → JS no-op total
+- **Helper canonique Phase 3 intact** : `sapi_get_product_photo_ids` n'est pas modifié. Le wrapper `sapi_get_product_photo_ids_with_fallback` est une NOUVELLE fonction qui l'enveloppe.
+- **Repeater `galerie_produit` intact** : zéro write. Le handler AJAX lit le helper Phase 3 (qui lit Gallery prioritaire, fallback repeater). Aucune écriture.
+- **Lecture seule de `sapiProject`** : le JS appelle `window.sapiProject.get()` + `subscribe()`. Pas d'écriture, pas de cookie créé.
+- **`img.srcset` reset** sur swap (cf CLAUDE.md règle #9) : `img.srcset = ''` + `removeAttribute('srcset')`.
+- **CSRF** : nonce `sapi_photo_swap` créé via `wp_create_nonce` + vérifié via `check_ajax_referer`.
+- **Sanitization** : `sanitize_key` (piece, essence, type, size), `(int)` (ids, count). Whitelist sur `type` (7 valeurs) et `size` (4 valeurs). Hard cap 50 IDs/appel.
+
+### Architecture du swap (rappel succinct)
+
+```
+Visiteur charge /mes-creations/
+  → PHP rend les cards avec photos par défaut (ambiance générique)
+  → Browser parse HTML, image src commence à fetch
+  → DOMContentLoaded fire
+  → sapi-photo-swap.js exec : lit sapiProject.answers.piece (localStorage)
+  → Si piece = 'salon' : groupe les cards [data-piece-swap] par (type, size)
+  → 1 appel AJAX par groupe : ?action=sapi_get_piece_photos&piece=salon&ids=5035,5036,...
+  → Handler PHP : pour chaque produit, sapi_get_product_photo_ids($pid, 'ambiance', 1, 'salon')
+    – si filtre retourne [] (pas de photo taguée salon), tente sans essence (si essence présente)
+    – si toujours [], ne renvoie RIEN pour ce produit → défaut conservé côté front
+  → JS reçoit la map { product_id: [url1] } → applique img.src + srcset = ''
+  → Subscribe sapiProject : re-swap si la pièce change in-session
+```
+
+### Décisions techniques
+
+- **Endpoint AJAX unique flexible** (pas 4 endpoints séparés). Params : `piece`, `essence`, `type`, `count` (1..4), `size`, `ids` (CSV). Retour : map `{pid: [url1, url2, ...]}`.
+- **Whitelist taxonomies** : type whitelisté à 7 valeurs (ambiance, detail, fabrication, client, tailles, packshot, accessoires). Size whitelistée à 4 (large, full, woocommerce_thumbnail, woocommerce_single).
+- **Auto-fallback granulaire** : (`$piece` + `$essence`) → (`$piece` seul) → défaut. Le helper canonique reste strict.
+- **Enqueue global** (footer, ~2 KB JS + nonce/ajaxUrl) au lieu de conditionnel par template. Plus simple, JS no-op si pas de `[data-piece-swap]`.
+- **Pas d'event custom `sapi:project-changed`** : on utilise `sapiProject.subscribe()` (pattern thème, cf Phase 4a §1.3).
+- **`srcset = ''` + `removeAttribute('srcset')`** : règle CLAUDE.md #9 — sans ça, le navigateur reste sur l'ancien srcset.
+
+### Protocole de test pour Robin (à exécuter sur test après déploiement GHA)
+
+#### Pré-requis : tagging minimal pour voir le swap en action
+
+Le swap dépend du tagging `media_room`. Phase 5 (tagging massif) n'est pas faite. Pour valider Phase 4b, **tagger un échantillon minimal** :
+
+1. Aller dans `WP Admin → Médias`
+2. Pour **2 produits de test** (ex: Gaston #5036, Olivia #5035), prendre **2 photos `galerie_ambiance`** chacun (en regardant la fiche produit ACF pour récupérer les IDs/files des Gallery)
+3. Sur chacune de ces 4 photos, en éditant l'attachment, **assigner `media_room = salon`** (cocher la case salon dans la sidebar)
+4. Pour 1 des 2 produits, prendre aussi **1 photo `galerie_detail`** et lui assigner `media_room = salon` (sert au test home featured + page la-star-du-moment)
+
+**Total à tagger : 4 photos ambiance + 1 photo detail = 5 photos.** ~5 minutes.
+
+#### Test 1 — Cards `/mes-creations/`
+
+1. Ouvrir une fenêtre **navigation privée** sur `test.atelier-sapi.fr/mes-creations/?piece=salon`
+2. Le projet `salon` est ingéré au load (cf `sapi-project.js:388`)
+3. **Attendu** :
+   - Les 2 produits taggués (Gaston, Olivia) → leur card swap vers la photo ambiance salon (~50-200 ms après le paint initial)
+   - Tous les autres produits → la photo ambiance par défaut reste (handler renvoie rien pour eux)
+4. **Vérifier** dans DevTools Network : 1 seule requête `admin-ajax.php?action=sapi_get_piece_photos&piece=salon&type=ambiance&size=large&...&ids=5035,5036,...`. Réponse JSON `{ "5035": ["..."], "5036": ["..."] }`.
+
+#### Test 2 — Cards page catégorie
+
+1. Toujours en navigation privée avec projet salon : ouvrir `/categorie-produit/suspensions/`
+2. **Attendu** :
+   - Les produits taggués qui sont des suspensions → swap photo (ici `size = woocommerce_thumbnail`, plus petite que `/mes-creations/`)
+   - Tous les autres → défaut
+3. Vérifier que la photo HOVER (gallery WC) reste inchangée (le swap cible la photo principale seulement).
+
+#### Test 3 — Home featured
+
+1. Ouvrir `/` en navigation privée avec projet salon
+2. **Attendu** : si le produit coup de cœur affiché du jour est dans les taggués (Gaston ou Olivia), sa photo (de type `detail`) swap vers la version salon. Sinon, défaut conservé.
+3. Note : le coup de cœur étant tiré random parmi les produits, refresh plusieurs fois pour potentiellement tomber sur un produit taggué.
+
+#### Test 4 — Fiche produit positions 1+2
+
+1. Ouvrir une fiche produit taggée (ex: `/produit/olivia-la-gardienne/`) avec projet salon
+2. **Attendu** :
+   - Slideshow ambiance en haut : positions 1 et 2 swappent vers les photos salon (les 2 premières ambiance taguées salon)
+   - Les positions 3+ (vue de dessous, detail, fabrication) restent inchangées
+   - Le reste de la galerie produit (gallery WC à droite) reste inchangée
+3. **DevTools** : 1 requête AJAX avec `count=2`, retour `{ "5035": ["url_ambiance_salon_1", "url_ambiance_salon_2"] }`.
+
+#### Test 5 — Progressive enhancement (sans projet)
+
+1. **Vider le localStorage** dans DevTools (Application → Local Storage → supprimer `sapiProject`)
+2. Recharger les 4 surfaces ci-dessus
+3. **Attendu** : strictement le comportement actuel — photos par défaut partout, **zéro requête AJAX `sapi_get_piece_photos`** (le JS détecte pas de pièce et no-op).
+
+#### Test 6 — Pièce sans photo taguée (fallback)
+
+1. Choisir une pièce qu'on n'a PAS taguée (ex: `cuisine`) : `?piece=cuisine`
+2. **Attendu** : toutes les cards montrent le défaut. Une requête AJAX part, mais retour `{}` (map vide). Aucun swap. Photos inchangées.
+
+#### Test 7 — Swap in-session (sans reload)
+
+1. Sur `/mes-creations/` avec projet `salon` actif → cards swappées
+2. Ouvrir le Conseiller via la card "Mon projet" → modifier la pièce vers `chambre`
+3. Fermer la modale (sans reload de la page)
+4. **Attendu** : `sapiProject.subscribe` fire → re-swap automatique. Les cards retrouvent leurs photos par défaut (si chambre pas taguée) ou les photos chambre.
+
+#### Test 8 — Échec AJAX simulé
+
+1. DevTools → Network → Block request URL `sapi_get_piece_photos`
+2. Recharger `/mes-creations/?piece=salon`
+3. **Attendu** : photos par défaut affichées (le `catch` du fetchWithTimeout ne casse rien). Aucune erreur visible utilisateur.
+
+### Critères de succès — verdict
+
+- [ ] Module `sapi-photo-swap.js` créé, enqueue global, no-op si pas de `[data-piece-swap]`
+- [ ] Handler AJAX créé avec nonce, sanitization, whitelist type/size, cap 50 IDs
+- [ ] Wrapper `sapi_get_product_photo_ids_with_fallback` créé (F1) avec fallback granulaire
+- [ ] Les 4 surfaces swappent vers la photo pièce **après tagging** (tests 1-4 à valider visuellement par Robin)
+- [ ] Fallback OK : produit sans photo de la pièce → photo par défaut (test 6)
+- [ ] Sans projet → rendu par défaut strictement inchangé (test 5)
+- [ ] Si AJAX échoue → rendu par défaut reste (test 8)
+- [ ] Fiche produit : positions 1+2 swappées, reste de la galerie inchangé (test 4)
+- [ ] Repeater intact, helper canonique Phase 3 intact, wrapper Phase 3 intact
+- [ ] 5 commits séparés (1 par chantier) ✅
+- [ ] Push auto sur `feature/photos-par-piece` ✅
+
+**Verdict final** : ⏳ **À remplir par Robin après les tests sur test post-déploiement.**
+
+### Suite (hors scope Phase 4b)
+
+- **Phase 5** : tagging massif des photos par Robin (`media_room` + `media_essence`). C'est ce qui rendra le swap réellement visible sur la majorité des produits. Suggéré dans l'ordre du trafic : salon → chambre → cuisine → bureau → entrée → escalier.
+- **Phase 6** : vidage du repeater `galerie_produit` (après plusieurs semaines de stabilité prod).
+- **Mise en prod** : Phase 1+2 sont en prod. Phases 3+4 mergent dans `test-theme-sapi-maison` puis `master` après validation complète sur test.
+
+---
 
 ## [RETOUR] S28 Phase 4a — Investigation + document d'architecture du swap photos par pièce
 **Date livrée :** 2026-05-28
