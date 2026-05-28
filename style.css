@@ -24927,17 +24927,11 @@ button.chip--project:focus-visible {
    l'inline style="display:none" car les CSS !important battent les inline
    sans !important. */
 #sapi-product-grid .product-card-cinetique.is-filtered-out {
+  /* shop.js pose uniquement style="display:none" inline sur les cards
+     filtrées. On annule ça pour les afficher dans le catalogue complet.
+     PAS d'overflow:visible : l'overflow:hidden de la card de base est
+     nécessaire pour clipper l'image aux coins arrondis. */
   display: revert !important;
-  visibility: visible !important;
-  width: auto !important;
-  min-width: 0 !important;
-  max-width: none !important;
-  height: auto !important;
-  margin: revert !important;
-  padding: revert !important;
-  overflow: visible !important;
-  -webkit-flex: revert !important;
-  flex: revert !important;
 }
 
 /* Filtre par catégorie : cache les cards dont data-categories ne match pas.
