@@ -227,6 +227,98 @@ Au retour, indiquer pour chaque chantier :
 
 ## ✅ Livré
 
+## [RETOUR] Polish /mes-creations/ + audit pré-prod + push production
+**Date livrée :** 2026-05-28
+**Branche :** `test-theme-sapi-maison` → mergée dans `master` (`e092f1d`)
+**Push prod :** ✅ Robin a lancé le workflow GitHub Actions après merge
+**Volume :** 78 commits, ~1600 lignes touchées (PHP/JS/CSS)
+
+### Périmètre travaillé pendant la session
+
+**1. Polish UX /mes-creations/ post-refonte (itérations sur ~20 commits)**
+- Card englobante "Mon projet" → "**Ton projet**" (rebranding tutoiement)
+- Padding latéral de la card englobante : `26px` → `10px` (desktop + mobile) → plus de largeur au slot intérieur
+- Phrase IA : padding latéral mini `10px` (ne colle plus aux bords)
+- Slot horizontal mobile : `padding-left: 20px` (vrai gap avant la 1re card), `padding-bottom: 24px`, `scroll-padding-inline-start: 20px` (snap aligné), cards ≤480px à 85% (au lieu de 80%)
+- Cards produit du slot : `.product-firstname` + `.product-restname` en `display: block` (titres forcés sur 2 lignes via le formatter → hauteurs alignées même quand nom long type "L'incandescent")
+- Prix centré dans le slot
+- Séparateur entre sections : 3 dots + 2 lignes latérales → **filet fin de 80px** centré (Option B validée Robin)
+- Pills filtre : suppression du count (compteurs sur "Tous30/Suspensions11/…"), retour au wrap multi-lignes mobile (vs scroll horizontal qui tronquait les textes)
+- Fix coins arrondis cards catalogue : suppression du `overflow: visible !important` sur `.is-filtered-out` qui faisait déborder l'image hors du border-radius
+
+**2. Polish modale Conseiller**
+- Textes bumpés (+30% sur titres, +15% sur le reste) pour lisibilité
+- Boutons réponse `.choice` agrandis (padding 18 12 15, icône 44×44, SVG 24×24)
+- Chip-question mobile : stack vertical 1 bouton par ligne, label 12px, width 100%
+- Overlay plus sombre : `rgba(50, 40, 30, 0.55)` → `rgba(30, 22, 14, 0.82)`
+- Room picker (3 emplacements Home/Mes créations/Conseil) uniformisé : icône 60px, SVG 30px, label 14px
+- Chorégraphie 5 phases dans la card englobante : typewriter → chip-question (+0) → slot grid (+600ms) → nav slider (+1200ms) → lien Modifier (+1800ms)
+- Animations max-height + opacity + transform sur transitions cubic-bezier
+- Modale s'ouvre sur la question répondue avec pill sélectionné, puis **auto-avance** vers la question suivante après 700ms (UX : confirmation visuelle que la réponse a été prise en compte)
+
+**3. Race conditions modale-card (audit interne avant cette session)**
+- `pauseNotifications`/`resumeNotifications` sur sapiProject pour éviter notify pendant la modale ouverte
+- Bug 1 (race condition handler) : `pauseNotifications()` appelé AVANT `update()` dans handleChipAnswer + room-card handler
+- Bug 2 (resumeNotifications jamais appelé sur sortie "Voir ma sélection") : `SessionTracker.finalize()` + `resumeNotifications()` ajoutés au .then du `runExitSequence`
+
+**4. Audit pré-prod par 3 agents (PHP / JS / CSS) — 0 bloqueur identifié**
+4 nits corrigés en un commit avant push prod (`342447d`, puis `7d5055a` pour ajuster) :
+- a11y : `:focus-visible` (outline `--color-wood-dark`) sur pills, slider nav arrows + dots, edit link, sur-mesure card
+- JS chorégraphie : timers `revealTimers` trackés au niveau module + `clearRevealTimers()` au début de chaque appel → plus d'animations désynchronisées si `render()` est rappelé
+- JS auto-avance confirmStep : `state.confirmAdvanceTimer` annulé dans `closeModal` + garde `state.open` dans le callback
+- CSS max-height slot : ajout de `.is-fully-revealed { max-height: none }` via `transitionend` JS → plus de clip vertical possible si une card atypique dépasse (max-height de transition restée à 600 pour préserver la vitesse visuelle d'expansion)
+
+### Self-check par critère
+
+| Critère | État | Détails |
+|---|---|---|
+| Card englobante "Ton projet" — chorégraphie progressive | ✅ | Chaque phase s'enchaîne visuellement (typewriter → chip → slot → dots → edit), card grandit progressivement |
+| Slot horizontal scroll-snap | ✅ | Desktop 4 cards / Tablette 3 / Mobile 2 / Petit mobile 85% (peek) |
+| Pills filtre : multi-lignes mobile, wrap centré | ✅ | Plus de scroll horizontal qui tronquait les textes |
+| Séparateur Option B | ✅ | 80px × 1px centré opacity 0.6, plus de dots |
+| Cards catalogue : coins arrondis homogènes | ✅ | Plus de `overflow: visible !important` qui cassait le radius |
+| Pas de count dans les pills | ✅ | `$mes_creations_total` + spans `__count` + règle CSS retirés |
+| a11y clavier | ✅ | Tab → outline wood-dark sur tous les nouveaux interactifs |
+| Modale auto-avance fermable | ✅ | Si user ferme dans les 700ms : timer annulé, pas de snapshot tracking inutile |
+| Aucun setTimeout orphelin chorégraphie | ✅ | `revealTimers` array + `clearRevealTimers()` au début de chaque reveal |
+| Audit 3 agents | ✅ | 0 bloqueur PHP/JS/CSS. 4 nits corrigés avant merge |
+| Merge master + push GHA + déploiement prod | ✅ | Confirmé par Robin |
+
+### Plan de test communiqué à Robin avant push
+
+1. **Focus clavier** : Tab + clic souris sur pills/nav/links → outline uniquement au clavier
+2. **Chorégraphie** : recharger `/mes-creations/` avec projet actif + stress test rapide-clic chip-question
+3. **Auto-avance confirmStep** : clic réponse + fermeture rapide → pas d'erreur, pas d'auto-validation post-close
+4. **Slot max-height** : vérifier `.is-fully-revealed` post-animation via DevTools
+
+Robin a validé tous les points après hard-refresh.
+
+### Fichiers modifiés / créés (cumul session)
+
+| Fichier | Nature |
+|---|---|
+| `style.css` | Polish massif `.mes-creations-*` + `.conseiller-card--mon-projet.mes-creations-selection__card` + `.choice.is-selected` + chorégraphie + `:focus-visible` + `.is-fully-revealed` |
+| `assets/sapi-cards-conseiller.js` | populateSelectionGrid + SessionTracker + chorégraphie 5 phases + `revealTimers` tracking + transitionend listener |
+| `assets/sapi-modal-conseiller.js` | confirmStep listener + auto-avance + `state.confirmAdvanceTimer` + race condition fixes |
+| `assets/sapi-project.js` | `pauseNotifications` / `resumeNotifications` |
+| `woocommerce/archive-product.php` | Refonte structure + room picker + slot englobante + pills + section catalogue + suppression count |
+| `functions.php` | Enqueue admin Conseiller V3 + nouveaux scripts `sapi-mes-creations-*` |
+| `assets/sapi-mes-creations-pills.js` | NOUVEAU (Round précédent) |
+| `assets/sapi-mes-creations-ga4.js` | NOUVEAU (Round précédent) |
+
+### Notes côté Cowork
+
+- **78 commits déployés en une fois** : si Robin remonte un bug en prod sur les jours qui viennent, on a beaucoup de surface à investiguer. Les agents d'audit ont scanné PHP/JS/CSS et n'ont rien trouvé de bloquant, mais surveiller GA4 + analytics + tickets éventuels.
+- **Page `/mes-creations/` est l'entrée commerciale principale** : c'est la page la plus retravaillée du push. Si feedback utilisateur arrive, c'est probablement dessus.
+- **Workflow Cowork ↔ Claude Code** : Robin a opéré la session principalement en mode "feedback direct + itération rapide" (pas via la queue). Pour des tâches structurées (Round 2, refontes), la queue reste l'outil.
+
+### Branches après push
+
+- `master` (prod) : à jour, déployé sur atelier-sapi.fr
+- `test-theme-sapi-maison` : alignée avec master (rien à rebaser)
+
+---
+
 ## [RETOUR] /mes-creations/ refonte UX — 2 sections + card englobante + pills cat + GA4
 **Date livrée :** 2026-05-26
 **Branche :** `test-theme-sapi-maison`
