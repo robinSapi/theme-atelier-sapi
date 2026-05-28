@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - test-theme-sapi-maison
+      - feature/photos-par-piece
   workflow_dispatch:
 
 env:
