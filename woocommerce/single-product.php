@@ -139,42 +139,44 @@ get_header();
 
   $acf_only_count = count($acf_photos) - $first_acf_index;
 
-  // Photos ACF filtrées pour les thumbnails galerie :
-  // - Ambiance 1 (première photo ambiance uniquement)
-  // - Types taille et accessoires
+  // S28 Phase 6a — thumbnails galerie via helper Phase 3 (dual-read Gallery
+  // → repeater). Plus de lecture directe du repeater.
+  //
+  // Contenu (ordre préservé) :
+  //  1. 1re photo ambiance uniquement
+  //  2. Toutes les photos "tailles" (avec merge legacy 'taille' singulier)
+  //  3. Toutes les photos "accessoires"
+  //
+  // Note ordre : avant, taille et accessoires étaient traitées dans une boucle
+  // commune sur le repeater (l'ordre dépendait du drag&drop). Maintenant, on
+  // a "toutes les tailles puis toutes les accessoires" — strictement déterministe.
   $gallery_acf_photos = [];
-  $ambiance_added = false;
-  if (function_exists('get_field')) {
-    $galerie_repeater_gal = get_field('galerie_produit');
-    if (!empty($galerie_repeater_gal) && is_array($galerie_repeater_gal)) {
-      // D'abord : première photo ambiance
-      foreach ($galerie_repeater_gal as $row) {
-        $type = isset($row['type_photo']) ? $row['type_photo'] : '';
-        if (is_array($type)) $type = isset($type['value']) ? $type['value'] : '';
-        if ($type !== 'ambiance') continue;
-        $img_field = isset($row['image']) ? $row['image'] : null;
-        $img_id = sapi_get_acf_image_id($img_field);
-        $url = $img_id ? wp_get_attachment_image_url($img_id, 'full') : '';
-        if ($url) {
-          $gallery_acf_photos[] = ['url' => $url, 'label' => 'Ambiance', 'id' => $img_id];
-          $ambiance_added = true;
-          break; // Seulement la première
-        }
-      }
-      // Ensuite : taille + accessoires
-      foreach ($galerie_repeater_gal as $row) {
-        $type = isset($row['type_photo']) ? $row['type_photo'] : '';
-        if (is_array($type)) $type = isset($type['value']) ? $type['value'] : '';
-        if ($type !== 'taille' && $type !== 'accessoires') continue;
-        $img_field = isset($row['image']) ? $row['image'] : null;
-        $img_id = sapi_get_acf_image_id($img_field);
-        $url = $img_id ? wp_get_attachment_image_url($img_id, 'full') : '';
-        if ($url) {
-          $gallery_acf_photos[] = ['url' => $url, 'label' => isset($type_labels[$type]) ? $type_labels[$type] : ucfirst($type), 'id' => $img_id];
-        }
-      }
-    }
+
+  // 1. Première photo ambiance (limit=1)
+  $amb_ids = sapi_get_product_photo_ids(get_the_ID(), 'ambiance', 1);
+  if (!empty($amb_ids)) {
+    $aid = $amb_ids[0];
+    $url = wp_get_attachment_image_url($aid, 'full');
+    if ($url) $gallery_acf_photos[] = ['url' => $url, 'label' => 'Ambiance', 'id' => $aid];
   }
+
+  // 2. Toutes les tailles (canonique 'tailles' + alias legacy 'taille')
+  $taille_ids = array_values(array_unique(array_merge(
+    sapi_get_product_photo_ids(get_the_ID(), 'tailles', 0),
+    sapi_get_product_photo_ids(get_the_ID(), 'taille',  0)
+  )));
+  foreach ($taille_ids as $tid) {
+    $url = wp_get_attachment_image_url($tid, 'full');
+    if ($url) $gallery_acf_photos[] = ['url' => $url, 'label' => 'Tailles', 'id' => $tid];
+  }
+
+  // 3. Toutes les accessoires (pas d'alias legacy)
+  $acc_ids = sapi_get_product_photo_ids(get_the_ID(), 'accessoires', 0);
+  foreach ($acc_ids as $aid) {
+    $url = wp_get_attachment_image_url($aid, 'full');
+    if ($url) $gallery_acf_photos[] = ['url' => $url, 'label' => 'Accessoires', 'id' => $aid];
+  }
+
   $gallery_acf_count = count($gallery_acf_photos);
   ?>
 
