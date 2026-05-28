@@ -1065,31 +1065,81 @@ function sapi_type_to_gallery_name($type) {
 }
 
 /**
- * Helper: get photo URLs from galerie_produit repeater by type.
- * Returns array of URLs matching the given type, or all photos if no type specified.
+ * Récupère les IDs d'attachments d'un produit, filtré par type / pièce / essence.
  *
- * @param int    $post_id  Product ID
- * @param string $type     Photo type: 'ambiance', 'detail', 'taille', 'client', 'fabrication', or '' for all
- * @param int    $limit    Max number of photos to return (0 = all)
- * @return array           Array of attachment IDs (0 excluded — only valid IDs)
+ * Mode dual-read (Phase 3 S28) :
+ *  1. Lit en priorité la Gallery ACF cible (galerie_ambiance, galerie_detail, etc.)
+ *  2. Fallback sur le repeater galerie_produit si la Gallery est vide
+ *  3. Filtre optionnellement par taxonomies media_room ($piece) et
+ *     media_essence ($essence)
+ *
+ * Rétrocompatibilité : les 17 call-sites existants (audit Phase 0) passent
+ * 1 à 3 arguments. Les 2 nouveaux ($piece, $essence) sont nullables avec
+ * défaut null → comportement strictement inchangé sans eux.
+ *
+ * @param int|WP_Post $post_id  ID du produit (ou WP_Post)
+ * @param string      $type     Type photo ('ambiance', 'detail', 'fabrication',
+ *                              'client', 'tailles', 'packshot', 'vue de dessous',
+ *                              'accessoires') ou '' pour tous les types
+ * @param int         $limit    Max N IDs retournés (0 = sans limite)
+ * @param string|null $piece    Slug taxonomie media_room (ex: 'salon') ou null
+ * @param string|null $essence  Slug taxonomie media_essence (ex: 'peuplier') ou null
+ * @return int[] Array d'IDs d'attachments, ordre préservé (Gallery ACF puis
+ *               repeater), sans 0
  */
-function sapi_get_product_photo_ids($post_id, $type = '', $limit = 0) {
-  if (!function_exists('get_field')) return [];
+function sapi_get_product_photo_ids($post_id, $type = '', $limit = 0, $piece = null, $essence = null) {
+  if (!$post_id || !function_exists('get_field')) return [];
 
   $ids = [];
-  $galerie = get_field('galerie_produit', $post_id);
 
-  if (!empty($galerie) && is_array($galerie)) {
-    foreach ($galerie as $row) {
-      $row_type = isset($row['type_photo']) ? $row['type_photo'] : '';
-      if (is_array($row_type)) $row_type = isset($row_type['value']) ? $row_type['value'] : '';
-      if ($type && $row_type !== $type) continue;
-      $id = sapi_get_acf_image_id(isset($row['image']) ? $row['image'] : null);
-      if ($id) {
-        $ids[] = $id;
-        if ($limit > 0 && count($ids) >= $limit) break;
+  if ($type === '') {
+    // Tous types : concatène les 8 Gallery dans l'ordre canonique
+    // (avec fallback repeater par type si Gallery vide), puis dédoublonne.
+    $all_types_ordered = ['ambiance', 'detail', 'vue de dessous', 'tailles', 'packshot', 'fabrication', 'client', 'accessoires'];
+    foreach ($all_types_ordered as $t) {
+      $ids = array_merge($ids, sapi_get_product_photo_ids($post_id, $t, 0, null, null));
+    }
+    $ids = array_values(array_unique($ids));
+  } else {
+    // Type spécifique : Gallery prioritaire, fallback repeater si Gallery vide.
+    $gallery_name = sapi_type_to_gallery_name($type);
+    if ($gallery_name) {
+      $gallery_ids = get_field($gallery_name, $post_id);
+      if (!empty($gallery_ids) && is_array($gallery_ids)) {
+        foreach ($gallery_ids as $item) {
+          $id = sapi_get_acf_image_id($item);
+          if ($id) $ids[] = (int) $id;
+        }
       }
     }
+
+    // Fallback repeater si Gallery vide (ou type non mappé).
+    if (empty($ids)) {
+      $galerie = get_field('galerie_produit', $post_id);
+      if (!empty($galerie) && is_array($galerie)) {
+        foreach ($galerie as $row) {
+          $row_type = isset($row['type_photo']) ? $row['type_photo'] : '';
+          if (is_array($row_type)) $row_type = isset($row_type['value']) ? $row_type['value'] : '';
+          if ($row_type !== $type) continue;
+          $id = sapi_get_acf_image_id(isset($row['image']) ? $row['image'] : null);
+          if ($id) $ids[] = (int) $id;
+        }
+      }
+    }
+  }
+
+  // Filtres taxonomies APRÈS le merge — on filtre le pool complet,
+  // pas la troncature.
+  if ($piece !== null && $piece !== '' && !empty($ids)) {
+    $ids = sapi_filter_attachment_ids_by_term($ids, 'media_room', $piece);
+  }
+  if ($essence !== null && $essence !== '' && !empty($ids)) {
+    $ids = sapi_filter_attachment_ids_by_term($ids, 'media_essence', $essence);
+  }
+
+  // Limit appliqué en dernier (après filtres taxo).
+  if ($limit > 0 && count($ids) > $limit) {
+    $ids = array_slice($ids, 0, $limit);
   }
 
   return $ids;
