@@ -2,228 +2,202 @@
 
 ## 🔧 À faire
 
-## [TÂCHE] S28 — Phase 0 : audit exhaustif des call-sites du repeater `galerie_produit`
+## [TÂCHE] S28 — Phase 2 : script de migration repeater `galerie_produit` → 8 Gallery ACF (dual-write)
 **Date :** 2026-05-28
-**Branche :** `feature/photos-par-piece` (créée depuis master à jour, commit `e092f1d` ou plus récent)
-**Priorité :** haute — bloquant pour Phase 1 (création des 8 Gallery ACF) et Phase 2 (script de migration)
-**Mémoire de contexte** (côté Cowork) : `project_photos_par_piece.md` — relire AVANT toute action pour comprendre l'architecture cible (option B = 8 Gallery ACF distincts + taxonomie `media_room` 15 termes + plugin EML).
+**Branche :** `feature/photos-par-piece`
+**Priorité :** haute — déverrouille Phase 3 (helper dual-read) et Phase 4 (activation swap)
+**Mémoire de contexte** (côté Cowork) : `project_photos_par_piece.md` — relire AVANT toute action pour comprendre l'architecture cible et l'état Phase 1 livré le 28/05 (snippet taxonomies + 19 termes + 8 Gallery ACF déjà créés sur test).
+**Audit Phase 0** (déjà commité sur la branche) : `site-web/memory/audit_galerie_produit_callsites.md` — 25 call-sites, top file `single-product.php`.
 
 ### Contexte
 
-Le repeater ACF `galerie_produit` actuellement attaché aux produits WooCommerce sera **remplacé** par 8 champs Gallery ACF distincts (un par type de photo) en Phase 2. Avant de migrer, on a besoin d'un **inventaire exhaustif** de tous les endroits du code thème qui lisent, écrivent ou raisonnent sur ce repeater, pour :
+La Phase 1 a livré sur test les **8 Gallery ACF vides** (`galerie_ambiance`, `galerie_detail`, `galerie_vue_de_dessous`, `galerie_tailles`, `galerie_packshot`, `galerie_fabrication`, `galerie_client`, `galerie_accessoires`) dans le groupe `Photos produits`, à côté du repeater existant `galerie_produit`. Les produits ont actuellement leurs photos dans le repeater, et les 8 nouveaux Gallery sont vides.
 
-1. Savoir quels fichiers devront être modifiés en Phase 3 (helper dual-read transitoire)
-2. Évaluer les risques de la migration (combien de surfaces touchées, complexité)
-3. Identifier les éventuels helpers à factoriser
+**Objectif Phase 2** : copier les photos du repeater vers les 8 Gallery selon le `type_photo` de chaque row, en mode **dual-write** (le repeater reste intact, on n'y touche pas).
 
-Cette phase est **lecture seule** — pas de modif, pas de commit, juste un rapport markdown structuré.
-
-### Sortie attendue
-
-**Un seul fichier markdown** créé à : `site-web/memory/audit_galerie_produit_callsites.md`
-
-Format strict :
-
-```markdown
-# Audit call-sites repeater `galerie_produit` — Phase 0 S28
-**Date audit :** 2026-05-XX
-**Branche :** feature/photos-par-piece
-**Commit base :** <hash>
-
-## Résumé
-- Nombre total de call-sites : N
-- Fichiers PHP impactés : N
-- Fichiers JS impactés : N
-- Snippets Code Snippets impactés : N (si applicable, sinon "non auditable depuis le repo")
-
-## Par catégorie d'usage
-
-### Lecture meta directe (`get_post_meta`, `get_field`)
-... (call-sites de ce type)
-
-### Boucles repeater (`have_rows` / `the_row` / `get_sub_field`)
-... (call-sites de ce type)
-
-### Helpers existants
-... (fonctions wrappers du thème qui encapsulent l'accès au repeater)
-
-### Rendu front (templates WC, single-product, archive, etc.)
-... (call-sites qui produisent du HTML à partir des données du repeater)
-
-### JS / AJAX
-... (call-sites JS qui consomment les données — typiquement via wp_localize_script ou data-attributes)
-
-### Admin / WP-Admin
-... (si le repeater est manipulé côté admin custom — métaboxes, colonnes liste produits, etc.)
-
-## Détail par call-site
-
-### [#1] `path/to/file.php:LINE` — <type d'usage en 3 mots>
-**Contexte** : <template / helper / JS / admin>
-**Pattern matché** : `get_field('galerie_produit')` (ou autre)
-**Extrait** :
-\`\`\`php
-<5 à 10 lignes de code centrées sur la ligne matchée>
-\`\`\`
-**Note** : <ce que ce call-site fait, en 1 phrase>
-**Impact migration** : <faible | moyen | fort> — <justification courte>
-
-### [#2] ...
-```
-
-### Méthode de recherche (à appliquer rigoureusement)
-
-**Patterns à grep** (case-insensitive, sur tout le repo thème) :
-
-1. **Nom direct** : `galerie_produit` (toutes occurrences, y compris dans les commentaires — utile pour traquer l'historique)
-2. **Variantes de nom** : `galerie-produit`, `_galerie_produit`, `gallerie_produit` (typo défensive)
-3. **API ACF lecture** :
-   - `get_field\s*\(\s*['"]galerie` (regex)
-   - `the_field\s*\(\s*['"]galerie`
-   - `have_rows\s*\(\s*['"]galerie`
-   - `get_sub_field` dans un bloc qui contient `galerie_produit` plus haut
-4. **Méta WP brut** :
-   - `get_post_meta.*galerie_produit`
-   - `update_post_meta.*galerie_produit`
-   - `meta_key.*galerie_produit` (pour les requêtes WP_Query / meta_query)
-5. **JS / data-attributes** :
-   - `galerie_produit` dans assets/*.js
-   - `data-galerie` dans templates
-   - `wp_localize_script` qui passe `galerie_produit` au JS
-
-**Périmètre** :
-- `wp-content/themes/theme-sapi-maison/**` (tout le thème)
-- **Inclure** : functions.php, inc/*, woocommerce/*, assets/*.js, *.php templates
-- **Exclure** : vendor/, node_modules/ (si présents), backup/, *.min.js
-- **Hors scope** : Code Snippets (plugin WP) — pas accessibles depuis le repo. Si la mémoire `reference_snippets_actifs` (côté Cowork) liste des snippets liés à `galerie_produit`, mentionner dans le rapport mais ne pas chercher dans le repo (Robin auditera côté admin si besoin).
+**Pourquoi dual-write** : préserver les données originales pendant Phases 3-4 (helper dual-read + activation swap). Le repeater ne sera vidé qu'en Phase 6 après plusieurs semaines de stabilité prod.
 
 ### Garde-fous absolus
 
-1. **LECTURE SEULE — AUCUNE MODIFICATION** du code. Pas de commit, pas de fichier édité. Le seul fichier créé est `site-web/memory/audit_galerie_produit_callsites.md`.
-2. **Pas de filtrage prématuré** — lister TOUS les matches, même ceux qui semblent triviaux (commentaires, anciennes routes). On filtrera ensuite. Mieux : pour chaque match, noter dans le rapport si c'est "actif" (du code qui s'exécute) ou "mort" (commentaire, code dans une branche conditionnelle jamais atteinte, etc.).
-3. **Ne pas confondre `galerie_produit` (le repeater) avec `gallery` ou `product_gallery_images`** (galerie WC native, qui elle a son propre système). Si un call-site mentionne les deux, le préciser dans la note.
-4. **Ne pas anticiper la solution** — ne pas commenter "ici on devrait remplacer par sapi_get_product_photo_ids()". Juste documenter l'état actuel. Les recommandations viendront en Phase 1.
+1. **NE PAS toucher au repeater `galerie_produit`** — il reste intact en lecture et en données. Aucun `delete_post_meta`, aucun `update_field('galerie_produit', ...)`.
+2. **NE PAS modifier les attachments** eux-mêmes (pas de `update_post_meta` sur les attachments, pas de renommage, pas de tagging media_room/media_essence automatique — ça c'est manuel en Phase 5 par Robin).
+3. **Idempotent** : relancer le script ne doit pas dupliquer les IDs dans les Gallery. Si une Gallery contient déjà un ID, on ne l'ajoute pas en double.
+4. **Restriction admin** : seul un user `current_user_can('manage_options')` peut lancer la migration. Nonce CSRF obligatoire sur les boutons.
+5. **Mode DRY-RUN par défaut** : le script doit pouvoir tourner en lecture seule pour générer un rapport, sans rien écrire dans la DB. Le mode "Lancer en mode réel" est une action explicite séparée.
+6. **Préserver l'ordre des rows** : les photos du repeater sont ordonnées (par Robin via drag & drop). L'ordre doit être préservé dans les Gallery cibles (premier row ambiance du repeater = première image de `galerie_ambiance`, etc.).
 
-### Critères de succès
-
-- [ ] Fichier `site-web/memory/audit_galerie_produit_callsites.md` créé et commité sur `feature/photos-par-piece`
-- [ ] Tous les patterns listés ci-dessus ont été grepés
-- [ ] Le rapport contient une section "Résumé" avec les compteurs N
-- [ ] Le rapport est organisé par catégorie d'usage (lecture meta / boucles repeater / helpers / rendu front / JS / admin)
-- [ ] Chaque call-site individuel a : fichier:ligne, contexte, pattern matché, extrait 5-10 lignes, note, impact migration estimé (faible/moyen/fort)
-- [ ] Les matches "actifs" vs "morts" (commentaires, code mort) sont distingués
-- [ ] Aucune modification au code thème (vérification : `git diff master..feature/photos-par-piece` doit montrer UNIQUEMENT le nouveau fichier audit)
-- [ ] Un commit propre type `feat(s28): audit phase 0 — inventaire call-sites galerie_produit`
-
-### Notes pour le retour
-
-Dans la réponse côté queue Cowork (section ✅ Livré), indiquer :
-- Hash du commit audit
-- N total de call-sites trouvés (résumé chiffré)
-- Top 3 fichiers les plus impactés
-- Surfaces ou helpers qu'il faudra factoriser en Phase 1 (recommandations brèves, max 5 bullets)
-
-### Suite (hors scope Phase 0, pour information)
-
-Phase 1 = création des 8 Gallery ACF + installation EML + déclaration taxonomie `media_room` (UI WordPress par Robin, pas Claude Code).
-Phase 2 = script de migration repeater → 8 Gallery (dry-run d'abord). C'est là que le rapport Phase 0 sera consulté pour identifier le code consommateur à migrer.
+### Périmètre — 3 chantiers
 
 ---
 
-## [TÂCHE] Card sur-mesure dans /mes-creations/ — refonte visuelle "carnet d'atelier"
-**Date :** 2026-05-28
-**Branche :** `test-theme-sapi-maison`
-**Priorité :** moyenne — la card actuelle fonctionne, mais son visuel ne plait pas à Robin (trop "service abstrait", pas assez "artisan")
-**Mockup de référence :** `site-web/mockups/mockup-16-card-surmesure-alternatives.html` — **variante C UNIQUEMENT** (section "Carnet d'atelier", marqueur orange "Variante C")
+### Chantier 1 — Modifier le workflow GHA pour auto-deploy de la branche feature
 
-### Contexte
+**Fichier** : `.github/workflows/deploy-test.yml`
 
-La card sur-mesure actuellement en prod (dernière cellule de la grille "Ma sélection" sur `/mes-creations/`, classes `.mes-creations-surmesure-card*`) utilise un design "service" : fond dégradé orange clair, icône recyclage SVG, badge pill orange. Robin trouve ça trop abstrait, pas assez en lien avec son univers d'artisan.
+**Action** : ajouter `feature/photos-par-piece` aux branches déclencheuses du workflow.
 
-**Nouvelle direction validée Robin (28/05/2026) — variante C "Carnet d'atelier"** : esthétique page de carnet, croquis trait fin d'une suspension dessinée à la main (SVG), lignes de cahier discrètes en arrière-plan, signature "— Robin" en Square Peg orange. Plus intimiste, plus personnel, raconte une histoire.
-
-### Garde-fous absolus
-
-1. **Lire avant d'écrire** : ouvrir le mockup #16, identifier la section variante C uniquement (classes `.v-carnet*`). Lire l'état actuel des classes `.mes-creations-surmesure-card*` dans `style.css` ET le `<template>` correspondant dans `woocommerce/archive-product.php` AVANT toute modification.
-2. **Réutiliser les classes existantes** `.mes-creations-surmesure-card*` — modifier leur contenu CSS et le markup du template, NE PAS créer de nouvelles classes parallèles. Cf. mémoire Cowork `feedback_claude_code_refonte_grille`.
-3. **Aucun changement JS** : `populateSelectionGrid()` dans `sapi-cards-conseiller.js` continue de cloner le `<template>` tel quel — seul le contenu du template change.
-4. **Aucun changement comportement** : `href="/sur-mesure/"` préservé, event GA4 `mes_creations_card_surmesure_click` continue de fire au clic.
-
-### Spec visuelle (variante C)
-
-**Fond** : papier crème pur `#FDFBF5` (plus clair que `--color-warm`). PAS de dégradé. PAS d'orange.
-
-**Lignes de cahier décoratives** : pseudo-élément `::before` en `position: absolute; inset: 0`, `pointer-events: none`, avec :
-```css
-background-image: repeating-linear-gradient(
-  to bottom,
-  transparent 0,
-  transparent 21px,
-  rgba(139, 115, 85, 0.06) 22px
-);
+**Diff** (avant) :
+```yaml
+on:
+  push:
+    branches:
+      - test-theme-sapi-maison
+  workflow_dispatch:
 ```
 
-**Bordure** : aucune bordure visible (PAS de dashed, PAS d'outline orange). Garder un léger `box-shadow: 0 2px 8px rgba(74, 63, 53, 0.06)`.
-
-**Padding interne** : `22px 18px 18px`.
-
-**Contenu vertical** (de haut en bas, texte centré) :
-
-1. **Eyebrow** "Croquis..." en Square Peg, `font-family: 'Square Peg', cursive; font-size: 22px; color: var(--color-wood); line-height: 1; margin-bottom: 4px;`
-
-2. **SVG croquis suspension** centré (`95×95px` desktop, `75×75px` mobile, `margin: 10px auto 14px;`, `color: var(--color-wood-dark);`). Markup exact :
-```html
-<svg class="mes-creations-surmesure-card__sketch" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-  <path d="M50 6 L50 24"/>
-  <ellipse cx="50" cy="26" rx="6" ry="2.5"/>
-  <path d="M28 32 Q50 30 72 32 Q62 60 50 75 Q38 60 28 32"/>
-  <path d="M34 34 Q50 33 66 34"/>
-  <path d="M32 42 Q50 40 68 42"/>
-  <path d="M32 52 Q50 51 68 52"/>
-  <path d="M36 62 Q50 61 64 62"/>
-  <ellipse cx="50" cy="80" rx="4" ry="5" fill="rgba(227, 91, 36, 0.12)"/>
-  <path d="M48 86 L52 86 M47 88 L53 88"/>
-</svg>
+**Diff** (après) :
+```yaml
+on:
+  push:
+    branches:
+      - test-theme-sapi-maison
+      - feature/photos-par-piece
+  workflow_dispatch:
 ```
 
-3. **Titre** "Sur-mesure" : `font-size: 14px; font-weight: 700; color: var(--color-wood-dark); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; line-height: 1.25;`
+Ce chantier doit être committé en **premier** (avant le chantier 2) pour que le push suivant déploie automatiquement le code sur test.
 
-4. **Sous-titre italique** "Et si on dessinait le tien ensemble ?" : `font-size: 12px; color: var(--color-wood-mid); line-height: 1.5; font-style: italic; padding: 0 8px;`
+---
 
-5. **Signature** "— Robin" : `font-family: 'Square Peg', cursive; font-size: 22px; color: var(--color-orange); margin-top: 14px; line-height: 1;`
+### Chantier 2 — Page admin custom de migration
 
-**Hover** : `transform: translateY(-3px) rotate(0.4deg);` (la petite rotation donne un effet "page qui bouge"). `transition: transform 0.2s;`
+**Fichier nouveau** : `inc/sapi-migrate-galerie.php` (ou équivalent — à inclure depuis `functions.php`)
 
-**Aspect ratio / alignement de cellule** : la card doit s'aligner en hauteur avec les cards produits voisines dans le slot. Si les cards produits utilisent un pattern `[photo aspect-ratio + body]`, la card sur-mesure peut soit imiter ce pattern, soit occuper la cellule en bloc unique (préférer le bloc unique avec padding interne uniforme — c'est ce que fait le mockup #16). À adapter pour que la hauteur soit cohérente avec les voisines.
+**Comportement** :
 
-### Wordings exacts (respecter mot pour mot)
+- Ajouter un sous-menu sous **Outils** dans WP Admin : `add_submenu_page('tools.php', 'Migration galerie produit', 'Migration galerie', 'manage_options', 'sapi-migrate-galerie', 'sapi_migrate_galerie_render_page');`
+- URL : `/wp-admin/tools.php?page=sapi-migrate-galerie`
+- Page protégée par `current_user_can('manage_options')`
 
-- Eyebrow : `Croquis...`
-- Titre : `Sur-mesure`
-- Sous-titre : `Et si on dessinait le tien ensemble ?`
-- Signature : `— Robin`
+**UI de la page** :
+
+```
+=== MIGRATION REPEATER galerie_produit → 8 Gallery ACF ===
+
+État actuel :
+- N produits avec repeater non vide : XX
+- Total photos dans les repeaters : YYY
+- N Gallery déjà peuplées (audit) : ZZ
+
+[Bouton bleu : Lancer en DRY-RUN]     (lit sans écrire, produit le rapport)
+[Bouton orange : Lancer en mode RÉEL] (écrit dans les Gallery, dual-write)
+
+(zone de résultat après clic)
+```
+
+**Mode DRY-RUN** :
+- Boucle sur tous les produits publiés (`get_posts(['post_type' => 'product', 'posts_per_page' => -1, 'post_status' => 'publish'])`)
+- Pour chaque produit, lire `get_field('galerie_produit', $product_id)` (le repeater)
+- Pour chaque row, identifier `type_photo` + `image` (utiliser `sapi_get_acf_image_id()` existant pour normaliser l'image en ID)
+- Mapper le type vers le slug Gallery cible (voir mapping ci-dessous)
+- Accumuler en mémoire un plan `[product_id => [gallery_name => [photo_ids...]]]`
+- **NE RIEN écrire dans la DB**
+- Afficher un tableau récap : par produit, N photos → galerie_ambiance, N → galerie_detail, etc. + erreurs (types inconnus, photos sans ID résolvable, etc.)
+- Total global en bas : N produits scannés, M photos prêtes à migrer, K types orphelins
+
+**Mode RÉEL** :
+- Exécuter la même logique que dry-run (pour le calcul du plan)
+- Pour chaque Gallery cible non vide dans le plan :
+  - Lire le contenu actuel de cette Gallery via `get_field('galerie_ambiance', $product_id)` → array d'IDs (ou vide)
+  - Calculer la **diff idempotente** : `$new_ids = array_values(array_unique(array_merge($existing_ids, $plan_ids)))` (préserve l'ordre + déduplique)
+  - Écrire via **ACF API** : `update_field('galerie_ambiance', $new_ids, $product_id);` (PAS `update_post_meta` direct — ACF a besoin de son traitement)
+- Logguer chaque écriture
+- Afficher le même tableau récap + une colonne "Action effectuée : OK / Skipped (déjà à jour) / Erreur".
+
+**Mapping `type_photo` → Gallery cible** :
+
+```php
+$type_to_gallery = [
+    'ambiance'         => 'galerie_ambiance',
+    'detail'           => 'galerie_detail',
+    'vue de dessous'   => 'galerie_vue_de_dessous',  // ⚠️ type avec espaces et accent
+    'taille'           => 'galerie_tailles',         // ⚠️ singulier dans repeater → pluriel dans Gallery
+    'tailles'          => 'galerie_tailles',         // tolérance si le type a été corrigé entre temps
+    'studio'           => 'galerie_packshot',        // legacy "studio" remappé sur packshot
+    'packshot'         => 'galerie_packshot',
+    'fabrication'      => 'galerie_fabrication',
+    'client'           => 'galerie_client',
+    'accessoires'      => 'galerie_accessoires',
+];
+```
+
+**Types orphelins** (un `type_photo` qui n'est pas dans le mapping) :
+- NE PAS migrer la photo dans une Gallery par défaut
+- **Lister explicitement** dans le rapport : "Produit X — N photos avec type orphelin 'Y' (non migrées, à clarifier avec Robin)"
+
+**Lecture du `type_photo` ACF** : peut être string OU array (`['value' => 'ambiance']`). Normaliser comme dans le helper existant `sapi_get_product_photo_ids` :
+
+```php
+$type = isset($row['type_photo']) ? $row['type_photo'] : '';
+if (is_array($type)) $type = isset($type['value']) ? $type['value'] : '';
+```
+
+---
+
+### Chantier 3 — Helper bas niveau pour itérer le repeater (optionnel, recommandé)
+
+**Recommandation issue de l'audit Phase 0** : factoriser un helper bas niveau `sapi_iterate_product_photos($post_id)` qui yield `[$type, $img_id, $row_index]` pour chaque row du repeater. Permet à `page-inspiration.php` (qui duplique actuellement la logique) de l'utiliser plus tard.
+
+**Fichier** : `functions.php` (à côté de `sapi_get_product_photo_ids`)
+
+**Code suggéré** :
+
+```php
+/**
+ * Itère les rows du repeater galerie_produit d'un produit, en yield-style.
+ * Retourne un array de tableaux ['type' => string, 'image_id' => int, 'index' => int].
+ * Type normalisé (string, pas array). Image ID résolu via sapi_get_acf_image_id.
+ * Skip les rows sans image résolvable.
+ */
+function sapi_iterate_product_photos($post_id) {
+    if (!function_exists('get_field')) return [];
+    $galerie = get_field('galerie_produit', $post_id);
+    if (empty($galerie) || !is_array($galerie)) return [];
+
+    $out = [];
+    foreach ($galerie as $index => $row) {
+        $type = isset($row['type_photo']) ? $row['type_photo'] : '';
+        if (is_array($type)) $type = isset($type['value']) ? $type['value'] : '';
+        $img_id = sapi_get_acf_image_id(isset($row['image']) ? $row['image'] : null);
+        if (!$img_id) continue;
+        $out[] = ['type' => (string) $type, 'image_id' => (int) $img_id, 'index' => $index];
+    }
+    return $out;
+}
+```
+
+Utiliser ce helper dans la page admin de migration (chantier 2) pour ne pas dupliquer la logique de parcours. Si Claude Code juge le chantier 3 hors scope, le mentionner dans le retour, mais le helper sera quand même utile pour Phase 3.
+
+---
 
 ### Critères de succès
 
-- [ ] Card sur-mesure dans le slot "Ma sélection" affiche le nouveau visuel "carnet d'atelier"
-- [ ] Plus aucune trace du dégradé orange clair, de l'icône recyclage, du badge pill orange "Sur-mesure"
-- [ ] SVG croquis suspension présent, centré, `95px` desktop / `75px` mobile
-- [ ] Wordings respectés mot pour mot (eyebrow Square Peg "Croquis...", titre "Sur-mesure" uppercase wood-dark, sous-titre italique wood-mid, signature "— Robin" orange Square Peg)
-- [ ] Hover : `translateY(-3px) rotate(0.4deg)`, transition 0.2s
-- [ ] Lignes de cahier discrètes en arrière-plan (`repeating-linear-gradient` 22px, opacity `rgba(139, 115, 85, 0.06)`)
-- [ ] `href="/sur-mesure/"` préservé sur l'élément cliquable
-- [ ] Event GA4 `mes_creations_card_surmesure_click` continue de fire au clic (delegate via `sapi-mes-creations-ga4.js`)
-- [ ] Mobile (≤768px) : SVG redimensionné à `75×75px`, layout intact, lisible
-- [ ] Cellule de grille s'aligne en hauteur avec les cards produits voisines (pas plus haute, pas plus basse)
-- [ ] Aucune régression sur les autres cards du slot
-- [ ] Aucune régression sur le `populateSelectionGrid()` JS (le clone du template fonctionne identique)
+- [ ] **Chantier 1** : `feature/photos-par-piece` est ajoutée à `deploy-test.yml`, committée en premier, et un push ultérieur déclenche le workflow GHA
+- [ ] **Chantier 2** : page admin accessible à `/wp-admin/tools.php?page=sapi-migrate-galerie`, restreinte aux administrateurs
+- [ ] Bouton DRY-RUN affiche le plan complet par produit sans rien modifier dans la DB
+- [ ] Bouton mode RÉEL exécute la migration via `update_field('galerie_*', $ids, $product_id)`
+- [ ] Idempotence vérifiée : 2 lancements consécutifs en mode RÉEL = même état final (pas de doublons dans les Gallery)
+- [ ] Le repeater `galerie_produit` reste intact (vérifiable via `get_field('galerie_produit', $product_id)` après migration)
+- [ ] Préservation de l'ordre : la 1re photo ambiance du repeater est en 1re position de `galerie_ambiance`
+- [ ] Types orphelins listés explicitement dans le rapport (et NON migrés)
+- [ ] Tableau récapitulatif lisible : produits scannés, photos migrées par Gallery, erreurs, types orphelins
+- [ ] **Chantier 3** : helper `sapi_iterate_product_photos` ajouté à `functions.php` ET utilisé par la page admin (si le chantier 3 a été fait)
+- [ ] CSRF nonce sur les 2 boutons d'action
 
-### Notes
+### Notes pour le retour
 
-- **Pas de modification JS prévue** : `populateSelectionGrid()` dans `assets/sapi-cards-conseiller.js` continue de cloner le `<template>` tel quel.
-- **Branche** : code sur `test-theme-sapi-maison`, auto-deploy test, validation Robin avant merge master + déploiement prod.
-- **Si le SVG croquis pose problème de rendu** (trop fin, mal aligné, etc.) : Claude Code peut ajuster le stroke-width ou le viewBox mais pas changer la silhouette générale (Robin a validé ce dessin).
-- **Évolution future** (hors scope) : Robin pourrait fournir un scan d'un croquis dessiné à la main pour remplacer le SVG. Pas demandé pour cette livraison.
+Dans le retour côté queue (section `## ✅ Livré`), indiquer :
+- Hash des commits livrés (chantier 1 + chantier 2 + éventuel chantier 3 séparés)
+- Sortie du DRY-RUN sur test (capture ou copie texte du tableau) — utile pour valider que les chiffres sont cohérents avec ce qu'on attend
+- Type orphelins découverts (si certains) — à clarifier avec Robin avant d'envisager le mode RÉEL
+- N photos potentiellement migrables au total
+
+Robin lancera le mode RÉEL manuellement après validation visuelle du dry-run.
+
+### Suite (hors scope Phase 2, pour information)
+
+Phase 3 = refactor du helper canonique `sapi_get_product_photo_ids($post_id, $type, $limit, $piece = null, $essence = null)` en mode dual-read : lit d'abord les 8 Gallery, fallback sur le repeater si Gallery vide. Pour permettre une transition douce.
+Phase 4 = activation du swap surface par surface (mes-creations → catégorie → fiche produit → home).
 
 ---
 
@@ -451,6 +425,112 @@ Au retour, indiquer pour chaque chantier :
 ---
 
 ## ✅ Livré
+
+## [RETOUR] S28 Phase 2 — Script de migration repeater `galerie_produit` → 8 Gallery ACF (dual-write)
+**Date livrée :** 2026-05-28
+**Branche :** `feature/photos-par-piece` (3 commits ajoutés, **non poussés** — Robin pousse manuellement quand il veut déclencher GHA)
+**Périmètre :** 3 chantiers livrés (1, 2, 3), commités séparément comme demandé
+
+### Commits livrés (ordre chronologique)
+
+| # | Hash | Chantier | Fichier(s) | Lignes |
+|---|------|----------|------------|--------|
+| 1 | `4e2ebef` | Auto-deploy GHA pour la branche feature | `.github/workflows/deploy-test.yml` | +1 |
+| 2 | `2f6ed6e` | Helper `sapi_iterate_product_photos()` | `functions.php` | +33 |
+| 3 | `f7e044a` | Page admin migration (DRY-RUN + RÉEL) | `inc/sapi-migrate-galerie.php` + require dans `functions.php` | +400 |
+
+**Total :** ~434 lignes ajoutées, 0 ligne supprimée. Aucune modification du repeater `galerie_produit` ni des call-sites existants — c'est du code additif strict (dual-write).
+
+### Garde-fous respectés (tous ✅)
+
+- **Repeater intact** : aucun `update_field('galerie_produit', …)`, aucun `delete_post_meta`. Le repeater est uniquement **lu** via `get_field` / `sapi_iterate_product_photos`.
+- **Attachments intacts** : aucun `update_post_meta` sur les attachments, aucun renommage, aucun tagging media_room/media_essence (manuel Phase 5).
+- **Idempotent** : `array_values(array_unique(array_merge($existing_ids, $plan_ids)))` — existing en tête, donc 2 runs successifs en mode RÉEL = même état final. Diff explicite : si `$merged === $existing_ids`, statut `SKIPPED` (pas d'écriture).
+- **Restriction admin** : `current_user_can('manage_options')` + `wp_die` si refusé. Nonces CSRF distincts par mode (`sapi_migrate_galerie_dryrun` / `sapi_migrate_galerie_real`) avec `wp_verify_nonce`.
+- **DRY-RUN par défaut** : deux formulaires POST séparés, deux boutons distincts (bleu = dry-run, orange = réel). Bouton mode réel a un `confirm()` JS supplémentaire avant submit.
+- **Ordre du repeater préservé** : `sapi_iterate_product_photos` itère via `foreach ($galerie as $index => $row)` sans tri, l'ordre du repeater est donc préservé tel quel dans les Gallery cibles.
+- **Types orphelins listés, NON migrés** : tout `type_photo` hors mapping est listé dans le rapport (par produit + total) sans aucune écriture en Gallery.
+
+### Architecture de la page admin
+
+**URL :** `/wp-admin/tools.php?page=sapi-migrate-galerie` (sous-menu Outils → "Migration galerie")
+
+**Sections affichées :**
+1. **État actuel** (toujours visible) :
+   - N produits scannés
+   - N produits avec repeater non vide
+   - Total photos dans les repeaters
+   - N couples (produit × Gallery) déjà peuplés
+   - N photos prêtes à migrer (mapping connu)
+   - N types orphelins (+ détail des labels orphelins)
+2. **Actions** : 2 boutons (DRY-RUN bleu / RÉEL orange)
+3. **Rapport** (uniquement après soumission) : tableau récapitulatif par produit avec une colonne par Gallery cible, colonne Orphelins, et — en mode RÉEL — colonne Résultat (OK / SKIPPED / ERROR par Gallery).
+
+**Inclusion conditionnée à `is_admin()`** dans `functions.php` pour ne pas peser sur le front.
+
+### Mapping `type_photo` → Gallery cible (tel qu'imposé par le brief)
+
+```
+ambiance         → galerie_ambiance
+detail           → galerie_detail
+vue de dessous   → galerie_vue_de_dessous   (espaces + sans accent)
+taille | tailles → galerie_tailles          (tolérance singulier + pluriel)
+studio | packshot → galerie_packshot         (legacy "studio" remappé)
+fabrication      → galerie_fabrication
+client           → galerie_client
+accessoires      → galerie_accessoires
+```
+
+### Mode RÉEL — pas lancé
+
+**Conformément à la consigne, le mode RÉEL n'a PAS été déclenché par Claude Code.** Le DRY-RUN non plus n'a pas été lancé (pas d'accès à l'admin WP depuis cette session).
+
+→ **Robin doit donc** :
+1. `git push` (déclenche GHA auto-deploy, ~3 min jusqu'à test.atelier-sapi.fr)
+2. Se connecter à `/wp-admin/tools.php?page=sapi-migrate-galerie` sur test
+3. Cliquer **Lancer en DRY-RUN** → relire le tableau (chiffres cohérents avec ce qu'on attend ? types orphelins acceptables ?)
+4. Si OK : **Lancer en mode RÉEL** → l'idempotence garantit qu'un second clic ne fait rien
+5. Re-vérifier visuellement sur quelques fiches produit ACF que les Gallery sont peuplées et que le repeater est intact
+
+### Sortie DRY-RUN à remonter à Cowork
+
+Impossible à fournir depuis cette session (pas d'accès admin WP). À récupérer par Robin après le 1er DRY-RUN sur test :
+- Nombre total de photos migrables (totals → `photos_to_migrate`)
+- Liste des types orphelins découverts (totals → `orphan_types`)
+- Anomalies visibles dans le tableau par produit (produits sans aucune photo classée, déséquilibre majeur entre types, etc.)
+
+Ces infos serviront à valider la cohérence avant de bénir le mode RÉEL.
+
+### Suite (hors scope Phase 2)
+
+- **Phase 3** : refactor `sapi_get_product_photo_ids` en mode dual-read (lit Gallery d'abord, fallback repeater). Le helper `sapi_iterate_product_photos` livré ici servira aussi à refactorer `page-inspiration.php` qui duplique aujourd'hui la logique de parcours.
+- **Phase 4** : activation du swap surface par surface (mes-creations → catégorie → fiche → home).
+- **Phase 6** : vidage du repeater (uniquement après plusieurs semaines de stabilité prod).
+
+---
+
+## [RETOUR] Création branche `feature/photos-par-piece` (pré-requis S28)
+**Date livrée :** 2026-05-28
+**Branche créée :** `feature/photos-par-piece`
+**Base :** `master` au commit `4d606df` ("Merge test-theme-sapi-maison → master : card sur-mesure variante D + queue Cowork")
+**HEAD branche :** `4d606df` (identique à master, aucun commit ajouté)
+**Push GitHub :** ✅ effectué avec tracking upstream (`origin/feature/photos-par-piece`)
+
+### Vérifications (tous critères ✅)
+
+- `git branch --show-current` → `feature/photos-par-piece`
+- `git branch -r | grep photos-par-piece` → `origin/feature/photos-par-piece`
+- `git log -1 --oneline` → `4d606df Merge test-theme-sapi-maison → master : card sur-mesure variante D + queue Cowork`
+- `snippet-sapi-cookie-popup.php` toujours en état `M` (non commité, voyage avec la branche)
+- Fichiers untracked strictement identiques avant/après (rien ajouté, rien retiré)
+- Aucun fichier PHP/JS/CSS du thème modifié
+- `deploy-test.yml` non touché
+
+### Suite
+
+S28 Phase 0 (audit call-sites `galerie_produit`) **n'a pas été lancée** comme demandé. Robin la déclenchera dans une session Claude Code séparée. La branche est prête à recevoir le rapport d'audit.
+
+---
 
 ## [RETOUR] Polish /mes-creations/ + audit pré-prod + push production
 **Date livrée :** 2026-05-28
