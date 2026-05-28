@@ -23103,14 +23103,14 @@ body.woocommerce-cart div.woocommerce-wrapper {
   transition: max-height 0.65s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .mes-creations-selection__grid.is-revealed {
-  /* Valeur de transition (animation 0 → 1200px). Le JS retire le max-height
-     via transitionend une fois l'animation terminée → aucune contrainte
-     verticale en régime stationnaire, même si une card produit dépasse
-     cette borne (variation longue, sur-mesure étoffée, etc.). */
-  max-height: 1200px;
+  /* Borne calibrée sur la hauteur réelle des cards produit (~400-500px) +
+     padding : conserve la bonne vitesse visuelle de croissance (sur 0.65s).
+     Une borne plus haute rendrait l'animation trop rapide à l'œil. */
+  max-height: 600px;
 }
 /* Une fois l'expansion terminée, le JS ajoute .is-fully-revealed qui retire
-   toute contrainte max-height. Évite tout clip vertical post-animation. */
+   toute contrainte max-height. Aucun clip vertical possible si une card
+   atypique dépasse 600px (variation longue, sur-mesure étoffée, etc.). */
 .mes-creations-selection__grid.is-fully-revealed {
   max-height: none;
 }
