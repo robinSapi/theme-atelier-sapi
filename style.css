@@ -24667,6 +24667,9 @@ button.chip--project:focus-visible {
      avec son contenu. Box-shadow subtile pour signaler le clic possible. */
 .mes-creations-selection__card {
   min-height: 0;
+  /* Padding latéral réduit à 10px (override du 26px hérité de
+     .conseiller-card--mon-projet) pour donner plus de largeur au slot. */
+  padding: 26px 10px;
 }
 .mes-creations-selection__card:hover {
   -webkit-transform: none;
@@ -24961,7 +24964,7 @@ button.chip--project:focus-visible {
     margin-top: 24px;
   }
   .mes-creations-selection__card {
-    padding: 34px 18px 30px;
+    padding: 34px 10px 30px;
   }
   /* Dashed border interne plus proche du bord en mobile */
   .conseiller-card--mon-projet.mes-creations-selection__card::before {
