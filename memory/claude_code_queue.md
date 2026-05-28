@@ -2,86 +2,61 @@
 
 ## 🔧 À faire
 
-## [TÂCHE] S28 — Phase 4b : implémentation du swap photos par pièce (Option B, surface par surface)
+## [TÂCHE] S28 — Phase 6a : câbler les 3 lectures directes de `single-product.php` vers les Gallery (non destructif)
 **Date :** 2026-05-28
 **Branche :** `feature/photos-par-piece`
-**Priorité :** haute — dernière phase de code du chantier S28 (avant Phase 5 tagging + Phase 6 cleanup)
-**Spec d'implémentation = source de vérité** : `site-web/memory/phase4-archi-swap-photos.md` (le doc de reco produit en Phase 4a). **LIRE EN INTÉGRALITÉ avant de coder** — il contient l'architecture détaillée, le découpage des 5 chantiers, et les décisions techniques.
-**Mémoire de contexte** (Cowork) : `project_photos_par_piece.md` (règles de swap).
-
-### Décisions tranchées par Robin (28/05/2026)
-
-1. **Approche = Option B** : swap JS post-rendu via AJAX. Micro-flash de ~150ms accepté (imperceptible sur un swap d'image). Compatible cache, zéro config infra.
-2. **Fallback = F1** : wrapper centralisé `sapi_get_product_photo_ids_with_fallback($id, $type, $limit, $piece, $essence)` qui retombe sur la photo par défaut si le filtre pièce retourne `[]`. Le helper canonique `sapi_get_product_photo_ids` reste sémantiquement strict.
-3. **Fiche produit = OUI** : refactor de `single-product.php` (positions 1+2 du carousel ambiance) pour activer le swap dessus.
+**Priorité :** haute — finalise la bascule technique vers les Gallery (dernier code avant déploiement prod 3+4+6a)
+**Mémoire de contexte** (Cowork) : `project_photos_par_piece.md`. **Audit Phase 0** : `site-web/memory/audit_galerie_produit_callsites.md` (extraits #5, #6, #7 = les 3 lectures concernées).
 
 ### Contexte
 
-Phases 0-3 livrées. Helper dual-read + filtres taxonomies en place (Phase 3). Phase 4a a établi l'architecture. Il reste à **activer le swap** : afficher la photo de la pièce du visiteur sur 4 surfaces, via swap JS post-rendu.
+`single-product.php` est le **seul fichier** qui lit encore DIRECTEMENT le repeater `galerie_produit` (3 lectures, ne passent pas par le helper Phase 3). Il faut les câbler vers les Gallery pour que la fiche produit cesse de dépendre du repeater.
 
-**4 surfaces concernées** (les seules, cf reco Phase 4a) :
-1. Cards `/mes-creations/`
-2. Cards page catégorie (hover)
-3. Fiche produit (positions 1+2 du carousel ambiance)
-4. Home featured (produit coup de cœur uniquement)
+**Non destructif** : on GARDE le repeater (il reste le fallback du helper dual-read Phase 3). On change uniquement la SOURCE de lecture de ces 3 blocs : `get_field('galerie_produit')` + foreach → appels au helper `sapi_get_product_photo_ids()` (qui fait déjà le dual-read Gallery→repeater).
 
-**Rappel important** : le swap n'aura d'effet VISIBLE que sur les produits dont des photos sont taguées `media_room`. Robin n'a pas encore tagué (Phase 5). Donc Phase 4b met en place le MÉCANISME ; pour le tester, il faudra tagger quelques photos d'abord (voir protocole de test).
+**Les 3 lectures** (lignes approximatives, à reconfirmer) :
+- **L104 — Galerie principale** (`$acf_photos[]`) : actuellement lit toutes les rows du repeater SAUF `client`, avec un **label humain par type**. Garde un `['url', 'label', 'id']` par photo.
+- **L135 — Thumbnails** (`$gallery_acf_photos[]`) : 1re photo `ambiance` + toutes les `taille`/`tailles` + toutes les `accessoires`.
+- **L178 — Slideshow** (`$slideshow_photos[]`) : ordre imposé `['ambiance', 'vue de dessous', 'detail', 'fabrication']`.
 
 ### Garde-fous absolus
 
-1. **Progressive enhancement** : si le JS échoue (AJAX timeout, pas de projet, pièce sans photo), le rendu par défaut (photo ambiance par défaut, rendue par le PHP) DOIT rester affiché. Le swap est un "plus", jamais un prérequis. Aucune surface ne doit se retrouver sans photo si le swap échoue.
-2. **Surface par surface** : implémenter et tester chaque surface AVANT de passer à la suivante. Commit séparé par surface. Ordre : infra → /mes-creations/ → catégorie → home → fiche produit (la plus délicate en dernier).
-3. **Ne pas casser le rendu par défaut** : les 4 call-sites continuent de rendre la photo par défaut côté PHP. Le swap JS vient PAR-DESSUS.
-4. **Helper canonique intact** : `sapi_get_product_photo_ids` (Phase 3) n'est pas modifié. Le wrapper fallback F1 est une NOUVELLE fonction qui l'enveloppe.
-5. **Repeater intact** : zéro write.
-6. **Lecture `sapiProject`** : lecture seule du localStorage (clé `sapiProject`), via le mécanisme `subscribe()` existant. Pas d'écriture, pas de cookie créé.
+1. **Reproduire EXACTEMENT le comportement visuel actuel** sur la fiche produit. Les mêmes photos, autant que possible le même ordre. Avant de coder, lire les 3 blocs en détail (single-product.php L~100-195) pour comprendre la logique exacte (exclusions, labels, ordres, doublons).
+2. **NON DESTRUCTIF** : ne PAS toucher au repeater `galerie_produit` (ni write, ni suppression). On le garde comme fallback.
+3. **Utiliser le helper Phase 3** `sapi_get_product_photo_ids($id, $type, $limit)` pour les lectures (il fait le dual-read Gallery→repeater automatiquement). Ne PAS réécrire de `get_field('galerie_produit')` direct.
+4. **Ne PAS casser le swap Phase 4b** : la fiche produit a déjà des `data-*` pour le swap JS des positions 1+2 du carousel ambiance (commit `9cd7593`). Le câblage 6a doit rester compatible avec ce swap (vérifier que les attributs data restent en place et cohérents).
+5. **Changement d'ordre à signaler** : la galerie principale (L104) lisait l'ordre "mélangé" du repeater. Après migration Phase 2, les photos sont réparties par type dans les Gallery → l'ordre sera désormais **groupé par type** (toutes les ambiances, puis détails, etc.). C'est inévitable (l'ordre mélangé original n'existe plus dans les Gallery). **Signaler ce changement dans le retour** et proposer un ordre de concaténation des types qui soit le plus naturel (suggestion : ambiance → detail → vue de dessous → tailles → packshot → fabrication → accessoires, client exclu).
 
-### Périmètre — 5 chantiers (cf doc §5.2)
+### Périmètre — 3 sous-chantiers (1 commit chacun idéalement)
 
-Suivre le découpage détaillé du document `phase4-archi-swap-photos.md`. En résumé :
-
-1. **Infra** : nouveau module JS `sapi-photo-swap.js` + handler AJAX PHP (qui appelle le wrapper fallback F1) + wrapper `sapi_get_product_photo_ids_with_fallback`. Le module lit `sapiProject.answers.piece` (+ essence si pertinent), fait 1 appel AJAX batché pour toutes les cards de la page, et remplace les `img.src`.
-2. **Activation `/mes-creations/`** : les cards swappent leur photo principale vers la photo pièce.
-3. **Activation cards page catégorie** : idem sur `/categorie-produit/*`.
-4. **Activation home featured** : seul le produit coup de cœur swappe.
-5. **Activation fiche produit** : refactor `single-product.php` positions 1+2 du carousel ambiance (chantier le plus délicat — bien tester que le reste de la galerie est inchangé).
-
-### Protocole de test (à exécuter par Robin sur test après déploiement)
-
-Comme le swap dépend du tagging (pas encore fait), préparer un jeu de test minimal :
-
-1. **Tagger quelques photos** : sur 2-3 produits (ex: Gaston, Olivia), taguer 1-2 photos `galerie_ambiance` avec `media_room = salon` via la modale média
-2. **Créer un projet "salon"** dans le navigateur : ouvrir le Conseiller sur test, faire un parcours qui aboutit à `sapiProject.answers.piece = salon`
-3. **Vérifier le swap** sur les 4 surfaces : les produits taggés salon doivent montrer leur photo salon ; les produits NON taggés salon doivent montrer leur photo par défaut (fallback F1)
-4. **Vérifier sans projet** : en navigation privée (pas de projet), toutes les surfaces montrent les photos par défaut (comportement actuel inchangé)
-5. **Vérifier le micro-flash** : recharger une page avec projet actif, observer le swap (doit être quasi imperceptible)
+1. **Galerie principale (L104)** : remplacer la lecture repeater par une concaténation des Gallery par type (tous sauf `client`), en conservant le label humain par type. Réutiliser le mapping de labels existant (`$type_labels` dans le fichier actuel).
+2. **Thumbnails (L135)** : `sapi_get_product_photo_ids($id, 'ambiance', 1)` + `sapi_get_product_photo_ids($id, 'tailles')` + `sapi_get_product_photo_ids($id, 'accessoires')`. Attention à la tolérance `taille`/`tailles` (le mapping Phase 3 gère les deux → utiliser `'tailles'` qui est le slug Gallery cible).
+3. **Slideshow (L178)** : concaténer `sapi_get_product_photo_ids($id, $type, 0)` pour `$type` dans `['ambiance', 'vue de dessous', 'detail', 'fabrication']`, dans cet ordre.
 
 ### Critères de succès
 
-- [ ] Module `sapi-photo-swap.js` créé, enqueue sur les bonnes surfaces
-- [ ] Handler AJAX PHP créé (nonce + sanitization du `piece`/`essence`)
-- [ ] Wrapper `sapi_get_product_photo_ids_with_fallback` créé (F1)
-- [ ] Les 4 surfaces swappent vers la photo pièce quand projet actif ET photo taguée
-- [ ] Fallback OK : produit sans photo de la pièce → photo par défaut (jamais de trou)
-- [ ] Sans projet → rendu par défaut strictement inchangé (progressive enhancement)
-- [ ] Si AJAX échoue → rendu par défaut reste (pas de page cassée)
-- [ ] Fiche produit : positions 1+2 swappées, reste de la galerie inchangé
-- [ ] Repeater intact, helper canonique Phase 3 intact
-- [ ] Commit séparé par chantier (infra + 4 surfaces)
+- [ ] Les 3 lectures de `single-product.php` passent par le helper `sapi_get_product_photo_ids` (plus aucun `get_field('galerie_produit')` direct dans ce fichier)
+- [ ] La fiche produit affiche les mêmes photos qu'avant (vérif visuelle sur test : galerie principale, thumbnails, slideshow)
+- [ ] Le swap Phase 4b (positions 1+2 ambiance) fonctionne toujours
+- [ ] Repeater `galerie_produit` intact (zéro write, zéro suppression)
+- [ ] Helper canonique Phase 3 intact
+- [ ] Changement d'ordre de la galerie principale (groupé par type) documenté dans le retour
+- [ ] `grep galerie_produit woocommerce/single-product.php` ne retourne plus que d'éventuels commentaires (zéro `get_field` actif)
+- [ ] Commits séparés par sous-chantier
 - [ ] Push auto sur `feature/photos-par-piece` (cf [[feedback_claude_code_push_test]])
 
 ### Notes pour le retour
 
-- Hash des commits (1 par chantier idéalement)
-- Confirmer que le rendu par défaut est préservé sur chaque surface (progressive enhancement)
-- Indiquer à Robin le protocole de test exact à suivre (avec le tagging minimal requis)
-- Toute déviation vs le doc d'archi, avec justification
+- Hash des commits
+- Confirmer que la fiche produit est visuellement identique (hors changement d'ordre galerie principale, à décrire)
+- Protocole de test pour Robin (quelles fiches produit ouvrir, quoi vérifier)
+- Après validation de 6a sur test → on déploiera Phase 3+4+6a en prod d'un coup
 
-### Suite (hors scope Phase 4b)
+### Suite (hors scope 6a)
 
-- **Phase 5** : tagging massif des photos par Robin (media_room + media_essence), dans l'ordre du trafic (salon → chambre → cuisine → ...). C'est ce qui rendra le swap réellement visible sur le site.
-- **Phase 6** : vidage du repeater `galerie_produit` (après plusieurs semaines de stabilité prod).
-- **Mise en prod de Phase 3+4** : merge master + déploiement, après validation complète sur test. (Phase 1+2 sont déjà en prod.)
+- **Déploiement prod** de tout le paquet (3+4+6a) : merge master + workflow Deploy to Production
+- **Phase 5** : tagging massif (Robin)
+- **6b** : suppression du repeater (après soak time prod) — c'est là que le helper Phase 3 perdra son fallback repeater et que le champ ACF sera supprimé
 
 ---
 
@@ -309,6 +284,109 @@ Au retour, indiquer pour chaque chantier :
 ---
 
 ## ✅ Livré
+
+## [RETOUR] S28 Phase 6a — Câblage `single-product.php` vers helper Phase 3 (3 sous-chantiers)
+**Date livrée :** 2026-05-28
+**Branche :** `feature/photos-par-piece` (3 commits code + 1 commit retour, **poussés** sur origin — GHA en cours de déploiement sur test)
+**Périmètre :** un seul fichier modifié — `woocommerce/single-product.php`. Helper Phase 3 et repeater intacts.
+
+### Commits livrés
+
+| # | Hash | Sous-chantier | Bloc | Lignes |
+|---|------|---------------|------|--------|
+| 1 | `4ce312f` | Galerie principale (`$acf_photos`) | L103-125 | +33/-20 |
+| 2 | `80f6cc3` | Thumbnails (`$gallery_acf_photos`) | L142-178 | +36/-34 |
+| 3 | `e665c6c` | Slideshow (`$slideshow_photos`) + cleanup `$type_labels` | L171-204 | +11/-30 |
+
+**Total :** ~80 lignes ajoutées, ~84 supprimées. Net = simplification (-4 lignes), code plus déclaratif.
+
+### Garde-fous respectés (tous ✅)
+
+- **Zéro `get_field('galerie_produit')` actif** dans `single-product.php`. Seule occurrence restante = un commentaire de référence (L95).
+- **Helper canonique Phase 3 intact** : `sapi_get_product_photo_ids` n'est pas modifié.
+- **Repeater intact** : zéro write, zéro suppression. Le helper Phase 3 fait du dual-read (Gallery prioritaire, fallback repeater) — le repeater reste accessible en fallback.
+- **Swap Phase 4b préservé** : `$slideshow_ambiance_indices` est toujours peuplé pendant la construction du slideshow. Les `data-piece-swap-slide="1|2"` + `data-product-id` continuent d'être posés sur les positions 1+2 ambiance. Le JS swap par pièce reste 100% opérationnel.
+- **Robustesse "prod avant migration Phase 2"** : pour les types `tailles` et `packshot`, le code merge explicitement les variants legacy (`taille`, `studio`) du repeater via `array_unique`. Sans ce merge, le fallback strict du helper Phase 3 (`row_type !== $type`) raterait les rows legacy. Phase 6a survit donc à un déploiement même si la migration Phase 2 prod n'est pas encore lancée.
+
+### Changement d'ordre — galerie principale (à signaler à l'utilisateur)
+
+**Ancien comportement** : la galerie principale (`$acf_photos`, consommée par `ambiance-lightbox` en bas de fiche produit) suivait l'**ordre du repeater** — celui défini par Robin via drag&drop dans l'éditeur ACF. Cet ordre était potentiellement **mélangé** (par exemple : ambiance1, detail1, ambiance2, accessoire1, detail2, fabrication1…).
+
+**Nouveau comportement** : impossible de reproduire l'ordre du drag&drop original — les Gallery Phase 2 sont réparties par type (`galerie_ambiance`, `galerie_detail`, …) et l'information d'entrelacement entre types est perdue. L'ordre est désormais **groupé par type** :
+
+> ambiance → detail → vue de dessous → tailles → packshot → fabrication → accessoires
+>
+> *(client toujours exclu de la galerie principale)*
+
+Cet ordre a été choisi pour être **narrativement naturel** : on commence par les photos d'ambiance (qui vendent le produit en contexte), puis les détails (qui rassurent sur la qualité), puis les vues techniques (vue de dessous, tailles, packshot), puis les coulisses (fabrication), puis les accessoires. Cohérent avec le récit Sâpi "artisan + ambiance maison".
+
+**Note pour Robin** : si l'ordre paraît trop figé après tests, on peut envisager un champ ACF `ordre_galerie_principale` ou un ordre custom par produit en Phase 7. Pour l'instant l'ordre est uniforme.
+
+**Bloc thumbnails** (`$gallery_acf_photos`, ambiance 1 + tailles + accessoires) : très léger changement d'ordre — avant taille/accessoires étaient itérées dans une boucle commune sur le repeater (ordre dépendait du drag&drop entre rows des 2 types). Désormais c'est strictement "toutes les tailles puis toutes les accessoires". En pratique, Robin groupe ses photos par type intuitivement → impact visuel quasi nul.
+
+**Bloc slideshow** (`$slideshow_photos`) : ordre **strictement identique** à avant (l'ancien code itérait déjà dans l'ordre `['ambiance', 'vue de dessous', 'detail', 'fabrication']`, le nouveau aussi).
+
+### Protocole de test fiche produit (à exécuter par Robin sur test post-déploiement)
+
+#### Pré-requis
+
+Le déploiement GHA pousse les 3 commits sur test (~3 min). Une fois en ligne, ouvrir **3 fiches produit représentatives** :
+
+- **Une fiche avec beaucoup de photos d'ambiance et détails** (ex: une Olivia avec 4 ambiance + 3 detail + 2 fabrication)
+- **Une fiche avec un type taille/tailles** (vérifier le rendu des thumbnails)
+- **Une fiche d'accessoire** (vérifier que la photo ambiance/accessoires s'affiche correctement)
+
+#### Test 1 — Slideshow ambiance (en haut de la fiche, mobile + desktop)
+
+1. Compter les slides — doit être identique à avant (mêmes IDs, même ordre par type `ambiance` puis `vue de dessous` puis `detail` puis `fabrication`)
+2. Vérifier que les barres de progression Stories en bas du slideshow comptent juste
+3. Vérifier que l'auto-play fonctionne
+4. **Vérifier Phase 4b** : ouvrir DevTools > Elements, inspecter le 1er et 2e slide ambiance. Confirmer la présence de `data-piece-swap-slide="1"` et `data-piece-swap-slide="2"` + `data-product-id` sur les `<img>`.
+5. Avec un projet `salon` actif (`?piece=salon` + photos taggées), confirmer que les 2 premiers slides ambiance swappent.
+
+#### Test 2 — Galerie principale (carousel central, hero produit)
+
+1. Vérifier que toutes les photos non-`client` apparaissent (compter par type)
+2. **Vérifier le nouvel ordre** : doit être ambiance → detail → vue de dessous → tailles → packshot → fabrication → accessoires
+3. Vérifier que le swap mobile (scroll-snap horizontal) fonctionne
+4. Cliquer sur une photo : la lightbox s'ouvre et navigation fonctionne (← →)
+
+#### Test 3 — Thumbnails galerie (sous la grande photo, desktop)
+
+1. Doit afficher : 1re ambiance, puis toutes les `tailles`, puis toutes les `accessoires`
+2. Clic sur une thumbnail : la grande photo change vers celle cliquée
+3. Vérifier que les `<label>` (Ambiance, Tailles, Accessoires) restent corrects
+
+#### Test 4 — Ambiance lightbox (bas de page)
+
+1. Scroller en bas de la fiche, ouvrir le bandeau "Photos d'ambiance" → lightbox plein écran
+2. Vérifier le nombre total de photos (doit matcher la galerie principale)
+3. Navigation fonctionne
+
+#### Test 5 — Photos client (testimonials)
+
+1. Si la fiche a des photos client (taggées `client` dans le repeater) : elles doivent toujours apparaître dans le bandeau preuve sociale (single-product.php:558, hors périmètre Phase 6a)
+2. Elles NE doivent PAS apparaître dans la galerie principale ni dans la lightbox ambiance (exclusion `client` préservée).
+
+#### Test 6 — Fiche d'un produit avec photos legacy `taille` (singulier) ou `studio`
+
+1. Si Robin a déjà migré (Phase 2) en prod : les Gallery sont peuplées, le helper lit Gallery directement.
+2. Sinon (prod avant migration) : le fallback repeater du helper Phase 3 + le merge legacy/canonique côté Phase 6a couvrent le cas. Les photos legacy doivent apparaître.
+
+**Verdict tests** : ⏳ À remplir par Robin après tests sur test.
+
+### Notes additionnelles
+
+- **`page-inspiration.php:30`** : il existe encore UNE lecture directe `get_field('galerie_produit', $product_id)` dans tout le repo (cf audit Phase 0). **HORS scope Phase 6a** (qui ciblait `single-product.php` uniquement). À traiter dans une éventuelle Phase 6b si Robin veut un repo 100% sans `get_field('galerie_produit')`.
+- **`page-inspiration.php`** pourrait également bénéficier du helper `sapi_iterate_product_photos` ajouté en Phase 2 chantier 3, qui retourne `[type, image_id, index]` par row — exactement ce dont la page inspiration a besoin (filtrage ambiance + detail).
+
+### Suite (hors scope 6a)
+
+- **Déploiement prod du paquet 3+4+6a** : après validation tests, merge dans `test-theme-sapi-maison` puis `master` + workflow Deploy to Production.
+- **Phase 5** : tagging massif des photos par Robin (`media_room` + `media_essence`). C'est ce qui rendra le swap pièce visible sur la majorité des produits.
+- **Phase 6b** : suppression du repeater `galerie_produit` (après plusieurs semaines de stabilité prod, et **après éventuel refactor de page-inspiration.php** pour qu'il ne lise plus le repeater directement).
+
+---
 
 ## [RETOUR] S28 Phase 4b — Implémentation du swap photos par pièce (Option B, 5 chantiers)
 **Date livrée :** 2026-05-28
