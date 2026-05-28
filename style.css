@@ -10846,6 +10846,7 @@ transform: translateY(15px);
   justify-content: center;
   gap: 1.25rem;
   width: 100%;
+  padding: 0 24px;
 }
 
 /* Cards harmonisées avec .conseiller-choice : fond blanc, bordure neutre,
@@ -11901,6 +11902,7 @@ button.room-card {
   .room-picker-cards {
     flex-wrap: wrap;
     gap: 0.75rem;
+    padding: 0;
   }
 
   /* Mobile — wrap en 3 colonnes. On match aussi button.room-card pour
@@ -22823,7 +22825,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 
 .conseiller-subtitle {
   font-family: var(--font-body);
-  font-size: 14.5px;
+  font-size: 18px;
   line-height: 1.55;
   color: var(--color-wood-mid);
   margin: 0 auto 22px;
@@ -23044,9 +23046,140 @@ body.woocommerce-cart div.woocommerce-wrapper {
   display: none;
 }
 
+/* Fade-in à l'entrée des cards Conseil / Mon projet (proposition #4) —
+   classe .is-entering posée par JS au moment du toggle hidden → false,
+   puis retirée à la frame suivante → transition opacity 0→1 + scale
+   subtile pour signaler l'apparition. */
+.conseiller-card--conseil,
+.conseiller-card--mon-projet {
+  opacity: 1;
+  -webkit-transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+  transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+}
+.conseiller-card--conseil.is-entering,
+.conseiller-card--mon-projet.is-entering {
+  opacity: 0;
+  -webkit-transform: scale(0.985);
+  transform: scale(0.985);
+}
+
+/* Chorégraphie 3 phases (propositions #1 + #3 + #5) :
+   - Phase A : card englobante compacte = badge + typewriter en cours
+   - Phase B : chip-question expand (max-height 0 → valeur) + fade-in
+     → la card grandit pour faire de la place
+   - Phase C : slot grid expand (max-height 0 → valeur) + cascade cards
+     → la card grandit encore
+   Séquencement temporel piloté par JS (revealSelectionGrid).
+*/
+
+/* Phase B — Chip-question collapsed → expanded */
+.conseiller-mon-projet__inline-question:not([hidden]) {
+  opacity: 0;
+  max-height: 0;
+  margin-top: 0;
+  overflow: hidden;
+  -webkit-transform: translateY(8px);
+  transform: translateY(8px);
+  /* Durées : max-height + margin pilotent l'expansion physique de la card,
+     opacity + translate pilotent l'apparition du contenu. */
+  -webkit-transition: opacity 0.5s ease 0.1s, max-height 0.55s cubic-bezier(0.4, 0, 0.2, 1), margin-top 0.55s cubic-bezier(0.4, 0, 0.2, 1), -webkit-transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
+  transition: opacity 0.5s ease 0.1s, max-height 0.55s cubic-bezier(0.4, 0, 0.2, 1), margin-top 0.55s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
+}
+.conseiller-mon-projet__inline-question.is-revealed {
+  opacity: 1;
+  max-height: 320px;
+  margin-top: 18px;
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
+}
+
+/* Phase C — Slot grid collapsed → expanded.
+   On utilise max-height (overflow-y hidden) pour faire grandir la card
+   physiquement. Le slider horizontal (overflow-x: auto) reste fonctionnel. */
+.mes-creations-selection__grid {
+  max-height: 0;
+  overflow-y: hidden;
+  -webkit-transition: max-height 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: max-height 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mes-creations-selection__grid.is-revealed {
+  /* Borne calibrée sur la hauteur réelle des cards produit (~400-500px) +
+     padding : conserve la bonne vitesse visuelle de croissance (sur 0.65s).
+     Une borne plus haute rendrait l'animation trop rapide à l'œil. */
+  max-height: 600px;
+}
+/* Une fois l'expansion terminée, le JS ajoute .is-fully-revealed qui retire
+   toute contrainte max-height. Aucun clip vertical possible si une card
+   atypique dépasse 600px (variation longue, sur-mesure étoffée, etc.). */
+.mes-creations-selection__grid.is-fully-revealed {
+  max-height: none;
+}
+
+/* Cascade des cards à l'intérieur du slot — transition-delay inline par JS.
+   Le fade-in commence après que le slot ait fini son max-height expand. */
+.mes-creations-selection__grid > * {
+  opacity: 0;
+  -webkit-transform: translateY(12px);
+  transform: translateY(12px);
+  -webkit-transition: opacity 0.55s ease, -webkit-transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mes-creations-selection__grid.is-revealed > * {
+  opacity: 1;
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
+}
+
+/* Phase D — Nav slider (flèches + dots) apparaît après les cards. */
+.mes-creations-selection__nav:not([hidden]) {
+  opacity: 0;
+  -webkit-transform: translateY(6px);
+  transform: translateY(6px);
+  -webkit-transition: opacity 0.4s ease, -webkit-transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mes-creations-selection__nav.is-revealed {
+  opacity: 1;
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
+}
+
+/* Lien "Préciser ou modifier mon projet" (visible quand projet complet,
+   à la place de la chip-question) : même fade-in que la chip-question
+   pour cohérence visuelle (apparaît en phase B). */
+.mes-creations-selection__edit:not([hidden]) {
+  opacity: 0;
+  -webkit-transform: translateY(6px);
+  transform: translateY(6px);
+  -webkit-transition: opacity 0.4s ease, -webkit-transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
+}
+.mes-creations-selection__edit.is-revealed {
+  opacity: 1;
+  -webkit-transform: translateY(0);
+  transform: translateY(0);
+}
+
+/* Respect prefers-reduced-motion : pas d'animations max-height/transform
+   ni stagger, juste opacity courte */
+@media (prefers-reduced-motion: reduce) {
+  .conseiller-mon-projet__inline-question:not([hidden]),
+  .mes-creations-selection__grid,
+  .mes-creations-selection__grid > *,
+  .mes-creations-selection__nav:not([hidden]),
+  .mes-creations-selection__edit:not([hidden]) {
+    max-height: none !important;
+    -webkit-transform: none !important;
+    transform: none !important;
+    -webkit-transition: opacity 0.2s ease !important;
+    transition: opacity 0.2s ease !important;
+    transition-delay: 0s !important;
+  }
+}
+
 .conseiller-card--mon-projet {
   position: relative; /* F2a-sexies : pour positionner .conseiller-mon-projet__edit */
-  padding: 40px 36px 38px;
+  padding: 26px;
   text-align: center;
   min-height: 280px;
   display: -webkit-flex;
@@ -23105,6 +23238,9 @@ body.woocommerce-cart div.woocommerce-wrapper {
   line-height: 1.5;
   max-width: 880px;
   margin: 0 auto;
+  /* Padding latéral minimal pour ne pas coller aux bords de la card
+     englobante (visible quand la card est étroite, ex. mobile). */
+  padding: 0 10px;
 }
 
 /* Mobile — clamp plancher à 22px était un peu trop volumineux dans la card
@@ -23233,24 +23369,95 @@ body.woocommerce-cart div.woocommerce-wrapper {
 
 /* F2a-sexies : zone "Question d'accroche + chips de réponse" sous la phrase IA
    (visible quand le parcours est incomplet — toggled par JS via [hidden]). */
+/* Chip-question refondue (cards .choice harmonisées avec la modale).
+   Container : flex column, label en haut + grille de .choice en dessous. */
 .conseiller-mon-projet__inline-question {
   margin-top: 18px;
   display: -webkit-flex;
   display: flex;
-  -webkit-flex-wrap: wrap;
-  flex-wrap: wrap;
-  -webkit-justify-content: center;
-  justify-content: center;
+  -webkit-flex-direction: column;
+  flex-direction: column;
   -webkit-align-items: center;
   align-items: center;
-  gap: 10px 14px;
+  gap: 12px;
+  width: 100%;
 }
 .inline-question__label {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  font-style: italic;
-  color: var(--color-wood);
+  color: var(--color-wood-dark);
+  text-align: center;
+}
+
+/* Override .choice DANS la chip-question : layout horizontal compact —
+   icône à gauche du label (pas de dim affiché, retiré côté JS).
+   Le modale garde son layout vertical natif (.choice base CSS).
+   Le grid .choices garde la responsivité native via .choices--2col /
+   .choices--4col (set par le JS renderInlineQuestion selon nb de choix). */
+.conseiller-mon-projet__inline-question .choices {
+  /* width: max-content fait rétracter le container à la largeur de ses
+     colonnes 1fr = N × le plus large bouton. Le groupe ne prend que la
+     place strictement nécessaire et se centre via margin auto. Si jamais
+     ça dépasse le parent, max-width: 100% clamp et 1fr revient en relatif. */
+  width: -webkit-max-content;
+  width: -moz-max-content;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+}
+.conseiller-mon-projet__inline-question .choice {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+  gap: 10px;
+  padding: 12px 14px;
+  min-height: 0;
+  min-width: 0;
+  text-align: center;
+}
+/* Icône réduite (32×32 avec SVG 18px) pour libérer de la place au texte */
+.conseiller-mon-projet__inline-question .choice__icon {
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  -webkit-flex-shrink: 0;
+  flex-shrink: 0;
+}
+.conseiller-mon-projet__inline-question .choice__icon svg {
+  width: 18px;
+  height: 18px;
+}
+.conseiller-mon-projet__inline-question .choice__label {
+  text-align: center;
+}
+
+/* Mobile (≤768px) : forcer grid 2 colonnes (au lieu de 4) pour que les
+   boutons aient assez de largeur. 2×2 = 4 choix sur 2 lignes, plus compact
+   verticalement que 1 par ligne mais lisible. Override .choices--4col.
+   Width 100% (au lieu de max-content desktop) clampé à 360px : force le
+   container à respecter la largeur du parent → cols 1fr ajustées, le texte
+   wrappe à l'intérieur sans déborder. */
+@media (max-width: 768px) {
+  .conseiller-mon-projet__inline-question .choices {
+    width: 100%;
+    max-width: 360px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 16px;
+  }
+  /* Label réduit pour tenir mieux dans la largeur réduite des boutons */
+  .conseiller-mon-projet__inline-question .choice__label {
+    font-size: 12px;
+  }
 }
 .inline-question__answers {
   display: -webkit-flex;
@@ -23420,7 +23627,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .conseiller-modal {
   position: fixed;
   inset: 0;
-  background: rgba(50, 40, 30, 0.55);
+  background: rgba(30, 22, 14, 0.82);
   /* z-index 10050 : au-dessus du site-header sticky (10001) et du panier
      sticky (10002). Sinon le header masque le haut de la modale (croix). */
   z-index: 10050;
@@ -23595,11 +23802,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
   display: inline-flex;
   -webkit-align-items: center;
   align-items: center;
-  gap: 7px;
-  padding: 7px 16px;
+  gap: 8px;
+  padding: 9px 19px;
   background: var(--color-wood-dark);
   color: #fff;
-  font-size: 10.5px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -23634,7 +23841,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 /* Titres */
 .h1 {
   font-family: 'Square Peg', cursive;
-  font-size: clamp(28px, 4.2vw, 36px);
+  font-size: clamp(34px, 5vw, 44px);
   font-weight: 400;
   color: var(--color-wood-dark);
   line-height: 1.15;
@@ -23643,7 +23850,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 .h2 {
   font-weight: 700;
-  font-size: clamp(17px, 2.4vw, 21px);
+  font-size: clamp(22px, 3vw, 27px);
   color: var(--color-wood-dark);
   line-height: 1.25;
   text-transform: uppercase;
@@ -23681,8 +23888,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
   background: #fff;
   border: 1px solid var(--color-line);
   border-radius: 12px;
-  padding: 14px 8px 11px;
-  min-height: 92px;
+  padding: 18px 12px 15px;
+  min-height: 116px;
   cursor: pointer;
   -webkit-transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
@@ -23707,11 +23914,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
   border-color: var(--color-wood);
 }
 .choice__icon {
-  width: 36px;
-  height: 36px;
-  margin: 0 auto 6px;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 8px;
   background: var(--color-warm);
-  border-radius: 10px;
+  border-radius: 12px;
   display: -webkit-flex;
   display: flex;
   -webkit-align-items: center;
@@ -23720,15 +23927,31 @@ body.woocommerce-cart div.woocommerce-wrapper {
   justify-content: center;
   color: var(--color-wood);
 }
-.choice__icon svg { width: 20px; height: 20px; }
+.choice__icon svg { width: 24px; height: 24px; }
 .choice__label {
   display: block;
-  font-size: 10.5px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-wood-dark);
   line-height: 1.3;
+}
+
+/* État sélectionné — appliqué par JS quand state.answers[stepId] === choice.slug.
+   Utilisé notamment pour le feedback "ta réponse est prise" quand on ouvre
+   la modale sur la question répondue depuis la chip-question de la card. */
+.choice.is-selected {
+  border-color: var(--color-wood-dark);
+  background: var(--color-warm);
+  box-shadow: var(--shadow-card-hover);
+}
+.choice.is-selected .choice__icon {
+  background: var(--color-wood-dark);
+  color: #fff;
+}
+.choice.is-selected .choice__label {
+  color: var(--color-wood-dark);
 }
 
 /* Texte libre input */
@@ -24425,4 +24648,481 @@ button.chip--project:focus-visible {
     font-size: 14px;
     padding: 12px 18px;
   }
+}
+
+/* ============================================================
+   Refonte /mes-creations/ — 2 sections empilées (Chantier 1)
+
+   Structure :
+   [Hero existant] (conservé)
+   [.mes-creations-selection] = card englobante "Mon projet"
+       (badge dynamique N luminaires + phrase IA + lien Modifier
+        + slot grille peuplé par JS via clones depuis la grille basse)
+   [.mes-creations-section-divider] = filet fin centré (Option B)
+   [.mes-creations-catalogue] = section "Toutes mes créations"
+       (H2 + sous-titre + placeholder pills cat + grille shop-products)
+   ============================================================ */
+
+/* Card englobante "Mon projet" : la card prend toute la largeur (au lieu
+   du span-X du pattern conseiller universel) — elle contient la grille
+   des matches comme un wrap, pas comme une cellule de la grille produit. */
+.mes-creations-selection {
+  margin-top: 32px;
+}
+/* Override .conseiller-card--mon-projet héritée :
+   - min-height auto (laisser la card grandir naturellement avec la grille)
+   - cursor pointer : la card entière est cliquable (ouvre la modale en
+     s3 si projet complet, s0 sinon). Les zones interactives internes
+     (cards produit, sur-mesure, slider nav, lien Modifier, chip-question)
+     sont exclues côté JS pour ne pas déclencher la modale en double action.
+   - Hover : pas de translateY pour éviter le déplacement de toute la card
+     avec son contenu. Box-shadow subtile pour signaler le clic possible. */
+.mes-creations-selection__card {
+  min-height: 0;
+  /* Padding latéral réduit à 10px (override du 26px hérité de
+     .conseiller-card--mon-projet) pour donner plus de largeur au slot. */
+  padding: 26px 10px;
+}
+.mes-creations-selection__card:hover {
+  -webkit-transform: none;
+  transform: none;
+  box-shadow: 0 4px 16px rgba(147, 125, 104, 0.12);
+}
+/* Slot grille à l'intérieur de la card englobante. Mêmes specs que la
+   grille produit du catalogue (.shop-products .product-grid) :
+   4 cols desktop / 3 cols ≤1024px / 2 cols ≤768px / 1 col ≤480px, gap 2rem.
+   width: 100% nécessaire car le parent .conseiller-card__inner est en
+   flex column avec align-items: center → sans width explicite, le grid
+   ne s'étire pas. */
+/* Slider horizontal : 4 cards visibles d'un coup sur desktop, scroll
+   horizontal + scroll-snap pour voir le reste. La navigation (flèches +
+   dots) sous le slider est le seul moyen visuel — scrollbar masquée.
+   Padding horizontal pour faire respirer les cards aux extrémités du
+   slider (sinon collées au bord de la card englobante). */
+.mes-creations-selection__grid {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+  gap: 2rem;
+  width: 100%;
+  padding: 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  /* scroll-padding-inline pour que les cards snappent à 24px du bord
+     (sinon elles collent au bord en scroll-snap-align: start). */
+  scroll-padding-inline: 24px;
+  /* Scrollbar masquée — la nav (flèches + dots) prend le relais */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.mes-creations-selection__grid::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+/* Chaque cellule : largeur = (100% - 3 gaps de 2rem) / 4 cards visibles.
+   scroll-snap-align: start pour que les cards se calent à gauche au swipe. */
+.mes-creations-selection__grid > * {
+  -webkit-flex: 0 0 calc((100% - 6rem) / 4);
+  flex: 0 0 calc((100% - 6rem) / 4);
+  scroll-snap-align: start;
+}
+@media (max-width: 1024px) {
+  .mes-creations-selection__grid > * {
+    -webkit-flex: 0 0 calc((100% - 4rem) / 3);
+    flex: 0 0 calc((100% - 4rem) / 3);
+  }
+}
+@media (max-width: 768px) {
+  .mes-creations-selection__grid {
+    gap: 1rem;
+  }
+  .mes-creations-selection__grid > * {
+    -webkit-flex: 0 0 calc((100% - 1rem) / 2);
+    flex: 0 0 calc((100% - 1rem) / 2);
+  }
+}
+@media (max-width: 480px) {
+  .mes-creations-selection__grid > * {
+    -webkit-flex: 0 0 85%;
+    flex: 0 0 85%;
+  }
+}
+
+/* Navigation slider : flèches de chaque côté + dots centrés */
+.mes-creations-selection__nav {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  gap: 18px;
+}
+.mes-creations-selection__nav-arrow {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  /* override règle button global padding: 10px 25px */
+  padding: 0;
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+  background: var(--color-white);
+  color: var(--color-wood-dark);
+  cursor: pointer;
+  -webkit-transition: background 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
+}
+.mes-creations-selection__nav-arrow:hover:not(:disabled) {
+  background: var(--color-wood-dark);
+  color: #fff;
+  border-color: var(--color-wood-dark);
+}
+.mes-creations-selection__nav-arrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.mes-creations-selection__nav-arrow svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+.mes-creations-selection__nav-dots {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 8px;
+}
+.mes-creations-selection__nav-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  padding: 0;
+  border: none;
+  background: rgba(147, 125, 104, 0.3);
+  cursor: pointer;
+  -webkit-transition: background 0.2s, transform 0.2s;
+  transition: background 0.2s, transform 0.2s;
+}
+.mes-creations-selection__nav-dot:hover {
+  background: rgba(147, 125, 104, 0.6);
+}
+.mes-creations-selection__nav-dot.is-active {
+  background: var(--color-wood-dark);
+  -webkit-transform: scale(1.25);
+  transform: scale(1.25);
+}
+/* Slot vide (avant que le JS ait peuplé OU si 0 match) : ne pas afficher
+   d'espace vide béant. Géré aussi côté JS avec display none si besoin. */
+.mes-creations-selection__grid:empty {
+  display: none;
+}
+
+/* Lien "Préciser ou modifier mon projet" sous la phrase IA. Souligné
+   discret, hover orange, icône crayon en suffixe. */
+.mes-creations-selection__edit {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-wood);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  -webkit-transition: color 0.2s ease;
+  transition: color 0.2s ease;
+}
+.mes-creations-selection__edit:hover,
+.mes-creations-selection__card:hover .mes-creations-selection__edit {
+  color: var(--color-orange);
+}
+.mes-creations-selection__edit svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Séparateur entre "Ma sélection" et "Toutes mes créations" — Option B :
+   un seul filet fin court (80px), centré, opacity faible. Pas de dots. */
+.mes-creations-section-divider {
+  width: 80px;
+  height: 1px;
+  margin: 70px auto 0;
+  background: var(--color-line);
+  opacity: 0.6;
+}
+
+/* Section "Toutes mes créations" — H2 + sous-titre + placeholder pills. */
+.mes-creations-catalogue {
+  max-width: 1400px;
+  margin: 44px auto 0;
+  padding: 0 3rem;
+}
+.mes-creations-catalogue__header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.mes-creations-catalogue__title {
+  font-family: var(--font-body);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: clamp(20px, 2.6vw, 26px);
+  letter-spacing: 0.04em;
+  color: var(--color-wood-dark);
+  margin: 0;
+}
+.mes-creations-catalogue__sub {
+  margin: 8px 0 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-wood);
+}
+/* Pills catégorie (Chantier 3) — design mockup-15. Filtrent la grille basse
+   "Toutes mes créations" uniquement. La grille haute (slot "Ma sélection")
+   n'est pas affectée par les pills (CSS scopé via #sapi-product-grid). */
+.mes-creations-pills {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-justify-content: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 36px;
+}
+.mes-creations-pill {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  padding: 9px 18px;
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-wood-dark);
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-transition: background 0.2s, border-color 0.2s, color 0.2s;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.mes-creations-pill:hover {
+  border-color: var(--color-wood);
+}
+.mes-creations-pill.is-active {
+  background: var(--color-wood-dark);
+  color: #fff;
+  border-color: var(--color-wood-dark);
+}
+
+/* Focus clavier accessible (a11y) sur tous les nouveaux interactifs de
+   /mes-creations/. Le user-agent style retire l'outline sur les boutons,
+   on rétablit un focus-ring cohérent avec la palette wood-dark. */
+.mes-creations-pill:focus-visible,
+.mes-creations-selection__nav-arrow:focus-visible,
+.mes-creations-selection__nav-dot:focus-visible,
+.mes-creations-selection__edit:focus-visible,
+.mes-creations-surmesure-card:focus-visible {
+  outline: 2px solid var(--color-wood-dark);
+  outline-offset: 2px;
+}
+
+/* Refonte /mes-creations/ — la grille catalogue "Toutes mes créations"
+   affiche TOUS les produits, indépendamment du filtre projet.
+   shop.js applique encore .is-filtered-out + style="display:none" inline
+   sur les cards qui ne matchent pas sapiProject (utile pour identifier
+   quoi cloner dans le slot "Ma sélection"), MAIS visuellement on force
+   l'affichage dans le catalogue complet. Le `display: revert` annule
+   l'inline style="display:none" car les CSS !important battent les inline
+   sans !important. */
+#sapi-product-grid .product-card-cinetique.is-filtered-out {
+  /* shop.js pose uniquement style="display:none" inline sur les cards
+     filtrées. On annule ça pour les afficher dans le catalogue complet.
+     PAS d'overflow:visible : l'overflow:hidden de la card de base est
+     nécessaire pour clipper l'image aux coins arrondis. */
+  display: revert !important;
+}
+
+/* Filtre par catégorie : cache les cards dont data-categories ne match pas.
+   IMPORTANT : sélecteur 2-classes pour battre l'override is-filtered-out
+   ci-dessus (sinon spécificité 0,2,1 > 0,1,1 → cat-filtered ignoré quand
+   projet actif). Le sélecteur combiné .is-filtered-out.is-cat-filtered
+   gère le cas où une card a les deux classes simultanément. */
+#sapi-product-grid .product-card-cinetique.is-cat-filtered,
+#sapi-product-grid .product-card-cinetique.is-filtered-out.is-cat-filtered {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* ============================================================
+   Refonte /mes-creations/ — Responsive mobile (Chantier 5)
+   Aligné sur mockup-15 (@media max-width: 768px).
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Section englobante "Ma sélection" : padding réduit, dashed plus proche */
+  .mes-creations-selection {
+    padding: 0 14px;
+    margin-top: 24px;
+  }
+  .mes-creations-selection__card {
+    padding: 34px 10px 30px;
+  }
+  /* Dashed border interne plus proche du bord en mobile */
+  .conseiller-card--mon-projet.mes-creations-selection__card::before {
+    inset: 8px;
+  }
+  /* Slot grille mobile :
+     - left 20px pour un vrai gap avant la 1re card (visuellement aéré)
+     - right 4px conservé pour que la card suivante "peek" au bord
+     - bottom 24px (un peu plus que top) pour respirer sous les cards
+     - scroll-padding-inline-start: 20px → snap aligné sur le padding gauche */
+  .mes-creations-selection__grid {
+    padding: 16px 4px 24px 20px;
+    scroll-padding-inline-start: 20px;
+  }
+  /* Lien Modifier un peu plus discret en mobile */
+  .mes-creations-selection__edit {
+    font-size: 12.5px;
+  }
+  /* Séparateur mobile : resserré verticalement, même largeur 80px */
+  .mes-creations-section-divider {
+    margin-top: 48px;
+  }
+  /* Section "Toutes mes créations" */
+  .mes-creations-catalogue {
+    padding: 0 14px 60px;
+    margin-top: 32px;
+  }
+  /* Pills cat mobile : wrap sur plusieurs lignes, centrées, jamais comprimées */
+  .mes-creations-pills {
+    margin-bottom: 28px;
+  }
+  .mes-creations-pill {
+    font-size: 12px;
+    padding: 8px 14px;
+  }
+  /* Card sur-mesure : SVG icône plus petit en mobile (mockup ligne 334) */
+  .mes-creations-surmesure-card__photo svg {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Marqueur sur les clones (cards "Ma sélection"). Utile pour le tracking
+   GA4 (Chantier 5) et pour les distinguer des cards originales si besoin. */
+.is-selection-clone {
+  /* Pas de style spécifique pour l'instant — les clones héritent du style
+     des .product-card-cinetique. Le marker existe pour le sélecteur JS. */
+}
+
+/* Slot "Ma sélection" : homogénéiser les cards produit.
+   - product-name-formatter.js découpe le nom en .product-firstname (prénom
+     Montserrat) + .product-restname (article+nom Square Peg). On force chaque
+     morceau sur sa propre ligne → 2 lignes garanties, hauteur de body alignée.
+   - Prix centré horizontalement */
+.mes-creations-selection__grid .product-card-cinetique .product-name .product-firstname,
+.mes-creations-selection__grid .product-card-cinetique .product-name .product-restname {
+  display: block;
+}
+.mes-creations-selection__grid .product-card-cinetique .product-price {
+  -webkit-justify-content: center;
+  justify-content: center;
+}
+
+
+/* Card sur-mesure (Chantier 2) — cellule de grille spéciale en dernière
+   position du slot. Markup mockup-15 ligne 419 (template cloné par JS).
+   Format identique aux cards produit (aspect ratio + body), accent orange. */
+.mes-creations-surmesure-card {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  background: #fff;
+  border: 1px dashed rgba(227, 91, 36, 0.45);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  -webkit-transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+@media (hover: hover) {
+  .mes-creations-surmesure-card:hover {
+    -webkit-transform: translateY(-3px);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(227, 91, 36, 0.18);
+    border-color: var(--color-orange);
+  }
+}
+.mes-creations-surmesure-card__photo {
+  aspect-ratio: 1/1.1;
+  background: linear-gradient(135deg, #FFF4ED 0%, #FFE4D3 100%);
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  color: var(--color-orange);
+  gap: 14px;
+  padding: 20px;
+}
+.mes-creations-surmesure-card__photo svg {
+  width: 42px;
+  height: 42px;
+  opacity: 0.85;
+}
+.mes-creations-surmesure-card__badge {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  padding: 5px 11px;
+  background: var(--color-orange);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: 50px;
+}
+.mes-creations-surmesure-card__body {
+  padding: 14px 12px 18px;
+  text-align: center;
+}
+.mes-creations-surmesure-card__title {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-orange);
+  margin-bottom: 3px;
+}
+.mes-creations-surmesure-card__sub {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--color-wood-mid);
 }

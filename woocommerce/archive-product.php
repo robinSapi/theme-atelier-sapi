@@ -20,6 +20,27 @@ $all_products = new WP_Query([
   'orderby' => 'menu_order date',
   'order' => 'ASC',
 ]);
+
+// Pills catégorie (Chantier 3) — récupère les catégories WC avec leurs counts.
+// Ordre fixe : suspensions / lampadaires / lampesaposer / appliques / accessoires.
+// Le total "Tous" exclut uniquement carte-cadeau (gift card, hors créations).
+$mes_creations_cat_order = ['suspensions', 'lampadaires', 'lampesaposer', 'appliques', 'accessoires'];
+$mes_creations_cats_raw  = get_terms([
+  'taxonomy'   => 'product_cat',
+  'hide_empty' => true,
+  'exclude'    => [get_option('default_product_cat')],
+]);
+$mes_creations_cats_by_slug = [];
+if ($mes_creations_cats_raw && !is_wp_error($mes_creations_cats_raw)) {
+  foreach ($mes_creations_cats_raw as $cat) {
+    $mes_creations_cats_by_slug[$cat->slug] = $cat;
+  }
+}
+// Lecture du param GET ?product_cat= pour le filtre actif initial.
+$mes_creations_active_cat = isset($_GET['product_cat']) ? sanitize_key(wp_unslash($_GET['product_cat'])) : '';
+if ($mes_creations_active_cat && !isset($mes_creations_cats_by_slug[$mes_creations_active_cat])) {
+  $mes_creations_active_cat = '';
+}
 ?>
 
 <!-- Hero Section - Magazine Style -->
@@ -101,14 +122,19 @@ $conseil_room_choices = [
 ];
 $conseil_room_icons = sapi_guide_get_icons();
 ?>
-<section class="conseiller-cards-zone" data-conseiller-zone aria-label="<?php esc_attr_e('Conseil de Robin', 'theme-sapi-maison'); ?>">
-  <!-- Card "Conseil de Robin" — visible sans projet en localStorage.
-       Round 4 : contenu room picker (titre + 6 pièces + séparateur "ou"
-       + champ texte libre) identique à la homepage. -->
+<!-- Refonte /mes-creations/ — Section "Ma sélection" : card englobante qui
+     contient badge + phrase IA + slot grille (peuplé par sapi-cards-conseiller.js
+     via clone des produits matchés depuis la grille basse "Toutes mes créations").
+     Sans projet : card "Conseil de Robin" simple avec CTA → modale V3. -->
+<section class="conseiller-cards-zone mes-creations-selection" data-conseiller-zone data-mes-creations-selection aria-label="<?php esc_attr_e('Ma sélection', 'theme-sapi-maison'); ?>">
+
+  <!-- Card "Conseil de Robin" — visible sans projet. Contient le room
+       picker complet : titre + 6 pièces clicables + séparateur "ou" +
+       champ texte libre (identique à la home et au pré-refonte). -->
   <div class="conseiller-card conseiller-card--conseil" data-conseiller-card="conseil" data-room-picker hidden>
     <div class="conseiller-card__inner">
       <span class="conseiller-badge conseiller-badge--default">
-        <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput — SVG statique en dur ?>
+        <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
         <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
       </span>
       <h2 class="room-picker-title"><?php esc_html_e('Pour quelle pièce cherchez-vous un luminaire ?', 'theme-sapi-maison'); ?></h2>
@@ -137,28 +163,95 @@ $conseil_room_icons = sapi_guide_get_icons();
     </div>
   </div>
 
-  <!-- Card "Mon projet" — visible avec projet en localStorage.
-       F2a-sexies : la card n'est plus un <button> entier. Les interactions
-       sont portées par :
-         - Le lien "Modifier" coin haut-droit (visible quand projet complet) → S3
-         - Les chips de réponse de la prochaine question (visible quand projet incomplet) → enregistre + ouvre la modale sur la question d'après -->
-  <section class="conseiller-card conseiller-card--mon-projet" data-conseiller-card="mon-projet" hidden>
-    <a class="conseiller-mon-projet__edit" href="#" data-action="open-modal" data-modal-state="s3" data-mon-projet-edit hidden>
-      <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-      <span><?php esc_html_e('Modifier', 'theme-sapi-maison'); ?></span>
-    </a>
+  <!-- Card "Mon projet" englobante — visible avec projet. Contient :
+       - badge "Mon projet · N luminaires" (N dynamique via JS)
+       - phrase IA italique + signature Square Peg
+       - lien "Préciser ou modifier mon projet" → modale V3 en édition (S3)
+       - slot grille rempli par JS (clones des cards matching + card sur-mesure) -->
+  <section class="conseiller-card conseiller-card--mon-projet mes-creations-selection__card" data-conseiller-card="mon-projet" hidden>
     <div class="conseiller-card__inner">
-      <span class="conseiller-badge conseiller-badge--default">
+      <span class="conseiller-badge conseiller-badge--default" data-mon-projet-badge>
         <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-        <?php esc_html_e('Mon projet', 'theme-sapi-maison'); ?>
+        <span data-mon-projet-badge-text><?php esc_html_e('Ton projet', 'theme-sapi-maison'); ?></span>
       </span>
       <p class="conseiller-mon-projet__text" data-mon-projet-phrase>
         <span class="conseiller-mon-projet__text-content" data-mon-projet-phrase-content></span>
       </p>
+      <!-- Chip-question : prochaine question non répondue avec ses pills
+           cliquables (héritage F2a-sexies). Visible quand le projet est
+           incomplet, le clic sur une pill enregistre la réponse + ouvre
+           la modale sur la question suivante. -->
       <div class="conseiller-mon-projet__inline-question" data-inline-question hidden></div>
+      <a class="conseiller-link mes-creations-selection__edit" href="#" data-action="open-modal" data-modal-state="s3" data-mon-projet-edit>
+        <span><?php esc_html_e('Préciser ou modifier mon projet', 'theme-sapi-maison'); ?></span>
+        <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+      </a>
+      <!-- Slot grille : rempli par sapi-cards-conseiller.js avec les clones
+           des cards .product-card-cinetique qui matchent sapiProject + la
+           card sur-mesure (clonée depuis le <template> ci-dessous) en
+           dernière cellule. -->
+      <div class="mes-creations-selection__grid" data-mes-creations-selection-grid aria-live="polite"></div>
+
+      <!-- Navigation slider : flèches + dots. Peuplé par JS selon le nombre
+           de pages (= total cards / cards visibles par viewport). Masqué
+           si tout tient sur une page. -->
+      <div class="mes-creations-selection__nav" data-mes-creations-selection-nav hidden></div>
+
+      <!-- Template card sur-mesure (Chantier 2) — markup mockup-15 ligne 419.
+           Cloné par populateSelectionGrid() comme dernière cellule du slot.
+           Pas rendu dans le DOM tant que le JS ne le clone pas. -->
+      <template data-mes-creations-surmesure-template>
+        <a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>" class="mes-creations-surmesure-card" data-mes-creations-surmesure-cta>
+          <div class="mes-creations-surmesure-card__photo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+              <path d="M21 3v5h-5"/>
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+              <path d="M8 16H3v5"/>
+            </svg>
+            <span class="mes-creations-surmesure-card__badge"><?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?></span>
+          </div>
+          <div class="mes-creations-surmesure-card__body">
+            <div class="mes-creations-surmesure-card__title"><?php esc_html_e('Et si on créait le tien ?', 'theme-sapi-maison'); ?></div>
+            <div class="mes-creations-surmesure-card__sub"><?php esc_html_e('Décris ton projet à Robin', 'theme-sapi-maison'); ?></div>
+          </div>
+        </a>
+      </template>
     </div>
   </section>
 </section>
+
+<!-- Séparateur visuel entre "Ma sélection" et "Toutes mes créations" :
+     filet fin court centré (Option B). -->
+<div class="mes-creations-section-divider" aria-hidden="true"></div>
+
+<!-- Section "Toutes mes créations" — catalogue complet (1 seule grille DOM,
+     source of truth pour les matches qui sont clonés dans la card "Ma sélection"
+     via JS). Pills catégorie : Chantier 4 (placeholder visuel pour l'instant). -->
+<section class="mes-creations-catalogue" id="mes-creations-catalogue">
+  <header class="mes-creations-catalogue__header">
+    <h2 class="mes-creations-catalogue__title"><?php esc_html_e('Toutes mes créations', 'theme-sapi-maison'); ?></h2>
+    <p class="mes-creations-catalogue__sub"><?php esc_html_e('Le catalogue complet, classé par type de luminaire', 'theme-sapi-maison'); ?></p>
+  </header>
+
+  <!-- Pills catégorie (Chantier 3) — filtrage AJAX-less (toutes les cards
+       sont déjà dans le DOM, on toggle .is-cat-filtered via JS). URL mise
+       à jour via history.pushState. Au reload avec ?product_cat=<slug>,
+       la classe is-active est appliquée côté PHP. -->
+  <nav class="mes-creations-pills" data-mes-creations-pills aria-label="<?php esc_attr_e('Filtrer par catégorie', 'theme-sapi-maison'); ?>">
+    <button type="button" class="mes-creations-pill<?php echo empty($mes_creations_active_cat) ? ' is-active' : ''; ?>" data-cat="all">
+      <?php esc_html_e('Tous', 'theme-sapi-maison'); ?>
+    </button>
+    <?php foreach ($mes_creations_cat_order as $slug) :
+      if (!isset($mes_creations_cats_by_slug[$slug])) continue;
+      $cat = $mes_creations_cats_by_slug[$slug];
+      $is_active = ($mes_creations_active_cat === $slug);
+    ?>
+      <button type="button" class="mes-creations-pill<?php echo $is_active ? ' is-active' : ''; ?>" data-cat="<?php echo esc_attr($cat->slug); ?>">
+        <?php echo esc_html($cat->name); ?>
+      </button>
+    <?php endforeach; ?>
+  </nav>
 
 <!-- Products Grid — grille 2 colonnes photos ambiance -->
 <section class="shop-products" id="shop-products">
@@ -531,6 +624,8 @@ $conseil_room_icons = sapi_guide_get_icons();
   <?php endif; ?>
   <?php wp_reset_postdata(); ?>
 </section>
+
+</section><!-- /.mes-creations-catalogue (wrap "Toutes mes créations") -->
 
 <!-- Outro Section with CTA -->
 <section class="shop-outro">

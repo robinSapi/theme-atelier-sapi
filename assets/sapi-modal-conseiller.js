@@ -502,7 +502,18 @@
       state.open = false;
       exitChatMode();
 
-      // 4. Refilter la grille
+      // Fix audit — Bug 2 : reprendre les notifications sapiProject (sinon
+      // le notify bufferisé de sapiProject.set() ligne 496 n'est jamais
+      // flushé puisque ce chemin ne passe pas par closeModal()) +
+      // finaliser le tracking V3 (sinon la session n'est pas terminée
+      // dans l'admin). Le resume déclenche un render() des cards qui va
+      // basculer Conseil → Ton projet + repopulate le slot.
+      SessionTracker.finalize();
+      if (window.sapiProject && typeof window.sapiProject.resumeNotifications === 'function') {
+        window.sapiProject.resumeNotifications();
+      }
+
+      // 4. Refilter la grille (idempotent — déjà déclenché par resume → render)
       if (typeof window.sapiShopRefilter === 'function') window.sapiShopRefilter();
 
       // 5. Le texte apparaît maintenant : retire .is-awaiting-advice +
@@ -598,9 +609,12 @@
   // Séquence de sortie en 3 phases (~2s) :
   //   Phase 1 (0–600ms)     : fade-out du contenu interne (screens)
   //   Phase 2 (500–1100ms)  : fade-out de la modale entière (overlay + dialog)
-  //   Phase 3 (1100–1900ms) : scroll smooth de la page pour centrer la card
-  //                           "Mon projet" puis resolve (texte apparaît ensuite
-  //                           via finishAdvice + typewriter)
+  //   Phase 3 (1100–1900ms) : hide modale + cleanup styles puis resolve
+  //                           (le texte apparaît ensuite via finishAdvice +
+  //                           typewriter sur la card "Mon projet")
+  // Round 6 — scroll auto retiré : trop perturbant avec la chorégraphie
+  // 4 phases de la card "Ton projet" (apparition étagée typewriter →
+  // chip-question → cards → nav). Le visiteur garde sa position de scroll.
   function runExitSequence(targetCard) {
     return new Promise(function (resolve) {
       var modalCard = els.modalCard;
@@ -642,20 +656,9 @@
         document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
 
-        // Scroll smooth pour centrer la card "Mon projet" dans la viewport
-        if (targetCard) {
-          try {
-            var rect = targetCard.getBoundingClientRect();
-            var targetY = window.scrollY + rect.top - Math.max(40, (window.innerHeight - rect.height) / 2);
-            window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
-          } catch (e) {
-            // Fallback navigateur sans behavior:smooth
-            targetCard.scrollIntoView();
-          }
-        }
-
-        // Attendre ~800ms pour laisser le scroll smooth se terminer
-        // avant de résoudre (= avant que le texte apparaisse)
+        // Round 6 — scroll auto retiré. Le délai 800ms est conservé pour
+        // laisser le fade-out modale finir avant que le texte typewriter
+        // ne démarre sur la card "Ton projet".
         setTimeout(resolve, 800);
       }, 1100);
     });
@@ -1024,7 +1027,7 @@
 
     if (mode === 's0-partiel') {
       nextStepId = getNextUnansweredVisibleStep() || 'piece';
-      badgeText = 'Mon projet';
+      badgeText = 'Ton projet';
       placeholderText = 'Précise ton projet en quelques mots…';
       resetVisible = true;
     } else {
@@ -1655,6 +1658,14 @@
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
 
+    // Geler les notifications sapiProject pendant la modale : évite que
+    // les cards en arrière-plan (Conseil/Mon projet sur /mes-creations/)
+    // refilter à chaque réponse cliquée (sinon flashs visibles à travers
+    // l'overlay). À closeModal(), un flush unique met tout à jour d'un coup.
+    if (window.sapiProject && typeof window.sapiProject.pauseNotifications === 'function') {
+      window.sapiProject.pauseNotifications();
+    }
+
     // Tracking V3 — INSERT row (entry_point + entry_url). Doit être appelé
     // AVANT showScreen() pour que le snapshot suivant soit un UPDATE.
     SessionTracker.start();
@@ -1712,6 +1723,12 @@
       try { state.aiController.abort(); } catch (e) { /* swallow */ }
       state.aiController = null;
     }
+    // Annule l'éventuel auto-avance confirmStep en attente (sinon snapshot
+    // tracking inutile + risque d'avancer dans une modale fermée).
+    if (state.confirmAdvanceTimer) {
+      clearTimeout(state.confirmAdvanceTimer);
+      state.confirmAdvanceTimer = null;
+    }
     els.modal.hidden = true;
     document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
@@ -1721,6 +1738,11 @@
     }
     // Tracking V3 — snapshot final via sendBeacon (résilient au unload).
     SessionTracker.finalize();
+    // Reprendre les notifications sapiProject + flush l'éventuel update
+    // accumulé pendant la modale (un seul refresh des cards à la fermeture).
+    if (window.sapiProject && typeof window.sapiProject.resumeNotifications === 'function') {
+      window.sapiProject.resumeNotifications();
+    }
   }
 
   /* ─────────────────────────────────────────────
@@ -1746,6 +1768,30 @@
       var freetext = (e.detail && typeof e.detail.freetext === 'string') ? e.detail.freetext.trim() : '';
       if (freetext) {
         setTimeout(function () { submitFromS0Text(freetext); }, 50);
+      }
+      // Confirm-step : la card chip-question a déjà enregistré la réponse,
+      // on ouvre la modale sur la question répondue (pill selected via
+      // state.answers hydraté), puis on auto-avance après 700ms vers la
+      // suivante. Feedback visuel "ma réponse a bien été prise".
+      var confirmStep  = e.detail && e.detail.confirmStep;
+      var confirmSlug  = e.detail && e.detail.confirmSlug;
+      var confirmLabel = e.detail && e.detail.confirmLabel;
+      if (confirmStep && confirmSlug) {
+        requestAnimationFrame(function () {
+          state.currentQuestion = confirmStep;
+          showQuestion(confirmStep);
+          if (state.screen !== 's1') showScreen('s1');
+          // Auto-avance : reuse answerCurrentQuestion qui gère history +
+          // sapiProject sync + transition vers la prochaine question.
+          // Tracker le timer pour pouvoir l'annuler si l'utilisateur ferme
+          // la modale dans l'intervalle (sinon snapshot tracking inutile).
+          if (state.confirmAdvanceTimer) clearTimeout(state.confirmAdvanceTimer);
+          state.confirmAdvanceTimer = setTimeout(function () {
+            state.confirmAdvanceTimer = null;
+            if (!state.open) return;
+            answerCurrentQuestion(confirmSlug, confirmLabel);
+          }, 700);
+        });
       }
     });
 

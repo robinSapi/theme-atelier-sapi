@@ -14,6 +14,7 @@
 
   var config = window.SAPI_CARDS_CONSEILLER || {};
   var STEPS = Array.isArray(config.steps) ? config.steps : [];
+  var ICONS = config.icons || {};
   var RULES = config.rules || {};
 
   /* ─────────────────────────────────────────────
@@ -309,6 +310,16 @@
   // À la fin, fondu de la signature "— Robin" via .is-typing-done.
   var signatureTimer = null;
 
+  // Timers de la chorégraphie revealSelectionGrid (phases C, D, E).
+  // Tracker module-level pour pouvoir tout annuler si render() est rappelé
+  // pendant la séquence (sinon les classes is-revealed se ré-appliquent
+  // sur d'anciennes refs DOM ou à des timings désynchronisés).
+  var revealTimers = [];
+  function clearRevealTimers() {
+    for (var i = 0; i < revealTimers.length; i++) clearTimeout(revealTimers[i]);
+    revealTimers.length = 0;
+  }
+
   function typewriterEffect(contentEl, phraseEl, text, perCharDelay) {
     if (signatureTimer) {
       clearTimeout(signatureTimer);
@@ -347,6 +358,9 @@
     signatureTimer = setTimeout(function () {
       signatureTimer = null;
       if (phraseEl) phraseEl.classList.add('is-typing-done');
+      // Proposition #3 : révéler les cards du slot après le typewriter.
+      // La cascade stagger (proposition #5) prend ensuite le relais.
+      if (typeof revealSelectionGrid === 'function') revealSelectionGrid();
     }, totalMs);
   }
 
@@ -368,31 +382,57 @@
     return step.question;
   }
 
-  // F2a-sexies : injecte le markup "question + chips de réponse" dans la
-  // zone data-inline-question. step = objet step complet du localize.
+  // F2a-sexies (refondu) : injecte le markup "question + cards de réponse"
+  // dans la zone data-inline-question — utilise le pattern .choice du modale
+  // pour cohérence visuelle (cards carrées avec icône + label uppercase).
   function renderInlineQuestion(step, answers) {
     if (!els.inlineQuestion || !step) return;
     var choices = step.choices || [];
     var question = getDynamicQuestion(step, answers || {});
-    var html = '<span class="inline-question__label">' + escHtml(question) + '</span>';
-    html += '<div class="inline-question__answers">';
+
+    var choicesClass = 'choices';
+    if (choices.length === 2) choicesClass += ' choices--2col';
+    else if (choices.length === 4) choicesClass += ' choices--4col';
+
+    var html = '<div class="inline-question__label">' + escHtml(question) + '</div>';
+    html += '<div class="' + choicesClass + '">';
     for (var i = 0; i < choices.length; i++) {
       var c = choices[i];
-      html += '<button class="answer-chip" type="button"' +
+      html += '<button class="choice" type="button"' +
         ' data-step-id="' + escHtml(step.id) + '"' +
         ' data-slug="' + escHtml(c.slug) + '"' +
-        ' data-label="' + escHtml(c.label) + '">' +
-        escHtml(c.label) +
-        '</button>';
+        ' data-label="' + escHtml(c.label) + '">';
+      html += '<span class="choice__icon">' + (ICONS[c.icon] || '') + '</span>';
+      html += '<span class="choice__label">' + escHtml(c.label) + '</span>';
+      // Round 6 — dim retiré du rendu chip-question (le label seul tient
+      // mieux dans les boutons compacts horizontaux, surtout sur mobile).
+      // Le dim reste rendu par le modale via showQuestion (layout vertical).
+      html += '</button>';
     }
     html += '</div>';
     els.inlineQuestion.innerHTML = html;
   }
 
+  // Petit helper crossfade : ajoute .is-entering au moment où la card
+  // passe de hidden à visible, puis l'enlève à la frame suivante → le
+  // transition CSS opacity + scale joue automatiquement.
+  function revealCard(card) {
+    if (!card) return;
+    var wasHidden = card.hidden;
+    card.hidden = false;
+    if (!wasHidden) return; // déjà visible : pas de re-fade
+    card.classList.add('is-entering');
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        card.classList.remove('is-entering');
+      });
+    });
+  }
+
   function renderMonProjet() {
     if (!els.cardMonProjet || !els.phraseContent) return;
     els.cardConseil && (els.cardConseil.hidden = true);
-    els.cardMonProjet.hidden = false;
+    revealCard(els.cardMonProjet);
 
     // F2a-quater : pendant l'animation morph + l'attente IA, on injecte 3
     // ronds qui pulsent en cascade. Pendant ce temps : pas de chip-question,
@@ -416,29 +456,47 @@
     if (els.phraseContent.dataset.lastText !== newText) {
       els.phraseContent.dataset.lastText = newText;
       typewriterEffect(els.phraseContent, els.phrase, newText, 16);
+    } else {
+      // Texte inchangé → on révèle quand même le slot (sinon les clones
+      // restent opacity 0 après populateSelectionGrid).
+      revealSelectionGrid();
     }
 
-    // F2a-sexies : bascule entre chip-question (parcours incomplet) et lien
-    // Modifier (parcours complet).
+    // F2a-sexies (restauré) : bascule entre chip-question (parcours
+    // incomplet) et lien Modifier (parcours complet). La chip-question
+    // affiche la prochaine question non répondue avec ses pills cliquables
+    // pour progression rapide sans ouvrir la modale.
     var answers = (project && project.answers) || {};
     var next = getNextUnansweredStep(answers);
     if (next) {
       renderInlineQuestion(next, answers);
-      if (els.inlineQuestion) els.inlineQuestion.hidden = false;
-      if (els.editLink) els.editLink.hidden = true;
+      if (els.inlineQuestion) {
+        // Reset état revealed avant ré-affichage pour relancer la fade-in
+        els.inlineQuestion.classList.remove('is-revealed');
+        els.inlineQuestion.hidden = false;
+      }
+      if (els.editLink) {
+        els.editLink.hidden = true;
+        els.editLink.classList.remove('is-revealed');
+      }
     } else {
       if (els.inlineQuestion) {
         els.inlineQuestion.innerHTML = '';
         els.inlineQuestion.hidden = true;
+        els.inlineQuestion.classList.remove('is-revealed');
       }
-      if (els.editLink) els.editLink.hidden = false;
+      if (els.editLink) {
+        // Reset état revealed pour relancer la fade-in en phase E
+        els.editLink.classList.remove('is-revealed');
+        els.editLink.hidden = false;
+      }
     }
   }
 
   function renderConseil() {
     if (!els.cardConseil) return;
     els.cardMonProjet && (els.cardMonProjet.hidden = true);
-    els.cardConseil.hidden = false;
+    revealCard(els.cardConseil);
   }
 
   function render() {
@@ -448,6 +506,252 @@
       renderConseil();
     }
     refilterGrid();
+    populateSelectionGrid();
+  }
+
+  /**
+   * Refonte /mes-creations/ — Peuple le slot grille de la card englobante
+   * "Ma sélection" en clonant les .product-card-cinetique qui matchent
+   * sapiProject (= celles SANS .is-filtered-out après refilterGrid).
+   * Met aussi à jour le badge "Mon projet · N luminaire(s)".
+   */
+  function populateSelectionGrid() {
+    if (!els.selectionGrid) return;
+    els.selectionGrid.innerHTML = '';
+
+    if (!window.sapiProject || !window.sapiProject.hasProject()) return;
+
+    var sourceGrid = document.getElementById('sapi-product-grid');
+    if (!sourceGrid) return;
+
+    // Reset état revealed avant repopulation (cards opacity 0, prêtes à
+    // re-fade-in après le typewriter via revealSelectionGrid()).
+    els.selectionGrid.classList.remove('is-revealed');
+    if (els.selectionNav) els.selectionNav.classList.remove('is-revealed');
+
+    var matches = sourceGrid.querySelectorAll('.product-card-cinetique:not(.is-filtered-out)');
+    var count = 0;
+    var staggerStep = 60; // ms entre chaque card (cascade visuelle)
+    matches.forEach(function (card, idx) {
+      var clone = card.cloneNode(true);
+      clone.classList.add('is-selection-clone');
+      // Stagger transition-delay calculé par card pour cascade (proposition #5)
+      clone.style.transitionDelay = (idx * staggerStep) + 'ms';
+      els.selectionGrid.appendChild(clone);
+      count++;
+    });
+
+    // Card sur-mesure en DERNIÈRE cellule du slot. Cloné depuis le <template>
+    // pour préserver le markup PHP i18n. Affichée même si 0 match (cas dégradé)
+    // — donne toujours une issue concrète au visiteur.
+    if (els.surmesureTemplate && els.surmesureTemplate.content) {
+      var surmesureClone = els.surmesureTemplate.content.cloneNode(true);
+      els.selectionGrid.appendChild(surmesureClone);
+      // Délai du sur-mesure : juste après la dernière card produit
+      var lastChild = els.selectionGrid.lastElementChild;
+      if (lastChild) lastChild.style.transitionDelay = (count * staggerStep) + 'ms';
+    }
+
+    // Badge "Ton projet" — texte fixe (count retiré sur demande Robin)
+    if (els.badgeText) {
+      els.badgeText.textContent = 'Ton projet';
+    }
+
+    // Navigation slider (flèches + dots) selon nb de cards total
+    buildSelectionNav();
+  }
+
+  /**
+   * Chorégraphie 5 phases après le typewriter :
+   * - Phase B (immédiat) : chip-question expand + fade-in → card grandit
+   * - Phase C (+600ms) : slot grid expand + cascade des cards → card grandit
+   * - Phase D (+1200ms) : nav slider (flèches + dots) apparaît
+   * - Phase E (+1800ms) : lien "Préciser ou modifier mon projet" apparaît
+   *   (en dernier, action secondaire qui ne doit pas perturber la découverte
+   *   du contenu principal — uniquement visible quand projet complet, donc
+   *   à la place de la chip-question)
+   *
+   * Le séquencement crée un rythme "card s'agrandit pour accueillir chaque
+   * élément l'un après l'autre" plutôt qu'une apparition simultanée.
+   */
+  function revealSelectionGrid() {
+    // Annule les timers d'une éventuelle séquence en cours (render()
+    // rappelé pendant la chorégraphie → on repart proprement).
+    clearRevealTimers();
+    // Phase B — chip-question : double rAF pour que le browser lise les
+    // valeurs CSS avant la transition.
+    if (els.inlineQuestion) {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          els.inlineQuestion.classList.add('is-revealed');
+        });
+      });
+    }
+    // Phase C — slot grid : delay 600ms après le début de la phase B
+    // pour que la question apparaisse d'abord, puis les cards.
+    // Quand la transition max-height termine, on retire la contrainte via
+    // .is-fully-revealed (max-height: none) — évite tout clip si une card
+    // dépasse la borne d'animation.
+    if (els.selectionGrid) {
+      revealTimers.push(setTimeout(function () {
+        var grid = els.selectionGrid;
+        grid.classList.add('is-revealed');
+        var onEnd = function (e) {
+          if (e.target !== grid || e.propertyName !== 'max-height') return;
+          grid.removeEventListener('transitionend', onEnd);
+          grid.classList.add('is-fully-revealed');
+        };
+        grid.addEventListener('transitionend', onEnd);
+      }, 600));
+    }
+    // Phase D — nav slider : 600ms après phase C (= +1200ms total) pour
+    // arriver après que la cascade des cards soit visible.
+    if (els.selectionNav) {
+      revealTimers.push(setTimeout(function () {
+        els.selectionNav.classList.add('is-revealed');
+      }, 1200));
+    }
+    // Phase E — lien Modifier : 600ms après phase D (= +1800ms total),
+    // action secondaire qui apparaît en dernier.
+    if (els.editLink) {
+      revealTimers.push(setTimeout(function () {
+        els.editLink.classList.add('is-revealed');
+      }, 1800));
+    }
+  }
+
+  /* ─────────────────────────────────────────────
+     Slider nav : flèches + dots
+     ───────────────────────────────────────────── */
+
+  function getCardsPerPage() {
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    if (vw <= 480) return 1;
+    if (vw <= 768) return 2;
+    if (vw <= 1024) return 3;
+    return 4;
+  }
+
+  function getTotalCards() {
+    if (!els.selectionGrid) return 0;
+    return els.selectionGrid.children.length;
+  }
+
+  /**
+   * Nombre de positions de scroll possibles (= dots affichés).
+   * Avec N cards et P cards visibles : positions 0..N-P → totalDots = N - P + 1.
+   * Min 1.
+   */
+  function getTotalDots() {
+    var total = getTotalCards();
+    var perPage = getCardsPerPage();
+    return Math.max(1, total - perPage + 1);
+  }
+
+  function getCardStep() {
+    if (!els.selectionGrid) return 0;
+    var first = els.selectionGrid.querySelector(':scope > *');
+    if (!first) return 0;
+    var cardWidth = first.getBoundingClientRect().width;
+    var gap = parseFloat(window.getComputedStyle(els.selectionGrid).gap) || 0;
+    return cardWidth + gap;
+  }
+
+  function getCurrentDot() {
+    if (!els.selectionGrid) return 0;
+    var step = getCardStep();
+    if (step === 0) return 0;
+    return Math.round(els.selectionGrid.scrollLeft / step);
+  }
+
+  function scrollToDot(idx) {
+    if (!els.selectionGrid) return;
+    var totalDots = getTotalDots();
+    idx = Math.max(0, Math.min(totalDots - 1, idx));
+    var step = getCardStep();
+    els.selectionGrid.scrollTo({ left: idx * step, behavior: 'smooth' });
+  }
+
+  function scrollByOneCard(direction) {
+    if (!els.selectionGrid) return;
+    var step = getCardStep();
+    if (step === 0) return;
+    var current = els.selectionGrid.scrollLeft;
+    var target = direction === 'next' ? current + step : current - step;
+    els.selectionGrid.scrollTo({ left: target, behavior: 'smooth' });
+  }
+
+  function updateActiveDot() {
+    if (!els.selectionNav || !els.selectionGrid) return;
+    var current = getCurrentDot();
+    var dots = els.selectionNav.querySelectorAll('[data-page]');
+    dots.forEach(function (dot) {
+      var idx = parseInt(dot.getAttribute('data-page'), 10);
+      dot.classList.toggle('is-active', idx === current);
+    });
+    // Flèches : disable aux extrémités du SCROLL (pas des pages, car les
+    // flèches avancent d'une seule card à la fois). Tolérance 2px pour
+    // les arrondis de subpixel scroll.
+    var prevBtn = els.selectionNav.querySelector('[data-nav="prev"]');
+    var nextBtn = els.selectionNav.querySelector('[data-nav="next"]');
+    var scrollLeft = els.selectionGrid.scrollLeft;
+    var maxScroll = els.selectionGrid.scrollWidth - els.selectionGrid.clientWidth;
+    if (prevBtn) prevBtn.disabled = (scrollLeft <= 2);
+    if (nextBtn) nextBtn.disabled = (scrollLeft >= maxScroll - 2);
+  }
+
+  var selectionNavBound = false;
+  function buildSelectionNav() {
+    if (!els.selectionNav || !els.selectionGrid) return;
+    var pages = getTotalDots();
+    if (pages <= 1) {
+      els.selectionNav.hidden = true;
+      els.selectionNav.innerHTML = '';
+      return;
+    }
+    els.selectionNav.hidden = false;
+
+    var html = '<button type="button" class="mes-creations-selection__nav-arrow" data-nav="prev" aria-label="Précédent">';
+    html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>';
+    html += '</button>';
+    html += '<div class="mes-creations-selection__nav-dots">';
+    for (var i = 0; i < pages; i++) {
+      html += '<button type="button" class="mes-creations-selection__nav-dot" data-page="' + i + '" aria-label="Page ' + (i + 1) + '"></button>';
+    }
+    html += '</div>';
+    html += '<button type="button" class="mes-creations-selection__nav-arrow" data-nav="next" aria-label="Suivant">';
+    html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>';
+    html += '</button>';
+
+    els.selectionNav.innerHTML = html;
+
+    if (!selectionNavBound) {
+      // Délégation clic sur dots + arrows
+      els.selectionNav.addEventListener('click', function (e) {
+        var dot = e.target.closest('[data-page]');
+        if (dot) {
+          var idx = parseInt(dot.getAttribute('data-page'), 10);
+          if (!isNaN(idx)) scrollToDot(idx);
+          return;
+        }
+        var arrow = e.target.closest('[data-nav]');
+        if (arrow) {
+          scrollByOneCard(arrow.getAttribute('data-nav'));
+        }
+      });
+      // Update dot actif au scroll (throttle via rAF)
+      var scrollRaf = null;
+      els.selectionGrid.addEventListener('scroll', function () {
+        if (scrollRaf) return;
+        scrollRaf = requestAnimationFrame(function () {
+          scrollRaf = null;
+          updateActiveDot();
+        });
+      }, { passive: true });
+      selectionNavBound = true;
+    }
+
+    updateActiveDot();
   }
 
   /* ─────────────────────────────────────────────
@@ -477,6 +781,13 @@
       }
     }
 
+    // Fix audit — Bug 1 : pauser AVANT update() pour éviter que le notify
+    // synchrone ne déclenche refilterGrid en arrière-plan avant que la
+    // modale ait posé son propre pauseNotifications (race condition
+    // visible à travers l'overlay non encore opaque).
+    if (window.sapiProject && typeof window.sapiProject.pauseNotifications === 'function') {
+      window.sapiProject.pauseNotifications();
+    }
     // 1. Enregistre la réponse en PREMIER → sapiProject à jour.
     //    ⚠️ Effet de bord : le subscribe re-render renderInlineQuestion qui
     //    DÉTACHE le chip cliqué du DOM (innerHTML wipe). On ne peut donc
@@ -487,19 +798,28 @@
       window.sapiProject.update(patch, lpatch);
     }
 
-    // 2. Dispatch sur document directement (le listener modale est sur
-    //    document.addEventListener) — pas besoin de bubbling, le chip
-    //    détaché ne porte plus.
+    // 2. Dispatch sur document avec confirmStep/Slug/Label : la modale
+    //    affichera d'abord la question répondue (pill selected visible)
+    //    puis auto-avancera vers la question suivante après un court délai.
+    //    Donne au visiteur un feedback visuel "ma réponse a bien été prise".
     document.dispatchEvent(new CustomEvent('sapi:open-modal', {
-      detail: { state: 's0' },
+      detail: {
+        state: 's0',
+        confirmStep: stepId,
+        confirmSlug: slug,
+        confirmLabel: label || slug,
+      },
     }));
   }
 
   function bindCTAs() {
     if (!els.zone) return;
     els.zone.addEventListener('click', function (e) {
-      // F2a-sexies : clic sur une chip de réponse (priorité sur open-modal)
-      var chip = e.target.closest('.answer-chip[data-step-id]');
+      // F2a-sexies : clic sur une réponse de la chip-question (priorité
+      // sur open-modal). Le data-step-id distingue ces .choice (rendues
+      // par renderInlineQuestion) des .choice du modale (qui n'ont pas
+      // data-step-id).
+      var chip = e.target.closest('.choice[data-step-id]');
       if (chip) {
         e.preventDefault();
         handleChipAnswer(chip);
@@ -515,6 +835,14 @@
         e.preventDefault();
         var slug = roomCard.getAttribute('data-piece');
         var label = roomCard.getAttribute('data-piece-label') || slug;
+        // Fix audit — Bug 1 : pauser AVANT update() pour éviter que le
+        // notify synchrone de update() ne déclenche refilterGrid() sur
+        // la grille en arrière-plan (visible à travers l'overlay non
+        // encore opaque). openModal pose aussi pauseNotifications de
+        // manière idempotente.
+        if (window.sapiProject && typeof window.sapiProject.pauseNotifications === 'function') {
+          window.sapiProject.pauseNotifications();
+        }
         if (window.sapiProject && typeof window.sapiProject.update === 'function') {
           window.sapiProject.update({ piece: slug }, { piece: label });
         }
@@ -541,12 +869,25 @@
         return;
       }
 
-      // F2a-sexies-bis : clic ailleurs sur la card "Mon projet" → ouvre s0
-      // (determineInitialState → s0-partiel → prochaine question non répondue).
-      // Les éléments interactifs internes (chip, lien Modifier) sont déjà
-      // captés ci-dessus, donc on n'arrive ici qu'au clic sur la card elle-même.
+      // F2a-sexies-bis : clic ailleurs sur la card "Mon projet" → ouvre la
+      // modale. Les éléments interactifs internes (chip-question, lien
+      // Modifier, CTAs data-action) sont déjà captés ci-dessus, donc on
+      // n'arrive ici qu'au clic sur la card elle-même.
+      // Refonte /mes-creations/ : pour la variante englobante, on exclut
+      // les zones interactives internes (cards produit, card sur-mesure,
+      // slider nav) pour ne pas déclencher la modale en double action.
       var monProjetCard = e.target.closest('.conseiller-card--mon-projet');
       if (monProjetCard) {
+        var isEnglobante = monProjetCard.classList.contains('mes-creations-selection__card');
+        if (isEnglobante && e.target.closest('.product-card-cinetique, .mes-creations-surmesure-card, .mes-creations-selection__nav')) {
+          return; // laisser l'élément interne gérer son propre clic
+        }
+        // On passe toujours s0 — la modale route automatiquement via
+        // determineInitialState() :
+        // - projet complet (toutes questions visibles répondues) → s3-carrefour
+        // - projet partiel (au moins 1 réponse, manque des questions) → s0-partiel
+        //   sur la prochaine question non répondue (= la chip-question visible)
+        // - projet vide → s0-initial (1re question)
         monProjetCard.dispatchEvent(new CustomEvent('sapi:open-modal', {
           bubbles: true,
           detail: { state: 's0' },
@@ -597,6 +938,18 @@
     // F2a-sexies : zone chip-question + lien Modifier coin haut-droit
     els.inlineQuestion    = els.zone.querySelector('[data-inline-question]');
     els.editLink          = els.zone.querySelector('[data-mon-projet-edit]');
+    // Refonte /mes-creations/ : slot grille de la card englobante + badge dynamique
+    els.selectionGrid     = els.zone.querySelector('[data-mes-creations-selection-grid]');
+    els.selectionNav      = els.zone.querySelector('[data-mes-creations-selection-nav]');
+    els.badgeText         = els.zone.querySelector('[data-mon-projet-badge-text]');
+    els.surmesureTemplate = els.zone.querySelector('[data-mes-creations-surmesure-template]');
+
+    // Resize : rebuild nav (cards visibles par page change selon viewport)
+    var resizeTimer = null;
+    window.addEventListener('resize', function () {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () { buildSelectionNav(); }, 150);
+    }, { passive: true });
 
     bindCTAs();
     render();

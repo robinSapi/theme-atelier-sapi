@@ -338,7 +338,7 @@ function sapi_maison_enqueue_assets() {
         'bureau'   => ['ampoule_degagee', 'semi_degagee'],
         'salon'    => ['ampoule_entouree', 'semi_degagee'],
         'chambre'  => ['ampoule_entouree', 'semi_degagee'],
-        'entree'   => null,
+        'entree'   => ['ampoule_entouree', 'semi_degagee'], // Round 5 — aligné salon/chambre
         'escalier' => null,
       ],
       'ampoule_skip_when_grande' => ['cuisine', 'bureau'],
@@ -363,6 +363,31 @@ function sapi_maison_enqueue_assets() {
       'extras_slugs' => ['accessoires', 'carte-cadeau'],
     ];
 
+    // Pills catégorie sur /mes-creations/ (Chantier 3) — filtrage AJAX-less
+    // de la grille basse par data-categories.
+    $mes_creations_pills_js_path = get_template_directory() . '/assets/sapi-mes-creations-pills.js';
+    if (file_exists($mes_creations_pills_js_path)) {
+      wp_enqueue_script(
+        'sapi-mes-creations-pills',
+        get_template_directory_uri() . '/assets/sapi-mes-creations-pills.js',
+        [],
+        filemtime($mes_creations_pills_js_path),
+        true
+      );
+    }
+
+    // Tracking GA4 sur /mes-creations/ (Chantier 4) — 5 events via dataLayer.push
+    $mes_creations_ga4_js_path = get_template_directory() . '/assets/sapi-mes-creations-ga4.js';
+    if (file_exists($mes_creations_ga4_js_path)) {
+      wp_enqueue_script(
+        'sapi-mes-creations-ga4',
+        get_template_directory_uri() . '/assets/sapi-mes-creations-ga4.js',
+        [],
+        filemtime($mes_creations_ga4_js_path),
+        true
+      );
+    }
+
     // F2a Phase 2 — cards "Conseil de Robin" / "Mon projet" sur /mes-creations/
     $cards_conseiller_js_path = get_template_directory() . '/assets/sapi-cards-conseiller.js';
     if (file_exists($cards_conseiller_js_path)) {
@@ -378,6 +403,8 @@ function sapi_maison_enqueue_assets() {
         'nonce'          => wp_create_nonce('sapi-megafilter'),
         'steps'          => sapi_guide_get_steps(),
         'rules'          => $sapi_filter_rules,
+        // Icons SVG — pour harmonisation chip-question avec les .choice du modale
+        'icons'          => sapi_guide_get_icons(),
         // F2a-bis : textes génériques par pièce + fallback ultime — lus
         // synchronement par sapi-cards-conseiller.js (zéro AJAX au load).
         'genericAdvice'  => sapi_megafilter_get_generic_advices(),
@@ -4860,9 +4887,13 @@ function sapi_guide_get_ampoule_filter($piece, $taille = '') {
       return ['ampoule_degagee', 'semi_degagee'];
     case 'salon':
     case 'chambre':
+    case 'entree':
+      // Round 5 — entrée bénéficie du même filtre que salon/chambre :
+      // ampoule entourée privilégiée (cf. guide-prompt-savoir.txt qui
+      // recommande l'ampoule entourée pour salon/chambre/entrée/couloir).
       return ['ampoule_entouree', 'semi_degagee'];
     default:
-      return null; // entrée/couloir: all types OK
+      return null; // escalier : tous types OK
   }
 }
 
