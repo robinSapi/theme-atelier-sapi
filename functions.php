@@ -1146,6 +1146,53 @@ function sapi_get_product_photo_ids($post_id, $type = '', $limit = 0, $piece = n
 }
 
 /**
+ * Filtre une liste d'IDs d'attachments par un slug de terme dans une taxonomie.
+ * Préserve l'ordre des IDs en entrée.
+ *
+ * Optimisation : utilise get_objects_in_term() qui fait une seule requête DB
+ * par (taxonomy, term) — plus performant que wp_get_object_terms() appelé
+ * dans une boucle sur chaque attachment. Cache statique par (taxonomy, term)
+ * pour éviter une 2e requête si le même filtre est appliqué dans la même
+ * request (ex: galerie_ambiance + galerie_detail filtrés sur même $piece).
+ *
+ * @param int[]  $attachment_ids IDs d'attachments à filtrer
+ * @param string $taxonomy       'media_room' ou 'media_essence'
+ * @param string $term_slug      Slug du terme (ex: 'salon', 'peuplier')
+ * @return int[] IDs filtrés, ordre d'entrée préservé. [] si term inconnu.
+ */
+function sapi_filter_attachment_ids_by_term($attachment_ids, $taxonomy, $term_slug) {
+  if (empty($attachment_ids) || !$taxonomy || !$term_slug) return [];
+
+  static $cache = [];
+  $cache_key = $taxonomy . '|' . $term_slug;
+
+  if (!isset($cache[$cache_key])) {
+    $term = get_term_by('slug', $term_slug, $taxonomy);
+    if (!$term || is_wp_error($term)) {
+      $cache[$cache_key] = []; // term inconnu : cache une réponse vide
+    } else {
+      $tagged_ids = get_objects_in_term((int) $term->term_id, $taxonomy);
+      if (is_wp_error($tagged_ids) || empty($tagged_ids)) {
+        $cache[$cache_key] = [];
+      } else {
+        // Set keyed by int ID pour lookup O(1) dans la boucle d'intersect.
+        $cache[$cache_key] = array_flip(array_map('intval', $tagged_ids));
+      }
+    }
+  }
+
+  $tagged_set = $cache[$cache_key];
+  if (empty($tagged_set)) return [];
+
+  $filtered = [];
+  foreach ($attachment_ids as $id) {
+    $id = (int) $id;
+    if (isset($tagged_set[$id])) $filtered[] = $id;
+  }
+  return $filtered;
+}
+
+/**
  * Helper bas niveau : itère les rows du repeater galerie_produit d'un produit.
  * Renvoie un tableau de ['type' => string, 'image_id' => int, 'index' => int]
  * pour chaque row dont l'image est résolvable en attachment ID.
