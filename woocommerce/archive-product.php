@@ -197,26 +197,23 @@ $conseil_room_icons = sapi_guide_get_icons();
            si tout tient sur une page. -->
       <div class="mes-creations-selection__nav" data-mes-creations-selection-nav hidden></div>
 
-      <!-- Template card sur-mesure — variante C "Carnet d'atelier" (mockup-16).
-           Cloné par populateSelectionGrid() comme dernière cellule du slot.
-           Pas rendu dans le DOM tant que le JS ne le clone pas. -->
+      <!-- Template card sur-mesure — variante D "Invitation chaleureuse" (mockup-16).
+           Card pleine couleur orange + dashed décoratif blanc inversé du
+           pattern Conseiller V3. Cloné par populateSelectionGrid() comme
+           dernière cellule du slot. Pas rendu dans le DOM tant que le JS
+           ne le clone pas. -->
       <template data-mes-creations-surmesure-template>
         <a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>" class="mes-creations-surmesure-card" data-mes-creations-surmesure-cta>
-          <span class="mes-creations-surmesure-card__eyebrow"><?php esc_html_e('Croquis...', 'theme-sapi-maison'); ?></span>
-          <svg class="mes-creations-surmesure-card__sketch" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M50 6 L50 24"/>
-            <ellipse cx="50" cy="26" rx="6" ry="2.5"/>
-            <path d="M28 32 Q50 30 72 32 Q62 60 50 75 Q38 60 28 32"/>
-            <path d="M34 34 Q50 33 66 34"/>
-            <path d="M32 42 Q50 40 68 42"/>
-            <path d="M32 52 Q50 51 68 52"/>
-            <path d="M36 62 Q50 61 64 62"/>
-            <ellipse cx="50" cy="80" rx="4" ry="5" fill="rgba(227, 91, 36, 0.12)"/>
-            <path d="M48 86 L52 86 M47 88 L53 88"/>
-          </svg>
-          <div class="mes-creations-surmesure-card__title"><?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?></div>
-          <p class="mes-creations-surmesure-card__sub"><?php esc_html_e('Et si on dessinait le tien ensemble ?', 'theme-sapi-maison'); ?></p>
-          <div class="mes-creations-surmesure-card__sig">— Robin</div>
+          <div class="mes-creations-surmesure-card__eyebrow"><?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?></div>
+          <div class="mes-creations-surmesure-card__title"><?php esc_html_e('Et si on créait le tien ?', 'theme-sapi-maison'); ?></div>
+          <p class="mes-creations-surmesure-card__sub"><?php esc_html_e('Décris-moi ce que tu as en tête, je te fais une proposition à la main.', 'theme-sapi-maison'); ?></p>
+          <span class="mes-creations-surmesure-card__cta">
+            <?php esc_html_e('En parler à Robin', 'theme-sapi-maison'); ?>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </span>
         </a>
       </template>
     </div>

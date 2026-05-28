@@ -25018,10 +25018,9 @@ button.chip--project:focus-visible {
     font-size: 12px;
     padding: 8px 14px;
   }
-  /* Card sur-mesure (variante C) : croquis plus petit en mobile (mockup-16) */
-  .mes-creations-surmesure-card__sketch {
-    width: 75px;
-    height: 75px;
+  /* Card sur-mesure (variante D) : titre Square Peg resserré en mobile (mockup-16) */
+  .mes-creations-surmesure-card__title {
+    font-size: 36px;
   }
 }
 
@@ -25047,88 +25046,105 @@ button.chip--project:focus-visible {
 }
 
 
-/* Card sur-mesure — variante C "Carnet d'atelier" (mockup-16). Page de
-   cahier crème + croquis dessiné main + signature manuscrite Robin orange.
-   Cellule de grille spéciale en dernière position du slot "Ma sélection".
-   Le template est cloné par populateSelectionGrid() dans sapi-cards-conseiller.js. */
+/* Card sur-mesure — variante D "Invitation chaleureuse" (mockup-16). Card
+   pleine couleur orange chaud + dashed décoratif blanc à l'intérieur
+   (pattern Conseiller V3 inversé). Cellule de grille spéciale en dernière
+   position du slot "Ma sélection". Le template est cloné par
+   populateSelectionGrid() dans sapi-cards-conseiller.js. */
 .mes-creations-surmesure-card {
   position: relative;
-  display: block;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-justify-content: center;
+  justify-content: center;
   aspect-ratio: 1 / 1.4;
-  background: #FDFBF5;
+  background: -webkit-linear-gradient(320deg, #E35B24 0%, #C44A1E 100%);
+  background: linear-gradient(160deg, #E35B24 0%, #C44A1E 100%);
   border-radius: 12px;
-  padding: 22px 18px 18px;
+  padding: 28px 22px 24px;
+  color: #fff;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
   overflow: hidden;
-  -webkit-box-shadow: 0 2px 8px rgba(74, 63, 53, 0.06);
-  box-shadow: 0 2px 8px rgba(74, 63, 53, 0.06);
   -webkit-transition: -webkit-transform 0.2s ease;
   transition: transform 0.2s ease;
 }
 @media (hover: hover) {
   .mes-creations-surmesure-card:hover {
-    -webkit-transform: translateY(-3px) rotate(0.4deg);
-    transform: translateY(-3px) rotate(0.4deg);
+    -webkit-transform: translateY(-3px);
+    transform: translateY(-3px);
   }
 }
-/* Lignes de cahier décoratives très légères (pseudo-élément en couche basse).
-   pointer-events:none → le clic traverse vers le lien <a> parent. */
+/* Dashed décoratif blanc inset 10px — inverse du pattern Conseiller V3
+   (dashed wood-dark sur fond crème). pointer-events:none → clic traverse
+   vers le lien <a> parent. */
 .mes-creations-surmesure-card::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 21px,
-    rgba(139, 115, 85, 0.06) 22px
-  );
+  inset: 10px;
+  border: 1.5px dashed rgba(255, 255, 255, 0.30);
+  border-radius: 8px;
   pointer-events: none;
 }
-/* Les enfants passent au-dessus du pseudo-élément lignes. */
+/* Les enfants passent au-dessus du pseudo-élément dashed. */
 .mes-creations-surmesure-card > * {
   position: relative;
+  z-index: 1;
 }
 .mes-creations-surmesure-card__eyebrow {
-  display: block;
-  font-family: 'Square Peg', cursive;
-  font-size: 22px;
-  color: var(--color-wood);
-  line-height: 1;
-  margin-bottom: 4px;
-}
-.mes-creations-surmesure-card__sketch {
-  display: block;
-  width: 95px;
-  height: 95px;
-  margin: 10px auto 14px;
-  color: var(--color-wood-dark);
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  margin-bottom: 12px;
 }
 .mes-creations-surmesure-card__title {
-  font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--color-wood-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  line-height: 1.25;
-  margin-bottom: 6px;
+  font-family: 'Square Peg', cursive;
+  font-size: 44px;
+  line-height: 0.95;
+  margin-bottom: 14px;
 }
 .mes-creations-surmesure-card__sub {
   font-family: var(--font-body);
-  font-size: 12px;
-  font-style: italic;
-  color: var(--color-wood-mid);
-  line-height: 1.5;
+  font-size: 12.5px;
+  line-height: 1.55;
+  opacity: 0.92;
   padding: 0 8px;
-  margin: 0;
+  margin: 0 0 18px;
 }
-.mes-creations-surmesure-card__sig {
-  font-family: 'Square Peg', cursive;
-  font-size: 22px;
-  color: var(--color-orange);
-  line-height: 1;
-  margin-top: 14px;
+/* CTA pill button blanc translucide. Inline-flex pour centrer texte + flèche.
+   align-self:center pour ne pas s'étirer dans le parent flex column. */
+.mes-creations-surmesure-card__cta {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-align-self: center;
+  align-self: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.40);
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  -webkit-transition: background 0.2s ease;
+  transition: background 0.2s ease;
+}
+.mes-creations-surmesure-card:hover .mes-creations-surmesure-card__cta {
+  background: rgba(255, 255, 255, 0.30);
+}
+.mes-creations-surmesure-card__cta svg {
+  width: 12px;
+  height: 12px;
 }
