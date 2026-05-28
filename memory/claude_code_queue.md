@@ -470,6 +470,94 @@ Au retour, indiquer pour chaque chantier :
 
 ## ✅ Livré
 
+## [RETOUR] S28 Phase 3 — Refactor `sapi_get_product_photo_ids` en dual-read + params `$piece` / `$essence`
+**Date livrée :** 2026-05-28
+**Branche :** `feature/photos-par-piece` (4 commits ajoutés et **poussés** sur origin — GHA déclenché, déploie sur test)
+**Périmètre :** 3 chantiers code + bonus DRY effectué + tests non-régression à valider par Robin (UI test post-déploiement)
+
+### Commits livrés
+
+| # | Hash | Chantier | Fichier(s) | Lignes |
+|---|------|----------|------------|--------|
+| 1 | `4463786` | Mapping centralisé `sapi_type_to_gallery_name()` + refactor migration page (bonus DRY) | `functions.php` + `inc/sapi-migrate-galerie.php` | +32/-22 |
+| 2 | `e996b20` | Refactor `sapi_get_product_photo_ids` en dual-read + 2 nouveaux params | `functions.php` | +68/-18 |
+| 3 | `578992d` | Helper `sapi_filter_attachment_ids_by_term` (optimisé `get_objects_in_term` + cache statique) | `functions.php` | +47/0 |
+
+**Total :** ~147 lignes ajoutées, ~40 supprimées. Code additif strict côté API publique (signature étendue, pas modifiée).
+
+### Garde-fous respectés (tous ✅)
+
+- **Rétrocompat absolue** : la signature de `sapi_get_product_photo_ids` ajoute 2 params nullables à la fin (`$piece = null`, `$essence = null`). Les 17 call-sites existants passent 1 à 3 args → comportement strictement inchangé sans `$piece`/`$essence`.
+- **Repeater intact** : aucun `update_field('galerie_produit', …)`. Lecture seule en fallback quand Gallery vide.
+- **17 call-sites non modifiés** : zéro touche aux 17 appels dans `single-product.php`, `taxonomy-product_cat.php`, `archive-product.php`, `content-product.php`, `page-inspiration.php`, `page-la-star-du-moment.php`, `front-page.php`, `functions.php`. Phase 4 fera le swap surface par surface.
+- **Ordre préservé** : Gallery suit l'ordre drag&drop ACF de Robin ; fallback repeater suit l'ordre des rows ; filtres taxonomies préservent l'ordre d'entrée (boucle `foreach` + lookup `isset`, pas de `array_intersect_key` qui briserait l'ordre).
+- **Wrapper `sapi_get_product_photos`** (URLs) suit gratuitement — il appelle le helper avec 3 args, donc reçoit dual-read sans le savoir.
+- **`sapi_get_acf_image_id`** intact (agnostique du nom du champ).
+- **`$limit` appliqué après les filtres taxo** : le pool est filtré complet, puis tronqué (sinon `limit=1` puis filtre `$piece` aurait retourné `[]` quand la 1re photo n'a pas le bon tag).
+
+### Décisions de design
+
+**1. Bonus chantier 1 (factorisation côté migration page) : FAIT.**
+   - `sapi_migrate_galerie_type_map()` supprimée (un seul caller, devenait redondante).
+   - La page admin appelle maintenant `sapi_type_to_gallery_name()` directement. Comportement strictement identique : `isset($map[$type])` ↔ `$gallery !== null`.
+   - Justification : la migration page est déjà idempotente et testée (274 photos migrées sur test), le changement est purement de la délégation (pas de logique modifiée), risque négligeable.
+
+**2. Ordre des commits (1 → 2 → 3) :**
+   - Le commit 2 (refactor du helper) référence `sapi_filter_attachment_ids_by_term`, introduite seulement au commit 3.
+   - **Pas un break** en pratique : PHP résout les fonctions au call-time. Aucun call-site existant ne passe `$piece`/`$essence` → le filtre n'est jamais invoqué tant que Phase 4 n'a pas modifié les call-sites.
+   - J'ai préféré respecter l'ordre logique demandé (Chantier 1/2/3 = mapping/refactor/helper-taxo) plutôt que de réordonner en 1/3/2 pour des raisons de pure dépendance.
+
+**3. Cache statique dans `sapi_filter_attachment_ids_by_term` :**
+   - Ajouté en bonus (non spec). Évite une 2e requête DB si le même `(taxonomy, term)` est appelé plusieurs fois dans la même request (typiquement `galerie_ambiance + galerie_detail` filtrés sur le même `$piece='salon'`).
+   - Cache par clé `taxonomy|term_slug`. Survit pour la durée de la request.
+
+**4. Comportement `$type = ''` (changement subtil mais désiré) :**
+   - Avant : iterait toutes les rows du repeater (tous types confondus, incl. types inconnus).
+   - Maintenant : concatène les 8 Gallery dans l'ordre canonique avec fallback repeater par type. Les types orphelins (hors mapping) ne sont pas retournés.
+   - **Impact réel** : audit Phase 0 montre que le seul call-site `$type = ''` est `single-product.php:119` (fallback quand le repeater est vide). Avec dual-read, ce cas devient inatteignable (les Gallery ne sont jamais "vides" si la migration Phase 2 est passée). Sinon, comportement identique.
+
+### Tests de non-régression — À valider par Robin sur test
+
+Le push pour `feature/photos-par-piece` déclenche le workflow GHA. Une fois déployé (~3 min), Robin doit visuellement vérifier ces surfaces. **Toutes utilisent le helper refactoré** — si elles affichent les bonnes photos, la rétrocompat dual-read est confirmée.
+
+| # | Surface | URL / contexte | Call-site testé | Type |
+|---|---------|----------------|-----------------|------|
+| 1 | `/mes-creations/` | `test.atelier-sapi.fr/mes-creations/` | `archive-product.php:364` | ambiance |
+| 2 | Hero catégorie | `/categorie-produit/suspensions/` | `taxonomy-product_cat.php:79/80/178` | ambiance + detail + fabrication |
+| 3 | Card produit en cat. | (sur la même page) | `content-product.php:127` | ambiance ×2 (hover) |
+| 4 | Vignette croisée | bas de page catégorie | `taxonomy-product_cat.php:371` | ambiance |
+| 5 | Home carousel | `/` | `front-page.php:41` | ambiance |
+| 6 | Star du moment | `/` (section dédiée) | `front-page.php:132` | detail |
+| 7 | Featured products | `/` (section dédiée) | `front-page.php:236` | detail |
+| 8 | Collections home | `/` (section dédiée) | `front-page.php:309` | ambiance |
+| 9 | Page star | `/la-star-du-moment/` | `page-la-star-du-moment.php:50/51` | ambiance + detail |
+| 10 | Bandeau ambiance card sur-mesure | `/mes-creations/` (variante D) | `functions.php:5300` (wrapper URLs) | ambiance |
+| 11 | Fiche produit galerie | `/produit/olivia-la-gardienne/` ou autre | `single-product.php:119` (fallback type='') + `:558` (client) | tous + client |
+| 12 | Preload LCP | sur n'importe quelle page catégorie | `functions.php:190` | ambiance ×1 |
+
+**Critère de succès** : toutes les photos affichées sur ces 12 surfaces sont identiques à celles affichées avant le push (en supposant que la migration Phase 2 a été lancée en mode RÉEL — 274 photos déjà dans les Gallery). Si Robin a déjà validé Phase 2, les Gallery sont peuplées et le dual-read lit exclusivement la Gallery (le fallback repeater n'intervient jamais).
+
+**Verdict des tests** : ⏳ **À remplir par Robin après vérification sur test.** Je n'ai pas d'accès UI au site déployé.
+
+### Sortie attendue (pour validation rapide)
+
+Si Robin veut tester programmatiquement avant de regarder le rendu, il peut ouvrir `/wp-admin/edit.php?post_type=product`, ajouter un filtre temporaire à un produit (via Console de l'admin) :
+```php
+// Test dual-read direct
+$ids_old = sapi_get_product_photo_ids(5035, 'ambiance'); // Olivia La gardienne
+var_dump($ids_old); // doit retourner ≥1 ID (le 1er ambiance Gallery, ou fallback repeater)
+$ids_filtered = sapi_get_product_photo_ids(5035, 'ambiance', 0, 'salon');
+var_dump($ids_filtered); // doit retourner sous-ensemble si tagging media_room='salon' fait
+```
+
+### Suite (hors scope Phase 3)
+
+- **Phase 4** : activation surface par surface. Modifier les 17 call-sites un par un pour passer `$piece = sapi_get_visitor_piece()`. Ordre suggéré : `/mes-creations/` → pages catégorie → fiche produit (ambiance positions 1-2) → home featured. Tester chaque surface séparément avant la suivante.
+- **Phase 5** : tagging manuel des photos via `media_room` / `media_essence` par Robin.
+- **Phase 6** : vidage du repeater (après plusieurs semaines de stabilité prod).
+
+---
+
 ## [RETOUR] S28 Phase 2 — Script de migration repeater `galerie_produit` → 8 Gallery ACF (dual-write)
 **Date livrée :** 2026-05-28
 **Branche :** `feature/photos-par-piece` (3 commits ajoutés, **non poussés** — Robin pousse manuellement quand il veut déclencher GHA)
