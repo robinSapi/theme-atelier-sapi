@@ -1037,6 +1037,34 @@ function sapi_get_video_thumbnail($url) {
 }
 
 /**
+ * Mapping `type_photo` (string du repeater) → nom du champ Gallery ACF cible.
+ * Source de vérité unique, partagée entre la migration Phase 2
+ * (inc/sapi-migrate-galerie.php) et le helper dual-read Phase 3
+ * (sapi_get_product_photo_ids).
+ *
+ * Tolère 'taille'/'tailles' et 'studio'/'packshot' (legacy → canonique).
+ *
+ * @param string $type Type photo (ex: 'ambiance', 'detail', 'vue de dessous')
+ * @return string|null Nom du Gallery ACF (ex: 'galerie_ambiance') ou null si type inconnu
+ */
+function sapi_type_to_gallery_name($type) {
+  static $map = [
+    'ambiance'         => 'galerie_ambiance',
+    'detail'           => 'galerie_detail',
+    'vue de dessous'   => 'galerie_vue_de_dessous',
+    'taille'           => 'galerie_tailles',   // singulier dans repeater → pluriel dans Gallery
+    'tailles'          => 'galerie_tailles',
+    'studio'           => 'galerie_packshot',  // legacy "studio" remappé sur packshot
+    'packshot'         => 'galerie_packshot',
+    'fabrication'      => 'galerie_fabrication',
+    'client'           => 'galerie_client',
+    'accessoires'      => 'galerie_accessoires',
+  ];
+  $type = (string) $type;
+  return isset($map[$type]) ? $map[$type] : null;
+}
+
+/**
  * Helper: get photo URLs from galerie_produit repeater by type.
  * Returns array of URLs matching the given type, or all photos if no type specified.
  *

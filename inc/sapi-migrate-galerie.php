@@ -24,26 +24,9 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Mapping type_photo (string normalisé du repeater) → slug Gallery ACF cible.
- * Voir Cowork project_photos_par_piece.md pour le détail des décisions.
- */
-function sapi_migrate_galerie_type_map() {
-  return [
-    'ambiance'         => 'galerie_ambiance',
-    'detail'           => 'galerie_detail',
-    'vue de dessous'   => 'galerie_vue_de_dessous',
-    'taille'           => 'galerie_tailles',  // singulier dans repeater → pluriel dans Gallery
-    'tailles'          => 'galerie_tailles',  // tolérance si déjà corrigé en pluriel
-    'studio'           => 'galerie_packshot', // legacy "studio" remappé sur packshot
-    'packshot'         => 'galerie_packshot',
-    'fabrication'      => 'galerie_fabrication',
-    'client'           => 'galerie_client',
-    'accessoires'      => 'galerie_accessoires',
-  ];
-}
-
-/**
  * Liste des 8 Gallery cibles (slugs ACF) — créés en Phase 1.
+ * Le mapping type_photo → Gallery vit dans sapi_type_to_gallery_name()
+ * (functions.php) — source de vérité unique partagée avec le helper dual-read.
  */
 function sapi_migrate_galerie_target_galleries() {
   return [
@@ -80,7 +63,6 @@ function sapi_migrate_galerie_normalize_ids($value) {
  * @return array Structure complète plan + totaux (voir clés ci-dessous).
  */
 function sapi_migrate_galerie_build_plan() {
-  $map = sapi_migrate_galerie_type_map();
   $targets = sapi_migrate_galerie_target_galleries();
 
   // Volume contrôlé (~24-30 produits, cf. CLAUDE.md "24 fiches").
@@ -133,8 +115,8 @@ function sapi_migrate_galerie_build_plan() {
     foreach ($rows as $row) {
       $type = $row['type'];
       $img_id = $row['image_id'];
-      if (isset($map[$type])) {
-        $gallery = $map[$type];
+      $gallery = sapi_type_to_gallery_name($type);
+      if ($gallery !== null) {
         if (!isset($plan[$gallery])) $plan[$gallery] = [];
         $plan[$gallery][] = $img_id;
         $totals['photos_to_migrate']++;
