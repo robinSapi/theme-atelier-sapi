@@ -1146,6 +1146,150 @@ function sapi_get_product_photo_ids($post_id, $type = '', $limit = 0, $piece = n
 }
 
 /**
+ * Wrapper auto-fallback du helper canonique (S28 Phase 4b).
+ *
+ * Stratégie : essaie ($piece + $essence) → si vide, retire $essence → si encore
+ * vide, retire $piece aussi. Le helper canonique sapi_get_product_photo_ids
+ * reste sémantiquement strict (jamais de fallback silencieux) — ce wrapper
+ * est dédié aux surfaces "swap par pièce" (Phase 4b) qui veulent une photo
+ * de la pièce SI possible, et sinon retomber gracieusement sur la photo
+ * par défaut sans afficher de trou.
+ *
+ * @param int|WP_Post $post_id ID du produit (ou WP_Post)
+ * @param string      $type    Type photo ('ambiance', 'detail', ...) ou ''
+ * @param int         $limit   Max N IDs (0 = sans limite)
+ * @param string|null $piece   Slug media_room ou null
+ * @param string|null $essence Slug media_essence ou null
+ * @return int[] IDs d'attachments, jamais vide tant que le produit a au moins
+ *               une photo du $type demandé (ou tout type si $type === '')
+ */
+function sapi_get_product_photo_ids_with_fallback($post_id, $type = '', $limit = 0, $piece = null, $essence = null) {
+  $has_piece   = ($piece !== null && $piece !== '');
+  $has_essence = ($essence !== null && $essence !== '');
+
+  // Tentative 1 : avec tous les filtres
+  $ids = sapi_get_product_photo_ids($post_id, $type, $limit, $piece, $essence);
+  if (!empty($ids)) return $ids;
+
+  // Tentative 2 : on retire $essence (le filtre essence est plus restrictif que pièce)
+  if ($has_piece && $has_essence) {
+    $ids = sapi_get_product_photo_ids($post_id, $type, $limit, $piece, null);
+    if (!empty($ids)) return $ids;
+  }
+
+  // Tentative 3 : on retire $piece aussi → photo par défaut
+  if ($has_piece || $has_essence) {
+    $ids = sapi_get_product_photo_ids($post_id, $type, $limit, null, null);
+  }
+
+  return $ids;
+}
+
+/**
+ * Handler AJAX (S28 Phase 4b) — renvoie pour une liste d'IDs produit la map
+ * `{ product_id: [url1, url2, ...] }` des photos filtrées par pièce/essence,
+ * avec auto-fallback sur la photo par défaut si la pièce n'a aucune photo
+ * taguée. Consommé par assets/sapi-photo-swap.js.
+ *
+ * Paramètres GET :
+ *  - piece   : slug media_room (ex: 'salon'), obligatoire mais peut être ''
+ *  - essence : slug media_essence (ex: 'peuplier'), optionnel
+ *  - ids     : CSV d'IDs produit (max 50)
+ *  - type    : 'ambiance' | 'detail' (whitelisté)
+ *  - count   : 1 ou 2 (clamp 1..4)
+ *  - size    : whitelist d'image sizes WP
+ *  - _wpnonce : nonce sapi_photo_swap
+ *
+ * Réponse : JSON { "5035": ["https://...", "https://..."], "5036": [...], ... }
+ * Produits sans piece-photo NE FIGURENT PAS dans la map (le défaut côté front
+ * reste, progressive enhancement).
+ */
+function sapi_ajax_get_piece_photos() {
+  check_ajax_referer('sapi_photo_swap', '_wpnonce');
+
+  $piece   = isset($_GET['piece'])   ? sanitize_key(wp_unslash($_GET['piece']))   : '';
+  $essence = isset($_GET['essence']) ? sanitize_key(wp_unslash($_GET['essence'])) : '';
+  $type    = isset($_GET['type'])    ? sanitize_key(wp_unslash($_GET['type']))    : 'ambiance';
+  $count   = isset($_GET['count'])   ? (int) $_GET['count'] : 1;
+  $size    = isset($_GET['size'])    ? sanitize_key(wp_unslash($_GET['size']))    : 'large';
+
+  $valid_types = ['ambiance', 'detail', 'fabrication', 'client', 'tailles', 'packshot', 'accessoires'];
+  if (!in_array($type, $valid_types, true)) $type = 'ambiance';
+
+  // Sizes whitelistées — celles effectivement utilisées par les call-sites.
+  $valid_sizes = ['large', 'full', 'woocommerce_thumbnail', 'woocommerce_single'];
+  if (!in_array($size, $valid_sizes, true)) $size = 'large';
+
+  if ($count < 1) $count = 1;
+  if ($count > 4) $count = 4;
+
+  $raw_ids = isset($_GET['ids']) ? explode(',', sanitize_text_field(wp_unslash($_GET['ids']))) : [];
+  $ids = [];
+  foreach ($raw_ids as $r) {
+    $i = (int) $r;
+    if ($i > 0) $ids[] = $i;
+    if (count($ids) >= 50) break; // hard cap anti-abus
+  }
+
+  $piece_or_null   = $piece !== ''   ? $piece   : null;
+  $essence_or_null = $essence !== '' ? $essence : null;
+
+  $map = [];
+  foreach ($ids as $pid) {
+    // Wrapper auto-fallback : si la pièce n'a pas de photo, retombe sur le défaut.
+    // Mais ici on veut RIEN renvoyer si la photo retournée = la photo par défaut,
+    // pour économiser des swaps inutiles. → on appelle d'abord SANS fallback,
+    // et si vide, on ne renvoie rien. Le client garde son rendu PHP par défaut.
+    if ($piece_or_null === null && $essence_or_null === null) continue; // pas de pièce ni d'essence → no-op
+    $photo_ids = sapi_get_product_photo_ids($pid, $type, $count, $piece_or_null, $essence_or_null);
+    if (empty($photo_ids)) {
+      // 2e tentative : sans essence (si on en avait une)
+      if ($essence_or_null !== null) {
+        $photo_ids = sapi_get_product_photo_ids($pid, $type, $count, $piece_or_null, null);
+      }
+    }
+    if (empty($photo_ids)) continue; // pièce sans photo → rien envoyé, défaut conservé
+
+    $urls = [];
+    foreach ($photo_ids as $aid) {
+      $url = wp_get_attachment_image_url($aid, $size);
+      if ($url) $urls[] = $url;
+    }
+    if (!empty($urls)) $map[(string) $pid] = $urls;
+  }
+
+  wp_send_json($map);
+}
+add_action('wp_ajax_sapi_get_piece_photos',        'sapi_ajax_get_piece_photos');
+add_action('wp_ajax_nopriv_sapi_get_piece_photos', 'sapi_ajax_get_piece_photos');
+
+/**
+ * Enqueue du module JS sapi-photo-swap (S28 Phase 4b).
+ * Enqueue global (footer) — le JS no-op si la page n'a aucun élément
+ * [data-piece-swap]. Coût négligeable, évite la complexité d'un enqueue
+ * conditionnel par template.
+ */
+function sapi_enqueue_photo_swap() {
+  $base = get_template_directory_uri();
+  $dir  = get_template_directory();
+  $path = $dir . '/assets/sapi-photo-swap.js';
+  if (!file_exists($path)) return;
+
+  wp_enqueue_script(
+    'sapi-photo-swap',
+    $base . '/assets/sapi-photo-swap.js',
+    [], // pas de dépendance dure — sapiProject n'est pas en wp_register_script
+    filemtime($path),
+    true // footer
+  );
+  wp_localize_script('sapi-photo-swap', 'SAPI_PHOTO_SWAP', [
+    'ajaxUrl' => admin_url('admin-ajax.php'),
+    'nonce'   => wp_create_nonce('sapi_photo_swap'),
+  ]);
+}
+add_action('wp_enqueue_scripts', 'sapi_enqueue_photo_swap');
+
+/**
  * Filtre une liste d'IDs d'attachments par un slug de terme dans une taxonomie.
  * Préserve l'ordre des IDs en entrée.
  *
