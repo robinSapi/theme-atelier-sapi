@@ -405,7 +405,7 @@ $conseil_room_icons = sapi_guide_get_icons();
           // Prix HTML
           $price_html = $is_variable ? wc_price($price_min) : $product->get_price_html();
         ?>
-        <div class="product-card-cinetique" data-product-id="<?php echo esc_attr($product_id); ?>" <?php echo $data_attrs; ?>>
+        <div class="product-card-cinetique" data-product-id="<?php echo esc_attr($product_id); ?>" <?php echo $data_attrs; ?><?php echo !$is_accessoire ? ' data-piece-swap data-piece-swap-type="ambiance" data-piece-swap-size="large"' : ''; ?>>
           <a href="<?php echo esc_url(get_permalink($product_id)); ?>" class="product-card-link">
             <div class="product-media<?php echo $hover_id ? ' has-hover-image' : ''; ?>">
               <?php if ($ambiance_id) : ?>
