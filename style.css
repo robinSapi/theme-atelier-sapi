@@ -24911,11 +24911,6 @@ button.chip--project:focus-visible {
   color: #fff;
   border-color: var(--color-wood-dark);
 }
-.mes-creations-pill__count {
-  margin-left: 6px;
-  opacity: 0.6;
-  font-size: 11px;
-}
 
 /* Refonte /mes-creations/ — la grille catalogue "Toutes mes créations"
    affiche TOUS les produits, indépendamment du filtre projet.

@@ -36,10 +36,6 @@ if ($mes_creations_cats_raw && !is_wp_error($mes_creations_cats_raw)) {
     $mes_creations_cats_by_slug[$cat->slug] = $cat;
   }
 }
-$mes_creations_total = $all_products->found_posts;
-if (isset($mes_creations_cats_by_slug['carte-cadeau'])) {
-  $mes_creations_total -= (int) $mes_creations_cats_by_slug['carte-cadeau']->count;
-}
 // Lecture du param GET ?product_cat= pour le filtre actif initial.
 $mes_creations_active_cat = isset($_GET['product_cat']) ? sanitize_key(wp_unslash($_GET['product_cat'])) : '';
 if ($mes_creations_active_cat && !isset($mes_creations_cats_by_slug[$mes_creations_active_cat])) {
@@ -245,7 +241,6 @@ $conseil_room_icons = sapi_guide_get_icons();
   <nav class="mes-creations-pills" data-mes-creations-pills aria-label="<?php esc_attr_e('Filtrer par catégorie', 'theme-sapi-maison'); ?>">
     <button type="button" class="mes-creations-pill<?php echo empty($mes_creations_active_cat) ? ' is-active' : ''; ?>" data-cat="all">
       <?php esc_html_e('Tous', 'theme-sapi-maison'); ?>
-      <span class="mes-creations-pill__count"><?php echo esc_html($mes_creations_total); ?></span>
     </button>
     <?php foreach ($mes_creations_cat_order as $slug) :
       if (!isset($mes_creations_cats_by_slug[$slug])) continue;
@@ -254,7 +249,6 @@ $conseil_room_icons = sapi_guide_get_icons();
     ?>
       <button type="button" class="mes-creations-pill<?php echo $is_active ? ' is-active' : ''; ?>" data-cat="<?php echo esc_attr($cat->slug); ?>">
         <?php echo esc_html($cat->name); ?>
-        <span class="mes-creations-pill__count"><?php echo esc_html($cat->count); ?></span>
       </button>
     <?php endforeach; ?>
   </nav>
