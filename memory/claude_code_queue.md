@@ -2,6 +2,231 @@
 
 ## 🔧 À faire
 
+## [TÂCHE] S28 — Phase 0 : audit exhaustif des call-sites du repeater `galerie_produit`
+**Date :** 2026-05-28
+**Branche :** `feature/photos-par-piece` (créée depuis master à jour, commit `e092f1d` ou plus récent)
+**Priorité :** haute — bloquant pour Phase 1 (création des 8 Gallery ACF) et Phase 2 (script de migration)
+**Mémoire de contexte** (côté Cowork) : `project_photos_par_piece.md` — relire AVANT toute action pour comprendre l'architecture cible (option B = 8 Gallery ACF distincts + taxonomie `media_room` 15 termes + plugin EML).
+
+### Contexte
+
+Le repeater ACF `galerie_produit` actuellement attaché aux produits WooCommerce sera **remplacé** par 8 champs Gallery ACF distincts (un par type de photo) en Phase 2. Avant de migrer, on a besoin d'un **inventaire exhaustif** de tous les endroits du code thème qui lisent, écrivent ou raisonnent sur ce repeater, pour :
+
+1. Savoir quels fichiers devront être modifiés en Phase 3 (helper dual-read transitoire)
+2. Évaluer les risques de la migration (combien de surfaces touchées, complexité)
+3. Identifier les éventuels helpers à factoriser
+
+Cette phase est **lecture seule** — pas de modif, pas de commit, juste un rapport markdown structuré.
+
+### Sortie attendue
+
+**Un seul fichier markdown** créé à : `site-web/memory/audit_galerie_produit_callsites.md`
+
+Format strict :
+
+```markdown
+# Audit call-sites repeater `galerie_produit` — Phase 0 S28
+**Date audit :** 2026-05-XX
+**Branche :** feature/photos-par-piece
+**Commit base :** <hash>
+
+## Résumé
+- Nombre total de call-sites : N
+- Fichiers PHP impactés : N
+- Fichiers JS impactés : N
+- Snippets Code Snippets impactés : N (si applicable, sinon "non auditable depuis le repo")
+
+## Par catégorie d'usage
+
+### Lecture meta directe (`get_post_meta`, `get_field`)
+... (call-sites de ce type)
+
+### Boucles repeater (`have_rows` / `the_row` / `get_sub_field`)
+... (call-sites de ce type)
+
+### Helpers existants
+... (fonctions wrappers du thème qui encapsulent l'accès au repeater)
+
+### Rendu front (templates WC, single-product, archive, etc.)
+... (call-sites qui produisent du HTML à partir des données du repeater)
+
+### JS / AJAX
+... (call-sites JS qui consomment les données — typiquement via wp_localize_script ou data-attributes)
+
+### Admin / WP-Admin
+... (si le repeater est manipulé côté admin custom — métaboxes, colonnes liste produits, etc.)
+
+## Détail par call-site
+
+### [#1] `path/to/file.php:LINE` — <type d'usage en 3 mots>
+**Contexte** : <template / helper / JS / admin>
+**Pattern matché** : `get_field('galerie_produit')` (ou autre)
+**Extrait** :
+\`\`\`php
+<5 à 10 lignes de code centrées sur la ligne matchée>
+\`\`\`
+**Note** : <ce que ce call-site fait, en 1 phrase>
+**Impact migration** : <faible | moyen | fort> — <justification courte>
+
+### [#2] ...
+```
+
+### Méthode de recherche (à appliquer rigoureusement)
+
+**Patterns à grep** (case-insensitive, sur tout le repo thème) :
+
+1. **Nom direct** : `galerie_produit` (toutes occurrences, y compris dans les commentaires — utile pour traquer l'historique)
+2. **Variantes de nom** : `galerie-produit`, `_galerie_produit`, `gallerie_produit` (typo défensive)
+3. **API ACF lecture** :
+   - `get_field\s*\(\s*['"]galerie` (regex)
+   - `the_field\s*\(\s*['"]galerie`
+   - `have_rows\s*\(\s*['"]galerie`
+   - `get_sub_field` dans un bloc qui contient `galerie_produit` plus haut
+4. **Méta WP brut** :
+   - `get_post_meta.*galerie_produit`
+   - `update_post_meta.*galerie_produit`
+   - `meta_key.*galerie_produit` (pour les requêtes WP_Query / meta_query)
+5. **JS / data-attributes** :
+   - `galerie_produit` dans assets/*.js
+   - `data-galerie` dans templates
+   - `wp_localize_script` qui passe `galerie_produit` au JS
+
+**Périmètre** :
+- `wp-content/themes/theme-sapi-maison/**` (tout le thème)
+- **Inclure** : functions.php, inc/*, woocommerce/*, assets/*.js, *.php templates
+- **Exclure** : vendor/, node_modules/ (si présents), backup/, *.min.js
+- **Hors scope** : Code Snippets (plugin WP) — pas accessibles depuis le repo. Si la mémoire `reference_snippets_actifs` (côté Cowork) liste des snippets liés à `galerie_produit`, mentionner dans le rapport mais ne pas chercher dans le repo (Robin auditera côté admin si besoin).
+
+### Garde-fous absolus
+
+1. **LECTURE SEULE — AUCUNE MODIFICATION** du code. Pas de commit, pas de fichier édité. Le seul fichier créé est `site-web/memory/audit_galerie_produit_callsites.md`.
+2. **Pas de filtrage prématuré** — lister TOUS les matches, même ceux qui semblent triviaux (commentaires, anciennes routes). On filtrera ensuite. Mieux : pour chaque match, noter dans le rapport si c'est "actif" (du code qui s'exécute) ou "mort" (commentaire, code dans une branche conditionnelle jamais atteinte, etc.).
+3. **Ne pas confondre `galerie_produit` (le repeater) avec `gallery` ou `product_gallery_images`** (galerie WC native, qui elle a son propre système). Si un call-site mentionne les deux, le préciser dans la note.
+4. **Ne pas anticiper la solution** — ne pas commenter "ici on devrait remplacer par sapi_get_product_photo_ids()". Juste documenter l'état actuel. Les recommandations viendront en Phase 1.
+
+### Critères de succès
+
+- [ ] Fichier `site-web/memory/audit_galerie_produit_callsites.md` créé et commité sur `feature/photos-par-piece`
+- [ ] Tous les patterns listés ci-dessus ont été grepés
+- [ ] Le rapport contient une section "Résumé" avec les compteurs N
+- [ ] Le rapport est organisé par catégorie d'usage (lecture meta / boucles repeater / helpers / rendu front / JS / admin)
+- [ ] Chaque call-site individuel a : fichier:ligne, contexte, pattern matché, extrait 5-10 lignes, note, impact migration estimé (faible/moyen/fort)
+- [ ] Les matches "actifs" vs "morts" (commentaires, code mort) sont distingués
+- [ ] Aucune modification au code thème (vérification : `git diff master..feature/photos-par-piece` doit montrer UNIQUEMENT le nouveau fichier audit)
+- [ ] Un commit propre type `feat(s28): audit phase 0 — inventaire call-sites galerie_produit`
+
+### Notes pour le retour
+
+Dans la réponse côté queue Cowork (section ✅ Livré), indiquer :
+- Hash du commit audit
+- N total de call-sites trouvés (résumé chiffré)
+- Top 3 fichiers les plus impactés
+- Surfaces ou helpers qu'il faudra factoriser en Phase 1 (recommandations brèves, max 5 bullets)
+
+### Suite (hors scope Phase 0, pour information)
+
+Phase 1 = création des 8 Gallery ACF + installation EML + déclaration taxonomie `media_room` (UI WordPress par Robin, pas Claude Code).
+Phase 2 = script de migration repeater → 8 Gallery (dry-run d'abord). C'est là que le rapport Phase 0 sera consulté pour identifier le code consommateur à migrer.
+
+---
+
+## [TÂCHE] Card sur-mesure dans /mes-creations/ — refonte visuelle "carnet d'atelier"
+**Date :** 2026-05-28
+**Branche :** `test-theme-sapi-maison`
+**Priorité :** moyenne — la card actuelle fonctionne, mais son visuel ne plait pas à Robin (trop "service abstrait", pas assez "artisan")
+**Mockup de référence :** `site-web/mockups/mockup-16-card-surmesure-alternatives.html` — **variante C UNIQUEMENT** (section "Carnet d'atelier", marqueur orange "Variante C")
+
+### Contexte
+
+La card sur-mesure actuellement en prod (dernière cellule de la grille "Ma sélection" sur `/mes-creations/`, classes `.mes-creations-surmesure-card*`) utilise un design "service" : fond dégradé orange clair, icône recyclage SVG, badge pill orange. Robin trouve ça trop abstrait, pas assez en lien avec son univers d'artisan.
+
+**Nouvelle direction validée Robin (28/05/2026) — variante C "Carnet d'atelier"** : esthétique page de carnet, croquis trait fin d'une suspension dessinée à la main (SVG), lignes de cahier discrètes en arrière-plan, signature "— Robin" en Square Peg orange. Plus intimiste, plus personnel, raconte une histoire.
+
+### Garde-fous absolus
+
+1. **Lire avant d'écrire** : ouvrir le mockup #16, identifier la section variante C uniquement (classes `.v-carnet*`). Lire l'état actuel des classes `.mes-creations-surmesure-card*` dans `style.css` ET le `<template>` correspondant dans `woocommerce/archive-product.php` AVANT toute modification.
+2. **Réutiliser les classes existantes** `.mes-creations-surmesure-card*` — modifier leur contenu CSS et le markup du template, NE PAS créer de nouvelles classes parallèles. Cf. mémoire Cowork `feedback_claude_code_refonte_grille`.
+3. **Aucun changement JS** : `populateSelectionGrid()` dans `sapi-cards-conseiller.js` continue de cloner le `<template>` tel quel — seul le contenu du template change.
+4. **Aucun changement comportement** : `href="/sur-mesure/"` préservé, event GA4 `mes_creations_card_surmesure_click` continue de fire au clic.
+
+### Spec visuelle (variante C)
+
+**Fond** : papier crème pur `#FDFBF5` (plus clair que `--color-warm`). PAS de dégradé. PAS d'orange.
+
+**Lignes de cahier décoratives** : pseudo-élément `::before` en `position: absolute; inset: 0`, `pointer-events: none`, avec :
+```css
+background-image: repeating-linear-gradient(
+  to bottom,
+  transparent 0,
+  transparent 21px,
+  rgba(139, 115, 85, 0.06) 22px
+);
+```
+
+**Bordure** : aucune bordure visible (PAS de dashed, PAS d'outline orange). Garder un léger `box-shadow: 0 2px 8px rgba(74, 63, 53, 0.06)`.
+
+**Padding interne** : `22px 18px 18px`.
+
+**Contenu vertical** (de haut en bas, texte centré) :
+
+1. **Eyebrow** "Croquis..." en Square Peg, `font-family: 'Square Peg', cursive; font-size: 22px; color: var(--color-wood); line-height: 1; margin-bottom: 4px;`
+
+2. **SVG croquis suspension** centré (`95×95px` desktop, `75×75px` mobile, `margin: 10px auto 14px;`, `color: var(--color-wood-dark);`). Markup exact :
+```html
+<svg class="mes-creations-surmesure-card__sketch" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M50 6 L50 24"/>
+  <ellipse cx="50" cy="26" rx="6" ry="2.5"/>
+  <path d="M28 32 Q50 30 72 32 Q62 60 50 75 Q38 60 28 32"/>
+  <path d="M34 34 Q50 33 66 34"/>
+  <path d="M32 42 Q50 40 68 42"/>
+  <path d="M32 52 Q50 51 68 52"/>
+  <path d="M36 62 Q50 61 64 62"/>
+  <ellipse cx="50" cy="80" rx="4" ry="5" fill="rgba(227, 91, 36, 0.12)"/>
+  <path d="M48 86 L52 86 M47 88 L53 88"/>
+</svg>
+```
+
+3. **Titre** "Sur-mesure" : `font-size: 14px; font-weight: 700; color: var(--color-wood-dark); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; line-height: 1.25;`
+
+4. **Sous-titre italique** "Et si on dessinait le tien ensemble ?" : `font-size: 12px; color: var(--color-wood-mid); line-height: 1.5; font-style: italic; padding: 0 8px;`
+
+5. **Signature** "— Robin" : `font-family: 'Square Peg', cursive; font-size: 22px; color: var(--color-orange); margin-top: 14px; line-height: 1;`
+
+**Hover** : `transform: translateY(-3px) rotate(0.4deg);` (la petite rotation donne un effet "page qui bouge"). `transition: transform 0.2s;`
+
+**Aspect ratio / alignement de cellule** : la card doit s'aligner en hauteur avec les cards produits voisines dans le slot. Si les cards produits utilisent un pattern `[photo aspect-ratio + body]`, la card sur-mesure peut soit imiter ce pattern, soit occuper la cellule en bloc unique (préférer le bloc unique avec padding interne uniforme — c'est ce que fait le mockup #16). À adapter pour que la hauteur soit cohérente avec les voisines.
+
+### Wordings exacts (respecter mot pour mot)
+
+- Eyebrow : `Croquis...`
+- Titre : `Sur-mesure`
+- Sous-titre : `Et si on dessinait le tien ensemble ?`
+- Signature : `— Robin`
+
+### Critères de succès
+
+- [ ] Card sur-mesure dans le slot "Ma sélection" affiche le nouveau visuel "carnet d'atelier"
+- [ ] Plus aucune trace du dégradé orange clair, de l'icône recyclage, du badge pill orange "Sur-mesure"
+- [ ] SVG croquis suspension présent, centré, `95px` desktop / `75px` mobile
+- [ ] Wordings respectés mot pour mot (eyebrow Square Peg "Croquis...", titre "Sur-mesure" uppercase wood-dark, sous-titre italique wood-mid, signature "— Robin" orange Square Peg)
+- [ ] Hover : `translateY(-3px) rotate(0.4deg)`, transition 0.2s
+- [ ] Lignes de cahier discrètes en arrière-plan (`repeating-linear-gradient` 22px, opacity `rgba(139, 115, 85, 0.06)`)
+- [ ] `href="/sur-mesure/"` préservé sur l'élément cliquable
+- [ ] Event GA4 `mes_creations_card_surmesure_click` continue de fire au clic (delegate via `sapi-mes-creations-ga4.js`)
+- [ ] Mobile (≤768px) : SVG redimensionné à `75×75px`, layout intact, lisible
+- [ ] Cellule de grille s'aligne en hauteur avec les cards produits voisines (pas plus haute, pas plus basse)
+- [ ] Aucune régression sur les autres cards du slot
+- [ ] Aucune régression sur le `populateSelectionGrid()` JS (le clone du template fonctionne identique)
+
+### Notes
+
+- **Pas de modification JS prévue** : `populateSelectionGrid()` dans `assets/sapi-cards-conseiller.js` continue de cloner le `<template>` tel quel.
+- **Branche** : code sur `test-theme-sapi-maison`, auto-deploy test, validation Robin avant merge master + déploiement prod.
+- **Si le SVG croquis pose problème de rendu** (trop fin, mal aligné, etc.) : Claude Code peut ajuster le stroke-width ou le viewBox mais pas changer la silhouette générale (Robin a validé ce dessin).
+- **Évolution future** (hors scope) : Robin pourrait fournir un scan d'un croquis dessiné à la main pour remplacer le SVG. Pas demandé pour cette livraison.
+
+---
+
 ## [TÂCHE] Conseiller V3 — Round 2 : 17 bugs (audit code restant + tests UX Robin)
 **Date :** 2026-05-22
 **Branche :** `test-theme-sapi-maison`
@@ -226,6 +451,98 @@ Au retour, indiquer pour chaque chantier :
 ---
 
 ## ✅ Livré
+
+## [RETOUR] Polish /mes-creations/ + audit pré-prod + push production
+**Date livrée :** 2026-05-28
+**Branche :** `test-theme-sapi-maison` → mergée dans `master` (`e092f1d`)
+**Push prod :** ✅ Robin a lancé le workflow GitHub Actions après merge
+**Volume :** 78 commits, ~1600 lignes touchées (PHP/JS/CSS)
+
+### Périmètre travaillé pendant la session
+
+**1. Polish UX /mes-creations/ post-refonte (itérations sur ~20 commits)**
+- Card englobante "Mon projet" → "**Ton projet**" (rebranding tutoiement)
+- Padding latéral de la card englobante : `26px` → `10px` (desktop + mobile) → plus de largeur au slot intérieur
+- Phrase IA : padding latéral mini `10px` (ne colle plus aux bords)
+- Slot horizontal mobile : `padding-left: 20px` (vrai gap avant la 1re card), `padding-bottom: 24px`, `scroll-padding-inline-start: 20px` (snap aligné), cards ≤480px à 85% (au lieu de 80%)
+- Cards produit du slot : `.product-firstname` + `.product-restname` en `display: block` (titres forcés sur 2 lignes via le formatter → hauteurs alignées même quand nom long type "L'incandescent")
+- Prix centré dans le slot
+- Séparateur entre sections : 3 dots + 2 lignes latérales → **filet fin de 80px** centré (Option B validée Robin)
+- Pills filtre : suppression du count (compteurs sur "Tous30/Suspensions11/…"), retour au wrap multi-lignes mobile (vs scroll horizontal qui tronquait les textes)
+- Fix coins arrondis cards catalogue : suppression du `overflow: visible !important` sur `.is-filtered-out` qui faisait déborder l'image hors du border-radius
+
+**2. Polish modale Conseiller**
+- Textes bumpés (+30% sur titres, +15% sur le reste) pour lisibilité
+- Boutons réponse `.choice` agrandis (padding 18 12 15, icône 44×44, SVG 24×24)
+- Chip-question mobile : stack vertical 1 bouton par ligne, label 12px, width 100%
+- Overlay plus sombre : `rgba(50, 40, 30, 0.55)` → `rgba(30, 22, 14, 0.82)`
+- Room picker (3 emplacements Home/Mes créations/Conseil) uniformisé : icône 60px, SVG 30px, label 14px
+- Chorégraphie 5 phases dans la card englobante : typewriter → chip-question (+0) → slot grid (+600ms) → nav slider (+1200ms) → lien Modifier (+1800ms)
+- Animations max-height + opacity + transform sur transitions cubic-bezier
+- Modale s'ouvre sur la question répondue avec pill sélectionné, puis **auto-avance** vers la question suivante après 700ms (UX : confirmation visuelle que la réponse a été prise en compte)
+
+**3. Race conditions modale-card (audit interne avant cette session)**
+- `pauseNotifications`/`resumeNotifications` sur sapiProject pour éviter notify pendant la modale ouverte
+- Bug 1 (race condition handler) : `pauseNotifications()` appelé AVANT `update()` dans handleChipAnswer + room-card handler
+- Bug 2 (resumeNotifications jamais appelé sur sortie "Voir ma sélection") : `SessionTracker.finalize()` + `resumeNotifications()` ajoutés au .then du `runExitSequence`
+
+**4. Audit pré-prod par 3 agents (PHP / JS / CSS) — 0 bloqueur identifié**
+4 nits corrigés en un commit avant push prod (`342447d`, puis `7d5055a` pour ajuster) :
+- a11y : `:focus-visible` (outline `--color-wood-dark`) sur pills, slider nav arrows + dots, edit link, sur-mesure card
+- JS chorégraphie : timers `revealTimers` trackés au niveau module + `clearRevealTimers()` au début de chaque appel → plus d'animations désynchronisées si `render()` est rappelé
+- JS auto-avance confirmStep : `state.confirmAdvanceTimer` annulé dans `closeModal` + garde `state.open` dans le callback
+- CSS max-height slot : ajout de `.is-fully-revealed { max-height: none }` via `transitionend` JS → plus de clip vertical possible si une card atypique dépasse (max-height de transition restée à 600 pour préserver la vitesse visuelle d'expansion)
+
+### Self-check par critère
+
+| Critère | État | Détails |
+|---|---|---|
+| Card englobante "Ton projet" — chorégraphie progressive | ✅ | Chaque phase s'enchaîne visuellement (typewriter → chip → slot → dots → edit), card grandit progressivement |
+| Slot horizontal scroll-snap | ✅ | Desktop 4 cards / Tablette 3 / Mobile 2 / Petit mobile 85% (peek) |
+| Pills filtre : multi-lignes mobile, wrap centré | ✅ | Plus de scroll horizontal qui tronquait les textes |
+| Séparateur Option B | ✅ | 80px × 1px centré opacity 0.6, plus de dots |
+| Cards catalogue : coins arrondis homogènes | ✅ | Plus de `overflow: visible !important` qui cassait le radius |
+| Pas de count dans les pills | ✅ | `$mes_creations_total` + spans `__count` + règle CSS retirés |
+| a11y clavier | ✅ | Tab → outline wood-dark sur tous les nouveaux interactifs |
+| Modale auto-avance fermable | ✅ | Si user ferme dans les 700ms : timer annulé, pas de snapshot tracking inutile |
+| Aucun setTimeout orphelin chorégraphie | ✅ | `revealTimers` array + `clearRevealTimers()` au début de chaque reveal |
+| Audit 3 agents | ✅ | 0 bloqueur PHP/JS/CSS. 4 nits corrigés avant merge |
+| Merge master + push GHA + déploiement prod | ✅ | Confirmé par Robin |
+
+### Plan de test communiqué à Robin avant push
+
+1. **Focus clavier** : Tab + clic souris sur pills/nav/links → outline uniquement au clavier
+2. **Chorégraphie** : recharger `/mes-creations/` avec projet actif + stress test rapide-clic chip-question
+3. **Auto-avance confirmStep** : clic réponse + fermeture rapide → pas d'erreur, pas d'auto-validation post-close
+4. **Slot max-height** : vérifier `.is-fully-revealed` post-animation via DevTools
+
+Robin a validé tous les points après hard-refresh.
+
+### Fichiers modifiés / créés (cumul session)
+
+| Fichier | Nature |
+|---|---|
+| `style.css` | Polish massif `.mes-creations-*` + `.conseiller-card--mon-projet.mes-creations-selection__card` + `.choice.is-selected` + chorégraphie + `:focus-visible` + `.is-fully-revealed` |
+| `assets/sapi-cards-conseiller.js` | populateSelectionGrid + SessionTracker + chorégraphie 5 phases + `revealTimers` tracking + transitionend listener |
+| `assets/sapi-modal-conseiller.js` | confirmStep listener + auto-avance + `state.confirmAdvanceTimer` + race condition fixes |
+| `assets/sapi-project.js` | `pauseNotifications` / `resumeNotifications` |
+| `woocommerce/archive-product.php` | Refonte structure + room picker + slot englobante + pills + section catalogue + suppression count |
+| `functions.php` | Enqueue admin Conseiller V3 + nouveaux scripts `sapi-mes-creations-*` |
+| `assets/sapi-mes-creations-pills.js` | NOUVEAU (Round précédent) |
+| `assets/sapi-mes-creations-ga4.js` | NOUVEAU (Round précédent) |
+
+### Notes côté Cowork
+
+- **78 commits déployés en une fois** : si Robin remonte un bug en prod sur les jours qui viennent, on a beaucoup de surface à investiguer. Les agents d'audit ont scanné PHP/JS/CSS et n'ont rien trouvé de bloquant, mais surveiller GA4 + analytics + tickets éventuels.
+- **Page `/mes-creations/` est l'entrée commerciale principale** : c'est la page la plus retravaillée du push. Si feedback utilisateur arrive, c'est probablement dessus.
+- **Workflow Cowork ↔ Claude Code** : Robin a opéré la session principalement en mode "feedback direct + itération rapide" (pas via la queue). Pour des tâches structurées (Round 2, refontes), la queue reste l'outil.
+
+### Branches après push
+
+- `master` (prod) : à jour, déployé sur atelier-sapi.fr
+- `test-theme-sapi-maison` : alignée avec master (rien à rebaser)
+
+---
 
 ## [RETOUR] /mes-creations/ refonte UX — 2 sections + card englobante + pills cat + GA4
 **Date livrée :** 2026-05-26
