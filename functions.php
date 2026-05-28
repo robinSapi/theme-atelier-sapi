@@ -16,6 +16,12 @@ function sapi_check_form_rate_limit($form_id = 'contact', $max_hits = 5) {
   return true;
 }
 
+// S28 Phase 2 — Page admin migration repeater galerie_produit → 8 Gallery ACF.
+// Chargée uniquement en admin pour ne pas peser sur le front.
+if (is_admin()) {
+  require_once get_template_directory() . '/inc/sapi-migrate-galerie.php';
+}
+
 function sapi_maison_setup() {
   add_theme_support('title-tag');
   add_theme_support('post-thumbnails');
