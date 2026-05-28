@@ -23229,6 +23229,9 @@ body.woocommerce-cart div.woocommerce-wrapper {
   line-height: 1.5;
   max-width: 880px;
   margin: 0 auto;
+  /* Padding latéral minimal pour ne pas coller aux bords de la card
+     englobante (visible quand la card est étroite, ex. mobile). */
+  padding: 0 10px;
 }
 
 /* Mobile — clamp plancher à 22px était un peu trop volumineux dans la card
