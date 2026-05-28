@@ -91,15 +91,6 @@ get_header();
     }
   }
 
-  // 3. ACF photos from repeater (with fallback to old fields in helper)
-  $type_labels = [
-    'ambiance'    => 'Ambiance',
-    'detail'      => 'Détail',
-    'taille'      => 'Tailles',
-    'client'      => 'Client',
-    'fabrication' => 'Fabrication',
-  ];
-
   // S28 Phase 6a — lecture via helper Phase 3 (dual-read Gallery → repeater).
   // Plus de lecture directe de get_field('galerie_produit'). Le helper fait
   // automatiquement le fallback sur le repeater si la Gallery cible est vide.
@@ -184,34 +175,24 @@ get_header();
 
   <?php
   // ── Slideshow ambiance : photos ACF filtrées par type ──
+  // S28 Phase 6a — lecture via helper Phase 3 (dual-read Gallery → repeater).
+  // Plus de lecture directe du repeater. L'ordre fixe par type est préservé
+  // (cf $slideshow_types) ainsi que le tracking Phase 4b des positions 1+2
+  // ambiance (swap par pièce côté JS).
   $slideshow_types = ['ambiance', 'vue de dessous', 'detail', 'fabrication'];
   $slideshow_photos = [];
-  // S28 Phase 4b : track des indices slides "ambiance" pour cibler les
-  // positions 1+2 du carousel — celles que le JS swap selon la pièce.
   $slideshow_ambiance_indices = [];
-  if (function_exists('get_field')) {
-    $galerie_repeater_ss = get_field('galerie_produit');
-    if (!empty($galerie_repeater_ss) && is_array($galerie_repeater_ss)) {
-      // Trier par ordre des types demandés
-      foreach ($slideshow_types as $ss_type) {
-        foreach ($galerie_repeater_ss as $row) {
-          $type = isset($row['type_photo']) ? $row['type_photo'] : '';
-          if (is_array($type)) $type = isset($type['value']) ? $type['value'] : '';
-          if ($type !== $ss_type) continue;
-          $img_field = isset($row['image']) ? $row['image'] : null;
-          $img_id = sapi_get_acf_image_id($img_field);
-          if ($img_id) {
-            $slideshow_photos[] = $img_id;
-            if ($ss_type === 'ambiance' && count($slideshow_ambiance_indices) < 2) {
-              $slideshow_ambiance_indices[] = count($slideshow_photos) - 1;
-            }
-          }
-        }
+  foreach ($slideshow_types as $ss_type) {
+    $type_ids = sapi_get_product_photo_ids(get_the_ID(), $ss_type, 0);
+    foreach ($type_ids as $img_id) {
+      $slideshow_photos[] = $img_id;
+      if ($ss_type === 'ambiance' && count($slideshow_ambiance_indices) < 2) {
+        $slideshow_ambiance_indices[] = count($slideshow_photos) - 1;
       }
     }
   }
   // Map index_slide → position_swap (1 ou 2). Présent uniquement pour les
-  // 2 premiers slides ambiance — ceux que le JS swap par pièce.
+  // 2 premiers slides ambiance — ceux que le JS swap par pièce (Phase 4b).
   $slideshow_swap_position = [];
   foreach ($slideshow_ambiance_indices as $pos0 => $slide_idx) {
     $slideshow_swap_position[$slide_idx] = $pos0 + 1; // 1-indexed
