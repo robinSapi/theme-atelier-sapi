@@ -219,8 +219,19 @@ if ($is_editorial_carousel) {
     $data_attrs .= ' data-thumbnail="' . esc_url($thumbnail_url) . '"';
   }
 }
+
+// S28 Phase 4b — swap pièce activé UNIQUEMENT sur pages catégorie
+// (le même template content-product.php sert aussi à des carousels home
+// hors périmètre swap). Conditionné à la présence d'une ambiance ACF.
+// data-product-id ajouté ici pour cohérence avec archive-product.php
+// (le data-id existant en data_attrs est conservé pour shop.js).
+$data_piece_swap = '';
+if (is_product_category() && $sapi_category_ambiance_id) {
+  $data_piece_swap = ' data-product-id="' . esc_attr($product_id) . '"'
+                   . ' data-piece-swap data-piece-swap-type="ambiance" data-piece-swap-size="woocommerce_thumbnail"';
+}
 ?>
-<li <?php wc_product_class($card_classes, $product); ?> <?php echo $data_attrs; ?>>
+<li <?php wc_product_class($card_classes, $product); ?> <?php echo $data_attrs; ?><?php echo $data_piece_swap; ?>>
   <a href="<?php the_permalink(); ?>" class="product-card-link">
     <div class="product-media<?php echo $hover_image_id ? ' has-hover-image' : ''; ?>">
       <?php
