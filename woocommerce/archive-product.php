@@ -205,7 +205,7 @@ $conseil_room_icons = sapi_guide_get_icons();
       <template data-mes-creations-surmesure-template>
         <a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>" class="mes-creations-surmesure-card" data-mes-creations-surmesure-cta>
           <div class="mes-creations-surmesure-card__eyebrow"><?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?></div>
-          <div class="mes-creations-surmesure-card__title"><?php esc_html_e('Créons le bon luminaire ensemble', 'theme-sapi-maison'); ?></div>
+          <div class="mes-creations-surmesure-card__title"><?php esc_html_e('Créons ensemble', 'theme-sapi-maison'); ?></div>
           <p class="mes-creations-surmesure-card__sub"><?php esc_html_e('Pour ton projet, la solution idéale est peut-être un luminaire dessiné sur mesure. Robin peut te conseiller.', 'theme-sapi-maison'); ?></p>
           <span class="mes-creations-surmesure-card__cta">
             <?php esc_html_e('En parler à Robin', 'theme-sapi-maison'); ?>
