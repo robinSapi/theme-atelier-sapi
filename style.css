@@ -25032,6 +25032,10 @@ button.chip--project:focus-visible {
   .mes-creations-pill {
     font-size: 12px;
     padding: 8px 14px;
+    /* Empêche flex de comprimer les pills quand wrap:nowrap est actif :
+       chaque pill garde sa largeur naturelle, la rangée scroll horizontalement */
+    -webkit-flex-shrink: 0;
+    flex-shrink: 0;
   }
   /* Card sur-mesure : SVG icône plus petit en mobile (mockup ligne 334) */
   .mes-creations-surmesure-card__photo svg {
