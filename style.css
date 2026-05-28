@@ -24737,8 +24737,8 @@ button.chip--project:focus-visible {
 }
 @media (max-width: 480px) {
   .mes-creations-selection__grid > * {
-    -webkit-flex: 0 0 80%;
-    flex: 0 0 80%;
+    -webkit-flex: 0 0 85%;
+    flex: 0 0 85%;
   }
 }
 
@@ -24973,10 +24973,14 @@ button.chip--project:focus-visible {
   .conseiller-card--mon-projet.mes-creations-selection__card::before {
     inset: 8px;
   }
-  /* Slot grille : padding horizontal léger + vertical pour que les cards
-     ne touchent pas les bords haut/bas de la card englobante */
+  /* Slot grille mobile :
+     - left 20px pour un vrai gap avant la 1re card (visuellement aéré)
+     - right 4px conservé pour que la card suivante "peek" au bord
+     - bottom 24px (un peu plus que top) pour respirer sous les cards
+     - scroll-padding-inline-start: 20px → snap aligné sur le padding gauche */
   .mes-creations-selection__grid {
-    padding: 16px 4px;
+    padding: 16px 4px 24px 20px;
+    scroll-padding-inline-start: 20px;
   }
   /* Lien Modifier un peu plus discret en mobile */
   .mes-creations-selection__edit {
