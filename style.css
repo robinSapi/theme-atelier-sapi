@@ -25018,10 +25018,10 @@ button.chip--project:focus-visible {
     font-size: 12px;
     padding: 8px 14px;
   }
-  /* Card sur-mesure : SVG icône plus petit en mobile (mockup ligne 334) */
-  .mes-creations-surmesure-card__photo svg {
-    width: 32px;
-    height: 32px;
+  /* Card sur-mesure (variante C) : croquis plus petit en mobile (mockup-16) */
+  .mes-creations-surmesure-card__sketch {
+    width: 75px;
+    height: 75px;
   }
 }
 
@@ -25047,82 +25047,88 @@ button.chip--project:focus-visible {
 }
 
 
-/* Card sur-mesure (Chantier 2) — cellule de grille spéciale en dernière
-   position du slot. Markup mockup-15 ligne 419 (template cloné par JS).
-   Format identique aux cards produit (aspect ratio + body), accent orange. */
+/* Card sur-mesure — variante C "Carnet d'atelier" (mockup-16). Page de
+   cahier crème + croquis dessiné main + signature manuscrite Robin orange.
+   Cellule de grille spéciale en dernière position du slot "Ma sélection".
+   Le template est cloné par populateSelectionGrid() dans sapi-cards-conseiller.js. */
 .mes-creations-surmesure-card {
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-direction: column;
-  flex-direction: column;
-  background: #fff;
-  border: 1px dashed rgba(227, 91, 36, 0.45);
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1.4;
+  background: #FDFBF5;
   border-radius: 12px;
-  overflow: hidden;
-  cursor: pointer;
+  padding: 22px 18px 18px;
+  text-align: center;
   text-decoration: none;
-  -webkit-transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+  overflow: hidden;
+  -webkit-box-shadow: 0 2px 8px rgba(74, 63, 53, 0.06);
+  box-shadow: 0 2px 8px rgba(74, 63, 53, 0.06);
+  -webkit-transition: -webkit-transform 0.2s ease;
+  transition: transform 0.2s ease;
 }
 @media (hover: hover) {
   .mes-creations-surmesure-card:hover {
-    -webkit-transform: translateY(-3px);
-    transform: translateY(-3px);
-    box-shadow: 0 12px 28px rgba(227, 91, 36, 0.18);
-    border-color: var(--color-orange);
+    -webkit-transform: translateY(-3px) rotate(0.4deg);
+    transform: translateY(-3px) rotate(0.4deg);
   }
 }
-.mes-creations-surmesure-card__photo {
-  aspect-ratio: 1/1.1;
-  background: linear-gradient(135deg, #FFF4ED 0%, #FFE4D3 100%);
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-direction: column;
-  flex-direction: column;
-  -webkit-align-items: center;
-  align-items: center;
-  -webkit-justify-content: center;
-  justify-content: center;
-  color: var(--color-orange);
-  gap: 14px;
-  padding: 20px;
+/* Lignes de cahier décoratives très légères (pseudo-élément en couche basse).
+   pointer-events:none → le clic traverse vers le lien <a> parent. */
+.mes-creations-surmesure-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 21px,
+    rgba(139, 115, 85, 0.06) 22px
+  );
+  pointer-events: none;
 }
-.mes-creations-surmesure-card__photo svg {
-  width: 42px;
-  height: 42px;
-  opacity: 0.85;
+/* Les enfants passent au-dessus du pseudo-élément lignes. */
+.mes-creations-surmesure-card > * {
+  position: relative;
 }
-.mes-creations-surmesure-card__badge {
-  display: -webkit-inline-flex;
-  display: inline-flex;
-  -webkit-align-items: center;
-  align-items: center;
-  padding: 5px 11px;
-  background: var(--color-orange);
-  color: #fff;
-  font-family: var(--font-body);
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  border-radius: 50px;
+.mes-creations-surmesure-card__eyebrow {
+  display: block;
+  font-family: 'Square Peg', cursive;
+  font-size: 22px;
+  color: var(--color-wood);
+  line-height: 1;
+  margin-bottom: 4px;
 }
-.mes-creations-surmesure-card__body {
-  padding: 14px 12px 18px;
-  text-align: center;
+.mes-creations-surmesure-card__sketch {
+  display: block;
+  width: 95px;
+  height: 95px;
+  margin: 10px auto 14px;
+  color: var(--color-wood-dark);
 }
 .mes-creations-surmesure-card__title {
   font-family: var(--font-body);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
+  color: var(--color-wood-dark);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--color-orange);
-  margin-bottom: 3px;
+  line-height: 1.25;
+  margin-bottom: 6px;
 }
 .mes-creations-surmesure-card__sub {
   font-family: var(--font-body);
   font-size: 12px;
   font-style: italic;
   color: var(--color-wood-mid);
+  line-height: 1.5;
+  padding: 0 8px;
+  margin: 0;
+}
+.mes-creations-surmesure-card__sig {
+  font-family: 'Square Peg', cursive;
+  font-size: 22px;
+  color: var(--color-orange);
+  line-height: 1;
+  margin-top: 14px;
 }
