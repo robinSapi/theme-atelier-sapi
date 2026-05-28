@@ -24646,7 +24646,7 @@ button.chip--project:focus-visible {
    [.mes-creations-selection] = card englobante "Mon projet"
        (badge dynamique N luminaires + phrase IA + lien Modifier
         + slot grille peuplé par JS via clones depuis la grille basse)
-   [.mes-creations-section-divider] = 3 dots en pointillés
+   [.mes-creations-section-divider] = filet fin centré (Option B)
    [.mes-creations-catalogue] = section "Toutes mes créations"
        (H2 + sous-titre + placeholder pills cat + grille shop-products)
    ============================================================ */
@@ -24837,35 +24837,14 @@ button.chip--project:focus-visible {
   height: 14px;
 }
 
-/* Séparateur 3 dots entre "Ma sélection" et "Toutes mes créations".
-   Mockup-15 : 3 ronds wood opacity 0.4 + 2 lignes horizontales latérales. */
+/* Séparateur entre "Ma sélection" et "Toutes mes créations" — Option B :
+   un seul filet fin court (80px), centré, opacity faible. Pas de dots. */
 .mes-creations-section-divider {
-  max-width: 1400px;
-  margin: 70px auto 0;
-  padding: 0 3rem;
-  text-align: center;
-  position: relative;
-}
-.mes-creations-section-divider::before,
-.mes-creations-section-divider::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: calc(50% - 80px);
+  width: 80px;
   height: 1px;
+  margin: 70px auto 0;
   background: var(--color-line);
-}
-.mes-creations-section-divider::before { left: 3rem; }
-.mes-creations-section-divider::after  { right: 3rem; }
-.mes-creations-section-divider__dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--color-wood);
-  opacity: 0.4;
-  margin: 0 5px;
-  vertical-align: middle;
+  opacity: 0.6;
 }
 
 /* Section "Toutes mes créations" — H2 + sous-titre + placeholder pills. */
@@ -25002,13 +24981,10 @@ button.chip--project:focus-visible {
   .mes-creations-selection__edit {
     font-size: 12.5px;
   }
-  /* Séparateur 3 dots resserré */
+  /* Séparateur mobile : resserré verticalement, même largeur 80px */
   .mes-creations-section-divider {
     margin-top: 48px;
-    padding: 0 14px;
   }
-  .mes-creations-section-divider::before { left: 14px; }
-  .mes-creations-section-divider::after  { right: 14px; }
   /* Section "Toutes mes créations" */
   .mes-creations-catalogue {
     padding: 0 14px 60px;

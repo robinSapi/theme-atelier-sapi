@@ -225,12 +225,9 @@ $conseil_room_icons = sapi_guide_get_icons();
   </section>
 </section>
 
-<!-- Séparateur visuel entre "Ma sélection" et "Toutes mes créations" -->
-<div class="mes-creations-section-divider" aria-hidden="true">
-  <span class="mes-creations-section-divider__dot"></span>
-  <span class="mes-creations-section-divider__dot"></span>
-  <span class="mes-creations-section-divider__dot"></span>
-</div>
+<!-- Séparateur visuel entre "Ma sélection" et "Toutes mes créations" :
+     filet fin court centré (Option B). -->
+<div class="mes-creations-section-divider" aria-hidden="true"></div>
 
 <!-- Section "Toutes mes créations" — catalogue complet (1 seule grille DOM,
      source of truth pour les matches qui sont clonés dans la card "Ma sélection"
