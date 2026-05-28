@@ -23103,7 +23103,16 @@ body.woocommerce-cart div.woocommerce-wrapper {
   transition: max-height 0.65s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .mes-creations-selection__grid.is-revealed {
-  max-height: 600px; /* assez large pour les cards produit (~330px hauteur) + padding */
+  /* Valeur de transition (animation 0 → 1200px). Le JS retire le max-height
+     via transitionend une fois l'animation terminée → aucune contrainte
+     verticale en régime stationnaire, même si une card produit dépasse
+     cette borne (variation longue, sur-mesure étoffée, etc.). */
+  max-height: 1200px;
+}
+/* Une fois l'expansion terminée, le JS ajoute .is-fully-revealed qui retire
+   toute contrainte max-height. Évite tout clip vertical post-animation. */
+.mes-creations-selection__grid.is-fully-revealed {
+  max-height: none;
 }
 
 /* Cascade des cards à l'intérieur du slot — transition-delay inline par JS.
@@ -24916,6 +24925,18 @@ button.chip--project:focus-visible {
   background: var(--color-wood-dark);
   color: #fff;
   border-color: var(--color-wood-dark);
+}
+
+/* Focus clavier accessible (a11y) sur tous les nouveaux interactifs de
+   /mes-creations/. Le user-agent style retire l'outline sur les boutons,
+   on rétablit un focus-ring cohérent avec la palette wood-dark. */
+.mes-creations-pill:focus-visible,
+.mes-creations-selection__nav-arrow:focus-visible,
+.mes-creations-selection__nav-dot:focus-visible,
+.mes-creations-selection__edit:focus-visible,
+.mes-creations-surmesure-card:focus-visible {
+  outline: 2px solid var(--color-wood-dark);
+  outline-offset: 2px;
 }
 
 /* Refonte /mes-creations/ — la grille catalogue "Toutes mes créations"

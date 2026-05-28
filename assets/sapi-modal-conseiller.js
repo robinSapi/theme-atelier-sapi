@@ -1723,6 +1723,12 @@
       try { state.aiController.abort(); } catch (e) { /* swallow */ }
       state.aiController = null;
     }
+    // Annule l'éventuel auto-avance confirmStep en attente (sinon snapshot
+    // tracking inutile + risque d'avancer dans une modale fermée).
+    if (state.confirmAdvanceTimer) {
+      clearTimeout(state.confirmAdvanceTimer);
+      state.confirmAdvanceTimer = null;
+    }
     els.modal.hidden = true;
     document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
@@ -1777,7 +1783,12 @@
           if (state.screen !== 's1') showScreen('s1');
           // Auto-avance : reuse answerCurrentQuestion qui gère history +
           // sapiProject sync + transition vers la prochaine question.
-          setTimeout(function () {
+          // Tracker le timer pour pouvoir l'annuler si l'utilisateur ferme
+          // la modale dans l'intervalle (sinon snapshot tracking inutile).
+          if (state.confirmAdvanceTimer) clearTimeout(state.confirmAdvanceTimer);
+          state.confirmAdvanceTimer = setTimeout(function () {
+            state.confirmAdvanceTimer = null;
+            if (!state.open) return;
             answerCurrentQuestion(confirmSlug, confirmLabel);
           }, 700);
         });

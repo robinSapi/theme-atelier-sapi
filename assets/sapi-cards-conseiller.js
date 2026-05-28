@@ -310,6 +310,16 @@
   // À la fin, fondu de la signature "— Robin" via .is-typing-done.
   var signatureTimer = null;
 
+  // Timers de la chorégraphie revealSelectionGrid (phases C, D, E).
+  // Tracker module-level pour pouvoir tout annuler si render() est rappelé
+  // pendant la séquence (sinon les classes is-revealed se ré-appliquent
+  // sur d'anciennes refs DOM ou à des timings désynchronisés).
+  var revealTimers = [];
+  function clearRevealTimers() {
+    for (var i = 0; i < revealTimers.length; i++) clearTimeout(revealTimers[i]);
+    revealTimers.length = 0;
+  }
+
   function typewriterEffect(contentEl, phraseEl, text, perCharDelay) {
     if (signatureTimer) {
       clearTimeout(signatureTimer);
@@ -565,6 +575,9 @@
    * élément l'un après l'autre" plutôt qu'une apparition simultanée.
    */
   function revealSelectionGrid() {
+    // Annule les timers d'une éventuelle séquence en cours (render()
+    // rappelé pendant la chorégraphie → on repart proprement).
+    clearRevealTimers();
     // Phase B — chip-question : double rAF pour que le browser lise les
     // valeurs CSS avant la transition.
     if (els.inlineQuestion) {
@@ -576,24 +589,34 @@
     }
     // Phase C — slot grid : delay 600ms après le début de la phase B
     // pour que la question apparaisse d'abord, puis les cards.
+    // Quand la transition max-height termine, on retire la contrainte via
+    // .is-fully-revealed (max-height: none) — évite tout clip si une card
+    // dépasse la borne d'animation.
     if (els.selectionGrid) {
-      setTimeout(function () {
-        els.selectionGrid.classList.add('is-revealed');
-      }, 600);
+      revealTimers.push(setTimeout(function () {
+        var grid = els.selectionGrid;
+        grid.classList.add('is-revealed');
+        var onEnd = function (e) {
+          if (e.target !== grid || e.propertyName !== 'max-height') return;
+          grid.removeEventListener('transitionend', onEnd);
+          grid.classList.add('is-fully-revealed');
+        };
+        grid.addEventListener('transitionend', onEnd);
+      }, 600));
     }
     // Phase D — nav slider : 600ms après phase C (= +1200ms total) pour
     // arriver après que la cascade des cards soit visible.
     if (els.selectionNav) {
-      setTimeout(function () {
+      revealTimers.push(setTimeout(function () {
         els.selectionNav.classList.add('is-revealed');
-      }, 1200);
+      }, 1200));
     }
     // Phase E — lien Modifier : 600ms après phase D (= +1800ms total),
     // action secondaire qui apparaît en dernier.
     if (els.editLink) {
-      setTimeout(function () {
+      revealTimers.push(setTimeout(function () {
         els.editLink.classList.add('is-revealed');
-      }, 1800);
+      }, 1800));
     }
   }
 
