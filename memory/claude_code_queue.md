@@ -2,246 +2,83 @@
 
 ## 🔧 À faire
 
-## [TÂCHE] S28 — Phase 3 : refactor `sapi_get_product_photo_ids` en dual-read + params `$piece` / `$essence`
+## [TÂCHE] S28 — Phase 4a : investigation + proposition d'architecture du swap photos par pièce
 **Date :** 2026-05-28
 **Branche :** `feature/photos-par-piece`
-**Priorité :** haute — déverrouille Phase 4 (activation du swap surface par surface)
-**Mémoire de contexte** (côté Cowork) : `project_photos_par_piece.md` — relire AVANT toute action. État livré : Phases 0, 1, 2 sur test. 274 photos déjà migrées dans les 8 Gallery, repeater intact (dual-write).
-**Audit Phase 0** : `site-web/memory/audit_galerie_produit_callsites.md` — 17 appels indirects au helper, lecture indispensable pour préserver la rétrocompatibilité.
+**Priorité :** haute — bloquant pour Phase 4b (implémentation du swap)
+**Type :** INVESTIGATION + DOCUMENT DE RECO. **Ne PAS implémenter le swap dans cette phase** — uniquement lire le code et produire une reco d'architecture.
+**Mémoire de contexte** (Cowork) : `project_photos_par_piece.md` (règles de swap section "Règles de swap"). **Audit Phase 0** : `site-web/memory/audit_galerie_produit_callsites.md` (les 25 call-sites).
 
 ### Contexte
 
-Aujourd'hui, le helper canonique `sapi_get_product_photo_ids($post_id, $type, $limit)` lit **uniquement** le repeater `galerie_produit` (via `get_field('galerie_produit', $post_id)` + foreach sur `type_photo`). Les 17 call-sites indirects passent tous par ce helper, donc son refactor fait suivre 17 surfaces gratuitement.
+Phases 0-3 livrées. Le helper `sapi_get_product_photo_ids($post_id, $type, $limit, $piece, $essence)` est en dual-read avec filtres taxonomies (Phase 3). Il reste à **activer le swap** : afficher la photo de la pièce du visiteur au lieu de la photo par défaut, sur les bonnes surfaces.
 
-**Objectif Phase 3** : faire passer le helper en **mode dual-read** — lit en priorité les 8 Gallery ACF (nouvelle source de vérité depuis Phase 2), fallback sur le repeater si la Gallery cible est vide. **+** ajouter 2 paramètres optionnels `$piece` et `$essence` pour filtrer par taxonomies `media_room` / `media_essence`.
+**Le problème d'architecture à résoudre** : `sapiProject` (dont `sapiProject.answers.piece`) est stocké **uniquement en localStorage côté JS**. Il n'y a **aucun cookie PHP** actuellement. Le PHP côté serveur ne peut donc pas connaître la pièce du visiteur au moment du rendu.
 
-**Critique** : **rétrocompatibilité absolue**. Aucun call-site existant ne doit changer de comportement. Les 17 appels du type `sapi_get_product_photo_ids($id, 'ambiance', 1)` continuent de retourner exactement la même chose qu'avant — l'API du helper est strictement étendue (nouveaux params optionnels avec valeur par défaut), pas modifiée.
+Le pattern actuel du site = **PHP rend une version par défaut, JS adapte en live** (cf `sapi-hero-live.js`, `sapi-help-pill.js`, `sapi-cards-conseiller.js`).
 
-### Garde-fous absolus
+**Préférence Robin** : viser le **zéro flash** (idéalement rendu serveur direct), MAIS il accepte que tu explores et proposes la meilleure approche selon les contraintes réelles (cache, etc.).
 
-1. **Rétrocompatibilité stricte** : tous les call-sites existants (cf audit Phase 0) doivent continuer à fonctionner identiquement. Aucune modification de leur appel.
-2. **NE PAS toucher au repeater** `galerie_produit` — il reste lu en fallback. Aucun write dessus.
-3. **NE PAS modifier les 17 call-sites** dans cette phase (single-product.php, taxonomy-product_cat.php, archive-product.php, content-product.php, page-inspiration.php, page-la-star-du-moment.php, front-page.php, functions.php). C'est Phase 4 qui activera le swap surface par surface.
-4. **Préserver l'ordre** : les IDs retournés doivent rester dans l'ordre stocké (par Gallery, l'ordre est celui défini par Robin via drag & drop ACF).
-5. **Wrapper `sapi_get_product_photos`** (URLs version, functions.php:1073) doit aussi suivre. Il appelle déjà `sapi_get_product_photo_ids` en interne, donc gratuit si on garde le contrat.
-6. **Helper `sapi_get_acf_image_id`** (functions.php:1127) intact — il est agnostique du nom du champ, sera réutilisé pour la branche fallback repeater.
+### Mission Phase 4a — produire un document de reco
 
-### Périmètre — 4 chantiers
+**Fichier de sortie** : `site-web/memory/phase4-archi-swap-photos.md`
 
----
+Le document doit contenir :
 
-### Chantier 1 — Factoriser le mapping `type` → Gallery dans une fonction réutilisable
+**1. État des lieux du mécanisme `sapiProject` actuel**
+- Lire `assets/sapi-project.js` : comment `sapiProject` est stocké (clé localStorage exacte), lu, mis à jour, et quels events sont émis lors d'un changement
+- Lire `assets/sapi-hero-live.js`, `assets/sapi-cards-conseiller.js`, `assets/sapi-help-pill.js`, `assets/sapi-product-preselect.js` : comprendre le pattern de "swap live JS" existant (comment ils réagissent au changement de pièce, comment ils manipulent le DOM)
+- Documenter : y a-t-il déjà un event type `sapi:project-changed` que le JS écoute ?
 
-**Fichier** : `functions.php` (à côté de `sapi_get_product_photo_ids`)
+**2. Analyse des contraintes de cache (prod)**
+- Identifier les caches actifs en prod susceptibles d'impacter un rendu serveur par pièce : LiteSpeed LsCache, WP Super Cache, Autoptimize, Redis Object Cache (cf mémoire Cowork `reference_plugins_actifs`)
+- Question clé : si on optait pour un rendu serveur basé sur un cookie `sapi_piece`, est-ce que le cache de page servirait une version figée (cassant le swap) ? Le cache varie-t-il par cookie ?
+- Conclusion : le rendu serveur direct (zéro flash) est-il réellement viable sur cette infra, ou le cache l'empêche-t-il en pratique ?
 
-**Objectif** : éviter la duplication du mapping entre Phase 2 (page admin migration, dans `inc/sapi-migrate-galerie.php`) et Phase 3 (helper read).
+**3. Surfaces à swapper (rappel des règles de swap validées)**
+D'après `project_photos_par_piece` :
+- Cards `/mes-creations/` + cards page catégorie : photo principale = photo pièce si elle existe, sinon fallback ambiance par défaut
+- Fiche produit : positions 1 et 2 du carousel ambiance = photos pièce si elles existent, reste inchangé
+- Home : seul le produit featured/coup de cœur swap
+- Aucune autre surface ne swap
 
-**Action** :
+Pour chaque surface, indiquer le(s) call-site(s) concerné(s) (depuis l'audit Phase 0) et si c'est un appel via helper ou une lecture directe.
 
-```php
-/**
- * Mapping `type_photo` (string du repeater) → nom du champ Gallery ACF cible.
- * Source de vérité unique, partagée entre la migration (Phase 2) et le helper (Phase 3).
- *
- * @param string $type Type photo (ex: 'ambiance', 'detail', 'vue de dessous').
- *                     Tolère 'taille'/'tailles' et 'studio'/'packshot' pour les legacy.
- * @return string|null Nom du Gallery ACF (ex: 'galerie_ambiance') ou null si type inconnu.
- */
-function sapi_type_to_gallery_name($type) {
-    static $map = [
-        'ambiance'         => 'galerie_ambiance',
-        'detail'           => 'galerie_detail',
-        'vue de dessous'   => 'galerie_vue_de_dessous',
-        'taille'           => 'galerie_tailles',
-        'tailles'          => 'galerie_tailles',
-        'studio'           => 'galerie_packshot',
-        'packshot'         => 'galerie_packshot',
-        'fabrication'      => 'galerie_fabrication',
-        'client'           => 'galerie_client',
-        'accessoires'      => 'galerie_accessoires',
-    ];
-    $type = (string) $type;
-    return isset($map[$type]) ? $map[$type] : null;
-}
-```
+**4. Options d'architecture proposées (avec trade-offs)**
 
-**Bonus** : faire que `inc/sapi-migrate-galerie.php` (Phase 2) utilise désormais cette fonction (DRY). Si Claude Code juge le changement trop risqué (la migration est livrée et idempotente, on ne veut pas la casser), il peut **dupliquer** le mapping et laisser `sapi-migrate-galerie.php` avec son mapping local. Mentionner le choix dans le retour.
+Au minimum analyser :
 
----
+- **Option A — Cookie + rendu serveur direct (zéro flash)** : le JS écrit `sapiProject.answers.piece` dans un cookie `sapi_piece`, le PHP le lit (`$_COOKIE['sapi_piece']`) et passe `$piece` au helper au moment du rendu. Trade-offs : zéro flash, MAIS dépend de la compatibilité cache (point 2), et 1er chargement sans cookie = pas de swap (acceptable ?).
+- **Option B — Swap JS post-rendu (micro-flash)** : le PHP rend la photo par défaut, le JS lit le localStorage et remplace les `src` via data-attributes ou AJAX. Cohérent avec l'archi existante. Trade-offs : compatible cache, mais flash possible.
+- **Option C — Hybride** : data-attributes pré-rendus en PHP (toutes les variantes par pièce exposées dans le HTML) + JS qui pick la bonne sans AJAX. Zéro flash si le HTML contient déjà la bonne photo via CSS/JS instantané. Trade-offs à détailler.
+- Toute autre option pertinente que l'analyse révèle.
 
-### Chantier 2 — Refactor `sapi_get_product_photo_ids` en dual-read
+**5. Recommandation argumentée**
+- Quelle option Claude Code recommande, pourquoi, et comment elle concilie au mieux la préférence "zéro flash" de Robin avec les contraintes réelles
+- Le découpage suggéré de Phase 4b (ordre des surfaces, dépendances)
+- La gestion du **fallback** : si une pièce n'a pas de photo taguée pour un produit, le helper retourne `[]` avec le filtre `$piece` → il faut re-appeler sans filtre pour retomber sur l'ambiance par défaut. Où mettre cette logique (wrapper helper ? dans chaque call-site ?).
 
-**Fichier** : `functions.php:1042` (helper existant)
+### Garde-fous
 
-**Nouvelle signature** :
-
-```php
-/**
- * Récupère les IDs d'attachments d'un produit, filtré par type/pièce/essence.
- *
- * Mode dual-read (Phase 3 S28) :
- * 1. Lit en priorité les 8 Gallery ACF (galerie_ambiance, galerie_detail, etc.)
- * 2. Fallback sur le repeater galerie_produit si la Gallery cible est vide
- * 3. Filtre par taxonomies media_room (pièce) et media_essence (essence) si fournies
- *
- * @param int    $post_id  ID du produit
- * @param string $type     Type photo ('ambiance', 'detail', etc.) ou '' pour tous les types
- * @param int    $limit    Max N photos retournées (0 = sans limite)
- * @param string|null $piece   Slug taxonomie media_room (ex: 'salon') ou null pour pas de filtre
- * @param string|null $essence Slug taxonomie media_essence (ex: 'peuplier') ou null pour pas de filtre
- * @return int[] Array d'IDs d'attachments, ordre préservé
- */
-function sapi_get_product_photo_ids($post_id, $type = '', $limit = 0, $piece = null, $essence = null) {
-    // ... voir logique ci-dessous
-}
-```
-
-**Logique détaillée** :
-
-```php
-function sapi_get_product_photo_ids($post_id, $type = '', $limit = 0, $piece = null, $essence = null) {
-    if (!$post_id || !function_exists('get_field')) return [];
-
-    $ids = [];
-
-    if ($type === '') {
-        // Cas "tous les types" : on lit toutes les Gallery puis fallback repeater par type manquant
-        $all_types_ordered = ['ambiance', 'detail', 'vue de dessous', 'tailles', 'packshot', 'fabrication', 'client', 'accessoires'];
-        foreach ($all_types_ordered as $t) {
-            $ids = array_merge($ids, sapi_get_product_photo_ids($post_id, $t, 0, null, null));
-        }
-        $ids = array_values(array_unique($ids));
-    } else {
-        // Cas "type spécifique" : Gallery prioritaire, fallback repeater si vide
-        $gallery_name = sapi_type_to_gallery_name($type);
-
-        if ($gallery_name) {
-            $gallery_ids = get_field($gallery_name, $post_id);
-            if (!empty($gallery_ids) && is_array($gallery_ids)) {
-                $ids = array_map('intval', $gallery_ids);
-            }
-        }
-
-        // Fallback sur le repeater si Gallery vide
-        if (empty($ids)) {
-            $galerie = get_field('galerie_produit', $post_id);
-            if (!empty($galerie) && is_array($galerie)) {
-                foreach ($galerie as $row) {
-                    $row_type = isset($row['type_photo']) ? $row['type_photo'] : '';
-                    if (is_array($row_type)) $row_type = isset($row_type['value']) ? $row_type['value'] : '';
-                    if ($type && $row_type !== $type) continue;
-                    $id = sapi_get_acf_image_id(isset($row['image']) ? $row['image'] : null);
-                    if ($id) $ids[] = (int) $id;
-                }
-            }
-        }
-    }
-
-    // Filtre par taxonomie media_room (pièce) si fourni
-    if ($piece !== null && $piece !== '' && !empty($ids)) {
-        $ids = sapi_filter_attachment_ids_by_term($ids, 'media_room', $piece);
-    }
-
-    // Filtre par taxonomie media_essence (essence) si fourni
-    if ($essence !== null && $essence !== '' && !empty($ids)) {
-        $ids = sapi_filter_attachment_ids_by_term($ids, 'media_essence', $essence);
-    }
-
-    // Appliquer le limit
-    if ($limit > 0 && count($ids) > $limit) {
-        $ids = array_slice($ids, 0, $limit);
-    }
-
-    return $ids;
-}
-```
-
----
-
-### Chantier 3 — Helper de filtre par taxonomie
-
-**Fichier** : `functions.php` (à côté de `sapi_get_product_photo_ids`)
-
-**Action** :
-
-```php
-/**
- * Filtre une liste d'IDs d'attachments par un slug de terme dans une taxonomie donnée.
- * Préserve l'ordre des IDs en entrée.
- *
- * @param int[]  $attachment_ids IDs d'attachments à filtrer
- * @param string $taxonomy       'media_room' ou 'media_essence'
- * @param string $term_slug      Slug du terme (ex: 'salon', 'peuplier')
- * @return int[] IDs filtrés (preserve l'ordre d'entrée)
- */
-function sapi_filter_attachment_ids_by_term($attachment_ids, $taxonomy, $term_slug) {
-    if (empty($attachment_ids) || !$taxonomy || !$term_slug) return [];
-
-    $term = get_term_by('slug', $term_slug, $taxonomy);
-    if (!$term || is_wp_error($term)) return [];
-    $term_id = (int) $term->term_id;
-
-    // Optimisation : récupérer en une seule requête tous les attachments du term
-    $tagged_ids = get_objects_in_term($term_id, $taxonomy);
-    if (is_wp_error($tagged_ids) || empty($tagged_ids)) return [];
-    $tagged_ids = array_map('intval', $tagged_ids);
-    $tagged_set = array_flip($tagged_ids);
-
-    // Intersect en préservant l'ordre d'entrée
-    $filtered = [];
-    foreach ($attachment_ids as $id) {
-        $id = (int) $id;
-        if (isset($tagged_set[$id])) {
-            $filtered[] = $id;
-        }
-    }
-    return $filtered;
-}
-```
-
-**Note** : `get_objects_in_term()` est plus performant que de faire `wp_get_object_terms` sur chaque ID dans une boucle. Une seule requête DB par taxonomie.
-
----
-
-### Chantier 4 — Tests de non-régression (rapport texte dans le retour)
-
-Sur la branche `feature/photos-par-piece` déployée sur test, vérifier manuellement (sans modifier le code) que les fonctions de rendu existantes continuent à marcher :
-
-1. **`/mes-creations/`** : ouvrir la page sur test, vérifier que les cards produits ont bien leurs photos d'ambiance affichées (= helper appelé via `sapi_get_product_photo_ids($id, 'ambiance', 1)` → maintenant lit la Gallery au lieu du repeater)
-2. **Fiche produit** (ex: Olivia La gardiena #5035) : ouvrir, vérifier que la galerie principale, les thumbnails et le slideshow ambiance fonctionnent (= 3 lectures directes du repeater dans single-product.php — ces 3 NE PASSENT PAS par le helper, donc elles utilisent toujours le repeater, c'est OK)
-3. **Page catégorie** (ex: `/categorie-produit/suspensions/`) : vérifier hero carousel ambiance/detail + background fabrication
-4. **Home** : vérifier carousel ambiance + star du moment + featured products + section collections
-
-**Si tout marche identiquement sur test** → Phase 3 est validée. Phase 4 pourra alors activer le swap en passant `$piece` aux call-sites surface par surface.
-
-Inclure dans le retour côté queue les screenshots ou un descriptif texte de ce qui a été vérifié.
+1. **AUCUNE implémentation du swap** — Phase 4a est lecture + rédaction du doc uniquement. Pas de modif des call-sites, pas de nouveau JS de swap, pas de cookie créé.
+2. Le seul fichier créé/modifié = `site-web/memory/phase4-archi-swap-photos.md`.
+3. Ne pas modifier le helper (Phase 3 est figée et validée).
 
 ### Critères de succès
 
-- [ ] **Chantier 1** : `sapi_type_to_gallery_name($type)` existe dans `functions.php`, retourne le bon nom Gallery ou `null` pour les types inconnus
-- [ ] **Chantier 2** : `sapi_get_product_photo_ids` signature étendue (5 params au lieu de 3) avec defaults rétro-compatibles
-- [ ] Helper en mode dual-read : Gallery prioritaire, fallback repeater par type
-- [ ] Cas `$type = ''` (tous types) : concatène les 8 Gallery dans l'ordre, dédoublonne
-- [ ] **Chantier 3** : `sapi_filter_attachment_ids_by_term` existe, optimisé via `get_objects_in_term`
-- [ ] `$piece` et `$essence` filtrent correctement (tester avec Robin qui aura tagué quelques photos)
-- [ ] `$limit` appliqué APRÈS les filtres taxonomies (pour que le filtrage ne réduise pas le pool avant troncature)
-- [ ] **Chantier 4** : test de non-régression manuel sur test — toutes les surfaces front affichent les photos identiquement à avant
-- [ ] Le repeater `galerie_produit` reste intact (zéro write)
-- [ ] Les 17 call-sites existants ne sont PAS modifiés dans cette phase
-- [ ] `sapi_get_product_photos` (wrapper URLs) suit l'évolution gratuitement (vérifier qu'il marche encore)
-- [ ] PHPDoc à jour sur les 3 fonctions
+- [ ] Fichier `site-web/memory/phase4-archi-swap-photos.md` créé et commité
+- [ ] État des lieux `sapiProject` documenté (clé localStorage, events, pattern swap JS existant)
+- [ ] Analyse cache prod : verdict sur la viabilité du rendu serveur direct
+- [ ] Surfaces à swapper listées avec call-sites associés
+- [ ] Au moins 3 options d'architecture avec trade-offs concrets
+- [ ] Recommandation argumentée + découpage Phase 4b proposé
+- [ ] Gestion du fallback (pièce sans photo) traitée
+- [ ] Aucune modification de code (vérif : `git diff` ne montre que le nouveau .md)
+- [ ] Push auto sur `feature/photos-par-piece` (cf [[feedback_claude_code_push_test]])
 
 ### Notes pour le retour
 
-Dans le retour côté queue (section `## ✅ Livré`) :
-- Hash des commits livrés (idéalement 3 commits séparés : factorisation mapping, refactor helper, helper filtre taxonomie)
-- Résultat des tests de non-régression sur test (liste des surfaces vérifiées + verdict OK/KO)
-- Si le chantier 1 bonus (factoriser dans sapi-migrate-galerie.php) a été fait ou pas, avec justification
-- Push automatique sur `feature/photos-par-piece` (cf [[feedback_claude_code_push_test]])
-
-### Suite (hors scope Phase 3, pour information)
-
-Phase 4 = activation du swap surface par surface. On modifiera les 17 call-sites un par un pour passer `$piece = sapi_get_visitor_piece()` (qui lit `sapiProject.piece` côté JS hydratée en PHP). Surfaces dans l'ordre : `/mes-creations/` → pages catégorie → fiche produit (positions 1 et 2 du carousel ambiance) → home (featured uniquement). Cf règles de swap dans `project_photos_par_piece`.
+Dans le retour côté queue : résumé de la reco (3-5 bullets), l'option recommandée, et les 2-3 décisions que Robin devra trancher avant Phase 4b.
 
 ---
 
@@ -469,6 +306,63 @@ Au retour, indiquer pour chaque chantier :
 ---
 
 ## ✅ Livré
+
+## [RETOUR] S28 Phase 4a — Investigation + document d'architecture du swap photos par pièce
+**Date livrée :** 2026-05-28
+**Branche :** `feature/photos-par-piece` (2 commits ajoutés et **poussés** sur origin)
+**Livrable :** `site-web/memory/phase4-archi-swap-photos.md` (403 lignes, 8 sections)
+**Type :** doc only — aucune modification PHP/JS/CSS (vérifié `git diff` = 0 fichier de code)
+
+### Commits livrés
+
+| # | Hash | Objet |
+|---|------|-------|
+| 1 | `bde4345` | Document `memory/phase4-archi-swap-photos.md` (la reco) |
+| 2 | (ce commit) | Retour Cowork dans `claude_code_queue.md` |
+
+### Résumé de la reco (5 bullets)
+
+- **`sapiProject` est 100 % côté JS / localStorage** (clé : `sapiProject`). Aucun cookie n'existe aujourd'hui — le PHP côté serveur ne peut pas connaître la pièce au rendu. Pattern de notification = `subscribe(callback)` ; pas d'event DOM custom à inventer.
+- **Cache prod (LSCache O2switch + WP Super Cache + Autoptimize)** : aucune config vary-cookie en place. Un rendu serveur direct via cookie servirait une version cached figée → **rendu serveur direct non viable sans investissement infra non trivial** (vary cookie / exclusion cache / ESI).
+- **4 surfaces seulement à swapper** (sur les 17 indirects de l'audit) : cards `/mes-creations/`, cards page catégorie (hover), positions 1+2 du carousel ambiance fiche produit, home featured. Le périmètre est plus petit qu'attendu — moins de risque de régression.
+- **Pattern de swap recommandé** : `subscribe(fn)` + nouveau module `sapi-photo-swap.js` qui swap `img.src` via AJAX batché (1 appel pour toutes les cards de la page). Cohérent avec `sapi-hero-live.js` / `sapi-help-pill.js`. Aucune config infra requise.
+- **Gestion du fallback (pièce sans photo taguée)** : wrapper auto-fallback `sapi_get_product_photo_ids_with_fallback($id, $type, $limit, $piece, $essence)` qui retombe sur le défaut si le helper canonique avec filtre retourne `[]`. Le helper canonique reste sémantiquement strict.
+
+### Option d'architecture recommandée
+
+**Option B — Swap JS post-rendu via AJAX (compatible cache)**
+
+Pourquoi B et pas A/C/D :
+- Pas de config infra (compatible cache prod en l'état)
+- Pattern cohérent avec `sapi-hero-live.js`, `sapi-help-pill.js`, `sapi-cards-conseiller.js`
+- Périmètre maîtrisé : ~150-200 lignes total (1 nouveau JS + 1 handler AJAX + 4 modifs ciblées)
+- Réversible : si le micro-flash devient gênant, migration vers Option C (data-attributes pré-rendus) sans refactor majeur
+
+Compromis assumé : **~50-200 ms de micro-flash** sur premier load avec projet existant. Imperceptible sur un swap d'image (pas de layout shift).
+
+### Décisions à trancher par Robin avant Phase 4b
+
+1. **Niveau de flash acceptable** : Option B (micro-flash 50-200 ms compatible cache) vs Option D (zéro flash mais investissement infra LSCache vary-cookie ou ESI) ?
+   → Reco Claude Code : **B**.
+
+2. **Stratégie de fallback** : auto-fallback dans un wrapper helper (F1, reco), ou fallback explicite dans chaque call-site (F2) ?
+   → Reco Claude Code : **F1**. Centralisé, le helper canonique `sapi_get_product_photo_ids` reste strict.
+
+3. **Refactor partiel de `single-product.php:104`** (lecture directe du repeater) pour activer le swap sur positions 1+2 du carousel ambiance ?
+   → Reco Claude Code : **oui, refactor**. ~20 lignes localisées. Sinon le swap ne couvre que 3/4 des surfaces et l'effet "personnalisation" est incomplet sur la fiche produit (surface la plus engageante).
+
+### Suite
+
+Une fois ces 3 décisions tranchées, Phase 4b s'attaque à 5 chantiers (cf. doc §5.2) :
+1. Infra JS + handler AJAX + wrapper helper auto-fallback
+2. Activation `/mes-creations/`
+3. Activation cards page catégorie
+4. Activation home featured
+5. Activation fiche produit positions 1+2 (chantier le plus délicat)
+
+Le détail complet est dans `memory/phase4-archi-swap-photos.md` (lecture indispensable pour Phase 4b).
+
+---
 
 ## [RETOUR] S28 Phase 3 — Refactor `sapi_get_product_photo_ids` en dual-read + params `$piece` / `$essence`
 **Date livrée :** 2026-05-28
