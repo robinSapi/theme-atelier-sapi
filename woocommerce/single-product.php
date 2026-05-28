@@ -171,6 +171,9 @@ get_header();
   // ── Slideshow ambiance : photos ACF filtrées par type ──
   $slideshow_types = ['ambiance', 'vue de dessous', 'detail', 'fabrication'];
   $slideshow_photos = [];
+  // S28 Phase 4b : track des indices slides "ambiance" pour cibler les
+  // positions 1+2 du carousel — celles que le JS swap selon la pièce.
+  $slideshow_ambiance_indices = [];
   if (function_exists('get_field')) {
     $galerie_repeater_ss = get_field('galerie_produit');
     if (!empty($galerie_repeater_ss) && is_array($galerie_repeater_ss)) {
@@ -184,10 +187,19 @@ get_header();
           $img_id = sapi_get_acf_image_id($img_field);
           if ($img_id) {
             $slideshow_photos[] = $img_id;
+            if ($ss_type === 'ambiance' && count($slideshow_ambiance_indices) < 2) {
+              $slideshow_ambiance_indices[] = count($slideshow_photos) - 1;
+            }
           }
         }
       }
     }
+  }
+  // Map index_slide → position_swap (1 ou 2). Présent uniquement pour les
+  // 2 premiers slides ambiance — ceux que le JS swap par pièce.
+  $slideshow_swap_position = [];
+  foreach ($slideshow_ambiance_indices as $pos0 => $slide_idx) {
+    $slideshow_swap_position[$slide_idx] = $pos0 + 1; // 1-indexed
   }
   ?>
 
@@ -195,9 +207,16 @@ get_header();
   <div class="product-intro-wrapper">
   <div class="product-slideshow" id="product-slideshow">
     <div class="product-slideshow-track">
-      <?php foreach ($slideshow_photos as $ss_index => $ss_img_id) : ?>
+      <?php foreach ($slideshow_photos as $ss_index => $ss_img_id) :
+        $ss_attrs = ['class' => 'product-slideshow-img', 'alt' => get_the_title() . ' - photo ' . ($ss_index + 1)];
+        if (isset($slideshow_swap_position[$ss_index])) {
+          // S28 Phase 4b — slide swappable par pièce (positions 1 ou 2 ambiance)
+          $ss_attrs['data-piece-swap-slide'] = (string) $slideshow_swap_position[$ss_index];
+          $ss_attrs['data-product-id']       = (string) get_the_ID();
+        }
+        ?>
       <div class="product-slideshow-slide<?php echo $ss_index === 0 ? ' is-active' : ''; ?>">
-        <?php echo wp_get_attachment_image($ss_img_id, 'full', false, ['class' => 'product-slideshow-img', 'alt' => get_the_title() . ' - photo ' . ($ss_index + 1)]); ?>
+        <?php echo wp_get_attachment_image($ss_img_id, 'full', false, $ss_attrs); ?>
       </div>
       <?php endforeach; ?>
     </div>
