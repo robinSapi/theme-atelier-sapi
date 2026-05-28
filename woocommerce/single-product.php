@@ -100,27 +100,40 @@ get_header();
     'fabrication' => 'Fabrication',
   ];
 
-  if (function_exists('get_field')) {
-    $galerie_repeater = get_field('galerie_produit');
-    if (!empty($galerie_repeater) && is_array($galerie_repeater)) {
-      foreach ($galerie_repeater as $row) {
-        $img_field = isset($row['image']) ? $row['image'] : null;
-        $img_id = sapi_get_acf_image_id($img_field);
-        $url = $img_id ? wp_get_attachment_image_url($img_id, 'full') : '';
-        if ($url) {
-          $type = isset($row['type_photo']) ? $row['type_photo'] : 'ambiance';
-          if (is_array($type)) $type = isset($type['value']) ? $type['value'] : 'ambiance';
-          if ($type === 'client') continue; // Photos client exclues de la galerie
-          $acf_photos[] = ['url' => $url, 'label' => isset($type_labels[$type]) ? $type_labels[$type] : ucfirst($type), 'id' => $img_id];
-        }
+  // S28 Phase 6a — lecture via helper Phase 3 (dual-read Gallery → repeater).
+  // Plus de lecture directe de get_field('galerie_produit'). Le helper fait
+  // automatiquement le fallback sur le repeater si la Gallery cible est vide.
+  // Ordre fixé (avant : ordre du repeater, mélangé via drag&drop ACF Robin)
+  // : groupé par type dans cet ordre. 'client' reste exclu de la galerie
+  // principale (réservé aux photos témoignages, non lightbox).
+  $main_gallery_order = [
+    'ambiance'       => 'Ambiance',
+    'detail'         => 'Détail',
+    'vue de dessous' => 'Vue de dessous',
+    'tailles'        => 'Tailles',
+    'packshot'       => 'Packshot',
+    'fabrication'    => 'Fabrication',
+    'accessoires'    => 'Accessoires',
+  ];
+  // Types legacy à merger avec leur canonique pour couvrir le cas
+  // "prod avant migration Phase 2" (repeater taggé 'taille'/'studio' singulier).
+  // Le helper Phase 3 a un fallback STRICT (row_type !== $type), donc sans
+  // ce merge, des photos legacy seraient perdues si la Gallery est vide.
+  $legacy_aliases = [
+    'tailles'  => ['taille'],
+    'packshot' => ['studio'],
+  ];
+  foreach ($main_gallery_order as $type => $label) {
+    $type_ids = sapi_get_product_photo_ids(get_the_ID(), $type, 0);
+    if (isset($legacy_aliases[$type])) {
+      foreach ($legacy_aliases[$type] as $legacy_type) {
+        $type_ids = array_merge($type_ids, sapi_get_product_photo_ids(get_the_ID(), $legacy_type, 0));
       }
-    } else {
-      // Fallback: use helper which reads old fixed fields
-      $all_photo_ids = sapi_get_product_photo_ids(get_the_ID());
-      foreach ($all_photo_ids as $photo_id) {
-        $photo_url = wp_get_attachment_image_url($photo_id, 'full');
-        if ($photo_url) $acf_photos[] = ['url' => $photo_url, 'label' => 'Photo', 'id' => $photo_id];
-      }
+      $type_ids = array_values(array_unique($type_ids));
+    }
+    foreach ($type_ids as $img_id) {
+      $url = wp_get_attachment_image_url($img_id, 'full');
+      if ($url) $acf_photos[] = ['url' => $url, 'label' => $label, 'id' => $img_id];
     }
   }
 
