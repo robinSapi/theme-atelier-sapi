@@ -1230,25 +1230,22 @@ get_header();
       goToSlide(0);
       timer = setTimeout(nextSlide, slideDuration);
 
-      // Desktop : pause + masque barres quand les cards hero recouvrent le slideshow
+      // Desktop : masque les barres quand les cards hero recouvrent le slideshow
+      // (le slideshow continue de tourner en arrière-plan)
       if (window.innerWidth > 600) {
         var barsEl = slideshow.querySelector('.product-slideshow-bars');
         var heroEl = document.querySelector('.product-hero-v2');
-        var isPaused = false;
+        var barsHidden = false;
 
         if (heroEl) {
-          // Le hero a margin-top: -15vh donc il intersecte toujours un peu.
-          // On pause quand >25% du hero est visible (= scroll réel au-delà du chevauchement initial).
           var scrollObserver = new IntersectionObserver(function(entries) {
             var ratio = entries[0].intersectionRatio;
-            if (ratio >= 0.25 && !isPaused) {
-              isPaused = true;
-              clearTimeout(timer);
+            if (ratio >= 0.25 && !barsHidden) {
+              barsHidden = true;
               if (barsEl) barsEl.style.opacity = '0';
-            } else if (ratio < 0.25 && isPaused) {
-              isPaused = false;
+            } else if (ratio < 0.25 && barsHidden) {
+              barsHidden = false;
               if (barsEl) barsEl.style.opacity = '';
-              timer = setTimeout(nextSlide, slideDuration);
             }
           }, { threshold: [0.25] });
 
