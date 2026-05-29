@@ -2,61 +2,67 @@
 
 ## 🔧 À faire
 
-## [TÂCHE] S28 — Phase 6a : câbler les 3 lectures directes de `single-product.php` vers les Gallery (non destructif)
+## [TÂCHE] S28 — Phase 6b-1 : retirer le fallback repeater du helper `sapi_get_product_photo_ids`
 **Date :** 2026-05-28
 **Branche :** `feature/photos-par-piece`
-**Priorité :** haute — finalise la bascule technique vers les Gallery (dernier code avant déploiement prod 3+4+6a)
-**Mémoire de contexte** (Cowork) : `project_photos_par_piece.md`. **Audit Phase 0** : `site-web/memory/audit_galerie_produit_callsites.md` (extraits #5, #6, #7 = les 3 lectures concernées).
+**Priorité :** haute — permet de tester le système en conditions réelles (sans le filet qui masque les trous)
+**Mémoire de contexte** (Cowork) : `project_photos_par_piece.md`.
 
 ### Contexte
 
-`single-product.php` est le **seul fichier** qui lit encore DIRECTEMENT le repeater `galerie_produit` (3 lectures, ne passent pas par le helper Phase 3). Il faut les câbler vers les Gallery pour que la fiche produit cesse de dépendre du repeater.
+Tout le code S28 (Phases 1-4 + 6a) est en prod. Le helper `sapi_get_product_photo_ids` (Phase 3) lit les Gallery en priorité MAIS retombe sur le repeater `galerie_produit` si une Gallery est vide (dual-read). Ce fallback **masque** les éventuels trous des Gallery : on ne sait jamais si une photo affichée vient des Gallery (nouveau système) ou du repeater (ancien filet).
 
-**Non destructif** : on GARDE le repeater (il reste le fallback du helper dual-read Phase 3). On change uniquement la SOURCE de lecture de ces 3 blocs : `get_field('galerie_produit')` + foreach → appels au helper `sapi_get_product_photo_ids()` (qui fait déjà le dual-read Gallery→repeater).
+**Objectif 6b-1** : retirer la branche fallback repeater pour que le helper lise **exclusivement les Gallery**. À partir de là, si une Gallery est mal remplie, le trou est visible immédiatement (au lieu d'être masqué). C'est ce qui permet de valider que les Gallery se suffisent à elles-mêmes.
 
-**Les 3 lectures** (lignes approximatives, à reconfirmer) :
-- **L104 — Galerie principale** (`$acf_photos[]`) : actuellement lit toutes les rows du repeater SAUF `client`, avec un **label humain par type**. Garde un `['url', 'label', 'id']` par photo.
-- **L135 — Thumbnails** (`$gallery_acf_photos[]`) : 1re photo `ambiance` + toutes les `taille`/`tailles` + toutes les `accessoires`.
-- **L178 — Slideshow** (`$slideshow_photos[]`) : ordre imposé `['ambiance', 'vue de dessous', 'detail', 'fabrication']`.
+**Réversible** : c'est un retrait de code. Si ça révèle un problème, `git revert` remet le fallback.
 
-### Garde-fous absolus
+### ⚠️ DISTINCTION CRITIQUE — deux fallbacks différents dans le code
 
-1. **Reproduire EXACTEMENT le comportement visuel actuel** sur la fiche produit. Les mêmes photos, autant que possible le même ordre. Avant de coder, lire les 3 blocs en détail (single-product.php L~100-195) pour comprendre la logique exacte (exclusions, labels, ordres, doublons).
-2. **NON DESTRUCTIF** : ne PAS toucher au repeater `galerie_produit` (ni write, ni suppression). On le garde comme fallback.
-3. **Utiliser le helper Phase 3** `sapi_get_product_photo_ids($id, $type, $limit)` pour les lectures (il fait le dual-read Gallery→repeater automatiquement). Ne PAS réécrire de `get_field('galerie_produit')` direct.
-4. **Ne PAS casser le swap Phase 4b** : la fiche produit a déjà des `data-*` pour le swap JS des positions 1+2 du carousel ambiance (commit `9cd7593`). Le câblage 6a doit rester compatible avec ce swap (vérifier que les attributs data restent en place et cohérents).
-5. **Changement d'ordre à signaler** : la galerie principale (L104) lisait l'ordre "mélangé" du repeater. Après migration Phase 2, les photos sont réparties par type dans les Gallery → l'ordre sera désormais **groupé par type** (toutes les ambiances, puis détails, etc.). C'est inévitable (l'ordre mélangé original n'existe plus dans les Gallery). **Signaler ce changement dans le retour** et proposer un ordre de concaténation des types qui soit le plus naturel (suggestion : ambiance → detail → vue de dessous → tailles → packshot → fabrication → accessoires, client exclu).
+Il y a **deux** fallbacks, il ne faut toucher QU'À UN SEUL :
 
-### Périmètre — 3 sous-chantiers (1 commit chacun idéalement)
+- ❌ **À RETIRER** : le fallback **repeater** dans `sapi_get_product_photo_ids` (functions.php). C'est le bloc `if (empty($ids)) { $galerie = get_field('galerie_produit', $post_id); ... foreach ... }` qui lit le repeater quand la Gallery est vide.
+- ✅ **À GARDER ABSOLUMENT** : le fallback **F1** dans `sapi_get_product_photo_ids_with_fallback` (Phase 4b). Celui-ci gère "pièce sans photo taguée → photo par défaut". Il n'a RIEN à voir avec le repeater. NE PAS le toucher.
 
-1. **Galerie principale (L104)** : remplacer la lecture repeater par une concaténation des Gallery par type (tous sauf `client`), en conservant le label humain par type. Réutiliser le mapping de labels existant (`$type_labels` dans le fichier actuel).
-2. **Thumbnails (L135)** : `sapi_get_product_photo_ids($id, 'ambiance', 1)` + `sapi_get_product_photo_ids($id, 'tailles')` + `sapi_get_product_photo_ids($id, 'accessoires')`. Attention à la tolérance `taille`/`tailles` (le mapping Phase 3 gère les deux → utiliser `'tailles'` qui est le slug Gallery cible).
-3. **Slideshow (L178)** : concaténer `sapi_get_product_photo_ids($id, $type, 0)` pour `$type` dans `['ambiance', 'vue de dessous', 'detail', 'fabrication']`, dans cet ordre.
+### Périmètre
+
+**Fichier** : `functions.php`, fonction `sapi_get_product_photo_ids`.
+
+**Action** : supprimer la branche de fallback qui lit `get_field('galerie_produit', $post_id)`. Après modification, le helper :
+1. Lit le(s) Gallery ACF correspondant(s) au type
+2. Si vide → retourne `[]` (PLUS de fallback repeater)
+3. Applique les filtres taxonomies (`$piece`, `$essence`) et le `$limit` comme avant
+
+Le cas `$type = ''` (tous types) doit continuer à concaténer les 8 Gallery (sans fallback repeater).
+
+### Garde-fous
+
+1. **NE PAS toucher** au wrapper `sapi_get_product_photo_ids_with_fallback` (fallback F1, sans rapport).
+2. **NE PAS toucher** au repeater lui-même (champ ACF + données) — Robin le supprimera manuellement APRÈS déploiement prod de 6b-1.
+3. **NE PAS toucher** à `inc/sapi-migrate-galerie.php` (la page de migration lit le repeater volontairement — elle deviendra obsolète après suppression du champ, on la nettoiera en cleanup final séparé).
+4. **Vérifier** qu'après 6b-1, plus AUCUNE lecture active de `galerie_produit` ne subsiste dans le code de rendu (helper + templates). Grep `get_field.*galerie_produit` : ne doit rester que la page de migration (admin, hors rendu) et d'éventuels commentaires.
 
 ### Critères de succès
 
-- [ ] Les 3 lectures de `single-product.php` passent par le helper `sapi_get_product_photo_ids` (plus aucun `get_field('galerie_produit')` direct dans ce fichier)
-- [ ] La fiche produit affiche les mêmes photos qu'avant (vérif visuelle sur test : galerie principale, thumbnails, slideshow)
-- [ ] Le swap Phase 4b (positions 1+2 ambiance) fonctionne toujours
-- [ ] Repeater `galerie_produit` intact (zéro write, zéro suppression)
-- [ ] Helper canonique Phase 3 intact
-- [ ] Changement d'ordre de la galerie principale (groupé par type) documenté dans le retour
-- [ ] `grep galerie_produit woocommerce/single-product.php` ne retourne plus que d'éventuels commentaires (zéro `get_field` actif)
-- [ ] Commits séparés par sous-chantier
+- [ ] Le bloc fallback repeater est retiré de `sapi_get_product_photo_ids`
+- [ ] Le helper retourne `[]` si la Gallery cible est vide (plus de fallback)
+- [ ] Le wrapper F1 (`sapi_get_product_photo_ids_with_fallback`) est intact
+- [ ] La page de migration `inc/sapi-migrate-galerie.php` est intacte
+- [ ] Grep `get_field.*galerie_produit` dans le code de rendu (functions.php hors page migration, woocommerce/*, front-page.php, page-*.php) = 0 résultat actif
+- [ ] Test sur test : toutes les surfaces affichent leurs photos depuis les Gallery uniquement (si un trou apparaît sur un produit, c'est une Gallery mal remplie à corriger — le signaler)
 - [ ] Push auto sur `feature/photos-par-piece` (cf [[feedback_claude_code_push_test]])
 
 ### Notes pour le retour
 
-- Hash des commits
-- Confirmer que la fiche produit est visuellement identique (hors changement d'ordre galerie principale, à décrire)
-- Protocole de test pour Robin (quelles fiches produit ouvrir, quoi vérifier)
-- Après validation de 6a sur test → on déploiera Phase 3+4+6a en prod d'un coup
+- Hash du commit
+- Confirmer que le fallback F1 et la page de migration sont intacts
+- Résultat du grep `galerie_produit` (ce qui reste = page migration + commentaires uniquement)
+- Protocole de test pour Robin : ouvrir plusieurs surfaces sur test et vérifier qu'aucune photo ne manque (si trou → Gallery à compléter)
+- Rappeler à Robin : après validation test + déploiement prod de 6b-1, IL pourra supprimer le champ ACF `galerie_produit` manuellement (6b-2)
 
-### Suite (hors scope 6a)
+### Suite
 
-- **Déploiement prod** de tout le paquet (3+4+6a) : merge master + workflow Deploy to Production
-- **Phase 5** : tagging massif (Robin)
-- **6b** : suppression du repeater (après soak time prod) — c'est là que le helper Phase 3 perdra son fallback repeater et que le champ ACF sera supprimé
+- **6b-2 (Robin)** : supprimer le champ ACF `galerie_produit` (définition) sur test + prod, APRÈS déploiement prod de 6b-1. Les données meta restent en DB (orphelines, récupérables).
+- **Cleanup final (plus tard)** : retirer la page de migration `inc/sapi-migrate-galerie.php` (devenue inutile) + éventuellement purger les données meta orphelines via SQL (irréversible, après long soak).
 
 ---
 
@@ -284,6 +290,112 @@ Au retour, indiquer pour chaque chantier :
 ---
 
 ## ✅ Livré
+
+## [RETOUR] S28 Phase 6b-1 — Retrait du fallback repeater dans `sapi_get_product_photo_ids`
+**Date livrée :** 2026-05-29
+**Branche :** `feature/photos-par-piece` (1 commit code + 1 commit retour, **poussés** sur origin — GHA en cours de déploiement sur test)
+**Périmètre :** un seul fichier modifié — `functions.php`, helper `sapi_get_product_photo_ids` uniquement.
+
+### Commit livré
+
+| # | Hash | Action |
+|---|------|--------|
+| 1 | `b51797b` | Retrait du bloc fallback repeater + mise à jour du docblock/commentaires |
+
+**Stat :** `functions.php` +10 / −27 lignes. Net = −17 (simplification).
+
+### Détail du retrait
+
+- **Bloc retiré** (branche `else` du helper, ex-lignes 1116-1128) :
+  ```php
+  // Fallback repeater si Gallery vide (ou type non mappé).
+  if (empty($ids)) {
+    $galerie = get_field('galerie_produit', $post_id);
+    if (!empty($galerie) && is_array($galerie)) {
+      foreach ($galerie as $row) {
+        $row_type = isset($row['type_photo']) ? $row['type_photo'] : '';
+        if (is_array($row_type)) $row_type = isset($row_type['value']) ? $row_type['value'] : '';
+        if ($row_type !== $type) continue;
+        $id = sapi_get_acf_image_id(isset($row['image']) ? $row['image'] : null);
+        if ($id) $ids[] = (int) $id;
+      }
+    }
+  }
+  ```
+- **Commentaires/docblock** mis à jour : plus aucune mention de "dual-read" ou "fallback repeater". Le helper est désormais documenté comme "lit exclusivement les 8 Gallery ACF".
+- **Branche `if ($type === '')`** : non touchée (concaténation des 8 Gallery via récursion). La récursion s'appuyait déjà sur la branche else qui retombe sur le repeater type-par-type — désormais, si la Gallery cible est vide, ce type ne contribue rien, comme attendu.
+
+### Garde-fous respectés (tous ✅)
+
+- **Wrapper F1 `sapi_get_product_photo_ids_with_fallback` (Phase 4b)** : **INTACT**. Aucune ligne touchée. Il continue à gérer "pièce sans photo → photo par défaut" via 3 tentatives en cascade (filtre complet → sans essence → sans piece). Sans rapport avec le fallback repeater retiré.
+- **Page de migration `inc/sapi-migrate-galerie.php`** : **INTACTE**. `git diff inc/sapi-migrate-galerie.php` = 0 ligne modifiée. Continue de lire le repeater volontairement (c'est son rôle).
+- **Champ et données ACF `galerie_produit`** : **INTACTS**. Aucun write, aucune suppression. Robin pourra supprimer le champ manuellement (Phase 6b-2) après validation de 6b-1 sur prod.
+- **`sapi_iterate_product_photos`** (helper bas niveau Phase 2 chantier 3, functions.php:1339) : intact aussi. Utilisé uniquement par la page de migration — c'est de l'infra migration, pas du rendu.
+
+### Résultat du grep `get_field.*galerie_produit` dans tout le repo
+
+```
+$ grep -rn "get_field.*galerie_produit" --include="*.php" .
+inc/sapi-migrate-galerie.php       — (multiples : page de migration, hors rendu) ✅ attendu
+functions.php:1341                  — sapi_iterate_product_photos (infra migration) ✅ attendu
+woocommerce/single-product.php:95   — UNIQUEMENT un commentaire (référence doc) ✅ attendu
+page-inspiration.php:30             — lecture directe résiduelle hors scope 6b-1 ⚠ à signaler
+```
+
+**Plus AUCUNE lecture active du repeater dans le helper canonique.** Tout le code de rendu qui passe par `sapi_get_product_photo_ids` (les 17 call-sites de l'audit Phase 0 + les 3 lectures de `single-product.php` câblées en Phase 6a) lit désormais EXCLUSIVEMENT les Gallery.
+
+### Cas résiduel à signaler — `page-inspiration.php:30`
+
+`page-inspiration.php` (template page Inspiration) lit toujours directement le repeater :
+```php
+$galerie = get_field('galerie_produit', $product_id);
+```
+Cette lecture est dans **du code de rendu**, donc le grep ci-dessus n'est PAS strictement "0 actif". Mais elle est **hors scope strict** du brief Phase 6b-1 qui ciblait uniquement `sapi_get_product_photo_ids`. Documenté dans le retour Phase 6a comme "à traiter en Phase 6b si Robin veut 100% sans `get_field('galerie_produit')` dans le rendu".
+
+**Conséquence** : si Robin supprime le champ ACF `galerie_produit` (étape 6b-2) sans avoir refactoré `page-inspiration.php`, la page Inspiration affichera 0 photo. **Recommandation** : refactor `page-inspiration.php` avant suppression du champ ACF. C'est un travail de ~20 lignes (utiliser `sapi_iterate_product_photos` ou des appels au helper Phase 3 par type, comme single-product.php Phase 6a).
+
+### Protocole de test pour Robin (à exécuter sur test après déploiement GHA)
+
+Le déploiement GHA pousse le commit sur test (~3 min). Une fois en ligne :
+
+#### Test 1 — Surfaces principales (toutes doivent afficher correctement)
+
+Ouvrir sur test (de préférence en **navigation privée** pour éviter cache navigateur) :
+1. **`/mes-creations/`** — vérifier toutes les cards produit affichent leur photo ambiance
+2. **`/categorie-produit/suspensions/`** — vérifier les cards de la catégorie
+3. **`/`** (home) — vérifier le produit "coup de cœur" affiche bien sa photo detail
+4. **3 fiches produit représentatives** : Olivia, Gaston, un accessoire — vérifier le slideshow ambiance, la galerie principale (carousel central), les thumbnails, la lightbox ambiance en bas
+
+**Attendu** : strictement identique à avant 6b-1, **À UNE CONDITION** : que la migration Phase 2 (admin) ait bien été exécutée en prod sur tous les produits. Si oui, toutes les Gallery sont peuplées → le retrait du fallback n'a aucun effet visible.
+
+#### Test 2 — Détection des trous (l'objectif principal de 6b-1)
+
+**Si un trou apparaît** quelque part (card sans photo, slide vide, thumbnail manquante) :
+1. Noter quel produit + quelle Gallery est en cause (ex: "Olivia, position 3 du slideshow ambiance vide")
+2. Aller dans l'admin produit → onglet ACF → vérifier la Gallery cible (ex: `galerie_ambiance`)
+3. Si la Gallery est vide ou incomplète : la compléter manuellement (faire glisser les images depuis la médiathèque, en s'aidant éventuellement de la page Outils → Migration galerie qui peut relancer l'import)
+4. Si la Gallery est correcte mais le trou subsiste : c'est un bug à signaler à Claude Code
+
+#### Test 3 — Page Inspiration (cas hors scope)
+
+1. Ouvrir `/inspiration/` (ou l'URL équivalente)
+2. **Devrait fonctionner normalement** : la page Inspiration lit toujours directement le repeater (ne passe pas par le helper). Phase 6b-1 ne l'a pas affectée.
+3. **Note importante** : si Robin supprime le champ ACF `galerie_produit` ensuite (Phase 6b-2), cette page deviendra cassée. Il faut soit refactor cette page avant, soit accepter que /inspiration/ deviendra vide.
+
+#### Test 4 — Page admin migration (devra encore fonctionner)
+
+1. Ouvrir `/wp-admin/tools.php?page=sapi-migrate-galerie`
+2. Lancer un **dry-run**
+3. **Attendu** : le rapport s'affiche, montre les compteurs par produit, **doit indiquer** "couples (produit × Gallery) déjà peuplés" = total attendu si la migration prod est complète
+4. Cette page reste utile en cas de besoin de re-migration ponctuelle (avant que Robin supprime le champ ACF)
+
+### Suite
+
+- **Après validation 6b-1 sur test** : merge `feature/photos-par-piece` → `master` + déploiement prod (workflow Deploy to Production, déclenché manuellement par Robin)
+- **Phase 6b-2 (Robin)** : suppression du champ ACF `galerie_produit` (interface ACF, group "Photos produits") sur test + prod. **Précondition** : refactor `page-inspiration.php` (ou acceptation que cette page devienne vide).
+- **Cleanup final (plus tard)** : retirer la page de migration `inc/sapi-migrate-galerie.php` (devenue inutile) + `sapi_iterate_product_photos` (son seul consommateur sera parti) + éventuellement purger les meta orphelines en DB via SQL.
+
+---
 
 ## [RETOUR] S28 Phase 6a — Câblage `single-product.php` vers helper Phase 3 (3 sous-chantiers)
 **Date livrée :** 2026-05-28
