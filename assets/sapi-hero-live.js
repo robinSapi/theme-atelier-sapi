@@ -129,13 +129,35 @@
       if (m && m[1]) heroEl.setAttribute('data-hero-bg-current', m[1]);
     }
 
-    window.sapiProject.subscribe(function (project) {
-      var piece = project && project.answers && project.answers.piece;
+    // Helper : applique titre + photo pour une pièce donnée. Factorisé pour
+    // être réutilisé au sync initial (lecture localStorage) ET sur chaque
+    // notify subscribe (changement de projet).
+    function applyForPiece(piece) {
       updateHeroTitle(heroTitle, getTitleForPiece(piece));
       if (heroEl && photosMap) {
         var newUrl = pickPhotoForPiece(photosMap, piece);
         if (newUrl) swapHeroBackground(heroEl, newUrl);
       }
+    }
+
+    // Sync initial — sapiProject.subscribe ne notifie QUE sur changement
+    // d'état. Sans cette lecture, un visiteur récurrent qui arrive sur
+    // /mes-creations/ sans ?piece= en URL (mais avec piece=salon stocké
+    // en localStorage) reste sur Bandeau-1 jusqu'à ce qu'il modifie son
+    // projet. On lit donc l'état courant au load et on applique tout de
+    // suite. Si le PHP a déjà rendu le bon bg (cas ?piece= en URL),
+    // swapHeroBackground court-circuite via data-hero-bg-current.
+    if (typeof window.sapiProject.get === 'function') {
+      try {
+        var initial = window.sapiProject.get();
+        var initialPiece = initial && initial.answers && initial.answers.piece;
+        if (initialPiece) applyForPiece(initialPiece);
+      } catch (e) { /* silent : le subscribe ci-dessous reprendra la main */ }
+    }
+
+    window.sapiProject.subscribe(function (project) {
+      var piece = project && project.answers && project.answers.piece;
+      applyForPiece(piece);
     });
   }
 
