@@ -19361,8 +19361,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
   position: absolute;
   inset: 0;
   opacity: 0;
-  -webkit-transition: opacity 0.6s ease;
-  transition: opacity 0.6s ease;
+  -webkit-transition: opacity 0.9s ease;
+  transition: opacity 0.9s ease;
 }
 
 .product-slideshow-slide.is-active {
