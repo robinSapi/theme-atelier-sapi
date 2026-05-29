@@ -2,56 +2,6 @@
 
 ## 🔧 À faire
 
-## [TÂCHE] S28 — Phase 6a-bis : câbler `page-inspiration.php` vers les Gallery (dernier call-site repeater du rendu)
-**Date :** 2026-05-29
-**Branche :** `feature/photos-par-piece`
-**Priorité :** haute — DERNIER call-site de rendu qui lit le repeater. Bloquant avant que Robin supprime le champ ACF (6b-2).
-**Mémoire de contexte** (Cowork) : `project_photos_par_piece.md`. **Audit Phase 0** : call-site #4 (`page-inspiration.php`).
-
-### Contexte
-
-Après 6a (single-product) et 6b-1 (retrait du fallback dans le helper), il reste **un seul** endroit du code de rendu qui lit directement le repeater : **`page-inspiration.php:30`** (template "Galerie Inspiration"). Si Robin supprime le champ ACF `galerie_produit` (6b-2) sans câbler ce fichier, la page Inspiration n'affichera plus de photos.
-
-**Particularité de ce call-site** (cf audit Phase 0 #4) : `page-inspiration.php` parcourt jusqu'à 200 produits et collecte toutes les photos `ambiance` + `detail`, en gardant le **`product_id` à côté de l'`attachment_id`** (pour lier chaque photo à son produit). C'est pour ça qu'il duplique la logique au lieu d'utiliser le helper (qui ne retourne que des IDs photos, sans le product_id).
-
-### Objectif
-
-Câbler `page-inspiration.php` pour qu'il lise les Gallery au lieu du repeater, en préservant le besoin `[product_id, attachment_id]`.
-
-**Approche A recommandée** : dans la boucle sur les 200 produits, pour chaque produit, appeler `sapi_get_product_photo_ids($product_id, 'ambiance')` et `sapi_get_product_photo_ids($product_id, 'detail')`, et construire le tableau `[attachment_id, product_id]` comme avant. Le `product_id` est disponible dans la boucle.
-
-**NE PAS utiliser** `sapi_iterate_product_photos` ici : ce helper lit le repeater (infra migration), or on veut lire les Gallery.
-
-### Garde-fous
-
-1. **Reproduire le comportement actuel** : la page Inspiration doit afficher les mêmes photos qu'avant (ambiance + detail de chaque produit), avec le lien vers le bon produit.
-2. **Lire les Gallery via le helper Phase 3** (`sapi_get_product_photo_ids`) — PAS de `get_field('galerie_produit')` direct, PAS `sapi_iterate_product_photos`.
-3. **NE PAS toucher** au repeater (champ + données).
-4. Après cette tâche, `grep "get_field.*galerie_produit"` dans le code de RENDU (hors `inc/sapi-migrate-galerie.php` et hors `sapi_iterate_product_photos` qui sont de l'infra migration) doit retourner **0 résultat actif** (juste des commentaires éventuels).
-
-### Critères de succès
-
-- [ ] `page-inspiration.php` lit les Gallery via `sapi_get_product_photo_ids` (plus de `get_field('galerie_produit')`)
-- [ ] La page Inspiration affiche les mêmes photos qu'avant (ambiance + detail, liées au bon produit)
-- [ ] Repeater intact (champ + données)
-- [ ] Grep `get_field.*galerie_produit` dans le rendu = 0 actif (reste : page migration + helper iterate infra + commentaires)
-- [ ] Test sur test : ouvrir la page Inspiration, vérifier que les photos s'affichent et que les liens produits fonctionnent
-- [ ] Push auto sur `feature/photos-par-piece` (cf [[feedback_claude_code_push_test]])
-
-### Notes pour le retour
-
-- Hash du commit
-- Confirmer que la page Inspiration affiche identique
-- Confirmer le grep final : plus AUCUNE lecture repeater dans le rendu → après ça, Robin peut supprimer le champ ACF en toute sécurité (6b-2)
-
-### Suite
-
-Une fois 6a-bis validé sur test + déployé prod (avec 6b-1) :
-- **6b-2 (Robin)** : supprimer le champ ACF `galerie_produit` (test + prod). Le rendu ne dépend plus du repeater du tout.
-- **Cleanup final (plus tard)** : retirer `inc/sapi-migrate-galerie.php` + `sapi_iterate_product_photos` (infra migration devenue inutile) + purge SQL des meta orphelines (irréversible, après long soak).
-
----
-
 ## [TÂCHE] Conseiller V3 — Round 2 : 17 bugs (audit code restant + tests UX Robin)
 **Date :** 2026-05-22
 **Branche :** `test-theme-sapi-maison`
