@@ -1067,15 +1067,14 @@ function sapi_type_to_gallery_name($type) {
 /**
  * Récupère les IDs d'attachments d'un produit, filtré par type / pièce / essence.
  *
- * Mode dual-read (Phase 3 S28) :
- *  1. Lit en priorité la Gallery ACF cible (galerie_ambiance, galerie_detail, etc.)
- *  2. Fallback sur le repeater galerie_produit si la Gallery est vide
- *  3. Filtre optionnellement par taxonomies media_room ($piece) et
- *     media_essence ($essence)
+ * Lit exclusivement les 8 Gallery ACF (galerie_ambiance, galerie_detail, etc.)
+ * via le mapping `sapi_type_to_gallery_name()`. Si la Gallery cible est vide,
+ * retourne `[]` — le repeater `galerie_produit` n'est plus consulté en
+ * fallback (retiré en S28 Phase 6b-1, après que toutes les surfaces aient
+ * migré vers les Gallery).
  *
- * Rétrocompatibilité : les 17 call-sites existants (audit Phase 0) passent
- * 1 à 3 arguments. Les 2 nouveaux ($piece, $essence) sont nullables avec
- * défaut null → comportement strictement inchangé sans eux.
+ * Pour le fallback "pièce sans photo taguée → photo par défaut" (sémantique
+ * Phase 4b), voir le wrapper `sapi_get_product_photo_ids_with_fallback`.
  *
  * @param int|WP_Post $post_id  ID du produit (ou WP_Post)
  * @param string      $type     Type photo ('ambiance', 'detail', 'fabrication',
@@ -1084,8 +1083,7 @@ function sapi_type_to_gallery_name($type) {
  * @param int         $limit    Max N IDs retournés (0 = sans limite)
  * @param string|null $piece    Slug taxonomie media_room (ex: 'salon') ou null
  * @param string|null $essence  Slug taxonomie media_essence (ex: 'peuplier') ou null
- * @return int[] Array d'IDs d'attachments, ordre préservé (Gallery ACF puis
- *               repeater), sans 0
+ * @return int[] Array d'IDs d'attachments, ordre préservé, sans 0
  */
 function sapi_get_product_photo_ids($post_id, $type = '', $limit = 0, $piece = null, $essence = null) {
   if (!$post_id || !function_exists('get_field')) return [];
@@ -1093,35 +1091,20 @@ function sapi_get_product_photo_ids($post_id, $type = '', $limit = 0, $piece = n
   $ids = [];
 
   if ($type === '') {
-    // Tous types : concatène les 8 Gallery dans l'ordre canonique
-    // (avec fallback repeater par type si Gallery vide), puis dédoublonne.
+    // Tous types : concatène les 8 Gallery dans l'ordre canonique puis dédoublonne.
     $all_types_ordered = ['ambiance', 'detail', 'vue de dessous', 'tailles', 'packshot', 'fabrication', 'client', 'accessoires'];
     foreach ($all_types_ordered as $t) {
       $ids = array_merge($ids, sapi_get_product_photo_ids($post_id, $t, 0, null, null));
     }
     $ids = array_values(array_unique($ids));
   } else {
-    // Type spécifique : Gallery prioritaire, fallback repeater si Gallery vide.
+    // Type spécifique : lecture exclusive de la Gallery cible.
     $gallery_name = sapi_type_to_gallery_name($type);
     if ($gallery_name) {
       $gallery_ids = get_field($gallery_name, $post_id);
       if (!empty($gallery_ids) && is_array($gallery_ids)) {
         foreach ($gallery_ids as $item) {
           $id = sapi_get_acf_image_id($item);
-          if ($id) $ids[] = (int) $id;
-        }
-      }
-    }
-
-    // Fallback repeater si Gallery vide (ou type non mappé).
-    if (empty($ids)) {
-      $galerie = get_field('galerie_produit', $post_id);
-      if (!empty($galerie) && is_array($galerie)) {
-        foreach ($galerie as $row) {
-          $row_type = isset($row['type_photo']) ? $row['type_photo'] : '';
-          if (is_array($row_type)) $row_type = isset($row_type['value']) ? $row_type['value'] : '';
-          if ($row_type !== $type) continue;
-          $id = sapi_get_acf_image_id(isset($row['image']) ? $row['image'] : null);
           if ($id) $ids[] = (int) $id;
         }
       }
