@@ -557,6 +557,18 @@
   color: var(--color-dark, #323232);
 }
 
+/* Mobile : pleine largeur, sort du flow masonry pour ne pas se coincer
+   dans une colonne étroite (qui coupait les labels en deux). */
+@media (max-width: 1023px) {
+  .inspiration-card--filters {
+    display: block;
+    width: 100%;
+    -moz-column-span: all;
+    column-span: all;
+    margin: 0 0 16px;
+  }
+}
+
 .inspiration-filters__inner {
   /* Override de .inspiration-card__inner pour layout filtres */
   padding: 22px 18px;
