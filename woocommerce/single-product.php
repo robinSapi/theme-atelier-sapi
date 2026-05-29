@@ -1150,7 +1150,7 @@ get_header();
     slideshow.style.setProperty('--slideshow-height', 'calc(100vh - ' + stickyTop + 'px)');
     slideshow.style.setProperty('--slideshow-height', 'calc(100dvh - ' + stickyTop + 'px)');
   }
-  // Même calcul pour la card galerie produit
+  // Card galerie produit : centrée verticalement dans la zone visible (sous header+bandeau)
   var gallery = document.querySelector('.product-gallery-v2');
   if (gallery && window.innerWidth > 600) {
     var hdr = document.querySelector('.site-header');
@@ -1158,7 +1158,18 @@ get_header();
     var galTop = 0;
     if (hdr) galTop += hdr.offsetHeight;
     if (bnd) galTop += bnd.offsetHeight;
-    gallery.style.setProperty('--gallery-sticky-top', (galTop + 16) + 'px');
+
+    function updateGalleryStickyTop() {
+      var galleryHeight = gallery.offsetHeight;
+      var availableSpace = window.innerHeight - galTop;
+      // Si la galerie est plus grande que l'espace dispo, on reste collé en haut.
+      var centerOffset = Math.max(0, (availableSpace - galleryHeight) / 2);
+      gallery.style.setProperty('--gallery-sticky-top', (galTop + centerOffset) + 'px');
+    }
+
+    updateGalleryStickyTop();
+    window.addEventListener('load', updateGalleryStickyTop);
+    window.addEventListener('resize', updateGalleryStickyTop, { passive: true });
   }
 
   // ── Product Slideshow ──
