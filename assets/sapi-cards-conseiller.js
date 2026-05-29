@@ -628,8 +628,7 @@
     var vw = window.innerWidth || document.documentElement.clientWidth;
     if (vw <= 480) return 1;
     if (vw <= 768) return 2;
-    if (vw <= 1024) return 3;
-    return 4;
+    return 3;
   }
 
   function getTotalCards() {

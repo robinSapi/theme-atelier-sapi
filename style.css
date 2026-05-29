@@ -24751,18 +24751,12 @@ button.chip--project:focus-visible {
   width: 0;
   height: 0;
 }
-/* Chaque cellule : largeur = (100% - 3 gaps de 2rem) / 4 cards visibles.
+/* Chaque cellule : largeur = (100% - 2 gaps de 2rem) / 3 cards visibles.
    scroll-snap-align: start pour que les cards se calent à gauche au swipe. */
 .mes-creations-selection__grid > * {
-  -webkit-flex: 0 0 calc((100% - 6rem) / 4);
-  flex: 0 0 calc((100% - 6rem) / 4);
+  -webkit-flex: 0 0 calc((100% - 4rem) / 3);
+  flex: 0 0 calc((100% - 4rem) / 3);
   scroll-snap-align: start;
-}
-@media (max-width: 1024px) {
-  .mes-creations-selection__grid > * {
-    -webkit-flex: 0 0 calc((100% - 4rem) / 3);
-    flex: 0 0 calc((100% - 4rem) / 3);
-  }
 }
 @media (max-width: 768px) {
   .mes-creations-selection__grid {
@@ -25062,12 +25056,19 @@ button.chip--project:focus-visible {
 
 /* Slot "Ma sélection" : homogénéiser les cards produit.
    - product-name-formatter.js découpe le nom en .product-firstname (prénom
-     Montserrat) + .product-restname (article+nom Square Peg). On force chaque
-     morceau sur sa propre ligne → 2 lignes garanties, hauteur de body alignée.
+     Montserrat) + .product-restname (article+nom Square Peg). Avec le passage
+     à 3 cards visibles desktop (au lieu de 4), chaque card est plus large :
+     on remet firstname + restname sur UNE SEULE LIGNE avec ellipsis en
+     garde-fou si un nom est exceptionnellement long.
    - Prix centré horizontalement */
+.mes-creations-selection__grid .product-card-cinetique .product-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .mes-creations-selection__grid .product-card-cinetique .product-name .product-firstname,
 .mes-creations-selection__grid .product-card-cinetique .product-name .product-restname {
-  display: block;
+  display: inline;
 }
 .mes-creations-selection__grid .product-card-cinetique .product-price {
   -webkit-justify-content: center;
