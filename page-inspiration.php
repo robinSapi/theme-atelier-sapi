@@ -46,6 +46,62 @@ if ($products_query->have_posts() && function_exists('get_field')) {
 
 shuffle($photos);
 
+// Lecture des taxonomies media_room / media_essence pour chaque photo
+// (snippet maison "Photos par pièce + matière"). Précharge le cache de termes
+// pour éviter ~2N requêtes lors des wp_get_object_terms par photo.
+$used_rooms    = []; // slug => label (collectés pour la card filtres)
+$used_essences = [];
+
+if (!empty($photos)) {
+  $attachment_ids = wp_list_pluck($photos, 'attachment_id');
+  update_object_term_cache(array_unique($attachment_ids), 'attachment');
+
+  foreach ($photos as $i => $photo) {
+    $img_id = $photo['attachment_id'];
+
+    $room_slugs = [];
+    $room_terms = wp_get_object_terms($img_id, 'media_room');
+    if (!is_wp_error($room_terms)) {
+      foreach ($room_terms as $t) {
+        $room_slugs[] = $t->slug;
+        $used_rooms[$t->slug] = $t->name;
+      }
+    }
+    $photos[$i]['rooms'] = $room_slugs;
+
+    $essence_slugs = [];
+    $essence_terms = wp_get_object_terms($img_id, 'media_essence');
+    if (!is_wp_error($essence_terms)) {
+      foreach ($essence_terms as $t) {
+        $essence_slugs[] = $t->slug;
+        $used_essences[$t->slug] = $t->name;
+      }
+    }
+    $photos[$i]['essences'] = $essence_slugs;
+  }
+
+  asort($used_rooms);
+  asort($used_essences);
+}
+
+$show_filters = !empty($used_rooms) || !empty($used_essences);
+
+// Icônes pièces (reprises du room-picker homepage). Slug → SVG.
+// Slugs absents du mapping → label seul (validé Robin).
+$inspiration_room_icons = [
+  'salon'           => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3"/><rect x="2" y="11" width="20" height="7" rx="2"/><path d="M5 18v2m14-2v2"/></svg>',
+  'cuisine'         => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V20H6Z"/><line x1="6" y1="17" x2="18" y2="17"/></svg>',
+  'salle-a-manger'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V20H6Z"/><line x1="6" y1="17" x2="18" y2="17"/></svg>',
+  'chambre'         => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M2 14h20"/><path d="M2 10V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/></svg>',
+  'chambre-enfant'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M2 14h20"/><path d="M2 10V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/></svg>',
+  'bureau'          => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>',
+  'entree'          => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="15" cy="12" r="1"/></svg>',
+  'escalier'        => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4v-4h4v-4h4V8h4"/><path d="M4 20V8"/><path d="M20 20V8"/></svg>',
+];
+
+// Icône bois générique pour toutes les essences (planche avec lignes de grain).
+$inspiration_essence_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M3 14h18"/></svg>';
+
 // Équivalent PHP de product-name-formatter.js (split premier mot / reste).
 // Le rendu serveur évite le FOUC ; le formatter JS détecte .product-firstname
 // et n'agit pas si déjà présent.
@@ -202,13 +258,71 @@ $render_photo = function ($photo, $position_in_grid) {
   if ($position_in_grid === 1) {
     $img_attrs['fetchpriority'] = 'high';
   }
+
+  $rooms_attr    = !empty($photo['rooms'])    ? implode(' ', $photo['rooms'])    : '';
+  $essences_attr = !empty($photo['essences']) ? implode(' ', $photo['essences']) : '';
   ?>
-  <a href="<?php echo esc_url($product_url); ?>" class="inspiration-tile" aria-label="<?php echo esc_attr($product_name); ?>">
+  <a href="<?php echo esc_url($product_url); ?>" class="inspiration-tile"
+     data-rooms="<?php echo esc_attr($rooms_attr); ?>"
+     data-essences="<?php echo esc_attr($essences_attr); ?>"
+     aria-label="<?php echo esc_attr($product_name); ?>">
     <?php echo wp_get_attachment_image($img_id, 'large', false, $img_attrs); ?>
     <span class="inspiration-tile-overlay" aria-hidden="true">
       <span class="inspiration-tile-name"><?php echo inspiration_format_product_name($product_name); ?></span>
     </span>
   </a>
+  <?php
+};
+
+$render_filter_card = function () use ($used_rooms, $used_essences, $inspiration_room_icons, $inspiration_essence_icon) {
+  ?>
+  <article class="inspiration-card inspiration-card--filters" data-inspiration-filters>
+    <div class="inspiration-card__inner inspiration-filters__inner">
+      <h3 class="inspiration-filters__title">Filtrer la galerie</h3>
+
+      <?php if (!empty($used_rooms)) : ?>
+        <div class="inspiration-filters__section">
+          <p class="inspiration-filters__legend">Pièce</p>
+          <div class="inspiration-filters__grid">
+            <?php foreach ($used_rooms as $slug => $label) :
+              $has_icon = isset($inspiration_room_icons[$slug]);
+              $btn_class = 'inspiration-filter-btn' . ($has_icon ? '' : ' inspiration-filter-btn--no-icon');
+              ?>
+              <button type="button" class="<?php echo esc_attr($btn_class); ?>"
+                      data-filter-type="room"
+                      data-filter-value="<?php echo esc_attr($slug); ?>"
+                      aria-pressed="false">
+                <?php if ($has_icon) : ?>
+                  <span class="inspiration-filter-btn__icon" aria-hidden="true"><?php echo $inspiration_room_icons[$slug]; ?></span>
+                <?php endif; ?>
+                <span class="inspiration-filter-btn__label"><?php echo esc_html($label); ?></span>
+              </button>
+            <?php endforeach; ?>
+          </div>
+        </div>
+      <?php endif; ?>
+
+      <?php if (!empty($used_essences)) : ?>
+        <div class="inspiration-filters__section">
+          <p class="inspiration-filters__legend">Essence de bois</p>
+          <div class="inspiration-filters__grid">
+            <?php foreach ($used_essences as $slug => $label) : ?>
+              <button type="button" class="inspiration-filter-btn"
+                      data-filter-type="essence"
+                      data-filter-value="<?php echo esc_attr($slug); ?>"
+                      aria-pressed="false">
+                <span class="inspiration-filter-btn__icon" aria-hidden="true"><?php echo $inspiration_essence_icon; ?></span>
+                <span class="inspiration-filter-btn__label"><?php echo esc_html($label); ?></span>
+              </button>
+            <?php endforeach; ?>
+          </div>
+        </div>
+      <?php endif; ?>
+
+      <button type="button" class="inspiration-filters__reset" data-inspiration-reset hidden>Réinitialiser les filtres</button>
+      <p class="inspiration-filters__empty" data-inspiration-empty hidden>Aucune photo ne correspond à ces filtres.</p>
+    </div>
+  </article>
   <?php
 };
 ?>
@@ -231,6 +345,9 @@ $render_photo = function ($photo, $position_in_grid) {
   <?php if (empty($photos)) : ?>
     <p class="inspiration-empty">Aucune image à afficher pour le moment.</p>
   <?php else :
+    if ($show_filters) {
+      $render_filter_card();
+    }
     for ($i = 1; $i <= $total_tiles; $i++) {
       if (isset($cards_at[$i])) {
         $render_card($cards_at[$i]);

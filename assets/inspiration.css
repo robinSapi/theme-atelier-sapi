@@ -545,3 +545,222 @@
   }
 }
 
+/* =========================================================
+   CARD FILTRES (1ère position de la galerie)
+   Style inspiré du room-picker homepage (cards blanches +
+   icône warm), adapté en format compact pour tenir dans
+   une colonne masonry. Multi-sélection via aria-pressed.
+   ========================================================= */
+
+.inspiration-card--filters {
+  background: var(--color-warm, #FBF6EA);
+  color: var(--color-dark, #323232);
+}
+
+.inspiration-filters__inner {
+  /* Override de .inspiration-card__inner pour layout filtres */
+  padding: 22px 18px;
+  gap: 18px;
+  text-align: left;
+}
+
+@media (min-width: 1024px) {
+  .inspiration-filters__inner {
+    padding: 28px 22px;
+    gap: 20px;
+  }
+}
+
+.inspiration-filters__title {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-wood-dark, #4A3F35);
+  margin: 0;
+  text-align: center;
+}
+
+.inspiration-filters__section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inspiration-filters__legend {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-wood, #937D68);
+  margin: 0;
+}
+
+.inspiration-filters__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(78px, 100%), 1fr));
+  gap: 8px;
+}
+
+@media (min-width: 1024px) {
+  .inspiration-filters__grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(88px, 100%), 1fr));
+    gap: 10px;
+  }
+}
+
+.inspiration-filter-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 10px 4px 8px;
+  background: var(--color-white, #FFFFFF);
+  color: inherit;
+  font-family: inherit;
+  text-transform: none;
+  letter-spacing: normal;
+  border: 1px solid var(--color-line, rgba(147, 125, 104, 0.18));
+  border-radius: 10px;
+  box-shadow: var(--shadow-card, 0 2px 8px rgba(147,125,104,0.12));
+  cursor: pointer;
+  transition:
+    transform 0.2s var(--ease-smooth, ease),
+    box-shadow 0.2s var(--ease-smooth, ease),
+    border-color 0.2s var(--ease-smooth, ease),
+    background 0.2s var(--ease-smooth, ease);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.inspiration-filter-btn__icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-wood, #937D68);
+  background: var(--color-warm, #FBF6EA);
+  border-radius: 8px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.inspiration-filter-btn__icon svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.inspiration-filter-btn__label {
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-wood-dark, #4A3F35);
+  line-height: 1.25;
+  text-align: center;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+@media (min-width: 1024px) {
+  .inspiration-filter-btn__label {
+    font-size: 0.7rem;
+  }
+}
+
+/* Variante sans icône (slug pièce inconnu) — label centré verticalement. */
+.inspiration-filter-btn--no-icon {
+  min-height: 64px;
+  padding: 14px 6px;
+  justify-content: center;
+}
+
+@media (hover: hover) {
+  .inspiration-filter-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-card-hover, 0 4px 14px rgba(147,125,104,0.16));
+    border-color: var(--color-wood, #937D68);
+  }
+}
+
+/* État actif (multi-sélection) — bordure wood + fond warm continu,
+   icône inversée (fond blanc, couleur wood-dark) pour le distinguer
+   du simple hover. */
+.inspiration-filter-btn[aria-pressed="true"] {
+  border-color: var(--color-wood, #937D68);
+  background: var(--color-warm, #FBF6EA);
+  box-shadow: var(--shadow-card-hover, 0 4px 14px rgba(147,125,104,0.16));
+}
+
+.inspiration-filter-btn[aria-pressed="true"] .inspiration-filter-btn__icon {
+  background: var(--color-white, #FFFFFF);
+  color: var(--color-wood-dark, #4A3F35);
+}
+
+.inspiration-filter-btn:focus-visible {
+  outline: 2px solid var(--color-orange, #E35B24);
+  outline-offset: 2px;
+}
+
+.inspiration-filters__reset {
+  align-self: center;
+  margin-top: 4px;
+  padding: 8px 18px;
+  background: transparent;
+  color: var(--color-wood-dark, #4A3F35);
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid var(--color-line, rgba(147, 125, 104, 0.18));
+  border-radius: var(--radius, 5px);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.inspiration-filters__reset:hover {
+  background: var(--color-white, #FFFFFF);
+  border-color: var(--color-wood, #937D68);
+}
+
+.inspiration-filters__reset:focus-visible {
+  outline: 2px solid var(--color-orange, #E35B24);
+  outline-offset: 2px;
+}
+
+.inspiration-filters__empty {
+  margin: 4px 0 0;
+  padding: 12px 10px;
+  background: rgba(50, 50, 50, 0.04);
+  border-radius: 8px;
+  font-family: var(--font-body, 'Montserrat', sans-serif);
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--color-text-light, #717171);
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Photo masquée par le filtre. Cf. CLAUDE.md — exception !important documentée. */
+.inspiration-tile.is-filtered-out {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inspiration-filter-btn,
+  .inspiration-filters__reset {
+    transition: none;
+  }
+  .inspiration-filter-btn:hover {
+    transform: none;
+  }
+}
+
