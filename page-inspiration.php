@@ -49,8 +49,10 @@ shuffle($photos);
 // Lecture des taxonomies media_room / media_essence pour chaque photo
 // (snippet maison "Photos par pièce + matière"). Précharge le cache de termes
 // pour éviter ~2N requêtes lors des wp_get_object_terms par photo.
-$used_rooms    = []; // slug => label (collectés pour la card filtres)
-$used_essences = [];
+$used_rooms     = []; // slug => label (collectés pour la card filtres)
+$used_essences  = [];
+$room_counts    = []; // slug => nb de photos taguées (pour tri popularité)
+$essence_counts = [];
 
 if (!empty($photos)) {
   $attachment_ids = wp_list_pluck($photos, 'attachment_id');
@@ -65,6 +67,7 @@ if (!empty($photos)) {
       foreach ($room_terms as $t) {
         $room_slugs[] = $t->slug;
         $used_rooms[$t->slug] = $t->name;
+        $room_counts[$t->slug] = (isset($room_counts[$t->slug]) ? $room_counts[$t->slug] : 0) + 1;
       }
     }
     $photos[$i]['rooms'] = $room_slugs;
@@ -75,6 +78,7 @@ if (!empty($photos)) {
       foreach ($essence_terms as $t) {
         $essence_slugs[] = $t->slug;
         $used_essences[$t->slug] = $t->name;
+        $essence_counts[$t->slug] = (isset($essence_counts[$t->slug]) ? $essence_counts[$t->slug] : 0) + 1;
       }
     }
     $photos[$i]['essences'] = $essence_slugs;
@@ -90,36 +94,26 @@ if (!empty($photos)) {
     }
   }
 
-  // Tri pièces par popularité supposée (Robin) ; "autre-*" en fin de liste ;
-  // pièces hors classement → après les connues mais avant les "autre-*".
-  $room_priority = [
-    'salon'             => 1,
-    'cuisine'           => 2,
-    'salle-a-manger'    => 3,
-    'chambre'           => 4,
-    'chambre-enfant'    => 5,
-    'bureau'            => 6,
-    'entree'            => 7,
-    'escalier'          => 8,
-    'couloir'           => 9,
-    'hotel'             => 20,
-    'restaurant'        => 21,
-    'boutique'          => 22,
-    'espace-bien-etre'  => 23,
-    'salle-de-reunion'  => 24,
-  ];
-  uksort($used_rooms, function ($a, $b) use ($room_priority, $used_rooms) {
+  // Tri pièces par nombre de photos taguées (DESC) ; "autre-*" forcé en fin ;
+  // égalité → ordre alpha sur le label affiché.
+  uksort($used_rooms, function ($a, $b) use ($room_counts, $used_rooms) {
     $aIsAutre = strpos($a, 'autre') === 0;
     $bIsAutre = strpos($b, 'autre') === 0;
     if ($aIsAutre && !$bIsAutre) return 1;
     if (!$aIsAutre && $bIsAutre) return -1;
-    $rankA = isset($room_priority[$a]) ? $room_priority[$a] : 100;
-    $rankB = isset($room_priority[$b]) ? $room_priority[$b] : 100;
-    if ($rankA !== $rankB) return $rankA - $rankB;
+    $countA = isset($room_counts[$a]) ? $room_counts[$a] : 0;
+    $countB = isset($room_counts[$b]) ? $room_counts[$b] : 0;
+    if ($countA !== $countB) return $countB - $countA; // DESC
     return strcmp($used_rooms[$a], $used_rooms[$b]);
   });
 
-  asort($used_essences);
+  // Même logique pour essences : popularité DESC, égalité → alpha.
+  uksort($used_essences, function ($a, $b) use ($essence_counts, $used_essences) {
+    $countA = isset($essence_counts[$a]) ? $essence_counts[$a] : 0;
+    $countB = isset($essence_counts[$b]) ? $essence_counts[$b] : 0;
+    if ($countA !== $countB) return $countB - $countA; // DESC
+    return strcmp($used_essences[$a], $used_essences[$b]);
+  });
 }
 
 $show_filters = !empty($used_rooms) || !empty($used_essences);
