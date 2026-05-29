@@ -5,6 +5,7 @@ on:
     branches:
       - test-theme-sapi-maison
       - feature/photos-par-piece
+      - feature/hero-dynamique
   workflow_dispatch:
 
 env:
