@@ -12261,12 +12261,35 @@ button.room-card {
   position: absolute;
   inset: 0;
   background: rgba(74, 63, 53, 0.75);
+  z-index: 1;
+}
+
+/* Layer injecté par sapi-hero-live.js pour crossfader la photo de fond
+   au changement de pièce. Reste sous l'overlay sombre (::before z-index 1)
+   et sous le contenu (-inner z-index 2). */
+.shop-hero-artisan__fade-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+  -webkit-transition: opacity 0.4s ease;
+  transition: opacity 0.4s ease;
+  will-change: opacity;
+}
+
+.shop-hero-artisan__fade-layer.is-active {
+  opacity: 1;
 }
 
 .shop-hero-artisan-inner {
   position: relative;
   max-width: 800px;
   margin: 0 auto;
+  z-index: 2;
 }
 
 .shop-hero-artisan h1 {

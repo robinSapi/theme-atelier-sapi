@@ -98,8 +98,78 @@ $piece_param = isset($_GET['piece']) ? sanitize_key(wp_unslash($_GET['piece'])) 
 $hero_title  = isset($hero_titles['pieces'][$piece_param])
   ? $hero_titles['pieces'][$piece_param]
   : $hero_titles['default'];
+
+// Photos hero par pièce (ACF) — lit hero_<slug> sur la page boutique
+// (wc_get_page_id('shop')) et expose les URLs en data-hero-photos pour swap
+// JS au changement de pièce. Robuste : champs absents/vides ignorés,
+// sapi-hero-live.js retombe sur la clé 'default' (Bandeau-1 par défaut,
+// surchargeable via un éventuel champ ACF hero_default). Format de sortie :
+// { slug: [url1, url2, ...], … } — array même pour un seul ID, pour rester
+// future-proof si Robin passe les champs en Galerie (tirage aléatoire JS).
+$hero_default_bg = 'https://atelier-sapi.fr/wp-content/uploads/2026/02/Bandeau-1.jpg';
+$hero_photos_by_piece = [];
+if (function_exists('get_field') && function_exists('wc_get_page_id')) {
+  $shop_page_id = wc_get_page_id('shop');
+  if ($shop_page_id > 0) {
+    // Helper local : normalise une valeur ACF (ID seul, array d'IDs,
+    // ou array d'objets attachment) en liste d'URLs full size.
+    $sapi_acf_to_urls = function ($val) {
+      $ids = [];
+      if (is_array($val)) {
+        foreach ($val as $item) {
+          if (is_numeric($item)) {
+            $ids[] = (int) $item;
+          } elseif (is_array($item) && !empty($item['ID'])) {
+            $ids[] = (int) $item['ID'];
+          }
+        }
+      } elseif (is_numeric($val)) {
+        $ids[] = (int) $val;
+      }
+      $urls = [];
+      foreach ($ids as $id) {
+        $url = wp_get_attachment_image_url($id, 'full');
+        if ($url) $urls[] = $url;
+      }
+      return $urls;
+    };
+
+    foreach (array_keys($hero_titles['pieces']) as $piece_slug) {
+      $urls = $sapi_acf_to_urls(get_field('hero_' . $piece_slug, $shop_page_id));
+      if (!empty($urls)) {
+        $hero_photos_by_piece[$piece_slug] = $urls;
+      }
+    }
+
+    // Champ optionnel hero_default : surcharge la photo de fallback si
+    // Robin l'a créé. Sinon, on garde Bandeau-1 (cohérent avec le CSS).
+    $default_urls = $sapi_acf_to_urls(get_field('hero_default', $shop_page_id));
+    if (!empty($default_urls)) {
+      $hero_default_bg = $default_urls[0];
+    }
+  }
+}
+// Le fallback est toujours exposé sous la clé 'default' — utilisé par
+// sapi-hero-live.js quand le visiteur efface son projet ou choisit une
+// pièce sans photo dédiée.
+$hero_photos_by_piece['default'] = [$hero_default_bg];
+
+// Premier paint : si une pièce est dans l'URL et qu'on a une photo ACF
+// pour elle, on l'utilise comme background inline (override le Bandeau-1
+// par défaut). Pas de random côté serveur — on prend la première du tableau
+// pour rester déterministe au load. Le JS prend le relais ensuite.
+$hero_initial_bg = '';
+if ($piece_param && !empty($hero_photos_by_piece[$piece_param])) {
+  $hero_initial_bg = $hero_photos_by_piece[$piece_param][0];
+}
+
+$hero_photos_attr = !empty($hero_photos_by_piece)
+  ? wp_json_encode($hero_photos_by_piece, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+  : '';
 ?>
-<section class="shop-hero-artisan">
+<section class="shop-hero-artisan"
+  <?php if ($hero_photos_attr) : ?>data-hero-photos="<?php echo esc_attr($hero_photos_attr); ?>"<?php endif; ?>
+  <?php if ($hero_initial_bg) : ?>style="background-image: url('<?php echo esc_url($hero_initial_bg); ?>');"<?php endif; ?>>
   <div class="shop-hero-artisan-inner">
     <h1 data-hero-title><?php echo esc_html($hero_title); ?></h1>
   </div>
