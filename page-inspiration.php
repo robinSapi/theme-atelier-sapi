@@ -23,22 +23,23 @@ $products_query = new WP_Query([
   ],
 ]);
 
+// S28 Phase 6a-bis — lecture via helper Phase 3 (Gallery uniquement, plus
+// de fallback repeater depuis 6b-1). On garde le couple [attachment_id,
+// product_id] pour pouvoir lier chaque photo à son produit. L'ordre interne
+// par produit (ambiance puis detail, au lieu de l'ordre repeater mélangé) est
+// SANS IMPACT VISIBLE : shuffle($photos) randomise tout ci-dessous.
 $photos = [];
 
 if ($products_query->have_posts() && function_exists('get_field')) {
   foreach ($products_query->posts as $product_id) {
-    $galerie = get_field('galerie_produit', $product_id);
-    if (empty($galerie) || !is_array($galerie)) continue;
-    foreach ($galerie as $row) {
-      $type = isset($row['type_photo']) ? $row['type_photo'] : '';
-      if (is_array($type)) $type = isset($type['value']) ? $type['value'] : '';
-      if ($type !== 'ambiance' && $type !== 'detail') continue;
-      $img_id = sapi_get_acf_image_id(isset($row['image']) ? $row['image'] : null);
-      if (!$img_id) continue;
-      $photos[] = [
-        'attachment_id' => $img_id,
-        'product_id'    => $product_id,
-      ];
+    foreach (['ambiance', 'detail'] as $type) {
+      $ids = sapi_get_product_photo_ids($product_id, $type);
+      foreach ($ids as $img_id) {
+        $photos[] = [
+          'attachment_id' => $img_id,
+          'product_id'    => $product_id,
+        ];
+      }
     }
   }
 }
