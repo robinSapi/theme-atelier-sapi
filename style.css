@@ -12250,7 +12250,7 @@ button.room-card {
 
 /* Hero style artisan pour /nos-creations/ */
 .shop-hero-artisan {
-  padding: 140px 20px 100px;
+  padding: 168px 20px 120px;
   text-align: center;
   background: url('https://atelier-sapi.fr/wp-content/uploads/2026/02/Bandeau-1.jpg') center/cover no-repeat;
   position: relative;
@@ -12317,7 +12317,7 @@ button.room-card {
 
 @media (max-width: 768px) {
   .shop-hero-artisan {
-    padding: 100px 20px 60px;
+    padding: 120px 20px 72px;
   }
 
   .shop-hero-artisan h1 {
