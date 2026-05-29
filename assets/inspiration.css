@@ -571,17 +571,6 @@
   }
 }
 
-.inspiration-filters__title {
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-weight: 700;
-  font-size: 0.9rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-wood-dark, #4A3F35);
-  margin: 0;
-  text-align: center;
-}
-
 .inspiration-filters__section {
   display: flex;
   flex-direction: column;
@@ -596,17 +585,21 @@
   text-transform: uppercase;
   color: var(--color-wood, #937D68);
   margin: 0;
+  text-align: center;
 }
 
+/* Colonnes à largeur fixe + justify-content: center pour centrer
+   l'ensemble (et la dernière ligne quand elle n'est pas pleine). */
 .inspiration-filters__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(78px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, 80px);
   gap: 8px;
+  justify-content: center;
 }
 
 @media (min-width: 1024px) {
   .inspiration-filters__grid {
-    grid-template-columns: repeat(auto-fill, minmax(min(88px, 100%), 1fr));
+    grid-template-columns: repeat(auto-fit, 92px);
     gap: 10px;
   }
 }

@@ -80,7 +80,35 @@ if (!empty($photos)) {
     $photos[$i]['essences'] = $essence_slugs;
   }
 
-  asort($used_rooms);
+  // Tri pièces par popularité supposée (Robin) ; "autre-*" en fin de liste ;
+  // pièces hors classement → après les connues mais avant les "autre-*".
+  $room_priority = [
+    'salon'             => 1,
+    'cuisine'           => 2,
+    'salle-a-manger'    => 3,
+    'chambre'           => 4,
+    'chambre-enfant'    => 5,
+    'bureau'            => 6,
+    'entree'            => 7,
+    'escalier'          => 8,
+    'couloir'           => 9,
+    'hotel'             => 20,
+    'restaurant'        => 21,
+    'boutique'          => 22,
+    'espace-bien-etre'  => 23,
+    'salle-de-reunion'  => 24,
+  ];
+  uksort($used_rooms, function ($a, $b) use ($room_priority, $used_rooms) {
+    $aIsAutre = strpos($a, 'autre') === 0;
+    $bIsAutre = strpos($b, 'autre') === 0;
+    if ($aIsAutre && !$bIsAutre) return 1;
+    if (!$aIsAutre && $bIsAutre) return -1;
+    $rankA = isset($room_priority[$a]) ? $room_priority[$a] : 100;
+    $rankB = isset($room_priority[$b]) ? $room_priority[$b] : 100;
+    if ($rankA !== $rankB) return $rankA - $rankB;
+    return strcmp($used_rooms[$a], $used_rooms[$b]);
+  });
+
   asort($used_essences);
 }
 
@@ -98,9 +126,6 @@ $inspiration_room_icons = [
   'entree'          => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="15" cy="12" r="1"/></svg>',
   'escalier'        => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4v-4h4v-4h4V8h4"/><path d="M4 20V8"/><path d="M20 20V8"/></svg>',
 ];
-
-// Icône bois générique pour toutes les essences (planche avec lignes de grain).
-$inspiration_essence_icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M3 14h18"/></svg>';
 
 // Équivalent PHP de product-name-formatter.js (split premier mot / reste).
 // Le rendu serveur évite le FOUC ; le formatter JS détecte .product-firstname
@@ -274,11 +299,10 @@ $render_photo = function ($photo, $position_in_grid) {
   <?php
 };
 
-$render_filter_card = function () use ($used_rooms, $used_essences, $inspiration_room_icons, $inspiration_essence_icon) {
+$render_filter_card = function () use ($used_rooms, $used_essences, $inspiration_room_icons) {
   ?>
   <article class="inspiration-card inspiration-card--filters" data-inspiration-filters>
     <div class="inspiration-card__inner inspiration-filters__inner">
-      <h3 class="inspiration-filters__title">Filtrer la galerie</h3>
 
       <?php if (!empty($used_rooms)) : ?>
         <div class="inspiration-filters__section">
@@ -307,11 +331,10 @@ $render_filter_card = function () use ($used_rooms, $used_essences, $inspiration
           <p class="inspiration-filters__legend">Essence de bois</p>
           <div class="inspiration-filters__grid">
             <?php foreach ($used_essences as $slug => $label) : ?>
-              <button type="button" class="inspiration-filter-btn"
+              <button type="button" class="inspiration-filter-btn inspiration-filter-btn--no-icon"
                       data-filter-type="essence"
                       data-filter-value="<?php echo esc_attr($slug); ?>"
                       aria-pressed="false">
-                <span class="inspiration-filter-btn__icon" aria-hidden="true"><?php echo $inspiration_essence_icon; ?></span>
                 <span class="inspiration-filter-btn__label"><?php echo esc_html($label); ?></span>
               </button>
             <?php endforeach; ?>
