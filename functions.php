@@ -113,7 +113,7 @@ function sapi_fallback_primary_menu() {
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/suspensions/')); ?>">Suspensions</a></li>
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampadaires/')); ?>">Lampadaires</a></li>
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/appliques/')); ?>">Appliques</a></li>
-          <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampesaposer/')); ?>">À poser</a></li>
+          <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampesaposer/')); ?>">Lampe à poser</a></li>
         </ul>
       </li>
       <li class="menu-item"><a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>">Sur mesure</a></li>
@@ -136,7 +136,7 @@ function sapi_fallback_mobile_menu() {
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/suspensions/')); ?>">Suspensions</a></li>
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampadaires/')); ?>">Lampadaires</a></li>
           <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/appliques/')); ?>">Appliques</a></li>
-          <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampesaposer/')); ?>">À poser</a></li>
+          <li class="menu-item"><a href="<?php echo esc_url(home_url('/categorie-produit/lampesaposer/')); ?>">Lampe à poser</a></li>
         </ul>
       </li>
       <li class="menu-item"><a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>">Sur mesure</a></li>

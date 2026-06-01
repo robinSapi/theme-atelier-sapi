@@ -265,7 +265,7 @@ $collection_slugs = [
   ['slug' => 'suspensions', 'name' => 'Suspensions'],
   ['slug' => 'lampadaires', 'name' => 'Lampadaires'],
   ['slug' => 'appliques',   'name' => 'Appliques'],
-  ['slug' => 'lampesaposer', 'name' => 'À poser'],
+  ['slug' => 'lampesaposer', 'name' => 'Lampe à poser'],
   ['slug' => 'accessoires', 'name' => 'Accessoires', 'prefer' => 'ampoule'],
 ];
 
