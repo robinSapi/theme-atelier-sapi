@@ -277,41 +277,51 @@ foreach ($collection_slugs as $col) {
   $cat_url = get_term_link($cat_term);
   $cat_count = $cat_term->count;
 
-  // Récupérer l'image d'un produit de la catégorie (bandeau ACF → image à la une)
-  $col_image = '';
-  $col_query = new WP_Query([
-    'post_type' => 'product',
-    'posts_per_page' => 12,
-    'post_status' => 'publish',
-    'tax_query' => [['taxonomy' => 'product_cat', 'field' => 'slug', 'terms' => $col['slug']]],
-    'orderby' => 'menu_order date',
-    'order' => 'ASC',
-  ]);
-  if ($col_query->have_posts()) {
-    $fallback_id = null;
-    $preferred_id = null;
-    while ($col_query->have_posts()) {
-      $col_query->the_post();
-      $pid = get_the_ID();
-      if (!$fallback_id) $fallback_id = $pid;
-
-      // Priorité à un produit spécifique si défini (ex: "ampoule" pour accessoires)
-      if (!empty($col['prefer']) && stripos(get_the_title(), $col['prefer']) !== false) {
-        $preferred_id = $pid;
-      }
+  // 1. Vérifier si une image custom ACF existe pour cette catégorie
+  $col_image_id = null;
+  if (function_exists('get_field') && $cat_term) {
+    $custom_image_id = get_field('image_collection', 'product_cat_' . $cat_term->term_id);
+    if ($custom_image_id) {
+      $col_image_id = $custom_image_id;
     }
-    wp_reset_postdata();
+  }
 
-    // Image collection : 3ème photo ambiance du repeater galerie_produit
-    // (produit "preferred" si défini, sinon 1er produit de la catégorie),
-    // fallback sur la dernière ambiance disponible, puis vignette WC en dernier recours.
-    $target_id = $preferred_id ?: $fallback_id;
-    if ($target_id) {
-      $amb_photo_ids = sapi_get_product_photo_ids($target_id, 'ambiance');
-      if (!empty($amb_photo_ids)) {
-        $col_image_id = isset($amb_photo_ids[2]) ? $amb_photo_ids[2] : end($amb_photo_ids);
-      } else {
-        $col_image_id = get_post_thumbnail_id($target_id);
+  // 2. Fallback : image depuis un produit de la catégorie (si pas d'ACF)
+  if (!$col_image_id) {
+    $col_query = new WP_Query([
+      'post_type' => 'product',
+      'posts_per_page' => 12,
+      'post_status' => 'publish',
+      'tax_query' => [['taxonomy' => 'product_cat', 'field' => 'slug', 'terms' => $col['slug']]],
+      'orderby' => 'menu_order date',
+      'order' => 'ASC',
+    ]);
+    if ($col_query->have_posts()) {
+      $fallback_id = null;
+      $preferred_id = null;
+      while ($col_query->have_posts()) {
+        $col_query->the_post();
+        $pid = get_the_ID();
+        if (!$fallback_id) $fallback_id = $pid;
+
+        // Priorité à un produit spécifique si défini (ex: "ampoule" pour accessoires)
+        if (!empty($col['prefer']) && stripos(get_the_title(), $col['prefer']) !== false) {
+          $preferred_id = $pid;
+        }
+      }
+      wp_reset_postdata();
+
+      // Image collection : 3ème photo ambiance du repeater galerie_produit
+      // (produit "preferred" si défini, sinon 1er produit de la catégorie),
+      // fallback sur la dernière ambiance disponible, puis vignette WC en dernier recours.
+      $target_id = $preferred_id ?: $fallback_id;
+      if ($target_id) {
+        $amb_photo_ids = sapi_get_product_photo_ids($target_id, 'ambiance');
+        if (!empty($amb_photo_ids)) {
+          $col_image_id = isset($amb_photo_ids[2]) ? $amb_photo_ids[2] : end($amb_photo_ids);
+        } else {
+          $col_image_id = get_post_thumbnail_id($target_id);
+        }
       }
     }
   }

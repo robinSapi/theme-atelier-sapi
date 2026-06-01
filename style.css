@@ -11466,15 +11466,15 @@ button.room-card {
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   gap: 1.5rem;
-  padding: 3.5rem 0 4rem 5rem;
-  scroll-padding-left: 5rem;
+  padding: 3.5rem 0 4rem 0;
+  /* Gouttière identique aux sections de contenu (.hero-bento, .newsletter-kinetic) :
+     max-width 1600px centré + 3rem. Mise en padding INTERNE du conteneur de scroll
+     (pas en ::before, qui se faisait avaler par scroll-snap mandatory) : le track
+     reste pleine largeur (scroll bord à bord) et la 1re carte s'aligne sur le contenu. */
+  padding-inline: max(3rem, calc((100vw - 1600px) / 2 + 3rem));
+  scroll-padding-inline: max(3rem, calc((100vw - 1600px) / 2 + 3rem));
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-}
-
-.collections-grid::after {
-  content: '';
-  flex: 0 0 5rem;
 }
 
 .collections-grid::-webkit-scrollbar {
@@ -11485,7 +11485,7 @@ button.room-card {
   position: relative;
   flex: 0 0 30%;
   aspect-ratio: 3/4;
-  max-height: 420px;
+  max-height: 500px;
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
