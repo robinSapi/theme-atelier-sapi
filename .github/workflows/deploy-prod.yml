@@ -12,9 +12,6 @@ name: Deploy to Production
 on:
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   deploy:
     name: Deploy to atelier-sapi.fr
@@ -27,7 +24,7 @@ jobs:
           fetch-depth: 0
 
       - name: Deploy to O2Switch via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_SERVER_PROD }}
           username: ${{ secrets.FTP_USERNAME_PROD }}
