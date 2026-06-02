@@ -234,7 +234,7 @@ get_header();
   <!-- ═══════════════════════════════════════════════════════════════
        SECTION 01 — HERO PRODUIT (Premium Layout)
        ═══════════════════════════════════════════════════════════════ -->
-  <section class="product-hero product-hero-v2">
+  <section class="product-hero product-hero-v2<?php echo empty($slideshow_photos) ? ' product-hero--no-intro' : ''; ?>">
     <div class="product-hero-container">
 
       <!-- COLONNE GAUCHE: Galerie (60%) -->
