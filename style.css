@@ -16799,6 +16799,13 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
   background: transparent;
 }
 
+/* Pas de slideshow d'ambiance (ex : carte cadeau, accessoires sans photo
+   ambiance) → pas de chevauchement à compenser. Sans ce reset, le margin-top
+   négatif remonte le hero sous le header + barre de réassurance (haut coupé). */
+.product-hero--no-intro {
+  margin-top: 0;
+}
+
 .product-hero-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -18186,6 +18193,10 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
   .product-hero-v2 {
     padding: 0.5rem 0 1rem;
     margin-top: -10vh;
+  }
+
+  .product-hero--no-intro {
+    margin-top: 0;
   }
 
   .product-hero-container {
