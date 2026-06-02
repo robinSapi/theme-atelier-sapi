@@ -6164,34 +6164,17 @@ function sapi_format_product_for_search($product) {
 }
 
 /**
- * Newsletter opt-in checkbox on checkout (RGPD — opt-in explicite)
- * Case à cocher activement ; la meta _sapi_newsletter_optin est exploitée
- * par sapi_brevo_newsletter_sync_optin() pour pousser le contact dans la
- * liste Brevo #6 "Newsletter" dès la création de la commande.
+ * NOTE : la case opt-in newsletter du checkout (enregistrement du champ +
+ * sauvegarde de la meta _sapi_newsletter_optin) ainsi que toutes les syncs
+ * Brevo liées aux commandes (#6 Newsletter + #12 Commande récente) ont été
+ * migrées vers le snippet Code Snippets « sapi-brevo-sync-commandes »
+ * (voir snippet-brevo-sync-commandes.php). functions.php ne garde ici que
+ * la sauvegarde de la note client et de la meta opt-in au retry paiement. — 2026-06-02
  */
-add_action('woocommerce_init', function () {
-  if (!function_exists('woocommerce_register_additional_checkout_field')) return;
 
-  woocommerce_register_additional_checkout_field([
-    'id'       => 'sapi-maison/newsletter-optin',
-    'label'    => 'Je souhaite recevoir des nouvelles de l\'atelier et de jolies idées pour m\'inspirer',
-    'location' => 'order',
-    'type'     => 'checkbox',
-    'default'  => false,
-  ]);
-});
-
-
-// Save the opt-in choice as order meta
-add_action('woocommerce_set_additional_field_value', function ($key, $value, $group, $wc_object) {
-  if ($key !== 'sapi-maison/newsletter-optin') return;
-  if (!($wc_object instanceof WC_Order)) return;
-  $wc_object->update_meta_data('_sapi_newsletter_optin', wc_bool_to_string($value));
-}, 10, 4);
-
-// Sauvegarder la note et l'opt-in newsletter depuis la page Order Pay,
-// puis déclencher la sync Brevo si la case vient d'être cochée (cas retry
-// paiement où la case a été oubliée au checkout initial).
+// Sauvegarder la note et l'opt-in newsletter depuis la page Order Pay.
+// La sync Brevo correspondante est gérée par le snippet « sapi-brevo-sync-commandes »
+// (hook woocommerce_before_pay_action priorité 25, après ce handler).
 add_action('woocommerce_before_pay_action', function ($order) {
   // Note de commande
   if (! empty($_POST['sapi_order_note'])) {
@@ -6206,92 +6189,9 @@ add_action('woocommerce_before_pay_action', function ($order) {
     $order->update_meta_data('_sapi_newsletter_optin', 'yes');
   }
   $order->save();
-
-  sapi_brevo_newsletter_sync_optin($order->get_id());
+  // La sync Brevo #6 au retry est déclenchée par le snippet
+  // « sapi-brevo-sync-commandes » (même hook, priorité 25).
 });
-
-/**
- * Push vers la liste Brevo #6 (Newsletter) si le client a coché l'opt-in.
- *
- * Déclenché à la création de la commande (tous moyens de paiement, avant
- * validation du paiement — le consentement est donné au submit). Également
- * rappelé depuis la page order-pay si l'opt-in est coché au retry. Le flag
- * _sapi_newsletter_brevo_synced garantit l'idempotence.
- *
- * updateEnabled: true → dédoublonne si déjà inscrit via la popup cookie.
- * Un échec Brevo n'interrompt pas le workflow commande (log uniquement).
- */
-// Checkout Blocks (Store API) — hook principal sur ce site
-add_action('woocommerce_store_api_checkout_order_processed', function ($order) {
-  if ($order instanceof WC_Order) {
-    sapi_brevo_newsletter_sync_optin($order->get_id());
-  }
-}, 20, 1);
-// Checkout classique (fallback / compat)
-add_action('woocommerce_checkout_order_processed', 'sapi_brevo_newsletter_sync_optin', 20, 1);
-
-function sapi_brevo_newsletter_sync_optin($order_id) {
-  $order = wc_get_order($order_id);
-  if (!$order) return;
-
-  if ($order->get_meta('_sapi_newsletter_optin') !== 'yes') return;
-  if ($order->get_meta('_sapi_newsletter_brevo_synced') === 'yes') return;
-
-  $email = $order->get_billing_email();
-  if (!$email || !is_email($email)) return;
-
-  $api_key = defined('BREVO_API_KEY') ? BREVO_API_KEY : '';
-  if (!$api_key) {
-    error_log('[sapi-brevo-newsletter] BREVO_API_KEY manquante, opt-in non synchronisé (commande #' . $order_id . ')');
-    return;
-  }
-
-  $attributes = [];
-  $firstname = $order->get_billing_first_name();
-  $lastname  = $order->get_billing_last_name();
-  if ($firstname) $attributes['PRENOM'] = $firstname;
-  if ($lastname)  $attributes['NOM']    = $lastname;
-
-  $payload = [
-    'email'         => $email,
-    'listIds'       => [6],
-    'updateEnabled' => true,
-  ];
-  if (!empty($attributes)) {
-    $payload['attributes'] = $attributes;
-  }
-
-  $response = wp_remote_post('https://api.brevo.com/v3/contacts', [
-    'timeout' => 10,
-    'headers' => [
-      'accept'       => 'application/json',
-      'content-type' => 'application/json',
-      'api-key'      => $api_key,
-    ],
-    'body'    => wp_json_encode($payload),
-  ]);
-
-  if (is_wp_error($response)) {
-    error_log('[sapi-brevo-newsletter] Erreur HTTP commande #' . $order_id . ' : ' . $response->get_error_message());
-    return;
-  }
-
-  $code = wp_remote_retrieve_response_code($response);
-  if ($code >= 200 && $code < 300) {
-    $order->update_meta_data('_sapi_newsletter_brevo_synced', 'yes');
-    $order->save();
-    return;
-  }
-
-  error_log('[sapi-brevo-newsletter] Brevo a répondu ' . $code . ' pour commande #' . $order_id . ' : ' . wp_remote_retrieve_body($response));
-}
-
-/**
- * NOTE : le push vers la liste Brevo #12 "Commande récente" a été migré
- * vers un snippet Code Snippets (délai de 5 min via wp_schedule_single_event)
- * pour passer APRÈS la sync destructive du plugin "Brevo for WooCommerce".
- * Voir snippet-brevo-delayed-list12.php. — 2026-06-02
- */
 
 /**
  * ============================================================
