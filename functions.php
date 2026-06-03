@@ -3883,6 +3883,7 @@ function sapi_render_conseiller_modal() {
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
                 </button>
                 <p class="contact-reassure"><?php esc_html_e('Réponse de Robin sous 48h · Aucun engagement', 'theme-sapi-maison'); ?></p>
+                <p class="contact-disclaimer"><?php esc_html_e('En envoyant votre demande, vous acceptez de recevoir occasionnellement des nouvelles de l\'Atelier Sâpi. Désinscription possible à tout moment.', 'theme-sapi-maison'); ?></p>
               </form>
             </div>
           </div>
@@ -4313,6 +4314,39 @@ function sapi_ajax_megafilter_surmesure() {
   if (!empty($_POST['website'])) {
     wp_send_json_success(['message' => 'Merci.']);
     return;
+  }
+
+  // Inscription à la liste Brevo #6 (newsletter) avec SOURCE=conseiller, pour que
+  // ces prospects entrent dans la séquence d'accueil -10 % (branche A). Les deux
+  // sources (conseiller-modal + card-mes-creations) sont stampées 'conseiller'.
+  // On n'envoie QUE l'attribut SOURCE : ajouter tél/message/projet ferait rejeter
+  // tout l'ajout par Brevo (400). Non bloquant : l'email de notif et la réponse
+  // JSON ci-dessous continuent même si Brevo échoue.
+  $api_key = defined('BREVO_API_KEY') ? BREVO_API_KEY : '';
+  if ($api_key) {
+    $brevo_response = wp_remote_post('https://api.brevo.com/v3/contacts', [
+      'headers' => [
+        'api-key'      => $api_key,
+        'Content-Type' => 'application/json',
+        'Accept'       => 'application/json',
+      ],
+      'body' => wp_json_encode([
+        'email'         => $email,
+        'listIds'       => [6],
+        'attributes'    => ['SOURCE' => 'conseiller'],
+        'updateEnabled' => true,
+      ]),
+      'timeout' => 15,
+    ]);
+
+    if (is_wp_error($brevo_response)) {
+      error_log('[sapi-brevo-conseiller] Erreur HTTP (' . $email . ') : ' . $brevo_response->get_error_message());
+    } else {
+      $brevo_code = wp_remote_retrieve_response_code($brevo_response);
+      if ($brevo_code < 200 || $brevo_code >= 300) {
+        error_log('[sapi-brevo-conseiller] Brevo a répondu ' . $brevo_code . ' (' . $email . ') : ' . wp_remote_retrieve_body($brevo_response));
+      }
+    }
   }
 
   // Snapshot projet (optionnel)

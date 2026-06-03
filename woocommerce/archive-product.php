@@ -558,6 +558,7 @@ $conseil_room_icons = sapi_guide_get_icons();
                 </button>
               </form>
               <p class="conseiller-surmesure-reassurance"><?php esc_html_e('Réponse de Robin sous 48h · Aucun engagement', 'theme-sapi-maison'); ?></p>
+              <p class="conseiller-surmesure-disclaimer"><?php esc_html_e('En envoyant votre demande, vous acceptez de recevoir occasionnellement des nouvelles de l\'Atelier Sâpi. Désinscription possible à tout moment.', 'theme-sapi-maison'); ?></p>
             </div>
           </div>
 
@@ -585,6 +586,7 @@ $conseil_room_icons = sapi_guide_get_icons();
                 </button>
               </form>
               <p class="conseiller-surmesure-reassurance"><?php esc_html_e('Réponse de Robin sous 48h · Aucun engagement', 'theme-sapi-maison'); ?></p>
+              <p class="conseiller-surmesure-disclaimer"><?php esc_html_e('En envoyant votre demande, vous acceptez de recevoir occasionnellement des nouvelles de l\'Atelier Sâpi. Désinscription possible à tout moment.', 'theme-sapi-maison'); ?></p>
             </div>
           </div>
 
