@@ -6235,7 +6235,7 @@ function sapi_newsletter_subscribe() {
             'email'            => $email,
             'listIds'          => [6],
             'updateEnabled'    => true,
-            'attributes'       => ['SOURCE' => 'newsletter'],
+            'attributes'       => ['SOURCE' => 'homepage'],
         ]),
         'timeout' => 15,
     ]);
