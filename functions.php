@@ -2681,6 +2681,7 @@ function sapi_ajax_robin_contact() {
     if ($message) $attributes['MESSAGE']  = $message;
     if ($project) $attributes['PROJET']   = $project;
     if ($page)    $attributes['PAGE']     = $page;
+    $attributes['SOURCE'] = 'conseiller';
 
     wp_remote_post('https://api.brevo.com/v3/contacts', [
       'headers' => [
@@ -6234,6 +6235,7 @@ function sapi_newsletter_subscribe() {
             'email'            => $email,
             'listIds'          => [6],
             'updateEnabled'    => true,
+            'attributes'       => ['SOURCE' => 'newsletter'],
         ]),
         'timeout' => 15,
     ]);
@@ -7965,7 +7967,7 @@ function sapi_welcome_coupon_success_message($msg, $msg_code, $coupon) {
 /**
  * Galerie Inspiration — handler AJAX inscription newsletter Brevo (liste #6).
  * Mirroir du handler `sapi_brevo_subscribe` du snippet popup cookies, mais
- * avec SOURCE = "Galerie Inspiration" pour distinguer l'origine côté Brevo.
+ * avec SOURCE = "inspiration" pour distinguer l'origine côté Brevo.
  *
  * Pourquoi un handler dédié plutôt que de réutiliser celui du snippet :
  * - Le snippet hardcode SOURCE = 'popup', non paramétrable.
@@ -8020,7 +8022,7 @@ function sapi_inspiration_brevo_subscribe() {
       'listIds'       => [6],
       'updateEnabled' => true,
       'attributes'    => [
-        'SOURCE' => 'Galerie Inspiration',
+        'SOURCE' => 'inspiration',
       ],
     ]),
   ]);
