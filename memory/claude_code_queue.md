@@ -2,6 +2,220 @@
 
 ## 🔧 À faire
 
+_(rien en attente)_
+
+## ✅ [FAIT 2026-06-03 — en attente choix de branche] Étiqueter chaque inscription Brevo #6 avec un attribut SOURCE
+**Résultat (functions.php, non commité) :**
+- `sapi_newsletter_subscribe()` (payload #6, ~6236) : ajout `'attributes' => ['SOURCE' => 'newsletter']`.
+- `sapi_ajax_robin_contact()` (~2684) : ajout `$attributes['SOURCE'] = 'conseiller';` après les attributs existants.
+- Handler Galerie Inspiration (~8025) : `'Galerie Inspiration'` → `'inspiration'` (+ docblock ~7970 mis à jour).
+- **Greps OK** : `SOURCE` → `newsletter`, `conseiller`, `inspiration` (valeurs uniquement) ; les 3 payloads ciblent toujours `listIds:[6]`. Les 2 « Galerie Inspiration » restants (lignes 508, 7968) sont des **noms de feature/page** dans des commentaires, pas la valeur SOURCE — conservés volontairement.
+- Snippet popup (`SOURCE=popup`) et snippet `sapi-brevo-sync-commandes` (checkout) non touchés. Aucun handler de notif email modifié.
+- ⚠️ `php -l` impossible (pas de PHP local) → validation manuelle (ajouts d'une ligne dans des tableaux existants).
+
+### 👉 Action Robin
+**Choisir la branche avant que je commite/pousse** : `master` (hotfix direct) ou une `feature/*` ? Rien n'est poussé tant que tu n'as pas tranché.
+
+<details><summary>Énoncé original</summary>
+
+## [TÂCHE] Étiqueter chaque inscription Brevo #6 avec un attribut SOURCE
+**Date :** 2026-06-03
+**Branche :** à confirmer avec Robin avant de commiter (master = hotfix, sinon feature/*). Ne rien pousser sans accord.
+**Priorité :** normale
+
+**Contexte :** On déploie une séquence d'accueil Brevo sur la liste #6. Le routage de l'automatisation se fait sur l'attribut `SOURCE` : les **prospects** (`popup`, `inspiration`, `newsletter`, `conseiller`) reçoivent la séquence -10 %, les **acheteurs** (checkout) et ajouts manuels n'ont pas de SOURCE prospect et sortent. Aujourd'hui seules 2 portes posent un SOURCE (popup + galerie inspiration). Il faut étiqueter les autres et normaliser. La modification de l'automatisation Brevo elle-même est faite par Robin dans l'UI Brevo, pas ici.
+
+**À faire (functions.php) :**
+
+1. **`sapi_newsletter_subscribe()`** (~ligne 6204) — le payload Brevo (`wp_remote_post` vers `/v3/contacts`) n'envoie que `email` + `listIds:[6]` + `updateEnabled`. Ajouter dans le body :
+   `'attributes' => ['SOURCE' => 'newsletter'],`
+
+2. **`sapi_ajax_robin_contact()`** (~ligne 2647, payload #6 vers ~2693) — le tableau `$attributes` contient déjà `SMS`, `MESSAGE`, `PROJET`, `PAGE`. Y ajouter :
+   `$attributes['SOURCE'] = 'conseiller';`
+
+3. **Handler Galerie Inspiration** (~ligne 8020) — actuellement `'SOURCE' => 'Galerie Inspiration'`. Normaliser en :
+   `'SOURCE' => 'inspiration',`
+
+**Ne PAS toucher :** le snippet popup (déjà `SOURCE=popup`), ni le snippet Code Snippets `sapi-brevo-sync-commandes` (la SOURCE `checkout` y sera ajoutée séparément par Robin côté Code Snippets, hors thème).
+
+**Critères de succès :**
+- `grep -n "SOURCE" functions.php` montre les 3 valeurs : `newsletter`, `conseiller`, `inspiration` (et plus aucune occurrence de `Galerie Inspiration`).
+- Les 3 payloads Brevo concernés ciblent toujours `listIds:[6]` et rien d'autre n'est cassé.
+- Aucune modification des handlers de notification email à Robin.
+
+</details>
+
+## ✅ [FAIT 2026-06-02] Snippet Brevo unifié — migration syncs commandes
+**Résultat :**
+- **functions.php nettoyé** (commit `70fd4ae`, push master) : retirés l'enregistrement du champ checkbox opt-in (`woocommerce_init`), la save meta (`woocommerce_set_additional_field_value`), les 2 hooks `order_processed` #6, la fonction `sapi_brevo_newsletter_sync_optin`, et l'appel sync dans `before_pay_action`. **Handler `before_pay_action` conservé** (sauve toujours note client + meta opt-in). Résidus #12 : déjà 0 (commit dbf0f36).
+- **Greps de contrôle OK** : `sapi_brevo_newsletter_sync_optin`/`sapi_brevo_commande_recente_sync` → 0 ; `listIds [12]` → 0 ; `before_pay_action` intact ; handlers AJAX newsletter (popup #2693, subscribe, contact Robin) intacts.
+- **Snippet unifié créé** : `memory/snippet-brevo-sync-commandes.php` (6 sections, helper commun `sapi_brevo_upsert_contact()`, `error_log` partout, guards `function_exists`, démarre par `<?php`). Ancien `snippet-brevo-delayed-list12.php` supprimé.
+- ⚠️ `php -l` impossible (aucun PHP installé en local) → validé par contrôle manuel + équilibrage accolades/parenthèses/crochets (24/24, 115/115, 18/18).
+
+### 👉 Actions Robin
+1. **Coller** `snippet-brevo-sync-commandes.php` dans Code Snippets (SANS la ligne `<?php`), portée « Exécuter partout », activer. Si l'ancien snippet #12 y est encore, le **désactiver/supprimer** (remplacé).
+2. **Déployer master en prod** via le workflow GitHub Actions.
+3. ⚠️ **Ordre conseillé** : déployer master (suppression functions.php) PUIS activer le snippet juste après. Évite le conflit « champ déjà enregistré » (snippet + ancien functions.php simultanés) ; brève fenêtre sans case opt-in, sans gravité.
+
+<details><summary>Énoncé original</summary>
+
+## [TÂCHE] Snippet Brevo unifié — migration syncs commandes depuis functions.php
+**Date :** 2026-06-02
+**Branche :** `master` (push auto)
+**Priorité :** haute — complète la migration commencée par le commit dbf0f36
+
+### Contexte
+
+On migre TOUTES les syncs Brevo déclenchées par une commande hors de functions.php vers un **snippet Code Snippets unique**. Ça comprend :
+
+- **Liste #12 "Commande récente"** — déjà retirée de functions.php (commit `dbf0f36`), snippet existant dans `memory/snippet-brevo-delayed-list12.php`. À intégrer dans le snippet unifié.
+- **Liste #6 "Newsletter opt-in checkout"** — encore dans functions.php, à retirer et migrer.
+
+Les handlers AJAX (popup cookies, galerie inspiration, contact Robin Conseiller) **restent dans functions.php** — ils ne sont pas concernés.
+
+### PARTIE 1 — Supprimer de functions.php
+
+Lire le fichier et repérer les blocs exacts avant suppression. Voici les repères :
+
+#### 1a. Bloc "Newsletter opt-in checkbox on checkout"
+Tout le bloc depuis le commentaire `Newsletter opt-in checkbox on checkout (RGPD — opt-in explicite)` jusqu'à la fin du `woocommerce_set_additional_field_value` hook. Comprend :
+- `woocommerce_register_additional_checkout_field` (registration du champ checkbox)
+- `woocommerce_set_additional_field_value` (sauvegarde meta `_sapi_newsletter_optin`)
+
+#### 1b. Les hooks checkout pour la sync newsletter #6
+- `add_action('woocommerce_store_api_checkout_order_processed', function ($order) { ... sapi_brevo_newsletter_sync_optin ... });`
+- `add_action('woocommerce_checkout_order_processed', 'sapi_brevo_newsletter_sync_optin', 20, 1);`
+
+#### 1c. La fonction `sapi_brevo_newsletter_sync_optin` entière
+Depuis le docblock jusqu'à l'accolade fermante.
+
+#### 1d. Dans le handler `woocommerce_before_pay_action`
+- **Retirer UNIQUEMENT** la ligne `sapi_brevo_newsletter_sync_optin($order->get_id());`
+- **Garder TOUT le reste** du handler (save note + save opt-in meta + `$order->save()`)
+- **Mettre à jour le commentaire** au-dessus du hook pour refléter que la sync Brevo est maintenant gérée par le snippet
+
+#### 1e. Si le code #12 (sapi_brevo_commande_recente_sync) est encore là
+Il a normalement été supprimé par le commit `dbf0f36`. **Vérifier** avec grep. Si des résidus restent, les supprimer aussi.
+
+### PARTIE 2 — Créer le snippet unifié
+
+Créer le fichier `memory/snippet-brevo-sync-commandes.php` (remplace l'ancien `memory/snippet-brevo-delayed-list12.php`).
+
+Le snippet doit contenir **6 sections** :
+
+```
+SECTION 1 — Checkout field : newsletter opt-in
+  - woocommerce_register_additional_checkout_field (même config que l'actuel)
+  - woocommerce_set_additional_field_value (save meta _sapi_newsletter_optin)
+
+SECTION 2 — Hooks commande : scheduler #12 + appel #6
+  - Hook woocommerce_store_api_checkout_order_processed (priorité 25) :
+    → schedule wp_schedule_single_event(time() + 300) pour #12 (TOUJOURS)
+    → appel sync #6 si opt-in (CONDITIONNEL)
+  - Hook woocommerce_checkout_order_processed (priorité 25) : idem
+
+SECTION 3 — Hook order-pay : sync #6 au retry paiement
+  - Hook woocommerce_before_pay_action (priorité 25, APRÈS le handler functions.php qui save le meta) :
+    → appel sync #6 si opt-in
+  
+SECTION 4 — Handler WP-Cron : ajout retardé à #12
+  - add_action('sapi_brevo_delayed_list12_sync', ...) 
+  - Reprendre le code de memory/snippet-brevo-delayed-list12.php (POST Brevo /v3/contacts, listIds:[12], updateEnabled:true, PRENOM/NOM)
+
+SECTION 5 — Fonction sync newsletter #6
+  - Reprendre sapi_brevo_newsletter_sync_optin de functions.php
+  - Garde la vérification _sapi_newsletter_optin === 'yes'
+  - Garde l'idempotence via _sapi_newsletter_brevo_synced
+  - POST Brevo /v3/contacts, listIds:[6], updateEnabled:true, PRENOM/NOM
+
+SECTION 6 — Fonction helper commune (optionnel)
+  - Si pertinent, factoriser le POST Brevo en helper pour éviter la duplication #6/#12
+```
+
+**Règles du snippet :**
+- `defined('ABSPATH') || exit;` en 1re ligne
+- Pas de `<?php` (Code Snippets l'ajoute)
+- Constante `BREVO_API_KEY` de wp-config.php
+- `error_log()` pour tracer scheduling #12 et exécutions des deux syncs
+- Docblock en tête avec : nom du snippet, ce qu'il fait, séquence attendue pour #12, instructions d'installation Code Snippets ("Exécuter partout")
+- Autonome : zéro dépendance à functions.php pour les syncs Brevo
+
+### PARTIE 3 — Vérifications
+
+1. `grep -n 'sapi_brevo_newsletter_sync_optin\|sapi_brevo_commande_recente_sync' functions.php` → 0 résultat
+2. `grep -n 'listIds.*12\|listIds.*\[12\]' functions.php` → 0 résultat  
+3. Le handler `woocommerce_before_pay_action` existe toujours (save note + save meta)
+4. Les handlers AJAX newsletter (popup, galerie, contact Robin) sont **intacts**
+5. Le snippet compile sans erreur PHP (`php -l`)
+
+### Critères de succès
+
+- functions.php ne contient plus aucune sync Brevo liée aux commandes (#6 checkout + #12)
+- Le handler order-pay est intact SAUF l'appel Brevo supprimé
+- `memory/snippet-brevo-sync-commandes.php` est créé, complet, autonome
+- Le snippet gère les 2 listes (#6 + #12) dans un seul fichier
+- Commit + push sur master
+
+### Fichiers de référence
+- `memory/snippet-brevo-delayed-list12.php` — snippet #12 existant (à intégrer)
+- `memory/project_brevo_architecture.md` — contexte complet de l'architecture Brevo
+
+</details>
+
+---
+
+## ✅ [FAIT 2026-06-02] Retirer le hook Brevo #12 de functions.php
+**Résultat :**
+- Bloc complet supprimé de `functions.php` (docblock + 2 `add_action` + fonction `sapi_brevo_commande_recente_sync`), remplacé par un commentaire de migration. Grep préalable : la fonction n'était appelée nulle part ailleurs → suppression sûre.
+- Commit + push **direct sur master** (autorisation explicite Robin) : `dbf0f36`.
+- Snippet de remplacement prêt et à jour : `memory/snippet-brevo-delayed-list12.php` (ajout retardé 5 min via `wp_schedule_single_event`, autonome, `BREVO_API_KEY`, error_log au scheduling + exécution, 2 events). ⚠️ À coller dans Code Snippets SANS la ligne `<?php`, "Exécuter partout", puis activer.
+- ⚠️ Déploiement prod : Robin doit lancer le workflow GitHub Actions pour pousser master en prod.
+
+<details><summary>Énoncé original</summary>
+
+## [TÂCHE] Retirer le hook Brevo #12 de functions.php
+**Date :** 2026-06-02
+**Branche :** `master`
+**Priorité :** haute — chaque commande perd le suivi J+20
+
+### Contexte
+
+Le hook `sapi_brevo_commande_recente_sync` dans functions.php ajoute les acheteurs à la liste Brevo #12 à chaque commande. Ce hook fonctionne, mais le plugin "Brevo for WooCommerce" détruit immédiatement cet ajout côté serveur (retire de #12, ajoute à #11 NonSubscribers). On migre ce hook vers un snippet Code Snippets avec un **délai de 5 minutes** pour que l'ajout se fasse APRÈS la sync destructive du plugin.
+
+### À faire
+
+1. **Supprimer** tout le bloc suivant dans `functions.php` (lignes ~6289 à ~6353) :
+   - Le commentaire docblock "Push systématique vers la liste Brevo #12"
+   - Le `add_action('woocommerce_store_api_checkout_order_processed', function ($order) { ... }, 20, 1);` (closure)
+   - Le `add_action('woocommerce_checkout_order_processed', 'sapi_brevo_commande_recente_sync', 20, 1);`
+   - La fonction `sapi_brevo_commande_recente_sync($order_id)` entière
+
+2. **Fournir en output** (dans un message ou dans claude_code_queue.md) le code PHP d'un snippet Code Snippets de remplacement qui :
+   - Fait la même chose que le hook supprimé (POST vers `https://api.brevo.com/v3/contacts` avec `listIds:[12]`, `updateEnabled:true`, attributs PRENOM/NOM)
+   - MAIS avec un **délai de 5 minutes** via `wp_schedule_single_event(time() + 300, ...)`
+   - Utilise la constante `BREVO_API_KEY` de wp-config.php
+   - Hook sur les 2 mêmes events : `woocommerce_store_api_checkout_order_processed` (WC Blocks) + `woocommerce_checkout_order_processed` (fallback classique)
+   - Inclut du `error_log()` pour tracer le scheduling et l'exécution
+   - Le snippet doit être autonome (pas de dépendance à functions.php)
+   - Ne PAS inclure `<?php` au début (Code Snippets l'ajoute automatiquement)
+
+3. **Committer et pusher** la suppression sur master.
+
+### Critères de succès
+
+- La fonction `sapi_brevo_commande_recente_sync` n'existe plus dans functions.php
+- Les deux `add_action` associés n'existent plus dans functions.php
+- Le snippet de remplacement est fourni et prêt à copier-coller dans Code Snippets
+- Le site ne crash pas (pas d'appel à une fonction supprimée ailleurs)
+
+### ⚠️ Vérification importante
+
+Avant de supprimer, **grepper** `sapi_brevo_commande_recente_sync` dans tout le repo pour vérifier qu'il n'y a pas d'autre appel à cette fonction ailleurs que dans les lignes à supprimer.
+
+</details>
+
+---
+
 ## [TÂCHE] Conseiller V3 — Round 2 : 17 bugs (audit code restant + tests UX Robin)
 **Date :** 2026-05-22
 **Branche :** `test-theme-sapi-maison`

@@ -54,3 +54,7 @@
 
 # OS
 .DS_Store
+
+# Code Snippets mirrors (copie locale — collés dans le plugin Code Snippets,
+# JAMAIS chargés par le thème). Ne doivent pas être versionnés ni déployés.
+/snippet-*.php
