@@ -6510,8 +6510,8 @@ function sapi_handle_surmesure_form() {
     return ['submitted' => true, 'success' => false, 'error' => 'Adresse email invalide.'];
   }
 
-  // Inscription à la liste Brevo #6 (newsletter) avec SOURCE=conseiller, pour que
-  // ces prospects sur-mesure entrent dans la séquence d'accueil -10 % (branche A).
+  // Inscription à la liste Brevo #6 (newsletter) avec SOURCE=surmesure, source
+  // dédiée au formulaire de la page /sur-mesure/ (distincte de 'conseiller').
   // On n'envoie QUE l'attribut SOURCE : ajouter nom/message ferait rejeter tout
   // l'ajout par Brevo (400). Non bloquant : l'email de notif ci-dessous continue.
   $api_key = defined('BREVO_API_KEY') ? BREVO_API_KEY : '';
@@ -6525,18 +6525,18 @@ function sapi_handle_surmesure_form() {
       'body' => wp_json_encode([
         'email'         => $email,
         'listIds'       => [6],
-        'attributes'    => ['SOURCE' => 'conseiller'],
+        'attributes'    => ['SOURCE' => 'surmesure'],
         'updateEnabled' => true,
       ]),
       'timeout' => 15,
     ]);
 
     if (is_wp_error($brevo_response)) {
-      error_log('[sapi-brevo-conseiller] Erreur HTTP /sur-mesure/ (' . $email . ') : ' . $brevo_response->get_error_message());
+      error_log('[sapi-brevo-surmesure] Erreur HTTP /sur-mesure/ (' . $email . ') : ' . $brevo_response->get_error_message());
     } else {
       $brevo_code = wp_remote_retrieve_response_code($brevo_response);
       if ($brevo_code < 200 || $brevo_code >= 300) {
-        error_log('[sapi-brevo-conseiller] Brevo a répondu ' . $brevo_code . ' /sur-mesure/ (' . $email . ') : ' . wp_remote_retrieve_body($brevo_response));
+        error_log('[sapi-brevo-surmesure] Brevo a répondu ' . $brevo_code . ' /sur-mesure/ (' . $email . ') : ' . wp_remote_retrieve_body($brevo_response));
       }
     }
   }
