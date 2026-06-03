@@ -116,40 +116,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ========================================
-  // ========================================
   // Newsletter Form
   // ========================================
-  const newsletterForm = document.querySelector('.newsletter-form');
-
-  if (newsletterForm) {
-    newsletterForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      const input = newsletterForm.querySelector('.newsletter-input-kinetic');
-      const button = newsletterForm.querySelector('.newsletter-submit-kinetic');
-      const buttonText = button.querySelector('span');
-
-      if (!input.value || !input.validity.valid) {
-        input.focus();
-        return;
-      }
-
-      // Visual feedback
-      buttonText.textContent = 'Inscrit !';
-      button.style.background = 'var(--color-green)';
-      input.disabled = true;
-
-      showNotification('Inscription reussie !');
-
-      // Reset after delay
-      setTimeout(() => {
-        buttonText.textContent = "S'inscrire";
-        button.style.background = 'var(--color-wood)';
-        input.disabled = false;
-        input.value = '';
-      }, 3000);
-    });
-  }
+  // Géré par le JS inline de front-page.php (vrai appel AJAX vers
+  // sapi_newsletter_subscribe). Aucun handler ici : un second listener
+  // simulait une fausse inscription « réussie » sans rien envoyer au
+  // serveur, en conflit avec le vrai submit.
 
   // ========================================
   // Notification System

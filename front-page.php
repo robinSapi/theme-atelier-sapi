@@ -685,7 +685,7 @@ foreach ($carousel_products as $product) {
   <form class="newsletter-form" action="#" method="post" id="newsletter-form">
     <!-- Honeypot anti-spam -->
     <div style="display:none;" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
-    <input type="email" placeholder="votre@email.fr" class="newsletter-input-kinetic" required />
+    <input type="email" name="email" placeholder="votre@email.fr" class="newsletter-input-kinetic" required />
     <button type="submit" class="newsletter-submit-kinetic">
       <span>S'inscrire</span>
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
