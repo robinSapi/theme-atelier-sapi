@@ -2657,7 +2657,7 @@ function sapi_ajax_robin_contact() {
     return;
   }
 
-  // 1. Ajouter le contact à la liste Brevo #6 (newsletter) avec SOURCE=conseiller.
+  // 1. Ajouter le contact à la liste Brevo #6 (newsletter) avec SOURCE=ficheproduit.
   //    On n'envoie QUE l'attribut SOURCE : les détails (message, projet, page,
   //    téléphone) partent dans l'email de notif ci-dessous. Envoyer SMS/MESSAGE/
   //    PROJET/PAGE faisait rejeter tout l'ajout par Brevo (400 — tél non E.164
@@ -2673,18 +2673,18 @@ function sapi_ajax_robin_contact() {
       'body' => wp_json_encode([
         'email'         => $email,
         'listIds'       => [6],
-        'attributes'    => ['SOURCE' => 'conseiller'],
+        'attributes'    => ['SOURCE' => 'ficheproduit'],
         'updateEnabled' => true,
       ]),
       'timeout' => 15,
     ]);
 
     if (is_wp_error($response)) {
-      error_log('[sapi-brevo-conseiller] Erreur HTTP (' . $email . ') : ' . $response->get_error_message());
+      error_log('[sapi-brevo-ficheproduit] Erreur HTTP (' . $email . ') : ' . $response->get_error_message());
     } else {
       $code = wp_remote_retrieve_response_code($response);
       if ($code < 200 || $code >= 300) {
-        error_log('[sapi-brevo-conseiller] Brevo a répondu ' . $code . ' (' . $email . ') : ' . wp_remote_retrieve_body($response));
+        error_log('[sapi-brevo-ficheproduit] Brevo a répondu ' . $code . ' (' . $email . ') : ' . wp_remote_retrieve_body($response));
       }
     }
   }
