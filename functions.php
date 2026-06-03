@@ -479,22 +479,6 @@ function sapi_maison_enqueue_assets() {
       }
     }
 
-    // F2a Phase 4 — card Sur-mesure intercalée dans la grille
-    // MASQUÉE TEMPORAIREMENT — Robin a demandé de désactiver l'affichage pour
-    // l'instant. Le markup PHP reste en place (rendu avec attribut `hidden`)
-    // mais sans le JS pour le révéler, la card ne s'affiche jamais.
-    // Pour réactiver : décommenter le bloc ci-dessous.
-    //
-    // $surmesure_js_path = get_template_directory() . '/assets/sapi-surmesure-card.js';
-    // if (file_exists($surmesure_js_path)) {
-    //   wp_enqueue_script(
-    //     'sapi-surmesure-card',
-    //     get_template_directory_uri() . '/assets/sapi-surmesure-card.js',
-    //     ['sapi-project'],
-    //     filemtime($surmesure_js_path),
-    //     true
-    //   );
-    // }
   }
 
   // Cart page JS — enqueued when is_cart() returns true
@@ -6524,6 +6508,37 @@ function sapi_handle_surmesure_form() {
 
   if (!is_email($email)) {
     return ['submitted' => true, 'success' => false, 'error' => 'Adresse email invalide.'];
+  }
+
+  // Inscription à la liste Brevo #6 (newsletter) avec SOURCE=conseiller, pour que
+  // ces prospects sur-mesure entrent dans la séquence d'accueil -10 % (branche A).
+  // On n'envoie QUE l'attribut SOURCE : ajouter nom/message ferait rejeter tout
+  // l'ajout par Brevo (400). Non bloquant : l'email de notif ci-dessous continue.
+  $api_key = defined('BREVO_API_KEY') ? BREVO_API_KEY : '';
+  if ($api_key) {
+    $brevo_response = wp_remote_post('https://api.brevo.com/v3/contacts', [
+      'headers' => [
+        'api-key'      => $api_key,
+        'Content-Type' => 'application/json',
+        'Accept'       => 'application/json',
+      ],
+      'body' => wp_json_encode([
+        'email'         => $email,
+        'listIds'       => [6],
+        'attributes'    => ['SOURCE' => 'conseiller'],
+        'updateEnabled' => true,
+      ]),
+      'timeout' => 15,
+    ]);
+
+    if (is_wp_error($brevo_response)) {
+      error_log('[sapi-brevo-conseiller] Erreur HTTP /sur-mesure/ (' . $email . ') : ' . $brevo_response->get_error_message());
+    } else {
+      $brevo_code = wp_remote_retrieve_response_code($brevo_response);
+      if ($brevo_code < 200 || $brevo_code >= 300) {
+        error_log('[sapi-brevo-conseiller] Brevo a répondu ' . $brevo_code . ' /sur-mesure/ (' . $email . ') : ' . wp_remote_retrieve_body($brevo_response));
+      }
+    }
   }
 
   $to      = 'contact@atelier-sapi.fr';

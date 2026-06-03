@@ -417,6 +417,7 @@ get_header();
         <textarea id="surmesure-message" name="message" rows="6" required placeholder="D&eacute;crivez votre id&eacute;e : le type de luminaire, la pi&egrave;ce, les dimensions souhait&eacute;es, le style, le bois..."><?php echo esc_textarea($_POST['message'] ?? ''); ?></textarea>
 
         <button type="submit">Envoyer ma demande</button>
+        <p class="contact-disclaimer"><?php esc_html_e('En envoyant votre demande, vous acceptez de recevoir occasionnellement des nouvelles de l\'Atelier Sâpi. Désinscription possible à tout moment.', 'theme-sapi-maison'); ?></p>
       </form>
     <?php endif; ?>
 
