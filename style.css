@@ -24651,15 +24651,6 @@ button.chip--project:focus-visible {
   opacity: 0.85;
 }
 
-.conseiller-surmesure-disclaimer {
-  margin-top: 8px;
-  font-family: var(--font-body);
-  font-size: 11px;
-  line-height: 1.4;
-  color: var(--color-wood-mid);
-  opacity: 0.7;
-}
-
 /* ── Mobile S2 + Sur-mesure ── */
 @media (max-width: 720px) {
   .conseiller-freetext__input {
