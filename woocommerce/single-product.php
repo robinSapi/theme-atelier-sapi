@@ -489,6 +489,7 @@ get_header();
               <input type="email" name="email" class="robin-contact-email" placeholder="votre@email.com" required>
               <textarea name="message" class="robin-contact-message" placeholder="Votre message (optionnel)" rows="2"></textarea>
               <button type="submit" class="robin-contact-submit">Envoyer</button>
+              <p class="contact-disclaimer"><?php esc_html_e('En envoyant votre demande, vous acceptez de recevoir occasionnellement des nouvelles de l\'Atelier Sâpi. Désinscription possible à tout moment.', 'theme-sapi-maison'); ?></p>
             </form>
           </div>
           <div class="robin-contact-success" hidden>
