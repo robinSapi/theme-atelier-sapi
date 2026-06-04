@@ -211,76 +211,84 @@ $room_icons = [
   'autre'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
 ];
 
-// Best-sellers pour « Les créations du moment » (tri total_sales, Star exclue)
+// 2 produits les plus RÉCENTS parmi lampes à poser / lampadaires / appliques,
+// forcément de 2 catégories différentes (Star exclue).
 $featured_products = [];
+$fp_target_cats = ['lampesaposer', 'lampadaires', 'appliques'];
 $featured_query = new WP_Query([
   'post_type'      => 'product',
-  'posts_per_page' => 8,
+  'posts_per_page' => 12, // marge pour trouver 2 catégories différentes
   'post_status'    => 'publish',
-  'meta_key'       => 'total_sales',
-  'orderby'        => 'meta_value_num',
+  'orderby'        => 'date',
   'order'          => 'DESC',
   'post__not_in'   => !empty($star_id) ? [(int) $star_id] : [],
   'tax_query'      => [
     [
       'taxonomy' => 'product_cat',
       'field'    => 'slug',
-      'terms'    => ['suspensions', 'appliques', 'lampesaposer', 'lampadaires'],
+      'terms'    => $fp_target_cats,
       'operator' => 'IN',
     ],
   ],
 ]);
 
+$fp_used_cats = []; // verrou : 2 catégories différentes
 if ($featured_query->have_posts()) {
   while ($featured_query->have_posts()) {
     $featured_query->the_post();
     $fp_id = get_the_ID();
     $product = wc_get_product($fp_id);
+    if (!$product) continue;
 
-    if ($product) {
-      // Photo ambiance (fallback thumbnail) + hover (1re galerie WC) — pattern archive-product.php
-      $amb_ids = sapi_get_product_photo_ids($fp_id, 'ambiance', 1);
-      $ambiance_id = !empty($amb_ids) ? $amb_ids[0] : get_post_thumbnail_id($fp_id);
-      $gallery_ids = $product->get_gallery_image_ids();
-      $hover_id = !empty($gallery_ids) ? $gallery_ids[0] : 0;
-
-      // Catégorie au singulier (1re hors uncategorized)
-      $fp_cats = get_the_terms($fp_id, 'product_cat');
-      $fp_category = '';
-      if ($fp_cats && !is_wp_error($fp_cats)) {
-        foreach ($fp_cats as $cat) {
-          if ($cat->slug !== 'uncategorized') {
-            $fp_category = str_replace(
-              ['Suspensions', 'Appliques', 'Lampadaires', 'Lampes à poser'],
-              ['Suspension',  'Applique',  'Lampadaire',  'Lampe à poser'],
-              $cat->name
-            );
-            break;
-          }
+    // Catégorie cible de ce produit (1re parmi les 3 visées) — sert au verrou + à l'affichage
+    $fp_cats = get_the_terms($fp_id, 'product_cat');
+    $fp_cat_slug = '';
+    $fp_category = '';
+    if ($fp_cats && !is_wp_error($fp_cats)) {
+      foreach ($fp_cats as $cat) {
+        if (in_array($cat->slug, $fp_target_cats, true)) {
+          $fp_cat_slug = $cat->slug;
+          $fp_category = str_replace(
+            ['Appliques', 'Lampadaires', 'Lampes à poser'],
+            ['Applique',  'Lampadaire',  'Lampe à poser'],
+            $cat->name
+          );
+          break;
         }
       }
-
-      // Prix
-      $fp_is_variable = $product->is_type('variable');
-      if ($fp_is_variable) {
-        $min_price = $product->get_variation_price('min');
-        $price_display = $min_price ? wc_price($min_price) : $product->get_price_html();
-      } else {
-        $price_display = wc_price($product->get_price());
-      }
-
-      $featured_products[] = [
-        'id'          => $fp_id,
-        'name'        => get_the_title(),
-        'category'    => $fp_category,
-        'price'       => $price_display,
-        'is_variable' => $fp_is_variable,
-        'ambiance_id' => $ambiance_id,
-        'hover_id'    => $hover_id,
-        'url'         => get_permalink(),
-      ];
-      if (count($featured_products) >= 2) break;
     }
+    // Sauter si pas de catégorie cible, ou catégorie déjà prise (2 catégories distinctes)
+    if ($fp_cat_slug === '' || in_array($fp_cat_slug, $fp_used_cats, true)) {
+      continue;
+    }
+
+    // Photo ambiance (fallback thumbnail) + hover (1re galerie WC) — pattern archive-product.php
+    $amb_ids = sapi_get_product_photo_ids($fp_id, 'ambiance', 1);
+    $ambiance_id = !empty($amb_ids) ? $amb_ids[0] : get_post_thumbnail_id($fp_id);
+    $gallery_ids = $product->get_gallery_image_ids();
+    $hover_id = !empty($gallery_ids) ? $gallery_ids[0] : 0;
+
+    // Prix
+    $fp_is_variable = $product->is_type('variable');
+    if ($fp_is_variable) {
+      $min_price = $product->get_variation_price('min');
+      $price_display = $min_price ? wc_price($min_price) : $product->get_price_html();
+    } else {
+      $price_display = wc_price($product->get_price());
+    }
+
+    $fp_used_cats[] = $fp_cat_slug;
+    $featured_products[] = [
+      'id'          => $fp_id,
+      'name'        => get_the_title(),
+      'category'    => $fp_category,
+      'price'       => $price_display,
+      'is_variable' => $fp_is_variable,
+      'ambiance_id' => $ambiance_id,
+      'hover_id'    => $hover_id,
+      'url'         => get_permalink(),
+    ];
+    if (count($featured_products) >= 2) break;
   }
   wp_reset_postdata();
 }
