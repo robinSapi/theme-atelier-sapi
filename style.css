@@ -7957,6 +7957,13 @@ li.carousel-editorial-slide,
   .home-projet .room-card { flex: 0 0 calc(50% - 0.5rem); max-width: none; padding: 1rem 0.75rem; }
 }
 
+/* ===== Refonte home #2 — Section Les créations du moment ===== */
+.home-creations .section-header-kinetic {
+  padding: 0;
+  max-width: none;
+  margin: 0 0 1.5rem;
+}
+
 /* ========================================
    PAGE TEMPLATE - Contact (PREMIUM)
    ======================================== */

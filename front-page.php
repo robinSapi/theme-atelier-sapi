@@ -214,7 +214,7 @@ $room_icons = [
 $featured_products = [];
 $featured_query = new WP_Query([
   'post_type' => 'product',
-  'posts_per_page' => 4,
+  'posts_per_page' => 8,
   'post_status' => 'publish',
   'orderby' => 'rand',
   'tax_query' => [
@@ -252,7 +252,7 @@ if ($featured_query->have_posts()) {
           'image_id' => $featured_image_id,
           'url' => get_permalink(),
         ];
-        break; // Only need 1
+        if (count($featured_products) >= 2) break;
       }
     }
   }
@@ -504,20 +504,6 @@ foreach ($carousel_products as $product) {
 <section class="hero-bento">
   <div class="bento-container">
 
-    <!-- Star du moment -->
-    <?php if ($star_product_data) : ?>
-    <a href="<?php echo esc_url($star_product_data['url']); ?>" class="bento-card bento-hero">
-      <?php echo wp_get_attachment_image($star_product_data['image_id'], 'woocommerce_single', false, ['class' => 'bento-bg-img', 'loading' => 'lazy', 'alt' => $star_product_data['name'] . ' — Star du moment']); ?>
-      <span class="bento-bestseller-badge">Star du moment</span>
-      <div class="bento-content">
-        <h2 class="bento-title product-name"><?php echo esc_html($star_product_data['name']); ?></h2>
-        <?php if ($star_product_data['category']) : ?>
-          <p class="bento-category"><?php echo esc_html($star_product_data['category']); ?></p>
-        <?php endif; ?>
-      </div>
-    </a>
-    <?php endif; ?>
-
     <!-- Storytelling Artisanat -->
     <div class="bento-card bento-storytelling">
       <div class="storytelling-inner">
@@ -572,6 +558,48 @@ foreach ($carousel_products as $product) {
   </div>
 </section>
 
+<!-- Les créations du moment (refonte home #2) — regroupe Star + produits featured + CTA -->
+<section class="hero-bento home-creations">
+  <div class="section-header-kinetic">
+    <span class="section-num">03</span>
+    <h2 class="section-title-kinetic">Les créations du moment</h2>
+  </div>
+  <div class="bento-container">
+
+    <?php if ($star_product_data) : ?>
+    <a href="<?php echo esc_url($star_product_data['url']); ?>" class="bento-card bento-hero">
+      <?php echo wp_get_attachment_image($star_product_data['image_id'], 'woocommerce_single', false, ['class' => 'bento-bg-img', 'loading' => 'lazy', 'alt' => $star_product_data['name'] . ', star du moment']); ?>
+      <span class="bento-bestseller-badge">Star du moment</span>
+      <div class="bento-content">
+        <h2 class="bento-title product-name"><?php echo esc_html($star_product_data['name']); ?></h2>
+        <?php if ($star_product_data['category']) : ?>
+          <p class="bento-category"><?php echo esc_html($star_product_data['category']); ?></p>
+        <?php endif; ?>
+      </div>
+    </a>
+    <?php endif; ?>
+
+    <?php foreach ($featured_products as $fp) : ?>
+    <a href="<?php echo esc_url($fp['url']); ?>" class="bento-card bento-product-featured" data-product-id="<?php echo esc_attr($fp['id']); ?>" data-piece-swap data-piece-swap-type="detail" data-piece-swap-size="large">
+      <?php echo wp_get_attachment_image($fp['image_id'], 'large', false, ['class' => 'bento-bg-img', 'loading' => 'lazy', 'alt' => $fp['name'] . ', luminaire artisanal']); ?>
+      <div class="bento-product-featured-info">
+        <h3><?php echo esc_html($fp['name']); ?></h3>
+        <span class="bento-product-featured-price"><?php echo wp_kses_post($fp['price']); ?></span>
+      </div>
+    </a>
+    <?php endforeach; ?>
+
+    <a href="<?php echo home_url('/mes-creations/'); ?>" class="bento-card bento-cta">
+      <h3 class="cta-title">Toutes les créations</h3>
+      <span class="cta-button">
+        <span>Explorer</span>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2"/></svg>
+      </span>
+    </a>
+
+  </div>
+</section>
+
 <!-- Hero Bento Grid (continued) -->
 <section class="hero-bento">
   <div class="bento-container">
@@ -609,17 +637,6 @@ foreach ($carousel_products as $product) {
         </div>
       </div>
     </div>
-
-    <!-- Product Card - Random Featured Product -->
-    <?php if (!empty($featured_products)) : ?>
-    <a href="<?php echo esc_url($featured_products[0]['url']); ?>" class="bento-card bento-product-featured" data-product-id="<?php echo esc_attr($featured_products[0]['id']); ?>" data-piece-swap data-piece-swap-type="detail" data-piece-swap-size="large">
-      <?php echo wp_get_attachment_image($featured_products[0]['image_id'], 'large', false, ['class' => 'bento-bg-img', 'loading' => 'lazy', 'alt' => $featured_products[0]['name'] . ' — Luminaire artisanal']); ?>
-      <div class="bento-product-featured-info">
-        <h3><?php echo esc_html($featured_products[0]['name']); ?></h3>
-        <span class="bento-product-featured-price"><?php echo wp_kses_post($featured_products[0]['price']); ?></span>
-      </div>
-    </a>
-    <?php endif; ?>
 
     <!-- Atelier Image -->
     <a href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer" class="bento-card bento-atelier">
@@ -667,16 +684,6 @@ foreach ($carousel_products as $product) {
     endif;
     ?>
 
-    <!-- CTA Card -->
-    <a href="<?php echo home_url('/mes-creations/'); ?>" class="bento-card bento-cta">
-      <h3 class="cta-title">Toutes les créations</h3>
-      <span class="cta-button">
-        <span>Explorer</span>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2"/>
-        </svg>
-      </span>
-    </a>
   </div>
 </section>
 
