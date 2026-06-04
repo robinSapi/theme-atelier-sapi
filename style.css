@@ -1400,6 +1400,12 @@ button:hover,
   padding-top: 20px;
   padding-bottom: 20px;
 }
+/* Refonte #9 — items plus espacés sur la home, desktop uniquement (mobile reste compact) */
+@media (min-width: 601px) {
+  .robin-bandeau.home-repositioned-bar .reassurance-bar-inner {
+    gap: 48px;
+  }
+}
 .robin-bandeau .reassurance-bar-inner {
   display: flex;
   align-items: center;
@@ -7937,7 +7943,7 @@ li.carousel-editorial-slide,
   margin: 0;
 }
 .home-projet {
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
   text-align: center;
 }
@@ -7948,7 +7954,11 @@ li.carousel-editorial-slide,
   gap: 1.25rem;
   width: 100%;
 }
-.home-projet .room-card { max-width: 230px; } /* refonte #8 — un peu plus larges (global reste 200px) */
+.home-projet .room-card { max-width: 300px; } /* refonte #9 — ~+30% (global reste 200px) */
+/* refonte #9 — H2 room-picker sur une ligne en desktop (mobile : retour à la ligne autorisé) */
+@media (min-width: 769px) {
+  .home-projet .room-picker-title { white-space: nowrap; }
+}
 @media (max-width: 768px) {
   .home-projet-section { padding: 3.5rem 1rem 2.5rem; }
   .home-projet .room-picker-cards { gap: 0.75rem; }
@@ -8110,6 +8120,64 @@ li.carousel-editorial-slide,
   .newsletter-kinetic {
     padding-top: 3.5rem;
   }
+}
+
+/* ===== Refonte home #9 — grille Créations du moment (Star photo + cards classiques) ===== */
+.creations-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 2rem;
+  align-items: stretch;
+}
+.creation-star {
+  position: relative;
+  display: block;
+  border-radius: 16px;
+  overflow: hidden;
+  min-height: 420px;
+}
+.creation-star-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.creation-star::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 55%, rgba(34, 26, 20, 0.65) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+.creation-star .bento-bestseller-badge,
+.creations-grid .product-media .bento-bestseller-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+}
+.creations-grid .product-media { position: relative; }
+.creation-star-label {
+  position: absolute;
+  left: 18px;
+  bottom: 16px;
+  z-index: 2;
+}
+.creation-star-label .product-name,
+.creation-star-label .product-name *,
+.creation-star-label p { color: var(--color-white); }
+.creation-star-label .product-name { margin: 0; }
+.creation-star-label p { margin: 2px 0 0; font-size: 0.85rem; opacity: 0.92; }
+.creations-cta { text-align: center; margin-top: 2.5rem; }
+.home-creations .section-header-kinetic { margin-bottom: 2rem; }
+@media (max-width: 880px) {
+  .creations-grid { grid-template-columns: 1fr 1fr; }
+  .creation-star { grid-column: 1 / -1; min-height: 280px; }
+}
+@media (max-width: 520px) {
+  .creations-grid { grid-template-columns: 1fr; }
 }
 
 /* ========================================
@@ -10008,7 +10076,9 @@ body.cursor-hover .cursor-dot {
    et puissent être réordonnées via order. */
 .naming-card {
   pointer-events: auto;
-  background: rgba(255, 255, 255, 0.94); /* bulle blanche pleine (refonte #7) */
+  background: rgba(255, 255, 255, 0.8); /* bulle légèrement translucide + flou (refonte #9) */
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   border: none;
   border-radius: 50px;
   padding: 14px 22px;
@@ -10274,11 +10344,6 @@ a.carousel-slide-product {
 }
 
 /* Hero Card - Large */
-.bento-hero {
-  grid-column: span 8;
-  grid-row: span 3;
-}
-
 .bento-bg {
   position: absolute;
   top: 0;
@@ -10323,27 +10388,6 @@ a.carousel-slide-product {
   }
 }
 
-.bento-hero::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(50, 50, 50, 0.7) 0%, rgba(50, 50, 50, 0.3) 100%);
-  z-index: 1;
-}
-
-.bento-content {
-  position: relative;
-  z-index: 2;
-  padding: 3rem;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
 .bento-label {
   display: inline-block;
   font-size: 0.75rem;
@@ -10356,25 +10400,6 @@ a.carousel-slide-product {
   border-radius: 50px;
   margin-bottom: 1rem;
   box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
-}
-
-.bento-title {
-  font-family: var(--font-body);
-  font-size: clamp(3rem, 5vw, 5rem);
-  font-weight: 900;
-  line-height: 1.1;
-  margin-bottom: 0.25rem;
-  color: var(--color-white);
-}
-
-.bento-category {
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-cream);
-  opacity: 0.85;
-  margin: 0;
 }
 
 .bento-text {
@@ -10600,65 +10625,7 @@ transform: translateY(15px);
 }
 
 /* Featured Product Card (static, no hover effects) */
-.bento-product-featured {
-  grid-column: span 4;
-  grid-row: span 2;
-  cursor: pointer;
-}
-
-.bento-product-featured .bento-bg {
-  transition: transform 0.6s var(--ease-expo);
-}
-
-@media (hover: hover) {
-  .bento-product-featured:hover .bento-bg {
-    transform: scale(1.05);
-  }
-}
-
-.bento-product-featured-info {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1.5rem;
-  background: linear-gradient(to top, rgba(50, 50, 50, 0.85) 0%, transparent 100%);
-  z-index: 2;
-}
-
-.bento-product-featured-info h3 {
-  font-family: var(--font-body);
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--color-white);
-  margin: 0 0 0.75rem 0;
-}
-
-.bento-product-featured-price {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background: var(--color-wood);
-  color: var(--color-white);
-  font-family: var(--font-body);
-  font-size: 1.25rem;
-  font-weight: 900;
-  border-radius: 50px;
-}
-
-.bento-product-featured-badge {
-  position: absolute;
-  top: 1.25rem;
-  left: 1.25rem;
-  padding: 0.5rem 1rem;
-  background: var(--color-orange);
-  color: var(--color-white);
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  border-radius: 50px;
-  z-index: 2;
-}
+/* (refonte #9) bloc .bento-product-featured* retiré — remplacé par .product-card-cinetique */
 
 /* Small Product Cards (2 squares) */
 .bento-product-small {
@@ -11284,87 +11251,7 @@ button.room-card {
 }
 
 /* CTA Card */
-.bento-cta {
-  grid-column: span 12;
-  grid-row: span 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 2.5rem;
-  background: linear-gradient(135deg, var(--color-orange) 0%, #D35400 100%);
-  cursor: pointer;
-  text-decoration: none;
-  overflow: hidden;
-}
-
-.bento-cta::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 50%);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-@media (hover: hover) {
-  .bento-cta:hover::before {
-    opacity: 1;
-  }
-}
-
-.cta-title {
-  font-family: var(--font-body);
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: var(--color-white);
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  line-height: 1.2;
-  position: relative;
-  z-index: 1;
-}
-
-.bento-cta .cta-button {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 2.5rem;
-  background: var(--color-white);
-  color: var(--color-dark);
-  font-family: var(--font-body);
-  font-size: 0.875rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  border: none;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.3s var(--ease-expo);
-  position: relative;
-  z-index: 1;
-}
-
-@media (hover: hover) {
-  .bento-cta:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 50px rgba(230, 126, 34, 0.4);
-  }
-}
-
-@media (hover: hover) {
-  .bento-cta .cta-button:hover {
-    transform: scale(1.05);
-    gap: 1rem;
-    background: var(--color-wood);
-    color: var(--color-white);
-  }
-}
+/* (refonte #9) bloc .bento-cta* / .cta-title retiré — CTA = .hero-cta + .creations-cta */
 
 /* Atelier label — réutilisé par .atelier-photo (refonte #7) */
 .atelier-label {

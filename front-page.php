@@ -100,6 +100,7 @@ if ($front_page_id && function_exists('get_field')) {
 
 // Star du moment — lit le champ ACF produit_star de la page "La star du moment"
 $star_product_data = null;
+$star_id = 0; // initialisé ici pour rester accessible au bloc best-sellers (exclusion Star)
 $star_page = get_page_by_path('la-star-du-moment');
 if ($star_page && function_exists('get_field')) {
   $star_post = get_field('produit_star', $star_page->ID);
@@ -210,18 +211,21 @@ $room_icons = [
   'autre'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
 ];
 
-// Featured products for Bento grid (random product)
+// Best-sellers pour « Les créations du moment » (tri total_sales, Star exclue)
 $featured_products = [];
 $featured_query = new WP_Query([
-  'post_type' => 'product',
+  'post_type'      => 'product',
   'posts_per_page' => 8,
-  'post_status' => 'publish',
-  'orderby' => 'rand',
-  'tax_query' => [
+  'post_status'    => 'publish',
+  'meta_key'       => 'total_sales',
+  'orderby'        => 'meta_value_num',
+  'order'          => 'DESC',
+  'post__not_in'   => !empty($star_id) ? [(int) $star_id] : [],
+  'tax_query'      => [
     [
       'taxonomy' => 'product_cat',
-      'field' => 'slug',
-      'terms' => ['suspensions', 'appliques', 'lampesaposer', 'lampadaires'],
+      'field'    => 'slug',
+      'terms'    => ['suspensions', 'appliques', 'lampesaposer', 'lampadaires'],
       'operator' => 'IN',
     ],
   ],
@@ -230,30 +234,52 @@ $featured_query = new WP_Query([
 if ($featured_query->have_posts()) {
   while ($featured_query->have_posts()) {
     $featured_query->the_post();
-    $product = wc_get_product(get_the_ID());
+    $fp_id = get_the_ID();
+    $product = wc_get_product($fp_id);
 
     if ($product) {
-      $detail_photo_ids = sapi_get_product_photo_ids(get_the_ID(), 'detail', 1);
-      $featured_image_id = !empty($detail_photo_ids) ? $detail_photo_ids[0] : 0;
+      // Photo ambiance (fallback thumbnail) + hover (1re galerie WC) — pattern archive-product.php
+      $amb_ids = sapi_get_product_photo_ids($fp_id, 'ambiance', 1);
+      $ambiance_id = !empty($amb_ids) ? $amb_ids[0] : get_post_thumbnail_id($fp_id);
+      $gallery_ids = $product->get_gallery_image_ids();
+      $hover_id = !empty($gallery_ids) ? $gallery_ids[0] : 0;
 
-      if ($featured_image_id) {
-        // Get price
-        if ($product->is_type('variable')) {
-          $min_price = $product->get_variation_price('min');
-          $price_display = $min_price ? wc_price($min_price) : $product->get_price_html();
-        } else {
-          $price_display = wc_price($product->get_price());
+      // Catégorie au singulier (1re hors uncategorized)
+      $fp_cats = get_the_terms($fp_id, 'product_cat');
+      $fp_category = '';
+      if ($fp_cats && !is_wp_error($fp_cats)) {
+        foreach ($fp_cats as $cat) {
+          if ($cat->slug !== 'uncategorized') {
+            $fp_category = str_replace(
+              ['Suspensions', 'Appliques', 'Lampadaires', 'Lampes à poser'],
+              ['Suspension',  'Applique',  'Lampadaire',  'Lampe à poser'],
+              $cat->name
+            );
+            break;
+          }
         }
-
-        $featured_products[] = [
-          'id' => get_the_ID(),
-          'name' => get_the_title(),
-          'price' => $price_display,
-          'image_id' => $featured_image_id,
-          'url' => get_permalink(),
-        ];
-        if (count($featured_products) >= 2) break;
       }
+
+      // Prix
+      $fp_is_variable = $product->is_type('variable');
+      if ($fp_is_variable) {
+        $min_price = $product->get_variation_price('min');
+        $price_display = $min_price ? wc_price($min_price) : $product->get_price_html();
+      } else {
+        $price_display = wc_price($product->get_price());
+      }
+
+      $featured_products[] = [
+        'id'          => $fp_id,
+        'name'        => get_the_title(),
+        'category'    => $fp_category,
+        'price'       => $price_display,
+        'is_variable' => $fp_is_variable,
+        'ambiance_id' => $ambiance_id,
+        'hover_id'    => $hover_id,
+        'url'         => get_permalink(),
+      ];
+      if (count($featured_products) >= 2) break;
     }
   }
   wp_reset_postdata();
@@ -532,39 +558,45 @@ foreach ($carousel_products as $product) {
     <span class="section-num">03</span>
     <h2 class="section-title-kinetic">Les créations du moment</h2>
   </div>
-  <div class="bento-container">
+  <div class="creations-grid">
 
     <?php if ($star_product_data) : ?>
-    <a href="<?php echo esc_url($star_product_data['url']); ?>" class="bento-card bento-hero">
-      <?php echo wp_get_attachment_image($star_product_data['image_id'], 'woocommerce_single', false, ['class' => 'bento-bg-img', 'loading' => 'lazy', 'alt' => $star_product_data['name'] . ', star du moment']); ?>
+    <a href="<?php echo esc_url($star_product_data['url']); ?>" class="creation-star">
+      <?php echo wp_get_attachment_image($star_product_data['image_id'], 'woocommerce_single', false, ['class' => 'creation-star-img', 'loading' => 'lazy', 'alt' => $star_product_data['name'] . ', star du moment']); ?>
       <span class="bento-bestseller-badge">Star du moment</span>
-      <div class="bento-content">
-        <h3 class="bento-title product-name"><?php echo esc_html($star_product_data['name']); ?></h3>
-        <?php if ($star_product_data['category']) : ?>
-          <p class="bento-category"><?php echo esc_html($star_product_data['category']); ?></p>
-        <?php endif; ?>
+      <div class="creation-star-label">
+        <h3 class="product-name"><?php echo esc_html($star_product_data['name']); ?></h3>
+        <?php if ($star_product_data['category']) : ?><p><?php echo esc_html($star_product_data['category']); ?></p><?php endif; ?>
       </div>
     </a>
     <?php endif; ?>
 
     <?php foreach ($featured_products as $fp) : ?>
-    <a href="<?php echo esc_url($fp['url']); ?>" class="bento-card bento-product-featured" data-product-id="<?php echo esc_attr($fp['id']); ?>" data-piece-swap data-piece-swap-type="detail" data-piece-swap-size="large">
-      <?php echo wp_get_attachment_image($fp['image_id'], 'large', false, ['class' => 'bento-bg-img', 'loading' => 'lazy', 'alt' => $fp['name'] . ', luminaire artisanal']); ?>
-      <div class="bento-product-featured-info">
-        <h3><?php echo esc_html($fp['name']); ?></h3>
-        <span class="bento-product-featured-price"><?php echo wp_kses_post($fp['price']); ?></span>
-      </div>
-    </a>
+    <div class="product-card-cinetique" data-product-id="<?php echo esc_attr($fp['id']); ?>" data-piece-swap data-piece-swap-type="ambiance" data-piece-swap-size="large">
+      <a href="<?php echo esc_url($fp['url']); ?>" class="product-card-link">
+        <div class="product-media<?php echo !empty($fp['hover_id']) ? ' has-hover-image' : ''; ?>">
+          <span class="bento-bestseller-badge">Best-seller</span>
+          <span class="product-image-main"><?php echo wp_get_attachment_image($fp['ambiance_id'], 'large', false, ['alt' => $fp['name'], 'loading' => 'lazy']); ?></span>
+          <?php if (!empty($fp['hover_id'])) : ?>
+            <span class="product-image-hover"><?php echo wp_get_attachment_image($fp['hover_id'], 'woocommerce_thumbnail', false, ['alt' => $fp['name'] . ' - ambiance', 'loading' => 'lazy']); ?></span>
+          <?php endif; ?>
+        </div>
+        <div class="product-info">
+          <h3 class="product-name"><?php echo esc_html($fp['name']); ?></h3>
+          <?php if (!empty($fp['category'])) : ?><p class="product-category"><?php echo esc_html($fp['category']); ?></p><?php endif; ?>
+          <div class="product-price">
+            <?php if (!empty($fp['is_variable'])) : ?><span class="price-from">À partir de</span><?php endif; ?>
+            <span class="price-value"><?php echo wp_kses_post($fp['price']); ?></span>
+          </div>
+        </div>
+        <div class="product-actions"><span class="btn-view">Découvrir ⇾</span></div>
+      </a>
+    </div>
     <?php endforeach; ?>
 
-    <a href="<?php echo home_url('/mes-creations/'); ?>" class="bento-card bento-cta">
-      <h3 class="cta-title">Toutes les créations</h3>
-      <span class="cta-button">
-        <span>Explorer</span>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2"/></svg>
-      </span>
-    </a>
-
+  </div>
+  <div class="creations-cta">
+    <a href="<?php echo home_url('/mes-creations/'); ?>" class="hero-cta">Toutes les créations</a>
   </div>
 </section>
 </div>

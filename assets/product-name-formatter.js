@@ -25,8 +25,7 @@
       '.carousel-product-name',          // Carousel homepage
       '.product-name',                   // Grille produits
       '.product-hero-name',              // Mini-carousel catégories
-      '.bento-product-featured h3',      // Bento grid homepage
-      '.bento-hero .bento-title',        // Hero bestseller homepage
+      '.creation-star .product-name',    // Star photo « Créations du moment »
       '.product-name-small',             // Petites cartes bento
       '.wc-block-components-product-name', // Panier + récap commande (WooCommerce Blocks)
       '.guide-result-name',              // Résultat questionnaire guide luminaire
@@ -175,8 +174,7 @@
             '.carousel-product-name',
             '.product-name',
             '.product-hero-name',
-            '.bento-product-featured h3',
-            '.bento-hero .bento-title',
+            '.creation-star .product-name',
             '.product-name-small',
             '.wc-block-components-product-name',
             '.guide-result-name',
