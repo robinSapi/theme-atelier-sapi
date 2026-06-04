@@ -643,6 +643,79 @@ $sapi_cat_url = function ($slug) {
   </div>
 </section>
 
+<!-- Ils en parlent (refonte home #4) — avis Google, réutilise les composants de la fiche produit -->
+<?php $home_reviews = sapi_get_google_reviews(); ?>
+<?php if ($home_reviews && !empty($home_reviews['reviews'])) : ?>
+<section class="product-testimonials home-avis">
+  <div class="testimonials-header">
+    <span class="section-num">05</span>
+    <h2>Ils en parlent</h2>
+    <div class="google-reviews-badge">
+      <svg class="google-logo" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      <div class="google-reviews-summary">
+        <div class="google-stars">
+          <?php
+          $home_rating = $home_reviews['rating'];
+          for ($i = 1; $i <= 5; $i++) :
+            if ($i <= floor($home_rating)) : ?>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#FBBC05"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <?php else : ?>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#ddd"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <?php endif;
+          endfor; ?>
+        </div>
+        <span class="google-rating-text"><?php echo esc_html($home_rating); ?>/5 · <?php echo esc_html($home_reviews['total']); ?> avis</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="testimonials-grid">
+    <?php
+    $reviews_pool = $home_reviews['reviews'];
+    shuffle($reviews_pool);
+    $reviews_display = array_slice($reviews_pool, 0, 3);
+    ?>
+    <?php foreach ($reviews_display as $review) : ?>
+    <div class="testimonial-card">
+      <div class="testimonial-card-header">
+        <?php if (!empty($review['photo'])) : ?>
+        <img class="testimonial-avatar" src="<?php echo esc_url($review['photo']); ?>" alt="" width="36" height="36" loading="lazy">
+        <?php endif; ?>
+        <div class="testimonial-author-info">
+          <span class="author-name"><?php echo esc_html($review['author']); ?></span>
+          <span class="author-time"><?php echo esc_html($review['time']); ?></span>
+        </div>
+      </div>
+      <div class="testimonial-rating">
+        <?php for ($i = 1; $i <= 5; $i++) : ?>
+          <?php if ($i <= $review['rating']) : ?>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#FBBC05"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <?php else : ?>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#ddd"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <?php endif; ?>
+        <?php endfor; ?>
+      </div>
+      <?php
+        $text = $review['text'];
+        $short = $text;
+        if (mb_strlen($text) > 200) {
+          $short = mb_substr($text, 0, 200);
+          $short = mb_substr($short, 0, mb_strrpos($short, ' ')) . '…';
+        }
+      ?>
+      <p class="testimonial-text"><?php echo esc_html($short); ?></p>
+    </div>
+    <?php endforeach; ?>
+  </div>
+
+  <div class="testimonials-cta">
+    <a href="https://g.page/r/CQ0YW1uBzOimEAE/review" target="_blank" rel="noopener noreferrer" class="testimonials-cta-review">Laisser un avis sur Google</a>
+    <span class="testimonials-cta-sep">·</span>
+    <a href="https://www.google.com/maps/place/?q=place_id:ChIJYyWUfZOV9EcRDRhbW4HM6KY" target="_blank" rel="noopener noreferrer">Voir les <?php echo esc_html($home_reviews['total']); ?> avis</a>
+  </div>
+</section>
+<?php endif; ?>
+
 <!-- Hero Bento Grid (continued) -->
 <section class="hero-bento">
   <div class="bento-container">
@@ -702,7 +775,7 @@ $sapi_cat_url = function ($slug) {
 <!-- Newsletter Section -->
 <section class="newsletter-kinetic">
   <div class="section-header-kinetic">
-    <span class="section-num">05</span>
+    <span class="section-num">06</span>
     <h2 class="section-title-kinetic">Restez informés</h2>
   </div>
   <p class="newsletter-subtitle">Nouveautés, éditions limitées, coulisses d'atelier.</p>
