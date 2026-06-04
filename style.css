@@ -10852,37 +10852,6 @@ transform: translateY(15px);
   white-space: nowrap;
 }
 
-/* Room Picker — "Pour quelle pièce ?" — harmonisé avec .conseiller-card
-   (fond warm + bordure dashed INSET via ::before, décalée 12px vers
-   l'intérieur). On désactive la bordure grise héritée de .bento-card et
-   on n'a pas de hover sur le panneau. */
-.bento-room-picker {
-  grid-column: span 12;
-  grid-row: span 2;
-  background: var(--color-warm, #FBF6EA);
-  border: none;
-  /* Round 4 — flex column avec justify-content: center pour centrer
-     verticalement le contenu (room-picker-inner) dans la card. */
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-direction: column;
-  flex-direction: column;
-  -webkit-justify-content: center;
-  justify-content: center;
-}
-.bento-room-picker::before {
-  content: "";
-  position: absolute;
-  inset: 12px;
-  border: 1.5px dashed rgba(147, 125, 104, 0.35);
-  border-radius: 12px;
-  pointer-events: none;
-}
-.bento-room-picker .room-picker-inner {
-  position: relative;
-  z-index: 1;
-}
-
 .room-picker-inner {
   /* Round 4 — Espacements alignés sur la card Conseil de /mes-creations/
      (gap 18px = écarts homogènes badge / titre / cases / "ou" / champ texte). */
@@ -11864,8 +11833,7 @@ button.room-card {
 
   .bento-process,
   .bento-atelier,
-  .bento-cta,
-  .bento-room-picker {
+  .bento-cta {
     grid-column: span 6;
   }
 
@@ -11940,8 +11908,7 @@ button.room-card {
   .bento-actu,
   .bento-conseil,
   .bento-storytelling,
-  .bento-giftcard,
-  .bento-room-picker {
+  .bento-giftcard {
     grid-column: span 1;
     grid-row: span 1;
   }

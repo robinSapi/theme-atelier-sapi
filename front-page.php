@@ -474,7 +474,7 @@ foreach ($carousel_products as $product) {
   <div class="home-projet" data-room-picker>
     <div class="room-picker-inner">
       <span class="home-projet__eyebrow">Ton projet</span>
-      <h3 class="room-picker-title">Pour quelle pièce cherches-tu un luminaire ?</h3>
+      <h2 class="room-picker-title">Pour quelle pièce cherches-tu un luminaire ?</h2>
       <div class="room-picker-cards">
         <?php foreach ($room_choices as $room) :
           $icon_svg = isset($room_icons[$room['icon']]) ? $room_icons[$room['icon']] : '';
@@ -538,7 +538,7 @@ foreach ($carousel_products as $product) {
       <?php echo wp_get_attachment_image($star_product_data['image_id'], 'woocommerce_single', false, ['class' => 'bento-bg-img', 'loading' => 'lazy', 'alt' => $star_product_data['name'] . ', star du moment']); ?>
       <span class="bento-bestseller-badge">Star du moment</span>
       <div class="bento-content">
-        <h2 class="bento-title product-name"><?php echo esc_html($star_product_data['name']); ?></h2>
+        <h3 class="bento-title product-name"><?php echo esc_html($star_product_data['name']); ?></h3>
         <?php if ($star_product_data['category']) : ?>
           <p class="bento-category"><?php echo esc_html($star_product_data['category']); ?></p>
         <?php endif; ?>
@@ -586,7 +586,7 @@ $sapi_cat_url = function ($slug) {
     <div class="bento-card bento-storytelling">
       <div class="storytelling-inner">
         <span class="storytelling-label">Mon atelier à Lyon</span>
-        <h2 class="storytelling-title">Des sculptures lumineuses</h2>
+        <h3 class="storytelling-title">Des sculptures lumineuses</h3>
         <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
         <p class="storytelling-text storytelling-text--seo">Je dessine et fabrique à la commande des <a href="<?php echo esc_url($sapi_cat_url('suspensions')); ?>">suspensions</a>, <a href="<?php echo esc_url($sapi_cat_url('appliques')); ?>">appliques</a>, <a href="<?php echo esc_url($sapi_cat_url('lampesaposer')); ?>">lampes à poser</a> et <a href="<?php echo esc_url($sapi_cat_url('lampadaires')); ?>">lampadaires</a> en bois massif. Chaque luminaire est découpé au laser puis assemblé à la main : le peuplier clair ou l'okoumé chaleureux filtrent la lumière et dessinent des ombres uniques.</p>
         <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="storytelling-link">
