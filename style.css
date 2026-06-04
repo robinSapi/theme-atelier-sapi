@@ -7910,6 +7910,53 @@ li.carousel-editorial-slide,
   }
 }
 
+/* ===== Refonte home #1 — Section entrée projet ===== */
+.home-projet-section {
+  max-width: 1400px;
+  margin: 2.5rem auto;
+  padding: 0 2rem;
+}
+.home-projet {
+  position: relative;
+  background: var(--color-warm, #FBF6EA);
+  border-radius: 16px;
+  padding: 2.75rem 2rem;
+  text-align: center;
+  overflow: hidden;
+}
+.home-projet::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 1.5px dashed rgba(147, 125, 104, 0.35);
+  border-radius: 12px;
+  pointer-events: none;
+}
+.home-projet .room-picker-inner { position: relative; z-index: 1; }
+.home-projet__eyebrow {
+  display: block;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+  color: var(--color-wood);
+  opacity: 0.85;
+  margin-bottom: 0.5rem;
+}
+.home-projet .room-picker-cards {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  width: 100%;
+}
+@media (max-width: 768px) {
+  .home-projet-section { padding: 0 1rem; }
+  .home-projet { padding: 1.75rem 1.25rem; }
+  .home-projet .room-picker-cards { gap: 0.75rem; }
+  .home-projet .room-card { flex: 0 0 calc(50% - 0.5rem); max-width: none; padding: 1rem 0.75rem; }
+}
+
 /* ========================================
    PAGE TEMPLATE - Contact (PREMIUM)
    ======================================== */

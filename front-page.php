@@ -469,6 +469,37 @@ foreach ($carousel_products as $product) {
 <script>window.SAPI_CAROUSEL_DATA = <?php echo wp_json_encode($carousel_slides_data); ?>;</script>
 <?php endif; ?>
 
+<!-- Entrée projet — room picker promu en section pleine largeur (refonte home #1) -->
+<section class="home-projet-section">
+  <div class="home-projet" data-room-picker>
+    <div class="room-picker-inner">
+      <span class="home-projet__eyebrow">Ton projet</span>
+      <h3 class="room-picker-title">Pour quelle pièce cherches-tu un luminaire ?</h3>
+      <div class="room-picker-cards">
+        <?php foreach ($room_choices as $room) :
+          $icon_svg = isset($room_icons[$room['icon']]) ? $room_icons[$room['icon']] : '';
+        ?>
+          <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'])); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
+            <span class="room-card-icon"><?php echo $icon_svg; ?></span>
+            <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
+          </a>
+        <?php endforeach; ?>
+      </div>
+      <div class="room-picker-or" aria-hidden="true">
+        <span class="room-picker-or__text">ou</span>
+      </div>
+      <form class="room-picker-freetext" data-room-picker-freetext>
+        <input type="text" class="room-picker-freetext__input" name="freetext"
+               placeholder="Décris ton projet en quelques mots…" maxlength="500"
+               aria-label="Décris ton projet en quelques mots">
+        <button type="submit" class="room-picker-freetext__submit" aria-label="Envoyer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
 <!-- Hero Bento Grid -->
 <section class="hero-bento">
   <div class="bento-container">
@@ -512,32 +543,6 @@ foreach ($carousel_products as $product) {
       </div>
     </a>
     <?php endif; ?>
-
-    <!-- Pour quelle pièce ? — Question pièce + 6 cases + champ texte libre. -->
-    <div class="bento-card bento-room-picker" data-room-picker>
-      <div class="room-picker-inner">
-        <h3 class="room-picker-title">Pour quelle pièce cherchez-vous un luminaire ?</h3>
-        <div class="room-picker-cards">
-          <?php foreach ($room_choices as $room) : ?>
-            <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'])); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
-              <span class="room-card-icon"><?php echo $room_icons[$room['icon']]; ?></span>
-              <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
-            </a>
-          <?php endforeach; ?>
-        </div>
-        <div class="room-picker-or" aria-hidden="true">
-          <span class="room-picker-or__text">ou</span>
-        </div>
-        <form class="room-picker-freetext" data-room-picker-freetext>
-          <input type="text" class="room-picker-freetext__input" name="freetext"
-                 placeholder="Décris ton projet en quelques mots…" maxlength="500"
-                 aria-label="Décris ton projet en quelques mots">
-          <button type="submit" class="room-picker-freetext__submit" aria-label="Envoyer">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-          </button>
-        </form>
-      </div>
-    </div>
 
   </div>
 </section>
