@@ -7910,30 +7910,11 @@ li.carousel-editorial-slide,
   }
 }
 
-/* ===== Refonte home #1 — Section entrée projet ===== */
-.home-projet-section {
-  max-width: 1400px;
-  margin: 2.5rem auto;
-  padding: 0 2rem;
+/* ===== Design system — bandes de section (langage mockup-15, généralisable) ===== */
+.section-band--warm {
+  background: var(--color-warm);
 }
-.home-projet {
-  position: relative;
-  background: var(--color-warm, #FBF6EA);
-  border-radius: 16px;
-  padding: 2.75rem 2rem;
-  text-align: center;
-  overflow: hidden;
-}
-.home-projet::before {
-  content: "";
-  position: absolute;
-  inset: 12px;
-  border: 1.5px dashed rgba(147, 125, 104, 0.35);
-  border-radius: 12px;
-  pointer-events: none;
-}
-.home-projet .room-picker-inner { position: relative; z-index: 1; }
-.home-projet__eyebrow {
+.section-eyebrow {
   display: block;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -7943,6 +7924,18 @@ li.carousel-editorial-slide,
   opacity: 0.85;
   margin-bottom: 0.5rem;
 }
+
+/* ===== Refonte home — Entrée projet (bandeau pleine largeur) ===== */
+.home-projet-section {
+  background: var(--color-warm);
+  padding: 3.5rem 2rem;
+  margin: 0;
+}
+.home-projet {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
 .home-projet .room-picker-cards {
   display: flex;
   justify-content: center;
@@ -7951,8 +7944,7 @@ li.carousel-editorial-slide,
   width: 100%;
 }
 @media (max-width: 768px) {
-  .home-projet-section { padding: 0 1rem; }
-  .home-projet { padding: 1.75rem 1.25rem; }
+  .home-projet-section { padding: 2.5rem 1rem; }
   .home-projet .room-picker-cards { gap: 0.75rem; }
   .home-projet .room-card { flex: 0 0 calc(50% - 0.5rem); max-width: none; padding: 1rem 0.75rem; }
 }
@@ -7980,6 +7972,55 @@ li.carousel-editorial-slide,
 @media (hover: hover) {
   .storytelling-text--seo a:hover { color: var(--color-orange); }
 }
+
+/* ===== Refonte home — Ils en parlent (au diapason des sections) ===== */
+.home-avis {
+  max-width: none;
+  margin: 0;
+  padding: 2rem 0 3.5rem;
+  background: transparent;
+}
+.home-avis .testimonials-header {
+  display: flex;
+  align-items: baseline;
+  gap: 2rem;
+  max-width: 1600px;
+  margin: 0 auto 1.5rem;
+  padding: 1rem 3rem 0;
+}
+.home-avis .google-reviews-badge { margin-left: auto; }
+.home-avis .testimonials-grid {
+  align-items: start;
+  max-width: 1600px;
+  margin: 0 auto 2rem;
+  padding: 0 3rem;
+}
+.home-avis .testimonial-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-light);
+  height: auto;
+}
+.home-avis .testimonials-cta {
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 3rem;
+  padding-right: 3rem;
+}
+@media (max-width: 768px) {
+  .home-avis { padding: 1rem 0 2.5rem; }
+  .home-avis .testimonials-header { padding: 1rem 1.25rem 0; }
+  .home-avis .testimonials-grid { padding: 0 1.25rem; }
+  .home-avis .testimonials-cta { padding-left: 1.25rem; padding-right: 1.25rem; }
+}
+
+/* ===== Refonte home — Bento divers (variante A : carte cadeau en bannière) ===== */
+.home-divers .bento-giftcard { grid-column: span 12; grid-row: span 1; }
+/* Variante B (3 cartes égales) — décommenter pour tester, et commenter A :
+.home-divers .bento-giftcard { grid-column: span 4; grid-row: span 2; }
+.home-divers .bento-conseil  { grid-column: span 4; }
+.home-divers .bento-actu     { grid-column: span 4; }
+*/
 
 /* ========================================
    PAGE TEMPLATE - Contact (PREMIUM)
@@ -10700,17 +10741,16 @@ transform: translateY(15px);
   position: absolute;
   top: 1.25rem;
   left: 1.25rem;
-  padding: 0.5rem 1.25rem;
-  background: var(--gradient-cta);
+  padding: 5px 13px;
+  background: var(--color-orange);
   color: var(--color-white);
   font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   border-radius: 50px;
   z-index: 3;
-  box-shadow: 0 4px 12px rgba(227, 91, 36, 0.3);
 }
 
 /* Storytelling Artisanat Card */
@@ -10806,17 +10846,16 @@ transform: translateY(15px);
   position: absolute;
   top: 1rem;
   left: 1rem;
-  padding: 0.4rem 1rem;
-  background: var(--color-wood);
-  color: #fff;
+  padding: 5px 13px;
+  background: var(--color-orange);
+  color: var(--color-white);
   font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   border-radius: 50px;
   z-index: 2;
-  box-shadow: 0 2px 8px rgba(147, 125, 104, 0.3);
 }
 
 .giftcard-info {
@@ -11330,10 +11369,10 @@ button.room-card {
   position: absolute;
   top: 1.5rem;
   left: 1.5rem;
-  padding: 0.4rem 1rem;
+  padding: 5px 13px;
   background: var(--color-orange);
-  color: #fff;
-  font-size: 0.7rem;
+  color: var(--color-white);
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -11408,10 +11447,10 @@ button.room-card {
   position: absolute;
   top: 1.5rem;
   left: 1.5rem;
-  padding: 0.4rem 1rem;
-  background: var(--color-wood);
-  color: #fff;
-  font-size: 0.7rem;
+  padding: 5px 13px;
+  background: var(--color-orange);
+  color: var(--color-white);
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;

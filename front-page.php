@@ -473,7 +473,7 @@ foreach ($carousel_products as $product) {
 <section class="home-projet-section">
   <div class="home-projet" data-room-picker>
     <div class="room-picker-inner">
-      <span class="home-projet__eyebrow">Ton projet</span>
+      <span class="section-eyebrow">Ton projet</span>
       <h2 class="room-picker-title">Pour quelle pièce cherches-tu un luminaire ?</h2>
       <div class="room-picker-cards">
         <?php foreach ($room_choices as $room) :
@@ -526,6 +526,7 @@ foreach ($carousel_products as $product) {
 </section>
 
 <!-- Les créations du moment (refonte home #2) — regroupe Star + produits featured + CTA -->
+<div class="section-band--warm">
 <section class="hero-bento home-creations">
   <div class="section-header-kinetic">
     <span class="section-num">03</span>
@@ -566,6 +567,7 @@ foreach ($carousel_products as $product) {
 
   </div>
 </section>
+</div>
 
 <!-- L'atelier (refonte home #3) — storytelling + photo atelier + process + texte SEO -->
 <?php
@@ -646,6 +648,7 @@ $sapi_cat_url = function ($slug) {
 <!-- Ils en parlent (refonte home #4) — avis Google, réutilise les composants de la fiche produit -->
 <?php $home_reviews = sapi_get_google_reviews(); ?>
 <?php if ($home_reviews && !empty($home_reviews['reviews'])) : ?>
+<div class="section-band--warm">
 <section class="product-testimonials home-avis">
   <div class="testimonials-header">
     <span class="section-num">05</span>
@@ -714,10 +717,11 @@ $sapi_cat_url = function ($slug) {
     <a href="https://www.google.com/maps/place/?q=place_id:ChIJYyWUfZOV9EcRDRhbW4HM6KY" target="_blank" rel="noopener noreferrer">Voir les <?php echo esc_html($home_reviews['total']); ?> avis</a>
   </div>
 </section>
+</div>
 <?php endif; ?>
 
 <!-- Hero Bento Grid (continued) -->
-<section class="hero-bento">
+<section class="hero-bento home-divers">
   <div class="bento-container">
 
     <!-- Carte Cadeau (déplacée du 1er bento) -->
