@@ -583,65 +583,36 @@ $sapi_cat_url = function ($slug) {
     <span class="section-num">04</span>
     <h2 class="section-title-kinetic">L'atelier</h2>
   </div>
-  <div class="bento-container">
-
-    <div class="bento-card bento-storytelling">
-      <div class="storytelling-inner">
-        <span class="storytelling-label">Mon atelier à Lyon</span>
-        <h3 class="storytelling-title">Des sculptures lumineuses</h3>
-        <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
-        <p class="storytelling-text storytelling-text--seo">Je dessine et fabrique à la commande des <a href="<?php echo esc_url($sapi_cat_url('suspensions')); ?>">suspensions</a>, <a href="<?php echo esc_url($sapi_cat_url('appliques')); ?>">appliques</a>, <a href="<?php echo esc_url($sapi_cat_url('lampesaposer')); ?>">lampes à poser</a> et <a href="<?php echo esc_url($sapi_cat_url('lampadaires')); ?>">lampadaires</a> en bois massif. Chaque luminaire est découpé au laser puis assemblé à la main : le peuplier clair ou l'okoumé chaleureux filtrent la lumière et dessinent des ombres uniques.</p>
-        <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="storytelling-link">
-          <span>Découvrir l'artisan</span>
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-            <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
-          </svg>
-        </a>
-      </div>
+  <div class="atelier-duo">
+    <div class="atelier-story">
+      <span class="section-eyebrow">Mon atelier à Lyon</span>
+      <h3 class="atelier-story-title">Des sculptures lumineuses</h3>
+      <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
+      <p class="storytelling-text storytelling-text--seo">Je dessine et fabrique à la commande des <a href="<?php echo esc_url($sapi_cat_url('suspensions')); ?>">suspensions</a>, <a href="<?php echo esc_url($sapi_cat_url('appliques')); ?>">appliques</a>, <a href="<?php echo esc_url($sapi_cat_url('lampesaposer')); ?>">lampes à poser</a> et <a href="<?php echo esc_url($sapi_cat_url('lampadaires')); ?>">lampadaires</a> en bois massif. Chaque luminaire est découpé au laser puis assemblé à la main : le peuplier clair ou l'okoumé chaleureux filtrent la lumière et dessinent des ombres uniques.</p>
+      <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="hero-cta">Découvrir l'artisan</a>
     </div>
-
-    <!-- Atelier Image -->
-    <a href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer" class="bento-card bento-atelier">
-      <?php echo sapi_image('2025/05/Robin-Sapi-A.jpg', 'large', ['alt' => 'Atelier Sâpi — Atelier de fabrication de luminaires à Lyon', 'class' => 'bento-bg-img', 'loading' => 'lazy']); ?>
-      <div class="atelier-label">
-        <span>L'atelier · Lyon</span>
-      </div>
+    <a class="atelier-photo" href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer">
+      <?php echo sapi_image('2025/05/Robin-Sapi-A.jpg', 'large', ['alt' => 'Atelier Sâpi, atelier de fabrication de luminaires à Lyon', 'class' => 'atelier-photo-img', 'loading' => 'lazy']); ?>
+      <div class="atelier-label"><span>L'atelier · Lyon</span></div>
     </a>
-
-    <!-- Process Card -->
-    <div class="bento-card bento-process">
-      <div class="process-header">
-        <h3 class="process-title">Mon processus artisanal</h3>
+  </div>
+  <div class="process-strip">
+    <?php
+    $process_steps = [
+      ['01', 'Dessin',        '2025/05/IMG_1928-e1761747188966.png', "Dessin d'un luminaire en bois, Atelier Sâpi"],
+      ['02', 'Découpe laser', '2025/05/IMG_7638.jpg',                'Découpe laser du bois pour luminaire'],
+      ['03', 'Finitions',     '2025/03/P_SLM_XL_det5.jpg',           "Finitions manuelles d'un luminaire en bois"],
+      ['04', 'Assemblage',    '2025/05/Robin-Sapi-A.jpg',            'Robin assemble un luminaire dans son atelier à Lyon'],
+      ['05', 'Expédition',    '2025/07/Claudine-bandeau-1.jpg',      "Luminaire Claudine prêt pour l'expédition"],
+    ];
+    foreach ($process_steps as $step) : ?>
+      <div class="process-tile">
+        <div class="process-tile-img">
+          <?php echo sapi_image($step[2], 'large', ['alt' => $step[3], 'class' => 'process-tile-photo', 'loading' => 'lazy']); ?>
+        </div>
+        <span class="process-tile-label"><?php echo esc_html($step[0] . ' · ' . $step[1]); ?></span>
       </div>
-      <div class="process-inner">
-        <div class="process-step">
-          <span class="step-num">01</span>
-          <span class="step-text">Dessin</span>
-          <?php echo sapi_image('2025/05/IMG_1928-e1761747188966.png', 'large', ['alt' => "Dessin d'un luminaire en bois — Atelier Sâpi", 'class' => 'step-image-img', 'loading' => 'lazy']); ?>
-        </div>
-        <div class="process-step">
-          <span class="step-num">02</span>
-          <span class="step-text">Découpe laser</span>
-          <?php echo sapi_image('2025/05/IMG_7638.jpg', 'large', ['alt' => 'Découpe laser du bois pour luminaire', 'class' => 'step-image-img', 'loading' => 'lazy']); ?>
-        </div>
-        <div class="process-step">
-          <span class="step-num">03</span>
-          <span class="step-text">Finitions</span>
-          <?php echo sapi_image('2025/03/P_SLM_XL_det5.jpg', 'large', ['alt' => "Finitions manuelles d'un luminaire en bois", 'class' => 'step-image-img', 'loading' => 'lazy']); ?>
-        </div>
-        <div class="process-step">
-          <span class="step-num">04</span>
-          <span class="step-text">Assemblage</span>
-          <?php echo sapi_image('2025/05/Robin-Sapi-A.jpg', 'large', ['alt' => "Robin assemble un luminaire dans son atelier à Lyon", 'class' => 'step-image-img', 'loading' => 'lazy']); ?>
-        </div>
-        <div class="process-step">
-          <span class="step-num">05</span>
-          <span class="step-text">Expédition</span>
-          <?php echo sapi_image('2025/07/Claudine-bandeau-1.jpg', 'large', ['alt' => "Luminaire Claudine prêt pour l'expédition", 'class' => 'step-image-img', 'loading' => 'lazy']); ?>
-        </div>
-      </div>
-    </div>
-
+    <?php endforeach; ?>
   </div>
 </section>
 
