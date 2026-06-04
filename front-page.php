@@ -500,39 +500,6 @@ foreach ($carousel_products as $product) {
   </div>
 </section>
 
-<!-- Hero Bento Grid -->
-<section class="hero-bento">
-  <div class="bento-container">
-
-    <!-- Storytelling Artisanat -->
-    <div class="bento-card bento-storytelling">
-      <div class="storytelling-inner">
-        <span class="storytelling-label"><span class="storytelling-num">01</span> L'atelier</span>
-        <h2 class="storytelling-title">Des sculptures lumineuses</h2>
-        <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
-        <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="storytelling-link">
-          <span>Découvrir l'artisan</span>
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-            <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
-          </svg>
-        </a>
-      </div>
-    </div>
-
-    <!-- Carte Cadeau -->
-    <?php if ($gift_card) : ?>
-    <a href="<?php echo esc_url($gift_card['url']); ?>" class="bento-card bento-giftcard">
-      <?php echo wp_get_attachment_image($gift_card['image_id'], 'large', false, ['class' => 'bento-bg-img bento-bg-img--bottom-right', 'loading' => 'lazy', 'alt' => 'Carte cadeau Atelier Sâpi']); ?>
-      <span class="giftcard-badge">Idée cadeau</span>
-      <div class="giftcard-info">
-        <h3>Offrez la lumière avec une carte cadeau</h3>
-      </div>
-    </a>
-    <?php endif; ?>
-
-  </div>
-</section>
-
 <!-- Collections Carousel / Grid -->
 <section class="collections-kinetic">
   <div class="section-header-kinetic">
@@ -600,13 +567,48 @@ foreach ($carousel_products as $product) {
   </div>
 </section>
 
-<!-- Hero Bento Grid (continued) -->
-<section class="hero-bento">
+<!-- L'atelier (refonte home #3) — storytelling + photo atelier + process + texte SEO -->
+<?php
+// URLs catégories pour le maillage interne (slugs canon : voir tax_query carousel)
+$sapi_cat_url = function ($slug) {
+  $t = get_term_by('slug', $slug, 'product_cat');
+  $l = $t ? get_term_link($t) : '';
+  return (!is_wp_error($l) && $l) ? $l : home_url('/mes-creations/');
+};
+?>
+<section class="hero-bento home-atelier">
+  <div class="section-header-kinetic">
+    <span class="section-num">04</span>
+    <h2 class="section-title-kinetic">L'atelier</h2>
+  </div>
   <div class="bento-container">
+
+    <div class="bento-card bento-storytelling">
+      <div class="storytelling-inner">
+        <span class="storytelling-label">Mon atelier à Lyon</span>
+        <h2 class="storytelling-title">Des sculptures lumineuses</h2>
+        <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
+        <p class="storytelling-text storytelling-text--seo">Je dessine et fabrique à la commande des <a href="<?php echo esc_url($sapi_cat_url('suspensions')); ?>">suspensions</a>, <a href="<?php echo esc_url($sapi_cat_url('appliques')); ?>">appliques</a>, <a href="<?php echo esc_url($sapi_cat_url('lampesaposer')); ?>">lampes à poser</a> et <a href="<?php echo esc_url($sapi_cat_url('lampadaires')); ?>">lampadaires</a> en bois massif. Chaque luminaire est découpé au laser puis assemblé à la main : le peuplier clair ou l'okoumé chaleureux filtrent la lumière et dessinent des ombres uniques.</p>
+        <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="storytelling-link">
+          <span>Découvrir l'artisan</span>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Atelier Image -->
+    <a href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer" class="bento-card bento-atelier">
+      <?php echo sapi_image('2025/05/Robin-Sapi-A.jpg', 'large', ['alt' => 'Atelier Sâpi — Atelier de fabrication de luminaires à Lyon', 'class' => 'bento-bg-img', 'loading' => 'lazy']); ?>
+      <div class="atelier-label">
+        <span>L'atelier · Lyon</span>
+      </div>
+    </a>
+
     <!-- Process Card -->
     <div class="bento-card bento-process">
       <div class="process-header">
-        <span class="process-number">03</span>
         <h3 class="process-title">Mon processus artisanal</h3>
       </div>
       <div class="process-inner">
@@ -638,13 +640,23 @@ foreach ($carousel_products as $product) {
       </div>
     </div>
 
-    <!-- Atelier Image -->
-    <a href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer" class="bento-card bento-atelier">
-      <?php echo sapi_image('2025/05/Robin-Sapi-A.jpg', 'large', ['alt' => 'Atelier Sâpi — Atelier de fabrication de luminaires à Lyon', 'class' => 'bento-bg-img', 'loading' => 'lazy']); ?>
-      <div class="atelier-label">
-        <span>L'atelier · Lyon</span>
+  </div>
+</section>
+
+<!-- Hero Bento Grid (continued) -->
+<section class="hero-bento">
+  <div class="bento-container">
+
+    <!-- Carte Cadeau (déplacée du 1er bento) -->
+    <?php if ($gift_card) : ?>
+    <a href="<?php echo esc_url($gift_card['url']); ?>" class="bento-card bento-giftcard">
+      <?php echo wp_get_attachment_image($gift_card['image_id'], 'large', false, ['class' => 'bento-bg-img bento-bg-img--bottom-right', 'loading' => 'lazy', 'alt' => 'Carte cadeau Atelier Sâpi']); ?>
+      <span class="giftcard-badge">Idée cadeau</span>
+      <div class="giftcard-info">
+        <h3>Offrez la lumière avec une carte cadeau</h3>
       </div>
     </a>
+    <?php endif; ?>
 
     <!-- Conseil -->
     <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>" class="bento-card bento-conseil">
@@ -690,7 +702,7 @@ foreach ($carousel_products as $product) {
 <!-- Newsletter Section -->
 <section class="newsletter-kinetic">
   <div class="section-header-kinetic">
-    <span class="section-num">04</span>
+    <span class="section-num">05</span>
     <h2 class="section-title-kinetic">Restez informés</h2>
   </div>
   <p class="newsletter-subtitle">Nouveautés, éditions limitées, coulisses d'atelier.</p>
