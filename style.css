@@ -8151,14 +8151,12 @@ li.carousel-editorial-slide,
   pointer-events: none;
   z-index: 1;
 }
-.creation-star .bento-bestseller-badge,
-.creations-grid .product-media .bento-bestseller-badge {
+.creation-star .bento-bestseller-badge {
   position: absolute;
   top: 14px;
   left: 14px;
   z-index: 2;
 }
-.creations-grid .product-media { position: relative; }
 .creation-star-label {
   position: absolute;
   left: 18px;

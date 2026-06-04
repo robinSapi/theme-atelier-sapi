@@ -575,7 +575,6 @@ foreach ($carousel_products as $product) {
     <div class="product-card-cinetique" data-product-id="<?php echo esc_attr($fp['id']); ?>" data-piece-swap data-piece-swap-type="ambiance" data-piece-swap-size="large">
       <a href="<?php echo esc_url($fp['url']); ?>" class="product-card-link">
         <div class="product-media<?php echo !empty($fp['hover_id']) ? ' has-hover-image' : ''; ?>">
-          <span class="bento-bestseller-badge">Best-seller</span>
           <span class="product-image-main"><?php echo wp_get_attachment_image($fp['ambiance_id'], 'large', false, ['alt' => $fp['name'], 'loading' => 'lazy']); ?></span>
           <?php if (!empty($fp['hover_id'])) : ?>
             <span class="product-image-hover"><?php echo wp_get_attachment_image($fp['hover_id'], 'woocommerce_thumbnail', false, ['alt' => $fp['name'] . ' - ambiance', 'loading' => 'lazy']); ?></span>
