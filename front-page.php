@@ -640,21 +640,21 @@ $sapi_cat_url = function ($slug) {
   <div class="process-flips">
     <?php
     $process_steps = [
-      ['01', 'Dessin',        '2025/05/IMG_1928-e1761747188966.png', "Dessin d'un luminaire en bois, Atelier Sâpi",         "Tout commence par un trait de crayon"],
-      ['02', 'Découpe laser', '2025/05/IMG_7638.jpg',                'Découpe laser du bois pour luminaire',                "Le laser suit mon dessin au dixième près"],
-      ['03', 'Finitions',     '2025/03/P_SLM_XL_det5.jpg',           "Finitions manuelles d'un luminaire en bois",          "Le ponçage, c'est ma méditation"],
-      ['04', 'Assemblage',    '2025/05/Robin-Sapi-A.jpg',            'Robin assemble un luminaire dans son atelier à Lyon', "Chaque pièce s'emboîte sans une vis"],
-      ['05', 'Expédition',    '2025/07/Claudine-bandeau-1.jpg',      "Luminaire Claudine prêt pour l'expédition",           "Emballé comme si c'était pour ma mère"],
+      ['01', 'Dessin',        '2025/05/IMG_1928-e1761747188966.png', "Dessin d'un luminaire en bois, Atelier Sâpi"],
+      ['02', 'Découpe laser', '2025/05/IMG_7638.jpg',                'Découpe laser du bois pour luminaire'],
+      ['03', 'Finitions',     '2025/03/P_SLM_XL_det5.jpg',           "Finitions manuelles d'un luminaire en bois"],
+      ['04', 'Assemblage',    '2025/05/Robin-Sapi-A.jpg',            'Robin assemble un luminaire dans son atelier à Lyon'],
+      ['05', 'Expédition',    '2025/07/Claudine-bandeau-1.jpg',      "Luminaire Claudine prêt pour l'expédition"],
     ];
     foreach ($process_steps as $step) : ?>
     <div class="process-flip" tabindex="0" role="button" aria-label="Étape <?php echo esc_attr($step[0] . ' : ' . $step[1]); ?>">
       <div class="process-flip-inner">
         <div class="process-flip-front">
-          <?php echo sapi_image($step[2], 'large', ['alt' => $step[3], 'class' => 'process-flip-photo', 'loading' => 'lazy']); ?>
-          <span class="process-flip-label"><span class="process-flip-num"><?php echo esc_html($step[0]); ?></span> <?php echo esc_html($step[1]); ?></span>
+          <span class="process-flip-num"><?php echo esc_html($step[0]); ?></span>
+          <span class="process-flip-title"><?php echo esc_html($step[1]); ?></span>
         </div>
         <div class="process-flip-back">
-          <p>« <?php echo esc_html($step[4]); ?> »</p>
+          <?php echo sapi_image($step[2], 'large', ['alt' => $step[3], 'class' => 'process-flip-photo', 'loading' => 'lazy']); ?>
         </div>
       </div>
     </div>

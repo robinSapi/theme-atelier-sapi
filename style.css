@@ -8046,33 +8046,35 @@ li.carousel-editorial-slide,
   border-radius: 12px;
   overflow: hidden;
 }
-.process-flip-photo { width: 100%; height: 100%; object-fit: cover; }
-.process-flip-label {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  padding: 10px;
-  color: var(--color-white);
-  background: linear-gradient(transparent, rgba(40, 30, 20, 0.55));
-  font-size: 12px;
-  font-weight: 600;
-}
-.process-flip-num { font-weight: 700; letter-spacing: 0.1em; opacity: 0.9; margin-right: 4px; }
-.process-flip-back {
-  background: var(--color-wood-dark);
-  color: var(--color-warm);
+/* Recto : fond bois clair, numéro en grand + titre de l'étape */
+.process-flip-front {
+  background: var(--color-warm);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 14px;
   text-align: center;
+  padding: 14px;
+}
+.process-flip-num {
+  font-family: var(--font-body);
+  font-size: 3.25rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-wood-dark);
+}
+.process-flip-title {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-wood-mid);
+}
+/* Verso : la photo de l'étape */
+.process-flip-back {
   transform: rotateY(180deg);
 }
-.process-flip-back p {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  line-height: 1.1;
-  margin: 0;
-}
+.process-flip-photo { width: 100%; height: 100%; object-fit: cover; }
 @media (max-width: 880px) {
   .atelier-duo { grid-template-columns: 1fr; gap: 24px; }
   .process-flips { flex-wrap: wrap; }
