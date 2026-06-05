@@ -513,65 +513,34 @@
     }
   }
 
-  // Rotation des photos : on garde dans localStorage l'INDEX suivant à
-  // utiliser pour chaque pièce → à chaque visite, on avance d'un cran (A→B→C→A).
-  // Robuste si localStorage est indisponible (navigation privée) : on retombe
-  // sur un compteur en mémoire (rotation valable le temps de l'onglet).
-  var ROTATION_KEY = 'sapi_piece_photo_rotation';
-  var rotationFallback = {};
-
-  function readRotationStore() {
-    try {
-      var raw = window.localStorage.getItem(ROTATION_KEY);
-      var parsed = raw ? JSON.parse(raw) : null;
-      return (parsed && typeof parsed === 'object') ? parsed : {};
-    } catch (e) {
-      return rotationFallback;
-    }
-  }
-
-  function writeRotationStore(store) {
-    rotationFallback = store;
-    try {
-      window.localStorage.setItem(ROTATION_KEY, JSON.stringify(store));
-    } catch (e) { /* quota / privé : le fallback mémoire prend le relais */ }
-  }
-
-  // Mémorise la pièce affichée ce chargement-ci pour n'avancer la rotation
-  // qu'UNE fois par pièce et par chargement (render() est rappelé à chaque
-  // update du projet : sans ce garde, on sauterait des photos en plein parcours).
+  // Mémorise la pièce affichée pour ne reconstruire le bandeau que si la pièce
+  // change (render() est rappelé à chaque update du projet).
   var currentPhotoPiece = null;
-  var currentPhotoUrl = null;
 
-  // Affiche la photo de la pièce du projet en haut de la card, pleine largeur.
-  // ROTATION ordonnée parmi les photos ACF de la pièce. Règle métier : pas de
-  // photo dédiée à la pièce (ou pas de pièce) → pas de bandeau (on ne retombe
-  // PAS sur la clé 'default').
+  // Affiche TOUTES les photos ACF de la pièce côte à côte (colonnes égales) en
+  // haut de la card → chaque cliché est plus étroit donc moins recadré qu'un
+  // bandeau large unique. Règle métier : pas de photo dédiée à la pièce (ou pas
+  // de pièce) → pas de bandeau (on ne retombe PAS sur la clé 'default').
   function updateProjectPhoto() {
     if (!els.cardPhoto) return;
     var project = window.sapiProject ? window.sapiProject.get() : null;
     var piece = project && project.answers && project.answers.piece;
     var list = (piecePhotosMap && piece && piecePhotosMap[piece]) || null;
     if (list && list.length) {
-      // Avance d'un cran seulement si la pièce a changé depuis le dernier render.
-      if (piece !== currentPhotoPiece || !currentPhotoUrl) {
+      if (piece !== currentPhotoPiece) {
         currentPhotoPiece = piece;
-        if (list.length === 1) {
-          currentPhotoUrl = list[0];
-        } else {
-          var store = readRotationStore();
-          var idx = (parseInt(store[piece], 10) || 0) % list.length;
-          currentPhotoUrl = list[idx];
-          store[piece] = (idx + 1) % list.length; // prochaine visite → photo suivante
-          writeRotationStore(store);
-        }
+        els.cardPhoto.innerHTML = '';
+        list.forEach(function (url) {
+          var item = document.createElement('div');
+          item.className = 'conseiller-card__photo-item';
+          item.style.backgroundImage = 'url("' + url.replace(/"/g, '\\"') + '")';
+          els.cardPhoto.appendChild(item);
+        });
       }
-      els.cardPhoto.style.backgroundImage = 'url("' + currentPhotoUrl.replace(/"/g, '\\"') + '")';
       els.cardPhoto.hidden = false;
     } else {
       currentPhotoPiece = null;
-      currentPhotoUrl = null;
-      els.cardPhoto.style.backgroundImage = '';
+      els.cardPhoto.innerHTML = '';
       els.cardPhoto.hidden = true;
     }
   }
@@ -584,7 +553,8 @@
       renderConseil();
       if (els.cardPhoto) {
         els.cardPhoto.hidden = true;
-        els.cardPhoto.style.backgroundImage = '';
+        els.cardPhoto.innerHTML = '';
+        currentPhotoPiece = null;
       }
     }
     refilterGrid();

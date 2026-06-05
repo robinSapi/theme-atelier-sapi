@@ -22914,29 +22914,40 @@ body.woocommerce-cart div.woocommerce-wrapper {
   z-index: 1;
 }
 
-/* Bandeau photo de la pièce du projet — affiché en haut de la card
-   "Mon projet" quand un projet existe ET que la pièce a une photo dédiée
-   (sinon masqué). Pleine largeur : marges négatives qui annulent le padding
-   de la card. Le overflow:hidden + border-radius de .conseiller-card clippent
-   les coins hauts. Piloté par sapi-cards-conseiller.js (data-mon-projet-photo). */
+/* Bandeau photos de la pièce du projet — rangée de clichés côte à côte
+   (colonnes égales) en haut de la card "Mon projet", visible seulement si la
+   pièce a au moins une photo ACF dédiée. Pleine largeur : marges négatives qui
+   annulent le padding de la card. overflow:hidden + border-radius de
+   .conseiller-card clippent les coins hauts. Rempli par sapi-cards-conseiller.js. */
 .conseiller-card__photo {
   position: relative;
   z-index: 1;
+  display: -webkit-flex;
+  display: flex;
+  gap: 4px;
   margin: -36px -28px 28px;
-  height: 440px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  height: 300px;
 }
 
 .conseiller-card__photo[hidden] {
   display: none;
 }
 
+/* Chaque cliché : colonne de largeur égale, recadrée en cover. */
+.conseiller-card__photo-item {
+  -webkit-flex: 1 1 0;
+  flex: 1 1 0;
+  min-width: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 @media (max-width: 768px) {
   .conseiller-card__photo {
+    gap: 3px;
     margin: -28px -18px 22px;
-    height: 320px;
+    height: 200px;
   }
 }
 
