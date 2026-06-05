@@ -43,7 +43,9 @@
 
   function init() {
     cleanupLegacyConseillerStorage();
-    randomizeMobileReassurance();
+    // Refonte #11 : les 2 items mobiles sont désormais FIXES (Livraison 48-72h +
+    // Paiement sécurisé) via la classe .is-mobile-hidden dans le template.
+    // Plus de randomisation.
   }
 
   if (document.readyState === 'loading') {

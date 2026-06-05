@@ -7,7 +7,7 @@ $is_simplified = function_exists('is_cart') && (is_cart() || is_checkout());
 
 <footer class="site-footer site-footer--simplified">
   <div class="footer-bottom">
-    <p>&copy; <?php echo date('Y'); ?> Atelier Sâpi &mdash; Tous droits réservés</p>
+    <p>&copy; <?php echo date('Y'); ?> Atelier Sâpi &middot; Tous droits réservés</p>
     <div class="footer-legal">
       <?php
       wp_nav_menu([
@@ -76,7 +76,7 @@ $is_simplified = function_exists('is_cart') && (is_cart() || is_checkout());
   </div>
 
   <div class="footer-bottom">
-    <p>&copy; <?php echo date('Y'); ?> Atelier Sâpi &mdash; Tous droits réservés</p>
+    <p>&copy; <?php echo date('Y'); ?> Atelier Sâpi &middot; Tous droits réservés</p>
     <div class="footer-legal">
       <?php
       wp_nav_menu([

@@ -38,8 +38,16 @@ foreach ($categories_order as $cat_slug) {
       $product = wc_get_product(get_the_ID());
 
       if ($product) {
-        $photo_ids = sapi_get_product_photo_ids(get_the_ID(), 'ambiance', 1);
-        $image_id = !empty($photo_ids) ? $photo_ids[0] : 0;
+        // Cherche une photo ambiance PAYSAGE (width >= height) — écarte les portraits
+        $photo_ids = sapi_get_product_photo_ids(get_the_ID(), 'ambiance', 0);
+        $image_id = 0;
+        foreach ((array) $photo_ids as $pid) {
+          $meta = wp_get_attachment_metadata($pid);
+          if (!empty($meta['width']) && !empty($meta['height']) && $meta['width'] >= $meta['height']) {
+            $image_id = (int) $pid;
+            break;
+          }
+        }
 
         if ($image_id) {
           // Get minimum price
@@ -58,7 +66,7 @@ foreach ($categories_order as $cat_slug) {
             'image_id' => $image_id,
           ];
 
-          if (count($products_by_category[$cat_slug]) >= 2) break;
+          break; // 1 seul produit (paysage) par catégorie
         }
       }
     }
@@ -66,15 +74,10 @@ foreach ($categories_order as $cat_slug) {
   wp_reset_postdata();
 }
 
-// Interleave products: suspension, applique, lampe, lampadaire, suspension, applique, lampe, lampadaire
+// 1 produit par catégorie : suspension, applique, lampe à poser, lampadaire (4 slides produits)
 foreach ($categories_order as $cat_slug) {
   if (isset($products_by_category[$cat_slug][0])) {
     $carousel_products[] = $products_by_category[$cat_slug][0];
-  }
-}
-foreach ($categories_order as $cat_slug) {
-  if (isset($products_by_category[$cat_slug][1])) {
-    $carousel_products[] = $products_by_category[$cat_slug][1];
   }
 }
 
@@ -447,7 +450,7 @@ foreach ($carousel_products as $product) {
           <?php
             $img_attr = [
               'class'   => 'carousel-slide-img',
-              'alt'     => esc_attr($product['name']) . ' — Luminaire artisanal en bois',
+              'alt'     => esc_attr($product['name']) . ', luminaire artisanal en bois',
               'loading' => $is_first ? 'eager' : 'lazy',
               'sizes'   => '100vw',
             ];
@@ -553,7 +556,7 @@ foreach ($carousel_products as $product) {
     <?php foreach ($collections as $collection) : ?>
       <a href="<?php echo esc_url($collection['url']); ?>" class="collection-card">
         <div class="collection-visual">
-          <?php echo wp_get_attachment_image($collection['image_id'], 'large', false, ['class' => 'collection-visual-img', 'loading' => 'lazy', 'alt' => 'Collection ' . $collection['name'] . ' — Luminaires en bois']); ?>
+          <?php echo wp_get_attachment_image($collection['image_id'], 'large', false, ['class' => 'collection-visual-img', 'loading' => 'lazy', 'alt' => 'Collection ' . $collection['name'] . ', luminaires en bois']); ?>
         </div>
         <div class="collection-details">
           <h3><?php echo esc_html($collection['name']); ?></h3>
