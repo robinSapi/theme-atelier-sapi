@@ -660,48 +660,38 @@ $sapi_cat_url = function ($slug) {
   return (!is_wp_error($l) && $l) ? $l : home_url('/mes-creations/');
 };
 ?>
-<section class="hero-bento home-atelier">
-  <div class="section-header-kinetic">
-    <span class="section-num">04</span>
-    <h2 class="section-title-kinetic">L'atelier</h2>
-  </div>
-  <div class="atelier-duo">
-    <div class="atelier-story">
-      <h3 class="atelier-story-title">Des sculptures lumineuses</h3>
-      <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
-      <p class="storytelling-text storytelling-text--seo">Je dessine et fabrique à la commande des <a href="<?php echo esc_url($sapi_cat_url('suspensions')); ?>">suspensions</a>, <a href="<?php echo esc_url($sapi_cat_url('appliques')); ?>">appliques</a>, <a href="<?php echo esc_url($sapi_cat_url('lampesaposer')); ?>">lampes à poser</a> et <a href="<?php echo esc_url($sapi_cat_url('lampadaires')); ?>">lampadaires</a> en bois massif. Chaque luminaire est découpé au laser puis assemblé à la main : le peuplier clair ou l'okoumé chaleureux filtrent la lumière et dessinent des ombres uniques.</p>
-      <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="hero-cta hero-cta--wood">Découvrir l'artisan</a>
+<!-- L'atelier — bande immersive voile crème (refonte #15, idée C) -->
+<?php $atelier_band_img = '2026/02/Bandeau-2.jpg'; // PROVISOIRE — remplacer par une photo d'atelier (changer ce chemin suffit) ?>
+<section class="home-atelier home-atelier--band">
+  <?php echo sapi_image($atelier_band_img, 'large', ['class' => 'home-atelier__bg', 'loading' => 'lazy', 'alt' => "L'atelier de fabrication de luminaires en bois, Atelier Sâpi à Lyon"]); ?>
+  <div class="home-atelier__inner">
+    <div class="section-header-kinetic">
+      <span class="section-num">04</span>
+      <h2 class="section-title-kinetic">L'atelier</h2>
     </div>
-    <div class="atelier-media">
-      <div class="atelier-photo">
-        <?php echo sapi_image('2025/05/Robin-Sapi-A.jpg', 'large', ['alt' => 'Atelier Sâpi, atelier de fabrication de luminaires à Lyon', 'class' => 'atelier-photo-img', 'loading' => 'lazy']); ?>
-        <div class="atelier-label"><span>L'atelier · Lyon</span></div>
-      </div>
-      <a class="atelier-maps-link" href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer">Voir l'atelier sur Google Maps →</a>
-    </div>
-  </div>
-  <div class="process-flips">
-    <?php
-    $process_steps = [
-      ['01', 'Dessin',        '2025/05/IMG_1928-e1761747188966.png', "Dessin d'un luminaire en bois, Atelier Sâpi"],
-      ['02', 'Découpe laser', '2025/05/IMG_7638.jpg',                'Découpe laser du bois pour luminaire'],
-      ['03', 'Finitions',     '2025/03/P_SLM_XL_det5.jpg',           "Finitions manuelles d'un luminaire en bois"],
-      ['04', 'Assemblage',    '2025/05/Robin-Sapi-A.jpg',            'Robin assemble un luminaire dans son atelier à Lyon'],
-      ['05', 'Expédition',    '2025/07/Claudine-bandeau-1.jpg',      "Luminaire Claudine prêt pour l'expédition"],
-    ];
-    foreach ($process_steps as $step) : ?>
-    <div class="process-flip" tabindex="0" role="button" aria-label="Étape <?php echo esc_attr($step[0] . ' : ' . $step[1]); ?>">
-      <div class="process-flip-inner">
-        <div class="process-flip-front">
-          <span class="process-flip-num"><?php echo esc_html($step[0]); ?></span>
-          <span class="process-flip-title"><?php echo esc_html($step[1]); ?></span>
+    <h3 class="atelier-band-title">Des sculptures lumineuses</h3>
+    <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
+    <p class="storytelling-text storytelling-text--seo">Je dessine et fabrique à la commande des <a href="<?php echo esc_url($sapi_cat_url('suspensions')); ?>">suspensions</a>, <a href="<?php echo esc_url($sapi_cat_url('appliques')); ?>">appliques</a>, <a href="<?php echo esc_url($sapi_cat_url('lampesaposer')); ?>">lampes à poser</a> et <a href="<?php echo esc_url($sapi_cat_url('lampadaires')); ?>">lampadaires</a> en bois massif. Chaque luminaire est découpé au laser puis assemblé à la main : le peuplier clair ou l'okoumé chaleureux filtrent la lumière et dessinent des ombres uniques.</p>
+    <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="hero-cta hero-cta--wood">Découvrir l'artisan</a>
+    <div class="process-ribbon">
+      <?php
+      // [num, label, photo, alt, phrase manuscrite (tooltip natif title)]
+      $process_steps = [
+        ['01', 'Dessin',        '2025/05/IMG_1928-e1761747188966.png', "Dessin d'un luminaire en bois, Atelier Sâpi",         "Tout commence par un trait de crayon"],
+        ['02', 'Découpe laser', '2025/05/IMG_7638.jpg',                'Découpe laser du bois pour luminaire',                "Le laser suit mon dessin au dixième près"],
+        ['03', 'Finitions',     '2025/03/P_SLM_XL_det5.jpg',           "Finitions manuelles d'un luminaire en bois",          "Le ponçage, c'est ma méditation"],
+        ['04', 'Assemblage',    '2025/05/Robin-Sapi-A.jpg',            'Robin assemble un luminaire dans son atelier à Lyon', "Chaque pièce s'emboîte sans une vis"],
+        ['05', 'Expédition',    '2025/07/Claudine-bandeau-1.jpg',      "Luminaire Claudine prêt pour l'expédition",           "Emballé comme si c'était pour ma mère"],
+      ];
+      foreach ($process_steps as $step) : ?>
+      <div class="process-tile" title="« <?php echo esc_attr($step[4]); ?> »">
+        <div class="process-tile__img">
+          <?php echo sapi_image($step[2], 'large', ['alt' => $step[3], 'class' => 'process-tile__photo', 'loading' => 'lazy']); ?>
         </div>
-        <div class="process-flip-back">
-          <?php echo sapi_image($step[2], 'large', ['alt' => $step[3], 'class' => 'process-flip-photo', 'loading' => 'lazy']); ?>
-        </div>
+        <span class="process-tile__label"><?php echo esc_html($step[0] . ' ' . $step[1]); ?></span>
       </div>
+      <?php endforeach; ?>
     </div>
-    <?php endforeach; ?>
   </div>
 </section>
 
@@ -971,14 +961,6 @@ $sapi_cat_url = function ($slug) {
     window.addEventListener('scroll', updateHeaderState, { passive: true });
     updateHeaderState(); // Run once on load
   }
-
-  // 3. Process — cartes à retourner : flip au tap (mobile) + clavier
-  document.querySelectorAll('.process-flip').forEach(function (card) {
-    card.addEventListener('click', function () { card.classList.toggle('is-flipped'); });
-    card.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.classList.toggle('is-flipped'); }
-    });
-  });
 
   // 4. Collections — flèches desktop (scroll horizontal)
   var collectionsGrid = document.querySelector('.collections-grid');

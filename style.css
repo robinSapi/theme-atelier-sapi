@@ -7976,150 +7976,86 @@ li.carousel-editorial-slide,
   margin: 0 0 1.5rem;
 }
 
-/* ===== Refonte home #7/#10 — Section L'atelier (layout mockup + process flip) ===== */
-.atelier-duo {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 56px;
-  align-items: center;
-}
-.atelier-story-title {
-  font-family: var(--font-display);
-  font-size: clamp(2.2rem, 4vw, 3rem);
-  font-weight: 400;
-  color: var(--color-wood-dark);
-  line-height: 1;
-  margin: 0 0 12px;
-}
-.atelier-story .hero-cta { margin-top: 1rem; }
-.atelier-photo {
+/* ===== Refonte #15 — L'atelier en bande immersive voile crème (idée C) ===== */
+.home-atelier--band {
   position: relative;
-  border-radius: 14px;
   overflow: hidden;
-  min-height: 440px;
+  padding: 6rem 2rem 5.5rem;
+  background: var(--color-warm); /* fond de secours sous l'image */
 }
-.atelier-photo-img {
+.home-atelier__bg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-}
-.atelier-maps-link {
-  display: inline-block;
-  margin-top: 10px;
-  font-size: 0.85rem;
-  color: var(--color-wood);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-@media (hover: hover) {
-  .atelier-maps-link:hover { color: var(--color-orange); }
-}
-.hero-bento.home-atelier { padding-bottom: 5.5rem; }
-
-/* Process — cartes à retourner (refonte #10) */
-.process-flips {
-  display: flex;
-  gap: 16px;
-  margin-top: 48px;
-}
-.process-flip {
-  flex: 1;
-  height: 210px;
-  perspective: 800px;
-  cursor: pointer;
-}
-.process-flip-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.55s cubic-bezier(0.3, 0.7, 0.3, 1);
-  transform-style: preserve-3d;
-}
-@media (hover: hover) {
-  .process-flip:hover .process-flip-inner { transform: rotateY(180deg); }
-}
-.process-flip.is-flipped .process-flip-inner { transform: rotateY(180deg); }
-.process-flip-front,
-.process-flip-back {
-  position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  border-radius: 12px;
-  overflow: hidden;
-}
-/* Recto : fond bois clair, numéro en grand + titre de l'étape */
-.process-flip-front {
-  background: var(--color-warm);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 14px;
-}
-.process-flip-num {
-  font-family: var(--font-body);
-  font-size: 3.25rem;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--color-wood-dark);
-}
-.process-flip-title {
-  margin-top: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--color-wood-mid);
-}
-/* Verso : la photo de l'étape */
-.process-flip-back {
-  transform: rotateY(180deg);
-}
-.process-flip-photo { width: 100%; height: 100%; object-fit: cover; }
-@media (max-width: 880px) {
-  .atelier-duo { grid-template-columns: 1fr; gap: 24px; }
-  .process-flips { flex-wrap: wrap; }
-  .process-flip { flex: 1 1 30%; height: 180px; }
-}
-@media (max-width: 520px) {
-  .process-flip { flex: 1 1 45%; }
-}
-
-/* ===== Test — L'atelier en photo de fond + overlay (pattern .category-editorial) ===== */
-.home-atelier--photo-bg {
-  position: relative;
-  isolation: isolate;
-}
-.home-atelier--photo-bg > .home-atelier-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  max-width: none;
   object-fit: cover;
   object-position: center;
   z-index: 0;
 }
-.home-atelier--photo-bg::before {
+/* Voile crème — EXACTEMENT comme .category-editorial::before */
+.home-atelier--band::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(254, 253, 251, 0.92) 0%, rgba(251, 246, 234, 0.88) 50%, rgba(250, 246, 240, 0.92) 100%);
-  pointer-events: none;
   z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(254, 253, 251, 0.92) 0%, rgba(251, 246, 234, 0.88) 50%, rgba(250, 246, 240, 0.92) 100%);
+  /* Variante SOMBRE (basculer : commenter le crème ci-dessus, décommenter ci-dessous) :
+  background: linear-gradient(135deg, rgba(40, 31, 23, 0.82) 0%, rgba(58, 46, 35, 0.74) 50%, rgba(40, 31, 23, 0.85) 100%); */
 }
-.home-atelier--photo-bg > .section-header-kinetic,
-.home-atelier--photo-bg > .atelier-duo,
-.home-atelier--photo-bg > .process-flips {
+.home-atelier__inner {
   position: relative;
   z-index: 2;
+  max-width: 1000px;
+  margin: 0 auto;
+  text-align: center;
 }
-.home-atelier--photo-bg .atelier-duo {
-  grid-template-columns: 1fr;
+.home-atelier__inner .section-header-kinetic {
+  justify-content: center;
+  padding: 0;
+  margin: 0 0 1.25rem;
+}
+.atelier-band-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 5vw, 3.6rem);
+  font-weight: 400;
+  color: var(--color-wood-dark);
+  line-height: 1.05;
+  margin: 0 0 1rem;
+}
+.home-atelier__inner .storytelling-text {
   max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.home-atelier__inner .hero-cta { margin-top: 1.5rem; }
+/* Ruban process — 5 vignettes (remplace les cartes flip) */
+.process-ribbon {
+  display: flex;
+  gap: 14px;
+  margin-top: 3rem;
+}
+.process-tile {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.process-tile__img { height: 110px; overflow: hidden; }
+.process-tile__photo { width: 100%; height: 100%; object-fit: cover; display: block; }
+.process-tile__label {
+  display: block;
+  padding: 8px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--color-wood-mid);
+}
+@media (max-width: 768px) {
+  .home-atelier--band { padding: 3.5rem 1rem; }
+  .process-ribbon { flex-wrap: wrap; }
+  .process-tile { flex: 1 1 calc(50% - 7px); }
 }
 
 .storytelling-text--seo {
@@ -8204,7 +8140,6 @@ li.carousel-editorial-slide,
 /* ===== Refonte home #8 — respiration sections bento + ajustements divers ===== */
 /* (5) Respiration avant les sections bento — double classe pour battre .hero-bento */
 .hero-bento.home-creations,
-.hero-bento.home-atelier,
 .hero-bento.home-divers {
   padding-top: 6rem;
 }
@@ -8213,19 +8148,12 @@ li.carousel-editorial-slide,
   aspect-ratio: 2 / 3;
   max-height: 660px;
 }
-/* (7) Titre L'atelier sans majuscules + air autour */
-.atelier-story-title {
-  text-transform: none;
-  margin: 0.5rem 0 1.25rem;
-  line-height: 1.05;
-}
 /* (8) Numéro du header avis aligné sur les autres (scopé .home-avis) */
 .home-avis .testimonials-header .section-num {
   font-size: 1.5rem;
 }
 @media (max-width: 768px) {
   .hero-bento.home-creations,
-  .hero-bento.home-atelier,
   .hero-bento.home-divers,
   .collections-kinetic,
   .newsletter-kinetic {
@@ -11553,29 +11481,7 @@ button.room-card {
 /* CTA Card */
 /* (refonte #9) bloc .bento-cta* / .cta-title retiré — CTA = .hero-cta + .creations-cta */
 
-/* Atelier label — réutilisé par .atelier-photo (refonte #7) */
-.atelier-label {
-  position: absolute;
-  bottom: 2rem;
-  left: 2rem;
-  padding: 0.75rem 1.5rem;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 50px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  color: var(--color-dark);
-  z-index: 2;
-  transition: all 0.3s var(--ease-smooth);
-}
-
-@media (hover: hover) {
-  .atelier-photo:hover .atelier-label {
-    background: var(--color-wood);
-    color: var(--color-white);
-  }
-}
+/* (refonte #15) .atelier-label / .atelier-photo retirés — L'atelier est désormais une bande immersive */
 
 /* Bento - Flash Actu Card */
 .bento-actu {
