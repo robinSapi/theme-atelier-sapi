@@ -8445,7 +8445,8 @@ li.carousel-editorial-slide,
 /* Card carte (P12) posée sur la bande */
 .map-card {
   position: absolute;
-  right: 42px;
+  /* bord droit aligné sur la gouttière du site (conteneur 1600px + 48px), comme le bento/collections */
+  right: max(48px, calc((100vw - 1600px) / 2 + 48px));
   bottom: 36px;
   z-index: 3;
   width: 280px;
