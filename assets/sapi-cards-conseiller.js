@@ -513,29 +513,58 @@
     }
   }
 
-  // Mémorise le tirage en cours pour éviter de re-randomiser à chaque render
-  // (render() est rappelé à chaque update du projet : sans ce cache, la photo
-  // changerait en plein parcours). On ne retire un nouveau cliché que si la
-  // pièce change (ou au rechargement de page).
+  // Rotation des photos : on garde dans localStorage l'INDEX suivant à
+  // utiliser pour chaque pièce → à chaque visite, on avance d'un cran (A→B→C→A).
+  // Robuste si localStorage est indisponible (navigation privée) : on retombe
+  // sur un compteur en mémoire (rotation valable le temps de l'onglet).
+  var ROTATION_KEY = 'sapi_piece_photo_rotation';
+  var rotationFallback = {};
+
+  function readRotationStore() {
+    try {
+      var raw = window.localStorage.getItem(ROTATION_KEY);
+      var parsed = raw ? JSON.parse(raw) : null;
+      return (parsed && typeof parsed === 'object') ? parsed : {};
+    } catch (e) {
+      return rotationFallback;
+    }
+  }
+
+  function writeRotationStore(store) {
+    rotationFallback = store;
+    try {
+      window.localStorage.setItem(ROTATION_KEY, JSON.stringify(store));
+    } catch (e) { /* quota / privé : le fallback mémoire prend le relais */ }
+  }
+
+  // Mémorise la pièce affichée ce chargement-ci pour n'avancer la rotation
+  // qu'UNE fois par pièce et par chargement (render() est rappelé à chaque
+  // update du projet : sans ce garde, on sauterait des photos en plein parcours).
   var currentPhotoPiece = null;
   var currentPhotoUrl = null;
 
   // Affiche la photo de la pièce du projet en haut de la card, pleine largeur.
-  // Tirage ALÉATOIRE parmi les photos ACF de la pièce (stable tant que la
-  // pièce ne change pas). Règle métier : pas de photo dédiée à la pièce (ou
-  // pas de pièce) → pas de bandeau (on ne retombe PAS sur la clé 'default').
+  // ROTATION ordonnée parmi les photos ACF de la pièce. Règle métier : pas de
+  // photo dédiée à la pièce (ou pas de pièce) → pas de bandeau (on ne retombe
+  // PAS sur la clé 'default').
   function updateProjectPhoto() {
     if (!els.cardPhoto) return;
     var project = window.sapiProject ? window.sapiProject.get() : null;
     var piece = project && project.answers && project.answers.piece;
     var list = (piecePhotosMap && piece && piecePhotosMap[piece]) || null;
     if (list && list.length) {
-      // Nouveau tirage seulement si la pièce a changé depuis le dernier.
+      // Avance d'un cran seulement si la pièce a changé depuis le dernier render.
       if (piece !== currentPhotoPiece || !currentPhotoUrl) {
         currentPhotoPiece = piece;
-        currentPhotoUrl = list.length === 1
-          ? list[0]
-          : list[Math.floor(Math.random() * list.length)] || list[0];
+        if (list.length === 1) {
+          currentPhotoUrl = list[0];
+        } else {
+          var store = readRotationStore();
+          var idx = (parseInt(store[piece], 10) || 0) % list.length;
+          currentPhotoUrl = list[idx];
+          store[piece] = (idx + 1) % list.length; // prochaine visite → photo suivante
+          writeRotationStore(store);
+        }
       }
       els.cardPhoto.style.backgroundImage = 'url("' + currentPhotoUrl.replace(/"/g, '\\"') + '")';
       els.cardPhoto.hidden = false;
