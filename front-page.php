@@ -778,6 +778,29 @@ $sapi_cat_url = function ($slug) {
     <span class="testimonials-cta-sep">·</span>
     <a href="https://www.google.com/maps/place/?q=place_id:ChIJYyWUfZOV9EcRDRhbW4HM6KY" target="_blank" rel="noopener noreferrer">Voir les <?php echo esc_html($home_reviews['total']); ?> avis</a>
   </div>
+
+  <?php
+  // Ils parlent de nous — références presse. Ajouter une ligne par référence :
+  // 'logo' = chemin média (ex. '2026/06/logo-xxx.png') ; vide => le nom s'affiche en texte.
+  $press_refs = [
+    ['name' => 'Maisons Actuelle', 'url' => 'https://maisonsactuelle.com/2026/01/13/atelier-sapi-la-ou-la-lumiere-retrouve-dans-le-bois-le-souvenir-secret-de-la-nature/', 'logo' => ''],
+  ];
+  if (!empty($press_refs)) : ?>
+  <div class="home-press">
+    <span class="home-press__label">Ils parlent de nous</span>
+    <div class="home-press__logos">
+      <?php foreach ($press_refs as $ref) : ?>
+      <a class="home-press__item" href="<?php echo esc_url($ref['url']); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php echo esc_attr($ref['name']); ?>">
+        <?php if (!empty($ref['logo'])) : ?>
+          <?php echo sapi_image($ref['logo'], 'medium', ['class' => 'home-press__logo', 'alt' => $ref['name'], 'loading' => 'lazy']); ?>
+        <?php else : ?>
+          <span class="home-press__name"><?php echo esc_html($ref['name']); ?></span>
+        <?php endif; ?>
+      </a>
+      <?php endforeach; ?>
+    </div>
+  </div>
+  <?php endif; ?>
 </section>
 <?php endif; ?>
 

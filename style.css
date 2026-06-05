@@ -8140,6 +8140,53 @@ li.carousel-editorial-slide,
   .home-avis .testimonials-cta { padding-left: 1.25rem; padding-right: 1.25rem; }
 }
 
+/* ===== Ils parlent de nous — références presse (dans la section avis) ===== */
+.home-press {
+  max-width: 1600px;
+  margin: 2.5rem auto 0;
+  padding: 2.25rem 3rem 0;
+  border-top: 1px solid var(--color-gray-light);
+  text-align: center;
+}
+.home-press__label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-wood);
+  margin-bottom: 1.25rem;
+}
+.home-press__logos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem 2.5rem;
+}
+.home-press__item {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  filter: grayscale(1);
+  opacity: 0.75;
+  transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+.home-press__logo { max-height: 46px; width: auto; display: block; }
+.home-press__name {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--color-wood-dark);
+}
+@media (hover: hover) {
+  .home-press__item:hover { filter: grayscale(0); opacity: 1; transform: translateY(-1px); }
+}
+@media (max-width: 768px) {
+  .home-press { padding: 2rem 1.25rem 0; }
+  .home-press__logos { gap: 1.25rem 2rem; }
+}
+
 /* ===== Refonte home — Bento divers (variante A : carte cadeau en bannière) ===== */
 .home-divers .bento-giftcard { grid-column: 1 / -1; grid-row: span 1; } /* refonte #11 : 1/-1 survit au passage 1 colonne mobile */
 /* Variante B (3 cartes égales) — décommenter pour tester, et commenter A :
