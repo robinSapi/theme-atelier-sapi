@@ -243,7 +243,6 @@ if (!$piece_bg_default) {
 foreach ($piece_bg as $rslug => $bid) {
   if (!$bid) { $piece_bg[$rslug] = $piece_bg_default; }
 }
-$piece_bg_default_url = $piece_bg_default ? wp_get_attachment_image_url($piece_bg_default, 'large') : '';
 
 // 2 produits les plus RÉCENTS parmi lampes à poser / lampadaires / appliques,
 // forcément de 2 catégories différentes (Star exclue).
@@ -533,14 +532,14 @@ foreach ($carousel_products as $product) {
 
 <!-- Entrée projet — room picker immersif photographique (refonte #13) -->
 <section class="home-projet-section home-projet--immersif">
-  <!-- Couches de fond (1 par pièce + défaut). Lazy : data-bg appliqué au 1er survol -->
-  <div class="projet-bg projet-bg--default on"<?php echo $piece_bg_default_url ? ' style="background-image:url(' . esc_url($piece_bg_default_url) . ')"' : ''; ?>></div>
+  <!-- Couches photo par pièce (révélées au survol, sous l'overlay crème). Lazy : data-bg appliqué au 1er survol. -->
   <?php foreach ($room_choices as $room) :
     $bg_url = !empty($piece_bg[$room['slug']]) ? wp_get_attachment_image_url($piece_bg[$room['slug']], 'large') : '';
   ?>
     <div class="projet-bg" data-piece-bg="<?php echo esc_attr($room['slug']); ?>" data-bg="<?php echo esc_url($bg_url); ?>"></div>
   <?php endforeach; ?>
-  <div class="projet-scrim" aria-hidden="true"></div>
+  <!-- Overlay crème : c'est le « fond » de la section, semi-transparent → laisse voir la photo au survol -->
+  <div class="projet-veil" aria-hidden="true"></div>
   <div class="home-projet" data-room-picker>
     <div class="room-picker-inner">
       <span class="section-eyebrow">Ton projet</span>
@@ -976,14 +975,12 @@ $sapi_cat_url = function ($slug) {
     projetSection.querySelectorAll('.projet-bg[data-piece-bg]').forEach(function (layer) {
       bgLayers[layer.getAttribute('data-piece-bg')] = layer;
     });
-    var defaultLayer = projetSection.querySelector('.projet-bg--default');
     function activatePieceLayer(layer) {
       if (!layer) return;
       if (!layer.style.backgroundImage && layer.getAttribute('data-bg')) {
         layer.style.backgroundImage = 'url(' + layer.getAttribute('data-bg') + ')';
       }
       Object.keys(bgLayers).forEach(function (k) { bgLayers[k].classList.remove('on'); });
-      if (defaultLayer) defaultLayer.classList.remove('on');
       layer.classList.add('on');
     }
     projetSection.querySelectorAll('.room-card[data-piece]').forEach(function (chip) {
@@ -991,9 +988,9 @@ $sapi_cat_url = function ($slug) {
         activatePieceLayer(bgLayers[chip.getAttribute('data-piece')]);
       });
     });
+    // Au repos : aucune photo (bande crème). On retire tout en quittant la section.
     projetSection.addEventListener('mouseleave', function () {
       Object.keys(bgLayers).forEach(function (k) { bgLayers[k].classList.remove('on'); });
-      if (defaultLayer) defaultLayer.classList.add('on');
     });
   }
 })();
