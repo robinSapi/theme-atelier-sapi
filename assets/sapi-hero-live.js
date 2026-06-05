@@ -129,6 +129,17 @@
       if (m && m[1]) heroEl.setAttribute('data-hero-bg-current', m[1]);
     }
 
+    // Hero immersif quand un projet existe : la classe --projet retire le
+    // titre + l'overlay sombre et double la hauteur (cf. style.css). Piloté
+    // ici car ce module est déjà le seul abonné à sapiProject côté hero.
+    function applyProjectState() {
+      if (!heroEl) return;
+      var hasProject = !!(window.sapiProject &&
+        typeof window.sapiProject.hasProject === 'function' &&
+        window.sapiProject.hasProject());
+      heroEl.classList.toggle('shop-hero-artisan--projet', hasProject);
+    }
+
     // Helper : applique titre + photo pour une pièce donnée. Factorisé pour
     // être réutilisé au sync initial (lecture localStorage) ET sur chaque
     // notify subscribe (changement de projet).
@@ -154,10 +165,12 @@
         if (initialPiece) applyForPiece(initialPiece);
       } catch (e) { /* silent : le subscribe ci-dessous reprendra la main */ }
     }
+    applyProjectState();
 
     window.sapiProject.subscribe(function (project) {
       var piece = project && project.answers && project.answers.piece;
       applyForPiece(piece);
+      applyProjectState();
     });
   }
 

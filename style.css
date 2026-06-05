@@ -12429,6 +12429,19 @@ button.room-card {
   color: rgba(255, 255, 255, 0.8);
 }
 
+/* État "avec projet" (/mes-creations/) — classe ajoutée par sapi-hero-live.js
+   quand window.sapiProject.hasProject(). Hero immersif : photo plein cadre
+   (overlay sombre + titre retirés) et hauteur ~doublée pour mettre l'ambiance
+   du projet en avant. Hauteur pilotable via --shop-hero-projet-h. */
+.shop-hero-artisan--projet {
+  min-height: var(--shop-hero-projet-h, clamp(640px, 90vh, 1040px));
+}
+
+.shop-hero-artisan--projet::before,
+.shop-hero-artisan--projet h1 {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .shop-hero-artisan {
     padding: 144px 20px 88px;
@@ -12436,6 +12449,10 @@ button.room-card {
 
   .shop-hero-artisan h1 {
     font-size: clamp(48px, 12vw, 80px);
+  }
+
+  .shop-hero-artisan--projet {
+    min-height: var(--shop-hero-projet-h-mobile, 70vh);
   }
 }
 
