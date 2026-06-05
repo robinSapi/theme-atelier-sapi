@@ -681,7 +681,7 @@ $sapi_cat_url = function ($slug) {
         ['01', 'Dessin',        '2025/05/IMG_1928-e1761747188966.png', "Dessin d'un luminaire en bois, Atelier Sâpi",         "Tout commence par un trait de crayon"],
         ['02', 'Découpe laser', '2025/05/IMG_7638.jpg',                'Découpe laser du bois pour luminaire',                "Le laser suit mon dessin au dixième près"],
         ['03', 'Finitions',     '2025/09/Poncage.jpg',                 "Ponçage manuel d'un luminaire en bois, Atelier Sâpi", "Le ponçage, c'est ma méditation"],
-        ['04', 'Assemblage',    '2025/05/Robin-Sapi-A.jpg',            'Robin assemble un luminaire dans son atelier à Lyon', "Chaque pièce s'emboîte sans une vis"],
+        ['04', 'Assemblage',    '2026/03/Robin-a-lassemblage.jpg',     'Robin assemble un luminaire dans son atelier à Lyon', "Chaque pièce s'emboîte sans une vis"],
         ['05', 'Expédition',    '2025/07/Claudine-bandeau-1.jpg',      "Luminaire Claudine prêt pour l'expédition",           "Emballé comme si c'était pour ma mère"],
       ];
       foreach ($process_steps as $step) : ?>
