@@ -673,6 +673,7 @@ $sapi_cat_url = function ($slug) {
     <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
     <p class="storytelling-text storytelling-text--seo">Je dessine et fabrique à la commande des <a href="<?php echo esc_url($sapi_cat_url('suspensions')); ?>">suspensions</a>, <a href="<?php echo esc_url($sapi_cat_url('appliques')); ?>">appliques</a>, <a href="<?php echo esc_url($sapi_cat_url('lampesaposer')); ?>">lampes à poser</a> et <a href="<?php echo esc_url($sapi_cat_url('lampadaires')); ?>">lampadaires</a> en bois massif. Chaque luminaire est découpé au laser puis assemblé à la main : le peuplier clair ou l'okoumé chaleureux filtrent la lumière et dessinent des ombres uniques.</p>
     <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="hero-cta hero-cta--wood">Découvrir l'artisan</a>
+    <h4 class="process-ribbon-title">Mon processus artisanal</h4>
     <div class="process-ribbon">
       <?php
       // [num, label, photo, alt, phrase manuscrite (tooltip natif title)]
