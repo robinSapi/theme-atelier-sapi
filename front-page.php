@@ -792,6 +792,38 @@ $sapi_cat_url = function ($slug) {
 </div>
 <?php endif; ?>
 
+<!-- Bande citation Robin (refonte #14, dispo A) — entre « Ils en parlent » et le bento divers -->
+<?php $quote_band_img = '2025/05/Robin-Sapi-A.jpg'; // PROVISOIRE — remplacer par la nouvelle photo de Robin (changer ce chemin suffit) ?>
+<section class="quote-band">
+  <?php echo sapi_image($quote_band_img, 'large', ['class' => 'quote-band__bg', 'loading' => 'lazy', 'alt' => 'Robin, artisan de l\'Atelier Sâpi, dans son atelier à Lyon']); ?>
+  <div class="quote-band__scrim" aria-hidden="true"></div>
+  <div class="quote-inner">
+    <span class="q-mark" aria-hidden="true">«</span>
+    <p class="q-text">Éclairer une pièce, c'est un peu comme choisir la bonne sauce pour ses pâtes : tout est une question de préférence et de dosage !</p>
+    <div class="q-sig">
+      <span class="who"><b>Robin</b><span>artisan de l'Atelier Sâpi · Lyon</span></span>
+    </div>
+    <div class="q-links">
+      <a class="q-link-cta" href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>">Les conseils de Robin</a>
+      <a class="q-link-discreet" href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>">Faire connaissance →</a>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-card__map">
+      <svg class="map-card__roads" viewBox="0 0 280 104" preserveAspectRatio="none" aria-hidden="true"><path d="M0 70 C56 62 84 84 140 76 S224 52 280 62" stroke="#DECDAF" stroke-width="6" fill="none"/><path d="M38 0 C46 36 32 70 50 104" stroke="#E8DCC8" stroke-width="4" fill="none"/><path d="M0 26 C74 33 168 22 280 30" stroke="#E8DCC8" stroke-width="3.5" fill="none"/><path d="M196 0 C187 44 210 78 200 104" stroke="#DECDAF" stroke-width="4" fill="none"/></svg>
+      <span class="map-card__pin" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="#E35B24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3" fill="#fff"/></svg>
+      </span>
+    </div>
+    <div class="map-card__info">
+      <div class="map-card__title">Venir me voir à l'atelier</div>
+      <div class="map-card__sub">Collonges-au-Mont-d'Or, à 15 min de Lyon · sur rendez-vous</div>
+      <a class="map-card__itin" href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer">Itinéraire <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+    </div>
+  </div>
+</section>
+
 <!-- Hero Bento Grid (continued) -->
 <section class="hero-bento home-divers">
   <div class="bento-container">
@@ -806,15 +838,6 @@ $sapi_cat_url = function ($slug) {
       </div>
     </a>
     <?php endif; ?>
-
-    <!-- Conseil -->
-    <a href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>" class="bento-card bento-conseil">
-      <span class="bento-conseil-badge">Conseil</span>
-      <div class="bento-conseil-content">
-        <h3>Éclairer une pièce, c'est un peu comme choisir la bonne sauce pour ses pâtes : tout est une question de préférence et de dosage !</h3>
-        <span class="bento-conseil-cta">Découvrir les conseils de Robin →</span>
-      </div>
-    </a>
 
     <!-- Dernier Flash Actu -->
     <?php
