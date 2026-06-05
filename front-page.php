@@ -809,7 +809,7 @@ $sapi_cat_url = function ($slug) {
     </div>
   </div>
 
-  <div class="map-card">
+  <a class="map-card" href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer" aria-label="Venir me voir à l'atelier — voir l'itinéraire sur Google Maps">
     <div class="map-card__map">
       <svg class="map-card__roads" viewBox="0 0 280 104" preserveAspectRatio="none" aria-hidden="true"><path d="M0 70 C56 62 84 84 140 76 S224 52 280 62" stroke="#DECDAF" stroke-width="6" fill="none"/><path d="M38 0 C46 36 32 70 50 104" stroke="#E8DCC8" stroke-width="4" fill="none"/><path d="M0 26 C74 33 168 22 280 30" stroke="#E8DCC8" stroke-width="3.5" fill="none"/><path d="M196 0 C187 44 210 78 200 104" stroke="#DECDAF" stroke-width="4" fill="none"/></svg>
       <span class="map-card__pin" aria-hidden="true">
@@ -819,9 +819,9 @@ $sapi_cat_url = function ($slug) {
     <div class="map-card__info">
       <div class="map-card__title">Venir me voir à l'atelier</div>
       <div class="map-card__sub">Collonges-au-Mont-d'Or, à 15 min de Lyon · sur rendez-vous</div>
-      <a class="map-card__itin" href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer">Itinéraire <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+      <span class="map-card__itin">Itinéraire <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
     </div>
-  </div>
+  </a>
 </section>
 
 <!-- Hero Bento Grid (continued) -->
