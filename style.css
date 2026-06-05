@@ -12376,7 +12376,7 @@ button.room-card {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(251, 246, 234, 0.62);
+  background: rgba(251, 246, 234, 0.82);
   z-index: 1;
 }
 
@@ -22923,7 +22923,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   position: relative;
   z-index: 1;
   margin: -36px -28px 28px;
-  height: 220px;
+  height: 440px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -22936,7 +22936,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 @media (max-width: 768px) {
   .conseiller-card__photo {
     margin: -28px -18px 22px;
-    height: 160px;
+    height: 320px;
   }
 }
 
