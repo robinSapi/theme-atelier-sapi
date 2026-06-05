@@ -617,7 +617,8 @@ $sapi_cat_url = function ($slug) {
   return (!is_wp_error($l) && $l) ? $l : home_url('/mes-creations/');
 };
 ?>
-<section class="hero-bento home-atelier">
+<section class="hero-bento home-atelier home-atelier--photo-bg">
+  <?php echo sapi_image('2025/05/Robin-Sapi-A.jpg', 'large', ['class' => 'home-atelier-bg', 'loading' => 'lazy', 'alt' => 'Atelier Sâpi, atelier de fabrication de luminaires à Lyon']); ?>
   <div class="section-header-kinetic">
     <span class="section-num">04</span>
     <h2 class="section-title-kinetic">L'atelier</h2>
@@ -628,12 +629,6 @@ $sapi_cat_url = function ($slug) {
       <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
       <p class="storytelling-text storytelling-text--seo">Je dessine et fabrique à la commande des <a href="<?php echo esc_url($sapi_cat_url('suspensions')); ?>">suspensions</a>, <a href="<?php echo esc_url($sapi_cat_url('appliques')); ?>">appliques</a>, <a href="<?php echo esc_url($sapi_cat_url('lampesaposer')); ?>">lampes à poser</a> et <a href="<?php echo esc_url($sapi_cat_url('lampadaires')); ?>">lampadaires</a> en bois massif. Chaque luminaire est découpé au laser puis assemblé à la main : le peuplier clair ou l'okoumé chaleureux filtrent la lumière et dessinent des ombres uniques.</p>
       <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="hero-cta">Découvrir l'artisan</a>
-    </div>
-    <div class="atelier-media">
-      <div class="atelier-photo">
-        <?php echo sapi_image('2025/05/Robin-Sapi-A.jpg', 'large', ['alt' => 'Atelier Sâpi, atelier de fabrication de luminaires à Lyon', 'class' => 'atelier-photo-img', 'loading' => 'lazy']); ?>
-        <div class="atelier-label"><span>L'atelier · Lyon</span></div>
-      </div>
       <a class="atelier-maps-link" href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer">Voir l'atelier sur Google Maps →</a>
     </div>
   </div>
