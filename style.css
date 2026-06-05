@@ -7980,7 +7980,7 @@ li.carousel-editorial-slide,
 .home-atelier--band {
   position: relative;
   overflow: hidden;
-  padding: 6rem 2rem 5.5rem;
+  padding: 6rem 0 5.5rem; /* vertical seulement : le bg est pleine largeur, la gouttière vit dans l'inner */
   background: var(--color-warm); /* fond de secours sous l'image */
 }
 .home-atelier__bg {
@@ -8006,8 +8006,9 @@ li.carousel-editorial-slide,
 .home-atelier__inner {
   position: relative;
   z-index: 2;
-  max-width: 1000px;
+  max-width: 1600px; /* même conteneur que .hero-bento / collections / newsletter */
   margin: 0 auto;
+  padding: 0 3rem;   /* même gouttière que les autres sections */
   text-align: left;
 }
 .home-atelier__inner .section-header-kinetic {
@@ -8054,7 +8055,8 @@ li.carousel-editorial-slide,
   color: var(--color-wood-mid);
 }
 @media (max-width: 768px) {
-  .home-atelier--band { padding: 3.5rem 1rem; }
+  .home-atelier--band { padding: 3.5rem 0; }
+  .home-atelier__inner { padding: 0 1.25rem; }
   .process-ribbon { flex-wrap: wrap; }
   .process-tile { flex: 1 1 calc(50% - 7px); }
 }
