@@ -513,19 +513,35 @@
     }
   }
 
+  // Mémorise le tirage en cours pour éviter de re-randomiser à chaque render
+  // (render() est rappelé à chaque update du projet : sans ce cache, la photo
+  // changerait en plein parcours). On ne retire un nouveau cliché que si la
+  // pièce change (ou au rechargement de page).
+  var currentPhotoPiece = null;
+  var currentPhotoUrl = null;
+
   // Affiche la photo de la pièce du projet en haut de la card, pleine largeur.
-  // Règle métier : pas de photo dédiée à la pièce (ou pas de pièce) → pas de
-  // bandeau (on ne retombe PAS sur la clé 'default').
+  // Tirage ALÉATOIRE parmi les photos ACF de la pièce (stable tant que la
+  // pièce ne change pas). Règle métier : pas de photo dédiée à la pièce (ou
+  // pas de pièce) → pas de bandeau (on ne retombe PAS sur la clé 'default').
   function updateProjectPhoto() {
     if (!els.cardPhoto) return;
     var project = window.sapiProject ? window.sapiProject.get() : null;
     var piece = project && project.answers && project.answers.piece;
     var list = (piecePhotosMap && piece && piecePhotosMap[piece]) || null;
     if (list && list.length) {
-      var url = list[0];
-      els.cardPhoto.style.backgroundImage = 'url("' + url.replace(/"/g, '\\"') + '")';
+      // Nouveau tirage seulement si la pièce a changé depuis le dernier.
+      if (piece !== currentPhotoPiece || !currentPhotoUrl) {
+        currentPhotoPiece = piece;
+        currentPhotoUrl = list.length === 1
+          ? list[0]
+          : list[Math.floor(Math.random() * list.length)] || list[0];
+      }
+      els.cardPhoto.style.backgroundImage = 'url("' + currentPhotoUrl.replace(/"/g, '\\"') + '")';
       els.cardPhoto.hidden = false;
     } else {
+      currentPhotoPiece = null;
+      currentPhotoUrl = null;
       els.cardPhoto.style.backgroundImage = '';
       els.cardPhoto.hidden = true;
     }
