@@ -539,6 +539,14 @@ foreach ($carousel_products as $product) {
   <div class="section-header-kinetic">
     <span class="section-num">02</span>
     <h2 class="section-title-kinetic">Collections</h2>
+    <div class="collections-nav">
+      <button type="button" class="carousel-arrow collections-nav-prev" aria-label="Collections précédentes">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button type="button" class="carousel-arrow collections-nav-next" aria-label="Collections suivantes">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
   </div>
 
   <div class="collections-grid">
@@ -627,7 +635,7 @@ $sapi_cat_url = function ($slug) {
       <h3 class="atelier-story-title">Des sculptures lumineuses</h3>
       <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
       <p class="storytelling-text storytelling-text--seo">Je dessine et fabrique à la commande des <a href="<?php echo esc_url($sapi_cat_url('suspensions')); ?>">suspensions</a>, <a href="<?php echo esc_url($sapi_cat_url('appliques')); ?>">appliques</a>, <a href="<?php echo esc_url($sapi_cat_url('lampesaposer')); ?>">lampes à poser</a> et <a href="<?php echo esc_url($sapi_cat_url('lampadaires')); ?>">lampadaires</a> en bois massif. Chaque luminaire est découpé au laser puis assemblé à la main : le peuplier clair ou l'okoumé chaleureux filtrent la lumière et dessinent des ombres uniques.</p>
-      <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="hero-cta">Découvrir l'artisan</a>
+      <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="hero-cta hero-cta--wood">Découvrir l'artisan</a>
     </div>
     <div class="atelier-media">
       <div class="atelier-photo">
@@ -901,6 +909,17 @@ $sapi_cat_url = function ($slug) {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.classList.toggle('is-flipped'); }
     });
   });
+
+  // 4. Collections — flèches desktop (scroll horizontal)
+  var collectionsGrid = document.querySelector('.collections-grid');
+  if (collectionsGrid) {
+    var firstCard = collectionsGrid.querySelector('.collection-card');
+    var collStep = firstCard ? firstCard.getBoundingClientRect().width + 24 : 320;
+    var collPrev = document.querySelector('.collections-nav-prev');
+    var collNext = document.querySelector('.collections-nav-next');
+    if (collPrev) collPrev.addEventListener('click', function () { collectionsGrid.scrollBy({ left: -collStep, behavior: 'smooth' }); });
+    if (collNext) collNext.addEventListener('click', function () { collectionsGrid.scrollBy({ left: collStep, behavior: 'smooth' }); });
+  }
 })();
 </script>
 

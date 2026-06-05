@@ -8174,7 +8174,7 @@ li.carousel-editorial-slide,
 }
 
 /* ===== Refonte home — Bento divers (variante A : carte cadeau en bannière) ===== */
-.home-divers .bento-giftcard { grid-column: span 12; grid-row: span 1; }
+.home-divers .bento-giftcard { grid-column: 1 / -1; grid-row: span 1; } /* refonte #11 : 1/-1 survit au passage 1 colonne mobile */
 /* Variante B (3 cartes égales) — décommenter pour tester, et commenter A :
 .home-divers .bento-giftcard { grid-column: span 4; grid-row: span 2; }
 .home-divers .bento-conseil  { grid-column: span 4; }
@@ -8267,6 +8267,30 @@ li.carousel-editorial-slide,
 }
 @media (max-width: 520px) {
   .creations-grid { grid-template-columns: 1fr; }
+}
+
+/* ===== Refonte #11 — Collections : peek + flèches desktop ===== */
+.collections-nav { display: none; }
+@media (min-width: 769px) {
+  /* peek : 4 cards entières + bord de la 5e visible */
+  .collections-kinetic .collection-card { flex: 0 0 23.5%; }
+  .collections-nav {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+    align-self: center;
+  }
+}
+.collections-nav .carousel-arrow {
+  background: transparent;
+  border: 1px solid rgba(147, 125, 104, 0.3);
+  color: var(--color-wood-dark);
+}
+@media (hover: hover) {
+  .collections-nav .carousel-arrow:hover {
+    background: var(--color-warm);
+    border-color: var(--color-wood);
+  }
 }
 
 /* ========================================
@@ -10541,6 +10565,18 @@ a.carousel-slide-product {
 @media (hover: hover) {
   .hero-cta:hover svg {
     transform: translateX(5px);
+  }
+}
+
+/* Refonte #11 — variante CTA bois (1 seul CTA orange « navigation » par écran) */
+.hero-cta--wood {
+  background: var(--color-wood);
+  box-shadow: 0 4px 15px rgba(147, 125, 104, 0.25);
+}
+@media (hover: hover) {
+  .hero-cta--wood:hover {
+    background: var(--color-wood-dark);
+    box-shadow: 0 6px 20px rgba(147, 125, 104, 0.35);
   }
 }
 
