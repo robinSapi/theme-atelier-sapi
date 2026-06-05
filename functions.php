@@ -7911,10 +7911,13 @@ function sapi_get_google_reviews() {
     foreach ($body['reviews'] as $review) {
       // Prefer originalText (French) over translated text
       $text = '';
+      $lang = '';
       if (!empty($review['originalText']['text'])) {
         $text = $review['originalText']['text'];
+        $lang = $review['originalText']['languageCode'] ?? '';
       } elseif (!empty($review['text']['text'])) {
         $text = $review['text']['text'];
+        $lang = $review['text']['languageCode'] ?? '';
       }
 
       $result['reviews'][] = [
@@ -7923,8 +7926,22 @@ function sapi_get_google_reviews() {
         'text'    => $text,
         'time'    => $review['relativePublishTimeDescription'] ?? '',
         'photo'   => $review['authorAttribution']['photoUri'] ?? '',
+        'lang'    => $lang,
       ];
     }
+
+    // P14 : avis en français d'abord (tri stable). Code langue Places, sinon
+    // heuristique sur les accents français quand la langue n'est pas exposée.
+    $fr = [];
+    $other = [];
+    foreach ($result['reviews'] as $r) {
+      $is_fr = (stripos($r['lang'], 'fr') === 0);
+      if (!$is_fr && $r['lang'] === '') {
+        $is_fr = (bool) preg_match('/[àâçéèêëîïôûùü]/iu', $r['text']);
+      }
+      if ($is_fr) { $fr[] = $r; } else { $other[] = $r; }
+    }
+    $result['reviews'] = array_merge($fr, $other);
   }
 
   set_transient($cache_key, $result, 6 * HOUR_IN_SECONDS);

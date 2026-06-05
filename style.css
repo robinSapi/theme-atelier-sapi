@@ -8163,6 +8163,22 @@ li.carousel-editorial-slide,
   border: 1px solid var(--color-gray-light);
   height: auto;
 }
+/* P13 — avatar initiales sur disque (zéro image/bleu Google), scopé home */
+.home-avis .testimonial-avatar--initials {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-warm);
+  color: var(--color-wood);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
 .home-avis .testimonials-cta {
   max-width: 1600px;
   margin-left: auto;

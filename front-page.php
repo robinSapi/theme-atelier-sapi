@@ -697,15 +697,27 @@ $sapi_cat_url = function ($slug) {
   <div class="testimonials-grid">
     <?php
     $reviews_pool = $home_reviews['reviews'];
-    shuffle($reviews_pool);
+    shuffle($reviews_pool); // variété à chaque chargement
+    // P14 : français d'abord (tri stable — préserve l'ordre mélangé au sein de chaque langue)
+    usort($reviews_pool, function ($a, $b) {
+      $fa = (stripos($a['lang'] ?? '', 'fr') === 0) ? 0 : 1;
+      $fb = (stripos($b['lang'] ?? '', 'fr') === 0) ? 0 : 1;
+      return $fa <=> $fb;
+    });
     $reviews_display = array_slice($reviews_pool, 0, 3);
     ?>
     <?php foreach ($reviews_display as $review) : ?>
     <div class="testimonial-card">
       <div class="testimonial-card-header">
-        <?php if (!empty($review['photo'])) : ?>
-        <img class="testimonial-avatar" src="<?php echo esc_url($review['photo']); ?>" alt="" width="36" height="36" loading="lazy">
-        <?php endif; ?>
+        <?php
+          // P13 : avatar = initiales sur disque (zéro image/bleu Google)
+          $av_parts = preg_split('/\s+/', trim($review['author']));
+          $av_initials = '';
+          if (!empty($av_parts[0])) $av_initials .= mb_substr($av_parts[0], 0, 1);
+          if (count($av_parts) > 1) $av_initials .= mb_substr(end($av_parts), 0, 1);
+          $av_initials = mb_strtoupper($av_initials);
+        ?>
+        <span class="testimonial-avatar testimonial-avatar--initials" aria-hidden="true"><?php echo esc_html($av_initials); ?></span>
         <div class="testimonial-author-info">
           <span class="author-name"><?php echo esc_html($review['author']); ?></span>
           <span class="author-time"><?php echo esc_html($review['time']); ?></span>
