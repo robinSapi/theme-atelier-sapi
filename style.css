@@ -8362,36 +8362,6 @@ li.carousel-editorial-slide,
   border-top: 1px solid rgba(147, 125, 104, 0.1);
 }
 
-/* ===== Refonte #13 (révisé) — Room picker : photo révélée au survol sous un voile crème ===== */
-/* Au repos : bande crème classique (styles de base .home-projet-section/.home-projet/.room-card
-   inchangés, texte sombre, cards blanches, ourlet P20). Au survol d'une chip : la photo de la
-   pièce apparaît derrière, et le « fond » crème devient un voile semi-transparent par-dessus. */
-.home-projet-section.home-projet--immersif {
-  position: relative;
-  overflow: hidden;
-}
-.home-projet--immersif .projet-bg {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  opacity: 0;
-  transition: opacity 0.7s ease;
-  z-index: 0;
-}
-.home-projet--immersif .projet-bg.on { opacity: 1; }
-.home-projet--immersif .projet-veil {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: rgba(251, 246, 234, 0.8); /* voile crème : laisse transparaître la photo au survol */
-}
-.home-projet--immersif .home-projet {
-  position: relative;
-  z-index: 2;
-}
-
 /* ===== Refonte #14 — Bande citation Robin pleine page (dispo A) ===== */
 .quote-band {
   position: relative;
