@@ -8338,11 +8338,12 @@ li.carousel-editorial-slide,
 /* Créations : la photo prend plus de hauteur (exit l'aspect carré) + textes centrés, info compacte */
 .creations-grid .product-card-cinetique .product-media {
   aspect-ratio: auto;
-  flex: 1 1 0%;
-  min-height: 0;
+  flex: 1 1 auto;
+  min-height: 400px; /* photo toujours grande et dominante */
 }
 .creations-grid .product-card-cinetique .product-info {
   flex: 0 0 auto;
+  padding: 1.5rem; /* zone texte compacte */
   text-align: center;
 }
 .creations-grid .product-card-cinetique .product-price {
@@ -8350,7 +8351,6 @@ li.carousel-editorial-slide,
   justify-content: center;
 }
 /* Créations : textes des cards agrandis */
-.creations-grid .product-card-cinetique .product-info { padding-top: 1.5rem; }
 .creations-grid .product-card-cinetique .product-name { font-size: 1.65rem !important; }
 .creations-grid .product-card-cinetique .product-category { font-size: 1.1rem; margin-bottom: 1rem; }
 .creations-grid .product-card-cinetique .price-from { font-size: 0.85rem; }
