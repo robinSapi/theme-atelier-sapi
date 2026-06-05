@@ -8335,6 +8335,20 @@ li.carousel-editorial-slide,
   height: 100%;
 }
 .creations-grid .product-media { flex: 1; }
+/* Créations : la photo prend plus de hauteur (exit l'aspect carré) + textes centrés, info compacte */
+.creations-grid .product-card-cinetique .product-media {
+  aspect-ratio: auto;
+  flex: 1 1 0%;
+  min-height: 0;
+}
+.creations-grid .product-card-cinetique .product-info {
+  flex: 0 0 auto;
+  text-align: center;
+}
+.creations-grid .product-card-cinetique .product-price {
+  margin-top: 0.6rem;
+  justify-content: center;
+}
 /* P20 — ourlet fin en haut des bandes crème */
 .section-band--warm,
 .home-projet-section {
