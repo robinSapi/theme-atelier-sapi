@@ -8297,6 +8297,27 @@ li.carousel-editorial-slide,
   }
 }
 
+/* ===== Refonte #12 — Polish DA ===== */
+/* P6 — hover icône room cards en accent orange sur la home (global reste warm/wood) */
+@media (hover: hover) {
+  .home-projet .room-card:hover .room-card-icon {
+    background: rgba(227, 91, 36, 0.12);
+    color: var(--color-orange);
+  }
+}
+/* P8 — Créations : pieds des 3 cards alignés (scopé .creations-grid) */
+.creations-grid .product-card-link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.creations-grid .product-media { flex: 1; }
+/* P20 — ourlet fin en haut des bandes crème */
+.section-band--warm,
+.home-projet-section {
+  border-top: 1px solid rgba(147, 125, 104, 0.1);
+}
+
 /* ========================================
    PAGE TEMPLATE - Contact (PREMIUM)
    ======================================== */
@@ -9734,49 +9755,6 @@ a.single-post-category:hover {
   .breadcrumbs {
     padding: 8px 16px;
   }
-}
-
-/* ========================================
-   CINÉTIQUE - Custom Cursor
-   ======================================== */
-
-.cursor-custom {
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 99999;
-}
-
-.cursor-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--color-orange);
-  border-radius: 50%;
-  position: absolute;
-  transform: translate(-50%, -50%);
-  transition: transform 0.15s ease;
-}
-
-.cursor-outline {
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--color-orange);
-  border-radius: 50%;
-  position: absolute;
-  transform: translate(-50%, -50%);
-  transition: all 0.3s ease;
-}
-
-body.cursor-hover .cursor-outline {
-  width: 60px;
-  height: 60px;
-  border-color: var(--color-orange);
-}
-
-body.cursor-hover .cursor-dot {
-  transform: translate(-50%, -50%) scale(1.5);
-  background: var(--color-orange);
 }
 
 /* ========================================
@@ -11676,11 +11654,12 @@ button.room-card {
   height: 100%;
   object-fit: cover;
   object-position: center;
+  transition: transform 0.6s var(--ease-expo); /* P7 — zoom doux dans le cadre */
 }
 
 @media (hover: hover) {
-  .collection-card:hover .collection-visual {
-    transform: scale(1.05);
+  .collection-card:hover .collection-visual-img {
+    transform: scale(1.04);
   }
 }
 
@@ -11801,7 +11780,7 @@ button.room-card {
   align-items: center;
   gap: 0.75rem;
   padding: 1.25rem 2.5rem;
-  background: var(--color-wood);
+  background: var(--color-orange);
   color: var(--color-white);
   font-family: var(--font-body);
   font-size: 1rem;
@@ -11814,7 +11793,7 @@ button.room-card {
 
 @media (hover: hover) {
   .newsletter-submit-kinetic:hover {
-    background: var(--color-orange);
+    background: var(--color-orange-hover);
     transform: translateX(5px);
   }
 }
@@ -11974,10 +11953,6 @@ button.room-card {
 }
 
 @media (max-width: 768px) {
-  .cursor-custom {
-    display: none;
-  }
-
   .header-architectural .header-content {
     padding: 1rem 1.5rem;
   }
@@ -18658,10 +18633,6 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
     }
   }
 
-  /* Disable custom cursor animations */
-  .cursor-custom {
-    display: none;
-  }
 }
 
 /* WooCommerce Wrapper - Base styles for all WooCommerce pages */

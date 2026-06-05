@@ -63,6 +63,17 @@
    * Vérifie si un élément appartient à une catégorie autorisée
    */
   function isInAllowedCategory(element) {
+    // P9-b : attribut explicite data-product-cat / data-categories (posé côté PHP) — prioritaire.
+    // Restreint le format prénom/surnom aux 4 catégories luminaires (les accessoires restent simples).
+    var dcEl = element.closest('[data-product-cat], [data-categories]');
+    if (dcEl) {
+      var raw = dcEl.getAttribute('data-product-cat') || dcEl.getAttribute('data-categories') || '';
+      var cats = raw.split(/\s+/).filter(function (c) { return c; });
+      if (cats.length) {
+        return cats.some(function (c) { return allowedCats.indexOf(c) !== -1; });
+      }
+    }
+
     // Vérifier le <li class="product product_cat-xxx"> parent
     var productEl = element.closest('li.product, .product');
     if (productEl) {
@@ -111,6 +122,13 @@
       return;
     }
 
+    // P9-a : si le nom commence par un article (La, Le, Les, L'), tout le nom en Square Peg
+    // (évite le « LA » Montserrat criard sur La Merveilleuse).
+    if (/^(la|le|les)$/i.test(words[0]) || /^l['']/i.test(words[0])) {
+      target.innerHTML = `<span class="product-restname">${fullName}</span>`;
+      return;
+    }
+
     const firstName = words[0];
     const rest = words.slice(1).join(' ');
 
@@ -146,6 +164,9 @@
     var nameHTML = '';
     if (words.length < 2) {
       nameHTML = '<span class="product-firstname">' + productName + '</span>';
+    } else if (/^(la|le|les)$/i.test(words[0]) || /^l['']/i.test(words[0])) {
+      // P9-a : nom commençant par un article → tout en Square Peg
+      nameHTML = '<span class="product-restname">' + productName + '</span>';
     } else {
       nameHTML = '<span class="product-firstname">' + words[0] + '</span> <span class="product-restname">' + words.slice(1).join(' ') + '</span>';
     }

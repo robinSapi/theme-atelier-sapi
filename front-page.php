@@ -372,12 +372,6 @@ foreach ($collection_slugs as $col) {
 }
 ?>
 
-<!-- Custom Cursor (desktop only, hidden on touch devices) -->
-<div class="cursor-custom">
-  <div class="cursor-dot"></div>
-  <div class="cursor-outline"></div>
-</div>
-
 <!-- Full Page Carousel -->
 <?php
 $total_slides = count($promo_slides) + count($carousel_products);
