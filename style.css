@@ -8349,6 +8349,13 @@ li.carousel-editorial-slide,
   margin-top: 0.6rem;
   justify-content: center;
 }
+/* Créations : textes des cards agrandis */
+.creations-grid .product-card-cinetique .product-info { padding-top: 1.5rem; }
+.creations-grid .product-card-cinetique .product-name { font-size: 1.65rem !important; }
+.creations-grid .product-card-cinetique .product-category { font-size: 1.1rem; margin-bottom: 1rem; }
+.creations-grid .product-card-cinetique .price-from { font-size: 0.85rem; }
+.creations-grid .product-card-cinetique .price-value { font-size: 1.4rem; }
+.creations-grid .product-card-cinetique .btn-view { font-size: 0.95rem; }
 /* P20 — ourlet fin en haut des bandes crème */
 .section-band--warm,
 .home-projet-section {
