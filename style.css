@@ -8097,7 +8097,28 @@ li.carousel-editorial-slide,
   margin: 0 auto 1.5rem;
   padding: 1rem 3rem 0;
 }
-.home-avis .google-reviews-badge { margin-left: auto; }
+/* Liens avis (laisser un avis / voir les N avis) : discrets, à gauche du badge Google */
+.home-avis .home-avis__links {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+.home-avis .home-avis__links a {
+  color: var(--color-wood);
+  text-decoration: none;
+}
+.home-avis .home-avis__links-sep { color: var(--color-wood); opacity: 0.5; }
+@media (hover: hover) {
+  .home-avis .home-avis__links a:hover {
+    color: var(--color-orange);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+/* le groupe de liens prend le margin-left auto : le badge suit avec le gap du header */
+.home-avis .testimonials-header .google-reviews-badge { margin-left: 0; }
 .home-avis .testimonials-grid {
   align-items: start;
   max-width: 1600px;
