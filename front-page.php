@@ -783,7 +783,7 @@ $sapi_cat_url = function ($slug) {
   // Ils parlent de nous — références presse. Ajouter une ligne par référence :
   // 'logo' = chemin média (ex. '2026/06/logo-xxx.png') ; vide => le nom s'affiche en texte.
   $press_refs = [
-    ['name' => 'Maisons Actuelle', 'url' => 'https://maisonsactuelle.com/2026/01/13/atelier-sapi-la-ou-la-lumiere-retrouve-dans-le-bois-le-souvenir-secret-de-la-nature/', 'logo' => ''],
+    ['name' => 'Maisons Actuelle', 'url' => 'https://maisonsactuelle.com/2026/01/13/atelier-sapi-la-ou-la-lumiere-retrouve-dans-le-bois-le-souvenir-secret-de-la-nature/', 'logo' => '2026/06/cropped-cropped-cropped-LogoMAISONactuelle.png'],
   ];
   if (!empty($press_refs)) : ?>
   <div class="home-press">
