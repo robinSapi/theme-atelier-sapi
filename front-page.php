@@ -214,6 +214,37 @@ $room_icons = [
   'autre'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
 ];
 
+// #13 — fond d'ambiance par pièce (taxonomie media_room) pour le room picker immersif.
+// 1 attachment tagué par pièce ; fallback → fond par défaut (salon).
+$piece_bg = [];
+foreach ($room_choices as $room) {
+  $bgq = new WP_Query([
+    'post_type'      => 'attachment',
+    'post_status'    => 'inherit',
+    'posts_per_page' => 1,
+    'orderby'        => 'rand',
+    'fields'         => 'ids',
+    'no_found_rows'  => true,
+    'tax_query'      => [[
+      'taxonomy' => 'media_room',
+      'field'    => 'slug',
+      'terms'    => $room['slug'],
+    ]],
+  ]);
+  $piece_bg[$room['slug']] = !empty($bgq->posts) ? (int) $bgq->posts[0] : 0;
+}
+wp_reset_postdata();
+// Fond par défaut : salon, sinon 1re pièce disponible
+$piece_bg_default = !empty($piece_bg['salon']) ? $piece_bg['salon'] : 0;
+if (!$piece_bg_default) {
+  foreach ($piece_bg as $bid) { if ($bid) { $piece_bg_default = $bid; break; } }
+}
+// Fallback par pièce → défaut (aucune pièce sans fond)
+foreach ($piece_bg as $rslug => $bid) {
+  if (!$bid) { $piece_bg[$rslug] = $piece_bg_default; }
+}
+$piece_bg_default_url = $piece_bg_default ? wp_get_attachment_image_url($piece_bg_default, 'large') : '';
+
 // 2 produits les plus RÉCENTS parmi lampes à poser / lampadaires / appliques,
 // forcément de 2 catégories différentes (Star exclue).
 $featured_products = [];
@@ -500,8 +531,16 @@ foreach ($carousel_products as $product) {
 <script>window.SAPI_CAROUSEL_DATA = <?php echo wp_json_encode($carousel_slides_data); ?>;</script>
 <?php endif; ?>
 
-<!-- Entrée projet — room picker promu en section pleine largeur (refonte home #1) -->
-<section class="home-projet-section">
+<!-- Entrée projet — room picker immersif photographique (refonte #13) -->
+<section class="home-projet-section home-projet--immersif">
+  <!-- Couches de fond (1 par pièce + défaut). Lazy : data-bg appliqué au 1er survol -->
+  <div class="projet-bg projet-bg--default on"<?php echo $piece_bg_default_url ? ' style="background-image:url(' . esc_url($piece_bg_default_url) . ')"' : ''; ?>></div>
+  <?php foreach ($room_choices as $room) :
+    $bg_url = !empty($piece_bg[$room['slug']]) ? wp_get_attachment_image_url($piece_bg[$room['slug']], 'large') : '';
+  ?>
+    <div class="projet-bg" data-piece-bg="<?php echo esc_attr($room['slug']); ?>" data-bg="<?php echo esc_url($bg_url); ?>"></div>
+  <?php endforeach; ?>
+  <div class="projet-scrim" aria-hidden="true"></div>
   <div class="home-projet" data-room-picker>
     <div class="room-picker-inner">
       <span class="section-eyebrow">Ton projet</span>
@@ -928,6 +967,34 @@ $sapi_cat_url = function ($slug) {
     var collNext = document.querySelector('.collections-nav-next');
     if (collPrev) collPrev.addEventListener('click', function () { collectionsGrid.scrollBy({ left: -collStep, behavior: 'smooth' }); });
     if (collNext) collNext.addEventListener('click', function () { collectionsGrid.scrollBy({ left: collStep, behavior: 'smooth' }); });
+  }
+
+  // 5. Room picker immersif — crossfade des fonds au survol des chips (desktop only, lazy)
+  var projetSection = document.querySelector('.home-projet--immersif');
+  if (projetSection && window.matchMedia('(hover: hover)').matches) {
+    var bgLayers = {};
+    projetSection.querySelectorAll('.projet-bg[data-piece-bg]').forEach(function (layer) {
+      bgLayers[layer.getAttribute('data-piece-bg')] = layer;
+    });
+    var defaultLayer = projetSection.querySelector('.projet-bg--default');
+    function activatePieceLayer(layer) {
+      if (!layer) return;
+      if (!layer.style.backgroundImage && layer.getAttribute('data-bg')) {
+        layer.style.backgroundImage = 'url(' + layer.getAttribute('data-bg') + ')';
+      }
+      Object.keys(bgLayers).forEach(function (k) { bgLayers[k].classList.remove('on'); });
+      if (defaultLayer) defaultLayer.classList.remove('on');
+      layer.classList.add('on');
+    }
+    projetSection.querySelectorAll('.room-card[data-piece]').forEach(function (chip) {
+      chip.addEventListener('mouseenter', function () {
+        activatePieceLayer(bgLayers[chip.getAttribute('data-piece')]);
+      });
+    });
+    projetSection.addEventListener('mouseleave', function () {
+      Object.keys(bgLayers).forEach(function (k) { bgLayers[k].classList.remove('on'); });
+      if (defaultLayer) defaultLayer.classList.add('on');
+    });
   }
 })();
 </script>

@@ -8334,6 +8334,97 @@ li.carousel-editorial-slide,
   border-top: 1px solid rgba(147, 125, 104, 0.1);
 }
 
+/* ===== Refonte #13 — Room picker immersif photographique (idée B) ===== */
+.home-projet-section.home-projet--immersif {
+  position: relative;
+  min-height: 560px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0;
+  background: var(--color-wood-dark); /* fallback sous les couches photo */
+  border-top: none; /* la section n'est plus crème : l'ourlet P20 ne s'applique pas */
+}
+.home-projet--immersif .projet-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+  z-index: 0;
+}
+.home-projet--immersif .projet-bg.on { opacity: 1; }
+.home-projet--immersif .projet-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(31, 24, 18, 0.55), rgba(31, 24, 18, 0.3) 45%, rgba(31, 24, 18, 0.55));
+}
+.home-projet--immersif .home-projet {
+  position: relative;
+  z-index: 2;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+/* Typo sur fond sombre */
+.home-projet--immersif .section-eyebrow {
+  color: var(--color-warm);
+  opacity: 1;
+}
+.home-projet--immersif .room-picker-title {
+  color: var(--color-white);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.4);
+}
+.home-projet--immersif .room-picker-or__text { color: rgba(255, 255, 255, 0.85); }
+.home-projet--immersif .room-picker-or::before,
+.home-projet--immersif .room-picker-or::after { background: rgba(255, 255, 255, 0.3); }
+/* Room cards → chips pills */
+.home-projet--immersif .home-projet .room-card,
+.home-projet--immersif .home-projet button.room-card {
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: none;
+  padding: 0.7rem 1.25rem;
+  background: rgba(255, 255, 255, 0.92);
+  border: none;
+  border-radius: 50px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+.home-projet--immersif .room-card-icon {
+  width: 18px;
+  height: 18px;
+  background: none;
+  border-radius: 0;
+  color: var(--color-wood);
+}
+.home-projet--immersif .room-card-icon svg { width: 18px; height: 18px; }
+.home-projet--immersif .room-card-label {
+  color: var(--color-wood-dark);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+@media (hover: hover) {
+  .home-projet--immersif .home-projet .room-card:hover {
+    background: var(--color-white);
+    transform: translateY(-2px);
+    border-color: transparent;
+  }
+  .home-projet--immersif .room-card:hover .room-card-icon { background: none; color: var(--color-orange); }
+}
+/* Freetext sur fond sombre */
+.home-projet--immersif .room-picker-freetext__input { background: rgba(255, 255, 255, 0.94); }
+@media (max-width: 768px) {
+  .home-projet-section.home-projet--immersif { min-height: 480px; }
+  .home-projet--immersif .home-projet { padding: 3rem 1rem; }
+}
+
 /* ========================================
    PAGE TEMPLATE - Contact (PREMIUM)
    ======================================== */
