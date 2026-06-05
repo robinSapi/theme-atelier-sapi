@@ -7943,7 +7943,7 @@ li.carousel-editorial-slide,
   margin: 0;
 }
 .home-projet {
-  max-width: 1100px;
+  max-width: 1280px;
   margin: 0 auto;
   text-align: center;
 }
@@ -7954,7 +7954,7 @@ li.carousel-editorial-slide,
   gap: 1.25rem;
   width: 100%;
 }
-.home-projet .room-card { max-width: 300px; } /* refonte #9 — ~+30% (global reste 200px) */
+.home-projet .room-card { max-width: 340px; } /* refonte #9/+ — chips un peu plus larges (conteneur élargi à 1280) */
 /* refonte #11 — accent orange au hover sur la home (le global reste wood pour modale/Conseils) */
 @media (hover: hover) {
   .home-projet .room-card:hover { border-color: var(--color-orange); }
