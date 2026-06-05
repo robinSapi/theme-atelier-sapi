@@ -661,7 +661,7 @@ $sapi_cat_url = function ($slug) {
 };
 ?>
 <!-- L'atelier — bande immersive voile crème (refonte #15, idée C) -->
-<?php $atelier_band_img = '2026/02/Bandeau-2.jpg'; // PROVISOIRE — remplacer par une photo d'atelier (changer ce chemin suffit) ?>
+<?php $atelier_band_img = '2025/05/Retouchee1.jpg'; // photo d'atelier (fournie par Robin) ?>
 <section class="home-atelier home-atelier--band">
   <?php echo sapi_image($atelier_band_img, 'large', ['class' => 'home-atelier__bg', 'loading' => 'lazy', 'alt' => "L'atelier de fabrication de luminaires en bois, Atelier Sâpi à Lyon"]); ?>
   <div class="home-atelier__inner">
