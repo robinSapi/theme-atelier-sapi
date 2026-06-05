@@ -312,21 +312,6 @@ function sapi_maison_enqueue_assets() {
     }
   }
 
-  // F2a-quinquies — Hero live update (H1 qui s'adapte au changement de
-  // sapiProject.answers.piece). Enqueue sur is_shop() uniquement.
-  if (class_exists('WooCommerce') && is_shop()) {
-    $hero_live_js_path = get_template_directory() . '/assets/sapi-hero-live.js';
-    if (file_exists($hero_live_js_path)) {
-      wp_enqueue_script(
-        'sapi-hero-live',
-        get_template_directory_uri() . '/assets/sapi-hero-live.js',
-        ['sapi-project'],
-        filemtime($hero_live_js_path),
-        true
-      );
-      wp_localize_script('sapi-hero-live', 'SAPI_HERO_TITLES', sapi_get_hero_piece_titles());
-    }
-  }
 
   // Méga-filtre intelligent + modale Conseiller V3
   // - is_shop() : tous les scripts (méga-filtre, cards Conseil/Mon projet, modale)
@@ -3546,10 +3531,10 @@ function sapi_ajax_megafilter_chat() {
  * n'a abouti dans la modale. Source de vérité unique partagée PHP / JS.
  */
 /**
- * Titres du hero /mes-creations/ par pièce (F2a-quinquies).
- * Source unique partagée entre le rendu PHP initial (archive-product.php)
- * et la localize JS (sapi-hero-live.js qui met à jour le H1 en live au
- * changement de sapiProject.answers.piece).
+ * Liste des pièces /mes-creations/ (slug → libellé).
+ * Le hero est désormais statique (titre fixe "Mes créations") : cette liste
+ * sert à archive-product.php pour énumérer les slugs et lire les photos ACF
+ * par pièce (hero_<slug>), qui alimentent le bandeau de la card "Mon projet".
  */
 function sapi_get_hero_piece_titles() {
   return [

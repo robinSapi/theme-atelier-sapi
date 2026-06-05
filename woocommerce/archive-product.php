@@ -43,72 +43,22 @@ if ($mes_creations_active_cat && !isset($mes_creations_cats_by_slug[$mes_creatio
 }
 ?>
 
-<!-- Hero Section - Magazine Style -->
+<!-- Hero Section -->
 <?php
-// Hero image: featured product gallery image (ambiance photo)
-$hero_img_url = '';
-$hero_alt = 'Mes Créations - Atelier Sâpi';
-if (!$hero_img_url) {
-  $hero_products = wc_get_products([
-    'limit'    => 1,
-    'status'   => 'publish',
-    'featured' => true,
-    'return'   => 'objects',
-  ]);
-
-  if (empty($hero_products)) {
-    $hero_products = wc_get_products([
-      'limit'   => 1,
-      'status'  => 'publish',
-      'orderby' => 'date',
-      'order'   => 'DESC',
-      'return'  => 'objects',
-    ]);
-  }
-
-  if (!empty($hero_products)) {
-    $hero_product = $hero_products[0];
-    // Try gallery first (ambiance photo), then main image
-    $gallery_ids = $hero_product->get_gallery_image_ids();
-    if (!empty($gallery_ids)) {
-      $hero_img_url = wp_get_attachment_image_url($gallery_ids[0], 'full');
-      $hero_alt = $hero_product->get_name() . ' - ambiance';
-    } else {
-      $hero_img_id = $hero_product->get_image_id();
-      $hero_img_url = $hero_img_id
-        ? wp_get_attachment_image_url($hero_img_id, 'full')
-        : wc_placeholder_img_src('full');
-      $hero_alt = $hero_product->get_name();
-    }
-  }
-}
-?>
-<?php
-// F2a-quinquies : hero qui s'adapte au changement de sapiProject.answers.piece
-// en live (crossfade via sapi-hero-live.js). Le mapping est centralisé dans
-// la fonction helper sapi_get_hero_piece_titles() (functions.php) — source
-// unique partagée entre le rendu PHP initial et la localize JS.
-// Sous-titre et CTA "Conseils de Robin" supprimés : le hero ne contient
-// que H1 + photo de fond. La photo reste statique (refonte par pièce =
-// chantier S28 séparé, en pause).
-$hero_titles = function_exists('sapi_get_hero_piece_titles')
+// Photos par pièce (ACF hero_<slug> sur la page boutique) exposées au JS via
+// data-piece-photos sur la card "Mon projet" : sapi-cards-conseiller.js
+// affiche un bandeau de la pièce du projet en haut de la card. Le hero, lui,
+// est statique (photo Croquis + titre "Mes créations" fixes, cf. CSS
+// .shop-hero-artisan). Format : { slug: [url1, url2, ...], … } — array même
+// pour un seul ID, future-proof si Robin passe les champs en Galerie. Pas de
+// clé 'default' : pas de photo dédiée à une pièce → pas de bandeau.
+$piece_titles = function_exists('sapi_get_hero_piece_titles')
   ? sapi_get_hero_piece_titles()
-  : ['default' => __('Mes Créations', 'theme-sapi-maison'), 'pieces' => []];
-$piece_param = isset($_GET['piece']) ? sanitize_key(wp_unslash($_GET['piece'])) : '';
-$hero_title  = isset($hero_titles['pieces'][$piece_param])
-  ? $hero_titles['pieces'][$piece_param]
-  : $hero_titles['default'];
+  : ['pieces' => []];
+$piece_slugs = !empty($piece_titles['pieces']) ? array_keys($piece_titles['pieces']) : [];
 
-// Photos hero par pièce (ACF) — lit hero_<slug> sur la page boutique
-// (wc_get_page_id('shop')) et expose les URLs en data-hero-photos pour swap
-// JS au changement de pièce. Robuste : champs absents/vides ignorés,
-// sapi-hero-live.js retombe sur la clé 'default' (Bandeau-1 par défaut,
-// surchargeable via un éventuel champ ACF hero_default). Format de sortie :
-// { slug: [url1, url2, ...], … } — array même pour un seul ID, pour rester
-// future-proof si Robin passe les champs en Galerie (tirage aléatoire JS).
-$hero_default_bg = 'https://atelier-sapi.fr/wp-content/uploads/2026/02/Bandeau-1.jpg';
 $hero_photos_by_piece = [];
-if (function_exists('get_field') && function_exists('wc_get_page_id')) {
+if ($piece_slugs && function_exists('get_field') && function_exists('wc_get_page_id')) {
   $shop_page_id = wc_get_page_id('shop');
   if ($shop_page_id > 0) {
     // Helper local : normalise une valeur ACF (ID seul, array d'IDs,
@@ -134,44 +84,22 @@ if (function_exists('get_field') && function_exists('wc_get_page_id')) {
       return $urls;
     };
 
-    foreach (array_keys($hero_titles['pieces']) as $piece_slug) {
+    foreach ($piece_slugs as $piece_slug) {
       $urls = $sapi_acf_to_urls(get_field('hero_' . $piece_slug, $shop_page_id));
       if (!empty($urls)) {
         $hero_photos_by_piece[$piece_slug] = $urls;
       }
     }
-
-    // Champ optionnel hero_default : surcharge la photo de fallback si
-    // Robin l'a créé. Sinon, on garde Bandeau-1 (cohérent avec le CSS).
-    $default_urls = $sapi_acf_to_urls(get_field('hero_default', $shop_page_id));
-    if (!empty($default_urls)) {
-      $hero_default_bg = $default_urls[0];
-    }
   }
-}
-// Le fallback est toujours exposé sous la clé 'default' — utilisé par
-// sapi-hero-live.js quand le visiteur efface son projet ou choisit une
-// pièce sans photo dédiée.
-$hero_photos_by_piece['default'] = [$hero_default_bg];
-
-// Premier paint : si une pièce est dans l'URL et qu'on a une photo ACF
-// pour elle, on l'utilise comme background inline (override le Bandeau-1
-// par défaut). Pas de random côté serveur — on prend la première du tableau
-// pour rester déterministe au load. Le JS prend le relais ensuite.
-$hero_initial_bg = '';
-if ($piece_param && !empty($hero_photos_by_piece[$piece_param])) {
-  $hero_initial_bg = $hero_photos_by_piece[$piece_param][0];
 }
 
 $hero_photos_attr = !empty($hero_photos_by_piece)
   ? wp_json_encode($hero_photos_by_piece, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
   : '';
 ?>
-<section class="shop-hero-artisan"
-  <?php if ($hero_photos_attr) : ?>data-hero-photos="<?php echo esc_attr($hero_photos_attr); ?>"<?php endif; ?>
-  <?php if ($hero_initial_bg) : ?>style="background-image: url('<?php echo esc_url($hero_initial_bg); ?>');"<?php endif; ?>>
+<section class="shop-hero-artisan">
   <div class="shop-hero-artisan-inner">
-    <h1 data-hero-title><?php echo esc_html($hero_title); ?></h1>
+    <h1><?php esc_html_e('Mes créations', 'theme-sapi-maison'); ?></h1>
   </div>
 </section>
 
@@ -238,7 +166,11 @@ $conseil_room_icons = sapi_guide_get_icons();
        - phrase IA italique + signature Square Peg
        - lien "Préciser ou modifier mon projet" → modale V3 en édition (S3)
        - slot grille rempli par JS (clones des cards matching + card sur-mesure) -->
-  <section class="conseiller-card conseiller-card--mon-projet mes-creations-selection__card" data-conseiller-card="mon-projet" hidden>
+  <section class="conseiller-card conseiller-card--mon-projet mes-creations-selection__card" data-conseiller-card="mon-projet"<?php if ($hero_photos_attr) : ?> data-piece-photos="<?php echo esc_attr($hero_photos_attr); ?>"<?php endif; ?> hidden>
+    <!-- Bandeau photo de la pièce du projet (pleine largeur, sans titre).
+         Affiché par sapi-cards-conseiller.js seulement si la pièce a une
+         photo dédiée (data-piece-photos). -->
+    <div class="conseiller-card__photo" data-mon-projet-photo hidden></div>
     <div class="conseiller-card__inner">
       <span class="conseiller-badge conseiller-badge--default" data-mon-projet-badge>
         <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>

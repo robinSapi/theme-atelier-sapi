@@ -12366,37 +12366,18 @@ button.room-card {
 .shop-hero-artisan {
   padding: 200px 20px 144px;
   text-align: center;
-  background: url('https://atelier-sapi.fr/wp-content/uploads/2026/02/Bandeau-1.jpg') center/cover no-repeat;
+  background: url('https://atelier-sapi.fr/wp-content/uploads/2026/06/Croquis.jpg') center/cover no-repeat;
   position: relative;
 }
 
+/* Overlay clair (bois clair de la charte, --color-warm) pour faire ressortir
+   le titre sombre par-dessus le croquis. */
 .shop-hero-artisan::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(74, 63, 53, 0.75);
+  background: rgba(251, 246, 234, 0.62);
   z-index: 1;
-}
-
-/* Layer injecté par sapi-hero-live.js pour crossfader la photo de fond
-   au changement de pièce. Reste sous l'overlay sombre (::before z-index 1)
-   et sous le contenu (-inner z-index 2). */
-.shop-hero-artisan__fade-layer {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 0;
-  -webkit-transition: opacity 0.4s ease;
-  transition: opacity 0.4s ease;
-  will-change: opacity;
-}
-
-.shop-hero-artisan__fade-layer.is-active {
-  opacity: 1;
 }
 
 .shop-hero-artisan-inner {
@@ -12410,10 +12391,10 @@ button.room-card {
   font-family: var(--font-display, 'Square Peg', Georgia, serif);
   font-size: clamp(72px, 14vw, 150px);
   font-weight: 400;
-  color: #fff;
+  color: var(--color-dark, #323232);
   margin-bottom: 1.5rem;
   line-height: 1.1;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 2px 16px rgba(254, 253, 251, 0.55);
 }
 
 .shop-hero-artisan-subtitle {
@@ -12429,19 +12410,6 @@ button.room-card {
   color: rgba(255, 255, 255, 0.8);
 }
 
-/* État "avec projet" (/mes-creations/) — classe ajoutée par sapi-hero-live.js
-   quand window.sapiProject.hasProject(). Hero immersif : photo plein cadre
-   (overlay sombre + titre retirés) et hauteur ~doublée pour mettre l'ambiance
-   du projet en avant. Hauteur pilotable via --shop-hero-projet-h. */
-.shop-hero-artisan--projet {
-  min-height: var(--shop-hero-projet-h, clamp(640px, 90vh, 1040px));
-}
-
-.shop-hero-artisan--projet::before,
-.shop-hero-artisan--projet h1 {
-  display: none;
-}
-
 @media (max-width: 768px) {
   .shop-hero-artisan {
     padding: 144px 20px 88px;
@@ -12449,10 +12417,6 @@ button.room-card {
 
   .shop-hero-artisan h1 {
     font-size: clamp(48px, 12vw, 80px);
-  }
-
-  .shop-hero-artisan--projet {
-    min-height: var(--shop-hero-projet-h-mobile, 70vh);
   }
 }
 
@@ -22948,6 +22912,32 @@ body.woocommerce-cart div.woocommerce-wrapper {
 .conseiller-card__inner {
   position: relative; /* passe devant le ::before */
   z-index: 1;
+}
+
+/* Bandeau photo de la pièce du projet — affiché en haut de la card
+   "Mon projet" quand un projet existe ET que la pièce a une photo dédiée
+   (sinon masqué). Pleine largeur : marges négatives qui annulent le padding
+   de la card. Le overflow:hidden + border-radius de .conseiller-card clippent
+   les coins hauts. Piloté par sapi-cards-conseiller.js (data-mon-projet-photo). */
+.conseiller-card__photo {
+  position: relative;
+  z-index: 1;
+  margin: -36px -28px 28px;
+  height: 220px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.conseiller-card__photo[hidden] {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .conseiller-card__photo {
+    margin: -28px -18px 22px;
+    height: 160px;
+  }
 }
 
 /* ── Badge "Conseil de Robin" / "Mon projet" / "Sur-mesure" ── */
