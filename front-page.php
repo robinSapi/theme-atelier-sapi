@@ -699,7 +699,6 @@ $sapi_cat_url = function ($slug) {
 <!-- Ils en parlent (refonte home #4) — avis Google, réutilise les composants de la fiche produit -->
 <?php $home_reviews = sapi_get_google_reviews(); ?>
 <?php if ($home_reviews && !empty($home_reviews['reviews'])) : ?>
-<div class="section-band--warm">
 <section class="product-testimonials home-avis">
   <div class="testimonials-header">
     <span class="section-num">05</span>
@@ -780,7 +779,6 @@ $sapi_cat_url = function ($slug) {
     <a href="https://www.google.com/maps/place/?q=place_id:ChIJYyWUfZOV9EcRDRhbW4HM6KY" target="_blank" rel="noopener noreferrer">Voir les <?php echo esc_html($home_reviews['total']); ?> avis</a>
   </div>
 </section>
-</div>
 <?php endif; ?>
 
 <!-- Bande citation Robin (refonte #14, dispo A) — entre « Ils en parlent » et le bento divers -->

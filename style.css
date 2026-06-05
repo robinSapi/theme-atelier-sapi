@@ -8107,6 +8107,7 @@ li.carousel-editorial-slide,
 .home-avis .testimonial-card {
   background: var(--color-white);
   border: 1px solid var(--color-gray-light);
+  box-shadow: var(--shadow-card); /* relief : la section avis est désormais sur fond blanc (#15-bis) */
   height: auto;
 }
 /* P13 — avatar initiales sur disque (zéro image/bleu Google), scopé home */
