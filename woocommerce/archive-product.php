@@ -86,6 +86,12 @@ if ($piece_slugs && function_exists('get_field') && function_exists('wc_get_page
 
     foreach ($piece_slugs as $piece_slug) {
       $urls = $sapi_acf_to_urls(get_field('hero_' . $piece_slug, $shop_page_id));
+      // Filet de sécurité : ACF convertit parfois les tirets du nom de champ
+      // en underscores (ex. champ nommé hero_chambre_enfant pour le slug
+      // chambre-enfant). On retente la variante underscore si rien trouvé.
+      if (empty($urls) && strpos($piece_slug, '-') !== false) {
+        $urls = $sapi_acf_to_urls(get_field('hero_' . str_replace('-', '_', $piece_slug), $shop_page_id));
+      }
       if (!empty($urls)) {
         $hero_photos_by_piece[$piece_slug] = $urls;
       }
