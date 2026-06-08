@@ -11485,7 +11485,7 @@ button.room-card {
 .collections-grid {
   display: flex;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
+  scroll-snap-type: x proximity; /* proximity (pas mandatory) : évite le re-calage/saut après scroll par flèches */
   scroll-behavior: smooth;
   gap: 1.5rem;
   padding: 2.5rem 0 4rem 0; /* top harmonisé sur L'atelier (header collections sans marge) */
