@@ -381,6 +381,7 @@
     bureau:   'Bureau / Atelier',
     salon:    'Salon / Salle à manger',
     chambre:  'Chambre',
+    'chambre-enfant': 'Chambre enfant',
     entree:   'Entrée / Couloir',
     escalier: 'Cage d\'escalier',
   };

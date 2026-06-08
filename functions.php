@@ -329,6 +329,7 @@ function sapi_maison_enqueue_assets() {
         'bureau'   => ['ampoule_degagee', 'semi_degagee'],
         'salon'    => ['ampoule_entouree', 'semi_degagee'],
         'chambre'  => ['ampoule_entouree', 'semi_degagee'],
+        'chambre-enfant' => ['ampoule_entouree', 'semi_degagee'], // lumière douce, aligné chambre
         'entree'   => ['ampoule_entouree', 'semi_degagee'], // Round 5 — aligné salon/chambre
         'escalier' => null,
       ],
@@ -3542,6 +3543,7 @@ function sapi_get_hero_piece_titles() {
     'pieces'  => [
       'salon'    => __('Pour un salon', 'theme-sapi-maison'),
       'chambre'  => __('Pour une chambre', 'theme-sapi-maison'),
+      'chambre-enfant' => __('Pour une chambre enfant', 'theme-sapi-maison'),
       'cuisine'  => __('Pour une cuisine', 'theme-sapi-maison'),
       'bureau'   => __('Pour un bureau', 'theme-sapi-maison'),
       'entree'   => __('Pour une entrée', 'theme-sapi-maison'),
@@ -3556,6 +3558,7 @@ function sapi_megafilter_get_generic_advices() {
     'bureau'   => __("Pour un bureau, je te propose les modèles où l'ampoule reste à découvert. La lumière est directe et tranchée, idéale pour la concentration sans fatiguer les yeux.", 'theme-sapi-maison'),
     'salon'    => __("Pour un salon, je te propose des luminaires à ampoule entourée. La lumière passe à travers le bois et dessine ses motifs au mur, l'ambiance s'installe.", 'theme-sapi-maison'),
     'chambre'  => __("Pour une chambre, je te propose des modèles à ampoule entourée. Une lumière douce et diffuse, qui invite au calme et révèle les jeux du bois.", 'theme-sapi-maison'),
+    'chambre-enfant' => __("Pour une chambre d'enfant, je te propose des modèles à ampoule entourée. Une lumière douce et tamisée, jamais agressive, qui rassure au moment du coucher et fait danser les ombres du bois au plafond.", 'theme-sapi-maison'),
     'entree'   => __("Pour une entrée, je te propose des modèles à ampoule entourée. La lumière joue avec les découpes du bois, donne le ton dès le pas de porte.", 'theme-sapi-maison'),
     'escalier' => __("Pour un escalier, je te propose les modèles hauts qui occupent le volume. La cage se révèle par étages, l'œil suit la lumière en montant.", 'theme-sapi-maison'),
   ];
@@ -5188,6 +5191,7 @@ function sapi_guide_get_ampoule_filter($piece, $taille = '') {
       return ['ampoule_degagee', 'semi_degagee'];
     case 'salon':
     case 'chambre':
+    case 'chambre-enfant':
     case 'entree':
       // Round 5 — entrée bénéficie du même filtre que salon/chambre :
       // ampoule entourée privilégiée (cf. guide-prompt-savoir.txt qui
@@ -6989,7 +6993,7 @@ add_action('admin_enqueue_scripts', 'sapi_megafilter_admin_enqueue');
 function sapi_megafilter_admin_read_filters() {
   $valid_periods  = ['7d', '30d', 'all'];
   $valid_entries  = ['home_picker', 'mes_creations', 'product_pill', 'freetext'];
-  $valid_pieces   = ['salon', 'cuisine', 'chambre', 'bureau', 'entree', 'escalier'];
+  $valid_pieces   = ['salon', 'cuisine', 'chambre', 'chambre-enfant', 'bureau', 'entree', 'escalier'];
   $valid_devices  = ['desktop', 'mobile'];
   $valid_statuses = ['chat', 'contact', 'complete'];
 
@@ -7185,6 +7189,7 @@ function sapi_megafilter_admin_page() {
   ];
   $piece_labels = [
     'salon' => 'Salon', 'cuisine' => 'Cuisine', 'chambre' => 'Chambre',
+    'chambre-enfant' => 'Chambre enfant',
     'bureau' => 'Bureau', 'entree' => 'Entrée', 'escalier' => 'Escalier',
   ];
   $taille_labels = [
@@ -7577,6 +7582,7 @@ function sapi_megafilter_render_session_detail($r) {
   ];
   $piece_labels = [
     'salon' => 'Salon', 'cuisine' => 'Cuisine', 'chambre' => 'Chambre',
+    'chambre-enfant' => 'Chambre enfant',
     'bureau' => 'Bureau', 'entree' => 'Entrée', 'escalier' => 'Escalier',
   ];
   $taille_labels = [
