@@ -7977,23 +7977,24 @@ li.carousel-editorial-slide,
 }
 
 /* ===== Refonte DA — L'atelier immersion par la lumière (mockup-da-04c) ===== */
-.home-atelier--lumiere{position:relative;overflow:hidden;min-height:620px;display:flex;align-items:stretch}
+.home-atelier--lumiere{position:relative;overflow:hidden;min-height:760px;display:flex;align-items:stretch}
 .home-atelier--lumiere .home-atelier__bgstack{position:absolute;inset:0;z-index:0}
 .home-atelier--lumiere .home-atelier__bg{position:absolute;inset:0;opacity:0;transition:opacity .6s ease}
 .home-atelier--lumiere .home-atelier__bg.is-on{opacity:1}
 .home-atelier--lumiere .home-atelier__bgimg{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
 .home-atelier--lumiere .home-atelier__veil{position:absolute;inset:0;z-index:1;background:linear-gradient(95deg,rgba(40,33,27,.95) 0%,rgba(40,33,27,.92) 32%,rgba(40,33,27,.6) 52%,rgba(40,33,27,.14) 74%,rgba(40,33,27,0) 100%)}
 .home-atelier--lumiere .home-atelier__veil-bottom{position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(40,33,27,.7) 0%,rgba(40,33,27,.18) 26%,transparent 46%)}
-.home-atelier--lumiere .home-atelier__inner{position:relative;z-index:2;width:52%;padding:60px 56px 150px;display:flex;flex-direction:column;justify-content:center;color:#fff;max-width:none;margin:0}
+.home-atelier--lumiere .home-atelier__inner{position:relative;z-index:2;width:100%;max-width:1600px;margin:0 auto;padding:80px 3rem 160px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;color:#fff}
+.home-atelier--lumiere .home-atelier__inner > *{max-width:540px} /* texte calé à gauche, reste dans la zone sombre du voile */
 .home-atelier--lumiere .section-header-kinetic{padding:0;max-width:none;margin:0 0 .5rem}
 .home-atelier--lumiere .section-title-kinetic,.home-atelier--lumiere .section-num{color:#fff}
 .home-atelier--lumiere .atelier-eyebrow{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#f0b07e}
-.home-atelier--lumiere .atelier-band-title{font-family:var(--font-display);font-weight:400;font-size:clamp(2.6rem,5vw,4.1rem);line-height:.92;color:#fff;margin:8px 0 18px}
+.home-atelier--lumiere .atelier-band-title{font-family:var(--font-display);font-weight:400;text-transform:none;font-size:clamp(2.6rem,5vw,4.1rem);line-height:.92;color:#fff;margin:8px 0 18px}
 .home-atelier--lumiere .storytelling-text{color:#ece3d6;max-width:460px}
 .home-atelier--lumiere .storytelling-text--seo a{color:#fff;text-decoration:none;border-bottom:1px solid rgba(240,176,126,.6);padding-bottom:1px}
 .home-atelier--lumiere .storytelling-text--seo a:hover{color:#f0b07e;border-bottom-color:var(--color-orange)}
 .home-atelier--lumiere .hero-cta{margin-top:6px}
-.atelier-steps{position:absolute;z-index:3;right:30px;bottom:30px;max-width:64%;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px}
+.atelier-steps{position:absolute;z-index:3;left:0;right:0;bottom:40px;max-width:1600px;margin:0 auto;padding:0 3rem;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px}
 .atelier-step{display:flex;align-items:center;gap:10px;background:rgba(40,33,27,.55);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);border:1px solid rgba(255,255,255,.2);border-radius:50px;padding:8px 18px 8px 8px;cursor:pointer;transition:.25s;font-family:inherit}
 .atelier-step:hover,.atelier-step:focus-visible{background:rgba(227,91,36,.92);border-color:var(--color-orange);transform:translateY(-2px)}
 .atelier-step__n{width:28px;height:28px;border-radius:50%;background:var(--color-orange);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:.25s;flex-shrink:0}
@@ -8002,8 +8003,9 @@ li.carousel-editorial-slide,
 .atelier-step:hover .atelier-step__t,.atelier-step:focus-visible .atelier-step__t{color:#fff}
 @media (max-width:900px){
   .home-atelier--lumiere{flex-direction:column;min-height:auto}
-  .home-atelier--lumiere .home-atelier__inner{width:100%;padding:48px 26px 24px}
-  .atelier-steps{position:static;max-width:none;justify-content:flex-start;padding:0 26px 36px}
+  .home-atelier--lumiere .home-atelier__inner{width:100%;max-width:none;margin:0;padding:48px 26px 24px}
+  .home-atelier--lumiere .home-atelier__inner > *{max-width:none}
+  .atelier-steps{position:static;max-width:none;margin:0;justify-content:flex-start;padding:0 26px 36px}
 }
 
 .storytelling-text--seo {
