@@ -840,6 +840,7 @@ $process_steps = [
   <div class="ca-grid">
     <?php if ($gift_card) : ?>
     <a href="<?php echo esc_url($gift_card['url']); ?>" class="gift-object">
+      <span class="gift-object__photo" aria-hidden="true"><?php echo sapi_image('2025/09/Carte-de-visite-3.jpg', 'large', ['class' => 'gift-object__photoimg', 'alt' => '', 'loading' => 'lazy']); ?></span>
       <span class="gift-object__halo" aria-hidden="true"></span>
       <span class="gift-object__badge">Offrir de la lumière</span>
       <span class="gift-object__body">
