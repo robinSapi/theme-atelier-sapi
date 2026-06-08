@@ -365,9 +365,14 @@ foreach ($collection_slugs as $col) {
     }
   }
 
+  // Description : champ WooCommerce de la catégorie en priorité (éditable en admin),
+  // sinon repli sur la ligne factuelle par défaut définie dans $collection_slugs.
+  $wc_desc = $cat_term->description ? trim(wp_strip_all_tags($cat_term->description)) : '';
+  $col_desc = $wc_desc !== '' ? $wc_desc : (isset($col['desc']) ? $col['desc'] : '');
+
   $collections[] = [
     'name' => $col['name'],
-    'desc' => isset($col['desc']) ? $col['desc'] : '',
+    'desc' => $col_desc,
     'count' => $cat_count . ' ' . ($cat_count > 1 ? 'créations' : 'création'),
     'image_id' => $col_image_id,
     'url' => $cat_url,
