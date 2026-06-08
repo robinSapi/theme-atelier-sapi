@@ -8181,7 +8181,7 @@ li.carousel-editorial-slide,
 /* (6) Cards catégories ~1/3 plus hautes (scopé home) */
 .collections-kinetic .collection-card {
   aspect-ratio: 2 / 3;
-  max-height: 800px; /* DA #4+ — cards +40% (plafond relevé pour suivre la largeur) */
+  max-height: 720px; /* DA #4+ — cards agrandies (plafond relevé), réduit un peu sur retour Robin */
 }
 /* (8) Numéro du header avis aligné sur les autres (scopé .home-avis) */
 .home-avis .testimonials-header .section-num {
@@ -8255,8 +8255,8 @@ li.carousel-editorial-slide,
 /* ===== Refonte #11 — Collections : peek + flèches desktop ===== */
 .collections-nav { display: none; }
 @media (min-width: 769px) {
-  /* DA #4+ — cards +40% en largeur (23.5% -> 32.9%) : ~3 cards visibles + peek */
-  .collections-kinetic .collection-card { flex: 0 0 32.9%; }
+  /* DA #4+ — cards agrandies (23.5% -> 29%) puis légèrement réduites sur retour Robin */
+  .collections-kinetic .collection-card { flex: 0 0 29%; }
   .collections-nav {
     display: flex;
     gap: 10px;
@@ -11716,10 +11716,20 @@ button.room-card {
 
 .collection-card .collection-details h3 {
   font-family: var(--font-body);
-  font-size: 2rem;
+  font-size: 2.4rem; /* DA #4+ — agrandi avec les cards */
   font-weight: 700;
   color: var(--color-white);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+/* DA #4+ — petite ligne factuelle sous le nom de catégorie */
+.collection-desc {
+  font-size: 1rem;
+  line-height: 1.35;
+  color: var(--color-cream);
+  opacity: 0.92;
+  margin: 0 0 0.7rem;
+  max-width: 92%;
 }
 
 .collection-meta {
@@ -11729,7 +11739,7 @@ button.room-card {
 }
 
 .collection-count {
-  font-size: 0.875rem;
+  font-size: 1.05rem; /* DA #4+ — agrandi avec les cards */
   font-weight: 400;
   color: var(--color-cream);
   opacity: 0.9;
@@ -11737,7 +11747,7 @@ button.room-card {
 
 .collection-btn {
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: 1.25rem; /* DA #4+ — agrandi avec les cards */
   font-weight: 600;
   color: var(--color-wood);
   transition: all 0.3s var(--ease-expo);
