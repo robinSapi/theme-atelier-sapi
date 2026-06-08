@@ -8175,18 +8175,40 @@ li.carousel-editorial-slide,
   .home-press__logos { gap: 1.25rem 2rem; }
 }
 
-/* ===== Refonte home — Bento divers (variante A : carte cadeau en bannière) ===== */
-.home-divers .bento-giftcard { grid-column: 1 / -1; grid-row: span 1; } /* refonte #11 : 1/-1 survit au passage 1 colonne mobile */
-/* Variante B (3 cartes égales) — décommenter pour tester, et commenter A :
-.home-divers .bento-giftcard { grid-column: span 4; grid-row: span 2; }
-.home-divers .bento-conseil  { grid-column: span 4; }
-.home-divers .bento-actu     { grid-column: span 4; }
-*/
+/* ===== Refonte DA #7 — Cadeau (objet orange iconique) + Actus (journal) — variante C ===== */
+.home-cadeau-actus{max-width:1400px;margin:0 auto;padding:5rem 3rem}
+.ca-grid{display:grid;grid-template-columns:.78fr 1.22fr;gap:26px;align-items:stretch}
+.gift-object{position:relative;border-radius:20px;overflow:hidden;background:linear-gradient(150deg,#E35B24 0%,#c4481b 100%);color:#fff;padding:40px 36px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow-card);text-decoration:none;transition:box-shadow .28s var(--ease-expo),transform .28s var(--ease-expo)}
+.gift-object:hover{box-shadow:var(--shadow-card-hover)}
+.gift-object__halo{position:absolute;right:-40px;top:-40px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,222,170,.55),transparent 68%);pointer-events:none}
+.gift-object__badge{position:relative;z-index:2;align-self:flex-start;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:50px;padding:7px 15px;font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.gift-object__body{position:relative;z-index:2;display:block}
+.gift-object__lamp{font-size:46px;line-height:1;display:block;margin:18px 0 6px}
+.gift-object__title{font-family:var(--font-display);font-size:54px;line-height:.9;display:block;margin-bottom:12px}
+.gift-object__text{font-size:14.5px;color:#ffeede;max-width:320px;display:block;margin-bottom:24px}
+.gift-object__cta{display:inline-flex;align-items:center;gap:9px;background:#fff;color:var(--color-wood-dark);font-weight:600;font-size:14.5px;border-radius:50px;padding:13px 26px}
+.news-journal{display:flex;flex-direction:column;background:#fff;border-radius:20px;overflow:hidden;box-shadow:var(--shadow-card);text-decoration:none;color:inherit;transition:box-shadow .28s var(--ease-expo),transform .28s var(--ease-expo)}
+.news-journal:hover{box-shadow:var(--shadow-card-hover)}
+.news-journal__photo{display:block;height:230px;overflow:hidden}
+.news-journal__photo img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.news-journal:hover .news-journal__photo img{transform:scale(1.04)}
+.news-journal__body{padding:28px 34px 30px;display:block}
+.news-journal__meta{display:flex;align-items:center;gap:12px;color:var(--color-wood)}
+.news-journal__eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.news-journal__date{color:var(--color-wood-mid);font-size:12.5px;font-weight:500}
+.news-journal__title{font-weight:700;font-size:25px;color:var(--color-wood-dark);line-height:1.2;display:block;margin:10px 0}
+.news-journal__chapo{font-size:14.5px;color:var(--color-dark);display:block;margin-bottom:16px}
+.news-journal__read{color:var(--color-orange);font-weight:600;font-size:14.5px;display:inline-flex;gap:7px;align-items:center}
+.ca-allnews{display:flex;justify-content:center;margin-top:22px}
+.ca-allnews__btn{display:inline-flex;align-items:center;gap:9px;background:transparent;border:1.5px solid var(--color-wood);color:var(--color-wood-dark);font-weight:600;font-size:14.5px;border-radius:50px;padding:13px 26px;text-decoration:none;transition:background .25s,color .25s}
+.ca-allnews__btn:hover{background:var(--color-wood);color:#fff}
+.home-cadeau-actus .arr{display:inline-block;transition:transform .25s}
+.gift-object:hover .arr,.news-journal:hover .arr,.ca-allnews__btn:hover .arr{transform:translateX(4px)}
+@media (max-width:880px){.ca-grid{grid-template-columns:1fr}.home-cadeau-actus{padding:3rem 1.25rem}}
 
 /* ===== Refonte home #8 — respiration sections bento + ajustements divers ===== */
 /* (5) Respiration avant les sections bento — double classe pour battre .hero-bento */
-.hero-bento.home-creations,
-.hero-bento.home-divers {
+.hero-bento.home-creations {
   padding-top: 6rem;
 }
 /* (6) Cards catégories ~1/3 plus hautes (scopé home) */
@@ -8200,7 +8222,6 @@ li.carousel-editorial-slide,
 }
 @media (max-width: 768px) {
   .hero-bento.home-creations,
-  .hero-bento.home-divers,
   .collections-kinetic,
   .newsletter-kinetic {
     padding-top: 3.5rem;
@@ -8429,12 +8450,6 @@ li.carousel-editorial-slide,
 @media (max-width: 700px) {
   .quote-band { min-height: 78vh; }
   .quote-band .q-mark { font-size: 70px; }
-}
-
-/* ===== Refonte #14 — Bento divers à 2 cards (Conseil retirée) ===== */
-@media (min-width: 769px) {
-  .home-divers .bento-giftcard { grid-column: span 8; }
-  .home-divers .bento-actu { grid-column: span 4; }
 }
 
 /* ========================================
@@ -11061,72 +11076,6 @@ transform: translateY(15px);
   color: var(--bois-sombre, #4A3F35);
 }
 
-/* Gift Card */
-.bento-giftcard {
-  grid-column: span 4;
-  grid-row: span 1;
-  cursor: pointer;
-}
-
-.bento-giftcard .bento-bg {
-  transition: transform 0.6s var(--ease-expo);
-}
-
-@media (hover: hover) {
-  .bento-giftcard:hover .bento-bg {
-    transform: scale(1.05);
-  }
-}
-
-.giftcard-badge {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  padding: 5px 13px;
-  background: var(--color-orange);
-  color: var(--color-white);
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border-radius: 50px;
-  z-index: 2;
-}
-
-.giftcard-info {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1.25rem;
-  background: linear-gradient(to top, rgba(50, 50, 50, 0.9) 0%, transparent 100%);
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.giftcard-info h3 {
-  font-family: var(--font-body);
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--color-white);
-  margin: 0;
-}
-
-.giftcard-price {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  background: var(--color-wood);
-  color: #fff;
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-radius: 50px;
-  white-space: nowrap;
-}
-
 .room-picker-inner {
   /* Round 4 — Espacements alignés sur la card Conseil de /mes-creations/
      (gap 18px = écarts homogènes badge / titre / cases / "ou" / champ texte). */
@@ -11470,86 +11419,7 @@ button.room-card {
 
 /* (refonte #15) .atelier-label / .atelier-photo retirés — L'atelier est désormais une bande immersive */
 
-/* Bento - Flash Actu Card */
-.bento-actu {
-  grid-column: span 4;
-  grid-row: span 2;
-  min-height: 400px;
-}
-
-.bento-actu::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 30%, rgba(50, 50, 50, 0.7) 100%);
-  z-index: 1;
-}
-
-.bento-actu-badge {
-  position: absolute;
-  top: 1.5rem;
-  left: 1.5rem;
-  padding: 5px 13px;
-  background: var(--color-orange);
-  color: var(--color-white);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border-radius: 50px;
-  z-index: 2;
-}
-
-.bento-actu-content {
-  position: absolute;
-  bottom: 2rem;
-  left: 2rem;
-  right: 2rem;
-  z-index: 2;
-}
-
-.bento-actu-content h3 {
-  font-family: var(--font-body);
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #fff;
-  margin: 0 0 0.5rem 0;
-  line-height: 1.4;
-}
-
-.bento-actu-date {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.7);
-  font-weight: 400;
-}
-.bento-actu-link {
-  display: block;
-  position: absolute;
-  inset: 0;
-  color: inherit;
-  text-decoration: none;
-}
-.bento-actu-all {
-  position: absolute;
-  bottom: 1rem;
-  right: 1.5rem;
-  z-index: 3;
-  font-family: var(--font-body);
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
-  text-decoration: none;
-  letter-spacing: 0.03em;
-  -webkit-transition: color 0.2s ease;
-  transition: color 0.2s ease;
-}
-@media (hover: hover) {
-  .bento-actu-all:hover {
-    color: #fff;
-  }
-}
-
-/* (refonte #14) bloc .bento-conseil* retiré — la citation Robin vit désormais dans la bande pleine page */
+/* (refonte DA #7) blocs .bento-actu* / .bento-giftcard* / .bento-conseil* retirés — Cadeau+Actus est désormais .home-cadeau-actus */
 
 /* ========================================
    CINÉTIQUE - Collections Section
@@ -11953,22 +11823,13 @@ button.room-card {
   .bento-statement,
   .bento-product,
   .bento-stats,
-  .bento-storytelling,
-  .bento-giftcard {
+  .bento-storytelling {
     grid-column: span 3;
   }
 
   .bento-process,
   .bento-atelier,
   .bento-cta {
-    grid-column: span 6;
-  }
-
-  .bento-actu {
-    grid-column: span 6;
-  }
-
-  .bento-conseil {
     grid-column: span 6;
   }
 }
@@ -12028,10 +11889,7 @@ button.room-card {
   .bento-process,
   .bento-cta,
   .bento-atelier,
-  .bento-actu,
-  .bento-conseil,
-  .bento-storytelling,
-  .bento-giftcard {
+  .bento-storytelling {
     grid-column: span 1;
     grid-row: span 1;
   }
@@ -12050,19 +11908,7 @@ button.room-card {
     min-height: 250px;
   }
 
-  .bento-actu {
-    min-height: 250px;
-  }
-
-  .bento-conseil {
-    min-height: 200px;
-  }
-
   .bento-product-small {
-    min-height: 200px;
-  }
-
-  .bento-giftcard {
     min-height: 200px;
   }
 

@@ -835,51 +835,37 @@ $process_steps = [
   </a>
 </section>
 
-<!-- Hero Bento Grid (continued) -->
-<section class="hero-bento home-divers">
-  <div class="bento-container">
-
-    <!-- Carte Cadeau (déplacée du 1er bento) -->
+<!-- Cadeau + Actus (refonte DA #7, variante C) — objet iconique vs journal -->
+<section class="home-cadeau-actus">
+  <div class="ca-grid">
     <?php if ($gift_card) : ?>
-    <a href="<?php echo esc_url($gift_card['url']); ?>" class="bento-card bento-giftcard">
-      <?php echo wp_get_attachment_image($gift_card['image_id'], 'large', false, ['class' => 'bento-bg-img bento-bg-img--bottom-right', 'loading' => 'lazy', 'alt' => 'Carte cadeau Atelier Sâpi']); ?>
-      <span class="giftcard-badge">Idée cadeau</span>
-      <div class="giftcard-info">
-        <h3>Offrez la lumière avec une carte cadeau</h3>
-      </div>
+    <a href="<?php echo esc_url($gift_card['url']); ?>" class="gift-object">
+      <span class="gift-object__halo" aria-hidden="true"></span>
+      <span class="gift-object__badge">Offrir de la lumière</span>
+      <span class="gift-object__body">
+        <span class="gift-object__lamp" aria-hidden="true">✦</span>
+        <span class="gift-object__title">La carte cadeau</span>
+        <span class="gift-object__text">Tu hésites sur le modèle ? Offre une carte cadeau : la bonne personne choisira son luminaire, allumé à la main rien que pour elle.</span>
+        <span class="gift-object__cta">Offrir une carte cadeau <span class="arr">→</span></span>
+      </span>
     </a>
     <?php endif; ?>
-
-    <!-- Dernier Flash Actu -->
     <?php
-    $last_actu = new WP_Query([
-      'posts_per_page' => 1,
-      'post_status'    => 'publish',
-      'category_name'  => 'flash-actu',
-      'orderby'        => 'date',
-      'order'          => 'DESC'
-    ]);
+    $last_actu = new WP_Query(['posts_per_page'=>1,'post_status'=>'publish','category_name'=>'flash-actu','orderby'=>'date','order'=>'DESC']);
     if ($last_actu->have_posts()) : $last_actu->the_post();
     ?>
-    <div class="bento-card bento-actu">
-      <a href="<?php the_permalink(); ?>" class="bento-actu-link">
-        <?php if (has_post_thumbnail()) : ?>
-          <?php echo get_the_post_thumbnail(get_the_ID(), 'large', ['class' => 'bento-bg-img', 'loading' => 'lazy', 'alt' => get_the_title()]); ?>
-        <?php endif; ?>
-        <span class="bento-actu-badge">Flash actu</span>
-        <div class="bento-actu-content">
-          <h3><?php echo esc_html(get_the_title()); ?></h3>
-          <span class="bento-actu-date"><?php echo esc_html(get_the_date('d/m/Y')); ?></span>
-        </div>
-      </a>
-      <a href="<?php echo esc_url(home_url('/actus/')); ?>" class="bento-actu-all">Voir toutes les actus →</a>
-    </div>
-    <?php
-    wp_reset_postdata();
-    endif;
-    ?>
-
+    <a href="<?php the_permalink(); ?>" class="news-journal">
+      <span class="news-journal__photo"><?php if (has_post_thumbnail()) echo get_the_post_thumbnail(get_the_ID(), 'large', ['loading'=>'lazy','alt'=>get_the_title()]); ?></span>
+      <span class="news-journal__body">
+        <span class="news-journal__meta"><span class="news-journal__eyebrow">Le journal de l'atelier</span><span class="news-journal__date">· <?php echo esc_html(get_the_date('j F Y')); ?></span></span>
+        <span class="news-journal__title"><?php echo esc_html(get_the_title()); ?></span>
+        <span class="news-journal__chapo"><?php echo esc_html(wp_trim_words(get_the_excerpt(), 26)); ?></span>
+        <span class="news-journal__read">Lire l'article <span class="arr">→</span></span>
+      </span>
+    </a>
+    <?php wp_reset_postdata(); endif; ?>
   </div>
+  <div class="ca-allnews"><a href="<?php echo esc_url(home_url('/actus/')); ?>" class="ca-allnews__btn">Voir toutes les actus <span class="arr">→</span></a></div>
 </section>
 
 <!-- Newsletter Section -->
