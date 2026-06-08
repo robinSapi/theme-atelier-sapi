@@ -624,39 +624,44 @@ $sapi_cat_url = function ($slug) {
   return (!is_wp_error($l) && $l) ? $l : home_url('/mes-creations/');
 };
 ?>
-<!-- L'atelier — bande immersive voile crème (refonte #15, idée C) -->
-<?php $atelier_band_img = '2025/05/Retouchee1.jpg'; // photo d'atelier (fournie par Robin) ?>
-<section class="home-atelier home-atelier--band">
-  <?php echo sapi_image($atelier_band_img, 'large', ['class' => 'home-atelier__bg', 'loading' => 'lazy', 'alt' => "L'atelier de fabrication de luminaires en bois, Atelier Sâpi à Lyon"]); ?>
+<!-- L'atelier — immersion par la lumière (refonte DA, mockup-da-04c) -->
+<?php
+$atelier_default_img = '2025/04/A7404411.jpg'; // fond par défaut = luminaire allumé (modifiable ; sinon une photo d'atelier chaude)
+// $process_steps : [num, label, photo, alt, phrase manuscrite] — repris à l'identique de l'existant
+$process_steps = [
+  ['01', 'Dessin',        '2025/05/IMG_1928-e1761747188966.png', "Dessin d'un luminaire en bois, Atelier Sâpi",          "Tout commence par un trait de crayon"],
+  ['02', 'Découpe laser', '2025/05/IMG_7638.jpg',                'Découpe laser du bois pour luminaire',                 "Le laser suit mon dessin au dixième près"],
+  ['03', 'Finitions',     '2025/09/Poncage.jpg',                 "Ponçage manuel d'un luminaire en bois, Atelier Sâpi",  "Le ponçage, c'est ma méditation"],
+  ['04', 'Assemblage',    '2026/03/Robin-a-lassemblage.jpg',     'Robin assemble un luminaire dans son atelier à Lyon',  "Chaque pièce s'emboîte sans une vis"],
+  ['05', 'Expédition',    '2026/06/Expedition.jpg',              "Luminaire emballé prêt pour l'expédition, Atelier Sâpi","Emballé comme si c'était pour ma mère"],
+];
+?>
+<section class="home-atelier home-atelier--lumiere" id="home-atelier">
+  <div class="home-atelier__bgstack" aria-hidden="true">
+    <span class="home-atelier__bg is-on" data-key="default"><?php echo sapi_image($atelier_default_img, 'large', ['class' => 'home-atelier__bgimg', 'alt' => '', 'loading' => 'lazy']); ?></span>
+    <?php foreach ($process_steps as $i => $step) : ?>
+      <span class="home-atelier__bg" data-key="<?php echo (int)($i + 1); ?>"><?php echo sapi_image($step[2], 'large', ['class' => 'home-atelier__bgimg', 'alt' => '', 'loading' => 'lazy']); ?></span>
+    <?php endforeach; ?>
+  </div>
+  <div class="home-atelier__veil" aria-hidden="true"></div>
+  <div class="home-atelier__veil-bottom" aria-hidden="true"></div>
+
   <div class="home-atelier__inner">
-    <div class="section-header-kinetic">
-      <span class="section-num">04</span>
-      <h2 class="section-title-kinetic">L'atelier</h2>
-    </div>
+    <div class="section-header-kinetic"><span class="section-num">04</span><h2 class="section-title-kinetic">L'atelier</h2></div>
+    <span class="atelier-eyebrow">L'atelier · Lyon</span>
     <h3 class="atelier-band-title">Des sculptures lumineuses</h3>
     <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
     <p class="storytelling-text storytelling-text--seo">Je dessine et fabrique à la commande des <a href="<?php echo esc_url($sapi_cat_url('suspensions')); ?>">suspensions</a>, <a href="<?php echo esc_url($sapi_cat_url('appliques')); ?>">appliques</a>, <a href="<?php echo esc_url($sapi_cat_url('lampesaposer')); ?>">lampes à poser</a> et <a href="<?php echo esc_url($sapi_cat_url('lampadaires')); ?>">lampadaires</a> en bois massif. Chaque luminaire est découpé au laser puis assemblé à la main : le peuplier clair ou l'okoumé chaleureux filtrent la lumière et dessinent des ombres uniques.</p>
     <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="hero-cta hero-cta--wood">Découvrir l'artisan</a>
-    <h4 class="process-ribbon-title">Mon processus artisanal</h4>
-    <div class="process-ribbon">
-      <?php
-      // [num, label, photo, alt, phrase manuscrite (tooltip natif title)]
-      $process_steps = [
-        ['01', 'Dessin',        '2025/05/IMG_1928-e1761747188966.png', "Dessin d'un luminaire en bois, Atelier Sâpi",         "Tout commence par un trait de crayon"],
-        ['02', 'Découpe laser', '2025/05/IMG_7638.jpg',                'Découpe laser du bois pour luminaire',                "Le laser suit mon dessin au dixième près"],
-        ['03', 'Finitions',     '2025/09/Poncage.jpg',                 "Ponçage manuel d'un luminaire en bois, Atelier Sâpi", "Le ponçage, c'est ma méditation"],
-        ['04', 'Assemblage',    '2026/03/Robin-a-lassemblage.jpg',     'Robin assemble un luminaire dans son atelier à Lyon', "Chaque pièce s'emboîte sans une vis"],
-        ['05', 'Expédition',    '2026/06/Expedition.jpg',              "Luminaire emballé prêt pour l'expédition, Atelier Sâpi", "Emballé comme si c'était pour ma mère"],
-      ];
-      foreach ($process_steps as $step) : ?>
-      <div class="process-tile" title="« <?php echo esc_attr($step[4]); ?> »">
-        <div class="process-tile__img">
-          <?php echo sapi_image($step[2], 'large', ['alt' => $step[3], 'class' => 'process-tile__photo', 'loading' => 'lazy']); ?>
-        </div>
-        <span class="process-tile__label"><?php echo esc_html($step[0] . ' ' . $step[1]); ?></span>
-      </div>
-      <?php endforeach; ?>
-    </div>
+  </div>
+
+  <div class="atelier-steps" id="atelier-steps">
+    <?php foreach ($process_steps as $i => $step) : ?>
+    <button type="button" class="atelier-step" data-bg="<?php echo (int)($i + 1); ?>" title="« <?php echo esc_attr($step[4]); ?> »">
+      <span class="atelier-step__n"><?php echo esc_html($step[0]); ?></span>
+      <span class="atelier-step__t"><?php echo esc_html($step[1]); ?></span>
+    </button>
+    <?php endforeach; ?>
   </div>
 </section>
 
@@ -960,6 +965,23 @@ $sapi_cat_url = function ($slug) {
     var collNext = document.querySelector('.collections-nav-next');
     if (collPrev) collPrev.addEventListener('click', function () { collectionsGrid.scrollBy({ left: -collStep, behavior: 'smooth' }); });
     if (collNext) collNext.addEventListener('click', function () { collectionsGrid.scrollBy({ left: collStep, behavior: 'smooth' }); });
+  }
+})();
+
+// L'atelier — crossfade du fond au survol des pills d'étape (refonte DA #1)
+(function(){
+  var sec = document.getElementById('home-atelier'); if(!sec) return;
+  var layers = {}; sec.querySelectorAll('.home-atelier__bg').forEach(function(el){ layers[el.dataset.key] = el; });
+  function show(k){ Object.keys(layers).forEach(function(x){ layers[x].classList.remove('is-on'); }); (layers[k]||layers['default']).classList.add('is-on'); }
+  var steps = sec.querySelector('.atelier-steps');
+  sec.querySelectorAll('.atelier-step').forEach(function(b){
+    b.addEventListener('mouseenter', function(){ show(b.dataset.bg); });
+    b.addEventListener('focus', function(){ show(b.dataset.bg); });
+    b.addEventListener('click', function(){ show(b.dataset.bg); }); // tap mobile
+  });
+  if(steps){
+    steps.addEventListener('mouseleave', function(){ show('default'); });
+    steps.addEventListener('focusout', function(e){ if(!steps.contains(e.relatedTarget)) show('default'); });
   }
 })();
 </script>
