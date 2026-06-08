@@ -1431,24 +1431,6 @@ button:hover,
   width: 18px;
   height: 18px;
 }
-/* Wording artisan : accroche + sous-ligne (DA) */
-.robin-bandeau .reassurance-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-  text-align: left;
-}
-.robin-bandeau .reassurance-label {
-  font-weight: 600;
-  color: var(--color-wood-dark);
-}
-.robin-bandeau .reassurance-sub {
-  font-size: 11.5px;
-  font-weight: 500;
-  color: var(--color-wood-mid);
-  opacity: 0.9;
-}
-
 /* ─── Modale ─── */
 
 
