@@ -506,8 +506,15 @@ foreach ($carousel_products as $product) {
 <section class="home-projet-section">
   <div class="home-projet" data-room-picker>
     <div class="room-picker-inner">
-      <span class="section-eyebrow">Ton projet</span>
+      <div class="conseiller-sig">
+        <span class="conseiller-sig__avatar"><?php echo sapi_image('2025/05/Robin-Sapi-A.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+        <span class="conseiller-sig__text">
+          <span class="conseiller-sig__who">Le conseil de Robin</span>
+          <span class="conseiller-sig__hook">Dis-moi pour quelle pièce, je te conseille</span>
+        </span>
+      </div>
       <h2 class="room-picker-title">Pour quelle pièce cherches-tu un luminaire ?</h2>
+      <p class="room-picker-sub">Choisis une pièce, je te propose une sélection adaptée. Ou raconte-moi ton projet en quelques mots.</p>
       <div class="room-picker-cards">
         <?php foreach ($room_choices as $room) :
           $icon_svg = isset($room_icons[$room['icon']]) ? $room_icons[$room['icon']] : '';
