@@ -869,13 +869,14 @@ $process_steps = [
   <div class="ca-allnews"><a href="<?php echo esc_url(home_url('/actus/')); ?>" class="ca-allnews__btn">Voir toutes les actus <span class="arr">→</span></a></div>
 </section>
 
-<!-- Newsletter Section -->
-<section class="newsletter-kinetic">
-  <div class="section-header-kinetic">
-    <span class="section-num">06</span>
-    <h2 class="section-title-kinetic">Restez informés</h2>
-  </div>
-  <p class="newsletter-subtitle">Nouveautés, éditions limitées, coulisses d'atelier.</p>
+<!-- Newsletter Section (refonte DA #8, variante B — bois chaud) -->
+<section class="newsletter-kinetic newsletter--band">
+  <?php echo sapi_image('2025/04/IMG_5851.jpg', 'large', ['class' => 'newsletter__bg', 'loading' => 'lazy', 'alt' => '']); ?>
+  <div class="newsletter__veil" aria-hidden="true"></div>
+  <div class="newsletter__inner">
+    <span class="newsletter__eyebrow">La lettre de l'atelier</span>
+    <h2 class="newsletter__title">Reste dans la lumière</h2>
+    <p class="newsletter-subtitle">Une fois par mois, je te raconte un nouveau modèle, un coin de l'atelier, une astuce déco. Pas de spam, juste l'essentiel.</p>
   <form class="newsletter-form" action="#" method="post" id="newsletter-form">
     <!-- Honeypot anti-spam -->
     <div style="display:none;" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
@@ -936,6 +937,8 @@ $process_steps = [
     });
   })();
   </script>
+    <p class="newsletter__fineprint">Désinscription en un clic. Je ne partage jamais ton adresse.</p>
+  </div>
 </section>
 
 <script>
