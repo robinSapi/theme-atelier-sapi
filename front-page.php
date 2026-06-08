@@ -801,7 +801,7 @@ $process_steps = [
 <?php endif; ?>
 
 <!-- Bande citation Robin (refonte #14, dispo A) — entre « Ils en parlent » et le bento divers -->
-<?php $quote_band_img = '2025/05/Robin-Sapi-A.jpg'; // PROVISOIRE — remplacer par la nouvelle photo de Robin (changer ce chemin suffit) ?>
+<?php $quote_band_img = '2026/06/Robin-Shooting.jpg'; // photo de Robin (shooting) ?>
 <section class="quote-band">
   <?php echo sapi_image($quote_band_img, 'large', ['class' => 'quote-band__bg', 'loading' => 'lazy', 'alt' => 'Robin, artisan de l\'Atelier Sâpi, dans son atelier à Lyon']); ?>
   <div class="quote-band__scrim" aria-hidden="true"></div>
