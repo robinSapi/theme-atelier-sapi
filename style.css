@@ -8294,8 +8294,7 @@ li.carousel-editorial-slide,
   .collections-nav {
     display: flex;
     gap: 10px;
-    margin-left: auto;
-    align-self: center;
+    align-self: center; /* flèches alignées à gauche, juste après le titre (plus de margin-left:auto) */
   }
 }
 .collections-nav .carousel-arrow {
