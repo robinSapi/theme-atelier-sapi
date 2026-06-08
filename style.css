@@ -8001,7 +8001,7 @@ li.carousel-editorial-slide,
 .home-atelier--lumiere .home-atelier__veil-bottom{position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(40,33,27,.7) 0%,rgba(40,33,27,.18) 26%,transparent 46%)}
 .home-atelier--lumiere .home-atelier__inner{position:relative;z-index:2;width:100%;max-width:1600px;margin:0 auto;padding:80px 3rem 160px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;color:#fff}
 .home-atelier--lumiere .home-atelier__inner > *{max-width:540px} /* texte calé à gauche, reste dans la zone sombre du voile */
-.home-atelier--lumiere .section-header-kinetic{padding:0;max-width:none;margin:0 0 2.5rem}
+.home-atelier--lumiere .section-header-kinetic{padding:0;max-width:none;margin:0 0 5rem}
 .home-atelier--lumiere .section-title-kinetic,.home-atelier--lumiere .section-num{color:#fff}
 .home-atelier--lumiere .atelier-eyebrow{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#f0b07e}
 .home-atelier--lumiere .atelier-band-title{font-family:var(--font-display);font-weight:400;text-transform:none;font-size:clamp(2.6rem,5vw,4.1rem);line-height:.92;color:#fff;margin:8px 0 18px}
