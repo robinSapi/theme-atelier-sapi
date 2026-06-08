@@ -8214,6 +8214,7 @@ li.carousel-editorial-slide,
 /* (5) Respiration avant les sections bento — double classe pour battre .hero-bento */
 .hero-bento.home-creations {
   padding-top: 6rem;
+  padding-bottom: 4rem; /* padding inférieur doublé (2rem -> 4rem) */
 }
 /* (6) Cards catégories ~1/3 plus hautes (scopé home) */
 .collections-kinetic .collection-card {
