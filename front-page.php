@@ -472,25 +472,25 @@ foreach ($carousel_products as $product) {
 
       <div class="card-area">
         <div class="naming-card">
-          <a class="naming-link" href="#" id="carousel-naming-link" aria-label="Découvrir le modèle affiché"></a>
-          <div class="card-controls">
+          <div class="naming-card__row">
             <button type="button" class="carousel-arrow carousel-arrow-prev" aria-label="Slide précédente">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="15 18 9 12 15 6"/>
               </svg>
             </button>
-            <div class="carousel-dots">
-              <?php for ($i = 0; $i < $total_slides; $i++) : ?>
-                <button type="button"
-                        class="carousel-dot<?php echo $i === 0 ? ' active' : ''; ?>"
-                        aria-label="Aller à la slide <?php echo ($i + 1); ?>"></button>
-              <?php endfor; ?>
-            </div>
+            <a class="naming-link" href="#" id="carousel-naming-link" aria-label="Découvrir le modèle affiché"></a>
             <button type="button" class="carousel-arrow carousel-arrow-next" aria-label="Slide suivante">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="9 18 15 12 9 6"/>
               </svg>
             </button>
+          </div>
+          <div class="carousel-dots">
+            <?php for ($i = 0; $i < $total_slides; $i++) : ?>
+              <button type="button"
+                      class="carousel-dot<?php echo $i === 0 ? ' active' : ''; ?>"
+                      aria-label="Aller à la slide <?php echo ($i + 1); ?>"></button>
+            <?php endfor; ?>
           </div>
         </div>
       </div>

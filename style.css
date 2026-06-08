@@ -10288,46 +10288,37 @@ a.single-post-category:hover {
 }
 
 /* ========================================
-   NAMING CARD — fond crème avec naming + controls
+   NAMING CARD — verre dépoli sombre (refonte DA #2)
    ======================================== */
 
-/* Layout horizontal compact « ‹ NAMING › » sur tous les viewports.
-   Les dots sont masqués (display: none plus bas), card-controls est en
-   display: contents pour que les flèches deviennent siblings du naming
-   et puissent être réordonnées via order. */
+/* 2 rangées : « ‹ NAMING › » dans .naming-card__row, puis les dots centrés
+   en dessous (.carousel-dots). Verre dépoli sombre, texte/flèches cream. */
 .naming-card {
   pointer-events: auto;
-  background: rgba(255, 255, 255, 0.8); /* bulle légèrement translucide + flou (refonte #9) */
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  border: none;
-  border-radius: 50px;
+  background: rgba(40, 33, 27, 0.30); /* verre dépoli sombre (refonte DA #2) */
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 22px;
   padding: 14px 22px;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   width: 520px; /* largeur FIXE : la bulle ne resize jamais selon le nom (refonte #8) */
   max-width: calc(100vw - 32px);
 }
+.naming-card__row { display: flex; align-items: center; gap: 14px; width: 100%; }
 
 .naming-card .carousel-dots {
   display: flex;
   gap: 6px;
+  justify-content: center; /* dots centrés sous le nom (refonte DA #2) */
 }
 
-.naming-card .card-controls {
-  display: contents;
-}
-
-/* Réordonnement : flèche prev — naming — flèche next.
-   flex: 1 sur le naming → il occupe tout l'espace entre les flèches, qui
-   restent collées aux bords de la card. text-align: center → le texte est
-   centré dans cette zone, peu importe sa longueur. */
-.card-controls .carousel-arrow:first-child { order: -1; }
-.card-controls .carousel-arrow:last-child  { order:  1; }
+/* flex: 1 sur le naming → il occupe tout l'espace entre les flèches (collées aux
+   bords de la rangée). text-align: center → texte centré quelle que soit sa longueur. */
 .naming-link {
-  order: 0;
   flex: 1;
   text-align: center;
 }
@@ -10377,13 +10368,6 @@ a.single-post-category:hover {
   font-size: 2rem;
 }
 
-/* Controls dans la card : flèche prev — dots — flèche next */
-.card-controls {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
 .carousel-arrow {
   width: 32px;
   height: 32px;
@@ -10414,7 +10398,7 @@ a.single-post-category:hover {
   stroke: currentColor;
 }
 
-/* Dots — désormais à l'intérieur de .card-controls (plus position absolute) */
+/* Dots — rangée dédiée sous le nom dans la naming card */
 .carousel-dots {
   display: flex;
   gap: 10px;
@@ -10447,7 +10431,7 @@ a.single-post-category:hover {
   width: 7px;
   height: 7px;
   border: none;
-  background: rgba(147, 125, 104, 0.4);
+  background: rgba(255, 255, 255, 0.45); /* visible sur le verre dépoli sombre (refonte DA #2) */
   border-radius: 50%;
 }
 .naming-card .carousel-dot.active {
@@ -10459,10 +10443,10 @@ a.single-post-category:hover {
 .naming-card .carousel-arrow {
   background: transparent;
   border: none;
-  color: var(--color-wood-dark);
+  color: var(--color-warm);
 }
 .naming-card .naming-link {
-  color: var(--color-wood-dark);
+  color: var(--color-warm);
   text-shadow: none;
   min-width: 0;
   overflow: hidden;
