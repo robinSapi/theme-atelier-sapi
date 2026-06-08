@@ -682,6 +682,7 @@ $process_steps = [
   </div>
 
   <div class="atelier-steps" id="atelier-steps">
+    <span class="atelier-steps__title">Mon processus artisanal</span>
     <?php foreach ($process_steps as $i => $step) : ?>
     <button type="button" class="atelier-step" data-bg="<?php echo (int)($i + 1); ?>" title="« <?php echo esc_attr($step[4]); ?> »">
       <span class="atelier-step__n"><?php echo esc_html($step[0]); ?></span>

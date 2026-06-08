@@ -8010,6 +8010,7 @@ li.carousel-editorial-slide,
 .home-atelier--lumiere .storytelling-text--seo a:hover{color:#f0b07e;border-bottom-color:var(--color-orange)}
 .home-atelier--lumiere .hero-cta{margin-top:6px}
 .atelier-steps{position:absolute;z-index:3;left:0;right:0;bottom:40px;max-width:1600px;margin:0 auto;padding:0 3rem;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px}
+.atelier-steps__title{flex-basis:100%;width:100%;text-align:right;margin:0 0 10px;color:#f3ead9;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
 .atelier-step{display:flex;align-items:center;gap:10px;background:rgba(40,33,27,.55);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);border:1px solid rgba(255,255,255,.2);border-radius:50px;padding:8px 18px 8px 8px;cursor:pointer;transition:.25s;font-family:inherit}
 .atelier-step:hover,.atelier-step:focus-visible{background:rgba(227,91,36,.92);border-color:var(--color-orange);transform:translateY(-2px)}
 .atelier-step__n{width:28px;height:28px;border-radius:50%;background:var(--color-orange);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:.25s;flex-shrink:0}
@@ -8021,6 +8022,7 @@ li.carousel-editorial-slide,
   .home-atelier--lumiere .home-atelier__inner{width:100%;max-width:none;margin:0;padding:48px 26px 24px}
   .home-atelier--lumiere .home-atelier__inner > *{max-width:none}
   .atelier-steps{position:static;max-width:none;margin:0;justify-content:flex-start;padding:0 26px 36px}
+  .atelier-steps__title{text-align:left}
 }
 
 .storytelling-text--seo {
