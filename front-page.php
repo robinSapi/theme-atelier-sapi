@@ -817,17 +817,20 @@ $process_steps = [
     </div>
   </div>
 
-  <a class="map-card" href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer" aria-label="Venir me voir à l'atelier — voir l'itinéraire sur Google Maps">
-    <div class="map-card__map">
-      <svg class="map-card__roads" viewBox="0 0 280 104" preserveAspectRatio="none" aria-hidden="true"><path d="M0 70 C56 62 84 84 140 76 S224 52 280 62" stroke="#DECDAF" stroke-width="6" fill="none"/><path d="M38 0 C46 36 32 70 50 104" stroke="#E8DCC8" stroke-width="4" fill="none"/><path d="M0 26 C74 33 168 22 280 30" stroke="#E8DCC8" stroke-width="3.5" fill="none"/><path d="M196 0 C187 44 210 78 200 104" stroke="#DECDAF" stroke-width="4" fill="none"/></svg>
-      <span class="map-card__pin" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="#E35B24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3" fill="#fff"/></svg>
-      </span>
+  <a class="loc-card" href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer" aria-label="Venir me voir à l'atelier, voir l'itinéraire sur Google Maps">
+    <div class="loc-media">
+      <svg viewBox="0 0 520 280" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="520" height="280" fill="#E7DCC8"/>
+        <path d="M -20 60 C 130 100, 190 30, 330 110 S 520 140, 560 120 L 560 190 C 420 170, 320 220, 200 190 S 40 220, -20 200 Z" fill="#D5C5A9"/>
+        <g stroke="#C4B393" stroke-width="6" fill="none" stroke-linecap="round"><path d="M 60 0 L 130 100 L 270 140 L 360 280"/><path d="M 0 170 L 210 140 L 430 80 L 520 100"/></g>
+        <g fill="#DCCDB3"><rect x="100" y="110" width="26" height="20" rx="3"/><rect x="310" y="92" width="28" height="22" rx="3"/><rect x="210" y="170" width="24" height="18" rx="3"/></g>
+        <g transform="translate(265,128)"><ellipse cx="0" cy="34" rx="14" ry="4" fill="rgba(74,63,53,.18)"/><path d="M 0 30 C -16 6, -16 -10, 0 -10 C 16 -10, 16 6, 0 30 Z" fill="#E35B24"/><circle cx="0" cy="-2" r="6" fill="#FBF6EA"/></g>
+      </svg>
+      <div class="loc-invite">À 15 min de Lyon, viens voir où ça se fabrique</div>
     </div>
-    <div class="map-card__info">
-      <div class="map-card__title">Venir me voir à l'atelier</div>
-      <div class="map-card__sub">Collonges-au-Mont-d'Or, à 15 min de Lyon · sur rendez-vous</div>
-      <span class="map-card__itin">Itinéraire <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+    <div class="loc-foot">
+      <div><div class="loc-foot__ttl">Venir me voir à l'atelier</div><div class="loc-foot__adr">3 Rue Pierre Termier · Collonges-au-Mont-d'Or</div></div>
+      <span class="loc-foot__go">Itinéraire <span class="loc-foot__arr">→</span></span>
     </div>
   </a>
 </section>
