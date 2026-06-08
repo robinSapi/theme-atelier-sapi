@@ -301,11 +301,11 @@ if ($featured_query->have_posts()) {
 // Collections
 // Collections dynamiques — URLs et images récupérées depuis WooCommerce/ACF
 $collection_slugs = [
-  ['slug' => 'suspensions', 'name' => 'Suspensions', 'desc' => 'Suspendues au plafond, au-dessus de la table'],
-  ['slug' => 'lampadaires', 'name' => 'Lampadaires', 'desc' => 'Sur pied, posés au sol'],
-  ['slug' => 'appliques',   'name' => 'Appliques',   'desc' => 'Fixées au mur, en lumière d\'appoint'],
-  ['slug' => 'lampesaposer', 'name' => 'Lampe à poser', 'desc' => 'À poser sur une table ou un meuble'],
-  ['slug' => 'accessoires', 'name' => 'Accessoires', 'prefer' => 'ampoule', 'desc' => 'Ampoules et compléments'],
+  ['slug' => 'suspensions', 'name' => 'Suspensions', 'desc' => 'Une lampe à suspendre au plafond. L\'idéal entre éclairage et déco !'],
+  ['slug' => 'lampadaires', 'name' => 'Lampadaires', 'desc' => 'Sur pied, posés au sol. Pratique à déplacer et à installer.'],
+  ['slug' => 'appliques',   'name' => 'Appliques',   'desc' => 'Fixées au mur, en lumière d\'appoint. Un éclairage qui habille la pièce par les côtés.'],
+  ['slug' => 'lampesaposer', 'name' => 'Lampe à poser', 'desc' => 'À poser sur une table ou un meuble. Rapide, pratique et mobiles.'],
+  ['slug' => 'accessoires', 'name' => 'Accessoires', 'prefer' => 'ampoule', 'desc' => 'Ampoules, systèmes électriques et compléments'],
 ];
 
 $collections = [];
@@ -583,7 +583,7 @@ foreach ($carousel_products as $product) {
         </div>
         <div class="collection-details">
           <h3>Sur mesure</h3>
-          <p class="collection-desc">Une pièce unique, pensée avec toi</p>
+          <p class="collection-desc">Une pièce unique, pensée avec toi.</p>
           <div class="collection-meta"><span class="collection-count">Ton projet unique</span><span class="collection-btn">→</span></div>
         </div>
       </a>
