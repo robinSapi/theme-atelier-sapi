@@ -8058,7 +8058,7 @@ li.carousel-editorial-slide,
 .home-avis .testimonials-header {
   display: flex;
   align-items: baseline;
-  gap: 2rem;
+  gap: 1rem; /* écart num -> H2 réduit de moitié, cohérent avec .section-header-kinetic */
   max-width: 1600px;
   margin: 0 auto 2.5rem; /* harmonisé sur L'atelier */
   padding: 1rem 3rem 0;
@@ -11435,7 +11435,7 @@ button.room-card {
 .section-header-kinetic {
   display: flex;
   align-items: baseline;
-  gap: 2rem;
+  gap: 1rem;
   margin-bottom: 0;
   padding: 0 3rem;
   max-width: 1600px;
