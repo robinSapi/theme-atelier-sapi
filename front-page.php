@@ -549,7 +549,7 @@ foreach ($carousel_products as $product) {
 <!-- Collections Carousel / Grid -->
 <section class="collections-kinetic">
   <div class="section-header-kinetic">
-    <span class="section-num">02</span>
+    <span class="section-num">01</span>
     <h2 class="section-title-kinetic">Collections</h2>
     <div class="collections-nav">
       <button type="button" class="carousel-arrow collections-nav-prev" aria-label="Collections précédentes">
@@ -594,7 +594,7 @@ foreach ($carousel_products as $product) {
 <div class="section-band--warm">
 <section class="hero-bento home-creations">
   <div class="section-header-kinetic">
-    <span class="section-num">03</span>
+    <span class="section-num">02</span>
     <h2 class="section-title-kinetic">Les créations du moment</h2>
   </div>
   <div class="creations-grid">
@@ -671,7 +671,7 @@ $process_steps = [
   <div class="home-atelier__veil-bottom" aria-hidden="true"></div>
 
   <div class="home-atelier__inner">
-    <div class="section-header-kinetic"><span class="section-num">04</span><h2 class="section-title-kinetic">L'atelier</h2></div>
+    <div class="section-header-kinetic"><span class="section-num">03</span><h2 class="section-title-kinetic">L'atelier</h2></div>
     <span class="atelier-eyebrow">L'atelier · Lyon</span>
     <h3 class="atelier-band-title">Des sculptures lumineuses</h3>
     <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
@@ -694,7 +694,7 @@ $process_steps = [
 <?php if ($home_reviews && !empty($home_reviews['reviews'])) : ?>
 <section class="product-testimonials home-avis">
   <div class="testimonials-header">
-    <span class="section-num">05</span>
+    <span class="section-num">04</span>
     <h2>Ils en parlent</h2>
     <div class="home-avis__links">
       <a href="https://g.page/r/CQ0YW1uBzOimEAE/review" target="_blank" rel="noopener noreferrer">Laisser un avis</a>
