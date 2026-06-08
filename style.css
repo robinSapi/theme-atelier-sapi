@@ -8044,7 +8044,18 @@ li.carousel-editorial-slide,
   margin: 0;
   padding: 6rem 0 3.5rem;
   background: transparent;
+  position: relative;
 }
+/* DA #5 — grain bois en filigrane (pas d'aplat crème), sous le contenu */
+.home-avis::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(92deg, rgba(139, 115, 85, .04) 0, rgba(139, 115, 85, .04) 1px, transparent 1px, transparent 7px);
+  pointer-events: none;
+  z-index: 0;
+}
+.home-avis > * { position: relative; z-index: 1; }
 .home-avis .testimonials-header {
   display: flex;
   align-items: baseline;
@@ -8083,8 +8094,8 @@ li.carousel-editorial-slide,
 }
 .home-avis .testimonial-card {
   background: var(--color-white);
-  border: 1px solid var(--color-gray-light);
-  box-shadow: var(--shadow-card); /* relief : la section avis est désormais sur fond blanc (#15-bis) */
+  border: none; /* DA #5 — papiers à ombre douce, sans bordure (hover --shadow-card-hover via la règle de base) */
+  box-shadow: var(--shadow-card);
   height: auto;
 }
 /* P13 — avatar initiales sur disque (zéro image/bleu Google), scopé home */
