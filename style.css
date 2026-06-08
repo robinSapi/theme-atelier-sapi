@@ -8356,7 +8356,7 @@ li.carousel-editorial-slide,
 .quote-inner {
   position: relative;
   z-index: 2;
-  max-width: 1180px;
+  max-width: 1600px; /* même conteneur que le reste : bord gauche aligné sur la gouttière (texte plafonné par .q-text 620px) */
   margin: 0 auto;
   padding: 80px 48px;
   width: 100%;
