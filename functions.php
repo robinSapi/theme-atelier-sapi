@@ -3688,6 +3688,13 @@ function sapi_render_conseiller_modal() {
       <!-- ═══ S0 — Accueil hybride (question pièce + texte libre) ═══════ -->
       <section class="modal__screen" data-screen="s0" hidden>
         <header class="modal__head">
+          <div class="conseiller-sig">
+            <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+            <span class="conseiller-sig__text">
+              <span class="conseiller-sig__who">Le conseil de Robin</span>
+              <span class="conseiller-sig__hook">Mon regard d'artisan sur ton projet</span>
+            </span>
+          </div>
           <span class="badge" data-s0-badge>
             <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
             <span data-s0-badge-text><?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?></span>
@@ -3753,6 +3760,13 @@ function sapi_render_conseiller_modal() {
       <!-- ═══ S2-chat — Conversation libre avec Robin (chat bubbles + input) ═══ -->
       <section class="modal__screen" data-screen="s2-chat" hidden>
         <header class="modal__head">
+          <div class="conseiller-sig">
+            <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+            <span class="conseiller-sig__text">
+              <span class="conseiller-sig__who">Le conseil de Robin</span>
+              <span class="conseiller-sig__hook">Mon regard d'artisan sur ton projet</span>
+            </span>
+          </div>
           <span class="badge">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8-1.476 0-2.866-.317-4.083-.876L3 21l1.876-4.917A7.997 7.997 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
             <?php esc_html_e('Échange avec Robin', 'theme-sapi-maison'); ?>
