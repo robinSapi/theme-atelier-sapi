@@ -17,7 +17,7 @@ $products_by_category = [];
 foreach ($categories_order as $cat_slug) {
   $args = [
     'post_type' => 'product',
-    'posts_per_page' => 4,
+    'posts_per_page' => 6,
     'post_status' => 'publish',
     'tax_query' => [
       [
@@ -66,7 +66,7 @@ foreach ($categories_order as $cat_slug) {
             'image_id' => $image_id,
           ];
 
-          break; // 1 seul produit (paysage) par catégorie
+          if (count($products_by_category[$cat_slug]) >= 2) break; // jusqu'à 2 produits (paysage) par catégorie
         }
       }
     }
@@ -74,10 +74,12 @@ foreach ($categories_order as $cat_slug) {
   wp_reset_postdata();
 }
 
-// 1 produit par catégorie : suspension, applique, lampe à poser, lampadaire (4 slides produits)
-foreach ($categories_order as $cat_slug) {
-  if (isset($products_by_category[$cat_slug][0])) {
-    $carousel_products[] = $products_by_category[$cat_slug][0];
+// 2 produits par catégorie, interleavés (8 slides produits max) : susp, applique, lampe, lampadaire ×2
+for ($i = 0; $i < 2; $i++) {
+  foreach ($categories_order as $cat_slug) {
+    if (isset($products_by_category[$cat_slug][$i])) {
+      $carousel_products[] = $products_by_category[$cat_slug][$i];
+    }
   }
 }
 
