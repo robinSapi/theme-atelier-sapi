@@ -8408,7 +8408,7 @@ li.carousel-editorial-slide,
   .quote-band .q-link-discreet:hover { color: var(--color-white); }
 }
 /* Card localisation (DA #6, variante C) — mini-carte bois posée sur la bande */
-.loc-card { position: absolute; right: 42px; bottom: 36px; z-index: 3; width: 340px; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-card); background: #fff; text-decoration: none; color: inherit; transition: transform 0.28s var(--ease-expo), box-shadow 0.28s var(--ease-expo); }
+.loc-card { position: absolute; right: max(48px, calc((100vw - 1600px) / 2 + 48px)); bottom: 36px; z-index: 3; /* bord droit aligné sur la gouttière du contenu (1600px + 48px), comme bento/collections */ width: 340px; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-card); background: #fff; text-decoration: none; color: inherit; transition: transform 0.28s var(--ease-expo), box-shadow 0.28s var(--ease-expo); }
 @media (hover: hover) {
   .loc-card:hover { box-shadow: var(--shadow-card-hover); transform: translateY(-2px); }
   .loc-card:hover .loc-foot__arr { transform: translateX(4px); display: inline-block; }
