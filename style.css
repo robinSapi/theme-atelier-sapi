@@ -11503,7 +11503,7 @@ button.room-card {
   scroll-snap-type: none; /* desktop : pas de snap (piloté par flèches) -> supprime le recalage/saut. Mobile re-active mandatory (swipe tactile) */
   scroll-behavior: smooth;
   gap: 1.5rem;
-  padding: 2.5rem 0 4rem 0; /* top harmonisé sur L'atelier (header collections sans marge) */
+  padding: 2.5rem 0 8rem 0; /* top harmonisé sur L'atelier ; padding bas doublé (4rem -> 8rem) */
   /* Gouttière identique aux sections de contenu (.hero-bento, .newsletter-kinetic) :
      max-width 1600px centré + 3rem. Mise en padding INTERNE du conteneur de scroll
      (pas en ::before, qui se faisait avaler par scroll-snap mandatory) : le track
