@@ -8060,7 +8060,7 @@ li.carousel-editorial-slide,
   align-items: baseline;
   gap: 2rem;
   max-width: 1600px;
-  margin: 0 auto 1.5rem;
+  margin: 0 auto 2.5rem; /* harmonisé sur L'atelier */
   padding: 1rem 3rem 0;
 }
 /* Liens avis (laisser un avis / voir les N avis) : discrets, à gauche du badge Google */
@@ -8277,7 +8277,7 @@ li.carousel-editorial-slide,
 .creation-star-label .product-name { margin: 0; }
 .creation-star-label p { margin: 2px 0 0; font-size: 0.85rem; opacity: 0.92; }
 .creations-cta { text-align: center; margin-top: 2.5rem; }
-.home-creations .section-header-kinetic { margin-bottom: 2rem; }
+.home-creations .section-header-kinetic { margin-bottom: 2.5rem; } /* harmonisé sur L'atelier */
 @media (max-width: 880px) {
   .creations-grid { grid-template-columns: 1fr 1fr; }
   .creation-star { grid-column: 1 / -1; min-height: 280px; }
@@ -11488,7 +11488,7 @@ button.room-card {
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   gap: 1.5rem;
-  padding: 3.5rem 0 4rem 0;
+  padding: 2.5rem 0 4rem 0; /* top harmonisé sur L'atelier (header collections sans marge) */
   /* Gouttière identique aux sections de contenu (.hero-bento, .newsletter-kinetic) :
      max-width 1600px centré + 3rem. Mise en padding INTERNE du conteneur de scroll
      (pas en ::before, qui se faisait avaler par scroll-snap mandatory) : le track
