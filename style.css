@@ -8147,7 +8147,9 @@ li.carousel-editorial-slide,
 @media (max-width: 768px) {
   .home-avis { padding: 3.5rem 0 2.5rem; }
   .home-avis .testimonials-header { padding: 1rem 1.25rem 0; }
-  .home-avis .testimonials-grid { padding: 0 1.25rem; }
+  /* mobile carrousel : padding vertical pour ne pas tronquer les ombres des cards */
+  .home-avis .testimonials-grid { padding: 1.5rem 1.25rem 1.75rem; }
+  .home-avis .testimonials-grid > .testimonial-card { flex: 0 0 85%; } /* un peu plus étroit → ombres latérales visibles */
   .home-avis .testimonials-cta { padding-left: 1.25rem; padding-right: 1.25rem; }
 }
 
