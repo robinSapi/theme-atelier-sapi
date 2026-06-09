@@ -8014,7 +8014,7 @@ li.carousel-editorial-slide,
 .home-atelier--lumiere .section-title-kinetic,.home-atelier--lumiere .section-num{color:#fff}
 .home-atelier--lumiere .atelier-eyebrow{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#f0b07e}
 .home-atelier--lumiere .atelier-band-title{font-family:var(--font-display);font-weight:400;text-transform:none;font-size:clamp(2.6rem,5vw,4.1rem);line-height:.92;color:#fff;margin:8px 0 18px}
-.home-atelier--lumiere .storytelling-text{color:#ece3d6;max-width:460px}
+.home-atelier--lumiere .storytelling-text{color:#ece3d6;max-width:460px;font-size:1.05rem}
 .home-atelier--lumiere .storytelling-text--seo a{color:#fff;text-decoration:none;border-bottom:1px solid rgba(240,176,126,.6);padding-bottom:1px}
 .home-atelier--lumiere .storytelling-text--seo a:hover{color:#f0b07e;border-bottom-color:var(--color-orange)}
 .home-atelier--lumiere .hero-cta{margin-top:6px}
