@@ -8344,6 +8344,15 @@ li.carousel-editorial-slide,
     flex: 0 0 65%;
     scroll-snap-align: center;
   }
+  /* mini-cards : neutralise les règles "photo dominante 400px" de la grille
+     (sinon cards énormes/cassées dans le slider) -> photo carrée proportionnée */
+  .creations-products .product-card-link { height: auto; }
+  .creations-products .product-card-cinetique .product-media {
+    min-height: 0;
+    flex: 0 0 auto;
+    aspect-ratio: 1 / 1;
+  }
+  .creations-products .product-card-cinetique .product-info { padding: 0.7rem 0.6rem; }
   /* prix masqué (mobile uniquement) pour gagner de la place */
   .creations-products .product-price { display: none; }
   /* mini-cards : textes réduits en proportion */
