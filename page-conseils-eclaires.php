@@ -12,6 +12,7 @@ $room_choices = [
   ['label' => 'Salon',   'slug' => 'salon',    'icon' => 'sofa'],
   ['label' => 'Cuisine', 'slug' => 'cuisine',  'icon' => 'dining'],
   ['label' => 'Chambre', 'slug' => 'chambre',  'icon' => 'bed'],
+  ['label' => 'Chambre enfant', 'slug' => 'chambre-enfant', 'icon' => 'teddy'],
   ['label' => 'Bureau',  'slug' => 'bureau',   'icon' => 'monitor'],
   ['label' => 'Entrée',  'slug' => 'entree',   'icon' => 'door'],
   ['label' => 'Escalier','slug' => 'escalier', 'icon' => 'stairs'],

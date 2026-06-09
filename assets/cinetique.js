@@ -5,55 +5,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   // ========================================
-  // Custom Cursor
-  // ========================================
-  const cursor = document.querySelector('.cursor-custom');
-  const cursorDot = document.querySelector('.cursor-dot');
-  const cursorOutline = document.querySelector('.cursor-outline');
-
-  // Only initialize cursor on desktop (no touch)
-  if (cursor && cursorDot && cursorOutline && !('ontouchstart' in window)) {
-    let mouseX = 0;
-    let mouseY = 0;
-    let cursorX = 0;
-    let cursorY = 0;
-
-    document.addEventListener('mousemove', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-
-      // Dot follows mouse directly
-      cursorDot.style.left = mouseX + 'px';
-      cursorDot.style.top = mouseY + 'px';
-    });
-
-    // Outline follows with smooth delay
-    function animateCursor() {
-      cursorX += (mouseX - cursorX) * 0.15;
-      cursorY += (mouseY - cursorY) * 0.15;
-
-      cursorOutline.style.left = cursorX + 'px';
-      cursorOutline.style.top = cursorY + 'px';
-
-      requestAnimationFrame(animateCursor);
-    }
-    animateCursor();
-
-    // Hover effects on interactive elements
-    const interactiveElements = document.querySelectorAll('a, button, .bento-card, .collection-card');
-
-    interactiveElements.forEach(el => {
-      el.addEventListener('mouseenter', () => {
-        document.body.classList.add('cursor-hover');
-      });
-
-      el.addEventListener('mouseleave', () => {
-        document.body.classList.remove('cursor-hover');
-      });
-    });
-  }
-
-  // ========================================
   // Bento Cards Animation on Scroll
   // ========================================
   const bentoCards = document.querySelectorAll('.bento-card');

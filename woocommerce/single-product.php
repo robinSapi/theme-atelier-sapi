@@ -422,7 +422,7 @@ get_header();
           if ($product->is_type('variable') && !$is_accessoire && !$is_carte_cadeau) {
             $render_help_pill = function () {
               echo '<button type="button" class="conseiller-pill-secondary" id="robin-product-pill" data-action="open-modal" data-modal-state="product" data-help-pill>';
-              echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="14" height="14"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>';
+              echo '<span class="conseiller-pill-secondary__avatar">' . sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => '', 'class' => 'conseiller-pill-secondary__img', 'loading' => 'lazy']) . '</span>';
               echo '<span data-help-pill-text>' . esc_html__('Comment choisir ?', 'theme-sapi-maison') . '</span>';
               echo '</button>';
             };

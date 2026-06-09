@@ -1181,7 +1181,7 @@ button:hover,
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
 }
 
 .mobile-nav-menu li {
@@ -1202,12 +1202,12 @@ button:hover,
 .mobile-nav-menu li:nth-child(5) { transition-delay: 0.3s; }
 
 .mobile-nav-menu a {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--color-gray);
   text-decoration: none;
   display: block;
-  padding: 6px 0;
+  padding: 4px 0;
   transition: all 0.3s ease;
 }
 
@@ -1222,11 +1222,11 @@ button:hover,
 /* Mobile Submenu */
 .mobile-nav-menu .sub-menu {
   list-style: none;
-  padding: 10px 0 0 20px;
+  padding: 4px 0 2px 18px;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 1px;
 }
 
 .mobile-nav-menu .sub-menu li {
@@ -1235,10 +1235,10 @@ button:hover,
 }
 
 .mobile-nav-menu .sub-menu a {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 400;
   color: var(--color-gray);
-  padding: 8px 0;
+  padding: 4px 0;
 }
 
 @media (hover: hover) {
@@ -1385,7 +1385,7 @@ button:hover,
 /* ── Bandeau réassurance (statique, mode projet retiré en F1a-bis) ── */
 .robin-bandeau {
   display: block;
-  background: var(--color-warm, #FBF6EA);
+  background: var(--color-white);
   border-bottom: 1px solid rgba(147, 125, 104, 0.1);
   padding: 12px 1.25rem;
   position: sticky;
@@ -1395,11 +1395,22 @@ button:hover,
 .home .robin-bandeau:not(.home-repositioned-bar) {
   display: none;
 }
+/* Refonte #8 — bandeau plus haut sur la home (les autres pages restent compactes) */
+.robin-bandeau.home-repositioned-bar {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+/* Refonte #9 — items plus espacés sur la home, desktop uniquement (mobile reste compact) */
+@media (min-width: 601px) {
+  .robin-bandeau.home-repositioned-bar .reassurance-bar-inner {
+    gap: 48px;
+  }
+}
 .robin-bandeau .reassurance-bar-inner {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
+  gap: 3rem;
   flex-wrap: wrap;
   row-gap: 8px;
   margin: 0 auto;
@@ -1411,16 +1422,15 @@ button:hover,
   font-family: var(--font-body, 'Montserrat', sans-serif);
   font-size: 14px;
   font-weight: 500;
-  color: var(--color-dark, #323232);
+  color: var(--color-wood-mid);
   white-space: nowrap;
 }
 .robin-bandeau .reassurance-item svg {
-  color: var(--color-wood, #937D68);
+  color: var(--color-orange);
   flex-shrink: 0;
   width: 18px;
   height: 18px;
 }
-
 /* ─── Modale ─── */
 
 
@@ -1588,7 +1598,7 @@ button:hover,
     width: 15px;
     height: 15px;
   }
-  /* 2 items masqués aléatoirement par JS via .is-mobile-hidden */
+  /* Refonte #11 : 2 items fixes masqués en mobile (Fabrication, Retours) via .is-mobile-hidden dans le template — restent Livraison 48-72h + Paiement sécurisé */
   .robin-bandeau .reassurance-item.is-mobile-hidden {
     display: none;
   }
@@ -7910,6 +7920,621 @@ li.carousel-editorial-slide,
   }
 }
 
+/* ===== Design system — bandes de section (langage mockup-15, généralisable) ===== */
+.section-band--warm {
+  background: var(--color-warm);
+}
+.section-eyebrow {
+  display: block;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+  color: var(--color-wood);
+  opacity: 0.85;
+  margin-bottom: 0.5rem;
+}
+
+/* ===== Refonte home — Entrée projet (bandeau pleine largeur) ===== */
+.home-projet-section {
+  background: var(--color-warm);
+  padding: 6rem 2rem 3.5rem;
+  margin: 0;
+}
+.home-projet {
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+}
+.home-projet .room-picker-cards {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  width: 100%;
+}
+.home-projet .room-card { max-width: 340px; } /* refonte #9/+ — chips un peu plus larges (conteneur élargi à 1280) */
+/* refonte #11 — accent orange au hover sur la home (le global reste wood pour modale/Conseils) */
+@media (hover: hover) {
+  .home-projet .room-card:hover { border-color: var(--color-orange); }
+}
+/* refonte #9 — H2 room-picker sur une ligne en desktop (mobile : retour à la ligne autorisé) */
+@media (min-width: 769px) {
+  .home-projet .room-picker-title { white-space: nowrap; }
+}
+@media (max-width: 768px) {
+  .home-projet-section { padding: 3.5rem 14px 2.5rem; }
+  .home-projet .room-picker-cards { gap: 0.75rem; }
+  /* Mobile — cards réponses compactes, layout horizontal (icône à gauche, texte à droite aligné à gauche) */
+  .home-projet .room-card {
+    flex: 0 0 calc(50% - 0.5rem);
+    max-width: none;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    gap: 0.55rem;
+    padding: 0.55rem 0.7rem;
+  }
+  .home-projet .room-card-icon { width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; }
+  .home-projet .room-card-icon svg { width: 18px; height: 18px; }
+  .home-projet .room-card-label { font-size: 11.5px; letter-spacing: 0.04em; text-align: left; line-height: 1.2; }
+}
+
+/* ===== DA #3 — Conseiller : signature de Robin (composant réutilisable) + réchauffe ===== */
+.conseiller-sig{display:flex;align-items:center;gap:18px;justify-content:center;margin-bottom:18px}
+.conseiller-sig__avatar{width:72px;height:72px;border-radius:50%;overflow:hidden;border:3px solid #fff;box-shadow:var(--shadow-card);flex-shrink:0}
+.conseiller-sig__img{width:100%;height:100%;object-fit:cover;display:block}
+.conseiller-sig__text{display:flex;flex-direction:column;text-align:left}
+.conseiller-sig__who{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-wood)}
+.conseiller-sig__hook{font-family:var(--font-display);font-size:32px;line-height:1;color:var(--color-wood-dark);margin-top:2px}
+/* Généralisation modale (S0 accueil + S2 chat) : la signature remplace le badge contextuel */
+.conseiller-card--modal [data-screen="s0"] .badge,
+.conseiller-card--modal [data-screen="s2-chat"] .badge{display:none}
+.conseiller-card--modal .conseiller-sig{margin-bottom:0}
+@media (max-width:600px){
+  .conseiller-card--modal .conseiller-sig{gap:14px}
+  .conseiller-card--modal .conseiller-sig__avatar{width:52px;height:52px}
+  .conseiller-card--modal .conseiller-sig__hook{font-size:24px}
+}
+/* réchauffe de la bande : grain bois discret en fond (sous le contenu) */
+.home-projet-section{position:relative}
+.home-projet-section::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(92deg,rgba(139,115,85,.045) 0,rgba(139,115,85,.045) 1px,transparent 1px,transparent 7px);pointer-events:none;z-index:0}
+.home-projet{position:relative;z-index:1}
+.home-projet .room-picker-sub{color:var(--color-wood-mid);font-size:15px;margin:0 auto 22px;max-width:560px}
+/* chips réchauffées au hover : crème chaud + ombre (en plus du border orange déjà là) */
+.home-projet .room-card{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease,background .2s ease}
+@media (hover:hover){.home-projet .room-card:hover{background:#f4ead3;box-shadow:var(--shadow-card-hover)}}
+
+/* ===== Refonte home #2/#3 — headers de section dans les bentos ===== */
+.hero-bento .section-header-kinetic {
+  padding: 0;
+  max-width: none;
+  margin: 0 0 1.5rem;
+}
+
+/* ===== Refonte DA — L'atelier immersion par la lumière (mockup-da-04c) ===== */
+.home-atelier--lumiere{position:relative;overflow:hidden;min-height:760px;display:flex;align-items:stretch}
+.home-atelier--lumiere .home-atelier__bgstack{position:absolute;inset:0;z-index:0}
+.home-atelier--lumiere .home-atelier__bg{position:absolute;inset:0;opacity:0;transition:opacity .6s ease}
+.home-atelier--lumiere .home-atelier__bg.is-on{opacity:1}
+.home-atelier--lumiere .home-atelier__bgimg{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.home-atelier--lumiere .home-atelier__veil{position:absolute;inset:0;z-index:1;background:linear-gradient(95deg,rgba(40,33,27,.95) 0%,rgba(40,33,27,.92) 32%,rgba(40,33,27,.6) 52%,rgba(40,33,27,.14) 74%,rgba(40,33,27,0) 100%)}
+.home-atelier--lumiere .home-atelier__veil-bottom{position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(40,33,27,.7) 0%,rgba(40,33,27,.18) 26%,transparent 46%)}
+.home-atelier--lumiere .home-atelier__inner{position:relative;z-index:2;width:100%;max-width:1600px;margin:0 auto;padding:80px 3rem 160px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;color:#fff}
+.home-atelier--lumiere .home-atelier__inner > *{max-width:540px} /* texte calé à gauche, reste dans la zone sombre du voile */
+.home-atelier--lumiere .section-header-kinetic{padding:0;max-width:none;margin:0 0 5rem}
+.home-atelier--lumiere .section-title-kinetic,.home-atelier--lumiere .section-num{color:#fff}
+.home-atelier--lumiere .atelier-eyebrow{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#f0b07e}
+.home-atelier--lumiere .atelier-band-title{font-family:var(--font-display);font-weight:400;text-transform:none;font-size:clamp(2.6rem,5vw,4.1rem);line-height:.92;color:#fff;margin:8px 0 18px}
+.home-atelier--lumiere .storytelling-text{color:#ece3d6;max-width:460px;font-size:1.05rem}
+.home-atelier--lumiere .storytelling-text--seo a{color:#fff;text-decoration:none;border-bottom:1px solid rgba(240,176,126,.6);padding-bottom:1px}
+.home-atelier--lumiere .storytelling-text--seo a:hover{color:#f0b07e;border-bottom-color:var(--color-orange)}
+.home-atelier--lumiere .hero-cta{margin-top:6px}
+.atelier-steps{position:absolute;z-index:3;left:0;right:0;bottom:40px;max-width:1600px;margin:0 auto;padding:0 3rem;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px}
+.atelier-steps__title{flex-basis:100%;width:100%;text-align:right;margin:0 0 10px;color:#f3ead9;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.atelier-step{display:flex;align-items:center;gap:10px;background:rgba(40,33,27,.55);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);border:1px solid rgba(255,255,255,.2);border-radius:50px;padding:8px 18px 8px 8px;cursor:pointer;transition:.25s;font-family:inherit}
+.atelier-step:hover,.atelier-step:focus-visible{background:rgba(227,91,36,.92);border-color:var(--color-orange);transform:translateY(-2px)}
+.atelier-step__n{width:28px;height:28px;border-radius:50%;background:var(--color-orange);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:.25s;flex-shrink:0}
+.atelier-step:hover .atelier-step__n,.atelier-step:focus-visible .atelier-step__n{background:#fff;color:var(--color-orange)}
+.atelier-step__t{color:#f3ead9;font-size:13px;font-weight:600;transition:.25s}
+.atelier-step:hover .atelier-step__t,.atelier-step:focus-visible .atelier-step__t{color:#fff}
+@media (max-width:900px){
+  .home-atelier--lumiere{flex-direction:column;min-height:auto}
+  .home-atelier--lumiere .home-atelier__inner{width:100%;max-width:none;margin:0;padding:48px 26px 24px}
+  .home-atelier--lumiere .home-atelier__inner > *{max-width:none}
+  .atelier-steps{position:static;max-width:none;margin:0;justify-content:flex-start;padding:0 26px 36px}
+  .atelier-steps__title{text-align:left}
+}
+
+.storytelling-text--seo {
+  margin-top: 0.75rem;
+  font-size: 0.92em;
+  opacity: 0.9;
+}
+.storytelling-text--seo a {
+  color: var(--color-wood);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+@media (hover: hover) {
+  .storytelling-text--seo a:hover { color: var(--color-orange); }
+}
+
+/* ===== Refonte home — Ils en parlent (au diapason des sections) ===== */
+.home-avis {
+  max-width: none;
+  margin: 0;
+  padding: 6rem 0 3.5rem;
+  background: transparent;
+  position: relative;
+}
+/* DA #5 — grain bois en filigrane (pas d'aplat crème), sous le contenu */
+.home-avis::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(92deg, rgba(139, 115, 85, .04) 0, rgba(139, 115, 85, .04) 1px, transparent 1px, transparent 7px);
+  pointer-events: none;
+  z-index: 0;
+}
+.home-avis > * { position: relative; z-index: 1; }
+.home-avis .testimonials-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem; /* écart num -> H2 réduit de moitié, cohérent avec .section-header-kinetic */
+  max-width: 1600px;
+  margin: 0 auto 2.5rem; /* harmonisé sur L'atelier */
+  padding: 1rem 3rem 0;
+}
+/* Liens avis (laisser un avis / voir les N avis) : discrets, à gauche du badge Google */
+.home-avis .home-avis__links {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+.home-avis .home-avis__links a {
+  color: var(--color-wood);
+  text-decoration: none;
+}
+.home-avis .home-avis__links-sep { color: var(--color-wood); opacity: 0.5; }
+@media (hover: hover) {
+  .home-avis .home-avis__links a:hover {
+    color: var(--color-orange);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+/* le groupe de liens prend le margin-left auto : le badge suit avec le gap du header */
+.home-avis .testimonials-header .google-reviews-badge { margin-left: 0; }
+.home-avis .testimonials-grid {
+  align-items: start;
+  max-width: 1600px;
+  margin: 0 auto 2rem;
+  padding: 0 3rem;
+}
+.home-avis .testimonial-card {
+  background: var(--color-white);
+  border: none; /* DA #5 — papiers à ombre douce, sans bordure (hover --shadow-card-hover via la règle de base) */
+  box-shadow: var(--shadow-card);
+  height: auto;
+}
+/* P13 — avatar initiales sur disque (zéro image/bleu Google), scopé home */
+.home-avis .testimonial-avatar--initials {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-warm);
+  color: var(--color-wood);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.home-avis .testimonials-cta {
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 3rem;
+  padding-right: 3rem;
+}
+@media (max-width: 768px) {
+  .home-avis { padding: 3.5rem 0 2.5rem; }
+  .home-avis .testimonials-header { padding: 1rem 1.25rem 0; }
+  /* mobile carrousel : padding vertical pour ne pas tronquer les ombres des cards */
+  .home-avis .testimonials-grid { padding: 1.5rem 14px 1.75rem; }
+  .home-avis .testimonials-grid > .testimonial-card { flex: 0 0 85%; } /* un peu plus étroit → ombres latérales visibles */
+  .home-avis .testimonials-cta { padding-left: 14px; padding-right: 14px; }
+}
+
+/* ===== Ils parlent de nous — références presse (dans la section avis) ===== */
+.home-press {
+  max-width: 1600px;
+  margin: 2.5rem auto 0;
+  padding: 2.25rem 3rem 0;
+  border-top: 1px solid var(--color-gray-light);
+  text-align: center;
+}
+.home-press__label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-wood);
+  margin-bottom: 1.25rem;
+}
+.home-press__logos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem 2.5rem;
+}
+.home-press__item {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  filter: grayscale(1);
+  opacity: 0.75;
+  transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+.home-press__logo { max-height: 46px; width: auto; display: block; }
+.home-press__name {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--color-wood-dark);
+}
+@media (hover: hover) {
+  .home-press__item:hover { filter: grayscale(0); opacity: 1; transform: translateY(-1px); }
+}
+@media (max-width: 768px) {
+  .home-press { padding: 2rem 1.25rem 0; }
+  .home-press__logos { gap: 1.25rem 2rem; }
+}
+
+/* ===== Refonte DA #7 — Cadeau (objet orange iconique) + Actus (journal) — variante C ===== */
+.home-cadeau-actus{max-width:1400px;margin:0 auto;padding:5rem 3rem}
+.ca-grid{display:grid;grid-template-columns:.78fr 1.22fr;gap:26px;align-items:stretch}
+.gift-object{position:relative;border-radius:20px;overflow:hidden;background:var(--color-wood);color:#fff;padding:40px 36px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow-card);text-decoration:none;transition:box-shadow .28s var(--ease-expo),transform .28s var(--ease-expo)}
+.gift-object__photo{position:absolute;inset:0;z-index:0}
+.gift-object__photoimg{width:100%;height:100%;object-fit:cover;display:block}
+.gift-object::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to right,rgba(40,33,27,.6) 0%,rgba(40,33,27,0) 100%)} /* voile sombre : 60% à gauche, s'atténue à 0% à droite */
+.gift-object:hover{box-shadow:var(--shadow-card-hover);transform:translateY(-2px);color:#fff} /* color:#fff : neutralise le a:hover bleu global sur les textes hérités (titre, ✦) */
+.gift-object__halo{position:absolute;right:-40px;top:-40px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,222,170,.55),transparent 68%);pointer-events:none;z-index:2}
+.gift-object__badge{position:relative;z-index:2;align-self:flex-start;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:50px;padding:7px 15px;font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.gift-object__body{position:relative;z-index:2;display:block}
+.gift-object__lamp{font-size:46px;line-height:1;display:block;margin:18px 0 6px}
+.gift-object__title{font-family:var(--font-display);font-size:54px;line-height:.9;display:block;margin-bottom:12px}
+.gift-object__text{font-size:14.5px;color:#fff;max-width:320px;display:block;margin-bottom:24px}
+.gift-object__cta{display:inline-flex;align-items:center;gap:9px;background:#fff;color:var(--color-wood-dark);font-weight:600;font-size:14.5px;border-radius:50px;padding:13px 26px}
+.news-journal{display:flex;flex-direction:column;background:#fff;border-radius:20px;overflow:hidden;box-shadow:var(--shadow-card);text-decoration:none;color:inherit;transition:box-shadow .28s var(--ease-expo),transform .28s var(--ease-expo)}
+.news-journal:hover{box-shadow:var(--shadow-card-hover);transform:translateY(-2px)}
+.news-journal__photo{display:block;height:230px;overflow:hidden}
+.news-journal__photo img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.news-journal:hover .news-journal__photo img{transform:scale(1.04)}
+.news-journal__body{padding:28px 34px 30px;display:block}
+.news-journal__meta{display:flex;align-items:center;gap:12px;color:var(--color-wood)}
+.news-journal__eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.news-journal__date{color:var(--color-wood-mid);font-size:12.5px;font-weight:500}
+.news-journal__title{font-weight:700;font-size:25px;color:var(--color-wood-dark);line-height:1.2;display:block;margin:10px 0}
+.news-journal__chapo{font-size:14.5px;color:var(--color-dark);display:block;margin-bottom:16px}
+.news-journal__read{color:var(--color-orange);font-weight:600;font-size:14.5px;display:inline-flex;gap:7px;align-items:center}
+.ca-allnews{display:flex;justify-content:center;margin-top:22px}
+.ca-allnews__btn{display:inline-flex;align-items:center;gap:9px;background:transparent;border:1.5px solid var(--color-wood);color:var(--color-wood-dark);font-weight:600;font-size:14.5px;border-radius:50px;padding:13px 26px;text-decoration:none;transition:background .25s,color .25s}
+.ca-allnews__btn:hover{background:var(--color-wood);color:#fff}
+.home-cadeau-actus .arr{display:inline-block;transition:transform .25s}
+.gift-object:hover .arr,.news-journal:hover .arr,.ca-allnews__btn:hover .arr{transform:translateX(4px)}
+@media (max-width:880px){.ca-grid{grid-template-columns:1fr}.home-cadeau-actus{padding:3rem 14px}}
+
+/* ===== Refonte home #8 — respiration sections bento + ajustements divers ===== */
+/* (5) Respiration avant les sections bento — double classe pour battre .hero-bento */
+.hero-bento.home-creations {
+  padding-top: 6rem;
+  padding-bottom: 4rem; /* padding inférieur doublé (2rem -> 4rem) */
+}
+/* (6) Cards catégories ~1/3 plus hautes (scopé home) */
+.collections-kinetic .collection-card {
+  aspect-ratio: 2 / 3;
+  max-height: 720px; /* DA #4+ — cards agrandies (plafond relevé), réduit un peu sur retour Robin */
+}
+/* (8) Numéro du header avis aligné sur les autres (scopé .home-avis) */
+.home-avis .testimonials-header .section-num {
+  font-size: 1.5rem;
+}
+@media (max-width: 768px) {
+  .hero-bento.home-creations,
+  .collections-kinetic,
+  .newsletter-kinetic {
+    padding-top: 3.5rem;
+  }
+}
+
+/* ===== Refonte home #9 — grille Créations du moment (Star photo + cards classiques) ===== */
+.creations-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 2rem;
+  align-items: stretch;
+}
+/* desktop : le wrapper des 2 cards est transparent -> elles restent des items de la grille (2fr 1fr 1fr) */
+.creations-products { display: contents; }
+.creation-star {
+  position: relative;
+  display: block;
+  border-radius: 16px;
+  overflow: hidden;
+  min-height: 420px;
+  transition: transform 0.4s var(--ease-expo), box-shadow 0.4s var(--ease-expo);
+}
+.creation-star-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s var(--ease-expo);
+}
+/* hover cohérent avec les cards sœurs (lift + ombre + zoom image) */
+@media (hover: hover) {
+  .creation-star:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card-hover);
+  }
+  .creation-star:hover .creation-star-img {
+    transform: scale(1.05);
+  }
+}
+.creation-star::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(40, 33, 27, 0.55) 0%, rgba(40, 33, 27, 0.12) 32%, transparent 55%); /* DA #4 — voile pour lisibilité du nom sur bois clair */
+  pointer-events: none;
+  z-index: 1;
+}
+.creation-star .bento-bestseller-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+}
+.creation-star-label {
+  position: absolute;
+  left: 18px;
+  bottom: 16px;
+  z-index: 2;
+}
+.creation-star-label .product-name,
+.creation-star-label .product-name *,
+.creation-star-label p { color: var(--color-white); }
+.creation-star-label .product-name { margin: 0; }
+.creation-star-label p { margin: 2px 0 0; font-size: 0.85rem; opacity: 0.92; }
+.creations-cta { text-align: center; margin-top: 2.5rem; }
+.home-creations .section-header-kinetic { margin-bottom: 2.5rem; } /* harmonisé sur L'atelier */
+@media (max-width: 880px) {
+  .creations-grid { grid-template-columns: 1fr 1fr; }
+  .creation-star { grid-column: 1 / -1; min-height: 280px; }
+}
+@media (max-width: 520px) {
+  .creations-grid { grid-template-columns: 1fr; }
+}
+/* Mobile : star pleine largeur (inchangée) + les 2 autres modèles en slider horizontal (dots via scroll-dots.js) */
+@media (max-width: 768px) {
+  .creations-grid { display: block; }
+  .creations-grid .creation-star { margin-bottom: 1rem; }
+  .creations-products {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 1rem;
+    /* pleine largeur (marges négatives annulent le padding 14px de la section) :
+       les cards scrollent jusqu'au bord de l'écran sans être coupées */
+    margin: 0 -14px;
+    /* padding vertical large : overflow-x:auto force overflow-y:auto -> sans ça
+       les ombres des cards sont coupées en haut/bas */
+    padding: 14px 14px 28px;
+  }
+  .creations-products::-webkit-scrollbar { display: none; }
+  .creations-products > .product-card-cinetique {
+    flex: 0 0 72%;
+    scroll-snap-align: center;
+  }
+  /* mini-cards : neutralise les règles "photo dominante 400px" de la grille
+     -> photo en hauteur fixe modérée (cards bien plus compactes) */
+  .creations-grid .creations-products .product-card-link { height: auto; }
+  .creations-grid .creations-products .product-card-cinetique .product-media {
+    min-height: 0;
+    flex: 0 0 auto;
+    aspect-ratio: auto;
+    height: 190px;
+  }
+  .creations-grid .creations-products .product-card-cinetique .product-info { padding: 0.7rem 0.6rem; }
+  /* prix masqué (mobile) — sélecteur 0,3,0 pour battre .product-card-cinetique .product-price{display:flex} */
+  .creations-products .product-card-cinetique .product-price { display: none; }
+  /* mini-cards : textes réduits */
+  .creations-grid .product-card-cinetique .product-name { font-size: 0.85rem !important; }
+  .creations-grid .product-card-cinetique .product-category { font-size: 0.72rem; margin-bottom: 0.4rem; }
+  .creations-grid .product-card-cinetique .btn-view { font-size: 0.72rem; }
+}
+
+/* ===== Refonte #11 — Collections : peek + flèches desktop ===== */
+.collections-nav { display: none; }
+@media (min-width: 769px) {
+  /* DA #4+ — cards agrandies (23.5% -> 29%) puis légèrement réduites sur retour Robin */
+  .collections-kinetic .collection-card { flex: 0 0 29%; }
+  .collections-nav {
+    display: flex;
+    gap: 10px;
+    align-self: center;
+    margin-left: 1.5rem; /* flèches à gauche, avec un peu d'écart après le titre */
+  }
+}
+.collections-nav .carousel-arrow {
+  background: transparent;
+  border: 1px solid rgba(147, 125, 104, 0.3);
+  color: var(--color-wood-dark);
+}
+@media (hover: hover) {
+  .collections-nav .carousel-arrow:hover {
+    background: var(--color-warm);
+    border-color: var(--color-wood);
+  }
+}
+
+/* ===== Refonte #12 — Polish DA ===== */
+/* P6 — hover icône room cards en accent orange sur la home (global reste warm/wood) */
+@media (hover: hover) {
+  .home-projet .room-card:hover .room-card-icon {
+    background: rgba(227, 91, 36, 0.12);
+    color: var(--color-orange);
+  }
+}
+/* P8 — Créations : pieds des 3 cards alignés (scopé .creations-grid) */
+.creations-grid .product-card-link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.creations-grid .product-media { flex: 1; }
+/* Créations : la photo prend plus de hauteur (exit l'aspect carré) + textes centrés, info compacte */
+.creations-grid .product-card-cinetique .product-media {
+  aspect-ratio: auto;
+  flex: 1 1 auto;
+  min-height: 400px; /* photo toujours grande et dominante */
+}
+.creations-grid .product-card-cinetique .product-info {
+  flex: 0 0 auto;
+  padding: 1.5rem; /* zone texte compacte */
+  text-align: center;
+}
+.creations-grid .product-card-cinetique .product-price {
+  margin-top: 0.6rem;
+  justify-content: center;
+}
+/* Créations : textes des cards agrandis */
+.creations-grid .product-card-cinetique .product-name { font-size: 1.65rem !important; }
+.creations-grid .product-card-cinetique .product-category { font-size: 1.1rem; margin-bottom: 1rem; }
+.creations-grid .product-card-cinetique .price-from { font-size: 0.85rem; }
+.creations-grid .product-card-cinetique .price-value { font-size: 1.4rem; }
+.creations-grid .product-card-cinetique .btn-view { font-size: 0.95rem; }
+/* P20 — ourlet fin en haut des bandes crème */
+.section-band--warm,
+.home-projet-section {
+  border-top: 1px solid rgba(147, 125, 104, 0.1);
+}
+
+/* ===== Refonte #14 — Bande citation Robin pleine page (dispo A) ===== */
+.quote-band {
+  position: relative;
+  min-height: 72vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.quote-band__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  z-index: 0;
+}
+.quote-band__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(31, 24, 18, 0.72) 0%, rgba(31, 24, 18, 0.45) 50%, rgba(31, 24, 18, 0.2) 100%);
+}
+.quote-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 1600px; /* même conteneur que le reste : bord gauche aligné sur la gouttière (texte plafonné par .q-text 620px) */
+  margin: 0 auto;
+  padding: 80px 48px;
+  width: 100%;
+}
+.quote-band .q-mark {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 96px;
+  line-height: 0.5;
+  color: var(--color-orange);
+  margin-bottom: 6px;
+}
+.quote-band .q-text {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 4.6vw, 4rem);
+  line-height: 1.04;
+  color: var(--color-white);
+  max-width: 620px;
+  margin: 0;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.35);
+}
+.quote-band .q-sig { display: flex; align-items: center; gap: 14px; margin-top: 30px; }
+.quote-band .q-sig .who { color: #f3e9dc; }
+.quote-band .q-sig .who b { display: block; font-size: 14px; font-weight: 600; color: var(--color-white); }
+.quote-band .q-sig .who span { font-size: 12px; opacity: 0.85; }
+.quote-band .q-links { display: flex; gap: 22px; margin-top: 26px; flex-wrap: wrap; align-items: center; }
+.quote-band .q-link-cta {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-white);
+  background: var(--color-orange);
+  border-radius: 50px;
+  padding: 12px 24px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.quote-band .q-link-discreet {
+  color: #f3e9dc;
+  border-bottom: 1px solid rgba(243, 233, 220, 0.5);
+  padding-bottom: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+@media (hover: hover) {
+  .quote-band .q-link-cta:hover { background: var(--color-orange-hover); }
+  .quote-band .q-link-discreet:hover { color: var(--color-white); }
+}
+/* Card localisation (DA #6, variante C) — mini-carte bois posée sur la bande */
+.loc-card { position: absolute; right: max(48px, calc((100vw - 1600px) / 2 + 48px)); bottom: 36px; z-index: 3; /* bord droit aligné sur la gouttière du contenu (1600px + 48px), comme bento/collections */ width: 340px; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-card); background: #fff; text-decoration: none; color: inherit; transition: transform 0.28s var(--ease-expo), box-shadow 0.28s var(--ease-expo); }
+@media (hover: hover) {
+  .loc-card:hover { box-shadow: var(--shadow-card-hover); transform: translateY(-2px); }
+  .loc-card:hover .loc-foot__arr { transform: translateX(4px); display: inline-block; }
+}
+.loc-media { position: relative; height: 150px; overflow: hidden; }
+.loc-media svg { width: 100%; height: 100%; object-fit: cover; display: block; }
+.loc-invite { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(74, 63, 53, 0.9), transparent); padding: 26px 16px 12px; color: #fff; font-family: var(--font-display); font-size: 20px; line-height: 1; }
+.loc-foot { padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.loc-foot__ttl { font-weight: 700; font-size: 14.5px; color: var(--color-wood-dark); }
+.loc-foot__adr { font-size: 12px; color: var(--color-wood-mid); margin-top: 2px; }
+.loc-foot__go { color: var(--color-orange); font-weight: 600; font-size: 13px; white-space: nowrap; }
+.loc-foot__arr { display: inline-block; transition: transform 0.28s var(--ease-expo); }
+@media (max-width: 900px) {
+  .quote-band { display: block; padding-bottom: 50px; }
+  .quote-inner { padding: 60px 22px; }
+  .loc-card { display: block; position: relative; right: auto; bottom: auto; width: auto; margin: 30px 14px 0; } /* display:block : l'<a> inline ne blockifie plus via position:absolute -> le fond blanc couvrait pas le footer */
+}
+@media (max-width: 700px) {
+  .quote-band { min-height: 78vh; }
+  .quote-band .q-mark { font-size: 70px; }
+}
+
 /* ========================================
    PAGE TEMPLATE - Contact (PREMIUM)
    ======================================== */
@@ -9350,49 +9975,6 @@ a.single-post-category:hover {
 }
 
 /* ========================================
-   CINÉTIQUE - Custom Cursor
-   ======================================== */
-
-.cursor-custom {
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 99999;
-}
-
-.cursor-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--color-orange);
-  border-radius: 50%;
-  position: absolute;
-  transform: translate(-50%, -50%);
-  transition: transform 0.15s ease;
-}
-
-.cursor-outline {
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--color-orange);
-  border-radius: 50%;
-  position: absolute;
-  transform: translate(-50%, -50%);
-  transition: all 0.3s ease;
-}
-
-body.cursor-hover .cursor-outline {
-  width: 60px;
-  height: 60px;
-  border-color: var(--color-orange);
-}
-
-body.cursor-hover .cursor-dot {
-  transform: translate(-50%, -50%) scale(1.5);
-  background: var(--color-orange);
-}
-
-/* ========================================
    CINÉTIQUE - Header Architectural
    ======================================== */
 
@@ -9701,9 +10283,9 @@ body.cursor-hover .cursor-dot {
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    transparent 35%,
-    rgba(0, 0, 0, 0.45) 70%,
-    rgba(0, 0, 0, 0.65) 100%
+    transparent 30%,
+    rgba(31, 24, 18, 0.45) 62%,
+    rgba(31, 24, 18, 0.72) 100%
   );
   z-index: 1;
   pointer-events: none; /* L'overlay est décoratif – laisse passer les clics */
@@ -9797,44 +10379,37 @@ body.cursor-hover .cursor-dot {
 }
 
 /* ========================================
-   NAMING CARD — fond crème avec naming + controls
+   NAMING CARD — verre dépoli sombre (refonte DA #2)
    ======================================== */
 
-/* Layout horizontal compact « ‹ NAMING › » sur tous les viewports.
-   Les dots sont masqués (display: none plus bas), card-controls est en
-   display: contents pour que les flèches deviennent siblings du naming
-   et puissent être réordonnées via order. */
+/* 2 rangées : « ‹ NAMING › » dans .naming-card__row, puis les dots centrés
+   en dessous (.carousel-dots). Verre dépoli sombre, texte/flèches cream. */
 .naming-card {
   pointer-events: auto;
-  background: transparent; /* glass pur : seul le blur crée l'effet verre dépoli */
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(251, 246, 234, 0.55);
-  border-radius: 16px;
+  background: rgba(40, 33, 27, 0.30); /* verre dépoli sombre (refonte DA #2) */
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 22px;
   padding: 14px 22px;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  gap: 14px;
-  min-width: 440px; /* verrou : la card ne resize pas selon la longueur du naming */
+  gap: 10px;
+  width: 520px; /* largeur FIXE : la bulle ne resize jamais selon le nom (refonte #8) */
+  max-width: calc(100vw - 32px);
 }
+.naming-card__row { display: flex; align-items: center; gap: 14px; width: 100%; }
 
 .naming-card .carousel-dots {
-  display: none;
+  display: flex;
+  gap: 6px;
+  justify-content: center; /* dots centrés sous le nom (refonte DA #2) */
 }
 
-.naming-card .card-controls {
-  display: contents;
-}
-
-/* Réordonnement : flèche prev — naming — flèche next.
-   flex: 1 sur le naming → il occupe tout l'espace entre les flèches, qui
-   restent collées aux bords de la card. text-align: center → le texte est
-   centré dans cette zone, peu importe sa longueur. */
-.card-controls .carousel-arrow:first-child { order: -1; }
-.card-controls .carousel-arrow:last-child  { order:  1; }
+/* flex: 1 sur le naming → il occupe tout l'espace entre les flèches (collées aux
+   bords de la rangée). text-align: center → texte centré quelle que soit sa longueur. */
 .naming-link {
-  order: 0;
   flex: 1;
   text-align: center;
 }
@@ -9884,13 +10459,6 @@ body.cursor-hover .cursor-dot {
   font-size: 2rem;
 }
 
-/* Controls dans la card : flèche prev — dots — flèche next */
-.card-controls {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
 .carousel-arrow {
   width: 32px;
   height: 32px;
@@ -9921,7 +10489,7 @@ body.cursor-hover .cursor-dot {
   stroke: currentColor;
 }
 
-/* Dots — désormais à l'intérieur de .card-controls (plus position absolute) */
+/* Dots — rangée dédiée sous le nom dans la naming card */
 .carousel-dots {
   display: flex;
   gap: 10px;
@@ -9947,6 +10515,33 @@ body.cursor-hover .cursor-dot {
   .carousel-dot:hover:not(.active) {
     background: rgba(251, 246, 234, 0.35);
   }
+}
+
+/* ===== Refonte home #7 — Hero naming card (bulle blanche, dots orange) ===== */
+.naming-card .carousel-dot {
+  width: 7px;
+  height: 7px;
+  border: none;
+  background: rgba(255, 255, 255, 0.45); /* visible sur le verre dépoli sombre (refonte DA #2) */
+  border-radius: 50%;
+}
+.naming-card .carousel-dot.active {
+  background: var(--color-orange);
+  width: 20px;
+  border-radius: 10px;
+  transform: none;
+}
+.naming-card .carousel-arrow {
+  background: transparent;
+  border: none;
+  color: var(--color-warm);
+}
+.naming-card .naming-link {
+  color: var(--color-warm);
+  text-shadow: none;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Mobile : card un peu plus compacte que desktop (padding/gap/typo plus petits).
@@ -9975,6 +10570,11 @@ body.cursor-hover .cursor-dot {
     width: 14px;
     height: 14px;
   }
+}
+
+/* Refonte #11 — ≤520px : masquer les dots de la naming card (nom du modèle en entier), garder les flèches */
+@media (max-width: 520px) {
+  .naming-card .carousel-dots { display: none; }
 }
 
 /* ========================================
@@ -10045,11 +10645,6 @@ a.carousel-slide-product {
 }
 
 /* Hero Card - Large */
-.bento-hero {
-  grid-column: span 8;
-  grid-row: span 3;
-}
-
 .bento-bg {
   position: absolute;
   top: 0;
@@ -10094,27 +10689,6 @@ a.carousel-slide-product {
   }
 }
 
-.bento-hero::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(50, 50, 50, 0.7) 0%, rgba(50, 50, 50, 0.3) 100%);
-  z-index: 1;
-}
-
-.bento-content {
-  position: relative;
-  z-index: 2;
-  padding: 3rem;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
 .bento-label {
   display: inline-block;
   font-size: 0.75rem;
@@ -10127,25 +10701,6 @@ a.carousel-slide-product {
   border-radius: 50px;
   margin-bottom: 1rem;
   box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
-}
-
-.bento-title {
-  font-family: var(--font-body);
-  font-size: clamp(3rem, 5vw, 5rem);
-  font-weight: 900;
-  line-height: 1.1;
-  margin-bottom: 0.25rem;
-  color: var(--color-white);
-}
-
-.bento-category {
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-cream);
-  opacity: 0.85;
-  margin: 0;
 }
 
 .bento-text {
@@ -10198,6 +10753,18 @@ a.carousel-slide-product {
 @media (hover: hover) {
   .hero-cta:hover svg {
     transform: translateX(5px);
+  }
+}
+
+/* Refonte #11 — variante CTA bois (1 seul CTA orange « navigation » par écran) */
+.hero-cta--wood {
+  background: var(--color-wood);
+  box-shadow: 0 4px 15px rgba(147, 125, 104, 0.25);
+}
+@media (hover: hover) {
+  .hero-cta--wood:hover {
+    background: var(--color-wood-dark);
+    box-shadow: 0 6px 20px rgba(147, 125, 104, 0.35);
   }
 }
 
@@ -10371,65 +10938,7 @@ transform: translateY(15px);
 }
 
 /* Featured Product Card (static, no hover effects) */
-.bento-product-featured {
-  grid-column: span 4;
-  grid-row: span 2;
-  cursor: pointer;
-}
-
-.bento-product-featured .bento-bg {
-  transition: transform 0.6s var(--ease-expo);
-}
-
-@media (hover: hover) {
-  .bento-product-featured:hover .bento-bg {
-    transform: scale(1.05);
-  }
-}
-
-.bento-product-featured-info {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1.5rem;
-  background: linear-gradient(to top, rgba(50, 50, 50, 0.85) 0%, transparent 100%);
-  z-index: 2;
-}
-
-.bento-product-featured-info h3 {
-  font-family: var(--font-body);
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--color-white);
-  margin: 0 0 0.75rem 0;
-}
-
-.bento-product-featured-price {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background: var(--color-wood);
-  color: var(--color-white);
-  font-family: var(--font-body);
-  font-size: 1.25rem;
-  font-weight: 900;
-  border-radius: 50px;
-}
-
-.bento-product-featured-badge {
-  position: absolute;
-  top: 1.25rem;
-  left: 1.25rem;
-  padding: 0.5rem 1rem;
-  background: var(--color-orange);
-  color: var(--color-white);
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  border-radius: 50px;
-  z-index: 2;
-}
+/* (refonte #9) bloc .bento-product-featured* retiré — remplacé par .product-card-cinetique */
 
 /* Small Product Cards (2 squares) */
 .bento-product-small {
@@ -10629,187 +11138,25 @@ transform: translateY(15px);
   position: absolute;
   top: 1.25rem;
   left: 1.25rem;
-  padding: 0.5rem 1.25rem;
-  background: var(--gradient-cta);
+  padding: 5px 13px;
+  background: var(--color-orange);
   color: var(--color-white);
   font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   border-radius: 50px;
   z-index: 3;
-  box-shadow: 0 4px 12px rgba(227, 91, 36, 0.3);
 }
 
-/* Storytelling Artisanat Card */
-.bento-storytelling {
-  grid-column: span 4;
-  grid-row: span 2;
-  background: var(--color-warm);
-}
-
-
-.storytelling-inner {
-  padding: 2.5rem;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.storytelling-num {
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: var(--color-orange, #E35B24);
-  letter-spacing: 0.05em;
-}
-
-.storytelling-label {
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--color-wood);
-}
-
-.storytelling-title {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 3.5vw, 3.5rem);
-  font-weight: 400;
-  line-height: 1.1;
-  color: var(--color-dark);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
+/* Storytelling — texte réutilisé par la section L'atelier (refonte #7) */
 .storytelling-text {
   font-family: var(--font-body);
   font-size: 0.95rem;
   font-weight: 400;
   line-height: 1.7;
   color: var(--bois-sombre, #4A3F35);
-}
-
-.storytelling-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-orange);
-  text-decoration: none;
-  margin-top: 0.5rem;
-  transition: gap 0.3s var(--ease-expo);
-}
-
-@media (hover: hover) {
-  .storytelling-link:hover {
-    gap: 0.85rem;
-    color: var(--color-orange);
-  }
-}
-
-/* Gift Card */
-.bento-giftcard {
-  grid-column: span 4;
-  grid-row: span 1;
-  cursor: pointer;
-}
-
-.bento-giftcard .bento-bg {
-  transition: transform 0.6s var(--ease-expo);
-}
-
-@media (hover: hover) {
-  .bento-giftcard:hover .bento-bg {
-    transform: scale(1.05);
-  }
-}
-
-.giftcard-badge {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  padding: 0.4rem 1rem;
-  background: var(--color-wood);
-  color: #fff;
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  border-radius: 50px;
-  z-index: 2;
-  box-shadow: 0 2px 8px rgba(147, 125, 104, 0.3);
-}
-
-.giftcard-info {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1.25rem;
-  background: linear-gradient(to top, rgba(50, 50, 50, 0.9) 0%, transparent 100%);
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.giftcard-info h3 {
-  font-family: var(--font-body);
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--color-white);
-  margin: 0;
-}
-
-.giftcard-price {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  background: var(--color-wood);
-  color: #fff;
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-radius: 50px;
-  white-space: nowrap;
-}
-
-/* Room Picker — "Pour quelle pièce ?" — harmonisé avec .conseiller-card
-   (fond warm + bordure dashed INSET via ::before, décalée 12px vers
-   l'intérieur). On désactive la bordure grise héritée de .bento-card et
-   on n'a pas de hover sur le panneau. */
-.bento-room-picker {
-  grid-column: span 12;
-  grid-row: span 2;
-  background: var(--color-warm, #FBF6EA);
-  border: none;
-  /* Round 4 — flex column avec justify-content: center pour centrer
-     verticalement le contenu (room-picker-inner) dans la card. */
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-direction: column;
-  flex-direction: column;
-  -webkit-justify-content: center;
-  justify-content: center;
-}
-.bento-room-picker::before {
-  content: "";
-  position: absolute;
-  inset: 12px;
-  border: 1.5px dashed rgba(147, 125, 104, 0.35);
-  border-radius: 12px;
-  pointer-events: none;
-}
-.bento-room-picker .room-picker-inner {
-  position: relative;
-  z-index: 1;
 }
 
 .room-picker-inner {
@@ -11151,290 +11498,25 @@ button.room-card {
 }
 
 /* CTA Card */
-.bento-cta {
-  grid-column: span 12;
-  grid-row: span 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 2.5rem;
-  background: linear-gradient(135deg, var(--color-orange) 0%, #D35400 100%);
-  cursor: pointer;
-  text-decoration: none;
-  overflow: hidden;
-}
+/* (refonte #9) bloc .bento-cta* / .cta-title retiré — CTA = .hero-cta + .creations-cta */
 
-.bento-cta::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 50%);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
+/* (refonte #15) .atelier-label / .atelier-photo retirés — L'atelier est désormais une bande immersive */
 
-@media (hover: hover) {
-  .bento-cta:hover::before {
-    opacity: 1;
-  }
-}
-
-.cta-title {
-  font-family: var(--font-body);
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: var(--color-white);
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  line-height: 1.2;
-  position: relative;
-  z-index: 1;
-}
-
-.bento-cta .cta-button {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 2.5rem;
-  background: var(--color-white);
-  color: var(--color-dark);
-  font-family: var(--font-body);
-  font-size: 0.875rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  border: none;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.3s var(--ease-expo);
-  position: relative;
-  z-index: 1;
-}
-
-@media (hover: hover) {
-  .bento-cta:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 50px rgba(230, 126, 34, 0.4);
-  }
-}
-
-@media (hover: hover) {
-  .bento-cta .cta-button:hover {
-    transform: scale(1.05);
-    gap: 1rem;
-    background: var(--color-wood);
-    color: var(--color-white);
-  }
-}
-
-/* Atelier Card */
-.bento-atelier {
-  grid-column: span 8;
-  grid-row: span 2;
-  min-height: 400px;
-}
-
-.bento-atelier::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 40%, rgba(50, 50, 50, 0.6) 100%);
-  z-index: 1;
-}
-
-.atelier-label {
-  position: absolute;
-  bottom: 2rem;
-  left: 2rem;
-  padding: 0.75rem 1.5rem;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 50px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  color: var(--color-dark);
-  z-index: 2;
-  transition: all 0.3s var(--ease-smooth);
-}
-
-@media (hover: hover) {
-  .bento-atelier:hover .atelier-label {
-    background: var(--color-wood);
-    color: var(--color-white);
-  }
-}
-
-/* Bento - Flash Actu Card */
-.bento-actu {
-  grid-column: span 4;
-  grid-row: span 2;
-  min-height: 400px;
-}
-
-.bento-actu::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 30%, rgba(50, 50, 50, 0.7) 100%);
-  z-index: 1;
-}
-
-.bento-actu-badge {
-  position: absolute;
-  top: 1.5rem;
-  left: 1.5rem;
-  padding: 0.4rem 1rem;
-  background: var(--color-orange);
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border-radius: 50px;
-  z-index: 2;
-}
-
-.bento-actu-content {
-  position: absolute;
-  bottom: 2rem;
-  left: 2rem;
-  right: 2rem;
-  z-index: 2;
-}
-
-.bento-actu-content h3 {
-  font-family: var(--font-body);
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #fff;
-  margin: 0 0 0.5rem 0;
-  line-height: 1.4;
-}
-
-.bento-actu-date {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.7);
-  font-weight: 400;
-}
-.bento-actu-link {
-  display: block;
-  position: absolute;
-  inset: 0;
-  color: inherit;
-  text-decoration: none;
-}
-.bento-actu-all {
-  position: absolute;
-  bottom: 1rem;
-  right: 1.5rem;
-  z-index: 3;
-  font-family: var(--font-body);
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
-  text-decoration: none;
-  letter-spacing: 0.03em;
-  -webkit-transition: color 0.2s ease;
-  transition: color 0.2s ease;
-}
-@media (hover: hover) {
-  .bento-actu-all:hover {
-    color: #fff;
-  }
-}
-
-/* Bento - Conseil Card */
-.bento-conseil {
-  grid-column: span 8;
-  grid-row: span 2;
-  min-height: 400px;
-  background: var(--color-warm);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem 3rem;
-  text-align: center;
-}
-
-.bento-conseil-badge {
-  position: absolute;
-  top: 1.5rem;
-  left: 1.5rem;
-  padding: 0.4rem 1rem;
-  background: var(--color-wood);
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border-radius: 50px;
-  z-index: 2;
-}
-
-.bento-conseil-content {
-  z-index: 2;
-}
-
-.bento-conseil-content h3 {
-  font-family: var(--font-display, "Square Peg", Georgia, serif);
-  font-size: clamp(2rem, 4vw, 3.2rem);
-  font-weight: 400;
-  font-style: italic;
-  color: var(--bois-profond, #6B5A4A);
-  margin: 0 0 1rem 0;
-  line-height: 1.3;
-  text-transform: none;
-  position: relative;
-}
-
-.bento-conseil-content h3::before {
-  content: '\201C';
-  font-family: Georgia, serif;
-  font-size: clamp(5rem, 10vw, 8rem);
-  font-style: normal;
-  color: var(--color-orange, #E35B24);
-  opacity: 0.2;
-  position: absolute;
-  top: -0.5em;
-  left: -0.15em;
-  line-height: 1;
-}
-
-.bento-conseil-cta {
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-orange);
-  letter-spacing: 0.03em;
-}
-
-@media (hover: hover) {
-  .bento-conseil:hover .bento-conseil-cta {
-    text-decoration: underline;
-  }
-}
+/* (refonte DA #7) blocs .bento-actu* / .bento-giftcard* / .bento-conseil* retirés — Cadeau+Actus est désormais .home-cadeau-actus */
 
 /* ========================================
    CINÉTIQUE - Collections Section
    ======================================== */
 
 .collections-kinetic {
-  padding: 1.5rem 0 0 0;
+  padding: 6rem 0 0 0;
   overflow-x: hidden;
 }
 
 .section-header-kinetic {
   display: flex;
   align-items: baseline;
-  gap: 2rem;
+  gap: 1rem;
   margin-bottom: 0;
   padding: 0 3rem;
   max-width: 1600px;
@@ -11454,19 +11536,40 @@ button.room-card {
 
 .section-title-kinetic {
   font-family: var(--font-body);
-  font-size: clamp(3rem, 6vw, 5rem);
-  font-weight: 900;
-  color: var(--color-dark);
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  font-weight: 700;
+  color: var(--color-wood-dark);
   margin: 0;
+}
+/* Refonte home #7/#8 — num de section (scopé home, ne touche pas .section-num global) */
+.section-header-kinetic .section-num {
+  font-size: 1.5rem;
+}
+/* Refonte home #7 — titre avis au même gabarit (scopé .home-avis, fiche produit intacte) */
+.home-avis .testimonials-header h2 {
+  font-family: var(--font-body);
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  font-weight: 700;
+  color: var(--color-wood-dark);
+  margin: 0;
+}
+/* Refonte home #7 — titre "Pour quelle pièce ?" au gabarit (scopé home) */
+.home-projet .room-picker-title {
+  font-family: var(--font-body);
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--color-wood-dark);
 }
 
 .collections-grid {
   display: flex;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
+  scroll-snap-type: none; /* desktop : pas de snap (piloté par flèches) -> supprime le recalage/saut. Mobile re-active mandatory (swipe tactile) */
   scroll-behavior: smooth;
   gap: 1.5rem;
-  padding: 3.5rem 0 4rem 0;
+  padding: 2.5rem 0 8rem 0; /* top harmonisé sur L'atelier ; padding bas doublé (4rem -> 8rem) */
   /* Gouttière identique aux sections de contenu (.hero-bento, .newsletter-kinetic) :
      max-width 1600px centré + 3rem. Mise en padding INTERNE du conteneur de scroll
      (pas en ::before, qui se faisait avaler par scroll-snap mandatory) : le track
@@ -11515,11 +11618,12 @@ button.room-card {
   height: 100%;
   object-fit: cover;
   object-position: center;
+  transition: transform 0.6s var(--ease-expo); /* P7 — zoom doux dans le cadre */
 }
 
 @media (hover: hover) {
-  .collection-card:hover .collection-visual {
-    transform: scale(1.05);
+  .collection-card:hover .collection-visual-img {
+    transform: scale(1.04);
   }
 }
 
@@ -11529,23 +11633,38 @@ button.room-card {
   left: 0;
   right: 0;
   padding: 7rem 1.5rem 1.5rem;
-  background: linear-gradient(to top, rgba(34, 26, 20, 0.9) 0%, rgba(34, 26, 20, 0.7) 25%, rgba(34, 26, 20, 0.35) 55%, transparent 100%);
+  background: linear-gradient(to top, rgba(34, 26, 20, 0.6) 0%, rgba(34, 26, 20, 0.45) 25%, rgba(34, 26, 20, 0.22) 55%, transparent 100%); /* DA #4 — scrim allégé ~1/3, la photo respire */
   transition: all 0.4s var(--ease-expo);
 }
 
 @media (hover: hover) {
   .collection-card:hover .collection-details {
-    background: linear-gradient(to top, rgba(34, 26, 20, 0.92) 0%, rgba(34, 26, 20, 0.75) 25%, rgba(34, 26, 20, 0.4) 55%, transparent 100%);
+    background: linear-gradient(to top, rgba(34, 26, 20, 0.62) 0%, rgba(34, 26, 20, 0.5) 25%, rgba(34, 26, 20, 0.27) 55%, transparent 100%);
     padding-bottom: 2rem;
   }
 }
 
 .collection-card .collection-details h3 {
   font-family: var(--font-body);
-  font-size: 2rem;
+  font-size: 2.4rem; /* DA #4+ — agrandi avec les cards */
   font-weight: 700;
   color: var(--color-white);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+/* DA #4+ — petite ligne factuelle sous le nom de catégorie */
+.collection-desc {
+  font-size: 1rem;
+  line-height: 1.35;
+  color: var(--color-cream);
+  opacity: 0.6; /* 40% de transparence */
+  margin: 0 0 0.7rem;
+  max-width: 92%;
+}
+/* Mobile : titres catégorie -40% (2.4 -> 1.44rem), sous-titres -30% (1 -> 0.7rem) */
+@media (max-width: 768px) {
+  .collection-card .collection-details h3 { font-size: 1.44rem; }
+  .collection-desc { font-size: 0.7rem; }
 }
 
 .collection-meta {
@@ -11555,7 +11674,7 @@ button.room-card {
 }
 
 .collection-count {
-  font-size: 0.875rem;
+  font-size: 1.05rem; /* DA #4+ — agrandi avec les cards */
   font-weight: 400;
   color: var(--color-cream);
   opacity: 0.9;
@@ -11563,7 +11682,7 @@ button.room-card {
 
 .collection-btn {
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: 1.25rem; /* DA #4+ — agrandi avec les cards */
   font-weight: 600;
   color: var(--color-wood);
   transition: all 0.3s var(--ease-expo);
@@ -11588,24 +11707,30 @@ button.room-card {
    ======================================== */
 
 .newsletter-kinetic {
-  padding: 3rem 3rem;
+  padding: 4rem 3rem 2.5rem; /* refonte #11 : padding vertical réduit (compense la hauteur de l'atelier) */
   max-width: 1600px;
   margin: 0 auto;
   border-top: 1px solid var(--color-gray-light);
+}
+
+/* refonte #11 — newsletter centrée en desktop (header + sous-titre + form) */
+.newsletter-kinetic .section-header-kinetic {
+  justify-content: center;
 }
 
 .newsletter-kinetic .newsletter-subtitle {
   font-size: 1.125rem;
   font-weight: 300;
   color: var(--color-gray);
-  margin: 1rem 0 2rem 4.5rem;
+  margin: 1rem auto 2rem;
+  text-align: center;
 }
 
 .newsletter-kinetic .newsletter-form {
   display: flex;
   gap: 1rem;
   max-width: 780px;
-  margin-left: 4.5rem;
+  margin: 0 auto;
 }
 
 .newsletter-input-kinetic {
@@ -11634,7 +11759,7 @@ button.room-card {
   align-items: center;
   gap: 0.75rem;
   padding: 1.25rem 2.5rem;
-  background: var(--color-wood);
+  background: var(--color-orange);
   color: var(--color-white);
   font-family: var(--font-body);
   font-size: 1rem;
@@ -11647,10 +11772,22 @@ button.room-card {
 
 @media (hover: hover) {
   .newsletter-submit-kinetic:hover {
-    background: var(--color-orange);
+    background: var(--color-orange-hover);
     transform: translateX(5px);
   }
 }
+
+/* ===== Refonte DA #8 — Newsletter en bande bois chaud (variante B) ===== */
+.newsletter--band{position:relative;overflow:hidden;background:linear-gradient(135deg,#a98a64,#8B7355);border-radius:18px;min-height:380px;display:flex;align-items:center;justify-content:center;text-align:center;padding:70px 24px;border-top:none}
+.newsletter--band .newsletter__bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(3px);transform:scale(1.06);opacity:.16}
+.newsletter--band .newsletter__veil{position:absolute;inset:0;background:rgba(139,115,85,.55);z-index:2}
+.newsletter--band .newsletter__inner{position:relative;z-index:3;max-width:720px}
+.newsletter--band .newsletter__eyebrow{font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#ffe7cc;display:block;margin-bottom:12px}
+.newsletter--band .newsletter__title{font-family:var(--font-display);font-size:clamp(2.6rem,5vw,3.2rem);font-weight:400;text-transform:none;color:#fff;line-height:1;margin-bottom:12px}
+.newsletter--band .newsletter-subtitle{color:#fbf2e4;font-size:15.5px;margin-bottom:30px}
+.newsletter--band .newsletter__fineprint{font-size:12px;color:#f3e8d8;margin-top:16px;opacity:.85}
+/* feedback AJAX lisible sur le bois : pastille blanche (le JS pose la couleur du texte) */
+.newsletter--band .newsletter-feedback{background:rgba(255,255,255,.94);border-radius:10px;padding:8px 14px}
 
 /* ========================================
    CINÉTIQUE - Footer
@@ -11786,38 +11923,24 @@ button.room-card {
   .bento-statement,
   .bento-product,
   .bento-stats,
-  .bento-storytelling,
-  .bento-giftcard {
+  .bento-storytelling {
     grid-column: span 3;
   }
 
   .bento-process,
   .bento-atelier,
-  .bento-cta,
-  .bento-room-picker {
-    grid-column: span 6;
-  }
-
-  .bento-actu {
-    grid-column: span 6;
-  }
-
-  .bento-conseil {
+  .bento-cta {
     grid-column: span 6;
   }
 }
 
 @media (max-width: 768px) {
-  .cursor-custom {
-    display: none;
-  }
-
   .header-architectural .header-content {
     padding: 1rem 1.5rem;
   }
 
   .hero-bento {
-    padding: 1.5rem 1rem;
+    padding: 1.5rem 14px;
   }
 
   .collections-kinetic {
@@ -11825,7 +11948,7 @@ button.room-card {
   }
 
   .section-header-kinetic {
-    padding: 0 1rem;
+    padding: 0 14px;
     gap: 0.25rem;
   }
 
@@ -11866,11 +11989,7 @@ button.room-card {
   .bento-process,
   .bento-cta,
   .bento-atelier,
-  .bento-actu,
-  .bento-conseil,
-  .bento-storytelling,
-  .bento-giftcard,
-  .bento-room-picker {
+  .bento-storytelling {
     grid-column: span 1;
     grid-row: span 1;
   }
@@ -11889,19 +12008,7 @@ button.room-card {
     min-height: 250px;
   }
 
-  .bento-actu {
-    min-height: 250px;
-  }
-
-  .bento-conseil {
-    min-height: 200px;
-  }
-
   .bento-product-small {
-    min-height: 200px;
-  }
-
-  .bento-giftcard {
     min-height: 200px;
   }
 
@@ -11986,6 +12093,11 @@ button.room-card {
   .menu-overlay-inner,
   .newsletter-kinetic {
     padding: 2rem 1.5rem;
+  }
+  /* légère marge gauche/droite de la band sur mobile (ne touche plus les bords) */
+  .newsletter--band {
+    margin-left: 14px;
+    margin-right: 14px;
   }
 
   .newsletter-kinetic .newsletter-subtitle {
@@ -12232,7 +12344,7 @@ button.room-card {
   }
 
   .collection-card .collection-details h3 {
-    font-size: 1.5rem;
+    font-size: 1.44rem; /* aligné sur l'override ≤768 (-40%) pour éviter un saut */
   }
 
   .stat-block strong {
@@ -12252,37 +12364,18 @@ button.room-card {
 .shop-hero-artisan {
   padding: 200px 20px 144px;
   text-align: center;
-  background: url('https://atelier-sapi.fr/wp-content/uploads/2026/02/Bandeau-1.jpg') center/cover no-repeat;
+  background: url('https://atelier-sapi.fr/wp-content/uploads/2026/06/Croquis.jpg') center/cover no-repeat;
   position: relative;
 }
 
+/* Overlay clair (bois clair de la charte, --color-warm) pour faire ressortir
+   le titre sombre par-dessus le croquis. */
 .shop-hero-artisan::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(74, 63, 53, 0.75);
+  background: rgba(251, 246, 234, 0.82);
   z-index: 1;
-}
-
-/* Layer injecté par sapi-hero-live.js pour crossfader la photo de fond
-   au changement de pièce. Reste sous l'overlay sombre (::before z-index 1)
-   et sous le contenu (-inner z-index 2). */
-.shop-hero-artisan__fade-layer {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 0;
-  -webkit-transition: opacity 0.4s ease;
-  transition: opacity 0.4s ease;
-  will-change: opacity;
-}
-
-.shop-hero-artisan__fade-layer.is-active {
-  opacity: 1;
 }
 
 .shop-hero-artisan-inner {
@@ -12296,10 +12389,10 @@ button.room-card {
   font-family: var(--font-display, 'Square Peg', Georgia, serif);
   font-size: clamp(72px, 14vw, 150px);
   font-weight: 400;
-  color: #fff;
+  color: var(--color-dark, #323232);
   margin-bottom: 1.5rem;
   line-height: 1.1;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 2px 16px rgba(254, 253, 251, 0.55);
 }
 
 .shop-hero-artisan-subtitle {
@@ -18512,10 +18605,6 @@ body.woocommerce-order-pay .woocommerce-privacy-policy-text a {
     }
   }
 
-  /* Disable custom cursor animations */
-  .cursor-custom {
-    display: none;
-  }
 }
 
 /* WooCommerce Wrapper - Base styles for all WooCommerce pages */
@@ -21179,13 +21268,13 @@ body.woocommerce-cart div.woocommerce-wrapper {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 1rem;
-    padding: 15px 5%;
+    padding: 15px 14px;
     scroll-padding-left: 0;
     scroll-behavior: auto;
   }
   .collections-grid::-webkit-scrollbar { display: none; }
   .collections-grid > .collection-card {
-    flex: 0 0 90%;
+    flex: 0 0 72%; /* mobile : cards catégorie réduites de 20% (90% -> 72%) */
     scroll-snap-align: center;
     max-height: none;
   }
@@ -22819,6 +22908,43 @@ body.woocommerce-cart div.woocommerce-wrapper {
   z-index: 1;
 }
 
+/* Bandeau photos de la pièce du projet — rangée de clichés côte à côte
+   (colonnes égales) en haut de la card "Mon projet", visible seulement si la
+   pièce a au moins une photo ACF dédiée. Pleine largeur : marges négatives qui
+   annulent le padding de la card. overflow:hidden + border-radius de
+   .conseiller-card clippent les coins hauts. Rempli par sapi-cards-conseiller.js. */
+.conseiller-card__photo {
+  position: relative;
+  z-index: 1;
+  display: -webkit-flex;
+  display: flex;
+  gap: 4px;
+  margin: -36px -28px 28px;
+  height: 300px;
+}
+
+.conseiller-card__photo[hidden] {
+  display: none;
+}
+
+/* Chaque cliché : colonne de largeur égale, recadrée en cover. */
+.conseiller-card__photo-item {
+  -webkit-flex: 1 1 0;
+  flex: 1 1 0;
+  min-width: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+@media (max-width: 768px) {
+  .conseiller-card__photo {
+    gap: 3px;
+    margin: -28px -18px 22px;
+    height: 200px;
+  }
+}
+
 /* ── Badge "Conseil de Robin" / "Mon projet" / "Sur-mesure" ── */
 .conseiller-badge {
   display: -webkit-inline-flex;
@@ -22940,6 +23066,10 @@ body.woocommerce-cart div.woocommerce-wrapper {
   border-style: solid;
   outline: none;
 }
+/* Mini-avatar Robin dans la pill conseil (généralisation design DA) */
+.conseiller-pill-secondary { padding: 6px 18px 6px 7px; gap: 9px; }
+.conseiller-pill-secondary__avatar { width: 26px; height: 26px; border-radius: 50%; overflow: hidden; flex-shrink: 0; box-shadow: 0 1px 3px rgba(147, 125, 104, 0.25); }
+.conseiller-pill-secondary__img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* ── Signature "— Robin" en Square Peg cursive ── */
 .conseiller-signature {

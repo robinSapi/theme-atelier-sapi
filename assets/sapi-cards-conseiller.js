@@ -286,6 +286,7 @@
      Rendu des cards (F2a-bis : 100% synchronous, zéro AJAX au load)
      ───────────────────────────────────────────── */
   var els = {};
+  var piecePhotosMap = null; // { piece_slug: [url, ...] } — alimente le bandeau card
   var GENERIC_ADVICE = config.genericAdvice || {};
   var FALLBACK_ADVICE = config.fallbackAdvice || 'Voici la sélection que je te propose dans le catalogue de Robin.';
 
@@ -499,11 +500,62 @@
     revealCard(els.cardConseil);
   }
 
+  // ── Bandeau photo de la pièce (haut de la card "Mon projet") ──────────
+  function parsePiecePhotos() {
+    if (!els.cardMonProjet) return null;
+    var raw = els.cardMonProjet.getAttribute('data-piece-photos');
+    if (!raw) return null;
+    try {
+      var parsed = JSON.parse(raw);
+      return (parsed && typeof parsed === 'object') ? parsed : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Mémorise la pièce affichée pour ne reconstruire le bandeau que si la pièce
+  // change (render() est rappelé à chaque update du projet).
+  var currentPhotoPiece = null;
+
+  // Affiche TOUTES les photos ACF de la pièce côte à côte (colonnes égales) en
+  // haut de la card → chaque cliché est plus étroit donc moins recadré qu'un
+  // bandeau large unique. Règle métier : pas de photo dédiée à la pièce (ou pas
+  // de pièce) → pas de bandeau (on ne retombe PAS sur la clé 'default').
+  function updateProjectPhoto() {
+    if (!els.cardPhoto) return;
+    var project = window.sapiProject ? window.sapiProject.get() : null;
+    var piece = project && project.answers && project.answers.piece;
+    var list = (piecePhotosMap && piece && piecePhotosMap[piece]) || null;
+    if (list && list.length) {
+      if (piece !== currentPhotoPiece) {
+        currentPhotoPiece = piece;
+        els.cardPhoto.innerHTML = '';
+        list.forEach(function (url) {
+          var item = document.createElement('div');
+          item.className = 'conseiller-card__photo-item';
+          item.style.backgroundImage = 'url("' + url.replace(/"/g, '\\"') + '")';
+          els.cardPhoto.appendChild(item);
+        });
+      }
+      els.cardPhoto.hidden = false;
+    } else {
+      currentPhotoPiece = null;
+      els.cardPhoto.innerHTML = '';
+      els.cardPhoto.hidden = true;
+    }
+  }
+
   function render() {
     if (window.sapiProject && window.sapiProject.hasProject()) {
       renderMonProjet();
+      updateProjectPhoto();
     } else {
       renderConseil();
+      if (els.cardPhoto) {
+        els.cardPhoto.hidden = true;
+        els.cardPhoto.innerHTML = '';
+        currentPhotoPiece = null;
+      }
     }
     refilterGrid();
     populateSelectionGrid();
@@ -932,6 +984,10 @@
 
     els.cardConseil       = els.zone.querySelector('[data-conseiller-card="conseil"]');
     els.cardMonProjet     = els.zone.querySelector('[data-conseiller-card="mon-projet"]');
+    // Bandeau photo de la pièce (haut de la card "Mon projet") + map des
+    // photos ACF par pièce (data-piece-photos, héritée de l'ancien hero live).
+    els.cardPhoto         = els.cardMonProjet ? els.cardMonProjet.querySelector('[data-mon-projet-photo]') : null;
+    piecePhotosMap        = parsePiecePhotos();
     els.phrase            = els.zone.querySelector('[data-mon-projet-phrase]');
     els.phraseContent     = els.zone.querySelector('[data-mon-projet-phrase-content]');
     // F2a-sexies : zone chip-question + lien Modifier coin haut-droit

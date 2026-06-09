@@ -20,6 +20,7 @@ function sapi_guide_get_steps() {
         ['label' => 'Bureau / Atelier',          'slug' => 'bureau',   'icon' => 'monitor'],
         ['label' => 'Salon / Salle à manger',    'slug' => 'salon',    'icon' => 'sofa'],
         ['label' => 'Chambre',                   'slug' => 'chambre',  'icon' => 'bed'],
+        ['label' => 'Chambre enfant',            'slug' => 'chambre-enfant', 'icon' => 'teddy'],
         ['label' => 'Entrée / Couloir',          'slug' => 'entree',   'icon' => 'door'],
         ['label' => 'Cage d\'escalier',          'slug' => 'escalier', 'icon' => 'stairs'],
       ],
@@ -27,13 +28,14 @@ function sapi_guide_get_steps() {
     [
       'id'         => 'taille',
       'question'   => 'Quelle taille fait votre pièce ?',
-      'visibility' => ['piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'entree']],
+      'visibility' => ['piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'chambre-enfant', 'entree']],
       'dynamic_question' => [
         'piece' => [
           'cuisine' => 'Quelle taille fait votre cuisine ?',
           'bureau'  => 'Quelle taille fait votre bureau ?',
           'salon'   => 'Quelle taille fait votre salon ?',
           'chambre' => 'Quelle taille fait votre chambre ?',
+          'chambre-enfant' => 'Quelle taille fait la chambre ?',
           'entree'  => 'Quelle taille fait votre entrée ?',
         ],
       ],
@@ -74,7 +76,7 @@ function sapi_guide_get_steps() {
       'visibility' => ['_or' => [
         ['taille' => ['petite', 'moyenne', 'ne-sais-pas']],
         ['eclairage' => ['principal', 'secondaire']],
-        ['piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'entree', 'escalier']],
+        ['piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'chambre-enfant', 'entree', 'escalier']],
       ]],
       'choices'    => [
         ['label' => 'Au plafond',               'slug' => 'plafond',       'icon' => 'ceiling-plug'],
@@ -86,7 +88,7 @@ function sapi_guide_get_steps() {
     [
       'id'         => 'hauteur',
       'question'   => 'Quelle hauteur sous plafond ?',
-      'visibility' => ['sortie' => ['plafond'], 'piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'entree']],
+      'visibility' => ['sortie' => ['plafond'], 'piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'chambre-enfant', 'entree']],
       'choices'    => [
         ['label' => 'Standard',    'dim' => '< 2,50 m',  'slug' => 'standard',    'icon' => 'ceiling-low'],
         ['label' => 'Confortable', 'dim' => '2,50–3 m',  'slug' => 'confortable', 'icon' => 'ceiling-mid'],
@@ -96,13 +98,14 @@ function sapi_guide_get_steps() {
     [
       'id'         => 'table',
       'question'   => 'Au-dessus d\'une table ou d\'un îlot ?',
-      'visibility' => ['hauteur' => ['standard'], 'piece' => ['cuisine', 'bureau', 'salon', 'chambre']],
+      'visibility' => ['hauteur' => ['standard'], 'piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'chambre-enfant']],
       'dynamic_question' => [
         'piece' => [
           'cuisine' => 'Au-dessus de votre table ou d\'un îlot ?',
           'bureau'  => 'Au-dessus de votre bureau ?',
           'salon'   => 'Au-dessus de votre table ?',
           'chambre' => 'Au-dessus de votre lit ?',
+          'chambre-enfant' => 'Au-dessus du lit ?',
         ],
       ],
       'choices'    => [
@@ -120,6 +123,7 @@ function sapi_guide_get_steps() {
           'bureau'   => 'Quel style pour votre bureau ?',
           'salon'    => 'Quel style pour votre salon ?',
           'chambre'  => 'Quel style pour votre chambre ?',
+          'chambre-enfant' => 'Quel style pour la chambre ?',
           'entree'   => 'Quel style pour votre entrée ?',
           'escalier' => 'Quel style pour votre escalier ?',
         ],
@@ -158,6 +162,7 @@ function sapi_guide_get_icons() {
     'sofa'         => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3"/><rect x="2" y="11" width="20" height="7" rx="2"/><path d="M5 18v2m14-2v2"/></svg>',
     'dining'       => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V20H6Z"/><line x1="6" y1="17" x2="18" y2="17"/></svg>',
     'bed'          => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M2 14h20"/><path d="M2 10V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/></svg>',
+    'teddy'        => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="7" r="2.5"/><circle cx="12" cy="13" r="7"/><circle cx="9.5" cy="12" r=".7" fill="currentColor" stroke="none"/><circle cx="14.5" cy="12" r=".7" fill="currentColor" stroke="none"/><circle cx="12" cy="15" r="1.3"/><path d="M10.6 16.6a2.1 2.1 0 0 0 2.8 0"/></svg>',
     'monitor'      => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>',
     'door'         => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="15" cy="12" r="1"/></svg>',
     'stairs'       => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21h4v-4h4v-4h4v-4h4V5"/></svg>',

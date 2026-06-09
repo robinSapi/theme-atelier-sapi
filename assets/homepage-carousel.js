@@ -33,6 +33,10 @@
     }
     const firstname = trimmed.substring(0, firstSpace);
     const restname  = trimmed.substring(firstSpace + 1);
+    // P9-a : nom commençant par un article (La, Le, Les, L') → tout en Square Peg
+    if (/^(la|le|les)$/i.test(firstname) || /^l['']/i.test(firstname)) {
+      return '<span class="product-restname">' + escapeHtml(trimmed) + '</span>';
+    }
     return '<span class="product-firstname">' + escapeHtml(firstname) + '</span>'
          + '<span class="product-restname">' + escapeHtml(restname) + '</span>';
   }

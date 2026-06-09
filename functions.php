@@ -312,21 +312,6 @@ function sapi_maison_enqueue_assets() {
     }
   }
 
-  // F2a-quinquies — Hero live update (H1 qui s'adapte au changement de
-  // sapiProject.answers.piece). Enqueue sur is_shop() uniquement.
-  if (class_exists('WooCommerce') && is_shop()) {
-    $hero_live_js_path = get_template_directory() . '/assets/sapi-hero-live.js';
-    if (file_exists($hero_live_js_path)) {
-      wp_enqueue_script(
-        'sapi-hero-live',
-        get_template_directory_uri() . '/assets/sapi-hero-live.js',
-        ['sapi-project'],
-        filemtime($hero_live_js_path),
-        true
-      );
-      wp_localize_script('sapi-hero-live', 'SAPI_HERO_TITLES', sapi_get_hero_piece_titles());
-    }
-  }
 
   // Méga-filtre intelligent + modale Conseiller V3
   // - is_shop() : tous les scripts (méga-filtre, cards Conseil/Mon projet, modale)
@@ -344,6 +329,7 @@ function sapi_maison_enqueue_assets() {
         'bureau'   => ['ampoule_degagee', 'semi_degagee'],
         'salon'    => ['ampoule_entouree', 'semi_degagee'],
         'chambre'  => ['ampoule_entouree', 'semi_degagee'],
+        'chambre-enfant' => ['ampoule_entouree', 'semi_degagee'], // lumière douce, aligné chambre
         'entree'   => ['ampoule_entouree', 'semi_degagee'], // Round 5 — aligné salon/chambre
         'escalier' => null,
       ],
@@ -3546,10 +3532,10 @@ function sapi_ajax_megafilter_chat() {
  * n'a abouti dans la modale. Source de vérité unique partagée PHP / JS.
  */
 /**
- * Titres du hero /mes-creations/ par pièce (F2a-quinquies).
- * Source unique partagée entre le rendu PHP initial (archive-product.php)
- * et la localize JS (sapi-hero-live.js qui met à jour le H1 en live au
- * changement de sapiProject.answers.piece).
+ * Liste des pièces /mes-creations/ (slug → libellé).
+ * Le hero est désormais statique (titre fixe "Mes créations") : cette liste
+ * sert à archive-product.php pour énumérer les slugs et lire les photos ACF
+ * par pièce (hero_<slug>), qui alimentent le bandeau de la card "Mon projet".
  */
 function sapi_get_hero_piece_titles() {
   return [
@@ -3557,6 +3543,7 @@ function sapi_get_hero_piece_titles() {
     'pieces'  => [
       'salon'    => __('Pour un salon', 'theme-sapi-maison'),
       'chambre'  => __('Pour une chambre', 'theme-sapi-maison'),
+      'chambre-enfant' => __('Pour une chambre enfant', 'theme-sapi-maison'),
       'cuisine'  => __('Pour une cuisine', 'theme-sapi-maison'),
       'bureau'   => __('Pour un bureau', 'theme-sapi-maison'),
       'entree'   => __('Pour une entrée', 'theme-sapi-maison'),
@@ -3571,6 +3558,7 @@ function sapi_megafilter_get_generic_advices() {
     'bureau'   => __("Pour un bureau, je te propose les modèles où l'ampoule reste à découvert. La lumière est directe et tranchée, idéale pour la concentration sans fatiguer les yeux.", 'theme-sapi-maison'),
     'salon'    => __("Pour un salon, je te propose des luminaires à ampoule entourée. La lumière passe à travers le bois et dessine ses motifs au mur, l'ambiance s'installe.", 'theme-sapi-maison'),
     'chambre'  => __("Pour une chambre, je te propose des modèles à ampoule entourée. Une lumière douce et diffuse, qui invite au calme et révèle les jeux du bois.", 'theme-sapi-maison'),
+    'chambre-enfant' => __("Pour une chambre d'enfant, je te propose des modèles à ampoule entourée. Une lumière douce et tamisée, jamais agressive, qui rassure au moment du coucher et fait danser les ombres du bois au plafond.", 'theme-sapi-maison'),
     'entree'   => __("Pour une entrée, je te propose des modèles à ampoule entourée. La lumière joue avec les découpes du bois, donne le ton dès le pas de porte.", 'theme-sapi-maison'),
     'escalier' => __("Pour un escalier, je te propose les modèles hauts qui occupent le volume. La cage se révèle par étages, l'œil suit la lumière en montant.", 'theme-sapi-maison'),
   ];
@@ -3700,6 +3688,13 @@ function sapi_render_conseiller_modal() {
       <!-- ═══ S0 — Accueil hybride (question pièce + texte libre) ═══════ -->
       <section class="modal__screen" data-screen="s0" hidden>
         <header class="modal__head">
+          <div class="conseiller-sig">
+            <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+            <span class="conseiller-sig__text">
+              <span class="conseiller-sig__who">Le conseil de Robin</span>
+              <span class="conseiller-sig__hook">Mon regard d'artisan sur ton projet</span>
+            </span>
+          </div>
           <span class="badge" data-s0-badge>
             <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
             <span data-s0-badge-text><?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?></span>
@@ -3765,6 +3760,13 @@ function sapi_render_conseiller_modal() {
       <!-- ═══ S2-chat — Conversation libre avec Robin (chat bubbles + input) ═══ -->
       <section class="modal__screen" data-screen="s2-chat" hidden>
         <header class="modal__head">
+          <div class="conseiller-sig">
+            <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+            <span class="conseiller-sig__text">
+              <span class="conseiller-sig__who">Le conseil de Robin</span>
+              <span class="conseiller-sig__hook">Mon regard d'artisan sur ton projet</span>
+            </span>
+          </div>
           <span class="badge">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8-1.476 0-2.866-.317-4.083-.876L3 21l1.876-4.917A7.997 7.997 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
             <?php esc_html_e('Échange avec Robin', 'theme-sapi-maison'); ?>
@@ -5203,6 +5205,7 @@ function sapi_guide_get_ampoule_filter($piece, $taille = '') {
       return ['ampoule_degagee', 'semi_degagee'];
     case 'salon':
     case 'chambre':
+    case 'chambre-enfant':
     case 'entree':
       // Round 5 — entrée bénéficie du même filtre que salon/chambre :
       // ampoule entourée privilégiée (cf. guide-prompt-savoir.txt qui
@@ -7004,7 +7007,7 @@ add_action('admin_enqueue_scripts', 'sapi_megafilter_admin_enqueue');
 function sapi_megafilter_admin_read_filters() {
   $valid_periods  = ['7d', '30d', 'all'];
   $valid_entries  = ['home_picker', 'mes_creations', 'product_pill', 'freetext'];
-  $valid_pieces   = ['salon', 'cuisine', 'chambre', 'bureau', 'entree', 'escalier'];
+  $valid_pieces   = ['salon', 'cuisine', 'chambre', 'chambre-enfant', 'bureau', 'entree', 'escalier'];
   $valid_devices  = ['desktop', 'mobile'];
   $valid_statuses = ['chat', 'contact', 'complete'];
 
@@ -7200,6 +7203,7 @@ function sapi_megafilter_admin_page() {
   ];
   $piece_labels = [
     'salon' => 'Salon', 'cuisine' => 'Cuisine', 'chambre' => 'Chambre',
+    'chambre-enfant' => 'Chambre enfant',
     'bureau' => 'Bureau', 'entree' => 'Entrée', 'escalier' => 'Escalier',
   ];
   $taille_labels = [
@@ -7592,6 +7596,7 @@ function sapi_megafilter_render_session_detail($r) {
   ];
   $piece_labels = [
     'salon' => 'Salon', 'cuisine' => 'Cuisine', 'chambre' => 'Chambre',
+    'chambre-enfant' => 'Chambre enfant',
     'bureau' => 'Bureau', 'entree' => 'Entrée', 'escalier' => 'Escalier',
   ];
   $taille_labels = [
@@ -7926,10 +7931,13 @@ function sapi_get_google_reviews() {
     foreach ($body['reviews'] as $review) {
       // Prefer originalText (French) over translated text
       $text = '';
+      $lang = '';
       if (!empty($review['originalText']['text'])) {
         $text = $review['originalText']['text'];
+        $lang = $review['originalText']['languageCode'] ?? '';
       } elseif (!empty($review['text']['text'])) {
         $text = $review['text']['text'];
+        $lang = $review['text']['languageCode'] ?? '';
       }
 
       $result['reviews'][] = [
@@ -7938,8 +7946,22 @@ function sapi_get_google_reviews() {
         'text'    => $text,
         'time'    => $review['relativePublishTimeDescription'] ?? '',
         'photo'   => $review['authorAttribution']['photoUri'] ?? '',
+        'lang'    => $lang,
       ];
     }
+
+    // P14 : avis en français d'abord (tri stable). Code langue Places, sinon
+    // heuristique sur les accents français quand la langue n'est pas exposée.
+    $fr = [];
+    $other = [];
+    foreach ($result['reviews'] as $r) {
+      $is_fr = (stripos($r['lang'], 'fr') === 0);
+      if (!$is_fr && $r['lang'] === '') {
+        $is_fr = (bool) preg_match('/[àâçéèêëîïôûùü]/iu', $r['text']);
+      }
+      if ($is_fr) { $fr[] = $r; } else { $other[] = $r; }
+    }
+    $result['reviews'] = array_merge($fr, $other);
   }
 
   set_transient($cache_key, $result, 6 * HOUR_IN_SECONDS);
