@@ -7963,7 +7963,7 @@ li.carousel-editorial-slide,
   .home-projet .room-picker-title { white-space: nowrap; }
 }
 @media (max-width: 768px) {
-  .home-projet-section { padding: 3.5rem 1rem 2.5rem; }
+  .home-projet-section { padding: 3.5rem 14px 2.5rem; }
   .home-projet .room-picker-cards { gap: 0.75rem; }
   /* Mobile — cards réponses compactes, layout horizontal (icône à gauche, texte à droite aligné à gauche) */
   .home-projet .room-card {
@@ -8148,9 +8148,9 @@ li.carousel-editorial-slide,
   .home-avis { padding: 3.5rem 0 2.5rem; }
   .home-avis .testimonials-header { padding: 1rem 1.25rem 0; }
   /* mobile carrousel : padding vertical pour ne pas tronquer les ombres des cards */
-  .home-avis .testimonials-grid { padding: 1.5rem 1.25rem 1.75rem; }
+  .home-avis .testimonials-grid { padding: 1.5rem 14px 1.75rem; }
   .home-avis .testimonials-grid > .testimonial-card { flex: 0 0 85%; } /* un peu plus étroit → ombres latérales visibles */
-  .home-avis .testimonials-cta { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .home-avis .testimonials-cta { padding-left: 14px; padding-right: 14px; }
 }
 
 /* ===== Ils parlent de nous — références presse (dans la section avis) ===== */
@@ -8232,7 +8232,7 @@ li.carousel-editorial-slide,
 .ca-allnews__btn:hover{background:var(--color-wood);color:#fff}
 .home-cadeau-actus .arr{display:inline-block;transition:transform .25s}
 .gift-object:hover .arr,.news-journal:hover .arr,.ca-allnews__btn:hover .arr{transform:translateX(4px)}
-@media (max-width:880px){.ca-grid{grid-template-columns:1fr}.home-cadeau-actus{padding:3rem 1.25rem}}
+@media (max-width:880px){.ca-grid{grid-template-columns:1fr}.home-cadeau-actus{padding:3rem 14px}}
 
 /* ===== Refonte home #8 — respiration sections bento + ajustements divers ===== */
 /* (5) Respiration avant les sections bento — double classe pour battre .hero-bento */
@@ -8486,7 +8486,7 @@ li.carousel-editorial-slide,
 @media (max-width: 900px) {
   .quote-band { display: block; padding-bottom: 50px; }
   .quote-inner { padding: 60px 22px; }
-  .loc-card { display: block; position: relative; right: auto; bottom: auto; width: auto; margin: 30px auto 0; } /* display:block : l'<a> inline ne blockifie plus via position:absolute -> le fond blanc couvrait pas le footer */
+  .loc-card { display: block; position: relative; right: auto; bottom: auto; width: auto; margin: 30px 14px 0; } /* display:block : l'<a> inline ne blockifie plus via position:absolute -> le fond blanc couvrait pas le footer */
 }
 @media (max-width: 700px) {
   .quote-band { min-height: 78vh; }
@@ -11893,7 +11893,7 @@ button.room-card {
   }
 
   .hero-bento {
-    padding: 1.5rem 1rem;
+    padding: 1.5rem 14px;
   }
 
   .collections-kinetic {
@@ -11901,7 +11901,7 @@ button.room-card {
   }
 
   .section-header-kinetic {
-    padding: 0 1rem;
+    padding: 0 14px;
     gap: 0.25rem;
   }
 
@@ -21221,7 +21221,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 1rem;
-    padding: 15px 5%;
+    padding: 15px 14px;
     scroll-padding-left: 0;
     scroll-behavior: auto;
   }
