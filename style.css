@@ -8344,16 +8344,17 @@ li.carousel-editorial-slide,
   }
   .creations-products::-webkit-scrollbar { display: none; }
   .creations-products > .product-card-cinetique {
-    flex: 0 0 82%;
+    flex: 0 0 72%;
     scroll-snap-align: center;
   }
   /* mini-cards : neutralise les règles "photo dominante 400px" de la grille
-     (sinon cards énormes/cassées) -> photo en 4/3 (moins haute) */
+     -> photo en hauteur fixe modérée (cards bien plus compactes) */
   .creations-products .product-card-link { height: auto; }
   .creations-products .product-card-cinetique .product-media {
     min-height: 0;
     flex: 0 0 auto;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: auto;
+    height: 150px;
   }
   .creations-products .product-card-cinetique .product-info { padding: 0.7rem 0.6rem; }
   /* prix masqué (mobile) — sélecteur 0,3,0 pour battre .product-card-cinetique .product-price{display:flex} */
