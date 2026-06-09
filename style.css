@@ -11619,6 +11619,11 @@ button.room-card {
   margin: 0 0 0.7rem;
   max-width: 92%;
 }
+/* Mobile : titres catégorie -40% (2.4 -> 1.44rem), sous-titres -30% (1 -> 0.7rem) */
+@media (max-width: 768px) {
+  .collection-card .collection-details h3 { font-size: 1.44rem; }
+  .collection-desc { font-size: 0.7rem; }
+}
 
 .collection-meta {
   display: flex;
@@ -12297,7 +12302,7 @@ button.room-card {
   }
 
   .collection-card .collection-details h3 {
-    font-size: 1.5rem;
+    font-size: 1.44rem; /* aligné sur l'override ≤768 (-40%) pour éviter un saut */
   }
 
   .stat-block strong {
