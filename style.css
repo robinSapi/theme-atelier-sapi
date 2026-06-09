@@ -8349,14 +8349,14 @@ li.carousel-editorial-slide,
   }
   /* mini-cards : neutralise les règles "photo dominante 400px" de la grille
      -> photo en hauteur fixe modérée (cards bien plus compactes) */
-  .creations-products .product-card-link { height: auto; }
-  .creations-products .product-card-cinetique .product-media {
+  .creations-grid .creations-products .product-card-link { height: auto; }
+  .creations-grid .creations-products .product-card-cinetique .product-media {
     min-height: 0;
     flex: 0 0 auto;
     aspect-ratio: auto;
     height: 150px;
   }
-  .creations-products .product-card-cinetique .product-info { padding: 0.7rem 0.6rem; }
+  .creations-grid .creations-products .product-card-cinetique .product-info { padding: 0.7rem 0.6rem; }
   /* prix masqué (mobile) — sélecteur 0,3,0 pour battre .product-card-cinetique .product-price{display:flex} */
   .creations-products .product-card-cinetique .product-price { display: none; }
   /* mini-cards : textes réduits */
