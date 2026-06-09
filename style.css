@@ -8486,7 +8486,7 @@ li.carousel-editorial-slide,
 @media (max-width: 900px) {
   .quote-band { display: block; padding-bottom: 50px; }
   .quote-inner { padding: 60px 22px; }
-  .loc-card { position: relative; right: auto; bottom: auto; width: auto; margin: 30px auto 0; }
+  .loc-card { display: block; position: relative; right: auto; bottom: auto; width: auto; margin: 30px auto 0; } /* display:block : l'<a> inline ne blockifie plus via position:absolute -> le fond blanc couvrait pas le footer */
 }
 @media (max-width: 700px) {
   .quote-band { min-height: 78vh; }
