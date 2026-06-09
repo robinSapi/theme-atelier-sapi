@@ -21220,7 +21220,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   }
   .collections-grid::-webkit-scrollbar { display: none; }
   .collections-grid > .collection-card {
-    flex: 0 0 90%;
+    flex: 0 0 72%; /* mobile : cards catégorie réduites de 20% (90% -> 72%) */
     scroll-snap-align: center;
     max-height: none;
   }
