@@ -822,7 +822,7 @@ $process_steps = [
 
   <a class="loc-card" href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer" aria-label="Venir me voir à l'atelier, voir l'itinéraire sur Google Maps">
     <div class="loc-media">
-      <svg viewBox="0 0 520 280" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <svg viewBox="0 0 520 280" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <rect width="520" height="280" fill="#E7DCC8"/>
         <path d="M -20 60 C 130 100, 190 30, 330 110 S 520 140, 560 120 L 560 190 C 420 170, 320 220, 200 190 S 40 220, -20 200 Z" fill="#D5C5A9"/>
         <g stroke="#C4B393" stroke-width="6" fill="none" stroke-linecap="round"><path d="M 60 0 L 130 100 L 270 140 L 360 280"/><path d="M 0 170 L 210 140 L 430 80 L 520 100"/></g>
