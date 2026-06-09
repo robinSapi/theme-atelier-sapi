@@ -8340,7 +8340,9 @@ li.carousel-editorial-slide,
     /* pleine largeur (marges négatives annulent le padding 14px de la section) :
        les cards scrollent jusqu'au bord de l'écran sans être coupées */
     margin: 0 -14px;
-    padding: 4px 14px 8px;
+    /* padding vertical large : overflow-x:auto force overflow-y:auto -> sans ça
+       les ombres des cards sont coupées en haut/bas */
+    padding: 14px 14px 28px;
   }
   .creations-products::-webkit-scrollbar { display: none; }
   .creations-products > .product-card-cinetique {
