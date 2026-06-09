@@ -815,7 +815,7 @@ $process_steps = [
       <span class="who"><b>Robin</b><span>artisan de l'Atelier Sâpi · Lyon</span></span>
     </div>
     <div class="q-links">
-      <a class="q-link-cta" href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>">Les conseils de Robin</a>
+      <a class="q-link-cta" href="<?php echo esc_url(home_url('/conseils-eclaires/')); ?>">Les conseils (sérieux) de Robin</a>
       <a class="q-link-discreet" href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>">Faire connaissance →</a>
     </div>
   </div>
