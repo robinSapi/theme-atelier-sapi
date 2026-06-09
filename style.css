@@ -8341,7 +8341,7 @@ li.carousel-editorial-slide,
   }
   .creations-products::-webkit-scrollbar { display: none; }
   .creations-products > .product-card-cinetique {
-    flex: 0 0 65%;
+    flex: 0 0 82%;
     scroll-snap-align: center;
   }
   /* mini-cards : neutralise les règles "photo dominante 400px" de la grille
@@ -8353,12 +8353,12 @@ li.carousel-editorial-slide,
     aspect-ratio: 1 / 1;
   }
   .creations-products .product-card-cinetique .product-info { padding: 0.7rem 0.6rem; }
-  /* prix masqué (mobile uniquement) pour gagner de la place */
-  .creations-products .product-price { display: none; }
-  /* mini-cards : textes réduits en proportion */
-  .creations-grid .product-card-cinetique .product-name { font-size: 1.05rem !important; }
-  .creations-grid .product-card-cinetique .product-category { font-size: 0.8rem; margin-bottom: 0.5rem; }
-  .creations-grid .product-card-cinetique .btn-view { font-size: 0.8rem; }
+  /* prix masqué (mobile) — sélecteur 0,3,0 pour battre .product-card-cinetique .product-price{display:flex} */
+  .creations-products .product-card-cinetique .product-price { display: none; }
+  /* mini-cards : textes réduits */
+  .creations-grid .product-card-cinetique .product-name { font-size: 0.85rem !important; }
+  .creations-grid .product-card-cinetique .product-category { font-size: 0.72rem; margin-bottom: 0.4rem; }
+  .creations-grid .product-card-cinetique .btn-view { font-size: 0.72rem; }
 }
 
 /* ===== Refonte #11 — Collections : peek + flèches desktop ===== */
