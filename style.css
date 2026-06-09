@@ -8337,6 +8337,9 @@ li.carousel-editorial-slide,
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     gap: 1rem;
+    /* pleine largeur (marges négatives annulent le padding 14px de la section) :
+       les cards scrollent jusqu'au bord de l'écran sans être coupées */
+    margin: 0 -14px;
     padding: 4px 14px 8px;
   }
   .creations-products::-webkit-scrollbar { display: none; }
@@ -8345,12 +8348,12 @@ li.carousel-editorial-slide,
     scroll-snap-align: center;
   }
   /* mini-cards : neutralise les règles "photo dominante 400px" de la grille
-     (sinon cards énormes/cassées dans le slider) -> photo carrée proportionnée */
+     (sinon cards énormes/cassées) -> photo en 4/3 (moins haute) */
   .creations-products .product-card-link { height: auto; }
   .creations-products .product-card-cinetique .product-media {
     min-height: 0;
     flex: 0 0 auto;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 4 / 3;
   }
   .creations-products .product-card-cinetique .product-info { padding: 0.7rem 0.6rem; }
   /* prix masqué (mobile) — sélecteur 0,3,0 pour battre .product-card-cinetique .product-price{display:flex} */
