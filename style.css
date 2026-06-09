@@ -11600,7 +11600,7 @@ button.room-card {
   font-size: 1rem;
   line-height: 1.35;
   color: var(--color-cream);
-  opacity: 0.92;
+  opacity: 0.6; /* 40% de transparence */
   margin: 0 0 0.7rem;
   max-width: 92%;
 }
