@@ -12047,6 +12047,11 @@ button.room-card {
   .newsletter-kinetic {
     padding: 2rem 1.5rem;
   }
+  /* légère marge gauche/droite de la band sur mobile (ne touche plus les bords) */
+  .newsletter--band {
+    margin-left: 14px;
+    margin-right: 14px;
+  }
 
   .newsletter-kinetic .newsletter-subtitle {
     margin-left: 0;
