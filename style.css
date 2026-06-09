@@ -8264,6 +8264,8 @@ li.carousel-editorial-slide,
   gap: 2rem;
   align-items: stretch;
 }
+/* desktop : le wrapper des 2 cards est transparent -> elles restent des items de la grille (2fr 1fr 1fr) */
+.creations-products { display: contents; }
 .creation-star {
   position: relative;
   display: block;
@@ -8323,6 +8325,31 @@ li.carousel-editorial-slide,
 }
 @media (max-width: 520px) {
   .creations-grid { grid-template-columns: 1fr; }
+}
+/* Mobile : star pleine largeur (inchangée) + les 2 autres modèles en slider horizontal (dots via scroll-dots.js) */
+@media (max-width: 768px) {
+  .creations-grid { display: block; }
+  .creations-grid .creation-star { margin-bottom: 1rem; }
+  .creations-products {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 1rem;
+    padding: 4px 14px 8px;
+  }
+  .creations-products::-webkit-scrollbar { display: none; }
+  .creations-products > .product-card-cinetique {
+    flex: 0 0 65%;
+    scroll-snap-align: center;
+  }
+  /* prix masqué (mobile uniquement) pour gagner de la place */
+  .creations-products .product-price { display: none; }
+  /* mini-cards : textes réduits en proportion */
+  .creations-grid .product-card-cinetique .product-name { font-size: 1.05rem !important; }
+  .creations-grid .product-card-cinetique .product-category { font-size: 0.8rem; margin-bottom: 0.5rem; }
+  .creations-grid .product-card-cinetique .btn-view { font-size: 0.8rem; }
 }
 
 /* ===== Refonte #11 — Collections : peek + flèches desktop ===== */

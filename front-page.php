@@ -611,7 +611,7 @@ foreach ($carousel_products as $product) {
     </a>
     <?php endif; ?>
 
-    <?php foreach ($featured_products as $fp) : ?>
+    <div class="creations-products"><?php foreach ($featured_products as $fp) : ?>
     <div class="product-card-cinetique" data-product-id="<?php echo esc_attr($fp['id']); ?>" data-piece-swap data-piece-swap-type="ambiance" data-piece-swap-size="large">
       <a href="<?php echo esc_url($fp['url']); ?>" class="product-card-link">
         <div class="product-media<?php echo !empty($fp['hover_id']) ? ' has-hover-image' : ''; ?>">
@@ -631,7 +631,7 @@ foreach ($carousel_products as $product) {
         <div class="product-actions"><span class="btn-view">Découvrir ⇾</span></div>
       </a>
     </div>
-    <?php endforeach; ?>
+    <?php endforeach; ?></div>
 
   </div>
   <div class="creations-cta">
