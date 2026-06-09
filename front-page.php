@@ -635,7 +635,7 @@ foreach ($carousel_products as $product) {
 
   </div>
   <div class="creations-cta">
-    <a href="<?php echo home_url('/mes-creations/'); ?>" class="hero-cta">Toutes les créations</a>
+    <a href="<?php echo home_url('/mes-creations/'); ?>" class="hero-cta">Voir toutes les créations</a>
   </div>
 </section>
 </div>
