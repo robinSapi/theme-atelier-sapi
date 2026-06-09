@@ -8354,7 +8354,7 @@ li.carousel-editorial-slide,
     min-height: 0;
     flex: 0 0 auto;
     aspect-ratio: auto;
-    height: 150px;
+    height: 190px;
   }
   .creations-grid .creations-products .product-card-cinetique .product-info { padding: 0.7rem 0.6rem; }
   /* prix masqué (mobile) — sélecteur 0,3,0 pour battre .product-card-cinetique .product-price{display:flex} */
