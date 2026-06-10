@@ -24695,8 +24695,11 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 /* Phrase de conseil (machine à écrire) */
 .mescreations-immersion__phrase {
   color: #fff;
-  font-size: clamp(1.4rem, 2.8vw, 2.1rem);
-  line-height: 1.4;
+  /* Grosse à l'état initial, rétrécit au scroll (interpolée via --reveal). */
+  --phrase-max: clamp(1.85rem, 3.6vw, 2.75rem);
+  --phrase-min: clamp(1.05rem, 1.7vw, 1.35rem);
+  font-size: calc(var(--phrase-max) - (var(--phrase-max) - var(--phrase-min)) * var(--reveal));
+  line-height: 1.35;
   font-style: italic;
   font-weight: 500;
   text-shadow: 0 2px 24px rgba(0,0,0,.45);
