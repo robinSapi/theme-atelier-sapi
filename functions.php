@@ -3688,7 +3688,7 @@ function sapi_render_conseiller_modal() {
       <!-- ═══ S0 — Accueil hybride (question pièce + texte libre) ═══════ -->
       <section class="modal__screen" data-screen="s0" hidden>
         <header class="modal__head">
-          <div class="conseiller-sig">
+          <div class="conseiller-sig conseiller-sig--v1">
             <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
             <span class="conseiller-sig__text">
               <span class="conseiller-sig__who">Le conseil de Robin</span>
@@ -3736,6 +3736,10 @@ function sapi_render_conseiller_modal() {
       <!-- ═══ S1 — Questions guidées (progress sticky bottom du body) ═══════ -->
       <section class="modal__screen" data-screen="s1" hidden>
         <header class="modal__head">
+          <div class="conseiller-sig conseiller-sig--v1">
+            <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+            <span class="conseiller-sig__text"><span class="conseiller-sig__who">Le conseil de Robin</span><span class="conseiller-sig__hook">On affine ton projet</span></span>
+          </div>
           <span class="badge">
             <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
             <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
@@ -3760,11 +3764,11 @@ function sapi_render_conseiller_modal() {
       <!-- ═══ S2-chat — Conversation libre avec Robin (chat bubbles + input) ═══ -->
       <section class="modal__screen" data-screen="s2-chat" hidden>
         <header class="modal__head">
-          <div class="conseiller-sig">
+          <div class="conseiller-sig conseiller-sig--v1">
             <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
             <span class="conseiller-sig__text">
               <span class="conseiller-sig__who">Le conseil de Robin</span>
-              <span class="conseiller-sig__hook">Mon regard d'artisan sur ton projet</span>
+              <span class="conseiller-sig__hook">Discutons de ton projet</span>
             </span>
           </div>
           <span class="badge">
@@ -3799,6 +3803,10 @@ function sapi_render_conseiller_modal() {
       <!-- ═══ S-product-recap — Récap fiche produit (essence + taille + conseils) ═══ -->
       <section class="modal__screen" data-screen="s-product-recap" hidden>
         <header class="modal__head">
+          <div class="conseiller-sig conseiller-sig--v1">
+            <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+            <span class="conseiller-sig__text"><span class="conseiller-sig__who">Le conseil de Robin</span><span class="conseiller-sig__hook">Mon conseil pour toi</span></span>
+          </div>
           <span class="badge">
             <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
             <?php esc_html_e('Mon conseil pour toi', 'theme-sapi-maison'); ?>
@@ -3844,6 +3852,10 @@ function sapi_render_conseiller_modal() {
         <!-- État form (défaut) -->
         <div data-contact-state="form">
           <header class="modal__head">
+            <div class="conseiller-sig conseiller-sig--v1">
+              <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+              <span class="conseiller-sig__text"><span class="conseiller-sig__who">Le conseil de Robin</span><span class="conseiller-sig__hook">Échangeons ensemble</span></span>
+            </div>
             <span class="badge">
               <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
               <span data-contact-badge-text><?php esc_html_e('Échangeons ensemble', 'theme-sapi-maison'); ?></span>
@@ -3869,7 +3881,7 @@ function sapi_render_conseiller_modal() {
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
                 </button>
                 <p class="contact-reassure"><?php esc_html_e('Réponse de Robin sous 48h · Aucun engagement', 'theme-sapi-maison'); ?></p>
-                <p class="contact-disclaimer"><?php esc_html_e('En envoyant votre demande, vous acceptez de recevoir occasionnellement des nouvelles de l\'Atelier Sâpi. Désinscription possible à tout moment.', 'theme-sapi-maison'); ?></p>
+                <p class="contact-disclaimer"><?php esc_html_e('En envoyant ta demande, tu acceptes de recevoir occasionnellement des nouvelles de l\'Atelier Sâpi. Désinscription possible à tout moment.', 'theme-sapi-maison'); ?></p>
               </form>
             </div>
           </div>
@@ -3884,6 +3896,10 @@ function sapi_render_conseiller_modal() {
         <!-- État succès -->
         <div data-contact-state="success" hidden>
           <header class="modal__head">
+            <div class="conseiller-sig conseiller-sig--v1">
+              <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+              <span class="conseiller-sig__text"><span class="conseiller-sig__who">Le conseil de Robin</span><span class="conseiller-sig__hook">Merci, à très vite</span></span>
+            </div>
             <span class="badge">
               <?php echo $pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
               <?php esc_html_e('Demande envoyée', 'theme-sapi-maison'); ?>
@@ -3907,6 +3923,10 @@ function sapi_render_conseiller_modal() {
       <!-- ═══ S3 — Carrefour récap "Ton projet" + 3 actions ═══════ -->
       <section class="modal__screen" data-screen="s3" hidden>
         <header class="modal__head">
+          <div class="conseiller-sig conseiller-sig--v1">
+            <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+            <span class="conseiller-sig__text"><span class="conseiller-sig__who">Le conseil de Robin</span><span class="conseiller-sig__hook">On récapitule ?</span></span>
+          </div>
           <span class="badge">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
             <?php esc_html_e('Ton projet', 'theme-sapi-maison'); ?>

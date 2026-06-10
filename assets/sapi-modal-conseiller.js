@@ -1353,10 +1353,22 @@
     return (options[idx].textContent || options[idx].text || '').trim();
   }
 
-  // Construit l'intro "Pour votre <pièce>, Robin recommande :"
+  // Construit l'intro "Pour <ta/ton pièce>, Robin recommande :" — tutoiement,
+  // possessif accordé au genre via une table piece-clé → forme tutoyée
+  // (« votre » est neutre, pas « ton/ta » → table explicite pour éviter
+  // « ton chambre »). Repli sur « ta pièce » si la clé est inconnue.
+  var PIECE_TUTOIEMENT = {
+    'cuisine': 'ta cuisine',
+    'bureau': 'ton bureau',
+    'salon': 'ton salon',
+    'chambre': 'ta chambre',
+    'chambre-enfant': 'ta chambre d\'enfant',
+    'entree': 'ton entrée',
+    'escalier': 'ta cage d\'escalier'
+  };
   function buildRecapIntro(answers, labels) {
-    var pieceLbl = (labels.piece || '').toLowerCase();
-    return 'Pour votre ' + pieceLbl + ', Robin recommande :';
+    var piece = PIECE_TUTOIEMENT[answers && answers.piece] || 'ta pièce';
+    return 'Pour ' + piece + ', Robin recommande :';
   }
 
   // Affiche l'écran s-product-recap (immédiat, aucun fetch).

@@ -7992,15 +7992,9 @@ li.carousel-editorial-slide,
 .conseiller-sig__text{display:flex;flex-direction:column;text-align:left}
 .conseiller-sig__who{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-wood)}
 .conseiller-sig__hook{font-family:var(--font-display);font-size:32px;line-height:1;color:var(--color-wood-dark);margin-top:2px}
-/* Généralisation modale (S0 accueil + S2 chat) : la signature remplace le badge contextuel */
-.conseiller-card--modal [data-screen="s0"] .badge,
-.conseiller-card--modal [data-screen="s2-chat"] .badge{display:none}
+/* Phase 4 — la pill V1 (.conseiller-sig--v1) remplace les anciens badges texte sur TOUS les écrans de la modale. Sizing géré par --v1 (desktop + mobile). */
+.conseiller-card--modal .badge{display:none}
 .conseiller-card--modal .conseiller-sig{margin-bottom:0}
-@media (max-width:600px){
-  .conseiller-card--modal .conseiller-sig{gap:14px}
-  .conseiller-card--modal .conseiller-sig__avatar{width:52px;height:52px}
-  .conseiller-card--modal .conseiller-sig__hook{font-size:24px}
-}
 /* ===== Signature Conseiller — pill bois sombre V1 : photo + accroche Square Peg, sans label (partagée home + Conseils) ===== */
 .conseiller-sig--v1{
   display:inline-flex;align-items:center;gap:12px;
@@ -23044,12 +23038,12 @@ body.woocommerce-cart div.woocommerce-wrapper {
   -webkit-animation: conseiller-dialog-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   animation: conseiller-dialog-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
+/* Phase 4 — cadre C : grain bois en filigrane (remplace l'ancien pointillé dashed) */
 .conseiller-card--modal::before {
   content: '';
   position: absolute;
-  inset: 12px;
-  border: 1.5px dashed rgba(139, 115, 85, 0.35);
-  border-radius: 12px;
+  inset: 0;
+  background-image: repeating-linear-gradient(92deg, rgba(139, 115, 85, .05) 0, rgba(139, 115, 85, .05) 1px, transparent 1px, transparent 7px);
   pointer-events: none;
   z-index: 0;
 }
@@ -23270,6 +23264,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
   transform: translateY(-2px);
   box-shadow: var(--shadow-card-hover);
   border-color: var(--color-wood);
+}
+/* Phase 4 — hover des cartes de choix en accent orange (comme la home), scopé modale */
+@media (hover:hover){
+  .conseiller-card--modal .choice:hover{border-color:var(--color-orange)}
+  .conseiller-card--modal .choice:hover .choice__icon{background:rgba(227,91,36,.12);color:var(--color-orange)}
 }
 .choice__icon {
   width: 44px;
@@ -23816,7 +23815,7 @@ button.chip--project:focus-visible {
     height: calc(100dvh - 64px);
     max-height: calc(100dvh - 64px);
   }
-  .conseiller-card--modal::before { inset: 8px; }
+  .conseiller-card--modal::before { inset: 0; }
   .modal__head { padding: 20px 22px 8px; }
   .modal__body { padding: 8px 22px; gap: 12px; }
   .modal__foot { padding: 10px 22px 22px; }

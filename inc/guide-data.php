@@ -27,16 +27,16 @@ function sapi_guide_get_steps() {
     ],
     [
       'id'         => 'taille',
-      'question'   => 'Quelle taille fait votre pièce ?',
+      'question'   => 'Quelle taille fait ta pièce ?',
       'visibility' => ['piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'chambre-enfant', 'entree']],
       'dynamic_question' => [
         'piece' => [
-          'cuisine' => 'Quelle taille fait votre cuisine ?',
-          'bureau'  => 'Quelle taille fait votre bureau ?',
-          'salon'   => 'Quelle taille fait votre salon ?',
-          'chambre' => 'Quelle taille fait votre chambre ?',
+          'cuisine' => 'Quelle taille fait ta cuisine ?',
+          'bureau'  => 'Quelle taille fait ton bureau ?',
+          'salon'   => 'Quelle taille fait ton salon ?',
+          'chambre' => 'Quelle taille fait ta chambre ?',
           'chambre-enfant' => 'Quelle taille fait la chambre ?',
-          'entree'  => 'Quelle taille fait votre entrée ?',
+          'entree'  => 'Quelle taille fait ton entrée ?',
         ],
       ],
       'choices'    => [
@@ -66,7 +66,7 @@ function sapi_guide_get_steps() {
     ],
     [
       'id'         => 'sortie',
-      'question'   => 'Où installerez-vous votre luminaire ?',
+      'question'   => 'Où vas-tu installer ton luminaire ?',
       // Round 2 — 4.1 : `sortie` doit rester visible dès qu'une pièce est
       // connue, même si taille/eclairage manquent. Sinon le freetext
       // ("applique pour ma chambre" → piece+sortie sans taille intermédiaire)
@@ -101,10 +101,10 @@ function sapi_guide_get_steps() {
       'visibility' => ['hauteur' => ['standard'], 'piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'chambre-enfant']],
       'dynamic_question' => [
         'piece' => [
-          'cuisine' => 'Au-dessus de votre table ou d\'un îlot ?',
-          'bureau'  => 'Au-dessus de votre bureau ?',
-          'salon'   => 'Au-dessus de votre table ?',
-          'chambre' => 'Au-dessus de votre lit ?',
+          'cuisine' => 'Au-dessus de ta table ou d\'un îlot ?',
+          'bureau'  => 'Au-dessus de ton bureau ?',
+          'salon'   => 'Au-dessus de ta table ?',
+          'chambre' => 'Au-dessus de ton lit ?',
           'chambre-enfant' => 'Au-dessus du lit ?',
         ],
       ],
@@ -115,17 +115,17 @@ function sapi_guide_get_steps() {
     ],
     [
       'id'         => 'style',
-      'question'   => 'Quel style pour votre intérieur ?',
+      'question'   => 'Quel style pour ton intérieur ?',
       'visibility' => 'always',
       'dynamic_question' => [
         'piece' => [
-          'cuisine'  => 'Quel style pour votre cuisine ?',
-          'bureau'   => 'Quel style pour votre bureau ?',
-          'salon'    => 'Quel style pour votre salon ?',
-          'chambre'  => 'Quel style pour votre chambre ?',
+          'cuisine'  => 'Quel style pour ta cuisine ?',
+          'bureau'   => 'Quel style pour ton bureau ?',
+          'salon'    => 'Quel style pour ton salon ?',
+          'chambre'  => 'Quel style pour ta chambre ?',
           'chambre-enfant' => 'Quel style pour la chambre ?',
-          'entree'   => 'Quel style pour votre entrée ?',
-          'escalier' => 'Quel style pour votre escalier ?',
+          'entree'   => 'Quel style pour ton entrée ?',
+          'escalier' => 'Quel style pour ton escalier ?',
         ],
       ],
       'choices'    => [
