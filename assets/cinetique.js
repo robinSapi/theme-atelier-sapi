@@ -5,68 +5,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   // ========================================
-  // Bento Cards Animation on Scroll
-  // ========================================
-  const bentoCards = document.querySelectorAll('.bento-card');
-
-  if (bentoCards.length > 0) {
-    const cardObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry, index) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-          }, index * 100);
-        }
-      });
-    }, {
-      threshold: 0.1,
-      rootMargin: '0px 0px -100px 0px'
-    });
-
-    bentoCards.forEach(card => {
-      card.style.opacity = '0';
-      card.style.transform = 'translateY(30px)';
-      card.style.transition = 'all 0.8s cubic-bezier(0.87, 0, 0.13, 1)';
-      cardObserver.observe(card);
-    });
-  }
-
-  // ========================================
-  // Product Cards - Parallax on Mouse Move
-  // ========================================
-  const productCards = document.querySelectorAll('.bento-product');
-
-  productCards.forEach(card => {
-    const productImage = card.querySelector('.product-image');
-    if (!productImage) return;
-
-    let moveRAF = null;
-    let rect = null;
-
-    card.addEventListener('mouseenter', () => {
-      rect = card.getBoundingClientRect();
-    });
-
-    card.addEventListener('mousemove', (e) => {
-      if (moveRAF || !rect) return;
-      moveRAF = requestAnimationFrame(() => {
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const rotateX = (y - rect.height / 2) / 20;
-        const rotateY = (rect.width / 2 - x) / 20;
-        productImage.style.transform = `scale(1.1) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-        moveRAF = null;
-      });
-    });
-
-    card.addEventListener('mouseleave', () => {
-      if (moveRAF) { cancelAnimationFrame(moveRAF); moveRAF = null; }
-      productImage.style.transform = 'scale(1) rotateX(0) rotateY(0)';
-    });
-  });
-
-  // ========================================
   // Newsletter Form
   // ========================================
   // Géré par le JS inline de front-page.php (vrai appel AJAX vers
@@ -166,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Cache DOM selectors for scroll handler (avoid querySelectorAll per frame)
   const cachedScroll = {
-    heroImage: document.querySelector('.bento-hero .bento-bg'),
     shopMagazineHero: document.querySelector('.shop-hero-magazine-bg'),
     categoryHeroImage: document.querySelector('.category-hero-visual img'),
     featuredCardsImages: document.querySelectorAll('.category-featured-media img'),
@@ -177,11 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!ticking) {
       window.requestAnimationFrame(() => {
         const scrolled = window.pageYOffset;
-
-        // Parallax on hero image (homepage) - DISABLED
-        // if (cachedScroll.heroImage) {
-        //   cachedScroll.heroImage.style.transform = `translateY(${scrolled * 0.1}px) scale(1.05)`;
-        // }
 
         // Parallax on shop magazine hero
         if (cachedScroll.shopMagazineHero) {

@@ -64,6 +64,36 @@ Le composant `.conseiller-sig` (pastille Robin + « Le conseil de Robin » + acc
 5. **Passe Yoast** (pas encore faite) : titre + meta description de la home — Claude Code peut préparer une proposition au prochain run.
 6. ~~(optionnel) nettoyage CSS mort résiduel~~ → ✅ **EN PROD (2026-06-10)** (commit `7534d2a`). Validé Robin, déployé.
 
+## ✅ [FAIT 2026-06-10 — sur test] Suppression complète du système bento LEGACY (CSS + JS)
+**Branche `test-theme-sapi-maison`, poussé sur test.** −869 lignes CSS / −68 lignes JS (cinetique.js) / −1 entrée scroll-dots.js. **Accolades CSS équilibrées 3724/3724**, JS balancé (parens/braces OK). Méthode : audit + grep boundary de CHAQUE classe (markup `.php` + JS `.js`, hors `/mockups/`) avant suppression.
+
+**🗑️ Retiré — JS :**
+| Fichier | Retiré |
+|--------|--------|
+| `cinetique.js` | bloc « Bento Cards Animation on Scroll » (`.bento-card` IntersectionObserver) ; bloc « Product Cards Parallax » (`.bento-product`/`.product-image` tilt souris) ; entrée cache `heroImage:'.bento-hero .bento-bg'` + son bloc parallax déjà commenté (DISABLED). Le reste du fichier (notifications, parallax shop/catégorie, particules canvas, smooth-scroll…) **intact**. |
+| `scroll-dots.js` | entrée morte `{container:'.process-inner', child:'.process-step'}` (plus aucun élément → ne matchait rien). |
+
+**🗑️ Retiré — CSS (0 usage markup ET JS confirmé) :** tout le système legacy « CINÉTIQUE Bento Grid » + ses media queries (1200px / 768px ×2 / 540px / 375px / reduced-motion / mobile slider) :
+`.bento-container` · `.bento-card`(+hovers, +`:focus-visible` du groupe) · `.bento-bg` / `.bento-bg-img`(+`--bottom-right`) · `.bento-label` · `.bento-text` · `.bento-corner-info` · `.bento-statement` · `.bento-product`(+`.product-image`/`.product-overlay`/`.product-name`/`.product-cat` descendants) · `.bento-product-small`(+`.product-image-small`/`.product-overlay-small`/`.product-name-small` descendants) · `.bento-stats` · `.bento-process` · `.bento-hero` / `.bento-storytelling` / `.bento-atelier` (MQ seulement).
+**+ companions orphelins** (0 usage, n'existaient QUE dans le markup bento supprimé, donc retirés pour finir la « suppression complète ») : `.hero-cta-row`, `.corner-label`, `.corner-price`, `.statement-inner/number/text/author`, `.product-info-reveal`, `.product-price-tag`, `.stat-block`(+`::after`/strong/span/hovers), `.stat-content`, `.stat-hover`(+img/text), `.process-header`, `.process-number`, `.process-title`, `.process-inner`(+`::before`), `.process-step`(+hovers), `.step-num`, `.step-text`, `.step-image-img`.
+
+**✅ CONSERVÉ (vérifié présent + raison) :**
+| Classe | Raison |
+|--------|--------|
+| `.hero-bento` | wrapper `.home-creations` (front-page.php:636) — 3 règles intactes (base + 2 MQ). |
+| `.bento-bestseller-badge` | badge « Star » sur `.creation-star` (front-page.php:646). |
+| `.product-badge` (base) | **live** : badges Promo/Nouveau des fiches/cartes produit (`content-product.php`). Le retirer décalait visuellement les badges → GARDÉ. |
+| `.hero-cta` / `.hero-cta--wood` | **live** : CTA « Voir toutes les créations » + « Découvrir l'artisan » (front-page.php). |
+| `.storytelling-text` | **live** : réutilisé par la section L'atelier (refonte #7). |
+| `.process-*` de `page-sur-mesure.php` | ce sont `.surmesure-process-*` (namespace distinct) — **non touchés**. `.progress-step .step-number` (stepper modale Conseiller) = classe distincte, **non touchée**. |
+
+**🔎 Pièges vérifiés :** page **« Star du moment »** utilise son propre namespace `star-storytelling__*` (PAS `process-*`/`step-*`/`bento-*`) → aucun risque. Commentaires de traçabilité `.bento-cta*`/`.bento-actu*`/`.bento-giftcard*`/`.bento-conseil*` (historique des refontes #9/DA#7) laissés en place (exacts, non trompeurs).
+**Reste 0 référence** à un sélecteur retiré dans tout le markup/JS live (grep final = NONE).
+
+**👉 Robin :** vérifier sur test — home (desktop **+ mobile**), page « Star du moment », une catégorie, une fiche produit (badges Promo/Nouveau OK) + **console F12 sur la home = 0 erreur**. Puis « go » → merge master + prod manuel. ⚠️ J'ai légèrement **étendu au-delà des seuls `.bento-*`** (companions orphelins `.stat-*`/`.process-*`/`.statement-*`/etc., tous 0 usage) pour vraiment finir le nettoyage — si tu préfères que je n'en retire qu'une partie, dis-le.
+
+<details><summary>Énoncé original</summary>
+
 ## [TÂCHE] Suppression complète du système bento LEGACY (CSS + JS, hors home)
 **Date :** 2026-06-10 · **Priorité :** basse (maintenance, aucune urgence) · **Branche :** `test-theme-sapi-maison` (auto-deploy test). Push auto. **Master/prod = SEULEMENT après validation Robin sur test.**
 **Contexte :** suite du nettoyage CSS (`7534d2a`). Le vieux système bento « CINÉTIQUE » (cartes `.bento-card`/`.bento-hero`/`.bento-bg`/`.bento-container`/`.bento-storytelling`/`.bento-process`/etc.) n'est **plus émis dans aucun markup** depuis la refonte, mais son CSS est resté « par prudence » car `cinetique.js` **poke encore ces sélecteurs** (`querySelector('.bento-hero .bento-bg')`, `querySelectorAll('.bento-card')`…) — code mort qui ne matche plus rien. On retire le tout d'un coup, CSS **et** JS.
@@ -81,6 +111,34 @@ Le composant `.conseiller-sig` (pastille Robin + « Le conseil de Robin » + acc
 
 **Livrable / critères :** tableau « retiré (CSS) / retiré (JS) / conservé » ; 0 erreur console ; rendu identique partout ; `.hero-bento` + `.bento-bestseller-badge` intacts. En cas de doute sur un bloc JS partagé → garder et le signaler.
 **👉 Robin :** vérifier sur test (visuel + ouvrir la console F12 sur la home pour confirmer 0 erreur), puis go → merge master + prod manuel.
+
+</details>
+
+## [TÂCHE] Signature Conseiller → pill bois sombre (V1) — HOME d'abord
+**Date :** 2026-06-10 · **Priorité :** normale · **Branche :** `test-theme-sapi-maison` (auto-deploy test). Push auto. Master/prod = après validation Robin.
+**Mockup de référence :** `mockups/mockup-conseiller-signature-20-variantes.html` → **variante V1** (capsule bois sombre + photo ronde).
+**Contexte :** Robin valide V1 pour la signature « Le conseil de Robin ». 1re étape : l'appliquer SUR LA HOME pour voir (section `.home-projet`). La généralisation (modale tous états + fiche produit) = tâche SUIVANTE, **ne PAS y toucher ici**. Règle de contenu : **ligne du haut TOUJOURS « Le conseil de Robin »** ; **ligne du bas contextuelle** (home = le hook actuel du room-picker ; ex. fiche produit = « Je t'aide à choisir la bonne variante »).
+
+**À faire :** restyler `.conseiller-sig` SCOPÉ à la home (`.home-projet .conseiller-sig*`) — markup et textes INCHANGÉS, juste l'habillage capsule sombre. Ajouter dans `style.css` (après les règles `.conseiller-sig` existantes) :
+```css
+/* ===== Signature Conseiller — V1 pill bois sombre (home) ===== */
+.home-projet .conseiller-sig{
+  display:inline-flex;align-items:center;gap:16px;
+  background:var(--color-wood-dark);
+  border-radius:60px;
+  padding:10px 26px 10px 10px;
+  margin:0 0 18px;
+}
+.home-projet .conseiller-sig__avatar{
+  width:60px;height:60px;border:2px solid rgba(255,255,255,.18);box-shadow:none;
+}
+.home-projet .conseiller-sig__who{color:#e0a878;} /* eyebrow tan chaud sur fond sombre */
+.home-projet .conseiller-sig__hook{color:#fff;font-size:28px;}
+```
+**Centrage :** la pill doit rester centrée dans la bande crème. `.conseiller-sig` passe en `inline-flex` → vérifier que son conteneur (`.room-picker-inner` / `.home-projet`) est bien `text-align:center` (a priori oui). Sinon, ajouter `.home-projet .room-picker-inner{text-align:center}` ou envelopper. Vérifier aussi le rendu mobile (la pill ne doit pas déborder ; réduire police/padding ≤600px si besoin).
+
+**Notes :** ne PAS toucher au markup ni aux textes (la ligne du bas reste celle déjà en place sur la home). Photo : laisser l'image actuelle de l'avatar. Pas de tiret cadratin. Accolades équilibrées. **NE PAS toucher** à la signature dans la modale ni à la pill fiche produit (étape suivante).
+**👉 Robin :** valider le rendu de la pill sombre sur la home test, puis on lance la généralisation (modale + fiche produit + page conseils) avec la même V1 et les lignes du bas contextuelles.
 
 ## ✅ EN PROD (2026-06-10) — nettoyage CSS mort + suppression pill « Signature »
 Déployés ensemble sur atelier-sapi.fr (master `0d114b1`) :

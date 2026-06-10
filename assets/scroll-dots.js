@@ -13,7 +13,6 @@
     { container: '.advice-tips-grid', child: '.advice-tip', snap: 'center' },
     { container: '.testimonials-grid', child: '.testimonial-card', snap: 'center' },
     { container: '.artisan-values-grid', child: '.artisan-value-item', snap: 'center' },
-    { container: '.process-inner', child: '.process-step', snap: 'center' },
     { container: '.surmesure-steps', child: '.surmesure-step', snap: 'center' },
     { container: '.surmesure-grid', child: '.surmesure-card', snap: 'center', alwaysActive: true },
     { container: '.use-cases-list', child: 'li', snap: 'center' },
