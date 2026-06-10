@@ -31,18 +31,12 @@ if (!$product || $product->get_status() !== 'publish') {
 $product_id = $product->get_id();
 $product_type = $product->get_type();
 $is_new = false;
-$is_signature = false;
 
 // Check if product is "new" (created within last 30 days)
 $created_date = get_the_date('U', $product_id);
 $thirty_days_ago = strtotime('-30 days');
 if ($created_date > $thirty_days_ago) {
   $is_new = true;
-}
-
-// Check for "signature" tag or featured status
-if ($product->is_featured()) {
-  $is_signature = true;
 }
 
 // Get category for display
@@ -254,8 +248,6 @@ if (is_product_category() && $sapi_category_ambiance_id) {
         <span class="product-badge badge-sale"><?php esc_html_e('Promo', 'theme-sapi-maison'); ?></span>
       <?php elseif ($is_new) : ?>
         <span class="product-badge badge-new"><?php esc_html_e('Nouveau', 'theme-sapi-maison'); ?></span>
-      <?php elseif ($is_signature) : ?>
-        <span class="product-badge badge-signature"><?php esc_html_e('Signature', 'theme-sapi-maison'); ?></span>
       <?php endif; ?>
 
     </div>

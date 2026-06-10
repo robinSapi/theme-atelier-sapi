@@ -13176,11 +13176,6 @@ button.room-card {
   color: var(--color-white);
 }
 
-.product-card-cinetique .badge-signature {
-  background: var(--color-wood);
-  color: var(--color-white);
-}
-
 .product-card-cinetique .badge-sale {
   background: var(--color-green);
   color: var(--color-white);
