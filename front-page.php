@@ -691,7 +691,7 @@ $sapi_cat_url = function ($slug) {
 ?>
 <!-- L'atelier — immersion par la lumière (refonte DA, mockup-da-04c) -->
 <?php
-$atelier_default_img = '2026/02/Fond-bois.webp'; // fond par défaut = texture bois (modifiable)
+$atelier_default_img = '2026/05/Claudine-La-turbine-Suspensions-Detail-1.jpg'; // fond par défaut (modifiable)
 // $process_steps : [num, label, photo, alt, phrase manuscrite] — repris à l'identique de l'existant
 $process_steps = [
   ['01', 'Dessin',        '2025/05/IMG_1928-e1761747188966.png', "Dessin d'un luminaire en bois, Atelier Sâpi",          "Tout commence par un trait de crayon"],
