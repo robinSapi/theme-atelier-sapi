@@ -8186,7 +8186,7 @@ li.carousel-editorial-slide,
   opacity: 0.75;
   transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
 }
-.home-press__logo { max-height: 46px; width: auto; display: block; }
+.home-press__logo { height: 46px; width: auto; max-width: 200px; object-fit: contain; display: block; }
 .home-press__name {
   font-family: var(--font-display);
   font-size: 1.5rem;
