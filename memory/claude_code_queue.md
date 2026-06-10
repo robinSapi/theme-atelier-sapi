@@ -3,8 +3,8 @@
 > Historique des tâches terminées archivé dans `claude_code_queue_archive.md` (nettoyé le 2026-06-03).
 
 ## ✅ RETOUR COWORK — Pill « Signature Conseiller » home FAIT sur TEST (2026-06-10)
-**Sur test, en attente de validation Robin. PAS en prod.** Branche `test-theme-sapi-maison` (V1 `99c6903` → **réduite en mini format B1 `595874f`** : la V1 était trop grosse et écrasait le titre), déployé sur test.atelier-sapi.fr.
-- La signature « Le conseil de Robin » de la **home** (section Conseiller / room-picker) passe en **mini capsule bois sombre B1** (fond `--color-wood-dark`, avatar rond 34px bordé clair, eyebrow tan, accroche Square Peg blanche 18px). **Textes et photo inchangés.** Rendu mobile géré (≤600px).
+**Sur test, en attente de validation Robin. PAS en prod.** Branche `test-theme-sapi-maison`, déployé sur test.atelier-sapi.fr. 3 itérations : V1 trop grosse (`99c6903`) → mini B1 (`595874f`) → **format final `76a468f`**.
+- **Format final :** la signature de la **home** (section Conseiller / room-picker) = mini capsule bois sombre avec **photo ronde sans contour + accroche Square Peg blanche 24px**. **« Le conseil de Robin » retiré** (l'identité passe par la photo). Texte d'accroche et photo inchangés. Rendu mobile géré (≤600px).
 - **Scopé à la home uniquement** : la signature dans la **modale Conseiller** et la pill **fiche produit** ne bougent pas (réservées à l'étape suivante = généralisation, à lancer si Robin valide la V1).
 - ⚠️ **Coordination 2 fenêtres :** ce chantier tournait **en parallèle** de la « suppression bento legacy » (autre fenêtre Claude Code) qui éditait le **même `style.css`** → ma 1re passe a été écrasée. Refaite proprement **après** que le bento soit passé en prod. Les deux travaux sont bien séparés, aucun mélange.
 
@@ -72,6 +72,39 @@ Le composant `.conseiller-sig` (pastille Robin + « Le conseil de Robin » + acc
 ---
 
 ## 🔧 À faire
+
+## ✅ [FAIT 2026-06-10 — sur test] Pill Conseiller home — V1 accroche Square Peg dans la pill, sans label (commit `76a468f`)
+**Résultat (branche `test-theme-sapi-maison`, poussé sur test) :** `.home-projet .conseiller-sig*` → la pill sombre ne contient plus que la **photo sans contour** (avatar 34px, `border:none`) + l'**accroche Square Peg blanche 24px**. **« Le conseil de Robin » masqué** (`__who{display:none}`, markup conservé). `gap:12`, `padding:6px 24px 6px 6px`, `margin:0 0 16px`, `__text gap:0`. Mobile ≤600px : hook **21px** + `max-width:100%`. Texte d'accroche et photo inchangés. Scopé home → modale + fiche produit intactes. Accolades 3732/3732, pas de tiret cadratin.
+**👉 Robin :** valider sur test (accroche Square Peg lisible, plus de label, titre dominant). Si OK → généralisation (modale + fiche + page conseils) avec ce format, accroche **contextuelle par page** (home = actuel ; fiche = « Je t'aide à choisir la bonne variante » ; etc.).
+
+<details><summary>Énoncé original</summary>
+
+## [TÂCHE] Pill Conseiller home — V1 « accroche Square Peg DANS la pill, sans label »
+**Date :** 2026-06-10 · **Priorité :** normale · **Branche :** `test-theme-sapi-maison` (auto-deploy test). Push auto. Master/prod après validation Robin.
+**Contexte :** itération finale du format. Le mini B1 (`595874f`) avec le Square Peg blanc 18px était illisible. Nouvelle direction validée (mockup `mockups/mockup-conseiller-pill-squarepeg-dedans.html` variante **V1**) : la pill sombre ne contient plus QUE la photo (**sans contour**) + l'**accroche Square Peg en plus grand** ; on **SUPPRIME « Le conseil de Robin »**. L'identité « Robin » passe par la photo. ⚠️ Ça remplace la règle précédente « ligne du haut fixe ».
+
+**À faire (scopé home `.home-projet .conseiller-sig*`, ne pas toucher modale ni fiche) :**
+1. **Retirer le label** : masquer la ligne « Le conseil de Robin » → `.home-projet .conseiller-sig__who{display:none}` (markup laissé en place, juste caché ; OK).
+2. **Remplacer les tailles B1** par V1 :
+```css
+.home-projet .conseiller-sig{
+  display:inline-flex;align-items:center;gap:12px;
+  background:var(--color-wood-dark);
+  border-radius:60px;
+  padding:6px 24px 6px 6px;
+  margin:0 0 16px;
+}
+.home-projet .conseiller-sig__avatar{width:34px;height:34px;border:none;box-shadow:none}
+.home-projet .conseiller-sig__who{display:none}
+.home-projet .conseiller-sig__text{gap:0}
+.home-projet .conseiller-sig__hook{color:#fff;font-size:24px;line-height:1;margin:0}
+```
+Mobile ≤600px : vérifier que l'accroche ne déborde pas (réduire à ~21px si besoin), pas de contour avatar.
+**Notes :** photo et texte d'accroche inchangés (la home garde son hook actuel). Pas de tiret cadratin, accolades équilibrées.
+**Critères :** pill = photo sans contour + accroche Square Peg blanche 24px, lisible ; plus de « Le conseil de Robin » ; le titre reste dominant.
+**👉 Robin :** valider sur test. Si OK → généralisation (modale + fiche + page conseils) avec ce format, accroche contextuelle par page (home = actuel ; fiche = « Je t'aide à choisir la bonne variante » ; etc.).
+
+</details>
 
 ## ✅ [FAIT 2026-06-10 — sur test] Pill Conseiller home — mini format B1 (commit `595874f`)
 **Résultat (branche `test-theme-sapi-maison`, poussé sur test) :** tailles de `.home-projet .conseiller-sig*` réduites au format **B1** — avatar **34px**, `gap:10px`, `padding:5px 18px 5px 5px`, `__text gap:1px`, eyebrow **9px** (letter-spacing .14em), accroche Square Peg **18px** (`line-height:1`). Mobile ≤600px : hook **16px** + `max-width:100%`. **Markup, textes, photo, centrage inchangés.** Toujours scopé home → modale + pill fiche produit intactes. Accolades 3732/3732, pas de tiret cadratin.
