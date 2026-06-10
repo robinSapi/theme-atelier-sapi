@@ -223,7 +223,7 @@ endif;
         <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
         <span class="conseiller-sig__text">
           <span class="conseiller-sig__who">Le conseil de Robin</span>
-          <span class="conseiller-sig__hook">Mes conseils spéciaux pour ton projet</span>
+          <span class="conseiller-sig__hook">Mes conseils spécifiques pour ton projet</span>
         </span>
       </div>
       <h3 class="room-picker-title">Pour quelle pièce cherches-tu un luminaire ?</h3>
