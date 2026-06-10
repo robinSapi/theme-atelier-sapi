@@ -23311,6 +23311,32 @@ body.woocommerce-cart div.woocommerce-wrapper {
   color: var(--color-wood-dark);
 }
 
+/* Phase 4 — option neutre (« Je ne sais pas » / « Pas de préférence ») :
+   carte à part, pleine largeur sous la grille, compacte (horizontale, moins haute). */
+.conseiller-card--modal .choices .choice[data-choice="ne-sais-pas"],
+.conseiller-card--modal .choices .choice[data-choice="neutre"] {
+  grid-column: 1 / -1;
+  -webkit-flex-direction: row;
+  flex-direction: row;
+  min-height: 0;
+  padding: 10px 16px;
+  gap: 10px;
+}
+.conseiller-card--modal .choices .choice[data-choice="ne-sais-pas"] .choice__icon,
+.conseiller-card--modal .choices .choice[data-choice="neutre"] .choice__icon {
+  width: 30px;
+  height: 30px;
+  margin: 0;
+}
+.conseiller-card--modal .choices .choice[data-choice="ne-sais-pas"] .choice__icon svg,
+.conseiller-card--modal .choices .choice[data-choice="neutre"] .choice__icon svg { width: 18px; height: 18px; }
+/* Desktop : les vraies réponses occupent la ligne sans cellule vide
+   (taille/sortie = 3 réponses ; style = 2). L'option neutre passe en dessous. */
+@media (min-width: 601px) {
+  .conseiller-card--modal .choices:has(.choice[data-choice="ne-sais-pas"]) { grid-template-columns: repeat(3, 1fr); }
+  .conseiller-card--modal .choices:has(.choice[data-choice="neutre"]) { grid-template-columns: repeat(2, 1fr); }
+}
+
 /* Texte libre input */
 .text-input-wrap {
   position: relative;
