@@ -2,6 +2,12 @@
 
 > Historique des tâches terminées archivé dans `claude_code_queue_archive.md` (nettoyé le 2026-06-03).
 
+## 🚀 RETOUR COWORK — GO-LIVE Harmonisation Conseiller (Phases 0→4) — mergé master (2026-06-10)
+**Robin a donné le « go prod ». `test-theme-sapi-maison` (31 commits) mergé dans `master`** — merge commit `3f9fd11` « Harmonisation Conseiller (Phases 0→4) + refonte modale ». Master poussé.
+**⚠️ Déploiement encore À LANCER par Robin** : Actions GitHub → « Deploy to Production » → Run workflow sur `master` (workflow_dispatch manuel ; `gh` pas installé en local).
+**Contenu livré :** pills Robin V1 partout (home, Conseils, modale 6 états, fiche produit) ; page Conseils alignée sur la home (Phase 1) ; modale refondue (grain bois sans pointillé, tutoiement gender-correct, hover orange, hauteur +20%, chat encadré + saisie en bas, récap s3 boutons en bas, option neutre pleine largeur) ; avatars en thumbnail ; **fix perf `:has()` qui bloquait /mes-creations/** (commit `0981348`).
+**Vérifs prod après déploiement (Robin) :** /mes-creations/ charge + card « Conseil de Robin » visible ; page Conseils (pill + grain) ; fiche produit variable (pill « Je t'aide à choisir la bonne version » + ouvre la modale) ; modale (grain sans pointillé, tutoiement, chat encadré). Reste **Phase 3** (card Robin Mes créations) en attente du brief refonte Mes créations.
+
 ## ✅ RETOUR COWORK — Pill « Signature Conseiller » home FAIT sur TEST (2026-06-10)
 **Sur test, en attente de validation Robin. PAS en prod.** Branche `test-theme-sapi-maison`, déployé sur test.atelier-sapi.fr. 3 itérations : V1 trop grosse (`99c6903`) → mini B1 (`595874f`) → **format final `76a468f`**.
 - **Format final :** la signature de la **home** (section Conseiller / room-picker) = mini capsule bois sombre avec **photo ronde sans contour + accroche Square Peg blanche 24px**. **« Le conseil de Robin » retiré** (l'identité passe par la photo). Texte d'accroche et photo inchangés. Rendu mobile géré (≤600px).
