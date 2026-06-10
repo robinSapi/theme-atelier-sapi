@@ -780,7 +780,7 @@ $process_steps = [
     ['name' => 'Maisons Actuelle', 'url' => 'https://maisonsactuelle.com/2026/01/13/atelier-sapi-la-ou-la-lumiere-retrouve-dans-le-bois-le-souvenir-secret-de-la-nature/', 'logo' => '2026/06/cropped-cropped-cropped-LogoMAISONactuelle.png'],
     ['name' => "L'univers de la maison", 'url' => 'https://luniversdelamaison-lemag.com/decoration/luminaire/2873-quand-le-bois-devient-lumiere', 'logo' => '2026/06/images.jpeg'],
     ['name' => 'Le Progrès', 'url' => 'https://www.leprogres.fr/economie/2025/11/13/un-artisan-createur-de-luminaire-ouvre-son-atelier', 'logo' => '2026/06/le-nouveau-logo-de-votre-journal-1665505929.jpg'],
-    ['name' => 'Région Auvergne-Rhône-Alpes', 'url' => 'https://www.auvergnerhonealpes-orientation.fr/laureats-auverboost-lyon-decembre-2025/', 'logo' => '2026/06/logo-white.png.webp'],
+    ['name' => 'Région Auvergne-Rhône-Alpes', 'url' => 'https://www.auvergnerhonealpes-orientation.fr/laureats-auverboost-lyon-decembre-2025/', 'logo' => '2026/06/region-auvergne-rhone-alpes-logo-conseil-regional-auvergne-rhone-alpes-11569040597pvlcktbyry-3754393009.png'],
     ['name' => "Collonges-au-Mont-d'Or", 'url' => 'https://www.collongesaumontdor.fr/mon-quotidien/vie-economique/commercants-et-artisans/?filter_sectors%5B0%5D=commercants-artisans-entreprises', 'logo' => '2026/06/filemanager-2827393906.jpg'],
   ];
   if (!empty($press_refs)) : ?>
