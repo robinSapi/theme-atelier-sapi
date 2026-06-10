@@ -62,9 +62,32 @@ Le composant `.conseiller-sig` (pastille Robin + « Le conseil de Robin » + acc
 3. **Re-soumettre le sitemap** dans Google Search Console.
 4. **Brevo** : maj séquence d'accueil −10 % pour inclure les sources `surmesure` + `ficheproduit`.
 5. **Passe Yoast** (pas encore faite) : titre + meta description de la home — Claude Code peut préparer une proposition au prochain run.
-6. ~~(optionnel) nettoyage CSS mort résiduel~~ → ✅ **FAIT sur test** (commit `7534d2a`, voir tâche ci-dessous). À valider visuellement puis go prod.
+6. ~~(optionnel) nettoyage CSS mort résiduel~~ → ✅ **EN PROD (2026-06-10)** (commit `7534d2a`). Validé Robin, déployé.
 
-## ✅ [FAIT 2026-06-10 — sur test] Nettoyage CSS mort post-refonte home (commit `7534d2a`)
+## [TÂCHE] Suppression complète du système bento LEGACY (CSS + JS, hors home)
+**Date :** 2026-06-10 · **Priorité :** basse (maintenance, aucune urgence) · **Branche :** `test-theme-sapi-maison` (auto-deploy test). Push auto. **Master/prod = SEULEMENT après validation Robin sur test.**
+**Contexte :** suite du nettoyage CSS (`7534d2a`). Le vieux système bento « CINÉTIQUE » (cartes `.bento-card`/`.bento-hero`/`.bento-bg`/`.bento-container`/`.bento-storytelling`/`.bento-process`/etc.) n'est **plus émis dans aucun markup** depuis la refonte, mais son CSS est resté « par prudence » car `cinetique.js` **poke encore ces sélecteurs** (`querySelector('.bento-hero .bento-bg')`, `querySelectorAll('.bento-card')`…) — code mort qui ne matche plus rien. On retire le tout d'un coup, CSS **et** JS.
+
+**⚠️ À CONSERVER absolument (encore utilisés, NE PAS supprimer) :**
+- `.hero-bento` → wrapper de la section `.home-creations` (markup actuel).
+- `.bento-bestseller-badge` → badge « Star du moment » sur `.creation-star`.
+- Tout le reste de `cinetique.js` qui ne concerne PAS le bento (autres animations/sections) : ne toucher QUE les blocs bento.
+
+**À faire :**
+1. **Audit `cinetique.js`** : lister tous les blocs/sélecteurs liés au bento legacy (`.bento-card`, `.bento-hero`, `.bento-bg`, `.bento-product`, `.bento-container`, etc.). Confirmer par grep markup que ces éléments n'existent plus dans le DOM rendu (front-page + autres templates). 
+2. **Retirer le code JS mort** correspondant (handlers hover/parallax/tilt des bento cards, init bento…), en gardant le reste du fichier intact. Vérifier qu'aucune autre partie du JS n'en dépend.
+3. **Retirer le CSS** désormais totalement orphelin : tous les `.bento-*` SAUF `.hero-bento` et `.bento-bestseller-badge` (grep chacun avant : 0 markup ET 0 JS après l'étape 2 → supprimer). Inclure leurs media queries + commentaires obsolètes.
+4. **Vérifs :** accolades CSS équilibrées ; `cinetique.js` valide (pas d'erreur de syntaxe) ; **console navigateur sur la home test = 0 erreur JS** ; home (desktop + mobile), page « Star du moment », une catégorie, une fiche produit = rendu strictement inchangé.
+
+**Livrable / critères :** tableau « retiré (CSS) / retiré (JS) / conservé » ; 0 erreur console ; rendu identique partout ; `.hero-bento` + `.bento-bestseller-badge` intacts. En cas de doute sur un bloc JS partagé → garder et le signaler.
+**👉 Robin :** vérifier sur test (visuel + ouvrir la console F12 sur la home pour confirmer 0 erreur), puis go → merge master + prod manuel.
+
+## ✅ EN PROD (2026-06-10) — nettoyage CSS mort + suppression pill « Signature »
+Déployés ensemble sur atelier-sapi.fr (master `0d114b1`) :
+- **Nettoyage CSS mort** post-refonte (`7534d2a`) — détail dans la tâche ci-dessous.
+- **Suppression du pill « Signature »** des cards produit (`0d114b1`) : badge `.badge-signature` + logique `$is_signature`/`is_featured()` + CSS retirés de `content-product.php` et `style.css`. Badges **Promo** et **Nouveau** conservés. (Le statut WooCommerce « mis en avant » reste utilisable ailleurs ; on a juste arrêté d'en faire un pill.)
+
+## ✅ [EN PROD 2026-06-10] Nettoyage CSS mort post-refonte home (commit `7534d2a`)
 **Résultat (branche `test-theme-sapi-maison`, poussé sur test — zéro régression).** Méthode : grep de chaque candidat dans tout le markup/JS (`*.php` + `*.js`, hors mockups, hors `style.css`).
 
 **Constat clé :** la **refonte (#1/#6/#7) avait déjà retiré la quasi-totalité des blocs morts** (confirmé par les commentaires de traçabilité dans `style.css`). La plupart des candidats (`bento-room-picker`, `process-flip/tile/ribbon`, `home-atelier--band`, `atelier-duo/story/photo/media/maps-link`, `map-card`, `bento-giftcard`, `giftcard-*`, `bento-actu`, `bento-conseil`, `home-divers`, `cta-button`) → **déjà absents** de `style.css` (ne restent que des commentaires).
