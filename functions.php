@@ -3795,7 +3795,7 @@ function sapi_render_conseiller_modal() {
         <footer class="modal__foot" data-chat-cta hidden>
           <button type="button" class="action-btn action-btn--primary" data-action="apply">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12h18M13 5l7 7-7 7"/></svg>
-            <?php esc_html_e('Voir ma sélection', 'theme-sapi-maison'); ?>
+            <?php esc_html_e('Voir la sélection pour mon projet', 'theme-sapi-maison'); ?>
           </button>
         </footer>
       </section>
@@ -3946,7 +3946,7 @@ function sapi_render_conseiller_modal() {
             <div class="actions-3">
               <button type="button" class="action-btn action-btn--primary" data-action="s3-view">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12h18M13 5l7 7-7 7"/></svg>
-                <?php esc_html_e('Voir la sélection', 'theme-sapi-maison'); ?>
+                <?php esc_html_e('Voir la sélection pour mon projet', 'theme-sapi-maison'); ?>
               </button>
               <button type="button" class="action-btn action-btn--secondary" data-action="s3-refine">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9h.01M15 9h.01M9 15c1 1 2 1.5 3 1.5s2-.5 3-1.5"/></svg>
