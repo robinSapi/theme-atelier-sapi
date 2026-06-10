@@ -73,6 +73,80 @@ Le composant `.conseiller-sig` (pastille Robin + « Le conseil de Robin » + acc
 
 ## 🔧 À faire
 
+## ✅ [FAIT 2026-06-10 — sur test] Harmonisation Conseiller — PHASE 1 : page Conseils alignée sur la home (commit `cb849af`)
+**Résultat (branche `test-theme-sapi-maison`, poussé sur test) :**
+- **A. Pill V1 factorisée** : `.home-projet .conseiller-sig*` → classe partagée **`.conseiller-sig--v1*`** (mêmes déclarations). Home : classe `conseiller-sig--v1` ajoutée sur `.conseiller-sig` → **rendu home strictement identique** (base + override, v1 gagne par ordre source comme avant). 0 référence `.home-projet .conseiller-sig` restante.
+- **B. Panneau Conseils** : cadre **dashed crème supprimé** (`.advice-room-picker::before` dashed inset) → **fond warm + grain bois** (`::before` repeating-linear-gradient, inset:0, z-index:0 ; inner z-index:1). Panneau **contenu** conservé (`.advice-room-picker-section` max-width 1400). Padding 2.75rem 2rem.
+- **C. Pill Robin V1** ajoutée en tête du `.room-picker-inner` de `page-conseils-eclaires.php` (même avatar que la home `2026/03/Robin-face-avec-Alice-lhelice.jpg`), accroche dédiée **« Je t'éclaire avant de choisir »**.
+- **D. Titre** : `<h3>` conservé, texte passé au **tutoiement** « Pour quelle pièce cherches-tu un luminaire ? ». Style déjà aligné (classe partagée `.room-picker-title` = même typo que la home) → aucune CSS dupliquée ajoutée.
+- **E. Hover chips orange** scopé Conseils : valeurs **exactement celles de la home** (border orange + bg #f4ead3 + shadow-card-hover + translateY-2 ; icône bg rgba(227,91,36,.12) + color orange).
+- **Vérifs** : accolades 3735/3735 ; modale, fiche produit, Inspiration, tous les `data-*` non touchés ; pas de tiret cadratin.
+**👉 Robin :** comparer home et page Conseils côte à côte sur test (fond warm+grain, pill V1 « Je t'éclaire avant de choisir », chips hover orange, titre tutoyé, panneau contenu). Home doit être inchangée. Si OK → **Phase 2** (mockup pill fiche produit d'abord, puis code).
+
+<details><summary>Énoncé original</summary>
+
+## [TÂCHE] Harmonisation Conseiller — PHASE 1 : aligner le room-picker page Conseils sur la home
+**Date :** 2026-06-10 · **Priorité :** haute · **Branche :** `test-theme-sapi-maison` (auto-deploy test). Push auto. Master/prod après validation Robin.
+**Réf :** `mockups/AUDIT-CONSEILLER-PHASE0.md` + `mockups/PLAN-HARMONISATION-CONSEILLER.md`.
+**Décisions Robin :** panneau contenu restylé (PAS pleine largeur) · garder `<h3>` mais style aligné + tutoiement · accroche dédiée Conseils « **Je t'éclaire avant de choisir** » · Inspiration HORS périmètre (ne pas toucher) · modale = Phase 4 (ne pas toucher) · fiche produit = Phase 2 (ne pas toucher).
+
+**À faire :**
+
+### A. Factoriser la pill V1 en classe partagée `.conseiller-sig--v1`
+Dans `style.css`, RENOMMER les règles `.home-projet .conseiller-sig*` (commit `76a468f`) en `.conseiller-sig--v1*` (mêmes déclarations, juste le sélecteur change) :
+```css
+.conseiller-sig--v1{display:inline-flex;align-items:center;gap:12px;background:var(--color-wood-dark);border-radius:60px;padding:6px 24px 6px 6px;margin:0 0 16px}
+.conseiller-sig--v1 .conseiller-sig__avatar{width:34px;height:34px;border:none;box-shadow:none}
+.conseiller-sig--v1 .conseiller-sig__who{display:none}
+.conseiller-sig--v1 .conseiller-sig__text{gap:0}
+.conseiller-sig--v1 .conseiller-sig__hook{color:#fff;font-size:24px;line-height:1;margin:0}
+@media (max-width:600px){.conseiller-sig--v1{max-width:100%}.conseiller-sig--v1 .conseiller-sig__hook{font-size:21px}}
+```
+Puis dans `front-page.php`, ajouter la classe `conseiller-sig--v1` à l'élément `.conseiller-sig` de la home. **Le rendu de la home doit rester STRICTEMENT identique** (vérifier).
+
+### B. Restyler le panneau Conseils (panneau contenu, pas pleine largeur)
+Supprimer le cadre dashed crème (`.advice-room-picker::before` dashed + fond carte actuel) et le remplacer par warm + grain :
+```css
+.advice-room-picker{position:relative;background:var(--color-warm);border-radius:16px;padding:2.75rem 2rem;text-align:center;overflow:hidden}
+.advice-room-picker::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(92deg,rgba(139,115,85,.05) 0,rgba(139,115,85,.05) 1px,transparent 1px,transparent 7px);pointer-events:none;z-index:0}
+.advice-room-picker .room-picker-inner{position:relative;z-index:1}
+```
+`.advice-room-picker-section` garde son `max-width:1400` + padding (→ contenu, pas edge-to-edge).
+
+### C. Ajouter la pill Robin V1 en tête du `.room-picker-inner` (avant le `<h3>`), dans `page-conseils-eclaires.php`
+```php
+<div class="conseiller-sig conseiller-sig--v1">
+  <span class="conseiller-sig__avatar"><?php echo sapi_image('<MÊME IMAGE AVATAR QUE LA HOME>', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+  <span class="conseiller-sig__text">
+    <span class="conseiller-sig__who">Le conseil de Robin</span>
+    <span class="conseiller-sig__hook">Je t'éclaire avant de choisir</span>
+  </span>
+</div>
+```
+(reprendre l'image d'avatar EXACTE utilisée sur la home pour la cohérence.)
+
+### D. Titre : garder `<h3 class="room-picker-title">` mais aligner le style sur la home + passer au tutoiement
+- Texte → « Pour quelle pièce cherches-tu un luminaire ? » (tutoiement).
+- Style identique à la home : `.advice-room-picker .room-picker-title{font-family:var(--font-body);font-weight:700;font-size:clamp(...même valeur que la home...);color:var(--color-wood-dark)}`. Relever la valeur exacte du titre home et la reprendre.
+
+### E. Hover des chips en ORANGE (comme la home), scopé Conseils
+Reprendre les valeurs EXACTES de la home :
+```css
+@media (hover:hover){
+  .advice-room-picker .room-card:hover{border-color:var(--color-orange);background:#f4ead3;box-shadow:var(--shadow-card-hover);transform:translateY(-2px)}
+  .advice-room-picker .room-card:hover .room-card-icon{background:rgba(227,91,36,.12);color:var(--color-orange)}
+}
+```
+
+**Pièges / NE PAS faire :** ne pas toucher la modale, la fiche produit, la page Inspiration, ni les `data-*` du room-picker. Pas de tiret cadratin. Accolades équilibrées. Vérifier que la home rend identique après la refacto de la pill (point A).
+
+**Critères :** la page Conseils a le MÊME langage que la home (fond warm + grain, pill V1 avec accroche « Je t'éclaire avant de choisir », chips hover orange, titre aligné, tutoiement), en restant un panneau contenu (max-width 1400). Home inchangée. Mobile OK.
+
+### 👉 Action Robin
+Comparer home et page Conseils côte à côte sur test. Si identiques → on passe à la **Phase 2** (mockup pill fiche produit d'abord, puis code).
+
+</details>
+
 ## ✅ [FAIT 2026-06-10 — lecture seule] Harmonisation Conseiller — PHASE 0 : spec + audit
 **Livrable : `mockups/AUDIT-CONSEILLER-PHASE0.md`** (rapport complet, aucune modif de code). Synthèse :
 - **(a) Spec de référence** figée (HOME) : bande `.home-projet-section` warm + grain bois `::before` (⚠️ pas de border-top aujourd'hui) ; pill V1 `.home-projet .conseiller-sig` (capsule wood-dark, photo 34px sans contour, hook Square Peg blanc 24px, label masqué) ; socle partagé `.room-picker-*` (valeurs exactes inner/title/cards/room-card/icon/label/or/freetext) ; câblage `data-room-picker`/`data-piece`/`data-room-picker-freetext`.
