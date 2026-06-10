@@ -178,7 +178,26 @@ Lis ce plan + trancher les 5 décisions ci-dessus (ou valider mes recos). Sur «
 4. **Élargissement progressif conservé** : `sapi_guide_query_products` a déjà des fallbacks intégrés (ampoule → format → taille) → jamais de slider vide.
 5. **Repli photo générique** si la pièce n'a pas de `hero_<slug>`.
 
-**Étape 1 en cours (push test à suivre) :** socle PHP état B **entièrement gated sur `?piece=` valide** (état A + visiteurs normaux 100 % inchangés) : détection + `body.mescreations-immersion`, photo pièce (+ repli), pill V1, phrase générique figée, **sélection pièce-level rendue côté serveur** (`sapi_guide_query_products`) dans le slider + carte sur-mesure, bandeau réassurance dédié, header over-hero (JS dédié), machine à écrire + révélation « Voir ma sélection » / scroll « Voir toutes ». `sapi-cards-conseiller.js` **bypassé en mode immersion** → catalogue bas intact. **Pas encore :** affinage taille/style qui re-filtre la sélection (= AJAX serveur, étape 4) ni hydratation localStorage sans param (étape 6).
+### ✅ [FAIT 2026-06-10 — sur test] ÉTAPE 1 — socle immersion serveur (commit `d8fa9ce`)
+**Branche `test-theme-sapi-maison`, poussé sur test.** Tout est **gated sur un `?piece=` valide** → état A + visiteurs normaux **100 % inchangés** (aucun risque).
+- **Détection** : `sapi_mescreations_immersion_piece()` valide `?piece=` contre la whitelist des pièces → `body.mescreations-immersion` + flag JS `SAPI_IMMERSION`.
+- **Rendu serveur** du hero immersif : photo pièce (`hero_<slug>` + **repli générique** si absente, décision #5), **pill V1**, **phrase générique figée** (jamais l'IA), **sélection PIÈCE-LEVEL calculée côté serveur** (`sapi_guide_query_products`, avec ses fallbacks → jamais vide) dans le slider + **carte sur-mesure**, **bandeau réassurance dédié** (bas de la photo), CTAs, scroll hint.
+- **JS séquence** (`sapi-mescreations-immersion.js`) : machine à écrire (instantanée, ne se réécrit jamais), **affinage inline taille→style** (stocke dans `sapiProject`, **sans rouvrir la modale**), **révélation sélection** (flou photo + slider) au clic « Voir ma sélection » OU après les 2 réponses, « Voir toutes les créations » → scroll catalogue, « Préciser avec Robin » → ouvre la modale (s3).
+- **Catalogue bas intact** : `sapi-cards-conseiller.js` se met **en retrait** en mode immersion → « Toutes mes créations » garde toutes ses cartes + pills + cards réassurance.
+- **product-name-formatter** appliqué aux cartes du slider (prénom caps + surnom Square Peg).
+
+**👉 Action Robin — à regarder sur test :**
+- `https://test.atelier-sapi.fr/mes-creations/?piece=salon` (essaie aussi `?piece=cuisine`, `?piece=chambre`, `?piece=bureau`, `?piece=entree`, `?piece=escalier`, `?piece=chambre-enfant`).
+- Vérifie : la **photo plein écran** de la pièce, la **pill Robin**, la **phrase qui s'écrit**, la **question taille puis style** (cliquer valide + passe à la suivante), à la fin la **sélection qui se révèle** (photo se floute + slider de produits + carte sur-mesure), « **Voir ma sélection** » qui révèle à tout moment, « **Voir toutes les créations** » qui scrolle au catalogue, « **Préciser avec Robin** » qui ouvre la modale.
+- Vérifie surtout que **`/mes-creations/` SANS `?piece=` est strictement comme avant** (état A + catalogue intacts), et **console F12 = 0 erreur**.
+
+**⚠️ Volontairement PAS encore fait (étapes suivantes, je code après ton retour) :**
+1. **Header transparent par-dessus la photo + bandeau qui devient sticky sous le header** au scroll (étape 1 garde le header normal opaque — le transparent-over-photo demande de gérer la lisibilité du logo/nav sur la photo, je le fais en passe dédiée propre).
+2. **Re-filtrage de la sélection quand tu réponds taille/style** (= petit AJAX serveur, étape 4) — pour l'instant la sélection reste pièce-level, tes réponses sont bien mémorisées mais le slider ne se re-filtre pas encore.
+3. **Hydratation localStorage** : un visiteur de retour avec un projet mais **sans `?piece=`** dans l'URL n'a pas encore l'état B (étape 6).
+4. **Phrase courte de Robin par carte** du slider (pas de source de contenu pour l'instant — à voir avec toi : on l'écrit, ou on prend l'accroche produit ?).
+
+**Dis-moi ce qui va / ce qui ne va pas, et je continue les étapes 2→6.**
 
 ---
 
