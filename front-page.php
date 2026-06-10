@@ -380,6 +380,39 @@ foreach ($collection_slugs as $col) {
     'url' => $cat_url,
   ];
 }
+
+// Card "Sur mesure" : image pilotée depuis l'admin par la catégorie produit
+// "creations-sur-mesure" (même priorité que les collections : ACF image_collection
+// -> 3e photo ambiance d'un produit -> vignette). La card garde son lien vers /sur-mesure/.
+$surmesure_image_id = null;
+$sm_term = get_term_by('slug', 'creations-sur-mesure', 'product_cat');
+if ($sm_term) {
+  if (function_exists('get_field')) {
+    $sm_acf = get_field('image_collection', 'product_cat_' . $sm_term->term_id);
+    if ($sm_acf) $surmesure_image_id = $sm_acf;
+  }
+  if (!$surmesure_image_id) {
+    $sm_query = new WP_Query([
+      'post_type' => 'product',
+      'posts_per_page' => 1,
+      'post_status' => 'publish',
+      'tax_query' => [['taxonomy' => 'product_cat', 'field' => 'slug', 'terms' => 'creations-sur-mesure']],
+      'orderby' => 'menu_order date',
+      'order' => 'ASC',
+    ]);
+    if ($sm_query->have_posts()) {
+      $sm_query->the_post();
+      $sm_pid = get_the_ID();
+      wp_reset_postdata();
+      $sm_amb = sapi_get_product_photo_ids($sm_pid, 'ambiance');
+      if (!empty($sm_amb)) {
+        $surmesure_image_id = isset($sm_amb[2]) ? $sm_amb[2] : end($sm_amb);
+      } else {
+        $surmesure_image_id = get_post_thumbnail_id($sm_pid);
+      }
+    }
+  }
+}
 ?>
 
 <!-- Full Page Carousel -->
@@ -580,7 +613,11 @@ foreach ($carousel_products as $product) {
     <?php endforeach; ?>
       <a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>" class="collection-card collection-card--surmesure">
         <div class="collection-visual">
-          <?php echo sapi_image('2026/04/Photo-Trio-de-34.jpg', 'large', ['class' => 'collection-visual-img', 'loading' => 'lazy', 'alt' => 'Luminaire sur mesure, Atelier Sâpi']); ?>
+          <?php if ($surmesure_image_id) : ?>
+            <?php echo wp_get_attachment_image($surmesure_image_id, 'large', false, ['class' => 'collection-visual-img', 'loading' => 'lazy', 'alt' => 'Créations sur mesure, Atelier Sâpi']); ?>
+          <?php else : ?>
+            <?php echo sapi_image('2026/04/Photo-Trio-de-34.jpg', 'large', ['class' => 'collection-visual-img', 'loading' => 'lazy', 'alt' => 'Luminaire sur mesure, Atelier Sâpi']); ?>
+          <?php endif; ?>
         </div>
         <div class="collection-details">
           <h3>Sur mesure</h3>
