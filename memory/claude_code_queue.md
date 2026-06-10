@@ -73,6 +73,82 @@ Le composant `.conseiller-sig` (pastille Robin + « Le conseil de Robin » + acc
 
 ## 🔧 À faire
 
+## ✅ [FAIT 2026-06-10 — sur test] Harmonisation Conseiller — PHASE 4 : modale (6 états) (commit `f45f187`)
+**Résultat (branche `test-theme-sapi-maison`, poussé sur test) :**
+- **A. Cadre C** : la carte modale (`.conseiller-card--modal`) passe en **grain bois en filigrane** (le `::before` dashed est **repurposé en grain**, inset:0 desktop + mobile) → **plus de pointillé**, pas d'ourlet orange. Fond crème, radius 16, ombre inchangés.
+- **B. Pill V1 sur les 6 écrans** : `.conseiller-sig conseiller-sig--v1` (composant Phase 1, non recréé) sur **s0** (accroche gardée) + **s2-chat** (« Discutons de ton projet ») + **ajoutée** en tête de **s1** (« On affine ton projet »), **s-product-recap** (« Mon conseil pour toi »), **s3** (« On récapitule ? »), **s-contact** form (« Échangeons ensemble ») et succès (« Merci, à très vite »). Anciens **badges texte masqués** (`.conseiller-card--modal .badge{display:none}`) mais **gardés dans le DOM** (ils portent `data-s0-badge-text`/`data-contact-badge-text`). Overrides modale obsolètes (signature 72px mobile) **nettoyés** → sizing 100 % géré par `--v1`.
+- **C. Tutoiement** : corrigé dans `inc/guide-data.php` (titres taille/sortie/table/style — **possessifs accordés au genre** via table pièce→forme, pas de « ton chambre »), dans `buildRecapIntro` (JS, même table → « Pour ton salon, Robin recommande : ») et le **consentement s-contact** (« en envoyant ta demande, tu acceptes… »). ⚠️ `guide-data.php` est partagé → le bandeau « Mon projet » bénéficie aussi du tutoiement.
+- **D. Hover des cartes de choix** (`.choice`) en **orange** (border + icône), scopé modale, comme la home.
+- **Préservé** : tous les `data-*` (data-screen, data-s0-*, data-question-title, data-choices, data-progress-fill, data-chat-*, data-product-recap-*, data-recap-chips, data-contact-*), l'attribut `hidden`, le **honeypot `name="website"`**, la pill `#robin-product-pill`. **Aucune logique JS de filtre touchée.**
+- **Vérifs** : accolades CSS 3738/3738 ; 7 pills `--v1` ; 0 vouvoiement résiduel (guide-data + modale) ; hooks présents.
+**👉 Robin :** sur une **fiche produit variable** (test), ouvrir le Conseiller et parcourir les 6 écrans (desktop **+ mobile**) → carte au **grain bois sans pointillé**, **pill V1 photo + accroche Square Peg** en tête de chaque écran, **plus de vouvoiement** (titres s1, intro recap, consentement), **hover des choix en orange**. Vérifier que le filtre marche comme avant (choix → étapes → reco → appliquer → contact) et **console F12 = 0 erreur**. ⚠️ Lien « Contacter Robin » du récap produit → toujours `/contact/` (hors périmètre, à traiter à part si tu veux). Reste **Phase 3** (card Mes créations, après ton brief).
+
+<details><summary>Énoncé original</summary>
+
+## [TÂCHE] Harmonisation Conseiller — PHASE 4 : modale (tous les états)
+**Date :** 2026-06-10 · **Priorité :** haute · **Branche :** `test-theme-sapi-maison` (auto-deploy test). Push auto. Master/prod = SEULEMENT après validation Robin sur test.
+**Réfs :** `mockups/AUDIT-MODALE-PHASE4.md` (audit complet des 6 états + liste des hooks à préserver) · `mockups/mockup-modale-conseiller-phase4.html` (rendu cible validé Robin).
+**Décisions Robin (validées sur mockup) :** (1) **cadre C** = la carte modale passe en **fond crème + grain bois en filigrane seul**, on **retire le pointillé** (`::before` dashed) ; pas d'ourlet orange. (2) **pill V1 sur TOUS les écrans** (photo Robin sans contour + accroche Square Peg blanche), à la place des anciens badges texte. (3) **tutoiement** corrigé partout.
+
+**Contexte / périmètre :** la modale (`.conseiller-modal` / `.conseiller-card--modal`) est injectée sur la **fiche produit variable** (markup statique PHP dans le shell `functions.php` ; scripts `sapi-modal-conseiller.js`, `sapi-cards-conseiller.js`, `sapi-help-pill.js`). **6 écrans** : `s0`, `s1`, `s2-chat`, `s-product-recap`, `s3`, `s-contact`. ⚠️ **Markup propre à la modale** (`.modal__*`, `.choices`, `.separator-or`, `.text-input*`, `.badge`) — ce n'est PAS la famille `.room-picker-*`. **Ne casser AUCUN hook JS / `data-*`** (liste exhaustive dans l'audit §4 : tous les `data-screen`, `data-s0-*`, `data-question-title`, `data-choices`, `data-progress-fill`, `data-chat-*`, `data-product-recap-*`, `data-recap-chips`, `data-contact-*`, l'attribut `hidden` de chaque `.modal__screen`, et le **honeypot `input[name="website"]`**). La pill déclencheur `#robin-product-pill` (Phase 2) reste inchangée.
+
+**À faire :**
+
+### A. Cadre C sur la carte modale (`.conseiller-card--modal`)
+- Garder le fond crème `--color-warm`, **ajouter le grain bois** en filigrane : `background-image:repeating-linear-gradient(92deg,rgba(139,115,85,.05) 0,rgba(139,115,85,.05) 1px,transparent 1px,transparent 7px);`
+- **Retirer le pointillé** : supprimer (ou neutraliser) le `::before` dashed `1.11px rgba(139,115,85,.35)` de la carte. Pas d'ourlet orange. Reste : `border-radius:16px`, ombre actuelle, overlay inchangé, bouton fermer inchangé.
+
+### B. Pill V1 sur les 6 écrans (remplace les badges texte)
+- **Réutiliser la classe existante `.conseiller-sig conseiller-sig--v1`** (déjà au CSS depuis Phase 1, commit `cb849af` — capsule wood-dark, avatar 34px sans contour, `__who` masqué, hook Square Peg blanc 24px, MQ mobile 21px). **Ne pas recréer de composant.**
+- **s0 et s2-chat** : la signature `.conseiller-sig` existe déjà (commit `d659fe8`) → **ajouter la classe `conseiller-sig--v1`** + mettre l'accroche voulue. ⚠️ Vérifier qu'aucun override modale plus spécifique (`.conseiller-card--modal .conseiller-sig__avatar` à 72px, etc.) ne batte `--v1` ; si oui, neutraliser pour que le rendu compact V1 s'applique réellement dans la modale.
+- **s1, s-product-recap, s3, s-contact** : **ajouter** le markup pill en tête de chaque écran :
+```php
+<div class="conseiller-sig conseiller-sig--v1">
+  <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg','medium',['alt'=>'Robin, artisan de l\'Atelier Sâpi','class'=>'conseiller-sig__img','loading'=>'lazy']); ?></span>
+  <span class="conseiller-sig__text"><span class="conseiller-sig__who">Le conseil de Robin</span><span class="conseiller-sig__hook">ACCROCHE</span></span>
+</div>
+```
+- **Masquer les anciens badges texte** sans les retirer du DOM (ils portent des `data-*` lus par le JS) : `.conseiller-card--modal .badge{display:none}`. Vérifier que `.badge` n'a pas d'autre rôle visible dans la modale (l'audit ne lui en voit aucun) et qu'aucune LOGIQUE JS ne dépend de sa visibilité (texte/valeur OK, visibilité non).
+- **Accroches Square Peg par écran** (tutoiement, pas de tiret cadratin) :
+  - `s0` → « Mon regard d'artisan sur ton projet » (déjà en place, garder)
+  - `s1` → « On affine ton projet »
+  - `s2-chat` → « Discutons de ton projet » (remplace l'accroche actuelle)
+  - `s-product-recap` → « Mon conseil pour toi »
+  - `s3` → « On récapitule ? »
+  - `s-contact` → « Échangeons ensemble »
+
+### C. Tutoiement (corriger le vouvoiement résiduel)
+Repérer et corriger dans le code de la modale / du mégafiltre (PHP `functions.php` et/ou config des questions) :
+1. **Titres s1** type « QUELLE TAILLE FAIT VOTRE SALON ? » / « QUEL STYLE POUR VOTRE SALON ? ».
+2. **Intro s-product-recap** : « Pour **votre** salon / salle à manger, Robin recommande : ».
+3. **Consentement s-contact** : « En envoyant **votre** demande, **vous** acceptez… » → « En envoyant **ta** demande, **tu** acceptes… ».
+
+⚠️ **Piège de genre** : ces titres **interpolent le nom de la pièce** ; « votre » est neutre, le tutoiement ne l'est pas. **Ne PAS remplacer mécaniquement « votre » par « ton »** (ça donnerait « ton chambre »). Introduire une **table piece-clé → possessif tutoyé exact**, et l'utiliser pour s1 + l'intro produit-recap :
+| Pièce (label) | Forme tutoyée |
+|---|---|
+| Cuisine | ta cuisine |
+| Bureau / Atelier | ton bureau |
+| Salon / Salle à manger | ton salon |
+| Chambre | ta chambre |
+| Chambre enfant | ta chambre d'enfant |
+| Entrée / Couloir | ton entrée |
+| Cage d'escalier | ta cage d'escalier |
+(Adapter aux clés réelles trouvées dans le code. Si une pièce manque, choisir la forme correcte ; en dernier recours, replier sur « **ta pièce** » plutôt qu'une forme fautive.)
+
+### D. Hover des cartes de choix en orange (comme la home)
+- `.conseiller-card--modal .choices > *:hover` (ou la classe réelle des cartes `.choices`) → aligner sur la home : `border-color:var(--color-orange);transform:translateY(-2px);box-shadow:var(--shadow-card-hover)` + carré d'icône `background:rgba(227,91,36,.12);color:var(--color-orange)` au hover. Scoper à la modale.
+
+**NE PAS faire :** toucher au JS de filtre / aux `data-*` / au honeypot / à l'attribut `hidden` / à `#robin-product-pill`. Ne pas changer le comportement du lien « Contacter Robin » du récap produit (il part sur `/contact/` — incohérence notée dans l'audit §1 s-product-recap, mais **hors périmètre design**, à traiter à part si Robin le veut). Pas de tiret cadratin. Accolades équilibrées.
+
+**Critères de succès :** sur une fiche produit variable (test), ouvrir la modale et parcourir les 6 écrans → carte au **grain bois sans pointillé**, **pill V1 photo + accroche Square Peg** en tête de **chaque** écran (accroches ci-dessus), **plus aucun vouvoiement** (titres s1, intro recap, consentement contact), **hover des choix en orange**. Le filtre fonctionne exactement comme avant (choix → étapes → reco → appliquer la sélection → contact). Console F12 = 0 erreur. Mobile ≤600px OK (pill 21px, plein écran).
+
+### 👉 Action Robin
+Sur test, fiche produit variable → ouvrir le Conseiller et faire défiler les 6 écrans (desktop + mobile). Vérifier grain/pill/tutoiement/hover + que rien n'est cassé. Si OK → go-live (avec les autres chantiers Conseiller en attente). Reste après ça : **Phase 3** (card Robin sur Mes créations, après ton brief refonte Mes créations).
+
+</details>
+
+---
+
 ## ✅ [FAIT 2026-06-10 — sur test] Harmonisation Conseiller — PHASE 2 : pill fiche produit mini V1 (V6) (commit `424828f`)
 **Résultat (branche `test-theme-sapi-maison`, poussé sur test) :**
 - **CSS** `.conseiller-pill-secondary` : capsule claire dashed → **mini capsule bois sombre** (`--color-wood-dark`, radius 60), **photo sans contour** (rond), **accroche Square Peg blanche**, **sans badge ni flèche**, hover ombre + lift. **Anciennes règles mortes retirées**. Retouche Robin (`068d366`) : **+20 % de taille** (avatar 31px, accroche 22px / mobile 19px, gap 11 / padding 5px 17px 5px 5px) + **`text-transform:none`** (le texte sortait en MAJUSCULES à cause de la règle `button` globale).
