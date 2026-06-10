@@ -139,15 +139,16 @@ if ($imm_piece) {
   </div>
   <div class="mescreations-immersion__scrim" aria-hidden="true"></div>
 
-  <!-- Bandeau réassurance DÉDIÉ (décision Robin #3) : collé en bas de la photo
-       au repos (translucide), puis sticky blanc sous le header au scroll (JS).
-       Wording identique à la home. -->
-  <div class="mescreations-immersion__reassure" data-immersion-reassure aria-hidden="true">
-    <span class="mescreations-immersion__reassure-item"><?php esc_html_e('Livraison rapide en 48-72h', 'theme-sapi-maison'); ?></span>
-    <span class="mescreations-immersion__reassure-item is-mobile-hidden"><?php esc_html_e('Façonné main à Lyon sous 5 jours', 'theme-sapi-maison'); ?></span>
-    <span class="mescreations-immersion__reassure-item is-mobile-hidden"><?php esc_html_e('30 jours pour changer d\'avis', 'theme-sapi-maison'); ?></span>
-    <span class="mescreations-immersion__reassure-item"><?php esc_html_e('Paiement sécurisé', 'theme-sapi-maison'); ?></span>
-  </div>
+  <!-- Bandeau réassurance DÉDIÉ (décision Robin #3) : instance du bandeau du
+       site (sapi_robin_bandeau_v2, MÊME markup/style = fond blanc, icônes SVG
+       orange, items identiques) rendue SANS id (le global #robin-bandeau est
+       masqué en mode immersion). Positionné en bas de la photo via CSS. -->
+  <?php
+  if (!function_exists('sapi_robin_bandeau_v2')) {
+    require_once get_template_directory() . '/inc/template-robin-bandeau-v2.php';
+  }
+  sapi_robin_bandeau_v2('', 'mescreations-immersion__reassure');
+  ?>
 
   <div class="mescreations-immersion__inner">
     <!-- Pill Robin V1 (composant partagé, déjà stylé) -->

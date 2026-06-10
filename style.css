@@ -24585,7 +24585,7 @@ button.chip--project:focus-visible {
 body.mescreations-immersion-on .shop-hero-artisan,
 body.mescreations-immersion-on .conseiller-cards-zone,
 body.mescreations-immersion-on .mes-creations-section-divider,
-body.mescreations-immersion-on .robin-bandeau { display: none !important; }
+body.mescreations-immersion-on #robin-bandeau { display: none !important; }
 
 /* Le contenu du site est dans une colonne centrée (.site-content ~1440px).
    Pour un vrai plein écran, le hero immersif sort de cette colonne (full-bleed
@@ -24879,26 +24879,16 @@ body.mescreations-immersion-on { overflow-x: clip; }
 @keyframes immersionBob { 50% { transform: translateY(5px); } }
 
 /* Bandeau réassurance dédié — bas de la photo, translucide */
-.mescreations-immersion__reassure {
+/* Bandeau réassurance = instance du bandeau du site (.robin-bandeau, fond blanc
+   + icônes orange + items identiques). On ne fait que le repositionner en bas
+   de la photo (le .robin-bandeau de base est sticky top:80px). */
+.mescreations-immersion__reassure.robin-bandeau {
   position: absolute;
-  left: 0; right: 0; bottom: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 30px;
-  flex-wrap: wrap;
-  padding: 11px 24px;
-  background: rgba(20,14,8,.24);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  border-top: 1px solid rgba(255,255,255,.22);
-}
-.mescreations-immersion__reassure-item {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #fff;
-  text-shadow: 0 1px 8px rgba(0,0,0,.4);
+  top: auto;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
 }
 
 /* ── Sélection révélée (slider) ── */
@@ -25061,8 +25051,6 @@ body.mescreations-immersion-on { overflow-x: clip; }
 
 @media (max-width: 600px) {
   .mescreations-immersion { padding: 80px 14px 90px; }
-  .mescreations-immersion__reassure { gap: 16px; }
-  .mescreations-immersion__reassure-item.is-mobile-hidden { display: none; }
   .mescreations-immersion__pcard { flex-basis: 200px; }
   .mescreations-immersion__selection-head { flex-direction: column; align-items: flex-start; gap: 6px; }
 }
