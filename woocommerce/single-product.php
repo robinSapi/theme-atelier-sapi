@@ -423,7 +423,7 @@ get_header();
             $render_help_pill = function () {
               echo '<button type="button" class="conseiller-pill-secondary" id="robin-product-pill" data-action="open-modal" data-modal-state="product" data-help-pill>';
               echo '<span class="conseiller-pill-secondary__avatar">' . sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => '', 'class' => 'conseiller-pill-secondary__img', 'loading' => 'lazy']) . '</span>';
-              echo '<span data-help-pill-text>' . esc_html__('Je t\'aide à choisir la bonne taille', 'theme-sapi-maison') . '</span>';
+              echo '<span data-help-pill-text>' . esc_html__('Je t\'aide à choisir la bonne version', 'theme-sapi-maison') . '</span>';
               echo '</button>';
             };
             add_action('woocommerce_before_single_variation', $render_help_pill, 5);
