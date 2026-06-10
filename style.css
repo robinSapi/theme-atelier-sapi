@@ -24598,6 +24598,14 @@ body.mescreations-immersion .robin-bandeau { display: none !important; }
   padding: 90px 24px 96px;
   overflow: hidden;
   background: var(--color-wood-dark);
+  /* Full-bleed : neutralise le padding latéral de .site-content (0 20px) pour
+     que la photo touche les bords du viewport (vrai « plein écran »).
+     Annulé ≤768px où .site-content perd son padding. */
+  margin-left: -20px;
+  margin-right: -20px;
+}
+@media (max-width: 768px) {
+  .mescreations-immersion { margin-left: 0; margin-right: 0; }
 }
 .mescreations-immersion__bg {
   position: absolute;
