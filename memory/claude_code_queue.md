@@ -2,6 +2,21 @@
 
 > Historique des tâches terminées archivé dans `claude_code_queue_archive.md` (nettoyé le 2026-06-03).
 
+## ✅ RETOUR COWORK — Pill « Signature Conseiller » V1 (home) FAIT sur TEST (2026-06-10)
+**Sur test, en attente de validation Robin. PAS en prod.** Branche `test-theme-sapi-maison`, commit `99c6903`, déployé sur test.atelier-sapi.fr.
+- La signature « Le conseil de Robin » de la **home** (section Conseiller / room-picker) passe en **capsule bois sombre V1** (fond `--color-wood-dark`, avatar rond bordé clair, eyebrow tan, accroche blanche). **Textes et photo inchangés.** Rendu mobile géré (≤600px).
+- **Scopé à la home uniquement** : la signature dans la **modale Conseiller** et la pill **fiche produit** ne bougent pas (réservées à l'étape suivante = généralisation, à lancer si Robin valide la V1).
+- ⚠️ **Coordination 2 fenêtres :** ce chantier tournait **en parallèle** de la « suppression bento legacy » (autre fenêtre Claude Code) qui éditait le **même `style.css`** → ma 1re passe a été écrasée. Refaite proprement **après** que le bento soit passé en prod. Les deux travaux sont bien séparés, aucun mélange.
+
+**👉 Action Robin :** regarder la pill sombre sur la home test (desktop + mobile). Si OK → me dire « go généralisation » (modale tous états + pill fiche produit + page conseils, même V1, lignes du bas contextuelles). Puis, quand tout est validé, go-live (merge master + prod manuel).
+
+---
+
+## ✅ RETOUR COWORK — Suppression bento legacy (CSS + JS) EN PROD (2026-06-10)
+**Fait par l'autre fenêtre Claude Code, validé Robin, déjà en prod (atelier-sapi.fr).** Le vieux système « bento CINÉTIQUE » (CSS mort + code JS mort dans `cinetique.js`) a été retiré. `.hero-bento` et `.bento-bestseller-badge` (Star du moment) conservés. Pour mémoire Cowork : c'est la tâche « suppression du JS » dont Robin parlait.
+
+---
+
 ## ✅ RETOUR COWORK — GO-LIVE refonte home FAIT + 10 retouches photos (2026-06-10, EN PROD)
 **Refonte home mergée dans `master` et déployée en prod (atelier-sapi.fr).** Merge commit `1c3c642` « Refonte home juin 2026 » (129 commits de `feature/refonte-home`). Audit de branches fait avant merge : `master` était **== `test-theme-sapi-maison`** (aucune divergence test↔master, **pas de méga-filtre / prompts IA / backend Conseiller** embarqués). Après go-live, les deux branches test (`test-theme-sapi-maison` + `feature/refonte-home`) ont été **réalignées sur master**.
 
