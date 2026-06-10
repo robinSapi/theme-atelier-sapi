@@ -24668,7 +24668,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   right: 0;
   top: 50%;
   width: 100%;
-  max-width: 1150px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 0 24px;
   display: flex;
@@ -24676,8 +24676,8 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   align-items: center;
   gap: 18px;
   /* Remonte + rétrécit proportionnellement (scale, pas de reflow) au scroll. */
-  -webkit-transform: translateY(-50%) translateY(calc(var(--reveal) * -22vh)) scale(calc(1 - var(--reveal) * 0.42));
-  transform: translateY(-50%) translateY(calc(var(--reveal) * -22vh)) scale(calc(1 - var(--reveal) * 0.42));
+  -webkit-transform: translateY(-50%) translateY(calc(var(--reveal) * -22vh)) scale(calc(1 - var(--reveal) * 0.28));
+  transform: translateY(-50%) translateY(calc(var(--reveal) * -22vh)) scale(calc(1 - var(--reveal) * 0.28));
   will-change: transform;
 }
 
