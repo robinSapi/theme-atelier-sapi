@@ -7864,24 +7864,24 @@ li.carousel-editorial-slide,
   margin: 2rem auto;
   padding: 0 2rem;
 }
-/* Harmonisé avec .conseiller-card : fond warm + bordure dashed INSET via
-   ::before (décor décalé 12px vers l'intérieur, comme dans la modale).
+/* Harmonisation Conseiller Phase 1 : même langage que la home (fond warm +
+   grain bois en filigrane), en restant un panneau contenu (pas pleine largeur).
    Pas de hover (panneau statique). */
 .advice-room-picker {
   position: relative;
-  background: var(--color-warm, #FBF6EA);
+  background: var(--color-warm);
   border-radius: 16px;
-  padding: 2.5rem 2rem;
+  padding: 2.75rem 2rem;
   text-align: center;
   overflow: hidden;
 }
 .advice-room-picker::before {
   content: "";
   position: absolute;
-  inset: 12px;
-  border: 1.5px dashed rgba(147, 125, 104, 0.35);
-  border-radius: 12px;
+  inset: 0;
+  background-image: repeating-linear-gradient(92deg, rgba(139, 115, 85, .05) 0, rgba(139, 115, 85, .05) 1px, transparent 1px, transparent 7px);
   pointer-events: none;
+  z-index: 0;
 }
 .advice-room-picker .room-picker-inner {
   position: relative;
@@ -7893,6 +7893,11 @@ li.carousel-editorial-slide,
   flex-wrap: wrap;
   gap: 1.25rem;
   width: 100%;
+}
+/* Phase 1 — hover chips en accent orange, identique à la home */
+@media (hover:hover){
+  .advice-room-picker .room-card:hover{border-color:var(--color-orange);background:#f4ead3;box-shadow:var(--shadow-card-hover);transform:translateY(-2px)}
+  .advice-room-picker .room-card:hover .room-card-icon{background:rgba(227,91,36,.12);color:var(--color-orange)}
 }
 
 @media (max-width: 768px) {
@@ -7996,21 +8001,21 @@ li.carousel-editorial-slide,
   .conseiller-card--modal .conseiller-sig__avatar{width:52px;height:52px}
   .conseiller-card--modal .conseiller-sig__hook{font-size:24px}
 }
-/* ===== Signature Conseiller — pill bois sombre V1 : photo + accroche Square Peg, sans label (home) ===== */
-.home-projet .conseiller-sig{
+/* ===== Signature Conseiller — pill bois sombre V1 : photo + accroche Square Peg, sans label (partagée home + Conseils) ===== */
+.conseiller-sig--v1{
   display:inline-flex;align-items:center;gap:12px;
   background:var(--color-wood-dark);
   border-radius:60px;
   padding:6px 24px 6px 6px;
   margin:0 0 16px;
 }
-.home-projet .conseiller-sig__avatar{width:34px;height:34px;border:none;box-shadow:none}
-.home-projet .conseiller-sig__who{display:none} /* « Le conseil de Robin » retiré : l'identité passe par la photo */
-.home-projet .conseiller-sig__text{gap:0}
-.home-projet .conseiller-sig__hook{color:#fff;font-size:24px;line-height:1;margin:0}
+.conseiller-sig--v1 .conseiller-sig__avatar{width:34px;height:34px;border:none;box-shadow:none}
+.conseiller-sig--v1 .conseiller-sig__who{display:none} /* « Le conseil de Robin » retiré : l'identité passe par la photo */
+.conseiller-sig--v1 .conseiller-sig__text{gap:0}
+.conseiller-sig--v1 .conseiller-sig__hook{color:#fff;font-size:24px;line-height:1;margin:0}
 @media (max-width:600px){
-  .home-projet .conseiller-sig{max-width:100%}
-  .home-projet .conseiller-sig__hook{font-size:21px}
+  .conseiller-sig--v1{max-width:100%}
+  .conseiller-sig--v1 .conseiller-sig__hook{font-size:21px}
 }
 /* réchauffe de la bande : grain bois discret en fond (sous le contenu) */
 .home-projet-section{position:relative}
