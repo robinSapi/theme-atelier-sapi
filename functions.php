@@ -3634,7 +3634,10 @@ function sapi_piece_possessive($piece) {
  */
 add_filter('body_class', function ($classes) {
   if (function_exists('is_shop') && is_shop() && sapi_mescreations_immersion_piece() !== '') {
-    $classes[] = 'mescreations-immersion';
+    // Classe DISTINCTE du nom de la section (.mescreations-immersion) : sinon
+    // la règle de base .mescreations-immersion{display:flex;width:100vw;
+    // overflow:hidden;…} s'appliquerait AUSSI au <body> (collision de classe).
+    $classes[] = 'mescreations-immersion-on';
   }
   return $classes;
 });

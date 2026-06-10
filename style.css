@@ -24575,23 +24575,23 @@ button.chip--project:focus-visible {
 
 /* ════════════════════════════════════════════════════════════════════════
    Refonte /mes-creations/ — état B « immersion » (arrivée depuis room-picker)
-   Gated par body.mescreations-immersion (?piece= valide, cf. functions.php +
+   Gated par body.mescreations-immersion-on (?piece= valide, cf. functions.php +
    archive-product.php). Contrôleur : assets/sapi-mescreations-immersion.js.
    Étape 1 : header laissé normal (transparent-over-photo = passe suivante).
    ════════════════════════════════════════════════════════════════════════ */
 
 /* État B : masque le hero croquis, la zone cards conseiller, le séparateur et
    le bandeau global (remplacé par le bandeau dédié du hero, décision Robin #3). */
-body.mescreations-immersion .shop-hero-artisan,
-body.mescreations-immersion .conseiller-cards-zone,
-body.mescreations-immersion .mes-creations-section-divider,
-body.mescreations-immersion .robin-bandeau { display: none !important; }
+body.mescreations-immersion-on .shop-hero-artisan,
+body.mescreations-immersion-on .conseiller-cards-zone,
+body.mescreations-immersion-on .mes-creations-section-divider,
+body.mescreations-immersion-on .robin-bandeau { display: none !important; }
 
 /* Le contenu du site est dans une colonne centrée (.site-content ~1440px).
    Pour un vrai plein écran, le hero immersif sort de cette colonne (full-bleed
    100vw). overflow-x:clip neutralise la barre de scroll horizontale du 100vw
    sans casser le position:sticky du header (même technique que la home). */
-body.mescreations-immersion { overflow-x: clip; }
+body.mescreations-immersion-on { overflow-x: clip; }
 
 .mescreations-immersion {
   position: relative;

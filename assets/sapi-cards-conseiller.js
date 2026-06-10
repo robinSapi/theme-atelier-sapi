@@ -985,7 +985,7 @@
     // immersif), NI ne re-filtre la grille basse "Toutes mes créations" (qu'on
     // veut intacte). On ne définit pas window.sapiMegaFilter → shop.js laisse le
     // catalogue dans son état naturel (toutes les créations + cards réassurance).
-    if (document.body && document.body.classList.contains('mescreations-immersion')) {
+    if (document.body && document.body.classList.contains('mescreations-immersion-on')) {
       return;
     }
 
