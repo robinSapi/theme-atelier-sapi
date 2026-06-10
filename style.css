@@ -24675,8 +24675,10 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   flex-direction: column;
   align-items: center;
   gap: 18px;
-  -webkit-transform: translateY(-50%) translateY(calc(var(--reveal) * -22vh));
-  transform: translateY(-50%) translateY(calc(var(--reveal) * -22vh));
+  /* Remonte + rétrécit proportionnellement (scale, pas de reflow) au scroll. */
+  -webkit-transform: translateY(-50%) translateY(calc(var(--reveal) * -22vh)) scale(calc(1 - var(--reveal) * 0.42));
+  transform: translateY(-50%) translateY(calc(var(--reveal) * -22vh)) scale(calc(1 - var(--reveal) * 0.42));
+  will-change: transform;
 }
 
 /* Pill V1 — fade-in */
@@ -24695,10 +24697,9 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 /* Phrase de conseil (machine à écrire) */
 .mescreations-immersion__phrase {
   color: #fff;
-  /* Grosse à l'état initial, rétrécit au scroll (interpolée via --reveal). */
-  --phrase-max: clamp(1.85rem, 3.6vw, 2.75rem);
-  --phrase-min: clamp(1.05rem, 1.7vw, 1.35rem);
-  font-size: calc(var(--phrase-max) - (var(--phrase-max) - var(--phrase-min)) * var(--reveal));
+  /* Taille FIXE (lignes figées → pas de reflow/saut pendant le scroll). La
+     réduction au scroll se fait par scale() sur tout le bloc __inner. */
+  font-size: clamp(1.85rem, 3.6vw, 2.75rem);
   line-height: 1.35;
   font-style: italic;
   font-weight: 500;
