@@ -1,41 +1,39 @@
 /**
  * Sapi — /mes-creations/ état B « immersion » (arrivée depuis le room-picker).
  *
- * Contrôleur de la séquence du hero immersif (machine à écrire, affinage
- * inline taille→style, révélation de la sélection). Le markup + la sélection
- * pièce-level sont rendus CÔTÉ SERVEUR (archive-product.php) ; ce script ne
- * fait que jouer la chorégraphie et stocker les réponses dans window.sapiProject.
+ * Contrôleur du hero immersif. Le markup + la sélection pièce-level sont rendus
+ * CÔTÉ SERVEUR (archive-product.php) ; ce script joue la chorégraphie d'entrée
+ * (machine à écrire), l'affinage inline taille→style (stocké dans
+ * window.sapiProject) et surtout la RÉVÉLATION PILOTÉE PAR LE SCROLL : le hero
+ * est épinglé (sticky dans un track), et la progression du scroll (--reveal,
+ * 0→1) floute la photo, fait remonter le texte et fait apparaître les cards.
+ * Réversible (lié à la position de scroll). Header + bandeau = mécanisme home.
  *
- * S'auto-désactive si le hero immersif n'est pas présent (body sans
- * .mescreations-immersion, pas de [data-immersion]). Voir functions.php
- * (sapi_mescreations_immersion_piece, body_class, enqueue) et le CSS
- * (.mescreations-immersion*).
- *
- * Étape 1 : affinage stocke les réponses + révèle la sélection pièce-level.
- * Le re-filtrage taille/style de la sélection (AJAX serveur) viendra ensuite.
+ * S'auto-désactive si le hero n'est pas présent (pas de [data-immersion]).
  */
 (function () {
   'use strict';
 
   var config = window.SAPI_IMMERSION || {};
 
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
   function init() {
     var section = document.querySelector('[data-immersion]');
     if (!section) return; // pas en mode immersion
+    var track = document.querySelector('[data-immersion-track]');
 
     var els = {
-      sig:        section.querySelector('[data-immersion-sig]'),
-      phrase:     section.querySelector('[data-immersion-phrase]'),
-      phraseText: '',
+      sig:           section.querySelector('[data-immersion-sig]'),
+      phrase:        section.querySelector('[data-immersion-phrase]'),
+      phraseText:    '',
       phraseContent: section.querySelector('.mescreations-immersion__phrase-content'),
-      affine:     section.querySelector('[data-immersion-affine]'),
-      affineQ:    section.querySelector('[data-immersion-affine-q]'),
-      affineChips:section.querySelector('[data-immersion-affine-chips]'),
-      refine:     section.querySelector('[data-immersion-refine]'),
-      cta:        section.querySelector('[data-immersion-cta]'),
-      seeSel:     section.querySelector('[data-immersion-see-selection]'),
-      seeAll:     section.querySelectorAll('[data-immersion-see-all]'),
-      scrollhint: section.querySelector('[data-immersion-scrollhint]')
+      affine:        section.querySelector('[data-immersion-affine]'),
+      affineQ:       section.querySelector('[data-immersion-affine-q]'),
+      affineChips:   section.querySelector('[data-immersion-affine-chips]'),
+      refine:        section.querySelector('[data-immersion-refine]'),
+      selection:     section.querySelector('[data-immersion-selection]'),
+      scrollhint:    section.querySelector('[data-immersion-scrollhint]')
     };
     if (els.phrase) els.phraseText = els.phrase.getAttribute('data-immersion-phrase-text') || '';
 
@@ -67,7 +65,7 @@
       if (!els.phraseContent) { done && done(); return; }
       if (reduceMotion || !text) {
         els.phraseContent.textContent = text || '';
-        els.phrase.classList.add('is-done');
+        if (els.phrase) els.phrase.classList.add('is-done');
         done && done();
         return;
       }
@@ -86,7 +84,8 @@
       }, 26);
     }
 
-    /* ── Affinage inline ── */
+    /* ── Affinage inline (stocke la réponse, passe à la suivante ; NE déclenche
+       PAS la révélation — celle-ci est pilotée par le scroll). ── */
     function renderQuestion() {
       var q = questions[qIndex];
       if (!q || !els.affineChips) return;
@@ -121,70 +120,59 @@
         qIndex++;
         if (qIndex < questions.length) {
           renderQuestion(); // la question suivante prend la place
-        } else {
-          // toutes les questions répondues → la sélection se révèle
-          if (els.affine) els.affine.hidden = true;
-          openSelection();
-          if (els.refine) { els.refine.hidden = false; requestAnimationFrame(function () { els.refine.classList.add('is-in'); }); }
+        } else if (els.affine) {
+          els.affine.hidden = true; // parcours fini ; la sélection se révèle au scroll
         }
       }, 420);
-    }
-
-    /* ── Révélation de la sélection ── */
-    function openSelection() {
-      var sel = section.querySelector('[data-immersion-selection]');
-      if (sel) sel.hidden = false;
-      // 2 rAF pour que la transition CSS (opacity/blur) parte d'un état rendu
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () { section.classList.add('is-selection'); });
-      });
-    }
-
-    function scrollToCatalogue() {
-      var cat = document.getElementById('mes-creations-catalogue');
-      if (cat) cat.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
     }
 
     function openModaleRefine() {
       document.dispatchEvent(new CustomEvent('sapi:open-modal', { detail: { state: 's3' } }));
     }
-
-    /* ── Header + bandeau : MÊME mécanisme que la home (front-page.php). Le
-       bandeau global est déplacé juste après le hero et reçoit
-       .home-repositioned-bar (sticky sous le header). Le header bascule
-       .is-scrolled quand le bas du hero passe le haut du viewport. ── */
-    var header = document.querySelector('.site-header');
-    var band = document.querySelector('.robin-bandeau');
-    if (band && section.parentNode) {
-      section.parentNode.insertBefore(band, section.nextSibling);
-      band.classList.add('home-repositioned-bar');
-    }
-    if (header) {
-      var updateHeaderState = function () {
-        var bottom = section.getBoundingClientRect().bottom;
-        header.classList.toggle('is-scrolled', bottom < 50);
-      };
-      window.addEventListener('scroll', updateHeaderState, { passive: true });
-      window.addEventListener('resize', updateHeaderState, { passive: true });
-      updateHeaderState();
-    }
-
-    /* ── Câblage ── */
-    if (els.seeSel) els.seeSel.addEventListener('click', openSelection);
-    if (els.seeAll && els.seeAll.length) {
-      [].slice.call(els.seeAll).forEach(function (b) { b.addEventListener('click', scrollToCatalogue); });
-    }
     if (els.refine) els.refine.addEventListener('click', openModaleRefine);
 
-    /* ── Séquence d'entrée ── */
+    /* ── Header + bandeau : MÊME mécanisme que la home (front-page.php). Le
+       bandeau global est déplacé juste après le track et reçoit
+       .home-repositioned-bar (sticky sous le header). ── */
+    var header = document.querySelector('.site-header');
+    var band = document.querySelector('.robin-bandeau');
+    if (band && track && track.parentNode) {
+      track.parentNode.insertBefore(band, track.nextSibling);
+      band.classList.add('home-repositioned-bar');
+    }
+
+    /* ── Révélation pilotée par le scroll (--reveal 0→1 via le track épinglé) +
+       header opaque (comme la home : quand le bas du hero passe le haut). ── */
+    var rafPending = false;
+    function applyScroll() {
+      rafPending = false;
+      if (track) {
+        var rect = track.getBoundingClientRect();
+        var total = track.offsetHeight - window.innerHeight;
+        var p = total > 0 ? clamp((-rect.top) / total, 0, 1) : 0;
+        section.style.setProperty('--reveal', p.toFixed(4));
+        if (els.selection) els.selection.style.pointerEvents = p > 0.45 ? 'auto' : 'none';
+      }
+      if (header) {
+        header.classList.toggle('is-scrolled', section.getBoundingClientRect().bottom < 50);
+      }
+    }
+    function onScroll() {
+      if (!rafPending) { rafPending = true; requestAnimationFrame(applyScroll); }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    applyScroll();
+
+    /* ── Séquence d'entrée (au load) : pill → phrase qui s'écrit → question →
+       hint. La révélation de la sélection, elle, se joue au scroll. ── */
     function playSequence() {
       renderQuestion();
       later(function () { if (els.sig) els.sig.classList.add('is-in'); }, reduceMotion ? 0 : 300);
       later(function () {
         typewriter(els.phraseText, function () {
           later(function () { if (els.affine) els.affine.classList.add('is-in'); }, reduceMotion ? 0 : 250);
-          later(function () { if (els.cta) els.cta.classList.add('is-in'); }, reduceMotion ? 0 : 700);
-          later(function () { if (els.scrollhint) els.scrollhint.classList.add('is-in'); }, reduceMotion ? 0 : 950);
+          later(function () { if (els.scrollhint) els.scrollhint.classList.add('is-in'); }, reduceMotion ? 0 : 650);
         });
       }, reduceMotion ? 0 : 900);
     }
