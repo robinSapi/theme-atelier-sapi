@@ -73,6 +73,36 @@ Le composant `.conseiller-sig` (pastille Robin + « Le conseil de Robin » + acc
 
 ## 🔧 À faire
 
+## ✅ [FAIT 2026-06-10 — lecture seule] Harmonisation Conseiller — PHASE 0 : spec + audit
+**Livrable : `mockups/AUDIT-CONSEILLER-PHASE0.md`** (rapport complet, aucune modif de code). Synthèse :
+- **(a) Spec de référence** figée (HOME) : bande `.home-projet-section` warm + grain bois `::before` (⚠️ pas de border-top aujourd'hui) ; pill V1 `.home-projet .conseiller-sig` (capsule wood-dark, photo 34px sans contour, hook Square Peg blanc 24px, label masqué) ; socle partagé `.room-picker-*` (valeurs exactes inner/title/cards/room-card/icon/label/or/freetext) ; câblage `data-room-picker`/`data-piece`/`data-room-picker-freetext`.
+- **(b) Écarts par emplacement** : **Conseils** (`.advice-room-picker`) = cadre crème **dashed inset** + pas de pill + titre `<h3>` **vouvoiement** + hover **wood** (vs orange) + pas de grain ; **Modale S0** = ⚠️ **markup totalement à part** (`.modal__*`/`.choices`/`.separator-or`/`.text-input*`, PAS la famille `.room-picker-*`) + `.conseiller-sig` style ANCIEN → confirme un chantier Phase 4 (réécriture, pas override) ; **Pill fiche produit** = capsule claire dashed + avatar 26px → à passer V1 (préserver `id robin-product-pill`/`data-action`/`data-modal-state`/`data-help-pill`/`data-help-pill-text`) ; **Mes créations** = carte + badge crayon + titre vouvoiement (Phase 3, attend le brief).
+- **(c) Reco Phase 1** : le socle `.room-picker-*` est **déjà bien factorisé** → ne pas le refactorer, juste réduire les overrides Conseils. Option : extraire les 3 traits identitaires home (grain + pill V1 + hover orange + tutoiement) dans un modificateur partagé `.room-picker--robin` **scopé aux room-pickers de PAGE** (home + conseils ; jamais modale/mes-créations).
+- **(d) Verdict Inspiration** : **HORS périmètre** — c'est un **filtre de galerie** (`.inspiration-filter-btn`, pièce+essence), pas un room-picker. Il n'y a PAS de 4e room-picker.
+- **Questions à trancher avant Phase 1** (dans le rapport §E) : Conseils en bande pleine largeur ou panneau contenu restylé (reco) ? garder `<h3>` SEO ou `<h2>` ? accroche pill propre à Conseils ? confirmer Inspiration exclu.
+**👉 Robin :** lire `mockups/AUDIT-CONSEILLER-PHASE0.md` + trancher les questions §E → j'écris la Phase 1.
+
+<details><summary>Énoncé original</summary>
+
+## [TÂCHE] Harmonisation Conseiller — PHASE 0 : spec + audit (LECTURE SEULE, aucun changement)
+**Date :** 2026-06-10 · **Priorité :** haute · **Lecture seule, AUCUNE modif de fichier.**
+**Plan complet :** `mockups/PLAN-HARMONISATION-CONSEILLER.md` (à lire). Objectif : préparer l'harmonisation du composant « Robin Conseiller » sur tout le site, en partant de la HOME comme référence (pill V1 = commit `76a468f`).
+
+**À faire :**
+1. **Figer la spec** du composant de référence (room-picker home `.home-projet` + pill Robin V1) : relever les valeurs réelles dans `front-page.php` + `style.css` — fond/grain de la bande, titre (typo, tutoiement), pill V1 (capsule wood-dark, photo 34px sans contour, accroche Square Peg blanche 24px, pas de label), chips `.room-card` (repos + hover), séparateur « ou », champ libre + bouton rond orange, couleurs, attributs `data-*`. Restituer la spec noir sur blanc.
+2. **Auditer chaque emplacement** et lister les ÉCARTS vs la référence :
+   - Room-picker page **Conseils** (`page-conseils-eclaires.php` `.advice-room-picker-section`) : cadre crème dashed, titre vouvoiement « cherchez-vous », pas de pill Robin…
+   - Room-picker **modale** (mégafiltre S0, `functions.php`) : documenter (traité en Phase 4, mais relever l'état).
+   - **Pill fiche produit** (`single-product.php` `.conseiller-pill-secondary`).
+   - **Card Robin Mes créations** (`woocommerce/archive-product.php`).
+   - **`page-inspiration.php`** : confirmer si ses `room-card` = room-picker « pour quelle pièce » (4e à aligner) ou filtre distinct.
+3. **Cartographier classes partagées vs spécifiques** (`.room-picker-*` base vs overrides `.home-projet` / `.advice-room-picker` / modale) → préparer une factorisation pour Phase 1.
+
+**Livrable :** rapport = (a) spec de référence ; (b) tableau « emplacement → écarts » ; (c) reco de factorisation Phase 1 ; (d) verdict Inspiration. Aucune modif de code.
+**👉 Robin :** lire le rapport → j'écris la Phase 1 (aligner Conseils sur la home) depuis les écarts.
+
+</details>
+
 ## ✅ [FAIT 2026-06-10 — sur test] Pill Conseiller home — V1 accroche Square Peg dans la pill, sans label (commit `76a468f`)
 **Résultat (branche `test-theme-sapi-maison`, poussé sur test) :** `.home-projet .conseiller-sig*` → la pill sombre ne contient plus que la **photo sans contour** (avatar 34px, `border:none`) + l'**accroche Square Peg blanche 24px**. **« Le conseil de Robin » masqué** (`__who{display:none}`, markup conservé). `gap:12`, `padding:6px 24px 6px 6px`, `margin:0 0 16px`, `__text gap:0`. Mobile ≤600px : hook **21px** + `max-width:100%`. Texte d'accroche et photo inchangés. Scopé home → modale + fiche produit intactes. Accolades 3732/3732, pas de tiret cadratin.
 **👉 Robin :** valider sur test (accroche Square Peg lisible, plus de label, titre dominant). Si OK → généralisation (modale + fiche + page conseils) avec ce format, accroche **contextuelle par page** (home = actuel ; fiche = « Je t'aide à choisir la bonne variante » ; etc.).
