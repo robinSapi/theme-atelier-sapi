@@ -75,8 +75,8 @@ Le composant `.conseiller-sig` (pastille Robin + « Le conseil de Robin » + acc
 
 ## ✅ [FAIT 2026-06-10 — sur test] Harmonisation Conseiller — PHASE 2 : pill fiche produit mini V1 (V6) (commit `424828f`)
 **Résultat (branche `test-theme-sapi-maison`, poussé sur test) :**
-- **CSS** `.conseiller-pill-secondary` : capsule claire dashed → **mini capsule bois sombre** (`--color-wood-dark`, radius 60, padding 4px 14px 4px 4px), **photo 26px sans contour** (`object-fit:cover`, rond), **accroche Square Peg blanche 18px**, **sans badge ni flèche**. Hover = ombre + `translateY(-1px)`. Mobile ≤600 : 16px. **Anciennes règles mortes retirées** (cadre dashed, ancien avatar à ombre) → −25 lignes nettes.
-- **Texte par défaut (PHP, `single-product.php`)** : « Comment choisir ? » → **« Je t'aide à choisir la bonne variante »**.
+- **CSS** `.conseiller-pill-secondary` : capsule claire dashed → **mini capsule bois sombre** (`--color-wood-dark`, radius 60), **photo sans contour** (rond), **accroche Square Peg blanche**, **sans badge ni flèche**, hover ombre + lift. **Anciennes règles mortes retirées**. Retouche Robin (`068d366`) : **+20 % de taille** (avatar 31px, accroche 22px / mobile 19px, gap 11 / padding 5px 17px 5px 5px) + **`text-transform:none`** (le texte sortait en MAJUSCULES à cause de la règle `button` globale).
+- **Texte par défaut (PHP, `single-product.php`)** : « Comment choisir ? » → **« Je t'aide à choisir la bonne taille »** (`068d366`).
 - **JS (`sapi-help-pill.js`)** : `TXT_INITIAL` (état **sans projet**) aligné sur le nouveau wording + commentaire doc maj. **Logique inchangée** : `TXT_PARTIAL` (« Adapter à mon projet ») et l'état complet (chips « Salon · Grande · Peuplier ✓ ») toujours gérés par le JS.
 - **Câblage préservé** : `id="robin-product-pill"`, `data-action="open-modal"`, `data-modal-state="product"`, `data-help-pill`, `data-help-pill-text` → clic ouvre toujours la modale. Hook `woocommerce_before_single_variation` inchangé (**pill à sa position actuelle**). Accessoires/carte cadeau : toujours pas de pill.
 - **Vérifs** : accolades 3737/3737 ; escaping JS/PHP OK ; pas de tiret cadratin.
