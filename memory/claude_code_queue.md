@@ -73,6 +73,43 @@ Le composant `.conseiller-sig` (pastille Robin + « Le conseil de Robin » + acc
 
 ## 🔧 À faire
 
+## ✅ [FAIT 2026-06-10 — sur test] Harmonisation Conseiller — PHASE 2 : pill fiche produit mini V1 (V6) (commit `424828f`)
+**Résultat (branche `test-theme-sapi-maison`, poussé sur test) :**
+- **CSS** `.conseiller-pill-secondary` : capsule claire dashed → **mini capsule bois sombre** (`--color-wood-dark`, radius 60, padding 4px 14px 4px 4px), **photo 26px sans contour** (`object-fit:cover`, rond), **accroche Square Peg blanche 18px**, **sans badge ni flèche**. Hover = ombre + `translateY(-1px)`. Mobile ≤600 : 16px. **Anciennes règles mortes retirées** (cadre dashed, ancien avatar à ombre) → −25 lignes nettes.
+- **Texte par défaut (PHP, `single-product.php`)** : « Comment choisir ? » → **« Je t'aide à choisir la bonne variante »**.
+- **JS (`sapi-help-pill.js`)** : `TXT_INITIAL` (état **sans projet**) aligné sur le nouveau wording + commentaire doc maj. **Logique inchangée** : `TXT_PARTIAL` (« Adapter à mon projet ») et l'état complet (chips « Salon · Grande · Peuplier ✓ ») toujours gérés par le JS.
+- **Câblage préservé** : `id="robin-product-pill"`, `data-action="open-modal"`, `data-modal-state="product"`, `data-help-pill`, `data-help-pill-text` → clic ouvre toujours la modale. Hook `woocommerce_before_single_variation` inchangé (**pill à sa position actuelle**). Accessoires/carte cadeau : toujours pas de pill.
+- **Vérifs** : accolades 3737/3737 ; escaping JS/PHP OK ; pas de tiret cadratin.
+**👉 Robin :** sur une **fiche produit variable** (test) : vérifier le look V6 (mini pill sombre + photo Robin + accroche Square Peg) + que le clic ouvre la modale + que le texte évolue selon le projet. **Position** : la pill reste à sa place actuelle — si tu la veux SOUS le sélecteur (mockup V6), c'est un changement de hook à part, dis-le. Restent **Phase 4** (modale, exploration mockup) et **Phase 3** (card Mes créations, après ton brief).
+
+<details><summary>Énoncé original</summary>
+
+## [TÂCHE] Harmonisation Conseiller — PHASE 2 : pill fiche produit en mini V1 (variante V6)
+**Date :** 2026-06-10 · **Priorité :** haute · **Branche :** `test-theme-sapi-maison` (auto-deploy test). Push auto. Master/prod après validation Robin.
+**Mockup de référence :** `mockups/mockup-conseiller-pill-fiche-produit-10.html` → **variante V6** (mini pill V1 sombre DISCRÈTE, photo sans contour + accroche Square Peg, SANS badge ni flèche).
+**Contexte :** la pill « Comment choisir ? » de la fiche produit (`.conseiller-pill-secondary`, `single-product.php` ~l.424) passe au design V1 mini/discret (capsule bois sombre, photo sans contour, accroche Square Peg, pas d'ornement). ⚠️ C'est un `<button>` CLIQUABLE qui ouvre la modale → **préserver tout le câblage** : `id="robin-product-pill"`, `data-action="open-modal"`, `data-modal-state="product"`, `data-help-pill`, et le span `data-help-pill-text` (texte piloté en live par `assets/sapi-help-pill.js`). **NE PAS toucher au JS.**
+
+**À faire :**
+1. **Markup** (`single-product.php`, `$render_help_pill`) : garder le `<button>` + tous ses attributs + le span avatar + le span `data-help-pill-text`. Juste **changer le texte par défaut** « Comment choisir ? » → « **Je t'aide à choisir la bonne variante** ». Vérifier dans `sapi-help-pill.js` si « Comment choisir ? » est codé en dur comme fallback → si oui, aligner le fallback sur le nouveau wording, **sans changer la logique** (les variantes contextuelles type « Adapter à mon projet » restent gérées par le JS).
+2. **CSS** — remplacer le style actuel (capsule claire dashed) de `.conseiller-pill-secondary` par le mini V1 (V6, sans badge) :
+```css
+.conseiller-pill-secondary{display:inline-flex;align-items:center;gap:9px;background:var(--color-wood-dark);border:none;border-radius:60px;padding:4px 14px 4px 4px;cursor:pointer;transition:.2s}
+.conseiller-pill-secondary:hover{box-shadow:var(--shadow-card-hover);transform:translateY(-1px)}
+.conseiller-pill-secondary__avatar{width:26px;height:26px;flex-shrink:0}
+.conseiller-pill-secondary__img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.conseiller-pill-secondary [data-help-pill-text]{font-family:var(--font-display);color:#fff;font-size:18px;line-height:1}
+```
+(Pas de badge, pas de flèche. Mobile ≤600px : si l'accroche déborde, réduire à ~16px.)
+3. **Cleanup** : retirer les anciennes règles `.conseiller-pill-secondary` devenues mortes (cadre dashed, ancien avatar, etc.).
+
+**Pièges :** ne pas toucher au JS (`sapi-help-pill.js`), aux `data-*`, à l'`id`, ni au hook `woocommerce_before_single_variation` (la pill reste à sa position actuelle — si Robin veut la passer SOUS le sélecteur comme dans le mockup V6, c'est un changement de hook à part, à confirmer). Pas de tiret cadratin. Accolades équilibrées.
+**Critères :** sur une fiche produit VARIABLE, la pill = mini capsule bois sombre + photo Robin sans contour (26px) + accroche Square Peg « Je t'aide à choisir la bonne variante », discrète ; clic ouvre toujours la modale ; le texte dynamique selon le projet fonctionne encore. Accessoires / carte cadeau : pas de pill (inchangé).
+
+### 👉 Action Robin
+Ouvrir une fiche produit variable sur test : vérifier le look V6 + que le clic ouvre bien la modale. Dis-moi aussi si tu veux la pill SOUS le sélecteur (mockup V6) ou si la position actuelle te va. Si OK → reste la **Phase 4** (modale, exploration mockup) et la **Phase 3** (card Mes créations, après ton brief).
+
+</details>
+
 ## ✅ [FAIT 2026-06-10 — sur test] Harmonisation Conseiller — PHASE 1 : page Conseils alignée sur la home (commit `cb849af`)
 **Résultat (branche `test-theme-sapi-maison`, poussé sur test) :**
 - **A. Pill V1 factorisée** : `.home-projet .conseiller-sig*` → classe partagée **`.conseiller-sig--v1*`** (mêmes déclarations). Home : classe `conseiller-sig--v1` ajoutée sur `.conseiller-sig` → **rendu home strictement identique** (base + override, v1 gagne par ordre source comme avant). 0 référence `.home-projet .conseiller-sig` restante.
