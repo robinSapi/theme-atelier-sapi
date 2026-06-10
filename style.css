@@ -23331,11 +23331,12 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 .conseiller-card--modal .choices .choice[data-choice="ne-sais-pas"] .choice__icon svg,
 .conseiller-card--modal .choices .choice[data-choice="neutre"] .choice__icon svg { width: 18px; height: 18px; }
-/* Desktop : les vraies réponses occupent la ligne sans cellule vide
-   (taille/sortie = 3 réponses ; style = 2). L'option neutre passe en dessous. */
+/* Desktop : les 3 vraies réponses des questions taille/sortie occupent la
+   ligne (la grille .choices--4col = toujours « 3 réponses + 1 option neutre »),
+   l'option neutre passant en pleine largeur dessous via grid-column:1/-1.
+   (Pas de :has() — coûteux en perf sur les pages à fort remaniement DOM.) */
 @media (min-width: 601px) {
-  .conseiller-card--modal .choices:has(.choice[data-choice="ne-sais-pas"]) { grid-template-columns: repeat(3, 1fr); }
-  .conseiller-card--modal .choices:has(.choice[data-choice="neutre"]) { grid-template-columns: repeat(2, 1fr); }
+  .conseiller-card--modal .choices--4col { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* Texte libre input */
