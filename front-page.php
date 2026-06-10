@@ -580,7 +580,7 @@ foreach ($carousel_products as $product) {
     <?php endforeach; ?>
       <a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>" class="collection-card collection-card--surmesure">
         <div class="collection-visual">
-          <?php echo sapi_image('2025/09/Vincent-Ambiance3.jpg', 'large', ['class' => 'collection-visual-img', 'loading' => 'lazy', 'alt' => 'Luminaire sur mesure, Atelier Sâpi']); ?>
+          <?php echo sapi_image('2026/04/Photo-Trio-de-34.jpg', 'large', ['class' => 'collection-visual-img', 'loading' => 'lazy', 'alt' => 'Luminaire sur mesure, Atelier Sâpi']); ?>
         </div>
         <div class="collection-details">
           <h3>Sur mesure</h3>
