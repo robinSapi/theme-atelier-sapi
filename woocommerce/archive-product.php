@@ -139,16 +139,10 @@ if ($imm_piece) {
   </div>
   <div class="mescreations-immersion__scrim" aria-hidden="true"></div>
 
-  <!-- Bandeau réassurance DÉDIÉ (décision Robin #3) : instance du bandeau du
-       site (sapi_robin_bandeau_v2, MÊME markup/style = fond blanc, icônes SVG
-       orange, items identiques) rendue SANS id (le global #robin-bandeau est
-       masqué en mode immersion). Positionné en bas de la photo via CSS. -->
-  <?php
-  if (!function_exists('sapi_robin_bandeau_v2')) {
-    require_once get_template_directory() . '/inc/template-robin-bandeau-v2.php';
-  }
-  sapi_robin_bandeau_v2('', 'mescreations-immersion__reassure');
-  ?>
+  <!-- Bandeau réassurance : on réutilise le MÊME mécanisme que la home — le
+       bandeau global .robin-bandeau est déplacé en JS juste après ce hero et
+       reçoit .home-repositioned-bar (sticky sous le header au scroll). Rien
+       n'est rendu ici. -->
 
   <div class="mescreations-immersion__inner">
     <!-- Pill Robin V1 (composant partagé, déjà stylé) -->

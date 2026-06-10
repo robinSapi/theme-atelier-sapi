@@ -12,11 +12,9 @@
 
 if (!defined('ABSPATH')) exit;
 
-function sapi_robin_bandeau_v2($id = 'robin-bandeau', $extra_class = '') {
-  $class = 'robin-bandeau' . ($extra_class ? ' ' . $extra_class : '');
-  $id_attr = $id ? ' id="' . esc_attr($id) . '"' : '';
+function sapi_robin_bandeau_v2() {
 ?>
-<div class="<?php echo esc_attr($class); ?>"<?php echo $id_attr; // phpcs:ignore WordPress.Security.EscapeOutput ?>>
+<div class="robin-bandeau" id="robin-bandeau">
   <div class="reassurance-bar-inner">
     <div class="reassurance-item">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

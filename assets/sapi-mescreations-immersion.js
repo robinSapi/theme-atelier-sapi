@@ -149,24 +149,25 @@
       document.dispatchEvent(new CustomEvent('sapi:open-modal', { detail: { state: 's3' } }));
     }
 
-    /* ── Header over-photo + bandeau : transparent/bas sur la photo → opaque/
-       sticky sous le header au scroll (option B). ── */
+    /* ── Header + bandeau : MÊME mécanisme que la home (front-page.php). Le
+       bandeau global est déplacé juste après le hero et reçoit
+       .home-repositioned-bar (sticky sous le header). Le header bascule
+       .is-scrolled quand le bas du hero passe le haut du viewport. ── */
     var header = document.querySelector('.site-header');
-    var band = section.querySelector('.mescreations-immersion__reassure');
-    function syncHeaderHeight() {
-      if (header) {
-        document.documentElement.style.setProperty('--immersion-header-h', header.offsetHeight + 'px');
-      }
+    var band = document.querySelector('.robin-bandeau');
+    if (band && section.parentNode) {
+      section.parentNode.insertBefore(band, section.nextSibling);
+      band.classList.add('home-repositioned-bar');
     }
-    function onScroll() {
-      var past = window.scrollY > window.innerHeight * 0.5;
-      if (header) header.classList.toggle('is-immersion-scrolled', past);
-      if (band) band.classList.toggle('is-immersion-top', past);
+    if (header) {
+      var updateHeaderState = function () {
+        var bottom = section.getBoundingClientRect().bottom;
+        header.classList.toggle('is-scrolled', bottom < 50);
+      };
+      window.addEventListener('scroll', updateHeaderState, { passive: true });
+      window.addEventListener('resize', updateHeaderState, { passive: true });
+      updateHeaderState();
     }
-    syncHeaderHeight();
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', function () { syncHeaderHeight(); onScroll(); }, { passive: true });
 
     /* ── Câblage ── */
     if (els.seeSel) els.seeSel.addEventListener('click', openSelection);

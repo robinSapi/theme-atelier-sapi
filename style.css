@@ -24581,11 +24581,11 @@ button.chip--project:focus-visible {
    ════════════════════════════════════════════════════════════════════════ */
 
 /* État B : masque le hero croquis, la zone cards conseiller, le séparateur et
-   le bandeau global (remplacé par le bandeau dédié du hero, décision Robin #3). */
+   le bandeau global tant qu'il n'est pas repositionné en JS (cf. home). */
 body.mescreations-immersion-on .shop-hero-artisan,
 body.mescreations-immersion-on .conseiller-cards-zone,
 body.mescreations-immersion-on .mes-creations-section-divider,
-body.mescreations-immersion-on #robin-bandeau { display: none !important; }
+body.mescreations-immersion-on .robin-bandeau:not(.home-repositioned-bar) { display: none !important; }
 
 /* Le contenu du site est dans une colonne centrée (.site-content ~1440px).
    Pour un vrai plein écran, le hero immersif sort de cette colonne (full-bleed
@@ -24593,39 +24593,19 @@ body.mescreations-immersion-on #robin-bandeau { display: none !important; }
    sans casser le position:sticky du header (même technique que la home). */
 body.mescreations-immersion-on { overflow-x: clip; }
 
-/* ── Header over-photo (option B) : transparent par-dessus la photo, opaque au
-   scroll. Scopé immersion (la home n'est pas touchée). Position fixed pour que
-   la photo passe sous le header (vrai plein écran). Le scroll bascule
-   .is-immersion-scrolled. ── */
+/* ── Header : MÊME comportement que la home (.home .site-header) — fixed +
+   blanc translucide 35% par-dessus la photo (texte normal) → blanc opaque au
+   scroll (.is-scrolled). Valeurs reprises à l'identique, scopées immersion. ── */
 body.mescreations-immersion-on .site-header {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: transparent;
-  box-shadow: none;
-  transition: background .35s ease, box-shadow .35s ease;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.35) !important;
+  box-shadow: none !important;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
-body.mescreations-immersion-on .site-header.is-immersion-scrolled {
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-}
-/* Lisibilité sur la photo (tant que non scrollé) : nav + icônes + logo en blanc
-   avec ombre portée. Au scroll (opaque) on retombe sur les couleurs normales. */
-body.mescreations-immersion-on .site-header:not(.is-immersion-scrolled) .nav-menu a {
-  color: #fff;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
-}
-body.mescreations-immersion-on .site-header:not(.is-immersion-scrolled) .header-actions button {
-  color: #fff;
-}
-body.mescreations-immersion-on .site-header:not(.is-immersion-scrolled) .header-actions svg {
-  -webkit-filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.5));
-  filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.5));
-}
-body.mescreations-immersion-on .site-header:not(.is-immersion-scrolled) .site-logo img {
-  -webkit-filter: drop-shadow(0 1px 8px rgba(0, 0, 0, 0.4));
-  filter: drop-shadow(0 1px 8px rgba(0, 0, 0, 0.4));
+body.mescreations-immersion-on .site-header.is-scrolled {
+  background: rgba(255, 255, 255, 1) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
 }
 /* Le catalogue passe sous le header fixed → marge de scroll pour les ancres. */
 body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90px; }
@@ -24914,27 +24894,6 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 }
 @-webkit-keyframes immersionBob { 50% { -webkit-transform: translateY(5px); } }
 @keyframes immersionBob { 50% { transform: translateY(5px); } }
-
-/* Bandeau réassurance dédié — bas de la photo, translucide */
-/* Bandeau réassurance = instance du bandeau du site (.robin-bandeau, fond blanc
-   + icônes orange + items identiques). On ne fait que le repositionner en bas
-   de la photo (le .robin-bandeau de base est sticky top:80px). */
-.mescreations-immersion__reassure.robin-bandeau {
-  position: absolute;
-  top: auto;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 3;
-}
-/* Au scroll : le bandeau quitte le bas de la photo et se cale en sticky sous le
-   header (comportement du site). --immersion-header-h posée en JS. */
-body.mescreations-immersion-on .mescreations-immersion__reassure.robin-bandeau.is-immersion-top {
-  position: fixed;
-  top: var(--immersion-header-h, 64px);
-  bottom: auto;
-  z-index: 997;
-}
 
 /* ── Sélection révélée (slider) ── */
 .mescreations-immersion__selection {
