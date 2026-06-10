@@ -404,6 +404,28 @@ function sapi_maison_enqueue_assets() {
       ]);
     }
 
+    // Refonte /mes-creations/ — état B « immersion » : contrôleur de la
+    // séquence (machine à écrire, révélation sélection, header/bandeau
+    // over-photo). Chargé partout sur la boutique : il s'auto-désactive si
+    // le body n'est pas en mode immersion (pas de ?piece= valide).
+    $immersion_js_path = get_template_directory() . '/assets/sapi-mescreations-immersion.js';
+    if (file_exists($immersion_js_path)) {
+      wp_enqueue_script(
+        'sapi-mescreations-immersion',
+        get_template_directory_uri() . '/assets/sapi-mescreations-immersion.js',
+        ['sapi-project'],
+        filemtime($immersion_js_path),
+        true
+      );
+      $immersion_piece = sapi_mescreations_immersion_piece();
+      wp_localize_script('sapi-mescreations-immersion', 'SAPI_IMMERSION', [
+        'ajaxUrl'     => admin_url('admin-ajax.php'),
+        'nonce'       => wp_create_nonce('sapi-megafilter'),
+        'piece'       => $immersion_piece,
+        'possessive'  => $immersion_piece ? sapi_piece_possessive($immersion_piece) : '',
+      ]);
+    }
+
     // F2a Phase 3 — modale tunnel 2 portes (S0/S1/S3) + Phase 4 (S2)
     $modal_conseiller_js_path = get_template_directory() . '/assets/sapi-modal-conseiller.js';
     if (file_exists($modal_conseiller_js_path)) {
@@ -3569,6 +3591,53 @@ function sapi_megafilter_generic_advice_for($piece) {
   if (is_string($piece) && isset($advices[$piece])) return $advices[$piece];
   return __('Voici la sélection que je te propose dans le catalogue de Robin.', 'theme-sapi-maison');
 }
+
+/**
+ * Refonte /mes-creations/ — état B « immersion ».
+ * Résout la pièce d'arrivée depuis ?piece=<slug>, validée contre la whitelist
+ * des pièces du méga-filtre. Retourne le slug validé, ou '' si absent/invalide.
+ * Source unique de vérité pour : le body_class, le rendu serveur du hero
+ * immersif, et le flag JS SAPI_IMMERSION.
+ */
+function sapi_mescreations_immersion_piece() {
+  if (empty($_GET['piece'])) return '';
+  $piece = sanitize_key(wp_unslash($_GET['piece']));
+  $whitelist = function_exists('sapi_megafilter_filters_whitelist') ? sapi_megafilter_filters_whitelist() : [];
+  $valid = isset($whitelist['piece']) && is_array($whitelist['piece']) ? $whitelist['piece'] : [];
+  return in_array($piece, $valid, true) ? $piece : '';
+}
+
+/**
+ * Forme possessive tutoyée d'une pièce (« ton salon », « ta cuisine »…).
+ * Miroir PHP de la table PIECE_TUTOIEMENT de sapi-modal-conseiller.js : « votre »
+ * est neutre mais « ton/ta » s'accorde au genre → table explicite pour éviter
+ * « ton chambre ». Repli sur « ta pièce » si la clé est inconnue.
+ */
+function sapi_piece_possessive($piece) {
+  $map = [
+    'cuisine'        => 'ta cuisine',
+    'bureau'         => 'ton bureau',
+    'salon'          => 'ton salon',
+    'chambre'        => 'ta chambre',
+    'chambre-enfant' => "ta chambre d'enfant",
+    'entree'         => 'ton entrée',
+    'escalier'       => 'ta cage d\'escalier',
+  ];
+  return isset($map[$piece]) ? $map[$piece] : 'ta pièce';
+}
+
+/**
+ * Ajoute la classe body `mescreations-immersion` quand on est sur la boutique
+ * avec un ?piece= valide → le CSS bascule en état B (masque hero croquis +
+ * cards conseiller, affiche le hero immersif) et sapi-cards-conseiller.js se
+ * met en retrait (catalogue bas laissé intact).
+ */
+add_filter('body_class', function ($classes) {
+  if (function_exists('is_shop') && is_shop() && sapi_mescreations_immersion_piece() !== '') {
+    $classes[] = 'mescreations-immersion';
+  }
+  return $classes;
+});
 
 /**
  * Sanitise un payload {answers, labels} en ne gardant que les paires reconnues

@@ -979,6 +979,16 @@
      Init
      ───────────────────────────────────────────── */
   function init() {
+    // Refonte /mes-creations/ — état B « immersion » : quand le hero immersif
+    // est actif (body.mescreations-immersion, ?piece= valide), ce contrôleur se
+    // met en retrait. Il ne rend NI la card "mon-projet" (remplacée par le hero
+    // immersif), NI ne re-filtre la grille basse "Toutes mes créations" (qu'on
+    // veut intacte). On ne définit pas window.sapiMegaFilter → shop.js laisse le
+    // catalogue dans son état naturel (toutes les créations + cards réassurance).
+    if (document.body && document.body.classList.contains('mescreations-immersion')) {
+      return;
+    }
+
     els.zone = document.querySelector('[data-conseiller-zone]');
     if (!els.zone) return; // pas sur /mes-creations/
 

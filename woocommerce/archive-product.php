@@ -102,7 +102,147 @@ if ($piece_slugs && function_exists('get_field') && function_exists('wc_get_page
 $hero_photos_attr = !empty($hero_photos_by_piece)
   ? wp_json_encode($hero_photos_by_piece, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
   : '';
+
+// ── Refonte /mes-creations/ — état B « immersion » (arrivée depuis le
+// room-picker via ?piece=). Tout est gated sur une pièce valide : sans
+// ?piece= valide, $imm_piece reste vide et rien ci-dessous n'est rendu
+// (état A 100 % inchangé). Le CSS (body.mescreations-immersion) masque le
+// hero croquis + la zone cards conseiller et révèle ce hero immersif.
+$imm_piece = function_exists('sapi_mescreations_immersion_piece') ? sapi_mescreations_immersion_piece() : '';
+if ($imm_piece) {
+  $imm_possessive = function_exists('sapi_piece_possessive') ? sapi_piece_possessive($imm_piece) : 'ta pièce';
+  // Photo plein écran : 1re photo hero_<slug> si dispo, sinon repli générique
+  // (décision Robin #5). Repli = une ambiance neutre connue en prod.
+  $imm_photo_url = !empty($hero_photos_by_piece[$imm_piece][0]) ? $hero_photos_by_piece[$imm_piece][0] : '';
+  $imm_generic_fallback = '2025/04/Alban-Le-virevoltant-Salon-Paysage.jpg';
+  // Phrase de conseil FIGÉE par pièce (jamais l'IA live — décision Robin / brief).
+  $imm_phrase = function_exists('sapi_megafilter_generic_advice_for') ? sapi_megafilter_generic_advice_for($imm_piece) : '';
+
+  // Sélection PIÈCE-LEVEL calculée CÔTÉ SERVEUR (réutilise le matching du
+  // méga-filtre : catégories admissibles + filtre ampoule par pièce + fallbacks
+  // progressifs intégrés → jamais de slider vide). taille/style viendront
+  // affiner via AJAX serveur à l'étape suivante.
+  $imm_answers   = ['piece' => $imm_piece];
+  $imm_cats      = function_exists('sapi_guide_get_categories') ? sapi_guide_get_categories($imm_answers) : [];
+  $imm_query_res = (function_exists('sapi_guide_query_products') && $imm_cats)
+    ? sapi_guide_query_products($imm_answers, $imm_cats)
+    : ['products' => []];
+  $imm_products  = isset($imm_query_res['products']) ? $imm_query_res['products'] : [];
 ?>
+<section class="mescreations-immersion" data-immersion data-immersion-piece="<?php echo esc_attr($imm_piece); ?>" aria-label="<?php echo esc_attr(sprintf(__('Ma sélection pour %s', 'theme-sapi-maison'), $imm_possessive)); ?>">
+  <div class="mescreations-immersion__bg">
+    <?php if ($imm_photo_url) : ?>
+      <img class="mescreations-immersion__bg-img" src="<?php echo esc_url($imm_photo_url); ?>" alt="" loading="eager" fetchpriority="high">
+    <?php else : ?>
+      <?php echo sapi_image($imm_generic_fallback, 'full', ['alt' => '', 'class' => 'mescreations-immersion__bg-img', 'loading' => 'eager']); ?>
+    <?php endif; ?>
+  </div>
+  <div class="mescreations-immersion__scrim" aria-hidden="true"></div>
+
+  <!-- Bandeau réassurance DÉDIÉ (décision Robin #3) : collé en bas de la photo
+       au repos (translucide), puis sticky blanc sous le header au scroll (JS).
+       Wording identique à la home. -->
+  <div class="mescreations-immersion__reassure" data-immersion-reassure aria-hidden="true">
+    <span class="mescreations-immersion__reassure-item"><?php esc_html_e('Livraison rapide en 48-72h', 'theme-sapi-maison'); ?></span>
+    <span class="mescreations-immersion__reassure-item is-mobile-hidden"><?php esc_html_e('Façonné main à Lyon sous 5 jours', 'theme-sapi-maison'); ?></span>
+    <span class="mescreations-immersion__reassure-item is-mobile-hidden"><?php esc_html_e('30 jours pour changer d\'avis', 'theme-sapi-maison'); ?></span>
+    <span class="mescreations-immersion__reassure-item"><?php esc_html_e('Paiement sécurisé', 'theme-sapi-maison'); ?></span>
+  </div>
+
+  <div class="mescreations-immersion__inner">
+    <!-- Pill Robin V1 (composant partagé, déjà stylé) -->
+    <div class="conseiller-sig conseiller-sig--v1 mescreations-immersion__sig" data-immersion-sig>
+      <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+      <span class="conseiller-sig__text">
+        <span class="conseiller-sig__who"><?php esc_html_e('Le conseil de Robin', 'theme-sapi-maison'); ?></span>
+        <span class="conseiller-sig__hook"><?php echo esc_html(sprintf(__('Mon conseil pour %s', 'theme-sapi-maison'), $imm_possessive)); ?></span>
+      </span>
+    </div>
+
+    <!-- Phrase de conseil (machine à écrire au load, ne se réécrit jamais).
+         Le texte complet est dans data-immersion-phrase-text ; le JS l'écrit. -->
+    <p class="mescreations-immersion__phrase" data-immersion-phrase data-immersion-phrase-text="<?php echo esc_attr($imm_phrase); ?>">
+      <span class="mescreations-immersion__phrase-content"></span><span class="mescreations-immersion__caret" aria-hidden="true"></span>
+    </p>
+
+    <!-- Question d'affinage inline (taille puis style — révélées par le JS).
+         Répondre valide + passe à la suivante, SANS rouvrir la modale. -->
+    <div class="mescreations-immersion__affine" data-immersion-affine hidden>
+      <div class="mescreations-immersion__affine-q" data-immersion-affine-q></div>
+      <div class="mescreations-immersion__affine-chips" data-immersion-affine-chips></div>
+    </div>
+
+    <!-- Lien discret « Préciser avec Robin » → ouvre la modale (questionnaire
+         complet), sans réécrire l'IA. Révélé une fois les questions finies. -->
+    <button type="button" class="mescreations-immersion__refine" data-immersion-refine data-action="open-modal" data-modal-state="s3" hidden>
+      <span class="mescreations-immersion__refine-av"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => '', 'class' => 'mescreations-immersion__refine-img', 'loading' => 'lazy']); ?></span>
+      <?php esc_html_e('Préciser avec Robin pour la sélection idéale', 'theme-sapi-maison'); ?> &rarr;
+    </button>
+
+    <!-- Boutons primaires -->
+    <div class="mescreations-immersion__cta" data-immersion-cta>
+      <button type="button" class="mescreations-immersion__btn-primary" data-immersion-see-selection>
+        <?php esc_html_e('Voir ma sélection pour toi', 'theme-sapi-maison'); ?>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </button>
+      <button type="button" class="mescreations-immersion__btn-secondary" data-immersion-see-all>
+        <?php esc_html_e('Voir toutes les créations', 'theme-sapi-maison'); ?>
+      </button>
+    </div>
+
+    <!-- Sélection (révélée : clic « Voir ma sélection » OU 3 réponses données).
+         Cartes rendues CÔTÉ SERVEUR (sélection pièce-level) + carte sur-mesure. -->
+    <div class="mescreations-immersion__selection" data-immersion-selection hidden>
+      <div class="mescreations-immersion__selection-head">
+        <span class="mescreations-immersion__selection-title"><?php echo esc_html(sprintf(__('Ma sélection pour %s', 'theme-sapi-maison'), $imm_possessive)); ?></span>
+        <button type="button" class="mescreations-immersion__selection-all" data-immersion-see-all>
+          <?php esc_html_e('Voir toutes les créations', 'theme-sapi-maison'); ?> &rarr;
+        </button>
+      </div>
+      <div class="mescreations-immersion__slider" data-immersion-slider>
+        <?php foreach ($imm_products as $imm_prod) :
+          // Nom complet rendu ici ; product-name-formatter.js le scinde en
+          // prénom (caps) + surnom (Square Peg) côté client (cf. .product-name).
+          $imm_cat_label = '';
+          if (!empty($imm_prod['category_label'])) {
+            $imm_cat_label = str_replace(
+              ['Suspensions', 'Appliques', 'Lampadaires', 'Lampes à poser'],
+              ['Suspension',  'Applique',  'Lampadaire',  'Lampe à poser'],
+              $imm_prod['category_label']
+            );
+          }
+        ?>
+          <a class="mescreations-immersion__pcard" href="<?php echo esc_url($imm_prod['permalink']); ?>" data-immersion-pcard data-id="<?php echo esc_attr($imm_prod['id']); ?>" data-categories="<?php echo esc_attr(!empty($imm_prod['categories']) ? implode(' ', $imm_prod['categories']) : ''); ?>">
+            <span class="mescreations-immersion__pcard-img"<?php if (!empty($imm_prod['image'])) : ?> style="background-image:url('<?php echo esc_url($imm_prod['image']); ?>')"<?php endif; ?>></span>
+            <span class="mescreations-immersion__pcard-body">
+              <span class="mescreations-immersion__pcard-name product-name"><?php echo esc_html($imm_prod['title']); ?></span>
+              <?php if ($imm_cat_label) : ?><span class="mescreations-immersion__pcard-cat"><?php echo esc_html($imm_cat_label); ?></span><?php endif; ?>
+              <span class="mescreations-immersion__pcard-price"><?php echo wp_kses_post($imm_prod['price']); ?></span>
+            </span>
+          </a>
+        <?php endforeach; ?>
+
+        <!-- Carte sur-mesure en fin de slider -->
+        <a class="mescreations-immersion__pcard mescreations-immersion__pcard--sur" href="<?php echo esc_url(home_url('/sur-mesure/')); ?>">
+          <span class="mescreations-immersion__sur-eyebrow"><?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?></span>
+          <span class="mescreations-immersion__sur-title"><?php esc_html_e('Créons ensemble', 'theme-sapi-maison'); ?></span>
+          <span class="mescreations-immersion__sur-sub"><?php esc_html_e('Rien ne colle parfaitement ? Robin dessine ton luminaire.', 'theme-sapi-maison'); ?></span>
+          <span class="mescreations-immersion__sur-cta">
+            <?php esc_html_e('En parler à Robin', 'theme-sapi-maison'); ?>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="14" height="14"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="mescreations-immersion__scrollhint" data-immersion-scrollhint aria-hidden="true">
+    <span><?php esc_html_e('Le catalogue complet', 'theme-sapi-maison'); ?></span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+  </div>
+</section>
+<?php } // end état B immersion ?>
+
 <section class="shop-hero-artisan">
   <div class="shop-hero-artisan-inner">
     <h1><?php esc_html_e('Mes créations', 'theme-sapi-maison'); ?></h1>

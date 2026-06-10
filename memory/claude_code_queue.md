@@ -78,6 +78,110 @@ Le composant `.conseiller-sig` (pastille Robin + « Le conseil de Robin » + acc
 
 ## 🔧 À faire
 
+## [TÂCHE] Refonte /mes-creations/ — état B « arrivée depuis le room-picker » (expérience immersive)
+**Date :** 2026-06-10 · **Priorité :** haute · **Branche :** `test-theme-sapi-maison` (auto-deploy test). Push auto. Master/prod = SEULEMENT après validation Robin sur test.
+**⚠️ Gros chantier qui touche au Conseiller** → **commence par un court PLAN d'implémentation (archi)**, écris-le dans ce queue, attends le feu vert de Robin via Cowork, PUIS code par étapes sur test. Ne pars pas bille en tête.
+
+**Référence visuelle + interaction (source de vérité) :** `mockups/mockup-mes-creations-etat-B.html` (prototype validé par Robin : séquence, flou, slider, header, bandeau). **Audit de l'existant :** `mockups/AUDIT-MES-CREATIONS.md` (structure actuelle + hooks à préserver). Template concerné : `woocommerce/archive-product.php` + `assets/sapi-cards-conseiller.js` + `assets/sapi-project.js`.
+
+### Le postulat (Robin)
+Quasi personne n'arrive sur /mes-creations/ autrement que par le **room-picker** (sinon on atterrit sur une page catégorie). Donc on **personnalise** la page selon la pièce choisie. **Deux états :**
+
+**État A — sans projet : NE RIEN CHANGER.** Hero croquis actuel + carte « Conseil de Robin » (room-picker) + catalogue. On laisse tel quel pour l'instant (l'harmonisation pill V1 de cette carte = un autre sujet, Phase 3, hors de cette tâche).
+
+**État B — avec projet (= arrivée depuis le room-picker / projet connu) : la nouvelle expérience immersive** décrite ci-dessous, qui remplace le haut de page (hero + cartes Conseiller) ; le **catalogue « Toutes mes créations » reste en dessous**, inchangé.
+
+### Détection A vs B (à arbitrer dans ton plan)
+Le room-picker home pointe déjà vers `/mes-creations/?piece=<slug>`. Donc la pièce peut être connue **côté serveur** via le param `?piece=` → permet de rendre l'état B en PHP (photo + phrase + sélection filtrée). Un visiteur de retour avec un projet en `localStorage.sapiProject` (sans param) doit aussi avoir l'état B → bascule **côté JS**. **Propose l'archi** : rendu PHP quand `?piece=` est là + activation JS quand le projet vient du localStorage ; réconcilie avec `sapi-project.js` (structure `sapiProject`) et la logique actuelle des cartes `conseil` / `mon-projet` (qu'on remplace/réutilise).
+
+### La séquence état B (cf. mockup)
+1. **Plein écran sur la photo de la pièce choisie**, **sans header** au départ. Photo = champ ACF **`hero_<slug>`** de la page boutique (déjà exposé, cf. `archive-product.php` `$hero_photos_by_piece` / `data-piece-photos`).
+2. **Pill Robin V1** + la **phrase de conseil propre à la pièce qui s'écrit** (machine à écrire). ⚠️ **La phrase ne se réécrit JAMAIS** (pas d'aller-retour IA → instantané). Source = le **conseil générique par pièce** déjà en PHP (`sapi_megafilter_get_generic_advices()` / `genericAdvice`), pas l'IA live.
+3. Une fois la phrase écrite : la **question d'affinage** apparaît, puis le bouton primaire **« Voir ma sélection pour toi »**, puis le secondaire **« Voir toutes les créations »**, puis **le header se révèle en fondu** + le **bandeau réassurance** apparaît.
+4. **Questions inline = `taille` puis `style` UNIQUEMENT** (la pièce est déjà connue). C'est le strict nécessaire pour cibler la **variation**. Le reste du questionnaire (sortie/hauteur/table…) reste réservé à **la modale**. Répondre à une chip = la valide (état sélectionné, cliquable pour changer) → **la question suivante prend la place** ; **la sélection ne s'affiche PAS** à ce moment, et la phrase ne se réécrit pas.
+5. **La sélection se révèle** dans 2 cas seulement : clic sur **« Voir ma sélection pour toi »** (à tout moment), OU **après que les 3 questions soient répondues** (pièce + taille + style). Effet : **l'image plein écran se floute**, la **phrase remonte se caler sous le header** (devient le titre de la séquence), et un **slider horizontal des produits filtrés** apparaît dans l'espace libéré, par-dessus la pièce floutée. Chaque carte produit porte une **courte phrase de Robin** + nom formaté (prénom caps + surnom Square Peg) + prix ; **carte sur-mesure** en fin de slider.
+6. **« Voir toutes les créations »** = **scrolle** vers le catalogue classique en dessous (inchangé : pills + grille).
+7. Une fois les questions finies, un discret **« Préciser avec Robin »** ouvre **la modale** (questionnaire complet → sélection idéale, sans réécrire l'IA).
+
+### Sélection des produits = en PHP
+Robin veut le matching **calculé côté serveur** (propre, SEO), pas le clone JS actuel. **Réutilise les règles de filtre déjà en PHP** (`$sapi_filter_rules`, et la logique de `cardMatchesAnswers` de `sapi-cards-conseiller.js` à porter/мirror en PHP si pas déjà dispo serveur). À l'arrivée `?piece=salon`, la sélection est filtrée par pièce ; quand `taille`/`style` sont connus (localStorage), elle s'affine. **Propose dans ton plan** : tout PHP au load + re-filtrage JS au fil des réponses, ou rendu PHP via petit endpoint. Garder l'expérience instantanée (pas d'attente IA).
+
+### Header + bandeau réassurance = comportement de la home
+- **Header** : légèrement **transparent** (léger flou, texte clair) tant qu'il est **sur la photo**, puis **blanc opaque** (texte foncé) une fois scrollé. **Réutilise le comportement déjà en place sur la home** s'il existe (ne pas réinventer).
+- **Bandeau réassurance** : **collé en bas de la photo plein écran** au départ (translucide), puis **sticky sous le header** une fois scrollé (blanc opaque). Même bandeau / wording que la home (Livraison 48-72h · Façonné main à Lyon sous 5 jours · 30 jours pour changer d'avis · Paiement sécurisé). Bascule au scroll (~mi-photo dans le proto, à régler).
+
+### Garde-fous / à préserver
+- **Tutoiement** partout, **pas de tiret cadratin**, accolades équilibrées.
+- **Ne casse aucun `data-*` ni hook JS** listés dans `AUDIT-MES-CREATIONS.md §3` (zone conseiller, room-picker, mon-projet, sélection, catalogue, cartes produit `.product-card-cinetique` + tous leurs `data-*`, `data-piece-swap`, pills `data-cat`, modale `#robin-product-pill` etc.).
+- **Catalogue bas inchangé** ; on ne touche pas à l'état A.
+- Le **product-name-formatter** doit s'appliquer aux cartes du slider comme ailleurs.
+- Mobile : prévoir le rendu (photo plein écran, slider scrollable, bandeau qui masque des items si besoin — cf. proto).
+
+### Plan attendu (avant de coder)
+Réponds dans ce queue avec : (a) détection A/B retenue (param `?piece=` + localStorage) et où vit le markup état B ; (b) source de la sélection en PHP (fonction réutilisée/créée) ; (c) réutilisation vs remplacement des cartes `conseil`/`mon-projet` actuelles ; (d) réutilisation du header/bandeau de la home ; (e) découpage en sous-étapes livrables sur test. **Puis attends le go de Robin.**
+
+### 👉 Action Robin
+Quand Claude Code aura posté son plan d'archi, le valider (ou ajuster) avant qu'il code. Référence à regarder en attendant : le prototype `mockups/mockup-mes-creations-etat-B.html`.
+
+---
+
+## 📐 RÉPONSE CLAUDE CODE — PLAN D'ARCHI état B (2026-06-10) · **EN ATTENTE DU GO DE ROBIN, RIEN DE CODÉ**
+
+> Audit du code fait (archive-product.php + sapi-cards-conseiller.js + sapi-project.js + functions.php + header). **Bonne nouvelle :** la « sélection calculée côté serveur » que Robin veut **existe déjà** en PHP — la version JS actuelle (`cardMatchesAnswers`) n'en est qu'un miroir. Donc l'état B s'appuie sur de la mécanique éprouvée ; le gros du chantier = l'expérience (séquence hero + flou + slider), pas le matching.
+
+### (a) Détection A vs B + où vit le markup état B
+- **Source de vérité de l'état = `localStorage.sapiProject`** (déjà géré par `sapi-project.js`). `?piece=salon` n'est qu'une **graine** : au chargement, `sapi-project.js` (`ingestQueryParams()`) l'ingère déjà dans `sapiProject` et nettoie l'URL. Donc « arrivée room-picker » et « retour avec projet » convergent vers le **même signal** : `sapiProject.hasProject()`.
+- **Rendu hybride, sans flash :**
+  1. **PHP lit `?piece=` AU LOAD** (nouveau, ~10 lignes dans `archive-product.php`) → valide contre la whitelist (`sapi_megafilter_filters_whitelist()['piece']`) → si présent, **rend l'état B pré-peuplé côté serveur** (photo pièce, phrase générique de la pièce, slider de produits déjà filtrés) **et pose une classe `is-state-b` sur `<body>`/section** pour que le CSS cache l'état A immédiatement (zéro flash, bon pour le SEO : le contenu est dans le HTML).
+  2. **Sans `?piece=` mais projet en localStorage** (visiteur de retour) : l'état B est **activé/hydraté par JS** au DOMContentLoaded (même markup, rempli/màj depuis `sapiProject`). Léger flash possible côté retour ; acceptable (cas minoritaire) ou masquable via une pré-classe lue très tôt.
+  3. **Ni l'un ni l'autre** = **état A inchangé** (hero croquis + carte « Conseil de Robin » + room-picker), strictement comme aujourd'hui.
+- **Où vit le markup état B :** un **nouveau bloc PHP dans `archive-product.php`**, en tête de page, **frère** des cartes actuelles (il ne remplace pas leur DOM — voir (c)). Il porte ses propres hooks (`data-immersion-*`). Le **catalogue bas reste la source des cartes** clonées dans le slider (comme aujourd'hui le fait `populateSelectionGrid`).
+
+### (b) Source de la sélection = PHP **déjà existant** (réutilisé, pas recréé)
+- `sapi_guide_get_categories($answers)` → catégories admissibles ; `sapi_guide_query_products($answers, $cats)` → `WP_Query` filtré ; `sapi_guide_collect_results($query, $answers)` → produits + **meilleure variation** (essence selon `style`, taille selon `taille`), prix, image, permalink. **C'est exactement le matching que Robin veut côté serveur.**
+- À l'arrivée `?piece=salon` (taille/style encore inconnus) : on appelle ces fonctions avec `{piece}` seul → **sélection filtrée par pièce**, rendue en PHP dans le slider.
+- Quand `taille`/`style` arrivent (réponses inline, côté JS) : **re-filtrage instantané sans IA**. Deux options à trancher (voir §Décisions) : **(b1)** re-render via un petit endpoint AJAX `wp_ajax_sapi_mescreations_selection` qui rappelle les mêmes fonctions PHP (100 % cohérent serveur, léger lag réseau), ou **(b2)** tout le catalogue est déjà dans le DOM (cas actuel) → on **clone + filtre côté JS** via `window.sapiMegaFilter.computeFilterMeta()` (déjà dispo, instantané, zéro réseau). **Ma reco : b2** (instantané, déjà éprouvé, le PHP au load couvre le SEO/premier rendu ; le JS n'affine que taille+style sur un volume déjà chargé).
+- **Phrase de conseil :** `sapi_megafilter_generic_advice_for($piece)` (texte figé par pièce, **jamais l'IA live**) → conforme à « la phrase ne se réécrit jamais ».
+
+### (c) Cartes `conseil` / `mon-projet` : réutilisation vs remplacement
+- **`conseil` (état A) : conservée telle quelle**, on n'y touche pas (Phase 3 = autre sujet).
+- **`mon-projet` (état B actuel, la carte englobante) : REMPLACÉE visuellement** par le hero immersif — **mais on garde et réutilise toute sa plomberie** : `window.sapiProject` (get/update/subscribe), `window.sapiMegaFilter`, `genericAdvice`, le `<template data-mes-creations-surmesure-template>` (carte sur-mesure), le clonage depuis `#sapi-product-grid`. **Nouveau contrôleur JS** `assets/sapi-mescreations-immersion.js` pour la **séquence** (machine à écrire, apparition Q → CTA → header/bandeau, flou + remontée + slider). ⚠️ **Différence de comportement clé vs l'existant :** aujourd'hui répondre à une chip inline **ouvre la modale** (`handleChipAnswer` → `sapi:open-modal`). En état B, répondre à une chip **valide inline et passe à la question suivante SANS ouvrir la modale** (cf. mockup). Donc je n'appelle **pas** `handleChipAnswer` ; j'écris la logique inline taille→style dédiée, qui fait juste `sapiProject.update()` + avance. La modale n'est ouverte que par le discret « Préciser avec Robin ».
+- **Hooks préservés** (AUDIT-MES-CREATIONS §3) : je ne supprime aucun `data-*` existant ; l'état B ajoute les siens (`data-immersion`, `data-immersion-phrase`, `data-immersion-affine`, `data-immersion-slider`, `data-immersion-refine`…). Le catalogue bas + `.product-card-cinetique` + pills = **intacts**.
+
+### (d) Header + bandeau réassurance de la home
+- **Bandeau réassurance : déjà présent sur /mes-creations/** (sortie globale `sapi_robin_bandeau_v2()` via `header.php`, même wording). MAIS le proto veut un comportement spécifique état B (**translucide collé en bas de la photo** → **sticky blanc sous le header** au scroll), différent du bandeau sticky-haut global. **Reco :** réutiliser le **markup/wording** (même partial) mais piloter le **positionnement état B** via une classe (`is-immersion` : bottom translucide → `is-top` au scroll), scopée à cette page. À trancher : réutiliser l'instance globale en la repositionnant, ou rendre une instance dédiée dans le hero (plus propre, pas de risque de régression ailleurs). **Reco : instance dédiée dans le hero**, l'instance globale étant masquée tant qu'on est en état B.
+- **Header transparent → opaque :** le mécanisme existe mais est **scopé `.home`** (CSS `.home .site-header` + JS inline dans `front-page.php` qui suit `.homepage-carousel-fullscreen`). **Reco :** généraliser proprement — sélecteur CSS `.site-header.header--over-hero` (au lieu de `.home`) + extraire le scroll-listener dans `assets/header-hero.js` réutilisable, déclenché par un `data-header-hero` sur la section hero. La home garde son rendu (on ajoute la classe là où `.home` l'avait). **Petit risque de régression home** → vérif côte à côte obligatoire. Si Robin préfère ne pas toucher la home, repli : JS dédié état B qui pose `is-scrolled` sans refactorer la home (duplication assumée mais zéro risque).
+
+### (e) Découpage en sous-étapes livrables sur test (chaque étape = commit testable)
+1. **Socle PHP état B** : lecture `?piece=` + whitelist + classe d'état ; rendu serveur du hero (photo pièce via `hero_<slug>`, pill V1, phrase générique de la pièce) — **statique, sans séquence** (juste la structure + le contenu correct). État A et catalogue inchangés.
+2. **Sélection serveur dans le slider** : brancher `sapi_guide_query_products` + `collect_results` pour rendre les cartes produit filtrées par pièce en PHP + carte sur-mesure. Nom formaté (formatter), prix, « phrase de Robin » par carte.
+3. **Séquence d'entrée (JS)** : machine à écrire (instantanée, pas d'IA), apparition question d'affinage → CTA → révélation header + bandeau. Header/bandeau over-photo (point d).
+4. **Affinage inline taille→style** (JS) : chips validables, avance question suivante, `sapiProject.update()`, re-filtrage instantané du slider (b2). Pas d'ouverture modale.
+5. **Révélation sélection** : « Voir ma sélection pour toi » **ou** fin des 3 réponses → flou photo + remontée phrase sous le header + slider par-dessus. « Voir toutes les créations » → scroll catalogue. « Préciser avec Robin » → modale (sans réécrire l'IA).
+6. **Hydratation localStorage** (retour sans param) : activer l'état B côté JS depuis `sapiProject`. **Bascule A/B propre** (param vs localStorage vs rien).
+7. **Passe mobile** (photo plein écran, slider scrollable, bandeau qui masque des items, chips) + **garde-fous** : tutoiement, pas de tiret cadratin, accolades, `console = 0 erreur`, tous les `data-*` AUDIT §3 préservés.
+
+### ❓ Décisions à trancher par Robin avant que je code
+1. **Re-filtrage taille/style : b2 (clone+filtre JS instantané, ma reco) ou b1 (endpoint AJAX 100 % serveur) ?**
+2. **Header over-hero : généraliser le mécanisme home (refacto `.home`→classe, ma reco) ou JS dédié état B sans toucher la home (zéro risque) ?**
+3. **Bandeau : instance dédiée dans le hero (ma reco) ou repositionner l'instance globale ?**
+4. **Comportement « 0 produit » après affinage** (ex. combinaison rare) : on garde l'**élargissement progressif** existant (`computeEffectiveAnswers`, retire style puis taille…) pour ne jamais montrer un slider vide ? (Ma reco : oui, c'est déjà codé.)
+5. **Photo pièce** : si la pièce choisie n'a **pas** de `hero_<slug>` renseigné en ACF → repli (photo générique ? on bascule en état A ?).
+
+### 👉 Action Robin
+Lis ce plan + trancher les 5 décisions ci-dessus (ou valider mes recos). Sur « go » → je code étape 1, push test, et on itère étape par étape. Rien n'est touché tant que tu n'as pas validé.
+
+### ✅ Décisions Robin (2026-06-10) + démarrage code
+1. **Re-filtrage taille/style → délégué à Claude.** Choix retenu : **serveur (petit AJAX `wp_ajax` qui rappelle `sapi_guide_query_products`)**. Raison : c'est exactement ton ask de départ (« matching calculé côté serveur, pas le clone JS »), et le re-filtrage client partagerait `sapiMegaFilter` avec le catalogue → risquerait de filtrer « Toutes mes créations » (qu'on veut intact). Le serveur gère aussi correctement les **variations** (essence/taille). Latence minime, écran déjà rempli pendant le fetch. → **arrive à l'étape 4**, pas étape 1.
+2. **Header over-hero → JS dédié état B, on ne touche PAS la home** (zéro risque de régression).
+3. **Bandeau → instance dédiée** dans le hero (wording réutilisé, positionnement état B propre).
+4. **Élargissement progressif conservé** : `sapi_guide_query_products` a déjà des fallbacks intégrés (ampoule → format → taille) → jamais de slider vide.
+5. **Repli photo générique** si la pièce n'a pas de `hero_<slug>`.
+
+**Étape 1 en cours (push test à suivre) :** socle PHP état B **entièrement gated sur `?piece=` valide** (état A + visiteurs normaux 100 % inchangés) : détection + `body.mescreations-immersion`, photo pièce (+ repli), pill V1, phrase générique figée, **sélection pièce-level rendue côté serveur** (`sapi_guide_query_products`) dans le slider + carte sur-mesure, bandeau réassurance dédié, header over-hero (JS dédié), machine à écrire + révélation « Voir ma sélection » / scroll « Voir toutes ». `sapi-cards-conseiller.js` **bypassé en mode immersion** → catalogue bas intact. **Pas encore :** affinage taille/style qui re-filtre la sélection (= AJAX serveur, étape 4) ni hydratation localStorage sans param (étape 6).
+
+---
+
 ## ✅ [FAIT 2026-06-10 — sur test] Harmonisation Conseiller — PHASE 4 : modale (6 états) (commit `f45f187`)
 **Résultat (branche `test-theme-sapi-maison`, poussé sur test) :**
 - **A. Cadre C** : la carte modale (`.conseiller-card--modal`) passe en **grain bois en filigrane** (le `::before` dashed est **repurposé en grain**, inset:0 desktop + mobile) → **plus de pointillé**, pas d'ourlet orange. Fond crème, radius 16, ombre inchangés.
