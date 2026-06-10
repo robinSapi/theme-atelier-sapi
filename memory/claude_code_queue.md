@@ -114,6 +114,13 @@ Le composant `.conseiller-sig` (pastille Robin + « Le conseil de Robin » + acc
 
 </details>
 
+## ✅ [FAIT 2026-06-10 — sur test] Signature Conseiller → pill bois sombre (V1) — HOME (commit `99c6903`)
+**Résultat (branche `test-theme-sapi-maison`, poussé sur test) :** `.conseiller-sig` restylée SCOPÉE à la home (`.home-projet .conseiller-sig*`) en capsule bois sombre — `inline-flex`, fond `--color-wood-dark`, radius 60px, avatar 60px bordé clair (`rgba(255,255,255,.18)`), eyebrow tan `#e0a878`, accroche blanche 28px. **Markup et textes inchangés** (ligne haut « Le conseil de Robin », ligne bas = le hook actuel de la home). Centrage OK sans rien ajouter : `.room-picker-inner` est déjà `flex`/`align-items:center` → la pill `inline-flex` se centre toute seule. **Réduction mobile ≤600px** (gap/padding réduits, avatar 48px, hook 21px, `max-width:100%` anti-débordement). Accolades 3732/3732. **Modale Conseiller (`.conseiller-card--modal`) + pill fiche produit NON touchés** (réservés à l'étape suivante).
+⚠️ **Coordination :** 1re tentative écrasée par la fenêtre bento (édition concurrente du même `style.css`). Refait proprement une fois le bento mergé en prod.
+**👉 Robin :** valider le rendu de la pill sombre sur la home test (desktop + mobile). Si OK → on lance la généralisation (modale tous états + pill fiche produit + page conseils) avec la même V1 et lignes du bas contextuelles.
+
+<details><summary>Énoncé original</summary>
+
 ## [TÂCHE] Signature Conseiller → pill bois sombre (V1) — HOME d'abord
 **Date :** 2026-06-10 · **Priorité :** normale · **Branche :** `test-theme-sapi-maison` (auto-deploy test). Push auto. Master/prod = après validation Robin.
 **Mockup de référence :** `mockups/mockup-conseiller-signature-20-variantes.html` → **variante V1** (capsule bois sombre + photo ronde).
@@ -139,6 +146,8 @@ Le composant `.conseiller-sig` (pastille Robin + « Le conseil de Robin » + acc
 
 **Notes :** ne PAS toucher au markup ni aux textes (la ligne du bas reste celle déjà en place sur la home). Photo : laisser l'image actuelle de l'avatar. Pas de tiret cadratin. Accolades équilibrées. **NE PAS toucher** à la signature dans la modale ni à la pill fiche produit (étape suivante).
 **👉 Robin :** valider le rendu de la pill sombre sur la home test, puis on lance la généralisation (modale + fiche produit + page conseils) avec la même V1 et les lignes du bas contextuelles.
+
+</details>
 
 ## ✅ EN PROD (2026-06-10) — nettoyage CSS mort + suppression pill « Signature »
 Déployés ensemble sur atelier-sapi.fr (master `0d114b1`) :
