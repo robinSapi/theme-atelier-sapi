@@ -385,8 +385,11 @@ foreach ($collection_slugs as $col) {
 // "creations-sur-mesure" (même priorité que les collections : ACF image_collection
 // -> 3e photo ambiance d'un produit -> vignette). La card garde son lien vers /sur-mesure/.
 $surmesure_image_id = null;
+$surmesure_desc = 'Une pièce unique, pensée avec toi.'; // repli si pas de description WooCommerce
 $sm_term = get_term_by('slug', 'creations-sur-mesure', 'product_cat');
 if ($sm_term) {
+  $sm_wc_desc = $sm_term->description ? trim(wp_strip_all_tags($sm_term->description)) : '';
+  if ($sm_wc_desc !== '') $surmesure_desc = $sm_wc_desc;
   if (function_exists('get_field')) {
     $sm_acf = get_field('image_collection', 'product_cat_' . $sm_term->term_id);
     if ($sm_acf) $surmesure_image_id = $sm_acf;
@@ -621,7 +624,7 @@ foreach ($carousel_products as $product) {
         </div>
         <div class="collection-details">
           <h3>Sur mesure</h3>
-          <p class="collection-desc">Une pièce unique, pensée avec toi.</p>
+          <?php if (!empty($surmesure_desc)) : ?><p class="collection-desc"><?php echo esc_html($surmesure_desc); ?></p><?php endif; ?>
           <div class="collection-meta"><span class="collection-count">Ton projet unique</span><span class="collection-btn">→</span></div>
         </div>
       </a>
