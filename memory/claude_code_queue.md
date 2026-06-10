@@ -2,9 +2,9 @@
 
 > Historique des tâches terminées archivé dans `claude_code_queue_archive.md` (nettoyé le 2026-06-03).
 
-## ✅ RETOUR COWORK — Pill « Signature Conseiller » V1 (home) FAIT sur TEST (2026-06-10)
-**Sur test, en attente de validation Robin. PAS en prod.** Branche `test-theme-sapi-maison`, commit `99c6903`, déployé sur test.atelier-sapi.fr.
-- La signature « Le conseil de Robin » de la **home** (section Conseiller / room-picker) passe en **capsule bois sombre V1** (fond `--color-wood-dark`, avatar rond bordé clair, eyebrow tan, accroche blanche). **Textes et photo inchangés.** Rendu mobile géré (≤600px).
+## ✅ RETOUR COWORK — Pill « Signature Conseiller » home FAIT sur TEST (2026-06-10)
+**Sur test, en attente de validation Robin. PAS en prod.** Branche `test-theme-sapi-maison` (V1 `99c6903` → **réduite en mini format B1 `595874f`** : la V1 était trop grosse et écrasait le titre), déployé sur test.atelier-sapi.fr.
+- La signature « Le conseil de Robin » de la **home** (section Conseiller / room-picker) passe en **mini capsule bois sombre B1** (fond `--color-wood-dark`, avatar rond 34px bordé clair, eyebrow tan, accroche Square Peg blanche 18px). **Textes et photo inchangés.** Rendu mobile géré (≤600px).
 - **Scopé à la home uniquement** : la signature dans la **modale Conseiller** et la pill **fiche produit** ne bougent pas (réservées à l'étape suivante = généralisation, à lancer si Robin valide la V1).
 - ⚠️ **Coordination 2 fenêtres :** ce chantier tournait **en parallèle** de la « suppression bento legacy » (autre fenêtre Claude Code) qui éditait le **même `style.css`** → ma 1re passe a été écrasée. Refaite proprement **après** que le bento soit passé en prod. Les deux travaux sont bien séparés, aucun mélange.
 
@@ -70,6 +70,37 @@ Le composant `.conseiller-sig` (pastille Robin + « Le conseil de Robin » + acc
 **👉 Robin :** valider sur test (ouvrir le Conseiller → S0 + chat ; fiche produit variable → pill avec avatar). Reste pour la généralisation complète si voulu : room-picker page /conseils-éclairés/, encart contact fiche produit.
 
 ---
+
+## 🔧 À faire
+
+## ✅ [FAIT 2026-06-10 — sur test] Pill Conseiller home — mini format B1 (commit `595874f`)
+**Résultat (branche `test-theme-sapi-maison`, poussé sur test) :** tailles de `.home-projet .conseiller-sig*` réduites au format **B1** — avatar **34px**, `gap:10px`, `padding:5px 18px 5px 5px`, `__text gap:1px`, eyebrow **9px** (letter-spacing .14em), accroche Square Peg **18px** (`line-height:1`). Mobile ≤600px : hook **16px** + `max-width:100%`. **Markup, textes, photo, centrage inchangés.** Toujours scopé home → modale + pill fiche produit intactes. Accolades 3732/3732, pas de tiret cadratin.
+**👉 Robin :** valider sur test (le titre « Pour quelle pièce » doit reprendre la vedette). Si OK → généralisation (modale + fiche + page conseils) avec ce format B1 et lignes du bas contextuelles.
+
+<details><summary>Énoncé original</summary>
+
+## [TÂCHE] Pill Conseiller home — réduire en mini format B1 (trop grosse en V1)
+**Date :** 2026-06-10 · **Priorité :** normale · **Branche :** `test-theme-sapi-maison` (auto-deploy test). Push auto. Master/prod après validation Robin.
+**Contexte :** la V1 appliquée (commit `99c6903`) est **trop grosse/visible** sur la home : elle écrase le titre « Pour quelle pièce… ». Robin valide le **format B1** (mini pill, mêmes style/couleurs, juste réduit) → mockup `mockups/mockup-conseiller-pill-B-squarepeg.html` variante **B1**. L'accroche reste en **Square Peg**.
+**À faire :** ajuster UNIQUEMENT les valeurs de taille de la règle home `.home-projet .conseiller-sig*` (ajoutée en `99c6903`). Remplacer par :
+```css
+.home-projet .conseiller-sig{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--color-wood-dark);
+  border-radius:60px;
+  padding:5px 18px 5px 5px;
+  margin:0 0 18px;
+}
+.home-projet .conseiller-sig__avatar{width:34px;height:34px;border:2px solid rgba(255,255,255,.18);box-shadow:none}
+.home-projet .conseiller-sig__text{gap:1px;text-align:left}
+.home-projet .conseiller-sig__who{color:#e0a878;font-size:9px;letter-spacing:.14em}
+.home-projet .conseiller-sig__hook{color:#fff;font-size:18px;line-height:1;margin-top:0}
+```
+Mobile ≤600px : la pill est déjà petite, vérifier juste qu'elle ne déborde pas (réduire le hook à ~16px si besoin). Rien d'autre ne change (markup, textes, photo, centrage). Pas de tiret cadratin, accolades équilibrées.
+**Critères :** signature nettement plus discrète, le titre reprend la vedette, accroche en Square Peg lisible.
+**👉 Robin :** valider sur test. Si OK → généralisation (modale + fiche + page conseils) avec ce format B1 et lignes du bas contextuelles.
+
+</details>
 
 ## 🔧 À faire — actions Robin (post go-live)
 1. **Vérifier la home en prod** (atelier-sapi.fr) : photos `2026/02`/`2026/04`/`2026/05`/`2026/06` affichées ; **card Sur mesure** (photo tirée de la catégorie `creations-sur-mesure` → si mauvaise/absente, mettre l'image voulue dans le champ ACF **Image collection** de la catégorie) ; **logo Région** affiché ; **logos presse alignés** ; **photo Assemblage en miroir** au survol de l'étape 04.
