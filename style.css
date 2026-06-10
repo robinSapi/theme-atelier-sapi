@@ -11929,8 +11929,7 @@ button.room-card {
   }
 
   .bento-process,
-  .bento-atelier,
-  .bento-cta {
+  .bento-atelier {
     grid-column: span 6;
   }
 }
@@ -11988,7 +11987,6 @@ button.room-card {
   .bento-product-small,
   .bento-stats,
   .bento-process,
-  .bento-cta,
   .bento-atelier,
   .bento-storytelling {
     grid-column: span 1;
@@ -11998,11 +11996,6 @@ button.room-card {
   /* Cards that need minimum height for their background images */
   .bento-hero {
     min-height: 300px;
-  }
-
-  .bento-product-featured {
-    grid-column: span 1;
-    min-height: 350px;
   }
 
   .bento-atelier {
@@ -12071,24 +12064,6 @@ button.room-card {
   .bento-stats {
     min-height: auto;
     padding: 1.5rem;
-  }
-
-  /* CTA card: compact */
-  .bento-cta {
-    min-height: auto;
-    padding: 2rem;
-  }
-
-  /* Reduce padding on mobile for better fit */
-  .bento-content {
-    padding: 2rem 1.5rem;
-  }
-
-  /* Ensure hero title fits properly */
-  .bento-title {
-    font-size: clamp(2.5rem, 8vw, 3.5rem);
-    line-height: 1.15;
-    margin-bottom: 0.75rem;
   }
 
   .menu-overlay-inner,
@@ -12321,14 +12296,6 @@ button.room-card {
   .bento-container {
     gap: 1rem;
     grid-auto-rows: minmax(250px, auto);
-  }
-
-  .bento-content {
-    padding: 1.5rem 1rem;
-  }
-
-  .bento-title {
-    font-size: clamp(2rem, 10vw, 2.5rem);
   }
 
   .bento-text {
