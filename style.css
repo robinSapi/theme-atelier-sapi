@@ -23026,7 +23026,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   position: relative;
   width: 100%;
   max-width: 700px;
-  height: 700px;
+  height: 840px; /* +20% desktop (700->840) ; plafonné par max-height, plein écran en mobile */
   max-height: calc(100dvh - 64px);
   background: var(--color-warm);
   border-radius: 16px;
