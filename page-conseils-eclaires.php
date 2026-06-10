@@ -220,7 +220,7 @@ endif;
   <div class="advice-room-picker" data-room-picker>
     <div class="room-picker-inner">
       <div class="conseiller-sig conseiller-sig--v1">
-        <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+        <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
         <span class="conseiller-sig__text">
           <span class="conseiller-sig__who">Le conseil de Robin</span>
           <span class="conseiller-sig__hook">Mes conseils spécifiques pour ton projet</span>

@@ -3689,7 +3689,7 @@ function sapi_render_conseiller_modal() {
       <section class="modal__screen" data-screen="s0" hidden>
         <header class="modal__head">
           <div class="conseiller-sig conseiller-sig--v1">
-            <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+            <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
             <span class="conseiller-sig__text">
               <span class="conseiller-sig__who">Le conseil de Robin</span>
               <span class="conseiller-sig__hook">Mon regard d'artisan sur ton projet</span>
@@ -3737,7 +3737,7 @@ function sapi_render_conseiller_modal() {
       <section class="modal__screen" data-screen="s1" hidden>
         <header class="modal__head">
           <div class="conseiller-sig conseiller-sig--v1">
-            <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+            <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
             <span class="conseiller-sig__text"><span class="conseiller-sig__who">Le conseil de Robin</span><span class="conseiller-sig__hook">On affine ton projet</span></span>
           </div>
           <span class="badge">
@@ -3765,7 +3765,7 @@ function sapi_render_conseiller_modal() {
       <section class="modal__screen" data-screen="s2-chat" hidden>
         <header class="modal__head">
           <div class="conseiller-sig conseiller-sig--v1">
-            <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+            <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
             <span class="conseiller-sig__text">
               <span class="conseiller-sig__who">Le conseil de Robin</span>
               <span class="conseiller-sig__hook">Discutons de ton projet</span>
@@ -3804,7 +3804,7 @@ function sapi_render_conseiller_modal() {
       <section class="modal__screen" data-screen="s-product-recap" hidden>
         <header class="modal__head">
           <div class="conseiller-sig conseiller-sig--v1">
-            <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+            <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
             <span class="conseiller-sig__text"><span class="conseiller-sig__who">Le conseil de Robin</span><span class="conseiller-sig__hook">Mon conseil pour toi</span></span>
           </div>
           <span class="badge">
@@ -3853,7 +3853,7 @@ function sapi_render_conseiller_modal() {
         <div data-contact-state="form">
           <header class="modal__head">
             <div class="conseiller-sig conseiller-sig--v1">
-              <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+              <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
               <span class="conseiller-sig__text"><span class="conseiller-sig__who">Le conseil de Robin</span><span class="conseiller-sig__hook">Échangeons ensemble</span></span>
             </div>
             <span class="badge">
@@ -3897,7 +3897,7 @@ function sapi_render_conseiller_modal() {
         <div data-contact-state="success" hidden>
           <header class="modal__head">
             <div class="conseiller-sig conseiller-sig--v1">
-              <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+              <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
               <span class="conseiller-sig__text"><span class="conseiller-sig__who">Le conseil de Robin</span><span class="conseiller-sig__hook">Merci, à très vite</span></span>
             </div>
             <span class="badge">
@@ -3924,7 +3924,7 @@ function sapi_render_conseiller_modal() {
       <section class="modal__screen" data-screen="s3" hidden>
         <header class="modal__head">
           <div class="conseiller-sig conseiller-sig--v1">
-            <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+            <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
             <span class="conseiller-sig__text"><span class="conseiller-sig__who">Le conseil de Robin</span><span class="conseiller-sig__hook">On récapitule ?</span></span>
           </div>
           <span class="badge">
