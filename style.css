@@ -22250,39 +22250,14 @@ body.woocommerce-cart div.woocommerce-wrapper {
   flex-shrink: 0;
 }
 
-/* ── Pill secondaire : crème + dashed wood (style "Comment choisir ?" F2b) ── */
-.conseiller-pill-secondary {
-  display: -webkit-inline-flex;
-  display: inline-flex;
-  -webkit-align-items: center;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 18px;
-  background: var(--color-warm);
-  color: var(--color-wood-dark);
-  border: 1.5px dashed rgba(147, 125, 104, 0.5);
-  border-radius: 50px;
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-decoration: none;
-  cursor: pointer;
-  -webkit-transition: background 0.2s ease, border-color 0.2s ease;
-  transition: background 0.2s ease, border-color 0.2s ease;
-}
-
+/* ── Pill secondaire fiche produit : mini V1 sombre discret (Phase 2 / V6) ── */
+.conseiller-pill-secondary{display:inline-flex;align-items:center;gap:9px;background:var(--color-wood-dark);border:none;border-radius:60px;padding:4px 14px 4px 4px;cursor:pointer;transition:.2s}
 .conseiller-pill-secondary:hover,
-.conseiller-pill-secondary:focus-visible {
-  background: var(--color-white);
-  border-color: var(--color-wood-dark);
-  border-style: solid;
-  outline: none;
-}
-/* Mini-avatar Robin dans la pill conseil (généralisation design DA) */
-.conseiller-pill-secondary { padding: 6px 18px 6px 7px; gap: 9px; }
-.conseiller-pill-secondary__avatar { width: 26px; height: 26px; border-radius: 50%; overflow: hidden; flex-shrink: 0; box-shadow: 0 1px 3px rgba(147, 125, 104, 0.25); }
-.conseiller-pill-secondary__img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.conseiller-pill-secondary:focus-visible{box-shadow:var(--shadow-card-hover);transform:translateY(-1px);outline:none}
+.conseiller-pill-secondary__avatar{width:26px;height:26px;flex-shrink:0}
+.conseiller-pill-secondary__img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.conseiller-pill-secondary [data-help-pill-text]{font-family:var(--font-display);color:#fff;font-size:18px;line-height:1}
+@media (max-width:600px){.conseiller-pill-secondary [data-help-pill-text]{font-size:16px}}
 
 /* ── Signature "— Robin" en Square Peg cursive ── */
 .conseiller-signature {

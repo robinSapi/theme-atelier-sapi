@@ -2,7 +2,7 @@
  * Sapi Help Pill — Pill "Comment choisir ?" sur fiche produit (F2b).
  *
  * Trois états (repris du legacy robin-conseiller.js → updateProductPillContextual) :
- *  - Sans projet                 → "Comment choisir ?"
+ *  - Sans projet                 → "Je t'aide à choisir la bonne variante"
  *  - Projet partiel              → "Adapter à mon projet"
  *  - Projet complet (piece + taille|escalier + style) → chips
  *    "Salon · Grande · Peuplier ✓"
@@ -14,7 +14,7 @@
 (function () {
   'use strict';
 
-  var TXT_INITIAL = 'Comment choisir ?';
+  var TXT_INITIAL = 'Je t\'aide à choisir la bonne variante';
   var TXT_PARTIAL = 'Adapter à mon projet';
 
   // Mapping repris de l'ancien mon-projet.js (pré-F1c)
