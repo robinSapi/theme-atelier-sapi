@@ -149,6 +149,25 @@
       document.dispatchEvent(new CustomEvent('sapi:open-modal', { detail: { state: 's3' } }));
     }
 
+    /* ── Header over-photo + bandeau : transparent/bas sur la photo → opaque/
+       sticky sous le header au scroll (option B). ── */
+    var header = document.querySelector('.site-header');
+    var band = section.querySelector('.mescreations-immersion__reassure');
+    function syncHeaderHeight() {
+      if (header) {
+        document.documentElement.style.setProperty('--immersion-header-h', header.offsetHeight + 'px');
+      }
+    }
+    function onScroll() {
+      var past = window.scrollY > window.innerHeight * 0.5;
+      if (header) header.classList.toggle('is-immersion-scrolled', past);
+      if (band) band.classList.toggle('is-immersion-top', past);
+    }
+    syncHeaderHeight();
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', function () { syncHeaderHeight(); onScroll(); }, { passive: true });
+
     /* ── Câblage ── */
     if (els.seeSel) els.seeSel.addEventListener('click', openSelection);
     if (els.seeAll && els.seeAll.length) {
