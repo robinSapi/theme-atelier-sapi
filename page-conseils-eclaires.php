@@ -219,7 +219,14 @@ endif;
 <section class="advice-room-picker-section">
   <div class="advice-room-picker" data-room-picker>
     <div class="room-picker-inner">
-      <h3 class="room-picker-title">Pour quelle pièce cherchez-vous un luminaire ?</h3>
+      <div class="conseiller-sig conseiller-sig--v1">
+        <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+        <span class="conseiller-sig__text">
+          <span class="conseiller-sig__who">Le conseil de Robin</span>
+          <span class="conseiller-sig__hook">Mes conseils spécifiques pour ton projet</span>
+        </span>
+      </div>
+      <h3 class="room-picker-title">Pour quelle pièce cherches-tu un luminaire ?</h3>
       <div class="room-picker-cards">
         <?php foreach ($room_choices as $room) :
           $icon_svg = isset($room_icons[$room['icon']]) ? $room_icons[$room['icon']] : '';

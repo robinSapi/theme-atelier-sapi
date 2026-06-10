@@ -7864,24 +7864,24 @@ li.carousel-editorial-slide,
   margin: 2rem auto;
   padding: 0 2rem;
 }
-/* Harmonisé avec .conseiller-card : fond warm + bordure dashed INSET via
-   ::before (décor décalé 12px vers l'intérieur, comme dans la modale).
+/* Harmonisation Conseiller Phase 1 : même langage que la home (fond warm +
+   grain bois en filigrane), en restant un panneau contenu (pas pleine largeur).
    Pas de hover (panneau statique). */
 .advice-room-picker {
   position: relative;
-  background: var(--color-warm, #FBF6EA);
+  background: var(--color-warm);
   border-radius: 16px;
-  padding: 2.5rem 2rem;
+  padding: 2.75rem 2rem;
   text-align: center;
   overflow: hidden;
 }
 .advice-room-picker::before {
   content: "";
   position: absolute;
-  inset: 12px;
-  border: 1.5px dashed rgba(147, 125, 104, 0.35);
-  border-radius: 12px;
+  inset: 0;
+  background-image: repeating-linear-gradient(92deg, rgba(139, 115, 85, .05) 0, rgba(139, 115, 85, .05) 1px, transparent 1px, transparent 7px);
   pointer-events: none;
+  z-index: 0;
 }
 .advice-room-picker .room-picker-inner {
   position: relative;
@@ -7893,6 +7893,11 @@ li.carousel-editorial-slide,
   flex-wrap: wrap;
   gap: 1.25rem;
   width: 100%;
+}
+/* Phase 1 — hover chips en accent orange, identique à la home */
+@media (hover:hover){
+  .advice-room-picker .room-card:hover{border-color:var(--color-orange);background:#f4ead3;box-shadow:var(--shadow-card-hover);transform:translateY(-2px)}
+  .advice-room-picker .room-card:hover .room-card-icon{background:rgba(227,91,36,.12);color:var(--color-orange)}
 }
 
 @media (max-width: 768px) {
@@ -7987,14 +7992,24 @@ li.carousel-editorial-slide,
 .conseiller-sig__text{display:flex;flex-direction:column;text-align:left}
 .conseiller-sig__who{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-wood)}
 .conseiller-sig__hook{font-family:var(--font-display);font-size:32px;line-height:1;color:var(--color-wood-dark);margin-top:2px}
-/* Généralisation modale (S0 accueil + S2 chat) : la signature remplace le badge contextuel */
-.conseiller-card--modal [data-screen="s0"] .badge,
-.conseiller-card--modal [data-screen="s2-chat"] .badge{display:none}
+/* Phase 4 — la pill V1 (.conseiller-sig--v1) remplace les anciens badges texte sur TOUS les écrans de la modale. Sizing géré par --v1 (desktop + mobile). */
+.conseiller-card--modal .badge{display:none}
 .conseiller-card--modal .conseiller-sig{margin-bottom:0}
+/* ===== Signature Conseiller — pill bois sombre V1 : photo + accroche Square Peg, sans label (partagée home + Conseils) ===== */
+.conseiller-sig--v1{
+  display:inline-flex;align-items:center;gap:12px;
+  background:var(--color-wood-dark);
+  border-radius:60px;
+  padding:6px 24px 6px 6px;
+  margin:0 0 16px;
+}
+.conseiller-sig--v1 .conseiller-sig__avatar{width:34px;height:34px;border:none;box-shadow:none}
+.conseiller-sig--v1 .conseiller-sig__who{display:none} /* « Le conseil de Robin » retiré : l'identité passe par la photo */
+.conseiller-sig--v1 .conseiller-sig__text{gap:0}
+.conseiller-sig--v1 .conseiller-sig__hook{color:#fff;font-size:24px;line-height:1;margin:0}
 @media (max-width:600px){
-  .conseiller-card--modal .conseiller-sig{gap:14px}
-  .conseiller-card--modal .conseiller-sig__avatar{width:52px;height:52px}
-  .conseiller-card--modal .conseiller-sig__hook{font-size:24px}
+  .conseiller-sig--v1{max-width:100%}
+  .conseiller-sig--v1 .conseiller-sig__hook{font-size:21px}
 }
 /* réchauffe de la bande : grain bois discret en fond (sous le contenu) */
 .home-projet-section{position:relative}
@@ -22229,39 +22244,14 @@ body.woocommerce-cart div.woocommerce-wrapper {
   flex-shrink: 0;
 }
 
-/* ── Pill secondaire : crème + dashed wood (style "Comment choisir ?" F2b) ── */
-.conseiller-pill-secondary {
-  display: -webkit-inline-flex;
-  display: inline-flex;
-  -webkit-align-items: center;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 18px;
-  background: var(--color-warm);
-  color: var(--color-wood-dark);
-  border: 1.5px dashed rgba(147, 125, 104, 0.5);
-  border-radius: 50px;
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-decoration: none;
-  cursor: pointer;
-  -webkit-transition: background 0.2s ease, border-color 0.2s ease;
-  transition: background 0.2s ease, border-color 0.2s ease;
-}
-
+/* ── Pill secondaire fiche produit : mini V1 sombre discret (Phase 2 / V6) ── */
+.conseiller-pill-secondary{display:inline-flex;align-items:center;gap:13px;background:var(--color-wood-dark);border:none;border-radius:60px;padding:6px 22px 6px 6px;cursor:pointer;transition:.2s;text-transform:none}
 .conseiller-pill-secondary:hover,
-.conseiller-pill-secondary:focus-visible {
-  background: var(--color-white);
-  border-color: var(--color-wood-dark);
-  border-style: solid;
-  outline: none;
-}
-/* Mini-avatar Robin dans la pill conseil (généralisation design DA) */
-.conseiller-pill-secondary { padding: 6px 18px 6px 7px; gap: 9px; }
-.conseiller-pill-secondary__avatar { width: 26px; height: 26px; border-radius: 50%; overflow: hidden; flex-shrink: 0; box-shadow: 0 1px 3px rgba(147, 125, 104, 0.25); }
-.conseiller-pill-secondary__img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.conseiller-pill-secondary:focus-visible{box-shadow:var(--shadow-card-hover);transform:translateY(-1px);outline:none}
+.conseiller-pill-secondary__avatar{width:38px;height:38px;flex-shrink:0}
+.conseiller-pill-secondary__img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.conseiller-pill-secondary [data-help-pill-text]{font-family:var(--font-display);color:#fff;font-size:27px;line-height:1;text-transform:none}
+@media (max-width:600px){.conseiller-pill-secondary{gap:11px;padding:5px 18px 5px 5px}.conseiller-pill-secondary__avatar{width:32px;height:32px}.conseiller-pill-secondary [data-help-pill-text]{font-size:21px}}
 
 /* ── Signature "— Robin" en Square Peg cursive ── */
 .conseiller-signature {
@@ -23036,7 +23026,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   position: relative;
   width: 100%;
   max-width: 700px;
-  height: 700px;
+  height: 840px; /* +20% desktop (700->840) ; plafonné par max-height, plein écran en mobile */
   max-height: calc(100dvh - 64px);
   background: var(--color-warm);
   border-radius: 16px;
@@ -23048,12 +23038,13 @@ body.woocommerce-cart div.woocommerce-wrapper {
   -webkit-animation: conseiller-dialog-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   animation: conseiller-dialog-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
+/* Phase 4 — cadre C : grain bois en filigrane (remplace l'ancien pointillé dashed) */
 .conseiller-card--modal::before {
   content: '';
   position: absolute;
-  inset: 12px;
-  border: 1.5px dashed rgba(139, 115, 85, 0.35);
-  border-radius: 12px;
+  inset: 0;
+  border: none; /* neutralise le pointillé hérité de .conseiller-card::before */
+  background-image: repeating-linear-gradient(92deg, rgba(139, 115, 85, .05) 0, rgba(139, 115, 85, .05) 1px, transparent 1px, transparent 7px);
   pointer-events: none;
   z-index: 0;
 }
@@ -23275,6 +23266,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
   box-shadow: var(--shadow-card-hover);
   border-color: var(--color-wood);
 }
+/* Phase 4 — hover des cartes de choix en accent orange (comme la home), scopé modale */
+@media (hover:hover){
+  .conseiller-card--modal .choice:hover{border-color:var(--color-orange)}
+  .conseiller-card--modal .choice:hover .choice__icon{background:rgba(227,91,36,.12);color:var(--color-orange)}
+}
 .choice__icon {
   width: 44px;
   height: 44px;
@@ -23314,6 +23310,33 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 .choice.is-selected .choice__label {
   color: var(--color-wood-dark);
+}
+
+/* Phase 4 — option neutre (« Je ne sais pas » / « Pas de préférence ») :
+   carte à part, pleine largeur sous la grille, compacte (horizontale, moins haute). */
+.conseiller-card--modal .choices .choice[data-choice="ne-sais-pas"],
+.conseiller-card--modal .choices .choice[data-choice="neutre"] {
+  grid-column: 1 / -1;
+  -webkit-flex-direction: row;
+  flex-direction: row;
+  min-height: 0;
+  padding: 10px 16px;
+  gap: 10px;
+}
+.conseiller-card--modal .choices .choice[data-choice="ne-sais-pas"] .choice__icon,
+.conseiller-card--modal .choices .choice[data-choice="neutre"] .choice__icon {
+  width: 30px;
+  height: 30px;
+  margin: 0;
+}
+.conseiller-card--modal .choices .choice[data-choice="ne-sais-pas"] .choice__icon svg,
+.conseiller-card--modal .choices .choice[data-choice="neutre"] .choice__icon svg { width: 18px; height: 18px; }
+/* Desktop : les 3 vraies réponses des questions taille/sortie occupent la
+   ligne (la grille .choices--4col = toujours « 3 réponses + 1 option neutre »),
+   l'option neutre passant en pleine largeur dessous via grid-column:1/-1.
+   (Pas de :has() — coûteux en perf sur les pages à fort remaniement DOM.) */
+@media (min-width: 601px) {
+  .conseiller-card--modal .choices--4col { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* Texte libre input */
@@ -23621,6 +23644,34 @@ button.chip--project:focus-visible {
   border-bottom-right-radius: 4px;
 }
 
+/* Phase 4 — écran chat : zone des bulles encadrée qui remplit l'espace,
+   champ de saisie poussé en bas du body. */
+.conseiller-card--modal [data-screen="s2-chat"] .chat-bubbles {
+  -webkit-flex: 1;
+  flex: 1;
+  width: 100%;
+  max-width: 480px;
+  overflow-y: auto;
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.conseiller-card--modal [data-screen="s2-chat"] .text-input-wrap {
+  max-width: 480px;
+}
+
+/* Phase 4 — écran récap projet (s3) : récap en haut, disclaimer + boutons en bas. */
+.conseiller-card--modal [data-screen="s3"] .recap-hint {
+  margin-top: auto;
+  margin-bottom: 4px;
+  font-size: 11.5px;
+  font-style: italic;
+  color: var(--color-wood-mid);
+  text-align: center;
+}
+
 /* Round 4 — Classes dynamiques générées par sapi-modal-conseiller.js
    (filters appliqués sous bulle Robin, dots animés "réflexion"). Non
    couvertes par le mockup-11 (cas dynamiques). Documentées comme
@@ -23820,7 +23871,7 @@ button.chip--project:focus-visible {
     height: calc(100dvh - 64px);
     max-height: calc(100dvh - 64px);
   }
-  .conseiller-card--modal::before { inset: 8px; }
+  .conseiller-card--modal::before { inset: 0; }
   .modal__head { padding: 20px 22px 8px; }
   .modal__body { padding: 8px 22px; gap: 12px; }
   .modal__foot { padding: 10px 22px 22px; }
