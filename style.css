@@ -7996,21 +7996,21 @@ li.carousel-editorial-slide,
   .conseiller-card--modal .conseiller-sig__avatar{width:52px;height:52px}
   .conseiller-card--modal .conseiller-sig__hook{font-size:24px}
 }
-/* ===== Signature Conseiller — mini pill bois sombre B1 (home) ===== */
+/* ===== Signature Conseiller — pill bois sombre V1 : photo + accroche Square Peg, sans label (home) ===== */
 .home-projet .conseiller-sig{
-  display:inline-flex;align-items:center;gap:10px;
+  display:inline-flex;align-items:center;gap:12px;
   background:var(--color-wood-dark);
   border-radius:60px;
-  padding:5px 18px 5px 5px;
-  margin:0 0 18px;
+  padding:6px 24px 6px 6px;
+  margin:0 0 16px;
 }
-.home-projet .conseiller-sig__avatar{width:34px;height:34px;border:2px solid rgba(255,255,255,.18);box-shadow:none}
-.home-projet .conseiller-sig__text{gap:1px;text-align:left}
-.home-projet .conseiller-sig__who{color:#e0a878;font-size:9px;letter-spacing:.14em} /* eyebrow tan chaud sur fond sombre */
-.home-projet .conseiller-sig__hook{color:#fff;font-size:18px;line-height:1;margin-top:0}
+.home-projet .conseiller-sig__avatar{width:34px;height:34px;border:none;box-shadow:none}
+.home-projet .conseiller-sig__who{display:none} /* « Le conseil de Robin » retiré : l'identité passe par la photo */
+.home-projet .conseiller-sig__text{gap:0}
+.home-projet .conseiller-sig__hook{color:#fff;font-size:24px;line-height:1;margin:0}
 @media (max-width:600px){
   .home-projet .conseiller-sig{max-width:100%}
-  .home-projet .conseiller-sig__hook{font-size:16px}
+  .home-projet .conseiller-sig__hook{font-size:21px}
 }
 /* réchauffe de la bande : grain bois discret en fond (sous le contenu) */
 .home-projet-section{position:relative}
