@@ -24587,6 +24587,12 @@ body.mescreations-immersion .conseiller-cards-zone,
 body.mescreations-immersion .mes-creations-section-divider,
 body.mescreations-immersion .robin-bandeau { display: none !important; }
 
+/* Le contenu du site est dans une colonne centrée (.site-content ~1440px).
+   Pour un vrai plein écran, le hero immersif sort de cette colonne (full-bleed
+   100vw). overflow-x:clip neutralise la barre de scroll horizontale du 100vw
+   sans casser le position:sticky du header (même technique que la home). */
+body.mescreations-immersion { overflow-x: clip; }
+
 .mescreations-immersion {
   position: relative;
   min-height: 100vh;
@@ -24598,14 +24604,13 @@ body.mescreations-immersion .robin-bandeau { display: none !important; }
   padding: 90px 24px 96px;
   overflow: hidden;
   background: var(--color-wood-dark);
-  /* Full-bleed : neutralise le padding latéral de .site-content (0 20px) pour
-     que la photo touche les bords du viewport (vrai « plein écran »).
-     Annulé ≤768px où .site-content perd son padding. */
-  margin-left: -20px;
-  margin-right: -20px;
-}
-@media (max-width: 768px) {
-  .mescreations-immersion { margin-left: 0; margin-right: 0; }
+  /* Full-bleed viewport : sort de la colonne centrée .site-content quelle que
+     soit sa largeur. left:50%/-50vw = recentrage sur le viewport. */
+  width: 100vw;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
 }
 .mescreations-immersion__bg {
   position: absolute;
@@ -24614,8 +24619,11 @@ body.mescreations-immersion .robin-bandeau { display: none !important; }
   transition: -webkit-filter .9s ease, filter .9s ease, -webkit-transform .9s ease, transform .9s ease;
 }
 .mescreations-immersion__bg-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100% !important;
+  max-width: none; /* annule le img{max-width:100%} global */
   object-fit: cover;
   object-position: center;
   display: block;
