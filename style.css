@@ -22251,13 +22251,13 @@ body.woocommerce-cart div.woocommerce-wrapper {
 }
 
 /* ── Pill secondaire fiche produit : mini V1 sombre discret (Phase 2 / V6) ── */
-.conseiller-pill-secondary{display:inline-flex;align-items:center;gap:11px;background:var(--color-wood-dark);border:none;border-radius:60px;padding:5px 17px 5px 5px;cursor:pointer;transition:.2s;text-transform:none}
+.conseiller-pill-secondary{display:inline-flex;align-items:center;gap:13px;background:var(--color-wood-dark);border:none;border-radius:60px;padding:6px 22px 6px 6px;cursor:pointer;transition:.2s;text-transform:none}
 .conseiller-pill-secondary:hover,
 .conseiller-pill-secondary:focus-visible{box-shadow:var(--shadow-card-hover);transform:translateY(-1px);outline:none}
-.conseiller-pill-secondary__avatar{width:31px;height:31px;flex-shrink:0}
+.conseiller-pill-secondary__avatar{width:38px;height:38px;flex-shrink:0}
 .conseiller-pill-secondary__img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
-.conseiller-pill-secondary [data-help-pill-text]{font-family:var(--font-display);color:#fff;font-size:22px;line-height:1;text-transform:none}
-@media (max-width:600px){.conseiller-pill-secondary [data-help-pill-text]{font-size:19px}}
+.conseiller-pill-secondary [data-help-pill-text]{font-family:var(--font-display);color:#fff;font-size:27px;line-height:1;text-transform:none}
+@media (max-width:600px){.conseiller-pill-secondary{gap:11px;padding:5px 18px 5px 5px}.conseiller-pill-secondary__avatar{width:32px;height:32px}.conseiller-pill-secondary [data-help-pill-text]{font-size:21px}}
 
 /* ── Signature "— Robin" en Square Peg cursive ── */
 .conseiller-signature {
