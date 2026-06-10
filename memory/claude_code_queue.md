@@ -62,7 +62,63 @@ Le composant `.conseiller-sig` (pastille Robin + « Le conseil de Robin » + acc
 3. **Re-soumettre le sitemap** dans Google Search Console.
 4. **Brevo** : maj séquence d'accueil −10 % pour inclure les sources `surmesure` + `ficheproduit`.
 5. **Passe Yoast** (pas encore faite) : titre + meta description de la home — Claude Code peut préparer une proposition au prochain run.
-6. (optionnel) nettoyage CSS mort résiduel (`.bento-*`, `.process-*`).
+6. ~~(optionnel) nettoyage CSS mort résiduel~~ → ✅ **FAIT sur test** (commit `7534d2a`, voir tâche ci-dessous). À valider visuellement puis go prod.
+
+## ✅ [FAIT 2026-06-10 — sur test] Nettoyage CSS mort post-refonte home (commit `7534d2a`)
+**Résultat (branche `test-theme-sapi-maison`, poussé sur test — zéro régression).** Méthode : grep de chaque candidat dans tout le markup/JS (`*.php` + `*.js`, hors mockups, hors `style.css`).
+
+**Constat clé :** la **refonte (#1/#6/#7) avait déjà retiré la quasi-totalité des blocs morts** (confirmé par les commentaires de traçabilité dans `style.css`). La plupart des candidats (`bento-room-picker`, `process-flip/tile/ribbon`, `home-atelier--band`, `atelier-duo/story/photo/media/maps-link`, `map-card`, `bento-giftcard`, `giftcard-*`, `bento-actu`, `bento-conseil`, `home-divers`, `cta-button`) → **déjà absents** de `style.css` (ne restent que des commentaires).
+
+**🗑️ Retiré (0 occurrence markup + 0 JS) :**
+| Classe | Ce qui a été retiré |
+|--------|---------------------|
+| `.bento-cta` | règle mobile dédiée (768px) + 2 entrées dans des sélecteurs groupés |
+| `.bento-content` | 2 règles mobiles (768px, 375px) |
+| `.bento-title` | 2 règles mobiles (768px, 375px) |
+| `.bento-product-featured` | 1 règle mobile (768px) |
+→ −34 lignes, accolades équilibrées **3843/3843**.
+
+**✅ GARDÉ car référencé (règle « ≥1 usage → garder ») :**
+- `bento-bg`, `bento-card`, `bento-hero`, `bento-product` → **référencés dans `cinetique.js`** (le système bento legacy « CINÉTIQUE » est encore poké par le JS ; le retirer entièrement = toucher au JS, **hors périmètre** de cette tâche CSS-only).
+- `bento-bestseller-badge`, `hero-bento` → utilisés dans le markup PHP.
+- `bento-container` / `bento-bg-img` / `bento-storytelling` / `bento-process` / `bento-statement` / `bento-stats` / `bento-atelier` / `bento-product-small` → **gardés par prudence** (colonne vertébrale structurelle du système bento référencé + warning explicite du task).
+
+**🔎 Warning du task levé :** la page **« Star du moment »** (`page-la-star-du-moment.php`) utilise son **propre namespace `star-storytelling__*`** — elle ne réutilise **ni** `bento-storytelling`/`bento-process`, **ni** `storytelling-*`/`process-*`/`step-*`/`atelier-label`. Aucun risque de ce côté.
+
+**💡 Reste possible (tâche SÉPARÉE, non faite ici) :** retirer **tout** le système bento legacy d'un coup (CSS **+** le code mort correspondant dans `cinetique.js` : `querySelector('.bento-hero .bento-bg')`, `querySelectorAll('.bento-card')`…). Hors périmètre « CSS-only » de cette tâche.
+
+**👉 Robin :** vérifier sur test que rien n'a bougé (home desktop+mobile, page Star, une catégorie, une fiche produit) → puis « go » pour merge master + prod. Si tu veux que je retire aussi le bento legacy complet (CSS+JS), dis-le.
+
+<details><summary>Énoncé original</summary>
+
+**Date :** 2026-06-10 · **Priorité :** basse (maintenance) · **Branche :** `test-theme-sapi-maison` (auto-deploy test pour valider). Push auto. **Master = SEULEMENT après validation Robin sur test** (puis merge + prod manuel comme d'hab).
+**Objectif :** supprimer de `style.css` les règles devenues ORPHELINES après la refonte home (anciennes sections remplacées), SANS toucher à rien d'utilisé. Tâche cosmétique/perf : **zéro changement visuel**, en cas de doute on GARDE.
+
+**Méthode OBLIGATOIRE — vérif avant chaque suppression :**
+Pour CHAQUE classe candidate, grep le token de classe dans TOUT le repo hors `style.css` : `grep -rn "nom-de-classe" --include=*.php --include=*.js --include=*.html .` (inclure `woocommerce/`, `inc/`, `template-parts/`, `assets/`). 
+- 0 occurrence en markup/JS → règle CSS **morte → supprimer**.
+- ≥1 occurrence → **garder**, même si ça paraît lié à la home.
+
+**⚠️ Pièges de classes PARTAGÉES (à NE PAS supprimer, vérifier d'abord) :**
+- `page-la-star-du-moment.php` réutilise des classes `storytelling-*` / `process-*` / `atelier-label` / éventuellement `bento-storytelling` / `bento-process` / `step-*` → **probablement à GARDER**. Grep impératif.
+- `.bento-bestseller-badge` est RÉUTILISÉ (Star de « Créations du moment ») → GARDER.
+- `.hero-bento` est RÉUTILISÉ (section `.home-creations`) → GARDER.
+- `.section-header-kinetic` / `.section-title-kinetic` / `.section-num` / `.collection-card--surmesure` / `.creation-star*` / `.product-card-cinetique` / `.conseiller-sig*` / `.home-projet*` / `.home-atelier--lumiere` + ses enfants / `.loc-card*` / `.home-cadeau-actus` + enfants / `.newsletter--band` + enfants → tous UTILISÉS, GARDER.
+
+**Candidats probables (à confirmer par grep, supprimer SI 0 usage) :**
+`.bento-room-picker`, `.process-flip*`, `.process-tile*`, `.process-ribbon*`, `.home-atelier--band`, `.atelier-duo`, `.atelier-story*`, `.atelier-photo*`, `.atelier-media`, `.atelier-maps-link`, `.map-card*`, `.bento-giftcard`, `.giftcard-badge`, `.giftcard-info`, `.bento-actu*`, `.home-divers`, `.bento-cta`, `.cta-title`, `.cta-button`, `.bento-hero`, `.bento-content`, `.bento-title`, `.bento-category`, `.bento-product-featured*`, `.bento-conseil*`.
+(⚠️ pour `.bento-bg` / `.bento-bg-img` : grep d'abord, encore utilisés par d'autres cartes éventuelles ? sinon supprimer. `.bento-container` / `.bento-card` : grep — si plus aucun markup ne les utilise après refonte, supprimer, sinon garder.)
+
+**À faire :**
+1. Lister chaque candidat, grep, classer gardé/supprimé.
+2. Supprimer UNIQUEMENT les règles 100 % orphelines (bloc + media queries associées + commentaires obsolètes).
+3. Ne PAS toucher au JS, au PHP, ni aux classes utilisées.
+4. Vérifs : accolades CSS équilibrées ; **comparer visuellement sur test** la home (desktop + mobile), la page « Star du moment », une page catégorie et une fiche produit → strictement identiques.
+
+**Livrable / critères :** un **tableau gardé vs supprimé** (avec le nb d'occurrences trouvées) dans le résultat ; accolades équilibrées ; rendu inchangé partout ; aucune classe utilisée supprimée par erreur.
+**👉 Robin :** vérifier sur test que rien n'a bougé visuellement, puis « go » → merge master + déploiement prod manuel.
+
+</details>
 
 <details><summary>✅ [FAIT 2026-06-10 — EN PROD] GO-LIVE refonte home — énoncé original</summary>
 
