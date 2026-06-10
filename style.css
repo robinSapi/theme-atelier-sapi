@@ -23043,6 +23043,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
   content: '';
   position: absolute;
   inset: 0;
+  border: none; /* neutralise le pointillé hérité de .conseiller-card::before */
   background-image: repeating-linear-gradient(92deg, rgba(139, 115, 85, .05) 0, rgba(139, 115, 85, .05) 1px, transparent 1px, transparent 7px);
   pointer-events: none;
   z-index: 0;
