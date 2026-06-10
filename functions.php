@@ -3939,6 +3939,10 @@ function sapi_render_conseiller_modal() {
 
             <div class="recap-groups" data-recap-chips></div>
 
+            <p class="recap-hint">
+              <?php esc_html_e('Tu peux modifier n\'importe quelle réponse en cliquant sur une chip', 'theme-sapi-maison'); ?>
+            </p>
+
             <div class="actions-3">
               <button type="button" class="action-btn action-btn--primary" data-action="s3-view">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12h18M13 5l7 7-7 7"/></svg>
@@ -3954,12 +3958,6 @@ function sapi_render_conseiller_modal() {
             </div>
           </div>
         </div>
-
-        <footer class="modal__foot">
-          <span style="font-size:11.5px;color:var(--color-wood-mid);font-style:italic;text-align:center;">
-            <?php esc_html_e('Tu peux modifier n\'importe quelle réponse en cliquant sur une chip', 'theme-sapi-maison'); ?>
-          </span>
-        </footer>
       </section>
 
     </div><!-- /.conseiller-card--modal -->

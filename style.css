@@ -23660,6 +23660,16 @@ button.chip--project:focus-visible {
   max-width: 480px;
 }
 
+/* Phase 4 — écran récap projet (s3) : récap en haut, disclaimer + boutons en bas. */
+.conseiller-card--modal [data-screen="s3"] .recap-hint {
+  margin-top: auto;
+  margin-bottom: 4px;
+  font-size: 11.5px;
+  font-style: italic;
+  color: var(--color-wood-mid);
+  text-align: center;
+}
+
 /* Round 4 — Classes dynamiques générées par sapi-modal-conseiller.js
    (filters appliqués sous bulle Robin, dots animés "réflexion"). Non
    couvertes par le mockup-11 (cas dynamiques). Documentées comme
