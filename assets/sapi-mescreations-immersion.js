@@ -97,6 +97,24 @@
     }
     if (els.describe) els.describe.addEventListener('click', openModale);
 
+    /* Indices du bas cliquables : « Découvre ta sélection » → scrolle pour
+       révéler la sélection ; « Voir le catalogue complet » → scrolle au
+       catalogue. pointer-events activé seulement quand l'indice est visible
+       (cf. applyScroll). */
+    var hintRevealEl = section.querySelector('.mescreations-immersion__hint--reveal');
+    var hintCatalogueEl = section.querySelector('.mescreations-immersion__hint--catalogue');
+    function scrollToReveal() {
+      if (!track) return;
+      var trackTop = track.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({ top: Math.round(trackTop + window.innerHeight), behavior: reduceMotion ? 'auto' : 'smooth' });
+    }
+    function scrollToCatalogue() {
+      var cat = document.getElementById('mes-creations-catalogue');
+      if (cat) cat.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    }
+    if (hintRevealEl) hintRevealEl.addEventListener('click', scrollToReveal);
+    if (hintCatalogueEl) hintCatalogueEl.addEventListener('click', scrollToCatalogue);
+
     /* ── Slider : flèches de part et d'autre, 1 card par clic. Les flèches sont
        masquées si tout tient (pas de débordement) et désactivées aux extrémités. ── */
     var sliderEl = els.slider, prevEl = els.prev, nextEl = els.next;
@@ -166,6 +184,10 @@
         var p = clamp((-rect.top) / window.innerHeight, 0, 1);
         section.style.setProperty('--reveal', p.toFixed(4));
         if (els.selection) els.selection.style.pointerEvents = p > 0.45 ? 'auto' : 'none';
+        // Indices cliquables seulement quand ils sont visibles (sinon ils
+        // capteraient les clics par-dessus l'autre).
+        if (hintRevealEl) hintRevealEl.style.pointerEvents = p < 0.4 ? 'auto' : 'none';
+        if (hintCatalogueEl) hintCatalogueEl.style.pointerEvents = p >= 0.85 ? 'auto' : 'none';
         // Recalage des flèches quand la sélection se dévoile (le layout est sûr
         // à ce moment ; évite une mesure de débordement faussée au tout load).
         if (p > 0.05) updateArrows();

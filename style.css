@@ -24798,7 +24798,10 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   text-transform: uppercase;
   text-shadow: 0 1px 8px rgba(0,0,0,.5);
   white-space: nowrap;
+  cursor: pointer;
 }
+.mescreations-immersion__hint-label { transition: opacity .2s ease; }
+.mescreations-immersion__hint:hover .mescreations-immersion__hint-label { opacity: .7; }
 /* Indice 1 : visible au départ, monte et s'efface à mesure qu'on révèle. */
 .mescreations-immersion__hint--reveal {
   opacity: calc(1 - var(--reveal) * 2.4);
@@ -24956,4 +24959,21 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   .mescreations-immersion__pcard--sur { flex-basis: 82%; }
   .mescreations-immersion__selection { bottom: 8vh; }
   .mescreations-immersion__inner { gap: 14px; }
+}
+
+/* Écrans peu hauts (large + bas) : on compacte pour que texte + cards + hint
+   tiennent dans les 100vh sans se chevaucher (l'info des cards est en px fixe,
+   donc proportionnellement haute quand le viewport est court). */
+@media (max-height: 840px) {
+  .mescreations-immersion__phrase { font-size: clamp(1.4rem, 2.6vw, 2.05rem); }
+  .mescreations-immersion__inner { gap: 12px; }
+  .mescreations-immersion__describe { margin-top: 2px; padding: 9px 20px; font-size: 13px; }
+  .mescreations-immersion__slider .product-card-cinetique .product-media { height: 17vh; }
+  .mescreations-immersion__selection { bottom: 7vh; }
+}
+@media (max-height: 700px) {
+  .mescreations-immersion__phrase { font-size: clamp(1.2rem, 2.3vw, 1.75rem); }
+  .mescreations-immersion__slider .product-card-cinetique .product-media { height: 13vh; }
+  .mescreations-immersion__selection { bottom: 6vh; }
+  .mescreations-immersion__describe { font-size: 12.5px; padding: 8px 18px; }
 }
