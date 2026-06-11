@@ -249,8 +249,11 @@ if ($imm_piece) {
     </div><!-- /.mescreations-immersion__slider-wrap -->
   </div>
 
-  <div class="mescreations-immersion__scrollhint" data-immersion-scrollhint aria-hidden="true">
-    <span><?php esc_html_e('Le catalogue complet', 'theme-sapi-maison'); ?></span>
+  <div class="mescreations-immersion__scrollhint" data-immersion-scrollhint
+       data-hint-reveal="<?php esc_attr_e('Découvre ta sélection', 'theme-sapi-maison'); ?>"
+       data-hint-catalogue="<?php esc_attr_e('Le catalogue complet', 'theme-sapi-maison'); ?>"
+       aria-hidden="true">
+    <span data-immersion-hint-text><?php esc_html_e('Découvre ta sélection', 'theme-sapi-maison'); ?></span>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
   </div>
 </section>

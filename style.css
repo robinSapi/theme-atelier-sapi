@@ -24611,7 +24611,9 @@ body.mescreations-immersion-on .site-header.is-scrolled {
 body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90px; }
 
 /* Track de scroll-pinning : full-bleed (sort de la colonne .site-content), sa
-   hauteur = durée de l'animation de révélation (220vh → ~120vh de scroll). */
+   hauteur = durée de la zone épinglée. 250vh → 150vh de scroll épinglé : la
+   révélation se joue sur les ~100 premiers vh, puis PAUSE courte (~50vh, état
+   « cards révélées » figé) avant de relâcher vers le catalogue. */
 .mescreations-immersion-track {
   position: relative;
   width: 100vw;
@@ -24619,7 +24621,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   right: 50%;
   margin-left: -50vw;
   margin-right: -50vw;
-  height: 200vh;
+  height: 250vh;
 }
 /* Le hero = scène épinglée (sticky) de 100vh. --reveal (0→1) est piloté par le
    scroll en JS et anime flou photo + remontée texte + apparition des cards. */
