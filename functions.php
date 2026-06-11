@@ -2335,15 +2335,11 @@ function sapi_ajax_buy_now() {
 }
 
 /**
- * ═══════════════════════════════════════════════════════════════════
- * GUIDE LUMINAIRE V2 — AJAX + Claude AI Integration
- * Filters products by category/format/ampoule, then generates
- * a personalised AI recommendation via the Claude API.
- * ═══════════════════════════════════════════════════════════════════
+ * Limiteur de débit IA (par IP) — partagé par les endpoints Conseiller (chat,
+ * freetext, refine, contact…). NB : le quiz V1 `sapi_ajax_guide_results` +
+ * `sapi_guide_build_system_prompt` ont été retirés (Tâche 7), remplacés par la
+ * modale V3 ; ce limiteur reste utilisé par les autres endpoints.
  */
-add_action('wp_ajax_sapi_guide_results', 'sapi_ajax_guide_results');
-add_action('wp_ajax_nopriv_sapi_guide_results', 'sapi_ajax_guide_results');
-
 function sapi_guide_check_rate_limit() {
   $ip  = md5(isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : 'unknown');
   $key = 'sapi_guide_rl_' . $ip;
@@ -2353,135 +2349,6 @@ function sapi_guide_check_rate_limit() {
   }
   set_transient($key, $hits + 1, HOUR_IN_SECONDS);
   return true;
-}
-
-function sapi_ajax_guide_results() {
-  // 1. Nonce check
-  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
-    wp_send_json_error(['message' => 'Nonce invalide']);
-    return;
-  }
-
-  // 1b. Rate limiting (10 appels IA/heure par IP) — checked later, products still returned
-  $ai_allowed = sapi_guide_check_rate_limit();
-
-  // 1c. Honeypot check
-  if (!empty($_POST['guide_website'])) {
-    $bot_ip  = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : 'inconnue';
-    $bot_val = sanitize_text_field(wp_unslash($_POST['guide_website']));
-    wp_mail(
-      'contact@atelier-sapi.fr',
-      '[Sécurité] Bot détecté sur le quiz luminaire',
-      "Un robot a rempli le champ honeypot du questionnaire guide luminaire.\n\n" .
-      "IP : " . $bot_ip . "\n" .
-      "Valeur du champ : " . $bot_val . "\n" .
-      "Date : " . current_time('d/m/Y H:i:s') . "\n\n" .
-      "Le bot a été bloqué automatiquement."
-    );
-    wp_send_json_error(['message' => 'Erreur de validation']);
-    return;
-  }
-
-  // 2. Parse & sanitize answers
-  $raw_answers = isset($_POST['answers']) ? sanitize_text_field(wp_unslash($_POST['answers'])) : '{}';
-  $answers = json_decode($raw_answers, true);
-
-  if (!is_array($answers) || empty($answers)) {
-    wp_send_json_error(['message' => 'Données invalides']);
-    return;
-  }
-
-  $clean = [];
-  foreach ($answers as $key => $val) {
-    $clean[sanitize_key($key)] = sanitize_text_field($val);
-  }
-
-  // Normalise taille_escalier → taille pour le filtrage produits
-  // standard → petite (suspensions compactes), ouvert → grande (grandes suspensions verticales)
-  if (!empty($clean['taille_escalier']) && empty($clean['taille'])) {
-    $clean['taille'] = ($clean['taille_escalier'] === 'ouvert') ? 'grande' : 'petite';
-  }
-
-  // "Je ne sais pas" → pas de filtre taille (montrer tous les produits quelle que soit leur taille)
-  if (isset($clean['taille']) && $clean['taille'] === 'ne-sais-pas') {
-    unset($clean['taille']);
-  }
-
-  // 3. Determine product categories
-  $categories = sapi_guide_get_categories($clean);
-
-  // 4. Query main products
-  $query_result = sapi_guide_query_products($clean, $categories);
-  $products_data  = $query_result['products'];
-  $fallback_notes = $query_result['fallback_notes'];
-
-  // 4b. Build filter context for refinement calls
-  $filter_context = sapi_guide_build_filter_context($clean, $categories, $fallback_notes);
-
-  // 5. Show sur mesure card? (grappe, grande pièce, haute hauteur)
-  $show_sur_mesure = false;
-  $eclairage_answer = isset($clean['eclairage']) ? $clean['eclairage'] : '';
-  $taille_answer    = isset($clean['taille'])    ? $clean['taille']    : '';
-  $hauteur_answer   = isset($clean['hauteur'])   ? $clean['hauteur']   : '';
-
-  $sur_mesure_reason = '';
-  if ($eclairage_answer === 'grappe') {
-    $show_sur_mesure = true;
-    $sur_mesure_reason = 'grappe';
-  } elseif ($taille_answer === 'grande') {
-    $show_sur_mesure = true;
-    $sur_mesure_reason = 'grande';
-  } elseif (in_array($hauteur_answer, ['haute', 'confortable'], true)) {
-    $show_sur_mesure = true;
-    $sur_mesure_reason = 'hauteur';
-  }
-
-  // 6. Pick products: 3 if sur mesure card shown (4th slot = carte sur mesure), else 4
-  // Grappe: diversify by format (one of each)
-  $diversify_format = ($eclairage_answer === 'grappe');
-  $display_products = sapi_guide_pick_four($products_data, $show_sur_mesure ? 3 : 4, $diversify_format);
-
-  // 6. Call Claude API for AI recommendation (skip if rate limited)
-  $ai_response = null;
-  if (!empty($display_products) && $ai_allowed) {
-    $system_prompt = sapi_guide_build_system_prompt($display_products, $clean, $fallback_notes, $show_sur_mesure);
-    $ai_response = sapi_guide_call_claude($system_prompt);
-  }
-
-  // 6. Build response
-  $conseils_text = null;
-  $selection_text = null;
-  $sur_mesure_text = null;
-
-  if ($ai_response) {
-    if (isset($ai_response['conseils_text'])) {
-      $conseils_text = $ai_response['conseils_text'];
-    }
-    if (isset($ai_response['selection_text'])) {
-      $selection_text = $ai_response['selection_text'];
-    }
-    if (isset($ai_response['sur_mesure_text'])) {
-      $sur_mesure_text = $ai_response['sur_mesure_text'];
-    }
-  }
-
-  if (empty($display_products)) {
-    wp_send_json_error(['message' => 'Aucun produit trouvé']);
-    return;
-  }
-
-  $session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : wp_generate_uuid4();
-
-  wp_send_json_success([
-    'conseils_text'     => $conseils_text,
-    'selection_text'    => $selection_text,
-    'products'          => $display_products,
-    'show_sur_mesure'   => $show_sur_mesure,
-    'sur_mesure_reason' => $sur_mesure_reason,
-    'sur_mesure_text'   => $sur_mesure_text,
-    'filter_context'    => $filter_context,
-    'session_id'        => $session_id,
-  ]);
 }
 
 /**
@@ -6086,73 +5953,6 @@ function sapi_guide_pick_four(array $products, $count = 4, $diversify_format = f
 /**
  * Build the system prompt for Claude with filtered products and client answers
  */
-function sapi_guide_build_system_prompt(array $products_data, array $answers, array $fallback_notes = [], $show_sur_mesure = false) {
-  $theme_dir = get_stylesheet_directory();
-
-  // Load rules and tone from text files
-  $regles = file_get_contents($theme_dir . '/assets/guide-prompt-regles.txt');
-  $ton    = file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt');
-
-  $prompt = $regles . "\n\n" . $ton . "\n\n";
-
-  // Inject fallback warnings if filters were relaxed
-  if (!empty($fallback_notes)) {
-    $prompt .= implode("\n", $fallback_notes) . "\n\n";
-  }
-
-  // Catalogue filtré
-  $prompt .= "CATALOGUE FILTRÉ (correspond aux besoins du client) :\n";
-  foreach ($products_data as $p) {
-    $prompt .= "- " . $p['title'] . " | Catégorie : " . implode(', ', $p['categories']) . " | Format : " . $p['format'] . " | Ampoule : " . $p['type_ampoule'];
-    if ($p['variation_label']) {
-      $prompt .= " | Essence recommandée : " . $p['variation_label'];
-    }
-    if (!empty($p['size_label'])) {
-      $prompt .= " | Taille recommandée : " . $p['size_label'];
-    }
-    $prompt .= " | Ventes : " . $p['total_sales'] . " | ID : " . $p['id'] . "\n";
-  }
-
-  // Réponses du client
-  $prompt .= "\nRÉPONSES DU CLIENT :\n";
-  $labels = [
-    'piece'     => 'Pièce',
-    'taille'    => 'Taille de la pièce',
-    'eclairage' => 'Type d\'éclairage',
-    'sortie'    => 'Sortie électrique',
-    'hauteur'   => 'Hauteur sous-plafond',
-    'table'     => 'Au-dessus d\'une table',
-    'style'     => 'Style intérieur',
-  ];
-  foreach ($labels as $key => $label) {
-    $val = isset($answers[$key]) ? $answers[$key] : 'Non demandé';
-    $prompt .= "- " . $label . " : " . $val . "\n";
-  }
-
-  if ($show_sur_mesure) {
-    $prompt .= "\nINFO CONTEXTE : Une carte \"Création sur mesure\" est affichée à côté des produits. NE mentionne PAS le sur mesure dans le champ \"recommendation\" — utilise le champ \"sur_mesure_text\" à la place.\n";
-    $prompt .= "Dans \"sur_mesure_text\", écris un texte court (30 mots max) qui DOIT commencer par \"Par exemple\" ou \"Et pourquoi pas\". Tu proposes une IDÉE ouverte, pas une solution. Tu NE décides PAS à la place du client. Exemple de ton : \"Par exemple, Robin pourrait imaginer…\" ou \"Et pourquoi pas quelque chose de…\". Reste rêveur et suggestif. L'objectif : ouvrir une porte, donner envie d'en discuter avec Robin.\n";
-  }
-
-  // Format de réponse JSON
-  $prompt .= "\nTEXTES À GÉNÉRER :\n";
-  $prompt .= "1. \"conseils_text\" (~150-200 mots) : Conseils CONCRETS, TECHNIQUES et FACTUELS adaptés au projet du client. Type d'éclairage selon la pièce, hauteur de suspension idéale, nombre de points lumineux, puissance recommandée, température de couleur, type d'ampoule, etc. NE mentionne AUCUN nom de modèle — le client verra sa sélection personnalisée sur une autre page. Reste purement sur le conseil technique et l'expertise artisanale.\n";
-  $prompt .= "2. \"selection_text\" (~60-80 mots) : Texte pour la page Nos Créations. Justifie le choix de ces modèles précis pour le projet du client. Explique pourquoi chaque type de luminaire recommandé correspond à sa situation (pièce, hauteur, style…). Plus technique et factuel que le texte conseils.\n";
-  if ($show_sur_mesure) {
-    $prompt .= "3. \"sur_mesure_text\" (30 mots max) : DOIT commencer par \"Par exemple\" ou \"Et pourquoi pas\". Propose une IDÉE ouverte de création sur mesure, pas une solution. Reste rêveur et suggestif.\n";
-  }
-  $prompt .= "\nFORMAT DE RÉPONSE (JSON strict, sans commentaires, sans markdown) :\n";
-  $prompt .= "{\n";
-  $prompt .= "  \"conseils_text\": \"...\",\n";
-  $prompt .= "  \"selection_text\": \"...\"";
-  if ($show_sur_mesure) {
-    $prompt .= ",\n  \"sur_mesure_text\": \"...\"";
-  }
-  $prompt .= "\n}\n";
-
-  return $prompt;
-}
-
 /**
  * Call Claude API and return parsed response
  */
