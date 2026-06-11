@@ -479,7 +479,6 @@ function sapi_rules_admin_render() {
               });
               h+='</div>';
             }else{h+='<p><em>Aucun produit pour cette situation.</em></p>';}
-            if(d.debug){h+='<details style="margin-top:12px"><summary style="cursor:pointer;color:#646970">Diagnostic</summary><pre style="font-size:11px;background:#f6f7f7;padding:10px;overflow:auto;max-height:300px">'+esc(JSON.stringify(d.debug,null,2))+'</pre></details>';}
             out.innerHTML=h;
           })
           .catch(function(){out.innerHTML='<span style="color:#b32d2e">Erreur réseau.</span>';});
@@ -629,17 +628,6 @@ function sapi_rules_ajax_preview() {
       ];
     }
   }
-
-  // DEBUG temporaire (Tâche 5) — à retirer une fois l'aperçu validé.
-  $raw_opt = get_option('sapi_conseiller_rules', '__NONE__');
-  $out['debug'] = [
-    'option_exists'         => ($raw_opt !== '__NONE__'),
-    'option_cats_by_sortie' => (is_array($raw_opt) && isset($raw_opt['cats_by_sortie'])) ? $raw_opt['cats_by_sortie'] : 'AUCUNE/ABSENTE',
-    'default_cats_by_sortie'=> sapi_conseiller_default_rules()['cats_by_sortie'],
-    'raw_posted_cats'       => isset($posted_rules['cats_by_sortie']) ? $posted_rules['cats_by_sortie'] : 'MISSING',
-    'draft_cats_by_sortie'  => $draft['cats_by_sortie'],
-    'answers'               => $answers,
-  ];
 
   remove_filter('sapi_conseiller_rules', $override, 99);
   wp_send_json_success($out);
