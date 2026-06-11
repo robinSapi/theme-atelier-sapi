@@ -249,12 +249,17 @@ if ($imm_piece) {
     </div><!-- /.mescreations-immersion__slider-wrap -->
   </div>
 
-  <div class="mescreations-immersion__scrollhint" data-immersion-scrollhint
-       data-hint-reveal="<?php esc_attr_e('Découvre ta sélection', 'theme-sapi-maison'); ?>"
-       data-hint-catalogue="<?php esc_attr_e('Le catalogue complet', 'theme-sapi-maison'); ?>"
-       aria-hidden="true">
-    <span data-immersion-hint-text><?php esc_html_e('Découvre ta sélection', 'theme-sapi-maison'); ?></span>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+  <div class="mescreations-immersion__scrollhint" data-immersion-scrollhint aria-hidden="true">
+    <!-- Indice 1 : incite à scroller pour révéler — monte et disparaît au scroll. -->
+    <span class="mescreations-immersion__hint mescreations-immersion__hint--reveal">
+      <span class="mescreations-immersion__hint-label"><?php esc_html_e('Découvre ta sélection', 'theme-sapi-maison'); ?></span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </span>
+    <!-- Indice 2 : apparaît une fois la sélection révélée (pause) → catalogue. -->
+    <span class="mescreations-immersion__hint mescreations-immersion__hint--catalogue">
+      <span class="mescreations-immersion__hint-label"><?php esc_html_e('Voir le catalogue complet', 'theme-sapi-maison'); ?></span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </span>
   </div>
 </section>
 </div><!-- /.mescreations-immersion-track -->

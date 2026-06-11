@@ -33,11 +33,8 @@
       slider:        section.querySelector('[data-immersion-slider]'),
       prev:          section.querySelector('[data-immersion-prev]'),
       next:          section.querySelector('[data-immersion-next]'),
-      scrollhint:    section.querySelector('[data-immersion-scrollhint]'),
-      hintText:      section.querySelector('[data-immersion-hint-text]')
+      scrollhint:    section.querySelector('[data-immersion-scrollhint]')
     };
-    var hintReveal = els.scrollhint ? (els.scrollhint.getAttribute('data-hint-reveal') || '') : '';
-    var hintCatalogue = els.scrollhint ? (els.scrollhint.getAttribute('data-hint-catalogue') || '') : '';
     if (els.phrase) els.phraseText = els.phrase.getAttribute('data-immersion-phrase-text') || '';
 
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -169,12 +166,6 @@
         var p = clamp((-rect.top) / window.innerHeight, 0, 1);
         section.style.setProperty('--reveal', p.toFixed(4));
         if (els.selection) els.selection.style.pointerEvents = p > 0.45 ? 'auto' : 'none';
-        // Hint qui change : « Découvre ta sélection » pendant la révélation →
-        // « Le catalogue complet » une fois révélé (pendant la pause).
-        if (els.hintText) {
-          var wanted = p >= 0.95 ? hintCatalogue : hintReveal;
-          if (els.hintText.textContent !== wanted) els.hintText.textContent = wanted;
-        }
         // Recalage des flèches quand la sélection se dévoile (le layout est sûr
         // à ce moment ; évite une mesure de débordement faussée au tout load).
         if (p > 0.05) updateArrows();

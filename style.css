@@ -24767,28 +24767,49 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   flex-shrink: 0;
 }
 
-/* Scroll hint — toujours visible, indique la suite vers le catalogue */
+/* Scroll hint = 2 indices pilotés par --reveal. Le conteneur est révélé par la
+   séquence de chargement (.is-in) ; à l'intérieur, l'indice « Découvre ta
+   sélection » monte+disparaît au scroll, puis « Voir le catalogue complet »
+   apparaît une fois la sélection révélée (pause). */
 .mescreations-immersion__scrollhint {
   position: absolute;
   bottom: 24px;
-  left: 50%;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  height: 42px;
   z-index: 3;
-  color: #fff;
   opacity: 0;
   transition: opacity .6s ease .3s;
-  font-size: 11px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
+  pointer-events: none;
+}
+.mescreations-immersion__scrollhint.is-in { opacity: 1; }
+.mescreations-immersion__hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 5px;
+  color: #fff;
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
   text-shadow: 0 1px 8px rgba(0,0,0,.5);
+  white-space: nowrap;
 }
-.mescreations-immersion__scrollhint.is-in { opacity: .85; }
-.mescreations-immersion__scrollhint svg {
+/* Indice 1 : visible au départ, monte et s'efface à mesure qu'on révèle. */
+.mescreations-immersion__hint--reveal {
+  opacity: calc(1 - var(--reveal) * 2.4);
+  -webkit-transform: translateY(calc(var(--reveal) * -38px));
+  transform: translateY(calc(var(--reveal) * -38px));
+}
+/* Indice 2 : apparaît seulement une fois la sélection révélée (≥ 0.85). */
+.mescreations-immersion__hint--catalogue {
+  opacity: clamp(0, calc((var(--reveal) - 0.85) / 0.15), 1);
+}
+.mescreations-immersion__hint svg {
   width: 18px;
   height: 18px;
   -webkit-animation: immersionBob 1.6s ease-in-out infinite;
