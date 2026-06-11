@@ -75,7 +75,6 @@
     eclairage: 'Éclairage',
     sortie: 'Sortie',
     hauteur: 'Hauteur',
-    table: 'Au-dessus',
     style: 'Style',
   };
 
@@ -1163,7 +1162,7 @@
   // Esthétique) avec chips icône + label uppercase + valeur.
   var S3_GROUPS = [
     { title: 'Espace',       steps: ['piece', 'taille', 'taille_escalier'] },
-    { title: 'Installation', steps: ['sortie', 'eclairage', 'hauteur', 'table'] },
+    { title: 'Installation', steps: ['sortie', 'eclairage', 'hauteur'] },
     { title: 'Esthétique',   steps: ['style'] }
   ];
   var S3_KEY_LABELS = {
@@ -1173,7 +1172,6 @@
     eclairage: 'Éclairage',
     sortie: 'Sortie électrique',
     hauteur: 'Hauteur sous plafond',
-    table: 'Au-dessus',
     style: 'Style'
   };
 
@@ -1463,7 +1461,7 @@
      ───────────────────────────────────────────── */
   // Construit le récap projet (chips ordonnées séparées par " · ").
   function buildContactRecap(answers, labels) {
-    var orderedKeys = ['piece', 'taille', 'taille_escalier', 'eclairage', 'sortie', 'hauteur', 'table', 'style'];
+    var orderedKeys = ['piece', 'taille', 'taille_escalier', 'eclairage', 'sortie', 'hauteur', 'style'];
     var lines = [];
     orderedKeys.forEach(function (k) {
       var slug = answers && answers[k];

@@ -4107,7 +4107,7 @@ function sapi_megafilter_parse_ignored_answers($raw) {
   if (!is_string($raw) || $raw === '') return [];
   $decoded = json_decode($raw, true);
   if (!is_array($decoded)) return [];
-  $valid_keys = ['piece','taille','taille_escalier','eclairage','sortie','hauteur','table','style'];
+  $valid_keys = ['piece','taille','taille_escalier','eclairage','sortie','hauteur','style']; // « table » retiré (Tâche 2)
   $out = [];
   foreach ($decoded as $v) {
     if (is_string($v) && in_array($v, $valid_keys, true)) $out[] = $v;
@@ -5513,7 +5513,6 @@ function sapi_guide_build_filter_context(array $answers, array $categories, arra
   $hauteur   = isset($answers['hauteur'])   ? $answers['hauteur']   : '';
   $style     = isset($answers['style'])     ? $answers['style']     : '';
   $eclairage = isset($answers['eclairage']) ? $answers['eclairage'] : '';
-  $table     = isset($answers['table'])     ? $answers['table']     : '';
 
   $parts[] = 'Catégories filtrées : ' . implode(', ', $categories);
 
@@ -5536,9 +5535,6 @@ function sapi_guide_build_filter_context(array $answers, array $categories, arra
     $parts[] = 'Filtre ampoule : ' . implode(' ou ', $ampoule_filter) . ' (pièce : ' . $piece . ').';
   }
 
-  if ($sortie === 'plafond' && $hauteur === 'standard' && $table === 'non') {
-    $parts[] = 'Format vertical exclu (plafond standard sans table en dessous).';
-  }
 
   if ($style === 'moderne') {
     $parts[] = 'Essence conseillée : Peuplier (style moderne).';

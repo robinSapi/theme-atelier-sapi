@@ -206,7 +206,7 @@
   // Ordre de retrait pour l'élargissement progressif (du moins critique au plus).
   // 'sortie' n'est JAMAIS dans cette liste — c'est ce qui détermine le type de
   // produit (applique vs suspension vs lampadaire), intouchable.
-  var WIDENING_ORDER = ['style', 'table', 'hauteur', 'eclairage', 'taille', 'piece'];
+  var WIDENING_ORDER = ['style', 'hauteur', 'eclairage', 'taille', 'piece'];
 
   // Élargissement progressif : si le filtre direct ramène 0, retire les réponses
   // dans WIDENING_ORDER (cumul à partir du début), jusqu'à trouver ≥1 produit ou
