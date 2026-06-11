@@ -162,6 +162,48 @@
     setTimeout(updateArrows, 600);  // recalage après mise en page / chargement images
     window.addEventListener('resize', updateArrows, { passive: true });
 
+    /* ── Moment 2 (refonte filtrage) : à la FERMETURE de la modale Conseiller,
+       window.sapiProject émet UNE notification (resume) avec les réponses
+       finales. On re-filtre + classe CÔTÉ SERVEUR (même moteur que le
+       chargement) et on remplace les cards du slider. On ignore « pièce seule »
+       (état initial / modale sans affinage) et les répétitions identiques. ── */
+    var lastAnswersSig = null;
+    function refreshSelection(answers) {
+      if (!sliderEl || !config.ajaxUrl) return;
+      var fd = new FormData();
+      fd.append('action', 'sapi_immersion_selection');
+      fd.append('nonce', config.nonce || '');
+      fd.append('answers', JSON.stringify(answers || {}));
+      fetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (json) {
+          if (!json || !json.success || !json.data || typeof json.data.html !== 'string') return;
+          var sur = sliderEl.querySelector('.mescreations-immersion__pcard--sur');
+          [].slice.call(sliderEl.querySelectorAll('.product-card-cinetique')).forEach(function (c) {
+            if (c.parentNode) c.parentNode.removeChild(c);
+          });
+          var tmp = document.createElement('div');
+          tmp.innerHTML = json.data.html; // product-name-formatter (MutationObserver) reformate les noms
+          [].slice.call(tmp.querySelectorAll('.product-card-cinetique')).forEach(function (c) {
+            sliderEl.insertBefore(c, sur || null);
+          });
+          sliderEl.scrollLeft = 0;
+          updateArrows();
+        })
+        .catch(function () {});
+    }
+    if (window.sapiProject && typeof window.sapiProject.subscribe === 'function') {
+      window.sapiProject.subscribe(function (snap) {
+        var answers = (snap && snap.answers) ? snap.answers : {};
+        var refined = Object.keys(answers).filter(function (k) { return k !== 'piece' && answers[k]; });
+        if (!refined.length) return; // que la pièce → pas d'affinage à re-filtrer
+        var sig = JSON.stringify(answers);
+        if (sig === lastAnswersSig) return;
+        lastAnswersSig = sig;
+        refreshSelection(answers);
+      });
+    }
+
     /* ── Header + bandeau : MÊME mécanisme que la home (front-page.php). Le
        bandeau global est déplacé juste après le track et reçoit
        .home-repositioned-bar (sticky sous le header). ── */

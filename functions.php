@@ -5834,6 +5834,113 @@ function sapi_conseiller_rank_products(array $products, array $answers, $rules =
 }
 
 /**
+ * Rendu d'UNE card produit du slider immersion (.product-card-cinetique, design
+ * catalogue + photo d'ambiance adaptée à la pièce). Utilisé par le template
+ * (archive-product.php) ET l'endpoint AJAX du « moment 2 » (fermeture modale).
+ * Échoue le HTML.
+ *
+ * @param array  $prod  Un produit enrichi (sortie de sapi_guide_collect_results)
+ * @param string $piece Slug pièce (pour la photo d'ambiance taguée)
+ */
+function sapi_immersion_render_product_card(array $prod, $piece = '') {
+  if (empty($prod['id'])) return;
+  $cat_label = '';
+  if (!empty($prod['category_label'])) {
+    $cat_label = str_replace(
+      ['Suspensions', 'Appliques', 'Lampadaires', 'Lampes à poser'],
+      ['Suspension',  'Applique',  'Lampadaire',  'Lampe à poser'],
+      $prod['category_label']
+    );
+  }
+  $has_var   = !empty($prod['variations']);
+  $hover     = !empty($prod['hover_image']);
+  $cats_attr = !empty($prod['categories']) ? implode(' ', $prod['categories']) : '';
+  $amb_ids = function_exists('sapi_get_product_photo_ids_with_fallback')
+    ? sapi_get_product_photo_ids_with_fallback($prod['id'], 'ambiance', 1, $piece) : [];
+  $amb_id = !empty($amb_ids) ? (int) $amb_ids[0] : 0;
+  ?>
+  <div class="product-card-cinetique" data-product-id="<?php echo esc_attr($prod['id']); ?>" data-categories="<?php echo esc_attr($cats_attr); ?>">
+    <a href="<?php echo esc_url($prod['permalink']); ?>" class="product-card-link">
+      <div class="product-media<?php echo $hover ? ' has-hover-image' : ''; ?>">
+        <?php if ($amb_id) : ?>
+          <span class="product-image-main"><?php echo wp_get_attachment_image($amb_id, 'large', false, ['alt' => get_the_title($prod['id']), 'loading' => 'lazy']); ?></span>
+        <?php elseif (!empty($prod['image'])) : ?>
+          <span class="product-image-main"><img src="<?php echo esc_url($prod['image']); ?>" alt="<?php echo esc_attr($prod['title']); ?>" loading="lazy"></span>
+        <?php endif; ?>
+        <?php if ($hover) : ?>
+          <span class="product-image-hover"><img src="<?php echo esc_url($prod['hover_image']); ?>" alt="" loading="lazy"></span>
+        <?php endif; ?>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name"><?php echo esc_html($prod['title']); ?></h3>
+        <?php if ($cat_label) : ?><p class="product-category"><?php echo esc_html($cat_label); ?></p><?php endif; ?>
+        <div class="product-price">
+          <?php if ($has_var) : ?><span class="price-from"><?php esc_html_e('À partir de', 'theme-sapi-maison'); ?></span><?php endif; ?>
+          <span class="price-value"><?php echo $has_var ? wp_kses_post(wc_price($prod['price_min_raw'])) : wp_kses_post($prod['price']); ?></span>
+        </div>
+      </div>
+      <div class="product-actions">
+        <span class="btn-view"><?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> &#8702;</span>
+      </div>
+    </a>
+  </div>
+  <?php
+}
+
+/**
+ * Endpoint « moment 2 » (refonte filtrage) — appelé à la fermeture de la modale
+ * Conseiller sur /mes-creations/ (terminée OU abandonnée). Re-filtre + classe la
+ * sélection avec les réponses données (le MÊME moteur serveur que le chargement)
+ * et renvoie les cards rendues. Le JS ne fait que remplacer le slider.
+ */
+add_action('wp_ajax_sapi_immersion_selection', 'sapi_ajax_immersion_selection');
+add_action('wp_ajax_nopriv_sapi_immersion_selection', 'sapi_ajax_immersion_selection');
+function sapi_ajax_immersion_selection() {
+  $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
+  if (!wp_verify_nonce($nonce, 'sapi-megafilter')) {
+    wp_send_json_error(['message' => 'nonce'], 403);
+  }
+  $raw = isset($_POST['answers']) ? json_decode(wp_unslash($_POST['answers']), true) : [];
+  if (!is_array($raw)) $raw = [];
+
+  // Ne garder que les clés du questionnaire, valeurs en slug.
+  $whitelist = function_exists('sapi_megafilter_filters_whitelist') ? sapi_megafilter_filters_whitelist() : [];
+  $allowed = array_merge(array_keys($whitelist), ['taille_escalier']);
+  $answers = [];
+  foreach ($raw as $k => $v) {
+    $key = sanitize_key($k);
+    if (in_array($key, $allowed, true) && (is_string($v) || is_numeric($v))) {
+      $answers[$key] = sanitize_key($v);
+    }
+  }
+
+  $piece = isset($answers['piece']) ? $answers['piece'] : '';
+  // Escalier → taille (via la config unique).
+  global $sapi_filter_rules;
+  if ($piece === 'escalier' && !empty($answers['taille_escalier'])) {
+    $map = isset($sapi_filter_rules['escalier_map']) ? $sapi_filter_rules['escalier_map'] : ['standard' => 'petite', 'ouvert' => 'grande'];
+    $answers['taille'] = isset($map[$answers['taille_escalier']]) ? $map[$answers['taille_escalier']] : 'petite';
+  }
+
+  $cats = function_exists('sapi_guide_get_categories') ? sapi_guide_get_categories($answers) : [];
+  $res  = ($cats && function_exists('sapi_guide_query_products')) ? sapi_guide_query_products($answers, $cats) : ['products' => []];
+  $products = isset($res['products']) ? $res['products'] : [];
+  if (function_exists('sapi_conseiller_rank_products')) {
+    $products = sapi_conseiller_rank_products($products, $answers);
+  }
+
+  ob_start();
+  foreach ($products as $prod) {
+    if (function_exists('sapi_immersion_render_product_card')) {
+      sapi_immersion_render_product_card($prod, $piece);
+    }
+  }
+  $html = ob_get_clean();
+
+  wp_send_json_success(['html' => $html, 'count' => count($products)]);
+}
+
+/**
  * Find a product in the data array by ID
  */
 function sapi_guide_find_product_by_id(array $products, $id) {

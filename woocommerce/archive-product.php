@@ -188,53 +188,13 @@ if ($imm_piece) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
       <div class="mescreations-immersion__slider" data-immersion-slider>
-      <?php foreach ($imm_products as $imm_prod) :
-        // MÊME markup que les cards du catalogue (.product-card-cinetique) pour
-        // un design identique. product-name-formatter.js scinde le .product-name.
-        $imm_cat_label = '';
-        if (!empty($imm_prod['category_label'])) {
-          $imm_cat_label = str_replace(
-            ['Suspensions', 'Appliques', 'Lampadaires', 'Lampes à poser'],
-            ['Suspension',  'Applique',  'Lampadaire',  'Lampe à poser'],
-            $imm_prod['category_label']
-          );
-        }
-        $imm_has_var   = !empty($imm_prod['variations']);
-        $imm_hover     = !empty($imm_prod['hover_image']);
-        $imm_cats_attr = !empty($imm_prod['categories']) ? implode(' ', $imm_prod['categories']) : '';
-        // Photo d'ambiance ADAPTÉE À LA PIÈCE (comme la grille), avec repli sur
-        // l'ambiance par défaut si la pièce n'a pas de photo taguée.
-        $imm_amb_ids = function_exists('sapi_get_product_photo_ids_with_fallback')
-          ? sapi_get_product_photo_ids_with_fallback($imm_prod['id'], 'ambiance', 1, $imm_piece)
-          : [];
-        $imm_amb_id = !empty($imm_amb_ids) ? (int) $imm_amb_ids[0] : 0;
+      <?php
+      // Card = sapi_immersion_render_product_card() (même rendu que l'endpoint
+      // AJAX du « moment 2 » → une seule source pour le markup des cards).
+      foreach ($imm_products as $imm_prod) {
+        sapi_immersion_render_product_card($imm_prod, $imm_piece);
+      }
       ?>
-        <div class="product-card-cinetique" data-product-id="<?php echo esc_attr($imm_prod['id']); ?>" data-categories="<?php echo esc_attr($imm_cats_attr); ?>">
-          <a href="<?php echo esc_url($imm_prod['permalink']); ?>" class="product-card-link">
-            <div class="product-media<?php echo $imm_hover ? ' has-hover-image' : ''; ?>">
-              <?php if ($imm_amb_id) : ?>
-                <span class="product-image-main"><?php echo wp_get_attachment_image($imm_amb_id, 'large', false, ['alt' => get_the_title($imm_prod['id']), 'loading' => 'lazy']); ?></span>
-              <?php elseif (!empty($imm_prod['image'])) : ?>
-                <span class="product-image-main"><img src="<?php echo esc_url($imm_prod['image']); ?>" alt="<?php echo esc_attr($imm_prod['title']); ?>" loading="lazy"></span>
-              <?php endif; ?>
-              <?php if ($imm_hover) : ?>
-                <span class="product-image-hover"><img src="<?php echo esc_url($imm_prod['hover_image']); ?>" alt="" loading="lazy"></span>
-              <?php endif; ?>
-            </div>
-            <div class="product-info">
-              <h3 class="product-name"><?php echo esc_html($imm_prod['title']); ?></h3>
-              <?php if ($imm_cat_label) : ?><p class="product-category"><?php echo esc_html($imm_cat_label); ?></p><?php endif; ?>
-              <div class="product-price">
-                <?php if ($imm_has_var) : ?><span class="price-from"><?php esc_html_e('À partir de', 'theme-sapi-maison'); ?></span><?php endif; ?>
-                <span class="price-value"><?php echo $imm_has_var ? wp_kses_post(wc_price($imm_prod['price_min_raw'])) : wp_kses_post($imm_prod['price']); ?></span>
-              </div>
-            </div>
-            <div class="product-actions">
-              <span class="btn-view"><?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> ⇾</span>
-            </div>
-          </a>
-        </div>
-      <?php endforeach; ?>
 
       <!-- Carte sur-mesure en fin de slider -->
       <a class="mescreations-immersion__pcard mescreations-immersion__pcard--sur" href="<?php echo esc_url(home_url('/sur-mesure/')); ?>">
