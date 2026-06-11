@@ -181,8 +181,8 @@ if ($imm_piece) {
     </div>
     <div class="mescreations-immersion__slider" data-immersion-slider>
       <?php foreach ($imm_products as $imm_prod) :
-        // Nom complet rendu ici ; product-name-formatter.js le scinde en
-        // prénom (caps) + surnom (Square Peg) côté client (cf. .product-name).
+        // MÊME markup que les cards du catalogue (.product-card-cinetique) pour
+        // un design identique. product-name-formatter.js scinde le .product-name.
         $imm_cat_label = '';
         if (!empty($imm_prod['category_label'])) {
           $imm_cat_label = str_replace(
@@ -191,15 +191,33 @@ if ($imm_piece) {
             $imm_prod['category_label']
           );
         }
+        $imm_has_var   = !empty($imm_prod['variations']);
+        $imm_hover     = !empty($imm_prod['hover_image']);
+        $imm_cats_attr = !empty($imm_prod['categories']) ? implode(' ', $imm_prod['categories']) : '';
       ?>
-        <a class="mescreations-immersion__pcard" href="<?php echo esc_url($imm_prod['permalink']); ?>" data-immersion-pcard data-id="<?php echo esc_attr($imm_prod['id']); ?>" data-categories="<?php echo esc_attr(!empty($imm_prod['categories']) ? implode(' ', $imm_prod['categories']) : ''); ?>">
-          <span class="mescreations-immersion__pcard-img"<?php if (!empty($imm_prod['image'])) : ?> style="background-image:url('<?php echo esc_url($imm_prod['image']); ?>')"<?php endif; ?>></span>
-          <span class="mescreations-immersion__pcard-body">
-            <span class="mescreations-immersion__pcard-name product-name"><?php echo esc_html($imm_prod['title']); ?></span>
-            <?php if ($imm_cat_label) : ?><span class="mescreations-immersion__pcard-cat"><?php echo esc_html($imm_cat_label); ?></span><?php endif; ?>
-            <span class="mescreations-immersion__pcard-price"><?php echo wp_kses_post($imm_prod['price']); ?></span>
-          </span>
-        </a>
+        <div class="product-card-cinetique" data-product-id="<?php echo esc_attr($imm_prod['id']); ?>" data-categories="<?php echo esc_attr($imm_cats_attr); ?>">
+          <a href="<?php echo esc_url($imm_prod['permalink']); ?>" class="product-card-link">
+            <div class="product-media<?php echo $imm_hover ? ' has-hover-image' : ''; ?>">
+              <?php if (!empty($imm_prod['image'])) : ?>
+                <span class="product-image-main"><img src="<?php echo esc_url($imm_prod['image']); ?>" alt="<?php echo esc_attr($imm_prod['title']); ?>" loading="lazy"></span>
+              <?php endif; ?>
+              <?php if ($imm_hover) : ?>
+                <span class="product-image-hover"><img src="<?php echo esc_url($imm_prod['hover_image']); ?>" alt="" loading="lazy"></span>
+              <?php endif; ?>
+            </div>
+            <div class="product-info">
+              <h3 class="product-name"><?php echo esc_html($imm_prod['title']); ?></h3>
+              <?php if ($imm_cat_label) : ?><p class="product-category"><?php echo esc_html($imm_cat_label); ?></p><?php endif; ?>
+              <div class="product-price">
+                <?php if ($imm_has_var) : ?><span class="price-from"><?php esc_html_e('À partir de', 'theme-sapi-maison'); ?></span><?php endif; ?>
+                <span class="price-value"><?php echo $imm_has_var ? wp_kses_post(wc_price($imm_prod['price_min_raw'])) : wp_kses_post($imm_prod['price']); ?></span>
+              </div>
+            </div>
+            <div class="product-actions">
+              <span class="btn-view"><?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> ⇾</span>
+            </div>
+          </a>
+        </div>
       <?php endforeach; ?>
 
       <!-- Carte sur-mesure en fin de slider -->

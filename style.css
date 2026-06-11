@@ -24876,60 +24876,24 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 .mescreations-immersion__slider::-webkit-scrollbar { height: 6px; }
 .mescreations-immersion__slider::-webkit-scrollbar-thumb { background: rgba(255,255,255,.4); border-radius: 3px; }
 
-.mescreations-immersion__pcard {
-  flex: 0 0 256px;
+/* Cards produit = EXACTEMENT le design du catalogue (.product-card-cinetique).
+   On ne fait que les dimensionner pour le slider horizontal. */
+.mescreations-immersion__slider .product-card-cinetique {
+  flex: 0 0 280px;
   scroll-snap-align: start;
-  background: #fff;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: var(--shadow-card-hover);
-  text-decoration: none;
-  color: inherit;
-  display: flex;
-  flex-direction: column;
-}
-.mescreations-immersion__pcard-img {
-  aspect-ratio: 4 / 3;
-  background: #eee center / cover no-repeat;
-  display: block;
-}
-.mescreations-immersion__pcard-body {
-  padding: 14px 16px 16px;
-  text-align: center;
-  display: block;
-}
-.mescreations-immersion__pcard-name {
-  display: block;
-  margin-bottom: 3px;
-  font-size: 14px;
-}
-.mescreations-immersion__pcard-cat {
-  display: block;
-  font-size: 11px;
-  color: var(--color-wood);
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  margin-bottom: 8px;
-}
-.mescreations-immersion__pcard-price {
-  display: block;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--color-dark);
-}
-.mescreations-immersion__pcard-price .price-from,
-.mescreations-immersion__pcard-price small {
-  font-weight: 500;
-  color: var(--color-wood);
-  font-size: 10.5px;
-  text-transform: uppercase;
-  letter-spacing: .04em;
 }
 
-/* Carte sur-mesure en fin de slider */
+/* Carte sur-mesure en fin de slider (CTA, volontairement distincte) */
 .mescreations-immersion__pcard--sur {
+  flex: 0 0 280px;
+  scroll-snap-align: start;
+  border-radius: 14px;
+  overflow: hidden;
+  text-decoration: none;
   background: var(--color-orange);
   color: #fff;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
@@ -24980,7 +24944,8 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 }
 
 @media (max-width: 600px) {
-  .mescreations-immersion__pcard { flex-basis: 200px; }
+  .mescreations-immersion__slider .product-card-cinetique,
+  .mescreations-immersion__pcard--sur { flex-basis: 220px; }
   .mescreations-immersion__selection { bottom: 8vh; }
   .mescreations-immersion__inner { gap: 14px; }
 }
