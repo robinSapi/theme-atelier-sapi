@@ -294,11 +294,11 @@ function sapi_maison_enqueue_assets() {
 
   }
 
-  // Round 4 — Room picker (homepage + page conseils-eclaires) : question
-  // pièce (6 cases) + champ texte libre. Le submit du champ libre redirige
-  // vers /mes-creations/?freetext=… pour auto-ouvrir la modale en chat S2
-  // avec le texte saisi.
-  if (is_front_page() || is_page_template('page-conseils-eclaires.php')) {
+  // Room picker (homepage + page conseils-eclaires + boutique /mes-creations/) :
+  // submit du champ libre (home) → /mes-creations/?freetext= (modale chat S2) ;
+  // et SURTOUT, sur toutes ces pages, un clic sur une carte-pièce pose le cookie
+  // 'sapi_imm' → l'immersion ne s'active QUE depuis le room-picker.
+  if (is_front_page() || is_page_template('page-conseils-eclaires.php') || (class_exists('WooCommerce') && is_shop())) {
     $room_picker_js_path = get_template_directory() . '/assets/sapi-room-picker.js';
     if (file_exists($room_picker_js_path)) {
       wp_enqueue_script(
@@ -3426,6 +3426,11 @@ function sapi_megafilter_generic_advice_for($piece) {
  */
 function sapi_mescreations_immersion_piece() {
   if (empty($_GET['piece'])) return '';
+  // L'immersion ne s'obtient QUE depuis un clic sur une carte-pièce du
+  // room-picker : ce clic pose le cookie de session 'sapi_imm' (sapi-room-picker.js).
+  // Une URL ?piece= « froide » (lien partagé, favori, SEO) ou un revenant
+  // n'a pas le cookie → pas d'immersion → room-picker (état A) s'affiche.
+  if (empty($_COOKIE['sapi_imm'])) return '';
   $piece = sanitize_key(wp_unslash($_GET['piece']));
   $whitelist = function_exists('sapi_megafilter_filters_whitelist') ? sapi_megafilter_filters_whitelist() : [];
   $valid = isset($whitelist['piece']) && is_array($whitelist['piece']) ? $whitelist['piece'] : [];
@@ -3485,35 +3490,9 @@ add_filter('body_class', function ($classes) {
   return $classes;
 });
 
-/**
- * Tâche 4 — Reprise auto : sur /mes-creations/ en état A (sans ?piece= valide),
- * si un projet est sauvegardé dans le navigateur avec une pièce valide, on
- * redirige directement vers ?piece=<pièce> AVANT le paint (zéro flash, zéro
- * clic). Le visiteur retrouve son immersion + sa sélection. Pour repartir de
- * zéro : « Décrire mon projet » dans la modale (change la pièce → recharge).
- * Pur affichage côté client : localStorage est invisible au serveur, donc ce
- * petit script inline est la seule façon de décider la redirection.
- */
-add_action('wp_head', function () {
-  if (!(function_exists('is_shop') && is_shop())) return;
-  if (sapi_mescreations_immersion_piece() !== '') return; // déjà en état B
-  $whitelist = function_exists('sapi_megafilter_filters_whitelist') ? sapi_megafilter_filters_whitelist() : [];
-  $valid = isset($whitelist['piece']) && is_array($whitelist['piece']) ? array_values($whitelist['piece']) : [];
-  if (empty($valid)) return;
-  ?>
-<script>/* mes-creations — reprise auto vers ?piece= si projet sauvegardé (Tâche 4) */
-(function(){try{
-  // Pas de reprise si déjà une pièce (état B) ni pendant un flux texte libre
-  // (?freetext= → la modale s'ouvre, on ne détourne pas vers l'immersion).
-  if(location.search.indexOf('piece=')!==-1||location.search.indexOf('freetext=')!==-1)return;
-  var raw=window.localStorage&&localStorage.getItem('sapiProject');if(!raw)return;
-  var p=JSON.parse(raw),piece=p&&p.answers&&p.answers.piece;if(!piece)return;
-  var valid=<?php echo wp_json_encode($valid); ?>;if(valid.indexOf(piece)===-1)return;
-  var sep=location.search?'&':'?';
-  location.replace(location.pathname+location.search+sep+'piece='+encodeURIComponent(piece));
-}catch(e){}})();</script>
-  <?php
-}, 1);
+<?php /* Reprise auto retirée : un revenant arrive sur le room-picker, pas
+ * directement dans l'immersion (décision Robin : l'immersion ne s'obtient que
+ * par un clic sur une carte-pièce, cf. cookie 'sapi_imm'). */ ?>
 
 /**
  * Sanitise un payload {answers, labels} en ne gardant que les paires reconnues
