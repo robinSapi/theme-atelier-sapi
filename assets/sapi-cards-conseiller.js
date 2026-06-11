@@ -12,6 +12,22 @@
 (function () {
   'use strict';
 
+  // Refonte /mes-creations/ — état B « immersion » : ce contrôleur se met en
+  // retrait DÈS LE NIVEAU MODULE (avant que shop.js ne tourne). On expose un
+  // window.sapiMegaFilter INERTE pour que shop.js (qui l'utilise dans
+  // applyFilters au load) ne filtre NI le catalogue bas (qu'on veut intact) NI
+  // les cards de la sélection immersion (rendues côté serveur). Sans ça, comme
+  // le projet contient déjà ?piece=, hasAnyAnswer() serait vrai et tout serait
+  // filtré. La card "mon-projet" n'est pas rendue (le hero immersif la remplace).
+  if (document.body && document.body.classList.contains('mescreations-immersion-on')) {
+    window.sapiMegaFilter = {
+      cardMatches: function () { return true; },
+      hasAnyAnswer: function () { return false; },
+      computeFilterMeta: function () { return { effectiveAnswers: {}, ignoredAnswers: [], matchingIds: [] }; }
+    };
+    return;
+  }
+
   var config = window.SAPI_CARDS_CONSEILLER || {};
   var STEPS = Array.isArray(config.steps) ? config.steps : [];
   var ICONS = config.icons || {};
@@ -979,16 +995,6 @@
      Init
      ───────────────────────────────────────────── */
   function init() {
-    // Refonte /mes-creations/ — état B « immersion » : quand le hero immersif
-    // est actif (body.mescreations-immersion, ?piece= valide), ce contrôleur se
-    // met en retrait. Il ne rend NI la card "mon-projet" (remplacée par le hero
-    // immersif), NI ne re-filtre la grille basse "Toutes mes créations" (qu'on
-    // veut intacte). On ne définit pas window.sapiMegaFilter → shop.js laisse le
-    // catalogue dans son état naturel (toutes les créations + cards réassurance).
-    if (document.body && document.body.classList.contains('mescreations-immersion-on')) {
-      return;
-    }
-
     els.zone = document.querySelector('[data-conseiller-zone]');
     if (!els.zone) return; // pas sur /mes-creations/
 
