@@ -20,6 +20,8 @@ function sapi_check_form_rate_limit($form_id = 'contact', $max_hits = 5) {
 // Chargée uniquement en admin pour ne pas peser sur le front.
 if (is_admin()) {
   require_once get_template_directory() . '/inc/sapi-migrate-galerie.php';
+  // Tâche 5 — page admin « Règles de filtrage » du Conseiller.
+  require_once get_template_directory() . '/inc/conseiller-rules-admin.php';
 }
 
 function sapi_maison_setup() {
