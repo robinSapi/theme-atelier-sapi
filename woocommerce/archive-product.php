@@ -179,7 +179,11 @@ if ($imm_piece) {
     <div class="mescreations-immersion__selection-head">
       <span class="mescreations-immersion__selection-title"><?php echo esc_html(sprintf(__('Ma sélection pour %s', 'theme-sapi-maison'), $imm_possessive)); ?></span>
     </div>
-    <div class="mescreations-immersion__slider" data-immersion-slider>
+    <div class="mescreations-immersion__slider-wrap">
+      <button type="button" class="mes-creations-selection__nav-arrow mescreations-immersion__arrow" data-immersion-prev aria-label="<?php esc_attr_e('Précédent', 'theme-sapi-maison'); ?>" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="mescreations-immersion__slider" data-immersion-slider>
       <?php foreach ($imm_products as $imm_prod) :
         // MÊME markup que les cards du catalogue (.product-card-cinetique) pour
         // un design identique. product-name-formatter.js scinde le .product-name.
@@ -238,10 +242,11 @@ if ($imm_piece) {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="14" height="14"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
         </span>
       </a>
-    </div>
-    <!-- Nav slider : flèches + dots (mêmes classes que la sélection du site),
-         peuplée par sapi-mescreations-immersion.js. -->
-    <div class="mes-creations-selection__nav mescreations-immersion__nav" data-immersion-nav hidden></div>
+      </div><!-- /.mescreations-immersion__slider -->
+      <button type="button" class="mes-creations-selection__nav-arrow mescreations-immersion__arrow" data-immersion-next aria-label="<?php esc_attr_e('Suivant', 'theme-sapi-maison'); ?>" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div><!-- /.mescreations-immersion__slider-wrap -->
     <!-- Lien discret « Préciser avec Robin » → ouvre la modale (questionnaire
          complet), sans réécrire l'IA. -->
     <button type="button" class="mescreations-immersion__refine" data-immersion-refine data-action="open-modal" data-modal-state="s3">

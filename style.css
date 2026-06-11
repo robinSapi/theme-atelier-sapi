@@ -24897,20 +24897,20 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   height: 25vh;
 }
 
-/* Nav flèches + dots — mêmes classes que la sélection du site, couleurs
-   adaptées au fond sombre/photo. */
-.mescreations-immersion__nav {
-  margin-top: 16px;
+/* Flèches de part et d'autre du slider (pas de dots). 1 card par clic. */
+.mescreations-immersion__slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.mescreations-immersion__nav .mes-creations-selection__nav-dot {
-  background: rgba(255, 255, 255, 0.4);
+.mescreations-immersion__slider-wrap .mescreations-immersion__slider {
+  flex: 1 1 auto;
+  min-width: 0;
 }
-.mescreations-immersion__nav .mes-creations-selection__nav-dot:hover {
-  background: rgba(255, 255, 255, 0.7);
+.mescreations-immersion__arrow {
+  flex: 0 0 auto;
 }
-.mescreations-immersion__nav .mes-creations-selection__nav-dot.is-active {
-  background: #fff;
-}
+.mescreations-immersion__arrow[hidden] { display: none; }
 
 /* Carte sur-mesure en fin de slider (CTA, volontairement distincte) */
 .mescreations-immersion__pcard--sur {
