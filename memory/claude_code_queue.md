@@ -7,8 +7,8 @@
 > **Source de vérité du comportement voulu :** `assets/guide-filtrage-simulateur.html` (simulateur jouable + éditeur de règles, à ouvrir). Doc d'appui : `assets/guide-filtrage-impact.html`.
 > **Toutes les tâches :** branche test uniquement, jamais master, Robin valide avant prod.
 
-## [BUG À CORRIGER — branche test] Le commentaire IA en fin de modale ne s'écrit jamais
-Robin constate (11/06) : à la fin du parcours de la modale, le **message personnalisé de l'IA n'est jamais affiché**. À diagnostiquer et corriger : la chaîne `sapi_megafilter_advice` (Sonnet) → `sapiProject.advice_text` → typewriter dans la carte « Mon projet ». À traiter dans le cadre de la refonte (tâche 1).
+## [BUG ✅ CORRIGÉ — sur test] Le commentaire IA en fin de modale ne s'écrit jamais
+Cause : le commentaire Sonnet (`sapi_megafilter_advice` → `advice_text`) était bien calculé, mais son lieu d'affichage (carte « Mon projet » + `sapi-cards-conseiller.js`) a été supprimé pendant la refonte (4b/7). **Fix** : il s'affiche désormais dans la **phrase de l'immersion** — la modale émet `sapi:advice-loading` (dès le début du calcul → loader 3 points qui remplace la phrase générique) puis `sapi:advice-ready` (texte → tapé à la machine, ou repli générique si vide). En attente de validation Robin.
 
 ## [TÂCHE 1] Architecture — filtrage serveur unique (fondation)
 **Priorité : HAUTE — à faire en premier, les autres en dépendent.**
