@@ -7,6 +7,12 @@
 > **Source de vérité du comportement voulu :** `assets/guide-filtrage-simulateur.html` (simulateur jouable + éditeur de règles, à ouvrir). Doc d'appui : `assets/guide-filtrage-impact.html`.
 > **Toutes les tâches :** branche test uniquement, jamais master, Robin valide avant prod.
 
+## [⚠️ AVANT GO-LIVE PROD] Cache LSCache vs cookie immersion
+L'immersion (`/mes-creations/?piece=`) ne s'active que si le cookie de session `sapi_imm` est présent (posé au clic d'une carte-pièce du room-picker). Donc le rendu de `?piece=` **dépend du cookie**. Sur le test : pas de cache → OK. **Sur prod (LSCache)** : exclure `/mes-creations/?piece=*` du cache OU faire varier le cache sur le cookie `sapi_imm`, sinon un visiteur froid pourrait recevoir une immersion en cache (ou inversement).
+
+## [✅ FAIT — sur test] Immersion réservée au room-picker
+Décision Robin : l'immersion ne s'obtient QUE par un **clic sur une carte-pièce** du room-picker (cookie `sapi_imm`). URL `?piece=` froide (lien/favori/SEO) ou **revenant** → room-picker (reprise auto **retirée**). Changement de pièce dans la modale = garde le cookie → reste en immersion.
+
 ## [BUG ✅ CORRIGÉ — sur test] Le commentaire IA en fin de modale ne s'écrit jamais
 Cause : le commentaire Sonnet (`sapi_megafilter_advice` → `advice_text`) était bien calculé, mais son lieu d'affichage (carte « Mon projet » + `sapi-cards-conseiller.js`) a été supprimé pendant la refonte (4b/7). **Fix** : il s'affiche désormais dans la **phrase de l'immersion** — la modale émet `sapi:advice-loading` (dès le début du calcul → loader 3 points qui remplace la phrase générique) puis `sapi:advice-ready` (texte → tapé à la machine, ou repli générique si vide). En attente de validation Robin.
 
