@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette — /mes-creations/ état A : room-picker (Tâche 4)</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --color-cream:#FEFDFB; --color-warm:#FBF6EA; --color-wood:#937D68;
+    --color-wood-dark:#5A4A38; --color-wood-mid:#7A6857; --color-orange:#E35B24;
+    --color-orange-hover:#c94d1c; --color-dark:#323232; --color-white:#fff;
+    --color-line:rgba(147,125,104,.18);
+    --shadow-card:0 6px 24px rgba(50,40,30,.08);
+    --font-display:'Square Peg',cursive; --font-body:'Montserrat',sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-body);color:var(--color-dark);background:var(--color-cream)}
+
+  /* ── Bandeau démo (pas dans le thème) ── */
+  .demo-bar{background:#222;color:#eee;font-size:12.5px;padding:8px 16px;text-align:center;letter-spacing:.03em}
+  .demo-bar b{color:#ffb38a}
+  .demo-toggle{display:inline-flex;gap:8px;align-items:center;margin-left:14px}
+  .demo-toggle button{font:inherit;font-size:11.5px;background:#3a3a3a;color:#ddd;border:1px solid #555;border-radius:20px;padding:3px 12px;cursor:pointer}
+  .demo-toggle button.on{background:var(--color-orange);border-color:var(--color-orange);color:#fff}
+
+  /* ── Header simplifié (rappel) ── */
+  .fake-header{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;border-bottom:1px solid var(--color-line);background:var(--color-cream)}
+  .fake-header .logo{font-family:var(--font-display);font-size:30px;color:var(--color-wood-dark)}
+  .fake-header nav{display:flex;gap:26px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--color-wood-mid)}
+
+  /* ════════ HERO = ROOM PICKER ════════ */
+  .picker-hero{position:relative;background:var(--color-warm);padding:54px 24px 48px;border-bottom:1px solid var(--color-line)}
+  .picker-hero::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(92deg,rgba(139,115,85,.045) 0,rgba(139,115,85,.045) 1px,transparent 1px,transparent 7px);pointer-events:none}
+  .picker-inner{position:relative;max-width:880px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center}
+
+  /* Bande "Reprendre" (revenants — mini-JS lit localStorage) */
+  .resume-band{display:flex;align-items:center;gap:14px;width:100%;max-width:560px;background:var(--color-white);border:1px solid var(--color-line);border-left:3px solid var(--color-orange);border-radius:14px;padding:12px 16px;box-shadow:var(--shadow-card);text-align:left}
+  .resume-band__ico{width:38px;height:38px;border-radius:10px;background:rgba(227,91,36,.1);color:var(--color-orange);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .resume-band__ico svg{width:20px;height:20px}
+  .resume-band__txt{flex:1;font-size:13.5px;line-height:1.35;color:var(--color-wood-dark)}
+  .resume-band__txt b{color:var(--color-dark)}
+  .resume-band__cta{font:inherit;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--color-orange);color:#fff;border:none;border-radius:50px;padding:9px 16px;cursor:pointer;text-decoration:none;white-space:nowrap}
+  .resume-band__cta:hover{background:var(--color-orange-hover)}
+  .resume-band__dismiss{background:none;border:none;color:var(--color-wood);font-size:18px;line-height:1;cursor:pointer;padding:0 2px}
+
+  /* Signature Robin (pill v1) */
+  .conseiller-sig--v1{display:inline-flex;align-items:center;gap:12px;background:var(--color-wood-dark);border-radius:60px;padding:6px 24px 6px 6px}
+  .conseiller-sig__avatar{width:34px;height:34px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#cdbba4 url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%238a7560%22><circle cx=%2212%22 cy=%228%22 r=%224%22/><path d=%22M4 20c0-4 4-6 8-6s8 2 8 6%22/></svg>') center/cover}
+  .conseiller-sig__hook{font-family:var(--font-display);font-size:24px;line-height:1;color:#fff}
+
+  .picker-title{font-size:clamp(1.6rem,3.4vw,2.4rem);font-weight:700;color:var(--color-wood-dark);line-height:1.2;margin:0}
+  .picker-sub{color:var(--color-wood-mid);font-size:15px;margin:0 auto;max-width:560px}
+
+  .room-picker-cards{display:flex;flex-wrap:wrap;justify-content:center;gap:.9rem;width:100%;max-width:760px}
+  .room-card{flex:0 0 calc(25% - .7rem);min-width:120px;display:flex;flex-direction:column;align-items:center;gap:.7rem;padding:20px 12px 16px;background:var(--color-white);border:1px solid var(--color-line);border-radius:12px;box-shadow:var(--shadow-card);text-decoration:none;color:inherit;transition:transform .2s,box-shadow .2s,border-color .2s}
+  .room-card:hover{transform:translateY(-3px);border-color:var(--color-orange);box-shadow:0 10px 28px rgba(50,40,30,.13)}
+  .room-card-icon{width:54px;height:54px;display:flex;align-items:center;justify-content:center;color:var(--color-wood);background:var(--color-warm);border-radius:12px;transition:background .2s,color .2s}
+  .room-card:hover .room-card-icon{background:rgba(227,91,36,.12);color:var(--color-orange)}
+  .room-card-icon svg{width:28px;height:28px}
+  .room-card-label{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--color-wood-dark);line-height:1.3}
+
+  .room-picker-or{display:flex;align-items:center;justify-content:center;width:100%;max-width:480px;margin:2px auto}
+  .room-picker-or::before,.room-picker-or::after{content:'';flex:1;height:1px;background:rgba(139,115,85,.25)}
+  .room-picker-or__text{margin:0 14px;padding:4px 12px;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-wood);background:var(--color-white);border-radius:50px;border:1px solid rgba(139,115,85,.25)}
+
+  .room-picker-freetext{position:relative;width:100%;max-width:480px;margin:0 auto}
+  .room-picker-freetext__input{width:100%;padding:13px 52px 13px 20px;border:1.5px solid var(--color-line);border-radius:50px;background:var(--color-white);font-family:var(--font-body);font-size:14.5px;color:var(--color-wood-dark)}
+  .room-picker-freetext__input:focus{outline:none;border-color:var(--color-wood)}
+  .room-picker-freetext__submit{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;background:var(--color-orange);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .room-picker-freetext__submit:hover{background:var(--color-orange-hover)}
+  .room-picker-freetext__submit svg{width:16px;height:16px}
+
+  /* ════════ CATALOGUE (aperçu, inchangé) ════════ */
+  .cata{max-width:1180px;margin:0 auto;padding:46px 24px 70px}
+  .cata-head{text-align:center;margin-bottom:8px}
+  .cata-head .kicker{font-family:var(--font-display);font-size:30px;color:var(--color-wood)}
+  .cata-head h2{font-size:clamp(1.5rem,3vw,2.1rem);font-weight:700;color:var(--color-wood-dark);margin:.1em 0 0;text-transform:uppercase;letter-spacing:.02em}
+  .pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:26px 0 32px}
+  .pill{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:8px 18px;border-radius:50px;border:1px solid var(--color-line);background:var(--color-white);color:var(--color-wood-mid);cursor:pointer}
+  .pill.active{background:var(--color-wood-dark);color:#fff;border-color:var(--color-wood-dark)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(240px,100%),1fr));gap:22px}
+  .pcard{background:var(--color-white);border:1px solid var(--color-line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-card)}
+  .pcard .ph{aspect-ratio:4/5;background:linear-gradient(135deg,#efe7da,#e3d6c2);display:flex;align-items:center;justify-content:center;color:#bda988;font-size:13px}
+  .pcard .body{padding:14px 14px 18px}
+  .pcard .nm{font-family:var(--font-display);font-size:22px;color:var(--color-wood-dark);line-height:1}
+  .pcard .pr{font-size:13px;font-weight:600;color:var(--color-wood-mid);margin-top:6px}
+
+  /* État revenant masqué par défaut → togglé par la barre démo */
+  body:not(.demo-returning) .resume-band{display:none}
+
+  @media(max-width:680px){
+    .room-card{flex:0 0 calc(50% - .5rem)}
+    .fake-header nav{display:none}
+    .resume-band{flex-wrap:wrap}
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-bar">
+  <b>MAQUETTE</b> — /mes-creations/ <b>sans ?piece=</b> (état A) · Tâche 4 room-picker. Cliquer une pièce → recharge <code>?piece=&lt;slug&gt;</code> → immersion.
+  <span class="demo-toggle">
+    Visiteur :
+    <button id="t-new" class="on" onclick="setReturn(false)">nouveau</button>
+    <button id="t-ret" onclick="setReturn(true)">revenant (projet en cours)</button>
+  </span>
+</div>
+
+<header class="fake-header">
+  <div class="logo">Atelier Sâpi</div>
+  <nav><span>Mes créations</span><span>L'atelier</span><span>Contact</span></nav>
+</header>
+
+<!-- ════════ HERO = ROOM PICKER ════════ -->
+<section class="picker-hero">
+  <div class="picker-inner">
+
+    <!-- Bande "Reprendre" : visible seulement si projet sauvegardé (mini-JS localStorage) -->
+    <div class="resume-band" role="note">
+      <span class="resume-band__ico" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v4h4"/></svg>
+      </span>
+      <span class="resume-band__txt">Tu avais commencé un projet pour <b>ta cuisine</b>.</span>
+      <a class="resume-band__cta" href="?piece=cuisine">Reprendre ma sélection</a>
+      <button class="resume-band__dismiss" title="Repartir de zéro" onclick="setReturn(false)">×</button>
+    </div>
+
+    <span class="conseiller-sig--v1">
+      <span class="conseiller-sig__avatar" aria-hidden="true"></span>
+      <span class="conseiller-sig__hook">Le conseil de Robin</span>
+    </span>
+
+    <h2 class="picker-title">Pour quelle pièce cherches-tu un luminaire ?</h2>
+    <p class="picker-sub">Choisis une pièce : je te montre la sélection que je conseille, pensée pour cet espace.</p>
+
+    <div class="room-picker-cards">
+      <a class="room-card" href="?piece=salon"><span class="room-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3"/><rect x="2" y="11" width="20" height="7" rx="2"/><path d="M5 18v2m14-2v2"/></svg></span><span class="room-card-label">Salon</span></a>
+      <a class="room-card" href="?piece=cuisine"><span class="room-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V20H6Z"/><line x1="6" y1="17" x2="18" y2="17"/></svg></span><span class="room-card-label">Cuisine</span></a>
+      <a class="room-card" href="?piece=chambre"><span class="room-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M2 14h20"/><path d="M2 10V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/></svg></span><span class="room-card-label">Chambre</span></a>
+      <a class="room-card" href="?piece=chambre-enfant"><span class="room-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="7" r="2.5"/><circle cx="12" cy="13" r="7"/><circle cx="9.5" cy="12" r=".7" fill="currentColor" stroke="none"/><circle cx="14.5" cy="12" r=".7" fill="currentColor" stroke="none"/><circle cx="12" cy="15" r="1.3"/><path d="M10.6 16.6a2.1 2.1 0 0 0 2.8 0"/></svg></span><span class="room-card-label">Chambre enfant</span></a>
+      <a class="room-card" href="?piece=bureau"><span class="room-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg></span><span class="room-card-label">Bureau</span></a>
+      <a class="room-card" href="?piece=entree"><span class="room-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="15" cy="12" r="1"/></svg></span><span class="room-card-label">Entrée</span></a>
+      <a class="room-card" href="?piece=escalier"><span class="room-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4v-4h4v-4h4V8h4"/><path d="M4 20V8"/><path d="M20 20V8"/></svg></span><span class="room-card-label">Escalier</span></a>
+    </div>
+
+    <div class="room-picker-or"><span class="room-picker-or__text">ou</span></div>
+
+    <form class="room-picker-freetext" onsubmit="return false">
+      <input class="room-picker-freetext__input" type="text" placeholder="Décris ton projet en quelques mots…" aria-label="Décris ton projet">
+      <button class="room-picker-freetext__submit" type="submit" aria-label="Envoyer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+    </form>
+  </div>
+</section>
+
+<!-- ════════ CATALOGUE (inchangé, browse-all) ════════ -->
+<section class="cata">
+  <div class="cata-head">
+    <span class="kicker">et aussi…</span>
+    <h2>Toutes mes créations</h2>
+  </div>
+  <div class="pills">
+    <span class="pill active">Tout</span><span class="pill">Suspensions</span><span class="pill">Lampes à poser</span><span class="pill">Appliques</span><span class="pill">Lampadaires</span>
+  </div>
+  <div class="grid">
+    <div class="pcard"><div class="ph">photo produit</div><div class="body"><div class="nm">Halo</div><div class="pr">189 €</div></div></div>
+    <div class="pcard"><div class="ph">photo produit</div><div class="body"><div class="nm">Brindille</div><div class="pr">145 €</div></div></div>
+    <div class="pcard"><div class="ph">photo produit</div><div class="body"><div class="nm">Comète</div><div class="pr">220 €</div></div></div>
+    <div class="pcard"><div class="ph">photo produit</div><div class="body"><div class="nm">Sillon</div><div class="pr">175 €</div></div></div>
+  </div>
+</section>
+
+<script>
+  function setReturn(on){
+    document.body.classList.toggle('demo-returning', on);
+    document.getElementById('t-new').classList.toggle('on', !on);
+    document.getElementById('t-ret').classList.toggle('on', on);
+  }
+</script>
+</body>
+</html>
