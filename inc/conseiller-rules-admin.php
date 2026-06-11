@@ -339,18 +339,18 @@ function sapi_rules_admin_render() {
       sapi_rules_flat_multi('ampoule_skip_when_grande', $V['pieces'], (array) $R['ampoule_skip_when_grande']);
       echo '</div>';
 
-      // ===== Catégories par sortie (principale) =====
-      sapi_rules_card('Catégories par sortie (principale)', 'Filtre dur : types de luminaires proposés selon la sortie électrique.');
+      // ===== Catégories par sortie — éclairage PRINCIPAL =====
+      sapi_rules_card('Catégories — éclairage principal (par sortie)', 'Filtre dur. Types de luminaires montrés quand ce sera la LUMIÈRE PRINCIPALE de la pièce (= cas par défaut). La question « est-ce l\'éclairage principal ? » n\'est posée qu\'en grande pièce.');
       sapi_rules_table_map_multi('cats_by_sortie', $V['sorties'], $V['cats'], $R['cats_by_sortie']);
       echo '</div>';
 
-      // ===== Catégories par sortie (secondaire / élargissement) =====
-      sapi_rules_card('Catégories par sortie (secondaire)', 'Pool d\'élargissement si la sélection principale est trop courte.');
+      // ===== Catégories par sortie — éclairage d'APPOINT =====
+      sapi_rules_card('Catégories — éclairage d\'appoint (par sortie)', 'Filtre dur. Types de luminaires montrés quand le visiteur a DÉJÀ d\'autres sources (luminaire d\'appoint / déco) — uniquement si, en grande pièce, il répond « j\'ai d\'autres sources ». Jamais mélangé avec l\'éclairage principal.');
       sapi_rules_table_map_multi('cats_secondaire_by_sortie', $V['sorties'], $V['cats'], $R['cats_secondaire_by_sortie']);
       echo '</div>';
 
       // ===== Catégorie prioritaire par sortie =====
-      sapi_rules_card('Catégorie prioritaire par sortie', 'Couche priorité : met cette catégorie devant les autres pour la sortie. « Aucune » = pas de priorité.');
+      sapi_rules_card('Catégorie prioritaire par sortie', 'Couche priorité (ne filtre rien). Utile UNIQUEMENT quand une sélection mélange plusieurs catégories en même temps (ex. Prise 230V) : met celle-ci devant. « Aucune » = ordre WooCommerce par défaut.');
       sapi_rules_table_map_single('cat_priority_by_sortie', $V['sorties'], $V['cats'], $R['cat_priority_by_sortie'], true);
       echo '</div>';
 
