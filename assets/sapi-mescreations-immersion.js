@@ -235,14 +235,32 @@
     window.addEventListener('resize', onScroll, { passive: true });
     applyScroll();
 
+    /* Verrou de scroll pendant la frappe (sinon le scroll déclenche la
+       révélation avant la fin du texte). Libéré quand la machine à écrire finit. */
+    function lockScroll() {
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+    }
+    function unlockScroll() {
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    }
+
     /* ── Séquence d'entrée (au load) : pill → phrase qui s'écrit → question →
        hint. La révélation de la sélection, elle, se joue au scroll. ── */
     function playSequence() {
       reservePhraseHeight();
       renderQuestion();
+      var safety = null;
+      if (!reduceMotion) {
+        lockScroll();
+        safety = later(unlockScroll, 7000); // filet de sécurité
+      }
       later(function () { if (els.sig) els.sig.classList.add('is-in'); }, reduceMotion ? 0 : 300);
       later(function () {
         typewriter(els.phraseText, function () {
+          unlockScroll();
+          if (safety) clearTimeout(safety);
           later(function () { if (els.affine) els.affine.classList.add('is-in'); }, reduceMotion ? 0 : 250);
           later(function () { if (els.scrollhint) els.scrollhint.classList.add('is-in'); }, reduceMotion ? 0 : 650);
         });
