@@ -37,6 +37,16 @@
     };
     if (els.phrase) els.phraseText = els.phrase.getAttribute('data-immersion-phrase-text') || '';
     var genericPhrase = els.phraseText; // conseil générique par pièce (repli si l'IA échoue)
+    // Au chargement : si un commentaire IA personnalisé existe déjà pour CETTE
+    // pièce (ex. après rechargement suite à un changement de pièce dans la
+    // modale), on le tape d'emblée au lieu du générique.
+    try {
+      var proj0 = (window.sapiProject && window.sapiProject.get) ? window.sapiProject.get() : null;
+      if (proj0 && typeof proj0.advice_text === 'string' && proj0.advice_text &&
+          proj0.answers && proj0.answers.piece === (config.piece || '')) {
+        els.phraseText = proj0.advice_text;
+      }
+    } catch (e) { /* swallow */ }
 
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var typeTimer = null;
@@ -108,10 +118,13 @@
       buildChars(els.phraseText);
       revealChars();
     }
+    var advicePending = false; // true entre 'advice-loading' et 'advice-ready' (questionnaire terminé)
     document.addEventListener('sapi:advice-loading', function () {
+      advicePending = true;
       if (els.phraseContent) showPhraseDots();
     });
     document.addEventListener('sapi:advice-ready', function (e) {
+      advicePending = false;
       if (!els.phraseContent) return;
       var advice = (e && e.detail && typeof e.detail.advice === 'string') ? e.detail.advice.trim() : '';
       retypePhrase(advice || genericPhrase);
@@ -244,12 +257,27 @@
       // recharge la page vers ?piece=<nouvelle> pour que le décor du hero
       // (photo, phrase, pill) ET la sélection restent cohérents.
       if (answers.piece !== (config.piece || '')) {
-        try {
-          var url = new URL(window.location.href);
-          url.searchParams.set('piece', answers.piece);
-          window.location.assign(url.toString());
-        } catch (err) {
-          window.location.search = '?piece=' + encodeURIComponent(answers.piece);
+        var go = function () {
+          try {
+            var url = new URL(window.location.href);
+            url.searchParams.set('piece', answers.piece);
+            window.location.assign(url.toString());
+          } catch (err) {
+            window.location.search = '?piece=' + encodeURIComponent(answers.piece);
+          }
+        };
+        if (advicePending) {
+          // Questionnaire TERMINÉ : un commentaire IA est en cours de calcul.
+          // On attend qu'il soit stocké dans sapiProject (juste avant
+          // 'sapi:advice-ready') AVANT de recharger, pour que la nouvelle page
+          // l'affiche d'emblée. Garde-fou : recharge quand même après 4 s.
+          var reloaded = false;
+          var reload = function () { if (reloaded) return; reloaded = true; go(); };
+          document.addEventListener('sapi:advice-ready', reload, { once: true });
+          setTimeout(reload, 4000);
+        } else {
+          // Abandon (pas de commentaire IA) → rechargement immédiat.
+          go();
         }
         return;
       }
