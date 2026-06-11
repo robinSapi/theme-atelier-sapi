@@ -194,11 +194,19 @@ if ($imm_piece) {
         $imm_has_var   = !empty($imm_prod['variations']);
         $imm_hover     = !empty($imm_prod['hover_image']);
         $imm_cats_attr = !empty($imm_prod['categories']) ? implode(' ', $imm_prod['categories']) : '';
+        // Photo d'ambiance ADAPTÉE À LA PIÈCE (comme la grille), avec repli sur
+        // l'ambiance par défaut si la pièce n'a pas de photo taguée.
+        $imm_amb_ids = function_exists('sapi_get_product_photo_ids_with_fallback')
+          ? sapi_get_product_photo_ids_with_fallback($imm_prod['id'], 'ambiance', 1, $imm_piece)
+          : [];
+        $imm_amb_id = !empty($imm_amb_ids) ? (int) $imm_amb_ids[0] : 0;
       ?>
         <div class="product-card-cinetique" data-product-id="<?php echo esc_attr($imm_prod['id']); ?>" data-categories="<?php echo esc_attr($imm_cats_attr); ?>">
           <a href="<?php echo esc_url($imm_prod['permalink']); ?>" class="product-card-link">
             <div class="product-media<?php echo $imm_hover ? ' has-hover-image' : ''; ?>">
-              <?php if (!empty($imm_prod['image'])) : ?>
+              <?php if ($imm_amb_id) : ?>
+                <span class="product-image-main"><?php echo wp_get_attachment_image($imm_amb_id, 'large', false, ['alt' => get_the_title($imm_prod['id']), 'loading' => 'lazy']); ?></span>
+              <?php elseif (!empty($imm_prod['image'])) : ?>
                 <span class="product-image-main"><img src="<?php echo esc_url($imm_prod['image']); ?>" alt="<?php echo esc_attr($imm_prod['title']); ?>" loading="lazy"></span>
               <?php endif; ?>
               <?php if ($imm_hover) : ?>
