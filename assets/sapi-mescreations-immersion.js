@@ -167,7 +167,11 @@
        finales. On re-filtre + classe CÔTÉ SERVEUR (même moteur que le
        chargement) et on remplace les cards du slider. On ignore « pièce seule »
        (état initial / modale sans affinage) et les répétitions identiques. ── */
-    var lastAnswersSig = null;
+    /* Baseline de dédup = ce que le SERVEUR a déjà rendu, c.-à-d. la sélection
+       pour la pièce seule (archive-product.php : $imm_answers = ['piece' => …]).
+       Ainsi « aucun changement » est détecté par la signature, et un changement
+       de pièce (recommencer le projet) produit une signature différente → recharge. */
+    var lastAnswersSig = JSON.stringify({ piece: config.piece || '' });
     function refreshSelection(answers, sig) {
       if (!sliderEl || !config.ajaxUrl) return;
       var fd = new FormData();
@@ -199,10 +203,9 @@
        resume (cause du « ne se recharge pas tout le temps »). */
     document.addEventListener('sapi:conseiller-closed', function (e) {
       var answers = (e && e.detail && e.detail.answers) ? e.detail.answers : {};
-      var refined = Object.keys(answers).filter(function (k) { return k !== 'piece' && answers[k]; });
-      if (!refined.length) return; // que la pièce → pas d'affinage à re-filtrer
+      if (!answers.piece) return; // jamais sans pièce
       var sig = JSON.stringify(answers);
-      if (sig === lastAnswersSig) return;
+      if (sig === lastAnswersSig) return; // identique à ce qui est déjà affiché
       refreshSelection(answers, sig);
     });
 
