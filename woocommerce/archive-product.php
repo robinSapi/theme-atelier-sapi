@@ -168,7 +168,6 @@ if ($imm_piece) {
     <!-- Bouton sous la citation : ouvre la modale Conseiller pour décrire le
          projet en détail (questionnaire complet → produit plus adapté). -->
     <button type="button" class="mescreations-immersion__describe" data-immersion-describe data-action="open-modal" data-modal-state="s0" hidden>
-      <span class="mescreations-immersion__describe-av"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => '', 'class' => 'mescreations-immersion__describe-img', 'loading' => 'lazy']); ?></span>
       <?php esc_html_e('Décrire mon projet en détail pour un luminaire plus adapté', 'theme-sapi-maison'); ?>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
     </button>
