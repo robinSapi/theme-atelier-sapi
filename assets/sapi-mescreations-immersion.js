@@ -258,9 +258,6 @@
       // (photo, phrase, pill) ET la sélection restent cohérents.
       if (answers.piece !== (config.piece || '')) {
         var go = function () {
-          // On vient de la modale lancée DEPUIS l'immersion → on garde le
-          // drapeau immersion pour que la nouvelle pièce reste en immersion.
-          document.cookie = 'sapi_imm=1; path=/; SameSite=Lax';
           try {
             var url = new URL(window.location.href);
             url.searchParams.set('piece', answers.piece);

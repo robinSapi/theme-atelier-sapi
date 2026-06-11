@@ -294,11 +294,10 @@ function sapi_maison_enqueue_assets() {
 
   }
 
-  // Room picker (homepage + page conseils-eclaires + boutique /mes-creations/) :
-  // submit du champ libre (home) → /mes-creations/?freetext= (modale chat S2) ;
-  // et SURTOUT, sur toutes ces pages, un clic sur une carte-pièce pose le cookie
-  // 'sapi_imm' → l'immersion ne s'active QUE depuis le room-picker.
-  if (is_front_page() || is_page_template('page-conseils-eclaires.php') || (class_exists('WooCommerce') && is_shop())) {
+  // Room picker (homepage + page conseils-eclaires) : question pièce (cases) +
+  // champ texte libre. Le submit du champ libre redirige vers
+  // /mes-creations/?freetext=… pour auto-ouvrir la modale en chat S2.
+  if (is_front_page() || is_page_template('page-conseils-eclaires.php')) {
     $room_picker_js_path = get_template_directory() . '/assets/sapi-room-picker.js';
     if (file_exists($room_picker_js_path)) {
       wp_enqueue_script(
@@ -3426,11 +3425,9 @@ function sapi_megafilter_generic_advice_for($piece) {
  */
 function sapi_mescreations_immersion_piece() {
   if (empty($_GET['piece'])) return '';
-  // L'immersion ne s'obtient QUE depuis un clic sur une carte-pièce du
-  // room-picker : ce clic pose le cookie de session 'sapi_imm' (sapi-room-picker.js).
-  // Une URL ?piece= « froide » (lien partagé, favori, SEO) ou un revenant
-  // n'a pas le cookie → pas d'immersion → room-picker (état A) s'affiche.
-  if (empty($_COOKIE['sapi_imm'])) return '';
+  // L'immersion s'active sur ?piece= valide. En pratique ces URLs viennent du
+  // room-picker (les cartes-pièces sont des liens ?piece=) ; la reprise auto qui
+  // ajoutait ?piece= sans clic a été retirée → un revenant arrive sur le picker.
   $piece = sanitize_key(wp_unslash($_GET['piece']));
   $whitelist = function_exists('sapi_megafilter_filters_whitelist') ? sapi_megafilter_filters_whitelist() : [];
   $valid = isset($whitelist['piece']) && is_array($whitelist['piece']) ? $whitelist['piece'] : [];
@@ -3490,9 +3487,9 @@ add_filter('body_class', function ($classes) {
   return $classes;
 });
 
-<?php /* Reprise auto retirée : un revenant arrive sur le room-picker, pas
- * directement dans l'immersion (décision Robin : l'immersion ne s'obtient que
- * par un clic sur une carte-pièce, cf. cookie 'sapi_imm'). */ ?>
+<?php /* Reprise auto retirée (décision Robin) : un revenant arrive sur le
+ * room-picker, pas directement dans l'immersion. L'immersion s'obtient via un
+ * clic sur une carte-pièce (lien ?piece=) ; plus de redirection automatique. */ ?>
 
 /**
  * Sanitise un payload {answers, labels} en ne gardant que les paires reconnues

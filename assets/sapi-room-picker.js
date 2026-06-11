@@ -13,18 +13,8 @@
   var CREATIONS_URL = CFG.creationsUrl || '/mes-creations/';
 
   function init() {
-    // Drapeau immersion : tout clic sur une carte-pièce (home OU /mes-creations/)
-    // pose un cookie de session. Le serveur n'active l'immersion que si ce cookie
-    // est présent → l'immersion ne s'obtient QUE depuis le room-picker (pas via
-    // une URL ?piece= froide / partagée / d'un revenant). Délégué au document car
-    // le conteneur diffère (home: [data-room-picker], archive: [data-mes-creations-picker]).
-    document.addEventListener('click', function (e) {
-      var card = (e.target && e.target.closest) ? e.target.closest('a.room-card[href*="piece="]') : null;
-      if (card) document.cookie = 'sapi_imm=1; path=/; SameSite=Lax';
-    });
-
     var picker = document.querySelector('[data-room-picker]');
-    if (!picker) return; // freetext = home / conseils seulement
+    if (!picker) return;
 
     var forms = picker.querySelectorAll('[data-room-picker-freetext]');
     forms.forEach(function (form) {
