@@ -178,6 +178,9 @@
       html += '<button type="button" class="mes-creations-selection__nav-arrow" data-nav="next" aria-label="Suivant">' + ARROW_NEXT + '</button>';
       navEl.innerHTML = html;
       navEl.hidden = false;
+      // La classe partagée .mes-creations-selection__nav est opacity:0 tant que
+      // .is-revealed n'est pas posée → on l'active (la sélection gère le fade).
+      navEl.classList.add('is-revealed');
       updateNav();
     }
     if (navEl) {
