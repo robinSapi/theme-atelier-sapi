@@ -3487,9 +3487,9 @@ add_filter('body_class', function ($classes) {
   return $classes;
 });
 
-<?php /* Reprise auto retirée (décision Robin) : un revenant arrive sur le
- * room-picker, pas directement dans l'immersion. L'immersion s'obtient via un
- * clic sur une carte-pièce (lien ?piece=) ; plus de redirection automatique. */ ?>
+/* Reprise auto retirée (décision Robin) : un revenant arrive sur le room-picker,
+   pas directement dans l'immersion. L'immersion s'obtient via un clic sur une
+   carte-pièce (lien ?piece=) ; plus de redirection automatique. */
 
 /**
  * Sanitise un payload {answers, labels} en ne gardant que les paires reconnues
