@@ -5715,13 +5715,12 @@ function sapi_guide_collect_results($query, array $answers, $skip_exclusions = f
 }
 
 /**
- * Refonte filtrage Conseiller (Tâche 1) — CONFIG UNIQUE du moteur de filtrage.
- * Source de vérité : lue par tout le filtre PHP (get_categories, ampoule, format,
- * priorité…) ET localisée au JS. Calquée sur le simulateur
- * (assets/guide-filtrage-simulateur.html). Sera basculée en option WordPress
- * (DB) en Tâche 5. Une SEULE définition, pas de variable locale d'enqueue.
+ * Refonte filtrage Conseiller — valeurs PAR DÉFAUT du moteur de filtrage.
+ * Socle en dur calqué sur le simulateur (assets/guide-filtrage-simulateur.html).
+ * Toute clé non surchargée par l'admin (Tâche 5, option `sapi_conseiller_rules`)
+ * retombe ici. NE PAS lire directement : passer par sapi_conseiller_get_rules().
  */
-function sapi_conseiller_get_rules() {
+function sapi_conseiller_default_rules() {
   return [
     // ── Filtre DUR : ampoule par pièce ──
     'ampoule_by_piece' => [
@@ -5785,6 +5784,22 @@ function sapi_conseiller_get_rules() {
     // ── Taille ──
     'grande_exclut_2_tailles'  => true,
   ];
+}
+
+/**
+ * Règles de filtrage EFFECTIVES = défauts surchargés par l'option admin
+ * `sapi_conseiller_rules` (Tâche 5), au niveau des clés de 1er rang (l'admin
+ * sauvegarde la valeur complète de chaque règle éditée → array_merge suffit).
+ * `apply_filters('sapi_conseiller_rules', …)` permet à l'aperçu live (5.4)
+ * d'injecter des règles « draft » NON sauvegardées le temps d'une requête, sans
+ * toucher à l'option. SEULE source pour tout le filtre PHP — ne jamais relire
+ * l'array en dur ailleurs (cf. piège « config en variable locale » corrigé).
+ */
+function sapi_conseiller_get_rules() {
+  $defaults = sapi_conseiller_default_rules();
+  $saved = get_option('sapi_conseiller_rules', []);
+  $rules = (is_array($saved) && $saved) ? array_merge($defaults, $saved) : $defaults;
+  return apply_filters('sapi_conseiller_rules', $rules);
 }
 
 /**
