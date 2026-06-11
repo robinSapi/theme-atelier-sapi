@@ -24847,7 +24847,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   z-index: 2;
   left: 0;
   right: 0;
-  bottom: 8vh;
+  bottom: 5vh;
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
@@ -24888,6 +24888,13 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 .mescreations-immersion__pcard--sur {
   flex: 0 0 calc((100% - 36px) / 3);
   scroll-snap-align: start;
+}
+/* Le hero fait 100vh fixe → on plafonne la hauteur de l'image (sinon les cards
+   1:1 larges sont trop hautes et remontent dans le texte). Le reste de la card
+   (nom/catégorie/prix/bouton) garde le design catalogue. */
+.mescreations-immersion__slider .product-card-cinetique .product-media {
+  aspect-ratio: auto;
+  height: 25vh;
 }
 
 /* Nav flèches + dots — mêmes classes que la sélection du site, couleurs
