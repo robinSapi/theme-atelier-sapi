@@ -24774,6 +24774,33 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 }
 .mescreations-immersion__char.is-shown { opacity: 1; }
 
+/* Loader « Robin rédige son conseil » : 3 points qui pulsent doucement, pendant
+   le calcul du commentaire IA (entre la fin du questionnaire et son arrivée). */
+.mescreations-immersion__dots {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 0.4em;
+  vertical-align: middle;
+}
+.mescreations-immersion__dots span {
+  width: 0.42em;
+  height: 0.42em;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.28;
+  -webkit-animation: sapi-immersion-dot 1.3s infinite ease-in-out;
+  animation: sapi-immersion-dot 1.3s infinite ease-in-out;
+}
+.mescreations-immersion__dots span:nth-child(2) { -webkit-animation-delay: 0.18s; animation-delay: 0.18s; }
+.mescreations-immersion__dots span:nth-child(3) { -webkit-animation-delay: 0.36s; animation-delay: 0.36s; }
+@-webkit-keyframes sapi-immersion-dot { 0%, 65%, 100% { opacity: 0.28; } 32% { opacity: 1; } }
+@keyframes sapi-immersion-dot { 0%, 65%, 100% { opacity: 0.28; } 32% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .mescreations-immersion__dots span { -webkit-animation: none; animation: none; opacity: 0.6; }
+}
+
 /* Question d'affinage */
 /* Bouton « Décrire mon projet en détail » sous la citation (ouvre la modale). */
 .mescreations-immersion__describe {

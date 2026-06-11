@@ -487,6 +487,11 @@
       return advice;
     });
 
+    // Immersion /mes-creations/ : dès le DÉBUT du calcul (modale encore ouverte),
+    // on fait disparaître la phrase générique et on affiche le loader (3 points).
+    // Le commentaire IA personnalisé la remplacera via 'sapi:advice-ready'.
+    document.dispatchEvent(new CustomEvent('sapi:advice-loading'));
+
     // 2. Save les réponses dans sapiProject SANS advice_text. Add la class
     //    .is-awaiting-advice sur la card AVANT le set, pour que le subscribe
     //    qui fire ne déclenche pas un typewriter sur le texte générique.
@@ -605,6 +610,11 @@
       // Hack : notify manuel via un setAdviceText(null) — pas idéal mais OK.
       window.sapiProject.setAdviceText(null);
     }
+    // Immersion : remplacer le loader par le commentaire IA (ou revenir au
+    // texte générique si l'IA n'a rien renvoyé → advice vide).
+    document.dispatchEvent(new CustomEvent('sapi:advice-ready', {
+      detail: { advice: (typeof advice === 'string' ? advice : '') }
+    }));
   }
 
   // Séquence de sortie en 3 phases (~2s) :

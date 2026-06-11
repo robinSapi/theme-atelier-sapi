@@ -36,6 +36,7 @@
       scrollhint:    section.querySelector('[data-immersion-scrollhint]')
     };
     if (els.phrase) els.phraseText = els.phrase.getAttribute('data-immersion-phrase-text') || '';
+    var genericPhrase = els.phraseText; // conseil générique par pièce (repli si l'IA échoue)
 
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var typeTimer = null;
@@ -89,6 +90,32 @@
         }
       }, CHAR_DELAY);
     }
+
+    /* ── Commentaire IA personnalisé (fin de questionnaire modale) ──
+       La modale émet 'sapi:advice-loading' DÈS le début du calcul (encore
+       ouverte) → on vide la phrase et on affiche un loader 3 points. Puis
+       'sapi:advice-ready' avec le texte → on le tape (ou repli générique). */
+    function showPhraseDots() {
+      if (!els.phraseContent) return;
+      clearInterval(typeTimer);
+      charSpans = [];
+      els.phraseContent.innerHTML =
+        '<span class="mescreations-immersion__dots" role="status" aria-label="Robin rédige son conseil">' +
+        '<span></span><span></span><span></span></span>';
+    }
+    function retypePhrase(text) {
+      els.phraseText = text || '';
+      buildChars(els.phraseText);
+      revealChars();
+    }
+    document.addEventListener('sapi:advice-loading', function () {
+      if (els.phraseContent) showPhraseDots();
+    });
+    document.addEventListener('sapi:advice-ready', function (e) {
+      if (!els.phraseContent) return;
+      var advice = (e && e.detail && typeof e.detail.advice === 'string') ? e.detail.advice.trim() : '';
+      retypePhrase(advice || genericPhrase);
+    });
 
     /* Bouton « Décrire mon projet en détail » → ouvre la modale Conseiller
        (questionnaire complet) pour un produit plus adapté. */
