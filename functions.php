@@ -383,6 +383,18 @@ function sapi_maison_enqueue_assets() {
       // ── Réglages divers du simulateur (centralisés ici) ──
       'style_essence' => ['moderne' => 'peuplier', 'ancien' => 'okoume', 'neutre' => ''],
       'escalier_map'  => ['standard' => 'petite', 'ouvert' => 'grande'],
+      // ── Filtre DUR : catégories à retirer en cuisine ──
+      // (valeur ACTUELLE ; la Tâche 2 y ajoutera 'lampadaires')
+      'cuisine_remove' => ['lampesaposer'],
+      // ── Filtre DUR : format des suspensions (valeurs ACTUELLES) ──
+      // vertical_haute=false aujourd'hui (le vertical « toutes pièces si plafond
+      // haut » est la nouveauté Tâche 2 → passera à true là-bas).
+      'vertical_haute'           => false,
+      'vertical_entree_confort'  => true,
+      'vertical_petite_confort'  => true,
+      'horizontal_petite_haute'  => true,
+      // ── Taille : grande pièce exclut les suspensions à ≤2 tailles ──
+      'grande_exclut_2_tailles'  => true,
     ];
 
     // Pills catégorie sur /mes-creations/ (Chantier 3) — filtrage AJAX-less
@@ -5262,78 +5274,59 @@ function sapi_robin_call_claude_step($system_prompt, $user_message) {
  * Step 1 → WooCommerce product categories
  */
 function sapi_guide_get_categories(array $answers) {
+  // Refonte filtrage (Tâche 1) : lit la config unique $sapi_filter_rules au lieu
+  // de règles en dur. Comportement identique aux entrées réelles.
+  global $sapi_filter_rules;
+  $rules = is_array($sapi_filter_rules) ? $sapi_filter_rules : [];
+
   $sortie    = isset($answers['sortie'])    ? $answers['sortie']    : '';
   $piece     = isset($answers['piece'])     ? $answers['piece']     : '';
   $eclairage = isset($answers['eclairage']) ? $answers['eclairage'] : '';
+  $cuisine_remove = (isset($rules['cuisine_remove']) && is_array($rules['cuisine_remove']))
+    ? $rules['cuisine_remove'] : ['lampesaposer'];
 
-  // Éclairage secondaire → pool limité, affiné par sortie
-  if ($eclairage === 'secondaire') {
-    // Round 3.1 — Fix 2 : default (sortie=ne-sais-pas) inclut désormais
-    // 'appliques' par cohérence avec $sapi_filter_rules['cats_secondaire_by_sortie']['ne-sais-pas']
-    // (Round 1 — e41f735, RÉEL #4). Le kit prise électrique (savoir.txt:48,
-    // regles.txt:37) permet l'installation d'une applique sans sortie murale dédiée.
-    $pool = ['lampadaires', 'lampesaposer', 'appliques'];
-    if ($sortie === 'plafond') {
-      $pool = ['suspensions'];
-    } elseif ($sortie === 'mur') {
-      $pool = ['appliques'];
-    } elseif ($sortie === 'pas-de-sortie') {
-      $pool = ['lampadaires', 'lampesaposer', 'appliques'];
-    }
-    if ($piece === 'cuisine') {
-      $pool = array_values(array_diff($pool, ['lampesaposer']));
-    }
-    return $pool;
+  // Choix de la table de catégories (principale vs secondaire), repli sur la
+  // ligne 'ne-sais-pas' pour toute sortie inconnue (comportement actuel).
+  $map_key = ($eclairage === 'secondaire') ? 'cats_secondaire_by_sortie' : 'cats_by_sortie';
+  $map = (isset($rules[$map_key]) && is_array($rules[$map_key])) ? $rules[$map_key] : [];
+  if (isset($map[$sortie]) && is_array($map[$sortie])) {
+    $cats = $map[$sortie];
+  } elseif (isset($map['ne-sais-pas']) && is_array($map['ne-sais-pas'])) {
+    $cats = $map['ne-sais-pas'];
+  } else {
+    $cats = ($eclairage === 'secondaire')
+      ? ['lampadaires', 'lampesaposer', 'appliques']
+      : ['suspensions', 'lampadaires', 'lampesaposer', 'appliques'];
   }
+  $cats = array_values($cats);
 
-  switch ($sortie) {
-    case 'plafond':
-      $cats = ['suspensions'];
-      break;
-    case 'mur':
-      $cats = ['appliques'];
-      break;
-    case 'pas-de-sortie':
-      $cats = ['lampadaires', 'lampesaposer', 'appliques'];
-      break;
-    default:
-      // Round 3 — Lot B : "ne-sais-pas" inclut désormais appliques, par cohérence
-      // avec $sapi_filter_rules['cats_by_sortie']['ne-sais-pas'] (Round 2 — N8,
-      // commit d8be0ff). Le kit prise électrique (savoir.txt:48, regles.txt:37)
-      // permet l'installation d'une applique sans sortie murale dédiée.
-      $cats = ['suspensions', 'lampadaires', 'lampesaposer', 'appliques'];
-  }
-
-  // Règle A : jamais de lampe à poser en cuisine
+  // Retraits en cuisine (jamais de lampe à poser ; + lampadaires en Tâche 2).
   if ($piece === 'cuisine') {
-    $cats = array_values(array_diff($cats, ['lampesaposer']));
+    $cats = array_values(array_diff($cats, $cuisine_remove));
   }
 
   return $cats;
 }
 
 /**
- * Get ampoule type filter based on room
+ * Get ampoule type filter based on room (lit la config unique — Tâche 1).
  */
 function sapi_guide_get_ampoule_filter($piece, $taille = '') {
-  switch ($piece) {
-    case 'cuisine':
-    case 'bureau':
-      if ($taille === 'grande') {
-        return null; // grande pièce : tous les types OK
-      }
-      return ['ampoule_degagee', 'semi_degagee'];
-    case 'salon':
-    case 'chambre':
-    case 'chambre-enfant':
-    case 'entree':
-      // Round 5 — entrée bénéficie du même filtre que salon/chambre :
-      // ampoule entourée privilégiée (cf. guide-prompt-savoir.txt qui
-      // recommande l'ampoule entourée pour salon/chambre/entrée/couloir).
-      return ['ampoule_entouree', 'semi_degagee'];
-    default:
-      return null; // escalier : tous types OK
+  global $sapi_filter_rules;
+  $rules = is_array($sapi_filter_rules) ? $sapi_filter_rules : [];
+
+  $skip = (isset($rules['ampoule_skip_when_grande']) && is_array($rules['ampoule_skip_when_grande']))
+    ? $rules['ampoule_skip_when_grande'] : ['cuisine', 'bureau'];
+  if ($taille === 'grande' && in_array($piece, $skip, true)) {
+    return null; // grande pièce de travail : tous les types OK
   }
+
+  $map = (isset($rules['ampoule_by_piece']) && is_array($rules['ampoule_by_piece']))
+    ? $rules['ampoule_by_piece'] : [];
+  if (array_key_exists($piece, $map)) {
+    return is_array($map[$piece]) ? $map[$piece] : null;
+  }
+  return null; // escalier / pièce inconnue : pas de filtre
 }
 
 /**
@@ -5355,17 +5348,25 @@ function sapi_guide_query_products(array $answers, array $categories) {
     'operator' => 'IN',
   ];
 
-  // Format vertical : exclu par défaut pour suspensions, SAUF escalier ou (petite + haute)
+  // Format des suspensions : règles lues depuis la config unique (Tâche 1).
+  global $sapi_filter_rules;
+  $rules = is_array($sapi_filter_rules) ? $sapi_filter_rules : [];
   $piece   = isset($answers['piece'])   ? $answers['piece']   : '';
   $taille  = isset($answers['taille'])  ? $answers['taille']  : '';
   $hauteur = isset($answers['hauteur']) ? $answers['hauteur'] : '';
 
   $eclairage = isset($answers['eclairage']) ? $answers['eclairage'] : '';
 
+  $v_haute  = !empty($rules['vertical_haute']);
+  $v_entree = !isset($rules['vertical_entree_confort']) || $rules['vertical_entree_confort'];
+  $v_petite = !isset($rules['vertical_petite_confort']) || $rules['vertical_petite_confort'];
+  $h_petite_haute = !isset($rules['horizontal_petite_haute']) || $rules['horizontal_petite_haute'];
+
   $allow_vertical = (
     $piece === 'escalier' ||
-    ($piece === 'entree' && in_array($hauteur, ['haute', 'confortable'], true)) ||
-    ($taille === 'petite' && in_array($hauteur, ['haute', 'confortable'], true))
+    ($v_haute && $hauteur === 'haute') ||
+    ($v_entree && $piece === 'entree' && in_array($hauteur, ['haute', 'confortable'], true)) ||
+    ($v_petite && $taille === 'petite' && in_array($hauteur, ['haute', 'confortable'], true))
   );
 
   if (in_array('suspensions', $categories) && !$allow_vertical) {
@@ -5380,7 +5381,7 @@ function sapi_guide_query_products(array $answers, array $categories) {
   // Règle B : exclure format horizontal dans les espaces étroits + hauts
   $exclude_horizontal = (
     ($piece === 'escalier') ||
-    ($taille === 'petite' && $hauteur === 'haute')
+    ($h_petite_haute && $taille === 'petite' && $hauteur === 'haute')
   );
   if ($exclude_horizontal && in_array('suspensions', $categories)) {
     $tax_query[] = [
@@ -5563,6 +5564,10 @@ function sapi_guide_build_filter_context(array $answers, array $categories, arra
  * Process query results into product data arrays
  */
 function sapi_guide_collect_results($query, array $answers, $skip_exclusions = false) {
+  // Exclusion « grande pièce + suspension ≤2 tailles » : pilotée par la config.
+  global $sapi_filter_rules;
+  $grande_exclut_2 = !is_array($sapi_filter_rules) || !isset($sapi_filter_rules['grande_exclut_2_tailles'])
+    || $sapi_filter_rules['grande_exclut_2_tailles'];
   // Determine preferred essence from style answer
   $style = isset($answers['style']) ? $answers['style'] : '';
   $preferred_essence = '';
@@ -5620,7 +5625,7 @@ function sapi_guide_collect_results($query, array $answers, $skip_exclusions = f
         $taille_terms = wc_get_product_terms($product->get_id(), 'pa_taille', ['orderby' => 'menu_order']);
 
         // Grande pièce + suspension : exclure les produits avec 2 tailles ou moins (sauf en refine)
-        if (!$skip_exclusions && $taille_answer === 'grande' && !empty($taille_terms) && count($taille_terms) <= 2 && array_intersect($cat_slugs, ['suspensions'])) {
+        if ($grande_exclut_2 && !$skip_exclusions && $taille_answer === 'grande' && !empty($taille_terms) && count($taille_terms) <= 2 && array_intersect($cat_slugs, ['suspensions'])) {
           continue;
         }
 
