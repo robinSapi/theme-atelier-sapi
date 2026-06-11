@@ -63,40 +63,52 @@
     var seqTimers = [];
     function later(fn, ms) { var t = setTimeout(fn, ms); seqTimers.push(t); return t; }
 
-    /* Réserve la hauteur finale du texte DÈS LE DÉPART (mesure le texte complet
-       puis vide) : le cadre a sa taille définitive avant la frappe → le bloc ne
-       grandit jamais ligne par ligne, donc aucun saut pendant la lecture. */
-    function reservePhraseHeight() {
-      if (!els.phrase || !els.phraseContent) return;
-      els.phraseContent.textContent = els.phraseText || '';
-      els.phrase.style.minHeight = els.phrase.offsetHeight + 'px';
-      els.phraseContent.textContent = '';
+    var charSpans = [];
+    var CHAR_DELAY = 34; // cadence d'apparition (ms/lettre) — un peu plus lente
+
+    /* Construit le texte en spans lettre par lettre (mot = inline-block pour ne
+       pas couper un mot en fin de ligne). Toutes les lettres sont présentes dès
+       le départ (opacity 0) → la hauteur du cadre est réservée (aucun saut). */
+    function buildChars(text) {
+      charSpans = [];
+      if (!els.phraseContent) return;
+      els.phraseContent.innerHTML = '';
+      if (!text) return;
+      var words = text.split(' ');
+      var frag = document.createDocumentFragment();
+      words.forEach(function (word, wi) {
+        var w = document.createElement('span');
+        w.className = 'mescreations-immersion__word';
+        for (var k = 0; k < word.length; k++) {
+          var c = document.createElement('span');
+          c.className = 'mescreations-immersion__char';
+          c.textContent = word.charAt(k);
+          w.appendChild(c);
+          charSpans.push(c);
+        }
+        frag.appendChild(w);
+        if (wi < words.length - 1) frag.appendChild(document.createTextNode(' '));
+      });
+      els.phraseContent.appendChild(frag);
     }
 
-    /* ── Machine à écrire (le cadre est déjà à sa hauteur finale, cf. ci-dessus) ── */
-    function typewriter(text, done) {
-      if (!els.phraseContent || !els.phrase) { done && done(); return; }
-      if (reduceMotion || !text) {
-        els.phraseContent.textContent = text || '';
-        els.phrase.classList.add('is-done');
-        els.phrase.style.minHeight = ''; // texte complet présent → hauteur naturelle
+    /* Révèle chaque lettre en fondu, une à une (CSS transition opacity). */
+    function revealChars(done) {
+      if (reduceMotion || !charSpans.length) {
+        charSpans.forEach(function (c) { c.classList.add('is-shown'); });
         done && done();
         return;
       }
       var i = 0;
-      els.phrase.classList.remove('is-done');
-      els.phraseContent.textContent = '';
       clearInterval(typeTimer);
       typeTimer = setInterval(function () {
+        if (charSpans[i]) charSpans[i].classList.add('is-shown');
         i++;
-        els.phraseContent.textContent = text.slice(0, i);
-        if (i >= text.length) {
+        if (i >= charSpans.length) {
           clearInterval(typeTimer);
-          els.phrase.classList.add('is-done');
-          els.phrase.style.minHeight = ''; // texte complet → on libère (responsive)
           done && done();
         }
-      }, 26);
+      }, CHAR_DELAY);
     }
 
     /* ── Affinage inline (stocke la réponse, passe à la suivante ; NE déclenche
@@ -243,16 +255,16 @@
     /* ── Séquence d'entrée (au load) : pill → phrase qui s'écrit → question →
        hint. La révélation de la sélection, elle, se joue au scroll. ── */
     function playSequence() {
-      reservePhraseHeight();
+      buildChars(els.phraseText); // lettres présentes (opacity 0) → hauteur réservée
       renderQuestion();
       var safety = null;
       if (!reduceMotion) {
         lockScroll();
-        safety = later(unlockScroll, 7000); // filet de sécurité
+        safety = later(unlockScroll, 9000); // filet de sécurité
       }
       later(function () { if (els.sig) els.sig.classList.add('is-in'); }, reduceMotion ? 0 : 300);
       later(function () {
-        typewriter(els.phraseText, function () {
+        revealChars(function () {
           unlockScroll();
           if (safety) clearTimeout(safety);
           later(function () { if (els.affine) els.affine.classList.add('is-in'); }, reduceMotion ? 0 : 250);

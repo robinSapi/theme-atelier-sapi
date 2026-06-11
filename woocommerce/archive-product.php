@@ -162,7 +162,7 @@ if ($imm_piece) {
     <!-- Phrase de conseil (machine à écrire au load, ne se réécrit jamais).
          Le texte complet est dans data-immersion-phrase-text ; le JS l'écrit. -->
     <p class="mescreations-immersion__phrase" data-immersion-phrase data-immersion-phrase-text="<?php echo esc_attr($imm_phrase); ?>">
-      <span class="mescreations-immersion__phrase-content"></span><span class="mescreations-immersion__caret" aria-hidden="true"></span>
+      <span class="mescreations-immersion__phrase-content"></span>
     </p>
 
     <!-- Question d'affinage inline (taille puis style — révélées par le JS).

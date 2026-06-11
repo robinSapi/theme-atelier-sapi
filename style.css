@@ -24711,19 +24711,15 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   min-height: 2.4em;
   margin: 0;
 }
-.mescreations-immersion__caret {
-  display: inline-block;
-  width: 2px;
-  height: 1em;
-  background: var(--color-orange);
-  vertical-align: -2px;
-  margin-left: 2px;
-  -webkit-animation: immersionBlink 1s steps(1) infinite;
-  animation: immersionBlink 1s steps(1) infinite;
+/* Machine à écrire en fondu : chaque lettre apparaît en opacity (mot = bloc
+   inline-block pour ne pas couper un mot en fin de ligne). */
+.mescreations-immersion__word { display: inline-block; }
+.mescreations-immersion__char {
+  opacity: 0;
+  -webkit-transition: opacity .55s ease;
+  transition: opacity .55s ease;
 }
-.mescreations-immersion__phrase.is-done .mescreations-immersion__caret { display: none; }
-@-webkit-keyframes immersionBlink { 50% { opacity: 0; } }
-@keyframes immersionBlink { 50% { opacity: 0; } }
+.mescreations-immersion__char.is-shown { opacity: 1; }
 
 /* Question d'affinage */
 .mescreations-immersion__affine {
