@@ -33,6 +33,8 @@
       affineChips:   section.querySelector('[data-immersion-affine-chips]'),
       refine:        section.querySelector('[data-immersion-refine]'),
       selection:     section.querySelector('[data-immersion-selection]'),
+      slider:        section.querySelector('[data-immersion-slider]'),
+      nav:           section.querySelector('[data-immersion-nav]'),
       scrollhint:    section.querySelector('[data-immersion-scrollhint]')
     };
     if (els.phrase) els.phraseText = els.phrase.getAttribute('data-immersion-phrase-text') || '';
@@ -130,6 +132,63 @@
       document.dispatchEvent(new CustomEvent('sapi:open-modal', { detail: { state: 's3' } }));
     }
     if (els.refine) els.refine.addEventListener('click', openModaleRefine);
+
+    /* ── Carousel sélection : flèches + dots (3 visibles desktop), mêmes classes
+       que la sélection du site. On scrolle d'une "page" (= largeur visible). ── */
+    var sliderEl = els.slider, navEl = els.nav;
+    var pageW = 0, pages = 1;
+    var ARROW_PREV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
+    var ARROW_NEXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>';
+    function recomputePages() {
+      pageW = sliderEl ? sliderEl.clientWidth : 0;
+      pages = pageW > 0 ? Math.ceil((sliderEl.scrollWidth - 2) / pageW) : 1;
+    }
+    function updateNav() {
+      if (!navEl || navEl.hidden || !pageW) return;
+      var page = Math.round(sliderEl.scrollLeft / pageW);
+      var dots = navEl.querySelectorAll('.mes-creations-selection__nav-dot');
+      [].slice.call(dots).forEach(function (d, idx) { d.classList.toggle('is-active', idx === page); });
+      var prev = navEl.querySelector('[data-nav="prev"]');
+      var next = navEl.querySelector('[data-nav="next"]');
+      if (prev) prev.disabled = sliderEl.scrollLeft <= 2;
+      if (next) next.disabled = sliderEl.scrollLeft >= sliderEl.scrollWidth - pageW - 2;
+    }
+    function renderNav() {
+      if (!navEl || !sliderEl) return;
+      recomputePages();
+      if (pages <= 1) { navEl.hidden = true; navEl.innerHTML = ''; return; }
+      var html = '<button type="button" class="mes-creations-selection__nav-arrow" data-nav="prev" aria-label="Précédent">' + ARROW_PREV + '</button>';
+      html += '<div class="mes-creations-selection__nav-dots">';
+      for (var i = 0; i < pages; i++) {
+        html += '<button type="button" class="mes-creations-selection__nav-dot" data-page="' + i + '" aria-label="Page ' + (i + 1) + '"></button>';
+      }
+      html += '</div>';
+      html += '<button type="button" class="mes-creations-selection__nav-arrow" data-nav="next" aria-label="Suivant">' + ARROW_NEXT + '</button>';
+      navEl.innerHTML = html;
+      navEl.hidden = false;
+      updateNav();
+    }
+    if (navEl) {
+      navEl.addEventListener('click', function (e) {
+        var dot = e.target.closest('[data-page]');
+        var arrow = e.target.closest('[data-nav]');
+        if (dot) {
+          sliderEl.scrollTo({ left: parseInt(dot.getAttribute('data-page'), 10) * pageW, behavior: reduceMotion ? 'auto' : 'smooth' });
+        } else if (arrow) {
+          var dir = arrow.getAttribute('data-nav') === 'next' ? 1 : -1;
+          sliderEl.scrollBy({ left: dir * pageW, behavior: reduceMotion ? 'auto' : 'smooth' });
+        }
+      });
+    }
+    if (sliderEl) {
+      var navRaf = null;
+      sliderEl.addEventListener('scroll', function () {
+        if (navRaf) cancelAnimationFrame(navRaf);
+        navRaf = requestAnimationFrame(updateNav);
+      }, { passive: true });
+    }
+    renderNav();
+    window.addEventListener('resize', renderNav, { passive: true });
 
     /* ── Header + bandeau : MÊME mécanisme que la home (front-page.php). Le
        bandeau global est déplacé juste après le track et reçoit

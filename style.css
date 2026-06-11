@@ -24666,7 +24666,10 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   z-index: 2;
   left: 0;
   right: 0;
-  top: 50%;
+  /* Centré à l'état initial (top 50% + translateY -50%) → remonte jusqu'à
+     ~11vh du haut au scroll (reste SOUS le header), en rétrécissant en scale
+     (pas de reflow). À reveal 1 : top 11vh, translateY 0, scale ~0.72. */
+  top: calc(50% - var(--reveal) * 39vh);
   width: 100%;
   max-width: 1320px;
   margin: 0 auto;
@@ -24675,13 +24678,11 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   flex-direction: column;
   align-items: center;
   gap: 18px;
-  /* Remonte (jusqu'en haut, sous le header) + rétrécit proportionnellement
-     (scale, pas de reflow) au scroll. transform-origin top → remonte vraiment. */
   -webkit-transform-origin: center top;
   transform-origin: center top;
-  -webkit-transform: translateY(-50%) translateY(calc(var(--reveal) * -34vh)) scale(calc(1 - var(--reveal) * 0.28));
-  transform: translateY(-50%) translateY(calc(var(--reveal) * -34vh)) scale(calc(1 - var(--reveal) * 0.28));
-  will-change: transform;
+  -webkit-transform: translateY(calc(-50% * (1 - var(--reveal)))) scale(calc(1 - var(--reveal) * 0.28));
+  transform: translateY(calc(-50% * (1 - var(--reveal)))) scale(calc(1 - var(--reveal) * 0.28));
+  will-change: transform, top;
 }
 
 /* Pill V1 — fade-in */
@@ -24874,24 +24875,38 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   display: flex;
   gap: 18px;
   overflow-x: auto;
-  padding: 4px 2px 16px;
+  padding: 4px 2px 8px;
   scroll-snap-type: x mandatory;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
-.mescreations-immersion__slider::-webkit-scrollbar { height: 6px; }
-.mescreations-immersion__slider::-webkit-scrollbar-thumb { background: rgba(255,255,255,.4); border-radius: 3px; }
+.mescreations-immersion__slider::-webkit-scrollbar { display: none; }
 
 /* Cards produit = EXACTEMENT le design du catalogue (.product-card-cinetique).
-   On ne fait que les dimensionner pour le slider horizontal. */
-.mescreations-immersion__slider .product-card-cinetique {
-  flex: 0 0 244px;
+   3 visibles par page (slider à flèches + dots, comme le reste du site). */
+.mescreations-immersion__slider .product-card-cinetique,
+.mescreations-immersion__pcard--sur {
+  flex: 0 0 calc((100% - 36px) / 3);
   scroll-snap-align: start;
+}
+
+/* Nav flèches + dots — mêmes classes que la sélection du site, couleurs
+   adaptées au fond sombre/photo. */
+.mescreations-immersion__nav {
+  margin-top: 16px;
+}
+.mescreations-immersion__nav .mes-creations-selection__nav-dot {
+  background: rgba(255, 255, 255, 0.4);
+}
+.mescreations-immersion__nav .mes-creations-selection__nav-dot:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+.mescreations-immersion__nav .mes-creations-selection__nav-dot.is-active {
+  background: #fff;
 }
 
 /* Carte sur-mesure en fin de slider (CTA, volontairement distincte) */
 .mescreations-immersion__pcard--sur {
-  flex: 0 0 244px;
-  scroll-snap-align: start;
   border-radius: 14px;
   overflow: hidden;
   text-decoration: none;
@@ -24948,9 +24963,13 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   padding-bottom: 2px;
 }
 
+@media (max-width: 900px) {
+  .mescreations-immersion__slider .product-card-cinetique,
+  .mescreations-immersion__pcard--sur { flex-basis: calc((100% - 18px) / 2); }
+}
 @media (max-width: 600px) {
   .mescreations-immersion__slider .product-card-cinetique,
-  .mescreations-immersion__pcard--sur { flex-basis: 200px; }
-  .mescreations-immersion__selection { bottom: 5vh; }
+  .mescreations-immersion__pcard--sur { flex-basis: 82%; }
+  .mescreations-immersion__selection { bottom: 4vh; }
   .mescreations-immersion__inner { gap: 14px; }
 }

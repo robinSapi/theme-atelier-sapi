@@ -231,6 +231,9 @@ if ($imm_piece) {
         </span>
       </a>
     </div>
+    <!-- Nav slider : flèches + dots (mêmes classes que la sélection du site),
+         peuplée par sapi-mescreations-immersion.js. -->
+    <div class="mes-creations-selection__nav mescreations-immersion__nav" data-immersion-nav hidden></div>
     <!-- Lien discret « Préciser avec Robin » → ouvre la modale (questionnaire
          complet), sans réécrire l'IA. -->
     <button type="button" class="mescreations-immersion__refine" data-immersion-refine data-action="open-modal" data-modal-state="s3">
