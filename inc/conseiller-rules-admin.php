@@ -625,12 +625,13 @@ function sapi_rules_ajax_preview() {
   }
 
   // DEBUG temporaire (Tâche 5) — à retirer une fois l'aperçu validé.
+  $raw_opt = get_option('sapi_conseiller_rules', '__NONE__');
   $out['debug'] = [
-    'posted_has_rules'      => isset($_POST['rules']),
-    'posted_rules_keys'     => array_keys($posted_rules),
-    'posted_cats_keys'      => isset($posted_rules['cats_by_sortie']) ? array_keys($posted_rules['cats_by_sortie']) : 'MISSING',
+    'option_exists'         => ($raw_opt !== '__NONE__'),
+    'option_cats_by_sortie' => (is_array($raw_opt) && isset($raw_opt['cats_by_sortie'])) ? $raw_opt['cats_by_sortie'] : 'AUCUNE/ABSENTE',
+    'default_cats_by_sortie'=> sapi_conseiller_default_rules()['cats_by_sortie'],
+    'raw_posted_cats'       => isset($posted_rules['cats_by_sortie']) ? $posted_rules['cats_by_sortie'] : 'MISSING',
     'draft_cats_by_sortie'  => $draft['cats_by_sortie'],
-    'merged_cats_by_sortie' => sapi_conseiller_get_rules()['cats_by_sortie'],
     'answers'               => $answers,
   ];
 
