@@ -174,6 +174,13 @@
     var lastAnswersSig = JSON.stringify({ piece: config.piece || '' });
     function refreshSelection(answers, sig) {
       if (!sliderEl || !config.ajaxUrl) return;
+      // Transition douce : on fond le slider AVANT le swap (le remplacement sec
+      // des cards « flashait »). Le fetch est un aller-retour réseau, donc le
+      // fade-out (220ms) est quasi toujours terminé quand la réponse arrive →
+      // le swap se fait pendant que le slider est invisible, puis fondu d'entrée.
+      sliderEl.style.transition = 'opacity .22s ease';
+      sliderEl.style.opacity = '0';
+      var restore = function () { sliderEl.style.opacity = '1'; };
       var fd = new FormData();
       fd.append('action', 'sapi_immersion_selection');
       fd.append('nonce', config.nonce || '');
@@ -181,7 +188,7 @@
       fetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
         .then(function (r) { return r.json(); })
         .then(function (json) {
-          if (!json || !json.success || !json.data || typeof json.data.html !== 'string') return;
+          if (!json || !json.success || !json.data || typeof json.data.html !== 'string') { restore(); return; }
           lastAnswersSig = sig; // on ne « brûle » la signature qu'en cas de succès (retry possible si échec)
           var sur = sliderEl.querySelector('.mescreations-immersion__pcard--sur');
           [].slice.call(sliderEl.querySelectorAll('.product-card-cinetique')).forEach(function (c) {
@@ -194,8 +201,10 @@
           });
           sliderEl.scrollLeft = 0;
           updateArrows();
+          // Fondu d'entrée sur la frame suivante (le swap a eu lieu à opacité 0).
+          requestAnimationFrame(restore);
         })
-        .catch(function () {});
+        .catch(restore);
     }
     /* On écoute l'événement déterministe émis par la modale à CHAQUE fermeture
        (fin ou abandon), porteur des réponses finales. Fiable contrairement au
