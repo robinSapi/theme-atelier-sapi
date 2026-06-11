@@ -4136,11 +4136,22 @@ function sapi_ajax_megafilter_advice() {
 
   $project_text = sapi_megafilter_format_project_text($answers, $labels);
 
-  // Contexte filtre : matching IDs + ignored answers (envoyés par le JS, qui
-  // est la source de vérité du filtrage côté client). On enrichit le prompt
-  // pour que l'IA sache combien de produits sont présentés au visiteur et
-  // si des contraintes ont été élargies — pour adapter sa phrase en conséquence.
-  $matching_ids = sapi_megafilter_parse_matching_ids(isset($_POST['matching_product_ids']) ? wp_unslash($_POST['matching_product_ids']) : '');
+  // Contexte filtre : quels produits sont présentés au visiteur. Refonte
+  // (filtrage 100% serveur) : le JS ne calcule PLUS la sélection, donc on la
+  // détermine ICI via le moteur réel (mêmes règles que l'immersion / l'aperçu
+  // admin). Sinon matching_ids serait vide → l'IA croirait qu'aucun modèle ne
+  // correspond et pousserait le sur-mesure à tort.
+  $adv_cats     = function_exists('sapi_guide_get_categories') ? sapi_guide_get_categories($answers) : [];
+  $adv_res      = function_exists('sapi_guide_query_products')  ? sapi_guide_query_products($answers, $adv_cats) : ['products' => []];
+  $adv_products = isset($adv_res['products']) ? $adv_res['products'] : [];
+  if (function_exists('sapi_conseiller_rank_products')) {
+    $adv_products = sapi_conseiller_rank_products($adv_products, $answers);
+  }
+  $matching_ids = array_values(array_filter(array_map(function ($p) {
+    return isset($p['id']) ? (int) $p['id'] : 0;
+  }, $adv_products)));
+  // ignored_answers : plus calculé par le JS ; les éventuels relâchements sont
+  // dans $adv_res['fallback_notes'] (non injectés ici pour l'instant).
   $ignored_keys = sapi_megafilter_parse_ignored_answers(isset($_POST['ignored_answers']) ? wp_unslash($_POST['ignored_answers']) : '');
   $all_products = sapi_guide_query_all_products([]);
   $catalog_split_block  = sapi_megafilter_format_catalog_split($all_products, $matching_ids);
