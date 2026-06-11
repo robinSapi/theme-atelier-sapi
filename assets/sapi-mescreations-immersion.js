@@ -204,6 +204,20 @@
     document.addEventListener('sapi:conseiller-closed', function (e) {
       var answers = (e && e.detail && e.detail.answers) ? e.detail.answers : {};
       if (!answers.piece) return; // jamais sans pièce
+      // Changement de pièce (le projet recommence sur une autre pièce) : on
+      // recharge la page vers ?piece=<nouvelle> pour que le décor du hero
+      // (photo, phrase, pill) ET la sélection restent cohérents.
+      if (answers.piece !== (config.piece || '')) {
+        try {
+          var url = new URL(window.location.href);
+          url.searchParams.set('piece', answers.piece);
+          window.location.assign(url.toString());
+        } catch (err) {
+          window.location.search = '?piece=' + encodeURIComponent(answers.piece);
+        }
+        return;
+      }
+      // Même pièce, seuls les affinages changent : rechargement AJAX du slider.
       var sig = JSON.stringify(answers);
       if (sig === lastAnswersSig) return; // identique à ce qui est déjà affiché
       refreshSelection(answers, sig);
