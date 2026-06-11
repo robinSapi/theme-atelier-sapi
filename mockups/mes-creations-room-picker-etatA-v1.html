@@ -102,8 +102,8 @@
   <b>MAQUETTE</b> — /mes-creations/ <b>sans ?piece=</b> (état A) · Tâche 4 room-picker. Cliquer une pièce → recharge <code>?piece=&lt;slug&gt;</code> → immersion.
   <span class="demo-toggle">
     Visiteur :
-    <button id="t-new" class="on" onclick="setReturn(false)">nouveau</button>
-    <button id="t-ret" onclick="setReturn(true)">revenant (projet en cours)</button>
+    <button id="t-new" class="on" onclick="setReturn(false)">nouveau → room-picker</button>
+    <button id="t-ret" onclick="setReturn(true)">revenant → redirection auto</button>
   </span>
 </div>
 
@@ -116,14 +116,16 @@
 <section class="picker-hero">
   <div class="picker-inner">
 
-    <!-- Bande "Reprendre" : visible seulement si projet sauvegardé (mini-JS localStorage) -->
+    <!-- REVENANT : pas de bande. Au chargement, un script wp_head lit le projet
+         sauvegardé (localStorage['sapiProject']) et REDIRIGE direct vers
+         ?piece=<pièce> avant le paint. La "bande" ci-dessous n'est qu'une
+         simulation visuelle de ce qui se passerait (en réalité : redirection). -->
     <div class="resume-band" role="note">
       <span class="resume-band__ico" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v4h4"/></svg>
       </span>
-      <span class="resume-band__txt">Tu avais commencé un projet pour <b>ta cuisine</b>.</span>
-      <a class="resume-band__cta" href="?piece=cuisine">Reprendre ma sélection</a>
-      <button class="resume-band__dismiss" title="Repartir de zéro" onclick="setReturn(false)">×</button>
+      <span class="resume-band__txt">Projet en cours pour <b>ta cuisine</b> détecté → <b>redirection automatique</b> vers la page immersion <code>?piece=cuisine</code> (zéro clic). <i>Ceci est juste une simulation : en vrai, la page bascule directement.</i></span>
+      <button class="resume-band__dismiss" title="Voir le room-picker (nouveau visiteur)" onclick="setReturn(false)">×</button>
     </div>
 
     <span class="conseiller-sig--v1">
