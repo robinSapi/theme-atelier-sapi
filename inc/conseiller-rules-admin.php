@@ -148,13 +148,15 @@ function sapi_rules_sanitize($posted) {
   $c = [];
 
   $keys = function ($assoc) { return array_keys($assoc); };
-  // Helper : garde uniquement les valeurs présentes dans la whitelist.
+  // Helper : les cases à cocher multiples sont envoyées en map { option => "1" }
+  // (nom UNIQUE par case, cf. rendu). La sélection = les options autorisées
+  // présentes et cochées. Robuste aux WAF/max_input_vars qui fusionnaient les
+  // params de même nom `[]`.
   $filter_list = function ($raw, $allowed) {
     $raw = is_array($raw) ? $raw : [];
     $out = [];
-    foreach ($raw as $v) {
-      $v = is_string($v) ? $v : '';
-      if (in_array($v, $allowed, true) && !in_array($v, $out, true)) $out[] = $v;
+    foreach ($allowed as $a) {
+      if (!empty($raw[$a])) $out[] = $a;
     }
     return $out;
   };
@@ -519,7 +521,10 @@ function sapi_rules_table_map_multi($name, $rows, $options, $current) {
     echo '<tr><td class="rowlabel">' . esc_html($rlab) . '</td>';
     foreach ($options as $oslug => $olab) {
       $checked = in_array($oslug, $sel, true) ? ' checked' : '';
-      echo '<td><input type="checkbox" name="rules[' . esc_attr($name) . '][' . esc_attr($fkey) . '][]" value="' . esc_attr($oslug) . '"' . $checked . '></td>';
+      // Nom UNIQUE par case (clé = option), value=1. Évite les params de même
+      // nom `[]` fusionnés par le serveur/WAF (on perdait toutes les valeurs
+      // sauf une). La sélection = les clés cochées (cf. sanitize).
+      echo '<td><input type="checkbox" name="rules[' . esc_attr($name) . '][' . esc_attr($fkey) . '][' . esc_attr($oslug) . ']" value="1"' . $checked . '></td>';
     }
     echo '</tr>';
   }
@@ -550,7 +555,8 @@ function sapi_rules_flat_multi($name, $options, $current) {
   echo '<div>';
   foreach ($options as $oslug => $olab) {
     $checked = in_array($oslug, $current, true) ? ' checked' : '';
-    echo '<label class="chk"><input type="checkbox" name="rules[' . esc_attr($name) . '][]" value="' . esc_attr($oslug) . '"' . $checked . '> ' . esc_html($olab) . '</label>';
+    // Nom unique par case (cf. sapi_rules_table_map_multi).
+    echo '<label class="chk"><input type="checkbox" name="rules[' . esc_attr($name) . '][' . esc_attr($oslug) . ']" value="1"' . $checked . '> ' . esc_html($olab) . '</label>';
   }
   echo '</div>';
 }
