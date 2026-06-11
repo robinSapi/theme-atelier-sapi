@@ -24824,7 +24824,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   z-index: 2;
   left: 0;
   right: 0;
-  bottom: 5vh;
+  bottom: 10vh;
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
@@ -24871,7 +24871,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
    (nom/catégorie/prix/bouton) garde le design catalogue. */
 .mescreations-immersion__slider .product-card-cinetique .product-media {
   aspect-ratio: auto;
-  height: 25vh;
+  height: 22vh;
 }
 
 /* Flèches de part et d'autre du slider (pas de dots). 1 card par clic. */
@@ -24954,6 +24954,6 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 @media (max-width: 600px) {
   .mescreations-immersion__slider .product-card-cinetique,
   .mescreations-immersion__pcard--sur { flex-basis: 82%; }
-  .mescreations-immersion__selection { bottom: 4vh; }
+  .mescreations-immersion__selection { bottom: 8vh; }
   .mescreations-immersion__inner { gap: 14px; }
 }
