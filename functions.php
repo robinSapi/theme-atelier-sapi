@@ -320,83 +320,9 @@ function sapi_maison_enqueue_assets() {
   if (class_exists('WooCommerce') && (is_shop() || is_product())) {
     require_once get_template_directory() . '/inc/guide-data.php';
 
-    // Règles de filtrage utilisées par sapi-cards-conseiller.js pour décider
-    // quels produits matchent le projet du visiteur (pièce/sortie/taille).
-    $sapi_filter_rules = [
-      // Pièces avec filtre ampoule (mirror sapi_guide_get_ampoule_filter)
-      'ampoule_by_piece' => [
-        'cuisine'  => ['ampoule_degagee', 'semi_degagee'],
-        'bureau'   => ['ampoule_degagee', 'semi_degagee'],
-        'salon'    => ['ampoule_entouree', 'semi_degagee'],
-        'chambre'  => ['ampoule_entouree', 'semi_degagee'],
-        'chambre-enfant' => ['ampoule_entouree', 'semi_degagee'], // lumière douce, aligné chambre
-        'entree'   => ['ampoule_entouree', 'semi_degagee'], // Round 5 — aligné salon/chambre
-        'escalier' => null,
-      ],
-      'ampoule_skip_when_grande' => ['cuisine', 'bureau'],
-      'cats_by_sortie' => [
-        'plafond'       => ['suspensions'],
-        'mur'           => ['appliques'],
-        'pas-de-sortie' => ['lampadaires', 'lampesaposer', 'appliques'],
-        // Round 2 — 6.1 (N8) : appliques ajoutées par symétrie avec
-        // cats_secondaire_by_sortie['ne-sais-pas']. Cohérent avec le kit
-        // prise électrique (regles.txt:37, savoir.txt:48) qui permet
-        // d'installer une applique sans sortie murale.
-        'ne-sais-pas'   => ['suspensions', 'lampadaires', 'lampesaposer', 'appliques'],
-        ''              => ['suspensions', 'lampadaires', 'lampesaposer', 'appliques'],
-      ],
-      'cats_secondaire_by_sortie' => [
-        'plafond'       => ['suspensions'],
-        'mur'           => ['appliques'],
-        'pas-de-sortie' => ['lampadaires', 'lampesaposer', 'appliques'],
-        'ne-sais-pas'   => ['lampadaires', 'lampesaposer', 'appliques'],
-        ''              => ['lampadaires', 'lampesaposer'],
-      ],
-      'extras_slugs' => ['accessoires', 'carte-cadeau'],
-
-      // ── Refonte filtrage Conseiller (Tâche 1) : config UNIQUE du moteur
-      // serveur, calquée sur le simulateur (assets/guide-filtrage-simulateur.html).
-      // Source de vérité unique (sera basculée en option WordPress en Tâche 5).
-      // ── Couche PRIORITÉ (ne fait que CLASSER, n'exclut jamais) ──
-      'prio'       => true,        // activer le classement par préférence
-      'prio_mode'  => 'souple',    // 'souple' (préférés en tête + on complète) | 'strict'
-      'importance' => ['categorie', 'ampoule', 'format'], // 1er l'emporte sur 2e sur 3e
-      // Ampoule préférée par pièce (doit figurer dans ampoule_by_piece)
-      'ampoule_pref_by_piece' => [
-        'salon'          => 'ampoule_entouree',
-        'chambre'        => 'ampoule_entouree',
-        'chambre-enfant' => 'ampoule_entouree',
-        'entree'         => 'ampoule_entouree',
-        'cuisine'        => 'ampoule_degagee',
-        'bureau'         => 'ampoule_degagee',
-        'escalier'       => null,
-      ],
-      // Format de suspension préféré par pièce ('' = aucune préférence)
-      'format_pref_by_piece' => [
-        'salon' => '', 'chambre' => '', 'chambre-enfant' => '', 'cuisine' => '',
-        'bureau' => '', 'entree' => '', 'escalier' => '',
-      ],
-      // Catégorie prioritaire par sortie ('' = aucune ; surtout utile « je ne sais pas »)
-      'cat_priority_by_sortie' => [
-        'plafond' => '', 'mur' => '', 'pas-de-sortie' => '', 'ne-sais-pas' => '', '' => '',
-      ],
-      // ── Réglages divers du simulateur (centralisés ici) ──
-      'style_essence' => ['moderne' => 'peuplier', 'ancien' => 'okoume', 'neutre' => ''],
-      'escalier_map'  => ['standard' => 'petite', 'ouvert' => 'grande'],
-      // ── Filtre DUR : catégories à retirer en cuisine ──
-      // Tâche 2 : on retire AUSSI les lampadaires (lampe à poser + lampadaire au
-      // sol n'ont pas leur place près d'un plan de travail).
-      'cuisine_remove' => ['lampesaposer', 'lampadaires'],
-      // ── Filtre DUR : format des suspensions ──
-      // Tâche 2 : vertical autorisé dès que le plafond est haut (>3 m), TOUTES
-      // pièces, toutes tailles.
-      'vertical_haute'           => true,
-      'vertical_entree_confort'  => true,
-      'vertical_petite_confort'  => true,
-      'horizontal_petite_haute'  => true,
-      // ── Taille : grande pièce exclut les suspensions à ≤2 tailles ──
-      'grande_exclut_2_tailles'  => true,
-    ];
+    // Config unique du moteur de filtrage (source de vérité, cf.
+    // sapi_conseiller_get_rules). Localisée au JS + lue par tout le filtre PHP.
+    $sapi_filter_rules = sapi_conseiller_get_rules();
 
     // Pills catégorie sur /mes-creations/ (Chantier 3) — filtrage AJAX-less
     // de la grille basse par data-categories.
@@ -5277,8 +5203,7 @@ function sapi_robin_call_claude_step($system_prompt, $user_message) {
 function sapi_guide_get_categories(array $answers) {
   // Refonte filtrage (Tâche 1) : lit la config unique $sapi_filter_rules au lieu
   // de règles en dur. Comportement identique aux entrées réelles.
-  global $sapi_filter_rules;
-  $rules = is_array($sapi_filter_rules) ? $sapi_filter_rules : [];
+  $rules = sapi_conseiller_get_rules();
 
   $sortie    = isset($answers['sortie'])    ? $answers['sortie']    : '';
   $piece     = isset($answers['piece'])     ? $answers['piece']     : '';
@@ -5313,8 +5238,7 @@ function sapi_guide_get_categories(array $answers) {
  * Get ampoule type filter based on room (lit la config unique — Tâche 1).
  */
 function sapi_guide_get_ampoule_filter($piece, $taille = '') {
-  global $sapi_filter_rules;
-  $rules = is_array($sapi_filter_rules) ? $sapi_filter_rules : [];
+  $rules = sapi_conseiller_get_rules();
 
   $skip = (isset($rules['ampoule_skip_when_grande']) && is_array($rules['ampoule_skip_when_grande']))
     ? $rules['ampoule_skip_when_grande'] : ['cuisine', 'bureau'];
@@ -5350,8 +5274,7 @@ function sapi_guide_query_products(array $answers, array $categories) {
   ];
 
   // Format des suspensions : règles lues depuis la config unique (Tâche 1).
-  global $sapi_filter_rules;
-  $rules = is_array($sapi_filter_rules) ? $sapi_filter_rules : [];
+  $rules = sapi_conseiller_get_rules();
   $piece   = isset($answers['piece'])   ? $answers['piece']   : '';
   $taille  = isset($answers['taille'])  ? $answers['taille']  : '';
   $hauteur = isset($answers['hauteur']) ? $answers['hauteur'] : '';
@@ -5562,9 +5485,8 @@ function sapi_guide_build_filter_context(array $answers, array $categories, arra
  */
 function sapi_guide_collect_results($query, array $answers, $skip_exclusions = false) {
   // Exclusion « grande pièce + suspension ≤2 tailles » : pilotée par la config.
-  global $sapi_filter_rules;
-  $grande_exclut_2 = !is_array($sapi_filter_rules) || !isset($sapi_filter_rules['grande_exclut_2_tailles'])
-    || $sapi_filter_rules['grande_exclut_2_tailles'];
+  $sapi_rules = sapi_conseiller_get_rules();
+  $grande_exclut_2 = !isset($sapi_rules['grande_exclut_2_tailles']) || $sapi_rules['grande_exclut_2_tailles'];
   // Determine preferred essence from style answer
   $style = isset($answers['style']) ? $answers['style'] : '';
   $preferred_essence = '';
@@ -5758,6 +5680,79 @@ function sapi_guide_collect_results($query, array $answers, $skip_exclusions = f
 }
 
 /**
+ * Refonte filtrage Conseiller (Tâche 1) — CONFIG UNIQUE du moteur de filtrage.
+ * Source de vérité : lue par tout le filtre PHP (get_categories, ampoule, format,
+ * priorité…) ET localisée au JS. Calquée sur le simulateur
+ * (assets/guide-filtrage-simulateur.html). Sera basculée en option WordPress
+ * (DB) en Tâche 5. Une SEULE définition, pas de variable locale d'enqueue.
+ */
+function sapi_conseiller_get_rules() {
+  return [
+    // ── Filtre DUR : ampoule par pièce ──
+    'ampoule_by_piece' => [
+      'cuisine'  => ['ampoule_degagee', 'semi_degagee'],
+      'bureau'   => ['ampoule_degagee', 'semi_degagee'],
+      'salon'    => ['ampoule_entouree', 'semi_degagee'],
+      'chambre'  => ['ampoule_entouree', 'semi_degagee'],
+      'chambre-enfant' => ['ampoule_entouree', 'semi_degagee'],
+      'entree'   => ['ampoule_entouree', 'semi_degagee'],
+      'escalier' => null,
+    ],
+    'ampoule_skip_when_grande' => ['cuisine', 'bureau'],
+    'cats_by_sortie' => [
+      'plafond'       => ['suspensions'],
+      'mur'           => ['appliques'],
+      'pas-de-sortie' => ['lampadaires', 'lampesaposer', 'appliques'],
+      'ne-sais-pas'   => ['suspensions', 'lampadaires', 'lampesaposer', 'appliques'],
+      ''              => ['suspensions', 'lampadaires', 'lampesaposer', 'appliques'],
+    ],
+    'cats_secondaire_by_sortie' => [
+      'plafond'       => ['suspensions'],
+      'mur'           => ['appliques'],
+      'pas-de-sortie' => ['lampadaires', 'lampesaposer', 'appliques'],
+      'ne-sais-pas'   => ['lampadaires', 'lampesaposer', 'appliques'],
+      ''              => ['lampadaires', 'lampesaposer'],
+    ],
+    'extras_slugs' => ['accessoires', 'carte-cadeau'],
+
+    // ── Couche PRIORITÉ (ne fait que CLASSER, n'exclut jamais) ──
+    'prio'       => true,
+    'prio_mode'  => 'souple', // 'souple' | 'strict'
+    'importance' => ['categorie', 'ampoule', 'format'],
+    'ampoule_pref_by_piece' => [
+      'salon'          => 'ampoule_entouree',
+      'chambre'        => 'ampoule_entouree',
+      'chambre-enfant' => 'ampoule_entouree',
+      'entree'         => 'ampoule_entouree',
+      'cuisine'        => 'ampoule_degagee',
+      'bureau'         => 'ampoule_degagee',
+      'escalier'       => null,
+    ],
+    'format_pref_by_piece' => [
+      'salon' => '', 'chambre' => '', 'chambre-enfant' => '', 'cuisine' => '',
+      'bureau' => '', 'entree' => '', 'escalier' => '',
+    ],
+    'cat_priority_by_sortie' => [
+      'plafond' => '', 'mur' => '', 'pas-de-sortie' => '', 'ne-sais-pas' => '', '' => '',
+    ],
+
+    // ── Réglages divers ──
+    'style_essence' => ['moderne' => 'peuplier', 'ancien' => 'okoume', 'neutre' => ''],
+    'escalier_map'  => ['standard' => 'petite', 'ouvert' => 'grande'],
+
+    // ── Filtre DUR : cuisine retire lampe à poser ET lampadaire (Tâche 2) ──
+    'cuisine_remove' => ['lampesaposer', 'lampadaires'],
+    // ── Filtre DUR : format des suspensions (Tâche 2 : vertical dès plafond haut) ──
+    'vertical_haute'           => true,
+    'vertical_entree_confort'  => true,
+    'vertical_petite_confort'  => true,
+    'horizontal_petite_haute'  => true,
+    // ── Taille ──
+    'grande_exclut_2_tailles'  => true,
+  ];
+}
+
+/**
  * Refonte filtrage Conseiller (Tâche 1) — couche PRIORITÉ / classement.
  *
  * Reproduit la mécanique du simulateur (assets/guide-filtrage-simulateur.html,
@@ -5774,8 +5769,7 @@ function sapi_guide_collect_results($query, array $answers, $skip_exclusions = f
  */
 function sapi_conseiller_rank_products(array $products, array $answers, $rules = null) {
   if ($rules === null) {
-    global $sapi_filter_rules;
-    $rules = is_array($sapi_filter_rules) ? $sapi_filter_rules : [];
+    $rules = sapi_conseiller_get_rules();
   }
   if (empty($products) || empty($rules['prio'])) {
     return $products; // priorité désactivée → ordre inchangé (ventes / menu_order)
@@ -5913,9 +5907,9 @@ function sapi_ajax_immersion_selection() {
 
   $piece = isset($answers['piece']) ? $answers['piece'] : '';
   // Escalier → taille (via la config unique).
-  global $sapi_filter_rules;
   if ($piece === 'escalier' && !empty($answers['taille_escalier'])) {
-    $map = isset($sapi_filter_rules['escalier_map']) ? $sapi_filter_rules['escalier_map'] : ['standard' => 'petite', 'ouvert' => 'grande'];
+    $rules = sapi_conseiller_get_rules();
+    $map = isset($rules['escalier_map']) ? $rules['escalier_map'] : ['standard' => 'petite', 'ouvert' => 'grande'];
     $answers['taille'] = isset($map[$answers['taille_escalier']]) ? $map[$answers['taille_escalier']] : 'petite';
   }
 
