@@ -229,7 +229,7 @@ if ($imm_piece) {
 </div><!-- /.mescreations-immersion-track -->
 <?php } // end état B immersion ?>
 
-<?php if ($imm_piece) : // ── ÉTAT B : hero artisan + zone conseiller, cachés en CSS sous l'immersion et inertes (inchangés). ── ?>
+<?php if ($imm_piece) : // ── ÉTAT B : hero artisan (h1, caché en CSS sous l'immersion). Zone cards conseiller retirée (Tâche 7, plus de sapi-cards-conseiller.js). ── ?>
 
 <section class="shop-hero-artisan">
   <div class="shop-hero-artisan-inner">
@@ -237,129 +237,6 @@ if ($imm_piece) {
   </div>
 </section>
 
-<!-- ── F2a Phase 2 — Cards Conseiller V3 (sans projet / avec projet) ── -->
-<?php
-// Icône SVG crayon (badge "Conseil de Robin" / "Mon projet") + CTA.
-$conseiller_pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>';
-
-// Round 4 — Room picker dans la card Conseil (même contenu que la homepage).
-require_once get_template_directory() . '/inc/guide-data.php';
-$conseil_room_choices = [
-  ['label' => 'Salon',   'slug' => 'salon',    'icon' => 'sofa'],
-  ['label' => 'Cuisine', 'slug' => 'cuisine',  'icon' => 'dining'],
-  ['label' => 'Chambre', 'slug' => 'chambre',  'icon' => 'bed'],
-  ['label' => 'Chambre enfant', 'slug' => 'chambre-enfant', 'icon' => 'teddy'],
-  ['label' => 'Bureau',  'slug' => 'bureau',   'icon' => 'monitor'],
-  ['label' => 'Entrée',  'slug' => 'entree',   'icon' => 'door'],
-  ['label' => 'Escalier','slug' => 'escalier', 'icon' => 'stairs'],
-];
-$conseil_room_icons = sapi_guide_get_icons();
-?>
-<!-- Refonte /mes-creations/ — Section "Ma sélection" : card englobante qui
-     contient badge + phrase IA + slot grille (peuplé par sapi-cards-conseiller.js
-     via clone des produits matchés depuis la grille basse "Toutes mes créations").
-     Sans projet : card "Conseil de Robin" simple avec CTA → modale V3. -->
-<section class="conseiller-cards-zone mes-creations-selection" data-conseiller-zone data-mes-creations-selection aria-label="<?php esc_attr_e('Ma sélection', 'theme-sapi-maison'); ?>">
-
-  <!-- Card "Conseil de Robin" — visible sans projet. Contient le room
-       picker complet : titre + 6 pièces clicables + séparateur "ou" +
-       champ texte libre (identique à la home et au pré-refonte). -->
-  <div class="conseiller-card conseiller-card--conseil" data-conseiller-card="conseil" data-room-picker hidden>
-    <div class="conseiller-card__inner">
-      <span class="conseiller-badge conseiller-badge--default">
-        <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-        <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
-      </span>
-      <h2 class="room-picker-title"><?php esc_html_e('Pour quelle pièce cherchez-vous un luminaire ?', 'theme-sapi-maison'); ?></h2>
-      <div class="room-picker-cards">
-        <?php foreach ($conseil_room_choices as $room) :
-          $icon_svg = isset($conseil_room_icons[$room['icon']]) ? $conseil_room_icons[$room['icon']] : '';
-        ?>
-          <button type="button" class="room-card" data-piece="<?php echo esc_attr($room['slug']); ?>" data-piece-label="<?php echo esc_attr($room['label']); ?>">
-            <span class="room-card-icon"><?php echo $icon_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-            <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
-          </button>
-        <?php endforeach; ?>
-      </div>
-      <div class="room-picker-or" aria-hidden="true">
-        <span class="room-picker-or__text"><?php esc_html_e('ou', 'theme-sapi-maison'); ?></span>
-      </div>
-      <form class="room-picker-freetext" data-room-picker-freetext>
-        <input type="text" class="room-picker-freetext__input" name="freetext"
-               placeholder="<?php esc_attr_e('Décris ton projet en quelques mots…', 'theme-sapi-maison'); ?>"
-               maxlength="500"
-               aria-label="<?php esc_attr_e('Décris ton projet en quelques mots', 'theme-sapi-maison'); ?>">
-        <button type="submit" class="room-picker-freetext__submit" aria-label="<?php esc_attr_e('Envoyer', 'theme-sapi-maison'); ?>">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Card "Mon projet" englobante — visible avec projet. Contient :
-       - badge "Mon projet · N luminaires" (N dynamique via JS)
-       - phrase IA italique + signature Square Peg
-       - lien "Préciser ou modifier mon projet" → modale V3 en édition (S3)
-       - slot grille rempli par JS (clones des cards matching + card sur-mesure) -->
-  <section class="conseiller-card conseiller-card--mon-projet mes-creations-selection__card" data-conseiller-card="mon-projet"<?php if ($hero_photos_attr) : ?> data-piece-photos="<?php echo esc_attr($hero_photos_attr); ?>"<?php endif; ?> hidden>
-    <!-- Bandeau photo de la pièce du projet (pleine largeur, sans titre).
-         Affiché par sapi-cards-conseiller.js seulement si la pièce a une
-         photo dédiée (data-piece-photos). -->
-    <div class="conseiller-card__photo" data-mon-projet-photo hidden></div>
-    <div class="conseiller-card__inner">
-      <span class="conseiller-badge conseiller-badge--default" data-mon-projet-badge>
-        <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-        <span data-mon-projet-badge-text><?php esc_html_e('Ton projet', 'theme-sapi-maison'); ?></span>
-      </span>
-      <p class="conseiller-mon-projet__text" data-mon-projet-phrase>
-        <span class="conseiller-mon-projet__text-content" data-mon-projet-phrase-content></span>
-      </p>
-      <!-- Chip-question : prochaine question non répondue avec ses pills
-           cliquables (héritage F2a-sexies). Visible quand le projet est
-           incomplet, le clic sur une pill enregistre la réponse + ouvre
-           la modale sur la question suivante. -->
-      <div class="conseiller-mon-projet__inline-question" data-inline-question hidden></div>
-      <a class="conseiller-link mes-creations-selection__edit" href="#" data-action="open-modal" data-modal-state="s3" data-mon-projet-edit>
-        <span><?php esc_html_e('Préciser ou modifier mon projet', 'theme-sapi-maison'); ?></span>
-        <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-      </a>
-      <!-- Slot grille : rempli par sapi-cards-conseiller.js avec les clones
-           des cards .product-card-cinetique qui matchent sapiProject + la
-           card sur-mesure (clonée depuis le <template> ci-dessous) en
-           dernière cellule. -->
-      <div class="mes-creations-selection__grid" data-mes-creations-selection-grid aria-live="polite"></div>
-
-      <!-- Navigation slider : flèches + dots. Peuplé par JS selon le nombre
-           de pages (= total cards / cards visibles par viewport). Masqué
-           si tout tient sur une page. -->
-      <div class="mes-creations-selection__nav" data-mes-creations-selection-nav hidden></div>
-
-      <!-- Template card sur-mesure — variante D "Invitation chaleureuse" (mockup-16).
-           Card pleine couleur orange + dashed décoratif blanc inversé du
-           pattern Conseiller V3. Cloné par populateSelectionGrid() comme
-           dernière cellule du slot. Pas rendu dans le DOM tant que le JS
-           ne le clone pas. -->
-      <template data-mes-creations-surmesure-template>
-        <a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>" class="mes-creations-surmesure-card" data-mes-creations-surmesure-cta>
-          <div class="mes-creations-surmesure-card__eyebrow"><?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?></div>
-          <div class="mes-creations-surmesure-card__title"><?php esc_html_e('Créons ensemble', 'theme-sapi-maison'); ?></div>
-          <p class="mes-creations-surmesure-card__sub"><?php esc_html_e('Pour ton projet, la solution idéale est peut-être un luminaire dessiné sur mesure. Robin peut te conseiller.', 'theme-sapi-maison'); ?></p>
-          <span class="mes-creations-surmesure-card__cta">
-            <?php esc_html_e('En parler à Robin', 'theme-sapi-maison'); ?>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <line x1="5" y1="12" x2="19" y2="12"/>
-              <polyline points="12 5 19 12 12 19"/>
-            </svg>
-          </span>
-        </a>
-      </template>
-    </div>
-  </section>
-</section>
-
-<!-- Séparateur visuel entre "Ma sélection" et "Toutes mes créations" :
-     filet fin court centré (Option B). -->
-<div class="mes-creations-section-divider" aria-hidden="true"></div>
 
 <?php else : // ── ÉTAT A (sans ?piece=) : le room-picker EST le hero (Tâche 4). ── ?>
 
