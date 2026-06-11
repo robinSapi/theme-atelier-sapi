@@ -183,6 +183,7 @@
       }, { passive: true });
     }
     updateArrows();
+    setTimeout(updateArrows, 600);  // recalage après mise en page / chargement images
     window.addEventListener('resize', updateArrows, { passive: true });
 
     /* ── Header + bandeau : MÊME mécanisme que la home (front-page.php). Le
@@ -206,6 +207,9 @@
         var p = total > 0 ? clamp((-rect.top) / total, 0, 1) : 0;
         section.style.setProperty('--reveal', p.toFixed(4));
         if (els.selection) els.selection.style.pointerEvents = p > 0.45 ? 'auto' : 'none';
+        // Recalage des flèches quand la sélection se dévoile (le layout est sûr
+        // à ce moment ; évite une mesure de débordement faussée au tout load).
+        if (p > 0.05) updateArrows();
       }
       if (header) {
         header.classList.toggle('is-scrolled', section.getBoundingClientRect().bottom < 50);
