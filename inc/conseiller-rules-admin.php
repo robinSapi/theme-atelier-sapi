@@ -83,6 +83,9 @@ function sapi_rules_vocab() {
 /* ─────────────────────────────────────────────────────────────────────────
    Menu + enqueue (page dédiée seulement)
    ───────────────────────────────────────────────────────────────────────── */
+// Priorité 11 : APRÈS l'enregistrement du menu parent « Robin Conseiller »
+// (sapi_megafilter_admin_menu, priorité 10). Sinon add_submenu_page s'exécute
+// avant que le parent existe → page mal enregistrée (404 au clic).
 add_action('admin_menu', function () {
   add_submenu_page(
     'sapi-conseiller-sessions',
@@ -92,7 +95,7 @@ add_action('admin_menu', function () {
     SAPI_RULES_PAGE,
     'sapi_rules_admin_render'
   );
-});
+}, 11);
 
 /* ─────────────────────────────────────────────────────────────────────────
    Écriture : enregistrement + réinitialisation (via admin-post.php)
