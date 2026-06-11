@@ -28,10 +28,7 @@
       phrase:        section.querySelector('[data-immersion-phrase]'),
       phraseText:    '',
       phraseContent: section.querySelector('.mescreations-immersion__phrase-content'),
-      affine:        section.querySelector('[data-immersion-affine]'),
-      affineQ:       section.querySelector('[data-immersion-affine-q]'),
-      affineChips:   section.querySelector('[data-immersion-affine-chips]'),
-      refine:        section.querySelector('[data-immersion-refine]'),
+      describe:      section.querySelector('[data-immersion-describe]'),
       selection:     section.querySelector('[data-immersion-selection]'),
       slider:        section.querySelector('[data-immersion-slider]'),
       prev:          section.querySelector('[data-immersion-prev]'),
@@ -39,24 +36,6 @@
       scrollhint:    section.querySelector('[data-immersion-scrollhint]')
     };
     if (els.phrase) els.phraseText = els.phrase.getAttribute('data-immersion-phrase-text') || '';
-
-    var possessive = config.possessive || 'ta pièce';
-
-    // La pièce est déjà connue (room-picker). On n'affine inline que taille puis
-    // style (le strict nécessaire pour cibler la variation). Le reste du
-    // questionnaire reste réservé à la modale.
-    var questions = [
-      { id: 'taille', q: 'Quelle taille fait ' + possessive + ' ?', chips: [
-        { l: 'Petit', v: 'petite' }, { l: 'Standard', v: 'moyenne' },
-        { l: 'Grand', v: 'grande' }, { l: 'Je ne sais pas', v: '' }
-      ] },
-      { id: 'style', q: 'Quel style pour ' + possessive + ' ?', chips: [
-        { l: 'Moderne, tons clairs', v: 'moderne' },
-        { l: 'Ancien, bois, tons chauds', v: 'ancien' },
-        { l: 'Pas de préférence', v: '' }
-      ] }
-    ];
-    var qIndex = 0;
 
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var typeTimer = null;
@@ -111,52 +90,12 @@
       }, CHAR_DELAY);
     }
 
-    /* ── Affinage inline (stocke la réponse, passe à la suivante ; NE déclenche
-       PAS la révélation — celle-ci est pilotée par le scroll). ── */
-    function renderQuestion() {
-      var q = questions[qIndex];
-      if (!q || !els.affineChips) return;
-      if (els.affineQ) els.affineQ.textContent = q.q;
-      els.affineChips.innerHTML = '';
-      q.chips.forEach(function (c) {
-        var b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'mescreations-immersion__chip';
-        b.textContent = c.l;
-        b.addEventListener('click', function () { answer(q.id, c.v, c.l, b); });
-        els.affineChips.appendChild(b);
-      });
+    /* Bouton « Décrire mon projet en détail » → ouvre la modale Conseiller
+       (questionnaire complet) pour un produit plus adapté. */
+    function openModale() {
+      document.dispatchEvent(new CustomEvent('sapi:open-modal', { detail: { state: 's0' } }));
     }
-
-    function storeAnswer(id, value, label) {
-      if (!value) return; // « Je ne sais pas » / « Pas de préférence » : on n'impose rien
-      if (window.sapiProject && typeof window.sapiProject.update === 'function') {
-        var patch = {}; patch[id] = value;
-        var lpatch = {}; lpatch[id] = label || value;
-        window.sapiProject.update(patch, lpatch);
-      }
-    }
-
-    function answer(id, value, label, btn) {
-      storeAnswer(id, value, label);
-      if (els.affineChips) {
-        [].slice.call(els.affineChips.children).forEach(function (c) { c.classList.remove('is-validated'); });
-      }
-      if (btn) btn.classList.add('is-validated');
-      later(function () {
-        qIndex++;
-        if (qIndex < questions.length) {
-          renderQuestion(); // la question suivante prend la place
-        } else if (els.affine) {
-          els.affine.hidden = true; // parcours fini ; la sélection se révèle au scroll
-        }
-      }, 420);
-    }
-
-    function openModaleRefine() {
-      document.dispatchEvent(new CustomEvent('sapi:open-modal', { detail: { state: 's3' } }));
-    }
-    if (els.refine) els.refine.addEventListener('click', openModaleRefine);
+    if (els.describe) els.describe.addEventListener('click', openModale);
 
     /* ── Slider : flèches de part et d'autre, 1 card par clic. Les flèches sont
        masquées si tout tient (pas de débordement) et désactivées aux extrémités. ── */
@@ -256,7 +195,6 @@
        hint. La révélation de la sélection, elle, se joue au scroll. ── */
     function playSequence() {
       buildChars(els.phraseText); // lettres présentes (opacity 0) → hauteur réservée
-      renderQuestion();
       var safety = null;
       if (!reduceMotion) {
         lockScroll();
@@ -267,7 +205,10 @@
         revealChars(function () {
           unlockScroll();
           if (safety) clearTimeout(safety);
-          later(function () { if (els.affine) els.affine.classList.add('is-in'); }, reduceMotion ? 0 : 250);
+          if (els.describe) {
+            els.describe.hidden = false;
+            later(function () { els.describe.classList.add('is-in'); }, reduceMotion ? 0 : 250);
+          }
           later(function () { if (els.scrollhint) els.scrollhint.classList.add('is-in'); }, reduceMotion ? 0 : 650);
         });
       }, reduceMotion ? 0 : 900);

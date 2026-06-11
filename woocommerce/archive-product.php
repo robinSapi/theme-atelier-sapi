@@ -165,12 +165,13 @@ if ($imm_piece) {
       <span class="mescreations-immersion__phrase-content"></span>
     </p>
 
-    <!-- Question d'affinage inline (taille puis style — révélées par le JS).
-         Répondre valide + passe à la suivante, SANS rouvrir la modale. -->
-    <div class="mescreations-immersion__affine" data-immersion-affine hidden>
-      <div class="mescreations-immersion__affine-q" data-immersion-affine-q></div>
-      <div class="mescreations-immersion__affine-chips" data-immersion-affine-chips></div>
-    </div>
+    <!-- Bouton sous la citation : ouvre la modale Conseiller pour décrire le
+         projet en détail (questionnaire complet → produit plus adapté). -->
+    <button type="button" class="mescreations-immersion__describe" data-immersion-describe data-action="open-modal" data-modal-state="s0" hidden>
+      <span class="mescreations-immersion__describe-av"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => '', 'class' => 'mescreations-immersion__describe-img', 'loading' => 'lazy']); ?></span>
+      <?php esc_html_e('Décrire mon projet en détail pour un luminaire plus adapté', 'theme-sapi-maison'); ?>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </button>
   </div>
 
   <!-- Sélection : apparaît au scroll (flou photo), pièce-level rendue CÔTÉ
@@ -247,12 +248,6 @@ if ($imm_piece) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
       </button>
     </div><!-- /.mescreations-immersion__slider-wrap -->
-    <!-- Lien discret « Préciser avec Robin » → ouvre la modale (questionnaire
-         complet), sans réécrire l'IA. -->
-    <button type="button" class="mescreations-immersion__refine" data-immersion-refine data-action="open-modal" data-modal-state="s3">
-      <span class="mescreations-immersion__refine-av"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => '', 'class' => 'mescreations-immersion__refine-img', 'loading' => 'lazy']); ?></span>
-      <?php esc_html_e('Préciser avec Robin pour la sélection idéale', 'theme-sapi-maison'); ?> &rarr;
-    </button>
   </div>
 
   <div class="mescreations-immersion__scrollhint" data-immersion-scrollhint aria-hidden="true">
