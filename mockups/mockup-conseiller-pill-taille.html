@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signature Conseiller — réglage de taille (en contexte)</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wood:#8B7355; --wood-dark:#4A3F35; --orange:#E35B24; --cream:#FBF6EA; --ink:#3a322b; --border:#e7ded2;
+    --robin:url('https://atelier-sapi.fr/wp-content/uploads/2026/03/Robin-face-avec-Alice-lhelice.jpg');
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Montserrat',sans-serif;color:var(--ink);background:#efe9dc}
+  .devnote{background:var(--wood-dark);color:#f0e7d8;font-size:13px;padding:14px 28px}
+  .devnote b{color:#fff}
+  .band{background:var(--cream);background-image:repeating-linear-gradient(92deg,rgba(139,115,85,.05) 0,rgba(139,115,85,.05) 1px,transparent 1px,transparent 7px);
+    padding:42px 24px 30px;text-align:center;border-top:1px solid #efe6da;margin-bottom:14px;position:relative}
+  .tag{position:absolute;left:24px;top:14px;background:var(--wood);color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;border-radius:50px;padding:4px 12px}
+  .h2{font-weight:700;font-size:clamp(1.8rem,3.4vw,2.4rem);color:var(--wood-dark)}
+
+  /* pill de base */
+  .pill{display:inline-flex;align-items:center;background:var(--wood-dark);color:#fff;border-radius:60px}
+  .pill .av{border-radius:50%;background-image:var(--robin);background-size:cover;background-position:center 22%;border:2px solid rgba(255,255,255,.18);flex-shrink:0}
+  .pill .eye{font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#e0a878;display:block}
+  .pill .hook{font-family:'Square Peg';color:#fff;line-height:1;display:block}
+  .pill .txt{text-align:left}
+
+  /* === Référence (actuel, trop gros) === */
+  .ref{gap:16px;padding:10px 26px 10px 10px;margin-bottom:18px}
+  .ref .av{width:60px;height:60px}
+  .ref .eye{font-size:11.5px}.ref .hook{font-size:28px;margin-top:2px}
+
+  /* === A — compact ~65% === */
+  .a{gap:11px;padding:6px 18px 6px 6px;margin-bottom:16px}
+  .a .av{width:40px;height:40px}
+  .a .eye{font-size:9.5px}.a .hook{font-size:19px;margin-top:1px}
+
+  /* === B — mini une ligne === */
+  .b{gap:9px;padding:5px 16px 5px 5px;margin-bottom:16px}
+  .b .av{width:30px;height:30px}
+  .b .line{font-size:12px;font-weight:600;color:#fff}
+  .b .line b{color:#e0a878;font-weight:700;letter-spacing:.04em}
+
+  /* === C — discret 2 lignes, très compact === */
+  .c{gap:9px;padding:5px 16px 5px 5px;margin-bottom:14px}
+  .c .av{width:34px;height:34px}
+  .c .eye{font-size:9px}.c .hook{font-size:16px}
+
+  /* === D — sans photo, mini point === */
+  .d{gap:9px;padding:7px 18px;margin-bottom:14px}
+  .d .dot{width:9px;height:9px;border-radius:50%;background:var(--orange);flex-shrink:0;box-shadow:0 0 0 3px rgba(227,91,36,.25)}
+  .d .eye{font-size:9.5px}.d .hook{font-size:17px}
+</style>
+</head>
+<body>
+<div class="devnote"><b>Réglage de taille de la signature Conseiller</b> &nbsp;·&nbsp; problème = trop grosse/isolée, elle écrase le titre. Même style V1, mais réduite pour redevenir une signature discrète. 4 niveaux + une version sans photo.</div>
+
+<div class="band">
+  <span class="tag">Référence (actuel)</span>
+  <span class="pill ref"><span class="av"></span><span class="txt"><span class="eye">Le conseil de Robin</span><span class="hook">Mon regard d'artisan sur ton projet</span></span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div>
+</div>
+
+<div class="band">
+  <span class="tag">A — compact (~65 %)</span>
+  <span class="pill a"><span class="av"></span><span class="txt"><span class="eye">Le conseil de Robin</span><span class="hook">Mon regard d'artisan sur ton projet</span></span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div>
+</div>
+
+<div class="band">
+  <span class="tag">B — mini une ligne</span>
+  <span class="pill b"><span class="av"></span><span class="line"><b>Le conseil de Robin</b> · Mon regard d'artisan sur ton projet</span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div>
+</div>
+
+<div class="band">
+  <span class="tag">C — discret, 2 lignes très compact</span>
+  <span class="pill c"><span class="av"></span><span class="txt"><span class="eye">Le conseil de Robin</span><span class="hook">Mon regard d'artisan sur ton projet</span></span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div>
+</div>
+
+<div class="band">
+  <span class="tag">D — sans photo, point orange</span>
+  <span class="pill d"><span class="dot"></span><span class="txt"><span class="eye">Le conseil de Robin</span><span class="hook">Mon regard d'artisan sur ton projet</span></span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div>
+</div>
+
+</body>
+</html>

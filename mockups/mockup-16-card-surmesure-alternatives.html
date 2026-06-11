@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup #16 — Card sur-mesure (4 alternatives au visuel actuel)</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-wood: #8B7355;
+    --color-wood-dark: #4A3F35;
+    --color-wood-mid: #6B5A4A;
+    --color-warm: #F5F0E8;
+    --color-warm-2: #EDE6D8;
+    --color-warm-3: #F9F5EC;
+    --color-orange: #E35B24;
+    --color-orange-dark: #C44A1E;
+    --color-line: rgba(147, 125, 104, 0.18);
+    --color-bg: #FAFAF7;
+    --color-paper: #FDFBF5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-wood-dark);
+    line-height: 1.55;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  /* Marqueur variante */
+  .variant-marker {
+    background: var(--color-wood-dark);
+    color: #fff;
+    text-align: left;
+    padding: 22px 32px;
+    margin-top: 0;
+  }
+  .variant-marker__pill {
+    display: inline-block;
+    background: rgba(255,255,255,0.12);
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .variant-marker h2 {
+    font-family: 'Square Peg', cursive;
+    font-size: 38px;
+    font-weight: normal;
+    margin-bottom: 4px;
+  }
+  .variant-marker p {
+    font-size: 13px;
+    opacity: 0.72;
+    max-width: 720px;
+  }
+
+  /* Conteneur mini-contexte grille */
+  .grid-context {
+    padding: 40px 32px 60px;
+    background: var(--color-bg);
+  }
+  .grid-context__inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+
+  /* Card produit stub (pour contexte) */
+  .stub {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .stub__photo {
+    aspect-ratio: 1/1.1;
+    background: linear-gradient(135deg, var(--color-warm) 0%, var(--color-warm-2) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-wood);
+    opacity: 0.55;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .stub__body {
+    padding: 14px 12px 18px;
+    text-align: center;
+  }
+  .stub__name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-wood-dark);
+    margin-bottom: 3px;
+  }
+  .stub__price {
+    font-size: 12px;
+    color: var(--color-wood);
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     VARIANTE A — POLAROÏD / PHOTO AUTHENTIQUE
+     Photo de l'atelier (placeholder visuel), overlay texte en bas.
+  ════════════════════════════════════════════════════════════════ */
+  .v-polaroid {
+    position: relative;
+    aspect-ratio: 1/1.4;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.25s;
+    box-shadow: 0 6px 22px rgba(74, 63, 53, 0.10);
+  }
+  .v-polaroid:hover {
+    transform: translateY(-3px) rotate(-0.5deg);
+  }
+  .v-polaroid__photo {
+    position: absolute;
+    inset: 0;
+    /* Placeholder photo atelier — dégradé chaud type bois + ombre */
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15) 0%, transparent 50%),
+      linear-gradient(160deg, #6B5A4A 0%, #4A3F35 60%, #2E2820 100%);
+  }
+  .v-polaroid__photo-label {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    color: rgba(255,255,255,0.4);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .v-polaroid__sketch {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 56%;
+    opacity: 0.85;
+  }
+  .v-polaroid__overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 70px 18px 18px;
+    background: linear-gradient(0deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+    color: #fff;
+    text-align: center;
+  }
+  .v-polaroid__title {
+    font-family: 'Square Peg', cursive;
+    font-size: 32px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .v-polaroid__sub {
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    opacity: 0.88;
+  }
+  .v-polaroid__sub strong {
+    color: #FF9C70;
+    font-weight: 600;
+  }
+
+
+  /* ════════════════════════════════════════════════════════════════
+     VARIANTE B — MINIMAL SQUARE PEG (épuré, fond crème pur)
+     Pas d'icône, pas de badge. Typo qui porte tout.
+  ════════════════════════════════════════════════════════════════ */
+  .v-minimal {
+    aspect-ratio: 1/1.4;
+    background: var(--color-warm);
+    border-radius: 12px;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.25s;
+    border: 1px solid transparent;
+  }
+  .v-minimal:hover {
+    transform: translateY(-3px);
+    background: var(--color-warm-2);
+  }
+  .v-minimal__eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-wood);
+    font-weight: 600;
+  }
+  .v-minimal__title {
+    font-family: 'Square Peg', cursive;
+    font-size: 64px;
+    line-height: 0.85;
+    color: var(--color-wood-dark);
+    margin: 12px 0;
+  }
+  .v-minimal__sub {
+    font-size: 12.5px;
+    color: var(--color-wood-mid);
+    line-height: 1.5;
+    font-style: italic;
+    margin-top: 4px;
+  }
+  .v-minimal__arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-orange);
+  }
+  .v-minimal__arrow svg { width: 14px; height: 14px; }
+
+
+  /* ════════════════════════════════════════════════════════════════
+     VARIANTE C — CARNET D'ATELIER (page de cahier)
+     Texture papier + croquis dessiné main + écriture manuscrite.
+  ════════════════════════════════════════════════════════════════ */
+  .v-carnet {
+    position: relative;
+    aspect-ratio: 1/1.4;
+    background: var(--color-paper);
+    border-radius: 12px;
+    padding: 22px 18px 18px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    text-align: center;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(74, 63, 53, 0.06);
+  }
+  .v-carnet:hover { transform: translateY(-3px) rotate(0.4deg); }
+  /* Lignes de cahier décoratives très légères */
+  .v-carnet::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 21px,
+      rgba(139, 115, 85, 0.06) 22px
+    );
+    pointer-events: none;
+  }
+  .v-carnet > * { position: relative; }
+  .v-carnet__eyebrow {
+    font-family: 'Square Peg', cursive;
+    font-size: 22px;
+    color: var(--color-wood);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .v-carnet__sketch {
+    width: 95px;
+    height: 95px;
+    margin: 10px auto 14px;
+    color: var(--color-wood-dark);
+  }
+  .v-carnet__title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-wood-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+    line-height: 1.25;
+  }
+  .v-carnet__sub {
+    font-size: 12px;
+    color: var(--color-wood-mid);
+    line-height: 1.5;
+    font-style: italic;
+    padding: 0 8px;
+  }
+  .v-carnet__sig {
+    margin-top: 14px;
+    font-family: 'Square Peg', cursive;
+    font-size: 22px;
+    color: var(--color-orange);
+    line-height: 1;
+  }
+
+
+  /* ════════════════════════════════════════════════════════════════
+     VARIANTE D — INVITATION CHALEUREUSE
+     Card pleine couleur orange chaud, signature manuscrite forte.
+     Plus directe, "Robin t'invite à dialoguer".
+  ════════════════════════════════════════════════════════════════ */
+  .v-invitation {
+    position: relative;
+    aspect-ratio: 1/1.4;
+    background: linear-gradient(160deg, #E35B24 0%, #C44A1E 100%);
+    border-radius: 12px;
+    padding: 28px 22px 24px;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.2s;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+  .v-invitation:hover { transform: translateY(-3px); }
+  /* Décor visuel discret */
+  .v-invitation::before {
+    content: '';
+    position: absolute;
+    inset: 10px;
+    border: 1.5px dashed rgba(255, 255, 255, 0.30);
+    border-radius: 8px;
+    pointer-events: none;
+  }
+  .v-invitation > * { position: relative; z-index: 1; }
+  .v-invitation__eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.85;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .v-invitation__title {
+    font-family: 'Square Peg', cursive;
+    font-size: 44px;
+    line-height: 0.95;
+    margin-bottom: 14px;
+  }
+  .v-invitation__sub {
+    font-size: 12.5px;
+    line-height: 1.55;
+    opacity: 0.92;
+    padding: 0 8px;
+    margin-bottom: 18px;
+  }
+  .v-invitation__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    align-self: center;
+    padding: 9px 18px;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 50px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: background 0.2s;
+  }
+  .v-invitation:hover .v-invitation__cta {
+    background: rgba(255,255,255,0.30);
+  }
+  .v-invitation__cta svg { width: 12px; height: 12px; }
+
+
+  /* Responsive — préserver le ratio */
+  @media (max-width: 968px) {
+    .grid-context__inner { grid-template-columns: repeat(3, 1fr); }
+    .variant-marker { padding: 18px 22px; }
+    .grid-context { padding: 28px 22px 40px; }
+  }
+  @media (max-width: 640px) {
+    .grid-context__inner { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .variant-marker h2 { font-size: 30px; }
+    .v-minimal { padding: 22px 16px; }
+    .v-minimal__title { font-size: 50px; }
+    .v-carnet__sketch { width: 75px; height: 75px; }
+    .v-invitation__title { font-size: 36px; }
+    .v-polaroid__title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     VARIANTE A — Polaroïd / photo authentique
+     ════════════════════════════════════════════════════════════════ -->
+<div class="variant-marker">
+  <span class="variant-marker__pill">Variante A</span>
+  <h2>Polaroïd atelier</h2>
+  <p>Photo authentique (atelier, mains au travail, copeaux de bois) avec un overlay texte en bas. Donne une présence physique : on voit Robin "au travail", pas un service abstrait. Visuellement très différenciante dans la grille.</p>
+</div>
+<div class="grid-context">
+  <div class="grid-context__inner">
+    <div class="stub"><div class="stub__photo">Olivia</div><div class="stub__body"><div class="stub__name">Olivia</div><div class="stub__price">À partir de 195 €</div></div></div>
+    <div class="stub"><div class="stub__photo">Gaston</div><div class="stub__body"><div class="stub__name">Gaston</div><div class="stub__price">À partir de 220 €</div></div></div>
+    <div class="stub"><div class="stub__photo">Myriam</div><div class="stub__body"><div class="stub__name">Myriam</div><div class="stub__price">À partir de 240 €</div></div></div>
+
+    <a href="/sur-mesure/" class="v-polaroid">
+      <div class="v-polaroid__photo">
+        <span class="v-polaroid__photo-label">Photo authentique<br>atelier</span>
+        <svg class="v-polaroid__sketch" viewBox="0 0 100 100" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1.2">
+          <path d="M50 12 L50 28 M30 32 L70 32 M28 32 L38 64 L62 64 L72 32 M38 64 L40 76 M62 64 L60 76"/>
+          <ellipse cx="50" cy="48" rx="3" ry="4" fill="rgba(255,200,150,0.4)" stroke="none"/>
+        </svg>
+      </div>
+      <div class="v-polaroid__overlay">
+        <div class="v-polaroid__title">Sur-mesure ?</div>
+        <div class="v-polaroid__sub"><strong>Parle-moi de ton projet →</strong></div>
+      </div>
+    </a>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     VARIANTE B — Minimal Square Peg
+     ════════════════════════════════════════════════════════════════ -->
+<div class="variant-marker">
+  <span class="variant-marker__pill">Variante B</span>
+  <h2>Minimal typo</h2>
+  <p>Fond crème, pas d'icône, pas de badge. La typo Square Peg porte toute la présence — "Sur-mesure ?" géant, comme une page de magazine. Coller au reste du design system Conseiller V3 sans surcharge.</p>
+</div>
+<div class="grid-context">
+  <div class="grid-context__inner">
+    <div class="stub"><div class="stub__photo">Timothée</div><div class="stub__body"><div class="stub__name">Timothée</div><div class="stub__price">À partir de 175 €</div></div></div>
+    <div class="stub"><div class="stub__photo">Joséphine</div><div class="stub__body"><div class="stub__name">Joséphine</div><div class="stub__price">À partir de 285 €</div></div></div>
+    <div class="stub"><div class="stub__photo">Léon</div><div class="stub__body"><div class="stub__name">Léon</div><div class="stub__price">À partir de 95 €</div></div></div>
+
+    <a href="/sur-mesure/" class="v-minimal">
+      <div class="v-minimal__eyebrow">Une idée précise ?</div>
+      <div>
+        <div class="v-minimal__title">Sur-mesure ?</div>
+        <p class="v-minimal__sub">Décris-moi ton projet, je t'envoie une proposition.</p>
+      </div>
+      <div class="v-minimal__arrow">
+        En parler à Robin
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </div>
+    </a>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     VARIANTE C — Carnet d'atelier (croquis dessiné)
+     ════════════════════════════════════════════════════════════════ -->
+<div class="variant-marker">
+  <span class="variant-marker__pill">Variante C</span>
+  <h2>Carnet d'atelier</h2>
+  <p>Aspect "page de carnet" : fond papier crème, lignes très discrètes, croquis trait fin d'une suspension dessinée à la main. Plus intimiste, plus artisan. Donne l'impression d'avoir feuilleté un cahier de croquis personnel.</p>
+</div>
+<div class="grid-context">
+  <div class="grid-context__inner">
+    <div class="stub"><div class="stub__photo">Olivia</div><div class="stub__body"><div class="stub__name">Olivia</div><div class="stub__price">À partir de 195 €</div></div></div>
+    <div class="stub"><div class="stub__photo">Marius</div><div class="stub__body"><div class="stub__name">Marius</div><div class="stub__price">À partir de 210 €</div></div></div>
+    <div class="stub"><div class="stub__photo">Henri</div><div class="stub__body"><div class="stub__name">Henri</div><div class="stub__price">À partir de 310 €</div></div></div>
+
+    <a href="/sur-mesure/" class="v-carnet">
+      <span class="v-carnet__eyebrow">Croquis...</span>
+      <svg class="v-carnet__sketch" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Câble suspension -->
+        <path d="M50 6 L50 24"/>
+        <!-- Couronne/anneau d'attache -->
+        <ellipse cx="50" cy="26" rx="6" ry="2.5"/>
+        <!-- Lignes décoratives bois (multiples lattes) -->
+        <path d="M28 32 Q50 30 72 32 Q62 60 50 75 Q38 60 28 32"/>
+        <path d="M34 34 Q50 33 66 34"/>
+        <path d="M32 42 Q50 40 68 42"/>
+        <path d="M32 52 Q50 51 68 52"/>
+        <path d="M36 62 Q50 61 64 62"/>
+        <!-- Ampoule en bas -->
+        <ellipse cx="50" cy="80" rx="4" ry="5" fill="rgba(227, 91, 36, 0.12)"/>
+        <path d="M48 86 L52 86 M47 88 L53 88"/>
+      </svg>
+      <div class="v-carnet__title">Sur-mesure</div>
+      <p class="v-carnet__sub">Et si on dessinait le tien ensemble ?</p>
+      <div class="v-carnet__sig">— Robin</div>
+    </a>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     VARIANTE D — Invitation chaleureuse (orange plein)
+     ════════════════════════════════════════════════════════════════ -->
+<div class="variant-marker">
+  <span class="variant-marker__pill">Variante D</span>
+  <h2>Invitation orange</h2>
+  <p>Card pleine couleur orange chaud (le ton du site), dashed décoratif blanc en intérieur (reprend le pattern Conseiller V3 inversé). Plus directe, joue à fond la carte "appel à dialoguer" sans complexe.</p>
+</div>
+<div class="grid-context">
+  <div class="grid-context__inner">
+    <div class="stub"><div class="stub__photo">Lucienne</div><div class="stub__body"><div class="stub__name">Lucienne</div><div class="stub__price">À partir de 165 €</div></div></div>
+    <div class="stub"><div class="stub__photo">Camille</div><div class="stub__body"><div class="stub__name">Camille</div><div class="stub__price">À partir de 180 €</div></div></div>
+    <div class="stub"><div class="stub__photo">Dalida</div><div class="stub__body"><div class="stub__name">Dalida</div><div class="stub__price">À partir de 145 €</div></div></div>
+
+    <a href="/sur-mesure/" class="v-invitation">
+      <div class="v-invitation__eyebrow">Sur-mesure</div>
+      <div class="v-invitation__title">Et si on créait le tien ?</div>
+      <p class="v-invitation__sub">Décris-moi ce que tu as en tête, je te fais une proposition à la main.</p>
+      <span class="v-invitation__cta">
+        En parler à Robin
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </span>
+    </a>
+  </div>
+</div>
+
+
+</body>
+</html>

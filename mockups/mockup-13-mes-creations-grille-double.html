@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup #13 — /mes-creations/ refonte grille double (sélection projet + catalogue complet)</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-wood: #8B7355;
+    --color-wood-dark: #4A3F35;
+    --color-wood-mid: #6B5A4A;
+    --color-warm: #F5F0E8;
+    --color-warm-2: #EDE6D8;
+    --color-orange: #E35B24;
+    --color-orange-dark: #C44A1E;
+    --color-line: rgba(147, 125, 104, 0.18);
+    --color-bg: #FAFAF7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-wood-dark);
+    line-height: 1.55;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  /* ============================================
+     MARQUEUR ÉTAT (mockup uniquement, à supprimer en prod)
+  ============================================ */
+  .state-marker {
+    background: var(--color-wood-dark);
+    color: #fff;
+    text-align: center;
+    padding: 14px 20px;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .state-marker em {
+    font-style: normal;
+    color: #E35B24;
+    font-family: 'Square Peg', cursive;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 22px;
+    margin-left: 8px;
+  }
+
+  /* ============================================
+     HERO
+  ============================================ */
+  .hero {
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 90px 20px 56px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-family: 'Square Peg', cursive;
+    font-size: clamp(56px, 10vw, 100px);
+    font-weight: normal;
+    line-height: 1;
+  }
+  .hero p {
+    margin-top: 14px;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    opacity: 0.85;
+    text-transform: uppercase;
+  }
+
+  /* ============================================
+     CARD CONSEILLER (Mon projet OU Conseil de Robin)
+  ============================================ */
+  .conseiller-bento {
+    max-width: 1200px;
+    margin: 40px auto 0;
+    padding: 0 20px;
+  }
+  .conseiller-bento__card {
+    position: relative;
+    background: var(--color-warm);
+    border-radius: 16px;
+    padding: 48px 40px 44px;
+    text-align: center;
+  }
+  .conseiller-bento__card::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 1.5px dashed rgba(139, 115, 85, 0.35);
+    border-radius: 12px;
+    pointer-events: none;
+  }
+  .conseiller-bento__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 16px;
+    background: var(--color-wood-dark);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    margin-bottom: 22px;
+  }
+  .conseiller-bento__badge svg { width: 11px; height: 11px; }
+  .conseiller-bento__text {
+    font-size: 17px;
+    font-style: italic;
+    color: var(--color-wood-dark);
+    line-height: 1.6;
+    max-width: 640px;
+    margin: 0 auto 18px;
+  }
+  .conseiller-bento__sig {
+    display: inline;
+    margin-left: 8px;
+    font-family: 'Square Peg', cursive;
+    font-style: normal;
+    font-size: 24px;
+    color: var(--color-wood);
+    line-height: 1;
+  }
+  .conseiller-bento__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--color-wood);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    margin-top: 6px;
+  }
+  .conseiller-bento__link:hover { color: var(--color-orange); }
+
+  /* Variante card "Conseil de Robin" (sans projet) */
+  .conseiller-bento__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 26px;
+    background: var(--color-orange);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 6px;
+  }
+  .conseiller-bento__cta:hover { background: var(--color-orange-dark); }
+  .conseiller-bento__cta svg { width: 14px; height: 14px; }
+
+  /* ============================================
+     SECTION SÉLECTION ("Pour ton salon")
+  ============================================ */
+  .section-selection {
+    max-width: 1400px;
+    margin: 56px auto 0;
+    padding: 0 20px;
+  }
+  .section-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .section-header__eyebrow {
+    display: block;
+    font-family: 'Square Peg', cursive;
+    font-size: 32px;
+    color: var(--color-wood);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .section-header h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: clamp(22px, 3vw, 30px);
+    letter-spacing: 0.04em;
+    color: var(--color-wood-dark);
+    line-height: 1.2;
+  }
+  .section-header__sub {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--color-wood);
+    letter-spacing: 0.04em;
+  }
+
+  /* Grille produits */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 28px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(74, 63, 53, 0.12);
+  }
+  .card__photo {
+    aspect-ratio: 1/1.1;
+    background: linear-gradient(135deg, var(--color-warm) 0%, var(--color-warm-2) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-wood);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+  }
+  .card__body {
+    padding: 16px 14px 20px;
+    text-align: center;
+  }
+  .card__name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-wood-dark);
+    margin-bottom: 4px;
+  }
+  .card__price {
+    font-size: 13px;
+    color: var(--color-wood);
+  }
+
+  /* ============================================
+     SÉPARATEUR ENTRE LES 2 SECTIONS
+  ============================================ */
+  .section-divider {
+    max-width: 1400px;
+    margin: 80px auto 0;
+    padding: 0 20px;
+    position: relative;
+    text-align: center;
+  }
+  .section-divider::before,
+  .section-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: calc(50% - 80px);
+    height: 1px;
+    background: var(--color-line);
+  }
+  .section-divider::before { left: 20px; }
+  .section-divider::after { right: 20px; }
+  .section-divider__dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-wood);
+    opacity: 0.4;
+    margin: 0 6px;
+    vertical-align: middle;
+  }
+
+  /* ============================================
+     SECTION CATALOGUE COMPLET ("Toutes mes créations")
+  ============================================ */
+  .section-catalogue {
+    max-width: 1400px;
+    margin: 50px auto 0;
+    padding: 0 20px 80px;
+  }
+
+  /* Pills catégorie */
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 18px;
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 50px;
+    font-size: 13px;
+    color: var(--color-wood-dark);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .pill:hover {
+    border-color: var(--color-wood);
+    color: var(--color-wood-dark);
+  }
+  .pill--active {
+    background: var(--color-wood-dark);
+    color: #fff;
+    border-color: var(--color-wood-dark);
+  }
+  .pill__count {
+    margin-left: 6px;
+    opacity: 0.6;
+    font-size: 11px;
+  }
+
+  /* ============================================
+     SÉPARATEUR INTER-MOCKUPS (mockup uniquement)
+  ============================================ */
+  .mockup-sep {
+    height: 80px;
+    background:
+      repeating-linear-gradient(
+        45deg,
+        var(--color-wood-dark) 0,
+        var(--color-wood-dark) 12px,
+        #3a3128 12px,
+        #3a3128 24px
+      );
+  }
+
+  /* ============================================
+     RESPONSIVE
+  ============================================ */
+  @media (max-width: 768px) {
+    .hero { padding: 70px 20px 36px; }
+    .conseiller-bento { padding: 0 14px; margin-top: 24px; }
+    .conseiller-bento__card { padding: 34px 22px 32px; }
+    .conseiller-bento__card::before { inset: 8px; }
+    .conseiller-bento__text { font-size: 16px; }
+    .section-selection,
+    .section-catalogue { padding: 0 14px 50px; margin-top: 40px; }
+    .section-divider { margin-top: 56px; padding: 0 14px; }
+    .section-divider::before,
+    .section-divider::after { width: calc(50% - 60px); }
+    .grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .card__photo { aspect-ratio: 1/1.05; }
+    .card__body { padding: 10px 8px 14px; }
+    .card__name { font-size: 13px; }
+    .card__price { font-size: 12px; }
+    /* Pills scroll horizontal sur mobile */
+    .pills {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      justify-content: flex-start;
+      padding: 0 14px 4px;
+      margin: 0 -14px 28px;
+      scrollbar-width: none;
+    }
+    .pills::-webkit-scrollbar { display: none; }
+    .pill { font-size: 12px; padding: 8px 14px; }
+  }
+</style>
+</head>
+<body>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ÉTAT A — VISITEUR AVEC PROJET ACTIF (sapiProject.piece = salon)
+     ═══════════════════════════════════════════════════════════════ -->
+
+<div class="state-marker">
+  État A — Visiteur avec projet actif <em>« Pour ton salon »</em>
+</div>
+
+<section class="hero">
+  <h1>Pour ton salon</h1>
+  <p>Ma sélection pour cette pièce</p>
+</section>
+
+
+<!-- Card Mon projet (pattern Conseiller, conservée à l'identique) -->
+<div class="conseiller-bento">
+  <div class="conseiller-bento__card">
+    <span class="conseiller-bento__badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Mon projet
+    </span>
+    <p class="conseiller-bento__text">
+      "Pour un salon spacieux et moderne, j'ai sélectionné des suspensions à ampoule entourée — la lumière diffuse y est plus douce, idéale pour les soirées canapé."
+      <span class="conseiller-bento__sig">— Robin</span>
+    </p>
+    <a href="#" class="conseiller-bento__link">Préciser ou modifier mon projet ✎</a>
+  </div>
+</div>
+
+
+<!-- Section 1 : Ma sélection (produits qui matchent le projet) -->
+<section class="section-selection">
+  <header class="section-header">
+    <span class="section-header__eyebrow">Ma sélection</span>
+    <h2>Pour ton salon</h2>
+    <p class="section-header__sub">5 luminaires adaptés à ton projet</p>
+  </header>
+
+  <div class="grid">
+    <a href="#" class="card">
+      <div class="card__photo">Olivia · suspension</div>
+      <div class="card__body">
+        <div class="card__name">Olivia</div>
+        <div class="card__price">À partir de 195 €</div>
+      </div>
+    </a>
+    <a href="#" class="card">
+      <div class="card__photo">Gaston · suspension</div>
+      <div class="card__body">
+        <div class="card__name">Gaston</div>
+        <div class="card__price">À partir de 220 €</div>
+      </div>
+    </a>
+    <a href="#" class="card">
+      <div class="card__photo">Timothée · suspension</div>
+      <div class="card__body">
+        <div class="card__name">Timothée</div>
+        <div class="card__price">À partir de 175 €</div>
+      </div>
+    </a>
+    <a href="#" class="card">
+      <div class="card__photo">Myriam · suspension</div>
+      <div class="card__body">
+        <div class="card__name">Myriam</div>
+        <div class="card__price">À partir de 240 €</div>
+      </div>
+    </a>
+    <a href="#" class="card">
+      <div class="card__photo">Joséphine · lampadaire</div>
+      <div class="card__body">
+        <div class="card__name">Joséphine</div>
+        <div class="card__price">À partir de 285 €</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+
+<!-- Séparateur visuel entre les 2 sections -->
+<div class="section-divider">
+  <span class="section-divider__dot"></span>
+  <span class="section-divider__dot"></span>
+  <span class="section-divider__dot"></span>
+</div>
+
+
+<!-- Section 2 : Toutes mes créations (catalogue complet + pills cat) -->
+<section class="section-catalogue">
+  <header class="section-header">
+    <h2>Toutes mes créations</h2>
+    <p class="section-header__sub">Le catalogue complet, classé par type de luminaire</p>
+  </header>
+
+  <!-- Pills catégorie (récupérées du git history pré-F1) -->
+  <div class="pills">
+    <button class="pill pill--active">Tous <span class="pill__count">24</span></button>
+    <button class="pill">Suspensions <span class="pill__count">11</span></button>
+    <button class="pill">Lampadaires <span class="pill__count">4</span></button>
+    <button class="pill">Lampes à poser <span class="pill__count">6</span></button>
+    <button class="pill">Appliques <span class="pill__count">3</span></button>
+  </div>
+
+  <div class="grid">
+    <a href="#" class="card"><div class="card__photo">Olivia · suspension</div><div class="card__body"><div class="card__name">Olivia</div><div class="card__price">À partir de 195 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Gaston · suspension</div><div class="card__body"><div class="card__name">Gaston</div><div class="card__price">À partir de 220 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Timothée · suspension</div><div class="card__body"><div class="card__name">Timothée</div><div class="card__price">À partir de 175 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Myriam · suspension</div><div class="card__body"><div class="card__name">Myriam</div><div class="card__price">À partir de 240 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Joséphine · lampadaire</div><div class="card__body"><div class="card__name">Joséphine</div><div class="card__price">À partir de 285 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Dalida · lampe à poser</div><div class="card__body"><div class="card__name">Dalida</div><div class="card__price">À partir de 145 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">La Merveilleuse · suspension</div><div class="card__body"><div class="card__name">La Merveilleuse</div><div class="card__price">À partir de 195 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Léon · applique</div><div class="card__body"><div class="card__name">Léon</div><div class="card__price">À partir de 95 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Camille · suspension</div><div class="card__body"><div class="card__name">Camille</div><div class="card__price">À partir de 180 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Henri · lampadaire</div><div class="card__body"><div class="card__name">Henri</div><div class="card__price">À partir de 310 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Lucienne · lampe à poser</div><div class="card__body"><div class="card__name">Lucienne</div><div class="card__price">À partir de 165 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Marius · suspension</div><div class="card__body"><div class="card__name">Marius</div><div class="card__price">À partir de 210 €</div></div></a>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SÉPARATEUR MOCKUP
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="mockup-sep"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ÉTAT B — VISITEUR SANS PROJET ACTIF (pas de sapiProject)
+     ═══════════════════════════════════════════════════════════════ -->
+
+<div class="state-marker">
+  État B — Visiteur sans projet actif <em>« Mes créations »</em>
+</div>
+
+<section class="hero">
+  <h1>Mes créations</h1>
+  <p>Tous les luminaires de l'atelier</p>
+</section>
+
+
+<!-- Card Conseil de Robin (invitation modale, pas de projet en cours) -->
+<div class="conseiller-bento">
+  <div class="conseiller-bento__card">
+    <span class="conseiller-bento__badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Conseil de Robin
+    </span>
+    <p class="conseiller-bento__text">
+      "Avant de tout regarder, dis-moi pour quelle pièce tu cherches — je te ferai une sélection adaptée à ton projet."
+      <span class="conseiller-bento__sig">— Robin</span>
+    </p>
+    <button class="conseiller-bento__cta">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+        <path d="M12 17h.01"/>
+      </svg>
+      Démarrer mon projet
+    </button>
+  </div>
+</div>
+
+
+<!-- Section unique : Toutes mes créations (pas de section sélection) -->
+<section class="section-catalogue" style="margin-top: 56px;">
+  <header class="section-header">
+    <h2>Toutes mes créations</h2>
+    <p class="section-header__sub">Le catalogue complet, classé par type de luminaire</p>
+  </header>
+
+  <div class="pills">
+    <button class="pill pill--active">Tous <span class="pill__count">24</span></button>
+    <button class="pill">Suspensions <span class="pill__count">11</span></button>
+    <button class="pill">Lampadaires <span class="pill__count">4</span></button>
+    <button class="pill">Lampes à poser <span class="pill__count">6</span></button>
+    <button class="pill">Appliques <span class="pill__count">3</span></button>
+  </div>
+
+  <div class="grid">
+    <a href="#" class="card"><div class="card__photo">Olivia · suspension</div><div class="card__body"><div class="card__name">Olivia</div><div class="card__price">À partir de 195 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Gaston · suspension</div><div class="card__body"><div class="card__name">Gaston</div><div class="card__price">À partir de 220 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Timothée · suspension</div><div class="card__body"><div class="card__name">Timothée</div><div class="card__price">À partir de 175 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Myriam · suspension</div><div class="card__body"><div class="card__name">Myriam</div><div class="card__price">À partir de 240 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Joséphine · lampadaire</div><div class="card__body"><div class="card__name">Joséphine</div><div class="card__price">À partir de 285 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Dalida · lampe à poser</div><div class="card__body"><div class="card__name">Dalida</div><div class="card__price">À partir de 145 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">La Merveilleuse · suspension</div><div class="card__body"><div class="card__name">La Merveilleuse</div><div class="card__price">À partir de 195 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Léon · applique</div><div class="card__body"><div class="card__name">Léon</div><div class="card__price">À partir de 95 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Camille · suspension</div><div class="card__body"><div class="card__name">Camille</div><div class="card__price">À partir de 180 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Henri · lampadaire</div><div class="card__body"><div class="card__name">Henri</div><div class="card__price">À partir de 310 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Lucienne · lampe à poser</div><div class="card__body"><div class="card__name">Lucienne</div><div class="card__price">À partir de 165 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Marius · suspension</div><div class="card__body"><div class="card__name">Marius</div><div class="card__price">À partir de 210 €</div></div></a>
+  </div>
+</section>
+
+
+</body>
+</html>

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup #5 — Modale mode texte libre</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-wood: #8B7355;
+    --color-wood-dark: #4A3F35;
+    --color-wood-mid: #6B5A4A;
+    --color-warm: #F5F0E8;
+    --color-orange: #E35B24;
+    --color-orange-dark: #C44A1E;
+    --color-line: rgba(147, 125, 104, 0.18);
+    --color-bg: #FAFAF7;
+    --shadow-card: 0 2px 8px rgba(147,125,104,0.12), 0 6px 28px rgba(147,125,104,0.15);
+    --shadow-card-hover: 0 4px 14px rgba(147,125,104,0.16), 0 12px 44px rgba(147,125,104,0.22);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-wood-dark);
+    line-height: 1.55;
+  }
+
+  /* Modale en simulation (deux exemples enchaînés sur la page) */
+  .modal-sim {
+    background: var(--color-bg);
+    border-bottom: 1px dashed var(--color-line);
+    padding-bottom: 0;
+  }
+  /* Pour l'état 2 (chat), on simule la hauteur réelle 100dvh */
+  .modal-sim--full {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 8px solid var(--color-wood-dark);
+  }
+  .modal-sim__label {
+    max-width: 1200px;
+    margin: 48px auto 0;
+    padding: 0 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-wood);
+    opacity: 0.55;
+  }
+
+  /* Header modale */
+  .modal__header {
+    flex-shrink: 0;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--color-line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+  }
+  .modal__title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-wood);
+  }
+  .modal__close {
+    background: none;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--color-wood-dark);
+    font-size: 22px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal__close:hover { background: var(--color-warm); }
+
+  /* Body */
+  .modal__body {
+    padding: 32px 20px 24px;
+    display: flex;
+    justify-content: center;
+  }
+  /* Variante body pour le mode chat (hauteur fixe + scroll interne) */
+  .modal__body--chat {
+    flex: 1;
+    padding: 24px 20px;
+    overflow: hidden;
+    align-items: stretch;
+  }
+
+  /* Card Conseiller universelle */
+  .conseiller-card {
+    position: relative;
+    width: 100%;
+    max-width: 880px;
+    background: var(--color-warm);
+    border-radius: 16px;
+    padding: 36px 40px 28px;
+    text-align: center;
+  }
+  /* Variante chat — la card prend la hauteur dispo et organise son contenu */
+  .conseiller-card--chat {
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    padding: 28px 28px 24px;
+    overflow: hidden;
+  }
+  .conseiller-card--chat::before { inset: 8px; }
+  .conseiller-card::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 1.5px dashed rgba(139, 115, 85, 0.35);
+    border-radius: 12px;
+    pointer-events: none;
+  }
+  .conseiller-card__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 16px;
+    background: var(--color-wood-dark);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    margin-bottom: 22px;
+  }
+  .conseiller-card__badge svg { width: 11px; height: 11px; }
+  .conseiller-card__title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: clamp(20px, 3vw, 28px);
+    color: var(--color-wood-dark);
+    line-height: 1.25;
+    text-transform: uppercase;
+    letter-spacing: 0.005em;
+    max-width: 640px;
+    margin: 0 auto 28px;
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     ÉTAT 1 — Input texte central + suggestions
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  .freetext-input-wrap {
+    position: relative;
+    max-width: 680px;
+    margin: 0 auto 22px;
+  }
+  .freetext-input {
+    width: 100%;
+    padding: 18px 60px 18px 24px;
+    border: 1.5px solid var(--color-line);
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 16px;
+    background: #fff;
+    color: var(--color-wood-dark);
+    transition: border-color 0.2s;
+  }
+  .freetext-input:focus {
+    outline: none;
+    border-color: var(--color-wood);
+  }
+  .freetext-input::placeholder {
+    color: var(--color-wood-mid);
+    opacity: 0.7;
+  }
+  .freetext-submit {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--color-orange);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .freetext-submit:hover { background: var(--color-orange-dark); }
+  .freetext-submit svg { width: 18px; height: 18px; }
+
+  .suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .suggestion {
+    padding: 8px 16px;
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--color-wood-dark);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .suggestion:hover {
+    border-color: var(--color-wood);
+    background: #fff;
+  }
+
+  /* Footer card (bouton Retour centré) */
+  .nav {
+    margin-top: 26px;
+    display: flex;
+    justify-content: center;
+  }
+  .nav__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--color-wood);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .nav__back:hover { color: var(--color-orange); }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     ÉTAT 2 — Chat avec bulles
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  .chat {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 660px;
+    text-align: left;
+    flex: 1;                /* prend tout l'espace dispo */
+    overflow-y: auto;       /* scroll interne */
+    padding: 4px 6px 12px;
+    /* scrollbar douce */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 115, 85, 0.35) transparent;
+  }
+  .chat::-webkit-scrollbar { width: 6px; }
+  .chat::-webkit-scrollbar-thumb {
+    background: rgba(139, 115, 85, 0.35);
+    border-radius: 50px;
+  }
+  .chat-message {
+    margin-bottom: 14px;
+    max-width: 85%;
+  }
+  .chat-message.user {
+    margin-left: auto;
+    text-align: right;
+  }
+  .chat-message.robin {
+    margin-right: auto;
+  }
+  .chat-message__bubble {
+    display: inline-block;
+    padding: 12px 18px;
+    font-size: 15px;
+    line-height: 1.5;
+    text-align: left;
+  }
+  .chat-message.user .chat-message__bubble {
+    background: var(--color-wood-dark);
+    color: #fff;
+    border-radius: 18px 18px 4px 18px;
+  }
+  .chat-message.robin .chat-message__bubble {
+    background: #fff;
+    color: var(--color-wood-dark);
+    border-radius: 18px 18px 18px 4px;
+    border: 1px solid var(--color-line);
+  }
+
+  /* Encart filtres appliqués sous la bulle Robin */
+  .filters-applied {
+    margin: 10px 0 0;
+    padding: 12px 16px;
+    background: rgba(139, 115, 85, 0.08);
+    border-left: 3px solid var(--color-wood);
+    border-radius: 4px 12px 12px 4px;
+    font-size: 12.5px;
+    color: var(--color-wood-dark);
+    max-width: 85%;
+  }
+  .filters-applied__label {
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 10.5px;
+    color: var(--color-wood);
+    margin-bottom: 4px;
+    display: block;
+  }
+  .filters-applied__chips {
+    color: var(--color-wood-dark);
+    font-weight: 500;
+  }
+
+  /* Bouton "Voir la sélection" — CTA principal en bas du chat, jamais dans le scroll */
+  .see-results {
+    margin-top: 16px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .see-results__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 14px 32px;
+    background: var(--color-orange);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .see-results__btn:hover {
+    background: var(--color-orange-dark);
+    transform: translateY(-1px);
+  }
+  .see-results__btn svg { width: 14px; height: 14px; }
+
+  /* Footer sticky pour le mode chat — input + envoyer */
+  .chat-footer {
+    flex-shrink: 0;
+    background: #fff;
+    border-top: 1px solid var(--color-line);
+    padding: 16px 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .chat-footer__inner {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  .chat-footer__input {
+    flex: 1;
+    padding: 12px 20px;
+    border: 1.5px solid var(--color-line);
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--color-wood-dark);
+  }
+  .chat-footer__input:focus {
+    outline: none;
+    border-color: var(--color-wood);
+  }
+  .chat-footer__submit {
+    padding: 0 22px;
+    height: 44px;
+    background: var(--color-wood-dark);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .chat-footer__submit:hover { background: var(--color-wood); }
+
+  /* Footer mockup global */
+  .mockup-footer {
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 16px 20px;
+    text-align: center;
+    font-size: 11px;
+    opacity: 0.9;
+  }
+
+  /* Mobile */
+  @media (max-width: 720px) {
+    .modal__body { padding: 20px 14px 24px; }
+    .conseiller-card { padding: 28px 22px 22px; }
+    .conseiller-card::before { inset: 8px; }
+    .conseiller-card__title { font-size: 18px; margin-bottom: 22px; }
+
+    .freetext-input { font-size: 15px; padding: 16px 56px 16px 20px; }
+    .freetext-submit { width: 38px; height: 38px; right: 6px; }
+
+    .suggestion { font-size: 12.5px; padding: 7px 13px; }
+
+    .chat-message__bubble { font-size: 14px; padding: 11px 16px; }
+    .chat-footer { padding: 12px 14px; gap: 8px; }
+    .chat-footer__input { font-size: 13px; padding: 11px 16px; }
+    .chat-footer__submit { padding: 0 16px; height: 40px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ ÉTAT 1 — Input texte central + suggestions ══════════════ -->
+<div class="modal-sim__label">État 1 — Démarrage : input + suggestions</div>
+<section class="modal-sim">
+
+  <header class="modal__header">
+    <span class="modal__title">Décrire mon projet</span>
+    <button class="modal__close" aria-label="Fermer">×</button>
+  </header>
+
+  <div class="modal__body">
+    <div class="conseiller-card">
+      <span class="conseiller-card__badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+          <path d="m15 5 4 4"/>
+        </svg>
+        Conseil de Robin
+      </span>
+
+      <h2 class="conseiller-card__title">Décrivez votre projet</h2>
+
+      <div class="freetext-input-wrap">
+        <input class="freetext-input" type="text" placeholder="Ex. : Une suspension moderne pour mon salon, au-dessus de la table…">
+        <button class="freetext-submit" aria-label="Envoyer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="suggestions">
+        <button class="suggestion" type="button">Une suspension moderne pour mon salon</button>
+        <button class="suggestion" type="button">Une lampe d'appoint pour ma chambre</button>
+        <button class="suggestion" type="button">Quelque chose pour éclairer mon escalier</button>
+      </div>
+
+      <div class="nav">
+        <button class="nav__back" type="button">← Retour</button>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- ══════════════ ÉTAT 2 — Chat avec bulles + filtres appliqués + footer ══════════════ -->
+<div class="modal-sim__label">État 2 — Chat : modale 100dvh fixe, zone bulles scrollable, CTA et footer toujours visibles</div>
+<section class="modal-sim modal-sim--full">
+
+  <header class="modal__header">
+    <span class="modal__title">Décrire mon projet</span>
+    <button class="modal__close" aria-label="Fermer">×</button>
+  </header>
+
+  <div class="modal__body modal__body--chat">
+    <div class="conseiller-card conseiller-card--chat">
+      <span class="conseiller-card__badge" style="margin-bottom: 14px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+          <path d="m15 5 4 4"/>
+        </svg>
+        Conseil de Robin
+      </span>
+
+      <!-- Zone bulles : scrollable à l'intérieur de la card -->
+      <div class="chat">
+
+        <div class="chat-message user">
+          <span class="chat-message__bubble">Une suspension moderne pour mon salon, au-dessus de la table</span>
+        </div>
+
+        <div class="chat-message robin">
+          <span class="chat-message__bubble">
+            Pour un salon moderne avec une suspension au-dessus de la table, j'ai sélectionné des modèles à ampoule entourée — la lumière y est plus douce, agréable pour les repas. Voici une sélection de 17 luminaires adaptés à votre projet.
+          </span>
+          <div class="filters-applied">
+            <span class="filters-applied__label">Filtres appliqués</span>
+            <span class="filters-applied__chips">Salon · Style moderne · Sortie plafond · Au-dessus d'une table</span>
+          </div>
+        </div>
+
+        <div class="chat-message user">
+          <span class="chat-message__bubble">Et plutôt en bois clair</span>
+        </div>
+
+        <div class="chat-message robin">
+          <span class="chat-message__bubble">
+            Bonne précision — tous mes luminaires sont déclinables en peuplier (bois clair). Dans cette sélection, Gaston et Timothée s'intègrent particulièrement bien dans un salon moderne. La couleur n'étant pas un filtre direct, regardez chaque fiche produit pour la finition.
+          </span>
+        </div>
+
+        <div class="chat-message user">
+          <span class="chat-message__bubble">Et si la pièce fait plutôt 30m² ?</span>
+        </div>
+
+        <div class="chat-message robin">
+          <span class="chat-message__bubble">
+            Pour 30m², on est sur du spacieux — il vaut mieux combiner plusieurs sources de lumière. La suspension principale au-dessus de la table reste, mais pense à ajouter un lampadaire dans un coin et peut-être une applique côté canapé. Je peux te montrer ma sélection de luminaires complémentaires si tu veux ?
+          </span>
+          <div class="filters-applied">
+            <span class="filters-applied__label">Filtres mis à jour</span>
+            <span class="filters-applied__chips">Salon · <strong>Taille spacieuse</strong> · Style moderne · Sortie plafond · Au-dessus d'une table</span>
+          </div>
+        </div>
+
+        <div class="chat-message user">
+          <span class="chat-message__bubble">Oui montre-moi tout</span>
+        </div>
+
+        <div class="chat-message robin">
+          <span class="chat-message__bubble">
+            J'ai élargi à 24 modèles — suspensions, lampadaires et appliques compatibles avec un grand salon moderne. Tu peux cliquer "Voir la sélection" pour explorer.
+          </span>
+        </div>
+
+      </div>
+
+      <!-- CTA principal : toujours visible en bas de card, jamais dans le scroll -->
+      <div class="see-results">
+        <button class="see-results__btn" type="button">
+          Voir la sélection
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer sticky : input + Envoyer -->
+  <div class="chat-footer">
+    <div class="chat-footer__inner">
+      <input class="chat-footer__input" type="text" placeholder="Continuer à discuter avec Robin…">
+      <button class="chat-footer__submit" type="button">Envoyer</button>
+    </div>
+  </div>
+
+</section>
+
+
+<div class="mockup-footer">
+  Mockup #5 — Mode texte libre · 2 états (démarrage / chat) · esthétique Conseiller conservée
+</div>
+
+</body>
+</html>

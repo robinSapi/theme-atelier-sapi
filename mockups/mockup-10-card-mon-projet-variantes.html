@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup #10 — Card "Mon projet" · variantes A/B/C/D/E</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-wood: #8B7355;
+    --color-wood-dark: #4A3F35;
+    --color-wood-mid: #6B5A4A;
+    --color-warm: #F5F0E8;
+    --color-orange: #E35B24;
+    --color-orange-dark: #C44A1E;
+    --color-line: rgba(147, 125, 104, 0.18);
+    --color-bg: #FAFAF7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-wood-dark);
+    line-height: 1.55;
+    padding-bottom: 60px;
+  }
+
+  /* Variant label */
+  .variant-label {
+    max-width: 1200px;
+    margin: 60px auto 0;
+    padding: 0 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-wood);
+    opacity: 0.65;
+  }
+  .variant-label strong {
+    color: var(--color-orange);
+    font-weight: 700;
+  }
+  .variant-note {
+    max-width: 1200px;
+    margin: 8px auto 0;
+    padding: 0 20px;
+    font-size: 13px;
+    color: var(--color-wood-mid);
+    font-style: italic;
+  }
+
+  /* Hero (état avec projet — "Pour une chambre") */
+  .hero {
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 70px 20px 50px;
+    text-align: center;
+    margin-top: 14px;
+  }
+  .hero h1 {
+    font-family: 'Square Peg', cursive;
+    font-size: clamp(48px, 9vw, 88px);
+    font-weight: normal;
+    line-height: 1;
+  }
+
+  /* ━━━━━━━━━━━ Card "Mon projet" base ━━━━━━━━━━━ */
+  .conseiller-bento {
+    max-width: 1200px;
+    margin: 32px auto;
+    padding: 0 20px;
+  }
+  .conseiller-bento__card {
+    position: relative;
+    background: var(--color-warm);
+    border-radius: 16px;
+    padding: 44px 38px 40px;
+    text-align: center;
+  }
+  .conseiller-bento__card::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 1.5px dashed rgba(139, 115, 85, 0.35);
+    border-radius: 12px;
+    pointer-events: none;
+  }
+  .conseiller-bento__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 16px;
+    background: var(--color-wood-dark);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    margin-bottom: 22px;
+  }
+  .conseiller-bento__badge svg { width: 11px; height: 11px; }
+
+  /* Variante "Conseil de Robin" (badge orange) */
+  .conseiller-bento__badge--invite {
+    background: var(--color-orange);
+  }
+
+  .conseiller-bento__text {
+    font-size: 17px;
+    font-style: italic;
+    color: var(--color-wood-dark);
+    line-height: 1.6;
+    max-width: 640px;
+    margin: 0 auto 18px;
+  }
+  .conseiller-bento__sig {
+    display: inline;
+    margin-left: 8px;
+    font-family: 'Square Peg', cursive;
+    font-style: normal;
+    font-size: 24px;
+    color: var(--color-wood);
+    line-height: 1;
+  }
+
+  .conseiller-bento__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--color-wood);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    margin-top: 6px;
+    cursor: pointer;
+  }
+  .conseiller-bento__link:hover { color: var(--color-orange); }
+
+  /* ━━━ CTA orange "Affiner mon projet" (variante A, D) ━━━ */
+  .conseiller-bento__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 22px;
+    padding: 14px 28px;
+    background: var(--color-orange);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .conseiller-bento__cta:hover {
+    background: var(--color-orange-dark);
+    transform: translateY(-1px);
+  }
+  .conseiller-bento__cta svg { width: 14px; height: 14px; }
+
+  /* ━━━ Lien "Modifier" coin haut-droit (variante C, D) ━━━ */
+  .conseiller-bento__edit {
+    position: absolute;
+    top: 22px;
+    right: 26px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--color-wood);
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(139, 115, 85, 0.4);
+    padding-bottom: 1px;
+    cursor: pointer;
+    z-index: 1;
+  }
+  .conseiller-bento__edit:hover {
+    color: var(--color-orange);
+    border-bottom-color: var(--color-orange);
+  }
+  .conseiller-bento__edit svg { width: 11px; height: 11px; }
+
+  /* ━━━ Variante B — Card "Conseil de Robin" (invitation) ━━━ */
+  .conseiller-bento__h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--color-wood-dark);
+    line-height: 1.3;
+    margin: 10px auto 18px;
+    max-width: 620px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .conseiller-bento__h2 em {
+    font-family: 'Square Peg', cursive;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 36px;
+    color: var(--color-wood);
+    line-height: 0.9;
+    display: inline-block;
+    transform: translateY(2px);
+  }
+
+  /* ━━━ Variante E — Mini-cards-questions ━━━ */
+  .question-cards {
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .question-card {
+    background: #fff;
+    border: 1.5px dashed rgba(139, 115, 85, 0.4);
+    border-radius: 14px;
+    padding: 16px 12px 14px;
+    text-align: center;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--color-wood-dark);
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .question-card:hover {
+    background: #fff;
+    border-color: var(--color-orange);
+    transform: translateY(-2px);
+  }
+  .question-card__icon {
+    width: 28px;
+    height: 28px;
+    color: var(--color-wood);
+  }
+  .question-card__icon svg { width: 100%; height: 100%; }
+  .question-card__label {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.25;
+    color: var(--color-wood-dark);
+  }
+  .question-card__nudge {
+    font-size: 10px;
+    color: var(--color-orange);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* Helper text au-dessus des mini-cards */
+  .question-cards-hint {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--color-wood);
+    font-style: italic;
+    text-align: center;
+  }
+
+  /* ━━━ Variante F — Question inline + réponses cliquables (épuré) ━━━ */
+  .inline-question {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px 12px;
+  }
+  .inline-question__label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-wood);
+    font-style: italic;
+  }
+  .inline-question__answers {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+  .answer-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    background: #fff;
+    border: 1.5px solid rgba(139, 115, 85, 0.35);
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--color-wood-dark);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.2s;
+  }
+  .answer-chip:hover {
+    background: var(--color-warm);
+    border-color: var(--color-orange);
+    transform: translateY(-1px);
+  }
+
+  /* Stub grille */
+  .grid-stub {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  .grid-stub__card {
+    aspect-ratio: 1/1.2;
+    background: linear-gradient(135deg, var(--color-warm) 0%, #E5DED3 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-wood);
+    opacity: 0.45;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  hr.section-sep {
+    border: none;
+    border-top: 2px dashed var(--color-line);
+    margin: 80px 0 0;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .hero { padding: 50px 20px 36px; }
+    .conseiller-bento { padding: 0 14px; margin: 22px auto; }
+    .conseiller-bento__card { padding: 36px 20px 34px; }
+    .conseiller-bento__card::before { inset: 8px; }
+    .conseiller-bento__text { font-size: 15px; }
+    .conseiller-bento__edit { top: 16px; right: 18px; font-size: 11px; }
+    .question-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .question-card { padding: 14px 8px; }
+    .grid-stub { grid-template-columns: repeat(2, 1fr); gap: 14px; padding: 0 14px; }
+  }
+</style>
+</head>
+<body>
+
+
+<!-- ════════════════════ A — CTA "Affiner mon projet" ════════════════════ -->
+<div class="variant-label">Variante <strong>A</strong> · CTA orange "Affiner mon projet" sous la phrase</div>
+<div class="variant-note">On garde la card actuelle, on ajoute juste un bouton d'appel à l'action évident. Câblage minimal, signal fort.</div>
+
+<section class="hero"><h1>Pour une chambre</h1></section>
+
+<div class="conseiller-bento">
+  <div class="conseiller-bento__card">
+    <span class="conseiller-bento__badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Mon projet
+    </span>
+
+    <p class="conseiller-bento__text">
+      "Pour une chambre, ma sélection privilégie les lumières douces et apaisantes."
+      <span class="conseiller-bento__sig">— Robin</span>
+    </p>
+
+    <button class="conseiller-bento__cta" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Affiner mon projet
+    </button>
+  </div>
+</div>
+
+<div class="grid-stub">
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+</div>
+
+
+<hr class="section-sep">
+
+<!-- ════════════════════ B — Card "Conseil de Robin" (invitation) ════════════════════ -->
+<div class="variant-label">Variante <strong>B</strong> · Si 1 seule answer → card "Conseil de Robin" (invitation), pas "Mon projet"</div>
+<div class="variant-note">1 answer (juste la pièce) ≠ projet. On bascule sur la card invitation (mockup #1) avec wording adapté. Card "Mon projet" réservée à 2+ answers.</div>
+
+<section class="hero"><h1>Pour une chambre</h1></section>
+
+<div class="conseiller-bento">
+  <div class="conseiller-bento__card">
+    <span class="conseiller-bento__badge conseiller-bento__badge--invite">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Conseil de Robin
+    </span>
+
+    <p class="conseiller-bento__h2">
+      <em>Pour une chambre,</em> je peux te guider plus précisément vers la sélection qui te correspond
+    </p>
+
+    <button class="conseiller-bento__cta" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+        <path d="M12 17h.01"/>
+      </svg>
+      Démarrer un projet
+    </button>
+  </div>
+</div>
+
+<div class="grid-stub">
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+</div>
+
+
+<hr class="section-sep">
+
+<!-- ════════════════════ C — Lien "Modifier" discret coin haut ════════════════════ -->
+<div class="variant-label">Variante <strong>C</strong> · Lien "Modifier" subtil dans le coin haut-droit</div>
+<div class="variant-note">Convention édition classique : petit lien underline en haut. Discret, élégant — mais peu visible pour qui n'a que la pièce.</div>
+
+<section class="hero"><h1>Pour une chambre</h1></section>
+
+<div class="conseiller-bento">
+  <div class="conseiller-bento__card">
+    <a class="conseiller-bento__edit" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Modifier
+    </a>
+
+    <span class="conseiller-bento__badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Mon projet
+    </span>
+
+    <p class="conseiller-bento__text">
+      "Pour une chambre, ma sélection privilégie les lumières douces et apaisantes."
+      <span class="conseiller-bento__sig">— Robin</span>
+    </p>
+  </div>
+</div>
+
+<div class="grid-stub">
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+</div>
+
+
+<hr class="section-sep">
+
+<!-- ════════════════════ D — Mix A + C ════════════════════ -->
+<div class="variant-label">Variante <strong>D</strong> · Mix · lien "Modifier" en haut + CTA orange "Affiner" en bas</div>
+<div class="variant-note">Le lien sert de retour aux réponses déjà données ; le CTA orange invite à continuer le parcours. Risque : deux portes pour à peu près la même action.</div>
+
+<section class="hero"><h1>Pour une chambre</h1></section>
+
+<div class="conseiller-bento">
+  <div class="conseiller-bento__card">
+    <a class="conseiller-bento__edit" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Modifier
+    </a>
+
+    <span class="conseiller-bento__badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Mon projet
+    </span>
+
+    <p class="conseiller-bento__text">
+      "Pour une chambre, ma sélection privilégie les lumières douces et apaisantes."
+      <span class="conseiller-bento__sig">— Robin</span>
+    </p>
+
+    <button class="conseiller-bento__cta" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Affiner mon projet
+    </button>
+  </div>
+</div>
+
+<div class="grid-stub">
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+</div>
+
+
+<hr class="section-sep">
+
+<!-- ════════════════════ E — Mini-cards-questions (proposition Robin) ════════════════════ -->
+<div class="variant-label">Variante <strong>E</strong> · 💡 proposition Robin — mini-cards questions suivantes sous la phrase</div>
+<div class="variant-note">Chaque question non répondue devient une porte d'entrée visible. Le visiteur voit immédiatement quelles dimensions il peut préciser. Au clic = ouverture modale directement sur cette question.</div>
+
+<section class="hero"><h1>Pour une chambre</h1></section>
+
+<div class="conseiller-bento">
+  <div class="conseiller-bento__card">
+    <span class="conseiller-bento__badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Mon projet
+    </span>
+
+    <p class="conseiller-bento__text">
+      "Pour une chambre, ma sélection privilégie les lumières douces et apaisantes."
+      <span class="conseiller-bento__sig">— Robin</span>
+    </p>
+
+    <p class="question-cards-hint">Affine ta sélection en répondant à une question</p>
+
+    <div class="question-cards">
+      <!-- Q1 : Taille -->
+      <button class="question-card" type="button">
+        <span class="question-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <path d="M3 9h18M9 3v18"/>
+          </svg>
+        </span>
+        <span class="question-card__label">Taille de la pièce ?</span>
+      </button>
+
+      <!-- Q2 : Éclairage -->
+      <button class="question-card" type="button">
+        <span class="question-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+        </span>
+        <span class="question-card__label">Éclairage principal ?</span>
+      </button>
+
+      <!-- Q3 : Hauteur -->
+      <button class="question-card" type="button">
+        <span class="question-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 5h18M3 19h18M12 5v14M9 8l3-3 3 3M9 16l3 3 3-3"/>
+          </svg>
+        </span>
+        <span class="question-card__label">Hauteur sous plafond ?</span>
+      </button>
+
+      <!-- Q4 : Style -->
+      <button class="question-card" type="button">
+        <span class="question-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12h6l2-9 4 18 2-9h4"/>
+          </svg>
+        </span>
+        <span class="question-card__label">Style de l'intérieur ?</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="grid-stub">
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+</div>
+
+
+<hr class="section-sep">
+
+<!-- ════════════════════ E bis — Avec une question répondue (3 cards restantes) ════════════════════ -->
+<div class="variant-label">Variante <strong>E bis</strong> · même principe, après 1 question répondue dans la modale (3 cards restantes + résumé pièce + taille)</div>
+<div class="variant-note">Les cards disparaissent au fur et à mesure des réponses. La phrase IA s'enrichit. Quand toutes les questions sont répondues → plus de cards (juste la phrase + lien "Modifier" éventuel).</div>
+
+<section class="hero"><h1>Pour une chambre</h1></section>
+
+<div class="conseiller-bento">
+  <div class="conseiller-bento__card">
+    <span class="conseiller-bento__badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Mon projet
+    </span>
+
+    <p class="conseiller-bento__text">
+      "Pour une chambre standard, ma sélection privilégie les lumières douces et apaisantes — parfaites pour s'endormir en regardant le plafond."
+      <span class="conseiller-bento__sig">— Robin</span>
+    </p>
+
+    <p class="question-cards-hint">Encore 3 questions pour affiner ta sélection</p>
+
+    <div class="question-cards" style="grid-template-columns: repeat(3, 1fr); max-width: 580px;">
+      <button class="question-card" type="button">
+        <span class="question-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+        </span>
+        <span class="question-card__label">Éclairage principal ?</span>
+      </button>
+
+      <button class="question-card" type="button">
+        <span class="question-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 5h18M3 19h18M12 5v14M9 8l3-3 3 3M9 16l3 3 3-3"/>
+          </svg>
+        </span>
+        <span class="question-card__label">Hauteur sous plafond ?</span>
+      </button>
+
+      <button class="question-card" type="button">
+        <span class="question-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12h6l2-9 4 18 2-9h4"/>
+          </svg>
+        </span>
+        <span class="question-card__label">Style de l'intérieur ?</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="grid-stub">
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+</div>
+
+<hr class="section-sep">
+
+<!-- ════════════════════ F — Question inline avec réponses cliquables ════════════════════ -->
+<div class="variant-label">Variante <strong>F</strong> · 💡 proposition Robin — chip d'accroche qui embarque dans la modale</div>
+<div class="variant-note">Au clic sur une réponse : la réponse est enregistrée silencieusement, puis la modale s'ouvre directement sur la question suivante. Le visiteur enchaîne le reste du parcours en modale. 1 seul appel IA en sortie → phrase enrichie.</div>
+
+<section class="hero"><h1>Pour une chambre</h1></section>
+
+<div class="conseiller-bento">
+  <div class="conseiller-bento__card">
+    <span class="conseiller-bento__badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Mon projet
+    </span>
+
+    <p class="conseiller-bento__text">
+      "Pour une chambre, ma sélection privilégie les lumières douces et apaisantes."
+      <span class="conseiller-bento__sig">— Robin</span>
+    </p>
+
+    <div class="inline-question">
+      <span class="inline-question__label">Taille de la pièce ?</span>
+      <div class="inline-question__answers">
+        <button class="answer-chip" type="button">Petite</button>
+        <button class="answer-chip" type="button">Standard</button>
+        <button class="answer-chip" type="button">Grande</button>
+        <button class="answer-chip" type="button">Je ne sais pas</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid-stub">
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+</div>
+
+
+<hr class="section-sep">
+
+<!-- ════════════════════ F bis — Après clic "Standard" → question suivante ════════════════════ -->
+<div class="variant-label">Variante <strong>F bis</strong> · état final après parcours complet en modale → phrase IA enrichie + lien Modifier</div>
+<div class="variant-note">Le visiteur a fait tout le parcours (initié par 1 clic sur le chip de la card, terminé en modale). 1 appel IA en sortie a produit l'advice_text personnalisé. Plus de chip-question : juste la phrase enrichie + un petit lien "Modifier" discret pour réouvrir le S3 carrefour.</div>
+
+<section class="hero"><h1>Pour une chambre</h1></section>
+
+<div class="conseiller-bento">
+  <div class="conseiller-bento__card">
+    <a class="conseiller-bento__edit" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Modifier
+    </a>
+
+    <span class="conseiller-bento__badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Mon projet
+    </span>
+
+    <p class="conseiller-bento__text">
+      "Pour une chambre standard avec une belle hauteur sous plafond, j'ai choisi des suspensions à ampoule entourée — la lumière y est douce et diffuse, parfaite pour s'endormir sans éblouissement."
+      <span class="conseiller-bento__sig">— Robin</span>
+    </p>
+  </div>
+</div>
+
+<div class="grid-stub">
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+</div>
+
+</body>
+</html>

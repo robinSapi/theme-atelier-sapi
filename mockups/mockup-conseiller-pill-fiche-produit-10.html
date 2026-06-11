@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pill Conseiller — fiche produit (Phase 2, 10 pistes)</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wood:#8B7355; --wood-dark:#4A3F35; --wood-mid:#6B5A4A; --orange:#E35B24; --cream:#FBF6EA; --ink:#3a322b; --border:#e7ded2;
+    --robin:url('https://atelier-sapi.fr/wp-content/uploads/2026/03/Robin-face-avec-Alice-lhelice.jpg');
+    --shadow:0 2px 8px rgba(147,125,104,.12),0 6px 28px rgba(147,125,104,.15);
+    --shadow-h:0 4px 14px rgba(147,125,104,.16),0 12px 44px rgba(147,125,104,.22);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Montserrat',sans-serif;color:var(--ink);background:#efe9dc}
+  .devnote{background:var(--wood-dark);color:#f0e7d8;font-size:13px;padding:14px 28px}.devnote b{color:#fff}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;max-width:1300px;margin:0 auto;padding:24px}
+  .cell{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 16px}
+  .cell .lab{display:flex;align-items:baseline;gap:8px;margin-bottom:14px}
+  .cell .lab .n{background:var(--wood);color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;border-radius:50px;padding:3px 10px}
+  .cell .lab .d{font-size:12px;color:var(--wood-mid)}
+
+  /* contexte fiche : label finition + select + prix + bouton */
+  .fld-lab{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--wood-mid);margin-bottom:6px}
+  .sel{display:flex;align-items:center;justify-content:space-between;border:1px solid #d9cdbb;border-radius:10px;padding:11px 14px;font-size:14px;color:var(--ink);background:#fdfbf7}
+  .sel svg{width:16px;height:16px;color:var(--wood)}
+  .buy{display:flex;align-items:center;gap:12px;margin-top:12px}
+  .buy .price{font-weight:700;color:var(--ink)}
+  .buy .cart{margin-left:auto;background:var(--orange);color:#fff;border:none;border-radius:8px;padding:11px 20px;font-family:inherit;font-weight:600;font-size:13px}
+
+  /* pill de base (V1) — cliquable */
+  .pill{display:inline-flex;align-items:center;gap:10px;background:var(--wood-dark);border-radius:60px;padding:5px 18px 5px 5px;cursor:pointer;text-decoration:none;transition:.2s}
+  .pill:hover{box-shadow:var(--shadow-h);transform:translateY(-1px)}
+  .pill .av{width:32px;height:32px;border-radius:50%;background-image:var(--robin);background-size:cover;background-position:center 22%;flex-shrink:0}
+  .pill .hook{font-family:'Square Peg';color:#fff;font-size:21px;line-height:1}
+  .pill .arr{color:#e0a878;font-size:15px;margin-left:2px}
+  .mt{margin-top:12px}
+
+  /* variantes spécifiques */
+  .v3-row{display:flex;align-items:center;gap:12px}
+  .v4 .pill{display:flex;width:100%;border-radius:12px;padding:8px 16px 8px 8px}.v4 .pill .arr{margin-left:auto;font-size:20px}
+  .v5 .pill{box-shadow:0 0 0 2px rgba(227,91,36,.5)}
+  .v6 .pill{padding:4px 14px 4px 4px}.v6 .pill .av{width:26px;height:26px}.v6 .pill .hook{font-size:18px}
+  .v7 .pill{border-radius:12px}.v7 .pill .chev{margin-left:6px;color:#e0a878}
+  .v8 .pill .badge{position:relative}.v8 .qmark{position:absolute;right:-2px;bottom:-2px;width:15px;height:15px;border-radius:50%;background:var(--orange);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--wood-dark)}
+  .v9 .pill{padding-left:20px;position:relative}.v9 .pill .av{position:absolute;left:-6px;width:42px;height:42px;border:2px solid #fff}
+  .v9 .pill .hook{margin-left:6px}
+  /* V10 light */
+  .v10 .pill{background:var(--cream);border:1px solid var(--border)}.v10 .pill .hook{color:var(--wood-dark)}.v10 .pill .arr{color:var(--orange)}
+</style>
+</head>
+<body>
+<div class="devnote"><b>Pill Conseiller sur la FICHE PRODUIT — Phase 2</b> &nbsp;·&nbsp; pill CLIQUABLE (ouvre la modale d'aide), accroche « Je t'aide à choisir la bonne variante ». Posée près du sélecteur de variante. 10 pistes (placement + affordance).</div>
+
+<div class="grid">
+
+  <div class="cell v1"><div class="lab"><span class="n">V1</span><span class="d">Pill V1 au-dessus du sélecteur + flèche</span></div>
+    <a class="pill"><span class="av"></span><span class="hook">Je t'aide à choisir la bonne variante</span><span class="arr">↗</span></a>
+    <div class="mt"><div class="fld-lab">Finition</div><div class="sel">Bois clair (peuplier)<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+    <div class="buy"><span class="price">155,00 €</span><button class="cart">Ajouter au panier</button></div></div>
+
+  <div class="cell v2"><div class="lab"><span class="n">V2</span><span class="d">Pill V1 sous le sélecteur</span></div>
+    <div class="fld-lab">Finition</div><div class="sel">Bois clair (peuplier)<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+    <a class="pill mt"><span class="av"></span><span class="hook">Je t'aide à choisir la bonne variante</span><span class="arr">↗</span></a></div>
+
+  <div class="cell v3"><div class="lab"><span class="n">V3</span><span class="d">Pill à droite du label « Finition »</span></div>
+    <div class="v3-row"><div class="fld-lab" style="margin:0">Finition</div><a class="pill" style="padding:3px 14px 3px 3px"><span class="av" style="width:26px;height:26px"></span><span class="hook" style="font-size:18px">Je t'aide à choisir</span></a></div>
+    <div class="sel mt">Bois clair (peuplier)<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+
+  <div class="cell v4"><div class="lab"><span class="n">V4</span><span class="d">Barre pleine largeur sous le sélecteur</span></div>
+    <div class="fld-lab">Finition</div><div class="sel">Bois clair (peuplier)<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+    <a class="pill mt"><span class="av"></span><span class="hook">Je t'aide à choisir la bonne variante</span><span class="arr">→</span></a></div>
+
+  <div class="cell v5"><div class="lab"><span class="n">V5</span><span class="d">Pill V1 + liseré orange (action)</span></div>
+    <a class="pill"><span class="av"></span><span class="hook">Je t'aide à choisir la bonne variante</span><span class="arr">↗</span></a>
+    <div class="mt"><div class="fld-lab">Finition</div><div class="sel">Bois clair (peuplier)<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div></div></div>
+
+  <div class="cell v6"><div class="lab"><span class="n">V6</span><span class="d">Mini pill discrète</span></div>
+    <div class="fld-lab">Finition</div><div class="sel">Bois clair (peuplier)<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+    <a class="pill mt"><span class="av"></span><span class="hook">Je t'aide à choisir la bonne variante</span></a></div>
+
+  <div class="cell v7"><div class="lab"><span class="n">V7</span><span class="d">Pill « carte » arrondie + chevron</span></div>
+    <a class="pill"><span class="av"></span><span class="hook">Je t'aide à choisir la bonne variante</span><span class="chev">›</span></a>
+    <div class="mt"><div class="fld-lab">Finition</div><div class="sel">Bois clair (peuplier)<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div></div></div>
+
+  <div class="cell v8"><div class="lab"><span class="n">V8</span><span class="d">Avatar + badge « ? » (aide)</span></div>
+    <a class="pill"><span class="av badge"><span class="qmark">?</span></span><span class="hook">Je t'aide à choisir la bonne variante</span></a>
+    <div class="mt"><div class="fld-lab">Finition</div><div class="sel">Bois clair (peuplier)<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div></div></div>
+
+  <div class="cell v9"><div class="lab"><span class="n">V9</span><span class="d">Photo qui dépasse (médaillon)</span></div>
+    <a class="pill"><span class="av"></span><span class="hook">Je t'aide à choisir la bonne variante</span><span class="arr">↗</span></a>
+    <div class="mt"><div class="fld-lab">Finition</div><div class="sel">Bois clair (peuplier)<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div></div></div>
+
+  <div class="cell v10"><div class="lab"><span class="n">V10</span><span class="d">Variante claire (compa fond blanc)</span></div>
+    <a class="pill"><span class="av"></span><span class="hook">Je t'aide à choisir la bonne variante</span><span class="arr">↗</span></a>
+    <div class="mt"><div class="fld-lab">Finition</div><div class="sel">Bois clair (peuplier)<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div></div></div>
+
+</div>
+</body>
+</html>

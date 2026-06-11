@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes créations — état B (arrivée depuis le room-picker) — prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wood:#8B7355; --wood-dark:#4A3F35; --wood-mid:#6B5A4A; --orange:#E35B24;
+    --cream:#FBF6EA; --warm:#FBF6EA; --ink:#3a322b; --border:#e7ded2;
+    --robin:url('https://atelier-sapi.fr/wp-content/uploads/2026/03/Robin-face-avec-Alice-lhelice.jpg');
+    --room:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/04/Alban-Le-virevoltant-Salon-Paysage.jpg');
+    --shadow-card:0 2px 8px rgba(147,125,104,.12),0 6px 28px rgba(147,125,104,.15);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Montserrat',sans-serif;color:var(--ink);background:#000}
+  .devnote{position:fixed;bottom:14px;left:14px;z-index:200;background:var(--wood-dark);color:#f0e7d8;font-size:12px;padding:9px 14px;border-radius:10px;max-width:340px;line-height:1.5;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+  .devnote b{color:#fff}
+  .replay{position:fixed;bottom:14px;right:14px;z-index:200;background:var(--orange);color:#fff;border:none;border-radius:50px;padding:11px 20px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+
+  /* ===== Faux header (révélé en fondu) ===== */
+  .site-header{position:fixed;top:0;left:0;right:0;z-index:100;height:64px;display:flex;align-items:center;gap:34px;padding:0 34px;
+    background:rgba(255,255,255,.10);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    opacity:0;transform:translateY(-100%);transition:opacity .8s ease,transform .8s ease,background .4s ease,box-shadow .4s ease}
+  .site-header.is-in{opacity:1;transform:translateY(0)}
+  .site-header.is-scrolled{background:#fff;box-shadow:0 1px 0 var(--border);backdrop-filter:none}
+  .site-header__logo{width:38px;height:38px;border-radius:50%;background:#1a1a1a;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Square Peg';font-size:20px}
+  .site-header__nav{display:flex;gap:26px;font-size:14px;font-weight:600}
+  .site-header__nav a{color:#fff;text-decoration:none;text-shadow:0 1px 8px rgba(0,0,0,.35);transition:color .4s ease}
+  .site-header__nav a:first-child{color:#ffd9c2}
+  .site-header.is-scrolled .site-header__nav a{color:var(--ink);text-shadow:none}
+  .site-header.is-scrolled .site-header__nav a:first-child{color:var(--orange)}
+
+  /* ===== Bandeau réassurance — bas de la photo, puis sticky sous le header ===== */
+  .reassure-band{position:fixed;left:0;right:0;bottom:0;z-index:90;
+    display:flex;align-items:center;justify-content:center;gap:30px;flex-wrap:wrap;padding:11px 24px;
+    background:rgba(20,14,8,.22);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,.22);
+    opacity:0;transform:translateY(100%);transition:opacity .7s ease,transform .7s ease,background .4s ease,box-shadow .4s ease}
+  .reassure-band.is-in{opacity:1;transform:none}
+  .reassure-band.is-top{bottom:auto;top:64px;background:#fff;border-top:none;box-shadow:0 1px 0 var(--border)}
+  .reassure-band__item{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.4)}
+  .reassure-band__item svg{width:16px;height:16px;color:#fff;opacity:.95}
+  .reassure-band.is-top .reassure-band__item{color:var(--ink);text-shadow:none}
+  .reassure-band.is-top .reassure-band__item svg{color:var(--orange)}
+  @media(max-width:600px){.reassure-band{gap:16px}.reassure-band__item:nth-child(n+3){display:none}}
+
+  /* ===== HERO immersif ===== */
+  .hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:90px 24px 40px;overflow:hidden;
+    transition:justify-content .6s ease}
+  .hero__bg{position:absolute;inset:0;background:var(--room) center/cover no-repeat;z-index:0;transition:filter .9s ease,transform .9s ease}
+  .hero__scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(20,14,8,.30) 0%,rgba(20,14,8,.10) 35%,rgba(20,14,8,.45) 100%);transition:background .9s ease}
+  .hero.is-selection{justify-content:flex-start;padding-bottom:88px}
+  .hero.is-selection .hero__bg{filter:blur(16px) brightness(.78);transform:scale(1.08)}
+  .hero.is-selection .hero__scrim{background:rgba(20,14,8,.55)}
+
+  .hero__inner{position:relative;z-index:2;width:100%;max-width:780px;display:flex;flex-direction:column;align-items:center;gap:20px;transition:max-width .6s ease}
+  .hero.is-selection .hero__inner{max-width:1180px;margin-top:74px}
+  .hero.is-selection .cta-row,.hero.is-selection .scrollhint{display:none}
+  .hero.is-selection .affine__q{font-size:13px}
+  .chip.is-validated{background:var(--wood-dark);color:#fff}
+  .chip.is-validated svg{color:#e0a878}
+  .refine-link{opacity:0;transform:translateY(8px);transition:.4s;display:none;align-items:center;gap:8px;background:none;border:none;color:#fff;font-family:inherit;font-size:12.5px;font-weight:600;text-decoration:underline;text-underline-offset:4px;cursor:pointer;margin-top:2px}
+  .refine-link.is-in{display:inline-flex;opacity:.95;transform:none}
+  .refine-link .av{width:24px;height:24px;border-radius:50%;background-image:var(--robin);background-size:cover;background-position:center 22%}
+  .pcard.is-filtered{display:none}
+
+  /* pill Robin V1 */
+  .sig{display:inline-flex;align-items:center;gap:11px;background:var(--wood-dark);border-radius:60px;padding:6px 20px 6px 6px;opacity:0;transform:translateY(10px);transition:opacity .5s ease,transform .5s ease}
+  .sig.is-in{opacity:1;transform:none}
+  .sig .av{width:32px;height:32px;border-radius:50%;background-image:var(--robin);background-size:cover;background-position:center 22%}
+  .sig .who{font-family:'Square Peg';color:#fff;font-size:21px;line-height:1}
+
+  /* phrase IA qui s'écrit */
+  .phrase{color:#fff;font-size:clamp(1.4rem,2.8vw,2.1rem);line-height:1.4;font-style:italic;font-weight:500;text-shadow:0 2px 24px rgba(0,0,0,.45);min-height:2.4em;
+    transition:font-size .6s ease,max-width .6s ease}
+  .phrase .caret{display:inline-block;width:2px;height:1em;background:var(--orange);vertical-align:-2px;margin-left:2px;animation:blink 1s steps(1) infinite}
+  .phrase.done .caret{display:none}
+  @keyframes blink{50%{opacity:0}}
+  .hero.is-selection .phrase{font-size:clamp(1rem,1.6vw,1.25rem);max-width:880px}
+
+  /* question d'affinage */
+  .affine{opacity:0;transform:translateY(10px);transition:opacity .5s ease,transform .5s ease;display:flex;flex-direction:column;gap:12px;align-items:center}
+  .affine.is-in{opacity:1;transform:none}
+  .affine__q{color:#fff;font-size:14px;font-weight:600;letter-spacing:.02em;text-shadow:0 2px 14px rgba(0,0,0,.5)}
+  .affine__chips{display:flex;flex-wrap:wrap;gap:9px;justify-content:center}
+  .chip{background:rgba(255,255,255,.92);border:none;border-radius:50px;padding:9px 18px;font-family:inherit;font-size:13px;font-weight:600;color:var(--wood-dark);cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+  .chip:hover{background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+  .chip svg{width:15px;height:15px;color:var(--wood)}
+
+  /* boutons */
+  .cta-row{display:flex;flex-direction:column;align-items:center;gap:12px;opacity:0;transform:translateY(10px);transition:opacity .5s ease,transform .5s ease}
+  .cta-row.is-in{opacity:1;transform:none}
+  .btn-primary{background:var(--orange);color:#fff;border:none;border-radius:50px;padding:15px 34px;font-family:inherit;font-weight:700;font-size:14px;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;display:inline-flex;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(227,91,36,.4)}
+  .btn-primary svg{width:18px;height:18px}
+  .btn-secondary{background:transparent;color:#fff;border:none;font-family:inherit;font-weight:600;font-size:13px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;text-decoration:underline;text-underline-offset:4px;opacity:.92}
+
+  /* scroll hint */
+  .scrollhint{position:absolute;bottom:64px;left:50%;transform:translateX(-50%);z-index:2;color:#fff;opacity:0;transition:opacity .6s ease .3s;font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:5px}
+  .cta-row.is-in ~ .scrollhint{opacity:.8}
+  .scrollhint svg{width:18px;height:18px;animation:bob 1.6s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(5px)}}
+
+  /* ===== Slider sélection (révélé) ===== */
+  .selection{position:relative;z-index:2;width:100%;max-width:1180px;opacity:0;transform:translateY(20px);transition:opacity .6s ease .25s,transform .6s ease .25s;display:none}
+  .hero.is-selection .selection{display:block;opacity:1;transform:none}
+  .selection__head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;gap:16px}
+  .selection__title{color:#fff;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+  .selection__all{color:#fff;font-size:12px;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer;background:none;border:none;font-family:inherit;opacity:.9}
+  .slider{display:flex;gap:18px;overflow-x:auto;padding:4px 2px 16px;scroll-snap-type:x mandatory;scrollbar-width:thin}
+  .slider::-webkit-scrollbar{height:6px}.slider::-webkit-scrollbar-thumb{background:rgba(255,255,255,.4);border-radius:3px}
+  .pcard{flex:0 0 256px;scroll-snap-align:start;background:#fff;border-radius:14px;overflow:hidden;box-shadow:var(--shadow-card);text-decoration:none;color:inherit;display:flex;flex-direction:column}
+  .pcard__img{aspect-ratio:4/3;background:#eee center/cover no-repeat}
+  .pcard__body{padding:14px 16px 16px;text-align:center}
+  .pcard__name{font-size:0;margin-bottom:3px}
+  .pcard__first{font-family:'Montserrat';font-weight:700;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink)}
+  .pcard__sur{font-family:'Square Peg';font-size:22px;color:var(--ink);margin-left:5px}
+  .pcard__cat{font-size:11px;color:var(--wood-mid);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+  .pcard__why{font-size:11.5px;color:var(--wood-mid);font-style:italic;line-height:1.4;margin-bottom:10px;min-height:2.8em}
+  .pcard__price{font-size:13px;font-weight:700;color:var(--ink)}
+  .pcard__price small{font-weight:500;color:var(--wood-mid);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em}
+  /* carte sur-mesure */
+  .pcard--sur{background:var(--orange);color:#fff;justify-content:center;align-items:center;text-align:center;padding:24px 18px;position:relative}
+  .pcard--sur::before{content:"";position:absolute;inset:9px;border:1.5px dashed rgba(255,255,255,.5);border-radius:9px}
+  .pcard--sur .ey{font-size:11px;text-transform:uppercase;letter-spacing:.1em;opacity:.9;margin-bottom:8px;position:relative}
+  .pcard--sur .ti{font-family:'Square Peg';font-size:30px;line-height:1;margin-bottom:8px;position:relative}
+  .pcard--sur .su{font-size:12px;line-height:1.5;opacity:.95;margin-bottom:14px;position:relative}
+  .pcard--sur .cc{position:relative;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;display:inline-flex;gap:7px;align-items:center;border-bottom:1px solid #fff;padding-bottom:2px}
+
+  /* ===== Catalogue (sous le hero, accessible au scroll) ===== */
+  .catalogue{background:var(--warm);padding:54px 24px 80px;text-align:center;scroll-margin-top:112px}
+  .catalogue__title{font-size:1.7rem;font-weight:700;color:var(--wood-dark);text-transform:uppercase;letter-spacing:.02em}
+  .catalogue__sub{color:var(--wood-mid);font-size:13px;margin-top:6px}
+  .pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:24px 0}
+  .pill{background:#fff;border:1px solid var(--border);border-radius:50px;padding:9px 18px;font-size:12.5px;font-weight:600;color:var(--wood-dark);cursor:pointer}
+  .pill.is-active{background:var(--wood-dark);color:#fff;border-color:var(--wood-dark)}
+  .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;max-width:1180px;margin:0 auto}
+  .gcard{background:#fff;border-radius:12px;overflow:hidden;box-shadow:var(--shadow-card)}
+  .gcard__img{aspect-ratio:4/3;background:#eee center/cover no-repeat}
+  .gcard__b{padding:12px 14px 16px;text-align:center}
+  .gcard__b .pcard__first{font-size:13px}.gcard__b .pcard__sur{font-size:19px}
+
+  @media(max-width:600px){
+    .site-header__nav{display:none}
+    .hero.is-selection .hero__inner{margin-top:64px}
+    .pcard{flex-basis:200px}
+  }
+</style>
+</head>
+<body>
+
+<!-- Faux header -->
+<header class="site-header" id="header">
+  <div class="site-header__logo">S</div>
+  <nav class="site-header__nav">
+    <a href="#">Mes créations</a><a href="#">Sur mesure</a><a href="#">Galerie</a><a href="#">L'artisan</a><a href="#">Conseils</a><a href="#">Contact</a>
+  </nav>
+</header>
+
+<!-- Bandeau réassurance — bas de la photo plein écran, puis sticky sous le header -->
+<div class="reassure-band" id="reassure">
+  <span class="reassure-band__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg>Livraison rapide 48-72h</span>
+  <span class="reassure-band__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10l2 2M5 19l2-2M17 7l2-2"/></svg>Façonné main à Lyon sous 5 jours</span>
+  <span class="reassure-band__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>30 jours pour changer d'avis</span>
+  <span class="reassure-band__item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Paiement sécurisé</span>
+</div>
+
+<!-- HERO immersif état B -->
+<section class="hero" id="hero">
+  <div class="hero__bg"></div>
+  <div class="hero__scrim"></div>
+
+  <div class="hero__inner">
+    <span class="sig" id="sig"><span class="av"></span><span class="who">Le conseil de Robin</span></span>
+    <p class="phrase" id="phrase"><span class="caret"></span></p>
+
+    <div class="affine" id="affine">
+      <div class="affine__q" id="affineQ"></div>
+      <div class="affine__chips" id="affineChips"></div>
+    </div>
+    <button class="refine-link" id="refineLink"><span class="av"></span>Préciser avec Robin pour la sélection idéale&nbsp;→</button>
+
+    <div class="cta-row" id="ctaRow">
+      <button class="btn-primary" id="seeSelection">
+        Voir ma sélection pour toi
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </button>
+      <button class="btn-secondary" id="seeAll">Voir toutes les créations</button>
+    </div>
+
+    <!-- Slider sélection (révélé au clic) -->
+    <div class="selection" id="selection">
+      <div class="selection__head">
+        <span class="selection__title">Ma sélection pour ton salon</span>
+        <button class="selection__all" id="seeAll2">Voir toutes les créations →</button>
+      </div>
+      <div class="slider" id="slider">
+        <a class="pcard" href="#" data-taille="grande" data-style="ancien">
+          <span class="pcard__img" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/10/Large-1-768x547.jpg')"></span>
+          <span class="pcard__body">
+            <span class="pcard__name"><span class="pcard__first">Gaston</span><span class="pcard__sur">Le chardon</span></span>
+            <div class="pcard__cat">Suspension</div>
+            <div class="pcard__why">« Sa lumière éclatée réchauffe un grand salon. »</div>
+            <div class="pcard__price"><small>À partir de</small> 75,00 €</div>
+          </span>
+        </a>
+        <a class="pcard" href="#" data-taille="moyenne" data-style="moderne">
+          <span class="pcard__img" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/03/IMG_8441-768x491.jpg')"></span>
+          <span class="pcard__body">
+            <span class="pcard__name"><span class="pcard__first">Suze</span><span class="pcard__sur">La méduse</span></span>
+            <div class="pcard__cat">Suspension</div>
+            <div class="pcard__why">« Des ombres douces qui ondulent au plafond. »</div>
+            <div class="pcard__price"><small>À partir de</small> 75,00 €</div>
+          </span>
+        </a>
+        <a class="pcard" href="#" data-taille="moyenne" data-style="ancien">
+          <span class="pcard__img" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/04/IMG_5851-768x568.jpg')"></span>
+          <span class="pcard__body">
+            <span class="pcard__name"><span class="pcard__first">Dalida</span><span class="pcard__sur">Le dahlia</span></span>
+            <div class="pcard__cat">Suspension</div>
+            <div class="pcard__why">« Un motif floral qui se projette sur les murs. »</div>
+            <div class="pcard__price"><small>À partir de</small> 65,00 €</div>
+          </span>
+        </a>
+        <a class="pcard" href="#" data-taille="grande" data-style="moderne">
+          <span class="pcard__img" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/04/IMG_5668-768x590.jpg')"></span>
+          <span class="pcard__body">
+            <span class="pcard__name"><span class="pcard__first">Vincent</span><span class="pcard__sur">L'incandescent</span></span>
+            <div class="pcard__cat">Suspension</div>
+            <div class="pcard__why">« Chaleureux au-dessus d'une table de salon. »</div>
+            <div class="pcard__price"><small>À partir de</small> 85,00 €</div>
+          </span>
+        </a>
+        <a class="pcard pcard--sur" href="#">
+          <span class="ey">Sur-mesure</span>
+          <span class="ti">Créons ensemble</span>
+          <span class="su">Rien ne colle parfaitement&nbsp;? Robin dessine ton luminaire.</span>
+          <span class="cc">En parler à Robin
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="scrollhint"><span>Le catalogue complet</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+  </div>
+</section>
+
+<!-- Catalogue (page classique en dessous) -->
+<section class="catalogue" id="catalogue">
+  <div class="catalogue__title">Toutes mes créations</div>
+  <div class="catalogue__sub">Le catalogue complet, classé par type de luminaire</div>
+  <div class="pills">
+    <button class="pill is-active">Tous</button><button class="pill">Suspensions</button><button class="pill">Lampadaires</button><button class="pill">Lampes à poser</button><button class="pill">Appliques</button><button class="pill">Accessoires</button>
+  </div>
+  <div class="pgrid">
+    <div class="gcard"><div class="gcard__img" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/10/Large-1-768x547.jpg')"></div><div class="gcard__b"><span class="pcard__first">Gaston</span><span class="pcard__sur">Le chardon</span></div></div>
+    <div class="gcard"><div class="gcard__img" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/03/IMG_8441-768x491.jpg')"></div><div class="gcard__b"><span class="pcard__first">Suze</span><span class="pcard__sur">La méduse</span></div></div>
+    <div class="gcard"><div class="gcard__img" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/04/IMG_5851-768x568.jpg')"></div><div class="gcard__b"><span class="pcard__first">Dalida</span><span class="pcard__sur">Le dahlia</span></div></div>
+    <div class="gcard"><div class="gcard__img" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/04/IMG_5668-768x590.jpg')"></div><div class="gcard__b"><span class="pcard__first">Vincent</span><span class="pcard__sur">L'incandescent</span></div></div>
+  </div>
+</section>
+
+<div class="devnote"><b>Prototype état B</b> — arrivée depuis le room-picker (salon). La séquence se joue automatiquement. Clique <b>« Voir ma sélection »</b> pour le flou + remontée + slider. <b>« Voir toutes les créations »</b> scrolle au catalogue.</div>
+<button class="replay" id="replay">↻ Rejouer la séquence</button>
+
+<script>
+const phraseText = "Pour ton salon, je te propose des luminaires à ampoule entourée. La lumière passe à travers le bois et dessine ses motifs au mur, l'ambiance s'installe.";
+const $ = id => document.getElementById(id);
+let typeTimer = null;
+
+// La pièce est déjà connue (room-picker). On n'affine inline que taille puis
+// style (= ce qu'il faut pour cibler la variation). Le reste = la modale.
+const questions = [
+  {id:'taille', q:'Quelle taille fait ton salon ?', chips:[
+    {l:'Petit',v:'petite'},{l:'Standard',v:'moyenne'},{l:'Grand',v:'grande'},{l:'Je ne sais pas',v:''}]},
+  {id:'style', q:'Quel style pour ton salon ?', chips:[
+    {l:'Moderne, tons clairs',v:'moderne'},{l:'Ancien, bois, tons chauds',v:'ancien'},{l:'Pas de préférence',v:''}]}
+];
+let qIndex = 0;
+let answers = {};
+
+function typewriter(el, text, done){
+  const caret = '<span class="caret"></span>';
+  let i = 0;
+  el.classList.remove('done');
+  el.innerHTML = caret;
+  clearInterval(typeTimer);
+  typeTimer = setInterval(()=>{
+    i++;
+    el.innerHTML = text.slice(0,i).replace(/\n/g,'<br>') + caret;
+    if(i>=text.length){ clearInterval(typeTimer); el.classList.add('done'); done && done(); }
+  }, 28);
+}
+
+function renderQuestion(){
+  const q = questions[qIndex];
+  $('affineQ').textContent = q.q;
+  const wrap = $('affineChips');
+  wrap.innerHTML = '';
+  q.chips.forEach(c=>{
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.textContent = c.l;
+    b.addEventListener('click', ()=> answer(q.id, c.v, b));
+    wrap.appendChild(b);
+  });
+}
+
+function filterSlider(){
+  document.querySelectorAll('.pcard:not(.pcard--sur)').forEach(card=>{
+    const okT = !answers.taille || card.dataset.taille === answers.taille;
+    const okS = !answers.style  || card.dataset.style  === answers.style;
+    card.classList.toggle('is-filtered', !(okT && okS));
+  });
+}
+
+function openSelection(){
+  $('hero').classList.add('is-selection');
+  $('header').classList.add('is-in');
+}
+
+function answer(qid, val, btn){
+  answers[qid] = val;
+  [...$('affineChips').children].forEach(c=> c.classList.remove('is-validated'));
+  btn.classList.add('is-validated');
+  filterSlider();           // garde le slider en phase (re-filtrage en direct s'il est déjà ouvert)
+  setTimeout(()=>{
+    qIndex++;
+    if (qIndex < questions.length){
+      renderQuestion();      // question suivante prend la place — la sélection NE s'affiche PAS encore
+    } else {
+      // toutes les questions répondues → là seulement la sélection se révèle
+      $('affine').style.display = 'none';
+      openSelection();
+      $('refineLink').classList.add('is-in');
+    }
+  }, 420);
+}
+
+function playSequence(){
+  qIndex = 0; answers = {};
+  const hero = $('hero');
+  hero.classList.remove('is-selection');
+  $('sig').classList.remove('is-in');
+  $('affine').classList.remove('is-in');
+  $('affine').style.display = '';
+  $('refineLink').classList.remove('is-in');
+  $('ctaRow').classList.remove('is-in');
+  $('header').classList.remove('is-in');
+  $('reassure').classList.remove('is-in');
+  $('phrase').classList.remove('done');
+  $('phrase').innerHTML = '<span class="caret"></span>';
+  document.querySelectorAll('.pcard').forEach(c=> c.classList.remove('is-filtered'));
+  renderQuestion();
+
+  setTimeout(()=> $('sig').classList.add('is-in'), 300);
+  setTimeout(()=> typewriter($('phrase'), phraseText, ()=>{
+    setTimeout(()=> $('affine').classList.add('is-in'), 250);
+    setTimeout(()=> $('ctaRow').classList.add('is-in'), 700);
+    setTimeout(()=>{ $('header').classList.add('is-in'); $('reassure').classList.add('is-in'); }, 950);
+  }), 900);
+}
+
+// Header + bandeau : transparent/bas sur la photo → opaque/sticky sous le header au scroll
+const _header = $('header'), _band = $('reassure');
+function onScroll(){
+  const past = window.scrollY > window.innerHeight * 0.5;
+  _header.classList.toggle('is-scrolled', past);
+  _band.classList.toggle('is-top', past);
+}
+window.addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+
+// "Voir ma sélection" sans répondre = sélection pièce seule, question reste dispo
+$('seeSelection').addEventListener('click', openSelection);
+function scrollCat(){ $('catalogue').scrollIntoView({behavior:'smooth'}); }
+$('seeAll').addEventListener('click', scrollCat);
+$('seeAll2').addEventListener('click', scrollCat);
+$('refineLink').addEventListener('click', ()=> alert('→ Ouvre la modale Conseiller (questionnaire complet vers la sélection idéale).'));
+$('replay').addEventListener('click', playSequence);
+
+playSequence();
+</script>
+</body>
+</html>

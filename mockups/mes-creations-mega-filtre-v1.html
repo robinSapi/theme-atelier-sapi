@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — Mes créations · Méga-filtre intelligent</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-wood: #8B7355;
+    --color-wood-dark: #4A3F35;
+    --color-wood-mid: #6B5A4A;
+    --color-orange: #E35B24;
+    --color-warm: #F5F0E8;
+    --color-bg: #FAFAF7;
+    --color-line: #E5DED3;
+    --shadow-card: 0 2px 8px rgba(147,125,104,0.12), 0 6px 28px rgba(147,125,104,0.15);
+    --shadow-card-hover: 0 4px 14px rgba(147,125,104,0.16), 0 12px 44px rgba(147,125,104,0.22);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-wood-dark);
+    line-height: 1.5;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 100px 20px 60px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-family: 'Square Peg', cursive;
+    font-size: clamp(56px, 10vw, 100px);
+    font-weight: normal;
+    line-height: 1;
+  }
+  .hero p {
+    margin-top: 16px;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    opacity: 0.85;
+    text-transform: uppercase;
+  }
+
+  /* ── PILLS CATEGORIE (existantes) ── */
+  .category-pills {
+    max-width: 1200px;
+    margin: 40px auto 0;
+    padding: 0 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+  .pill {
+    padding: 10px 22px;
+    border: 1px solid var(--color-line);
+    border-radius: 50px;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-wood-dark);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .pill:hover { border-color: var(--color-wood); color: var(--color-wood); }
+  .pill.is-active {
+    background: var(--color-orange);
+    border-color: var(--color-orange);
+    color: #fff;
+  }
+  .pill .count {
+    opacity: 0.6;
+    margin-left: 4px;
+    font-weight: 400;
+  }
+  .pill.is-active .count { opacity: 0.85; color: #fff; }
+
+  /* ── BARRE AFFINER (NOUVELLE) ── */
+  .affiner-bar {
+    max-width: 1200px;
+    margin: 32px auto 0;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    box-shadow: var(--shadow-card);
+  }
+  .affiner-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 12px;
+  }
+  .affiner-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-wood);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .affiner-title::before {
+    content: "✎";
+    font-size: 14px;
+  }
+  .ai-btn {
+    padding: 10px 18px;
+    background: var(--color-wood);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+  }
+  .ai-btn:hover { background: var(--color-wood-dark); }
+  .ai-btn::before {
+    content: "✎";
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .question-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .qchip {
+    position: relative;
+    padding: 9px 16px 9px 14px;
+    border: 1px solid var(--color-line);
+    border-radius: 50px;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-wood-dark);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+  .qchip:hover {
+    border-color: var(--color-wood);
+    background: var(--color-warm);
+  }
+  .qchip.has-value {
+    border-color: var(--color-wood);
+    background: var(--color-warm);
+    padding-right: 32px;
+  }
+  .qchip.has-value .value { color: var(--color-wood); font-weight: 600; }
+  .qchip .arrow { font-size: 10px; opacity: 0.6; }
+
+  /* Chips conditionnelles : cachées par défaut, fade-in à l'apparition */
+  .qchip.is-conditional {
+    opacity: 0;
+    transform: translateY(-4px);
+    pointer-events: none;
+    width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    border-width: 0;
+    overflow: hidden;
+    margin: 0;
+    transition: opacity 0.25s ease, transform 0.25s ease, width 0.3s ease, padding 0.3s ease;
+  }
+  .qchip.is-conditional.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    width: auto;
+    padding: 9px 16px 9px 14px;
+    border-width: 1px;
+  }
+  .qchip .clear {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--color-wood);
+    color: #fff;
+    font-size: 11px;
+    line-height: 16px;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  /* dropdown menu (preview, juste pour structure) */
+  .qchip__menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 12px;
+    padding: 6px;
+    min-width: 200px;
+    box-shadow: var(--shadow-card);
+    z-index: 10;
+  }
+  .qchip:focus-within .qchip__menu { display: block; }
+  .qchip__menu button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--color-wood-dark);
+    cursor: pointer;
+  }
+  .qchip__menu button:hover { background: var(--color-warm); }
+
+  /* ── COMMENTAIRE ROBIN (apparaît après 2-3s de stabilité) ── */
+  .robin-commentary {
+    max-width: 900px;
+    margin: 24px auto 0;
+    padding: 0 20px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    pointer-events: none;
+    min-height: 56px;
+  }
+  .robin-commentary.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .robin-commentary__text {
+    font-style: italic;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--color-wood-dark);
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .robin-commentary__text .accent {
+    font-family: 'Square Peg', cursive;
+    font-style: normal;
+    color: var(--color-wood);
+    font-size: 1.5em;
+    line-height: 0.85;
+  }
+  .robin-commentary__sig {
+    display: inline-block;
+    margin-left: 6px;
+    font-family: 'Square Peg', cursive;
+    font-size: 22px;
+    color: var(--color-wood);
+    font-style: normal;
+  }
+
+  /* ── COMPTEUR RÉSULTATS ── */
+  .results-bar {
+    max-width: 1200px;
+    margin: 28px auto 0;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .results-count {
+    font-family: 'Square Peg', cursive;
+    font-size: 32px;
+    color: var(--color-wood);
+    line-height: 1;
+  }
+  .results-count strong {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--color-wood-dark);
+    margin-right: 4px;
+    letter-spacing: -0.01em;
+  }
+  .results-reset {
+    font-size: 12px;
+    color: var(--color-wood);
+    background: none;
+    border: 1px solid var(--color-line);
+    padding: 8px 16px;
+    border-radius: 50px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+  .results-reset:hover { background: var(--color-warm); }
+
+  /* ── GRILLE PRODUITS ── */
+  .product-grid {
+    max-width: 1200px;
+    margin: 32px auto 80px;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 28px;
+  }
+  .pcard {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
+  .pcard:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card-hover);
+  }
+  .pcard__photo {
+    aspect-ratio: 1/1;
+    background: linear-gradient(135deg, var(--color-warm) 0%, #E5DED3 100%);
+    position: relative;
+  }
+  .pcard__photo::after {
+    content: "photo produit";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-wood);
+    opacity: 0.4;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .pcard__body { padding: 18px 20px 22px; }
+  .pcard__name { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .pcard__nickname {
+    font-family: 'Square Peg', cursive;
+    font-size: 28px;
+    color: var(--color-wood);
+    line-height: 1;
+    margin-top: 4px;
+  }
+  .pcard__cat { font-size: 11px; color: var(--color-wood-mid); margin-top: 8px; text-transform: lowercase; }
+  .pcard__price { font-size: 14px; font-weight: 600; margin-top: 10px; }
+  .pcard__cta {
+    margin-top: 14px;
+    padding: 10px 18px;
+    display: inline-block;
+    background: transparent;
+    color: var(--color-orange);
+    border: 1px solid var(--color-orange);
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* ── MODALE IA PLEIN ÉCRAN ── */
+  .ai-modal {
+    position: fixed;
+    inset: 0;
+    background: var(--color-bg);
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+  }
+  .ai-modal.is-open { display: flex; }
+  .ai-modal__header {
+    padding: 20px;
+    border-bottom: 1px solid var(--color-line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+  }
+  .ai-modal__title { font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-wood); }
+  .ai-modal__close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--color-wood-dark); padding: 0 8px; }
+  .ai-modal__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 40px 20px 100px;
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .ai-start {
+    text-align: center;
+    padding: 40px 0;
+  }
+  .ai-start h2 {
+    font-family: 'Square Peg', cursive;
+    font-size: 56px;
+    color: var(--color-wood);
+    line-height: 1;
+    font-weight: normal;
+    margin-bottom: 8px;
+  }
+  .ai-start p {
+    color: var(--color-wood-mid);
+    font-size: 15px;
+    margin-bottom: 32px;
+  }
+  .ai-input-wrap {
+    position: relative;
+    margin-bottom: 24px;
+  }
+  .ai-input {
+    width: 100%;
+    padding: 18px 24px;
+    border: 2px solid var(--color-line);
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 15px;
+    background: #fff;
+    color: var(--color-wood-dark);
+    transition: border-color 0.2s;
+  }
+  .ai-input:focus { outline: none; border-color: var(--color-wood); }
+  .ai-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  .ai-sug {
+    padding: 8px 14px;
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 50px;
+    font-size: 12px;
+    color: var(--color-wood);
+    cursor: pointer;
+  }
+  .ai-sug:hover { background: var(--color-warm); border-color: var(--color-wood); }
+
+  /* chat bubbles preview */
+  .chat-message { margin-bottom: 16px; max-width: 80%; }
+  .chat-message.user { margin-left: auto; }
+  .chat-message__bubble {
+    padding: 12px 18px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .chat-message.user .chat-message__bubble {
+    background: var(--color-wood);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .chat-message.robin .chat-message__bubble {
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-bottom-left-radius: 4px;
+  }
+  .chat-filters-applied {
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: var(--color-warm);
+    border-radius: 12px;
+    font-size: 12px;
+    color: var(--color-wood);
+  }
+  .chat-filters-applied strong { color: var(--color-wood-dark); }
+
+  .ai-modal__footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--color-line);
+    background: #fff;
+    display: flex;
+    gap: 12px;
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .ai-modal__footer .ai-input { flex: 1; }
+  .ai-modal__send {
+    padding: 0 24px;
+    background: var(--color-orange);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .ai-modal__return {
+    text-align: center;
+    margin: 24px auto;
+    max-width: 720px;
+    padding: 0 20px;
+  }
+  .return-btn {
+    padding: 12px 28px;
+    background: var(--color-orange);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    .hero { padding: 80px 20px 40px; }
+    .category-pills { gap: 8px; margin-top: 24px; }
+    .pill { padding: 8px 16px; font-size: 11px; }
+    .affiner-bar {
+      margin: 24px 12px 0;
+      padding: 16px;
+      border-radius: 12px;
+    }
+    .affiner-header { flex-direction: column; align-items: stretch; gap: 12px; }
+    .ai-btn { width: 100%; justify-content: center; }
+    .question-chips { gap: 8px; }
+    .qchip { padding: 8px 14px; font-size: 12px; }
+    .results-bar { padding: 0 12px; margin-top: 18px; }
+    .results-count { font-size: 24px; }
+    .results-count strong { font-size: 18px; }
+    .product-grid { grid-template-columns: 1fr; gap: 20px; padding: 0 12px; margin: 24px auto 60px; }
+    .ai-start h2 { font-size: 42px; }
+  }
+
+  /* ── BANNIÈRE EXPLICATIVE DU MOCKUP ── */
+  .mockup-banner {
+    position: fixed;
+    top: 0;
+    right: 0;
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 8px 14px;
+    font-size: 11px;
+    z-index: 9999;
+    border-bottom-left-radius: 8px;
+    letter-spacing: 0.06em;
+  }
+  .mockup-banner button {
+    margin-left: 10px;
+    background: var(--color-orange);
+    color: #fff;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 11px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div class="mockup-banner">
+  DÉMO ·
+  <button onclick="cycleChip('taille')">Changer Taille</button>
+  <button onclick="answerChip('sortie','Au plafond')">Sortie : Plafond</button>
+  <button onclick="answerChip('hauteur','Standard')">Hauteur : Standard</button>
+  <button onclick="openAI()">Modale IA</button>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>Mes créations</h1>
+  <p>27 luminaires en bois faits main à Lyon</p>
+</section>
+
+<!-- PILLS CATÉGORIE (existantes — inchangées) -->
+<div class="category-pills">
+  <button class="pill is-active">Toutes mes créations <span class="count">(27)</span></button>
+  <button class="pill">Suspensions <span class="count">(12)</span></button>
+  <button class="pill">Appliques et plafonniers <span class="count">(4)</span></button>
+  <button class="pill">Lampadaires <span class="count">(7)</span></button>
+  <button class="pill">Lampes à poser <span class="count">(4)</span></button>
+  <button class="pill">Accessoires <span class="count">(6)</span></button>
+  <button class="pill">Carte cadeau <span class="count">(1)</span></button>
+</div>
+
+<!-- BARRE AFFINER -->
+<div class="affiner-bar">
+  <div class="affiner-header">
+    <span class="affiner-title">Affiner avec Robin</span>
+    <button class="ai-btn" onclick="openAI()">Décrire précisément mon projet</button>
+  </div>
+
+  <div class="question-chips" id="chips">
+
+    <!-- Pièce — toujours visible (déjà répondu = "Salon" depuis home) -->
+    <span class="qchip has-value" data-q="piece" tabindex="0">
+      <span class="label">Pièce :</span>
+      <span class="value">Salon</span>
+      <span class="clear" onclick="clearChip(event, 'piece')">×</span>
+    </span>
+
+    <!-- Taille — visible si pièce sauf escalier -->
+    <span class="qchip has-value" data-q="taille" tabindex="0" onclick="cycleChip('taille')">
+      <span class="label">Taille :</span>
+      <span class="value">Confortable</span>
+      <span class="clear" onclick="clearChip(event, 'taille')">×</span>
+    </span>
+
+    <!-- Éclairage — conditionnelle (apparaît si taille=spacieuse) -->
+    <span class="qchip is-conditional" data-q="eclairage" tabindex="0">
+      <span class="label">Éclairage</span>
+      <span class="arrow">▾</span>
+    </span>
+
+    <!-- Sortie — visible (taille=confortable suffit) -->
+    <span class="qchip" data-q="sortie" tabindex="0" onclick="answerChip('sortie', 'Au plafond')">
+      <span class="label">Sortie</span>
+      <span class="arrow">▾</span>
+    </span>
+
+    <!-- Hauteur — conditionnelle (apparaît si sortie=plafond) -->
+    <span class="qchip is-conditional" data-q="hauteur" tabindex="0">
+      <span class="label">Hauteur</span>
+      <span class="arrow">▾</span>
+    </span>
+
+    <!-- Table — conditionnelle (apparaît si hauteur=standard) -->
+    <span class="qchip is-conditional" data-q="table" tabindex="0">
+      <span class="label">Table en dessous</span>
+      <span class="arrow">▾</span>
+    </span>
+
+    <!-- Style — toujours visible -->
+    <span class="qchip has-value" data-q="style" tabindex="0">
+      <span class="label">Style :</span>
+      <span class="value">Moderne</span>
+      <span class="clear" onclick="clearChip(event, 'style')">×</span>
+    </span>
+
+  </div>
+</div>
+
+<!-- COMMENTAIRE DE ROBIN (apparaît 2-3s après la dernière sélection) -->
+<div class="robin-commentary" id="robinCommentary">
+  <p class="robin-commentary__text" id="robinCommentaryText">
+    Pour ton <strong>salon</strong> de taille confortable et de style moderne, j'ai sélectionné des suspensions à lumière douce — voici les modèles qui te correspondent.
+    <span class="robin-commentary__sig">— Robin</span>
+  </p>
+</div>
+
+<!-- COMPTEUR RÉSULTATS -->
+<div class="results-bar">
+  <span class="results-count"><strong>17 modèles</strong> correspondent à ton projet</span>
+  <button class="results-reset">Tout effacer</button>
+</div>
+
+<!-- GRILLE PRODUITS -->
+<div class="product-grid">
+  <div class="pcard"><div class="pcard__photo"></div><div class="pcard__body">
+    <div class="pcard__name">Gaston</div><div class="pcard__nickname">le chardon</div>
+    <div class="pcard__cat">suspension</div><div class="pcard__price">329 €</div>
+    <a class="pcard__cta">Découvrir</a>
+  </div></div>
+  <div class="pcard"><div class="pcard__photo"></div><div class="pcard__body">
+    <div class="pcard__name">Timothée</div><div class="pcard__nickname">l'enchanté</div>
+    <div class="pcard__cat">suspension</div><div class="pcard__price">289 €</div>
+    <a class="pcard__cta">Découvrir</a>
+  </div></div>
+  <div class="pcard"><div class="pcard__photo"></div><div class="pcard__body">
+    <div class="pcard__name">Olivia</div><div class="pcard__nickname">la gardiena</div>
+    <div class="pcard__cat">suspension</div><div class="pcard__price">399 €</div>
+    <a class="pcard__cta">Découvrir</a>
+  </div></div>
+  <div class="pcard"><div class="pcard__photo"></div><div class="pcard__body">
+    <div class="pcard__name">Bertrand</div><div class="pcard__nickname">le volcan</div>
+    <div class="pcard__cat">suspension</div><div class="pcard__price">259 €</div>
+    <a class="pcard__cta">Découvrir</a>
+  </div></div>
+  <div class="pcard"><div class="pcard__photo"></div><div class="pcard__body">
+    <div class="pcard__name">Dalida</div><div class="pcard__nickname">le dahlia</div>
+    <div class="pcard__cat">suspension</div><div class="pcard__price">449 €</div>
+    <a class="pcard__cta">Découvrir</a>
+  </div></div>
+  <div class="pcard"><div class="pcard__photo"></div><div class="pcard__body">
+    <div class="pcard__name">Suze</div><div class="pcard__nickname">la méduse</div>
+    <div class="pcard__cat">suspension</div><div class="pcard__price">319 €</div>
+    <a class="pcard__cta">Découvrir</a>
+  </div></div>
+</div>
+
+
+<!-- MODALE IA PLEIN ÉCRAN -->
+<div class="ai-modal" id="aiModal">
+  <div class="ai-modal__header">
+    <span class="ai-modal__title">Décrire mon projet</span>
+    <button class="ai-modal__close" onclick="closeAI()">×</button>
+  </div>
+
+  <div class="ai-modal__body" id="aiBody">
+
+    <!-- État initial : input centré -->
+    <div class="ai-start" id="aiStart">
+      <h2>Décris ton projet</h2>
+      <p>Je transforme tes mots en sélection de luminaires.</p>
+      <div class="ai-input-wrap">
+        <input class="ai-input" type="text" placeholder="Ex. : Un luminaire pour mon salon, au-dessus de la table…" onkeypress="if(event.key==='Enter') simulate()">
+      </div>
+      <div class="ai-suggestions">
+        <span class="ai-sug" onclick="simulate()">Une suspension moderne pour mon salon</span>
+        <span class="ai-sug" onclick="simulate()">Quelque chose pour éclairer mon escalier</span>
+        <span class="ai-sug" onclick="simulate()">Une lampe d'appoint chambre bois clair</span>
+      </div>
+    </div>
+
+    <!-- État chat (caché par défaut) -->
+    <div id="aiChat" style="display:none;">
+      <div class="chat-message user">
+        <div class="chat-message__bubble">Une suspension moderne pour mon salon, au-dessus de la table</div>
+      </div>
+      <div class="chat-message robin">
+        <div class="chat-message__bubble">
+          Très bien ! Pour un salon moderne avec une suspension au-dessus de la table, je te recommande des modèles à ampoule entourée (lumière diffuse, agréable pour les repas) et un format plutôt boule ou horizontal. Je t'ai sélectionné 17 modèles qui correspondent.
+        </div>
+        <div class="chat-filters-applied">
+          <strong>Filtres appliqués :</strong> Pièce = Salon · Style = Moderne · Sortie = Plafond · Table en dessous = Oui
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="ai-modal__return" id="aiReturn" style="display:none;">
+    <button class="return-btn" onclick="closeAI()">Voir la sélection (17 modèles) →</button>
+  </div>
+
+  <div class="ai-modal__footer" id="aiFooter" style="display:none;">
+    <input class="ai-input" type="text" placeholder="Continuer à discuter avec Robin…">
+    <button class="ai-modal__send">Envoyer</button>
+  </div>
+</div>
+
+<script>
+  /* ──────────────────────────────────────────
+     État simulé du mockup
+  ────────────────────────────────────────── */
+  var state = {
+    piece: 'Salon',
+    taille: 'Confortable',
+    eclairage: null,
+    sortie: null,
+    hauteur: null,
+    table: null,
+    style: 'Moderne'
+  };
+
+  /* Logique de visibilité (miroir de inc/guide-data.php) */
+  function isVisible(q) {
+    switch(q) {
+      case 'piece':     return true;
+      case 'taille':    return !!state.piece && state.piece !== 'Escalier';
+      case 'eclairage': return state.taille === 'Spacieuse';
+      case 'sortie':    return ['Intime','Confortable','Je ne sais pas'].includes(state.taille)
+                              || !!state.eclairage
+                              || state.piece === 'Escalier';
+      case 'hauteur':   return state.sortie === 'Au plafond' && state.piece !== 'Escalier';
+      case 'table':     return state.hauteur === 'Standard'
+                              && ['Cuisine','Bureau','Salon','Chambre'].includes(state.piece);
+      case 'style':     return true;
+    }
+  }
+
+  function refreshChips() {
+    document.querySelectorAll('.qchip').forEach(function(chip) {
+      var q = chip.dataset.q;
+      var visible = isVisible(q);
+      if (chip.classList.contains('is-conditional')) {
+        chip.classList.toggle('is-visible', visible);
+      }
+      // Mettre à jour valeur affichée
+      var valueEl = chip.querySelector('.value');
+      if (state[q]) {
+        chip.classList.add('has-value');
+        if (valueEl) valueEl.textContent = state[q];
+      } else {
+        chip.classList.remove('has-value');
+        if (valueEl) valueEl.textContent = '';
+      }
+    });
+  }
+
+  /* ──────────────────────────────────────────
+     Commentaire débouncé (2,5s après dernier changement)
+  ────────────────────────────────────────── */
+  var commentaryTimer = null;
+  var COMMENTARY_DELAY = 2500; // ms
+
+  function buildCommentary() {
+    var parts = [];
+    if (state.piece) parts.push(state.piece.toLowerCase());
+    var tailleMap = { 'Intime': 'compact', 'Confortable': 'confortable', 'Spacieuse': 'spacieux' };
+    var taille = tailleMap[state.taille];
+    var style = state.style ? state.style.toLowerCase() : null;
+
+    // Phrase composable
+    var sentence;
+    if (state.piece && taille && style) {
+      sentence = 'Pour ton <strong>'+state.piece.toLowerCase()+'</strong> '+taille+' et de style '+style+
+                 ', j\'ai sélectionné une lumière douce qui te correspond.';
+    } else if (state.piece && taille) {
+      sentence = 'Pour ton <strong>'+state.piece.toLowerCase()+'</strong> '+taille+
+                 ', voici une première sélection. Précise ton style pour affiner.';
+    } else if (state.piece) {
+      sentence = 'Pour ton <strong>'+state.piece.toLowerCase()+'</strong>, voici tout ce qui peut convenir. Réponds à quelques questions pour affiner.';
+    } else {
+      sentence = 'Réponds à quelques questions et je te montre les modèles qui te correspondent.';
+    }
+
+    return sentence + ' <span class="robin-commentary__sig">— Robin</span>';
+  }
+
+  function scheduleCommentary() {
+    var box = document.getElementById('robinCommentary');
+    var txt = document.getElementById('robinCommentaryText');
+    // On le cache immédiatement à chaque changement
+    box.classList.remove('is-visible');
+    if (commentaryTimer) clearTimeout(commentaryTimer);
+    commentaryTimer = setTimeout(function() {
+      txt.innerHTML = buildCommentary();
+      box.classList.add('is-visible');
+    }, COMMENTARY_DELAY);
+  }
+
+  /* ──────────────────────────────────────────
+     Interactions chips (simulées pour le mockup)
+  ────────────────────────────────────────── */
+  function clearChip(e, q) {
+    e.stopPropagation();
+    state[q] = null;
+    refreshChips();
+    scheduleCommentary();
+  }
+  function cycleChip(q) {
+    // Démo : taille cycle entre Intime/Confortable/Spacieuse
+    if (q === 'taille') {
+      var order = ['Intime','Confortable','Spacieuse','Je ne sais pas'];
+      var idx = order.indexOf(state.taille);
+      state.taille = order[(idx + 1) % order.length];
+      refreshChips();
+      scheduleCommentary();
+    }
+  }
+  function answerChip(q, value) {
+    state[q] = value;
+    refreshChips();
+    scheduleCommentary();
+  }
+
+  /* Premier déclenchement au chargement */
+  refreshChips();
+  scheduleCommentary();
+
+  /* ──────────────────────────────────────────
+     Modale IA
+  ────────────────────────────────────────── */
+  function openAI() {
+    document.getElementById('aiModal').classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeAI() {
+    document.getElementById('aiModal').classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+  function simulate() {
+    document.getElementById('aiStart').style.display = 'none';
+    document.getElementById('aiChat').style.display = 'block';
+    document.getElementById('aiReturn').style.display = 'block';
+    document.getElementById('aiFooter').style.display = 'flex';
+  }
+</script>
+
+</body>
+</html>

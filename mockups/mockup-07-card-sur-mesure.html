@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup #7 v2 — Card sur-mesure / capture email (2 états)</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-wood: #8B7355;
+    --color-wood-dark: #4A3F35;
+    --color-wood-mid: #6B5A4A;
+    --color-warm: #F5F0E8;
+    --color-orange: #E35B24;
+    --color-orange-dark: #C44A1E;
+    --color-line: rgba(147, 125, 104, 0.18);
+    --color-bg: #FAFAF7;
+    --shadow-card: 0 2px 8px rgba(147,125,104,0.12), 0 6px 28px rgba(147,125,104,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-wood-dark);
+    line-height: 1.55;
+  }
+
+  .variant-label {
+    max-width: 1200px;
+    margin: 48px auto 0;
+    padding: 0 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-wood);
+    opacity: 0.55;
+  }
+
+  .demo-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 20px 24px;
+  }
+
+  /* Card Sur-mesure — esthétique Conseiller, badge orange */
+  .surmesure-card {
+    position: relative;
+    background: var(--color-warm);
+    border-radius: 16px;
+    padding: 50px 40px 46px;
+    text-align: center;
+  }
+  .surmesure-card::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 1.5px dashed rgba(139, 115, 85, 0.35);
+    border-radius: 12px;
+    pointer-events: none;
+  }
+
+  .surmesure-card__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 16px;
+    background: var(--color-orange);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    margin-bottom: 22px;
+  }
+  .surmesure-card__badge svg { width: 11px; height: 11px; }
+
+  .surmesure-card__title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: clamp(22px, 3.4vw, 32px);
+    color: var(--color-wood-dark);
+    line-height: 1.25;
+    text-transform: uppercase;
+    letter-spacing: 0.005em;
+    max-width: 640px;
+    margin: 0 auto 20px;
+  }
+
+  .surmesure-card__intro {
+    font-size: 16px;
+    color: var(--color-wood-mid);
+    max-width: 560px;
+    margin: 0 auto 28px;
+  }
+
+  /* Récap des chips du projet (état B) — version standard */
+  .recap-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    max-width: 640px;
+    margin: 0 auto 24px;
+  }
+  .recap-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 50px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--color-wood-dark);
+  }
+  .recap-chip__key {
+    color: var(--color-wood-mid);
+    font-weight: 500;
+    text-transform: lowercase;
+  }
+
+  /* Variante condensée (état B compact) */
+  .recap-chips--compact {
+    gap: 6px;
+    margin: 0 auto 18px;
+  }
+  .recap-chips--compact .recap-chip {
+    background: transparent;
+    border: 1px dashed rgba(139, 115, 85, 0.3);
+    padding: 5px 10px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--color-wood-mid);
+  }
+  .recap-chips--compact .recap-chip__key { display: none; }
+
+  /* Variante card condensée */
+  .surmesure-card--compact {
+    padding: 32px 30px 30px;
+  }
+  .surmesure-card--compact .surmesure-card__badge {
+    margin-bottom: 16px;
+  }
+  .surmesure-card--compact .surmesure-card__title {
+    font-size: clamp(18px, 2.4vw, 22px);
+    margin-bottom: 4px;
+  }
+
+  /* Input précisions discret (état B) */
+  .surmesure-form__input--small {
+    padding: 11px 18px;
+    font-size: 13.5px;
+    background: rgba(255,255,255,0.6);
+    border-color: rgba(139, 115, 85, 0.2);
+  }
+  .surmesure-form__input--small::placeholder {
+    font-style: italic;
+    opacity: 0.6;
+  }
+
+  /* Form */
+  .surmesure-form {
+    max-width: 560px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .surmesure-form__input,
+  .surmesure-form__textarea {
+    width: 100%;
+    padding: 14px 22px;
+    border: 1.5px solid var(--color-line);
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 15px;
+    background: #fff;
+    color: var(--color-wood-dark);
+    transition: border-color 0.2s;
+  }
+  .surmesure-form__textarea {
+    border-radius: 18px;
+    min-height: 92px;
+    resize: vertical;
+    line-height: 1.55;
+  }
+  .surmesure-form__input:focus,
+  .surmesure-form__textarea:focus {
+    outline: none;
+    border-color: var(--color-wood);
+  }
+  .surmesure-form__input::placeholder,
+  .surmesure-form__textarea::placeholder {
+    color: var(--color-wood-mid);
+    opacity: 0.7;
+  }
+
+  .surmesure-form__submit {
+    align-self: center;
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 14px 32px;
+    background: var(--color-orange);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .surmesure-form__submit:hover {
+    background: var(--color-orange-dark);
+    transform: translateY(-1px);
+  }
+  .surmesure-form__submit svg { width: 14px; height: 14px; }
+
+  .surmesure-card__reassurance {
+    margin-top: 20px;
+    font-size: 12.5px;
+    color: var(--color-wood-mid);
+    opacity: 0.85;
+  }
+
+  /* Footer mockup */
+  .mockup-footer {
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 16px 20px;
+    margin-top: 40px;
+    text-align: center;
+    font-size: 11px;
+    opacity: 0.9;
+  }
+
+  /* Mobile */
+  @media (max-width: 720px) {
+    .surmesure-card { padding: 36px 22px 36px; }
+    .surmesure-card::before { inset: 8px; }
+    .surmesure-card__title { font-size: 20px; }
+    .surmesure-card__intro { font-size: 15px; margin-bottom: 22px; }
+    .surmesure-form__input, .surmesure-form__textarea { font-size: 14px; padding: 12px 18px; }
+    .recap-chip { font-size: 12px; padding: 6px 12px; }
+  }
+</style>
+</head>
+<body>
+
+
+<!-- ══════════════ État A — Sans projet ══════════════ -->
+<div class="variant-label">État A — Le visiteur n'a pas de projet en cours</div>
+<div class="demo-container">
+
+  <div class="surmesure-card">
+
+    <span class="surmesure-card__badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+        <path d="M21 3v5h-5"/>
+        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+        <path d="M8 16H3v5"/>
+      </svg>
+      Sur-mesure
+    </span>
+
+    <h2 class="surmesure-card__title">Et si on créait votre luminaire sur-mesure ?</h2>
+
+    <p class="surmesure-card__intro">
+      Laissez votre email et décrivez votre projet en quelques mots. Robin vous revient avec une proposition personnalisée.
+    </p>
+
+    <form class="surmesure-form" onsubmit="event.preventDefault()">
+      <input class="surmesure-form__input" type="email" placeholder="Votre adresse email" required>
+      <textarea class="surmesure-form__textarea" placeholder="Décrivez votre projet (taille, pièce, contraintes, inspirations…)"></textarea>
+
+      <button class="surmesure-form__submit" type="submit">
+        Recevoir une proposition
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </button>
+    </form>
+
+    <p class="surmesure-card__reassurance">
+      Réponse de Robin sous 48h · Aucun engagement
+    </p>
+
+  </div>
+</div>
+
+
+<!-- ══════════════ État B — Avec projet en cours (version condensée) ══════════════ -->
+<div class="variant-label">État B — Avec projet en cours · version condensée</div>
+<div class="demo-container">
+
+  <div class="surmesure-card surmesure-card--compact">
+
+    <span class="surmesure-card__badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+        <path d="M21 3v5h-5"/>
+        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+        <path d="M8 16H3v5"/>
+      </svg>
+      Sur-mesure
+    </span>
+
+    <h2 class="surmesure-card__title">Un sur-mesure pour ce projet ?</h2>
+
+    <!-- Récap discret du projet : juste les valeurs, pas les libellés -->
+    <div class="recap-chips recap-chips--compact">
+      <span class="recap-chip">Salon</span>
+      <span class="recap-chip">Spacieuse</span>
+      <span class="recap-chip">Plafond</span>
+      <span class="recap-chip">Standard</span>
+      <span class="recap-chip">Au-dessus d'une table</span>
+      <span class="recap-chip">Moderne</span>
+    </div>
+
+    <form class="surmesure-form" onsubmit="event.preventDefault()">
+      <input class="surmesure-form__input" type="email" placeholder="Votre adresse email" required>
+      <input class="surmesure-form__input surmesure-form__input--small" type="text" placeholder="Précisions ou inspirations (optionnel)">
+
+      <button class="surmesure-form__submit" type="submit">
+        Recevoir une proposition
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </button>
+    </form>
+
+    <p class="surmesure-card__reassurance">
+      Réponse de Robin sous 48h · Aucun engagement
+    </p>
+
+  </div>
+</div>
+
+
+<div class="mockup-footer">
+  Mockup #7 v2 — Card "Sur-mesure" · 2 états selon présence d'un projet · esthétique Conseiller universelle, badge orange<br>
+  Emplacement validé pour le moment : dans la grille de /mes-creations/ (extension possible pages catégorie plus tard)
+</div>
+
+</body>
+</html>

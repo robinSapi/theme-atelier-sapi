@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup #11 — Modale Conseiller, tous les états (cible refactor)</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-wood: #8B7355;
+    --color-wood-dark: #4A3F35;
+    --color-wood-mid: #6B5A4A;
+    --color-warm: #F5F0E8;
+    --color-warm-light: #FBF8F2;
+    --color-orange: #E35B24;
+    --color-orange-dark: #C44A1E;
+    --color-line: rgba(147, 125, 104, 0.18);
+    --color-bg: #FAFAF7;
+    --shadow-card: 0 2px 8px rgba(147,125,104,0.12), 0 6px 28px rgba(147,125,104,0.15);
+    --shadow-card-hover: 0 4px 14px rgba(147,125,104,0.16), 0 12px 44px rgba(147,125,104,0.22);
+    --overlay-bg: rgba(50, 40, 30, 0.55);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-wood-dark);
+    line-height: 1.5;
+  }
+
+  /* ─── Doc header ───────────────── */
+  .doc-header {
+    max-width: 880px;
+    margin: 48px auto 12px;
+    padding: 0 20px;
+    text-align: center;
+  }
+  .doc-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-wood-dark);
+    margin-bottom: 8px;
+  }
+  .doc-header p {
+    font-size: 13.5px;
+    color: var(--color-wood-mid);
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .page-label {
+    max-width: 1200px;
+    margin: 40px auto 0;
+    padding: 0 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-wood);
+    opacity: 0.55;
+  }
+  .page-label__desc {
+    margin-top: 4px;
+    font-size: 11.5px;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+    opacity: 0.85;
+  }
+
+  /* ─── Overlay simulé ────────────── */
+  .overlay {
+    background: var(--overlay-bg);
+    padding: 32px 20px;
+    display: flex;
+    justify-content: center;
+    margin: 12px 0;
+  }
+
+  /* ═══════════════════════════════════
+     CARD MODALE — STRUCTURE CIBLE
+     CSS Grid 3 rows : head / body / foot
+     ═══════════════════════════════════ */
+  .conseiller-card {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    height: 620px;
+    max-height: calc(100dvh - 64px);
+    background: var(--color-warm);
+    border-radius: 16px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+    overflow: hidden;
+
+    /* ⬇ Le cœur du refactor : grid 3 rows */
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+  .conseiller-card::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 1.5px dashed rgba(139, 115, 85, 0.35);
+    border-radius: 12px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Bouton close top-right (toujours présent, hors grid) */
+  .modal__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: var(--color-wood-mid);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: background 0.15s;
+  }
+  .modal__close:hover { background: rgba(139, 115, 85, 0.12); color: var(--color-wood-dark); }
+  .modal__close svg { width: 18px; height: 18px; }
+
+  /* Écran = `display: contents` → enfants deviennent grid items */
+  .modal__screen {
+    display: contents;
+  }
+
+  .modal__head {
+    grid-row: 1;
+    padding: 28px 36px 12px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .modal__body {
+    grid-row: 2;
+    padding: 12px 36px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+  }
+  /* Wrapper qui contient le vrai contenu central de chaque écran, centré
+     dans l'espace disponible du body. La progress (si présente) reste en
+     dehors de ce wrapper et se colle en bas du body. */
+  .modal__body-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    min-height: 0;
+  }
+
+  .modal__foot {
+    grid-row: 3;
+    padding: 14px 36px 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── Badge "pill" header ────────── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 16px;
+    background: var(--color-wood-dark);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: 50px;
+  }
+  .badge svg { width: 11px; height: 11px; }
+
+  /* Progress bar — dernier enfant du __body, collée au bas du body
+     en sticky pour rester visible même si le contenu scrolle. Le badge
+     dans __head garde sa position de référence sur tous les écrans. */
+  .progress {
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    max-width: 320px;
+    height: 4px;
+    background: rgba(139, 115, 85, 0.15);
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 8px auto 0;
+    align-self: center;
+    z-index: 5;
+  }
+  .progress__bar {
+    height: 100%;
+    background: var(--color-orange);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  /* ─── Titres ─────────────────────── */
+  .h1 {
+    font-family: 'Square Peg', cursive;
+    font-size: clamp(28px, 4.2vw, 36px);
+    font-weight: 400;
+    color: var(--color-wood-dark);
+    line-height: 1.15;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .h2 {
+    font-weight: 700;
+    font-size: clamp(17px, 2.4vw, 21px);
+    color: var(--color-wood-dark);
+    line-height: 1.25;
+    text-transform: uppercase;
+    letter-spacing: 0.005em;
+    text-align: center;
+    max-width: 460px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--color-wood-mid);
+    text-align: center;
+    max-width: 440px;
+  }
+  .quote {
+    font-style: italic;
+    font-size: 14.5px;
+    color: var(--color-wood-dark);
+    line-height: 1.55;
+    text-align: center;
+    max-width: 460px;
+  }
+
+  /* ─── Choix (s1) ─────────────────── */
+  .choices {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%;
+    max-width: 480px;
+  }
+  .choices--2col { grid-template-columns: repeat(2, 1fr); max-width: 360px; }
+  .choices--4col { grid-template-columns: repeat(4, 1fr); }
+  .choice {
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 12px;
+    padding: 14px 8px 11px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    font-family: inherit;
+    color: inherit;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+  }
+  .choice:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: var(--color-wood);
+  }
+  .choice__icon {
+    width: 36px;
+    height: 36px;
+    margin: 0 auto 6px;
+    background: var(--color-warm);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-wood);
+  }
+  .choice__icon svg { width: 20px; height: 20px; }
+  .choice__label {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-wood-dark);
+    line-height: 1.3;
+  }
+
+  /* ─── Texte libre input ──────────── */
+  .text-input-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+  }
+  .text-input {
+    width: 100%;
+    padding: 13px 52px 13px 18px;
+    border: 1.5px solid var(--color-line);
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 14px;
+    background: #fff;
+    color: var(--color-wood-dark);
+  }
+  .text-input:focus {
+    outline: none;
+    border-color: var(--color-wood);
+  }
+  .text-submit {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--color-orange);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .text-submit svg { width: 14px; height: 14px; }
+
+  /* Séparateur "ou" entre 2 portes */
+  .separator-or {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 440px;
+    margin: 4px 0;
+  }
+  .separator-or::before,
+  .separator-or::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(139, 115, 85, 0.25);
+  }
+  .separator-or__text {
+    margin: 0 14px;
+    padding: 4px 12px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-wood);
+    background: var(--color-warm);
+    border-radius: 50px;
+    border: 1px solid rgba(139, 115, 85, 0.25);
+  }
+
+  /* ─── Chips récap (s3, s-contact) ── */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    width: 100%;
+    max-width: 460px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 11px;
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 50px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-wood-dark);
+    letter-spacing: 0.02em;
+  }
+  /* Variante "tile" — plus visible, avec icône à gauche + label de catégorie
+     pour que la chip se comprenne seule ("Pièce : Cuisine" plutôt que juste
+     "Cuisine"). Utilisée sur s3 pour mettre en valeur le projet entier. */
+  .chips--project {
+    gap: 8px;
+    max-width: 500px;
+  }
+  .chip--project {
+    padding: 9px 14px 9px 10px;
+    font-size: 13px;
+    gap: 9px;
+    background: #FBF8F2;
+    border-color: rgba(139, 115, 85, 0.3);
+    box-shadow: 0 1px 3px rgba(147,125,104,0.08);
+    line-height: 1.25;
+  }
+  .chip__icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: var(--color-warm);
+    color: var(--color-wood);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .chip__icon svg { width: 14px; height: 14px; }
+  .chip__label {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-wood);
+    margin-right: 5px;
+  }
+  .chip__value {
+    font-weight: 700;
+    color: var(--color-wood-dark);
+  }
+
+  /* ─── Récap projet groupé par thème (Option D) ─── */
+  .recap-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    max-width: 500px;
+  }
+  .recap-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .recap-group__title {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-wood);
+    opacity: 0.75;
+    padding-left: 4px;
+    border-left: 3px solid var(--color-orange);
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+  .recap-group__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chips-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-wood);
+    margin-bottom: 2px;
+  }
+
+  /* ─── Actions (3 boutons s3) ─────── */
+  .actions-3 {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 360px;
+  }
+  .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 18px;
+    border-radius: 50px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    border: none;
+  }
+  .action-btn:hover { transform: translateY(-1px); }
+  .action-btn--primary {
+    background: var(--color-orange);
+    color: #fff;
+  }
+  .action-btn--primary:hover { background: var(--color-orange-dark); }
+  .action-btn--secondary {
+    background: #fff;
+    color: var(--color-wood-dark);
+    border: 1px solid var(--color-line);
+    box-shadow: var(--shadow-card);
+  }
+  .action-btn svg { width: 14px; height: 14px; }
+
+  /* ─── Footer link ───────────────── */
+  .footer-link {
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-wood-mid);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .footer-link:hover { color: var(--color-orange); }
+
+  /* ─── Chat (s2-chat) ─────────────── */
+  .chat-bubbles {
+    width: 100%;
+    max-width: 460px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .chat-bubble {
+    padding: 11px 15px;
+    border-radius: 14px;
+    font-size: 13.5px;
+    line-height: 1.45;
+    max-width: 85%;
+  }
+  .chat-bubble--robin {
+    background: #fff;
+    border: 1px solid var(--color-line);
+    color: var(--color-wood-dark);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+  }
+  .chat-bubble--visitor {
+    background: var(--color-wood-dark);
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+
+  /* ─── Mini-form contact (s-contact) ─── */
+  .contact-form {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .contact-form input,
+  .contact-form textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--color-line);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13.5px;
+    background: #fff;
+    color: var(--color-wood-dark);
+    resize: vertical;
+  }
+  .contact-form input:focus,
+  .contact-form textarea:focus {
+    outline: none;
+    border-color: var(--color-orange);
+  }
+  .contact-form textarea { min-height: 90px; }
+  .contact-form button {
+    padding: 13px 20px;
+    background: var(--color-orange);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .contact-form button:hover { background: var(--color-orange-dark); }
+  .contact-form button svg { width: 14px; height: 14px; }
+  .contact-reassure {
+    font-size: 11.5px;
+    color: var(--color-wood-mid);
+    text-align: center;
+    margin-top: -2px;
+  }
+
+  /* ─── Recap fiche produit (s-product-recap) ── */
+  .recap-card {
+    width: 100%;
+    max-width: 380px;
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+    box-shadow: var(--shadow-card);
+  }
+  .recap-card__item-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-wood);
+  }
+  .recap-card__item-value {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--color-wood-dark);
+  }
+  .conseil-italic {
+    font-style: italic;
+    font-size: 13px;
+    color: var(--color-wood-mid);
+    line-height: 1.5;
+    text-align: center;
+    max-width: 420px;
+  }
+
+  /* ─── Annotation / hint ──────────── */
+  .hint {
+    max-width: 600px;
+    margin: 4px auto 0;
+    padding: 0 24px;
+    font-size: 11.5px;
+    color: var(--color-wood-mid);
+    font-style: italic;
+    text-align: center;
+  }
+
+  /* ─── Mobile ─────────────────────── */
+  @media (max-width: 600px) {
+    .overlay { padding: 16px 12px; }
+    .conseiller-card {
+      max-width: 100%;
+      height: calc(100dvh - 24px);
+      max-height: calc(100dvh - 24px);
+    }
+    .conseiller-card::before { inset: 8px; }
+    .modal__head { padding: 20px 22px 8px; }
+    .modal__body { padding: 8px 22px; gap: 12px; }
+    .modal__foot { padding: 10px 22px 22px; }
+    .h2 { font-size: 15.5px; }
+    .h1 { font-size: 28px; }
+    .choices { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .choices--4col { grid-template-columns: repeat(2, 1fr); }
+    .choice { padding: 12px 6px 9px; }
+    .recap-card { grid-template-columns: 1fr; gap: 6px; }
+    .modal__close { top: 12px; right: 12px; }
+  }
+
+  /* ─── Doc footer ─────────────────── */
+  .doc-footer {
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 28px 20px;
+    margin-top: 60px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .doc-footer h3 {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    opacity: 0.85;
+  }
+  .doc-footer__notes {
+    max-width: 720px;
+    margin: 8px auto 0;
+    text-align: left;
+    font-size: 11.5px;
+    opacity: 0.95;
+  }
+  .doc-footer__notes li {
+    margin-bottom: 6px;
+    list-style: disc;
+    margin-left: 20px;
+  }
+  .doc-footer code {
+    background: rgba(255,255,255,0.12);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <h1>Modale Conseiller — markup cible après refactor</h1>
+  <p>6 écrans, même squelette <code>__head / __body / __foot</code> sur CSS Grid 3 rows. Badge toujours en haut, footer toujours en bas, contenu central qui s'adapte. Plus de <code>position: absolute</code>, plus de <code>margin-top: auto</code>, plus de patches CSS.</p>
+</div>
+
+<!-- ═══ ÉCRAN 1 — S0 ═══════════════════════════════════════ -->
+<div class="page-label">
+  Écran 1 — <strong>s0</strong> · Accueil
+  <div class="page-label__desc">Question 1 (pièce) + texte libre, 2 portes d'entrée</div>
+</div>
+<div class="overlay">
+  <div class="conseiller-card">
+    <button class="modal__close" aria-label="Fermer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    <div class="modal__screen">
+
+      <header class="modal__head">
+        <span class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+          Conseil de Robin
+        </span>
+      </header>
+
+      <div class="modal__body">
+        <div class="modal__body-content">
+          <h2 class="h2">Pour quelle pièce cherches-tu un luminaire&nbsp;?</h2>
+
+          <div class="choices">
+            <button class="choice"><span class="choice__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12h18M3 12v8h18v-8M6 8h12"/></svg></span><span class="choice__label">Cuisine</span></button>
+            <button class="choice"><span class="choice__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="6" width="18" height="12" rx="1"/><path d="M3 18v3M21 18v3"/></svg></span><span class="choice__label">Salon</span></button>
+            <button class="choice"><span class="choice__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 10h20v10H2zM4 10V6h16v4"/></svg></span><span class="choice__label">Chambre</span></button>
+            <button class="choice"><span class="choice__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M9 8h6M9 12h6"/></svg></span><span class="choice__label">Bureau</span></button>
+            <button class="choice"><span class="choice__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16v12H4zM8 4h8v4"/></svg></span><span class="choice__label">Entrée</span></button>
+            <button class="choice"><span class="choice__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20l4-4 4 4 4-4 4 4"/></svg></span><span class="choice__label">Escalier</span></button>
+          </div>
+
+          <div class="separator-or">
+            <span class="separator-or__text">ou</span>
+          </div>
+
+          <div class="text-input-wrap">
+            <input type="text" class="text-input" placeholder="Décris-moi ton projet en quelques mots…">
+            <button class="text-submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="modal__foot">
+        <span style="font-size:11.5px;color:var(--color-wood-mid);font-style:italic;">Robin t'aide à choisir, sans engagement</span>
+      </footer>
+
+    </div>
+  </div>
+</div>
+<p class="hint">Badge centré en haut. Question + grille + champ libre au centre. Réassurance courte en bas.</p>
+
+
+<!-- ═══ ÉCRAN 2 — S1 ═══════════════════════════════════════ -->
+<div class="page-label">
+  Écran 2 — <strong>s1</strong> · Question guidée (étape 3 sur 5)
+  <div class="page-label__desc">Progress bar collée en bas du body (sticky) + badge dans le head + question + choix + lien retour</div>
+</div>
+<div class="overlay">
+  <div class="conseiller-card">
+    <button class="modal__close" aria-label="Fermer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    <div class="modal__screen">
+
+      <header class="modal__head">
+        <span class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+          Conseil de Robin
+        </span>
+      </header>
+
+      <div class="modal__body">
+        <div class="modal__body-content">
+          <h2 class="h2">Où arrive ton électricité&nbsp;?</h2>
+
+          <div class="choices choices--4col">
+            <button class="choice"><span class="choice__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="6" r="2"/><path d="M12 8v14"/></svg></span><span class="choice__label">Plafond</span></button>
+            <button class="choice"><span class="choice__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4v16M6 8h10v3H6"/></svg></span><span class="choice__label">Mur</span></button>
+            <button class="choice"><span class="choice__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="14" width="4" height="6" rx="1"/><rect x="14" y="14" width="4" height="6" rx="1"/></svg></span><span class="choice__label">Pas de sortie</span></button>
+            <button class="choice"><span class="choice__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M9.5 10a2.5 2.5 0 1 1 5 0c0 1.5-2.5 2-2.5 4"/><circle cx="12" cy="17" r="0.7" fill="currentColor"/></svg></span><span class="choice__label">Je ne sais pas</span></button>
+          </div>
+        </div>
+        <div class="progress"><div class="progress__bar" style="width: 60%;"></div></div>
+      </div>
+
+      <footer class="modal__foot">
+        <button class="footer-link">← Étape précédente</button>
+      </footer>
+
+    </div>
+  </div>
+</div>
+<p class="hint">Progress bar dans le body, collée en bas (sticky) → reste visible même si le contenu scrolle. Le badge dans le head reste à la même hauteur que sur les autres écrans.</p>
+
+
+<!-- ═══ ÉCRAN 3 — S2-CHAT ═══════════════════════════════════════ -->
+<div class="page-label">
+  Écran 3 — <strong>s2-chat</strong> · Conversation libre avec Robin
+  <div class="page-label__desc">Cas particulier — body en mode chat (bulles + input), reste du squelette inchangé</div>
+</div>
+<div class="overlay">
+  <div class="conseiller-card">
+    <button class="modal__close" aria-label="Fermer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    <div class="modal__screen">
+
+      <header class="modal__head">
+        <span class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8-1.476 0-2.866-.317-4.083-.876L3 21l1.876-4.917A7.997 7.997 0 0 1 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          Échange avec Robin
+        </span>
+      </header>
+
+      <div class="modal__body">
+        <div class="modal__body-content" style="justify-content: flex-start;">
+          <div class="chat-bubbles">
+            <div class="chat-bubble chat-bubble--visitor">Je cherche une applique pour ma chambre</div>
+            <div class="chat-bubble chat-bubble--robin">Une applique pour la chambre, parfait. Tu vises plutôt un format compact ou tu as la place pour quelque chose de plus généreux&nbsp;?</div>
+            <div class="chat-bubble chat-bubble--visitor">Plutôt compact, c'est une chambre d'amis</div>
+            <div class="chat-bubble chat-bubble--robin">Compris. Une dernière chose pour t'orienter&nbsp;: tu préfères un style moderne, plus traditionnel, ou pas de préférence&nbsp;?</div>
+          </div>
+          <div class="text-input-wrap">
+            <input type="text" class="text-input" placeholder="Ta réponse…">
+            <button class="text-submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="modal__foot">
+        <button class="action-btn action-btn--primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12h18M13 5l7 7-7 7"/></svg>
+          Voir ma sélection
+        </button>
+      </footer>
+
+    </div>
+  </div>
+</div>
+<p class="hint">Squelette identique. Le body contient bulles + input scrollables. CTA "Voir ma sélection" en bas dès que la conversation a démarré.</p>
+
+
+<!-- ═══ ÉCRAN 4 — S3 ═══════════════════════════════════════ -->
+<div class="page-label">
+  Écran 4 — <strong>s3</strong> · Carrefour récap (projet complet)
+  <div class="page-label__desc">Chips récap + 3 actions (Recommencer / Préciser / Voir la sélection)</div>
+</div>
+<div class="overlay">
+  <div class="conseiller-card">
+    <button class="modal__close" aria-label="Fermer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    <div class="modal__screen">
+
+      <header class="modal__head">
+        <span class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
+          Ton projet
+        </span>
+      </header>
+
+      <div class="modal__body">
+        <div class="modal__body-content">
+          <h2 class="h2">Voilà ce qu'on a vu ensemble</h2>
+
+          <div class="recap-groups">
+            <div class="recap-group">
+              <div class="recap-group__title">Espace</div>
+              <div class="recap-group__chips">
+                <span class="chip chip--project">
+                  <span class="chip__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h18M3 12v8h18v-8M6 8h12"/></svg></span>
+                  <span><span class="chip__label">Pièce</span><span class="chip__value">Cuisine</span></span>
+                </span>
+                <span class="chip chip--project">
+                  <span class="chip__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="7" y="7" width="10" height="10" rx="1"/></svg></span>
+                  <span><span class="chip__label">Taille</span><span class="chip__value">Petite</span></span>
+                </span>
+              </div>
+            </div>
+
+            <div class="recap-group">
+              <div class="recap-group__title">Installation</div>
+              <div class="recap-group__chips">
+                <span class="chip chip--project">
+                  <span class="chip__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="6" r="2"/><path d="M12 8v14"/></svg></span>
+                  <span><span class="chip__label">Sortie électrique</span><span class="chip__value">Plafond</span></span>
+                </span>
+                <span class="chip chip--project">
+                  <span class="chip__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></span>
+                  <span><span class="chip__label">Éclairage</span><span class="chip__value">Principale</span></span>
+                </span>
+                <span class="chip chip--project">
+                  <span class="chip__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/></svg></span>
+                  <span><span class="chip__label">Hauteur sous plafond</span><span class="chip__value">2,50 – 3 m</span></span>
+                </span>
+              </div>
+            </div>
+
+            <div class="recap-group">
+              <div class="recap-group__title">Esthétique</div>
+              <div class="recap-group__chips">
+                <span class="chip chip--project">
+                  <span class="chip__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z"/></svg></span>
+                  <span><span class="chip__label">Style de la pièce</span><span class="chip__value">Moderne</span></span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions-3">
+            <button class="action-btn action-btn--primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12h18M13 5l7 7-7 7"/></svg>
+              Voir ma sélection
+            </button>
+            <button class="action-btn action-btn--secondary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9h.01M15 9h.01M9 15c1 1 2 1.5 3 1.5s2-.5 3-1.5"/></svg>
+              Préciser avec Robin
+            </button>
+            <button class="footer-link" style="margin-top: 4px;">↻ Recommencer</button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="modal__foot">
+        <span style="font-size:11.5px;color:var(--color-wood-mid);font-style:italic;">Tu peux modifier n'importe quelle réponse en cliquant sur une chip</span>
+      </footer>
+
+    </div>
+  </div>
+</div>
+<p class="hint">Chips + actions au centre. Hint discret en bas.</p>
+
+
+<!-- ═══ ÉCRAN 5 — S-PRODUCT-RECAP ═══════════════════════════ -->
+<div class="page-label">
+  Écran 5 — <strong>s-product-recap</strong> · Récap fiche produit
+  <div class="page-label__desc">Conseil de style + conseil de taille + 3 actions (mode court depuis fiche produit)</div>
+</div>
+<div class="overlay">
+  <div class="conseiller-card">
+    <button class="modal__close" aria-label="Fermer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    <div class="modal__screen">
+
+      <header class="modal__head">
+        <span class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+          Mon conseil pour toi
+        </span>
+      </header>
+
+      <div class="modal__body">
+        <div class="modal__body-content">
+          <p class="subtitle">Voilà ce que je te recommande pour ce modèle, en fonction de ton projet&nbsp;:</p>
+
+          <div class="recap-card">
+            <span class="recap-card__item-label">Essence</span>
+            <span class="recap-card__item-value">Peuplier</span>
+            <span class="recap-card__item-label">Taille</span>
+            <span class="recap-card__item-value">Standard</span>
+          </div>
+
+          <p class="conseil-italic">Le peuplier donne un rendu clair et lumineux, parfait pour un style moderne — le grain se voit, mais en douceur.</p>
+          <p class="conseil-italic">La taille standard convient à la plupart des pièces, c'est un bon repère pour un premier achat.</p>
+
+          <div class="actions-3">
+            <button class="action-btn action-btn--primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+              Appliquer cette sélection
+            </button>
+            <button class="action-btn action-btn--secondary">Modifier mon projet</button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="modal__foot">
+        <button class="footer-link">Contacter Robin</button>
+      </footer>
+
+    </div>
+  </div>
+</div>
+<p class="hint">2 conseils italiques (style + taille). 2 actions principales. Lien Contacter Robin en bas.</p>
+
+
+<!-- ═══ ÉCRAN 6 — S-CONTACT ═══════════════════════════════════ -->
+<div class="page-label">
+  Écran 6 — <strong>s-contact</strong> · Mini-form contact (projet pro / sur-mesure)
+  <div class="page-label__desc">Quand l'IA détecte un projet hors-catalogue : email + textarea pré-remplie + Envoyer</div>
+</div>
+<div class="overlay">
+  <div class="conseiller-card">
+    <button class="modal__close" aria-label="Fermer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    <div class="modal__screen">
+
+      <header class="modal__head">
+        <span class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+          Échangeons ensemble
+        </span>
+      </header>
+
+      <div class="modal__body">
+        <div class="modal__body-content">
+          <p class="quote">Super, un projet hôtel pour 30 chambres, c'est un beau chantier. C'est le genre de projet où j'aime travailler — laisse tes coordonnées ci-dessous et précise ton besoin, je te recontacte sous 48h.</p>
+
+          <div style="text-align: center;">
+            <div class="chips-label">Ton projet</div>
+            <div class="chips" style="margin-top: 6px;">
+              <span class="chip">Chambre</span>
+              <span class="chip">Multi-luminaires</span>
+            </div>
+          </div>
+
+          <form class="contact-form">
+            <input type="email" placeholder="Ton email">
+            <textarea placeholder="Précise ton besoin…">Projet hôtel — 30 chambres à équiper
+
+Bonjour Robin, je suis hôtelier et je cherche à équiper 30 chambres.</textarea>
+            <button type="submit">
+              Envoyer ma demande
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </button>
+            <p class="contact-reassure">Réponse de Robin sous 48h · Aucun engagement</p>
+          </form>
+        </div>
+      </div>
+
+      <footer class="modal__foot">
+        <button class="footer-link">← Reprendre la discussion</button>
+      </footer>
+
+    </div>
+  </div>
+</div>
+<p class="hint">Message IA + récap + form direct (pas de redirection vers une autre page). Lien retour en bas.</p>
+
+
+<!-- ─── Doc footer ─── -->
+<div class="doc-footer">
+  <h3>Markup &amp; règles CSS du refactor</h3>
+
+  <p>Tous les écrans suivent ce squelette uniforme :</p>
+  <ul class="doc-footer__notes">
+    <li><code>.conseiller-card</code> : <code>display: grid; grid-template-rows: auto 1fr auto;</code> + <code>height: 620px; max-height: calc(100dvh - 64px);</code></li>
+    <li><code>.modal__screen</code> : <code>display: contents</code> → les enfants <code>__head / __body / __foot</code> deviennent les vrais grid items, pas le wrapper.</li>
+    <li><code>.modal__head</code> : <code>grid-row: 1</code> · badge seul. Toujours en haut, à la même hauteur sur tous les écrans.</li>
+    <li><code>.modal__body</code> : <code>grid-row: 2</code> · absorbe l'espace restant, <code>overflow-y: auto</code> pour scroller si déborde. Contient un wrapper <code>.modal__body-content</code> (<code>flex: 1; justify-content: center</code>) qui centre le contenu, et optionnellement une <code>.progress</code> en dernier enfant.</li>
+    <li><code>.progress</code> : <code>position: sticky; bottom: 0</code> · présente uniquement sur s1, collée en bas du body, reste visible même si le contenu scrolle.</li>
+    <li><code>.modal__foot</code> : <code>grid-row: 3</code> · footer (CTA, lien, hint). Toujours en bas.</li>
+    <li><code>.modal__close</code> : <code>position: absolute</code> top-right, en dehors du grid. Visible sur tous les écrans.</li>
+  </ul>
+
+  <p style="margin-top: 12px;">Plus de <code>position: absolute</code> sur le badge, plus de <code>margin-top: auto</code> sur des éléments arbitraires, plus de wrappers ad-hoc par écran. La règle globale <code>.conseiller-card__inner { position: relative }</code> qui polluait les fixes peut rester — on ne s'en sert plus comme conteneur principal.</p>
+</div>
+
+</body>
+</html>

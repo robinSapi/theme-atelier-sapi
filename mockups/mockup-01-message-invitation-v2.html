@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup #1 v2 — Message d'invitation /mes-creations/ (esthétique roompicker)</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-wood: #8B7355;
+    --color-wood-dark: #4A3F35;
+    --color-wood-mid: #6B5A4A;
+    --color-warm: #F5F0E8;
+    --color-orange: #E35B24;
+    --color-orange-dark: #C44A1E;
+    --color-line: rgba(147, 125, 104, 0.18);
+    --color-bg: #FAFAF7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-wood-dark);
+    line-height: 1.55;
+  }
+
+  /* Hero standard */
+  .hero {
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 100px 20px 60px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-family: 'Square Peg', cursive;
+    font-size: clamp(56px, 10vw, 100px);
+    font-weight: normal;
+    line-height: 1;
+  }
+  .hero p {
+    margin-top: 12px;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    opacity: 0.85;
+    text-transform: uppercase;
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     Card invitation — esthétique roompicker
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  .invite-bento {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  .invite-bento__card {
+    position: relative;
+    background: var(--color-warm);
+    border-radius: 16px;
+    padding: 56px 40px 60px;
+    text-align: center;
+  }
+  /* bordure dashed décorative interne */
+  .invite-bento__card::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 1.5px dashed rgba(139, 115, 85, 0.35);
+    border-radius: 12px;
+    pointer-events: none;
+  }
+
+  .invite-bento__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 16px;
+    background: var(--color-wood-dark);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    margin-bottom: 26px;
+  }
+  .invite-bento__badge svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  .invite-bento__title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: clamp(22px, 3.4vw, 34px);
+    color: var(--color-wood-dark);
+    letter-spacing: 0.005em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .invite-bento__subtitle {
+    font-size: 16px;
+    color: var(--color-wood-mid);
+    max-width: 560px;
+    margin: 0 auto 32px;
+    line-height: 1.55;
+  }
+
+  .invite-bento__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 14px 30px;
+    background: var(--color-orange);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .invite-bento__cta:hover {
+    background: var(--color-orange-dark);
+    transform: translateY(-1px);
+  }
+  .invite-bento__cta svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Stub grille produit pour contexte */
+  .grid-stub {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 28px;
+  }
+  .grid-stub__card {
+    aspect-ratio: 1/1.2;
+    background: linear-gradient(135deg, var(--color-warm) 0%, #E5DED3 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-wood);
+    opacity: 0.5;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* Footer mockup */
+  .mockup-footer {
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 32px 20px;
+    text-align: center;
+    font-size: 13px;
+    opacity: 0.9;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .hero { padding: 80px 20px 40px; }
+    .invite-bento { padding: 0 14px; margin: 28px auto; }
+    .invite-bento__card { padding: 40px 22px 44px; }
+    .invite-bento__card::before { inset: 8px; }
+    .invite-bento__title { font-size: 22px; }
+    .invite-bento__subtitle { font-size: 15px; }
+    .grid-stub { grid-template-columns: 1fr; gap: 18px; padding: 0 14px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <h1>Mes créations</h1>
+  <p>27 luminaires en bois faits main à Lyon</p>
+</section>
+
+
+<!-- ═══════════ Card invitation alignée sur le roompicker ═══════════ -->
+<div class="invite-bento">
+  <div class="invite-bento__card">
+    <span class="invite-bento__badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Conseil de Robin
+    </span>
+
+    <h2 class="invite-bento__title">Un coup de main pour choisir ?</h2>
+
+    <p class="invite-bento__subtitle">
+      Décrivez votre projet — pièce, taille, style — et Robin vous propose une sélection de luminaires adaptés.
+    </p>
+
+    <a href="#" class="invite-bento__cta">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Décrire mon projet
+    </a>
+  </div>
+</div>
+
+
+<!-- Grille produit (stub) -->
+<div class="grid-stub">
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+</div>
+
+
+<div class="mockup-footer">
+  <strong>Mockup #1 v2 — Message d'invitation /mes-creations/</strong> · esthétique alignée sur le roompicker existant<br>
+  Fond crème, bordure dashed, badge wood-dark plein, H2 Montserrat uppercase, CTA orange pill
+</div>
+
+</body>
+</html>

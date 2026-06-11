@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DA Home · 05 Ils en parlent (avis) — variantes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+:root{
+  --color-wood:#8B7355;--color-wood-dark:#4A3F35;--color-wood-mid:#6B5A4A;
+  --color-warm:#FBF6EA;--color-orange:#E35B24;--color-ink:#3a322b;
+  --shadow-card:0 2px 8px rgba(147,125,104,.12),0 6px 28px rgba(147,125,104,.15);
+  --shadow-hover:0 4px 14px rgba(147,125,104,.16),0 12px 44px rgba(147,125,104,.22);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Montserrat',sans-serif;background:#efe9dc;color:var(--color-ink);line-height:1.55}
+.devnote{background:var(--color-wood-dark);color:var(--color-warm);padding:14px 28px;font-size:13px}
+.devnote strong{color:#fff}.devnote em{color:#e9c9a8;font-style:normal}
+.wrap{max-width:1300px;margin:0 auto;padding:48px 24px 80px}
+.variant-head{margin:56px 0 18px}
+.variant-head .tag{display:inline-block;background:var(--color-wood);color:#fff;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:6px 14px;border-radius:50px}
+.variant-head h2{font-family:'Square Peg',cursive;font-size:40px;color:var(--color-wood-dark);font-weight:400;margin-top:8px}
+.variant-head p{max-width:820px;color:var(--color-wood-mid);font-size:14.5px;margin-top:2px}
+
+/* fond clair NON crème, légèrement texturé bois en filigrane */
+.avis-band{position:relative;background:#f3eee2;border-radius:18px;padding:50px 50px 56px;overflow:hidden}
+.avis-band::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(96deg,rgba(139,115,85,.04) 0,rgba(139,115,85,.04) 1px,transparent 1px,transparent 9px);pointer-events:none}
+.avis-inner{position:relative;z-index:2}
+.avis-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:34px}
+.avis-top .stars{display:flex;align-items:center;gap:12px}
+.avis-top .stars .big{font-size:30px;font-weight:700;color:var(--color-wood-dark)}
+.avis-top .stars .gold{color:#E8A93B;font-size:22px;letter-spacing:2px}
+.avis-top .stars .cnt{font-size:14px;color:var(--color-wood-mid)}
+.gbadge{display:inline-flex;align-items:center;gap:9px;background:#fff;border-radius:50px;padding:9px 18px;box-shadow:var(--shadow-card);font-size:13.5px;font-weight:600;color:var(--color-wood-dark)}
+.gbadge .g{width:20px;height:20px;border-radius:50%;background:conic-gradient(#4285F4 0 25%,#EA4335 0 50%,#FBBC05 0 75%,#34A853 0 100%);display:inline-block}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+
+/* avatar disque bois (pas le bleu Google) */
+.av{width:46px;height:46px;border-radius:50%;background:var(--color-wood);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;flex-shrink:0}
+.av.cream{background:#e6d8c2;color:var(--color-wood-dark)}
+.who{font-weight:600;font-size:15px;color:var(--color-wood-dark)}
+.who .meta{display:block;font-weight:400;font-size:12.5px;color:var(--color-wood-mid)}
+.mini-stars{color:#E8A93B;font-size:13px;letter-spacing:1px;margin-top:8px}
+.quote{font-size:14.5px;color:var(--color-ink);margin-top:11px}
+
+/* Variant A : papiers à ombre douce, pas de bordure */
+.paper{background:#fff;border-radius:14px;padding:24px 24px 26px;box-shadow:var(--shadow-card);transition:.25s}
+.paper:hover{box-shadow:var(--shadow-hover);transform:translateY(-2px)}
+.paper .head{display:flex;align-items:center;gap:13px}
+
+/* Variant B : reliés par un liseré bois */
+.tied{background:#fff;border-radius:14px;padding:24px 24px 26px 28px;box-shadow:var(--shadow-card);position:relative;overflow:hidden}
+.tied::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(var(--color-wood),var(--color-wood-mid))}
+.tied .head{display:flex;align-items:center;gap:13px}
+.tie-line{height:2px;background:linear-gradient(90deg,transparent,rgba(139,115,85,.4) 12%,rgba(139,115,85,.4) 88%,transparent);margin:6px 4px 26px}
+
+/* presse */
+.press{margin-top:34px;display:flex;align-items:center;gap:26px;flex-wrap:wrap;padding-top:26px;border-top:1px solid rgba(139,115,85,.2)}
+.press .lbl{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-wood)}
+.press .logo{font-family:'Square Peg',cursive;font-size:26px;color:var(--color-wood-mid)}
+
+.note{font-size:13px;color:var(--color-wood-mid);background:#fff;border-left:3px solid var(--color-wood);padding:12px 16px;border-radius:0 8px 8px 0;margin-top:18px;max-width:1000px}
+</style>
+</head>
+<body>
+<div class="devnote"><strong>DA HOME · Section 05 — Ils en parlent (avis + presse)</strong> &nbsp;·&nbsp; <em>PAS de fond crème (trop de crème qui se suit). Fond clair MAIS sans bordures de cartes → ombres douces de charte (avis = petits papiers posés) + chaleur par la matière (grain bois en filigrane). Avatars = initiales sur disque bois/crème (pas le bleu Google). Badge Google + zone presse conservés.</em></div>
+
+<div class="wrap">
+
+  <!-- VARIANTE A -->
+  <div class="variant-head">
+    <span class="tag">Variante A</span>
+    <h2>Petits papiers à ombre douce, sur fond clair texturé</h2>
+    <p>Plus de bordures (le côté corporate disparaît). Chaque avis devient un petit papier blanc posé, avec l'ombre douce de la charte. Le fond est clair mais pas crème, parcouru d'un grain bois en filigrane très léger. La chaleur vient de la matière, pas d'un aplat.</p>
+  </div>
+  <div class="avis-band">
+    <div class="avis-inner">
+      <div class="avis-top">
+        <div class="stars"><span class="big">5,0</span><span class="gold">★★★★★</span><span class="cnt">27 avis vérifiés</span></div>
+        <span class="gbadge"><span class="g"></span> Avis Google</span>
+      </div>
+      <div class="grid">
+        <div class="paper"><div class="head"><div class="av">MC</div><div class="who">Marie C.<span class="meta">Lyon · Suspension</span></div></div><div class="mini-stars">★★★★★</div><p class="quote">« La lampe est encore plus belle en vrai. On sent que c'est fait main, le bois est superbe et la lumière est douce. »</p></div>
+        <div class="paper"><div class="head"><div class="av cream">JT</div><div class="who">Julien T.<span class="meta">Annecy · Lampadaire</span></div></div><div class="mini-stars">★★★★★</div><p class="quote">« Échange super sympa avec Robin, livraison rapide et soignée. Exactement ce que je cherchais pour le salon. »</p></div>
+        <div class="paper"><div class="head"><div class="av">SL</div><div class="who">Sophie L.<span class="meta">Paris · Lampe à poser</span></div></div><div class="mini-stars">★★★★★</div><p class="quote">« Un vrai objet d'artisan. Le surnom de la lampe, le petit mot dans le colis… on sent l'attention partout. »</p></div>
+      </div>
+      <div class="press">
+        <span class="lbl">Ils parlent de nous</span>
+        <span class="logo">Le Progrès</span><span class="logo">Lyon Mag</span><span class="logo">Marie Claire Maison</span>
+      </div>
+    </div>
+  </div>
+  <div class="note">Avatars en disque bois/crème (pas le bleu Google), étoiles dorées sobres, badge Google conservé pour la crédibilité, zone presse en pied.</div>
+
+  <!-- VARIANTE B -->
+  <div class="variant-head">
+    <span class="tag">Variante B</span>
+    <h2>Cartes reliées par un liseré bois</h2>
+    <p>Même principe sans bordure, mais chaque papier porte un liseré bois vertical à gauche (comme un signet) et les cartes sont reliées par une fine ligne bois sous l'en-tête. Plus « collection cohérente » qu'avis isolés, lecture plus liée.</p>
+  </div>
+  <div class="avis-band">
+    <div class="avis-inner">
+      <div class="avis-top">
+        <div class="stars"><span class="big">5,0</span><span class="gold">★★★★★</span><span class="cnt">27 avis vérifiés</span></div>
+        <span class="gbadge"><span class="g"></span> Avis Google</span>
+      </div>
+      <div class="tie-line"></div>
+      <div class="grid">
+        <div class="tied"><div class="head"><div class="av">MC</div><div class="who">Marie C.<span class="meta">Lyon · Suspension</span></div></div><div class="mini-stars">★★★★★</div><p class="quote">« La lampe est encore plus belle en vrai. On sent que c'est fait main, le bois est superbe. »</p></div>
+        <div class="tied"><div class="head"><div class="av cream">JT</div><div class="who">Julien T.<span class="meta">Annecy · Lampadaire</span></div></div><div class="mini-stars">★★★★★</div><p class="quote">« Échange super sympa avec Robin, livraison rapide et soignée. Parfait pour le salon. »</p></div>
+        <div class="tied"><div class="head"><div class="av">SL</div><div class="who">Sophie L.<span class="meta">Paris · Lampe à poser</span></div></div><div class="mini-stars">★★★★★</div><p class="quote">« Un vrai objet d'artisan. Le petit mot dans le colis, on sent l'attention partout. »</p></div>
+      </div>
+      <div class="press">
+        <span class="lbl">Ils parlent de nous</span>
+        <span class="logo">Le Progrès</span><span class="logo">Lyon Mag</span><span class="logo">Marie Claire Maison</span>
+      </div>
+    </div>
+  </div>
+  <div class="note">Liseré bois = filigrane matière plus présent que la variante A. À doser : ne doit pas redevenir une « bordure ».</div>
+
+</div>
+</body>
+</html>

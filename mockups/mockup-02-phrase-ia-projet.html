@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup #2 — Phrase IA + lien Modifier (avec projet)</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-wood: #8B7355;
+    --color-wood-dark: #4A3F35;
+    --color-wood-mid: #6B5A4A;
+    --color-warm: #F5F0E8;
+    --color-orange: #E35B24;
+    --color-orange-dark: #C44A1E;
+    --color-line: rgba(147, 125, 104, 0.18);
+    --color-bg: #FAFAF7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-wood-dark);
+    line-height: 1.55;
+  }
+
+  /* Hero réactif (état avec projet) */
+  .hero {
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 100px 20px 60px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-family: 'Square Peg', cursive;
+    font-size: clamp(56px, 10vw, 100px);
+    font-weight: normal;
+    line-height: 1;
+  }
+  .hero p {
+    margin-top: 14px;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    opacity: 0.85;
+    text-transform: uppercase;
+  }
+
+  /* Étiquette de variante */
+  .variant-label {
+    max-width: 1200px;
+    margin: 56px auto 0;
+    padding: 0 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-wood);
+    opacity: 0.55;
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     Variante A — Texte éditorial épuré
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  .advice-A {
+    max-width: 720px;
+    margin: 28px auto 0;
+    padding: 0 20px;
+    text-align: center;
+  }
+  .advice-A__text {
+    font-size: 18px;
+    font-style: italic;
+    line-height: 1.6;
+    color: var(--color-wood-dark);
+    margin-bottom: 18px;
+  }
+  .advice-A__sig {
+    display: inline;
+    margin-left: 8px;
+    font-family: 'Square Peg', cursive;
+    font-style: normal;
+    font-size: 22px;
+    color: var(--color-wood);
+    line-height: 1;
+  }
+  .advice-A__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--color-wood);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .advice-A__link:hover { color: var(--color-orange); }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     Variante B — Card crème "Mon projet" (aligné #1)
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  .advice-B {
+    max-width: 1200px;
+    margin: 28px auto 0;
+    padding: 0 20px;
+  }
+  .advice-B__card {
+    position: relative;
+    background: var(--color-warm);
+    border-radius: 16px;
+    padding: 46px 40px 42px;
+    text-align: center;
+  }
+  .advice-B__card::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 1.5px dashed rgba(139, 115, 85, 0.35);
+    border-radius: 12px;
+    pointer-events: none;
+  }
+  .advice-B__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 16px;
+    background: var(--color-wood-dark);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    margin-bottom: 22px;
+  }
+  .advice-B__badge svg { width: 11px; height: 11px; }
+  .advice-B__text {
+    font-size: 17px;
+    font-style: italic;
+    color: var(--color-wood-dark);
+    line-height: 1.6;
+    max-width: 620px;
+    margin: 0 auto 18px;
+  }
+  .advice-B__sig {
+    display: inline;
+    margin-left: 8px;
+    font-family: 'Square Peg', cursive;
+    font-style: normal;
+    font-size: 22px;
+    color: var(--color-wood);
+  }
+  .advice-B__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--color-wood);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    margin-top: 8px;
+  }
+  .advice-B__link:hover { color: var(--color-orange); }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     Variante C — Bandeau crème pleine largeur
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  .advice-C {
+    background: var(--color-warm);
+    padding: 50px 20px 52px;
+    text-align: center;
+    margin-top: 28px;
+  }
+  .advice-C__inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .advice-C__signature {
+    font-family: 'Square Peg', cursive;
+    font-size: 26px;
+    color: var(--color-wood);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .advice-C__text {
+    font-size: 17px;
+    color: var(--color-wood-dark);
+    line-height: 1.6;
+    margin-bottom: 22px;
+  }
+  .advice-C__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--color-wood);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .advice-C__link:hover { color: var(--color-orange); }
+
+  /* Stub grille produit */
+  .grid-stub {
+    max-width: 1400px;
+    margin: 40px auto 0;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 28px;
+  }
+  .grid-stub__card {
+    aspect-ratio: 1/1.2;
+    background: linear-gradient(135deg, var(--color-warm) 0%, #E5DED3 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-wood);
+    opacity: 0.5;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .variant-sep {
+    border: none;
+    border-top: 1px dashed var(--color-line);
+    margin: 80px 0 0;
+  }
+
+  .mockup-footer {
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 32px 20px;
+    margin-top: 60px;
+    text-align: center;
+    font-size: 13px;
+    opacity: 0.9;
+  }
+
+  @media (max-width: 768px) {
+    .hero { padding: 80px 20px 40px; }
+    .advice-A__text { font-size: 16px; }
+    .advice-B { padding: 0 14px; }
+    .advice-B__card { padding: 36px 22px 32px; }
+    .advice-B__text { font-size: 15.5px; }
+    .advice-C { padding: 40px 14px; }
+    .advice-C__text { font-size: 16px; }
+    .grid-stub { grid-template-columns: 1fr; gap: 18px; padding: 0 14px; }
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <h1>Pour ton salon</h1>
+  <p>Ma sélection pour cette pièce</p>
+</section>
+
+
+<!-- ═══════════ VARIANTE A — Texte éditorial épuré ═══════════ -->
+<div class="variant-label">Variante A — Texte éditorial épuré (sans cadre)</div>
+<div class="advice-A">
+  <p class="advice-A__text">
+    "Pour un salon spacieux et moderne, j'ai sélectionné des suspensions à ampoule entourée — la lumière diffuse y est plus douce, idéale pour les soirées canapé."
+    <span class="advice-A__sig">— Robin</span>
+  </p>
+  <a href="#" class="advice-A__link">Préciser ou modifier mon projet ✎</a>
+</div>
+
+<div class="grid-stub">
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+</div>
+
+
+<hr class="variant-sep">
+
+
+<!-- ═══════════ VARIANTE B — Card crème "Mon projet" ═══════════ -->
+<div class="variant-label">Variante B — Card crème "Mon projet" (aligné sur le mockup #1)</div>
+<div class="advice-B">
+  <div class="advice-B__card">
+    <span class="advice-B__badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Mon projet
+    </span>
+    <p class="advice-B__text">
+      "Pour un salon spacieux et moderne, j'ai sélectionné des suspensions à ampoule entourée — la lumière diffuse y est plus douce, idéale pour les soirées canapé."
+      <span class="advice-B__sig">— Robin</span>
+    </p>
+    <a href="#" class="advice-B__link">Préciser ou modifier mon projet ✎</a>
+  </div>
+</div>
+
+<div class="grid-stub">
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+</div>
+
+
+<hr class="variant-sep">
+
+
+<!-- ═══════════ VARIANTE C — Bandeau crème pleine largeur ═══════════ -->
+<div class="variant-label">Variante C — Bandeau crème pleine largeur</div>
+<div class="advice-C">
+  <div class="advice-C__inner">
+    <div class="advice-C__signature">Robin</div>
+    <p class="advice-C__text">
+      Pour un salon spacieux et moderne, j'ai sélectionné des suspensions à ampoule entourée — la lumière diffuse y est plus douce, idéale pour les soirées canapé.
+    </p>
+    <a href="#" class="advice-C__link">Préciser ou modifier mon projet ✎</a>
+  </div>
+</div>
+
+<div class="grid-stub">
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+</div>
+
+
+<div class="mockup-footer">
+  <strong>Mockup #2 — Phrase IA + lien Modifier (avec projet)</strong><br>
+  3 variantes (A : épuré · B : card crème · C : bandeau crème pleine largeur)<br>
+  Tutoiement utilisé pour matcher le hero réactif "Pour ton salon"
+</div>
+
+</body>
+</html>

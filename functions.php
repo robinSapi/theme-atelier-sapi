@@ -320,10 +320,6 @@ function sapi_maison_enqueue_assets() {
   if (class_exists('WooCommerce') && (is_shop() || is_product())) {
     require_once get_template_directory() . '/inc/guide-data.php';
 
-    // Config unique du moteur de filtrage (source de vérité, cf.
-    // sapi_conseiller_get_rules). Localisée au JS + lue par tout le filtre PHP.
-    $sapi_filter_rules = sapi_conseiller_get_rules();
-
     // Pills catégorie sur /mes-creations/ (Chantier 3) — filtrage AJAX-less
     // de la grille basse par data-categories.
     $mes_creations_pills_js_path = get_template_directory() . '/assets/sapi-mes-creations-pills.js';
@@ -349,29 +345,12 @@ function sapi_maison_enqueue_assets() {
       );
     }
 
-    // F2a Phase 2 — cards "Conseil de Robin" / "Mon projet" sur /mes-creations/
-    $cards_conseiller_js_path = get_template_directory() . '/assets/sapi-cards-conseiller.js';
-    if (file_exists($cards_conseiller_js_path)) {
-      wp_enqueue_script(
-        'sapi-cards-conseiller',
-        get_template_directory_uri() . '/assets/sapi-cards-conseiller.js',
-        ['sapi-project', 'sapi-maison-shop'],
-        filemtime($cards_conseiller_js_path),
-        true
-      );
-      wp_localize_script('sapi-cards-conseiller', 'SAPI_CARDS_CONSEILLER', [
-        'ajaxUrl'        => admin_url('admin-ajax.php'),
-        'nonce'          => wp_create_nonce('sapi-megafilter'),
-        'steps'          => sapi_guide_get_steps(),
-        'rules'          => $sapi_filter_rules,
-        // Icons SVG — pour harmonisation chip-question avec les .choice du modale
-        'icons'          => sapi_guide_get_icons(),
-        // F2a-bis : textes génériques par pièce + fallback ultime — lus
-        // synchronement par sapi-cards-conseiller.js (zéro AJAX au load).
-        'genericAdvice'  => sapi_megafilter_get_generic_advices(),
-        'fallbackAdvice' => __('Voici la sélection que je te propose dans le catalogue de Robin.', 'theme-sapi-maison'),
-      ]);
-    }
+    // Tâche 4b — sapi-cards-conseiller.js SUPPRIMÉ : le filtrage JS (règles
+    // métier dupliquées + sapiMegaFilter) est retiré, le filtrage est 100%
+    // côté serveur. Le room-picker (cartes = liens ?piece=) et le catalogue
+    // n'ont plus besoin de ce contrôleur. Les seuls textes qu'il localisait
+    // encore utiles (conseils génériques par pièce) sont déplacés sur
+    // sapi-modal-conseiller (global SAPI_CARDS_CONSEILLER conservé, cf. plus bas).
 
     // Refonte /mes-creations/ — état B « immersion » : contrôleur de la
     // séquence (machine à écrire, révélation sélection, header/bandeau
@@ -401,7 +380,7 @@ function sapi_maison_enqueue_assets() {
       wp_enqueue_script(
         'sapi-modal-conseiller',
         get_template_directory_uri() . '/assets/sapi-modal-conseiller.js',
-        ['sapi-project', 'sapi-cards-conseiller'],
+        ['sapi-project'],
         filemtime($modal_conseiller_js_path),
         true
       );
@@ -427,6 +406,14 @@ function sapi_maison_enqueue_assets() {
         // de l'écran s-contact et de la card sur-mesure routée contact.
         'contactSurmesureUrl' => home_url('/sur-mesure/'),
         'contactEmail'        => 'robin@atelier-sapi.fr',
+      ]);
+      // Tâche 4b — conseils génériques par pièce (bulle initiale du chat),
+      // anciennement portés par SAPI_CARDS_CONSEILLER de sapi-cards-conseiller.js
+      // (supprimé). On garde le même nom de global, réduit aux clés que la
+      // modale lit réellement (getInitialChatAdvice : genericAdvice + fallback).
+      wp_localize_script('sapi-modal-conseiller', 'SAPI_CARDS_CONSEILLER', [
+        'genericAdvice'  => sapi_megafilter_get_generic_advices(),
+        'fallbackAdvice' => __('Voici la sélection que je te propose dans le catalogue de Robin.', 'theme-sapi-maison'),
       ]);
     }
 

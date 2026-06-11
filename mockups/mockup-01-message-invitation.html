@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup #1 — Message d'invitation /mes-creations/ sans projet</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-wood: #8B7355;
+    --color-wood-dark: #4A3F35;
+    --color-warm: #F5F0E8;
+    --color-orange: #E35B24;
+    --color-orange-dark: #C44A1E;
+    --color-line: rgba(147, 125, 104, 0.18);
+    --color-bg: #FAFAF7;
+    --shadow-card: 0 2px 8px rgba(147,125,104,0.12), 0 6px 28px rgba(147,125,104,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-wood-dark);
+    line-height: 1.55;
+  }
+
+  /* Hero (fidèle au hero standard du site) */
+  .hero {
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 100px 20px 60px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-family: 'Square Peg', cursive;
+    font-size: clamp(56px, 10vw, 100px);
+    font-weight: normal;
+    line-height: 1;
+  }
+  .hero p {
+    margin-top: 12px;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    opacity: 0.85;
+    text-transform: uppercase;
+  }
+
+  /* Étiquette de variante pour le mockup */
+  .variant-label {
+    max-width: 1400px;
+    margin: 48px auto 0;
+    padding: 0 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-wood);
+    opacity: 0.55;
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     Variante A — Minimaliste inline
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  .invite-minimal {
+    max-width: 720px;
+    margin: 20px auto 0;
+    padding: 0 20px;
+    text-align: center;
+  }
+  .invite-minimal__text {
+    font-size: 17px;
+    color: var(--color-wood-dark);
+    line-height: 1.6;
+    margin-bottom: 22px;
+  }
+  .invite-minimal__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 30px;
+    background: var(--color-orange);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .invite-minimal__cta:hover {
+    background: var(--color-orange-dark);
+    transform: translateY(-1px);
+  }
+  .invite-minimal__cta::before { content: "✎"; font-size: 15px; line-height: 1; }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     Variante B — Card identité Robin
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  .invite-card {
+    max-width: 720px;
+    margin: 20px auto 0;
+    padding: 36px 32px;
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    box-shadow: var(--shadow-card);
+    text-align: center;
+  }
+  .invite-card__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    background: var(--color-warm);
+    color: var(--color-wood);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    margin-bottom: 16px;
+  }
+  .invite-card__badge::before { content: "✎"; font-size: 12px; }
+  .invite-card__title {
+    font-family: 'Square Peg', cursive;
+    font-size: 40px;
+    color: var(--color-wood);
+    line-height: 1;
+    margin-bottom: 14px;
+    font-weight: normal;
+  }
+  .invite-card__text {
+    font-size: 15.5px;
+    color: var(--color-wood-dark);
+    line-height: 1.6;
+    max-width: 520px;
+    margin: 0 auto 22px;
+  }
+  .invite-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 30px;
+    background: var(--color-orange);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .invite-card__cta:hover { background: var(--color-orange-dark); transform: translateY(-1px); }
+  .invite-card__cta::before { content: "✎"; font-size: 15px; }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     Variante C — Bandeau pleine largeur fond crème
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  .invite-banner {
+    background: var(--color-warm);
+    padding: 50px 20px 56px;
+    text-align: center;
+    margin-top: 20px;
+  }
+  .invite-banner__inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .invite-banner__signature {
+    font-family: 'Square Peg', cursive;
+    font-size: 26px;
+    color: var(--color-wood);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .invite-banner__text {
+    font-size: 17px;
+    color: var(--color-wood-dark);
+    line-height: 1.55;
+    margin-bottom: 24px;
+  }
+  .invite-banner__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 30px;
+    background: var(--color-orange);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .invite-banner__cta:hover { background: var(--color-orange-dark); transform: translateY(-1px); }
+  .invite-banner__cta::before { content: "✎"; font-size: 15px; }
+
+  /* Stub grille produit */
+  .grid-stub {
+    max-width: 1400px;
+    margin: 40px auto 0;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 28px;
+  }
+  .grid-stub__card {
+    aspect-ratio: 1/1.2;
+    background: linear-gradient(135deg, var(--color-warm) 0%, #E5DED3 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-wood);
+    opacity: 0.5;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* Séparateur entre variantes */
+  .variant-sep {
+    border: none;
+    border-top: 1px dashed var(--color-line);
+    margin: 80px 0 0;
+  }
+
+  /* Footer mockup */
+  .mockup-footer {
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 40px 20px;
+    margin-top: 80px;
+    text-align: center;
+    font-size: 13px;
+    opacity: 0.9;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .hero { padding: 80px 20px 40px; }
+    .variant-label { margin-top: 36px; }
+    .invite-minimal__text { font-size: 16px; }
+    .invite-card { padding: 28px 22px; margin: 14px 14px 0; }
+    .invite-card__title { font-size: 32px; }
+    .invite-banner { padding: 40px 14px 44px; }
+    .invite-banner__signature { font-size: 22px; }
+    .invite-banner__text { font-size: 16px; }
+    .grid-stub { grid-template-columns: 1fr; gap: 18px; padding: 0 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO standard -->
+<section class="hero">
+  <h1>Mes créations</h1>
+  <p>27 luminaires en bois faits main à Lyon</p>
+</section>
+
+
+<!-- ═══════════ VARIANTE A — Minimaliste inline ═══════════ -->
+<div class="variant-label">Variante A — Minimaliste, intégrée au flow</div>
+<div class="invite-minimal">
+  <p class="invite-minimal__text">
+    Décris ton projet, Robin t'aide à sélectionner les modèles qui te correspondent.
+  </p>
+  <a href="#" class="invite-minimal__cta">Décrire mon projet</a>
+</div>
+
+<div class="grid-stub">
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+</div>
+
+
+<hr class="variant-sep">
+
+
+<!-- ═══════════ VARIANTE B — Card identité Robin ═══════════ -->
+<div class="variant-label">Variante B — Card "Conseil de Robin"</div>
+<div class="invite-card">
+  <span class="invite-card__badge">Conseil de Robin</span>
+  <h2 class="invite-card__title">Un coup de main pour choisir ?</h2>
+  <p class="invite-card__text">
+    Décris ton projet (pièce, taille, style…) et je t'aide à sélectionner les modèles qui correspondent vraiment.
+  </p>
+  <a href="#" class="invite-card__cta">Décrire mon projet</a>
+</div>
+
+<div class="grid-stub">
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+</div>
+
+
+<hr class="variant-sep">
+
+
+<!-- ═══════════ VARIANTE C — Bandeau crème pleine largeur ═══════════ -->
+<div class="variant-label">Variante C — Bandeau crème pleine largeur</div>
+<div class="invite-banner">
+  <div class="invite-banner__inner">
+    <div class="invite-banner__signature">Robin</div>
+    <p class="invite-banner__text">
+      Décris-moi ton projet — pièce, taille, style — je sélectionne les modèles qui te correspondent.
+    </p>
+    <a href="#" class="invite-banner__cta">Décrire mon projet</a>
+  </div>
+</div>
+
+<div class="grid-stub">
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+</div>
+
+
+<div class="mockup-footer">
+  <strong>Mockup #1 — Message d'invitation /mes-creations/ sans projet</strong><br>
+  3 variantes côte à côte (A : minimaliste · B : card · C : bandeau crème pleine largeur)<br>
+  Mobile : redimensionne ta fenêtre sous 768px
+</div>
+
+</body>
+</html>

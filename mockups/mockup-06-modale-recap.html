@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup #6 — Modale écran récap</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-wood: #8B7355;
+    --color-wood-dark: #4A3F35;
+    --color-wood-mid: #6B5A4A;
+    --color-warm: #F5F0E8;
+    --color-orange: #E35B24;
+    --color-orange-dark: #C44A1E;
+    --color-line: rgba(147, 125, 104, 0.18);
+    --color-bg: #FAFAF7;
+    --shadow-card: 0 2px 8px rgba(147,125,104,0.12), 0 6px 28px rgba(147,125,104,0.15);
+    --shadow-card-hover: 0 4px 14px rgba(147,125,104,0.16), 0 12px 44px rgba(147,125,104,0.22);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-wood-dark);
+    line-height: 1.55;
+  }
+
+  .variant-label {
+    max-width: 1200px;
+    margin: 48px auto 0;
+    padding: 0 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-wood);
+    opacity: 0.55;
+  }
+
+  /* Modale */
+  .modal {
+    background: var(--color-bg);
+    border-bottom: 1px dashed var(--color-line);
+    padding-bottom: 0;
+  }
+  .modal__header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--color-line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+  }
+  .modal__title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-wood);
+  }
+  .modal__close {
+    background: none;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--color-wood-dark);
+    font-size: 22px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal__close:hover { background: var(--color-warm); }
+  .modal__body {
+    padding: 32px 20px 56px;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Card Conseiller */
+  .conseiller-card {
+    position: relative;
+    width: 100%;
+    max-width: 880px;
+    background: var(--color-warm);
+    border-radius: 16px;
+    padding: 36px 40px 28px;
+    text-align: center;
+  }
+  .conseiller-card::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 1.5px dashed rgba(139, 115, 85, 0.35);
+    border-radius: 12px;
+    pointer-events: none;
+  }
+  .conseiller-card__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 16px;
+    background: var(--color-wood-dark);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    margin-bottom: 22px;
+  }
+  .conseiller-card__badge svg { width: 11px; height: 11px; }
+
+  .conseiller-card__title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: clamp(20px, 3vw, 28px);
+    color: var(--color-wood-dark);
+    line-height: 1.25;
+    text-transform: uppercase;
+    letter-spacing: 0.005em;
+    max-width: 640px;
+    margin: 0 auto 28px;
+  }
+
+  /* Récap des réponses — chips d'affichage (non interactifs) */
+  .recap-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    max-width: 720px;
+    margin: 0 auto 28px;
+  }
+  .recap-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 50px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--color-wood-dark);
+  }
+  .recap-chip__key {
+    color: var(--color-wood-mid);
+    font-weight: 500;
+    text-transform: lowercase;
+  }
+
+  /* Phrase IA personnalisée */
+  .ia-quote {
+    max-width: 620px;
+    margin: 0 auto 32px;
+    padding: 22px 26px;
+    background: #fff;
+    border-radius: 12px;
+    text-align: left;
+    box-shadow: var(--shadow-card);
+    position: relative;
+  }
+  .ia-quote__text {
+    font-size: 15.5px;
+    font-style: italic;
+    color: var(--color-wood-dark);
+    line-height: 1.6;
+    margin-bottom: 6px;
+  }
+  .ia-quote__sig {
+    font-family: 'Square Peg', cursive;
+    font-style: normal;
+    font-size: 22px;
+    color: var(--color-wood);
+    line-height: 1;
+    display: block;
+    text-align: right;
+  }
+
+  /* CTA principal — varie selon contexte */
+  .cta-block {
+    text-align: center;
+  }
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 14px 32px;
+    background: var(--color-orange);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .cta-btn:hover {
+    background: var(--color-orange-dark);
+    transform: translateY(-1px);
+  }
+  .cta-btn svg { width: 14px; height: 14px; }
+
+  /* Bouton Retour */
+  .nav {
+    margin-top: 22px;
+    display: flex;
+    justify-content: center;
+  }
+  .nav__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--color-wood);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .nav__back:hover { color: var(--color-orange); }
+
+  /* Footer mockup */
+  .mockup-footer {
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 16px 20px;
+    text-align: center;
+    font-size: 11px;
+    opacity: 0.9;
+  }
+
+  /* Mobile */
+  @media (max-width: 720px) {
+    .modal__body { padding: 20px 14px 40px; }
+    .conseiller-card { padding: 28px 22px 22px; }
+    .conseiller-card::before { inset: 8px; }
+    .conseiller-card__title { font-size: 18px; margin-bottom: 22px; }
+    .recap-chips { margin-bottom: 22px; }
+    .recap-chip { font-size: 12px; padding: 6px 12px; }
+    .ia-quote { padding: 18px 20px; margin-bottom: 24px; }
+    .ia-quote__text { font-size: 14.5px; }
+  }
+</style>
+</head>
+<body>
+
+
+<!-- ══════════════ VARIANTE A — Fin du mode complet (sur /mes-creations/) ══════════════ -->
+<div class="variant-label">Variante A — Fin du mode complet (depuis /mes-creations/) → vers la sélection</div>
+<section class="modal">
+
+  <header class="modal__header">
+    <span class="modal__title">Décrire mon projet</span>
+    <button class="modal__close" aria-label="Fermer">×</button>
+  </header>
+
+  <div class="modal__body">
+    <div class="conseiller-card">
+      <span class="conseiller-card__badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+          <path d="m15 5 4 4"/>
+        </svg>
+        Conseil de Robin
+      </span>
+
+      <h2 class="conseiller-card__title">Voici votre projet</h2>
+
+      <!-- Chips de récap des réponses -->
+      <div class="recap-chips">
+        <span class="recap-chip"><span class="recap-chip__key">Pièce :</span> Salon</span>
+        <span class="recap-chip"><span class="recap-chip__key">Taille :</span> Spacieuse</span>
+        <span class="recap-chip"><span class="recap-chip__key">Sortie :</span> Au plafond</span>
+        <span class="recap-chip"><span class="recap-chip__key">Hauteur :</span> Standard</span>
+        <span class="recap-chip"><span class="recap-chip__key">Au-dessus d'une table :</span> Oui</span>
+        <span class="recap-chip"><span class="recap-chip__key">Style :</span> Moderne</span>
+      </div>
+
+      <!-- Phrase IA personnalisée -->
+      <div class="ia-quote">
+        <p class="ia-quote__text">
+          "Pour un salon spacieux et moderne avec une suspension au-dessus de la table, je vous propose une sélection de 17 luminaires à ampoule entourée — la lumière y est plus douce, parfaite pour les soirées canapé."
+        </p>
+        <span class="ia-quote__sig">— Robin</span>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-block">
+        <button class="cta-btn" type="button">
+          Voir la sélection
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Retour -->
+      <div class="nav">
+        <button class="nav__back" type="button">← Modifier mes réponses</button>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- ══════════════ VARIANTE B — Mode court depuis fiche produit ══════════════ -->
+<div class="variant-label">Variante B — Mode court (depuis fiche produit) → pré-sélection de variation</div>
+<section class="modal">
+
+  <header class="modal__header">
+    <span class="modal__title">Comment choisir ?</span>
+    <button class="modal__close" aria-label="Fermer">×</button>
+  </header>
+
+  <div class="modal__body">
+    <div class="conseiller-card">
+      <span class="conseiller-card__badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+          <path d="m15 5 4 4"/>
+        </svg>
+        Conseil de Robin
+      </span>
+
+      <h2 class="conseiller-card__title">Voici votre projet</h2>
+
+      <!-- Chips de récap (mode court = 3 réponses) -->
+      <div class="recap-chips">
+        <span class="recap-chip"><span class="recap-chip__key">Pièce :</span> Salon</span>
+        <span class="recap-chip"><span class="recap-chip__key">Taille :</span> Spacieuse</span>
+        <span class="recap-chip"><span class="recap-chip__key">Style :</span> Moderne</span>
+      </div>
+
+      <!-- Phrase IA personnalisée (variation à appliquer) -->
+      <div class="ia-quote">
+        <p class="ia-quote__text">
+          "Pour un salon spacieux et moderne comme le vôtre, je vous recommande la version <strong>Taille L</strong> de Gaston, en peuplier. C'est la dimension qui s'intègre le mieux dans une pièce de cette taille."
+        </p>
+        <span class="ia-quote__sig">— Robin</span>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-block">
+        <button class="cta-btn" type="button">
+          Appliquer cette sélection
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Retour -->
+      <div class="nav">
+        <button class="nav__back" type="button">← Modifier mes réponses</button>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
+<div class="mockup-footer">
+  Mockup #6 — Récap · 2 variantes (A : fin mode complet · B : mode court fiche produit) · esthétique Conseiller universelle
+</div>
+
+</body>
+</html>

@@ -5,7 +5,8 @@
  * État S1 : questions guidées (boutons-cards, avance auto, retour, progress)
  * État S3 : récap (chips + phrase IA Sonnet + CTA "Voir la sélection")
  *
- * Listener : event 'sapi:open-modal' (dispatché par sapi-cards-conseiller)
+ * Listener : event 'sapi:open-modal' (dispatché par l'immersion /mes-creations/,
+ * la pill fiche produit, ou le param ?freetext= au load)
  *   detail.state = 's0' → tunnel complet depuis le début
  *   detail.state = 's3' → récap direct (projet existant, mode Modifier)
  *

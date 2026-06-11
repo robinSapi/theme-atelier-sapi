@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mockup — Home « Deux portes » — Atelier Sâpi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-wood: #8B7355;
+      --color-wood-dark: #4A3F35;
+      --color-wood-mid: #6B5A4A;
+      --color-warm: #FBF6EA;
+      --color-cream: #F5EFE3;
+      --color-orange: #E35B24;
+      --gradient-cta: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+      --shadow-card: 0 2px 8px rgba(147,125,104,0.12), 0 6px 28px rgba(147,125,104,0.15);
+      --shadow-card-hover: 0 4px 14px rgba(147,125,104,0.16), 0 12px 44px rgba(147,125,104,0.22);
+      --font-body: 'Montserrat', system-ui, sans-serif;
+      --font-display: 'Square Peg', cursive;
+      --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+      --header-height: 74px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: #fff; font-family: var(--font-body); color: var(--color-wood-dark); -webkit-font-smoothing: antialiased; }
+
+    /* ============== HEADER simulé — opaque permanent ============== */
+    .header-mock {
+      position: sticky; top: 0; left: 0; right: 0;
+      padding: 14px 40px; z-index: 100;
+      height: var(--header-height, 74px);
+      display: flex; justify-content: space-between; align-items: center;
+      color: var(--color-wood-dark);
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+    .header-mock .logo { font-family: var(--font-display); font-size: 26px; line-height: 1; }
+    .header-mock nav { display: flex; gap: 28px; font-size: 12px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; }
+
+    /* ============== 1. CAROUSEL HERO — image pure, sous le header ============== */
+    .hero-carousel {
+      position: relative;
+      width: 100%;
+      height: calc(100vh - var(--header-height, 74px));
+      min-height: 480px;
+      overflow: hidden;
+      /* Placeholder visuel : gradient warm wood/luminaire ambiance */
+      background:
+        radial-gradient(ellipse 60% 70% at 70% 35%, rgba(255, 200, 130, 0.5) 0%, transparent 65%),
+        radial-gradient(circle at 30% 80%, rgba(0,0,0,0.45) 0%, transparent 55%),
+        linear-gradient(135deg, #2c1f15 0%, #4a3a23 50%, #8b6234 100%);
+    }
+    .hero-carousel::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 35% 55% at 65% 40%, rgba(255, 235, 180, 0.18), transparent);
+    }
+    .hero-carousel::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, transparent 0%, transparent 50%, rgba(0,0,0,0.45) 85%, rgba(0,0,0,0.65) 100%);
+    }
+
+    /* Slide entièrement cliquable */
+    .hero-clickable {
+      position: absolute; inset: 0; z-index: 3;
+      display: block; text-decoration: none; color: inherit;
+    }
+
+    /* Naming produit — centré en bas, une seule ligne (firstname + restname) */
+    .hero-product-name {
+      position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
+      z-index: 2; color: white;
+      font-size: clamp(20px, 2.2vw, 32px);
+      line-height: 1; white-space: nowrap;
+      pointer-events: none;
+      text-shadow: 0 2px 15px rgba(0,0,0,0.5);
+    }
+    .hero-product-name .firstname {
+      font-family: var(--font-body);
+      font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.55em;
+      vertical-align: baseline;
+      margin-right: 0.4em;
+      opacity: 0.95;
+    }
+    .hero-product-name .restname {
+      font-family: var(--font-display);
+      font-size: 1.5em;
+      line-height: 1;
+      vertical-align: baseline;
+    }
+
+    /* Dots — sous le naming, en pied de carousel */
+    .hero-dots {
+      position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
+      z-index: 2; display: flex; gap: 12px;
+      pointer-events: none;
+    }
+    .hero-dots .dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.75); background: transparent;
+    }
+    .hero-dots .dot.active { background: white; }
+
+    /* Label "DEMO" */
+    .hero-demo-label {
+      position: absolute; top: 80px; right: 30px; z-index: 5;
+      background: rgba(255,255,255,0.95); color: var(--color-wood-dark);
+      padding: 7px 14px; border-radius: 4px;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+    }
+
+    /* ============== 2. BANDEAU DEUX PORTES ============== */
+    .bandeau-deux-portes {
+      padding: 80px 40px 90px;
+      background: var(--color-warm);
+      text-align: center;
+    }
+    .bandeau-h1 {
+      font-family: var(--font-body);
+      font-size: clamp(15px, 1.7vw, 24px);
+      font-weight: 600;
+      color: var(--color-wood-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 18px; line-height: 1.25;
+    }
+    .bandeau-subtitle {
+      font-family: var(--font-display);
+      font-size: clamp(44px, 6.5vw, 88px);
+      color: var(--color-wood); margin-bottom: 60px;
+      line-height: 0.95; font-weight: 400;
+      max-width: 1100px; margin-left: auto; margin-right: auto;
+    }
+    .bandeau-portes {
+      display: flex; justify-content: center; gap: 24px;
+      flex-wrap: wrap; max-width: 880px; margin: 0 auto;
+    }
+    .porte {
+      flex: 1 1 360px; max-width: 420px;
+      padding: 36px 32px;
+      border-radius: 16px;
+      background: white;
+      box-shadow: var(--shadow-card);
+      text-decoration: none; color: inherit;
+      transition: transform 0.4s var(--ease-smooth), box-shadow 0.4s var(--ease-smooth);
+      cursor: pointer; text-align: left;
+    }
+    .porte:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card-hover);
+    }
+    .porte-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--color-wood); opacity: 0.6; margin-bottom: 12px;
+    }
+    .porte-title {
+      font-size: 22px; font-weight: 600; color: var(--color-wood-dark);
+      margin-bottom: 10px; line-height: 1.2;
+    }
+    .porte-sub {
+      font-size: 14px; color: rgba(74,63,53,0.7);
+      margin-bottom: 24px; line-height: 1.55;
+    }
+    .porte-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 28px;
+      border-radius: 50px;
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      transition: all 0.3s var(--ease-smooth);
+    }
+    .porte-cta.cta-wood { background: var(--color-wood); color: white; }
+    .porte:hover .porte-cta.cta-wood { background: var(--color-wood-dark); }
+    .porte-cta.cta-orange { background: var(--gradient-cta); color: white; box-shadow: 0 4px 15px rgba(227, 91, 36, 0.25); }
+    .porte:hover .porte-cta.cta-orange { box-shadow: 0 6px 20px rgba(227, 91, 36, 0.35); }
+
+    /* ============== 3. Section suivante simulée ============== */
+    .next-section {
+      padding: 80px 40px;
+      background: white; text-align: center;
+    }
+    .next-section .num {
+      font-size: 13px; font-weight: 700; letter-spacing: 0.2em;
+      color: var(--color-wood); opacity: 0.7;
+    }
+    .next-section h2 {
+      font-family: var(--font-body); font-size: 32px; font-weight: 600;
+      margin-top: 8px; color: var(--color-wood-dark);
+    }
+    .next-section .placeholder-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px; max-width: 1100px; margin: 40px auto 0;
+    }
+    .next-section .placeholder-card {
+      aspect-ratio: 4/5;
+      background: var(--color-cream);
+      border-radius: 12px;
+      display: flex; align-items: flex-end;
+      padding: 16px;
+      font-size: 12px; font-weight: 600;
+      color: var(--color-wood-dark); opacity: 0.6;
+    }
+
+    /* ============== Mobile ============== */
+    @media (max-width: 768px) {
+      :root { --header-height: 60px; }
+      .header-mock { padding: 10px 20px; }
+      .header-mock nav { display: none; }
+      .header-mock .logo { font-size: 22px; }
+      .hero-carousel { min-height: 420px; }
+      .hero-product-name { left: 20px; bottom: 24px; max-width: 80%; }
+      .hero-product-name .restname { font-size: 32px; }
+      .hero-demo-label { top: 70px; right: 16px; font-size: 9px; padding: 5px 10px; }
+      .bandeau-deux-portes { padding: 60px 20px 70px; }
+      .bandeau-portes { flex-direction: column; }
+      .porte { padding: 28px 24px; }
+      .next-section { padding: 60px 20px; }
+    }
+
+    /* ============== Légende mockup ============== */
+    .mockup-legend {
+      position: sticky; bottom: 0; left: 0; right: 0;
+      background: rgba(28, 24, 20, 0.96); backdrop-filter: blur(8px);
+      color: #FBF6EA;
+      padding: 14px 24px;
+      font-size: 12px; line-height: 1.5;
+      z-index: 200;
+      display: flex; gap: 30px; align-items: center; flex-wrap: wrap;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .mockup-legend strong { color: #fff; font-weight: 600; letter-spacing: 0.05em; }
+    .mockup-legend .badge { background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 3px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+
+    /* Détection scroll pour menu opaque (V réelle Sâpi) */
+  </style>
+</head>
+<body>
+
+  <!-- HEADER simulé — opaque permanent -->
+  <header class="header-mock">
+    <div class="logo">Atelier Sâpi</div>
+    <nav>
+      <span>Créations</span>
+      <span>L'atelier</span>
+      <span>Sur mesure</span>
+      <span>Conseils</span>
+    </nav>
+  </header>
+
+  <!-- 1. CAROUSEL HERO — image pure (H1/H2 sortis vers le bandeau ci-dessous) -->
+  <section class="hero-carousel">
+    <a class="hero-clickable" href="#" aria-label="Découvrir Vincent l'incandescent"></a>
+    <div class="hero-demo-label">Image carousel — placeholder</div>
+
+    <div class="hero-product-name">
+      <span class="firstname">Vincent</span><span class="restname">l'incandescent</span>
+    </div>
+
+    <div class="hero-dots">
+      <span class="dot active"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </div>
+  </section>
+
+  <!-- 2. BANDEAU DEUX PORTES — H1/H2 vivent ICI -->
+  <section class="bandeau-deux-portes">
+    <h1 class="bandeau-h1">Luminaires en bois · Atelier Sâpi</h1>
+    <p class="bandeau-subtitle">Fabriqués à la main, à la commande, dans mon atelier à Lyon</p>
+
+    <div class="bandeau-portes">
+      <a class="porte" href="#">
+        <div class="porte-label">Porte A — Catalogue</div>
+        <div class="porte-title">Voir toutes mes créations</div>
+        <p class="porte-sub">Suspensions, lampadaires, appliques, lampes à poser. Tous les luminaires conçus et fabriqués par Robin.</p>
+        <span class="porte-cta cta-orange">Explorer le catalogue →</span>
+      </a>
+
+      <a class="porte" href="#">
+        <div class="porte-label">Porte B — Conseil</div>
+        <div class="porte-title">Trouver ma lumière idéale</div>
+        <p class="porte-sub">Quelques questions, je vous oriente vers la création qui correspond à votre intérieur.</p>
+        <span class="porte-cta cta-wood">Démarrer mon projet →</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- 3. Section suivante simulée -->
+  <section class="next-section">
+    <span class="num">02</span>
+    <h2>Collections</h2>
+    <div class="placeholder-grid">
+      <div class="placeholder-card">Suspensions</div>
+      <div class="placeholder-card">Appliques</div>
+      <div class="placeholder-card">Lampes à poser</div>
+      <div class="placeholder-card">Lampadaires</div>
+      <div class="placeholder-card">Accessoires</div>
+    </div>
+  </section>
+
+  <!-- Légende explicative -->
+  <div class="mockup-legend">
+    <span class="badge">Mockup</span>
+    <span><strong>Architecture « Deux portes »</strong> — Le carousel est nettoyé : zéro H1, zéro H2, juste l'image et le naming. Le H1+H2 vit dans le bandeau d'orientation juste sous le hero, accompagné des deux CTA principaux. Le reste de la home (collections, brand story unifiée, newsletter) suit dessous.</span>
+  </div>
+
+</body>
+</html>

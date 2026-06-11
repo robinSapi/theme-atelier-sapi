@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DA Home · 07b Cadeau + Actus — NOUVELLES directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+:root{
+  --color-wood:#8B7355;--color-wood-dark:#4A3F35;--color-wood-mid:#6B5A4A;
+  --color-warm:#FBF6EA;--color-orange:#E35B24;--color-ink:#3a322b;
+  --shadow-card:0 2px 8px rgba(147,125,104,.12),0 6px 28px rgba(147,125,104,.15);
+  --shadow-hover:0 4px 14px rgba(147,125,104,.16),0 12px 44px rgba(147,125,104,.22);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Montserrat',sans-serif;background:#efe9dc;color:var(--color-ink);line-height:1.55}
+.devnote{background:var(--color-wood-dark);color:var(--color-warm);padding:14px 28px;font-size:13px}
+.devnote strong{color:#fff}.devnote em{color:#e9c9a8;font-style:normal}
+.wrap{max-width:1300px;margin:0 auto;padding:48px 24px 90px}
+.variant-head{margin:64px 0 18px}
+.variant-head:first-of-type{margin-top:8px}
+.variant-head .tag{display:inline-block;background:var(--color-wood);color:#fff;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:6px 14px;border-radius:50px}
+.variant-head .tag.alt{background:var(--color-orange)}
+.variant-head h2{font-family:'Square Peg',cursive;font-size:42px;color:var(--color-wood-dark);font-weight:400;margin-top:8px;line-height:1}
+.variant-head p{max-width:880px;color:var(--color-wood-mid);font-size:14.5px;margin-top:6px}
+.note{font-size:13px;color:var(--color-wood-mid);background:#fff;border-left:3px solid var(--color-wood);padding:12px 16px;border-radius:0 8px 8px 0;margin-top:18px;max-width:1040px}
+
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.cta{display:inline-flex;align-items:center;gap:9px;font-weight:600;font-size:14.5px;border-radius:50px;padding:13px 26px;text-decoration:none;transition:.22s}
+.cta .arr{transition:transform .25s}.cta:hover .arr{transform:translateX(4px)}
+.cta-orange{background:var(--color-orange);color:#fff}.cta-orange:hover{background:#c84d1c}
+.cta-white{background:#fff;color:var(--color-wood-dark)}.cta-white:hover{background:#f3ead9}
+.cta-outline{background:transparent;border:1.5px solid var(--color-wood);color:var(--color-wood-dark)}.cta-outline:hover{background:var(--color-wood);color:#fff}
+.read-link{color:var(--color-orange);font-weight:600;font-size:14.5px;display:inline-flex;gap:7px;align-items:center;text-decoration:none}
+.read-link .arr{transition:transform .25s}.read-link:hover .arr{transform:translateX(4px)}
+
+/* ====== CTA actus SÉPARÉ (hors card) — élément commun ====== */
+.allnews{display:flex;justify-content:center;margin-top:22px}
+.allnews.right{justify-content:flex-end}
+
+/* =========================================================
+   VARIANTE C — OBJET ICONIQUE (orange) vs JOURNAL (clair)
+   Cadeau = bloc compact chaud orange, iconique, sans grande
+   photo. Actus = card "journal" claire, photo large + titre +
+   chapô. CTA « toutes les actus » SÉPARÉ sous la section.
+   ========================================================= */
+.layC{display:grid;grid-template-columns:0.78fr 1.22fr;gap:26px;align-items:stretch}
+
+/* -- objet cadeau orange -- */
+.gift-object{position:relative;border-radius:20px;overflow:hidden;background:linear-gradient(150deg,#E35B24 0%,#c4481b 100%);color:#fff;padding:40px 36px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow-card);transition:.28s}
+.gift-object:hover{box-shadow:var(--shadow-hover)}
+.gift-object .halo{position:absolute;right:-40px;top:-40px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,222,170,.55),transparent 68%);pointer-events:none}
+.gift-object .badge{position:relative;z-index:2;align-self:flex-start;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:50px;padding:7px 15px;font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.gift-object .lamp{position:relative;z-index:2;font-size:46px;margin:18px 0 6px;line-height:1}
+.gift-object h3{position:relative;z-index:2;font-family:'Square Peg',cursive;font-size:54px;font-weight:400;line-height:.9;margin-bottom:12px}
+.gift-object p{position:relative;z-index:2;font-size:14.5px;color:#ffeede;max-width:320px;margin-bottom:24px}
+.gift-object .cta{position:relative;z-index:2;align-self:flex-start}
+
+/* -- actus journal clair -- */
+.news-journal{display:flex;flex-direction:column;background:#fff;border-radius:20px;overflow:hidden;box-shadow:var(--shadow-card);transition:.28s;cursor:pointer}
+.news-journal:hover{box-shadow:var(--shadow-hover)}
+.news-journal .photo{height:230px;overflow:hidden}
+.news-journal .photo img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.news-journal:hover .photo img{transform:scale(1.04)}
+.news-journal .body{padding:28px 34px 30px}
+.news-journal .meta{display:flex;align-items:center;gap:12px;color:var(--color-wood)}
+.news-journal .meta .date{color:var(--color-wood-mid);font-size:12.5px;font-weight:500;letter-spacing:0}
+.news-journal h3{font-family:'Montserrat';font-weight:700;font-size:25px;color:var(--color-wood-dark);line-height:1.2;margin:10px 0 10px}
+.news-journal .chapo{font-size:14.5px;color:var(--color-ink);max-width:560px;margin-bottom:16px}
+
+/* =========================================================
+   VARIANTE D — BANDEAU VERTICAL SIGNÉ vs MODULE HORIZONTAL
+   Cadeau = colonne verticale étroite bois, "signée" (ruban).
+   Actus = grand module horizontal photo+texte. CTA actus
+   séparé, posé à DROITE sous le module.
+   ========================================================= */
+.layD{display:grid;grid-template-columns:300px 1fr;gap:26px;align-items:stretch}
+
+.gift-strip{position:relative;border-radius:20px;overflow:hidden;background:var(--color-wood-dark);color:#fff;padding:38px 30px;display:flex;flex-direction:column;box-shadow:var(--shadow-card);transition:.28s}
+.gift-strip:hover{box-shadow:var(--shadow-hover)}
+.gift-strip::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(to bottom,var(--color-orange),#c4481b)}
+.gift-strip .glow{position:absolute;left:50%;top:32%;transform:translateX(-50%);width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,rgba(255,196,128,.4),transparent 70%);pointer-events:none}
+.gift-strip .eyebrow{position:relative;z-index:2;color:#f0b07e}
+.gift-strip .lamp{position:relative;z-index:2;font-size:42px;margin:auto 0 6px}
+.gift-strip h3{position:relative;z-index:2;font-family:'Square Peg',cursive;font-size:50px;font-weight:400;line-height:.9;margin-bottom:12px}
+.gift-strip p{position:relative;z-index:2;font-size:13.5px;color:#e7ddcf;margin-bottom:22px}
+.gift-strip .cta{position:relative;z-index:2}
+.gift-strip .sig{position:relative;z-index:2;margin-top:18px;font-family:'Square Peg',cursive;font-size:26px;color:#f0b07e}
+
+.news-wide{display:flex;background:var(--color-warm);border-radius:20px;overflow:hidden;box-shadow:var(--shadow-card);transition:.28s;cursor:pointer}
+.news-wide:hover{box-shadow:var(--shadow-hover)}
+.news-wide .photo{flex:0 0 46%;overflow:hidden}
+.news-wide .photo img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.news-wide:hover .photo img{transform:scale(1.04)}
+.news-wide .body{flex:1;padding:36px 40px;display:flex;flex-direction:column;justify-content:center}
+.news-wide .meta{display:flex;align-items:center;gap:12px;color:var(--color-wood)}
+.news-wide .meta .date{color:var(--color-wood-mid);font-size:12.5px;font-weight:500}
+.news-wide h3{font-family:'Montserrat';font-weight:700;font-size:27px;color:var(--color-wood-dark);line-height:1.2;margin:10px 0 10px}
+.news-wide .chapo{font-size:14.5px;color:var(--color-ink);max-width:480px;margin-bottom:16px}
+
+/* =========================================================
+   VARIANTE E — ENCART INVITATION (bois) vs CARD PHOTO CLAIRE
+   Cadeau = encart "invitation" fond bois chaud, traité comme
+   un carton manuscrit (pas de photo produit). Actus = card
+   photo claire éditoriale. CTA actus séparé, centré dessous.
+   ========================================================= */
+.layE{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:stretch}
+
+.gift-invite{position:relative;border-radius:20px;overflow:hidden;background:linear-gradient(160deg,#6B5A4A 0%,#4A3F35 100%);color:#fff;padding:46px 44px;display:flex;flex-direction:column;justify-content:center;box-shadow:var(--shadow-card);transition:.28s}
+.gift-invite:hover{box-shadow:var(--shadow-hover)}
+.gift-invite::after{content:"";position:absolute;inset:14px;border:1px solid rgba(240,176,126,.4);border-radius:14px;pointer-events:none}
+.gift-invite .glow{position:absolute;right:8%;top:18%;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,196,128,.4),transparent 70%);pointer-events:none}
+.gift-invite .inner{position:relative;z-index:2}
+.gift-invite .eyebrow{color:#f0b07e}
+.gift-invite .hand{font-family:'Square Peg',cursive;font-size:30px;color:#f0b07e;margin:6px 0 2px}
+.gift-invite h3{font-family:'Square Peg',cursive;font-size:56px;font-weight:400;line-height:.9;margin:0 0 14px}
+.gift-invite p{font-size:15px;color:#ece3d6;max-width:380px;margin-bottom:24px}
+
+.news-card{display:flex;flex-direction:column;background:#fff;border-radius:20px;overflow:hidden;box-shadow:var(--shadow-card);transition:.28s;cursor:pointer}
+.news-card:hover{box-shadow:var(--shadow-hover)}
+.news-card .photo{height:250px;overflow:hidden;position:relative}
+.news-card .photo img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.news-card:hover .photo img{transform:scale(1.04)}
+.news-card .tag-news{position:absolute;left:18px;top:16px;z-index:2;background:rgba(74,63,53,.78);backdrop-filter:blur(4px);color:#fff;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:6px 13px;border-radius:50px}
+.news-card .body{padding:26px 32px 30px;flex:1;display:flex;flex-direction:column}
+.news-card .date{color:var(--color-wood-mid);font-size:12.5px;font-weight:500}
+.news-card h3{font-family:'Montserrat';font-weight:700;font-size:24px;color:var(--color-wood-dark);line-height:1.2;margin:8px 0 10px}
+.news-card .chapo{font-size:14.5px;color:var(--color-ink);margin-bottom:16px}
+.news-card .read-link{margin-top:auto}
+</style>
+</head>
+<body>
+<div class="devnote"><strong>DA HOME · Section 07 — Carte cadeau + Actus · NOUVELLES directions (07b)</strong> &nbsp;·&nbsp; <em>Robin veut PLUS de distinction design entre la carte cadeau (un côté) et les actus (l'autre) : actuellement « les deux se ressemblent trop, posés là ». Et il faut SORTIR le CTA « Voir toutes les actus » de la card de l'article (élément séparé). Toujours : carte cadeau intemporelle (luminaire qui s'allume = métaphore, ton chaud non saisonnier) + UN SEUL dernier article (image + titre + chapô court). 3 directions à traitements visuels nettement différents. Photos provisoires.</em></div>
+
+<div class="wrap">
+
+  <!-- ============ VARIANTE C ============ -->
+  <div class="variant-head">
+    <span class="tag alt">Variante C · reco</span>
+    <h2>Objet iconique vs journal</h2>
+    <p><strong>Intention :</strong> deux langages opposés. À gauche, le cadeau devient un OBJET : bloc orange compact, chaud, sans photo produit, juste un halo de lumière et le geste d'offrir. À droite, les actus prennent le ton d'un JOURNAL clair : grande photo, titre, chapô. Impossible de les confondre. Le CTA « Voir toutes les actus » est sorti de la card et posé, centré, sous toute la section.</p>
+  </div>
+  <div class="layC">
+    <div class="gift-object">
+      <div class="halo"></div>
+      <span class="badge">Offrir de la lumière</span>
+      <div>
+        <div class="lamp">✦</div>
+        <h3>La carte cadeau</h3>
+        <p>Tu hésites sur le modèle ? Offre une carte cadeau : la bonne personne choisira son luminaire, allumé à la main rien que pour elle.</p>
+        <a class="cta cta-white" href="#">Offrir une carte cadeau <span class="arr">→</span></a>
+      </div>
+    </div>
+    <div class="news-journal">
+      <div class="photo"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/07/P1130073-1536x1244.jpg" alt=""></div>
+      <div class="body">
+        <div class="meta"><span class="eyebrow">Le journal de l'atelier</span><span class="date">· 3 juin 2026</span></div>
+        <h3>Pourquoi je fabrique tout en bois clair</h3>
+        <p class="chapo">Peuplier, okoumé… le choix du bois n'est pas qu'esthétique. Je te raconte comment la matière change la lumière qui sort de chaque luminaire.</p>
+        <a class="read-link" href="#">Lire l'article <span class="arr">→</span></a>
+      </div>
+    </div>
+  </div>
+  <div class="allnews"><a class="cta cta-outline" href="#">Voir toutes les actus <span class="arr">→</span></a></div>
+  <div class="note">Cadeau = objet chaud orange iconique (la lumière = la métaphore, non saisonnière). Actus = journal clair. Le CTA « toutes les actus » est bien hors de la card, centré sous la section.</div>
+
+  <!-- ============ VARIANTE D ============ -->
+  <div class="variant-head">
+    <span class="tag">Variante D</span>
+    <h2>Bandeau vertical signé vs module horizontal</h2>
+    <p><strong>Intention :</strong> jouer sur les FORMATS. À gauche, le cadeau devient un bandeau vertical étroit, bois sombre, signé de la main de Robin (liseré orange, signature Square Peg). À droite, les actus s'étalent en module horizontal large photo + texte. Vertical compact contre horizontal généreux : la différence se lit au premier coup d'œil. CTA « toutes les actus » sorti de la card, aligné à droite sous le module.</p>
+  </div>
+  <div class="layD">
+    <div class="gift-strip">
+      <div class="glow"></div>
+      <div class="eyebrow">Offrir de la lumière</div>
+      <div class="lamp">✦</div>
+      <h3>La carte cadeau</h3>
+      <p>Offre une carte cadeau : la bonne personne choisira son luminaire, allumé à la main rien que pour elle.</p>
+      <a class="cta cta-orange" href="#">Offrir <span class="arr">→</span></a>
+      <div class="sig">Robin</div>
+    </div>
+    <div>
+      <div class="news-wide">
+        <div class="photo"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/09/Poncage-1536x682.jpg" alt=""></div>
+        <div class="body">
+          <div class="meta"><span class="eyebrow">Le journal de l'atelier</span><span class="date">· 3 juin 2026</span></div>
+          <h3>Pourquoi je fabrique tout en bois clair</h3>
+          <p class="chapo">Peuplier, okoumé… le choix du bois n'est pas qu'esthétique. Je te raconte comment la matière change la lumière qui sort de chaque luminaire, et pourquoi je passe parfois de l'un à l'autre.</p>
+          <a class="read-link" href="#">Lire l'article <span class="arr">→</span></a>
+        </div>
+      </div>
+      <div class="allnews right" style="margin-top:18px"><a class="cta cta-outline" href="#">Voir toutes les actus <span class="arr">→</span></a></div>
+    </div>
+  </div>
+  <div class="note">Contraste de format : colonne verticale signée (objet rare, presque un « carton ») vs bandeau éditorial large. Le CTA actus est posé hors card, sous le module, aligné sur sa largeur.</div>
+
+  <!-- ============ VARIANTE E ============ -->
+  <div class="variant-head">
+    <span class="tag">Variante E</span>
+    <h2>Encart invitation vs card photo</h2>
+    <p><strong>Intention :</strong> le cadeau comme une INVITATION manuscrite. Encart bois chaud encadré d'un filet fin, ouverture à la main (« Pour toi, »), aucune photo produit, juste la chaleur. En face, les actus restent une vraie card photo claire avec pastille « Journal ». Carton intime contre photo lumineuse : deux registres francs. CTA « toutes les actus » sorti de la card, centré sous la section.</p>
+  </div>
+  <div class="layE">
+    <div class="gift-invite">
+      <div class="glow"></div>
+      <div class="inner">
+        <div class="eyebrow">Offrir de la lumière</div>
+        <div class="hand">Pour toi,</div>
+        <h3>une carte cadeau</h3>
+        <p>Tu choisis le montant, la bonne personne choisit son luminaire. Je l'allume à la main avant de l'envoyer, rien que pour elle.</p>
+        <a class="cta cta-orange" href="#">Offrir une carte cadeau <span class="arr">→</span></a>
+      </div>
+    </div>
+    <div class="news-card">
+      <div class="photo">
+        <span class="tag-news">Le journal de l'atelier</span>
+        <img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/05/IMG_7638-1024x744.jpg" alt="">
+      </div>
+      <div class="body">
+        <div class="date">3 juin 2026</div>
+        <h3>Pourquoi je fabrique tout en bois clair</h3>
+        <p class="chapo">Peuplier, okoumé… le choix du bois n'est pas qu'esthétique. Je te raconte comment la matière change la lumière qui sort de chaque luminaire.</p>
+        <a class="read-link" href="#">Lire l'article <span class="arr">→</span></a>
+      </div>
+    </div>
+  </div>
+  <div class="allnews"><a class="cta cta-outline" href="#">Voir toutes les actus <span class="arr">→</span></a></div>
+  <div class="note">Cadeau = carton d'invitation bois (intime, manuscrit, zéro photo produit) vs actus = card photo claire avec pastille « Journal ». Le CTA actus est centré sous la section, hors de la card article.</div>
+
+</div>
+</body>
+</html>

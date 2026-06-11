@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signature Conseiller — mini pill B + Square Peg</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wood:#8B7355; --wood-dark:#4A3F35; --orange:#E35B24; --cream:#FBF6EA; --ink:#3a322b;
+    --robin:url('https://atelier-sapi.fr/wp-content/uploads/2026/03/Robin-face-avec-Alice-lhelice.jpg');
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Montserrat',sans-serif;color:var(--ink);background:#efe9dc}
+  .devnote{background:var(--wood-dark);color:#f0e7d8;font-size:13px;padding:14px 28px}.devnote b{color:#fff}
+  .band{background:var(--cream);background-image:repeating-linear-gradient(92deg,rgba(139,115,85,.05) 0,rgba(139,115,85,.05) 1px,transparent 1px,transparent 7px);
+    padding:40px 24px 30px;text-align:center;border-top:1px solid #efe6da;margin-bottom:14px;position:relative}
+  .tag{position:absolute;left:24px;top:14px;background:var(--wood);color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;border-radius:50px;padding:4px 12px}
+  .h2{font-weight:700;font-size:clamp(1.8rem,3.4vw,2.4rem);color:var(--wood-dark)}
+
+  .pill{display:inline-flex;align-items:center;background:var(--wood-dark);color:#fff;border-radius:60px;margin-bottom:18px}
+  .pill .av{border-radius:50%;background-image:var(--robin);background-size:cover;background-position:center 22%;border:2px solid rgba(255,255,255,.18);flex-shrink:0}
+  .pill .eye{font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#e0a878}
+  .pill .hook{font-family:'Square Peg';color:#fff;line-height:1}
+
+  /* B1 — 2 micro-lignes empilées (eyebrow + Square Peg) */
+  .b1{gap:10px;padding:5px 18px 5px 5px}
+  .b1 .av{width:34px;height:34px}
+  .b1 .txt{text-align:left;display:flex;flex-direction:column;gap:1px}
+  .b1 .eye{font-size:9px;display:block}
+  .b1 .hook{font-size:18px;display:block}
+
+  /* B2 — idem, hook un peu plus lisible */
+  .b2{gap:11px;padding:6px 20px 6px 6px}
+  .b2 .av{width:38px;height:38px}
+  .b2 .txt{text-align:left;display:flex;flex-direction:column;gap:1px}
+  .b2 .eye{font-size:9.5px;display:block}
+  .b2 .hook{font-size:21px;display:block}
+
+  /* B3 — vraiment une ligne : eyebrow + Square Peg côte à côte */
+  .b3{gap:9px;padding:5px 18px 5px 5px}
+  .b3 .av{width:32px;height:32px}
+  .b3 .row{display:flex;align-items:center;gap:9px}
+  .b3 .eye{font-size:9.5px}
+  .b3 .sep{width:3px;height:3px;border-radius:50%;background:#e0a878}
+  .b3 .hook{font-size:20px}
+</style>
+</head>
+<body>
+<div class="devnote"><b>Mini pill B avec la 2e ligne en Square Peg</b> &nbsp;·&nbsp; B1 = compact / B2 = un cran plus lisible / B3 = tout sur une ligne (eyebrow + Square Peg côte à côte). Au-dessus du vrai titre pour juger l'échelle.</div>
+
+<div class="band">
+  <span class="tag">B1 — compact</span>
+  <span class="pill b1"><span class="av"></span><span class="txt"><span class="eye">Le conseil de Robin</span><span class="hook">Mon regard d'artisan sur ton projet</span></span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div>
+</div>
+
+<div class="band">
+  <span class="tag">B2 — un cran plus lisible</span>
+  <span class="pill b2"><span class="av"></span><span class="txt"><span class="eye">Le conseil de Robin</span><span class="hook">Mon regard d'artisan sur ton projet</span></span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div>
+</div>
+
+<div class="band">
+  <span class="tag">B3 — tout sur une ligne</span>
+  <span class="pill b3"><span class="av"></span><span class="row"><span class="eye">Le conseil de Robin</span><span class="sep"></span><span class="hook">Mon regard d'artisan sur ton projet</span></span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div>
+</div>
+
+</body>
+</html>
