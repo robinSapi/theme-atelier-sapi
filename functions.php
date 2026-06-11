@@ -353,6 +353,36 @@ function sapi_maison_enqueue_assets() {
         ''              => ['lampadaires', 'lampesaposer'],
       ],
       'extras_slugs' => ['accessoires', 'carte-cadeau'],
+
+      // ── Refonte filtrage Conseiller (Tâche 1) : config UNIQUE du moteur
+      // serveur, calquée sur le simulateur (assets/guide-filtrage-simulateur.html).
+      // Source de vérité unique (sera basculée en option WordPress en Tâche 5).
+      // ── Couche PRIORITÉ (ne fait que CLASSER, n'exclut jamais) ──
+      'prio'       => true,        // activer le classement par préférence
+      'prio_mode'  => 'souple',    // 'souple' (préférés en tête + on complète) | 'strict'
+      'importance' => ['categorie', 'ampoule', 'format'], // 1er l'emporte sur 2e sur 3e
+      // Ampoule préférée par pièce (doit figurer dans ampoule_by_piece)
+      'ampoule_pref_by_piece' => [
+        'salon'          => 'ampoule_entouree',
+        'chambre'        => 'ampoule_entouree',
+        'chambre-enfant' => 'ampoule_entouree',
+        'entree'         => 'ampoule_entouree',
+        'cuisine'        => 'ampoule_degagee',
+        'bureau'         => 'ampoule_degagee',
+        'escalier'       => null,
+      ],
+      // Format de suspension préféré par pièce ('' = aucune préférence)
+      'format_pref_by_piece' => [
+        'salon' => '', 'chambre' => '', 'chambre-enfant' => '', 'cuisine' => '',
+        'bureau' => '', 'entree' => '', 'escalier' => '',
+      ],
+      // Catégorie prioritaire par sortie ('' = aucune ; surtout utile « je ne sais pas »)
+      'cat_priority_by_sortie' => [
+        'plafond' => '', 'mur' => '', 'pas-de-sortie' => '', 'ne-sais-pas' => '', '' => '',
+      ],
+      // ── Réglages divers du simulateur (centralisés ici) ──
+      'style_essence' => ['moderne' => 'peuplier', 'ancien' => 'okoume', 'neutre' => ''],
+      'escalier_map'  => ['standard' => 'petite', 'ouvert' => 'grande'],
     ];
 
     // Pills catégorie sur /mes-creations/ (Chantier 3) — filtrage AJAX-less
@@ -5570,13 +5600,15 @@ function sapi_guide_collect_results($query, array $answers, $skip_exclusions = f
       }
     }
 
-    // Get format attribute
+    // Get format attribute (nom + slug — le slug sert au moteur de classement)
     $format_terms = get_the_terms($product->get_id(), 'pa_format');
     $format = ($format_terms && !is_wp_error($format_terms)) ? $format_terms[0]->name : '';
+    $format_slug = ($format_terms && !is_wp_error($format_terms)) ? $format_terms[0]->slug : '';
 
-    // Get ampoule attribute
+    // Get ampoule attribute (nom + slug)
     $ampoule_terms = get_the_terms($product->get_id(), 'pa_type-ampoule');
     $ampoule = ($ampoule_terms && !is_wp_error($ampoule_terms)) ? $ampoule_terms[0]->name : '';
+    $ampoule_slug = ($ampoule_terms && !is_wp_error($ampoule_terms)) ? $ampoule_terms[0]->slug : '';
 
     // Match preferred essence + size variation
     if ($product->is_type('variable')) {
@@ -5710,7 +5742,9 @@ function sapi_guide_collect_results($query, array $answers, $skip_exclusions = f
       'categories'      => $cat_slugs,
       'category_label'  => $cat_label,
       'format'          => $format,
+      'format_slug'     => $format_slug,
       'type_ampoule'    => $ampoule,
+      'type_ampoule_slug' => $ampoule_slug,
       'total_sales'     => (int) $product->get_total_sales(),
       'ambiance'        => $ambiance_url,
       'variations'        => isset($all_vars) ? $all_vars : [],
@@ -5719,6 +5753,79 @@ function sapi_guide_collect_results($query, array $answers, $skip_exclusions = f
   }
 
   return $products;
+}
+
+/**
+ * Refonte filtrage Conseiller (Tâche 1) — couche PRIORITÉ / classement.
+ *
+ * Reproduit la mécanique du simulateur (assets/guide-filtrage-simulateur.html,
+ * fonctions ranks/score) : la priorité ne fait que CLASSER (n'exclut jamais).
+ * Chaque produit reçoit un rang 0/1 par critère (ampoule / catégorie / format),
+ * combinés en un score lexicographique selon l'ordre d'importance ; tri stable
+ * (à score égal, on garde l'ordre d'entrée = ventes / menu_order). En mode
+ * 'strict', on ne garde que le meilleur score.
+ *
+ * @param array $products Produits enrichis (sortie de sapi_guide_collect_results)
+ * @param array $answers  Réponses {piece, sortie, taille, ...}
+ * @param array|null $rules Config ; par défaut le global $sapi_filter_rules
+ * @return array Produits reclassés
+ */
+function sapi_conseiller_rank_products(array $products, array $answers, $rules = null) {
+  if ($rules === null) {
+    global $sapi_filter_rules;
+    $rules = is_array($sapi_filter_rules) ? $sapi_filter_rules : [];
+  }
+  if (empty($products) || empty($rules['prio'])) {
+    return $products; // priorité désactivée → ordre inchangé (ventes / menu_order)
+  }
+
+  $piece  = isset($answers['piece'])  ? $answers['piece']  : '';
+  $sortie = isset($answers['sortie']) ? $answers['sortie'] : '';
+  $taille = isset($answers['taille']) ? $answers['taille'] : '';
+  $importance = (isset($rules['importance']) && is_array($rules['importance']))
+    ? $rules['importance'] : ['categorie', 'ampoule', 'format'];
+
+  // Préférence ampoule : seulement si un filtre ampoule est actif ET que la
+  // préférée en fait partie (cf. getAmpPref du simulateur).
+  $amp_pref = '';
+  $amp_filter = function_exists('sapi_guide_get_ampoule_filter')
+    ? sapi_guide_get_ampoule_filter($piece, $taille) : null;
+  if ($amp_filter && is_array($amp_filter)) {
+    $pp = isset($rules['ampoule_pref_by_piece'][$piece]) ? $rules['ampoule_pref_by_piece'][$piece] : '';
+    if ($pp && in_array($pp, $amp_filter, true)) $amp_pref = $pp;
+  }
+  $cat_pref = isset($rules['cat_priority_by_sortie'][$sortie]) ? $rules['cat_priority_by_sortie'][$sortie] : '';
+  $fmt_pref = isset($rules['format_pref_by_piece'][$piece]) ? $rules['format_pref_by_piece'][$piece] : '';
+
+  // Rang + score par produit, en conservant l'index d'origine pour un tri stable.
+  $tmp = [];
+  foreach ($products as $idx => $p) {
+    $cats = isset($p['categories']) && is_array($p['categories']) ? $p['categories'] : [];
+    $is_susp = in_array('suspensions', $cats, true);
+    $r_amp = $amp_pref ? (((isset($p['type_ampoule_slug']) ? $p['type_ampoule_slug'] : '') === $amp_pref) ? 0 : 1) : 0;
+    $r_cat = $cat_pref ? (in_array($cat_pref, $cats, true) ? 0 : 1) : 0;
+    $r_fmt = ($fmt_pref && $is_susp) ? (((isset($p['format_slug']) ? $p['format_slug'] : '') === $fmt_pref) ? 0 : 1) : 0;
+
+    $score = 0;
+    foreach ($importance as $crit) {
+      $rk = ($crit === 'ampoule') ? $r_amp : (($crit === 'categorie') ? $r_cat : $r_fmt);
+      $score = $score * 10 + $rk;
+    }
+    $tmp[] = ['score' => $score, 'idx' => $idx, 'p' => $p];
+  }
+
+  usort($tmp, function ($a, $b) {
+    if ($a['score'] !== $b['score']) return $a['score'] - $b['score'];
+    return $a['idx'] - $b['idx']; // tri stable : ordre d'origine à score égal
+  });
+
+  // Mode strict : ne garder que le(s) meilleur(s) score(s).
+  if (isset($rules['prio_mode']) && $rules['prio_mode'] === 'strict' && !empty($tmp)) {
+    $best = $tmp[0]['score'];
+    $tmp = array_values(array_filter($tmp, function ($x) use ($best) { return $x['score'] === $best; }));
+  }
+
+  return array_map(function ($x) { return $x['p']; }, $tmp);
 }
 
 /**

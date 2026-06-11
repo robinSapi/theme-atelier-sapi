@@ -128,6 +128,10 @@ if ($imm_piece) {
     ? sapi_guide_query_products($imm_answers, $imm_cats)
     : ['products' => []];
   $imm_products  = isset($imm_query_res['products']) ? $imm_query_res['products'] : [];
+  // Refonte filtrage (Tâche 1) : classement par priorité (couche serveur unique).
+  if (function_exists('sapi_conseiller_rank_products')) {
+    $imm_products = sapi_conseiller_rank_products($imm_products, $imm_answers);
+  }
 ?>
 <!-- Track de scroll-pinning : le hero (sticky) reste épinglé pendant que le
      scroll pilote la révélation (flou photo + remontée texte + apparition des
