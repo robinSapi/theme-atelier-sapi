@@ -273,6 +273,7 @@ function sapi_rules_sanitize($posted) {
    ───────────────────────────────────────────────────────────────────────── */
 function sapi_rules_admin_render() {
   if (!current_user_can(SAPI_RULES_CAP)) wp_die('Accès refusé.');
+  require_once get_template_directory() . '/inc/guide-data.php'; // sapi_guide_get_steps (pickers aperçu)
   $V = sapi_rules_vocab();
   $R = sapi_conseiller_get_rules(); // effectif (défauts + option)
   $is_custom = (get_option(SAPI_RULES_OPTION, null) !== null);
@@ -319,7 +320,7 @@ function sapi_rules_admin_render() {
       .sapi-rules-admin .actions .button-primary{margin-right:10px}
     </style>
 
-    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+    <form method="post" id="sapi-rules-form" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
       <input type="hidden" name="action" value="sapi_save_conseiller_rules">
       <?php wp_nonce_field('sapi_save_conseiller_rules'); ?>
 
@@ -420,6 +421,67 @@ function sapi_rules_admin_render() {
       </div>
     </form>
 
+    <div class="card" id="sapi-preview">
+      <h2>Aperçu live</h2>
+      <p class="hint">Choisis une situation de visiteur : tu vois la sélection que le moteur renverrait <strong>avec les règles ci-dessus, même non enregistrées</strong> (c'est le vrai moteur du site, pas une copie).</p>
+      <div style="display:flex;flex-wrap:wrap;align-items:flex-end">
+        <?php
+        sapi_rules_preview_select('piece', 'Pièce', sapi_rules_step_choices('piece'));
+        sapi_rules_preview_select('taille', 'Taille', sapi_rules_step_choices('taille'));
+        sapi_rules_preview_select('sortie', 'Sortie', sapi_rules_step_choices('sortie'));
+        sapi_rules_preview_select('hauteur', 'Hauteur', sapi_rules_step_choices('hauteur'));
+        sapi_rules_preview_select('eclairage', 'Éclairage', sapi_rules_step_choices('eclairage'));
+        sapi_rules_preview_select('style', 'Style', sapi_rules_step_choices('style'));
+        ?>
+      </div>
+      <button type="button" class="button button-primary" id="sapi-preview-run">Simuler la sélection</button>
+      <div id="sapi-preview-out" style="margin-top:14px"></div>
+    </div>
+
+    <script>
+    (function(){
+      var btn=document.getElementById('sapi-preview-run');
+      var form=document.getElementById('sapi-rules-form');
+      var out=document.getElementById('sapi-preview-out');
+      if(!btn||!form||!out)return;
+      var CFG={url:<?php echo wp_json_encode(admin_url('admin-ajax.php')); ?>,nonce:<?php echo wp_json_encode(wp_create_nonce('sapi_rules_preview')); ?>};
+      function esc(s){var d=document.createElement('div');d.textContent=(s==null?'':String(s));return d.innerHTML;}
+      btn.addEventListener('click',function(){
+        out.innerHTML='<em>Calcul…</em>';
+        var fd=new FormData(form);
+        fd.set('action','sapi_admin_filter_preview');
+        fd.set('nonce',CFG.nonce);
+        document.querySelectorAll('#sapi-preview [data-pa]').forEach(function(sel){
+          fd.append('pa['+sel.getAttribute('data-pa')+']',sel.value);
+        });
+        fetch(CFG.url,{method:'POST',body:fd,credentials:'same-origin'})
+          .then(function(r){return r.json();})
+          .then(function(j){
+            if(!j||!j.success){out.innerHTML='<span style="color:#b32d2e">Erreur de calcul.</span>';return;}
+            var d=j.data,h='';
+            if(d.errors&&d.errors.length){h+='<div class="notice notice-warning inline" style="margin:0 0 10px"><p><strong>Règles incohérentes (l\'aperçu applique quand même les valeurs corrigées) :</strong><br>'+d.errors.map(esc).join('<br>')+'</p></div>';}
+            if(!d.answers||!d.answers.piece){out.innerHTML=h+'<p><em>Choisis au moins une pièce.</em></p>';return;}
+            h+='<p><strong>'+d.count+' produit(s)</strong> · catégories interrogées : '+(d.cats&&d.cats.length?d.cats.map(esc).join(', '):'—')+'</p>';
+            if(d.notes&&d.notes.length){h+='<p style="color:#996800;font-size:12px">⚠ '+d.notes.map(esc).join('<br>⚠ ')+'</p>';}
+            if(d.products&&d.products.length){
+              h+='<div style="display:flex;flex-wrap:wrap;gap:12px">';
+              d.products.forEach(function(p,i){
+                h+='<div style="width:130px;font-size:12px;text-align:center">'+
+                   (p.image?'<img src="'+esc(p.image)+'" style="width:100%;height:120px;object-fit:cover;border-radius:8px;border:1px solid #dcdcde">':'<div style="height:120px;background:#f0ece5;border-radius:8px"></div>')+
+                   '<div style="font-weight:600;margin-top:4px">'+(i+1)+'. '+esc(p.title)+'</div>'+
+                   '<div style="color:#646970">'+esc(p.cat)+(p.format?' · '+esc(p.format):'')+'</div>'+
+                   (p.ampoule?'<div style="color:#646970">'+esc(p.ampoule)+'</div>':'')+
+                   '</div>';
+              });
+              h+='</div>';
+            }else{h+='<p><em>Aucun produit pour cette situation.</em></p>';}
+            out.innerHTML=h;
+          })
+          .catch(function(){out.innerHTML='<span style="color:#b32d2e">Erreur réseau.</span>';});
+      });
+    })();
+    </script>
+
     <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="margin-top:8px"
           onsubmit="return confirm('Réinitialiser toutes les règles aux valeurs par défaut ?');">
       <input type="hidden" name="action" value="sapi_reset_conseiller_rules">
@@ -479,4 +541,98 @@ function sapi_rules_flat_multi($name, $options, $current) {
     echo '<label class="chk"><input type="checkbox" name="rules[' . esc_attr($name) . '][]" value="' . esc_attr($oslug) . '"' . $checked . '> ' . esc_html($olab) . '</label>';
   }
   echo '</div>';
+}
+
+// Select d'une réponse simulée (aperçu live). data-pa = clé de réponse.
+function sapi_rules_preview_select($key, $label, $choices) {
+  echo '<label style="display:inline-flex;flex-direction:column;font-size:12px;font-weight:600;margin:0 14px 10px 0">' . esc_html($label);
+  echo '<select data-pa="' . esc_attr($key) . '" style="margin-top:3px;font-weight:400;min-width:150px">';
+  echo '<option value="">(non précisé)</option>';
+  foreach ((array) $choices as $slug => $lab) {
+    echo '<option value="' . esc_attr($slug) . '">' . esc_html($lab) . '</option>';
+  }
+  echo '</select></label>';
+}
+
+// Choix (slug => label) d'une étape du questionnaire (pour les pickers aperçu).
+function sapi_rules_step_choices($step_id) {
+  $out = [];
+  if (!function_exists('sapi_guide_get_steps')) return $out;
+  foreach (sapi_guide_get_steps() as $s) {
+    if (isset($s['id'], $s['choices']) && $s['id'] === $step_id && is_array($s['choices'])) {
+      foreach ($s['choices'] as $c) {
+        if (isset($c['slug'])) $out[$c['slug']] = isset($c['label']) ? $c['label'] : $c['slug'];
+      }
+      return $out;
+    }
+  }
+  return $out;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Aperçu live (5.4) — endpoint AJAX. Exécute le VRAI moteur PHP avec les
+   règles en cours d'édition (draft, NON sauvegardées) injectées via le filtre
+   `sapi_conseiller_rules` le temps de la requête → l'aperçu == le site.
+   ───────────────────────────────────────────────────────────────────────── */
+add_action('wp_ajax_sapi_admin_filter_preview', 'sapi_rules_ajax_preview');
+function sapi_rules_ajax_preview() {
+  if (!current_user_can(SAPI_RULES_CAP)) wp_send_json_error(['msg' => 'forbidden'], 403);
+  check_ajax_referer('sapi_rules_preview', 'nonce');
+
+  // Règles « draft » = état du formulaire, sanitizé comme à l'enregistrement.
+  $posted_rules = (isset($_POST['rules']) && is_array($_POST['rules'])) ? wp_unslash($_POST['rules']) : [];
+  list($draft, $errors) = sapi_rules_sanitize($posted_rules);
+
+  // Injection le temps de la requête : tout le moteur lit ces règles.
+  $override = function ($rules) use ($draft) { return array_merge($rules, $draft); };
+  add_filter('sapi_conseiller_rules', $override, 99);
+
+  $answers = sapi_rules_preview_answers($_POST);
+  $out = ['count' => 0, 'products' => [], 'cats' => [], 'answers' => $answers, 'notes' => [], 'errors' => $errors];
+
+  if (!empty($answers['piece']) && function_exists('sapi_guide_get_categories')) {
+    $cats = sapi_guide_get_categories($answers);
+    $res  = function_exists('sapi_guide_query_products') ? sapi_guide_query_products($answers, $cats) : ['products' => []];
+    $products = isset($res['products']) ? $res['products'] : [];
+    if (function_exists('sapi_conseiller_rank_products')) {
+      $products = sapi_conseiller_rank_products($products, $answers);
+    }
+    $out['cats']  = $cats;
+    $out['notes'] = isset($res['fallback_notes']) ? $res['fallback_notes'] : [];
+    $out['count'] = count($products);
+    foreach ($products as $p) {
+      $out['products'][] = [
+        'id'      => isset($p['id']) ? (int) $p['id'] : 0,
+        'title'   => isset($p['title']) ? $p['title'] : '',
+        'image'   => isset($p['image']) ? $p['image'] : '',
+        'cat'     => isset($p['category_label']) ? $p['category_label'] : '',
+        'format'  => isset($p['format']) ? $p['format'] : '',
+        'ampoule' => isset($p['type_ampoule']) ? $p['type_ampoule'] : '',
+      ];
+    }
+  }
+
+  remove_filter('sapi_conseiller_rules', $override, 99);
+  wp_send_json_success($out);
+}
+
+// Construit les réponses du visiteur simulé depuis $_POST['pa'] (whitelist).
+function sapi_rules_preview_answers($post) {
+  $pa = (isset($post['pa']) && is_array($post['pa'])) ? wp_unslash($post['pa']) : [];
+  $V  = sapi_rules_vocab();
+  $get = function ($k) use ($pa) { return isset($pa[$k]) ? sanitize_key($pa[$k]) : ''; };
+  $a = [];
+  $piece = $get('piece');
+  if ($piece !== '' && isset($V['pieces'][$piece])) $a['piece'] = $piece;
+  $sortie = $get('sortie');
+  if (in_array($sortie, ['plafond', 'mur', 'pas-de-sortie', 'ne-sais-pas'], true)) $a['sortie'] = $sortie;
+  $taille = $get('taille');
+  if (in_array($taille, ['petite', 'moyenne', 'grande'], true)) $a['taille'] = $taille;
+  $hauteur = $get('hauteur');
+  if ($hauteur !== '') $a['hauteur'] = $hauteur;
+  $ecl = $get('eclairage');
+  if (in_array($ecl, ['principal', 'secondaire'], true)) $a['eclairage'] = $ecl;
+  $style = $get('style');
+  if (in_array($style, ['moderne', 'ancien', 'neutre'], true)) $a['style'] = $style;
+  return $a;
 }
