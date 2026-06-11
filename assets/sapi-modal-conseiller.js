@@ -511,6 +511,7 @@
       if (window.sapiProject && typeof window.sapiProject.resumeNotifications === 'function') {
         window.sapiProject.resumeNotifications();
       }
+      dispatchConseillerClosed();
 
       // 4. Refilter la grille (idempotent — déjà déclenché par resume → render)
       if (typeof window.sapiShopRefilter === 'function') window.sapiShopRefilter();
@@ -1753,6 +1754,23 @@
     if (window.sapiProject && typeof window.sapiProject.resumeNotifications === 'function') {
       window.sapiProject.resumeNotifications();
     }
+    dispatchConseillerClosed();
+  }
+
+  // Événement déterministe émis à CHAQUE fermeture de la modale (fin ou
+  // abandon), porteur des réponses finales. Plus fiable que d'écouter le
+  // subscribe sapiProject côté immersion (qui dépend du flush pendingNotify
+  // du resume → « ne se recharge pas tout le temps »).
+  function dispatchConseillerClosed() {
+    var answers = {};
+    try {
+      if (window.sapiProject && typeof window.sapiProject.get === 'function') {
+        answers = window.sapiProject.get().answers || {};
+      }
+    } catch (e) { /* swallow */ }
+    document.dispatchEvent(new CustomEvent('sapi:conseiller-closed', {
+      detail: { answers: answers }
+    }));
   }
 
   /* ─────────────────────────────────────────────

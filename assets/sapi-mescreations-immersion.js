@@ -168,7 +168,7 @@
        chargement) et on remplace les cards du slider. On ignore « pièce seule »
        (état initial / modale sans affinage) et les répétitions identiques. ── */
     var lastAnswersSig = null;
-    function refreshSelection(answers) {
+    function refreshSelection(answers, sig) {
       if (!sliderEl || !config.ajaxUrl) return;
       var fd = new FormData();
       fd.append('action', 'sapi_immersion_selection');
@@ -178,6 +178,7 @@
         .then(function (r) { return r.json(); })
         .then(function (json) {
           if (!json || !json.success || !json.data || typeof json.data.html !== 'string') return;
+          lastAnswersSig = sig; // on ne « brûle » la signature qu'en cas de succès (retry possible si échec)
           var sur = sliderEl.querySelector('.mescreations-immersion__pcard--sur');
           [].slice.call(sliderEl.querySelectorAll('.product-card-cinetique')).forEach(function (c) {
             if (c.parentNode) c.parentNode.removeChild(c);
@@ -192,17 +193,18 @@
         })
         .catch(function () {});
     }
-    if (window.sapiProject && typeof window.sapiProject.subscribe === 'function') {
-      window.sapiProject.subscribe(function (snap) {
-        var answers = (snap && snap.answers) ? snap.answers : {};
-        var refined = Object.keys(answers).filter(function (k) { return k !== 'piece' && answers[k]; });
-        if (!refined.length) return; // que la pièce → pas d'affinage à re-filtrer
-        var sig = JSON.stringify(answers);
-        if (sig === lastAnswersSig) return;
-        lastAnswersSig = sig;
-        refreshSelection(answers);
-      });
-    }
+    /* On écoute l'événement déterministe émis par la modale à CHAQUE fermeture
+       (fin ou abandon), porteur des réponses finales. Fiable contrairement au
+       subscribe sapiProject dont le notify dépend du flush pendingNotify du
+       resume (cause du « ne se recharge pas tout le temps »). */
+    document.addEventListener('sapi:conseiller-closed', function (e) {
+      var answers = (e && e.detail && e.detail.answers) ? e.detail.answers : {};
+      var refined = Object.keys(answers).filter(function (k) { return k !== 'piece' && answers[k]; });
+      if (!refined.length) return; // que la pièce → pas d'affinage à re-filtrer
+      var sig = JSON.stringify(answers);
+      if (sig === lastAnswersSig) return;
+      refreshSelection(answers, sig);
+    });
 
     /* ── Header + bandeau : MÊME mécanisme que la home (front-page.php). Le
        bandeau global est déplacé juste après le track et reçoit
