@@ -384,12 +384,13 @@ function sapi_maison_enqueue_assets() {
       'style_essence' => ['moderne' => 'peuplier', 'ancien' => 'okoume', 'neutre' => ''],
       'escalier_map'  => ['standard' => 'petite', 'ouvert' => 'grande'],
       // ── Filtre DUR : catégories à retirer en cuisine ──
-      // (valeur ACTUELLE ; la Tâche 2 y ajoutera 'lampadaires')
-      'cuisine_remove' => ['lampesaposer'],
-      // ── Filtre DUR : format des suspensions (valeurs ACTUELLES) ──
-      // vertical_haute=false aujourd'hui (le vertical « toutes pièces si plafond
-      // haut » est la nouveauté Tâche 2 → passera à true là-bas).
-      'vertical_haute'           => false,
+      // Tâche 2 : on retire AUSSI les lampadaires (lampe à poser + lampadaire au
+      // sol n'ont pas leur place près d'un plan de travail).
+      'cuisine_remove' => ['lampesaposer', 'lampadaires'],
+      // ── Filtre DUR : format des suspensions ──
+      // Tâche 2 : vertical autorisé dès que le plafond est haut (>3 m), TOUTES
+      // pièces, toutes tailles.
+      'vertical_haute'           => true,
       'vertical_entree_confort'  => true,
       'vertical_petite_confort'  => true,
       'horizontal_petite_haute'  => true,
