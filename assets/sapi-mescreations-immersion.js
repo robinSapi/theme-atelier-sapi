@@ -62,12 +62,23 @@
     var seqTimers = [];
     function later(fn, ms) { var t = setTimeout(fn, ms); seqTimers.push(t); return t; }
 
-    /* ── Machine à écrire (instantanée, jamais de réécriture) ── */
+    /* Réserve la hauteur finale du texte DÈS LE DÉPART (mesure le texte complet
+       puis vide) : le cadre a sa taille définitive avant la frappe → le bloc ne
+       grandit jamais ligne par ligne, donc aucun saut pendant la lecture. */
+    function reservePhraseHeight() {
+      if (!els.phrase || !els.phraseContent) return;
+      els.phraseContent.textContent = els.phraseText || '';
+      els.phrase.style.minHeight = els.phrase.offsetHeight + 'px';
+      els.phraseContent.textContent = '';
+    }
+
+    /* ── Machine à écrire (le cadre est déjà à sa hauteur finale, cf. ci-dessus) ── */
     function typewriter(text, done) {
-      if (!els.phraseContent) { done && done(); return; }
+      if (!els.phraseContent || !els.phrase) { done && done(); return; }
       if (reduceMotion || !text) {
         els.phraseContent.textContent = text || '';
-        if (els.phrase) els.phrase.classList.add('is-done');
+        els.phrase.classList.add('is-done');
+        els.phrase.style.minHeight = ''; // texte complet présent → hauteur naturelle
         done && done();
         return;
       }
@@ -81,6 +92,7 @@
         if (i >= text.length) {
           clearInterval(typeTimer);
           els.phrase.classList.add('is-done');
+          els.phrase.style.minHeight = ''; // texte complet → on libère (responsive)
           done && done();
         }
       }, 26);
@@ -226,6 +238,7 @@
     /* ── Séquence d'entrée (au load) : pill → phrase qui s'écrit → question →
        hint. La révélation de la sélection, elle, se joue au scroll. ── */
     function playSequence() {
+      reservePhraseHeight();
       renderQuestion();
       later(function () { if (els.sig) els.sig.classList.add('is-in'); }, reduceMotion ? 0 : 300);
       later(function () {
