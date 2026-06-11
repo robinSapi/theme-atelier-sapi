@@ -197,7 +197,8 @@ function sapi_rules_sanitize($posted) {
   foreach (['cats_by_sortie', 'cats_secondaire_by_sortie'] as $mk) {
     $c[$mk] = [];
     foreach ($keys($V['sorties']) as $s) {
-      $c[$mk][$s] = $filter_list(isset($posted[$mk][$s]) ? $posted[$mk][$s] : [], $cat_allowed);
+      $fk = sapi_rules_fkey($s); // '' encodé en '__empty' côté formulaire
+      $c[$mk][$s] = $filter_list(isset($posted[$mk][$fk]) ? $posted[$mk][$fk] : [], $cat_allowed);
     }
   }
 
@@ -221,7 +222,8 @@ function sapi_rules_sanitize($posted) {
   // ── cat_priority_by_sortie : map sortie → cat | '' ──
   $c['cat_priority_by_sortie'] = [];
   foreach ($keys($V['sorties']) as $s) {
-    $c['cat_priority_by_sortie'][$s] = $pick(isset($posted['cat_priority_by_sortie'][$s]) ? $posted['cat_priority_by_sortie'][$s] : '', $cat_allowed, '');
+    $fk = sapi_rules_fkey($s);
+    $c['cat_priority_by_sortie'][$s] = $pick(isset($posted['cat_priority_by_sortie'][$fk]) ? $posted['cat_priority_by_sortie'][$fk] : '', $cat_allowed, '');
   }
 
   // ── style_essence : map style → essence (peuplier|okoume|'') ──
@@ -475,6 +477,7 @@ function sapi_rules_admin_render() {
               });
               h+='</div>';
             }else{h+='<p><em>Aucun produit pour cette situation.</em></p>';}
+            if(d.debug){h+='<details style="margin-top:12px"><summary style="cursor:pointer;color:#646970">Diagnostic</summary><pre style="font-size:11px;background:#f6f7f7;padding:10px;overflow:auto;max-height:300px">'+esc(JSON.stringify(d.debug,null,2))+'</pre></details>';}
             out.innerHTML=h;
           })
           .catch(function(){out.innerHTML='<span style="color:#b32d2e">Erreur réseau.</span>';});
@@ -498,17 +501,25 @@ function sapi_rules_card($title, $hint = '') {
   if ($hint) echo '<p class="hint">' . esc_html($hint) . '</p>';
 }
 
+// Clé de formulaire d'une ligne : '' (ex. sortie par défaut) deviendrait un
+// crochet VIDE rules[map][][] → PHP l'interprète comme un index numérique et
+// PERD la valeur. On encode '' par un sentinel, décodé dans sapi_rules_sanitize.
+function sapi_rules_fkey($rslug) {
+  return ($rslug === '') ? '__empty' : $rslug;
+}
+
 // Map rows → cases à cocher multiples. $current = map row => liste (ou null).
 function sapi_rules_table_map_multi($name, $rows, $options, $current) {
   echo '<table class="rt"><thead><tr><th>&nbsp;</th>';
   foreach ($options as $oslug => $olab) echo '<th>' . esc_html($olab) . '</th>';
   echo '</tr></thead><tbody>';
   foreach ($rows as $rslug => $rlab) {
+    $fkey = sapi_rules_fkey($rslug);
     $sel = isset($current[$rslug]) && is_array($current[$rslug]) ? $current[$rslug] : [];
     echo '<tr><td class="rowlabel">' . esc_html($rlab) . '</td>';
     foreach ($options as $oslug => $olab) {
       $checked = in_array($oslug, $sel, true) ? ' checked' : '';
-      echo '<td><input type="checkbox" name="rules[' . esc_attr($name) . '][' . esc_attr($rslug) . '][]" value="' . esc_attr($oslug) . '"' . $checked . '></td>';
+      echo '<td><input type="checkbox" name="rules[' . esc_attr($name) . '][' . esc_attr($fkey) . '][]" value="' . esc_attr($oslug) . '"' . $checked . '></td>';
     }
     echo '</tr>';
   }
@@ -519,10 +530,11 @@ function sapi_rules_table_map_multi($name, $rows, $options, $current) {
 function sapi_rules_table_map_single($name, $rows, $options, $current, $with_none = true, $none_label = 'Aucune') {
   echo '<table class="rt"><tbody>';
   foreach ($rows as $rslug => $rlab) {
+    $fkey = sapi_rules_fkey($rslug);
     $cur = isset($current[$rslug]) ? $current[$rslug] : '';
     if ($cur === null) $cur = '';
     echo '<tr><td class="rowlabel">' . esc_html($rlab) . '</td><td>';
-    echo '<select name="rules[' . esc_attr($name) . '][' . esc_attr($rslug) . ']">';
+    echo '<select name="rules[' . esc_attr($name) . '][' . esc_attr($fkey) . ']">';
     if ($with_none) echo '<option value="">' . esc_html($none_label) . '</option>';
     foreach ($options as $oslug => $olab) {
       if ($oslug === '' && $with_none) continue; // évite doublon avec l'option « Aucune »
@@ -612,27 +624,32 @@ function sapi_rules_ajax_preview() {
     }
   }
 
+  // DEBUG temporaire (Tâche 5) — à retirer une fois l'aperçu validé.
+  $out['debug'] = [
+    'posted_has_rules'      => isset($_POST['rules']),
+    'posted_rules_keys'     => array_keys($posted_rules),
+    'posted_cats_keys'      => isset($posted_rules['cats_by_sortie']) ? array_keys($posted_rules['cats_by_sortie']) : 'MISSING',
+    'draft_cats_by_sortie'  => $draft['cats_by_sortie'],
+    'merged_cats_by_sortie' => sapi_conseiller_get_rules()['cats_by_sortie'],
+    'answers'               => $answers,
+  ];
+
   remove_filter('sapi_conseiller_rules', $override, 99);
   wp_send_json_success($out);
 }
 
-// Construit les réponses du visiteur simulé depuis $_POST['pa'] (whitelist).
+// Construit les réponses du visiteur simulé depuis $_POST['pa']. Les pickers
+// fournissent les VRAIS slugs (dérivés des steps du questionnaire) → on passe
+// la valeur sanitizée telle quelle au moteur (qui gère/ignore les inconnues).
 function sapi_rules_preview_answers($post) {
   $pa = (isset($post['pa']) && is_array($post['pa'])) ? wp_unslash($post['pa']) : [];
   $V  = sapi_rules_vocab();
-  $get = function ($k) use ($pa) { return isset($pa[$k]) ? sanitize_key($pa[$k]) : ''; };
   $a = [];
-  $piece = $get('piece');
+  $piece = isset($pa['piece']) ? sanitize_key($pa['piece']) : '';
   if ($piece !== '' && isset($V['pieces'][$piece])) $a['piece'] = $piece;
-  $sortie = $get('sortie');
-  if (in_array($sortie, ['plafond', 'mur', 'pas-de-sortie', 'ne-sais-pas'], true)) $a['sortie'] = $sortie;
-  $taille = $get('taille');
-  if (in_array($taille, ['petite', 'moyenne', 'grande'], true)) $a['taille'] = $taille;
-  $hauteur = $get('hauteur');
-  if ($hauteur !== '') $a['hauteur'] = $hauteur;
-  $ecl = $get('eclairage');
-  if (in_array($ecl, ['principal', 'secondaire'], true)) $a['eclairage'] = $ecl;
-  $style = $get('style');
-  if (in_array($style, ['moderne', 'ancien', 'neutre'], true)) $a['style'] = $style;
+  foreach (['sortie', 'taille', 'hauteur', 'eclairage', 'style'] as $k) {
+    $v = isset($pa[$k]) ? sanitize_key($pa[$k]) : '';
+    if ($v !== '') $a[$k] = $v;
+  }
   return $a;
 }
