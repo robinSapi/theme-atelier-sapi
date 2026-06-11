@@ -149,13 +149,24 @@
     /* ── Slider : flèches de part et d'autre, 1 card par clic. Les flèches sont
        masquées si tout tient (pas de débordement) et désactivées aux extrémités. ── */
     var sliderEl = els.slider, prevEl = els.prev, nextEl = els.next;
-    function cardStep() {
-      if (!sliderEl) return 0;
-      var card = sliderEl.querySelector('.product-card-cinetique, .mescreations-immersion__pcard--sur');
-      if (!card) return sliderEl.clientWidth;
-      var cs = getComputedStyle(sliderEl);
-      var gap = parseFloat(cs.columnGap || cs.gap || '18') || 18;
-      return card.getBoundingClientRect().width + gap;
+    // Position de scroll (offset gauche) de chaque card dans le slider = points
+    // de snap. On scrolle PILE sur l'une d'elles → pas de re-snap, pas de saut.
+    function cardOffsets() {
+      if (!sliderEl) return [];
+      var base = sliderEl.getBoundingClientRect().left - sliderEl.scrollLeft;
+      var cards = sliderEl.querySelectorAll('.product-card-cinetique, .mescreations-immersion__pcard--sur');
+      return [].slice.call(cards).map(function (c) {
+        return Math.round(c.getBoundingClientRect().left - base);
+      });
+    }
+    function scrollCards(dir) {
+      var offs = cardOffsets();
+      if (!offs.length) return;
+      var cur = sliderEl.scrollLeft;
+      var idx = 0, best = Infinity;
+      offs.forEach(function (o, i) { var d = Math.abs(o - cur); if (d < best) { best = d; idx = i; } });
+      var target = Math.max(0, Math.min(offs.length - 1, idx + dir));
+      sliderEl.scrollTo({ left: offs[target], behavior: reduceMotion ? 'auto' : 'smooth' });
     }
     function updateArrows() {
       if (!sliderEl) return;
@@ -169,12 +180,8 @@
         nextEl.disabled = sliderEl.scrollLeft >= sliderEl.scrollWidth - sliderEl.clientWidth - 2;
       }
     }
-    if (prevEl) prevEl.addEventListener('click', function () {
-      sliderEl.scrollBy({ left: -cardStep(), behavior: reduceMotion ? 'auto' : 'smooth' });
-    });
-    if (nextEl) nextEl.addEventListener('click', function () {
-      sliderEl.scrollBy({ left: cardStep(), behavior: reduceMotion ? 'auto' : 'smooth' });
-    });
+    if (prevEl) prevEl.addEventListener('click', function () { scrollCards(-1); });
+    if (nextEl) nextEl.addEventListener('click', function () { scrollCards(1); });
     if (sliderEl) {
       var navRaf = null;
       sliderEl.addEventListener('scroll', function () {
