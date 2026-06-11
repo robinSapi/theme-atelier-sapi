@@ -229,6 +229,8 @@ if ($imm_piece) {
 </div><!-- /.mescreations-immersion-track -->
 <?php } // end état B immersion ?>
 
+<?php if ($imm_piece) : // ── ÉTAT B : hero artisan + zone conseiller, cachés en CSS sous l'immersion et inertes (inchangés). ── ?>
+
 <section class="shop-hero-artisan">
   <div class="shop-hero-artisan-inner">
     <h1><?php esc_html_e('Mes créations', 'theme-sapi-maison'); ?></h1>
@@ -358,6 +360,53 @@ $conseil_room_icons = sapi_guide_get_icons();
 <!-- Séparateur visuel entre "Ma sélection" et "Toutes mes créations" :
      filet fin court centré (Option B). -->
 <div class="mes-creations-section-divider" aria-hidden="true"></div>
+
+<?php else : // ── ÉTAT A (sans ?piece=) : le room-picker EST le hero (Tâche 4). ── ?>
+
+<?php
+require_once get_template_directory() . '/inc/guide-data.php';
+$picker_icons = sapi_guide_get_icons();
+?>
+<section class="mescreations-picker-hero" data-mes-creations-picker aria-label="<?php esc_attr_e('Choisir une pièce', 'theme-sapi-maison'); ?>">
+  <div class="mescreations-picker-hero__inner room-picker-inner">
+    <div class="conseiller-sig conseiller-sig--v1">
+      <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+      <span class="conseiller-sig__text">
+        <span class="conseiller-sig__who"><?php esc_html_e('Le conseil de Robin', 'theme-sapi-maison'); ?></span>
+        <span class="conseiller-sig__hook"><?php esc_html_e('Mon regard d\'artisan sur ton projet', 'theme-sapi-maison'); ?></span>
+      </span>
+    </div>
+    <h1 class="room-picker-title"><?php esc_html_e('Pour quelle pièce cherches-tu un luminaire ?', 'theme-sapi-maison'); ?></h1>
+    <p class="room-picker-sub"><?php esc_html_e('Choisis une pièce : je te montre la sélection que je conseille, pensée pour cet espace.', 'theme-sapi-maison'); ?></p>
+    <div class="room-picker-cards">
+      <?php foreach (sapi_room_choices() as $room) :
+        $icon_svg = isset($picker_icons[$room['icon']]) ? $picker_icons[$room['icon']] : '';
+      ?>
+        <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'])); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
+          <span class="room-card-icon"><?php echo $icon_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+          <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
+        </a>
+      <?php endforeach; ?>
+    </div>
+    <div class="room-picker-or" aria-hidden="true">
+      <span class="room-picker-or__text"><?php esc_html_e('ou', 'theme-sapi-maison'); ?></span>
+    </div>
+    <!-- Texte libre : formulaire GET natif → /mes-creations/?freetext=… ; la
+         modale s'auto-ouvre en chat sur ce param (sapi-modal-conseiller.js init).
+         Aucun JS requis ici. -->
+    <form class="room-picker-freetext" method="get" role="search" action="<?php echo esc_url(home_url('/mes-creations/')); ?>">
+      <input type="text" class="room-picker-freetext__input" name="freetext"
+             placeholder="<?php esc_attr_e('Décris ton projet en quelques mots…', 'theme-sapi-maison'); ?>"
+             maxlength="500"
+             aria-label="<?php esc_attr_e('Décris ton projet en quelques mots', 'theme-sapi-maison'); ?>">
+      <button type="submit" class="room-picker-freetext__submit" aria-label="<?php esc_attr_e('Envoyer', 'theme-sapi-maison'); ?>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </button>
+    </form>
+  </div>
+</section>
+
+<?php endif; // fin état A / état B ?>
 
 <!-- Section "Toutes mes créations" — catalogue complet (1 seule grille DOM,
      source of truth pour les matches qui sont clonés dans la card "Ma sélection"

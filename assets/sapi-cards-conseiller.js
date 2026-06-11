@@ -19,7 +19,12 @@
   // les cards de la sélection immersion (rendues côté serveur). Sans ça, comme
   // le projet contient déjà ?piece=, hasAnyAnswer() serait vrai et tout serait
   // filtré. La card "mon-projet" n'est pas rendue (le hero immersif la remplace).
-  if (document.body && document.body.classList.contains('mescreations-immersion-on')) {
+  // On se met aussi en retrait dans le NOUVEAU état A (Tâche 4) : le room-picker
+  // serveur a remplacé la zone cards conseiller, donc [data-conseiller-zone] est
+  // absent. Sans zone, ce contrôleur n'a plus rien à piloter et le catalogue bas
+  // doit rester INTACT (plus de filtrage projet en JS) → sapiMegaFilter inerte.
+  if ((document.body && document.body.classList.contains('mescreations-immersion-on'))
+      || !document.querySelector('[data-conseiller-zone]')) {
     window.sapiMegaFilter = {
       cardMatches: function () { return true; },
       hasAnyAnswer: function () { return false; },

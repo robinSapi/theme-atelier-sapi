@@ -196,16 +196,9 @@ if ($gc_query->have_posts()) {
 // Room picker now opens Mon Projet banner instead of guide-luminaire page
 $creations_url = home_url('/mes-creations/');
 
-// Room choices for mini-questionnaire "Pour quelle pièce ?"
-$room_choices = [
-  ['label' => 'Salon',   'slug' => 'salon',    'icon' => 'sofa'],
-  ['label' => 'Cuisine', 'slug' => 'cuisine',  'icon' => 'dining'],
-  ['label' => 'Chambre', 'slug' => 'chambre',  'icon' => 'bed'],
-  ['label' => 'Chambre enfant', 'slug' => 'chambre-enfant', 'icon' => 'teddy'],
-  ['label' => 'Bureau',  'slug' => 'bureau',   'icon' => 'monitor'],
-  ['label' => 'Entrée',  'slug' => 'entree',   'icon' => 'door'],
-  ['label' => 'Escalier','slug' => 'escalier', 'icon' => 'stairs'],
-];
+// Room choices for mini-questionnaire "Pour quelle pièce ?" — source unique
+// partagée avec l'état A de /mes-creations/ (cf. sapi_room_choices()).
+$room_choices = function_exists('sapi_room_choices') ? sapi_room_choices() : [];
 
 $room_icons = [
   'sofa'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3"/><rect x="2" y="11" width="20" height="7" rx="2"/><path d="M5 18v2m14-2v2"/></svg>',

@@ -24580,6 +24580,57 @@ button.chip--project:focus-visible {
    Étape 1 : header laissé normal (transparent-over-photo = passe suivante).
    ════════════════════════════════════════════════════════════════════════ */
 
+/* ════════════════════════════════════════════════════════════════════════
+   TÂCHE 4 — État A /mes-creations/ (sans ?piece=) : le room-picker EST le hero.
+   Réutilise les classes .room-picker-* / .room-card / .conseiller-sig--v1 déjà
+   stylées globalement ; ce bloc ne fournit que l'enveloppe « hero » (fond warm
+   + texture papier, comme .home-projet-section) et le calage des cartes.
+   ════════════════════════════════════════════════════════════════════════ */
+.mescreations-picker-hero {
+  position: relative;
+  background: var(--color-warm);
+  padding: clamp(40px, 6vw, 64px) 24px clamp(32px, 4vw, 48px);
+  border-bottom: 1px solid var(--color-line);
+}
+.mescreations-picker-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(92deg, rgba(139, 115, 85, .045) 0, rgba(139, 115, 85, .045) 1px, transparent 1px, transparent 7px);
+  pointer-events: none;
+}
+.mescreations-picker-hero .room-picker-inner {
+  position: relative;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0; /* le padding est porté par .mescreations-picker-hero */
+}
+.mescreations-picker-hero .room-picker-title {
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.mescreations-picker-hero .room-picker-sub {
+  margin: -6px auto 2px;
+  max-width: 560px;
+  color: var(--color-wood-mid);
+  font-size: 15px;
+  line-height: 1.45;
+}
+.mescreations-picker-hero .room-picker-cards {
+  flex-wrap: wrap;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.mescreations-picker-hero .room-card {
+  flex: 1 1 150px;
+  max-width: 190px;
+}
+@media (max-width: 600px) {
+  .mescreations-picker-hero .room-card { flex: 1 1 calc(50% - 0.5rem); }
+}
+
 /* État B : masque le hero croquis, la zone cards conseiller, le séparateur et
    le bandeau global tant qu'il n'est pas repositionné en JS (cf. home). */
 body.mescreations-immersion-on .shop-hero-artisan,

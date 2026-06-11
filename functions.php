@@ -3577,6 +3577,24 @@ function sapi_mescreations_immersion_piece() {
 }
 
 /**
+ * Choix de pièces du room-picker (home + état A /mes-creations/).
+ * Source UNIQUE (ordre d'affichage + libellés courts) : évite la duplication
+ * du tableau entre front-page.php et woocommerce/archive-product.php.
+ * Les icônes SVG correspondantes sont fournies par sapi_guide_get_icons().
+ */
+function sapi_room_choices() {
+  return [
+    ['label' => 'Salon',          'slug' => 'salon',          'icon' => 'sofa'],
+    ['label' => 'Cuisine',        'slug' => 'cuisine',        'icon' => 'dining'],
+    ['label' => 'Chambre',        'slug' => 'chambre',        'icon' => 'bed'],
+    ['label' => 'Chambre enfant', 'slug' => 'chambre-enfant', 'icon' => 'teddy'],
+    ['label' => 'Bureau',         'slug' => 'bureau',         'icon' => 'monitor'],
+    ['label' => 'Entrée',         'slug' => 'entree',         'icon' => 'door'],
+    ['label' => 'Escalier',       'slug' => 'escalier',       'icon' => 'stairs'],
+  ];
+}
+
+/**
  * Forme possessive tutoyée d'une pièce (« ton salon », « ta cuisine »…).
  * Miroir PHP de la table PIECE_TUTOIEMENT de sapi-modal-conseiller.js : « votre »
  * est neutre mais « ton/ta » s'accorde au genre → table explicite pour éviter
@@ -3610,6 +3628,36 @@ add_filter('body_class', function ($classes) {
   }
   return $classes;
 });
+
+/**
+ * Tâche 4 — Reprise auto : sur /mes-creations/ en état A (sans ?piece= valide),
+ * si un projet est sauvegardé dans le navigateur avec une pièce valide, on
+ * redirige directement vers ?piece=<pièce> AVANT le paint (zéro flash, zéro
+ * clic). Le visiteur retrouve son immersion + sa sélection. Pour repartir de
+ * zéro : « Décrire mon projet » dans la modale (change la pièce → recharge).
+ * Pur affichage côté client : localStorage est invisible au serveur, donc ce
+ * petit script inline est la seule façon de décider la redirection.
+ */
+add_action('wp_head', function () {
+  if (!(function_exists('is_shop') && is_shop())) return;
+  if (sapi_mescreations_immersion_piece() !== '') return; // déjà en état B
+  $whitelist = function_exists('sapi_megafilter_filters_whitelist') ? sapi_megafilter_filters_whitelist() : [];
+  $valid = isset($whitelist['piece']) && is_array($whitelist['piece']) ? array_values($whitelist['piece']) : [];
+  if (empty($valid)) return;
+  ?>
+<script>/* mes-creations — reprise auto vers ?piece= si projet sauvegardé (Tâche 4) */
+(function(){try{
+  // Pas de reprise si déjà une pièce (état B) ni pendant un flux texte libre
+  // (?freetext= → la modale s'ouvre, on ne détourne pas vers l'immersion).
+  if(location.search.indexOf('piece=')!==-1||location.search.indexOf('freetext=')!==-1)return;
+  var raw=window.localStorage&&localStorage.getItem('sapiProject');if(!raw)return;
+  var p=JSON.parse(raw),piece=p&&p.answers&&p.answers.piece;if(!piece)return;
+  var valid=<?php echo wp_json_encode($valid); ?>;if(valid.indexOf(piece)===-1)return;
+  var sep=location.search?'&':'?';
+  location.replace(location.pathname+location.search+sep+'piece='+encodeURIComponent(piece));
+}catch(e){}})();</script>
+  <?php
+}, 1);
 
 /**
  * Sanitise un payload {answers, labels} en ne gardant que les paires reconnues
