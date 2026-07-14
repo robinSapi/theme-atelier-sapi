@@ -739,7 +739,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========================================
   // Showcase Cards — Slideshow au hover
   // ========================================
-  var SLIDE_DURATION = 3000;
+  var SLIDE_DURATION = 2400;
 
   function initShowcaseSlideshow() {
     document.querySelectorAll('.sapi-showcase-card').forEach(function(card) {
