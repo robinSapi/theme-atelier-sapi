@@ -113,12 +113,23 @@ if (function_exists('sapi_maison_breadcrumbs')) {
         if ($term_slug !== 'accessoires') {
             $amb_ids    = sapi_get_product_photo_ids($pid, 'ambiance', 6);
             $detail_ids = sapi_get_product_photo_ids($pid, 'detail',   6);
-            // Alternance ambiance / détail
+            // Ordre du diaporama : 3 ambiances d'abord, puis alternance
+            // détail / ambiance → le 1er détail arrive en position 4 (au lieu
+            // de 2). Dégrade proprement si < 3 ambiances (détail plus tôt).
             $slide_ids = [];
-            $max = max(count($amb_ids), count($detail_ids));
-            for ($j = 0; $j < $max; $j++) {
-                if (isset($amb_ids[$j]))    $slide_ids[] = $amb_ids[$j];
-                if (isset($detail_ids[$j])) $slide_ids[] = $detail_ids[$j];
+            $ai = 0; $di = 0;
+            $n_amb = count($amb_ids); $n_det = count($detail_ids);
+            while ($ai < 3 && $ai < $n_amb) {          // positions 1-3 : ambiances
+                $slide_ids[] = $amb_ids[$ai++];
+            }
+            $want_detail = true;                        // puis détail, ambiance, détail…
+            while ($ai < $n_amb || $di < $n_det) {
+                if ($want_detail && $di < $n_det) {
+                    $slide_ids[] = $detail_ids[$di++];
+                } elseif (!$want_detail && $ai < $n_amb) {
+                    $slide_ids[] = $amb_ids[$ai++];
+                }
+                $want_detail = !$want_detail;
             }
             $slide_ids = array_values(array_unique($slide_ids));
             $slide_ids = array_slice($slide_ids, 0, 6);
