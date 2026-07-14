@@ -45,7 +45,10 @@ if (function_exists('sapi_maison_breadcrumbs')) {
 <!-- Full product grid (all products) -->
 <section class="category-products-grid">
   <?php
-  // Query all products in this category for the grid
+  // Tous les produits de la catégorie, du plus récent au plus ancien (= liste
+  // "nouveautés"). On garde les WP_Post complets (caches post + meta amorcés en
+  // une requête). Pas de meta_key total_sales ici : un produit sans cette meta
+  // serait exclu d'un tri meta_value_num — on ne veut exclure aucun produit.
   $grid_query = new WP_Query([
     'post_type' => 'product',
     'posts_per_page' => -1,
@@ -56,19 +59,51 @@ if (function_exists('sapi_maison_breadcrumbs')) {
         'terms' => $term_id,
       ],
     ],
-    'meta_key' => 'total_sales',
-    'orderby' => 'meta_value_num',
+    'orderby' => 'date',
     'order' => 'DESC',
   ]);
+  $by_date = wp_list_pluck($grid_query->posts, 'ID'); // récent → ancien
 
-  if ($grid_query->have_posts()) :
+  // Liste "ventes" : même ensemble trié par total_sales décroissant. À nombre de
+  // ventes égal, on conserve l'ordre par date (tri stabilisé via l'index d'origine,
+  // usort n'étant pas garanti stable avant PHP 8.0).
+  $rank = [];
+  foreach ($by_date as $pos => $id) {
+    $rank[] = ['id' => $id, 'sales' => (int) get_post_meta($id, 'total_sales', true), 'pos' => $pos];
+  }
+  usort($rank, function ($a, $b) {
+    if ($a['sales'] !== $b['sales']) return $b['sales'] - $a['sales']; // ventes DESC
+    return $a['pos'] - $b['pos'];                                       // ex aequo : date DESC
+  });
+  $by_sales = wp_list_pluck($rank, 'id');
+
+  // Entrelacement demandé : 1re plus vendue, 1re plus récente, 2e plus vendue,
+  // 2e plus récente, … avec dédoublonnage. Les produits à la fois anciens ET
+  // jamais vendus se retrouvent naturellement en fin de liste.
+  $ordered_ids = [];
+  $used = [];
+  $total = count($by_date);
+  $si = 0; $ni = 0; $turn = 0; // 0 = tour "ventes", 1 = tour "date"
+  while (count($ordered_ids) < $total) {
+    if ($turn === 0) {
+      while ($si < $total && isset($used[$by_sales[$si]])) $si++;
+      if ($si < $total) { $ordered_ids[] = $by_sales[$si]; $used[$by_sales[$si]] = true; }
+    } else {
+      while ($ni < $total && isset($used[$by_date[$ni]])) $ni++;
+      if ($ni < $total) { $ordered_ids[] = $by_date[$ni]; $used[$by_date[$ni]] = true; }
+    }
+    $turn = 1 - $turn;
+  }
+
+  if (!empty($ordered_ids)) :
+    global $post;
     $product_count = 0;
   ?>
     <div class="sapi-showcase-grid">
       <?php
-      while ($grid_query->have_posts()) :
-        $grid_query->the_post();
-        $pid = get_the_ID();
+      foreach ($ordered_ids as $pid) :
+        $post = get_post($pid);
+        setup_postdata($post);
         $product = wc_get_product($pid);
         if (!$product) continue;
         $product_count++;
@@ -142,7 +177,7 @@ if (function_exists('sapi_maison_breadcrumbs')) {
         <?php
         endif;
 
-      endwhile;
+      endforeach;
       ?>
     </div>
   <?php
