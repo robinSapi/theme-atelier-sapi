@@ -4,8 +4,10 @@
 
 ---
 
-## [TÂCHE ✅ CODÉE — sur test, en attente validation Robin] Habillage des emails WooCommerce à la charte
+## [TÂCHE ✅ VALIDÉE VISUELLEMENT SUR TEST — en attente « Go prod »] Habillage des emails WooCommerce à la charte
 **Date :** 2026-07-22
+
+> **✔️ Robin (2026-07-22) : « ça a l'air parfait »** via l'aperçu WooCommerce (Réglages → E-mails), sans passer de commande. Reste : « Go prod » de Robin → je merge test → master + push, puis Robin lance le workflow GitHub Actions. Non poussé sur master pour l'instant.
 
 ### ✅ Résultat Claude Code (2026-07-22)
 **Livré + poussé sur test** (commit `cb3092f`, rien sur master). 3 fichiers de coquille commune surchargés dans le thème, **aucun template individuel touché** :
