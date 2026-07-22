@@ -4,6 +4,67 @@
 
 ---
 
+## [TÂCHE ✅ CODÉE — sur test, en attente validation Robin] Habillage des emails WooCommerce à la charte
+**Date :** 2026-07-22
+
+### ✅ Résultat Claude Code (2026-07-22)
+**Livré + poussé sur test** (commit `cb3092f`, rien sur master). 3 fichiers de coquille commune surchargés dans le thème, **aucun template individuel touché** :
+- `woocommerce/emails/email-header.php` : en-tête **fond crème `#FBF6EA`**, **logo PNG** (`.../2024/12/logo_sapi.png`, 128px) centré et hardcodé (pas le SVG), titre du mail (`$email_heading`) en **Square Peg 38px bois `#937D68`** (repli Georgia), **filet bois `#937D68` 3px** dessous (pas de filet orange). Google Fonts en `<link>`, fond extérieur sable `#F5EDE4`.
+- `woocommerce/emails/email-footer.php` : pied **crème**, réseaux **Instagram / Facebook / Pinterest** en bois, contact (contact@atelier-sapi.fr · 06 80 43 55 85), « Luminaires artisanaux en bois, Lyon, France », « © 2026 Atelier Sâpi, Assemblez, Éclairez, Admirez ! ».
+- `woocommerce/emails/email-styles.php` : palette charte + **tableau de commande** : en-tête **fond bois texte crème**, lignes séparées par `#E8DCC4`, **Total en orange `#E35B24` gras**, texte `#323232`, secondaire `#585858`. Container 600px, fond sable. Couleurs **en dur** (rendu prévisible, indépendant des réglages WooCommerce).
+
+**Structure :** header.php ouvre le container + `#body_content_inner`, footer.php referme tout (paire cohérente, balises vérifiées équilibrées). Le **corps** (tableau, adresses) reste **généré par WooCommerce** ; il est juste habillé via les sélecteurs de `email-styles.php`.
+
+**Flag `email_improvements` géré :** sélecteurs **mode-agnostiques** (`thead th`, `tr.order_item`, `tr.order-totals-total`, `.address`) → posés dans les DEUX modes (vérifié dans le markup core 9.7.1 : la classe `email-order-details` n'apparaît que si le flag est ON, mais `.td` / `.order-totals-total` / `thead>th` sont toujours là). Les 3 surcharges remplacent de toute façon la coquille core quel que soit le flag.
+
+**Charte :** couleurs charte, **aucun tiret cadratin** (le « — » de la maquette dans le pied a été remplacé par « , »), accents en entités HTML, sorties échappées (`esc_html`/`esc_url`/`esc_attr`).
+
+**⚠️ Non vérifié ici (pas de rendu email dans le bac à sable, pas de `php -l`) :** contrôlé = balises HTML équilibrées, `{}`/`()` PHP équilibrés, aucun tiret cadratin. **À tester par Robin sur test :**
+1. Passer une **commande test** sur test.atelier-sapi.fr (ou WooCommerce → Réglages → E-mails → un mail → *Aperçu* / *Envoyer un test*).
+2. Vérifier sur **Gmail** (le logo PNG doit s'afficher, Square Peg retombera sur Georgia = normal) **et** si possible Apple Mail / Outlook.
+3. Points à l'œil : en-tête crème + logo + filet bois, en-tête de tableau bois, **Total en orange**, pied crème.
+
+**Réglages couleurs WooCommerce (secondaires, car tout est en dur dans email-styles) — à poser par Robin si tu veux un repli cohérent :** base `#937D68`, fond `#F5EDE4`, fond du corps `#FEFDFB`, texte `#323232`. Le champ « Texte de pied de page » des réglages est désormais **ignoré** (le pied est hardcodé dans email-footer.php).
+
+**Reste à confirmer :** état réel du flag `email_improvements` sur le site (si le tableau s'affiche bizarrement sous ce mode, me le dire, mais les sélecteurs sont prévus pour les deux).
+
+---
+
+**Date (consigne d'origine) :** 2026-07-22
+**Priorité :** normale.
+**Branche :** test uniquement, jamais master. Robin valide sur test avant prod.
+
+**Contexte :** Robin veut que tous les emails transactionnels WooCommerce (Commande en cours, en attente, terminée, remboursée, Colissimo…) soient habillés à la charte Atelier Sâpi, au lieu du gabarit WooCommerce par défaut. Le rendu cible est **validé** par Robin.
+
+**⚠️ Maquette de référence validée (source de vérité du rendu) :** `~/Atelier Sapi Claude Cowork/business/docs/emails/coquille-email-woocommerce-reference.html`. **L'ouvrir et s'y conformer** (couleurs, en-tête, tableau de commande, bouton, pied de page). C'est un mail « Commande en cours » simulé ; en prod le corps (tableau, adresses) est généré par WooCommerce, seul l'habillage est à reproduire.
+
+**Principe (ne PAS refaire les 15 templates un par un) :** surcharger uniquement la **coquille commune** dans le thème `theme-sapi-maison/woocommerce/emails/` :
+- `email-header.php` (copié depuis `woocommerce/templates/emails/email-header.php`) : en-tête **fond crème `#FBF6EA`**, logo centré (voir ci-dessous), le titre du mail (`$email_heading`) en **Square Peg 38px `#937D68`** avec repli Georgia, puis un **filet bois `#937D68` de 3px** sous l'en-tête. Pas de filet orange (choix Robin, cohérent avec le bandeau du site).
+- `email-footer.php` : pied **fond crème `#FBF6EA`**, liens réseaux (Instagram / Facebook / Pinterest) en bois, contact (contact@atelier-sapi.fr · 06 80 43 55 85), ligne « Luminaires artisanaux en bois — Lyon, France », et « © 2026 Atelier Sâpi — Assemblez, Éclairez, Admirez ! ». (Voir la maquette pour le détail.)
+- `email-styles.php` : reprendre la **palette charte** pour le corps et surtout le **tableau de commande** — en-tête de tableau **fond bois `#937D68` texte crème**, lignes séparées par `#E8DCC4`, **Total en orange `#E35B24` gras**, texte courant `#323232`, secondaire `#585858`. Corps en Montserrat (repli Arial), titres en Square Peg (repli Georgia). Largeur container 600px, fond extérieur sable `#F5EDE4`.
+
+**Logo :** utiliser le PNG déjà présent dans la médiathèque : `https://atelier-sapi.fr/wp-content/uploads/2024/12/logo_sapi.png` (largeur ~128px). **Ne PAS utiliser le SVG** (`logo_sapi.svg`) : les SVG ne s'affichent pas dans Gmail/Outlook. Le hardcoder dans `email-header.php` (centré) plutôt que dépendre du champ « Image d'en-tête ».
+
+**Réglages couleurs à poser (WooCommerce → Réglages → E-mails), à confirmer avec Robin :** couleur de base `#937D68`, fond `#F5EDE4`, fond du corps `#FEFDFB`, texte du corps `#323232`. (Le gros de l'habillage vient des 3 fichiers ; ces réglages servent de repli cohérent.)
+
+**Polices :** charger Montserrat + Square Peg via `<link>` Google Fonts dans le header pour les clients qui les supportent, avec replis **Arial (corps)** et **Georgia (titres)** partout ailleurs. Ne pas compter sur leur affichage universel (c'est la nature de l'email).
+
+**Points de vigilance :**
+- WooCommerce 10.4 a un flag **`email_improvements`** (vu dans le template `customer-processing-order.php`) qui change un peu le markup. Vérifier son état sur le site et s'assurer que la surcharge marche dans les deux cas.
+- **Aucun tiret cadratin** dans les textes (charte Robin) : utiliser « : » ou « , ». Accents en entités HTML pour l'éditeur.
+- Sorties échappées (`esc_url`, `esc_html`).
+- Tester le rendu réel : passer une **commande test** sur le site test (ou l'aperçu/envoi de test WooCommerce) et vérifier sur Gmail + un client Outlook/Apple Mail si possible. Le rendu visuel n'est pas vérifiable dans le bac à sable.
+
+**Critères de succès :**
+- Tous les mails WooCommerce héritent de l'habillage charte (en-tête crème + logo + filet bois, tableau bois/orange, pied crème), sans avoir touché aux templates individuels.
+- Le logo (PNG) s'affiche, y compris sur Gmail.
+- Le total de commande ressort en orange, l'en-tête de tableau en bois.
+- Rien poussé sur master ; validé sur test par Robin avant prod.
+
+**Après validation :** décliner l'identité sur les mails Brevo est **déjà couvert** côté Cowork (le `template_base.html` newsletter est dans la même charte) — rien à faire ici.
+
+---
+
 ## [TÂCHE ✅ CODÉE — snippet prêt à coller, en attente validation Robin] Mode vacances — congés du 24 juillet au 24 août 2026
 **Date :** 2026-07-22
 
