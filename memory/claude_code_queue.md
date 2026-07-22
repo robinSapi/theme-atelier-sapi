@@ -29,6 +29,8 @@
 
 **Non vérifié ici :** rendu visuel réel (pas de navigateur / pas d'accès WP dans le bac à sable). Syntaxe PHP contrôlée (accolades/parenthèses équilibrées, tous les hooks pointent vers des fonctions définies) mais pas de `php -l` (binaire absent). À valider à l'œil sur test.
 
+**🔧 Ajustement (2026-07-22, retour Robin) :** sur la **homepage**, le header transparent passe par-dessus le bandeau → **bandeau masqué sur la homepage** (`if ( is_front_page() ) return;` dans `sapi_vacances_banniere`). Les rappels fiche produit / panier / checkout restent affichés partout. Robin doit **re-coller la version à jour** du snippet dans Code Snippets sur test.
+
 ---
 
 **Date (consigne d'origine) :** 2026-07-22
