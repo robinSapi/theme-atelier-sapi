@@ -13667,3 +13667,14 @@ Handler `sapi_handle_surmesure_form` (functions.php ~6498), POST classique, cham
 - Plus aucune trace du form inline mort ni de son JS ; la card-lien orange /mes-creations/ → /sur-mesure/ reste intacte.
 
 </details>
+
+## [TÂCHE] Charte graphique sous Git + déploiement GHA — ✅ FAIT 16/07/2026
+Dépôt `robinSapi/charte-atelier-sapi` (privé), déployé sur charte.atelier-sapi.fr via
+GitHub Actions + FTP (compte `deployCharte`, chrooté sur /home/velu1541/charte.atelier-sapi.fr/).
+Vérifié : / → 200, /download/logo-sapi.zip → 200 application/zip, /img/*.jpg → 200,
+/_local/ et /README.md → 404 (exclusions OK).
+⚠️ AutoSSL n'émet pas le certificat à la création d'un sous-domaine : il a fallu passer
+par cPanel → Let's Encrypt SSL → Générer (http-01, RSA 2048, sans les sous-domaines cPanel).
+À refaire pour tout nouveau sous-domaine.
+⚠️ `main` de ce dépôt est directement en ligne, pas d'environnement de test. Un push publie.
+Ne PAS transposer au thème, où master reste interdit au push auto.

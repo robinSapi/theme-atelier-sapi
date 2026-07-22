@@ -2,6 +2,62 @@
 
 > Historique des tâches terminées archivé dans `claude_code_queue_archive.md` (nettoyé le 2026-06-03).
 
+---
+
+## [TÂCHE ✅ CODÉE — snippet prêt à coller, en attente validation Robin] Mode vacances — congés du 24 juillet au 24 août 2026
+**Date :** 2026-07-22
+
+### ✅ Résultat Claude Code (2026-07-22)
+**Livrable :** `snippet-mode-vacances.php` à la racine du dépôt (même convention que les autres `snippet-*.php`). **C'est un snippet Code Snippets, PAS une modif du thème** (conforme à la demande). Rien poussé sur master.
+
+**Ce que fait le snippet (tout piloté par 2 dates) :**
+- **Bandeau haut de site** sur toutes les pages, injecté via `wp_body_open` (juste au-dessus du header, en flux normal → aucun conflit avec le header sticky, rien en `position:fixed`). Fond crème chaud charte (`#FBF6EA`→`#F4EAD4`), filet orange charte en haut (`#E35B24`), filet bois en bas (`#937D68`), texte foncé `#323232` (contraste ~11:1, largement lisible). Message = celui proposé, dates en gras.
+- **Rappel court « expédition à partir du 24 août »** à 3 endroits : fiche produit (hook `woocommerce_before_add_to_cart_button`, juste au-dessus du bouton Ajouter au panier), page panier (`woocommerce_before_cart`), checkout (`woocommerce_before_checkout_form`, avant paiement). Petite pastille crème + liseré orange à gauche.
+- La **date affichée est dérivée de la config** (`wp_date('j F')`) → changer la date de retour change le texte partout, automatiquement.
+
+**Mécanisme dates :** en haut du fichier, fonction `sapi_vacances_reglages()` avec `'debut' => '2026-07-24'`, `'retour' => '2026-08-24'`. Actif du jour de début (00h00) au jour de retour **exclu** → **s'affiche tout seul le 24/07, disparaît tout seul le 24/08**. Prochaine fois : Robin change juste ces 2 dates. Toggle `'apercu' => false` : le passer à `true` force l'affichage pour tester hors période (bien le **remettre à false** avant la vraie mise en ligne).
+
+**Charte respectée :** couleurs charte uniquement, **aucun tiret cadratin** (le « — » de l'exemple de la tâche a été remplacé par « : » dans les messages), accents en entités HTML pour zéro souci d'encodage dans l'éditeur Code Snippets. Sorties échappées (date via `esc_html`, reste = texte statique que je maîtrise).
+
+**👉 Étape Robin pour valider sur test (le snippet n'est pas déployé par git — c'est un Code Snippet à coller) :**
+1. Site **test** → réglages → **Code Snippets** → *Ajouter*.
+2. Coller le contenu de `snippet-mode-vacances.php`, exécution **« Partout / Everywhere »**, Activer.
+3. Comme on est avant le 24/07, pour prévisualiser : mettre `'apercu' => true`, vérifier le rendu (bandeau + fiche produit + panier + checkout), puis **remettre `'apercu' => false`**.
+4. Quand c'est bon → « Go » : je peux te confirmer la manip, mais côté prod **c'est le même geste** (coller/activer le snippet sur le site prod). Les 2 dates étant déjà bonnes, il s'activera seul le 24/07 et se coupera seul le 24/08.
+
+**⚠️ Hypothèse à confirmer :** panier/checkout en mode **classique** (shortcode), pas en blocs Gutenberg. Le site a des templates classiques custom (`woocommerce/cart/`, `woocommerce/checkout/`) → très probablement classique, donc les hooks panier/checkout marchent. **Filet de sécurité :** même si le panier/checkout étaient en blocs (hooks inline non déclenchés), le **bandeau site-wide s'affiche quand même sur ces pages** → le client est prévenu avant de payer dans tous les cas.
+
+**Non vérifié ici :** rendu visuel réel (pas de navigateur / pas d'accès WP dans le bac à sable). Syntaxe PHP contrôlée (accolades/parenthèses équilibrées, tous les hooks pointent vers des fonctions définies) mais pas de `php -l` (binaire absent). À valider à l'œil sur test.
+
+---
+
+**Date (consigne d'origine) :** 2026-07-22
+**Priorité :** HAUTE — ⏰ congés dans 2 jours (début vendredi 24/07). À livrer sur test vite pour validation Robin avant le départ.
+**Branche :** test uniquement, jamais master. Robin valide avant prod.
+
+**Contexte :** Robin part en congés du **vendredi 24 juillet au lundi 24 août 2026**. Il fabrique et expédie tout seul, donc aucune expédition pendant cette période. Décision prise : **on continue à vendre** (zéro perte de vente), on gère juste l'attente en prévenant clairement le client que sa commande sera **fabriquée et expédiée à partir du lundi 24 août**.
+
+**À faire :**
+
+1. **Bandeau haut de site** (toutes pages), aux couleurs de la charte, bien visible mais pas agressif. Message proposé (Robin peut ajuster) :
+   « Atelier en congés jusqu'au 24 août. Vous pouvez commander dès maintenant : vos créations seront fabriquées et expédiées à partir du 24 août. Merci pour votre patience ! »
+
+2. **Rappel du délai différé aux endroits sensibles** pour que personne ne découvre le délai après avoir payé :
+   - **Fiche produit**, près du bouton « Ajouter au panier » : mention courte type « Atelier en congés — expédition à partir du 24 août ».
+   - **Page panier + checkout** : le même rappel, visible avant paiement.
+
+3. **Mécanisme d'activation/désactivation simple, piloté par dates.** Idéalement un **snippet via Code Snippets** (pas de modif directe du thème) qui active tout automatiquement entre deux dates paramétrables (début / fin de congés) et se désactive seul après. Robin ne doit pas avoir à toucher au code pour rentrer/sortir du mode vacances la prochaine fois — juste changer 2 dates.
+
+**Critères de succès :**
+- Le bandeau s'affiche sur tout le site pendant la période et disparaît seul après le 24 août.
+- Le délai est rappelé sur fiche produit, panier et checkout.
+- Le client peut commander et payer normalement.
+- Robin peut réactiver le mode plus tard en changeant seulement les dates.
+- Respect de la charte (couleurs, pas de tirets cadratins), rien poussé sur master.
+
+**⚠️ Vu l'urgence :** si le mécanisme complet par dates prend trop de temps, livrer d'abord le **bandeau seul activable** (le plus important) et compléter le reste ensuite.
+
+
 > **REFONTE FILTRAGE CONSEILLER — décisions d'architecture (11/06/2026).** Les tâches ci-dessous REMPLACENT les anciennes (qui supposaient un filtrage en double PHP/JS, désormais périmé).
 > **Cap :** filtrage 100% côté serveur (PHP), un seul cerveau, **suppression du filtrage JavaScript** (le JS ne fait plus qu'afficher). Le filtre serveur est appelé à **2 moments** : (1) au chargement de `/mes-creations/` avec une pièce, (2) à la fermeture de la modale (questionnaire terminé OU abandonné en cours). L'IA (Sonnet) n'ajoute qu'un **commentaire** en fin de questionnaire.
 > **Source de vérité du comportement voulu :** `assets/guide-filtrage-simulateur.html` (simulateur jouable + éditeur de règles, à ouvrir). Doc d'appui : `assets/guide-filtrage-impact.html`.
@@ -158,3 +214,299 @@ Objectif : une page dans l'admin WordPress (comme le dashboard de stats du Conse
 
 ## [IDÉE — à explorer plus tard] Grappe / multi-ampoules comme rampe vers le sur-mesure
 Le mode « grappe » (montrer un produit de chaque format = de la diversité, + afficher la carte sur-mesure) est aujourd'hui orphelin (l'option a été retirée du questionnaire). Robin veut le **garder** : il doit servir de **support pour orienter vite le visiteur vers le sur-mesure**. L'objectif : que l'IA / le parcours puisse proposer rapidement une composition multi-ampoules ou un ensemble sur-mesure quand c'est pertinent, et le mécanisme « un de chaque format » est un bon véhicule pour donner à imaginer. À recâbler dans le nouveau système (porte d'entrée à définir) le moment venu. Le code `diversify_format` dans `sapi_guide_pick_four` est conservé exprès pour ça.
+
+---
+
+## [✅ FAIT — 2026-07-16] Charte — pousser la refonte du logo et des polices
+**Date :** 2026-07-16
+**Priorité :** normale
+
+### ✅ Résultat Claude Code (2026-07-16)
+- **Vérif avant commit** : `git status` propre — le `.ai` est bien dans `_local/` (gitignoré), rien d'interdit (`_local/`, `.DS_Store`, `.ai`, `charte-en-ligne.zip`) stagé. ✅
+- **Commit** `dea72a2` « Logo régénéré depuis le vectoriel + zone de protection + Montserrat », `git push origin main` → OK.
+- **Déploiement GHA** confirmé (fichier live re-daté ~30 s après le push). Critères testés :
+  - `/` → 200, **identique** à `index.html` poussé ✅
+  - `download/logo/logo-sapi-noir-zone.svg` → 200 (`image/svg+xml`) ✅
+  - `download/logo-sapi.zip` → 200 (356 Ko) ✅
+  - `download/polices-sapi.zip` → 200 (492 Ko) ✅
+  - `download/square-peg.zip` → **404** (renommé, bien supprimé par la synchro FTP) ✅
+  - `_local/` → **404** ✅
+  - anciens PNG (`logo-sapi-noir-1000.png`) → **404** (supprimés), nouveaux PNG 1200 → 200 ✅
+- **🔒 SSL** : l'AutoSSL O2switch est **désormais émis** → `https://charte.atelier-sapi.fr` répond en 200 avec **certificat valide** (le point en attente de la tâche précédente est résolu).
+
+<details><summary>Consigne d'origine (archivée)</summary>
+
+**⚠️ Dépôt séparé, PAS le thème :** `~/Atelier Sapi Claude Cowork/business/docs/charte-graphique/`
+(dépôt `robinSapi/charte-atelier-sapi`). Ne rien toucher dans `theme-atelier-sapi`.
+
+**Contexte :** Robin a validé. Tout est écrit et vérifié côté fichiers, il ne reste qu'à
+committer et pousser. Le workflow GHA déploie tout seul sur `charte.atelier-sapi.fr`.
+
+**Ce qui change :**
+- Logo entièrement régénéré depuis le master vectoriel (`.ai` converti en SVG).
+  4 déclinaisons (noir, bois, gris, creme) x (SVG nu + SVG avec zone + PNG 1200/600/300).
+- Zone de protection : carré = 2x le diamètre du disque, disque centré, marge D/2.
+  Ratio vérifié à 0,500 sur les 5 images.
+- Montserrat ajoutée au pack (4 TTF : Light, Regular, Bold, Black).
+- Anciens PNG au lettrage évidé supprimés, filtres CSS retirés de la page.
+- Section Logo : les cartes n'ont plus de padding, elles SONT le carré de protection.
+
+**À faire :**
+1. `cd business/docs/charte-graphique/`
+2. `git status` — vérifier qu'il n'y a NI `_local/`, NI `.DS_Store`, NI `.ai`, NI `charte-en-ligne.zip`.
+   (contrôlé côté Cowork : c'est propre, mais revérifier avant de committer)
+3. `git add -A`
+4. Commit : « Logo régénéré depuis le vectoriel + zone de protection + Montserrat »
+5. `git push origin main`
+6. Suivre le run Actions. En cas d'échec, rapporter le log ici sans retenter en boucle.
+
+**Critères de succès :**
+- `https://charte.atelier-sapi.fr` à jour : section Logo avec 6 cartes à l'échelle
+- `download/logo/logo-sapi-noir-zone.svg` → 200
+- `download/logo-sapi.zip` et `download/polices-sapi.zip` → 200
+- `download/square-peg.zip` → **404 attendu** (renommé en polices-sapi.zip)
+- `/_local/` → toujours 404
+
+**Rappel :** `main` de ce dépôt est directement en ligne. Le push publie.
+
+</details>
+
+---
+
+## [✅ FAIT — 2026-07-17] Charte — pousser en prod : photos, survol, carrousel, palette
+
+**Date :** 2026-07-17
+**Priorité :** normale
+
+### ✅ Résultat Claude Code (2026-07-17)
+**⚠️ Déployé en 2 commits — Cowork a enrichi les fichiers PENDANT mon travail** (ajout suppression Print + palette Affinity + README, après mon 1er commit). J'ai donc complété avec un 2e commit pour que le live corresponde à l'état final voulu. Le résultat en ligne est complet et correct.
+- **Commit 1** `14bd66c` « Photos, doctrine de survol, carrousel de densité, dérivées en bande » (48 fichiers : photos, survol, carrousel, dérivées en bande, montserrat/square-peg séparés).
+- **Commit 2** `88eb2be` « Retrait de la rubrique Print + palette Affinity (.clr) » (le delta arrivé après : `index.html` sans Print, `download/palette-sapi.clr`, `README.md`).
+- **Vérif avant chaque commit** : `.DS_Store` (dans `download/fonts/`) et `.ai` (dans `_local/`) bien **ignorés**, absents du staging. Rien d'interdit poussé. ✅
+- **Déploiement GHA** confirmé pour les 2 push (fichier live re-daté à chaque fois). Critères finaux testés (cert SSL valide) :
+  - `/` → 200, **identique** à `index.html` final poussé ✅
+  - `download/square-peg.zip` + `download/montserrat.zip` → **200** ✅
+  - `download/polices-sapi.zip` → **404** (pack combiné retiré par la synchro FTP) ✅
+  - `download/fonts/SquarePeg-Regular.woff2` → **404** ; `…SquarePeg-Regular.ttf` → 200 ✅
+  - `download/palette-sapi.clr` → **200** (1670 o ; non matché par les exclusions `*.zip`, monte bien, pas besoin de toucher `deploy.yml`) ✅
+  - `img/regle-zone.jpg` → 200 ; `img/regle-2-3.jpg` + `img/sapi-art.jpg` → **404** ✅
+  - **Print retiré** : plus qu'**1** occurrence de « print » dans le HTML live = le garde-fou `localStorage` (attendu), aucun onglet Print ✅
+  - `_local/` → **404** ✅
+- **Contrôle assets** : tous les fichiers (img/ + download/) référencés dans le `index.html` live répondent **200** — aucun lien cassé.
+- **⚠️ Rendu visuel non vérifié** (pas de navigateur dans le bac à sable, comme signalé par Cowork) : contrastes/largeurs/carrousel/survol + le garde-fou `sapi-charte-ctx=print` (page pas blanche) à contrôler à l'œil. Structure + tous les assets OK, mais le visuel reste à valider par Robin.
+
+<details><summary>Consigne d'origine (archivée)</summary>
+
+**⚠️ Dépôt séparé, PAS le thème :** `~/Atelier Sapi Claude Cowork/business/docs/charte-graphique/`
+(dépôt `robinSapi/charte-atelier-sapi`, branche `main`). Ne rien toucher dans `theme-atelier-sapi`.
+
+**Contexte :** Robin a validé. Tout est écrit et vérifié côté fichiers, il ne reste qu'à
+committer et pousser. Le workflow GHA déploie seul sur `charte.atelier-sapi.fr`.
+48 fichiers en attente depuis le commit `dea72a2`.
+
+**Ce qui change :**
+- **Survol** : doctrine posée. Bouton = la couleur fonce + l'ombre s'ouvre, aucun mouvement.
+  Carte = elle lévite, la couleur ne bouge pas. Inerte = rien. Boutons en aplat, plus de dégradé.
+- **Couleurs** : une seule pastille par couleur, coupée 66/34. La dérivée de survol est la
+  tranche droite (hex + « SURVOL », copiable au clic, token en `title`). Le bloc « 1 DÉRIVÉE »
+  et les cartes `span 2` sont supprimés → **la grille des couleurs est devenue uniforme**.
+- **Photos** : section refaite. 4 exemples segmentés, 3 overlays côte à côte, carrousel de
+  densité pleine largeur (scroll-snap), lightbox qui conserve la bordure rouge des faux.
+- **Règle de cadrage** : « le luminaire au centre, entier dans la moitié centrale ».
+  Nouvelle image `img/regle-zone.jpg`. `img/regle-2-3.jpg` et `img/sapi-art.jpg` supprimées.
+- **Section Formats refondue** : grille en 3 colonnes explicites (l'`auto-fit` écrasait les cartes),
+  Pinterest réuni en une seule carte pleine largeur avec ses 3 ratios (2:3 référence, carré, long).
+  Sous-titre supprimé : il énonçait encore l'ancienne règle des 2/3 et contredisait la section Photos.
+  Nouvelle règle « Le centrage » + `img/regle-centrage.jpg`.
+- **Les 3 exemples d'overlay repassés en 4:5** (ils étaient en 4:3), régénérés depuis `situation.jpg`.
+- ⚠️ **Règle du nom de produit appliquée aux images** : prénom Montserrat 700 CAPITALES + surnom
+  Square Peg, sur une seule ligne de base, rapport 2,12× (la charte affiche 2,13×). Les visuels
+  violaient la règle que la charte énonce dans sa propre section Polices.
+- **Polices** : woff2 remplacés par des TTF. `polices-sapi.zip` (pack combiné) abandonné au
+  profit de **deux packs séparés** : `square-peg.zip` + `montserrat.zip`.
+- Textes raccourcis à l'essentiel (2129 mots), tirets cadratins retirés partout.
+- **Print supprimé** : Robin abandonne la rubrique. L'onglet, la section 09, l'entrée de menu,
+  les 2 encarts « manque » disséminés dans Logo et Couleurs, le contexte `print` des 14 sections
+  partagées et les 6 règles CSS orphelines (`.gap`, `.gap-t`, `.gap-list`) sont retirés.
+  **Garde-fou ajouté** : le contexte est mémorisé en `localStorage`, et `'print'` dort dans le
+  navigateur de quiconque a cliqué l'onglet. Sans lui la page s'ouvrait **vide**, sans rien en
+  console pour l'expliquer. Il retombe sur `web` si le contexte mémorisé n'existe plus.
+- **Nouvelle carte de téléchargement : la palette Affinity** (`download/palette-sapi.clr`,
+  18 couleurs nommées, là où l'ancienne en avait 17 anonymes dont 2 fantômes).
+  ⚠️ Elle est **générée depuis la constante `GAMMES` d'`index.html`** : ne jamais l'éditer à la
+  main, sinon la charte et le nuancier divergent. Le `.clr` du Drive a été remplacé par le même
+  fichier (ancien archivé dans `_local/`).
+- README remis d'aplomb (il décrivait 12 PNG et des woff2 qui n'existent plus).
+
+**À faire :**
+1. `cd business/docs/charte-graphique/`
+2. `git status` — vérifier qu'il n'y a NI `_local/`, NI `.DS_Store`, NI `.ai`, NI `charte-en-ligne.zip`.
+   (contrôlé côté Cowork : c'est propre, mais revérifier avant de committer)
+3. `git add -A` — inclut 4 suppressions (`polices-sapi.zip`, les 2 woff2, `sapi-art.jpg`)
+4. Commit : « Photos, survol, dérivées en bande, palette Affinity, print retiré »
+5. `git push origin main`
+6. Suivre le run Actions. En cas d'échec, rapporter le log ici sans retenter en boucle.
+
+**Critères de succès :**
+- `https://charte.atelier-sapi.fr` à jour
+- `download/square-peg.zip` et `download/montserrat.zip` → **200**
+- `download/polices-sapi.zip` → **404 attendu** (le pack combiné est abandonné ; le workflow
+  synchronise et doit le retirer du serveur — si il répond encore 200, le signaler)
+- `download/fonts/SquarePeg-Regular.woff2` → **404 attendu**
+- `img/regle-zone.jpg` et `img/regle-centrage.jpg` → 200 ; `img/regle-2-3.jpg` et `img/sapi-art.jpg` → 404
+- `download/palette-sapi.clr` → **200**. Le workflow exclut `*.zip` et ré-inclut `download/*.zip` ;
+  `.clr` n'est matché par aucune exclusion, donc il devrait monter. À vérifier quand même : si 404,
+  ajouter une exception dans `deploy.yml`.
+- **Plus aucun onglet « Print »** dans la barre de contexte : il ne reste que Site web et Réseaux
+  sociaux. Et la page ne doit **pas** être blanche même avec `sapi-charte-ctx=print` en localStorage
+  (c'est le cas de Robin) : tester en console avec
+  `localStorage.setItem('sapi-charte-ctx','print')` puis recharger.
+- `/_local/` → toujours 404
+
+**⚠️ Point non vérifié côté Cowork :** le **rendu**. Pas de navigateur dans le bac à sable
+(playwright ne peut pas installer Chromium sans sudo). Les contrastes, la largeur des textes,
+l'équilibre des accolades et le parse JS sont vérifiés ; **le visuel ne l'est pas**.
+Si quelque chose s'affiche de travers après déploiement, c'est là qu'il faut regarder en premier.
+
+**Rappel :** `main` de ce dépôt est directement en ligne. Le push publie.
+
+---
+
+## [✅ FAIT — 2026-07-17] Charte — pousser la refonte des visuels et de la densité
+
+**Date :** 2026-07-17
+**Priorité :** normale
+
+### ✅ Résultat Claude Code (2026-07-17)
+- **Vérif avant commit** : `.ai` (dans `_local/`) et `.DS_Store` (dans `download/fonts/`) bien **ignorés** ; rien de `_local/` (ni `.bak.html`) stagé. 26 fichiers stagés (conforme), dont les 4 suppressions génériques. ✅
+- **Commit** `5187b4a` « Photos de Robin, compositions réseaux, densité en 8 cartes », `git push origin main` → OK (un seul commit cette fois, pas de modif concurrente de Cowork).
+- **Déploiement GHA** confirmé (fichier live re-daté ~20 s après le push). Critères testés (cert SSL valide) :
+  - `/` → 200, **identique** à l'`index.html` poussé ✅
+  - les **8 photos par modèle** (`packshot-leon`, `packshot-merveilleuse`, `detail-claudine`, `vue-dessous-olivia`, `vue-dessous-gaston`, `situation-sebastien`, `situation-alice`, `situation-charlie`) → **200** ✅
+  - les **8 compositions réseaux** `img/compo-*.jpg` référencées et servies → **200** ✅
+  - `img/regle-centrage.jpg` + `img/regle-zone.jpg` → 200 ✅
+  - anciennes génériques (`packshot.jpg`, `detail.jpg`, `situation.jpg`, `vue-dessous.jpg`) → **404** (retirées par la synchro FTP) ✅
+  - `_local/` → **404** ✅
+- **Section Densité** : `.m-edito` (éditoriale) et `.m-split` (scindée) présentes dans le HTML live → 8 cartes en place ✅
+- **Intégrité liens** : tous les assets référencés dans l'`index.html` live répondent **200** — aucun lien cassé.
+- **Perf** : somme des photos référencées ~3,4 Mo (conforme à l'estimation Cowork ~3,6 Mo). Si la page traîne, l'option « redescendre 1600→1200px » reste en réserve.
+- **⚠️ Rendu visuel non vérifié** (pas de navigateur dans le bac à sable) : hauteurs `.m-edito`/`.m-split` **estimées** → surveiller un éventuel débordement clippé en silence par `overflow:hidden` ; contraste des 3 critères photo sur aplat orange (3,63:1, sous le seuil 4,5 — réserve assumée par Robin). À valider à l'œil par Robin.
+
+<details><summary>Consigne d'origine (archivée)</summary>
+
+**⚠️ Dépôt séparé, PAS le thème :** `~/Atelier Sapi Claude Cowork/business/docs/charte-graphique/`
+(dépôt `robinSapi/charte-atelier-sapi`, branche `main`). Ne rien toucher dans `theme-atelier-sapi`.
+
+**Contexte :** Robin a validé (« c'est parfait, on pousse en prod »). **26 fichiers** en attente
+depuis `88eb2be`. Tout est écrit et contrôlé côté Cowork, il ne reste qu'à committer et pousser.
+
+**Ce qui change :**
+- **8 photos fournies par Robin remplacent les anciennes**, nommées **par modèle** :
+  `packshot-leon`, `packshot-merveilleuse`, `detail-claudine`, `vue-dessous-olivia`,
+  `vue-dessous-gaston`, `situation-sebastien`, `situation-alice`, `situation-charlie`.
+  Les 4 génériques (`packshot.jpg`, `detail.jpg`, `situation.jpg`, `vue-dessous.jpg`) sont supprimées.
+- **Les 4 catégories de visuels passent en carré.**
+- **8 compositions réseaux publiées** ajoutées en galerie dans Formats (`img/compo-*.jpg`).
+  35 Mo compressés à 601 Ko.
+- **Les 5 images fabriquées régénérées** (`regle-zone`, `regle-centrage`, `overlay-noir/blanc/faux`)
+  avec une recette unique : courbe `(1-(1-t)³)²`, rampe pure sans palier, dégradé qui s'arrête au
+  luminaire, nom de produit en une seule couleur.
+- **Carrousel de densité : 5 → 8 cartes.** Deux mises en page nouvelles (`.m-edito` éditorial à
+  vignette, `.m-split` texte/photo 50-50) et deux cas nouveaux (la primaire en aplat sombre,
+  l'orange répété quatre fois). Données produit tirées du **catalogue réel** (Olivia Ø700/750 g/120 €,
+  Claudine Ø650/135 €) — aucun chiffre inventé.
+- **Section Formats refondue** : grille 3 colonnes, Pinterest réuni en une carte pleine largeur avec
+  ses 3 ratios, sous-titre supprimé, règle « Le centrage » ajoutée.
+- **Les 3 critères photo en aplat orange** (choix de Robin, voir la réserve).
+- **Infractions de la charte contre elle-même, corrigées** : 2 overlays pleins cadres qui mangeaient
+  le luminaire dans les mockups, 6 noms de produit ayant perdu leurs deux polices, 1 prix en
+  monospace (3e police interdite).
+- **Le hero était illisible depuis le premier jour.** « ATELIER SÂPI » était en `--wood` sur le fond
+  sombre : **1,36:1**. Le bois est un ton moyen (luminance 0,21), il ne peut porter aucun petit texte
+  sur ce fond — même sans la photo il plafonnerait à 3,13. Passé en crème à 90% → **4,68:1**.
+  La date en bas à droite était à **2,84:1** (opacité 50%) → passée à 85% → **4,75:1**.
+  ⚠️ Conséquence assumée : le hero perd son accent bois.
+
+**À faire :**
+1. `cd business/docs/charte-graphique/`
+2. `git status` — vérifier qu'il n'y a NI `_local/`, NI `.DS_Store`, NI `.ai`.
+   ⚠️ `_local/` contient des `.bak.html` et des PNG de travail : ils doivent rester gitignorés.
+3. `git add -A` — inclut 4 suppressions (les photos génériques)
+4. Commit : « Photos de Robin, compositions réseaux, densité en 8 cartes »
+5. `git push origin main`
+6. Suivre le run Actions. En cas d'échec, rapporter le log ici sans retenter en boucle.
+
+**Critères de succès :**
+- `https://charte.atelier-sapi.fr` à jour
+- `img/packshot-leon.jpg` et `img/compo-achetez-lampadaire.jpg` → **200**
+- `img/packshot.jpg`, `img/detail.jpg`, `img/situation.jpg`, `img/vue-dessous.jpg` → **404 attendu**
+  (le workflow synchronise et doit les retirer du serveur ; s'ils répondent encore 200, le signaler)
+- Section Densité : **8 cartes**, dont une éditoriale et une scindée
+- Section Formats : la galerie des 8 compositions s'affiche sous l'onglet **Réseaux sociaux**
+
+**⚠️ Non vérifié côté Cowork — à regarder en premier si ça casse :**
+- **Le rendu.** Pas de navigateur dans le bac à sable (playwright ne peut pas installer Chromium sans
+  sudo). Contrastes, largeurs de texte, accolades, parse JS et intégrité des liens sont vérifiés ;
+  **le visuel ne l'est pas**. Les hauteurs de `.m-edito` et `.m-split` sont **estimées** (marges de
+  12 à 168px selon les cartes). Si une carte déborde, c'est là — un débordement de 42px est déjà
+  passé inaperçu aujourd'hui parce que `overflow:hidden` clippe en silence.
+- **`img/` pèse 3,6 Mo.** Si la page traîne, redescendre les photos de 1600 à 1200px.
+
+**Réserve assumée par Robin :** les 3 critères photo sont en aplat `#E35B24`. Le corps de texte y est
+à **3,63:1 pour un seuil de 4,5** — aucune couleur de texte ne passe sur cet orange. Le titre (19px
+gras) et le chiffre passent, au seuil « grand texte » de 3,0. Robin a tranché en connaissance de
+cause. Même situation sur tous les boutons blanc-sur-orange des maquettes.
+
+**Rappel :** `main` de ce dépôt est directement en ligne. Le push publie.
+
+</details>
+
+---
+
+## [✅ FAIT — 2026-07-17] Charte — corriger le hero, illisible depuis le premier jour
+
+**Date :** 2026-07-17
+**Priorité :** normale — **2 lignes de CSS, rien d'autre**
+
+### ✅ Résultat Claude Code (2026-07-17)
+- **Diff conforme** : un seul fichier (`index.html`), 2 lignes dans le `<style>`, rien d'autre.
+  - `.hero .eyebrow` : `color:var(--wood)` → `color:var(--creme);opacity:.9` ✅
+  - `.hero .date` : `opacity:.5` → `opacity:.85` ✅
+- **Commit** `c907c5e` « Hero lisible : ourlet et date remontés au-dessus de 4,5:1 », `git push origin main` → OK.
+- **Déploiement GHA** confirmé (fichier live re-daté ~10 s après le push). Les 2 règles corrigées sont **présentes telles quelles dans le HTML live** ; page live == `index.html` poussé ; arbre propre, HEAD=origin/main.
+- **⚠️ Rendu non vérifié à l'œil** (pas de navigateur) : les valeurs de contraste (4,68:1 / 4,75:1) sont celles calculées par Cowork ; à confirmer visuellement par Robin que « ATELIER SÂPI » (crème, plus bois) et la date sont bien lisibles.
+- 📝 Observation hors-scope (non touchée) : `.hero .date` reste en `font-family:ui-monospace…` (une police monospace) — la charte interdit une 3ᵉ police. Pas dans le périmètre de cette tâche ; à signaler si tu veux qu'on l'aligne plus tard.
+
+<details><summary>Consigne d'origine (archivée)</summary>
+
+**⚠️ Dépôt séparé, PAS le thème :** `~/Atelier Sapi Claude Cowork/business/docs/charte-graphique/`
+(dépôt `robinSapi/charte-atelier-sapi`, branche `main`).
+
+**Contexte :** Robin a signalé que « ATELIER SÂPI » était illisible dans l'en-tête. Mesuré : **1,36:1**.
+Un second échec a été trouvé au passage, qu'il n'avait pas signalé : la date en bas à droite, à
+**2,84:1**. Seul `index.html` a changé depuis `5187b4a`, et uniquement dans le `<style>`.
+
+**Ce qui change :**
+- `.hero .eyebrow` : `color:var(--wood)` → `color:var(--creme);opacity:.9` → **1,36 → 4,68:1**
+- `.hero .date` : `opacity:.5` → `opacity:.85` → **2,84 → 4,75:1**
+
+**Pourquoi le bois ne pouvait pas rester :** sa luminance (0,21) est trop proche de celle du hero
+(0,15 — `#323232` recouvert de la photo à 28%). Même en retirant la photo, il plafonnerait à **3,13**
+sur le noir. Ce n'était pas un réglage à ajuster : le bois est un ton moyen, il ne porte aucun petit
+texte sur fond sombre. **Conséquence assumée par Robin : le hero perd son accent bois.**
+
+**À faire :**
+1. `cd business/docs/charte-graphique/`
+2. `git status` — un seul fichier modifié, `index.html`
+3. `git add index.html`
+4. Commit : « Hero lisible : ourlet et date remontés au-dessus de 4,5:1 »
+5. `git push origin main`
+6. Suivre le run Actions.
+
+**Critères de succès :**
+- `https://charte.atelier-sapi.fr` : « ATELIER SÂPI » lisible dans l'en-tête, en crème et non en bois
+- La date en bas à droite du hero est lisible
+
+**Rappel :** `main` de ce dépôt est directement en ligne. Le push publie.
+
+</details>
