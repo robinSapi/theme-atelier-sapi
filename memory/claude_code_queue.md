@@ -4,10 +4,12 @@
 
 ---
 
-## [TÂCHE ✅ VALIDÉE VISUELLEMENT SUR TEST — en attente « Go prod »] Habillage des emails WooCommerce à la charte
+## [TÂCHE ✅ EN PROD (master poussé) — reste : Robin lance le workflow GHA] Habillage des emails WooCommerce à la charte
 **Date :** 2026-07-22
 
-> **✔️ Robin (2026-07-22) : « ça a l'air parfait »** via l'aperçu WooCommerce (Réglages → E-mails), sans passer de commande. Reste : « Go prod » de Robin → je merge test → master + push, puis Robin lance le workflow GitHub Actions. Non poussé sur master pour l'instant.
+> **✔️ Robin (2026-07-22) : « ça a l'air parfait »** via l'aperçu WooCommerce (Réglages → E-mails).
+> **🚀 GO PROD (2026-07-22) — emails SEULS :** vu que `master..test` = 86 commits (toute la refonte conseiller encore en cours), on n'a PAS mergé toute la branche. **Cherry-pick du seul commit emails `cb3092f` sur master** (→ `93e172b`, 3 fichiers `woocommerce/emails/` uniquement), `git push origin master` OK. La refonte conseiller reste sur test.
+> **⏳ Reste à faire par Robin :** lancer le **workflow GitHub Actions** pour déployer master → atelier-sapi.fr. Puis vérifier un aperçu email sur la prod.
 
 ### ✅ Résultat Claude Code (2026-07-22)
 **Livré + poussé sur test** (commit `cb3092f`, rien sur master). 3 fichiers de coquille commune surchargés dans le thème, **aucun template individuel touché** :
