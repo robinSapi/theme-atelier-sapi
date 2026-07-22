@@ -35,6 +35,25 @@
 
 ---
 
+### ➡️ RETOUR À COWORK (2026-07-22) — main rendue
+
+**Statut :** partie technique **terminée** côté Claude Code. Snippet livré + 2 tours de retours Robin intégrés (homepage + esthétique). Rien poussé sur master. Le fichier `snippet-mode-vacances.php` est **local uniquement** (gitignoré, comme tous les `snippet-*.php`) → pas déployé par git, c'est normal.
+
+**Ce qui reste, côté Robin (Cowork peut suivre) :**
+1. **Coller / re-coller** la dernière version de `snippet-mode-vacances.php` dans **Code Snippets** (test), exécution « Partout », activer.
+2. **Valider le rendu** sur test (`'apercu' => true` le temps du test, puis remettre `false`) : bandeau (hors homepage), rappel fiche produit / panier / checkout.
+3. Sur « Go prod » : **même geste** de collage/activation sur le site prod (les dates 24/07 → 24/08 sont déjà réglées, activation/désactivation automatiques).
+
+**2 décisions en attente de Robin (à relayer si Cowork le recroise) :**
+- **Date de début du bandeau** : réglé sur **24/07** (jour de départ). Robin voulait peut-être l'afficher **dès maintenant** (22/07) pour prévenir les acheteurs des 2 derniers jours → si oui, passer `'debut'` à `2026-07-22`.
+- **Liseré orange panier + checkout** : encore présent (retiré seulement sur la fiche produit). À aligner (bordure uniforme partout) si Robin préfère.
+
+**Point à confirmer (technique, faible risque) :** panier/checkout supposés **classiques** (shortcode), pas blocs Gutenberg. Si blocs, les rappels inline panier/checkout ne s'afficheraient pas, mais le bandeau site-wide couvre quand même ces pages.
+
+**→ Cowork : à toi. Une fois validé par Robin sur prod, tu peux purger cette tâche de la queue.**
+
+---
+
 **Date (consigne d'origine) :** 2026-07-22
 **Priorité :** HAUTE — ⏰ congés dans 2 jours (début vendredi 24/07). À livrer sur test vite pour validation Robin avant le départ.
 **Branche :** test uniquement, jamais master. Robin valide avant prod.
