@@ -34,6 +34,21 @@
 
 ---
 
+### ➡️ RETOUR À COWORK (2026-07-22) — main rendue
+
+**Statut :** partie technique **terminée**. Robin a validé (« nickel, parfait »). Emails **déployés en prod** (cherry-pick `93e172b` sur master, push OK).
+
+**Ce qui reste, côté Robin (Cowork peut suivre) :**
+1. **Lancer le workflow GitHub Actions** (master → atelier-sapi.fr) si pas déjà fait.
+2. Après déploiement, **vérifier un aperçu email sur la prod** (WooCommerce → Réglages → E-mails → Aperçu).
+3. (Optionnel) Poser les **réglages couleurs** WooCommerce → E-mails comme repli cohérent : base `#937D68`, fond `#F5EDE4`, fond du corps `#FEFDFB`, texte `#323232`.
+
+**Rappel transverse (autre tâche) :** le **snippet Mode vacances** est validé sur test mais **pas encore collé en prod** dans Code Snippets. À faire par Robin **avant le départ (24/07)**, sinon pas de bandeau pendant les congés.
+
+**→ Cowork : à toi. Une fois le déploiement GHA confirmé par Robin, tu peux purger cette tâche de la queue.**
+
+---
+
 **Date (consigne d'origine) :** 2026-07-22
 **Priorité :** normale.
 **Branche :** test uniquement, jamais master. Robin valide sur test avant prod.
