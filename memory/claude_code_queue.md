@@ -31,6 +31,8 @@
 
 **🔧 Ajustement (2026-07-22, retour Robin) :** sur la **homepage**, le header transparent passe par-dessus le bandeau → **bandeau masqué sur la homepage** (`if ( is_front_page() ) return;` dans `sapi_vacances_banniere`). Les rappels fiche produit / panier / checkout restent affichés partout. Robin doit **re-coller la version à jour** du snippet dans Code Snippets sur test.
 
+**🎨 Esthétique (2026-07-22, retour Robin) :** (1) filet orange en haut du bandeau **retiré** (filet bois en bas conservé) ; (2) liseré orange à gauche de la pill **retiré sur la fiche produit** (classe modifieur `sapi-vac-note--produit` ciblée via `current_action()` → bordure uniforme). **Panier + checkout gardent le liseré orange** pour l'instant (Robin a scopé « fiche produit » ; à aligner si besoin). Re-coller la version à jour du snippet.
+
 ---
 
 **Date (consigne d'origine) :** 2026-07-22
