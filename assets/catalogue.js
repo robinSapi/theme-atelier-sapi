@@ -86,7 +86,8 @@
 
       mediaSlot.innerHTML = '';
       bodySlot.innerHTML = '';
-      titleSlot.textContent = titleEl ? titleEl.textContent : '';
+      // Recopie le titre DÉJÀ formaté par product-name-formatter.js (spans prénom/surnom).
+      titleSlot.innerHTML = titleEl ? titleEl.innerHTML : '';
 
       if (gallery) {
         var g = gallery.cloneNode(true);

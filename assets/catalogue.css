@@ -155,7 +155,23 @@ body.catalogue-b2b {
 .cat-card.is-filtered-out { display: none !important; }
 .cat-card__media { position: relative; }
 .cat-card__body { padding: 18px 20px 22px; display: flex; flex-direction: column; flex: 1; }
-.cat-card__title { font-size: 1.2rem; margin: 0 0 8px; color: var(--color-dark); }
+.cat-card__title { font-size: 1.2rem; margin: 0 0 8px; color: var(--color-dark); line-height: 1.2; }
+
+/* Formatter noms produit (prénom Montserrat / surnom Square Peg) — recopié du
+   Design System car style.css n'est pas chargé sur cette page autonome. */
+.product-firstname {
+  font-family: var(--font-body);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 0.75em;
+}
+.product-restname {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: capitalize;
+  font-size: 1.6em;
+  white-space: nowrap;
+}
 .cat-card__essences { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
 .cat-chip {
   font-size: .74rem;
@@ -281,12 +297,14 @@ body.catalogue-b2b {
 .cat-modal__media .cat-gallery { aspect-ratio: auto; height: 100%; min-height: 320px; }
 .cat-modal__content { padding: 30px 30px 36px; overflow: auto; }
 .cat-modal__title {
+  /* Base em : les spans .product-firstname/.product-restname s'y échelonnent
+     (surnom = 1.6em). font-family display = repli si le formatter ne tourne pas. */
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-size: clamp(1.25rem, 2.4vw, 1.6rem);
   color: var(--color-wood);
   margin: 4px 0 16px;
-  line-height: 1.1;
+  line-height: 1.25;
 }
 .fiche__essences { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
 .fiche__desc { color: #4a443d; margin-bottom: 24px; }

@@ -46,8 +46,11 @@ $logo_alt = get_bloginfo('name');
 // ── Assets étanches : enregistrés + imprimés à la main (pas de wp_head) ──
 $css_path = get_template_directory() . '/assets/catalogue.css';
 $js_path  = get_template_directory() . '/assets/catalogue.js';
+$fmt_path = get_template_directory() . '/assets/product-name-formatter.js';
 wp_register_style('sapi-catalogue', get_template_directory_uri() . '/assets/catalogue.css', [], file_exists($css_path) ? filemtime($css_path) : null);
 wp_register_script('sapi-catalogue', get_template_directory_uri() . '/assets/catalogue.js', [], file_exists($js_path) ? filemtime($js_path) : null, true);
+// Formatter des noms produit (prénom Montserrat / surnom Square Peg) — cohérence avec le reste du site.
+wp_register_script('sapi-catalogue-formatter', get_template_directory_uri() . '/assets/product-name-formatter.js', [], file_exists($fmt_path) ? filemtime($fmt_path) : null, true);
 
 // Adresse de contact (mailto — pas de lien vers /contact)
 $contact_email   = 'contact@atelier-sapi.fr';
@@ -115,6 +118,11 @@ function sapi_catalogue_render_specs($sections) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Catalogue — <?php echo esc_html(get_bloginfo('name')); ?></title>
+<?php // Montserrat via Google Fonts (comme le reste du site ; Square Peg reste local — fix Safari).
+      // Ressources de police EXTERNES : ne créent aucun chemin vers le site (étanchéité préservée). ?>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;900&display=swap">
 <?php wp_print_styles(['sapi-catalogue']); ?>
 </head>
 <body class="catalogue-b2b">
@@ -202,12 +210,12 @@ function sapi_catalogue_render_specs($sections) {
         $pid   = (int) $p['id'];
         $title = (string) $p['title'];
         ?>
-        <article class="cat-card" data-cat="<?php echo esc_attr($slug); ?>" data-product-id="<?php echo $pid; ?>">
+        <article class="cat-card" data-cat="<?php echo esc_attr($slug); ?>" data-product-cat="<?php echo esc_attr($slug); ?>" data-product-id="<?php echo $pid; ?>">
           <div class="cat-card__media">
             <?php sapi_catalogue_render_gallery($p['gallery_ids'], $title); ?>
           </div>
           <div class="cat-card__body">
-            <h3 class="cat-card__title"><?php echo esc_html($title); ?></h3>
+            <h3 class="cat-card__title product-name"><?php echo esc_html($title); ?></h3>
             <?php if (!empty($p['essences'])) : ?>
               <div class="cat-card__essences">
                 <?php foreach ($p['essences'] as $ess) : ?>
@@ -269,13 +277,13 @@ function sapi_catalogue_render_specs($sections) {
     <div class="cat-modal__grid">
       <div class="cat-modal__media" id="cat-modal-media"></div>
       <div class="cat-modal__content">
-        <h2 class="cat-modal__title" id="cat-modal-title"></h2>
+        <h2 class="cat-modal__title product-name" id="cat-modal-title"></h2>
         <div class="cat-modal__body" id="cat-modal-body"></div>
       </div>
     </div>
   </div>
 </div>
 
-<?php wp_print_scripts(['sapi-catalogue']); ?>
+<?php wp_print_scripts(['sapi-catalogue-formatter', 'sapi-catalogue']); ?>
 </body>
 </html>
