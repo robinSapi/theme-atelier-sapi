@@ -541,3 +541,56 @@ texte sur fond sombre. **Conséquence assumée par Robin : le hero perd son acce
 3. La page publiée fait apparaître le bloc ACF **« Catalogue B2B — contenus »** : remplir Accroche, Histoire (titre/texte/image), Bois (intro + textes/images Peuplier & Okoumé). Vide = valeurs par défaut.
 4. Ouvrir `test.atelier-sapi.fr/catalogue` et valider : filtres, galeries, bouton « Fiche technique » (modale : description + tableau caractéristiques), fermeture croix/clic/Échap, mobile.
 5. Retour : ce qui va / ne va pas → j'ajuste. (Le bloc PDF est volontairement masqué : Temps 2.)
+
+---
+
+## [TÂCHE] Catalogue B2B — Temps 2 : export PDF
+**Date :** 2026-08-04
+**Priorité :** normale
+**⚠️ Demander un PLAN + état des lieux AVANT de coder.** Ne rien committer sans le go de Robin. Même branche que le Temps 1 : **`test-theme-sapi-maison`** (jamais master). Robin valide sur test. **Mise en prod groupée** : Temps 1 + Temps 2 seront mergés ensemble vers master quand Robin dira go (ne pas merger avant).
+
+**Brief complet :** `business/docs/brief-catalogue-temps2-pdf.md` (à lire en entier).
+
+**Réutiliser les fondations du Temps 1 (ne PAS redévelopper)** :
+- Source de données sans prix : `sapi_catalogue_get_products()` (`inc/catalogue-data.php`).
+- Mapping caractéristiques : `sapi_catalogue_specs_schema()` / `sapi_catalogue_get_product_specs()`.
+- Champs ACF Histoire/Bois (groupe `group_catalogue_b2b`) → mêmes contenus dans le PDF.
+
+**À faire (résumé, détail dans le brief) :**
+- **mPDF** via Composer dans le thème, police(s) de marque enregistrées (`fontdata`). CSS PDF **distincte** (mPDF ne gère qu'un sous-ensemble CSS).
+- **Route REST** (ex. `/wp-json/sapi/v1/catalogue-pdf`) recevant les catégories cochées ; rejoue la même requête produits que la page. **Un seul PDF combiné** : page de garde → page Histoire (ACF) → page Bois Peuplier/Okoumé (ACF) → une section par catégorie cochée (une page/produit) → page contact en texte non cliquable.
+- **Étanchéité PDF** : aucun prix, aucun lien, aucune URL cliquable. Mention « Document non contractuel, ne constitue pas une offre de prix ».
+- Gabarit fiche : titre + SKU, visuel principal, 2-3 vignettes, description intégrale (débordement propre sur 2e page, pas de troncature), tableau caractéristiques (mapping Temps 1), pied = réf + n° de page. Champs vides = tiret, pas masqués.
+- **Perf/cache** : images `large` (1024px) principal / `medium` vignettes, JPEG ~80, cible < 25 Mo. Cache fichier dans `wp-content/uploads/catalogues/` (dossier non indexable), clé = hash catégories + timestamp dernière modif produit ; invalidation sur `save_post`, `updated_post_meta` (ACF), remplacement image, modif description. **Pré-générer** « toutes catégories » + 4 mono-catégorie (hook/cron) ; combinaisons rares à la demande avec loader explicite. Vérifier `max_execution_time` / `memory_limit` sur o2switch mutualisé.
+- **Câbler le bloc export** en bas de `/catalogue` (actuellement masqué) : cases 4 catégories + bouton « Télécharger en PDF » → endpoint. Choix **indépendant** du filtre d'affichage du haut (libellé clair).
+
+**Critères de succès :** voir la « Recette Temps 2 » à la fin du brief. En particulier : PDF combiné = exactement les catégories cochées ; pages Histoire/Bois présentes ; 0 prix, 0 lien/URL cliquable ; mention non contractuel ; poids complet mesuré < 25 Mo ; pré-génération OK ; invalidation cache testée ; dossier catalogues non indexable.
+
+### ✅ RÉPONSE CLAUDE CODE — Temps 2 PDF CODÉ + RECETTE TECHNIQUE OK SUR TEST (2026-08-04)
+
+**Décisions Robin (validées) :** mPDF installé via **étape Composer en CI** (vendor/ gitignoré) ; limites serveur **détectées** ; bloc export **affiché+câblé** ; **polices de marque** TTF (charte).
+
+**Infra & diagnostic serveur (test, o2switch) :** PHP 8.3, **mémoire 512 Mo**, **max_execution 600 s**, GD dispo, tempDir inscriptible. mPDF 8.3.1 OK.
+
+**Mesures réelles :** PDF **toutes catégories = 3,9 Mo, 2,06 s** (pic 58 Mo) — largement < 25 Mo. Mono-catégorie (appliques) = 0,78 Mo.
+
+**Recette (Recette Temps 2 du brief) :**
+- [x] Endpoint `GET /wp-json/sapi/v1/catalogue-pdf?cats=…` → 200 `application/pdf`, `%PDF-1.4`, pièce jointe.
+- [x] PDF combiné = catégories cochées (clé de cache par sélection).
+- [x] Pages Histoire + Bois présentes (lisent l'ACF Temps 1).
+- [x] **0 prix** : données Temps 1 sans prix + audit flux PDF décompressés (0 « euro/EUR/prix ») + audit page Temps 1 (mêmes descriptions, 0 €).
+- [x] **0 lien/URL cliquable** : **0 annotation `/URI`** dans le PDF ; contact en texte brut.
+- [x] Mention « Document non contractuel, ne constitue pas une offre de prix » (pied + page contact).
+- [x] Poids complet **3,9 Mo < 25 Mo**.
+- [x] Pré-génération (cron single event) : toutes + 4 mono-catégorie.
+- [x] Invalidation : `save_post_product`, add/edit/delete attachment, meta produit + ACF Histoire/Bois → bump stamp + purge + pré-gén différée.
+- [x] Dossier `uploads/catalogues/` **non accessible en direct** (vrai fichier caché → 404 ; upload normal → 200) **+ noms non devinables** (`wp_hash`). `mpdf-tmp` → 404.
+- [x] Bloc export **indépendant** du filtre d'affichage (cases dédiées, libellé clair).
+
+**Fichiers :** `composer.json`, `.gitignore` (+vendor/), `.github/workflows/deploy-test.yml`+`deploy-prod.yml` (étape composer + exclude scopé), `inc/catalogue-pdf.php` (infra+générateur+cache+endpoint+pregen), `assets/pdf-fonts/*.ttf`, `assets/pdf-logo.png`, `page-catalogue.php` (bloc câblé), `assets/catalogue.js`+`.css` (bouton). SKU ajouté à `inc/catalogue-data.php`.
+Commits : `51058bc` (infra) → `1efeab9` (polices) → `c02c6c8` (générateur) → `4a1f7fd` (cache/endpoint/pregen/bouton) → `a0a1b56` (durcissement cache).
+
+**⚠️ RESTE AVANT PROD :**
+1. **Validation visuelle du PDF par Robin** (rendu des fiches, garde, Histoire/Bois) via la route de prévisualisation.
+2. **Nettoyage** : retirer les routes temporaires `catalogue-pdf-selftest` et `catalogue-pdf-preview` (diagnostic) — à faire juste avant le merge master.
+3. **Go prod groupé Temps 1 + Temps 2** : sur ordre de Robin → merge `test-theme-sapi-maison` → `master`, puis Robin lance le workflow. Le déploiement prod inclura l'étape Composer (vendor/ régénéré).
