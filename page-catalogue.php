@@ -253,15 +253,17 @@ function sapi_catalogue_render_specs($sections) {
     <p class="cat-grid__empty" hidden>Aucun produit dans cette catégorie.</p>
   </section>
 
-  <!-- BLOC EXPORT PDF — MASQUÉ au Temps 1 (câblé au Temps 2) -->
-  <section class="cat-pdf" hidden aria-hidden="true" data-temps2>
-    <h2 class="cat-section__title cat-section__title--center">Choisissez les catégories à inclure dans le PDF</h2>
+  <!-- BLOC EXPORT PDF (Temps 2) — sélection INDÉPENDANTE du filtre d'affichage du haut -->
+  <section class="cat-pdf" data-endpoint="<?php echo esc_url(rest_url('sapi/v1/catalogue-pdf')); ?>">
+    <h2 class="cat-section__title cat-section__title--center">Télécharger le catalogue en PDF</h2>
+    <p class="cat-pdf__hint">Choisissez les catégories à inclure dans le PDF.</p>
     <div class="cat-pdf__choices">
       <?php foreach ($categories as $slug => $label) : ?>
-        <label class="cat-pdf__choice"><input type="checkbox" value="<?php echo esc_attr($slug); ?>" checked disabled> <?php echo esc_html($label); ?></label>
+        <label class="cat-pdf__choice"><input type="checkbox" value="<?php echo esc_attr($slug); ?>" checked> <?php echo esc_html($label); ?></label>
       <?php endforeach; ?>
     </div>
-    <button type="button" class="cat-pdf__btn" disabled>Télécharger en PDF</button>
+    <button type="button" class="cat-pdf__btn">Télécharger en PDF</button>
+    <p class="cat-pdf__status" role="status" aria-live="polite" hidden></p>
   </section>
 
 </main>

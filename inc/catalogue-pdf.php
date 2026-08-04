@@ -376,6 +376,162 @@ function sapi_catalogue_pdf_build($cats = null) {
 }
 
 /* =========================================================================
+ * SÉ 4 — Cache fichier + invalidation. Dossier uploads/catalogues protégé.
+ * ========================================================================= */
+
+/**
+ * Dossier de cache des PDF (uploads/catalogues), protégé de l'accès direct
+ * et de l'indexation. Les fichiers sont servis par l'endpoint REST, pas en direct.
+ * @return string
+ */
+function sapi_catalogue_pdf_dir() {
+  $up  = wp_upload_dir();
+  $dir = trailingslashit($up['basedir']) . 'catalogues';
+  if (!file_exists($dir)) wp_mkdir_p($dir);
+
+  $ht = trailingslashit($dir) . '.htaccess';
+  if (!file_exists($ht)) {
+    @file_put_contents($ht,
+      "Options -Indexes\n" .
+      "<IfModule mod_authz_core.c>\nRequire all denied\n</IfModule>\n" .
+      "<IfModule !mod_authz_core.c>\nOrder allow,deny\nDeny from all\n</IfModule>\n"
+    );
+  }
+  $idx = trailingslashit($dir) . 'index.html';
+  if (!file_exists($idx)) @file_put_contents($idx, '');
+
+  return $dir;
+}
+
+/** Timestamp global d'invalidation (bumpé à chaque modif produit/ACF). */
+function sapi_catalogue_pdf_stamp() {
+  $s = get_option('sapi_catalogue_pdf_stamp');
+  if (!$s) {
+    $s = time();
+    update_option('sapi_catalogue_pdf_stamp', $s, false);
+  }
+  return (int) $s;
+}
+
+/** Normalise + trie les slugs de catégorie (clé de cache stable). */
+function sapi_catalogue_pdf_normalize_slugs($cats) {
+  $all   = array_keys(sapi_catalogue_categories());
+  $slugs = $cats ? array_values(array_intersect($all, $cats)) : $all;
+  if (!$slugs) $slugs = $all;
+  sort($slugs);
+  return $slugs;
+}
+
+/** Chemin de cache pour une sélection (clé = hash cats + stamp). */
+function sapi_catalogue_pdf_cache_path($slugs) {
+  $key = md5(implode(',', $slugs) . '|' . sapi_catalogue_pdf_stamp());
+  return trailingslashit(sapi_catalogue_pdf_dir()) . 'catalogue-' . $key . '.pdf';
+}
+
+/** Sert le cache si présent, sinon (re)génère et écrit le fichier. */
+function sapi_catalogue_pdf_get_or_build($cats, $allow_build = true) {
+  $slugs = sapi_catalogue_pdf_normalize_slugs($cats);
+  $path  = sapi_catalogue_pdf_cache_path($slugs);
+  if (file_exists($path) && filesize($path) > 0) return $path;
+  if (!$allow_build) return null;
+
+  $pdf = sapi_catalogue_pdf_build($slugs);
+  if ($pdf === '' || $pdf === null) return null;
+  file_put_contents($path, $pdf);
+  return $path;
+}
+
+/** Supprime tous les PDF en cache (les clés changent au bump, mais on nettoie). */
+function sapi_catalogue_pdf_clear_cache() {
+  $dir = sapi_catalogue_pdf_dir();
+  foreach ((glob(trailingslashit($dir) . '*.pdf') ?: []) as $f) @unlink($f);
+}
+
+/**
+ * Invalide le cache : bumpe le stamp, purge, et planifie une pré-génération
+ * DIFFÉRÉE (hors de la requête de sauvegarde) des combinaisons courantes.
+ */
+function sapi_catalogue_pdf_bump_stamp() {
+  update_option('sapi_catalogue_pdf_stamp', time(), false);
+  sapi_catalogue_pdf_clear_cache();
+  if (!wp_next_scheduled('sapi_catalogue_pregen_event')) {
+    wp_schedule_single_event(time() + 60, 'sapi_catalogue_pregen_event');
+  }
+}
+
+// ── Hooks d'invalidation ──
+add_action('save_post_product', function ($post_id) {
+  if (wp_is_post_autosave($post_id) || wp_is_post_revision($post_id)) return;
+  sapi_catalogue_pdf_bump_stamp();
+});
+add_action('deleted_post', function ($post_id) {
+  if (get_post_type($post_id) === 'product') sapi_catalogue_pdf_bump_stamp();
+});
+add_action('add_attachment',    'sapi_catalogue_pdf_bump_stamp');
+add_action('edit_attachment',   'sapi_catalogue_pdf_bump_stamp');
+add_action('delete_attachment', 'sapi_catalogue_pdf_bump_stamp');
+
+// ACF / meta : sur un produit OU sur la page catalogue (Histoire/Bois).
+function sapi_catalogue_pdf_meta_hook($meta_id, $post_id, $meta_key = '', $meta_value = '') {
+  $pt = get_post_type($post_id);
+  if ($pt === 'product' || (int) $post_id === sapi_catalogue_page_id()) {
+    sapi_catalogue_pdf_bump_stamp();
+  }
+}
+add_action('updated_post_meta', 'sapi_catalogue_pdf_meta_hook', 10, 4);
+add_action('added_post_meta',   'sapi_catalogue_pdf_meta_hook', 10, 4);
+add_action('deleted_post_meta', 'sapi_catalogue_pdf_meta_hook', 10, 4);
+
+/* =========================================================================
+ * SÉ 6 — Pré-génération des combinaisons courantes (toutes + 4 mono-catégorie).
+ * ========================================================================= */
+add_action('sapi_catalogue_pregen_event', 'sapi_catalogue_pdf_pregenerate');
+function sapi_catalogue_pdf_pregenerate() {
+  if (!sapi_catalogue_pdf_autoload()) return;
+  $all    = array_keys(sapi_catalogue_categories());
+  $combos = [$all];
+  foreach ($all as $c) $combos[] = [$c];
+  foreach ($combos as $combo) {
+    try { sapi_catalogue_pdf_get_or_build($combo, true); }
+    catch (\Throwable $e) { /* on continue les autres combos */ }
+  }
+}
+
+/* =========================================================================
+ * SÉ 5 — Endpoint REST public de téléchargement.
+ * GET /wp-json/sapi/v1/catalogue-pdf?cats=suspensions,appliques
+ * ========================================================================= */
+function sapi_catalogue_pdf_endpoint($request) {
+  if (!sapi_catalogue_pdf_autoload()) {
+    return new WP_Error('mpdf_absent', 'Export PDF momentanément indisponible.', ['status' => 503]);
+  }
+  $raw  = (string) $request->get_param('cats');
+  $cats = $raw !== '' ? array_filter(array_map('sanitize_key', explode(',', $raw))) : null;
+  $slugs = sapi_catalogue_pdf_normalize_slugs($cats);
+
+  try {
+    $path = sapi_catalogue_pdf_get_or_build($slugs, true);
+  } catch (\Throwable $e) {
+    return new WP_Error('pdf_error', 'Échec de génération du PDF.', ['status' => 500]);
+  }
+  if (!$path || !file_exists($path)) {
+    return new WP_Error('pdf_error', 'Échec de génération du PDF.', ['status' => 500]);
+  }
+
+  $all      = sapi_catalogue_categories();
+  $suffix   = (count($slugs) < count($all)) ? '-' . implode('-', $slugs) : '';
+  $filename = 'catalogue-atelier-sapi' . $suffix . '.pdf';
+
+  nocache_headers();
+  header('Content-Type: application/pdf');
+  header('Content-Disposition: attachment; filename="' . $filename . '"');
+  header('Content-Length: ' . filesize($path));
+  header('X-Robots-Tag: noindex, nofollow');
+  readfile($path); // phpcs:ignore — flux binaire
+  exit;
+}
+
+/* =========================================================================
  * Route REST self-test (SÉ 1) — diagnostic, à retirer/sécuriser après la S1.
  * GET /wp-json/sapi/v1/catalogue-pdf-selftest        → JSON diagnostic
  * GET /wp-json/sapi/v1/catalogue-pdf-selftest?download=1 → PDF « hello » inline
@@ -393,6 +549,13 @@ add_action('rest_api_init', function () {
     'methods'             => 'GET',
     'permission_callback' => '__return_true',
     'callback'            => 'sapi_catalogue_pdf_preview',
+  ]);
+
+  // Endpoint public de téléchargement (SÉ 5) — sert le cache ou (re)génère.
+  register_rest_route('sapi/v1', '/catalogue-pdf', [
+    'methods'             => 'GET',
+    'permission_callback' => '__return_true',
+    'callback'            => 'sapi_catalogue_pdf_endpoint',
   ]);
 });
 

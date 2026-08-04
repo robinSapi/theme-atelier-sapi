@@ -153,10 +153,46 @@
     });
   }
 
+  /* ---- Export PDF (indépendant des filtres d'affichage) ---- */
+  function initPdfExport() {
+    var block = document.querySelector('.cat-pdf');
+    if (!block) return;
+    var endpoint = block.getAttribute('data-endpoint');
+    var btn = block.querySelector('.cat-pdf__btn');
+    var status = block.querySelector('.cat-pdf__status');
+    var boxes = Array.prototype.slice.call(block.querySelectorAll('.cat-pdf__choice input[type="checkbox"]'));
+    if (!btn || !endpoint) return;
+
+    function selected() {
+      return boxes.filter(function (b) { return b.checked; }).map(function (b) { return b.value; });
+    }
+    function sync() { btn.disabled = selected().length === 0; }
+    boxes.forEach(function (b) { b.addEventListener('change', sync); });
+    sync();
+
+    btn.addEventListener('click', function () {
+      var cats = selected();
+      if (!cats.length) return;
+      var url = endpoint + (endpoint.indexOf('?') > -1 ? '&' : '?') + 'cats=' + encodeURIComponent(cats.join(','));
+      var label = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Préparation du PDF…';
+      if (status) { status.hidden = false; status.textContent = 'Génération du PDF en cours, le téléchargement va démarrer…'; }
+      // Déclenche le téléchargement (Content-Disposition: attachment) sans quitter la page.
+      window.location.href = url;
+      setTimeout(function () {
+        btn.textContent = label;
+        sync();
+        if (status) { status.hidden = true; status.textContent = ''; }
+      }, 8000);
+    });
+  }
+
   function init() {
     initGalleriesIn(document);
     initFilters();
     initModal();
+    initPdfExport();
   }
 
   if (document.readyState === 'loading') {

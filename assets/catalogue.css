@@ -238,11 +238,29 @@ body.catalogue-b2b {
 .cat-gallery__dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255, 255, 255, .6); box-shadow: 0 0 0 1px rgba(0, 0, 0, .1); }
 .cat-gallery__dot.is-active { background: var(--color-orange); }
 
-/* ── Bloc PDF (masqué au Temps 1) ── */
-.cat-pdf { max-width: 720px; margin: 0 auto; padding: 40px 20px 80px; text-align: center; }
-.cat-pdf__choices { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-bottom: 24px; }
-.cat-pdf__choice { font-weight: 600; }
-.cat-pdf__btn { font-family: var(--font-body); font-weight: 600; color: #fff; background: var(--color-wood); border: none; border-radius: 999px; padding: 12px 28px; opacity: .5; cursor: not-allowed; }
+/* ── Bloc export PDF (Temps 2) ── */
+.cat-pdf { max-width: 720px; margin: 0 auto; padding: 48px 20px 90px; text-align: center; }
+.cat-pdf__hint { color: #6a6055; margin: 0 0 20px; }
+.cat-pdf__choices { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px 22px; margin-bottom: 26px; }
+.cat-pdf__choice { font-weight: 600; color: var(--color-dark); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.cat-pdf__choice input { width: 17px; height: 17px; accent-color: var(--color-orange); cursor: pointer; }
+.cat-pdf__btn {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1rem;
+  color: #fff;
+  background: linear-gradient(180deg, var(--color-orange), #D14F1C);
+  border: none;
+  border-radius: 999px;
+  padding: 14px 34px;
+  cursor: pointer;
+  box-shadow: var(--shadow-warm);
+  transition: box-shadow .2s ease, transform .1s ease, opacity .2s ease;
+}
+.cat-pdf__btn:hover:not(:disabled) { box-shadow: 0 10px 26px rgba(227, 91, 36, .4); }
+.cat-pdf__btn:active:not(:disabled) { transform: translateY(1px); }
+.cat-pdf__btn:disabled { opacity: .45; cursor: not-allowed; }
+.cat-pdf__status { margin: 14px 0 0; color: var(--color-wood); font-size: .92rem; }
 
 /* ── Bouton contact permanent (FAB) ── */
 .cat-contact-fab {
