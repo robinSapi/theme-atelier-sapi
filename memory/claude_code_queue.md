@@ -502,7 +502,34 @@ texte sur fond sombre. **Conséquence assumée par Robin : le hero perd son acce
 - `<meta robots noindex,nofollow>` présent. Bloc PDF `hidden`. 27 produits, tableaux specs présents.
 - **Formatter câblé** (commit `2bb3d57`) : titres carte+modale en `.product-name` + `product-name-formatter.js` chargé ; Montserrat via Google Fonts (comme le site). Le rendu prénom/surnom est JS (invisible au curl) → à confirmer à l'œil.
 
-**⚠️ Reste à valider par Robin EN NAVIGATEUR (non testable au curl) :** rendu visuel, titres formatés prénom/surnom, filtres catégories, ouverture modale + fermeture croix/clic/Échap, galeries + swipe, mobile Safari.
+**✅ VALIDÉ PAR ROBIN SUR TEST (2026-08-04)** — page publiée + testée en navigateur : rendu, titres prénom/surnom, filtres, modale, galeries. Page live : `test.atelier-sapi.fr/catalogue`.
+
+**Retouches cosmétiques post-validation (commit `8487112`) :**
+- Image de carte : remplit tout le carré (fix spécificité `.cat-gallery__slide .cat-gallery__img` vs la règle globale `img{height:auto}`).
+- Clic n'importe où sur la carte → ouvre la fiche (flèches/dots de galerie exclus). Curseur pointer sur la carte.
+- Modale desktop refaite en **colonne verticale** : photo paysage 3/2 en haut (grande, pleine largeur), titre + desc + specs dessous, scroll d'un bloc. Dialog 820px ; photo 4/3 sur mobile.
+
+**Commits (branche test) :** `eefb25a` (page + fondation) → `2bb3d57` (formatter + Montserrat) → `0a6341d` (audit) → `8487112` (cosmétique).
+
+---
+
+### 📨 RETOUR À COWORK — Temps 1 catalogue B2B : TERMINÉ + VALIDÉ SUR TEST
+
+**Statut :** ✅ livré, validé par Robin sur `test.atelier-sapi.fr/catalogue`. **Pas encore en prod.**
+
+**Ce qui est en place :** page `/catalogue` étanche (0 lien interne, 0 prix, 0 fuite wp_head, `noindex` — audité sur le HTML live), 27 produits en 4 catégories, sections Histoire/Bois éditables en ACF, filtres, modale fiche technique, formatter des noms, bloc PDF **masqué** (Temps 2).
+
+**Fondations posées pour le Temps 2 (PDF)** — à réutiliser tel quel, ne pas redévelopper :
+- Source de données unique **sans prix** : `sapi_catalogue_get_products()` (dans `inc/catalogue-data.php`).
+- Mapping caractéristiques : `sapi_catalogue_specs_schema()` / `sapi_catalogue_get_product_specs()`.
+- Champs ACF Histoire/Bois (groupe `group_catalogue_b2b`) — même source pour le PDF.
+
+**Actions côté Robin / Cowork avant d'aller plus loin :**
+1. **Remplir le contenu ACF** de la page Catalogue (bloc « Catalogue B2B — contenus » : Histoire, intro Bois, textes/images Peuplier & Okoumé). Sans ça = valeurs par défaut.
+2. **Go prod** quand Robin le décide → merge `test-theme-sapi-maison` → `master` (uniquement sur son ordre), puis Robin lance le workflow GitHub Actions.
+3. **Décider du Temps 2 (export PDF)** : quand Cowork/Robin veut l'enchaîner, ouvrir la tâche à partir de `business/docs/brief-catalogue-temps2-pdf.md` — les fondations ci-dessus sont prêtes.
+
+**Points à trancher restés ouverts (mineurs, si Cowork veut affiner) :** bloc PDF actuellement masqué (le rendre visible-désactivé possible au Temps 2) ; adresse contact = `contact@atelier-sapi.fr`.
 
 **Écarts assumés (à confirmer) :**
 1. **Titres produit** affichés bruts (pas passés dans `product-name-formatter.js`) — choix d'étanchéité/simplicité pour cette page B2B autonome. Si tu veux le rendu prénom/surnom, je câble le formatter (self-contained) au tour suivant.
