@@ -1,0 +1,14 @@
+{
+    "name": "atelier-sapi/theme-sapi-maison",
+    "description": "Dépendances PHP du thème Atelier Sâpi (catalogue B2B — export PDF via mPDF).",
+    "type": "wordpress-theme",
+    "license": "proprietary",
+    "require": {
+        "php": ">=7.4",
+        "mpdf/mpdf": "^8.2"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "platform-check": false
+    }
+}

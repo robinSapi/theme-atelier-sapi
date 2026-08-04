@@ -23,6 +23,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Temps 2 catalogue PDF : génère /vendor (mPDF) sur le runner avant le FTP.
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Install PHP dependencies (mPDF)
+        run: composer update --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
       - name: Deploy to O2Switch via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:

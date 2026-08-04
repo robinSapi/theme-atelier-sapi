@@ -19,6 +19,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Temps 2 catalogue PDF : génère /vendor (mPDF) sur le runner avant le FTP.
+      # vendor/ est gitignoré ; il n'existe que le temps du déploiement.
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Install PHP dependencies (mPDF)
+        run: composer update --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
       - name: Deploy to O2Switch via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
@@ -28,6 +39,9 @@ jobs:
           port: 21
           server-dir: /wp-content/themes/theme-sapi-maison/
           local-dir: ./
+          # ⚠️ Globs de docs SCOPÉS (racine + assets/) et NON récursifs : ils
+          # reproduisent exactement les exclusions du thème SANS stripper les
+          # fichiers .md/.txt/.html à l'intérieur de /vendor (sinon mPDF cassé).
           exclude: |
             **/.git*
             **/.git*/**
@@ -38,8 +52,10 @@ jobs:
             .claude/**
             memory/**
             mockups/**
-            **/*.md
-            **/*.csv
-            **/*.txt
-            **/*.html
+            *.md
+            *.csv
+            *.txt
+            *.html
+            assets/*.txt
+            assets/*.html
             .ftp-deploy-sync-state.json
