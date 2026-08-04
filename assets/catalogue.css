@@ -149,6 +149,7 @@ body.catalogue-b2b {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
   transition: transform .25s ease, box-shadow .25s ease;
 }
 .cat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-warm-lg); }
@@ -206,7 +207,9 @@ body.catalogue-b2b {
 .cat-gallery__track { position: absolute; inset: 0; }
 .cat-gallery__slide { position: absolute; inset: 0; margin: 0; opacity: 0; transition: opacity .35s ease; }
 .cat-gallery__slide.is-active { opacity: 1; }
-.cat-gallery__img { width: 100%; height: 100%; object-fit: cover; }
+/* Spécificité 0,2,0 pour battre `.catalogue-b2b img { height:auto }` (0,1,1),
+   sinon l'image landscape ne remplit pas le carré et laisse une bande crème. */
+.cat-gallery__slide .cat-gallery__img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cat-gallery--empty { background: var(--color-warm); }
 .cat-gallery__nav {
   position: absolute;
@@ -265,7 +268,7 @@ body.catalogue-b2b {
 .cat-modal__overlay { position: absolute; inset: 0; background: rgba(50, 50, 50, .6); backdrop-filter: blur(3px); }
 .cat-modal__dialog {
   position: relative;
-  max-width: 980px;
+  max-width: 820px;
   width: calc(100% - 40px);
   max-height: calc(100vh - 60px);
   margin: 30px auto;
@@ -292,10 +295,12 @@ body.catalogue-b2b {
   cursor: pointer;
   box-shadow: var(--shadow-warm);
 }
-.cat-modal__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; overflow: auto; }
-.cat-modal__media { position: relative; background: var(--color-warm); min-height: 320px; }
-.cat-modal__media .cat-gallery { aspect-ratio: auto; height: 100%; min-height: 320px; }
-.cat-modal__content { padding: 30px 30px 36px; overflow: auto; }
+/* Mise en page verticale : photo paysage en haut (grande), le reste dessous.
+   Le conteneur .cat-modal__grid est la zone de scroll (média + contenu). */
+.cat-modal__grid { display: flex; flex-direction: column; overflow: auto; -webkit-overflow-scrolling: touch; }
+.cat-modal__media { position: relative; background: var(--color-warm); width: 100%; flex: none; }
+.cat-modal__media .cat-gallery { aspect-ratio: 3 / 2; height: auto; min-height: 0; width: 100%; }
+.cat-modal__content { padding: 30px 36px 42px; }
 .cat-modal__title {
   /* Base em : les spans .product-firstname/.product-restname s'y échelonnent
      (surnom = 1.6em). font-family display = repli si le formatter ne tourne pas. */
@@ -321,15 +326,13 @@ body.catalogue-b2b {
 /* ── Responsive ── */
 @media (max-width: 860px) {
   .cat-histoire__inner { grid-template-columns: 1fr; gap: 24px; }
-  .cat-modal__grid { grid-template-columns: 1fr; }
-  .cat-modal__media { min-height: 260px; }
-  .cat-modal__media .cat-gallery { aspect-ratio: 1/1; height: auto; min-height: 0; }
 }
 @media (max-width: 640px) {
   .cat-section__inner { padding: 40px 18px; }
   .cat-bois__grid { grid-template-columns: 1fr; gap: 18px; }
   .cat-grid { padding: 28px 16px 90px; gap: 20px; }
   .cat-modal__dialog { width: 100%; max-height: 100vh; margin: 0; border-radius: 0; }
+  .cat-modal__media .cat-gallery { aspect-ratio: 4 / 3; }
   .cat-modal__content { padding: 22px 20px 30px; }
   .cat-gallery__nav { opacity: 1; }
   .cat-contact-fab { right: 14px; bottom: 14px; padding: 12px 20px; }

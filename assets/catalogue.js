@@ -139,11 +139,11 @@
       }
     }
 
-    // Ouverture (délégation)
+    // Ouverture : clic n'importe où sur la carte (bouton « Fiche technique » inclus).
+    // Les flèches/dots de galerie stoppent la propagation → ils naviguent sans ouvrir.
     document.addEventListener('click', function (e) {
-      var trigger = e.target.closest('[data-open-fiche]');
-      if (!trigger) return;
-      var card = trigger.closest('.cat-card');
+      if (e.target.closest('.cat-gallery__nav') || e.target.closest('.cat-gallery__dot')) return;
+      var card = e.target.closest('.cat-card');
       if (card) open(card);
     });
 
