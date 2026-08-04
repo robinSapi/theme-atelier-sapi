@@ -422,9 +422,14 @@ function sapi_catalogue_pdf_normalize_slugs($cats) {
   return $slugs;
 }
 
-/** Chemin de cache pour une sélection (clé = hash cats + stamp). */
+/**
+ * Chemin de cache pour une sélection.
+ * Clé = wp_hash(cats + stamp) → NON devinable (salée par les clés secrètes WP).
+ * La sécurité ne dépend donc pas d'AllowOverride/.htaccess : sans connaître le
+ * nom exact, un fichier ne peut pas être atteint en accès direct.
+ */
 function sapi_catalogue_pdf_cache_path($slugs) {
-  $key = md5(implode(',', $slugs) . '|' . sapi_catalogue_pdf_stamp());
+  $key = wp_hash(implode(',', $slugs) . '|' . sapi_catalogue_pdf_stamp());
   return trailingslashit(sapi_catalogue_pdf_dir()) . 'catalogue-' . $key . '.pdf';
 }
 
@@ -582,6 +587,13 @@ function sapi_catalogue_pdf_preview($request) {
   }
 
   if ($request->get_param('info')) {
+    // TEMP (recette SÉ8) : écrit le cache et expose son URL pour tester l'accès direct.
+    $path = sapi_catalogue_pdf_get_or_build($cats, true);
+    if ($path) {
+      $up = wp_upload_dir();
+      $meta['cache_basename'] = basename($path);
+      $meta['cache_url']      = str_replace($up['basedir'], $up['baseurl'], $path);
+    }
     return rest_ensure_response($meta);
   }
   header('Content-Type: application/pdf');
