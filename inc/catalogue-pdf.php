@@ -87,6 +87,295 @@ function sapi_catalogue_pdf_new_mpdf($config = []) {
 }
 
 /* =========================================================================
+ * SÉ 3 — Générateur PDF. Réutilise sapi_catalogue_get_products() (Temps 1,
+ * SANS prix) + le mapping caractéristiques + les ACF Histoire/Bois.
+ * ========================================================================= */
+
+/**
+ * ID de la page portant le template page-catalogue.php (pour lire les ACF).
+ * @return int 0 si introuvable
+ */
+function sapi_catalogue_page_id() {
+  static $id = null;
+  if ($id !== null) return $id;
+  $pages = get_posts([
+    'post_type'   => 'page',
+    'post_status' => 'publish',
+    'numberposts' => 1,
+    'fields'      => 'ids',
+    'meta_key'    => '_wp_page_template',
+    'meta_value'  => 'page-catalogue.php',
+  ]);
+  $id = $pages ? (int) $pages[0] : 0;
+  return $id;
+}
+
+/**
+ * Prépare une image pour le PDF : jamais l'original — la taille WP demandée,
+ * recompressée en JPEG ~80, mise en cache dans tmpdir/img (clé = id+taille+mtime).
+ *
+ * @param int    $attachment_id
+ * @param string $size 'large' (1024) ou 'medium'
+ * @return array{path:string,w:int,h:int}|null
+ */
+function sapi_catalogue_pdf_image($attachment_id, $size = 'large') {
+  $attachment_id = (int) $attachment_id;
+  if (!$attachment_id) return null;
+
+  $src = wp_get_attachment_image_src($attachment_id, $size);
+  if (!$src || empty($src[0])) return null;
+
+  $up   = wp_upload_dir();
+  $path = str_replace($up['baseurl'], $up['basedir'], $src[0]);
+  if (!file_exists($path)) {
+    $path = get_attached_file($attachment_id);
+    if (!$path || !file_exists($path)) return null;
+  }
+
+  $w = (int) $src[1];
+  $h = (int) $src[2];
+
+  $mtime     = @filemtime($path) ?: 0;
+  $cache_dir = trailingslashit(sapi_catalogue_pdf_tmpdir()) . 'img';
+  if (!file_exists($cache_dir)) wp_mkdir_p($cache_dir);
+  $out = trailingslashit($cache_dir) . "pdfimg-{$attachment_id}-{$size}-{$mtime}.jpg";
+
+  if (file_exists($out)) {
+    if (!$w || !$h) { $sz = @getimagesize($out); if ($sz) { $w = $sz[0]; $h = $sz[1]; } }
+    return ['path' => $out, 'w' => $w, 'h' => $h];
+  }
+
+  $editor = wp_get_image_editor($path);
+  if (is_wp_error($editor)) {
+    return ['path' => $path, 'w' => $w, 'h' => $h]; // repli : chemin brut
+  }
+  $editor->set_quality(80);
+  $saved = $editor->save($out, 'image/jpeg');
+  if (is_wp_error($saved)) {
+    return ['path' => $path, 'w' => $w, 'h' => $h];
+  }
+  $final = isset($saved['path']) ? $saved['path'] : $out;
+  if (!$w || !$h) { $sz = @getimagesize($final); if ($sz) { $w = $sz[0]; $h = $sz[1]; } }
+  return ['path' => $final, 'w' => $w, 'h' => $h];
+}
+
+/**
+ * Balise <img> ajustée (contain) dans une boîte en mm, aspect préservé.
+ * @param array|null $img  retour de sapi_catalogue_pdf_image()
+ */
+function sapi_catalogue_pdf_img_tag($img, $box_w_mm, $box_h_mm, $class = '') {
+  if (!$img || empty($img['path'])) return '';
+  $w = max(1, (int) $img['w']);
+  $h = max(1, (int) $img['h']);
+  $aspect = $w / $h;
+  if (($box_w_mm / $box_h_mm) > $aspect) {
+    $disp_h = $box_h_mm; $disp_w = $box_h_mm * $aspect;
+  } else {
+    $disp_w = $box_w_mm; $disp_h = $box_w_mm / $aspect;
+  }
+  return sprintf(
+    '<img src="%s" class="%s" style="width:%.1fmm;height:%.1fmm;">',
+    esc_attr($img['path']),
+    esc_attr($class),
+    $disp_w,
+    $disp_h
+  );
+}
+
+/**
+ * Feuille de style PDF (sous-ensemble CSS supporté par mPDF : pas de flex/grid).
+ * @return string bloc <style>
+ */
+function sapi_catalogue_pdf_css() {
+  return '<style>
+    body { font-family: montserrat; font-size: 10pt; color: #323232; }
+    h1, h2, h3 { margin: 0; }
+    .center { text-align: center; }
+    .cover { text-align: center; }
+    .cover .brand { font-family: squarepeg; font-size: 54pt; color: #937D68; }
+    .cover .subtitle { font-family: montserrat; font-size: 22pt; letter-spacing: 2px; text-transform: uppercase; color: #323232; margin-top: 6mm; }
+    .cover .cats { font-size: 11pt; color: #6a6055; margin-top: 10mm; }
+    .cover .date { font-size: 9pt; color: #937D68; margin-top: 4mm; }
+    .section-title { font-family: squarepeg; font-size: 30pt; color: #937D68; margin-bottom: 4mm; }
+    .lead { font-size: 10.5pt; color: #4a443d; }
+    .bois-block { margin-bottom: 8mm; }
+    .bois-name { font-family: squarepeg; font-size: 22pt; color: #937D68; }
+    .cat-heading { font-family: montserrat; font-weight: bold; font-size: 13pt; text-transform: uppercase; letter-spacing: 1px; color: #E35B24; border-bottom: 0.4mm solid #E35B24; padding-bottom: 2mm; margin-bottom: 5mm; }
+    .prod-title { font-family: squarepeg; font-size: 26pt; color: #937D68; }
+    .prod-sku { font-family: montserrat; font-size: 9pt; color: #937D68; text-transform: uppercase; letter-spacing: 1px; }
+    .prod-desc { font-size: 10pt; color: #4a443d; text-align: justify; }
+    .prod-desc p { margin: 0 0 2.5mm; }
+    .thumbs td { padding: 0 2mm; text-align: center; vertical-align: top; }
+    .specs { width: 100%; border-collapse: collapse; margin-top: 3mm; }
+    .specs .sec { font-family: montserrat; font-weight: bold; font-size: 9.5pt; text-transform: uppercase; color: #E35B24; padding: 3mm 0 1mm; }
+    .specs th { text-align: left; width: 42%; font-weight: bold; color: #6a6055; padding: 1.4mm 2mm; border-bottom: 0.2mm solid #e6ddd0; font-size: 9pt; }
+    .specs td { text-align: left; color: #323232; padding: 1.4mm 2mm; border-bottom: 0.2mm solid #e6ddd0; font-size: 9pt; }
+    .contact { text-align: center; }
+    .contact .h { font-family: squarepeg; font-size: 30pt; color: #937D68; margin-bottom: 6mm; }
+    .contact .line { font-size: 11pt; color: #323232; margin: 2mm 0; }
+    .muted { color: #6a6055; font-size: 8pt; }
+  </style>';
+}
+
+/**
+ * Construit le PDF combiné pour les catégories données (SANS prix, SANS lien).
+ *
+ * @param array<string>|null $cats slugs canoniques (null = toutes)
+ * @return string octets du PDF
+ * @throws \RuntimeException si mPDF indisponible
+ */
+function sapi_catalogue_pdf_build($cats = null) {
+  $all_cats = sapi_catalogue_categories();
+  $slugs    = $cats ? array_values(array_intersect(array_keys($all_cats), $cats)) : array_keys($all_cats);
+  if (!$slugs) $slugs = array_keys($all_cats);
+
+  $catalogue = sapi_catalogue_get_products($slugs);
+
+  // ── Contenus ACF (Histoire / Bois) lus sur la page catalogue ──
+  $page_id = sapi_catalogue_page_id();
+  $g = function ($key, $default = '') use ($page_id) {
+    if (!$page_id || !function_exists('get_field')) return $default;
+    $v = get_field($key, $page_id);
+    return ($v === null || $v === '') ? $default : $v;
+  };
+  $histoire_titre = (string) $g('catalogue_histoire_titre', 'Histoire de l’atelier');
+  $histoire_texte = (string) $g('catalogue_histoire_texte', '');
+  $histoire_img   = (int) $g('catalogue_histoire_image', 0);
+  $bois_titre     = (string) $g('catalogue_bois_titre', 'Deux bois au choix');
+  $bois_intro     = (string) $g('catalogue_bois_intro', '');
+  $peuplier_texte = (string) $g('catalogue_bois_peuplier_texte', 'Finition claire.');
+  $peuplier_img   = (int) $g('catalogue_bois_peuplier_image', 0);
+  $okoume_texte   = (string) $g('catalogue_bois_okoume_texte', 'Teinte plus rosée et plus sombre.');
+  $okoume_img     = (int) $g('catalogue_bois_okoume_image', 0);
+
+  $mpdf = sapi_catalogue_pdf_new_mpdf();
+  $mpdf->SetTitle('Catalogue — Atelier Sâpi');
+  $mpdf->SetAuthor('Atelier Sâpi');
+
+  $mention = 'Document non contractuel, ne constitue pas une offre de prix.';
+  $footer_global = '<div style="text-align:center; font-family:montserrat; font-size:7.5pt; color:#937D68;">Atelier Sâpi &nbsp;·&nbsp; ' . esc_html($mention) . ' &nbsp;·&nbsp; {PAGENO}</div>';
+  $mpdf->SetHTMLFooter($footer_global);
+
+  // CSS (persiste pour tout le document)
+  $mpdf->WriteHTML(sapi_catalogue_pdf_css());
+
+  // ── 1. Page de garde ──
+  $selected_labels = [];
+  foreach ($slugs as $s) $selected_labels[] = $all_cats[$s];
+  $logo_path = get_template_directory() . '/assets/pdf-logo.png';
+  $logo_html = file_exists($logo_path)
+    ? '<img src="' . esc_attr($logo_path) . '" style="width:46mm;"><br><br>'
+    : '';
+  $date_str = function_exists('date_i18n') ? date_i18n('j F Y') : date('Y-m-d');
+
+  $cover  = '<div class="cover" style="margin-top:60mm;">';
+  $cover .= $logo_html;
+  $cover .= '<div class="brand">Atelier Sâpi</div>';
+  $cover .= '<div class="subtitle">Catalogue</div>';
+  $cover .= '<div class="cats">' . esc_html(implode(' · ', $selected_labels)) . '</div>';
+  $cover .= '<div class="date">Édition du ' . esc_html($date_str) . '</div>';
+  $cover .= '</div>';
+  $mpdf->WriteHTML($cover);
+
+  // ── 2. Histoire de l'atelier ──
+  $h  = '<pagebreak />';
+  $h .= '<h2 class="section-title">' . esc_html($histoire_titre) . '</h2>';
+  if ($histoire_img) {
+    $img = sapi_catalogue_pdf_image($histoire_img, 'large');
+    $h  .= '<div class="center" style="margin:4mm 0;">' . sapi_catalogue_pdf_img_tag($img, 170, 95) . '</div>';
+  }
+  if ($histoire_texte !== '') {
+    $h .= '<div class="lead">' . wpautop(sapi_catalogue_safe_html($histoire_texte)) . '</div>';
+  }
+  $mpdf->WriteHTML($h);
+
+  // ── 3. Deux bois au choix ──
+  $b  = '<pagebreak />';
+  $b .= '<h2 class="section-title">' . esc_html($bois_titre) . '</h2>';
+  if ($bois_intro !== '') $b .= '<p class="lead">' . esc_html($bois_intro) . '</p>';
+  $peuplier_tag = $peuplier_img ? sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($peuplier_img, 'large'), 80, 60) : '';
+  $okoume_tag   = $okoume_img   ? sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($okoume_img, 'large'), 80, 60)   : '';
+  $b .= '<table style="width:100%; margin-top:4mm;"><tr>';
+  $b .= '<td style="width:50%; text-align:center; vertical-align:top; padding:0 4mm;">' . $peuplier_tag . '<div class="bois-name">Peuplier</div><p class="lead">' . esc_html($peuplier_texte) . '</p></td>';
+  $b .= '<td style="width:50%; text-align:center; vertical-align:top; padding:0 4mm;">' . $okoume_tag . '<div class="bois-name">Okoumé</div><p class="lead">' . esc_html($okoume_texte) . '</p></td>';
+  $b .= '</tr></table>';
+  $mpdf->WriteHTML($b);
+
+  // ── 4. Sections catégories → une page par produit ──
+  foreach ($slugs as $slug) {
+    $block = isset($catalogue[$slug]) ? $catalogue[$slug] : null;
+    if (!$block || empty($block['products'])) continue;
+    $first = true;
+    foreach ($block['products'] as $p) {
+      // Pied de page spécifique : référence produit + mention + n° de page
+      $ref = $p['sku'] !== '' ? 'Réf. ' . $p['sku'] . ' · ' : '';
+      $mpdf->SetHTMLFooter('<div style="font-family:montserrat; font-size:7.5pt; color:#937D68;"><table style="width:100%"><tr><td style="text-align:left;">' . esc_html($ref) . esc_html($mention) . '</td><td style="text-align:right;">{PAGENO}</td></tr></table></div>');
+
+      $html  = '<pagebreak />';
+      if ($first) {
+        $html .= '<div class="cat-heading">' . esc_html($block['label']) . '</div>';
+        $first = false;
+      }
+      // En-tête produit
+      $html .= '<table style="width:100%;"><tr>';
+      $html .= '<td style="vertical-align:bottom;"><span class="prod-title">' . esc_html($p['title']) . '</span></td>';
+      if ($p['sku'] !== '') $html .= '<td style="text-align:right; vertical-align:bottom;"><span class="prod-sku">Réf. ' . esc_html($p['sku']) . '</span></td>';
+      $html .= '</tr></table>';
+
+      // Visuel principal + vignettes
+      $gids = array_values(array_filter(array_map('intval', $p['gallery_ids'])));
+      if (!empty($gids)) {
+        $main = sapi_catalogue_pdf_image($gids[0], 'large');
+        $html .= '<div class="center" style="margin:3mm 0;">' . sapi_catalogue_pdf_img_tag($main, 170, 100) . '</div>';
+        $thumbs = array_slice($gids, 1, 3);
+        if (!empty($thumbs)) {
+          $html .= '<table class="thumbs" style="width:100%; margin-bottom:3mm;"><tr>';
+          foreach ($thumbs as $tid) {
+            $html .= '<td>' . sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($tid, 'medium'), 52, 40) . '</td>';
+          }
+          // cellules vides pour garder l'alignement si < 3 vignettes
+          for ($k = count($thumbs); $k < 3; $k++) $html .= '<td></td>';
+          $html .= '</tr></table>';
+        }
+      }
+
+      // Description intégrale (déjà nettoyée des liens au Temps 1)
+      if ($p['description'] !== '') {
+        $html .= '<div class="prod-desc">' . wpautop($p['description']) . '</div>';
+      }
+
+      // Tableau caractéristiques (mapping Temps 1)
+      if (!empty($p['specs'])) {
+        $html .= '<table class="specs">';
+        foreach ($p['specs'] as $section) {
+          $html .= '<tr><td class="sec" colspan="2">' . esc_html($section['title']) . '</td></tr>';
+          foreach ($section['items'] as $item) {
+            $html .= '<tr><th>' . esc_html($item['label']) . '</th><td>' . esc_html($item['value']) . '</td></tr>';
+          }
+        }
+        $html .= '</table>';
+      }
+
+      $mpdf->WriteHTML($html);
+    }
+  }
+
+  // ── 5. Page contact (texte NON cliquable) ──
+  $mpdf->SetHTMLFooter($footer_global);
+  $c  = '<pagebreak />';
+  $c .= '<div class="contact" style="margin-top:70mm;">';
+  $c .= '<div class="h">Nous contacter</div>';
+  $c .= '<div class="line">Atelier Sâpi — Luminaires artisanaux en bois</div>';
+  $c .= '<div class="line">contact@atelier-sapi.fr</div>';
+  $c .= '<div class="line">atelier-sapi.fr</div>';
+  $c .= '<br><div class="muted">' . esc_html($mention) . '</div>';
+  $c .= '</div>';
+  $mpdf->WriteHTML($c);
+
+  return $mpdf->Output('', \Mpdf\Output\Destination::STRING_RETURN);
+}
+
+/* =========================================================================
  * Route REST self-test (SÉ 1) — diagnostic, à retirer/sécuriser après la S1.
  * GET /wp-json/sapi/v1/catalogue-pdf-selftest        → JSON diagnostic
  * GET /wp-json/sapi/v1/catalogue-pdf-selftest?download=1 → PDF « hello » inline
@@ -97,7 +386,47 @@ add_action('rest_api_init', function () {
     'permission_callback' => '__return_true',
     'callback'            => 'sapi_catalogue_pdf_selftest',
   ]);
+
+  // Prévisualisation TEMPORAIRE (SÉ 3) — remplacée par l'endpoint réel en SÉ 5.
+  // GET /wp-json/sapi/v1/catalogue-pdf-preview?cats=suspensions,appliques[&info=1]
+  register_rest_route('sapi/v1', '/catalogue-pdf-preview', [
+    'methods'             => 'GET',
+    'permission_callback' => '__return_true',
+    'callback'            => 'sapi_catalogue_pdf_preview',
+  ]);
 });
+
+function sapi_catalogue_pdf_preview($request) {
+  if (!sapi_catalogue_pdf_autoload()) {
+    return new WP_Error('mpdf_absent', 'mPDF non déployé', ['status' => 503]);
+  }
+  $raw  = (string) $request->get_param('cats');
+  $cats = $raw !== '' ? array_filter(array_map('sanitize_key', explode(',', $raw))) : null;
+
+  try {
+    $t0  = microtime(true);
+    $pdf = sapi_catalogue_pdf_build($cats);
+    $meta = [
+      'ok'          => strlen($pdf) > 0,
+      'bytes'       => strlen($pdf),
+      'mb'          => round(strlen($pdf) / 1048576, 2),
+      'seconds'     => round(microtime(true) - $t0, 2),
+      'peak_mem_mb' => round(memory_get_peak_usage(true) / 1048576, 1),
+      'cats'        => $cats ?: 'toutes',
+    ];
+  } catch (\Throwable $e) {
+    return new WP_Error('pdf_error', $e->getMessage(), ['status' => 500]);
+  }
+
+  if ($request->get_param('info')) {
+    return rest_ensure_response($meta);
+  }
+  header('Content-Type: application/pdf');
+  header('Content-Disposition: inline; filename="catalogue-atelier-sapi.pdf"');
+  header('X-Robots-Tag: noindex, nofollow');
+  echo $pdf; // phpcs:ignore — flux binaire PDF
+  exit;
+}
 
 function sapi_catalogue_pdf_selftest($request) {
   $tmpdir = sapi_catalogue_pdf_tmpdir();

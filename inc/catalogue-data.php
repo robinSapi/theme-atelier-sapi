@@ -353,6 +353,7 @@ function sapi_catalogue_normalize_product($product) {
   return [
     'id'          => $id,
     'title'       => get_the_title($id),
+    'sku'         => (string) $product->get_sku(), // référence (pas un prix) — utile au gabarit PDF
     'short_desc'  => sapi_catalogue_safe_html($product->get_short_description()),
     'description' => sapi_catalogue_safe_html($product->get_description()),
     'gallery_ids' => array_map('intval', $gallery_ids),
