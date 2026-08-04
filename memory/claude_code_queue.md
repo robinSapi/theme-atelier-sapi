@@ -495,7 +495,14 @@ texte sur fond sombre. **Conséquence assumée par Robin : le hero perd son acce
 - **Durcissement** : descriptions produit passées par `sapi_catalogue_safe_html()` → `strip_shortcodes` + `wp_kses` sans `<a>` (empêche un lien interne éditorial de fuiter dans la modale).
 - Équilibrage accolades/parenthèses/crochets OK sur les 2 fichiers PHP (pas de binaire PHP local pour lint, comme d'habitude).
 
-**⚠️ Non vérifié (nécessite la page publiée + un navigateur, comme les tâches charte) :** rendu visuel, audit du HTML **rendu** (galeries, filtres à l'écran, modale, mobile Safari). À valider par Robin sur test.
+**✅ AUDIT DU HTML RENDU — page publiée `/catalogue` (fetch live 2026-08-04, commit `2bb3d57`) :**
+- `<a href>` interne : **0** (uniquement Google Fonts externe + mailto contact).
+- Prix (€, woocommerce-Price, data-price, "price") : **0**.
+- Fuites wp_head (canonical, og:, JSON-LD, rel REST/RSS/oEmbed/shortlink, wp-json) : **0** → `<head>` manuel étanche confirmé.
+- `<meta robots noindex,nofollow>` présent. Bloc PDF `hidden`. 27 produits, tableaux specs présents.
+- **Formatter câblé** (commit `2bb3d57`) : titres carte+modale en `.product-name` + `product-name-formatter.js` chargé ; Montserrat via Google Fonts (comme le site). Le rendu prénom/surnom est JS (invisible au curl) → à confirmer à l'œil.
+
+**⚠️ Reste à valider par Robin EN NAVIGATEUR (non testable au curl) :** rendu visuel, titres formatés prénom/surnom, filtres catégories, ouverture modale + fermeture croix/clic/Échap, galeries + swipe, mobile Safari.
 
 **Écarts assumés (à confirmer) :**
 1. **Titres produit** affichés bruts (pas passés dans `product-name-formatter.js`) — choix d'étanchéité/simplicité pour cette page B2B autonome. Si tu veux le rendu prénom/surnom, je câble le formatter (self-contained) au tour suivant.
