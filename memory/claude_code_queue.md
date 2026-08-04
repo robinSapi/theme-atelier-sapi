@@ -4,163 +4,6 @@
 
 ---
 
-## [TÂCHE ✅ EN PROD (master poussé) — reste : Robin lance le workflow GHA] Habillage des emails WooCommerce à la charte
-**Date :** 2026-07-22
-
-> **✔️ Robin (2026-07-22) : « ça a l'air parfait »** via l'aperçu WooCommerce (Réglages → E-mails).
-> **🚀 GO PROD (2026-07-22) — emails SEULS :** vu que `master..test` = 86 commits (toute la refonte conseiller encore en cours), on n'a PAS mergé toute la branche. **Cherry-pick du seul commit emails `cb3092f` sur master** (→ `93e172b`, 3 fichiers `woocommerce/emails/` uniquement), `git push origin master` OK. La refonte conseiller reste sur test.
-> **⏳ Reste à faire par Robin :** lancer le **workflow GitHub Actions** pour déployer master → atelier-sapi.fr. Puis vérifier un aperçu email sur la prod.
-
-### ✅ Résultat Claude Code (2026-07-22)
-**Livré + poussé sur test** (commit `cb3092f`, rien sur master). 3 fichiers de coquille commune surchargés dans le thème, **aucun template individuel touché** :
-- `woocommerce/emails/email-header.php` : en-tête **fond crème `#FBF6EA`**, **logo PNG** (`.../2024/12/logo_sapi.png`, 128px) centré et hardcodé (pas le SVG), titre du mail (`$email_heading`) en **Square Peg 38px bois `#937D68`** (repli Georgia), **filet bois `#937D68` 3px** dessous (pas de filet orange). Google Fonts en `<link>`, fond extérieur sable `#F5EDE4`.
-- `woocommerce/emails/email-footer.php` : pied **crème**, réseaux **Instagram / Facebook / Pinterest** en bois, contact (contact@atelier-sapi.fr · 06 80 43 55 85), « Luminaires artisanaux en bois, Lyon, France », « © 2026 Atelier Sâpi, Assemblez, Éclairez, Admirez ! ».
-- `woocommerce/emails/email-styles.php` : palette charte + **tableau de commande** : en-tête **fond bois texte crème**, lignes séparées par `#E8DCC4`, **Total en orange `#E35B24` gras**, texte `#323232`, secondaire `#585858`. Container 600px, fond sable. Couleurs **en dur** (rendu prévisible, indépendant des réglages WooCommerce).
-
-**Structure :** header.php ouvre le container + `#body_content_inner`, footer.php referme tout (paire cohérente, balises vérifiées équilibrées). Le **corps** (tableau, adresses) reste **généré par WooCommerce** ; il est juste habillé via les sélecteurs de `email-styles.php`.
-
-**Flag `email_improvements` géré :** sélecteurs **mode-agnostiques** (`thead th`, `tr.order_item`, `tr.order-totals-total`, `.address`) → posés dans les DEUX modes (vérifié dans le markup core 9.7.1 : la classe `email-order-details` n'apparaît que si le flag est ON, mais `.td` / `.order-totals-total` / `thead>th` sont toujours là). Les 3 surcharges remplacent de toute façon la coquille core quel que soit le flag.
-
-**Charte :** couleurs charte, **aucun tiret cadratin** (le « — » de la maquette dans le pied a été remplacé par « , »), accents en entités HTML, sorties échappées (`esc_html`/`esc_url`/`esc_attr`).
-
-**⚠️ Non vérifié ici (pas de rendu email dans le bac à sable, pas de `php -l`) :** contrôlé = balises HTML équilibrées, `{}`/`()` PHP équilibrés, aucun tiret cadratin. **À tester par Robin sur test :**
-1. Passer une **commande test** sur test.atelier-sapi.fr (ou WooCommerce → Réglages → E-mails → un mail → *Aperçu* / *Envoyer un test*).
-2. Vérifier sur **Gmail** (le logo PNG doit s'afficher, Square Peg retombera sur Georgia = normal) **et** si possible Apple Mail / Outlook.
-3. Points à l'œil : en-tête crème + logo + filet bois, en-tête de tableau bois, **Total en orange**, pied crème.
-
-**Réglages couleurs WooCommerce (secondaires, car tout est en dur dans email-styles) — à poser par Robin si tu veux un repli cohérent :** base `#937D68`, fond `#F5EDE4`, fond du corps `#FEFDFB`, texte `#323232`. Le champ « Texte de pied de page » des réglages est désormais **ignoré** (le pied est hardcodé dans email-footer.php).
-
-**Reste à confirmer :** état réel du flag `email_improvements` sur le site (si le tableau s'affiche bizarrement sous ce mode, me le dire, mais les sélecteurs sont prévus pour les deux).
-
----
-
-### ➡️ RETOUR À COWORK (2026-07-22) — main rendue
-
-**Statut :** partie technique **terminée**. Robin a validé (« nickel, parfait »). Emails **déployés en prod** (cherry-pick `93e172b` sur master, push OK).
-
-**Ce qui reste, côté Robin (Cowork peut suivre) :**
-1. **Lancer le workflow GitHub Actions** (master → atelier-sapi.fr) si pas déjà fait.
-2. Après déploiement, **vérifier un aperçu email sur la prod** (WooCommerce → Réglages → E-mails → Aperçu).
-3. (Optionnel) Poser les **réglages couleurs** WooCommerce → E-mails comme repli cohérent : base `#937D68`, fond `#F5EDE4`, fond du corps `#FEFDFB`, texte `#323232`.
-
-**Rappel transverse (autre tâche) :** le **snippet Mode vacances** est validé sur test mais **pas encore collé en prod** dans Code Snippets. À faire par Robin **avant le départ (24/07)**, sinon pas de bandeau pendant les congés.
-
-**→ Cowork : à toi. Une fois le déploiement GHA confirmé par Robin, tu peux purger cette tâche de la queue.**
-
----
-
-**Date (consigne d'origine) :** 2026-07-22
-**Priorité :** normale.
-**Branche :** test uniquement, jamais master. Robin valide sur test avant prod.
-
-**Contexte :** Robin veut que tous les emails transactionnels WooCommerce (Commande en cours, en attente, terminée, remboursée, Colissimo…) soient habillés à la charte Atelier Sâpi, au lieu du gabarit WooCommerce par défaut. Le rendu cible est **validé** par Robin.
-
-**⚠️ Maquette de référence validée (source de vérité du rendu) :** `~/Atelier Sapi Claude Cowork/business/docs/emails/coquille-email-woocommerce-reference.html`. **L'ouvrir et s'y conformer** (couleurs, en-tête, tableau de commande, bouton, pied de page). C'est un mail « Commande en cours » simulé ; en prod le corps (tableau, adresses) est généré par WooCommerce, seul l'habillage est à reproduire.
-
-**Principe (ne PAS refaire les 15 templates un par un) :** surcharger uniquement la **coquille commune** dans le thème `theme-sapi-maison/woocommerce/emails/` :
-- `email-header.php` (copié depuis `woocommerce/templates/emails/email-header.php`) : en-tête **fond crème `#FBF6EA`**, logo centré (voir ci-dessous), le titre du mail (`$email_heading`) en **Square Peg 38px `#937D68`** avec repli Georgia, puis un **filet bois `#937D68` de 3px** sous l'en-tête. Pas de filet orange (choix Robin, cohérent avec le bandeau du site).
-- `email-footer.php` : pied **fond crème `#FBF6EA`**, liens réseaux (Instagram / Facebook / Pinterest) en bois, contact (contact@atelier-sapi.fr · 06 80 43 55 85), ligne « Luminaires artisanaux en bois — Lyon, France », et « © 2026 Atelier Sâpi — Assemblez, Éclairez, Admirez ! ». (Voir la maquette pour le détail.)
-- `email-styles.php` : reprendre la **palette charte** pour le corps et surtout le **tableau de commande** — en-tête de tableau **fond bois `#937D68` texte crème**, lignes séparées par `#E8DCC4`, **Total en orange `#E35B24` gras**, texte courant `#323232`, secondaire `#585858`. Corps en Montserrat (repli Arial), titres en Square Peg (repli Georgia). Largeur container 600px, fond extérieur sable `#F5EDE4`.
-
-**Logo :** utiliser le PNG déjà présent dans la médiathèque : `https://atelier-sapi.fr/wp-content/uploads/2024/12/logo_sapi.png` (largeur ~128px). **Ne PAS utiliser le SVG** (`logo_sapi.svg`) : les SVG ne s'affichent pas dans Gmail/Outlook. Le hardcoder dans `email-header.php` (centré) plutôt que dépendre du champ « Image d'en-tête ».
-
-**Réglages couleurs à poser (WooCommerce → Réglages → E-mails), à confirmer avec Robin :** couleur de base `#937D68`, fond `#F5EDE4`, fond du corps `#FEFDFB`, texte du corps `#323232`. (Le gros de l'habillage vient des 3 fichiers ; ces réglages servent de repli cohérent.)
-
-**Polices :** charger Montserrat + Square Peg via `<link>` Google Fonts dans le header pour les clients qui les supportent, avec replis **Arial (corps)** et **Georgia (titres)** partout ailleurs. Ne pas compter sur leur affichage universel (c'est la nature de l'email).
-
-**Points de vigilance :**
-- WooCommerce 10.4 a un flag **`email_improvements`** (vu dans le template `customer-processing-order.php`) qui change un peu le markup. Vérifier son état sur le site et s'assurer que la surcharge marche dans les deux cas.
-- **Aucun tiret cadratin** dans les textes (charte Robin) : utiliser « : » ou « , ». Accents en entités HTML pour l'éditeur.
-- Sorties échappées (`esc_url`, `esc_html`).
-- Tester le rendu réel : passer une **commande test** sur le site test (ou l'aperçu/envoi de test WooCommerce) et vérifier sur Gmail + un client Outlook/Apple Mail si possible. Le rendu visuel n'est pas vérifiable dans le bac à sable.
-
-**Critères de succès :**
-- Tous les mails WooCommerce héritent de l'habillage charte (en-tête crème + logo + filet bois, tableau bois/orange, pied crème), sans avoir touché aux templates individuels.
-- Le logo (PNG) s'affiche, y compris sur Gmail.
-- Le total de commande ressort en orange, l'en-tête de tableau en bois.
-- Rien poussé sur master ; validé sur test par Robin avant prod.
-
-**Après validation :** décliner l'identité sur les mails Brevo est **déjà couvert** côté Cowork (le `template_base.html` newsletter est dans la même charte) — rien à faire ici.
-
----
-
-## [TÂCHE ✅ CODÉE — snippet prêt à coller, en attente validation Robin] Mode vacances — congés du 24 juillet au 24 août 2026
-**Date :** 2026-07-22
-
-### ✅ Résultat Claude Code (2026-07-22)
-**Livrable :** `snippet-mode-vacances.php` à la racine du dépôt (même convention que les autres `snippet-*.php`). **C'est un snippet Code Snippets, PAS une modif du thème** (conforme à la demande). Rien poussé sur master.
-
-**Ce que fait le snippet (tout piloté par 2 dates) :**
-- **Bandeau haut de site** sur toutes les pages, injecté via `wp_body_open` (juste au-dessus du header, en flux normal → aucun conflit avec le header sticky, rien en `position:fixed`). Fond crème chaud charte (`#FBF6EA`→`#F4EAD4`), filet orange charte en haut (`#E35B24`), filet bois en bas (`#937D68`), texte foncé `#323232` (contraste ~11:1, largement lisible). Message = celui proposé, dates en gras.
-- **Rappel court « expédition à partir du 24 août »** à 3 endroits : fiche produit (hook `woocommerce_before_add_to_cart_button`, juste au-dessus du bouton Ajouter au panier), page panier (`woocommerce_before_cart`), checkout (`woocommerce_before_checkout_form`, avant paiement). Petite pastille crème + liseré orange à gauche.
-- La **date affichée est dérivée de la config** (`wp_date('j F')`) → changer la date de retour change le texte partout, automatiquement.
-
-**Mécanisme dates :** en haut du fichier, fonction `sapi_vacances_reglages()` avec `'debut' => '2026-07-24'`, `'retour' => '2026-08-24'`. Actif du jour de début (00h00) au jour de retour **exclu** → **s'affiche tout seul le 24/07, disparaît tout seul le 24/08**. Prochaine fois : Robin change juste ces 2 dates. Toggle `'apercu' => false` : le passer à `true` force l'affichage pour tester hors période (bien le **remettre à false** avant la vraie mise en ligne).
-
-**Charte respectée :** couleurs charte uniquement, **aucun tiret cadratin** (le « — » de l'exemple de la tâche a été remplacé par « : » dans les messages), accents en entités HTML pour zéro souci d'encodage dans l'éditeur Code Snippets. Sorties échappées (date via `esc_html`, reste = texte statique que je maîtrise).
-
-**👉 Étape Robin pour valider sur test (le snippet n'est pas déployé par git — c'est un Code Snippet à coller) :**
-1. Site **test** → réglages → **Code Snippets** → *Ajouter*.
-2. Coller le contenu de `snippet-mode-vacances.php`, exécution **« Partout / Everywhere »**, Activer.
-3. Comme on est avant le 24/07, pour prévisualiser : mettre `'apercu' => true`, vérifier le rendu (bandeau + fiche produit + panier + checkout), puis **remettre `'apercu' => false`**.
-4. Quand c'est bon → « Go » : je peux te confirmer la manip, mais côté prod **c'est le même geste** (coller/activer le snippet sur le site prod). Les 2 dates étant déjà bonnes, il s'activera seul le 24/07 et se coupera seul le 24/08.
-
-**⚠️ Hypothèse à confirmer :** panier/checkout en mode **classique** (shortcode), pas en blocs Gutenberg. Le site a des templates classiques custom (`woocommerce/cart/`, `woocommerce/checkout/`) → très probablement classique, donc les hooks panier/checkout marchent. **Filet de sécurité :** même si le panier/checkout étaient en blocs (hooks inline non déclenchés), le **bandeau site-wide s'affiche quand même sur ces pages** → le client est prévenu avant de payer dans tous les cas.
-
-**Non vérifié ici :** rendu visuel réel (pas de navigateur / pas d'accès WP dans le bac à sable). Syntaxe PHP contrôlée (accolades/parenthèses équilibrées, tous les hooks pointent vers des fonctions définies) mais pas de `php -l` (binaire absent). À valider à l'œil sur test.
-
-**🔧 Ajustement (2026-07-22, retour Robin) :** sur la **homepage**, le header transparent passe par-dessus le bandeau → **bandeau masqué sur la homepage** (`if ( is_front_page() ) return;` dans `sapi_vacances_banniere`). Les rappels fiche produit / panier / checkout restent affichés partout. Robin doit **re-coller la version à jour** du snippet dans Code Snippets sur test.
-
-**🎨 Esthétique (2026-07-22, retour Robin) :** (1) filet orange en haut du bandeau **retiré** (filet bois en bas conservé) ; (2) liseré orange à gauche de la pill **retiré sur la fiche produit** (classe modifieur `sapi-vac-note--produit` ciblée via `current_action()` → bordure uniforme). **Panier + checkout gardent le liseré orange** pour l'instant (Robin a scopé « fiche produit » ; à aligner si besoin). Re-coller la version à jour du snippet.
-
----
-
-### ➡️ RETOUR À COWORK (2026-07-22) — main rendue
-
-**Statut :** partie technique **terminée** côté Claude Code. Snippet livré + 2 tours de retours Robin intégrés (homepage + esthétique). Rien poussé sur master. Le fichier `snippet-mode-vacances.php` est **local uniquement** (gitignoré, comme tous les `snippet-*.php`) → pas déployé par git, c'est normal.
-
-**Ce qui reste, côté Robin (Cowork peut suivre) :**
-1. **Coller / re-coller** la dernière version de `snippet-mode-vacances.php` dans **Code Snippets** (test), exécution « Partout », activer.
-2. **Valider le rendu** sur test (`'apercu' => true` le temps du test, puis remettre `false`) : bandeau (hors homepage), rappel fiche produit / panier / checkout.
-3. Sur « Go prod » : **même geste** de collage/activation sur le site prod (les dates 24/07 → 24/08 sont déjà réglées, activation/désactivation automatiques).
-
-**2 décisions en attente de Robin (à relayer si Cowork le recroise) :**
-- **Date de début du bandeau** : réglé sur **24/07** (jour de départ). Robin voulait peut-être l'afficher **dès maintenant** (22/07) pour prévenir les acheteurs des 2 derniers jours → si oui, passer `'debut'` à `2026-07-22`.
-- **Liseré orange panier + checkout** : encore présent (retiré seulement sur la fiche produit). À aligner (bordure uniforme partout) si Robin préfère.
-
-**Point à confirmer (technique, faible risque) :** panier/checkout supposés **classiques** (shortcode), pas blocs Gutenberg. Si blocs, les rappels inline panier/checkout ne s'afficheraient pas, mais le bandeau site-wide couvre quand même ces pages.
-
-**→ Cowork : à toi. Une fois validé par Robin sur prod, tu peux purger cette tâche de la queue.**
-
----
-
-**Date (consigne d'origine) :** 2026-07-22
-**Priorité :** HAUTE — ⏰ congés dans 2 jours (début vendredi 24/07). À livrer sur test vite pour validation Robin avant le départ.
-**Branche :** test uniquement, jamais master. Robin valide avant prod.
-
-**Contexte :** Robin part en congés du **vendredi 24 juillet au lundi 24 août 2026**. Il fabrique et expédie tout seul, donc aucune expédition pendant cette période. Décision prise : **on continue à vendre** (zéro perte de vente), on gère juste l'attente en prévenant clairement le client que sa commande sera **fabriquée et expédiée à partir du lundi 24 août**.
-
-**À faire :**
-
-1. **Bandeau haut de site** (toutes pages), aux couleurs de la charte, bien visible mais pas agressif. Message proposé (Robin peut ajuster) :
-   « Atelier en congés jusqu'au 24 août. Vous pouvez commander dès maintenant : vos créations seront fabriquées et expédiées à partir du 24 août. Merci pour votre patience ! »
-
-2. **Rappel du délai différé aux endroits sensibles** pour que personne ne découvre le délai après avoir payé :
-   - **Fiche produit**, près du bouton « Ajouter au panier » : mention courte type « Atelier en congés — expédition à partir du 24 août ».
-   - **Page panier + checkout** : le même rappel, visible avant paiement.
-
-3. **Mécanisme d'activation/désactivation simple, piloté par dates.** Idéalement un **snippet via Code Snippets** (pas de modif directe du thème) qui active tout automatiquement entre deux dates paramétrables (début / fin de congés) et se désactive seul après. Robin ne doit pas avoir à toucher au code pour rentrer/sortir du mode vacances la prochaine fois — juste changer 2 dates.
-
-**Critères de succès :**
-- Le bandeau s'affiche sur tout le site pendant la période et disparaît seul après le 24 août.
-- Le délai est rappelé sur fiche produit, panier et checkout.
-- Le client peut commander et payer normalement.
-- Robin peut réactiver le mode plus tard en changeant seulement les dates.
-- Respect de la charte (couleurs, pas de tirets cadratins), rien poussé sur master.
-
-**⚠️ Vu l'urgence :** si le mécanisme complet par dates prend trop de temps, livrer d'abord le **bandeau seul activable** (le plus important) et compléter le reste ensuite.
-
-
 > **REFONTE FILTRAGE CONSEILLER — décisions d'architecture (11/06/2026).** Les tâches ci-dessous REMPLACENT les anciennes (qui supposaient un filtrage en double PHP/JS, désormais périmé).
 > **Cap :** filtrage 100% côté serveur (PHP), un seul cerveau, **suppression du filtrage JavaScript** (le JS ne fait plus qu'afficher). Le filtre serveur est appelé à **2 moments** : (1) au chargement de `/mes-creations/` avec une pièce, (2) à la fermeture de la modale (questionnaire terminé OU abandonné en cours). L'IA (Sonnet) n'ajoute qu'un **commentaire** en fin de questionnaire.
 > **Source de vérité du comportement voulu :** `assets/guide-filtrage-simulateur.html` (simulateur jouable + éditeur de règles, à ouvrir). Doc d'appui : `assets/guide-filtrage-impact.html`.
@@ -613,3 +456,54 @@ texte sur fond sombre. **Conséquence assumée par Robin : le hero perd son acce
 **Rappel :** `main` de ce dépôt est directement en ligne. Le push publie.
 
 </details>
+
+---
+
+## [TÂCHE] Page /catalogue B2B — Temps 1 (page web seule, sans PDF)
+**Date :** 2026-08-04
+**Priorité :** normale
+**⚠️ Demander un PLAN + état des lieux AVANT de coder.** Ne rien committer sans le go de Robin. Travail sur **branche test** (jamais master), Robin valide sur test avant prod. Demander la branche exacte à utiliser.
+
+**Brief complet :** `business/docs/brief-catalogue-temps1-page.md` (à lire en entier). Le Temps 2 (export PDF) est documenté séparément dans `business/docs/brief-catalogue-temps2-pdf.md` — **hors périmètre ici**, mais le Temps 1 doit poser les fondations qu'il réutilisera.
+
+**Contexte :** catalogue produits sans prix pour prescripteurs B2B (architectes, décorateurs) qui le transmettent à leur client final. ~40 produits, 4 catégories (Suspensions, Appliques, Lampadaires, Posables). Découpé en 2 temps : la page d'abord, le PDF plus tard.
+
+**À faire (résumé, détail dans le brief) :**
+- Template autonome `page-catalogue.php`, **étanchéité** (aucun chemin vers le reste du site) : pas de `get_header/footer/nav`, ne pas se reposer sur `wp_head()` (imprimer à la main les seuls CSS/JS nécessaires), logo image non cliquable, aucune fiche cliquable vers `/produit/`, aucun lien sortant, aucun prix (ni HTML ni JSON), `noindex,nofollow`.
+- Ordre de page : en-tête -> section « Histoire de l'atelier » (ACF) -> section « Deux bois au choix » Peuplier/Okoumé (ACF) -> 4 boutons filtres catégories (affichage client) -> grille produits (carte : galerie + titre + desc courte + bouton « Fiche technique ») -> bloc export PDF **désactivé/non câblé au Temps 1** -> bouton « Nous contacter » (mailto ou form intégré).
+- Modale fiche technique : description complète + tableau caractéristiques à partir des **clés ACF/attributs Woo réels (lire le code, ne rien inventer)** ; établir le mapping caractéristiques (réutilisé au Temps 2) ; fermeture croix/clic extérieur/Échap ; mobile OK.
+- **Fondations pour le Temps 2** : isoler la source de données produits (requête appelable indépendamment du rendu) et le mapping caractéristiques ; créer les champs ACF « Histoire » et « Bois ».
+
+**Critères de succès :** voir la « Recette Temps 1 » à la fin du brief. En particulier : audit HTML remonte zéro `<a href>`/`<link rel>` interne, zéro `og:url`, zéro prix ; filtres catégories OK ; modale OK ; `noindex` vérifié ; mobile OK.
+
+### ✅ RÉPONSE CLAUDE CODE — Temps 1 CODÉ + POUSSÉ SUR TEST (2026-08-04, en attente validation Robin)
+
+**Branche :** `test-theme-sapi-maison`. Code livré, mais **la page n'existe pas encore côté WordPress** — voir le pas-à-pas ci-dessous (action Robin).
+
+**Fichiers créés/modifiés :**
+- `inc/catalogue-data.php` (NEW) — fondation Temps 2 : source de données unique `sapi_catalogue_get_products()` (produits groupés par catégorie, **zéro prix**, images en IDs d'attachment) + mapping caractéristiques `sapi_catalogue_specs_schema()` / `sapi_catalogue_get_product_specs()` (aligné sur `single-product.php` + `acf-champs-fiche-technique.csv`, aucune clé inventée) + `sapi_catalogue_categories()` + groupe ACF `group_catalogue_b2b` (Histoire / Bois / accroche).
+- `page-catalogue.php` (NEW) — template autonome « Catalogue B2B » (pas de get_header/footer/wp_head/wp_footer ; `<head>` manuel + `noindex,nofollow` ; logo image morte ; en-tête → Histoire → Bois → 4 filtres → grille cartes → bloc PDF **masqué** → FAB contact mailto `contact@atelier-sapi.fr` ; modale fiche technique).
+- `assets/catalogue.css` (NEW) — feuille autonome (tokens recopiés, Square Peg local, Montserrat→fallback système, responsive).
+- `assets/catalogue.js` (NEW) — galerie (nav + dots + swipe), filtres client-side (`.is-filtered-out`), modale (ouverture par clonage du `<template>` de la carte, fermeture croix/clic extérieur/Échap, piège de focus, lock scroll).
+- `functions.php` — 1 ligne : `require_once .../inc/catalogue-data.php` (front + admin).
+
+**Étanchéité — audit STATIQUE passé** (le HTML rendu reste à auditer une fois la page publiée) :
+- 0 `get_header/get_footer/wp_head/wp_footer/wp_nav_menu` appelés.
+- Unique `<a href>` = le mailto contact (autorisé par le brief). 0 `<link rel>`, 0 `og:`, 0 JSON-LD dans le template.
+- 0 prix / `get_price` / permalink dans template + data + JS.
+- `<meta name="robots" content="noindex, nofollow">` présent.
+- **Durcissement** : descriptions produit passées par `sapi_catalogue_safe_html()` → `strip_shortcodes` + `wp_kses` sans `<a>` (empêche un lien interne éditorial de fuiter dans la modale).
+- Équilibrage accolades/parenthèses/crochets OK sur les 2 fichiers PHP (pas de binaire PHP local pour lint, comme d'habitude).
+
+**⚠️ Non vérifié (nécessite la page publiée + un navigateur, comme les tâches charte) :** rendu visuel, audit du HTML **rendu** (galeries, filtres à l'écran, modale, mobile Safari). À valider par Robin sur test.
+
+**Écarts assumés (à confirmer) :**
+1. **Titres produit** affichés bruts (pas passés dans `product-name-formatter.js`) — choix d'étanchéité/simplicité pour cette page B2B autonome. Si tu veux le rendu prénom/surnom, je câble le formatter (self-contained) au tour suivant.
+2. **Montserrat** non self-hosté dans le thème → fallback police système sur cette page autonome (Square Peg, lui, est local). Si tu veux Montserrat garanti, je l'ajoute en @font-face local.
+
+**👉 ACTION ROBIN — créer la page dans WordPress :**
+1. WP admin → **Pages → Ajouter** : titre « Catalogue », **permalien `/catalogue`**.
+2. Panneau **Attributs de page → Modèle → « Catalogue B2B »**, puis **Publier**.
+3. La page publiée fait apparaître le bloc ACF **« Catalogue B2B — contenus »** : remplir Accroche, Histoire (titre/texte/image), Bois (intro + textes/images Peuplier & Okoumé). Vide = valeurs par défaut.
+4. Ouvrir `test.atelier-sapi.fr/catalogue` et valider : filtres, galeries, bouton « Fiche technique » (modale : description + tableau caractéristiques), fermeture croix/clic/Échap, mobile.
+5. Retour : ce qui va / ne va pas → j'ajuste. (Le bloc PDF est volontairement masqué : Temps 2.)

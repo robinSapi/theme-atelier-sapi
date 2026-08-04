@@ -24,6 +24,10 @@ if (is_admin()) {
   require_once get_template_directory() . '/inc/conseiller-rules-admin.php';
 }
 
+// Catalogue B2B (prescripteurs) — Temps 1. Source de données + mapping specs +
+// champs ACF éditoriaux. Chargé front ET admin (ACF acf/init + rendu template).
+require_once get_template_directory() . '/inc/catalogue-data.php';
+
 function sapi_maison_setup() {
   add_theme_support('title-tag');
   add_theme_support('post-thumbnails');

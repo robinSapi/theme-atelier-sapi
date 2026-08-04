@@ -1,0 +1,166 @@
+/* =========================================================================
+ * Catalogue B2B (prescripteurs) — Temps 1
+ * Galerie produit (card + modale), filtres catégories (client-side),
+ * modale fiche technique (croix / clic extérieur / Échap, mobile).
+ * Vanilla JS, aucune dépendance. Aucun prix, aucun lien vers le site.
+ * ========================================================================= */
+(function () {
+  'use strict';
+
+  /* ---- Galerie réutilisable ---- */
+  function initGallery(gallery) {
+    if (!gallery || gallery.dataset.galleryReady === '1') return;
+    gallery.dataset.galleryReady = '1';
+
+    var slides = Array.prototype.slice.call(gallery.querySelectorAll('.cat-gallery__slide'));
+    var dots = Array.prototype.slice.call(gallery.querySelectorAll('.cat-gallery__dot'));
+    if (slides.length <= 1) return;
+
+    var index = 0;
+    function go(i) {
+      index = (i + slides.length) % slides.length;
+      slides.forEach(function (s, k) { s.classList.toggle('is-active', k === index); });
+      dots.forEach(function (d, k) { d.classList.toggle('is-active', k === index); });
+    }
+
+    var prev = gallery.querySelector('.cat-gallery__nav--prev');
+    var next = gallery.querySelector('.cat-gallery__nav--next');
+    if (prev) prev.addEventListener('click', function (e) { e.stopPropagation(); go(index - 1); });
+    if (next) next.addEventListener('click', function (e) { e.stopPropagation(); go(index + 1); });
+    dots.forEach(function (d) {
+      d.addEventListener('click', function (e) { e.stopPropagation(); go(parseInt(d.getAttribute('data-go'), 10) || 0); });
+    });
+
+    // Swipe tactile
+    var startX = null;
+    gallery.addEventListener('touchstart', function (e) { startX = e.touches[0].clientX; }, { passive: true });
+    gallery.addEventListener('touchend', function (e) {
+      if (startX === null) return;
+      var dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 40) go(index + (dx < 0 ? 1 : -1));
+      startX = null;
+    }, { passive: true });
+  }
+
+  function initGalleriesIn(root) {
+    Array.prototype.slice.call(root.querySelectorAll('.cat-gallery')).forEach(initGallery);
+  }
+
+  /* ---- Filtres catégories ---- */
+  function initFilters() {
+    var buttons = Array.prototype.slice.call(document.querySelectorAll('.cat-filter'));
+    var cards = Array.prototype.slice.call(document.querySelectorAll('.cat-card'));
+    var empty = document.querySelector('.cat-grid__empty');
+    if (!buttons.length) return;
+
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var filter = btn.getAttribute('data-filter');
+        buttons.forEach(function (b) { b.classList.toggle('is-active', b === btn); });
+        var visible = 0;
+        cards.forEach(function (card) {
+          var show = filter === 'all' || card.getAttribute('data-cat') === filter;
+          card.classList.toggle('is-filtered-out', !show);
+          if (show) visible++;
+        });
+        if (empty) empty.hidden = visible !== 0;
+      });
+    });
+  }
+
+  /* ---- Modale fiche technique ---- */
+  function initModal() {
+    var modal = document.getElementById('cat-modal');
+    if (!modal) return;
+    var mediaSlot = document.getElementById('cat-modal-media');
+    var titleSlot = document.getElementById('cat-modal-title');
+    var bodySlot = document.getElementById('cat-modal-body');
+    var dialog = modal.querySelector('.cat-modal__dialog');
+    var closeBtn = modal.querySelector('.cat-modal__close');
+    var lastFocused = null;
+
+    function open(card) {
+      var tpl = card.querySelector('.cat-card__fiche');
+      var gallery = card.querySelector('.cat-gallery');
+      var titleEl = card.querySelector('.cat-card__title');
+
+      mediaSlot.innerHTML = '';
+      bodySlot.innerHTML = '';
+      titleSlot.textContent = titleEl ? titleEl.textContent : '';
+
+      if (gallery) {
+        var g = gallery.cloneNode(true);
+        g.removeAttribute('data-gallery-ready');
+        // réinitialise l'état actif au premier visuel
+        Array.prototype.slice.call(g.querySelectorAll('.cat-gallery__slide')).forEach(function (s, k) {
+          s.classList.toggle('is-active', k === 0);
+        });
+        Array.prototype.slice.call(g.querySelectorAll('.cat-gallery__dot')).forEach(function (d, k) {
+          d.classList.toggle('is-active', k === 0);
+        });
+        mediaSlot.appendChild(g);
+        initGallery(g);
+      }
+
+      if (tpl && tpl.content) {
+        bodySlot.appendChild(tpl.content.cloneNode(true));
+      }
+
+      lastFocused = document.activeElement;
+      modal.hidden = false;
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      if (dialog) dialog.scrollTop = 0;
+      if (closeBtn) closeBtn.focus();
+      document.addEventListener('keydown', onKey);
+    }
+
+    function close() {
+      modal.hidden = true;
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      mediaSlot.innerHTML = '';
+      bodySlot.innerHTML = '';
+      document.removeEventListener('keydown', onKey);
+      if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+    }
+
+    function onKey(e) {
+      if (e.key === 'Escape') { close(); return; }
+      // Piège de focus minimal
+      if (e.key === 'Tab') {
+        var focusables = modal.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])');
+        if (!focusables.length) return;
+        var first = focusables[0];
+        var last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+
+    // Ouverture (délégation)
+    document.addEventListener('click', function (e) {
+      var trigger = e.target.closest('[data-open-fiche]');
+      if (!trigger) return;
+      var card = trigger.closest('.cat-card');
+      if (card) open(card);
+    });
+
+    // Fermeture : croix + clic extérieur (overlay / éléments [data-close])
+    modal.addEventListener('click', function (e) {
+      if (e.target.closest('[data-close]')) close();
+    });
+  }
+
+  function init() {
+    initGalleriesIn(document);
+    initFilters();
+    initModal();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
