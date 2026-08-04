@@ -170,21 +170,50 @@
     boxes.forEach(function (b) { b.addEventListener('change', sync); });
     sync();
 
+    function showStatus(msg, isError) {
+      if (!status) return;
+      status.hidden = false;
+      status.textContent = msg;
+      status.classList.toggle('is-error', !!isError);
+    }
+    function endLoading() {
+      btn.classList.remove('is-loading');
+      sync();
+    }
+
     btn.addEventListener('click', function () {
       var cats = selected();
       if (!cats.length) return;
       var url = endpoint + (endpoint.indexOf('?') > -1 ? '&' : '?') + 'cats=' + encodeURIComponent(cats.join(','));
-      var label = btn.textContent;
+
+      btn.classList.add('is-loading');
       btn.disabled = true;
-      btn.textContent = 'Préparation du PDF…';
-      if (status) { status.hidden = false; status.textContent = 'Génération du PDF en cours, le téléchargement va démarrer…'; }
-      // Déclenche le téléchargement (Content-Disposition: attachment) sans quitter la page.
-      window.location.href = url;
-      setTimeout(function () {
-        btn.textContent = label;
-        sync();
-        if (status) { status.hidden = true; status.textContent = ''; }
-      }, 8000);
+      showStatus('Préparation de votre catalogue PDF…', false);
+
+      fetch(url, { credentials: 'same-origin' })
+        .then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          var cd = r.headers.get('Content-Disposition') || '';
+          var m = /filename="?([^";]+)"?/.exec(cd);
+          var fname = m ? m[1] : 'catalogue-atelier-sapi.pdf';
+          return r.blob().then(function (blob) { return { blob: blob, fname: fname }; });
+        })
+        .then(function (o) {
+          var objUrl = URL.createObjectURL(o.blob);
+          var a = document.createElement('a');
+          a.href = objUrl;
+          a.download = o.fname;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(function () { URL.revokeObjectURL(objUrl); }, 5000);
+          endLoading();
+          if (status) { status.hidden = true; status.textContent = ''; status.classList.remove('is-error'); }
+        })
+        .catch(function () {
+          endLoading();
+          showStatus('Le téléchargement a échoué. Merci de réessayer.', true);
+        });
     });
   }
 

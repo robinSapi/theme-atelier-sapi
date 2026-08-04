@@ -260,7 +260,38 @@ body.catalogue-b2b {
 .cat-pdf__btn:hover:not(:disabled) { box-shadow: 0 10px 26px rgba(227, 91, 36, .4); }
 .cat-pdf__btn:active:not(:disabled) { transform: translateY(1px); }
 .cat-pdf__btn:disabled { opacity: .45; cursor: not-allowed; }
+/* État chargement : texte masqué + spinner qui tourne */
+.cat-pdf__btn.is-loading { color: transparent; pointer-events: none; opacity: 1; }
+.cat-pdf__btn.is-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, .45);
+  border-top-color: #fff;
+  animation: cat-spin .7s linear infinite;
+}
+@keyframes cat-spin { to { -webkit-transform: rotate(360deg); transform: rotate(360deg); } }
+.cat-pdf__btn { position: relative; }
 .cat-pdf__status { margin: 14px 0 0; color: var(--color-wood); font-size: .92rem; }
+.cat-pdf__status::before {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+  vertical-align: -1px;
+  border-radius: 50%;
+  border: 2px solid rgba(147, 125, 104, .35);
+  border-top-color: var(--color-wood);
+  animation: cat-spin .7s linear infinite;
+}
+.cat-pdf__status.is-error::before { display: none; }
+.cat-pdf__status.is-error { color: #c0392b; }
 
 /* ── Bouton contact permanent (FAB) ── */
 .cat-contact-fab {
