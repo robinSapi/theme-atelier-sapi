@@ -587,13 +587,6 @@ function sapi_catalogue_pdf_preview($request) {
   }
 
   if ($request->get_param('info')) {
-    // TEMP (recette SÉ8) : écrit le cache et expose son URL pour tester l'accès direct.
-    $path = sapi_catalogue_pdf_get_or_build($cats, true);
-    if ($path) {
-      $up = wp_upload_dir();
-      $meta['cache_basename'] = basename($path);
-      $meta['cache_url']      = str_replace($up['basedir'], $up['baseurl'], $path);
-    }
     return rest_ensure_response($meta);
   }
   header('Content-Type: application/pdf');
