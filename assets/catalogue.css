@@ -325,7 +325,7 @@ body.catalogue-b2b {
   font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(1.25rem, 2.4vw, 1.6rem);
-  color: var(--color-wood);
+  color: var(--color-dark); /* noms de modèles en noir (demande Robin) */
   margin: 4px 0 16px;
   line-height: 1.25;
 }

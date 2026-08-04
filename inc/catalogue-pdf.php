@@ -191,30 +191,68 @@ function sapi_catalogue_pdf_css() {
     body { font-family: montserrat; font-size: 10pt; color: #323232; }
     h1, h2, h3 { margin: 0; }
     .center { text-align: center; }
+
+    /* Découpage nom : prénom (Montserrat gras) + surnom (Square Peg), en NOIR */
+    .pf { font-family: montserrat; font-weight: bold; text-transform: uppercase; color: #1a1a1a; }
+    .pr { font-family: squarepeg; color: #1a1a1a; }
+
     .cover { text-align: center; }
     .cover .brand { font-family: squarepeg; font-size: 54pt; color: #937D68; }
     .cover .subtitle { font-family: montserrat; font-size: 22pt; letter-spacing: 2px; text-transform: uppercase; color: #323232; margin-top: 6mm; }
     .cover .cats { font-size: 11pt; color: #6a6055; margin-top: 10mm; }
     .cover .date { font-size: 9pt; color: #937D68; margin-top: 4mm; }
+
     .section-title { font-family: squarepeg; font-size: 30pt; color: #937D68; margin-bottom: 4mm; }
     .lead { font-size: 10.5pt; color: #4a443d; }
-    .bois-block { margin-bottom: 8mm; }
     .bois-name { font-family: squarepeg; font-size: 22pt; color: #937D68; }
-    .cat-heading { font-family: montserrat; font-weight: bold; font-size: 13pt; text-transform: uppercase; letter-spacing: 1px; color: #E35B24; border-bottom: 0.4mm solid #E35B24; padding-bottom: 2mm; margin-bottom: 5mm; }
-    .prod-title { font-family: squarepeg; font-size: 26pt; color: #937D68; }
-    .prod-sku { font-family: montserrat; font-size: 9pt; color: #937D68; text-transform: uppercase; letter-spacing: 1px; }
-    .prod-desc { font-size: 10pt; color: #4a443d; text-align: justify; }
-    .prod-desc p { margin: 0 0 2.5mm; }
-    .thumbs td { padding: 0 2mm; text-align: center; vertical-align: top; }
-    .specs { width: 100%; border-collapse: collapse; margin-top: 3mm; }
-    .specs .sec { font-family: montserrat; font-weight: bold; font-size: 9.5pt; text-transform: uppercase; color: #E35B24; padding: 3mm 0 1mm; }
-    .specs th { text-align: left; width: 42%; font-weight: bold; color: #6a6055; padding: 1.4mm 2mm; border-bottom: 0.2mm solid #e6ddd0; font-size: 9pt; }
-    .specs td { text-align: left; color: #323232; padding: 1.4mm 2mm; border-bottom: 0.2mm solid #e6ddd0; font-size: 9pt; }
+
+    /* Carte produit (esthétique du site) */
+    .prod-card { border: 0.3mm solid #ece2d3; border-radius: 4mm; background: #fffdfb; padding: 6mm 7mm; }
+    .cat-tag { font-family: montserrat; font-weight: bold; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 1.5px; color: #E35B24; margin-bottom: 2.5mm; }
+    .prod-head { width: 100%; margin-bottom: 3mm; }
+    .prod-name .pf { font-size: 11pt; }
+    .prod-name .pr { font-size: 25pt; }
+    .prod-sku { font-family: montserrat; font-size: 8.5pt; color: #937D68; text-transform: uppercase; letter-spacing: 1px; }
+    .essence { background: #FBF6EA; color: #937D68; font-size: 8pt; font-weight: bold; padding: 0.6mm 2.6mm; border-radius: 3mm; }
+    .prod-desc { font-size: 9pt; color: #4a443d; text-align: justify; line-height: 1.5; }
+    .prod-desc p { margin: 0 0 2mm; }
+    .thumb-row td { padding: 2mm 1.5mm 0 0; text-align: left; vertical-align: top; }
+
+    /* Tableau caractéristiques en 2 colonnes de sections (compact = 1 page) */
+    .specs-grid { width: 100%; margin-top: 4mm; }
+    .specs-grid > tbody > tr > td { width: 50%; vertical-align: top; padding: 0 3mm; }
+    .spec-block { width: 100%; border-collapse: collapse; margin-bottom: 2mm; }
+    .spec-block .sec { font-family: montserrat; font-weight: bold; font-size: 8.5pt; text-transform: uppercase; letter-spacing: .5px; color: #E35B24; padding: 1mm 0; }
+    .spec-block th { text-align: left; width: 46%; font-weight: bold; color: #6a6055; padding: 1mm 1.5mm; border-bottom: 0.2mm solid #efe7da; font-size: 8pt; }
+    .spec-block td { text-align: left; color: #323232; padding: 1mm 1.5mm; border-bottom: 0.2mm solid #efe7da; font-size: 8pt; }
+
     .contact { text-align: center; }
     .contact .h { font-family: squarepeg; font-size: 30pt; color: #937D68; margin-bottom: 6mm; }
     .contact .line { font-size: 11pt; color: #323232; margin: 2mm 0; }
     .muted { color: #6a6055; font-size: 8pt; }
   </style>';
+}
+
+/**
+ * Découpe un nom produit en prénom (Montserrat gras) + surnom (Square Peg),
+ * en reproduisant la logique de assets/product-name-formatter.js. Rendu NOIR.
+ * @param string $title
+ * @return string HTML
+ */
+function sapi_catalogue_pdf_name_html($title) {
+  $title = trim((string) $title);
+  if ($title === '') return '';
+  $words = preg_split('/\s+/', $title);
+  if (count($words) < 2) {
+    return '<span class="pf">' . esc_html($title) . '</span>';
+  }
+  // Nom commençant par un article (La, Le, Les, L\') → tout en surnom
+  if (preg_match('/^(la|le|les)$/i', $words[0]) || preg_match("/^l['\x{2019}]/iu", $words[0])) {
+    return '<span class="pr">' . esc_html($title) . '</span>';
+  }
+  $first = array_shift($words);
+  $rest  = implode(' ', $words);
+  return '<span class="pf">' . esc_html($first) . '</span> <span class="pr">' . esc_html($rest) . '</span>';
 }
 
 /**
@@ -252,7 +290,7 @@ function sapi_catalogue_pdf_build($cats = null) {
   $mpdf->SetTitle('Catalogue — Atelier Sâpi');
   $mpdf->SetAuthor('Atelier Sâpi');
 
-  $mention = 'Document non contractuel, ne constitue pas une offre de prix.';
+  $mention = 'Document non contractuel remis à titre de présentation.';
   $footer_global = '<div style="text-align:center; font-family:montserrat; font-size:7.5pt; color:#937D68;">Atelier Sâpi &nbsp;·&nbsp; ' . esc_html($mention) . ' &nbsp;·&nbsp; {PAGENO}</div>';
   $mpdf->SetHTMLFooter($footer_global);
 
@@ -301,60 +339,71 @@ function sapi_catalogue_pdf_build($cats = null) {
   $b .= '</tr></table>';
   $mpdf->WriteHTML($b);
 
-  // ── 4. Sections catégories → une page par produit ──
+  // ── 4. Sections catégories → une carte produit par page ──
   foreach ($slugs as $slug) {
     $block = isset($catalogue[$slug]) ? $catalogue[$slug] : null;
     if (!$block || empty($block['products'])) continue;
-    $first = true;
     foreach ($block['products'] as $p) {
-      // Pied de page spécifique : référence produit + mention + n° de page
-      $ref = $p['sku'] !== '' ? 'Réf. ' . $p['sku'] . ' · ' : '';
+      // Pied de page : référence produit + mention + n° de page
+      $ref = $p['sku'] !== '' ? 'Réf. ' . $p['sku'] . '  ·  ' : '';
       $mpdf->SetHTMLFooter('<div style="font-family:montserrat; font-size:7.5pt; color:#937D68;"><table style="width:100%"><tr><td style="text-align:left;">' . esc_html($ref) . esc_html($mention) . '</td><td style="text-align:right;">{PAGENO}</td></tr></table></div>');
 
-      $html  = '<pagebreak />';
-      if ($first) {
-        $html .= '<div class="cat-heading">' . esc_html($block['label']) . '</div>';
-        $first = false;
-      }
-      // En-tête produit
-      $html .= '<table style="width:100%;"><tr>';
-      $html .= '<td style="vertical-align:bottom;"><span class="prod-title">' . esc_html($p['title']) . '</span></td>';
-      if ($p['sku'] !== '') $html .= '<td style="text-align:right; vertical-align:bottom;"><span class="prod-sku">Réf. ' . esc_html($p['sku']) . '</span></td>';
-      $html .= '</tr></table>';
+      $gids   = array_values(array_filter(array_map('intval', $p['gallery_ids'])));
+      $main   = !empty($gids) ? sapi_catalogue_pdf_image($gids[0], 'large') : null;
+      $thumbs = array_slice($gids, 1, 3);
 
-      // Visuel principal + vignettes
-      $gids = array_values(array_filter(array_map('intval', $p['gallery_ids'])));
-      if (!empty($gids)) {
-        $main = sapi_catalogue_pdf_image($gids[0], 'large');
-        $html .= '<div class="center" style="margin:3mm 0;">' . sapi_catalogue_pdf_img_tag($main, 170, 100) . '</div>';
-        $thumbs = array_slice($gids, 1, 3);
-        if (!empty($thumbs)) {
-          $html .= '<table class="thumbs" style="width:100%; margin-bottom:3mm;"><tr>';
-          foreach ($thumbs as $tid) {
-            $html .= '<td>' . sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($tid, 'medium'), 52, 40) . '</td>';
-          }
-          // cellules vides pour garder l'alignement si < 3 vignettes
-          for ($k = count($thumbs); $k < 3; $k++) $html .= '<td></td>';
-          $html .= '</tr></table>';
+      // Colonne image (visuel principal + jusqu'à 3 vignettes)
+      $img_col = '';
+      if ($main) $img_col .= '<div>' . sapi_catalogue_pdf_img_tag($main, 82, 66) . '</div>';
+      if (!empty($thumbs)) {
+        $img_col .= '<table class="thumb-row"><tr>';
+        foreach ($thumbs as $tid) {
+          $img_col .= '<td>' . sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($tid, 'medium'), 24, 20) . '</td>';
         }
+        $img_col .= '</tr></table>';
       }
 
-      // Description intégrale (déjà nettoyée des liens au Temps 1)
+      // Colonne texte (essences + description)
+      $txt_col = '';
+      if (!empty($p['essences'])) {
+        $chips = [];
+        foreach ($p['essences'] as $ess) $chips[] = '<span class="essence">' . esc_html($ess) . '</span>';
+        $txt_col .= '<div style="margin-bottom:2.5mm;">' . implode(' ', $chips) . '</div>';
+      }
       if ($p['description'] !== '') {
-        $html .= '<div class="prod-desc">' . wpautop($p['description']) . '</div>';
+        $txt_col .= '<div class="prod-desc">' . wpautop($p['description']) . '</div>';
       }
 
-      // Tableau caractéristiques (mapping Temps 1)
-      if (!empty($p['specs'])) {
-        $html .= '<table class="specs">';
-        foreach ($p['specs'] as $section) {
-          $html .= '<tr><td class="sec" colspan="2">' . esc_html($section['title']) . '</td></tr>';
-          foreach ($section['items'] as $item) {
-            $html .= '<tr><th>' . esc_html($item['label']) . '</th><td>' . esc_html($item['value']) . '</td></tr>';
-          }
+      // Caractéristiques réparties en 2 colonnes de sections (compact)
+      $sections = !empty($p['specs']) ? $p['specs'] : [];
+      $col_a = ''; $col_b = '';
+      foreach ($sections as $i => $section) {
+        $blk  = '<table class="spec-block"><tr><td class="sec" colspan="2">' . esc_html($section['title']) . '</td></tr>';
+        foreach ($section['items'] as $item) {
+          $blk .= '<tr><th>' . esc_html($item['label']) . '</th><td>' . esc_html($item['value']) . '</td></tr>';
         }
-        $html .= '</table>';
+        $blk .= '</table>';
+        if ($i % 2 === 0) $col_a .= $blk; else $col_b .= $blk;
       }
+
+      // Carte produit
+      $html  = '<pagebreak />';
+      $html .= '<div class="prod-card">';
+      $html .= '<div class="cat-tag">' . esc_html($block['label']) . '</div>';
+      $html .= '<table class="prod-head"><tr>';
+      $html .= '<td style="vertical-align:bottom;"><span class="prod-name">' . sapi_catalogue_pdf_name_html($p['title']) . '</span></td>';
+      if ($p['sku'] !== '') $html .= '<td style="text-align:right; vertical-align:bottom; width:32mm;"><span class="prod-sku">Réf. ' . esc_html($p['sku']) . '</span></td>';
+      $html .= '</tr></table>';
+      $html .= '<table style="width:100%;"><tr>';
+      $html .= '<td style="width:44%; vertical-align:top; padding-right:5mm;">' . $img_col . '</td>';
+      $html .= '<td style="width:56%; vertical-align:top;">' . $txt_col . '</td>';
+      $html .= '</tr></table>';
+      if ($sections) {
+        $html .= '<table class="specs-grid"><tr>';
+        $html .= '<td>' . $col_a . '</td><td>' . $col_b . '</td>';
+        $html .= '</tr></table>';
+      }
+      $html .= '</div>';
 
       $mpdf->WriteHTML($html);
     }
