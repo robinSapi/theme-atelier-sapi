@@ -44,6 +44,48 @@ function sapi_catalogue_pdf_tmpdir() {
   return $dir;
 }
 
+/**
+ * Fabrique une instance mPDF configurée : A4, tempDir inscriptible, et les
+ * polices de marque (Montserrat + Square Peg, TTF locales dans assets/pdf-fonts).
+ * Source unique de config → self-test ET générateur passent par ici.
+ *
+ * @param array $config surcharges passées au constructeur mPDF
+ * @return \Mpdf\Mpdf
+ * @throws \RuntimeException si mPDF n'est pas disponible
+ */
+function sapi_catalogue_pdf_new_mpdf($config = []) {
+  if (!sapi_catalogue_pdf_autoload()) {
+    throw new \RuntimeException('mPDF indisponible (vendor/ non déployé).');
+  }
+
+  $configVars = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+  $fontVars   = (new \Mpdf\Config\FontVariables())->getDefaults();
+  $brand_dir  = get_template_directory() . '/assets/pdf-fonts';
+
+  $defaults = [
+    'mode'              => 'utf-8',
+    'format'            => 'A4',
+    'tempDir'           => sapi_catalogue_pdf_tmpdir(),
+    'fontDir'           => array_merge($configVars['fontDir'], [$brand_dir]),
+    'fontdata'          => $fontVars['fontdata'] + [
+      // Corps de texte
+      'montserrat'      => ['R' => 'Montserrat-Regular.ttf', 'B' => 'Montserrat-Bold.ttf'],
+      'montserratlight' => ['R' => 'Montserrat-Light.ttf'],
+      'montserratblack' => ['R' => 'Montserrat-Black.ttf'],
+      // Titres (surnom produit / titres de section) — signature de marque
+      'squarepeg'       => ['R' => 'SquarePeg-Regular.ttf'],
+    ],
+    'default_font'      => 'montserrat',
+    'default_font_size' => 10,
+    'margin_left'       => 15,
+    'margin_right'      => 15,
+    'margin_top'        => 16,
+    'margin_bottom'     => 16,
+  ];
+
+  return new \Mpdf\Mpdf(array_merge($defaults, $config));
+}
+
 /* =========================================================================
  * Route REST self-test (SÉ 1) — diagnostic, à retirer/sécuriser après la S1.
  * GET /wp-json/sapi/v1/catalogue-pdf-selftest        → JSON diagnostic
@@ -80,13 +122,14 @@ function sapi_catalogue_pdf_selftest($request) {
 
   try {
     $t0 = microtime(true);
-    $mpdf = new \Mpdf\Mpdf([
-      'mode'    => 'utf-8',
-      'format'  => 'A4',
-      'tempDir' => $tmpdir,
-    ]);
+    $mpdf = sapi_catalogue_pdf_new_mpdf();
     $diag['mpdf_version'] = \Mpdf\Mpdf::VERSION;
-    $mpdf->WriteHTML('<h1 style="font-family:sans-serif">Atelier Sâpi — self-test mPDF</h1><p style="font-family:sans-serif">Rendu accentué : é è à ù ç œ €. Page A4 unique.</p>');
+    $diag['fonts_ok'] = true; // pas d'exception = fontdata chargé
+    $mpdf->WriteHTML(
+      '<h1 style="font-family:squarepeg; font-size:34px; color:#937D68">Atelier Sâpi — self-test</h1>' .
+      '<p style="font-family:montserrat">Corps Montserrat. Accents : é è à ù ç œ €.</p>' .
+      '<p style="font-family:montserratblack; font-size:16px">Montserrat Black.</p>'
+    );
     $pdf = $mpdf->Output('', \Mpdf\Output\Destination::STRING_RETURN);
 
     $diag['render'] = [
