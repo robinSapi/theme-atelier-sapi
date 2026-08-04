@@ -13,6 +13,10 @@
 
 if (!defined('ABSPATH')) exit;
 
+// Version du générateur PDF : entre dans la clé de cache → à INCRÉMENTER à chaque
+// évolution de la mise en page pour invalider automatiquement les PDF en cache.
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '2');
+
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
  * @return bool true si la classe \Mpdf\Mpdf est disponible.
@@ -478,7 +482,7 @@ function sapi_catalogue_pdf_normalize_slugs($cats) {
  * nom exact, un fichier ne peut pas être atteint en accès direct.
  */
 function sapi_catalogue_pdf_cache_path($slugs) {
-  $key = wp_hash(implode(',', $slugs) . '|' . sapi_catalogue_pdf_stamp());
+  $key = wp_hash(implode(',', $slugs) . '|' . sapi_catalogue_pdf_stamp() . '|v' . SAPI_CATALOGUE_PDF_VERSION);
   return trailingslashit(sapi_catalogue_pdf_dir()) . 'catalogue-' . $key . '.pdf';
 }
 
