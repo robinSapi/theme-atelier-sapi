@@ -44,6 +44,30 @@ Ajouter dans `sapi_ajax_guide_contact()` (après le honeypot) l'appel déjà uti
 
 **Note :** si le spam persiste après déploiement prod malgré cette couche, l'étape suivante est Cloudflare Turnstile (captcha invisible, gratuit, non-Google, RGPD ok). Ne pas l'implémenter maintenant.
 
+### ✅ RÉPONSE CLAUDE CODE — FAIT SUR TEST (2026-08-05, commit `68d1561`, en attente validation Robin)
+
+**Les 3 couches sont en place, ajoutées au nonce + honeypot + rate limit existants (rien retiré).**
+
+**Helpers ajoutés (functions.php, à côté de `sapi_check_form_rate_limit`) :**
+- `sapi_time_trap_new()` → `['ts','sig']` (timestamp + HMAC-sha256 avec `wp_salt('auth')`), à générer au rendu.
+- `sapi_time_trap_valid($ts,$sig,$min=3,$max=DAY_IN_SECONDS)` → `hash_equals` sur la signature + délai humain.
+- `sapi_is_junk_contact($email,$message,$require_message=false)` → domaines test (example.com/.org/.net, test.com) + message numérique-seul / <5 car. ; **ne filtre jamais** sur URL ni mots-clés.
+
+**Câblage par formulaire :**
+- **page-contact.php** (POST, `fullname`/`email`/`message` tous requis) : time-trap (elseif après honeypot) + junk (`require_message=true`) + 2 champs cachés signés dans le form.
+- **sapi_ajax_robin_contact()** (single-product, email requis / **message optionnel**) : time-trap + junk (`require_message=false`) + champs cachés dans le form + append JS (`sapi_ts`/`sapi_tsig`).
+- **sapi_ajax_guide_contact()** : time-trap + **rate limit `guide_contact` (celui qui manquait)** + junk (`require_message=false`).
+
+**⚠️ 2 points à connaître :**
+1. **`sapi_ajax_guide_contact()` est ORPHELIN** : aucun JS ne l'appelle et son nonce `sapi-guide-contact` **n'est créé nulle part** (c'est le contact du quiz V1 retiré en Tâche 7) → il rejette déjà 100% des appels au nonce. J'y ai quand même mis les 3 couches (défense, sans le retirer, comme demandé), mais **il ne protège rien d'actif** aujourd'hui. Les 2 formulaires **réellement vivants** sont page-contact + robin_contact. Si vous voulez, on pourra le supprimer proprement plus tard.
+2. **Borne haute du time-trap : 24 h (DAY_IN_SECONDS) et non 3600 s.** Raison = **zéro faux positif** (règle cardinale) : le `$ts` signé est rendu dans le HTML ; si la page /contact ou produit est servie en **cache** (LiteSpeed o2switch), un vrai client pourrait dépasser 1 h → rejeté à tort. Le nonce de ces mêmes formulaires tolère déjà ~12-24 h, on s'aligne. **Le vrai levier anti-bot reste la borne basse à 3 s** (inchangée). Si vous préférez 3600 s strict, c'est un seul paramètre à changer — dites-le.
+
+**À tester par Robin sur test :**
+- Envoi normal (humain, > 3 s, vrai message, email valide) → passe sur `/contact` et sur « Contacter Robin » (fiche produit).
+- Email `@example.com` ou message `555`/`20` → rejeté (silencieux côté robin_contact = la fiche affiche quand même « envoyé » mais **aucun mail** ne part ; côté /contact = message « Spam détecté »).
+- Honeypot + nonces toujours actifs ; home + catalogue inchangés ; console 0 erreur.
+- ⚠️ Je n'ai **pas** de moyen de simuler un vrai bot ici — la validation « le spam s'arrête » se fera à l'usage après prod. Si ça persiste → Turnstile (réserve).
+
 ---
 
 > **REFONTE FILTRAGE CONSEILLER — décisions d'architecture (11/06/2026).** Les tâches ci-dessous REMPLACENT les anciennes (qui supposaient un filtrage en double PHP/JS, désormais périmé).
@@ -672,3 +696,29 @@ Commits : `51058bc` (infra) → `1efeab9` (polices) → `c02c6c8` (générateur)
 **Diagnostic serveur test o2switch (utile pour la prod)** : PHP 8.3, mémoire 512 Mo, max_execution 600 s, GD ok — génération synchrone viable. Vérifier que la prod a les mêmes ordres de grandeur.
 
 </details>
+
+---
+
+## [TÂCHE] Catalogue B2B — Corrections post-prod (fonts, cache, robustesse PDF)
+**Date :** 2026-08-05
+**Priorité :** normale
+**⚠️ Demander un PLAN + état des lieux AVANT de coder.** Ne rien committer sans le go de Robin. Développer sur **`test-theme-sapi-maison`**, valider sur test, puis **cherry-pick sélectif vers master** (même pattern que le déploiement initial du catalogue, commit `113a1ef`) — pas de merge de test. ⚠️ Le catalogue vit désormais sur deux branches (couture cherry-pick), rester scopé aux fichiers du catalogue.
+
+**Contexte :** le catalogue B2B (Temps 1 + 2) est en prod et validé. Trois corrections de qualité identifiées en revue. Le reste (pré-génération, noindex, distribution) est assumé par Robin, hors périmètre.
+
+### Point 2 — Self-héberger les polices (retirer Google Fonts externe)
+**Problème :** la page `/catalogue` charge Montserrat depuis Google Fonts (`<link>` externe) → requête sortante qui écorne l'étanchéité + friction RGPD connue en France (IP visiteur envoyée à Google).
+**À faire :** self-héberger Montserrat (les graisses réellement utilisées) en `@font-face` local dans `assets/catalogue.css`, supprimer le `<link>` Google Fonts du `<head>` de `page-catalogue.php`. Square Peg est déjà local, s'aligner sur le même schéma. Fichiers de police dans le thème (ex. `assets/fonts/`).
+**Succès :** re-audit du HTML live = **0 `<link>`/requête externe** (plus aucun appel Google) ; rendu Montserrat identique à l'œil ; les TTF du PDF (`assets/pdf-fonts/`) restent cohérents avec les graisses de la page.
+
+### Point 3 — Busting de cache PDF automatique (fin du compteur manuel)
+**Problème :** `SAPI_CATALOGUE_PDF_VERSION = 14` s'incrémente **à la main** à chaque évolution de mise en page. Oubli = vieux PDF servi silencieusement, bug difficile à diagnostiquer.
+**À faire :** dériver la version de la clé de cache d'un **hash (ou filemtime) des fichiers qui déterminent le rendu PDF** (`inc/catalogue-pdf.php` + la CSS/template PDF + éventuellement la CSS des polices). La clé de cache devient : hash catégories + timestamp dernière modif produit + hash template PDF. Supprimer la dépendance au compteur manuel (ou le garder en override d'urgence seulement).
+**Succès :** modifier le template PDF (sans toucher aucune constante) → le prochain téléchargement régénère automatiquement ; deux générations sans changement de code = cache réutilisé (pas de régénération inutile).
+
+### Point 4 — Durcir la robustesse du gabarit PDF (pièges mPDF)
+**Problème :** mPDF ignore les sélecteurs descendants (piège documenté : la taille du surnom Square Peg doit être en style inline sinon retour à ~10pt). Chaque futur ajustement du gabarit risque de rouvrir ce type de régression silencieuse.
+**À faire :** (a) centraliser/commenter les styles fragiles du gabarit produit (tailles de police des noms, etc.) dans un helper unique en inline, avec un commentaire d'avertissement, pour ne pas les redécouvrir à chaque édition ; (b) ajouter un **self-check de non-régression** léger (endpoint admin-only OU commande, pas de route publique) qui régénère un PDF échantillon et **assert les invariants machine-vérifiables** : `%PDF`, 0 annotation `/URI`, 0 occurrence de prix (€/EUR), nombre de pages attendu, présence des pages Histoire + Bois. Retirer la route après si besoin, ou la garder gated admin.
+**Succès :** le self-check passe ; les invariants d'étanchéité (0 `/URI`, 0 prix) sont vérifiables à la demande sans refaire l'audit à la main ; les réglages de police du gabarit sont regroupés et commentés.
+
+**Rappel transverse :** ces corrections ne doivent rien changer au rendu validé par Robin (mise en page « Option A », 1 produit/page, mention « document non contractuel remis à titre de présentation »). Re-mesurer le poids du PDF toutes catégories après coup (doit rester < 25 Mo, était à 3,9 Mo).
