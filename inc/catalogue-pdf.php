@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) exit;
 
 // Version du générateur PDF : entre dans la clé de cache → à INCRÉMENTER à chaque
 // évolution de la mise en page pour invalider automatiquement les PDF en cache.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '12');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '13');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -249,7 +249,7 @@ function sapi_catalogue_pdf_name_html($title) {
   // (ex. « .prod-name .pr { font-size } »), donc la taille doit être portée
   // directement par le span, sinon le surnom retombe à la taille par défaut.
   $pf = 'font-size:13pt;';
-  $pr = 'font-size:46pt;';
+  $pr = 'font-size:36pt;';
   $words = preg_split('/\s+/', $title);
   if (count($words) < 2) {
     return '<span class="pf" style="' . $pf . '">' . esc_html($title) . '</span>';
