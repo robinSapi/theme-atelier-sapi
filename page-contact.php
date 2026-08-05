@@ -17,6 +17,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sapi_contact_nonce'])
   elseif (!empty($_POST['website'])) {
     $form_error = 'Spam détecté.';
   }
+  // Time-trap signé (trop rapide / signature invalide → traité comme le honeypot)
+  elseif (!sapi_time_trap_valid($_POST['sapi_ts'] ?? 0, $_POST['sapi_tsig'] ?? '')) {
+    $form_error = 'Spam détecté.';
+  }
   // Rate limiting (5 soumissions/heure par IP)
   elseif (!sapi_check_form_rate_limit('contact')) {
     $form_error = 'Trop de messages envoyés. Réessayez plus tard.';
@@ -29,8 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sapi_contact_nonce'])
     $email = sanitize_email($_POST['email'] ?? '');
     $message = sanitize_textarea_field($_POST['message'] ?? '');
 
-    // Validate
-    if (empty($name) || empty($email) || empty($message)) {
+    // Validate — filtre anti-junk d'abord (message requis sur ce formulaire)
+    if (sapi_is_junk_contact($email, $message, true)) {
+      $form_error = 'Spam détecté.';
+    } elseif (empty($name) || empty($email) || empty($message)) {
       $form_error = 'Veuillez remplir tous les champs.';
     } elseif (!is_email($email)) {
       $form_error = 'Adresse email invalide.';
@@ -151,6 +157,9 @@ get_header();
 
           <form action="" method="post">
             <?php wp_nonce_field('sapi_contact_form', 'sapi_contact_nonce'); ?>
+            <?php $sapi_tt = function_exists('sapi_time_trap_new') ? sapi_time_trap_new() : ['ts' => 0, 'sig' => '']; ?>
+            <input type="hidden" name="sapi_ts" value="<?php echo esc_attr($sapi_tt['ts']); ?>">
+            <input type="hidden" name="sapi_tsig" value="<?php echo esc_attr($sapi_tt['sig']); ?>">
 
             <!-- Honeypot anti-spam (hidden field) -->
             <div style="display: none;" aria-hidden="true">
