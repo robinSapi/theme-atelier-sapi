@@ -87,7 +87,14 @@ Ajouter dans `sapi_ajax_guide_contact()` (après le honeypot) l'appel déjà uti
 
 **✅ CODE MORT SUPPRIMÉ (~473 lignes, 0 appelant, 0 référence, validé Robin)** : `sapi_ajax_guide_contact`, `sapi_ajax_guide_refine`, `sapi_ajax_conseils_products`, `sapi_ajax_robin_conseil_step`, `sapi_ajax_robin_filter_products` (+ leurs `add_action`). Helpers partagés **conservés** (dont `sapi_guide_pick_four`/`diversify_format`, gardés exprès). Vérifié : tous les `wp_ajax_*` restants pointent vers une fonction existante ; accolades équilibrées.
 
-**Reste (optionnel, non fait)** : ajouter honeypot + rate limit au formulaire Inspiration (risque faible). À voir si Robin veut. Branche test, pas de master.
+**Reste (optionnel, non fait)** : ajouter honeypot + rate limit au formulaire Inspiration (risque faible). À voir si Robin veut.
+
+### ✅ POUSSÉ EN PROD (master) le 2026-08-05 — cherry-pick SÉLECTIF
+Robin a validé les 4 formulaires sur test (les 4 mails de test reçus = zéro faux positif). **Go prod donné, uniquement les modifs formulaires.**
+- Cherry-pick propre de **3 commits** sur master (par-dessus le catalogue) : `68d5af7` (anti-spam 3 formulaires) + `68f84ab` (contact modale + suppression 5 handlers morts) + `ed5b0de` (sur-mesure). Fast-forward.
+- Diff master vérifié = **exactement 5 fichiers** (functions.php, page-contact.php, single-product.php, sapi-modal-conseiller.js, page-sur-mesure.php) — **aucun** autre commit de test (immersion, état B, Tâche 5, emails, mode vacances **restent sur test**).
+- Contrôles : helpers présents, 5 handlers morts retirés, handlers vivants intacts, accolades équilibrées, tous les `wp_ajax_*` résolvent.
+- **⚠️ RESTE À ROBIN : lancer le workflow GitHub Actions « Deploy to Production »** (manuel) pour mettre en ligne. Rien n'est déployé tant qu'il ne l'a pas lancé.
 
 ---
 
