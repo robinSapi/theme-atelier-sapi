@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) exit;
 
 // Version du générateur PDF : entre dans la clé de cache → à INCRÉMENTER à chaque
 // évolution de la mise en page pour invalider automatiquement les PDF en cache.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '10');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '11');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -243,8 +243,8 @@ function sapi_catalogue_pdf_css() {
     .prod-hero { text-align: center; margin: 0 0 2mm; }
     .prod-desc { font-size: 8.5pt; color: #4a443d; text-align: justify; line-height: 1.34; }
     .prod-desc p { margin: 0 0 1.5mm; }
-    .thumb-row { text-align: center; margin: 0 0 4mm; }
-    .thumb-row .thumb { display: inline-block; margin: 0 1.8mm; }
+    .thumb-row { margin: 0 auto; }
+    .thumb-row td { padding: 0 1.8mm 4mm; text-align: center; vertical-align: top; }
 
     /* Tableau caractéristiques en 2 colonnes de sections (compact = 1 page) */
     .specs-grid { width: 100%; }
@@ -408,15 +408,14 @@ function sapi_catalogue_pdf_build($cats = null) {
       if ($main) {
         $html .= '<div class="prod-hero">' . sapi_catalogue_pdf_img_box($main, 167, 100, 3.5, false) . '</div>';
       }
-      // Vignettes en bande recadrée uniforme, coins arrondis.
-      // NB : divs inline-block centrés (PAS de tableau) — mPDF ne peint pas un
-      // background-image dans une cellule <td>, mais le fait sur un <div>.
+      // Vignettes : <img> dans un tableau (fiable sous mPDF). Coins droits — mPDF
+      // ne sait ni arrondir un <img>, ni disposer des divs-fond en ligne.
       if (!empty($thumbs)) {
-        $html .= '<div class="thumb-row">';
+        $html .= '<table class="thumb-row" align="center"><tr>';
         foreach ($thumbs as $tid) {
-          $html .= '<span class="thumb">' . sapi_catalogue_pdf_img_box(sapi_catalogue_pdf_image($tid, 'medium'), 52, 35, 2.2, true) . '</span>';
+          $html .= '<td>' . sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($tid, 'medium'), 50, 33) . '</td>';
         }
-        $html .= '</div>';
+        $html .= '</tr></table>';
       }
 
       // Description (essences + tailles vivent dans le tableau caractéristiques)
