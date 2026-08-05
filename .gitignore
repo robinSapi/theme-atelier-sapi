@@ -38,6 +38,10 @@
 
 # Plugins (keep only custom if needed)
 /wp-content/plugins/
+
+# Dépendances Composer (générées en CI avant le déploiement FTP — voir .github/workflows)
+/vendor/
+composer.lock
 /wp-content/mu-plugins/
 
 # Themes (keep only custom theme)

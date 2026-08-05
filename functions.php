@@ -22,6 +22,14 @@ if (is_admin()) {
   require_once get_template_directory() . '/inc/sapi-migrate-galerie.php';
 }
 
+// Catalogue B2B (prescripteurs) — Temps 1. Source de données + mapping specs +
+// champs ACF éditoriaux. Chargé front ET admin (ACF acf/init + rendu template).
+require_once get_template_directory() . '/inc/catalogue-data.php';
+
+// Catalogue B2B — Temps 2. Export PDF (mPDF via Composer/vendor, généré en CI).
+// Réutilise la source de données + le mapping du Temps 1. Guardé si vendor absent.
+require_once get_template_directory() . '/inc/catalogue-pdf.php';
+
 function sapi_maison_setup() {
   add_theme_support('title-tag');
   add_theme_support('post-thumbnails');
