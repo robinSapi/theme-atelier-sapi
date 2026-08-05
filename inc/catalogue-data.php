@@ -154,6 +154,12 @@ function sapi_catalogue_get_product_specs($product) {
         $value = $has_acf ? (string) get_field($row['key'], $product_id) : '';
       }
 
+      // « Bois » : privilégier les essences réelles des variations (repli ACF).
+      if ($row['key'] === 'bois') {
+        $ess = sapi_catalogue_product_essences($product);
+        if ($ess) $value = implode(' · ', $ess);
+      }
+
       if ($value === '' || $value === null) {
         $value = $row['fallback'] !== '' ? $row['fallback'] : '—';
       }

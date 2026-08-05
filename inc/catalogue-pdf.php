@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) exit;
 
 // Version du générateur PDF : entre dans la clé de cache → à INCRÉMENTER à chaque
 // évolution de la mise en page pour invalider automatiquement les PDF en cache.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '6');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '7');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -383,9 +383,9 @@ function sapi_catalogue_pdf_build($cats = null) {
       if ($p['sku'] !== '') $html .= '<td style="text-align:right; vertical-align:bottom; width:32mm;"><span class="prod-sku">Réf. ' . esc_html($p['sku']) . '</span></td>';
       $html .= '</tr></table>';
 
-      // Grande photo paysage pleine largeur
+      // Grande photo paysage pleine largeur (+20%)
       if ($main) {
-        $html .= '<div class="prod-hero">' . sapi_catalogue_pdf_img_tag($main, 172, 84) . '</div>';
+        $html .= '<div class="prod-hero">' . sapi_catalogue_pdf_img_tag($main, 165, 101) . '</div>';
       }
       // Vignettes (jusqu'à 3), centrées sous la photo
       if (!empty($thumbs)) {
@@ -396,13 +396,7 @@ function sapi_catalogue_pdf_build($cats = null) {
         $html .= '</tr></table>';
       }
 
-      // Essences + tailles (pastilles) + description (pleine largeur)
-      if (!empty($p['essences']) || !empty($p['sizes'])) {
-        $chips = [];
-        foreach ($p['essences'] as $ess) $chips[] = '<span class="chip chip-wood">' . esc_html($ess) . '</span>';
-        foreach ($p['sizes'] as $sz)     $chips[] = '<span class="chip chip-size">' . esc_html($sz) . '</span>';
-        $html .= '<div class="essences">' . implode('', $chips) . '</div>';
-      }
+      // Description (essences + tailles vivent dans le tableau caractéristiques)
       if ($p['description'] !== '') {
         $html .= '<div class="prod-desc">' . wpautop($p['description']) . '</div>';
       }
