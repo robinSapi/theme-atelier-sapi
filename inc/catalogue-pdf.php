@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) exit;
 
 // Version du générateur PDF : entre dans la clé de cache → à INCRÉMENTER à chaque
 // évolution de la mise en page pour invalider automatiquement les PDF en cache.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '4');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '5');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -211,27 +211,27 @@ function sapi_catalogue_pdf_css() {
     .bois-name { font-family: squarepeg; font-size: 22pt; color: #937D68; }
 
     /* Carte produit (esthétique du site) */
-    .prod-card { border: 0.3mm solid #ece2d3; border-radius: 4mm; background: #fffdfb; padding: 6mm 7mm; }
-    .cat-tag { font-family: montserrat; font-weight: bold; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 1.5px; color: #E35B24; margin-bottom: 2.5mm; }
-    .prod-head { width: 100%; margin-bottom: 3mm; }
+    .prod-card { border: 0.3mm solid #ece2d3; border-radius: 4mm; background: #fffdfb; padding: 4.5mm 6mm; }
+    .cat-tag { font-family: montserrat; font-weight: bold; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 1.5px; color: #E35B24; margin-bottom: 1.5mm; }
+    .prod-head { width: 100%; margin-bottom: 1.5mm; }
     .prod-name .pf { font-size: 12pt; }
-    .prod-name .pr { font-size: 36pt; }
+    .prod-name .pr { font-size: 34pt; }
     .prod-sku { font-family: montserrat; font-size: 8.5pt; color: #937D68; text-transform: uppercase; letter-spacing: 1px; }
     .essence { background: #FBF6EA; color: #937D68; font-size: 8pt; font-weight: bold; padding: 0.6mm 2.6mm; border-radius: 3mm; }
-    .prod-hero { text-align: center; margin: 1mm 0 2mm; }
-    .essences { margin: 3mm 0 2mm; }
-    .prod-desc { font-size: 9pt; color: #4a443d; text-align: justify; line-height: 1.5; }
-    .prod-desc p { margin: 0 0 2mm; }
-    .thumb-row { margin: 0 auto 1mm; }
-    .thumb-row td { padding: 0 2mm; text-align: center; vertical-align: top; }
+    .prod-hero { text-align: center; margin: 0 0 1.5mm; }
+    .essences { margin: 2mm 0 1.5mm; }
+    .prod-desc { font-size: 8.5pt; color: #4a443d; text-align: justify; line-height: 1.38; }
+    .prod-desc p { margin: 0 0 1.5mm; }
+    .thumb-row { margin: 0 auto 0.5mm; }
+    .thumb-row td { padding: 0 1.6mm; text-align: center; vertical-align: top; }
 
     /* Tableau caractéristiques en 2 colonnes de sections (compact = 1 page) */
-    .specs-grid { width: 100%; margin-top: 4mm; }
+    .specs-grid { width: 100%; margin-top: 2.5mm; }
     .specs-grid > tbody > tr > td { width: 50%; vertical-align: top; padding: 0 3mm; }
-    .spec-block { width: 100%; border-collapse: collapse; margin-bottom: 2mm; }
-    .spec-block .sec { font-family: montserrat; font-weight: bold; font-size: 8.5pt; text-transform: uppercase; letter-spacing: .5px; color: #E35B24; padding: 1mm 0; }
-    .spec-block th { text-align: left; width: 46%; font-weight: bold; color: #6a6055; padding: 1mm 1.5mm; border-bottom: 0.2mm solid #efe7da; font-size: 8pt; }
-    .spec-block td { text-align: left; color: #323232; padding: 1mm 1.5mm; border-bottom: 0.2mm solid #efe7da; font-size: 8pt; }
+    .spec-block { width: 100%; border-collapse: collapse; margin-bottom: 1.5mm; }
+    .spec-block .sec { font-family: montserrat; font-weight: bold; font-size: 8pt; text-transform: uppercase; letter-spacing: .5px; color: #E35B24; padding: 0.5mm 0; }
+    .spec-block th { text-align: left; width: 46%; font-weight: bold; color: #6a6055; padding: 0.7mm 1.5mm; border-bottom: 0.2mm solid #efe7da; font-size: 7.5pt; }
+    .spec-block td { text-align: left; color: #323232; padding: 0.7mm 1.5mm; border-bottom: 0.2mm solid #efe7da; font-size: 7.5pt; }
 
     .contact { text-align: center; }
     .contact .h { font-family: squarepeg; font-size: 30pt; color: #937D68; margin-bottom: 6mm; }
@@ -382,13 +382,13 @@ function sapi_catalogue_pdf_build($cats = null) {
 
       // Grande photo paysage pleine largeur
       if ($main) {
-        $html .= '<div class="prod-hero">' . sapi_catalogue_pdf_img_tag($main, 172, 96) . '</div>';
+        $html .= '<div class="prod-hero">' . sapi_catalogue_pdf_img_tag($main, 172, 84) . '</div>';
       }
       // Vignettes (jusqu'à 3), centrées sous la photo
       if (!empty($thumbs)) {
         $html .= '<table class="thumb-row" align="center"><tr>';
         foreach ($thumbs as $tid) {
-          $html .= '<td>' . sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($tid, 'medium'), 46, 32) . '</td>';
+          $html .= '<td>' . sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($tid, 'medium'), 40, 26) . '</td>';
         }
         $html .= '</tr></table>';
       }
