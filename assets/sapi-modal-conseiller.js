@@ -1598,6 +1598,8 @@
     var fd = new FormData();
     fd.append('action', 'sapi_megafilter_surmesure');
     fd.append('nonce', config.nonce || '');
+    fd.append('sapi_ts', config.ts || '');
+    fd.append('sapi_tsig', config.tsig || '');
     fd.append('email', emailVal);
     fd.append('description', msgVal);
     fd.append('source', 'conseiller-modal');

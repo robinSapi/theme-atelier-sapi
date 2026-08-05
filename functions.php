@@ -21,7 +21,7 @@ function sapi_check_form_rate_limit($form_id = 'contact', $max_hits = 5) {
  * honeypot + rate limit existants (on n'en retire aucun). Résistant à la
  * rotation d'IP du bot, sans friction pour les vrais clients, sans dépendance
  * externe. Utilisé par page-contact.php + sapi_ajax_robin_contact() +
- * sapi_ajax_guide_contact().
+ * sapi_ajax_megafilter_surmesure() (contact de la modale Conseiller).
  * ───────────────────────────────────────────────────────────────────────── */
 
 /**
@@ -494,9 +494,12 @@ function sapi_maison_enqueue_assets() {
         filemtime($modal_conseiller_js_path),
         true
       );
+      $sapi_modal_tt = sapi_time_trap_new(); // time-trap signé (contact de la modale)
       wp_localize_script('sapi-modal-conseiller', 'SAPI_MODAL_CONSEILLER', [
         'ajaxUrl'        => admin_url('admin-ajax.php'),
         'nonce'          => wp_create_nonce('sapi-megafilter'),
+        'ts'             => $sapi_modal_tt['ts'],
+        'tsig'           => $sapi_modal_tt['sig'],
         'steps'          => sapi_guide_get_steps(),
         'icons'          => sapi_guide_get_icons(),
         'maxMessages'    => 15,
@@ -2589,121 +2592,7 @@ function sapi_ajax_guide_results() {
  * Receives the client's message + contact info + full guide context.
  * Sends a lead email to Robin.
  */
-add_action('wp_ajax_sapi_guide_contact', 'sapi_ajax_guide_contact');
-add_action('wp_ajax_nopriv_sapi_guide_contact', 'sapi_ajax_guide_contact');
 
-function sapi_ajax_guide_contact() {
-  // 1. Nonce
-  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-contact')) {
-    wp_send_json_error(['message' => 'Nonce invalide']);
-    return;
-  }
-
-  // 2. Honeypot
-  if (!empty($_POST['website'])) {
-    wp_send_json_error(['message' => 'Spam']);
-    return;
-  }
-
-  // 2b. Time-trap signé (rejet silencieux si trop rapide / signature invalide)
-  if (!sapi_time_trap_valid($_POST['sapi_ts'] ?? 0, $_POST['sapi_tsig'] ?? '')) {
-    wp_send_json_error(['message' => 'Spam']);
-    return;
-  }
-
-  // 2c. Rate limit (5/h/IP) — était manquant sur ce handler
-  if (!sapi_check_form_rate_limit('guide_contact')) {
-    wp_send_json_error(['message' => 'Trop de messages envoyés. Réessayez plus tard.']);
-    return;
-  }
-
-  // 3. Sanitize
-  $name    = sanitize_text_field(wp_unslash($_POST['name'] ?? ''));
-  $email   = sanitize_email(wp_unslash($_POST['email'] ?? ''));
-  $phone   = sanitize_text_field(wp_unslash($_POST['phone'] ?? ''));
-  $message = sanitize_textarea_field(wp_unslash($_POST['message'] ?? ''));
-  $ai_text = sanitize_textarea_field(wp_unslash($_POST['ai_text'] ?? ''));
-
-  // 3b. Filtre anti-junk (message optionnel ici → n'exige pas un message)
-  if (sapi_is_junk_contact($email, $message, false)) {
-    wp_send_json_error(['message' => 'Spam']);
-    return;
-  }
-
-  // 4. Validate
-  if (empty($name)) {
-    wp_send_json_error(['message' => 'Prénom requis']);
-    return;
-  }
-  if (empty($email) && empty($phone)) {
-    wp_send_json_error(['message' => 'Email ou téléphone requis']);
-    return;
-  }
-  if (!empty($email) && !is_email($email)) {
-    wp_send_json_error(['message' => 'Email invalide']);
-    return;
-  }
-
-  // 5. Parse guide answers + conversation history
-  $labels_raw = json_decode(wp_unslash($_POST['labels'] ?? '{}'), true);
-  if (!is_array($labels_raw)) {
-    $labels_raw = [];
-  }
-  $conversation_raw = json_decode(wp_unslash($_POST['conversation'] ?? '[]'), true);
-  if (!is_array($conversation_raw)) {
-    $conversation_raw = [];
-  }
-
-  // 6. Build email body
-  $body  = "Nouveau message depuis le Robin Conseiller\n";
-  $body .= "==========================================\n\n";
-  $body .= "CLIENT :\n";
-  $body .= "- Prénom : " . esc_html($name) . "\n";
-  if ($email) {
-    $body .= "- Email : " . esc_html($email) . "\n";
-  }
-  if ($phone) {
-    $body .= "- Téléphone : " . esc_html($phone) . "\n";
-  }
-  $body .= "\nMESSAGE :\n" . esc_html($message) . "\n";
-  $body .= "\nRÉPONSES AU QUESTIONNAIRE :\n";
-  foreach ($labels_raw as $step => $label) {
-    $body .= "- " . ucfirst(sanitize_text_field($step)) . " : " . sanitize_text_field($label) . "\n";
-  }
-  // Include conversation history if the client had a back-and-forth with the AI
-  if (!empty($conversation_raw)) {
-    $body .= "\nHISTORIQUE DE CONVERSATION :\n";
-    foreach ($conversation_raw as $msg) {
-      if (!isset($msg['role']) || !isset($msg['content'])) continue;
-      $role_label = ($msg['role'] === 'user') ? 'Client' : 'IA (Robin)';
-      $body .= $role_label . " : " . sanitize_textarea_field($msg['content']) . "\n\n";
-    }
-  } else {
-    $body .= "\nRECOMMANDATION IA :\n" . ($ai_text ? esc_html($ai_text) : '(pas de texte IA)') . "\n";
-  }
-  $body .= "\n---\nDate : " . wp_date('d/m/Y H:i') . "\n";
-
-  // 7. Headers
-  $headers = ['Content-Type: text/plain; charset=UTF-8'];
-  if ($email) {
-    $headers[] = 'Reply-To: ' . $name . ' <' . $email . '>';
-  }
-
-  // 8. Send
-  $sent = wp_mail(
-    'contact@atelier-sapi.fr',
-    '[Robin Conseiller] Message de ' . $name,
-    $body,
-    $headers
-  );
-
-  // Log contact
-  if ($sent) {
-    wp_send_json_success(['message' => 'Envoyé']);
-  } else {
-    wp_send_json_error(['message' => 'Erreur envoi']);
-  }
-}
 
 /**
  * ── Contact inline depuis la card Robin-Conseil ──
@@ -2819,172 +2708,7 @@ function sapi_ajax_robin_contact() {
  * Client sends a follow-up message after seeing initial results.
  * Claude decides: refine products, show contact form, or both.
  */
-add_action('wp_ajax_sapi_guide_refine', 'sapi_ajax_guide_refine');
-add_action('wp_ajax_nopriv_sapi_guide_refine', 'sapi_ajax_guide_refine');
 
-function sapi_ajax_guide_refine() {
-  // 1. Nonce check (reuses the guide results nonce)
-  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
-    wp_send_json_error(['message' => 'Nonce invalide']);
-    return;
-  }
-
-  // 1b. Rate limiting — if exceeded, fallback to contact form
-  if (!sapi_guide_check_rate_limit()) {
-    wp_send_json_success([
-      'action'         => 'contact',
-      'ai_text'        => 'Je ne peux pas affiner davantage pour le moment. Laissez vos coordonnées et Robin vous répondra personnellement.',
-      'conversation'   => [],
-    ]);
-    return;
-  }
-
-  // 2. Parse inputs
-  $user_message      = sanitize_textarea_field(wp_unslash($_POST['user_message'] ?? ''));
-  $raw_answers       = isset($_POST['answers']) ? sanitize_text_field(wp_unslash($_POST['answers'])) : '{}';
-  $answers           = json_decode($raw_answers, true);
-  $conversation_raw  = isset($_POST['conversation']) ? wp_unslash($_POST['conversation']) : '[]';
-  $conversation      = json_decode($conversation_raw, true);
-  $current_ids_raw   = isset($_POST['current_products']) ? wp_unslash($_POST['current_products']) : '[]';
-  $current_product_ids = json_decode($current_ids_raw, true);
-  $filter_context    = sanitize_textarea_field(wp_unslash($_POST['filter_context'] ?? ''));
-
-  if (empty($user_message)) {
-    wp_send_json_error(['message' => 'Message vide']);
-    return;
-  }
-
-  if (!is_array($answers)) $answers = [];
-  if (!is_array($conversation)) $conversation = [];
-  if (!is_array($current_product_ids)) $current_product_ids = [];
-
-  // Limiter l'historique de conversation pour éviter de dépasser les limites de tokens
-  $conversation = array_slice($conversation, -20);
-
-  // Sanitize answers
-  $clean = [];
-  foreach ($answers as $key => $val) {
-    $clean[sanitize_key($key)] = sanitize_text_field($val);
-  }
-
-  // Sanitize current product IDs
-  $current_product_ids = array_map('intval', $current_product_ids);
-
-  // 3. Get FULL product catalog
-  $all_products = sapi_guide_query_all_products($clean);
-
-  // 4. Build refinement system prompt
-  $system_prompt = sapi_guide_build_refine_prompt(
-    $all_products,
-    $clean,
-    $filter_context,
-    $current_product_ids
-  );
-
-  // 5. Build messages array with conversation history
-  $messages = [];
-  if (is_array($conversation)) {
-    foreach ($conversation as $msg) {
-      if (!isset($msg['role']) || !isset($msg['content'])) continue;
-      $role = ($msg['role'] === 'assistant') ? 'assistant' : 'user';
-      $messages[] = ['role' => $role, 'content' => sanitize_textarea_field($msg['content'])];
-    }
-  }
-  $messages[] = ['role' => 'user', 'content' => $user_message];
-
-  // 6. Call Claude API
-  $ai_response = sapi_guide_call_claude_refine($system_prompt, $messages);
-
-  if (!$ai_response) {
-    // Fallback: route to contact form
-    wp_send_json_success([
-      'action'       => 'contact',
-      'ai_text'      => '',
-      'products'     => [],
-      'conversation' => array_merge(
-        $conversation,
-        [['role' => 'user', 'content' => $user_message]]
-      ),
-    ]);
-    return;
-  }
-
-  $action         = isset($ai_response['action']) ? $ai_response['action'] : 'contact';
-  $recommendation = isset($ai_response['recommendation']) ? $ai_response['recommendation'] : '';
-  $raw_product_ids = isset($ai_response['product_ids']) ? $ai_response['product_ids'] : [];
-
-  // Validate action
-  if (!in_array($action, ['refine', 'contact', 'both'], true)) {
-    $action = 'contact';
-  }
-
-  // Normalize product_ids: support both old [123, 456] and new [{"product_id":123,"variation_id":456}] formats
-  $product_requests = [];
-  foreach ($raw_product_ids as $item) {
-    if (is_array($item) && isset($item['product_id'])) {
-      $product_requests[] = [
-        'product_id'   => (int) $item['product_id'],
-        'variation_id' => isset($item['variation_id']) ? (int) $item['variation_id'] : 0,
-      ];
-    } elseif (is_numeric($item)) {
-      $product_requests[] = [
-        'product_id'   => (int) $item,
-        'variation_id' => 0,
-      ];
-    }
-  }
-
-  // 7. If refine or both, resolve product IDs to full product data
-  $new_products = [];
-  if (in_array($action, ['refine', 'both'], true) && !empty($product_requests)) {
-    foreach ($product_requests as $req) {
-      $found = sapi_guide_find_product_by_id($all_products, $req['product_id']);
-      if ($found) {
-        // If Claude specified a variation_id, override image/price/labels with that variation
-        if ($req['variation_id'] && !empty($found['variations'])) {
-          foreach ($found['variations'] as $v) {
-            if ($v['variation_id'] === $req['variation_id']) {
-              if ($v['image_url']) {
-                $found['image'] = $v['image_url'];
-                $found['image_alt'] = $found['title'] . ' - ' . trim($v['essence'] . ' ' . $v['taille']);
-              }
-              if ($v['price']) {
-                $found['price'] = $v['price'];
-              }
-              $found['variation_label'] = $v['essence'];
-              $found['size_label'] = $v['taille'];
-              break;
-            }
-          }
-        }
-        // Strip variations data before sending to frontend
-        unset($found['variations'], $found['best_variation_id']);
-        $new_products[] = $found;
-      }
-    }
-    // If Claude returned IDs but none resolved, fallback to contact
-    if (empty($new_products)) {
-      $action = 'contact';
-    }
-  }
-
-  // 8. Build updated conversation
-  $updated_conversation = array_merge(
-    $conversation,
-    [
-      ['role' => 'user', 'content' => $user_message],
-      ['role' => 'assistant', 'content' => $recommendation],
-    ]
-  );
-
-  // 9. Send response
-  wp_send_json_success([
-    'action'       => $action,
-    'ai_text'      => $recommendation,
-    'products'     => $new_products,
-    'conversation' => $updated_conversation,
-  ]);
-}
 
 /* ═══════════════════════════════════════════════════════════
    MÉGA-FILTRE INTELLIGENT (F1b) — IA dans la modale "Décrire mon projet"
@@ -4430,6 +4154,17 @@ function sapi_ajax_megafilter_surmesure() {
     return;
   }
 
+  // Time-trap signé + filtre anti-junk (mêmes couches que les autres contacts).
+  // Rejet SILENCIEUX (success sans envoi) — cohérent avec le honeypot ci-dessus.
+  if (!sapi_time_trap_valid($_POST['sapi_ts'] ?? 0, $_POST['sapi_tsig'] ?? '')) {
+    wp_send_json_success(['message' => 'Merci.']);
+    return;
+  }
+  if (sapi_is_junk_contact($email, $description, false)) {
+    wp_send_json_success(['message' => 'Merci.']);
+    return;
+  }
+
   // Inscription à la liste Brevo #6 (newsletter) avec SOURCE=conseiller, pour que
   // ces prospects entrent dans la séquence d'accueil -10 % (branche A). Les deux
   // sources (conseiller-modal + card-mes-creations) sont stampées 'conseiller'.
@@ -4531,166 +4266,12 @@ function sapi_ajax_megafilter_surmesure() {
 /* ═══════════════════════════════════════════════════════════
    ROBIN CONSEILLER V2 — Filtrage produits pour "Ma sélection"
 ═══════════════════════════════════════════════════════════ */
-add_action('wp_ajax_sapi_robin_filter_products', 'sapi_ajax_robin_filter_products');
-add_action('wp_ajax_nopriv_sapi_robin_filter_products', 'sapi_ajax_robin_filter_products');
 
-function sapi_ajax_robin_filter_products() {
-  // 1. Nonce
-  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
-    wp_send_json_error(['message' => 'Nonce invalide']);
-  }
-
-  // 2. Parse answers
-  $answers = [];
-  if (!empty($_POST['answers'])) {
-    $raw = json_decode(sanitize_text_field(wp_unslash($_POST['answers'])), true);
-    if (is_array($raw)) {
-      foreach ($raw as $k => $v) {
-        $answers[sanitize_key($k)] = sanitize_text_field($v);
-      }
-    }
-  }
-
-  if (empty($answers)) {
-    wp_send_json_error(['message' => 'Pas de réponses']);
-  }
-
-  // 3. Normaliser taille_escalier → taille
-  if (!empty($answers['taille_escalier'])) {
-    $answers['taille'] = $answers['taille_escalier'] === 'ouvert' ? 'grande' : 'petite';
-  }
-
-  // "Je ne sais pas" → pas de filtre taille
-  if (isset($answers['taille']) && $answers['taille'] === 'ne-sais-pas') {
-    unset($answers['taille']);
-  }
-
-  // 4. Filtrage via le pipeline existant
-  require_once get_template_directory() . '/inc/guide-data.php';
-  $categories = sapi_guide_get_categories($answers);
-  $result = sapi_guide_query_products($answers, $categories);
-  $products = isset($result['products']) ? $result['products'] : [];
-
-  // 5. Extraire les IDs
-  $ids = array_map(function($p) { return $p['id']; }, $products);
-
-  wp_send_json_success([
-    'product_ids' => $ids,
-    'count'       => count($ids),
-  ]);
-}
 
 /* ═══════════════════════════════════════════════════════════
    ROBIN CONSEILLER V2 — Endpoint per-step AI conseil
 ═══════════════════════════════════════════════════════════ */
-add_action('wp_ajax_sapi_robin_conseil_step', 'sapi_ajax_robin_conseil_step');
-add_action('wp_ajax_nopriv_sapi_robin_conseil_step', 'sapi_ajax_robin_conseil_step');
 
-function sapi_ajax_robin_conseil_step() {
-  // 1. Nonce
-  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
-    wp_send_json_error(['message' => 'Nonce invalide']);
-  }
-
-  // 2. Honeypot
-  if (!empty($_POST['guide_website'])) {
-    wp_send_json_error(['message' => 'Erreur']);
-  }
-
-  // 3. Rate limit
-  $ai_allowed = sapi_guide_check_rate_limit();
-
-  // 4. Parse inputs
-  $step_id = isset($_POST['step_id']) ? sanitize_key($_POST['step_id']) : '';
-  $answers = [];
-  if (!empty($_POST['answers'])) {
-    $raw = json_decode(sanitize_text_field(wp_unslash($_POST['answers'])), true);
-    if (is_array($raw)) {
-      foreach ($raw as $k => $v) {
-        $answers[sanitize_key($k)] = sanitize_text_field($v);
-      }
-    }
-  }
-
-  $opening_context = isset($_POST['opening_context']) ? sanitize_key($_POST['opening_context']) : 'bandeau';
-  $context_data = [];
-  if (!empty($_POST['context_data'])) {
-    $cd = json_decode(sanitize_text_field(wp_unslash($_POST['context_data'])), true);
-    if (is_array($cd)) {
-      foreach ($cd as $k => $v) {
-        $context_data[sanitize_key($k)] = sanitize_text_field($v);
-      }
-    }
-  }
-
-  $user_message = isset($_POST['user_message']) ? sanitize_textarea_field(wp_unslash($_POST['user_message'])) : '';
-  $ai_call_count = isset($_POST['ai_call_count']) ? (int) $_POST['ai_call_count'] : 0;
-
-  if (empty($step_id)) {
-    wp_send_json_error(['message' => 'step_id manquant']);
-  }
-
-  // 5. Si pas d'IA (rate limit), renvoyer un fallback
-  if (!$ai_allowed) {
-    wp_send_json_success([
-      'conseil_text' => 'Le service est temporairement indisponible. Pour une réponse rapide, contactez Robin directement.',
-      'link_url'     => null,
-      'link_label'   => null,
-      'suggested_buttons' => [
-        ['label' => 'Contacter Robin', 'url' => '/contact/'],
-      ],
-      'next_step_id' => 'hors_parcours',
-      'answered_steps' => new \stdClass(),
-    ]);
-  }
-
-  // 6. Recommendation finale — pipeline complet
-  if ($step_id === 'recommendation') {
-    sapi_robin_handle_recommendation($answers, $ai_allowed);
-    return; // sapi_robin_handle_recommendation fait son propre wp_send_json
-  }
-
-  // 7. Étapes normales — construire le prompt et appeler Claude
-  $system_prompt = sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $context_data, $user_message, $ai_call_count);
-
-  // Message user contextuel
-  $user_prompt = '';
-  if (!empty($user_message)) {
-    $user_prompt = $user_message;
-  } elseif ($step_id === 'recommendation') {
-    $user_prompt = 'Voici mes réponses complètes. Recommande-moi des luminaires précis.';
-  } elseif ($step_id === 'product_page') {
-    $product_name = isset($context_data['product_name']) ? $context_data['product_name'] : 'ce luminaire';
-    $user_prompt = 'Je regarde ' . $product_name . '. Qu\'en penses-tu par rapport à mon projet ?';
-  } else {
-    // Step normal — le dernier choix fait
-    $last_answer = isset($answers[$step_id]) ? $answers[$step_id] : '';
-    $user_prompt = $last_answer
-      ? 'J\'ai répondu "' . $last_answer . '" à la question sur ' . $step_id . '. Donne-moi ton conseil.'
-      : 'Donne-moi ton conseil pour cette étape.';
-  }
-
-  $result = sapi_robin_call_claude_step($system_prompt, $user_prompt);
-
-  if (!$result || empty($result['conseil_text'])) {
-    wp_send_json_success([
-      'conseil_text' => 'Je ne peux pas répondre à cette question. Le mieux est d\'en parler directement avec Robin.',
-      'link_url'     => null,
-      'link_label'   => null,
-      'suggested_buttons' => [
-        ['label' => 'Contacter Robin', 'url' => '/contact/'],
-        ['label' => 'Reprendre le questionnaire', 'slug' => 'restart', 'step_id' => 'piece'],
-      ],
-      'next_step_id' => 'hors_parcours',
-      'answered_steps' => new \stdClass(),
-    ]);
-  }
-
-  // Filtrer les boutons et réponses invalides avant d'envoyer
-  $result = sapi_robin_validate_response($result);
-
-  wp_send_json_success($result);
-}
 
 /**
  * Robin V2 — Valide et nettoie la réponse IA.
@@ -7967,47 +7548,7 @@ function sapi_megafilter_render_session_detail($r) {
 }
 
 // ─── AJAX: Render product cards for Conseils page ───
-add_action('wp_ajax_sapi_conseils_products', 'sapi_ajax_conseils_products');
-add_action('wp_ajax_nopriv_sapi_conseils_products', 'sapi_ajax_conseils_products');
 
-function sapi_ajax_conseils_products() {
-  if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'sapi-guide-results')) {
-    wp_send_json_error(['message' => 'Nonce invalide']);
-    return;
-  }
-
-  $ids_raw = isset($_POST['ids']) ? sanitize_text_field(wp_unslash($_POST['ids'])) : '[]';
-  $ids = json_decode($ids_raw, true);
-
-  if (!is_array($ids) || empty($ids)) {
-    wp_send_json_error('No product IDs');
-    return;
-  }
-
-  // Limit to 12 products max
-  $ids = array_slice(array_map('absint', $ids), 0, 12);
-
-  $query = new WP_Query([
-    'post_type'      => 'product',
-    'post__in'       => $ids,
-    'orderby'        => 'post__in',
-    'posts_per_page' => 12,
-  ]);
-
-  ob_start();
-  if ($query->have_posts()) {
-    echo '<ul class="products columns-4">';
-    while ($query->have_posts()) {
-      $query->the_post();
-      wc_get_template_part('content', 'product');
-    }
-    echo '</ul>';
-    wp_reset_postdata();
-  }
-  $html = ob_get_clean();
-
-  wp_send_json_success($html);
-}
 
 /* ─── Google Reviews (Places API New) ─── */
 function sapi_get_google_reviews() {
