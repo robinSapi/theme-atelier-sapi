@@ -644,8 +644,14 @@ Commits : `51058bc` (infra) → `1efeab9` (polices) → `c02c6c8` (générateur)
 
 **✅ NETTOYAGE FAIT** : routes temporaires `catalogue-pdf-selftest` / `catalogue-pdf-preview` retirées. Ne reste que l'endpoint public `catalogue-pdf`.
 
-**⚠️ RESTE : GO PROD (Temps 1 + Temps 2 groupés)** — sur ordre explicite de Robin uniquement :
+**✅ POUSSÉ EN PROD (master) le 2026-08-05 — commit `113a1ef`.** Déploiement **sélectif** : cherry-pick propre en UN commit par-dessus master (16 fichiers = 100% catalogue), **PAS** un merge de test (qui aurait envoyé immersion / état B / Tâche 5 / emails / mode vacances, non validés prod). master ne contient qu'un commit de plus que l'avant-catalogue. **Reste à Robin :** (1) lancer le workflow GitHub Actions « Deploy to Production » (manuel, régénère vendor via Composer) ; (2) créer la page `/catalogue` en prod (template + ACF) ; (3) vérifier `atelier-sapi.fr/catalogue` + bouton PDF.
+
+<details><summary>Ancien « RESTE avant prod » (archivé)</summary>
+
+**GO PROD (Temps 1 + Temps 2 groupés)** — sur ordre explicite de Robin uniquement :
 1. Merge `test-theme-sapi-maison` → `master` + push.
 2. Robin lance le workflow GitHub Actions prod (qui régénère `vendor/` via l'étape Composer).
 3. Robin crée/complète la page `/catalogue` en prod (template + ACF) si pas déjà répliqué.
 **Diagnostic serveur test o2switch (utile pour la prod)** : PHP 8.3, mémoire 512 Mo, max_execution 600 s, GD ok — génération synchrone viable. Vérifier que la prod a les mêmes ordres de grandeur.
+
+</details>
