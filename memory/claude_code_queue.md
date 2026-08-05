@@ -78,7 +78,7 @@ Ajouter dans `sapi_ajax_guide_contact()` (après le honeypot) l'appel déjà uti
 | Contact `/contact` | ✅ | nonce+honeypot+rate limit + time-trap+junk |
 | « Contacter Robin » (fiche produit) | ✅ | idem |
 | « Échangeons ensemble » (modale Conseiller, `megafilter_surmesure`) | ✅ | nonce+honeypot+rate limit **+ time-trap+junk AJOUTÉS ce commit** |
-| Sur-mesure `/sur-mesure` | ✅ | nonce+honeypot+rate limit |
+| Sur-mesure `/sur-mesure` | ✅ | nonce+honeypot+rate limit **+ time-trap+junk AJOUTÉS (commit `d23b9bd`)** |
 | Newsletter (home + popup cookie) | ✅ | nonce+honeypot+rate limit |
 | Inspiration (email→Brevo, `/inspiration`) | ✅ | nonce (pas de honeypot/rate limit, mais email seul, pas de message libre — risque faible) |
 | Recherches (404/search/room-pickers) | ✅ | GET WordPress, hors périmètre spam |
