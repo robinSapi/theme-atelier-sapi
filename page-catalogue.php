@@ -216,10 +216,13 @@ function sapi_catalogue_render_specs($sections) {
           </div>
           <div class="cat-card__body">
             <h3 class="cat-card__title product-name"><?php echo esc_html($title); ?></h3>
-            <?php if (!empty($p['essences'])) : ?>
+            <?php if (!empty($p['essences']) || !empty($p['sizes'])) : ?>
               <div class="cat-card__essences">
                 <?php foreach ($p['essences'] as $ess) : ?>
                   <span class="cat-chip"><?php echo esc_html($ess); ?></span>
+                <?php endforeach; ?>
+                <?php foreach ($p['sizes'] as $sz) : ?>
+                  <span class="cat-chip cat-chip--size"><?php echo esc_html($sz); ?></span>
                 <?php endforeach; ?>
               </div>
             <?php endif; ?>
@@ -232,10 +235,13 @@ function sapi_catalogue_render_specs($sections) {
           <!-- Contenu de la fiche technique (cloné dans la modale à l'ouverture) -->
           <template class="cat-card__fiche">
             <div class="fiche" data-fiche-title="<?php echo esc_attr($title); ?>">
-              <?php if (!empty($p['essences'])) : ?>
+              <?php if (!empty($p['essences']) || !empty($p['sizes'])) : ?>
                 <div class="fiche__essences">
                   <?php foreach ($p['essences'] as $ess) : ?>
                     <span class="cat-chip"><?php echo esc_html($ess); ?></span>
+                  <?php endforeach; ?>
+                  <?php foreach ($p['sizes'] as $sz) : ?>
+                    <span class="cat-chip cat-chip--size"><?php echo esc_html($sz); ?></span>
                   <?php endforeach; ?>
                 </div>
               <?php endif; ?>

@@ -185,6 +185,12 @@ body.catalogue-b2b {
   border-radius: 999px;
   padding: 3px 10px;
 }
+/* Pastille de taille : contour, pour la distinguer des essences */
+.cat-chip--size {
+  color: var(--color-dark);
+  background: #fff;
+  border: 1px solid rgba(147, 125, 104, .38);
+}
 .cat-card__desc { color: #6a6055; font-size: .95rem; margin-bottom: 16px; }
 .cat-card__more {
   margin-top: auto;

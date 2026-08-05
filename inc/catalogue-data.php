@@ -145,7 +145,9 @@ function sapi_catalogue_get_product_specs($product) {
       $value  = '';
 
       if ($source === 'dimensions') {
-        $value = sapi_catalogue_product_dimensions($product, $has_acf);
+        // Priorité aux tailles réelles des variations ; repli sur ACF/WooCommerce.
+        $sizes = sapi_catalogue_product_sizes($product);
+        $value = $sizes ? implode(' · ', $sizes) : sapi_catalogue_product_dimensions($product, $has_acf);
       } elseif ($source === 'weight') {
         $value = sapi_catalogue_product_weight($product, $has_acf);
       } else {
@@ -232,6 +234,27 @@ function sapi_catalogue_product_essences($product) {
     }
   }
   return $found;
+}
+
+/**
+ * Tailles disponibles d'un produit, lues sur l'attribut de variation `pa_taille`
+ * (même principe que les essences). Triées par ordre numérique croissant.
+ *
+ * @param WC_Product $product
+ * @return array<int,string> libellés (ex. ['50 cm', '100 cm', '130 cm'])
+ */
+function sapi_catalogue_product_sizes($product) {
+  if (!function_exists('wc_get_product_terms')) return [];
+  $names = wc_get_product_terms($product->get_id(), 'pa_taille', ['fields' => 'names']);
+  if (empty($names) || is_wp_error($names)) return [];
+  $names = array_values(array_unique(array_map('trim', $names)));
+  usort($names, function ($a, $b) {
+    $na = (float) preg_replace('/[^0-9.]/', '', $a);
+    $nb = (float) preg_replace('/[^0-9.]/', '', $b);
+    if ($na == $nb) return strcmp($a, $b);
+    return $na < $nb ? -1 : 1;
+  });
+  return $names;
 }
 
 /**
@@ -358,6 +381,7 @@ function sapi_catalogue_normalize_product($product) {
     'description' => sapi_catalogue_safe_html($product->get_description()),
     'gallery_ids' => array_map('intval', $gallery_ids),
     'essences'    => sapi_catalogue_product_essences($product),
+    'sizes'       => sapi_catalogue_product_sizes($product),
     'specs'       => sapi_catalogue_get_product_specs($product),
     // Volontairement : aucun 'price', aucun 'permalink', aucun lien.
   ];

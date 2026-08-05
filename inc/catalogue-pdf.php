@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) exit;
 
 // Version du générateur PDF : entre dans la clé de cache → à INCRÉMENTER à chaque
 // évolution de la mise en page pour invalider automatiquement les PDF en cache.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '5');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '6');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -217,7 +217,10 @@ function sapi_catalogue_pdf_css() {
     .prod-name .pf { font-size: 12pt; }
     .prod-name .pr { font-size: 34pt; }
     .prod-sku { font-family: montserrat; font-size: 8.5pt; color: #937D68; text-transform: uppercase; letter-spacing: 1px; }
-    .essence { background: #FBF6EA; color: #937D68; font-size: 8pt; font-weight: bold; padding: 0.6mm 2.6mm; border-radius: 3mm; }
+    /* Vraies pastilles (inline-block → padding vertical + coins arrondis) */
+    .chip { display: inline-block; font-size: 8pt; font-weight: bold; padding: 0.5mm 2.8mm; margin: 0 1.4mm 0.5mm 0; border-radius: 3mm; }
+    .chip-wood { background: #FBF6EA; color: #937D68; }
+    .chip-size { background: #ffffff; border: 0.3mm solid #d8cbb6; color: #4a443d; }
     .prod-hero { text-align: center; margin: 0 0 1.5mm; }
     .essences { margin: 2mm 0 1.5mm; }
     .prod-desc { font-size: 8.5pt; color: #4a443d; text-align: justify; line-height: 1.38; }
@@ -393,11 +396,12 @@ function sapi_catalogue_pdf_build($cats = null) {
         $html .= '</tr></table>';
       }
 
-      // Essences + description (pleine largeur)
-      if (!empty($p['essences'])) {
+      // Essences + tailles (pastilles) + description (pleine largeur)
+      if (!empty($p['essences']) || !empty($p['sizes'])) {
         $chips = [];
-        foreach ($p['essences'] as $ess) $chips[] = '<span class="essence">' . esc_html($ess) . '</span>';
-        $html .= '<div class="essences">' . implode(' ', $chips) . '</div>';
+        foreach ($p['essences'] as $ess) $chips[] = '<span class="chip chip-wood">' . esc_html($ess) . '</span>';
+        foreach ($p['sizes'] as $sz)     $chips[] = '<span class="chip chip-size">' . esc_html($sz) . '</span>';
+        $html .= '<div class="essences">' . implode('', $chips) . '</div>';
       }
       if ($p['description'] !== '') {
         $html .= '<div class="prod-desc">' . wpautop($p['description']) . '</div>';
