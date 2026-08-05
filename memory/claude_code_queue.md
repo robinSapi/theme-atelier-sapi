@@ -68,6 +68,27 @@ Ajouter dans `sapi_ajax_guide_contact()` (après le honeypot) l'appel déjà uti
 - Honeypot + nonces toujours actifs ; home + catalogue inchangés ; console 0 erreur.
 - ⚠️ Je n'ai **pas** de moyen de simuler un vrai bot ici — la validation « le spam s'arrête » se fera à l'usage après prod. Si ça persiste → Turnstile (réserve).
 
+### 🔎 AUDIT COMPLET DES FORMULAIRES + NETTOYAGE (2026-08-05, commit `863fcc3`) — demandé par Robin
+
+**Combien de questionnaires ?** UN seul actif : le **Robin Conseiller** (parcours à étapes, modale, boutique/fiches). L'ancien « quiz V1 » a été retiré (Tâche 7) ; ses handlers restaient en code mort (supprimés ci-dessous).
+
+**Tous les formulaires visibles sont fonctionnels** (aucun cassé). Inventaire + anti-spam :
+| Formulaire | Fonctionnel | Anti-spam |
+|---|---|---|
+| Contact `/contact` | ✅ | nonce+honeypot+rate limit + time-trap+junk |
+| « Contacter Robin » (fiche produit) | ✅ | idem |
+| « Échangeons ensemble » (modale Conseiller, `megafilter_surmesure`) | ✅ | nonce+honeypot+rate limit **+ time-trap+junk AJOUTÉS ce commit** |
+| Sur-mesure `/sur-mesure` | ✅ | nonce+honeypot+rate limit |
+| Newsletter (home + popup cookie) | ✅ | nonce+honeypot+rate limit |
+| Inspiration (email→Brevo, `/inspiration`) | ✅ | nonce (pas de honeypot/rate limit, mais email seul, pas de message libre — risque faible) |
+| Recherches (404/search/room-pickers) | ✅ | GET WordPress, hors périmètre spam |
+
+→ Découverte : le **contact de la modale Conseiller** était un **4ᵉ formulaire de contact vivant** non listé dans la tâche. Il est maintenant au même niveau que les autres.
+
+**✅ CODE MORT SUPPRIMÉ (~473 lignes, 0 appelant, 0 référence, validé Robin)** : `sapi_ajax_guide_contact`, `sapi_ajax_guide_refine`, `sapi_ajax_conseils_products`, `sapi_ajax_robin_conseil_step`, `sapi_ajax_robin_filter_products` (+ leurs `add_action`). Helpers partagés **conservés** (dont `sapi_guide_pick_four`/`diversify_format`, gardés exprès). Vérifié : tous les `wp_ajax_*` restants pointent vers une fonction existante ; accolades équilibrées.
+
+**Reste (optionnel, non fait)** : ajouter honeypot + rate limit au formulaire Inspiration (risque faible). À voir si Robin veut. Branche test, pas de master.
+
 ---
 
 > **REFONTE FILTRAGE CONSEILLER — décisions d'architecture (11/06/2026).** Les tâches ci-dessous REMPLACENT les anciennes (qui supposaient un filtrage en double PHP/JS, désormais périmé).
