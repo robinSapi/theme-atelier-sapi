@@ -385,6 +385,9 @@ get_header();
 
       <form id="sur-mesure-form" action="#surmesure-form" method="post">
         <?php wp_nonce_field('sapi_surmesure_form', 'sapi_surmesure_nonce'); ?>
+        <?php $sapi_tt = function_exists('sapi_time_trap_new') ? sapi_time_trap_new() : ['ts' => 0, 'sig' => '']; ?>
+        <input type="hidden" name="sapi_ts" value="<?php echo esc_attr($sapi_tt['ts']); ?>">
+        <input type="hidden" name="sapi_tsig" value="<?php echo esc_attr($sapi_tt['sig']); ?>">
 
         <!-- Honeypot -->
         <div style="display: none;" aria-hidden="true">
