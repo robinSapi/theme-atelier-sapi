@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) exit;
 
 // Version du générateur PDF : entre dans la clé de cache → à INCRÉMENTER à chaque
 // évolution de la mise en page pour invalider automatiquement les PDF en cache.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '13');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '14');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -226,8 +226,8 @@ function sapi_catalogue_pdf_css() {
     .specs-grid > tbody > tr > td { width: 50%; vertical-align: top; padding: 0 3mm; }
     .spec-block { width: 100%; border-collapse: collapse; margin-bottom: 1.5mm; }
     .spec-block .sec { font-family: montserrat; font-weight: bold; font-size: 8pt; text-transform: uppercase; letter-spacing: .5px; color: #E35B24; padding: 0.4mm 0; }
-    .spec-block th { text-align: left; width: 46%; font-weight: bold; color: #6a6055; padding: 0.6mm 1.5mm; border-bottom: 0.2mm solid #efe7da; font-size: 7pt; }
-    .spec-block td { text-align: left; color: #323232; padding: 0.6mm 1.5mm; border-bottom: 0.2mm solid #efe7da; font-size: 7pt; }
+    .spec-block th { text-align: left; width: 46%; font-weight: bold; color: #6a6055; padding: 0.45mm 1.5mm; border-bottom: 0.2mm solid #efe7da; font-size: 7pt; }
+    .spec-block td { text-align: left; color: #323232; padding: 0.45mm 1.5mm; border-bottom: 0.2mm solid #efe7da; font-size: 7pt; }
 
     .contact { text-align: center; }
     .contact .h { font-family: squarepeg; font-size: 30pt; color: #937D68; margin-bottom: 6mm; }
@@ -249,7 +249,7 @@ function sapi_catalogue_pdf_name_html($title) {
   // (ex. « .prod-name .pr { font-size } »), donc la taille doit être portée
   // directement par le span, sinon le surnom retombe à la taille par défaut.
   $pf = 'font-size:13pt;';
-  $pr = 'font-size:36pt;';
+  $pr = 'font-size:34pt;';
   $words = preg_split('/\s+/', $title);
   if (count($words) < 2) {
     return '<span class="pf" style="' . $pf . '">' . esc_html($title) . '</span>';
