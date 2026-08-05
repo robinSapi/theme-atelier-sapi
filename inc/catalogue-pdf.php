@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) exit;
 
 // Version du générateur PDF : entre dans la clé de cache → à INCRÉMENTER à chaque
 // évolution de la mise en page pour invalider automatiquement les PDF en cache.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '3');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '4');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -218,9 +218,12 @@ function sapi_catalogue_pdf_css() {
     .prod-name .pr { font-size: 36pt; }
     .prod-sku { font-family: montserrat; font-size: 8.5pt; color: #937D68; text-transform: uppercase; letter-spacing: 1px; }
     .essence { background: #FBF6EA; color: #937D68; font-size: 8pt; font-weight: bold; padding: 0.6mm 2.6mm; border-radius: 3mm; }
+    .prod-hero { text-align: center; margin: 1mm 0 2mm; }
+    .essences { margin: 3mm 0 2mm; }
     .prod-desc { font-size: 9pt; color: #4a443d; text-align: justify; line-height: 1.5; }
     .prod-desc p { margin: 0 0 2mm; }
-    .thumb-row td { padding: 2mm 1.5mm 0 0; text-align: left; vertical-align: top; }
+    .thumb-row { margin: 0 auto 1mm; }
+    .thumb-row td { padding: 0 2mm; text-align: center; vertical-align: top; }
 
     /* Tableau caractéristiques en 2 colonnes de sections (compact = 1 page) */
     .specs-grid { width: 100%; margin-top: 4mm; }
@@ -356,28 +359,6 @@ function sapi_catalogue_pdf_build($cats = null) {
       $main   = !empty($gids) ? sapi_catalogue_pdf_image($gids[0], 'large') : null;
       $thumbs = array_slice($gids, 1, 3);
 
-      // Colonne image (visuel principal + jusqu'à 3 vignettes)
-      $img_col = '';
-      if ($main) $img_col .= '<div>' . sapi_catalogue_pdf_img_tag($main, 82, 66) . '</div>';
-      if (!empty($thumbs)) {
-        $img_col .= '<table class="thumb-row"><tr>';
-        foreach ($thumbs as $tid) {
-          $img_col .= '<td>' . sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($tid, 'medium'), 24, 20) . '</td>';
-        }
-        $img_col .= '</tr></table>';
-      }
-
-      // Colonne texte (essences + description)
-      $txt_col = '';
-      if (!empty($p['essences'])) {
-        $chips = [];
-        foreach ($p['essences'] as $ess) $chips[] = '<span class="essence">' . esc_html($ess) . '</span>';
-        $txt_col .= '<div style="margin-bottom:2.5mm;">' . implode(' ', $chips) . '</div>';
-      }
-      if ($p['description'] !== '') {
-        $txt_col .= '<div class="prod-desc">' . wpautop($p['description']) . '</div>';
-      }
-
       // Caractéristiques réparties en 2 colonnes de sections (compact)
       $sections = !empty($p['specs']) ? $p['specs'] : [];
       $col_a = ''; $col_b = '';
@@ -390,7 +371,7 @@ function sapi_catalogue_pdf_build($cats = null) {
         if ($i % 2 === 0) $col_a .= $blk; else $col_b .= $blk;
       }
 
-      // Carte produit
+      // Carte produit — Option A : grande photo en bandeau haut
       $html  = '<pagebreak />';
       $html .= '<div class="prod-card">';
       $html .= '<div class="cat-tag">' . esc_html($block['label']) . '</div>';
@@ -398,10 +379,31 @@ function sapi_catalogue_pdf_build($cats = null) {
       $html .= '<td style="vertical-align:bottom;"><span class="prod-name">' . sapi_catalogue_pdf_name_html($p['title']) . '</span></td>';
       if ($p['sku'] !== '') $html .= '<td style="text-align:right; vertical-align:bottom; width:32mm;"><span class="prod-sku">Réf. ' . esc_html($p['sku']) . '</span></td>';
       $html .= '</tr></table>';
-      $html .= '<table style="width:100%;"><tr>';
-      $html .= '<td style="width:44%; vertical-align:top; padding-right:5mm;">' . $img_col . '</td>';
-      $html .= '<td style="width:56%; vertical-align:top;">' . $txt_col . '</td>';
-      $html .= '</tr></table>';
+
+      // Grande photo paysage pleine largeur
+      if ($main) {
+        $html .= '<div class="prod-hero">' . sapi_catalogue_pdf_img_tag($main, 172, 96) . '</div>';
+      }
+      // Vignettes (jusqu'à 3), centrées sous la photo
+      if (!empty($thumbs)) {
+        $html .= '<table class="thumb-row" align="center"><tr>';
+        foreach ($thumbs as $tid) {
+          $html .= '<td>' . sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($tid, 'medium'), 46, 32) . '</td>';
+        }
+        $html .= '</tr></table>';
+      }
+
+      // Essences + description (pleine largeur)
+      if (!empty($p['essences'])) {
+        $chips = [];
+        foreach ($p['essences'] as $ess) $chips[] = '<span class="essence">' . esc_html($ess) . '</span>';
+        $html .= '<div class="essences">' . implode(' ', $chips) . '</div>';
+      }
+      if ($p['description'] !== '') {
+        $html .= '<div class="prod-desc">' . wpautop($p['description']) . '</div>';
+      }
+
+      // Caractéristiques en 2 colonnes
       if ($sections) {
         $html .= '<table class="specs-grid"><tr>';
         $html .= '<td>' . $col_a . '</td><td>' . $col_b . '</td>';
