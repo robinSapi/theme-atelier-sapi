@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) exit;
 
 // Version du générateur PDF : entre dans la clé de cache → à INCRÉMENTER à chaque
 // évolution de la mise en page pour invalider automatiquement les PDF en cache.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '2');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '3');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -214,8 +214,8 @@ function sapi_catalogue_pdf_css() {
     .prod-card { border: 0.3mm solid #ece2d3; border-radius: 4mm; background: #fffdfb; padding: 6mm 7mm; }
     .cat-tag { font-family: montserrat; font-weight: bold; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 1.5px; color: #E35B24; margin-bottom: 2.5mm; }
     .prod-head { width: 100%; margin-bottom: 3mm; }
-    .prod-name .pf { font-size: 11pt; }
-    .prod-name .pr { font-size: 25pt; }
+    .prod-name .pf { font-size: 12pt; }
+    .prod-name .pr { font-size: 36pt; }
     .prod-sku { font-family: montserrat; font-size: 8.5pt; color: #937D68; text-transform: uppercase; letter-spacing: 1px; }
     .essence { background: #FBF6EA; color: #937D68; font-size: 8pt; font-weight: bold; padding: 0.6mm 2.6mm; border-radius: 3mm; }
     .prod-desc { font-size: 9pt; color: #4a443d; text-align: justify; line-height: 1.5; }

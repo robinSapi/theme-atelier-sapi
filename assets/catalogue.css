@@ -156,7 +156,9 @@ body.catalogue-b2b {
 .cat-card.is-filtered-out { display: none !important; }
 .cat-card__media { position: relative; }
 .cat-card__body { padding: 18px 20px 22px; display: flex; flex-direction: column; flex: 1; }
-.cat-card__title { font-size: 1.2rem; margin: 0 0 8px; color: var(--color-dark); line-height: 1.2; }
+/* Base alignée sur les cartes produit du site (.product-card-cinetique = 1.4rem)
+   pour que le surnom Square Peg (1.6em) rende à la même taille qu'ailleurs. */
+.cat-card__title { font-size: 1.4rem; margin: 0 0 8px; color: var(--color-dark); line-height: 1.15; }
 
 /* Formatter noms produit (prénom Montserrat / surnom Square Peg) — recopié du
    Design System car style.css n'est pas chargé sur cette page autonome. */
@@ -355,10 +357,10 @@ body.catalogue-b2b {
      (surnom = 1.6em). font-family display = repli si le formatter ne tourne pas. */
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+  font-size: clamp(1.5rem, 3vw, 1.9rem); /* base relevée → surnom Square Peg plus grand */
   color: var(--color-dark); /* noms de modèles en noir (demande Robin) */
   margin: 4px 0 16px;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 .fiche__essences { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
 .fiche__desc { color: #4a443d; margin-bottom: 24px; }
