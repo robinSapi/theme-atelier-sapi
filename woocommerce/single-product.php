@@ -484,6 +484,9 @@ get_header();
             <span class="robin-contact-label">Robin vous recontacte rapidement.</span>
             <form class="robin-contact-form" data-product="<?php echo esc_attr($product->get_name()); ?>">
               <?php wp_nonce_field('sapi-guide-results', 'robin_contact_nonce', false); ?>
+              <?php $sapi_tt = function_exists('sapi_time_trap_new') ? sapi_time_trap_new() : ['ts' => 0, 'sig' => '']; ?>
+              <input type="hidden" name="sapi_ts" value="<?php echo esc_attr($sapi_tt['ts']); ?>">
+              <input type="hidden" name="sapi_tsig" value="<?php echo esc_attr($sapi_tt['sig']); ?>">
               <!-- Honeypot anti-spam -->
               <div style="display:none;" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
               <input type="email" name="email" class="robin-contact-email" placeholder="votre@email.com" required>
@@ -2036,6 +2039,10 @@ get_header();
     var fd = new FormData();
     fd.append('action', 'sapi_robin_contact');
     fd.append('nonce', form.querySelector('[name="robin_contact_nonce"]').value);
+    var tsEl = form.querySelector('[name="sapi_ts"]');
+    var tsigEl = form.querySelector('[name="sapi_tsig"]');
+    if (tsEl) fd.append('sapi_ts', tsEl.value);
+    if (tsigEl) fd.append('sapi_tsig', tsigEl.value);
     var message = form.querySelector('.robin-contact-message').value;
     fd.append('email', email);
     fd.append('page', form.dataset.product || window.location.pathname);

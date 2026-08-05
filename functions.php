@@ -16,6 +16,78 @@ function sapi_check_form_rate_limit($form_id = 'contact', $max_hits = 5) {
   return true;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+ * Anti-spam formulaires de contact (2026-08-05) — couches AJOUTÉES au nonce +
+ * honeypot + rate limit existants (on n'en retire aucun). Résistant à la
+ * rotation d'IP du bot, sans friction pour les vrais clients, sans dépendance
+ * externe. Utilisé par page-contact.php + sapi_ajax_robin_contact() +
+ * sapi_ajax_guide_contact().
+ * ───────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Time-trap : génère un timestamp SIGNÉ côté serveur au rendu du formulaire.
+ * La signature empêche un bot d'envoyer simplement time() courant.
+ * @return array{ts:int,sig:string}
+ */
+function sapi_time_trap_new() {
+  $ts = time();
+  return ['ts' => $ts, 'sig' => hash_hmac('sha256', (string) $ts, wp_salt('auth'))];
+}
+
+/**
+ * Vérifie un time-trap : signature valide ET délai humain (≥ min, ≤ max).
+ * Un bot poste en < 1 s ; un humain met toujours plusieurs secondes.
+ * Le vrai levier anti-bot est la borne BASSE (3 s). La borne HAUTE n'est qu'un
+ * garde-fou de sanité, fixée à 24 h (et non 1 h) pour NE PAS créer de faux
+ * positif si la page est servie en cache (LiteSpeed) : le nonce de ces mêmes
+ * formulaires tolère déjà ~12-24 h, on s'aligne dessus.
+ * @return bool true si la soumission est plausible (humaine)
+ */
+function sapi_time_trap_valid($ts, $sig, $min = 3, $max = DAY_IN_SECONDS) {
+  $ts = (int) $ts;
+  if ($ts <= 0 || !is_string($sig) || $sig === '') return false;
+  $expected = hash_hmac('sha256', (string) $ts, wp_salt('auth'));
+  if (!hash_equals($expected, $sig)) return false;
+  $elapsed = time() - $ts;
+  return ($elapsed >= $min && $elapsed <= $max);
+}
+
+/**
+ * Filtre anti-junk CONSERVATEUR (zéro faux positif visé). Rejette si :
+ *  - le domaine de l'email est un domaine de test/réservé ;
+ *  - le message est présent mais purement numérique ou < 5 caractères (hors espaces) ;
+ *  - le message est vide ET requis par le formulaire ($require_message).
+ * NE filtre PAS sur la présence d'URL ni sur des mots-clés (un client peut coller
+ * un lien Pinterest ou un nom de modèle).
+ *
+ * @param string $email
+ * @param string $message
+ * @param bool   $require_message  true si ce formulaire exige un message
+ * @return bool true si la soumission ressemble à du spam
+ */
+function sapi_is_junk_contact($email, $message, $require_message = false) {
+  $bad_domains = ['example.com', 'example.org', 'example.net', 'test.com'];
+  $email = strtolower(trim((string) $email));
+  if ($email !== '') {
+    $at = strrpos($email, '@');
+    if ($at !== false) {
+      $domain = substr($email, $at + 1);
+      if (in_array($domain, $bad_domains, true)) return true;
+    }
+  }
+  $msg = trim((string) $message);
+  if ($msg === '') {
+    return (bool) $require_message; // vide = junk seulement si le message est requis
+  }
+  if (preg_match('/^\s*\d+\s*$/', $msg)) return true;            // purement numérique
+  if (function_exists('mb_strlen')) {
+    if (mb_strlen(preg_replace('/\s+/', '', $msg)) < 5) return true;
+  } elseif (strlen(preg_replace('/\s+/', '', $msg)) < 5) {
+    return true;
+  }
+  return false;
+}
+
 // S28 Phase 2 — Page admin migration repeater galerie_produit → 8 Gallery ACF.
 // Chargée uniquement en admin pour ne pas peser sur le front.
 if (is_admin()) {
@@ -2379,12 +2451,30 @@ function sapi_ajax_guide_contact() {
     return;
   }
 
+  // 2b. Time-trap signé (rejet silencieux si trop rapide / signature invalide)
+  if (!sapi_time_trap_valid($_POST['sapi_ts'] ?? 0, $_POST['sapi_tsig'] ?? '')) {
+    wp_send_json_error(['message' => 'Spam']);
+    return;
+  }
+
+  // 2c. Rate limit (5/h/IP) — était manquant sur ce handler
+  if (!sapi_check_form_rate_limit('guide_contact')) {
+    wp_send_json_error(['message' => 'Trop de messages envoyés. Réessayez plus tard.']);
+    return;
+  }
+
   // 3. Sanitize
   $name    = sanitize_text_field(wp_unslash($_POST['name'] ?? ''));
   $email   = sanitize_email(wp_unslash($_POST['email'] ?? ''));
   $phone   = sanitize_text_field(wp_unslash($_POST['phone'] ?? ''));
   $message = sanitize_textarea_field(wp_unslash($_POST['message'] ?? ''));
   $ai_text = sanitize_textarea_field(wp_unslash($_POST['ai_text'] ?? ''));
+
+  // 3b. Filtre anti-junk (message optionnel ici → n'exige pas un message)
+  if (sapi_is_junk_contact($email, $message, false)) {
+    wp_send_json_error(['message' => 'Spam']);
+    return;
+  }
 
   // 4. Validate
   if (empty($name)) {
@@ -2480,6 +2570,12 @@ function sapi_ajax_robin_contact() {
     return;
   }
 
+  // Time-trap signé (rejet silencieux si trop rapide / signature invalide)
+  if (!sapi_time_trap_valid($_POST['sapi_ts'] ?? 0, $_POST['sapi_tsig'] ?? '')) {
+    wp_send_json_error(['message' => 'Spam détecté.']);
+    return;
+  }
+
   // Rate limiting (5 soumissions/heure par IP)
   if (!sapi_check_form_rate_limit('robin_contact')) {
     wp_send_json_error(['message' => 'Trop de messages envoyés. Réessayez plus tard.']);
@@ -2491,6 +2587,12 @@ function sapi_ajax_robin_contact() {
   $message = sanitize_textarea_field(wp_unslash($_POST['message'] ?? ''));
   $project = sanitize_text_field(wp_unslash($_POST['project'] ?? ''));
   $page    = sanitize_text_field(wp_unslash($_POST['page'] ?? ''));
+
+  // Filtre anti-junk (message optionnel ici → n'exige pas un message)
+  if (sapi_is_junk_contact($email, $message, false)) {
+    wp_send_json_error(['message' => 'Spam détecté.']);
+    return;
+  }
 
   if (empty($email) || !is_email($email)) {
     wp_send_json_error(['message' => 'Email requis']);
