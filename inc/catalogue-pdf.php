@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) exit;
 
 // Version du générateur PDF : entre dans la clé de cache → à INCRÉMENTER à chaque
 // évolution de la mise en page pour invalider automatiquement les PDF en cache.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '7');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '8');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -165,9 +165,10 @@ function sapi_catalogue_pdf_image($attachment_id, $size = 'large') {
 
 /**
  * Balise <img> ajustée (contain) dans une boîte en mm, aspect préservé.
- * @param array|null $img  retour de sapi_catalogue_pdf_image()
+ * @param array|null $img       retour de sapi_catalogue_pdf_image()
+ * @param float      $radius_mm rayon des coins arrondis (0 = angles droits)
  */
-function sapi_catalogue_pdf_img_tag($img, $box_w_mm, $box_h_mm, $class = '') {
+function sapi_catalogue_pdf_img_tag($img, $box_w_mm, $box_h_mm, $radius_mm = 0) {
   if (!$img || empty($img['path'])) return '';
   $w = max(1, (int) $img['w']);
   $h = max(1, (int) $img['h']);
@@ -177,13 +178,9 @@ function sapi_catalogue_pdf_img_tag($img, $box_w_mm, $box_h_mm, $class = '') {
   } else {
     $disp_w = $box_w_mm; $disp_h = $box_w_mm / $aspect;
   }
-  return sprintf(
-    '<img src="%s" class="%s" style="width:%.1fmm;height:%.1fmm;">',
-    esc_attr($img['path']),
-    esc_attr($class),
-    $disp_w,
-    $disp_h
-  );
+  $style = sprintf('width:%.1fmm;height:%.1fmm;', $disp_w, $disp_h);
+  if ($radius_mm > 0) $style .= sprintf('border-radius:%.1fmm;', $radius_mm);
+  return '<img src="' . esc_attr($img['path']) . '" style="' . $style . '">';
 }
 
 /**
@@ -212,29 +209,27 @@ function sapi_catalogue_pdf_css() {
 
     /* Carte produit (esthétique du site) */
     .prod-card { border: 0.3mm solid #ece2d3; border-radius: 4mm; background: #fffdfb; padding: 4.5mm 6mm; }
-    .cat-tag { font-family: montserrat; font-weight: bold; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 1.5px; color: #E35B24; margin-bottom: 1.5mm; }
-    .prod-head { width: 100%; margin-bottom: 1.5mm; }
+    .cat-tag { font-family: montserrat; font-weight: bold; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 1.5px; color: #E35B24; margin-bottom: 1mm; }
+    .prod-head { width: 100%; }
     .prod-name .pf { font-size: 12pt; }
-    .prod-name .pr { font-size: 34pt; }
+    .prod-name .pr { font-size: 42pt; }
     .prod-sku { font-family: montserrat; font-size: 8.5pt; color: #937D68; text-transform: uppercase; letter-spacing: 1px; }
-    /* Vraies pastilles (inline-block → padding vertical + coins arrondis) */
-    .chip { display: inline-block; font-size: 8pt; font-weight: bold; padding: 0.5mm 2.8mm; margin: 0 1.4mm 0.5mm 0; border-radius: 3mm; }
-    .chip-wood { background: #FBF6EA; color: #937D68; }
-    .chip-size { background: #ffffff; border: 0.3mm solid #d8cbb6; color: #4a443d; }
+    /* Filets de séparation discrets */
+    .head-rule { border-top: 0.25mm solid #ece2d3; margin: 0.5mm 0 2mm; }
+    .specs-rule { border-top: 0.25mm solid #ece2d3; margin: 2.5mm 0 2mm; }
     .prod-hero { text-align: center; margin: 0 0 1.5mm; }
-    .essences { margin: 2mm 0 1.5mm; }
-    .prod-desc { font-size: 8.5pt; color: #4a443d; text-align: justify; line-height: 1.38; }
+    .prod-desc { font-size: 8.5pt; color: #4a443d; text-align: justify; line-height: 1.34; }
     .prod-desc p { margin: 0 0 1.5mm; }
-    .thumb-row { margin: 0 auto 0.5mm; }
-    .thumb-row td { padding: 0 1.6mm; text-align: center; vertical-align: top; }
+    .thumb-row { margin: 0 auto 0; }
+    .thumb-row td { padding: 0 1.8mm; text-align: center; vertical-align: top; }
 
     /* Tableau caractéristiques en 2 colonnes de sections (compact = 1 page) */
-    .specs-grid { width: 100%; margin-top: 2.5mm; }
+    .specs-grid { width: 100%; }
     .specs-grid > tbody > tr > td { width: 50%; vertical-align: top; padding: 0 3mm; }
     .spec-block { width: 100%; border-collapse: collapse; margin-bottom: 1.5mm; }
-    .spec-block .sec { font-family: montserrat; font-weight: bold; font-size: 8pt; text-transform: uppercase; letter-spacing: .5px; color: #E35B24; padding: 0.5mm 0; }
-    .spec-block th { text-align: left; width: 46%; font-weight: bold; color: #6a6055; padding: 0.7mm 1.5mm; border-bottom: 0.2mm solid #efe7da; font-size: 7.5pt; }
-    .spec-block td { text-align: left; color: #323232; padding: 0.7mm 1.5mm; border-bottom: 0.2mm solid #efe7da; font-size: 7.5pt; }
+    .spec-block .sec { font-family: montserrat; font-weight: bold; font-size: 8pt; text-transform: uppercase; letter-spacing: .5px; color: #E35B24; padding: 0.4mm 0; }
+    .spec-block th { text-align: left; width: 46%; font-weight: bold; color: #6a6055; padding: 0.6mm 1.5mm; border-bottom: 0.2mm solid #efe7da; font-size: 7pt; }
+    .spec-block td { text-align: left; color: #323232; padding: 0.6mm 1.5mm; border-bottom: 0.2mm solid #efe7da; font-size: 7pt; }
 
     .contact { text-align: center; }
     .contact .h { font-family: squarepeg; font-size: 30pt; color: #937D68; margin-bottom: 6mm; }
@@ -362,16 +357,18 @@ function sapi_catalogue_pdf_build($cats = null) {
       $main   = !empty($gids) ? sapi_catalogue_pdf_image($gids[0], 'large') : null;
       $thumbs = array_slice($gids, 1, 3);
 
-      // Caractéristiques réparties en 2 colonnes de sections (compact)
+      // Caractéristiques en 2 colonnes, équilibrées par nombre de lignes
       $sections = !empty($p['specs']) ? $p['specs'] : [];
-      $col_a = ''; $col_b = '';
-      foreach ($sections as $i => $section) {
+      $col_a = ''; $col_b = ''; $ha = 0; $hb = 0;
+      foreach ($sections as $section) {
         $blk  = '<table class="spec-block"><tr><td class="sec" colspan="2">' . esc_html($section['title']) . '</td></tr>';
         foreach ($section['items'] as $item) {
           $blk .= '<tr><th>' . esc_html($item['label']) . '</th><td>' . esc_html($item['value']) . '</td></tr>';
         }
         $blk .= '</table>';
-        if ($i % 2 === 0) $col_a .= $blk; else $col_b .= $blk;
+        $cost = 1 + count($section['items']);
+        if ($ha <= $hb) { $col_a .= $blk; $ha += $cost; }
+        else            { $col_b .= $blk; $hb += $cost; }
       }
 
       // Carte produit — Option A : grande photo en bandeau haut
@@ -382,16 +379,17 @@ function sapi_catalogue_pdf_build($cats = null) {
       $html .= '<td style="vertical-align:bottom;"><span class="prod-name">' . sapi_catalogue_pdf_name_html($p['title']) . '</span></td>';
       if ($p['sku'] !== '') $html .= '<td style="text-align:right; vertical-align:bottom; width:32mm;"><span class="prod-sku">Réf. ' . esc_html($p['sku']) . '</span></td>';
       $html .= '</tr></table>';
+      $html .= '<div class="head-rule"></div>';
 
-      // Grande photo paysage pleine largeur (+20%)
+      // Grande photo paysage pleine largeur, coins arrondis
       if ($main) {
-        $html .= '<div class="prod-hero">' . sapi_catalogue_pdf_img_tag($main, 165, 101) . '</div>';
+        $html .= '<div class="prod-hero">' . sapi_catalogue_pdf_img_tag($main, 165, 100, 3.2) . '</div>';
       }
-      // Vignettes (jusqu'à 3), centrées sous la photo
+      // Vignettes en bande, arrondies
       if (!empty($thumbs)) {
         $html .= '<table class="thumb-row" align="center"><tr>';
         foreach ($thumbs as $tid) {
-          $html .= '<td>' . sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($tid, 'medium'), 40, 26) . '</td>';
+          $html .= '<td>' . sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($tid, 'medium'), 50, 33, 2) . '</td>';
         }
         $html .= '</tr></table>';
       }
@@ -403,6 +401,7 @@ function sapi_catalogue_pdf_build($cats = null) {
 
       // Caractéristiques en 2 colonnes
       if ($sections) {
+        $html .= '<div class="specs-rule"></div>';
         $html .= '<table class="specs-grid"><tr>';
         $html .= '<td>' . $col_a . '</td><td>' . $col_b . '</td>';
         $html .= '</tr></table>';
