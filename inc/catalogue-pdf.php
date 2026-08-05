@@ -592,114 +592,13 @@ function sapi_catalogue_pdf_endpoint($request) {
 }
 
 /* =========================================================================
- * Route REST self-test (SÉ 1) — diagnostic, à retirer/sécuriser après la S1.
- * GET /wp-json/sapi/v1/catalogue-pdf-selftest        → JSON diagnostic
- * GET /wp-json/sapi/v1/catalogue-pdf-selftest?download=1 → PDF « hello » inline
+ * Route REST publique de téléchargement.
+ * GET /wp-json/sapi/v1/catalogue-pdf?cats=suspensions,appliques
  * ========================================================================= */
 add_action('rest_api_init', function () {
-  register_rest_route('sapi/v1', '/catalogue-pdf-selftest', [
-    'methods'             => 'GET',
-    'permission_callback' => '__return_true',
-    'callback'            => 'sapi_catalogue_pdf_selftest',
-  ]);
-
-  // Prévisualisation TEMPORAIRE (SÉ 3) — remplacée par l'endpoint réel en SÉ 5.
-  // GET /wp-json/sapi/v1/catalogue-pdf-preview?cats=suspensions,appliques[&info=1]
-  register_rest_route('sapi/v1', '/catalogue-pdf-preview', [
-    'methods'             => 'GET',
-    'permission_callback' => '__return_true',
-    'callback'            => 'sapi_catalogue_pdf_preview',
-  ]);
-
-  // Endpoint public de téléchargement (SÉ 5) — sert le cache ou (re)génère.
   register_rest_route('sapi/v1', '/catalogue-pdf', [
     'methods'             => 'GET',
     'permission_callback' => '__return_true',
     'callback'            => 'sapi_catalogue_pdf_endpoint',
   ]);
 });
-
-function sapi_catalogue_pdf_preview($request) {
-  if (!sapi_catalogue_pdf_autoload()) {
-    return new WP_Error('mpdf_absent', 'mPDF non déployé', ['status' => 503]);
-  }
-  $raw  = (string) $request->get_param('cats');
-  $cats = $raw !== '' ? array_filter(array_map('sanitize_key', explode(',', $raw))) : null;
-
-  try {
-    $t0  = microtime(true);
-    $pdf = sapi_catalogue_pdf_build($cats);
-    $meta = [
-      'ok'          => strlen($pdf) > 0,
-      'bytes'       => strlen($pdf),
-      'mb'          => round(strlen($pdf) / 1048576, 2),
-      'seconds'     => round(microtime(true) - $t0, 2),
-      'peak_mem_mb' => round(memory_get_peak_usage(true) / 1048576, 1),
-      'cats'        => $cats ?: 'toutes',
-    ];
-  } catch (\Throwable $e) {
-    return new WP_Error('pdf_error', $e->getMessage(), ['status' => 500]);
-  }
-
-  if ($request->get_param('info')) {
-    return rest_ensure_response($meta);
-  }
-  header('Content-Type: application/pdf');
-  header('Content-Disposition: inline; filename="catalogue-atelier-sapi.pdf"');
-  header('X-Robots-Tag: noindex, nofollow');
-  echo $pdf; // phpcs:ignore — flux binaire PDF
-  exit;
-}
-
-function sapi_catalogue_pdf_selftest($request) {
-  $tmpdir = sapi_catalogue_pdf_tmpdir();
-  $diag = [
-    'php_version'        => PHP_VERSION,
-    'memory_limit'       => ini_get('memory_limit'),
-    'max_execution_time' => ini_get('max_execution_time'),
-    'upload_basedir'     => wp_upload_dir()['basedir'],
-    'tmpdir'             => $tmpdir,
-    'tmpdir_writable'    => wp_is_writable($tmpdir),
-    'vendor_present'     => file_exists(get_template_directory() . '/vendor/autoload.php'),
-    'mpdf_class'         => false,
-    'mpdf_version'       => null,
-    'render'             => null,
-    'gd_or_imagick'      => extension_loaded('gd') ? 'gd' : (extension_loaded('imagick') ? 'imagick' : 'none'),
-  ];
-
-  if (!sapi_catalogue_pdf_autoload()) {
-    return rest_ensure_response($diag);
-  }
-  $diag['mpdf_class'] = true;
-
-  try {
-    $t0 = microtime(true);
-    $mpdf = sapi_catalogue_pdf_new_mpdf();
-    $diag['mpdf_version'] = \Mpdf\Mpdf::VERSION;
-    $diag['fonts_ok'] = true; // pas d'exception = fontdata chargé
-    $mpdf->WriteHTML(
-      '<h1 style="font-family:squarepeg; font-size:34px; color:#937D68">Atelier Sâpi — self-test</h1>' .
-      '<p style="font-family:montserrat">Corps Montserrat. Accents : é è à ù ç œ €.</p>' .
-      '<p style="font-family:montserratblack; font-size:16px">Montserrat Black.</p>'
-    );
-    $pdf = $mpdf->Output('', \Mpdf\Output\Destination::STRING_RETURN);
-
-    $diag['render'] = [
-      'ok'          => strlen($pdf) > 0,
-      'bytes'       => strlen($pdf),
-      'seconds'     => round(microtime(true) - $t0, 2),
-      'peak_mem_mb' => round(memory_get_peak_usage(true) / 1048576, 1),
-    ];
-
-    if ($request->get_param('download')) {
-      header('Content-Type: application/pdf');
-      header('Content-Disposition: inline; filename="sapi-selftest.pdf"');
-      echo $pdf; // phpcs:ignore — flux binaire PDF
-      exit;
-    }
-  } catch (\Throwable $e) {
-    $diag['render'] = ['ok' => false, 'error' => $e->getMessage()];
-  }
-
-  return rest_ensure_response($diag);
-}
