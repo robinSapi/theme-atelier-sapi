@@ -6205,6 +6205,11 @@ function sapi_handle_surmesure_form() {
     return ['submitted' => true, 'success' => false, 'error' => 'Spam détecté.'];
   }
 
+  // Time-trap signé (trop rapide / signature invalide → traité comme le honeypot)
+  if (!sapi_time_trap_valid($_POST['sapi_ts'] ?? 0, $_POST['sapi_tsig'] ?? '')) {
+    return ['submitted' => true, 'success' => false, 'error' => 'Spam détecté.'];
+  }
+
   // Rate limiting (5 soumissions/heure par IP)
   if (!sapi_check_form_rate_limit('surmesure')) {
     return ['submitted' => true, 'success' => false, 'error' => 'Trop de messages envoyés. Réessayez plus tard.'];
@@ -6213,6 +6218,11 @@ function sapi_handle_surmesure_form() {
   $name    = sanitize_text_field($_POST['fullname'] ?? '');
   $email   = sanitize_email($_POST['email'] ?? '');
   $message = sanitize_textarea_field($_POST['message'] ?? '');
+
+  // Filtre anti-junk (message requis sur ce formulaire)
+  if (sapi_is_junk_contact($email, $message, true)) {
+    return ['submitted' => true, 'success' => false, 'error' => 'Spam détecté.'];
+  }
 
   if (empty($name) || empty($email) || empty($message)) {
     return ['submitted' => true, 'success' => false, 'error' => 'Veuillez remplir tous les champs.'];
