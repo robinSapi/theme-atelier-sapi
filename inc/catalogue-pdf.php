@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) exit;
 
 // Version du générateur PDF : entre dans la clé de cache → à INCRÉMENTER à chaque
 // évolution de la mise en page pour invalider automatiquement les PDF en cache.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '11');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '12');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -184,29 +184,6 @@ function sapi_catalogue_pdf_img_tag($img, $box_w_mm, $box_h_mm, $radius_mm = 0) 
 }
 
 /**
- * Image en FOND d'un conteneur (seul moyen d'obtenir des coins arrondis sous
- * mPDF : border-radius ne s'applique pas à une balise <img>).
- *
- * @param bool $crop  true = remplit la boîte donnée (cover, recadre) ; false =
- *                    boîte ajustée à l'aspect (aucun recadrage).
- */
-function sapi_catalogue_pdf_img_box($img, $box_w_mm, $box_h_mm, $radius_mm = 0, $crop = false) {
-  if (!$img || empty($img['path'])) return '';
-  if ($crop) {
-    $dw = $box_w_mm; $dh = $box_h_mm;
-  } else {
-    $w = max(1, (int) $img['w']); $h = max(1, (int) $img['h']); $a = $w / $h;
-    if (($box_w_mm / $box_h_mm) > $a) { $dh = $box_h_mm; $dw = $box_h_mm * $a; }
-    else                              { $dw = $box_w_mm; $dh = $box_w_mm / $a; }
-  }
-  $radius = $radius_mm > 0 ? sprintf('border-radius:%.1fmm;', $radius_mm) : '';
-  return sprintf(
-    '<div style="display:inline-block; width:%.1fmm; height:%.1fmm; background-image:url(\'%s\'); background-size:cover; background-position:center; %s"></div>',
-    $dw, $dh, $img['path'], $radius
-  );
-}
-
-/**
  * Feuille de style PDF (sous-ensemble CSS supporté par mPDF : pas de flex/grid).
  * @return string bloc <style>
  */
@@ -234,17 +211,15 @@ function sapi_catalogue_pdf_css() {
     .prod-card { border: 0.3mm solid #ece2d3; border-radius: 4mm; background: #fffdfb; padding: 4.5mm 6mm; }
     .cat-tag { font-family: montserrat; font-weight: bold; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 1.5px; color: #E35B24; margin-bottom: 1mm; }
     .prod-head { width: 100%; }
-    .prod-name .pf { font-size: 12pt; }
-    .prod-name .pr { font-size: 46pt; }
     .prod-sku { font-family: montserrat; font-size: 8.5pt; color: #937D68; text-transform: uppercase; letter-spacing: 1px; }
     /* Filets de séparation discrets */
     .head-rule { border-top: 0.25mm solid #ece2d3; margin: 0.5mm 0 2mm; }
     .specs-rule { border-top: 0.25mm solid #ece2d3; margin: 2.5mm 0 2mm; }
-    .prod-hero { text-align: center; margin: 0 0 2mm; }
+    .prod-hero { text-align: left; margin: 0 0 2mm; }
     .prod-desc { font-size: 8.5pt; color: #4a443d; text-align: justify; line-height: 1.34; }
     .prod-desc p { margin: 0 0 1.5mm; }
-    .thumb-row { margin: 0 auto; }
-    .thumb-row td { padding: 0 1.8mm 4mm; text-align: center; vertical-align: top; }
+    .thumb-row { margin: 0; }
+    .thumb-row td { padding: 0 3.6mm 4mm 0; text-align: left; vertical-align: top; }
 
     /* Tableau caractéristiques en 2 colonnes de sections (compact = 1 page) */
     .specs-grid { width: 100%; }
@@ -270,17 +245,22 @@ function sapi_catalogue_pdf_css() {
 function sapi_catalogue_pdf_name_html($title) {
   $title = trim((string) $title);
   if ($title === '') return '';
+  // ⚠️ Taille EN STYLE INLINE : mPDF n'applique pas les sélecteurs descendants
+  // (ex. « .prod-name .pr { font-size } »), donc la taille doit être portée
+  // directement par le span, sinon le surnom retombe à la taille par défaut.
+  $pf = 'font-size:13pt;';
+  $pr = 'font-size:46pt;';
   $words = preg_split('/\s+/', $title);
   if (count($words) < 2) {
-    return '<span class="pf">' . esc_html($title) . '</span>';
+    return '<span class="pf" style="' . $pf . '">' . esc_html($title) . '</span>';
   }
   // Nom commençant par un article (La, Le, Les, L\') → tout en surnom
   if (preg_match('/^(la|le|les)$/i', $words[0]) || preg_match("/^l['\x{2019}]/iu", $words[0])) {
-    return '<span class="pr">' . esc_html($title) . '</span>';
+    return '<span class="pr" style="' . $pr . '">' . esc_html($title) . '</span>';
   }
   $first = array_shift($words);
   $rest  = implode(' ', $words);
-  return '<span class="pf">' . esc_html($first) . '</span> <span class="pr">' . esc_html($rest) . '</span>';
+  return '<span class="pf" style="' . $pf . '">' . esc_html($first) . '</span> <span class="pr" style="' . $pr . '">' . esc_html($rest) . '</span>';
 }
 
 /**
@@ -404,14 +384,13 @@ function sapi_catalogue_pdf_build($cats = null) {
       $html .= '</tr></table>';
       $html .= '<div class="head-rule"></div>';
 
-      // Grande photo paysage, coins arrondis (sans recadrage)
+      // Grande photo paysage, alignée à gauche
       if ($main) {
-        $html .= '<div class="prod-hero">' . sapi_catalogue_pdf_img_box($main, 167, 100, 3.5, false) . '</div>';
+        $html .= '<div class="prod-hero">' . sapi_catalogue_pdf_img_tag($main, 167, 100) . '</div>';
       }
-      // Vignettes : <img> dans un tableau (fiable sous mPDF). Coins droits — mPDF
-      // ne sait ni arrondir un <img>, ni disposer des divs-fond en ligne.
+      // Vignettes : <img> dans un tableau, alignées à gauche
       if (!empty($thumbs)) {
-        $html .= '<table class="thumb-row" align="center"><tr>';
+        $html .= '<table class="thumb-row"><tr>';
         foreach ($thumbs as $tid) {
           $html .= '<td>' . sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($tid, 'medium'), 50, 33) . '</td>';
         }
