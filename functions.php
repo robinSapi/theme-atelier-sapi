@@ -1637,6 +1637,7 @@ function sapi_get_shipping_schema($product) {
 }
 
 function sapi_maison_structured_data() {
+  if (!class_exists('WooCommerce')) return; // garde WC (is_product / WC_Shipping_Zones plus bas)
   if (is_product()) {
     global $product;
 
@@ -1700,6 +1701,7 @@ function sapi_maison_structured_data() {
 add_action('wp_head', 'sapi_maison_structured_data');
 
 function sapi_maison_open_graph() {
+  if (!class_exists('WooCommerce')) return; // garde WC (is_product)
   if (is_product()) {
     global $product;
 
