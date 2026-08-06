@@ -1497,6 +1497,7 @@ add_action('woocommerce_order_details_after_customer_details', function() {
  * S'exécute une fois au premier chargement admin, puis ne fait plus rien.
  */
 add_action('admin_init', function () {
+  if (!function_exists('wc_get_page_id')) return; // garde WC : évite le fatal admin si WooCommerce est désactivé
   $page_id = wc_get_page_id('checkout');
   if (!$page_id || $page_id < 1) return;
   if (get_post_meta($page_id, '_wp_page_template', true) !== 'elementor_header_footer') return;
