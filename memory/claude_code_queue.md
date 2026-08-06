@@ -64,6 +64,18 @@ Ajouter dans `sapi_ajax_guide_contact()` (après le honeypot) l'appel déjà uti
 
 **❓ DÉCISION À TRANCHER (Robin ↔ Cowork) :** périmètre **A seul** (les 6 fatals) OU **A + B** (recommandé : + endpoint REST public + 3 AJAX panier + recently-viewed explicite → thème 100% résilient). Sur **go** → je code par sous-étapes sur `test-theme-sapi-maison`, puis test de résilience (désactiver WC sur test) + smoke-test, puis cherry-pick sélectif vers master.
 
+### ✅ FAIT SUR TEST (2026-08-06) — périmètre A+B validé par Robin, 6 commits atomiques
+- `6bf268d` A6 : garde `wc_get_page_id` sur callback admin_init (le déclencheur).
+- `7822ca3` A1+A2 : garde `class_exists('WooCommerce')` en tête de `structured_data` + `open_graph` (wp_head).
+- `5456d5a` A3 : `class_exists &&` sur les elseif `is_product_category`/`is_shop` de `meta_description` (homepage reste couverte).
+- `06085cd` A4 : garde en tête du filtre `document_title_parts` (joué sur chaque `<title>`).
+- `ad75dcf` A5 : early-return neutre dans `sapi_render_mini_cart_contents` (la garde de header.php `function_exists('sapi_render_mini_cart_contents')` était toujours vraie → inefficace ; mini-panier vide sans lien shop si WC absent).
+- `27612a1` B : endpoint REST public `sapi_product_search` + 3 handlers AJAX panier (add_to_cart/buy_now/update_mini_cart_qty, erreur gracieuse) + garde explicite recently-viewed.
+
+Gardes **additives** (early-return / `class_exists &&`) → **zéro changement quand WC actif**. Accolades équilibrées. Smoke-test WC actif : pages 200, 0 erreur PHP.
+
+**⚠️ RESTE (Robin) : TEST DE RÉSILIENCE.** Robin désactive WooCommerce sur test → doit constater : **front + /wp-admin accessibles** (mode dégradé, sans blocs boutique), **plus aucun `undefined function` du thème dans debug.log**. Puis réactive WC → tout identique. **Après validation → cherry-pick sélectif des 6 commits vers master (sur go explicite de Robin, PAS de merge de test).**
+
 ---
 
 **Note :** si le spam persiste après déploiement prod malgré cette couche, l'étape suivante est Cloudflare Turnstile (captcha invisible, gratuit, non-Google, RGPD ok). Ne pas l'implémenter maintenant.
