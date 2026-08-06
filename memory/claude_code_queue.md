@@ -42,6 +42,30 @@ Ajouter dans `sapi_ajax_guide_contact()` (après le honeypot) l'appel déjà uti
 - Rejets **silencieux** côté bot (pas d'indice exploitable), messages d'erreur clairs seulement pour les vrais cas (email invalide, etc.).
 - Console 0 erreur ; aucun impact sur la home ni le catalogue.
 
+### 📐 ÉTAT DES LIEUX + PLAN CLAUDE CODE (2026-08-06) — EN ATTENTE décision périmètre (Robin demande à Cowork)
+
+**Rien codé.** Audit de `functions.php` : les appels WC dangereux sont dans des **callbacks sur hooks toujours joués** (piège : `is_product()`/`is_shop()`/`is_cart()`/`WC()` sont elles-mêmes des fonctions WC → un `if (is_product())` non gardé plante aussi).
+
+**🔴 A — 6 points FATALS (front + admin écran blanc sans WC) :**
+| # | Fonction | Hook | Ligne |
+|---|---|---|---|
+| A1 | `sapi_maison_structured_data` | wp_head | 1618 (+ WC_Shipping_Zones) |
+| A2 | `sapi_maison_open_graph` | wp_head | 1681 |
+| A3 | `sapi_maison_meta_description` | wp_head | 1724/1736 (elseif) |
+| A4 | filtre `document_title_parts` | `<title>` de CHAQUE page | 2237 |
+| A5 | `sapi_render_mini_cart_contents` | header.php:121 (toutes pages) | 1958 — garde header.php **inefficace** |
+| A6 | callback `admin_init` (checkout Elementor) | admin_init | 1500 — **déclencheur exact de l'incident** |
+
+**🟠 B — risque moindre (ne plante que si appelé) :** endpoint REST public `sapi/v1/products/search` (l.5894, atteignable publiquement) ; 3 handlers AJAX panier (add_to_cart/buy_now/update_mini_cart_qty) ; recently-viewed (l.598, déjà protégé de fait par `is_singular('product')`).
+
+**🟢 C — déjà gardés (~13 blocs) :** enqueue assets, footer cross-sells, cart count, fragments, body_class, modale conseiller, coupon welcome, endpoint order-received. On n'y touche pas.
+
+**PLAN :** gardes **additives** (early-return `class_exists('WooCommerce')`/`function_exists()` ou `class_exists &&`), **zéro changement de comportement quand WC est actif**. A6→garde ; A1/A2→garde en tête ; A3→`class_exists &&` sur 2 elseif ; A4→garde en tête du filtre ; A5→early-return propre (mini-panier vide neutre) au lieu de la garde inefficace.
+
+**❓ DÉCISION À TRANCHER (Robin ↔ Cowork) :** périmètre **A seul** (les 6 fatals) OU **A + B** (recommandé : + endpoint REST public + 3 AJAX panier + recently-viewed explicite → thème 100% résilient). Sur **go** → je code par sous-étapes sur `test-theme-sapi-maison`, puis test de résilience (désactiver WC sur test) + smoke-test, puis cherry-pick sélectif vers master.
+
+---
+
 **Note :** si le spam persiste après déploiement prod malgré cette couche, l'étape suivante est Cloudflare Turnstile (captcha invisible, gratuit, non-Google, RGPD ok). Ne pas l'implémenter maintenant.
 
 ### ✅ RÉPONSE CLAUDE CODE — FAIT SUR TEST (2026-08-05, commit `68d1561`, en attente validation Robin)
@@ -750,3 +774,27 @@ Commits : `51058bc` (infra) → `1efeab9` (polices) → `c02c6c8` (générateur)
 **Succès :** le self-check passe ; les invariants d'étanchéité (0 `/URI`, 0 prix) sont vérifiables à la demande sans refaire l'audit à la main ; les réglages de police du gabarit sont regroupés et commentés.
 
 **Rappel transverse :** ces corrections ne doivent rien changer au rendu validé par Robin (mise en page « Option A », 1 produit/page, mention « document non contractuel remis à titre de présentation »). Re-mesurer le poids du PDF toutes catégories après coup (doit rester < 25 Mo, était à 3,9 Mo).
+
+---
+
+## [TÂCHE] Blinder les appels WooCommerce du thème (anti-fatal quand WC est absent/inactif)
+**Date :** 2026-08-05
+**Priorité :** haute
+**Branche :** `test-theme-sapi-maison` d'abord, valider sur test, puis cherry-pick sélectif vers master (pas de merge de test). Ne rien committer sans le go de Robin. Demander un PLAN + état des lieux AVANT de coder.
+
+**Contexte :** le 5 août 2026, une mise à jour du plugin **Broken Link Checker** a provoqué une erreur fatale qui a désactivé WooCommerce dans la foulée. Résultat : le thème a planté tout le site (front + admin, écran blanc) car `functions.php` appelle des fonctions WooCommerce **sans vérifier que WC est chargé**. L'erreur exacte remontée par WordPress :
+`Uncaught Error: Call to undefined function wc_get_page_id() in .../theme-sapi-maison/functions.php` (dans le callback `admin_init` de migration checkout, `wc_get_page_id('checkout')` — ~ligne 1500 sur master).
+Le site n'a été rétabli que par une restauration UpdraftPlus. Objectif : que la seule indisponibilité de WooCommerce ne puisse **plus jamais** faire tomber le thème.
+
+**À faire :**
+
+1. **Corriger le déclencheur exact.** Dans le callback `add_action('admin_init', function () { $page_id = wc_get_page_id('checkout'); ... })`, ajouter en première ligne un garde : `if (!function_exists('wc_get_page_id')) return;`.
+
+2. **Auditer et blinder les autres appels WooCommerce non gardés** exécutés au chargement de `functions.php` ou sur des hooks toujours joués (`after_setup_theme`, `init`, `admin_init`, `wp_enqueue_scripts`, `widgets_init`, etc.). Cibler les appels nus à `wc_*()`, `WC()->...`, `is_cart()`, `is_checkout()`, `wc_get_page_id()`, etc. qui ne sont pas déjà protégés par `class_exists('WooCommerce')` / `function_exists(...)`. Certains le sont déjà (ex. l 532, 672, 774) — les laisser ; il s'agit de couvrir ceux qui ne le sont pas. Pattern de garde à réutiliser : `if (!class_exists('WooCommerce')) return;` en tête de callback, ou `function_exists()` autour de l'appel isolé.
+
+3. **Ne pas modifier le comportement** quand WooCommerce EST actif (cas nominal) : les gardes ne doivent s'activer que si WC est absent. Zéro changement fonctionnel visible en prod.
+
+**Critères de succès :**
+- Test de résilience : WooCommerce désactivé → le site (front + `/wp-admin`) reste accessible, plus d'écran blanc, plus d'`undefined function` dans `debug.log` provenant du thème. Le site tourne en mode dégradé (sans les blocs boutique) mais **ne plante pas**.
+- WooCommerce réactivé → comportement identique à aujourd'hui (panier, checkout, compteur, etc. inchangés).
+- Console 0 erreur ; aucun impact sur la home ni le catalogue.
