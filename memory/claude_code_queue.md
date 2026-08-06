@@ -74,7 +74,15 @@ Ajouter dans `sapi_ajax_guide_contact()` (après le honeypot) l'appel déjà uti
 
 Gardes **additives** (early-return / `class_exists &&`) → **zéro changement quand WC actif**. Accolades équilibrées. Smoke-test WC actif : pages 200, 0 erreur PHP.
 
-**⚠️ RESTE (Robin) : TEST DE RÉSILIENCE.** Robin désactive WooCommerce sur test → doit constater : **front + /wp-admin accessibles** (mode dégradé, sans blocs boutique), **plus aucun `undefined function` du thème dans debug.log**. Puis réactive WC → tout identique. **Après validation → cherry-pick sélectif des 6 commits vers master (sur go explicite de Robin, PAS de merge de test).**
+**⚠️ RESTE (Robin) : TEST DE RÉSILIENCE.** Robin désactive WooCommerce sur test → doit constater : **front + /wp-admin accessibles** (mode dégradé, sans blocs boutique), **plus aucun `undefined function` du thème dans debug.log**. Puis réactive WC → tout identique.
+
+**Décision Robin : périmètre = functions.php uniquement** (les templates `woocommerce/*` ne rendent que si WC est actif → risque assumé).
+
+**✅ CHERRY-PICK PROD PRÉPARÉ (non poussé) — attend le « go prod » de Robin (au calme).**
+- Branche locale `prod-wc-hardening` = `origin/master` + les 6 commits de blindage, cherry-pick **propre** (0 conflit).
+- Diff vs master vérifié = **functions.php uniquement**, 27 ajouts / 3 suppr., **que des gardes additives** (aucune autre modif de test). Accolades équilibrées.
+- Recette pour recréer si besoin : `git checkout -B prod-wc-hardening origin/master && git cherry-pick 6bf268d 7822ca3 5456d5a 06085cd ad75dcf 27612a1`.
+- **Sur go Robin** → `git push origin prod-wc-hardening:master` (fast-forward) puis Robin lance le workflow prod. **Rien ne part sans son go.**
 
 ---
 
