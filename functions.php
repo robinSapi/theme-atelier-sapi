@@ -600,6 +600,7 @@ add_action('wp_enqueue_scripts', 'sapi_maison_enqueue_assets');
  * On le gère manuellement ici pour toujours avoir les données.
  */
 add_action('template_redirect', function () {
+  if (!class_exists('WooCommerce')) return; // garde WC explicite (wc_setcookie plus bas)
   if (!is_singular('product')) return;
 
   $product_id = get_queried_object_id();
@@ -2101,6 +2102,7 @@ function sapi_render_mini_cart_contents() {
  * AJAX handler: update mini-cart item quantity
  */
 function sapi_update_mini_cart_qty() {
+  if (!function_exists('WC') || !WC()->cart) { wp_send_json_error(['message' => 'Boutique momentanément indisponible.']); return; } // garde WC
   // Verify nonce
   if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'sapi-update-mini-cart-qty')) {
     wp_send_json_error(['message' => 'Invalid nonce']);
@@ -2310,6 +2312,7 @@ add_action('wp_ajax_nopriv_sapi_add_to_cart', 'sapi_ajax_add_to_cart');
 add_action('wc_ajax_sapi_add_to_cart', 'sapi_ajax_add_to_cart');
 
 function sapi_ajax_add_to_cart() {
+  if (!function_exists('WC') || !WC()->cart) { wp_send_json_error(['message' => 'Boutique momentanément indisponible.']); return; } // garde WC
   // Verify nonce
   if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'sapi-add-to-cart')) {
     wp_send_json_error(['message' => 'Invalid nonce']);
@@ -2399,6 +2402,7 @@ add_action('wp_ajax_nopriv_sapi_buy_now', 'sapi_ajax_buy_now');
 add_action('wc_ajax_sapi_buy_now', 'sapi_ajax_buy_now');
 
 function sapi_ajax_buy_now() {
+  if (!function_exists('WC') || !WC()->cart) { wp_send_json_error(['message' => 'Boutique momentanément indisponible.']); return; } // garde WC
   // Verify nonce
   if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'sapi-buy-now')) {
     wp_send_json_error(['message' => 'Session expirée, veuillez recharger la page']);
@@ -5757,6 +5761,7 @@ function sapi_register_product_search_endpoint() {
 add_action('rest_api_init', 'sapi_register_product_search_endpoint');
 
 function sapi_product_search($request) {
+  if (!function_exists('wc_get_product')) return new WP_REST_Response([], 200); // garde WC (endpoint public)
   $query_string = $request->get_param('query');
 
   if (empty($query_string) || strlen($query_string) < 2) {
