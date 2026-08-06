@@ -1979,6 +1979,19 @@ add_filter('woocommerce_add_to_cart_fragments', function($fragments) {
  * Render mini cart contents for AJAX refresh
  */
 function sapi_render_mini_cart_contents() {
+  // Garde WC : appelée depuis header.php sur TOUTES les pages. La garde de header.php
+  // (function_exists('sapi_render_mini_cart_contents')) est toujours vraie donc inefficace.
+  // Si WooCommerce est absent, on rend un mini-panier vide neutre (sans lien shop) et on sort.
+  if (!function_exists('WC') || !WC()->cart) {
+    ?>
+    <div class="mini-cart-body">
+      <div class="mini-cart-empty">
+        <p><?php esc_html_e('Votre panier est vide', 'theme-sapi-maison'); ?></p>
+      </div>
+    </div>
+    <?php
+    return;
+  }
   if (!WC()->cart || WC()->cart->is_empty()) {
     ?>
     <div class="mini-cart-body">
