@@ -818,3 +818,5 @@ Le site n'a été rétabli que par une restauration UpdraftPlus. Objectif : que 
 - Test de résilience : WooCommerce désactivé → le site (front + `/wp-admin`) reste accessible, plus d'écran blanc, plus d'`undefined function` dans `debug.log` provenant du thème. Le site tourne en mode dégradé (sans les blocs boutique) mais **ne plante pas**.
 - WooCommerce réactivé → comportement identique à aujourd'hui (panier, checkout, compteur, etc. inchangés).
 - Console 0 erreur ; aucun impact sur la home ni le catalogue.
+
+**🧪 TEST DE RÉSILIENCE (Robin, 2026-08-06) :** WC désactivé → **/wp-admin accessible ✅** (objectif principal atteint, plus de blocage back-office). **Front (home) reste cassé** : identifié = `front-page.php` (~12 appels non gardés `wc_get_product`/`wc_price` lignes 38/56/58/113/118/120/165/170/172/240/275/277, blocs produits de la home). `header.php`/`footer.php` déjà gardés. **Décision Robin : ON LAISSE — périmètre clôturé à functions.php, front-page.php assumé.** Si un jour on veut la home résiliente : encadrer ces blocs d'un `if (class_exists('WooCommerce'))` (petit follow-up, 1 fichier).
