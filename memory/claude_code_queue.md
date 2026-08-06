@@ -78,7 +78,7 @@ Gardes **additives** (early-return / `class_exists &&`) → **zéro changement q
 
 **Décision Robin : périmètre = functions.php uniquement** (les templates `woocommerce/*` ne rendent que si WC est actif → risque assumé).
 
-**✅ POUSSÉ EN PROD (master) le 2026-08-06 — cherry-pick sélectif des 6 commits (functions.php uniquement, fast-forward). Reste : Robin lance le workflow « Deploy to Production ».**
+**✅ POUSSÉ EN PROD (master) le 2026-08-06 — cherry-pick sélectif des 6 commits (functions.php uniquement, fast-forward). Déployé + audit prod OK (pages 200, 0 erreur PHP, mini-panier + endpoint REST OK).**
 - Branche locale `prod-wc-hardening` = `origin/master` + les 6 commits de blindage, cherry-pick **propre** (0 conflit).
 - Diff vs master vérifié = **functions.php uniquement**, 27 ajouts / 3 suppr., **que des gardes additives** (aucune autre modif de test). Accolades équilibrées.
 - Recette pour recréer si besoin : `git checkout -B prod-wc-hardening origin/master && git cherry-pick 6bf268d 7822ca3 5456d5a 06085cd ad75dcf 27612a1`.
