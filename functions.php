@@ -1745,7 +1745,7 @@ function sapi_maison_meta_description() {
         $description = wp_strip_all_tags($product->get_description());
       }
     }
-  } elseif (is_product_category()) {
+  } elseif (class_exists('WooCommerce') && is_product_category()) {
     $term = get_queried_object();
     if ($term) {
       $descs = [
@@ -1757,7 +1757,7 @@ function sapi_maison_meta_description() {
       ];
       $description = isset($descs[$term->slug]) ? $descs[$term->slug] : wp_strip_all_tags(term_description($term->term_id, 'product_cat'));
     }
-  } elseif (is_shop()) {
+  } elseif (class_exists('WooCommerce') && is_shop()) {
     $description = 'Luminaires artisanaux en bois, découpés au laser et assemblés à la main à Lyon. Suspensions, lampadaires, appliques et lampes design.';
   } elseif (is_front_page()) {
     $description = get_bloginfo('description') ?: 'Luminaires artisanaux en bois sculptés à la main à Lyon. Suspensions, lampadaires, appliques et lampes design. 100% français.';
