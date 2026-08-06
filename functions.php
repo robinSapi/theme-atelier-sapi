@@ -2237,7 +2237,10 @@ add_filter('woocommerce_gallery_image_size', function() {
  * Custom SEO titles for product category pages
  */
 add_filter('document_title_parts', function($title) {
-  if (is_product_category()) {
+  // Garde WC : ce filtre est joué sur le <title> de CHAQUE page. is_product_category()
+  // est une fonction WC → early-return si WC absent (comportement inchangé sinon).
+  if (!function_exists('is_product_category') || !is_product_category()) return $title;
+  {
     $term = get_queried_object();
     $category_titles = [
       'suspension' => 'Suspensions artisanales en bois',
