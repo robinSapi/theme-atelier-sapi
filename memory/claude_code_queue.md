@@ -1261,3 +1261,22 @@ Demande de Robin, avec repli sur ambiance. Le nombre **total** de cases étant i
 
 **⏳ En attente de Robin :** (1) revalidation au rendu des DEUX PDF — le pro n'a pas encore été vu dans sa version « 3 grands + 5 petits », contrôler LÉON en priorité ; (2) l'écart de 1,8 mm entre les deux largeurs utiles (179,2 mesuré vs 181 en constante côté pro) ; (3) le champ « Poids » qui affiche du balisage en prod ; (4) le cherry-pick vers `master`.
 
+
+---
+
+## 🚀 CHERRY-PICK PROD FAIT (2026-08-24) — `master` = commit `a92516c`
+
+**⚠️ Robin avait dit « main » : `origin/main` est ABANDONNÉE** — 2 commits, restés au premier import, 2707 commits derrière. La branche de prod est bien **`master`**, conformément au CLAUDE.md. C'est elle qui a reçu le cherry-pick.
+
+**Un seul commit par-dessus `master`**, même pattern que `113a1ef` — surtout **pas** un merge de `test-theme-sapi-maison`, qui aurait embarqué immersion, room-picker, Tâche 5, emails WooCommerce et front-page, non validés pour la prod.
+
+**8 fichiers, 1952 insertions.** Les 7 fichiers catalogue sont repris **à l'octet près** depuis test (vérifié par diff). `functions.php` ne cède que **13 lignes de `require`, purement additives** (0 suppression) — ses 806 lignes d'écart avec test appartiennent à d'autres chantiers. Vérifié avant push : aucun fichier hors catalogue dans le diff, 0 commit perdu.
+
+**⏳ Ce qui reste à faire par Robin, dans l'ordre :**
+1. **Lancer le workflow GitHub Actions « Deploy to Production »** — il est en `workflow_dispatch` uniquement, le push sur `master` ne déploie donc RIEN tout seul. L'étape Composer y régénère `vendor/` (mPDF), qui est gitignoré.
+2. **Créer la page `/catalogue-prix` en prod** : c'est du contenu en base, pas du code. Template « Catalogue B2B », slug `catalogue-prix`, champ « Afficher les prix publics » activé. Puis l'exclure du sitemap Yoast.
+3. **Compléter les mentions légales** dans `Produits > Catalogue PRO` — les cinq crochets `[à compléter]` partiraient tels quels chez un revendeur.
+4. **Vérifier `atelier-sapi.fr/catalogue`** : rendu inchangé, et le PDF public qui, lui, change d'apparence.
+
+**Restent ouverts, sans urgence :** l'écart de 1,8 mm entre les deux largeurs utiles (179,2 mesuré vs 181 en constante côté pro) ; et le champ « Poids » de 5 fiches qui affiche `<p>35 Kilos le matin</p>` en toutes lettres — le contenu est à corriger côté Robin, et un `wp_strip_all_tags()` sur les valeurs de specs reste à décider.
+
