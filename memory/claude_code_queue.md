@@ -1215,3 +1215,31 @@ Deux problèmes distincts : (a) le contenu du champ ACF `poids` est une valeur d
 mPDF sous-ensemble ses polices : les flux de contenu ne contiennent que des index de glyphes, aucun texte en clair. Chercher la chaîne `€` dans un flux décompressé ne pouvait donc jamais rien trouver, quel que soit le contenu réel du document. Restaient valables : le contrôle des annotations `/URI`, le comptage de pages, et les comparaisons d'empreintes entre versions.
 **Corrigé :** un extracteur passant par les CMap `/ToUnicode` embarquées a été écrit (`scratchpad/pdftext.py`). Sur le PDF public complet : 33 423 caractères extraits, « Culot » 27 fois et « Peuplier » 28 fois — soit bien les 27 fiches, l'extraction fonctionne — et **0 occurrence de `€`, `Prix`, `TTC`, `HT`**. L'étanchéité du PDF public est donc désormais **réellement** vérifiée, et non plus supposée. À réutiliser pour tout audit futur.
 
+
+---
+
+### ✅ PDF PUBLIC — bande photo « 2 grandes + 4 moyennes » (2026-08-24, commit `b7cab95`, v23)
+
+Demande de Robin après constat que les fiches publiques descendaient au pire à 259,6 mm, laissant 64 à 68 mm de blanc — presque un quart de page.
+
+**Contrainte structurante rappelée par Robin :** la taille des carrés n'est pas libre, elle est imposée par la largeur. Pour occuper de la hauteur, on met **moins d'images par rangée**, jamais des images plus grandes.
+
+| Profil | Rangée haute | Rangée basse | Bande |
+|---|---|---|---|
+| `pro` | 3 × 58,33 mm | 5 × 33,80 mm | 95,13 mm |
+| `public` | 2 × **87,87 mm** | 4 × **42,20 mm** | **133,53 mm** |
+
+Largeurs utiles et écarts **mesurés par Robin sur le rendu** (179,2 mm et 3,46 mm côté public), pas déduits. ⚠️ Le profil pro garde 181/3, valeurs sous lesquelles sa bande a été validée à l'œil : **l'écart de 1,8 mm entre les deux mesures reste à trancher**, il n'a pas été touché.
+
+**Les deux PDF divergent volontairement** — les publics ne sont pas les mêmes, ne pas chercher à les unifier. Le moteur, le recadrage carré au point focal, le dédoublonnage et les règles de repli restent partagés ; seuls le nombre de cases par rangée et l'ordre de remplissage changent, via un profil.
+
+**Ordre public :** 2 ambiances en grand, puis packshot, ambiance, détail, accessoire. La fiche s'ouvre sur des mises en situation et non sur un détourage — c'est un document qui doit séduire. Le filet clair suit désormais le **packshot où qu'il atterrisse** (case 1 en pro, case 3 en public), et non plus la première case.
+
+**Correctif trouvé en simulant :** les réserves de fin sont servies sur leur type **strict**, sans repli, et repliées seulement une fois les cases de tête pourvues. Sinon un produit sans accessoire voyait le repli lui prendre la **première** ambiance, reléguée en dernière petite case au lieu d'ouvrir la fiche en grand. Vérifié sur 8 cas, profils pro et public, sans régression du pro.
+
+**Mesuré sur test après déploiement :** 11 pages sur les lampadaires, soit **une fiche par page, aucun débordement**. Bas du contenu 262,2 → **259,1 mm**, 23,9 mm de dégagement sous le plancher de 283. Poids du catalogue complet 3,91 → **6,21 Mo** (+59 %, six images carrées au lieu de quatre en « contain ») — **très loin du plafond de 25 Mo**. Étanchéité revérifiée avec l'extracteur `/ToUnicode` : 33 423 caractères, 0 occurrence de `€`, `Prix`, `TTC`, `HT`.
+
+L'ancien gabarit « grande photo + 3 vignettes » et ses règles CSS ont été retirés — plus rien ne les appelait, git les conserve.
+
+**⏳ Reste : la seconde revalidation du PDF public au rendu par Robin**, qu'il assume.
+
