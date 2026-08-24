@@ -28,8 +28,10 @@ if (!defined('ABSPATH')) exit;
 // v20 (2026-08-24) : bande photo refaite (schéma Robin) — 3 grands carrés
 //                    + colonne détail/accessoire, recadrage carré par
 //                    construction. Corrige l'étirement jusqu'à +35 %.
+// v21 (2026-08-24) : le recadrage carré suit le point focal pose dans la
+//                    mediatheque (extension Media Focus Point).
 // La constante entre dans la clé de cache des DEUX générateurs, public et pro.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '20');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '21');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -218,15 +220,8 @@ function sapi_catalogue_pdf_image($attachment_id, $size = 'large') {
 /**
  * Point focal d'une image, en fractions [0,1] depuis le coin haut-gauche.
  *
- * Aucun point focal n'est stocké aujourd'hui (ni le thème ni une extension n'en
- * fournissent) : le défaut est donc le centre géométrique. Le filtre permet de
- * brancher une source réelle — méta d'attachment, champ ACF, extension — sans
- * retoucher le recadrage lui-même.
- *
- *   add_filter('sapi_catalogue_focal_point', function ($fp, $id) {
- *     $v = get_post_meta($id, '_ma_cle_focal', true);   // ex. "0.42,0.31"
- *     return $v ? array_map('floatval', explode(',', $v)) : $fp;
- *   }, 10, 2);
+ * Défaut : centre géométrique. La source réelle est branchée par le filtre
+ * `sapi_catalogue_focal_point` (voir l'adaptateur Media Focus Point ci-dessous).
  *
  * @param int $attachment_id
  * @return array{0:float,1:float} [x, y], chacun dans [0,1]
@@ -238,6 +233,41 @@ function sapi_catalogue_pdf_focal_point($attachment_id) {
   $y = (float) $fp[1];
   return [min(1.0, max(0.0, $x)), min(1.0, max(0.0, $y))];
 }
+
+/**
+ * Adaptateur pour l'extension « Media Focus Point » (wpcompany), installée sur
+ * le site : Robin place le point focal depuis la médiathèque, et le recadrage
+ * carré du PDF le respecte.
+ *
+ * On passe par `MFP_Background($id, false)`, l'API PUBLIQUE documentée de
+ * l'extension depuis sa v1.3, qui renvoie « background-position: 45% 34%;
+ * background-size: cover; ». Lire directement sa méta serait plus court mais se
+ * casserait à la première mise à jour ; la fonction publique, non.
+ *
+ * ⚠️ Sortie tamponnée : si une version de l'extension venait à `echo` au lieu de
+ * retourner, l'octet parasite corromprait le flux binaire du PDF. On capture les
+ * deux cas.
+ *
+ * Sans l'extension (ou sans point focal posé sur l'image), elle rend 50% 50% et
+ * le recadrage reste centré — dégradation silencieuse, jamais d'erreur.
+ *
+ * @param array $fp            valeur par défaut [x, y]
+ * @param int   $attachment_id
+ * @return array{0:float,1:float}
+ */
+function sapi_catalogue_focal_point_from_mfp($fp, $attachment_id) {
+  if (!function_exists('MFP_Background')) return $fp;
+
+  ob_start();
+  $returned = MFP_Background((int) $attachment_id, false);
+  $echoed   = ob_get_clean();
+
+  $style = (is_string($returned) && $returned !== '') ? $returned : (string) $echoed;
+  if (!preg_match('/background-position:\s*([\d.]+)%\s+([\d.]+)%/i', $style, $m)) return $fp;
+
+  return [((float) $m[1]) / 100, ((float) $m[2]) / 100];
+}
+add_filter('sapi_catalogue_focal_point', 'sapi_catalogue_focal_point_from_mfp', 10, 2);
 
 /**
  * Version CARRÉE d'une image, recadrée autour de son point focal.
