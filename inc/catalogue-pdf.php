@@ -96,7 +96,19 @@ function sapi_catalogue_pdf_new_mpdf($config = []) {
  * ========================================================================= */
 
 /**
- * ID de la page portant le template page-catalogue.php (pour lire les ACF).
+ * ID de la page SANS PRIX portant le template page-catalogue.php (pour lire les
+ * ACF Histoire / Bois du PDF public).
+ *
+ * ⚠️ Depuis /catalogue-prix, DEUX pages partagent ce template. get_posts() sans
+ * `orderby` retombe sur date DESC : la page la plus RÉCENTE gagnait, donc le PDF
+ * public se serait mis à lire les ACF de la page prix. Deux gardes :
+ *   1. exclusion des pages dont `catalogue_affiche_prix` vaut 1. La branche
+ *      NOT EXISTS est indispensable : la page /catalogue a été créée AVANT
+ *      l'existence du champ, elle n'a donc AUCUNE ligne de meta pour cette clé,
+ *      et un `!=` seul ne matche pas une meta absente en SQL — la fonction
+ *      renverrait 0 et le PDF public perdrait ses contenus éditoriaux.
+ *   2. `ID ASC` : à égalité, la page historique (créée en premier) l'emporte.
+ *
  * @return int 0 si introuvable
  */
 function sapi_catalogue_page_id() {
@@ -107,8 +119,19 @@ function sapi_catalogue_page_id() {
     'post_status' => 'publish',
     'numberposts' => 1,
     'fields'      => 'ids',
-    'meta_key'    => '_wp_page_template',
-    'meta_value'  => 'page-catalogue.php',
+    'meta_query'  => [
+      [
+        'key'   => '_wp_page_template',
+        'value' => 'page-catalogue.php',
+      ],
+      [
+        'relation' => 'OR',
+        ['key' => 'catalogue_affiche_prix', 'compare' => 'NOT EXISTS'],
+        ['key' => 'catalogue_affiche_prix', 'value' => '1', 'compare' => '!='],
+      ],
+    ],
+    'orderby'     => 'ID',
+    'order'       => 'ASC',
   ]);
   $id = $pages ? (int) $pages[0] : 0;
   return $id;

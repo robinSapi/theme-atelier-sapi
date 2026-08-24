@@ -18,16 +18,34 @@ Template Name: Catalogue B2B
  *
  * Source de données + mapping caractéristiques : inc/catalogue-data.php
  * (source de vérité unique, réutilisée par le Temps 2 / export PDF).
+ *
+ * ── VARIANTE PRIX ────────────────────────────────────────────────────────────
+ * Le même template sert la page /catalogue-prix : champ ACF
+ * `catalogue_affiche_prix` à true → PVP TTC affichés (carte + fiche technique)
+ * et bloc de mentions légales en tête. Le flag est lu UNE SEULE FOIS ci-dessous
+ * dans $show_prices ; /catalogue le garde à false et son rendu ne change pas.
+ * Les prix viennent d'inc/catalogue-data-pro.php — jamais de catalogue-data.php,
+ * qui reste la couche sans prix, auditable.
  */
 
 if (!defined('ABSPATH')) exit;
 
-// ── Données produits (SANS prix), groupées par catégorie ──
-$catalogue      = function_exists('sapi_catalogue_get_products') ? sapi_catalogue_get_products() : [];
-$categories     = function_exists('sapi_catalogue_categories') ? sapi_catalogue_categories() : [];
-
 // ── Contenus éditoriaux ACF (page courante) ──
 $has_acf        = function_exists('get_field');
+
+// ── Variante prix : lue UNE SEULE FOIS, pilote tout le rendu conditionnel ──
+$show_prices    = $has_acf && function_exists('sapi_catalogue_get_products_priced')
+                    ? (bool) get_field('catalogue_affiche_prix')
+                    : false;
+$mentions       = $show_prices ? (string) get_field('catalogue_mentions_legales') : '';
+
+// ── Données produits, groupées par catégorie ──
+// Sans le flag : la source SANS prix, strictement comme avant.
+$catalogue      = function_exists('sapi_catalogue_get_products')
+                    ? ($show_prices ? sapi_catalogue_get_products_priced() : sapi_catalogue_get_products())
+                    : [];
+$categories     = function_exists('sapi_catalogue_categories') ? sapi_catalogue_categories() : [];
+
 $accroche       = $has_acf ? (string) get_field('catalogue_accroche') : '';
 $histoire_titre = ($has_acf ? (string) get_field('catalogue_histoire_titre') : '') ?: 'Histoire de l’atelier';
 $histoire_texte = $has_acf ? (string) get_field('catalogue_histoire_texte') : '';
@@ -92,6 +110,29 @@ function sapi_catalogue_render_gallery($ids, $title) {
 }
 
 /**
+ * Rendu du tableau de prix d'un produit (variante /catalogue-prix uniquement).
+ * Une ligne par combinaison achetable, PVP TTC. Aucun prix HT, aucun taux :
+ * ces notions n'existent que dans le PDF tarif pro, généré depuis l'admin.
+ *
+ * @param array $pricing issu de sapi_catalogue_product_pricing()
+ */
+function sapi_catalogue_render_prices($pricing) {
+  if (empty($pricing['rows'])) return;
+  $rows = $pricing['rows'];
+  echo '<div class="cat-price-block">';
+  echo '<h4 class="cat-price-block__title">Prix</h4>';
+  echo '<table class="cat-price-table"><thead><tr>';
+  echo '<th scope="col">Variation</th><th scope="col">Prix TTC</th>';
+  echo '</tr></thead><tbody>';
+  foreach ($rows as $row) {
+    echo '<tr><th scope="row">' . esc_html($row['label']) . '</th>';
+    echo '<td>' . esc_html(sapi_catalogue_format_price($row['ttc'])) . '</td></tr>';
+  }
+  echo '</tbody></table>';
+  echo '</div>';
+}
+
+/**
  * Rendu du tableau de caractéristiques (sections).
  * @param array $sections issu de sapi_catalogue_get_product_specs()
  */
@@ -125,7 +166,7 @@ function sapi_catalogue_render_specs($sections) {
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;900&display=swap">
 <?php wp_print_styles(['sapi-catalogue']); ?>
 </head>
-<body class="catalogue-b2b">
+<body class="catalogue-b2b<?php echo $show_prices ? ' has-prices' : ''; ?>">
 
 <!-- EN-TÊTE : logo image morte + titre + accroche -->
 <header class="cat-header">
@@ -146,6 +187,15 @@ function sapi_catalogue_render_specs($sections) {
 </header>
 
 <main class="cat-main">
+
+  <?php if ($show_prices && $mentions !== '') : ?>
+  <!-- MENTIONS LÉGALES (page prix uniquement) — en tête, sous l'accroche -->
+  <section class="cat-price-legal">
+    <div class="cat-price-legal__inner">
+      <div class="cat-price-legal__body"><?php echo wp_kses_post(wpautop($mentions)); ?></div>
+    </div>
+  </section>
+  <?php endif; ?>
 
   <!-- SECTION : Histoire de l'atelier (ACF) -->
   <section class="cat-histoire">
@@ -219,6 +269,12 @@ function sapi_catalogue_render_specs($sections) {
             <?php if ($p['short_desc'] !== '') : ?>
               <div class="cat-card__desc"><?php echo wp_kses_post($p['short_desc']); ?></div>
             <?php endif; ?>
+            <?php if ($show_prices && isset($p['pricing']['min_ttc']) && $p['pricing']['min_ttc'] !== null) : ?>
+              <p class="cat-price-from">À partir de
+                <span class="cat-price-from__amount"><?php echo esc_html(sapi_catalogue_format_price($p['pricing']['min_ttc'])); ?></span>
+                <span class="cat-price-from__tax">TTC</span>
+              </p>
+            <?php endif; ?>
             <button type="button" class="cat-card__more" data-open-fiche="<?php echo $pid; ?>">Fiche technique</button>
           </div>
 
@@ -228,6 +284,7 @@ function sapi_catalogue_render_specs($sections) {
               <?php if ($p['description'] !== '') : ?>
                 <div class="fiche__desc"><?php echo wp_kses_post(wpautop($p['description'])); ?></div>
               <?php endif; ?>
+              <?php if ($show_prices && !empty($p['pricing'])) sapi_catalogue_render_prices($p['pricing']); ?>
               <?php sapi_catalogue_render_specs($p['specs']); ?>
             </div>
           </template>
@@ -239,7 +296,11 @@ function sapi_catalogue_render_specs($sections) {
     <p class="cat-grid__empty" hidden>Aucun produit dans cette catégorie.</p>
   </section>
 
+  <?php if (!$show_prices) : ?>
   <!-- BLOC EXPORT PDF (Temps 2) — sélection INDÉPENDANTE du filtre d'affichage du haut -->
+  <!-- Masqué sur /catalogue-prix : l'endpoint public produit un PDF SANS prix,
+       incohérent sur une page qui en affiche. Un PDF prix public reste possible
+       plus tard — même gabarit que le tarif pro, colonne HT retirée. -->
   <section class="cat-pdf" data-endpoint="<?php echo esc_url(rest_url('sapi/v1/catalogue-pdf')); ?>">
     <h2 class="cat-section__title cat-section__title--center">Télécharger le catalogue en PDF</h2>
     <p class="cat-pdf__hint">Choisissez les catégories à inclure dans le PDF.</p>
@@ -251,6 +312,7 @@ function sapi_catalogue_render_specs($sections) {
     <button type="button" class="cat-pdf__btn">Télécharger en PDF</button>
     <p class="cat-pdf__status" role="status" aria-live="polite" hidden></p>
   </section>
+  <?php endif; ?>
 
 </main>
 

@@ -100,6 +100,11 @@ if (is_admin()) {
 // champs ACF éditoriaux. Chargé front ET admin (ACF acf/init + rendu template).
 require_once get_template_directory() . '/inc/catalogue-data.php';
 
+// Catalogue B2B — couche PRIX (page /catalogue-prix + futur tarif pro). Fichier
+// SÉPARÉ : catalogue-data.php garde sa garantie « zéro prix », qui est ce qui
+// rend /catalogue auditable. Chargé après lui (il l'enrichit, il en dépend).
+require_once get_template_directory() . '/inc/catalogue-data-pro.php';
+
 // Catalogue B2B — Temps 2. Export PDF (mPDF via Composer/vendor, généré en CI).
 // Réutilise la source de données + le mapping du Temps 1. Guardé si vendor absent.
 require_once get_template_directory() . '/inc/catalogue-pdf.php';

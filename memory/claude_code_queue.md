@@ -820,3 +820,128 @@ Le site n'a été rétabli que par une restauration UpdraftPlus. Objectif : que 
 - Console 0 erreur ; aucun impact sur la home ni le catalogue.
 
 **🧪 TEST DE RÉSILIENCE (Robin, 2026-08-06) :** WC désactivé → **/wp-admin accessible ✅** (objectif principal atteint, plus de blocage back-office). **Front (home) reste cassé** : identifié = `front-page.php` (~12 appels non gardés `wc_get_product`/`wc_price` lignes 38/56/58/113/118/120/165/170/172/240/275/277, blocs produits de la home). `header.php`/`footer.php` déjà gardés. **Décision Robin : ON LAISSE — périmètre clôturé à functions.php, front-page.php assumé.** Si un jour on veut la home résiliente : encadrer ces blocs d'un `if (class_exists('WooCommerce'))` (petit follow-up, 1 fichier).
+
+---
+
+## [TÂCHE] Catalogue — page prix publics `/catalogue-prix` + export PDF tarif pro (admin)
+**Date :** 2026-08-24
+**Priorité :** normale
+**Branche :** `test-theme-sapi-maison`, valider sur test, puis **cherry-pick sélectif vers master** (même pattern que `113a1ef`, pas de merge de test).
+**⚠️ Demander un PLAN + un état des lieux AVANT de coder.** Rien ne part sans le go de Robin.
+**Brief complet côté Cowork :** `business/docs/brief-catalogue-pro-tarife.md` (à lire, il contient les arbitrages et le texte par défaut des mentions légales).
+
+**Contexte :** le catalogue B2B `/catalogue` est en prod, sans aucun prix, et sert aux prescripteurs qui montrent la gamme à leur client final. Robin a besoin de deux choses en plus : une version de cette page **avec les prix publics TTC**, et un **tarif professionnel remisé** à envoyer aux revendeurs (Muse, Ankorstore, prospects salons).
+
+**Décision d'architecture — le point à ne pas rater :** le tarif professionnel n'existe **jamais sur le web**. Aucune page, aucun endpoint public, aucun lien secret ne contient de prix remisé. Le taux est saisi par Robin dans l'admin au moment de générer un PDF, et ne vit que le temps de cette génération. Conséquence directe : Robin peut sortir un PDF à -12% pour un client historique et à -30% pour un prospect, sans que le site ait à savoir qui est qui.
+
+Trois objets, trois niveaux :
+
+| Objet | Contenu | Accès |
+|---|---|---|
+| `/catalogue` (existant) | zéro prix | public, **strictement inchangé** |
+| `/catalogue-prix` (nouveau) | PVP TTC par variation | public, `noindex` |
+| PDF tarif pro (nouveau) | prix HT remisé + PVP TTC | admin seul |
+
+**Contraintes fermes :**
+- `inc/catalogue-data.php` porte une garantie documentée « aucune donnée de prix n'est jamais produite par cette couche ». **Ne pas la casser.** Les prix vivent dans un fichier séparé qui enrichit la couche existante.
+- `/catalogue` ne doit pas bouger d'un octet dans son rendu.
+- Le catalogue vit sur deux branches (couture cherry-pick) : rester scopé aux fichiers du catalogue.
+- Prix WooCommerce = **PVP TTC**, TVA 20% (confirmé par Robin).
+
+---
+
+### Lot 1 — Couche de données prix (`inc/catalogue-data-pro.php`, nouveau fichier)
+
+- `sapi_catalogue_round_ht($price)` — arrondi à **l'euro inférieur** (74,17 → 74). Un seul endroit.
+- `sapi_catalogue_ht_from_ttc($ttc, $rate)` — `floor($ttc / 1.20 * (1 - $rate))`. Le taux est **toujours un argument**, jamais une constante : c'est ce qui rend l'export à taux variable possible.
+- `sapi_catalogue_product_pricing($product)` — tableau de prix par variation : croise `pa_taille` × essence (`pa_materiau` / `pa_bois` / `pa_essence`) ; retourne pour chaque combinaison le libellé, le PVP TTC et le SKU de variation ; produit simple = une ligne. **Ne calcule aucun prix HT** : la conversion se fait au rendu du PDF, avec le taux du moment. Réutiliser `sapi_catalogue_product_sizes()` et `sapi_catalogue_product_essences()` qui existent déjà.
+- `sapi_catalogue_normalize_product_priced($product)` — appelle `sapi_catalogue_normalize_product()` puis **ajoute** la clé `pricing`. Aucune duplication de la logique specs / galerie / descriptions.
+- `sapi_catalogue_get_products()` gagne un argument optionnel `$include_ids` restreignant le résultat à une liste d'IDs produit, groupement et ordre conservés. **Modification additive** : sans l'argument, comportement strictement identique.
+
+⚠️ Pas de paramètre `$with_prices = false` sur la fonction publique. Une fonction séparée, appelée explicitement. Un défaut finit toujours par se retourner contre soi.
+
+### Lot 2 — Page `/catalogue-prix`
+
+- Champ ACF `catalogue_affiche_prix` (true/false) sur le template `page-catalogue.php`, lu **une seule fois** en tête dans `$show_prices`. `/catalogue` garde le flag à false.
+- Robin créera une seconde page WordPress, même template, flag à true, slug `catalogue-prix`.
+- Rendu quand le flag est actif :
+  - carte produit : « À partir de XX € TTC » sous la description courte
+  - modale fiche technique : tableau complet des variations (Variation / Prix TTC)
+  - section mentions légales en début de page, sous l'accroche (nouveau champ ACF `catalogue_mentions_legales`, textarea)
+- `noindex, nofollow` déjà en place dans le template. Vérifier aussi l'exclusion du sitemap Yoast : la page reprend les descriptions des fiches produit, risque de cannibalisation.
+- CSS : classes `cat-price-*` dans `assets/catalogue.css`, portées par `body.has-prices`. Pas de nouveau fichier.
+
+### Lot 3 — Export PDF tarif pro
+
+**Page admin** `Produits > Catalogue PRO`, capacité `manage_woocommerce` :
+
+| Champ | Type | Défaut |
+|---|---|---|
+| Taux de remise (%) | nombre | 30 |
+| Produits à inclure | liste à cocher groupée par catégorie | tous cochés |
+| Établi pour | texte libre | vide |
+| Date d'export | date | aujourd'hui |
+| Valable jusqu'au | date | 31/12 de l'année en cours |
+| Mentions légales | textarea | texte par défaut (voir le brief Cowork) |
+
+- **Sélecteur produits** : ~40 lignes, case + nom + SKU, un « tout / rien » sur chaque en-tête de catégorie, compteur « 12 produits sélectionnés », export refusé à zéro produit. L'ordre du PDF reste celui du site (catégorie puis `menu_order`), pas l'ordre de cochage.
+- ⚠️ **Piège o2switch déjà rencontré en Tâche 5** : des cases multiples en `name="...[]"` sont fusionnées par le WAF, une seule valeur survit. Utiliser un **nom unique par case** (`produits[<id>]=1`), sélection = clés cochées.
+- **Persistance** : chaque export enregistre les valeurs en option WP et les repropose au suivant, **sauf `Établi pour`** qui repart toujours vide (ne jamais envoyer à Ankorstore un tarif au nom de Muse).
+- **Garde-fou** : au-delà de 35% de remise, confirmation explicite avant génération.
+- **Journal des exports** en option WP (date, taux, client, nombre de produits), 20 dernières entrées affichées sous le formulaire.
+
+**Génération** (`inc/catalogue-pdf-pro.php`), en réutilisant `sapi_catalogue_pdf_new_mpdf()` et la CSS existante :
+
+- Page de garde : « Tarif professionnel », « Établi pour X » (bloc masqué si le champ est vide), date d'export, date de validité. **Le taux n'apparaît nulle part** : le revendeur voit ses prix, pas la remise qu'on lui consent par rapport à un autre.
+- Page mentions légales juste après, rendue depuis le champ libre (`wpautop` + `wp_kses` sur un jeu de balises sûr).
+- Par produit : tableau de prix pleine largeur sous les vignettes, avant les caractéristiques. Colonnes **Variation / Prix pro HT / PVP conseillé TTC**.
+- Filigrane discret « Tarif professionnel — confidentiel » sur les pages produit.
+- Bump `SAPI_CATALOGUE_PDF_VERSION` (14 → 15). ⚠️ Si le Point 3 de la tâche « Corrections post-prod » (busting automatique par hash) est déjà fait, le bump manuel n'a plus lieu d'être, et le hash doit couvrir `catalogue-pdf-pro.php`.
+
+**Cache** — le PDF pro ne passe **pas** par le cache public :
+- clé propre `wp_hash(ids triés + stamp + version + taux + client + dates + mentions)`. Le texte des mentions **doit** entrer dans la clé, sinon une correction resservirait l'ancien fichier.
+- même dossier protégé `uploads/catalogues/`, préfixe `pro-`
+- purge automatique des `pro-*.pdf` de plus de 30 jours : ils portent des noms de clients
+- pas de pré-génération : chaque sélection est quasi unique, le cache ne sert qu'au ré-export identique après correction d'une coquille
+
+**Route** — **pas de route REST publique**. Un `admin_post_sapi_catalogue_pro_pdf` avec vérification de nonce et de capacité. La route publique existante `/sapi/v1/catalogue-pdf` ne change pas et reste sans prix.
+
+**Temps de génération** : le diagnostic du Temps 2 (PHP 8.3, 512 Mo, `max_execution_time` 600 s, GD ok) conclut à une génération synchrone viable. Rester en synchrone. Relever les mêmes valeurs sur la prod avant le cherry-pick.
+
+---
+
+**Critères de succès :**
+1. `curl` sur `/catalogue` → aucune occurrence de `€` ni de prix, **y compris dans les `<template>` de fiche technique**. Rendu identique à aujourd'hui.
+2. `curl` sur `/catalogue-prix` → PVP TTC présents, **aucun prix HT, aucun taux**.
+3. `/wp-json/sapi/v1/catalogue-pdf` → PDF toujours sans prix, inchangé.
+4. `admin_post` pro appelé non connecté → refus.
+5. Deux exports au même périmètre mais à taux différents → deux fichiers distincts, prix corrects dans les deux.
+6. Un export à 8 produits ne contient que ces 8 produits, dans l'ordre du site, catégories vides absentes.
+7. Modifier les mentions légales et ré-exporter à périmètre identique → le nouveau texte apparaît (cache bien invalidé).
+8. Contrôle **au rendu du PDF, pas au XML** : rasteriser une page produit et lire les prix à l'œil (règle acquise sur le logo de la charte).
+9. Cas limite d'arrondi vérifié : PVP se terminant par 9 €, taux à décimale.
+10. `/catalogue-prix` absent du sitemap, `noindex` effectif.
+
+---
+
+### 🚧 AVANCEMENT — Lots 1+2 faits sur `test-theme-sapi-maison` (2026-08-24)
+
+Robin a donné le go pour **les lots 1+2 seulement** : il veut voir la page avant que je parte sur l'admin. **Lot 3 (admin + PDF pro) en attente de sa validation visuelle.**
+
+**Fait :**
+- `inc/catalogue-data-pro.php` (NEW) — arrondis, `sapi_catalogue_ht_from_ttc($ttc, $rate)` (taux en argument), `sapi_catalogue_product_pricing()`, `sapi_catalogue_normalize_product_priced()`, `sapi_catalogue_get_products_priced()`, `sapi_catalogue_format_price()`, groupe ACF `group_catalogue_prix`.
+- `inc/catalogue-data.php` — SEULE modification : argument optionnel `$include_ids` (additif). La garantie « zéro prix » de la couche est intacte.
+- `page-catalogue.php` — `$show_prices` lu une fois, « À partir de X € TTC » sur la carte, tableau Variation/Prix TTC dans la fiche technique, bloc mentions légales, bloc PDF masqué quand le flag est actif.
+- `assets/catalogue.css` — classes `cat-price-*` portées par `body.has-prices`.
+- `inc/catalogue-pdf.php` — correctif `sapi_catalogue_page_id()` (voir ci-dessous).
+
+**Deux pièges traités, tous deux signalés par Robin :**
+1. **`sapi_catalogue_page_id()` serait tombé dès la création de `/catalogue-prix`.** `get_posts()` sans `orderby` retombe sur date DESC → la page la plus récente aurait gagné, et le PDF public aurait lu les ACF Histoire/Bois de la page prix. Corrigé par `meta_query` avec branche **`NOT EXISTS`** (indispensable : la page `/catalogue` a été créée avant l'existence du champ, elle n'a aucune ligne de meta, un `!=` seul ne matche pas une meta absente) + `orderby ID ASC`.
+2. **`floor()` nu sur `ttc / 1.20 * (1 - taux)` perd un euro.** Corrigé en `floor(round($x, 6))`. Vérifié par balayage (PVP 20→600 € pas 0,10 × taux 0→50% pas 0,1 pt, ~2,9 M de cas, référence en rationnels exacts) : **82 divergences avec `floor()` nu, 0 avec le correctif.** Jeu de test du critère n°9, au taux par défaut de 30% : PVP 108 → 63, 204 → 119, 216 → 126, 396 → 231, 408 → 238, 420 → 245, 432 → 252.
+
+**Décisions prises avec Robin :**
+- Bloc « Télécharger en PDF » **masqué** sur `/catalogue-prix` (l'endpoint public produit un PDF sans prix, incohérent). Un PDF prix public reste possible plus tard : même gabarit que le tarif pro, colonne HT retirée.
+- Champ ACF `catalogue_mentions_legales` laissé **vide par défaut**. Le texte du brief est celui du **PDF pro** (HT, MOQ, confidentialité) et ne doit pas être recyclé sur une page TTC grand public — Robin le remplira.
+- PVP de référence = **prix régulier** (repli sur le prix actif) : une promo temporaire ne doit pas devenir la base d'un tarif revendeur.
+
+**Reste à faire côté Robin pour voir la page :** créer la page WordPress (template « Catalogue B2B », slug `catalogue-prix`), activer le flag « Afficher les prix publics », et l'exclure du sitemap Yoast.
