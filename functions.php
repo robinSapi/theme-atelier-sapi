@@ -109,6 +109,14 @@ require_once get_template_directory() . '/inc/catalogue-data-pro.php';
 // Réutilise la source de données + le mapping du Temps 1. Guardé si vendor absent.
 require_once get_template_directory() . '/inc/catalogue-pdf.php';
 
+// Catalogue — tarif professionnel (PDF remisé, admin SEULEMENT). Aucune route
+// publique : un admin_post gardé par nonce + capacité. Chargé après le PDF
+// public, dont il réutilise l'instance mPDF, la CSS et le cache.
+require_once get_template_directory() . '/inc/catalogue-pdf-pro.php';
+if (is_admin()) {
+  require_once get_template_directory() . '/inc/catalogue-pro-admin.php';
+}
+
 function sapi_maison_setup() {
   add_theme_support('title-tag');
   add_theme_support('post-thumbnails');

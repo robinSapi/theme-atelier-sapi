@@ -15,7 +15,9 @@ if (!defined('ABSPATH')) exit;
 
 // Version du générateur PDF : entre dans la clé de cache → à INCRÉMENTER à chaque
 // évolution de la mise en page pour invalider automatiquement les PDF en cache.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '14');
+// v15 (2026-08-24) : ajout du tarif professionnel (inc/catalogue-pdf-pro.php).
+// La constante entre dans la clé de cache des DEUX générateurs, public et pro.
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '15');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
