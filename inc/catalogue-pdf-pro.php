@@ -223,17 +223,21 @@ function sapi_catalogue_pro_pdf_css() {
     /* margin-top = le petit espace qui detache le tarif de la description qui
        le precede desormais. Pas de filet : une respiration, pas une coupure. */
     .pro-prices { width: 100%; border-collapse: collapse; margin: 3.5mm 0 0; }
-    /* ⚠️ Ce titre doit etre TYPOGRAPHIQUEMENT IDENTIQUE aux titres de section de
-       la fiche technique (.spec-block .sec dans sapi_catalogue_pdf_css). Les
-       declarations sont recopiees a l identique, et non heritees : mPDF gere mal
-       les selecteurs descendants, on ne peut pas reutiliser la classe .sec ici.
-       Toute retouche de .spec-block .sec doit etre repercutee ligne a ligne. */
-    .pro-prices caption { font-family: montserrat; font-weight: bold; font-size: 8pt; text-transform: uppercase; letter-spacing: .5px; color: #E35B24; text-align: left; padding: 0.4mm 0; }
     .pro-prices th.h { font-family: montserrat; font-weight: bold; font-size: 7pt; text-transform: uppercase; letter-spacing: .5px; color: #937D68; border-bottom: 0.35mm solid #ece2d3; padding: 1mm 1.5mm; text-align: left; }
     .pro-prices th.h.num, .pro-prices td.num { text-align: right; }
     .pro-prices td { font-size: 8pt; color: #323232; border-bottom: 0.2mm solid #efe7da; padding: 1mm 1.5mm; }
     .pro-prices td.ht { font-weight: bold; color: #1a1a1a; }
     .pro-prices td.pvp { color: #6a6055; }
+    /* ⚠️ Titre de la section « Tarif ». Il DOIT etre typographiquement identique
+       aux titres de section de la fiche technique (.spec-block .sec, defini dans
+       sapi_catalogue_pdf_css). Deux contraintes mPDF a respecter :
+       1. surtout PAS de <caption> : mPDF ne lui applique aucun style et le rend
+          centre, en noir, en casse normale. Il faut une CELLULE de tableau
+          portant une classe — exactement la structure des blocs de specs.
+       2. les declarations sont RECOPIEES et non heritees : toute retouche de
+          .spec-block .sec doit etre repercutee ici, ligne a ligne.
+       Placee APRES .pro-prices td pour l emporter sur sa bordure et son padding. */
+    .pro-prices .sec { font-family: montserrat; font-weight: bold; font-size: 8pt; text-transform: uppercase; letter-spacing: .5px; color: #E35B24; text-align: left; padding: 0.4mm 0; border-bottom: none; }
   </style>';
 }
 
@@ -357,7 +361,11 @@ function sapi_catalogue_pro_price_table_html($pricing, $rate) {
 
   // Pas de filet en tête : le tableau est séparé de la description par la seule
   // marge haute de .pro-prices (cf. CSS), comme demandé.
-  $html  = '<table class="pro-prices"><caption>Tarif</caption><tr>';
+  // ⚠️ Le titre est une CELLULE (comme les titres de section de la fiche
+  // technique), jamais un <caption> : mPDF ne style pas les captions.
+  $html  = '<table class="pro-prices">';
+  $html .= '<tr><td class="sec" colspan="3">Tarif</td></tr>';
+  $html .= '<tr>';
   $html .= '<th class="h">Variation</th>';
   $html .= '<th class="h num">Prix pro HT</th>';
   $html .= '<th class="h num">PVP conseillé TTC</th>';

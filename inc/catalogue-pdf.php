@@ -23,8 +23,10 @@ if (!defined('ABSPATH')) exit;
 //                    se posait à 2,7 mm du bord, sous la zone non imprimable.
 // v18 (2026-08-24) : PDF pro — description AVANT le tableau de prix, et titre
 //                    « Tarif » aligné sur les titres de section de la fiche.
+// v19 (2026-08-24) : le titre « Tarif » passe de <caption> (que mPDF ne style
+//                    PAS) à une cellule .sec — le v18 sortait centré en noir.
 // La constante entre dans la clé de cache des DEUX générateurs, public et pro.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '18');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '19');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
