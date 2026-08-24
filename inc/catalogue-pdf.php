@@ -30,8 +30,11 @@ if (!defined('ABSPATH')) exit;
 //                    construction. Corrige l'étirement jusqu'à +35 %.
 // v21 (2026-08-24) : le recadrage carré suit le point focal pose dans la
 //                    mediatheque (extension Media Focus Point).
+// v22 (2026-08-24) : bande photo « 3 grands + rangee de 5 » (addendum 2) —
+//                    58,33 / 33,80 mm, types en preference avec repli, plus
+//                    aucune case vide, filet sur la photo produit.
 // La constante entre dans la clé de cache des DEUX générateurs, public et pro.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '21');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '22');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -626,62 +629,82 @@ if (!defined('SAPI_CATALOGUE_CARD_INNER_W')) define('SAPI_CATALOGUE_CARD_INNER_W
 /**
  * Géométrie de la bande, déduite de la largeur utile — rien n'est codé en dur.
  *
- * Contraintes : 3 carrés de côté S, une colonne de 2 carrés de côté s empilés
- * qui doit faire la même hauteur (2s + écart = S), et 3 écarts entre colonnes.
+ *   rangée haute : 3 carrés  →  S = (W − 2g) / 3
+ *   rangée basse : 5 carrés  →  s = (W − 4g) / 5
+ *   hauteur totale = S + g + s
  *
- *   3S + 3g + s = W   et   s = (S − g) / 2
- *   ⟹  7S + 5g = 2W  ⟹  S = (2W − 5g) / 7
- *
- * @return array{s_big:float,s_small:float,gap:float}
+ * @return array{s_big:float,s_small:float,gap:float,height:float}
  */
 function sapi_catalogue_pdf_band_geometry() {
   $w = (float) SAPI_CATALOGUE_CARD_INNER_W;
   $g = (float) SAPI_CATALOGUE_BAND_GAP;
-  $big   = (2 * $w - 5 * $g) / 7;
-  $small = ($big - $g) / 2;
-  return ['s_big' => $big, 's_small' => $small, 'gap' => $g];
+  $big   = ($w - 2 * $g) / 3;
+  $small = ($w - 4 * $g) / 5;
+  return ['s_big' => $big, 's_small' => $small, 'gap' => $g, 'height' => $big + $g + $small];
 }
 
 /**
- * Les 5 emplacements de la bande, chacun lié à un TYPE de photo précis.
+ * Séquence des photos de la bande, jusqu'à 8, sans aucun trou.
+ *
+ * ⚠️ Les types ne sont PLUS des réservations d'emplacement : c'est ce qui
+ * laissait une case blanche en bas à droite sur toutes les fiches, faute de
+ * photo d'accessoire. Ce sont désormais des PRÉFÉRENCES avec repli, et une case
+ * n'est jamais vide parce que la photo de son type manque (addendum 2).
+ *
+ * Construction :
+ *   - une photo de détail et une d'accessoire sont MISES DE CÔTÉ pour la fin de
+ *     la séquence, dans cet ordre : ce sont les deux dernières cases AFFICHÉES,
+ *     pas les cases n°7 et 8. À 6 photos, la rangée basse donne donc
+ *     ambiance / détail / accessoire.
+ *   - le reste est rempli par la photo produit, puis les ambiances, puis les
+ *     détails et accessoires excédentaires en appoint.
  *
  * ⚠️ La photo produit n'est PAS `gallery_ids[0]` : la galerie du catalogue vient
  * de sapi_get_product_photo_ids_with_fallback() et commence par une ambiance. On
- * lit donc l'image mise en avant explicitement, et on la dédoublonne du reste.
+ * lit donc l'image mise en avant explicitement.
  *
- * Aucun repli d'un type sur un autre : un emplacement sans photo de son type
- * RESTE BLANC (consigne Robin pour l'accessoire, appliquée à tous par cohérence).
- * On ne répète jamais une image pour boucher un trou.
+ * Dédoublonnage global : une même image n'apparaît jamais deux fois.
  *
  * @param int $product_id
- * @return array{0:int,1:int,2:int,3:int,4:int} produit, ambiance 1, ambiance 2,
- *         détail, accessoire — 0 quand l'emplacement reste vide
+ * @return array<int,int> 0 à 8 IDs d'attachment, dans l'ordre d'affichage
  */
-function sapi_catalogue_pdf_band_slots($product_id) {
-  $used = [];
-  $take = function ($type, $rank = 0) use ($product_id, &$used) {
-    if (!function_exists('sapi_get_product_photo_ids')) return 0;
-    $seen = 0;
-    foreach ((array) sapi_get_product_photo_ids($product_id, $type) as $id) {
-      $id = (int) $id;
-      if (!$id || in_array($id, $used, true)) continue;
-      if ($seen++ < $rank) continue;
-      $used[] = $id;
-      return $id;
-    }
-    return 0;
-  };
+function sapi_catalogue_pdf_band_photos($product_id) {
+  $seen = [];
 
   $featured = (int) get_post_thumbnail_id($product_id);
-  if ($featured) $used[] = $featured;
+  if ($featured) $seen[$featured] = true;
 
-  return [
-    $featured,
-    $take('ambiance'),
-    $take('ambiance'),
-    $take('detail'),
-    $take('accessoires'),
-  ];
+  $pool = function ($type) use ($product_id, &$seen) {
+    $out = [];
+    if (!function_exists('sapi_get_product_photo_ids')) return $out;
+    foreach ((array) sapi_get_product_photo_ids($product_id, $type) as $id) {
+      $id = (int) $id;
+      if (!$id || isset($seen[$id])) continue;
+      $seen[$id] = true;
+      $out[] = $id;
+    }
+    return $out;
+  };
+
+  $ambiance   = $pool('ambiance');
+  $detail     = $pool('detail');
+  $accessoire = $pool('accessoires');
+
+  // Fin de séquence : détail puis accessoire, groupés, quand ils existent.
+  $tail = [];
+  if ($detail)     $tail[] = array_shift($detail);
+  if ($accessoire) $tail[] = array_shift($accessoire);
+
+  // Appoint : produit, ambiances, puis les surplus de détail et d'accessoire.
+  $filler = array_merge(
+    $featured ? [$featured] : [],
+    $ambiance,
+    $detail,
+    $accessoire
+  );
+
+  $head = array_slice($filler, 0, max(0, 8 - count($tail)));
+  return array_values(array_merge($head, $tail));
 }
 
 /**
@@ -693,45 +716,65 @@ function sapi_catalogue_pdf_band_slots($product_id) {
  * @return string HTML
  */
 function sapi_catalogue_pdf_photo_band_html($product_id) {
-  $slots = sapi_catalogue_pdf_band_slots($product_id);
-  if (!array_filter($slots)) return '';
+  $ids = sapi_catalogue_pdf_band_photos($product_id);
+  if (!$ids) return '';
 
   $geo   = sapi_catalogue_pdf_band_geometry();
   $big   = $geo['s_big'];
   $small = $geo['s_small'];
   $gap   = $geo['gap'];
 
-  // ~250 dpi : largement au-delà du besoin d'impression, sans alourdir le PDF.
-  $px = function ($mm) { return (int) round($mm / 25.4 * 250); };
+  $n       = count($ids);
+  $n_big   = min(3, $n);
+  $n_small = $n - $n_big; // 0 à 5
 
-  $cell = function ($id, $side_mm, $target_px) {
-    if (!$id) return ''; // emplacement laissé BLANC
-    $img = sapi_catalogue_pdf_square_image($id, $target_px);
+  /**
+   * Vignette carrée. Le filet ne va QUE sur la photo produit : c'est un
+   * détourage sur blanc posé sur le fond crème de la carte, sans cadre il se
+   * lit comme un vide. L'épaisseur du filet est retranchée de l'image pour que
+   * la case garde exactement son côté et que la grille reste juste.
+   */
+  $cell = function ($id, $side_mm, $framed = false) {
+    // ~250 dpi : au-delà du besoin d'impression, sans alourdir le PDF.
+    $img = sapi_catalogue_pdf_square_image($id, (int) round($side_mm / 25.4 * 250));
     if (!$img || empty($img['path'])) return '';
-    return sprintf(
-      '<img src="%s" style="width:%.2fmm;height:%.2fmm;border-radius:2mm;">',
-      esc_attr($img['path']), $side_mm, $side_mm
-    );
+    if (!$framed) {
+      return sprintf('<img src="%s" style="width:%.2fmm;height:%.2fmm;border-radius:2mm;">',
+        esc_attr($img['path']), $side_mm, $side_mm);
+    }
+    $b = 0.25;
+    return sprintf('<img src="%s" style="width:%.2fmm;height:%.2fmm;border:%.2fmm solid #ece2d3;border-radius:2mm;">',
+      esc_attr($img['path']), $side_mm - 2 * $b, $side_mm - 2 * $b, $b);
   };
 
-  $big_px   = $px($big);
-  $small_px = $px($small);
+  /**
+   * Une rangée, alignée à GAUCHE : les cases gardent leur côté et le blanc
+   * reste à droite. Pas de recentrage, pas d'agrandissement — agrandir ferait
+   * sortir la bande du budget vertical de la fiche.
+   */
+  $row = function ($items, $side, $frame_first) use ($gap, $cell) {
+    $count = count($items);
+    if (!$count) return '';
+    $width = $count * $side + ($count - 1) * $gap;
+    $html  = sprintf('<table style="width:%.2fmm;"><tr>', $width);
+    foreach ($items as $i => $id) {
+      $pad = ($i < $count - 1) ? $gap : 0;
+      $html .= sprintf('<td style="width:%.2fmm; padding:0 %.2fmm 0 0;">', $side + $pad, $pad);
+      $html .= $cell($id, $side, $frame_first && $i === 0);
+      $html .= '</td>';
+    }
+    return $html . '</tr></table>';
+  };
 
-  // Colonne de droite : détail en haut, accessoire en bas.
-  $stack  = sprintf('<table style="width:%.2fmm;"><tr><td style="padding:0 0 %.2fmm 0;">', $small, $gap);
-  $stack .= $cell($slots[3], $small, $small_px);
-  $stack .= '</td></tr><tr><td style="padding:0;">';
-  $stack .= $cell($slots[4], $small, $small_px);
-  $stack .= '</td></tr></table>';
+  $top    = $row(array_slice($ids, 0, $n_big), $big, true);
+  $bottom = $n_small ? $row(array_slice($ids, $n_big), $small, false) : '';
 
-  $html = '<table class="photo-band"><tr>';
-  foreach ([0, 1, 2] as $i) {
-    $html .= sprintf('<td style="width:%.2fmm; padding:0 %.2fmm 0 0;">', $big + $gap, $gap);
-    $html .= $cell($slots[$i], $big, $big_px);
-    $html .= '</td>';
-  }
-  $html .= sprintf('<td style="width:%.2fmm; padding:0;">%s</td>', $small, $stack);
-  $html .= '</tr></table>';
+  // Rangée basse absente (moins de 4 photos) → pas de rangée vide, et pas
+  // d'espacement inutile sous la rangée haute.
+  $html  = '<table class="photo-band">';
+  $html .= sprintf('<tr><td style="padding:0 0 %.2fmm 0;">%s</td></tr>', $bottom ? $gap : 0, $top);
+  if ($bottom) $html .= sprintf('<tr><td style="padding:0;">%s</td></tr>', $bottom);
+  $html .= '</table>';
   return $html;
 }
 
