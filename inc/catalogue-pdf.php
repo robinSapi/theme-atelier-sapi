@@ -37,8 +37,12 @@ if (!defined('ABSPATH')) exit;
 //                    2 grandes de 87,87 mm + 4 moyennes de 42,20 mm, bande de
 //                    133,53 mm. Meme hauteur qu'avant pour 6 images au lieu de
 //                    4, ambiances doublees en taille. Ancien gabarit retire.
+// v24 (2026-08-24) : DEUX photos de detail dans les deux profils (repli sur
+//                    ambiance), a la place d'une ambiance. Le repli d'une
+//                    reserve vide se pose a sa place, l'accessoire reste la
+//                    derniere case affichee.
 // La constante entre dans la clé de cache des DEUX générateurs, public et pro.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '23');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '24');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -630,15 +634,18 @@ function sapi_catalogue_pdf_product_card_html($p, $cat_label, $args = []) {
  */
 function sapi_catalogue_pdf_band_layout($profile = 'public') {
   $profiles = [
+    // ⚠️ Le nombre TOTAL de cases est imposé par la géométrie (top + bottom).
+    // Ajouter une case d'un type en retire donc une à un autre : la 2ᵉ photo de
+    // détail (demande Robin) prend la place d'une ambiance dans les deux profils.
     'pro' => [
       'top' => 3, 'bottom' => 5, 'w' => 181.0, 'gap' => 3.0,
-      'head' => ['produit', 'ambiance', 'ambiance', 'ambiance', 'ambiance', 'ambiance'],
-      'tail' => ['detail', 'accessoire'],
+      'head' => ['produit', 'ambiance', 'ambiance', 'ambiance', 'ambiance'],
+      'tail' => ['detail', 'detail', 'accessoire'],
     ],
     'public' => [
       'top' => 2, 'bottom' => 4, 'w' => 179.2, 'gap' => 3.46,
-      'head' => ['ambiance', 'ambiance', 'produit', 'ambiance'],
-      'tail' => ['detail', 'accessoire'],
+      'head' => ['ambiance', 'ambiance', 'produit'],
+      'tail' => ['detail', 'detail', 'accessoire'],
     ],
   ];
   $p = isset($profiles[$profile]) ? $profiles[$profile] : $profiles['public'];
@@ -719,11 +726,15 @@ function sapi_catalogue_pdf_band_photos($product_id, $layout) {
   // voyait le repli lui prendre la PREMIÈRE ambiance, qui se retrouvait reléguée
   // en dernière petite case au lieu d'ouvrir la fiche en grand. Les réserves non
   // servies sont repliées plus bas, une fois les cases de tête pourvues.
-  $tail = [];
-  $unserved = 0;
-  foreach ($layout['tail'] as $wanted) {
-    if (!empty($pools[$wanted])) $tail[] = (int) array_shift($pools[$wanted]);
-    else $unserved++;
+  $tail  = [];
+  $holes = [];
+  foreach ($layout['tail'] as $i => $wanted) {
+    if (!empty($pools[$wanted])) {
+      $tail[$i] = (int) array_shift($pools[$wanted]);
+    } else {
+      $tail[$i] = 0;
+      $holes[]  = $i;
+    }
   }
 
   $head = [];
@@ -732,14 +743,18 @@ function sapi_catalogue_pdf_band_photos($product_id, $layout) {
     if ($id) $head[] = $id;
   }
 
-  // Repli des réserves restées vides : ce qui traîne encore, en fin de séquence.
-  for ($i = 0; $i < $unserved; $i++) {
+  // ⚠️ Le repli d'une réserve vide se pose À SA PLACE, pas en fin de séquence :
+  // sinon, un produit avec une seule photo de détail voyait l'ambiance de repli
+  // passer APRÈS l'accessoire, alors que l'accessoire doit rester la dernière
+  // case affichée.
+  foreach ($holes as $i) {
     $id = $take('ambiance');
     if (!$id) break;
-    $tail[] = $id;
+    $tail[$i] = $id;
   }
 
-  $ids = array_values(array_merge($head, $tail));
+  ksort($tail);
+  $ids = array_values(array_merge($head, array_filter($tail)));
 
   return [
     'ids' => $ids,
