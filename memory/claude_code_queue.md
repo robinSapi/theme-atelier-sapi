@@ -947,4 +947,10 @@ Robin a donné le go pour **les lots 1+2 seulement** : il veut voir la page avan
 
 **Constaté sur test** (JSON des variations des fiches produit) : les prix **varient fortement selon l'essence** — Vincent l'incandescent, 18x33cm : Peuplier 85 € / Okoumé 105 €. Le tableau croisé taille × essence est donc nécessaire, pas de simplification possible. Aucune promo en cours (prix régulier = prix actif partout). Détail cosmétique sans gravité : les libellés de `pa_taille` sont irréguliers (« 50 cm », « 70cm », « 90 cm ») — à uniformiser dans les attributs WooCommerce si Robin le souhaite, ça n'a aucun impact sur le code.
 
-**Reste à faire côté Robin pour voir la page :** créer la page WordPress (template « Catalogue B2B », slug `catalogue-prix`), activer le flag « Afficher les prix publics », et l'exclure du sitemap Yoast.
+**✅ LOTS 1+2 VALIDÉS PAR ROBIN sur test (2026-08-24).** Page `/catalogue-prix` créée par Robin sur test.atelier-sapi.fr, 27 produits, 27 tableaux de prix, `noindex` effectif, bloc PDF absent, `has-prices` actif. `/catalogue` re-audité après coup : **0 occurrence de `€`**, ligne « Bois » inchangée — la non-régression tient.
+
+**Itération visuelle demandée et livrée** : le tableau des prix est passé de la liste « une ligne par combinaison » à un **tableau croisé** (essences en lignes, dimensions en colonnes). Ex. Vincent l'incandescent : Peuplier 85/110/115 €, Okoumé 105/135/135 € pour 18x33 / 25x40 / 32x33 cm. Sur les 27 produits : 0 case vide, toutes les combinaisons existent en base. Trois choix intégrés : lignes ordonnées par la table du catalogue (Peuplier puis Okoumé) et non par ordre de création des variations ; combinaison absente = « — » (jamais un prix déduit par symétrie) ; défilement horizontal confiné au tableau, la page ne part jamais en travers sur mobile.
+
+**Commits sur `test-theme-sapi-maison`** : `cb5c884` (lots 1+2), `d8c5295` (filtre essences), `0ba0ca9` (tableau croisé).
+
+**⏭️ Lot 3 (admin `Produits > Catalogue PRO` + PDF tarif pro) : prêt à démarrer, en attente du go de Robin.** Deux questions ouvertes pour lui : (a) cherry-pick des lots 1+2 vers `master` maintenant, ou tout garder sur test jusqu'à ce que le lot 3 soit fini ? (b) rappel — la page `/catalogue-prix` devra être **recréée à la main en prod** (contenu en base, pas en code), ainsi que son exclusion du sitemap Yoast.
