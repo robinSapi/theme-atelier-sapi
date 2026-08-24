@@ -219,6 +219,22 @@ function sapi_catalogue_product_weight($product, $has_acf) {
 }
 
 /**
+ * Essences de bois EXPOSÉES par le catalogue : slug d'attribut => libellé.
+ *
+ * SOURCE UNIQUE, volontairement restrictive. La base contient d'autres essences
+ * (ex. `peuplier-noir` = « Peuplier teinté noir »), délibérément écartées du
+ * catalogue prescripteurs — décision Robin, 2026-08-24. Toute essence absente de
+ * cette table est ignorée partout : puces, ligne « Bois », PDF, ET tableaux de
+ * prix de /catalogue-prix (inc/catalogue-data-pro.php s'aligne ici, pour que la
+ * page ne puisse jamais afficher un prix sur un bois qu'elle ne présente pas).
+ *
+ * @return array<string,string>
+ */
+function sapi_catalogue_essence_labels() {
+  return ['peuplier' => 'Peuplier', 'okoume' => 'Okoumé'];
+}
+
+/**
  * Essences de bois disponibles pour un produit (Peuplier / Okoumé), lues sur
  * l'attribut de variation. Utilisé pour afficher des puces informatives, jamais
  * pour un prix ou une variation achetable.
@@ -227,7 +243,7 @@ function sapi_catalogue_product_weight($product, $has_acf) {
  * @return array<int,string> libellés (ex. ['Peuplier', 'Okoumé'])
  */
 function sapi_catalogue_product_essences($product) {
-  $labels = ['peuplier' => 'Peuplier', 'okoume' => 'Okoumé'];
+  $labels = sapi_catalogue_essence_labels();
   $found  = [];
   if (!function_exists('wc_get_product_terms')) return $found;
   foreach (['pa_materiau', 'pa_bois', 'pa_essence'] as $tax) {
@@ -303,10 +319,15 @@ function sapi_catalogue_safe_html($html) {
  * tableaux normalisés SANS AUCUN PRIX. Requête appelable indépendamment du
  * rendu (le PDF du Temps 2 rejouera la même).
  *
- * @param array<string>|null $categories slugs canoniques à inclure (null = tous)
+ * @param array<string>|null $categories  slugs canoniques à inclure (null = tous)
+ * @param array<int>|null    $include_ids IDs produit à inclure (null = tous).
+ *                                        Modification ADDITIVE : sans cet
+ *                                        argument, le comportement est
+ *                                        strictement identique (/catalogue et le
+ *                                        PDF public ne bougent pas d'un octet).
  * @return array<string,array{label:string,products:array}> slug => bloc catégorie
  */
-function sapi_catalogue_get_products($categories = null) {
+function sapi_catalogue_get_products($categories = null, $include_ids = null) {
   if (!function_exists('wc_get_product')) return [];
 
   $cats  = sapi_catalogue_categories();
@@ -318,10 +339,19 @@ function sapi_catalogue_get_products($categories = null) {
   }
   if (!$slugs) return $out;
 
+  // Restriction optionnelle à une liste d'IDs (sélection produit du tarif pro).
+  $ids = null;
+  if ($include_ids !== null) {
+    $ids = array_values(array_unique(array_filter(array_map('intval', (array) $include_ids))));
+    // ⚠️ `post__in => []` est IGNORÉ par WP_Query : elle renverrait TOUT le
+    // catalogue au lieu de rien. Une sélection vide doit sortir ici.
+    if (!$ids) return $out;
+  }
+
   // EXCEPTION posts_per_page => -1 documentée (CLAUDE.md règle 2) :
   // catalogue B2B à volume contrôlé (~40 produits), chargé en une fois pour un
   // filtrage 100% client-side. Pas de pagination, pas d'AJAX.
-  $query = new WP_Query([
+  $args = [
     'post_type'      => 'product',
     'post_status'    => 'publish',
     'posts_per_page' => -1,
@@ -332,7 +362,12 @@ function sapi_catalogue_get_products($categories = null) {
       'field'    => 'slug',
       'terms'    => $slugs,
     ]],
-  ]);
+  ];
+  // `post__in` restreint sans toucher au tri : l'ordre reste celui du site
+  // (catégorie puis menu_order), jamais l'ordre de la sélection.
+  if ($ids) $args['post__in'] = $ids;
+
+  $query = new WP_Query($args);
 
   foreach ($query->posts as $post) {
     $product = wc_get_product($post->ID);

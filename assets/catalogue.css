@@ -380,6 +380,86 @@ body.catalogue-b2b {
 .fiche-specs__table th { font-weight: 600; color: #6a6055; width: 42%; }
 .fiche-specs__table td { color: var(--color-dark); }
 
+/* =========================================================================
+ * VARIANTE PRIX — page /catalogue-prix uniquement.
+ * Tout est porté par `body.has-prices` : sur /catalogue, aucune de ces règles
+ * ne s'applique et aucun de ces éléments n'est même émis dans le HTML.
+ * ========================================================================= */
+
+/* ── Mentions légales, en tête de page ── */
+.has-prices .cat-price-legal {
+  background: var(--color-warm);
+  border-bottom: 1px solid rgba(147, 125, 104, .18);
+}
+.has-prices .cat-price-legal__inner { max-width: 900px; margin: 0 auto; padding: 26px 20px; }
+.has-prices .cat-price-legal__body { color: #6a6055; font-size: .88rem; line-height: 1.65; }
+.has-prices .cat-price-legal__body p { margin: 0 0 8px; }
+.has-prices .cat-price-legal__body p:last-child { margin-bottom: 0; }
+.has-prices .cat-price-legal__body strong { color: var(--color-dark); }
+
+/* ── « À partir de XX € TTC » sur la carte, sous la description ── */
+.has-prices .cat-price-from {
+  margin: 0 0 16px;
+  color: #6a6055;
+  font-size: .86rem;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.has-prices .cat-price-from__amount {
+  font-size: 1.32rem;
+  font-weight: 700;
+  color: var(--color-dark);
+  letter-spacing: -.01em;
+}
+.has-prices .cat-price-from__tax { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
+
+/* ── Tableau CROISÉ des prix (essences en lignes, dimensions en colonnes),
+      dans la fiche technique (modale) ── */
+.has-prices .cat-price-block { margin-bottom: 24px; }
+.has-prices .cat-price-block__title {
+  font-size: 1.02rem;
+  color: var(--color-orange);
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+/* Le tableau défile dans sa propre boîte : la page ne défile jamais
+   horizontalement, même sur une gamme à 5 tailles. */
+.has-prices .cat-price-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.has-prices .cat-price-table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.has-prices .cat-price-table th,
+.has-prices .cat-price-table td {
+  text-align: center;
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(147, 125, 104, .18);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+/* En-têtes de colonnes = dimensions */
+.has-prices .cat-price-table thead th {
+  font-size: .74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--color-wood);
+  border-bottom-width: 2px;
+}
+.has-prices .cat-price-table__corner { border-bottom: 2px solid rgba(147, 125, 104, .18); }
+/* En-têtes de lignes = essences */
+.has-prices .cat-price-table tbody th { text-align: left; font-weight: 600; color: #6a6055; }
+.has-prices .cat-price-table tbody td { color: var(--color-dark); font-weight: 700; }
+.has-prices .cat-price-table tbody tr:last-child th,
+.has-prices .cat-price-table tbody tr:last-child td { border-bottom: 0; }
+/* Combinaison qui n'existe pas en base — jamais un prix déduit par symétrie */
+.has-prices .cat-price-table__na { color: #b3a89b; font-weight: 400; }
+
+/* Produit à combinaison unique : une ligne, pas un tableau 1×1 */
+.has-prices .cat-price-single { margin: 0; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.has-prices .cat-price-single__label { color: #6a6055; font-size: .92rem; }
+.has-prices .cat-price-single__amount { font-size: 1.18rem; font-weight: 700; color: var(--color-dark); }
+
 /* ── Responsive ── */
 @media (max-width: 860px) {
   .cat-histoire__inner { grid-template-columns: 1fr; gap: 24px; }
@@ -393,4 +473,8 @@ body.catalogue-b2b {
   .cat-modal__content { padding: 22px 20px 30px; }
   .cat-gallery__nav { opacity: 1; }
   .cat-contact-fab { right: 14px; bottom: 14px; padding: 12px 20px; }
+  .has-prices .cat-price-legal__inner { padding: 20px 18px; }
+  .has-prices .cat-price-table { font-size: .86rem; }
+  .has-prices .cat-price-table th,
+  .has-prices .cat-price-table td { padding: 8px 9px; }
 }
