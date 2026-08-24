@@ -1002,6 +1002,16 @@ Ordre final de la carte : en-tête → photos → description → prix → carac
 
 **Vérifié :** le PDF public n'est pas affecté (il passe une chaîne vide à `after_description`). Régénéré en v18, ses 33 flux de contenu décompressés ont la **même empreinte SHA-256** qu'en v17 — seules les métadonnées `CreationDate`/`ModDate` diffèrent. 11 pages, 0 lien, 0 prix.
 
+### 🐛 EN COURS — Bande photo du PDF pro : les images sont ÉTIRÉES (diagnostiqué, correctif en attente du schéma de Robin)
+
+**Cause racine :** `WP_Image_Editor::resize($w, $h, true)` **n'agrandit jamais**. WordPress (`image_resize_dimensions()`, branche crop) renvoie `(min(cible_w, source_w), min(cible_h, source_h))` — pas la cible. Le recadrage part du format `large` (plafonné à 1024 px) et vise 570×650 : dès qu'une source fait moins de 650 px de haut, la sortie n'a pas le ratio demandé. `sapi_catalogue_pdf_image()` **affirme** ensuite les dimensions demandées (`$w = $crop['w']`) au lieu de lire celles obtenues, et le HTML force `width:57mm; height:65mm` → l'image est étirée pour remplir la case.
+
+**Mesuré sur les 205 images de galerie du catalogue :** ratios réels de **0,56 à 2,13** ; **20 images sur 205** ne peuvent pas atteindre le ratio cible ; pire cas source 1024×481 → sortie 570×481 → **étirement de +35 % en hauteur**.
+
+**Acquis, quelle que soit la mise en page retenue :** lire les dimensions **réelles** du fichier produit (`getimagesize` sur la sortie) et ne jamais imposer largeur ET hauteur sur une image dont le ratio n'est pas garanti. C'est cette double faute qui déforme, pas le choix de composition.
+
+**Exigences Robin :** aucune déformation (rédhibitoire) ; rognage toléré mais ratio d'origine préféré ; **la première photo doit être carrée**. Trois compositions lui ont été proposées (hauteur commune/largeurs réelles, trois carrés avec vrai recadrage, cases identiques en image contenue) — il envoie **un schéma** de ce qu'il veut. Ne rien coder avant.
+
 **🛑 PAS DE CHERRY-PICK VERS `master` POUR L'INSTANT — décision Robin.** D'autres modifications sont à venir sur le catalogue. Tout reste sur `test-theme-sapi-maison`. Au moment du passage en prod, ne pas oublier : la page `/catalogue-prix` est du contenu en base, **à recréer à la main** sur atelier-sapi.fr, avec son exclusion du sitemap Yoast.
 
 ---
