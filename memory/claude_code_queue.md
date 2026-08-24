@@ -924,6 +924,82 @@ Trois objets, trois niveaux :
 
 ---
 
+### 📐 ADDENDUM (2026-08-24) — Gabarit PDF : le tableau de prix fait déborder la fiche sur une 2ᵉ page
+
+**Constat :** avec la section prix ajoutée, chaque fiche produit déborde d'un peu sur une seconde page. Le bloc photo actuel (héro 167 × 100 mm + rangée de 3 vignettes 50 × 33 mm) consomme à lui seul ~137 mm des 265 mm utiles. Décisions de Robin ci-dessous.
+
+#### A. Bande de 3 photos à hauteur fixe — **PDF PRO UNIQUEMENT**
+
+Remplacer héro + vignettes par **une seule bande horizontale de 3 photos de taille identique**, pleine largeur de la carte, hauteur fixe.
+
+Ordre imposé :
+1. **La photo produit = l'image mise en avant WooCommerce** (`get_post_thumbnail_id()`). ⚠️ Ce n'est **pas** la première image de `gallery_ids` : la galerie du catalogue vient de `sapi_get_product_photo_ids_with_fallback()` et commence par une ambiance. Il faut donc aller chercher la featured image **explicitement**, et la dédoublonner de la suite si elle figure aussi dans la galerie.
+2. La 1ʳᵉ photo d'ambiance
+3. La 2ᵉ photo d'ambiance
+
+**Repli** si moins de deux ambiances disponibles : compléter avec une **photo de détail**. Si le compte n'y est toujours pas, laisser l'emplacement vide plutôt que de répéter une image.
+
+**Hauteur de bande : 65 mm** (voir le calcul de budget en D). Emplacements d'environ 55 × 65 mm, légèrement portrait, ce qui convient à des luminaires qui sont des objets verticaux.
+
+⚠️ **Recadrage obligatoire.** `sapi_catalogue_pdf_img_tag()` ajuste en « contain » : à hauteur fixe, une portrait sort étroite et une paysage large, et la bande part en dents de scie. Recadrer les 3 images **au même ratio** dans `sapi_catalogue_pdf_image()`, qui repasse déjà par `wp_get_image_editor` (ajouter un `crop`, pas seulement un `resize`). Sans ça, ce n'est pas une bande.
+
+#### B. Marges réduites — **LES DEUX PDF**
+
+- Marges de page : `margin_top` / `margin_bottom` de 16 → **12 mm**, `margin_left` / `margin_right` de 15 → **10 mm**.
+- Padding de `.prod-card` : `4.5mm 6mm` → **`3mm 4mm`**.
+
+⚠️ Le pied de page vit dans la marge basse. Vérifier `margin_footer` après réduction : à 12 mm de marge basse avec un footer en 7,5 pt, ça passe, mais si le footer se fait rogner ou chevaucher le contenu, remonter `margin_bottom` à 14 plutôt que de bricoler le footer.
+
+Gain : ~8 mm en hauteur, ~3 mm de padding, et la largeur utile passe de 180 à 190 mm.
+
+#### C. Catégorie alignée en haut à droite, sur la ligne du nom — **LES DEUX PDF**
+
+Aujourd'hui `.cat-tag` est un `div` au-dessus du nom (~4 mm perdus), et `prod-head` porte le nom à gauche + **`Réf. SKU` à droite**. La cellule de droite est donc déjà occupée.
+
+⚠️ **Conflit à trancher, ne pas empiler les deux.** Le SKU figure **déjà dans le pied de page** de chaque fiche produit (`SetHTMLFooter`, `'Réf. ' . $p['sku']`). Donc : **retirer le `Réf.` de l'en-tête** et donner la cellule de droite à la catégorie. Le SKU reste lisible en pied de page, l'information n'est pas perdue.
+
+Résultat : une seule ligne d'en-tête, nom à gauche (Montserrat + Square Peg, styles inline conservés), catégorie à droite dans le style `.cat-tag` actuel (8,5 pt bold, capitales, `#E35B24`), alignée en bas comme le nom.
+
+#### D. Budget vertical après les trois changements
+
+| Poste | Avant | Après (PDF pro) |
+|---|---|---|
+| Bloc photo | 137 mm | 65 mm |
+| Marges page (haut + bas) | 32 mm | 24 mm |
+| Padding carte | 9 mm | 6 mm |
+| Ligne catégorie | ~4 mm | 0 (fusionnée) |
+
+Environ **87 mm récupérés** sur la fiche pro, pour un tableau de prix qui en demande 25 au plus. La marge est confortable, c'est délibéré : elle absorbe les descriptions longues.
+
+Sur le **PDF public**, le gain est d'environ 15 mm (marges + padding + ligne catégorie), sans changement de photos.
+
+### ✅ ADDENDUM TRAITÉ (2026-08-24) — commits `a8d78d0` + `869e2cb`
+
+**A, B, C faits.** Le gabarit de carte produit est extrait en fonction partagée `sapi_catalogue_pdf_product_card_html()` : les deux générateurs ne divergent plus que par le bloc photo et le tableau de prix. `sapi_catalogue_pdf_image()` gagne un argument `$crop` optionnel (recadrage centré via `wp_get_image_editor->resize(w, h, true)`, entrant dans le nom du fichier de cache image) ; sans lui la bande partait en dents de scie. Bande à 57 × 65 mm (l'addendum disait « environ 55 » — 57 remplit mieux la largeur utile de la carte). Ordre : `get_post_thumbnail_id()` lu **explicitement** puis dédoublonné, 2 ambiances, repli sur les détails, emplacement laissé vide sinon.
+
+**Correction en cours de route sur le pied de page.** L'addendum avertissait du risque. Mesure sur le PDF réellement généré : la ligne de pied se pose à (`margin_footer` − 4,3 mm) du bord de feuille. Avec `margin_footer` à 7, elle tombait à **2,7 mm** — sous la zone non imprimable de la plupart des imprimantes. Correctif : garder les 9 mm par défaut (pied à 4,7 mm, exactement là où Robin l'avait validé) et descendre `margin_bottom` à **14** plutôt que 12. On perd 2 mm des 8 visés, sur une fiche qui en récupère ~87.
+
+**Vérifié par machine sur test** (PDF public, catégorie **lampadaires** = le cas le plus dense) :
+- **11 pages** = garde + Histoire + Deux bois + **7 lampadaires** + contact → **exactement une page par fiche, aucun débordement**.
+- Marge gauche mesurée dans le flux : **15,9 mm avant → 10,9 mm après**. Le resserrement a bien pris.
+- Pied de page : 2,7 mm en v16 → **4,7 mm en v17**, identique à l'ancien gabarit.
+- 0 lien `/URI`, 0 occurrence de `€`/`EUR`/`prix`/`TTC`/`HT`. Le PDF public reste sans prix.
+
+`SAPI_CATALOGUE_PDF_VERSION` : 15 → 16 → **17**.
+
+**⏳ Reste à Robin (session admin nécessaire) :** générer un tarif pro et vérifier **au rendu** (a) qu'une fiche de lampadaire tient sur une page avec son tableau de prix, (b) que la bande de 3 photos est régulière — mêmes largeurs, pas de dents de scie, et (c) que la photo produit en position 1 est bien l'image mise en avant, pas une ambiance. ⚠️ **Le PDF public a changé d'apparence** (marges, en-tête, SKU retiré du haut) : il est en prod et validé, il doit être **re-validé au rendu** avant le cherry-pick vers master.
+
+---
+
+#### E. Vérification
+
+- **Cas le plus dense à tester en priorité : un lampadaire.** C'est la catégorie qui porte le plus de lignes de caractéristiques (`hauteur_totale`, `hauteur_ampoule`, `interrupteur` en plus du tronc commun), avec la description la plus longue disponible. Si celui-là tient sur une page, les autres tiennent.
+- **Contrôle au rendu rasterisé, pas au XML** : compter les pages, et vérifier à l'œil que la bande de 3 photos est bien régulière (mêmes largeurs, pas de dents de scie).
+- ⚠️ **Le PDF public change d'apparence** (marges + en-tête). Il est en prod et validé : le faire re-valider par Robin au rendu avant le cherry-pick vers master.
+- Bump de `SAPI_CATALOGUE_PDF_VERSION` obligatoire, le gabarit des deux PDF change.
+
+---
+
 ### 🚧 AVANCEMENT — Lots 1+2 faits sur `test-theme-sapi-maison` (2026-08-24)
 
 Robin a donné le go pour **les lots 1+2 seulement** : il veut voir la page avant que je parte sur l'admin. **Lot 3 (admin + PDF pro) en attente de sa validation visuelle.**
