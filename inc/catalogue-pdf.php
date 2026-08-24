@@ -19,8 +19,10 @@ if (!defined('ABSPATH')) exit;
 // v16 (2026-08-24) : gabarit resserré — marges réduites, catégorie en haut à
 //                    droite (SKU retiré de l'en-tête), bande de 3 photos à
 //                    hauteur fixe côté pro. Le rendu des DEUX PDF change.
+// v17 (2026-08-24) : marge basse remontée de 12 à 14 mm — à 12, le pied de page
+//                    se posait à 2,7 mm du bord, sous la zone non imprimable.
 // La constante entre dans la clé de cache des DEUX générateurs, public et pro.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '16');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '17');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -92,11 +94,16 @@ function sapi_catalogue_pdf_new_mpdf($config = []) {
     'margin_left'       => 10,
     'margin_right'      => 10,
     'margin_top'        => 12,
-    'margin_bottom'     => 12,
-    // ⚠️ Le pied de page vit DANS la marge basse. À 12 mm de marge, la valeur
-    // mPDF par défaut (9 mm) ne laisserait que ~3 mm à une ligne de 7,5 pt.
-    // 7 mm donne 5 mm de dégagement : pas de rognage, pas de chevauchement.
-    'margin_footer'     => 7,
+    // ⚠️ Le pied de page vit DANS la marge basse. Mesuré sur le PDF généré :
+    // la ligne de pied se pose à (margin_footer − 4,3 mm) du bord de feuille.
+    // Un margin_footer à 7 la mettait à 2,7 mm — sous la zone non imprimable
+    // de la plupart des imprimantes. On garde donc les 9 mm par défaut, qui
+    // reposent le pied exactement où Robin l'a validé (4,7 mm), et on descend
+    // la marge basse à 14 plutôt que 12 : le pied culmine vers 7,3 mm, il
+    // reste 6,7 mm de dégagement avant le contenu. Deux millimètres de gain en
+    // moins sur les huit visés, sur une fiche qui en récupère ~87.
+    'margin_bottom'     => 14,
+    'margin_footer'     => 9,
   ];
 
   return new \Mpdf\Mpdf(array_merge($defaults, $config));
