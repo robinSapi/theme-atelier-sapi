@@ -987,9 +987,12 @@ Sur le **PDF public**, le gain est d'environ 15 mm (marges + padding + ligne cat
 
 `SAPI_CATALOGUE_PDF_VERSION` : 15 → 16 → **17**.
 
-**✅ BANDE DE PHOTOS VALIDÉE PAR ROBIN au rendu (2026-08-24)** : régularité de la bande et photo produit en position 1 (image mise en avant, pas une ambiance) — conformes.
+**✅ TOUT VALIDÉ PAR ROBIN au rendu (2026-08-24) :**
+- Bande de 3 photos : régularité conforme, et photo produit en position 1 = bien l'image mise en avant, pas une ambiance.
+- **Toutes les fiches du tarif pro tiennent sur une page**, avec de la marge en plus. L'objectif de l'addendum est atteint.
+- **PDF public re-validé** malgré son changement d'apparence (marges resserrées, en-tête sur une ligne, SKU retiré du haut et conservé en pied).
 
-**⏳ Reste à Robin (session admin nécessaire) :** confirmer sur le tarif pro qu'une fiche de **lampadaire** (le cas le plus dense) tient bien sur une seule page avec son tableau de prix. ⚠️ **Le PDF public a changé d'apparence** (marges, en-tête, SKU retiré du haut) : il est en prod et validé, il doit être **re-validé au rendu** avant le cherry-pick vers master.
+**🛑 PAS DE CHERRY-PICK VERS `master` POUR L'INSTANT — décision Robin.** D'autres modifications sont à venir sur le catalogue. Tout reste sur `test-theme-sapi-maison`. Au moment du passage en prod, ne pas oublier : la page `/catalogue-prix` est du contenu en base, **à recréer à la main** sur atelier-sapi.fr, avec son exclusion du sitemap Yoast.
 
 ---
 
