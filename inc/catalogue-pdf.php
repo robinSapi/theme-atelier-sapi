@@ -288,6 +288,76 @@ function sapi_catalogue_pdf_name_html($title) {
   return '<span class="pf" style="' . $pf . '">' . esc_html($first) . '</span> <span class="pr" style="' . $pr . '">' . esc_html($rest) . '</span>';
 }
 
+/* =========================================================================
+ * Pages d'introduction (Histoire de l'atelier / Deux bois au choix).
+ * Extraites en helpers pour être partagées par les DEUX générateurs — public
+ * (ci-dessous) et tarif professionnel (inc/catalogue-pdf-pro.php) — sans
+ * recopier le gabarit. Le rendu du PDF public est inchangé au caractère près.
+ * ========================================================================= */
+
+/**
+ * Contenus éditoriaux ACF lus sur la page catalogue (celle SANS prix, cf.
+ * sapi_catalogue_page_id()). Les deux PDF présentent donc le même atelier.
+ *
+ * @return array<string,mixed>
+ */
+function sapi_catalogue_pdf_intro_fields() {
+  $page_id = sapi_catalogue_page_id();
+  $g = function ($key, $default = '') use ($page_id) {
+    if (!$page_id || !function_exists('get_field')) return $default;
+    $v = get_field($key, $page_id);
+    return ($v === null || $v === '') ? $default : $v;
+  };
+  return [
+    'histoire_titre' => (string) $g('catalogue_histoire_titre', 'Histoire de l’atelier'),
+    'histoire_texte' => (string) $g('catalogue_histoire_texte', ''),
+    'histoire_img'   => (int)    $g('catalogue_histoire_image', 0),
+    'bois_titre'     => (string) $g('catalogue_bois_titre', 'Deux bois au choix'),
+    'bois_intro'     => (string) $g('catalogue_bois_intro', ''),
+    'peuplier_texte' => (string) $g('catalogue_bois_peuplier_texte', 'Finition claire.'),
+    'peuplier_img'   => (int)    $g('catalogue_bois_peuplier_image', 0),
+    'okoume_texte'   => (string) $g('catalogue_bois_okoume_texte', 'Teinte plus rosée et plus sombre.'),
+    'okoume_img'     => (int)    $g('catalogue_bois_okoume_image', 0),
+  ];
+}
+
+/**
+ * Page « Histoire de l'atelier ». Inclut son propre saut de page.
+ * @param array $f retour de sapi_catalogue_pdf_intro_fields()
+ * @return string HTML
+ */
+function sapi_catalogue_pdf_histoire_html($f) {
+  $h  = '<pagebreak />';
+  $h .= '<h2 class="section-title">' . esc_html($f['histoire_titre']) . '</h2>';
+  if ($f['histoire_img']) {
+    $img = sapi_catalogue_pdf_image($f['histoire_img'], 'large');
+    $h  .= '<div class="center" style="margin:4mm 0;">' . sapi_catalogue_pdf_img_tag($img, 170, 95) . '</div>';
+  }
+  if ($f['histoire_texte'] !== '') {
+    $h .= '<div class="lead">' . wpautop(sapi_catalogue_safe_html($f['histoire_texte'])) . '</div>';
+  }
+  return $h;
+}
+
+/**
+ * Page « Deux bois au choix ». Inclut son propre saut de page.
+ * @param array $f retour de sapi_catalogue_pdf_intro_fields()
+ * @return string HTML
+ */
+function sapi_catalogue_pdf_bois_html($f) {
+  $peuplier_tag = $f['peuplier_img'] ? sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($f['peuplier_img'], 'large'), 80, 60) : '';
+  $okoume_tag   = $f['okoume_img']   ? sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($f['okoume_img'], 'large'), 80, 60)   : '';
+
+  $b  = '<pagebreak />';
+  $b .= '<h2 class="section-title">' . esc_html($f['bois_titre']) . '</h2>';
+  if ($f['bois_intro'] !== '') $b .= '<p class="lead">' . esc_html($f['bois_intro']) . '</p>';
+  $b .= '<table style="width:100%; margin-top:4mm;"><tr>';
+  $b .= '<td style="width:50%; text-align:center; vertical-align:top; padding:0 4mm;">' . $peuplier_tag . '<div class="bois-name">Peuplier</div><p class="lead">' . esc_html($f['peuplier_texte']) . '</p></td>';
+  $b .= '<td style="width:50%; text-align:center; vertical-align:top; padding:0 4mm;">' . $okoume_tag . '<div class="bois-name">Okoumé</div><p class="lead">' . esc_html($f['okoume_texte']) . '</p></td>';
+  $b .= '</tr></table>';
+  return $b;
+}
+
 /**
  * Construit le PDF combiné pour les catégories données (SANS prix, SANS lien).
  *
@@ -303,21 +373,7 @@ function sapi_catalogue_pdf_build($cats = null) {
   $catalogue = sapi_catalogue_get_products($slugs);
 
   // ── Contenus ACF (Histoire / Bois) lus sur la page catalogue ──
-  $page_id = sapi_catalogue_page_id();
-  $g = function ($key, $default = '') use ($page_id) {
-    if (!$page_id || !function_exists('get_field')) return $default;
-    $v = get_field($key, $page_id);
-    return ($v === null || $v === '') ? $default : $v;
-  };
-  $histoire_titre = (string) $g('catalogue_histoire_titre', 'Histoire de l’atelier');
-  $histoire_texte = (string) $g('catalogue_histoire_texte', '');
-  $histoire_img   = (int) $g('catalogue_histoire_image', 0);
-  $bois_titre     = (string) $g('catalogue_bois_titre', 'Deux bois au choix');
-  $bois_intro     = (string) $g('catalogue_bois_intro', '');
-  $peuplier_texte = (string) $g('catalogue_bois_peuplier_texte', 'Finition claire.');
-  $peuplier_img   = (int) $g('catalogue_bois_peuplier_image', 0);
-  $okoume_texte   = (string) $g('catalogue_bois_okoume_texte', 'Teinte plus rosée et plus sombre.');
-  $okoume_img     = (int) $g('catalogue_bois_okoume_image', 0);
+  $intro = sapi_catalogue_pdf_intro_fields();
 
   $mpdf = sapi_catalogue_pdf_new_mpdf();
   $mpdf->SetTitle('Catalogue — Atelier Sâpi');
@@ -349,28 +405,10 @@ function sapi_catalogue_pdf_build($cats = null) {
   $mpdf->WriteHTML($cover);
 
   // ── 2. Histoire de l'atelier ──
-  $h  = '<pagebreak />';
-  $h .= '<h2 class="section-title">' . esc_html($histoire_titre) . '</h2>';
-  if ($histoire_img) {
-    $img = sapi_catalogue_pdf_image($histoire_img, 'large');
-    $h  .= '<div class="center" style="margin:4mm 0;">' . sapi_catalogue_pdf_img_tag($img, 170, 95) . '</div>';
-  }
-  if ($histoire_texte !== '') {
-    $h .= '<div class="lead">' . wpautop(sapi_catalogue_safe_html($histoire_texte)) . '</div>';
-  }
-  $mpdf->WriteHTML($h);
+  $mpdf->WriteHTML(sapi_catalogue_pdf_histoire_html($intro));
 
   // ── 3. Deux bois au choix ──
-  $b  = '<pagebreak />';
-  $b .= '<h2 class="section-title">' . esc_html($bois_titre) . '</h2>';
-  if ($bois_intro !== '') $b .= '<p class="lead">' . esc_html($bois_intro) . '</p>';
-  $peuplier_tag = $peuplier_img ? sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($peuplier_img, 'large'), 80, 60) : '';
-  $okoume_tag   = $okoume_img   ? sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($okoume_img, 'large'), 80, 60)   : '';
-  $b .= '<table style="width:100%; margin-top:4mm;"><tr>';
-  $b .= '<td style="width:50%; text-align:center; vertical-align:top; padding:0 4mm;">' . $peuplier_tag . '<div class="bois-name">Peuplier</div><p class="lead">' . esc_html($peuplier_texte) . '</p></td>';
-  $b .= '<td style="width:50%; text-align:center; vertical-align:top; padding:0 4mm;">' . $okoume_tag . '<div class="bois-name">Okoumé</div><p class="lead">' . esc_html($okoume_texte) . '</p></td>';
-  $b .= '</tr></table>';
-  $mpdf->WriteHTML($b);
+  $mpdf->WriteHTML(sapi_catalogue_pdf_bois_html($intro));
 
   // ── 4. Sections catégories → une carte produit par page ──
   foreach ($slugs as $slug) {

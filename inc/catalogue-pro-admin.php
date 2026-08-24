@@ -110,8 +110,10 @@ function sapi_catalogue_pro_admin_render() {
               echo esc_textarea($settings['mentions']);
             ?></textarea>
             <p class="description">
-              Imprimées sur une page dédiée, juste après la page de garde. À compléter une fois
-              (les mentions <code>[à compléter]</code>), la valeur est ensuite conservée d’un export à l’autre.
+              Imprimées sur une page dédiée intitulée <strong>« Tarif professionnel »</strong>, après les pages
+              Histoire et Deux bois. À compléter une fois (les mentions <code>[à compléter]</code>), la valeur est
+              ensuite conservée d’un export à l’autre.<br>
+              Inutile de commencer par un titre : la page en porte déjà un.
             </p>
           </td>
         </tr>

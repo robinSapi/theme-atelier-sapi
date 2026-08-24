@@ -41,8 +41,9 @@ if (!defined('SAPI_CATALOGUE_PRO_TTL_DAYS'))   define('SAPI_CATALOGUE_PRO_TTL_DA
  * @return string
  */
 function sapi_catalogue_pro_default_mentions() {
+  // ⚠️ Pas de titre « Tarifs professionnels » en tête : la page porte désormais
+  // ce titre elle-même (mise en page alignée sur Histoire / Deux bois).
   return
-    "Tarifs professionnels\n" .
     "Prix exprimés en euros hors taxes, TVA 20% en sus. Le prix public conseillé est indiqué à titre indicatif et n'a aucun caractère contractuel : le revendeur reste libre de fixer son prix de vente.\n\n" .
     "Éco-participation\n" .
     "Une éco-participation DEEE de 0,25 € par pièce s'ajoute aux prix indiqués, conformément à la réglementation applicable aux équipements électriques et électroniques.\n\n" .
@@ -213,7 +214,8 @@ function sapi_catalogue_pro_pdf_css() {
     .cover .client .label { font-size: 9pt; text-transform: uppercase; letter-spacing: 1.5px; color: #937D68; }
     .cover .dates { font-size: 9.5pt; color: #6a6055; margin-top: 8mm; }
 
-    .mentions h2 { font-family: squarepeg; font-size: 30pt; color: #937D68; margin-bottom: 4mm; }
+    /* Le titre reprend .section-title (Histoire / Bois) — même famille, même
+       corps, même couleur : les trois pages d’introduction sont identiques. */
     .mentions .body { font-size: 9pt; color: #4a443d; line-height: 1.45; text-align: justify; }
     .mentions .body p { margin: 0 0 2.2mm; }
 
@@ -284,11 +286,18 @@ function sapi_catalogue_pro_pdf_build($args) {
   $mpdf->SetHTMLFooter($footer);
   $mpdf->WriteHTML($cover);
 
-  // ── 2. Mentions légales ──
+  // ── 2. Pages d'introduction, identiques au catalogue public ──
+  // Mêmes helpers, mêmes ACF, même gabarit : le revendeur reçoit la même
+  // présentation de l'atelier que le prescripteur, seul le tarif s'ajoute.
+  $intro = sapi_catalogue_pdf_intro_fields();
+  $mpdf->WriteHTML(sapi_catalogue_pdf_histoire_html($intro));
+  $mpdf->WriteHTML(sapi_catalogue_pdf_bois_html($intro));
+
+  // ── 3. Mentions légales, mises en page comme les deux pages d'intro ──
   $mentions_html = sapi_catalogue_safe_html(wpautop((string) $args['mentions']));
   if ($mentions_html !== '') {
     $m  = '<pagebreak /><div class="mentions">';
-    $m .= '<h2>Mentions</h2>';
+    $m .= '<h2 class="section-title">Tarif professionnel</h2>';
     $m .= '<div class="body">' . $mentions_html . '</div>';
     $m .= '</div>';
     $mpdf->WriteHTML($m);
