@@ -320,56 +320,13 @@ function sapi_catalogue_pro_pdf_build($args) {
         . '<td style="text-align:right;">{PAGENO}</td></tr></table></div>'
       );
 
-      $gids   = array_values(array_filter(array_map('intval', $p['gallery_ids'])));
-      $main   = !empty($gids) ? sapi_catalogue_pdf_image($gids[0], 'large') : null;
-      $thumbs = array_slice($gids, 1, 3);
-
-      $html  = '<pagebreak /><div class="prod-card">';
-      $html .= '<div class="cat-tag">' . esc_html($block['label']) . '</div>';
-      $html .= '<table class="prod-head"><tr>';
-      $html .= '<td style="vertical-align:bottom;"><span class="prod-name">' . sapi_catalogue_pdf_name_html($p['title']) . '</span></td>';
-      if ($p['sku'] !== '') {
-        $html .= '<td style="text-align:right; vertical-align:bottom; width:32mm;"><span class="prod-sku">Réf. ' . esc_html($p['sku']) . '</span></td>';
-      }
-      $html .= '</tr></table><div class="head-rule"></div>';
-
-      if ($main)   $html .= '<div class="prod-hero">' . sapi_catalogue_pdf_img_tag($main, 167, 100) . '</div>';
-      if ($thumbs) {
-        $html .= '<table class="thumb-row"><tr>';
-        foreach ($thumbs as $tid) {
-          $html .= '<td>' . sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($tid, 'medium'), 50, 33) . '</td>';
-        }
-        $html .= '</tr></table>';
-      }
-
-      // Tableau de prix pleine largeur, AVANT les caractéristiques
-      $html .= sapi_catalogue_pro_price_table_html($p['pricing'], $rate);
-
-      if ($p['description'] !== '') {
-        $html .= '<div class="specs-rule"></div>';
-        $html .= '<div class="prod-desc">' . wpautop($p['description']) . '</div>';
-      }
-
-      // Caractéristiques en 2 colonnes équilibrées (même logique que le PDF public)
-      $sections = !empty($p['specs']) ? $p['specs'] : [];
-      if ($sections) {
-        $col_a = ''; $col_b = ''; $ha = 0; $hb = 0;
-        foreach ($sections as $section) {
-          $blk = '<table class="spec-block"><tr><td class="sec" colspan="2">' . esc_html($section['title']) . '</td></tr>';
-          foreach ($section['items'] as $item) {
-            $blk .= '<tr><th>' . esc_html($item['label']) . '</th><td>' . esc_html($item['value']) . '</td></tr>';
-          }
-          $blk .= '</table>';
-          $cost = 1 + count($section['items']);
-          if ($ha <= $hb) { $col_a .= $blk; $ha += $cost; }
-          else            { $col_b .= $blk; $hb += $cost; }
-        }
-        $html .= '<div class="specs-rule"></div>';
-        $html .= '<table class="specs-grid"><tr><td>' . $col_a . '</td><td>' . $col_b . '</td></tr></table>';
-      }
-
-      $html .= '</div>';
-      $mpdf->WriteHTML($html);
+      // Même gabarit que le PDF public (en-tête, description, caractéristiques),
+      // avec deux différences propres au tarif : la bande de 3 photos à hauteur
+      // fixe, et le tableau de prix inséré juste après elle.
+      $mpdf->WriteHTML(sapi_catalogue_pdf_product_card_html($p, $block['label'], [
+        'photos'       => 'band',
+        'after_photos' => sapi_catalogue_pro_price_table_html($p['pricing'], $rate),
+      ]));
     }
   }
 

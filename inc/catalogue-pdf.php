@@ -16,8 +16,11 @@ if (!defined('ABSPATH')) exit;
 // Version du générateur PDF : entre dans la clé de cache → à INCRÉMENTER à chaque
 // évolution de la mise en page pour invalider automatiquement les PDF en cache.
 // v15 (2026-08-24) : ajout du tarif professionnel (inc/catalogue-pdf-pro.php).
+// v16 (2026-08-24) : gabarit resserré — marges réduites, catégorie en haut à
+//                    droite (SKU retiré de l'en-tête), bande de 3 photos à
+//                    hauteur fixe côté pro. Le rendu des DEUX PDF change.
 // La constante entre dans la clé de cache des DEUX générateurs, public et pro.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '15');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '16');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -83,10 +86,17 @@ function sapi_catalogue_pdf_new_mpdf($config = []) {
     ],
     'default_font'      => 'montserrat',
     'default_font_size' => 10,
-    'margin_left'       => 15,
-    'margin_right'      => 15,
-    'margin_top'        => 16,
-    'margin_bottom'     => 16,
+    // Marges resserrées (addendum 2026-08-24) : gagne ~8 mm en hauteur et porte
+    // la largeur utile de 180 à 190 mm, pour que la fiche produit tienne sur une
+    // page une fois le tableau de prix ajouté.
+    'margin_left'       => 10,
+    'margin_right'      => 10,
+    'margin_top'        => 12,
+    'margin_bottom'     => 12,
+    // ⚠️ Le pied de page vit DANS la marge basse. À 12 mm de marge, la valeur
+    // mPDF par défaut (9 mm) ne laisserait que ~3 mm à une ligne de 7,5 pt.
+    // 7 mm donne 5 mm de dégagement : pas de rognage, pas de chevauchement.
+    'margin_footer'     => 7,
   ];
 
   return new \Mpdf\Mpdf(array_merge($defaults, $config));
@@ -143,11 +153,17 @@ function sapi_catalogue_page_id() {
  * Prépare une image pour le PDF : jamais l'original — la taille WP demandée,
  * recompressée en JPEG ~80, mise en cache dans tmpdir/img (clé = id+taille+mtime).
  *
- * @param int    $attachment_id
- * @param string $size 'large' (1024) ou 'medium'
+ * @param int         $attachment_id
+ * @param string      $size 'large' (1024) ou 'medium'
+ * @param array|null  $crop ['w' => px, 'h' => px] → RECADRAGE au ratio exact
+ *                          (et non simple redimensionnement). Indispensable à la
+ *                          bande de photos à hauteur fixe : sans lui, une image
+ *                          portrait et une paysage sortent de largeurs
+ *                          différentes et la bande part en dents de scie.
+ *                          null = comportement historique, inchangé.
  * @return array{path:string,w:int,h:int}|null
  */
-function sapi_catalogue_pdf_image($attachment_id, $size = 'large') {
+function sapi_catalogue_pdf_image($attachment_id, $size = 'large', $crop = null) {
   $attachment_id = (int) $attachment_id;
   if (!$attachment_id) return null;
 
@@ -167,9 +183,13 @@ function sapi_catalogue_pdf_image($attachment_id, $size = 'large') {
   $mtime     = @filemtime($path) ?: 0;
   $cache_dir = trailingslashit(sapi_catalogue_pdf_tmpdir()) . 'img';
   if (!file_exists($cache_dir)) wp_mkdir_p($cache_dir);
-  $out = trailingslashit($cache_dir) . "pdfimg-{$attachment_id}-{$size}-{$mtime}.jpg";
+  // Le recadrage entre dans le nom du cache : une même image sert au format
+  // « contain » du PDF public ET à la bande recadrée du PDF pro.
+  $suffix = $crop ? "-c{$crop['w']}x{$crop['h']}" : '';
+  $out = trailingslashit($cache_dir) . "pdfimg-{$attachment_id}-{$size}{$suffix}-{$mtime}.jpg";
 
   if (file_exists($out)) {
+    if ($crop) return ['path' => $out, 'w' => (int) $crop['w'], 'h' => (int) $crop['h']];
     if (!$w || !$h) { $sz = @getimagesize($out); if ($sz) { $w = $sz[0]; $h = $sz[1]; } }
     return ['path' => $out, 'w' => $w, 'h' => $h];
   }
@@ -177,6 +197,12 @@ function sapi_catalogue_pdf_image($attachment_id, $size = 'large') {
   $editor = wp_get_image_editor($path);
   if (is_wp_error($editor)) {
     return ['path' => $path, 'w' => $w, 'h' => $h]; // repli : chemin brut
+  }
+  if ($crop) {
+    // 3e argument à true = recadrage centré aux dimensions exactes.
+    $editor->resize((int) $crop['w'], (int) $crop['h'], true);
+    $w = (int) $crop['w'];
+    $h = (int) $crop['h'];
   }
   $editor->set_quality(80);
   $saved = $editor->save($out, 'image/jpeg');
@@ -233,8 +259,17 @@ function sapi_catalogue_pdf_css() {
     .bois-name { font-family: squarepeg; font-size: 22pt; color: #937D68; }
 
     /* Carte produit (esthétique du site) */
-    .prod-card { border: 0.3mm solid #ece2d3; border-radius: 4mm; background: #fffdfb; padding: 4.5mm 6mm; }
-    .cat-tag { font-family: montserrat; font-weight: bold; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 1.5px; color: #E35B24; margin-bottom: 1mm; }
+    .prod-card { border: 0.3mm solid #ece2d3; border-radius: 4mm; background: #fffdfb; padding: 3mm 4mm; }
+    /* Catégorie : désormais en HAUT À DROITE, sur la ligne du nom (plus de div
+       au-dessus, qui coûtait ~4 mm). Le SKU quitte le haut de la carte : il
+       reste lisible en pied de page, aucune information perdue.
+       ⚠️ Cette feuille est une chaîne PHP en quotes simples : PAS d apostrophe
+       dans ce bloc, elle fermerait la chaîne et casserait le fichier. */
+    .cat-tag { font-family: montserrat; font-weight: bold; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 1.5px; color: #E35B24; }
+    /* Bande de 3 photos à hauteur fixe (PDF pro) — images recadrées au même
+       ratio en amont, sans quoi la bande partirait en dents de scie. */
+    .photo-band { width: 100%; margin: 0 0 1mm; }
+    .photo-band td { width: 33.33%; text-align: center; vertical-align: top; padding: 0; }
     .prod-head { width: 100%; }
     .prod-sku { font-family: montserrat; font-size: 8.5pt; color: #937D68; text-transform: uppercase; letter-spacing: 1px; }
     /* Filets de séparation discrets */
@@ -359,6 +394,167 @@ function sapi_catalogue_pdf_bois_html($f) {
 }
 
 /**
+ * Carte produit d'une page de PDF — gabarit PARTAGÉ par les deux générateurs.
+ *
+ * En-tête sur une seule ligne : nom à gauche, catégorie en haut à droite. Le SKU
+ * n'y figure plus — il est déjà en pied de page de chaque fiche, l'y répéter
+ * coûtait une cellule et une ligne (addendum 2026-08-24).
+ *
+ * @param array  $p         produit normalisé (sapi_catalogue_normalize_product)
+ * @param string $cat_label libellé de catégorie affiché en haut à droite
+ * @param array  $args {
+ *   @type string $photos       'hero' = grande photo + vignettes (PDF public),
+ *                              'band' = bande de 3 photos à hauteur fixe (pro)
+ *   @type string $after_photos HTML inséré juste après le bloc photo
+ *                              (tableau de prix du tarif pro)
+ * }
+ * @return string HTML, saut de page inclus
+ */
+function sapi_catalogue_pdf_product_card_html($p, $cat_label, $args = []) {
+  $args = array_merge(['photos' => 'hero', 'after_photos' => ''], $args);
+
+  // ── Caractéristiques en 2 colonnes, équilibrées par nombre de lignes ──
+  $sections = !empty($p['specs']) ? $p['specs'] : [];
+  $col_a = ''; $col_b = ''; $ha = 0; $hb = 0;
+  foreach ($sections as $section) {
+    $blk = '<table class="spec-block"><tr><td class="sec" colspan="2">' . esc_html($section['title']) . '</td></tr>';
+    foreach ($section['items'] as $item) {
+      $blk .= '<tr><th>' . esc_html($item['label']) . '</th><td>' . esc_html($item['value']) . '</td></tr>';
+    }
+    $blk .= '</table>';
+    $cost = 1 + count($section['items']);
+    if ($ha <= $hb) { $col_a .= $blk; $ha += $cost; }
+    else            { $col_b .= $blk; $hb += $cost; }
+  }
+
+  $html  = '<pagebreak />';
+  $html .= '<div class="prod-card">';
+
+  // En-tête : nom à gauche, catégorie à droite, sur la même ligne
+  $html .= '<table class="prod-head"><tr>';
+  $html .= '<td style="vertical-align:bottom;"><span class="prod-name">' . sapi_catalogue_pdf_name_html($p['title']) . '</span></td>';
+  $html .= '<td style="text-align:right; vertical-align:bottom; width:42mm;"><span class="cat-tag">' . esc_html($cat_label) . '</span></td>';
+  $html .= '</tr></table>';
+  $html .= '<div class="head-rule"></div>';
+
+  // ── Bloc photo ──
+  if ($args['photos'] === 'band') {
+    $html .= sapi_catalogue_pdf_photo_band_html((int) $p['id']);
+  } else {
+    $gids   = array_values(array_filter(array_map('intval', $p['gallery_ids'])));
+    $main   = !empty($gids) ? sapi_catalogue_pdf_image($gids[0], 'large') : null;
+    $thumbs = array_slice($gids, 1, 3);
+    if ($main) {
+      $html .= '<div class="prod-hero">' . sapi_catalogue_pdf_img_tag($main, 167, 100) . '</div>';
+    }
+    if (!empty($thumbs)) {
+      $html .= '<table class="thumb-row"><tr>';
+      foreach ($thumbs as $tid) {
+        $html .= '<td>' . sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($tid, 'medium'), 50, 33) . '</td>';
+      }
+      $html .= '</tr></table>';
+    }
+  }
+
+  // Tableau de prix (tarif pro uniquement — chaîne vide côté public)
+  $html .= $args['after_photos'];
+
+  // Description (essences + tailles vivent dans le tableau caractéristiques)
+  if ($p['description'] !== '') {
+    $html .= '<div class="prod-desc">' . wpautop($p['description']) . '</div>';
+  }
+
+  if ($sections) {
+    $html .= '<div class="specs-rule"></div>';
+    $html .= '<table class="specs-grid"><tr>';
+    $html .= '<td>' . $col_a . '</td><td>' . $col_b . '</td>';
+    $html .= '</tr></table>';
+  }
+  $html .= '</div>';
+
+  return $html;
+}
+
+/* ── Bande de 3 photos à hauteur fixe (PDF pro) ─────────────────────────── */
+
+/** Largeur d'un emplacement de la bande, en mm. */
+if (!defined('SAPI_CATALOGUE_BAND_W')) define('SAPI_CATALOGUE_BAND_W', 57);
+/** Hauteur de la bande, en mm (budget vertical de l'addendum). */
+if (!defined('SAPI_CATALOGUE_BAND_H')) define('SAPI_CATALOGUE_BAND_H', 65);
+
+/**
+ * Les 3 images de la bande, dans l'ordre imposé :
+ *   1. l'image mise en avant WooCommerce (la photo PRODUIT)
+ *   2. la 1ʳᵉ photo d'ambiance
+ *   3. la 2ᵉ photo d'ambiance
+ *
+ * ⚠️ La photo produit n'est PAS `gallery_ids[0]` : la galerie du catalogue vient
+ * de sapi_get_product_photo_ids_with_fallback() et commence par une ambiance. On
+ * va donc chercher la featured image explicitement, et on la dédoublonne de la
+ * suite si elle figure aussi dans les galeries.
+ *
+ * Repli : moins de deux ambiances → complété par des photos de détail. Si le
+ * compte n'y est toujours pas, l'emplacement reste VIDE — on ne répète jamais
+ * une image pour boucher un trou.
+ *
+ * @param int $product_id
+ * @return array<int,int> 0 à 3 IDs d'attachment, sans doublon
+ */
+function sapi_catalogue_pdf_band_ids($product_id) {
+  $ids = [];
+
+  $featured = (int) get_post_thumbnail_id($product_id);
+  if ($featured) $ids[] = $featured;
+
+  $push = function ($candidates) use (&$ids) {
+    foreach ((array) $candidates as $id) {
+      if (count($ids) >= 3) return;
+      $id = (int) $id;
+      if ($id && !in_array($id, $ids, true)) $ids[] = $id;
+    }
+  };
+
+  if (function_exists('sapi_get_product_photo_ids')) {
+    $push(sapi_get_product_photo_ids($product_id, 'ambiance'));
+    if (count($ids) < 3) $push(sapi_get_product_photo_ids($product_id, 'detail'));
+  }
+
+  return $ids;
+}
+
+/**
+ * Bande horizontale de 3 photos de taille identique, pleine largeur de carte.
+ * Les images sont RECADRÉES au ratio de l'emplacement en amont : à hauteur fixe,
+ * un simple « contain » donnerait des largeurs inégales et une bande en dents de
+ * scie. Un emplacement sans image reste vide, la grille ne bouge pas.
+ *
+ * @param int $product_id
+ * @return string HTML
+ */
+function sapi_catalogue_pdf_photo_band_html($product_id) {
+  $ids = sapi_catalogue_pdf_band_ids($product_id);
+  if (!$ids) return '';
+
+  // Ratio de l'emplacement, converti en pixels de recadrage (~250 dpi).
+  $crop = ['w' => SAPI_CATALOGUE_BAND_W * 10, 'h' => SAPI_CATALOGUE_BAND_H * 10];
+  $style = sprintf('width:%dmm;height:%dmm;border-radius:2mm;', SAPI_CATALOGUE_BAND_W, SAPI_CATALOGUE_BAND_H);
+
+  $html = '<table class="photo-band"><tr>';
+  for ($i = 0; $i < 3; $i++) {
+    $html .= '<td>';
+    if (isset($ids[$i])) {
+      $img = sapi_catalogue_pdf_image($ids[$i], 'large', $crop);
+      if ($img && !empty($img['path'])) {
+        $html .= '<img src="' . esc_attr($img['path']) . '" style="' . $style . '">';
+      }
+    }
+    $html .= '</td>';
+  }
+  $html .= '</tr></table>';
+  return $html;
+}
+
+/**
  * Construit le PDF combiné pour les catégories données (SANS prix, SANS lien).
  *
  * @param array<string>|null $cats slugs canoniques (null = toutes)
@@ -419,62 +615,7 @@ function sapi_catalogue_pdf_build($cats = null) {
       $ref = $p['sku'] !== '' ? 'Réf. ' . $p['sku'] . '  ·  ' : '';
       $mpdf->SetHTMLFooter('<div style="font-family:montserrat; font-size:7.5pt; color:#937D68;"><table style="width:100%"><tr><td style="text-align:left;">' . esc_html($ref) . esc_html($mention) . '</td><td style="text-align:right;">{PAGENO}</td></tr></table></div>');
 
-      $gids   = array_values(array_filter(array_map('intval', $p['gallery_ids'])));
-      $main   = !empty($gids) ? sapi_catalogue_pdf_image($gids[0], 'large') : null;
-      $thumbs = array_slice($gids, 1, 3);
-
-      // Caractéristiques en 2 colonnes, équilibrées par nombre de lignes
-      $sections = !empty($p['specs']) ? $p['specs'] : [];
-      $col_a = ''; $col_b = ''; $ha = 0; $hb = 0;
-      foreach ($sections as $section) {
-        $blk  = '<table class="spec-block"><tr><td class="sec" colspan="2">' . esc_html($section['title']) . '</td></tr>';
-        foreach ($section['items'] as $item) {
-          $blk .= '<tr><th>' . esc_html($item['label']) . '</th><td>' . esc_html($item['value']) . '</td></tr>';
-        }
-        $blk .= '</table>';
-        $cost = 1 + count($section['items']);
-        if ($ha <= $hb) { $col_a .= $blk; $ha += $cost; }
-        else            { $col_b .= $blk; $hb += $cost; }
-      }
-
-      // Carte produit — Option A : grande photo en bandeau haut
-      $html  = '<pagebreak />';
-      $html .= '<div class="prod-card">';
-      $html .= '<div class="cat-tag">' . esc_html($block['label']) . '</div>';
-      $html .= '<table class="prod-head"><tr>';
-      $html .= '<td style="vertical-align:bottom;"><span class="prod-name">' . sapi_catalogue_pdf_name_html($p['title']) . '</span></td>';
-      if ($p['sku'] !== '') $html .= '<td style="text-align:right; vertical-align:bottom; width:32mm;"><span class="prod-sku">Réf. ' . esc_html($p['sku']) . '</span></td>';
-      $html .= '</tr></table>';
-      $html .= '<div class="head-rule"></div>';
-
-      // Grande photo paysage, alignée à gauche
-      if ($main) {
-        $html .= '<div class="prod-hero">' . sapi_catalogue_pdf_img_tag($main, 167, 100) . '</div>';
-      }
-      // Vignettes : <img> dans un tableau, alignées à gauche
-      if (!empty($thumbs)) {
-        $html .= '<table class="thumb-row"><tr>';
-        foreach ($thumbs as $tid) {
-          $html .= '<td>' . sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($tid, 'medium'), 50, 33) . '</td>';
-        }
-        $html .= '</tr></table>';
-      }
-
-      // Description (essences + tailles vivent dans le tableau caractéristiques)
-      if ($p['description'] !== '') {
-        $html .= '<div class="prod-desc">' . wpautop($p['description']) . '</div>';
-      }
-
-      // Caractéristiques en 2 colonnes
-      if ($sections) {
-        $html .= '<div class="specs-rule"></div>';
-        $html .= '<table class="specs-grid"><tr>';
-        $html .= '<td>' . $col_a . '</td><td>' . $col_b . '</td>';
-        $html .= '</tr></table>';
-      }
-      $html .= '</div>';
-
-      $mpdf->WriteHTML($html);
+      $mpdf->WriteHTML(sapi_catalogue_pdf_product_card_html($p, $block['label']));
     }
   }
 
