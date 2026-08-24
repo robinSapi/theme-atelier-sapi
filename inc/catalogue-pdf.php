@@ -25,8 +25,11 @@ if (!defined('ABSPATH')) exit;
 //                    « Tarif » aligné sur les titres de section de la fiche.
 // v19 (2026-08-24) : le titre « Tarif » passe de <caption> (que mPDF ne style
 //                    PAS) à une cellule .sec — le v18 sortait centré en noir.
+// v20 (2026-08-24) : bande photo refaite (schéma Robin) — 3 grands carrés
+//                    + colonne détail/accessoire, recadrage carré par
+//                    construction. Corrige l'étirement jusqu'à +35 %.
 // La constante entre dans la clé de cache des DEUX générateurs, public et pro.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '19');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '20');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -164,17 +167,14 @@ function sapi_catalogue_page_id() {
  * Prépare une image pour le PDF : jamais l'original — la taille WP demandée,
  * recompressée en JPEG ~80, mise en cache dans tmpdir/img (clé = id+taille+mtime).
  *
- * @param int         $attachment_id
- * @param string      $size 'large' (1024) ou 'medium'
- * @param array|null  $crop ['w' => px, 'h' => px] → RECADRAGE au ratio exact
- *                          (et non simple redimensionnement). Indispensable à la
- *                          bande de photos à hauteur fixe : sans lui, une image
- *                          portrait et une paysage sortent de largeurs
- *                          différentes et la bande part en dents de scie.
- *                          null = comportement historique, inchangé.
+ * ⚠️ Ne recadre PAS : elle préserve le ratio d'origine. Pour un carré exact,
+ * voir sapi_catalogue_pdf_square_image().
+ *
+ * @param int    $attachment_id
+ * @param string $size 'large' (1024) ou 'medium'
  * @return array{path:string,w:int,h:int}|null
  */
-function sapi_catalogue_pdf_image($attachment_id, $size = 'large', $crop = null) {
+function sapi_catalogue_pdf_image($attachment_id, $size = 'large') {
   $attachment_id = (int) $attachment_id;
   if (!$attachment_id) return null;
 
@@ -194,13 +194,9 @@ function sapi_catalogue_pdf_image($attachment_id, $size = 'large', $crop = null)
   $mtime     = @filemtime($path) ?: 0;
   $cache_dir = trailingslashit(sapi_catalogue_pdf_tmpdir()) . 'img';
   if (!file_exists($cache_dir)) wp_mkdir_p($cache_dir);
-  // Le recadrage entre dans le nom du cache : une même image sert au format
-  // « contain » du PDF public ET à la bande recadrée du PDF pro.
-  $suffix = $crop ? "-c{$crop['w']}x{$crop['h']}" : '';
-  $out = trailingslashit($cache_dir) . "pdfimg-{$attachment_id}-{$size}{$suffix}-{$mtime}.jpg";
+  $out = trailingslashit($cache_dir) . "pdfimg-{$attachment_id}-{$size}-{$mtime}.jpg";
 
   if (file_exists($out)) {
-    if ($crop) return ['path' => $out, 'w' => (int) $crop['w'], 'h' => (int) $crop['h']];
     if (!$w || !$h) { $sz = @getimagesize($out); if ($sz) { $w = $sz[0]; $h = $sz[1]; } }
     return ['path' => $out, 'w' => $w, 'h' => $h];
   }
@@ -208,12 +204,6 @@ function sapi_catalogue_pdf_image($attachment_id, $size = 'large', $crop = null)
   $editor = wp_get_image_editor($path);
   if (is_wp_error($editor)) {
     return ['path' => $path, 'w' => $w, 'h' => $h]; // repli : chemin brut
-  }
-  if ($crop) {
-    // 3e argument à true = recadrage centré aux dimensions exactes.
-    $editor->resize((int) $crop['w'], (int) $crop['h'], true);
-    $w = (int) $crop['w'];
-    $h = (int) $crop['h'];
   }
   $editor->set_quality(80);
   $saved = $editor->save($out, 'image/jpeg');
@@ -223,6 +213,98 @@ function sapi_catalogue_pdf_image($attachment_id, $size = 'large', $crop = null)
   $final = isset($saved['path']) ? $saved['path'] : $out;
   if (!$w || !$h) { $sz = @getimagesize($final); if ($sz) { $w = $sz[0]; $h = $sz[1]; } }
   return ['path' => $final, 'w' => $w, 'h' => $h];
+}
+
+/**
+ * Point focal d'une image, en fractions [0,1] depuis le coin haut-gauche.
+ *
+ * Aucun point focal n'est stocké aujourd'hui (ni le thème ni une extension n'en
+ * fournissent) : le défaut est donc le centre géométrique. Le filtre permet de
+ * brancher une source réelle — méta d'attachment, champ ACF, extension — sans
+ * retoucher le recadrage lui-même.
+ *
+ *   add_filter('sapi_catalogue_focal_point', function ($fp, $id) {
+ *     $v = get_post_meta($id, '_ma_cle_focal', true);   // ex. "0.42,0.31"
+ *     return $v ? array_map('floatval', explode(',', $v)) : $fp;
+ *   }, 10, 2);
+ *
+ * @param int $attachment_id
+ * @return array{0:float,1:float} [x, y], chacun dans [0,1]
+ */
+function sapi_catalogue_pdf_focal_point($attachment_id) {
+  $fp = apply_filters('sapi_catalogue_focal_point', [0.5, 0.5], (int) $attachment_id);
+  if (!is_array($fp) || count($fp) < 2) return [0.5, 0.5];
+  $x = (float) $fp[0];
+  $y = (float) $fp[1];
+  return [min(1.0, max(0.0, $x)), min(1.0, max(0.0, $y))];
+}
+
+/**
+ * Version CARRÉE d'une image, recadrée autour de son point focal.
+ *
+ * ⚠️ N'UTILISE PAS `$editor->resize($w, $h, true)`. WordPress n'agrandit jamais :
+ * `image_resize_dimensions()` renvoie `(min(cible_w, source_w), min(cible_h,
+ * source_h))`, si bien qu'une source de 1024×481 demandée en 570×650 ressort en
+ * 570×481 — puis se fait étirer de 35 % par le HTML. C'est le bug de la bande
+ * photo du 24/08. Ici on découpe nous-même le plus grand carré possible avec
+ * `crop()`, et la sortie est carrée PAR CONSTRUCTION, quelle que soit la source.
+ *
+ * On ne suragrandit jamais non plus : la cible est plafonnée au côté du carré
+ * disponible.
+ *
+ * @param int $attachment_id
+ * @param int $target_px côté visé en pixels (plafonné à la source)
+ * @return array{path:string,w:int,h:int}|null w === h garanti
+ */
+function sapi_catalogue_pdf_square_image($attachment_id, $target_px = 500) {
+  $attachment_id = (int) $attachment_id;
+  if (!$attachment_id) return null;
+
+  $src = wp_get_attachment_image_src($attachment_id, 'large');
+  if (!$src || empty($src[0])) return null;
+
+  $up   = wp_upload_dir();
+  $path = str_replace($up['baseurl'], $up['basedir'], $src[0]);
+  if (!file_exists($path)) {
+    $path = get_attached_file($attachment_id);
+    if (!$path || !file_exists($path)) return null;
+  }
+
+  $size = @getimagesize($path);
+  if (!$size || empty($size[0]) || empty($size[1])) return null;
+  $ow = (int) $size[0];
+  $oh = (int) $size[1];
+
+  // Plus grand carré inscriptible, positionné sur le point focal puis ramené
+  // dans les bornes de l'image.
+  $side = min($ow, $oh);
+  list($fx, $fy) = sapi_catalogue_pdf_focal_point($attachment_id);
+  $sx = (int) round($fx * $ow - $side / 2);
+  $sy = (int) round($fy * $oh - $side / 2);
+  $sx = max(0, min($sx, $ow - $side));
+  $sy = max(0, min($sy, $oh - $side));
+
+  $target = (int) min($target_px, $side); // jamais d'agrandissement
+
+  $mtime     = @filemtime($path) ?: 0;
+  $cache_dir = trailingslashit(sapi_catalogue_pdf_tmpdir()) . 'img';
+  if (!file_exists($cache_dir)) wp_mkdir_p($cache_dir);
+  $out = trailingslashit($cache_dir) . "pdfsq-{$attachment_id}-{$target}-{$sx}x{$sy}-{$mtime}.jpg";
+
+  if (!file_exists($out)) {
+    $editor = wp_get_image_editor($path);
+    if (is_wp_error($editor)) return null;
+    $cropped = $editor->crop($sx, $sy, $side, $side, $target, $target);
+    if (is_wp_error($cropped)) return null;
+    $editor->set_quality(82);
+    $saved = $editor->save($out, 'image/jpeg');
+    if (is_wp_error($saved)) return null;
+  }
+
+  // Dimensions RELUES sur le fichier produit — jamais celles qu'on a demandées.
+  $final = @getimagesize($out);
+  if (!$final) return null;
+  return ['path' => $out, 'w' => (int) $final[0], 'h' => (int) $final[1]];
 }
 
 /**
@@ -277,10 +359,12 @@ function sapi_catalogue_pdf_css() {
        ⚠️ Cette feuille est une chaîne PHP en quotes simples : PAS d apostrophe
        dans ce bloc, elle fermerait la chaîne et casserait le fichier. */
     .cat-tag { font-family: montserrat; font-weight: bold; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 1.5px; color: #E35B24; }
-    /* Bande de 3 photos à hauteur fixe (PDF pro) — images recadrées au même
-       ratio en amont, sans quoi la bande partirait en dents de scie. */
+    /* Bande photo du PDF pro : 3 grands carres + 1 colonne de 2 petits.
+       Les largeurs et les ecarts sont poses en style inline, calcules par
+       sapi_catalogue_pdf_band_geometry() a partir de la largeur utile — ne rien
+       imposer ici, cette regle ne porte que le cadre general. */
     .photo-band { width: 100%; margin: 0 0 1mm; }
-    .photo-band td { width: 33.33%; text-align: center; vertical-align: top; padding: 0; }
+    .photo-band td { vertical-align: top; text-align: left; }
     .prod-head { width: 100%; }
     .prod-sku { font-family: montserrat; font-size: 8.5pt; color: #937D68; text-transform: uppercase; letter-spacing: 1px; }
     /* Filets de séparation discrets */
@@ -489,81 +573,134 @@ function sapi_catalogue_pdf_product_card_html($p, $cat_label, $args = []) {
   return $html;
 }
 
-/* ── Bande de 3 photos à hauteur fixe (PDF pro) ─────────────────────────── */
+/* ── Bande photo du PDF pro (schéma Robin, 24/08) ────────────────────────────
+ *
+ *   +--------+ +--------+ +--------+ +----+
+ *   |        | |        | |        | | D  |     3 grands carrés de côté S
+ *   | PRODUIT| |AMBIANCE| |AMBIANCE| +----+     + 1 colonne de 2 petits
+ *   |        | |   1    | |   2    | | A  |       carrés de côté s
+ *   +--------+ +--------+ +--------+ +----+
+ *
+ * TOUTES les images sont carrées et de même hauteur, la bande occupe toute la
+ * largeur utile. D = photo de détail, A = photo d'accessoire.
+ * ─────────────────────────────────────────────────────────────────────────── */
 
-/** Largeur d'un emplacement de la bande, en mm. */
-if (!defined('SAPI_CATALOGUE_BAND_W')) define('SAPI_CATALOGUE_BAND_W', 57);
-/** Hauteur de la bande, en mm (budget vertical de l'addendum). */
-if (!defined('SAPI_CATALOGUE_BAND_H')) define('SAPI_CATALOGUE_BAND_H', 65);
+/** Écart entre les vignettes, en mm. */
+if (!defined('SAPI_CATALOGUE_BAND_GAP')) define('SAPI_CATALOGUE_BAND_GAP', 3);
+/**
+ * Largeur utile à l'intérieur de la carte produit, en mm :
+ * A4 (210) − marges (10 + 10) − padding de .prod-card (4 + 4) − bordures (~0,6).
+ */
+if (!defined('SAPI_CATALOGUE_CARD_INNER_W')) define('SAPI_CATALOGUE_CARD_INNER_W', 181);
 
 /**
- * Les 3 images de la bande, dans l'ordre imposé :
- *   1. l'image mise en avant WooCommerce (la photo PRODUIT)
- *   2. la 1ʳᵉ photo d'ambiance
- *   3. la 2ᵉ photo d'ambiance
+ * Géométrie de la bande, déduite de la largeur utile — rien n'est codé en dur.
  *
- * ⚠️ La photo produit n'est PAS `gallery_ids[0]` : la galerie du catalogue vient
- * de sapi_get_product_photo_ids_with_fallback() et commence par une ambiance. On
- * va donc chercher la featured image explicitement, et on la dédoublonne de la
- * suite si elle figure aussi dans les galeries.
+ * Contraintes : 3 carrés de côté S, une colonne de 2 carrés de côté s empilés
+ * qui doit faire la même hauteur (2s + écart = S), et 3 écarts entre colonnes.
  *
- * Repli : moins de deux ambiances → complété par des photos de détail. Si le
- * compte n'y est toujours pas, l'emplacement reste VIDE — on ne répète jamais
- * une image pour boucher un trou.
+ *   3S + 3g + s = W   et   s = (S − g) / 2
+ *   ⟹  7S + 5g = 2W  ⟹  S = (2W − 5g) / 7
  *
- * @param int $product_id
- * @return array<int,int> 0 à 3 IDs d'attachment, sans doublon
+ * @return array{s_big:float,s_small:float,gap:float}
  */
-function sapi_catalogue_pdf_band_ids($product_id) {
-  $ids = [];
-
-  $featured = (int) get_post_thumbnail_id($product_id);
-  if ($featured) $ids[] = $featured;
-
-  $push = function ($candidates) use (&$ids) {
-    foreach ((array) $candidates as $id) {
-      if (count($ids) >= 3) return;
-      $id = (int) $id;
-      if ($id && !in_array($id, $ids, true)) $ids[] = $id;
-    }
-  };
-
-  if (function_exists('sapi_get_product_photo_ids')) {
-    $push(sapi_get_product_photo_ids($product_id, 'ambiance'));
-    if (count($ids) < 3) $push(sapi_get_product_photo_ids($product_id, 'detail'));
-  }
-
-  return $ids;
+function sapi_catalogue_pdf_band_geometry() {
+  $w = (float) SAPI_CATALOGUE_CARD_INNER_W;
+  $g = (float) SAPI_CATALOGUE_BAND_GAP;
+  $big   = (2 * $w - 5 * $g) / 7;
+  $small = ($big - $g) / 2;
+  return ['s_big' => $big, 's_small' => $small, 'gap' => $g];
 }
 
 /**
- * Bande horizontale de 3 photos de taille identique, pleine largeur de carte.
- * Les images sont RECADRÉES au ratio de l'emplacement en amont : à hauteur fixe,
- * un simple « contain » donnerait des largeurs inégales et une bande en dents de
- * scie. Un emplacement sans image reste vide, la grille ne bouge pas.
+ * Les 5 emplacements de la bande, chacun lié à un TYPE de photo précis.
+ *
+ * ⚠️ La photo produit n'est PAS `gallery_ids[0]` : la galerie du catalogue vient
+ * de sapi_get_product_photo_ids_with_fallback() et commence par une ambiance. On
+ * lit donc l'image mise en avant explicitement, et on la dédoublonne du reste.
+ *
+ * Aucun repli d'un type sur un autre : un emplacement sans photo de son type
+ * RESTE BLANC (consigne Robin pour l'accessoire, appliquée à tous par cohérence).
+ * On ne répète jamais une image pour boucher un trou.
+ *
+ * @param int $product_id
+ * @return array{0:int,1:int,2:int,3:int,4:int} produit, ambiance 1, ambiance 2,
+ *         détail, accessoire — 0 quand l'emplacement reste vide
+ */
+function sapi_catalogue_pdf_band_slots($product_id) {
+  $used = [];
+  $take = function ($type, $rank = 0) use ($product_id, &$used) {
+    if (!function_exists('sapi_get_product_photo_ids')) return 0;
+    $seen = 0;
+    foreach ((array) sapi_get_product_photo_ids($product_id, $type) as $id) {
+      $id = (int) $id;
+      if (!$id || in_array($id, $used, true)) continue;
+      if ($seen++ < $rank) continue;
+      $used[] = $id;
+      return $id;
+    }
+    return 0;
+  };
+
+  $featured = (int) get_post_thumbnail_id($product_id);
+  if ($featured) $used[] = $featured;
+
+  return [
+    $featured,
+    $take('ambiance'),
+    $take('ambiance'),
+    $take('detail'),
+    $take('accessoires'),
+  ];
+}
+
+/**
+ * Bande photo du PDF pro. Toutes les images sont carrées PAR CONSTRUCTION
+ * (sapi_catalogue_pdf_square_image), donc imposer un côté carré en mm ne peut
+ * pas déformer — c'est exactement ce qui clochait dans la version précédente.
  *
  * @param int $product_id
  * @return string HTML
  */
 function sapi_catalogue_pdf_photo_band_html($product_id) {
-  $ids = sapi_catalogue_pdf_band_ids($product_id);
-  if (!$ids) return '';
+  $slots = sapi_catalogue_pdf_band_slots($product_id);
+  if (!array_filter($slots)) return '';
 
-  // Ratio de l'emplacement, converti en pixels de recadrage (~250 dpi).
-  $crop = ['w' => SAPI_CATALOGUE_BAND_W * 10, 'h' => SAPI_CATALOGUE_BAND_H * 10];
-  $style = sprintf('width:%dmm;height:%dmm;border-radius:2mm;', SAPI_CATALOGUE_BAND_W, SAPI_CATALOGUE_BAND_H);
+  $geo   = sapi_catalogue_pdf_band_geometry();
+  $big   = $geo['s_big'];
+  $small = $geo['s_small'];
+  $gap   = $geo['gap'];
+
+  // ~250 dpi : largement au-delà du besoin d'impression, sans alourdir le PDF.
+  $px = function ($mm) { return (int) round($mm / 25.4 * 250); };
+
+  $cell = function ($id, $side_mm, $target_px) {
+    if (!$id) return ''; // emplacement laissé BLANC
+    $img = sapi_catalogue_pdf_square_image($id, $target_px);
+    if (!$img || empty($img['path'])) return '';
+    return sprintf(
+      '<img src="%s" style="width:%.2fmm;height:%.2fmm;border-radius:2mm;">',
+      esc_attr($img['path']), $side_mm, $side_mm
+    );
+  };
+
+  $big_px   = $px($big);
+  $small_px = $px($small);
+
+  // Colonne de droite : détail en haut, accessoire en bas.
+  $stack  = sprintf('<table style="width:%.2fmm;"><tr><td style="padding:0 0 %.2fmm 0;">', $small, $gap);
+  $stack .= $cell($slots[3], $small, $small_px);
+  $stack .= '</td></tr><tr><td style="padding:0;">';
+  $stack .= $cell($slots[4], $small, $small_px);
+  $stack .= '</td></tr></table>';
 
   $html = '<table class="photo-band"><tr>';
-  for ($i = 0; $i < 3; $i++) {
-    $html .= '<td>';
-    if (isset($ids[$i])) {
-      $img = sapi_catalogue_pdf_image($ids[$i], 'large', $crop);
-      if ($img && !empty($img['path'])) {
-        $html .= '<img src="' . esc_attr($img['path']) . '" style="' . $style . '">';
-      }
-    }
+  foreach ([0, 1, 2] as $i) {
+    $html .= sprintf('<td style="width:%.2fmm; padding:0 %.2fmm 0 0;">', $big + $gap, $gap);
+    $html .= $cell($slots[$i], $big, $big_px);
     $html .= '</td>';
   }
+  $html .= sprintf('<td style="width:%.2fmm; padding:0;">%s</td>', $small, $stack);
   $html .= '</tr></table>';
   return $html;
 }
