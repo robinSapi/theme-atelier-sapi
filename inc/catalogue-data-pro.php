@@ -159,6 +159,10 @@ function sapi_catalogue_size_sort_value($label) {
  * essences : une combinaison non créée en base n'apparaît pas.
  * Produit simple = une seule ligne.
  *
+ * Les variations portant une essence hors catalogue sont ÉCARTÉES (cf.
+ * sapi_catalogue_essence_labels()). Un produit dont toutes les variations
+ * seraient écartées ne sort aucune ligne : ni prix sur la carte, ni tableau.
+ *
  * ⚠️ NE CALCULE AUCUN PRIX HT. La conversion se fait au rendu du PDF pro, avec
  * le taux du moment (cf. sapi_catalogue_ht_from_ttc()).
  *
@@ -201,8 +205,18 @@ function sapi_catalogue_product_pricing($product) {
         }
       }
 
+      // ⚠️ Essences NON exposées par le catalogue (ex. « Peuplier teinté noir »)
+      // → variation écartée. Sans ce filtre, /catalogue-prix afficherait un prix
+      // sur un bois que la fiche technique juste en dessous ne mentionne pas :
+      // le prescripteur verrait une option qu'on ne lui présente pas.
+      // Table de référence : sapi_catalogue_essence_labels() (catalogue-data.php).
+      $allowed = sapi_catalogue_essence_labels();
+      if ($ess_slug !== '' && !isset($allowed[$ess_slug])) continue;
+
       $size    = $size_slug !== '' ? sapi_catalogue_term_label($size_slug, 'pa_taille') : '';
-      $essence = $ess_slug !== ''  ? sapi_catalogue_term_label($ess_slug, $ess_tax)     : '';
+      // Libellé pris dans la table du catalogue (et non sur le terme WooCommerce)
+      // pour que le tableau de prix et la ligne « Bois » disent exactement pareil.
+      $essence = $ess_slug !== ''  ? $allowed[$ess_slug] : '';
 
       $parts = array_filter([$size, $essence]);
       $rows[] = [

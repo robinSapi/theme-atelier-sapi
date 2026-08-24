@@ -219,6 +219,22 @@ function sapi_catalogue_product_weight($product, $has_acf) {
 }
 
 /**
+ * Essences de bois EXPOSÉES par le catalogue : slug d'attribut => libellé.
+ *
+ * SOURCE UNIQUE, volontairement restrictive. La base contient d'autres essences
+ * (ex. `peuplier-noir` = « Peuplier teinté noir »), délibérément écartées du
+ * catalogue prescripteurs — décision Robin, 2026-08-24. Toute essence absente de
+ * cette table est ignorée partout : puces, ligne « Bois », PDF, ET tableaux de
+ * prix de /catalogue-prix (inc/catalogue-data-pro.php s'aligne ici, pour que la
+ * page ne puisse jamais afficher un prix sur un bois qu'elle ne présente pas).
+ *
+ * @return array<string,string>
+ */
+function sapi_catalogue_essence_labels() {
+  return ['peuplier' => 'Peuplier', 'okoume' => 'Okoumé'];
+}
+
+/**
  * Essences de bois disponibles pour un produit (Peuplier / Okoumé), lues sur
  * l'attribut de variation. Utilisé pour afficher des puces informatives, jamais
  * pour un prix ou une variation achetable.
@@ -227,7 +243,7 @@ function sapi_catalogue_product_weight($product, $has_acf) {
  * @return array<int,string> libellés (ex. ['Peuplier', 'Okoumé'])
  */
 function sapi_catalogue_product_essences($product) {
-  $labels = ['peuplier' => 'Peuplier', 'okoume' => 'Okoumé'];
+  $labels = sapi_catalogue_essence_labels();
   $found  = [];
   if (!function_exists('wc_get_product_terms')) return $found;
   foreach (['pa_materiau', 'pa_bois', 'pa_essence'] as $tax) {
