@@ -953,4 +953,19 @@ Robin a donné le go pour **les lots 1+2 seulement** : il veut voir la page avan
 
 **Commits sur `test-theme-sapi-maison`** : `cb5c884` (lots 1+2), `d8c5295` (filtre essences), `0ba0ca9` (tableau croisé).
 
-**⏭️ Lot 3 (admin `Produits > Catalogue PRO` + PDF tarif pro) : prêt à démarrer, en attente du go de Robin.** Deux questions ouvertes pour lui : (a) cherry-pick des lots 1+2 vers `master` maintenant, ou tout garder sur test jusqu'à ce que le lot 3 soit fini ? (b) rappel — la page `/catalogue-prix` devra être **recréée à la main en prod** (contenu en base, pas en code), ainsi que son exclusion du sitemap Yoast.
+---
+
+### 🚧 LOT 3 livré sur `test-theme-sapi-maison` (2026-08-24) — commit `111b126`
+
+`inc/catalogue-pdf-pro.php` (génération, cache, route) + `inc/catalogue-pro-admin.php` (formulaire). `SAPI_CATALOGUE_PDF_VERSION` 14 → 15.
+
+**Conforme au brief :** page de garde sans jamais le taux, page mentions, une page par produit avec tableau Variation / Prix pro HT / PVP conseillé TTC, filigrane « Tarif professionnel — confidentiel » sur les pages produit seulement. Sélecteur produit à nom unique par case (`produits[<id>]`, piège WAF o2switch de la Tâche 5), « tout / rien » par catégorie, compteur, export refusé à zéro produit, persistance sauf « Établi pour », garde-fou > 35%, journal des 20 derniers exports. Cache à clé propre incluant le hash des mentions, préfixe `pro-`, purge à 30 jours, pas de pré-génération. Route `admin_post` gardée par capacité + nonce, **aucune route REST ajoutée**.
+
+**Vérifié sur test après déploiement :**
+- `/catalogue` 200, **0 occurrence de `€`** ; `/catalogue-prix` 200. Aucun fatal.
+- `admin_post` pro **non connecté → refusé** (404, aucun PDF servi). Page admin non connectée → redirection vers `wp-login`.
+- Endpoint public `/wp-json/sapi/v1/catalogue-pdf` : 200 `application/pdf`, régénéré après le bump de version, audit des flux décompressés = **16 pages, 0 lien `/URI`, 0 occurrence de `€`/`EUR`/`prix`/`TTC`/`HT`**. Le PDF public reste strictement sans prix.
+
+**⏳ Reste à faire par Robin (nécessite une session admin, je ne peux pas la simuler) :** lancer un export depuis `Produits > Catalogue PRO` et contrôler **au rendu du PDF, pas au XML** (règle acquise sur le logo de la charte). Valeurs attendues pour Vincent l'incandescent au taux par défaut de 30% — 18x33cm : Peuplier 49 € HT / 85 € TTC, Okoumé 61 € HT / 105 € TTC ; 25x40cm : 64 / 110 et 78 / 135 ; 32x33cm : 67 / 115 et 78 / 135. Vérifier aussi : deux exports à taux différents donnent deux fichiers distincts, un export à 8 produits ne contient que ces 8 produits dans l'ordre du site, et une correction des mentions suivie d'un ré-export au même périmètre fait bien apparaître le nouveau texte (invalidation du cache).
+
+**Questions toujours ouvertes pour Robin :** (a) cherry-pick vers `master` maintenant ou à la fin ? (b) rappel — la page `/catalogue-prix` devra être **recréée à la main en prod** (contenu en base, pas en code), ainsi que son exclusion du sitemap Yoast. (c) le PDF pro ne contient ni pages Histoire/Bois ni page contact (le brief ne les prévoyait pas pour un document tarifaire) — à confirmer.
