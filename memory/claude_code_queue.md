@@ -1002,7 +1002,21 @@ Ordre final de la carte : en-tête → photos → description → prix → carac
 
 **Vérifié :** le PDF public n'est pas affecté (il passe une chaîne vide à `after_description`). Régénéré en v18, ses 33 flux de contenu décompressés ont la **même empreinte SHA-256** qu'en v17 — seules les métadonnées `CreationDate`/`ModDate` diffèrent. 11 pages, 0 lien, 0 prix.
 
-### 🐛 EN COURS — Bande photo du PDF pro : les images sont ÉTIRÉES (diagnostiqué, correctif en attente du schéma de Robin)
+### ✅ RÉSOLU — Bande photo du PDF pro refaite (commits `5635c03` + `f70c707`, v20 puis v21)
+
+**Composition, d'après le schéma de Robin :** 3 grands carrés (photo produit = image mise en avant, puis 2 ambiances) + 1 colonne de 2 petits carrés (détail en haut, accessoire en bas). Toutes carrées, même hauteur, la bande occupe toute la largeur utile.
+
+**Géométrie déduite, rien en dur** : `3S + 3g + s = W` avec `2s + g = S`, soit `S = (2W − 5g)/7`. À 181 mm utiles (A4 − marges − padding de carte) et 3 mm d'écart : grands carrés **49,57 mm**, petits **23,29 mm**, bande haute de 49,57 mm. Rapport grand/petit **2,13**, contre 2,12 sur le schéma de Robin (ses 52 mm supposaient les 190 mm de la page, sans le padding de la carte).
+
+**Correctif de fond de l'étirement :** `sapi_catalogue_pdf_image()` retrouve sa forme d'origine (ne recadre plus, préserve le ratio). Le recadrage vit dans `sapi_catalogue_pdf_square_image()`, qui **n'utilise pas** `resize($w, $h, true)` — on découpe soi-même le plus grand carré disponible avec `crop()`, donc la sortie est carrée **par construction**, et les dimensions sont **relues** sur le fichier produit au lieu d'être affirmées. Cible plafonnée au côté disponible : jamais de suragrandissement.
+
+**Point focal branché :** Robin a l'extension **Media Focus Point** (wpcompany v2.0.5), confirmée sur le serveur de test. Adaptateur `sapi_catalogue_focal_point_from_mfp()` accroché au filtre `sapi_catalogue_focal_point`, passant par `MFP_Background($id, false)` — l'API publique documentée depuis la v1.3 — et non par sa méta, qui casserait à la première mise à jour. Appel entouré d'un tampon de sortie : un `echo` de l'extension corromprait le flux binaire du PDF. Sans extension ou sans point focal posé, retour à 50/50 et recadrage centré.
+
+**Règle des emplacements vides :** chaque emplacement affiche une photo de **son type** ou reste blanc, sans repli d'un type sur un autre (consigne Robin pour l'accessoire, appliquée à tous). À rediscuter si trop de colonnes de droite sortent vides.
+
+**Vérifié :** PDF public inchangé (même empreinte de contenu en v19, v20 et v21 — la bande ne concerne que le PDF pro), pages publiques 200.
+
+<details><summary>Diagnostic d'origine (archivé)</summary>
 
 **Cause racine :** `WP_Image_Editor::resize($w, $h, true)` **n'agrandit jamais**. WordPress (`image_resize_dimensions()`, branche crop) renvoie `(min(cible_w, source_w), min(cible_h, source_h))` — pas la cible. Le recadrage part du format `large` (plafonné à 1024 px) et vise 570×650 : dès qu'une source fait moins de 650 px de haut, la sortie n'a pas le ratio demandé. `sapi_catalogue_pdf_image()` **affirme** ensuite les dimensions demandées (`$w = $crop['w']`) au lieu de lire celles obtenues, et le HTML force `width:57mm; height:65mm` → l'image est étirée pour remplir la case.
 
@@ -1010,7 +1024,9 @@ Ordre final de la carte : en-tête → photos → description → prix → carac
 
 **Acquis, quelle que soit la mise en page retenue :** lire les dimensions **réelles** du fichier produit (`getimagesize` sur la sortie) et ne jamais imposer largeur ET hauteur sur une image dont le ratio n'est pas garanti. C'est cette double faute qui déforme, pas le choix de composition.
 
-**Exigences Robin :** aucune déformation (rédhibitoire) ; rognage toléré mais ratio d'origine préféré ; **la première photo doit être carrée**. Trois compositions lui ont été proposées (hauteur commune/largeurs réelles, trois carrés avec vrai recadrage, cases identiques en image contenue) — il envoie **un schéma** de ce qu'il veut. Ne rien coder avant.
+**Exigences Robin :** aucune déformation (rédhibitoire) ; rognage toléré mais ratio d'origine préféré ; **la première photo doit être carrée**. Trois compositions lui ont été proposées — il a répondu par un schéma, mis en œuvre ci-dessus.
+
+</details>
 
 **🛑 PAS DE CHERRY-PICK VERS `master` POUR L'INSTANT — décision Robin.** D'autres modifications sont à venir sur le catalogue. Tout reste sur `test-theme-sapi-maison`. Au moment du passage en prod, ne pas oublier : la page `/catalogue-prix` est du contenu en base, **à recréer à la main** sur atelier-sapi.fr, avec son exclusion du sitemap Yoast.
 
