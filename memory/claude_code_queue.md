@@ -992,6 +992,16 @@ Sur le **PDF public**, le gain est d'environ 15 mm (marges + padding + ligne cat
 - **Toutes les fiches du tarif pro tiennent sur une page**, avec de la marge en plus. L'objectif de l'addendum est atteint.
 - **PDF public re-validé** malgré son changement d'apparence (marges resserrées, en-tête sur une ligne, SKU retiré du haut et conservé en pied).
 
+### 🎨 Retouches design du PDF pro (2026-08-24) — commit `703a1d5`, v18
+
+Deux incohérences relevées par Robin sur la fiche du tarif pro :
+1. **Titre du tableau de prix désaccordé** des titres de section de la fiche technique : `letter-spacing` 1px au lieu de .5px, `padding-bottom` 1mm au lieu de `0.4mm 0`. Déclarations désormais recopiées à l'identique depuis `.spec-block .sec`. ⚠️ **Recopiées et non héritées** : mPDF gère mal les sélecteurs descendants, on ne peut pas réutiliser la classe `.sec` dans `.pro-prices`. Un commentaire d'avertissement dans les deux feuilles rappelle que toute retouche de l'une doit être répercutée sur l'autre.
+2. **Description déplacée AVANT le tableau de prix** — on présente l'objet, puis on le chiffre. L'argument du gabarit partagé devient `after_description` (au lieu de `after_photos`). Le filet en tête du tableau est remplacé par une marge haute de 3,5 mm : une respiration, pas une coupure.
+
+Ordre final de la carte : en-tête → photos → description → prix → caractéristiques.
+
+**Vérifié :** le PDF public n'est pas affecté (il passe une chaîne vide à `after_description`). Régénéré en v18, ses 33 flux de contenu décompressés ont la **même empreinte SHA-256** qu'en v17 — seules les métadonnées `CreationDate`/`ModDate` diffèrent. 11 pages, 0 lien, 0 prix.
+
 **🛑 PAS DE CHERRY-PICK VERS `master` POUR L'INSTANT — décision Robin.** D'autres modifications sont à venir sur le catalogue. Tout reste sur `test-theme-sapi-maison`. Au moment du passage en prod, ne pas oublier : la page `/catalogue-prix` est du contenu en base, **à recréer à la main** sur atelier-sapi.fr, avec son exclusion du sitemap Yoast.
 
 ---
