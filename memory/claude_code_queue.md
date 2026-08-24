@@ -1243,3 +1243,21 @@ L'ancien gabarit « grande photo + 3 vignettes » et ses règles CSS ont été r
 
 **⏳ Reste : la seconde revalidation du PDF public au rendu par Robin**, qu'il assume.
 
+
+---
+
+### ✅ Deux photos de détail dans les deux PDF (2026-08-24, commit `a3f57f2`, v24)
+
+Demande de Robin, avec repli sur ambiance. Le nombre **total** de cases étant imposé par la géométrie, la 2ᵉ case de détail prend la place d'une ambiance dans chaque profil :
+
+| Profil | Composition |
+|---|---|
+| `pro` | packshot + **4** ambiances + **2 détails** + 1 accessoire (était 5 ambiances + 1 détail) |
+| `public` | 2 ambiances en grand + packshot + **2 détails** + 1 accessoire (était 2 ambiances + packshot + 1 ambiance + 1 détail) |
+
+**Correctif trouvé en simulant :** le repli d'une réserve restée vide se pose **à sa place** dans la séquence, plus en fin. Sinon un produit avec une seule photo de détail voyait l'ambiance de repli passer **après** l'accessoire, alors que celui-ci doit rester la dernière case affichée (règle de l'addendum 2 : détail et accessoire groupés en fin, dans cet ordre). Vérifié sur 7 cas × 2 profils : avec 2 détails, avec 1 seul, sans aucun, sans détail ni accessoire — l'accessoire termine toujours la séquence quand il existe.
+
+**Vérifié sur test :** 11 pages sur les lampadaires (une fiche par page), 0 lien `/URI`, et étanchéité confirmée à l'extracteur `/ToUnicode` — 0 `€`, 0 `Prix`, 0 `TTC`, 0 `HT`, « Culot » 7 fois pour 7 lampadaires.
+
+**⏳ En attente de Robin :** (1) revalidation au rendu des DEUX PDF — le pro n'a pas encore été vu dans sa version « 3 grands + 5 petits », contrôler LÉON en priorité ; (2) l'écart de 1,8 mm entre les deux largeurs utiles (179,2 mesuré vs 181 en constante côté pro) ; (3) le champ « Poids » qui affiche du balisage en prod ; (4) le cherry-pick vers `master`.
+
