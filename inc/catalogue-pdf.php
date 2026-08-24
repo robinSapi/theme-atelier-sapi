@@ -33,8 +33,12 @@ if (!defined('ABSPATH')) exit;
 // v22 (2026-08-24) : bande photo « 3 grands + rangee de 5 » (addendum 2) —
 //                    58,33 / 33,80 mm, types en preference avec repli, plus
 //                    aucune case vide, filet sur la photo produit.
+// v23 (2026-08-24) : le PDF PUBLIC passe lui aussi en bande, profil propre —
+//                    2 grandes de 87,87 mm + 4 moyennes de 42,20 mm, bande de
+//                    133,53 mm. Meme hauteur qu'avant pour 6 images au lieu de
+//                    4, ambiances doublees en taille. Ancien gabarit retire.
 // La constante entre dans la clé de cache des DEUX générateurs, public et pro.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '22');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '23');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -403,11 +407,8 @@ function sapi_catalogue_pdf_css() {
     /* Filets de séparation discrets */
     .head-rule { border-top: 0.25mm solid #ece2d3; margin: 0.5mm 0 2mm; }
     .specs-rule { border-top: 0.25mm solid #ece2d3; margin: 2.5mm 0 2mm; }
-    .prod-hero { text-align: left; margin: 0 0 2mm; }
     .prod-desc { font-size: 8.5pt; color: #4a443d; text-align: justify; line-height: 1.34; }
     .prod-desc p { margin: 0 0 1.5mm; }
-    .thumb-row { margin: 0; }
-    .thumb-row td { padding: 0 3.6mm 4mm 0; text-align: left; vertical-align: top; }
 
     /* Tableau caractéristiques en 2 colonnes de sections (compact = 1 page) */
     .specs-grid { width: 100%; }
@@ -531,8 +532,8 @@ function sapi_catalogue_pdf_bois_html($f) {
  * @param array  $p         produit normalisé (sapi_catalogue_normalize_product)
  * @param string $cat_label libellé de catégorie affiché en haut à droite
  * @param array  $args {
- *   @type string $photos            'hero' = grande photo + vignettes (public),
- *                                   'band' = bande de 3 photos à hauteur fixe (pro)
+ *   @type string $photos            profil de bande : 'public' (2 grandes +
+ *                                   4 moyennes) ou 'pro' (3 grands + 5 petits)
  *   @type string $after_description HTML inséré APRÈS la description et AVANT les
  *                                   caractéristiques (tableau de prix du tarif
  *                                   pro). La description passe donc en premier :
@@ -541,7 +542,7 @@ function sapi_catalogue_pdf_bois_html($f) {
  * @return string HTML, saut de page inclus
  */
 function sapi_catalogue_pdf_product_card_html($p, $cat_label, $args = []) {
-  $args = array_merge(['photos' => 'hero', 'after_description' => ''], $args);
+  $args = array_merge(['photos' => 'public', 'after_description' => ''], $args);
 
   // ── Caractéristiques en 2 colonnes, équilibrées par nombre de lignes ──
   $sections = !empty($p['specs']) ? $p['specs'] : [];
@@ -568,23 +569,10 @@ function sapi_catalogue_pdf_product_card_html($p, $cat_label, $args = []) {
   $html .= '<div class="head-rule"></div>';
 
   // ── Bloc photo ──
-  if ($args['photos'] === 'band') {
-    $html .= sapi_catalogue_pdf_photo_band_html((int) $p['id']);
-  } else {
-    $gids   = array_values(array_filter(array_map('intval', $p['gallery_ids'])));
-    $main   = !empty($gids) ? sapi_catalogue_pdf_image($gids[0], 'large') : null;
-    $thumbs = array_slice($gids, 1, 3);
-    if ($main) {
-      $html .= '<div class="prod-hero">' . sapi_catalogue_pdf_img_tag($main, 167, 100) . '</div>';
-    }
-    if (!empty($thumbs)) {
-      $html .= '<table class="thumb-row"><tr>';
-      foreach ($thumbs as $tid) {
-        $html .= '<td>' . sapi_catalogue_pdf_img_tag(sapi_catalogue_pdf_image($tid, 'medium'), 50, 33) . '</td>';
-      }
-      $html .= '</tr></table>';
-    }
-  }
+  // Les deux PDF utilisent désormais une bande, avec un profil différent.
+  // L'ancien gabarit « grande photo + 3 vignettes » du PDF public a été retiré :
+  // plus rien ne l'appelait, et git le conserve si besoin de revenir dessus.
+  $html .= sapi_catalogue_pdf_photo_band_html((int) $p['id'], $args['photos']);
 
   // Description (essences + tailles vivent dans le tableau caractéristiques)
   if ($p['description'] !== '') {
@@ -618,29 +606,50 @@ function sapi_catalogue_pdf_product_card_html($p, $cat_label, $args = []) {
  * largeur utile. D = photo de détail, A = photo d'accessoire.
  * ─────────────────────────────────────────────────────────────────────────── */
 
-/** Écart entre les vignettes, en mm. */
-if (!defined('SAPI_CATALOGUE_BAND_GAP')) define('SAPI_CATALOGUE_BAND_GAP', 3);
 /**
- * Largeur utile à l'intérieur de la carte produit, en mm :
- * A4 (210) − marges (10 + 10) − padding de .prod-card (4 + 4) − bordures (~0,6).
+ * Profils de bande. Les DEUX PDF divergent volontairement : leurs publics ne
+ * sont pas les mêmes. Le moteur, le recadrage et les règles de repli sont
+ * partagés ; seuls le nombre de cases par rangée et l'ordre de remplissage
+ * changent (décision Robin, 2026-08-24 — ne pas chercher à les unifier).
+ *
+ *   pro     3 grands + 5 petits   — le tarif montre la gamme, dense
+ *   public  2 grandes + 4 moyennes — la fiche s'ouvre sur deux mises en
+ *           situation en grand, et le packshot, le détail et l'accessoire
+ *           restent lisibles à 42,2 mm au lieu de 33
+ *
+ * `head` = cases remplies dans l'ordre ; `tail` = cases réservées à la FIN de
+ * la séquence affichée (pas à un rang fixe).
+ *
+ * ⚠️ Largeurs utiles et écarts MESURÉS par Robin sur le rendu, pas déduits :
+ * 179,2 mm et 3,46 mm pour le public. Le profil pro garde 181/3, valeurs sous
+ * lesquelles sa bande a été validée à l'œil — l'écart de 1,8 mm entre les deux
+ * mesures reste à trancher, il n'a pas été touché volontairement.
+ *
+ * @param string $profile 'pro' ou 'public'
+ * @return array
  */
-if (!defined('SAPI_CATALOGUE_CARD_INNER_W')) define('SAPI_CATALOGUE_CARD_INNER_W', 181);
+function sapi_catalogue_pdf_band_layout($profile = 'public') {
+  $profiles = [
+    'pro' => [
+      'top' => 3, 'bottom' => 5, 'w' => 181.0, 'gap' => 3.0,
+      'head' => ['produit', 'ambiance', 'ambiance', 'ambiance', 'ambiance', 'ambiance'],
+      'tail' => ['detail', 'accessoire'],
+    ],
+    'public' => [
+      'top' => 2, 'bottom' => 4, 'w' => 179.2, 'gap' => 3.46,
+      'head' => ['ambiance', 'ambiance', 'produit', 'ambiance'],
+      'tail' => ['detail', 'accessoire'],
+    ],
+  ];
+  $p = isset($profiles[$profile]) ? $profiles[$profile] : $profiles['public'];
 
-/**
- * Géométrie de la bande, déduite de la largeur utile — rien n'est codé en dur.
- *
- *   rangée haute : 3 carrés  →  S = (W − 2g) / 3
- *   rangée basse : 5 carrés  →  s = (W − 4g) / 5
- *   hauteur totale = S + g + s
- *
- * @return array{s_big:float,s_small:float,gap:float,height:float}
- */
-function sapi_catalogue_pdf_band_geometry() {
-  $w = (float) SAPI_CATALOGUE_CARD_INNER_W;
-  $g = (float) SAPI_CATALOGUE_BAND_GAP;
-  $big   = ($w - 2 * $g) / 3;
-  $small = ($w - 4 * $g) / 5;
-  return ['s_big' => $big, 's_small' => $small, 'gap' => $g, 'height' => $big + $g + $small];
+  // La taille des carrés n'est PAS libre : elle est imposée par la largeur.
+  // Pour occuper de la hauteur, on met moins d'images par rangée — jamais des
+  // images plus grandes.
+  $p['s_top']    = ($p['w'] - ($p['top'] - 1) * $p['gap']) / $p['top'];
+  $p['s_bottom'] = ($p['w'] - ($p['bottom'] - 1) * $p['gap']) / $p['bottom'];
+  $p['height']   = $p['s_top'] + $p['gap'] + $p['s_bottom'];
+  return $p;
 }
 
 /**
@@ -668,13 +677,13 @@ function sapi_catalogue_pdf_band_geometry() {
  * @param int $product_id
  * @return array<int,int> 0 à 8 IDs d'attachment, dans l'ordre d'affichage
  */
-function sapi_catalogue_pdf_band_photos($product_id) {
+function sapi_catalogue_pdf_band_photos($product_id, $layout) {
   $seen = [];
 
   $featured = (int) get_post_thumbnail_id($product_id);
   if ($featured) $seen[$featured] = true;
 
-  $pool = function ($type) use ($product_id, &$seen) {
+  $gallery = function ($type) use ($product_id, &$seen) {
     $out = [];
     if (!function_exists('sapi_get_product_photo_ids')) return $out;
     foreach ((array) sapi_get_product_photo_ids($product_id, $type) as $id) {
@@ -686,25 +695,59 @@ function sapi_catalogue_pdf_band_photos($product_id) {
     return $out;
   };
 
-  $ambiance   = $pool('ambiance');
-  $detail     = $pool('detail');
-  $accessoire = $pool('accessoires');
+  // Réserves par type. `produit` n'en contient qu'une : l'image mise en avant.
+  $pools = [
+    'produit'    => $featured ? [$featured] : [],
+    'ambiance'   => $gallery('ambiance'),
+    'detail'     => $gallery('detail'),
+    'accessoire' => $gallery('accessoires'),
+  ];
 
-  // Fin de séquence : détail puis accessoire, groupés, quand ils existent.
+  // Cascade de repli : le type voulu d'abord, puis l'ordre générique. Elle
+  // reproduit exactement le tableau de l'addendum — ambiance se replie sur
+  // détail, détail sur ambiance, accessoire sur ambiance, produit sur ambiance.
+  $take = function ($wanted) use (&$pools) {
+    foreach (array_unique([$wanted, 'ambiance', 'detail', 'accessoire', 'produit']) as $type) {
+      if (!empty($pools[$type])) return (int) array_shift($pools[$type]);
+    }
+    return 0;
+  };
+
+  // Les cases de fin sont réservées EN PREMIER, sinon leur photo serait
+  // consommée en appoint par une case précédente et la réserve tomberait à vide.
+  // ⚠️ Mais sur leur type STRICT, sans repli : sinon, un produit sans accessoire
+  // voyait le repli lui prendre la PREMIÈRE ambiance, qui se retrouvait reléguée
+  // en dernière petite case au lieu d'ouvrir la fiche en grand. Les réserves non
+  // servies sont repliées plus bas, une fois les cases de tête pourvues.
   $tail = [];
-  if ($detail)     $tail[] = array_shift($detail);
-  if ($accessoire) $tail[] = array_shift($accessoire);
+  $unserved = 0;
+  foreach ($layout['tail'] as $wanted) {
+    if (!empty($pools[$wanted])) $tail[] = (int) array_shift($pools[$wanted]);
+    else $unserved++;
+  }
 
-  // Appoint : produit, ambiances, puis les surplus de détail et d'accessoire.
-  $filler = array_merge(
-    $featured ? [$featured] : [],
-    $ambiance,
-    $detail,
-    $accessoire
-  );
+  $head = [];
+  foreach ($layout['head'] as $wanted) {
+    $id = $take($wanted);
+    if ($id) $head[] = $id;
+  }
 
-  $head = array_slice($filler, 0, max(0, 8 - count($tail)));
-  return array_values(array_merge($head, $tail));
+  // Repli des réserves restées vides : ce qui traîne encore, en fin de séquence.
+  for ($i = 0; $i < $unserved; $i++) {
+    $id = $take('ambiance');
+    if (!$id) break;
+    $tail[] = $id;
+  }
+
+  $ids = array_values(array_merge($head, $tail));
+
+  return [
+    'ids' => $ids,
+    // Le filet clair suit le PACKSHOT où qu'il atterrisse : case 1 côté pro,
+    // case 3 côté public, et ailleurs si des cases précédentes sont restées
+    // vides et que la séquence s'est compactée.
+    'framed' => $featured ? array_search($featured, $ids, true) : false,
+  ];
 }
 
 /**
@@ -715,18 +758,20 @@ function sapi_catalogue_pdf_band_photos($product_id) {
  * @param int $product_id
  * @return string HTML
  */
-function sapi_catalogue_pdf_photo_band_html($product_id) {
-  $ids = sapi_catalogue_pdf_band_photos($product_id);
+function sapi_catalogue_pdf_photo_band_html($product_id, $profile = 'public') {
+  $layout = sapi_catalogue_pdf_band_layout($profile);
+  $photos = sapi_catalogue_pdf_band_photos($product_id, $layout);
+  $ids    = $photos['ids'];
   if (!$ids) return '';
 
-  $geo   = sapi_catalogue_pdf_band_geometry();
-  $big   = $geo['s_big'];
-  $small = $geo['s_small'];
-  $gap   = $geo['gap'];
+  $big    = $layout['s_top'];
+  $small  = $layout['s_bottom'];
+  $gap    = $layout['gap'];
+  $framed = $photos['framed'];
 
   $n       = count($ids);
-  $n_big   = min(3, $n);
-  $n_small = $n - $n_big; // 0 à 5
+  $n_big   = min($layout['top'], $n);
+  $n_small = $n - $n_big;
 
   /**
    * Vignette carrée. Le filet ne va QUE sur la photo produit : c'est un
@@ -752,7 +797,7 @@ function sapi_catalogue_pdf_photo_band_html($product_id) {
    * reste à droite. Pas de recentrage, pas d'agrandissement — agrandir ferait
    * sortir la bande du budget vertical de la fiche.
    */
-  $row = function ($items, $side, $frame_first) use ($gap, $cell) {
+  $row = function ($items, $side, $offset) use ($gap, $cell, $framed) {
     $count = count($items);
     if (!$count) return '';
     $width = $count * $side + ($count - 1) * $gap;
@@ -760,14 +805,14 @@ function sapi_catalogue_pdf_photo_band_html($product_id) {
     foreach ($items as $i => $id) {
       $pad = ($i < $count - 1) ? $gap : 0;
       $html .= sprintf('<td style="width:%.2fmm; padding:0 %.2fmm 0 0;">', $side + $pad, $pad);
-      $html .= $cell($id, $side, $frame_first && $i === 0);
+      $html .= $cell($id, $side, $framed !== false && ($offset + $i) === $framed);
       $html .= '</td>';
     }
     return $html . '</tr></table>';
   };
 
-  $top    = $row(array_slice($ids, 0, $n_big), $big, true);
-  $bottom = $n_small ? $row(array_slice($ids, $n_big), $small, false) : '';
+  $top    = $row(array_slice($ids, 0, $n_big), $big, 0);
+  $bottom = $n_small ? $row(array_slice($ids, $n_big), $small, $n_big) : '';
 
   // Rangée basse absente (moins de 4 photos) → pas de rangée vide, et pas
   // d'espacement inutile sous la rangée haute.

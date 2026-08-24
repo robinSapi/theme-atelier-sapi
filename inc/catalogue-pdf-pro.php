@@ -336,7 +336,7 @@ function sapi_catalogue_pro_pdf_build($args) {
       // fixe, et le tableau de prix inséré après la description — on présente
       // l'objet, puis on le chiffre.
       $mpdf->WriteHTML(sapi_catalogue_pdf_product_card_html($p, $block['label'], [
-        'photos'            => 'band',
+        'photos'            => 'pro',
         'after_description' => sapi_catalogue_pro_price_table_html($p['pricing'], $rate),
       ]));
     }
