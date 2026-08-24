@@ -111,25 +111,60 @@ function sapi_catalogue_render_gallery($ids, $title) {
 
 /**
  * Rendu du tableau de prix d'un produit (variante /catalogue-prix uniquement).
- * Une ligne par combinaison achetable, PVP TTC. Aucun prix HT, aucun taux :
- * ces notions n'existent que dans le PDF tarif pro, généré depuis l'admin.
+ * TABLEAU CROISÉ : essences en lignes, dimensions en colonnes. PVP TTC.
+ * Aucun prix HT, aucun taux : ces notions n'existent que dans le PDF tarif pro,
+ * généré depuis l'admin.
  *
  * @param array $pricing issu de sapi_catalogue_product_pricing()
  */
 function sapi_catalogue_render_prices($pricing) {
   if (empty($pricing['rows'])) return;
-  $rows = $pricing['rows'];
+
+  $matrix   = sapi_catalogue_pricing_matrix($pricing);
+  $sizes    = $matrix['sizes'];
+  $essences = $matrix['essences'];
+  $cells    = $matrix['cells'];
+  if (!$sizes || !$essences) return;
+
   echo '<div class="cat-price-block">';
-  echo '<h4 class="cat-price-block__title">Prix</h4>';
+  echo '<h4 class="cat-price-block__title">Prix TTC</h4>';
+
+  // Une seule combinaison (produit simple, ou taille unique en bois unique) :
+  // un tableau croisé 1×1 serait grotesque, une ligne suffit.
+  if (count($sizes) === 1 && count($essences) === 1) {
+    $only  = isset($cells[$essences[0]][$sizes[0]]) ? $cells[$essences[0]][$sizes[0]] : null;
+    $label = trim($sizes[0] . ' ' . $essences[0]);
+    if ($only !== null) {
+      echo '<p class="cat-price-single">';
+      if ($label !== '') echo '<span class="cat-price-single__label">' . esc_html($label) . '</span> ';
+      echo '<span class="cat-price-single__amount">' . esc_html(sapi_catalogue_format_price($only)) . '</span>';
+      echo '</p>';
+    }
+    echo '</div>';
+    return;
+  }
+
+  // Conteneur de défilement : une gamme à 4-5 tailles déborde sur mobile, et
+  // c'est le tableau qui doit défiler, jamais la page.
+  echo '<div class="cat-price-scroll">';
   echo '<table class="cat-price-table"><thead><tr>';
-  echo '<th scope="col">Variation</th><th scope="col">Prix TTC</th>';
+  echo '<td class="cat-price-table__corner"></td>';
+  foreach ($sizes as $size) {
+    echo '<th scope="col">' . esc_html($size !== '' ? $size : 'Prix') . '</th>';
+  }
   echo '</tr></thead><tbody>';
-  foreach ($rows as $row) {
-    echo '<tr><th scope="row">' . esc_html($row['label']) . '</th>';
-    echo '<td>' . esc_html(sapi_catalogue_format_price($row['ttc'])) . '</td></tr>';
+  foreach ($essences as $essence) {
+    echo '<tr><th scope="row">' . esc_html($essence !== '' ? $essence : 'Prix') . '</th>';
+    foreach ($sizes as $size) {
+      $value = isset($cells[$essence][$size]) ? $cells[$essence][$size] : null;
+      echo '<td>' . ($value === null
+        ? '<span class="cat-price-table__na" title="Combinaison non disponible">—</span>'
+        : esc_html(sapi_catalogue_format_price($value))) . '</td>';
+    }
+    echo '</tr>';
   }
   echo '</tbody></table>';
-  echo '</div>';
+  echo '</div></div>';
 }
 
 /**

@@ -261,6 +261,53 @@ function sapi_catalogue_product_pricing($product) {
 }
 
 /**
+ * Pivote les lignes de prix en TABLEAU CROISÉ : essences en lignes, tailles en
+ * colonnes (demande Robin — un tarif se lit d'un coup d'œil sous cette forme).
+ *
+ * Les combinaisons qui n'existent pas en base ressortent absentes du tableau
+ * `cells` : le rendu affiche « — », il n'invente jamais un prix par symétrie.
+ *
+ * @param array $pricing issu de sapi_catalogue_product_pricing()
+ * @return array{
+ *   sizes: array<int,string>,
+ *   essences: array<int,string>,
+ *   cells: array<string,array<string,float>>
+ * } sizes/essences peuvent contenir '' (produit sans taille ou sans essence)
+ */
+function sapi_catalogue_pricing_matrix($pricing) {
+  if (empty($pricing['rows'])) return ['sizes' => [], 'essences' => [], 'cells' => []];
+
+  $sizes = $essences = $cells = [];
+  foreach ($pricing['rows'] as $row) {
+    $s = (string) $row['size'];
+    $e = (string) $row['essence'];
+    if (!in_array($s, $sizes, true))    $sizes[] = $s;
+    if (!in_array($e, $essences, true)) $essences[] = $e;
+    // Deux variations sur la même case (doublon en base) : on garde la moins
+    // chère — un tarif ne doit jamais surprendre à la hausse.
+    if (!isset($cells[$e][$s]) || $row['ttc'] < $cells[$e][$s]) {
+      $cells[$e][$s] = (float) $row['ttc'];
+    }
+  }
+
+  // Lignes dans l'ordre du catalogue (Peuplier puis Okoumé), et non dans l'ordre
+  // de création des variations, qui n'a aucune raison d'être stable.
+  $order = array_values(sapi_catalogue_essence_labels());
+  usort($essences, function ($a, $b) use ($order) {
+    $ia = array_search($a, $order, true);
+    $ib = array_search($b, $order, true);
+    if ($ia === false) $ia = PHP_INT_MAX;
+    if ($ib === false) $ib = PHP_INT_MAX;
+    if ($ia === $ib) return strcmp($a, $b);
+    return $ia < $ib ? -1 : 1;
+  });
+
+  // Les tailles sont déjà triées par sapi_catalogue_product_pricing() : leur
+  // ordre de première apparition est donc l'ordre croissant.
+  return ['sizes' => $sizes, 'essences' => $essences, 'cells' => $cells];
+}
+
+/**
  * Le prix dépend-il de l'essence, à taille égale ?
  *
  * Diagnostic : si la réponse est non sur tout le catalogue, le tableau des
