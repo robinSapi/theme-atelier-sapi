@@ -1090,3 +1090,48 @@ Robin a donné le go pour **les lots 1+2 seulement** : il veut voir la page avan
 ⚠️ Le titre « Tarifs professionnels » en tête du texte par défaut des mentions a été retiré (doublon avec le titre de page). Si Robin a déjà lancé un export avant cette itération, sa version enregistrée contient encore cette ligne : à supprimer à la main dans le champ.
 
 **Questions toujours ouvertes pour Robin :** (a) cherry-pick vers `master` maintenant ou à la fin ? (b) rappel — la page `/catalogue-prix` devra être **recréée à la main en prod** (contenu en base, pas en code), ainsi que son exclusion du sitemap Yoast. (c) le PDF pro n'a pas de page contact finale (le brief ne la prévoyait pas) — à confirmer.
+
+---
+
+## 📨 RETOUR À COWORK — Catalogue prix + Tarifs professionnels : LIVRÉ SUR TEST ✅ (2026-08-24)
+
+**Statut : terminé et validé par Robin sur `test.atelier-sapi.fr`. VOLONTAIREMENT PAS EN PROD** — Robin a d'autres modifications du catalogue à demander, le passage sur `master` attendra qu'elles soient faites.
+
+### Ce qui existe maintenant
+
+Trois objets, trois niveaux de confidentialité, exactement comme le brief le prévoyait :
+
+| Objet | Contenu | Qui y a accès |
+|---|---|---|
+| `/catalogue` | zéro prix | public — **strictement inchangé**, audité après chaque modification |
+| `/catalogue-prix` | prix publics TTC par variation | public, `noindex`, lien à transmettre à la main |
+| PDF « Tarifs professionnels » | prix revendeur HT remisés + PVP conseillés | Robin seul, depuis l'admin |
+
+**Le point d'architecture à retenir, y compris côté commercial : le tarif remisé n'existe nulle part sur le web.** Aucune page, aucun lien secret, aucune adresse à protéger. Le taux de remise est saisi par Robin au moment de générer le PDF et disparaît ensuite. Conséquence directe : un tarif à ‑12 % pour un revendeur historique et un autre à ‑30 % pour un prospect de salon, sans que l'un puisse jamais deviner l'existence de l'autre, et sans que le site ait à savoir qui est qui.
+
+### Comment Robin s'en sert
+
+`wp-admin` → **Produits → Catalogue PRO**. Il règle le taux, coche les produits à inclure, saisit éventuellement « Établi pour [nom du revendeur] », et le PDF se télécharge.
+
+Détails utiles à connaître pour l'accompagner :
+- **« Établi pour » repart toujours vide** à chaque ouverture. C'est délibéré : on n'envoie jamais à Ankorstore un tarif encore au nom de Muse. Tout le reste (taux, sélection de produits, dates, mentions) est mémorisé d'un export à l'autre.
+- **Au-delà de 35 % de remise**, une confirmation est demandée avant génération.
+- **Un journal des 20 derniers exports** (date, client, taux, nombre de produits, auteur) s'affiche sous le formulaire. C'est la réponse le jour où un revendeur affirme qu'on lui avait promis autre chose.
+- Le taux **n'apparaît nulle part** dans le document produit.
+
+### ⚠️ Ce qui reste à faire, et qui n'est pas du code
+
+1. **Compléter les mentions légales.** Le texte du brief est pré-rempli dans l'admin, mais cinq crochets `[à compléter]` attendent : minimum de commande, frais de port, délai de fabrication, conditions de règlement, capital social. Tant qu'ils sont là, ils partiront tels quels chez le revendeur. C'est à remplir **une seule fois**, la valeur est ensuite conservée.
+2. **Vérifier la cohérence des PVP avant le premier envoi.** Le tarif pro affiche le prix public conseillé à côté du prix d'achat. Si le prix du site et celui d'Etsy divergent aujourd'hui sur un modèle, le PDF expose l'écart au revendeur. Le brief le signalait déjà — ça n'a pas été vérifié.
+3. **Le jour du passage en prod** : la page `/catalogue-prix` est du **contenu en base, pas du code**. Elle devra être recréée à la main sur `atelier-sapi.fr` (template « Catalogue B2B », slug `catalogue-prix`, bouton « Afficher les prix publics » activé), avec son **exclusion du sitemap Yoast** — sinon elle cannibalise les fiches produit, dont elle reprend les descriptions.
+
+### Constats de terrain, potentiellement utiles côté business
+
+- **Les prix varient fortement selon l'essence** : sur Vincent l'incandescent, 85 € en peuplier contre 105 € en okoumé pour la même taille, jusqu'à 80 € d'écart sur certaines lignes. Le tableau des prix croise donc taille × essence.
+- **Une troisième essence existe en base, « Peuplier teinté noir » (+50 €), que `/catalogue` n'a jamais affichée.** Décision de Robin : on garde ce périmètre à deux bois. À reconsidérer si elle devient commercialement significative — c'est un choix business, plus un oubli technique.
+- **Aucune promotion en cours** sur le catalogue au moment du développement. Le tarif se base sur le prix régulier, pas sur le prix actif : une promo de saison ne contaminera jamais un tarif annuel envoyé à un revendeur.
+
+### Idée pour Cowork
+
+La mécanique est prête, il manque le commercial. Cowork peut préparer un **message-type d'envoi du tarif à un revendeur** (Muse, Ankorstore, prospects salons), et un second pour la page `/catalogue-prix` à destination des décorateurs qui veulent les prix publics. Le lien de la page se partage à la main, elle n'est ni indexée ni liée depuis le site.
+
