@@ -1028,6 +1028,61 @@ Ordre final de la carte : en-tête → photos → description → prix → carac
 
 </details>
 
+### 📐 ADDENDUM 2 (2026-08-24) — Bande photo du PDF pro : disposition « 3 grands + rangée de 5 »
+
+**Mesuré sur le PDF pro que tu as livré** (`tarifs-pro-atelier-sapi-test-4`, 31 pages, rasterisé) :
+- Les fiches produit s'arrêtent entre **220,0 et 226,2 mm**. Avec `margin_bottom` à 14, il reste donc **56,8 mm de blanc** sous la fiche la plus dense. Il y a de la place pour une bande nettement plus haute.
+- **L'emplacement « accessoire » est vide sur toutes les pages contrôlées.** La bande n'affiche que 4 images sur 5 : 3 grands carrés + 1 petit en haut à droite, et un blanc en bas à droite. La règle « chaque emplacement affiche une photo de son type ou reste blanc » produit ce trou en pratique, pas seulement en théorie. **Elle est remplacée ci-dessous.**
+
+#### A. Nouvelle géométrie — décision Robin
+
+Bande à **deux rangées**, plus de colonne latérale :
+- **Rangée haute : 3 grands carrés.** `S = (181 − 2×3)/3` = **58,33 mm**
+- **Rangée basse : 5 petits carrés.** `s = (181 − 4×3)/5` = **33,80 mm**
+- Écart de 3 mm partout, **hauteur de bande = 95,13 mm**
+
+Les grands passent donc de 49,6 à 58,3 mm : les photos principales grossissent **et** on gagne des emplacements (8 au lieu de 5).
+
+⚠️ **Marge de sécurité réduite.** Le supplément est de 46,5 mm pour 56,8 mm disponibles : il ne reste que **~10 mm** sur la fiche la plus dense. **Vérifier le nombre de pages sur les 27 produits**, pas seulement sur un lampadaire. Si une fiche déborde, réduire la rangée basse plutôt que les grands.
+
+#### B. Ordre de remplissage et types
+
+Les types ne sont plus des réservations, ce sont des **préférences avec repli sur l'ambiance**. Une case ne reste jamais vide parce que la photo de son type manque.
+
+| Position | Type préféré | Repli |
+|---|---|---|
+| 1 (grand) | photo produit = `get_post_thumbnail_id()` | ambiance |
+| 2, 3 (grands) | ambiance | détail |
+| 4, 5, 6 (petits) | ambiance | détail |
+| 7 (petit) | **détail** | ambiance |
+| 8 (petit, dernier) | **accessoire** | ambiance |
+
+Détail et accessoire restent **groupés en fin de rangée**, dans cet ordre. Dédoublonnage global : une même image n'apparaît jamais deux fois dans la bande.
+
+#### C. Moins de 8 photos — rangée alignée à gauche (décision Robin)
+
+Les petits carrés **gardent leurs 33,80 mm** et la rangée se remplit **de la gauche vers la droite**, laissant le blanc à droite. Pas de recentrage, pas d'agrandissement (agrandir ferait monter la bande à 104 mm, au-dessus du budget).
+
+Conséquences à coder explicitement :
+- « L'accessoire est en dernier » signifie **dernière case affichée**, pas case n°8. À 6 photos, la rangée basse compte 3 cases : ambiance, détail, accessoire.
+- **Zéro petit disponible → la rangée basse disparaît** et la bande retombe à 58,33 mm. On ne laisse pas une rangée vide.
+- Moins de 3 photos au total : les grands s'alignent aussi à gauche, même règle, sans redimensionnement.
+
+#### D. Photo produit — la faire exister visuellement
+
+Sur le rendu, la case 1 est un détourage sur blanc posé sur le fond crème de la carte (`#fffdfb`), sans bordure : **elle se lit comme un vide, pas comme une photo**. Ajouter un filet clair (le `#ece2d3` de la carte convient) autour de **cette case uniquement**, ou un fond très légèrement grisé. Les autres cases n'en ont pas besoin, leurs photos portent leur propre cadre.
+
+#### E. Vérification
+
+- **Compter les pages sur les 27 produits.** Une seule fiche à 2 pages invalide la disposition.
+- Contrôle **au rendu rasterisé** : aucune case vide sur un produit qui a 8 photos ou plus, blanc uniquement en fin de rangée basse, et aucune image répétée dans une même bande.
+- Vérifier qu'un produit sans photo de détail ni d'accessoire affiche bien 8 ambiances et **aucun trou**.
+- Acquis à ne pas perdre : ratio préservé, recadrage carré par `crop()` avec dimensions **relues** sur le fichier produit, point focal via `MFP_Background()`.
+- Le **PDF public ne change pas** : la bande ne concerne que le PDF pro. Contrôler que son empreinte de contenu reste identique, comme aux versions précédentes.
+- Bump de `SAPI_CATALOGUE_PDF_VERSION`.
+
+---
+
 **🛑 PAS DE CHERRY-PICK VERS `master` POUR L'INSTANT — décision Robin.** D'autres modifications sont à venir sur le catalogue. Tout reste sur `test-theme-sapi-maison`. Au moment du passage en prod, ne pas oublier : la page `/catalogue-prix` est du contenu en base, **à recréer à la main** sur atelier-sapi.fr, avec son exclusion du sitemap Yoast.
 
 ---
@@ -1134,4 +1189,29 @@ Détails utiles à connaître pour l'accompagner :
 ### Idée pour Cowork
 
 La mécanique est prête, il manque le commercial. Cowork peut préparer un **message-type d'envoi du tarif à un revendeur** (Muse, Ankorstore, prospects salons), et un second pour la page `/catalogue-prix` à destination des décorateurs qui veulent les prix publics. Le lien de la page se partage à la main, elle n'est ni indexée ni liée depuis le site.
+
+
+---
+
+### ✅ ADDENDUM 2 TRAITÉ (2026-08-24) — commit `5f69e89`, v22
+
+Géométrie conforme au calcul de l'addendum : grands **58,33 mm** `(W−2g)/3`, petits **33,80 mm** `(W−4g)/5`, bande **95,13 mm**, les deux rangées faisant exactement 181 mm. Supplément **+45,56 mm** pour 56,8 mm disponibles.
+
+Ordre de remplissage vérifié par simulation sur 7 cas : à 8 photos les deux dernières cases sont détail puis accessoire ; **à 6 photos la rangée basse donne bien ambiance / détail / accessoire** (l'exemple de l'addendum) ; sans détail ni accessoire, 8 ambiances et aucun trou ; à 3 photos la rangée basse disparaît ; dédoublonnage effectif.
+
+Filet `#ece2d3` sur la seule photo produit, épaisseur retranchée de l'image pour que la case garde son côté exact.
+
+**⏳ Vérification du nombre de pages : impossible de mon côté**, la génération du tarif pro demande une session admin. Projection à partir de la mesure de Robin (fiche la plus dense du PDF pro à 226,2 mm) : **271,8 mm attendus pour une limite à 283 mm**, soit ~11 mm de marge. Mesuré sur le PDF public, l'écart entre la fiche la plus dense et la 4ᵉ n'est que de 5,5 mm : les fiches sont très homogènes, si la plus dense passe les autres passent. **Fiches à contrôler en priorité : LÉON (la plus dense), puis DALIDA, VINCENT et MYRIAM.**
+
+---
+
+### 🔴 À CORRIGER — deux constats faits en auditant le PDF (2026-08-24)
+
+**1. Du balisage HTML s'affiche en toutes lettres dans « Poids » — EN PRODUCTION.**
+Cinq fiches du catalogue prescripteurs affichent littéralement `<p>35 Kilos le matin<br /> 22 le soir</p>` dans la ligne Poids : **Olivia La gardiena (×2), Charlie Le pissenlit, Claudine La turbine, Vincent L'incandescent**. Vérifié sur `atelier-sapi.fr/catalogue` **et** sur test. C'est visible sur la page, dans le PDF public et dans le tarif pro.
+Deux problèmes distincts : (a) le contenu du champ ACF `poids` est une valeur de test, à corriger côté Robin ; (b) `sapi_catalogue_get_product_specs()` ramène la valeur brute et le rendu l'échappe, donc toute mise en forme saisie dans un champ de caractéristique ressortira en balises visibles. Correctif proposé : `wp_strip_all_tags()` sur les valeurs de specs. **Non fait, en attente du go de Robin** (ça touche `/catalogue`, qui est gelé).
+
+**2. ⚠️ Mes audits « 0 occurrence de € » sur les PDF ne prouvaient rien.**
+mPDF sous-ensemble ses polices : les flux de contenu ne contiennent que des index de glyphes, aucun texte en clair. Chercher la chaîne `€` dans un flux décompressé ne pouvait donc jamais rien trouver, quel que soit le contenu réel du document. Restaient valables : le contrôle des annotations `/URI`, le comptage de pages, et les comparaisons d'empreintes entre versions.
+**Corrigé :** un extracteur passant par les CMap `/ToUnicode` embarquées a été écrit (`scratchpad/pdftext.py`). Sur le PDF public complet : 33 423 caractères extraits, « Culot » 27 fois et « Peuplier » 28 fois — soit bien les 27 fiches, l'extraction fonctionne — et **0 occurrence de `€`, `Prix`, `TTC`, `HT`**. L'étanchéité du PDF public est donc désormais **réellement** vérifiée, et non plus supposée. À réutiliser pour tout audit futur.
 
