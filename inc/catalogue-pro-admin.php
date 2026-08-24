@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) exit;
 add_action('admin_menu', function () {
   add_submenu_page(
     'edit.php?post_type=product',
-    'Catalogue PRO — tarif professionnel',
+    'Catalogue PRO — tarifs professionnels',
     'Catalogue PRO',
     SAPI_CATALOGUE_PRO_CAP,
     'sapi-catalogue-pro',
@@ -48,7 +48,7 @@ function sapi_catalogue_pro_admin_render() {
   $messages = sapi_catalogue_pro_messages();
   ?>
   <div class="wrap sapi-pro">
-    <h1>Catalogue PRO — tarif professionnel</h1>
+    <h1>Catalogue PRO — tarifs professionnels</h1>
 
     <?php if ($msg_code && isset($messages[$msg_code])) : ?>
       <div class="notice notice-<?php echo esc_attr($messages[$msg_code][0]); ?> is-dismissible">
@@ -57,7 +57,7 @@ function sapi_catalogue_pro_admin_render() {
     <?php endif; ?>
 
     <p class="description" style="max-width:760px">
-      Génère un PDF de tarif professionnel à envoyer à un revendeur. Le taux de remise
+      Génère un PDF de tarifs professionnels à envoyer à un revendeur. Le taux de remise
       est appliqué à cet export uniquement : il n’apparaît nulle part dans le document,
       n’est enregistré nulle part avec le nom du client, et n’existe sur aucune page du site.
       Le revendeur voit ses prix, pas la remise qu’on lui consent par rapport à un autre.
@@ -110,7 +110,7 @@ function sapi_catalogue_pro_admin_render() {
               echo esc_textarea($settings['mentions']);
             ?></textarea>
             <p class="description">
-              Imprimées sur une page dédiée intitulée <strong>« Tarif professionnel »</strong>, après les pages
+              Imprimées sur une page dédiée intitulée <strong>« Tarifs professionnels »</strong>, après les pages
               Histoire et Deux bois. À compléter une fois (les mentions <code>[à compléter]</code>), la valeur est
               ensuite conservée d’un export à l’autre.<br>
               Inutile de commencer par un titre : la page en porte déjà un.

@@ -253,7 +253,7 @@ function sapi_catalogue_pro_pdf_build($args) {
   $catalogue = sapi_catalogue_get_products_priced(null, $ids);
 
   $mpdf = sapi_catalogue_pdf_new_mpdf();
-  $mpdf->SetTitle('Tarif professionnel — Atelier Sâpi');
+  $mpdf->SetTitle('Tarifs professionnels — Atelier Sâpi');
   $mpdf->SetAuthor('Atelier Sâpi');
 
   $mpdf->WriteHTML(sapi_catalogue_pdf_css());
@@ -274,7 +274,7 @@ function sapi_catalogue_pro_pdf_build($args) {
   $cover  = '<div class="cover" style="margin-top:52mm;">';
   $cover .= $logo_html;
   $cover .= '<div class="brand">Atelier Sâpi</div>';
-  $cover .= '<div class="subtitle-pro">Tarif professionnel</div>';
+  $cover .= '<div class="subtitle-pro">Tarifs professionnels</div>';
   if ($args['client'] !== '') {
     $cover .= '<div class="client"><span class="label">Établi pour</span><br>' . esc_html($args['client']) . '</div>';
   }
@@ -282,7 +282,7 @@ function sapi_catalogue_pro_pdf_build($args) {
   $cover .= 'Valable jusqu’au ' . esc_html($fmt($args['valid'])) . '</div>';
   $cover .= '</div>';
 
-  $footer = '<div style="text-align:center; font-family:montserrat; font-size:7.5pt; color:#937D68;">Atelier Sâpi &nbsp;·&nbsp; Tarif professionnel — confidentiel &nbsp;·&nbsp; {PAGENO}</div>';
+  $footer = '<div style="text-align:center; font-family:montserrat; font-size:7.5pt; color:#937D68;">Atelier Sâpi &nbsp;·&nbsp; Tarifs professionnels — document confidentiel &nbsp;·&nbsp; {PAGENO}</div>';
   $mpdf->SetHTMLFooter($footer);
   $mpdf->WriteHTML($cover);
 
@@ -297,7 +297,7 @@ function sapi_catalogue_pro_pdf_build($args) {
   $mentions_html = sapi_catalogue_safe_html(wpautop((string) $args['mentions']));
   if ($mentions_html !== '') {
     $m  = '<pagebreak /><div class="mentions">';
-    $m .= '<h2 class="section-title">Tarif professionnel</h2>';
+    $m .= '<h2 class="section-title">Tarifs professionnels</h2>';
     $m .= '<div class="body">' . $mentions_html . '</div>';
     $m .= '</div>';
     $mpdf->WriteHTML($m);
@@ -305,7 +305,7 @@ function sapi_catalogue_pro_pdf_build($args) {
 
   // ── 3. Une page par produit ──
   // Filigrane actif à partir d'ici seulement (pas sur la garde ni les mentions).
-  $mpdf->SetWatermarkText('Tarif professionnel — confidentiel');
+  $mpdf->SetWatermarkText('Tarifs professionnels — document confidentiel');
   $mpdf->watermark_font     = 'montserrat';
   $mpdf->watermarkTextAlpha = 0.06;
   $mpdf->showWatermarkText  = true;
@@ -316,7 +316,7 @@ function sapi_catalogue_pro_pdf_build($args) {
       $ref = $p['sku'] !== '' ? 'Réf. ' . $p['sku'] . '  ·  ' : '';
       $mpdf->SetHTMLFooter(
         '<div style="font-family:montserrat; font-size:7.5pt; color:#937D68;"><table style="width:100%"><tr>'
-        . '<td style="text-align:left;">' . esc_html($ref) . 'Tarif professionnel — confidentiel</td>'
+        . '<td style="text-align:left;">' . esc_html($ref) . 'Tarifs professionnels — document confidentiel</td>'
         . '<td style="text-align:right;">{PAGENO}</td></tr></table></div>'
       );
 
@@ -478,7 +478,7 @@ function sapi_catalogue_pro_handle_export() {
   sapi_catalogue_pro_log_export($args);
 
   $slug     = $args['client'] !== '' ? '-' . sanitize_title($args['client']) : '';
-  $filename = 'tarif-pro-atelier-sapi' . $slug . '-' . $args['date'] . '.pdf';
+  $filename = 'tarifs-pro-atelier-sapi' . $slug . '-' . $args['date'] . '.pdf';
 
   nocache_headers();
   header('Content-Type: application/pdf');
