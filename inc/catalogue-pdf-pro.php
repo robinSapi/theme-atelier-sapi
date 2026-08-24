@@ -220,8 +220,15 @@ function sapi_catalogue_pro_pdf_css() {
     .mentions .body p { margin: 0 0 2.2mm; }
 
     /* Tableau de prix pleine largeur, sous les vignettes, avant les caractéristiques */
-    .pro-prices { width: 100%; border-collapse: collapse; margin: 1mm 0 0; }
-    .pro-prices caption { font-family: montserrat; font-weight: bold; font-size: 8pt; text-transform: uppercase; letter-spacing: 1px; color: #E35B24; text-align: left; padding-bottom: 1mm; }
+    /* margin-top = le petit espace qui detache le tarif de la description qui
+       le precede desormais. Pas de filet : une respiration, pas une coupure. */
+    .pro-prices { width: 100%; border-collapse: collapse; margin: 3.5mm 0 0; }
+    /* ⚠️ Ce titre doit etre TYPOGRAPHIQUEMENT IDENTIQUE aux titres de section de
+       la fiche technique (.spec-block .sec dans sapi_catalogue_pdf_css). Les
+       declarations sont recopiees a l identique, et non heritees : mPDF gere mal
+       les selecteurs descendants, on ne peut pas reutiliser la classe .sec ici.
+       Toute retouche de .spec-block .sec doit etre repercutee ligne a ligne. */
+    .pro-prices caption { font-family: montserrat; font-weight: bold; font-size: 8pt; text-transform: uppercase; letter-spacing: .5px; color: #E35B24; text-align: left; padding: 0.4mm 0; }
     .pro-prices th.h { font-family: montserrat; font-weight: bold; font-size: 7pt; text-transform: uppercase; letter-spacing: .5px; color: #937D68; border-bottom: 0.35mm solid #ece2d3; padding: 1mm 1.5mm; text-align: left; }
     .pro-prices th.h.num, .pro-prices td.num { text-align: right; }
     .pro-prices td { font-size: 8pt; color: #323232; border-bottom: 0.2mm solid #efe7da; padding: 1mm 1.5mm; }
@@ -322,10 +329,11 @@ function sapi_catalogue_pro_pdf_build($args) {
 
       // Même gabarit que le PDF public (en-tête, description, caractéristiques),
       // avec deux différences propres au tarif : la bande de 3 photos à hauteur
-      // fixe, et le tableau de prix inséré juste après elle.
+      // fixe, et le tableau de prix inséré après la description — on présente
+      // l'objet, puis on le chiffre.
       $mpdf->WriteHTML(sapi_catalogue_pdf_product_card_html($p, $block['label'], [
-        'photos'       => 'band',
-        'after_photos' => sapi_catalogue_pro_price_table_html($p['pricing'], $rate),
+        'photos'            => 'band',
+        'after_description' => sapi_catalogue_pro_price_table_html($p['pricing'], $rate),
       ]));
     }
   }
@@ -347,8 +355,9 @@ function sapi_catalogue_pro_pdf_build($args) {
 function sapi_catalogue_pro_price_table_html($pricing, $rate) {
   if (empty($pricing['rows'])) return '';
 
-  $html  = '<div class="specs-rule"></div>';
-  $html .= '<table class="pro-prices"><caption>Tarif</caption><tr>';
+  // Pas de filet en tête : le tableau est séparé de la description par la seule
+  // marge haute de .pro-prices (cf. CSS), comme demandé.
+  $html  = '<table class="pro-prices"><caption>Tarif</caption><tr>';
   $html .= '<th class="h">Variation</th>';
   $html .= '<th class="h num">Prix pro HT</th>';
   $html .= '<th class="h num">PVP conseillé TTC</th>';

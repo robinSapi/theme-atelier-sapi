@@ -21,8 +21,10 @@ if (!defined('ABSPATH')) exit;
 //                    hauteur fixe côté pro. Le rendu des DEUX PDF change.
 // v17 (2026-08-24) : marge basse remontée de 12 à 14 mm — à 12, le pied de page
 //                    se posait à 2,7 mm du bord, sous la zone non imprimable.
+// v18 (2026-08-24) : PDF pro — description AVANT le tableau de prix, et titre
+//                    « Tarif » aligné sur les titres de section de la fiche.
 // La constante entre dans la clé de cache des DEUX générateurs, public et pro.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '17');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '18');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
@@ -410,15 +412,17 @@ function sapi_catalogue_pdf_bois_html($f) {
  * @param array  $p         produit normalisé (sapi_catalogue_normalize_product)
  * @param string $cat_label libellé de catégorie affiché en haut à droite
  * @param array  $args {
- *   @type string $photos       'hero' = grande photo + vignettes (PDF public),
- *                              'band' = bande de 3 photos à hauteur fixe (pro)
- *   @type string $after_photos HTML inséré juste après le bloc photo
- *                              (tableau de prix du tarif pro)
+ *   @type string $photos            'hero' = grande photo + vignettes (public),
+ *                                   'band' = bande de 3 photos à hauteur fixe (pro)
+ *   @type string $after_description HTML inséré APRÈS la description et AVANT les
+ *                                   caractéristiques (tableau de prix du tarif
+ *                                   pro). La description passe donc en premier :
+ *                                   on présente l'objet, puis on le chiffre.
  * }
  * @return string HTML, saut de page inclus
  */
 function sapi_catalogue_pdf_product_card_html($p, $cat_label, $args = []) {
-  $args = array_merge(['photos' => 'hero', 'after_photos' => ''], $args);
+  $args = array_merge(['photos' => 'hero', 'after_description' => ''], $args);
 
   // ── Caractéristiques en 2 colonnes, équilibrées par nombre de lignes ──
   $sections = !empty($p['specs']) ? $p['specs'] : [];
@@ -463,13 +467,14 @@ function sapi_catalogue_pdf_product_card_html($p, $cat_label, $args = []) {
     }
   }
 
-  // Tableau de prix (tarif pro uniquement — chaîne vide côté public)
-  $html .= $args['after_photos'];
-
   // Description (essences + tailles vivent dans le tableau caractéristiques)
   if ($p['description'] !== '') {
     $html .= '<div class="prod-desc">' . wpautop($p['description']) . '</div>';
   }
+
+  // Tableau de prix (tarif pro uniquement — chaîne vide côté public), après la
+  // description et avant les caractéristiques.
+  $html .= $args['after_description'];
 
   if ($sections) {
     $html .= '<div class="specs-rule"></div>';
