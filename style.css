@@ -25324,10 +25324,25 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     position: relative;
     top: auto;
     bottom: auto;
-    -webkit-box-flex: 0;
-    -ms-flex: 0 1 auto;
-    flex: 0 1 auto;
+    /* La zone 1 prend LE RESTE, une fois le carrousel servi (cf. zone 3).
+       C'est la demande de Robin : le carrousel garde une hauteur constante,
+       c'est le texte qui absorbe la variation. */
+    -webkit-box-flex: 1;
+    -ms-flex: 1 1 0px;
+    flex: 1 1 0;
     min-height: 0;
+    /* ⚠️ LARGEUR BRIDÉE À 82 % — PAS COSMÉTIQUE.
+       Le bloc est agrandi de 22 % au repos (scale ci-dessous) depuis son
+       centre : à pleine largeur, il débordait de 11 % de chaque côté et la
+       pill comme le bouton sortaient de l'écran. 82 % × 1,22 = 100 %.
+       ⇦ CES DEUX NOMBRES DOIVENT RESTER EN PHASE : si le .22 du scale change,
+       cette largeur change (largeur = 100 / échelle). Une largeur en % est
+       constante, donc aucun recalcul pendant le scroll — c'est pour ça qu'on
+       bride la largeur plutôt que d'interpoler un padding. */
+    width: 82%;
+    max-width: 82%;
+    padding-left: 0;
+    padding-right: 0;
     /* ÉCRAN A → B : ce n'est PAS une autre mise en page. C'est le même bloc,
        agrandi et redescendu au repos, pendant que le carrousel est invisible.
        Agrandir et déplacer ne coûtent aucun recalcul.
@@ -25355,22 +25370,24 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     overflow: hidden;
   }
 
-  /* ── ZONE 3 — la sélection. Elle ABSORBE ce qui reste. ─────────────────
-     ⚠️ `flex: 1 1 0`, PAS `1 1 auto`. Avec une base `auto`, la hauteur de la
-     zone dépendrait encore de son CONTENU : pendant les ~220 ms où
-     swapCards() vide le slider au moment 2, la base changerait et la zone 1
-     bougerait. Base `0` = « exactement ce qui reste », quoi qu'elle contienne.
-     C'est la vraie expression de « la zone 3 absorbe ».
-     ⇦ min-height = « part minimale garantie au carrousel ». C'est ce plancher
-     qui fait céder le TEXTE en premier plutôt que les cards (décision Robin) :
-     la zone 3 ne pouvant pas descendre en dessous, c'est la zone 1 qui donne. */
+  /* ── ZONE 3 — le carrousel : HAUTEUR CONSTANTE ────────────────────────
+     Demande de Robin (recette du 25/08) : « pourquoi c'est la hauteur du
+     carrousel qui dépend de la longueur du texte et pas l'inverse ? »
+     Il a raison, et c'est cohérent avec son propre arbitrage (« le texte
+     cède ») : la zone 3 est SERVIE EN PREMIER, à hauteur fixe, et la zone 1
+     prend ce qui reste. Un conseil long ne rapetisse plus les photos — il se
+     réduit puis se coupe, lui.
+     ⇦ --imm-selection-h = LE réglage de ce bloc : « quelle part de l'écran
+     revient au carrousel ». En svh, donc constant : aucun recalcul quand la
+     barre d'adresse bouge. L'augmenter réduit d'autant la place du texte. */
   .mescreations-immersion__selection {
     position: relative;
     bottom: auto;
-    -webkit-box-flex: 1;
-    -ms-flex: 1 1 0px;
-    flex: 1 1 0;
-    min-height: 190px;
+    --imm-selection-h: 40svh;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto;
+    height: var(--imm-selection-h);
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -25378,13 +25395,73 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     -webkit-box-direction: normal;
     -ms-flex-direction: column;
     flex-direction: column;
+    /* Air entre le bouton « Décrire mon projet » et le titre de la sélection —
+       ils se touchaient presque (retour Robin). */
+    padding-top: clamp(10px, 2.4svh, 24px);
   }
-  .mescreations-immersion__selection-head { -ms-flex: 0 0 auto; flex: 0 0 auto; }
+  .mescreations-immersion__selection-head {
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto;
+    margin-bottom: clamp(6px, 1.2svh, 14px);
+  }
   .mescreations-immersion__slider-wrap {
     -webkit-box-flex: 1;
     -ms-flex: 1 1 auto;
     flex: 1 1 auto;
     min-height: 0;
+    /* Les cards remplissent la zone au lieu d'être centrées dedans : c'est ce
+       qui creusait un vide au-dessus ET en dessous du carrousel (retour Robin,
+       point C). Les flèches sont en absolu en mobile, elles ne s'étirent pas. */
+    -webkit-box-align: stretch;
+    -ms-flex-align: stretch;
+    align-items: stretch;
+  }
+  .mescreations-immersion__slider { height: 100%; }
+
+  /* ── La card remplit sa zone : la PHOTO absorbe, le texte garde sa taille ──
+     Le markup réel est .product-card-cinetique > a.product-card-link > (media,
+     info, actions) — le lien intermédiaire doit être rendu flex lui aussi,
+     sinon la chaîne de hauteurs est rompue et rien ne se passe.
+     Ces règles NEUTRALISENT les hauteurs `product-media` en vh (30 / 23 / 17)
+     des blocs au-dessus, qui restent en place pour le desktop.
+     ⚠️ TOUT est préfixé .mescreations-immersion__slider : .product-card-cinetique
+     est partagé avec /nos-creations/ et le catalogue sous ce hero. */
+  .mescreations-immersion__slider .product-card-cinetique {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    height: 100%;
+  }
+  .mescreations-immersion__slider .product-card-link {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-flex: 1;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .mescreations-immersion__slider .product-card-cinetique .product-media {
+    -webkit-box-flex: 1;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    height: auto;
+    aspect-ratio: auto;
+    min-height: 70px; /* ⇦ plancher de la photo : en dessous, la card déborde */
+  }
+  .mescreations-immersion__slider .product-info,
+  .mescreations-immersion__slider .product-actions {
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto;
   }
 
   /* ── ZONE 2 — l'indice, en bas, hauteur RÉSERVÉE ──────────────────────

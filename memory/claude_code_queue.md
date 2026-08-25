@@ -403,6 +403,23 @@ Le premier jet du portage annonçait « supprimer les 4 ancrages `bottom` et les
 
 **Reste à vérifier en recette, non vérifiable machine :** le `padding-top: 64px` contre la hauteur réelle du header en état `.is-scrolled` (la pill peut passer dessous) ; le `backdrop-filter` du bouton à l'intérieur d'un ancêtre promu (le backdrop peut se vider) ; et bien sûr la fluidité du pinning.
 
+### ✅ RECETTE LOT A — VALIDÉE PAR ROBIN + 3 retours traités (2026-08-25)
+
+**Les 5 points de contrôle passent :** fluidité « parfaite », **plus aucun chevauchement**, pill sous le header OK, bouton inchangé, desktop sans changement. **Le modèle à zones tient.**
+
+**A — Le bloc texte débordait en largeur en écran A.** Cause : le bloc est agrandi de 22 % depuis son centre ; à pleine largeur il sortait de 11 % de chaque côté (pill et bouton coupés). Corrigé par `width: 82%` (= 100 / 1,22). ⚠️ **Les deux nombres doivent rester en phase** — c'est écrit dans le CSS. Une largeur en % est constante → aucun recalcul pendant le scroll, contrairement à un padding interpolé.
+
+**B — « Pourquoi c'est la hauteur du carrousel qui dépend du texte et pas l'inverse ? »** Robin a raison, et c'était incohérent avec son propre arbitrage. **Inversé :** la zone 3 est désormais **servie en premier, à hauteur fixe** (`--imm-selection-h: 40svh`, en svh donc constante) et la zone 1 prend le reste. Un conseil long ne rapetisse plus les photos — c'est lui qui se réduit puis se coupe. `--imm-selection-h` devient LE réglage du bloc : « quelle part de l'écran revient au carrousel ».
+
+**C — Titre « Ma sélection » trop collé au-dessus, trop loin des cards.** Deux causes distinctes :
+- trop collé au bouton → `padding-top` sur la zone 3 ;
+- trop loin des cards → **les cards ne remplissaient pas leur zone** : `.mescreations-immersion__slider-wrap` est en `align-items: center` (règle de base), donc le slider était centré et gardait la hauteur intrinsèque des cards, creusant un vide au-dessus ET en dessous.
+→ **Le cœur du LOT B a été avancé ici**, parce que C n'était pas corrigeable sans lui : `align-items: stretch`, slider en `height: 100%`, et la chaîne de hauteurs de la card (`.product-card-cinetique` **et** `a.product-card-link` en flex-colonne, `product-media` en `flex: 1 1 auto` avec plancher 70px, `product-info`/`product-actions` en `flex: 0 0 auto`). ⚠️ **Le lien intermédiaire est indispensable** : sans lui la chaîne est rompue et rien ne se passe. Les hauteurs `vh` de base restent en place pour le desktop, elles sont neutralisées ici.
+
+**Vérifié machine :** accolades 3876/3876, aucune règle de card non préfixée dans le nouveau bloc (zéro fuite vers `/nos-creations/`), les 4 hauteurs `vh` de base toujours présentes.
+
+**Reste du LOT B :** plancher sur `.mescreations-immersion__pcard--sur` (la card la plus haute du slider, en px fixes, sans plancher — c'est elle qui casse en premier).
+
 ---
 
 ## LOT A — Le socle : les trois zones en flux (mobile portrait) — spécification
