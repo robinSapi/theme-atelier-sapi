@@ -530,7 +530,29 @@ Robin, après validation du mobile : « en desktop, il faut qu'on augmente la ha
 **⚠️ ARBITRAGE À CONNAÎTRE — ces trois demandes COÛTENT de la hauteur.** Plus de marges (+20px) et des dots (+24px) se prennent sur la photo, puisque le carrousel absorbe l'espace restant. Compensé en partie par la phrase élargie et par la bande d'indice resserrée (42+24 → 34+14), mais le solde reste négatif : **photo ~199px contre 243px** dans la version que Robin venait de valider.
 **Le levier pour revenir à ~239px : masquer le bouton « Découvrir » en desktop aussi**, comme en mobile — `product-actions` est à l'intérieur du `<a>` qui enveloppe toute la card, donc cliquer n'importe où ouvre déjà la fiche. Une ligne. **Robin a tranché : on garde le bouton en desktop, les ~199px lui conviennent.**
 
-**Mobile — carrousel réduit après le retour des dots (décision Robin).** Les dots ajoutaient ~24px au bloc et le carrousel paraissait trop haut. Ratio de la photo `3 / 4` → **`4 / 5`** : photo 395 → 370px, bloc 529 → 504px, air 53 → 66px de chaque côté. Un cran de ratio rend exactement ce que les dots prennent — et c'est un réglage qui se juge à l'œil, pas un pixel à deviner.
+**Mobile — carrousel réduit après le retour des dots (décision Robin).** Les dots ajoutaient ~24px au bloc et le carrousel paraissait trop haut. Ratio de la photo `3 / 4` → `4 / 5` : photo 395 → 370px, air 53 → 66px de chaque côté.
+
+### ✅ MOBILE — la hauteur des cards dépend maintenant AUSSI de la hauteur d'écran
+
+Question de Robin, puis constat : « en mobile, il faudrait que la hauteur des cartes dépende aussi de la hauteur de l'écran, non ? » Il avait raison — la hauteur ne venait que de la **largeur** (via le rapport de forme), donc sur un téléphone plus haut l'espace en trop devenait de l'air au lieu d'agrandir la photo. En desktop, à l'inverse, le carrousel absorbait déjà l'espace restant.
+
+**On ne pouvait pas simplement faire remplir la card comme en desktop** : c'est exactement ce qui produit la bande verticale étirée (une vue de pièce recadrée en fente, luminaire hors cadre) — le cadrage écarté plus haut dans ce chantier.
+
+**Solution : `height: clamp(60px, 49svh, 101vw)` sur la photo.**
+- `49svh` = la taille voulue, proportionnelle à la **hauteur** d'écran (= les 370px actuels sur un iPhone de 752). **C'est LE chiffre à toucher** pour agrandir ou réduire les cards en mobile.
+- `101vw` = **plafond de FORME**, calculé depuis la largeur de card (76vw × 4/3) : la photo ne peut jamais dépasser un format 3/4. ⚠️ **Lié au 76vw** — si la largeur de card change, ce plafond doit suivre.
+- `60px` = plancher absolu.
+
+**Comportement mesuré :**
+
+| appareil | photo | forme | ce qui décide |
+|---|---|---|---|
+| iPhone 14 (390×752) | 368px | 0,80 | la hauteur |
+| iPhone Pro Max (430×838) | 411px | 0,80 | la hauteur |
+| iPhone SE (375×618) | 303px | 0,94 | la hauteur |
+| Android haut (360×900) | 364px | 0,75 | le **plafond de forme** |
+
+Sur l'appareil de Robin, rien ne change (368 ≈ 370). Le gain est sur les grands téléphones ; le garde-fou joue sur les écrans étroits et hauts, où la photo se serait déformée.
 
 ---
 

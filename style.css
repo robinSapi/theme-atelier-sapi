@@ -25600,28 +25600,47 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     height: auto;
     max-height: 100%;
   }
-  /* ⇦ LE RÉGLAGE DE LA TAILLE DES CARDS EN MOBILE : le RAPPORT DE FORME de la
-     photo. `4 / 5` = largeur / hauteur, donc la photo est un quart plus haute
-     que large : ~370px pour une card de 296. C'est lui qui décide de la
-     hauteur de toute la card, et donc du centrage du bloc.
-     Passé de `3 / 4` à `4 / 5` quand les dots sont revenus (retour Robin) :
-     ils ajoutaient ~24px au bloc et le carrousel paraissait trop haut. Un
-     ratio un cran plus court rend exactement ce qu'ils prennent.
+  /* ⇦ LE RÉGLAGE DE LA TAILLE DES CARDS EN MOBILE, et le seul.
+     La hauteur de la photo dépend de la HAUTEUR de l'écran (`49svh`), bornée
+     par sa LARGEUR (`101vw`) — les trois valeurs du `clamp()` se lisent ainsi :
+
+       clamp(  60px  ,  49svh  ,  101vw  )
+              ↑         ↑          ↑
+              |         |          └─ PLAFOND DE FORME. La card fait 76vw de
+              |         |             large ; 76 × 4/3 = 101, donc la photo ne
+              |         |             peut jamais devenir plus haute qu'un
+              |         |             format 3/4. Sans ce plafond, un écran
+              |         |             étroit et haut la transformerait en bande
+              |         |             verticale : une vue de pièce y serait
+              |         |             recadrée en fente et le luminaire
+              |         |             sortirait du cadre.
+              |         └─ LA TAILLE VOULUE. 49 % de la hauteur d'écran = les
+              |            370px actuels sur un iPhone de 752. C'est CE chiffre
+              |            qu'on touche pour agrandir ou réduire les cards.
+              └─ Plancher absolu, pour que la photo ne disparaisse jamais.
+
+     Demande de Robin : « en mobile, il faudrait que la hauteur des cartes
+     dépende aussi de la hauteur de l'écran ». C'était le cas en desktop
+     (le carrousel y absorbe l'espace restant) mais pas en mobile, où la
+     hauteur ne venait que de la largeur via un rapport de forme — sur un
+     téléphone plus haut, l'espace en trop devenait de l'air.
+     On ne pouvait pas pour autant faire remplir la card comme en desktop :
+     c'est justement ce qui produit la bande verticale. D'où le plafond.
+
      Pourquoi pas un carré (décision Robin, après calcul) : une photo carrée ne
      peut pas être plus haute que la card n'est LARGE, et la largeur est
      plafonnée par l'écran — elle serait plus PETITE qu'avant. Photo carrée +
      grande + aperçu de la card suivante : il faut en abandonner un des trois.
-     Un ratio rend de la hauteur sans toucher à la largeur, donc sans manger
-     l'aperçu.
-     `flex: 0 1 auto` + `min-height` : sur un écran trop court, c'est la photo
-     qui cède sur sa hauteur (le ratio n'est plus tenu) plutôt que la card qui
-     déborde. Le prix et le nom restent toujours visibles. */
+     ⚠️ `101vw` est LIÉ au `76vw` de la largeur de card : si l'un change,
+     l'autre doit suivre (largeur × 4/3).
+     `flex: 0 1 auto` + `min-height` : filet ultime sur écran très court, la
+     photo cède avant que la card ne déborde. Nom et prix restent visibles. */
   .mescreations-immersion__slider .product-card-cinetique .product-media {
     -webkit-box-flex: 0;
     -ms-flex: 0 1 auto;
     flex: 0 1 auto;
-    height: auto;
-    aspect-ratio: 4 / 5;
+    aspect-ratio: auto;
+    height: clamp(60px, 49svh, 101vw);
     min-height: 60px;
   }
   /* ── Carrousel PLEINE LARGEUR, card active CENTRÉE (retour Robin) ──────
