@@ -24757,9 +24757,20 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
    passant les zones du hero en flux. Ne PAS tenter de compenser ici.
 
    `dvh` se recalcule pendant le scroll : seuls des éléments en position absolue
-   en dépendent (indices + bloc sélection), pas la mise en page du hero. */
-@supports (height: 100dvh) {
-  .mescreations-immersion { --safe-bottom: calc(100vh - 100dvh); }
+   en dépendent (indices + bloc sélection), pas la mise en page du hero.
+
+   ⚠️ DÉCLARÉE SOUS `min-width: 769px` DEPUIS LE MODÈLE À ZONES (25/08). En
+   mobile, le décalage est porté par la couche de contenu, en UNE transform sur
+   UN élément. Garder `--safe-bottom` en mobile coûterait cher pour rien : une
+   custom property qui change invalide le style de TOUT le sous-arbre qui en
+   hérite, à chaque frame du mouvement de barre, qu'elle soit consommée ou non.
+   On la déplace plutôt que la supprimer : les 5 `bottom: calc(… + var(--safe-bottom))`
+   sont des règles de BASE, actives en desktop — les effacer y casserait la
+   mise en page (un absolu sans top ni bottom retombe en haut du hero). */
+@media (min-width: 769px) {
+  @supports (height: 100dvh) {
+    .mescreations-immersion { --safe-bottom: calc(100vh - 100dvh); }
+  }
 }
 .mescreations-immersion__bg {
   position: absolute;
@@ -24786,6 +24797,24 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   z-index: 1;
   background: linear-gradient(180deg, rgba(20,14,8,.34) 0%, rgba(20,14,8,.12) 35%, rgba(20,14,8,.50) 100%);
 }
+
+/* ── COUCHE DE CONTENU (modèle à zones) — règle de base : INVISIBLE ────────
+   `display: contents` ne génère aucune boîte : la div n'existe pas pour la
+   mise en page, et ne peut donc pas servir de bloc conteneur à un descendant
+   absolu. Les trois zones continuent de se positionner contre
+   .mescreations-immersion (sticky, donc positionnée) EXACTEMENT comme avant
+   → desktop invariant, sans qu'on touche à une seule de ses règles.
+   Le modèle à zones est activé plus bas, uniquement sous 768px.
+
+   ⚠️ Base = `contents`, mobile = override, et SURTOUT PAS l'inverse. Enfermé
+   dans un `min-width: 769px`, ce réglage disparaîtrait à la première
+   réorganisation du fichier et laisserait le desktop sans règle du tout.
+   Dans ce sens-ci, l'absence de règle dégrade vers le comportement ACTUEL,
+   donc vers le connu.
+   ⚠️ Corollaire : tout ce qu'on pose sur cette div (position, z-index,
+   transform, overflow, will-change) est IGNORÉ en desktop. Rien ne doit donc
+   être déclaré pour elle en dehors du bloc mobile. */
+.mescreations-immersion__layer { display: contents; }
 
 /* Bloc texte (pill + phrase + question) : centré, remonte au scroll (--reveal). */
 .mescreations-immersion__inner {
@@ -25211,4 +25240,169 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   .mescreations-immersion__slider .product-card-cinetique .product-media { height: 17vh; }
   .mescreations-immersion__selection { bottom: calc(6vh + var(--safe-bottom)); }
   .mescreations-immersion__describe { font-size: 12.5px; padding: 8px 18px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LOT A — MODÈLE À ZONES (mobile). Proposition de Robin, 25/08/2026.
+   ──────────────────────────────────────────────────────────────────────────
+   AVANT : les trois blocs du hero étaient PUNAISÉS indépendamment, chacun à
+   une distance du bas mesurée à la main (10vh / 8vh / 7vh / 6vh selon
+   l'écran, 24px pour l'indice). Aucun ne connaissait l'existence des autres →
+   dès que l'écran rétrécissait, deux punaises se rapprochaient jusqu'au
+   chevauchement, et rien dans le système ne pouvait l'empêcher. Les quatre
+   valeurs successives n'étaient pas quatre réglages mais quatre tentatives de
+   deviner la bonne distance.
+
+   APRÈS : les trois zones se PARTAGENT une hauteur. Deux zones qui se
+   partagent une hauteur ne peuvent pas se chevaucher — c'est structurel, ce
+   n'est plus un réglage.
+
+   ⚠️ CE BLOC DOIT RESTER LE DERNIER DU FICHIER. Les blocs @media
+   (max-height: 840px / 700px) juste au-dessus redéclarent __phrase{font-size},
+   __inner{gap} et __selection{bottom} À SPÉCIFICITÉ ÉGALE, et surtout SANS
+   borne de largeur : un petit téléphone en paysage les matche ET matche
+   `max-width: 768px`. Une media query n'ajoutant pas de spécificité, c'est le
+   plus BAS dans le fichier qui gagne. Remonté ailleurs, ce bloc serait
+   silencieusement écrasé, précisément dans le cas le plus contraint.
+
+   ⚠️ ON NEUTRALISE, ON NE SUPPRIME JAMAIS. Les `bottom:` et les hauteurs `vh`
+   des règles au-dessus sont des règles de BASE, actives en DESKTOP (recette
+   validée). `display: contents` protège le desktop de ce qu'on AJOUTE, pas de
+   ce qu'on RETIRE. Toute neutralisation se fait donc ici, par surcharge.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ── LA COUCHE : une hauteur CONSTANTE, glissée sous la barre d'adresse ──
+     `100svh` = le viewport le plus PETIT (barre déployée). C'est un budget
+     CONSTANT : les zones ne se redistribuent donc JAMAIS quand la barre bouge
+     — c'est ce qui évite que le texte se recoupe en lignes et que les photos
+     changent de taille à chaque transition (le « ça saute »).
+     `translateY(100dvh - 100svh)` fait glisser le bloc entier vers le bas à
+     mesure que la barre se rétracte, pour qu'il reste calé sur la zone
+     visible : le mouvement validé par Robin le 25/08 est conservé.
+
+     ⚠️ Cohérent avec le commentaire de `--safe-bottom` plus haut, malgré
+     l'apparence : là-bas on REMONTE depuis le bas (`100vh - 100dvh`), ici on
+     DESCEND depuis le haut (`100dvh - 100svh`). Le bord bas obtenu est le
+     même : `100dvh`. Les deux formules concordent — NE PAS « corriger ».
+
+     ⚠️ Le repli `height: 100vh` n'est pas décoratif. Si `100dvh` est inconnu,
+     seule la transform tombe → dégradation propre. Mais si `100svh` est
+     inconnu, `height` tomberait à `auto` : plus de hauteur définie, `flex: 1`
+     ne distribue plus rien, `height: 100%` des cards ne résout plus =
+     rupture DURE. Le parc WordPress voit des WebViews d'applications tierces. */
+  .mescreations-immersion__layer {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 3;
+    height: 100vh;   /* repli — voir ci-dessus */
+    height: 100svh;  /* budget constant */
+    -webkit-transform: translateY(calc(100dvh - 100svh));
+    transform: translateY(calc(100dvh - 100svh));
+    will-change: transform;
+    /* Place du header fixe : en flux, la zone 1 est POSÉE ici (elle n'est plus
+       centrée), donc sans ce padding la pill passerait sous le header opaque
+       en état .is-scrolled. ⇦ à vérifier en recette. */
+    padding-top: 64px;
+  }
+
+  /* ── ZONE 1 — pill + phrase + bouton ──────────────────────────────────
+     `flex: 0 1 auto` : elle peut RÉTRÉCIR. C'est la décision de Robin —
+     quand ça ne tient pas, c'est le texte qui cède, pas le carrousel.
+     `position: relative` (et non `static`) : les enfants absolus éventuels
+     doivent continuer de se résoudre contre leur zone, pas contre le hero. */
+  .mescreations-immersion__inner {
+    position: relative;
+    top: auto;
+    bottom: auto;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
+    min-height: 0;
+    /* ÉCRAN A → B : ce n'est PAS une autre mise en page. C'est le même bloc,
+       agrandi et redescendu au repos, pendant que le carrousel est invisible.
+       Agrandir et déplacer ne coûtent aucun recalcul.
+       ⇦ --imm-a-drop = « où est le texte au repos ». Purement esthétique tant
+       qu'il reste modeste : à --reveal 0 le carrousel est invisible, mais
+       l'INDICE, lui, est visible — donc ne pas monter ce chiffre sans vérifier
+       qu'on ne descend pas dessus sur un petit écran. */
+    --imm-a-drop: 18svh;
+    -webkit-transform: translateY(calc((1 - var(--reveal)) * var(--imm-a-drop))) scale(calc(1 + (1 - var(--reveal)) * .22));
+    transform: translateY(calc((1 - var(--reveal)) * var(--imm-a-drop))) scale(calc(1 + (1 - var(--reveal)) * .22));
+    /* Transféré sur la couche : on n'empile pas deux calques promus imbriqués. */
+    will-change: auto;
+    gap: clamp(6px, 1.4svh, 16px);
+  }
+
+  /* La phrase est dimensionnée sur la HAUTEUR d'écran, pas sur la largeur :
+     c'est la hauteur qui est la ressource rare. L'ancien clamp en `vw`
+     produisait un texte grand sur un budget nul (écran large et bas).
+     `overflow: hidden` : si un conseil démesuré arrivait, il se coupe ICI au
+     lieu de pousser les autres zones. Le fondu de coupe et la borne serveur
+     viendront au lot C. */
+  .mescreations-immersion__phrase {
+    font-size: clamp(0.95rem, 2.5svh, 1.6rem);
+    line-height: 1.3;
+    overflow: hidden;
+  }
+
+  /* ── ZONE 3 — la sélection. Elle ABSORBE ce qui reste. ─────────────────
+     ⚠️ `flex: 1 1 0`, PAS `1 1 auto`. Avec une base `auto`, la hauteur de la
+     zone dépendrait encore de son CONTENU : pendant les ~220 ms où
+     swapCards() vide le slider au moment 2, la base changerait et la zone 1
+     bougerait. Base `0` = « exactement ce qui reste », quoi qu'elle contienne.
+     C'est la vraie expression de « la zone 3 absorbe ».
+     ⇦ min-height = « part minimale garantie au carrousel ». C'est ce plancher
+     qui fait céder le TEXTE en premier plutôt que les cards (décision Robin) :
+     la zone 3 ne pouvant pas descendre en dessous, c'est la zone 1 qui donne. */
+  .mescreations-immersion__selection {
+    position: relative;
+    bottom: auto;
+    -webkit-box-flex: 1;
+    -ms-flex: 1 1 0px;
+    flex: 1 1 0;
+    min-height: 190px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+  }
+  .mescreations-immersion__selection-head { -ms-flex: 0 0 auto; flex: 0 0 auto; }
+  .mescreations-immersion__slider-wrap {
+    -webkit-box-flex: 1;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  /* ── ZONE 2 — l'indice, en bas, hauteur RÉSERVÉE ──────────────────────
+     ⚠️ `position: relative` OBLIGATOIRE (et non `static`) : les DEUX indices
+     sont en `position: absolute` à l'intérieur. En `static`, ils se
+     résoudraient contre .mescreations-immersion et repartiraient se coller au
+     bas du hero — on réintroduirait exactement le chevron coupé sous la barre
+     d'adresse, corrigé en 1ʳᵉ passe.
+     La hauteur explicite est ce qui fait que la zone RÉSERVE sa place : sans
+     elle, des enfants absolus ne mesurant rien, elle ne vaudrait que son
+     padding. */
+  .mescreations-immersion__scrollhint {
+    position: relative;
+    bottom: auto;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto;
+    height: 42px;
+    margin-bottom: 24px;
+  }
 }

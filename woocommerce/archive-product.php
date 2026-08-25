@@ -152,6 +152,30 @@ if ($imm_piece) {
        reçoit .home-repositioned-bar (sticky sous le header au scroll). Rien
        n'est rendu ici. -->
 
+  <!-- ══════════════════════════════════════════════════════════════════════
+       COUCHE DE CONTENU — modèle à zones (proposition Robin, 25/08/2026)
+       Enveloppe les TROIS zones (texte / sélection / indice) pour qu'elles se
+       PARTAGENT une hauteur, au lieu d'être punaisées chacune à une distance
+       du bas mesurée à la main. Deux zones qui se partagent une hauteur ne
+       peuvent pas se chevaucher ; trois blocs punaisés, si — c'est l'origine
+       de tous les chevauchements de la recette mobile.
+
+       ⚠️ EN DESKTOP, CETTE DIV N'EXISTE PAS. `display: contents` (règle de
+       base dans style.css) fait qu'elle ne génère aucune boîte, donc elle ne
+       peut pas être bloc conteneur d'un descendant absolu : les trois zones
+       continuent de se positionner contre .mescreations-immersion exactement
+       comme avant. Le desktop, validé en recette, est invariant. Le modèle à
+       zones n'est activé que sous 768px.
+
+       ⚠️ NE JAMAIS AJOUTER ICI de role, aria-*, tabindex ni landmark.
+       `display: contents` retire l'élément de l'arbre d'accessibilité et lui
+       vole son rôle sémantique. Sur cette div NUE l'impact est nul ; un
+       aria-label ajouté un jour disparaîtrait EN DESKTOP SEULEMENT — un bug
+       d'accessibilité asymétrique par breakpoint, invisible en recette
+       visuelle. Si un libellé est nécessaire, le mettre sur une des zones.
+       ══════════════════════════════════════════════════════════════════════ -->
+  <div class="mescreations-immersion__layer">
+
   <!-- Bloc texte (pill + phrase IA + question) : centré, remonte au scroll. -->
   <div class="mescreations-immersion__inner">
     <!-- Pill Robin V1 (composant partagé, déjà stylé) -->
@@ -224,7 +248,9 @@ if ($imm_piece) {
       <span class="mescreations-immersion__hint-label"><?php esc_html_e('Voir le catalogue complet', 'theme-sapi-maison'); ?></span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
     </span>
-  </div>
+  </div><!-- /.mescreations-immersion__scrollhint -->
+
+  </div><!-- /.mescreations-immersion__layer -->
 </section>
 </div><!-- /.mescreations-immersion-track -->
 <?php } // end état B immersion ?>

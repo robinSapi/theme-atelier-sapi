@@ -384,7 +384,28 @@ Le premier jet du portage annonçait « supprimer les 4 ancrages `bottom` et les
 
 ---
 
-## LOT A — Le socle : les trois zones en flux (mobile portrait)
+## ✅ LOT A CODÉ (2026-08-25) — en attente de recette Robin
+
+**2 fichiers.** `woocommerce/archive-product.php` (le conteneur, ouvert ET fermé) + `style.css` (règle de base `display: contents`, `--safe-bottom` déplacé sous `min-width: 769px`, nouveau bloc mobile en toute fin de fichier).
+
+**Écart assumé par rapport au découpage prévu :** le dimensionnement de la phrase en `svh` a été inclus dans le lot A, alors qu'il était prévu au lot C. Raison : sans lui, la phrase garde son `clamp()` en `vw` (22,4px sur mobile), la zone 1 mange tout le budget et le lot A serait **inévaluable** — Robin verrait des cards minuscules et conclurait à tort que le modèle échoue. La conversion de la pill et du bouton, le fondu de coupe et la borne serveur restent au lot C.
+
+**Points de vigilance intégrés au code (chacun commenté sur place) :**
+- `flex: 1 1 0` sur la zone 3 (et non `1 1 auto`) : sinon la hauteur dépendrait du contenu et la zone 1 bougerait pendant les ~220 ms où `swapCards()` vide le slider.
+- `position: relative` sur la zone 2 (et non `static`) : ses deux indices sont en absolu, en `static` ils se recolleraient au bas du hero = chevron coupé, le défaut de la 1ʳᵉ passe réintroduit.
+- Hauteur explicite sur la zone 2 : des enfants absolus ne mesurent rien, sans hauteur elle ne réserverait que son padding.
+- `min-height: 190px` sur la zone 3 : c'est ce plancher qui fait céder le TEXTE en premier plutôt que les cards (décision Robin).
+- Repli `height: 100vh` avant `100svh` : si `svh` est inconnu, `height` tomberait à `auto` = rupture dure.
+- `will-change` transféré sur la couche, retiré de `__inner` en mobile.
+- Nouveau bloc placé en **dernier** du fichier (vérifié : l. 25273, après les `max-height` l. 25231/25238).
+
+**Vérifié machine :** `<div>` du hero équilibrés (10/10), conteneur ouvert 1× et fermé 1×, accolades CSS 3871/3871, aucun commentaire non fermé, les 5 ancrages `bottom` et les hauteurs `vh` de base **toujours présents** (desktop intact).
+
+**Reste à vérifier en recette, non vérifiable machine :** le `padding-top: 64px` contre la hauteur réelle du header en état `.is-scrolled` (la pill peut passer dessous) ; le `backdrop-filter` du bouton à l'intérieur d'un ancêtre promu (le backdrop peut se vider) ; et bien sûr la fluidité du pinning.
+
+---
+
+## LOT A — Le socle : les trois zones en flux (mobile portrait) — spécification
 
 **`woocommerce/archive-product.php`** : un conteneur `.mescreations-immersion__layer` autour des trois zones existantes (`__inner`, `__selection`, `__scrollhint`), aujourd'hui frères directs. Une balise ouvrante, une fermante. **Un `<div>` NU** — voir la contrainte a11y ci-dessous.
 
