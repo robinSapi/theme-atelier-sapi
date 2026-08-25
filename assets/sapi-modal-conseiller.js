@@ -490,7 +490,12 @@
     // Immersion /mes-creations/ : dès le DÉBUT du calcul (modale encore ouverte),
     // on fait disparaître la phrase générique et on affiche le loader (3 points).
     // Le commentaire IA personnalisé la remplacera via 'sapi:advice-ready'.
-    document.dispatchEvent(new CustomEvent('sapi:advice-loading'));
+    // On porte les réponses dans le detail : l'immersion précharge SA sélection
+    // maintenant (~300ms), pendant que l'IA calcule et que l'animation de sortie
+    // se joue (~1,9s). Les deux attentes se recouvrent au lieu de s'additionner.
+    document.dispatchEvent(new CustomEvent('sapi:advice-loading', {
+      detail: { answers: state.answers || {} }
+    }));
 
     // 2. Save les réponses dans sapiProject SANS advice_text. Add la class
     //    .is-awaiting-advice sur la card AVANT le set, pour que le subscribe

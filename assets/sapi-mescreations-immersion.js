@@ -125,8 +125,16 @@
     });
     document.addEventListener('sapi:advice-ready', function (e) {
       advicePending = false;
-      if (!els.phraseContent) return;
       var advice = (e && e.detail && typeof e.detail.advice === 'string') ? e.detail.advice.trim() : '';
+      /* Révélation SIMULTANÉE (décision Robin) : la sélection a été préchargée
+         pendant le calcul IA mais volontairement PAS affichée. On la libère ici,
+         à l'instant où le conseil est prêt → le texte et les nouvelles cards
+         arrivent ensemble, jamais la sélection en avance sur le conseil.
+         Sûr par construction : fetchAdviceFromIA a un timeout de 25 s et un
+         .catch qui résout à null → cet événement est TOUJOURS émis, échec IA
+         compris. Aucun risque de sélection bloquée indéfiniment. */
+      flushPendingSelection();
+      if (!els.phraseContent) return;
       retypePhrase(advice || genericPhrase);
     });
 
@@ -212,39 +220,78 @@
        Ainsi « aucun changement » est détecté par la signature, et un changement
        de pièce (recommencer le projet) produit une signature différente → recharge. */
     var lastAnswersSig = JSON.stringify({ piece: config.piece || '' });
-    function refreshSelection(answers, sig) {
-      if (!sliderEl || !config.ajaxUrl) return;
-      // Transition douce : on fond le slider AVANT le swap (le remplacement sec
-      // des cards « flashait »). Le fetch est un aller-retour réseau, donc le
-      // fade-out (220ms) est quasi toujours terminé quand la réponse arrive →
-      // le swap se fait pendant que le slider est invisible, puis fondu d'entrée.
-      sliderEl.style.transition = 'opacity .22s ease';
-      sliderEl.style.opacity = '0';
-      var restore = function () { sliderEl.style.opacity = '1'; };
+
+    /* Le fetch et l'AFFICHAGE sont volontairement séparés. Au moment 2 on veut
+       précharger la sélection pendant que l'IA calcule (les deux attentes se
+       recouvrent) mais ne la révéler qu'avec le conseil — d'où fetch d'un côté,
+       apply de l'autre, reliés par pendingSelection. */
+    function fetchSelectionHtml(answers) {
+      if (!sliderEl || !config.ajaxUrl) return Promise.resolve(null);
       var fd = new FormData();
       fd.append('action', 'sapi_immersion_selection');
       fd.append('nonce', config.nonce || '');
       fd.append('answers', JSON.stringify(answers || {}));
-      fetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
+      return fetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
         .then(function (r) { return r.json(); })
         .then(function (json) {
-          if (!json || !json.success || !json.data || typeof json.data.html !== 'string') { restore(); return; }
-          lastAnswersSig = sig; // on ne « brûle » la signature qu'en cas de succès (retry possible si échec)
-          var sur = sliderEl.querySelector('.mescreations-immersion__pcard--sur');
-          [].slice.call(sliderEl.querySelectorAll('.product-card-cinetique')).forEach(function (c) {
-            if (c.parentNode) c.parentNode.removeChild(c);
-          });
-          var tmp = document.createElement('div');
-          tmp.innerHTML = json.data.html; // product-name-formatter (MutationObserver) reformate les noms
-          [].slice.call(tmp.querySelectorAll('.product-card-cinetique')).forEach(function (c) {
-            sliderEl.insertBefore(c, sur || null);
-          });
-          sliderEl.scrollLeft = 0;
-          updateArrows();
-          // Fondu d'entrée sur la frame suivante (le swap a eu lieu à opacité 0).
-          requestAnimationFrame(restore);
+          if (!json || !json.success || !json.data || typeof json.data.html !== 'string') return null;
+          return json.data.html;
         })
-        .catch(restore);
+        .catch(function () { return null; });
+    }
+
+    function swapCards(html) {
+      var sur = sliderEl.querySelector('.mescreations-immersion__pcard--sur');
+      [].slice.call(sliderEl.querySelectorAll('.product-card-cinetique')).forEach(function (c) {
+        if (c.parentNode) c.parentNode.removeChild(c);
+      });
+      var tmp = document.createElement('div');
+      tmp.innerHTML = html; // product-name-formatter (MutationObserver) reformate les noms
+      [].slice.call(tmp.querySelectorAll('.product-card-cinetique')).forEach(function (c) {
+        sliderEl.insertBefore(c, sur || null);
+      });
+      sliderEl.scrollLeft = 0;
+      updateArrows();
+    }
+
+    /* Transition douce : fondu de sortie → swap pendant que le slider est
+       invisible → fondu d'entrée (le remplacement sec des cards « flashait »). */
+    function applySelectionHtml(html, sig) {
+      if (!sliderEl || typeof html !== 'string') return;
+      lastAnswersSig = sig; // signature « brûlée » seulement en cas de succès (retry possible sinon)
+      sliderEl.style.transition = 'opacity .22s ease';
+      sliderEl.style.opacity = '0';
+      later(function () {
+        swapCards(html);
+        requestAnimationFrame(function () { sliderEl.style.opacity = '1'; });
+      }, 220);
+    }
+
+    /* Sélection préchargée en attente du conseil IA : { promise, sig }. */
+    var pendingSelection = null;
+    function flushPendingSelection() {
+      if (!pendingSelection) return;
+      var p = pendingSelection;
+      pendingSelection = null;
+      p.promise.then(function (html) { applySelectionHtml(html, p.sig); });
+    }
+
+    /* Questionnaire terminé : l'appel IA vient de partir et la modale est encore
+       ouverte (il reste ~1,9 s d'animation de sortie). On lance la sélection MAINTENANT
+       pour que ses ~300 ms disparaissent dans cette fenêtre : au moment où le
+       conseil arrive, les cards sont déjà prêtes et la révélation est instantanée. */
+    document.addEventListener('sapi:advice-loading', function (e) {
+      var answers = (e && e.detail && e.detail.answers) ? e.detail.answers : null;
+      if (!answers || !answers.piece) return;
+      // Pièce différente → la page sera rechargée : précharger ne servirait à rien.
+      if (answers.piece !== (config.piece || '')) return;
+      var sig = JSON.stringify(answers);
+      if (sig === lastAnswersSig) return; // identique à ce qui est déjà affiché
+      pendingSelection = { promise: fetchSelectionHtml(answers), sig: sig };
+    });
+
+    function refreshSelection(answers, sig) {
+      fetchSelectionHtml(answers).then(function (html) { applySelectionHtml(html, sig); });
     }
     /* On écoute l'événement déterministe émis par la modale à CHAQUE fermeture
        (fin ou abandon), porteur des réponses finales. Fiable contrairement au
@@ -274,16 +321,34 @@
           var reloaded = false;
           var reload = function () { if (reloaded) return; reloaded = true; go(); };
           document.addEventListener('sapi:advice-ready', reload, { once: true });
-          setTimeout(reload, 4000);
+          /* Garde-fou porté de 4 s à 26 s : on attend le conseil DANS TOUS LES CAS
+             (décision Robin). L'appel IA a lui-même un timeout de 25 s et résout
+             toujours → ce délai n'est qu'un filet ultime si l'événement se perd,
+             jamais le chemin normal. À 4 s il coupait une IA simplement lente et
+             la nouvelle page repartait sans le conseil. */
+          setTimeout(reload, 26000);
         } else {
           // Abandon (pas de commentaire IA) → rechargement immédiat.
           go();
         }
         return;
       }
-      // Même pièce, seuls les affinages changent : rechargement AJAX du slider.
+      // Même pièce, seuls les affinages changent.
       var sig = JSON.stringify(answers);
       if (sig === lastAnswersSig) return; // identique à ce qui est déjà affiché
+      /* Questionnaire TERMINÉ : la sélection a déjà été préchargée sur
+         'sapi:advice-loading' et attend le conseil. On ne l'affiche surtout pas
+         ici — ce serait précisément la désynchronisation qu'on corrige (la
+         sélection arrivait ~300 ms après la fermeture, le texte 1 à 4 s plus tard).
+         C'est 'sapi:advice-ready' qui révèle les deux ensemble. */
+      if (advicePending) {
+        // Filet : si le préchargement n'a pas eu lieu (event sans réponses,
+        // signature égale au moment du calcul…), on l'amorce maintenant. Il sera
+        // libéré par advice-ready comme les autres.
+        if (!pendingSelection) pendingSelection = { promise: fetchSelectionHtml(answers), sig: sig };
+        return;
+      }
+      // Abandon en cours de questionnaire : pas d'appel IA, donc rien à attendre.
       refreshSelection(answers, sig);
     });
 
