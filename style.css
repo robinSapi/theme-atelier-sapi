@@ -25370,26 +25370,29 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     overflow: hidden;
   }
 
-  /* ── ZONE 3 — le carrousel : HAUTEUR CONSTANTE ────────────────────────
+  /* ── ZONE 3 — le carrousel : IL OCCUPE TOUT, son bloc est CENTRÉ ──────
      Demande de Robin (recette du 25/08) : « pourquoi c'est la hauteur du
-     carrousel qui dépend de la longueur du texte et pas l'inverse ? »
-     Il a raison, et c'est cohérent avec son propre arbitrage (« le texte
-     cède ») : la zone 3 est SERVIE EN PREMIER, à hauteur fixe, et la zone 1
-     prend ce qui reste. Un conseil long ne rapetisse plus les photos — il se
-     réduit puis se coupe, lui.
-     ⇦ --imm-selection-h = LE réglage de ce bloc : « quelle part de l'écran
-     revient au carrousel ». En svh, donc constant : aucun recalcul quand la
-     barre d'adresse bouge. L'augmenter réduit d'autant la place du texte. */
+     carrousel qui dépend de la longueur du texte et pas l'inverse ? » puis,
+     une fois la zone 1 sortie de l'écran : « il faut centrer le carrousel et
+     lui faire occuper l'espace ».
+     La zone 1 étant hors flux, la question ne se pose plus : le carrousel a
+     TOUT l'espace, et son bloc (titre + cards) y est centré. La longueur du
+     conseil n'a plus aucun effet sur la taille des photos. */
   .mescreations-immersion__selection {
     position: relative;
     bottom: auto;
-    /* Peut être plus généreux depuis que la zone 1 sort de l'écran : elle ne
-       lui dispute plus la place. ⇦ LE réglage de la taille des cards. */
-    --imm-selection-h: 56svh;
-    -webkit-box-flex: 0;
-    -ms-flex: 0 0 auto;
-    flex: 0 0 auto;
-    height: var(--imm-selection-h);
+    /* La zone 1 étant hors flux, le carrousel occupe TOUT l'espace libre, et
+       son bloc (titre + cards) y est CENTRÉ. Plus aucune hauteur réglée à la
+       main : `--imm-selection-h` a disparu. C'est désormais le RAPPORT DE
+       FORME de la photo qui décide de la taille des cards (voir plus bas) —
+       un réglage qui se voit à l'œil au lieu d'un pourcentage d'écran. */
+    -webkit-box-flex: 1;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -25397,12 +25400,9 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     -webkit-box-direction: normal;
     -ms-flex-direction: column;
     flex-direction: column;
-    /* Air entre le bouton « Décrire mon projet » et le titre de la sélection.
-       ⚠️ Ce n'est PAS ce qui gouverne le grand écart entre le bouton et les
-       cards : cet écart, c'est l'espace INUTILISÉ de la zone 1 (elle prend le
-       reste, son contenu est calé en haut, la marge tombe donc en bas). Pour
-       le réduire, on augmente --imm-selection-h — un seul geste qui resserre
-       ET agrandit les cards. */
+    /* Marge de sécurité en haut. L'aération du bloc ne se règle plus ici :
+       elle vient du centrage (`justify-content: center`) et de la hauteur des
+       cards, elle-même donnée par le rapport de forme de la photo. */
     padding-top: clamp(6px, 1.4svh, 14px);
   }
   .mescreations-immersion__selection-head {
@@ -25410,19 +25410,25 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     flex: 0 0 auto;
     margin-bottom: clamp(6px, 1.2svh, 14px);
   }
+  /* Le bloc des cards est dimensionné par son CONTENU (donc par le rapport de
+     forme de la photo), pas par la zone : c'est ce qui permet de le centrer.
+     `flex: 0 1 auto` + `min-height: 0` : il ne grandit pas, mais il PEUT
+     rétrécir si l'écran est trop court — la photo cède alors sur sa hauteur
+     plutôt que la card de déborder. */
   .mescreations-immersion__slider-wrap {
-    -webkit-box-flex: 1;
-    -ms-flex: 1 1 auto;
-    flex: 1 1 auto;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
     min-height: 0;
-    /* Les cards remplissent la zone au lieu d'être centrées dedans : c'est ce
-       qui creusait un vide au-dessus ET en dessous du carrousel (retour Robin,
-       point C). Les flèches sont en absolu en mobile, elles ne s'étirent pas. */
+    max-height: 100%;
+    /* stretch : toutes les cards s'alignent sur la plus haute (un nom qui
+       passe sur deux lignes ne décale pas ses voisines). Les flèches sont en
+       absolu en mobile, elles ne s'étirent pas. */
     -webkit-box-align: stretch;
     -ms-flex-align: stretch;
     align-items: stretch;
   }
-  .mescreations-immersion__slider { height: 100%; }
+  .mescreations-immersion__slider { height: auto; max-height: 100%; }
 
   /* ── La card remplit sa zone : la PHOTO absorbe, le texte garde sa taille ──
      Le markup réel est .product-card-cinetique > a.product-card-link > (media,
@@ -25440,7 +25446,8 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     -webkit-box-direction: normal;
     -ms-flex-direction: column;
     flex-direction: column;
-    height: 100%;
+    height: auto;
+    max-height: 100%;
   }
   .mescreations-immersion__slider .product-card-link {
     display: -webkit-box;
@@ -25455,13 +25462,26 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     flex: 1 1 auto;
     min-height: 0;
   }
+  /* ⇦ LE RÉGLAGE DE LA TAILLE DES CARDS, désormais : le RAPPORT DE FORME de la
+     photo. `3 / 4` = largeur / hauteur, donc la photo est un tiers plus haute
+     que large : ~372px pour une card de 279. C'est lui qui décide de la
+     hauteur de toute la card, et donc du centrage du bloc.
+     Pourquoi pas un carré (décision Robin, après calcul) : une photo carrée ne
+     peut pas être plus haute que la card n'est LARGE, et la largeur est
+     plafonnée par l'écran. En 78% de largeur elle ferait 279px — plus PETITE
+     qu'avant. Photo carrée + grande + aperçu de la card suivante : il faut en
+     abandonner un des trois. Le 3/4 rend de la hauteur sans toucher à la
+     largeur, donc sans manger l'aperçu.
+     `flex: 0 1 auto` + `min-height` : sur un écran trop court, c'est la photo
+     qui cède sur sa hauteur (le ratio n'est plus tenu) plutôt que la card qui
+     déborde. Le prix et le nom restent toujours visibles. */
   .mescreations-immersion__slider .product-card-cinetique .product-media {
-    -webkit-box-flex: 1;
-    -ms-flex: 1 1 auto;
-    flex: 1 1 auto;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
     height: auto;
-    aspect-ratio: auto;
-    min-height: 70px; /* ⇦ plancher de la photo : en dessous, la card déborde */
+    aspect-ratio: 3 / 4;
+    min-height: 60px;
   }
   .mescreations-immersion__slider .product-info,
   .mescreations-immersion__slider .product-actions {

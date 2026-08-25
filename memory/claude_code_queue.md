@@ -457,6 +457,28 @@ Le texte est maintenant simplement **centré** dans l'espace disponible, puis il
 
 **⚠️ Trois nombres doivent rester en phase** (commenté sur place) : `padding-top: 64px` de la couche, `top: 64px` de la zone 1, et `bottom: 52px` de la zone 1 = hauteur de la bande d'indice (34 + 18).
 
+### ✅ CARROUSEL CENTRÉ, PHOTO EN 3/4 (2026-08-25) — suite directe de la prop. 3
+
+Robin, en voyant le grand vide laissé par la zone 1 : « si ça disparaît complètement, il faut centrer le carrousel et lui faire occuper l'espace ! »
+
+**⚠️ ERREUR DE MA PART, corrigée avant de coder — à retenir.** J'avais proposé « photo carrée, ~330px » et Robin l'avait choisie. Le chiffre était faux : **une photo carrée ne peut pas être plus haute que la card n'est LARGE**, et la largeur est plafonnée par l'écran. À 78 % de largeur elle ferait **279px — plus PETITE que les ~315px du moment**, à l'opposé de la demande. Corrigé auprès de Robin avec le tableau des trois combinaisons :
+
+| largeur de card | photo carrée | aperçu de la card suivante |
+|---|---|---|
+| 78 % (actuel) | 279px | 68px, confortable |
+| 88 % | 315px | 25px, mince bande |
+| 96 % | 344px | quasi nul |
+
+**Règle générale à garder : photo carrée + grande + aperçu visible → il faut en abandonner un des trois.** Le rapport de forme est le seul levier qui rende de la hauteur SANS toucher à la largeur, donc sans manger l'aperçu.
+
+**Décision Robin après correction : trois quarts, cards inchangées à 78 %.**
+
+**Ce que ça donne (390×752) :** card 279px de large → **photo 372px** (contre ~315 avant, ~150 avant le lot A), card totale 442px, bloc centré avec ~77px d'air en haut et en bas, aperçu de la suivante conservé à 61px.
+
+**Un réglage de moins :** `--imm-selection-h` **supprimé**. La zone 1 étant hors flux, le carrousel occupe tout l'espace libre (`flex: 1 1 auto`) et son bloc y est centré (`justify-content: center`). La taille des cards est désormais donnée par le **rapport de forme de la photo** — un réglage qui se juge à l'œil, au lieu d'un pourcentage d'écran.
+
+**Dégradation prévue sur écran court :** `flex: 0 1 auto` + `min-height: 60px` sur la photo → c'est elle qui cède sur sa hauteur (le ratio n'est plus tenu) plutôt que la card qui déborde. Le nom et le prix restent toujours visibles.
+
 ---
 
 ## LOT A — Le socle : les trois zones en flux (mobile portrait) — spécification
