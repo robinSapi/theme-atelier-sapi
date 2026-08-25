@@ -147,6 +147,22 @@ Robin a validé les 4 formulaires sur test (les 4 mails de test reçus = zéro f
 > **Source de vérité du comportement voulu :** `assets/guide-filtrage-simulateur.html` (simulateur jouable + éditeur de règles, à ouvrir). Doc d'appui : `assets/guide-filtrage-impact.html`.
 > **Toutes les tâches :** branche test uniquement, jamais master, Robin valide avant prod.
 
+## 🖥️ RECETTE DESKTOP VALIDÉE PAR ROBIN (2026-08-25) — refonte /mes-creations/ + filtrage Conseiller
+
+Robin a passé le parcours complet sur `test.atelier-sapi.fr` en **desktop : tout passe**. Cela lève les 3 points qui restaient en attente de validation depuis juin :
+1. **4a + 4b** — room-picker serveur en état A + suppression du filtrage JS (`73d365f`, `682a82a`) ✅
+2. **Commentaire IA en fin de modale** — loader 3 points puis texte tapé dans la phrase de l'immersion (`a5cffcc`, `332f1f8`, `0d2c0bd`) ✅
+3. **Fondu doux du slider au moment 2** — fin du « flash » signalé par Robin (`664e9d5`) ✅
+
+Vérifié aussi : question « table » absente du parcours (T2), règle cuisine (ni lampe à poser ni lampadaire), admin *Règles de filtrage* + aperçu live == site, reset OK, home et catalogue sans régression.
+
+**⏳ RESTE : la recette MOBILE** (en cours côté Robin). Points de vigilance identifiés en lisant le CSS, à confirmer sur appareil réel :
+- `.mescreations-immersion { height: 100vh }` (style.css l.24683) et `.mescreations-immersion-track { height: 250vh }` (l.24675) — **pas de `dvh`**. Sur iOS Safari, `100vh` ignore la barre d'URL → risque de bas de bloc coupé, et le recalcul de `vh` quand la barre se rétracte peut faire sauter le scroll-pinning (`--reveal`). Le projet utilise déjà `height:100vh; height:100dvh` ailleurs (`.mobile-menu-overlay`) — pattern à reprendre si confirmé.
+- Scroll lock pendant la machine à écrire = `overflow:hidden` sur html+body (`sapi-mescreations-immersion.js` l.333-335). Connu pour être inopérant au toucher sur iOS ; filet de sécurité 9 s présent (l.349).
+- Slider horizontal (cards à 82 % sous 600px) vs scroll vertical de la page pendant le pinning : conflit de geste possible. Flèches masquées si pas d'overflow (l.182-188).
+
+**Pas de cherry-pick vers master avant le feu vert mobile de Robin.**
+
 ## [✅ FAIT — sur test] Immersion = via le room-picker (approche simple)
 L'immersion s'active sur `?piece=` valide. En pratique ces URLs viennent du room-picker (cartes = liens `?piece=`). La **reprise auto** (qui ajoutait `?piece=` sans clic pour les revenants) a été **retirée** → un revenant arrive sur le room-picker. Pas de cookie (approche cookie abandonnée car sur-compliquée + souci cache prod). Seul compromis assumé : un lien `?piece=` partagé/favori affiche l'immersion (indistinguable d'un vrai clic). Aucun impact cache prod.
 
