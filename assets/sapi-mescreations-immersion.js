@@ -168,12 +168,27 @@
     var sliderEl = els.slider, prevEl = els.prev, nextEl = els.next;
     // Position de scroll (offset gauche) de chaque card dans le slider = points
     // de snap. On scrolle PILE sur l'une d'elles → pas de re-snap, pas de saut.
+    /* Renvoie, pour chaque card, LA POSITION DE SCROLL qui l'amène à sa place —
+       pas son offset brut. Les deux diffèrent depuis que le slider est en
+       pleine largeur sur mobile : la card y est CENTRÉE dans l'écran, alors
+       qu'en desktop elle est calée à gauche.
+       On ne teste pas la largeur de l'écran pour le savoir : on lit le
+       `scroll-snap-align` que le CSS a effectivement appliqué à la card. Le
+       comportement suit donc automatiquement la feuille de style, sans qu'un
+       point de rupture soit dupliqué ici (et sans risque de désaccord entre
+       les deux fichiers). */
     function cardOffsets() {
       if (!sliderEl) return [];
       var base = sliderEl.getBoundingClientRect().left - sliderEl.scrollLeft;
       var cards = sliderEl.querySelectorAll('.product-card-cinetique, .mescreations-immersion__pcard--sur');
+      var port = sliderEl.clientWidth;
       return [].slice.call(cards).map(function (c) {
-        return Math.round(c.getBoundingClientRect().left - base);
+        var r = c.getBoundingClientRect();
+        var off = r.left - base;
+        var align = '';
+        try { align = window.getComputedStyle(c).scrollSnapAlign || ''; } catch (e) { /* swallow */ }
+        if (align.indexOf('center') === 0) off -= (port - r.width) / 2;
+        return Math.max(0, Math.round(off));
       });
     }
     function scrollCards(dir) {

@@ -479,6 +479,21 @@ Robin, en voyant le grand vide laissé par la zone 1 : « si ça disparaît comp
 
 **Dégradation prévue sur écran court :** `flex: 0 1 auto` + `min-height: 60px` sur la photo → c'est elle qui cède sur sa hauteur (le ratio n'est plus tenu) plutôt que la card qui déborde. Le nom et le prix restent toujours visibles.
 
+### ✅ CARROUSEL PLEINE LARGEUR, CARD ACTIVE CENTRÉE (2026-08-25)
+
+Robin : « supprimer les marges latérales, les cards coupées au bord de l'écran » + « la card actuelle doit être centrée ».
+
+**Répartition : `12vw` de padding + `76vw` de card + `12vw` = 100.**
+⚠️ **Tout est en `vw`, jamais en `%`, et c'est obligatoire** : un `flex-basis` en % se calcule sur la **boîte de contenu** du slider (padding déduit), un padding en % sur la **largeur du parent**. Les deux références diffèrent → en %, `12 + 76 + 12` ne ferait pas 100. En `vw` tout se rapporte à l'écran et l'addition tombe juste. Les trois valeurs doivent toujours totaliser 100.
+
+**Résultat (390px) :** card 296px de large → **photo 395px** (contre 372, et ~150 avant le lot A). Morceau visible de chaque côté : **29px, symétrique**.
+
+**Le padding latéral du slider n'est pas décoratif** : c'est lui qui permet à la **première** et à la **dernière** card de venir au centre. Sans lui, elles resteraient collées à leur bord. Vérifié : première card centrée ⇔ `scrollLeft = 0`.
+
+**JS — `cardOffsets()` renvoie désormais la POSITION DE SCROLL cible, plus l'offset brut.** Les deux diffèrent depuis que la card est centrée en mobile alors qu'elle est calée à gauche en desktop. **Le mode n'est PAS déterminé par un test de largeur d'écran mais par la lecture du `scroll-snap-align` réellement appliqué** (`center` vs `start`) : le JS suit donc automatiquement la feuille de style, sans dupliquer un point de rupture ni risquer un désaccord entre les deux fichiers. `applyScroll()` reste intact.
+
+**⚠️ À vérifier en recette :** que la **dernière** card (la sur-mesure orange) vient bien au centre. Le `padding-right` d'un conteneur de défilement flex est historiquement ignoré par certains navigateurs ; le `scroll-snap-align: center` devrait suffire à rendre la position atteignable, mais ça se constate.
+
 ---
 
 ## LOT A — Le socle : les trois zones en flux (mobile portrait) — spécification

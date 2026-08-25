@@ -25508,6 +25508,39 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
         en bas de la zone texte. On le neutralise ici.
      ⚠️ `!important` sur .product-name : la règle mobile plus haut en porte un
      (l. ~25120). À spécificité égale, seul un `!important` plus bas gagne. */
+  /* ── Carrousel PLEINE LARGEUR, card active CENTRÉE (retour Robin) ──────
+     Les cards sont coupées par le bord de l'écran, de façon symétrique.
+     ⚠️ TOUT EST EN `vw`, PAS EN `%`, ET C'EST OBLIGATOIRE. Un `flex-basis` en
+     % se calcule sur la BOÎTE DE CONTENU du slider (donc padding déduit),
+     alors qu'un padding en % se calcule sur la largeur du parent. Les deux ne
+     se rapportent pas à la même référence : en %, `12 + 76 + 12` ne ferait
+     PAS 100. En `vw`, tout se rapporte à l'écran et l'addition tombe juste.
+     ⇦ Les trois valeurs doivent toujours faire 100 : 12 + 76 + 12.
+     Élargir la card (76 → 80) agrandit la photo mais rétrécit d'autant les
+     morceaux visibles sur les côtés — c'est le même arbitrage qu'avant.
+     Le padding latéral est ce qui permet à la PREMIÈRE et à la DERNIÈRE card
+     de venir au centre : sans lui, elles resteraient collées à leur bord. */
+  .mescreations-immersion__selection {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  /* Le titre, lui, garde ses marges — c'est du texte, pas une image. */
+  .mescreations-immersion__selection-head { padding: 0 16px; }
+  .mescreations-immersion__slider {
+    padding-left: 12vw;
+    padding-right: 12vw;
+    scroll-padding-left: 0;
+  }
+  .mescreations-immersion__slider .product-card-cinetique,
+  .mescreations-immersion__pcard--sur {
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 76vw;
+    flex: 0 0 76vw;
+    /* `center` (et non `start`) : c'est ce mot que le JS lit pour savoir qu'il
+       doit viser le centre quand on clique sur une flèche. */
+    scroll-snap-align: center;
+  }
+
   .mescreations-immersion__slider .product-actions { display: none; }
   .mescreations-immersion__slider .product-info { padding: 0.5rem 0.5rem 0.7rem; }
   .mescreations-immersion__slider .product-name { font-size: 0.95rem !important; }
