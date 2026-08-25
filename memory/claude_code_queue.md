@@ -420,6 +420,23 @@ Le premier jet du portage annonçait « supprimer les 4 ancrages `bottom` et les
 
 **Reste du LOT B :** plancher sur `.mescreations-immersion__pcard--sur` (la card la plus haute du slider, en px fixes, sans plancher — c'est elle qui casse en premier).
 
+### ✅ AGRANDISSEMENT DES CARDS (2026-08-25) — propositions 1 et 2 de Robin
+
+Robin : « je trouve les cards toujours trop petites ». Trois propositions ; les deux premières sont faites, la 3ᵉ est une décision produit (voir plus bas).
+
+**Prop. 1 — rééquilibrage du texte des cards.** Tout ce qui est gagné ici part **directement dans la photo**, puisqu'elle absorbe l'espace restant. Levier le moins cher.
+- **Bouton « Découvrir » masqué en mobile** : il ne servait à rien, `product-actions` est **à l'intérieur** du `<a class="product-card-link">` qui enveloppe toute la card (vérifié dans `sapi_immersion_render_product_card()`) — taper n'importe où ouvrait déjà la fiche. ~45px rendus.
+- **Hiérarchie inversée corrigée** : le nom du modèle (11,5px) était plus petit que le prix (16,8px). C'est le nom qu'on vend. Nom → 0,95rem, prix → 0,9rem, « à partir de » → 0,62rem.
+- **Le grand vide au-dessus du prix** venait de `.product-card-cinetique .product-price { margin-top: auto }` (règle de base) : `.product-info` étant en flex-colonne avec `flex: 1`, ce `auto` poussait le prix tout en bas. Neutralisé.
+- ⚠️ `!important` nécessaire sur `.product-name` : la règle mobile plus haut en porte un ; à spécificité égale, seul un `!important` **plus bas** gagne.
+
+**Prop. 2 — plus de place au carrousel.** `--imm-selection-h` 40 → **48svh** ; bande d'indice 42+24 → **34+18px** ; `padding-top` de la zone 3 resserré.
+⚠️ **Précision utile consignée dans le CSS** : le grand écart entre le bouton « Décrire mon projet » et les cards **n'est pas** un padding — c'est l'espace **inutilisé de la zone 1** (elle prend le reste, son contenu est calé en haut, la marge tombe en bas). Le seul geste qui le réduit est d'augmenter `--imm-selection-h`, qui resserre ET agrandit les cards d'un coup.
+
+**Gain calculé sur 390×752 : ~+120px pour la photo, soit environ le double de sa taille actuelle.**
+
+**Prop. 3 — « le scroll fait sortir le conteneur du haut plutôt que le réduire ».** ⏸️ **NON CODÉE — décision produit posée à Robin.** Ce n'est pas un réglage : en écran B, on perdrait le conseil, la pill **et le bouton « Décrire mon projet », qui est l'entrée du questionnaire** (donc un chemin de conversion). Variante possible : ne faire sortir que le texte et la pill, et garder le bouton. À trancher après avoir vu l'effet des props 1+2, qui suffisent peut-être.
+
 ---
 
 ## LOT A — Le socle : les trois zones en flux (mobile portrait) — spécification

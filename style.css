@@ -25383,7 +25383,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   .mescreations-immersion__selection {
     position: relative;
     bottom: auto;
-    --imm-selection-h: 40svh;
+    --imm-selection-h: 48svh;
     -webkit-box-flex: 0;
     -ms-flex: 0 0 auto;
     flex: 0 0 auto;
@@ -25395,9 +25395,13 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     -webkit-box-direction: normal;
     -ms-flex-direction: column;
     flex-direction: column;
-    /* Air entre le bouton « Décrire mon projet » et le titre de la sélection —
-       ils se touchaient presque (retour Robin). */
-    padding-top: clamp(10px, 2.4svh, 24px);
+    /* Air entre le bouton « Décrire mon projet » et le titre de la sélection.
+       ⚠️ Ce n'est PAS ce qui gouverne le grand écart entre le bouton et les
+       cards : cet écart, c'est l'espace INUTILISÉ de la zone 1 (elle prend le
+       reste, son contenu est calé en haut, la marge tombe donc en bas). Pour
+       le réduire, on augmente --imm-selection-h — un seul geste qui resserre
+       ET agrandit les cards. */
+    padding-top: clamp(6px, 1.4svh, 14px);
   }
   .mescreations-immersion__selection-head {
     -ms-flex: 0 0 auto;
@@ -25464,6 +25468,32 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     flex: 0 0 auto;
   }
 
+  /* ── Rééquilibrage du texte des cards (retour Robin, 25/08) ────────────
+     Tout ce qu'on gagne ici part directement dans la PHOTO, puisque celle-ci
+     absorbe l'espace restant. C'est le levier le moins cher pour agrandir les
+     images sans toucher à la mise en page.
+
+     1. Le bouton « Découvrir » est MASQUÉ en mobile. Il ne servait à rien :
+        `product-actions` est À L'INTÉRIEUR du `<a class="product-card-link">`
+        qui enveloppe toute la card — taper n'importe où ouvre déjà la fiche.
+        Vérifié dans sapi_immersion_render_product_card(). ~45px rendus.
+     2. Hiérarchie inversée : le NOM du modèle (11,5px) était plus petit que le
+        prix (16,8px). C'est le nom qu'on vend, pas le chiffre. On remonte le
+        nom, on redescend le prix.
+     3. Le grand vide au-dessus du prix venait de `.product-card-cinetique
+        .product-price { margin-top: auto }` (règle de base) : `.product-info`
+        étant en flex-colonne avec `flex: 1`, ce `auto` poussait le prix tout
+        en bas de la zone texte. On le neutralise ici.
+     ⚠️ `!important` sur .product-name : la règle mobile plus haut en porte un
+     (l. ~25120). À spécificité égale, seul un `!important` plus bas gagne. */
+  .mescreations-immersion__slider .product-actions { display: none; }
+  .mescreations-immersion__slider .product-info { padding: 0.5rem 0.5rem 0.7rem; }
+  .mescreations-immersion__slider .product-name { font-size: 0.95rem !important; }
+  .mescreations-immersion__slider .product-category { font-size: 0.68rem; margin-bottom: 0.15rem; }
+  .mescreations-immersion__slider .product-price { margin-top: 0; gap: 0.3rem; }
+  .mescreations-immersion__slider .price-from { font-size: 0.62rem; }
+  .mescreations-immersion__slider .price-value { font-size: 0.9rem; }
+
   /* ── ZONE 2 — l'indice, en bas, hauteur RÉSERVÉE ──────────────────────
      ⚠️ `position: relative` OBLIGATOIRE (et non `static`) : les DEUX indices
      sont en `position: absolute` à l'intérieur. En `static`, ils se
@@ -25479,7 +25509,12 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     -webkit-box-flex: 0;
     -ms-flex: 0 0 auto;
     flex: 0 0 auto;
-    height: 42px;
-    margin-bottom: 24px;
+    /* Bande resserrée (retour Robin) : chaque pixel rendu ici part dans la
+       photo des cards, la zone 3 ayant une hauteur fixe et la photo absorbant
+       le reste. On ne descend pas plus bas : le chevron doit rester touchable. */
+    height: 34px;
+    margin-bottom: 18px;
   }
+  .mescreations-immersion__hint { gap: 2px; }
+  .mescreations-immersion__hint svg { width: 15px; height: 15px; }
 }
