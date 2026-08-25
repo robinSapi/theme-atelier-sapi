@@ -1303,5 +1303,7 @@ Demande de Robin, avec repli sur ambiance. Le nombre **total** de cases étant i
 
 **(a) La blague reste sur les pages produit publiques.** `woocommerce/single-product.php:777` lit la même meta orpheline pour sa propre fiche technique (ligne 829). Vérifié en prod : `atelier-sapi.fr/mes-creations/olivia-la-gardiena` et `claudine-la-turbine` affichent toujours `<p>35 Kilos le matin</p>`, balises comprises. **Hors périmètre catalogue, pas corrigé.** Même correctif possible (lire les variations), mais c'est un fichier du site marchand, à décider séparément.
 
-**(b) Un second cherry-pick vers `master` est nécessaire.** `master` porte déjà le catalogue depuis `a92516c`, donc la blague part en prod avec le catalogue tant que ce correctif n'est pas repris. Fichiers concernés : `inc/catalogue-data.php`, `inc/catalogue-data-pro.php`, `inc/catalogue-pdf.php`, `inc/catalogue-pdf-pro.php`, `page-catalogue.php`, `assets/catalogue.css`. `functions.php` n'est PAS concerné cette fois.
+**(b) ✅ SECOND CHERRY-PICK FAIT — `master` = `b930f09` (2026-08-25).** 6 fichiers catalogue repris à l'identique de test, `functions.php` non concerné (ses require du catalogue y étaient déjà et n'ont pas bougé). Vérifié avant push : aucun fichier hors catalogue, 0 commit perdu, plus aucune lecture de `get_field('poids')` ni de `sapi_catalogue_product_weight()` dans la couche catalogue.
+
+`master` porte donc maintenant DEUX commits catalogue : `a92516c` (page prix + tarifs pro) puis `b930f09` (poids). **Le workflow « Deploy to Production » est toujours à lancer à la main par Robin** — le push ne déploie rien.
 
