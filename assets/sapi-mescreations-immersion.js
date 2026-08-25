@@ -620,13 +620,15 @@
        des trois. Au-dessus du hero et une fois entré dans le catalogue, la
        page redevient libre — on ne retient jamais quelqu'un qui lit.
 
-       ⚠️ Ça ne marche que parce que le track a été ramené à 200vh (cf. le
-       commentaire de `.mescreations-immersion-track` dans style.css) : les
-       trois positions sont alors à une poussée d'écart. Avec les 250vh
-       d'origine, il fallait franchir les trois quarts d'un écran avant que la
-       page accepte d'aller au catalogue — elle aurait paru retenir. La
-       longueur du track et cette règle d'accroche vont ENSEMBLE : changer
-       l'une sans l'autre ramène le défaut. */
+       ⚠️ C'EST CETTE RÈGLE, ET ELLE SEULE, QUI A RÉPARÉ L'AIMANT DU
+       CATALOGUE. Il ne mordait pas parce qu'il n'accrochait que dans une
+       fenêtre de 30vh, sur un trajet de 150vh : un geste normal la survolait.
+       En visant « la plus proche des trois », la bascule se fait à mi-chemin
+       (75vh), ce qu'une poussée normale dépasse largement.
+       On a un temps cru qu'il fallait aussi RACCOURCIR le track pour
+       rapprocher les étapes. Essayé (200vh), et refusé par Robin dans la
+       minute : ça supprime la pause après la révélation et le hero amorce son
+       départ au moindre geste. La longueur n'était pas le problème. */
     function snapTarget() {
       if (!track) return null;
       var y = window.pageYOffset;

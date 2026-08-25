@@ -24734,20 +24734,25 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   right: 50%;
   margin-left: -50vw;
   margin-right: -50vw;
-  /* ⚠️ CETTE HAUTEUR FIXE LA DISTANCE ENTRE LES POSITIONS D'ANCRAGE 2 ET 3.
+  /* ⚠️ CETTE HAUTEUR FIXE DEUX CHOSES À LA FOIS.
      La scène épinglée fait 100vh, donc l'épinglage dure `hauteur - 100vh` ;
      la révélation, elle, se termine sur le repère, à 100vh. D'où :
-       250vh → position 2 à 100vh, catalogue à 250vh = 150vh d'écart, soit
-               UNE POUSSÉE ET DEMIE. L'aimant du catalogue ne mordait alors
-               que sur la toute fin du trajet, et un geste normal le survolait
-               (défaut constaté par Robin).
-       200vh → 100vh d'écart = UNE POUSSÉE = UNE ÉTAPE. C'est le réglage.
-     Le « plateau » (la zone après la révélation où l'écran est identique au
-     pixel près) tombe du coup à zéro, et c'est sans conséquence DEPUIS QU'IL
-     Y A UN AIMANT : la position 2 est un point d'arrêt, on ne peut plus s'y
-     poser « un peu après ». Sans aimant, ce raccourcissement serait une
-     régression de confort. ⇦ Passer à 220vh si le pas paraît trop sec. */
-  height: 200vh;
+       · le PLATEAU = `hauteur - 200vh` — la zone après la révélation où la
+         scène reste épinglée et où l'écran est identique au pixel près. C'est
+         la « pause » : elle permet de scroller un peu sans que rien ne bouge,
+         et elle masque le va-et-vient du hero quand l'aimant ramène un petit
+         geste en arrière ;
+       · l'ÉCART entre les positions d'ancrage 2 et 3 = `hauteur - 100vh`.
+
+     250vh → plateau 50vh, écart 150vh. C'est le réglage retenu.
+
+     ⚠️ NE PAS RACCOURCIR pour « rapprocher les étapes ». Ça a été essayé
+     (200vh) et Robin l'a immédiatement vu : ça supprime la pause, et le hero
+     amorce son départ au moindre geste. L'aimant du catalogue qui ne mordait
+     pas n'était PAS un problème de longueur mais de règle d'accroche (une
+     fenêtre de 30vh au lieu de « la position la plus proche ») — corrigé côté
+     JS, et il fonctionne très bien avec cette longueur-ci. */
+  height: 250vh;
 }
 /* Le hero = scène épinglée (sticky) de 100vh. --reveal (0→1) est piloté par le
    scroll en JS et anime flou photo + remontée texte + apparition des cards. */
