@@ -1331,3 +1331,27 @@ Robin a lancé le déploiement, créé la page `/catalogue-prix` en prod et excl
 4. **Écart de 1,8 mm** entre les deux largeurs utiles (179,2 mm mesuré par Robin vs 181 en constante côté profil pro). Non tranché.
 5. **Cohérence des PVP site / Etsy** à vérifier avant le premier envoi d'un tarif : le PDF pro affiche le PVP conseillé à côté du prix d'achat, un écart serait exposé au revendeur.
 
+
+---
+
+## ✅ RECETTE PRODUCTION VALIDÉE PAR ROBIN (2026-08-25) — chantier clos
+
+Les cinq contrôles humains sont passés sur `atelier-sapi.fr` : tarif pro généré depuis la prod, page prix sur mobile, bouton PDF du catalogue, fiches techniques du catalogue prescripteurs, et poids dynamique d'une fiche produit.
+
+**En production :** `/catalogue` (inchangée, sans prix), `/catalogue-prix` (PVP TTC + poids en matrice croisée, `noindex`, hors sitemap), PDF public refondu, et `Produits > Catalogue PRO` pour les tarifs professionnels. `master` = `b930f09`.
+
+### Ce qui reste, hors code
+
+1. **Les cinq crochets `[à compléter]`** des mentions légales du tarif pro (minimum de commande, port, délai, règlement, capital social) — à remplir avant le premier envoi à un revendeur. Robin s'en charge.
+2. **Cohérence des PVP site / Etsy** à vérifier avant ce même premier envoi. Robin s'en charge.
+
+### Défaut connu, laissé volontairement (décision Robin)
+
+La meta ACF `poids` reste en base sur 5 produits (Olivia ×2, Charlie, Claudine, Vincent) et continue d'être écrite **dans le code source** de leur fiche produit, puis remplacée par « Faites votre choix » dès le chargement — invisible à l'écran, visible seulement au source ou pour un robot sans JavaScript. La couche catalogue, elle, ne la lit plus nulle part.
+
+⚠️ **Ne pas supprimer cette meta sans corriger le code d'abord.** [single-product.php:829](woocommerce/single-product.php) n'ajoute la ligne « Poids » que si le serveur a trouvé une valeur : c'est cette meta parasite qui fait exister la ligne sur ces 5 produits, et donc qui permet au JavaScript d'y écrire le poids de la variation. La supprimer ferait disparaître la ligne — et le poids dynamique avec. Le correctif propre (rendre la ligne inconditionnelle sur les produits à variations, avec « Faites votre choix » en valeur initiale) a été proposé et **refusé pour l'instant**. Il ferait au passage fonctionner le poids dynamique sur les 36 produits au lieu de 8.
+
+### Non tranché, sans conséquence
+
+Écart de 1,8 mm entre les deux largeurs utiles de la bande photo (179,2 mm mesuré par Robin vs 181 en constante côté profil pro). Robin : « on s'en moque ».
+
