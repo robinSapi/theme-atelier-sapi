@@ -24733,22 +24733,33 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
      viewport barre rétractée → bande de fond visible sous le hero. */
   --safe-bottom: 0px;
 }
-/* `dvh` = viewport DYNAMIQUE : il suit la barre d'adresse en temps réel.
-   `100dvh - 100svh` vaut donc la hauteur de barre RESTANT à l'écran — pleine au
-   chargement (barre visible), nulle une fois la barre rétractée, nulle en desktop.
-   C'est ce qu'il fallait : les deux indices du bas n'apparaissent PAS au même
-   moment. « Découvre ta sélection » s'affiche au chargement, barre visible → il
-   doit être décalé. « Voir le catalogue complet » n'apparaît qu'après le scroll,
-   barre rétractée → il ne doit plus l'être, et la constante `100lvh - 100svh`
-   (qui vaut toujours la hauteur de barre) le remontait à tort.
-   ⚠️ Contrepartie assumée : `dvh` se recalcule pendant le scroll. Seuls des
-   éléments en position absolue en dépendent ici (indices + bloc sélection), pas
-   la mise en page du hero — le scroll-pinning reste piloté par `vh` et par
-   window.innerHeight côté JS, donc intact. Le glissement du bloc sélection est
-   masqué par son animation d'entrée (opacity + translateY sur --reveal), qui se
-   joue au même moment. À revérifier au doigt à chaque retouche de ce bloc. */
-@supports (height: 100dvh) and (height: 100svh) {
-  .mescreations-immersion { --safe-bottom: calc(100dvh - 100svh); }
+/* Ce qu'on cherche : quelle PART du bloc (haut de `height:100vh`) est à cet
+   instant masquée sous la barre d'adresse. Réponse : `100vh - 100dvh`.
+
+   ⚠️ SENS DES UNITÉS — c'est contre-intuitif et je me suis trompé une fois :
+     · `svh` = viewport quand le chrome est DÉPLOYÉ  → le PLUS PETIT
+     · `lvh` = viewport quand le chrome est RÉTRACTÉ → le PLUS GRAND (== `vh` sur iOS)
+     · `dvh` = état courant, il suit la barre en temps réel
+   Donc barre visible → `dvh == svh` → `100vh - 100dvh` = hauteur de barre ✅
+        barre rétractée → `dvh == lvh == vh` → `100vh - 100dvh` = 0 ✅
+        desktop → `vh == dvh` → 0, sans média query ni garde ✅
+   La formule inverse (`100dvh - 100svh`) donne exactement le contraire : rien
+   n'est décalé quand la barre masque le bas, et tout remonte de 90px pour rien
+   quand elle est rétractée. Symptômes observés : chevron de l'indice coupé
+   barre déployée, card coupée par le bas du viewport.
+
+   ⚠️ CE QUE CETTE VARIABLE NE PEUT PAS CORRIGER : le chevauchement entre le bloc
+   sélection et l'indice « Voir le catalogue complet ». Les deux portent la MÊME
+   valeur, elle s'annule dans l'écart qui les sépare. Cet écart vaut
+   `X vh - 60px` (X = bottom du bloc sélection, 60px = coût fixe de l'indice) et
+   diverge sur les petits écrans : +30px en desktop, -7px sur iPhone, -20px sur
+   iPhone SE. Aucune valeur de X ne le referme — c'est structurel, à traiter en
+   passant les zones du hero en flux. Ne PAS tenter de compenser ici.
+
+   `dvh` se recalcule pendant le scroll : seuls des éléments en position absolue
+   en dépendent (indices + bloc sélection), pas la mise en page du hero. */
+@supports (height: 100dvh) {
+  .mescreations-immersion { --safe-bottom: calc(100vh - 100dvh); }
 }
 .mescreations-immersion__bg {
   position: absolute;

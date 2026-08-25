@@ -274,6 +274,37 @@ La cause profonde n'était pas « il manque des règles » mais l'ordre de décl
 
 **Toujours pas de cherry-pick vers `master`.**
 
+### 🔬 DIAGNOSTIC DISPOSITION (2026-08-25, après recette mobile de la 2ᵉ passe)
+
+Robin a recetté sur iPhone et envoyé 4 captures. Deux défauts, **de natures différentes** — c'est ce qui rend le diagnostic utile.
+
+**A. `--safe-bottom` était écrit à l'envers (ma faute, corrigée).**
+Sémantique réelle des unités, contre-intuitive : `svh` = viewport chrome **déployé** (le plus petit), `lvh` = chrome **rétracté** (le plus grand, `== vh` sur iOS), `dvh` = état courant. Donc `100dvh - 100svh` vaut **0 quand la barre masque le bas** et **la hauteur de barre quand elle est rétractée** : l'inverse exact du besoin. Symptômes constatés : chevron de « Découvre ta sélection » coupé barre déployée (capture C), bloc sélection remonté de 90px pour rien barre rétractée (capture D), card coupée par le bas (capture B).
+→ **Corrigé en `calc(100vh - 100dvh)`**, `@supports` réduit à `(height: 100dvh)` (plus besoin de garde `svh`, ni de repli desktop où `vh == dvh`). Le sens des trois unités est désormais écrit en toutes lettres dans `style.css` au-dessus de la règle.
+
+**B. Le chevauchement « Voir le catalogue complet » × card est STRUCTUREL — `--safe-bottom` ne peut ni le causer ni le corriger.**
+`__selection` et `__scrollhint` portent la **même** variable : elle s'annule dans l'écart qui les sépare. Cet écart vaut, quel que soit l'état de la barre :
+`écart = X vh − 24px (bottom du hint) − 36px (hauteur du hint) = X vh − 60px`
+
+| contexte | X | 100vh | écart |
+|---|---|---|---|
+| desktop | 10vh | ~900 | **+30px** → passe (d'où la recette desktop verte) |
+| largeur ≤600 | 8vh | ~750 | **0px** → contact |
+| **hauteur ≤840 (l'iPhone de Robin)** | 7vh | ~750 | **−7px** → chevauchement |
+| hauteur ≤700 (iPhone SE) | 6vh | ~660 | **−20px** |
+
+Une position en `vh` moins un coût fixe en `px` : la soustraction **diverge** quand l'écran rétrécit. Les valeurs 10/8/7/6vh ne sont pas quatre réglages, ce sont quatre tentatives de rattraper la même divergence. **Aucune cinquième valeur ne referme le problème** — elle le déplace vers l'appareil suivant. À traiter en passant les 3 zones du hero (texte / sélection / indice) **en flux** (flex column) : deux frères en flux ne peuvent pas occuper le même pixel, la garantie devient structurelle.
+
+**C. Piège de préséance : `@media (max-height: 840px)` gagne sur presque tous les iPhones.**
+Il est déclaré APRÈS `@media (max-width: 768px)`, et le viewport large d'un iPhone fait ~750-800px de haut, donc < 840. Conséquence : `product-media` y vaut **23vh**, pas les 30vh du bloc mobile — **le réglage 26→30vh de la 2ᵉ passe n'a rien changé sur l'appareil de Robin**, c'est le 20→23vh qui a agi. Deux chiffres qui ressemblent tous deux à « hauteur de card en mobile », un seul actif.
+
+**D. Le texte du conseil IA n'est borné par rien.** Le « max 300 caractères » de `functions.php` (~l. 4019) est une **consigne de prompt**, jamais appliquée à la réception. C'est le seul élément du système sans borne, et la zone texte dimensionne tout le reste du hero.
+
+**Décision Robin : étape 0 seule** (le correctif de signe), recette, puis on reparle de la refonte. Motif : séparer ma bourde du vrai sujet, pour ne pas recetter deux chantiers mêlés. **Attendu après ce commit :** captures C et D réglées, chevauchement B **toujours présent** (c'est normal, hors de portée de ce correctif).
+
+**Plan de refonte gardé sous le coude (5 étapes, CSS mobile uniquement, desktop intouché) :** 1) les 3 zones en flex column, `__inner` perd son `top` animé ; 2) `padding-bottom: calc(100vh - 100svh)` sur la scène **remplace et supprime** `--safe-bottom` (valeur statique → plus aucun recalcul pendant le scroll) ; 3) la photo de card absorbe l'espace restant (`flex:1 1 auto` + `min-height`), ce qui **supprime les 4 hauteurs en vh** ; 4) écrans très courts + borne du texte IA, ce qui **supprime les 2 blocs `max-height`** et le piège C ; 5) facultatif, unifier desktop. Bilan : de 7 chiffres réglés à la main à 1. `applyScroll()` n'est touché par aucune étape — `--reveal` reste calculé sur `window.innerHeight`, validé.
+**Risque principal identifié :** aujourd'hui les 3 zones sont hors flux, donc rien de ce qui leur arrive ne peut provoquer de reflow pendant le pinning. Les remettre en flux rend la scène sensible aux variations de hauteur (images de card qui chargent, swap AJAX du moment 2). Parade prévue : hauteur des zones imposée par le conteneur, pas par le contenu. **À vérifier au doigt, pas au raisonnement** — c'est l'acquis principal qui est en jeu.
+
 ## [✅ FAIT — sur test] Immersion = via le room-picker (approche simple)
 L'immersion s'active sur `?piece=` valide. En pratique ces URLs viennent du room-picker (cartes = liens `?piece=`). La **reprise auto** (qui ajoutait `?piece=` sans clic pour les revenants) a été **retirée** → un revenant arrive sur le room-picker. Pas de cookie (approche cookie abandonnée car sur-compliquée + souci cache prod). Seul compromis assumé : un lien `?piece=` partagé/favori affiche l'immersion (indistinguable d'un vrai clic). Aucun impact cache prod.
 
