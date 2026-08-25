@@ -435,7 +435,27 @@ Robin : « je trouve les cards toujours trop petites ». Trois propositions ; le
 
 **Gain calculé sur 390×752 : ~+120px pour la photo, soit environ le double de sa taille actuelle.**
 
-**Prop. 3 — « le scroll fait sortir le conteneur du haut plutôt que le réduire ».** ⏸️ **NON CODÉE — décision produit posée à Robin.** Ce n'est pas un réglage : en écran B, on perdrait le conseil, la pill **et le bouton « Décrire mon projet », qui est l'entrée du questionnaire** (donc un chemin de conversion). Variante possible : ne faire sortir que le texte et la pill, et garder le bouton. À trancher après avoir vu l'effet des props 1+2, qui suffisent peut-être.
+### ✅ PROP. 3 CODÉE — la zone 1 SORT de l'écran au scroll (2026-08-25)
+
+**Décision Robin, formulée précisément :** « le haut sort jusqu'à ce que le carrousel s'affiche entièrement, ça dépendra donc de la taille de l'écran. »
+
+**Elle SIMPLIFIE le système au lieu de le compliquer** — c'est ce qui la rend meilleure, et je ne l'avais pas vu en la présentant comme un simple arbitrage produit. **Un bloc qui s'en va n'a plus besoin de rétrécir.** Trois réglages disparaissent d'un coup :
+- le `scale(1.22)` d'agrandissement au repos ;
+- le `width: 82%` qui existait UNIQUEMENT pour compenser le débordement de ce scale (retour A) ;
+- `--imm-a-drop`, qui servait à recentrer le bloc au repos.
+Le texte est maintenant simplement **centré** dans l'espace disponible, puis il s'en va.
+
+**Mise en œuvre :**
+- Zone 1 **hors flux** (`position: absolute`), bornée par `top: 64px` ET `bottom: 52px` → elle ne prend aucune place au carrousel, et **ne peut toujours pas chevaucher l'indice** (elle est bornée, et son `overflow: hidden` coupe un texte trop long au lieu de pousser).
+- `translateY(calc(var(--reveal) * -100%))` : **le `-100%` se rapporte à la hauteur de l'élément lui-même**, pas à l'écran. La sortie fait donc exactement ce qu'il faut et **s'adapte seule à chaque taille d'écran** — la demande de Robin obtenue sans mesurer quoi que ce soit en JS. Plus un fondu, pour qu'il ne survole pas le carrousel pendant la traversée.
+- Couche en `justify-content: flex-end` : carrousel et indice calés en bas, l'espace libre tombe en haut, là où flotte la zone 1. C'est ce qui fait que le carrousel « s'affiche entièrement ».
+- `--imm-selection-h` 48 → **56svh** (la zone 1 ne lui dispute plus la place) et phrase plus généreuse (`clamp(1.05rem, 3.1svh, 1.9rem)`), puisqu'elle n'a plus à cohabiter avec le carrousel.
+
+**Résultat calculé sur 390×752 : card de ~377px dont ~317px de photo**, contre ~180px de card totale avant le lot A. Bande de texte en écran A : 636px.
+
+**⚠️ Conséquence assumée, signalée à Robin avant qu'il tranche :** en écran B, le visiteur ne voit plus le conseil, ni la pill, **ni le bouton « Décrire mon projet »** — qui est l'entrée du questionnaire, donc un chemin de conversion. Robin a choisi cette voie en connaissance de cause. Si les statistiques du Conseiller baissent après la mise en prod, **c'est la première cause à examiner**, et la parade existe : ressortir le bouton de la zone 1 pour l'ancrer au-dessus du carrousel.
+
+**⚠️ Trois nombres doivent rester en phase** (commenté sur place) : `padding-top: 64px` de la couche, `top: 64px` de la zone 1, et `bottom: 52px` de la zone 1 = hauteur de la bande d'indice (34 + 18).
 
 ---
 

@@ -25309,63 +25309,63 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     -webkit-transform: translateY(calc(100dvh - 100svh));
     transform: translateY(calc(100dvh - 100svh));
     will-change: transform;
-    /* Place du header fixe : en flux, la zone 1 est POSÉE ici (elle n'est plus
-       centrée), donc sans ce padding la pill passerait sous le header opaque
-       en état .is-scrolled. ⇦ à vérifier en recette. */
+    /* Place du header fixe. ⇦ à garder en phase avec le `top` de la zone 1. */
     padding-top: 64px;
+    /* Le carrousel et l'indice sont calés EN BAS. L'espace libre tombe donc en
+       haut, là où flotte la zone 1 (hors flux) — c'est ce qui fait que le
+       carrousel « s'affiche entièrement » quelle que soit la taille d'écran. */
+    -webkit-box-pack: end;
+    -ms-flex-pack: end;
+    justify-content: flex-end;
   }
 
-  /* ── ZONE 1 — pill + phrase + bouton ──────────────────────────────────
-     `flex: 0 1 auto` : elle peut RÉTRÉCIR. C'est la décision de Robin —
-     quand ça ne tient pas, c'est le texte qui cède, pas le carrousel.
-     `position: relative` (et non `static`) : les enfants absolus éventuels
-     doivent continuer de se résoudre contre leur zone, pas contre le hero. */
+  /* ── ZONE 1 — pill + phrase + bouton : ELLE SORT DE L'ÉCRAN AU SCROLL ──
+     Proposition de Robin (25/08) : « le scroll fait carrément sortir le
+     conteneur du haut plutôt que le réduire ».
+     Elle SIMPLIFIE le système au lieu de le compliquer, et c'est ce qui la
+     rend meilleure : un bloc qui s'en va n'a plus besoin de rétrécir. Trois
+     réglages disparaissent d'un coup — l'agrandissement au repos (`scale`),
+     le bridage de largeur qui compensait son débordement, et le décalage
+     `--imm-a-drop` qui devait le recentrer. Le texte est simplement centré
+     dans l'espace disponible, puis il s'en va.
+
+     Hors flux (`position: absolute`), donc il ne prend AUCUNE place au
+     carrousel : celui-ci est servi le premier et occupe tout le bas.
+     ⚠️ Aucun risque de chevauchement pour autant : le bloc est BORNÉ par
+     `top` ET `bottom`, donc il ne peut pas descendre sur l'indice, et son
+     `overflow: hidden` coupe un texte trop long au lieu de le laisser pousser.
+
+     `translateY(--reveal * -100%)` : le `-100%` se rapporte à la HAUTEUR DE
+     L'ÉLÉMENT LUI-MÊME, pas à l'écran. La sortie est donc exactement de ce
+     qu'il faut, et elle s'adapte seule à chaque taille d'écran — c'est la
+     demande de Robin (« ça dépendra donc de la taille de l'écran ») obtenue
+     sans mesurer quoi que ce soit en JS.
+     Le fondu évite qu'il ne survole le carrousel pendant la traversée. */
   .mescreations-immersion__inner {
-    position: relative;
-    top: auto;
-    bottom: auto;
-    /* La zone 1 prend LE RESTE, une fois le carrousel servi (cf. zone 3).
-       C'est la demande de Robin : le carrousel garde une hauteur constante,
-       c'est le texte qui absorbe la variation. */
-    -webkit-box-flex: 1;
-    -ms-flex: 1 1 0px;
-    flex: 1 1 0;
-    min-height: 0;
-    /* ⚠️ LARGEUR BRIDÉE À 82 % — PAS COSMÉTIQUE.
-       Le bloc est agrandi de 22 % au repos (scale ci-dessous) depuis son
-       centre : à pleine largeur, il débordait de 11 % de chaque côté et la
-       pill comme le bouton sortaient de l'écran. 82 % × 1,22 = 100 %.
-       ⇦ CES DEUX NOMBRES DOIVENT RESTER EN PHASE : si le .22 du scale change,
-       cette largeur change (largeur = 100 / échelle). Une largeur en % est
-       constante, donc aucun recalcul pendant le scroll — c'est pour ça qu'on
-       bride la largeur plutôt que d'interpoler un padding. */
-    width: 82%;
-    max-width: 82%;
-    padding-left: 0;
-    padding-right: 0;
-    /* ÉCRAN A → B : ce n'est PAS une autre mise en page. C'est le même bloc,
-       agrandi et redescendu au repos, pendant que le carrousel est invisible.
-       Agrandir et déplacer ne coûtent aucun recalcul.
-       ⇦ --imm-a-drop = « où est le texte au repos ». Purement esthétique tant
-       qu'il reste modeste : à --reveal 0 le carrousel est invisible, mais
-       l'INDICE, lui, est visible — donc ne pas monter ce chiffre sans vérifier
-       qu'on ne descend pas dessus sur un petit écran. */
-    --imm-a-drop: 18svh;
-    -webkit-transform: translateY(calc((1 - var(--reveal)) * var(--imm-a-drop))) scale(calc(1 + (1 - var(--reveal)) * .22));
-    transform: translateY(calc((1 - var(--reveal)) * var(--imm-a-drop))) scale(calc(1 + (1 - var(--reveal)) * .22));
+    position: absolute;
+    top: 64px;      /* sous le header, comme le padding de la couche */
+    bottom: 52px;   /* = hauteur de la bande d'indice (34 + 18) */
+    left: 0;
+    right: 0;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    overflow: hidden;
+    -webkit-transform: translateY(calc(var(--reveal) * -100%));
+    transform: translateY(calc(var(--reveal) * -100%));
+    opacity: clamp(0, calc(1 - var(--reveal) * 1.7), 1);
     /* Transféré sur la couche : on n'empile pas deux calques promus imbriqués. */
     will-change: auto;
-    gap: clamp(6px, 1.4svh, 16px);
+    gap: clamp(8px, 1.8svh, 20px);
   }
 
   /* La phrase est dimensionnée sur la HAUTEUR d'écran, pas sur la largeur :
      c'est la hauteur qui est la ressource rare. L'ancien clamp en `vw`
      produisait un texte grand sur un budget nul (écran large et bas).
-     `overflow: hidden` : si un conseil démesuré arrivait, il se coupe ICI au
-     lieu de pousser les autres zones. Le fondu de coupe et la borne serveur
-     viendront au lot C. */
+     Elle peut être plus généreuse depuis que la zone 1 s'en va : elle n'a plus
+     à cohabiter avec le carrousel, seulement à tenir dans l'écran A. */
   .mescreations-immersion__phrase {
-    font-size: clamp(0.95rem, 2.5svh, 1.6rem);
+    font-size: clamp(1.05rem, 3.1svh, 1.9rem);
     line-height: 1.3;
     overflow: hidden;
   }
@@ -25383,7 +25383,9 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   .mescreations-immersion__selection {
     position: relative;
     bottom: auto;
-    --imm-selection-h: 48svh;
+    /* Peut être plus généreux depuis que la zone 1 sort de l'écran : elle ne
+       lui dispute plus la place. ⇦ LE réglage de la taille des cards. */
+    --imm-selection-h: 56svh;
     -webkit-box-flex: 0;
     -ms-flex: 0 0 auto;
     flex: 0 0 auto;
