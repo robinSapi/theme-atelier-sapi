@@ -24734,7 +24734,20 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   right: 50%;
   margin-left: -50vw;
   margin-right: -50vw;
-  height: 250vh;
+  /* ⚠️ CETTE HAUTEUR FIXE LA DISTANCE ENTRE LES POSITIONS D'ANCRAGE 2 ET 3.
+     La scène épinglée fait 100vh, donc l'épinglage dure `hauteur - 100vh` ;
+     la révélation, elle, se termine sur le repère, à 100vh. D'où :
+       250vh → position 2 à 100vh, catalogue à 250vh = 150vh d'écart, soit
+               UNE POUSSÉE ET DEMIE. L'aimant du catalogue ne mordait alors
+               que sur la toute fin du trajet, et un geste normal le survolait
+               (défaut constaté par Robin).
+       200vh → 100vh d'écart = UNE POUSSÉE = UNE ÉTAPE. C'est le réglage.
+     Le « plateau » (la zone après la révélation où l'écran est identique au
+     pixel près) tombe du coup à zéro, et c'est sans conséquence DEPUIS QU'IL
+     Y A UN AIMANT : la position 2 est un point d'arrêt, on ne peut plus s'y
+     poser « un peu après ». Sans aimant, ce raccourcissement serait une
+     régression de confort. ⇦ Passer à 220vh si le pas paraît trop sec. */
+  height: 200vh;
 }
 /* Le hero = scène épinglée (sticky) de 100vh. --reveal (0→1) est piloté par le
    scroll en JS et anime flou photo + remontée texte + apparition des cards. */

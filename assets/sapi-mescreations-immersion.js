@@ -615,19 +615,35 @@
       try { margin = parseFloat(window.getComputedStyle(cat).scrollMarginTop) || 0; } catch (e) { /* swallow */ }
       return Math.round(cat.getBoundingClientRect().top + window.pageYOffset - margin);
     }
+    /* Les trois positions se comportent comme les trois vues d'un diaporama :
+       tant qu'on est DANS le hero, on est toujours attiré vers la plus proche
+       des trois. Au-dessus du hero et une fois entré dans le catalogue, la
+       page redevient libre — on ne retient jamais quelqu'un qui lit.
+
+       ⚠️ Ça ne marche que parce que le track a été ramené à 200vh (cf. le
+       commentaire de `.mescreations-immersion-track` dans style.css) : les
+       trois positions sont alors à une poussée d'écart. Avec les 250vh
+       d'origine, il fallait franchir les trois quarts d'un écran avant que la
+       page accepte d'aller au catalogue — elle aurait paru retenir. La
+       longueur du track et cette règle d'accroche vont ENSEMBLE : changer
+       l'une sans l'autre ramène le défaut. */
     function snapTarget() {
       if (!track) return null;
       var y = window.pageYOffset;
       var top = Math.round(track.getBoundingClientRect().top + y);
-      var end = top + Math.round(revealSpan);
-      // Dans la zone de révélation : toujours l'une des deux extrémités.
-      if (y >= top - 8 && y <= end + 8) {
-        return (y - top) < revealSpan / 2 ? top : end;
-      }
-      // Au-delà : seulement à l'approche du catalogue.
+      var pos2 = top + Math.round(revealSpan);
       var pos3 = catalogueSnapY();
-      if (pos3 != null && Math.abs(y - pos3) < window.innerHeight * SNAP_CATCH) return pos3;
-      return null;
+      if (pos3 == null) pos3 = pos2;
+
+      if (y < top - 8) return null;                                  // avant le hero : libre
+      if (y > pos3 + window.innerHeight * SNAP_CATCH) return null;   // dans le catalogue : libre
+
+      var best = null, bestDist = Infinity;
+      [top, pos2, pos3].forEach(function (c) {
+        var d = Math.abs(c - y);
+        if (d < bestDist) { bestDist = d; best = c; }
+      });
+      return best;
     }
 
     function maybeSnap() {

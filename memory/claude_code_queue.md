@@ -615,6 +615,19 @@ La distance ne dépend que de `vh`, donc constante : mesurée au chargement, à 
 
 **À recetter en priorité :** le **moment 2** (fermeture de la modale → relâchement du `overflow` → `rewindToTop()` → arrivée exacte en position 1 → retape du conseil → remplacement des cards). C'est la seule séquence où deux scrolls pourraient partir dans la même image.
 
+### ✅ CORRECTIF — « il manque l'aimant de la 3ᵉ partie » (Robin, recette du lot 2)
+
+**Il n'était pas cassé, il mordait à peine.** L'ancre `#mes-creations-catalogue` existe bien. Le problème était géométrique : **150vh entre les positions 2 et 3** (soit une poussée et demie) pour une distance d'accroche de 30vh. Une poussée normale survolait la fenêtre d'accroche, donc l'aimant ne se déclenchait jamais.
+
+**Deux corrections qui vont ENSEMBLE — changer l'une sans l'autre ramène le défaut :**
+
+1. **Track 250vh → 200vh.** La scène épinglée fait 100vh et la révélation finit sur le repère à 100vh, donc la hauteur du track fixe directement l'écart 2→3 : 250 donnait 150vh, 200 donne **100vh = une poussée = une étape**. ⇦ Passer à 220vh si le pas paraît trop sec.
+2. **Accroche vers la plus proche des trois positions sur tout le hero**, au lieu d'une fenêtre étroite autour du catalogue. La bascule 2↔3 se fait donc à mi-chemin (50vh) au lieu des 30 derniers vh. Au-dessus du hero et une fois entré dans le catalogue, la page redevient libre — on ne retient jamais quelqu'un qui lit.
+
+**⚠️ L'agent avait raison de vouloir raccourcir le track, mais pas pour la raison qu'il donnait.** Son argument (« plateau de 150vh, la page paraîtra collée ») reposait sur un chiffre faux — le plateau faisait 50vh. La vraie raison est celle-ci : la hauteur du track gouverne l'écart entre les points d'ancrage, donc le nombre de gestes pour passer d'une étape à la suivante. **Bonne conclusion, mauvaise démonstration** — et c'est en refusant sa démonstration qu'on a mis un lot de plus à trouver la vraie.
+
+**Le « plateau à zéro » que je redoutais en refusant son conseil n'est effectivement plus un problème — mais seulement DEPUIS qu'il y a un aimant** : la position 2 est un point d'arrêt, on ne peut plus s'y poser « un peu après ». Sans aimant, ce raccourcissement aurait bien été une régression de confort. Les deux lots devaient donc être livrés dans cet ordre.
+
 ### ⏳ LOT 2 — spécification d'origine (non codé)
 Ancrage **en JavaScript**, pas en CSS : c'est le seul qui sache **s'abstenir**. Il doit être neutralisé dans quatre fenêtres — verrou de la machine à écrire, modale ouverte, `rewindToTop()` en vol, et geste initié dans le carrousel. Prévoir un drapeau « scroll programmatique » honoré par `rewindToTop()`, `scrollToReveal()` et `scrollToCatalogue()`, et l'annulation au `touchstart`. Arbitrer aussi le `scroll-behavior: smooth` global (l. 128) : deux animations de scroll sur le même axe = rebond. Recette dédiée au moment 2, séquence la plus fragile de la page.
 
