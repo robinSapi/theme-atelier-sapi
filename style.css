@@ -24699,7 +24699,29 @@ body.mescreations-immersion-on .site-header.is-scrolled {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
 }
 /* Le catalogue passe sous le header fixed → marge de scroll pour les ancres. */
+/* Calage du catalogue sous le header quand on lui saute dessus (indice « Voir
+   le catalogue complet », et future 3ᵉ position d'ancrage). ⚠️ Le header ne
+   fait pas la même hauteur partout : 90px en desktop, 64px en mobile — sans
+   la borne, le catalogue se calait 26px trop bas sur téléphone. */
 body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90px; }
+@media (max-width: 768px) {
+  body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 64px; }
+}
+
+/* Repère de fin de révélation : 1px, invisible, hors flux. Il donne au JS la
+   distance EXACTE sur laquelle la révélation doit se jouer, mesurée dans les
+   mêmes unités que la mise en page. Voir le commentaire du markup dans
+   archive-product.php. Le track est `position: relative`, donc ce `top` se
+   compte bien depuis son sommet. */
+.mescreations-immersion__mark {
+  position: absolute;
+  top: 100vh;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+  visibility: hidden;
+}
 
 /* Track de scroll-pinning : full-bleed (sort de la colonne .site-content), sa
    hauteur = durée de la zone épinglée. 250vh → 150vh de scroll épinglé : la
@@ -25137,6 +25159,11 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   gap: 18px;
   overflow-x: auto;
   padding: 4px 2px 8px;
+  /* ⚠️ Empêche le défilement de « déborder » sur la page : arrivé en butée sur
+     la dernière card, iOS enchaîne sinon sur le scroller parent, et un swipe
+     de trop relâche la page vers le catalogue. Sans conséquence visible
+     aujourd'hui, mais ça le deviendrait avec un ancrage vertical. */
+  overscroll-behavior: contain;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;

@@ -556,6 +556,46 @@ Sur l'appareil de Robin, rien ne change (368 ≈ 370). Le gain est sur les grand
 
 ---
 
+## ⚓ ANCRAGE AU DÉFILEMENT — 3 positions (demande Robin, 2026-08-25)
+
+Robin veut trois positions d'arrêt : (1) le conseil en grand, (2) le carrousel révélé, (3) le haut du catalogue. Et il proposait de **tout refaire en deux vues plein écran successives**.
+
+### Avis de l'agent : garder l'architecture, ajouter l'ancrage
+**Le diagnostic de Robin est juste** — la page n'a aujourd'hui aucun endroit où elle veut s'arrêter ; on peut relâcher le doigt à `--reveal: 0.37` et rester sur un état que personne n'a dessiné. Même méthode que ses deux intuitions précédentes : supprimer un continuum d'états non spécifiés.
+
+**Mais deux vues ne peuvent pas partager la photo de fond.** Trois issues, toutes mauvaises : deux photos (ça se lit « on change d'image », pas « la photo se floute ») ; une photo `fixed` (le comportement iOS qu'on a passé la journée à contourner) ; ou un fond `sticky` dans un conteneur englobant — **soit l'architecture actuelle avec d'autres noms**. La simplification promise n'existe que si on abandonne l'effet.
+
+**Contre-intuitif et vérifiable : l'architecture actuelle est PLUS stable pour l'ancrage que deux vues.** Le track est en `vh`, unité qui ignore la barre d'adresse → les positions d'arrêt ne bougent jamais. Deux sections plein écran auraient leurs points d'ancrage définis par leur hauteur ; en `dvh` ils se déplaceraient quand la barre se rétracte — or sur iOS la barre se rétracte PARCE QU'ON SCROLLE. Boucle où scroller déplace la cible.
+
+**Question décisive posée à Robin :** « si le flou se faisait tout seul en une demi-seconde au lieu de suivre ton doigt, le regretterais-tu ? » → **« Oui, j'y tiens. »** Donc on garde le modèle actuel. (Si la réponse avait été non, la refonte de Robin était la bonne : plus courte, sans track, sans `--reveal`, avec des points d'arrêt gratuits.)
+
+### ⚠️ ERREUR DE L'AGENT, corrigée avant de coder
+Il annonçait un **plateau de 150vh** et en déduisait qu'il fallait raccourcir le track à 200vh, présenté comme « une condition, pas un réglage ». **Faux.** Le calcul : track 250vh, scène 100vh → épinglage sur **150vh** ; la révélation finit à 100vh → **plateau = 50vh**, pas 150.
+Conséquence : **raccourcir à 200vh donnerait un plateau de ZÉRO** — le hero commencerait à partir à l'instant même où la révélation se termine, sans aucun endroit où se poser. Ce serait une régression de confort, et surtout invisible à la lecture du plan.
+→ **Track laissé à 250vh.** Son argument (« la page paraîtra collée entre les points 2 et 3 ») ne vaut que pour un ancrage CSS `mandatory` ; on part sur un ancrage JS, dont on fixe nous-mêmes le seuil d'accroche. La longueur de la page se rejugera à l'œil au lot 2, une fois les aimants en place.
+**Leçon : recalculer les chiffres d'un avis avant de bâtir dessus, même quand le reste de l'analyse est solide.**
+
+### ✅ LOT 1 CODÉ — la fondation, SANS aucun aimant
+Livré seul et à recetter seul : c'est le seul lot qui touche à la fluidité, et une régression noyée dans un lot double serait indiagnosticable.
+
+**Le cœur : faire coïncider par construction « la révélation est finie » et « le point d'ancrage 2 ».**
+Un **repère** de 1px, invisible et hors flux, est posé en CSS à `top: 100vh` dans le track (`[data-immersion-mark]`). `applyScroll()` lit sa position au lieu d'utiliser `window.innerHeight`.
+⚠️ **Pourquoi c'est nécessaire** — 4ᵉ épisode de la série des pièges d'unités : sur iOS, `window.innerHeight` **suit** la barre d'adresse (752px) alors que le `100vh` du CSS l'**ignore** (838px). 86px d'écart, invisibles tant qu'ils tombent dans le plateau, mais qui **deviendraient la position d'arrêt elle-même** dès qu'on ancre sur ce point : la page se calerait sur une révélation à ~90 %, texte encore visible, photo pas tout à fait floue. Et l'écart varie avec l'état de la barre → le défaut apparaîtrait et disparaîtrait tout seul.
+La distance ne dépend que de `vh`, donc constante : mesurée au chargement, à 600 ms (polices/images) et aux redimensionnements — **jamais à chaque image de scroll**.
+`scrollToReveal()` (l'indice « Découvre ta sélection ») utilise la même distance → il amène exactement à la fin de la révélation.
+
+**Trois corrections de détail repérées par l'agent :**
+- `overscroll-behavior: contain` sur le slider : en butée sur la dernière card, iOS enchaînait sinon sur le scroller parent — un swipe de trop aurait relâché la page vers le catalogue.
+- `scroll-margin-top` du catalogue borné en mobile (90 → 64px) : le header n'a pas la même hauteur, le catalogue se calait 26px trop bas. Sert aussi à la future 3ᵉ position d'ancrage.
+- Commentaire périmé de `archive-product.php` corrigé : il affirmait encore « en desktop cette div n'existe pas / `display: contents` », faux depuis l'extension du modèle. Exactement le type de commentaire qui fait « corriger » un faux bug.
+
+**Règle posée pour le lot 2 :** la scène épinglée ne doit **JAMAIS** être une cible d'ancrage — un sticky est perpétuellement « déjà aligné » pour le moteur, ce qui donne blocage ou tremblement selon le navigateur. Cibles : le track, le repère, le catalogue.
+
+### ⏳ LOT 2 — les aimants (non codé)
+Ancrage **en JavaScript**, pas en CSS : c'est le seul qui sache **s'abstenir**. Il doit être neutralisé dans quatre fenêtres — verrou de la machine à écrire, modale ouverte, `rewindToTop()` en vol, et geste initié dans le carrousel. Prévoir un drapeau « scroll programmatique » honoré par `rewindToTop()`, `scrollToReveal()` et `scrollToCatalogue()`, et l'annulation au `touchstart`. Arbitrer aussi le `scroll-behavior: smooth` global (l. 128) : deux animations de scroll sur le même axe = rebond. Recette dédiée au moment 2, séquence la plus fragile de la page.
+
+---
+
 ## LOT A — Le socle : les trois zones en flux (mobile portrait) — spécification
 
 **`woocommerce/archive-product.php`** : un conteneur `.mescreations-immersion__layer` autour des trois zones existantes (`__inner`, `__selection`, `__scrollhint`), aujourd'hui frères directs. Une balise ouvrante, une fermante. **Un `<div>` NU** — voir la contrainte a11y ci-dessous.

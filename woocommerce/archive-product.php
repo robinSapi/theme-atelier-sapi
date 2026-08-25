@@ -160,19 +160,11 @@ if ($imm_piece) {
        peuvent pas se chevaucher ; trois blocs punaisés, si — c'est l'origine
        de tous les chevauchements de la recette mobile.
 
-       ⚠️ EN DESKTOP, CETTE DIV N'EXISTE PAS. `display: contents` (règle de
-       base dans style.css) fait qu'elle ne génère aucune boîte, donc elle ne
-       peut pas être bloc conteneur d'un descendant absolu : les trois zones
-       continuent de se positionner contre .mescreations-immersion exactement
-       comme avant. Le desktop, validé en recette, est invariant. Le modèle à
-       zones n'est activé que sous 768px.
-
-       ⚠️ NE JAMAIS AJOUTER ICI de role, aria-*, tabindex ni landmark.
-       `display: contents` retire l'élément de l'arbre d'accessibilité et lui
-       vole son rôle sémantique. Sur cette div NUE l'impact est nul ; un
-       aria-label ajouté un jour disparaîtrait EN DESKTOP SEULEMENT — un bug
-       d'accessibilité asymétrique par breakpoint, invisible en recette
-       visuelle. Si un libellé est nécessaire, le mettre sur une des zones.
+       Le modèle est actif SUR TOUS LES ÉCRANS depuis le 25/08 (il a d'abord
+       été livré en mobile, puis étendu au desktop le même jour). Le bloc
+       `@media (max-width: 768px)` de style.css ne porte plus que les
+       différences du mobile — la zone texte y sort de l'écran au scroll,
+       alors qu'en desktop elle reste dans le flux.
        ══════════════════════════════════════════════════════════════════════ -->
   <div class="mescreations-immersion__layer">
 
@@ -257,6 +249,28 @@ if ($imm_piece) {
 
   </div><!-- /.mescreations-immersion__layer -->
 </section>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     REPÈRE DE FIN DE RÉVÉLATION — élément de 1px, invisible, sans effet sur
+     la mise en page. Il matérialise EN CSS l'endroit exact où la révélation
+     doit être terminée (`top: 100vh`, cf. style.css).
+
+     Pourquoi il existe : jusqu'ici le JS mesurait cette distance avec
+     `window.innerHeight`, qui SUIT la barre d'adresse iOS, alors que le
+     `100vh` du CSS l'IGNORE — 86px d'écart sur un iPhone 14. Sans conséquence
+     tant que l'écart tombe dans le plateau, mais dès qu'on ancrera le scroll
+     sur ce point, l'écart deviendrait la position d'arrêt elle-même : la page
+     se calerait sur une révélation à ~90 %, texte encore un peu visible.
+
+     En lisant sa position, le JS et le CSS ne peuvent plus être en désaccord
+     sur « où finit la révélation » : c'est le même endroit par construction,
+     sur tous les écrans et dans les deux états de la barre d'adresse.
+     C'est aussi la future cible du 2ᵉ point d'ancrage — la scène épinglée,
+     elle, ne doit JAMAIS en être une (un sticky est perpétuellement « déjà
+     aligné » pour le moteur d'ancrage : blocage ou tremblement selon le
+     navigateur).
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="mescreations-immersion__mark" data-immersion-mark aria-hidden="true"></div>
 </div><!-- /.mescreations-immersion-track -->
 <?php } // end état B immersion ?>
 

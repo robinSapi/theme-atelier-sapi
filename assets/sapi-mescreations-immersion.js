@@ -155,7 +155,9 @@
     function scrollToReveal() {
       if (!track) return;
       var trackTop = track.getBoundingClientRect().top + window.pageYOffset;
-      window.scrollTo({ top: Math.round(trackTop + window.innerHeight), behavior: reduceMotion ? 'auto' : 'smooth' });
+      // Même distance que celle qui pilote --reveal : l'indice amène donc
+      // EXACTEMENT à la fin de la révélation, pas à 90 % ni à 110 %.
+      window.scrollTo({ top: Math.round(trackTop + revealSpan), behavior: reduceMotion ? 'auto' : 'smooth' });
     }
     function scrollToCatalogue() {
       var cat = document.getElementById('mes-creations-catalogue');
@@ -476,14 +478,39 @@
 
     /* ── Révélation pilotée par le scroll (--reveal 0→1 via le track épinglé) +
        header opaque (comme la home : quand le bas du hero passe le haut). ── */
+    /* ── Sur quelle distance la révélation se joue ─────────────────────────
+       Mesurée sur le REPÈRE posé en CSS (`[data-immersion-mark]`, à `top:
+       100vh` dans le track), et non plus sur `window.innerHeight`.
+
+       Pourquoi ça compte : sur iOS Safari, `window.innerHeight` SUIT la barre
+       d'adresse (752px barre déployée) alors que le `100vh` du CSS l'IGNORE
+       (838px). Le JS et le CSS n'étaient donc pas d'accord sur « où finit la
+       révélation » — 86px d'écart, invisibles tant qu'ils tombent dans le
+       plateau, mais qui deviendraient la position d'arrêt elle-même dès qu'on
+       ancrera le scroll sur ce point : la page se calerait sur une révélation
+       à ~90 %. En lisant le repère, les deux ne PEUVENT plus diverger.
+
+       La distance ne dépend que de `vh`, donc elle est constante quoi que
+       fasse la barre d'adresse : on la mesure au chargement et aux
+       redimensionnements, pas à chaque image de scroll.
+       Repli sur `window.innerHeight` si le repère manque (markup plus ancien). */
+    var revealMark = track ? track.querySelector('[data-immersion-mark]') : null;
+    var revealSpan = window.innerHeight;
+    function measureRevealSpan() {
+      if (!revealMark || !track) { revealSpan = window.innerHeight; return; }
+      var d = revealMark.getBoundingClientRect().top - track.getBoundingClientRect().top;
+      revealSpan = d > 40 ? d : window.innerHeight; // garde-fou : jamais 0
+    }
+    measureRevealSpan();
+
     var rafPending = false;
     function applyScroll() {
       rafPending = false;
       if (track) {
         var rect = track.getBoundingClientRect();
-        // La révélation se termine après ~1 écran de scroll (innerHeight) ; le
-        // reste de la zone épinglée (le track est plus haut) = PAUSE à --reveal 1.
-        var p = clamp((-rect.top) / window.innerHeight, 0, 1);
+        // La révélation se termine sur le repère ; le reste de la zone
+        // épinglée (le track est plus haut) = PAUSE à --reveal 1.
+        var p = clamp((-rect.top) / revealSpan, 0, 1);
         section.style.setProperty('--reveal', p.toFixed(4));
         if (els.selection) els.selection.style.pointerEvents = p > 0.45 ? 'auto' : 'none';
         // Indices cliquables seulement quand ils sont visibles (sinon ils
@@ -502,8 +529,11 @@
       if (!rafPending) { rafPending = true; requestAnimationFrame(applyScroll); }
     }
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
+    window.addEventListener('resize', function () { measureRevealSpan(); onScroll(); }, { passive: true });
     applyScroll();
+    // La mise en page n'est fiable qu'après le premier rendu (polices, images) :
+    // on remesure une fois, comme pour le débordement du slider.
+    setTimeout(function () { measureRevealSpan(); applyScroll(); }, 600);
 
     /* Verrou de scroll pendant la frappe (sinon le scroll déclenche la
        révélation avant la fin du texte). Libéré quand la machine à écrire finit. */
