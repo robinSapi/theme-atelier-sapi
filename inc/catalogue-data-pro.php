@@ -93,6 +93,22 @@ function sapi_catalogue_format_price($amount) {
   return number_format_i18n($amount, $decimals) . ' €';
 }
 
+/**
+ * Formate un poids WooCommerce (stocké en kg) pour l'affichage.
+ * Grammes en dessous du kilo — « 315 g » se lit mieux que « 0,315 kg » —,
+ * kilos au-delà, sans zéros décimaux inutiles.
+ *
+ * @param float|string|null $kg
+ * @return string '' si aucun poids exploitable
+ */
+function sapi_catalogue_format_weight($kg) {
+  $kg = (float) $kg;
+  if ($kg <= 0) return '';
+  if ($kg < 1) return number_format_i18n(round($kg * 1000)) . ' g';
+  $decimals = (abs($kg - round($kg)) < 0.005) ? 0 : 2;
+  return number_format_i18n($kg, $decimals) . ' kg';
+}
+
 /* =========================================================================
  * 2. Prix par variation
  * ========================================================================= */
@@ -224,6 +240,9 @@ function sapi_catalogue_product_pricing($product) {
         'size'    => $size,
         'essence' => $essence,
         'ttc'     => (float) $ttc,
+        // Le poids vit sur la VARIATION, jamais sur le parent. C'est la seule
+        // source fiable : le champ ACF `poids` du parent est orphelin.
+        'weight'  => (float) $variation->get_weight(),
         'sku'     => (string) $variation->get_sku(),
       ];
     }
@@ -243,6 +262,7 @@ function sapi_catalogue_product_pricing($product) {
         'size'    => '',
         'essence' => '',
         'ttc'     => (float) $ttc,
+        'weight'  => (float) $product->get_weight(),
         'sku'     => (string) $product->get_sku(),
       ];
     }
@@ -271,7 +291,7 @@ function sapi_catalogue_product_pricing($product) {
  * @return array{
  *   sizes: array<int,string>,
  *   essences: array<int,string>,
- *   cells: array<string,array<string,float>>
+ *   cells: array<string,array<string,array{ttc:float,weight:float}>>
  * } sizes/essences peuvent contenir '' (produit sans taille ou sans essence)
  */
 function sapi_catalogue_pricing_matrix($pricing) {
@@ -285,8 +305,11 @@ function sapi_catalogue_pricing_matrix($pricing) {
     if (!in_array($e, $essences, true)) $essences[] = $e;
     // Deux variations sur la même case (doublon en base) : on garde la moins
     // chère — un tarif ne doit jamais surprendre à la hausse.
-    if (!isset($cells[$e][$s]) || $row['ttc'] < $cells[$e][$s]) {
-      $cells[$e][$s] = (float) $row['ttc'];
+    if (!isset($cells[$e][$s]) || $row['ttc'] < $cells[$e][$s]['ttc']) {
+      $cells[$e][$s] = [
+        'ttc'    => (float) $row['ttc'],
+        'weight' => isset($row['weight']) ? (float) $row['weight'] : 0.0,
+      ];
     }
   }
 

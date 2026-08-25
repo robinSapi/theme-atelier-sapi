@@ -41,8 +41,13 @@ if (!defined('ABSPATH')) exit;
 //                    ambiance), a la place d'une ambiance. Le repli d'une
 //                    reserve vide se pose a sa place, l'accessoire reste la
 //                    derniere case affichee.
+// v25 (2026-08-25) : ligne « Poids » RETIREE de la fiche technique des quatre
+//                    surfaces (elle lisait une meta ACF orpheline, et son
+//                    repli interrogeait le produit parent, sans poids sur un
+//                    variable). Le poids passe dans la matrice de prix et
+//                    dans le tableau du tarif pro, aux memes axes.
 // La constante entre dans la clé de cache des DEUX générateurs, public et pro.
-if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '24');
+if (!defined('SAPI_CATALOGUE_PDF_VERSION')) define('SAPI_CATALOGUE_PDF_VERSION', '25');
 
 /**
  * Charge l'autoloader Composer (mPDF) une seule fois.
