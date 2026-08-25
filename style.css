@@ -24916,9 +24916,12 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
      de __inner qui l'agrandit. */
   font-size: clamp(1.3rem, 2.2vw, 1.85rem);
   /* ⚠️ Garde-fou du `scale` : la phrase ne peut pas déborder de l'écran une
-     fois agrandie, puisqu'elle est bornée en em. 20em × 1,2 reste très en
-     deçà de la largeur du bloc. C'est aussi une longueur de ligne lisible. */
-  max-width: 20em;
+     fois agrandie, puisqu'elle est bornée en em. 27em × 1,2 ≈ 930px, très en
+     deçà des 1272px utiles du bloc.
+     ⇦ C'est aussi LA LARGEUR DE LA ZONE DE TEXTE (demande Robin : plus large).
+     L'élargir a un bénéfice caché : moins de lignes, donc une zone 1 plus
+     courte, donc des cards plus hautes. */
+  max-width: 27em;
   margin-left: auto;
   margin-right: auto;
   line-height: 1.35;
@@ -25026,8 +25029,11 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   -webkit-box-flex: 0;
   -ms-flex: 0 0 auto;
   flex: 0 0 auto;
-  height: 42px;
-  margin-bottom: 16px;
+  /* Bande resserrée : chaque pixel rendu ici part dans la photo des cards,
+     puisque le carrousel absorbe l'espace restant. On ne descend pas plus
+     bas, le chevron doit rester cliquable et lisible. */
+  height: 34px;
+  margin-bottom: 14px;
   z-index: 3;
   opacity: 0;
   transition: opacity .6s ease .3s;
@@ -25099,10 +25105,11 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
-  /* ⇦ L'écart entre le bouton « Décrire mon projet » et le titre de la
-     sélection (demande de Robin : le réduire). C'est le SEUL endroit qui le
-     gouverne maintenant que les zones sont en flux. */
-  padding: 20px 24px 0;
+  /* ⇦ L'air AUTOUR du carrousel — haut et bas (demande Robin). C'est le SEUL
+     endroit qui le gouverne maintenant que les zones sont en flux : le haut
+     sépare du bouton « Décrire mon projet », le bas sépare de l'indice.
+     Financé par l'élargissement de la phrase (moins de lignes). */
+  padding: 24px 24px 16px;
   /* Apparaît un peu plus tard que la remontée du texte (de 0.3 à 1) → les deux
      zones ne se croisent pas. */
   opacity: clamp(0, calc((var(--reveal) - 0.3) / 0.7), 1);
@@ -25201,12 +25208,56 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
    SANS toucher au catalogue (préfixe .mescreations-immersion__slider).
    .product-firstname (0.75em) et .product-restname (1.6em) sont relatifs à
    .product-name : le réduire suffit pour le nom ET le surnom Square Peg. */
-.mescreations-immersion__slider .product-info { padding: 0.55rem 0.55rem 0.4rem; }
-.mescreations-immersion__slider .product-name { font-size: 0.78rem !important; }
-.mescreations-immersion__slider .product-category { font-size: 0.68rem; margin-bottom: 0.3rem; }
-.mescreations-immersion__slider .price-from { font-size: 0.78rem; }
-.mescreations-immersion__slider .price-value { font-size: 1.2rem; }
-.mescreations-immersion__slider .product-actions { margin-bottom: 0.7rem; }
+.mescreations-immersion__slider .product-info { padding: 0.7rem 0.6rem 0.4rem; }
+/* Nom remonté (retour Robin : « les titres des produits sont trop petits »).
+   Il était aussi plus PETIT que le prix — hiérarchie inversée : c'est le nom
+   du modèle qu'on vend, pas le chiffre. */
+.mescreations-immersion__slider .product-name { font-size: 1.05rem !important; }
+.mescreations-immersion__slider .product-category { font-size: 0.75rem; margin-bottom: 0.25rem; }
+.mescreations-immersion__slider .price-from { font-size: 0.7rem; }
+.mescreations-immersion__slider .price-value { font-size: 1rem; }
+/* `margin-top: auto` (règle de base de .product-price) poussait le prix tout
+   en bas de la zone texte et y creusait un vide. */
+.mescreations-immersion__slider .product-price { margin-top: 0; gap: 0.35rem; }
+.mescreations-immersion__slider .product-actions { margin-bottom: 0.6rem; }
+
+/* ── Dots du carrousel (remis à la demande de Robin, mobile + desktop) ────
+   Générés en JS (le nombre de cards varie selon la pièce et change au moment
+   2). Zone de frappe élargie par le padding : la pastille visible fait 7px,
+   la cible tactile 22px. */
+.mescreations-immersion__dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  flex: 0 0 auto;
+  margin-top: 4px;
+  min-height: 20px;
+}
+.mescreations-immersion__dots[hidden] { display: none; }
+.mescreations-immersion__dot {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: none;
+  padding: 8px 4px;
+  cursor: pointer;
+  line-height: 0;
+}
+.mescreations-immersion__dot::before {
+  content: "";
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .45);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .35);
+  transition: width .25s ease, background .25s ease;
+}
+.mescreations-immersion__dot.is-active::before {
+  width: 20px;
+  background: #fff;
+}
 
 /* Flèches de part et d'autre du slider (pas de dots). 1 card par clic.
    `align-items: stretch` : les cards remplissent la hauteur du slider au lieu

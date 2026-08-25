@@ -517,6 +517,19 @@ Robin, après validation du mobile : « en desktop, il faut qu'on augmente la ha
 
 **Recette desktop à refaire entièrement** (elle était validée sur l'ancien modèle) : arrivée, scroll complet aller-retour, fluidité, pièce au conseil le plus long (`?piece=chambre-enfant`), flèches du carrousel, dernière card, et `/nos-creations/` inchangé.
 
+### ✅ 4 retours desktop + retour des dots (2026-08-25)
+
+**1. Zone de texte plus large.** `max-width` de la phrase 20 → **27em**. Bénéfice caché : moins de lignes → zone 1 plus courte → cards plus hautes. Reste le garde-fou du `scale` (27em × 1,2 ≈ 930px, très en deçà des 1272px utiles).
+
+**2. Titres produit plus grands.** `product-name` 0,78 → **1,05rem**, prix 1,2 → 1rem, catégorie 0,68 → 0,75rem. Le nom était **plus petit que le prix** : hiérarchie inversée, c'est le nom du modèle qu'on vend. Ajouté aussi le `margin-top: 0` sur le prix en desktop (il n'était qu'en mobile) — la règle de base `margin-top: auto` y creusait un vide.
+
+**3. Plus d'air autour du carrousel.** `padding` de la zone 3 : **24px en haut, 16px en bas**. C'est le seul endroit qui gouverne ces deux écarts maintenant que les zones sont en flux.
+
+**4. Dots remis (mobile + desktop).** Conteneur `[data-immersion-dots]` dans le markup, **contenu généré en JS** : le nombre de cards varie selon la pièce ET change au moment 2, un rendu PHP obligerait à les régénérer côté serveur aussi = deux sources pour la même chose. Ils partagent `cardOffsets()` avec les flèches → un dot cliqué amène la card exactement où une flèche l'aurait amenée, centrée ou non selon ce que le CSS a décidé. Masqués s'il n'y a rien à faire défiler. Reconstruits après `swapCards()`.
+
+**⚠️ ARBITRAGE À CONNAÎTRE — ces trois demandes COÛTENT de la hauteur.** Plus de marges (+20px) et des dots (+24px) se prennent sur la photo, puisque le carrousel absorbe l'espace restant. Compensé en partie par la phrase élargie et par la bande d'indice resserrée (42+24 → 34+14), mais le solde reste négatif : **photo ~199px contre 243px** dans la version que Robin venait de valider.
+**Le levier pour revenir à ~239px : masquer le bouton « Découvrir » en desktop aussi**, comme en mobile — `product-actions` est à l'intérieur du `<a>` qui enveloppe toute la card, donc cliquer n'importe où ouvre déjà la fiche. Une ligne. Non fait : Robin ne l'a pas demandé pour le desktop, où le bouton sert d'affordance au survol.
+
 ---
 
 ## LOT A — Le socle : les trois zones en flux (mobile portrait) — spécification

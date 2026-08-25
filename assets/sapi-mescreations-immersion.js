@@ -33,6 +33,7 @@
       slider:        section.querySelector('[data-immersion-slider]'),
       prev:          section.querySelector('[data-immersion-prev]'),
       next:          section.querySelector('[data-immersion-next]'),
+      dots:          section.querySelector('[data-immersion-dots]'),
       scrollhint:    section.querySelector('[data-immersion-scrollhint]')
     };
     if (els.phrase) els.phraseText = els.phrase.getAttribute('data-immersion-phrase-text') || '';
@@ -200,6 +201,60 @@
       var target = Math.max(0, Math.min(offs.length - 1, idx + dir));
       sliderEl.scrollTo({ left: offs[target], behavior: reduceMotion ? 'auto' : 'smooth' });
     }
+    /* ── Dots ────────────────────────────────────────────────────────────
+       Construits en JS parce que le nombre de cards varie selon la pièce ET
+       change au « moment 2 » quand la sélection est remplacée. Un rendu PHP
+       obligerait à les régénérer aussi côté serveur : deux sources pour la
+       même chose. On les reconstruit donc après chaque swap.
+       Ils partagent `cardOffsets()` avec les flèches → un dot cliqué amène la
+       card exactement là où une flèche l'aurait amenée, centrée ou non selon
+       ce que le CSS a décidé. */
+    var dotsEl = els.dots;
+    function buildDots() {
+      if (!dotsEl || !sliderEl) return;
+      var n = sliderEl.querySelectorAll('.product-card-cinetique, .mescreations-immersion__pcard--sur').length;
+      // Un seul écran de cards = pas de dots (rien à naviguer).
+      var overflow = sliderEl.scrollWidth > sliderEl.clientWidth + 4;
+      dotsEl.innerHTML = '';
+      if (!overflow || n < 2) { dotsEl.hidden = true; return; }
+      dotsEl.hidden = false;
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < n; i++) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'mescreations-immersion__dot';
+        b.setAttribute('data-immersion-dot', String(i));
+        b.setAttribute('aria-label', 'Créations ' + (i + 1) + ' sur ' + n);
+        frag.appendChild(b);
+      }
+      dotsEl.appendChild(frag);
+      updateDots();
+    }
+    function currentIndex() {
+      var offs = cardOffsets();
+      if (!offs.length) return 0;
+      var cur = sliderEl.scrollLeft, idx = 0, best = Infinity;
+      offs.forEach(function (o, i) { var d = Math.abs(o - cur); if (d < best) { best = d; idx = i; } });
+      return idx;
+    }
+    function updateDots() {
+      if (!dotsEl || dotsEl.hidden) return;
+      var idx = currentIndex();
+      [].slice.call(dotsEl.children).forEach(function (d, i) {
+        d.classList.toggle('is-active', i === idx);
+      });
+    }
+    if (dotsEl) {
+      dotsEl.addEventListener('click', function (e) {
+        var b = e.target.closest ? e.target.closest('[data-immersion-dot]') : null;
+        if (!b) return;
+        var offs = cardOffsets();
+        var i = parseInt(b.getAttribute('data-immersion-dot'), 10);
+        if (offs[i] == null) return;
+        sliderEl.scrollTo({ left: offs[i], behavior: reduceMotion ? 'auto' : 'smooth' });
+      });
+    }
+
     function updateArrows() {
       if (!sliderEl) return;
       var overflow = sliderEl.scrollWidth > sliderEl.clientWidth + 4;
@@ -211,6 +266,7 @@
         nextEl.hidden = !overflow;
         nextEl.disabled = sliderEl.scrollLeft >= sliderEl.scrollWidth - sliderEl.clientWidth - 2;
       }
+      updateDots();
     }
     if (prevEl) prevEl.addEventListener('click', function () { scrollCards(-1); });
     if (nextEl) nextEl.addEventListener('click', function () { scrollCards(1); });
@@ -221,9 +277,13 @@
         navRaf = requestAnimationFrame(updateArrows);
       }, { passive: true });
     }
+    buildDots();
     updateArrows();
-    setTimeout(updateArrows, 600);  // recalage après mise en page / chargement images
-    window.addEventListener('resize', updateArrows, { passive: true });
+    // Recalage après mise en page / chargement des images : c'est seulement à
+    // ce moment que le débordement du slider est mesurable de façon fiable,
+    // donc que l'on sait s'il faut des dots.
+    setTimeout(function () { buildDots(); updateArrows(); }, 600);
+    window.addEventListener('resize', function () { buildDots(); updateArrows(); }, { passive: true });
 
     /* ── Moment 2 (refonte filtrage) : à la FERMETURE de la modale Conseiller,
        window.sapiProject émet UNE notification (resume) avec les réponses
@@ -266,6 +326,7 @@
         sliderEl.insertBefore(c, sur || null);
       });
       sliderEl.scrollLeft = 0;
+      buildDots(); // le nombre de cards a pu changer
       updateArrows();
     }
 

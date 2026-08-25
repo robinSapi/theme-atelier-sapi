@@ -235,6 +235,11 @@ if ($imm_piece) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
       </button>
     </div><!-- /.mescreations-immersion__slider-wrap -->
+
+    <!-- Dots du carrousel : générés en JS (le nombre de cards varie selon la
+         pièce, et change au « moment 2 » quand la sélection est remplacée).
+         Rendus ici plutôt qu'en PHP pour n'avoir qu'UNE source de vérité. -->
+    <div class="mescreations-immersion__dots" data-immersion-dots aria-hidden="true"></div>
   </div>
 
   <div class="mescreations-immersion__scrollhint" data-immersion-scrollhint aria-hidden="true">
