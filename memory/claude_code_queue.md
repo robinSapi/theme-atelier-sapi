@@ -1355,3 +1355,42 @@ La meta ACF `poids` reste en base sur 5 produits (Olivia ×2, Charlie, Claudine,
 
 Écart de 1,8 mm entre les deux largeurs utiles de la bande photo (179,2 mm mesuré par Robin vs 181 en constante côté profil pro). Robin : « on s'en moque ».
 
+
+---
+
+## 📨 RETOUR À COWORK — Catalogue prix + Tarifs professionnels : EN PROD ✅ (2026-08-25)
+
+> Ce retour **remplace** celui du 24/08 (« livré sur test, volontairement pas en prod »). Tout est désormais en ligne sur `atelier-sapi.fr`, déployé et recetté par Robin.
+
+### Ce que Robin peut faire dès maintenant
+
+**Envoyer le lien `/catalogue-prix`** à un décorateur ou un architecte qui réclame les prix publics. La page reprend le catalogue avec les PVP TTC en tableau croisé essences × dimensions, et le poids de chaque déclinaison. Elle est `noindex` et retirée du sitemap : elle ne se trouve pas sur Google, le lien se transmet à la main.
+
+**Générer un tarif professionnel** depuis `Produits > Catalogue PRO` : il choisit un taux de remise, coche les produits, saisit éventuellement le nom du revendeur, et récupère un PDF de marque avec prix pro HT, PVP conseillé et poids.
+
+**Le point d'architecture à retenir côté commercial :** le tarif remisé n'existe nulle part sur le web. Le taux est saisi au moment de l'export et disparaît ensuite. Muse peut donc recevoir un -12 % et un prospect de salon un -30 % sans qu'aucun des deux ne puisse deviner l'autre, et sans que le site ait à savoir qui est qui.
+
+### ⚠️ Deux choses à finir AVANT le premier envoi à un revendeur
+
+1. **Les cinq crochets `[à compléter]`** des mentions légales, dans l'admin : minimum de commande, frais de port, délai de fabrication, conditions de règlement, capital social. Tant qu'ils sont là, ils partent tels quels dans le PDF. À remplir **une seule fois**, la valeur est ensuite conservée d'un export à l'autre.
+2. **La cohérence des PVP entre le site et Etsy.** Le tarif pro affiche le prix public conseillé juste à côté du prix d'achat : si les deux divergent sur un modèle, le revendeur voit l'écart. Jamais vérifié.
+
+Robin a dit prendre ces deux points en charge. **Cowork peut utilement le relancer dessus** — ce sont les seuls vrais bloquants commerciaux.
+
+### Ce que Cowork peut préparer
+
+La mécanique est prête, il manque le commercial : un **message-type d'envoi du tarif** à un revendeur (Muse, Ankorstore, prospects salons), et un second pour transmettre `/catalogue-prix` à un prescripteur qui veut les prix publics. Le journal des 20 derniers exports (date, client, taux, nombre de produits) est consultable sous le formulaire d'export — utile pour savoir qui a reçu quoi.
+
+### Constats utiles au business
+
+- **Les prix varient fortement selon l'essence** : jusqu'à 80 € d'écart sur une même taille (Vincent l'incandescent, 85 € en peuplier contre 105 € en okoumé). D'où le tableau croisé plutôt qu'une simple liste.
+- **Une 3ᵉ essence existe en base, « Peuplier teinté noir » (+50 €)**, que le catalogue n'a jamais affichée. Périmètre volontairement maintenu à deux bois — **c'est un choix commercial à reconsidérer si elle se vend**, pas un oubli technique.
+- **Le poids de chaque déclinaison est désormais exposé** dans la matrice de prix et dans le tarif pro. Pour un revendeur, c'est ce qui conditionne le port.
+- **Aucune promotion en cours** au moment du développement. Le tarif se base sur le prix régulier : une promo de saison ne contaminera jamais un tarif annuel déjà envoyé.
+
+### Défaut connu, laissé volontairement
+
+Sur 5 fiches produit (Olivia ×2, Charlie, Claudine, Vincent), une ancienne valeur de test — « 35 Kilos le matin, 22 le soir » — subsiste en base et apparaît dans le **code source** de la page, avant d'être remplacée à l'affichage. Invisible à l'écran pour un visiteur. Robin a choisi de ne pas y toucher.
+
+⚠️ **Si le sujet revient : ne pas supprimer cette donnée sans faire corriger le code d'abord.** C'est elle qui fait exister la ligne « Poids » sur ces 5 fiches ; la supprimer seule ferait disparaître le poids dynamique au lieu de le réparer. Le détail technique est consigné plus haut dans ce fichier.
+
