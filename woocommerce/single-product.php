@@ -767,14 +767,23 @@ get_header();
       $has_acf = function_exists('get_field');
 
       // ── Dimensions (champs ACF + WooCommerce en fallback) ──
+      //
+      // ⚠️ Le champ ACF `poids` N'EST PLUS LU (2026-08-25). Il est ORPHELIN :
+      // retiré des groupes ACF, sa valeur est restée en base et plus aucun
+      // écran d'admin ne permet de la corriger. Cinq produits affichaient ainsi
+      // publiquement « <p>35 Kilos le matin<br /> 22 le soir</p> », balises
+      // comprises. Son repli interrogeait `get_weight()` sur le produit PARENT,
+      // qui n'a jamais de poids sur un variable.
+      // Le poids réel est DÉJÀ affiché, et au bon endroit : WooCommerce l'écrit
+      // dans la description de variation, qui s'affiche quand le client choisit
+      // sa taille (« Dimensions : 50 cm… · Matériau : Peuplier · Poids : 315g »).
+      // La ligne de la fiche technique était donc fausse ET redondante.
       $dimensions_str = '';
-      $poids = '';
       if ($has_acf) {
         $dimensions = get_field('dimensions');
         $hauteur    = get_field('hauteur');
         $largeur    = get_field('largeur');
         $profondeur = get_field('profondeur');
-        $poids      = (string) get_field('poids');
 
         if ($dimensions) {
           $dimensions_str = (string) $dimensions;
@@ -792,11 +801,6 @@ get_header();
           $dimensions_str = $wc_dims;
         }
       }
-      if (!$poids) {
-        $weight = $product ? $product->get_weight() : '';
-        $poids  = $weight ? $weight . ' kg' : '';
-      }
-
       // ── Champs ACF communs (avec fallbacks) ──
       $culot              = ($has_acf ? (string) get_field('culot') : '')                    ?: 'E27';
       $ampoule_reco       = ($has_acf ? (string) get_field('ampoule_recommandee') : '')      ?: 'LED filament 4-6W (2700K)';
@@ -826,7 +830,6 @@ get_header();
       // Section 1 : Dimensions & Produit
       $specs_dimensions   = [];
       $specs_dimensions[] = ['label' => 'Dimensions', 'value' => $dimensions_str ?: 'Voir variations'];
-      if ($poids)                             $specs_dimensions[] = ['label' => 'Poids',              'value' => $poids];
       if ($is_lampadaire && $hauteur_totale)  $specs_dimensions[] = ['label' => 'Hauteur totale',     'value' => $hauteur_totale];
       if ($is_lampadaire && $hauteur_ampoule_ft) $specs_dimensions[] = ['label' => 'Hauteur ampoule', 'value' => $hauteur_ampoule_ft];
       if ($longueur_cable)                    $specs_dimensions[] = ['label' => 'Longueur câble',     'value' => $longueur_cable];
