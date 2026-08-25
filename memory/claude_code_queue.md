@@ -163,6 +163,21 @@ Vérifié aussi : question « table » absente du parcours (T2), règle cuisine 
 
 **Pas de cherry-pick vers master avant le feu vert mobile de Robin.**
 
+### 📱 RECETTE MOBILE — 1ʳᵉ passe (2026-08-25) : 4 constats, 4 correctifs livrés sur test
+
+**Validé d'emblée sur iPhone :** scroll bien bloqué pendant la machine à écrire ; révélation au scroll **fluide, sans saut** (le calcul `--reveal` via `window.innerHeight` encaisse bien la barre d'adresse) ; swipe horizontal du slider nickel ; texte lisible.
+
+**Corrigé — commits `fadfb5c` (CSS) + `41cdb9c` (JS) :**
+
+1. **Indice du bas caché par la barre d'adresse iOS.** Ancrages bas décalés de `--safe-bottom: calc(100lvh - 100svh)` = exactement la hauteur de la barre, et `0` partout ailleurs (desktop, barre rétractée). **⚠️ Ne PAS passer le bloc en `100svh`** : il serait plus court que le viewport barre rétractée → bande de fond visible sous le hero. Le bloc reste en `100vh`, seuls les ancrages bougent.
+2. **Room-picker de `/mes-creations/` trop gros en mobile.** Trois règles à spécificité `0,2,0` écrasaient les réglages mobiles de la home (`0,1,1`) : cartes en 2 colonnes au lieu de 3, titre `clamp(1.6rem…)` = 25,6px au lieu de 20px, padding vertical `clamp(40px…)`. Bloc mobile aligné sur la home, breakpoint porté de 600 à **768px** (celui de la home). **RÈGLE : un hero qui réutilise des classes globales doit reprendre AUSSI leurs médias mobiles, sinon sa spécificité les annule.**
+3. **Densité du slider (mobile + desktop).** Trois causes mesurées sur 390×844 : (a) la phrase tombait sur le **minimum** du clamp desktop — `3.6vw` ne vaut que 14px sur 390px, donc `1.85rem` = 29,6px → ~10 lignes, la moitié de l'écran, collision avec le titre de la sélection ; (b) les flèches étaient **dans le flux flex** : 2×36px + 2×10px = **92px, 24 % de la largeur** → il ne restait que ~27px de la card suivante (d'où la mince bande sur la capture) ; (c) cards à ~60 % texte / 40 % photo. → phrase en `clamp(1.15rem, 5vw, 1.75rem)`, flèches superposées en absolu, textes du slider resserrés et photo agrandie (25vh base / 20vh / 15vh selon la hauteur d'écran). **Tout est préfixé `.mescreations-immersion__slider` : `.product-card-cinetique` est partagé avec le catalogue.**
+4. **Texte IA en retard sur la sélection (moment 2).** Deux requêtes de vitesses très différentes lancées à des moments différents : sélection ~300 ms après la fermeture, conseil IA 1 à 4 s plus tard. `sapi:advice-loading` porte désormais les réponses → l'immersion **précharge** sa sélection dès le début du calcul IA (ses 300 ms disparaissent dans les ~1,9 s d'animation de sortie) et ne l'affiche qu'à `sapi:advice-ready`. **Décision Robin : on attend le conseil DANS TOUS LES CAS**, pas de plafond. Sûr par construction — `fetchAdviceFromIA` a un timeout de 25 s et un `.catch` résolvant à `null`, donc l'événement est toujours émis, échec IA compris. Garde-fou du rechargement (changement de pièce) porté de 4 s à **26 s** : à 4 s il coupait une IA simplement lente et la page repartait sans le conseil. Abandon en cours de questionnaire → pas d'appel IA → mise à jour immédiate, comportement inchangé.
+
+**Vérifié côté machine :** les deux JS parsent (jsc), accolades CSS équilibrées, assets bien déployés sur test (`--safe-bottom` ×8, `pendingSelection` ×7, `advice-loading` avec detail).
+
+**⏳ EN ATTENTE : 2ᵉ passe mobile de Robin** sur les 4 points ci-dessus.
+
 ## [✅ FAIT — sur test] Immersion = via le room-picker (approche simple)
 L'immersion s'active sur `?piece=` valide. En pratique ces URLs viennent du room-picker (cartes = liens `?piece=`). La **reprise auto** (qui ajoutait `?piece=` sans clic pour les revenants) a été **retirée** → un revenant arrive sur le room-picker. Pas de cookie (approche cookie abandonnée car sur-compliquée + souci cache prod). Seul compromis assumé : un lien `?piece=` partagé/favori affiche l'immersion (indistinguable d'un vrai clic). Aucun impact cache prod.
 
