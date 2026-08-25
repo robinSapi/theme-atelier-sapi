@@ -24798,34 +24798,77 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   background: linear-gradient(180deg, rgba(20,14,8,.34) 0%, rgba(20,14,8,.12) 35%, rgba(20,14,8,.50) 100%);
 }
 
-/* ── COUCHE DE CONTENU (modèle à zones) — règle de base : INVISIBLE ────────
-   `display: contents` ne génère aucune boîte : la div n'existe pas pour la
-   mise en page, et ne peut donc pas servir de bloc conteneur à un descendant
-   absolu. Les trois zones continuent de se positionner contre
-   .mescreations-immersion (sticky, donc positionnée) EXACTEMENT comme avant
-   → desktop invariant, sans qu'on touche à une seule de ses règles.
-   Le modèle à zones est activé plus bas, uniquement sous 768px.
+/* ══════════════════════════════════════════════════════════════════════════
+   COUCHE DE CONTENU — MODÈLE À ZONES, désormais SUR TOUS LES ÉCRANS.
+   ──────────────────────────────────────────────────────────────────────────
+   Les trois zones (texte / carrousel / indice) se PARTAGENT une hauteur au
+   lieu d'être punaisées chacune à une distance du bas. Deux zones qui se
+   partagent une hauteur ne peuvent pas se chevaucher : c'est structurel, ce
+   n'est plus un réglage à deviner.
 
-   ⚠️ Base = `contents`, mobile = override, et SURTOUT PAS l'inverse. Enfermé
-   dans un `min-width: 769px`, ce réglage disparaîtrait à la première
-   réorganisation du fichier et laisserait le desktop sans règle du tout.
-   Dans ce sens-ci, l'absence de règle dégrade vers le comportement ACTUEL,
-   donc vers le connu.
-   ⚠️ Corollaire : tout ce qu'on pose sur cette div (position, z-index,
-   transform, overflow, will-change) est IGNORÉ en desktop. Rien ne doit donc
-   être déclaré pour elle en dehors du bloc mobile. */
-.mescreations-immersion__layer { display: contents; }
+   Historique : livré d'abord en mobile (25/08), étendu au desktop le même
+   jour à la demande de Robin. Le desktop était devenu la moitié fragile —
+   ses cards ne pouvaient grandir qu'en mangeant l'écart avec le texte, et il
+   ne restait qu'une dizaine de pixels sous les cards.
 
-/* Bloc texte (pill + phrase + question) : centré, remonte au scroll (--reveal). */
-.mescreations-immersion__inner {
+   ⚠️ Les 5 `bottom: calc(… + var(--safe-bottom))` et les 4 hauteurs
+   `product-media` en vh qui subsistent plus bas sont désormais INERTES : les
+   règles ci-dessous les neutralisent (`position: relative` + `bottom: auto`,
+   `height: auto`). On les laisse en place volontairement — les retirer est
+   un nettoyage à part, à faire une fois la recette desktop validée, pas au
+   milieu d'une refonte.
+
+   `100svh` = viewport le plus PETIT (barre d'adresse déployée), donc un budget
+   CONSTANT : les zones ne se redistribuent jamais quand la barre bouge.
+   `translateY(100dvh - 100svh)` fait glisser le bloc entier vers le bas quand
+   la barre se rétracte, pour qu'il épouse la zone visible — une transform ne
+   coûte aucun recalcul de mise en page.
+   ⚠️ Le repli `height: 100vh` n'est pas décoratif : si `100svh` est inconnu,
+   `height` tomberait à `auto`, `flex: 1` ne distribuerait plus rien et la
+   chaîne de hauteurs des cards ne résoudrait plus. Rupture dure. */
+.mescreations-immersion__layer {
   position: absolute;
-  z-index: 2;
+  top: 0;
   left: 0;
   right: 0;
-  /* Centré à l'état initial (top 50% + translateY -50%) → remonte jusqu'à
-     ~11vh du haut au scroll (reste SOUS le header), en rétrécissant en scale
-     (pas de reflow). À reveal 1 : top 11vh, translateY 0, scale ~0.72. */
-  top: calc(50% - var(--reveal) * 39vh);
+  z-index: 3;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  height: 100vh;   /* repli — voir ci-dessus */
+  height: 100svh;  /* budget constant */
+  -webkit-transform: translateY(calc(100dvh - 100svh));
+  transform: translateY(calc(100dvh - 100svh));
+  will-change: transform;
+  /* Place du header fixe. ⇦ à garder en phase avec la hauteur réelle du header
+     (le mobile a sa propre valeur plus bas). */
+  padding-top: 90px;
+}
+
+/* ── ZONE 1 — pill + phrase + bouton ────────────────────────────────────
+   EN FLUX : elle prend sa hauteur naturelle en haut de la couche, et ne peut
+   donc plus recouvrir le carrousel ni l'indice.
+   Au repos (--reveal 0), elle est simplement DESCENDUE au centre et un peu
+   agrandie — deux transforms, donc aucun recalcul. Ce n'est pas une autre
+   mise en page : c'est le même bloc, déplacé.
+   ⇦ --imm-a-drop et le coefficient du `scale` sont purement ESTHÉTIQUES : ils
+   décident de l'allure au repos, pas des frontières entre zones (celles-ci
+   sont garanties par le flux). Seule réserve : ne pas gonfler `--imm-a-drop`
+   au point de descendre sur l'indice, qui est visible au repos.
+   Le `max-width` de la phrase (plus bas) garantit qu'aucun agrandissement ne
+   la fait déborder de l'écran. */
+.mescreations-immersion__inner {
+  position: relative;
+  top: auto;
+  bottom: auto;
+  z-index: 2;
+  -webkit-box-flex: 0;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
   width: 100%;
   max-width: 1320px;
   margin: 0 auto;
@@ -24833,16 +24876,27 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  /* ⚠️ La zone 1 occupe désormais sa hauteur NATURELLE (avant, elle était
+     réduite à 72 % par un `scale`, donc elle prenait visuellement 28 % de
+     moins). Sans dégonflage, le passage en flux lui ferait manger PLUS de
+     place au carrousel qu'avant — l'inverse de la demande de Robin.
+     D'où le gap resserré ici, la pill sans marge basse et le bouton sans
+     marge haute juste en dessous : ~64px rendus au carrousel. */
+  gap: 12px;
+  --imm-a-drop: 20vh;
   -webkit-transform-origin: center top;
   transform-origin: center top;
-  -webkit-transform: translateY(calc(-50% * (1 - var(--reveal)))) scale(calc(1 - var(--reveal) * 0.28));
-  transform: translateY(calc(-50% * (1 - var(--reveal)))) scale(calc(1 - var(--reveal) * 0.28));
-  will-change: transform, top;
+  -webkit-transform: translateY(calc((1 - var(--reveal)) * var(--imm-a-drop))) scale(calc(1 + (1 - var(--reveal)) * 0.2));
+  transform: translateY(calc((1 - var(--reveal)) * var(--imm-a-drop))) scale(calc(1 + (1 - var(--reveal)) * 0.2));
+  /* Transféré sur la couche : on n'empile pas deux calques promus imbriqués. */
+  will-change: auto;
 }
 
-/* Pill V1 — fade-in */
+/* Pill V1 — fade-in. `margin-bottom: 0` : la pill partagée (.conseiller-sig--v1)
+   porte 16px de marge basse qui s'ADDITIONNAIENT au `gap` du flex. Préfixé,
+   donc la home et /conseils-eclaires/ gardent la leur. */
 .mescreations-immersion__sig {
+  margin-bottom: 0;
   opacity: 0;
   -webkit-transform: translateY(10px);
   transform: translateY(10px);
@@ -24857,9 +24911,16 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 /* Phrase de conseil (machine à écrire) */
 .mescreations-immersion__phrase {
   color: #fff;
-  /* Taille FIXE (lignes figées → pas de reflow/saut pendant le scroll). La
-     réduction au scroll se fait par scale() sur tout le bloc __inner. */
-  font-size: clamp(1.85rem, 3.6vw, 2.75rem);
+  /* Taille FIXE (lignes figées → pas de reflow/saut pendant le scroll).
+     Dimensionnée pour l'état ANCRÉ (--reveal 1) ; au repos, c'est le `scale`
+     de __inner qui l'agrandit. */
+  font-size: clamp(1.3rem, 2.2vw, 1.85rem);
+  /* ⚠️ Garde-fou du `scale` : la phrase ne peut pas déborder de l'écran une
+     fois agrandie, puisqu'elle est bornée en em. 20em × 1,2 reste très en
+     deçà de la largeur du bloc. C'est aussi une longueur de ligne lisible. */
+  max-width: 20em;
+  margin-left: auto;
+  margin-right: auto;
   line-height: 1.35;
   font-style: italic;
   font-weight: 500;
@@ -24911,7 +24972,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   align-items: center;
   gap: 10px;
   max-width: 560px;
-  margin: 6px auto 0;
+  margin: 0 auto; /* le `gap` du flex suffit — voir le dégonflage de la zone 1 */
   padding: 11px 24px;
   background: rgba(255, 255, 255, .18);
   -webkit-backdrop-filter: blur(6px);
@@ -24952,13 +25013,21 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
    séquence de chargement (.is-in) ; à l'intérieur, l'indice « Découvre ta
    sélection » monte+disparaît au scroll, puis « Voir le catalogue complet »
    apparaît une fois la sélection révélée (pause). */
+/* ── ZONE 2 — l'indice, dernier en flux, hauteur RÉSERVÉE ──────────────
+   ⚠️ `position: relative` (et non `static`) est OBLIGATOIRE : les deux indices
+   sont en `position: absolute` À L'INTÉRIEUR. En `static`, ils se
+   résoudraient contre .mescreations-immersion et repartiraient se coller au
+   bas du hero — le chevron coupé sous la barre d'adresse serait de retour.
+   La hauteur explicite est ce qui fait que la zone RÉSERVE sa place : ses
+   enfants étant absolus, ils ne mesurent rien. */
 .mescreations-immersion__scrollhint {
-  position: absolute;
-  /* + --safe-bottom : sinon l'indice passe sous la barre d'adresse iOS. */
-  bottom: calc(24px + var(--safe-bottom));
-  left: 0;
-  right: 0;
+  position: relative;
+  bottom: auto;
+  -webkit-box-flex: 0;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
   height: 42px;
+  margin-bottom: 16px;
   z-index: 3;
   opacity: 0;
   transition: opacity .6s ease .3s;
@@ -25003,17 +25072,37 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 @-webkit-keyframes immersionBob { 50% { -webkit-transform: translateY(5px); } }
 @keyframes immersionBob { 50% { transform: translateY(5px); } }
 
-/* ── Sélection : apparaît au scroll (--reveal), dans la partie basse du hero ── */
+/* ── ZONE 3 — le carrousel : il ABSORBE tout l'espace restant ────────────
+   C'est ce qui répond à la demande de Robin « augmenter la hauteur des cards
+   en desktop » sans avoir à deviner un chiffre : les cards prennent ce qui
+   reste une fois le texte et l'indice servis, et elles grandissent donc
+   d'elles-mêmes sur les grands écrans.
+   ⚠️ `flex: 1 1 0` et NON `1 1 auto` : avec une base `auto`, la hauteur
+   dépendrait encore du contenu, et pendant les ~220 ms où swapCards() vide le
+   slider au moment 2, la zone 1 bougerait. Base `0` = « exactement ce qui
+   reste », quoi que la zone contienne. */
 .mescreations-immersion__selection {
-  position: absolute;
+  position: relative;
+  bottom: auto;
   z-index: 2;
-  left: 0;
-  right: 0;
-  bottom: calc(10vh + var(--safe-bottom));
+  -webkit-box-flex: 1;
+  -ms-flex: 1 1 0px;
+  flex: 1 1 0;
+  min-height: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 0 24px;
+  /* ⇦ L'écart entre le bouton « Décrire mon projet » et le titre de la
+     sélection (demande de Robin : le réduire). C'est le SEUL endroit qui le
+     gouverne maintenant que les zones sont en flux. */
+  padding: 20px 24px 0;
   /* Apparaît un peu plus tard que la remontée du texte (de 0.3 à 1) → les deux
      zones ne se croisent pas. */
   opacity: clamp(0, calc((var(--reveal) - 0.3) / 0.7), 1);
@@ -25024,6 +25113,9 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   display: flex;
   justify-content: center;
   margin-bottom: 14px;
+  -webkit-box-flex: 0;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
 }
 .mescreations-immersion__selection-title {
   color: #fff;
@@ -25057,12 +25149,52 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   flex: 0 0 calc((100% - 36px) / 3);
   scroll-snap-align: start;
 }
-/* Le hero fait 100vh fixe → on plafonne la hauteur de l'image (sinon les cards
-   1:1 larges sont trop hautes et remontent dans le texte). Le reste de la card
-   (nom/catégorie/prix/bouton) garde le design catalogue. */
+/* ── La card REMPLIT sa zone, et c'est la PHOTO qui absorbe ──────────────
+   Le markup réel est .product-card-cinetique > a.product-card-link > (media,
+   info, actions). **Le lien intermédiaire doit être rendu flex lui aussi**,
+   sinon la chaîne de hauteurs est rompue et rien ne se passe — c'est la
+   couche invisible de ce mécanisme.
+   Plus aucune hauteur de photo réglée à la main : elle prend ce qui reste
+   après le nom, la catégorie et le prix. Les `height: 25vh / 30vh / 23vh /
+   17vh` qui subsistent au-dessus et au-dessous sont désormais inertes.
+   ⚠️ TOUT est préfixé .mescreations-immersion__slider : .product-card-cinetique
+   est partagé avec /nos-creations/ et avec le catalogue sous ce hero. */
+.mescreations-immersion__slider .product-card-cinetique {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  height: 100%;
+}
+.mescreations-immersion__slider .product-card-link {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-flex: 1;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
 .mescreations-immersion__slider .product-card-cinetique .product-media {
   aspect-ratio: auto;
-  height: 25vh;
+  height: auto;
+  -webkit-box-flex: 1;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  min-height: 80px; /* ⇦ plancher de la photo */
+}
+.mescreations-immersion__slider .product-info,
+.mescreations-immersion__slider .product-actions {
+  -webkit-box-flex: 0;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
 }
 /* Rééquilibrage card du slider (desktop + mobile) : la card était à ~60 % de
    texte pour 40 % de photo. On resserre l'info pour rendre la place à l'image,
@@ -25076,13 +25208,23 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 .mescreations-immersion__slider .price-value { font-size: 1.2rem; }
 .mescreations-immersion__slider .product-actions { margin-bottom: 0.7rem; }
 
-/* Flèches de part et d'autre du slider (pas de dots). 1 card par clic. */
+/* Flèches de part et d'autre du slider (pas de dots). 1 card par clic.
+   `align-items: stretch` : les cards remplissent la hauteur du slider au lieu
+   d'y être centrées — sans ça, un vide se creuse au-dessus ET en dessous.
+   `flex: 1 1 0` + `min-height: 0` : le slider prend toute la hauteur de la
+   zone 3, indépendamment de ce qu'il contient. */
 .mescreations-immersion__slider-wrap {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 10px;
+  -webkit-box-flex: 1;
+  -ms-flex: 1 1 0px;
+  flex: 1 1 0;
+  min-height: 0;
 }
+.mescreations-immersion__slider-wrap .mescreations-immersion__arrow { align-self: center; }
 .mescreations-immersion__slider-wrap .mescreations-immersion__slider {
+  height: 100%;
   flex: 1 1 auto;
   min-width: 0;
 }
@@ -25266,54 +25408,24 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
    silencieusement écrasé, précisément dans le cas le plus contraint.
 
    ⚠️ ON NEUTRALISE, ON NE SUPPRIME JAMAIS. Les `bottom:` et les hauteurs `vh`
-   des règles au-dessus sont des règles de BASE, actives en DESKTOP (recette
-   validée). `display: contents` protège le desktop de ce qu'on AJOUTE, pas de
-   ce qu'on RETIRE. Toute neutralisation se fait donc ici, par surcharge.
+   qui subsistent dans les règles de base sont désormais inertes (neutralisés
+   là-haut). Les retirer est un nettoyage à part, à faire une fois la recette
+   desktop validée — pas au milieu d'une refonte.
+
+   ⚠️ CE BLOC NE PORTE QUE LES DIFFÉRENCES DU MOBILE. Le modèle à zones
+   lui-même (couche, flux, chaîne de hauteurs des cards) est en RÈGLE DE BASE
+   depuis l'extension au desktop. Ne rien y redupliquer : deux copies d'une
+   même règle finissent toujours par diverger.
    ══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-  /* ── LA COUCHE : une hauteur CONSTANTE, glissée sous la barre d'adresse ──
-     `100svh` = le viewport le plus PETIT (barre déployée). C'est un budget
-     CONSTANT : les zones ne se redistribuent donc JAMAIS quand la barre bouge
-     — c'est ce qui évite que le texte se recoupe en lignes et que les photos
-     changent de taille à chaque transition (le « ça saute »).
-     `translateY(100dvh - 100svh)` fait glisser le bloc entier vers le bas à
-     mesure que la barre se rétracte, pour qu'il reste calé sur la zone
-     visible : le mouvement validé par Robin le 25/08 est conservé.
-
-     ⚠️ Cohérent avec le commentaire de `--safe-bottom` plus haut, malgré
-     l'apparence : là-bas on REMONTE depuis le bas (`100vh - 100dvh`), ici on
-     DESCEND depuis le haut (`100dvh - 100svh`). Le bord bas obtenu est le
-     même : `100dvh`. Les deux formules concordent — NE PAS « corriger ».
-
-     ⚠️ Le repli `height: 100vh` n'est pas décoratif. Si `100dvh` est inconnu,
-     seule la transform tombe → dégradation propre. Mais si `100svh` est
-     inconnu, `height` tomberait à `auto` : plus de hauteur définie, `flex: 1`
-     ne distribue plus rien, `height: 100%` des cards ne résout plus =
-     rupture DURE. Le parc WordPress voit des WebViews d'applications tierces. */
   .mescreations-immersion__layer {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -ms-flex-direction: column;
-    flex-direction: column;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 3;
-    height: 100vh;   /* repli — voir ci-dessus */
-    height: 100svh;  /* budget constant */
-    -webkit-transform: translateY(calc(100dvh - 100svh));
-    transform: translateY(calc(100dvh - 100svh));
-    will-change: transform;
-    /* Place du header fixe. ⇦ à garder en phase avec le `top` de la zone 1. */
+    /* Header plus bas en mobile. ⇦ à garder en phase avec le `top` de la zone 1. */
     padding-top: 64px;
     /* Le carrousel et l'indice sont calés EN BAS. L'espace libre tombe donc en
-       haut, là où flotte la zone 1 (hors flux) — c'est ce qui fait que le
-       carrousel « s'affiche entièrement » quelle que soit la taille d'écran. */
+       haut, là où flotte la zone 1 (hors flux en mobile) — c'est ce qui fait
+       que le carrousel « s'affiche entièrement » quelle que soit la taille
+       d'écran. En desktop la zone 1 reste dans le flux, donc pas de flex-end. */
     -webkit-box-pack: end;
     -ms-flex-pack: end;
     justify-content: flex-end;
@@ -25430,39 +25542,14 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   }
   .mescreations-immersion__slider { height: auto; max-height: 100%; }
 
-  /* ── La card remplit sa zone : la PHOTO absorbe, le texte garde sa taille ──
-     Le markup réel est .product-card-cinetique > a.product-card-link > (media,
-     info, actions) — le lien intermédiaire doit être rendu flex lui aussi,
-     sinon la chaîne de hauteurs est rompue et rien ne se passe.
-     Ces règles NEUTRALISENT les hauteurs `product-media` en vh (30 / 23 / 17)
-     des blocs au-dessus, qui restent en place pour le desktop.
-     ⚠️ TOUT est préfixé .mescreations-immersion__slider : .product-card-cinetique
-     est partagé avec /nos-creations/ et le catalogue sous ce hero. */
+  /* En mobile la card n'est PAS étirée à la zone : sa hauteur vient du rapport
+     de forme de la photo, ce qui permet de centrer le bloc. (La mise en flex
+     de la card et du lien est en règle de base, ne pas la redupliquer ici.) */
   .mescreations-immersion__slider .product-card-cinetique {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -ms-flex-direction: column;
-    flex-direction: column;
     height: auto;
     max-height: 100%;
   }
-  .mescreations-immersion__slider .product-card-link {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -ms-flex-direction: column;
-    flex-direction: column;
-    -webkit-box-flex: 1;
-    -ms-flex: 1 1 auto;
-    flex: 1 1 auto;
-    min-height: 0;
-  }
-  /* ⇦ LE RÉGLAGE DE LA TAILLE DES CARDS, désormais : le RAPPORT DE FORME de la
+  /* ⇦ LE RÉGLAGE DE LA TAILLE DES CARDS EN MOBILE : le RAPPORT DE FORME de la
      photo. `3 / 4` = largeur / hauteur, donc la photo est un tiers plus haute
      que large : ~372px pour une card de 279. C'est lui qui décide de la
      hauteur de toute la card, et donc du centrage du bloc.
@@ -25483,31 +25570,6 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     aspect-ratio: 3 / 4;
     min-height: 60px;
   }
-  .mescreations-immersion__slider .product-info,
-  .mescreations-immersion__slider .product-actions {
-    -webkit-box-flex: 0;
-    -ms-flex: 0 0 auto;
-    flex: 0 0 auto;
-  }
-
-  /* ── Rééquilibrage du texte des cards (retour Robin, 25/08) ────────────
-     Tout ce qu'on gagne ici part directement dans la PHOTO, puisque celle-ci
-     absorbe l'espace restant. C'est le levier le moins cher pour agrandir les
-     images sans toucher à la mise en page.
-
-     1. Le bouton « Découvrir » est MASQUÉ en mobile. Il ne servait à rien :
-        `product-actions` est À L'INTÉRIEUR du `<a class="product-card-link">`
-        qui enveloppe toute la card — taper n'importe où ouvre déjà la fiche.
-        Vérifié dans sapi_immersion_render_product_card(). ~45px rendus.
-     2. Hiérarchie inversée : le NOM du modèle (11,5px) était plus petit que le
-        prix (16,8px). C'est le nom qu'on vend, pas le chiffre. On remonte le
-        nom, on redescend le prix.
-     3. Le grand vide au-dessus du prix venait de `.product-card-cinetique
-        .product-price { margin-top: auto }` (règle de base) : `.product-info`
-        étant en flex-colonne avec `flex: 1`, ce `auto` poussait le prix tout
-        en bas de la zone texte. On le neutralise ici.
-     ⚠️ `!important` sur .product-name : la règle mobile plus haut en porte un
-     (l. ~25120). À spécificité égale, seul un `!important` plus bas gagne. */
   /* ── Carrousel PLEINE LARGEUR, card active CENTRÉE (retour Robin) ──────
      Les cards sont coupées par le bord de l'écran, de façon symétrique.
      ⚠️ TOUT EST EN `vw`, PAS EN `%`, ET C'EST OBLIGATOIRE. Un `flex-basis` en
@@ -25541,6 +25603,21 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     scroll-snap-align: center;
   }
 
+  /* ── Rééquilibrage du texte des cards (retour Robin, 25/08) ────────────
+     Tout ce qu'on gagne ici part directement dans la PHOTO, puisque celle-ci
+     absorbe l'espace restant.
+     1. Le bouton « Découvrir » est MASQUÉ en mobile : `product-actions` est À
+        L'INTÉRIEUR du `<a class="product-card-link">` qui enveloppe toute la
+        card, donc taper n'importe où ouvrait déjà la fiche. Vérifié dans
+        sapi_immersion_render_product_card(). ~45px rendus à la photo.
+     2. Hiérarchie inversée : le NOM (11,5px) était plus petit que le PRIX
+        (16,8px). C'est le nom qu'on vend, pas le chiffre.
+     3. Le grand vide au-dessus du prix venait de `.product-card-cinetique
+        .product-price { margin-top: auto }` (règle de base) : `.product-info`
+        étant en flex-colonne avec `flex: 1`, ce `auto` poussait le prix tout
+        en bas de la zone texte.
+     ⚠️ `!important` sur .product-name : la règle desktop en porte un ; à
+     spécificité égale, seul un `!important` plus BAS dans le fichier gagne. */
   .mescreations-immersion__slider .product-actions { display: none; }
   .mescreations-immersion__slider .product-info { padding: 0.5rem 0.5rem 0.7rem; }
   .mescreations-immersion__slider .product-name { font-size: 0.95rem !important; }

@@ -494,6 +494,29 @@ Robin : « supprimer les marges latérales, les cards coupées au bord de l'écr
 
 **⚠️ À vérifier en recette :** que la **dernière** card (la sur-mesure orange) vient bien au centre. Le `padding-right` d'un conteneur de défilement flex est historiquement ignoré par certains navigateurs ; le `scroll-snap-align: center` devrait suffire à rendre la position atteignable, mais ça se constate.
 
+## 🖥️ MODÈLE À ZONES ÉTENDU AU DESKTOP (2026-08-25) — décision Robin
+
+Robin, après validation du mobile : « en desktop, il faut qu'on augmente la hauteur des cards + réduire l'écart entre le bouton et le conteneur du dessous ».
+
+**Constat qui a motivé l'extension plutôt qu'un réglage :** le desktop était devenu la moitié fragile. Mesuré : il ne restait que **~13px** entre le bas des cards et l'indice. Les cards ne pouvaient donc grandir que **vers le haut**, c'est-à-dire en mangeant l'écart que Robin voulait réduire — les deux demandes étaient le même geste, mais avec ~70px de marge avant collision, marge qui **dépend de la longueur du conseil** (3 lignes en cuisine, 4 en chambre d'enfant → négatif). Exactement le mécanisme corrigé sur mobile. Robin a choisi l'extension du modèle.
+
+**Restructuration :** le modèle à zones passe en **règle de base** (`.mescreations-immersion__layer` devient une vraie couche flex partout, `display: contents` supprimé). Le bloc `@media (max-width: 768px)` ne garde plus que les **différences** du mobile : header 64px, zone 1 hors flux qui sort de l'écran, phrase en svh, carrousel pleine largeur en vw, photo en 3/4, bande d'indice resserrée. **Aucune règle du modèle n'est dupliquée entre les deux** — deux copies finissent toujours par diverger.
+
+**⚠️ PIÈGE MAJEUR, rattrapé au calcul avant livraison.** Le passage en flux **à lui seul aurait RÉDUIT** la photo desktop (197 → ~178px), soit l'inverse de la demande. Cause : la zone 1 était visuellement réduite à 72 % par un `scale`, donc elle occupait 28 % de moins que sa hauteur réelle. En flux, elle prend sa hauteur **naturelle** — donc plus de place qu'avant. **Le flux ne crée pas d'espace, il ne fait que supprimer le risque de chevauchement.** Il a fallu dégonfler la zone 1 en parallèle :
+- `gap` du bloc texte 18 → 12px ;
+- pill : `margin-bottom` 16 → 0 (la marge de `.conseiller-sig--v1`, partagée avec la home, s'**additionnait** au `gap` — neutralisée en préfixé, la home garde la sienne) ;
+- bouton : `margin-top` 6 → 0 ;
+- phrase : `clamp(1.85rem, 3.6vw, 2.75rem)` → `clamp(1.3rem, 2.2vw, 1.85rem)`, dimensionnée pour l'état ANCRÉ (avant, la taille était celle du repos et le `scale` la réduisait) ;
+- bande d'indice : `margin-bottom` 24 → 16px.
+
+**Résultat calculé (1300×790) : photo ~243px contre 197** (+23 %), et **l'écart bouton → titre passe de ~104px à 20px**, réglé par un seul `padding-top` sur la zone 3 — le seul endroit qui le gouverne désormais.
+
+**Ce qui a disparu du desktop :** le `top: calc(50% - reveal*39vh)` animé (propriété de **layout**, donc recalcul à chaque frame de scroll) est remplacé par un `translateY` (compositeur). Le desktop devrait être **plus fluide qu'avant**, pas seulement plus robuste.
+
+**Inertes désormais, à nettoyer plus tard :** les 5 `bottom: calc(… + var(--safe-bottom))` et les 4 hauteurs `product-media` en vh. Neutralisés par les règles de base, laissés en place volontairement — le nettoyage est un chantier à part, après validation de la recette desktop.
+
+**Recette desktop à refaire entièrement** (elle était validée sur l'ancien modèle) : arrivée, scroll complet aller-retour, fluidité, pièce au conseil le plus long (`?piece=chambre-enfant`), flèches du carrousel, dernière card, et `/nos-creations/` inchangé.
+
 ---
 
 ## LOT A — Le socle : les trois zones en flux (mobile portrait) — spécification
