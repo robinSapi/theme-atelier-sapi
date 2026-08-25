@@ -344,6 +344,101 @@ Corrige le chevauchement HAUT constaté à 390×752 / 375×720 / 375×618 barre 
 Résultat mesuré lots 1+2 : plus aucun chevauchement, ni haut ni bas, sur 430×838 / 390×752 / 375×720 / 375×618, dans les deux états de barre.
 **Résidu connu assumé :** viewport > 840px de haut ET < 768px de large (en pratique : site ajouté à l'écran d'accueil en plein écran sur un grand iPhone) → la card garde 30vh et il reste ~8px de contact barre déployée. Pas de 4ᵉ réglage pour ça tant que ce n'est pas constaté.
 
+---
+
+## 🏗️ REFONTE DU HERO IMMERSIF — MODÈLE À ZONES (plan validé, NON CODÉ, 2026-08-25)
+
+> **Ni le lot 1 ni le lot 2 ci-dessus ne seront codés** : le modèle à zones les rend sans objet. Ils restent consignés pour la trace du raisonnement.
+
+### D'où ça vient
+**Le modèle est de Robin**, pas de l'analyse technique. Son objection de départ : « ça me gêne qu'on se base sur un écran iPhone seulement, notre système doit être compatible avec tous les écrans ». Elle est juste, et c'est une objection de **méthode** : raisonner à partir d'appareils mesurés produit des seuils bricolés (`max-height: 840px`, `700px`) qui sont exactement le symptôme d'un modèle qui ne tient pas debout tout seul.
+
+**Sa description :** deux écrans (A = phrase seule, B = phrase + sélection) et des conteneurs qui se partagent la hauteur. Écran A : conteneur 1 centré (pill + texte + bouton) et conteneur 2 collé en bas (indice de scroll). Écran B : conteneur 1 réduit à ~1/3, conteneur 3 au milieu (carrousel), conteneur 2 toujours en bas mais avec un autre texte et une autre action.
+
+**Ce que ça a débloqué :** l'analyse avait écarté le flux au motif que « barre déployée, le budget vertical est nul ou négatif, donc le layout devra comprimer quelque chose à chaque transition de barre ». Robin répond « le texte a dû réduire, **on peut autoriser** ». La taille du texte était tenue pour intouchable ; elle ne l'est pas. Sur ce point comme sur la méthode, il avait raison et l'analyse avait tort.
+
+**Maquette validée par Robin** (ouverte en local sur Mac) : `mockups/immersion-zones-v1.html`. ⚠️ Test local = la **structure** est validée, PAS le comportement de la barre d'adresse iOS, qui ne se vérifiera qu'après portage.
+
+### Les deux mécaniques qui font tenir le modèle
+1. **Hauteur constante + décalage par transform.** La couche de contenu a `height: 100svh` (constante) → les zones ne se redistribuent JAMAIS quand la barre bouge. Elle est décalée par `transform: translateY(calc(100dvh - 100svh))` pour épouser la zone visible → le mouvement validé le 25/08 est conservé.
+   **L'argument décisif n'est pas « une transform est gratuite »** (`dvh` change en continu pendant l'animation de barre, donc il y a bien un recalcul de style par frame). Le vrai argument : aujourd'hui `--safe-bottom` est une **custom property déclarée sur `.mescreations-immersion`** → chaque frame invalide le style de **tout le sous-arbre** ET déclenche 4 recalculs de position. Le modèle ramène ça à **un élément, une propriété non-layout**. → **Le nouveau modèle est strictement MOINS CHER que ce que Robin a déjà validé comme fluide.** Vérifiable, contrairement au slogan.
+   ⚠️ Vérifier la cohérence avec le commentaire l. 24746 : `100dvh - 100svh` (décalage vers le bas depuis le haut) et `100vh - 100dvh` (remontée depuis le bas) donnent **le même bord bas**. Les deux formules concordent — **à écrire dans le CSS, sinon un relecteur « corrigera » un faux bug.**
+2. **A et B ne sont pas deux mises en page.** On construit pour B (l'état contraint) ; A s'obtient par `translateY` + `scale` du même bloc de texte. Portée réelle de « si ça tient en B, ça tient partout » : **portrait, largeur ≤ 768px** (voir lot D).
+
+### ⚠️ Ce que le modèle NE tient PAS, et qu'il ne faut pas répéter
+« Deux frères en flux ne peuvent pas occuper le même pixel » est vrai des **boîtes**, pas du **rendu**. Formulation juste : *le chevauchement entre zones devient impossible, et les ruptures restantes sont **contenues et silencieuses** au lieu d'être étalées à l'écran.* On passe de 8 nombres gouvernant des collisions **couplées** (bouger la hauteur de card déplaçait la card vers le texte) à 4 nombres à **effet local et visible**. C'est le vrai gain. Ne pas prétendre mieux.
+
+### 🎯 Décisions produit de Robin (à respecter, elles ne sont pas techniques)
+- **Ordre de sacrifice quand ça ne tient pas : le TEXTE cède, pas le carrousel.** Le texte réduit jusqu'à son plancher puis se coupe. Le carrousel garde sa place. (À noter : l'analyse recommandait l'inverse ; Robin a tranché autrement, c'est son arbitrage commercial — les créations sont ce qui vend.)
+- **Technique de coupe : FONDU, pas ellipse.** Un « … » sur du multi-lignes exige de fixer un **nombre de lignes** = un nombre réglé à la main de plus. Le fondu s'adapte seul à la place disponible. Décision assumée, à juger à l'œil en recette.
+- **Paysage petits écrans : BASCULE de mode, pas compromis.** Écran A = texte seul. Écran B = carrousel seul. Plus simple à coder que le compromis, et plus lisible qu'un budget où la card ferait 29px de haut.
+
+### ⚠️ Conséquence structurelle à connaître (dite à Robin avant la recette)
+**Dans ce modèle, la hauteur des cards dépend de la longueur de la phrase.** Un conseil long donne des photos plus petites. Aujourd'hui les deux sont indépendants. C'est le prix du modèle, accepté en connaissance de cause.
+
+### 🔴 LA FAUTE RATTRAPÉE : surcharger, ne JAMAIS supprimer
+Le premier jet du portage annonçait « supprimer les 4 ancrages `bottom` et les 4 hauteurs `vh` ». **Ça aurait cassé le desktop**, qui est en recette validée : ce sont des **règles de base**, actives en desktop (l. 24929 `__scrollhint`, l. 24983 `__selection`, l. 25036 `product-media`). Un `position: absolute` sans `top` ni `bottom` retombe à sa position statique = en haut du hero, par-dessus le texte. Et il y a **5** ancrages, pas 4 : 24929, 24983, 25130, 25207, 25212.
+**`display: contents` protège le desktop de ce qu'on AJOUTE, pas de ce qu'on RETIRE.**
+→ Règle du chantier : **toutes** les neutralisations se font par surcharge dans le bloc mobile (`position: static`, `bottom: auto`, `height: auto`, `flex: …`). Zéro suppression de règle de base.
+→ `--safe-bottom` : **déplacer sa déclaration sous `@media (min-width: 769px)`** plutôt que la supprimer. Desktop intact à l'identique, coût de recalcul mobile éliminé, aucune règle desktop touchée.
+
+---
+
+## LOT A — Le socle : les trois zones en flux (mobile portrait)
+
+**`woocommerce/archive-product.php`** : un conteneur `.mescreations-immersion__layer` autour des trois zones existantes (`__inner`, `__selection`, `__scrollhint`), aujourd'hui frères directs. Une balise ouvrante, une fermante. **Un `<div>` NU** — voir la contrainte a11y ci-dessous.
+
+**`style.css`, règle de base (hors media query)** : `.mescreations-immersion__layer { display: contents; }`
+Un élément en `display: contents` ne génère aucune boîte, ne peut donc pas être bloc conteneur d'un descendant absolu : les zones continuent de se résoudre contre `.mescreations-immersion` (sticky, donc positionné) **exactement comme aujourd'hui**. Corollaire : `position`, `z-index`, `transform`, `overflow`, `will-change` posés sur le conteneur sont **ignorés en desktop** → il faut que TOUT soit déclaré dans le bloc mobile, rien dehors.
+⚠️ **Base = `contents`, mobile = override** — et surtout PAS l'inverse (`contents` enfermé dans `min-width: 769px`), qui laisserait le desktop sans règle du tout après une réorganisation du fichier. Cette version dégrade vers le comportement actuel, donc vers le connu.
+⚠️ **JAMAIS de `role`, `aria-*`, `tabindex` ni landmark sur ce conteneur.** `display: contents` le retire de l'arbre d'accessibilité et lui vole son rôle sémantique (bug corrigé Chrome 89 / Safari 16 / iOS 17, mais le parc reste). Sur un `div` nu l'impact est nul ; un `aria-label` ajouté un jour disparaîtrait **en desktop seulement** = bug asymétrique par breakpoint, invisible en recette visuelle. À écrire en commentaire dans le markup.
+
+**`style.css`, bloc `@media (max-width: 768px)`** — placé **APRÈS** les blocs `max-height: 840px / 700px` existants, OU ces blocs bornés en `min-width: 769px`. Non négociable : ils redéclarent `__phrase{font-size}`, `__inner{gap}`, `__describe` **sans borne de largeur**, donc un SE en paysage les matche ET matche `max-width: 768px` → à spécificité égale, le dernier déclaré gagne, et le dimensionnement en `svh` serait **silencieusement écrasé par le `clamp()` en `vw`**, précisément dans le cas le plus contraint. Même traitement pour `@media (max-width: 600px)` (l. 25127, redéclare `__selection{bottom}` et `__inner{gap}`).
+- **La couche** : `height: 100vh` (repli obligatoire) **puis** `height: 100svh` ; `transform: translateY(calc(100dvh - 100svh))` ; `will-change: transform` ; `display: flex; flex-direction: column` ; `padding-top` = hauteur réelle du header fixe.
+  ⚠️ Le repli n'est pas décoratif : si `100dvh` est inconnu, la `transform` est invalidée et tombe → dégradation propre. Mais **si `100svh` est inconnu, `height` tombe à `auto`** → plus de hauteur définie, `flex: 1` ne distribue rien, `height: 100%` des cards ne résout plus = **rupture dure**. Le parc WordPress voit des WebViews d'applications tierces.
+- **Zone 1** (`__inner`) : `position: static; bottom: auto; top: auto; flex: 0 0 auto`. Retirer le `top` animé (propriété de layout) au profit d'un `translateY`. **Retirer aussi `will-change: transform, top` (l. 24812) en mobile** : il est transféré sur la couche, on n'empile pas deux calques promus imbriqués.
+- **Zone 3** (`__selection`) : `position: static; bottom: auto; flex: 1 1 0; min-height: 0`.
+  ⚠️ **`flex: 1 1 0`, PAS `1 1 auto`.** Avec `basis: auto`, la hauteur de la zone dépend encore de son contenu → pendant les ~220 ms où `swapCards()` vide le slider, la base change et **la zone 1 bouge**. `basis: 0` = « exactement ce qui reste », quel que soit le contenu. C'est la vraie expression de « la zone 3 absorbe ».
+- **Zone 2** (`__scrollhint`) : `position: static; bottom: auto; flex: 0 0 auto` **et une hauteur réservée**.
+  ⚠️ **Les deux indices sont en `position: absolute` à l'intérieur** : sans hauteur explicite, la zone ne réserve que son padding et le chevron déborde sous la barre d'adresse — on réintroduirait littéralement le défaut corrigé en 1ʳᵉ passe.
+- **`--safe-bottom`** : déclaration déplacée sous `@media (min-width: 769px)`.
+
+**L'invariant à obtenir, et à vérifier :**
+> *La seule chose au monde qui puisse déplacer une frontière de zone est la longueur de la phrase de Robin. Photos, swap AJAX, reformatage des noms, flèches : tout le reste est absorbé.*
+
+**Bonne nouvelle vérifiée dans le CSS :** `.product-image-main` / `.product-image-hover` sont en `position: absolute; inset` (l. 12449-12460) → elles ne contribuent pas à la hauteur intrinsèque de `.product-media` → **le moment de chargement d'une image est structurellement sans effet**. Ce n'est pas une hypothèse. De même, le reformatage des noms par `product-name-formatter.js` fait grandir `.product-info` et la photo rend la hauteur : la card ne change pas de hauteur, les frontières ne bougent pas.
+
+**Recette Robin :** scroller lentement haut→bas puis remonter, barre déployée puis rétractée → aucun à-coup ; le vocabulaire à employer est « ça **glisse** » (voulu) vs « ça **saute** » (reflow, à signaler). Puis desktop et `/nos-creations/` **rigoureusement identiques**.
+
+**⚠️ Vérifier aussi :** le `padding-top` contre la hauteur réelle du header, en état `.is-scrolled` (header opaque) — aujourd'hui `__inner` est centré et ne peut pas toucher le header ; en flux, il est posé à `padding-top` et la pill peut passer dessous. Et le `backdrop-filter` du bouton (l. 24888) à l'intérieur d'un ancêtre promu : combinaison historiquement fragile, le backdrop peut se vider. Risque faible (le bouton vit déjà dans un ancêtre transformé) mais c'est une ligne de recette.
+
+## LOT B — La card en flux (le vrai markup, la couche invisible)
+
+⚠️ **Le markup réel ne ressemble pas à celui de la maquette** : il y a un `<a class="product-card-link">` entre `.product-card-cinetique` et les blocs, et **quatre** enfants (`product-media`, `product-info`, `product-actions`), pas deux. `.product-card-cinetique` n'est PAS `display: flex` en contexte immersion (il ne l'est que sous `.creations-grid`, l. 8434). **C'est la couche que la maquette masque, et celle qui, oubliée, ferait échouer silencieusement toute la promesse.**
+- Card **et** lien en flex-colonne ; lien en `flex: 1 1 auto; min-height: 0` ; `product-info` **et** `product-actions` en `flex: 0 0 auto` ; `product-media` en `flex: 1 1 auto; min-height: <plancher>`.
+- Neutraliser les 4 hauteurs `product-media` en `vh` **par surcharge** dans le bloc mobile (`height: auto`), jamais par suppression.
+- **Plancher sur `.mescreations-immersion__pcard--sur`** : c'est la card la plus haute du slider (24px de padding + ~121px de texte en px fixes, l. 25066) et elle n'a aucun plancher → **c'est elle qui casse en premier**.
+- Tout préfixé `.mescreations-immersion__slider` — `.product-card-cinetique` est partagé avec `/nos-creations/`.
+
+**Recette :** `/nos-creations/` et le catalogue sous le hero strictement identiques. Slider : swipe, flèches, dernière card sur-mesure.
+
+## LOT C — Le texte : budget vertical, coupe en fondu, borne serveur
+
+- **Phrase, pill et bouton dimensionnés en `svh`** (préfixés). ⚠️ Dans la maquette les 3 éléments sont en `svh` ; sur le site réel **2 sur 3 sont en px fixes ET partagés** : `.conseiller-sig--v1` (l. 8014 — avatar 34px, accroche 24px, `margin-bottom: 16px` qui s'additionne au `gap`) et `__describe` (13,5px). Plancher réel de la zone 1 ≈ 62px de pill + ~40px de bouton, soit **~40 % plus lourd que la maquette validée par Robin**. Sans cette conversion, « le texte s'adapte au budget vertical » ne vaut que pour un tiers de la zone. `.conseiller-sig--v1` est partagé avec la home et `/conseils-eclaires/` → **préfixer impérativement**.
+- **Coupe en fondu** sur les dernières lignes de la phrase (décision Robin, cf. plus haut).
+- ⚠️ **`__phrase { min-height: 2.4em }`** (l. 24838) devient un **plancher de flex** dans le nouveau modèle (un `min-height` explicite bat le `min-height: auto`). Nécessaire pour l'état « 3 points » du loader, mais c'est lui qui décide du point de troncature. À traiter consciemment.
+- **`functions.php` : troncature dure du conseil IA.** Le « max 300 caractères » (~l. 4019) est une **instruction de prompt**, jamais appliquée — aucun `mb_substr`. Un modèle qui rend 420 caractères n'est pas un cas d'école. **C'est la garde la moins chère de tout le chantier**, et sans elle le modèle n'a aucune borne d'entrée.
+
+## LOT D — Paysage : bascule de mode (décision Robin)
+
+⚠️ **Le cas n'est pas celui qu'on croit.** Un iPhone 14 en paysage fait **844 × 390** : 844 > 768, il **sort** du bloc mobile et garde la mise en page absolue. C'est le **SE / 8 en paysage (667 × 375)** qui **entre** dans le modèle en flux, avec ~330 svh. Budget calculé : après zone 1 au plancher (~165px) et zone 2 (~46px), il reste ~56px pour la zone 3, dont 27 de titre → **29px de slider** pour une card qui ne peut pas descendre sous ~172px. Aucune zone ne se chevauche — la promesse est tenue à la lettre — et le résultat est inutilisable.
+→ **Règle `max-width: 768px` ET `max-height: ~500px`** : écran A = texte seul, écran B = carrousel seul. Bascule, pas cohabitation.
+
+---
+
+### Recette finale (appareil réel, texte le plus long)
+430×838 · 390×752 · 375×720 · 375×618 · **667×375 (SE paysage — le cas qui décide)** · une **rotation portrait↔paysage pendant que le track est épinglé** · un moment 2 complet avec swap AJAX.
+
 ## [✅ FAIT — sur test] Immersion = via le room-picker (approche simple)
 L'immersion s'active sur `?piece=` valide. En pratique ces URLs viennent du room-picker (cartes = liens `?piece=`). La **reprise auto** (qui ajoutait `?piece=` sans clic pour les revenants) a été **retirée** → un revenant arrive sur le room-picker. Pas de cookie (approche cookie abandonnée car sur-compliquée + souci cache prod). Seul compromis assumé : un lien `?piece=` partagé/favori affiche l'immersion (indistinguable d'un vrai clic). Aucun impact cache prod.
 
