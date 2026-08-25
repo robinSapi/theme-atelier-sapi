@@ -25159,11 +25159,18 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   gap: 18px;
   overflow-x: auto;
   padding: 4px 2px 8px;
-  /* ⚠️ Empêche le défilement de « déborder » sur la page : arrivé en butée sur
-     la dernière card, iOS enchaîne sinon sur le scroller parent, et un swipe
-     de trop relâche la page vers le catalogue. Sans conséquence visible
-     aujourd'hui, mais ça le deviendrait avec un ancrage vertical. */
-  overscroll-behavior: contain;
+  /* Empêche le défilement HORIZONTAL de « déborder » sur la page : arrivé en
+     butée sur la dernière card, iOS enchaîne sinon sur le scroller parent, et
+     un swipe de trop relâche la page vers le catalogue.
+     ⚠️ SUR L'AXE X UNIQUEMENT, et c'est vital. `overscroll-behavior: contain`
+     tout court s'applique aux DEUX axes. Or `overflow-x: auto` fait aussi de
+     cet élément un scroller vertical (l'autre axe passe de `visible` à `auto`
+     automatiquement) — même s'il n'a rien à faire défiler en hauteur. Le
+     `contain` y bloquait donc la propagation vers la page : le scroll vertical
+     ne marchait plus dès que le doigt ou le pointeur était sur le carrousel.
+     Régression constatée par Robin en recette du lot 1. */
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;

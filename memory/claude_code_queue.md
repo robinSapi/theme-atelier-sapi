@@ -585,7 +585,8 @@ La distance ne dépend que de `vh`, donc constante : mesurée au chargement, à 
 `scrollToReveal()` (l'indice « Découvre ta sélection ») utilise la même distance → il amène exactement à la fin de la révélation.
 
 **Trois corrections de détail repérées par l'agent :**
-- `overscroll-behavior: contain` sur le slider : en butée sur la dernière card, iOS enchaînait sinon sur le scroller parent — un swipe de trop aurait relâché la page vers le catalogue.
+- `overscroll-behavior-x: contain` sur le slider : en butée sur la dernière card, iOS enchaînait sinon sur le scroller parent — un swipe de trop aurait relâché la page vers le catalogue.
+  ⚠️ **RÉGRESSION LIVRÉE PUIS CORRIGÉE — à ne pas refaire.** Écrit d'abord en `overscroll-behavior: contain` (sans axe), ce qui **s'applique aux DEUX axes**. Or `overflow-x: auto` fait aussi de l'élément un scroller **vertical** — l'autre axe passe automatiquement de `visible` à `auto` — même quand il n'a rien à faire défiler en hauteur. Le `contain` y bloquait donc la propagation vers la page : **le scroll vertical ne fonctionnait plus dès que le doigt ou le pointeur était sur le carrousel**, en mobile comme en desktop. Constaté par Robin en recette. Toujours borner l'axe sur un scroller à une seule direction.
 - `scroll-margin-top` du catalogue borné en mobile (90 → 64px) : le header n'a pas la même hauteur, le catalogue se calait 26px trop bas. Sert aussi à la future 3ᵉ position d'ancrage.
 - Commentaire périmé de `archive-product.php` corrigé : il affirmait encore « en desktop cette div n'existe pas / `display: contents` », faux depuis l'extension du modèle. Exactement le type de commentaire qui fait « corriger » un faux bug.
 
