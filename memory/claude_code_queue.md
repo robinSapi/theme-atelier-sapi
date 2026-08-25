@@ -1280,3 +1280,28 @@ Demande de Robin, avec repli sur ambiance. Le nombre **total** de cases étant i
 
 **Restent ouverts, sans urgence :** l'écart de 1,8 mm entre les deux largeurs utiles (179,2 mesuré vs 181 en constante côté pro) ; et le champ « Poids » de 5 fiches qui affiche `<p>35 Kilos le matin</p>` en toutes lettres — le contenu est à corriger côté Robin, et un `wp_strip_all_tags()` sur les valeurs de specs reste à décider.
 
+
+---
+
+### ✅ POIDS — retiré de la fiche technique, porté par la matrice de prix (2026-08-25, commit `8acd8c8`, v25)
+
+**Le point de départ était un faux diagnostic de ma part.** J'avais dit à Robin d'aller corriger le champ « Poids » dans l'admin produit. **Il n'existe pas** : le champ ACF `poids` a été retiré des groupes de champs, mais la valeur est restée en base. `get_field('poids')` la lit toujours alors que plus aucun écran ne permet de l'éditer — visible en façade, introuvable en coulisses.
+
+**Et le problème était bien plus large que les 5 blagues.** Audit de la ligne « Poids » sur les 36 fiches en prod : **28 affichaient « — »**, 5 la blague, 3 un poids correct. Cause : le repli interrogeait `$product->get_weight()` sur le produit **parent**, qui n'a jamais de poids sur un variable. Le code cherchait au seul endroit où l'information ne se trouve pas — alors qu'elle est parfaitement renseignée sur les variations (Olivia : 12/12, de 315 g à 2,01 kg).
+
+**Décision Robin :** le catalogue sans prix n'affiche plus de poids **du tout** ; le poids ne réapparaît que là où il y a des prix.
+
+1. **Ligne « Poids » supprimée** des quatre surfaces. `sapi_catalogue_product_weight()` supprimée, plus aucun appelant. La meta orpheline n'est plus jamais lue par la couche catalogue.
+2. **Le poids vient des variations** et rejoint le prix : prix et poids varient sur **exactement les mêmes axes** (taille × essence), la matrice de prix est donc son domicile naturel — aucun tableau supplémentaire, aucune fourchette approximative, précision totale.
+   - `/catalogue-prix` : sous le prix dans chaque case, en second rang typographique.
+   - PDF pro : une 4ᵉ colonne « Poids ». Pour un revendeur, le poids conditionne le port.
+3. `sapi_catalogue_format_weight()` : grammes sous le kilo, kilos au-delà.
+
+**Vérifié sur test :** `/catalogue` → 0 ligne Poids, 0 « Kilos le matin », 0 poids affiché. `/catalogue-prix` → 141 poids dans les matrices. Vincent : `Peuplier 60 € / 290 g · 80 € / 480 g · 105 € / 800 g · 145 € / 1,20 kg`.
+
+**⚠️ DEUX SUITES À TRAITER**
+
+**(a) La blague reste sur les pages produit publiques.** `woocommerce/single-product.php:777` lit la même meta orpheline pour sa propre fiche technique (ligne 829). Vérifié en prod : `atelier-sapi.fr/mes-creations/olivia-la-gardiena` et `claudine-la-turbine` affichent toujours `<p>35 Kilos le matin</p>`, balises comprises. **Hors périmètre catalogue, pas corrigé.** Même correctif possible (lire les variations), mais c'est un fichier du site marchand, à décider séparément.
+
+**(b) Un second cherry-pick vers `master` est nécessaire.** `master` porte déjà le catalogue depuis `a92516c`, donc la blague part en prod avec le catalogue tant que ce correctif n'est pas repris. Fichiers concernés : `inc/catalogue-data.php`, `inc/catalogue-data-pro.php`, `inc/catalogue-pdf.php`, `inc/catalogue-pdf-pro.php`, `page-catalogue.php`, `assets/catalogue.css`. `functions.php` n'est PAS concerné cette fois.
+
