@@ -592,7 +592,30 @@ La distance ne dépend que de `vh`, donc constante : mesurée au chargement, à 
 
 **Règle posée pour le lot 2 :** la scène épinglée ne doit **JAMAIS** être une cible d'ancrage — un sticky est perpétuellement « déjà aligné » pour le moteur, ce qui donne blocage ou tremblement selon le navigateur. Cibles : le track, le repère, le catalogue.
 
-### ⏳ LOT 2 — les aimants (non codé)
+### ✅ LOT 2 CODÉ — les aimants (2026-08-25)
+
+**Un seul fichier : `assets/sapi-mescreations-immersion.js`.** Aucun CSS, aucun markup.
+
+**La règle d'accroche n'est pas la même partout — c'est le cœur du réglage :**
+- **DANS la zone de révélation** (du haut du track au repère) : on accroche **toujours** vers l'une des deux extrémités, quelle que soit la distance. Un état à moitié révélé n'est jamais un état voulu.
+- **AU-DELÀ** : libre. Le plateau après la révélation est identique au pixel près, donc il n'y a rien à corriger, et le visiteur qui descend vers le catalogue ne doit jamais se sentir retenu. Seule exception : une accroche à l'approche du catalogue (30 % de hauteur d'écran).
+→ **C'est cette asymétrie qui évite l'effet « page collante »** que l'agent redoutait avec un ancrage CSS uniforme.
+
+**Pourquoi en JS et pas `scroll-snap-type` :** le CSS ne sait pas **s'abstenir**. Il faut ne pas ancrer dans quatre situations — verrou de la machine à écrire, modale ouverte, remontée du moment 2 en vol, geste ayant fait défiler le carrousel.
+**Astuce qui couvre les deux premières d'un coup :** le verrou de scroll est posé par `overflow: hidden` sur `html`, par notre machine à écrire **et** par la modale Conseiller. Un seul test (`scrollLocked()`) suffit.
+
+**Détails qui comptent :**
+- **Tous** les scrolls verticaux du fichier passent désormais par `programmaticScrollTo()` (les deux indices + `rewindToTop`) : sans ce drapeau, l'ancreur se déclencherait à la fin de leur animation et se battrait avec elle — deux animations sur le même axe = rebond. Vérifié : plus aucun `window.scrollTo` ni `scrollIntoView` non encadré.
+- **Annulation dès que le visiteur reprend la main** (`touchstart`, `wheel`, `keydown`). ⚠️ Un simple `window.scrollTo(x, y)` ne suffit PAS à annuler : `html` porte un `scroll-behavior: smooth` global (style.css l. 128) qui animerait même ce saut. On neutralise la propriété le temps de l'appel (`jumpTo()`). C'est la réponse à l'arbitrage « smooth global vs animations de calage » soulevé par l'agent.
+- **Geste dans le carrousel** : on teste le **déplacement** de `scrollLeft`, pas la cible du toucher. Un doigt posé sur les cards qui tire la page vers le bas est un scroll vertical légitime et doit s'ancrer comme les autres ; seul un swipe horizontal effectif désactive l'accroche.
+- **`prefers-reduced-motion` → aucun ancrage.** Déplacer la page sous quelqu'un qui a demandé moins d'animation serait à contresens.
+- La scène épinglée n'est **jamais** une cible : les positions sont calculées (haut du track, repère, catalogue moins son `scroll-margin-top`).
+
+**Réglages, tous deux nommés en tête de bloc :** `SNAP_IDLE` (150 ms d'immobilité avant de considérer le geste fini) et `SNAP_CATCH` (0,30 hauteur d'écran = distance d'accroche au catalogue).
+
+**À recetter en priorité :** le **moment 2** (fermeture de la modale → relâchement du `overflow` → `rewindToTop()` → arrivée exacte en position 1 → retape du conseil → remplacement des cards). C'est la seule séquence où deux scrolls pourraient partir dans la même image.
+
+### ⏳ LOT 2 — spécification d'origine (non codé)
 Ancrage **en JavaScript**, pas en CSS : c'est le seul qui sache **s'abstenir**. Il doit être neutralisé dans quatre fenêtres — verrou de la machine à écrire, modale ouverte, `rewindToTop()` en vol, et geste initié dans le carrousel. Prévoir un drapeau « scroll programmatique » honoré par `rewindToTop()`, `scrollToReveal()` et `scrollToCatalogue()`, et l'annulation au `touchstart`. Arbitrer aussi le `scroll-behavior: smooth` global (l. 128) : deux animations de scroll sur le même axe = rebond. Recette dédiée au moment 2, séquence la plus fragile de la page.
 
 ---

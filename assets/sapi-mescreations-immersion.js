@@ -152,16 +152,19 @@
        (cf. applyScroll). */
     var hintRevealEl = section.querySelector('.mescreations-immersion__hint--reveal');
     var hintCatalogueEl = section.querySelector('.mescreations-immersion__hint--catalogue');
+    /* Les deux indices visent EXACTEMENT les positions d'ancrage 2 et 3, et
+       passent par `programmaticScrollTo` : sans ce drapeau, l'ancreur se
+       déclencherait à la fin de leur animation et se battrait avec elle. */
     function scrollToReveal() {
       if (!track) return;
       var trackTop = track.getBoundingClientRect().top + window.pageYOffset;
       // Même distance que celle qui pilote --reveal : l'indice amène donc
       // EXACTEMENT à la fin de la révélation, pas à 90 % ni à 110 %.
-      window.scrollTo({ top: Math.round(trackTop + revealSpan), behavior: reduceMotion ? 'auto' : 'smooth' });
+      programmaticScrollTo(trackTop + revealSpan);
     }
     function scrollToCatalogue() {
-      var cat = document.getElementById('mes-creations-catalogue');
-      if (cat) cat.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+      var y = catalogueSnapY();
+      if (y != null) programmaticScrollTo(y);
     }
     if (hintRevealEl) hintRevealEl.addEventListener('click', scrollToReveal);
     if (hintCatalogueEl) hintCatalogueEl.addEventListener('click', scrollToCatalogue);
@@ -399,8 +402,10 @@
       if (!track) return;
       var top = Math.round(track.getBoundingClientRect().top + window.pageYOffset);
       if (window.pageYOffset <= top + 2) return; // déjà en haut : rien à faire
-      // Même appel que scrollToReveal (l'inverse de celui-ci), volontairement.
-      window.scrollTo({ top: top, behavior: reduceMotion ? 'auto' : 'smooth' });
+      // Position d'ancrage 1. Passe par le drapeau : sinon l'ancreur se
+      // déclencherait à la fin de cette remontée, au moment le plus
+      // scénographié de la page.
+      programmaticScrollTo(top);
     }
     /* On écoute l'événement déterministe émis par la modale à CHAQUE fermeture
        (fin ou abandon), porteur des réponses finales. Fiable contrairement au
@@ -527,6 +532,7 @@
     }
     function onScroll() {
       if (!rafPending) { rafPending = true; requestAnimationFrame(applyScroll); }
+      scheduleSnap();
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', function () { measureRevealSpan(); onScroll(); }, { passive: true });
@@ -534,6 +540,129 @@
     // La mise en page n'est fiable qu'après le premier rendu (polices, images) :
     // on remesure une fois, comme pour le débordement du slider.
     setTimeout(function () { measureRevealSpan(); applyScroll(); }, 600);
+
+    /* ══════════════════════════════════════════════════════════════════════
+       ANCRAGE AU DÉFILEMENT — trois positions d'arrêt (demande Robin)
+       ──────────────────────────────────────────────────────────────────────
+       1. le haut du track  → le conseil en grand, rien de révélé
+       2. le repère         → la révélation est finie, le carrousel est là
+       3. le catalogue      → la section « tous les modèles », calée sous le header
+
+       POURQUOI EN JS ET NON EN CSS. `scroll-snap-type` ferait ça en une ligne,
+       mais il ne sait pas S'ABSTENIR — or il le faut dans quatre situations
+       (verrou de la machine à écrire, modale ouverte, remontée du moment 2,
+       geste qui a fait défiler le carrousel). Et il ne doit surtout pas viser
+       la scène épinglée : un `sticky` est perpétuellement « déjà aligné » pour
+       le moteur d'ancrage, ce qui donne blocage ou tremblement selon le
+       navigateur. Ici les cibles sont des positions calculées, jamais un
+       élément épinglé.
+
+       ⚠️ LA RÈGLE D'ACCROCHE N'EST PAS LA MÊME PARTOUT, et c'est le cœur du
+       réglage : DANS la zone de révélation, on accroche TOUJOURS vers l'une
+       des deux extrémités — un état à moitié révélé n'est jamais un état
+       voulu. AU-DELÀ, on laisse libre : le visiteur qui descend vers le
+       catalogue ne doit jamais se sentir retenu, et le plateau après la
+       révélation est de toute façon identique au pixel près, donc il n'y a
+       rien à corriger. C'est cette asymétrie qui évite l'effet « page
+       collante ».
+
+       Mouvement réduit demandé par le système → aucun ancrage : déplacer la
+       page sous quelqu'un qui a demandé moins d'animation serait à contresens.
+       ══════════════════════════════════════════════════════════════════════ */
+    var SNAP_IDLE = 150;        // ms d'immobilité avant de considérer le geste fini
+    var SNAP_CATCH = 0.30;      // distance d'accroche au catalogue, en hauteurs d'écran
+    var snapTimer = null;
+    var touching = false;       // un doigt est posé
+    var progScroll = false;     // un scroll programmatique est en vol
+    var skipNextSnap = false;   // le geste a fait défiler le carrousel
+    var gestureInSlider = false, sliderStartLeft = 0;
+
+    /* Le verrou de scroll est posé par `overflow: hidden` sur html — par NOTRE
+       machine à écrire ET par la modale Conseiller. Un seul test couvre donc
+       les deux situations où il ne faut pas ancrer. */
+    function scrollLocked() {
+      return document.documentElement.style.overflow === 'hidden';
+    }
+
+    /* Saut instantané. `window.scrollTo(x, y)` ne suffit pas : `html` porte un
+       `scroll-behavior: smooth` global (style.css l. 128) qui animerait même
+       ce saut. On le neutralise le temps de l'appel. Sert à ANNULER une
+       animation d'ancrage dès que le visiteur reprend la main. */
+    function jumpTo(y) {
+      var html = document.documentElement, prev = html.style.scrollBehavior;
+      html.style.scrollBehavior = 'auto';
+      window.scrollTo(0, y);
+      html.style.scrollBehavior = prev;
+    }
+    /* Tout scroll que NOUS déclenchons passe par ici : le drapeau empêche
+       l'ancreur de se déclencher à la fin de l'animation et de se battre avec
+       elle (deux animations sur le même axe = rebond). */
+    function programmaticScrollTo(y) {
+      progScroll = true;
+      window.scrollTo({ top: Math.round(y), behavior: reduceMotion ? 'auto' : 'smooth' });
+      setTimeout(function () { progScroll = false; }, 700);
+    }
+    function cancelProgrammatic() {
+      if (!progScroll) return;
+      jumpTo(window.pageYOffset);
+      progScroll = false;
+    }
+
+    function catalogueSnapY() {
+      var cat = document.getElementById('mes-creations-catalogue');
+      if (!cat) return null;
+      var margin = 0;
+      try { margin = parseFloat(window.getComputedStyle(cat).scrollMarginTop) || 0; } catch (e) { /* swallow */ }
+      return Math.round(cat.getBoundingClientRect().top + window.pageYOffset - margin);
+    }
+    function snapTarget() {
+      if (!track) return null;
+      var y = window.pageYOffset;
+      var top = Math.round(track.getBoundingClientRect().top + y);
+      var end = top + Math.round(revealSpan);
+      // Dans la zone de révélation : toujours l'une des deux extrémités.
+      if (y >= top - 8 && y <= end + 8) {
+        return (y - top) < revealSpan / 2 ? top : end;
+      }
+      // Au-delà : seulement à l'approche du catalogue.
+      var pos3 = catalogueSnapY();
+      if (pos3 != null && Math.abs(y - pos3) < window.innerHeight * SNAP_CATCH) return pos3;
+      return null;
+    }
+
+    function maybeSnap() {
+      if (skipNextSnap) { skipNextSnap = false; return; }
+      if (reduceMotion || touching || progScroll || scrollLocked()) return;
+      var target = snapTarget();
+      if (target == null) return;
+      if (Math.abs(target - window.pageYOffset) < 4) return; // déjà en place
+      programmaticScrollTo(target);
+    }
+    function scheduleSnap() {
+      clearTimeout(snapTimer);
+      snapTimer = setTimeout(maybeSnap, SNAP_IDLE);
+    }
+
+    document.addEventListener('touchstart', function (e) {
+      touching = true;
+      cancelProgrammatic(); // le doigt reprend toujours la main
+      gestureInSlider = !!(sliderEl && e.target && sliderEl.contains(e.target));
+      sliderStartLeft = sliderEl ? sliderEl.scrollLeft : 0;
+    }, { passive: true });
+    document.addEventListener('touchend', function () {
+      touching = false;
+      /* On n'ancre pas si le geste a réellement fait défiler le carrousel.
+         Test sur le DÉPLACEMENT et non sur la cible du toucher : un doigt posé
+         sur les cards qui tire la page vers le bas est un scroll vertical
+         parfaitement légitime, et il doit s'ancrer comme les autres. */
+      if (gestureInSlider && sliderEl && Math.abs(sliderEl.scrollLeft - sliderStartLeft) > 6) {
+        skipNextSnap = true;
+      }
+      gestureInSlider = false;
+      scheduleSnap();
+    }, { passive: true });
+    window.addEventListener('wheel', cancelProgrammatic, { passive: true });
+    window.addEventListener('keydown', cancelProgrammatic);
 
     /* Verrou de scroll pendant la frappe (sinon le scroll déclenche la
        révélation avant la fin du texte). Libéré quand la machine à écrire finit. */
