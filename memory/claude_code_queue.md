@@ -305,6 +305,45 @@ Il est déclaré APRÈS `@media (max-width: 768px)`, et le viewport large d'un i
 **Plan de refonte gardé sous le coude (5 étapes, CSS mobile uniquement, desktop intouché) :** 1) les 3 zones en flex column, `__inner` perd son `top` animé ; 2) `padding-bottom: calc(100vh - 100svh)` sur la scène **remplace et supprime** `--safe-bottom` (valeur statique → plus aucun recalcul pendant le scroll) ; 3) la photo de card absorbe l'espace restant (`flex:1 1 auto` + `min-height`), ce qui **supprime les 4 hauteurs en vh** ; 4) écrans très courts + borne du texte IA, ce qui **supprime les 2 blocs `max-height`** et le piège C ; 5) facultatif, unifier desktop. Bilan : de 7 chiffres réglés à la main à 1. `applyScroll()` n'est touché par aucune étape — `--reveal` reste calculé sur `window.innerHeight`, validé.
 **Risque principal identifié :** aujourd'hui les 3 zones sont hors flux, donc rien de ce qui leur arrive ne peut provoquer de reflow pendant le pinning. Les remettre en flux rend la scène sensible aux variations de hauteur (images de card qui chargent, swap AJAX du moment 2). Parade prévue : hauteur des zones imposée par le conteneur, pas par le contenu. **À vérifier au doigt, pas au raisonnement** — c'est l'acquis principal qui est en jeu.
 
+### ✅ ÉTAPE 0 VALIDÉE PAR ROBIN (2026-08-25) — puis MESURES SUR LE SITE : la refonte en flux est ABANDONNÉE
+
+**Étape 0 validée sur iPhone.** Retour Robin : « les écarts avec la barre du bas et des mouvements fonctionnent très bien ». À retenir : **il apprécie explicitement que les éléments SUIVENT la barre en temps réel**, pas seulement qu'ils soient bien placés. Toute proposition qui figerait ce mouvement est une régression de confort, pas une simplification neutre.
+
+**Puis on a mesuré la vraie page** (test.atelier-sapi.fr, dans des iframes aux dimensions réelles des viewports iOS). Trois découvertes qui renversent le plan de refonte :
+
+**1. Le viewport CSS d'un iPhone n'est PAS la taille de son écran.** Un iPhone 14 « 390×844 » donne un viewport CSS de **390×752** sous Safari. Conséquence directe : `@media (max-height: 840px)` s'applique sur **tous** les iPhones. Le `30vh` de hauteur de card du bloc mobile n'a **jamais** été actif sur un téléphone — c'est le `23vh` qui gouverne. Le commentaire du fichier a été corrigé pour le dire.
+
+**2. Le « grand vide » de 280px n'est PAS une ressource.** Il n'existe que barre **rétractée** et disparaît intégralement barre déployée — c'est exactement la marge que la barre consomme (la sélection porte `--safe-bottom`, le bloc texte non). Il n'y a donc rien à redistribuer : c'est déjà la marge de sécurité du pire état.
+
+**3. Un chevauchement HAUT existe en production, invisible sur l'écran de Robin.** À 390×752 barre déployée (iPhone 12→15 standard), « MA SÉLECTION POUR TA CUISINE » s'écrit **par-dessus** le bouton « Décrire mon projet » (−50px). −69px sur un 13 mini, −19px sur un SE. Robin ne l'a jamais vu parce que son viewport fait 838px.
+
+**➡️ La refonte en flux est ABANDONNÉE, et pour une raison plus forte que le risque de reflow initialement identifié.** Le débat « svh statique vs dvh dynamique » supposait qu'il existe une hauteur de contenu tenant dans les deux états de barre. Les mesures disent le contraire : barre déployée, le budget vertical est **nul ou négatif sur la moitié des iPhones**. Un layout en flux devrait donc **compresser** quelque chose à chaque transition de barre — photo de card qui change de hauteur, phrase qui se recoupe en lignes, tout le bloc qui sursaute. En absolu, la même contrainte se traduit par des blocs qui **glissent** l'un vers l'autre sans jamais se redimensionner : c'est fluide, et c'est précisément ce que Robin vient de valider. **On garde l'absolu, on corrige l'unité.**
+(La 3ᵉ voie — `transform: translateY()` sur le seul `__scrollhint` — tient techniquement mais ne sert à rien tant que rien n'est en flux : `bottom` ne provoque aucun reflow de voisin. Gardée en réserve.)
+
+### 📋 LOT 1 — ancrage bas déterministe (PLAN, NON CODÉ, en attente du go de Robin)
+
+**Le correctif de fond :** l'ancrage de la sélection passe de `vh` à **px**. L'écart card ↔ indice valait `X vh − 55,5px` (+3px sur un grand iPhone, −3 sur un iPhone 14, −19 sur un SE) ; il vaut désormais **+15px constant sur tous les écrans et dans les deux états de barre**.
+- Supprimé : `bottom: calc(8vh + …)` du bloc `@media (max-width: 600px)`. L'ancrage est décidé en **un seul endroit**.
+- Ajouté **en toute fin de `style.css`** : bloc `@media (max-width: 768px)` avec `--hint-band: 33px` et `--selection-bottom: 63px`, plus la compaction de l'intérieur de la bande d'indice (chevron 18→16px, interligne 1,5→1,2, gap 5→3). L'indice **garde ses 24px** d'écart au bord d'écran, et `--safe-bottom` reste porté par les deux blocs → le mouvement validé est intact.
+- **Un seul chiffre à ajuster** pour l'air sous les cards : `--selection-bottom`. +1px = +1px d'air.
+- ⚠️ **L'EMPLACEMENT EN FIN DE FICHIER EST OBLIGATOIRE.** Les blocs `@media (max-height: 840px/700px)` déclarent `bottom` sur le même élément à spécificité égale ; une media query n'ajoute pas de spécificité, donc le plus bas gagne. Remonté ailleurs → sans effet sur iPhone, symptôme « rien n'a changé du tout ». Leurs `7vh`/`6vh` sont **conservés exprès** : morts sur mobile, vivants sur une fenêtre desktop basse (cas courant), et le desktop est en recette validée.
+
+**Recette Robin, `?piece=cuisine` :**
+1. Haut de page, barre déployée puis rétractée : l'indice et son chevron toujours entièrement visibles, à la même distance du bord. Le chevron est un peu plus petit et plus près du texte — voulu.
+2. Descendre jusqu'aux cards : « Voir le catalogue complet » **nettement sous** la card, avec de l'air. Le bas de la card n'est plus coupé.
+3. **Déployer / rétracter la barre plusieurs fois, cards visibles** : les cards et l'indice glissent **ensemble**, l'air entre eux ne change pas.
+4. Scroller lentement haut→bas puis remonter, dans les deux états de barre : aucun à-coup.
+5. Desktop + `/nos-creations/` : rigoureusement identiques (contrôle qui a manqué deux fois).
+
+**Vocabulaire pour décrire un problème :** « ça **glisse** » = comportement voulu. « ça **saute** quand la barre change » = reflow, à signaler immédiatement (ne devrait pas arriver, rien n'est passé en flux).
+
+### ⏳ LOT 2 PRÊT, NON CODÉ — tenue du contenu sur écrans courts (le bug invisible chez Robin)
+
+Corrige le chevauchement HAUT constaté à 390×752 / 375×720 / 375×618 barre déployée. Deux blocs `@media (max-width: 768px) and (max-height: 780px | 700px)` : phrase réduite, `scale` du bloc texte à pleine révélation porté de 0,72 à 0,64 (une **transform** : pas de re-coupe de lignes, pas de reflow, et l'état d'arrivée `--reveal: 0` strictement inchangé), photo de card 23→21vh. **Rien ne s'applique au-dessus de 780px de haut → l'écran de Robin n'est pas concerné et ne doit RIEN voir changer.**
+⚠️ Robin ne peut pas recetter ce lot sur son téléphone : le test principal est justement que **rien ne bouge** chez lui. La vérification réelle demande un iPhone plus petit (mini, SE, 12→15 non-Plus).
+Résultat mesuré lots 1+2 : plus aucun chevauchement, ni haut ni bas, sur 430×838 / 390×752 / 375×720 / 375×618, dans les deux états de barre.
+**Résidu connu assumé :** viewport > 840px de haut ET < 768px de large (en pratique : site ajouté à l'écran d'accueil en plein écran sur un grand iPhone) → la card garde 30vh et il reste ~8px de contact barre déployée. Pas de 4ᵉ réglage pour ça tant que ce n'est pas constaté.
+
 ## [✅ FAIT — sur test] Immersion = via le room-picker (approche simple)
 L'immersion s'active sur `?piece=` valide. En pratique ces URLs viennent du room-picker (cartes = liens `?piece=`). La **reprise auto** (qui ajoutait `?piece=` sans clic pour les revenants) a été **retirée** → un revenant arrive sur le room-picker. Pas de cookie (approche cookie abandonnée car sur-compliquée + souci cache prod). Seul compromis assumé : un lien `?piece=` partagé/favori affiche l'immersion (indistinguable d'un vrai clic). Aucun impact cache prod.
 

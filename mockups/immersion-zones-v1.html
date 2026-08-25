@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Immersion — modèle à zones (maquette v1)</title>
+<style>
+/* ══════════════════════════════════════════════════════════════════════════
+   MAQUETTE — modèle à zones proposé par Robin (25/08/2026)
+   Autonome : aucune dépendance, aucun lien avec le thème. À jeter après usage.
+
+   CE QU'ELLE DÉMONTRE
+   1. Trois zones en FLUX. Deux frères en flux ne peuvent pas occuper le même
+      pixel : le chevauchement devient impossible, ce n'est plus un réglage.
+   2. La mise en page est calculée sur une hauteur CONSTANTE (100svh = le
+      viewport le plus petit, barre d'adresse déployée). Elle ne se recalcule
+      donc JAMAIS quand la barre bouge.
+   3. Le mouvement validé le 25/08 est conservé : tout le bloc est GLISSÉ vers
+      le bas quand la barre se rétracte, via translateY(100dvh - 100svh).
+      Glisser ne coûte rien au navigateur — pas de recalcul, pas de saccade.
+   4. Les écrans A et B ne sont PAS deux mises en page. On construit pour B
+      (l'état contraint) ; A s'obtient en agrandissant et redescendant le même
+      bloc de texte. Agrandir/déplacer = transform = gratuit.
+      Conséquence : si ça tient en B, ça tient partout.
+   5. Le texte est dimensionné en `svh` : il s'adapte au budget VERTICAL, qui
+      est la ressource rare, au lieu de la largeur.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #2A2018;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Le track : donne la longueur de scroll qui pilote --reveal ─────────── */
+.track { position: relative; height: 250vh; }
+
+/* ── La SCÈNE : épinglée, 100vh. Elle ne porte QUE le décor. ─────────────
+   Elle reste en 100vh (et non svh) pour que la photo couvre le viewport le
+   plus grand : aucune bande de fond ne peut apparaître barre rétractée. */
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  --reveal: 0;
+}
+.stage__bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255,214,150,.55), transparent 55%),
+    linear-gradient(170deg, #C9A87C 0%, #A8865E 45%, #6B5340 100%);
+  filter: blur(calc(var(--reveal) * 14px)) brightness(calc(1 - var(--reveal) * .26));
+  transform: scale(calc(1 + var(--reveal) * .08));
+}
+.stage__scrim {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(20,14,8,.34) 0%, rgba(20,14,8,.10) 35%, rgba(20,14,8,.52) 100%);
+}
+
+/* ══ LA COUCHE DE CONTENU — le cœur du modèle ══════════════════════════════
+   height: 100svh  → hauteur CONSTANTE (viewport barre déployée). Les zones se
+                     partagent toujours le même budget : zéro recalcul quand la
+                     barre bouge.
+   translateY(100dvh - 100svh) → glisse le bloc vers le bas à mesure que la
+                     barre se rétracte, pour qu'il épouse toujours la zone
+                     visible. Barre déployée : dvh == svh → 0. Barre rétractée :
+                     dvh == lvh → hauteur de barre. Une transform ne provoque
+                     AUCUN recalcul de mise en page. */
+.layer {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 100svh;
+  transform: translateY(calc(100dvh - 100svh));
+  display: flex;
+  flex-direction: column;
+  padding: 64px 16px 0; /* 64 = place du header du site */
+}
+
+/* ── ZONE 1 — pill + texte + bouton ──────────────────────────────────────
+   flex-basis en % du budget : c'est la « part de l'écran donnée au texte ».
+   min-height la protège sur les écrans très courts. */
+.zone1 {
+  flex: 0 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 1.4svh, 16px);
+  text-align: center;
+  /* ÉCRAN A → B : le même bloc, agrandi et redescendu. Aucune des deux
+     propriétés ne coûte de recalcul.
+     --a-drop = de combien il descend au repos. Purement esthétique : à
+     --reveal 0 le carrousel est invisible, donc rien à heurter. */
+  --a-drop: 26svh;
+  transform:
+    translateY(calc((1 - var(--reveal)) * var(--a-drop)))
+    scale(calc(1 + (1 - var(--reveal)) * .30));
+  transform-origin: center top;
+}
+
+.pill {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(58,44,32,.86);
+  border-radius: 999px;
+  padding: 5px 16px 5px 5px;
+  font-size: clamp(11px, 1.7svh, 15px);
+  font-style: italic;
+}
+.pill__ava {
+  width: clamp(24px, 3.4svh, 34px); height: clamp(24px, 3.4svh, 34px);
+  border-radius: 50%; background: #8B6F4E; flex: 0 0 auto;
+}
+
+/* Le texte est dimensionné en `svh` : il s'adapte au budget VERTICAL, la
+   ressource rare. En `vw` (l'ancien réglage) il ignorait la hauteur — d'où un
+   texte trop grand sur les écrans larges et bas. */
+.phrase {
+  margin: 0;
+  font-size: clamp(14px, 2.5svh, 26px);
+  line-height: 1.32;
+  font-style: italic;
+  text-shadow: 0 1px 12px rgba(0,0,0,.45);
+  max-width: 22em;
+  /* Dernier rempart : si un texte délirant arrivait, il se coupe ici plutôt
+     que de pousser les autres zones. N'arrive jamais si le texte est borné. */
+  overflow: hidden;
+}
+.describe {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: rgba(255,255,255,.20);
+  border: 0; border-radius: 999px;
+  color: #fff; text-align: left;
+  padding: clamp(7px, 1.2svh, 12px) clamp(14px, 2svh, 22px);
+  font-size: clamp(11px, 1.6svh, 14px);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  opacity: var(--reveal-inv, 1);
+}
+
+/* ── ZONE 3 — la sélection. Elle ABSORBE ce qui reste. ───────────────────
+   flex: 1 1 auto + min-height: 0 → c'est elle qui encaisse la variation, pas
+   les autres. Si le texte est long, c'est le carrousel qui rétrécit. */
+.zone3 {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: clamp(8px, 1.6svh, 20px);
+  opacity: clamp(0, calc((var(--reveal) - .30) / .70), 1);
+  transform: translateY(calc((1 - var(--reveal)) * 24px));
+}
+.zone3__title {
+  flex: 0 0 auto;
+  font-size: clamp(11px, 1.6svh, 14px);
+  font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  text-align: center;
+  margin-bottom: clamp(6px, 1.2svh, 14px);
+  text-shadow: 0 1px 10px rgba(0,0,0,.4);
+}
+.slider {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex; gap: 14px;
+  overflow-x: auto;
+  padding-left: 20px; scroll-padding-left: 20px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.slider::-webkit-scrollbar { display: none; }
+.card {
+  flex: 0 0 78%;
+  scroll-snap-align: start;
+  background: #fff; color: #2A2018;
+  border-radius: 14px; overflow: hidden;
+  display: flex; flex-direction: column;
+  height: 100%;
+}
+/* La photo prend ce qui reste après le texte de la card. Plus aucune hauteur
+   en vh à régler : 4 chiffres supprimés d'un coup. */
+.card__media {
+  flex: 1 1 auto;
+  min-height: 80px;
+  background: linear-gradient(160deg, #E9762E, #C4551B);
+}
+.card__info {
+  flex: 0 0 auto;
+  padding: .55rem .5rem .7rem;
+  text-align: center;
+}
+.card__name { font-size: .78rem; font-weight: 700; letter-spacing: .04em; }
+.card__cat  { font-size: .68rem; color: #7A6A5A; margin: .15rem 0 .3rem; }
+.card__price { font-size: 1.05rem; font-weight: 700; }
+.card__price small { font-size: .68rem; font-weight: 400; color: #7A6A5A; }
+.card__cta { color: #E35B24; font-size: .68rem; font-weight: 700; margin-top: .35rem; }
+
+/* ── ZONE 2 — l'indice, toujours collé en bas ────────────────────────────
+   flex: 0 0 auto → hauteur intrinsèque, jamais comprimée. */
+.zone2 {
+  flex: 0 0 auto;
+  padding: clamp(6px, 1.2svh, 14px) 0 clamp(10px, 1.8svh, 22px);
+  text-align: center;
+  font-size: clamp(9px, 1.3svh, 11px);
+  letter-spacing: .1em; text-transform: uppercase;
+  text-shadow: 0 1px 8px rgba(0,0,0,.5);
+  position: relative;
+}
+.hint { position: absolute; left: 0; right: 0; }
+.hint span { display: block; }
+.hint svg { width: 16px; height: 16px; margin-top: 3px; animation: bob 1.6s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(4px); } }
+.hint--a { opacity: calc(1 - var(--reveal) * 2.4); }
+.hint--b { opacity: clamp(0, calc((var(--reveal) - .85) / .15), 1); }
+
+/* ══ Outils de la maquette (rien de tout ceci n'irait sur le site) ════════ */
+.panel {
+  position: fixed; z-index: 50; left: 8px; right: 8px; bottom: 8px;
+  background: rgba(22,16,11,.93);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-size: 11px; line-height: 1.45;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.panel[hidden] { display: none; }
+.panel__row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
+.panel button {
+  flex: 1 1 auto;
+  background: rgba(255,255,255,.13); color: #fff;
+  border: 1px solid rgba(255,255,255,.2); border-radius: 7px;
+  padding: 6px 8px; font-size: 11px; font-family: inherit;
+}
+.panel button.on { background: #E35B24; border-color: #E35B24; }
+.panel__read { font-family: ui-monospace, Menlo, monospace; font-size: 10px; color: #E6D6C2; }
+.panel__read b { color: #7BD88F; }
+.panel__read b.bad { color: #FF7A6B; }
+.panel__close {
+  position: fixed; z-index: 51; right: 8px; top: 8px;
+  background: rgba(22,16,11,.9); color: #fff;
+  border: 1px solid rgba(255,255,255,.2); border-radius: 8px;
+  padding: 6px 10px; font-size: 11px; font-family: inherit;
+}
+
+/* Vue « zones » : montre les frontières. C'est la démonstration visuelle que
+   les zones ne se recouvrent pas — elles se touchent, elles ne se croisent pas. */
+body.show-zones .zone1 { outline: 2px dashed #7BD88F; background: rgba(123,216,143,.10); }
+body.show-zones .zone3 { outline: 2px dashed #6BB8FF; background: rgba(107,184,255,.10); }
+body.show-zones .zone2 { outline: 2px dashed #FFC46B; background: rgba(255,196,107,.12); }
+body.show-zones .layer { outline: 2px solid rgba(255,255,255,.5); }
+</style>
+</head>
+<body>
+
+<div class="track" id="track">
+  <section class="stage" id="stage">
+    <div class="stage__bg"></div>
+    <div class="stage__scrim"></div>
+
+    <div class="layer" id="layer">
+
+      <!-- ZONE 1 -->
+      <div class="zone1" id="zone1">
+        <div class="pill"><span class="pill__ava"></span> Mon conseil pour ta cuisine</div>
+        <p class="phrase" id="phrase"></p>
+        <button class="describe">Décrire mon projet en détail pour un luminaire plus adapté &nbsp;→</button>
+      </div>
+
+      <!-- ZONE 3 -->
+      <div class="zone3" id="zone3">
+        <div class="zone3__title">Ma sélection pour ta cuisine</div>
+        <div class="slider" id="slider"></div>
+      </div>
+
+      <!-- ZONE 2 -->
+      <div class="zone2" id="zone2">
+        <div class="hint hint--a">
+          <span>Découvre ta sélection</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="hint hint--b">
+          <span>Voir le catalogue complet</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<div style="height:60vh;background:#1B1410;display:flex;align-items:center;justify-content:center;color:#8B7355;font-size:13px">
+  (ici commencerait le catalogue)
+</div>
+
+<button class="panel__close" id="toggle">outils</button>
+<div class="panel" id="panel">
+  <div class="panel__row">
+    <button data-len="court">texte court</button>
+    <button data-len="moyen" class="on">moyen</button>
+    <button data-len="long">long</button>
+    <button data-len="max">300 car.</button>
+  </div>
+  <div class="panel__row">
+    <button id="zones">voir les zones</button>
+    <button id="jump">aller à l'écran B</button>
+  </div>
+  <div class="panel__read" id="read"></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var TEXTES = {
+    court: "Pour une cuisine, je te propose les modèles où l'ampoule reste à découvert.",
+    moyen: "Pour une cuisine, je te propose les modèles où l'ampoule reste à découvert. La lumière descend franchement sur le plan de travail, sans zone d'ombre.",
+    long:  "Pour une chambre d'enfant, je te propose des luminaires à ampoule entourée : la lumière passe à travers le bois et dessine ses motifs au mur, ce qui crée une ambiance douce au moment du coucher.",
+    max:   "Pour une cuisine, je te propose les modèles où l'ampoule reste à découvert. La lumière descend franchement sur le plan de travail, sans aucune zone d'ombre, et le bois réchauffe l'ensemble sans jamais assombrir ton espace de préparation."
+  };
+
+  var stage  = document.getElementById('stage');
+  var track  = document.getElementById('track');
+  var phrase = document.getElementById('phrase');
+  var slider = document.getElementById('slider');
+  var read   = document.getElementById('read');
+  var panel  = document.getElementById('panel');
+
+  // Cards de démonstration
+  var MODELES = [
+    ['DALIDA', 'Le Dahlia', '65,00'],
+    ['OLIVIA', 'La Gardiena', '75,00'],
+    ['TIMOTHÉE', 'Le Timide', '89,00'],
+    ['GASTON', 'Le Costaud', '120,00']
+  ];
+  slider.innerHTML = MODELES.map(function (m) {
+    return '<article class="card">' +
+      '<div class="card__media"></div>' +
+      '<div class="card__info">' +
+        '<div class="card__name">' + m[0] + ' <i>' + m[1] + '</i></div>' +
+        '<div class="card__cat">Suspension</div>' +
+        '<div class="card__price"><small>à partir de</small> ' + m[2] + ' €</div>' +
+        '<div class="card__cta">Découvrir →</div>' +
+      '</div></article>';
+  }).join('');
+
+  phrase.textContent = TEXTES.moyen;
+
+  /* --reveal : STRICTEMENT le calcul du site réel (sapi-mescreations-immersion.js).
+     Il n'est pas modifié par le modèle à zones — c'est le point à démontrer. */
+  function applyScroll() {
+    var rect = track.getBoundingClientRect();
+    var p = Math.max(0, Math.min(1, (-rect.top) / window.innerHeight));
+    stage.style.setProperty('--reveal', p.toFixed(4));
+    stage.style.setProperty('--reveal-inv', (1 - Math.min(1, p * 2.2)).toFixed(3));
+    measure(p);
+  }
+
+  /* Contrôle objectif : on mesure les écarts réels entre les zones. Ils doivent
+     rester positifs quoi qu'il arrive — c'est ça, « impossible par construction ». */
+  function measure(p) {
+    var z1 = document.getElementById('zone1').getBoundingClientRect();
+    var z3 = document.getElementById('zone3').getBoundingClientRect();
+    var z2 = document.getElementById('zone2').getBoundingClientRect();
+    var hautBas = Math.round(z3.top - z1.bottom);
+    var basBas  = Math.round(z2.top - z3.bottom);
+    function tag(v) {
+      return '<b class="' + (v < 0 ? 'bad' : '') + '">' + (v >= 0 ? '+' : '') + v + 'px</b>';
+    }
+    read.innerHTML =
+      'viewport ' + window.innerWidth + '×' + window.innerHeight +
+      ' · barre ' + Math.round(bar()) + 'px · reveal ' + p.toFixed(2) + '<br>' +
+      'texte→sélection ' + tag(hautBas) + ' · sélection→indice ' + tag(basBas);
+  }
+  function bar() {
+    var d = document.createElement('div');
+    d.style.cssText = 'position:absolute;visibility:hidden;height:100lvh;top:0';
+    document.body.appendChild(d);
+    var lv = d.offsetHeight;
+    d.style.height = '100svh';
+    var sv = d.offsetHeight;
+    document.body.removeChild(d);
+    return lv - sv;
+  }
+
+  var raf = false;
+  function onScroll() {
+    if (!raf) { raf = true; requestAnimationFrame(function () { raf = false; applyScroll(); }); }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  applyScroll();
+
+  // Outils
+  document.querySelectorAll('[data-len]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('[data-len]').forEach(function (o) { o.classList.remove('on'); });
+      b.classList.add('on');
+      phrase.textContent = TEXTES[b.getAttribute('data-len')];
+      applyScroll();
+    });
+  });
+  document.getElementById('zones').addEventListener('click', function () {
+    document.body.classList.toggle('show-zones');
+    this.classList.toggle('on');
+  });
+  document.getElementById('jump').addEventListener('click', function () {
+    var top = track.getBoundingClientRect().top + window.pageYOffset;
+    window.scrollTo({ top: Math.round(top + window.innerHeight), behavior: 'smooth' });
+  });
+  document.getElementById('toggle').addEventListener('click', function () {
+    panel.hidden = !panel.hidden;
+  });
+})();
+</script>
+</body>
+</html>
