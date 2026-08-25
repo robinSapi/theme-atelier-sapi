@@ -1307,3 +1307,27 @@ Demande de Robin, avec repli sur ambiance. Le nombre **total** de cases étant i
 
 `master` porte donc maintenant DEUX commits catalogue : `a92516c` (page prix + tarifs pro) puis `b930f09` (poids). **Le workflow « Deploy to Production » est toujours à lancer à la main par Robin** — le push ne déploie rien.
 
+
+---
+
+## ✅ EN PRODUCTION ET AUDITÉ (2026-08-25) — `master` = `b930f09`
+
+Robin a lancé le déploiement, créé la page `/catalogue-prix` en prod et exclu les deux pages du sitemap Yoast. Audit complet de `atelier-sapi.fr` :
+
+| Contrôle | Résultat |
+|---|---|
+| `/catalogue` | 200 · 0 `€` · 0 ligne Poids · 0 « Kilos le matin » |
+| `/catalogue-prix` | 200 · `has-prices` · 36 fiches · 173 poids dans les matrices · `noindex` · sans bloc PDF |
+| PDF public (lampadaires) | 200 `application/pdf` · 2,1 Mo **généré en 2,1 s** — `vendor/`/mPDF bien régénéré par le workflow |
+| Étanchéité du PDF (extracteur `/ToUnicode`) | 12 pages · 0 lien `/URI` · **0 `€`, 0 `Prix`, 0 `TTC`, 0 `HT`** · « Culot » 8 fois pour 8 fiches |
+| `admin_post` tarif pro, non connecté | refusé |
+| Sitemap Yoast | **15 pages, plus aucune entrée catalogue** (étaient 17) |
+
+### ⏳ Ce qui reste ouvert
+
+1. **Mentions légales du tarif pro** — les cinq crochets `[à compléter]` (minimum de commande, port, délai, règlement, capital social) partiraient tels quels chez un revendeur. Contenu, côté Robin.
+2. **La blague « 35 Kilos le matin » subsiste sur les pages produit publiques.** `woocommerce/single-product.php:777` lit la même meta ACF orpheline (affichée l.829). Vérifié en prod sur `olivia-la-gardiena` et `claudine-la-turbine`. Hors périmètre catalogue — décision Robin : même correctif (lire les variations) ou plus tard.
+3. **Exclusion Yoast ancrée dans le code** — proposée, non faite. Un filtre `wpseo_exclude_from_sitemap_by_post_ids` excluant toute page portant le template `page-catalogue.php`. Le réglage manuel actuel vit en base : il sera à refaire si une page est recréée, ce qui vient précisément d'arriver pour `/catalogue-prix`. Demanderait un 3ᵉ cherry-pick, court.
+4. **Écart de 1,8 mm** entre les deux largeurs utiles (179,2 mm mesuré par Robin vs 181 en constante côté profil pro). Non tranché.
+5. **Cohérence des PVP site / Etsy** à vérifier avant le premier envoi d'un tarif : le PDF pro affiche le PVP conseillé à côté du prix d'achat, un écart serait exposé au revendeur.
+
