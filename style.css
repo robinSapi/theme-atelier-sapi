@@ -25601,15 +25601,18 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     max-height: 100%;
   }
   /* ⇦ LE RÉGLAGE DE LA TAILLE DES CARDS EN MOBILE : le RAPPORT DE FORME de la
-     photo. `3 / 4` = largeur / hauteur, donc la photo est un tiers plus haute
-     que large : ~372px pour une card de 279. C'est lui qui décide de la
+     photo. `4 / 5` = largeur / hauteur, donc la photo est un quart plus haute
+     que large : ~370px pour une card de 296. C'est lui qui décide de la
      hauteur de toute la card, et donc du centrage du bloc.
+     Passé de `3 / 4` à `4 / 5` quand les dots sont revenus (retour Robin) :
+     ils ajoutaient ~24px au bloc et le carrousel paraissait trop haut. Un
+     ratio un cran plus court rend exactement ce qu'ils prennent.
      Pourquoi pas un carré (décision Robin, après calcul) : une photo carrée ne
      peut pas être plus haute que la card n'est LARGE, et la largeur est
-     plafonnée par l'écran. En 78% de largeur elle ferait 279px — plus PETITE
-     qu'avant. Photo carrée + grande + aperçu de la card suivante : il faut en
-     abandonner un des trois. Le 3/4 rend de la hauteur sans toucher à la
-     largeur, donc sans manger l'aperçu.
+     plafonnée par l'écran — elle serait plus PETITE qu'avant. Photo carrée +
+     grande + aperçu de la card suivante : il faut en abandonner un des trois.
+     Un ratio rend de la hauteur sans toucher à la largeur, donc sans manger
+     l'aperçu.
      `flex: 0 1 auto` + `min-height` : sur un écran trop court, c'est la photo
      qui cède sur sa hauteur (le ratio n'est plus tenu) plutôt que la card qui
      déborde. Le prix et le nom restent toujours visibles. */
@@ -25618,7 +25621,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     -ms-flex: 0 1 auto;
     flex: 0 1 auto;
     height: auto;
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 4 / 5;
     min-height: 60px;
   }
   /* ── Carrousel PLEINE LARGEUR, card active CENTRÉE (retour Robin) ──────

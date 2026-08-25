@@ -528,7 +528,9 @@ Robin, après validation du mobile : « en desktop, il faut qu'on augmente la ha
 **4. Dots remis (mobile + desktop).** Conteneur `[data-immersion-dots]` dans le markup, **contenu généré en JS** : le nombre de cards varie selon la pièce ET change au moment 2, un rendu PHP obligerait à les régénérer côté serveur aussi = deux sources pour la même chose. Ils partagent `cardOffsets()` avec les flèches → un dot cliqué amène la card exactement où une flèche l'aurait amenée, centrée ou non selon ce que le CSS a décidé. Masqués s'il n'y a rien à faire défiler. Reconstruits après `swapCards()`.
 
 **⚠️ ARBITRAGE À CONNAÎTRE — ces trois demandes COÛTENT de la hauteur.** Plus de marges (+20px) et des dots (+24px) se prennent sur la photo, puisque le carrousel absorbe l'espace restant. Compensé en partie par la phrase élargie et par la bande d'indice resserrée (42+24 → 34+14), mais le solde reste négatif : **photo ~199px contre 243px** dans la version que Robin venait de valider.
-**Le levier pour revenir à ~239px : masquer le bouton « Découvrir » en desktop aussi**, comme en mobile — `product-actions` est à l'intérieur du `<a>` qui enveloppe toute la card, donc cliquer n'importe où ouvre déjà la fiche. Une ligne. Non fait : Robin ne l'a pas demandé pour le desktop, où le bouton sert d'affordance au survol.
+**Le levier pour revenir à ~239px : masquer le bouton « Découvrir » en desktop aussi**, comme en mobile — `product-actions` est à l'intérieur du `<a>` qui enveloppe toute la card, donc cliquer n'importe où ouvre déjà la fiche. Une ligne. **Robin a tranché : on garde le bouton en desktop, les ~199px lui conviennent.**
+
+**Mobile — carrousel réduit après le retour des dots (décision Robin).** Les dots ajoutaient ~24px au bloc et le carrousel paraissait trop haut. Ratio de la photo `3 / 4` → **`4 / 5`** : photo 395 → 370px, bloc 529 → 504px, air 53 → 66px de chaque côté. Un cran de ratio rend exactement ce que les dots prennent — et c'est un réglage qui se juge à l'œil, pas un pixel à deviner.
 
 ---
 
