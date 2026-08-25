@@ -135,9 +135,11 @@ function sapi_catalogue_render_prices($pricing) {
     $only  = isset($cells[$essences[0]][$sizes[0]]) ? $cells[$essences[0]][$sizes[0]] : null;
     $label = trim($sizes[0] . ' ' . $essences[0]);
     if ($only !== null) {
+      $poids = sapi_catalogue_format_weight($only['weight']);
       echo '<p class="cat-price-single">';
       if ($label !== '') echo '<span class="cat-price-single__label">' . esc_html($label) . '</span> ';
-      echo '<span class="cat-price-single__amount">' . esc_html(sapi_catalogue_format_price($only)) . '</span>';
+      echo '<span class="cat-price-single__amount">' . esc_html(sapi_catalogue_format_price($only['ttc'])) . '</span>';
+      if ($poids !== '') echo ' <span class="cat-price-weight">' . esc_html($poids) . '</span>';
       echo '</p>';
     }
     echo '</div>';
@@ -157,9 +159,17 @@ function sapi_catalogue_render_prices($pricing) {
     echo '<tr><th scope="row">' . esc_html($essence !== '' ? $essence : 'Prix') . '</th>';
     foreach ($sizes as $size) {
       $value = isset($cells[$essence][$size]) ? $cells[$essence][$size] : null;
-      echo '<td>' . ($value === null
-        ? '<span class="cat-price-table__na" title="Combinaison non disponible">—</span>'
-        : esc_html(sapi_catalogue_format_price($value))) . '</td>';
+      if ($value === null) {
+        echo '<td><span class="cat-price-table__na" title="Combinaison non disponible">—</span></td>';
+        continue;
+      }
+      // Prix et poids partagent EXACTEMENT les mêmes axes (taille × essence) :
+      // la matrice de prix est donc le domicile naturel du poids, sans tableau
+      // supplémentaire ni fourchette approximative.
+      $poids = sapi_catalogue_format_weight($value['weight']);
+      echo '<td><span class="cat-price-table__amount">' . esc_html(sapi_catalogue_format_price($value['ttc'])) . '</span>';
+      if ($poids !== '') echo '<span class="cat-price-weight">' . esc_html($poids) . '</span>';
+      echo '</td>';
     }
     echo '</tr>';
   }

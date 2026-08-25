@@ -58,7 +58,7 @@ function sapi_catalogue_canonical_cat($slug) {
  *      - label    : libellé affiché
  *      - cats     : 'all' ou tableau de slugs canoniques où la ligne s'applique
  *      - fallback : valeur par défaut si le champ est vide ('' = pas de défaut)
- *      - source   : 'acf' (défaut) | 'dimensions' | 'weight'
+ *      - source   : 'acf' (défaut) | 'dimensions'
  * ========================================================================= */
 
 /**
@@ -68,7 +68,19 @@ function sapi_catalogue_specs_schema() {
   return [
     'Dimensions' => [
       ['key' => 'dimensions',      'label' => 'Dimensions',            'cats' => 'all',            'fallback' => 'Voir variations', 'source' => 'dimensions'],
-      ['key' => 'poids',           'label' => 'Poids',                 'cats' => 'all',            'fallback' => '',                'source' => 'weight'],
+      // ⚠️ Ligne « Poids » RETIRÉE (décision Robin, 2026-08-25). Deux raisons :
+      // 1. elle lisait une meta ACF `poids` ORPHELINE — le champ a été retiré
+      //    des groupes ACF, la valeur est restée en base, plus aucun écran ne
+      //    permettait de la corriger. Cinq fiches affichaient ainsi en prod, y
+      //    compris sur les pages produit publiques, un « <p>35 Kilos le matin
+      //    <br /> 22 le soir</p> » balises comprises ;
+      // 2. le repli `$product->get_weight()` interrogeait le produit PARENT,
+      //    qui n'a jamais de poids sur un produit variable — 28 fiches sur 36
+      //    affichaient donc « — ».
+      // Le poids réel vit sur les VARIATIONS, et n'a de sens que rapproché du
+      // prix : il est désormais porté par la matrice de prix et par le tableau
+      // du tarif pro (inc/catalogue-data-pro.php). Le catalogue sans prix ne
+      // l'affiche plus du tout.
       ['key' => 'hauteur_totale',  'label' => 'Hauteur totale',        'cats' => ['lampadaires'],  'fallback' => ''],
       ['key' => 'hauteur_ampoule', 'label' => 'Hauteur ampoule',       'cats' => ['lampadaires'],  'fallback' => ''],
       ['key' => 'longueur_cable',  'label' => 'Longueur câble',        'cats' => 'all',            'fallback' => ''],
@@ -148,8 +160,6 @@ function sapi_catalogue_get_product_specs($product) {
         // Priorité aux tailles réelles des variations ; repli sur ACF/WooCommerce.
         $sizes = sapi_catalogue_product_sizes($product);
         $value = $sizes ? implode(' · ', $sizes) : sapi_catalogue_product_dimensions($product, $has_acf);
-      } elseif ($source === 'weight') {
-        $value = sapi_catalogue_product_weight($product, $has_acf);
       } else {
         $value = $has_acf ? (string) get_field($row['key'], $product_id) : '';
       }
@@ -206,16 +216,6 @@ function sapi_catalogue_product_dimensions($product, $has_acf) {
   }
 
   return $dimensions_str;
-}
-
-/**
- * Poids : champ ACF `poids`, sinon poids WooCommerce natif (+ « kg »).
- */
-function sapi_catalogue_product_weight($product, $has_acf) {
-  $poids = $has_acf ? (string) get_field('poids', $product->get_id()) : '';
-  if ($poids !== '') return $poids;
-  $weight = $product->get_weight();
-  return $weight ? $weight . ' kg' : '';
 }
 
 /**

@@ -364,18 +364,24 @@ function sapi_catalogue_pro_price_table_html($pricing, $rate) {
   // ⚠️ Le titre est une CELLULE (comme les titres de section de la fiche
   // technique), jamais un <caption> : mPDF ne style pas les captions.
   $html  = '<table class="pro-prices">';
-  $html .= '<tr><td class="sec" colspan="3">Tarif</td></tr>';
+  $html .= '<tr><td class="sec" colspan="4">Tarif</td></tr>';
   $html .= '<tr>';
   $html .= '<th class="h">Variation</th>';
   $html .= '<th class="h num">Prix pro HT</th>';
   $html .= '<th class="h num">PVP conseillé TTC</th>';
+  // Le poids conditionne le port : pour un revendeur c'est une information
+  // commerciale, pas un ornement. Il vit sur les variations, donc aux mêmes
+  // axes que le prix — d'où sa place dans ce tableau et nulle part ailleurs.
+  $html .= '<th class="h num">Poids</th>';
   $html .= '</tr>';
   foreach ($pricing['rows'] as $row) {
-    $ht = sapi_catalogue_ht_from_ttc($row['ttc'], $rate);
+    $ht    = sapi_catalogue_ht_from_ttc($row['ttc'], $rate);
+    $poids = sapi_catalogue_format_weight(isset($row['weight']) ? $row['weight'] : 0);
     $html .= '<tr>';
     $html .= '<td>' . esc_html($row['label']) . '</td>';
     $html .= '<td class="num ht">' . esc_html(sapi_catalogue_format_price($ht)) . '</td>';
     $html .= '<td class="num pvp">' . esc_html(sapi_catalogue_format_price($row['ttc'])) . '</td>';
+    $html .= '<td class="num pvp">' . esc_html($poids !== '' ? $poids : '—') . '</td>';
     $html .= '</tr>';
   }
   $html .= '</table>';
