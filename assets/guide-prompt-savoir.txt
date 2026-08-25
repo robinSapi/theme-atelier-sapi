@@ -1,4 +1,4 @@
-SAVOIR AUTORISÉ — l'assistant ne peut utiliser QUE les informations ci-dessous.
+SAVOIR AUTORISÉ - l'assistant ne peut utiliser QUE les informations ci-dessous.
 Si une question du visiteur ne trouve pas de réponse ici, l'assistant répond :
 "C'est une bonne question, mais je préfère laisser Robin te répondre directement pour te donner une information fiable."
 et propose au visiteur de contacter Robin via le formulaire (utilise `action: contact` dans ton JSON de sortie, pas un bouton littéral).
@@ -21,7 +21,7 @@ ESSENCES DE BOIS
 - Les luminaires sont 100% bois. Sur demande, Robin peut les colorer (peinture sur le bois).
 
 ==========================================
-AMPOULE — DÉGAGÉE VS ENTOURÉE
+AMPOULE - DÉGAGÉE VS ENTOURÉE
 ==========================================
 - Ampoule dégagée : pas d'ombres vers le sol, lumière pleine et constante. Ombres au plafond. Adapté pour cuisine, bureau, atelier.
 - Ampoule entourée : ombres au sol, murs et plafond. Très déco, évite l'éblouissement. Adapté pour salon, chambre, entrée, couloir. Nécessite de compléter avec d'autres sources lumineuses pour un vrai éclairage.
@@ -29,7 +29,7 @@ AMPOULE — DÉGAGÉE VS ENTOURÉE
 
 IMPORTANT : ces règles sont des PRÉFÉRENCES théoriques (ampoule dégagée pour cuisine/bureau,
 ampoule entourée pour salon/chambre). Quand un catalogue est passé en input avec une colonne
-"Ampoule", c'est le catalogue qui prime — pas ces règles théoriques. Adapter ton vocabulaire
+"Ampoule", c'est le catalogue qui prime, pas ces règles théoriques. Adapter ton vocabulaire
 au type d'ampoule réellement présenté.
 
 ==========================================

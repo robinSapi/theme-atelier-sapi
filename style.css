@@ -24744,7 +24744,13 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
          geste en arrière ;
        · l'ÉCART entre les positions d'ancrage 2 et 3 = `hauteur - 100vh`.
 
-     250vh → plateau 50vh, écart 150vh. C'est le réglage retenu.
+     300vh → plateau 100vh (un écran entier de pause), écart 200vh.
+     ⇦ C'EST LE RÉGLAGE DE LA LONGUEUR DE LA PAUSE : +50vh ici = +50vh de
+     scroll pendant lequel rien ne bouge. Robin l'a demandée plus longue après
+     la première version à 250vh (pause 50vh).
+     L'écart entre les positions 2 et 3 grandit d'autant, mais l'aimant tient :
+     il vise la position suivante dès 35 % du trajet quand on descend (biais
+     directionnel côté JS), pas à mi-chemin.
 
      ⚠️ NE PAS RACCOURCIR pour « rapprocher les étapes ». Ça a été essayé
      (200vh) et Robin l'a immédiatement vu : ça supprime la pause, et le hero
@@ -24752,7 +24758,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
      pas n'était PAS un problème de longueur mais de règle d'accroche (une
      fenêtre de 30vh au lieu de « la position la plus proche ») — corrigé côté
      JS, et il fonctionne très bien avec cette longueur-ci. */
-  height: 250vh;
+  height: 300vh;
 }
 /* Le hero = scène épinglée (sticky) de 100vh. --reveal (0→1) est piloté par le
    scroll en JS et anime flou photo + remontée texte + apparition des cards. */
@@ -24924,12 +24930,37 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
      marge haute juste en dessous : ~64px rendus au carrousel. */
   gap: 12px;
   --imm-a-drop: 20vh;
+  isolation: isolate; /* garantit que le voile ::before reste derrière le texte */
   -webkit-transform-origin: center top;
   transform-origin: center top;
   -webkit-transform: translateY(calc((1 - var(--reveal)) * var(--imm-a-drop))) scale(calc(1 + (1 - var(--reveal)) * 0.2));
   transform: translateY(calc((1 - var(--reveal)) * var(--imm-a-drop))) scale(calc(1 + (1 - var(--reveal)) * 0.2));
   /* Transféré sur la couche : on n'empile pas deux calques promus imbriqués. */
   will-change: auto;
+}
+
+/* ── Voile sombre DERRIÈRE LE TEXTE seulement (demande Robin) ─────────────
+   Le conseil manquait de contraste sur les photos claires. On aurait pu
+   assombrir le scrim général, mais ça aurait terni TOUTE la pièce — or c'est
+   la photo qui vend. Ce voile est donc un dégradé ovale, flouté, qui ne
+   couvre que le bloc texte et s'éteint avant les bords : la photo reste
+   lumineuse partout ailleurs.
+   Il suit le bloc (même transform, même sortie d'écran en mobile) puisqu'il
+   en est le pseudo-élément. `inset` négatif : il déborde du texte pour que
+   son dégradé s'éteigne au-delà, sans bord visible.
+   ⇦ Le premier `rgba` règle l'intensité. */
+.mescreations-immersion__inner::before {
+  content: "";
+  position: absolute;
+  inset: -8% -6%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center,
+    rgba(18, 12, 7, .58) 0%,
+    rgba(18, 12, 7, .40) 45%,
+    rgba(18, 12, 7, 0) 72%);
+  -webkit-filter: blur(18px);
+  filter: blur(18px);
 }
 
 /* Pill V1 — fade-in. `margin-bottom: 0` : la pill partagée (.conseiller-sig--v1)

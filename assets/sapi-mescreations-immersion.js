@@ -576,6 +576,7 @@
     var progScroll = false;     // un scroll programmatique est en vol
     var skipNextSnap = false;   // le geste a fait défiler le carrousel
     var gestureInSlider = false, sliderStartLeft = 0;
+    var scrollDir = 1, lastY = window.pageYOffset; // sens du dernier mouvement : 1 = vers le bas
 
     /* Le verrou de scroll est posé par `overflow: hidden` sur html — par NOTRE
        machine à écrire ET par la modale Conseiller. Un seul test couvre donc
@@ -640,12 +641,25 @@
       if (y < top - 8) return null;                                  // avant le hero : libre
       if (y > pos3 + window.innerHeight * SNAP_CATCH) return null;   // dans le catalogue : libre
 
-      var best = null, bestDist = Infinity;
-      [top, pos2, pos3].forEach(function (c) {
-        var d = Math.abs(c - y);
-        if (d < bestDist) { bestDist = d; best = c; }
-      });
-      return best;
+      /* BIAIS DIRECTIONNEL — on suit le sens du geste au lieu de viser
+         bêtement la position la plus proche.
+         Sans lui, la bascule se ferait à mi-chemin ; avec une pause longue
+         (le track fait 300vh, donc 200vh entre les positions 2 et 3), il
+         faudrait pousser un écran entier avant que la page accepte d'aller au
+         catalogue, et elle paraîtrait retenir. Ici, descendre suffit à
+         atteindre l'étape suivante dès 35 % du trajet, et remonter joue la
+         règle symétrique. C'est ce qui permet d'allonger la pause SANS rendre
+         le catalogue difficile à atteindre — les deux réglages seraient sinon
+         en opposition. */
+      var stops = [top, pos2, pos3];
+      var a = top, b = pos3;
+      for (var i = 0; i < stops.length - 1; i++) {
+        if (y >= stops[i] - 8 && y <= stops[i + 1] + 8) { a = stops[i]; b = stops[i + 1]; break; }
+      }
+      if (b - a < 8) return a;
+      var t = (y - a) / (b - a);
+      var forward = scrollDir >= 0;
+      return (forward ? t > 0.35 : t > 0.65) ? b : a;
     }
 
     function maybeSnap() {
@@ -657,6 +671,10 @@
       programmaticScrollTo(target);
     }
     function scheduleSnap() {
+      // Sens du geste, mémorisé pour le biais directionnel de snapTarget().
+      // Un mouvement d'un pixel ne compte pas : c'est du bruit de rendu.
+      var y = window.pageYOffset;
+      if (Math.abs(y - lastY) > 1) { scrollDir = y > lastY ? 1 : -1; lastY = y; }
       clearTimeout(snapTimer);
       snapTimer = setTimeout(maybeSnap, SNAP_IDLE);
     }

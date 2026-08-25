@@ -628,6 +628,20 @@ Le raccourcissement **supprimait le plateau** (`hauteur - 200vh`), c'est-à-dire
 
 **Ce que ça dit du raisonnement de l'agent :** son conseil de raccourcir reposait sur un chiffre faux (plateau annoncé à 150vh, réel 50vh). J'ai eu raison de vérifier le chiffre, puis tort d'y revenir en croyant avoir trouvé une autre justification. **La longueur du track n'a jamais été le problème** — c'était la règle d'accroche depuis le début. Vérifier un chiffre ne suffit pas : il faut aussi vérifier que la conclusion ne survit pas pour de mauvaises raisons.
 
+### ✅ TROIS RETOURS DE RECETTE (2026-08-25, fin de journée)
+
+**1. Pause trop courte → track 250 → 300vh (plateau 50 → 100vh).**
+⚠️ Allonger la pause éloigne mécaniquement la position 3 (l'écart 2→3 passe à 200vh) : sans rien d'autre, il aurait fallu pousser un écran entier avant que la page accepte d'aller au catalogue. **D'où un BIAIS DIRECTIONNEL ajouté à l'aimant** : au lieu de viser la position la plus proche, il suit le sens du geste et bascule vers l'étape suivante dès **35 %** du trajet en descendant (règle symétrique en remontant). **C'est ce qui découple les deux réglages** — sans lui, « pause plus longue » et « catalogue facile à atteindre » sont en opposition directe.
+
+**2. Contraste derrière le conseil → voile local, pas un scrim plus sombre.**
+Assombrir le scrim général aurait terni **toute la pièce**, or c'est la photo qui vend. Le voile est un `::before` sur le bloc texte : dégradé ovale flouté, `inset` négatif pour s'éteindre au-delà du texte sans bord visible, `z-index: -1` avec `isolation: isolate` sur le parent pour rester derrière le texte. Il suit le bloc (même transform, même sortie d'écran en mobile) puisqu'il en est le pseudo-élément. ⇦ Le premier `rgba` règle l'intensité.
+
+**3. Plus de tirets longs dans les textes IA — traité sur TROIS niveaux.**
+- **La cause racine était dans les exemples** : `guide-prompt-exemples.txt` en contenait **26**. On apprenait littéralement au modèle à en produire. Nettoyés (26 → 0), avec trois règles distinctes : plages chiffrées `10–20` → `10-20`, titres de section → ` - `, incises en phrase → virgule.
+- **Règle explicite** ajoutée en fin de `guide-prompt-regles.txt` (les 2 tirets qui y restent sont ceux de la règle elle-même, qui doit montrer ce qu'elle interdit).
+- **Garde-fou serveur `sapi_strip_long_dashes()`**, appliqué aux **5** points de sortie de texte IA (conseil final, messages de la modale, messages de contact). ⚠️ **Nécessaire parce qu'une consigne de prompt n'est PAS une contrainte** — précédent dans ce fichier : la limite « max 300 caractères » du conseil, écrite dans le prompt et jamais appliquée nulle part. Le trait d'union normal est préservé (mots composés, sur-mesure, plages).
+- Vérifié : les conseils pré-écrits par pièce (`sapi_megafilter_get_generic_advices`) étaient déjà propres.
+
 ### ⏳ LOT 2 — spécification d'origine (non codé)
 Ancrage **en JavaScript**, pas en CSS : c'est le seul qui sache **s'abstenir**. Il doit être neutralisé dans quatre fenêtres — verrou de la machine à écrire, modale ouverte, `rewindToTop()` en vol, et geste initié dans le carrousel. Prévoir un drapeau « scroll programmatique » honoré par `rewindToTop()`, `scrollToReveal()` et `scrollToCatalogue()`, et l'annulation au `touchstart`. Arbitrer aussi le `scroll-behavior: smooth` global (l. 128) : deux animations de scroll sur le même axe = rebond. Recette dédiée au moment 2, séquence la plus fragile de la page.
 

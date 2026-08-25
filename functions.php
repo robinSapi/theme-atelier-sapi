@@ -2633,6 +2633,33 @@ function sapi_megafilter_filters_whitelist() {
  * Note : on duplique légèrement sapi_guide_call_claude{,_refine} pour
  * isoler le nouveau contexte. Un refactor global est prévu en F1d.
  */
+
+/**
+ * Retire les tirets longs (— cadratin, – demi-cadratin) de tout texte destiné
+ * au visiteur. Règle absolue de la marque : Robin n'en veut nulle part.
+ *
+ * ⚠️ POURQUOI UNE FONCTION ET PAS SEULEMENT UNE CONSIGNE DE PROMPT.
+ * La règle est bien écrite dans assets/guide-prompt-regles.txt, et les
+ * exemples qui en étaient truffés ont été nettoyés (ils apprenaient au modèle
+ * à en produire). Mais une consigne de prompt n'est pas une contrainte : le
+ * modèle peut passer outre, et il le fera un jour. Précédent dans ce même
+ * fichier : la limite « max 300 caractères » du conseil, écrite dans le
+ * prompt et jamais appliquée nulle part.
+ *
+ * Le tiret d'union normal (-) est conservé : mots composés, sur-mesure,
+ * plages de mesures (10-20 m²).
+ */
+function sapi_strip_long_dashes($text) {
+  if (!is_string($text) || $text === '') return $text;
+  // Plage chiffrée : « 10–20 » devient « 10-20 », pas « 10, 20 ».
+  $text = preg_replace('/(\d)\s*[—–]\s*(\d)/u', '$1-$2', $text);
+  // Incise : « c'est idéal — le luminaire… » devient « c'est idéal, le luminaire… »
+  $text = preg_replace('/\s*[—–]\s*/u', ', ', $text);
+  // Un tiret déjà précédé d'une virgule en produisait deux.
+  $text = preg_replace('/,\s*,/u', ',', $text);
+  return trim($text);
+}
+
 function sapi_megafilter_call_claude($model, $system, array $messages, $max_tokens = 1024) {
   $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
   if (empty($api_key)) {
@@ -3041,7 +3068,7 @@ function sapi_ajax_megafilter_freetext() {
   }
 
   $robin_message = (isset($parsed['message']) && is_string($parsed['message']))
-    ? sanitize_textarea_field($parsed['message'])
+    ? sapi_strip_long_dashes(sanitize_textarea_field($parsed['message']))
     : '';
 
   // Round 2 — 4.1.c : on propage `action: contact` quand l'IA route vers le
@@ -3063,7 +3090,7 @@ function sapi_ajax_megafilter_freetext() {
       $contact_subject = sanitize_text_field($parsed['contact_subject']);
     }
     if (isset($parsed['contact_message']) && is_string($parsed['contact_message'])) {
-      $contact_message = sanitize_textarea_field($parsed['contact_message']);
+      $contact_message = sapi_strip_long_dashes(sanitize_textarea_field($parsed['contact_message']));
     }
   }
 
@@ -3179,7 +3206,7 @@ function sapi_ajax_megafilter_chat() {
   $action = null;
 
   if ($parsed && isset($parsed['message']) && is_string($parsed['message'])) {
-    $robin_message = sanitize_textarea_field($parsed['message']);
+    $robin_message = sapi_strip_long_dashes(sanitize_textarea_field($parsed['message']));
   } else {
     $robin_message = sanitize_textarea_field($ai_text);
   }
@@ -3213,7 +3240,7 @@ function sapi_ajax_megafilter_chat() {
       $contact_subject = sanitize_text_field($parsed['contact_subject']);
     }
     if (isset($parsed['contact_message']) && is_string($parsed['contact_message'])) {
-      $contact_message = sanitize_textarea_field($parsed['contact_message']);
+      $contact_message = sapi_strip_long_dashes(sanitize_textarea_field($parsed['contact_message']));
     }
   }
 
@@ -4048,7 +4075,7 @@ function sapi_ajax_megafilter_advice() {
   if ($ai_text) {
     $parsed = sapi_megafilter_parse_json($ai_text);
     if ($parsed && isset($parsed['advice_text']) && is_string($parsed['advice_text'])) {
-      $advice = sanitize_textarea_field($parsed['advice_text']);
+      $advice = sapi_strip_long_dashes(sanitize_textarea_field($parsed['advice_text']));
     }
   }
 
