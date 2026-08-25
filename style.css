@@ -7966,11 +7966,23 @@ li.carousel-editorial-slide,
 @media (min-width: 769px) {
   .home-projet .room-picker-title { white-space: nowrap; }
 }
+/* ⚠️ BLOC MOBILE PARTAGÉ — room-picker de la home ET hero de /mes-creations/.
+   Les deux contextes réutilisent les mêmes classes globales (.room-card,
+   .room-card-icon, .room-card-label) mais les préfixent chacun avec la sienne,
+   donc à spécificité égale (0,2,0) c'est le bloc le plus BAS dans le fichier qui
+   gagne. Le hero de /mes-creations/ étant déclaré ~16 700 lignes plus loin, il a
+   déjà annulé deux fois ces réglages mobiles sans qu'on le voie (cartes 1,5× trop
+   larges en 1ʳᵉ passe, icônes 60px au lieu de 34px en 2ᵉ passe).
+   RÈGLE : toute règle mobile de CARTE va ici, en sélecteur partagé — jamais dans
+   le bloc du hero. Ce dernier ne garde que ce qui lui est propre (enveloppe,
+   titre, sous-titre). */
 @media (max-width: 768px) {
   .home-projet-section { padding: 3.5rem 14px 2.5rem; }
-  .home-projet .room-picker-cards { gap: 0.75rem; }
+  .home-projet .room-picker-cards,
+  .mescreations-picker-hero .room-picker-cards { gap: 0.75rem; }
   /* Mobile — cards réponses compactes, layout horizontal (icône à gauche, texte à droite aligné à gauche) */
-  .home-projet .room-card {
+  .home-projet .room-card,
+  .mescreations-picker-hero .room-card {
     flex: 0 0 calc(50% - 0.5rem);
     max-width: none;
     flex-direction: row;
@@ -7980,9 +7992,12 @@ li.carousel-editorial-slide,
     gap: 0.55rem;
     padding: 0.55rem 0.7rem;
   }
-  .home-projet .room-card-icon { width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; }
-  .home-projet .room-card-icon svg { width: 18px; height: 18px; }
-  .home-projet .room-card-label { font-size: 11.5px; letter-spacing: 0.04em; text-align: left; line-height: 1.2; }
+  .home-projet .room-card-icon,
+  .mescreations-picker-hero .room-card-icon { width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; }
+  .home-projet .room-card-icon svg,
+  .mescreations-picker-hero .room-card-icon svg { width: 18px; height: 18px; }
+  .home-projet .room-card-label,
+  .mescreations-picker-hero .room-card-label { font-size: 11.5px; letter-spacing: 0.04em; text-align: left; line-height: 1.2; }
 }
 
 /* ===== DA #3 — Conseiller : signature de Robin (composant réutilisable) + réchauffe ===== */
@@ -24623,17 +24638,26 @@ button.chip--project:focus-visible {
   max-width: 760px;
   margin: 0 auto;
 }
-.mescreations-picker-hero .room-card {
-  flex: 1 1 150px;
-  max-width: 190px;
+/* ⚠️ Calage desktop des cartes, VOLONTAIREMENT enfermé dans min-width:769px.
+   Une media query n'ajoute PAS de spécificité : sans cette borne, cette règle
+   (0,2,0, déclarée ligne ~24 640) écraserait le bloc mobile partagé de la home
+   (0,2,0, déclaré ligne ~7 970) — le plus bas dans le fichier l'emporte. C'est
+   exactement le piège qui a produit les deux régressions du room-picker mobile. */
+@media (min-width: 769px) {
+  .mescreations-picker-hero .room-card {
+    flex: 1 1 150px;
+    max-width: 190px;
+  }
 }
 /* Mobile — le hero de /mes-creations/ doit être AUSSI compact que le room-picker
-   de la home. Trois règles de ce bloc écrasaient les réglages mobiles de la home
-   (spécificité 0,2,0 contre 0,1,1) et gonflaient le hero :
-     · cartes en 2 colonnes (au lieu de 3) → 4 rangées, cartes 1,5× plus larges ;
-     · titre en clamp(1.6rem…) = 25,6px (au lieu des 20px de la home) ;
-     · padding vertical clamp(40px…) porté par .mescreations-picker-hero.
-   On s'aligne sur le breakpoint de la home (768px, pas 600px). */
+   de la home. On s'aligne sur le breakpoint de la home (768px, pas 600px).
+   ⚠️ Ce bloc ne porte QUE ce qui est propre au hero (enveloppe, titre, sous-titre).
+   Tout ce qui concerne les CARTES (colonnes, disposition ligne, taille d'icône,
+   label, padding, gap) vit dans le bloc mobile PARTAGÉ déclaré avec la home
+   (chercher « BLOC MOBILE PARTAGÉ » dans ce fichier). Raison : ce bloc-ci est
+   ~16 700 lignes plus bas, donc à spécificité égale il écrase silencieusement la
+   home — c'est ce qui a produit deux régressions de suite. Ne pas y redéclarer
+   .room-card. */
 @media (max-width: 768px) {
   .mescreations-picker-hero {
     padding: 28px 16px 24px;
@@ -24644,16 +24668,6 @@ button.chip--project:focus-visible {
   .mescreations-picker-hero .room-picker-sub {
     font-size: 13.5px;
     margin: -2px auto 2px;
-  }
-  .mescreations-picker-hero .room-picker-cards {
-    gap: 0.75rem;
-  }
-  /* 3 colonnes, comme la home. max-width levé (sinon les 190px de la règle
-     desktop rebrident les cartes et laissent des trous dans la rangée). */
-  .mescreations-picker-hero .room-card {
-    flex: 0 0 calc(33.33% - 0.5rem);
-    max-width: none;
-    padding: 1rem 0.75rem;
   }
 }
 
@@ -24713,15 +24727,28 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   background: var(--color-wood-dark);
   --reveal: 0;
   /* Mobile — la barre d'adresse (Safari/Chrome iOS) recouvre le bas du viewport
-     `vh` : les éléments ancrés en bottom passent dessous. `100lvh - 100svh` vaut
-     EXACTEMENT la hauteur de cette barre, et 0 partout ailleurs (desktop, barre
-     rétractée). On décale les ancrages bas de cette valeur.
+     `vh` : les éléments ancrés en bottom passent dessous. On décale les ancrages
+     bas de la hauteur réellement occupée par cette barre.
      ⚠️ On garde le bloc en 100vh (pas svh) : en svh il serait plus court que le
      viewport barre rétractée → bande de fond visible sous le hero. */
   --safe-bottom: 0px;
 }
-@supports (height: 100svh) {
-  .mescreations-immersion { --safe-bottom: calc(100lvh - 100svh); }
+/* `dvh` = viewport DYNAMIQUE : il suit la barre d'adresse en temps réel.
+   `100dvh - 100svh` vaut donc la hauteur de barre RESTANT à l'écran — pleine au
+   chargement (barre visible), nulle une fois la barre rétractée, nulle en desktop.
+   C'est ce qu'il fallait : les deux indices du bas n'apparaissent PAS au même
+   moment. « Découvre ta sélection » s'affiche au chargement, barre visible → il
+   doit être décalé. « Voir le catalogue complet » n'apparaît qu'après le scroll,
+   barre rétractée → il ne doit plus l'être, et la constante `100lvh - 100svh`
+   (qui vaut toujours la hauteur de barre) le remontait à tort.
+   ⚠️ Contrepartie assumée : `dvh` se recalcule pendant le scroll. Seuls des
+   éléments en position absolue en dépendent ici (indices + bloc sélection), pas
+   la mise en page du hero — le scroll-pinning reste piloté par `vh` et par
+   window.innerHeight côté JS, donc intact. Le glissement du bloc sélection est
+   masqué par son animation d'entrée (opacity + translateY sur --reveal), qui se
+   joue au même moment. À revérifier au doigt à chaque retouche de ce bloc. */
+@supports (height: 100dvh) and (height: 100svh) {
+  .mescreations-immersion { --safe-bottom: calc(100dvh - 100svh); }
 }
 .mescreations-immersion__bg {
   position: absolute;
@@ -24976,6 +25003,12 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   -webkit-overflow-scrolling: touch;
 }
 .mescreations-immersion__slider::-webkit-scrollbar { display: none; }
+/* Prix centré dans la card du slider (demande Robin). `.product-price` est un
+   FLEX (« À partir de » + montant alignés sur la baseline) : c'est
+   justify-content qui centre, pas text-align. Même traitement que le catalogue
+   .creations-grid juste en dessous, donc la colonne reste cohérente.
+   ⚠️ Préfixe obligatoire : .product-card-cinetique est partagé avec /nos-creations/. */
+.mescreations-immersion__slider .product-price { justify-content: center; }
 
 /* Cards produit = EXACTEMENT le design du catalogue (.product-card-cinetique).
    3 visibles par page (slider à flèches + dots, comme le reste du site). */
@@ -25123,8 +25156,24 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   .mescreations-immersion__slider .product-card-cinetique,
   .mescreations-immersion__pcard--sur { flex-basis: 78%; }
 
-  /* (c) */
-  .mescreations-immersion__slider .product-card-cinetique .product-media { height: 26vh; }
+  /* (d) Marge avant la 1ʳᵉ card : elle démarrait au ras du bord gauche, sous la
+     flèche « précédent » (superposée à left:-2px), d'où une photo qui paraissait
+     décalée à gauche. `scroll-padding-left` est INDISPENSABLE en plus du padding :
+     sans lui, `scroll-snap-align: start` recale la card contre le bord du
+     scroll-port au premier snap et annule le décalage. Les deux valeurs doivent
+     rester ÉGALES — c'est le seul chiffre à toucher pour ajuster le cadrage. */
+  .mescreations-immersion__slider {
+    padding-left: 20px;
+    scroll-padding-left: 20px;
+  }
+
+  /* (c) — card plus haute (demande Robin) : 26vh → 30vh ici, 20 → 23vh sous
+     840px de haut, 15 → 17vh sous 700px. C'EST LE RÉGLAGE À SURVEILLER : la card
+     est ancrée par le bas, donc l'agrandir la fait remonter vers la phrase et
+     peut recréer la collision corrigée en 1ʳᵉ passe. Marge gagnée au passage :
+     --safe-bottom est désormais dynamique et retombe à 0 barre rétractée, donc
+     le bloc sélection descend d'autant au moment où il s'affiche. */
+  .mescreations-immersion__slider .product-card-cinetique .product-media { height: 30vh; }
   .mescreations-immersion__slider .product-info { padding: 0.5rem 0.5rem 0.35rem; }
   /* .product-firstname (0.75em) et .product-restname (1.6em) suivent
      proportionnellement — un seul levier suffit pour le nom + le surnom. */
@@ -25143,12 +25192,12 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   .mescreations-immersion__phrase { font-size: clamp(1.4rem, 2.6vw, 2.05rem); }
   .mescreations-immersion__inner { gap: 12px; }
   .mescreations-immersion__describe { margin-top: 2px; padding: 9px 20px; font-size: 13px; }
-  .mescreations-immersion__slider .product-card-cinetique .product-media { height: 20vh; }
+  .mescreations-immersion__slider .product-card-cinetique .product-media { height: 23vh; }
   .mescreations-immersion__selection { bottom: calc(7vh + var(--safe-bottom)); }
 }
 @media (max-height: 700px) {
   .mescreations-immersion__phrase { font-size: clamp(1.2rem, 2.3vw, 1.75rem); }
-  .mescreations-immersion__slider .product-card-cinetique .product-media { height: 15vh; }
+  .mescreations-immersion__slider .product-card-cinetique .product-media { height: 17vh; }
   .mescreations-immersion__selection { bottom: calc(6vh + var(--safe-bottom)); }
   .mescreations-immersion__describe { font-size: 12.5px; padding: 8px 18px; }
 }

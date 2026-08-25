@@ -230,6 +230,50 @@ La révélation simultanée fonctionne (validé). Mais pendant que l'IA calcule,
 
 **État :** les 4 correctifs de la 1ʳᵉ passe sont sur test (`fadfb5c`, `41cdb9c`) et validés par Robin, hors la régression du point 3. **Toujours pas de cherry-pick vers `master`.**
 
+### 🛠️ RECETTE MOBILE — 2ᵉ passe CODÉE PAR COWORK (2026-08-25) — les 4 points ouverts
+
+> **Nouveau process à partir d'ici :** Cowork écrit le code, **Robin commit et push lui-même** (GitHub Desktop) sur `test-theme-sapi-maison`, puis sur `master` quand il estime que c'est bon. Cowork ne lance **aucune** commande git (pas même `git status` : ça laisse un `index.lock` qui bloque GitHub Desktop). Cherry-pick ou manip git → Claude Code.
+
+**Fichiers touchés : 2.** `style.css` et `assets/sapi-mescreations-immersion.js`. Aucun PHP.
+
+**Point 1 — Room-picker `/mes-creations/` mobile : résolu par FACTORISATION, pas par recopie.**
+La cause profonde n'était pas « il manque des règles » mais l'ordre de déclaration : `.home-projet .room-card` (l. ~7 970) et `.mescreations-picker-hero .room-card` (l. ~24 640) ont la **même spécificité 0,2,0**, et une media query n'en ajoute pas — donc le bloc du hero, déclaré ~16 700 lignes plus bas, écrase la home en silence. C'est ce qui a produit les deux régressions de suite.
+- Le bloc mobile de la home devient un **bloc partagé** (sélecteurs `.home-projet …, .mescreations-picker-hero …`) : disposition ligne, icône 34px (svg 18px), label 11,5px à gauche, padding `0.55rem 0.7rem`, 2 colonnes, gap. **La home ne change pas d'un pixel** — on ajoute un sélecteur à ses règles, on ne les modifie pas.
+- Le bloc mobile du hero ne garde plus que ce qui lui est propre (enveloppe, titre, sous-titre) et porte l'avertissement « ne pas redéclarer `.room-card` ici ».
+- Le calage **desktop** des cartes du hero est enfermé dans `@media (min-width: 769px)` — sans ça il continuait d'écraser le bloc partagé en mobile.
+- Gain de hauteur : 7 cartes passent de 3 rangées à ~117px (icône 60px, disposition colonne) à 4 rangées à ~52px, soit ~375px → ~240px.
+- **Effet de bord voulu : il n'est désormais plus possible de régler la carte d'un côté sans l'autre.** Le piège est fermé, pas seulement contourné.
+
+**Point 3 — `--safe-bottom` : option (b) retenue par Robin.** `calc(100lvh - 100svh)` → `calc(100dvh - 100svh)`, `@supports` élargi à `(height: 100dvh) and (height: 100svh)`. `dvh` suit la barre d'adresse en temps réel : décalage plein au chargement (barre visible, « Découvre ta sélection » bien placé), nul après le scroll (barre rétractée, « Voir le catalogue complet » revient à sa place). Le pinning reste piloté par `vh` et `window.innerHeight` côté JS → **non touché**. Bénéfice collatéral : le bloc sélection descend d'autant au moment où il s'affiche, ce qui finance la card plus haute du point 4.
+⚠️ **C'est le point à vérifier au doigt en priorité** : `dvh` se recalcule pendant le scroll. Seuls des éléments en position absolue en dépendent, et l'entrée du bloc sélection (opacity + translateY) masque son glissement — mais la fluidité du pinning est l'acquis à ne pas perdre. Si ça bouge, le repli est (a) : n'appliquer `--safe-bottom` qu'à `__hint--reveal` et `__selection`.
+
+**Point 4 — Slider, les 3 retouches.**
+- *Marge avant la 1ʳᵉ card* : `padding-left: 20px` **+ `scroll-padding-left: 20px`** sur `.mescreations-immersion__slider` (mobile uniquement). Les deux valeurs doivent rester égales — sans `scroll-padding-left`, `scroll-snap-align: start` recale la card contre le bord au premier snap et annule le décalage. **C'est le seul chiffre à bouger pour ajuster le cadrage.**
+- *Prix centré* : `justify-content: center` et **non** `text-align` — `.product-price` est un flex (« À partir de » + montant sur la baseline). Aligné sur ce que fait déjà `.creations-grid` juste en dessous, donc la colonne reste cohérente. **Appliqué desktop + mobile** (comme le prévoyait le diagnostic) : à revoir d'un œil en desktop, c'est une ligne à retirer si tu préfères l'ancien.
+- *Card plus haute* : `product-media` 26 → **30vh** (≤768px), 20 → **23vh** (max-height 840), 15 → **17vh** (max-height 700). **Réglage à surveiller** : la card est ancrée par le bas, l'agrandir la fait remonter vers la phrase et peut recréer la collision corrigée en 1ʳᵉ passe. Si ça touche, redescendre le 30vh — c'est le seul levier.
+- Tout est préfixé `.mescreations-immersion__slider` (vérifié : **zéro** règle non préfixée, `.product-card-cinetique` reste intact pour le catalogue).
+
+**Point 5 — Chorégraphie rejouée au moment 2.** Nouvelle fonction `rewindToTop()` : remonte en haut du track → `--reveal` repasse à 0 → il ne reste que le décor, les 3 points et le futur texte en grand ; le visiteur re-scrolle pour découvrir la nouvelle sélection. Le swap des cards se fait alors **hors écran**.
+- ⚠️ **Déclenché sur `sapi:conseiller-closed`, PAS sur `sapi:advice-loading`** — alors même que ce dernier est « le déclenchement du recalcul ». Raison : à cet instant la modale tient encore le verrou de scroll (`overflow:hidden` sur html+body jusqu'à t+1100 ms de sa séquence de sortie) et un `scrollTo` n'aurait **aucun** effet. `conseiller-closed` est émis après le déverrouillage et **toujours avant** `advice-ready` (`dispatchConseillerClosed()` précède `finishAdvice()` dans `sapi-modal-conseiller.js`) → l'ordre remontée-puis-révélation est garanti par construction, pas par un timing.
+- Placé **après** le test de signature : si la sélection ne change pas, la page ne bouge pas.
+- **Pas de verrou de scroll** pendant la frappe du conseil, contrairement à la séquence de chargement : bloquer la page juste après une interaction se lit comme un plantage, et le verrou par `overflow` est de toute façon inopérant au toucher sur iOS. Au pire le visiteur scrolle pendant la frappe et découvre la nouvelle sélection un peu plus tôt — **jamais l'ancienne**, qui est le défaut qu'on corrige.
+- Le fondu de `applySelectionHtml` est **conservé** : il couvre le cas où le conseil arrive avant la fin du scroll smooth.
+- **Abandon en cours de questionnaire : la remontée s'applique aussi**, via la constante `REWIND_ON_ABANDON = true` en tête de fonction. C'est un affinage comme un autre et le défaut y est identique. **Un seul mot à passer à `false`** si tu préfères le réserver au questionnaire terminé.
+- Changement de pièce → inchangé (rechargement de page, rien d'ajouté).
+
+**Vérifié côté machine :** les deux JS parsent (`node --check`), accolades CSS équilibrées (3861/3861), aucune règle slider non préfixée, markup du room-picker (`room-card-icon`/`room-card-label`) identique home ↔ `/mes-creations/`.
+
+**À recetter par Robin sur test, dans cet ordre :**
+1. **La fluidité du scroll-pinning** (l'acquis à ne pas perdre) — c'est le seul vrai risque du lot, à cause du passage en `dvh`.
+2. `/mes-creations/` sans pièce en mobile : room-picker aussi compact que la home, cartes en ligne.
+3. **La home en mobile : rigoureusement inchangée** (le bloc partagé la touche par construction, donc c'est le contrôle qui compte).
+4. Les deux indices du bas : « Découvre ta sélection » au chargement, « Voir le catalogue complet » après scroll — les deux bien placés.
+5. Slider : 1ʳᵉ photo cadrée, prix centré, card plus haute sans collision avec la phrase. **Et le catalogue `/mes-creations/` en dessous, inchangé.**
+6. Moment 2 : finir le questionnaire → la page remonte, les 3 points s'affichent, le conseil se tape, on re-scrolle et la sélection est la nouvelle. Puis rejouer en **abandonnant** en cours de questionnaire.
+7. Desktop : prix centré dans le slider (seul changement desktop du lot).
+
+**Toujours pas de cherry-pick vers `master`.**
+
 ## [✅ FAIT — sur test] Immersion = via le room-picker (approche simple)
 L'immersion s'active sur `?piece=` valide. En pratique ces URLs viennent du room-picker (cartes = liens `?piece=`). La **reprise auto** (qui ajoutait `?piece=` sans clic pour les revenants) a été **retirée** → un revenant arrive sur le room-picker. Pas de cookie (approche cookie abandonnée car sur-compliquée + souci cache prod). Seul compromis assumé : un lien `?piece=` partagé/favori affiche l'immersion (indistinguable d'un vrai clic). Aucun impact cache prod.
 

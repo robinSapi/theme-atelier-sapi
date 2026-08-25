@@ -293,6 +293,37 @@
     function refreshSelection(answers, sig) {
       fetchSelectionHtml(answers).then(function (html) { applySelectionHtml(html, sig); });
     }
+
+    /* ── Chorégraphie rejouée à chaque affinage (demande produit de Robin) ──
+       Sans ça, on restait scrollé sur l'ANCIENNE sélection pendant que l'IA
+       calculait : on la donnait donc à voir alors qu'elle était déjà périmée. On
+       remonte en haut du track → --reveal repasse à 0 → il ne reste que le décor,
+       les 3 points de chargement et le futur texte en grand. Le visiteur re-scrolle
+       ensuite pour découvrir la nouvelle sélection, exactement comme à l'arrivée.
+       Effet de bord recherché : le swap des cards (sur 'advice-ready') se fait
+       alors HORS ÉCRAN.
+
+       ⚠️ Pourquoi ici et pas sur 'sapi:advice-loading' — qui serait pourtant
+       « le déclenchement du recalcul » : à cet instant la modale tient encore le
+       verrou de scroll (overflow:hidden sur html+body jusqu'à t+1100 ms de sa
+       séquence de sortie) et un scrollTo n'aurait tout simplement aucun effet.
+       'sapi:conseiller-closed' est émis après ce déverrouillage, et TOUJOURS avant
+       'advice-ready' (dispatchConseillerClosed() précède finishAdvice() dans
+       sapi-modal-conseiller.js) → l'ordre remontée-puis-révélation est garanti.
+
+       On ne verrouille volontairement PAS le scroll pendant la frappe du conseil
+       (contrairement à la séquence de chargement) : bloquer la page juste après une
+       interaction se lit comme un plantage, et le verrou par overflow est de toute
+       façon inopérant au toucher sur iOS. Au pire le visiteur scrolle pendant la
+       frappe et découvre la nouvelle sélection un peu plus tôt — jamais l'ancienne. */
+    var REWIND_ON_ABANDON = true; // abandon en cours de questionnaire = un affinage comme un autre
+    function rewindToTop() {
+      if (!track) return;
+      var top = Math.round(track.getBoundingClientRect().top + window.pageYOffset);
+      if (window.pageYOffset <= top + 2) return; // déjà en haut : rien à faire
+      // Même appel que scrollToReveal (l'inverse de celui-ci), volontairement.
+      window.scrollTo({ top: top, behavior: reduceMotion ? 'auto' : 'smooth' });
+    }
     /* On écoute l'événement déterministe émis par la modale à CHAQUE fermeture
        (fin ou abandon), porteur des réponses finales. Fiable contrairement au
        subscribe sapiProject dont le notify dépend du flush pendingNotify du
@@ -336,6 +367,11 @@
       // Même pièce, seuls les affinages changent.
       var sig = JSON.stringify(answers);
       if (sig === lastAnswersSig) return; // identique à ce qui est déjà affiché
+
+      /* La sélection VA changer → on rejoue la chorégraphie d'arrivée. Placé
+         APRÈS le test de signature : si rien ne change, on ne bouge pas la page. */
+      if (advicePending || REWIND_ON_ABANDON) rewindToTop();
+
       /* Questionnaire TERMINÉ : la sélection a déjà été préchargée sur
          'sapi:advice-loading' et attend le conseil. On ne l'affiche surtout pas
          ici — ce serait précisément la désynchronisation qu'on corrige (la
