@@ -24627,8 +24627,34 @@ button.chip--project:focus-visible {
   flex: 1 1 150px;
   max-width: 190px;
 }
-@media (max-width: 600px) {
-  .mescreations-picker-hero .room-card { flex: 1 1 calc(50% - 0.5rem); }
+/* Mobile — le hero de /mes-creations/ doit être AUSSI compact que le room-picker
+   de la home. Trois règles de ce bloc écrasaient les réglages mobiles de la home
+   (spécificité 0,2,0 contre 0,1,1) et gonflaient le hero :
+     · cartes en 2 colonnes (au lieu de 3) → 4 rangées, cartes 1,5× plus larges ;
+     · titre en clamp(1.6rem…) = 25,6px (au lieu des 20px de la home) ;
+     · padding vertical clamp(40px…) porté par .mescreations-picker-hero.
+   On s'aligne sur le breakpoint de la home (768px, pas 600px). */
+@media (max-width: 768px) {
+  .mescreations-picker-hero {
+    padding: 28px 16px 24px;
+  }
+  .mescreations-picker-hero .room-picker-title {
+    font-size: 20px;
+  }
+  .mescreations-picker-hero .room-picker-sub {
+    font-size: 13.5px;
+    margin: -2px auto 2px;
+  }
+  .mescreations-picker-hero .room-picker-cards {
+    gap: 0.75rem;
+  }
+  /* 3 colonnes, comme la home. max-width levé (sinon les 190px de la règle
+     desktop rebrident les cartes et laissent des trous dans la rangée). */
+  .mescreations-picker-hero .room-card {
+    flex: 0 0 calc(33.33% - 0.5rem);
+    max-width: none;
+    padding: 1rem 0.75rem;
+  }
 }
 
 /* État B : masque le hero croquis, la zone cards conseiller, le séparateur et
@@ -24686,6 +24712,16 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   text-align: center;
   background: var(--color-wood-dark);
   --reveal: 0;
+  /* Mobile — la barre d'adresse (Safari/Chrome iOS) recouvre le bas du viewport
+     `vh` : les éléments ancrés en bottom passent dessous. `100lvh - 100svh` vaut
+     EXACTEMENT la hauteur de cette barre, et 0 partout ailleurs (desktop, barre
+     rétractée). On décale les ancrages bas de cette valeur.
+     ⚠️ On garde le bloc en 100vh (pas svh) : en svh il serait plus court que le
+     viewport barre rétractée → bande de fond visible sous le hero. */
+  --safe-bottom: 0px;
+}
+@supports (height: 100svh) {
+  .mescreations-immersion { --safe-bottom: calc(100lvh - 100svh); }
 }
 .mescreations-immersion__bg {
   position: absolute;
@@ -24851,7 +24887,8 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
    apparaît une fois la sélection révélée (pause). */
 .mescreations-immersion__scrollhint {
   position: absolute;
-  bottom: 24px;
+  /* + --safe-bottom : sinon l'indice passe sous la barre d'adresse iOS. */
+  bottom: calc(24px + var(--safe-bottom));
   left: 0;
   right: 0;
   height: 42px;
@@ -24905,7 +24942,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   z-index: 2;
   left: 0;
   right: 0;
-  bottom: 10vh;
+  bottom: calc(10vh + var(--safe-bottom));
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
@@ -24952,8 +24989,19 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
    (nom/catégorie/prix/bouton) garde le design catalogue. */
 .mescreations-immersion__slider .product-card-cinetique .product-media {
   aspect-ratio: auto;
-  height: 22vh;
+  height: 25vh;
 }
+/* Rééquilibrage card du slider (desktop + mobile) : la card était à ~60 % de
+   texte pour 40 % de photo. On resserre l'info pour rendre la place à l'image,
+   SANS toucher au catalogue (préfixe .mescreations-immersion__slider).
+   .product-firstname (0.75em) et .product-restname (1.6em) sont relatifs à
+   .product-name : le réduire suffit pour le nom ET le surnom Square Peg. */
+.mescreations-immersion__slider .product-info { padding: 0.55rem 0.55rem 0.4rem; }
+.mescreations-immersion__slider .product-name { font-size: 0.78rem !important; }
+.mescreations-immersion__slider .product-category { font-size: 0.68rem; margin-bottom: 0.3rem; }
+.mescreations-immersion__slider .price-from { font-size: 0.78rem; }
+.mescreations-immersion__slider .price-value { font-size: 1.2rem; }
+.mescreations-immersion__slider .product-actions { margin-bottom: 0.7rem; }
 
 /* Flèches de part et d'autre du slider (pas de dots). 1 card par clic. */
 .mescreations-immersion__slider-wrap {
@@ -25035,8 +25083,57 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 @media (max-width: 600px) {
   .mescreations-immersion__slider .product-card-cinetique,
   .mescreations-immersion__pcard--sur { flex-basis: 82%; }
-  .mescreations-immersion__selection { bottom: 8vh; }
+  .mescreations-immersion__selection { bottom: calc(8vh + var(--safe-bottom)); }
   .mescreations-immersion__inner { gap: 14px; }
+}
+
+/* ── Mobile : densité de l'immersion ────────────────────────────────────────
+   Trois causes de chevauchement / photos minuscules, corrigées ici :
+   (a) la phrase tombait sur le MINIMUM du clamp desktop (1,85rem = 29,6px sur
+       390px de large, car 3.6vw n'y vaut que 14px) → ~10 lignes, la moitié de
+       l'écran, et collision avec le titre de la sélection ;
+   (b) les flèches étaient DANS le flux flex : 2×36px + 2×10px de gap = 92px,
+       soit 24 % de la largeur. Il ne restait que ~27px de la card suivante.
+       On les superpose (le swipe reste le geste principal sur mobile) ;
+   (c) les cards étaient à 60 % texte / 40 % photo. On réduit les textes du
+       slider UNIQUEMENT et on rend la hauteur gagnée à l'image.
+   ⚠️ .product-card-cinetique est PARTAGÉ avec le catalogue : tout est préfixé
+   par .mescreations-immersion__slider pour ne pas toucher /nos-creations/.
+   Placé AVANT les blocs max-height pour que ceux-ci gardent la main sur les
+   écrans courts (iPhone SE), où il faut compacter davantage. */
+@media (max-width: 768px) {
+  /* (a) */
+  .mescreations-immersion__phrase { font-size: clamp(1.15rem, 5vw, 1.75rem); }
+  .mescreations-immersion__inner { padding: 0 16px; }
+  .mescreations-immersion__selection { padding: 0 16px; }
+
+  /* (b) */
+  .mescreations-immersion__slider-wrap { position: relative; }
+  .mescreations-immersion__arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 4;
+    opacity: .92;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+  }
+  .mescreations-immersion__arrow[data-immersion-prev] { left: -2px; }
+  .mescreations-immersion__arrow[data-immersion-next] { right: -2px; }
+  /* Largeur récupérée → on montre franchement le modèle suivant. */
+  .mescreations-immersion__slider .product-card-cinetique,
+  .mescreations-immersion__pcard--sur { flex-basis: 78%; }
+
+  /* (c) */
+  .mescreations-immersion__slider .product-card-cinetique .product-media { height: 26vh; }
+  .mescreations-immersion__slider .product-info { padding: 0.5rem 0.5rem 0.35rem; }
+  /* .product-firstname (0.75em) et .product-restname (1.6em) suivent
+     proportionnellement — un seul levier suffit pour le nom + le surnom. */
+  .mescreations-immersion__slider .product-name { font-size: 0.72rem !important; }
+  .mescreations-immersion__slider .product-category { font-size: 0.65rem; margin-bottom: 0.25rem; }
+  .mescreations-immersion__slider .price-from { font-size: 0.7rem; }
+  .mescreations-immersion__slider .price-value { font-size: 1.05rem; }
+  .mescreations-immersion__slider .product-actions { margin-bottom: 0.6rem; }
+  .mescreations-immersion__slider .btn-view { font-size: 0.68rem; }
 }
 
 /* Écrans peu hauts (large + bas) : on compacte pour que texte + cards + hint
@@ -25046,12 +25143,12 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   .mescreations-immersion__phrase { font-size: clamp(1.4rem, 2.6vw, 2.05rem); }
   .mescreations-immersion__inner { gap: 12px; }
   .mescreations-immersion__describe { margin-top: 2px; padding: 9px 20px; font-size: 13px; }
-  .mescreations-immersion__slider .product-card-cinetique .product-media { height: 17vh; }
-  .mescreations-immersion__selection { bottom: 7vh; }
+  .mescreations-immersion__slider .product-card-cinetique .product-media { height: 20vh; }
+  .mescreations-immersion__selection { bottom: calc(7vh + var(--safe-bottom)); }
 }
 @media (max-height: 700px) {
   .mescreations-immersion__phrase { font-size: clamp(1.2rem, 2.3vw, 1.75rem); }
-  .mescreations-immersion__slider .product-card-cinetique .product-media { height: 13vh; }
-  .mescreations-immersion__selection { bottom: 6vh; }
+  .mescreations-immersion__slider .product-card-cinetique .product-media { height: 15vh; }
+  .mescreations-immersion__selection { bottom: calc(6vh + var(--safe-bottom)); }
   .mescreations-immersion__describe { font-size: 12.5px; padding: 8px 18px; }
 }
