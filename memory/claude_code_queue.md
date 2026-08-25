@@ -176,7 +176,59 @@ Vérifié aussi : question « table » absente du parcours (T2), règle cuisine 
 
 **Vérifié côté machine :** les deux JS parsent (jsc), accolades CSS équilibrées, assets bien déployés sur test (`--safe-bottom` ×8, `pendingSelection` ×7, `advice-loading` avec detail).
 
-**⏳ EN ATTENTE : 2ᵉ passe mobile de Robin** sur les 4 points ci-dessus.
+### 📱 RECETTE MOBILE — 2ᵉ passe (2026-08-25) : 3 acquis, 5 points ouverts
+
+**Rien n'a été codé pour ces 5 points** — Robin reprend la main avec Cowork. Tout ce qui suit est du diagnostic prêt à l'emploi.
+
+**✅ Acquis, ne plus y toucher :** la fluidité du scroll-pinning est **intacte** après les correctifs (c'était le risque principal) ; l'indice « Découvre ta sélection » est bien visible au chargement ; le slider est nettement mieux (photos plus grandes, card suivante visible).
+
+---
+
+**1. ⏳ Room-picker `/mes-creations/` encore moins compact que la home.** — *cause trouvée*
+
+Le correctif `fadfb5c` a aligné les colonnes, le titre et le padding, mais **pas la structure interne de la carte**. En mobile, la home bascule ses cartes en **ligne horizontale** via un bloc préfixé `.home-projet` ([style.css:7969-7986](style.css#L7969), `@media max-width:768px`) :
+
+| | Home mobile (`.home-projet`) | `/mes-creations/` aujourd'hui |
+|---|---|---|
+| Disposition carte | `flex-direction: row` — icône à gauche, label à droite | colonne (icône au-dessus) |
+| Icône | **34px** (svg 18px) | **60px** (svg par défaut) |
+| Label | **11,5px**, aligné à gauche | **14px**, centré |
+| Padding carte | `0.55rem 0.7rem` | `1rem 0.75rem` |
+
+Ces règles étant préfixées `.home-projet`, elles ne s'appliquent tout simplement pas au hero de `/mes-creations/`. **Piste :** ajouter les mêmes déclarations préfixées `.mescreations-picker-hero` dans son bloc `@media (max-width: 768px)`. L'icône 60→34px est le plus gros gain de hauteur (×7 cartes). **Mieux encore :** factoriser ce bloc mobile en un sélecteur commun aux deux contextes — c'est la 2ᵉ fois que le hero rate un réglage mobile de la home (cf. règle consignée en 1ʳᵉ passe).
+
+**2. ✅ Indice du bas au chargement — corrigé et validé.**
+
+**3. ⏳ « Voir le catalogue complet » maintenant trop haut.** — *régression causée par le correctif 1, cause comprise*
+
+`--safe-bottom = 100lvh - 100svh` est une constante : elle vaut **toujours** la hauteur de la barre d'adresse, même quand la barre est rétractée. Or les deux indices n'apparaissent pas au même moment :
+- « Découvre ta sélection » s'affiche **au chargement**, barre **visible** → le décalage est juste ✅
+- « Voir le catalogue complet » s'affiche **après le scroll**, barre **rétractée** → le décalage n'a plus lieu d'être → il paraît trop haut ❌
+
+**Deux pistes :**
+- **(a) la plus simple, sans risque** — n'appliquer `--safe-bottom` qu'à `.mescreations-immersion__hint--reveal` (et à `__selection`), pas à `__hint--catalogue`, qui n'apparaît que barre rétractée.
+- **(b) la plus exacte** — `calc(100dvh - 100svh)` : décalage **dynamique**, égal à la portion de barre réellement visible (0 quand rétractée). ⚠️ `dvh` recalcule pendant le scroll ; ici ce n'est qu'un petit élément absolu, pas le layout — le risque de saut est faible, mais **à vérifier au doigt**, la fluidité du pinning est l'acquis à ne pas perdre.
+
+**4. ⏳ Slider — trois retouches demandées par Robin.**
+- **Première photo mal centrée** : il faut de la marge avant la 1ʳᵉ card. Le slider est en `padding: 4px 2px 8px` et hérite du `padding: 0 16px` de `__selection`, pendant que la flèche gauche est superposée à `left: -2px`. **Piste :** `padding-left` sur `.mescreations-immersion__slider` **+ `scroll-padding-left` de la même valeur**, sinon le `scroll-snap-align: start` recalera la card contre le bord et annulera l'effet.
+- **Prix à centrer** : `.mescreations-immersion__slider .product-price { text-align: center }` (⚠️ préfixe obligatoire — `.product-card-cinetique` est partagé avec le catalogue).
+- **Card plus haute** : marge disponible côté `product-media` (aujourd'hui 25vh base / 20vh sous 840px / 15vh sous 700px). Augmenter en surveillant le point 3 — une card plus haute remonte vers la phrase et peut recréer une collision.
+
+**5. ⏳ Moment 2 — l'ancienne sélection reste visible pendant l'attente du conseil.** — *demande produit de Robin, pas un bug*
+
+La révélation simultanée fonctionne (validé). Mais pendant que l'IA calcule, on reste scrollé sur l'ancienne sélection, ce qui la donne à voir alors qu'elle est périmée.
+
+**Ce que Robin veut :** au déclenchement du recalcul, **la page remonte** pour n'afficher que le décor + les 3 points de chargement, avec le futur texte en grand — puis le visiteur **re-scrolle** pour découvrir la nouvelle sélection. On rejoue la chorégraphie d'arrivée à chaque affinage.
+
+**Piste :** sur `sapi:advice-loading` (ou à la fermeture de la modale), `scrollTo` vers le haut du track pour ramener `--reveal` à 0. À concevoir avec soin :
+- interaction avec `lockScroll()`/`unlockScroll()` ([sapi-mescreations-immersion.js:333](assets/sapi-mescreations-immersion.js#L333)) — le scroll est déjà verrouillé pendant la machine à écrire ;
+- le swap des cards a lieu à `advice-ready` ; si on remonte à `advice-loading`, le swap se fait hors écran, ce qui est **idéal** (plus besoin du fondu) ;
+- ne pas rendre le retour en haut brutal : `behavior: 'smooth'` + respect de `prefers-reduced-motion` (`reduceMotion` existe déjà dans le fichier) ;
+- cas du **changement de pièce** : la page se recharge déjà, ne rien ajouter.
+
+---
+
+**État :** les 4 correctifs de la 1ʳᵉ passe sont sur test (`fadfb5c`, `41cdb9c`) et validés par Robin, hors la régression du point 3. **Toujours pas de cherry-pick vers `master`.**
 
 ## [✅ FAIT — sur test] Immersion = via le room-picker (approche simple)
 L'immersion s'active sur `?piece=` valide. En pratique ces URLs viennent du room-picker (cartes = liens `?piece=`). La **reprise auto** (qui ajoutait `?piece=` sans clic pour les revenants) a été **retirée** → un revenant arrive sur le room-picker. Pas de cookie (approche cookie abandonnée car sur-compliquée + souci cache prod). Seul compromis assumé : un lien `?piece=` partagé/favori affiche l'immersion (indistinguable d'un vrai clic). Aucun impact cache prod.
