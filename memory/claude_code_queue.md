@@ -771,6 +771,20 @@ Cause : le remplacement était conditionné à `if (Object.keys(filters).length)
 
 ⚠️ **Le motif à retenir : quand une décision est ambiguë, ne pas la prendre à la place du visiteur.** La règle « pas de pièce → contact » essayait de deviner ; deux boutons suppriment la devinette. C'est aussi ce que la conversation venait de proposer, donc ce à quoi il s'attendait.
 
+### ✅ LE TEXTE ET LES IMAGES NE PARLAIENT PAS DU MÊME PROJET
+
+**Recette Robin :** conversation sur un couloir avec sortie murale → arrivée sur `/mes-creations/?piece=entree`. Le conseil affiché dit « **Voici ma sélection d'appliques pour ton couloir** » — juste, il tient compte de la sortie murale. Mais le slider affiche des **suspensions**, et la pill dit « pour ton entrée ».
+
+**Cause : la page ne connaît QUE la pièce.** Le rendu serveur part de `['piece' => $imm_piece]` **et rien d'autre** (`archive-product.php` ~l.126) : c'est une sélection « niveau pièce », prévue dès l'origine pour être affinée ensuite par le **moment 2**, c'est-à-dire à la fermeture de la modale, sans rechargement.
+**Or le chemin que je viens de créer RECHARGE la page.** Le moment 2 n'a donc jamais lieu : la page arrive neuve, avec la seule pièce, et le reste du projet (sortie murale, hauteur) est ignoré. Le conseil, lui, avait été calculé avec **toutes** les réponses — d'où le désaccord entre le texte et les images.
+
+⚠️ **Ce n'est pas un bug introduit, c'est une limite ancienne rendue visible par un chemin neuf.** Le commentaire du fichier l'annonçait : « taille/style viendront affiner via AJAX serveur à l'étape suivante ». Personne n'avait prévu qu'on puisse ARRIVER sur cette page avec un projet déjà complet.
+
+→ **`refineFromStoredProject()` au chargement de l'immersion** : on rejoue l'affinage à partir du projet mémorisé, en réutilisant **exactement** le mécanisme du moment 2 (même endpoint, même dédup, même remplacement de cards). Le carrousel étant invisible à ce stade (`--reveal` à 0), le remplacement ne se voit pas.
+**La signature de dédup fait le tri toute seule** : si le projet ne contient que la pièce, elle est identique à la baseline et aucune requête n'est envoyée. Aucun coût sur le chemin normal (clic sur une carte-pièce).
+
+**Reste, et c'est cosmétique :** la pill et le titre disent « pour ton entrée » alors que le visiteur a dit « couloir » — l'extraction a mappé couloir sur la plus proche des sept pièces. Le conseil IA, lui, reprend le mot du visiteur. Léger décalage de vocabulaire, à trancher avec Robin s'il le juge gênant (une pièce « couloir » distincte, ou un libellé qui reprend le mot du visiteur).
+
 ### 🐛 3. Le CTA « Voir la sélection pour mon projet » ne menait nulle part (signalé par Robin)
 **Vu par Robin :** Robin annonce des filtres appliqués, le bouton promet la sélection, le clic ferme la modale et ramène au room-picker. Rien n'a bougé.
 

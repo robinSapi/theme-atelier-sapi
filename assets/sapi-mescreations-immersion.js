@@ -292,6 +292,7 @@
         navRaf = requestAnimationFrame(updateArrows);
       }, { passive: true });
     }
+    refineFromStoredProject();
     buildDots();
     updateArrows();
     // Recalage après mise en page / chargement des images : c'est seulement à
@@ -356,6 +357,36 @@
         swapCards(html);
         requestAnimationFrame(function () { sliderEl.style.opacity = '1'; });
       }, 220);
+    }
+
+    /* ── AU CHARGEMENT : affiner la sélection avec TOUT le projet ──────────
+       ⚠️ LA PAGE NE CONNAÎT QUE LA PIÈCE. Le rendu serveur part de
+       `['piece' => $imm_piece]` et rien d'autre (archive-product.php) : c'est
+       une sélection « niveau pièce », prévue pour être affinée ensuite par le
+       moment 2, quand la modale se ferme sans recharger la page.
+       Or depuis qu'un projet sans pièce peut RECHARGER vers `?piece=`, ce
+       moment 2 n'a jamais lieu : la page arrive neuve, avec la seule pièce.
+       Défaut constaté par Robin : le conseil disait « ma sélection d'appliques
+       pour ton couloir » — juste, il tenait compte de la sortie murale — tandis
+       que le slider affichait les suspensions génériques de l'entrée. Le texte
+       et les images ne parlaient pas du même projet.
+       On rejoue donc ici l'affinage, à partir du projet mémorisé, en réutilisant
+       exactement le mécanisme du moment 2 (même endpoint, même dédup). Le
+       carrousel est invisible à ce stade (`--reveal` à 0), donc le remplacement
+       ne se voit pas.
+       La signature de dédup fait le tri toute seule : si le projet ne contient
+       que la pièce, elle est identique à la baseline et rien n'est demandé. */
+    function refineFromStoredProject() {
+      if (!sliderEl || !config.ajaxUrl) return;
+      var proj = null;
+      try { proj = (window.sapiProject && window.sapiProject.get) ? window.sapiProject.get() : null; } catch (e) { return; }
+      if (!proj || !proj.answers || !proj.answers.piece) return;
+      if (proj.answers.piece !== (config.piece || '')) return; // autre pièce : pas notre affaire
+      var sig = JSON.stringify(proj.answers);
+      if (sig === lastAnswersSig) return; // rien de plus que la pièce
+      fetchSelectionHtml(proj.answers).then(function (html) {
+        applySelectionHtml(html, sig);
+      });
     }
 
     /* Sélection préchargée en attente du conseil IA : { promise, sig }. */
