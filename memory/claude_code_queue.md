@@ -746,6 +746,12 @@ Robin a signalé deux défauts d'UX et demandé un audit complet des parcours. L
 Cas réel : mémoire « salon », le visiteur écrit « salle de bain ». Cette pièce **n'existe pas dans les sept du référentiel**, l'extraction ne renvoie donc rien pour `piece`, et « salon » survit. **Les deux coexistaient, l'ancien gagnait** : chips « Salon » à l'écran, IA nourrie de « salon », sélection finale de salon.
 → `applyFiltersBatch(filters, replaceAll)` : le chemin du texte libre appelle `set()` au lieu d'`update()`. **Sans ce second correctif, le premier n'aurait fait que cacher le symptôme.**
 
+**⚠️ CORRIGÉ UNE 2ᵉ FOIS — le premier correctif avait un trou, trouvé en recette par Robin.**
+Test : « une petite lampe pour une salle de bain » → « il m'a proposé une sélection mais n'a pas enregistré la pièce et m'a donc resservi le projet précédent ».
+Cause : le remplacement était conditionné à `if (Object.keys(filters).length)`. **Quand l'extraction ne renvoie RIEN — ce qui est exactement le cas quand le visiteur nomme une pièce absente du référentiel — la branche était sautée et l'ancien projet survivait intact.** Le pire des cas, puisque c'est précisément là que le visiteur a décrit autre chose.
+→ Remplacement rendu **inconditionnel**, dans la branche de succès. Sur ce chemin le message EST une description de projet par construction (le champ dit « Décris ton projet en quelques mots ») : il n'existe aucun cas où l'on voudrait conserver l'ancien. Placé dans la branche de succès pour qu'une panne réseau ou une erreur IA ne détruise pas le projet du visiteur.
+**Leçon : un correctif conditionné à « l'IA a compris quelque chose » laisse toujours passer le cas où elle n'a rien compris — et c'est souvent celui qui compte.**
+
 ### 🐛 3. Le CTA « Voir la sélection pour mon projet » ne menait nulle part (signalé par Robin)
 **Vu par Robin :** Robin annonce des filtres appliqués, le bouton promet la sélection, le clic ferme la modale et ramène au room-picker. Rien n'a bougé.
 

@@ -982,14 +982,26 @@
         var data = resp.data || {};
         state.chat.sessionId = data.session_id || state.chat.sessionId;
 
+        /* Freetext = nouvelle description complète : on REMPLACE, et on le fait
+           MÊME QUAND L'EXTRACTION NE RENVOIE RIEN.
+           ⚠️ C'ÉTAIT LE TROU DU PREMIER CORRECTIF. Le remplacement était
+           conditionné à `if (Object.keys(filters).length)` : quand le visiteur
+           décrivait quelque chose que le référentiel ne sait pas nommer, le
+           modèle ne renvoyait aucun filtre, la branche était sautée, et
+           l'ANCIEN PROJET SURVIVAIT INTACT — le pire des cas, puisque c'est
+           précisément là que le visiteur a décrit autre chose.
+           Cas réel (Robin) : « une petite lampe pour une salle de bain ». La
+           salle de bain n'existe pas dans les sept pièces, rien n'est extrait,
+           et le site lui reservait la sélection de son projet précédent.
+           Sur ce chemin, le message EST une description de projet par
+           construction (le champ dit « Décris ton projet en quelques mots ») :
+           il n'y a donc pas de cas où l'on voudrait conserver l'ancien.
+           Placé dans la branche de SUCCÈS : une panne réseau ou une erreur IA
+           ne détruit pas le projet du visiteur. */
         var filters = data.filters || {};
-        if (Object.keys(filters).length) {
-          // Freetext = nouvelle description complète : on REMPLACE, on ne
-          // fusionne pas (cf. le commentaire de applyFiltersBatch).
-          state.answers = {};
-          state.labels = {};
-          applyFiltersBatch(filters, true);
-        }
+        state.answers = {};
+        state.labels = {};
+        applyFiltersBatch(filters, true);
 
         addRobinBubble(data.message || '', { filters: filters });
         state.chat.conversation.push({ role: 'user', content: text });
