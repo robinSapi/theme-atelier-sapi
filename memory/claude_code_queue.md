@@ -752,6 +752,25 @@ Cause : le remplacement était conditionné à `if (Object.keys(filters).length)
 → Remplacement rendu **inconditionnel**, dans la branche de succès. Sur ce chemin le message EST une description de projet par construction (le champ dit « Décris ton projet en quelques mots ») : il n'existe aucun cas où l'on voudrait conserver l'ancien. Placé dans la branche de succès pour qu'une panne réseau ou une erreur IA ne détruise pas le projet du visiteur.
 **Leçon : un correctif conditionné à « l'IA a compris quelque chose » laisse toujours passer le cas où elle n'a rien compris — et c'est souvent celui qui compte.**
 
+### ✅ DEUX SORTIES AU LIEU D'UNE — la règle « pas de pièce → contact » était trop grossière
+
+**Recette Robin :** conversation sur une suspension de salle de bain → l'IA comprend « sortie au-dessus du miroir » = sortie murale, propose les appliques, l'encart affiche « Au mur · Standard ». Clic sur « Voir la sélection » → **formulaire de contact**.
+
+**Ce n'était pas un bug mais ma règle appliquée à la lettre, et elle était fausse :**
+- Le projet **n'était pas vide** : deux critères, et **le moteur de filtrage n'a jamais eu besoin de la pièce** — il se règle d'abord sur la sortie électrique. « Au mur » suffit à déduire les appliques.
+- Mon message « je n'ai pas assez d'éléments » s'affichait **juste au-dessus** d'un encart qui en listait un. Contradiction visible à l'écran.
+- **Cause de fond :** la page de sélection est indexée sur la pièce. `/mes-creations/?piece=salon` existe ; **aucune URL ne dit « appliques murales, pièce inconnue »**. Il y avait quelque chose à montrer, mais nulle part où l'envoyer.
+- Et l'IA posait déjà la bonne question : « tu veux qu'on regarde les appliques, ou tu veux en parler directement avec Robin ? » **Un seul bouton devait donc deviner lequel des deux chemins prendre.**
+
+**Décision Robin : deux boutons, comme l'IA les proposait.**
+- **« Voir les appliques et plafonniers »** → le catalogue filtré (`?product_cat=`), qui sait déjà se filtrer et pré-activer sa pastille. On réutilise une page existante au lieu d'en inventer une.
+- **« En parler à Robin »** → l'écran contact.
+- Quand la **pièce est connue**, le second bouton reste **masqué** : un seul chemin a du sens et on ne dilue pas l'action principale.
+
+**Mise en œuvre :** l'endpoint chat renvoie désormais `catalog_cat` + `catalog_label`, **la catégorie déduite quand il n'en trouve qu'UNE seule**. Le libellé du bouton est alors réécrit avec son nom, pour qu'il promette exactement ce qu'il donne. Plusieurs catégories → catalogue complet, ce qui reste honnête : on ne prétend pas cibler.
+
+⚠️ **Le motif à retenir : quand une décision est ambiguë, ne pas la prendre à la place du visiteur.** La règle « pas de pièce → contact » essayait de deviner ; deux boutons suppriment la devinette. C'est aussi ce que la conversation venait de proposer, donc ce à quoi il s'attendait.
+
 ### 🐛 3. Le CTA « Voir la sélection pour mon projet » ne menait nulle part (signalé par Robin)
 **Vu par Robin :** Robin annonce des filtres appliqués, le bouton promet la sélection, le clic ferme la modale et ramène au room-picker. Rien n'a bougé.
 

@@ -23662,6 +23662,27 @@ button.chip--project:focus-visible {
   color: #fff;
 }
 .action-btn--primary:hover { background: var(--color-orange-hover); }
+/* Sortie secondaire du chat (« En parler à Robin ») : présente mais discrète,
+   elle ne doit pas concurrencer la sélection. Sans fond, juste un liseré. */
+.action-btn--ghost {
+  background: transparent;
+  color: var(--color-wood-dark);
+  border: 1px solid var(--color-line);
+}
+.action-btn--ghost:hover { background: rgba(147, 125, 104, .08); }
+.action-btn[hidden] { display: none; }
+/* Les deux sorties du chat côte à côte. Elles s'empilent d'elles-mêmes quand
+   la place manque — donc en mobile, sans media query. */
+.modal__foot--duo {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-justify-content: center;
+  justify-content: center;
+  gap: 8px;
+}
+.modal__foot--duo .action-btn { -webkit-flex: 1 1 auto; flex: 1 1 auto; }
 .action-btn--secondary {
   background: #fff;
   color: var(--color-wood-dark);

@@ -98,6 +98,10 @@
       sessionId: null,
       status: 'idle',     // 'idle' | 'thinking'
       maxUserMessages: config.maxMessages || 15,
+      // Catégorie déduite par le serveur quand il n'en trouve qu'UNE. Sert de
+      // destination au bouton « Voir… » lorsque le projet n'a pas de pièce.
+      catalogCat: '',
+      catalogLabel: '',
     },
   };
 
@@ -935,8 +939,55 @@
     }
   }
 
+  /* Les deux sorties du chat.
+     ⚠️ UN SEUL BOUTON DEVAIT DEVINER, ET SE TROMPAIT. Quand le projet n'a pas
+     de pièce — cas fréquent : le visiteur nomme une pièce absente des sept du
+     référentiel, « salle de bain » par exemple — le bouton unique basculait
+     sur le contact, alors qu'une vraie sélection existait. Le moteur de
+     filtrage n'a jamais eu besoin de la pièce : « au mur » suffit à déduire
+     les appliques. C'est la PAGE de sélection qui est indexée sur la pièce.
+     L'IA, elle, posait déjà la bonne question : « tu veux qu'on regarde les
+     appliques, ou tu veux en parler directement avec Robin ? ». Les deux
+     boutons reprennent exactement ces deux chemins, et on cesse de choisir à
+     la place du visiteur.
+     Quand la pièce EST connue, le second bouton reste masqué : un seul chemin
+     a du sens, et on ne dilue pas l'action principale. */
   function revealChatCta() {
-    if (els.chatCta) els.chatCta.hidden = false;
+    if (!els.chatCta) return;
+    els.chatCta.hidden = false;
+
+    var contactBtn = els.chatCta.querySelector('[data-chat-cta-contact]');
+    var labelEl = els.chatCta.querySelector('[data-chat-cta-label]');
+    var hasPiece = !!projectPiece();
+
+    if (contactBtn) contactBtn.hidden = hasPiece;
+    if (labelEl) {
+      if (hasPiece) {
+        labelEl.textContent = 'Voir la sélection pour mon projet';
+      } else if (state.chat.catalogLabel) {
+        // Le serveur n'a déduit qu'une seule catégorie : on la nomme, pour que
+        // le bouton promette exactement ce qu'il donne.
+        labelEl.textContent = 'Voir les ' + state.chat.catalogLabel.toLowerCase();
+      } else {
+        labelEl.textContent = 'Voir la sélection';
+      }
+    }
+  }
+
+  /* Destination quand aucune pièce n'est connue : le catalogue, filtré sur la
+     catégorie déduite si le serveur n'en a trouvé qu'une. Plusieurs catégories
+     → catalogue complet, ce qui reste honnête : on ne prétend pas cibler. */
+  function goToCatalogue(cat) {
+    try {
+      var url = new URL(window.location.href);
+      url.pathname = '/mes-creations/';
+      url.searchParams.delete('freetext');
+      url.searchParams.delete('piece');
+      if (cat) { url.searchParams.set('product_cat', cat); } else { url.searchParams.delete('product_cat'); }
+      window.location.assign(url.toString());
+    } catch (err) {
+      window.location.href = '/mes-creations/' + (cat ? '?product_cat=' + encodeURIComponent(cat) : '');
+    }
   }
 
   // Appel IA : extraction freetext (Haiku) — endpoint F1b existant
@@ -981,6 +1032,10 @@
 
         var data = resp.data || {};
         state.chat.sessionId = data.session_id || state.chat.sessionId;
+        // Catégorie déduite côté serveur : destination du bouton « Voir… »
+        // quand le projet n'a pas de pièce (cf. revealChatCta).
+        state.chat.catalogCat   = data.catalog_cat   || '';
+        state.chat.catalogLabel = data.catalog_label || '';
 
         /* Freetext = nouvelle description complète : on REMPLACE, et on le fait
            MÊME QUAND L'EXTRACTION NE RENVOIE RIEN.
@@ -1096,6 +1151,10 @@
 
         var data = resp.data || {};
         state.chat.sessionId = data.session_id || state.chat.sessionId;
+        // Catégorie déduite côté serveur : destination du bouton « Voir… »
+        // quand le projet n'a pas de pièce (cf. revealChatCta).
+        state.chat.catalogCat   = data.catalog_cat   || '';
+        state.chat.catalogLabel = data.catalog_label || '';
 
         if (data.filters_update) {
           applyFiltersBatch(data.filters_update);
@@ -2045,11 +2104,29 @@
           backFromQuestion();
           break;
         case 'apply':
-          // F2a-bis : CTA "Voir la sélection" en S2.chat → écran transition + appel IA
-          // unique (avec la conversation), puis save + close. Plus de S3 récap.
+          /* CTA « Voir… » du chat.
+             Sans pièce, `showTransitionAndExit` basculerait sur le contact —
+             c'est justement ce qu'on veut éviter ici, puisque le second bouton
+             offre déjà ce chemin. On enregistre le projet et on emmène le
+             visiteur au catalogue, filtré sur la catégorie déduite. */
+          if (!immersionIsOnPage() && !projectPiece()) {
+            if (window.sapiProject) window.sapiProject.set(state.answers, state.labels);
+            goToCatalogue(state.chat && state.chat.catalogCat);
+            break;
+          }
+          // F2a-bis : écran transition + appel IA unique (avec la conversation),
+          // puis save + close.
           showTransitionAndExit({
             source: 's2',
             conversation: (state.chat && state.chat.conversation) || [],
+          });
+          break;
+        case 'chat-contact':
+          // Seconde sortie du chat, celle que l'IA propose elle-même quand
+          // elle sent que le projet mérite un échange direct.
+          if (window.sapiProject) window.sapiProject.set(state.answers, state.labels);
+          showContact({
+            message: 'Dis-m’en un peu plus et laisse-moi ton mail : je te réponds moi-même.'
           });
           break;
         // F2a-ter : 3 actions du carrefour S3 "Modifier mon projet"

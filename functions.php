@@ -3271,6 +3271,23 @@ function sapi_ajax_megafilter_chat() {
     ['role' => 'assistant', 'content' => $robin_message],
   ]);
 
+  /* Où le visiteur pourrait voir cette sélection s'il n'a PAS de pièce.
+     ⚠️ Le moteur de filtrage n'a jamais eu besoin de la pièce : il se règle
+     d'abord sur la sortie électrique. « au mur » suffit à renvoyer les
+     appliques. C'est la PAGE de sélection qui est indexée sur la pièce —
+     `/mes-creations/?piece=salon` existe, mais aucune URL ne dit « appliques
+     murales, pièce inconnue ». D'où le cul-de-sac constaté par Robin : il y
+     avait bien quelque chose à montrer, mais nulle part où l'envoyer.
+     On renvoie donc la catégorie déduite : le catalogue sait déjà se filtrer
+     dessus (`?product_cat=`, pastilles pré-activées). Une seule catégorie →
+     on filtre ; plusieurs → le catalogue complet, ce qui reste honnête. */
+  $cat_slug = (count($chat_cats) === 1) ? (string) $chat_cats[0] : '';
+  $cat_label = '';
+  if ($cat_slug) {
+    $term = get_term_by('slug', $cat_slug, 'product_cat');
+    if ($term && !is_wp_error($term)) $cat_label = $term->name;
+  }
+
   wp_send_json_success([
     'message'         => $robin_message,
     'filters_update' => $filters_update,
@@ -3280,6 +3297,8 @@ function sapi_ajax_megafilter_chat() {
     'contact_message' => $contact_message,
     'conversation'    => $new_conversation,
     'session_id'      => $session_id,
+    'catalog_cat'     => $cat_slug,
+    'catalog_label'   => $cat_label,
   ]);
 }
 
@@ -3632,10 +3651,24 @@ function sapi_render_conseiller_modal() {
           </div>
         </div>
 
-        <footer class="modal__foot" data-chat-cta hidden>
-          <button type="button" class="action-btn action-btn--primary" data-action="apply">
+        <?php /* ⚠️ DEUX SORTIES, PAS UNE. Un seul bouton devait DEVINER où
+                 emmener le visiteur, et se trompait quand le projet n'avait pas
+                 de pièce : il basculait sur le contact alors qu'une vraie
+                 sélection existait (« au mur » suffit à déduire les appliques).
+                 L'IA, elle, posait déjà la bonne question — « tu veux qu'on
+                 regarde les appliques, ou tu veux en parler directement avec
+                 Robin ? ». Les deux boutons reprennent ces deux chemins.
+                 Le second reste MASQUÉ quand la pièce est connue : là, un seul
+                 chemin a du sens et on ne dilue pas l'action principale.
+                 Le libellé du premier est réécrit en JS avec le nom de la
+                 catégorie déduite quand il y en a une seule. */ ?>
+        <footer class="modal__foot modal__foot--duo" data-chat-cta hidden>
+          <button type="button" class="action-btn action-btn--primary" data-action="apply" data-chat-cta-primary>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12h18M13 5l7 7-7 7"/></svg>
-            <?php esc_html_e('Voir la sélection pour mon projet', 'theme-sapi-maison'); ?>
+            <span data-chat-cta-label><?php esc_html_e('Voir la sélection pour mon projet', 'theme-sapi-maison'); ?></span>
+          </button>
+          <button type="button" class="action-btn action-btn--ghost" data-action="chat-contact" data-chat-cta-contact hidden>
+            <?php esc_html_e('En parler à Robin', 'theme-sapi-maison'); ?>
           </button>
         </footer>
       </section>
