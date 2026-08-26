@@ -23901,7 +23901,66 @@ button.chip--project:focus-visible {
   .h1 { font-size: 28px; }
   .choices { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .choices--4col { grid-template-columns: repeat(2, 1fr); }
-  .choice { padding: 12px 6px 9px; }
+
+  /* ── Boutons de choix compacts, calqués sur le room-picker mobile ───────
+     Demande de Robin : « sur mobile les boutons sont trop gros, s'inspirer du
+     nouveau room-picker version mobile ». Mêmes valeurs que lui : icône 34px
+     (svg 18), libellé 11,5px aligné à gauche, rembourrage 0.55/0.7rem. La
+     hauteur d'un bouton passe d'environ 116px à ~50px.
+
+     ⚠️ GRILLE ET NON FLEX EN LIGNE, contrairement au room-picker. Ces boutons
+     ont un TROISIÈME enfant que les cartes de pièce n'ont pas : `.choice__dim`,
+     la précision entre parenthèses (« moins de 10 m² »…). En flex-ligne, elle
+     se retrouverait à côté du libellé au lieu d'être dessous. Ici l'icône
+     occupe la colonne 1 sur toute la hauteur, libellé et précision s'empilent
+     en colonne 2 — et quand il n'y a pas de précision, la mise en page reste
+     juste sans règle supplémentaire.
+
+     ⚠️ TOUT EST PRÉFIXÉ `.conseiller-card--modal`, ET C'EST OBLIGATOIRE.
+     `.choice` sert à DEUX composants : les questions de la modale (ici) et la
+     chip-question posée sur la card « Mon projet », qui a sa propre mise en
+     page horizontale (cf. `.conseiller-mon-projet__inline-question .choice`).
+     Sans préfixe, la plupart des règles seraient bien écrasées par celles de
+     la chip (spécificité 0,2,0 contre 0,1,0) — mais pas toutes : le rayon de
+     l'icône, l'interlettrage et l'interligne du libellé ne sont PAS
+     redéclarés par la chip, ils auraient donc fui dessus. Une fuite discrète,
+     et sur un composant qui n'a rien demandé. */
+  .conseiller-card--modal .choices .choice {
+    display: -ms-grid;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    -webkit-column-gap: 0.55rem;
+    column-gap: 0.55rem;
+    -webkit-align-items: center;
+    align-items: center;
+    padding: 0.55rem 0.7rem;
+    min-height: 0;
+    text-align: left;
+  }
+  .conseiller-card--modal .choices .choice__icon {
+    grid-row: 1 / -1;
+    width: 34px;
+    height: 34px;
+    margin: 0;
+    border-radius: 9px;
+    -webkit-flex-shrink: 0;
+    flex-shrink: 0;
+  }
+  .conseiller-card--modal .choices .choice__icon svg { width: 18px; height: 18px; }
+  .conseiller-card--modal .choices .choice__label {
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    text-align: left;
+  }
+  .conseiller-card--modal .choices .choice__dim {
+    font-size: 10.5px;
+    line-height: 1.2;
+    text-align: left;
+    color: var(--color-wood-mid);
+    text-transform: none;
+    letter-spacing: 0;
+  }
   .recap-card { grid-template-columns: 1fr; gap: 6px; }
   /* Mobile — croix renforcée visuellement (sur cream, le SVG transparent
      wood-mid était quasi-invisible). Fond blanc subtil + couleur wood-dark
