@@ -632,8 +632,22 @@ select:focus-visible {
    ⚠️ Ne PAS lever cette règle pour « rendre un champ plus discret ». Le gain
    visuel se paierait par un zoom subi à chaque saisie. Pour un champ plus
    discret, jouer sur la couleur, le rembourrage ou la hauteur, jamais sur la
-   taille du texte. */
-@media (max-width: 768px) {
+   taille du texte.
+
+   ⚠️ DEUX CONDITIONS, ET LA SECONDE N'EST PAS REDONDANTE. La largeur couvre
+   les téléphones ; `(hover: none) and (pointer: coarse)` couvre TOUT appareil
+   tactile quelle que soit sa largeur — notamment un iPad en paysage, large de
+   1024px, qui zoome exactement pareil et que la seule borne de largeur aurait
+   laissé de côté. À l'inverse, un navigateur de bureau réduit à 700px de large
+   ne zoome pas, mais reçoit la règle : sans conséquence, les champs y sont
+   simplement lisibles.
+
+   Couverture vérifiée sur le thème : les types réellement utilisés sont text,
+   email, search, number, date, tel, plus `textarea` et `select`. `url`,
+   `password` et `input` sans type sont listés par précaution, pour les champs
+   rendus par WooCommerce et les extensions. Aucun `contenteditable` ni
+   `::placeholder` avec sa propre taille (vérifié). */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
   input[type="text"],
   input[type="email"],
   input[type="search"],
