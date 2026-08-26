@@ -225,7 +225,16 @@ if ($imm_piece) {
       <a class="mescreations-immersion__pcard mescreations-immersion__pcard--sur" href="<?php echo esc_url(home_url('/sur-mesure/')); ?>">
         <span class="mescreations-immersion__sur-eyebrow"><?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?></span>
         <span class="mescreations-immersion__sur-title"><?php esc_html_e('Créons ensemble', 'theme-sapi-maison'); ?></span>
-        <span class="mescreations-immersion__sur-sub"><?php esc_html_e('Rien ne colle parfaitement ? Robin dessine ton luminaire.', 'theme-sapi-maison'); ?></span>
+        <?php /* ⚠️ Formulation POSITIVE, décidée par Robin. L'ancienne version
+                 (« Rien ne colle parfaitement ? Robin dessine ton luminaire. »)
+                 présentait le sur-mesure comme un lot de consolation, à lire
+                 juste après quatre modèles qu'on vient de recommander : elle
+                 disqualifiait la sélection en même temps qu'elle proposait
+                 autre chose. Ici c'est une option de plus, pas un repli.
+                 ⚠️ Espace INSÉCABLE avant le « ! » : une espace ordinaire est
+                 un point de césure, le « ! » tomberait seul en bout de ligne
+                 (même piège que le « ? » du room-picker). */ ?>
+        <span class="mescreations-immersion__sur-sub"><?php esc_html_e('Pour ce projet, un luminaire sur-mesure est aussi une bonne idée !', 'theme-sapi-maison'); ?></span>
         <span class="mescreations-immersion__sur-cta">
           <?php esc_html_e('En parler à Robin', 'theme-sapi-maison'); ?>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="14" height="14"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
