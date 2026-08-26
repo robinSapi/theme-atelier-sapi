@@ -618,10 +618,15 @@
        avec le flou piloté au doigt et la pause. D'où la version ci-dessous, et
        elle seule. */
 
-    var SNAP_IDLE = 150;         // ms d'immobilité avant de considérer le geste fini
-    var SNAP_CATCH = 0.30;       // distance d'accroche au catalogue, en hauteurs d'écran
-    var GESTE_MINIMUM = 8;       // ⇦ en dessous, il ne s'est rien passé (px)
-    var TOLERANCE_ARRIVEE = 4;   // px : on se considère posé sur une étape
+    var SNAP_IDLE = 150;              // ms d'immobilité avant le recalage de secours
+    var SNAP_CATCH = 0.30;            // au-delà, on est dans le catalogue : page libre
+    var GESTE_MINIMUM = 8;            // ⇦ en dessous, il ne s'est rien passé (px)
+    var TOLERANCE_ARRIVEE = 4;        // px : on se considère posé sur une étape
+    /* ⇦ Le temps de calme exigé avant d'accepter un nouveau geste à la molette.
+       À MONTER si une seule poussée de pavé tactile franchit deux étapes : le
+       pavé émet son inertie en continu pendant une à deux secondes, et c'est ce
+       silence qui distingue « même poussée » de « nouvelle poussée ». */
+    var REPOS_ENTRE_DEUX_PAS = 140;   // ms
     /* ⇦ LE TEMPS QUE MET LA PAGE POUR PASSER D'UN ÉCRAN AU SUIVANT.
        Avant, on laissait faire `behavior: 'smooth'` : la durée appartenait
        alors au navigateur, et elle GRANDIT AVEC LA DISTANCE. Le trajet
@@ -632,12 +637,7 @@
        Monter ce chiffre rend le mouvement plus posé, le descendre plus sec. */
     var DUREE_TRANSITION = 420;  // ms
     var snapTimer = null;
-    var touching = false;       // un doigt est posé
     var progScroll = false;     // un scroll programmatique est en vol
-    var skipNextSnap = false;   // le geste a fait défiler le carrousel
-    var gestureInSlider = false, sliderStartLeft = 0;
-    var currentStep = 0;        // étape sur laquelle on est posé (0, 1, 2)
-    var gestureFrom = null;     // étape d'où le geste EN COURS est parti
 
     /* Le verrou de scroll est posé par `overflow: hidden` sur html — par NOTRE
        machine à écrire ET par la modale Conseiller. Un seul test couvre donc
@@ -712,13 +712,6 @@
       progScroll = false;
       progTarget = null;
     }
-    // Le visiteur reprend la main : on arrête l'animation là où elle en est,
-    // sans la faire sauter. `--reveal` suit la position réelle, donc rien à
-    // resynchroniser.
-    function cancelProgrammatic() {
-      if (!progScroll) return;
-      endProgrammatic();
-    }
 
     /* Hauteur de tout ce qui reste COLLÉ EN HAUT de l'écran et masquerait le
        haut du catalogue : le header, ET le bandeau de réassurance, qui est
@@ -789,94 +782,122 @@
     function inHeroRange(y, stops) {
       return y >= stops[0] - 8 && y <= stops[2] + window.innerHeight * SNAP_CATCH;
     }
-    /* Mémorise l'étape d'où part le geste. C'est CE point de départ, et non la
-       position atteinte, qui décide de l'arrivée : c'est ce qui garantit
-       « un geste = une étape », jamais deux, même si l'élan du téléphone a
-       emporté la page plus loin. */
-    function noteGestureStart() {
-      if (gestureFrom !== null || progScroll) return;
+    /* Recalage de secours. Le carrousel ci-dessous rend impossible de S'ARRÊTER
+       entre deux étapes ; mais on peut y ENTRER autrement : un geste parti du
+       catalogue (le verrou CSS ne vaut que pour les gestes nés dans le hero),
+       une restauration de position au rechargement, une rotation d'écran.
+       Dans ces cas seulement, on recale sur l'étape la plus proche. */
+    function maybeSnap() {
+      if (reduceMotion || progScroll || scrollLocked()) return;
       var stops = stopPositions();
       if (!stops) return;
-      gestureFrom = nearestStep(window.pageYOffset, stops);
-    }
-
-    function maybeSnap() {
-      if (skipNextSnap) { skipNextSnap = false; gestureFrom = null; return; }
-      // Doigt encore posé : le geste continue, on garde son origine.
-      if (touching) return;
-      /* ⚠️ TOUTES les autres sorties anticipées DOIVENT remettre `gestureFrom`
-         à zéro. Sinon il reste pointé sur l'origine du geste PRÉCÉDENT, et
-         `noteGestureStart()` refuse ensuite de le mettre à jour : le calcul de
-         l'étape d'arrivée part alors d'une origine périmée — saut en arrière,
-         ou saut de deux étapes.
-         Le cas n'est pas théorique : en mode carrousel dur, `progScroll` est
-         vrai à CHAQUE fin de geste, donc absolument tous les gestes passaient
-         par cette sortie et fuyaient. */
-      if (reduceMotion || progScroll || scrollLocked()) { gestureFrom = null; return; }
-      var stops = stopPositions();
-      if (!stops) { gestureFrom = null; return; }
       var y = window.pageYOffset;
-      if (!inHeroRange(y, stops)) { gestureFrom = null; currentStep = stops.length - 1; return; }
-
-      var from = (gestureFrom === null) ? nearestStep(y, stops) : gestureFrom;
-      var moved = y - stops[from];
-      var step = from;
-      // Un geste, une étape : c'est l'étape de DÉPART qui décide de l'arrivée,
-      // pas la position atteinte. L'élan du téléphone ne peut donc jamais en
-      // faire franchir deux.
-      if (Math.abs(moved) > GESTE_MINIMUM) {
-        step = Math.max(0, Math.min(stops.length - 1, from + (moved > 0 ? 1 : -1)));
-      }
-      gestureFrom = null;
-      currentStep = step;
-      if (Math.abs(stops[step] - y) < TOLERANCE_ARRIVEE) return; // déjà en place
-      programmaticScrollTo(stops[step]);
+      if (!inHeroRange(y, stops)) return;
+      var i = nearestStep(y, stops);
+      if (Math.abs(stops[i] - y) < TOLERANCE_ARRIVEE) return;
+      programmaticScrollTo(stops[i]);
     }
-
     function scheduleSnap() {
-      // (Le drapeau est levé par l'animation elle-même, à sa dernière image :
-      //  un seul propriétaire, pas de délai à deviner.)
-      // Le premier mouvement d'un geste fixe son point de départ : c'est de là
-      // que se compte « une étape ». Sans scroll programmatique en cours, sinon
-      // notre propre animation passerait pour un geste du visiteur.
-      noteGestureStart();
       clearTimeout(snapTimer);
       snapTimer = setTimeout(maybeSnap, SNAP_IDLE);
     }
 
-    document.addEventListener('touchstart', function (e) {
-      touching = true;
-      cancelProgrammatic(); // le doigt reprend toujours la main (sauf en vrai carrousel)
-      noteGestureStart();   // avant tout mouvement : c'est ici que part le geste
-      gestureInSlider = !!(sliderEl && e.target && sliderEl.contains(e.target));
-      sliderStartLeft = sliderEl ? sliderEl.scrollLeft : 0;
-    }, { passive: true });
-    function onTouchEnd() {
-      touching = false;
-      /* On n'ancre pas si le geste a réellement fait défiler le carrousel.
-         Test sur le DÉPLACEMENT et non sur la cible du toucher : un doigt posé
-         sur les cards qui tire la page vers le bas est un scroll vertical
-         parfaitement légitime, et il doit s'ancrer comme les autres. */
-      if (gestureInSlider && sliderEl && Math.abs(sliderEl.scrollLeft - sliderStartLeft) > GESTE_MINIMUM) {
-        skipNextSnap = true;
-      }
-      gestureInSlider = false;
-      scheduleSnap();
+    /* ══════════════════════════════════════════════════════════════════════
+       LE CARROUSEL : un geste amorcé = une étape, automatiquement.
+       ──────────────────────────────────────────────────────────────────────
+       Le clic sur « Découvrir ma sélection » et le début d'un geste vers le
+       bas font exactement la même chose. Aucun état intermédiaire n'est
+       atteignable.
+
+       ⚠️ LE VERROU EST EN CSS, ET IL DOIT L'ÊTRE. Le navigateur décide au TOUT
+       PREMIER `touchmove` si un geste est un défilement, et ignore ensuite
+       toute annulation : un `preventDefault` en JS arrive toujours trop tard,
+       et c'est pourquoi la première tentative de carrousel ne fonctionnait que
+       sur les gestes violents. `touch-action`, lui, est consulté quand le doigt
+       SE POSE. Valeur : `pan-x pinch-zoom` — surtout pas `none`, qui tuerait
+       le swipe horizontal des cards (le slider est un descendant du hero) et
+       le pincer-zoomer.
+
+       ⚠️ C'est un verrou DUR : si le JS ne fait pas son travail, le hero
+       devient impossible à faire défiler. D'où : posé PAR le JS (donc absent
+       si le script ne tourne pas), sur le hero SEUL (le reste de la page reste
+       libre), et jamais en mouvement réduit.
+
+       Le verrou ne concerne QUE le tactile. À la molette, on annule
+       explicitement — et là `preventDefault` fonctionne. L'écouteur est posé
+       sur le hero et non sur `window` : il ne coûte donc rien au reste du site. */
+    var lastWheelAt = 0;
+    function stepBy(dir) {
+      var stops = stopPositions();
+      if (!stops) return false;
+      var y = window.pageYOffset;
+      if (!inHeroRange(y, stops)) return false;
+      var from = nearestStep(y, stops);
+      // Pas posé sur une étape (on y est entré par un autre chemin) : on
+      // recale d'abord, plutôt que de franchir deux crans d'un coup.
+      if (Math.abs(stops[from] - y) > TOLERANCE_ARRIVEE) { programmaticScrollTo(stops[from]); return true; }
+      var next = Math.max(0, Math.min(stops.length - 1, from + dir));
+      if (next === from) return false; // déjà à une extrémité
+      programmaticScrollTo(stops[next]);
+      return true;
     }
-    document.addEventListener('touchend', onTouchEnd, { passive: true });
-    /* ⚠️ `touchcancel` EST INDISPENSABLE, et son absence est un bug silencieux.
-       iOS l'émet À LA PLACE de `touchend` dans des cas quotidiens : balayage
-       depuis le bord de l'écran, centre de contrôle tiré, appel entrant, appui
-       long sur une image (les cards en sont), second doigt posé — et surtout
-       quand le navigateur reprend le geste à son compte pour faire défiler,
-       c'est-à-dire la situation même de toute cette page.
-       Sans lui, `touching` restait `true` POUR LE RESTE DE LA VIE DE LA PAGE :
-       l'ancrage mourait sans erreur, sans symptôme immédiat, et redevenait
-       normal au rechargement. La forme exacte du « ça marche, et parfois ça ne
-       marche plus » — le plus cher à diagnostiquer en recette. */
-    document.addEventListener('touchcancel', onTouchEnd, { passive: true });
-    window.addEventListener('wheel', cancelProgrammatic, { passive: true });
-    window.addEventListener('keydown', cancelProgrammatic);
+    function carouselBusy() { return progScroll || scrollLocked(); }
+
+    if (!reduceMotion) {
+      section.classList.add('is-carousel');
+
+      /* Molette et pavé tactile. Le pavé envoie une rafale continue d'inertie
+         pendant une à deux secondes : sans temps de calme, une seule poussée
+         franchirait plusieurs étapes. On annule le défilement à CHAQUE
+         événement (sinon le hero défilerait librement entre deux pas) mais on
+         ne franchit une étape qu'après un silence. */
+      section.addEventListener('wheel', function (e) {
+        if (sliderEl && e.target && sliderEl.contains(e.target) && Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+        var stops = stopPositions();
+        if (!stops || !inHeroRange(window.pageYOffset, stops)) return;
+        e.preventDefault();
+        if (carouselBusy()) return;
+        var now = Date.now();
+        var calme = now - lastWheelAt > REPOS_ENTRE_DEUX_PAS;
+        lastWheelAt = now;
+        if (calme) stepBy(e.deltaY > 0 ? 1 : -1);
+      }, { passive: false });
+
+      /* Tactile. L'écouteur peut rester PASSIF : c'est `touch-action` qui a
+         déjà empêché le défilement, on ne fait ici que lire la direction.
+         `aFranchi` garantit une seule étape par geste, quelle que soit sa durée. */
+      var tY = 0, tX = 0, aFranchi = false;
+      section.addEventListener('touchstart', function (e) {
+        tY = e.touches[0].clientY;
+        tX = e.touches[0].clientX;
+        aFranchi = false;
+      }, { passive: true });
+      section.addEventListener('touchmove', function (e) {
+        if (aFranchi || carouselBusy()) return;
+        var dy = tY - e.touches[0].clientY;
+        var dx = tX - e.touches[0].clientX;
+        // Geste horizontal → c'est le slider, on ne s'en mêle pas.
+        if (Math.abs(dy) < GESTE_MINIMUM || Math.abs(dx) > Math.abs(dy)) return;
+        aFranchi = true;
+        stepBy(dy > 0 ? 1 : -1);
+      }, { passive: true });
+
+      /* Clavier : si la page est un carrousel, les flèches et la barre d'espace
+         doivent franchir des étapes elles aussi — sinon elles traversent le
+         hero en défilement natif et atterrissent entre deux états. */
+      document.addEventListener('keydown', function (e) {
+        if (carouselBusy() || e.metaKey || e.ctrlKey || e.altKey) return;
+        var t = e.target;
+        if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+        var dir = 0;
+        if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ' || e.key === 'Spacebar') dir = 1;
+        else if (e.key === 'ArrowUp' || e.key === 'PageUp') dir = -1;
+        if (!dir) return;
+        var stops = stopPositions();
+        if (!stops || !inHeroRange(window.pageYOffset, stops)) return;
+        if (stepBy(dir)) e.preventDefault();
+      });
+    }
 
     /* Verrou de scroll pendant la frappe (sinon le scroll déclenche la
        révélation avant la fin du texte). Libéré quand la machine à écrire finit. */

@@ -741,6 +741,35 @@ J'avais écrit noir sur blanc qu'on ne pouvait pas remonter dès `sapi:advice-lo
 
 **2. Le bouton blanc suit le texte.** Masqué dès le début du recalcul, il ne revient qu'**à la fin de la frappe** du conseil — exactement comme à l'arrivée sur la page. Avant, il réapparaissait dès que la remontée ramenait `--reveal` à 0, donc **pendant que les trois points tournaient** : il proposait d'aller découvrir une sélection qui n'était pas encore la bonne. `revealChars()` reçoit désormais un callback, utilisé pour le rappeler.
 
+---
+
+## 🎠 CARROUSEL AUTOMATIQUE — état final du scroll (2026-08-25)
+
+Robin : « il faut vraiment qu'on simplifie et qu'on passe à un scroll automatique comme un carrousel : quand on est en haut, le clic sur le bouton *Découvrir ma sélection* ou un début de scroll doivent avoir le même effet : on passe rapidement et automatiquement à l'état suivant. Pareil pour l'étape suivante. »
+
+**⚠️ ARBITRAGE TRANCHÉ POUR DE BON, après trois allers-retours dans la journée : le flou NE SUIT PLUS LE DOIGT.** Il se joue pendant la transition de 420 ms. Robin l'a confirmé explicitement après reformulation, en connaissance de la conséquence. **Ne pas ressortir l'argument « tu avais dit que tu y tenais »** : la question a été posée trois fois, la réponse est celle-ci.
+
+**Ce que ça donne :** trois états, aucun état intermédiaire atteignable. Un début de geste vers le bas = une étape. Le bouton et le geste sont le même déclencheur. Symétrique au retour. Une fois dans le catalogue, défilement normal.
+
+### La mécanique, et pourquoi elle est en CSS
+**`touch-action: pan-x pinch-zoom` sur le hero**, posé par une classe ajoutée en JS.
+- **Pourquoi pas en JS** : le navigateur décide au **tout premier `touchmove`** si un geste est un défilement, et ignore ensuite toute annulation (`cancelable: false`). C'est exactement ce qui faisait échouer la première tentative de carrousel **sur les gestes posés** tout en la faisant marcher sur les gestes violents. `touch-action` est consulté quand le doigt **se pose** : jamais trop tard.
+- **Pourquoi `pan-x pinch-zoom` et surtout pas `none`** : le slider des cards est un **descendant** du hero et `touch-action` se compose le long des ancêtres. `none` tuerait le swipe horizontal — et le pincer-zoomer avec, ce qui est une régression d'accessibilité.
+- **Pourquoi posé par le JS** : c'est un verrou **dur**. Si le script ne tourne pas, la classe n'existe pas et la page reste défilable. Jamais écrit en dur dans le CSS de base. Retiré aussi en `prefers-reduced-motion`.
+
+**La molette n'est PAS concernée par `touch-action`** → annulation explicite par `preventDefault` (qui, elle, fonctionne pour `wheel`). **Écouteur posé sur le hero et non sur `window`** : il ne coûte rien au reste du site, et rien du tout une fois qu'on est dans le catalogue.
+
+**Pavé tactile :** il émet son inertie en continu pendant une à deux secondes. Sans temps de calme, une poussée franchirait plusieurs étapes. On annule le défilement à chaque événement, mais on ne franchit une étape qu'après un silence de `REPOS_ENTRE_DEUX_PAS` (140 ms). ⇦ À monter si une poussée en franchit deux.
+
+**Clavier traité** (flèches, espace, Page suivante/précédente) : sans ça, il traversait le hero en défilement natif et atterrissait entre deux états. Ignoré si le focus est dans un champ.
+
+**Recalage de secours conservé** : on ne peut plus s'ARRÊTER entre deux étapes, mais on peut y ENTRER autrement — un geste parti du catalogue (le verrou ne vaut que pour les gestes nés dans le hero), une restauration de position au rechargement, une rotation. Dans ces cas, recalage sur l'étape la plus proche.
+
+### Simplification obtenue
+Supprimés : `touching`, `gestureFrom`, `noteGestureStart()`, `skipNextSnap`, `gestureInSlider`, `sliderStartLeft`, `currentStep`, `cancelProgrammatic()`, les écouteurs `touchend`/`touchcancel` au niveau du document, et le biais directionnel. **Le fichier fait 948 lignes contre ~1 000 avant, pour un comportement plus simple à décrire.**
+
+**Track 300vh → 200vh, plateau ZÉRO.** ⚠️ C'est le carrousel qui l'autorise : la pause servait à pouvoir s'arrêter après la révélation, or on ne peut plus s'arrêter entre deux étapes. **Ne pas rallonger « pour la pause » ni raccourcir davantage sans avoir d'abord retiré le carrousel** — les deux réglages vont ensemble. Un raccourcissement tenté AVANT le carrousel avait été vu immédiatement par Robin.
+
 ### ⏳ LOT 2 — spécification d'origine (non codé)
 Ancrage **en JavaScript**, pas en CSS : c'est le seul qui sache **s'abstenir**. Il doit être neutralisé dans quatre fenêtres — verrou de la machine à écrire, modale ouverte, `rewindToTop()` en vol, et geste initié dans le carrousel. Prévoir un drapeau « scroll programmatique » honoré par `rewindToTop()`, `scrollToReveal()` et `scrollToCatalogue()`, et l'annulation au `touchstart`. Arbitrer aussi le `scroll-behavior: smooth` global (l. 128) : deux animations de scroll sur le même axe = rebond. Recette dédiée au moment 2, séquence la plus fragile de la page.
 

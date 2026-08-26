@@ -24751,13 +24751,19 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
          geste en arrière ;
        · l'ÉCART entre les positions d'ancrage 2 et 3 = `hauteur - 100vh`.
 
-     300vh → plateau 100vh (un écran entier de pause), écart 200vh.
-     ⇦ C'EST LE RÉGLAGE DE LA LONGUEUR DE LA PAUSE : +50vh ici = +50vh de
-     scroll pendant lequel rien ne bouge. Robin l'a demandée plus longue après
-     la première version à 250vh (pause 50vh).
-     L'écart entre les positions 2 et 3 grandit d'autant, mais l'aimant tient :
-     il vise la position suivante dès 35 % du trajet quand on descend (biais
-     directionnel côté JS), pas à mi-chemin.
+     200vh → plateau ZÉRO, écart 100vh entre les positions 2 et 3.
+
+     ⚠️ LE PLATEAU N'A PLUS DE RAISON D'ÊTRE DEPUIS LE PASSAGE EN CARROUSEL, et
+     c'est ce qui autorise ce raccourcissement. La « pause » servait à pouvoir
+     s'arrêter après la révélation sans que le hero ne reparte : elle a d'abord
+     été portée à 100vh à la demande de Robin. Or on ne peut désormais plus
+     s'arrêter entre deux étapes — la position 2 EST un point d'arrêt, et le
+     seul. Un écran entier de scroll pendant lequel rien ne se passait n'était
+     plus qu'une longueur de page inutile.
+     ⚠️ NE PAS raccourcir davantage, et NE PAS rallonger « pour la pause » sans
+     avoir d'abord retiré le carrousel : les deux réglages vont ensemble. Un
+     raccourcissement avait déjà été tenté AVANT le carrousel et Robin l'avait
+     vu immédiatement (« tu as retiré le stop / pause »).
 
      ⚠️ NE PAS RACCOURCIR pour « rapprocher les étapes ». Ça a été essayé
      (200vh) et Robin l'a immédiatement vu : ça supprime la pause, et le hero
@@ -24765,7 +24771,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
      pas n'était PAS un problème de longueur mais de règle d'accroche (une
      fenêtre de 30vh au lieu de « la position la plus proche ») — corrigé côté
      JS, et il fonctionne très bien avec cette longueur-ci. */
-  height: 300vh;
+  height: 200vh;
 }
 /* Le hero = scène épinglée (sticky) de 100vh. --reveal (0→1) est piloté par le
    scroll en JS et anime flou photo + remontée texte + apparition des cards. */
@@ -24825,6 +24831,24 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     .mescreations-immersion { --safe-bottom: calc(100vh - 100dvh); }
   }
 }
+/* ── VERROU DU CARROUSEL — posé par le JS, jamais écrit en dur ────────────
+   Interdit le défilement vertical au doigt DANS le hero : c'est ce qui permet
+   au premier mouvement de déclencher le passage à l'étape suivante au lieu de
+   faire glisser la page.
+   ⚠️ Il DOIT être en CSS : le navigateur décide au tout premier `touchmove` si
+   un geste est un défilement, et ignore ensuite toute annulation en JS —
+   `touch-action`, lui, est consulté quand le doigt SE POSE.
+   ⚠️ `pan-x pinch-zoom`, surtout PAS `none` : le slider des cards est un
+   descendant du hero et `touch-action` se compose le long des ancêtres. `none`
+   tuerait le swipe horizontal, et le pincer-zoomer avec (accessibilité).
+   ⚠️ La classe est ajoutée par le JS et seulement hors mouvement réduit : si le
+   script ne tourne pas, la page reste normalement défilable. C'est un verrou
+   dur, il ne doit jamais survivre à l'absence de ce qui le pilote. */
+.mescreations-immersion.is-carousel {
+  -ms-touch-action: pan-x pinch-zoom;
+  touch-action: pan-x pinch-zoom;
+}
+
 .mescreations-immersion__bg {
   position: absolute;
   inset: 0;
