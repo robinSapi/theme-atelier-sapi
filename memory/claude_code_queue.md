@@ -693,6 +693,29 @@ Le biais directionnel de la version précédente (35 % du trajet) **disparaît**
 ⚠️ **Le plafond s'applique APRÈS le classement par priorité**, aux deux points de rendu (chargement + endpoint du moment 2) : couper avant reviendrait à garder 4 modèles au hasard puis à les ordonner, au lieu de garder les **4 meilleurs**.
 Lecture retenue de la demande : « 5 au total, dont sur-mesure en dernier ». Si Robin voulait 5 modèles **plus** la carte, c'est un seul chiffre à changer.
 
+### ✅ LE VRAI CARROUSEL EST RETIRÉ — audit + simplification (2026-08-25)
+
+Robin, après l'avoir essayé : « on est un peu au milieu du gué, le scroll continue sur le mouvement suivant s'il est trop long ». Puis, après l'audit : « **on peut oublier mes demandes précédentes pour faire quelque chose de simple et propre. Je pense au flou contrôlé sur l'image et à la pause. Le plus important c'est quelque chose de propre qui fonctionne.** »
+
+**⚠️ POURQUOI LE VRAI CARROUSEL NE POUVAIT PAS MARCHER — à relire avant toute tentative de le réintroduire.**
+Mon diagnostic était faux : je croyais que `preventDefault` s'arrêtait trop tôt. Il arrivait **trop tard**. **Le navigateur décide au TOUT PREMIER `touchmove` si le geste est un défilement**, et une fois qu'il a décidé, il ignore silencieusement toute annulation ultérieure (les `touchmove` suivants passent en `cancelable: false`). Or un seuil de déclenchement, si petit soit-il, laisse forcément passer les premiers mouvements.
+→ **Le mode ne prenait la main que sur les gestes VIOLENTS** (premier mouvement > seuil) et échouait précisément sur les gestes posés. C'est mot pour mot le symptôme de Robin, et c'est l'inverse de sa demande (« un mouvement quel qu'il soit »).
+La seule mécanique correcte serait `touch-action: pan-x pinch-zoom` en CSS (consulté quand le doigt se pose, jamais trop tard, et qui permettrait au passage de **supprimer** l'écouteur non passif — donc meilleur pour la fluidité). Mais c'est un **verrou dur** : si le JS ne fait pas son travail, la page devient impossible à faire défiler dans le hero. Écarté au profit de la simplicité.
+
+**Régression que le code embarquait et qui n'a jamais été livrée :** l'exclusion du carrousel se faisait sur **la cible du toucher**. Avec un verrou CSS, un doigt posé sur les cards qui tire la page vers le bas — geste légitime, explicitement voulu — n'aurait **plus rien fait du tout**. Il faut exclure sur la **direction dominante** du geste, jamais sur la cible.
+
+**🐛 CINQUIÈME PIÈGE (série des unités, du flux, de l'overscroll) : `touchcancel` n'était géré nulle part.**
+iOS l'émet **à la place** de `touchend` dans des cas quotidiens : balayage depuis le bord, centre de contrôle, appel entrant, appui long sur une image (les cards en sont), second doigt — et surtout **quand le navigateur reprend le geste à son compte pour scroller**, c'est-à-dire la situation même de cette page.
+Sans lui, `touching` restait `true` **pour le reste de la vie de la page** : l'ancrage mourait **sans erreur, sans symptôme immédiat**, et redevenait normal au rechargement. La forme exacte du « ça marche, et parfois ça ne marche plus », la plus chère à diagnostiquer en recette. **Corrigé et livré seul**, avant tout le reste.
+
+**Fuite du même genre, corrigée avec :** `maybeSnap()` sortait sans remettre `gestureFrom` à zéro. En mode dur, `progScroll` étant vrai à chaque fin de geste, **tous** les gestes passaient par cette sortie : l'origine du geste précédent restait en mémoire et faussait le calcul de l'étape d'arrivée (saut en arrière, ou de deux étapes). Toutes les sorties anticipées la remettent désormais à zéro — sauf celle du doigt encore posé, où le geste continue légitimement.
+
+**Le drapeau de scroll programmatique se lève désormais À L'ARRIVÉE, pas après un délai.** Il l'était par un `setTimeout(700)` — une supposition sur une durée que le navigateur possède. Le trajet carrousel → catalogue fait 200 % de hauteur d'écran (~1 500px sur téléphone) : l'animation y dépasse facilement 700 ms, le drapeau retombait **en plein vol**, l'ancreur prenait une position intermédiaire pour origine et lançait une **seconde** transition. Le délai ne subsiste qu'en filet ultime (2 500 ms, onglet en arrière-plan).
+
+**Trois nombres épars fondus en deux, nommés :** `GESTE_MINIMUM` (8px — en dessous, il ne s'est rien passé) et `TOLERANCE_ARRIVEE` (4px — on se considère posé sur une étape). Avec `SNAP_IDLE` et `SNAP_CATCH`, le bloc n'a plus que quatre réglages, tous nommés en tête.
+
+**Ce qui reste, et c'est tout :** le doigt pilote la révélation, la page complète toujours exactement une étape au relâchement, et la pause de 100vh masque le dépassement des gestes violents. Simple, et sans écouteur non passif nulle part.
+
 ### ⏳ LOT 2 — spécification d'origine (non codé)
 Ancrage **en JavaScript**, pas en CSS : c'est le seul qui sache **s'abstenir**. Il doit être neutralisé dans quatre fenêtres — verrou de la machine à écrire, modale ouverte, `rewindToTop()` en vol, et geste initié dans le carrousel. Prévoir un drapeau « scroll programmatique » honoré par `rewindToTop()`, `scrollToReveal()` et `scrollToCatalogue()`, et l'annulation au `touchstart`. Arbitrer aussi le `scroll-behavior: smooth` global (l. 128) : deux animations de scroll sur le même axe = rebond. Recette dédiée au moment 2, séquence la plus fragile de la page.
 
