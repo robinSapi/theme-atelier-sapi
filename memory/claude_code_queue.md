@@ -730,6 +730,17 @@ Robin : « le scroll est juste trop lent entre les deux premiers écrans ».
 
 `prefers-reduced-motion` → saut instantané, aucune animation.
 
+### ✅ MOMENT 2 — remontée instantanée et bouton synchronisé (2026-08-25)
+
+Robin, sur la modification d'un projet : « le bouton *Découvrir ma sélection* doit toujours apparaître après l'écriture du texte IA » et « il faut tout de suite remonter en haut, là on reste quelques secondes sur l'ancienne sélection, ce qui fait bizarre ».
+
+**1. La remontée devient INSTANTANÉE et INVISIBLE — meilleure que ce que je croyais possible.**
+J'avais écrit noir sur blanc qu'on ne pouvait pas remonter dès `sapi:advice-loading` parce que la modale tient le verrou de scroll (`overflow: hidden` sur html+body jusqu'à t+1100 ms de sa séquence de sortie) et qu'un `scrollTo` n'aurait aucun effet. C'était exact, mais **je n'avais pas exploité le fait que la modale COUVRE l'écran** : on peut lever le verrou le temps d'un **saut instantané que personne ne voit**, et le remettre aussitôt.
+→ Quand la modale s'efface (~1,9 s plus tard), **la page est déjà en haut, sur les trois points**. Aucun mouvement visible, donc mieux qu'une remontée animée. Les quelques secondes passées devant l'ancienne sélection disparaissent complètement.
+`rewindToTop()` sur `sapi:conseiller-closed` reste, mais devient un **filet** : il ne sert plus qu'à l'abandon en cours de questionnaire (où aucun conseil n'est calculé, donc `advice-loading` n'est jamais émis). Dans le cas terminé, il sort immédiatement — on est déjà en haut. Commentaire du fichier corrigé, il affirmait le contraire.
+
+**2. Le bouton blanc suit le texte.** Masqué dès le début du recalcul, il ne revient qu'**à la fin de la frappe** du conseil — exactement comme à l'arrivée sur la page. Avant, il réapparaissait dès que la remontée ramenait `--reveal` à 0, donc **pendant que les trois points tournaient** : il proposait d'aller découvrir une sélection qui n'était pas encore la bonne. `revealChars()` reçoit désormais un callback, utilisé pour le rappeler.
+
 ### ⏳ LOT 2 — spécification d'origine (non codé)
 Ancrage **en JavaScript**, pas en CSS : c'est le seul qui sache **s'abstenir**. Il doit être neutralisé dans quatre fenêtres — verrou de la machine à écrire, modale ouverte, `rewindToTop()` en vol, et geste initié dans le carrousel. Prévoir un drapeau « scroll programmatique » honoré par `rewindToTop()`, `scrollToReveal()` et `scrollToCatalogue()`, et l'annulation au `touchstart`. Arbitrer aussi le `scroll-behavior: smooth` global (l. 128) : deux animations de scroll sur le même axe = rebond. Recette dédiée au moment 2, séquence la plus fragile de la page.
 

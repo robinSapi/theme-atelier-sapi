@@ -115,11 +115,17 @@
         '<span class="mescreations-immersion__dots" role="status" aria-label="Robin rédige son conseil">' +
         '<span></span><span></span><span></span></span>';
     }
-    function retypePhrase(text) {
+    function retypePhrase(text, done) {
       els.phraseText = text || '';
       buildChars(els.phraseText);
-      revealChars();
+      revealChars(done);
     }
+    /* Le bouton blanc suit le texte : il s'efface pendant que l'IA rédige, et
+       ne revient qu'une fois la phrase ÉCRITE — exactement comme à l'arrivée
+       sur la page. Le proposer pendant que les trois points tournent laisserait
+       découvrir une sélection qui n'est pas encore la bonne. */
+    function hideRevealBtn() { if (els.revealBtn) els.revealBtn.classList.remove('is-in'); }
+    function showRevealBtn() { if (els.revealBtn) els.revealBtn.classList.add('is-in'); }
     var advicePending = false; // true entre 'advice-loading' et 'advice-ready' (questionnaire terminé)
     document.addEventListener('sapi:advice-loading', function () {
       advicePending = true;
@@ -136,8 +142,8 @@
          .catch qui résout à null → cet événement est TOUJOURS émis, échec IA
          compris. Aucun risque de sélection bloquée indéfiniment. */
       flushPendingSelection();
-      if (!els.phraseContent) return;
-      retypePhrase(advice || genericPhrase);
+      if (!els.phraseContent) { showRevealBtn(); return; }
+      retypePhrase(advice || genericPhrase, showRevealBtn);
     });
 
     /* Bouton « Décrire mon projet en détail » → ouvre la modale Conseiller
@@ -373,6 +379,25 @@
       var sig = JSON.stringify(answers);
       if (sig === lastAnswersSig) return; // identique à ce qui est déjà affiché
       pendingSelection = { promise: fetchSelectionHtml(answers), sig: sig };
+
+      /* Remontée IMMÉDIATE, pendant que la modale est encore à l'écran.
+         Avant, on attendait sa fermeture (`sapi:conseiller-closed`, ~1,9 s plus
+         tard) : le visiteur restait donc quelques secondes devant l'ANCIENNE
+         sélection, déjà périmée. Robin : « ça fait bizarre ».
+         On ne pouvait pas simplement scroller : la modale tient le verrou
+         (`overflow: hidden` sur html+body) et un scrollTo n'aurait aucun effet.
+         Mais elle COUVRE l'écran — donc on peut lever le verrou le temps d'un
+         saut instantané, que personne ne voit, et le remettre aussitôt. Quand
+         la modale s'efface, la page est déjà en haut, sur les trois points.
+         Aucun mouvement visible : c'est mieux qu'une remontée animée. */
+      hideRevealBtn();
+      if (track) {
+        var html = document.documentElement, body = document.body;
+        var hPrev = html.style.overflow, bPrev = body.style.overflow;
+        html.style.overflow = ''; body.style.overflow = '';
+        jumpTo(Math.round(track.getBoundingClientRect().top + window.pageYOffset));
+        html.style.overflow = hPrev; body.style.overflow = bPrev;
+      }
     });
 
     function refreshSelection(answers, sig) {
@@ -388,13 +413,15 @@
        Effet de bord recherché : le swap des cards (sur 'advice-ready') se fait
        alors HORS ÉCRAN.
 
-       ⚠️ Pourquoi ici et pas sur 'sapi:advice-loading' — qui serait pourtant
-       « le déclenchement du recalcul » : à cet instant la modale tient encore le
-       verrou de scroll (overflow:hidden sur html+body jusqu'à t+1100 ms de sa
-       séquence de sortie) et un scrollTo n'aurait tout simplement aucun effet.
-       'sapi:conseiller-closed' est émis après ce déverrouillage, et TOUJOURS avant
-       'advice-ready' (dispatchConseillerClosed() précède finishAdvice() dans
-       sapi-modal-conseiller.js) → l'ordre remontée-puis-révélation est garanti.
+       ⚠️ CE CHEMIN N'EST PLUS LE PRINCIPAL. Quand le questionnaire est TERMINÉ,
+       la remontée se fait maintenant beaucoup plus tôt, d'un saut instantané et
+       invisible derrière la modale, dès 'sapi:advice-loading' (voir ce
+       listener). Ce qui reste ici sert :
+         · à l'ABANDON en cours de questionnaire, où aucun conseil n'est calculé
+           et où 'advice-loading' n'est donc jamais émis ;
+         · de filet, si le saut invisible n'a pas eu lieu.
+       Dans le cas terminé, `rewindToTop()` ne fait rien : on est déjà en haut,
+       et le test ci-dessous sort immédiatement.
 
        On ne verrouille volontairement PAS le scroll pendant la frappe du conseil
        (contrairement à la séquence de chargement) : bloquer la page juste après une
