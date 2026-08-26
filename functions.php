@@ -5546,6 +5546,23 @@ function sapi_immersion_render_product_card(array $prod, $piece = '') {
  */
 add_action('wp_ajax_sapi_immersion_selection', 'sapi_ajax_immersion_selection');
 add_action('wp_ajax_nopriv_sapi_immersion_selection', 'sapi_ajax_immersion_selection');
+/**
+ * Nombre de MODÈLES affichés dans le carrousel de l'immersion.
+ *
+ * Robin veut 5 propositions au total, la 5ᵉ étant toujours la carte
+ * « Créons ensemble » (sur-mesure). Celle-ci est rendue par le template
+ * (archive-product.php) et conservée telle quelle par swapCards() au moment 2 :
+ * elle est donc TOUJOURS présente et occupe le dernier emplacement.
+ * Il reste 4 places pour les modèles du catalogue.
+ *
+ * ⚠️ Le plafond s'applique APRÈS le classement par priorité, jamais avant :
+ * couper d'abord reviendrait à garder 4 modèles au hasard puis à les ordonner,
+ * au lieu de garder les 4 MEILLEURS.
+ */
+function sapi_immersion_max_products() {
+  return 4;
+}
+
 function sapi_ajax_immersion_selection() {
   $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
   if (!wp_verify_nonce($nonce, 'sapi-megafilter')) {
@@ -5579,6 +5596,8 @@ function sapi_ajax_immersion_selection() {
   if (function_exists('sapi_conseiller_rank_products')) {
     $products = sapi_conseiller_rank_products($products, $answers);
   }
+  // Plafond APRÈS le classement : on garde les 4 meilleurs, pas 4 au hasard.
+  $products = array_slice($products, 0, sapi_immersion_max_products());
 
   ob_start();
   foreach ($products as $prod) {

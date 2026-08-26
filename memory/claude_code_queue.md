@@ -676,6 +676,23 @@ Robin : l'indice « Découvre ta sélection » est trop peu visible. Il devient 
 **Ajustement suivant (Robin) : le bouton translucide passe SOUS le carrousel.** Ordre final de la zone sélection : titre → carrousel → dots → bouton. Logique : on ne propose d'affiner qu'après avoir montré. Et le carrousel remonte d'autant (~53px).
 Avec, `padding-top` de la zone sélection 24 → **12px** : en desktop, la zone 1 prenant sa hauteur naturelle et la zone 3 tout le reste, **ce padding EST l'écart entre la phrase de Robin et le titre de la sélection** — il n'y a aucun espace résiduel ailleurs, donc c'est le seul levier. +12px rendus aux cards, en plus des 53 gagnés par le déplacement.
 
+### ✅ « UN GESTE = UN ÉCRAN » + PLAFOND À 5 PROPOSITIONS (2026-08-25)
+
+**1. Scroll en carrousel — deux comportements, un seul mot pour basculer.**
+Robin : « sur l'écran A, un scroll vers le bas (quel qu'il soit) fait passer à l'écran B, puis à C, puis normal. Et pareil au retour. Un peu comme un carrousel. »
+
+⚠️ **Cette demande rouvre un arbitrage tranché le matin même.** Un vrai carrousel signifie que la page prend la main dès le geste amorcé, donc que **la révélation se joue sur une horloge et non plus sous le doigt** — précisément ce que Robin avait dit regretter (« oui, j'y tiens, il doit suivre le doigt »). Signalé avant de coder. Sa réponse : « montre-moi les deux ».
+
+- **Version DOUCE, livrée par défaut** (`CAROUSEL_HARD = false`). Le doigt pilote la révélation pendant tout le geste ; c'est au **relâchement** que la page va **toujours exactement à l'étape suivante**, jamais zéro ni deux. Mécanisme : on mémorise l'étape d'où **part** le geste (`gestureFrom`, posé au `touchstart` et au premier mouvement), et c'est ce point de départ — non la position atteinte — qui décide de l'arrivée. C'est ce qui garantit « une étape », même quand l'élan du téléphone a emporté la page plus loin.
+  Faiblesse assumée : sur un geste très violent, la page dépasse puis revient.
+- **VRAI CARROUSEL** (`CAROUSEL_HARD = true`). Écouteurs `wheel`/`touchmove` **non passifs** qui annulent le geste natif et lancent la transition, rendue **ininterruptible** (`cancelProgrammatic()` devient inopérant). Net, sans retour en arrière. Les écouteurs ne sont posés QUE dans ce mode : un écouteur non passif sur le scroll coûte cher, on ne le paie pas si on ne s'en sert pas. Deux exclusions indispensables : geste parti du carrousel (sinon le swipe horizontal des cards serait annulé) et les quatre fenêtres déjà exclues en douce.
+
+Le biais directionnel de la version précédente (35 % du trajet) **disparaît** : il devient sans objet dès lors que l'arrivée se calcule depuis l'étape de départ.
+
+**2. Plafond à 5 propositions.** `sapi_immersion_max_products()` = **4 modèles**, la carte « Créons ensemble » (sur-mesure) occupant le 5ᵉ emplacement. Elle est rendue par le template et conservée par `swapCards()`, donc toujours présente.
+⚠️ **Le plafond s'applique APRÈS le classement par priorité**, aux deux points de rendu (chargement + endpoint du moment 2) : couper avant reviendrait à garder 4 modèles au hasard puis à les ordonner, au lieu de garder les **4 meilleurs**.
+Lecture retenue de la demande : « 5 au total, dont sur-mesure en dernier ». Si Robin voulait 5 modèles **plus** la carte, c'est un seul chiffre à changer.
+
 ### ⏳ LOT 2 — spécification d'origine (non codé)
 Ancrage **en JavaScript**, pas en CSS : c'est le seul qui sache **s'abstenir**. Il doit être neutralisé dans quatre fenêtres — verrou de la machine à écrire, modale ouverte, `rewindToTop()` en vol, et geste initié dans le carrousel. Prévoir un drapeau « scroll programmatique » honoré par `rewindToTop()`, `scrollToReveal()` et `scrollToCatalogue()`, et l'annulation au `touchstart`. Arbitrer aussi le `scroll-behavior: smooth` global (l. 128) : deux animations de scroll sur le même axe = rebond. Recette dédiée au moment 2, séquence la plus fragile de la page.
 

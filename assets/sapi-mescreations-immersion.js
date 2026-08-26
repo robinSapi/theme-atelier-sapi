@@ -573,6 +573,20 @@
        Mouvement réduit demandé par le système → aucun ancrage : déplacer la
        page sous quelqu'un qui a demandé moins d'animation serait à contresens.
        ══════════════════════════════════════════════════════════════════════ */
+    /* ⇦ LE SEUL MOT À CHANGER ENTRE LES DEUX COMPORTEMENTS DEMANDÉS PAR ROBIN.
+       false = version DOUCE (par défaut). Le doigt pilote la révélation
+         pendant tout le geste, exactement comme aujourd'hui ; c'est au
+         RELÂCHEMENT que la page va toujours à l'étape suivante, jamais à
+         zéro ni à deux. Un petit geste vers le bas suffit donc à passer à
+         l'écran suivant. Faiblesse assumée : un geste très violent peut, par
+         l'élan du téléphone, dépasser l'étape avant que la page ne revienne.
+       true = VRAI CARROUSEL. Le moindre geste amorcé rend la main à la page,
+         qui part seule vers l'écran suivant sans pouvoir être retenue. Net et
+         sans retour en arrière, MAIS la révélation se joue alors sur une
+         horloge et non plus sous le doigt — ce que Robin disait regretter
+         quand la question s'était posée le matin même. */
+    var CAROUSEL_HARD = false;
+
     var SNAP_IDLE = 150;        // ms d'immobilité avant de considérer le geste fini
     var SNAP_CATCH = 0.30;      // distance d'accroche au catalogue, en hauteurs d'écran
     var snapTimer = null;
@@ -580,7 +594,8 @@
     var progScroll = false;     // un scroll programmatique est en vol
     var skipNextSnap = false;   // le geste a fait défiler le carrousel
     var gestureInSlider = false, sliderStartLeft = 0;
-    var scrollDir = 1, lastY = window.pageYOffset; // sens du dernier mouvement : 1 = vers le bas
+    var currentStep = 0;        // étape sur laquelle on est posé (0, 1, 2)
+    var gestureFrom = null;     // étape d'où le geste EN COURS est parti
 
     /* Le verrou de scroll est posé par `overflow: hidden` sur html — par NOTRE
        machine à écrire ET par la modale Conseiller. Un seul test couvre donc
@@ -608,7 +623,10 @@
       setTimeout(function () { progScroll = false; }, 700);
     }
     function cancelProgrammatic() {
-      if (!progScroll) return;
+      // En vrai carrousel, la transition est volontairement ININTERRUPTIBLE :
+      // c'est ce qui la rend nette. En version douce, le visiteur reprend
+      // toujours la main.
+      if (CAROUSEL_HARD || !progScroll) return;
       jumpTo(window.pageYOffset);
       progScroll = false;
     }
@@ -663,72 +681,111 @@
       var offset = Math.max(cssMargin, stickyOffset()) + marginTop;
       return Math.round(cat.getBoundingClientRect().top + window.pageYOffset - offset);
     }
-    /* Les trois positions se comportent comme les trois vues d'un diaporama :
-       tant qu'on est DANS le hero, on est toujours attiré vers la plus proche
-       des trois. Au-dessus du hero et une fois entré dans le catalogue, la
-       page redevient libre — on ne retient jamais quelqu'un qui lit.
-
-       ⚠️ C'EST CETTE RÈGLE, ET ELLE SEULE, QUI A RÉPARÉ L'AIMANT DU
-       CATALOGUE. Il ne mordait pas parce qu'il n'accrochait que dans une
-       fenêtre de 30vh, sur un trajet de 150vh : un geste normal la survolait.
-       En visant « la plus proche des trois », la bascule se fait à mi-chemin
-       (75vh), ce qu'une poussée normale dépasse largement.
-       On a un temps cru qu'il fallait aussi RACCOURCIR le track pour
-       rapprocher les étapes. Essayé (200vh), et refusé par Robin dans la
-       minute : ça supprime la pause après la révélation et le hero amorce son
-       départ au moindre geste. La longueur n'était pas le problème. */
-    function snapTarget() {
+    /* Les trois positions de repos, du haut vers le bas. */
+    function stopPositions() {
       if (!track) return null;
-      var y = window.pageYOffset;
-      var top = Math.round(track.getBoundingClientRect().top + y);
+      var top = Math.round(track.getBoundingClientRect().top + window.pageYOffset);
       var pos2 = top + Math.round(revealSpan);
       var pos3 = catalogueSnapY();
-      if (pos3 == null) pos3 = pos2;
-
-      if (y < top - 8) return null;                                  // avant le hero : libre
-      if (y > pos3 + window.innerHeight * SNAP_CATCH) return null;   // dans le catalogue : libre
-
-      /* BIAIS DIRECTIONNEL — on suit le sens du geste au lieu de viser
-         bêtement la position la plus proche.
-         Sans lui, la bascule se ferait à mi-chemin ; avec une pause longue
-         (le track fait 300vh, donc 200vh entre les positions 2 et 3), il
-         faudrait pousser un écran entier avant que la page accepte d'aller au
-         catalogue, et elle paraîtrait retenir. Ici, descendre suffit à
-         atteindre l'étape suivante dès 35 % du trajet, et remonter joue la
-         règle symétrique. C'est ce qui permet d'allonger la pause SANS rendre
-         le catalogue difficile à atteindre — les deux réglages seraient sinon
-         en opposition. */
-      var stops = [top, pos2, pos3];
-      var a = top, b = pos3;
-      for (var i = 0; i < stops.length - 1; i++) {
-        if (y >= stops[i] - 8 && y <= stops[i + 1] + 8) { a = stops[i]; b = stops[i + 1]; break; }
-      }
-      if (b - a < 8) return a;
-      var t = (y - a) / (b - a);
-      var forward = scrollDir >= 0;
-      return (forward ? t > 0.35 : t > 0.65) ? b : a;
+      if (pos3 == null || pos3 < pos2) pos3 = pos2;
+      return [top, pos2, pos3];
+    }
+    function nearestStep(y, stops) {
+      var idx = 0, best = Infinity;
+      stops.forEach(function (s, i) { var d = Math.abs(s - y); if (d < best) { best = d; idx = i; } });
+      return idx;
+    }
+    /* Hors de cette plage, la page est LIBRE : au-dessus du hero, et une fois
+       entré dans le catalogue. On ne retient jamais quelqu'un qui lit. */
+    function inHeroRange(y, stops) {
+      return y >= stops[0] - 8 && y <= stops[2] + window.innerHeight * SNAP_CATCH;
+    }
+    /* Mémorise l'étape d'où part le geste. C'est CE point de départ, et non la
+       position atteinte, qui décide de l'arrivée : c'est ce qui garantit
+       « un geste = une étape », jamais deux, même si l'élan du téléphone a
+       emporté la page plus loin. */
+    function noteGestureStart() {
+      if (gestureFrom !== null || progScroll) return;
+      var stops = stopPositions();
+      if (!stops) return;
+      gestureFrom = nearestStep(window.pageYOffset, stops);
     }
 
     function maybeSnap() {
-      if (skipNextSnap) { skipNextSnap = false; return; }
+      if (skipNextSnap) { skipNextSnap = false; gestureFrom = null; return; }
       if (reduceMotion || touching || progScroll || scrollLocked()) return;
-      var target = snapTarget();
-      if (target == null) return;
-      if (Math.abs(target - window.pageYOffset) < 4) return; // déjà en place
-      programmaticScrollTo(target);
+      var stops = stopPositions();
+      if (!stops) return;
+      var y = window.pageYOffset;
+      if (!inHeroRange(y, stops)) { gestureFrom = null; currentStep = stops.length - 1; return; }
+
+      var from = (gestureFrom === null) ? nearestStep(y, stops) : gestureFrom;
+      var moved = y - stops[from];
+      var step = from;
+      // Un geste, une étape. Le seuil de 6px ne sert qu'à ignorer le bruit :
+      // en dessous, il ne s'est rien passé et on ne bouge pas.
+      if (Math.abs(moved) > 6) {
+        step = Math.max(0, Math.min(stops.length - 1, from + (moved > 0 ? 1 : -1)));
+      }
+      gestureFrom = null;
+      currentStep = step;
+      if (Math.abs(stops[step] - y) < 4) return; // déjà en place
+      programmaticScrollTo(stops[step]);
+    }
+
+    /* ── Vrai carrousel (CAROUSEL_HARD) ────────────────────────────────────
+       La page prend la main dès que le geste est amorcé, au lieu d'attendre le
+       relâchement. On annule le geste natif (`preventDefault`), ce qui exige
+       des écouteurs non passifs — d'où le fait qu'ils ne soient posés QUE dans
+       ce mode : un écouteur non passif sur le scroll coûte cher, et on ne le
+       paie pas si on ne s'en sert pas.
+       Deux exclusions indispensables : un geste parti du carrousel (sinon le
+       swipe horizontal des cards serait annulé), et tout ce que la version
+       douce exclut déjà (verrou de frappe, modale, scroll programmatique). */
+    function stepBy(dir) {
+      var stops = stopPositions();
+      if (!stops) return false;
+      var y = window.pageYOffset;
+      if (!inHeroRange(y, stops)) return false;
+      var from = nearestStep(y, stops);
+      if (Math.abs(stops[from] - y) > 4) return false; // pas posé sur une étape
+      var next = from + dir;
+      if (next < 0 || next > stops.length - 1) return false;
+      currentStep = next;
+      programmaticScrollTo(stops[next]);
+      return true;
+    }
+    if (CAROUSEL_HARD) {
+      window.addEventListener('wheel', function (e) {
+        if (reduceMotion || progScroll || scrollLocked()) return;
+        if (sliderEl && e.target && sliderEl.contains(e.target) && Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+        if (stepBy(e.deltaY > 0 ? 1 : -1)) e.preventDefault();
+      }, { passive: false });
+      var hardTouchY = 0, hardInSlider = false;
+      window.addEventListener('touchstart', function (e) {
+        hardTouchY = e.touches[0].clientY;
+        hardInSlider = !!(sliderEl && e.target && sliderEl.contains(e.target));
+      }, { passive: true });
+      window.addEventListener('touchmove', function (e) {
+        if (reduceMotion || progScroll || scrollLocked() || hardInSlider) return;
+        var dy = hardTouchY - e.touches[0].clientY;
+        if (Math.abs(dy) < 12) return; // laisse passer les micro-mouvements
+        if (stepBy(dy > 0 ? 1 : -1)) e.preventDefault();
+      }, { passive: false });
     }
     function scheduleSnap() {
-      // Sens du geste, mémorisé pour le biais directionnel de snapTarget().
-      // Un mouvement d'un pixel ne compte pas : c'est du bruit de rendu.
-      var y = window.pageYOffset;
-      if (Math.abs(y - lastY) > 1) { scrollDir = y > lastY ? 1 : -1; lastY = y; }
+      // Le premier mouvement d'un geste fixe son point de départ : c'est de là
+      // que se compte « une étape ». Sans scroll programmatique en cours, sinon
+      // notre propre animation passerait pour un geste du visiteur.
+      noteGestureStart();
       clearTimeout(snapTimer);
       snapTimer = setTimeout(maybeSnap, SNAP_IDLE);
     }
 
     document.addEventListener('touchstart', function (e) {
       touching = true;
-      cancelProgrammatic(); // le doigt reprend toujours la main
+      cancelProgrammatic(); // le doigt reprend toujours la main (sauf en vrai carrousel)
+      noteGestureStart();   // avant tout mouvement : c'est ici que part le geste
       gestureInSlider = !!(sliderEl && e.target && sliderEl.contains(e.target));
       sliderStartLeft = sliderEl ? sliderEl.scrollLeft : 0;
     }, { passive: true });

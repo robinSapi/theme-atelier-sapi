@@ -132,6 +132,11 @@ if ($imm_piece) {
   if (function_exists('sapi_conseiller_rank_products')) {
     $imm_products = sapi_conseiller_rank_products($imm_products, $imm_answers);
   }
+  // 5 propositions au total, dont la carte sur-mesure en dernier → 4 modèles.
+  // Plafond APRÈS le classement : les 4 MEILLEURS, pas 4 au hasard.
+  if (function_exists('sapi_immersion_max_products')) {
+    $imm_products = array_slice($imm_products, 0, sapi_immersion_max_products());
+  }
 ?>
 <!-- Track de scroll-pinning : le hero (sticky) reste épinglé pendant que le
      scroll pilote la révélation (flou photo + remontée texte + apparition des
