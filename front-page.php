@@ -550,7 +550,7 @@ foreach ($carousel_products as $product) {
           <span class="conseiller-sig__hook">Mon regard d'artisan sur ton projet</span>
         </span>
       </div>
-      <h2 class="room-picker-title">Pour quelle pièce cherches-tu un luminaire ?</h2>
+      <h2 class="room-picker-title">Pour quelle pièce cherches-tu un luminaire ?</h2>
       <div class="room-picker-cards">
         <?php foreach ($room_choices as $room) :
           $icon_svg = isset($room_icons[$room['icon']]) ? $room_icons[$room['icon']] : '';

@@ -298,7 +298,7 @@ $picker_icons = sapi_guide_get_icons();
         <span class="conseiller-sig__hook"><?php esc_html_e('Mon regard d\'artisan sur ton projet', 'theme-sapi-maison'); ?></span>
       </span>
     </div>
-    <h1 class="room-picker-title"><?php esc_html_e('Pour quelle pièce cherches-tu un luminaire ?', 'theme-sapi-maison'); ?></h1>
+    <h1 class="room-picker-title"><?php esc_html_e('Pour quelle pièce cherches-tu un luminaire ?', 'theme-sapi-maison'); ?></h1>
     <p class="room-picker-sub"><?php esc_html_e('Choisis une pièce : je te montre la sélection que je conseille, pensée pour cet espace.', 'theme-sapi-maison'); ?></p>
     <div class="room-picker-cards">
       <?php foreach (sapi_room_choices() as $room) :

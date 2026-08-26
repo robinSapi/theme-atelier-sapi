@@ -609,12 +609,32 @@
       progScroll = false;
     }
 
+    /* Hauteur de tout ce qui reste COLLÉ EN HAUT de l'écran et masquerait le
+       haut du catalogue : le header, ET le bandeau de réassurance, qui est
+       repositionné en sticky sous le header sur cette page (cf. plus haut dans
+       ce fichier). Le `scroll-margin-top` du CSS ne connaissait que le header
+       — d'où le titre « Toutes mes créations » masqué par le bandeau à
+       l'arrivée du 3ᵉ aimant (constaté par Robin).
+       Mesuré plutôt qu'écrit en dur : les deux hauteurs diffèrent entre mobile
+       et desktop, et le bandeau peut changer de contenu. */
+    function stickyOffset() {
+      var off = 0;
+      [document.querySelector('.site-header'), document.querySelector('.robin-bandeau')].forEach(function (el) {
+        if (!el) return;
+        var pos = '';
+        try { pos = window.getComputedStyle(el).position; } catch (e) { /* swallow */ }
+        if (pos === 'fixed' || pos === 'sticky') off += el.getBoundingClientRect().height;
+      });
+      return Math.round(off);
+    }
     function catalogueSnapY() {
       var cat = document.getElementById('mes-creations-catalogue');
       if (!cat) return null;
       var margin = 0;
       try { margin = parseFloat(window.getComputedStyle(cat).scrollMarginTop) || 0; } catch (e) { /* swallow */ }
-      return Math.round(cat.getBoundingClientRect().top + window.pageYOffset - margin);
+      // Le CSS reste le plancher (il sert aux sauts d'ancre natifs) ; la mesure
+      // le complète quand un bandeau s'ajoute sous le header.
+      return Math.round(cat.getBoundingClientRect().top + window.pageYOffset - Math.max(margin, stickyOffset()));
     }
     /* Les trois positions se comportent comme les trois vues d'un diaporama :
        tant qu'on est DANS le hero, on est toujours attiré vers la plus proche

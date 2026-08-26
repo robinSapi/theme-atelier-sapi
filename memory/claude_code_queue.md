@@ -642,6 +642,16 @@ Assombrir le scrim général aurait terni **toute la pièce**, or c'est la photo
 - **Garde-fou serveur `sapi_strip_long_dashes()`**, appliqué aux **5** points de sortie de texte IA (conseil final, messages de la modale, messages de contact). ⚠️ **Nécessaire parce qu'une consigne de prompt n'est PAS une contrainte** — précédent dans ce fichier : la limite « max 300 caractères » du conseil, écrite dans le prompt et jamais appliquée nulle part. Le trait d'union normal est préservé (mots composés, sur-mesure, plages).
 - Vérifié : les conseils pré-écrits par pièce (`sapi_megafilter_get_generic_advices`) étaient déjà propres.
 
+### ✅ TROIS CORRECTIFS DESKTOP (2026-08-25)
+
+**1. Le « ? » tombait seul sur sa ligne** (titre du room-picker). Cause : la typographie française impose une espace avant les ponctuations doubles, mais **une espace ordinaire est un point de césure**. Remplacée par une **espace insécable (U+00A0)** dans les **trois** fichiers qui portent la phrase : `archive-product.php`, `front-page.php`, `page-conseils-eclaires.php`. Vérifié caractère par caractère.
+→ **À refaire pour toute phrase se terminant par ? ! : ou ;** ajoutée au site.
+
+**2. « CHAMBRE ENFANT » aligné à gauche** alors que les autres libellés paraissaient centrés. Cause : la carte est un flex centré, donc **la boîte du libellé se réduit à la largeur de sa plus longue ligne** — la boîte était bien centrée, mais la 2ᵉ ligne se collait à gauche à l'intérieur. Visible uniquement sur les libellés à deux lignes, d'où le fait que ça n'ait sauté aux yeux que sur celui-là. `text-align: center` ajouté sur `.room-card-label`. Les blocs mobiles (spécificité 0,2,0) repassent volontairement à `left` pour la disposition en ligne, ils ne sont pas touchés.
+
+**3. Le 3ᵉ aimant masquait le titre « Toutes mes créations »** derrière le bandeau de réassurance. Cause : `scroll-margin-top` ne connaissait que le **header**, alors que le bandeau est repositionné en **sticky sous le header** sur cette page (mécanisme repris de la home). Il manquait donc sa hauteur.
+→ Nouvelle fonction `stickyOffset()` : **mesure** la hauteur de tout ce qui est `fixed`/`sticky` en haut (header + bandeau) plutôt que de l'écrire en dur — les deux hauteurs diffèrent entre mobile et desktop, et le bandeau peut changer de contenu. Le `scroll-margin-top` du CSS reste le plancher (il sert aux sauts d'ancre natifs), la mesure le complète. Corrige du même coup l'indice « Voir le catalogue complet », qui partage `catalogueSnapY()`.
+
 ### ⏳ LOT 2 — spécification d'origine (non codé)
 Ancrage **en JavaScript**, pas en CSS : c'est le seul qui sache **s'abstenir**. Il doit être neutralisé dans quatre fenêtres — verrou de la machine à écrire, modale ouverte, `rewindToTop()` en vol, et geste initié dans le carrousel. Prévoir un drapeau « scroll programmatique » honoré par `rewindToTop()`, `scrollToReveal()` et `scrollToCatalogue()`, et l'annulation au `touchstart`. Arbitrer aussi le `scroll-behavior: smooth` global (l. 128) : deux animations de scroll sur le même axe = rebond. Recette dédiée au moment 2, séquence la plus fragile de la page.
 

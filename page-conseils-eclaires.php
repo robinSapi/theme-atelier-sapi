@@ -226,7 +226,7 @@ endif;
           <span class="conseiller-sig__hook">Mes conseils spécifiques pour ton projet</span>
         </span>
       </div>
-      <h3 class="room-picker-title">Pour quelle pièce cherches-tu un luminaire ?</h3>
+      <h3 class="room-picker-title">Pour quelle pièce cherches-tu un luminaire ?</h3>
       <div class="room-picker-cards">
         <?php foreach ($room_choices as $room) :
           $icon_svg = isset($room_icons[$room['icon']]) ? $room_icons[$room['icon']] : '';
