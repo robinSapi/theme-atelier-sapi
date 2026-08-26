@@ -716,6 +716,20 @@ Sans lui, `touching` restait `true` **pour le reste de la vie de la page** : l'a
 
 **Ce qui reste, et c'est tout :** le doigt pilote la révélation, la page complète toujours exactement une étape au relâchement, et la pause de 100vh masque le dépassement des gestes violents. Simple, et sans écouteur non passif nulle part.
 
+### ✅ TRANSITION À DURÉE MAÎTRISÉE (2026-08-25)
+
+Robin : « le scroll est juste trop lent entre les deux premiers écrans ».
+
+**Cause : la durée ne nous appartenait pas.** On laissait faire `behavior: 'smooth'`, dont **la durée grandit avec la distance** et varie selon le navigateur. Le trajet phrase → carrousel fait 100 % de hauteur d'écran (~838px, soit 600-800 ms) ; celui vers le catalogue en fait 200 % et durait encore plus.
+
+→ **Animation maison en `requestAnimationFrame`, `DUREE_TRANSITION = 420 ms`, décélération cubique.** La durée est désormais **la même pour toutes les étapes quelle que soit la distance** : c'est ce qui donne la sensation d'un pas régulier. ⇦ Un seul chiffre : monter = plus posé, descendre = plus sec.
+
+**⚠️ PIÈGE ÉVITÉ, à connaître absolument si on retouche à ça :** il faut neutraliser le `scroll-behavior: smooth` global (style.css l. 128) **pendant toute la durée de l'animation**, pas seulement le temps d'un appel comme le faisait `jumpTo()`. Chaque image appelle `scrollTo` ; avec le smooth actif, **chaque appel déclencherait sa propre mini-animation** et la page ramperait sans jamais arriver. Le symptôme serait « c'est devenu tout mou » — et on l'imputerait à la durée, donc à la mauvaise cause.
+
+**Bénéfices annexes :** le drapeau de scroll programmatique a maintenant **un seul propriétaire** (l'animation le lève à sa dernière image) — plus de délai à deviner, plus de risque qu'il retombe en vol. Le filet de 2 500 ms ne sert que si l'onglet passe en arrière-plan. Et l'annulation (doigt, molette, clavier) arrête l'animation **là où elle en est**, sans saut : `--reveal` suivant la position réelle, il n'y a rien à resynchroniser.
+
+`prefers-reduced-motion` → saut instantané, aucune animation.
+
 ### ⏳ LOT 2 — spécification d'origine (non codé)
 Ancrage **en JavaScript**, pas en CSS : c'est le seul qui sache **s'abstenir**. Il doit être neutralisé dans quatre fenêtres — verrou de la machine à écrire, modale ouverte, `rewindToTop()` en vol, et geste initié dans le carrousel. Prévoir un drapeau « scroll programmatique » honoré par `rewindToTop()`, `scrollToReveal()` et `scrollToCatalogue()`, et l'annulation au `touchstart`. Arbitrer aussi le `scroll-behavior: smooth` global (l. 128) : deux animations de scroll sur le même axe = rebond. Recette dédiée au moment 2, séquence la plus fragile de la page.
 

@@ -595,6 +595,15 @@
     var SNAP_CATCH = 0.30;       // distance d'accroche au catalogue, en hauteurs d'écran
     var GESTE_MINIMUM = 8;       // ⇦ en dessous, il ne s'est rien passé (px)
     var TOLERANCE_ARRIVEE = 4;   // px : on se considère posé sur une étape
+    /* ⇦ LE TEMPS QUE MET LA PAGE POUR PASSER D'UN ÉCRAN AU SUIVANT.
+       Avant, on laissait faire `behavior: 'smooth'` : la durée appartenait
+       alors au navigateur, et elle GRANDIT AVEC LA DISTANCE. Le trajet
+       phrase → carrousel fait 100 % de la hauteur d'écran, d'où le « trop
+       lent » de Robin ; celui vers le catalogue en fait 200 % et durait
+       encore plus. Ici la durée est la MÊME pour toutes les étapes, quelle que
+       soit la distance : c'est ce qui donne une sensation de pas régulier.
+       Monter ce chiffre rend le mouvement plus posé, le descendre plus sec. */
+    var DUREE_TRANSITION = 420;  // ms
     var snapTimer = null;
     var touching = false;       // un doigt est posé
     var progScroll = false;     // un scroll programmatique est en vol
@@ -632,22 +641,55 @@
        et lançait une SECONDE transition. Un geste, deux mouvements.
        Le délai ne subsiste qu'en filet ultime (onglet passé en arrière-plan,
        animation jamais terminée). */
-    var progTarget = null, progTimer = null;
+    var progTarget = null, progTimer = null, progRaf = null;
+    var progFrom = 0, progStart = 0, progPrevBehavior = '';
+    // Décélération : départ franc, arrivée qui se pose. C'est ce qui fait
+    // qu'un déplacement court paraît net sans paraître brutal.
+    function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
     function programmaticScrollTo(y) {
-      progTarget = Math.round(y);
+      var target = Math.round(y);
+      var from = window.pageYOffset;
+      if (Math.abs(target - from) < TOLERANCE_ARRIVEE) return;
+      progTarget = target;
+      progFrom = from;
       progScroll = true;
       clearTimeout(progTimer);
-      progTimer = setTimeout(endProgrammatic, 2500);
-      window.scrollTo({ top: progTarget, behavior: reduceMotion ? 'auto' : 'smooth' });
+      progTimer = setTimeout(endProgrammatic, 2500); // filet : onglet en arrière-plan
+      if (reduceMotion) { jumpTo(target); endProgrammatic(); return; }
+
+      /* ⚠️ NEUTRALISER LE `scroll-behavior: smooth` GLOBAL (style.css l. 128)
+         PENDANT TOUTE L'ANIMATION, et pas seulement le temps d'un appel.
+         Chaque image appelle `scrollTo` ; avec le smooth actif, CHAQUE APPEL
+         déclencherait sa propre mini-animation et la page ramperait sans
+         jamais arriver. Le symptôme serait « c'est devenu tout mou » — et on
+         l'imputerait à la durée, donc à la mauvaise cause. */
+      var html = document.documentElement;
+      progPrevBehavior = html.style.scrollBehavior;
+      html.style.scrollBehavior = 'auto';
+
+      progStart = 0;
+      if (progRaf) cancelAnimationFrame(progRaf);
+      progRaf = requestAnimationFrame(function step(ts) {
+        if (!progStart) progStart = ts;
+        var t = Math.min(1, (ts - progStart) / DUREE_TRANSITION);
+        window.scrollTo(0, Math.round(progFrom + (progTarget - progFrom) * easeOut(t)));
+        if (t < 1) progRaf = requestAnimationFrame(step);
+        else endProgrammatic();
+      });
     }
     function endProgrammatic() {
       clearTimeout(progTimer);
+      if (progRaf) { cancelAnimationFrame(progRaf); progRaf = null; }
+      document.documentElement.style.scrollBehavior = progPrevBehavior;
       progScroll = false;
       progTarget = null;
     }
+    // Le visiteur reprend la main : on arrête l'animation là où elle en est,
+    // sans la faire sauter. `--reveal` suit la position réelle, donc rien à
+    // resynchroniser.
     function cancelProgrammatic() {
       if (!progScroll) return;
-      jumpTo(window.pageYOffset); // stoppe net l'animation en cours
       endProgrammatic();
     }
 
@@ -765,12 +807,8 @@
     }
 
     function scheduleSnap() {
-      // Notre animation est-elle arrivée ? C'est ce test, et non un délai, qui
-      // lève le drapeau (cf. programmaticScrollTo).
-      if (progScroll && progTarget !== null &&
-          Math.abs(window.pageYOffset - progTarget) <= TOLERANCE_ARRIVEE) {
-        endProgrammatic();
-      }
+      // (Le drapeau est levé par l'animation elle-même, à sa dernière image :
+      //  un seul propriétaire, pas de délai à deviner.)
       // Le premier mouvement d'un geste fixe son point de départ : c'est de là
       // que se compte « une étape ». Sans scroll programmatique en cours, sinon
       // notre propre animation passerait pour un geste du visiteur.
