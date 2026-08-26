@@ -950,65 +950,44 @@
      la place du visiteur.
      Quand la pièce EST connue, le second bouton reste masqué : un seul chemin
      a du sens, et on ne dilue pas l'action principale. */
-  /* Le projet a-t-il de quoi filtrer ? `style` ne compte pas : il ne sert qu'au
-     prompt IA, le moteur ne le lit jamais. Tout le reste (sortie, eclairage,
-     piece, taille, hauteur) donne au moins une catégorie exploitable.
-     ⚠️ Cette fonction répond « y a-t-il quelque chose à MONTRER », pas
-     « connaît-on la pièce ». Les deux questions ont été confondues une fois
-     dans chaque sens, et chaque confusion a coûté un bug. */
-  var CRITERES_INERTES = ['style'];
-  function projectHasCriteria() {
-    var a = null;
-    try {
-      var p = window.sapiProject && window.sapiProject.get ? window.sapiProject.get() : null;
-      if (p && p.answers) a = p.answers;
-    } catch (e) { /* swallow */ }
-    if (!a) a = state.answers || {};
-    return Object.keys(a).some(function (k) {
-      return a[k] && CRITERES_INERTES.indexOf(k) === -1;
-    });
-  }
+  /* ── LA BARRE DE SORTIE DU CHAT ────────────────────────────────────────────
+     Trois situations, et une seule question pour les départager : **connaît-on
+     la pièce ?** Elle suffit, parce que la page de sélection est indexée
+     dessus — sans pièce, il n'existe aucune URL où envoyer le visiteur.
 
-  function revealChatCta() {
+     1. Pièce connue → un seul bouton, « Voir la sélection ». On ne dilue pas
+        l'action principale avec une sortie contact dont personne n'a besoin.
+     2. Pièce inconnue, conversation EN COURS → **aucune barre**. L'IA vient de
+        poser une question ; lui montrer la sortie au même instant, c'est lui
+        répondre « laisse tomber » pendant qu'on lui demande de préciser.
+     3. Pièce inconnue, conversation TERMINÉE (`forceExit`) → le contact seul,
+        en bouton plein. Là il faut bien proposer quelque chose.
+
+     ⚠️ Le cas « pièce hors périmètre » (salle de bain, garage) ne passe PAS
+     par ici : le serveur renvoie `action: "contact"` et les deux appelants
+     partent sur `showContact()` avant d'arriver à cette fonction. Ne pas
+     confondre « la pièce est hors périmètre » et « on ne connaît pas encore la
+     pièce » — c'est la confusion qui a produit les deux derniers défauts, une
+     fois dans chaque sens. */
+  function revealChatCta(opts) {
     if (!els.chatCta) return;
+    var forceExit = !!(opts && opts.forceExit);
+    var canSelect = !!projectPiece();
+
+    if (!canSelect && !forceExit) { els.chatCta.hidden = true; return; }
     els.chatCta.hidden = false;
 
     var contactBtn = els.chatCta.querySelector('[data-chat-cta-contact]');
     var primaryBtn = els.chatCta.querySelector('[data-chat-cta-primary]');
-    var labelEl = els.chatCta.querySelector('[data-chat-cta-label]');
-    var hasPiece = !!projectPiece();
 
-    /* ── PAS DE PIÈCE CONNUE → UNE SEULE SORTIE : ROBIN ─────────────────────
-       ⚠️ DÉCISION ROBIN DU 26/08, qui remplace les deux boutons de la veille :
-       « toutes les pièces qui ne sont pas dans le room-picker » sortent du
-       périmètre du site. Le picker couvre déjà les synonymes — couloir est
-       dans « Entrée / Couloir », salle à manger dans « Salon / Salle à
-       manger », atelier dans « Bureau / Atelier ». Donc si l'extraction ne
-       rend AUCUNE pièce, c'est que le projet n'entre dans aucune des sept :
-       salle de bain, garage, terrasse. Là, seul Robin peut répondre — humidité
-       et sécurité électrique sur du bois, ça ne se devine pas.
-
-       Défaut qui a mené là : « une lampe pour ma salle de bain ». L'IA posait
-       une question de clarification — elle n'avait proposé AUCUNE sélection —
-       et « Voir la sélection » s'affichait quand même, parce qu'on révélait le
-       bouton après CHAQUE réponse sans regarder s'il y avait quelque chose à
-       voir. Il re-servait alors les modèles du projet précédent.
-       Un bouton qui promet une sélection inexistante est pire qu'un bouton
-       absent : le visiteur clique, tombe sur des modèles sans rapport, et croit
-       que c'est ce que le site lui recommande.
-
-       `projectHasCriteria()` reste la ceinture : sans pièce ET sans critère, il
-       n'y a même pas de quoi remplir un formulaire de contact utile. */
-    var canSelect = hasPiece && projectHasCriteria();
     if (primaryBtn) primaryBtn.hidden = !canSelect;
     if (contactBtn) {
-      contactBtn.hidden = false; // toujours offert : c'est la sortie de secours
+      contactBtn.hidden = canSelect;
       /* Seul en piste, le bouton contact cesse d'être secondaire : le style
          fantôme signifierait « il y a mieux ailleurs », et il n'y a rien. */
-      contactBtn.classList.toggle('action-btn--ghost', canSelect);
-      contactBtn.classList.toggle('action-btn--primary', !canSelect);
+      contactBtn.classList.toggle('action-btn--ghost', false);
+      contactBtn.classList.toggle('action-btn--primary', true);
     }
-    if (labelEl && canSelect) labelEl.textContent = 'Voir la sélection pour mon projet';
   }
 
   // Appel IA : extraction freetext (Haiku) — endpoint F1b existant
@@ -1124,9 +1103,17 @@
       if (state.chat.conversation[i].role === 'user') userMsgCount++;
     }
     if (userMsgCount >= state.chat.maxUserMessages) {
-      addRobinBubble('On a bien discuté ! Clique sur Voir la sélection pour découvrir les modèles.');
+      /* Plafond atteint : la saisie se verrouille, donc la barre DOIT proposer
+         une sortie — d'où `forceExit`. Et le message doit nommer le bouton qui
+         sera réellement là : sans pièce, « clique sur Voir la sélection »
+         désignait un bouton masqué, sur un écran où l'on ne pouvait plus
+         écrire. Cul-de-sac complet, rare mais total. */
+      var hasPiece = !!projectPiece();
+      addRobinBubble(hasPiece
+        ? 'On a bien discuté ! Clique sur Voir la sélection pour découvrir les modèles.'
+        : 'On a bien discuté ! Pour aller plus loin sur ce projet, le mieux est qu’on en parle directement.');
       setChatFooterState('locked');
-      revealChatCta();
+      revealChatCta({ forceExit: true });
       return;
     }
 
@@ -1531,7 +1518,11 @@
     state.chat.sessionId = null;
     state.chat.status = 'idle';
     if (els.chatMessages) els.chatMessages.innerHTML = '';
-    if (els.chatCta) els.chatCta.hidden = false; // CTA visible direct (advice est déjà en mémoire)
+    /* Le CTA est visible d'emblée (le conseil est déjà en mémoire), mais il
+       DOIT passer par revealChatCta : c'était le seul chemin du fichier qui
+       forçait `hidden = false` à la main, et il ressortait donc avec l'état
+       visuel laissé par la conversation précédente. */
+    revealChatCta();
     if (els.chatInput) {
       els.chatInput.value = '';
       els.chatInput.disabled = false;
@@ -2131,7 +2122,7 @@
              n'ayant jamais changé. C'est exactement ce que Robin a vu — les
              modèles du projet précédent sous une conversation sur une salle
              de bain. */
-          if (!projectPiece() || !projectHasCriteria()) {
+          if (!projectPiece()) {
             showContact({
               message: 'Pour cette pièce, je préfère te répondre moi-même. Laisse-moi ton mail et un mot sur ton projet.'
             });

@@ -2850,6 +2850,12 @@ function sapi_megafilter_build_freetext_prompt(array $whitelist) {
   $prompt .= "- \"simple\" : résidentiel léger qui veut juste un échange rapide. CTA principal = \"M'envoyer un email\".\n\n";
 
   $prompt .= "RÈGLE DU CAS PAR CAS (très important) :\n";
+  /* ⚠️ Cette règle encourage les modèles approchants ; la règle « pièce hors
+     périmètre » les interdit. Sans l'exception ci-dessous, les deux se
+     contredisaient sur exactement le cas visé — une salle de bain aurait reçu
+     `piece: cuisine`, slug valide, et le visiteur serait reparti avec une
+     sélection de cuisine. Défaut relevé en relecture avant mise en ligne. */
+  $prompt .= "- EXCEPTION QUI PRIME SUR TOUT LE RESTE : si la PIÈCE est hors périmètre (voir plus haut), cette règle ne s'applique PAS. Aucun modèle approchant, aucune pièce approchante, `filters` vide. Une salle de bain n'est pas une cuisine.\n";
   $prompt .= "- Si malgré la complexité tu peux quand même proposer 1-2 modèles approchants du catalogue, fais-le : remplis `filters` AVEC `action: \"contact\"`. Le visiteur voit la sélection ET la porte sur-mesure côte à côte.\n";
   $prompt .= "- Si l'écart est trop grand (ex: hôtelier 30 chambres) : bascule directement en `action: \"contact\"` avec `filters: {}` — ne simule pas une recherche catalogue qui n'a aucun sens.\n\n";
 
@@ -2978,6 +2984,10 @@ function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_pr
   $prompt .= "- \"simple\" : résidentiel léger qui veut juste un échange rapide → CTA UI principal = email direct.\n\n";
 
   $prompt .= "RÈGLE DU CAS PAR CAS :\n";
+  /* Miroir de l'exception du prompt d'extraction — voir le commentaire là-bas.
+     Les deux prompts DOIVENT rester identiques sur ce point : s'ils divergent,
+     le visiteur reçoit deux comportements selon qu'il parle une ou deux fois. */
+  $prompt .= "- EXCEPTION QUI PRIME SUR TOUT LE RESTE : si la PIÈCE est hors périmètre (voir plus haut), cette règle ne s'applique PAS. Aucun modèle approchant, aucune pièce approchante, pas de `filters_update` de pièce. Une salle de bain n'est pas une cuisine.\n";
   $prompt .= "- Si malgré la complexité tu peux quand même proposer 1-2 modèles approchants, fais-le : remplis `filters_update` AVEC `action: \"contact\"`. Le visiteur voit la sélection ET la porte sur-mesure côte à côte.\n";
   $prompt .= "- Si l'écart est trop grand (ex: hôtelier 30 chambres) : bascule directement en `action: \"contact\"` sans `filters_update`.\n\n";
 
@@ -3653,17 +3663,17 @@ function sapi_render_conseiller_modal() {
           </div>
         </div>
 
-        <?php /* ⚠️ DEUX SORTIES, PAS UNE. Un seul bouton devait DEVINER où
-                 emmener le visiteur, et se trompait quand le projet n'avait pas
-                 de pièce : il basculait sur le contact alors qu'une vraie
-                 sélection existait (« au mur » suffit à déduire les appliques).
-                 L'IA, elle, posait déjà la bonne question — « tu veux qu'on
-                 regarde les appliques, ou tu veux en parler directement avec
-                 Robin ? ». Les deux boutons reprennent ces deux chemins.
-                 Le second reste MASQUÉ quand la pièce est connue : là, un seul
-                 chemin a du sens et on ne dilue pas l'action principale.
-                 Le libellé du premier est réécrit en JS avec le nom de la
-                 catégorie déduite quand il y en a une seule. */ ?>
+        <?php /* ⚠️ DEUX BOUTONS DANS LE MARKUP, MAIS JAMAIS LES DEUX À L'ÉCRAN.
+                 `revealChatCta()` en montre exactement un, selon qu'on connaît
+                 la pièce ou non — la logique est là-bas, et nulle part ailleurs.
+                 Pièce connue → « Voir la sélection » seul. Pièce inconnue en
+                 fin de conversation → « En parler à Robin » seul, promu en
+                 bouton plein. Pièce inconnue en cours de conversation → cette
+                 barre est masquée entièrement : on ne montre pas la sortie à
+                 quelqu'un à qui l'IA vient de poser une question.
+                 Le libellé du premier est FIXE : la variante « Voir les
+                 appliques » a existé une journée, elle est morte avec la
+                 décision de renvoyer vers Robin les pièces hors périmètre. */ ?>
         <footer class="modal__foot modal__foot--duo" data-chat-cta hidden>
           <button type="button" class="action-btn action-btn--primary" data-action="apply" data-chat-cta-primary>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12h18M13 5l7 7-7 7"/></svg>

@@ -95,11 +95,32 @@ Projet vidé. Depuis la home, utilise le **champ texte libre** et écris :
 
 > *une petite applique pour mon couloir*
 
-- [ ] Le chat propose une sélection et **deux boutons**
-- [ ] « Voir les appliques » mène à une page dont le titre dit **« Mes appliques pour… »**
+- [ ] Le chat propose une sélection et **un seul bouton**, « Voir la sélection pour mon projet »
+- [ ] Il mène à une page dont le libellé du carrousel dit **« Mes appliques pour… »**
 - [ ] Le carrousel montre bien des **appliques**, pas des suspensions
 
-> C'est le test de ta capture. Le décalage restant — le site dit « entrée » là où tu as écrit « couloir » — est **attendu** à ce stade : c'est le sujet du vocabulaire, qu'on n'a pas encore tranché.
+> C'est le test de ta capture. Deux précisions : le libellé « Voir les appliques » a existé une journée, il est mort avec la décision de renvoyer vers toi les pièces hors périmètre — un seul bouton dès que la pièce est connue. Et le décalage restant, le site qui dit « entrée » là où tu as écrit « couloir », est **attendu** : c'est le sujet du vocabulaire, qu'on n'a pas tranché.
+
+### B3 bis · La salle de bain, hors périmètre
+
+Projet vidé. Champ texte libre : *une lampe pour ma salle de bain*.
+
+- [ ] L'IA **ne pose aucune question** sur la vasque ou la prise
+- [ ] Elle dit que c'est toi qui dois répondre, et affiche l'écran de contact
+- [ ] Aucun bouton « Voir la sélection » nulle part
+- [ ] Après cet échange, le projet mémorisé ne contient **pas** de pièce approchante — surtout pas `cuisine`
+
+> **Le piège exact que la relecture a trouvé :** une autre règle du prompt, plus ancienne et marquée « très important », encourageait à proposer des modèles approchants. Elle annulait celle qu'on venait d'écrire. Une salle de bain serait repartie avec `piece: cuisine`, un slug parfaitement valide — et le bouton « Voir la sélection » se serait rallumé au retour.
+
+### B3 ter · Une question légitime ne doit pas pousser vers la sortie
+
+Projet vidé. Champ texte libre : *je cherche une applique* — sans dire la pièce.
+
+- [ ] Robin demande pour quelle pièce
+- [ ] **Aucune barre de boutons** ne s'affiche sous sa question
+- [ ] Tu réponds « pour mon salon » → le bouton « Voir la sélection » apparaît
+
+> **Pourquoi :** montrer « En parler à Robin » en bouton plein sous une question, c'est répondre « laisse tomber » à quelqu'un à qui on demande de préciser. La barre attend qu'il y ait vraiment quelque chose à proposer.
 
 ### B4 · Quand la catégorie n'est PAS certaine
 
