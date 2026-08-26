@@ -7905,15 +7905,9 @@ li.carousel-editorial-slide,
     padding: 36px 20px;
   }
 
-  .advice-room-picker .room-picker-cards {
-    gap: 0.75rem;
-  }
-
-  .advice-room-picker .room-card {
-    flex: 0 0 calc(50% - 0.5rem);
-    max-width: none;
-    padding: 1rem 0.75rem;
-  }
+  /* (gap des cards et disposition des cartes : voir le « BLOC MOBILE PARTAGÉ »
+     un peu plus bas dans ce fichier. Ne rien redéclarer ici — ce bloc-ci est
+     AU-DESSUS, il serait donc écrasé, et on croirait à un réglage sans effet.) */
 
   .advice-room-picker-section {
     padding: 0 1rem;
@@ -7966,23 +7960,31 @@ li.carousel-editorial-slide,
 @media (min-width: 769px) {
   .home-projet .room-picker-title { white-space: nowrap; }
 }
-/* ⚠️ BLOC MOBILE PARTAGÉ — room-picker de la home ET hero de /mes-creations/.
-   Les deux contextes réutilisent les mêmes classes globales (.room-card,
+/* ⚠️ BLOC MOBILE PARTAGÉ — LES TROIS room-pickers du site :
+     · la home                       → .home-projet
+     · /mes-creations/ sans pièce    → .mescreations-picker-hero
+     · /conseils-eclaires/           → .advice-room-picker
+   Les trois réutilisent les mêmes classes globales (.room-card,
    .room-card-icon, .room-card-label) mais les préfixent chacun avec la sienne,
    donc à spécificité égale (0,2,0) c'est le bloc le plus BAS dans le fichier qui
    gagne. Le hero de /mes-creations/ étant déclaré ~16 700 lignes plus loin, il a
    déjà annulé deux fois ces réglages mobiles sans qu'on le voie (cartes 1,5× trop
    larges en 1ʳᵉ passe, icônes 60px au lieu de 34px en 2ᵉ passe).
    RÈGLE : toute règle mobile de CARTE va ici, en sélecteur partagé — jamais dans
-   le bloc du hero. Ce dernier ne garde que ce qui lui est propre (enveloppe,
-   titre, sous-titre). */
+   le bloc d'un picker en particulier. Chacun ne garde que ce qui lui est propre
+   (enveloppe, titre, sous-titre, rembourrage de section).
+   ⚠️ Un quatrième picker ajouté un jour doit être inscrit ICI, sinon il gardera
+   la disposition verticale et ses icônes de 60px — c'est exactement l'oubli
+   qu'ont connu les deux premiers, à deux reprises. */
 @media (max-width: 768px) {
   .home-projet-section { padding: 3.5rem 14px 2.5rem; }
   .home-projet .room-picker-cards,
-  .mescreations-picker-hero .room-picker-cards { gap: 0.75rem; }
+  .mescreations-picker-hero .room-picker-cards,
+  .advice-room-picker .room-picker-cards { gap: 0.75rem; }
   /* Mobile — cards réponses compactes, layout horizontal (icône à gauche, texte à droite aligné à gauche) */
   .home-projet .room-card,
-  .mescreations-picker-hero .room-card {
+  .mescreations-picker-hero .room-card,
+  .advice-room-picker .room-card {
     flex: 0 0 calc(50% - 0.5rem);
     max-width: none;
     flex-direction: row;
@@ -7993,11 +7995,14 @@ li.carousel-editorial-slide,
     padding: 0.55rem 0.7rem;
   }
   .home-projet .room-card-icon,
-  .mescreations-picker-hero .room-card-icon { width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; }
+  .mescreations-picker-hero .room-card-icon,
+  .advice-room-picker .room-card-icon { width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; }
   .home-projet .room-card-icon svg,
-  .mescreations-picker-hero .room-card-icon svg { width: 18px; height: 18px; }
+  .mescreations-picker-hero .room-card-icon svg,
+  .advice-room-picker .room-card-icon svg { width: 18px; height: 18px; }
   .home-projet .room-card-label,
-  .mescreations-picker-hero .room-card-label { font-size: 11.5px; letter-spacing: 0.04em; text-align: left; line-height: 1.2; }
+  .mescreations-picker-hero .room-card-label,
+  .advice-room-picker .room-card-label { font-size: 11.5px; letter-spacing: 0.04em; text-align: left; line-height: 1.2; }
 }
 
 /* ===== DA #3 — Conseiller : signature de Robin (composant réutilisable) + réchauffe ===== */
