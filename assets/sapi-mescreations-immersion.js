@@ -634,8 +634,11 @@
        lent » de Robin ; celui vers le catalogue en fait 200 % et durait
        encore plus. Ici la durée est la MÊME pour toutes les étapes, quelle que
        soit la distance : c'est ce qui donne une sensation de pas régulier.
-       Monter ce chiffre rend le mouvement plus posé, le descendre plus sec. */
-    var DUREE_TRANSITION = 420;  // ms
+       Monter ce chiffre rend le mouvement plus posé, le descendre plus sec.
+       Historique du réglage : 420 ms jugé « trop rapide » par Robin, porté à
+       560. La fourchette utile est ~450-700 ; au-delà on retombe dans le
+       « trop lent » qui avait motivé la reprise en main de l'animation. */
+    var DUREE_TRANSITION = 560;  // ms
     var snapTimer = null;
     var progScroll = false;     // un scroll programmatique est en vol
 
