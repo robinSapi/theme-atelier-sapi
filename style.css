@@ -25912,4 +25912,22 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   }
   .mescreations-immersion__hint { gap: 2px; }
   .mescreations-immersion__hint svg { width: 15px; height: 15px; }
+
+  /* ── Bouton « Décrire mon projet » : moins large, moins imposant ────────
+     Il s'étalait d'un bord à l'autre de l'écran. C'est un effet de bord du
+     carrousel pleine largeur : la zone sélection a perdu ses marges latérales
+     pour que les cards soient coupées par les bords, et le bouton, qui vit
+     dans cette zone, les a perdues avec.
+     ⇦ `76vw` n'est pas un chiffre au hasard : c'est EXACTEMENT la largeur des
+     cards. Le bouton s'aligne donc sur la card active, ce qui se voit à
+     l'œil. Garder les deux en phase si l'un des deux change.
+     Taille de texte et rembourrage réduits d'un cran au passage : c'est
+     l'action secondaire, elle ne doit pas peser autant que la sélection. */
+  .mescreations-immersion__describe {
+    max-width: 76vw;
+    padding: 9px 18px;
+    font-size: 12.5px;
+    gap: 8px;
+  }
+  .mescreations-immersion__describe svg { width: 15px; height: 15px; }
 }
