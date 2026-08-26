@@ -5542,6 +5542,107 @@ function sapi_conseiller_rank_products(array $products, array $answers, $rules =
   return array_map(function ($x) { return $x['p']; }, $tmp);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   CONTEXTE D'IMMERSION — LA SÉLECTION ET SON DÉCOR, D'UN SEUL CALCUL
+   ═══════════════════════════════════════════════════════════
+
+   ⚠️ POURQUOI CETTE FONCTION EXISTE — à lire avant de la contourner.
+
+   Deux objets différents portaient le même mot « sélection », et le template
+   les avait soudés dans une seule variable, `$imm_piece` :
+     • LA SÉLECTION = le résultat du moteur, fonction de six critères — et
+       `piece` est le MOINS déterminant d'entre eux. `sapi_guide_get_categories()`
+       choisit sur `sortie` d'abord ; la pièce n'y sert qu'à retirer les lampes
+       à poser en cuisine.
+     • LE DÉCOR = la photo, le possessif « pour ton salon », le titre. Fonction
+       d'UN seul critère, la pièce.
+
+   Tant que les deux sortaient d'endroits différents, ils pouvaient se
+   contredire — et ils l'ont fait. Défaut constaté par Robin le 26/08 : le
+   conseil disait « ma sélection d'appliques pour ton couloir », juste, tandis
+   que le titre annonçait l'entrée et le carrousel montrait des suspensions.
+   L'endpoint d'affinage ne renvoyait que `html` et `count` : AUCUN affinage ne
+   POUVAIT corriger le décor. Ce n'était pas un oubli, c'était structurel.
+
+   Le précédent est `sapi_immersion_render_product_card()` juste en dessous :
+   une source unique pour le markup d'une card, partagée entre le template et
+   l'AJAX. Même réflexe ici, pour le décor.
+
+   → TROIS APPELANTS, un seul calcul : le template (archive-product.php),
+     l'endpoint du moment 2, et tout ce qui viendra ensuite.
+
+   @param array $answers Réponses du questionnaire (déjà validées/slugifiées)
+   @return array products, category_label, possessive, title, phrase, fallback_notes
+*/
+function sapi_immersion_build_context(array $answers) {
+  $piece = isset($answers['piece']) ? $answers['piece'] : '';
+
+  /* Escalier → taille. Cette conversion vivait en double (endpoint + ailleurs) ;
+     elle est ici pour que les deux appelants la subissent à l'identique. */
+  if ($piece === 'escalier' && !empty($answers['taille_escalier'])) {
+    $rules = function_exists('sapi_conseiller_get_rules') ? sapi_conseiller_get_rules() : [];
+    $map = isset($rules['escalier_map']) ? $rules['escalier_map'] : ['standard' => 'petite', 'ouvert' => 'grande'];
+    $answers['taille'] = isset($map[$answers['taille_escalier']]) ? $map[$answers['taille_escalier']] : 'petite';
+  }
+
+  // ── La sélection (le moteur, inchangé : il est l'acquis, on ne le refait pas)
+  $cats = function_exists('sapi_guide_get_categories') ? sapi_guide_get_categories($answers) : [];
+  $res  = ($cats && function_exists('sapi_guide_query_products'))
+    ? sapi_guide_query_products($answers, $cats)
+    : ['products' => [], 'fallback_notes' => []];
+  $products = isset($res['products']) ? $res['products'] : [];
+  if (function_exists('sapi_conseiller_rank_products')) {
+    $products = sapi_conseiller_rank_products($products, $answers);
+  }
+  // Plafond APRÈS le classement : les 4 MEILLEURS, pas 4 au hasard.
+  if (function_exists('sapi_immersion_max_products')) {
+    $products = array_slice($products, 0, sapi_immersion_max_products());
+  }
+
+  // ── Le décor, calculé sur les MÊMES réponses
+  $possessive = function_exists('sapi_piece_possessive') ? sapi_piece_possessive($piece) : 'ta pièce';
+  $phrase = function_exists('sapi_megafilter_generic_advice_for') ? sapi_megafilter_generic_advice_for($piece) : '';
+
+  /* La catégorie dominante : elle n'existe que si le moteur n'en a déduit
+     qu'UNE. Deux catégories ou plus, et annoncer « ma sélection d'appliques »
+     serait un mensonge — on retombe alors sur le titre neutre. */
+  $cat_label = '';
+  if (is_array($cats) && count($cats) === 1) {
+    $term = get_term_by('slug', (string) $cats[0], 'product_cat');
+    if ($term && !is_wp_error($term)) $cat_label = $term->name;
+  }
+
+  /* Le titre dit la catégorie DÈS QU'ELLE EST CERTAINE. C'est précisément ce
+     qui manquait dans la capture de Robin : le conseil parlait d'appliques,
+     le titre parlait de la pièce, et rien ne raccrochait les deux. */
+  /* « Mes appliques pour ton entrée » plutôt que « Ma sélection d'appliques
+     pour ton entrée » : dix caractères de moins, et Robin parle à la première
+     personne comme partout ailleurs sur le site. Le calcul de largeur comptait :
+     à 13 px capitales espacées, le titre long dépassait les 327 px utiles d'un
+     iPhone et passait à deux lignes, ce qui rognait la photo des cards. */
+  $title = $cat_label
+    ? sprintf(
+        __('Mes %s pour %s', 'theme-sapi-maison'),
+        function_exists('mb_strtolower') ? mb_strtolower($cat_label, 'UTF-8') : strtolower($cat_label),
+        $possessive
+      )
+    : sprintf(__('Ma sélection pour %s', 'theme-sapi-maison'), $possessive);
+
+  return [
+    'products'       => $products,
+    'categories'     => is_array($cats) ? array_values($cats) : [],
+    'category_label' => $cat_label,
+    'possessive'     => $possessive,
+    'title'          => $title,
+    'phrase'         => $phrase,
+    /* Le moteur SAIT quand il a relâché une contrainte, et il le dit à l'IA.
+       Le hero, lui, jetait l'information : le visiteur voyait un compromis
+       présenté comme un idéal. On la remonte ; où l'afficher est une décision
+       de Robin (la mise en page du hero est calibrée au pixel). */
+    'fallback_notes' => isset($res['fallback_notes']) ? $res['fallback_notes'] : [],
+  ];
+}
+
 /**
  * Rendu d'UNE card produit du slider immersion (.product-card-cinetique, design
  * catalogue + photo d'ambiance adaptée à la pièce). Utilisé par le template
@@ -5641,21 +5742,13 @@ function sapi_ajax_immersion_selection() {
   }
 
   $piece = isset($answers['piece']) ? $answers['piece'] : '';
-  // Escalier → taille (via la config unique).
-  if ($piece === 'escalier' && !empty($answers['taille_escalier'])) {
-    $rules = sapi_conseiller_get_rules();
-    $map = isset($rules['escalier_map']) ? $rules['escalier_map'] : ['standard' => 'petite', 'ouvert' => 'grande'];
-    $answers['taille'] = isset($map[$answers['taille_escalier']]) ? $map[$answers['taille_escalier']] : 'petite';
-  }
 
-  $cats = function_exists('sapi_guide_get_categories') ? sapi_guide_get_categories($answers) : [];
-  $res  = ($cats && function_exists('sapi_guide_query_products')) ? sapi_guide_query_products($answers, $cats) : ['products' => []];
-  $products = isset($res['products']) ? $res['products'] : [];
-  if (function_exists('sapi_conseiller_rank_products')) {
-    $products = sapi_conseiller_rank_products($products, $answers);
-  }
-  // Plafond APRÈS le classement : on garde les 4 meilleurs, pas 4 au hasard.
-  $products = array_slice($products, 0, sapi_immersion_max_products());
+  /* Sélection ET décor du même calcul — voir le commentaire de
+     sapi_immersion_build_context(). Avant, cet endpoint ne renvoyait que des
+     cards : le titre et la pill restaient figés sur ce que le serveur avait
+     rendu au chargement, et pouvaient contredire les produits affichés. */
+  $ctx = sapi_immersion_build_context($answers);
+  $products = $ctx['products'];
 
   ob_start();
   foreach ($products as $prod) {
@@ -5665,7 +5758,14 @@ function sapi_ajax_immersion_selection() {
   }
   $html = ob_get_clean();
 
-  wp_send_json_success(['html' => $html, 'count' => count($products)]);
+  wp_send_json_success([
+    'html'           => $html,
+    'count'          => count($products),
+    'title'          => $ctx['title'],
+    'possessive'     => $ctx['possessive'],
+    'category_label' => $ctx['category_label'],
+    'fallback_notes' => $ctx['fallback_notes'],
+  ]);
 }
 
 /**

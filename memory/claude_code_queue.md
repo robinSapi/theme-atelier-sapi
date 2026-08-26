@@ -783,6 +783,26 @@ Cause : le remplacement était conditionné à `if (Object.keys(filters).length)
 → **`refineFromStoredProject()` au chargement de l'immersion** : on rejoue l'affinage à partir du projet mémorisé, en réutilisant **exactement** le mécanisme du moment 2 (même endpoint, même dédup, même remplacement de cards). Le carrousel étant invisible à ce stade (`--reveal` à 0), le remplacement ne se voit pas.
 **La signature de dédup fait le tri toute seule** : si le projet ne contient que la pièce, elle est identique à la baseline et aucune requête n'est envoyée. Aucun coût sur le chemin normal (clic sur une carte-pièce).
 
+### ✅ ÉTAPE 1 — LE DÉCOR SORT DU MÊME CALCUL QUE LA SÉLECTION
+
+**Le problème de fond, nommé après une passe d'agent :** il n'y avait pas de page de sélection mal indexée. **Il y avait une page de PIÈCE, et la sélection y était un effet de bord.** Deux objets portaient le même mot et le template les avait soudés dans `$imm_piece` :
+- **la sélection** = le résultat du moteur, fonction de six critères — et `piece` est le **moins déterminant** : `sapi_guide_get_categories()` choisit sur `sortie` d'abord, la pièce ne sert qu'à retirer les lampes à poser en cuisine ;
+- **le décor** = photo, possessif, titre. Fonction d'**un** critère, la pièce.
+
+⚠️ **Le critère le plus déterminant du moteur est précisément celui que l'URL ne sait pas exprimer.**
+
+Tant que les deux sortaient d'endroits différents, ils pouvaient se contredire — et ils l'ont fait. L'endpoint d'affinage ne renvoyait que `html` et `count` : **aucun affinage ne POUVAIT corriger le décor.** Ce n'était pas un oubli, c'était structurel. Mon correctif précédent avait réparé les images ; la pill, elle, ne pouvait pas l'être.
+
+→ **`sapi_immersion_build_context($answers)`** : une fonction, trois appelants (template, endpoint du moment 2, et la suite). Elle rend produits + catégorie dominante + possessif + titre + phrase + notes de repli. Le précédent existait déjà et il est bon : `sapi_immersion_render_product_card()` est la source unique du markup d'une card. Même réflexe pour le décor.
+→ L'endpoint renvoie le paquet complet ; le JS applique le décor **dans le même creux du fondu** que les cards. À aucun instant l'écran ne montre un titre et des produits qui se contredisent.
+→ **Le titre dit la catégorie dès qu'elle est certaine** — une seule catégorie déduite. Deux ou plus, et « mes appliques » serait un mensonge : on retombe sur le titre neutre.
+
+**Deux pièges évités en chemin, tous deux par le calcul avant livraison :**
+- `d'%s` donnait « ma sélection **d'suspensions** » — l'élision ne vaut que devant une voyelle. Reformulé en « Mes %s pour… », qui n'a plus le problème du tout.
+- À 13 px capitales espacées, « Ma sélection de lampes à poser pour ta chambre d'enfant » faisait 517 px pour 327 px utiles sur iPhone → deux lignes, photo rognée. « Mes lampes à poser pour… » ramène à 404 px, soit **le pire cas qui existait déjà** avant ce chantier (« Ma sélection pour ta chambre d'enfant » = 348 px). Aucune régression de mise en page.
+
+**Disponible mais PAS encore affiché : `fallback_notes`.** Le moteur sait quand il a relâché une contrainte et le dit à l'IA ; le hero jetait l'information, donc le visiteur voyait un compromis présenté comme un idéal. La donnée remonte maintenant jusqu'au JS. **Où l'afficher est une décision de Robin** — la mise en page du hero est calibrée au pixel, je n'y ajoute pas un élément visible sans son accord.
+
 **Reste, et c'est cosmétique :** la pill et le titre disent « pour ton entrée » alors que le visiteur a dit « couloir » — l'extraction a mappé couloir sur la plus proche des sept pièces. Le conseil IA, lui, reprend le mot du visiteur. Léger décalage de vocabulaire, à trancher avec Robin s'il le juge gênant (une pièce « couloir » distincte, ou un libellé qui reprend le mot du visiteur).
 
 ### 🐛 3. Le CTA « Voir la sélection pour mon projet » ne menait nulle part (signalé par Robin)

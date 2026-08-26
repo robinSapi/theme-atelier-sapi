@@ -326,9 +326,24 @@
         .then(function (r) { return r.json(); })
         .then(function (json) {
           if (!json || !json.success || !json.data || typeof json.data.html !== 'string') return null;
-          return json.data.html;
+          /* On rend le PAQUET COMPLET, plus seulement le HTML : le décor
+             (titre, pill) sort du même calcul serveur que les cards et doit
+             changer au même instant, sinon il les contredit. */
+          return json.data;
         })
         .catch(function () { return null; });
+    }
+
+    /* Décor : le titre de la sélection et la pill de signature. Ils étaient
+       gravés au rendu serveur et ne bougeaient plus, quoi qu'affiche ensuite
+       le carrousel. Ils suivent maintenant la sélection. */
+    var hookEl  = section.querySelector('[data-imm-hook]');
+    var titleEl = section.querySelector('[data-imm-title]');
+    function applyDecor(data) {
+      if (!data) return;
+      if (titleEl && data.title) titleEl.textContent = data.title;
+      if (hookEl && data.possessive) hookEl.textContent = 'Mon conseil pour ' + data.possessive;
+      if (data.title) section.setAttribute('aria-label', data.title);
     }
 
     function swapCards(html) {
@@ -348,13 +363,16 @@
 
     /* Transition douce : fondu de sortie → swap pendant que le slider est
        invisible → fondu d'entrée (le remplacement sec des cards « flashait »). */
-    function applySelectionHtml(html, sig) {
-      if (!sliderEl || typeof html !== 'string') return;
+    function applySelectionHtml(data, sig) {
+      if (!sliderEl || !data || typeof data.html !== 'string') return;
       lastAnswersSig = sig; // signature « brûlée » seulement en cas de succès (retry possible sinon)
       sliderEl.style.transition = 'opacity .22s ease';
       sliderEl.style.opacity = '0';
       later(function () {
-        swapCards(html);
+        swapCards(data.html);
+        /* Le décor change DANS le même creux du fondu que les cards. À aucun
+           instant l'écran ne montre un titre et des produits qui se contredisent. */
+        applyDecor(data);
         requestAnimationFrame(function () { sliderEl.style.opacity = '1'; });
       }, 220);
     }
@@ -384,8 +402,8 @@
       if (proj.answers.piece !== (config.piece || '')) return; // autre pièce : pas notre affaire
       var sig = JSON.stringify(proj.answers);
       if (sig === lastAnswersSig) return; // rien de plus que la pièce
-      fetchSelectionHtml(proj.answers).then(function (html) {
-        applySelectionHtml(html, sig);
+      fetchSelectionHtml(proj.answers).then(function (data) {
+        applySelectionHtml(data, sig);
       });
     }
 
@@ -395,7 +413,7 @@
       if (!pendingSelection) return;
       var p = pendingSelection;
       pendingSelection = null;
-      p.promise.then(function (html) { applySelectionHtml(html, p.sig); });
+      p.promise.then(function (data) { applySelectionHtml(data, p.sig); });
     }
 
     /* Questionnaire terminé : l'appel IA vient de partir et la modale est encore
@@ -432,7 +450,7 @@
     });
 
     function refreshSelection(answers, sig) {
-      fetchSelectionHtml(answers).then(function (html) { applySelectionHtml(html, sig); });
+      fetchSelectionHtml(answers).then(function (data) { applySelectionHtml(data, sig); });
     }
 
     /* ── Chorégraphie rejouée à chaque affinage (demande produit de Robin) ──

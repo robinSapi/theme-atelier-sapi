@@ -110,39 +110,34 @@ $hero_photos_attr = !empty($hero_photos_by_piece)
 // hero croquis + la zone cards conseiller et révèle ce hero immersif.
 $imm_piece = function_exists('sapi_mescreations_immersion_piece') ? sapi_mescreations_immersion_piece() : '';
 if ($imm_piece) {
-  $imm_possessive = function_exists('sapi_piece_possessive') ? sapi_piece_possessive($imm_piece) : 'ta pièce';
   // Photo plein écran : 1re photo hero_<slug> si dispo, sinon repli générique
   // (décision Robin #5). Repli = une ambiance neutre connue en prod.
   $imm_photo_url = !empty($hero_photos_by_piece[$imm_piece][0]) ? $hero_photos_by_piece[$imm_piece][0] : '';
   $imm_generic_fallback = '2025/04/Alban-Le-virevoltant-Salon-Paysage.jpg';
-  // Phrase de conseil FIGÉE par pièce (jamais l'IA live — décision Robin / brief).
-  $imm_phrase = function_exists('sapi_megafilter_generic_advice_for') ? sapi_megafilter_generic_advice_for($imm_piece) : '';
 
-  // Sélection PIÈCE-LEVEL calculée CÔTÉ SERVEUR (réutilise le matching du
-  // méga-filtre : catégories admissibles + filtre ampoule par pièce + fallbacks
-  // progressifs intégrés → jamais de slider vide). taille/style viendront
-  // affiner via AJAX serveur à l'étape suivante.
-  $imm_answers   = ['piece' => $imm_piece];
-  $imm_cats      = function_exists('sapi_guide_get_categories') ? sapi_guide_get_categories($imm_answers) : [];
-  $imm_query_res = (function_exists('sapi_guide_query_products') && $imm_cats)
-    ? sapi_guide_query_products($imm_answers, $imm_cats)
-    : ['products' => []];
-  $imm_products  = isset($imm_query_res['products']) ? $imm_query_res['products'] : [];
-  // Refonte filtrage (Tâche 1) : classement par priorité (couche serveur unique).
-  if (function_exists('sapi_conseiller_rank_products')) {
-    $imm_products = sapi_conseiller_rank_products($imm_products, $imm_answers);
-  }
-  // 5 propositions au total, dont la carte sur-mesure en dernier → 4 modèles.
-  // Plafond APRÈS le classement : les 4 MEILLEURS, pas 4 au hasard.
-  if (function_exists('sapi_immersion_max_products')) {
-    $imm_products = array_slice($imm_products, 0, sapi_immersion_max_products());
-  }
+  /* ⚠️ SÉLECTION ET DÉCOR VIENNENT DU MÊME CALCUL — sapi_immersion_build_context().
+     Avant, ce bloc calculait la sélection ici et le décor trois lignes plus
+     haut, chacun de son côté : ils pouvaient se contredire, et ils l'ont fait
+     (conseil « appliques pour ton couloir » sous un titre « ton entrée » avec
+     des suspensions dans le carrousel). L'endpoint du moment 2 appelle
+     EXACTEMENT la même fonction : les deux chemins ne peuvent plus diverger.
+
+     Toujours piece-level à ce stade — l'URL ne porte encore qu'un critère.
+     C'est l'étape 2 qui la fera lire en entier. */
+  $imm_answers = ['piece' => $imm_piece];
+  $imm_ctx     = sapi_immersion_build_context($imm_answers);
+
+  $imm_products   = $imm_ctx['products'];
+  $imm_possessive = $imm_ctx['possessive'];
+  $imm_title      = $imm_ctx['title'];
+  // Phrase de conseil FIGÉE par pièce (jamais l'IA live — décision Robin / brief).
+  $imm_phrase     = $imm_ctx['phrase'];
 ?>
 <!-- Track de scroll-pinning : le hero (sticky) reste épinglé pendant que le
      scroll pilote la révélation (flou photo + remontée texte + apparition des
      cards), réversible. La hauteur du track = durée de l'animation. -->
 <div class="mescreations-immersion-track" data-immersion-track>
-<section class="mescreations-immersion" data-immersion data-immersion-piece="<?php echo esc_attr($imm_piece); ?>" aria-label="<?php echo esc_attr(sprintf(__('Ma sélection pour %s', 'theme-sapi-maison'), $imm_possessive)); ?>">
+<section class="mescreations-immersion" data-immersion data-immersion-piece="<?php echo esc_attr($imm_piece); ?>" aria-label="<?php echo esc_attr($imm_title); ?>">
   <div class="mescreations-immersion__bg">
     <?php if ($imm_photo_url) : ?>
       <img class="mescreations-immersion__bg-img" src="<?php echo esc_url($imm_photo_url); ?>" alt="" loading="eager" fetchpriority="high">
@@ -180,7 +175,8 @@ if ($imm_piece) {
       <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
       <span class="conseiller-sig__text">
         <span class="conseiller-sig__who"><?php esc_html_e('Le conseil de Robin', 'theme-sapi-maison'); ?></span>
-        <span class="conseiller-sig__hook"><?php echo esc_html(sprintf(__('Mon conseil pour %s', 'theme-sapi-maison'), $imm_possessive)); ?></span>
+        <?php /* [data-imm-hook] : réécrit par le moment 2 quand le décor change. */ ?>
+        <span class="conseiller-sig__hook" data-imm-hook><?php echo esc_html(sprintf(__('Mon conseil pour %s', 'theme-sapi-maison'), $imm_possessive)); ?></span>
       </span>
     </div>
 
@@ -205,7 +201,9 @@ if ($imm_piece) {
        SERVEUR + carte sur-mesure. Positionnée dans la partie basse du hero. -->
   <div class="mescreations-immersion__selection" data-immersion-selection>
     <div class="mescreations-immersion__selection-head">
-      <span class="mescreations-immersion__selection-title"><?php echo esc_html(sprintf(__('Ma sélection pour %s', 'theme-sapi-maison'), $imm_possessive)); ?></span>
+      <?php /* [data-imm-title] : réécrit par le moment 2 — il dit la catégorie
+               dès qu'elle est certaine (« ma sélection d'appliques pour… »). */ ?>
+      <span class="mescreations-immersion__selection-title" data-imm-title><?php echo esc_html($imm_title); ?></span>
     </div>
 
     <div class="mescreations-immersion__slider-wrap">
