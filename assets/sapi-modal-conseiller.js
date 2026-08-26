@@ -794,11 +794,31 @@
     if (el && el.parentNode) el.parentNode.removeChild(el);
   }
 
+  /* Fait défiler la conversation jusqu'à la dernière bulle.
+     ⚠️ ON CHERCHE QUI DÉFILE, ON NE LE SUPPOSE PLUS. La version précédente
+     visait `.modal__body` en dur, avec le commentaire « Round 4 — le scrollable
+     est .modal__body ». C'était vrai à l'époque. Depuis, une passe CSS a posé
+     `flex: 1` + `overflow-y: auto` sur `.chat-bubbles` : c'est ce cadre qui
+     débordait, `.modal__body` avait exactement la hauteur de son contenu, et
+     lui écrire un `scrollTop` ne faisait donc RIEN. La dernière réponse de
+     Robin restait coupée en plein milieu — le défaut visible sur la capture.
+     Une modification CSS avait silencieusement invalidé une hypothèse JS.
+     En remontant jusqu'au premier ancêtre qui déborde réellement, le code
+     survit aux deux mises en page : le cadre en desktop, le corps de la modale
+     en mobile depuis qu'on a retiré le cadre. La recherche s'arrête à la carte
+     de la modale — jamais question de faire défiler la page derrière. */
   function scrollChatToBottom() {
     if (!els.chatMessages) return;
-    // Round 4 — Le scrollable est .modal__body (CSS Grid row 2, overflow-y: auto)
-    var scrollable = els.chatMessages.closest('.modal__body') || els.chatMessages;
-    scrollable.scrollTop = scrollable.scrollHeight;
+    var el = els.chatMessages;
+    var stop = els.modalCard || document.body;
+    while (el) {
+      if (el.scrollHeight > el.clientHeight + 2) {
+        el.scrollTop = el.scrollHeight;
+        return;
+      }
+      if (el === stop) return;
+      el = el.parentElement;
+    }
   }
 
   function setChatFooterState(mode) {

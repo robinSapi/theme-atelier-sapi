@@ -730,6 +730,36 @@ Robin : « le scroll est juste trop lent entre les deux premiers écrans ».
 
 `prefers-reduced-motion` → saut instantané, aucune animation.
 
+### ✅ MODALE CONSEILLER — refonte de la densité mobile (2026-08-25)
+
+Robin : « sur mobile il faut vraiment faire de la place dans la modale, dans toutes les modales, et dans tous les états. **Le texte est bien, mais tout le reste est trop gros et la zone de texte se retrouve trop petite.** »
+
+**Audit chiffré (agent) sur l'écran le plus contraint, le chat texte libre, iPhone 390×844 :**
+- **417px de décor pour 284px de lecture — près de 60 % de l'écran ne disait rien.**
+- En largeur, **six boîtes emboîtées** ne laissaient que **155px de texte utile**, soit ~23 caractères par ligne : une réponse de Robin y prenait treize lignes. **C'est la largeur perdue qui se payait en hauteur**, et personne ne l'avait regardée.
+- Inventaire : **9 rendus visuels distincts** (7 `[data-screen]` + 2 sous-états contact). Le seul élément commun aux neuf est la pill de Robin → le réglage le plus transversal du fichier.
+
+**Les quatre leviers, par rentabilité :**
+1. **`.conseiller-card--modal { padding: 0 }` — une ligne, +68px de haut et +56px de large.** Le meilleur rapport du lot. Ce rembourrage était **hérité et jamais voulu** : la classe ne déclarait pas de `padding`, elle prenait donc le `36px 28px 32px` de `.conseiller-card`, une règle écrite pour les cards de `/mes-creations/`. Head, body et foot portent déjà le leur.
+   ⚠️ **Ne JAMAIS corriger à la source** : `.conseiller-card` habille aussi la card « Conseil de Robin », la card « Mon projet », la card Sur-mesure de la grille produit et la pill « Comment choisir ? ». L'override reste dans le bloc mobile de la modale.
+2. **Plein écran** (+64 v, +40 h) : le voile de 32px tout autour n'a pas de sens sur téléphone. ⚠️ `env(safe-area-inset-*)` sur head et foot **obligatoire** une fois le plein écran posé, sinon le bouton du pied passe sous l'indicateur d'accueil des iPhone à encoche.
+3. **Suppression du cadre clair autour du chat** (+36 v, **+65 h**) : la troisième boîte repérée par Robin. Sur 390px elle ne dessinait rien.
+4. **Boutons d'action compactés** (+27 v) : « VOIR LA SÉLECTION POUR MON PROJET » repasse **sur une ligne**, et le gain se retrouve sur quatre écrans d'un seul réglage.
+
+Plus les finitions transversales (pill, marges intérieures, écart entre blocs, rembourrage du champ) et par écran (récap, contact, fiche produit, séparateur « ou »).
+
+**Résultat : décor 417 → 177px, zone de lecture 284 → 524px (+85 %), largeur du texte 155 → ~314px (~23 caractères par ligne → ~46).**
+
+⚠️ **AUCUNE TAILLE DE TEXTE DE CONTENU N'A ÉTÉ TOUCHÉE**, ni aucune police de champ (règle des 16px = contrainte iOS). Tout le gain vient des marges. C'était la consigne de Robin et c'est ce qui rend le résultat sûr.
+
+**🐛 BUG RÉEL TROUVÉ AU PASSAGE — la dernière bulle restait coupée.**
+`scrollChatToBottom()` visait `.modal__body` en dur, avec le commentaire « Round 4 — le scrollable est .modal__body ». C'était vrai à l'écriture. Depuis, une passe CSS a posé `flex: 1` + `overflow-y: auto` sur `.chat-bubbles` : **c'est ce cadre qui débordait**, `.modal__body` avait exactement la hauteur de son contenu, et lui écrire un `scrollTop` ne faisait **rien**. **Une modification CSS avait silencieusement invalidé une hypothèse JS** — et le symptôme (texte coupé en plein milieu) passait pour un manque de place.
+→ Le code **cherche** désormais le premier ancêtre qui déborde réellement, en s'arrêtant à la carte de la modale. Il survit aux deux mises en page : le cadre en desktop, le corps en mobile depuis qu'on a retiré le cadre.
+
+**⚠️ PIÈGE APPAIRÉ, traité :** la croix de fermeture et la pill ne se croisaient que grâce à **8px de dégagement vertical**. Le head en perdant 48, elles se seraient chevauchées. La croix est donc réduite (36 → 32px) et remontée (12 → 8px) **dans le même geste** — les deux réglages ne doivent jamais être dissociés.
+
+**Piège évité :** un bloc `@media (max-width: 720px)` situé après contient `.conseiller-chat-bubble`, `.conseiller-chat-footer`, `.conseiller-freetext__input` — noms presque identiques mais **autres composants** (le chat inline de la card, hors modale). L'éditer en croyant toucher la modale n'aurait rien produit et aurait cassé un composant qui n'a rien demandé.
+
 ### ✅ MOMENT 2 — remontée instantanée et bouton synchronisé (2026-08-25)
 
 Robin, sur la modification d'un projet : « le bouton *Découvrir ma sélection* doit toujours apparaître après l'écriture du texte IA » et « il faut tout de suite remonter en haut, là on reste quelques secondes sur l'ancienne sélection, ce qui fait bizarre ».

@@ -23939,20 +23939,67 @@ button.chip--project:focus-visible {
   max-width: 420px;
 }
 
-/* Mobile */
+/* ══════════════════════════════════════════════════════════════════════════
+   MOBILE — DENSITÉ DE LA MODALE (refonte 25/08).
+   ──────────────────────────────────────────────────────────────────────────
+   Constat de Robin : « le texte est bien, mais tout le reste est trop gros et
+   la zone de texte se retrouve trop petite ». Mesuré sur l'écran le plus
+   contraint (chat texte libre, iPhone 390×844) : **417px de décor pour 284px
+   de lecture — près de 60 % de l'écran ne disait rien**. Et en largeur, six
+   boîtes emboîtées ne laissaient que 155px de texte utile, soit ~23 caractères
+   par ligne : une réponse de Robin y prenait treize lignes.
+
+   Les quatre leviers, par rentabilité :
+     1. le rembourrage de la carte, HÉRITÉ ET JAMAIS VOULU (+68 v, +56 h) ;
+     2. la modale en plein écran (+64 v, +40 h) ;
+     3. la suppression du cadre clair autour du chat (+36 v, +65 h) ;
+     4. les boutons d'action compactés, qui repassent sur une ligne (+27 v).
+   Le décor tombe à ~176px et la largeur du texte double.
+
+   ⚠️ AUCUNE TAILLE DE TEXTE DE CONTENU N'EST TOUCHÉE. Robin a dit que le texte
+   lui convenait : tout le gain vient des marges, jamais de la lisibilité.
+   ⚠️ AUCUNE POLICE DE CHAMP NON PLUS — la règle des 16px (contrainte iOS,
+   voir le début du fichier) est intouchable. On gagne sur le rembourrage.
+   ══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 600px) {
+  /* ── 2. Plein écran ────────────────────────────────────────────────────
+     Le voile de 32px tout autour n'a pas de sens sur un téléphone : il fait
+     32px en haut, 32 en bas, 20 de chaque côté, pour montrer un fond flou
+     qu'on ne regarde pas. La modale devient une feuille plein écran, comme
+     partout ailleurs sur mobile.
+     ⚠️ `env(safe-area-inset-*)` OBLIGATOIRE une fois le plein écran posé :
+     sans ça, le bouton du pied passe sous l'indicateur d'accueil des iPhone
+     à encoche et devient partiellement intouchable. */
+  .conseiller-modal { padding: 0; }
   .conseiller-card--modal {
     max-width: 100%;
-    /* Fix mobile — la modale parente a padding: 32px 20px (64px vertical),
-       donc la card doit tenir dans 100dvh - 64px sinon elle déborde
-       au-dessus du viewport et masque la croix de fermeture. */
-    height: calc(100dvh - 64px);
-    max-height: calc(100dvh - 64px);
+    width: 100%;
+    /* ── 1. LE MEILLEUR RAPPORT DU LOT, et une ligne suffit.
+       `.conseiller-card--modal` ne déclarait pas de `padding` : il héritait
+       donc du `36px 28px 32px` de `.conseiller-card`, une règle écrite pour
+       les cards de /mes-creations/ et de la fiche produit. Personne ne l'avait
+       décidé pour la modale, et head/body/foot portent déjà le leur.
+       ⚠️ NE JAMAIS corriger ça à la source : `.conseiller-card` habille aussi
+       la card « Conseil de Robin », la card « Mon projet », la card Sur-mesure
+       de la grille produit et la pill « Comment choisir ? ». L'override doit
+       rester ici, dans le bloc mobile de la modale. */
+    padding: 0;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
   }
   .conseiller-card--modal::before { inset: 0; }
-  .modal__head { padding: 20px 22px 8px; }
-  .modal__body { padding: 8px 22px; gap: 12px; }
-  .modal__foot { padding: 10px 22px 22px; }
+  /* ── 5. Marges intérieures resserrées ⇦ les trois chiffres de gauche */
+  .modal__head {
+    padding: 8px 14px 6px;
+    padding-top: calc(8px + env(safe-area-inset-top, 0px));
+  }
+  .modal__body { padding: 6px 14px; gap: 10px; }
+  .modal__foot {
+    padding: 8px 14px 10px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
   .h2 { font-size: 15.5px; }
   .h1 { font-size: 28px; }
   .choices { grid-template-columns: repeat(2, 1fr); gap: 8px; }
@@ -24017,21 +24064,78 @@ button.chip--project:focus-visible {
     text-transform: none;
     letter-spacing: 0;
   }
-  .recap-card { grid-template-columns: 1fr; gap: 6px; }
+  .recap-card { grid-template-columns: 1fr; gap: 6px; padding: 10px 12px; }
+
+  /* ── 3. LE CADRE CLAIR AUTOUR DU CHAT DISPARAÎT ────────────────────────
+     C'est la troisième boîte que Robin a repérée sur sa capture. Sur 390px de
+     large elle ne dessine rien : elle prend 16px de rembourrage de chaque
+     côté, une bordure et 12px de marge basse, pour encadrer un contenu qui
+     occupe déjà toute la largeur.
+     ⚠️ Retirer `overflow-y: auto` ici change QUI défile : le débordement
+     retombe sur `.modal__body`, ce qui est justement l'hypothèse du JS
+     (`scrollChatToBottom`). Voir le correctif JS associé — les deux vont
+     ensemble, et c'est ce qui répare la dernière bulle coupée. */
+  [data-screen="s2-chat"] .chat-bubbles {
+    border: 0;
+    background: none;
+    padding: 0;
+    margin-bottom: 8px;
+    overflow-y: visible;
+  }
+  /* La bulle prend toute la largeur : 85 % d'une colonne déjà étroite ne
+     laissait que ~23 caractères par ligne. */
+  .chat-bubble { max-width: 100%; padding: 9px 12px; }
+
+  /* ── 4. Boutons d'action compactés ⇦ le libellé le plus long
+     (« VOIR LA SÉLECTION POUR MON PROJET ») repasse sur UNE ligne. Le gain se
+     retrouve sur le chat, le récapitulatif, la fiche produit et le contact,
+     d'un seul réglage. */
+  .action-btn {
+    padding: 9px 14px;
+    font-size: 11px;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── Pill de Robin : présente sur les NEUF rendus de la modale, donc le
+     réglage le plus transversal du fichier. Avatar 34 → 28, accroche 24 → 19. */
+  .conseiller-card--modal .conseiller-sig--v1 { padding: 4px 14px 4px 4px; }
+  .conseiller-card--modal .conseiller-sig--v1 .conseiller-sig__avatar { width: 28px; height: 28px; }
+  .conseiller-card--modal .conseiller-sig--v1 .conseiller-sig__hook { font-size: 19px; }
+
+  /* ── Champ de saisie : on gagne sur le rembourrage, JAMAIS sur la police
+     (16px = contrainte iOS, voir le début du fichier). */
+  .text-input { padding: 10px 46px 10px 14px; }
+  .text-submit { width: 32px; height: 32px; }
+
+  /* ── Finitions par écran ─────────────────────────────────────────────── */
+  .recap-groups { gap: 8px; }
+  .recap-group { gap: 5px; }
+  .contact-form { gap: 8px; }
+  .contact-form textarea { min-height: 72px; }
+  .contact-disclaimer { margin-top: 2px; }
+  .separator-or { margin: 0; }
+  .separator-or__text { padding: 2px 10px; }
+
   /* Mobile — croix renforcée visuellement (sur cream, le SVG transparent
      wood-mid était quasi-invisible). Fond blanc subtil + couleur wood-dark
-     + SVG un peu plus grand pour bonne cible tactile. */
+     + SVG un peu plus grand pour bonne cible tactile.
+     ⚠️ RESSERRÉE EN MÊME TEMPS QUE LE HEAD, ET CE N'EST PAS COSMÉTIQUE : la
+     croix et la pill ne se croisaient que grâce à 8px de dégagement vertical.
+     Le head vient d'en perdre 48 — sans réduire la croix et la remonter, les
+     deux se chevauchaient. Les deux réglages sont appairés. */
   .modal__close {
-    top: 12px;
-    right: 12px;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
     background: rgba(255, 255, 255, 0.92);
     border: 1px solid rgba(139, 115, 85, 0.18);
     color: var(--color-wood-dark);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   }
   .modal__close svg {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
   }
 }
 
