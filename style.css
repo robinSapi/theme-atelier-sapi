@@ -25108,7 +25108,8 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   -webkit-box-flex: 0;
   -ms-flex: 0 0 auto;
   flex: 0 0 auto;
-  margin: 0 auto 14px;
+  /* L'air est désormais AU-DESSUS : le bouton est passé sous le carrousel. */
+  margin: 14px auto 0;
   padding: 11px 24px;
   background: rgba(255, 255, 255, .18);
   -webkit-backdrop-filter: blur(6px);
@@ -25245,11 +25246,15 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
-  /* ⇦ L'air AUTOUR du carrousel — haut et bas (demande Robin). C'est le SEUL
-     endroit qui le gouverne maintenant que les zones sont en flux : le haut
-     sépare du bouton « Décrire mon projet », le bas sépare de l'indice.
-     Financé par l'élargissement de la phrase (moins de lignes). */
-  padding: 24px 24px 16px;
+  /* ⇦ L'air AUTOUR du carrousel. C'est le SEUL endroit qui le gouverne
+     maintenant que les zones sont en flux : le haut sépare de la phrase de
+     Robin, le bas sépare de l'indice.
+     Le haut est resserré à la demande de Robin, pour remonter le carrousel et
+     rendre la hauteur gagnée aux cards. En desktop, la zone 1 prenant sa
+     hauteur naturelle et la zone 3 tout le reste, ce padding EST l'écart
+     entre le texte et le titre de la sélection : il n'y a pas d'espace
+     résiduel ailleurs. */
+  padding: 12px 24px 16px;
   /* Apparaît un peu plus tard que la remontée du texte (de 0.3 à 1) → les deux
      zones ne se croisent pas. */
   opacity: clamp(0, calc((var(--reveal) - 0.3) / 0.7), 1);

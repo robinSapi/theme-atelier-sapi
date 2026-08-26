@@ -203,17 +203,6 @@ if ($imm_piece) {
       <span class="mescreations-immersion__selection-title"><?php echo esc_html(sprintf(__('Ma sélection pour %s', 'theme-sapi-maison'), $imm_possessive)); ?></span>
     </div>
 
-    <!-- Ouvre la modale Conseiller (questionnaire complet → sélection plus
-         fine). ⚠️ Il vivait sous la phrase de Robin ; Robin l'a déplacé ICI,
-         au-dessus des propositions, et c'est mieux pour deux raisons : il
-         arrive au moment où le visiteur juge la sélection, donc où l'envie de
-         l'affiner naît ; et il RESTE VISIBLE en écran B, alors que le bloc
-         texte sort de l'écran en mobile — l'entrée du questionnaire, qui est
-         un chemin de vente, avait été perdue à ce moment-là. -->
-    <button type="button" class="mescreations-immersion__describe" data-immersion-describe data-action="open-modal" data-modal-state="s0">
-      <?php esc_html_e('Décrire mon projet en détail pour un luminaire plus adapté', 'theme-sapi-maison'); ?>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-    </button>
     <div class="mescreations-immersion__slider-wrap">
       <button type="button" class="mes-creations-selection__nav-arrow mescreations-immersion__arrow" data-immersion-prev aria-label="<?php esc_attr_e('Précédent', 'theme-sapi-maison'); ?>" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -247,6 +236,19 @@ if ($imm_piece) {
          pièce, et change au « moment 2 » quand la sélection est remplacée).
          Rendus ici plutôt qu'en PHP pour n'avoir qu'UNE source de vérité. -->
     <div class="mescreations-immersion__dots" data-immersion-dots aria-hidden="true"></div>
+
+    <!-- Ouvre la modale Conseiller (questionnaire complet → sélection plus
+         fine). Placé SOUS le carrousel : on ne propose d'affiner qu'après
+         avoir montré, et le carrousel remonte d'autant.
+         ⚠️ Il vivait sous la phrase de Robin. En le déplaçant dans la zone
+         sélection, Robin a refermé un défaut connu : depuis que le bloc texte
+         sort de l'écran en mobile, l'entrée du questionnaire disparaissait en
+         écran B — un chemin de vente perdu au moment précis où le visiteur
+         juge la sélection. -->
+    <button type="button" class="mescreations-immersion__describe" data-immersion-describe data-action="open-modal" data-modal-state="s0">
+      <?php esc_html_e('Décrire mon projet en détail pour un luminaire plus adapté', 'theme-sapi-maison'); ?>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </button>
   </div>
 
   <div class="mescreations-immersion__scrollhint" data-immersion-scrollhint aria-hidden="true">

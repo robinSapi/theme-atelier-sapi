@@ -673,6 +673,9 @@ Robin : l'indice « Découvre ta sélection » est trop peu visible. Il devient 
 
 **Piège traité :** `__describe` portait un état d'entrée (`opacity: 0` + `.is-in` posé en JS). Dans sa nouvelle zone, plus personne ne lui donne `.is-in` — il serait resté **définitivement invisible**. L'état d'entrée a été transféré au bouton blanc ; le translucide est désormais révélé par l'opacité de la zone sélection, pilotée par `--reveal`.
 
+**Ajustement suivant (Robin) : le bouton translucide passe SOUS le carrousel.** Ordre final de la zone sélection : titre → carrousel → dots → bouton. Logique : on ne propose d'affiner qu'après avoir montré. Et le carrousel remonte d'autant (~53px).
+Avec, `padding-top` de la zone sélection 24 → **12px** : en desktop, la zone 1 prenant sa hauteur naturelle et la zone 3 tout le reste, **ce padding EST l'écart entre la phrase de Robin et le titre de la sélection** — il n'y a aucun espace résiduel ailleurs, donc c'est le seul levier. +12px rendus aux cards, en plus des 53 gagnés par le déplacement.
+
 ### ⏳ LOT 2 — spécification d'origine (non codé)
 Ancrage **en JavaScript**, pas en CSS : c'est le seul qui sache **s'abstenir**. Il doit être neutralisé dans quatre fenêtres — verrou de la machine à écrire, modale ouverte, `rewindToTop()` en vol, et geste initié dans le carrousel. Prévoir un drapeau « scroll programmatique » honoré par `rewindToTop()`, `scrollToReveal()` et `scrollToCatalogue()`, et l'annulation au `touchstart`. Arbitrer aussi le `scroll-behavior: smooth` global (l. 128) : deux animations de scroll sur le même axe = rebond. Recette dédiée au moment 2, séquence la plus fragile de la page.
 
