@@ -585,7 +585,7 @@
          sans retour en arrière, MAIS la révélation se joue alors sur une
          horloge et non plus sous le doigt — ce que Robin disait regretter
          quand la question s'était posée le matin même. */
-    var CAROUSEL_HARD = false;
+    var CAROUSEL_HARD = true;
 
     var SNAP_IDLE = 150;        // ms d'immobilité avant de considérer le geste fini
     var SNAP_CATCH = 0.30;      // distance d'accroche au catalogue, en hauteurs d'écran
