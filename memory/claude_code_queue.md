@@ -652,6 +652,27 @@ Assombrir le scrim général aurait terni **toute la pièce**, or c'est la photo
 **3. Le 3ᵉ aimant masquait le titre « Toutes mes créations »** derrière le bandeau de réassurance. Cause : `scroll-margin-top` ne connaissait que le **header**, alors que le bandeau est repositionné en **sticky sous le header** sur cette page (mécanisme repris de la home). Il manquait donc sa hauteur.
 → Nouvelle fonction `stickyOffset()` : **mesure** la hauteur de tout ce qui est `fixed`/`sticky` en haut (header + bandeau) plutôt que de l'écrire en dur — les deux hauteurs diffèrent entre mobile et desktop, et le bandeau peut changer de contenu. Le `scroll-margin-top` du CSS reste le plancher (il sert aux sauts d'ancre natifs), la mesure le complète. Corrige du même coup l'indice « Voir le catalogue complet », qui partage `catalogueSnapY()`.
 
+**⚠️ CORRIGÉ UNE 2ᵉ FOIS — « mieux mais toujours pas pile poil » (Robin). Deux erreurs se cumulaient :**
+1. **J'additionnais un chevauchement.** `hauteur du header + hauteur du bandeau` suppose que le bandeau se colle SOUS le header. Faux : il a sa propre position d'accroche (`position: sticky; top: 80px`, style.css l. 1390), qui ne vaut pas la hauteur réelle du header. La zone commune était comptée deux fois.
+   → `stickyOffset()` prend maintenant, pour chaque élément épinglé, **`top` (là où il se fige) + sa hauteur = son bord bas**, et garde **le plus bas des deux**. Exact quelles que soient les valeurs, mobile comme desktop.
+2. **Aucun air.** `.mes-creations-catalogue` porte `margin-top: 44px` — l'espace prévu par le design. Mais une marge est **au-dessus** du bloc : en calant le bord, elle passait derrière la barre et le titre arrivait collé.
+   → On cale désormais la **marge haute** sous la barre, pas le bord. On reprend la valeur du design plutôt que d'inventer un espacement de confort.
+
+### ✅ L'INDICE DEVIENT UN BOUTON — et les deux boutons changent de place (Robin)
+
+Robin : l'indice « Découvre ta sélection » est trop peu visible. Il devient un **bouton blanc plein**, sous la phrase de Robin. Puis il a poussé la réorganisation plus loin :
+
+- **Bouton blanc « Découvrir ma sélection »** → dans le bloc texte, sous la phrase. C'est l'action **principale**, et la hiérarchie était inversée : elle était un petit texte gris en bas d'écran pendant que l'action secondaire était un bouton.
+- **Bouton translucide « Décrire mon projet »** → déplacé **au-dessus du carrousel**, dans la zone sélection.
+
+**⚠️ Ce déplacement corrige un défaut que j'avais signalé et qu'on avait accepté.** Quand le bloc texte s'est mis à sortir de l'écran en mobile (prop. 3), on perdait en écran B l'entrée du questionnaire, donc un chemin de vente — noté à l'époque comme « première cause à examiner si les stats du Conseiller baissent ». En le mettant au-dessus des propositions, Robin le rend visible **exactement au moment où le visiteur juge la sélection**, donc où l'envie de l'affiner naît. Le défaut est refermé.
+
+**Effet sur les hauteurs : neutre en desktop.** La zone 1 perd le bouton, la zone 3 le gagne ; la zone 3 étant en `flex: 1 1 0`, elle récupère ce que la zone 1 libère. Les cards ne bougent pas.
+
+**Indice du bas : la flèche seule**, sans texte (décision Robin) — le libellé ferait doublon avec le bouton. Il garde un `aria-label`, puisqu'il n'a plus de texte visible. L'indice 2 (« Voir le catalogue complet ») garde le sien, c'est une autre action.
+
+**Piège traité :** `__describe` portait un état d'entrée (`opacity: 0` + `.is-in` posé en JS). Dans sa nouvelle zone, plus personne ne lui donne `.is-in` — il serait resté **définitivement invisible**. L'état d'entrée a été transféré au bouton blanc ; le translucide est désormais révélé par l'opacité de la zone sélection, pilotée par `--reveal`.
+
 ### ⏳ LOT 2 — spécification d'origine (non codé)
 Ancrage **en JavaScript**, pas en CSS : c'est le seul qui sache **s'abstenir**. Il doit être neutralisé dans quatre fenêtres — verrou de la machine à écrire, modale ouverte, `rewindToTop()` en vol, et geste initié dans le carrousel. Prévoir un drapeau « scroll programmatique » honoré par `rewindToTop()`, `scrollToReveal()` et `scrollToCatalogue()`, et l'annulation au `touchstart`. Arbitrer aussi le `scroll-behavior: smooth` global (l. 128) : deux animations de scroll sur le même axe = rebond. Recette dédiée au moment 2, séquence la plus fragile de la page.
 

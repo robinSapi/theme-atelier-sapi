@@ -29,6 +29,7 @@
       phraseText:    '',
       phraseContent: section.querySelector('.mescreations-immersion__phrase-content'),
       describe:      section.querySelector('[data-immersion-describe]'),
+      revealBtn:     section.querySelector('[data-immersion-reveal-btn]'),
       selection:     section.querySelector('[data-immersion-selection]'),
       slider:        section.querySelector('[data-immersion-slider]'),
       prev:          section.querySelector('[data-immersion-prev]'),
@@ -145,6 +146,9 @@
       document.dispatchEvent(new CustomEvent('sapi:open-modal', { detail: { state: 's0' } }));
     }
     if (els.describe) els.describe.addEventListener('click', openModale);
+    // Le bouton blanc fait ce que faisait l'indice du bas : descendre jusqu'à
+    // la sélection. Il vise la position d'ancrage 2, donc il arrive pile.
+    if (els.revealBtn) els.revealBtn.addEventListener('click', function () { scrollToReveal(); });
 
     /* Indices du bas cliquables : « Découvre ta sélection » → scrolle pour
        révéler la sélection ; « Voir le catalogue complet » → scrolle au
@@ -617,24 +621,47 @@
        l'arrivée du 3ᵉ aimant (constaté par Robin).
        Mesuré plutôt qu'écrit en dur : les deux hauteurs diffèrent entre mobile
        et desktop, et le bandeau peut changer de contenu. */
+    /* Où commence vraiment la zone lisible, sous tout ce qui reste collé en
+       haut (le header, et le bandeau de réassurance repositionné en sticky sur
+       cette page).
+
+       ⚠️ ON NE SOMME PAS LES HAUTEURS, on prend le BORD BAS LE PLUS BAS.
+       Première version : `hauteur du header + hauteur du bandeau`. Faux, parce
+       que le bandeau ne se colle pas sous le header mais à une position qui lui
+       est propre (`position: sticky; top: 80px`, style.css l. 1390) — et cette
+       valeur ne vaut pas la hauteur réelle du header. On additionnait donc un
+       chevauchement, d'où le calage « presque bon » signalé par Robin.
+       Ici : pour chaque élément épinglé, `top` (là où il se fige) + sa hauteur
+       = son bord bas ; on garde le plus bas. Exact quelles que soient les
+       valeurs, en mobile comme en desktop. */
     function stickyOffset() {
       var off = 0;
       [document.querySelector('.site-header'), document.querySelector('.robin-bandeau')].forEach(function (el) {
         if (!el) return;
-        var pos = '';
-        try { pos = window.getComputedStyle(el).position; } catch (e) { /* swallow */ }
-        if (pos === 'fixed' || pos === 'sticky') off += el.getBoundingClientRect().height;
+        var cs = null;
+        try { cs = window.getComputedStyle(el); } catch (e) { return; }
+        if (cs.position !== 'fixed' && cs.position !== 'sticky') return;
+        var bottom = (parseFloat(cs.top) || 0) + el.getBoundingClientRect().height;
+        if (bottom > off) off = bottom;
       });
       return Math.round(off);
     }
     function catalogueSnapY() {
       var cat = document.getElementById('mes-creations-catalogue');
       if (!cat) return null;
-      var margin = 0;
-      try { margin = parseFloat(window.getComputedStyle(cat).scrollMarginTop) || 0; } catch (e) { /* swallow */ }
-      // Le CSS reste le plancher (il sert aux sauts d'ancre natifs) ; la mesure
-      // le complète quand un bandeau s'ajoute sous le header.
-      return Math.round(cat.getBoundingClientRect().top + window.pageYOffset - Math.max(margin, stickyOffset()));
+      var cssMargin = 0, marginTop = 0;
+      try {
+        var cs = window.getComputedStyle(cat);
+        cssMargin = parseFloat(cs.scrollMarginTop) || 0;
+        /* On cale la MARGE HAUTE du catalogue sous la barre, pas son bord.
+           `.mes-creations-catalogue` porte `margin-top: 44px` : c'est l'air
+           prévu par le design. Sans ça, le titre arrive collé à la barre —
+           techniquement visible, mais « pas pile poil ». On préfère reprendre
+           cette valeur plutôt qu'inventer un espacement de confort. */
+        marginTop = parseFloat(cs.marginTop) || 0;
+      } catch (e) { /* swallow */ }
+      var offset = Math.max(cssMargin, stickyOffset()) + marginTop;
+      return Math.round(cat.getBoundingClientRect().top + window.pageYOffset - offset);
     }
     /* Les trois positions se comportent comme les trois vues d'un diaporama :
        tant qu'on est DANS le hero, on est toujours attiré vers la plus proche
@@ -745,9 +772,13 @@
         revealChars(function () {
           unlockScroll();
           if (safety) clearTimeout(safety);
-          if (els.describe) {
-            els.describe.hidden = false;
-            later(function () { els.describe.classList.add('is-in'); }, reduceMotion ? 0 : 250);
+          /* Le bouton blanc « Découvrir ma sélection » prend le rôle que
+             tenait « Décrire mon projet » dans cette séquence : il apparaît
+             une fois la phrase écrite. L'autre a migré au-dessus du
+             carrousel, où c'est l'opacité de la zone sélection qui le révèle. */
+          if (els.revealBtn) {
+            els.revealBtn.hidden = false;
+            later(function () { els.revealBtn.classList.add('is-in'); }, reduceMotion ? 0 : 250);
           }
           later(function () { if (els.scrollhint) els.scrollhint.classList.add('is-in'); }, reduceMotion ? 0 : 650);
         });

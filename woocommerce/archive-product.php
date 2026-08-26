@@ -185,11 +185,14 @@ if ($imm_piece) {
       <span class="mescreations-immersion__phrase-content"></span>
     </p>
 
-    <!-- Bouton sous la citation : ouvre la modale Conseiller pour décrire le
-         projet en détail (questionnaire complet → produit plus adapté). -->
-    <button type="button" class="mescreations-immersion__describe" data-immersion-describe data-action="open-modal" data-modal-state="s0" hidden>
-      <?php esc_html_e('Décrire mon projet en détail pour un luminaire plus adapté', 'theme-sapi-maison'); ?>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    <!-- Bouton PRINCIPAL de l'écran d'accueil : descend jusqu'à la sélection.
+         Il remplace l'ancien indice « Découvre ta sélection », qui était un
+         petit texte gris en bas d'écran et que Robin trouvait trop discret.
+         Fond blanc plein : c'est l'action principale, elle doit primer sur le
+         bouton translucide (qui a migré au-dessus du carrousel). -->
+    <button type="button" class="mescreations-immersion__reveal-btn" data-immersion-reveal-btn hidden>
+      <?php esc_html_e('Découvrir ma sélection', 'theme-sapi-maison'); ?>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
     </button>
   </div>
 
@@ -199,6 +202,18 @@ if ($imm_piece) {
     <div class="mescreations-immersion__selection-head">
       <span class="mescreations-immersion__selection-title"><?php echo esc_html(sprintf(__('Ma sélection pour %s', 'theme-sapi-maison'), $imm_possessive)); ?></span>
     </div>
+
+    <!-- Ouvre la modale Conseiller (questionnaire complet → sélection plus
+         fine). ⚠️ Il vivait sous la phrase de Robin ; Robin l'a déplacé ICI,
+         au-dessus des propositions, et c'est mieux pour deux raisons : il
+         arrive au moment où le visiteur juge la sélection, donc où l'envie de
+         l'affiner naît ; et il RESTE VISIBLE en écran B, alors que le bloc
+         texte sort de l'écran en mobile — l'entrée du questionnaire, qui est
+         un chemin de vente, avait été perdue à ce moment-là. -->
+    <button type="button" class="mescreations-immersion__describe" data-immersion-describe data-action="open-modal" data-modal-state="s0">
+      <?php esc_html_e('Décrire mon projet en détail pour un luminaire plus adapté', 'theme-sapi-maison'); ?>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </button>
     <div class="mescreations-immersion__slider-wrap">
       <button type="button" class="mes-creations-selection__nav-arrow mescreations-immersion__arrow" data-immersion-prev aria-label="<?php esc_attr_e('Précédent', 'theme-sapi-maison'); ?>" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -235,9 +250,12 @@ if ($imm_piece) {
   </div>
 
   <div class="mescreations-immersion__scrollhint" data-immersion-scrollhint aria-hidden="true">
-    <!-- Indice 1 : incite à scroller pour révéler — monte et disparaît au scroll. -->
-    <span class="mescreations-immersion__hint mescreations-immersion__hint--reveal">
-      <span class="mescreations-immersion__hint-label"><?php esc_html_e('Découvre ta sélection', 'theme-sapi-maison'); ?></span>
+    <!-- Indice 1 : la FLÈCHE SEULE (décision Robin). Le texte « Découvre ta
+         sélection » a migré dans le bouton blanc du bloc de Robin ; le garder
+         ici ferait doublon. Il reste la suggestion du geste de scroll, pour
+         qui ne lit pas les boutons. Le libellé accessible est porté par
+         aria-label, puisqu'il n'y a plus de texte visible. -->
+    <span class="mescreations-immersion__hint mescreations-immersion__hint--reveal mescreations-immersion__hint--arrow-only" role="button" tabindex="0" aria-label="<?php esc_attr_e('Découvrir ma sélection', 'theme-sapi-maison'); ?>">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
     </span>
     <!-- Indice 2 : apparaît une fois la sélection révélée (pause) → catalogue. -->
