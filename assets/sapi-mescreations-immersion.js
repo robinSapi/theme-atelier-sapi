@@ -619,7 +619,6 @@
        elle seule. */
 
     var SNAP_IDLE = 150;              // ms d'immobilité avant le recalage de secours
-    var SNAP_CATCH = 0.30;            // au-delà, on est dans le catalogue : page libre
     var GESTE_MINIMUM = 8;            // ⇦ en dessous, il ne s'est rien passé (px)
     var TOLERANCE_ARRIVEE = 4;        // px : on se considère posé sur une étape
     /* ⇦ Le temps de calme exigé avant d'accepter un nouveau geste à la molette.
@@ -780,23 +779,54 @@
       stops.forEach(function (s, i) { var d = Math.abs(s - y); if (d < best) { best = d; idx = i; } });
       return idx;
     }
-    /* Hors de cette plage, la page est LIBRE : au-dessus du hero, et une fois
-       entré dans le catalogue. On ne retient jamais quelqu'un qui lit. */
+    /* Hors de cette plage, la page est LIBRE : au-dessus du hero, et dès qu'on
+       est descendu sous la dernière étape. On ne retient jamais quelqu'un qui
+       lit le catalogue. Bornes STRICTES : une marge de tolérance sous la
+       dernière étape retiendrait le visiteur dans les premiers écrans du
+       catalogue, ce qui est exactement l'inverse du but. */
     function inHeroRange(y, stops) {
-      return y >= stops[0] - 8 && y <= stops[2] + window.innerHeight * SNAP_CATCH;
+      return y >= stops[0] - 8 && y <= stops[2] + 8;
     }
-    /* Recalage de secours. Le carrousel ci-dessous rend impossible de S'ARRÊTER
-       entre deux étapes ; mais on peut y ENTRER autrement : un geste parti du
-       catalogue (le verrou CSS ne vaut que pour les gestes nés dans le hero),
-       une restauration de position au rechargement, une rotation d'écran.
-       Dans ces cas seulement, on recale sur l'étape la plus proche. */
+    /* ── Le chemin du RETOUR, et pourquoi il diffère ───────────────────────
+       Le verrou `touch-action` ne vaut que pour les gestes NÉS dans le hero.
+       Or à la dernière étape, le hero est déjà remonté hors de l'écran : le
+       doigt se pose sur le catalogue, le geste échappe donc au verrou et la
+       page défile librement. C'est pour ça que la remontée depuis « Toutes mes
+       créations » ne se comportait pas comme le reste (constat de Robin).
+
+       On ne peut pas verrouiller le catalogue : il doit rester lisible. On
+       rattrape donc à la FIN du geste, et de façon DIRECTIONNELLE — une étape,
+       dans le sens du mouvement, à partir de l'étape d'où l'on venait. Le
+       résultat est le même (un geste = une étape) ; seul le moment où il se
+       résout change : à la fin du geste au lieu de son début.
+
+       `lastStopIndex` mémorise l'étape où l'on est posé. Il vaut `null` dès
+       qu'on quitte la zone par une extrémité : c'est ce qui libère le
+       catalogue au lieu de ramener le visiteur en arrière. */
+    var lastStopIndex = null;
     function maybeSnap() {
       if (reduceMotion || progScroll || scrollLocked()) return;
       var stops = stopPositions();
       if (!stops) return;
       var y = window.pageYOffset;
-      if (!inHeroRange(y, stops)) return;
-      var i = nearestStep(y, stops);
+      if (!inHeroRange(y, stops)) { lastStopIndex = null; return; }
+
+      var i;
+      if (lastStopIndex === null) {
+        // On ne sait pas d'où l'on vient (rechargement, rotation, arrivée par
+        // un lien) : on se contente de recaler sur l'étape la plus proche.
+        i = nearestStep(y, stops);
+      } else {
+        var moved = y - stops[lastStopIndex];
+        i = lastStopIndex;
+        if (Math.abs(moved) > GESTE_MINIMUM) {
+          var next = lastStopIndex + (moved > 0 ? 1 : -1);
+          // Sortie par une extrémité → on relâche : au-delà, la page est libre.
+          if (next < 0 || next > stops.length - 1) { lastStopIndex = null; return; }
+          i = next;
+        }
+      }
+      lastStopIndex = i;
       if (Math.abs(stops[i] - y) < TOLERANCE_ARRIVEE) return;
       programmaticScrollTo(stops[i]);
     }
@@ -841,6 +871,7 @@
       if (Math.abs(stops[from] - y) > TOLERANCE_ARRIVEE) { programmaticScrollTo(stops[from]); return true; }
       var next = Math.max(0, Math.min(stops.length - 1, from + dir));
       if (next === from) return false; // déjà à une extrémité
+      lastStopIndex = next; // le chemin du retour saura d'où l'on vient
       programmaticScrollTo(stops[next]);
       return true;
     }
