@@ -458,7 +458,17 @@
     // F2a-quater : Retour depuis S1 → revient à la question précédente, ou à
     // l'écran S0 hybride si on est sur la 1re question (history vide).
     if (state.questionHistory.length === 0) {
-      renderS0Hybrid(determineInitialState());
+      /* ⚠️ CUL-DE-SAC CORRIGÉ. `determineInitialState()` peut renvoyer
+         `s3-carrefour` (toutes les réponses visibles sont données), mais
+         `renderS0Hybrid` ne sait traiter que `s0-initial` et `s0-partiel` : il
+         tombait dans la branche « initial » et réaffichait la première
+         question comme si le projet était vide — alors qu'il était complet et
+         toujours en mémoire, et sans aucun chemin de retour vers le récap.
+         Chemin exact : récap → clic sur une chip (qui vide volontairement la
+         pile d'historique) → « Étape précédente ». */
+      var back = determineInitialState();
+      if (back === 's3-carrefour') { showS3Recap(); return; }
+      renderS0Hybrid(back);
       return;
     }
     var prev = state.questionHistory.pop();
@@ -473,9 +483,79 @@
      dans sapiProject.advice_text, puis on ferme la modale.
      ───────────────────────────────────────────── */
 
+  /* Où le visiteur doit-il atterrir en sortant de la modale ?
+     ⚠️ CE TEST MANQUAIT, ET C'EST LE DÉFAUT LE PLUS COÛTEUX DU PARCOURS.
+     La sortie de la modale a été conçue pour la page /mes-creations/ EN MODE
+     IMMERSION : elle émet des événements que le hero écoute pour rafraîchir sa
+     sélection. Mais le hero n'existe que si l'URL porte `?piece=`. Or le champ
+     libre (home, /conseils-eclaires/, état A) envoie vers `?freetext=` SANS
+     pièce : la page n'a donc ni hero, ni slider, personne pour écouter. Le
+     bouton « Voir la sélection pour mon projet » fermait la modale et rien
+     d'autre — alors que le message au-dessus venait d'annoncer des filtres.
+     Quand le filtrage est passé côté serveur, seul le chemin de l'immersion a
+     été rebranché ; la recette de l'époque ne vérifiait que l'OUVERTURE du
+     champ libre, jamais sa sortie.
+     → Sans immersion et avec une pièce connue, on RECHARGE vers
+       /mes-creations/?piece=<pièce> : le visiteur atterrit exactement là où
+       l'aurait mené un clic sur la carte de cette pièce, et `advice_text`,
+       déjà stocké, y est repris et tapé par le hero. On réutilise un chemin
+       éprouvé au lieu d'en inventer un.
+     → Sans pièce du tout (l'extraction n'a rien trouvé : « salle de bain »
+       n'existe pas dans les sept pièces du référentiel), il n'y a nulle part
+       où aller. Décision de Robin : on l'emmène vers le CONTACT plutôt que de
+       le laisser sur une page vide. C'est le seul moment du parcours où il a
+       décidé quelque chose. */
+  function immersionIsOnPage() {
+    return !!document.querySelector('[data-immersion]');
+  }
+  function projectPiece() {
+    try {
+      var p = window.sapiProject && window.sapiProject.get ? window.sapiProject.get() : null;
+      if (p && p.answers && p.answers.piece) return p.answers.piece;
+    } catch (e) { /* swallow */ }
+    return (state.answers && state.answers.piece) || '';
+  }
+  function goToSelectionPage(piece) {
+    try {
+      var url = new URL(window.location.href);
+      url.pathname = '/mes-creations/';
+      url.searchParams.delete('freetext');
+      url.searchParams.set('piece', piece);
+      window.location.assign(url.toString());
+    } catch (err) {
+      window.location.href = '/mes-creations/?piece=' + encodeURIComponent(piece);
+    }
+  }
+
   function showTransitionAndExit(opts) {
     opts = opts || {};
     if (state.transition) return; // évite double-trigger
+
+    /* Aucune sélection à révéler sur cette page : on redirige (ou on bascule
+       sur le contact) AVANT de lancer l'animation de sortie et l'appel IA.
+       ⚠️ L'appel IA n'est pas perdu dans le cas « avec pièce » : il est lancé
+       plus bas, son texte est stocké dans le projet, et la page d'arrivée le
+       lit et le tape. C'est justement ce qui rend la redirection gratuite. */
+    if (!immersionIsOnPage()) {
+      var piece = projectPiece();
+      if (!piece) {
+        if (window.sapiProject) window.sapiProject.set(state.answers, state.labels);
+        showContact({
+          message: 'Je n’ai pas encore assez d’éléments pour te proposer une sélection. Laisse-moi ton mail et deux mots sur ton projet, je te réponds moi-même.'
+        });
+        return;
+      }
+      state.transition = true;
+      if (window.sapiProject) window.sapiProject.set(state.answers, state.labels);
+      fetchAdviceFromIA(opts).then(function (advice) {
+        if (advice && window.sapiProject && typeof window.sapiProject.setAdviceText === 'function') {
+          window.sapiProject.setAdviceText(advice);
+        }
+        goToSelectionPage(piece);
+      });
+      return;
+    }
+
     state.transition = true;
 
     // 1. Lancer le fetch IA en parallèle (résolu indépendamment de l'anim)
@@ -694,8 +774,23 @@
     return slug;
   }
 
-  // Merge un patch {key: slug | null} dans state.answers + state.labels
-  function applyFiltersBatch(filters) {
+  /* Merge un patch {key: slug | null} dans state.answers + state.labels.
+     `replaceAll` : la description libre REMPLACE le projet au lieu de le
+     compléter.
+     ⚠️ SANS CE PARAMÈTRE, L'INTENTION ÉCRITE N'ÉTAIT PAS RÉALISÉE. Le chemin
+     du texte libre vide bien `state.answers` avec le commentaire « nouvelle
+     description complète, on remplace les chips » — mais il appelait ensuite
+     cette fonction, qui termine par `sapiProject.update()`, une FUSION. Vider
+     l'état côté JS ne supprime rien dans la mémoire du navigateur.
+     Cas réel constaté par Robin : mémoire « salon », il écrit « salle de bain ».
+     Cette pièce n'existe pas dans les sept du référentiel, l'extraction ne peut
+     donc rien renvoyer pour `piece` — et « salon » survivait. Le visiteur avait
+     explicitement contredit son projet, l'écran affichait toujours « Salon »,
+     l'IA était nourrie de « salon », et la sélection finale était celle d'un
+     salon. Les deux coexistaient, l'ancien gagnait.
+     `set()` remet aussi `advice_text` et l'état contact à zéro, ce qui est
+     exactement ce qu'on veut quand le projet est redécrit. */
+  function applyFiltersBatch(filters, replaceAll) {
     if (!filters || typeof filters !== 'object') return;
     Object.keys(filters).forEach(function (key) {
       var val = filters[key];
@@ -708,9 +803,12 @@
       }
     });
     cleanInvisibleAnswers();
-    // Sauvegarde incrémentale
     if (window.sapiProject) {
-      window.sapiProject.update(state.answers, state.labels);
+      if (replaceAll) {
+        window.sapiProject.set(state.answers, state.labels);
+      } else {
+        window.sapiProject.update(state.answers, state.labels); // sauvegarde incrémentale
+      }
     }
   }
 
@@ -886,10 +984,11 @@
 
         var filters = data.filters || {};
         if (Object.keys(filters).length) {
-          // Freetext = nouvelle description complète, on remplace les chips
+          // Freetext = nouvelle description complète : on REMPLACE, on ne
+          // fusionne pas (cf. le commentaire de applyFiltersBatch).
           state.answers = {};
           state.labels = {};
-          applyFiltersBatch(filters);
+          applyFiltersBatch(filters, true);
         }
 
         addRobinBubble(data.message || '', { filters: filters });
@@ -1064,7 +1163,9 @@
     if (mode === 's0-partiel') {
       nextStepId = getNextUnansweredVisibleStep() || 'piece';
       badgeText = 'Ton projet';
-      placeholderText = 'Précise ton projet en quelques mots…';
+      // ⚠️ « Précise » laissait croire à un complément ; le texte saisi
+      // REMPLACE le projet (cf. applyFiltersBatch). Le libellé le dit.
+      placeholderText = 'Décris ton projet en quelques mots…';
       resetVisible = true;
     } else {
       // 's0-initial' (fallback)
@@ -1160,11 +1261,21 @@
     }
     if (els.chatSend) els.chatSend.disabled = false;
 
-    // Bulle initiale de l'assistant (cosmétique, construite côté client — zéro IA)
-    var greeting = getInitialChatGreeting();
+    /* ⚠️ PAS DE BULLE D'ACCUEIL SUR CE CHEMIN — retiré le 25/08.
+       Elle a été conçue pour « Préciser avec Robin » depuis le récapitulatif
+       (`refineFromS3`), où elle a du sens : le visiteur vient de lire le
+       conseil et demande à l'affiner. Réutilisée telle quelle ici, sa prémisse
+       est fausse : le visiteur ne précise rien, il décrit un projet NEUF.
+       Ce que Robin a constaté : il tape « une grande suspension pour une salle
+       de bain », et la conversation s'ouvre sur « Pour un salon, je te propose
+       des luminaires à ampoule entourée… » — le conseil du projet mémorisé,
+       affiché AVANT son propre message, et parlant d'autre chose.
+       Aggravant, et c'était le vrai bug : la bulle était empilée dans
+       `conversation`, donc renvoyée à l'IA aux tours suivants. Le modèle lisait
+       une phrase que Robin n'a jamais dite, affirmant que le projet était un
+       salon, et restait ancré sur la mauvaise pièce.
+       Le fil commence désormais par le message du visiteur, comme il se doit. */
     enterChatMode();
-    addRobinBubble(greeting);
-    state.chat.conversation.push({ role: 'assistant', content: greeting });
 
     // Soumet le texte saisi via le flow freetext existant (Haiku + transition)
     submitFreetext(text);
@@ -1295,11 +1406,27 @@
   // éditables, sapiProject.update invalide advice_text à null quand answers
   // change), on relance un nouveau fetch advice via showTransitionAndExit
   // pour avoir une phrase à jour sur la card "Mon projet". Sinon ferme direct.
+  /* ⚠️ LE LIBELLÉ NE DÉCRIVAIT PAS L'EFFET. « Voir la sélection pour mon
+     projet » faisait défiler vers `#sapi-product-grid`, c'est-à-dire le
+     CATALOGUE COMPLET, non filtré (`posts_per_page => -1`). Séquelle de la
+     suppression du filtrage navigateur : la grille n'est plus filtrée par
+     personne, donc y descendre ne montre pas « ma sélection » mais « tous les
+     modèles ». On route désormais comme le CTA du chat : vers la page de
+     sélection de la pièce, ou vers le contact si aucune pièce n'est connue. */
   function viewSelectionFromS3() {
     var project = window.sapiProject ? window.sapiProject.get() : null;
     var needsNewAdvice = !project || !project.advice_text;
     if (needsNewAdvice) {
       showTransitionAndExit({ source: 's3' });
+      return;
+    }
+    // Le conseil est déjà en mémoire : pas d'appel IA, on emmène directement.
+    if (!immersionIsOnPage()) {
+      var piece = projectPiece();
+      if (piece) { goToSelectionPage(piece); return; }
+      showContact({
+        message: 'Je n’ai pas encore assez d’éléments pour te proposer une sélection. Laisse-moi ton mail et deux mots sur ton projet, je te réponds moi-même.'
+      });
       return;
     }
     closeModal();
@@ -1701,6 +1828,18 @@
     hydrateFromProject();
     state.questionHistory = [];
     state.transition = false;
+    /* ⚠️ CES DEUX-LÀ FUYAIENT D'UNE OUVERTURE À L'AUTRE.
+       `editFromS3` n'était remis à `false` que dans UNE branche de
+       `answerCurrentQuestion`. Le visiteur qui ouvrait le récap, cliquait une
+       chip pour corriger, puis se ravisait et fermait, laissait le drapeau
+       levé : à la session suivante, arrivé au bout du questionnaire, il
+       retombait sur le récap au lieu d'obtenir le conseil de Robin et sa
+       sélection. Le conseil n'était jamais calculé.
+       `chat.conversation` n'était vidé que sur deux chemins d'entrée : le
+       tracking pouvait donc réémettre la conversation de la session
+       précédente. */
+    state.editFromS3 = false;
+    state.chat.conversation = [];
 
     state.open = true;
     els.modal.hidden = false;

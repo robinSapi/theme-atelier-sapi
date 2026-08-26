@@ -730,6 +730,51 @@ Robin : « le scroll est juste trop lent entre les deux premiers écrans ».
 
 `prefers-reduced-motion` → saut instantané, aucune animation.
 
+## 🔧 MODALE CONSEILLER — AUDIT DES PARCOURS + 10 CORRECTIFS (2026-08-25)
+
+Robin a signalé deux défauts d'UX et demandé un audit complet des parcours. L'agent a cartographié **9 rendus visuels**, tous les points d'entrée et le cycle de vie du projet mémorisé. Les deux défauts avaient des causes plus profondes qu'ils ne le montraient, et il en a trouvé un troisième, grave, invisible à l'écran.
+
+### 🐛 1. La réponse périmée avant le message du visiteur (signalé par Robin)
+**Vu par Robin :** il tape « une grande suspension pour une salle de bain », la conversation s'ouvre sur « Pour un salon, je te propose des luminaires à ampoule entourée… », PUIS son message. Robin lui parle avant qu'il ait parlé, et d'autre chose.
+
+**Cause : la bulle n'a pas été écrite pour ce parcours.** Conçue pour « Préciser avec Robin » depuis le récapitulatif — où elle a du sens : on vient de lire le conseil et on demande à l'affiner — elle a été **réutilisée telle quelle** pour le champ libre, où la prémisse est fausse : le visiteur décrit un projet NEUF.
+**Aggravant, et c'était le vrai bug :** la bulle était empilée dans `state.chat.conversation`, donc **renvoyée à l'IA** aux tours suivants. Le modèle lisait une phrase que Robin n'a jamais dite, affirmant que le projet était un salon, et restait ancré sur la mauvaise pièce.
+→ Bulle supprimée de ce chemin (gardée pour `refineFromS3`). Le fil commence par le message du visiteur.
+
+### 🐛 2. LA FAUSSE MÉMOIRE — le défaut qui survivait à la correction visible
+`submitFreetext` déclare « nouvelle description complète, on remplace les chips », vide `state.answers`… puis appelle `applyFiltersBatch`, qui termine par `sapiProject.update()` — **une FUSION**. Vider l'état côté JS ne supprime rien dans le navigateur.
+Cas réel : mémoire « salon », le visiteur écrit « salle de bain ». Cette pièce **n'existe pas dans les sept du référentiel**, l'extraction ne renvoie donc rien pour `piece`, et « salon » survit. **Les deux coexistaient, l'ancien gagnait** : chips « Salon » à l'écran, IA nourrie de « salon », sélection finale de salon.
+→ `applyFiltersBatch(filters, replaceAll)` : le chemin du texte libre appelle `set()` au lieu d'`update()`. **Sans ce second correctif, le premier n'aurait fait que cacher le symptôme.**
+
+### 🐛 3. Le CTA « Voir la sélection pour mon projet » ne menait nulle part (signalé par Robin)
+**Vu par Robin :** Robin annonce des filtres appliqués, le bouton promet la sélection, le clic ferme la modale et ramène au room-picker. Rien n'a bougé.
+
+**Cause :** la sortie de la modale a été conçue pour `/mes-creations/` **en mode immersion** — elle émet des événements que le hero écoute. Mais le hero n'existe que si l'URL porte `?piece=`. Or le champ libre envoie vers `?freetext=` **sans pièce** : ni hero, ni slider, aucun auditeur. Le bouton appelait aussi Sonnet (25 s, payant) pour un texte affiché nulle part, et cherchait une card supprimée en Tâche 4b.
+**Quand le filtrage est passé côté serveur, seul le chemin de l'immersion a été rebranché** — et la recette de l'époque ne vérifiait que l'**ouverture** du champ libre, jamais sa sortie.
+→ Sans immersion et avec une pièce connue : **redirection vers `/mes-creations/?piece=`**, exactement là où mène un clic sur la carte de cette pièce. `advice_text` étant stocké avant, le hero le reprend et le tape — **l'appel IA n'est donc plus perdu, il devient utile**.
+→ **Sans pièce du tout : bascule sur l'écran CONTACT** (décision Robin). C'est le seul moment du parcours où le visiteur a décidé quelque chose : on ne le laisse pas sur une page vide.
+
+### 🐛 4. GRAVE ET INVISIBLE — l'IA du chat croyait le catalogue vide
+`buildFilterMeta()` lisait `window.sapiMegaFilter`, **objet supprimé** avec le filtrage navigateur. Il tombait silencieusement sur son repli et envoyait une liste **vide**. Le prompt affichait « PRODUITS PRÉSENTÉS AU VISITEUR (0) : (aucun) », et la consigne qui suit dit : « si aucun produit présenté, propose chaleureusement le sur-mesure ».
+→ **Dans CHAQUE conversation, Robin orientait vers le sur-mesure des visiteurs pour qui il avait des modèles en stock.** Rien ne plantait, l'IA répondait simplement à côté.
+**Le correctif était DÉJÀ ÉCRIT et commenté quinze lignes plus loin**, sur l'endpoint conseil — il n'avait été posé que sur **un des deux** endpoints. Recopié sur `sapi_ajax_megafilter_chat` : la sélection est recalculée par le moteur réel, le POST n'est plus lu.
+⚠️ **Même piège que `$sapi_filter_rules` : « rien de cassé » voulait dire « rien ne s'applique ».** Troisième occurrence de ce motif dans ce chantier — le repli silencieux d'un objet disparu.
+
+### 🐛 5 à 10 — états qui fuient et libellés qui mentent
+- **`editFromS3` fuyait d'une ouverture à l'autre** : ouvrir le récap, cliquer une chip, se raviser, fermer → à la session suivante, arrivé au bout du questionnaire, on retombait sur le récap et **le conseil n'était jamais calculé**. Remis à zéro dans `openModal`.
+- **`chat.conversation` fuyait** de même : le tracking pouvait réémettre la conversation précédente. Vidée à l'ouverture.
+- **Cul-de-sac** : récap → chip → « Étape précédente » renvoyait sur un S0 « projet vide » alors qu'il était complet, sans retour possible. `determineInitialState()` peut renvoyer `s3-carrefour`, que `renderS0Hybrid` ne sait pas traiter. Routé vers le récap.
+- **« Voir la sélection pour mon projet » (récap)** descendait vers `#sapi-product-grid`, le **catalogue complet non filtré**. Même routage que le CTA du chat désormais.
+- **« Modifier mon projet »** (fiche produit) **efface tout le projet** → renommé « Recommencer mon projet ».
+- **« Précise ton projet en quelques mots… »** alors que le texte **remplace** → renommé « Décris ton projet… ».
+
+### ⚠️ Sujets non traités, à décider avec Robin
+- **Aucune péremption du projet mémorisé.** `created_at`/`updated_at` sont écrits mais jamais relus : un projet vieux d'une semaine est traité comme celui d'il y a une minute. C'est ce qui rendait le défaut 1 si brutal.
+- **Pas de pièce « salle de bain »** dans le référentiel (7 pièces). Un visiteur qui la nomme ne peut jamais être compris. **Sujet catalogue, pas code.**
+- **Aucun retour possible depuis la conversation** vers le questionnaire guidé : le visiteur qui clique le champ texte par erreur a perdu le parcours guidé pour cette session.
+- **Tracking faussé** : `home_picker` restera toujours à zéro (la modale n'est jamais rendue sur la home), `freetext` aussi (le paramètre d'URL est effacé avant d'être lu), et `advice_text` n'apparaît jamais dans les sessions abouties (`finalize()` s'exécute avant l'écriture du conseil).
+- **Code mort** : `data-action="open-modal"`/`data-modal-state` ne sont plus lus, l'entrée `state:'s3'` n'est plus émise, `buildFilterMeta`/`sapiShopRefilter`/`.conseiller-card--mon-projet` sont des vestiges.
+
 ### ✅ MODALE CONSEILLER — refonte de la densité mobile (2026-08-25)
 
 Robin : « sur mobile il faut vraiment faire de la place dans la modale, dans toutes les modales, et dans tous les états. **Le texte est bien, mais tout le reste est trop gros et la zone de texte se retrouve trop petite.** »

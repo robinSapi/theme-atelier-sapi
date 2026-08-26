@@ -3169,8 +3169,30 @@ function sapi_ajax_megafilter_chat() {
 
   $all_products = sapi_guide_query_all_products([]);
 
-  // Contrat enrichi : matching IDs + ignored answers (envoyés par le JS).
-  $matching_ids = sapi_megafilter_parse_matching_ids(isset($_POST['matching_product_ids']) ? wp_unslash($_POST['matching_product_ids']) : '');
+  /* ⚠️ SÉLECTION RECALCULÉE ICI, PLUS JAMAIS LUE DEPUIS LE POST.
+     Le JS envoyait `matching_product_ids`, qu'il obtenait de
+     `window.sapiMegaFilter` — objet SUPPRIMÉ avec le filtrage navigateur
+     (Tâche 4b). Depuis, `buildFilterMeta()` tombait silencieusement sur son
+     repli et envoyait une liste VIDE. Le prompt affichait donc
+     « PRODUITS PRÉSENTÉS AU VISITEUR (0) : (aucun) », et la consigne qui suit
+     dit : « si aucun produit présenté, propose chaleureusement le sur-mesure ».
+     → **Dans CHAQUE conversation, Robin orientait vers le sur-mesure des
+     visiteurs pour qui il avait des modèles en stock.** Invisible à l'écran,
+     invisible dans les logs : rien ne plantait, l'IA répondait simplement à
+     côté. Le même piège que `$sapi_filter_rules` : « rien de cassé » voulait
+     dire « rien ne s'applique ».
+     Le correctif était DÉJÀ ÉCRIT et commenté quinze lignes plus loin, sur
+     l'endpoint conseil (`sapi_ajax_megafilter_advice`) — il n'avait été posé
+     que sur un des deux endpoints. On applique ici le même moteur réel. */
+  $chat_cats     = function_exists('sapi_guide_get_categories') ? sapi_guide_get_categories($clean_current) : [];
+  $chat_res      = function_exists('sapi_guide_query_products') ? sapi_guide_query_products($clean_current, $chat_cats) : ['products' => []];
+  $chat_products = isset($chat_res['products']) ? $chat_res['products'] : [];
+  if (function_exists('sapi_conseiller_rank_products')) {
+    $chat_products = sapi_conseiller_rank_products($chat_products, $clean_current);
+  }
+  $matching_ids = array_values(array_filter(array_map(function ($p) {
+    return isset($p['id']) ? (int) $p['id'] : 0;
+  }, $chat_products)));
   $ignored_keys = sapi_megafilter_parse_ignored_answers(isset($_POST['ignored_answers']) ? wp_unslash($_POST['ignored_answers']) : '');
 
   $system_prompt = sapi_megafilter_build_chat_prompt($clean_current, $all_products, $whitelist, $matching_ids, $ignored_keys);
@@ -3651,7 +3673,10 @@ function sapi_render_conseiller_modal() {
                 <?php esc_html_e('Appliquer cette sélection', 'theme-sapi-maison'); ?>
               </button>
               <button type="button" class="action-btn action-btn--secondary" data-action="product-modify">
-                <?php esc_html_e('Modifier mon projet', 'theme-sapi-maison'); ?>
+                <?php /* ⚠️ Libellé corrigé : ce bouton EFFACE tout le projet et
+                         repart de la première question (`modifyProductAnswers`).
+                         « Modifier » laissait attendre une retouche. */ ?>
+                <?php esc_html_e('Recommencer mon projet', 'theme-sapi-maison'); ?>
               </button>
             </div>
           </div>
