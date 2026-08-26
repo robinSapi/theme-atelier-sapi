@@ -100,8 +100,6 @@
       maxUserMessages: config.maxMessages || 15,
       // Catégorie déduite par le serveur quand il n'en trouve qu'UNE. Sert de
       // destination au bouton « Voir… » lorsque le projet n'a pas de pièce.
-      catalogCat: '',
-      catalogLabel: '',
     },
   };
 
@@ -952,42 +950,65 @@
      la place du visiteur.
      Quand la pièce EST connue, le second bouton reste masqué : un seul chemin
      a du sens, et on ne dilue pas l'action principale. */
+  /* Le projet a-t-il de quoi filtrer ? `style` ne compte pas : il ne sert qu'au
+     prompt IA, le moteur ne le lit jamais. Tout le reste (sortie, eclairage,
+     piece, taille, hauteur) donne au moins une catégorie exploitable.
+     ⚠️ Cette fonction répond « y a-t-il quelque chose à MONTRER », pas
+     « connaît-on la pièce ». Les deux questions ont été confondues une fois
+     dans chaque sens, et chaque confusion a coûté un bug. */
+  var CRITERES_INERTES = ['style'];
+  function projectHasCriteria() {
+    var a = null;
+    try {
+      var p = window.sapiProject && window.sapiProject.get ? window.sapiProject.get() : null;
+      if (p && p.answers) a = p.answers;
+    } catch (e) { /* swallow */ }
+    if (!a) a = state.answers || {};
+    return Object.keys(a).some(function (k) {
+      return a[k] && CRITERES_INERTES.indexOf(k) === -1;
+    });
+  }
+
   function revealChatCta() {
     if (!els.chatCta) return;
     els.chatCta.hidden = false;
 
     var contactBtn = els.chatCta.querySelector('[data-chat-cta-contact]');
+    var primaryBtn = els.chatCta.querySelector('[data-chat-cta-primary]');
     var labelEl = els.chatCta.querySelector('[data-chat-cta-label]');
     var hasPiece = !!projectPiece();
 
-    if (contactBtn) contactBtn.hidden = hasPiece;
-    if (labelEl) {
-      if (hasPiece) {
-        labelEl.textContent = 'Voir la sélection pour mon projet';
-      } else if (state.chat.catalogLabel) {
-        // Le serveur n'a déduit qu'une seule catégorie : on la nomme, pour que
-        // le bouton promette exactement ce qu'il donne.
-        labelEl.textContent = 'Voir les ' + state.chat.catalogLabel.toLowerCase();
-      } else {
-        labelEl.textContent = 'Voir la sélection';
-      }
-    }
-  }
+    /* ── PAS DE PIÈCE CONNUE → UNE SEULE SORTIE : ROBIN ─────────────────────
+       ⚠️ DÉCISION ROBIN DU 26/08, qui remplace les deux boutons de la veille :
+       « toutes les pièces qui ne sont pas dans le room-picker » sortent du
+       périmètre du site. Le picker couvre déjà les synonymes — couloir est
+       dans « Entrée / Couloir », salle à manger dans « Salon / Salle à
+       manger », atelier dans « Bureau / Atelier ». Donc si l'extraction ne
+       rend AUCUNE pièce, c'est que le projet n'entre dans aucune des sept :
+       salle de bain, garage, terrasse. Là, seul Robin peut répondre — humidité
+       et sécurité électrique sur du bois, ça ne se devine pas.
 
-  /* Destination quand aucune pièce n'est connue : le catalogue, filtré sur la
-     catégorie déduite si le serveur n'en a trouvé qu'une. Plusieurs catégories
-     → catalogue complet, ce qui reste honnête : on ne prétend pas cibler. */
-  function goToCatalogue(cat) {
-    try {
-      var url = new URL(window.location.href);
-      url.pathname = '/mes-creations/';
-      url.searchParams.delete('freetext');
-      url.searchParams.delete('piece');
-      if (cat) { url.searchParams.set('product_cat', cat); } else { url.searchParams.delete('product_cat'); }
-      window.location.assign(url.toString());
-    } catch (err) {
-      window.location.href = '/mes-creations/' + (cat ? '?product_cat=' + encodeURIComponent(cat) : '');
+       Défaut qui a mené là : « une lampe pour ma salle de bain ». L'IA posait
+       une question de clarification — elle n'avait proposé AUCUNE sélection —
+       et « Voir la sélection » s'affichait quand même, parce qu'on révélait le
+       bouton après CHAQUE réponse sans regarder s'il y avait quelque chose à
+       voir. Il re-servait alors les modèles du projet précédent.
+       Un bouton qui promet une sélection inexistante est pire qu'un bouton
+       absent : le visiteur clique, tombe sur des modèles sans rapport, et croit
+       que c'est ce que le site lui recommande.
+
+       `projectHasCriteria()` reste la ceinture : sans pièce ET sans critère, il
+       n'y a même pas de quoi remplir un formulaire de contact utile. */
+    var canSelect = hasPiece && projectHasCriteria();
+    if (primaryBtn) primaryBtn.hidden = !canSelect;
+    if (contactBtn) {
+      contactBtn.hidden = false; // toujours offert : c'est la sortie de secours
+      /* Seul en piste, le bouton contact cesse d'être secondaire : le style
+         fantôme signifierait « il y a mieux ailleurs », et il n'y a rien. */
+      contactBtn.classList.toggle('action-btn--ghost', canSelect);
+      contactBtn.classList.toggle('action-btn--primary', !canSelect);
     }
+    if (labelEl && canSelect) labelEl.textContent = 'Voir la sélection pour mon projet';
   }
 
   // Appel IA : extraction freetext (Haiku) — endpoint F1b existant
@@ -1034,8 +1055,6 @@
         state.chat.sessionId = data.session_id || state.chat.sessionId;
         // Catégorie déduite côté serveur : destination du bouton « Voir… »
         // quand le projet n'a pas de pièce (cf. revealChatCta).
-        state.chat.catalogCat   = data.catalog_cat   || '';
-        state.chat.catalogLabel = data.catalog_label || '';
 
         /* Freetext = nouvelle description complète : on REMPLACE, et on le fait
            MÊME QUAND L'EXTRACTION NE RENVOIE RIEN.
@@ -1153,8 +1172,6 @@
         state.chat.sessionId = data.session_id || state.chat.sessionId;
         // Catégorie déduite côté serveur : destination du bouton « Voir… »
         // quand le projet n'a pas de pièce (cf. revealChatCta).
-        state.chat.catalogCat   = data.catalog_cat   || '';
-        state.chat.catalogLabel = data.catalog_label || '';
 
         if (data.filters_update) {
           applyFiltersBatch(data.filters_update);
@@ -2104,14 +2121,20 @@
           backFromQuestion();
           break;
         case 'apply':
-          /* CTA « Voir… » du chat.
-             Sans pièce, `showTransitionAndExit` basculerait sur le contact —
-             c'est justement ce qu'on veut éviter ici, puisque le second bouton
-             offre déjà ce chemin. On enregistre le projet et on emmène le
-             visiteur au catalogue, filtré sur la catégorie déduite. */
-          if (!immersionIsOnPage() && !projectPiece()) {
-            if (window.sapiProject) window.sapiProject.set(state.answers, state.labels);
-            goToCatalogue(state.chat && state.chat.catalogCat);
+          /* CTA « Voir la sélection » du chat.
+
+             Garde-fou : sans pièce ni critère, il n'y a rien à montrer. Le
+             bouton est déjà masqué dans ce cas (revealChatCta) — ceci est la
+             ceinture, pas la bretelle. Elle compte quand même : SUR LA PAGE
+             D'IMMERSION, le chemin normal repartait en « moment 2 » et
+             re-servait la sélection de l'ancienne pièce, la page derrière
+             n'ayant jamais changé. C'est exactement ce que Robin a vu — les
+             modèles du projet précédent sous une conversation sur une salle
+             de bain. */
+          if (!projectPiece() || !projectHasCriteria()) {
+            showContact({
+              message: 'Pour cette pièce, je préfère te répondre moi-même. Laisse-moi ton mail et un mot sur ton projet.'
+            });
             break;
           }
           // F2a-bis : écran transition + appel IA unique (avec la conversation),

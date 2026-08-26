@@ -2833,7 +2833,16 @@ function sapi_megafilter_build_freetext_prompt(array $whitelist) {
   $prompt .= "- Pro / B2B : hôtel, restaurant, bureaux d'entreprise, salle d'événement, cadeau d'entreprise, retail, espace public\n";
   $prompt .= "- Dimensions custom : hauteur précise hors catalogue, format inhabituel demandé\n";
   $prompt .= "- Essence custom : bois non catalogue (chêne, noyer, etc.)\n";
-  $prompt .= "- Combinaison qui sort manifestement du catalogue (style/format/usage spécial)\n\n";
+  $prompt .= "- Combinaison qui sort manifestement du catalogue (style/format/usage spécial)\n";
+  /* Périmètre des pièces — décision Robin du 26/08. Miroir EXACT de la règle du
+     prompt de chat : c'est ce prompt-ci qui traite le PREMIER message, donc
+     celui qui a laissé passer « une lampe pour ma salle de bain » et enchaîné
+     sur la vasque et la prise. Si les deux règles divergent, le visiteur reçoit
+     deux comportements différents selon qu'il parle une ou deux fois. */
+  $prompt .= "- PIÈCE HORS PÉRIMÈTRE : le catalogue ne couvre que cuisine, bureau (ou atelier), salon (ou salle à manger), chambre, chambre d'enfant, entrée (ou couloir), cage d'escalier. Toute AUTRE pièce — salle de bain, salle d'eau, buanderie, garage, cave, terrasse, extérieur, véranda — est hors périmètre.\n";
+  $prompt .= "  → Renvoie `{filters: {}, message: \"...\", action: \"contact\", contact_kind: \"sur-mesure\"}`. NE POSE PAS de question de précision : la réponse ne changerait rien, la pièce reste hors catalogue.\n";
+  $prompt .= "  → Dans `message`, dis en une ou deux phrases que pour cette pièce c'est Robin lui-même qui doit répondre — humidité et sécurité électrique, ça se juge au cas par cas — et invite à lui écrire.\n";
+  $prompt .= "  → NE mets PAS de `piece` approchante dans `filters` : une salle de bain n'est pas une cuisine. Mieux vaut ne rien proposer que proposer à côté.\n\n";
 
   $prompt .= "CHOIX DE `contact_kind` :\n";
   $prompt .= "- \"pro\" : projet professionnel/B2B. CTA principal côté UI = \"Ouvrir le formulaire sur-mesure\".\n";
@@ -2949,7 +2958,19 @@ function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_pr
   $prompt .= "3) PROJET CONTACT : la demande sort du périmètre catalogue ou nécessite un échange direct → `action: \"contact\"` + `contact_kind: \"pro\"|\"sur-mesure\"|\"simple\"` + `contact_subject` + `contact_message`.\n\n";
 
   $prompt .= "CRITÈRES POUR `action: \"contact\"` :\n";
-  $prompt .= "- Multi-luminaires (≥2 lampes pour un même projet), pro/B2B (hôtel, restaurant, retail, espace public), dimensions custom, essence custom (chêne, noyer, etc.), combinaison hors catalogue.\n\n";
+  $prompt .= "- Multi-luminaires (≥2 lampes pour un même projet), pro/B2B (hôtel, restaurant, retail, espace public), dimensions custom, essence custom (chêne, noyer, etc.), combinaison hors catalogue.\n";
+  /* Périmètre des pièces — décision Robin du 26/08.
+     Le site ne sait conseiller que les sept pièces du room-picker. Une salle de
+     bain, un garage, une terrasse posent des questions d'humidité et de sécurité
+     électrique sur du bois : seul Robin peut y répondre, et une IA qui improvise
+     là-dessus engage sa responsabilité.
+     ⚠️ Les synonymes SONT dans le périmètre : le picker dit « Entrée / Couloir »,
+     « Salon / Salle à manger », « Bureau / Atelier ». Un couloir n'est donc PAS
+     hors périmètre — il est une entrée. Ne pas confondre « pièce absente de la
+     liste des slugs » et « pièce hors périmètre », l'erreur a déjà été faite. */
+  $prompt .= "- PIÈCE HORS PÉRIMÈTRE : le catalogue ne couvre que cuisine, bureau (ou atelier), salon (ou salle à manger), chambre, chambre d'enfant, entrée (ou couloir), cage d'escalier. Toute AUTRE pièce — salle de bain, salle d'eau, buanderie, garage, cave, terrasse, extérieur, véranda — est hors périmètre.\n";
+  $prompt .= "  → Dans ce cas : `action: \"contact\"`, `contact_kind: \"sur-mesure\"`, et NE POSE PAS de question de précision. Dis simplement, en une ou deux phrases, que pour cette pièce c'est Robin lui-même qui doit répondre (humidité, sécurité électrique : ça se juge au cas par cas), et invite à lui écrire.\n";
+  $prompt .= "  → NE remplis PAS `filters_update` avec une pièce approchante : une salle de bain n'est pas une cuisine. Mieux vaut ne rien proposer que proposer à côté.\n\n";
 
   $prompt .= "CHOIX DE `contact_kind` :\n";
   $prompt .= "- \"pro\" : projet professionnel/B2B → CTA UI principal = formulaire sur-mesure.\n";
@@ -3271,23 +3292,6 @@ function sapi_ajax_megafilter_chat() {
     ['role' => 'assistant', 'content' => $robin_message],
   ]);
 
-  /* Où le visiteur pourrait voir cette sélection s'il n'a PAS de pièce.
-     ⚠️ Le moteur de filtrage n'a jamais eu besoin de la pièce : il se règle
-     d'abord sur la sortie électrique. « au mur » suffit à renvoyer les
-     appliques. C'est la PAGE de sélection qui est indexée sur la pièce —
-     `/mes-creations/?piece=salon` existe, mais aucune URL ne dit « appliques
-     murales, pièce inconnue ». D'où le cul-de-sac constaté par Robin : il y
-     avait bien quelque chose à montrer, mais nulle part où l'envoyer.
-     On renvoie donc la catégorie déduite : le catalogue sait déjà se filtrer
-     dessus (`?product_cat=`, pastilles pré-activées). Une seule catégorie →
-     on filtre ; plusieurs → le catalogue complet, ce qui reste honnête. */
-  $cat_slug = (count($chat_cats) === 1) ? (string) $chat_cats[0] : '';
-  $cat_label = '';
-  if ($cat_slug) {
-    $term = get_term_by('slug', $cat_slug, 'product_cat');
-    if ($term && !is_wp_error($term)) $cat_label = $term->name;
-  }
-
   wp_send_json_success([
     'message'         => $robin_message,
     'filters_update' => $filters_update,
@@ -3297,8 +3301,6 @@ function sapi_ajax_megafilter_chat() {
     'contact_message' => $contact_message,
     'conversation'    => $new_conversation,
     'session_id'      => $session_id,
-    'catalog_cat'     => $cat_slug,
-    'catalog_label'   => $cat_label,
   ]);
 }
 

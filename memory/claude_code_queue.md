@@ -783,6 +783,28 @@ Cause : le remplacement était conditionné à `if (Object.keys(filters).length)
 → **`refineFromStoredProject()` au chargement de l'immersion** : on rejoue l'affinage à partir du projet mémorisé, en réutilisant **exactement** le mécanisme du moment 2 (même endpoint, même dédup, même remplacement de cards). Le carrousel étant invisible à ce stade (`--reveal` à 0), le remplacement ne se voit pas.
 **La signature de dédup fait le tri toute seule** : si le projet ne contient que la pièce, elle est identique à la baseline et aucune requête n'est envoyée. Aucun coût sur le chemin normal (clic sur une carte-pièce).
 
+### ✅ PIÈCE HORS PÉRIMÈTRE — LE BOUTON QUI PROMETTAIT UNE SÉLECTION INEXISTANTE
+
+**Recette Robin :** « Une lampe pour ma salle de bain » dans le chat. L'IA pose une question de clarification (la vasque, la prise) — elle n'a proposé **aucune** sélection — et « VOIR LA SÉLECTION » s'affiche quand même. Il renvoie vers les modèles du **projet précédent**.
+
+**Deux défauts empilés :**
+1. `revealChatCta()` était appelé après **chaque** réponse, sans jamais regarder s'il y avait quelque chose à voir.
+2. Sur la page d'immersion, `case 'apply'` ne prenait pas le garde-fou « sans pièce » (`immersionIsOnPage()` court-circuitait) : il repartait en moment 2, et la page derrière n'ayant jamais changé de pièce, elle re-servait l'ancienne sélection.
+
+⚠️ **Un bouton qui promet une sélection inexistante est pire qu'un bouton absent** : le visiteur clique, tombe sur des modèles sans rapport, et croit que c'est ce que le site lui recommande.
+
+**⚠️ DÉCISION ROBIN — elle REMPLACE les deux boutons de la veille.** « Toutes les pièces qui ne sont pas dans le room-picker » sortent du périmètre. Le picker couvre déjà les synonymes (« Entrée / Couloir », « Salon / Salle à manger », « Bureau / Atelier ») : **un couloir n'est donc PAS hors périmètre, il est une entrée.** Hors périmètre = salle de bain, garage, terrasse, cave, véranda — humidité et sécurité électrique sur du bois, seul Robin peut juger.
+
+→ **Sans pièce : un seul bouton, vers Robin.** Le bouton contact quitte son style fantôme quand il est seul en piste — le style secondaire signifierait « il y a mieux ailleurs », et il n'y a rien.
+→ **La règle de périmètre est posée dans LES DEUX prompts** (extraction freetext ET chat). C'est le prompt d'extraction qui traite le premier message, donc celui qui avait laissé passer la salle de bain. Deux règles divergentes = deux comportements selon que le visiteur parle une ou deux fois.
+→ Consigne explicite : **ne pas rabattre sur une pièce approchante.** Une salle de bain n'est pas une cuisine ; mieux vaut ne rien proposer que proposer à côté.
+
+**Code retiré (il n'a plus de chemin) :** `goToCatalogue()`, `state.chat.catalogCat/catalogLabel`, et côté serveur `catalog_cat`/`catalog_label` avec leur bloc de calcul. C'était la sortie « catalogue filtré » d'hier, que cette décision rend inatteignable.
+
+⚠️ **Ce que j'en retiens sur ma propre méthode :** deux fois en deux jours j'ai confondu « connaît-on la pièce » et « y a-t-il quelque chose à montrer ». Une fois dans chaque sens. Ce sont deux questions distinctes, et le code les nomme désormais séparément — `projectPiece()` et `projectHasCriteria()`.
+
+---
+
 ### ✅ ÉTAPE 1 — LE DÉCOR SORT DU MÊME CALCUL QUE LA SÉLECTION
 
 **Le problème de fond, nommé après une passe d'agent :** il n'y avait pas de page de sélection mal indexée. **Il y avait une page de PIÈCE, et la sélection y était un effet de bord.** Deux objets portaient le même mot et le template les avait soudés dans `$imm_piece` :
