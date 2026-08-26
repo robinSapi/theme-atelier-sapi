@@ -612,6 +612,43 @@ select:focus-visible {
   border-color: var(--color-wood);
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   16px MINIMUM SUR TOUT CHAMP DE SAISIE EN MOBILE.
+   ──────────────────────────────────────────────────────────────────────────
+   ⚠️ CONTRAINTE DU NAVIGATEUR, PAS UN CHOIX DE DESIGN. Safari iOS zoome
+   automatiquement sur un champ dès que sa police fait MOINS de 16px, pour le
+   rendre lisible — et il ne dézoome pas ensuite : la page reste agrandie et
+   décalée, et le visiteur doit pincer pour revenir. C'est ce que Robin a
+   constaté (« quand on clique sur mobile ça zoome »).
+   Le seuil est exactement 16px : 15,5px suffit à déclencher le zoom.
+
+   `!important` assumé, et c'est le seul endroit du fichier où il se justifie
+   ainsi : une dizaine de composants fixent leur propre taille plus bas
+   (jusqu'à 12px pour le champ des room-pickers), certains dans des media
+   queries, et il ne s'agit pas d'une préférence esthétique qu'un composant
+   pourrait légitimement vouloir écraser. Sans lui, il faudrait rouvrir chaque
+   composant — et le prochain champ ajouté au site retomberait dans le piège.
+
+   ⚠️ Ne PAS lever cette règle pour « rendre un champ plus discret ». Le gain
+   visuel se paierait par un zoom subi à chaque saisie. Pour un champ plus
+   discret, jouer sur la couleur, le rembourrage ou la hauteur, jamais sur la
+   taille du texte. */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="number"],
+  input[type="password"],
+  input[type="date"],
+  input:not([type]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 /* Nav dropdown keyboard support */
 .primary-nav > ul > li:focus-within > .sub-menu,
 .primary-nav > ul > li:focus-within > ul {
