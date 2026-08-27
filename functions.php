@@ -4401,6 +4401,22 @@ function sapi_ajax_megafilter_surmesure() {
 
   $sent = wp_mail($to, $subject, $body, $headers);
 
+  /* ⚠️ « CONTACTS ENVOYÉS » DOIT COMPTER DES MAILS REÇUS, PAS DES CLICS.
+     Le client marquait la session `contact_submitted = 1` AVANT même d'appeler
+     ce point d'entrée, et rien ne le rétractait ensuite. Étaient donc comptés
+     comme envoyés : les rejets honeypot, time-trap et anti-junk — qui
+     répondent « success » EN SILENCE par conception, donc que le client ne peut
+     pas distinguer d'un vrai envoi — plus les échecs de `wp_mail` et les
+     coupures réseau. Robin lisait « 12 contacts », en recevait 9, et cherchait
+     les 3 autres.
+     Seul le serveur sait si le mail est parti. C'est donc lui qui l'écrit, et
+     uniquement ici, après un envoi réussi. Rien ne fuit vers un robot : la
+     réponse HTTP est inchangée. */
+  if ($sent && function_exists('sapi_megafilter_marquer_contact_envoye')) {
+    $sid = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : '';
+    sapi_megafilter_marquer_contact_envoye($sid);
+  }
+
   if (!$sent) {
     error_log('Sapi MegaFilter sur-mesure : wp_mail failed pour ' . $email);
     wp_send_json_error([
@@ -6850,6 +6866,121 @@ add_action('admin_init', 'sapi_megafilter_migrate_v3');
 add_action('wp_ajax_sapi_megafilter_log_session', 'sapi_megafilter_log_session');
 add_action('wp_ajax_nopriv_sapi_megafilter_log_session', 'sapi_megafilter_log_session');
 
+/**
+ * Marque une session comme ayant RÉELLEMENT abouti à un mail reçu par Robin.
+ *
+ * Appelée uniquement depuis `sapi_ajax_megafilter_surmesure`, après un
+ * `wp_mail()` réussi. C'est le seul endroit du code qui connaisse la vérité :
+ * les rejets anti-spam répondent « success » en silence, donc le navigateur ne
+ * peut pas la connaître.
+ *
+ * UPDATE seulement, jamais d'INSERT : si la session n'existe pas (modale
+ * jamais ouverte, formulaire atteint autrement), on ne crée pas de ligne
+ * fantôme. Zéro ligne affectée est un résultat normal, pas une erreur.
+ */
+/**
+ * Affiche une date de la table des sessions, TELLE QU'ELLE EST STOCKÉE.
+ *
+ * ⚠️ NE PAS REMPLACER PAR `wp_date()`. WordPress force PHP en UTC, donc `date()`
+ * restitue exactement la chaîne enregistrée, tandis que `wp_date()` la
+ * reconvertit vers le fuseau du site et AJOUTE deux heures à une valeur déjà
+ * locale. Les deux cohabitaient : le tableau utilisait `date()`, le détail
+ * `wp_date()`. La même session s'affichait « 26/08 · 14:03 » dans la liste et
+ * « 26/08/2026 à 16:03 » dans son propre détail, et un contact envoyé deux
+ * minutes après la création apparaissait deux heures après, parfois dans le
+ * futur.
+ *
+ * Reste un sujet non tranché, à part : `created_at` vient de l'horloge MySQL
+ * (`DEFAULT CURRENT_TIMESTAMP`) et `contact_submitted_at` de celle de
+ * WordPress (`current_time('mysql')`). Si les deux serveurs divergent un jour,
+ * l'écart réapparaîtra — mais aligner le stockage créerait une frontière entre
+ * les lignes d'avant et d'après, ce qui serait pire.
+ */
+/**
+ * Les libellés du tableau de bord, CONSTRUITS DEPUIS LE QUESTIONNAIRE.
+ *
+ * ⚠️ Ils étaient recopiés à la main, en deux exemplaires (liste et détail), et
+ * ils avaient dérivé. Sur sept clés, quatre affichaient un repli `ucfirst` au
+ * lieu du vrai libellé, et douze entrées désignaient des slugs qui n'existent
+ * plus : `standard`/`intime`/`spacieuse`/`droit`/`tournant` pour la taille,
+ * `aucune`/`inconnu` pour la sortie, `haut`/`tres_haut` pour la hauteur,
+ * `appoint` pour l'éclairage. Robin lisait « Pas-de-sortie » et « Ne-sais-pas »
+ * là où il aurait dû lire des phrases, et « Standard (2,50 m) » sous un choix
+ * qui dit en réalité « moins de 2,50 m ».
+ *
+ * En les dérivant de `sapi_guide_get_steps()` — la source qui sert à POSER les
+ * questions — la divergence devient impossible, et un nouveau choix ajouté au
+ * questionnaire apparaît tout seul dans le tableau.
+ *
+ * @return array [stepId => [slug => libellé]]
+ */
+function sapi_megafilter_admin_labels() {
+  static $cache = null;
+  if ($cache !== null) return $cache;
+
+  /* ⚠️ `inc/guide-data.php` N'EST PAS CHARGÉ EN ADMIN.
+     Tous ses `require_once` sont dans des chemins front ou des endpoints AJAX
+     du conseiller — aucun ne passe par cette page. Sans cette ligne, la
+     fonction rendait un tableau VIDE, le mémorisait pour toute la requête, et
+     le tableau de bord affichait les slugs bruts : « grande »,
+     « pas-de-sortie », « moderne ». C'est-à-dire PIRE que les tables écrites à
+     la main qu'elle remplace. Trouvé en relecture avant livraison. */
+  $fichier = get_template_directory() . '/inc/guide-data.php';
+  if (file_exists($fichier)) require_once $fichier;
+
+  /* Le cache n'est posé QUE sur un succès. Mémoriser un échec le rendrait
+     définitif pour la requête, et invisible — le motif exact que ce dépôt
+     paye depuis le début. */
+  if (!function_exists('sapi_guide_get_steps')) return [];
+
+  $labels = [];
+  foreach (sapi_guide_get_steps() as $step) {
+    if (empty($step['id']) || empty($step['choices'])) continue;
+    $map = [];
+    foreach ($step['choices'] as $choice) {
+      if (empty($choice['slug'])) continue;
+      $texte = isset($choice['label']) ? $choice['label'] : $choice['slug'];
+      /* `dim` porte la précision utile (« intime », « < 2,50 m »). Sans elle,
+         Taille et Hauteur affichent toutes deux « Standard » : deux colonnes,
+         le même mot, aucune dimension. */
+      if (!empty($choice['dim'])) $texte .= ' (' . $choice['dim'] . ')';
+      $map[$choice['slug']] = $texte;
+    }
+    $labels[$step['id']] = $map;
+  }
+  $cache = $labels;
+  return $cache;
+}
+
+function sapi_megafilter_date_fr($mysql_datetime, $format = 'd/m/Y à H:i') {
+  if (empty($mysql_datetime)) return '';
+  $ts = strtotime($mysql_datetime);
+  return $ts ? date($format, $ts) : '';
+}
+
+function sapi_megafilter_marquer_contact_envoye($session_id) {
+  if (!is_string($session_id) || $session_id === '') return;
+  /* ⚠️ LONGUEUR TOLÉRANTE, ET C'EST INDISPENSABLE.
+     Le client produit 16 caractères via `crypto`, mais son repli — navigateurs
+     sans `crypto.getRandomValues` — en produit 19. Un contrôle en `{16}` strict
+     rejetait donc 100 % de ces visiteurs, en silence : le mail partait, Robin
+     le recevait, et le compteur restait à zéro. On aurait remplacé un
+     sur-comptage par un sous-comptage, ce qui est tout aussi faux.
+     On valide la FORME (préfixe + hexadécimal), pas une longueur exacte : le
+     but est d'écarter une valeur fabriquée, pas de deviner l'algorithme du
+     navigateur. Trouvé en relecture avant livraison. */
+  if (!preg_match('/^mfs_[0-9a-f]{8,32}$/', $session_id)) return;
+  global $wpdb;
+  $table = $wpdb->prefix . 'sapi_megafilter_sessions';
+  $wpdb->update(
+    $table,
+    ['contact_submitted' => 1, 'contact_submitted_at' => current_time('mysql')],
+    ['session_id' => $session_id],
+    ['%d', '%s'],
+    ['%s']
+  );
+}
+
 function sapi_megafilter_log_session() {
   // sendBeacon sends as application/x-www-form-urlencoded or text/plain
   // Payload : sendBeacon envoie en application/json ou text/plain → on lit
@@ -7302,14 +7433,27 @@ function sapi_megafilter_admin_compute_stats($filters) {
   $contacts_q = "SELECT COUNT(*) FROM $table $where_sql " . ($where_sql ? 'AND' : 'WHERE') . ' contact_submitted = 1';
   $contacts = (int) ($args ? $wpdb->get_var($wpdb->prepare($contacts_q, $args)) : $wpdb->get_var($contacts_q));
 
-  // Delta % vs période précédente (sauf si period = 'all')
+  /* Delta % vs période précédente (sauf si period = 'all').
+     ⚠️ IL DOIT PORTER LES MÊMES FILTRES QUE LE CHIFFRE QU'IL COMPARE.
+     La requête n'avait aucune clause en dehors des dates : filtrer sur
+     « Pièce : Salon » comparait *les sessions salon de cette semaine* à
+     *TOUTES les sessions de la semaine dernière*, et affichait un « ▼ 78 % »
+     mécanique et vide de sens. Robin lit ce chiffre pour savoir si ça monte ou
+     ça descend. */
   $delta_pct = null;
   if (!empty($filters['period']) && $filters['period'] !== 'all') {
     $days = ($filters['period'] === '30d') ? 30 : 7;
+    /* On reconstruit la clause SANS la période — elle est remplacée par la
+       fenêtre précédente — mais AVEC tous les autres filtres actifs. */
+    $filtres_prec = $filters;
+    $filtres_prec['period'] = 'all';
+    list($prev_where, $prev_args) = sapi_megafilter_admin_build_where($filtres_prec);
+    $prev_where .= ($prev_where ? ' AND' : 'WHERE')
+      . ' created_at >= DATE_SUB(NOW(), INTERVAL %d DAY) AND created_at < DATE_SUB(NOW(), INTERVAL %d DAY)';
+    $prev_args = array_merge($prev_args, [$days * 2, $days]);
     $prev = (int) $wpdb->get_var($wpdb->prepare(
-      "SELECT COUNT(*) FROM $table WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY) AND created_at < DATE_SUB(NOW(), INTERVAL %d DAY)",
-      $days * 2,
-      $days
+      "SELECT COUNT(*) FROM $table $prev_where",
+      $prev_args
     ));
     if ($prev > 0) {
       $delta_pct = (int) round((($total - $prev) / $prev) * 100);
@@ -7404,22 +7548,13 @@ function sapi_megafilter_admin_page() {
     'sur-mesure' => 'pill--sur-mesure',
     'simple'     => 'pill--simple',
   ];
-  $piece_labels = [
-    'salon' => 'Salon', 'cuisine' => 'Cuisine', 'chambre' => 'Chambre',
-    'chambre-enfant' => 'Chambre enfant',
-    'bureau' => 'Bureau', 'entree' => 'Entrée', 'escalier' => 'Escalier',
-  ];
-  $taille_labels = [
-    'petite' => 'Petite', 'standard' => 'Standard', 'grande' => 'Grande',
-    'intime' => 'Intime', 'confortable' => 'Confortable', 'spacieuse' => 'Spacieuse',
-    'droit' => 'Droit', 'tournant' => 'Tournant',
-  ];
-  $sortie_labels = [
-    'plafond' => 'Plafond', 'mur' => 'Mur', 'aucune' => 'Pas de sortie', 'inconnu' => 'Ne sais pas',
-  ];
-  $style_labels = [
-    'moderne' => 'Moderne', 'neutre' => 'Neutre', 'ancien' => 'Ancien',
-  ];
+  /* Construits depuis le questionnaire — voir sapi_megafilter_admin_labels().
+     Ne PAS les réécrire à la main : c'est ce qui les avait fait diverger. */
+  $sapi_labels     = sapi_megafilter_admin_labels();
+  $piece_labels    = $sapi_labels['piece'] ?? [];
+  $taille_labels   = ($sapi_labels['taille'] ?? []) + ($sapi_labels['taille_escalier'] ?? []);
+  $sortie_labels   = $sapi_labels['sortie'] ?? [];
+  $style_labels    = $sapi_labels['style'] ?? [];
 
   // Helpers d'affichage
   $period = $filters['period'];
@@ -7627,7 +7762,7 @@ function sapi_megafilter_admin_page() {
               $style_label = $style_labels[$r->style] ?? ($r->style ?: '—');
             ?>
               <tr data-session-id="<?php echo esc_attr($r->session_id); ?>">
-                <td class="nowrap"><?php echo esc_html(date('d/m · H:i', strtotime($r->created_at))); ?></td>
+                <td class="nowrap"><?php echo esc_html(sapi_megafilter_date_fr($r->created_at, 'd/m · H:i')); ?></td>
                 <td>
                   <?php if ($r->entry_point) : ?>
                     <span class="pill <?php echo esc_attr($entry_class); ?> pill--small"><?php echo esc_html($entry_label); ?></span>
@@ -7797,35 +7932,18 @@ function sapi_megafilter_render_session_detail($r) {
     'sur-mesure' => 'pill--sur-mesure',
     'simple'     => 'pill--simple',
   ];
-  $piece_labels = [
-    'salon' => 'Salon', 'cuisine' => 'Cuisine', 'chambre' => 'Chambre',
-    'chambre-enfant' => 'Chambre enfant',
-    'bureau' => 'Bureau', 'entree' => 'Entrée', 'escalier' => 'Escalier',
-  ];
-  $taille_labels = [
-    'petite' => 'Petite', 'standard' => 'Standard', 'grande' => 'Grande',
-    'intime' => 'Intime', 'confortable' => 'Confortable', 'spacieuse' => 'Spacieuse',
-    'droit' => 'Droit', 'tournant' => 'Tournant',
-  ];
-  $sortie_labels = [
-    'plafond' => 'Plafond', 'mur' => 'Mur', 'aucune' => 'Pas de sortie', 'inconnu' => 'Ne sais pas',
-  ];
-  $hauteur_labels = [
-    'standard'   => 'Standard (2,50 m)',
-    'haut'       => 'Plus haut',
-    'tres_haut'  => 'Très haut',
-  ];
-  $eclairage_labels = [
-    'principal'  => 'Principal',
-    'appoint'    => 'Appoint',
-  ];
-  $table_labels = [
-    'oui' => 'Oui',
-    'non' => 'Non',
-  ];
-  $style_labels = [
-    'moderne' => 'Moderne', 'neutre' => 'Neutre', 'ancien' => 'Ancien',
-  ];
+  /* Construits depuis le questionnaire — voir sapi_megafilter_admin_labels(). */
+  $sapi_labels      = sapi_megafilter_admin_labels();
+  $piece_labels     = $sapi_labels['piece'] ?? [];
+  $style_labels     = $sapi_labels['style'] ?? [];
+  $taille_labels    = ($sapi_labels['taille'] ?? []) + ($sapi_labels['taille_escalier'] ?? []);
+  $sortie_labels    = $sapi_labels['sortie'] ?? [];
+  $hauteur_labels   = $sapi_labels['hauteur'] ?? [];
+  $eclairage_labels = $sapi_labels['eclairage'] ?? [];
+  /* `table` : question retirée du parcours, la colonne n'est plus jamais
+     écrite. Table vide plutôt que des libellés qui laisseraient croire le
+     contraire. */
+  $table_labels     = [];
   $key_labels = [
     'piece'           => 'Pièce',
     'taille'          => 'Taille',
@@ -7848,7 +7966,7 @@ function sapi_megafilter_render_session_detail($r) {
   ];
 
   // ── Title
-  $date_h = wp_date('d/m/Y à H:i', strtotime($r->created_at));
+  $date_h = sapi_megafilter_date_fr($r->created_at);
   $kind = $r->contact_kind;
   $kind_suffix = $r->contact_submitted && $kind ? ' — ' . ($contact_kind_labels[$kind] ?? strtoupper($kind)) : '';
   $piece_suffix = $r->piece ? ' — ' . ($piece_labels[$r->piece] ?? ucfirst($r->piece)) : '';
@@ -7978,7 +8096,7 @@ function sapi_megafilter_render_session_detail($r) {
           <?php if ($r->contact_submitted) : ?>
             <span class="check">✓ Oui</span>
             <?php if ($r->contact_submitted_at) : ?>
-              · <?php echo esc_html(wp_date('d/m/Y à H:i', strtotime($r->contact_submitted_at))); ?>
+              · <?php echo esc_html(sapi_megafilter_date_fr($r->contact_submitted_at)); ?>
             <?php endif; ?>
           <?php else : ?>
             <span style="color:#8c8f94;">Non (abandon)</span>
@@ -8021,7 +8139,7 @@ function sapi_megafilter_render_session_detail($r) {
       <div><span class="t-key">Référent :</span> <?php echo esc_html($r->referrer ?: '—'); ?></div>
       <div><span class="t-key">Appels IA :</span> <?php echo (int)$r->ai_call_count; ?></div>
       <div><span class="t-key">Page d'entrée :</span> <?php echo esc_html($r->entry_url ?: '—'); ?></div>
-      <div><span class="t-key">Créée :</span> <?php echo esc_html(wp_date('d/m/Y H:i:s', strtotime($r->created_at))); ?></div>
+      <div><span class="t-key">Créée :</span> <?php echo esc_html(sapi_megafilter_date_fr($r->created_at, 'd/m/Y H:i:s')); ?></div>
     </div>
   </div>
   <?php

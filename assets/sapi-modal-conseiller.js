@@ -126,6 +126,35 @@
      passent par le champ texte libre, c'est-à-dire par le parcours qu'on
      vient justement de réparer.
      La capture doit rester ICI, au tout premier instant du script. */
+  /* ⚠️ CE QUE LE VISITEUR A RÉPONDU AUJOURD'HUI, et rien d'autre.
+     Le tableau de bord comptait comme « quiz complété » des réponses données
+     lors d'une visite PRÉCÉDENTE : `openModal()` recopie le projet mémorisé
+     dans l'état, le premier changement d'écran déclenche un enregistrement, et
+     la ligne partait avec « salon / grande / plafond / moderne » alors que le
+     visiteur n'avait rien répondu. Ouvrir puis refermer aussitôt suffisait.
+     Pire : l'identifiant est régénéré à chaque chargement de page, donc
+     quelqu'un qui ouvre la pastille sur quatre fiches produit produisait
+     QUATRE lignes identiques, toutes marquées « quiz complet ».
+     Robin décide sur ce chiffre. On ne l'enregistre donc que s'il correspond à
+     quelque chose que le visiteur a fait maintenant.
+     Volontairement à l'échelle de la PAGE, pas de l'ouverture de modale : la
+     ligne en base est la même d'une ouverture à l'autre, l'information doit
+     donc l'être aussi. */
+  var REPONSES_DE_CETTE_SESSION = {};
+  function noterReponse(stepId) {
+    if (stepId) REPONSES_DE_CETTE_SESSION[stepId] = true;
+  }
+  /* Le visiteur n'a rien RETAPÉ, mais il a explicitement VALIDÉ son projet —
+     « Voir ma sélection », « Appliquer cette sélection ». C'est un acte
+     d'aujourd'hui, pas un souvenir de localStorage.
+     Sans ça, le visiteur fidèle qui revient, valide et repart disparaissait des
+     statistiques : la règle « rien de répondu, rien d'enregistré » supprimait
+     bien les lignes en double, mais elle emportait aussi les vrais retours.
+     Une confirmation vaut une réponse. */
+  function noterValidation() {
+    Object.keys(state.answers || {}).forEach(noterReponse);
+  }
+
   var ENTREE_FREETEXT = '';
   try {
     ENTREE_FREETEXT = new URLSearchParams(window.location.search).get('freetext') || '';
@@ -220,8 +249,17 @@
     function buildSnapshotPayload() {
       var payload = {};
       var project = window.sapiProject && window.sapiProject.get ? window.sapiProject.get() : null;
+      /* ⚠️ RIEN N'EST ENVOYÉ TANT QUE LE VISITEUR N'A PAS RÉPONDU AUJOURD'HUI.
+         Le projet mémorisé vient peut-être d'une visite d'il y a trois
+         semaines : l'enregistrer ferait passer une simple ouverture de modale
+         pour un questionnaire rempli. Voir REPONSES_DE_CETTE_SESSION.
+         Conséquence assumée : une session « ouverte puis refermée » n'a plus
+         ni pièce ni réponses en base. C'est la vérité — et ça supprime du même
+         coup les lignes en double d'un visiteur qui ouvre la pastille sur
+         quatre fiches produit. */
+      var aReponduIci = Object.keys(REPONSES_DE_CETTE_SESSION).length > 0;
       if (project) {
-        if (project.answers && Object.keys(project.answers).length) {
+        if (aReponduIci && project.answers && Object.keys(project.answers).length) {
           payload.answers = project.answers;
         }
         if (project.advice_text) payload.advice_text = project.advice_text;
@@ -230,7 +268,7 @@
         if (project.contact_message) payload.contact_message = project.contact_message;
       }
       // answers_completed : toutes les questions visibles répondues
-      if (project && project.answers) {
+      if (aReponduIci && project && project.answers) {
         try {
           var visible = getVisibleStepIds(project.answers);
           payload.answers_completed = (visible.length > 0 && visible.every(function (id) {
@@ -290,6 +328,10 @@
       snapshot: snapshot,
       finalize: finalize,
       incrementAiCallCount: incrementAiCallCount,
+      /* Exposé pour que le formulaire de contact puisse le transmettre au
+         serveur : c'est lui, et lui seul, qui saura marquer la session comme
+         « mail réellement reçu ». */
+      getSessionId: getSessionId,
     };
   })();
 
@@ -428,6 +470,7 @@
     var step = state.currentQuestion;
     state.answers[step] = slug;
     state.labels[step] = label;
+    noterReponse(step); // réponse donnée MAINTENANT — cf. REPONSES_DE_CETTE_SESSION
     cleanInvisibleAnswers();
 
     // Sauvegarde incrémentale dans sapiProject (partielle OK)
@@ -825,6 +868,7 @@
       } else if (typeof val === 'string' && val) {
         state.answers[key] = val;
         state.labels[key]  = getChoiceLabel(key, val);
+        noterReponse(key); // extraite de ce que le visiteur vient d'écrire
       }
     });
     cleanInvisibleAnswers();
@@ -1545,6 +1589,7 @@
      modèles ». On route désormais comme le CTA du chat : vers la page de
      sélection de la pièce, ou vers le contact si aucune pièce n'est connue. */
   function viewSelectionFromS3() {
+    noterValidation(); // validation explicite du projet — cf. noterValidation()
     var project = window.sapiProject ? window.sapiProject.get() : null;
     var needsNewAdvice = !project || !project.advice_text;
     if (needsNewAdvice) {
@@ -1788,6 +1833,7 @@
   // CTA "Appliquer cette sélection" : ferme la modale, dispatch un event pour
   // que la fiche produit applique la pré-sélection variation.
   function applyProductSelection() {
+    noterValidation(); // validation explicite du projet — cf. noterValidation()
     var detail = {
       productId: PRODUCT_CTX && PRODUCT_CTX.id ? PRODUCT_CTX.id : 0,
       answers: state.answers,
@@ -1956,9 +2002,15 @@
 
     // Tracking V3 — snapshot AVANT le submit pour qu'on trace même si le
     // visiteur ferme la modale avant la confirmation serveur.
+    /* ⚠️ PAS de `contact_submitted` ici. On enregistre que le visiteur a
+       TENTÉ (`contact_triggered`) et ce qu'il a écrit — utile même s'il ferme
+       la modale avant la confirmation. Mais l'envoi réel n'est connu que du
+       serveur : les rejets anti-spam répondent « success » en silence, par
+       conception, donc ce code ne peut pas les distinguer d'un vrai envoi.
+       C'est `sapi_megafilter_marquer_contact_envoye()` qui écrit la vérité,
+       après un wp_mail réussi. */
     SessionTracker.snapshot({
       contact_triggered: 1,
-      contact_submitted: 1,
       contact_email: emailVal,
       contact_message: msgVal,
       contact_kind: contactKind,
@@ -1974,6 +2026,9 @@
     fd.append('description', msgVal);
     fd.append('source', 'conseiller-modal');
     fd.append('source_url', window.location.href);
+    // Voir sapi_megafilter_marquer_contact_envoye() : le serveur écrit lui-même
+    // `contact_submitted` sur cette ligne, après un envoi réussi.
+    try { fd.append('session_id', SessionTracker.getSessionId()); } catch (e) { /* swallow */ }
     if (contactKind)    fd.append('contact_kind', contactKind);
     if (contactSubject) fd.append('contact_subject', contactSubject);
     if (project) fd.append('project', JSON.stringify(project));

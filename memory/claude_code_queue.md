@@ -817,7 +817,31 @@ C'est un message d'**ÉTAT**, pas d'action — décision Robin. Conséquence vou
 
 ---
 
-### ✅ TABLEAU DE BORD — TROIS CHIFFRES QUI MENTAIENT
+### ✅ TABLEAU DE BORD — CINQ CHIFFRES REDRESSÉS (2e passe)
+
+1. **« Quiz complétés » comptait des réponses d'anciennes visites.** `openModal()` recopie le projet mémorisé, le premier changement d'écran enregistre, et la ligne partait « salon / grande / plafond / moderne » alors que le visiteur n'avait rien répondu. L'identifiant étant régénéré à chaque page, ouvrir la pastille sur quatre fiches produit produisait **quatre lignes identiques marquées quiz complet**.
+   → `REPONSES_DE_CETTE_SESSION` + `noterReponse()`. Rien n'est envoyé tant que le visiteur n'a pas répondu aujourd'hui.
+   → ⚠️ `noterValidation()` sur « Voir ma sélection » et « Appliquer cette sélection » : **une confirmation vaut une réponse**. Sans ça, le visiteur fidèle qui revient, valide et repart disparaissait des statistiques — on supprimait les doublons ET les vrais retours.
+
+2. **« Contacts envoyés » comptait des mails jamais reçus.** Le client marquait avant l'appel serveur, rien ne rétractait. Étaient comptés les rejets honeypot, time-trap et anti-junk — qui répondent `success` **en silence par conception**, donc que le client ne peut pas distinguer — plus les échecs de `wp_mail`.
+   → **Seul le serveur sait.** `sapi_megafilter_marquer_contact_envoye()`, appelée après un `wp_mail()` réussi. Le client transmet son `session_id` et n'affirme plus rien.
+   → ⚠️ **Contrôle de forme TOLÉRANT** (`{8,32}`) : le repli sans `crypto` produit 19 caractères, pas 16. Un `{16}` strict rejetait 100 % de ces visiteurs en silence — on aurait remplacé un sur-comptage par un sous-comptage.
+
+3. **Deux fuseaux horaires.** La liste utilisait `date()`, le détail `wp_date()` : la même session s'affichait à 14:03 et à 16:03. → `sapi_megafilter_date_fr()` partout, affichage **tel que stocké**. Le stockage n'est PAS touché : l'aligner créerait une frontière entre anciennes et nouvelles lignes.
+
+4. **Les libellés ne correspondaient plus aux réponses.** Deux tables recopiées à la main, douze entrées fantômes. → `sapi_megafilter_admin_labels()`, construite depuis `sapi_guide_get_steps()`.
+   ⚠️ **`inc/guide-data.php` N'EST PAS CHARGÉ EN ADMIN** — tous ses `require_once` sont front ou AJAX. Sans le `require_once` ajouté, la fonction rendait un tableau vide, **le mettait en cache**, et le tableau affichait les slugs bruts : pire que ce qu'elle remplace. Le cache n'est désormais posé que sur un succès.
+
+5. **Le delta « vs période précédente » ignorait tous les filtres.** Filtrer sur « Salon » comparait les sessions salon de cette semaine à TOUTES celles de la précédente. → clause reconstruite avec les mêmes filtres, période exceptée.
+
+⚠️ **À DIRE À ROBIN — TROIS FRONTIÈRES DE LECTURE.** La première semaine après le déploiement, **tous les chiffres baissent, et c'est le signe que ça marche** :
+- `contact_submitted` : avant = « il a cliqué Envoyer », après = « Robin a reçu le mail » ;
+- `answers_completed` / `piece` / `style` : avant = « il y avait un projet en mémoire », après = « il a répondu ou validé aujourd'hui » ;
+- les deltas ne sont comparables qu'entre périodes situées **du même côté** du déploiement.
+
+---
+
+### ✅ TABLEAU DE BORD — TROIS CHIFFRES QUI MENTAIENT (1re passe)
 
 Audit complet demandé par Robin : « est-ce que les parcours sont bien sauvegardés et affichés ? » Réponse : **non**, et le problème n'était pas des chiffres manquants mais des chiffres **faux sans le dire**. Trois correctifs retenus, les moins risqués.
 
