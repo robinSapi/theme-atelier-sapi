@@ -122,9 +122,17 @@ if ($imm_piece) {
      des suspensions dans le carrousel). L'endpoint du moment 2 appelle
      EXACTEMENT la même fonction : les deux chemins ne peuvent plus diverger.
 
-     Toujours piece-level à ce stade — l'URL ne porte encore qu'un critère.
-     C'est l'étape 2 qui la fera lire en entier. */
-  $imm_answers = ['piece' => $imm_piece];
+     ⚠️ L'URL EST LUE EN ENTIER, plus seulement `?piece=`. Le moteur se règle
+     d'abord sur la sortie électrique : le critère le plus déterminant était
+     précisément celui que l'adresse ne savait pas exprimer, et une sélection
+     n'était donc ni partageable ni rechargeable.
+     La pièce reste la CONDITION d'activation de l'immersion — le décor
+     (photo, possessif, conseil figé) n'existe que par elle. Les six autres
+     clés n'ajoutent que de la précision à la sélection. */
+  $imm_answers = function_exists('sapi_mescreations_immersion_answers')
+    ? sapi_mescreations_immersion_answers()
+    : ['piece' => $imm_piece];
+  $imm_answers['piece'] = $imm_piece; // la pièce validée fait foi
   $imm_ctx     = sapi_immersion_build_context($imm_answers);
 
   $imm_products   = $imm_ctx['products'];

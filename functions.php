@@ -460,11 +460,36 @@ function sapi_maison_enqueue_assets() {
         true
       );
       $immersion_piece = sapi_mescreations_immersion_piece();
+      /* ⚠️ LES RÉPONSES COMPLÈTES, PAS SEULEMENT LA PIÈCE.
+         Le JS s'en sert pour deux choses, et les deux cassent s'il ne connaît
+         que la pièce :
+           • semer sa baseline de déduplication — sinon il croit que le serveur
+             n'a rendu qu'une sélection niveau-pièce, envoie une requête pour
+             rien à chaque visite, et REMPLACE la bonne sélection de l'URL par
+             l'ancien projet du visiteur ;
+           • écrire le projet mémorisé à l'arrivée, sans re-valider l'URL de
+             son côté (ce qui ferait une quatrième copie de la whitelist).
+         `signature` est calculée ici, dans l'ordre canonique du questionnaire :
+         c'est la seule façon d'être sûr que les deux côtés produisent la même
+         chaîne. */
+      $immersion_answers = $immersion_piece && function_exists('sapi_mescreations_immersion_answers')
+        ? sapi_mescreations_immersion_answers()
+        : [];
+      if ($immersion_piece) $immersion_answers['piece'] = $immersion_piece;
       wp_localize_script('sapi-mescreations-immersion', 'SAPI_IMMERSION', [
         'ajaxUrl'     => admin_url('admin-ajax.php'),
         'nonce'       => wp_create_nonce('sapi-megafilter'),
         'piece'       => $immersion_piece,
         'possessive'  => $immersion_piece ? sapi_piece_possessive($immersion_piece) : '',
+        'answers'     => $immersion_answers,
+        'signature'   => function_exists('sapi_immersion_signature')
+          ? sapi_immersion_signature($immersion_answers) : '',
+        /* L'ordre canonique des clés, transmis au lieu d'être recopié en JS.
+           C'est ce qui permet au navigateur de produire exactement la même
+           signature que le serveur — et une table de moins à faire diverger. */
+        'ordreCles'   => function_exists('sapi_guide_get_steps')
+          ? array_values(array_filter(array_map(function ($s) { return isset($s['id']) ? $s['id'] : ''; }, sapi_guide_get_steps())))
+          : [],
       ]);
     }
 
@@ -3447,6 +3472,71 @@ function sapi_megafilter_generic_advice_for($piece) {
  * Source unique de vérité pour : le body_class, le rendu serveur du hero
  * immersif, et le flag JS SAPI_IMMERSION.
  */
+/**
+ * Les réponses du questionnaire portées par l'URL, validées.
+ *
+ * ⚠️ POURQUOI L'URL DOIT LES PORTER TOUTES.
+ * `/mes-creations/` était une page de PIÈCE où la sélection était un effet de
+ * bord : le template ne lisait que `?piece=`, alors que le moteur se règle
+ * d'abord sur `sortie` — le critère le plus déterminant était précisément
+ * celui que l'adresse ne savait pas exprimer. Une sélection n'était donc ni
+ * partageable ni rechargeable.
+ *
+ * ⚠️ LECTURE INDIFFÉRENTE À L'ORDRE DES PARAMÈTRES. Les liens déjà partagés
+ * (newsletters, Pinterest) ne doivent jamais casser. C'est l'ÉCRITURE qui
+ * devra produire un ordre constant — sinon la même sélection existe en
+ * centaines de variantes pour le cache et pour Google.
+ *
+ * ⚠️ `?piece=` SEUL RESTE VALIDE POUR TOUJOURS. Les cartes-pièces de l'accueil
+ * et de la page conseils n'écrivent que ça, et des liens sont dans la nature.
+ * Cette fonction ne fait qu'AJOUTER la lecture des six autres clés.
+ *
+ * La validation réutilise `sapi_megafilter_sanitize_project()` : appartenance
+ * stricte à la whitelist, elle-même dérivée du questionnaire. Aucune table
+ * recopiée.
+ */
+function sapi_mescreations_immersion_answers() {
+  $brut = [];
+  foreach (array_keys(sapi_megafilter_filters_whitelist()) as $cle) {
+    if (isset($_GET[$cle]) && is_string($_GET[$cle])) {
+      $brut[$cle] = sanitize_text_field(wp_unslash($_GET[$cle]));
+    }
+  }
+  list($propre) = sapi_megafilter_sanitize_project($brut);
+  return $propre;
+}
+
+/**
+ * La signature d'un jeu de réponses, dans un ORDRE FIXE.
+ *
+ * ⚠️ C'EST CE QUI EMPÊCHE UNE REQUÊTE INUTILE À CHAQUE VISITE.
+ * Le JS compare la signature du projet mémorisé à celle de ce que le serveur a
+ * rendu, pour ne pas redemander une sélection identique. Cette comparaison est
+ * une égalité de chaînes JSON, donc **sensible à l'ordre des clés**. Tant que
+ * la signature n'avait qu'une clé (`piece`), l'ordre ne se voyait pas. À sept
+ * clés, si PHP et JS ne sérialisent pas dans le même ordre, la déduplication
+ * échoue TOUJOURS — sans rien casser de visible : une requête part pour rien à
+ * chaque chargement, et la bonne sélection de l'URL se fait remplacer par
+ * l'ancien projet du visiteur.
+ *
+ * L'ordre canonique est celui du questionnaire (`sapi_guide_get_steps()`), la
+ * source unique. Le miroir JS est dans `sapi-mescreations-immersion.js`.
+ */
+function sapi_immersion_signature(array $answers) {
+  $ordonne = [];
+  if (function_exists('sapi_guide_get_steps')) {
+    foreach (sapi_guide_get_steps() as $step) {
+      $id = isset($step['id']) ? $step['id'] : '';
+      if ($id !== '' && isset($answers[$id])) $ordonne[$id] = $answers[$id];
+    }
+  }
+  // Filet : une clé hors questionnaire ne doit pas disparaître en silence.
+  foreach ($answers as $k => $v) {
+    if (!isset($ordonne[$k])) $ordonne[$k] = $v;
+  }
+  return wp_json_encode($ordonne, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+}
+
 function sapi_mescreations_immersion_piece() {
   if (empty($_GET['piece'])) return '';
   // L'immersion s'active sur ?piece= valide. En pratique ces URLs viennent du

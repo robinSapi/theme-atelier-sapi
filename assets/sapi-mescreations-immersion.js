@@ -18,6 +18,25 @@
 
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 
+  /* ⚠️ MIROIR EXACT DE `sapi_immersion_signature()` CÔTÉ PHP.
+     La déduplication compare deux chaînes JSON : elle est donc sensible à
+     l'ORDRE DES CLÉS. Tant que la signature n'avait qu'une clé, l'ordre ne se
+     voyait pas ; à sept clés, deux ordres différents font échouer la
+     comparaison À CHAQUE FOIS — sans rien casser de visible. Une requête part
+     pour rien à chaque chargement, et la bonne sélection de l'URL se fait
+     remplacer par l'ancien projet du visiteur.
+     L'ordre canonique est celui du questionnaire. `config.ordreCles` vient du
+     serveur : on ne le recopie pas ici, ce serait une table de plus à faire
+     diverger. */
+  function signatureCanonique(answers) {
+    answers = answers || {};
+    var ordre = config.ordreCles || [];
+    var out = {};
+    ordre.forEach(function (k) { if (answers[k]) out[k] = answers[k]; });
+    Object.keys(answers).forEach(function (k) { if (!(k in out) && answers[k]) out[k] = answers[k]; });
+    return JSON.stringify(out);
+  }
+
   function init() {
     var section = document.querySelector('[data-immersion]');
     if (!section) return; // pas en mode immersion
@@ -292,6 +311,25 @@
         navRaf = requestAnimationFrame(updateArrows);
       }, { passive: true });
     }
+    /* ⚠️ LA BASELINE VIENT DU SERVEUR, DANS SON ORDRE.
+       Elle disait `{"piece":"salon"}` alors que la page pouvait être rendue à
+       partir de six critères. Le rattrapage d'en dessous comparait donc une
+       signature complète à une signature à une clé, concluait « ça a changé »,
+       et REMPLAÇAIT la bonne sélection de l'URL par l'ancien projet du
+       visiteur — en envoyant une requête pour rien à chaque visite.
+       ⚠️ La comparaison est une égalité de chaînes JSON, donc sensible à
+       l'ordre des clés. PHP calcule la signature dans l'ordre du questionnaire
+       (`sapi_immersion_signature()`) et nous la transmet toute faite : c'est la
+       seule façon d'être certain que les deux côtés produisent la même chaîne.
+       Ne PAS la recalculer ici. */
+    var lastAnswersSig = config.signature || JSON.stringify({ piece: config.piece || '' });
+
+    /* ⚠️ APPELÉE ICI, ET PAS PLUS HAUT. Elle l'était AVANT la déclaration de
+       `lastAnswersSig` : par hoisting, la baseline valait `undefined` au moment
+       de l'appel, donc la comparaison de déduplication ne sortait JAMAIS. Une
+       requête partait à chaque chargement, même quand le projet mémorisé était
+       rigoureusement identique à ce que le serveur venait de rendre. Défaut
+       antérieur à ce lot, mais c'est lui qui rend la comparaison utile. */
     refineFromStoredProject();
     buildDots();
     updateArrows();
@@ -310,7 +348,6 @@
        pour la pièce seule (archive-product.php : $imm_answers = ['piece' => …]).
        Ainsi « aucun changement » est détecté par la signature, et un changement
        de pièce (recommencer le projet) produit une signature différente → recharge. */
-    var lastAnswersSig = JSON.stringify({ piece: config.piece || '' });
 
     /* Le fetch et l'AFFICHAGE sont volontairement séparés. Au moment 2 on veut
        précharger la sélection pendant que l'IA calcule (les deux attentes se
@@ -392,15 +429,30 @@
        exactement le mécanisme du moment 2 (même endpoint, même dédup). Le
        carrousel est invisible à ce stade (`--reveal` à 0), donc le remplacement
        ne se voit pas.
-       La signature de dédup fait le tri toute seule : si le projet ne contient
-       que la pièce, elle est identique à la baseline et rien n'est demandé. */
+       La signature de dédup fait le tri : si le projet ne contient que la
+       pièce, elle est identique à la baseline et rien n'est demandé.
+       ⚠️ Cette comparaison ne fonctionnait PAS avant le 27/08 : l'appel
+       précédait la déclaration de `lastAnswersSig`, qui valait donc `undefined`
+       par hoisting. Une requête partait à chaque chargement, même pour un
+       projet rigoureusement identique. Ne pas remonter l'appel au-dessus de la
+       baseline. */
     function refineFromStoredProject() {
       if (!sliderEl || !config.ajaxUrl) return;
+      /* ⚠️ QUAND L'URL EN DIT PLUS QUE LA PIÈCE, ELLE FAIT AUTORITÉ.
+         Ce rattrapage existe pour les liens qui ne portent qu'une pièce : les
+         cartes-pièces de l'accueil, les newsletters, Pinterest. Là, le projet
+         mémorisé est plus riche que l'adresse et mérite de compléter.
+         Mais si l'adresse porte déjà plusieurs critères, elle est plus fraîche
+         et plus juste que le localStorage : laisser le projet reprendre la main
+         ferait se dégrader la page sous les yeux du visiteur, en quelques
+         centaines de millisecondes, jusqu'à la sélection d'avant. */
+      var reponsesUrl = config.answers || {};
+      if (Object.keys(reponsesUrl).length > 1) return;
       var proj = null;
       try { proj = (window.sapiProject && window.sapiProject.get) ? window.sapiProject.get() : null; } catch (e) { return; }
       if (!proj || !proj.answers || !proj.answers.piece) return;
       if (proj.answers.piece !== (config.piece || '')) return; // autre pièce : pas notre affaire
-      var sig = JSON.stringify(proj.answers);
+      var sig = signatureCanonique(proj.answers);
       if (sig === lastAnswersSig) return; // rien de plus que la pièce
       fetchSelectionHtml(proj.answers).then(function (data) {
         applySelectionHtml(data, sig);
@@ -425,7 +477,7 @@
       if (!answers || !answers.piece) return;
       // Pièce différente → la page sera rechargée : précharger ne servirait à rien.
       if (answers.piece !== (config.piece || '')) return;
-      var sig = JSON.stringify(answers);
+      var sig = signatureCanonique(answers); // même ordre que la baseline serveur
       if (sig === lastAnswersSig) return; // identique à ce qui est déjà affiché
       pendingSelection = { promise: fetchSelectionHtml(answers), sig: sig };
 
@@ -499,9 +551,23 @@
       // (photo, phrase, pill) ET la sélection restent cohérents.
       if (answers.piece !== (config.piece || '')) {
         var go = function () {
+          /* ⚠️ ON RECONSTRUIT L'ADRESSE, ON NE LA RETOUCHE PAS.
+             On ne remplaçait que `piece`, donc TOUS les autres critères de
+             l'ancienne adresse survivaient. Depuis que le serveur les lit,
+             ils redeviennent actifs : un visiteur qui passait d'un salon avec
+             sortie murale à une cuisine au plafond rechargeait vers
+             `?piece=cuisine&sortie=mur` — la sortie du salon. Le serveur
+             servait des appliques, le projet fraîchement rempli était écrasé,
+             et le conseil de Robin détruit avec lui.
+             On efface donc TOUTES les clés du questionnaire, puis on écrit
+             celles du projet courant, dans l'ordre canonique. Les paramètres
+             étrangers (utm, fbclid) sont préservés. */
           try {
             var url = new URL(window.location.href);
-            url.searchParams.set('piece', answers.piece);
+            var cles = config.ordreCles || ['piece'];
+            cles.forEach(function (k) { url.searchParams.delete(k); });
+            cles.forEach(function (k) { if (answers[k]) url.searchParams.set(k, answers[k]); });
+            if (!url.searchParams.get('piece')) url.searchParams.set('piece', answers.piece);
             window.location.assign(url.toString());
           } catch (err) {
             window.location.search = '?piece=' + encodeURIComponent(answers.piece);
@@ -528,7 +594,7 @@
         return;
       }
       // Même pièce, seuls les affinages changent.
-      var sig = JSON.stringify(answers);
+      var sig = signatureCanonique(answers); // même ordre que la baseline serveur
       if (sig === lastAnswersSig) return; // identique à ce qui est déjà affiché
 
       /* La sélection VA changer → on rejoue la chorégraphie d'arrivée. Placé

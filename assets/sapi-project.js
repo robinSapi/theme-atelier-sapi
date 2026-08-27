@@ -386,26 +386,68 @@
     escalier: 'Cage d\'escalier',
   };
 
+  /* ⚠️ L'ADRESSE FAIT AUTORITÉ À L'ARRIVÉE — mais seulement à l'arrivée.
+     Le projet mémorisé sert ailleurs (fiche produit, présélection, pastilles).
+     Ici, ce que le visiteur vient d'ouvrir est ce qu'il doit voir.
+
+     Trois défauts corrigés d'un coup :
+       • on n'ingérait QUE la pièce. Depuis que l'adresse peut porter les six
+         autres critères, le projet et l'écran divergeaient immédiatement — et
+         c'est le projet qui gagnait, en écrasant la sélection du lien reçu ;
+       • « même pièce » sortait sans rien faire : un lien décrivant un salon
+         avec sortie murale était donc ignoré si le destinataire avait déjà un
+         salon en mémoire ;
+       • « autre pièce » effaçait TOUT puis n'écrivait que la pièce. L'effacement
+         emportait le conseil IA mémorisé et l'état contact, qui ne sont pas des
+         réponses — et il créait une fenêtre où le projet ne contenait que la
+         pièce, exactement l'état qui déclenchait la mauvaise requête.
+     On remplace donc en UN SEUL geste.
+
+     ⚠️ ON N'INGÈRE PAS L'URL, ON INGÈRE CE QUE LE SERVEUR EN A RETENU
+     (`SAPI_IMMERSION.answers`, déjà validé contre le questionnaire). Re-valider
+     ici imposerait une quatrième copie de la whitelist en JS — `VALID_PIECES`
+     est déjà la troisième copie de la seule liste des pièces. */
   function ingestQueryParams() {
     try {
       var params = new URLSearchParams(window.location.search);
       var piece = params.get('piece');
       if (!piece || !Object.prototype.hasOwnProperty.call(VALID_PIECES, piece)) return;
 
-      var existingPiece = getAnswer('piece');
+      var imm = window.SAPI_IMMERSION || {};
+      var reponsesUrl = (imm.answers && imm.answers.piece === piece) ? imm.answers : { piece: piece };
 
-      // F2a-quater : nouvelle pièce arrivée par URL (depuis home, roompicker,
-      // lien externe) → reset COMPLET du projet précédent. Les anciennes
-      // réponses (taille/sortie/hauteur/table/style) n'ont plus de sens sur
-      // une autre pièce — l'utilisateur démarre un nouveau parcours.
-      if (existingPiece && existingPiece !== piece) {
-        clearRaw(); // wipe localStorage silencieusement (notify unique via update)
-        update({ piece: piece }, { piece: VALID_PIECES[piece] });
+      var existingPiece = getAnswer('piece');
+      var pieceChange = existingPiece && existingPiece !== piece;
+      var urlRiche = Object.keys(reponsesUrl).length > 1;
+
+      /* ⚠️ NE RIEN FAIRE SI L'ADRESSE NE DIT RIEN DE NOUVEAU.
+         `set()` remet `advice_text` et l'état contact à zéro — c'est voulu pour
+         un nouveau projet, mais désastreux sur un simple RECHARGEMENT : le
+         conseil de Robin, déjà écrit et affiché, disparaîtrait au profit de la
+         phrase générique, à chaque F5 et à chaque retour arrière.
+         On compare donc les réponses avant d'écrire. */
+      var actuel = get().answers || {};
+      var identique = true;
+      var toutesCles = Object.keys(reponsesUrl).concat(Object.keys(actuel));
+      for (var i = 0; i < toutesCles.length; i++) {
+        if (actuel[toutesCles[i]] !== reponsesUrl[toutesCles[i]]) { identique = false; break; }
+      }
+      if (identique) return;
+
+      // Rien de neuf : même pièce, et l'adresse n'apporte aucun autre critère.
+      if (!pieceChange && !urlRiche && existingPiece === piece) return;
+
+      if (pieceChange || urlRiche) {
+        /* `set` remplace le projet en entier, sans passer par un état
+           intermédiaire vide. Les libellés sont reconstruits pour la pièce ;
+           les autres viendront du questionnaire au prochain passage dans la
+           modale, ce qui est sans conséquence : rien ne les affiche ici. */
+        var labels = {};
+        if (VALID_PIECES[piece]) labels.piece = VALID_PIECES[piece];
+        set(reponsesUrl, labels);
         return;
       }
-      // Même pièce → rien à faire
-      if (existingPiece === piece) return;
-      // Pas de projet existant → ingestion classique
+      // Pas de projet existant, adresse à une seule clé → ingestion classique.
       update({ piece: piece }, { piece: VALID_PIECES[piece] });
     } catch (e) {
       // URLSearchParams indisponible → silencieux
@@ -426,10 +468,24 @@
     ingestQueryParams();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
+  /* ⚠️ ON ATTEND `DOMContentLoaded` DANS TOUS LES CAS SAUF « complete ».
+     `ingestQueryParams` lit `SAPI_IMMERSION`, posé par un script chargé APRÈS
+     celui-ci — il faut donc que tous les scripts aient tourné.
+     Le test naïf `readyState === 'loading'` ne suffit PAS : **en production,
+     Autoptimize ajoute `defer` à tous les scripts**, et dans un script différé
+     `readyState` vaut déjà « interactive ». On tombait donc dans le `else`,
+     `init()` partait immédiatement, avant que `SAPI_IMMERSION` n'existe, et
+     l'ingestion retombait sur la pièce seule : **le lien partagé perdait ses
+     critères, en production uniquement.**
+     Et le site de test n'a PAS Autoptimize : la recette ne pouvait pas le
+     montrer. Robin aurait validé un acquis qu'il n'avait pas.
+     « interactive » précède toujours `DOMContentLoaded`, l'écouteur se
+     déclenche donc bien. Seul « complete » signifie que l'événement est déjà
+     passé. */
+  if (document.readyState === 'complete') {
     init();
+  } else {
+    document.addEventListener('DOMContentLoaded', init);
   }
 
   /* ═══════════════════════════════════════════════════════════
