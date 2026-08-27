@@ -23629,13 +23629,19 @@ button.chip--project:focus-visible {
   -webkit-justify-content: flex-start;
   justify-content: flex-start;
 }
-/* Respiration entre « ton projet » et « ce que je te recommande ». Les deux
-   sections se touchaient, alors que ce sont deux natures différentes — c'est
-   toute la lisibilité de l'écran qui repose sur cette séparation.
-   Financé par la sortie des deux phrases de conseil, qui sont passées DANS la
-   carte : elles ne coûtent plus deux écarts de bloc. */
+/* ── Les trois respirations de l'écran ────────────────────────────────────
+   Il n'y a pas UN écart uniforme mais trois moments : ce que tu as dit, ce que
+   Robin en fait, et ce que tu peux faire. L'écart de bloc générique (10 px en
+   mobile) sert à l'intérieur de chaque moment ; ces marges-ci séparent les
+   moments entre eux, et c'est ce qui rend l'écran lisible d'un coup d'œil.
+   Financées par la sortie des deux phrases de conseil, passées DANS la carte :
+   elles ne coûtent plus deux écarts de bloc. Le contenu tient avec de la marge,
+   la place existe. */
 [data-screen="s-product-recap"] [data-product-recap-reco-label] {
-  margin-top: 10px;
+  margin-top: 20px;
+}
+[data-screen="s-product-recap"] .actions-3 {
+  margin-top: 18px;
 }
 
 /* ── Densité mobile du récap produit ──────────────────────────────────────
