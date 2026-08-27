@@ -53,7 +53,21 @@ Il est masqué en mobile — la carte entière est déjà un lien, il ne servait
 
 ## 2. Défauts connus, non corrigés
 
-### 2.1 Le conseil de l'IA n'a aucune limite de longueur
+### 2.0 Le récap produit peut perdre son haut, sans recours
+`.modal__body-content` est en `justify-content: center` avec `min-height: 0`. Un débordement se répartit donc **en haut autant qu'en bas** — et le haut n'est pas rattrapable au défilement, `scrollTop` ne pouvant pas être négatif.
+
+*Ce que ça donne :* sur iPhone SE, après la compaction du 26/08, il reste environ **9 pixels de marge**. Si une phrase de conseil part sur trois lignes, le titre « TON PROJET » et sa première pastille disparaissent — et rien ne signale au visiteur qu'il manque quelque chose.
+
+*Ce qu'il faudrait :* un `justify-content: flex-start` scopé sur cet écran en mobile. Le centrage n'a de sens que quand le contenu tient. **Une ligne.**
+
+---
+
+### 2.1 Le conseil de l'IA n'a aucune limite de longueur — ✅ CORRIGÉ le 26/08
+`sapi_borner_conseil()` coupe à la dernière **phrase complète** qui tient sous 320 caractères, avec repli au dernier mot entier. Le seuil d'acceptation d'une coupe est volontairement bas (40) : un seuil élevé se retournait contre la règle qu'il servait, en refusant la coupe propre sur le dépassement le plus probable (accroche courte + longue phrase) et en rendant un conseil amputé de 319 caractères là où une première phrase complète de 50 suffisait.
+
+⚠️ **Trois nombres cohabitent désormais sans rien qui les relie** : 300 (la consigne du prompt), 320 (la borne du code), ≤199 (le plus long des replis figés). Si la zone du hero est un jour réduite, la borne ne suivra pas toute seule.
+
+*Texte d'origine, conservé pour mémoire :*
 Le prompt dit « 1 à 2 phrases, max 300 caractères ». **C'est une consigne, pas une contrainte** : rien ne l'applique à la réception. Un modèle qui rend 450 caractères passe tel quel.
 
 *Ce que ça donne :* sur mobile, le texte déborde de sa zone et se fait couper. Toute la mise en page du hero est dimensionnée en supposant un texte borné — cette borne n'existe pas.

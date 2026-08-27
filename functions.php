@@ -2666,6 +2666,64 @@ function sapi_strip_long_dashes($text) {
   return trim($text);
 }
 
+/**
+ * Borne dure de la longueur du conseil IA.
+ *
+ * ⚠️ POURQUOI CETTE FONCTION EXISTE — c'est le précédent que cite déjà le
+ * commentaire de `sapi_strip_long_dashes()` juste au-dessus.
+ * Le prompt dit « 1 à 2 phrases, max 300 caractères ». **C'est une consigne,
+ * pas une contrainte** : rien ne l'appliquait à la réception, et un modèle qui
+ * rend 450 caractères passait tel quel. Or TOUTE la mise en page du hero
+ * immersif est dimensionnée en supposant un texte borné — sur mobile, le texte
+ * débordait de sa zone et se faisait couper. La borne sur laquelle repose la
+ * mise en page n'existait tout simplement pas.
+ *
+ * On coupe à la dernière phrase COMPLÈTE qui tient. Couper au milieu d'une
+ * phrase donnerait un conseil de Robin qui s'interrompt, ce qui est pire qu'un
+ * conseil un peu long. À défaut de ponctuation, on coupe au dernier mot entier
+ * et on pose des points de suspension.
+ *
+ * 320 et non 300 : on laisse au modèle une marge de dépassement raisonnable
+ * plutôt que d'amputer une phrase à 305 caractères qui allait très bien.
+ */
+function sapi_borner_conseil($text, $max = 320) {
+  if (!is_string($text)) return '';
+  $text = trim($text);
+  $len = function_exists('mb_strlen') ? mb_strlen($text, 'UTF-8') : strlen($text);
+  if ($len <= $max) return $text;
+
+  $coupe = function_exists('mb_substr') ? mb_substr($text, 0, $max, 'UTF-8') : substr($text, 0, $max);
+
+  // 1. Dernière fin de phrase dans la portion retenue.
+  if (preg_match_all('/[.!?…]/u', $coupe, $m, PREG_OFFSET_CAPTURE)) {
+    $dernier = end($m[0]);
+    /* ⚠️ TOUT RESTE EN OCTETS ICI, ET C'EST VOULU.
+       `PREG_OFFSET_CAPTURE` rend un offset en octets, `strlen` compte des
+       octets, `substr` coupe des octets : la coupe tombe donc exactement après
+       le dernier octet du caractère trouvé, jamais au milieu.
+       Ne PAS « corriger » en `mb_substr` avec cet offset — ce serait mélanger
+       octets et caractères, et casser l'UTF-8 sans rien faire planter. */
+    $prefixe = substr($coupe, 0, $dernier[1] + strlen($dernier[0]));
+    $phrase = trim($prefixe);
+    /* Le seuil est BAS, volontairement. Il ne sert qu'à écarter une coupe
+       absurde (« Oui. »). Une première phrase complète, même courte, vaut
+       toujours mieux qu'une longue phrase amputée : c'est la règle du
+       docblock. Un seuil élevé la retournait contre elle-même — sur le
+       dépassement le plus probable, une accroche courte suivie d'une longue
+       phrase, il refusait la coupe propre et rendait un conseil de Robin qui
+       s'interrompt en plein milieu. */
+    $lp = function_exists('mb_strlen') ? mb_strlen($phrase, 'UTF-8') : strlen($phrase);
+    if ($lp >= 40) return $phrase;
+  }
+
+  // 2. Repli : dernier mot entier.
+  $espace = function_exists('mb_strrpos') ? mb_strrpos($coupe, ' ', 0, 'UTF-8') : strrpos($coupe, ' ');
+  if ($espace !== false && $espace > 0) {
+    $coupe = function_exists('mb_substr') ? mb_substr($coupe, 0, $espace, 'UTF-8') : substr($coupe, 0, $espace);
+  }
+  return rtrim($coupe, " ,;:") . '…';
+}
+
 function sapi_megafilter_call_claude($model, $system, array $messages, $max_tokens = 1024) {
   $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
   if (empty($api_key)) {
@@ -4165,7 +4223,10 @@ function sapi_ajax_megafilter_advice() {
   if ($ai_text) {
     $parsed = sapi_megafilter_parse_json($ai_text);
     if ($parsed && isset($parsed['advice_text']) && is_string($parsed['advice_text'])) {
-      $advice = sapi_strip_long_dashes(sanitize_textarea_field($parsed['advice_text']));
+      /* La borne s'applique APRÈS le nettoyage des tirets : celui-ci remplace
+         « — » par « , », donc il peut allonger le texte d'un caractère par
+         tiret. Borner avant laisserait repasser au-dessus de la limite. */
+      $advice = sapi_borner_conseil(sapi_strip_long_dashes(sanitize_textarea_field($parsed['advice_text'])));
     }
   }
 

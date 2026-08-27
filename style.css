@@ -23539,6 +23539,12 @@ button.chip--project {
   font-family: inherit;
   text-transform: none;
   letter-spacing: 0.02em;
+  /* ⚠️ Les navigateurs centrent le contenu d'un <button> par défaut. Ça ne se
+     voyait que sur la pastille « Éclairage » : son libellé (« Ce sera la
+     principale source d'éclairage ») est le seul assez long pour passer à la
+     ligne, et ses deux lignes se centraient au milieu de pastilles par
+     ailleurs alignées à gauche. Relevé par Robin en recette. */
+  text-align: left;
   cursor: pointer;
   -webkit-transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
   transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
@@ -23622,6 +23628,40 @@ button.chip--project:focus-visible {
 [data-screen="s-product-recap"] [data-product-recap-project] {
   -webkit-justify-content: flex-start;
   justify-content: flex-start;
+}
+
+/* ── Densité mobile du récap produit ──────────────────────────────────────
+   Recette Robin sur iPhone SE : l'écran déborde et oblige à faire défiler.
+   Quatre gisements, aucun ne touche à la taille du texte de contenu (règle
+   posée lors de la refonte de densité du 25/08) :
+     • l'écart entre blocs : 16 px, SIX fois (l'écran a sept enfants) → −36 px ;
+     • l'encart, que la règle mobile générale passe à UNE colonne — il occupe
+       alors quatre lignes (ESSENCE / Peuplier / TAILLE DU LUMINAIRE / 95 cm)
+       là où deux suffisent. La colonne de gauche prend la largeur de son
+       libellé, la valeur occupe le reste → −44 px ;
+     • le rembourrage des pastilles, qui sont ici sur trois lignes → −12 px ;
+     • l'interligne des deux phrases de conseil → −5 px.
+   Total ≈ 97 px, soit à peu près la hauteur des deux phrases que Robin
+   trouvait coûteuses — sans avoir à les supprimer.
+
+   ⚠️ La marge restante sur iPhone SE est d'environ 9 px. Ce n'est PAS un
+   filet : `.modal__body-content` est en `justify-content: center`, donc un
+   débordement résiduel rogne le HAUT autant que le bas, et le haut n'est pas
+   rattrapable au défilement. Le premier élément à disparaître serait le titre
+   « TON PROJET ». Le vrai correctif est un `justify-content: flex-start` scopé
+   sur cet écran en mobile — noté dans questions_ouvertes.md. */
+@media (max-width: 600px) {
+  [data-screen="s-product-recap"] .modal__body-content { gap: 10px; }
+  [data-screen="s-product-recap"] .recap-card {
+    grid-template-columns: auto 1fr;
+    gap: 4px 12px;
+  }
+  /* Le raccourci rabote aussi l'horizontal (10→8 à gauche, 14→12 à droite). */
+  [data-screen="s-product-recap"] .chip--stacked {
+    padding: 5px 12px 5px 8px;
+    gap: 7px;
+  }
+  [data-screen="s-product-recap"] .conseil-italic { line-height: 1.4; }
 }
 
 /* Récap projet groupé par thème (s3) */
