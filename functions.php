@@ -3182,7 +3182,12 @@ function sapi_ajax_megafilter_freetext() {
       $contact_kind = $parsed['contact_kind'];
     }
     if (isset($parsed['contact_subject']) && is_string($parsed['contact_subject'])) {
-      $contact_subject = sanitize_text_field($parsed['contact_subject']);
+      /* ⚠️ Le filtre des tirets s'appliquait au MESSAGE et pas au SUJET —
+         deux lignes écrites côte à côte, une seule protégée. Le tiret
+         cadratin survivait donc à l'endroit le plus visible : l'objet du
+         mail de Robin, et le tableau de bord. Relevé par Robin sur une
+         capture le 26/08. */
+      $contact_subject = sapi_strip_long_dashes(sanitize_text_field($parsed['contact_subject']));
     }
     if (isset($parsed['contact_message']) && is_string($parsed['contact_message'])) {
       $contact_message = sapi_strip_long_dashes(sanitize_textarea_field($parsed['contact_message']));
@@ -3354,7 +3359,12 @@ function sapi_ajax_megafilter_chat() {
       $contact_kind = $parsed['contact_kind'];
     }
     if (isset($parsed['contact_subject']) && is_string($parsed['contact_subject'])) {
-      $contact_subject = sanitize_text_field($parsed['contact_subject']);
+      /* ⚠️ Le filtre des tirets s'appliquait au MESSAGE et pas au SUJET —
+         deux lignes écrites côte à côte, une seule protégée. Le tiret
+         cadratin survivait donc à l'endroit le plus visible : l'objet du
+         mail de Robin, et le tableau de bord. Relevé par Robin sur une
+         capture le 26/08. */
+      $contact_subject = sapi_strip_long_dashes(sanitize_text_field($parsed['contact_subject']));
     }
     if (isset($parsed['contact_message']) && is_string($parsed['contact_message'])) {
       $contact_message = sapi_strip_long_dashes(sanitize_textarea_field($parsed['contact_message']));
@@ -3879,8 +3889,18 @@ function sapi_render_conseiller_modal() {
           </header>
           <div class="modal__body">
             <div class="modal__body-content">
-              <h2 class="h2"><?php esc_html_e('Reçu — Robin t\'écrit sous 48h', 'theme-sapi-maison'); ?></h2>
-              <p class="subtitle"><?php esc_html_e('Merci pour ta demande. Tu vas recevoir un email de confirmation et Robin te répondra personnellement.', 'theme-sapi-maison'); ?></p>
+              <?php /* ⚠️ NE PAS REPROMETTRE D'ACCUSÉ DE RÉCEPTION.
+                       Cet écran annonçait « tu vas recevoir un email de
+                       confirmation ». Il n'en existe aucun : l'endpoint
+                       n'envoie qu'UN seul mail, à Robin. Le visiteur
+                       surveillait sa boîte pour rien, et certains renvoyaient
+                       le formulaire — les doublons arrivaient chez Robin.
+                       Décision Robin du 26/08 : retirer la promesse plutôt que
+                       d'écrire le mail. Si l'accusé est créé un jour, c'est
+                       ici qu'on pourra le réannoncer, et pas avant.
+                       Tirets cadratins retirés au passage (règle de marque). */ ?>
+              <h2 class="h2"><?php esc_html_e('Reçu, Robin t\'écrit sous 48h', 'theme-sapi-maison'); ?></h2>
+              <p class="subtitle"><?php esc_html_e('Merci pour ta demande. Robin te répondra personnellement à l\'adresse que tu viens de laisser.', 'theme-sapi-maison'); ?></p>
             </div>
           </div>
           <footer class="modal__foot">
@@ -4255,7 +4275,7 @@ function sapi_megafilter_get_style_conseils() {
   return [
     'moderne' => __("Le Peuplier, clair et lumineux, s'accordera parfaitement avec ton intérieur moderne.", 'theme-sapi-maison'),
     'ancien'  => __("L'Okoumé, chaud et ambré, s'intègrera naturellement dans ton intérieur aux tons chauds.", 'theme-sapi-maison'),
-    'neutre'  => __("Les deux essences sont belles — tu pourras voir les photos de chaque finition sur la fiche.", 'theme-sapi-maison'),
+    'neutre'  => __("Les deux essences sont belles, tu pourras voir les photos de chaque finition sur la fiche.", 'theme-sapi-maison'),
   ];
 }
 

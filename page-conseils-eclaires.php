@@ -36,7 +36,7 @@ for ($i = 1; $i <= 4; $i++) {
 
 <!-- 1. Hero -->
 <section class="advice-hero-artisan">
-  <?php echo sapi_image('2025/03/Sapi-header_idees.jpg', 'full', ['alt' => 'Conseils éclairage — Atelier Sâpi', 'class' => 'advice-hero-artisan-img']); ?>
+  <?php echo sapi_image('2025/03/Sapi-header_idees.jpg', 'full', ['alt' => 'Conseils éclairage, Atelier Sâpi', 'class' => 'advice-hero-artisan-img']); ?>
   <div class="advice-hero-artisan-inner">
     <h1>Conseils éclairés</h1>
     <p>Suspensions ou lampadaire ? Quelle ampoule choisir ? Retrouvez ici les infos idéales pour une décoration réussie !</p>

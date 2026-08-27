@@ -91,7 +91,7 @@ function sapi_guide_get_steps() {
       'visibility' => ['sortie' => ['plafond'], 'piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'chambre-enfant', 'entree']],
       'choices'    => [
         ['label' => 'Standard',    'dim' => '< 2,50 m',  'slug' => 'standard',    'icon' => 'ceiling-low'],
-        ['label' => 'Confortable', 'dim' => '2,50–3 m',  'slug' => 'confortable', 'icon' => 'ceiling-mid'],
+        ['label' => 'Confortable', 'dim' => '2,50-3 m',  'slug' => 'confortable', 'icon' => 'ceiling-mid'],
         ['label' => 'Haute',       'dim' => '> 3 m',     'slug' => 'haute',       'icon' => 'ceiling-high'],
       ],
     ],

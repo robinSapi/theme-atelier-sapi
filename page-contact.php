@@ -75,11 +75,11 @@ get_header();
 ?>
 
 <section class="contact-hero">
-  <?php echo sapi_image('2025/07/Charlie-Bandeau-2.jpg', 'full', ['alt' => 'Contact Atelier Sâpi — Créateur de luminaires à Lyon', 'class' => 'contact-hero-img']); ?>
+  <?php echo sapi_image('2025/07/Charlie-Bandeau-2.jpg', 'full', ['alt' => 'Contact Atelier Sâpi, Créateur de luminaires à Lyon', 'class' => 'contact-hero-img']); ?>
   <div class="contact-hero-overlay"></div>
   <div class="contact-hero-content">
     <h1>Parlons de votre projet</h1>
-    <p>Une question, une envie, un projet sur mesure — Robin vous répond personnellement.</p>
+    <p>Une question, une envie, un projet sur mesure : Robin vous répond personnellement.</p>
   </div>
 </section>
 
@@ -125,7 +125,7 @@ get_header();
             </svg>
           </span>
           <span class="contact-card-content">
-            <span class="contact-card-label">L'atelier — sur rendez-vous</span>
+            <span class="contact-card-label">L'atelier, sur rendez-vous</span>
             <span class="contact-card-value"><a href="https://maps.app.goo.gl/vt9whr9AN9At9cMF8" target="_blank" rel="noopener noreferrer">Lyon, France</a></span>
             <span class="contact-card-sub">Lun&ndash;Ven : 9h&ndash;19h &middot; Sam&ndash;Dim : fermé</span>
             <span class="contact-card-sub"><a href="tel:+33680435585">Appelez pour prendre rendez-vous</a></span>
