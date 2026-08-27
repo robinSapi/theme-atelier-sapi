@@ -84,7 +84,17 @@
     transition: false,    // F2a-bis : true pendant l'écran "Robin réfléchit"
     aiController: null,   // Audit #7 : AbortController de la requête IA en cours, abort sur close/replace
     shortMode: false,     // F2b Phase 2 — true quand ouvert depuis fiche produit
-    editFromS3: false,    // Round 4 — true quand on édite une chip depuis S3 (retour direct au récap après modif)
+    /* Où revenir après avoir corrigé une réponse depuis une pastille.
+       `null` = on n'édite pas. Sinon `'s3'` (écran « Voir ton projet ») ou
+       `'product'` (récap de la fiche produit).
+       ⚠️ C'était un BOOLÉEN `editFromS3`, et le retour était codé en dur vers
+       l'écran S3. Rendre les pastilles du récap produit cliquables avec ce
+       booléen aurait éjecté le visiteur de la fiche qu'il regardait : le bouton
+       principal de S3 fait quitter le produit.
+       ⚠️ Une DESTINATION, pas un second drapeau. Ce drapeau-ci a déjà fui d'une
+       ouverture à l'autre une fois ; en ajouter un deuxième rouvrirait la même
+       famille de défaut. */
+    retourApresEdition: null,
     chat: {
       conversation: [],   // [{role:'user'|'assistant', content:'...'}]
       sessionId: null,
@@ -490,14 +500,21 @@
       showQuestion(nextStep);
       // F2a-quater : bascule visuelle S0→S1 (ou no-op si déjà S1)
       if (state.screen !== 's1') showScreen('s1');
-    } else if (state.editFromS3) {
-      // Round 4 — édition d'une chip depuis S3 : retour direct au récap
-      // (toutes les questions suivantes ont déjà des réponses valides).
-      state.editFromS3 = false;
+    } else if (state.retourApresEdition) {
+      /* Correction d'une réponse depuis une pastille : on revient à l'écran
+         D'OÙ ON VENAIT, pas à un écran choisi une fois pour toutes. Les
+         questions suivantes ont déjà des réponses valides, il n'y a rien à
+         redemander. */
+      var destination = state.retourApresEdition;
+      state.retourApresEdition = null;
       if (window.sapiProject) {
-        window.sapiProject.update(state.answers, state.labels);
+        /* `set` et non `update` : après une correction pièce → escalier,
+           `cleanInvisibleAnswers` a retiré `taille` de l'état, mais un patch
+           fusionnant l'aurait laissée en mémoire. L'écran aurait été juste et
+           le stockage faux. */
+        window.sapiProject.set(state.answers, state.labels);
       }
-      showS3Recap();
+      if (destination === 'product') { showProductRecap(); } else { showS3Recap(); }
     } else if (state.shortMode) {
       // F2b Phase 2 — fin du parcours court : récap produit + IA dédiée (pas de
       // morphing modale→card, on reste dans la modale ouverte).
@@ -523,6 +540,22 @@
          toujours en mémoire, et sans aucun chemin de retour vers le récap.
          Chemin exact : récap → clic sur une chip (qui vide volontairement la
          pile d'historique) → « Étape précédente ». */
+
+      /* ⚠️ CE CHEMIN AUSSI DOIT CONNAÎTRE LA DESTINATION.
+         Le clic sur une pastille vide l'historique, donc « Étape précédente »
+         tombe TOUJOURS ici. Le retour était codé en dur vers l'écran de la
+         page de sélection : le visiteur qui corrigeait une réponse depuis une
+         fiche produit puis se ravisait était éjecté de sa fiche, au deuxième
+         clic, à tous les coups. C'est exactement l'éjection que ce lot
+         supprime — je l'avais convertie dans la branche de réponse et oubliée
+         ici. Trouvé en relecture. */
+      if (state.retourApresEdition) {
+        var retour = state.retourApresEdition;
+        state.retourApresEdition = null;
+        if (retour === 'product') { showProductRecap(); return; }
+        showS3Recap();
+        return;
+      }
       var back = determineInitialState();
       if (back === 's3-carrefour') { showS3Recap(); return; }
       renderS0Hybrid(back);
@@ -1427,6 +1460,7 @@
     state.answers = {};
     state.labels = {};
     state.questionHistory = [];
+    state.retourApresEdition = null; // on repart de zéro : plus d'édition en cours
     renderS0Hybrid('s0-initial');
   }
 
@@ -1468,8 +1502,9 @@
 
      @param sid       clé de la réponse (piece, taille, style…)
      @param opts      { cliquable: bool, motCle: string }
-                      `cliquable` : un <button> qui édite la réponse. ⚠️ Sur la
-                      fiche produit il DOIT rester faux — voir plus bas.
+                      `cliquable` : un <button> qui édite la réponse. Le
+                      retour se fait sur l'écran d'où part le clic — voir
+                      `state.retourApresEdition`.
                       `motCle` : remplace le libellé par défaut (la fiche
                       produit dit « Taille de la pièce », pas « Taille »). */
   function buildProjectChip(sid, opts) {
@@ -1488,11 +1523,14 @@
 
     var chip;
     if (opts.cliquable) {
-      /* ⚠️ `data-step-edit` est écouté sur TOUTE la modale, pas sur un écran.
-         Toute pastille qui le porte devient cliquable où qu'elle soit — et le
-         retour après édition est codé en dur vers l'écran de la page de
-         sélection, dont le bouton principal fait QUITTER la fiche produit.
-         D'où le `<span>` par défaut. */
+      /* ⚠️ `data-step-edit` est écouté sur TOUTE la modale, pas sur un écran :
+         toute pastille qui le porte devient cliquable où qu'elle soit. C'est
+         sans danger depuis que le retour après édition est une DESTINATION
+         (`state.retourApresEdition`) déduite de l'écran d'où part le clic, et
+         non plus un retour codé en dur vers l'écran de la page de sélection.
+         ⚠️ Si tu ajoutes un troisième écran portant ces pastilles, ajoute-lui
+         sa destination dans l'écouteur — sinon il retombera sur `'s3'` et
+         éjectera le visiteur de l'endroit où il était. */
       chip = document.createElement('button');
       chip.type = 'button';
       chip.setAttribute('data-step-edit', sid);
@@ -1657,6 +1695,7 @@
     state.answers = {};
     state.labels = {};
     state.questionHistory = [];
+    state.retourApresEdition = null; // on repart de zéro : plus d'édition en cours
     renderS0Hybrid('s0-initial');
   }
 
@@ -1750,16 +1789,17 @@
        afficher ici promettrait un effet qu'elles n'ont pas sur cet écran.
        La phrase à se raconter : « on montre les réponses dont sort le conseil,
        et rien d'autre. »
-       ⚠️ Pastilles NON cliquables ici : l'écouteur d'édition est global à la
-       modale et son retour ramène vers l'écran de la page de sélection, dont
-       le bouton principal fait quitter la fiche produit. */
+       Pastilles CLIQUABLES : un clic corrige la réponse et ramène ICI, sur la
+       fiche produit — pas sur l'écran de la page de sélection, dont le bouton
+       principal ferait quitter le produit qu'on regarde. C'est ce que rend
+       possible `state.retourApresEdition`. */
     var chipsProjet = ['piece', 'taille', 'taille_escalier', 'style'];
     var MOTS_CLES_PRODUIT = { taille: 'Taille de la pièce' };
     if (els.productRecapProject) {
       els.productRecapProject.innerHTML = '';
       var nbChips = 0;
       chipsProjet.forEach(function (sid) {
-        var chip = buildProjectChip(sid, { cliquable: false, empile: true, motCle: MOTS_CLES_PRODUIT[sid] });
+        var chip = buildProjectChip(sid, { cliquable: true, empile: true, motCle: MOTS_CLES_PRODUIT[sid] });
         if (chip) { els.productRecapProject.appendChild(chip); nbChips++; }
       });
       els.productRecapProject.hidden = !nbChips;
@@ -1848,6 +1888,7 @@
     state.answers = {};
     state.labels = {};
     state.questionHistory = [];
+    state.retourApresEdition = null; // on repart de zéro : plus d'édition en cours
     renderS0Hybrid('s0-initial');
   }
 
@@ -2082,7 +2123,7 @@
     state.questionHistory = [];
     state.transition = false;
     /* ⚠️ CES DEUX-LÀ FUYAIENT D'UNE OUVERTURE À L'AUTRE.
-       `editFromS3` n'était remis à `false` que dans UNE branche de
+       `retourApresEdition` (alors booléen `editFromS3`) n'était remis à zéro que dans UNE branche de
        `answerCurrentQuestion`. Le visiteur qui ouvrait le récap, cliquait une
        chip pour corriger, puis se ravisait et fermait, laissait le drapeau
        levé : à la session suivante, arrivé au bout du questionnaire, il
@@ -2091,7 +2132,7 @@
        `chat.conversation` n'était vidé que sur deux chemins d'entrée : le
        tracking pouvait donc réémettre la conversation de la session
        précédente. */
-    state.editFromS3 = false;
+    state.retourApresEdition = null;
     state.chat.conversation = [];
 
     state.open = true;
@@ -2360,7 +2401,7 @@
     });
 
     // Round 4 — Click sur une chip de récap S3 → édite ce step.
-    // Bascule sur S1 avec la question correspondante, en mode editFromS3
+    // Bascule sur S1 avec la question correspondante, en mode édition
     // pour qu'à la fin du flow (qui peut être immédiate si aucune réponse
     // n'est invalidée par le changement), on retourne directement au récap.
     els.modal.addEventListener('click', function (e) {
@@ -2368,7 +2409,10 @@
       if (!editChip) return;
       var stepId = editChip.getAttribute('data-step-edit');
       if (!stepId) return;
-      state.editFromS3 = true;
+      /* La destination se déduit de l'écran courant. C'est la seule
+         information qui manquait pour rendre les pastilles du récap produit
+         cliquables sans éjecter le visiteur de sa fiche. */
+      state.retourApresEdition = (state.screen === 's-product-recap') ? 'product' : 's3';
       // Reset questionHistory pour que le retour de S1 ne ramène pas à
       // d'anciennes questions du parcours initial — depuis S3 on est
       // "hors-flow", on permet juste l'édition ponctuelle.
