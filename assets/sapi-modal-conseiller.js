@@ -62,17 +62,14 @@
   var CONTACT_SURMESURE_URL = config.contactSurmesureUrl || '/sur-mesure/';
   var CONTACT_EMAIL         = config.contactEmail || 'robin@atelier-sapi.fr';
 
-  /* Mapping projet → essence — COPIE de `sapi-product-preselect.js`
-     (`projectToEssence`) et de `sapi-photo-swap.js` (`deriveEssence`). Les
-     trois doivent rester identiques : elles pilotent le récap, la
-     présélection et la photo. **Toute modification ici doit être reportée
-     dans les deux autres.**
-     `neutre` = « Pas de préférence » → peuplier (décision Robin du 26/08) :
-     le visiteur a délégué le choix, pas refusé de choisir. */
-  var ESSENCE_FROM_STYLE = { moderne: 'peuplier', ancien: 'okoume', neutre: 'peuplier' };
+  /* ⚠️ LES TABLES DE TRADUCTION DU PROJET VIVENT DANS `sapi-project.js`.
+     `style → essence` existait ici, dans `sapi-product-preselect.js` et dans
+     `sapi-photo-swap.js` ; `taille → index` existait ici et là-bas, **avec une
+     divergence réelle sur l'escalier** qui faisait appliquer une taille et en
+     annoncer une autre sur le même écran. Ne pas les réintroduire.
+     Seuls restent ici les libellés d'affichage, qui ne sont lus que par la
+     modale. */
   var ESSENCE_LABEL      = { peuplier: 'Peuplier', okoume: 'Okoumé' };
-  // Mapping taille → index dans le select WC (legacy)
-  var TAILLE_TO_INDEX    = { petite: 0, moyenne: 1, grande: 2 };
 
   // F2a-ter : labels humains des clés pour les chips récap S3 ("Pièce : Salon").
   var KEY_LABELS = {
@@ -1606,18 +1603,41 @@
 
   // Lit le label de l'option taille effectivement disponible sur le produit
   // (correspondant à l'index dérivé du projet). Renvoie '' si pas de match.
+  /* ⚠️ MÊME CALCUL QUE LA PRÉSÉLECTION, JAMAIS UN DEUXIÈME.
+     Cette fonction refaisait tout de son côté : sa propre table `taille →
+     index`, son propre `querySelector` sur le seul nom `attribute_pa_taille`,
+     et sa propre règle pour l'escalier. Résultat, sur le MÊME écran : l'encart
+     affichait la taille du milieu pour un escalier ouvert, et la phrase juste
+     en dessous annonçait « cette grande taille ». Le site appliquait une chose
+     et en écrivait une autre.
+
+     ⚠️ POURQUOI ON PARTAGE LE CALCUL ET NON LE RÉSULTAT. Il serait tentant de
+     lire l'étiquette `data-sapi-recommandation` que la présélection pose sur le
+     formulaire. Ça ne marche pas ici : `openModal()` MET EN PAUSE les
+     notifications du projet, donc l'étiquette n'est réécrite qu'à la FERMETURE
+     de la modale — après cet écran. On lirait une étiquette absente (visiteur
+     sans projet préalable, le parcours le plus fréquent) ou périmée, et le
+     conseil de taille juste en dessous, lui calculé sur les réponses
+     courantes, la contredirait. Le défaut d'origine, revenu par une porte de
+     service. Trouvé en relecture, avant livraison. */
   function readTailleLabelFromProductSelect(answers) {
-    var sel = document.querySelector('select[name="attribute_pa_taille"]');
+    var form = document.querySelector('form.variations_form');
+    if (!form) return '';
+    // Le menu de TAILLE : celui des variations qui n'est pas la matière.
+    var sel = null;
+    var sels = form.querySelectorAll('.variations select');
+    for (var i = 0; i < sels.length; i++) {
+      var n = sels[i].name || '';
+      if (n.indexOf('materiau') === -1 && n.indexOf('essence') === -1) { sel = sels[i]; break; }
+    }
     if (!sel) return '';
     var options = [];
-    for (var i = 0; i < sel.options.length; i++) {
-      if (sel.options[i].value) options.push(sel.options[i]);
+    for (var j = 0; j < sel.options.length; j++) {
+      if (sel.options[j].value) options.push(sel.options[j]);
     }
-    if (!options.length) return '';
-    var taille = answers.taille || (answers.piece === 'escalier' && answers.taille_escalier === 'ouvert' ? 'moyenne' : '');
-    if (!(taille in TAILLE_TO_INDEX)) return '';
-    var idx = Math.min(TAILLE_TO_INDEX[taille], options.length - 1);
-    return (options[idx].textContent || options[idx].text || '').trim();
+    if (!options.length || !window.sapiProject || !window.sapiProject.resoudreTaille) return '';
+    var option = window.sapiProject.resoudreTaille(options, window.sapiProject.tailleIntention(answers));
+    return option ? (option.textContent || option.text || '').trim() : '';
   }
 
   // Construit l'intro "Pour <ta/ton pièce>, Robin recommande :" — tutoiement,
@@ -1645,7 +1665,9 @@
     var answers = state.answers;
     var labels = state.labels;
     var style = answers.style;
-    var essence = ESSENCE_FROM_STYLE[style] || null;
+    var essence = (window.sapiProject && window.sapiProject.styleToEssence)
+      ? (window.sapiProject.styleToEssence(answers) || null)
+      : null;
     var essenceLabel = essence ? ESSENCE_LABEL[essence] : '';
     var tailleLabel = readTailleLabelFromProductSelect(answers);
 
@@ -1678,14 +1700,24 @@
       els.productRecapConseil.hidden = !conseil;
     }
 
-    // Conseil de taille (mirror conseil de style — texte fixe pré-généré).
-    // Slug dérivé : pour escalier, taille_escalier=ouvert→grande, standard→petite.
+    /* Conseil de taille — LE MÊME CALCUL QUE L'ENCART, pas un deuxième.
+       ⚠️ Ce bloc dérivait son slug tout seul : `ouvert → grande`,
+       `standard → petite`. L'encart, lui, affichait la taille du milieu pour
+       un escalier ouvert et rien du tout pour un standard. Les deux étaient sur
+       le même écran, l'un sous l'autre : le site appliquait une taille et en
+       annonçait une autre, et il commentait une taille qu'il n'affichait pas.
+       L'intention vient maintenant de la source unique (`sapi-project.js`), la
+       même qui pilote la présélection.
+
+       Et la phrase suit la LIGNE : si l'encart n'annonce aucune taille, il n'y
+       a rien à commenter. Une phrase orpheline sous une ligne absente. */
     if (els.productRecapConseilTaille) {
-      var tailleSlug = answers.taille || '';
-      if (!tailleSlug && answers.piece === 'escalier' && answers.taille_escalier) {
-        tailleSlug = answers.taille_escalier === 'ouvert' ? 'grande' : 'petite';
-      }
-      var conseilTaille = (tailleSlug && SIZE_CONSEILS[tailleSlug]) || '';
+      var intention = (window.sapiProject && window.sapiProject.tailleIntention)
+        ? window.sapiProject.tailleIntention(answers)
+        : null;
+      // 'max' = la plus grande disponible : c'est bien du grand qu'on parle.
+      var slugConseil = (intention === 'max') ? 'grande' : intention;
+      var conseilTaille = (hasTaille && slugConseil && SIZE_CONSEILS[slugConseil]) || '';
       els.productRecapConseilTaille.textContent = conseilTaille;
       els.productRecapConseilTaille.hidden = !conseilTaille;
     }

@@ -1309,7 +1309,11 @@ function sapi_enqueue_photo_swap() {
   wp_enqueue_script(
     'sapi-photo-swap',
     $base . '/assets/sapi-photo-swap.js',
-    [], // pas de dépendance dure — sapiProject n'est pas en wp_register_script
+    // `sapi-project` porte les tables de traduction du projet ET la mémoire
+    // que ce script lit déjà. La dépendance était omise (« pas en
+    // wp_register_script » — inexact, elle est enqueuée globalement plus haut),
+    // donc l'ordre n'était garanti que par chance.
+    ['sapi-project'],
     filemtime($path),
     true // footer
   );

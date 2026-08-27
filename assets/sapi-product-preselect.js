@@ -2,106 +2,62 @@
  * Sapi Product Preselect — Pré-sélection de variation sur fiche produit (F2b Phase 3).
  *
  * Deux déclencheurs :
- *  1. AU LOAD : si sapiProject contient une taille (ou taille_escalier), on
- *     pré-sélectionne la variation correspondante dès que le formulaire WC est prêt.
- *  2. ÉVÉNEMENT 'sapi:apply-product-selection' (dispatché par la modale au CTA
- *     "Appliquer cette sélection") : on applique l'ID variation retourné par
- *     l'IA serveur — plus précis que le matching client.
+ *  1. AU LOAD : dès que le formulaire WooCommerce est prêt, on pose la taille et
+ *     l'essence que le projet mémorisé désigne.
+ *  2. ÉVÉNEMENT 'sapi:apply-product-selection', émis par la modale au clic sur
+ *     « Appliquer cette sélection ».
  *
- * Pattern repris de la version éprouvée pré-F1c (assets/cinetique.js, bloc
- * supprimé en F1c) : utilise jQuery wc_variation_form event + setTimeout
- * fallback pour gérer le timing init WC.
+ * Et une TROISIÈME chose, qui n'applique rien : à chaque changement du projet,
+ * on réécrit l'étiquette `data-sapi-recommandation` sur le formulaire. C'est
+ * elle que lit la pill pour dire « C'est le mieux pour ton projet ».
+ *
+ * ⚠️ CE FICHIER NE CONTIENT AUCUNE TABLE. `style → essence` et
+ * `taille → intention` vivent dans `sapi-project.js`, le seul fichier chargé
+ * partout où la question se pose. Elles ont existé en trois exemplaires, avec
+ * des divergences réelles — dont celle qui faisait appliquer une taille et en
+ * annoncer une autre sur le même écran. Ne pas les réintroduire ici.
+ *
+ * Ce fichier sait UNE chose que personne d'autre ne sait : combien de tailles a
+ * ce modèle précis. C'est `resoudreTaille()` qui traduit l'intention en option.
  *
  * Échecs silencieux (décision Robin C) : pas d'erreur visible si pas de match.
  */
 (function () {
   'use strict';
 
-  // Mapping projet → index dans les options du select taille.
-  // Repris du legacy mon-projet.js (pré-F1c) : petite=0, moyenne=1, grande=2,
-  // escalier ouvert=1 (décision Robin). Retourne null si pas de reco.
-  function projectToTailleIndex(answers) {
-    if (!answers) return null;
-    if (answers.piece === 'escalier') {
-      if (answers.taille_escalier === 'ouvert') return 1;
-      return null;
-    }
-    if (answers.taille === 'petite')  return 0;
-    if (answers.taille === 'moyenne') return 1;
-    if (answers.taille === 'grande')  return 2;
-    return null;
+  /* L'INTENTION vient de `sapi-project.js`, source unique. On ne la recalcule
+     pas ici : elle a existé en trois versions incohérentes, et c'est ce qui
+     faisait que le site appliquait une taille tout en en annonçant une autre
+     sur le même écran.
+     ⚠️ PAS de repli sur une table locale si la fonction manque : ce serait le
+     repli silencieux garanti — deux tables qui divergent sans que rien ne
+     plante. Mieux vaut que ça se voie une fois au déploiement (vider le cache)
+     que ça mente tous les jours. */
+  function intentionTaille(answers) {
+    return (window.sapiProject && window.sapiProject.tailleIntention)
+      ? window.sapiProject.tailleIntention(answers)
+      : null;
   }
 
-  // Mapping projet → code de taille S/M/L (fallback si l'index dépasse, ou pour
-  // les produits dont les valeurs sont sluggées en S/M/L). Sert au matching
-  // secondaire dans findOptionForSize après échec du mapping par index.
-  function projectToSizeCode(answers) {
-    var idx = projectToTailleIndex(answers);
-    if (idx === 0) return 'S';
-    if (idx === 1) return 'M';
-    if (idx === 2) return 'L';
-    return '';
+  /* La traduction intention → option vit aussi dans `sapi-project.js` : le
+     récap de la modale en a besoin au moment où l'étiquette n'est pas encore
+     rafraîchie (la modale met les notifications en pause). On partage le
+     CALCUL, pas seulement le résultat. */
+  function resoudreTaille(options, intention) {
+    return (window.sapiProject && window.sapiProject.resoudreTaille)
+      ? window.sapiProject.resoudreTaille(options, intention)
+      : null;
   }
 
-  /* Mapping projet.style → essence.
-     ⚠️ CETTE TABLE EXISTE EN TROIS EXEMPLAIRES : ici, `sapi-photo-swap.js`
-     (`deriveEssence`) et `sapi-modal-conseiller.js` (`ESSENCE_FROM_STYLE`).
-     Elles pilotent respectivement la présélection, la photo affichée et le
-     récap de la modale : les faire diverger, c'est montrer une photo de
-     peuplier sous un récap qui dit okoumé. **Toute modification ici doit être
-     reportée dans les deux autres.**
-
-     `neutre` = « Pas de préférence » → PEUPLIER (décision Robin du 26/08).
-     Le visiteur n'a pas refusé de choisir, il a délégué : lui laisser un menu
-     vide serait lui rendre la question qu'il vient de nous confier. Sans cette
-     valeur par défaut, la pill « C'est le mieux pour ton projet » ne pouvait
-     jamais s'afficher pour lui — elle exige que TOUS les attributs soient
-     recommandés, et son essence ne l'était pas.
-
-     ⚠️ Un style ABSENT reste sans recommandation, volontairement : quelqu'un
-     arrivé par une carte-pièce ou par le texte libre n'a jamais parlé de
-     style, et lui choisir un bois serait décider à sa place, pas pour lui. */
+  /* La table `style → essence` vit dans `sapi-project.js`, source unique.
+     Elle a existé ici, dans `sapi-photo-swap.js` et dans
+     `sapi-modal-conseiller.js` — trois copies à modifier à la main, donc trois
+     occasions de diverger, donc une photo de peuplier sous un récap annonçant
+     l'okoumé. Ne pas la réintroduire, même « juste pour un repli ». */
   function projectToEssence(answers) {
-    if (!answers || !answers.style) return '';
-    if (answers.style === 'moderne') return 'peuplier';
-    if (answers.style === 'ancien')  return 'okoume';
-    if (answers.style === 'neutre')  return 'peuplier';
-    return '';
-  }
-
-  // Trouve l'option dans un <select> dont la value correspond au code S/M/L.
-  // Stratégies en cascade : value exacte → préfixe → index (S=0, M=1, L=2).
-  function findOptionForSize(select, sizeCode) {
-    if (!select || !sizeCode) return null;
-    var target = sizeCode.toLowerCase();
-    var options = [];
-    for (var i = 0; i < select.options.length; i++) {
-      if (select.options[i].value) options.push(select.options[i]);
-    }
-    if (!options.length) return null;
-
-    // 1. Match exact sur value (ex. value="s", "m", "l")
-    for (var j = 0; j < options.length; j++) {
-      if (options[j].value.toLowerCase() === target) return options[j];
-    }
-    // 2. Match sur préfixe value (ex. "s-petit", "l-grande")
-    for (var k = 0; k < options.length; k++) {
-      var v = options[k].value.toLowerCase();
-      if (v.indexOf(target + '-') === 0 || v.indexOf(target + '_') === 0) return options[k];
-    }
-    // 3. Match sur label (ex. "S — Petit", "L (grande)")
-    for (var l = 0; l < options.length; l++) {
-      var txt = (options[l].textContent || '').trim().toLowerCase();
-      if (txt === target || txt.indexOf(target + ' ') === 0 || txt.indexOf(target + ' —') === 0) return options[l];
-    }
-    // 4. Fallback : index (S=0, M=1, L=2) clamp aux options dispo
-    var indexMap = { 's': 0, 'm': 1, 'l': 2 };
-    var idx = indexMap[target];
-    if (typeof idx === 'number') {
-      idx = Math.min(idx, options.length - 1);
-      return options[idx];
-    }
-    return null;
+    return (window.sapiProject && window.sapiProject.styleToEssence)
+      ? window.sapiProject.styleToEssence(answers)
+      : '';
   }
 
   // Trouve le select de taille parmi les attributs WC (peut être pa_taille, pa_format, etc.)
@@ -129,10 +85,6 @@
     return true;
   }
 
-  // Pré-sélection taille : on essaie d'abord par INDEX (pattern éprouvé pré-F1c
-  // qui ignore complètement les noms d'options) ; si l'index n'est pas
-  // disponible (escalier standard, ne-sais-pas), on retombe sur le matching
-  // S/M/L via findOptionForSize.
   /* Quelle option de taille CE projet désigne, sans l'appliquer.
      Séparé de l'application pour que la recommandation puisse être DÉCLARÉE
      avant d'être posée — voir `declarerRecommandation()` plus bas. */
@@ -144,18 +96,8 @@
       if (sizeSelect.options[i].value) options.push(sizeSelect.options[i]);
     }
     if (!options.length) return null;
-
-    // 1. INDEX-based (pattern éprouvé)
-    var idx = projectToTailleIndex(answers);
-    if (typeof idx === 'number') {
-      return { select: sizeSelect, option: options[Math.min(idx, options.length - 1)] };
-    }
-
-    // 2. Fallback : matching S/M/L par value/label/préfixe
-    var sizeCode = projectToSizeCode(answers);
-    if (!sizeCode) return null;
-    var match = findOptionForSize(sizeSelect, sizeCode);
-    return match ? { select: sizeSelect, option: match } : null;
+    var option = resoudreTaille(options, intentionTaille(answers));
+    return option ? { select: sizeSelect, option: option } : null;
   }
 
   function preselectTaille(form, answers) {
@@ -237,53 +179,6 @@
     try {
       document.dispatchEvent(new CustomEvent('sapi:recommandation-declaree'));
     } catch (e) { /* swallow */ }
-  }
-
-  // Pré-sélection à partir d'un variation_id (utilisé après "Appliquer cette
-  // sélection" depuis la modale). On lit data-product_variations sur le form
-  // pour récupérer les attributs de cette variation, puis on applique chaque
-  // attribut sur son select correspondant.
-  function preselectFromVariationId(form, variationId) {
-    if (!form || !variationId) return false;
-    var raw = form.getAttribute('data-product_variations');
-    if (!raw) return false;
-    var variations;
-    try { variations = JSON.parse(raw); } catch (e) { return false; }
-    if (!Array.isArray(variations)) return false;
-    var target = null;
-    for (var i = 0; i < variations.length; i++) {
-      if (parseInt(variations[i].variation_id, 10) === parseInt(variationId, 10)) {
-        target = variations[i];
-        break;
-      }
-    }
-    if (!target || !target.attributes) return false;
-
-    /* Même discipline que `preselectAll` : on repère TOUTES les cibles, on
-       déclare la carte en une fois, puis on applique. Sans ça, ce chemin-là
-       poserait la bonne version sans jamais l'annoncer à la pill. */
-    var cibles = [];
-    Object.keys(target.attributes).forEach(function (attrName) {
-      var attrVal = target.attributes[attrName];
-      if (!attrVal) return;
-      var sel = form.querySelector('select[name="' + attrName + '"]');
-      if (!sel) return;
-      // Trouve l'option dont value === attrVal (insensible casse)
-      for (var j = 0; j < sel.options.length; j++) {
-        if (sel.options[j].value && sel.options[j].value.toLowerCase() === String(attrVal).toLowerCase()) {
-          cibles.push({ select: sel, option: sel.options[j] });
-          break;
-        }
-      }
-    });
-
-    declarerRecommandation(form, cibles);
-
-    var any = false;
-    cibles.forEach(function (c) {
-      if (applyOption(c.select, c.option)) any = true;
-    });
-    return any;
   }
 
   // Bind sur le form : déclenche au moment où WC l'initialise.
@@ -389,16 +284,11 @@
       var detail = (e && e.detail) || {};
       var f = document.querySelector('form.variations_form');
       if (!f) return;
-      // Priorité au variation_id fourni par le serveur (couvre taille ET essence
-      // si la matière est une variation WC)
-      if (detail.variationId) {
-        preselectFromVariationId(f, detail.variationId);
-        // Essence en plus si elle est gérée hors variations (swatch custom)
-        var essence = projectToEssence(detail.answers || {});
-        if (essence) preselectEssence(f, essence);
-        return;
-      }
-      // Fallback : essence immédiate + taille avec délai
+      /* Il existait ici une branche prioritaire « variation_id fourni par le
+         serveur ». Retirée : AUCUN émetteur n'a jamais posé `variationId` —
+         l'endpoint qui devait le fournir n'existe plus dans le code. La branche
+         et ses 46 lignes ne pouvaient pas s'exécuter, mais l'en-tête du fichier
+         affirmait qu'elles étaient le chemin « plus précis ». */
       preselectAll(f, detail.answers || {});
     });
 

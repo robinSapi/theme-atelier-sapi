@@ -432,8 +432,89 @@
     init();
   }
 
+  /* ═══════════════════════════════════════════════════════════
+     TRADUIRE UN PROJET — les deux seules tables qui comptent
+     ═══════════════════════════════════════════════════════════
+     ⚠️ ELLES VIVENT ICI PARCE QUE C'EST LE SEUL FICHIER CHARGÉ PARTOUT où la
+     question se pose : fiche produit, page de sélection, catégories, accueil.
+     `sapi-product-preselect.js` n'existe que sur la fiche produit ; y mettre la
+     table obligerait `sapi-photo-swap.js`, qui tourne ailleurs, à s'appuyer sur
+     un fichier absent — et il retomberait silencieusement sur « aucune essence ».
+
+     La phrase à retenir : **la mémoire du projet sait le traduire ; personne ne
+     le recalcule.**
+
+     Historique : `style → essence` a existé en TROIS exemplaires et `taille →
+     intention` en TROIS versions incohérentes, cause du défaut de l'escalier
+     (le site appliquait une taille et en annonçait une autre sur le même écran).
+
+     ⚠️ Ces fonctions sont PURES : aucun DOM, aucun produit. Elles disent une
+     INTENTION. C'est à celui qui connaît les options du produit de la traduire
+     en option réelle — voir `resoudreTaille()` dans sapi-product-preselect.js. */
+
+  /* Décisions Robin du 26/08 — dans les trois cas, le site DÉCIDE plutôt que de
+     laisser le visiteur dans le vide :
+       • « Pas de préférence » de style → peuplier ;
+       • « Je ne sais pas » pour la taille → taille moyenne ;
+       • escalier standard → taille moyenne ;
+       • escalier ouvert → LA PLUS GRANDE taille disponible (pas la troisième :
+         sur un modèle qui en a quatre, c'est bien la dernière). */
+  function styleToEssence(answers) {
+    if (!answers || !answers.style) return ''; // jamais interrogé ≠ sans préférence
+    if (answers.style === 'moderne') return 'peuplier';
+    if (answers.style === 'ancien')  return 'okoume';
+    if (answers.style === 'neutre')  return 'peuplier';
+    return '';
+  }
+
+  /* Renvoie 'petite' | 'moyenne' | 'grande' | 'max' | null.
+     'max' = la dernière option, quel que soit le nombre de tailles du modèle.
+     'grande' = la troisième si elle existe, sinon la dernière. */
+  function tailleIntention(answers) {
+    if (!answers) return null;
+    if (answers.piece === 'escalier') {
+      if (answers.taille_escalier === 'ouvert') return 'max';
+      if (answers.taille_escalier === 'standard') return 'moyenne';
+      /* Escalier SANS précision : rien, comme un salon sans taille. Le visiteur
+         arrivé par une carte-pièce n'a répondu qu'à une question ; lui
+         recommander une taille serait décider sur la foi d'un seul mot, et ce
+         serait asymétrique avec toutes les autres pièces. */
+      return null;
+    }
+    if (answers.taille === 'petite')      return 'petite';
+    if (answers.taille === 'moyenne')     return 'moyenne';
+    if (answers.taille === 'grande')      return 'grande';
+    if (answers.taille === 'ne-sais-pas') return 'moyenne';
+    return null; // taille jamais renseignée : aucune recommandation
+  }
+
+  /* Traduit une intention en OPTION RÉELLE, à partir de la liste des options
+     de ce produit. Pure : elle ne touche pas au DOM, elle choisit dans un
+     tableau qu'on lui donne.
+     ⚠️ ELLE EST ICI, ET PAS DANS LA PRÉSÉLECTION, pour une raison de timing
+     découverte en relecture : la modale MET EN PAUSE les notifications du
+     projet pendant qu'elle est ouverte. L'étiquette posée sur le formulaire
+     n'est donc pas rafraîchie tant que la modale n'est pas fermée — et l'écran
+     de récap, qui s'affiche AVANT, lisait une étiquette absente ou périmée.
+     Résultat : un encart sans taille, ou une taille d'avant sous un conseil qui
+     la contredit. En partageant le calcul plutôt que le résultat, le récap n'a
+     plus rien à attendre de personne.
+     `max` = la dernière option, quel qu'en soit le nombre (Gaston : 110 cm).
+     `grande` = la troisième si elle existe, sinon la dernière. */
+  function resoudreTaille(options, intention) {
+    if (!options || !options.length || !intention) return null;
+    if (intention === 'max')     return options[options.length - 1];
+    if (intention === 'petite')  return options[0];
+    if (intention === 'moyenne') return options[Math.min(1, options.length - 1)];
+    if (intention === 'grande')  return options[Math.min(2, options.length - 1)];
+    return null;
+  }
+
   // API publique
   window.sapiProject = {
+    styleToEssence: styleToEssence,
+    tailleIntention: tailleIntention,
+    resoudreTaille: resoudreTaille,
     get: get,
     hasProject: hasProject,
     getAnswer: getAnswer,
