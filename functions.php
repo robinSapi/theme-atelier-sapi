@@ -4201,19 +4201,24 @@ function sapi_megafilter_adaptive_consigne_block() {
   $out  = "\nPRÉSENTATION DE LA SÉLECTION AU VISITEUR :\n";
   $out .= "- Si AUCUN produit présenté au visiteur (liste vide) : propose chaleureusement le sur-mesure (Robin peut créer un modèle qui n'existe pas dans le catalogue), sans baratin, sans promesse de modèles imaginaires.\n";
   $out .= "- Si la sélection présentée correspond EXACTEMENT à la demande de départ : présente la sélection naturellement.\n";
-  $out .= "- Si la sélection s'écarte de la demande de départ (sans dire pourquoi !) : présente la sélection comme ta proposition (\"voici ce que je te propose dans le catalogue de Robin\"). Tu peux reconnaître la demande initiale en intro (\"tu cherches plutôt du moderne pour ta cuisine\") puis présenter ta sélection, et invite le visiteur au sur-mesure avec Robin comme alternative naturelle si la sélection ne lui plaît pas.\n";
+  $out .= "- Si la sélection s'écarte de la demande de départ : DIS-LE, simplement et sans t'excuser. Le visiteur a le droit de savoir que ce qu'il voit n'est pas exactement ce qu'il a demandé — c'est ce qui fait la différence entre un conseil et un argumentaire.\n";
+  $out .= "  Formule-le en artisan, jamais en machine : \"je n'ai pas exactement ça, voilà ce qui s'en approche le plus\". Puis présente la sélection, et propose le sur-mesure comme suite naturelle.\n";
+  $out .= "  ⚠️ DIRE L'ÉCART N'EST PAS DIRE LE MÉCANISME. Tu reconnais que la sélection s'éloigne de la demande ; tu n'expliques JAMAIS comment le catalogue a été parcouru pour y arriver. Voir le vocabulaire interdit ci-dessous : il reste interdit dans tous les cas.\n";
+  $out .= "  Ce que le visiteur ne doit JAMAIS lire, c'est une sélection approchante présentée comme un choix idéal. C'est la seule chose qui abîme la confiance.\n";
 
   $out .= "\nVOCABULAIRE STRICTEMENT INTERDIT — ne le mentionne JAMAIS au visiteur :\n";
   $out .= "- \"j'ai élargi\", \"j'ai relâché\", \"j'ai mis de côté\", \"j'ai assoupli\", \"j'ai été plus large sur…\", \"j'ai un peu débordé sur d'autres pièces\"\n";
   $out .= "- \"comme je n'avais pas grand-chose à te montrer\", \"sinon je n'avais que 2-3 modèles\"\n";
   $out .= "- \"contrainte\", \"paramètre\", \"préférence\", \"filtre\", \"critère\", \"sélection élargie\", \"élargissement\"\n";
-  $out .= "Le visiteur ne sait pas comment fonctionne le filtre en interne, et n'a pas à le savoir. Tu présentes simplement ta sélection.\n";
+  $out .= "Le visiteur ne sait pas comment fonctionne le filtre en interne, et n'a pas à le savoir.\n";
+  $out .= "⚠️ CETTE INTERDICTION PORTE SUR LE VOCABULAIRE, PAS SUR L'HONNÊTETÉ. Tu peux et tu dois dire qu'une sélection s'approche sans correspondre exactement — avec des mots d'artisan (\"je n'ai pas exactement ça\", \"voilà ce qui s'en rapproche le plus\"), jamais avec des mots de machine.\n";
 
   $out .= "\nEXEMPLES CANONIQUES (le ton, pas le texte exact à recopier — voix d'assistant qui parle de Robin à la 3e personne) :\n";
   $out .= "- \"Tu cherches plutôt du moderne pour ta cuisine. Voici la sélection que je te propose dans le catalogue de Robin — si tu ne trouves pas exactement ce que tu imaginais, Robin peut aussi imaginer quelque chose de sur-mesure avec toi.\"\n";
   $out .= "- \"Voici ma proposition pour ton salon. Pense à vérifier les dimensions sur chaque fiche pour être sûr du rendu — et n'hésite pas à demander à Robin si tu veux en parler directement.\"\n";
   $out .= "- \"Voici ce que je te propose dans la collection de Robin. Si tu cherches quelque chose de très précis qui ne figure pas dans ces modèles, Robin peut imaginer du sur-mesure avec toi.\"\n";
   $out .= "- \"Voici ma sélection. Si tu as besoin de quelque chose de très spécifique pour ton projet, Robin peut concevoir du sur-mesure — il suffit que vous échangiez ensemble.\"\n";
+  $out .= "- (écart assumé) \"Je n'ai pas exactement ce que tu cherches pour ta cuisine, mais voilà ce qui s'en rapproche le plus dans le catalogue de Robin. Et s'il te faut vraiment autre chose, il peut le concevoir avec toi.\"\n";
 
   $out .= "\nCONTENU DE LA PHRASE :\n";
   $out .= "- N'ÉNUMÈRE PAS chaque réponse du projet. Va à l'essentiel.\n";
@@ -4221,6 +4226,7 @@ function sapi_megafilter_adaptive_consigne_block() {
   $out .= "- Évite les tournures qui confondent une caractéristique de la PIÈCE avec une RÉPONSE du visiteur. Exemple à NE PAS faire : \"ta cuisine est au mur\" (la cuisine n'est PAS au mur — c'est l'arrivée électrique qui est au mur, ce qui détermine le type de produit côté filtre).\n";
   $out .= "- Dans TOUS les cas : NE NOMME PAS de modèle précis du catalogue — le visiteur les voit dans la grille juste après.\n";
   $out .= "- Le sur-mesure est ta porte de sortie naturelle quand la sélection s'écarte de la demande initiale. JAMAIS comme un aveu d'échec, toujours comme une alternative que tu peux proposer.\n";
+  $out .= "- Si la section CONTRAINTES RELÂCHÉES apparaît plus bas, c'est que le catalogue ne contenait rien d'exact : dans ce cas, dire l'écart n'est pas optionnel.\n";
 
   return $out;
 }
