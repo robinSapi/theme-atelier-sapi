@@ -365,6 +365,13 @@ function sapi_maison_enqueue_assets() {
          Il est ici parce que `sapi-project.js` est le seul fichier chargé sur
          TOUTES les pages où la question se pose. `SAPI_IMMERSION` n'existe que
          sur l'immersion. Ne pas le recopier ailleurs. */
+      /* La table « style → essence », telle que Robin l'a réglée dans son
+         panneau. Transmise pour que la fiche produit et la photo obéissent au
+         MÊME réglage que le moteur de filtrage — sinon le bouton ne piloterait
+         que la moitié du site, ce qui serait pire qu'un bouton inerte. */
+      'styleEssence' => function_exists('sapi_conseiller_get_rules')
+        ? (array) (sapi_conseiller_get_rules()['style_essence'] ?? [])
+        : [],
       'ordreCles' => function_exists('sapi_guide_get_steps')
         ? array_values(array_filter(array_map(function ($st) { return isset($st['id']) ? $st['id'] : ''; }, sapi_guide_get_steps())))
         : [],
@@ -3004,7 +3011,7 @@ function sapi_megafilter_build_freetext_prompt(array $whitelist) {
 /**
  * System prompt — conversation libre (Sonnet).
  */
-function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_products, array $whitelist, array $matching_ids = [], array $ignored_keys = []) {
+function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_products, array $whitelist, array $matching_ids = [], array $relachements = []) {
   // Round 2 — 1.3 / Round 3 — pivot assistant : contexte d'interaction EN PREMIER
   // (avant ton/savoir/regles/exemples) pour que l'assistant arrête de prétendre que
   // le visiteur voit la grille pendant le chat, et ne se prenne pas pour Robin.
@@ -3041,7 +3048,7 @@ function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_pr
   // Contrat enrichi : catalogue split (présentés/écartés) + réponses élargies.
   // Remplace l'ancienne section "CATALOGUE COMPLET" : maintenant l'IA sait
   // précisément ce que le visiteur voit dans la grille.
-  $prompt .= sapi_megafilter_format_ignored_answers($ignored_keys);
+  $prompt .= sapi_megafilter_format_fallback_notes($relachements);
   $prompt .= sapi_megafilter_format_catalog_split($all_products, $matching_ids);
 
   // Round 3.1 — Fix 1 : ambiance lumineuse alignée sur le catalogue présenté.
@@ -3336,9 +3343,10 @@ function sapi_ajax_megafilter_chat() {
   $matching_ids = array_values(array_filter(array_map(function ($p) {
     return isset($p['id']) ? (int) $p['id'] : 0;
   }, $chat_products)));
-  $ignored_keys = sapi_megafilter_parse_ignored_answers(isset($_POST['ignored_answers']) ? wp_unslash($_POST['ignored_answers']) : '');
+  // Les relâchements viennent du MOTEUR, plus du navigateur — cf. la fonction.
+  $relachements = isset($chat_res['fallback_notes']) ? $chat_res['fallback_notes'] : [];
 
-  $system_prompt = sapi_megafilter_build_chat_prompt($clean_current, $all_products, $whitelist, $matching_ids, $ignored_keys);
+  $system_prompt = sapi_megafilter_build_chat_prompt($clean_current, $all_products, $whitelist, $matching_ids, $relachements);
 
   $messages = [];
   foreach ($conversation as $msg) {
@@ -4066,39 +4074,16 @@ function sapi_render_conseiller_modal() {
 }
 add_action('wp_footer', 'sapi_render_conseiller_modal');
 
-/* ── Helpers contrat IA enrichi : passes catalogue split + ignored_answers
+/* ── Helpers du contrat IA : catalogue présenté / écarté, contraintes relâchées
    ─────────────────────────────────────────────────────────────────────────────
-   Utilisés par sapi_ajax_megafilter_advice ET sapi_ajax_megafilter_chat pour
-   construire les sections "PRODUITS PRÉSENTÉS" / "PRODUITS ÉCARTÉS" /
-   "RÉPONSES ÉLARGIES" dans les prompts IA.
+   Utilisés par sapi_ajax_megafilter_advice ET sapi_ajax_megafilter_chat.
+   ⚠️ Ces sections sont construites À PARTIR DU MOTEUR, plus à partir de ce que
+   le navigateur envoie : les produits correspondants sont recalculés côté
+   serveur, et les contraintes relâchées viennent de `fallback_notes`. Deux
+   fonctions qui lisaient `$_POST` ont été retirées pour cette raison — elles
+   recevaient toujours des tableaux vides depuis la suppression de l'objet JS
+   qui les remplissait.
    ───────────────────────────────────────────────────────────────────────────── */
-
-// Parse le POST 'matching_product_ids' (JSON array d'IDs côté JS) en array d'ints.
-function sapi_megafilter_parse_matching_ids($raw) {
-  if (!is_string($raw) || $raw === '') return [];
-  $decoded = json_decode($raw, true);
-  if (!is_array($decoded)) return [];
-  $ids = [];
-  foreach ($decoded as $v) {
-    $id = absint($v);
-    if ($id > 0) $ids[] = $id;
-  }
-  return array_values(array_unique($ids));
-}
-
-// Parse le POST 'ignored_answers' (JSON array de slugs step côté JS) en array
-// filtré aux step IDs reconnus par le guide.
-function sapi_megafilter_parse_ignored_answers($raw) {
-  if (!is_string($raw) || $raw === '') return [];
-  $decoded = json_decode($raw, true);
-  if (!is_array($decoded)) return [];
-  $valid_keys = ['piece','taille','taille_escalier','eclairage','sortie','hauteur','style']; // « table » retiré (Tâche 2)
-  $out = [];
-  foreach ($decoded as $v) {
-    if (is_string($v) && in_array($v, $valid_keys, true)) $out[] = $v;
-  }
-  return array_values(array_unique($out));
-}
 
 // Construit les 2 sections "PRODUITS PRÉSENTÉS" + "PRODUITS ÉCARTÉS" depuis un
 // $all_products (sapi_guide_query_all_products) + les matching_ids.
@@ -4154,26 +4139,35 @@ function sapi_megafilter_format_catalog_split(array $all_products, array $matchi
   return $out;
 }
 
-// Construit la section "RÉPONSES ÉLARGIES" (ligne unique, "" si aucune).
-function sapi_megafilter_format_ignored_answers(array $ignored_keys) {
-  if (empty($ignored_keys)) return '';
-  $labels = [
-    'piece'           => 'la pièce',
-    'taille'          => 'la taille de pièce',
-    'taille_escalier' => "le type d'escalier",
-    'eclairage'       => "le rôle d'éclairage",
-    'sortie'          => "le type de sortie",
-    'hauteur'         => 'la hauteur sous plafond',
-    'table'           => "l'emplacement au-dessus d'un meuble",
-    'style'           => 'le style',
-  ];
-  $parts = [];
-  foreach ($ignored_keys as $k) {
-    if (isset($labels[$k])) $parts[] = $labels[$k];
+/**
+ * Les relâchements de contrainte, dits à l'IA — depuis ce que le MOTEUR a fait.
+ *
+ * ⚠️ POURQUOI CETTE FONCTION REMPLACE `format_ignored_answers()`.
+ * L'ancienne attendait la liste des critères relâchés **du navigateur**, via
+ * `$_POST['ignored_answers']`. Or l'objet JS qui la calculait a été supprimé
+ * lors d'une refonte : le client envoyait donc **toujours un tableau vide**, et
+ * le bloc n'apparaissait dans AUCUN prompt.
+ *
+ * Conséquence, tous les jours et sans trace : quand le moteur ne trouvait rien
+ * avec le bon type d'ampoule, il relâchait la contrainte ET écrivait une note
+ * explicite — « signale-le honnêtement au client comme un compromis, ne dis pas
+ * que c'est le choix idéal ». Cette consigne ne parvenait jamais au modèle.
+ * **Robin présentait un compromis comme un idéal.**
+ *
+ * Le moteur produit ces notes lui-même (`sapi_guide_query_products`), déjà
+ * rédigées pour l'IA. On les lui transmet telles quelles : le serveur cesse de
+ * demander au navigateur ce qu'il sait déjà — même discipline que pour les
+ * produits correspondants, recalculés côté serveur pour la même raison.
+ */
+function sapi_megafilter_format_fallback_notes($notes) {
+  if (!is_array($notes) || empty($notes)) return '';
+  $lignes = [];
+  foreach ($notes as $n) {
+    if (is_string($n) && trim($n) !== '') $lignes[] = '- ' . trim($n);
   }
-  if (empty($parts)) return '';
-  return "\nRÉPONSES ÉLARGIES POUR TROUVER DES MODÈLES : " . implode(', ', $parts)
-       . "\n(le visiteur avait répondu, mais le filtre direct ne ramenait rien → on a relâché ces contraintes pour pouvoir lui montrer des modèles)\n";
+  if (empty($lignes)) return '';
+  return "\nCONTRAINTES RELÂCHÉES POUR TROUVER DES MODÈLES :\n"
+       . implode("\n", $lignes) . "\n";
 }
 
 // Round 3.1 — Fix 1 : ambiance lumineuse = catalogue présenté est la source
@@ -4220,9 +4214,6 @@ function sapi_megafilter_adaptive_consigne_block() {
   $out .= "- \"Voici ma proposition pour ton salon. Pense à vérifier les dimensions sur chaque fiche pour être sûr du rendu — et n'hésite pas à demander à Robin si tu veux en parler directement.\"\n";
   $out .= "- \"Voici ce que je te propose dans la collection de Robin. Si tu cherches quelque chose de très précis qui ne figure pas dans ces modèles, Robin peut imaginer du sur-mesure avec toi.\"\n";
   $out .= "- \"Voici ma sélection. Si tu as besoin de quelque chose de très spécifique pour ton projet, Robin peut concevoir du sur-mesure — il suffit que vous échangiez ensemble.\"\n";
-
-  $out .= "\nRÈGLES MÉTIER vs RÉPONSES ÉLARGIES :\n";
-  $out .= "- Si la clé `piece` figure parmi les RÉPONSES ÉLARGIES, les règles métier par pièce ont été assouplies volontairement pour pouvoir te montrer une sélection. N'oppose donc PAS au visiteur les règles \"pas de lampe à poser en cuisine\" ou autres règles ampoule par pièce. Présente la sélection telle qu'elle, sans contredire la grille.\n";
 
   $out .= "\nCONTENU DE LA PHRASE :\n";
   $out .= "- N'ÉNUMÈRE PAS chaque réponse du projet. Va à l'essentiel.\n";
@@ -4305,12 +4296,11 @@ function sapi_ajax_megafilter_advice() {
   $matching_ids = array_values(array_filter(array_map(function ($p) {
     return isset($p['id']) ? (int) $p['id'] : 0;
   }, $adv_products)));
-  // ignored_answers : plus calculé par le JS ; les éventuels relâchements sont
-  // dans $adv_res['fallback_notes'] (non injectés ici pour l'instant).
-  $ignored_keys = sapi_megafilter_parse_ignored_answers(isset($_POST['ignored_answers']) ? wp_unslash($_POST['ignored_answers']) : '');
+  // Les relâchements viennent du MOTEUR, plus du navigateur — cf. la fonction.
+  $relachements = isset($adv_res['fallback_notes']) ? $adv_res['fallback_notes'] : [];
   $all_products = sapi_guide_query_all_products([]);
   $catalog_split_block  = sapi_megafilter_format_catalog_split($all_products, $matching_ids);
-  $ignored_answers_block = sapi_megafilter_format_ignored_answers($ignored_keys);
+  $ignored_answers_block = sapi_megafilter_format_fallback_notes($relachements);
 
   // Injecte ton + savoir + regles V2 en tête (PAS exemples : équivalent V2
   // sapi_robin_call_recommendation qui n'inclut pas les exemples — sortie
@@ -5436,12 +5426,21 @@ function sapi_guide_collect_results($query, array $answers, $skip_exclusions = f
   $sapi_rules = sapi_conseiller_get_rules();
   $grande_exclut_2 = !isset($sapi_rules['grande_exclut_2_tailles']) || $sapi_rules['grande_exclut_2_tailles'];
   // Determine preferred essence from style answer
+  /* ⚠️ L'ESSENCE VIENT DU RÉGLAGE DE ROBIN, plus d'une table écrite en dur.
+     Son panneau d'administration proposait « Style → essence de bois » : il
+     pouvait le changer, l'enregistrer, la page confirmait — et le site
+     continuait de servir l'okoumé. La valeur était validée, sauvegardée, et
+     relue par PERSONNE. C'est le pire défaut trouvé dans ce chantier, parce
+     que c'est le seul que Robin ne pouvait pas diagnostiquer seul : un bouton
+     qui ment dans sa propre interface.
+     La même table est transmise au JS (`SAPI_PROJECT.styleEssence`) pour que
+     la fiche produit obéisse au même réglage. Une seule source. */
   $style = isset($answers['style']) ? $answers['style'] : '';
   $preferred_essence = '';
-  if ($style === 'moderne') {
-    $preferred_essence = 'peuplier';
-  } elseif ($style === 'ancien') {
-    $preferred_essence = 'okoume';
+  if ($style !== '') {
+    $regles = function_exists('sapi_conseiller_get_rules') ? sapi_conseiller_get_rules() : [];
+    $map = (isset($regles['style_essence']) && is_array($regles['style_essence'])) ? $regles['style_essence'] : [];
+    if (!empty($map[$style])) $preferred_essence = $map[$style];
   }
 
   // Determine preferred size index from room size
@@ -5684,7 +5683,10 @@ function sapi_conseiller_default_rules() {
     ],
 
     // ── Réglages divers ──
-    'style_essence' => ['moderne' => 'peuplier', 'ancien' => 'okoume', 'neutre' => ''],
+    /* ⚠️ `neutre` → PEUPLIER, décision Robin du 26/08 : « pas de préférence »
+       n'est pas un refus de choisir, c'est une délégation. Le défaut disait
+       encore « aucune essence », l'état d'avant cette décision. */
+    'style_essence' => ['moderne' => 'peuplier', 'ancien' => 'okoume', 'neutre' => 'peuplier'],
     'escalier_map'  => ['standard' => 'petite', 'ouvert' => 'grande'],
 
     // ── Filtre DUR : cuisine retire lampe à poser ET lampadaire (Tâche 2) ──
@@ -7169,10 +7171,13 @@ function sapi_tronquer_ip($ip) {
  * purge les PDF à 30 jours « parce qu'ils portent des noms de clients ». Le
  * même raisonnement n'avait simplement jamais été appliqué ici.
  *
- * 12 mois : assez pour comparer une saison à la même saison l'an passé, ce qui
- * est l'usage réel de Robin, et assez court pour être défendable.
+ * ⚠️ 425 JOURS, ET PAS 365. L'usage réel de Robin est de comparer un mois au
+ * même mois de l'an passé. À 365 jours exactement, le décembre précédent est
+ * effacé la veille du jour où il en a besoin : la rétention est juste d'un
+ * cheveu trop courte pour l'usage qu'elle prétend servir. Quatorze mois
+ * laissent la marge nécessaire, et restent une durée courte et défendable.
  */
-if (!defined('SAPI_SESSIONS_TTL_DAYS')) define('SAPI_SESSIONS_TTL_DAYS', 365);
+if (!defined('SAPI_SESSIONS_TTL_DAYS')) define('SAPI_SESSIONS_TTL_DAYS', 425);
 
 /* ═══════════════════════════════════════════════════════════
    GÉOLOCALISATION DES SESSIONS — COUPÉE, DÉCISION EN ATTENTE

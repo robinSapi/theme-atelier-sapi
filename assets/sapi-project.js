@@ -544,10 +544,18 @@
          sur un modèle qui en a quatre, c'est bien la dernière). */
   function styleToEssence(answers) {
     if (!answers || !answers.style) return ''; // jamais interrogé ≠ sans préférence
-    if (answers.style === 'moderne') return 'peuplier';
-    if (answers.style === 'ancien')  return 'okoume';
-    if (answers.style === 'neutre')  return 'peuplier';
-    return '';
+    /* ⚠️ LA TABLE VIENT DU RÉGLAGE DE ROBIN (`SAPI_PROJECT.styleEssence`),
+       plus d'une liste écrite ici. Son panneau d'administration proposait ce
+       réglage depuis toujours et personne ne le lisait : il pouvait changer
+       l'essence associée à un style, enregistrer, et le site n'en tenait aucun
+       compte.
+       ⚠️ PAS DE REPLI SUR UNE TABLE LOCALE si le réglage manque. Deux tables
+       qui divergent sans que rien ne plante, c'est le défaut qu'on vient de
+       supprimer — mieux vaut aucune essence recommandée qu'une essence qui
+       contredit le moteur. */
+    var cfg = window.SAPI_PROJECT || {};
+    var map = cfg.styleEssence || {};
+    return map[answers.style] || '';
   }
 
   /* Renvoie 'petite' | 'moyenne' | 'grande' | 'max' | null.

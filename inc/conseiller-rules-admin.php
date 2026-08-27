@@ -230,9 +230,16 @@ function sapi_rules_sanitize($posted) {
 
   // ── style_essence : map style → essence (peuplier|okoume|'') ──
   $ess_allowed = $keys($V['essences']); // inclut ''
+  /* ⚠️ LE REPLI EST LE DÉFAUT, PAS LA CHAÎNE VIDE.
+     Un champ manquant à l'enregistrement mettait silencieusement « Aucune
+     essence » pour ce style, à l'échelle du site — alors que le voisin
+     `escalier_map`, juste en dessous, retombe correctement sur `$D`.
+     Ça compte d'autant plus depuis que ce réglage est réellement lu : avant, il
+     ne pilotait rien, donc un mauvais repli ne se voyait pas. */
   $c['style_essence'] = [];
   foreach ($keys($V['styles']) as $st) {
-    $c['style_essence'][$st] = $pick(isset($posted['style_essence'][$st]) ? $posted['style_essence'][$st] : '', $ess_allowed, '');
+    $def_ess = isset($D['style_essence'][$st]) ? $D['style_essence'][$st] : '';
+    $c['style_essence'][$st] = $pick(isset($posted['style_essence'][$st]) ? $posted['style_essence'][$st] : '', $ess_allowed, $def_ess);
   }
 
   // ── escalier_map : map question → taille ──

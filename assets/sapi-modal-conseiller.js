@@ -731,17 +731,6 @@
   }
 
   // Calcule la meta du filtre à la volée avec les answers donnés (élargissement
-  // progressif + IDs matchant). Permet d'envoyer au backend l'image exacte
-  // de ce que le visiteur va voir dans la grille.
-  function buildFilterMeta(answers) {
-    if (window.sapiMegaFilter && typeof window.sapiMegaFilter.computeFilterMeta === 'function') {
-      try {
-        return window.sapiMegaFilter.computeFilterMeta(answers || {});
-      } catch (e) { /* fallback */ }
-    }
-    return { effectiveAnswers: answers || {}, ignoredAnswers: [], matchingIds: [] };
-  }
-
   // Audit #7 : démarre une nouvelle requête IA — abort la précédente s'il y en
   // a une en cours. Retourne le signal à passer à sapiSafeFetch.
   function startAiRequest() {
@@ -757,7 +746,6 @@
 
   // Helper : appel IA dédié, isolé pour pouvoir le tester séparément
   function fetchAdviceFromIA(opts) {
-    var meta = buildFilterMeta(state.answers);
     var signal = startAiRequest();
 
     var fd = new FormData();
@@ -765,8 +753,13 @@
     fd.append('nonce', config.nonce || '');
     fd.append('answers', JSON.stringify(state.answers));
     fd.append('labels',  JSON.stringify(state.labels));
-    fd.append('matching_product_ids', JSON.stringify(meta.matchingIds));
-    fd.append('ignored_answers', JSON.stringify(meta.ignoredAnswers));
+    /* ⚠️ NI `matching_product_ids` NI `ignored_answers` NE SONT ENVOYÉS.
+       Ils venaient de `buildFilterMeta()`, qui lisait un objet global
+       supprimé lors d'une refonte et retombait donc TOUJOURS sur son repli
+       vide. Le serveur recalcule les produits correspondants lui-même, et
+       lit les contraintes relâchées directement dans la sortie du moteur
+       (`sapi_megafilter_format_fallback_notes`) : il ne demande plus au
+       navigateur ce qu'il sait déjà. */
     if (opts.conversation && Array.isArray(opts.conversation) && opts.conversation.length) {
       fd.append('conversation', JSON.stringify(opts.conversation));
     }
@@ -1229,14 +1222,18 @@
     state.chat.status = 'thinking';
     setChatFooterState('loading');
 
-    var meta = buildFilterMeta(state.answers);
 
     var fd = new FormData();
     fd.append('action', 'sapi_megafilter_chat');
     fd.append('nonce', config.nonce || '');
     fd.append('user_message', text);
-    fd.append('matching_product_ids', JSON.stringify(meta.matchingIds));
-    fd.append('ignored_answers', JSON.stringify(meta.ignoredAnswers));
+    /* ⚠️ NI `matching_product_ids` NI `ignored_answers` NE SONT ENVOYÉS.
+       Ils venaient de `buildFilterMeta()`, qui lisait un objet global
+       supprimé lors d'une refonte et retombait donc TOUJOURS sur son repli
+       vide. Le serveur recalcule les produits correspondants lui-même, et
+       lit les contraintes relâchées directement dans la sortie du moteur
+       (`sapi_megafilter_format_fallback_notes`) : il ne demande plus au
+       navigateur ce qu'il sait déjà. */
     fd.append('current_filters', JSON.stringify(state.answers));
     fd.append('conversation', JSON.stringify(state.chat.conversation));
     if (state.chat.sessionId) fd.append('session_id', state.chat.sessionId);
