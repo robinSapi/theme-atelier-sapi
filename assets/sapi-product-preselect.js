@@ -313,11 +313,52 @@
   // L'essence est appliquée immédiatement ; la taille avec 400ms de délai pour
   // laisser WC traiter le change d'essence (qui peut recharger/filtrer les
   // options de taille selon les variations disponibles).
+  /* Les deux cibles d'un projet, sur ce produit. Séparé pour pouvoir REDÉCLARER
+     sans appliquer — voir `rafraichirEtiquette()`. */
+  function ciblesDuProjet(form, answers) {
+    var essence = projectToEssence(answers);
+    return {
+      essence: essence,
+      cE: essence ? cibleEssence(form, essence) : null,
+      cT: cibleTaille(form, answers)
+    };
+  }
+
+  /* ⚠️ L'ÉTIQUETTE DOIT SUIVRE LE PROJET, PAS SEULEMENT LE CHARGEMENT.
+     Elle n'était écrite qu'au démarrage. Chemin du défaut, reproduit :
+     le visiteur arrive avec « salon / grand », la pill dit « C'est le mieux
+     pour ton projet » ; il rouvre la modale, refait son projet en « petit »,
+     puis ferme avec LA CROIX au lieu de cliquer « Appliquer ». Les menus n'ont
+     pas bougé, l'étiquette non plus — et la pill continue d'affirmer que la
+     version affichée est la meilleure pour un projet qui n'existe plus.
+     Rien ne plante. C'est faux en silence, exactement la maladie qui avait fait
+     abandonner la version précédente de la pill.
+     On réécrit donc l'étiquette à chaque changement du projet, SANS RIEN
+     APPLIQUER : aucun menu touché, aucun `change` émis, donc aucun risque de
+     reprendre au visiteur le choix qu'il vient de faire. La pill s'éteint
+     d'elle-même dès que l'écran cesse de correspondre.
+     L'invariant devient énonçable : « l'étiquette dit toujours ce que le projet
+     d'aujourd'hui recommande ; on ne la pose sur les menus qu'au chargement et
+     quand le visiteur clique Appliquer. » */
+  function rafraichirEtiquette() {
+    var form = document.querySelector('form.variations_form');
+    if (!form) return;
+    var answers = {};
+    try {
+      if (window.sapiProject && window.sapiProject.hasProject && window.sapiProject.hasProject()) {
+        answers = (window.sapiProject.get() || {}).answers || {};
+      }
+    } catch (e) { /* projet illisible → étiquette vide, la pill se taira */ }
+    var c = ciblesDuProjet(form, answers);
+    declarerRecommandation(form, [c.cE, c.cT]);
+  }
+
   function preselectAll(form, answers, opts) {
     opts = opts || {};
-    var essence = projectToEssence(answers);
-    var cE = essence ? cibleEssence(form, essence) : null;
-    var cT = cibleTaille(form, answers);
+    var c = ciblesDuProjet(form, answers);
+    var essence = c.essence;
+    var cE = c.cE;
+    var cT = c.cT;
 
     // 1. Déclarer les DEUX d'un coup, avant d'appliquer quoi que ce soit.
     declarerRecommandation(form, [cE, cT]);
@@ -371,6 +412,16 @@
         preselectAll(form, answers, { seulementVides: rattrapage });
       });
     }
+
+    /* Le projet peut changer sans qu'on applique quoi que ce soit : questionnaire
+       refait puis fermé par la croix, « Recommencer mon projet », modification
+       depuis un autre onglet. L'étiquette doit suivre, sinon la pill parle d'un
+       projet périmé. On ne fait que RÉÉCRIRE, jamais poser. */
+    try {
+      if (window.sapiProject && window.sapiProject.subscribe) {
+        window.sapiProject.subscribe(rafraichirEtiquette);
+      }
+    } catch (e) { /* swallow */ }
   }
 
   if (document.readyState === 'loading') {

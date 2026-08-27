@@ -156,9 +156,15 @@
     // La présélection vient d'écrire sa carte : ne pas attendre le geste suivant.
     document.addEventListener('sapi:recommandation-declaree', rendrePlusTard);
 
-    /* Le projet peut disparaître en cours de visite (« Recommencer mon
-       projet » vide la mémoire). La pill ne peut plus parler d'un projet qui
-       n'existe plus. */
+    /* Le projet peut disparaître ou changer en cours de visite (« Recommencer
+       mon projet »). La pill ne peut plus parler d'un projet qui n'existe plus.
+
+       ⚠️ ORDRE DES ABONNÉS : ce fichier est chargé AVANT la présélection, donc
+       il est notifié EN PREMIER — avant que l'étiquette n'ait été réécrite.
+       C'est `rendrePlusTard` qui rend ça sûr : ses 300 ms laissent largement le
+       temps à la présélection de mettre l'étiquette à jour, de façon synchrone,
+       dans le même cycle de notification. **Ne jamais brancher `rendre`
+       directement ici** — la pill lirait l'étiquette d'avant. */
     try {
       if (window.sapiProject && window.sapiProject.subscribe) {
         window.sapiProject.subscribe(rendrePlusTard);

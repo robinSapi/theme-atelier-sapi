@@ -783,24 +783,37 @@ Cause : le remplacement était conditionné à `if (Object.keys(filters).length)
 → **`refineFromStoredProject()` au chargement de l'immersion** : on rejoue l'affinage à partir du projet mémorisé, en réutilisant **exactement** le mécanisme du moment 2 (même endpoint, même dédup, même remplacement de cards). Le carrousel étant invisible à ce stade (`--reveal` à 0), le remplacement ne se voit pas.
 **La signature de dédup fait le tri toute seule** : si le projet ne contient que la pièce, elle est identique à la baseline et aucune requête n'est envoyée. Aucun coût sur le chemin normal (clic sur une carte-pièce).
 
-### ✅ FICHE PRODUIT — LA PILL DIT QUAND LE SITE A CHOISI
+### ✅ FICHE PRODUIT — LA PILL DIT « C'EST LE MIEUX » TANT QUE LA VERSION RECOMMANDÉE EST AFFICHÉE
 
-Deux états : « Je t'aide à choisir la bonne version » (normal, rendu par le PHP) et « **J'ai choisi pour ton projet** » (27 caractères — ⚠️ **la capsule est mono-ligne, 36 caractères maximum**, au-delà les jambages du Square Peg se touchent sur iPhone).
+⚠️ **Cette section a d'abord décrit une approche ABANDONNÉE.** Elle disait « J'ai choisi pour ton projet », « sans jamais revenir en arrière », « observer l'effet » — trois fois le contraire du code. Un document qui explique l'inverse de ce qui tourne est pire que pas de document. Relu et réécrit le 26/08.
 
-**Règles Robin :** on n'annonce que si les DEUX attributs ont bougé ; retour au normal au premier geste, **sans jamais revenir en arrière** ; aucune explication du changement.
+**LA RÈGLE, en une phrase :** la pill dit « **C'est le mieux pour ton projet** » quand **chaque** menu de variation affiche exactement la valeur recommandée. Sinon, « Je t'aide à choisir la bonne version ».
 
-**Le principe : observer l'effet, pas recalculer la cause.** La table `style → essence` existe déjà en trois exemplaires et diverge. On regarde donc si chaque menu a reçu un `change` non trusted, pas si une présélection « aurait dû » avoir lieu.
+C'est un message d'**ÉTAT**, pas d'action — décision Robin. Conséquence voulue : **la pill REVIENT** si le visiteur s'éloigne puis retombe sur la version recommandée. Il n'y a donc aucun verrou, aucun historique, juste une comparaison refaite à chaque changement.
 
-⚠️ **DEUX NOMMAGES, ET C'EST TOUT LE PIÈGE — le défaut que Robin a vu.** Le visiteur ne manipule PAS le menu que le code manipule. Le plugin **WooCommerce Variation Swatches** remplace les menus par des radios `wvs_radio_attribute_pa_taille__7183` : `attribute_` y est au **milieu**. La présélection, elle, écrit dans le vrai menu caché `attribute_pa_taille`, **préfixé**. Mon test unique exigeait le préfixe → l'allumage marchait, l'extinction ne partait jamais. Les deux branches ont donc désormais des tests **différents**, volontairement.
+⚠️ **La capsule est mono-ligne : 36 caractères MAXIMUM.** Au-delà, les jambages du Square Peg se touchent sur iPhone. Le texte actuel fait 30 caractères, mesuré à 274 px contre 313 px pour le texte normal.
 
-⚠️ **ET LE PIÈGE DU CORRECTIF, attrapé en relecture avant livraison :** j'avais ajouté `[class*="wvs-"]` pour couvrir les pastilles du plugin. Or **le plugin pose ses classes sur le `<body>`** (`wvs-behavior-blur`) : `closest()` remontait jusqu'en haut et **n'importe quel clic de la page** armait le verrou — y compris « Appliquer cette sélection » dans la modale. J'aurais cassé l'allumage en réparant l'extinction. Le sélecteur est maintenant **borné au formulaire de variation**.
+**Le mécanisme, en trois pièces :**
+1. **`sapi-product-preselect.js` DÉCLARE** sa recommandation dans `data-sapi-recommandation` sur le formulaire (`{nomDuMenu: valeurOption}`), **en une fois, avant d'appliquer**.
+2. **`sapi-help-pill.js` COMPARE** l'écran à cette étiquette. Il ne connaît aucune règle métier.
+3. **Le déclencheur est `found_variation` / `reset_data`** — événements jQuery de WooCommerce, écoutés sur le formulaire, débounce 300 ms. Ils couvrent indifféremment le plugin de pastilles, les menus natifs, le lien « Effacer » et les écritures de la présélection : **une seule porte au lieu de trois**. Ce motif tourne déjà sur cette page pour le prix et la photo.
 
-**Trois découvertes à garder :**
-- **`.material-option` n'existe pas sur la fiche produit.** Le filtre de pastilles du plugin gagne sur celui du thème (`functions.php:2131`), donc tout le code de pastilles maison — thème + `cinetique.js:359` — est **mort sur cette page**.
-- L'essence est rendue en `<li class="variable-item">` **sans contrôle nommé**, et le plugin recopie la valeur via jQuery, invisible d'un écouteur natif. **Le clic est la seule voie d'extinction pour cet attribut** — ne pas retirer `.variable-item` du sélecteur.
-- Le texte normal vient d'un attribut `data-help-pill-default` posé par le PHP, plus d'une lecture en direct, et une garde `data-help-pill-ready` interdit une seconde initialisation.
+⚠️ **L'étiquette suit le PROJET, pas seulement le chargement.** Elle n'était écrite qu'au démarrage : un visiteur qui refaisait son projet puis fermait la modale **par la croix** laissait la pill affirmer que l'écran était le meilleur pour un projet qui n'existait plus. `rafraichirEtiquette()` est abonné à `sapiProject` et **réécrit sans jamais appliquer** — aucun menu touché, donc aucun risque de reprendre son choix au visiteur.
 
-**Non fait, décision en attente :** si le visiteur touche une variation **puis** ouvre la modale et clique « Appliquer cette sélection », le verrou a déjà claqué et la pill reste muette — au moment même où le site repose les deux attributs à sa demande. Relâcher le verrou sur `sapi:apply-product-selection` (et vider `posesParLeCode` en même temps) est à trancher.
+⚠️ **Ordre des abonnés :** la pill est notifiée AVANT la présélection (ordre d'enqueue). Ce sont les 300 ms de débounce qui rendent ça sûr. **Ne jamais brancher `rendre` directement sur `subscribe`.**
+
+**DEUX APPROCHES ONT ÉCHOUÉ AVANT CELLE-CI. Ne pas les refaire :**
+- **Deviner en observant les événements**, avec `isTrusted` pour séparer l'humain du code. Deux raisons mesurées : quand la valeur est déjà bonne, `applyOption` **n'émet rien** — il n'y avait donc rien à observer, et la pill se taisait devant la recommandation affichée. Et **`isTrusted` ne sépare pas ce qu'on croit** : le bouton radio du plugin émet un `change` natif ET trusted même déclenché par script, tandis que la pastille image n'émet aucun `change`. Deux attributs de la même page, deux comportements opposés.
+- **`[class*="wvs-"]` pour attraper les pastilles** : le plugin pose ses classes jusque sur le `<body>`, donc `closest()` remontait et **n'importe quel clic de la page** armait le verrou.
+
+**Découvertes sur le site, à garder :**
+- **`.material-option` n'existe pas sur la fiche produit.** Le plugin *WooCommerce Variation Swatches* gagne sur le filtre du thème (`functions.php:2133`) : tout le code de pastilles maison — thème + `cinetique.js:359` + `shop.js:120` — est **mort sur cette page**.
+- L'essence est rendue en `<li class="variable-item">` **sans contrôle nommé** ; le plugin recopie la valeur via jQuery, invisible d'un écouteur natif.
+- **La prod servait encore l'ancien fichier** (347 octets contre 12 Ko) : recetter sur `test.`, pas sur `atelier-sapi.fr`.
+
+**Correction annexe, mesurée :** la présélection tournait deux fois, et la seconde passe **reprenait au visiteur le choix qu'il venait de faire**, entre ~2,2 s et ~3,0 s après l'arrivée. Elle ne remplit plus que ce qui est encore vide (`seulementVides`).
+
+**Décision Robin du 26/08 — « Pas de préférence » de style → PEUPLIER.** Le visiteur n'a pas refusé de choisir, il a délégué. Sans ça, la pill ne pouvait jamais s'allumer pour lui. ⚠️ **Reporté dans les TROIS copies de la table** (`sapi-product-preselect.js`, `sapi-photo-swap.js`, `sapi-modal-conseiller.js`) : elles pilotent la présélection, la photo et le récap, et divergentes elles montrent une photo de peuplier sous un récap qui annonce l'okoumé. Un style **absent** reste sans recommandation, volontairement.
 
 ---
 
