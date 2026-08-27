@@ -23629,6 +23629,14 @@ button.chip--project:focus-visible {
   -webkit-justify-content: flex-start;
   justify-content: flex-start;
 }
+/* Respiration entre « ton projet » et « ce que je te recommande ». Les deux
+   sections se touchaient, alors que ce sont deux natures différentes — c'est
+   toute la lisibilité de l'écran qui repose sur cette séparation.
+   Financé par la sortie des deux phrases de conseil, qui sont passées DANS la
+   carte : elles ne coûtent plus deux écarts de bloc. */
+[data-screen="s-product-recap"] [data-product-recap-reco-label] {
+  margin-top: 10px;
+}
 
 /* ── Densité mobile du récap produit ──────────────────────────────────────
    Recette Robin sur iPhone SE : l'écran déborde et oblige à faire défiler.
@@ -23640,7 +23648,8 @@ button.chip--project:focus-visible {
        là où deux suffisent. La colonne de gauche prend la largeur de son
        libellé, la valeur occupe le reste → −44 px ;
      • le rembourrage des pastilles, qui sont ici sur trois lignes → −12 px ;
-     • l'interligne des deux phrases de conseil → −5 px.
+     • les deux phrases de conseil, passées DANS la carte : elles ne coûtent
+       plus deux écarts de bloc → −20 px.
    Total ≈ 97 px, soit à peu près la hauteur des deux phrases que Robin
    trouvait coûteuses — sans avoir à les supprimer.
 
@@ -23661,7 +23670,6 @@ button.chip--project:focus-visible {
     padding: 5px 12px 5px 8px;
     gap: 7px;
   }
-  [data-screen="s-product-recap"] .conseil-italic { line-height: 1.4; }
 }
 
 /* Récap projet groupé par thème (s3) */
@@ -24027,6 +24035,24 @@ button.chip--project:focus-visible {
   font-weight: 600;
   color: var(--color-wood-dark);
 }
+/* L'explication d'une ligne : pleine largeur, juste sous la valeur qu'elle
+   commente. `1 / -1` traverse la grille quel que soit le nombre de colonnes —
+   deux en mobile comme en desktop. Alignée à gauche, contrairement aux
+   anciennes phrases flottantes qui étaient centrées : elle appartient
+   visiblement à la ligne au-dessus. */
+.recap-card__note {
+  grid-column: 1 / -1;
+  /* Aucune marge : c'est l'écart de ligne de la grille qui espace, et il le
+     fait uniformément, y compris quand une note est masquée. Une marge
+     propre aurait demandé de savoir quelle note est la dernière VISIBLE —
+     `:last-child` est structurel, pas visuel. */
+  margin: 0;
+  font-style: italic;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--color-wood-mid);
+  text-align: left;
+}
 /* Round 4 — Si le label est hidden (essence/taille non applicable), cache
    aussi la valeur qui suit immédiatement, sinon une cellule grid vide
    s'affiche. Sélecteur adjacent + qui matche `value` directement après un
@@ -24034,6 +24060,11 @@ button.chip--project:focus-visible {
 .recap-card__item-label[hidden] + .recap-card__item-value {
   display: none;
 }
+/* ⚠️ PLUS AUCUN PORTEUR depuis le 26/08 : les deux phrases de conseil du récap
+   produit sont passées DANS la carte (`.recap-card__note`), sous la ligne
+   qu'elles expliquent. Classe conservée telle quelle — elle décrit le style
+   « conseil de Robin » et le prochain écran qui en aura besoin la retrouvera.
+   Ne pas la modifier en croyant agir sur le récap produit. */
 .conseil-italic {
   font-style: italic;
   font-size: 13px;

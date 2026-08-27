@@ -1751,9 +1751,11 @@
       }
     }
 
-    // Conseil de style (texte fixe pré-généré)
+    /* Conseil de style — il suit SA ligne, comme celui de la taille.
+       La note vit maintenant DANS la carte, juste sous « Essence / Okoumé » :
+       si cette ligne n'est pas affichée, sa phrase n'a rien à commenter. */
     if (els.productRecapConseil) {
-      var conseil = (style && STYLE_CONSEILS[style]) || '';
+      var conseil = (hasEssence && style && STYLE_CONSEILS[style]) || '';
       els.productRecapConseil.textContent = conseil;
       els.productRecapConseil.hidden = !conseil;
     }

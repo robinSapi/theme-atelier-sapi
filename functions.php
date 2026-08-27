@@ -3780,15 +3780,21 @@ function sapi_render_conseiller_modal() {
             <div class="recap-group__chips" data-product-recap-project hidden></div>
 
             <span class="chips-label" data-product-recap-reco-label hidden><?php esc_html_e('Ce que je te recommande sur ce modèle', 'theme-sapi-maison'); ?></span>
+            <?php /* ⚠️ CHAQUE EXPLICATION EST DANS LA CARTE, SOUS SA PROPRE LIGNE.
+                     Les deux phrases flottaient auparavant sous l'encart, à la
+                     suite l'une de l'autre : rien ne disait laquelle expliquait
+                     l'essence et laquelle expliquait la taille. Elles occupent
+                     maintenant une ligne pleine largeur juste après la valeur
+                     qu'elles commentent, et elles se masquent avec elle.
+                     Demande de Robin en recette. */ ?>
             <div class="recap-card" data-product-recap-card hidden>
               <span class="recap-card__item-label" data-product-recap-essence hidden><?php esc_html_e('Essence', 'theme-sapi-maison'); ?></span>
               <span class="recap-card__item-value" data-product-recap-essence-value></span>
+              <p class="recap-card__note" data-product-recap-conseil hidden></p>
               <span class="recap-card__item-label" data-product-recap-taille hidden><?php esc_html_e('Taille du luminaire', 'theme-sapi-maison'); ?></span>
               <span class="recap-card__item-value" data-product-recap-taille-value></span>
+              <p class="recap-card__note" data-product-recap-conseil-taille hidden></p>
             </div>
-
-            <p class="conseil-italic" data-product-recap-conseil></p>
-            <p class="conseil-italic" data-product-recap-conseil-taille></p>
 
             <div class="actions-3">
               <button type="button" class="action-btn action-btn--primary" data-action="product-apply">
