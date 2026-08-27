@@ -3706,12 +3706,26 @@ function sapi_render_conseiller_modal() {
 
         <div class="modal__body">
           <div class="modal__body-content">
-            <p class="subtitle" data-product-recap-intro></p>
+            <?php /* ⚠️ DEUX BLOCS, DEUX NATURES, ET LE PIÈGE EST LE MOT « TAILLE ».
+                     En haut ce que le VISITEUR a dit — dont « Taille » qualifie
+                     sa PIÈCE. En bas ce que Robin recommande sur CE modèle —
+                     dont « Taille » qualifie le LUMINAIRE, en centimètres.
+                     Empilés sans distinction, l'écran afficherait « Taille :
+                     Grand » puis « Taille : 90 cm » et le visiteur croirait
+                     qu'on lui parle du même objet. D'où les deux libellés
+                     explicites ET les deux formes visuelles : pastilles à plat
+                     pour le projet, encart blanc pour la recommandation.
+                     La phrase d'intro « Pour ton bureau, Robin recommande : » a
+                     été retirée : la pastille dit la pièce mieux qu'elle, et sa
+                     place finance les pastilles sur mobile. */ ?>
+            <span class="chips-label" data-product-recap-project-label hidden><?php esc_html_e('Ton projet', 'theme-sapi-maison'); ?></span>
+            <div class="recap-group__chips" data-product-recap-project hidden></div>
 
+            <span class="chips-label" data-product-recap-reco-label hidden><?php esc_html_e('Ce que je te recommande sur ce modèle', 'theme-sapi-maison'); ?></span>
             <div class="recap-card" data-product-recap-card hidden>
               <span class="recap-card__item-label" data-product-recap-essence hidden><?php esc_html_e('Essence', 'theme-sapi-maison'); ?></span>
               <span class="recap-card__item-value" data-product-recap-essence-value></span>
-              <span class="recap-card__item-label" data-product-recap-taille hidden><?php esc_html_e('Taille', 'theme-sapi-maison'); ?></span>
+              <span class="recap-card__item-label" data-product-recap-taille hidden><?php esc_html_e('Taille du luminaire', 'theme-sapi-maison'); ?></span>
               <span class="recap-card__item-value" data-product-recap-taille-value></span>
             </div>
 

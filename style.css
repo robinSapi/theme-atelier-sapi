@@ -23581,6 +23581,49 @@ button.chip--project:focus-visible {
   color: var(--color-wood-dark);
 }
 
+/* Pastille « empilée » : mot-clé AU-DESSUS de la valeur.
+   ⚠️ Réservée au récap de la fiche produit, où le mot-clé « Taille de la
+   pièce » est long : côte à côte, la pastille ferait à elle seule plus de la
+   moitié d'un écran d'iPhone. L'écran « Voici ton projet » garde la forme
+   côte à côte, il n'est pas concerné.
+   Le mot-clé DOIT rester affiché : c'est ce qui distingue la taille de la
+   PIÈCE (ici) de la taille du LUMINAIRE (dans l'encart juste en dessous).
+   Deux autres endroits de la modale l'ont laissé tomber et affichent « Grand »
+   tout seul, ce qui ne veut rien dire. */
+.chip--stacked .chip__label {
+  display: block;
+  margin-right: 0;
+  margin-bottom: 1px;
+  line-height: 1.1;
+}
+.chip--stacked {
+  padding-top: 7px;
+  padding-bottom: 7px;
+  -webkit-align-items: center;
+  align-items: center;
+}
+
+/* ⚠️ CADRAGE DU RÉCAP FICHE PRODUIT — ne pas retirer.
+   `.modal__body-content` est en `align-items: center` : chaque bloc prend sa
+   largeur de contenu et se centre. Sur l'écran S3, `.recap-group__chips` est
+   enveloppée dans `.recap-groups`, qui porte la contrainte de largeur. Ici on
+   réutilise la classe SANS son enveloppe : sans ces règles, le bloc de
+   pastilles s'étale sur toute la largeur dès qu'elles passent à la ligne,
+   pendant que le titre « TON PROJET » reste centré — et le titre se retrouve
+   à 138 px de la première pastille qu'il est censé coiffer.
+   Les trois blocs partagent la largeur de `.recap-card` (380 px) pour que
+   titres, pastilles et encart s'alignent sur le même bord gauche. */
+[data-screen="s-product-recap"] .chips-label,
+[data-screen="s-product-recap"] [data-product-recap-project] {
+  width: 100%;
+  max-width: 380px;
+  text-align: left;
+}
+[data-screen="s-product-recap"] [data-product-recap-project] {
+  -webkit-justify-content: flex-start;
+  justify-content: flex-start;
+}
+
 /* Récap projet groupé par thème (s3) */
 .recap-groups {
   display: -webkit-flex;

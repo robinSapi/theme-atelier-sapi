@@ -1421,6 +1421,81 @@
     style: 'Style'
   };
 
+  /* ═══════════════════════════════════════════════════════════
+     UNE PASTILLE DE PROJET — le markup n'existe QU'ICI
+     ═══════════════════════════════════════════════════════════
+     ⚠️ Le projet est affiché à plusieurs endroits de la modale, et les formes
+     ont DÉJÀ divergé : l'écran contact et l'encart « Filtres appliqués »
+     affichent la valeur SANS son mot-clé. Résultat, le récap contact dit
+     littéralement « Salon / Salle à manger · Grand · Moderne » — et « Grand »
+     tout seul ne veut rien dire.
+     Cette forme-ci est la canonique : mot-clé + valeur + icône. C'est la seule
+     qui reste juste quand on la sort de son contexte. **Ne pas en écrire une
+     quatrième** ; appeler ce constructeur.
+
+     @param sid       clé de la réponse (piece, taille, style…)
+     @param opts      { cliquable: bool, motCle: string }
+                      `cliquable` : un <button> qui édite la réponse. ⚠️ Sur la
+                      fiche produit il DOIT rester faux — voir plus bas.
+                      `motCle` : remplace le libellé par défaut (la fiche
+                      produit dit « Taille de la pièce », pas « Taille »). */
+  function buildProjectChip(sid, opts) {
+    opts = opts || {};
+    var slug = state.answers[sid];
+    if (!slug) return null;
+    var step = getStep(sid);
+    /* ⚠️ `state.labels` D'ABORD, comme avant ce refactor. `getChoiceLabel`
+       ne renvoie jamais de chaîne vide — à défaut de correspondance elle rend
+       le slug brut. La mettre en premier rendait les deux termes suivants
+       inatteignables : le jour où un slug disparaît du référentiel, le
+       visiteur lirait « Pièce : chambre-enfant » alors que le libellé humain
+       était disponible juste à côté. Repli silencieux évité. */
+    var labelText = state.labels[sid] || getChoiceLabel(sid, slug) || slug;
+    var keyLabel = opts.motCle || S3_KEY_LABELS[sid] || sid;
+
+    var chip;
+    if (opts.cliquable) {
+      /* ⚠️ `data-step-edit` est écouté sur TOUTE la modale, pas sur un écran.
+         Toute pastille qui le porte devient cliquable où qu'elle soit — et le
+         retour après édition est codé en dur vers l'écran de la page de
+         sélection, dont le bouton principal fait QUITTER la fiche produit.
+         D'où le `<span>` par défaut. */
+      chip = document.createElement('button');
+      chip.type = 'button';
+      chip.setAttribute('data-step-edit', sid);
+      chip.setAttribute('aria-label', 'Modifier ' + keyLabel + ' : ' + labelText);
+    } else {
+      chip = document.createElement('span');
+    }
+    chip.className = 'chip chip--project' + (opts.empile ? ' chip--stacked' : '');
+
+    // Icône du choix sélectionné
+    var iconName = null;
+    if (step && step.choices) {
+      for (var i = 0; i < step.choices.length; i++) {
+        if (step.choices[i].slug === slug) { iconName = step.choices[i].icon; break; }
+      }
+    }
+    if (iconName && ICONS[iconName]) {
+      var iconEl = document.createElement('span');
+      iconEl.className = 'chip__icon';
+      iconEl.innerHTML = ICONS[iconName];
+      chip.appendChild(iconEl);
+    }
+
+    var textWrap = document.createElement('span');
+    var labelEl = document.createElement('span');
+    labelEl.className = 'chip__label';
+    labelEl.textContent = keyLabel;
+    var valueEl = document.createElement('span');
+    valueEl.className = 'chip__value';
+    valueEl.textContent = labelText;
+    textWrap.appendChild(labelEl);
+    textWrap.appendChild(valueEl);
+    chip.appendChild(textWrap);
+    return chip;
+  }
+
   function populateRecapChips() {
     if (!els.recapChips) return;
     els.recapChips.innerHTML = '';
@@ -1443,50 +1518,8 @@
       chipsEl.className = 'recap-group__chips';
 
       stepsWithValue.forEach(function (sid) {
-        var slug = state.answers[sid];
-        var step = getStep(sid);
-        var labelText = state.labels[sid] || slug;
-        var keyLabel = S3_KEY_LABELS[sid] || sid;
-
-        // Round 4 — chip cliquable pour éditer la réponse (mockup-11 hint
-        // promettait cette fonctionnalité). Utilise un <button> au lieu
-        // d'un <span> pour l'accessibilité + cursor pointer naturel.
-        var chip = document.createElement('button');
-        chip.type = 'button';
-        chip.className = 'chip chip--project';
-        chip.setAttribute('data-step-edit', sid);
-        chip.setAttribute('aria-label', 'Modifier ' + keyLabel + ' : ' + labelText);
-
-        // Icône : depuis l'icône du choix sélectionné dans le step
-        var iconName = null;
-        if (step && step.choices) {
-          for (var i = 0; i < step.choices.length; i++) {
-            if (step.choices[i].slug === slug) {
-              iconName = step.choices[i].icon;
-              break;
-            }
-          }
-        }
-        if (iconName && ICONS[iconName]) {
-          var iconEl = document.createElement('span');
-          iconEl.className = 'chip__icon';
-          iconEl.innerHTML = ICONS[iconName];
-          chip.appendChild(iconEl);
-        }
-
-        // Wrapper texte (label uppercase + valeur)
-        var textWrap = document.createElement('span');
-        var labelEl = document.createElement('span');
-        labelEl.className = 'chip__label';
-        labelEl.textContent = keyLabel;
-        var valueEl = document.createElement('span');
-        valueEl.className = 'chip__value';
-        valueEl.textContent = labelText;
-        textWrap.appendChild(labelEl);
-        textWrap.appendChild(valueEl);
-        chip.appendChild(textWrap);
-
-        chipsEl.appendChild(chip);
+        var chip = buildProjectChip(sid, { cliquable: true });
+        if (chip) chipsEl.appendChild(chip);
       });
 
       groupEl.appendChild(chipsEl);
@@ -1653,10 +1686,14 @@
     'entree': 'ton entrée',
     'escalier': 'ta cage d\'escalier'
   };
-  function buildRecapIntro(answers, labels) {
-    var piece = PIECE_TUTOIEMENT[answers && answers.piece] || 'ta pièce';
-    return 'Pour ' + piece + ', Robin recommande :';
-  }
+  /* `buildRecapIntro` produisait « Pour ton bureau, Robin recommande : ».
+     Retirée avec la phrase : la pastille « Pièce : Bureau » dit la même chose
+     en moins de place, et le bandeau « Ce que je te recommande sur ce modèle »
+     dit le reste. La laisser en place aurait fait un vestige de plus.
+     ⚠️ `PIECE_TUTOIEMENT` juste au-dessus n'a plus AUCUN lecteur dans ce
+     fichier. Elle est conservée volontairement : c'est le miroir JS de
+     `sapi_piece_possessive()` côté PHP, et le prochain écran qui tutoiera une
+     pièce en aura besoin. Ne pas la recopier ailleurs. */
 
   // Affiche l'écran s-product-recap (immédiat, aucun fetch).
   function showProductRecap() {
@@ -1671,15 +1708,36 @@
     var essenceLabel = essence ? ESSENCE_LABEL[essence] : '';
     var tailleLabel = readTailleLabelFromProductSelect(answers);
 
-    // Intro
-    if (els.productRecapIntro) {
-      els.productRecapIntro.textContent = buildRecapIntro(answers, labels);
+    /* ── TON PROJET ────────────────────────────────────────────────────────
+       On n'affiche QUE les réponses dont sort le conseil : la pièce donne le
+       contexte, la taille de la pièce donne la taille du luminaire, le style
+       donne l'essence. Sortie électrique, hauteur et éclairage servent à
+       choisir QUELS modèles montrer, pas quelle version de celui-ci : les
+       afficher ici promettrait un effet qu'elles n'ont pas sur cet écran.
+       La phrase à se raconter : « on montre les réponses dont sort le conseil,
+       et rien d'autre. »
+       ⚠️ Pastilles NON cliquables ici : l'écouteur d'édition est global à la
+       modale et son retour ramène vers l'écran de la page de sélection, dont
+       le bouton principal fait quitter la fiche produit. */
+    var chipsProjet = ['piece', 'taille', 'taille_escalier', 'style'];
+    var MOTS_CLES_PRODUIT = { taille: 'Taille de la pièce' };
+    if (els.productRecapProject) {
+      els.productRecapProject.innerHTML = '';
+      var nbChips = 0;
+      chipsProjet.forEach(function (sid) {
+        var chip = buildProjectChip(sid, { cliquable: false, empile: true, motCle: MOTS_CLES_PRODUIT[sid] });
+        if (chip) { els.productRecapProject.appendChild(chip); nbChips++; }
+      });
+      els.productRecapProject.hidden = !nbChips;
+      if (els.productRecapProjectLabel) els.productRecapProjectLabel.hidden = !nbChips;
     }
 
     // Récap card : Essence + Taille (chacune masquée si non disponible)
     var hasEssence = !!essence;
     var hasTaille = !!tailleLabel;
-    if (els.productRecapCard) els.productRecapCard.hidden = !(hasEssence || hasTaille);
+    var aReco = hasEssence || hasTaille;
+    if (els.productRecapCard) els.productRecapCard.hidden = !aReco;
+    if (els.productRecapRecoLabel) els.productRecapRecoLabel.hidden = !aReco;
     if (els.productRecapEssence) {
       els.productRecapEssence.hidden = !hasEssence;
       if (hasEssence && els.productRecapEssenceValue) {
@@ -2332,7 +2390,9 @@
     // S3 carrefour
     els.recapChips    = els.modal.querySelector('[data-recap-chips]');
     // s-product-recap (F2b Phase 2 — récap statique sans IA)
-    els.productRecapIntro        = els.modal.querySelector('[data-product-recap-intro]');
+    els.productRecapProject      = els.modal.querySelector('[data-product-recap-project]');
+    els.productRecapProjectLabel = els.modal.querySelector('[data-product-recap-project-label]');
+    els.productRecapRecoLabel    = els.modal.querySelector('[data-product-recap-reco-label]');
     els.productRecapCard         = els.modal.querySelector('[data-product-recap-card]');
     els.productRecapEssence      = els.modal.querySelector('[data-product-recap-essence]');
     els.productRecapEssenceValue = els.modal.querySelector('[data-product-recap-essence-value]');
