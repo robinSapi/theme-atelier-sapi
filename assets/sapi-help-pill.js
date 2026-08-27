@@ -77,6 +77,16 @@
     var pill = document.querySelector('[data-help-pill]');
     if (!pill) return;
 
+    /* Garde d'idempotence. Si ce fichier venait à s'exécuter deux fois — cache
+       qui duplique, scripts combinés, enqueue en double — la seconde instance
+       poserait un second écouteur de clic (la modale s'ouvrirait deux fois) et,
+       pire, lirait le texte « normal » APRÈS que la première a déjà annoncé.
+       Son texte de repli deviendrait « J'ai choisi pour ton projet », et elle
+       le réécrirait à chaque geste du visiteur : la pill ne reviendrait plus
+       jamais en arrière. */
+    if (pill.getAttribute('data-help-pill-ready') === '1') return;
+    pill.setAttribute('data-help-pill-ready', '1');
+
     pill.addEventListener('click', function () {
       document.dispatchEvent(new CustomEvent('sapi:open-modal', {
         detail: { state: 'product' }
@@ -87,10 +97,12 @@
     var form = document.querySelector('form.variations_form');
     if (!textEl || !form) return;
 
-    /* Le texte normal est LU dans le DOM, jamais réécrit ici. Le PHP est la
-       source de vérité (single-product.php) : le dépôt a déjà payé une
-       divergence PHP/JS sur ce texte précis. */
-    var TEXTE_NORMAL = textEl.textContent;
+    /* Le texte normal vient de l'ATTRIBUT posé par le PHP, jamais du contenu
+       affiché. Le PHP reste la source unique (single-product.php) — le dépôt a
+       déjà payé une divergence PHP/JS sur ce texte précis — mais la lecture par
+       attribut est en plus increvable : elle donne le même résultat qu'on la
+       fasse avant ou après une annonce. */
+    var TEXTE_NORMAL = textEl.getAttribute('data-help-pill-default') || textEl.textContent;
 
     var mainPris = false; // verrou à sens unique : le visiteur a pris la main
     var posesParLeCode = {};
@@ -136,13 +148,32 @@
       }, 180);
     }
 
-    // ── Ce que le CODE pose : `change` non trusted sur un menu d'attribut.
+    /* ⚠️ DEUX NOMMAGES DIFFÉRENTS, ET C'EST TOUT LE PIÈGE.
+       Le visiteur ne manipule PAS le menu que le code manipule. Un plugin de
+       pastilles (WVS) remplace les menus WooCommerce par des boutons radio
+       nommés `wvs_radio_attribute_pa_taille__7183` — `attribute_` y est au
+       MILIEU, pas au début. Le plugin recopie ensuite la valeur dans le vrai
+       menu caché, `attribute_pa_taille`, que la présélection vise elle aussi.
+
+       D'où le défaut constaté par Robin : l'allumage marchait (le code écrit
+       dans le vrai menu, nom préfixé) mais l'extinction ne partait jamais (le
+       geste humain porte le nom du plugin, et mon test l'écartait).
+
+       Les deux branches n'ont donc PAS le même test, et c'est volontaire :
+         • geste humain  → `attribute_` n'importe où dans le nom, pour attraper
+           le plugin d'aujourd'hui et celui qui le remplacera ;
+         • pose par le code → `attribute_` en PRÉFIXE strict, parce que le
+           compteur est indexé sur les vrais menus, ceux que `menusAChoix()`
+           énumère. Élargir ce test-là ferait compter deux fois le même
+           attribut sous deux noms. */
     form.addEventListener('change', function (e) {
       var sel = e.target;
-      if (!sel || !sel.name || sel.name.indexOf('attribute_') !== 0) return;
+      if (!sel || !sel.name || sel.name.indexOf('attribute_') === -1) return;
       if (e.isTrusted) { mainPris = true; rendre(); return; }
-      posesParLeCode[sel.name] = true;
-      rendre();
+      if (sel.name.indexOf('attribute_') === 0) {
+        posesParLeCode[sel.name] = true;
+        rendre();
+      }
     }, true);
 
     /* ── Ce que le VISITEUR fait. Trois gestes, tous en capture pour passer
@@ -152,7 +183,28 @@
       if (!e.isTrusted || mainPris) return;
       var t = e.target;
       if (!t || !t.closest) return;
-      if (t.closest('.material-option, .swatch-item, .reset_variations')) {
+      /* La pill est rendue À L'INTÉRIEUR du formulaire de variation (hook
+         `woocommerce_before_single_variation`). Cliquer dessus pour ouvrir la
+         modale ne doit évidemment pas compter comme « je reprends la main ». */
+      if (t.closest('[data-help-pill]')) return;
+
+      /* ⚠️ BORNÉ AU FORMULAIRE, ET C'EST INDISPENSABLE.
+         J'avais écrit `[class*="wvs-"]` pour couvrir les pastilles du plugin.
+         Or le plugin pose AUSSI ses classes sur le `<body>` lui-même
+         (`wvs-behavior-blur`, `wvs-tooltip`…) : `closest()` remontait donc
+         jusqu'en haut et n'importe quel clic — un lien du menu, le bandeau
+         cookies, et surtout « Appliquer cette sélection » DANS la modale —
+         armait le verrou. J'aurais cassé l'allumage en réparant l'extinction. */
+      if (!t.closest('form.variations_form')) return;
+
+      /* L'essence est rendue par le plugin en pastilles image : des `<li
+         class="variable-item">` SANS aucun contrôle nommé. Le plugin recopie
+         la valeur dans le menu caché via jQuery, ce qu'un écouteur natif ne
+         voit pas — le clic est donc la SEULE voie d'extinction pour cet
+         attribut. Ne pas retirer `.variable-item` de cette liste.
+         Les trois autres sélecteurs couvrent les pastilles du thème et le lien
+         « Effacer » de WooCommerce. */
+      if (t.closest('.variable-item, .material-option, .swatch-item, .reset_variations')) {
         mainPris = true;
         rendre();
       }

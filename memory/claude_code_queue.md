@@ -783,6 +783,27 @@ Cause : le remplacement était conditionné à `if (Object.keys(filters).length)
 → **`refineFromStoredProject()` au chargement de l'immersion** : on rejoue l'affinage à partir du projet mémorisé, en réutilisant **exactement** le mécanisme du moment 2 (même endpoint, même dédup, même remplacement de cards). Le carrousel étant invisible à ce stade (`--reveal` à 0), le remplacement ne se voit pas.
 **La signature de dédup fait le tri toute seule** : si le projet ne contient que la pièce, elle est identique à la baseline et aucune requête n'est envoyée. Aucun coût sur le chemin normal (clic sur une carte-pièce).
 
+### ✅ FICHE PRODUIT — LA PILL DIT QUAND LE SITE A CHOISI
+
+Deux états : « Je t'aide à choisir la bonne version » (normal, rendu par le PHP) et « **J'ai choisi pour ton projet** » (27 caractères — ⚠️ **la capsule est mono-ligne, 36 caractères maximum**, au-delà les jambages du Square Peg se touchent sur iPhone).
+
+**Règles Robin :** on n'annonce que si les DEUX attributs ont bougé ; retour au normal au premier geste, **sans jamais revenir en arrière** ; aucune explication du changement.
+
+**Le principe : observer l'effet, pas recalculer la cause.** La table `style → essence` existe déjà en trois exemplaires et diverge. On regarde donc si chaque menu a reçu un `change` non trusted, pas si une présélection « aurait dû » avoir lieu.
+
+⚠️ **DEUX NOMMAGES, ET C'EST TOUT LE PIÈGE — le défaut que Robin a vu.** Le visiteur ne manipule PAS le menu que le code manipule. Le plugin **WooCommerce Variation Swatches** remplace les menus par des radios `wvs_radio_attribute_pa_taille__7183` : `attribute_` y est au **milieu**. La présélection, elle, écrit dans le vrai menu caché `attribute_pa_taille`, **préfixé**. Mon test unique exigeait le préfixe → l'allumage marchait, l'extinction ne partait jamais. Les deux branches ont donc désormais des tests **différents**, volontairement.
+
+⚠️ **ET LE PIÈGE DU CORRECTIF, attrapé en relecture avant livraison :** j'avais ajouté `[class*="wvs-"]` pour couvrir les pastilles du plugin. Or **le plugin pose ses classes sur le `<body>`** (`wvs-behavior-blur`) : `closest()` remontait jusqu'en haut et **n'importe quel clic de la page** armait le verrou — y compris « Appliquer cette sélection » dans la modale. J'aurais cassé l'allumage en réparant l'extinction. Le sélecteur est maintenant **borné au formulaire de variation**.
+
+**Trois découvertes à garder :**
+- **`.material-option` n'existe pas sur la fiche produit.** Le filtre de pastilles du plugin gagne sur celui du thème (`functions.php:2131`), donc tout le code de pastilles maison — thème + `cinetique.js:359` — est **mort sur cette page**.
+- L'essence est rendue en `<li class="variable-item">` **sans contrôle nommé**, et le plugin recopie la valeur via jQuery, invisible d'un écouteur natif. **Le clic est la seule voie d'extinction pour cet attribut** — ne pas retirer `.variable-item` du sélecteur.
+- Le texte normal vient d'un attribut `data-help-pill-default` posé par le PHP, plus d'une lecture en direct, et une garde `data-help-pill-ready` interdit une seconde initialisation.
+
+**Non fait, décision en attente :** si le visiteur touche une variation **puis** ouvre la modale et clique « Appliquer cette sélection », le verrou a déjà claqué et la pill reste muette — au moment même où le site repose les deux attributs à sa demande. Relâcher le verrou sur `sapi:apply-product-selection` (et vider `posesParLeCode` en même temps) est à trancher.
+
+---
+
 ### ✅ TABLEAU DE BORD — TROIS CHIFFRES QUI MENTAIENT
 
 Audit complet demandé par Robin : « est-ce que les parcours sont bien sauvegardés et affichés ? » Réponse : **non**, et le problème n'était pas des chiffres manquants mais des chiffres **faux sans le dire**. Trois correctifs retenus, les moins risqués.
