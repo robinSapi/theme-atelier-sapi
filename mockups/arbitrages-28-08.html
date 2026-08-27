@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arbitrages — ce qui reste</title>
+<style>
+  :root{
+    --bois:#937D68; --orange:#E35B24; --encre:#2B2118; --brule:#241610;
+    --fond:#FAF7F2; --carte:#FFFFFF; --trait:#E6DED3; --doux:#8A7F73;
+    --ok:#3F7D58; --attente:#B8860B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fond);color:var(--encre);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-text-size-adjust:100%}
+  .wrap{max-width:860px;margin:0 auto;padding:24px 18px 150px}
+  header{padding:20px 0 6px}
+  h1{margin:0 0 6px;font-size:23px;letter-spacing:-.01em}
+  .sub{color:var(--doux);font-size:14px;margin:0}
+
+  .bar{position:sticky;top:0;z-index:20;background:rgba(250,247,242,.94);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--trait);
+    margin:14px -18px 0;padding:10px 18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .prog{flex:1 1 160px;height:7px;background:var(--trait);border-radius:99px;overflow:hidden;min-width:110px}
+  .prog i{display:block;height:100%;width:0;background:var(--bois);transition:width .3s}
+  .count{font-size:13px;color:var(--doux);white-space:nowrap}
+  .count b{color:var(--encre)}
+
+  h2{margin:36px 0 2px;font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--bois)}
+  h2 + p.intro{margin:6px 0 0;color:var(--doux);font-size:13.5px}
+
+  .q{background:var(--carte);border:1px solid var(--trait);border-radius:12px;
+    padding:16px 17px;margin:12px 0}
+  .q.is-done{border-color:#BFD9CB;box-shadow:inset 3px 0 0 var(--ok)}
+  .q h3{margin:0 0 8px;font-size:16px;line-height:1.35}
+  .q .n{color:var(--bois);font-weight:700;margin-right:7px}
+  .tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:2px}
+  .t-code{background:#EEF3F7;color:#3D5A73}
+  .t-dec{background:#F7F0E6;color:#8A6A2F}
+  .t-cat{background:#F3EEF7;color:#63467D}
+
+  .l{margin:9px 0 0;padding-left:13px;border-left:2px solid var(--trait)}
+  .l b{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--doux);margin-bottom:2px;font-weight:700}
+  .l.reco{border-left-color:var(--orange)}
+  .l.reco b{color:var(--orange)}
+
+  textarea{width:100%;margin-top:11px;padding:10px 12px;border:1px solid var(--trait);
+    border-radius:9px;background:#FCFAF7;font:16px/1.5 inherit;resize:vertical;min-height:46px;color:inherit}
+  textarea:focus{outline:2px solid var(--bois);outline-offset:-1px;background:#fff}
+  textarea::placeholder{color:#B3A899}
+
+  .choix{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .choix label{flex:1 1 120px;text-align:center;padding:8px 10px;border:1px solid var(--trait);
+    border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;background:#FCFAF7;user-select:none}
+  .choix input{position:absolute;opacity:0;pointer-events:none}
+  .choix label:has(input:checked){background:var(--bois);border-color:var(--bois);color:#fff}
+
+  .foot{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(250,247,242,.96);
+    backdrop-filter:blur(10px);border-top:1px solid var(--trait);padding:11px 18px;
+    padding-bottom:calc(11px + env(safe-area-inset-bottom));display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+  button{font:inherit;font-weight:700;font-size:14px;padding:11px 18px;border-radius:9px;
+    border:1px solid var(--trait);background:#fff;color:var(--encre);cursor:pointer}
+  button.p{background:var(--orange);border-color:var(--orange);color:#fff}
+  button.g{background:transparent;color:var(--doux)}
+  .out{max-width:860px;margin:0 auto;padding:0 18px}
+  #zone{display:none;margin:16px 0 0}#zone.on{display:block}
+  #txt{width:100%;min-height:300px;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}
+  .note{font-size:12.5px;color:var(--doux);margin:7px 0 0}
+  code{background:#F1EBE2;padding:1px 5px;border-radius:4px;font-size:12.5px}
+
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){--fond:#1A1512;--carte:#231C17;--trait:#3A2F27;--encre:#F0E9E0;--doux:#A2958A}
+    :root:not([data-theme="light"]) textarea{background:#1E1813}
+    :root:not([data-theme="light"]) .choix label{background:#2A221C}
+    :root:not([data-theme="light"]) button{background:#2A221C;color:var(--encre)}
+    :root:not([data-theme="light"]) .bar{background:rgba(26,21,18,.94)}
+    :root:not([data-theme="light"]) .foot{background:rgba(26,21,18,.96)}
+    :root:not([data-theme="light"]) code{background:#2E251E}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Arbitrages — ce qui reste</h1>
+    <p class="sub">Tes réponses du 27/08, ce que j'en comprends, et ce que je propose. Réponds dans les champs, puis exporte.</p>
+  </header>
+  <div class="bar">
+    <div class="prog"><i id="pi"></i></div>
+    <div class="count" id="pc">0 / 0</div>
+  </div>
+  <div id="list"></div>
+</div>
+
+<div class="foot">
+  <button class="p" id="bExport">Copier pour Claude</button>
+  <button id="bFile">Télécharger .md</button>
+  <button class="g" id="bClear">Tout effacer</button>
+</div>
+<div class="out"><div id="zone"><textarea id="txt" readonly></textarea>
+<p class="note">Colle ça dans la conversation. Seuls les points où tu as écrit ou choisi sont exportés.</p></div></div>
+
+<script>
+const P = [
+{g:"Décidé — je fais, tu n'as rien à valider", intro:"Tes réponses sont claires. Je les liste pour que tu vérifies que je n'ai pas mal compris."},
+
+{n:"1", tag:"code", t:"Enregistrer le conseil de Robin",
+ c:"Tu as dit « corrige ».",
+ r:"Deux instructions à intervertir : la session est fermée avant que le conseil soit écrit. J'inverse, et je vérifie que la ligne n'est pas déjà close.",
+ done:1},
+
+{n:"12", tag:"code", t:"Les deux horloges",
+ c:"Tu as dit « corrige ça ».",
+ r:"J'aligne le stockage : les deux dates seront écrites avec l'horloge de WordPress. ⚠️ Ça crée une frontière — les lignes d'avant gardent l'horloge MySQL. Si les deux serveurs sont à la même heure (probable chez o2switch), ça ne se verra pas.",
+ done:1},
+
+{n:"14", tag:"code", t:"Un projet vit 30 jours",
+ c:"Tu as dit 30 jours.",
+ r:"Au-delà, le projet mémorisé est effacé au chargement. Question qui va avec, et je propose de répondre non : faut-il prévenir le visiteur (« c'était toujours pour ton salon ? ») ou effacer en silence ? Silence = plus simple, et il refait le questionnaire s'il veut.",
+ done:1},
+
+{n:"21", tag:"code", t:"Le focus au clavier",
+ c:"Tu as dit « répare ».",
+ r:"À la fermeture de la modale, le curseur revient sur le bouton qui l'avait ouverte, au lieu de repartir en haut de page. Le crochet a été gardé exprès hier.",
+ done:1},
+
+{n:"30", tag:"code", t:"Le formulaire Inspiration",
+ c:"Tu as dit « au même niveau que les autres ».",
+ r:"J'ajoute le honeypot et la limite de fréquence, exactement comme les quatre autres formulaires du site.",
+ done:1},
+
+{n:"31 · 32", tag:"", t:"SEO — retirés de la file",
+ c:"Tu as dit « on oublie ».",
+ r:"Je retire le re-check Search Console et la cannibalisation de la liste. Ils restent dans tes notes SEO si tu y reviens.",
+ done:1},
+
+{n:"2 · 3 · 18 · 19 · 20 · 22", tag:"", t:"Laissés en l'état",
+ c:"Tu as dit « c'est pas grave » pour chacun.",
+ r:"Je les marque comme choix assumés dans tes notes, avec la raison — pour qu'on ne les redécouvre pas dans six mois comme des oublis.",
+ done:1},
+
+{g:"RGPD — ta réponse change tout", intro:"Tu as dit : « je me moque de sauvegarder les IP, je veux des datas pour faire des stats, pas pour identifier. » C'est une orientation, pas un détail : elle simplifie les points 4, 5, 7, 8 et 11 d'un coup."},
+
+{n:"4·5·7", tag:"dec", t:"Ne plus rien stocker qui identifie",
+ c:"Tu veux des statistiques, pas des identifiants. Aujourd'hui la table garde : l'IP (tronquée depuis hier), la ville, l'e-mail de contact, et le texte libre écrit par le visiteur.",
+ r:"Je propose de <b>supprimer purement et simplement l'IP et la ville</b>. Plus de troncature, plus de tiers, plus de question de consentement sur ces deux-là : la donnée n'existe plus.<br><br>⚠️ <b>L'e-mail, c'est une autre affaire.</b> Il est dans la table parce que le tableau de bord a un bouton « Répondre par email ». Si je le retire, tu perds ce bouton — mais tu reçois déjà la demande par mail, donc tu peux répondre depuis ta boîte. <b>À toi de dire.</b>",
+ q:["Retirer IP + ville, GARDER l'e-mail","Retirer IP + ville + e-mail","Ne rien retirer"]},
+
+{n:"6", tag:"code", t:"L'IP dans le snippet Pinterest",
+ c:"Tu demandes si on peut la retirer sans casser.",
+ r:"Oui. Pinterest s'en sert pour mieux rattacher une conversion à une personne : sans elle, le suivi <b>continue de fonctionner</b>, il est juste moins précis sur l'attribution. Vu que tu ne fais pas de publicité Pinterest en ce moment, le coût réel est proche de zéro.",
+ q:["Retirer l'IP du snippet","La garder"]},
+
+{n:"8 · 11", tag:"dec", t:"La géolocalisation — un autre fournisseur ?",
+ c:"Tu demandes s'il existe un équivalent gratuit.",
+ r:"Oui, trois en existent avec HTTPS et usage commercial autorisé : <b>ipwhois.io</b>, <b>FreeIPAPI</b> (60 requêtes/minute) et <b>IPinfo Lite</b> (attribution demandée).<br><br>Mais <b>je te déconseille d'en prendre un</b>, et c'est cohérent avec ta réponse au point 4 : la ville sert à quoi, concrètement ? Tu vends en France entière et tu expédies. Si c'est pour savoir d'où viennent tes visiteurs, <b>GA4 te le donne déjà</b>, sans que tu détiennes quoi que ce soit. Supprimer la colonne règle aussi le point 11.",
+ q:["Supprimer la géolocalisation","Prendre un fournisseur gratuit","Souscrire ip-api Pro"]},
+
+{g:"Ce que tu veux mesurer", intro:""},
+
+{n:"9", tag:"code", t:"Compter les arrivées depuis le room-picker",
+ c:"Tu veux savoir combien de personnes arrivent par les cartes-pièces de l'accueil. Aujourd'hui c'est impossible : une session n'est créée qu'à l'ouverture de la modale, et la modale n'existe pas sur l'accueil.",
+ r:"Je propose d'<b>enregistrer la session à l'arrivée sur la page de sélection</b>, pas seulement à l'ouverture de la modale. La provenance se déduit de la page d'où vient le clic.<br><br>⚠️ <b>Conséquence à accepter :</b> le mot « session » change de sens. Il comptera des <b>arrivées</b>, pas des ouvertures de modale — donc beaucoup plus de lignes, et tous tes pourcentages changent d'échelle. C'est plus proche de ce que tu veux savoir, mais ce n'est plus comparable à avant.",
+ q:["Oui, compter les arrivées","Non, garder les ouvertures de modale"]},
+
+{n:"10", tag:"code", t:"« Catalogue présenté » — ce que c'est",
+ c:"Tu ne vois pas de quoi il s'agit, et c'est normal : ça ne s'est jamais affiché.",
+ r:"C'est un encart prévu dans le détail d'une session, censé lister <b>quels luminaires ont été montrés à ce visiteur-là</b>. Le code qui devait le remplir cherchait un markup qui n'existe pas dans ton thème.<br><br>C'est la seule donnée qui te dirait si tes sélections ont du sens : « ce visiteur cherchait une applique pour un salon, voilà les quatre modèles qu'on lui a montrés ». Le serveur calcule déjà cette liste, il reste à la ranger dans la session.",
+ q:["Le brancher","Retirer l'encart"]},
+
+{n:"16", tag:"code", t:"Les pièces qu'on te demande et que tu n'as pas",
+ c:"Tu dis : toute pièce nommée par quelqu'un et absente de ta liste doit être considérée comme manquante.",
+ r:"Je propose d'<b>enregistrer le mot employé par le visiteur</b> quand l'IA le renvoie vers toi pour cause de pièce hors périmètre, et d'ajouter un petit classement dans ton tableau de bord : « pièces demandées et absentes du site ».<br><br>C'est le genre d'information qui décide d'une gamme. Si « salle de bain » revient trente fois en trois mois, tu le sauras.",
+ q:["Oui, avec le classement","Juste enregistrer, sans classement"]},
+
+{g:"Ce que je te propose de laisser tomber", intro:"Deux points où, après vérification, il n'y a rien à faire."},
+
+{n:"15", tag:"dec", t:"« Couloir » qui s'affiche « entrée »",
+ c:"Tu demandes le plus simple.",
+ r:"<b>Le plus simple, c'est de ne rien faire</b> — et je le pense vraiment. Ta carte-pièce s'appelle déjà « Entrée / Couloir » : un couloir <b>est</b> dans ta liste, ce n'est pas une pièce manquante. Et le conseil de Robin reprend déjà le mot du visiteur. Seul le petit titre au-dessus du carrousel dit « ton entrée ».<br><br>Le corriger voudrait dire afficher le mot du visiteur partout — mais alors il faut gérer le genre (« ton couloir », « ta salle de jeux »), et ça ouvre plus de problèmes que ça n'en règle.",
+ q:["D'accord, on ne touche à rien","Non, je veux qu'on le change"]},
+
+{n:"17", tag:"", t:"Où afficher les compromis",
+ c:"Tu n'as pas compris ce qu'on pourrait changer.",
+ r:"C'est réglé sans qu'on s'en aperçoive : depuis ta décision de ce soir, <b>Robin le dit avec ses mots</b> dans son conseil (« je n'ai pas exactement ça, voilà ce qui s'en approche »). Il n'y a plus rien à afficher en plus. Je retire ce point.",
+ done:1},
+
+{g:"Dette technique — ce qu'on peut faire", intro:"Tu as demandé pour chacun. Rien ne casse aujourd'hui ; ce sont des pièges pour la prochaine lecture, et deux d'entre eux ont déjà produit des bugs réels."},
+
+{n:"23", tag:"code", t:"L'ordre de chargement, faux en production",
+ c:"Six fichiers testent une condition qui n'est jamais vraie quand ton cache ajoute <code>defer</code>.",
+ r:"J'applique aux six la même correction qu'à <code>sapi-project.js</code> hier. Aucun effet visible attendu — c'est une mise en cohérence.<br><br><b>Pourquoi ça compte :</b> l'ordre d'initialisation est aujourd'hui différent entre ton site de test et la production, et <b>la recette ne peut structurellement pas le montrer</b>. Le prochain défaut de ce type ne se verra qu'en ligne.",
+ q:["Corriger les six","Laisser"]},
+
+{n:"24", tag:"code", t:"La table des tailles, encore en trois exemplaires",
+ c:"Le JS a été unifié hier, le PHP non — et les deux divergent sur l'escalier.",
+ r:"Je fais comme pour l'essence ce soir : <b>PHP devient la source</b> (la valeur est déjà dans tes règles), et le JS la lit. Bonus : la conversion escalier → taille deviendra réglable depuis ton panneau d'admin, comme le bois.<br><br>C'est exactement le défaut qu'on a corrigé aujourd'hui, un étage plus bas.",
+ q:["Unifier sur PHP","Laisser"]},
+
+{n:"25", tag:"code", t:"L'écran contact affiche « Grand » tout seul",
+ c:"Les pastilles y sont construites à la main, sans le mot-clé.",
+ r:"Je les fais passer par le constructeur unique, celui des autres écrans. « Grand » devient « Taille de la pièce : Grand ». <b>Et ces mêmes valeurs partent dans le mail que tu reçois</b> — donc tu y gagnes aussi.",
+ q:["Corriger","Laisser"]},
+
+{n:"26", tag:"code", t:"L'ordre des clés recopié en dur",
+ c:"Une copie subsiste dans la modale, alors que la source unique est disponible dans le même fichier.",
+ r:"Je la remplace par un appel à la source. Exact aujourd'hui, divergent au premier ajout de question — c'est une correction à zéro risque.",
+ q:["Corriger","Laisser"]},
+
+{n:"27", tag:"code", t:"700 lignes de « Robin V2 » sans appelant",
+ c:"Un bloc entier de fonctions mortes.",
+ r:"Je les retire, <b>après avoir vérifié un par un</b> qu'aucune n'est appelée — y compris depuis le PHP, les gabarits et les snippets. Ce bloc contient au passage une copie périmée de la conversion escalier → taille, qui a déjà semé la confusion.<br><br>⚠️ C'est la suppression la plus volumineuse de la liste. Un agent la relira avant que tu pousses.",
+ q:["Supprimer","Laisser"]},
+
+{n:"28", tag:"code", t:"Code mort divers",
+ c:"Une fonction jamais appelée, deux lecteurs d'un objet supprimé, 30 lignes de markup invisible, et environ 300 lignes de CSS de composants qui n'existent plus.",
+ r:"Même méthode : je vérifie chaque dépendance croisée avant de couper. C'est là que ce dépôt a payé le plus cher — une suppression a déjà laissé un lecteur orphelin qui a faussé les conseils pendant des semaines.",
+ q:["Nettoyer","Laisser"]},
+
+{n:"29", tag:"code", t:"Si le plugin de pastilles était désactivé",
+ c:"La présélection poserait le bon bois, mais la pastille ne s'allumerait pas.",
+ r:"Trois lignes dans <code>cinetique.js</code> : un écouteur qui suit le menu. <b>Mais honnêtement, ça ne sert que le jour où tu désactiverais ce plugin.</b> C'est le point le moins utile de la liste — je le ferais en dernier, ou jamais.",
+ q:["Corriger quand même","Laisser, c'est noté"]},
+
+{n:"13", tag:"code", t:"Colonnes mortes — nettoyer après vérification",
+ c:"Tu as dit « nettoie, mais vérifie avant ».",
+ r:"Deux colonnes : <code>table_reponse</code> correspond à une question retirée du parcours, <code>ai_freetext_used</code> est écrite mais aucun écran ne la lit. Je vérifie chaque lecteur avant de toucher, et je te dis ce que j'ai trouvé <b>avant</b> de supprimer quoi que ce soit en base.<br><br>⚠️ Supprimer une colonne SQL est irréversible. Je peux aussi me contenter de retirer le code qui l'écrit, et laisser la colonne — plus prudent.",
+ q:["Retirer le code ET les colonnes","Retirer le code, garder les colonnes"]}
+];
+
+const KEY='sapiArbitrages2708';
+let data={}; try{data=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){data={}}
+
+let html='', ids=[];
+P.forEach(x=>{
+  if(x.g){ html+=`<h2>${x.g}</h2>${x.intro?`<p class="intro">${x.intro}</p>`:''}`; return; }
+  const id='p'+x.n.replace(/[^0-9]/g,'');
+  ids.push({id, n:x.n, t:x.t, q:!!x.q});
+  const d=data[id]||{};
+  const tag = x.tag==='code'?'<span class="tag t-code">code</span>'
+            : x.tag==='dec'?'<span class="tag t-dec">décision</span>'
+            : x.tag==='cat'?'<span class="tag t-cat">catalogue</span>':'';
+  html+=`<div class="q${x.done?' is-done':''}" id="c-${id}" data-id="${id}">
+    <h3><span class="n">${x.n}</span>${x.t}${tag}</h3>
+    <div class="l"><b>Ce que je comprends</b>${x.c}</div>
+    <div class="l reco"><b>Ce que je propose</b>${x.r}</div>
+    ${x.q?`<div class="choix">${x.q.map((o,i)=>
+      `<label><input type="radio" name="r-${id}" value="${o.replace(/"/g,'&quot;')}"${d.v===o?' checked':''}>${o}</label>`).join('')}</div>`:''}
+    <textarea placeholder="${x.q?'Une précision, ou une autre idée…':'Un désaccord, une précision…'}">${(d.c||'').replace(/</g,'&lt;')}</textarea>
+  </div>`;
+});
+document.getElementById('list').innerHTML=html;
+
+const aRepondre = ids.filter(i=>i.q);
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
+function paint(){
+  let n=0; aRepondre.forEach(i=>{ if((data[i.id]||{}).v) n++; });
+  document.getElementById('pi').style.width=(n/aRepondre.length*100)+'%';
+  document.getElementById('pc').innerHTML=`<b>${n}</b> / ${aRepondre.length} arbitrages`;
+}
+document.getElementById('list').addEventListener('change',e=>{
+  const c=e.target.closest('.q'); if(!c)return;
+  const id=c.dataset.id; data[id]=data[id]||{};
+  if(e.target.type==='radio') data[id].v=e.target.value;
+  save(); paint();
+});
+document.getElementById('list').addEventListener('input',e=>{
+  if(e.target.tagName!=='TEXTAREA')return;
+  const id=e.target.closest('.q').dataset.id;
+  data[id]=data[id]||{}; data[id].c=e.target.value; save();
+});
+paint();
+
+function build(){
+  const L=['# Arbitrages — réponses de Robin','',`Le ${new Date().toLocaleString('fr-FR')}`,''];
+  let vide=true;
+  ids.forEach(i=>{
+    const d=data[i.id]||{};
+    if(!d.v && !(d.c||'').trim()) return;
+    vide=false;
+    L.push(`## ${i.n} — ${i.t}`);
+    if(d.v) L.push(`**Choix :** ${d.v}`);
+    if((d.c||'').trim()) L.push(`> ${d.c.trim().replace(/\n/g,'\n> ')}`);
+    L.push('');
+  });
+  return vide ? "Rien de renseigné pour l'instant." : L.join('\n');
+}
+document.getElementById('bExport').onclick=async function(){
+  const t=build(), z=document.getElementById('zone'), a=document.getElementById('txt');
+  a.value=t; z.classList.add('on');
+  try{await navigator.clipboard.writeText(t); this.textContent='Copié ✓';}
+  catch(e){a.readOnly=false;a.select();this.textContent='Sélectionné, fais Cmd+C';}
+  setTimeout(()=>{this.textContent='Copier pour Claude'},2600);
+  z.scrollIntoView({behavior:'smooth',block:'nearest'});
+};
+document.getElementById('bFile').onclick=function(){
+  const b=new Blob([build()],{type:'text/markdown'}), u=URL.createObjectURL(b), a=document.createElement('a');
+  a.href=u; a.download='arbitrages-27-08-2026.md'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(u),1000);
+};
+document.getElementById('bClear').onclick=function(){
+  if(!confirm('Effacer toutes tes réponses ?'))return;
+  data={}; save();
+  document.querySelectorAll('.q input:checked').forEach(i=>i.checked=false);
+  document.querySelectorAll('.q textarea').forEach(t=>t.value='');
+  document.getElementById('zone').classList.remove('on'); paint();
+};
+</script>
+</body>
+</html>

@@ -817,6 +817,30 @@ C'est un message d'**ÉTAT**, pas d'action — décision Robin. Conséquence vou
 
 ---
 
+### 📍 ÉTAT AU SOIR DU 27/08 — CE QUI RESTE
+
+**Douze lots livrés et recettés dans la journée.** Le fil conducteur : le site disait souvent le contraire de ce qu'il faisait, sans jamais planter.
+
+**À faire au déploiement, dans l'ordre :**
+1. `php -l functions.php` sur test, ou ouvrir une page. Beaucoup de PHP a bougé.
+2. **Robin Conseiller → Règles de filtrage.** Si « Réglages personnalisés actifs », mettre **Pas de préférence → Peuplier** et enregistrer. C'est le seul correctif qui ne s'applique pas seul : une valeur sauvegardée écrase le défaut en bloc.
+3. En prod : vider le cache de page ET Autoptimize, puis vérifier qu'un lien `?piece=salon&sortie=mur` affiche des appliques. **La recette sur test ne peut pas le prouver** — test n'a ni cache ni Autoptimize.
+4. Prévenir que les chiffres du tableau de bord **baissent la première semaine** : trois frontières de lecture, toutes dans le même sens.
+
+**Ce qui reste, par ordre de valeur :**
+
+*Le tableau de bord ment encore sur trois chiffres.* `advice_text` n'est jamais enregistré (`finalize()` passe avant `setAdviceText()`, et remet `hasStarted` à faux). `home_picker` restera à zéro tant que la modale n'existe pas sur l'accueil — la branche est du code mort. `matching_product_ids` est définitivement vide : le scan DOM a été retiré, il faut que le serveur rattache la liste qu'il calcule déjà.
+
+*Deux sujets catalogue, pas du code.* Le plus grand format (110 cm sur Gaston) n'est recommandé qu'aux escaliers ouverts, jamais à une grande pièce. Et sur les modèles à deux tailles, « standard » et « grand » donnent le même résultat. Le site suppose trois tailles par modèle ; le catalogue en a deux à quatre.
+
+*RGPD, ce qui n'est pas traité.* Les écritures partent avant tout consentement (Complianz n'est consulté nulle part), rien n'est mentionné dans la politique de confidentialité, et **le snippet Pinterest envoie l'IP complète** — ce chantier n'y a pas touché.
+
+*Décisions de Robin en attente.* La péremption du projet mémorisé (un projet de trois semaines est traité comme celui d'il y a une minute). Le vocabulaire « couloir » vs « entrée ». Où afficher `fallback_notes` dans le hero.
+
+*Dette technique connue.* `justify-content: center` sur le corps de la modale : tout débordement rogne le HAUT, sans recours. `SessionTracker` : ordre `finalize`/`advice`. `shop.js` lit encore `sapiMegaFilter`, supprimé. Vestiges CSS (`.conseiller-card--mon-projet`, `.conseiller-cards-zone`) et `.why-sapi-recap`, ~30 lignes de markup qui ne peuvent plus s'afficher.
+
+---
+
 ### ✅ TABLEAU DE BORD — CINQ CHIFFRES REDRESSÉS (2e passe)
 
 1. **« Quiz complétés » comptait des réponses d'anciennes visites.** `openModal()` recopie le projet mémorisé, le premier changement d'écran enregistre, et la ligne partait « salon / grande / plafond / moderne » alors que le visiteur n'avait rien répondu. L'identifiant étant régénéré à chaque page, ouvrir la pastille sur quatre fiches produit produisait **quatre lignes identiques marquées quiz complet**.

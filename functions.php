@@ -4519,6 +4519,15 @@ function sapi_ajax_megafilter_surmesure() {
      et une adresse complète ne lui apprend rien qu'il puisse utiliser. */
   $body   .= 'IP : ' . (isset($_SERVER['REMOTE_ADDR']) ? sapi_tronquer_ip(sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR']))) : '?') . "\n";
   $body   .= 'Date : ' . current_time('mysql') . "\n";
+  /* ⚠️ CE NUMÉRO EST LE SEUL PONT ENTRE CE MAIL ET LE TABLEAU DE BORD.
+     L'e-mail du visiteur n'est plus stocké en base (décision du 27/08) : sans
+     ce numéro, Robin lit une session dans le tableau, veut y répondre, et n'a
+     aucun moyen de savoir lequel des mails de l'après-midi lui correspond. Il
+     l'appariait à l'œil sur la date — impossible avec deux demandes dans la
+     même heure. Le serveur connaît déjà ce numéro ici : il s'en sert vingt
+     lignes plus bas pour marquer la ligne. Ne pas le retirer. */
+  $sid_pour_mail = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : '';
+  $body   .= 'Session : ' . ($sid_pour_mail !== '' ? $sid_pour_mail : '(non transmise)') . "\n";
 
   $headers = [
     'Content-Type: text/plain; charset=UTF-8',
@@ -4539,8 +4548,7 @@ function sapi_ajax_megafilter_surmesure() {
      uniquement ici, après un envoi réussi. Rien ne fuit vers un robot : la
      réponse HTTP est inchangée. */
   if ($sent && function_exists('sapi_megafilter_marquer_contact_envoye')) {
-    $sid = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : '';
-    sapi_megafilter_marquer_contact_envoye($sid);
+    sapi_megafilter_marquer_contact_envoye($sid_pour_mail);
   }
 
   if (!$sent) {
@@ -6996,76 +7004,39 @@ function sapi_megafilter_migrate_v3() {
 add_action('admin_init', 'sapi_megafilter_migrate_v3');
 
 /**
- * Tronque, UNE FOIS, les adresses IP déjà enregistrées.
+ * Efface, UNE FOIS, les adresses IP et e-mails déjà enregistrés.
  *
- * ⚠️ Sans ça, la mise en conformité serait cosmétique : les nouvelles lignes
- * seraient propres et la table continuerait de détenir des mois d'adresses
- * complètes. Ce sont les anciennes qui posent le problème, pas les futures.
+ * ⚠️ REMPLACE la migration de troncature du 26/08, devenue sans objet : il ne
+ * s'agit plus de réduire ces données mais de ne plus les détenir du tout
+ * (décision Robin du 27/08 : « des données pour faire des statistiques, pas
+ * pour identifier »).
  *
- * Irréversible, et c'est voulu : le but est précisément de ne plus détenir
- * cette donnée. Ce qui se perd — désigner un visiteur précis dans l'historique
- * — est exactement ce qu'on ne veut plus pouvoir faire.
+ * Sans cette passe, la mise en conformité serait cosmétique : les nouvelles
+ * lignes seraient propres et la table continuerait de garder des mois d'IP
+ * tronquées et d'adresses e-mail. Ce sont les anciennes qui posent le problème.
  *
- * SQL pur, en une requête : une boucle PHP sur des milliers de lignes ferait
- * expirer la page d'admin. `LIKE '%.%'` cible l'IPv4 non tronquée ; l'IPv6 est
- * traitée à part.
+ * Irréversible, et c'est le but. Les colonnes restent — on ne supprime pas une
+ * colonne sans nécessité — mais elles sont vidées et ne sont plus alimentées.
+ *
+ * ⚠️ L'option n'est posée qu'en cas de succès : une opération unique et
+ * irréversible ne doit jamais se déclarer faite sur un échec, sinon plus rien
+ * ne repassera jamais.
  */
-function sapi_megafilter_tronquer_ips_existantes() {
-  if (get_option('sapi_megafilter_ips_tronquees') === 'yes') return;
+function sapi_megafilter_effacer_donnees_nominatives() {
+  if (get_option('sapi_megafilter_donnees_effacees') === 'yes') return;
   global $wpdb;
   $table = $wpdb->prefix . 'sapi_megafilter_sessions';
-
-  /* IPv4 en SQL : `LIKE '%.%.%.%'` exige au moins trois points, donc il
-     n'attrape rien d'autre de réaliste, et pour toute valeur déjà en `a.b.c.0`
-     la formule redonne la même chaîne — le garde ne saute que des lignes déjà
-     conformes. Vérifié cas par cas.
-     ⚠️ Les IPv4 sont traitées EN PREMIER, et la forme mixte `::ffff:1.2.3.4`
-     est écartée du lot IPv6 juste après, pour qu'aucune ligne ne subisse les
-     deux passes. */
-  $ok4 = $wpdb->query(
-    "UPDATE $table
-        SET ip_address = CONCAT(SUBSTRING_INDEX(ip_address, '.', 3), '.0')
-      WHERE ip_address LIKE '%.%.%.%'
-        AND ip_address NOT LIKE '%.0'"
+  $r = $wpdb->query(
+    "UPDATE $table SET ip_address = '', contact_email = ''
+      WHERE ip_address <> '' OR contact_email <> ''"
   );
-
-  /* ⚠️ IPv6 EN PHP, PAS EN SQL. Découper une IPv6 sur « : » est faux dès que
-     la forme compressée entre en jeu : `SUBSTRING_INDEX` sur une chaîne de
-     moins de trois « : » renvoie la chaîne ENTIÈRE, et l'UPDATE se contentait
-     d'y coller « :: ». On aurait conservé des adresses complètes en marquant
-     la migration comme faite — irréversiblement, puisque le garde les aurait
-     ensuite sautées.
-     Les IPv6 sont rares dans cette table ; une boucle PHP sur quelques lignes
-     ne coûte rien, et `sapi_tronquer_ip()` est le seul endroit au monde qui
-     sache le faire juste. */
-  $ok6 = true;
-  $lignes6 = $wpdb->get_results(
-    "SELECT id, ip_address FROM $table
-      WHERE ip_address LIKE '%:%' AND ip_address NOT LIKE '%.%.%.%'"
-  );
-  if (is_array($lignes6)) {
-    foreach ($lignes6 as $l) {
-      $t = sapi_tronquer_ip($l->ip_address);
-      if ($t === $l->ip_address) continue; // déjà tronquée
-      $r = $wpdb->update($table, ['ip_address' => $t], ['id' => (int) $l->id], ['%s'], ['%d']);
-      if ($r === false) $ok6 = false;
-    }
+  if ($r !== false) {
+    update_option('sapi_megafilter_donnees_effacees', 'yes', true);
   } else {
-    $ok6 = false;
-  }
-
-  /* ⚠️ L'OPTION N'EST POSÉE QUE SI TOUT A RÉUSSI. Une opération unique et
-     irréversible ne doit jamais se déclarer faite sur un échec : la table
-     resterait avec des adresses complètes, et plus rien ne repasserait jamais.
-     `$wpdb->query` renvoie `false` en cas d'erreur, un entier sinon — zéro
-     ligne modifiée est un succès parfaitement normal. */
-  if ($ok4 !== false && $ok6) {
-    update_option('sapi_megafilter_ips_tronquees', 'yes', true);
-  } else {
-    error_log('Sapi : troncature des IP existantes incomplète, sera retentée au prochain passage en admin.');
+    error_log('Sapi : effacement des IP et e-mails incomplet, sera retenté au prochain passage en admin.');
   }
 }
-add_action('admin_init', 'sapi_megafilter_tronquer_ips_existantes');
+add_action('admin_init', 'sapi_megafilter_effacer_donnees_nominatives');
 
 /**
  * Endpoint AJAX V3 — UPSERT par session_id. Appelé via navigator.sendBeacon
@@ -7125,15 +7096,20 @@ add_action('wp_ajax_nopriv_sapi_megafilter_log_session', 'sapi_megafilter_log_se
  * @return array [stepId => [slug => libellé]]
  */
 /**
- * Tronque une adresse IP pour ne plus stocker une donnée qui identifie.
+ * Tronque une adresse IP. Ce n'est plus un anonymiseur de stockage.
  *
  * IPv4 : le dernier octet devient 0 (`77.196.117.198` → `77.196.117.0`).
  * IPv6 : on ne garde que le préfixe /48, les trois premiers groupes.
  *
- * C'est la recommandation de la CNIL, et ça ne coûte rien ici : l'IP servait à
- * distinguer deux visiteurs et à situer une région, ce que la version tronquée
- * fait tout aussi bien. Ce qu'on perd, c'est la capacité à désigner UNE
- * personne — précisément ce qu'on ne veut pas détenir.
+ * ⚠️ SON RÔLE A CHANGÉ LE 28/08. Elle servait à ranger une IP amputée dans la
+ * table ; depuis, **plus aucune IP n'est stockée**. Il lui reste deux emplois,
+ * tous deux des transmissions à un tiers :
+ *   1. l'adresse envoyée au fournisseur de géolocalisation ;
+ *   2. la ligne « IP » du mail envoyé à Robin, qui reste des années dans sa
+ *      boîte alors que la table, elle, purge à 425 jours.
+ * Dans les deux cas on transmet le strict nécessaire : de quoi situer une
+ * ville, pas de quoi désigner une personne. C'est la recommandation de la
+ * CNIL. Ne pas la supprimer en croyant qu'elle est devenue inutile.
  */
 function sapi_tronquer_ip($ip) {
   $ip = is_string($ip) ? trim($ip) : '';
@@ -7186,28 +7162,34 @@ function sapi_tronquer_ip($ip) {
 if (!defined('SAPI_SESSIONS_TTL_DAYS')) define('SAPI_SESSIONS_TTL_DAYS', 425);
 
 /* ═══════════════════════════════════════════════════════════
-   GÉOLOCALISATION DES SESSIONS — COUPÉE, DÉCISION EN ATTENTE
+   GÉOLOCALISATION DES SESSIONS — ACTIVE, FOURNISSEUR FREEIPAPI
    ═══════════════════════════════════════════════════════════
-   Trois raisons cumulées, toutes vérifiées :
+   Elle a été coupée le 27/08 puis rétablie le 28/08 avec un autre
+   fournisseur. Ce qui a motivé la coupure, pour ne pas y revenir :
 
-   1. L'appel partait en **HTTP non chiffré** : l'adresse du visiteur circulait
-      en clair sur le réseau.
+   1. L'appel partait en **HTTP non chiffré** : l'adresse du visiteur
+      circulait en clair sur le réseau.
    2. Le **HTTPS d'ip-api.com est réservé à leur offre payante**. Y basculer
       renvoie un 403 — et un 403 n'est PAS une erreur réseau : le code le
       prenait pour une réponse valide, n'y trouvait pas de ville, et sortait
-      sans un mot. La colonne serait restée vide indéfiniment, sans que
-      personne ne l'apprenne.
+      sans un mot.
    3. Leurs conditions **interdisent l'usage commercial** en offre gratuite.
-      Un site marchand n'y avait donc pas droit, HTTP compris.
 
-   Il n'existait pas de version « correcte » de cet appel. Le couper est la
-   seule position tenable en attendant que Robin tranche : renoncer à la
-   géolocalisation, souscrire l'offre payante, ou changer de fournisseur.
+   FreeIPAPI répond aux trois : HTTPS gratuit, usage commercial autorisé,
+   serveurs en Europe, 60 requêtes par minute. Et l'IP qui lui est envoyée
+   est **tronquée** — la ville reste juste, l'immeuble se perd.
 
-   Les lignes déjà géolocalisées gardent leur ville — on ne détruit rien de
-   plus que les IP. Remettre à `true` sans avoir réglé les points 2 et 3
-   remettrait une colonne muette et un usage hors conditions. */
-if (!defined('SAPI_GEOLOC_ACTIVE')) define('SAPI_GEOLOC_ACTIVE', false);
+   ⚠️ CE QUE LA COLONNE « LIEU » NE DIT PAS. Sur une IP v4 tronquée en /24,
+   la ville est fiable. Sur une **IPv6 tronquée en /48**, non : elle renvoie
+   la ville du préfixe de l'opérateur, pas celle du visiteur — `2a01:cb00::`
+   donne « Neuilly-sur-Seine ». Les FAI français sont massivement en IPv6.
+   Une part croissante des sessions va donc se ranger sous une poignée de
+   villes d'opérateurs. Ne pas lire cette colonne comme « d'où viennent mes
+   visiteurs ». Et elle mélange trois époques : IP entière + ip-api avant le
+   27/08, rien pendant la coupure, IP tronquée + FreeIPAPI depuis.
+
+   Changer de fournisseur : les trois points ci-dessus sont les critères. */
+if (!defined('SAPI_GEOLOC_ACTIVE')) define('SAPI_GEOLOC_ACTIVE', true);
 
 function sapi_megafilter_purge_sessions() {
   global $wpdb;
@@ -7434,10 +7416,11 @@ function sapi_megafilter_log_session() {
     $update_data['contact_message'] = sanitize_textarea_field($data['contact_message']);
     $update_formats[] = '%s';
   }
-  if (array_key_exists('contact_email', $data)) {
-    $update_data['contact_email'] = sanitize_email($data['contact_email']);
-    $update_formats[] = '%s';
-  }
+  /* ⚠️ L'E-MAIL N'EST PLUS STOCKÉ — décision Robin du 27/08.
+     Il arrivait déjà dans le mail que Robin reçoit ; le garder en base n'ajoutait
+     rien qu'une donnée nominative à protéger. Conséquence assumée : le bouton
+     « Répondre par email » du tableau de bord a été retiré, Robin répond depuis
+     sa boîte. La clé est ignorée si elle arrive encore. */
   if (array_key_exists('contact_submitted', $data)) {
     $submitted = !empty($data['contact_submitted']) ? 1 : 0;
     $update_data['contact_submitted'] = $submitted;
@@ -7495,12 +7478,15 @@ function sapi_megafilter_log_session() {
       $ip = sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR']));
     }
     $ip = trim($ip);
-    /* L'IP COMPLÈTE N'EST PAS STOCKÉE. La CNIL recommande de tronquer, et
-       l'adresse entière n'apporte rien ici : elle sert à distinguer deux
-       visiteurs et à situer une région, ce que la version tronquée fait aussi.
-       Elle reste ENTIÈRE en mémoire le temps de la requête, pour la
-       géolocalisation ci-dessous, et n'est jamais écrite telle quelle. */
-    $insert_data['ip_address'] = sapi_tronquer_ip($ip);
+    /* ⚠️ L'IP N'EST PLUS STOCKÉE DU TOUT — décision Robin du 27/08 :
+       « je veux des données pour faire des statistiques, pas pour identifier ».
+       Elle était tronquée depuis la veille ; elle n'est désormais plus écrite
+       en base, ni entière ni tronquée. La colonne reste (on ne supprime pas une
+       colonne sans nécessité) mais elle n'est plus alimentée.
+       Elle vit encore quelques millisecondes en mémoire, uniquement pour
+       demander la VILLE au service de géolocalisation — et c'est la version
+       TRONQUÉE qui part, jamais l'adresse entière. */
+    $insert_data['ip_address'] = '';
     $insert_formats[] = '%s';
 
     $insert_data['referrer'] = isset($_SERVER['HTTP_REFERER']) ? esc_url_raw(wp_unslash($_SERVER['HTTP_REFERER'])) : '';
@@ -7512,7 +7498,7 @@ function sapi_megafilter_log_session() {
   }
 
   // Géolocalisation async (shutdown) — seulement à l'INSERT pour éviter
-  // d'appeler ip-api.com à chaque update.
+  // d'appeler le fournisseur de géoloc à chaque update.
   if ($is_insert && $row_id) {
     /* ⚠️ LA CONDITION, PAS UN `return`. J'avais écrit `if (!SAPI_GEOLOC_ACTIVE)
        return;` ici : ça ne sortait pas du bloc, ça sortait de TOUTE la
@@ -7522,14 +7508,46 @@ function sapi_megafilter_log_session() {
        `sendBeacon` et ne lit jamais la réponse), et c'est bien le problème :
        la première ligne ajoutée après ce bloc ne se serait jamais exécutée,
        sur les INSERT seulement. Invisible en recette. */
-    $ip_for_geo = $insert_data['ip_address'] ?? '';
+    $ip_for_geo = sapi_tronquer_ip($ip); // tronquée : la ville reste juste, l'immeuble se perd
     if ($ip_for_geo && SAPI_GEOLOC_ACTIVE) {
       add_action('shutdown', function () use ($ip_for_geo, $row_id) {
-        $resp = wp_remote_get("https://ip-api.com/json/{$ip_for_geo}?fields=city,regionName,country&lang=fr", ['timeout' => 5]);
-        if (is_wp_error($resp)) return;
+        /* ⚠️ FOURNISSEUR CHANGÉ — ip-api.com a été abandonné pour deux raisons
+           cumulées : son HTTPS est réservé à l'offre payante (l'appel partait
+           donc en clair), et ses conditions interdisent l'usage commercial en
+           offre gratuite — un site marchand n'y avait pas droit.
+           FreeIPAPI : HTTPS gratuit, usage commercial autorisé, serveurs en
+           Europe, 60 requêtes par minute. Champs vérifiés dans leur
+           documentation : cityName / regionName / countryName. */
+        $resp = wp_remote_get("https://free.freeipapi.com/api/json/{$ip_for_geo}", ['timeout' => 5]);
+        /* ⚠️ CHAQUE SORTIE LAISSE UNE TRACE. L'ancien appel sortait muet dans
+           les quatre cas ci-dessous : la colonne restait vide et personne ne
+           l'apprenait jamais. On remplacerait un fournisseur muet par un
+           autre. `error_log` écrit dans le journal d'erreurs PHP de o2switch. */
+        if (is_wp_error($resp)) {
+          error_log('Sapi géoloc : appel FreeIPAPI en échec — ' . $resp->get_error_message());
+          return;
+        }
+        /* ⚠️ UN 200 N'EST PAS UNE RÉUSSITE. Un dépassement de quota renvoie un
+           code d'erreur HTTP avec un corps valide : `is_wp_error` ne le voit
+           pas. C'est exactement ce qui rendait l'ancien appel muet. */
+        $code = (int) wp_remote_retrieve_response_code($resp);
+        if ($code !== 200) {
+          /* 429 = les 60 requêtes par minute sont dépassées. */
+          error_log('Sapi géoloc : FreeIPAPI a répondu ' . $code . ($code === 429 ? ' (quota de 60 req/min dépassé)' : ''));
+          return;
+        }
         $body = json_decode(wp_remote_retrieve_body($resp), true);
-        if (empty($body['city'])) return;
-        $location = implode(', ', array_filter([$body['city'], $body['regionName'], $body['country']]));
+        if (!is_array($body)) {
+          error_log('Sapi géoloc : réponse FreeIPAPI illisible.');
+          return;
+        }
+        if (empty($body['cityName'])) {
+          /* Cas normal et fréquent : IP privée, réservée, ou inconnue du
+             fournisseur. FreeIPAPI répond alors 200 avec tous les champs à
+             null. On ne journalise pas, ce n'est pas une panne. */
+          return;
+        }
+        $location = implode(', ', array_filter([$body['cityName'], $body['regionName'] ?? '', $body['countryName'] ?? '']));
         global $wpdb;
         $table = $wpdb->prefix . 'sapi_megafilter_sessions';
         $wpdb->update($table, ['location' => mb_substr($location, 0, 200)], ['id' => $row_id], ['%s'], ['%d']);
@@ -7579,12 +7597,16 @@ function sapi_megafilter_export_csv() {
   $out = fopen('php://output', 'w');
   fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
+  /* Colonnes retirées le 27/08 : « IP » et « Contact email » ne sont plus
+     alimentées (décision Robin : des statistiques, pas des identifiants), et
+     « Produits matchés » ne l'a jamais été. Les exporter aurait produit trois
+     colonnes systématiquement vides. */
   fputcsv($out, [
-    'Date', 'Provenance', 'Device', 'Lieu', 'IP',
+    'Date', 'Provenance', 'Device', 'Lieu',
     'Pièce', 'Taille', 'Sortie', 'Hauteur', 'Éclairage', 'Style',
     'Quiz complet', 'IA chat', 'Nb appels IA', 'Advice text',
-    'Contact', 'Contact kind', 'Contact email', 'Contact sujet', 'Contact message',
-    'Produits matchés', 'Referrer', 'URL d\'entrée',
+    'Contact', 'Contact kind', 'Contact sujet', 'Contact message',
+    'Referrer', 'URL d\'entrée',
   ], ';');
 
   foreach ($rows as $r) {
@@ -7593,7 +7615,6 @@ function sapi_megafilter_export_csv() {
       $r['entry_point'],
       $r['device_type'],
       $r['location'],
-      $r['ip_address'],
       $r['piece'],
       $r['taille'],
       $r['sortie'],
@@ -7606,10 +7627,8 @@ function sapi_megafilter_export_csv() {
       $r['advice_text'],
       $r['contact_submitted'] ? 'Oui' : 'Non',
       $r['contact_kind'],
-      $r['contact_email'],
       $r['contact_subject'],
       $r['contact_message'],
-      $r['matching_product_ids'],
       $r['referrer'],
       $r['entry_url'],
     ], ';');
@@ -7729,9 +7748,12 @@ function sapi_megafilter_admin_build_where($filters) {
        agrégat et n'a aucun filtre — mais les mots « salle de bain » sont dans
        la conversation. Chercher devient le seul chemin vers l'information la
        plus utile du tableau : ce que les gens demandent et que Robin ne vend pas. */
-    $where[] = '(location LIKE %s OR ip_address LIKE %s OR ai_freetext_input LIKE %s OR contact_email LIKE %s'
+    /* Ni `ip_address` ni `contact_email` : ces colonnes ne sont plus alimentées
+       depuis le 27/08. Les proposer à la recherche promettrait un résultat qui
+       ne peut plus arriver. */
+    $where[] = '(location LIKE %s OR ai_freetext_input LIKE %s'
              . ' OR ai_chat_messages LIKE %s OR contact_subject LIKE %s OR contact_message LIKE %s)';
-    array_push($args, $q, $q, $q, $q, $q, $q, $q);
+    array_push($args, $q, $q, $q, $q, $q);
   }
 
   $where_sql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
@@ -8052,7 +8074,7 @@ function sapi_megafilter_admin_page() {
         <option value="contact"  <?php selected($filters['status'], 'contact'); ?>>Avec contact</option>
         <option value="complete" <?php selected($filters['status'], 'complete'); ?>>Quiz complets</option>
       </select>
-      <input type="search" name="q" class="filter-search" placeholder="Rechercher : « salle de bain », un lieu, un email…" value="<?php echo esc_attr($filters['q']); ?>">
+      <input type="search" name="q" class="filter-search" placeholder="Rechercher : « salle de bain », une ville, un mot du projet…" value="<?php echo esc_attr($filters['q']); ?>">
     </form>
 
     <!-- ═══════════════ TABLEAU ═══════════════ -->
@@ -8406,9 +8428,6 @@ function sapi_megafilter_render_session_detail($r) {
       <?php if (!empty($r->contact_subject)) : ?>
         <div class="contact-box__row"><span class="contact-box__key">Sujet :</span> <span class="contact-box__val"><?php echo esc_html($r->contact_subject); ?></span></div>
       <?php endif; ?>
-      <?php if (!empty($r->contact_email)) : ?>
-        <div class="contact-box__row"><span class="contact-box__key">Email :</span> <span class="contact-box__val"><a href="mailto:<?php echo esc_attr($r->contact_email); ?>"><?php echo esc_html($r->contact_email); ?></a></span></div>
-      <?php endif; ?>
       <?php if (!empty($r->contact_message)) : ?>
         <div class="contact-box__row"><span class="contact-box__key">Message :</span></div>
         <div class="contact-box__row" style="padding-left:6px;color:#1d2327;font-style:italic;font-size:12.5px;">
@@ -8459,10 +8478,6 @@ function sapi_megafilter_render_session_detail($r) {
     <div class="tech-grid">
       <div><span class="t-key">Session ID :</span> <?php echo esc_html($r->session_id); ?></div>
       <div><span class="t-key">Device :</span> <?php echo esc_html($r->device_type ?: '—'); ?></div>
-      <?php /* « tronquée » est affiché : sans ça, « 77.196.117.0 » se lit
-               comme une vraie adresse, et Robin croirait détenir plus que
-               ce qu'il détient. */ ?>
-      <div><span class="t-key">IP :</span> <?php echo esc_html($r->ip_address ?: '—'); ?><?php if ($r->ip_address) : ?> <span class="t-dim">(tronquée)</span><?php endif; ?></div>
       <div><span class="t-key">Localisation :</span> <?php echo esc_html($r->location ?: '—'); ?></div>
       <div><span class="t-key">Référent :</span> <?php echo esc_html($r->referrer ?: '—'); ?></div>
       <div><span class="t-key">Appels IA :</span> <?php echo (int)$r->ai_call_count; ?></div>
@@ -8476,9 +8491,9 @@ function sapi_megafilter_render_session_detail($r) {
 
   // Actions left (mailto si email)
   $actions_left = '';
-  if (!empty($r->contact_email)) {
-    $actions_left = '<a href="mailto:' . esc_attr($r->contact_email) . '" class="button button-primary">📧 Répondre par email</a>';
-  }
+  /* Il y avait ici un bouton « Répondre par email », alimenté par l'adresse
+     stockée en base. Retiré avec elle : Robin reçoit la demande dans sa boîte
+     et y répond de là. `$actions_left` reste, il servira au prochain bouton. */
 
   return [
     'title'        => $title,

@@ -2057,7 +2057,10 @@
        après un wp_mail réussi. */
     SessionTracker.snapshot({
       contact_triggered: 1,
-      contact_email: emailVal,
+      /* ⚠️ `contact_email` N'EST PLUS ENVOYÉ. Le serveur ne le stocke plus
+         (décision Robin du 27/08) : transporter une adresse pour qu'elle
+         soit jetée à l'arrivée serait la promener pour rien. Elle part
+         toujours dans le formulaire lui-même, qui produit le mail. */
       contact_message: msgVal,
       contact_kind: contactKind,
       contact_subject: contactSubject,
