@@ -25,12 +25,14 @@
      comparaison À CHAQUE FOIS — sans rien casser de visible. Une requête part
      pour rien à chaque chargement, et la bonne sélection de l'URL se fait
      remplacer par l'ancien projet du visiteur.
-     L'ordre canonique est celui du questionnaire. `config.ordreCles` vient du
-     serveur : on ne le recopie pas ici, ce serait une table de plus à faire
-     diverger. */
+     L'ordre canonique est celui du questionnaire, et il vit dans
+     `sapi-project.js` — le seul fichier chargé partout où la question se pose.
+     On le lui demande, on ne le recopie pas : ce serait une table de plus à
+     faire diverger. */
   function signatureCanonique(answers) {
     answers = answers || {};
-    var ordre = config.ordreCles || [];
+    var ordre = (window.sapiProject && window.sapiProject.clesProjet)
+      ? window.sapiProject.clesProjet() : [];
     var out = {};
     ordre.forEach(function (k) { if (answers[k]) out[k] = answers[k]; });
     Object.keys(answers).forEach(function (k) { if (!(k in out) && answers[k]) out[k] = answers[k]; });
@@ -564,10 +566,19 @@
              étrangers (utm, fbclid) sont préservés. */
           try {
             var url = new URL(window.location.href);
-            var cles = config.ordreCles || ['piece'];
-            cles.forEach(function (k) { url.searchParams.delete(k); });
-            cles.forEach(function (k) { if (answers[k]) url.searchParams.set(k, answers[k]); });
-            if (!url.searchParams.get('piece')) url.searchParams.set('piece', answers.piece);
+            if (window.sapiProject && window.sapiProject.ecrireProjetDansUrl) {
+              window.sapiProject.ecrireProjetDansUrl(url, answers);
+            } else {
+              /* ⚠️ REPLI INATTEIGNABLE (`sapi-project` est dépendance dure),
+                 mais il ne doit PAS réintroduire le défaut d'origine. Se
+                 contenter d'écrire `piece` laisserait survivre les critères de
+                 l'ancienne pièce — exactement ce que ce bloc répare. On repart
+                 donc d'une adresse propre : on perd les paramètres de campagne
+                 dans ce cas de figure, ce qui vaut mieux qu'une sélection
+                 fausse. */
+              url.search = '';
+              url.searchParams.set('piece', answers.piece);
+            }
             window.location.assign(url.toString());
           } catch (err) {
             window.location.search = '?piece=' + encodeURIComponent(answers.piece);

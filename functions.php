@@ -336,6 +336,18 @@ function sapi_maison_enqueue_assets() {
   $formatter_js_path = get_template_directory() . '/assets/product-name-formatter.js';
   wp_enqueue_script('sapi-maison-product-formatter', get_template_directory_uri() . '/assets/product-name-formatter.js', [], file_exists($formatter_js_path) ? filemtime($formatter_js_path) : '1.0.0', true);
 
+  /* ⚠️ `inc/guide-data.php` DOIT ÊTRE CHARGÉ ICI, avant le bloc `sapi-project`.
+     Ses autres `require_once` sont tous PLUS BAS dans cette fonction, ou
+     conditionnés à `is_shop() || is_product()`. `sapi_guide_get_steps()`
+     n'existait donc pas au moment de transmettre l'ordre canonique des clés :
+     il partait VIDE, sur toutes les pages, et le repli `['piece']` côté JS
+     rendait l'étape 3 entièrement inopérante — sans que rien ne casse, et sans
+     que la recette puisse le voir, puisque `?piece=salon` seul se comporte
+     alors exactement comme avant.
+     Trouvé en relecture. Le chargement est idempotent, il n'y a pas de coût. */
+  $sapi_guide_data_path = get_template_directory() . '/inc/guide-data.php';
+  if (file_exists($sapi_guide_data_path)) require_once $sapi_guide_data_path;
+
   // Sapi Project (F2a) — module localStorage "Mon projet", chargé toutes pages (léger, ~3KB)
   // Source de vérité pour les cards Conseiller, la modale tunnel, la fiche produit (F2b).
   $sapi_project_js_path = get_template_directory() . '/assets/sapi-project.js';
@@ -344,6 +356,18 @@ function sapi_maison_enqueue_assets() {
     wp_localize_script('sapi-project', 'SAPI_PROJECT', [
       'ajaxUrl' => admin_url('admin-ajax.php'),
       'nonce'   => wp_create_nonce('sapi-megafilter'),
+      /* ⚠️ L'ORDRE CANONIQUE DES CLÉS, ET SON DOMICILE UNIQUE.
+         Il sert à trois choses qui doivent s'accorder : écrire l'adresse
+         toujours dans le même ordre (sinon la même sélection existe en
+         centaines de variantes pour le cache et pour Google), calculer la
+         signature de déduplication, et effacer proprement toutes les clés
+         quand le visiteur recommence.
+         Il est ici parce que `sapi-project.js` est le seul fichier chargé sur
+         TOUTES les pages où la question se pose. `SAPI_IMMERSION` n'existe que
+         sur l'immersion. Ne pas le recopier ailleurs. */
+      'ordreCles' => function_exists('sapi_guide_get_steps')
+        ? array_values(array_filter(array_map(function ($st) { return isset($st['id']) ? $st['id'] : ''; }, sapi_guide_get_steps())))
+        : [],
     ]);
   }
 
@@ -484,12 +508,6 @@ function sapi_maison_enqueue_assets() {
         'answers'     => $immersion_answers,
         'signature'   => function_exists('sapi_immersion_signature')
           ? sapi_immersion_signature($immersion_answers) : '',
-        /* L'ordre canonique des clés, transmis au lieu d'être recopié en JS.
-           C'est ce qui permet au navigateur de produire exactement la même
-           signature que le serveur — et une table de moins à faire diverger. */
-        'ordreCles'   => function_exists('sapi_guide_get_steps')
-          ? array_values(array_filter(array_map(function ($s) { return isset($s['id']) ? $s['id'] : ''; }, sapi_guide_get_steps())))
-          : [],
       ]);
     }
 

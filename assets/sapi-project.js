@@ -23,6 +23,29 @@
   var STORAGE_KEY = 'sapiProject';
   var listeners = [];
 
+  /* ⚠️ LES CLÉS DU QUESTIONNAIRE, DANS L'ORDRE CANONIQUE — source unique.
+     Transmises par le serveur (`SAPI_PROJECT.ordreCles`), jamais recopiées.
+     Elles servent à écrire l'adresse toujours dans le même ordre, à calculer
+     la signature de déduplication, et à effacer proprement toutes les clés.
+     Repli sur `['piece']` : le comportement d'avant, jamais faux, seulement
+     incomplet — mieux que d'inventer une liste qui divergerait. */
+  function clesProjet() {
+    var cfg = window.SAPI_PROJECT || {};
+    return (cfg.ordreCles && cfg.ordreCles.length) ? cfg.ordreCles : ['piece'];
+  }
+
+  /* Écrit un jeu de réponses dans une URL : efface d'abord TOUTES les clés du
+     questionnaire, puis réécrit celles qui ont une valeur, dans l'ordre. Les
+     paramètres étrangers (utm, fbclid) sont préservés.
+     ⚠️ Effacer avant d'écrire est ce qui empêche les critères d'une pièce
+     précédente de survivre à un changement de projet. */
+  function ecrireProjetDansUrl(url, answers) {
+    var cles = clesProjet();
+    cles.forEach(function (k) { url.searchParams.delete(k); });
+    cles.forEach(function (k) { if (answers && answers[k]) url.searchParams.set(k, answers[k]); });
+    return url;
+  }
+
   /* ─────────────────────────────────────────────
      Helpers localStorage (tolérant aux erreurs)
      ───────────────────────────────────────────── */
@@ -211,13 +234,17 @@
     // Round 3 — Lot C1 : clear l'état contact aussi (action + kind/subject/message
     // sont stockés au même niveau que answers dans le storage)
     var ok = clearRaw();
-    // F2a-quater : nettoyer aussi ?piece= de l'URL pour éviter sa ré-ingestion
-    // par ingestQueryParams() au prochain chargement de page (sinon le projet
-    // "effacé" reviendrait dès le refresh).
+    /* Nettoyer l'URL de TOUTES les clés du questionnaire, sinon le projet
+       « effacé » revient au premier rechargement.
+       ⚠️ On n'effaçait que `?piece=`. Depuis que l'adresse porte les six autres
+       critères, « Recommencer » laissait derrière lui `sortie=mur&taille=grande`
+       — des critères orphelins, sans pièce, que le serveur relit au
+       rechargement. Le visiteur croyait avoir tout effacé. */
     try {
       var url = new URL(window.location.href);
-      if (url.searchParams.has('piece')) {
-        url.searchParams.delete('piece');
+      var avant = url.search;
+      clesProjet().forEach(function (k) { url.searchParams.delete(k); });
+      if (url.search !== avant) {
         var newUrl = url.pathname + (url.search || '') + (url.hash || '');
         window.history.replaceState({}, '', newUrl);
       }
@@ -568,6 +595,8 @@
 
   // API publique
   window.sapiProject = {
+    clesProjet: clesProjet,
+    ecrireProjetDansUrl: ecrireProjetDansUrl,
     styleToEssence: styleToEssence,
     tailleIntention: tailleIntention,
     resoudreTaille: resoudreTaille,

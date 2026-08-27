@@ -605,12 +605,34 @@
     } catch (e) { /* swallow */ }
     return (state.answers && state.answers.piece) || '';
   }
+  /* ⚠️ ON EMMÈNE LE PROJET ENTIER, PAS SEULEMENT LA PIÈCE.
+     Ce chemin est celui du texte libre : le visiteur a décrit son projet en
+     mots, l'IA en a tiré une pièce, une sortie, un style. N'écrire que la
+     pièce revenait à jeter tout ce qu'il venait de dire — la page d'arrivée
+     recalculait une sélection générique, et le conseil affiché parlait d'autre
+     chose que les produits montrés. C'est exactement la capture du couloir.
+     L'écriture passe par la source unique (`ecrireProjetDansUrl`) : mêmes clés,
+     même ordre que partout ailleurs. */
   function goToSelectionPage(piece) {
+    var answers = {};
+    try {
+      var p = window.sapiProject && window.sapiProject.get ? window.sapiProject.get() : null;
+      if (p && p.answers) answers = p.answers;
+    } catch (e) { /* swallow */ }
+    if (piece) answers = Object.assign({}, answers, { piece: piece });
     try {
       var url = new URL(window.location.href);
       url.pathname = '/mes-creations/';
       url.searchParams.delete('freetext');
-      url.searchParams.set('piece', piece);
+      if (window.sapiProject && window.sapiProject.ecrireProjetDansUrl) {
+        window.sapiProject.ecrireProjetDansUrl(url, answers);
+      } else {
+        /* Repli inatteignable, mais propre : voir la note jumelle dans
+           sapi-mescreations-immersion.js. Une adresse neuve plutôt qu'une
+           adresse à moitié corrigée. */
+        url.search = '';
+        url.searchParams.set('piece', piece);
+      }
       window.location.assign(url.toString());
     } catch (err) {
       window.location.href = '/mes-creations/?piece=' + encodeURIComponent(piece);
