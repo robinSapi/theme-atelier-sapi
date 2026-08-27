@@ -783,6 +783,25 @@ Cause : le remplacement était conditionné à `if (Object.keys(filters).length)
 → **`refineFromStoredProject()` au chargement de l'immersion** : on rejoue l'affinage à partir du projet mémorisé, en réutilisant **exactement** le mécanisme du moment 2 (même endpoint, même dédup, même remplacement de cards). Le carrousel étant invisible à ce stade (`--reveal` à 0), le remplacement ne se voit pas.
 **La signature de dédup fait le tri toute seule** : si le projet ne contient que la pièce, elle est identique à la baseline et aucune requête n'est envoyée. Aucun coût sur le chemin normal (clic sur une carte-pièce).
 
+### ✅ TABLEAU DE BORD — TROIS CHIFFRES QUI MENTAIENT
+
+Audit complet demandé par Robin : « est-ce que les parcours sont bien sauvegardés et affichés ? » Réponse : **non**, et le problème n'était pas des chiffres manquants mais des chiffres **faux sans le dire**. Trois correctifs retenus, les moins risqués.
+
+1. **La recherche promettait « texte libre » et interrogeait une colonne vide.** `ai_freetext_input` n'était écrite par personne — le serveur savait la traiter depuis toujours, le client ne l'envoyait jamais. Ajout de `ai_chat_messages`, `contact_subject`, `contact_message` à la clause, **et** envoi effectif de `ai_freetext_input`.
+   → C'est ce qui rend enfin trouvables les **pièces hors périmètre** : une demande pour une salle de bain n'a pas de `piece`, n'entre dans aucun agrégat, n'a aucun filtre — mais les mots sont dans la conversation. Chercher est le seul chemin vers l'information la plus utile du tableau : **ce que les gens demandent et que Robin ne vend pas.**
+
+2. **Le compteur `freetext` valait 0 depuis toujours.** `init()` retirait `?freetext=` de l'URL **puis** ouvrait la modale 100 ms plus tard ; `detectEntryPoint()` relisait une URL déjà nettoyée. Capture dans `ENTREE_FREETEXT` au tout premier instant du script. ⚠️ **Ne pas déplacer cette lecture.**
+
+3. **`contact_triggered` valait toujours `contact_submitted`.** Il n'était envoyé que dans le payload du submit. La pastille « Abandon » du tableau était donc du code mort, et celui qui atteignait le formulaire sans l'envoyer était indiscernable de celui qui fermait la modale — c'est-à-dire exactement la population qu'on vient d'y router.
+
+⚠️ **Défaut créé puis attrapé en relecture — cinquième exemplaire du motif du §4.** En ajoutant `ai_chat_messages` à la recherche, j'ouvrais une recherche **aveugle aux accents** : `wp_json_encode` sans `JSON_UNESCAPED_UNICODE` stockait « éclairage » sous la forme `éclairage`. Requête valide, résultat vide, aucune erreur — et Robin aurait vu le mot écrit noir sur blanc dans le détail, l'affichage décodant le JSON. Corrigé, **mais seulement pour les lignes écrites après ce commit.**
+
+⚠️ **À DIRE À ROBIN, sinon il lira le tableau de travers :** les « Abandon » n'existent **qu'à partir de ce déploiement**. Les sessions antérieures gardent l'ancienne sémantique et n'en porteront jamais, quoi qu'il se soit passé. Il les verra apparaître d'un coup et pourra croire à une dégradation du parcours : c'est simplement la mesure qui commence.
+
+**Non traité, et documenté dans `questions_ouvertes.md` :** « Quiz complétés » compte des réponses héritées du localStorage d'une visite précédente ; « Contacts envoyés » compte les rejets anti-spam (qui répondent « ok » en silence) ; `home_picker` est structurellement impossible ; deux fuseaux horaires cohabitent ; l'IP complète part chez ip-api.com **en HTTP non chiffré**, sans consentement ni durée de conservation, alors que le PDF catalogue purge à 30 jours.
+
+---
+
 ### ✅ PIÈCE HORS PÉRIMÈTRE — LE BOUTON QUI PROMETTAIT UNE SÉLECTION INEXISTANTE
 
 **Recette Robin :** « Une lampe pour ma salle de bain » dans le chat. L'IA pose une question de clarification (la vasque, la prise) — elle n'a proposé **aucune** sélection — et « VOIR LA SÉLECTION » s'affiche quand même. Il renvoie vers les modèles du **projet précédent**.

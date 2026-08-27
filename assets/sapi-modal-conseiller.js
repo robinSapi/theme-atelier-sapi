@@ -113,6 +113,21 @@
      submit contact. sendBeacon avec fallback fetch keepalive
      pour résilience au unload.
      ───────────────────────────────────────────── */
+  /* ⚠️ LU AU CHARGEMENT DU SCRIPT, AVANT TOUT LE RESTE — ne pas déplacer.
+     `init()` retire `?freetext=` de l'URL puis ouvre la modale 100 ms plus
+     tard. `detectEntryPoint()` relisait donc une URL DÉJÀ NETTOYÉE et
+     concluait « mes_creations » : le compteur `freetext` du tableau de bord
+     valait 0 depuis toujours, et `entry_url` — construit lui aussi après le
+     nettoyage — n'en gardait aucune trace non plus.
+     Résultat pour Robin : il ne pouvait pas savoir combien de visiteurs
+     passent par le champ texte libre, c'est-à-dire par le parcours qu'on
+     vient justement de réparer.
+     La capture doit rester ICI, au tout premier instant du script. */
+  var ENTREE_FREETEXT = '';
+  try {
+    ENTREE_FREETEXT = new URLSearchParams(window.location.search).get('freetext') || '';
+  } catch (e) { /* URLSearchParams indisponible — silencieux */ }
+
   var SessionTracker = (function () {
     var sessionId = null;
     var aiCallCount = 0;
@@ -142,10 +157,8 @@
       if (body && body.classList.contains('home')) return 'home_picker';
       var path = window.location.pathname || '';
       if (path.indexOf('/mes-creations/') !== -1) {
-        try {
-          var url = new URL(window.location.href);
-          if (url.searchParams.get('freetext')) return 'freetext';
-        } catch (e) { /* swallow */ }
+        // Capture faite au chargement du script, avant le nettoyage d'URL.
+        if (ENTREE_FREETEXT) return 'freetext';
         return 'mes_creations';
       }
       if (body && (body.classList.contains('single-product') || path.indexOf('/produit/') !== -1)) {
@@ -226,6 +239,13 @@
       if (state.chat && state.chat.conversation && state.chat.conversation.length) {
         payload.ai_chat_messages = state.chat.conversation;
       }
+      /* La phrase saisie sur la home. Le serveur sait la stocker depuis le
+         début (`ai_freetext_input`) mais le client ne l'envoyait JAMAIS : la
+         colonne était vide sur 100 % des lignes, `ai_freetext_used` restait à
+         0, l'encart « saisie initiale » du détail ne s'affichait jamais, et
+         surtout la recherche du tableau de bord — qui promet « texte libre » —
+         interrogeait une colonne toujours NULL. */
+      if (ENTREE_FREETEXT) payload.ai_freetext_input = ENTREE_FREETEXT;
       if (aiCallCount > 0) payload.ai_call_count = aiCallCount;
       // Produits matchés (uniquement sur /mes-creations/)
       var ids = getMatchingProductIds();
@@ -1786,6 +1806,17 @@
     }
 
     showScreen('s-contact');
+
+    /* ⚠️ `contact_triggered` n'était envoyé QUE dans le payload du submit,
+       à côté de `contact_submitted: 1` — les deux colonnes valaient donc
+       toujours la même chose. Conséquences pour Robin : la pastille
+       « Abandon » du tableau était du code mort, jamais affichée, et le
+       visiteur qui ATTEINT le formulaire sans l'envoyer était indiscernable
+       de celui qui a simplement fermé la modale.
+       C'est exactement la population des pièces hors périmètre — celles qu'on
+       vient d'y router. Sans cette ligne, on les envoie vers un formulaire
+       dont on ne saura jamais combien l'ont vu sans écrire. */
+    SessionTracker.snapshot({ contact_triggered: 1 });
   }
 
   // Submission du form de contact intégré → endpoint sapi_megafilter_surmesure.

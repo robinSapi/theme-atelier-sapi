@@ -6854,7 +6854,18 @@ function sapi_megafilter_log_session() {
           'content' => isset($m['content']) ? sanitize_textarea_field($m['content']) : '',
         ];
       }
-      $update_data['ai_chat_messages'] = wp_json_encode($sanitized);
+      /* ⚠️ JSON_UNESCAPED_UNICODE EST INDISPENSABLE À LA RECHERCHE.
+         Sans lui, « éclairage » est stocké littéralement « éclairage » :
+         la lettre accentuée n'existe plus dans les octets, et AUCUNE recherche
+         ne peut la retrouver — ni avec accent, ni sans, ni avec une collation
+         accent-insensible. Robin aurait tapé « éclairage », obtenu zéro
+         résultat, puis ouvert une session au hasard et vu le mot écrit noir sur
+         blanc dans le détail (l'affichage, lui, décode le JSON).
+         Défaut créé en ajoutant cette colonne à la recherche, attrapé en
+         relecture : requête valide, résultat vide, aucune erreur. Le motif
+         exact documenté au §4 de questions_ouvertes.md.
+         ⚠️ Ne répare QUE les lignes écrites après ce commit. */
+      $update_data['ai_chat_messages'] = wp_json_encode($sanitized, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
       $update_formats[] = '%s';
       $update_data['ai_chat_used'] = !empty($sanitized) ? 1 : 0;
       $update_formats[] = '%d';
@@ -7164,8 +7175,20 @@ function sapi_megafilter_admin_build_where($filters) {
   }
   if (!empty($filters['q'])) {
     $q = '%' . $wpdb->esc_like($filters['q']) . '%';
-    $where[] = '(location LIKE %s OR ip_address LIKE %s OR ai_freetext_input LIKE %s OR contact_email LIKE %s)';
-    array_push($args, $q, $q, $q, $q);
+    /* ⚠️ `ai_freetext_input` n'est écrite par PERSONNE : le serveur sait la
+       traiter, le client ne l'envoie jamais. La recherche promettait « texte
+       libre » et interrogeait une colonne toujours NULL — les mots des
+       visiteurs existent bien en base, dans `ai_chat_messages`, qui n'était pas
+       dans la clause. On l'ajoute, avec `contact_subject` (le résumé rédigé par
+       l'IA) et `contact_message`.
+       C'est ce qui rend enfin trouvables les PIÈCES HORS PÉRIMÈTRE : une
+       demande pour une salle de bain n'a pas de `piece`, n'entre dans aucun
+       agrégat et n'a aucun filtre — mais les mots « salle de bain » sont dans
+       la conversation. Chercher devient le seul chemin vers l'information la
+       plus utile du tableau : ce que les gens demandent et que Robin ne vend pas. */
+    $where[] = '(location LIKE %s OR ip_address LIKE %s OR ai_freetext_input LIKE %s OR contact_email LIKE %s'
+             . ' OR ai_chat_messages LIKE %s OR contact_subject LIKE %s OR contact_message LIKE %s)';
+    array_push($args, $q, $q, $q, $q, $q, $q, $q);
   }
 
   $where_sql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
@@ -7482,7 +7505,7 @@ function sapi_megafilter_admin_page() {
         <option value="contact"  <?php selected($filters['status'], 'contact'); ?>>Avec contact</option>
         <option value="complete" <?php selected($filters['status'], 'complete'); ?>>Quiz complets</option>
       </select>
-      <input type="search" name="q" class="filter-search" placeholder="Rechercher (lieu, IP, texte libre, email…)" value="<?php echo esc_attr($filters['q']); ?>">
+      <input type="search" name="q" class="filter-search" placeholder="Rechercher : « salle de bain », un lieu, un email, une IP…" value="<?php echo esc_attr($filters['q']); ?>">
     </form>
 
     <!-- ═══════════════ TABLEAU ═══════════════ -->
