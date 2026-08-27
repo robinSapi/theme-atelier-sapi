@@ -105,20 +105,20 @@
     return cible ? applyOption(cible.select, cible.option) : false;
   }
 
-  // Pré-sélection de l'essence (matière). Pattern repris du legacy cinetique.js
-  // pré-F1c : on cherche d'abord un swatch custom .material-option[data-value="X"]
-  // (qu'on clique pour déclencher la logique WC custom), fallback select natif.
+  /* Pré-sélection de l'essence (matière).
+     ⚠️ IL Y AVAIT ICI UNE BRANCHE « pastille maison » (`.material-option`),
+     essayée avant le menu. Elle ne s'exécute JAMAIS : le plugin
+     WooCommerce Variation Swatches remplace le filtre du thème sur les fiches
+     produit, et `.material-option` n'apparaît pas une seule fois dans le HTML
+     servi. Vérifié en ligne.
+     ⚠️ CE CODE DE PASTILLES MAISON EXISTE ENCORE AILLEURS et n'est PAS touché
+     ici : `functions.php` (le filtre qui produit le markup), `cinetique.js`
+     (le contrôleur de clic) et `shop.js` (une garde qui teste la classe pour
+     ne pas doubler cinetique). Ils redeviendraient utiles si le plugin était
+     désactivé un jour. Les retirer est un autre chantier — ne pas le faire
+     par ricochet. */
   function preselectEssence(form, essenceSlug) {
     if (!form || !essenceSlug) return false;
-    // 1. Swatch custom prioritaire
-    var swatch = form.querySelector('.material-option[data-value="' + essenceSlug + '"]') ||
-                 document.querySelector('.material-option[data-value="' + essenceSlug + '"]');
-    if (swatch && !swatch.classList.contains('selected')) {
-      try { swatch.click(); return true; } catch (e) { /* fall through au select */ }
-    } else if (swatch && swatch.classList.contains('selected')) {
-      return true; // déjà bon
-    }
-    // 2. Fallback : select WC standard attribute_pa_materiau
     var cible = cibleEssence(form, essenceSlug);
     return cible ? applyOption(cible.select, cible.option) : false;
   }

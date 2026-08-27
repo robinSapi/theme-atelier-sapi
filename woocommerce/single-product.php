@@ -421,7 +421,12 @@ get_header();
           // Le texte est mis à jour en live par sapi-help-pill.js selon sapiProject.
           if ($product->is_type('variable') && !$is_accessoire && !$is_carte_cadeau) {
             $render_help_pill = function () {
-              echo '<button type="button" class="conseiller-pill-secondary" id="robin-product-pill" data-action="open-modal" data-modal-state="product" data-help-pill>';
+              /* `data-action="open-modal"` : GARDÉ volontairement bien qu'aucun clic ne
+                 passe par lui (l'écouteur est dans sapi-help-pill.js). C'est le seul
+                 crochet qui permettra de réparer le retour du focus au clavier
+                 (questions_ouvertes §2.4). `data-modal-state` en revanche n'était lu
+                 par personne : la pill code son état en dur. Retiré. */
+              echo '<button type="button" class="conseiller-pill-secondary" id="robin-product-pill" data-action="open-modal" data-help-pill>';
               echo '<span class="conseiller-pill-secondary__avatar">' . sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => '', 'class' => 'conseiller-pill-secondary__img', 'loading' => 'lazy']) . '</span>';
               /* Le texte normal est AUSSI porté par un attribut : le JS le
                  restaure depuis là, jamais depuis le contenu affiché. Lire le

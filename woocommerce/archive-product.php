@@ -257,7 +257,9 @@ if ($imm_piece) {
          sort de l'écran en mobile, l'entrée du questionnaire disparaissait en
          écran B — un chemin de vente perdu au moment précis où le visiteur
          juge la sélection. -->
-    <button type="button" class="mescreations-immersion__describe" data-immersion-describe data-action="open-modal" data-modal-state="s0">
+    <?php /* `data-modal-state` retiré : lu par personne. Le clic passe par
+             l'écouteur de sapi-mescreations-immersion.js, qui code l'état en dur. */ ?>
+    <button type="button" class="mescreations-immersion__describe" data-immersion-describe data-action="open-modal">
       <?php esc_html_e('Décrire mon projet en détail pour un luminaire plus adapté', 'theme-sapi-maison'); ?>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
     </button>

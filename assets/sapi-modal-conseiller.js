@@ -71,17 +71,6 @@
      modale. */
   var ESSENCE_LABEL      = { peuplier: 'Peuplier', okoume: 'Okoumé' };
 
-  // F2a-ter : labels humains des clés pour les chips récap S3 ("Pièce : Salon").
-  var KEY_LABELS = {
-    piece: 'Pièce',
-    taille: 'Taille',
-    taille_escalier: 'Escalier',
-    eclairage: 'Éclairage',
-    sortie: 'Sortie',
-    hauteur: 'Hauteur',
-    style: 'Style',
-  };
-
   /* ─────────────────────────────────────────────
      State
      ───────────────────────────────────────────── */
@@ -1834,11 +1823,12 @@
   // que la fiche produit applique la pré-sélection variation.
   function applyProductSelection() {
     noterValidation(); // validation explicite du projet — cf. noterValidation()
-    var detail = {
-      productId: PRODUCT_CTX && PRODUCT_CTX.id ? PRODUCT_CTX.id : 0,
-      answers: state.answers,
-      labels: state.labels,
-    };
+    /* `answers` seulement : `productId` et `labels` n'étaient lus par personne.
+       Trois clés inutiles ne cassent rien, mais elles racontent une histoire
+       fausse — un lecteur croirait que la modale doit dire à la fiche produit
+       QUEL produit et QUELS libellés, alors qu'elle a juste besoin de dire
+       « vas-y, applique ». */
+    var detail = { answers: state.answers };
     document.dispatchEvent(new CustomEvent('sapi:apply-product-selection', { detail: detail }));
     closeModal();
     // Scroll smooth vers les variations WC pour montrer le résultat

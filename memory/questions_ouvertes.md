@@ -137,6 +137,9 @@ Rien de tout ça ne casse quoi que ce soit. Mais chaque vestige est un piège po
 - Les dictionnaires `'table'` dans les prompts IA : la question a été retirée du parcours, les clés ne sont plus lues.
 - `.conseiller-cards-zone`, `.mes-creations-section-divider` : règles CSS d'éléments supprimés.
 
+> ⚠️ **Si le plugin WooCommerce Variation Swatches était un jour désactivé**, la présélection poserait bien l'essence — elle passe par le menu caché, que le filtre du thème conserve — **mais la pastille maison ne s'allumerait pas** : `cinetique.js` synchronise le menu vers la pastille **une seule fois à l'init**, sans écouteur `change`, alors que la présélection arrive plus tard. Bonne variation, bon prix, bonne photo, pastille visuellement non sélectionnée.
+> Le correctif serait un écouteur `change` dans `cinetique.js`, **pas** un retour en arrière sur la branche `.material-option` retirée le 26/08. Et ne pas toucher au CSS `.material-option` sans traiter ce point d'abord.
+
 > ⚠️ **Le vestige dangereux n'est pas le code mort visible, c'est le repli silencieux.**
 > Trois fois dans ce chantier, un objet supprimé lors d'une refonte a laissé un code qui **ne plante pas** : il renvoie une valeur vide et valide, tout continue de tourner, et le comportement est simplement faux. `$sapi_filter_rules` (« rien de cassé » = « rien ne s'applique »), puis `sapiMegaFilter` côté conseil, puis le même côté chat — celui-ci a poussé le sur-mesure à tort dans **chaque** conversation pendant des semaines.
 > **À chaque suppression d'un objet global, chercher tous ses lecteurs et vérifier ce que fait leur repli.**
