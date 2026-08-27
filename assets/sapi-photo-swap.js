@@ -24,11 +24,17 @@
   var config = window.SAPI_PHOTO_SWAP || {};
   if (!config.ajaxUrl || !config.nonce) return;
 
-  // Mapping style → essence (mirror sapi-product-preselect.js).
+  /* Mapping style → essence — COPIE de `sapi-product-preselect.js`
+     (`projectToEssence`) et de `sapi-modal-conseiller.js`
+     (`ESSENCE_FROM_STYLE`). Les trois doivent rester identiques : elles
+     pilotent la photo, la présélection et le récap. Divergentes, elles
+     affichent une photo de peuplier sous un récap qui annonce l'okoumé.
+     `neutre` = « Pas de préférence » → peuplier (décision Robin du 26/08). */
   function deriveEssence(answers) {
     if (!answers || !answers.style) return '';
     if (answers.style === 'moderne') return 'peuplier';
     if (answers.style === 'ancien')  return 'okoume';
+    if (answers.style === 'neutre')  return 'peuplier';
     return '';
   }
 

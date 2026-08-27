@@ -62,8 +62,14 @@
   var CONTACT_SURMESURE_URL = config.contactSurmesureUrl || '/sur-mesure/';
   var CONTACT_EMAIL         = config.contactEmail || 'robin@atelier-sapi.fr';
 
-  // Mapping projet → essence (legacy mon-projet.js pré-F1c)
-  var ESSENCE_FROM_STYLE = { moderne: 'peuplier', ancien: 'okoume' };
+  /* Mapping projet → essence — COPIE de `sapi-product-preselect.js`
+     (`projectToEssence`) et de `sapi-photo-swap.js` (`deriveEssence`). Les
+     trois doivent rester identiques : elles pilotent le récap, la
+     présélection et la photo. **Toute modification ici doit être reportée
+     dans les deux autres.**
+     `neutre` = « Pas de préférence » → peuplier (décision Robin du 26/08) :
+     le visiteur a délégué le choix, pas refusé de choisir. */
+  var ESSENCE_FROM_STYLE = { moderne: 'peuplier', ancien: 'okoume', neutre: 'peuplier' };
   var ESSENCE_LABEL      = { peuplier: 'Peuplier', okoume: 'Okoumé' };
   // Mapping taille → index dans le select WC (legacy)
   var TAILLE_TO_INDEX    = { petite: 0, moyenne: 1, grande: 2 };

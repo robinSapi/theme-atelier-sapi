@@ -521,7 +521,9 @@ function sapi_maison_enqueue_assets() {
         wp_enqueue_script(
           'sapi-help-pill',
           get_template_directory_uri() . '/assets/sapi-help-pill.js',
-          ['sapi-project', 'sapi-modal-conseiller'],
+          // `jquery` : la pill écoute found_variation / reset_data, qui sont
+          // des événements jQuery de WooCommerce. Ça marchait sans, par chance.
+          ['sapi-project', 'sapi-modal-conseiller', 'jquery'],
           filemtime($help_pill_js_path),
           true
         );
