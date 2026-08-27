@@ -7503,9 +7503,16 @@ function sapi_megafilter_log_session() {
   // Géolocalisation async (shutdown) — seulement à l'INSERT pour éviter
   // d'appeler ip-api.com à chaque update.
   if ($is_insert && $row_id) {
+    /* ⚠️ LA CONDITION, PAS UN `return`. J'avais écrit `if (!SAPI_GEOLOC_ACTIVE)
+       return;` ici : ça ne sortait pas du bloc, ça sortait de TOUTE la
+       fonction, donc du `wp_send_json_success()` final — sur chaque INSERT.
+       La ligne était bien écrite en base, mais l'endpoint répondait « 0 » au
+       lieu de son JSON. Sans conséquence aujourd'hui (le client envoie en
+       `sendBeacon` et ne lit jamais la réponse), et c'est bien le problème :
+       la première ligne ajoutée après ce bloc ne se serait jamais exécutée,
+       sur les INSERT seulement. Invisible en recette. */
     $ip_for_geo = $insert_data['ip_address'] ?? '';
-    if ($ip_for_geo) {
-      if (!SAPI_GEOLOC_ACTIVE) return; // voir la constante, décision en attente
+    if ($ip_for_geo && SAPI_GEOLOC_ACTIVE) {
       add_action('shutdown', function () use ($ip_for_geo, $row_id) {
         $resp = wp_remote_get("https://ip-api.com/json/{$ip_for_geo}?fields=city,regionName,country&lang=fr", ['timeout' => 5]);
         if (is_wp_error($resp)) return;

@@ -230,21 +230,6 @@
       } catch (e) { /* swallow */ }
     }
 
-    function getMatchingProductIds() {
-      // Scan DOM de la grille /mes-creations/ : cards WC ont une classe
-      // `post-<id>` sur le <li.product>. Renvoie un CSV des IDs visibles
-      // (filtrés is-filtered-out exclus si présent).
-      var cards = document.querySelectorAll('ul.products li.product');
-      if (!cards.length) return '';
-      var ids = [];
-      cards.forEach(function (card) {
-        if (card.classList && card.classList.contains('is-filtered-out')) return;
-        var m = card.className.match(/post-(\d+)/);
-        if (m) ids.push(m[1]);
-      });
-      return ids.join(',');
-    }
-
     function buildSnapshotPayload() {
       var payload = {};
       var project = window.sapiProject && window.sapiProject.get ? window.sapiProject.get() : null;
@@ -287,9 +272,20 @@
          interrogeait une colonne toujours NULL. */
       if (ENTREE_FREETEXT) payload.ai_freetext_input = ENTREE_FREETEXT;
       if (aiCallCount > 0) payload.ai_call_count = aiCallCount;
-      // Produits matchés (uniquement sur /mes-creations/)
-      var ids = getMatchingProductIds();
-      if (ids) payload.matching_product_ids = ids;
+      /* ⚠️ `matching_product_ids` N'EST PLUS ENVOYÉ, ET C'EST VOULU.
+         Un scan du DOM cherchait ici `ul.products li.product` et la classe
+         `is-filtered-out` : **ni l'un ni l'autre n'existe dans ce thème** (la
+         grille est `#sapi-product-grid > .product-card-cinetique`, la classe
+         est `is-cat-filtered`). Deux sélecteurs faux, aucune erreur levée, une
+         colonne vide depuis le premier jour — et l'écran « Catalogue présenté »
+         du détail ne s'est donc jamais affiché.
+         ⚠️ NE PAS « RÉPARER » LES SÉLECTEURS : même justes, ils viseraient la
+         grille BASSE du catalogue, alors que ce que le visiteur voit comme sa
+         sélection est le carrousel de l'immersion (4 modèles). Le scan répondrait
+         à la mauvaise question.
+         La bonne source est le serveur, qui calcule déjà cette liste dans les
+         deux endpoints IA. La rattacher à la session est un chantier à part,
+         noté dans questions_ouvertes.md. */
       return payload;
     }
 

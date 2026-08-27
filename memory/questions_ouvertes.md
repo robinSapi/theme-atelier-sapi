@@ -118,6 +118,7 @@ Sur un viewport de plus de 840 pixels de haut **et** moins de 768 de large — e
 | `home_picker` : **toujours 0** | La modale n'est jamais rendue sur la home. Ce point d'entrée ne peut pas être compté. |
 | `freetext` : **toujours 0** | Le paramètre d'URL est effacé **avant** d'être lu. Ces parcours sont comptés comme de simples visites `/mes-creations/`. |
 | `advice_text` : **jamais rempli** dans les sessions abouties | La session est finalisée **avant** que le conseil ne soit écrit. |
+| `matching_product_ids` : **toujours vide** | Un scan du DOM cherchait le markup WooCommerce par défaut, absent de ce thème. Retiré le 27/08 plutôt que réparé : même corrigé, il aurait visé la grille BASSE du catalogue, alors que ce que le visiteur voit comme sa sélection est le carrousel de l'immersion. **La bonne source est le serveur**, qui calcule déjà cette liste dans les deux endpoints IA (`functions.php` ~3218 et ~4090) — il reste à la rattacher à la session. C'est la seule donnée qui dirait si les sélections affichées ont du sens. |
 
 *Ce que ça coûte :* tu ne sais pas combien de visiteurs passent par le champ libre plutôt que par les cartes — alors que c'est précisément le parcours qu'on vient de réparer, et que tu n'as aucun moyen d'en mesurer l'effet.
 
