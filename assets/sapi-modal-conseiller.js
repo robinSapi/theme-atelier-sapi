@@ -158,6 +158,18 @@
     Object.keys(state.answers || {}).forEach(noterReponse);
   }
 
+  /* ⚠️ MÊME RAISONNEMENT QUE `REPONSES_DE_CETTE_SESSION`, POUR LE CONSEIL.
+     L'export du 28/08 l'a montré noir sur blanc : sur 31 lignes portant un
+     conseil, 9 nommaient une AUTRE pièce que la leur (« Pour ton salon… » sur
+     une session cuisine) et 2 en portaient un sans avoir aucune pièce. Le
+     conseil partait sans condition, y compris quand il traînait dans le
+     localStorage depuis une visite d'il y a trois semaines.
+     Une colonne vide se remarque. Une colonne remplie de la mauvaise phrase,
+     non : Robin l'aurait lue comme ce que Robin a dit à ce visiteur-là.
+     On n'envoie donc que ce qui a été produit pendant cette visite. */
+  var CONSEIL_DE_CETTE_SESSION = false;
+  function noterConseil() { CONSEIL_DE_CETTE_SESSION = true; }
+
   var ENTREE_FREETEXT = '';
   try {
     ENTREE_FREETEXT = new URLSearchParams(window.location.search).get('freetext') || '';
@@ -191,13 +203,23 @@
       var body = document.body;
       if (body && body.classList.contains('home')) return 'home_picker';
       var path = window.location.pathname || '';
+      /* ⚠️ LA FICHE PRODUIT SE TESTE EN PREMIER, ET C'EST INDISPENSABLE ICI.
+         Les fiches produit de ce site vivent SOUS /mes-creations/ — par exemple
+         /mes-creations/olivia-la-gardiena/. Avec le test de la page de
+         sélection placé avant, toute fiche produit était étiquetée
+         « mes_creations » et `product_pill` ne pouvait structurellement jamais
+         être écrit : zéro ligne sur 97 dans l'export du 28/08, alors que la
+         pastille est utilisée tous les jours. Robin ne pouvait pas distinguer
+         « arrivé sur la page de sélection » de « ouvert la pastille sur une
+         fiche ». Deux chemins très différents, un seul nom.
+         Ne pas remettre `/mes-creations/` avant ce bloc. */
+      if (body && (body.classList.contains('single-product') || path.indexOf('/produit/') !== -1)) {
+        return 'product_pill';
+      }
       if (path.indexOf('/mes-creations/') !== -1) {
         // Capture faite au chargement du script, avant le nettoyage d'URL.
         if (ENTREE_FREETEXT) return 'freetext';
         return 'mes_creations';
-      }
-      if (body && (body.classList.contains('single-product') || path.indexOf('/produit/') !== -1)) {
-        return 'product_pill';
       }
       return '';
     }
@@ -253,7 +275,9 @@
         if (aReponduIci && project.answers && Object.keys(project.answers).length) {
           payload.answers = project.answers;
         }
-        if (project.advice_text) payload.advice_text = project.advice_text;
+        if (project.advice_text && CONSEIL_DE_CETTE_SESSION) {
+          payload.advice_text = project.advice_text;
+        }
         if (project.contact_kind) payload.contact_kind = project.contact_kind;
         if (project.contact_subject) payload.contact_subject = project.contact_subject;
         if (project.contact_message) payload.contact_message = project.contact_message;
@@ -665,6 +689,7 @@
       fetchAdviceFromIA(opts).then(function (advice) {
         if (advice && window.sapiProject && typeof window.sapiProject.setAdviceText === 'function') {
           window.sapiProject.setAdviceText(advice);
+          noterConseil();
         }
         /* ⚠️ CE CHEMIN NE FINALISAIT RIEN DU TOUT. Depuis une fiche produit ou
            la boutique, la modale ne se ferme pas : la page part vers
@@ -809,6 +834,7 @@
     if (card) card.classList.remove('is-awaiting-advice');
     if (advice && window.sapiProject) {
       window.sapiProject.setAdviceText(advice);
+      noterConseil();
     } else if (window.sapiProject) {
       // Force un re-render même sans advice pour sortir des dots et afficher
       // le texte générique de la pièce. Le typewriter va se déclencher.
