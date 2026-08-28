@@ -259,10 +259,13 @@
     function buildSnapshotPayload() {
       var payload = {};
       var project = window.sapiProject && window.sapiProject.get ? window.sapiProject.get() : null;
-      /* ⚠️ LES RÉPONSES NE PARTENT QUE SI LE VISITEUR A RÉPONDU OU VALIDÉ
-         AUJOURD'HUI — ce garde-fou ne porte QUE sur `answers`. Le conseil et
-         les champs de contact ci-dessous partent sans condition : ils sont
-         produits pendant cette visite, pas relus du localStorage.
+      /* ⚠️ DEUX GARDE-FOUS, MÊME PRINCIPE : on n'enregistre que ce qui a été
+         fait PENDANT cette visite. `answers` est gardé par
+         REPONSES_DE_CETTE_SESSION, `advice_text` par CONSEIL_DE_CETTE_SESSION.
+         Les champs de contact, eux, partent sans condition : ils ne peuvent
+         venir que du formulaire de cette visite.
+         Ne pas retirer l'une de ces deux conditions en croyant simplifier :
+         c'est exactement le défaut mesuré sur l'export du 28/08.
          Le projet mémorisé vient peut-être d'une visite d'il y a trois
          semaines : l'enregistrer ferait passer une simple ouverture de modale
          pour un questionnaire rempli. Voir REPONSES_DE_CETTE_SESSION.
@@ -1693,8 +1696,11 @@
       var piece = projectPiece();
       if (piece) {
         /* Même raison qu'au départ de `showTransitionAndExit` : on quitte la
-           page sans passer par `closeModal()`, donc sans rien finaliser. Le
-           conseil est déjà dans le projet sur ce chemin — il partira avec. */
+           page sans passer par `closeModal()`, donc sans rien finaliser.
+           ⚠️ Le conseil est bien dans le projet ici, mais il ne partira PAS
+           forcément : sur ce chemin il vient souvent du localStorage d'une
+           visite précédente, et CONSEIL_DE_CETTE_SESSION le retient alors.
+           C'est voulu — voir la note sur ce drapeau. */
         SessionTracker.finalize();
         goToSelectionPage(piece);
         return;
