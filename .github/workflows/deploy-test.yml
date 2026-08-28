@@ -42,6 +42,15 @@ jobs:
           # ⚠️ Globs de docs SCOPÉS (racine + assets/) et NON récursifs : ils
           # reproduisent exactement les exclusions du thème SANS stripper les
           # fichiers .md/.txt/.html à l'intérieur de /vendor (sinon mPDF cassé).
+          #
+          # ⚠️ `assets/*.txt` RETIRÉ le 28/08. Il était là, et c'était une bombe
+          # à retardement : `assets/guide-prompt-{ton,savoir,regles,exemples}.txt`
+          # sont LUS À L'EXÉCUTION par sapi_megafilter_load_v2_prompts(). Rien
+          # n'a jamais cassé parce que le déploiement FTP ne supprime pas ce
+          # qu'il ignore — les fichiers étaient déjà en place. Mais sur un site
+          # reconstruit de zéro, le Conseiller aurait perdu sa voix et ses
+          # règles métier sans un mot, `@file_get_contents` retombant sur ''.
+          # `assets/*.html` reste exclu : ce n'est que de la documentation.
           exclude: |
             **/.git*
             **/.git*/**
@@ -56,6 +65,5 @@ jobs:
             *.csv
             *.txt
             *.html
-            assets/*.txt
             assets/*.html
             .ftp-deploy-sync-state.json

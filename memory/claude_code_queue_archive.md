@@ -13678,3 +13678,117 @@ par cPanel → Let's Encrypt SSL → Générer (http-01, RSA 2048, sans les sous
 À refaire pour tout nouveau sous-domaine.
 ⚠️ `main` de ce dépôt est directement en ligne, pas d'environnement de test. Un push publie.
 Ne PAS transposer au thème, où master reste interdit au push auto.
+
+---
+
+## [TÂCHE] Audit test ↔ master avant la mise en production du 28/08
+**Date :** 2026-08-28
+**Priorité :** haute
+**Branche :** aucune modification attendue. **Audit en lecture seule**, Robin fusionne lui-même ensuite.
+
+**Contexte :** journée de treize lots livrés et recettés sur `test-theme-sapi-maison` (mesure du Conseiller, RGPD, dette technique, rappel de projet sur les sélecteurs de pièce). Chaque lot a été relu individuellement. **Personne n'a regardé le diff complet test ↔ master.** C'est exactement ce que ces relectures ne pouvaient pas voir : une modification d'un lot défaite par un autre, un fichier touché sans être dans aucun lot, un correctif de master jamais reporté sur test.
+
+**À faire — cinq questions, dans cet ordre :**
+
+1. **Inventaire du diff `master...test-theme-sapi-maison`.** Liste les fichiers modifiés et, pour chacun, en une ligne, ce qui change. Signale tout fichier dont la modification ne correspond à AUCUN des lots listés plus bas.
+
+2. **Commits de master absents de test.** Y a-t-il eu des correctifs directs sur `master` (la branche des hotfix) depuis le point de divergence ? Si oui, la fusion les écraserait-elle ?
+
+3. **Modifications qui s'annulent.** Sur les fichiers très touchés (`functions.php`, `assets/sapi-modal-conseiller.js`, `style.css`), cherche les endroits où un commit tardif défait un commit antérieur de la même journée — le cas classique étant un correctif appliqué puis reverté par un remplacement de bloc plus large.
+
+4. **`style.css` en particulier.** Une suppression de règles CSS par script a laissé un sélecteur orphelin le 28/08 (`.conseiller-modal [hidden],` avec sa virgule), qui a rendu la modale inutilisable. Le correctif est en place. **Vérifie dans le diff qu'aucune AUTRE règle n'a perdu un sélecteur de la même façon** — c'est-à-dire une ligne de sélecteur supprimée sans sa règle, ou une règle supprimée sans tous ses sélecteurs.
+
+5. **Le schéma de base.** `functions.php` ajoute une colonne `piece_hors_perimetre` au `CREATE TABLE` de `wp_sapi_megafilter_sessions` + une migration `sapi_megafilter_maybe_upgrade_table()` sur `init`. Confirme que rien dans le diff ne fait tourner `dbDelta` ailleurs, et que la constante `SAPI_SESSIONS_DB_VERSION` n'existe qu'une fois.
+
+**Les lots de la journée, pour référence :**
+- décor de l'immersion issu du même calcul que la sélection ; URL lue en entier ; expiration du projet à 10 jours
+- RGPD : IP et e-mail de contact ne sont plus stockés, géolocalisation via FreeIPAPI, migration d'effacement
+- mesure : `advice_text` enfin enregistré, `entry_point` dit la PAGE et plus la méthode, `product_pill` rétabli, `conseils_picker` ajouté, colonne `piece_hors_perimetre` + classement
+- dette : ~640 lignes mortes supprimées (bloc « Robin V2 », `sapi_guide_build_filter_context`, encart « Catalogue présenté », lecteurs de `window.sapiMegaFilter`, 21 règles CSS)
+- rappel de projet sur les trois sélecteurs de pièce (nouveau `sapi-room-picker.js`, `.room-picker-reprise`)
+
+**Critères de succès :**
+- Une liste de fichiers modifiés, chacun rattaché à un lot ou signalé comme orphelin.
+- Une réponse explicite sur les commits de master non reportés.
+- Zéro sélecteur CSS orphelin dans le diff, ou la liste de ceux qui restent.
+- Un avis franc : la fusion vers `master` est-elle sûre, et si non, ce qu'il faut régler d'abord.
+
+**⚠️ Ne rien modifier, ne rien fusionner.** Robin fusionne et pousse lui-même via GitHub Desktop.
+
+### ✅ AUDIT FAIT (2026-08-28, Claude Code) — lecture seule, aucune branche touchée
+
+**Verdict : fusion sûre côté git, un seul arbitrage. Le risque est le volume, pas le diff.**
+
+**Cadrage à corriger : le point de divergence est `0981348` du 10 JUIN, pas du 28/08.** La fusion
+ne livre pas 13 lots mais **262 commits sur 2 mois et demi** (11/06 : 65 · 14/07 : 3 · 22/07 : 9 ·
+04–06/08 : 50 · 24–28/08 : 124). Delta réel entre les deux têtes : **113 fichiers, +47 389 / −5 553**.
+
+**1. Inventaire.** Gros porteurs : `functions.php` (+1865/−1267, 58 cm), `style.css` (+1850/−221,
+63 cm), `sapi-modal-conseiller.js` (+1038/−210, 32 cm), `sapi-mescreations-immersion.js` (+1128,
+nouveau), `inc/conseiller-rules-admin.php` (+673, nouveau), `archive-product.php` (+267/−149),
+`sapi-project.js` (+251/−19), `sapi-product-preselect.js` (+231/−166), `sapi-cards-conseiller.js`
+(**−1025, supprimé**, tâche 4b). Catalogue B2B, e-mails WC et pages catégorie n'apparaissent que
+dans `master...test` : déjà identiques des deux côtés (cherry-pickés en prod).
+**Orphelins** (tous du 11/06, dormants) : `croisements-conseils.html`, `identite-visuelle-robin.html`,
+`test-bordure-interieure.html`, `assets/guide-filtrage-{impact,simulateur}.html`, 7 `newsletter-*.html`,
+`memory/snippet-brevo-*.php`. Rien de dangereux (les 3 snippets ont `defined('ABSPATH') || exit`),
+mais **`deploy-prod.yml` n'exclut que `.git*`, README, `.DS_Store`, node_modules, .vscode, .idea** :
+ils partiront en ligne (+2,1 Mo). `master` en déploie déjà 87 de même nature → pas une régression.
+Note : le `.gitignore` interdit les `snippet-*.php` mais son motif est ancré à la racine, il rate `memory/`.
+
+**2. Commits de master absents de test → AUCUNE perte.** 17 commits hors de test, 14 y existent par
+équivalence de patch. Les 3 « absents » (`113a1ef`, `a92516c`, `68f84ab`) le sont par découpage, pas
+par contenu — vérifié pièce par pièce : time-trap présent dans `page-contact.php`, `single-product.php`
+et le JS de la modale ; les 5 handlers morts absents des deux côtés ; les 6 gardes WC, `sapi_time_trap_new/valid`,
+`sapi_is_junk_contact`, `sapi_check_form_rate_limit` tous en place sur test.
+**Preuve directe** : fusion simulée en mémoire (`git merge-tree`, aucun fichier touché), résultat diffé
+contre test → **la fusion n'apporte que 604 lignes dans `functions.php`, rien d'autre**. Sur les 113
+fichiers, test est un sur-ensemble strict de master.
+**⚠️ UN SEUL CONFLIT, `functions.php`** : les deux branches ont supprimé du code mort qui se chevauche
+(master via `68f84ab`, test via le lot dette). Reste le bloc « Robin V2 » de 582 lignes que master garde
+encore. Ses 7 fonctions `sapi_robin_*` ont **zéro appelant sur master comme sur test** (seules traces :
+commentaires et notes de `memory/`). → **RÉSOUDRE EN GARDANT LA VERSION DE TEST (bloc supprimé).**
+
+**3. Modifications qui s'annulent → 3 cas, tous volontaires.** `688845c` (RGPD IP tronquées, géoloc
+coupée) défait à 65/109 lignes par `d9174d1` (IP plus stockée du tout, géoloc rétablie via FreeIPAPI) —
+purge planifiée, migration d'effacement et contrôle du code HTTP vérifiés à HEAD. `186f285` : sa table
+`ESSENCE_FROM_STYLE` retirée par `998de27` qui centralise dans `sapi-project.js` (`projectToEssence` et
+`deriveEssence` délèguent, sans repli local ; les 4 scripts déclarent bien `['sapi-project']` en dépendance
+d'enqueue). `246c389` : clause de recherche sur `ip_address`/`contact_email` tombée avec le RGPD.
+Les 5 paires de commits du 28/08 au titre identique sont des « commit puis correctif », aucune contradiction
+à HEAD. `22c9834` (13h30) n'est repassé dessus par aucun commit ultérieur.
+Deux vestiges manqués par le lot dette (pré-existants, aussi sur master) : `sapi_guide_build_refine_prompt()`
+n'a plus d'appelant, et elle lit `assets/guide-prompt-refine.txt` **qui n'existe sur aucune des deux branches**.
+
+**4. `style.css` → ZÉRO sélecteur orphelin.** Scan des 26 203 lignes commentaires retirés : aucune ligne
+de sélecteur finissant par une virgule suivie d'une accolade ouvrante, aucune virgule en tête de ligne,
+accolades équilibrées (profondeur 0), aucune déclaration hors bloc. Le cas du 28/08 est réparé :
+`.conseiller-modal [hidden]` est une règle autonome (l. 22970). C'est le **seul** sélecteur supprimé avec
+virgule de tout le diff. Les autres suppressions sont des retraits complets légitimes (`.why-sapi-recap*`,
+`.conseiller-cards-zone`) ou des réécritures : `.modal__close`, `.home-projet .room-card`,
+`.advice-room-picker .room-card`, `.room-picker-cards` réapparaissent tous plus loin — aucune classe encore
+présente dans le markup ou le JS ne s'est retrouvée sans style. Résidu cosmétique : 2 blocs `@media` vides
+de plus que master (l. 2129, l. 2133), laissés par le retrait des 21 règles. Master en a déjà 10. Sans effet.
+
+**5. Schéma de base → conforme.** `dbDelta` appelé **une seule fois** (l. 6465, dans
+`sapi_megafilter_create_sessions_table()`) ; aucun autre `dbDelta` ni `CREATE TABLE` dans le thème.
+`SAPI_SESSIONS_DB_VERSION` définie **une seule fois** (l. 6479, sous garde `!defined`), lue 2 fois.
+`sapi_megafilter_maybe_upgrade_table()` sur `init` (correct : les sessions s'écrivent depuis le front),
+et elle **vérifie par `SHOW COLUMNS` que la colonne existe avant de graver la version** — c'est la bonne
+façon. Réserve mineure : en cas d'échec, l'`error_log` part à chaque requête.
+
+**AVANT DE LANCER LE WORKFLOW — 3 points :**
+1. **Résoudre le conflit `functions.php` en gardant la version de test.** Seul arbitrage de la fusion.
+2. **Après déploiement, ouvrir une page publique et lire `debug.log`** : si « la colonne
+   `piece_hors_perimetre` n'a pas pu être ajoutée » apparaît, **plus aucune session n'est enregistrée**,
+   en silence. C'est le seul point qui peut casser sans se voir.
+3. Décider si `memory/` et `mockups/` doivent continuer de partir en ligne (3 lignes d'`exclude` dans
+   `deploy-prod.yml`). Pas bloquant.
+
+**Réserve honnête :** pas de `php -l` possible, ni PHP ni Node installés sur la machine. La recette sur
+test.atelier-sapi.fr reste la preuve. Et ce qui n'a jamais tourné sur les données et le trafic de prod :
+hero immersif `/mes-creations/`, refonte de la modale Conseiller, écran de réglages admin, table de sessions.
+
+---
+
+**📦 ARCHIVÉ le 2026-08-28 par Cowork.** Audit rendu et lu avec Robin. Trois suites retenues : résoudre le conflit `functions.php` en gardant test, lire `debug.log` après déploiement (canari de la migration de colonne), et trancher l'exclusion de `memory/` et `mockups/` dans `deploy-prod.yml`.
