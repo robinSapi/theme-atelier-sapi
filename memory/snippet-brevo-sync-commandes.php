@@ -29,11 +29,21 @@
  *    T+5m  : ce snippet ajoute à #12 → persiste ✅
  *
  *  SÉQUENCE #6 (corrigée le 28/08/2026 — cas Olivier Leibovici, cmd #10147) :
- *    T+0s  : opt-in coché → ajout immédiat à #6 (filet : si le tracker JS ne
- *            part pas, adblock par exemple, le contact est déjà correct)
- *    T+1m  : sync serveur Brevo → BLOCKLIST du contact (il reste dans #6 mais
- *            plus aucune campagne ne lui parvient)
- *    T+5m  : ce snippet repasse sur #6 avec emailBlacklisted:false → ✅
+ *    T+0s   : opt-in coché → ajout immédiat à #6 (filet : si le tracker JS ne
+ *             part pas, adblock par exemple, le contact est déjà correct)
+ *    T+1m   : sync serveur Brevo → BLOCKLIST du contact (il reste dans #6 mais
+ *             plus aucune campagne ne lui parvient)
+ *    T+5m30 : ce snippet RELIT le contact (GET) puis, seulement s'il est
+ *             blocklisté ET présent dans #11, lève le blocklist et le retire
+ *             de #11 (PUT), puis relit pour confirmer → ✅
+ *             Si la sync n'est pas encore passée, 2e passage à T+20m.
+ *
+ * ⚠️ ON NE DÉBLOQUE JAMAIS À L'AVEUGLE. Trois gardes, dans cet ordre :
+ *    1. opt-in `_sapi_newsletter_optin === 'yes'` (acte positif du client)
+ *    2. pas de hard bounce (sinon on abîme la réputation d'expéditeur)
+ *    3. présence dans #11 = signature de la sync du plugin. Un blocklist
+ *       hors #11 = désinscription volontaire ou plainte spam → on n'y touche
+ *       pas, on logue, Robin tranche.
  *
  * INSTALLATION : Code Snippets → Ajouter → coller CE fichier SANS la ligne
  *   <?php du haut → portée "Exécuter partout" → Activer.
@@ -134,6 +144,18 @@ add_action('woocommerce_before_pay_action', function ($order) {
 }, 25, 1);
 
 /* ════════════════════════════════════════════════════════════════════
+ * SECTION 3 bis — Page de remerciement : filet pour le déblocage #6
+ * C'est le moment exact où part le tracker JS Brevo (order_completed),
+ * donc le point zéro le mieux calibré pour programmer le recheck. Sur le
+ * chemin order-pay, la programmation faite avant le paiement peut arriver
+ * trop tôt : ce hook rattrape. wp_next_scheduled évite le doublon.
+ * ════════════════════════════════════════════════════════════════════ */
+
+add_action('woocommerce_thankyou', function ($order_id) {
+    sapi_brevo_schedule_newsletter_recheck($order_id);
+}, 25, 1);
+
+/* ════════════════════════════════════════════════════════════════════
  * SECTION 4 — Handler WP-Cron : ajout retardé à #12
  * ════════════════════════════════════════════════════════════════════ */
 
@@ -162,34 +184,90 @@ add_action('sapi_brevo_delayed_list12_sync', function ($order_id) {
  * dans #6 mais blocklisté, donc aucune campagne ne lui parvient.
  * ════════════════════════════════════════════════════════════════════ */
 
-add_action('sapi_brevo_delayed_newsletter_sync', function ($order_id) {
+add_action('sapi_brevo_delayed_newsletter_sync', function ($order_id, $attempt = 1) {
+    $log = '[sapi-brevo-newsletter-recheck]';
+
     $order = wc_get_order($order_id);
     if (!$order) {
-        error_log('[sapi-brevo-newsletter-recheck] Commande #' . $order_id . ' introuvable');
+        error_log($log . ' Commande #' . $order_id . ' introuvable');
         return;
     }
 
-    // Double garde : on ne déblocklist JAMAIS sans opt-in explicite.
+    // Garde 1 — on ne déblocklist JAMAIS sans opt-in explicite du client.
     if ($order->get_meta('_sapi_newsletter_optin') !== 'yes') {
-        error_log('[sapi-brevo-newsletter-recheck] Pas d\'opt-in sur commande #' . $order_id . ', abandon');
+        error_log($log . ' Pas d\'opt-in sur commande #' . $order_id . ', abandon');
         return;
     }
 
     $email = $order->get_billing_email();
     if (!$email || !is_email($email)) {
-        error_log('[sapi-brevo-newsletter-recheck] Email invalide pour commande #' . $order_id);
+        error_log($log . ' Email invalide pour commande #' . $order_id);
         return;
     }
 
-    $attrs = sapi_brevo_order_attributes($order);
-    $attrs['SOURCE'] = 'checkout';
+    // On REGARDE l'état réel du contact avant d'agir. Un POST qui répond 2xx
+    // ne prouve pas que le contact est débloqué : si la sync destructive
+    // Brevo n'est pas encore passée, elle repassera APRÈS nous.
+    $contact = sapi_brevo_get_contact($email, $log);
+    if ($contact === null) {
+        error_log($log . ' Contact ' . $email . ' illisible chez Brevo, abandon (commande #' . $order_id . ')');
+        return;
+    }
 
-    if (sapi_brevo_upsert_contact($email, 6, $attrs, '[sapi-brevo-newsletter-recheck]', false)) {
+    $blacklisted = !empty($contact['emailBlacklisted']);
+    $list_ids    = isset($contact['listIds']) && is_array($contact['listIds']) ? $contact['listIds'] : [];
+    $in_11       = in_array(11, array_map('intval', $list_ids), true);
+    $bounces     = isset($contact['statistics']['hardBounces']) ? $contact['statistics']['hardBounces'] : [];
+
+    // Cas A — pas blocklisté et pas encore dans #11 : la sync destructive
+    // n'a pas encore eu lieu (3DS long, tracker JS retardé…). On repasse
+    // dans 15 min, une seule fois.
+    if (!$blacklisted && !$in_11) {
+        if ($attempt < 2) {
+            wp_schedule_single_event(time() + 900, 'sapi_brevo_delayed_newsletter_sync', [$order_id, 2]);
+            error_log($log . ' Sync Brevo pas encore passée sur commande #' . $order_id . ', 2e passage programmé dans 15 min');
+        } else {
+            error_log($log . ' Commande #' . $order_id . ' : contact toujours propre au 2e passage, rien à faire');
+        }
+        return;
+    }
+
+    // Cas B — déjà propre malgré le passage de la sync : rien à faire.
+    if (!$blacklisted) {
+        error_log($log . ' Commande #' . $order_id . ' : contact dans #11 mais non blocklisté, rien à faire');
+        return;
+    }
+
+    // Garde 2 — hard bounce : ne jamais réinscrire, ça abîme la délivrabilité.
+    if (!empty($bounces)) {
+        error_log($log . ' ⚠️ ' . $email . ' blocklisté sur hard bounce (commande #' . $order_id . '), abandon');
+        return;
+    }
+
+    // Garde 3 — blocklist SANS appartenance à #11 = ce n'est pas la sync du
+    // plugin. C'est une désinscription volontaire ou une plainte spam.
+    // On ne force rien, Robin tranche au cas par cas.
+    if (!$in_11) {
+        error_log($log . ' ⚠️ ' . $email . ' blocklisté hors sync plugin (commande #' . $order_id . '), abandon, à traiter à la main');
+        return;
+    }
+
+    // Déblocage : PUT (le POST ne sait pas retirer d'une liste).
+    if (!sapi_brevo_unblock_contact($email, $log)) {
+        return;
+    }
+
+    // Vérification : on relit avant d'affirmer que c'est réglé.
+    $after = sapi_brevo_get_contact($email, $log);
+    if ($after !== null && empty($after['emailBlacklisted'])) {
         $order->update_meta_data('_sapi_newsletter_brevo_unblocked', 'yes');
         $order->save();
-        error_log('[sapi-brevo-newsletter-recheck] Déblocage #6 OK pour commande #' . $order_id . ' (' . $email . ')');
+        error_log($log . ' ✅ Déblocage #6 confirmé pour commande #' . $order_id . ' (' . $email . ')');
+        return;
     }
-});
+
+    error_log($log . ' ⚠️ Déblocage envoyé mais NON confirmé pour ' . $email . ' (commande #' . $order_id . ')');
+}, 10, 2);
 
 /* ════════════════════════════════════════════════════════════════════
  * SECTION 5 — Sync newsletter #6 (opt-in checkout / retry)
@@ -232,16 +310,96 @@ if (!function_exists('sapi_brevo_order_attributes')) {
     }
 }
 
+if (!function_exists('sapi_brevo_get_contact')) {
+    /**
+     * Lit un contact Brevo.
+     * @return array|null Le contact décodé, ou null si absent / erreur.
+     */
+    function sapi_brevo_get_contact($email, $log_prefix) {
+        $api_key = defined('BREVO_API_KEY') ? BREVO_API_KEY : '';
+        if (!$api_key) {
+            error_log($log_prefix . ' BREVO_API_KEY manquante (GET ' . $email . ')');
+            return null;
+        }
+
+        $response = wp_remote_get(
+            'https://api.brevo.com/v3/contacts/' . rawurlencode($email),
+            [
+                'timeout' => 10,
+                'headers' => ['accept' => 'application/json', 'api-key' => $api_key],
+            ]
+        );
+
+        if (is_wp_error($response)) {
+            error_log($log_prefix . ' Erreur HTTP GET contact : ' . $response->get_error_message());
+            return null;
+        }
+
+        $code = wp_remote_retrieve_response_code($response);
+        if ($code < 200 || $code >= 300) {
+            error_log($log_prefix . ' GET contact a répondu ' . $code . ' pour ' . $email);
+            return null;
+        }
+
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+        return is_array($data) ? $data : null;
+    }
+}
+
+if (!function_exists('sapi_brevo_unblock_contact')) {
+    /**
+     * Lève le blocklist posé par la sync du plugin Brevo WC, garantit la
+     * présence en #6 et retire de #11 (le POST /contacts ne sait pas retirer
+     * d'une liste, seul le PUT accepte unlinkListIds).
+     * À n'appeler qu'après vérification de l'opt-in ET de la présence en #11.
+     */
+    function sapi_brevo_unblock_contact($email, $log_prefix) {
+        $api_key = defined('BREVO_API_KEY') ? BREVO_API_KEY : '';
+        if (!$api_key) {
+            error_log($log_prefix . ' BREVO_API_KEY manquante (PUT ' . $email . ')');
+            return false;
+        }
+
+        $response = wp_remote_request(
+            'https://api.brevo.com/v3/contacts/' . rawurlencode($email),
+            [
+                'method'  => 'PUT',
+                'timeout' => 10,
+                'headers' => [
+                    'accept'       => 'application/json',
+                    'content-type' => 'application/json',
+                    'api-key'      => $api_key,
+                ],
+                'body'    => wp_json_encode([
+                    'emailBlacklisted' => false,
+                    'listIds'          => [6],
+                    'unlinkListIds'    => [11],
+                ]),
+            ]
+        );
+
+        if (is_wp_error($response)) {
+            error_log($log_prefix . ' Erreur HTTP PUT contact : ' . $response->get_error_message());
+            return false;
+        }
+
+        $code = wp_remote_retrieve_response_code($response);
+        if ($code >= 200 && $code < 300) {
+            return true;
+        }
+
+        error_log($log_prefix . ' PUT contact a répondu ' . $code . ' : ' . wp_remote_retrieve_body($response));
+        return false;
+    }
+}
+
 if (!function_exists('sapi_brevo_upsert_contact')) {
     /**
      * Upsert d'un contact Brevo dans une liste donnée.
-     *
-     * @param bool|null $blacklisted null = on ne touche pas au statut (défaut),
-     *                               false = on force la réinscription (opt-in
-     *                               explicite uniquement).
+     * Ne touche jamais au statut d'abonnement (voir sapi_brevo_unblock_contact).
      * @return bool true si Brevo a répondu 2xx.
      */
-    function sapi_brevo_upsert_contact($email, $list_id, $attributes, $log_prefix, $blacklisted = null) {
+    function sapi_brevo_upsert_contact($email, $list_id, $attributes, $log_prefix) {
         $api_key = defined('BREVO_API_KEY') ? BREVO_API_KEY : '';
         if (!$api_key) {
             error_log($log_prefix . ' BREVO_API_KEY manquante (liste #' . $list_id . ', ' . $email . ')');
@@ -255,9 +413,6 @@ if (!function_exists('sapi_brevo_upsert_contact')) {
         ];
         if (!empty($attributes)) {
             $payload['attributes'] = $attributes;
-        }
-        if ($blacklisted !== null) {
-            $payload['emailBlacklisted'] = (bool) $blacklisted;
         }
 
         $response = wp_remote_post('https://api.brevo.com/v3/contacts', [

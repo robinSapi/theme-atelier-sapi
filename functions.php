@@ -7295,11 +7295,12 @@ function sapi_megafilter_admin_build_where($filters) {
   }
   if (!empty($filters['q'])) {
     $q = '%' . $wpdb->esc_like($filters['q']) . '%';
-    /* ⚠️ `ai_freetext_input` n'est écrite par PERSONNE : le serveur sait la
-       traiter, le client ne l'envoie jamais. La recherche promettait « texte
-       libre » et interrogeait une colonne toujours NULL — les mots des
-       visiteurs existent bien en base, dans `ai_chat_messages`, qui n'était pas
-       dans la clause. On l'ajoute, avec `contact_subject` (le résumé rédigé par
+    /* ⚠️ `ai_freetext_input` N'ÉTAIT écrite par personne : le serveur savait la
+       traiter, le client ne l'envoyait jamais. C'est réparé depuis, mais elle
+       ne couvre QUE les phrases saisies dans un sélecteur de pièce, avant
+       l'arrivée — celles tapées dans la modale vivent dans `ai_chat_messages`.
+       La recherche promettait « texte libre » et n'interrogeait que la
+       première ; on cherche donc dans les deux, avec `contact_subject` (le résumé rédigé par
        l'IA) et `contact_message`.
        C'est ce qui rend enfin trouvables les PIÈCES HORS PÉRIMÈTRE : une
        demande pour une salle de bain n'a pas de `piece`, n'entre dans aucun
@@ -7376,7 +7377,12 @@ function sapi_megafilter_admin_compute_stats($filters) {
   $top_styles = $args ? $wpdb->get_results($wpdb->prepare($styles_q, $args)) : $wpdb->get_results($styles_q);
 
   // Top provenance
-  $entry_q = "SELECT entry_point, COUNT(*) AS c FROM $table $where_sql " . ($where_sql ? 'AND' : 'WHERE') . " entry_point != '' GROUP BY entry_point ORDER BY c DESC LIMIT 4";
+  /* ⚠️ 6 ET NON 4. Il n'y a que quatre provenances possibles aujourd'hui, mais
+     les anciennes lignes en portent une cinquième (`freetext`, plus jamais
+     écrite). Avec un plafond à 4, une provenance bien réelle disparaissait du
+     graphique sans un mot dès que l'ancienne était nombreuse — un chiffre faux
+     par omission, le pire genre : rien ne manque à l'écran. */
+  $entry_q = "SELECT entry_point, COUNT(*) AS c FROM $table $where_sql " . ($where_sql ? 'AND' : 'WHERE') . " entry_point != '' GROUP BY entry_point ORDER BY c DESC LIMIT 6";
   $top_entry = $args ? $wpdb->get_results($wpdb->prepare($entry_q, $args)) : $wpdb->get_results($entry_q);
 
   /* Les pièces qu'on demande à Robin et qu'il ne fait pas. Pas de LIMIT

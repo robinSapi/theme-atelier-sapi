@@ -122,8 +122,11 @@
      ⚠️ CE QU'ELLE NE SERT PLUS À FAIRE (28/08) : décider de la provenance.
      `entry_point` répond désormais à « sur quelle PAGE ? » et pas à « par
      quelle méthode ? » — avoir écrit une phrase n'est pas un endroit. La
-     phrase elle-même part dans `ai_freetext_input`, et c'est là qu'on lit si
-     le visiteur est passé par un champ libre.
+     phrase elle-même part dans `ai_freetext_input`.
+     ⚠️ CETTE COLONNE NE DIT PAS « le visiteur a écrit quelque part » : elle ne
+     contient QUE ce qui a été saisi avant l'arrivée, dans un des sélecteurs.
+     Quelqu'un qui clique une pièce puis écrit DANS la modale la laisse vide —
+     ses mots sont dans `ai_chat_messages`.
      `entry_url` ne portera donc plus `freetext` non plus : sans importance,
      puisque la phrase a sa propre colonne. */
   /* ⚠️ CE QUE LE VISITEUR A RÉPONDU AUJOURD'HUI, et rien d'autre.
@@ -229,13 +232,14 @@
 
     function detectEntryPoint() {
       var body = document.body;
-      /* ⚠️ L'ORIGINE ANNONCÉE PASSE AVANT TOUT LE RESTE. Les sélecteurs de
-         pièce de l'accueil et de /conseils-eclaires/ REDIRIGENT vers
-         /mes-creations/ : la session naît à l'arrivée, pas au clic, et sans ce
-         paramètre elle ressemble à s'y méprendre à une arrivée directe par
-         Google. C'est pour ça que `home_picker` est resté à zéro depuis le
-         premier jour — le test sur la classe `home` ci-dessous ne peut jamais
-         être vrai, la modale n'étant pas chargée sur l'accueil. */
+      /* ⚠️ POURQUOI L'ORIGINE EST ANNONCÉE DANS L'ADRESSE. Les trois sélecteurs
+         de pièce REDIRIGENT vers /mes-creations/, et la modale n'est chargée ni
+         sur l'accueil ni sur /conseils-eclaires/ : sans ce paramètre, leurs
+         visiteurs se confondent avec une arrivée directe par Google. C'est
+         pour ça que `home_picker` est resté à zéro depuis le premier jour.
+         ⚠️ MAIS IL NE PASSE PAS EN PREMIER POUR AUTANT — la fiche produit se
+         teste avant lui, voir la note plus bas. J'ai écrit ici l'inverse le
+         28/08, et c'est ce commentaire qui m'aurait fait rouvrir le trou. */
       /* ⚠️ CETTE COLONNE RÉPOND À « SUR QUELLE PAGE ? », PAS À « COMMENT ? ».
          Décision Robin du 28/08. Elle contenait aussi `freetext`, qui est une
          MÉTHODE (avoir écrit une phrase plutôt que cliqué une pièce) et non un
@@ -2804,22 +2808,22 @@
          questionnaire (`sapi_megafilter_sanitize_project`), parce que c'est lui
          qui écrit en base et qu'un contrôle côté navigateur se contourne. */
       SessionTracker.start(pieceCliquee ? { answers: { piece: pieceCliquee } } : null);
-
-      /* ⚠️ ON RETIRE `from` DE L'ADRESSE, TOUT DE SUITE.
-         Sans ça il survivait à tout : changer de pièce dans la modale, ou
-         suivre un lien interne, réécrit l'adresse en préservant les paramètres
-         étrangers — `from` revenait donc, une deuxième session naissait à
-         l'arrivée, et Robin comptait deux clics de sélecteur pour un seul.
-         Il a fait son office, on l'efface. Ça nettoie aussi le lien que le
-         visiteur pourrait partager. */
-      try {
-        var adresse = new URL(window.location.href);
-        if (adresse.searchParams.has('from')) {
-          adresse.searchParams.delete('from');
-          window.history.replaceState({}, '', adresse.pathname + adresse.search + adresse.hash);
-        }
-      } catch (e) { /* silencieux : au pire le paramètre reste visible */ }
     }
+
+    /* ⚠️ ON RETIRE `from` DE L'ADRESSE, ET HORS DU BLOC CI-DESSUS — donc AUSSI
+       sur une fiche produit, où il n'aura rien ouvert. Sinon il survit à tout :
+       une navigation interne réécrit l'adresse en préservant les paramètres
+       étrangers, `from` réapparaît sur /mes-creations/, et une deuxième session
+       naît pour un seul clic de sélecteur. Il a fait son office au chargement
+       du script, quand `ORIGINE_ANNONCEE` l'a lu ; à partir d'ici il ne sert
+       plus qu'à salir les liens que le visiteur pourrait partager. */
+    try {
+      var adresse = new URL(window.location.href);
+      if (adresse.searchParams.has('from')) {
+        adresse.searchParams.delete('from');
+        window.history.replaceState({}, '', adresse.pathname + adresse.search + adresse.hash);
+      }
+    } catch (e) { /* silencieux : au pire le paramètre reste visible */ }
   }
 
   /* ⚠️ « complete », PAS « loading ». Ce fichier doit démarrer APRÈS
