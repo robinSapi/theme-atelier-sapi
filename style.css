@@ -10671,6 +10671,77 @@ a.carousel-slide-product {
   text-align: center;
 }
 
+/* Rappel « tu as un projet en cours », posé par sapi-room-picker.js au-dessus
+   des cases quand un projet est mémorisé (variante A, 28/08).
+   ⚠️ FOND BLANC, PAS `--color-warm`. J'avais mis `--color-warm` : c'est la
+   couleur des TROIS conteneurs qui l'accueillent (`.home-projet-section`,
+   `.advice-room-picker`, `.mescreations-picker-hero`). Le rappel était donc
+   exactement de la couleur de son fond, séparé par un liseré à 18 %
+   d'opacité — invisible sur les trois pages. Le blanc sur crème est le
+   contraste que ce site utilise déjà pour tout élément actif posé sur ces
+   sections : c'est ce que fait le champ texte libre juste en dessous
+   (`.room-picker-freetext__input`), avec le même liseré et le même arrondi.
+   ⚠️ CE BLOC S'AJOUTE APRÈS L'AFFICHAGE, donc il POUSSE le contenu d'environ
+   45 px. Ce n'est pas un clignotement, c'est un décalage — et sur
+   /mes-creations/ il a lieu dans le hero. C'est le prix de la variante A, qui
+   reste plus discret qu'un hero entier remplacé. Ne pas le décrire comme
+   « invisible ».
+   Pas d'ombre : ce n'est pas une card. */
+.room-picker-reprise {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 10px;
+  flex-wrap: wrap;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 10px 20px;
+  background: var(--color-white);
+  border: 1.5px solid var(--color-line);
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.4;
+  color: var(--color-wood-mid);
+  text-align: center;
+}
+
+.room-picker-reprise strong {
+  color: var(--color-wood-dark);
+  font-weight: 700;
+}
+
+/* Le point médian de la maquette validée. En `flex-wrap`, il reste sur la
+   première ligne et marque la coupure ; sans lui, les deux moitiés se
+   retrouvent l'une sous l'autre sans rien entre elles. */
+.room-picker-reprise__sep {
+  color: var(--color-wood);
+  opacity: 0.6;
+}
+
+.room-picker-reprise__lien {
+  color: var(--color-orange);
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1.5px solid currentColor;
+  white-space: nowrap;
+}
+
+.room-picker-reprise__lien:hover,
+.room-picker-reprise__lien:focus {
+  color: var(--color-orange-hover);
+}
+
+/* 768 px, PAS 600 : c'est le point de bascule de la home, et les cases du
+   sélecteur passent en disposition mobile là. Entre les deux, le rappel
+   serait resté en pilule pendant que les cases étaient déjà empilées. */
+@media (max-width: 768px) {
+  .room-picker-reprise {
+    border-radius: 14px;
+    padding: 11px 16px;
+  }
+}
+
 .room-picker-cards {
   display: flex;
   justify-content: center;

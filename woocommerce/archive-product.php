@@ -331,7 +331,7 @@ if ($imm_piece) {
 require_once get_template_directory() . '/inc/guide-data.php';
 $picker_icons = sapi_guide_get_icons();
 ?>
-<section class="mescreations-picker-hero" data-mes-creations-picker aria-label="<?php esc_attr_e('Choisir une pièce', 'theme-sapi-maison'); ?>">
+<section class="mescreations-picker-hero" data-mes-creations-picker data-room-picker-from="mes_creations" aria-label="<?php esc_attr_e('Choisir une pièce', 'theme-sapi-maison'); ?>">
   <div class="mescreations-picker-hero__inner room-picker-inner">
     <div class="conseiller-sig conseiller-sig--v1">
       <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>

@@ -379,6 +379,15 @@ function sapi_maison_enqueue_assets() {
       'escalierMap' => function_exists('sapi_conseiller_get_rules')
         ? (array) (sapi_conseiller_get_rules()['escalier_map'] ?? [])
         : [],
+      /* Les possessifs tutoyés (« ton salon », « ta cuisine »). Il en existait
+         une copie manuscrite dans sapi-modal-conseiller.js, sans lecteur,
+         « conservée pour le prochain écran qui tutoiera une pièce » — cet écran
+         est arrivé (le rappel de projet du sélecteur), et il est sur des pages
+         où ce fichier n'est même pas chargé. On transmet la table PHP plutôt
+         que d'en écrire une troisième : « ton » ou « ta » se trompe vite, et
+         une divergence donnerait « ton chambre » à un endroit et pas à l'autre. */
+      'possessifs' => function_exists('sapi_piece_possessive_map')
+        ? sapi_piece_possessive_map() : [],
       'ordreCles' => function_exists('sapi_guide_get_steps')
         ? array_values(array_filter(array_map(function ($st) { return isset($st['id']) ? $st['id'] : ''; }, sapi_guide_get_steps())))
         : [],
@@ -428,13 +437,24 @@ function sapi_maison_enqueue_assets() {
   // Room picker (homepage + page conseils-eclaires) : question pièce (cases) +
   // champ texte libre. Le submit du champ libre redirige vers
   // /mes-creations/?freetext=… pour auto-ouvrir la modale en chat S2.
-  if (is_front_page() || is_page_template('page-conseils-eclaires.php')) {
+  /* ⚠️ LA BOUTIQUE AUSSI, DEPUIS LE 28/08. Il y a TROIS sélecteurs de pièce, et
+     le troisième sert de hero à /mes-creations/ tant qu'aucune pièce n'est
+     choisie. Ce script y est désormais nécessaire : c'est lui qui pose le
+     rappel « tu cherchais pour ton salon ». Il ne fait rien s'il ne trouve pas
+     de sélecteur — donc rien sur /mes-creations/ avec une pièce déjà choisie,
+     où le hero devient l'immersion. (Les fiches produit, elles, ne sont pas
+     concernées du tout : `is_shop()` y est faux.) */
+  if (is_front_page() || is_page_template('page-conseils-eclaires.php')
+      || (class_exists('WooCommerce') && is_shop())) {
     $room_picker_js_path = get_template_directory() . '/assets/sapi-room-picker.js';
     if (file_exists($room_picker_js_path)) {
       wp_enqueue_script(
         'sapi-room-picker',
         get_template_directory_uri() . '/assets/sapi-room-picker.js',
-        [],
+        /* ⚠️ DÉPENDANCE RÉELLE : ce script lit le projet mémorisé. Sans la
+           déclarer, l'ordre des balises ne tiendrait qu'à l'ordre des appels
+           dans ce fichier — c'est-à-dire à rien. */
+        ['sapi-project'],
         filemtime($room_picker_js_path),
         true
       );
@@ -3641,12 +3661,21 @@ function sapi_room_choices() {
 
 /**
  * Forme possessive tutoyée d'une pièce (« ton salon », « ta cuisine »…).
- * Miroir PHP de la table PIECE_TUTOIEMENT de sapi-modal-conseiller.js : « votre »
- * est neutre mais « ton/ta » s'accorde au genre → table explicite pour éviter
- * « ton chambre ». Repli sur « ta pièce » si la clé est inconnue.
+ *
+ * ⚠️ C'EST ICI LA SOURCE, ET NULLE PART AILLEURS. Le sens était inverse jusqu'au
+ * 28/08 : le JS portait sa propre copie (`PIECE_TUTOIEMENT`) et ce docblock s'en
+ * disait le « miroir ». Cette copie est supprimée ; la table part maintenant au
+ * navigateur dans `SAPI_PROJECT.possessifs`, via `sapi_piece_possessive_map()`.
+ * Si tu ajoutes une pièce au questionnaire, c'est cette table qu'il faut
+ * compléter — les deux côtés la reçoivent.
+ *
+ * « votre » serait neutre, mais « ton/ta » s'accorde au genre : d'où une table
+ * explicite plutôt qu'une règle. Repli sur « ta pièce » si la clé est inconnue —
+ * ⚠️ le navigateur, lui, préfère se taire que dire « ta pièce » (voir
+ * sapi-room-picker.js).
  */
-function sapi_piece_possessive($piece) {
-  $map = [
+function sapi_piece_possessive_map() {
+  return [
     'cuisine'        => 'ta cuisine',
     'bureau'         => 'ton bureau',
     'salon'          => 'ton salon',
@@ -3655,6 +3684,9 @@ function sapi_piece_possessive($piece) {
     'entree'         => 'ton entrée',
     'escalier'       => 'ta cage d\'escalier',
   ];
+}
+function sapi_piece_possessive($piece) {
+  $map = sapi_piece_possessive_map();
   return isset($map[$piece]) ? $map[$piece] : 'ta pièce';
 }
 

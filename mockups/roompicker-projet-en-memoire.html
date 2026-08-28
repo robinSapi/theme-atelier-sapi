@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Room-picker — projet en mémoire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --color-white:#FFFFFF; --color-cream:#FEFDFB; --color-warm:#FBF6EA;
+    --color-line:#E6DED3; --color-wood:#937D68; --color-wood-dark:#4A3F35;
+    --color-wood-mid:#6B5A4A; --color-orange:#E35B24;
+    --font-body:'Montserrat',sans-serif; --font-display:'Square Peg',cursive;
+    --shadow-card:0 2px 8px rgba(147,125,104,.12), 0 6px 28px rgba(147,125,104,.15);
+    --shadow-card-hover:0 4px 14px rgba(147,125,104,.16), 0 12px 44px rgba(147,125,104,.22);
+    --page:#F4EFE7;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--color-wood-dark);
+       font:15px/1.6 var(--font-body);-webkit-text-size-adjust:100%}
+
+  .wrap{max-width:1020px;margin:0 auto;padding:26px 18px 150px}
+  header.top{padding:18px 0 4px}
+  header.top h1{margin:0 0 8px;font-size:24px;letter-spacing:-.01em}
+  header.top p{margin:0;color:var(--color-wood-mid);font-size:14.5px;max-width:760px}
+
+  .legende{background:var(--color-warm);border:1px solid var(--color-line);
+    border-radius:12px;padding:14px 16px;margin:20px 0 6px}
+  .legende h2{margin:0 0 7px;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--color-wood)}
+  .legende p{margin:6px 0;font-size:13.5px;color:var(--color-wood-mid)}
+  .legende b{color:var(--color-wood-dark)}
+
+  /* ── En-tête de variante ─────────────────────────── */
+  .v{margin:44px 0 0}
+  .v__head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+  .v__num{font:700 12px/1 var(--font-body);letter-spacing:.1em;color:var(--color-wood);
+    background:#EDE4D8;padding:6px 9px;border-radius:6px}
+  .v__name{font-size:19px;font-weight:700;margin:0}
+  .v__pitch{margin:2px 0 14px;color:var(--color-wood-mid);font-size:14px;max-width:780px}
+
+  /* ── Scène : la page telle qu'elle serait ────────── */
+  .scene{background:var(--color-cream);border:1px solid var(--color-line);
+    border-radius:16px;padding:34px 22px;box-shadow:var(--shadow-card)}
+  .picker-inner{max-width:860px;margin:0 auto;display:flex;flex-direction:column;
+    align-items:center;gap:20px}
+
+  .sig{display:flex;align-items:center;gap:12px;justify-content:center}
+  .sig__ava{width:34px;height:34px;border-radius:50%;background:var(--color-wood);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;flex:0 0 auto}
+  .sig__hook{font-family:var(--font-display);font-size:24px;line-height:1;color:var(--color-wood-mid)}
+
+  .titre{font-family:var(--font-body);font-size:clamp(19px,2.6vw,28px);font-weight:700;
+    text-transform:uppercase;letter-spacing:.02em;color:var(--color-wood-dark);
+    text-align:center;line-height:1.2;margin:0}
+  .sous{margin:0;max-width:580px;text-align:center;font-size:14px;color:var(--color-wood-mid)}
+
+  .cards{display:flex;justify-content:center;gap:12px;width:100%;flex-wrap:wrap}
+  .card{flex:1 1 118px;max-width:150px;display:flex;flex-direction:column;align-items:center;
+    gap:10px;padding:18px 12px 15px;background:var(--color-white);border:1px solid var(--color-line);
+    border-radius:12px;box-shadow:var(--shadow-card);text-decoration:none;color:inherit;
+    transition:transform .2s,box-shadow .2s,border-color .2s;cursor:pointer;text-align:center}
+  .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-card-hover);border-color:var(--color-wood)}
+  .card__ico{width:52px;height:52px;display:flex;align-items:center;justify-content:center;
+    color:var(--color-wood);background:var(--color-warm);border-radius:12px;flex:0 0 auto}
+  .card__ico svg{width:26px;height:26px}
+  .card__lab{font-size:12.5px;font-weight:600;line-height:1.25}
+
+  .ou{display:flex;align-items:center;gap:12px;width:100%;max-width:560px;color:var(--color-wood);
+    font-size:12px;text-transform:uppercase;letter-spacing:.12em}
+  .ou::before,.ou::after{content:"";flex:1;height:1px;background:var(--color-line)}
+  .champ{display:flex;width:100%;max-width:560px;border:1px solid var(--color-line);
+    border-radius:999px;background:var(--color-white);overflow:hidden;box-shadow:var(--shadow-card)}
+  .champ input{flex:1;border:0;padding:13px 18px;font:inherit;font-size:14px;background:transparent;color:inherit}
+  .champ input::placeholder{color:#B3A899}
+  .champ button{border:0;background:var(--color-orange);color:#fff;width:44px;flex:0 0 44px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .champ button svg{width:18px;height:18px}
+
+  /* ── Éléments propres aux variantes ──────────────── */
+  .rappel{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
+    font-size:14px;color:var(--color-wood-mid);background:var(--color-warm);
+    border:1px solid var(--color-line);border-radius:999px;padding:9px 18px}
+  .rappel b{color:var(--color-wood-dark)}
+  .lien{color:var(--color-orange);font-weight:700;text-decoration:none;border-bottom:1.5px solid currentColor}
+  .lien:hover{color:#C94D1E}
+
+  .card--reprise{background:var(--color-wood-dark);border-color:var(--color-wood-dark);color:#fff;
+    max-width:none;flex:1 1 250px;align-items:flex-start;text-align:left;padding:16px 18px;gap:8px}
+  .card--reprise .card__ico{background:rgba(255,255,255,.14);color:#fff}
+  .card--reprise .card__lab{font-size:15px}
+  .mini{font-size:11.5px;opacity:.82;line-height:1.45}
+  .chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}
+  .chip{font-size:10.5px;font-weight:600;background:rgba(255,255,255,.16);
+    padding:3px 8px;border-radius:999px;letter-spacing:.02em}
+  .chip--clair{background:var(--color-warm);color:var(--color-wood-mid);border:1px solid var(--color-line)}
+
+  .badge{position:absolute;top:-9px;left:50%;transform:translateX(-50%);
+    background:var(--color-orange);color:#fff;font-size:9.5px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .card--marquee{position:relative;border-color:var(--color-orange);border-width:2px}
+  .card--marquee .card__ico{background:#FCEBE3;color:var(--color-orange)}
+
+  .bloc-projet{width:100%;background:var(--color-wood-dark);color:#fff;border-radius:16px;
+    padding:26px 24px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+  .bloc-projet h3{margin:0;font-size:clamp(18px,2.4vw,26px);font-weight:700;
+    text-transform:uppercase;letter-spacing:.02em;line-height:1.2}
+  .bloc-projet .mini{opacity:.86;font-size:13px}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--color-orange);color:#fff;
+    border:0;border-radius:999px;padding:13px 26px;font:700 14px/1 var(--font-body);
+    cursor:pointer;text-decoration:none}
+  .btn:hover{background:#C94D1E}
+  .btn--fant{background:transparent;border:1.5px solid rgba(255,255,255,.5);color:#fff}
+  .btn--fant:hover{background:rgba(255,255,255,.1)}
+  .btn--sobre{background:var(--color-white);border:1px solid var(--color-line);color:var(--color-wood-dark)}
+  .btn--sobre:hover{background:var(--color-warm)}
+
+  .repli{width:100%;text-align:center}
+  .repli__lien{background:none;border:0;font:600 13.5px/1 var(--font-body);color:var(--color-wood-mid);
+    cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+  .repli__contenu{margin-top:18px;display:flex;flex-direction:column;gap:16px;align-items:center}
+  .repli.ferme .repli__contenu{display:none}
+
+  .deux{display:flex;gap:16px;width:100%;flex-wrap:wrap}
+  .porte{flex:1 1 260px;background:var(--color-white);border:1px solid var(--color-line);
+    border-radius:14px;padding:22px 20px;display:flex;flex-direction:column;gap:11px;
+    align-items:flex-start;box-shadow:var(--shadow-card)}
+  .porte--reprise{background:var(--color-wood-dark);border-color:var(--color-wood-dark);color:#fff}
+  .porte h4{margin:0;font-size:16px;font-weight:700}
+  .porte p{margin:0;font-size:13px;line-height:1.5;color:var(--color-wood-mid)}
+  .porte--reprise p{color:rgba(255,255,255,.82)}
+
+  .reponses{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+
+  /* ── Panneau d'analyse ───────────────────────────── */
+  .ana{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:14px;
+    border:1px solid var(--color-line);border-radius:12px;overflow:hidden;background:var(--color-white)}
+  .ana>div{padding:13px 15px}
+  .ana>div+div{border-left:1px solid var(--color-line)}
+  .ana b{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+    margin-bottom:4px;font-weight:700}
+  .ana .pour b{color:#3F7D58}
+  .ana .contre b{color:#B4402B}
+  .ana p{margin:0;font-size:13px;line-height:1.5;color:var(--color-wood-mid)}
+  .tech{margin-top:9px;font-size:12.5px;color:var(--color-wood-mid);
+    background:var(--color-warm);border-left:3px solid var(--color-wood);padding:9px 12px;border-radius:0 8px 8px 0}
+  .tech b{color:var(--color-wood-dark)}
+
+  textarea{width:100%;margin-top:11px;padding:10px 12px;border:1px solid var(--color-line);
+    border-radius:9px;background:var(--color-white);font:16px/1.5 var(--font-body);
+    resize:vertical;min-height:44px;color:inherit}
+  textarea:focus{outline:2px solid var(--color-wood);outline-offset:-1px}
+  textarea::placeholder{color:#B3A899}
+  .note-choix{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .note-choix label{flex:1 1 130px;text-align:center;padding:9px 10px;border:1px solid var(--color-line);
+    border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;background:var(--color-white);user-select:none}
+  .note-choix input{position:absolute;opacity:0;pointer-events:none}
+  .note-choix label:has(input:checked){background:var(--color-wood);border-color:var(--color-wood);color:#fff}
+
+  .foot{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(244,239,231,.96);
+    backdrop-filter:blur(10px);border-top:1px solid var(--color-line);padding:11px 18px;
+    padding-bottom:calc(11px + env(safe-area-inset-bottom));display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+  .foot button{font:700 14px/1 var(--font-body);padding:12px 18px;border-radius:9px;
+    border:1px solid var(--color-line);background:#fff;color:var(--color-wood-dark);cursor:pointer}
+  .foot button.p{background:var(--color-orange);border-color:var(--color-orange);color:#fff}
+  .out{max-width:1020px;margin:0 auto;padding:0 18px}
+  #zone{display:none;margin:16px 0 0}#zone.on{display:block}
+  #txt{width:100%;min-height:220px;font:12.5px/1.6 ui-monospace,Menlo,monospace}
+
+  @media (max-width:720px){
+    .ana{grid-template-columns:1fr}
+    .ana>div+div{border-left:0;border-top:1px solid var(--color-line)}
+    .card{flex:1 1 90px}
+    .scene{padding:24px 14px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Le sélecteur de pièce quand un projet est déjà en mémoire</h1>
+    <p>Six orientations différentes, pas six nuances de la même. Chacune est montrée dans l'état « le visiteur a déjà un projet : salon, grande pièce, sortie au plafond, style ancien ». L'état neutre, lui, ne change pas — c'est celui que voit un nouveau visiteur.</p>
+  </header>
+
+  <div class="legende">
+    <h2>Ce qu'il faut avoir en tête en regardant</h2>
+    <p><b>Le serveur ne sait rien.</b> Le projet vit dans le navigateur du visiteur, et la page est mise en cache. La bascule se fera donc en JavaScript, <b>après</b> l'affichage.</p>
+    <p><b>Conséquence directe :</b> une variante qui <b>ajoute</b> un élément est invisible à l'œil. Une variante qui <b>remplace</b> le sélecteur produira un bref clignotement — le sélecteur s'affiche, puis se fait remplacer. C'est indiqué sur chaque variante.</p>
+    <p><b>Trois sélecteurs sont concernés :</b> l'accueil, Conseils éclairés, et le hero de Mes créations. C'est sur le troisième que ça compte le plus : c'est là qu'on arrive avec un projet en poche.</p>
+  </div>
+
+  <div id="liste"></div>
+</div>
+
+<div class="foot">
+  <button class="p" id="bExport">Copier pour Claude</button>
+  <button id="bFile">Télécharger .md</button>
+  <button id="bClear">Tout effacer</button>
+</div>
+<div class="out"><div id="zone"><textarea id="txt" readonly></textarea></div></div>
+
+<script>
+const ICO = {
+  cuisine:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 11h18M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4M7 15h.01M12 15h.01M4 11v8h16v-8"/></svg>',
+  bureau:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>',
+  salon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4M2 12h20v6H2zM6 18v2M18 18v2"/></svg>',
+  chambre:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 18v-6h20v6M2 18v2M22 18v2M6 12V8h12v4"/></svg>',
+  enfant:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>',
+  entree:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="3" width="14" height="18" rx="1"/><circle cx="15" cy="12" r="1"/></svg>',
+  escalier:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 20h5v-5h5v-5h5V5h3"/></svg>'
+};
+const PIECES = [
+  ['cuisine','Cuisine'],['bureau','Bureau / Atelier'],['salon','Salon / Salle à manger'],
+  ['chambre','Chambre'],['enfant','Chambre enfant'],['entree','Entrée / Couloir'],['escalier','Cage d\'escalier']
+];
+function cartes(marque){
+  return PIECES.map(function(p){
+    var estMarquee = marque && p[0]==='salon';
+    return '<a class="card'+(estMarquee?' card--marquee':'')+'">'
+      + (estMarquee?'<span class="badge">Ton projet</span>':'')
+      + '<span class="card__ico">'+ICO[p[0]]+'</span>'
+      + '<span class="card__lab">'+p[1]+'</span></a>';
+  }).join('');
+}
+const SIG = '<div class="sig"><span class="sig__ava">R</span>'
+  + '<span class="sig__hook">Mon regard d\'artisan sur ton projet</span></div>';
+const CHAMP = '<div class="ou"><span>ou</span></div>'
+  + '<div class="champ"><input placeholder="Décris ton projet en quelques mots…">'
+  + '<button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button></div>';
+const CHIPS_CLAIR = '<div class="chips"><span class="chip chip--clair">Salon</span>'
+  + '<span class="chip chip--clair">Grande pièce</span><span class="chip chip--clair">Plafond</span>'
+  + '<span class="chip chip--clair">Ancien</span></div>';
+const CHIPS_SOMBRE = '<div class="chips"><span class="chip">Grande pièce</span>'
+  + '<span class="chip">Plafond</span><span class="chip">Ancien</span></div>';
+
+const V = [
+{
+ n:"A", nom:"Le rappel discret",
+ pitch:"Le sélecteur ne bouge pas d'un pixel. On ajoute une seule ligne au-dessus des cases : le site te reconnaît, et te laisse faire ce que tu voulais faire.",
+ scene:
+   SIG
+ + '<h2 class="titre">Pour quelle pièce cherches-tu un luminaire ?</h2>'
+ + '<div class="rappel">Tu cherchais pour <b>ton salon</b> · <a class="lien">Reprendre ma sélection</a></div>'
+ + '<div class="cards">'+cartes(false)+'</div>'
+ + CHAMP,
+ pour:"L'intervention la plus légère qui existe. Rien n'est caché, rien n'est décidé à ta place, et le visiteur venu voir tout le catalogue voit tout le catalogue. Se pose à l'identique sur les trois sélecteurs.",
+ contre:"C'est aussi la moins visible. Une ligne de texte au-dessus de sept cases colorées, beaucoup ne la verront pas — et la reprise restera un chemin théorique.",
+ tech:"<b>Aucun clignotement</b> : on ajoute, on ne remplace rien."
+},
+{
+ n:"B", nom:"La reprise entre dans la grille",
+ pitch:"Ton projet devient une carte, la première, dans le même alignement que les pièces. Un seul langage visuel : on choisit une case, comme d'habitude — sauf qu'une des cases, c'est toi.",
+ scene:
+   SIG
+ + '<h2 class="titre">Pour quelle pièce cherches-tu un luminaire ?</h2>'
+ + '<div class="cards"><a class="card card--reprise">'
+ + '<span class="card__ico">'+ICO.salon+'</span>'
+ + '<span class="card__lab">Reprendre mon salon</span>'
+ + '<span class="mini">4 modèles t\'attendent</span>'+CHIPS_SOMBRE+'</a>'
+ + cartes(false).split('</a>').slice(0,4).join('</a>')+'</a></div>'
+ + CHAMP,
+ pour:"Impossible à manquer sans rien masquer : la reprise a le poids d'un vrai choix, à côté des autres. Elle porte les critères du projet, donc tu sais ce que tu reprends avant de cliquer.",
+ contre:"La ligne devient hétérogène — une carte large et sombre à côté de cases carrées. Et sur mobile, huit éléments au lieu de sept, ça descend bas.",
+ tech:"<b>Léger clignotement</b> : la carte s'insère après l'affichage et pousse les autres. À amortir avec une place réservée."
+},
+{
+ n:"C", nom:"Ton projet passe devant, le sélecteur se replie",
+ pitch:"On inverse la hiérarchie. Ce que tu as déjà fait devient le sujet de la page ; changer de pièce reste possible, mais devient le second choix.",
+ scene:
+   SIG
+ + '<div class="bloc-projet"><h3>Ton projet : le salon</h3>'
+ + '<p class="mini">Grande pièce · sortie au plafond · style ancien</p>'
+ + '<a class="btn">Voir ma sélection · 4 modèles</a></div>'
+ + '<div class="repli ferme"><button class="repli__lien" data-repli>ou choisir une autre pièce</button>'
+ + '<div class="repli__contenu"><div class="cards">'+cartes(false)+'</div>'+CHAMP+'</div></div>',
+ pour:"La plus claire des six sur l'intention : le site sait où tu en es et te le montre. C'est aussi celle qui valorise le plus le travail du Conseiller.",
+ contre:"Tu as cliqué « Mes créations » pour voir des créations, et tu tombes sur ton propre projet. Sur cette page-là, c'est peut-être une réponse à une question que tu ne posais pas.",
+ tech:"<b>Clignotement net</b> : le sélecteur s'affiche en entier, puis se replie. Sur l'accueil et Conseils, où il fait partie du décor, ce serait très visible."
+},
+{
+ n:"D", nom:"Robin te pose la question",
+ pitch:"On ne change pas la mise en page, on change la question. Le sélecteur ne demande plus « quelle pièce ? » mais « toujours la même ? ». C'est la voix du Conseiller, appliquée à l'accueil.",
+ scene:
+   SIG
+ + '<h2 class="titre">Toujours pour ton salon ?</h2>'
+ + '<p class="sous">La dernière fois, tu cherchais un luminaire pour une grande pièce avec une sortie au plafond.</p>'
+ + '<div class="reponses"><a class="btn">Oui, montre-moi ma sélection</a>'
+ + '<button class="btn btn--sobre" data-repli>Non, une autre pièce</button></div>'
+ + '<div class="repli ferme"><div class="repli__contenu"><div class="cards">'+cartes(false)+'</div>'+CHAMP+'</div></div>',
+ pour:"C'est la seule qui parle comme Robin, et elle règle au passage le projet qui traîne : la question rappelle qu'il date, et t'invite à le confirmer plutôt qu'à le subir.",
+ contre:"Deux clics au lieu d'un pour qui voulait juste parcourir. Et si le projet a dix jours, la question peut sembler intrusive — « comment ça, tu te souviens ? »",
+ tech:"<b>Clignotement net</b> : le titre et tout le bloc de choix sont remplacés."
+},
+{
+ n:"E", nom:"Le marquage dans la grille",
+ pitch:"Rien n'est ajouté, rien n'est déplacé. Ta pièce est simplement signalée parmi les autres, et cliquer dessus reprend ton projet au lieu d'en démarrer un neuf.",
+ scene:
+   SIG
+ + '<h2 class="titre">Pour quelle pièce cherches-tu un luminaire ?</h2>'
+ + '<div class="cards">'+cartes(true)+'</div>'
+ + '<p class="sous">Ta sélection pour le salon est prête, elle t\'attend.</p>'
+ + CHAMP,
+ pour:"Zéro élément en plus, zéro décalage, identique sur les trois sélecteurs et sur mobile. Le geste reste le même que pour un nouveau visiteur : on clique une pièce.",
+ contre:"Ambigu : cliquer sur une case marquée fait autre chose que cliquer sur les six autres, sans que ce soit dit. Et le visiteur qui veut repartir de zéro sur le salon n'a aucun moyen de le demander.",
+ tech:"<b>Aucun clignotement</b> : on ajoute une bordure et une pastille, la mise en page ne bouge pas."
+},
+{
+ n:"F", nom:"Deux portes, assumées",
+ pitch:"On ne devine pas ton intention, on te la demande. Reprendre, ou repartir de zéro. Les cases n'apparaissent qu'après.",
+ scene:
+   SIG
+ + '<h2 class="titre">Content de te revoir</h2>'
+ + '<div class="deux"><div class="porte porte--reprise"><h4>Reprendre mon projet</h4>'
+ + '<p>Le salon, en grande pièce, sortie au plafond.</p>'+CHIPS_SOMBRE
+ + '<a class="btn">Voir ma sélection</a></div>'
+ + '<div class="porte"><h4>Chercher autre chose</h4>'
+ + '<p>Une autre pièce, un autre projet. Ton projet actuel sera effacé.</p>'
+ + '<button class="btn btn--sobre" data-repli>Choisir une pièce</button></div></div>'
+ + '<div class="repli ferme"><div class="repli__contenu"><div class="cards">'+cartes(false)+'</div>'+CHAMP+'</div></div>',
+ pour:"Aucune ambiguïté possible, et c'est la seule variante qui traite honnêtement l'effacement : on prévient avant de perdre le projet, au lieu de l'écraser en silence.",
+ contre:"La plus lourde. Un carrefour à franchir avant d'accéder à quoi que ce soit, y compris pour quelqu'un qui passait juste voir. Et « ton projet sera effacé » sur une page d'accueil, c'est solennel pour un luminaire.",
+ tech:"<b>Clignotement net</b>, et le plus long : tout le contenu du sélecteur est remplacé."
+}
+];
+
+const liste = document.getElementById('liste');
+V.forEach(function(v){
+  const d = document.createElement('section');
+  d.className='v';
+  d.innerHTML =
+    '<div class="v__head"><span class="v__num">VARIANTE '+v.n+'</span>'
+    + '<h2 class="v__name">'+v.nom+'</h2></div>'
+    + '<p class="v__pitch">'+v.pitch+'</p>'
+    + '<div class="scene"><div class="picker-inner">'+v.scene+'</div></div>'
+    + '<div class="ana"><div class="pour"><b>Ce que ça apporte</b><p>'+v.pour+'</p></div>'
+    + '<div class="contre"><b>Ce que ça coûte</b><p>'+v.contre+'</p></div></div>'
+    + '<div class="tech">'+v.tech+'</div>'
+    + '<div class="note-choix">'
+    + '<label><input type="radio" name="n'+v.n+'" value="oui">Celle-là</label>'
+    + '<label><input type="radio" name="n'+v.n+'" value="peut">Pourquoi pas</label>'
+    + '<label><input type="radio" name="n'+v.n+'" value="non">Non</label></div>'
+    + '<textarea data-c="'+v.n+'" placeholder="Ce que tu en penses, ce que tu changerais…"></textarea>';
+  liste.appendChild(d);
+});
+
+// Déplier / replier les sélecteurs cachés
+document.addEventListener('click', function(e){
+  const b = e.target.closest('[data-repli]');
+  if (!b) return;
+  const scene = b.closest('.scene');
+  const r = scene && scene.querySelector('.repli');
+  if (r) r.classList.toggle('ferme');
+});
+
+// Mémoire des réponses
+const KEY='sapi-mockup-roompicker';
+let saved={}; try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+Object.keys(saved).forEach(function(k){
+  if(k.charAt(0)==='c'){const t=document.querySelector('textarea[data-c="'+k.slice(1)+'"]');if(t)t.value=saved[k];}
+  else{const i=document.querySelector('input[name="'+k+'"][value="'+saved[k]+'"]');if(i)i.checked=true;}
+});
+function sauve(){
+  const o={};
+  document.querySelectorAll('input[type=radio]:checked').forEach(function(i){o[i.name]=i.value});
+  document.querySelectorAll('textarea[data-c]').forEach(function(t){if(t.value.trim())o['c'+t.dataset.c]=t.value});
+  try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}
+}
+document.addEventListener('change',sauve);
+document.addEventListener('input',function(e){if(e.target.tagName==='TEXTAREA')sauve()});
+
+const LIB={oui:'CELLE-LÀ',peut:'POURQUOI PAS',non:'NON'};
+function texte(){
+  let s='# Room-picker avec projet en mémoire — mon retour\n\n',vide=true;
+  V.forEach(function(v){
+    const c=document.querySelector('input[name="n'+v.n+'"]:checked');
+    const t=document.querySelector('textarea[data-c="'+v.n+'"]');
+    const com=t&&t.value.trim();
+    if(!c&&!com)return; vide=false;
+    s+='## '+v.n+'. '+v.nom+' — **'+(c?LIB[c.value]:'sans avis')+'**\n';
+    if(com)s+=com+'\n'; s+='\n';
+  });
+  return vide?'(rien de rempli)':s;
+}
+document.getElementById('bExport').onclick=function(){
+  const z=document.getElementById('zone'),t=document.getElementById('txt');
+  t.value=texte(); z.classList.add('on');
+  try{navigator.clipboard.writeText(t.value);this.textContent='Copié ✓';
+    setTimeout(function(){document.getElementById('bExport').textContent='Copier pour Claude'},1800);}
+  catch(e){t.select()}
+  z.scrollIntoView({behavior:'smooth',block:'nearest'});
+};
+document.getElementById('bFile').onclick=function(){
+  const b=new Blob([texte()],{type:'text/markdown'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(b);a.download='retour-roompicker.md';a.click();
+};
+document.getElementById('bClear').onclick=function(){
+  if(!confirm('Effacer tes réponses ?'))return;
+  document.querySelectorAll('input[type=radio]').forEach(function(i){i.checked=false});
+  document.querySelectorAll('textarea[data-c]').forEach(function(t){t.value=''});
+  try{localStorage.removeItem(KEY)}catch(e){}
+};
+</script>
+</body>
+</html>

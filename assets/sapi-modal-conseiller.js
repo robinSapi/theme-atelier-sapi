@@ -1939,23 +1939,18 @@
   // possessif accordé au genre via une table piece-clé → forme tutoyée
   // (« votre » est neutre, pas « ton/ta » → table explicite pour éviter
   // « ton chambre »). Repli sur « ta pièce » si la clé est inconnue.
-  var PIECE_TUTOIEMENT = {
-    'cuisine': 'ta cuisine',
-    'bureau': 'ton bureau',
-    'salon': 'ton salon',
-    'chambre': 'ta chambre',
-    'chambre-enfant': 'ta chambre d\'enfant',
-    'entree': 'ton entrée',
-    'escalier': 'ta cage d\'escalier'
-  };
-  /* `buildRecapIntro` produisait « Pour ton bureau, Robin recommande : ».
-     Retirée avec la phrase : la pastille « Pièce : Bureau » dit la même chose
-     en moins de place, et le bandeau « Ce que je te recommande sur ce modèle »
-     dit le reste. La laisser en place aurait fait un vestige de plus.
-     ⚠️ `PIECE_TUTOIEMENT` juste au-dessus n'a plus AUCUN lecteur dans ce
-     fichier. Elle est conservée volontairement : c'est le miroir JS de
-     `sapi_piece_possessive()` côté PHP, et le prochain écran qui tutoiera une
-     pièce en aura besoin. Ne pas la recopier ailleurs. */
+  /* `PIECE_TUTOIEMENT` a été retirée le 28/08. Elle n'avait aucun lecteur ici
+     et attendait « le prochain écran qui tutoiera une pièce ». Cet écran est
+     arrivé — le rappel de projet du sélecteur — mais il vit sur des pages où ce
+     fichier n'est pas chargé. La table est donc partie là où tout le monde peut
+     la lire : PHP la transmet dans `SAPI_PROJECT.possessifs`, à partir de
+     `sapi_piece_possessive()`. Une seule table, plus de recopie. */
+  /* `buildRecapIntro` produisait « Pour ton bureau, Robin recommande : ». Elle
+     a été retirée avec la phrase : la pastille « Pièce : Bureau » dit la même
+     chose en moins de place, et le bandeau « Ce que je te recommande sur ce
+     modèle » dit le reste.
+     Pour tutoyer une pièce, lire `SAPI_PROJECT.possessifs` — voir la note
+     juste au-dessus. */
 
   // Affiche l'écran s-product-recap (immédiat, aucun fetch).
   function showProductRecap() {
