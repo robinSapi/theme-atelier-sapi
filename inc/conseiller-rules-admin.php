@@ -64,9 +64,19 @@ function sapi_rules_vocab() {
       'ancien'  => 'Ancien',
       'neutre'  => 'Pas de préférence',
     ],
+    /* ⚠️ `moyenne` MANQUAIT, ET C'ÉTAIT UN VRAI TROU. Le questionnaire propose
+       quatre tailles (petite / moyenne / grande / ne-sais-pas), ce panneau n'en
+       offrait que deux : Robin ne POUVAIT PAS régler un escalier standard sur
+       la taille moyenne, alors que c'est la valeur que le reste du site utilise.
+       Pire, le nettoyage plus bas refuse toute valeur hors de cette liste et
+       retombe sur le défaut — un défaut qui, lui, valait `moyenne` : on aurait
+       écrit une valeur que ce même panneau déclare interdite.
+       `ne-sais-pas` reste absente volontairement : c'est une réponse de
+       visiteur (« je ne sais pas »), pas une taille qu'on peut recommander. */
     'tailles'    => [
-      'petite' => 'Petite',
-      'grande' => 'Grande',
+      'petite'  => 'Petite',
+      'moyenne' => 'Moyenne (le « Standard » du questionnaire)',
+      'grande'  => 'Grande',
     ],
     'escalier_q' => [
       'standard' => 'Escalier standard',
@@ -248,7 +258,10 @@ function sapi_rules_sanitize($posted) {
   foreach ($keys($V['escalier_q']) as $q) {
     /* Repli sur `moyenne`, aligné sur le défaut du moteur. Il disait `petite` :
        un type d'escalier inconnu proposait le plus petit modèle du catalogue,
-       et le réglage de Robin s'en trouvait contredit en silence. */
+       et le réglage de Robin s'en trouvait contredit en silence.
+       ⚠️ Ce repli DOIT figurer dans `$V['tailles']` juste au-dessus, sinon on
+       écrit une valeur que le panneau ne sait pas afficher : le menu
+       retomberait sur sa première entrée et mentirait sur le réglage réel. */
     $def = isset($D['escalier_map'][$q]) ? $D['escalier_map'][$q] : 'moyenne';
     $c['escalier_map'][$q] = $pick(isset($posted['escalier_map'][$q]) ? $posted['escalier_map'][$q] : '', $taille_allowed, $def);
   }
@@ -385,7 +398,7 @@ function sapi_rules_admin_render() {
       echo '</div>';
 
       // ===== Escalier =====
-      sapi_rules_card('Cage d\'escalier → taille', 'Convertit le type d\'escalier en taille de luminaire.');
+      sapi_rules_card('Cage d\'escalier → taille', 'Convertit le type d\'escalier en taille de luminaire. « Moyenne » correspond au choix « Standard » du questionnaire.');
       sapi_rules_table_map_single('escalier_map', $V['escalier_q'], $V['tailles'], $R['escalier_map'], false);
       echo '</div>';
 
