@@ -104,19 +104,19 @@
 <div class="wrap">
   <header>
     <h1>Recette — lot dette</h1>
-    <p class="sub">12 chantiers, 640 lignes supprimées, une colonne ajoutée en base. Les deux premiers tests sont les plus importants : si l'un des deux échoue, arrête-toi et dis-le-moi.</p>
+    <p class="sub">12 chantiers, 640 lignes supprimées, une colonne ajoutée en base. Commence par le test 0, puis le 1 : si l'un des deux échoue, arrête-toi et dis-le-moi.</p>
   </header>
 
   <div class="bar">
     <div class="prog"><i id="pi"></i></div>
-    <div class="count" id="pc">0 / 11</div>
+    <div class="count" id="pc">0 / 12</div>
   </div>
 
   <div class="avant">
-    <h2>Avant de commencer — deux gestes obligatoires</h2>
+    <h2>Avant de commencer</h2>
     <ol>
       <li>Pousse la branche sur le site test et <strong>attends la fin du déploiement</strong>.</li>
-      <li><strong>Va dans WP-admin → réglages du Conseiller et repose « escalier standard » sur « moyenne ».</strong> Je ne peux pas le faire à ta place : tes réglages sauvegardés écrasent mes valeurs par défaut. Sans ce geste, le test 8 ne peut pas passer.</li>
+      <li><strong>Fais le test 0 avant tout le reste</strong> — il te fait reposer un réglage que je ne peux pas changer à ta place, et dont dépend le test 8.</li>
       <li>Ouvre <strong>WP-admin → Robin Conseiller</strong> dans un second onglet. Recharge-le à chaque fois, il ne se met pas à jour tout seul.</li>
       <li>Sauf mention contraire, chaque test commence par <strong>une nouvelle fenêtre de navigation privée</strong>.</li>
     </ol>
@@ -135,6 +135,20 @@
 
 <script>
 const T = [
+{
+ n:"0", t:"Le menu des réglages offre bien la taille moyenne",
+ crit:"À faire <b>en premier</b>, et à valider avant de passer au reste : le test 8 en dépend directement.",
+ why:"Le menu n'offrait que Petite et Grande, alors que le questionnaire propose trois tailles. J'avais changé la valeur par défaut sans vérifier que tu pouvais la choisir — tu me l'as montré en capture.",
+ steps:[
+  "WP-admin → <b>réglages du Conseiller</b>.",
+  "Descends jusqu'à la carte <b>« Cage d'escalier → taille »</b>.",
+  "Ouvre le menu de la ligne <b>Escalier standard</b>.",
+  "Choisis <b>« Moyenne (le &laquo;&nbsp;Standard&nbsp;&raquo; du questionnaire) »</b>, puis <b>enregistre</b>.",
+  "Recharge la page des réglages."
+ ],
+ look:"Le menu doit proposer <b>trois</b> choix : Petite, Moyenne, Grande. Et après enregistrement et rechargement, la ligne « Escalier standard » doit toujours afficher <b>Moyenne</b> — pas être retombée sur Petite. « Escalier ouvert » reste sur <b>Grande</b>.",
+ ph:"Si Moyenne n'apparaît pas, ou si le réglage ne tient pas après enregistrement, dis-le : n'enchaîne pas sur le test 8."
+},
 {
  n:"1", t:"Les sessions sont toujours enregistrées",
  crit:"Le test le plus important du lot. J'ai ajouté une colonne en base. Si la migration a échoué, <b>plus aucune session ne s'enregistre</b>, sans le moindre message d'erreur. Si ce test échoue, arrête tout et préviens-moi.",
@@ -227,7 +241,7 @@ const T = [
 },
 {
  n:"8", t:"Escalier standard donne la taille moyenne",
- crit:"Ce test ne peut passer que si tu as fait le geste n°2 de la liste « avant de commencer » : reposer « escalier standard → moyenne » dans les réglages du Conseiller.",
+ crit:"Ce test ne peut passer que si le <b>test 0</b> est validé : « escalier standard » doit être réglé sur <b>Moyenne</b> et enregistré. Sinon tu mesures l'ancien réglage, pas le correctif.",
  why:"Le serveur disait « petite », le navigateur disait « moyenne ». Deux visiteurs identiques recevaient deux recommandations différentes.",
  steps:[
   "Nouvelle fenêtre privée → <code>/mes-creations/</code>, Conseiller.",
