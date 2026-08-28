@@ -79,6 +79,80 @@
     var charSpans = [];
     var CHAR_DELAY = 34; // cadence d'apparition (ms/lettre) — un peu plus lente
 
+    /* ─────────────────────────────────────────────
+       « J'ai compris, montre-moi » — sauter la frappe
+       ─────────────────────────────────────────────
+       Un clic, un début de scroll ou une touche de défilement pendant que la
+       phrase s'écrit doit l'afficher ENTIÈRE d'un coup, bouton compris.
+
+       ⚠️ ON N'INTERCEPTE RIEN. Aucun `preventDefault`, aucun `stopPropagation`,
+       et l'écoute est passive là où le navigateur le permet. Un clic sur
+       « Décrire mon projet en détail » termine donc le texte ET ouvre la
+       modale — dans cet ordre, parce que `pointerdown` précède toujours
+       `click`. L'ordre compte : le texte se termine (et déverrouille le
+       défilement) AVANT que la modale ne pose son propre verrou. L'inverse
+       déverrouillerait la page sous une modale déjà ouverte.
+       C'est ce qui évite d'avoir à maintenir une liste d'exceptions : le jour
+       où un bouton est ajouté au hero, il n'y a rien à mettre à jour ici.
+
+       ⚠️ LE DÉFILEMENT EST FREINÉ, PAS ARRÊTÉ, pendant la séquence d'entrée.
+       `lockScroll` pose `overflow:hidden`, ce qui suffit à la souris mais pas
+       au toucher sur iOS (voir la note de `touch-action` plus bas). Dans les
+       deux cas les événements `wheel` et `touchmove` sont émis, et c'est ce
+       qui nous permet de détecter l'intention de faire défiler. Sans ça, le
+       geste le plus naturel du visiteur pressé serait le seul qu'on ne verrait
+       pas. */
+    var GESTES_SAUT = ['pointerdown', 'wheel', 'touchmove', 'keydown'];
+    /* Touches qui expriment « fais défiler » ou « vas-y ». Un Tab de navigation
+       ou une lettre ne doit pas sauter la phrase.
+       ⚠️ L'ESPACE ET ENTRÉE SE TAPENT AUSSI DANS LES CHAMPS. Ce sont les deux
+       frappes les plus courantes d'une saisie, et la modale de contact a un
+       `textarea`. D'où le filtre `champDeSaisie()` ci-dessous — le même que
+       celui du carrousel plus bas dans ce fichier, pour la même raison. */
+    var TOUCHES_SAUT = {
+      ' ': 1, 'Spacebar': 1, 'PageDown': 1, 'PageUp': 1, 'End': 1, 'Home': 1,
+      'ArrowDown': 1, 'ArrowUp': 1, 'Enter': 1
+    };
+    function champDeSaisie(cible) {
+      if (!cible || !cible.tagName) return false;
+      return /^(INPUT|TEXTAREA|SELECT)$/.test(cible.tagName) || cible.isContentEditable;
+    }
+    var sauteur = null; // l'écouteur armé, ou null
+
+    /* ⚠️ RETENU POUR LE DÉVERROUILLAGE DU DÉFILEMENT, ET RIEN D'AUTRE.
+       Un saut au pavé tactile arrive avec de l'inertie : si on déverrouille
+       dans la foulée, la fin du geste emporte la page de plusieurs centaines
+       de pixels, puis le recalage la ramène — le texte s'affiche, la page
+       part, la page revient, et le bouton blanc s'efface au passage puisque
+       son opacité suit la position de défilement. On diffère donc le
+       déverrouillage le temps que le geste retombe. Un clic, lui, n'a pas
+       d'inertie : il déverrouille tout de suite. */
+    var sautParDefilement = false;
+
+    function armerSaut(action) {
+      desarmerSaut();
+      sauteur = function (e) {
+        if (e.type === 'keydown') {
+          if (!TOUCHES_SAUT[e.key]) return;
+          if (champDeSaisie(e.target)) return; // il écrit, il ne veut pas sauter
+        }
+        sautParDefilement = (e.type !== 'pointerdown');
+        desarmerSaut();
+        action();
+      };
+      GESTES_SAUT.forEach(function (type) {
+        window.addEventListener(type, sauteur, { passive: true });
+      });
+    }
+
+    function desarmerSaut() {
+      if (!sauteur) return;
+      GESTES_SAUT.forEach(function (type) {
+        window.removeEventListener(type, sauteur);
+      });
+      sauteur = null;
+    }
+
     /* Construit le texte en spans lettre par lettre (mot = inline-block pour ne
        pas couper un mot en fin de ligne). Toutes les lettres sont présentes dès
        le départ (opacity 0) → la hauteur du cadre est réservée (aucun saut). */
@@ -106,22 +180,56 @@
     }
 
     /* Révèle chaque lettre en fondu, une à une (CSS transition opacity). */
-    function revealChars(done) {
-      if (reduceMotion || !charSpans.length) {
+    /**
+     * @param done        appelée UNE fois la phrase entièrement visible.
+     * @param instantane  true = tout afficher sans animer (le visiteur a déjà
+     *                    fait un geste avant même que la frappe ne démarre).
+     */
+    function revealChars(done, instantane) {
+      desarmerSaut(); // une frappe qui recommence annule le saut de la précédente
+      /* ⚠️ ON COUPE L'ANCIENNE FRAPPE AVANT TOUT, Y COMPRIS SUR LE CHEMIN
+         INSTANTANÉ. Ce `clearInterval` était plus bas, donc réservé au chemin
+         animé : une frappe relancée pendant qu'une autre tournait laissait
+         l'ancien intervalle vivant. Il continuait de lire `charSpans` — une
+         variable de module, donc DÉJÀ remplacée par le nouveau texte — puis
+         atteignait sa fin et appelait son propre `terminer()`, qui désarmait
+         le saut de la frappe en cours. Résultat : le clic ne faisait plus
+         rien, sans la moindre erreur. */
+      clearInterval(typeTimer);
+      if (reduceMotion || instantane || !charSpans.length) {
         charSpans.forEach(function (c) { c.classList.add('is-shown'); });
         done && done();
         return;
       }
       var i = 0;
-      clearInterval(typeTimer);
+
+      /* ⚠️ `done` NE DOIT PARTIR QU'UNE FOIS — mais pas pour la raison qu'on
+         imagine. JavaScript n'exécute qu'une chose à la fois : un saut et la
+         dernière lettre ne peuvent pas se croiser, le premier arrivé désarme
+         ou annule l'autre. Ce garde-fou couvre un cas moins visible : un
+         intervalle ORPHELIN d'une frappe précédente qui atteindrait sa fin ici
+         (voir le `clearInterval` ci-dessus). Il est bon marché et il rend
+         `terminer()` sûr quel que soit l'appelant — on le garde. */
+      var fini = false;
+      function terminer() {
+        if (fini) return;
+        fini = true;
+        clearInterval(typeTimer);
+        typeTimer = null;
+        desarmerSaut();
+        done && done();
+      }
+
       typeTimer = setInterval(function () {
         if (charSpans[i]) charSpans[i].classList.add('is-shown');
         i++;
-        if (i >= charSpans.length) {
-          clearInterval(typeTimer);
-          done && done();
-        }
+        if (i >= charSpans.length) terminer();
       }, CHAR_DELAY);
+
+      armerSaut(function () {
+        charSpans.forEach(function (c) { c.classList.add('is-shown'); });
+        terminer();
+      });
     }
 
     /* ── Commentaire IA personnalisé (fin de questionnaire modale) ──
@@ -130,16 +238,24 @@
        'sapi:advice-ready' avec le texte → on le tape (ou repli générique). */
     function showPhraseDots() {
       if (!els.phraseContent) return;
+      /* ⚠️ PENDANT QUE ROBIN RÉFLÉCHIT, IL N'Y A RIEN À SAUTER. Un saut armé
+         ici n'effacerait pas les points — il ne toucherait qu'à des lettres
+         déjà retirées du DOM — mais il appellerait `done` en avance, et `done`
+         c'est le bouton blanc. On le verrait donc réapparaître PENDANT que
+         l'IA rédige, c'est-à-dire exactement ce que `hideRevealBtn` empêche
+         trois lignes plus haut : proposer une sélection qui n'est pas encore
+         la bonne. */
+      desarmerSaut();
       clearInterval(typeTimer);
       charSpans = [];
       els.phraseContent.innerHTML =
         '<span class="mescreations-immersion__dots" role="status" aria-label="Robin rédige son conseil">' +
         '<span></span><span></span><span></span></span>';
     }
-    function retypePhrase(text, done) {
+    function retypePhrase(text, done, instantane) {
       els.phraseText = text || '';
       buildChars(els.phraseText);
-      revealChars(done);
+      revealChars(done, instantane);
     }
     /* Le bouton blanc suit le texte : il s'efface pendant que l'IA rédige, et
        ne revient qu'une fois la phrase ÉCRITE — exactement comme à l'arrivée
@@ -1084,21 +1200,60 @@
         safety = later(unlockScroll, 9000); // filet de sécurité
       }
       later(function () { if (els.sig) els.sig.classList.add('is-in'); }, reduceMotion ? 0 : 300);
-      later(function () {
+
+      /* ⚠️ LE SAUT DOIT COUVRIR AUSSI CETTE ATTENTE. La frappe ne démarre qu'au
+         bout de 900 ms — mais le scroll, lui, est bloqué DÈS MAINTENANT. Sans
+         l'armement ci-dessous, le visiteur qui tente de faire défiler pendant
+         cette seconde-là ne verrait rien se passer : ni la page qui bouge, ni
+         le texte qui s'affiche. C'est précisément le moment où il conclurait
+         que le site est figé.
+         Ce pré-armement est remplacé par celui de `revealChars` dès que la
+         frappe commence (`armerSaut` désarme le précédent). */
+      var demarrerFrappe = function (instantane) {
         revealChars(function () {
-          unlockScroll();
+          /* ⚠️ ON NE DÉVERROUILLE PAS DANS LE MÊME SOUFFLE QUE LE GESTE.
+             Ce code tourne DANS le gestionnaire du geste, donc AVANT que le
+             navigateur n'applique le défilement correspondant. Déverrouiller
+             ici laisserait passer l'inertie du pavé tactile : la page
+             descendrait de plusieurs centaines de pixels, le recalage la
+             remonterait une demi-seconde plus tard, et le bouton blanc —
+             dont l'opacité suit la position de défilement — clignoterait au
+             passage. Le visiteur verrait sa page partir et revenir pour avoir
+             voulu aller plus vite.
+             250 ms suffisent à absorber la fin du geste. Un clic, lui, n'a
+             pas d'inertie : il déverrouille immédiatement. */
+          if (sautParDefilement) {
+            later(unlockScroll, 250);
+          } else {
+            unlockScroll();
+          }
           if (safety) clearTimeout(safety);
           /* Le bouton blanc « Découvrir ma sélection » prend le rôle que
              tenait « Décrire mon projet » dans cette séquence : il apparaît
              une fois la phrase écrite. L'autre a migré au-dessus du
              carrousel, où c'est l'opacité de la zone sélection qui le révèle. */
+          /* ⚠️ SANS DÉCALAGE QUAND ON A SAUTÉ. Ces 250 et 650 ms sont une
+             chorégraphie : le bouton puis l'indice arrivent après la phrase,
+             posément. Mais quelqu'un qui vient de cliquer pour aller plus vite
+             ne veut pas d'une chorégraphie — il veut tout, maintenant. Robin :
+             « le texte et le bouton d'un coup ». */
+          var pose = (reduceMotion || instantane) ? 0 : 250;
           if (els.revealBtn) {
             els.revealBtn.hidden = false;
-            later(function () { els.revealBtn.classList.add('is-in'); }, reduceMotion ? 0 : 250);
+            later(function () { els.revealBtn.classList.add('is-in'); }, pose);
           }
-          later(function () { if (els.scrollhint) els.scrollhint.classList.add('is-in'); }, reduceMotion ? 0 : 650);
+          later(function () { if (els.scrollhint) els.scrollhint.classList.add('is-in'); },
+                (reduceMotion || instantane) ? 0 : 650);
+          sautParDefilement = false; // la séquence est finie, on repart à plat
+        }, instantane);
+      };
+      var attenteFrappe = later(function () { demarrerFrappe(false); }, reduceMotion ? 0 : 900);
+      if (!reduceMotion) {
+        armerSaut(function () {
+          clearTimeout(attenteFrappe);
+          demarrerFrappe(true); // on saute l'attente ET la frappe, d'un seul geste
         });
-      }, reduceMotion ? 0 : 900);
+      }
     }
 
     playSequence();
