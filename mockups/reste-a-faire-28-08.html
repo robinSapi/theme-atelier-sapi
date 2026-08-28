@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ce qui reste — 28/08</title>
+<style>
+  :root{
+    --bois:#937D68; --orange:#E35B24; --encre:#2B2118;
+    --fond:#FAF7F2; --carte:#FFFFFF; --trait:#E6DED3; --doux:#8A7F73;
+    --ok:#3F7D58; --plus:#B8860B; --parl:#3D5A73;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fond);color:var(--encre);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-text-size-adjust:100%}
+  .wrap{max-width:880px;margin:0 auto;padding:24px 18px 160px}
+  header{padding:20px 0 6px}
+  h1{margin:0 0 6px;font-size:23px;letter-spacing:-.01em}
+  .sub{color:var(--doux);font-size:14px;margin:0}
+
+  .bar{position:sticky;top:0;z-index:20;background:rgba(250,247,242,.94);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--trait);
+    margin:14px -18px 0;padding:10px 18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .prog{flex:1 1 160px;height:7px;background:var(--trait);border-radius:99px;overflow:hidden;min-width:110px}
+  .prog i{display:block;height:100%;width:0;background:var(--bois);transition:width .3s}
+  .count{font-size:13px;color:var(--doux);white-space:nowrap}
+  .count b{color:var(--encre)}
+
+  h2{margin:38px 0 2px;font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--bois)}
+  h2 + p.intro{margin:6px 0 0;color:var(--doux);font-size:13.5px}
+
+  .q{background:var(--carte);border:1px solid var(--trait);border-radius:12px;
+    padding:16px 17px;margin:13px 0}
+  .q.r-go{border-color:#BFD9CB;box-shadow:inset 3px 0 0 var(--ok)}
+  .q.r-late{border-color:#E8DBB8;box-shadow:inset 3px 0 0 var(--plus)}
+  .q.r-talk{border-color:#C3D2DD;box-shadow:inset 3px 0 0 var(--parl)}
+
+  .id{display:inline-block;font:700 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.06em;background:#F1EBE2;color:var(--bois);padding:4px 7px;border-radius:5px;
+    vertical-align:2px;margin-right:8px}
+  .q h3{margin:0 0 9px;font-size:16.5px;line-height:1.35;display:flex;align-items:flex-start;flex-wrap:wrap;gap:2px}
+  .q h3 span.t{flex:1 1 200px}
+
+  .l{margin:9px 0 0;padding-left:13px;border-left:2px solid var(--trait)}
+  .l b{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--doux);margin-bottom:2px;font-weight:700}
+  .l.cout{border-left-color:#D8B8AE}
+  .l.cout b{color:#A8543C}
+  .l.reco{border-left-color:var(--orange)}
+  .l.reco b{color:var(--orange)}
+
+  .meta{margin-top:10px;display:flex;gap:7px;flex-wrap:wrap}
+  .chip{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    padding:3px 8px;border-radius:20px}
+  .c-code{background:#EEF3F7;color:#3D5A73}
+  .c-dec{background:#F7F0E6;color:#8A6A2F}
+  .c-red{background:#F3EEF7;color:#63467D}
+  .c-court{background:#EAF3EC;color:#3F7D58}
+  .c-moyen{background:#FBF2E3;color:#8A6A2F}
+  .c-long{background:#F8EBE7;color:#A8543C}
+
+  .choix{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .choix label{flex:1 1 120px;text-align:center;padding:9px 10px;border:1px solid var(--trait);
+    border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;background:#FCFAF7;user-select:none}
+  .choix input{position:absolute;opacity:0;pointer-events:none}
+  .choix label:has(input:checked){background:var(--bois);border-color:var(--bois);color:#fff}
+  .choix label.late:has(input:checked){background:var(--plus);border-color:var(--plus)}
+  .choix label.talk:has(input:checked){background:var(--parl);border-color:var(--parl)}
+
+  textarea{width:100%;margin-top:10px;padding:10px 12px;border:1px solid var(--trait);
+    border-radius:9px;background:#FCFAF7;font:16px/1.5 inherit;resize:vertical;min-height:44px;color:inherit}
+  textarea:focus{outline:2px solid var(--bois);outline-offset:-1px;background:#fff}
+  textarea::placeholder{color:#B3A899}
+
+  .foot{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(250,247,242,.96);
+    backdrop-filter:blur(10px);border-top:1px solid var(--trait);padding:11px 18px;
+    padding-bottom:calc(11px + env(safe-area-inset-bottom));display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+  button{font:inherit;font-weight:700;font-size:14px;padding:11px 18px;border-radius:9px;
+    border:1px solid var(--trait);background:#fff;color:var(--encre);cursor:pointer}
+  button.p{background:var(--orange);border-color:var(--orange);color:#fff}
+  button.g{background:transparent;color:var(--doux)}
+  .out{max-width:880px;margin:0 auto;padding:0 18px}
+  #zone{display:none;margin:16px 0 0}#zone.on{display:block}
+  #txt{width:100%;min-height:300px;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}
+  .note{font-size:12.5px;color:var(--doux);margin:7px 0 0}
+  code{background:#F1EBE2;padding:1px 5px;border-radius:4px;font-size:12.5px;word-break:break-word}
+
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){--fond:#1A1512;--carte:#231C17;--trait:#3A2F27;--encre:#F0E9E0;--doux:#A2958A}
+    :root:not([data-theme="light"]) textarea{background:#1E1813}
+    :root:not([data-theme="light"]) .choix label{background:#2A221C}
+    :root:not([data-theme="light"]) button{background:#2A221C;color:var(--encre)}
+    :root:not([data-theme="light"]) .bar{background:rgba(26,21,18,.94)}
+    :root:not([data-theme="light"]) .foot{background:rgba(26,21,18,.96)}
+    :root:not([data-theme="light"]) code,
+    :root:not([data-theme="light"]) .id{background:#2E251E}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Ce qui reste — 28 août</h1>
+    <p class="sub">18 points. Pour chacun : ce que c'est, ce que ça coûte de ne rien faire, ce que je propose. Choisis, commente si tu veux, puis exporte.</p>
+  </header>
+  <div class="bar">
+    <div class="prog"><i id="pi"></i></div>
+    <div class="count" id="pc">0 / 18</div>
+  </div>
+  <div id="list"></div>
+</div>
+
+<div class="foot">
+  <button class="p" id="bExport">Copier pour Claude</button>
+  <button id="bFile">Télécharger .md</button>
+  <button class="g" id="bClear">Tout effacer</button>
+</div>
+<div class="out"><div id="zone"><textarea id="txt" readonly></textarea>
+<p class="note">Colle ça dans la conversation. Seuls les points où tu as choisi ou écrit sont exportés.</p></div></div>
+
+<script>
+const P = [
+
+{g:"Conformité", intro:"Le chantier d'hier a traité ce qu'on garde et combien de temps. Il n'a traité ni le consentement, ni l'information, ni les outils."},
+
+{id:"RGPD-1", ex:"4", t:"Rien n'attend le consentement", tags:["code","moyen"],
+ d:"Le Conseiller commence à enregistrer dès l'ouverture de la modale. Complianz gère bien le consentement pour Google Analytics et le marketing, mais <b>le Conseiller ne le consulte nulle part</b>.",
+ c:"Une plainte, ou simplement un visiteur qui demande des comptes, et tu n'as rien à répondre. Le risque est faible pour un artisan, mais il n'est pas nul et il ne diminue pas tout seul.",
+ r:"Faire lire à la modale l'état de Complianz avant sa première écriture. Si le visiteur a refusé, on n'enregistre rien — le Conseiller fonctionne normalement, il ne laisse simplement pas de trace. Une demi-journée, et ça peut faire baisser ton volume de sessions."},
+
+{id:"RGPD-2", ex:"7", t:"Le droit à l'effacement est intenable à la main", tags:["code","court"],
+ d:"Si quelqu'un demande la suppression de ses données, tu dois retrouver ses lignes une par une, 30 par page. Il n'y a ni suppression en masse, ni recherche fiable — et depuis hier tu ne peux plus chercher par e-mail, puisqu'on ne le stocke plus.",
+ c:"Une demande te prend une heure au lieu de deux minutes. Tant que personne ne demande, ça ne coûte rien. Le jour où quelqu'un demande, c'est urgent.",
+ r:"Un bouton « supprimer les lignes affichées » sur la page, qui agit sur le résultat du filtre en cours. Deux heures."},
+
+{id:"RGPD-3", ex:"5", t:"Ta politique de confidentialité ne mentionne rien de tout ça", tags:["rédaction","moyen"],
+ d:"Elle ne parle ni de la table des sessions, ni de ce qu'elle contient (réponses au questionnaire, texte du chat, message de contact, appareil, ville approximative), ni des 14 mois de conservation, ni des tiers : FreeIPAPI, Pinterest, Brevo, le fournisseur d'IA du chat.",
+ c:"C'est le seul point vraiment ouvert du RGPD. Le reste est technique et se rattrape ; celui-là est une obligation d'information, et c'est aussi le plus visible si on te la demande.",
+ r:"Je t'écris le texte, tu le relis et tu le colles. Je connais tous les traitements maintenant, c'est le bon moment. Une heure."},
+
+{g:"Mesure", intro:"Ce que le tableau de bord ne sait toujours pas voir."},
+
+{id:"MES-1", ex:"9", t:"Tu ne comptes que ceux qui ouvrent la modale", tags:["code","décision","long"],
+ d:"Une session n'existe que si quelqu'un ouvre le Conseiller. Les gens qui arrivent sur <code>/mes-creations/</code>, regardent et repartent sont invisibles. Et l'accueil n'est pas traçable du tout : la modale n'y est pas chargée, donc <code>home_picker</code> restera à zéro pour toujours.",
+ c:"Tu ne sais pas combien de visiteurs voient ta page de sélection sans jamais engager. C'est le dénominateur qui te dirait si le Conseiller convainc, ou s'il ne se fait simplement pas remarquer.",
+ r:"En deux temps. D'abord le petit : le room-picker de l'accueil marque sa redirection, et les arrivées venues de la home deviennent identifiables. Une demi-heure, sans effet de bord. Ensuite le gros : compter aussi les arrivées. ⚠️ Ça change le sens du mot « session », et tous tes taux actuels ont « sessions » au dénominateur — ils deviendraient incomparables une deuxième fois en une semaine. À décider ensemble."},
+
+{id:"MES-2", ex:"16", t:"Tu ne sais pas quelles pièces on te demande", tags:["code","moyen"],
+ d:"Salle de bain, garage, terrasse sont renvoyés vers toi. Mais rien ne note <b>quel mot</b> le visiteur avait employé, donc tu ne sais pas laquelle revient le plus souvent.",
+ c:"C'est une information catalogue que tes visiteurs te donnent gratuitement et que tu jettes. Si la salle de bain revient trente fois, ça vaut peut-être une gamme.",
+ r:"L'IA renvoie le mot qu'elle a jugé hors périmètre, on l'enregistre, et le tableau affiche un classement. Demande une colonne en plus. Une demi-journée. ⚠️ Piège connu : « couloir » est rapproché de « entrée » — ce n'est pas hors périmètre, il ne faut pas le compter là-dedans."},
+
+{g:"Produit et accessibilité"},
+
+{id:"UX-1", ex:"14", t:"Un projet mémorisé n'expire jamais", tags:["décision","court"],
+ d:"Quelqu'un qui revient dix jours plus tard retrouve son projet comme s'il ne l'avait jamais quitté. Les dates sont écrites mais jamais relues.",
+ c:"Ton visiteur reçoit une recommandation calibrée sur un besoin d'il y a trois semaines, sans qu'on lui demande si c'est toujours d'actualité. Et ça débloque deux autres sujets : la phrase de la pastille qui parle « de ton projet », et ce qu'on fait quand un lien reçu contredit un projet en cours.",
+ r:"Il me faut ta décision avant le code : au bout de combien de temps un projet cesse d'être « en cours » ? Et à l'expiration, on efface en silence, ou on demande « c'est toujours pour ton salon ? » Je propose 30 jours et la question, pas l'effacement."},
+
+{id:"UX-2", ex:"21", t:"Le focus ne revient jamais après fermeture de la modale", tags:["code","court"],
+ d:"Vérifié aujourd'hui, c'est bien cassé : le code cherche une méthode qui n'existe pas sur l'événement qu'il reçoit, donc il retombe sur « rien » à chaque fois, en silence.",
+ c:"Quelqu'un qui navigue au clavier est renvoyé en haut de la page à chaque fermeture, et doit tout retraverser. Ça ne concerne pas beaucoup de monde, mais pour eux c'est bloquant.",
+ r:"Corriger. Une ligne. L'attribut nécessaire a été conservé exprès pour ça."},
+
+{g:"Dette technique", intro:"Rien ici ne casse quoi que ce soit aujourd'hui. Mais deux de ces vestiges ont déjà produit des bugs réels cette semaine."},
+
+{id:"DET-1", ex:"23", t:"Un test qui ne marche jamais en production, dans 15 fichiers", tags:["code","moyen"],
+ d:"⚠️ <b>Trois fois plus gros que ce que je t'avais annoncé.</b> J'avais dit six fichiers, il y en a quinze. Ces fichiers testent si la page est encore en train de charger pour décider quand démarrer. En production, Autoptimize modifie le chargement et ce test n'est jamais vrai — l'ordre de démarrage s'inverse.",
+ c:"Aucune conséquence démontrée aujourd'hui. Mais le prochain morceau de code qui lira le projet au démarrage se cassera <b>en production uniquement</b>, et la recette sur test ne pourra pas le montrer. C'est exactement ce qui m'est arrivé hier.",
+ r:"Remplacer le test par sa version correcte partout. Mécanique, sans risque, mais quinze fichiers à retester. Une demi-journée."},
+
+{id:"DET-2", ex:"24", t:"La conversion taille → recommandation existe en trois exemplaires", tags:["code","court"],
+ d:"Le navigateur a été unifié hier, le serveur non. Deux calculs subsistent côté serveur, et <b>ils divergent sur la cage d'escalier</b> : le serveur choisit comme pour une petite pièce là où le navigateur choisit la moyenne.",
+ c:"Deux visiteurs identiques peuvent recevoir deux recommandations différentes selon le chemin emprunté. C'est le défaut qu'on a corrigé cette semaine, à un autre étage.",
+ r:"Une seule table, en PHP, exposée au navigateur comme on l'a fait pour les essences. Deux heures."},
+
+{id:"DET-3", ex:"25", t:"L'écran de contact affiche « Grand » tout seul", tags:["code","court"],
+ d:"Le récap de l'écran contact construit ses pastilles à la main, sans le mot qu'elles qualifient. Et ces mêmes valeurs partent dans le mail que tu reçois.",
+ c:"Tu lis « Grand » dans un mail sans savoir grand quoi. Petit, mais c'est un mail client.",
+ r:"Utiliser le constructeur de pastilles qu'on a écrit hier. Une heure."},
+
+{id:"DET-4", ex:"26", t:"L'ordre des questions est recopié en dur à un endroit", tags:["code","court"],
+ d:"La source unique existe et elle est disponible dans le fichier concerné. Une copie manuelle traîne à côté.",
+ c:"Exact aujourd'hui. Faux au premier ajout ou déplacement de question, et sans rien qui prévienne.",
+ r:"Remplacer par la source. Dix minutes."},
+
+{id:"DET-5", ex:"27", t:"Environ 700 lignes mortes, sans aucun appelant", tags:["code","court"],
+ d:"Un bloc entier de fonctions d'une ancienne version, que plus rien n'appelle. Il contient au passage une copie périmée de la conversion escalier → taille.",
+ c:"C'est du poids que je relis à chaque recherche, et un piège : la copie périmée qu'il contient peut se faire prendre pour la bonne.",
+ r:"Supprimer. Une heure, avec une vérification sérieuse qu'aucun appelant ne subsiste."},
+
+{id:"DET-6", ex:"28", t:"Code mort divers", tags:["code","court"],
+ d:"Une fonction jamais appelée · un fichier qui lit encore un objet supprimé, à deux endroits · une trentaine de lignes de balisage qui ne peuvent plus s'afficher · des vestiges de style, dont environ 280 lignes pour une carte qui n'existe plus.",
+ c:"Même chose : du poids et des pièges de lecture.",
+ r:"Nettoyer d'un coup, avec le point précédent. Une demi-journée pour les deux."},
+
+{id:"DET-7", ex:"30", t:"Le formulaire Inspiration n'a qu'un seul garde-fou", tags:["code","court"],
+ d:"Il a un jeton de sécurité, mais ni piège à robots ni limite de fréquence, contrairement aux quatre autres formulaires du site.",
+ c:"Le jour où un robot le trouve, tu reçois du spam et tu ne sais pas d'où il vient.",
+ r:"Aligner sur les quatre autres. Une heure."},
+
+{g:"Décisions catalogue", intro:"Là je ne peux rien décider à ta place : ce sont tes produits."},
+
+{id:"CAT-1", ex:"2", t:"Ton plus grand format n'est recommandé à personne", tags:["décision","court"],
+ d:"Gaston existe en 50, 70, 90 et 110 cm. Le site associe « grande pièce » au troisième, donc 90. Le 110 n'est proposé qu'aux escaliers ouverts. Pareil sur Olivia et Suze. La cause : le site suppose trois tailles par modèle, ton catalogue en a de deux à quatre.",
+ c:"Tu fabriques un format que le Conseiller ne propose presque jamais.",
+ r:"Ta décision : « grande pièce » doit-il désigner la troisième taille, ou la plus grande disponible ? Je penche pour la plus grande disponible, mais c'est un choix commercial."},
+
+{id:"CAT-2", ex:"3", t:"Deux réponses différentes, le même luminaire", tags:["décision","court"],
+ d:"Claudine existe en 65 et 85 cm. « Standard » donne 85. « Grand » donne 85 aussi.",
+ c:"Depuis qu'on affiche le projet dans le récap, chaque visiteur lit sa propre réponse juste au-dessus d'une recommandation identique à celle du voisin. Ça se voit.",
+ r:"Soit « Standard » descend sur le 65, soit on accepte et on ne le montre pas. Ta décision, elle dépend de ce que tu veux vendre."},
+
+{g:"SEO", intro:"En attente depuis mai, hors du chantier site."},
+
+{id:"SEO-1", ex:"31", t:"Le re-check Search Console", tags:["à faire","court"],
+ d:"Prévu le 26/08, pas fait. La mesure de référence de mai comptait 576 clics et cinq gains rapides identifiés.",
+ c:"Tu ne sais pas si les optimisations d'avril ont produit quelque chose. Quatre mois sans mesure.",
+ r:"Je le fais quand tu veux, il me faut juste l'accès ou un export."},
+
+{id:"SEO-2", ex:"32", t:"La cannibalisation", tags:["à faire","moyen"],
+ d:"25 produits en doublon relevés en mai : plusieurs de tes pages se disputent la même recherche Google.",
+ c:"Tes pages se prennent des positions les unes aux autres au lieu d'en gagner une bonne.",
+ r:"À traiter avec le point précédent : d'abord la mesure, ensuite les regroupements."}
+];
+
+const list = document.getElementById('list');
+const ITEMS = P.filter(x => x.id);
+const KEY = 'sapi-reste-28-08';
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch(e){}
+
+const TAG = {code:['c-code','Code'], 'décision':['c-dec','Décision'], 'rédaction':['c-red','Rédaction'],
+  'à faire':['c-red','À faire'], court:['c-court','Court'], moyen:['c-moyen','Moyen'], long:['c-long','Gros morceau']};
+
+P.forEach(function(x){
+  if (x.g) {
+    const h = document.createElement('h2'); h.textContent = x.g; list.appendChild(h);
+    if (x.intro) { const p = document.createElement('p'); p.className = 'intro'; p.textContent = x.intro; list.appendChild(p); }
+    return;
+  }
+  const d = document.createElement('div');
+  d.className = 'q'; d.dataset.id = x.id;
+  d.innerHTML =
+    '<h3><span class="id">'+x.id+'</span><span class="t">'+x.t+'</span></h3>'+
+    '<div class="l"><b>Ce que c\'est</b>'+x.d+'</div>'+
+    '<div class="l cout"><b>Ce que ça coûte de ne rien faire</b>'+x.c+'</div>'+
+    '<div class="l reco"><b>Ce que je propose</b>'+x.r+'</div>'+
+    '<div class="meta">'+x.tags.map(function(t){
+      const m = TAG[t] || ['c-code', t];
+      return '<span class="chip '+m[0]+'">'+m[1]+'</span>';
+    }).join('')+'<span class="chip c-code">ancien n°'+x.ex+'</span></div>'+
+    '<div class="choix">'+
+      '<label><input type="radio" name="'+x.id+'" value="go">Fais-le</label>'+
+      '<label class="late"><input type="radio" name="'+x.id+'" value="late">Plus tard</label>'+
+      '<label class="talk"><input type="radio" name="'+x.id+'" value="talk">On en parle</label>'+
+      '<label class="talk"><input type="radio" name="'+x.id+'" value="no">Laisse tomber</label>'+
+    '</div>'+
+    '<textarea data-c="'+x.id+'" placeholder="Ton commentaire, si tu en as un"></textarea>';
+  list.appendChild(d);
+});
+
+function etat(){
+  let n = 0;
+  ITEMS.forEach(function(x){
+    const c = document.querySelector('input[name="'+x.id+'"]:checked');
+    const card = document.querySelector('.q[data-id="'+x.id+'"]');
+    card.classList.remove('r-go','r-late','r-talk');
+    if (c) { n++; card.classList.add(c.value==='go'?'r-go':(c.value==='late'?'r-late':'r-talk')); }
+  });
+  document.getElementById('pi').style.width = (n/ITEMS.length*100)+'%';
+  document.getElementById('pc').innerHTML = '<b>'+n+'</b> / '+ITEMS.length;
+}
+
+function sauve(){
+  const o = {};
+  document.querySelectorAll('input[type=radio]:checked').forEach(function(i){ o[i.name] = i.value; });
+  document.querySelectorAll('textarea[data-c]').forEach(function(t){ if (t.value.trim()) o['c_'+t.dataset.c] = t.value; });
+  try { localStorage.setItem(KEY, JSON.stringify(o)); } catch(e){}
+}
+
+Object.keys(saved).forEach(function(k){
+  if (k.indexOf('c_') === 0) {
+    const t = document.querySelector('textarea[data-c="'+k.slice(2)+'"]');
+    if (t) t.value = saved[k];
+  } else {
+    const i = document.querySelector('input[name="'+k+'"][value="'+saved[k]+'"]');
+    if (i) i.checked = true;
+  }
+});
+etat();
+
+document.addEventListener('change', function(){ etat(); sauve(); });
+document.addEventListener('input', function(e){ if (e.target.tagName === 'TEXTAREA') sauve(); });
+
+const LIB = {go:'FAIS-LE', late:'PLUS TARD', talk:'ON EN PARLE', no:'LAISSE TOMBER'};
+
+function texte(){
+  let s = '# Ce qui reste — arbitrages du 28/08\n\n';
+  let vide = true;
+  ITEMS.forEach(function(x){
+    const c = document.querySelector('input[name="'+x.id+'"]:checked');
+    const t = document.querySelector('textarea[data-c="'+x.id+'"]');
+    const com = t && t.value.trim();
+    if (!c && !com) return;
+    vide = false;
+    s += '## ' + x.id + ' — ' + x.t + ' → **' + (c ? LIB[c.value] : 'sans choix') + '**\n';
+    if (com) s += com + '\n';
+    s += '\n';
+  });
+  return vide ? '(rien de rempli)' : s;
+}
+
+document.getElementById('bExport').onclick = function(){
+  const z = document.getElementById('zone'), t = document.getElementById('txt');
+  t.value = texte(); z.classList.add('on');
+  try {
+    navigator.clipboard.writeText(t.value);
+    this.textContent = 'Copié ✓';
+    setTimeout(function(){ document.getElementById('bExport').textContent = 'Copier pour Claude'; }, 1800);
+  } catch(e) { t.select(); }
+  z.scrollIntoView({behavior:'smooth', block:'nearest'});
+};
+
+document.getElementById('bFile').onclick = function(){
+  const b = new Blob([texte()], {type:'text/markdown'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b);
+  a.download = 'reste-a-faire-28-08.md';
+  a.click();
+};
+
+document.getElementById('bClear').onclick = function(){
+  if (!confirm('Effacer toutes tes réponses ?')) return;
+  document.querySelectorAll('input[type=radio]').forEach(function(i){ i.checked = false; });
+  document.querySelectorAll('textarea[data-c]').forEach(function(t){ t.value = ''; });
+  try { localStorage.removeItem(KEY); } catch(e){}
+  etat();
+};
+</script>
+</body>
+</html>

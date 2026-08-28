@@ -23,7 +23,12 @@
         var input = form.querySelector('input[name="freetext"]');
         var text = (input && input.value || '').trim();
         if (!text) return;
-        var url = CREATIONS_URL + '?freetext=' + encodeURIComponent(text);
+        /* On transporte aussi l'origine, comme les cartes de pièce juste à
+           côté : le champ libre et les cartes partent des deux mêmes pages, et
+           `entry_point` doit pouvoir les distinguer de l'arrivée directe. */
+        var origine = picker.getAttribute('data-room-picker-from') || '';
+        var url = CREATIONS_URL + '?freetext=' + encodeURIComponent(text)
+                + (origine ? '&from=' + encodeURIComponent(origine) : '');
         window.location.href = url;
       });
     });

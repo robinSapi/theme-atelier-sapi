@@ -225,7 +225,27 @@ $render_card = function ($card_id) {
         <div class="inspiration-card__inner">
           <h3 class="inspiration-card__title">Recevez les coulisses de mon atelier</h3>
           <p class="inspiration-card__text">Nouveautés, mes projets en cours, mes inspirations directement dans votre boîte mail.</p>
+          <?php
+          /* Anti-spam. Ce formulaire n'avait que son jeton, ce qui n'arrête
+             aucun robot : le jeton est dans la page, il suffit de le lire.
+             ⚠️ PAS DE TIME-TRAP SIGNÉ ICI, CONTRAIREMENT AUX FORMULAIRES DE
+             CONTACT. Le time-trap fige un horodatage AU RENDU. Sur une page
+             mise en cache, cet horodatage est celui de la génération du cache,
+             pas de la visite : sa borne basse — le vrai levier anti-robot — est
+             donc franchie d'office, et sa borne haute finirait par refuser tout
+             le monde une fois le cache plus vieux que 24 h. On aurait un
+             contrôle qui ne protège de rien et qui bloque les vrais visiteurs,
+             sans que Robin l'apprenne jamais.
+             À la place, le délai est mesuré DANS LE NAVIGATEUR (voir
+             inspiration.js) : il repart à chaque visite, cache ou pas. C'est
+             moins solide qu'une signature serveur — un robot peut annoncer
+             n'importe quel délai — mais ça ne peut refuser personne à tort, et
+             ça s'ajoute au piège à robots et à la limite de fréquence. */
+          ?>
           <form class="inspiration-card__form" data-inspiration-newsletter novalidate>
+            <div style="display:none;" aria-hidden="true">
+              <input type="text" name="website" tabindex="-1" autocomplete="off">
+            </div>
             <label for="<?php echo esc_attr($form_id); ?>" class="inspiration-card__form-label">Adresse email</label>
             <div class="inspiration-card__form-row">
               <input

@@ -170,9 +170,28 @@
   var CONSEIL_DE_CETTE_SESSION = false;
   function noterConseil() { CONSEIL_DE_CETTE_SESSION = true; }
 
+  /* La pièce hors catalogue signalée par l'IA pendant cette visite. Sert
+     uniquement au tableau de bord de Robin : savoir quelles pièces on lui
+     demande et qu'il ne fait pas. Jamais affichée au visiteur. */
+  var PIECE_HORS_PERIMETRE = '';
+  function noterPieceHorsPerimetre(mot) {
+    /* ⚠️ ON ÉCRASE AUSSI AVEC DU VIDE, ET C'EST VOULU. Si le visiteur parle
+       d'abord d'une salle de bain puis redécrit son projet en salon, l'IA ne
+       renvoie plus de pièce hors périmètre : garder l'ancien mot collerait
+       « salle de bain » à une session qui a fini sur un salon, et gonflerait
+       le classement de Robin avec des demandes qui n'existent pas. */
+    PIECE_HORS_PERIMETRE = (typeof mot === 'string' && mot) ? mot : '';
+  }
+
   var ENTREE_FREETEXT = '';
+  /* Posée par les sélecteurs de pièce (`from=home` / `from=conseils`). Lue au
+     chargement du script, comme `freetext` et pour la même raison : l'adresse
+     est réécrite ensuite. */
+  var ORIGINE_ANNONCEE = '';
   try {
-    ENTREE_FREETEXT = new URLSearchParams(window.location.search).get('freetext') || '';
+    var qs = new URLSearchParams(window.location.search);
+    ENTREE_FREETEXT = qs.get('freetext') || '';
+    ORIGINE_ANNONCEE = qs.get('from') || '';
   } catch (e) { /* URLSearchParams indisponible — silencieux */ }
 
   var SessionTracker = (function () {
@@ -201,6 +220,15 @@
 
     function detectEntryPoint() {
       var body = document.body;
+      /* ⚠️ L'ORIGINE ANNONCÉE PASSE AVANT TOUT LE RESTE. Les sélecteurs de
+         pièce de l'accueil et de /conseils-eclaires/ REDIRIGENT vers
+         /mes-creations/ : la session naît à l'arrivée, pas au clic, et sans ce
+         paramètre elle ressemble à s'y méprendre à une arrivée directe par
+         Google. C'est pour ça que `home_picker` est resté à zéro depuis le
+         premier jour — le test sur la classe `home` ci-dessous ne peut jamais
+         être vrai, la modale n'étant pas chargée sur l'accueil. */
+      if (ORIGINE_ANNONCEE === 'home') return 'home_picker';
+      if (ORIGINE_ANNONCEE === 'conseils') return 'conseils_picker';
       if (body && body.classList.contains('home')) return 'home_picker';
       var path = window.location.pathname || '';
       /* ⚠️ LA FICHE PRODUIT SE TESTE EN PREMIER, ET C'EST INDISPENSABLE ICI.
@@ -282,6 +310,12 @@
           payload.advice_text = project.advice_text;
         }
         if (project.contact_kind) payload.contact_kind = project.contact_kind;
+        /* La pièce que le catalogue ne couvre pas, telle que le visiteur l'a
+           nommée. Vit dans `state`, pas dans le projet : ce n'est pas une
+           réponse du visiteur, c'est une observation faite pendant CETTE
+           conversation — la mémoriser d'une visite à l'autre la collerait à des
+           sessions qui n'ont rien demandé de tel. */
+        if (PIECE_HORS_PERIMETRE) payload.piece_hors_perimetre = PIECE_HORS_PERIMETRE;
         if (project.contact_subject) payload.contact_subject = project.contact_subject;
         if (project.contact_message) payload.contact_message = project.contact_message;
       }
@@ -1219,6 +1253,9 @@
         // d'abord showContact mais sapiProject.action est stocké pour que
         // la grille montre la card sur-mesure en 1re position (Lot C3).
         if (data.action === 'contact') {
+          /* Noté avant `showContact`, qui peut interrompre le fil : c'est la
+             seule occasion de le relever, le serveur ne le renvoie qu'ici. */
+          noterPieceHorsPerimetre(data.piece_hors_perimetre);
           showContact(data);
           return;
         }
@@ -1331,6 +1368,9 @@
 
         // Round 3 — Lot C2 : action=contact → écran s-contact dédié.
         if (data.action === 'contact') {
+          /* Noté avant `showContact`, qui peut interrompre le fil : c'est la
+             seule occasion de le relever, le serveur ne le renvoie qu'ici. */
+          noterPieceHorsPerimetre(data.piece_hors_perimetre);
           showContact(data);
           return;
         }
@@ -1871,7 +1911,14 @@
        fiche produit — pas sur l'écran de la page de sélection, dont le bouton
        principal ferait quitter le produit qu'on regarde. C'est ce que rend
        possible `state.retourApresEdition`. */
-    var chipsProjet = ['piece', 'taille', 'taille_escalier', 'style'];
+    /* ⚠️ MÊME LISTE QUE LES QUESTIONS POSÉES, PAR CONSTRUCTION. Cette liste
+       était recopiée à la main ici, alors qu'elle doit être exactement celle
+       du mode court : on montre les réponses dont sort le conseil, donc celles
+       qu'on a posées. Une copie manuelle reste exacte jusqu'au jour où on
+       ajoute ou retire une question du mode court — et ce jour-là, la fiche
+       produit afficherait une pastille de moins ou de trop, sans rien casser.
+       `SHORT_STEPS` vient de PHP (`shortSteps`), qui est la source. */
+    var chipsProjet = SHORT_STEPS;
     var MOTS_CLES_PRODUIT = { taille: 'Taille de la pièce' };
     if (els.productRecapProject) {
       els.productRecapProject.innerHTML = '';
@@ -1975,15 +2022,33 @@
      Remplace les anciens CTAs externes (formulaire sur-mesure / mailto)
      par un form AJAX direct → endpoint sapi_megafilter_surmesure existant.
      ───────────────────────────────────────────── */
-  // Construit le récap projet (chips ordonnées séparées par " · ").
+  /* Le récap projet de l'écran contact, en texte.
+     ⚠️ DEUX DÉFAUTS CORRIGÉS ICI LE 28/08, ET LE SECOND PART DANS TON MAIL.
+     1. L'ordre des questions était recopié à la main. Il vient maintenant de
+        `clesProjet()`, la même source que l'URL et le reste du parcours : au
+        premier ajout de question, cet écran suivra tout seul.
+     2. Les pastilles ne portaient QUE la valeur : le visiteur lisait « Grand »
+        sans savoir grand quoi, juste avant de laisser son adresse. On y remet
+        le mot de la question avec `S3_KEY_LABELS`, la même table que les
+        pastilles cliquables.
+        ⚠️ Ces lignes ne partent PAS dans le mail à Robin, contrairement à ce
+        que j'avais écrit ici : le mail est construit côté serveur par
+        `sapi_megafilter_format_project_text()`, avec sa propre table de
+        libellés. Ne pas compter sur cette fonction pour corriger le mail.
+     On ne peut pas appeler `buildProjectChip` ici : elle rend un élément HTML,
+     alors que ce récap doit aussi voyager en texte dans le mail. Les deux
+     partagent en revanche leurs deux sources — libellés et mots de question. */
   function buildContactRecap(answers, labels) {
-    var orderedKeys = ['piece', 'taille', 'taille_escalier', 'eclairage', 'sortie', 'hauteur', 'style'];
+    var cles = (window.sapiProject && window.sapiProject.clesProjet)
+      ? window.sapiProject.clesProjet()
+      : ['piece', 'taille', 'taille_escalier', 'eclairage', 'sortie', 'hauteur', 'style'];
     var lines = [];
-    orderedKeys.forEach(function (k) {
+    cles.forEach(function (k) {
       var slug = answers && answers[k];
       if (!slug) return;
-      var lbl = (labels && labels[k]) || slug;
-      lines.push(lbl);
+      var valeur = (labels && labels[k]) || getChoiceLabel(k, slug) || slug;
+      var motCle = S3_KEY_LABELS[k];
+      lines.push(motCle ? (motCle + ' : ' + valeur) : valeur);
     });
     return lines;
   }
@@ -2296,9 +2361,14 @@
     document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
     exitChatMode();
-    if (lastTrigger && lastTrigger.focus) {
+    /* `isConnected` : entre l'ouverture et la fermeture, la page a pu être
+       redessinée (la grille se refiltre, la fiche produit change de variation).
+       Rendre le focus à un élément détaché ne lève pas d'erreur — il part
+       simplement sur `<body>`, c'est-à-dire nulle part. */
+    if (lastTrigger && lastTrigger.isConnected && lastTrigger.focus) {
       try { lastTrigger.focus(); } catch (e) { /* swallow */ }
     }
+    lastTrigger = null;
     // Tracking V3 — snapshot final via sendBeacon (résilient au unload).
     SessionTracker.finalize();
     // Reprendre les notifications sapiProject + flush l'éventuel update
@@ -2331,7 +2401,20 @@
   function bindEvents() {
     // Listener global pour l'événement venant des cards Phase 2
     document.addEventListener('sapi:open-modal', function (e) {
-      lastTrigger = e.target && e.target.closest ? e.target.closest('[data-action="open-modal"]') : null;
+      /* ⚠️ CE CODE CHERCHAIT `closest` SUR `document`, QUI NE L'A PAS.
+         L'événement est envoyé à `document` (`document.dispatchEvent`), donc
+         `e.target` EST `document` : le ternaire retombait sur `null` à chaque
+         ouverture, en silence. Résultat, une personne qui navigue au clavier
+         était renvoyée en haut de la page à chaque fermeture et devait tout
+         retraverser. Trois ans qu'il ne faisait rien.
+         L'élément déclencheur est maintenant transmis par celui qui ouvre la
+         modale — il est le seul à le connaître. À défaut, on retombe sur
+         l'élément qui avait le focus : c'est le bouton cliqué dans la quasi
+         totalité des cas. */
+      lastTrigger = (e.detail && e.detail.trigger)
+        || (document.activeElement && document.activeElement !== document.body
+              ? document.activeElement
+              : null);
       var st = (e.detail && e.detail.state) || 's0';
       // Round 2 — 2.1 : garde-fou. state='product' sans config.product (pas
       // sur fiche produit) déclencherait applyProductSelection avec
@@ -2613,10 +2696,22 @@
     } catch (e) { /* URLSearchParams indisponible — silencieux */ }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
+  /* ⚠️ « complete », PAS « loading ». Ce fichier doit démarrer APRÈS
+     `sapi-project.js` : il prépare la modale à partir du projet et pilote tout
+     le parcours — or
+     ce projet n'est complet qu'une fois l'adresse ingérée par `sapi-project`,
+     ce qui arrive à `DOMContentLoaded`.
+     Le test naïf `readyState === 'loading'` ne le garantit pas : **en
+     production, Autoptimize ajoute `defer` à tous les scripts**, et dans un
+     script différé `readyState` vaut déjà « interactive ». On tombait donc
+     dans le `else` et `init()` partait trop tôt.
+     ⚠️ Le site de test n'a PAS Autoptimize : cette classe de bug ne peut pas
+     être montrée en recette. Ne pas « simplifier » ce test parce qu'il a l'air
+     de marcher sur test. Explication complète dans sapi-project.js. */
+  if (document.readyState === 'complete') {
     init();
+  } else {
+    document.addEventListener('DOMContentLoaded', init);
   }
 
   // Exposition pour debug et appels externes (Phase 4 fiche produit)

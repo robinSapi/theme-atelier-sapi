@@ -541,7 +541,7 @@ foreach ($carousel_products as $product) {
 
 <!-- Entrée projet — room picker (bande crème) -->
 <section class="home-projet-section">
-  <div class="home-projet" data-room-picker>
+  <div class="home-projet" data-room-picker data-room-picker-from="home">
     <div class="room-picker-inner">
       <div class="conseiller-sig conseiller-sig--v1">
         <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
@@ -555,7 +555,13 @@ foreach ($carousel_products as $product) {
         <?php foreach ($room_choices as $room) :
           $icon_svg = isset($room_icons[$room['icon']]) ? $room_icons[$room['icon']] : '';
         ?>
-          <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'])); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
+          <?php /* `from=home` : c'est la SEULE façon de savoir qu'un visiteur
+                   est passé par le sélecteur de pièce de l'accueil. La modale
+                   du Conseiller n'est pas chargée sur cette page, aucune session n'y
+                   naît donc — elle naît à l'arrivée sur /mes-creations/, où ce
+                   paramètre est lu puis oublié. Sans lui, ces visiteurs se confondent
+                   avec ceux qui arrivent directement par Google. */ ?>
+          <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'] . '&from=home')); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
             <span class="room-card-icon"><?php echo $icon_svg; ?></span>
             <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
           </a>

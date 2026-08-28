@@ -217,7 +217,7 @@ endif;
      séparateur "ou" + champ texte libre). Le wrapper externe garde son
      style propre (max-width + padding adaptés à la page conseils). -->
 <section class="advice-room-picker-section">
-  <div class="advice-room-picker" data-room-picker>
+  <div class="advice-room-picker" data-room-picker data-room-picker-from="conseils">
     <div class="room-picker-inner">
       <div class="conseiller-sig conseiller-sig--v1">
         <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
@@ -231,7 +231,13 @@ endif;
         <?php foreach ($room_choices as $room) :
           $icon_svg = isset($room_icons[$room['icon']]) ? $room_icons[$room['icon']] : '';
         ?>
-          <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'])); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
+          <?php /* `from=conseils` : c'est la SEULE façon de savoir qu'un visiteur
+                   est passé par le sélecteur de pièce de la page Conseils éclairés. La modale
+                   du Conseiller n'est pas chargée sur cette page, aucune session n'y
+                   naît donc — elle naît à l'arrivée sur /mes-creations/, où ce
+                   paramètre est lu puis oublié. Sans lui, ces visiteurs se confondent
+                   avec ceux qui arrivent directement par Google. */ ?>
+          <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'] . '&from=conseils')); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
             <span class="room-card-icon"><?php echo $icon_svg; ?></span>
             <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
           </a>

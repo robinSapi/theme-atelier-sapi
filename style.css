@@ -1803,40 +1803,19 @@ button:hover,
 /* --- État replié --- */
 
 
-
-
-
-
-
-
 /* --- Boutons d'action (dans le bandeau déplié) --- */
-
-
-
-
-
 
 
 /* --- Bouton toggle --- */
 
 
-
 /* --- État déplié --- */
-
 
 
 /* --- Question row --- */
 
 
-
 /* --- Choix --- */
-
-
-
-
-
-
-
 
 
 /* --- Responsive Tablet --- */
@@ -1847,14 +1826,6 @@ button:hover,
 
 /* --- Responsive Mobile --- */
 @media (max-width: 600px) {
-
-
-
-
-
-
-
-
 
 
 }
@@ -2153,111 +2124,15 @@ ul.products li.product {
 }
 
 /* Recap card — visible only when filters are active */
-.why-sapi-recap {
-  max-width: 1400px;
-  margin: 2rem auto 0;
-  padding: 0 3rem;
-}
 
-.why-sapi-recap-inner {
-  background: var(--color-warm, #FBF6EA);
-  border-radius: var(--radius-lg, 16px);
-  border: 2px solid rgba(147, 125, 104, 0.12);
-  padding: 3rem;
-  text-align: center;
-}
-
-.why-sapi-recap-inner > h2 {
-  font-family: var(--font-display, 'Square Peg', cursive);
-  font-size: 2.5rem;
-  color: var(--color-wood, #937D68);
-  margin: 0 0 2rem;
-  font-weight: 400;
-}
-
-.why-sapi-recap-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
-  margin-bottom: 2rem;
-}
-
-.why-sapi-recap-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.why-sapi-recap-item h3 {
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--color-dark, #323232);
-  margin: 0;
-}
-
-.why-sapi-recap-item p {
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: rgba(50, 50, 50, 0.65);
-  margin: 0;
-}
-
-.why-sapi-recap-highlight {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  padding: 1.5rem 2rem;
-  background: linear-gradient(135deg, rgba(227, 91, 36, 0.04) 0%, rgba(227, 91, 36, 0.08) 100%);
-  border-radius: 12px;
-  text-align: left;
-}
-
-.why-sapi-recap-highlight .product-text-card-icon {
-  background: rgba(227, 91, 36, 0.1);
-  color: var(--color-orange, #E35B24);
-  flex-shrink: 0;
-}
-
-.why-sapi-recap-highlight h3 {
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--color-dark, #323232);
-  margin: 0 0 0.25rem;
-}
-
-.why-sapi-recap-highlight p {
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: rgba(50, 50, 50, 0.65);
-  margin: 0;
-}
 
 @media (max-width: 900px) {
-  .why-sapi-recap-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+
 }
 
 @media (max-width: 480px) {
-  .why-sapi-recap {
-    padding: 0 1.5rem;
-  }
-  .why-sapi-recap-inner {
-    padding: 2rem 1.5rem;
-  }
-  .why-sapi-recap-grid {
-    grid-template-columns: 1fr;
-  }
-  .why-sapi-recap-highlight {
-    flex-direction: column;
-    text-align: center;
-  }
+
+
 }
 
 /* EXCEPTION: Carousel slides have fixed width */
@@ -7236,11 +7111,7 @@ li.carousel-editorial-slide,
 /* Header : badge + chips */
 
 
-
-
-
 /* Body : guillemet + texte + signature */
-
 
 
 /* ─── Robin Conseil : Loading state ─── */
@@ -7251,18 +7122,10 @@ li.carousel-editorial-slide,
 }
 
 
-
-
-
-
-
-
 /* Actions */
 
 
-
 /* Produits recommandés dans la card Robin */
-
 
 
 /* Card "Création sur mesure" dans la grille produits */
@@ -7361,28 +7224,12 @@ li.carousel-editorial-slide,
 /* Formulaire contact inline — Contacter Robin */
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 @media (max-width: 900px) {
 
 
 }
 
 @media (max-width: 600px) {
-
-
-
 
 
 }
@@ -22417,12 +22264,6 @@ body.woocommerce-cart div.woocommerce-wrapper {
    Variantes du pattern universel : Conseil (sans projet) / Mon projet
    ============================================================ */
 
-.conseiller-cards-zone {
-  /* Alignée sur .shop-products .product-grid : max-width 1400 + padding 0 3rem */
-  max-width: 1400px;
-  margin: 32px auto 0;
-  padding: 0 3rem;
-}
 
 /* Variante Conseil — centrée, accent CTA orange. Card entière cliquable
    (les éléments internes — pièces + form — captent leur propre clic ;
@@ -23027,10 +22868,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 
 /* ── Mobile ── */
 @media (max-width: 600px) {
-  .conseiller-cards-zone {
-    margin: 22px auto 0;
-    padding: 0 1rem;
-  }
+
   .conseiller-card--conseil {
     padding: 36px 20px 40px;
   }
@@ -23049,9 +22887,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
    forcé display:flex/grid sur lui (le user-agent stylesheet a une
    spécificité inférieure et peut être écrasé). Nous a déjà piégé 2 fois. */
 .conseiller-modal [hidden],
-.conseiller-cards-zone [hidden] {
-  display: none !important;
-}
+
 
 /* Overlay : voile sombre centré qui couvre la page */
 .conseiller-modal {
@@ -24463,7 +24299,6 @@ button.chip--project:focus-visible {
    [.mes-creations-selection] = card englobante "Mon projet"
        (badge dynamique N luminaires + phrase IA + lien Modifier
         + slot grille peuplé par JS via clones depuis la grille basse)
-   [.mes-creations-section-divider] = filet fin centré (Option B)
    [.mes-creations-catalogue] = section "Toutes mes créations"
        (H2 + sous-titre + placeholder pills cat + grille shop-products)
    ============================================================ */
@@ -24653,13 +24488,7 @@ button.chip--project:focus-visible {
 
 /* Séparateur entre "Ma sélection" et "Toutes mes créations" — Option B :
    un seul filet fin court (80px), centré, opacity faible. Pas de dots. */
-.mes-creations-section-divider {
-  width: 80px;
-  height: 1px;
-  margin: 70px auto 0;
-  background: var(--color-line);
-  opacity: 0.6;
-}
+
 
 /* Section "Toutes mes créations" — H2 + sous-titre + placeholder pills. */
 .mes-creations-catalogue {
@@ -24801,9 +24630,7 @@ button.chip--project:focus-visible {
     font-size: 12.5px;
   }
   /* Séparateur mobile : resserré verticalement, même largeur 80px */
-  .mes-creations-section-divider {
-    margin-top: 48px;
-  }
+
   /* Section "Toutes mes créations" */
   .mes-creations-catalogue {
     padding: 0 14px 60px;
@@ -25038,11 +24865,12 @@ button.chip--project:focus-visible {
   }
 }
 
-/* État B : masque le hero croquis, la zone cards conseiller, le séparateur et
-   le bandeau global tant qu'il n'est pas repositionné en JS (cf. home). */
+/* État B : masque le hero croquis et le bandeau global tant qu'il n'est pas
+   repositionné en JS (cf. home).
+   `.conseiller-cards-zone` et `.mes-creations-section-divider` retirés le
+   28/08 : ces deux éléments n'existent plus dans aucun gabarit, on masquait
+   donc du vide. */
 body.mescreations-immersion-on .shop-hero-artisan,
-body.mescreations-immersion-on .conseiller-cards-zone,
-body.mescreations-immersion-on .mes-creations-section-divider,
 body.mescreations-immersion-on .robin-bandeau:not(.home-repositioned-bar) { display: none !important; }
 
 /* Le contenu du site est dans une colonne centrée (.site-content ~1440px).

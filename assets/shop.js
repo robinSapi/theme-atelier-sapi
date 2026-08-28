@@ -40,10 +40,12 @@
         // via le menu et leurs URLs /categorie-produit/accessoires/ etc.)
         const matchesExtras = !cats.some(c => extraCategories.indexOf(c) !== -1);
 
-        // Méga-filtre (F1a) — chips Robin sur /mes-creations/
-        const matchesMega = !window.sapiMegaFilter || window.sapiMegaFilter.cardMatches(slide);
-
-        const shouldShow = matchesExtras && matchesMega;
+        /* `window.sapiMegaFilter` a été SUPPRIMÉ avec le filtrage navigateur.
+           Le test qui vivait ici (`!window.sapiMegaFilter || …`) court-circuitait
+           donc toujours à `true` : il ne filtrait plus rien depuis des mois,
+           tout en donnant à lire le contraire. Le filtrage est désormais
+           entièrement côté serveur. */
+        const shouldShow = matchesExtras;
 
         if (shouldShow) {
           slide.classList.remove('is-filtered-out');
@@ -55,23 +57,18 @@
         }
       });
 
-      // Text cards (réassurance) + why-sapi-recap : visibles uniquement
-      // quand AUCUN filtre n'est actif (donc grille naturelle)
-      const textCards = document.querySelectorAll('.product-text-card');
-      const recapCard = document.querySelector('.why-sapi-recap');
-      const megaActive = !!(window.sapiMegaFilter && window.sapiMegaFilter.hasAnyAnswer && window.sapiMegaFilter.hasAnyAnswer());
-      textCards.forEach(card => {
-        if (megaActive) {
-          card.classList.add('is-filtered-out');
-          card.style.display = 'none';
-        } else {
-          card.classList.remove('is-filtered-out');
-          card.style.display = '';
-        }
+      /* Les cartes de réassurance sont toujours visibles.
+         Elles étaient masquées « quand un filtre est actif », via
+         `window.sapiMegaFilter` — objet supprimé avec le filtrage navigateur.
+         Le test valait donc toujours faux : le comportement réel était
+         « toujours visibles », et c'est celui qu'on écrit maintenant.
+         L'encart « Pourquoi choisir Sâpi » suivait la règle INVERSE : il ne
+         s'affichait qu'avec un filtre actif, donc jamais. Son markup a été
+         retiré de archive-product.php avec son CSS. */
+      document.querySelectorAll('.product-text-card').forEach(card => {
+        card.classList.remove('is-filtered-out');
+        card.style.display = '';
       });
-      if (recapCard) {
-        recapCard.style.display = megaActive ? '' : 'none';
-      }
 
       // Message "aucun résultat"
       const noResults = document.querySelector('.woocommerce-no-products-found');

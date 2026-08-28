@@ -49,6 +49,19 @@
   /* ─────────────────────────────────────────────
      Helpers localStorage (tolérant aux erreurs)
      ───────────────────────────────────────────── */
+  /* Un projet cesse d'être « en cours » au bout de 10 jours (décision Robin,
+     28/08). Passé ce délai il est effacé, sans rien demander au visiteur.
+     ⚠️ LE CONTRÔLE EST DANS `readRaw`, ET C'EST VOULU. C'est le seul point de
+     passage de toutes les lectures : la pastille, l'immersion, la modale, la
+     fiche produit, le récap contact. Le poser ailleurs reviendrait à le poser
+     à cinq endroits, dont un qu'on oublierait — et ce cinquième afficherait un
+     projet périmé sans que rien ne le signale.
+     Avant ça, `created_at` et `updated_at` étaient écrits mais relus par
+     personne : quelqu'un qui revenait trois semaines plus tard retrouvait son
+     projet intact, et recevait une recommandation calibrée sur un besoin
+     qu'il n'avait plus. */
+  var PROJET_DUREE_MAX = 10 * 24 * 60 * 60; // secondes, comme updated_at
+
   function readRaw() {
     try {
       var raw = window.localStorage.getItem(STORAGE_KEY);
@@ -56,6 +69,22 @@
       var parsed = JSON.parse(raw);
       if (!parsed || typeof parsed !== 'object') return null;
       if (!parsed.answers || typeof parsed.answers !== 'object') return null;
+
+      var repere = parsed.updated_at || parsed.created_at;
+      /* ⚠️ PAS DE DATE = ON GARDE. Un projet écrit par une version antérieure
+         peut ne pas en porter. L'effacer « par précaution » détruirait le
+         travail d'un visiteur à cause d'un champ manquant : c'est exactement
+         le genre de repli silencieux et destructeur qu'on chasse ici. Il
+         recevra sa date à la première écriture, et vieillira normalement. */
+      if (typeof repere === 'number' && repere > 0) {
+        var age = Math.floor(Date.now() / 1000) - repere;
+        // Une date dans le futur (horloge du visiteur déréglée) donne un âge
+        // négatif : ce n'est pas une expiration, on ne touche à rien.
+        if (age > PROJET_DUREE_MAX) {
+          clearRaw();
+          return null;
+        }
+      }
       return parsed;
     } catch (e) {
       return null;
@@ -508,7 +537,21 @@
      montrer. Robin aurait validé un acquis qu'il n'avait pas.
      « interactive » précède toujours `DOMContentLoaded`, l'écouteur se
      déclenche donc bien. Seul « complete » signifie que l'événement est déjà
-     passé. */
+     passé.
+
+     ⚠️ QUATRE AUTRES FICHIERS SUIVENT CETTE RÈGLE, ET C'EST DÉLIBÉRÉ :
+     `sapi-mescreations-immersion.js`, `sapi-product-preselect.js`,
+     `sapi-photo-swap.js` et `sapi-modal-conseiller.js`. Tous lisent le PROJET
+     au chargement, donc tous doivent démarrer après l'ingestion faite ici.
+     Les autres fichiers gardent le test simple `=== 'loading'`. Deux d'entre
+     eux touchent quand même à `sapiProject` — `sapi-help-pill.js` et
+     `sapi-mes-creations-ga4.js` — mais aucun ne LIT le projet au démarrage :
+     l'un s'abonne seulement, l'autre lit dans un gestionnaire de clic. Ils
+     n'ont donc rien à attendre. Les autres ne lisent que leur propre DOM ou
+     leurs propres données transmises par PHP, posées avant leur balise.
+     La règle à retenir : **`complete` si le fichier LIT LE PROJET au
+     démarrage, `loading` sinon.** Ce n'est pas « dépend d'un autre script » :
+     s'abonner ou lire plus tard ne demande aucun ordre particulier. */
   if (document.readyState === 'complete') {
     init();
   } else {
@@ -564,8 +607,23 @@
   function tailleIntention(answers) {
     if (!answers) return null;
     if (answers.piece === 'escalier') {
-      if (answers.taille_escalier === 'ouvert') return 'max';
-      if (answers.taille_escalier === 'standard') return 'moyenne';
+      /* ⚠️ CETTE TABLE VIENT DU PANNEAU DE ROBIN, ELLE N'EST PLUS ÉCRITE ICI.
+         Elle l'était, et elle disait autre chose que le serveur : « escalier
+         standard » donnait la taille moyenne au navigateur et la petite au
+         moteur. Deux visiteurs identiques, deux recommandations.
+         Le serveur parle en tailles (`petite`/`moyenne`/`grande`), parce que
+         c'est ce que son moteur de filtrage comprend. Le navigateur, lui,
+         choisit une variation dans une liste : `grande` y devient `max`,
+         c'est-à-dire la plus grande option existante — Robin a tranché le
+         27/08 qu'un grand escalier ouvert méritait le plus grand modèle, or
+         « grande » désigne la troisième taille, qui n'est pas toujours la
+         dernière (Gaston en a quatre). C'est la SEULE traduction, et elle est
+         ici, écrite. */
+      var mapEsc = (window.SAPI_PROJECT || {}).escalierMap || {};
+      var tailleEsc = mapEsc[answers.taille_escalier];
+      if (tailleEsc === 'grande')  return 'max';
+      if (tailleEsc === 'moyenne') return 'moyenne';
+      if (tailleEsc === 'petite')  return 'petite';
       /* Escalier SANS précision : rien, comme un salon sans taille. Le visiteur
          arrivé par une carte-pièce n'a répondu qu'à une question ; lui
          recommander une taille serait décider sur la foi d'un seul mot, et ce

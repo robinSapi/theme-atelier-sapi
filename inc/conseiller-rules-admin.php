@@ -246,7 +246,10 @@ function sapi_rules_sanitize($posted) {
   $taille_allowed = $keys($V['tailles']);
   $c['escalier_map'] = [];
   foreach ($keys($V['escalier_q']) as $q) {
-    $def = isset($D['escalier_map'][$q]) ? $D['escalier_map'][$q] : 'petite';
+    /* Repli sur `moyenne`, aligné sur le défaut du moteur. Il disait `petite` :
+       un type d'escalier inconnu proposait le plus petit modèle du catalogue,
+       et le réglage de Robin s'en trouvait contredit en silence. */
+    $def = isset($D['escalier_map'][$q]) ? $D['escalier_map'][$q] : 'moyenne';
     $c['escalier_map'][$q] = $pick(isset($posted['escalier_map'][$q]) ? $posted['escalier_map'][$q] : '', $taille_allowed, $def);
   }
 

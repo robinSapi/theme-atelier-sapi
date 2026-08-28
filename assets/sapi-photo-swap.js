@@ -214,9 +214,20 @@
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
+  /* ⚠️ « complete », PAS « loading ». Ce fichier doit démarrer APRÈS
+     `sapi-project.js`, parce que elle échange les photos d'après la pièce du projet, au chargement — or
+     ce projet n'est complet qu'une fois l'adresse ingérée par `sapi-project`,
+     ce qui arrive à `DOMContentLoaded`.
+     Le test naïf `readyState === 'loading'` ne le garantit pas : **en
+     production, Autoptimize ajoute `defer` à tous les scripts**, et dans un
+     script différé `readyState` vaut déjà « interactive ». On tombait donc
+     dans le `else` et `init()` partait trop tôt.
+     ⚠️ Le site de test n'a PAS Autoptimize : cette classe de bug ne peut pas
+     être montrée en recette. Ne pas « simplifier » ce test parce qu'il a l'air
+     de marcher sur test. Explication complète dans sapi-project.js. */
+  if (document.readyState === 'complete') {
     init();
+  } else {
+    document.addEventListener('DOMContentLoaded', init);
   }
 })();

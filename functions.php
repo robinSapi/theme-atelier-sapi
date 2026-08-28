@@ -372,6 +372,13 @@ function sapi_maison_enqueue_assets() {
       'styleEssence' => function_exists('sapi_conseiller_get_rules')
         ? (array) (sapi_conseiller_get_rules()['style_essence'] ?? [])
         : [],
+      /* La table « type d'escalier → taille », même origine et même raison que
+         `styleEssence` : le navigateur présélectionne la variation, le serveur
+         choisit les modèles. S'ils ne lisent pas la même table, le visiteur
+         voit une taille recommandée qui ne correspond pas à la sélection. */
+      'escalierMap' => function_exists('sapi_conseiller_get_rules')
+        ? (array) (sapi_conseiller_get_rules()['escalier_map'] ?? [])
+        : [],
       'ordreCles' => function_exists('sapi_guide_get_steps')
         ? array_values(array_filter(array_map(function ($st) { return isset($st['id']) ? $st['id'] : ''; }, sapi_guide_get_steps())))
         : [],
@@ -2866,7 +2873,8 @@ function sapi_megafilter_parse_json($text) {
  * retourne la concaténation prête à coller en tête d'un system prompt
  * méga-filtre V3.
  *
- * Pattern repris de sapi_robin_build_step_prompt (V2) pour rapatrier la
+ * Pattern repris du prompt par étape de la V2 (fonction supprimée le 28/08)
+ * pour rapatrier la
  * voix Robin (ton chaleureux, tutoiement) et les règles métier dures
  * (cuisine sans lampe à poser, multi-ampoules, escalier, applique kit
  * prise, etc.) dans les prompts V3.
@@ -2929,8 +2937,13 @@ function sapi_megafilter_build_freetext_prompt(array $whitelist) {
   $prompt .= '  "action": "contact",' . "\n";
   $prompt .= '  "contact_kind": "sur-mesure",' . "\n";
   $prompt .= '  "contact_subject": "Projet ...",' . "\n";
-  $prompt .= '  "contact_message": "Bonjour Robin, ..."' . "\n";
+  $prompt .= '  "contact_message": "Bonjour Robin, ...",' . "\n";
+  $prompt .= '  "piece_hors_perimetre": "salle de bain"' . "\n";
   $prompt .= "}\n\n";
+  /* ⚠️ CE CHAMP SERT À ROBIN, PAS AU VISITEUR : il lui dit quelles pièces on
+     lui demande et qu'il ne couvre pas. Il ne s'affiche nulle part côté site. */
+  $prompt .= "`piece_hors_perimetre` : À REMPLIR UNIQUEMENT si tu as déclenché la règle PIÈCE HORS PÉRIMÈTRE. Recopie le mot du visiteur, au singulier et en minuscules (« salle de bain », « garage », « véranda »). Dans TOUS les autres cas, omets ce champ.\n";
+  $prompt .= "⚠️ NE LE REMPLIS PAS pour une pièce que tu as simplement rapprochée d'une autre du catalogue : un couloir est une entrée, une salle à manger est un salon. Ce champ ne sert qu'aux pièces que le catalogue NE COUVRE PAS.\n\n";
 
   $prompt .= "3 VOIES DE SORTIE — arbitre selon la nature du projet du visiteur :\n";
   $prompt .= "1) PROJET STANDARD : tu extrais les filtres possibles depuis sa phrase. Renvoie {filters: {...}, message: \"...\", action: null}\n";
@@ -3022,8 +3035,9 @@ function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_pr
   $prompt .= "Ne dis donc JAMAIS \"tu vois les modèles à côté\", \"regarde la sélection\", ou équivalent.\n";
   $prompt .= "Présente-lui la sélection en mots, comme si vous étiez au téléphone ensemble.\n\n";
 
-  // Injecte ton + savoir + regles + exemples V2 (équivalent V2
-  // sapi_robin_build_step_prompt — les exemples guident le ton conversationnel).
+  // Injecte ton + savoir + règles + exemples V2. Les exemples guident le ton
+  // conversationnel — c'est ce qui les distingue du prompt de recommandation
+  // ci-dessous, qui ne les charge pas.
   $prompt .= sapi_megafilter_load_v2_prompts(true);
 
   $prompt .= "Tu es l'assistant de Robin, l'artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser dans son atelier à Lyon.\n";
@@ -3067,9 +3081,14 @@ function sapi_megafilter_build_chat_prompt(array $current_filters, array $all_pr
   $prompt .= '  "filters_update": { "piece": "cuisine", "style": null },' . "\n";
   $prompt .= '  "action": "contact",' . "\n";
   $prompt .= '  "contact_kind": "pro",' . "\n";
-  $prompt .= '  "contact_subject": "Projet hôtel — 30 chambres équipées",' . "\n";
-  $prompt .= '  "contact_message": "Bonjour Robin, je suis hôtelier..."' . "\n";
+  $prompt .= '  "contact_subject": "Projet hôtel, 30 chambres équipées",' . "\n";
+  $prompt .= '  "contact_message": "Bonjour Robin, je suis hôtelier...",' . "\n";
+  $prompt .= '  "piece_hors_perimetre": "salle de bain"' . "\n";
   $prompt .= "}\n\n";
+  /* ⚠️ CE CHAMP SERT À ROBIN, PAS AU VISITEUR : il lui dit quelles pièces on
+     lui demande et qu'il ne couvre pas. Il ne s'affiche nulle part côté site. */
+  $prompt .= "`piece_hors_perimetre` : À REMPLIR UNIQUEMENT si tu as déclenché la règle PIÈCE HORS PÉRIMÈTRE. Recopie le mot du visiteur, au singulier et en minuscules (« salle de bain », « garage », « véranda »). Dans TOUS les autres cas, omets ce champ.\n";
+  $prompt .= "⚠️ NE LE REMPLIS PAS pour une pièce que tu as simplement rapprochée d'une autre du catalogue : un couloir est une entrée, une salle à manger est un salon. Ce champ ne sert qu'aux pièces que le catalogue NE COUVRE PAS.\n\n";
 
   // Round 3 — Lot C1 : aligne les 3 voies de sortie sur le freetext (Haiku).
   $prompt .= "3 VOIES DE SORTIE — arbitre au fil de la conversation :\n";
@@ -3225,6 +3244,7 @@ function sapi_ajax_megafilter_freetext() {
   $contact_kind = null;
   $contact_subject = '';
   $contact_message = '';
+  $piece_hors_perimetre = '';
   if (isset($parsed['action']) && $parsed['action'] === 'contact') {
     $action = 'contact';
     $allowed_kinds = ['pro', 'sur-mesure', 'simple'];
@@ -3242,6 +3262,18 @@ function sapi_ajax_megafilter_freetext() {
     if (isset($parsed['contact_message']) && is_string($parsed['contact_message'])) {
       $contact_message = sapi_strip_long_dashes(sanitize_textarea_field($parsed['contact_message']));
     }
+    /* ⚠️ LU UNIQUEMENT DANS LA BRANCHE `action === contact`, ET C'EST LE
+       GARDE-FOU. Hors de cette branche, un modèle bavard pourrait remplir ce
+       champ pour une pièce parfaitement couverte, et Robin lirait « salon » en
+       tête de son classement des pièces qu'il ne fait pas. */
+    if (isset($parsed['piece_hors_perimetre']) && is_string($parsed['piece_hors_perimetre'])) {
+      $piece_hors = trim(sanitize_text_field($parsed['piece_hors_perimetre']));
+      // 60 caractères = la colonne. Une « pièce » plus longue est une phrase,
+      // donc une réponse hors sujet : on la laisse tomber plutôt que la couper.
+      if ($piece_hors !== '' && mb_strlen($piece_hors) <= 60) {
+        $piece_hors_perimetre = function_exists('mb_strtolower') ? mb_strtolower($piece_hors) : strtolower($piece_hors);
+      }
+    }
   }
 
   wp_send_json_success([
@@ -3251,6 +3283,7 @@ function sapi_ajax_megafilter_freetext() {
     'contact_kind'    => $contact_kind,
     'contact_subject' => $contact_subject,
     'contact_message' => $contact_message,
+    'piece_hors_perimetre' => $piece_hors_perimetre,
     'session_id'      => $session_id,
   ]);
 }
@@ -3403,6 +3436,7 @@ function sapi_ajax_megafilter_chat() {
   $contact_kind = null;
   $contact_subject = '';
   $contact_message = '';
+  $piece_hors_perimetre = '';
   if ($parsed && isset($parsed['action']) && $parsed['action'] === 'contact') {
     $action = 'contact';
     $allowed_kinds = ['pro', 'sur-mesure', 'simple'];
@@ -3420,6 +3454,18 @@ function sapi_ajax_megafilter_chat() {
     if (isset($parsed['contact_message']) && is_string($parsed['contact_message'])) {
       $contact_message = sapi_strip_long_dashes(sanitize_textarea_field($parsed['contact_message']));
     }
+    /* ⚠️ LU UNIQUEMENT DANS LA BRANCHE `action === contact`, ET C'EST LE
+       GARDE-FOU. Hors de cette branche, un modèle bavard pourrait remplir ce
+       champ pour une pièce parfaitement couverte, et Robin lirait « salon » en
+       tête de son classement des pièces qu'il ne fait pas. */
+    if (isset($parsed['piece_hors_perimetre']) && is_string($parsed['piece_hors_perimetre'])) {
+      $piece_hors = trim(sanitize_text_field($parsed['piece_hors_perimetre']));
+      // 60 caractères = la colonne. Une « pièce » plus longue est une phrase,
+      // donc une réponse hors sujet : on la laisse tomber plutôt que la couper.
+      if ($piece_hors !== '' && mb_strlen($piece_hors) <= 60) {
+        $piece_hors_perimetre = function_exists('mb_strtolower') ? mb_strtolower($piece_hors) : strtolower($piece_hors);
+      }
+    }
   }
 
   $new_conversation = array_merge($conversation, [
@@ -3434,6 +3480,7 @@ function sapi_ajax_megafilter_chat() {
     'contact_kind'    => $contact_kind,
     'contact_subject' => $contact_subject,
     'contact_message' => $contact_message,
+    'piece_hors_perimetre' => $piece_hors_perimetre,
     'conversation'    => $new_conversation,
     'session_id'      => $session_id,
   ]);
@@ -4308,9 +4355,8 @@ function sapi_ajax_megafilter_advice() {
   $catalog_split_block  = sapi_megafilter_format_catalog_split($all_products, $matching_ids);
   $ignored_answers_block = sapi_megafilter_format_fallback_notes($relachements);
 
-  // Injecte ton + savoir + regles V2 en tête (PAS exemples : équivalent V2
-  // sapi_robin_call_recommendation qui n'inclut pas les exemples — sortie
-  // JSON courte à 1-2 phrases, pas besoin d'amorces conversationnelles).
+  // Injecte ton + savoir + règles V2 en tête, SANS les exemples : la sortie
+  // est un JSON court d'une à deux phrases, pas une conversation.
   $system_prompt  = sapi_megafilter_load_v2_prompts(false);
 
   $system_prompt .= "Tu es l'assistant de Robin, l'artisan menuisier lyonnais qui fabrique des luminaires en bois à la découpe laser dans son atelier de Lyon.\n";
@@ -4566,588 +4612,22 @@ function sapi_ajax_megafilter_surmesure() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ROBIN CONSEILLER V2 — Filtrage produits pour "Ma sélection"
+   ROBIN CONSEILLER V2 — SUPPRIMÉ LE 28/08 (583 lignes)
+═══════════════════════════════════════════════════════════
+   Sept fonctions `sapi_robin_*` d'une version antérieure du Conseiller :
+   validation de réponse IA, recommandation finale, parcours sur-mesure, et
+   trois appels Claude. Plus AUCUN appelant hors du bloc lui-même — vérifié
+   fonction par fonction sur tout le thème avant suppression.
+
+   ⚠️ POURQUOI ÇA COMPTAIT. Ce bloc contenait sa propre copie de la
+   conversion escalier → taille (`ouvert ? grande : petite`), périmée et
+   contredisant celle du moteur. Une recherche sur « taille_escalier » la
+   trouvait, et rien n'indiquait qu'elle était morte : on pouvait la corriger,
+   la croire corrigée partout, et repartir avec le bug intact.
+
+   Ce que ce bloc appelait vit ailleurs : le Conseiller V3 passe par
+   `sapi_immersion_build_context()` et les deux points d'entrée IA.
 ═══════════════════════════════════════════════════════════ */
-
-
-/* ═══════════════════════════════════════════════════════════
-   ROBIN CONSEILLER V2 — Endpoint per-step AI conseil
-═══════════════════════════════════════════════════════════ */
-
-
-/**
- * Robin V2 — Valide et nettoie la réponse IA.
- * Supprime les boutons avec des slugs invalides et les answered_steps incorrects.
- */
-function sapi_robin_validate_response($result) {
-  require_once get_template_directory() . '/inc/guide-data.php';
-  $all_steps = sapi_guide_get_steps();
-
-  // Construire la map des slugs valides par step_id
-  $valid_slugs = [];
-  foreach ($all_steps as $s) {
-    $valid_slugs[$s['id']] = array_map(function($c) { return $c['slug']; }, $s['choices']);
-  }
-
-  // URLs valides pour les boutons liens
-  $valid_urls = ['/contact/', '/mes-creations/', '/mes-creations/?robin_selection=1', '/sur-mesure/',
-    '/categorie-produit/suspensions/', '/categorie-produit/appliques/',
-    '/categorie-produit/lampadaires/', '/categorie-produit/lampes-a-poser/'];
-
-  // Filtrer suggested_buttons
-  if (!empty($result['suggested_buttons']) && is_array($result['suggested_buttons'])) {
-    $clean_buttons = [];
-    foreach ($result['suggested_buttons'] as $btn) {
-      if (!empty($btn['url'])) {
-        // Bouton lien — vérifier que l'URL est dans la liste
-        if (in_array($btn['url'], $valid_urls, true)) {
-          $clean_buttons[] = $btn;
-        }
-      } elseif (!empty($btn['step_id']) && !empty($btn['slug'])) {
-        // Bouton questionnaire — vérifier que le slug est valide pour cette étape
-        if (isset($valid_slugs[$btn['step_id']]) && in_array($btn['slug'], $valid_slugs[$btn['step_id']], true)) {
-          $clean_buttons[] = $btn;
-        }
-      } elseif (!empty($btn['label'])) {
-        // Bouton conversation — juste un label, renvoie comme texte libre
-        $clean_buttons[] = ['label' => sanitize_text_field($btn['label'])];
-      }
-    }
-    $result['suggested_buttons'] = $clean_buttons;
-  }
-
-  // Filtrer answered_steps
-  if (!empty($result['answered_steps']) && is_array($result['answered_steps'])) {
-    $clean_answers = [];
-    foreach ($result['answered_steps'] as $step_id => $slug) {
-      if (isset($valid_slugs[$step_id]) && in_array($slug, $valid_slugs[$step_id], true)) {
-        $clean_answers[$step_id] = $slug;
-      }
-    }
-    $result['answered_steps'] = $clean_answers;
-  }
-
-  return $result;
-}
-
-/**
- * Robin V2 — Build system prompt for a single step.
- */
-/**
- * Robin V2 — Recommandation finale : filtrage + Claude + produits.
- */
-function sapi_robin_handle_recommendation($answers, $ai_allowed) {
-  require_once get_template_directory() . '/inc/guide-data.php';
-
-  // Normaliser taille_escalier → taille
-  if (!empty($answers['taille_escalier'])) {
-    $answers['taille'] = $answers['taille_escalier'] === 'ouvert' ? 'grande' : 'petite';
-  }
-
-  // Détecter si le projet relève du sur mesure
-  $piece   = isset($answers['piece']) ? $answers['piece'] : '';
-  $taille  = isset($answers['taille']) ? $answers['taille'] : '';
-  $hauteur = isset($answers['hauteur']) ? $answers['hauteur'] : '';
-  $is_sur_mesure = ($piece === 'escalier')
-    || ($taille === 'grande' && in_array($hauteur, ['haute', 'confortable'], true))
-    || ($taille === 'grande' && $piece === 'escalier');
-
-  if ($is_sur_mesure) {
-    sapi_robin_handle_sur_mesure($answers, $ai_allowed);
-    return;
-  }
-
-  // Pipeline de filtrage (parcours standard)
-  $categories = sapi_guide_get_categories($answers);
-  $result = sapi_guide_query_products($answers, $categories);
-  $products = isset($result['products']) ? $result['products'] : [];
-
-  $picked = sapi_guide_pick_four($products, 4);
-
-  if (empty($picked)) {
-    wp_send_json_success([
-      'conseil_text' => 'Je n\'ai pas trouvé de luminaire qui corresponde exactement à vos critères. Explorez le catalogue ou contactez Robin directement.',
-      'products' => [],
-    ]);
-    return;
-  }
-
-  // Préparer les données produit pour le front
-  $front_products = [];
-  foreach ($picked as $p) {
-    $front_products[] = [
-      'id'              => $p['id'],
-      'title'           => $p['title'],
-      'price'           => $p['price'],
-      'image'           => $p['image'],
-      'hover_image'     => isset($p['hover_image']) ? $p['hover_image'] : '',
-      'ambiance'        => isset($p['ambiance']) ? $p['ambiance'] : '',
-      'permalink'       => $p['permalink'],
-      'variation_label' => isset($p['variation_label']) ? $p['variation_label'] : '',
-      'size_label'      => isset($p['size_label']) ? $p['size_label'] : '',
-      'category_label'  => isset($p['category_label']) ? $p['category_label'] : '',
-      'reason'          => '', // Sera rempli par Claude
-    ];
-  }
-
-  // Appeler Claude pour le texte A + texte B par produit
-  if ($ai_allowed) {
-    $ai_result = sapi_robin_call_recommendation($picked, $answers);
-    if ($ai_result) {
-      // Texte A
-      $conseil_text = isset($ai_result['conseil_text']) ? $ai_result['conseil_text'] : '';
-
-      // Textes B par produit
-      if (!empty($ai_result['products'])) {
-        foreach ($ai_result['products'] as $ai_prod) {
-          $pid = isset($ai_prod['id']) ? (int) $ai_prod['id'] : 0;
-          $reason = isset($ai_prod['reason']) ? $ai_prod['reason'] : '';
-          for ($i = 0; $i < count($front_products); $i++) {
-            if ($front_products[$i]['id'] === $pid) {
-              $front_products[$i]['reason'] = $reason;
-              break;
-            }
-          }
-        }
-      }
-
-      wp_send_json_success([
-        'conseil_text' => $conseil_text,
-        'products'     => $front_products,
-      ]);
-      return;
-    }
-  }
-
-  // Fallback sans IA
-  wp_send_json_success([
-    'conseil_text' => 'Voici les luminaires qui correspondent le mieux à votre projet. Contactez Robin si vous souhaitez en discuter.',
-    'products'     => $front_products,
-  ]);
-}
-
-/**
- * Robin V2 — Gestion du parcours "sur mesure" (escalier, grande pièce + plafond haut).
- */
-function sapi_robin_handle_sur_mesure($answers, $ai_allowed) {
-  $label_map = [
-    'piece' => 'Pièce', 'taille' => 'Taille', 'taille_escalier' => 'Type escalier',
-    'eclairage' => 'Éclairage', 'sortie' => 'Installation', 'hauteur' => 'Hauteur plafond',
-    'table' => 'Au-dessus table/îlot', 'style' => 'Style',
-  ];
-  $answers_text = '';
-  foreach ($answers as $k => $v) {
-    $label = isset($label_map[$k]) ? $label_map[$k] : $k;
-    $answers_text .= '- ' . $label . ' : ' . $v . "\n";
-  }
-
-  $conseil_text = '';
-  if ($ai_allowed) {
-    $conseil_text = sapi_robin_call_sur_mesure($answers_text);
-  }
-  if (empty($conseil_text)) {
-    // Fallback sans IA
-    $conseil_text = 'Ce type de projet mérite une attention particulière. Robin a déjà réalisé des luminaires pour des situations similaires. Le mieux est d\'en discuter directement avec lui.';
-  }
-
-  wp_send_json_success([
-    'recommend_type' => 'sur_mesure',
-    'conseil_text'   => $conseil_text,
-    'products'       => [],
-  ]);
-}
-
-/**
- * Robin V2 — Appel Claude pour le texte sur mesure.
- */
-function sapi_robin_call_sur_mesure($answers_text) {
-  $theme_dir = get_template_directory();
-  $ton = @file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt') ?: '';
-
-  $prompt  = $ton . "\n\n";
-  $prompt .= "CONTEXTE : Le client a un projet qui relève du sur mesure. Robin crée des luminaires sur mesure pour ce genre de situations.\n\n";
-  $prompt .= "RÉPONSES DU CLIENT :\n" . $answers_text . "\n";
-  $prompt .= "MISSION : Rédige un court texte (3-4 phrases MAX) qui :\n";
-  $prompt .= "1. Valide que le sur mesure est la bonne option pour ce projet\n";
-  $prompt .= "2. Rassure le client en mentionnant que Robin a déjà créé des luminaires pour des situations similaires\n";
-  $prompt .= "3. Donne envie de contacter Robin pour en discuter\n\n";
-  $prompt .= "RÈGLES ABSOLUES :\n";
-  $prompt .= "- Tu ne proposes PAS de luminaire, tu ne décris PAS ce que Robin pourrait créer. C'est la mission de Robin, pas la tienne.\n";
-  $prompt .= "- Tu parles du projet du client (sa pièce, ses contraintes) et tu expliques pourquoi le sur mesure est adapté.\n";
-  $prompt .= "- Pas de guillemets « ». Pas de markdown. Texte brut uniquement.\n";
-  $prompt .= "- Réponds UNIQUEMENT avec le texte, rien d'autre (pas de JSON, pas de commentaire).\n";
-
-  $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
-  if (empty($api_key)) return '';
-
-  $body = [
-    'model'      => 'claude-sonnet-4-6',
-    'max_tokens' => 256,
-    'system'     => $prompt,
-    'messages'   => [
-      ['role' => 'user', 'content' => 'Voici mon projet. Est-ce que le sur mesure est adapté ?'],
-    ],
-  ];
-
-  $response = wp_remote_post('https://api.anthropic.com/v1/messages', [
-    'timeout' => 20,
-    'headers' => [
-      'Content-Type'      => 'application/json',
-      'x-api-key'         => $api_key,
-      'anthropic-version'  => '2023-06-01',
-    ],
-    'body' => wp_json_encode($body),
-  ]);
-
-  if (is_wp_error($response)) return '';
-
-  $resp_body = json_decode(wp_remote_retrieve_body($response), true);
-  if (!$resp_body || empty($resp_body['content'][0]['text'])) return '';
-
-  return trim($resp_body['content'][0]['text']);
-}
-
-/**
- * Robin V2 — Appel Claude pour la recommandation finale.
- */
-function sapi_robin_call_recommendation($products, $answers) {
-  $theme_dir = get_template_directory();
-  $ton    = @file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt') ?: '';
-  $savoir = @file_get_contents($theme_dir . '/assets/guide-prompt-savoir.txt') ?: '';
-  $regles = @file_get_contents($theme_dir . '/assets/guide-prompt-regles.txt') ?: '';
-
-  // Construire la liste des produits pour le prompt
-  $product_lines = [];
-  foreach ($products as $p) {
-    $line = '- ' . $p['title'] . ' (ID: ' . $p['id'] . ')';
-    $line .= ' | Catégorie: ' . ($p['category_label'] ?? '');
-    $line .= ' | Format: ' . ($p['format'] ?? '');
-    $line .= ' | Ampoule: ' . ($p['type_ampoule'] ?? '');
-    if (!empty($p['variation_label'])) $line .= ' | Essence: ' . $p['variation_label'];
-    $line .= ' | Ventes: ' . ($p['total_sales'] ?? 0);
-    $product_lines[] = $line;
-  }
-
-  // Résumé des réponses
-  $label_map = [
-    'piece' => 'Pièce', 'taille' => 'Taille', 'taille_escalier' => 'Type escalier',
-    'eclairage' => 'Éclairage', 'sortie' => 'Installation', 'hauteur' => 'Hauteur plafond',
-    'table' => 'Au-dessus table/îlot', 'style' => 'Style',
-  ];
-  $answers_text = '';
-  foreach ($answers as $k => $v) {
-    $label = isset($label_map[$k]) ? $label_map[$k] : $k;
-    $answers_text .= '- ' . $label . ' : ' . $v . "\n";
-  }
-
-  $prompt = $ton . "\n\n" . $savoir . "\n\n" . $regles . "\n\n";
-  $prompt .= "PRODUITS SÉLECTIONNÉS POUR CE CLIENT :\n" . implode("\n", $product_lines) . "\n\n";
-  $prompt .= "RÉPONSES DU CLIENT :\n" . $answers_text . "\n";
-  $prompt .= "MISSION : Rédige une recommandation finale personnalisée.\n\n";
-  $prompt .= "FORMAT DE RÉPONSE (JSON strict, pas de markdown) :\n";
-  $prompt .= "{\n";
-  $prompt .= '  "conseil_text": "Texte A : 2 phrases MAXIMUM. Synthèse technique courte. Ne cite pas les noms des produits.",' . "\n";
-  $prompt .= '  "products": [' . "\n";
-  $prompt .= '    { "id": 123, "reason": "Texte B : 1 seule phrase. Pourquoi ce modèle précis convient." }' . "\n";
-  $prompt .= '  ]' . "\n";
-  $prompt .= "}\n\n";
-  $prompt .= "RÈGLES :\n";
-  $prompt .= "- Le conseil_text ne mentionne PAS les noms de produits (ils sont affichés à côté).\n";
-  $prompt .= "- Chaque reason est personnalisée (pas générique).\n";
-  $prompt .= "- Pas de guillemets « » (ajoutés côté front).\n";
-  $prompt .= "- Pas de markdown.\n";
-  $prompt .= "- Les IDs dans products doivent correspondre exactement aux IDs des produits fournis.\n";
-
-  // Appel avec plus de tokens (la recommandation est plus longue)
-  $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
-  if (empty($api_key)) return null;
-
-  $body = [
-    'model'      => 'claude-sonnet-4-6',
-    'max_tokens' => 2048,
-    'system'     => $prompt,
-    'messages'   => [
-      ['role' => 'user', 'content' => 'Voici mon projet complet. Recommande-moi des luminaires.'],
-    ],
-  ];
-
-  $response = wp_remote_post('https://api.anthropic.com/v1/messages', [
-    'timeout' => 45,
-    'headers' => [
-      'Content-Type'      => 'application/json',
-      'x-api-key'         => $api_key,
-      'anthropic-version'  => '2023-06-01',
-    ],
-    'body' => wp_json_encode($body),
-  ]);
-
-  if (is_wp_error($response)) {
-    error_log('Robin V2 Reco API error: ' . $response->get_error_message());
-    return null;
-  }
-
-  $status   = wp_remote_retrieve_response_code($response);
-  $raw_body = wp_remote_retrieve_body($response);
-
-  if ($status !== 200) {
-    error_log('Robin V2 Reco API HTTP ' . $status . ': ' . $raw_body);
-    return null;
-  }
-
-  $data = json_decode($raw_body, true);
-  if (!isset($data['content'][0]['text'])) return null;
-
-  $text = $data['content'][0]['text'];
-  $text = preg_replace('/^```json\s*/i', '', trim($text));
-  $text = preg_replace('/\s*```$/i', '', $text);
-
-  $parsed = json_decode(trim($text), true);
-  if (!$parsed || !isset($parsed['conseil_text'])) {
-    // Fallback : essayer d'extraire conseil_text par regex
-    if (preg_match('/"conseil_text"\s*:\s*"((?:[^"\\\\]|\\\\.)*)"/s', $text, $m)) {
-      return ['conseil_text' => stripslashes($m[1]), 'products' => []];
-    }
-    return ['conseil_text' => 'Explorez les luminaires sélectionnés ci-dessous, ou contactez Robin pour un conseil personnalisé.', 'products' => []];
-  }
-
-  return $parsed;
-}
-
-function sapi_robin_build_step_prompt($step_id, $answers, $opening_context, $context_data, $user_message, $ai_call_count = 0) {
-  $theme_dir = get_template_directory();
-
-  // Load prompt files
-  $ton      = @file_get_contents($theme_dir . '/assets/guide-prompt-ton.txt') ?: '';
-  $savoir   = @file_get_contents($theme_dir . '/assets/guide-prompt-savoir.txt') ?: '';
-  $regles   = @file_get_contents($theme_dir . '/assets/guide-prompt-regles.txt') ?: '';
-  $exemples = @file_get_contents($theme_dir . '/assets/guide-prompt-exemples.txt') ?: '';
-
-  // Load full catalog
-  require_once $theme_dir . '/inc/guide-data.php';
-  $all_products = sapi_guide_query_all_products($answers);
-
-  $catalog_lines = [];
-  foreach ($all_products as $p) {
-    $line = '- ' . $p['title'];
-    $line .= ' | Catégorie: ' . ($p['category_label'] ?? '');
-    $line .= ' | Format: ' . ($p['format'] ?? '');
-    $line .= ' | Ampoule: ' . ($p['type_ampoule'] ?? '');
-    if (!empty($p['variation_label'])) {
-      $line .= ' | Essence recommandée: ' . $p['variation_label'];
-    }
-    $line .= ' | Ventes: ' . ($p['total_sales'] ?? 0);
-    $line .= ' | ID: ' . $p['id'];
-    $line .= ' | URL: ' . ($p['permalink'] ?? '');
-
-    if (!empty($p['variations'])) {
-      $vars = [];
-      foreach ($p['variations'] as $v) {
-        $vars[] = $v['essence'] . ' ' . ($v['taille'] ?? '') . ' (var:' . $v['variation_id'] . ')';
-      }
-      $line .= ' | Variations: ' . implode(', ', $vars);
-    }
-
-    $catalog_lines[] = $line;
-  }
-
-  // Build answers summary
-  $answers_text = '';
-  $label_map = [
-    'piece' => 'Pièce', 'taille' => 'Taille', 'taille_escalier' => 'Type escalier',
-    'eclairage' => 'Éclairage', 'sortie' => 'Installation', 'hauteur' => 'Hauteur plafond',
-    'table' => 'Au-dessus table/îlot', 'style' => 'Style',
-  ];
-  foreach ($answers as $k => $v) {
-    $label = isset($label_map[$k]) ? $label_map[$k] : $k;
-    $answers_text .= '- ' . $label . ' : ' . $v . "\n";
-  }
-
-  // Compose system prompt
-  $prompt = $ton . "\n\n" . $savoir . "\n\n" . $regles . "\n\n";
-
-  $prompt .= "EXEMPLES DE CONSEILS PAR ÉTAPE (pour le ton et la direction) :\n";
-  $prompt .= $exemples . "\n\n";
-
-  $prompt .= "CATALOGUE COMPLET DES LUMINAIRES :\n";
-  $prompt .= implode("\n", $catalog_lines) . "\n\n";
-
-  if (!empty($answers_text)) {
-    $prompt .= "RÉPONSES DU CLIENT JUSQU'À PRÉSENT :\n" . $answers_text . "\n";
-  }
-
-  $prompt .= "CONTEXTE D'OUVERTURE : " . $opening_context . "\n";
-  if (!empty($context_data)) {
-    $prompt .= "DONNÉES CONTEXTUELLES : " . wp_json_encode($context_data) . "\n";
-  }
-  $prompt .= "ÉTAPE ACTUELLE : " . $step_id . "\n\n";
-
-  // Output format — différent selon texte libre ou pas
-  $is_free_text = !empty($user_message);
-
-  $prompt .= "FORMAT DE RÉPONSE (JSON strict, pas de markdown, pas de code fences) :\n";
-
-  if ($is_free_text) {
-    $prompt .= "Le client a écrit un message libre. Analyse ce qu'il dit et réponds.\n";
-
-    // Compteur d'échanges IA — limite à 3
-    $exchange_num = $ai_call_count + 1;
-    $prompt .= "\nÉCHANGE IA N°" . $exchange_num . " sur 3 maximum.\n";
-    if ($exchange_num >= 3) {
-      $prompt .= "C'est ton DERNIER échange. Tu DOIS conclure maintenant :\n";
-      $prompt .= "- Plus de boutons conversation. Uniquement des boutons liens (catalogue, contact, sur-mesure) ou questionnaire.\n";
-      $prompt .= "- Oriente le client vers une action concrète : voir les modèles, contacter Robin, ou imaginer un sur-mesure.\n";
-    } elseif ($exchange_num === 2) {
-      $prompt .= "C'est ton avant-dernier échange. Commence à orienter le client vers une action.\n";
-    }
-    $prompt .= "\n";
-    $prompt .= "{\n";
-    $prompt .= '  "conseil_text": "Ta réponse personnalisée (2-5 phrases, style Robin)",' . "\n";
-    $prompt .= '  "link_url": "/mes-creations/suspensions/" ou null,' . "\n";
-    $prompt .= '  "link_label": "Voir les suspensions" ou null,' . "\n";
-    $prompt .= '  "answered_steps": { "piece": "cuisine", "taille": "petite" } ou {} si rien déduit,' . "\n";
-    $prompt .= '  "suggested_buttons": [' . "\n";
-    $prompt .= '    { "label": "Voir les suspensions", "url": "/categorie-produit/suspensions/" },' . "\n";
-    $prompt .= '    { "label": "Contacter Robin", "url": "/contact/" },' . "\n";
-    $prompt .= '    { "label": "Sortie plafond", "slug": "plafond", "step_id": "sortie" }' . "\n";
-    $prompt .= '  ] ou [] si pas pertinent,' . "\n";
-    $prompt .= '  "next_step_id": "sortie" ou "hors_parcours" ou null' . "\n";
-    $prompt .= "}\n\n";
-
-    $prompt .= "RÈGLES TEXTE LIBRE :\n";
-    $prompt .= "- Analyse le message du client et déduis les réponses aux questions du questionnaire.\n";
-    $prompt .= "- answered_steps : les step_id → slug que tu as pu déduire du message. Utilise UNIQUEMENT les slugs valides des étapes du questionnaire.\n";
-
-    // Liste des slugs valides par étape
-    $prompt .= "- Slugs valides :\n";
-    require_once get_template_directory() . '/inc/guide-data.php';
-    $all_steps = sapi_guide_get_steps();
-    foreach ($all_steps as $s) {
-      $slugs = array_map(function($c) { return $c['slug']; }, $s['choices']);
-      $prompt .= '  - ' . $s['id'] . ' : ' . implode(', ', $slugs) . "\n";
-    }
-
-    $prompt .= "- next_step_id : la prochaine étape logique du questionnaire, ou 'hors_parcours' si le message sort du cadre.\n";
-    $prompt .= "- suggested_buttons : trois types possibles :\n";
-    $prompt .= "  - Bouton lien (ouvre une page) : { \"label\": \"...\", \"url\": \"/chemin/\" }\n";
-    $prompt .= "  - Bouton questionnaire (valide une étape) : { \"label\": \"...\", \"slug\": \"...\", \"step_id\": \"...\" }\n";
-    $prompt .= "  - Bouton conversation (continue la discussion) : { \"label\": \"...\" } — le label est renvoyé comme message\n";
-    $prompt .= "  URLs valides : /contact/, /mes-creations/?robin_selection=1, /sur-mesure/\n";
-    $prompt .= "- BOUTONS PAR DÉFAUT : si tu n'as pas de meilleure idée, utilise ces boutons liens :\n";
-
-    // Injecter les boutons par défaut selon le contexte
-    $taille = isset($answers['taille']) ? $answers['taille'] : '';
-    $hauteur = isset($answers['hauteur']) ? $answers['hauteur'] : '';
-    $show_sur_mesure_prompt = ($taille === 'grande' || $hauteur === 'haute');
-
-    $prompt .= '  { "label": "Voir les modèles filtrés pour votre projet", "url": "/mes-creations/?robin_selection=1" }' . "\n";
-    if ($show_sur_mesure_prompt) {
-      $prompt .= '  { "label": "Imaginer un modèle sur mesure", "url": "/sur-mesure/" }' . "\n";
-    } else {
-      $prompt .= '  { "label": "Contacter Robin", "url": "/contact/" }' . "\n";
-    }
-    $prompt .= "  Tu peux garder ces boutons, les remplacer, ou en ajouter selon ta réponse. Retourne la liste complète dans suggested_buttons.\n";
-    $prompt .= "- Si le message est une question hors questionnaire (livraison, prix, sur mesure...), réponds et mets next_step_id à 'hors_parcours'.\n";
-  } else {
-    $prompt .= "{\n";
-    $prompt .= '  "conseil_text": "Ton conseil personnalisé pour cette étape (2-4 phrases, style citation Robin)",' . "\n";
-    $prompt .= '  "link_url": "/mes-creations/suspensions/" ou null si pas pertinent,' . "\n";
-    $prompt .= '  "link_label": "Voir les suspensions" ou null' . "\n";
-    $prompt .= "}\n\n";
-  }
-
-  $prompt .= "RÈGLES IMPORTANTES :\n";
-  $prompt .= "- Le conseil_text doit être personnel et adapté.\n";
-  $prompt .= "- Ne répète pas la question, donne directement le conseil.\n";
-  $prompt .= "- Le link_url doit pointer vers une page existante du site (catégorie, page nos-créations, etc.) ou null.\n";
-  $prompt .= "- Pas de markdown. Texte brut uniquement.\n";
-  $prompt .= "- Pas de guillemets « » dans le texte (ils sont ajoutés côté front).\n";
-  $prompt .= "- Les labels des boutons : première lettre majuscule, reste en minuscule. Exemple : \"Voir les suspensions\", \"Contacter Robin\".\n";
-  $prompt .= "- CRITIQUE : ta réponse doit être UNIQUEMENT du JSON valide. Pas de texte avant, pas de texte après, pas de commentaire, pas d'analyse. Juste le JSON.\n";
-  $prompt .= "- Tu es l'assistant de Robin, l'artisan de l'Atelier Sâpi. Tu parles directement au visiteur, naturellement, sans prétendre être Robin. Tu connais bien ses créations et tu guides le client. Ne dis jamais 'le client', 'mon analyse', 'voici ma réflexion'. Quand tu parles de Robin ou de son travail, utilise la 3e personne (\"Robin\", \"son atelier\"). Pour tes recommandations, utilise le \"je\" naturellement (\"je vous recommande\").\n";
-
-  return $prompt;
-}
-
-/**
- * Robin V2 — Call Claude API with custom user message.
- */
-function sapi_robin_call_claude_step($system_prompt, $user_message) {
-  $api_key = defined('ANTHROPIC_API_KEY') ? ANTHROPIC_API_KEY : '';
-  if (empty($api_key)) {
-    return null;
-  }
-
-  $body = [
-    'model'      => 'claude-sonnet-4-6',
-    'max_tokens' => 512,
-    'system'     => $system_prompt,
-    'messages'   => [
-      ['role' => 'user', 'content' => $user_message],
-    ],
-  ];
-
-  $response = wp_remote_post('https://api.anthropic.com/v1/messages', [
-    'timeout' => 30,
-    'headers' => [
-      'Content-Type'      => 'application/json',
-      'x-api-key'         => $api_key,
-      'anthropic-version'  => '2023-06-01',
-    ],
-    'body' => wp_json_encode($body),
-  ]);
-
-  if (is_wp_error($response)) {
-    error_log('Robin V2 Claude API error: ' . $response->get_error_message());
-    return null;
-  }
-
-  $status   = wp_remote_retrieve_response_code($response);
-  $raw_body = wp_remote_retrieve_body($response);
-
-  if ($status !== 200) {
-    error_log('Robin V2 Claude API HTTP ' . $status . ': ' . $raw_body);
-    return null;
-  }
-
-  $data = json_decode($raw_body, true);
-  if (!isset($data['content'][0]['text'])) {
-    return null;
-  }
-
-  $text = $data['content'][0]['text'];
-
-  // Nettoyer les code fences
-  $text = preg_replace('/^```json\s*/i', '', trim($text));
-  $text = preg_replace('/\s*```$/i', '', $text);
-
-  // Essai 1 : parser directement
-  $parsed = json_decode(trim($text), true);
-  if ($parsed && isset($parsed['conseil_text'])) {
-    return $parsed;
-  }
-
-  // Essai 2 : extraire le JSON du texte (si Claude a mis du texte autour)
-  if (preg_match('/\{[\s\S]*"conseil_text"[\s\S]*\}/s', $text, $match)) {
-    $parsed = json_decode($match[0], true);
-    if ($parsed && isset($parsed['conseil_text'])) {
-      return $parsed;
-    }
-  }
-
-  // Essai 3 : extraire juste le conseil_text par regex
-  if (preg_match('/"conseil_text"\s*:\s*"((?:[^"\\\\]|\\\\.)*)"/s', $text, $m)) {
-    return ['conseil_text' => stripslashes($m[1]), 'link_url' => null, 'link_label' => null];
-  }
-
-  // Fallback : texte brut nettoyé
-  $clean = preg_replace('/\{[\s\S]*\}/', '', $text);
-  $clean = trim($clean);
-  if (!empty($clean)) {
-    return ['conseil_text' => $clean, 'link_url' => null, 'link_label' => null];
-  }
-
-  return ['conseil_text' => $text, 'link_url' => null, 'link_label' => null];
-}
 
 /**
  * Step 1 → WooCommerce product categories
@@ -5376,61 +4856,11 @@ function sapi_guide_query_all_products($answers = []) {
   return $results;
 }
 
-/**
- * Build a human-readable description of the filters applied during the first recommendation.
- * Sent to Claude during refinement so it understands what was filtered and why.
- */
-function sapi_guide_build_filter_context(array $answers, array $categories, array $fallback_notes = []) {
-  $parts = [];
-  $sortie    = isset($answers['sortie'])    ? $answers['sortie']    : '';
-  $piece     = isset($answers['piece'])     ? $answers['piece']     : '';
-  $taille    = isset($answers['taille'])    ? $answers['taille']    : '';
-  $hauteur   = isset($answers['hauteur'])   ? $answers['hauteur']   : '';
-  $style     = isset($answers['style'])     ? $answers['style']     : '';
-  $eclairage = isset($answers['eclairage']) ? $answers['eclairage'] : '';
-
-  $parts[] = 'Catégories filtrées : ' . implode(', ', $categories);
-
-  if ($eclairage === 'secondaire') {
-    $parts[] = 'Éclairage secondaire demandé (complémentaire).';
-  }
-
-  if ($sortie === 'plafond') {
-    $parts[] = 'Filtré sur suspensions car sortie plafond.';
-  } elseif ($sortie === 'mur') {
-    $parts[] = 'Filtré sur appliques car sortie mur.';
-  } elseif ($sortie === 'pas-de-sortie') {
-    $parts[] = 'Filtré sur lampadaires, lampes à poser et appliques car prise 230V (pas de sortie électrique dédiée).';
-  } elseif ($sortie === 'ne-sais-pas') {
-    $parts[] = 'Sortie inconnue : suspensions, lampadaires et lampes à poser proposés.';
-  }
-
-  $ampoule_filter = sapi_guide_get_ampoule_filter($piece, $taille);
-  if ($ampoule_filter) {
-    $parts[] = 'Filtre ampoule : ' . implode(' ou ', $ampoule_filter) . ' (pièce : ' . $piece . ').';
-  }
-
-
-  if ($style === 'moderne') {
-    $parts[] = 'Essence conseillée : Peuplier (style moderne).';
-  } elseif ($style === 'ancien') {
-    $parts[] = 'Essence conseillée : Okoumé (style ancien/chaleureux).';
-  }
-
-  if ($piece === 'cuisine') {
-    $parts[] = 'Lampe à poser exclue (cuisine).';
-  }
-
-  if ($taille === 'grande') {
-    $parts[] = 'Grande pièce : produits avec peu de tailles disponibles exclus.';
-  }
-
-  if (!empty($fallback_notes)) {
-    $parts[] = 'Notes de fallback (filtres relâchés) : ' . implode(' ', $fallback_notes);
-  }
-
-  return implode("\n", $parts);
-}
+/* `sapi_guide_build_filter_context()` (55 lignes) supprimée le 28/08 : jamais
+   appelée, nulle part dans le thème. Elle mettait en phrase les contraintes du
+   filtrage pour l'IA — ce que fait aujourd'hui
+   `sapi_megafilter_format_fallback_notes()`, à partir de ce que le moteur
+   rapporte lui-même plutôt que d'une reconstitution. */
 
 /**
  * Process query results into product data arrays
@@ -5701,7 +5131,16 @@ function sapi_conseiller_default_rules() {
        n'est pas un refus de choisir, c'est une délégation. Le défaut disait
        encore « aucune essence », l'état d'avant cette décision. */
     'style_essence' => ['moderne' => 'peuplier', 'ancien' => 'okoume', 'neutre' => 'peuplier'],
-    'escalier_map'  => ['standard' => 'petite', 'ouvert' => 'grande'],
+    /* ⚠️ `standard` → MOYENNE, ET NON PLUS « PETITE ». Le serveur choisissait
+       comme pour une petite pièce là où le navigateur choisissait la moyenne
+       (décision Robin du 27/08 : « recommander la taille moyenne par défaut »).
+       Deux visiteurs identiques recevaient donc deux recommandations
+       différentes selon le chemin emprunté. Cette table est désormais la SEULE
+       source : elle est transmise au navigateur dans `SAPI_PROJECT.escalierMap`.
+       `ouvert` reste `grande` côté moteur — c'est le vocabulaire des tailles,
+       que le moteur comprend. Le navigateur, lui, le traduit en « la plus
+       grande option disponible » : voir la note dans sapi-project.js. */
+    'escalier_map'  => ['standard' => 'moyenne', 'ouvert' => 'grande'],
 
     // ── Filtre DUR : cuisine retire lampe à poser ET lampadaire (Tâche 2) ──
     'cuisine_remove' => ['lampesaposer', 'lampadaires'],
@@ -5842,8 +5281,10 @@ function sapi_immersion_build_context(array $answers) {
      elle est ici pour que les deux appelants la subissent à l'identique. */
   if ($piece === 'escalier' && !empty($answers['taille_escalier'])) {
     $rules = function_exists('sapi_conseiller_get_rules') ? sapi_conseiller_get_rules() : [];
-    $map = isset($rules['escalier_map']) ? $rules['escalier_map'] : ['standard' => 'petite', 'ouvert' => 'grande'];
-    $answers['taille'] = isset($map[$answers['taille_escalier']]) ? $map[$answers['taille_escalier']] : 'petite';
+    $map = isset($rules['escalier_map']) ? $rules['escalier_map'] : ['standard' => 'moyenne', 'ouvert' => 'grande'];
+    /* Repli sur `moyenne` et non `petite` : un type d'escalier inconnu n'est
+       pas une raison de proposer le plus petit modèle du catalogue. */
+    $answers['taille'] = isset($map[$answers['taille_escalier']]) ? $map[$answers['taille_escalier']] : 'moyenne';
   }
 
   // ── La sélection (le moteur, inchangé : il est l'acquis, on ne le refait pas)
@@ -6926,6 +6367,19 @@ function sapi_megafilter_create_sessions_table() {
   $table = $wpdb->prefix . 'sapi_megafilter_sessions';
   $charset = $wpdb->get_charset_collate();
 
+  /* ⚠️ AUCUN COMMENTAIRE À L'INTÉRIEUR DE CETTE CHAÎNE. `dbDelta` découpe le
+     contenu des parenthèses ligne par ligne et traite CHAQUE ligne comme une
+     définition de colonne : il essaierait de créer des colonnes nommées `/*`,
+     `(salle`, `pour`… Les ALTER échouent, et avec l'affichage des erreurs
+     activé, MySQL les imprime en haut de la page publique.
+     Ce que portent les colonnes non évidentes :
+     - `piece_hors_perimetre` : le mot du visiteur quand l'IA juge la pièce hors
+       catalogue (salle de bain, garage…). Jamais pour une pièce simplement
+       rapprochée d'une autre : « couloir » devient « entrée », ce n'est pas
+       hors périmètre.
+     - `table_reponse`, `ai_freetext_used`, `matching_product_ids`,
+       `ip_address`, `contact_email` : conservées, plus alimentées (voir les
+       notes aux endroits où l'écriture a été retirée). */
   $sql = "CREATE TABLE $table (
     id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
     session_id VARCHAR(36) NOT NULL,
@@ -6956,6 +6410,7 @@ function sapi_megafilter_create_sessions_table() {
     matching_product_ids TEXT DEFAULT NULL,
 
     contact_triggered TINYINT(1) DEFAULT 0,
+    piece_hors_perimetre VARCHAR(60) DEFAULT '',
     contact_kind VARCHAR(20) DEFAULT '',
     contact_subject VARCHAR(200) DEFAULT '',
     contact_message TEXT DEFAULT NULL,
@@ -6986,6 +6441,53 @@ function sapi_megafilter_maybe_create_table() {
     sapi_megafilter_create_sessions_table();
   }
 }
+
+/* Version du schéma. À INCRÉMENTER à chaque colonne ajoutée au CREATE TABLE.
+   1 → ajout de `piece_hors_perimetre` (28/08). */
+if (!defined('SAPI_SESSIONS_DB_VERSION')) define('SAPI_SESSIONS_DB_VERSION', '1');
+
+/**
+ * Applique au schéma existant les colonnes ajoutées depuis.
+ *
+ * ⚠️ SANS ÇA, UNE COLONNE AJOUTÉE N'EXISTE JAMAIS EN BASE. `dbDelta` n'était
+ * appelé que par `sapi_megafilter_create_sessions_table()`, elle-même appelée
+ * uniquement quand la table est ABSENTE (et au changement de thème). Sur un
+ * site déjà installé, ajouter une colonne au `CREATE TABLE` ne produisait donc
+ * rien du tout — et l'`INSERT` qui la mentionne échoue en silence : `$wpdb`
+ * renvoie `false`, la session n'est pas enregistrée, et personne ne l'apprend.
+ * On aurait perdu toutes les sessions jusqu'à ce que quelqu'un s'en aperçoive.
+ *
+ * ⚠️ SUR `init`, PAS `admin_init`. Les sessions sont écrites depuis le site
+ * public : si la migration n'attendait qu'une visite de l'admin, un visiteur
+ * arrivé avant Robin tomberait précisément sur l'`INSERT` cassé.
+ * Le contrôle ne coûte rien : `get_option` sur une option autochargée.
+ */
+function sapi_megafilter_maybe_upgrade_table() {
+  if (get_option('sapi_megafilter_db_version') === SAPI_SESSIONS_DB_VERSION) return;
+  global $wpdb;
+  $table = $wpdb->prefix . 'sapi_megafilter_sessions';
+  if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table)) !== $table) return;
+  sapi_megafilter_create_sessions_table(); // dbDelta ajoute les colonnes manquantes
+
+  /* ⚠️ ON VÉRIFIE AVANT DE DIRE QUE C'EST FAIT. `dbDelta` ne lève jamais
+     d'erreur : il renvoie une liste de messages, et un ALTER refusé (droits,
+     table verrouillée) passe inaperçu. Poser la version sans contrôler
+     reviendrait à graver un échec pour toujours — la migration ne serait plus
+     jamais retentée, et l'INSERT qui mentionne la colonne échouerait à chaque
+     session, en silence. C'est précisément ce que cette fonction existe pour
+     empêcher : elle ne doit pas rater de la même façon. */
+  $colonne = $wpdb->get_var($wpdb->prepare(
+    "SHOW COLUMNS FROM $table LIKE %s", 'piece_hors_perimetre'
+  ));
+  if ($colonne) {
+    update_option('sapi_megafilter_db_version', SAPI_SESSIONS_DB_VERSION, true);
+  } else {
+    error_log('Sapi : la colonne piece_hors_perimetre n\'a pas pu être ajoutée. '
+      . 'Les sessions ne seront pas enregistrées tant que ce n\'est pas réglé. '
+      . 'Nouvel essai à la prochaine requête.');
+  }
+}
+add_action('init', 'sapi_megafilter_maybe_upgrade_table');
 
 /**
  * Migration idempotente V2 → V3 : DROP ancienne table sapi_robin_sessions
@@ -7422,6 +6924,10 @@ function sapi_megafilter_log_session() {
     $update_data['contact_triggered'] = !empty($data['contact_triggered']) ? 1 : 0;
     $update_formats[] = '%d';
   }
+  if (array_key_exists('piece_hors_perimetre', $data)) {
+    $update_data['piece_hors_perimetre'] = mb_substr(sanitize_text_field($data['piece_hors_perimetre']), 0, 60);
+    $update_formats[] = '%s';
+  }
   if (array_key_exists('contact_kind', $data)) {
     $update_data['contact_kind'] = sanitize_key($data['contact_kind']);
     $update_formats[] = '%s';
@@ -7455,7 +6961,14 @@ function sapi_megafilter_log_session() {
 
   if ($existing) {
     if (!empty($update_data)) {
-      $wpdb->update($table, $update_data, ['session_id' => $session_id], $update_formats, ['%s']);
+      /* ⚠️ ON JOURNALISE L'ÉCHEC. `$wpdb->update` renvoie `false` sur erreur —
+         colonne absente, table verrouillée — et ce retour était jeté. Une
+         mesure qui s'arrête de fonctionner sans le dire est pire qu'une mesure
+         absente : Robin lirait des chiffres qui stagnent en croyant que le
+         trafic baisse. */
+      if ($wpdb->update($table, $update_data, ['session_id' => $session_id], $update_formats, ['%s']) === false) {
+        error_log('Sapi : mise à jour de session impossible — ' . $wpdb->last_error);
+      }
     }
     $row_id = (int) $existing;
     $is_insert = false;
@@ -7510,7 +7023,11 @@ function sapi_megafilter_log_session() {
     $insert_data['referrer'] = isset($_SERVER['HTTP_REFERER']) ? esc_url_raw(wp_unslash($_SERVER['HTTP_REFERER'])) : '';
     $insert_formats[] = '%s';
 
-    $wpdb->insert($table, $insert_data, $insert_formats);
+    if ($wpdb->insert($table, $insert_data, $insert_formats) === false) {
+      /* Même raison qu'à la mise à jour ci-dessus, en plus grave : ici c'est la
+         session ENTIÈRE qui est perdue, pas seulement sa dernière retouche. */
+      error_log('Sapi : enregistrement de session impossible — ' . $wpdb->last_error);
+    }
     $row_id = (int) $wpdb->insert_id;
     $is_insert = true;
   }
@@ -7690,7 +7207,10 @@ add_action('admin_enqueue_scripts', 'sapi_megafilter_admin_enqueue');
  */
 function sapi_megafilter_admin_read_filters() {
   $valid_periods  = ['7d', '30d', 'all'];
-  $valid_entries  = ['home_picker', 'mes_creations', 'product_pill', 'freetext'];
+  /* `conseils_picker` ajouté le 28/08 : le sélecteur de pièce existe sur DEUX
+     pages (l'accueil et /conseils-eclaires/), et les confondre reviendrait à ne
+     pas savoir laquelle des deux amène des visiteurs. */
+  $valid_entries  = ['home_picker', 'conseils_picker', 'mes_creations', 'product_pill', 'freetext'];
   $valid_pieces   = ['salon', 'cuisine', 'chambre', 'chambre-enfant', 'bureau', 'entree', 'escalier'];
   $valid_devices  = ['desktop', 'mobile'];
   $valid_statuses = ['chat', 'contact', 'complete'];
@@ -7846,6 +7366,13 @@ function sapi_megafilter_admin_compute_stats($filters) {
   $entry_q = "SELECT entry_point, COUNT(*) AS c FROM $table $where_sql " . ($where_sql ? 'AND' : 'WHERE') . " entry_point != '' GROUP BY entry_point ORDER BY c DESC LIMIT 4";
   $top_entry = $args ? $wpdb->get_results($wpdb->prepare($entry_q, $args)) : $wpdb->get_results($entry_q);
 
+  /* Les pièces qu'on demande à Robin et qu'il ne fait pas. Pas de LIMIT
+     serré : c'est une liste courte par nature, et une pièce qui revient trois
+     fois vaut d'être vue. */
+  $hors_q = "SELECT piece_hors_perimetre AS mot, COUNT(*) AS c FROM $table $where_sql "
+    . ($where_sql ? 'AND' : 'WHERE') . " piece_hors_perimetre != '' GROUP BY piece_hors_perimetre ORDER BY c DESC LIMIT 8";
+  $top_hors = $args ? $wpdb->get_results($wpdb->prepare($hors_q, $args)) : $wpdb->get_results($hors_q);
+
   // Breakdown contacts par kind (uniquement parmi les soumis)
   $contact_break_q = "SELECT contact_kind, COUNT(*) AS c FROM $table $where_sql " . ($where_sql ? 'AND' : 'WHERE') . " contact_submitted = 1 GROUP BY contact_kind";
   $contact_breakdown = $args ? $wpdb->get_results($wpdb->prepare($contact_break_q, $args)) : $wpdb->get_results($contact_break_q);
@@ -7860,6 +7387,7 @@ function sapi_megafilter_admin_compute_stats($filters) {
     'top_styles'        => $top_styles ?: [],
     'top_entry'         => $top_entry ?: [],
     'contact_breakdown' => $contact_breakdown ?: [],
+    'top_hors'          => $top_hors ?: [],
   ];
 }
 
@@ -7899,13 +7427,15 @@ function sapi_megafilter_admin_page() {
 
   // Labels d'affichage (mockup-12)
   $entry_labels = [
-    'home_picker'   => 'Accueil',
+    'home_picker'    => 'Accueil',
+    'conseils_picker' => 'Conseils éclairés',
     'mes_creations' => 'Mes créations',
     'product_pill'  => 'Fiche produit',
     'freetext'      => 'Texte libre',
   ];
   $entry_pill_class = [
     'home_picker'   => 'pill--home',
+    'conseils_picker' => 'pill--home',
     'mes_creations' => 'pill--mes-creations',
     'product_pill'  => 'pill--product',
     'freetext'      => 'pill--freetext',
@@ -8066,6 +7596,30 @@ function sapi_megafilter_admin_page() {
           <?php endforeach; ?>
         <?php endif; ?>
 
+        <?php /* Les pièces qu'on te demande et que tu ne fais pas. La donnée
+                 vient de l'IA, qui recopie le mot du visiteur au moment où elle
+                 le renvoie vers toi — donc uniquement pour les pièces hors
+                 catalogue, jamais pour un couloir qu'elle a rangé en entrée. */ ?>
+        <div style="margin-top: 22px;" class="ranking-card__title">Pièces hors catalogue demandées (<?php echo esc_html($period_label); ?>)</div>
+        <?php if (empty($stats['top_hors'])) : ?>
+          <p style="color:#8c8f94;font-size:12px;">Aucune pour l'instant.</p>
+        <?php else :
+          $max_hors = 0;
+          foreach ($stats['top_hors'] as $row) { $max_hors = max($max_hors, (int) $row->c); }
+          foreach ($stats['top_hors'] as $row) :
+            $bar_pct = $max_hors > 0 ? round(((int) $row->c / $max_hors) * 100) : 0;
+          ?>
+            <div class="ranking-row">
+              <div class="ranking-row__label"><?php echo esc_html(ucfirst($row->mot)); ?></div>
+              <div class="ranking-row__bar"><div class="ranking-row__fill" style="width:<?php echo esc_attr($bar_pct); ?>%;background:#8A6A2F;"></div></div>
+              <?php /* Un NOMBRE, pas un pourcentage : « 40 % des pièces hors
+                       catalogue » ne veut rien dire pour Robin, alors que
+                       « 12 demandes de salle de bain » se décide. */ ?>
+              <div class="ranking-row__pct"><?php echo esc_html((int) $row->c); ?></div>
+            </div>
+          <?php endforeach; ?>
+        <?php endif; ?>
+
         <div style="margin-top: 22px;" class="ranking-card__title">Provenance des sessions (<?php echo esc_html($period_label); ?>)</div>
         <?php if (empty($stats['top_entry'])) : ?>
           <p style="color:#8c8f94;font-size:12px;">Aucune donnée.</p>
@@ -8073,6 +7627,7 @@ function sapi_megafilter_admin_page() {
           <?php
           $entry_bar_colors = [
             'home_picker'   => '#2E7D32',
+            'conseils_picker' => '#558B2F',
             'mes_creations' => '#E35B24',
             'product_pill'  => '#1565C0',
             'freetext'      => '#7B1FA2',
@@ -8107,6 +7662,7 @@ function sapi_megafilter_admin_page() {
       <select name="entry" class="filter-select" onchange="this.form.submit()">
         <option value="">Toutes</option>
         <option value="home_picker"   <?php selected($filters['entry'], 'home_picker'); ?>>Accueil</option>
+        <option value="conseils_picker" <?php selected($filters['entry'], 'conseils_picker'); ?>>Conseils éclairés</option>
         <option value="mes_creations" <?php selected($filters['entry'], 'mes_creations'); ?>>Mes créations</option>
         <option value="product_pill"  <?php selected($filters['entry'], 'product_pill'); ?>>Fiche produit</option>
         <option value="freetext"      <?php selected($filters['entry'], 'freetext'); ?>>Texte libre</option>
@@ -8316,12 +7872,14 @@ function sapi_megafilter_ajax_delete_session() {
 function sapi_megafilter_render_session_detail($r) {
   $entry_labels = [
     'home_picker'   => 'page d\'accueil',
+    'conseils_picker' => 'page Conseils éclairés',
     'mes_creations' => 'page Mes créations',
     'product_pill'  => 'fiche produit',
     'freetext'      => 'texte libre',
   ];
   $entry_pill_class = [
     'home_picker'   => 'pill--home',
+    'conseils_picker' => 'pill--home',
     'mes_creations' => 'pill--mes-creations',
     'product_pill'  => 'pill--product',
     'freetext'      => 'pill--freetext',
@@ -8388,6 +7946,7 @@ function sapi_megafilter_render_session_detail($r) {
   $entry_class = $entry_pill_class[$r->entry_point] ?? 'pill--outline';
   $entry_label = ucfirst($r->entry_point ?: 'inconnu');
   if ($r->entry_point === 'home_picker') $entry_label = 'Accueil';
+  if ($r->entry_point === 'conseils_picker') $entry_label = 'Conseils éclairés';
   if ($r->entry_point === 'mes_creations') $entry_label = 'Mes créations';
   if ($r->entry_point === 'product_pill') $entry_label = 'Fiche produit';
   if ($r->entry_point === 'freetext') $entry_label = 'Texte libre';
@@ -8743,9 +8302,44 @@ function sapi_inspiration_brevo_subscribe() {
     wp_send_json_error(['message' => 'invalid_nonce'], 403);
   }
 
+  /* ⚠️ TROIS COUCHES AJOUTÉES LE 28/08. Ce formulaire n'avait que le jeton
+     ci-dessus, contrairement aux quatre autres du site — et un jeton posé dans
+     la page ne protège de rien : il suffit de le lire. Ordre des contrôles
+     calqué sur `sapi_ajax_robin_contact()`, pour qu'on n'ait qu'un seul
+     raisonnement anti-spam à tenir en tête. */
+
+  // Piège à robots : champ invisible, un humain ne peut pas le remplir.
+  if (!empty($_POST['website'])) {
+    wp_send_json_error(['message' => 'spam'], 400);
+  }
+
+  /* Délai de saisie, mesuré par le navigateur. Un robot poste en quelques
+     millisecondes ; une personne met plusieurs secondes à lire, cliquer et
+     taper son adresse. 2 secondes est volontairement bas : on cherche à
+     écarter l'envoi automatique, pas à chronométrer les gens pressés.
+     ⚠️ PAS `sapi_time_trap_valid()` ICI. Cette page est mise en cache :
+     l'horodatage signé au rendu serait celui de la génération du cache, sa
+     borne basse serait franchie d'office et sa borne haute finirait par
+     refuser tout le monde. Explication complète dans page-inspiration.php. */
+  $delai = isset($_POST['delai_ms']) ? (int) $_POST['delai_ms'] : -1;
+  if ($delai < 2000) {
+    wp_send_json_error(['message' => 'spam'], 400);
+  }
+
+  /* Limite de fréquence : 5 par heure et par adresse.
+     ⚠️ Un identifiant DISTINCT des autres formulaires. Avec un identifiant
+     partagé, une personne qui écrit à Robin depuis la page contact aurait
+     consommé le quota de son inscription à la newsletter. */
+  /* ⚠️ L'ADRESSE EST VALIDÉE AVANT DE CONSOMMER LE QUOTA. Dans l'autre ordre,
+     cinq fautes de frappe suffisaient à bloquer une vraie personne pendant une
+     heure — et le quota existe pour arrêter les robots, pas les maladroits. */
   $email = isset($_POST['email']) ? sanitize_email(wp_unslash($_POST['email'])) : '';
   if (empty($email) || !is_email($email)) {
     wp_send_json_error(['message' => 'invalid_email'], 400);
+  }
+
+  if (!sapi_check_form_rate_limit('inspiration_newsletter')) {
+    wp_send_json_error(['message' => 'rate_limited'], 429);
   }
 
   $api_key = sapi_get_brevo_api_key();

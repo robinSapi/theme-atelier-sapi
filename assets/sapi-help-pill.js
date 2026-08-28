@@ -70,8 +70,11 @@
     pill.setAttribute('data-help-pill-ready', '1');
 
     pill.addEventListener('click', function () {
+      /* `trigger` : la modale ne peut pas le deviner (l'événement est envoyé
+         à `document`), et c'est lui qui doit récupérer le focus à la
+         fermeture. Sans ça, la navigation au clavier repart du haut de page. */
       document.dispatchEvent(new CustomEvent('sapi:open-modal', {
-        detail: { state: 'product' }
+        detail: { state: 'product', trigger: pill }
       }));
     });
 
